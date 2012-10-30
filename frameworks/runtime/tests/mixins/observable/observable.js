@@ -588,7 +588,7 @@ module("Observable objects & object properties ", {
 
   setup: function() {
     window.NormalArray = [1,2,3,4,5];
-    
+
     object = SC.Object.create({
 
       normal: 'value',
@@ -898,43 +898,43 @@ module("addObservesHandler and removeObservesHandler functions", {
     window.TestNS = SC.Object.create({
       value: 0
     });
-    
+
     objectA = SC.Object.create({
-      
+
       value: 0,
       arrayValue: [],
-      
+
       handler1NotifiedCount: 0,
       handler2NotifiedCount: 0,
       arrayHandlerNotifiedCount: 0,
-      
+
       handler1: function() {
         this.handler1NotifiedCount++;
       },
-      
+
       handler2: function() {
         this.handler2NotifiedCount++;
       },
-      
+
       arrayHandler: function() {
         this.arrayHandlerNotifiedCount++;
       }
-      
+
     });
   },
-  
+
   teardown: function() {
     objectA = null;
     window.TestNS = null;
   }
-  
+
 });
 
 test("add and remove observer handler1", function() {
   objectA.addObservesHandler(objectA.handler1, 'value');
   objectA.set('value', 100);
   equals(objectA.handler1NotifiedCount, 1, "observes handler1 should be notified");
-  
+
   objectA.removeObservesHandler(objectA.handler1, 'value');
   objectA.set('value', 200);
   equals(objectA.handler1NotifiedCount, 1, "observes handler1 should not be notified");
@@ -944,7 +944,7 @@ test("add and remove observer handler2", function() {
   objectA.addObservesHandler(objectA.handler2, 'TestNS.value');
   window.TestNS.set('value', 1000);
   equals(objectA.handler2NotifiedCount, 1, "observes handler2 should be notified");
-  
+
   objectA.removeObservesHandler(objectA.handler2, 'TestNS.value');
   window.TestNS.set('value', 2000);
   equals(objectA.handler2NotifiedCount, 1, "observes handler1 should not be notified");
@@ -954,13 +954,13 @@ test("add and remove observer array handler without chain observes", function() 
   objectA.addObservesHandler(objectA.arrayHandler, 'arrayValue.[]');
   objectA.arrayValue.pushObject(SC.Object.create());
   ok(objectA.arrayHandlerNotifiedCount > 0, "observes array handler should be notified aftering pushing object to array");
-  
+
   objectA.arrayHandlerNotifiedCount = 0;
-  
+
   objectA.removeObservesHandler(objectA.arrayHandler, 'arrayValue.[]');
   objectA.arrayValue.pushObject(SC.Object.create());
   equals(objectA.arrayHandlerNotifiedCount, 0, "observes array handler should not be notified after removing observes handler");
-  
+
   objectA.addObservesHandler(objectA.arrayHandler, 'arrayValue.[]');
   objectA.set('arrayValue', []);
   equals(objectA.arrayHandlerNotifiedCount, 0, "observes array handler should not be notified after assigning new array");
@@ -972,15 +972,15 @@ test("add and remove observer array handler with chain observes", function() {
   objectA.addObservesHandler(objectA.arrayHandler, '*arrayValue.[]');
   objectA.arrayValue.pushObject(SC.Object.create());
   ok(objectA.arrayHandlerNotifiedCount > 0, "observes array handler should be notified aftering pushing object to array");
-  
+
   objectA.arrayHandlerNotifiedCount = 0;
-  
+
   objectA.removeObservesHandler(objectA.arrayHandler, '*arrayValue.[]');
   objectA.arrayValue.pushObject(SC.Object.create());
   equals(objectA.arrayHandlerNotifiedCount, 0, "observes array handler should not be notified of push after removing observes handler");
   objectA.set('arrayValue', []);
   equals(objectA.arrayHandlerNotifiedCount, 0, "observes array handler should not be notified of new array after removing observes handler");
-  
+
   objectA.addObservesHandler(objectA.arrayHandler, '*arrayValue.[]');
   objectA.set('arrayValue', []);
   ok(objectA.arrayHandlerNotifiedCount > 0, "observes array handler should be notified after assigning new array");
