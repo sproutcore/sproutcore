@@ -112,14 +112,14 @@ SC.Observers = {
     // flush any observers that we tried to setup but didn't have a path yet
     var oldQueue = this.queue, i,
         queueLen = oldQueue.length;
-    
+
     if (oldQueue && queueLen > 0) {
       var newQueue = (this.queue = []) ;
 
       for (i=0; i<queueLen; i++ ) {
         var item = oldQueue[i];
         if ( !item ) continue;
-        
+
         var tuple = SC.tupleForPropertyPath( item[0], item[3] );
         // check if object is observable (yet) before adding an observer
         if( tuple && tuple[0].addObserver ) {
@@ -129,7 +129,7 @@ SC.Observers = {
         }
       }
     }
-    
+
     // if this object needsRangeObserver then see if any pending range
     // observers need it.
     if ( object._kvo_needsRangeObserver ) {

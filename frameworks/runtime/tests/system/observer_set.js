@@ -17,7 +17,7 @@ module("Problematic SC.ObserverSet.getMethods() removal", {
   }
 });
 
-// This test succeeds using master up to commit 5826c745874f903f1e4765e5a2bcb5244ff72113 and using the 1-4-stable HEAD 
+// This test succeeds using master up to commit 5826c745874f903f1e4765e5a2bcb5244ff72113 and using the 1-4-stable HEAD
 // This test fails using subsequent master commit c78e1bf25087a3ebd553dbc513923e0d32d09f7b
 // It triggers an error at line 987 of frameworks/system/runtime/mixins/observable.js (in the method
 // SC.Observable._notifyPropertyObservers()) as of current master commit, 789fe805cd08976b7aab1c346c71cf22b78b7285
