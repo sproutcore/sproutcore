@@ -422,6 +422,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     if (this._connectionPending) {
       this._connectionPending = NO ;
 
+      SC.Binding._connectQueue.remove(this) ;
     // connection is completed, disconnect.
     } else {
       SC.Observers.removeObserver.apply(SC.Observers, this._fromObserverData);
@@ -461,19 +462,11 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     // Disconnect the binding.
     this.disconnect();
 
-    // Aggressively null out internal properties. (The binding remains in some queue that I can't find just now,
-    // which attempts to reconnect this binding if the property paths are left intact.)
+    // Aggressively null out internal properties.
     this._bindingSource = null;
-    this._toPropertyPath = null;
-    this._toPropertyKey = null;
-    this._toRoot = null;
-    this._toTarget = null;
-    this._fromPropertyPath = null;
-    this._fromPropertyKey = null;
-    this._fromRoot = null;
-    this._fromTarget = null;
-    this._toObserverData = null;
-    this._fromObserverData = null;
+    this._toRoot = this._toTarget = null;
+    this._fromRoot = this._fromTarget = null;
+    this._toObserverData = this._fromObserverData = null;
   },
 
   /**

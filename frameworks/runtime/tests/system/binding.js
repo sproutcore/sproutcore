@@ -13,46 +13,68 @@ var fromObject, toObject, binding, Bon1, bon2 ; // global variables
 
 module("basic object binding", {
 
-  setup: function() {
+  setup: function () {
     fromObject = SC.Object.create({ value: 'start' }) ;
+    midObject = SC.Object.create({ value: 'middle' });
     toObject = SC.Object.create({ value: 'end' }) ;
-    binding = SC.Binding.from("value", fromObject).to("value", toObject).connect() ;
+    binding1 = SC.Binding.from("value", fromObject).to("value", midObject).connect() ;
+    binding2 = SC.Binding.from("value", midObject).to("value", toObject).connect();
     SC.Binding.flushPendingChanges() ; // actually sets up up the connection
+  },
+
+  teardown: function () {
+    fromObject.destroy();
+    midObject.destroy();
+    toObject.destroy();
+    fromObject = midObject = toObject = binding1 = binding2 = null;
   }
 });
 
 test("binding is connected", function() {
-  equals(binding.isConnected, YES, "binding.isConnected") ;
+  equals(binding1.isConnected, YES, "binding1.isConnected") ;
+  equals(binding2.isConnected, YES, "binding2.isConnected") ;
 });
 
 test("binding has actually been setup", function() {
-  equals(binding._connectionPending, NO, "binding._connectionPending") ;
+  equals(binding1._connectionPending, NO, "binding1._connectionPending") ;
+  equals(binding2._connectionPending, NO, "binding2._connectionPending") ;
 });
 
 test("binding should have synced on connect", function() {
   equals(toObject.get("value"), "start", "toObject.value should match fromObject.value");
+  equals(midObject.get("value"), "start", "midObject.value should match fromObject.value");
 });
 
 test("changing fromObject should mark binding as dirty", function() {
   fromObject.set("value", "change") ;
-  ok(SC.Binding._changeQueue.contains(binding), "the binding should be in the _changeQueue");
+  ok(SC.Binding._changeQueue.contains(binding1), "the binding should be in the _changeQueue");
+  SC.Binding.flushPendingChanges() ;
+  ok(SC.Binding._changeQueue.contains(binding2), "the binding should be in the _changeQueue");
 });
 
 test("fromObject change should propogate to toObject only after flush", function() {
   fromObject.set("value", "change") ;
+  equals(midObject.get("value"), "start") ;
   equals(toObject.get("value"), "start") ;
+  SC.Binding.flushPendingChanges() ;
+  equals(midObject.get("value"), "change") ;
   SC.Binding.flushPendingChanges() ;
   equals(toObject.get("value"), "change") ;
 });
 
 test("changing toObject should mark binding as dirty", function() {
   toObject.set("value", "change") ;
-  ok(SC.Binding._changeQueue.contains(binding), "the binding should be in the _changeQueue");
+  ok(SC.Binding._changeQueue.contains(binding2), "the binding should be in the _changeQueue");
+  SC.Binding.flushPendingChanges() ;
+  ok(SC.Binding._changeQueue.contains(binding1), "the binding should be in the _changeQueue");
 });
 
 test("toObject change should propogate to fromObject only after flush", function() {
   toObject.set("value", "change") ;
+  equals(midObject.get("value"), "start") ;
   equals(fromObject.get("value"), "start") ;
+  SC.Binding.flushPendingChanges() ;
+  equals(midObject.get("value"), "change") ;
   SC.Binding.flushPendingChanges() ;
   equals(fromObject.get("value"), "change") ;
 });
@@ -90,25 +112,29 @@ test("suspended observing during bindings", function() {
 });
 
 test("binding will disconnect", function() {
-  binding.disconnect();
-  equals(binding.isConnected, NO, "binding.isConnected");
+  binding1.disconnect();
+  equals(binding1.isConnected, NO, "binding1.isConnected");
 });
 
 test("binding disconnection actually works", function() {
-  binding.disconnect();
+  binding1.disconnect();
   fromObject.set('value', 'change');
+  SC.Binding.flushPendingChanges();
+  equals(midObject.get('value'), 'start');
   SC.Binding.flushPendingChanges();
   equals(toObject.get('value'), 'start');
 
-  binding.connect();
+  binding1.connect();
+  SC.Binding.flushPendingChanges();
+  equals(midObject.get('value'), 'change');
   SC.Binding.flushPendingChanges();
   equals(toObject.get('value'), 'change');
 });
 
 test("binding destruction actually works", function() {
-  binding.destroy()
-  ok(binding.isDestroyed, "binding marks itself as destroyed.");
-  ok(!binding._fromTarget && !binding._toTarget, "binding destruction removes binding targets.");
+  binding1.destroy()
+  ok(binding1.isDestroyed, "binding marks itself as destroyed.");
+  ok(!binding1._fromTarget && !binding1._toTarget, "binding destruction removes binding targets.");
 });
 
 module("bindings on classes");
@@ -139,11 +165,6 @@ test("should connect when multiple instances of class are created", function() {
   } finally {
     window.TestNamespace = undefined;
   }
-});
-
-test("destroying a view destroys bindings that were instantiated from its class.", function() {
-  toObject.destroy();
-  ok(binding.isDestroyed, "destroying a view destroys its bindings.");
 });
 
 module("one way binding", {
