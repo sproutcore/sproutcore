@@ -287,6 +287,7 @@ test("Basic Write As a Hash when Child Record has no primary key", function() {
 
   // Test Child Record creation
   var oldCR = testParent3.get('info');
+  var oldKey = oldCR.get('id');
   testParent3.set('info', {
     type: 'ChildRecordTest',
     name: 'New Child Name',
@@ -302,8 +303,7 @@ test("Basic Write As a Hash when Child Record has no primary key", function() {
   var storeRef = store.find(NestedRecord.ChildRecordTest, key);
   ok(storeRef, 'after a set() with an object, checking that the store has the instance of the child record with proper primary key');
   equals(cr, storeRef, "after a set with an object, checking the parent reference is the same as the direct store reference");
-  var oldKey = oldCR.get('id');
-  ok((oldKey === key), 'check to see that the old child record has the same key as the new child record');
+  equals(oldKey, key, 'check to see that the old child record has the same key as the new child record');
 
   // Check for changes on the child bubble to the parent.
   cr.set('name', 'Child Name Change');
@@ -398,11 +398,14 @@ test("Basic Write As a Child Record when Child Record has no primary key", funct
 
 test("Writing over a child record should remove caches in the store.", function() {
   // Test Child Record creation
-  var cr, key, store = testParent.get('store'), cacheLength;
+  var cr, key, store = testParent.get('store'), cacheLength, idx, storeKeys = [], ids = [], sks;
 
   // Get the child record once before setting it in order to test that this child
   // doesn't become abandoned in the store.
   cr = testParent.get('info');
+  storeKeys.push(cr.get('storeKey'));
+  ids.push(cr.get('id'));
+  ids = ids.uniq();
 
   // Once we get the child record, certain caches are created in the store.
   // Verify the cache lengths to prove that there are no leaked objects.
@@ -422,9 +425,21 @@ test("Writing over a child record should remove caches in the store.", function(
   for (key in store.dataHashes) { if (store.dataHashes[key] !== null) cacheLength += 1; }
   equals(cacheLength, 4, 'there should be four non-null datahashes in the store');
 
+  cacheLength = 0;
+  for (idx = 0; idx < storeKeys.length; ++idx) { if (!SC.none(SC.Store.idsByStoreKey[storeKeys[idx]])) { cacheLength += 1; } }
+  equals(cacheLength, 1, 'there should be one id cached in the store');
+
+  cacheLength = 0;
+  sks = NestedRecord.ChildRecordTest.storeKeysById();
+  for (idx = 0; idx < ids.length; ++idx) { if (!SC.none(sks[ids[idx]])) { cacheLength += 1; } }
+  equals(cacheLength, 1, 'there should be one store key cached in the store');
+
   // Overwrite the child record with a new child record with the same guid.
   testParent.set('info', {type: 'ChildRecordTest', name: 'New Child Name', value: 'Red Goo', guid: '5001'});
   cr = testParent.get('info');
+  storeKeys.push(cr.get('storeKey'));
+  ids.push(cr.get('id'));
+  ids = ids.uniq();
 
   // Verify the cache lengths to prove that there are no leaked objects.
   cacheLength = 0;
@@ -443,9 +458,21 @@ test("Writing over a child record should remove caches in the store.", function(
   for (key in store.dataHashes) { if (store.dataHashes[key] !== null) cacheLength += 1; }
   equals(cacheLength, 4, 'there should be four non-null datahashes in the store after replacing child record once');
 
+  cacheLength = 0;
+  for (idx = 0; idx < storeKeys.length; ++idx) { if (!SC.none(SC.Store.idsByStoreKey[storeKeys[idx]])) { cacheLength += 1; } }
+  equals(cacheLength, 1, 'there should be one id cached in the store');
+
+  cacheLength = 0;
+  sks = NestedRecord.ChildRecordTest.storeKeysById();
+  for (idx = 0; idx < ids.length; ++idx) { if (!SC.none(sks[ids[idx]])) { cacheLength += 1; } }
+  equals(cacheLength, 1, 'there should be one store key cached in the store');
+
   // Overwrite the child record with a new child record with the same guid.
   testParent.set('info', store.createRecord(NestedRecord.ChildRecordTest, {type: 'ChildRecordTest', name: 'New Child Name', value: 'Orange Goo', guid: '6001'}));
   cr = testParent.get('info');
+  storeKeys.push(cr.get('storeKey'));
+  ids.push(cr.get('id'));
+  ids = ids.uniq();
 
   // Verify the cache lengths to prove that there are no leaked objects.
   cacheLength = 0;
@@ -463,6 +490,15 @@ test("Writing over a child record should remove caches in the store.", function(
   cacheLength = 0;
   for (key in store.dataHashes) { if (store.dataHashes[key] !== null) cacheLength += 1; }
   equals(cacheLength, 4, 'there should be four non-null datahashes in the store after replacing child record twice');
+
+  cacheLength = 0;
+  for (idx = 0; idx < storeKeys.length; ++idx) { if (!SC.none(SC.Store.idsByStoreKey[storeKeys[idx]])) { cacheLength += 1; } }
+  equals(cacheLength, 1, 'there should be one id cached in the store');
+
+  cacheLength = 0;
+  sks = NestedRecord.ChildRecordTest.storeKeysById();
+  for (idx = 0; idx < ids.length; ++idx) { if (!SC.none(sks[ids[idx]])) { cacheLength += 1; } }
+  equals(cacheLength, 1, 'there should be one store key cached in the store');
 
   // Make sure you can set the child to null.
   testParent.set('info', null);
@@ -484,6 +520,15 @@ test("Writing over a child record should remove caches in the store.", function(
   cacheLength = 0;
   for (key in store.dataHashes) { if (store.dataHashes[key] !== null) cacheLength += 1; }
   equals(cacheLength, 3, 'there should be three non-null datahashes in the store after removing child record');
+
+  cacheLength = 0;
+  for (idx = 0; idx < storeKeys.length; ++idx) { if (!SC.none(SC.Store.idsByStoreKey[storeKeys[idx]])) { cacheLength += 1; } }
+  equals(cacheLength, 0, 'there should be zero ids cached in the store');
+
+  cacheLength = 0;
+  sks = NestedRecord.ChildRecordTest.storeKeysById();
+  for (idx = 0; idx < ids.length; ++idx) { if (!SC.none(sks[ids[idx]])) { cacheLength += 1; } }
+  equals(cacheLength, 0, 'there should be zero store keys cached in the store');
 });
 
 test("Child Status Changed", function() {
