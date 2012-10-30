@@ -965,7 +965,7 @@ SC.Record = SC.Object.extend(
     // that we don't keep making new storeKeys for the same child record each
     // time that it is reloaded.
     id = hash[recordType.prototype.primaryKey];
-    if (!id) this.generateIdForChild(cr);
+    if (!id) { id = this.generateIdForChild(cr); }
     if (!id) { id = psk + '.' + path; }
 
     // If there is an id, there may also be a storeKey.  If so, update the

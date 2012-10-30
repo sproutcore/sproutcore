@@ -1448,7 +1448,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     Record to be removed from the store.
   */
   unregisterChildFromParent: function(childStoreKey) {
-    var crs, oldPk;
+    var crs, oldPk, storeKeys,
+        recordType = this.recordTypeFor(childStoreKey),
+        id = this.idFor(childStoreKey),
+        that = this;
 
     // Check the child to see if it has a parent
     crs = this.childRecords;
@@ -1469,6 +1472,16 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     this.removeDataHash(childStoreKey);
     delete this.records[childStoreKey];
     delete crs[childStoreKey];
+
+    // 4. from the cache of ids
+    // 5. from the cache of store keys
+    delete SC.Store.idsByStoreKey[childStoreKey];
+    storeKeys = recordType.storeKeysById();
+    delete storeKeys[id];
+
+    this._propagateToChildren(childStoreKey, function(storeKey) {
+      that.unregisterChildFromParent(storeKey);
+    });
   },
 
   /**

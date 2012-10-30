@@ -167,9 +167,18 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
         record   = this.get('record'), newRecs,
 
         pname    = this.get('propertyName'),
-        cr, recordType;
+        cr, recordType, i;
     
     newRecs = this._processRecordsToHashes(recs);
+
+    for (i = idx; i < idx + amt; ++i) {
+      this.unregisterNestedRecord(i);
+    }
+
+    for (i = 0; i < len; ++i) {
+      record.registerNestedRecord(newRecs[i], pname, pname + '.' + (idx + i));
+    }
+
     // notify that the record did change...
     if (newRecs !== this._prevChildren){
       this._performRecordPropertyChange(null, false);
@@ -199,6 +208,33 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     });
 
     return recs;
+  },
+
+  /**
+    Unregisters a child record from its parent record.
+
+    Since accessing a child (nested) record creates a new data hash for the
+    child and caches the child record and its relationship to the parent record,
+    it's important to clear those caches when the child record is overwritten
+    or removed.  This function tells the store to remove the child record from
+    the store's various child record caches.
+
+    You should not need to call this function directly.  Simply setting the
+    child record property on the parent to a different value will cause the
+    previous child record to be unregistered.
+
+    @param {Number} idx The index of the child record.
+  */
+  unregisterNestedRecord: function(idx) {
+    var childArray, childRecord, csk, store,
+        record   = this.get('record'),
+        pname    = this.get('propertyName');
+
+    store = record.get('store');
+    childArray = record.getPath(pname);
+    childRecord = childArray.objectAt(idx);
+    csk = childRecord.get('storeKey');
+    store.unregisterChildFromParent(csk);
   },
 
   /**
