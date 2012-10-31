@@ -63,6 +63,18 @@ SC.MainPane = SC.Pane.extend({
     if (!responder.get('keyRootView')) responder.makeKeyPane(this);
     return ret ;
   },
+
+  /**
+    @private
+
+    Withdraw body overflow request when the pane is detached.
+  */
+  paneAttachedDidChange: function() {
+    if (!this.get('isPaneAttached')) {
+      SC.bodyOverflowArbitrator.requestVisible(this);
+      SC.bodyOverflowArbitrator.withdrawRequest(this);
+    }
+  }.observes('isPaneAttached'),
   
   /** @private */
   acceptsKeyPane: YES,
