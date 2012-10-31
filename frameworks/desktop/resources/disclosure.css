@@ -5,9 +5,6 @@
   img.disclosure.button {
   	width: 16px;
   	height: 16px;
-  	position: absolute;
-  	left: 0px;
-  	top: 0px;
   }
   .sc-disclosure-label {
   	position: absolute;
