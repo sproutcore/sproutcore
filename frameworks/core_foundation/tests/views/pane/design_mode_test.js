@@ -15,17 +15,17 @@ SC.metricsFor('English', {
   'Medium.right': 0.25,
 });
 
-var largeLayout = { centerX: 0, width: 100 },
-  mediumLayout = "Medium".locLayout(),
-  normalLayout = { top: 0, left: 0, bottom: 0, right: 0 },
-  smallLayout = { left: 10, right: 10 };
+var largeLayout = { top: 0, bottom: 0, centerX: 0, width: 100 },
+  mediumLayout = { top: 0, bottom: 0, left: 0.25, right: 0.25 },
+  normalLayout = { top: 0, bottom: 0, left: 0, right: 0 },
+  smallLayout = { top: 0, bottom: 0, left: 10, right: 10 };
 
 var DesignModeTestView = SC.View.extend({
 
   designAdjustments: {
-    small: smallLayout,
-    medium: mediumLayout,
-    large: largeLayout
+    small: { left: 10, right: 10 },
+    medium: "Medium".locLayout(),
+    large: { left: null, right: null, centerX: 0, width: 100 }
   },
 
   init: function() {
@@ -59,7 +59,7 @@ module("SC.View/SC.Pane Design Mode Support", {
 
       // Override - no large design layout.
       designAdjustments: {
-        small: smallLayout,
+        small: { left: 10, right: 10 },
         medium: "Medium".locLayout()
       }
     });
@@ -81,12 +81,14 @@ module("SC.View/SC.Pane Design Mode Support", {
     if (pane.remove) { pane.remove(); }
 
     pane = view1 = view2 = view3 = view4 = view5 = null;
+
+    SC.RootResponder.responder.set('designModes', null);
   }
 
 });
 
 
-test("When RootResponder has no designModes, it doesn't set designMode on its pane or its childViews", function() {
+test("When RootResponder has no designModes, it doesn't set designMode on its panes or their childViews", function() {
   pane = pane.create();
 
   // designMode should not be set
@@ -119,7 +121,7 @@ test("When RootResponder has no designModes, it doesn't set designMode on its pa
   same(view4.get('classNames'), ['sc-view'], "classNames should be");
 });
 
-test("When you add a view to a pane without a  designMode, it doesn't set designMode on the childView.", function() {
+test("When RootResponder has no designModes, and you add a view to a pane, it doesn't set designMode on the new view.", function() {
   pane = pane.create();
   pane.append();
   pane.appendChild(view5);
@@ -134,7 +136,7 @@ test("When you add a view to a pane without a  designMode, it doesn't set design
   same(view5.get('classNames'), ['sc-view'], "classNames should be");
 });
 
-test("When RootResponder has designModes and you append a pane, it sets designMode on the pane and its childViews", function() {
+test("When RootResponder has designModes, it sets designMode on its panes and their childViews", function() {
   var windowSize,
     responder = SC.RootResponder.responder;
 
@@ -174,14 +176,13 @@ test("When RootResponder has designModes and you append a pane, it sets designMo
 });
 
 test("When updateDesignMode() is called on a pane, it sets designMode properly on itself and its childViews.", function() {
-  var oldSize = SC.RootResponder.responder.get('currentWindowSize'),
-    newSize = oldSize;
+  var windowSize,
+    responder = SC.RootResponder.responder;
 
-  pane = pane.create({
-    designModes: { small: oldSize.width - 10, large: Infinity }
-  });
+  windowSize = responder.get('currentWindowSize');
+  responder.set('designModes', { small: windowSize.width - 10, large: Infinity });
 
-  pane = pane.append();
+  pane = pane.create().append();
 
   // designMode should be set (for initialization)
   view1.set.expect(1);
@@ -189,33 +190,22 @@ test("When updateDesignMode() is called on a pane, it sets designMode properly o
   view3.set.expect(1);
   view4.set.expect(1);
 
-  equals(view1.get('designMode'), 'large', "designMode should be");
-  equals(view2.get('designMode'), 'large', "designMode should be");
-  equals(view3.get('designMode'), 'large', "designMode should be");
-  equals(view4.get('designMode'), 'large', "designMode should be");
+  equals(view1.get('designMode'), 'large', "designMode of view1 should be");
+  equals(view2.get('designMode'), 'large', "designMode of view2 should be");
+  equals(view3.get('designMode'), 'large', "designMode of view3 should be");
+  equals(view4.get('designMode'), 'large', "designMode of view4 should be");
 
-  same(view1.get('layout'), largeLayout, "layout should be");
-  same(view2.get('layout'), largeLayout, "layout should be");
-  same(view3.get('layout'), normalLayout, "layout should be");
-  same(view4.get('layout'), largeLayout, "layout should be");
+  same(view1.get('layout'), largeLayout,  "layout of view1 should be");
+  same(view2.get('layout'), largeLayout,  "layout of view2 should be");
+  same(view3.get('layout'), smallLayout, "layout of view3 should be");
+  same(view4.get('layout'), largeLayout,  "layout of view4 should be");
 
-  same(view1.get('classNames'), ['sc-view', 'large'], "classNames should be");
-  same(view2.get('classNames'), ['sc-view', 'large'], "classNames should be");
-  same(view3.get('classNames'), ['sc-view', 'large'], "classNames should be");
-  same(view4.get('classNames'), ['sc-view', 'large'], "classNames should be");
+  same(view1.get('classNames'), ['sc-view', 'large'], "classNames of view1 should be");
+  same(view2.get('classNames'), ['sc-view', 'large'], "classNames of view2 should be");
+  same(view3.get('classNames'), ['sc-view', 'large'], "classNames of view3 should be");
+  same(view4.get('classNames'), ['sc-view', 'large'], "classNames of view4 should be");
 
-  newSize.width -= 5;
-  pane.windowSizeDidChange(oldSize, newSize);
-  oldSize = newSize;
-
-  // designMode shouldn't be set again (didn't cross threshold)
-  view1.set.expect(1);
-  view2.set.expect(1);
-  view3.set.expect(1);
-  view4.set.expect(1);
-
-  newSize.width -= 6;
-  pane.windowSizeDidChange(oldSize, newSize);
+  pane.updateDesignMode('large', 'small');
 
   // designMode should be set (crossed threshold)
   view1.set.expect(2);
@@ -223,43 +213,44 @@ test("When updateDesignMode() is called on a pane, it sets designMode properly o
   view3.set.expect(2);
   view4.set.expect(2);
 
-  equals(view1.get('designMode'), 'small', "designMode should be");
-  equals(view2.get('designMode'), 'small', "designMode should be");
-  equals(view3.get('designMode'), 'small', "designMode should be");
-  equals(view4.get('designMode'), 'small', "designMode should be");
+  equals(view1.get('designMode'), 'small', "designMode of view1 should be");
+  equals(view2.get('designMode'), 'small', "designMode of view2 should be");
+  equals(view3.get('designMode'), 'small', "designMode of view3 should be");
+  equals(view4.get('designMode'), 'small', "designMode of view4 should be");
 
-  same(view1.get('layout'), smallLayout, "layout should be");
-  same(view2.get('layout'), smallLayout, "layout should be");
-  same(view3.get('layout'), smallLayout, "layout should be");
-  same(view4.get('layout'), smallLayout, "layout should be");
+  same(view1.get('layout'), smallLayout, "layout of view1 should be");
+  same(view2.get('layout'), smallLayout, "layout of view2 should be");
+  same(view3.get('layout'), smallLayout, "layout of view3 should be");
+  same(view4.get('layout'), smallLayout, "layout of view4 should be");
 
-  same(view1.get('classNames'), ['sc-view', 'small'], "classNames should be");
-  same(view2.get('classNames'), ['sc-view', 'small'], "classNames should be");
-  same(view3.get('classNames'), ['sc-view', 'small'], "classNames should be");
-  same(view4.get('classNames'), ['sc-view', 'small'], "classNames should be");
+  same(view1.get('classNames'), ['sc-view', 'small'], "classNames of view1 should be");
+  same(view2.get('classNames'), ['sc-view', 'small'], "classNames of view2 should be");
+  same(view3.get('classNames'), ['sc-view', 'small'], "classNames of view3 should be");
+  same(view4.get('classNames'), ['sc-view', 'small'], "classNames of view4 should be");
 });
 
-test("When you add a view to a pane with designModes, it sets designMode on the childView.", function() {
-  var oldSize = SC.RootResponder.responder.get('currentWindowSize');
+test("When RootResponder has designModes, and you add a view to a pane, it sets designMode on the new view.", function() {
+  var windowSize,
+    responder = SC.RootResponder.responder;
 
-  pane = pane.create({
-    designModes: { small: oldSize.width - 10, large: Infinity }
-  });
-  pane.append();
+  windowSize = responder.get('currentWindowSize');
+  responder.set('designModes', { small: windowSize.width - 10, large: Infinity });
+
+  pane = pane.create().append();
   pane.appendChild(view5);
 
   // designMode should be set
   view5.set.expect(1);
-  equals(view5.get('designMode'), 'large', "designMode should be");
+  equals(view5.get('designMode'), 'large', "designMode of view5 should be");
 
-  same(view5.get('classNames'), ['sc-view', 'large'], "classNames should be");
+  same(view5.get('classNames'), ['sc-view', 'large'], "classNames of view5 should be");
 });
 
-test("When you set designModes on a pane without designModes, it sets designMode on the pane and its childViews.", function() {
-  var oldSize = SC.RootResponder.responder.get('currentWindowSize');
+test("When you set designModes on RootResponder, it sets designMode on its panes and their childViews.", function() {
+  var windowSize,
+    responder = SC.RootResponder.responder;
 
-  pane = pane.create();
-  pane.append();
+  pane = pane.create().append();
 
   // designMode should not be set
   view1.set.expect(0);
@@ -267,9 +258,8 @@ test("When you set designModes on a pane without designModes, it sets designMode
   view3.set.expect(0);
   view4.set.expect(0);
 
-  SC.run(function() {
-    pane.set('designModes', { small: oldSize.width - 10, large: Infinity });
-  });
+  windowSize = responder.get('currentWindowSize');
+  responder.set('designModes', { small: windowSize.width - 10, large: Infinity });
 
   // designMode should be set (for initialization)
   view1.set.expect(1);
@@ -277,29 +267,30 @@ test("When you set designModes on a pane without designModes, it sets designMode
   view3.set.expect(1);
   view4.set.expect(1);
 
-  equals(view1.get('designMode'), 'large', "designMode should be");
-  equals(view2.get('designMode'), 'large', "designMode should be");
-  equals(view3.get('designMode'), 'large', "designMode should be");
-  equals(view4.get('designMode'), 'large', "designMode should be");
+  equals(view1.get('designMode'), 'large', "designMode of view1 should be");
+  equals(view2.get('designMode'), 'large', "designMode of view2 should be");
+  equals(view3.get('designMode'), 'large', "designMode of view3 should be");
+  equals(view4.get('designMode'), 'large', "designMode of view4 should be");
 
-  same(view1.get('layout'), largeLayout, "layout should be");
-  same(view2.get('layout'), largeLayout, "layout should be");
-  same(view3.get('layout'), normalLayout, "layout should be");
-  same(view4.get('layout'), largeLayout, "layout should be");
+  same(view1.get('layout'), largeLayout, "layout of view1 should be");
+  same(view2.get('layout'), largeLayout, "layout of view2 should be");
+  same(view3.get('layout'), smallLayout, "layout of view3 should be");
+  same(view4.get('layout'), largeLayout, "layout of view4 should be");
 
-  same(view1.get('classNames'), ['sc-view', 'large'], "classNames should be");
-  same(view2.get('classNames'), ['sc-view', 'large'], "classNames should be");
-  same(view3.get('classNames'), ['sc-view', 'large'], "classNames should be");
-  same(view4.get('classNames'), ['sc-view', 'large'], "classNames should be");
+  same(view1.get('classNames'), ['sc-view', 'large'], "classNames of view1 should be");
+  same(view2.get('classNames'), ['sc-view', 'large'], "classNames of view2 should be");
+  same(view3.get('classNames'), ['sc-view', 'large'], "classNames of view3 should be");
+  same(view4.get('classNames'), ['sc-view', 'large'], "classNames of view4 should be");
 });
 
-test("When you change designModes on a pane with designModes, it sets designMode on the pane and its childViews if the design mode has changed.", function() {
-  var oldSize = SC.RootResponder.responder.get('currentWindowSize');
+test("When you change designModes on RootResponder, it sets designMode on the pane and its childViews if the design mode has changed.", function() {
+  var windowSize,
+    responder = SC.RootResponder.responder;
 
-  pane = pane.create({
-    designModes: { small: oldSize.width - 10, large: Infinity }
-  });
-  pane.append();
+  windowSize = responder.get('currentWindowSize');
+  responder.set('designModes', { small: windowSize.width - 10, large: Infinity });
+
+  pane = pane.create().append();
 
   // designMode should be set (for initialization)
   view1.set.expect(1);
@@ -307,25 +298,23 @@ test("When you change designModes on a pane with designModes, it sets designMode
   view3.set.expect(1);
   view4.set.expect(1);
 
-  equals(view1.get('designMode'), 'large', "designMode should be");
-  equals(view2.get('designMode'), 'large', "designMode should be");
-  equals(view3.get('designMode'), 'large', "designMode should be");
-  equals(view4.get('designMode'), 'large', "designMode should be");
+  equals(view1.get('designMode'), 'large', "designMode for view1 should be");
+  equals(view2.get('designMode'), 'large', "designMode for view2 should be");
+  equals(view3.get('designMode'), 'large', "designMode for view3 should be");
+  equals(view4.get('designMode'), 'large', "designMode for view4 should be");
 
-  same(view1.get('layout'), largeLayout, "layout should be");
-  same(view2.get('layout'), largeLayout, "layout should be");
-  same(view3.get('layout'), normalLayout, "layout should be");
-  same(view4.get('layout'), largeLayout, "layout should be");
+  same(view1.get('layout'), largeLayout, "layout for view1 should be");
+  same(view2.get('layout'), largeLayout, "layout for view2 should be");
+  same(view3.get('layout'), smallLayout, "layout for view3 should be");
+  same(view4.get('layout'), largeLayout, "layout for view4 should be");
 
-  same(view1.get('classNames'), ['sc-view', 'large'], "classNames should be");
-  same(view2.get('classNames'), ['sc-view', 'large'], "classNames should be");
-  same(view3.get('classNames'), ['sc-view', 'large'], "classNames should be");
-  same(view4.get('classNames'), ['sc-view', 'large'], "classNames should be");
+  same(view1.get('classNames'), ['sc-view', 'large'], "classNames for view1 should be");
+  same(view2.get('classNames'), ['sc-view', 'large'], "classNames for view2 should be");
+  same(view3.get('classNames'), ['sc-view', 'large'], "classNames for view3 should be");
+  same(view4.get('classNames'), ['sc-view', 'large'], "classNames for view4 should be");
 
   // Change the small threshold
-  SC.run(function() {
-    pane.set('designModes', { small: oldSize.width + 10, large: Infinity });
-  });
+  responder.set('designModes', { small: windowSize.width + 10, large: Infinity });
 
   // designMode should be set
   view1.set.expect(2);
@@ -333,24 +322,23 @@ test("When you change designModes on a pane with designModes, it sets designMode
   view3.set.expect(2);
   view4.set.expect(2);
 
-  equals(view1.get('designMode'), 'small', "designMode should be");
-  equals(view2.get('designMode'), 'small', "designMode should be");
-  equals(view3.get('designMode'), 'small', "designMode should be");
-  equals(view4.get('designMode'), 'small', "designMode should be");
+  equals(view1.get('designMode'), 'small', "designMode for view1 should be");
+  equals(view2.get('designMode'), 'small', "designMode for view2 should be");
+  equals(view3.get('designMode'), 'small', "designMode for view3 should be");
+  equals(view4.get('designMode'), 'small', "designMode for view4 should be");
 
-  same(view1.get('layout'), smallLayout, "layout should be");
-  same(view2.get('layout'), smallLayout, "layout should be");
-  same(view3.get('layout'), smallLayout, "layout should be");
-  same(view4.get('layout'), smallLayout, "layout should be");
+  same(view1.get('layout'), smallLayout, "layout for view1 should be");
+  same(view2.get('layout'), smallLayout, "layout for view2 should be");
+  same(view3.get('layout'), smallLayout, "layout for view3 should be");
+  same(view4.get('layout'), smallLayout, "layout for view4 should be");
 
-  same(view1.get('classNames'), ['sc-view', 'small'], "classNames should be");
-  same(view2.get('classNames'), ['sc-view', 'small'], "classNames should be");
-  same(view3.get('classNames'), ['sc-view', 'small'], "classNames should be");
-  same(view4.get('classNames'), ['sc-view', 'small'], "classNames should be");
+  same(view1.get('classNames'), ['sc-view', 'small'], "classNames for view1 should be");
+  same(view2.get('classNames'), ['sc-view', 'small'], "classNames for view2 should be");
+  same(view3.get('classNames'), ['sc-view', 'small'], "classNames for view3 should be");
+  same(view4.get('classNames'), ['sc-view', 'small'], "classNames for view4 should be");
 
-  SC.run(function() {
-    pane.set('designModes', { small: oldSize.width - 10, medium: oldSize.width + 10, large: Infinity });
-  });
+  // Add a medium threshold
+  responder.set('designModes', { small: windowSize.width - 10, medium: windowSize.width + 10, large: Infinity });
 
   // designMode should be set
   view1.set.expect(3);
@@ -358,29 +346,30 @@ test("When you change designModes on a pane with designModes, it sets designMode
   view3.set.expect(3);
   view4.set.expect(3);
 
-  equals(view1.get('designMode'), 'medium', "designMode should be");
-  equals(view2.get('designMode'), 'medium', "designMode should be");
-  equals(view3.get('designMode'), 'medium', "designMode should be");
-  equals(view4.get('designMode'), 'medium', "designMode should be");
+  equals(view1.get('designMode'), 'medium', "designMode for view1 should be");
+  equals(view2.get('designMode'), 'medium', "designMode for view2 should be");
+  equals(view3.get('designMode'), 'medium', "designMode for view3 should be");
+  equals(view4.get('designMode'), 'medium', "designMode for view4 should be");
 
-  same(view1.get('layout'), mediumLayout, "layout should be");
-  same(view2.get('layout'), mediumLayout, "layout should be");
-  same(view3.get('layout'), mediumLayout, "layout should be");
-  same(view4.get('layout'), mediumLayout, "layout should be");
+  same(view1.get('layout'), mediumLayout, "layout for view1 should be");
+  same(view2.get('layout'), mediumLayout, "layout for view2 should be");
+  same(view3.get('layout'), mediumLayout, "layout for view3 should be");
+  same(view4.get('layout'), mediumLayout, "layout for view4 should be");
 
-  same(view1.get('classNames'), ['sc-view', 'medium'], "classNames should be");
-  same(view2.get('classNames'), ['sc-view', 'medium'], "classNames should be");
-  same(view3.get('classNames'), ['sc-view', 'medium'], "classNames should be");
-  same(view4.get('classNames'), ['sc-view', 'medium'], "classNames should be");
+  same(view1.get('classNames'), ['sc-view', 'medium'], "classNames for view1 should be");
+  same(view2.get('classNames'), ['sc-view', 'medium'], "classNames for view2 should be");
+  same(view3.get('classNames'), ['sc-view', 'medium'], "classNames for view3 should be");
+  same(view4.get('classNames'), ['sc-view', 'medium'], "classNames for view4 should be");
 });
 
-test("When you unset designModes on a pane with designModes, it clears designMode on the pane and its childViews.", function() {
-  var oldSize = SC.RootResponder.responder.get('currentWindowSize');
+test("When you unset designModes on RootResponder, it clears designMode on its panes and their childViews.", function() {
+  var windowSize,
+    responder = SC.RootResponder.responder;
 
-  pane = pane.create({
-    designModes: { small: oldSize.width - 10, large: Infinity }
-  });
-  pane.append();
+  windowSize = responder.get('currentWindowSize');
+  responder.set('designModes', { small: windowSize.width - 10, large: Infinity });
+
+  pane = pane.create().append();
 
   // designMode should be set (for initialization)
   view1.set.expect(1);
@@ -388,25 +377,23 @@ test("When you unset designModes on a pane with designModes, it clears designMod
   view3.set.expect(1);
   view4.set.expect(1);
 
-  equals(view1.get('designMode'), 'large', "designMode should be");
-  equals(view2.get('designMode'), 'large', "designMode should be");
-  equals(view3.get('designMode'), 'large', "designMode should be");
-  equals(view4.get('designMode'), 'large', "designMode should be");
+  equals(view1.get('designMode'), 'large', "designMode of view1 should be");
+  equals(view2.get('designMode'), 'large', "designMode of view2 should be");
+  equals(view3.get('designMode'), 'large', "designMode of view3 should be");
+  equals(view4.get('designMode'), 'large', "designMode of view4 should be");
 
-  same(view1.get('layout'), largeLayout, "layout should be");
-  same(view2.get('layout'), largeLayout, "layout should be");
-  same(view3.get('layout'), normalLayout, "layout should be");
-  same(view4.get('layout'), largeLayout, "layout should be");
+  same(view1.get('layout'), largeLayout, "layout of view1 should be");
+  same(view2.get('layout'), largeLayout, "layout of view2 should be");
+  same(view3.get('layout'), smallLayout, "layout of view3 should be");
+  same(view4.get('layout'), largeLayout, "layout of view4 should be");
 
-  same(view1.get('classNames'), ['sc-view', 'large'], "classNames should be");
-  same(view2.get('classNames'), ['sc-view', 'large'], "classNames should be");
-  same(view3.get('classNames'), ['sc-view', 'large'], "classNames should be");
-  same(view4.get('classNames'), ['sc-view', 'large'], "classNames should be");
+  same(view1.get('classNames'), ['sc-view', 'large'], "classNames of view1 should be");
+  same(view2.get('classNames'), ['sc-view', 'large'], "classNames of view2 should be");
+  same(view3.get('classNames'), ['sc-view', 'large'], "classNames of view3 should be");
+  same(view4.get('classNames'), ['sc-view', 'large'], "classNames of view4 should be");
 
   // Unset designModes
-  SC.run(function() {
-    pane.set('designModes', null);
-  });
+  responder.set('designModes', null);
 
   // designMode should be set
   view1.set.expect(2);
@@ -414,18 +401,18 @@ test("When you unset designModes on a pane with designModes, it clears designMod
   view3.set.expect(2);
   view4.set.expect(2);
 
-  equals(view1.get('designMode'), null, "designMode should be");
-  equals(view2.get('designMode'), null, "designMode should be");
-  equals(view3.get('designMode'), null, "designMode should be");
-  equals(view4.get('designMode'), null, "designMode should be");
+  equals(view1.get('designMode'), null, "designMode of view1 should be");
+  equals(view2.get('designMode'), null, "designMode of view2 should be");
+  equals(view3.get('designMode'), null, "designMode of view3 should be");
+  equals(view4.get('designMode'), null, "designMode of view4 should be");
 
-  same(view1.get('layout'), largeLayout, "layout should be");
-  same(view2.get('layout'), largeLayout, "layout should be");
-  same(view3.get('layout'), normalLayout, "layout should be");
-  same(view4.get('layout'), largeLayout, "layout should be");
+  same(view1.get('layout'), largeLayout, "layout of view1 should be");
+  same(view2.get('layout'), largeLayout, "layout of view2 should be");
+  same(view3.get('layout'), smallLayout, "layout of view3 should be");
+  same(view4.get('layout'), largeLayout, "layout of view4 should be");
 
-  same(view1.get('classNames'), ['sc-view'], "classNames should be");
-  same(view2.get('classNames'), ['sc-view'], "classNames should be");
-  same(view3.get('classNames'), ['sc-view'], "classNames should be");
-  same(view4.get('classNames'), ['sc-view'], "classNames should be");
+  same(view1.get('classNames'), ['sc-view'], "classNames of view1 should be");
+  same(view2.get('classNames'), ['sc-view'], "classNames of view2 should be");
+  same(view3.get('classNames'), ['sc-view'], "classNames of view3 should be");
+  same(view4.get('classNames'), ['sc-view'], "classNames of view4 should be");
 });
