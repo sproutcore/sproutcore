@@ -125,6 +125,7 @@ SC.Application = SC.Responder.extend(SC.ResponderContext,
   */
   designModes: null,
 
+
   /** @private */
   init: function () {
     sc_super();
@@ -135,6 +136,7 @@ SC.Application = SC.Responder.extend(SC.ResponderContext,
     // Initialize the value on the RootResponder when it is ready.
     SC.ready(this, '_designModesDidChange');
   }.property().cacheable(),
+
 
   /** @private */
   _designModesDidChange: function () {
