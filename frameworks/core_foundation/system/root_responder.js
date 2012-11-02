@@ -463,11 +463,12 @@ SC.RootResponder = SC.Object.extend(
     var designMode = null,
       designModeNames = this._designModeNames,
       designModeWidths = this._designModeWidths,
-      lastDesignMode = this.get('currentDesignMode'),
-      width = this.get('currentWindowSize').width;
+      width;
 
     // Fast path!
     if (!designModeNames) { return null; }
+
+    width = this.get('currentWindowSize').width;
 
     var i, len;
     for (i = 0, len = designModeWidths.get('length'); i < len; i++) {
@@ -486,7 +487,7 @@ SC.RootResponder = SC.Object.extend(
     return designMode;
   },
 
-  /** @private (semi)
+  /** @private (semi-private)
     Returns the fallback design mode for the given design mode.  This is
     primarily used by SC.View for the case where an adjustment isn't found
     for the current design mode and we want to apply the next best design
