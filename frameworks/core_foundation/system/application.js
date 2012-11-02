@@ -41,39 +41,38 @@ SC.Application = SC.Responder.extend(SC.ResponderContext,
   /**
     A hash of the design modes for this application.
 
-    While a design (the way views are positioned, shaped and styled) may be
+    While a "design" (the manner views are positioned, shaped and styled) may be
     flexible enough to stretch up for a large display and to compress down
     for a medium sized display, at a certain point it often makes more sense
-    to stop stretching or compressing and implement an additional design
-    layout specific to the much different display size.  In order to
-    make this possible and with as much ease as possible, SC.Application has
-    support for design "modes".
+    to stop stretching or compressing and implement an additional new design
+    specific to the much different display size.  In order to make this possible
+    and with as much ease as possible, SproutCore has support for design "modes".
 
-    For example, you may want to have a "small" design mode for smartphones and
-    a "large" design mode for everything else, but you could even go so far as
+    For example, you may want to have a "small" design for smartphones and
+    a "large" design for everything else, but you could even go so far as
     to have "small-portrait", "small-landscape", "medium-portrait",
     "medium-landscape", "large-portrait" and more.  Obviously, the more designs
     you use, the more complex it is to test each mode, but no matter how many
-    you implement, design modes can very easily be used to reposition, hide or
-    show and modify the styles of your application's views as needed.
+    you implement, design modes can still very easily be used to reposition,
+    hide or show and modify the styles of your application's views as needed.
 
     To use design modes in your application, set the designModes property to a
-    hash of mode names where the value of each represents the upper width
+    hash of mode names where the value of each mode is the upper pixel width
     limit at which the design mode of the pane should switch.  As the width of
     the window crosses the threshold value, the new design mode will be applied
     to each attached view.
 
-    Then, if the view has an adjustment in its designAdjustments
-    property that matches the current mode, the layout of the view will be
-    adjusted accordingly.
+    To use a design mode, you can specify designAdjustments for the view that
+    match the current mode.  These adjustments will alter the layout of the view
+    accordingly for the current mode.
 
     As well, a className for the current design mode will be applied to each
     view, which allows you to update the style of the views without manually
     adding bindings or observers.
 
-    Note that the designMode property of each view will be updated, so
-    you can make computed properties dependent on designMode in order to adjust
-    other properties, such as isVisible.
+    Finally, the designMode property of each view will be updated, so you can
+    also make computed properties dependent on designMode in order to adjust
+    other properties.
 
     For example,
 
@@ -120,6 +119,9 @@ SC.Application = SC.Responder.extend(SC.ResponderContext,
 
         }).append();
 
+    Note: this property can not be changed and should be set when your
+    SC.Application instance is created.
+
     @property {Object|null}
     @default null
   */
@@ -130,29 +132,17 @@ SC.Application = SC.Responder.extend(SC.ResponderContext,
   init: function () {
     sc_super();
 
-    // Watch designModes for changes.
-    this.addObserver('designModes', this, '_designModesDidChange');
-
     // Initialize the value on the RootResponder when it is ready.
-    SC.ready(this, '_designModesDidChange');
+    SC.ready(this, '_setDesignModes');
   }.property().cacheable(),
 
-
   /** @private */
-  _designModesDidChange: function () {
-    var binding = this._binding,
-      designModes = this.get('designModes'),
+  _setDesignModes: function () {
+    var designModes = this.get('designModes'),
       responder = SC.RootResponder.responder;
 
     // All we do is pass the value to the root responder for convenience.
     responder.set('designModes', designModes);
-
-    if (designModes) {
-      if (binding && !binding.isConnected) { binding.connect(); }
-      else if (!binding) { this._binding = this.bind('designMode', responder, 'currentDesignMode'); }
-    } else {
-      if (binding) { binding.disconnect(); }
-    }
   }
 
 });
