@@ -650,6 +650,7 @@ SC.MenuPane = SC.PickerPane.extend(
   createMenuItemViews: function() {
     var views = [], items = this.get('displayItems'),
         exampleView = this.get('exampleView'), item, itemView, view,
+        exampleViewKey, itemExampleView,
         height, heightKey, separatorKey, defaultHeight, separatorHeight,
         menuHeight, menuHeightPadding, keyEquivalentKey, keyEquivalent,
         keyArray, idx, layerIdKey, propertiesHash,
