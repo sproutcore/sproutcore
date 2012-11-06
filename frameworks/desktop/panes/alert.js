@@ -397,6 +397,7 @@ SC.AlertPane = SC.PanelPane.extend(
     }
 
     this.remove(); // hide alert
+    this.invokeLast(function() { this.destroy(); });
   },
 
   /** @private
