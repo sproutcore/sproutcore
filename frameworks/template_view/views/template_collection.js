@@ -50,6 +50,22 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
     return templateCollectionView;
   },
 
+  /**
+    @private
+    When the view is destroyed, remove array observers on the content array.
+  */
+  destroy: function() {
+    var content = this.get('content');
+    if(content) {
+      content.removeArrayObservers({
+        target: this,
+        willChange: 'arrayContentWillChange',
+        didChange: 'arrayContentDidChange'
+      });
+    }
+    return sc_super();
+  },
+  
   // In case a default content was set, trigger the child view creation
   // as soon as the empty layer was created
   didCreateLayer: function() {
@@ -207,6 +223,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
     // remove it now.
     var emptyView = this.get('emptyView');
     if (emptyView) { emptyView.$().remove(); emptyView.removeFromParent(); }
+    if(removedCount === 0 && addedCount === 0) { return; }
 
     // Loop through child views that correspond with the removed items.
     // Note that we loop from the end of the array to the beginning because
