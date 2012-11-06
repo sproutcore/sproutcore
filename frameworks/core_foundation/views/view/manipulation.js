@@ -204,13 +204,21 @@ SC.View.reopen(
     @returns {SC.View} receiver
   */
   replaceAllChildren: function(views) {
-    var len = views.get('length'), idx;
+    var len = views.get('length'),
+        childViews = this.get('childViews'),
+        toDestroy, idx;
+
+    toDestroy = childViews.filter(function(view) {
+      return !views.contains(view);
+    });
 
     this.beginPropertyChanges();
     this.destroyLayer().removeAllChildren();
     for(idx=0;idx<len;idx++) { this.appendChild(views.objectAt(idx)); }
     this.replaceLayer();
     this.endPropertyChanges();
+
+    toDestroy.invoke('destroy');
 
     return this ;
   },
