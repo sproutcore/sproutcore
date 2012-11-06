@@ -3136,6 +3136,28 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   },
 
   /** @private
+    Clean up memory at destruction
+  */
+  destroy: function(layerId) {
+    var ret = sc_super();
+
+    if (this._sc_itemViews) {
+      this._sc_itemViews.invoke('destroy');
+      this._sc_itemViews = null;
+    }
+    if (this._GROUP_VIEW_POOL) {
+      this._GROUP_VIEW_POOL.invoke('destroy');
+      this._GROUP_VIEW_POOL = null;
+    }
+    if (this._VIEW_POOL) {
+      this._VIEW_POOL.invoke('destroy');
+      this._VIEW_POOL = null;
+    }
+
+    return ret;
+  },
+
+  /** @private
     Become a drop target whenever reordering content is enabled.
   */
   _cv_canReorderContentDidChange: function () {
