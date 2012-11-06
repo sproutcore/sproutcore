@@ -339,6 +339,35 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     this.itemsDidChange();
   },
 
+  /** @private
+   Clean up to prevent memory leaks
+   */
+  destroy: function() {
+    var childViews = this.get('childViews'),
+        itemKeys = this.get('itemKeys'),
+        itemKey, i, j, localItem, childView;
+
+    // If we have segments
+    if (childViews.get('length') > 1) {
+      // Remove observers that we added
+      for (i = childViews.get('length') - 2; i >= 0; --i) {
+        childView = childViews.objectAt(i);
+        localItem = childView.get('localItem');
+
+        if (SC.kindOf(localItem, SC.Object)) {
+          for (j = itemKeys.get('length') - 1; j >= 0; --j) {
+            itemKey = this.get(itemKeys.objectAt(j));
+            if (itemKey) {
+              localItem.removeObserver(itemKey, this, this.itemContentDidChange);
+            }
+          }
+        }
+      }
+    }
+
+    return sc_super();
+  },
+  
   shouldHandleOverflowDidChange: function() {
     if (this.get('shouldHandleOverflow')) {
       // remeasure should show/hide it as needed
@@ -378,7 +407,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         localItem = childView.get('localItem');
 
         // Remove observers from items we are losing off the end
-        if (localItem instanceof SC.Object) {
+        if (SC.kindOf(localItem, SC.Object)) {
 
           for (j = itemKeys.get('length') - 1; j >= 0; j--) {
             itemKey = this.get(itemKeys.objectAt(j));
@@ -396,7 +425,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
           value = null;
         }
 
-        this.removeChild(childView);
+        childView.destroy();
       }
 
       // Update our value which may have changed
@@ -429,7 +458,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       childView = childViews.objectAt(i);
       previousItem = childView.get('localItem');
 
-      if (previousItem instanceof SC.Object && !items.contains(previousItem)) {
+      if (SC.kindOf(previousItem, SC.Object) && !items.contains(previousItem)) {
         // If the old item is no longer in the view, remove its observers
         for (j = itemKeys.get('length') - 1; j >= 0; j--) {
           itemKey = this.get(itemKeys.objectAt(j));
@@ -457,7 +486,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       } else if (SC.typeOf(localItem) === SC.T_HASH) {
 
         localItem = SC.Object.create(localItem);
-      } else if (localItem instanceof SC.Object)  {
+      } else if (SC.kindOf(localItem, SC.Object))  {
 
         // We don't need to make any changes to SC.Object items, but we can observe them
         for (j = itemKeys.get('length') - 1; j >= 0; j--) {
