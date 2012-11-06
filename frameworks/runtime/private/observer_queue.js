@@ -36,13 +36,16 @@ SC.Observers = {
 
    Attempt to add the named observer.  If the observer cannot be found, put
    it into a queue for later.
+   
+   @returns {Array} The tuple representing the property path of the observer that was added
   */
   addObserver: function(propertyPath, target, method, pathRoot) {
-    var tuple ;
+    var tuple, ret;
 
     // try to get the tuple for this.
     if (typeof propertyPath === "string") {
       tuple = SC.tupleForPropertyPath(propertyPath, pathRoot) ;
+      ret = tuple;
     } else {
       tuple = propertyPath;
     }
@@ -55,6 +58,8 @@ SC.Observers = {
     } else {
       this.queue.push([propertyPath, target, method, pathRoot]) ;
     }
+    
+    return ret;
   },
 
   /**
@@ -62,13 +67,16 @@ SC.Observers = {
 
     Remove the observer.  If it is already in the queue, remove it.  Also
     if already found on the object, remove that.
+
+    @returns {Boolean} true if an observer was removed
   */
   removeObserver: function(propertyPath, target, method, pathRoot) {
-    var idx, queue, tuple, item, newQueue;
+    var idx, queue, tuple, item, newQueue, removed = false;
 
     tuple = SC.tupleForPropertyPath(propertyPath, pathRoot) ;
     if (tuple) {
       tuple[0].removeObserver(tuple[1], target, method);
+      removed = true;
     }
     //@if(debug)
     // Add some developer support indicating that the observer was not removed.
@@ -89,11 +97,15 @@ SC.Observers = {
 
       if (item[0] !== propertyPath || item[1] !== target || item[2] !== method || item[3] !== pathRoot) {
         newQueue.push(item);
+      } else {
+        removed = true;
       }
     }
 
     // even though performance probably won't be a problem, we are defensive about memory alloc.
     this.queue = newQueue;
+    
+    return removed;
   },
 
   /**
