@@ -446,18 +446,6 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
       if(prev && prev.beginEditing) prev.beginEditing();
     }
     return YES ;
-  },
-
-  /** @private */
-  deleteForward: function(evt) {
-    evt.allowDefault();
-    return YES;
-  },
-
-  /** @private */
-  deleteBackward: function(evt) {
-    evt.allowDefault();
-    return YES ;
   }
 });
 

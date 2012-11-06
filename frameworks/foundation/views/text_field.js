@@ -1190,7 +1190,55 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     }
     return NO;
   },
+  
+  /** @private */
+  deleteForward: function(evt) { 
+    evt.allowDefault();
+    return YES;
+  },
 
+  /** @private */
+  deleteBackward: function(evt) { 
+    evt.allowDefault();
+    return YES;
+  },
+
+  /** @private */
+  moveLeft: function(evt) { 
+    evt.allowDefault();
+    return YES;
+  },
+
+  /** @private */
+  moveRight: function(evt) { 
+    evt.allowDefault();
+    return YES;
+  },
+
+  /** @private */
+  selectAll: function(evt) { 
+    evt.allowDefault();
+    return YES;
+  },
+
+  /** @private */
+  moveUp: function(evt) {
+    if (this.get('isTextArea')) {
+      evt.allowDefault();
+      return YES;
+    }
+    return NO;
+  },
+
+  /** @private */
+  moveDown: function(evt) {
+    if (this.get('isTextArea')) {
+      evt.allowDefault();
+      return YES;
+    }
+    return NO;
+  },
+  
   keyUp: function (evt) {
     if (SC.browser.isMozilla &&
         evt.keyCode === SC.Event.KEY_RETURN) { this.fieldValueDidChange(); }
