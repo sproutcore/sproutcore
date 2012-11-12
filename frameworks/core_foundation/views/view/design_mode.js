@@ -113,7 +113,7 @@ SC.View.reopen(
       this.beginPropertyChanges();
       if (prevAdjustment) {
         for (key in prevAdjustment) {
-          if (SC.none(newAdjustment[key])) { this.adjust(key, null); }
+          if (!newAdjustment || (newAdjustment && SC.none(newAdjustment[key]))) { this.adjust(key, null); }
         }
       }
 
