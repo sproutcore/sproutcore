@@ -46,7 +46,7 @@ SC.Application = SC.Responder.extend(SC.ResponderContext,
     for a medium sized display, at a certain point it often makes more sense
     to stop stretching or compressing and implement an additional new design
     specific to the much different display size.  In order to make this possible
-    and with as much ease as possible, SproutCore has support for design "modes".
+    and with as much ease as possible, SproutCore includes support for design modes.
 
     For example, you may want to have a "small" design for smartphones and
     a "large" design for everything else, but you could even go so far as
@@ -62,9 +62,8 @@ SC.Application = SC.Responder.extend(SC.ResponderContext,
     the window crosses the threshold value, the new design mode will be applied
     to each attached view.
 
-    To use a design mode, you can specify designAdjustments for the view that
-    match the current mode.  These adjustments will alter the layout of the view
-    accordingly for the current mode.
+    To adjust for a design mode, you specify designAdjustments that adjust the
+    layout of views for the current mode.
 
     As well, a className for the current design mode will be applied to each
     view, which allows you to update the style of the views without manually
@@ -101,13 +100,13 @@ SC.Application = SC.Responder.extend(SC.ResponderContext,
             // 'large' depending on the current design mode.
             classNames: ['my-view'],
 
-            // This view will adjust its layout for small and medium modes.
+            // This view will adjust its layout for small and medium modes and ignores the large mode.
             designAdjustments: {
               small: { height: 44, right: 10 },
               medium: { height: 50, width: 180 }
             },
 
-            // The layout is common to design modes.
+            // The layout is common for all design modes.
             layout: { left: 10, top: 10 },
 
             // This view will hide itself in large mode.
@@ -119,8 +118,8 @@ SC.Application = SC.Responder.extend(SC.ResponderContext,
 
         }).append();
 
-    Note: this property can not be changed and should be set when your
-    SC.Application instance is created.
+    Note: For performance, the designModes property can not be changed and
+    should be specified when your SC.Application instance is created.
 
     @property {Object|null}
     @default null
@@ -141,8 +140,11 @@ SC.Application = SC.Responder.extend(SC.ResponderContext,
     var designModes = this.get('designModes'),
       responder = SC.RootResponder.responder;
 
-    // All we do is pass the value to the root responder for convenience.
-    responder.set('designModes', designModes);
+    if (designModes) {
+      // All we do is pass the value to the root responder for convenience.
+      responder.set('designModes', designModes);
+      this.bind('designMode', SC.Binding.from('SC.RootResponder.responder.currentDesignMode'));
+    }
   }
 
 });
