@@ -402,3 +402,25 @@ test('extend', function() {
   var parsedDateTimeExt = dateTimeExt.parse('2011-10-15T21:30:00Z');
   ok(SC.instanceOf(parsedDateTimeExt, dateTimeExt), 'Correctly produced an instance of the extended type.');
 });
+
+/**
+ * This test trims out milliseconds, because time marches on during the unit
+ * test.
+ */
+test('elapsed', function() {
+  var dateTimeTest = SC.DateTime.create();
+  equals(Math.round(dateTimeTest.get('elapsed') / 1000), 0);
+  
+  // Modify the current time by 20 seconds;
+  dateTimeTest = SC.DateTime.create().advance({
+    second: -20
+  });
+  equals(Math.round(dateTimeTest.get('elapsed') / 1000), 20);
+  
+  // Modify the current time by -120 seconds;
+  dateTimeTest = SC.DateTime.create().advance({
+    second: 120
+  });
+  equals(Math.round(dateTimeTest.get('elapsed') / 1000), -120);
+  
+});
