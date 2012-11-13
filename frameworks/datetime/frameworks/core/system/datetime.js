@@ -289,6 +289,7 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
       - `millisecond`
       - `milliseconds`, the number of milliseconds since
         January, 1st 1970 00:00:00.0 UTC
+      - `elapsed`, the number of milliseconds until (-), or since (+), the date.
       - `isLeapYear`, a boolean value indicating whether the receiver's year
         is a leap year
       - `daysInMonth`, the number of days of the receiver's current month
@@ -672,6 +673,9 @@ SC.DateTime.mixin(SC.Comparable,
           break;
         case 'millisecond':
           v = d.getUTCMilliseconds();
+          break;
+        case 'elapsed':
+          v = +new Date() - d.getTime() - (timezone * 60000);
           break;
       }
 
