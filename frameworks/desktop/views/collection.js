@@ -2994,7 +2994,20 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
       objects = [];
       shift = 0;
       data.indexes.forEach(function(i) {
-        objects.push(content.objectAt(i-shift));
+        var o = content.objectAt(i-shift),
+            store, sk;
+        if (SC.get(o, 'isNestedRecord')) {
+          // special case here. removing a nested record from content will
+          // unregister the record from the parent, which removes the data hash.
+          // trying to reinsert that record will fail since the data hash is gone.
+          // to avoid this, read the data hash before removing and keep that around
+          // to reinsert.
+          store = o.get('store');
+          sk = o.get('storeKey');
+          objects.push(store.readDataHash(sk));
+        } else {
+          objects.push(o);
+        }
         content.removeAt(i-shift);
         shift++;
         if (i < idx) idx--;
