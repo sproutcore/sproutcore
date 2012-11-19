@@ -168,15 +168,19 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
         pname    = this.get('propertyName'),
         cr, recordType, i;
-    
+
     newRecs = this._processRecordsToHashes(recs);
 
-    for (i = idx; i < idx + amt; ++i) {
+    for (i = idx; i < children.length; ++i) {
       this.unregisterNestedRecord(i);
     }
 
     for (i = 0; i < len; ++i) {
       record.registerNestedRecord(newRecs[i], pname, pname + '.' + (idx + i));
+    }
+
+    for (i = 0; i < children.length - idx - amt; ++i) {
+      record.registerNestedRecord(children[idx + amt + i], pname, pname + '.' + (idx + len + i));
     }
 
     // notify that the record did change...
