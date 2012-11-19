@@ -38,6 +38,8 @@ Handlebars.registerHelper('collection', function(path, options) {
 
     extensions = SC.clone(hash);
     extensions.itemViewOptions = itemHash;
+    // don't duplicate properties in the view helper
+    options.hash = {};
   }
 
   if (fn) { extensions.itemViewTemplate = fn; }
