@@ -52,6 +52,36 @@ SC.Button = SC.TemplateView.extend(SC.ActionSupport,
 
   touchEnd: function(touch) {
     this.mouseUp(touch);
+  },
+
+  keyDown: function(evt) {
+    var ret = NO,
+        view;
+    if (evt.which === 9 || evt.keyCode === 9) {
+      view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
+      if (view) {
+        view.becomeFirstResponder();
+      } else {
+        evt.allowDefault();
+      }
+      ret = YES;
+    } else if (evt.which === SC.Event.KEY_SPACE || evt.which === SC.Event.KEY_RETURN) {
+      this.set('isActive', YES);
+      this.invokeLater('_runAction', 200);
+      ret = YES;
+    }
+
+    return ret;
+  },
+
+  keyUp: function(evt) {
+    this.set('isActive', NO);
+    return YES;
+  },
+
+  _runAction: function() {
+    this.fireAction();
+    this.set('isActive', NO);
   }
 
 });
