@@ -395,7 +395,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     if (!this._oneWay) {
       path = this._toPropertyPath; root = this._toRoot ;
       this._toObserverData = [path, this, this.toPropertyDidChange, root];
-      this.actualToTuple = SC.Observers.addObserver.apply(SC.Observers, this._toObserverData);
+      this._actualToTuple = SC.Observers.addObserver.apply(SC.Observers, this._toObserverData);
     }
 
     if (bench) SC.Benchmark.end("SC.Binding.connect()");
