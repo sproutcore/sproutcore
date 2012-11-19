@@ -179,7 +179,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
       defaultRecordType, storeKeysById,
       newObjects, rec,
       i, len;
-    
+
     // Create the proxy cache, we will need it.
     if (!this._records) this._records = [];
 
@@ -187,7 +187,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     newObjects = this._processRecordsToHashes(recs);
 
 	// Unregister the records being replaced.
-    // for (i = idx; i < idx + amt; ++i) {
+    // for (i = idx, len = children.length; i < len; ++i) {
     //  this.unregisterNestedRecord(i);
     // } 
 
@@ -206,7 +206,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
       } else {
         // Remove the cached record.
         this._records[i] = null;
-    } 
+    }
 
       // Now throw away the connection, so that the parent won't retrieve this
       // same instance. This is a work-around due to the fact that nested records
@@ -223,7 +223,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
         store.unregisterChildFromParent(rec.get('storeKey'));
 
         this._records[i] = null;
-      }
+    } 
     }
 
     // All objects from idx to the end must be removed to do an insert.
@@ -245,7 +245,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     // update to reflect its new nested object path.
     for (i = idx, len = children.length; i < len; i++) {
       this._records[i] = parent.registerNestedRecord(children[i], pname, pname + '.' + i);
-    }
+      }
 
     // Update the enumerable, [], property (including firstObject and lastObject)
     this.arrayContentDidChange(idx, removeCount, addCount);
