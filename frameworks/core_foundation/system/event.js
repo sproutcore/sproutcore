@@ -654,6 +654,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
   KEY_TAB:       9,
   KEY_RETURN:   13,
   KEY_ESC:      27,
+  KEY_SPACE:    32,
   KEY_LEFT:     37,
   KEY_UP:       38,
   KEY_RIGHT:    39,
