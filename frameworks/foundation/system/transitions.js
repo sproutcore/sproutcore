@@ -3,6 +3,7 @@
 // Copyright: @2012 7x7 Software, Inc.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
+sc_require('views/container');
 
 
 // This adds transition engine constants to SC.ContainerView.
