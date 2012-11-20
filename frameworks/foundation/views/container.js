@@ -163,8 +163,7 @@ SC.ContainerView = SC.View.extend(
   awake: function () {
     sc_super();
 
-    var nowShowing = this.get('nowShowing');
-    if (nowShowing && nowShowing.length > 0) { this.nowShowingDidChange(); }
+    if (this.get('nowShowing')) { this.nowShowingDidChange(); }
   },
 
   /** @private
@@ -230,6 +229,49 @@ SC.ContainerView = SC.View.extend(
   },
 
   /** @private
+    Invoked whenever the nowShowing property changes.  This will try to find
+    the new content if possible and set it.  If you set nowShowing to an
+    empty string or null, then the current content will be cleared.
+
+    If you set the content manually, the nowShowing property will be set to
+    SC.CONTENT_SET_DIRECTLY.
+  */
+  nowShowingDidChange: function () {
+    // This code turns this.nowShowing into a view object by any means necessary.
+    var content = this.get('nowShowing');
+
+    // If nowShowing was changed because the content was set directly, then do nothing.
+    if (content === SC.CONTENT_SET_DIRECTLY) { return; }
+
+    // If it's a string, try to turn it into the object it references...
+    if (SC.typeOf(content) === SC.T_STRING && content.length > 0) {
+      if (content.indexOf('.') > 0) {
+        content = SC.objectForPropertyPath(content);
+      } else {
+        var tempContent = this.getPath(content);
+        content = SC.kindOf(tempContent, SC.CoreView) ? tempContent : SC.objectForPropertyPath(content, this.get('page'));
+      }
+    }
+
+    // If it's an uninstantiated view, then attempt to instantiate it.
+    // (Uninstantiated views have a create() method; instantiated ones do not.)
+    if (SC.typeOf(content) === SC.T_CLASS) {
+      if (content.kindOf(SC.CoreView)) {
+        content = this.createChildView(content);
+        this._instantiatedNewView = YES;
+      } else {
+        content = null;
+      }
+    }
+
+    // If content has not been turned into a view by now, it's hopeless.
+    if (content && !(content instanceof SC.CoreView)) { content = null; }
+
+    // Sets the content.
+    this.set('contentView', content);
+  }.observes('nowShowing'),
+
+  /** @private
     Replaces any child views with the passed new content.
 
     This method is automatically called whenever your contentView property
@@ -291,49 +333,6 @@ SC.ContainerView = SC.View.extend(
     // Track the current view and transition (may be null).
     this._currentContent = newContent;
     this._currentTransition = transition;
-  },
-
-  /** @private
-    Invoked whenever the nowShowing property changes.  This will try to find
-    the new content if possible and set it.  If you set nowShowing to an
-    empty string or null, then the current content will be cleared.
-
-    If you set the content manually, the nowShowing property will be set to
-    SC.CONTENT_SET_DIRECTLY.
-  */
-  nowShowingDidChange: function () {
-    // This code turns this.nowShowing into a view object by any means necessary.
-    var content = this.get('nowShowing');
-
-    // If nowShowing was changed because the content was set directly, then do nothing.
-    if (content === SC.CONTENT_SET_DIRECTLY) { return; }
-
-    // If it's a string, try to turn it into the object it references...
-    if (SC.typeOf(content) === SC.T_STRING && content.length > 0) {
-      if (content.indexOf('.') > 0) {
-        content = SC.objectForPropertyPath(content);
-      } else {
-        var tempContent = this.getPath(content);
-        content = SC.kindOf(tempContent, SC.CoreView) ? tempContent : SC.objectForPropertyPath(content, this.get('page'));
-      }
-    }
-
-    // If it's an uninstantiated view, then attempt to instantiate it.
-    // (Uninstantiated views have a create() method; instantiated ones do not.)
-    if (SC.typeOf(content) === SC.T_CLASS) {
-      if (content.kindOf(SC.CoreView)) {
-        content = this.createChildView(content);
-        this._instantiatedNewView = YES;
-      } else {
-        content = null;
-      }
-    }
-
-    // If content has not been turned into a view by now, it's hopeless.
-    if (content && !(content instanceof SC.CoreView)) { content = null; }
-
-    // Sets the content.
-    this.set('contentView', content);
-  }.observes('nowShowing')
+  }
 
 });
