@@ -162,6 +162,15 @@ SC.ObjectController = SC.Controller.extend(
   },
 
   /**
+    This performs a conventional destroy
+    @returns {*}
+  */
+  destroyController: function() {
+    this.destroy();
+    return SC.Controller.prototype.destroy.apply(this, arguments);
+  },
+
+  /**
     Invoked whenever any property on the content object changes.
 
     The default implementation will simply notify any observers that the
