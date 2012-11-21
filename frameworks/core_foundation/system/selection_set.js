@@ -457,7 +457,7 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
     @param {Object} source the source to limit
     @returns {SC.SelectionSet} receiver
   */
-  constrain: function(source) {
+  constrain: function (source) {
     var set, len, max, objects;
 
     this.beginPropertyChanges();
@@ -477,9 +477,11 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
 
     // remove objects not in source
     if (objects = this._objects) {
-      objects.forEach(function(cur) {
-        if (source.indexOf(cur)<0) this.removeObject(cur);
-      },this);
+      var i, cur;
+      for (i = objects.length - 1; i >= 0; i--) {
+        cur = objects[i];
+        if (source.indexOf(cur) < 0) this.removeObject(cur);
+      }
     }
 
     this.endPropertyChanges();
