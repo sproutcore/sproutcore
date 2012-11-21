@@ -32,3 +32,36 @@ test('childViews specified as instances are also destroyed.', function() {
   ok(!v2.get('parentView'), 'destroying a parent removes the parentView reference from the child.');
   ok(v2.get('owner') === null, 'destroying a parent removes the owner reference from the child.');
 });
+
+/**
+  There was a bug introduced when we started destroying SC.Binding objects when
+  destroying SC.Objects.
+
+  Because the view was overriding destroy to destroy itself first (clearing out
+  parentViews), later when we try to clean up bindings, any bindings to the
+  parentView property of a view would not be able to remove observers from the
+  parent view instance.
+*/
+test("Destroying a view, should also destroy its binding objects", function () {
+  var v, v2;
+
+  SC.run(function() {
+    v = SC.View.create({
+      childViews: ['v2'],
+      foo: 'baz',
+      v2: SC.View.extend({
+        barBinding: '.parentView.foo'
+      })
+    });
+  });
+
+  v2 = v.get('v2');
+
+  ok(v.hasObserverFor('foo'), "The view should have an observer on 'foo'");
+  ok(v2.hasObserverFor('bar'), "The child view should have an observer on 'bar'");
+
+  v.destroy();
+
+  ok(!v.hasObserverFor('foo'), "The view should no longer have an observer on 'foo'");
+  ok(!v2.hasObserverFor('bar'), "The child view should no longer have an observer on 'bar'");
+});
