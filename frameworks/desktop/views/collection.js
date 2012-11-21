@@ -3154,6 +3154,11 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
       this._VIEW_POOL = null;
     }
 
+    if (this._content) {
+      this._content.removeObserver('length', this, this.contentLengthDidChange);
+    }
+    this.removeContentRangeObserver();
+
     return ret;
   },
 
