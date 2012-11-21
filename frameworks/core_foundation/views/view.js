@@ -1310,12 +1310,17 @@ SC.CoreView.reopen(
     memory manager.
   */
   destroy: function() {
-    if (this.get('isDestroyed')) { return this; } // nothing to do
+    var ret;
+    // Fast path!
+    if (this.get('isDestroyed')) { return this; }
 
-    this._destroy(); // core destroy method
+    // Do generic destroy. It takes care of mixins and sets isDestroyed to YES.
+    // Do this first, since it cleans up bindings that may apply to parentView
+    // (which we will soon null out).
+    ret = sc_super();
+    this._destroy();
 
-    //Do generic destroy. It takes care of mixins and sets isDestroyed to YES.
-    return sc_super();
+    return ret;
   },
 
   _destroy: function() {

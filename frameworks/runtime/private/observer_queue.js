@@ -68,8 +68,14 @@ SC.Observers = {
 
     tuple = SC.tupleForPropertyPath(propertyPath, pathRoot) ;
     if (tuple) {
-      tuple[0].removeObserver(tuple[1], target, method) ;
+      tuple[0].removeObserver(tuple[1], target, method);
     }
+    //@if(debug)
+    // Add some developer support indicating that the observer was not removed.
+    else {
+      SC.warn("Developer Warning: Attempted to remove observer for propertyPath %@ with root %@ and failed.  This may be because an object that the path refers to is no longer available.".fmt(propertyPath, pathRoot));
+    }
+    //@endif
 
     // tests show that the fastest way is to create a new array. On Safari,
     // it is fastest to set to null then loop over again to collapse, but for all other browsers
