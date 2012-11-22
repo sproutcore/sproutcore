@@ -7,11 +7,10 @@
 // ========================================================================
 // View Animation Unit Tests
 // ========================================================================
+/*globals module, test, ok, same, equals, stop, start*/
 
-/*globals module test ok same equals */
 
 /* These unit tests verify:  animate(). */
-
 var view, pane, originalSupportsTransitions = SC.platform.supportsCSSTransitions;
 
 function styleFor(view) {
@@ -55,7 +54,7 @@ if (SC.platform.supportsCSSTransitions) {
     SC.RunLoop.begin();
     view.animate('left', 100, { duration: 1 });
     SC.RunLoop.end();
-    equals(transitionFor(view), 'left 1s linear', 'add transition');
+    equals(transitionFor(view), 'left 1s linear 0s', 'add transition');
     equals(100, view.get('layout').left, 'left is 100');
   });
 
@@ -63,7 +62,7 @@ if (SC.platform.supportsCSSTransitions) {
     SC.RunLoop.begin();
     view.animate('left', 100, 1);
     SC.RunLoop.end();
-    equals(transitionFor(view), 'left 1s linear', 'add transition');
+    equals(transitionFor(view), 'left 1s linear 0s', 'add transition');
   });
 
   test("callbacks work in general", function(){
@@ -94,25 +93,32 @@ if (SC.platform.supportsCSSTransitions) {
     SC.RunLoop.end();
   });
 
+  test("handles delay function string", function(){
+    SC.RunLoop.begin();
+    view.animate('left', 100, { duration: 1, delay: 1 });
+    SC.RunLoop.end();
+    equals(transitionFor(view), 'left 1s linear 1s', 'uses delay');
+  });
+
   test("handles timing function string", function(){
     SC.RunLoop.begin();
     view.animate('left', 100, { duration: 1, timing: 'ease-in' });
     SC.RunLoop.end();
-    equals(transitionFor(view), 'left 1s ease-in', 'uses ease-in timing');
+    equals(transitionFor(view), 'left 1s ease-in 0s', 'uses ease-in timing');
   });
 
   test("handles timing function array", function(){
     SC.RunLoop.begin();
     view.animate('left', 100, { duration: 1, timing: [0.1, 0.2, 0.3, 0.4] });
     SC.RunLoop.end();
-    equals(transitionFor(view), 'left 1s cubic-bezier(0.1, 0.2, 0.3, 0.4)', 'uses cubic-bezier timing');
+    equals(transitionFor(view), 'left 1s cubic-bezier(0.1, 0.2, 0.3, 0.4) 0s', 'uses cubic-bezier timing');
   });
 
   test("should allow multiple keys to be set at once", function(){
     SC.RunLoop.begin();
     view.animate({ top: 100, left: 100 }, 1);
     SC.RunLoop.end();
-    equals(transitionFor(view), 'top 1s linear, left 1s linear', 'should add transition');
+    equals(transitionFor(view), 'top 1s linear 0s, left 1s linear 0s', 'should add transition');
     equals(100, view.get('layout').top, 'top is 100');
     equals(100, view.get('layout').left, 'left is 100');
   });
@@ -274,7 +280,7 @@ if (SC.platform.supportsCSSTransitions) {
     SC.RunLoop.begin();
     view.animate('rotateX', 45, { duration: 1 });
     SC.RunLoop.end();
-    equals(transitionFor(view), '-'+SC.platform.cssPrefix+'-transform 1s linear', 'add transition');
+    equals(transitionFor(view), SC.platform.transformPrefix+'transform 1s linear 0s', 'add transition');
     equals(styleFor(view)[SC.platform.domCSSPrefix+'Transform'], 'rotateX(45deg)', 'has both transforms');
     equals(45, view.get('layout').rotateX, 'rotateX is 45deg');
   });
@@ -291,7 +297,7 @@ if (SC.platform.supportsCSSTransitions) {
     view.animate('rotateX', 45, 1).animate('scale', 2, 2);
     SC.RunLoop.end();
 
-    equals(transitionFor(view), '-'+SC.platform.cssPrefix+'-transform 1s linear', 'use duration of first');
+    equals(transitionFor(view), SC.platform.transformPrefix+'transform 1s linear 0s', 'use duration of first');
     equals(styleFor(view)[SC.platform.domCSSPrefix+'Transform'], 'rotateX(45deg) scale(2)');
     equals(45, view.get('layout').rotateX, 'rotateX is 45deg');
     equals(2, view.get('layout').scale, 'scale is 2');
@@ -315,100 +321,100 @@ if (SC.platform.supportsCSSTransitions) {
     }, 1000);
   });
 
-  module("ANIMATION WITH ACCELERATED LAYER", {
-    setup: function(){
-      commonSetup.setup();
-      view.wantsAcceleratedLayer = YES;
-    },
 
-    teardown: commonSetup.teardown
-  });
+  if (SC.platform.supportsCSS3DTransforms) {
+    module("ANIMATION WITH ACCELERATED LAYER", {
+      setup: function(){
+        commonSetup.setup();
+        view.wantsAcceleratedLayer = YES;
+      },
 
-  test("handles acceleration when appropriate", function(){
-    SC.RunLoop.begin();
-    view.animate('top', 100, 1);
-    SC.RunLoop.end();
-    equals(transitionFor(view), '-'+SC.platform.cssPrefix+'-transform 1s linear', 'transition is on transform');
-  });
-
-  test("doesn't use acceleration when not appropriate", function(){
-    SC.RunLoop.begin();
-    view.adjust({ height: null, bottom: 0 });
-    view.animate('top', 100, 1);
-    SC.RunLoop.end();
-    equals(transitionFor(view), 'top 1s linear', 'transition is not on transform');
-  });
-
-  test("combines accelerated layer animation with compatible transform animations", function(){
-    SC.RunLoop.begin();
-    view.animate('top', 100, 1).animate('rotateX', 45, 1);
-    SC.RunLoop.end();
-
-    var transform = styleFor(view)[SC.platform.domCSSPrefix+'Transform'];
-
-    // We need to check these separately because in some cases we'll also have translateZ, this way we don't have to worry about it
-    ok(transform.match(/translateX\(0px\) translateY\(100px\)/), 'has translate');
-    ok(transform.match(/rotateX\(45deg\)/), 'has rotateX');
-  });
-
-  test("should not use accelerated layer if other transforms are being animated at different speeds", function(){
-    SC.RunLoop.begin();
-    view.animate('rotateX', 45, 2).animate('top', 100, 1);
-    SC.RunLoop.end();
-
-    var style = styleFor(view);
-
-    equals(style[SC.platform.domCSSPrefix+'Transform'], 'rotateX(45deg)', 'transform should only have rotateX');
-    equals(style['top'], '100px', 'should not accelerate top');
-  });
-
-  test("callbacks should work properly with acceleration", function(){
-    stop(2000);
-    var stopped = true;
-
-    expect(1);
-
-    SC.RunLoop.begin();
-    // We shouldn't have to use invokeLater, but it's the only way to get this to work!
-    view.invokeLater('animate', 1, { top: 100, left: 100, scale: 2 }, 0.500, function(data) {
-      if (stopped) {
-        start();
-        stopped = false;
-      }
-
-      ok(true);
+      teardown: commonSetup.teardown
     });
-    SC.RunLoop.end();
-  });
 
-  test("should not add animation for properties that have the same value as existing layout", function() {
-    var callbacks = 0;
-
-    SC.RunLoop.begin();
-    // we set width to the same value, but we change height
-    view.invokeLater('animate', 1, {width: 100, height: 50}, 0.5, function() { callbacks++; });
-    SC.RunLoop.end();
-
-    ok(callbacks === 0, "precond - callback should not have been run yet");
-
-    stop(2000);
-
-    // we need to test changing the width at a later time
-    setTimeout(function() {
-      start();
-
-      equals(callbacks, 1, "callback should have been run once, for height change");
-
+    test("handles acceleration when appropriate", function(){
       SC.RunLoop.begin();
-      view.animate('width', 50, 0.5);
+      view.animate('top', 100, 1);
+      SC.RunLoop.end();
+      equals(transitionFor(view), SC.platform.transformPrefix + 'transform 1s linear 0s', 'transition is on transform');
+    });
+
+    test("doesn't use acceleration when not appropriate", function(){
+      SC.RunLoop.begin();
+      view.adjust({ height: null, bottom: 0 });
+      view.animate('top', 100, 1);
+      SC.RunLoop.end();
+      equals(transitionFor(view), 'top 1s linear 0s', 'transition is not on transform');
+    });
+
+    test("combines accelerated layer animation with compatible transform animations", function(){
+      SC.RunLoop.begin();
+      view.animate('top', 100, 1).animate('rotateX', 45, 1);
       SC.RunLoop.end();
 
-      equals(callbacks, 1, "callback should still have only been called once, even though width has now been animated");
-    }, 1000);
-  });
+      var transform = styleFor(view)[SC.platform.domCSSPrefix+'Transform'];
 
-  test("should warn if multiple callbacks for transitions");
+      // We need to check these separately because in some cases we'll also have translateZ, this way we don't have to worry about it
+      ok(transform.match(/translateX\(0px\) translateY\(100px\)/), 'has translate');
+      ok(transform.match(/rotateX\(45deg\)/), 'has rotateX');
+    });
 
+    test("should not use accelerated layer if other transforms are being animated at different speeds", function(){
+      SC.RunLoop.begin();
+      view.animate('rotateX', 45, 2).animate('top', 100, 1);
+      SC.RunLoop.end();
+
+      var style = styleFor(view);
+
+      equals(style[SC.platform.domCSSPrefix+'Transform'], 'rotateX(45deg)', 'transform should only have rotateX');
+      equals(style.top, '100px', 'should not accelerate top');
+    });
+
+    test("callbacks should work properly with acceleration", function(){
+      stop(2000);
+      var stopped = true;
+
+      SC.RunLoop.begin();
+      // We shouldn't have to use invokeLater, but it's the only way to get this to work!
+      view.invokeLater('animate', 1, { top: 100, left: 100, scale: 2 }, 0.25, function(data) {
+        ok(true);
+
+        if (stopped) {
+          start();
+          stopped = false;
+        }
+      });
+      SC.RunLoop.end();
+    });
+
+    test("should not add animation for properties that have the same value as existing layout", function() {
+      var callbacks = 0;
+
+      SC.RunLoop.begin();
+      // we set width to the same value, but we change height
+      view.invokeLater('animate', 1, {width: 100, height: 50}, 0.5, function() { callbacks++; });
+      SC.RunLoop.end();
+
+      ok(callbacks === 0, "precond - callback should not have been run yet");
+
+      stop(2000);
+
+      // we need to test changing the width at a later time
+      setTimeout(function() {
+        start();
+
+        equals(callbacks, 1, "callback should have been run once, for height change");
+
+        SC.RunLoop.begin();
+        view.animate('width', 50, 0.5);
+        SC.RunLoop.end();
+
+        equals(callbacks, 1, "callback should still have only been called once, even though width has now been animated");
+      }, 1000);
+    });
+
+    test("should warn if multiple callbacks for transitions");
+  }
 }
 
 module("ANIMATION WITHOUT TRANSITIONS", {

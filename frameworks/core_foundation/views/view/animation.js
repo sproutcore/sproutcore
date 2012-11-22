@@ -39,6 +39,7 @@ SC.View.reopen(
      - duration: Duration of animation in seconds
      - callback: Callback method to run when animation completes
      - timing: Animation timing function
+     - delay: Animation delay in seconds
 
     @param {String|Hash} key
     @param {Object} value
@@ -89,6 +90,8 @@ SC.View.reopen(
     } else {
       options.timing = 'linear';
     }
+
+    if (SC.none(options.delay)) { options.delay = 0; }
 
     var layout = SC.clone(this.get('layout')), didChange = NO, value, cur, animValue, curAnim, key;
 

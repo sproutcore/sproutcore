@@ -20,7 +20,7 @@ SC.View.reopen({
     Specifies whether transforms can be used to move the layer.
   */
   hasAcceleratedLayer: function(){
-    if (this.get('wantsAcceleratedLayer') && SC.platform.supportsAcceleratedLayers) {
+    if (this.get('wantsAcceleratedLayer') && SC.platform.supportsCSS3DTransforms) {
       var layout = this.get('layout'),
           animations = layout.animate,
           AUTO = SC.LAYOUT_AUTO,
