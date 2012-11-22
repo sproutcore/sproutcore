@@ -156,7 +156,7 @@ SC.CoreView.reopen(
       if (!value) {
         var parent = this.get('parentView');
         if (parent) { parent = parent.get('layer'); }
-        if (parent) { this._view_layer = value = this.findLayerInParentLayer(parent); }
+        this._view_layer = value = this.findLayerInParentLayer(parent);
       }
     }
     return value ;
@@ -215,7 +215,7 @@ SC.CoreView.reopen(
   */
   findLayerInParentLayer: function(parentLayer) {
     var id = "#" + this.get('layerId');
-    return jQuery(id)[0] || jQuery(id, parentLayer)[0] ;
+    return jQuery(id, parentLayer)[0] || jQuery(id)[0];
   },
 
   /**
