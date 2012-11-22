@@ -10,31 +10,6 @@ sc_require('views/container');
 SC.mixin(SC.ContainerView,
 /** @scope SC.ContainerView.prototype */ {
 
-  /** @private */
-  _doubleClippingFrame: function (container, clippingFrame, options) {
-    var frame = container.get('frame');
-
-    switch (options.direction) {
-    case 'right':
-      clippingFrame.width = frame.width * 2;
-      clippingFrame.x = -frame.width;
-      break;
-    case 'up':
-      clippingFrame.height = frame.height * 2;
-      clippingFrame.y = -frame.height;
-      break;
-    case 'down':
-      clippingFrame.height = frame.height * 2;
-      clippingFrame.y = 0;
-      break;
-    default:
-      clippingFrame.width = frame.width * 2;
-      clippingFrame.x = 0;
-    }
-
-    return clippingFrame;
-  },
-
   /**
     Provides dissolve transitions to SC.ContainerView.  The new content will
     fade in as the old content fades out of the view.
@@ -125,26 +100,31 @@ SC.mixin(SC.ContainerView,
 
     /** @private */
     run: function (container, currentContent, newContent, options, onComplete) {
-      var self = this;
+      var childViews = container.get('childViews'),
+        colorView;
+
+      colorView = childViews.objectAt(childViews.get('length') - 1);
 
       // Fade the color in (uses half the total duration)
-      this.colorView.animate('opacity', 1, {
+      colorView.animate('opacity', 1, {
         duration: options.duration * 0.5 || 0.4,
         timing: options.timing || 'ease-in'
       }, function () {
-        // Remove old content and insert new content, then fade the color out.
-        if (currentContent) {
-          container.removeChild(currentContent);
-        }
-
+        // Show new content, then fade the color out.
         if (newContent) {
           newContent.adjust('opacity', 1);
         }
 
-        self.colorView.animate('opacity', 0, {
+        colorView.animate('opacity', 0, {
           duration: options.duration * 0.5 || 0.4,
           timing: options.timing || 'ease-in'
-        }, onComplete);
+        }, function () {
+          // It's best to clean up the colorView here rather than try to find it again on teardown,
+          // since multiple color views could be added.
+          container.removeChild(colorView);
+          colorView.destroy();
+          onComplete();
+        });
       });
     },
 
@@ -160,7 +140,7 @@ SC.mixin(SC.ContainerView,
 
       // Create a color view to fade through.
       color = SC.Color.from(options.color || 'black');
-      colorView = this.colorView = SC.View.create({
+      colorView = SC.View.create({
         layout: { opacity: 0 },
         render: function (context) {
           context.addStyle('background-color', color.get('cssText'));
@@ -171,9 +151,9 @@ SC.mixin(SC.ContainerView,
 
     /** @private */
     teardown: function (container, currentContent, newContent, options) {
-      container.removeChild(this.colorView);
-      this.colorView.destroy();
-      this.colorView = null;
+      if (currentContent) {
+        container.removeChild(currentContent);
+      }
     }
 
   },
@@ -217,17 +197,10 @@ SC.mixin(SC.ContainerView,
         value;
 
       switch (options.direction) {
-      case 'right':
-        key = 'left';
-        break;
-      case 'up':
-        key = 'top';
-        break;
-      case 'down':
-        key = 'top';
-        break;
-      default:
-        key = 'left';
+      case 'right': key = 'left'; break;
+      case 'up': key = 'top'; break;
+      case 'down': key = 'top'; break;
+      default: key = 'left';
       }
 
       newContent.animate(key, 0, {
@@ -269,11 +242,6 @@ SC.mixin(SC.ContainerView,
       if (currentContent) {
         container.removeChild(currentContent);
       }
-    },
-
-    /** @private */
-    transitionClippingFrame: function (container, clippingFrame, options) {
-      return this._doubleClippingFrame(container, clippingFrame, options);
     }
   },
 
@@ -312,6 +280,7 @@ SC.mixin(SC.ContainerView,
     run: function (container, currentContent, newContent, options, onComplete) {
       var frame = container.get('frame'),
         key,
+        callback,
         value;
 
       switch (options.direction) {
@@ -332,57 +301,102 @@ SC.mixin(SC.ContainerView,
         value = -frame.width;
       }
 
-      container.animate(key, value, {
-        duration: options.duration || 0.4,
-        timing: options.timing || 'ease'
-      }, onComplete);
+      if (currentContent) {
+        currentContent.animate(key, value, {
+          duration: options.duration || 0.4,
+          timing: options.timing || 'ease'
+        }, onComplete);
+      }
+
+      if (newContent) {
+        newContent.animate(key, 0, {
+          duration: options.duration || 0.4,
+          timing: options.timing || 'ease'
+        }, currentContent ? undefined : onComplete);
+      }
     },
 
     /** @private */
     setup: function (container, currentContent, newContent, options) {
-      var frame = container.get('frame'),
-        left,
-        top,
+      var adjustLeft = 0,
+        adjustTop = 0,
+        frame = container.get('frame'),
+        jqueryEl,
+        left = 0,
+        top = 0,
         height,
         width;
 
       height = frame.height;
       width = frame.width;
 
-      // Preserve the original layout.
-      this._originalLayout1 = container.get('layout');
-      container.adjust({ bottom: null, right: null, height: height, width: width });
+      if (currentContent) {
+        currentContent.adjust({ bottom: null, right: null, height: height, width: width });
+
+        // If another transition is pushed on, adjust the start position
+        jqueryEl = currentContent.$();
+        adjustLeft += parseFloat(jqueryEl.css('left'));
+        adjustTop += parseFloat(jqueryEl.css('top'));
+      }
 
       if (newContent) {
         switch (options.direction) {
-        case 'right': left = -width; break;
-        case 'up': top = height; break;
-        case 'down': top = -height; break;
-        default: left = width;
+        case 'right': left = -width + adjustLeft; break;
+        case 'up': top = height + adjustTop; break;
+        case 'down': top = -height + adjustTop; break;
+        default: left = width + adjustLeft;
         }
 
-        newContent.adjust({ bottom: null, left: left || 0, right: null, top: top || 0, height: height, width: width });
+        newContent.adjust({ bottom: null, left: left, right: null, top: top, height: height, width: width });
         container.appendChild(newContent);
       }
     },
 
     /** @private */
     teardown: function (container, currentContent, newContent, options) {
-      if (currentContent) {
-        container.removeChild(currentContent);
+      var key;
+
+      switch (options.direction) {
+      case 'right': key = 'left'; break;
+      case 'up': key = 'top'; break;
+      case 'down': key = 'top'; break;
+      default: key = 'left';
       }
 
-      // Adjust the newContent first, then the container.
-      if (newContent) {
+      // Don't reset the newContent if it is just being animated off by another
+      // newer content.
+      if (newContent && !newContent.layoutStyleCalculator._activeAnimations[key]) {
         newContent.set('layout', { bottom: 0, left: 0, right: 0, top: 0 });
       }
 
-      container.set('layout', this._originalLayout1);
+      if (currentContent) {
+        container.removeChild(currentContent);
+      }
     },
 
     /** @private */
     transitionClippingFrame: function (container, clippingFrame, options) {
-      return this._doubleClippingFrame(container, clippingFrame, options);
+      var frame = container.get('frame');
+
+      switch (options.direction) {
+      case 'right':
+        clippingFrame.width = frame.width * 2;
+        clippingFrame.x = -frame.width;
+        break;
+      case 'up':
+        clippingFrame.height = frame.height * 2;
+        clippingFrame.y = -frame.height;
+        break;
+      case 'down':
+        clippingFrame.height = frame.height * 2;
+        clippingFrame.y = 0;
+        break;
+      default:
+        clippingFrame.width = frame.width * 2;
+        clippingFrame.x = 0;
+      }
+
+      return clippingFrame;
     }
   },
 
@@ -442,10 +456,14 @@ SC.mixin(SC.ContainerView,
         value = frame.width;
       }
 
-      currentContent.animate(key, value, {
-        duration: options.duration || 0.4,
-        timing: options.timing || 'ease'
-      }, onComplete);
+      if (currentContent) {
+        currentContent.animate(key, value, {
+          duration: options.duration || 0.4,
+          timing: options.timing || 'ease'
+        }, onComplete);
+      } else {
+        onComplete();
+      }
     },
 
     /** @private */
@@ -470,11 +488,6 @@ SC.mixin(SC.ContainerView,
         currentContent.set('layout', { bottom: 0, left: 0, right: 0, top: 0 });
         container.removeChild(currentContent);
       }
-    },
-
-    /** @private */
-    transitionClippingFrame: function (container, clippingFrame, options) {
-      return this._doubleClippingFrame(container, clippingFrame, options);
     }
   }
 });

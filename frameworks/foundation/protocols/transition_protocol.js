@@ -20,20 +20,20 @@
 SC.TransitionProtocol = {
 
   /**
-    This method is called to cancel an active transition and will be called
-    before a new transition is set up.
+    This optional method is called to cancel an active transition and will be
+    called before a new transition is set up.
 
     Use this method to stop the animation and immediately clean up the views.
 
     @param {SC.ContainerView} container The SC.ContainerView using this plugin.
-    @param {SC.View} currentContent The current view in the container.
-    @param {SC.View} newContent The new view to add to the container.
+    @param {SC.View} oldContent The old view in the container, which is still transitioning out.
+    @param {SC.View} currentContent The current view in the container, which is still transitioning in.
     @param {Object} options Options to modify the transition.
   */
-  cancel:  function (container, currentContent, newContent, options) {},
+  cancel:  function (container, oldContent, currentContent, options) {},
 
   /**
-    This method is called to actually run the transition.
+    This required method is called to actually run the transition.
 
     The onComplete method should be called when the transition is done.
 
@@ -45,9 +45,8 @@ SC.TransitionProtocol = {
   */
   run: function (container, currentContent, newContent, options, onComplete) {},
 
-
   /**
-    This method is called to set up the transition.
+    This optional method is called to set up the transition.
 
     Use this method to adjust the layout of the container, currentContent or
     newContent so that it can be properly animated.  For example, you may
@@ -66,7 +65,7 @@ SC.TransitionProtocol = {
 
 
   /**
-    This method is called to tear down the transition.
+    This optional method is called to tear down the transition.
 
     Use this method to adjust the layout of the container, currentContent or
     newContent to clean up after the transition.  For example, you may
@@ -84,7 +83,7 @@ SC.TransitionProtocol = {
   teardown: function (container, currentContent, newContent, options) {},
 
   /**
-    This method is called to adjust the clippingFrame during the transition.
+    This optional method is called to adjust the clippingFrame during the transition.
 
     Because some childViews are altered by the clippingFrame of their parent
     views (notably collection views), we may need to provide a modified

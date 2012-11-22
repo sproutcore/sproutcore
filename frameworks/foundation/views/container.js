@@ -163,7 +163,12 @@ SC.ContainerView = SC.View.extend(
   awake: function () {
     sc_super();
 
-    if (this.get('nowShowing')) { this.nowShowingDidChange(); }
+    if (this.get('nowShowing')) {
+      // Prevent the initial awake from transitioning in.
+      this._nowShowingAlreadySet = true;
+      this.nowShowingDidChange();
+      delete this._nowShowingAlreadySet;
+    }
   },
 
   /** @private
@@ -226,6 +231,13 @@ SC.ContainerView = SC.View.extend(
     }
 
     return sc_super();
+  },
+
+  /** @private */
+  init: function () {
+    sc_super();
+
+    this._transitionCount = 0;
   },
 
   /** @private
@@ -295,16 +307,20 @@ SC.ContainerView = SC.View.extend(
     this._instantiatedLastView = this._instantiatedNewView;
     this._instantiatedNewView = NO;
 
-    // If a transition is in progress, give the plugin a chance to cancel it.
-    if (this.get('isTransitioning')) {
-      currentTransition.cancel(this, currentContent, newContent, options);
-    }
-
-    if (transition) {
+    if (transition && !this._nowShowingAlreadySet) {
       options = this.get('transitionOptions') || {};
 
-      this.set('isTransitioning', true);
-      transition.setup(this, currentContent, newContent, options);
+      // If a transition is in progress, give the plugin a chance to cancel it.
+      if (this.get('isTransitioning') && currentTransition.cancel) {
+        currentTransition.cancel(this, this._lastContent, currentContent, options);
+      } else {
+        this.set('isTransitioning', true);
+      }
+
+      this._transitionCount++;
+      if (transition.setup) {
+        transition.setup(this, currentContent, newContent, options);
+      }
 
       // Since the transition will likely rely on the setup being propagated to
       // the DOM, the only safe way is to wait a brief moment to ensure the
@@ -313,10 +329,15 @@ SC.ContainerView = SC.View.extend(
 
         transition.run(this, currentContent, newContent, options, function () {
 
-          transition.teardown(self, currentContent, newContent, options);
+          if (transition.teardown) {
+            transition.teardown(self, currentContent, newContent, options);
+          }
           if (shouldDestroyCurrentContent) { currentContent.destroy(); }
 
-          self.set('isTransitioning', false);
+          self._lastContent = newContent;
+          if (--self._transitionCount === 0) {
+            self.set('isTransitioning', false);
+          }
         });
 
       }, 20);
@@ -331,6 +352,7 @@ SC.ContainerView = SC.View.extend(
     }
 
     // Track the current view and transition (may be null).
+    this._lastContent = currentContent;
     this._currentContent = newContent;
     this._currentTransition = transition;
   }
