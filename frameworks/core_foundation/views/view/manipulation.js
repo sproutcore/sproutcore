@@ -139,7 +139,7 @@ SC.View.reopen(
       }
     });
 
-    // Even though its layer has not necessarily been created, the child views 
+    // Even though its layer has not necessarily been created, the child views
     // are added immediately. Hence notify views immediately.
     if (this.didAddChild) { this.didAddChild(view, beforeView) ; }
     if (view.didAddToParent) { view.didAddToParent(this, beforeView) ; }

@@ -3,8 +3,8 @@
 // Copyright: ©2006-2011 Apple Inc. and contributors.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
+/*globals module, test, equals, context, ok, same, Q$ */
 
-/*global module test equals context ok same Q$ */
 
 module("SC.View#destroyLayer");
 
