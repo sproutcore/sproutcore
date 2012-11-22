@@ -126,12 +126,10 @@ SC.View.reopen(
   */
   resetAnimation: function() {
     var layout = this.get('layout'),
-        animations = layout.animate,
+        animations = this.layoutStyleCalculator._activeAnimations,
         didChange = NO, key;
 
     if (!animations) { return; }
-
-    var hasAnimations;
 
     for (key in animations) {
       didChange = YES;
