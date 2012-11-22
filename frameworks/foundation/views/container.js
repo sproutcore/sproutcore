@@ -49,6 +49,16 @@ SC.ContainerView = SC.View.extend(
     @property {SC.View}
   */
   contentView: null,
+
+  /**
+    Option that attempt to reuse the views that are appended to the container.
+    This will work correctly for any instantiated view or not. If the view is 
+    not instantiated it will be instantiated and saved to be reused. If the container
+    is destroy, all the views that has been instantiated by it will be destroy.
+
+    @property {Boolean}
+  */
+  reuseInstantiatedViews: YES,
   
   /** @private */
   contentViewBindingDefault: SC.Binding.single(),
@@ -76,7 +86,7 @@ SC.ContainerView = SC.View.extend(
       this.childViews = [view] ;
     } 
   },
-  
+
   /**
     When a container view awakes, it will try to find the nowShowing, if 
     there is one, and set it as content if necessary.
@@ -85,6 +95,21 @@ SC.ContainerView = SC.View.extend(
     sc_super();
     var nowShowing = this.get('nowShowing') ;
     if (nowShowing && nowShowing.length>0) this.nowShowingDidChange();
+  },
+
+  /**
+    Destroy the views instantiated by the container
+  */
+  destroy: function () {
+    var instantiatedViews = this._instantiatedViews;
+
+    if (instantiatedViews) {
+      instantiatedViews.forEach(function(instantiatedView){  
+        instantiatedView.instance.destroy();
+      }); 
+      this._instantiatedViews = null;
+    }
+    sc_super();
   },
   
   /**
@@ -123,8 +148,36 @@ SC.ContainerView = SC.View.extend(
     // (Uninstantiated views have a create() method; instantiated ones do not.)
     if (SC.typeOf(content) === SC.T_CLASS) {
       if (content.kindOf(SC.CoreView)) {
-        content = this.createChildView(content);
-        this._instantiatedLastView = YES;
+        var reuseInstantiatedViews = this.get('reuseInstantiatedViews'),
+            instantiatedView;
+
+        if (reuseInstantiatedViews) {
+          if (!this._instantiatedViews) this._instantiatedViews = [];
+          instantiatedView = this._instantiatedViews.findProperty('view', content);
+        }
+
+        // If the view is already instantiated, we use it
+        if (instantiatedView) {
+          content = instantiatedView.instance;
+        }
+        else {
+          // Otherwise, we create it
+          instantiatedView = this.createChildView(content);
+
+          // If we want to reuse the views, we save it.
+          if (reuseInstantiatedViews) {
+            this._instantiatedViews.pushObject({ 
+              view: content,
+              instance: instantiatedView,
+            });
+          }
+          else {
+            // otherwise, we set _instantiatedLastView to true 
+            // to destroy it the next time nowShowing change.
+            this._instantiatedLastView = YES;
+          }
+          content = instantiatedView;
+        }
       } 
       else content = null;
     } 
