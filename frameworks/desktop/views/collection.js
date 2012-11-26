@@ -2391,6 +2391,14 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
     this._touchSelectedView = itemView;
 
+    info = this.touchStartInfo = {
+      event:        ev,
+      itemView:     itemView,
+      contentIndex: contentIndex,
+      at:           Date.now()
+    };
+
+
     if (!this.get('useToggleSelection')) {
       // We're faking the selection visually here
       // Only track this if we added a selection so we can remove it later
@@ -2404,6 +2412,89 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
   /** @private */
   touchesDragged: function(evt, touches) {
+    // Goals:
+    // - If there is one touch, and the delegate says that this should initiate a drag, do so.
+    // - Otherwise, if the touch has moved more than five pixels in any direction, pass it up the responder chain.
+
+    if (touches.length = 1) {
+      var del = this.get('selectionDelegate'),
+          content = this.get('content'),
+          sel     = this.get('selection'),
+          info    = this.touchDownInfo,
+          groupIndexes = this.get('_contentGroupIndexes'),
+          dragContent, dragDataTypes, dragView;
+
+      // If we have touch start info, and the user has been dragging for 123msec, and the delegate thinks we should drag, then drag.
+      //if (info && info.contentIndex >= 0 && ((Date.now() - info.at) >= 123) && del.collectionViewShouldBeginDrag()) {
+      if (info && info.contentIndex >= 0 && del.collectionViewShouldBeginDrag()) {
+
+        // First, get the selection to drag.  Drag an array of selected
+        // items appearing in this collection, in the order of the
+        // collection.
+        //
+        // Compute the dragContent - the indexes we will be dragging.
+        // if we don't select on mouse down, then the selection has not been
+        // updated to whatever the user clicked.  Instead use
+        // mouse down content.
+        if (!this.get("selectOnMouseDown")) {
+          dragContent = SC.IndexSet.create(info.contentIndex);
+        } else dragContent = sel ? sel.indexSetForSource(content) : null;
+
+        // remove any group indexes.  groups cannot be dragged.
+        if (dragContent && groupIndexes && groupIndexes.get('length')>0) {
+          dragContent = dragContent.copy().remove(groupIndexes);
+          if (dragContent.get('length')===0) dragContent = null;
+          else dragContent.freeze();
+        }
+
+        // If there's any drag content, have a go at dragging it.
+        if (dragContent) {
+          dragContent = dragContent.frozenCopy(); // so it doesn't change
+
+          dragContent = { content: content, indexes: dragContent };
+          this.set('dragContent', dragContent) ;
+
+          // Get the set of data types supported by the delegate.  If this returns
+          // a null or empty array and reordering content is not also supported
+          // then do not start the drag.
+          dragDataTypes = this.get('dragDataTypes');
+          if (dragDataTypes && dragDataTypes.get('length') > 0) {
+
+            // Build the drag view to use for the ghost drag.  This
+            // should essentially contain any visible drag items.
+            dragView = del.collectionViewDragViewFor(this, dragContent.indexes);
+            if (!dragView) dragView = this._cv_dragViewFor(dragContent.indexes);
+
+            // Make sure the dragView has created its layer.
+            dragView.createLayer();
+
+            // Initiate the drag
+            SC.Drag.start({
+              event: info.event,
+              source: this,
+              dragView: dragView,
+              ghost: NO,
+              ghostActsLikeCursor: del.ghostActsLikeCursor,
+              slideBack: YES,
+              dataSource: this
+            });
+
+            // Also use this opportunity to clean up since touchUp won't
+            // get called.
+            this._cleanupTouchStart() ;
+            this._lastInsertionIndex = null ;
+
+            return YES;
+
+          }
+        }
+
+      }
+    }
+
+    // If we've gotten this far, we're not dragging. Clear out dragContent and pass the touches up the responder chain if needed.
+    this.set('dragContent', null);
+
     touches.forEach(function(touch){
       if (
         Math.abs(touch.pageX - touch.startX) > 5 ||
@@ -2452,6 +2543,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     }
 
     this._touchSelectedView = null;
+    this._cleanupTouchStart();
   },
 
   /** @private */
@@ -2460,7 +2552,20 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     if (this._touchSelectedView) {
       this._touchSelectedView.set('isSelected', NO);
       this._touchSelectedView = null;
+      this._cleanupTouchStart();
     }
+  },
+
+  _cleanupTouchStart: function() {
+    // delete items explicitly to avoid leaks on IE
+    var info = this.touchDownInfo, key;
+    if (info) {
+      for(key in info) {
+        if (!info.hasOwnProperty(key)) continue;
+        delete info[key];
+      }
+    }
+    this.touchDownInfo = null;
   },
 
   /** @private */
@@ -2476,7 +2581,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         lim     = content.get('length')-1,
         min     = sel.get('min'),
         max     = sel.get('max')-1,
-        info    = this.mouseDownInfo,
         anchor  = this._selectionAnchor ;
     if (SC.none(anchor)) anchor = -1;
 
@@ -2563,8 +2667,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     mouseDragged event handler.  Initiates a drag if the following conditions
     are met:
 
-    - collectionViewShouldBeginDrag() returns YES *OR*
-    - the above method is not implemented and canReorderContent is true.
+    - collectionViewShouldBeginDrag() returns YES
     - the dragDataTypes property returns a non-empty array
     - a mouse down event was saved by the mouseDown method.
   */
@@ -3014,13 +3117,21 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   },
 
   /**
-    Default delegate method implementation, returns YES if canReorderContent
-    is also true.
+    Default delegate method implementation. Returns YES if cached event info
+    passed through a drag handle; on non-touch platforms also returns YES
+    if canReorderContent is true.
 
     @param {SC.View} view
   */
   collectionViewShouldBeginDrag: function(view) {
-    return this.get('canReorderContent');
+    // On non-touch platforms, support canReorderContent.
+    if (!SC.platform.touch && this.get('canReorderContent')) return YES;
+    // Support mouse event isDragHandle flag.
+    if (this.mouseDownInfo && this.mouseDownInfo.ev && this.mouseDownInfo.ev.isDragHandle) return YES;
+    // Support touch event isDragHandle flag.
+    if (this.touchStartInfo && this.touchStartInfo.ev && this.touchStartInfo.ev.isDragHandle) return YES;
+    // Otherwise...
+    return NO;
   },
 
 
