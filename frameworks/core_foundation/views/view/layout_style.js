@@ -8,28 +8,28 @@ sc_require('views/view/animation');
 */
 
 SC.CSS_TRANSFORM_MAP = {
-  rotate: function(val){
+  rotate: function () {
     return null;
   },
 
-  rotateX: function(val){
-    if (SC.typeOf(val) === SC.T_NUMBER) val += 'deg';
-    return 'rotateX('+val+')';
+  rotateX: function (val) {
+    if (SC.typeOf(val) === SC.T_NUMBER) { val += 'deg'; }
+    return 'rotateX(' + val + ')';
   },
 
-  rotateY: function(val){
-    if (SC.typeOf(val) === SC.T_NUMBER) val += 'deg';
-    return 'rotateY('+val+')';
+  rotateY: function (val) {
+    if (SC.typeOf(val) === SC.T_NUMBER) { val += 'deg'; }
+    return 'rotateY(' + val + ')';
   },
 
-  rotateZ: function(val){
-    if (SC.typeOf(val) === SC.T_NUMBER) val += 'deg';
-    return 'rotateZ('+val+')';
+  rotateZ: function (val) {
+    if (SC.typeOf(val) === SC.T_NUMBER) { val += 'deg'; }
+    return 'rotateZ(' + val + ')';
   },
 
-  scale: function(val){
-    if (SC.typeOf(val) === SC.T_ARRAY) val = val.join(', ');
-    return 'scale('+val+')';
+  scale: function (val) {
+    if (SC.typeOf(val) === SC.T_ARRAY) { val = val.join(', '); }
+    return 'scale(' + val + ')';
   }
 };
 
@@ -48,14 +48,14 @@ SC.View.reopen(
     @property {Hash}
     @readOnly
   */
-  layoutStyle: function() {
-    var props = {
-      layout:       this.get('layout'),
-      turbo:        this.get('hasAcceleratedLayer'),
-      staticLayout: this.get('useStaticLayout')
-    };
+  layoutStyle: function () {
+    var calculator = this.get('layoutStyleCalculator'),
+      props = {
+        layout:       this.get('layout'),
+        turbo:        this.get('hasAcceleratedLayer'),
+        staticLayout: this.get('useStaticLayout')
+      };
 
-    var calculator = this.get('layoutStyleCalculator');
     calculator.set(props);
 
     return calculator.calculate();
@@ -64,53 +64,45 @@ SC.View.reopen(
 
 SC.View.LayoutStyleCalculator = SC.Object.extend({
 
-  _layoutDidUpdate: function(){
+  _layoutDidUpdate: function () {
+    /*jshint eqnull:true */
     var layout = this.get('layout');
     if (!layout) { return; }
 
     this.dims = SC._VIEW_DEFAULT_DIMS;
     this.loc = this.dims.length;
 
+    var bottom = (this.bottom = layout.bottom),
+      centerX = (this.centerX = layout.centerX),
+      centerY = (this.centerY = layout.centerY),
+      height = (this.height = layout.height),
+      right = (this.right = layout.right),
+      left = (this.left = layout.left),
+      maxHeight = (this.maxHeight = (layout.maxHeight === undefined) ? null : layout.maxHeight),
+      maxWidth = (this.maxWidth = (layout.maxWidth === undefined) ? null : layout.maxWidth),
+      top = (this.top = layout.top),
+      width = (this.width = layout.width);
+
+    this.borderTop = ((layout.borderTop !== undefined) ? layout.borderTop : layout.border) || 0;
+    this.borderRight = ((layout.borderRight !== undefined) ? layout.borderRight : layout.border) || 0;
+    this.borderBottom = ((layout.borderBottom !== undefined) ? layout.borderBottom : layout.border) || 0;
+    this.borderLeft = ((layout.borderLeft !== undefined) ? layout.borderLeft : layout.border) || 0;
+
     // loose comparison used instead of (value === null || value === undefined)
-
-    var right = (this.right = layout.right);
-    this.hasRight = (right != null);
-
-    var left = (this.left = layout.left);
-    this.hasLeft = (left != null);
-
-    var top = (this.top = layout.top);
-    this.hasTop = (top != null);
-
-    var bottom = (this.bottom = layout.bottom);
     this.hasBottom = (bottom != null);
-
-    var width = (this.width = layout.width);
+    this.hasRight = (right != null);
+    this.hasLeft = (left != null);
+    this.hasTop = (top != null);
     this.hasWidth = (width != null);
-
-    var height = (this.height = layout.height);
     this.hasHeight = (height != null);
 
     this.minWidth = ((layout.minWidth === undefined) ? null : layout.minWidth);
-
-    var maxWidth = (this.maxWidth = (layout.maxWidth === undefined) ? null : layout.maxWidth);
     this.hasMaxWidth = (maxWidth != null);
-
     this.minHeight = (layout.minHeight === undefined) ? null : layout.minHeight;
-
-    var maxHeight = (this.maxHeight = (layout.maxHeight === undefined) ? null : layout.maxHeight);
     this.hasMaxHeight = (maxHeight != null);
 
-    var centerX = (this.centerX = layout.centerX);
     this.hasCenterX = (centerX != null);
-
-    var centerY = (this.centerY = layout.centerY);
     this.hasCenterY = (centerY != null);
-
-    var borderTop = (this.borderTop = ((layout.borderTop !== undefined) ? layout.borderTop : layout.border) || 0);
-    var borderRight = (this.borderRight = ((layout.borderRight !== undefined) ? layout.borderRight : layout.border) || 0);
-    var borderBottom = (this.borderBottom = ((layout.borderBottom !== undefined) ? layout.borderBottom : layout.border) || 0);
-    var borderLeft = (this.borderLeft = ((layout.borderLeft !== undefined) ? layout.borderLeft : layout.border) || 0);
 
     // the toString here is to ensure that it doesn't get px added to it
     this.zIndex  = (layout.zIndex  != null) ? layout.zIndex.toString() : null;
@@ -126,39 +118,39 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
   }.observes('layout'),
 
   // handles the case where you do width:auto or height:auto and are not using "staticLayout"
-  _invalidAutoValue: function(property){
+  _invalidAutoValue: function (property) {
     var error = SC.Error.desc("%@.layout() you cannot use %@:auto if staticLayout is disabled".fmt(
-      this.get('view'), property), "%@".fmt(this.get('view')),-1);
+      this.get('view'), property), "%@".fmt(this.get('view')), -1);
     SC.Logger.error(error.toString());
-    throw error ;
+    throw error;
   },
 
-  _handleMistakes: function() {
-    var layout = this.get('layout');
+  _handleMistakes: function () {
+    var key,
+      transformAnimationDuration;
 
     // handle invalid use of auto in absolute layouts
-    if(!this.staticLayout) {
+    if (!this.staticLayout) {
       if (this.width === SC.LAYOUT_AUTO) { this._invalidAutoValue("width"); }
       if (this.height === SC.LAYOUT_AUTO) { this._invalidAutoValue("height"); }
     }
 
     if (SC.platform.supportsCSSTransforms) {
       // Check to see if we're using transforms
-      var animations = layout.animate,
-          transformAnimationDuration,
-          key;
+      var layout = this.get('layout'),
+        animations = layout.animate,
+        platformTransform = SC.platform.transformPrefix + "transform";
 
       if (animations) {
-        for(key in animations){
+        for (key in animations) {
           if (SC.CSS_TRANSFORM_MAP[key]) {
             // To prevent:
             //   this.animate('scale', ...);
             //   this.animate('rotate', ...);
             // Use this instead
             //   this.animate({ scale: ..., rotate: ... }, ...);
-            var platformTransform = SC.platform.transformPrefix + "transform";
             if (this._pendingAnimations && this._pendingAnimations[platformTransform]) {
-              throw "Animations of transforms must be executed simultaneously!";
+              throw "Animations of transforms (i.e. rotate, scale or skew) must be executed simultaneously!";
             }
 
             // Because multiple transforms actually share one CSS property, we can't animate multiple transforms
@@ -166,7 +158,9 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
 
             // First time around this will never be true, but we're concerned with subsequent runs.
             if (transformAnimationDuration && animations[key].duration !== transformAnimationDuration) {
-              SC.Logger.warn("Can't animate transforms with different durations! Using first duration specified.");
+              //@if(debug)
+              SC.Logger.warn("Developer Warning: Can't animate transforms with different durations! Using first duration specified.");
+              //@endif
               animations[key].duration = transformAnimationDuration;
             }
 
@@ -177,14 +171,14 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     }
   },
 
-  _calculatePosition: function(direction) {
-    var translate = null, turbo = this.get('turbo'), ret = this.ret;
-
-    var start, finish, size, maxSize, margin,
-        hasStart, hasFinish, hasSize, hasMaxSize,
-        startBorder, startBorderVal,
-        finishBorder, finishBorderVal,
-        sizeNum;
+  _calculatePosition: function (direction) {
+    var translate = null,
+      turbo = this.get('turbo'),
+      ret = this.ret,
+      start, finish, size, maxSize, margin,
+      hasStart, hasFinish, hasSize, hasMaxSize,
+      startBorder,
+      finishBorder;
 
     if (direction === 'x') {
       start      = 'left';
@@ -215,18 +209,19 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     ret[start]  = this._cssNumber(this[start]);
     ret[finish] = this._cssNumber(this[finish]);
 
-    startBorderVal = this._cssNumber(this[startBorder]);
-    finishBorderVal = this._cssNumber(this[finishBorder]);
-    ret[startBorder+'Width'] = startBorderVal || null;
-    ret[finishBorder+'Width'] = finishBorderVal || null;
+    var startBorderVal = this._cssNumber(this[startBorder]),
+      finishBorderVal = this._cssNumber(this[finishBorder]),
+      sizeNum = this[size];
 
-    sizeNum = this[size];
+    ret[startBorder + 'Width'] = startBorderVal || null;
+    ret[finishBorder + 'Width'] = finishBorderVal || null;
+
     // This is a normal number
     if (sizeNum >= 1) { sizeNum -= (startBorderVal + finishBorderVal); }
     ret[size] = this._cssNumber(sizeNum);
 
 
-    if(hasStart) {
+    if (hasStart) {
       if (turbo) {
         translate = ret[start];
         ret[start] = 0;
@@ -236,7 +231,7 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
       if (hasFinish && hasSize)  { ret[finish] = null; }
     } else {
       // bottom aligned
-      if(!hasFinish || (hasFinish && !hasSize && !hasMaxSize)) {
+      if (!hasFinish || (hasFinish && !hasSize && !hasMaxSize)) {
         // no top, no bottom
         ret[start] = 0;
       }
@@ -247,45 +242,41 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     return translate;
   },
 
-  _calculateCenter: function(direction) {
+  _calculateCenter: function (direction) {
     var ret = this.ret,
         size, center, start, finish, margin,
-        startBorder, startBorderVal,
-        finishBorder, finishBorderVal;
+        startBorder,
+        finishBorder;
 
     if (direction === 'x') {
-        size   = 'width';
-        center = 'centerX';
-        start  = 'left';
-        finish = 'right';
-        margin = 'marginLeft';
-        startBorder  = 'borderLeft';
-        finishBorder = 'borderRight';
+      size   = 'width';
+      center = 'centerX';
+      start  = 'left';
+      finish = 'right';
+      margin = 'marginLeft';
+      startBorder  = 'borderLeft';
+      finishBorder = 'borderRight';
     } else {
-        size   = 'height';
-        center = 'centerY';
-        start  = 'top';
-        finish = 'bottom';
-        margin = 'marginTop';
-        startBorder  = 'borderTop';
-        finishBorder = 'borderBottom';
+      size   = 'height';
+      center = 'centerY';
+      start  = 'top';
+      finish = 'bottom';
+      margin = 'marginTop';
+      startBorder  = 'borderTop';
+      finishBorder = 'borderBottom';
     }
 
     ret[start] = "50%";
 
-    startBorderVal = this._cssNumber(this[startBorder]);
-    finishBorderVal = this._cssNumber(this[finishBorder]);
-    ret[startBorder+'Width'] = startBorderVal || null;
-    ret[finishBorder+'Width'] = finishBorderVal || null;
+    var startBorderVal = this._cssNumber(this[startBorder]),
+      finishBorderVal = this._cssNumber(this[finishBorder]),
+      sizeValue   = this[size],
+      centerValue = this[center],
+      sizeIsPercent = SC.isPercentage(sizeValue),
+      value;
 
-
-    var sizeIsPercent,
-        sizeValue   = this[size],
-        centerValue = this[center],
-        startValue  = this[start],
-        value;
-
-    sizeIsPercent = SC.isPercentage(sizeValue);
+    ret[startBorder + 'Width'] = startBorderVal || null;
+    ret[finishBorder + 'Width'] = finishBorderVal || null;
 
     // If > 1 then it should be a normal number value
     if (sizeValue > 1) { sizeValue -= (startBorderVal + finishBorderVal); }
@@ -293,11 +284,11 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     if (SC.none(sizeValue)) {
       //@if(debug)
       // This error message happens whenever width or height is not set.
-      SC.warn("Developer Warning: When setting '"+center+"' in the layout, you must also set '"+size+"'.");
+      SC.warn("Developer Warning: When setting '" + center + "' in the layout, you must also set '" + size + "'.");
       //@endif
       ret[margin] = "50%";
     } else {
-      value = centerValue - sizeValue/2;
+      value = centerValue - sizeValue / 2;
       ret[margin] = (sizeIsPercent) ? Math.floor(value * 100) + "%" : Math.floor(value);
     }
 
@@ -305,27 +296,28 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     ret[finish] = null;
   },
 
-  _calculateTransforms: function(translateLeft, translateTop){
+  _calculateTransforms: function (translateLeft, translateTop) {
+    /*jshint eqnull:true*/
     if (SC.platform.supportsCSSTransforms) {
       // Handle transforms
-      var layout = this.get('layout');
-      var transformAttribute = SC.platform.transitionPrefix+'Transform';
-      var transforms = [];
+      var layout = this.get('layout'),
+        transformAttribute = SC.platform.transitionPrefix + 'Transform',
+        transforms = [],
+        transformMap = SC.CSS_TRANSFORM_MAP;
 
       if (this.turbo) {
         // FIXME: Can we just set translateLeft / translateTop to 0 earlier?
-        transforms.push('translateX('+(translateLeft || 0)+'px)', 'translateY('+(translateTop || 0)+'px)');
+        transforms.push('translateX(' + (translateLeft || 0) + 'px)', 'translateY(' + (translateTop || 0) + 'px)');
 
         // double check to make sure this is needed
         if (SC.platform.supportsCSS3DTransforms) { transforms.push('translateZ(0px)'); }
       }
 
       // normalizing transforms like rotateX: 5 to rotateX(5deg)
-      var transformMap = SC.CSS_TRANSFORM_MAP;
-      for(var transformName in transformMap) {
+      for (var transformName in transformMap) {
         var layoutTransform = layout[transformName];
 
-        if(layoutTransform != null) {
+        if (layoutTransform != null) {
           transforms.push(transformMap[transformName](layoutTransform));
         }
       }
@@ -334,33 +326,33 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     }
   },
 
-  _calculateAnimations: function(translateLeft, translateTop){
+  _calculateAnimations: function (translateLeft, translateTop) {
+    /*jshint eqnull:true*/
     var layout = this.layout,
-        animations = layout.animate,
-        key;
+      animations = layout.animate,
+      key;
 
     // we're checking to see if the layout update was triggered by a call to .animate
     if (!animations) { return; }
 
     // Handle animations
-    var transitions = [], animation;
     this._animatedTransforms = [];
 
     if (!this._pendingAnimations) { this._pendingAnimations = {}; }
 
-    var platformTransform = SC.platform.transformPrefix + "transform";
+    var platformTransform = SC.platform.transformPrefix + "transform",
+      transitions = [];
 
     // animate({ scale: 2, rotateX: 90 })
     // both scale and rotateX are transformProperties
     // so they both actually are animating the same CSS key, i.e. -webkit-transform
 
     if (SC.platform.supportsCSSTransitions) {
-      for(key in animations) {
+      for (key in animations) {
         // FIXME: If we want to allow it to be set as just a number for duration we need to add support here
-        animation = animations[key];
-
-        var isTransformProperty = SC.CSS_TRANSFORM_MAP[key];
-        var isTurboProperty = (key === 'top' && translateTop != null) || (key === 'left' && translateLeft != null);
+        var animation = animations[key],
+          isTransformProperty = SC.CSS_TRANSFORM_MAP[key],
+          isTurboProperty = (key === 'top' && translateTop != null) || (key === 'left' && translateLeft != null);
 
         if (SC.platform.supportsCSSTransforms && (isTurboProperty || isTransformProperty)) {
           this._animatedTransforms.push(key);
@@ -378,13 +370,13 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
         }
       }
 
-      this.ret[SC.platform.transitionPrefix+"Transition"] = transitions.join(", ");
+      this.ret[SC.platform.transitionPrefix + "Transition"] = transitions.join(", ");
 
     } else {
       // TODO: Do it the JS way
 
       // For now we're just sticking them in so the callbacks can be run
-      for(key in animations) {
+      for (key in animations) {
         this._pendingAnimations[key] = animations[key];
       }
     }
@@ -394,24 +386,20 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
 
   // return "auto" for "auto", null for null, converts 0.XY into "XY%".
   // otherwise returns the original number, rounded down
-  _cssNumber: function(val){
+  _cssNumber: function (val) {
+    /*jshint eqnull:true*/
     if (val == null) { return null; }
     else if (val === SC.LAYOUT_AUTO) { return SC.LAYOUT_AUTO; }
-    else if (SC.isPercentage(val)) { return (val*100)+"%"; }
+    else if (SC.isPercentage(val)) { return (val * 100) + "%"; }
     else { return Math.floor(val); }
   },
 
-  calculate: function() {
-    var layout = this.get('layout'), pdim = null,
-        staticLayout = this.get('staticLayout'),
-        translateTop = null,
-        translateLeft = null,
-        turbo = this.get('turbo'),
-        ret = this.ret,
-        dims = this.dims,
-        loc = this.loc,
-        view = this.get('view'),
-        key, value;
+  calculate: function () {
+    var layout = this.get('layout'),
+      staticLayout = this.get('staticLayout'),
+      translateTop = null,
+      translateLeft = null,
+      ret = this.ret;
 
     this._handleMistakes(layout);
 
@@ -419,7 +407,7 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     // should not insert the styles "left: 0px; right: 0px; top: 0px; bottom: 0px" as they could
     // conflict with the developer's intention.  However, if they do provide a unique `layout`,
     // use it.
-    if (staticLayout && layout === SC.View.prototype.layout) return {};
+    if (staticLayout && layout === SC.View.prototype.layout) { return {}; }
 
     // X DIRECTION
 
@@ -429,7 +417,6 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
       this._calculateCenter("x");
     }
 
-
     // Y DIRECTION
 
     if (this.hasTop || this.hasBottom || !this.hasCenterY) {
@@ -437,7 +424,6 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     } else {
       this._calculateCenter("y");
     }
-
 
     // these properties pass through unaltered (after prior normalization)
     ret.minWidth   = this.minWidth;
@@ -463,14 +449,13 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     this._calculateTransforms(translateLeft, translateTop);
     this._calculateAnimations(translateLeft, translateTop);
 
-
     // convert any numbers into a number + "px".
-    for(key in ret) {
-      value = ret[key];
+    for (var key in ret) {
+      var value = ret[key];
       if (typeof value === SC.T_NUMBER) { ret[key] = (value + "px"); }
     }
 
-    return ret ;
+    return ret;
   },
 
   /** @private
@@ -479,37 +464,43 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
    this._pendingAnimations.  This method will clear out any conflicts between
    pending and active animations.
    */
-  willRenderAnimations: function() {
+  willRenderAnimations: function (newStyle) {
     if (SC.platform.supportsCSSTransitions) {
-      var view = this.get('view'),
-        layer = view.get('layer'),
-        currentStyle = layer ? layer.style : null,
-        newStyle = view.get('layoutStyle'),
-        activeAnimations = this._activeAnimations, activeAnimation,
-        pendingAnimations = this._pendingAnimations, pendingAnimation,
-        animatedTransforms = this._animatedTransforms,
-        transformsLength = animatedTransforms ? animatedTransforms.length : 0,
-        key, keys = [], callback, idx, shouldCancel;
+      var pendingAnimations = this._pendingAnimations;
 
       if (pendingAnimations) {
-        if (!activeAnimations) activeAnimations = {};
+        var activeAnimations = this._activeAnimations,
+          animatedTransforms = this._animatedTransforms,
+          keys = [],
+          transformsLength = animatedTransforms ? animatedTransforms.length : 0,
+          view = this.get('view'),
+          layer = view.get('layer'),
+          currentStyle = layer ? layer.style : null;
 
-        for (key in pendingAnimations) {
-          if (!pendingAnimations.hasOwnProperty(key)) continue;
+        if (!activeAnimations) { activeAnimations = {}; }
 
-          pendingAnimation = pendingAnimations[key];
-          activeAnimation = activeAnimations[key];
-          shouldCancel = NO;
+        for (var key in pendingAnimations) {
+          if (!pendingAnimations.hasOwnProperty(key)) { continue; }
 
-          if (newStyle[key] !== (currentStyle ? currentStyle[key] : null)) shouldCancel = YES;
+          var activeAnimation = activeAnimations[key],
+            pendingAnimation = pendingAnimations[key],
+            shouldCancel = NO;
 
-          // if we have a new animation (an animation property has changed), cancel current
-          if (activeAnimation && (activeAnimation.duration !== pendingAnimation.duration || activeAnimation.timing !== pendingAnimation.timing)) {
+          // If we have a new animation (an animation property has changed),
+          // while an animation is in progress there may be a conflict.  This
+          // code cancels any current conflicts.
+          if (newStyle[key] !== (currentStyle ? currentStyle[key] : null)) {
+            shouldCancel = YES;
+          } else if (activeAnimation && (activeAnimation.duration !== pendingAnimation.duration ||
+              activeAnimation.timing !== pendingAnimation.timing ||
+              activeAnimation.delay !== pendingAnimation.delay)) {
             shouldCancel = YES;
           }
 
+
           if (shouldCancel && activeAnimation) {
-            if (callback = activeAnimation.callback) {
+            var callback = activeAnimation.callback;
+            if (callback) {
               if (transformsLength > 0) {
                 this.runAnimationCallback(callback, null, YES);
                 this._animatedTransforms = null;
@@ -525,8 +516,8 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
           keys.push(key);
         }
 
-        if (!this._groupedAnimations) this._groupedAnimations = {};
-        this._groupedAnimations[key] = keys;
+        // if (!this._groupedAnimations) this._groupedAnimations = {};
+        // this._groupedAnimations[key] = keys;
 
         this._activeAnimations = activeAnimations;
         this._pendingAnimations = null;
@@ -539,19 +530,18 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     the platform didn't support CSS transitions, the callbacks will be fired
     immediately and the animations removed from the queue.
   */
-  didRenderAnimations: function(){
+  didRenderAnimations: function () {
     if (!SC.platform.supportsCSSTransitions) {
-      var key, callback;
 
       // Transitions not supported
-      for (key in this._pendingAnimations) {
-        callback = this._pendingAnimations[key].callback;
+      for (var key in this._pendingAnimations) {
+        var callback = this._pendingAnimations[key].callback;
         if (callback) {
           // We're using invokeOnce because we only want to call a callback
           // once for each group of animations.
           this.invokeOnceLater('runAnimationCallback', 1, callback, null, NO);
         }
-        this.removeAnimationFromLayout(key, NO, YES);
+        this.removeAnimationFromLayout(key, NO);
       }
 
       // Reset the placeholder variables now that the layout style has been applied.
@@ -559,22 +549,23 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     }
   },
 
-  runAnimationCallback: function(callback, evt, cancelled) {
+  runAnimationCallback: function (callback, evt, cancelled) {
     var view = this.get('view');
+
     if (callback) {
       if (SC.typeOf(callback) !== SC.T_HASH) { callback = { action: callback }; }
+
       callback.source = view;
+
       if (!callback.target) { callback.target = this; }
     }
+
     SC.View.runCallback(callback, { event: evt, view: view, isCancelled: cancelled });
   },
 
-  transitionDidEnd: function(evt) {
+  transitionDidEnd: function (evt) {
     var propertyName = evt.originalEvent.propertyName,
-        propertyNames,
-        animation, idx;
-
-    animation = this._activeAnimations ? this._activeAnimations[propertyName] : null;
+      animation = this._activeAnimations ? this._activeAnimations[propertyName] : null;
 
     if (animation) {
       if (animation.callback) {
@@ -585,50 +576,50 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
       }
       this.removeAnimationFromLayout(propertyName, YES);
 
-      var key;
-      propertyNames = this._groupedAnimations && this._groupedAnimations[propertyName];
-      if (propertyNames) {
-        for (var i = 0, len = propertyNames.length; i < len; i++) {
-          key = propertyNames[i];
-          delete this._activeAnimations[key];
-        }
+      // var key;
+      // propertyNames = this._groupedAnimations && this._groupedAnimations[propertyName];
+      // if (propertyNames) {
+      //   for (var i = 0, len = propertyNames.length; i < len; i++) {
+      //     key = propertyNames[i];
+      //     delete this._activeAnimations[key];
+      //   }
 
-        delete this._groupedAnimations[propertyName];
-      }
+      //   delete this._groupedAnimations[propertyName];
+      // }
     }
   },
 
-  removeAnimationFromLayout: function(propertyName, updateStyle, isPending) {
+  removeAnimationFromLayout: function (propertyName, updateStyle) {
     if (updateStyle) {
       var layer = this.getPath('view.layer'),
-          updatedCSS = [], key;
-      for(key in this._activeAnimations) {
+          updatedCSS = [];
+
+      for (var key in this._activeAnimations) {
         if (key !== propertyName) { updatedCSS.push(this._activeAnimations[key].css); } //  && this._activeAnimations[key]
       }
 
       // FIXME: Not really sure this is the right way to do it, but we don't want to trigger a layout update
-      if (layer) { layer.style[SC.platform.transitionPrefix+"Transition"] = updatedCSS.join(', '); }
+      if (layer) { layer.style[SC.platform.transitionPrefix + "Transition"] = updatedCSS.join(', '); }
     }
 
-
     var layout = this.getPath('view.layout'),
-        idx;
+      platformTransform = SC.platform.transformPrefix + "transform";
 
-    var platformTransform = SC.platform.transformPrefix + "transform";
     if (propertyName === platformTransform && this._animatedTransforms && this._animatedTransforms.length > 0) {
-      for(idx=0; idx < this._animatedTransforms.length; idx++) {
-        delete layout['animate' + SC.String.capitalize(this._animatedTransforms[idx])];
+      for (var i = this._animatedTransforms.length - 1; i >= 0; i--) {
+        delete layout['animate' + SC.String.capitalize(this._animatedTransforms[i])];
       }
       this._animatedTransforms = null;
     }
+
     delete layout['animate' + SC.String.capitalize(propertyName)];
   }
 
 });
 
-SC.CoreView.runCallback = function(callback)/** @scope SC.View.prototype */{
+SC.CoreView.runCallback = function (callback)/** @scope SC.View.prototype */{
   var additionalArgs = SC.$A(arguments).slice(1),
-      typeOfAction = SC.typeOf(callback.action);
+    typeOfAction = SC.typeOf(callback.action);
 
   // if the action is a function, just try to call it.
   if (typeOfAction == SC.T_FUNCTION) {
@@ -638,15 +629,15 @@ SC.CoreView.runCallback = function(callback)/** @scope SC.View.prototype */{
   // like a property path.
   } else if (typeOfAction === SC.T_STRING) {
     if (callback.action.indexOf('.') >= 0) {
-      var path = callback.action.split('.') ;
-      var property = path.pop() ;
+      var path = callback.action.split('.'),
+        property = path.pop(),
+        target = SC.objectForPropertyPath(path, window),
+        action = target.get ? target.get(property) : target[property];
 
-      var target = SC.objectForPropertyPath(path, window) ;
-      var action = target.get ? target.get(property) : target[property];
       if (action && SC.typeOf(action) == SC.T_FUNCTION) {
         action.apply(target, additionalArgs);
       } else {
-        throw 'SC.runCallback could not find a function at %@'.fmt(callback.action) ;
+        throw 'SC.runCallback could not find a function at %@'.fmt(callback.action);
       }
 
     // otherwise, try to execute action direction on target or send down

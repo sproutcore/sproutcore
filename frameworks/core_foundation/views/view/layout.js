@@ -968,9 +968,12 @@ SC.View.reopen(
     @test in layoutChildViews
   */
   renderLayout: function(context, firstTime) {
-    this.get('layoutStyleCalculator').willRenderAnimations();
-    context.setStyle(this.get('layoutStyle'));
-    this.get('layoutStyleCalculator').didRenderAnimations();
+    // Getting the layoutStyle sets up internal variables that willRenderAnimations uses.  This is not good code structure.
+    var layoutStyle = this.get('layoutStyle');
+
+    this.get('layoutStyleCalculator').willRenderAnimations(layoutStyle);
+    context.setStyle(layoutStyle);
+    this.get('layoutStyleCalculator').didRenderAnimations(layoutStyle);
   },
 
   _renderLayerSettings: function(original, context, firstTime) {
