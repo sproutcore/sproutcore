@@ -322,33 +322,31 @@ SC.ContainerView = SC.View.extend(
         transition.setup(this, currentContent, newContent, options);
       }
 
-      // Since the transition will likely rely on the setup being propagated to
-      // the DOM, the only safe way is to wait a brief moment to ensure the
-      // browser has updated the DOM.
-      this.invokeLater(function () {
+      transition.run(this, currentContent, newContent, options, function () {
+        // Clean up the transition.
+        if (transition.teardown) {
+          transition.teardown(self, currentContent, newContent, options);
+        }
 
-        transition.run(this, currentContent, newContent, options, function () {
+        // Clean up view we created.
+        if (shouldDestroyCurrentContent) { currentContent.destroy(); }
 
-          if (transition.teardown) {
-            transition.teardown(self, currentContent, newContent, options);
-          }
-          if (shouldDestroyCurrentContent) { currentContent.destroy(); }
+        self._lastContent = newContent;
+        if (--self._transitionCount === 0) { // remember, -- decrements the value and returns updated value
+          self.set('isTransitioning', false);
+        }
+      });
 
-          self._lastContent = newContent;
-          if (--self._transitionCount === 0) {
-            self.set('isTransitioning', false);
-          }
-        });
-
-      }, 20);
     } else {
       // The basic transition just swaps the content in place.
       if (newContent) {
         this.appendChild(newContent);
       }
 
-      if (this.childViews.contains(currentContent)) { this.removeChild(currentContent); }
-      if (shouldDestroyCurrentContent) { currentContent.destroy(); }
+      if (currentContent) {
+        if (this.childViews.contains(currentContent)) { this.removeChild(currentContent); }
+        if (shouldDestroyCurrentContent) { currentContent.destroy(); }
+      }
     }
 
     // Track the current view and transition (may be null).
