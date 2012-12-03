@@ -53,7 +53,9 @@ SC.View.reopen(
     for (i = 0; i < len; i++) {
       var childView = childViews.objectAt(i);
 
-      childView.updateDesignMode(lastDesignMode, designMode);
+      if (childView.updateDesignMode) {
+        childView.updateDesignMode(lastDesignMode, designMode);
+      }
     }
   },
 
