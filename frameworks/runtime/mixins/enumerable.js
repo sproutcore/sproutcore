@@ -366,20 +366,31 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     @returns {Array} filtered array
   */
   filterProperty: function(key, value) {
-    var len = this.get ? this.get('length') : this.length ;
-    var ret  = [];
-    var last = null ;
-    var context = SC.Enumerator._popContext();
-    for(var idx=0;idx<len;idx++) {
-      var next = this.nextObject(idx, last, context) ;
-      var cur = next ? (next.get ? next.get(key) : next[key]) : null;
-      var matched = (value === undefined) ? !!cur : SC.isEqual(cur, value);
-      if (matched) ret.push(next) ;
-      last = next ;
+    var len = this.get ? this.get('length') : this.length,
+        ret = [],
+        last = null,
+        context = SC.Enumerator._popContext(),
+        idx, item, cur;
+    // Although the code for value and no value are almost identical, we want to make as many decisions outside
+    // the loop as possible.
+    if (value === undefined) {
+      for (idx = 0; idx < len; idx++) {
+        item = this.nextObject(idx, last, context);
+        cur = item ? (item.get ? item.get(key) : item[key]) : null;
+        if (!!cur) ret.push(item);
+        last = item;
+      }
+    } else {     
+      for (idx = 0; idx < len; idx++) {
+        item = this.nextObject(idx, last, context);
+        cur = item ? (item.get ? item.get(key) : item[key]) : null;
+        if (SC.isEqual(cur, value)) ret.push(item);
+        last = item;
+      }
     }
-    last = null ;
+    last = null;
     context = SC.Enumerator._pushContext(context);
-    return ret ;
+    return ret;
   },
 
   /**
@@ -1078,17 +1089,26 @@ Array.prototype.isEnumerable = YES ;
     },
 
     filterProperty: function(key, value) {
-      var len = this.length ;
-      var ret  = [];
-      for(var idx=0;idx<len;idx++) {
-        var next = this[idx] ;
-        var cur = next ? (next.get ? next.get(key) : next[key]) : null;
-        var matched = (value === undefined) ? !!cur : SC.isEqual(cur, value);
-        if (matched) ret.push(next) ;
+      var len = this.length,
+          ret = [],
+          idx, item, cur;
+      // Although the code for value and no value are almost identical, we want to make as many decisions outside
+      // the loop as possible.
+      if (value === undefined) {
+        for (idx = 0; idx < len; idx++) {
+          item = this[idx];
+          cur = item ? (item.get ? item.get(key) : item[key]) : null;
+          if (!!cur) ret.push(item);
+        }
+      } else {     
+        for (idx = 0; idx < len; idx++) {
+          item = this[idx];
+          cur = item ? (item.get ? item.get(key) : item[key]) : null;
+          if (SC.isEqual(cur, value)) ret.push(item);
+        }
       }
-      return ret ;
+      return ret;
     },
-
     //returns a matrix
     groupBy: function(key) {
       var len = this.length,
