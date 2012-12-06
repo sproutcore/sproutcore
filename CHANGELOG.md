@@ -58,18 +58,18 @@ Edge
 
 ### BUG FIXES
 
-* Fixes moderate memory leak in SC.Set.  The way that SC.Set removes objects is 
+* Fixes minor memory leak in SC.Set.  The way that SC.Set removes objects is 
   to "untrack" the internal index of the object by shrinking its length, but it 
   never actually removed the object at the last index. The only way that the 
   object could be freed is if a new object is inserted at the same internal 
   index, thus replacing it. If the objects were removed in the reverse order 
   that they were added, every object would still be in the set (until they were 
   possibly overwritten).
-* Fixes major memory leak with bindings and observers.  Previously, SC.Binding 
+* Fixes moderate memory leak with bindings and observers.  Previously, SC.Binding 
   objects and observers were never cleaned up even as views and objects were 
   destroyed which could prevent the views and objects from being garbage collected
   and prevented the binding objects from being garbage collected.
-* Fixes small memory leak in SC.ObserverSet. Each time that a new observer is 
+* Fixes minor memory leak in SC.ObserverSet. Each time that a new observer is 
   added to an object the ObserverSet for the object will add a tracking hash for 
   the target and the method. As more methods are tracked for the target, they 
   are added and as methods are no longer tracked for the target, they are 
@@ -81,7 +81,18 @@ Edge
 1.9.1 - BUG FIX RELEASE
 ----------
 
-* Unit tests indicating ALL fixes are included.
+* Unit tests verifying ALL fixes are included.
+* Fixes a bug that left childView elements in the DOM when they were rendered as 
+  part of their parent's layer and the child was later removed.
+
+  If childView layers are rendered when the parentView's layer is created, the 
+  `layer` property on the childView will not be cached.  What occurs is that if 
+  the childView is then removed from the parent view without ever having its 
+  `layer` requested, when it comes time to destroy the DOM layer of the 
+  childView, it will try to find it with a `get('layer')`. The bug was that it 
+  only returned a layer if the view has a parent view. However, since the child 
+  was removed from the parent first and then destroyed, it no longer has a 
+  parent view and would not try to find its leftover DOM layer.
 * Fixes improper implementation of SC.SelectionSet:constrain (fixes #870).  It 
   was naively using forEach to iterate through the objects while mutating the 
   array so that the last object could never be constrained.
