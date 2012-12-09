@@ -1,7 +1,7 @@
 // ==========================================================================
 // Project: SproutCore - JavaScript Application Framework
-// Copyright: ©2006-2011 Strobe Inc. and contributors.
-// Portions ©2008-2011 Apple Inc. All rights reserved.
+// Copyright: ��2006-2011 Strobe Inc. and contributors.
+// Portions ��2008-2011 Apple Inc. All rights reserved.
 // License: Licensed under MIT license (see license.js)
 // ==========================================================================
 
@@ -13,6 +13,7 @@ SC.stringsFor('English', {
   '_SC.DateTime.AMPMNames' : 'AM PM',
 
   '_SC.DateTime.now' : 'Right now',
+  '_SC.DateTime.secondIn' : 'In a moment',
   '_SC.DateTime.secondsIn' : 'In %e seconds',
   '_SC.DateTime.minuteIn' : 'In a minute',
   '_SC.DateTime.minutesIn' : 'In %e minutes',
@@ -27,6 +28,7 @@ SC.stringsFor('English', {
   '_SC.DateTime.yearIn' : 'Next year',
   '_SC.DateTime.yearsIn' : 'In %e years',
 
+  '_SC.DateTime.secondAgo' : 'A moment ago',
   '_SC.DateTime.secondsAgo' : '%e seconds ago',
   '_SC.DateTime.minuteAgo' : 'A minute ago',
   '_SC.DateTime.minutesAgo' : '%e minutes ago',
