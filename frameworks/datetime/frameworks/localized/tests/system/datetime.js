@@ -23,8 +23,10 @@ module("SC.DateTime", {
 test('FormatElapsed', function() {
   var dateTimeTest = SC.DateTime.create();
   equals(dateTimeTest.toFormattedString("%E"), "Right now");
-
-  dateTimeTest = dateTimeTest.advance({ second: 20 });  // +20 seconds;
+  
+  dateTimeTest = dateTimeTest.advance({ second: 1 });  // +1 second;
+  equals(dateTimeTest.toFormattedString("%E"), "In a moment");
+  dateTimeTest = dateTimeTest.advance({ second: 19 });  // +19 seconds;
   equals(dateTimeTest.toFormattedString("%E"), "In 20 seconds");
   dateTimeTest =  dateTimeTest.advance({ minute: 1 });  // +1 minute;
   equals(dateTimeTest.toFormattedString("%E"), "In a minute");
@@ -55,7 +57,9 @@ test('FormatElapsed', function() {
   equals(dateTimeTest.toFormattedString("%E"), "In 3 years");
 
   var dateTimeTest = SC.DateTime.create();
-  dateTimeTest = dateTimeTest.advance({ second: -20 });  // -20 seconds;
+  dateTimeTest = dateTimeTest.advance({ second: -1 });  // -1 second;
+  equals(dateTimeTest.toFormattedString("%E"), "A moment ago");
+  dateTimeTest = dateTimeTest.advance({ second: -19 });  // -19 seconds;
   equals(dateTimeTest.toFormattedString("%E"), "20 seconds ago");
   dateTimeTest = dateTimeTest.advance({ minute: -1 });  // -1 minute;
   equals(dateTimeTest.toFormattedString("%E"), "A minute ago");
