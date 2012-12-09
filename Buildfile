@@ -48,7 +48,7 @@ config :designer,        :required => [:runtime, :foundation, :desktop]
 config :"experimental/split_view", :test_required => [:desktop]
 
 # WRAPPER FRAMEWORKS
-config :sproutcore, :required => [:desktop, :datastore, :statechart, :template_view]
+config :sproutcore, :required => [:desktop, :datastore, :statechart]
 config :animation, :required => :foundation
 
 config :qunit, :required => []

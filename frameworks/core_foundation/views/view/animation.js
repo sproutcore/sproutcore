@@ -39,6 +39,7 @@ SC.View.reopen(
      - duration: Duration of animation in seconds
      - callback: Callback method to run when animation completes
      - timing: Animation timing function
+     - delay: Animation delay in seconds
 
     @param {String|Hash} key
     @param {Object} value
@@ -90,6 +91,8 @@ SC.View.reopen(
       options.timing = 'linear';
     }
 
+    if (SC.none(options.delay)) { options.delay = 0; }
+
     var layout = SC.clone(this.get('layout')), didChange = NO, value, cur, animValue, curAnim, key;
 
     if (!layout.animate) { layout.animate = {}; }
@@ -126,12 +129,10 @@ SC.View.reopen(
   */
   resetAnimation: function() {
     var layout = this.get('layout'),
-        animations = layout.animate,
+        animations = this.layoutStyleCalculator._activeAnimations,
         didChange = NO, key;
 
     if (!animations) { return; }
-
-    var hasAnimations;
 
     for (key in animations) {
       didChange = YES;

@@ -1,6 +1,6 @@
 // ==========================================================================
 // Project:   DateTime Unit Test
-// Copyright: ��2010 Martin Ottenwaelter
+// Copyright: ©2010 Martin Ottenwaelter
 // ==========================================================================
 
 /*globals module test ok equals same stop start */

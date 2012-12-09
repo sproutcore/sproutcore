@@ -62,8 +62,7 @@ SC.RootResponder = SC.Object.extend(
     this.panes = SC.Set.create();
 
     if (SC.platform.supportsCSSTransitions) {
-      this[SC.platform.cssPrefix+'TransitionEnd'] = this.transitionEnd;
-      this['transitionend'] = this.transitionEnd;
+      this[SC.platform.transitionEndEventName] = this.transitionEnd;
     }
   },
 
@@ -645,7 +644,7 @@ SC.RootResponder = SC.Object.extend(
 
     // CSS Transitions
     if (SC.platform.supportsCSSTransitions) {
-      this.listenFor(['transitionend', SC.platform.cssPrefix+'TransitionEnd'], document);
+      this.listenFor([SC.platform.transitionEndEventName], document);
     }
 
     // handle special case for keypress- you can't use normal listener to block

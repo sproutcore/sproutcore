@@ -314,23 +314,9 @@ SC.platform = SC.Object.create({
   supportsCSSTransforms: NO,
 
   /**
-    Whether the browser understands 3D CSS transforms.
-    This does not guarantee that the browser properly handles them.
-    Calculated later.
-  */
-  understandsCSS3DTransforms: NO,
-
-  /**
     Whether the browser can properly handle 3D CSS transforms. Calculated later.
   */
   supportsCSS3DTransforms: NO,
-
-  /**
-    Whether the browser can handle accelerated layers. While supports3DTransforms tells us if they will
-    work in principle, sometimes accelerated layers interfere with things like getBoundingClientRect.
-    Then everything breaks.
-  */
-  supportsAcceleratedLayers: NO,
 
   /**
     Whether the browser supports the application cache.
@@ -378,6 +364,21 @@ SC.platform = SC.Object.create({
   supportsWebSQL: ('openDatabase' in window),
 
   /**
+    The name of the transitionend event on this platform.  Calculated later.
+  */
+  transitionEndEventName: 'transitionend',
+
+  /**
+    The prefix of the transition style on this platform.  Calculated later.
+  */
+  transitionPrefix: '',
+
+  /**
+    The prefix of the transform style on this platform.  Calculated later.
+  */
+  transformPrefix: '',
+
+  /**
     Because iOS is slow to dispatch the window.onorientationchange event,
     we use the window size to determine the orientation on iOS devices
     and desktop environments when SC.platform.touch is YES (ie. when
@@ -416,14 +417,20 @@ SC.platform = SC.Object.create({
   var el = document.createElement("div");
 
   // the css and javascript to test
-  var css_browsers = ["-moz-", "-moz-", "-o-", "-ms-", "-webkit-"],
-      test_browsers = ["moz", "Moz", "o", "ms", "webkit"];
+  var css_browsers = ["-o-", "-ms-", "-moz-", "-webkit-"],
+      test_browsers = ["O", "ms", "Moz", "Webkit"],
+      transEndEventNames = {
+         Webkit: 'webkitTransitionEnd',
+         Moz: 'transitionend',
+         O: 'oTransitionEnd',
+         ms: 'MsTransitionEnd'
+      };
 
   // prepare css
   var css = "", i = null, cssBrowser, iLen;
   for (i = 0, iLen = css_browsers.length; i < iLen; i++) {
     cssBrowser = css_browsers[i];
-    css += cssBrowser + "transition:all 1s linear;";
+    css += cssBrowser + "transition: all 1s linear;";
     css += cssBrowser + "transform: translate(1px, 1px);";
     css += cssBrowser + "perspective: 500px;";
   }
@@ -431,34 +438,42 @@ SC.platform = SC.Object.create({
   // set css text
   el.style.cssText = css;
 
+  // Ensure that any browsers that drop the prefix continue to pass.
+  if (el.style.transition !== undefined) SC.platform.supportsCSSTransitions = YES;
+  if (el.style.transform !== undefined) SC.platform.supportsCSSTransforms = YES;
+  if (el.style.perspective !== undefined || el.style.perspectiveProperty !== undefined) SC.platform.supportsCSSTransitions = YES;
+
   // test
   var testBrowser;
-  for (i = 0, iLen=test_browsers.length; i < iLen; i++)
-  {
+  for (i = 0, iLen=test_browsers.length; i < iLen; i++) {
     testBrowser = test_browsers[i];
-    if (el.style[testBrowser + "TransitionProperty"] !== undefined) SC.platform.supportsCSSTransitions = YES;
-    if (el.style[testBrowser + "Transform"] !== undefined) SC.platform.supportsCSSTransforms = YES;
-    if (el.style[testBrowser + "Perspective"] !== undefined || el.style[testBrowser + "PerspectiveProperty"] !== undefined) {
-      SC.platform.understandsCSS3DTransforms = YES;
+    if (!SC.platform.supportsCSSTransitions && el.style[testBrowser + "Transition"] !== undefined) {
+      // Determine the proper transition style names for this browser
+      SC.platform.transitionPrefix = testBrowser;
+      SC.platform.transitionEndEventName = transEndEventNames[testBrowser];
+      SC.platform.supportsCSSTransitions = YES;
+    }
+
+    if (!SC.platform.supportsCSSTransforms && el.style[testBrowser + "Transform"] !== undefined) {
+      SC.platform.transformPrefix = css_browsers[i];
+      SC.platform.supportsCSSTransforms = YES;
+    }
+
+    if (!SC.platform.supportsCSS3DTransforms && (el.style[testBrowser + "Perspective"] !== undefined || el.style[testBrowser + "PerspectiveProperty"] !== undefined)) {
       SC.platform.supportsCSS3DTransforms = YES;
     }
   }
 
   // unfortunately, we need a bit more to know FOR SURE that 3D is allowed
-  try{
-    if (window.media && window.media.matchMedium) {
-      if (!window.media.matchMedium('(-webkit-transform-3d)')) SC.platform.supportsCSS3DTransforms = NO;
-    } else if(window.styleMedia && window.styleMedia.matchMedium) {
-      if (!window.styleMedia.matchMedium('(-webkit-transform-3d)')) SC.platform.supportsCSS3DTransforms = NO;
-    }
-  }catch(e){
-    //Catch to support IE9 exception
-    SC.platform.supportsCSS3DTransforms = NO;
-  }
-
-  // Unfortunately, this has to be manual, as I can't think of a good way to test it
-  // webkit-only for now.
-  if (SC.platform.supportsCSSTransforms && SC.platform.cssPrefix === "webkit") {
-    SC.platform.supportsAcceleratedLayers = YES;
-  }
+  // Commented out unless someone can determine why is this code here?
+  // try{
+  //   if (window.media && window.media.matchMedium) {
+  //     if (!window.media.matchMedium('(-webkit-transform-3d)')) SC.platform.supportsCSS3DTransforms = NO;
+  //   } else if(window.styleMedia && window.styleMedia.matchMedium) {
+  //     if (!window.styleMedia.matchMedium('(-webkit-transform-3d)')) SC.platform.supportsCSS3DTransforms = NO;
+  //   }
+  // }catch(e){
+  //   //Catch to support IE9 exception
+  //   SC.platform.supportsCSS3DTransforms = NO;
+  // }
 })();

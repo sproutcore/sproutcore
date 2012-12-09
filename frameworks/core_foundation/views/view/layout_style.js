@@ -156,7 +156,8 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
             //   this.animate('rotate', ...);
             // Use this instead
             //   this.animate({ scale: ..., rotate: ... }, ...);
-            if (this._pendingAnimations && this._pendingAnimations['-'+SC.platform.cssPrefix+'-transform']) {
+            var platformTransform = SC.platform.transformPrefix + "transform";
+            if (this._pendingAnimations && this._pendingAnimations[platformTransform]) {
               throw "Animations of transforms must be executed simultaneously!";
             }
 
@@ -308,7 +309,7 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     if (SC.platform.supportsCSSTransforms) {
       // Handle transforms
       var layout = this.get('layout');
-      var transformAttribute = SC.platform.domCSSPrefix+'Transform';
+      var transformAttribute = SC.platform.transitionPrefix+'Transform';
       var transforms = [];
 
       if (this.turbo) {
@@ -341,17 +342,13 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
     // we're checking to see if the layout update was triggered by a call to .animate
     if (!animations) { return; }
 
-    // TODO: Deprecate SC.Animatable
-    if(this.getPath('view.isAnimatable')) { return; }
-
     // Handle animations
     var transitions = [], animation;
     this._animatedTransforms = [];
 
     if (!this._pendingAnimations) { this._pendingAnimations = {}; }
 
-    var platformTransform = "-" + SC.platform.cssPrefix + "-transform";
-
+    var platformTransform = SC.platform.transformPrefix + "transform";
 
     // animate({ scale: 2, rotateX: 90 })
     // both scale and rotateX are transformProperties
@@ -371,7 +368,7 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
         }
 
         // We're actually storing the css for the animation on layout.animate[key].css
-        animation.css = key + " " + animation.duration + "s " + animation.timing;
+        animation.css = key + " " + animation.duration + "s " + animation.timing + " " + animation.delay + "s";
 
         // If there are multiple transform properties, we only need to set this key once.
         // We already checked before to make sure they have the same duration.
@@ -381,7 +378,7 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
         }
       }
 
-      this.ret[SC.platform.domCSSPrefix+"Transition"] = transitions.join(", ");
+      this.ret[SC.platform.transitionPrefix+"Transition"] = transitions.join(", ");
 
     } else {
       // TODO: Do it the JS way
@@ -610,14 +607,15 @@ SC.View.LayoutStyleCalculator = SC.Object.extend({
       }
 
       // FIXME: Not really sure this is the right way to do it, but we don't want to trigger a layout update
-      if (layer) { layer.style[SC.platform.domCSSPrefix+"Transition"] = updatedCSS.join(', '); }
+      if (layer) { layer.style[SC.platform.transitionPrefix+"Transition"] = updatedCSS.join(', '); }
     }
 
 
     var layout = this.getPath('view.layout'),
         idx;
 
-    if (propertyName === '-'+SC.platform.cssPrefix+'-transform' && this._animatedTransforms && this._animatedTransforms.length > 0) {
+    var platformTransform = SC.platform.transformPrefix + "transform";
+    if (propertyName === platformTransform && this._animatedTransforms && this._animatedTransforms.length > 0) {
       for(idx=0; idx < this._animatedTransforms.length; idx++) {
         delete layout['animate' + SC.String.capitalize(this._animatedTransforms[idx])];
       }

@@ -5,11 +5,11 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('core') ;
+sc_require('core');
 sc_require('ext/function');
 sc_require('system/enumerator');
 
-/*globals Prototype */
+/*global Prototype */
 
 /**
   @class
@@ -90,8 +90,8 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     @param {Object} context a context object you can use to maintain state.
     @returns {Object} the next object in the iteration or undefined
   */
-  nextObject: function(index, previousObject, context) {
-    return this.objectAt ? this.objectAt(index) : this[index] ;
+  nextObject: function (index, previousObject, context) {
+    return this.objectAt ? this.objectAt(index) : this[index];
   },
 
   /**
@@ -113,15 +113,15 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
 
     @returns {Object} the object or undefined
   */
-  firstObject: function() {
-    if (this.get('length')===0) return undefined ;
+  firstObject: function () {
+    if (this.get('length') === 0) return undefined;
     if (this.objectAt) return this.objectAt(0); // support arrays out of box
 
     // handle generic enumerables
     var context = SC.Enumerator._popContext(), ret;
     ret = this.nextObject(0, null, context);
     context = SC.Enumerator._pushContext(context);
-    return ret ;
+    return ret;
   }.property().cacheable(),
 
   /**
@@ -136,10 +136,10 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
 
     @returns {Object} the object or undefined
   */
-  lastObject: function() {
+  lastObject: function () {
     var len = this.get('length');
-    if (len===0) return undefined ;
-    if (this.objectAt) return this.objectAt(len-1); // support arrays out of box
+    if (len === 0) return undefined;
+    if (this.objectAt) return this.objectAt(len - 1); // support arrays out of box
   }.property().cacheable(),
 
   /**
@@ -149,7 +149,7 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
 
     @returns {SC.Enumerator} an enumerator for the receiver
   */
-  enumerator: function() { return SC.Enumerator.create(this); },
+  enumerator: function () { return SC.Enumerator.create(this); },
 
   /**
     Iterates through the enumerable, calling the passed function on each
@@ -159,7 +159,7 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     The callback method you provide should have the following signature (all
     parameters are optional):
 
-          function(item, index, enumerable) ;
+          function (item, index, enumerable);
 
     - *item* is the current item in the iteration.
     - *index* is the current index in the iteration
@@ -173,21 +173,21 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     @param {Object} target the target object to use
     @returns {Object} this
   */
-  forEach: function(callback, target) {
-    if (typeof callback !== "function") throw new TypeError() ;
-    var len = this.get ? this.get('length') : this.length ;
+  forEach: function (callback, target) {
+    if (typeof callback !== "function") throw new TypeError();
+    var len = this.get ? this.get('length') : this.length;
     if (target === undefined) target = null;
 
-    var last = null ;
+    var last = null;
     var context = SC.Enumerator._popContext();
-    for(var idx=0;idx<len;idx++) {
-      var next = this.nextObject(idx, last, context) ;
+    for (var idx = 0; idx < len;idx++) {
+      var next = this.nextObject(idx, last, context);
       callback.call(target, next, idx, this);
-      last = next ;
+      last = next;
     }
-    last = null ;
+    last = null;
     context = SC.Enumerator._pushContext(context);
-    return this ;
+    return this;
   },
 
   /**
@@ -199,8 +199,8 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     @param {String} key the key to retrieve
     @returns {Array} extracted values
   */
-  getEach: function(key) {
-    return this.map(function(next) {
+  getEach: function (key) {
+    return this.map(function (next) {
       return next ? (next.get ? next.get(key) : next[key]) : null;
     }, this);
   },
@@ -215,14 +215,14 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     @param {Object} value the object to set
     @returns {Object} receiver
   */
-  setEach: function(key, value) {
-    this.forEach(function(next) {
+  setEach: function (key, value) {
+    this.forEach(function (next) {
       if (next) {
-        if (next.set) next.set(key, value) ;
-        else next[key] = value ;
+        if (next.set) next.set(key, value);
+        else next[key] = value;
       }
     }, this);
-    return this ;
+    return this;
   },
 
   /**
@@ -232,7 +232,7 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     The callback method you provide should have the following signature (all
     parameters are optional):
 
-        function(item, index, enumerable) ;
+        function (item, index, enumerable);
 
     - *item* is the current item in the iteration.
     - *index* is the current index in the iteration
@@ -248,22 +248,22 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     @param {Object} target the target object to use
     @returns {Array} The mapped array.
   */
-  map: function(callback, target) {
-    if (typeof callback !== "function") throw new TypeError() ;
-    var len = this.get ? this.get('length') : this.length ;
+  map: function (callback, target) {
+    if (typeof callback !== "function") throw new TypeError();
+    var len = this.get ? this.get('length') : this.length;
     if (target === undefined) target = null;
 
     var ret  = [];
-    var last = null ;
+    var last = null;
     var context = SC.Enumerator._popContext();
-    for(var idx=0;idx<len;idx++) {
-      var next = this.nextObject(idx, last, context) ;
-      ret[idx] = callback.call(target, next, idx, this) ;
-      last = next ;
+    for (var idx = 0; idx < len;idx++) {
+      var next = this.nextObject(idx, last, context);
+      ret[idx] = callback.call(target, next, idx, this);
+      last = next;
     }
-    last = null ;
+    last = null;
     context = SC.Enumerator._pushContext(context);
-    return ret ;
+    return ret;
   },
 
   /**
@@ -273,8 +273,8 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     @param {String} key name of the property
     @returns {Array} The mapped array.
   */
-  mapProperty: function(key) {
-    return this.map(function(next) {
+  mapProperty: function (key) {
+    return this.map(function (next) {
       return next ? (next.get ? next.get(key) : next[key]) : null;
     });
   },
@@ -287,7 +287,7 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     The callback method you provide should have the following signature (all
     parameters are optional):
 
-          function(item, index, enumerable) ;
+          function (item, index, enumerable);
 
     - *item* is the current item in the iteration.
     - *index* is the current index in the iteration
@@ -303,22 +303,22 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     @param {Object} target the target object to use
     @returns {Array} A filtered array.
   */
-  filter: function(callback, target) {
-    if (typeof callback !== "function") throw new TypeError() ;
-    var len = this.get ? this.get('length') : this.length ;
+  filter: function (callback, target) {
+    if (typeof callback !== "function") throw new TypeError();
+    var len = this.get ? this.get('length') : this.length;
     if (target === undefined) target = null;
 
     var ret  = [];
-    var last = null ;
+    var last = null;
     var context = SC.Enumerator._popContext();
-    for(var idx=0;idx<len;idx++) {
-      var next = this.nextObject(idx, last, context) ;
-      if(callback.call(target, next, idx, this)) ret.push(next) ;
-      last = next ;
+    for (var idx = 0; idx < len;idx++) {
+      var next = this.nextObject(idx, last, context);
+      if (callback.call(target, next, idx, this)) ret.push(next);
+      last = next;
     }
-    last = null ;
+    last = null;
     context = SC.Enumerator._pushContext(context);
-    return ret ;
+    return ret;
   },
 
   /**
@@ -329,7 +329,7 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     @param {String} key one or more key names
     @returns {Array}
   */
-  sortProperty: function(key) {
+  sortProperty: function (key) {
     var keys = (typeof key === SC.T_STRING) ? arguments : key,
         len  = keys.length,
         src;
@@ -338,20 +338,20 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     if (this instanceof Array) src = this;
     else {
       src = [];
-      this.forEach(function(i) { src.push(i); });
+      this.forEach(function (i) { src.push(i); });
     }
 
     if (!src) return [];
-    return src.sort(function(a,b) {
+    return src.sort(function (a, b) {
       var idx, key, aValue, bValue, ret = 0;
 
-      for(idx=0;ret===0 && idx<len;idx++) {
+      for (idx = 0; ret === 0 && idx < len; idx++) {
         key = keys[idx];
         aValue = a ? (a.get ? a.get(key) : a[key]) : null;
         bValue = b ? (b.get ? b.get(key) : b[key]) : null;
         ret = SC.compare(aValue, bValue);
       }
-      return ret ;
+      return ret;
     });
   },
 
@@ -361,25 +361,38 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     can pass an optional second argument with the target value.  Otherwise
     this will match any property that evaluates to true.
 
+    Note: null, undefined, false and the empty string all evaulate to false.
+
     @param {String} key the property to test
     @param {String} value optional value to test against.
     @returns {Array} filtered array
   */
-  filterProperty: function(key, value) {
-    var len = this.get ? this.get('length') : this.length ;
-    var ret  = [];
-    var last = null ;
-    var context = SC.Enumerator._popContext();
-    for(var idx=0;idx<len;idx++) {
-      var next = this.nextObject(idx, last, context) ;
-      var cur = next ? (next.get ? next.get(key) : next[key]) : null;
-      var matched = (value === undefined) ? !!cur : SC.isEqual(cur, value);
-      if (matched) ret.push(next) ;
-      last = next ;
+  filterProperty: function (key, value) {
+    var len = this.get ? this.get('length') : this.length,
+        ret = [],
+        last = null,
+        context = SC.Enumerator._popContext(),
+        idx, item, cur;
+    // Although the code for value and no value are almost identical, we want to make as many decisions outside
+    // the loop as possible.
+    if (value === undefined) {
+      for (idx = 0; idx < len; idx++) {
+        item = this.nextObject(idx, last, context);
+        cur = item ? (item.get ? item.get(key) : item[key]) : null;
+        if (!!cur) ret.push(item);
+        last = item;
+      }
+    } else {
+      for (idx = 0; idx < len; idx++) {
+        item = this.nextObject(idx, last, context);
+        cur = item ? (item.get ? item.get(key) : item[key]) : null;
+        if (SC.isEqual(cur, value)) ret.push(item);
+        last = item;
+      }
     }
-    last = null ;
+    last = null;
     context = SC.Enumerator._pushContext(context);
-    return ret ;
+    return ret;
   },
 
   /**
@@ -390,7 +403,7 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     The callback method you provide should have the following signature (all
     parameters are optional):
 
-          function(item, index, enumerable) ;
+          function (item, index, enumerable);
 
     - *item* is the current item in the iteration.
     - *index* is the current index in the iteration
@@ -406,20 +419,20 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     @param {Object} target the target object to use
     @returns {Object} Found item or null.
   */
-  find: function(callback, target) {
-    var len = this.get ? this.get('length') : this.length ;
+  find: function (callback, target) {
+    var len = this.get ? this.get('length') : this.length;
     if (target === undefined) target = null;
 
-    var last = null, next, found = NO, ret = null ;
+    var last = null, next, found = NO, ret = null;
     var context = SC.Enumerator._popContext();
-    for(var idx=0;idx<len && !found;idx++) {
-      next = this.nextObject(idx, last, context) ;
-      if (found = callback.call(target, next, idx, this)) ret = next ;
-      last = next ;
+    for (var idx = 0; idx < len && !found;idx++) {
+      next = this.nextObject(idx, last, context);
+      if (found = callback.call(target, next, idx, this)) ret = next;
+      last = next;
     }
-    next = last = null ;
+    next = last = null;
     context = SC.Enumerator._pushContext(context);
-    return ret ;
+    return ret;
   },
 
   /**
@@ -433,20 +446,20 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     @param {String} value optional value to test against.
     @returns {Object} found item or null
   */
-  findProperty: function(key, value) {
-    var len = this.get ? this.get('length') : this.length ;
-    var found = NO, ret = null, last = null, next, cur ;
+  findProperty: function (key, value) {
+    var len = this.get ? this.get('length') : this.length;
+    var found = NO, ret = null, last = null, next, cur;
     var context = SC.Enumerator._popContext();
-    for(var idx=0;idx<len && !found;idx++) {
-      next = this.nextObject(idx, last, context) ;
+    for (var idx = 0; idx < len && !found;idx++) {
+      next = this.nextObject(idx, last, context);
       cur = next ? (next.get ? next.get(key) : next[key]) : null;
       found = (value === undefined) ? !!cur : SC.isEqual(cur, value);
-      if (found) ret = next ;
-      last = next ;
+      if (found) ret = next;
+      last = next;
     }
-    last = next = null ;
+    last = next = null;
     context = SC.Enumerator._pushContext(context);
-    return ret ;
+    return ret;
   },
 
   /**
@@ -456,7 +469,7 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     The callback method you provide should have the following signature (all
     parameters are optional):
 
-          function(item, index, enumerable) ;
+          function (item, index, enumerable);
 
     - *item* is the current item in the iteration.
     - *index* is the current index in the iteration
@@ -476,22 +489,22 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     @param {Object} target the target object to use
     @returns {Boolean}
   */
-  every: function(callback, target) {
-    if (typeof callback !== "function") throw new TypeError() ;
-    var len = this.get ? this.get('length') : this.length ;
+  every: function (callback, target) {
+    if (typeof callback !== "function") throw new TypeError();
+    var len = this.get ? this.get('length') : this.length;
     if (target === undefined) target = null;
 
     var ret  = YES;
-    var last = null ;
+    var last = null;
     var context = SC.Enumerator._popContext();
-    for(var idx=0;ret && (idx<len);idx++) {
-      var next = this.nextObject(idx, last, context) ;
-      if(!callback.call(target, next, idx, this)) ret = NO ;
-      last = next ;
+    for (var idx = 0;ret && (idx < len);idx++) {
+      var next = this.nextObject(idx, last, context);
+      if (!callback.call(target, next, idx, this)) ret = NO;
+      last = next;
     }
-    last = null ;
+    last = null;
     context = SC.Enumerator._pushContext(context);
-    return ret ;
+    return ret;
   },
 
   /**
@@ -502,20 +515,20 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     @param {String} value optional value to test against.
     @returns {Array} filtered array
   */
-  everyProperty: function(key, value) {
-    var len = this.get ? this.get('length') : this.length ;
+  everyProperty: function (key, value) {
+    var len = this.get ? this.get('length') : this.length;
     var ret  = YES;
-    var last = null ;
+    var last = null;
     var context = SC.Enumerator._popContext();
-    for(var idx=0;ret && (idx<len);idx++) {
-      var next = this.nextObject(idx, last, context) ;
+    for (var idx = 0;ret && (idx < len);idx++) {
+      var next = this.nextObject(idx, last, context);
       var cur = next ? (next.get ? next.get(key) : next[key]) : null;
       ret = (value === undefined) ? !!cur : SC.isEqual(cur, value);
-      last = next ;
+      last = next;
     }
-    last = null ;
+    last = null;
     context = SC.Enumerator._pushContext(context);
-    return ret ;
+    return ret;
   },
 
 
@@ -526,7 +539,7 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     The callback method you provide should have the following signature (all
     parameters are optional):
 
-          function(item, index, enumerable) ;
+          function (item, index, enumerable);
 
     - *item* is the current item in the iteration.
     - *index* is the current index in the iteration
@@ -546,22 +559,22 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     @param {Object} target the target object to use
     @returns {Array} A filtered array.
   */
-  some: function(callback, target) {
-    if (typeof callback !== "function") throw new TypeError() ;
-    var len = this.get ? this.get('length') : this.length ;
+  some: function (callback, target) {
+    if (typeof callback !== "function") throw new TypeError();
+    var len = this.get ? this.get('length') : this.length;
     if (target === undefined) target = null;
 
     var ret  = NO;
-    var last = null ;
+    var last = null;
     var context = SC.Enumerator._popContext();
-    for(var idx=0;(!ret) && (idx<len);idx++) {
-      var next = this.nextObject(idx, last, context) ;
-      if(callback.call(target, next, idx, this)) ret = YES ;
-      last = next ;
+    for (var idx = 0;(!ret) && (idx < len);idx++) {
+      var next = this.nextObject(idx, last, context);
+      if (callback.call(target, next, idx, this)) ret = YES;
+      last = next;
     }
-    last = null ;
+    last = null;
     context = SC.Enumerator._pushContext(context);
-    return ret ;
+    return ret;
   },
 
   /**
@@ -572,20 +585,20 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     @param {String} value optional value to test against.
     @returns {Boolean} YES
   */
-  someProperty: function(key, value) {
-    var len = this.get ? this.get('length') : this.length ;
+  someProperty: function (key, value) {
+    var len = this.get ? this.get('length') : this.length;
     var ret  = NO;
-    var last = null ;
+    var last = null;
     var context = SC.Enumerator._popContext();
-    for(var idx=0; !ret && (idx<len); idx++) {
-      var next = this.nextObject(idx, last, context) ;
+    for (var idx = 0; !ret && (idx < len); idx++) {
+      var next = this.nextObject(idx, last, context);
       var cur = next ? (next.get ? next.get(key) : next[key]) : null;
       ret = (value === undefined) ? !!cur : SC.isEqual(cur, value);
-      last = next ;
+      last = next;
     }
-    last = null ;
+    last = null;
     context = SC.Enumerator._pushContext(context);
-    return ret ;  // return the invert
+    return ret;  // return the invert
   },
 
   /**
@@ -596,7 +609,7 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     The callback method you provide should have the following signature (all
     parameters are optional):
 
-          function(previousValue, item, index, enumerable) ;
+          function (previousValue, item, index, enumerable);
 
     - *previousValue* is the value returned by the last call to the iterator.
     - *item* is the current item in the iteration.
@@ -618,37 +631,37 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     @param {String} reducerProperty internal use only.  May not be available.
     @returns {Object} The reduced value.
   */
-  reduce: function(callback, initialValue, reducerProperty) {
-    if (typeof callback !== "function") throw new TypeError() ;
-    var len = this.get ? this.get('length') : this.length ;
+  reduce: function (callback, initialValue, reducerProperty) {
+    if (typeof callback !== "function") throw new TypeError();
+    var len = this.get ? this.get('length') : this.length;
 
     // no value to return if no initial value & empty
-    if (len===0 && initialValue === undefined) throw new TypeError();
+    if (len === 0 && initialValue === undefined) throw new TypeError();
 
     var ret  = initialValue;
-    var last = null ;
+    var last = null;
     var context = SC.Enumerator._popContext();
-    for(var idx=0;idx<len;idx++) {
-      var next = this.nextObject(idx, last, context) ;
+    for (var idx = 0; idx < len;idx++) {
+      var next = this.nextObject(idx, last, context);
 
       // while ret is still undefined, just set the first value we get as ret.
       // this is not the ideal behavior actually but it matches the FireFox
       // implementation... :(
       if (next !== null) {
         if (ret === undefined) {
-          ret = next ;
+          ret = next;
         } else {
           ret = callback.call(null, ret, next, idx, this, reducerProperty);
         }
       }
-      last = next ;
+      last = next;
     }
-    last = null ;
+    last = null;
     context = SC.Enumerator._pushContext(context);
 
     // uh oh...we never found a value!
-    if (ret === undefined) throw new TypeError() ;
-    return ret ;
+    if (ret === undefined) throw new TypeError();
+    return ret;
   },
 
   /**
@@ -660,32 +673,32 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     @param {Object...} args optional arguments to pass as well.
     @returns {Array} return values from calling invoke.
   */
-  invoke: function(methodName) {
-    var len = this.get ? this.get('length') : this.length ;
-    if (len <= 0) return [] ; // nothing to invoke....
+  invoke: function (methodName) {
+    var len = this.get ? this.get('length') : this.length;
+    if (len <= 0) return []; // nothing to invoke....
 
     var idx;
 
     // collect the arguments
-    var args = [] ;
-    var alen = arguments.length ;
+    var args = [];
+    var alen = arguments.length;
     if (alen > 1) {
-      for(idx=1;idx<alen;idx++) args.push(arguments[idx]) ;
+      for (idx = 1; idx < alen; idx++) args.push(arguments[idx]);
     }
 
     // call invoke
-    var ret = [] ;
-    var last = null ;
+    var ret = [];
+    var last = null;
     var context = SC.Enumerator._popContext();
-    for(idx=0;idx<len;idx++) {
-      var next = this.nextObject(idx, last, context) ;
-      var method = next ? next[methodName] : null ;
-      if (method) ret[idx] = method.apply(next, args) ;
-      last = next ;
+    for (idx = 0; idx < len; idx++) {
+      var next = this.nextObject(idx, last, context);
+      var method = next ? next[methodName] : null;
+      if (method) ret[idx] = method.apply(next, args);
+      last = next;
     }
-    last = null ;
+    last = null;
     context = SC.Enumerator._pushContext(context);
-    return ret ;
+    return ret;
   },
 
   /**
@@ -699,32 +712,32 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     @param {Object...} args optional arguments to pass as well.
     @returns {Array} return values from calling invoke.
   */
-  invokeWhile: function(targetValue, methodName) {
-    var len = this.get ? this.get('length') : this.length ;
+  invokeWhile: function (targetValue, methodName) {
+    var len = this.get ? this.get('length') : this.length;
     if (len <= 0) return null; // nothing to invoke....
 
     var idx;
 
     // collect the arguments
-    var args = [] ;
-    var alen = arguments.length ;
+    var args = [];
+    var alen = arguments.length;
     if (alen > 2) {
-      for(idx=2;idx<alen;idx++) args.push(arguments[idx]) ;
+      for (idx = 2; idx < alen; idx++) args.push(arguments[idx]);
     }
 
     // call invoke
-    var ret = targetValue ;
-    var last = null ;
+    var ret = targetValue;
+    var last = null;
     var context = SC.Enumerator._popContext();
-    for(idx=0;(ret === targetValue) && (idx<len);idx++) {
-      var next = this.nextObject(idx, last, context) ;
-      var method = next ? next[methodName] : null ;
-      if (method) ret = method.apply(next, args) ;
-      last = next ;
+    for (idx = 0; (ret === targetValue) && (idx < len); idx++) {
+      var next = this.nextObject(idx, last, context);
+      var method = next ? next[methodName] : null;
+      if (method) ret = method.apply(next, args);
+      last = next;
     }
-    last = null ;
+    last = null;
     context = SC.Enumerator._pushContext(context);
-    return ret ;
+    return ret;
   },
 
   /**
@@ -734,10 +747,10 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
 
     @returns {Array} the enumerable as an array.
   */
-  toArray: function() {
+  toArray: function () {
     var ret = [];
-    this.forEach(function(o) { ret.push(o); }, this);
-    return ret ;
+    this.forEach(function (o) { ret.push(o); }, this);
+    return ret;
   },
 
   /**
@@ -747,7 +760,7 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     @param {String} key the property to test
     @returns {Array} matrix of arrays
   */
-  groupBy: function(key){
+  groupBy: function (key) {
     var len = this.get ? this.get('length') : this.length,
         ret = [],
         last = null,
@@ -756,11 +769,12 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
         keyValues = [],
         idx, next, cur;
 
-    for(idx=0;idx<len;idx++) {
-      next = this.nextObject(idx, last, context) ;
+    for (idx = 0; idx < len;idx++) {
+      next = this.nextObject(idx, last, context);
       cur = next ? (next.get ? next.get(key) : next[key]) : null;
-      if(SC.none(grouped[cur])) {
-        grouped[cur] = []; keyValues.push(cur);
+      if (SC.none(grouped[cur])) {
+        grouped[cur] = [];
+        keyValues.push(cur);
       }
       grouped[cur].push(next);
       last = next;
@@ -768,28 +782,28 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     last = null;
     context = SC.Enumerator._pushContext(context);
 
-    for(idx=0,len=keyValues.length; idx < len; idx++){
+    for (idx = 0, len = keyValues.length; idx < len; idx++) {
       ret.push(grouped[keyValues[idx]]);
     }
-    return ret ;
+    return ret;
   }
 
-} ;
+};
 
 // Build in a separate function to avoid unintentional leaks through closures...
-SC._buildReducerFor = function(reducerKey, reducerProperty) {
-  return function(key, value) {
-    var reducer = this[reducerKey] ;
+SC._buildReducerFor = function (reducerKey, reducerProperty) {
+  return function (key, value) {
+    var reducer = this[reducerKey];
     if (SC.typeOf(reducer) !== SC.T_FUNCTION) {
       return this.unknownProperty ? this.unknownProperty(key, value) : null;
     } else {
       // Invoke the reduce method defined in enumerable instead of using the
       // one implemented in the receiver.  The receiver might be a native
       // implementation that does not support reducerProperty.
-      var ret = SC.Enumerable.reduce.call(this, reducer, null, reducerProperty) ;
-      return ret ;
+      var ret = SC.Enumerable.reduce.call(this, reducer, null, reducerProperty);
+      return ret;
     }
-  }.property('[]') ;
+  }.property('[]');
 };
 
 /** @class */
@@ -804,7 +818,7 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
 
     @property {SC.Array}
   */
-  '[]': function(key, value) { return this ; }.property(),
+  '[]': function (key, value) { return this; }.property(),
 
   /**
     Invoke this method when the contents of your enumerable has changed.
@@ -819,7 +833,7 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
     @param {Number} [deltas] if you added or removed objects, the delta change
     @returns {Object} receiver
   */
-  enumerableContentDidChange: function(start, length, deltas) {
+  enumerableContentDidChange: function (start, length, deltas) {
     // If the start & length are provided, we can also indicate if the firstObject
     // or lastObject properties changed, thus making them independently observable.
     if (!SC.none(start)) {
@@ -827,7 +841,7 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
       if (!SC.none(length) && start + length === this.get('length') - 1) this.notifyPropertyChange('lastObject');
     }
 
-    this.notifyPropertyChange('[]') ;
+    this.notifyPropertyChange('[]');
   },
 
   /**
@@ -843,8 +857,8 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
     property.  You can call this at the top of your unknownProperty handler
     like so:
 
-      unknownProperty: function(key, value) {
-        var ret = this.handleReduceProperty(key, value) ;
+      unknownProperty: function (key, value) {
+        var ret = this.handleReduceProperty(key, value);
         if (ret === undefined) {
           // process like normal
         }
@@ -859,18 +873,18 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
 
     @returns {Object} the reduced property or undefined
   */
-  reducedProperty: function(key, value, generateProperty) {
+  reducedProperty: function (key, value, generateProperty) {
 
-    if (!key || typeof key !== SC.T_STRING || key.charAt(0) !== '@') return undefined ; // not a reduced property
+    if (!key || typeof key !== SC.T_STRING || key.charAt(0) !== '@') return undefined; // not a reduced property
 
     // get the reducer key and the reducer
-    var matches = key.match(/^@([^(]*)(\(([^)]*)\))?$/) ;
-    if (!matches || matches.length < 2) return undefined ; // no match
+    var matches = key.match(/^@([^(]*)(\(([^)]*)\))?$/);
+    if (!matches || matches.length < 2) return undefined; // no match
 
     var reducerKey = matches[1]; // = 'max' if key = '@max(balance)'
-    var reducerProperty = matches[3] ; // = 'balance' if key = '@max(balance)'
-    reducerKey = "reduce" + reducerKey.slice(0,1).toUpperCase() + reducerKey.slice(1);
-    var reducer = this[reducerKey] ;
+    var reducerProperty = matches[3]; // = 'balance' if key = '@max(balance)'
+    reducerKey = "reduce" + reducerKey.slice(0, 1).toUpperCase() + reducerKey.slice(1);
+    var reducer = this[reducerKey];
 
     // if there is no reduce function defined for this key, then we can't
     // build a reducer for it.
@@ -878,26 +892,26 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
 
     // if we can't generate the property, just run reduce
     if (generateProperty === NO) {
-      return SC.Enumerable.reduce.call(this, reducer, null, reducerProperty) ;
+      return SC.Enumerable.reduce.call(this, reducer, null, reducerProperty);
     }
 
     // ok, found the reducer.  Let's build the computed property and install
     var func = SC._buildReducerFor(reducerKey, reducerProperty);
-    var p = this.constructor.prototype ;
+    var p = this.constructor.prototype;
 
     if (p) {
-      p[key] = func ;
+      p[key] = func;
 
       // add the function to the properties array so that new instances
       // will have their dependent key registered.
-      var props = p._properties || [] ;
-      props.push(key) ;
-      p._properties = props ;
-      this.registerDependentKey(key, '[]') ;
+      var props = p._properties || [];
+      props.push(key);
+      p._properties = props;
+      this.registerDependentKey(key, '[]');
     }
 
     // and reduce anyway...
-    return SC.Enumerable.reduce.call(this, reducer, null, reducerProperty) ;
+    return SC.Enumerable.reduce.call(this, reducer, null, reducerProperty);
   },
 
   /**
@@ -910,12 +924,12 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
 
     @returns {Object} reduced value
   */
-  reduceMax: function(previousValue, item, index, e, reducerProperty) {
+  reduceMax: function (previousValue, item, index, e, reducerProperty) {
     if (reducerProperty && item) {
       item = item.get ? item.get(reducerProperty) : item[reducerProperty];
     }
-    if (previousValue === null) return item ;
-    return (item > previousValue) ? item : previousValue ;
+    if (previousValue === null) return item;
+    return (item > previousValue) ? item : previousValue;
   },
 
   /**
@@ -930,22 +944,22 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
 
     @returns {Object} reduced value
   */
-  reduceMaxObject: function(previousItem, item, index, e, reducerProperty) {
+  reduceMaxObject: function (previousItem, item, index, e, reducerProperty) {
 
     // get the value for both the previous and current item.  If no
     // reducerProperty was supplied, use the items themselves.
-    var previousValue = previousItem, itemValue = item ;
+    var previousValue = previousItem, itemValue = item;
     if (reducerProperty) {
       if (item) {
-        itemValue = item.get ? item.get(reducerProperty) : item[reducerProperty] ;
+        itemValue = item.get ? item.get(reducerProperty) : item[reducerProperty];
       }
 
       if (previousItem) {
-        previousValue = previousItem.get ? previousItem.get(reducerProperty) : previousItem[reducerProperty] ;
+        previousValue = previousItem.get ? previousItem.get(reducerProperty) : previousItem[reducerProperty];
       }
     }
-    if (previousValue === null) return item ;
-    return (itemValue > previousValue) ? item : previousItem ;
+    if (previousValue === null) return item;
+    return (itemValue > previousValue) ? item : previousItem;
   },
 
   /**
@@ -960,12 +974,12 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
 
     @returns {Object} reduced value
   */
-  reduceMin: function(previousValue, item, index, e, reducerProperty) {
+  reduceMin: function (previousValue, item, index, e, reducerProperty) {
     if (reducerProperty && item) {
       item = item.get ? item.get(reducerProperty) : item[reducerProperty];
     }
-    if (previousValue === null) return item ;
-    return (item < previousValue) ? item : previousValue ;
+    if (previousValue === null) return item;
+    return (item < previousValue) ? item : previousValue;
   },
 
   /**
@@ -980,22 +994,22 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
 
     @returns {Object} reduced value
   */
-  reduceMinObject: function(previousItem, item, index, e, reducerProperty) {
+  reduceMinObject: function (previousItem, item, index, e, reducerProperty) {
 
     // get the value for both the previous and current item.  If no
     // reducerProperty was supplied, use the items themselves.
-    var previousValue = previousItem, itemValue = item ;
+    var previousValue = previousItem, itemValue = item;
     if (reducerProperty) {
       if (item) {
-        itemValue = item.get ? item.get(reducerProperty) : item[reducerProperty] ;
+        itemValue = item.get ? item.get(reducerProperty) : item[reducerProperty];
       }
 
       if (previousItem) {
-        previousValue = previousItem.get ? previousItem.get(reducerProperty) : previousItem[reducerProperty] ;
+        previousValue = previousItem.get ? previousItem.get(reducerProperty) : previousItem[reducerProperty];
       }
     }
-    if (previousValue === null) return item ;
-    return (itemValue < previousValue) ? item : previousItem ;
+    if (previousValue === null) return item;
+    return (itemValue < previousValue) ? item : previousItem;
   },
 
   /**
@@ -1010,14 +1024,14 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
 
     @returns {Object} reduced value
   */
-  reduceAverage: function(previousValue, item, index, e, reducerProperty) {
+  reduceAverage: function (previousValue, item, index, e, reducerProperty) {
     if (reducerProperty && item) {
       item = item.get ? item.get(reducerProperty) : item[reducerProperty];
     }
-    var ret = (previousValue || 0) + item ;
+    var ret = (previousValue || 0) + item;
     var len = e.get ? e.get('length') : e.length;
-    if (index >= len-1) ret = ret / len; //avg after last item.
-    return ret ;
+    if (index >= len - 1) ret = ret / len; //avg after last item.
+    return ret;
   },
 
   /**
@@ -1032,18 +1046,18 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
 
     @returns {Object} reduced value
   */
-  reduceSum: function(previousValue, item, index, e, reducerProperty) {
+  reduceSum: function (previousValue, item, index, e, reducerProperty) {
     if (reducerProperty && item) {
       item = item.get ? item.get(reducerProperty) : item[reducerProperty];
     }
-    return (previousValue === null) ? item : previousValue + item ;
+    return (previousValue === null) ? item : previousValue + item;
   }
-} ;
+};
 
 // Apply reducers...
-SC.mixin(SC.Enumerable, SC.Reducers) ;
-SC.mixin(Array.prototype, SC.Reducers) ;
-Array.prototype.isEnumerable = YES ;
+SC.mixin(SC.Enumerable, SC.Reducers);
+SC.mixin(Array.prototype, SC.Reducers);
+Array.prototype.isEnumerable = YES;
 
 // ......................................................
 // ARRAY SUPPORT
@@ -1051,7 +1065,7 @@ Array.prototype.isEnumerable = YES ;
 
 // Implement the same enhancements on Array.  We use specialized methods
 // because working with arrays are so common.
-(function() {
+(function () {
 
   // These methods will be applied even if they already exist b/c we do it
   // better.
@@ -1067,177 +1081,186 @@ Array.prototype.isEnumerable = YES ;
     sortProperty: SC.Enumerable.sortProperty,
 
     // see above...
-    mapProperty: function(key) {
-      var len = this.length ;
+    mapProperty: function (key) {
+      var len = this.length;
       var ret  = [];
-      for(var idx=0;idx<len;idx++) {
-        var next = this[idx] ;
+      for (var idx = 0; idx < len; idx++) {
+        var next = this[idx];
         ret[idx] = next ? (next.get ? next.get(key) : next[key]) : null;
       }
-      return ret ;
+      return ret;
     },
 
-    filterProperty: function(key, value) {
-      var len = this.length ;
-      var ret  = [];
-      for(var idx=0;idx<len;idx++) {
-        var next = this[idx] ;
-        var cur = next ? (next.get ? next.get(key) : next[key]) : null;
-        var matched = (value === undefined) ? !!cur : SC.isEqual(cur, value);
-        if (matched) ret.push(next) ;
+    filterProperty: function (key, value) {
+      var len = this.length,
+          ret = [],
+          idx, item, cur;
+      // Although the code for value and no value are almost identical, we want to make as many decisions outside
+      // the loop as possible.
+      if (value === undefined) {
+        for (idx = 0; idx < len; idx++) {
+          item = this[idx];
+          cur = item ? (item.get ? item.get(key) : item[key]) : null;
+          if (!!cur) ret.push(item);
+        }
+      } else {
+        for (idx = 0; idx < len; idx++) {
+          item = this[idx];
+          cur = item ? (item.get ? item.get(key) : item[key]) : null;
+          if (SC.isEqual(cur, value)) ret.push(item);
+        }
       }
-      return ret ;
+      return ret;
     },
-
     //returns a matrix
-    groupBy: function(key) {
+    groupBy: function (key) {
       var len = this.length,
           ret = [],
           grouped = [],
           keyValues = [],
           idx, next, cur;
 
-      for(idx=0;idx<len;idx++) {
-        next = this[idx] ;
+      for (idx = 0; idx < len; idx++) {
+        next = this[idx];
         cur = next ? (next.get ? next.get(key) : next[key]) : null;
-        if(SC.none(grouped[cur])){ grouped[cur] = []; keyValues.push(cur); }
+        if (SC.none(grouped[cur])) { grouped[cur] = []; keyValues.push(cur); }
         grouped[cur].push(next);
       }
 
-      for(idx=0,len=keyValues.length; idx < len; idx++){
+      for (idx = 0, len = keyValues.length; idx < len; idx++) {
         ret.push(grouped[keyValues[idx]]);
       }
-      return ret ;
+      return ret;
     },
 
-    find: function(callback, target) {
-      if (typeof callback !== "function") throw new TypeError() ;
-      var len = this.length ;
+    find: function (callback, target) {
+      if (typeof callback !== "function") throw new TypeError();
+      var len = this.length;
       if (target === undefined) target = null;
 
       var next, ret = null, found = NO;
-      for(var idx=0;idx<len && !found;idx++) {
-        next = this[idx] ;
-        if(found = callback.call(target, next, idx, this)) ret = next ;
+      for (var idx = 0; idx < len && !found; idx++) {
+        next = this[idx];
+        if (found = callback.call(target, next, idx, this)) ret = next;
       }
       next = null;
-      return ret ;
+      return ret;
     },
 
-    findProperty: function(key, value) {
-      var len = this.length ;
-      var next, cur, found=NO, ret=null;
-      for(var idx=0;idx<len && !found;idx++) {
-        cur = (next=this[idx]) ? (next.get ? next.get(key): next[key]):null;
+    findProperty: function (key, value) {
+      var len = this.length;
+      var next, cur, found = NO, ret = null;
+      for (var idx = 0; idx < len && !found; idx++) {
+        cur = (next = this[idx]) ? (next.get ? next.get(key): next[key]):null;
         found = (value === undefined) ? !!cur : SC.isEqual(cur, value);
-        if (found) ret = next ;
+        if (found) ret = next;
       }
-      next=null;
-      return ret ;
+      next = null;
+      return ret;
     },
 
-    everyProperty: function(key, value) {
-      var len = this.length ;
+    everyProperty: function (key, value) {
+      var len = this.length;
       var ret  = YES;
-      for(var idx=0;ret && (idx<len);idx++) {
-        var next = this[idx] ;
+      for (var idx = 0; ret && (idx < len); idx++) {
+        var next = this[idx];
         var cur = next ? (next.get ? next.get(key) : next[key]) : null;
         ret = (value === undefined) ? !!cur : SC.isEqual(cur, value);
       }
-      return ret ;
+      return ret;
     },
 
-    someProperty: function(key, value) {
-      var len = this.length ;
+    someProperty: function (key, value) {
+      var len = this.length;
       var ret  = NO;
-      for(var idx=0; !ret && (idx<len); idx++) {
-        var next = this[idx] ;
+      for (var idx = 0; !ret && (idx < len); idx++) {
+        var next = this[idx];
         var cur = next ? (next.get ? next.get(key) : next[key]) : null;
         ret = (value === undefined) ? !!cur : SC.isEqual(cur, value);
       }
-      return ret ;  // return the invert
+      return ret;  // return the invert
     },
 
-    invoke: function(methodName) {
-      var len = this.length ;
-      if (len <= 0) return [] ; // nothing to invoke....
+    invoke: function (methodName) {
+      var len = this.length;
+      if (len <= 0) return []; // nothing to invoke....
 
       var idx;
 
       // collect the arguments
-      var args = [] ;
-      var alen = arguments.length ;
+      var args = [];
+      var alen = arguments.length;
       if (alen > 1) {
-        for(idx=1;idx<alen;idx++) args.push(arguments[idx]) ;
+        for (idx = 1; idx < alen; idx++) args.push(arguments[idx]);
       }
 
       // call invoke
-      var ret = [] ;
-      for(idx=0;idx<len;idx++) {
-        var next = this[idx] ;
-        var method = next ? next[methodName] : null ;
-        if (method) ret[idx] = method.apply(next, args) ;
+      var ret = [];
+      for (idx = 0; idx < len; idx++) {
+        var next = this[idx];
+        var method = next ? next[methodName] : null;
+        if (method) ret[idx] = method.apply(next, args);
       }
-      return ret ;
+      return ret;
     },
 
-    invokeWhile: function(targetValue, methodName) {
-      var len = this.length ;
-      if (len <= 0) return null ; // nothing to invoke....
+    invokeWhile: function (targetValue, methodName) {
+      var len = this.length;
+      if (len <= 0) return null; // nothing to invoke....
 
       var idx;
 
       // collect the arguments
-      var args = [] ;
-      var alen = arguments.length ;
+      var args = [];
+      var alen = arguments.length;
       if (alen > 2) {
-        for(idx=2;idx<alen;idx++) args.push(arguments[idx]) ;
+        for (idx = 2; idx < alen; idx++) args.push(arguments[idx]);
       }
 
       // call invoke
-      var ret = targetValue ;
-      for(idx=0;(ret === targetValue) && (idx<len);idx++) {
-        var next = this[idx] ;
-        var method = next ? next[methodName] : null ;
-        if (method) ret = method.apply(next, args) ;
+      var ret = targetValue;
+      for (idx = 0; (ret === targetValue) && (idx < len); idx++) {
+        var next = this[idx];
+        var method = next ? next[methodName] : null;
+        if (method) ret = method.apply(next, args);
       }
-      return ret ;
+      return ret;
     },
 
-    toArray: function() {
-      var len = this.length ;
-      if (len <= 0) return [] ; // nothing to invoke....
+    toArray: function () {
+      var len = this.length;
+      if (len <= 0) return []; // nothing to invoke....
 
       // call invoke
-      var ret = [] ;
-      for(var idx=0;idx<len;idx++) {
-        var next = this[idx] ;
-        ret.push(next) ;
-      }
-      return ret ;
-    },
-
-    getEach: function(key) {
       var ret = [];
-      var len = this.length ;
-      for(var idx=0;idx<len;idx++) {
+      for (var idx = 0; idx < len; idx++) {
+        var next = this[idx];
+        ret.push(next);
+      }
+      return ret;
+    },
+
+    getEach: function (key) {
+      var ret = [];
+      var len = this.length;
+      for (var idx = 0; idx < len; idx++) {
         var obj = this[idx];
         ret[idx] = obj ? (obj.get ? obj.get(key) : obj[key]) : null;
       }
-      return ret ;
+      return ret;
     },
 
-    setEach: function(key, value) {
+    setEach: function (key, value) {
       var len = this.length;
-      for(var idx=0;idx<len;idx++) {
+      for (var idx = 0; idx < len; idx++) {
         var obj = this[idx];
         if (obj) {
           if (obj.set) {
             obj.set(key, value);
-          } else obj[key] = value ;
+          } else obj[key] = value;
         }
       }
-      return this ;
+      return this;
     }
 
   };
@@ -1247,88 +1270,88 @@ Array.prototype.isEnumerable = YES ;
   var mixinIfMissing = {
 
     // QUESTION: The lack of DRY is burning my eyes [YK]
-    forEach: function(callback, target) {
-      if (typeof callback !== "function") throw new TypeError() ;
+    forEach: function (callback, target) {
+      if (typeof callback !== "function") throw new TypeError();
 
       // QUESTION: Is this necessary?
       if (target === undefined) target = null;
 
-      for(var i=0, l=this.length; i<l; i++) {
-        var next = this[i] ;
+      for (var i = 0, l = this.length; i < l; i++) {
+        var next = this[i];
         callback.call(target, next, i, this);
       }
-      return this ;
+      return this;
     },
 
-    map: function(callback, target) {
-      if (typeof callback !== "function") throw new TypeError() ;
+    map: function (callback, target) {
+      if (typeof callback !== "function") throw new TypeError();
 
       if (target === undefined) target = null;
 
-      var ret  = [];
-      for(var i=0, l=this.length; i<l; i++) {
-        var next = this[i] ;
-        ret[i] = callback.call(target, next, i, this) ;
+      var ret = [];
+      for (var i = 0, l = this.length; i < l; i++) {
+        var next = this[i];
+        ret[i] = callback.call(target, next, i, this);
       }
-      return ret ;
+      return ret;
     },
 
-    filter: function(callback, target) {
-      if (typeof callback !== "function") throw new TypeError() ;
+    filter: function (callback, target) {
+      if (typeof callback !== "function") throw new TypeError();
 
       if (target === undefined) target = null;
 
-      var ret  = [];
-      for(var i=0, l=this.length; i<l; i++) {
-        var next = this[i] ;
-        if(callback.call(target, next, i, this)) ret.push(next) ;
+      var ret = [];
+      for (var i = 0, l = this.length; i < l; i++) {
+        var next = this[i];
+        if (callback.call(target, next, i, this)) ret.push(next);
       }
-      return ret ;
+      return ret;
     },
 
-    every: function(callback, target) {
-      if (typeof callback !== "function") throw new TypeError() ;
-      var len = this.length ;
+    every: function (callback, target) {
+      if (typeof callback !== "function") throw new TypeError();
+      var len = this.length;
       if (target === undefined) target = null;
 
       var ret  = YES;
-      for(var idx=0;ret && (idx<len);idx++) {
-        var next = this[idx] ;
-        if(!callback.call(target, next, idx, this)) ret = NO ;
+      for (var idx = 0; ret && (idx < len); idx++) {
+        var next = this[idx];
+        if (!callback.call(target, next, idx, this)) ret = NO;
       }
-      return ret ;
+      return ret;
     },
 
-    some: function(callback, target) {
-      if (typeof callback !== "function") throw new TypeError() ;
-      var len = this.length ;
+    some: function (callback, target) {
+      if (typeof callback !== "function") throw new TypeError();
+      var len = this.length;
       if (target === undefined) target = null;
 
       var ret  = NO;
-      for(var idx=0;(!ret) && (idx<len);idx++) {
-        var next = this[idx] ;
-        if(callback.call(target, next, idx, this)) ret = YES ;
+      for (var idx = 0; (!ret) && (idx < len); idx++) {
+        var next = this[idx];
+        if (callback.call(target, next, idx, this)) ret = YES;
       }
-      return ret ;
+      return ret;
     },
 
-    reduce: function(callback, initialValue, reducerProperty) {
-      if (typeof callback !== "function") throw new TypeError() ;
-      var len = this.length ;
+    reduce: function (callback, initialValue, reducerProperty) {
+      if (typeof callback !== "function") throw new TypeError();
+      var len = this.length;
 
       // no value to return if no initial value & empty
-      if (len===0 && initialValue === undefined) throw new TypeError();
+      if (len === 0 && initialValue === undefined) throw new TypeError();
 
       var ret  = initialValue;
-      for(var idx=0;idx<len;idx++) {
-        var next = this[idx] ;
+      for (var idx = 0; idx < len; idx++) {
+        var next = this[idx];
 
         // while ret is still undefined, just set the first value we get as
         // ret. this is not the ideal behavior actually but it matches the
         // FireFox implementation... :(
         if (next !== null) {
           if (ret === undefined) {
-            ret = next ;
+            ret = next;
           } else {
             ret = callback.call(null, ret, next, idx, this, reducerProperty);
           }
@@ -1336,26 +1359,26 @@ Array.prototype.isEnumerable = YES ;
       }
 
       // uh oh...we never found a value!
-      if (ret === undefined) throw new TypeError() ;
-      return ret ;
+      if (ret === undefined) throw new TypeError();
+      return ret;
     }
   };
 
   // Apply methods if missing...
-  for(var key in mixinIfMissing) {
-    if (!mixinIfMissing.hasOwnProperty(key)) continue ;
+  for (var key in mixinIfMissing) {
+    if (!mixinIfMissing.hasOwnProperty(key)) continue;
 
     // The mixinIfMissing methods should be applied if they are not defined.
     // If Prototype 1.6 is included, some of these methods will be defined
     // already, but we want to override them anyway in this special case
     // because our version is faster and functionally identical.
     if (!Array.prototype[key] || ((typeof Prototype === 'object') && Prototype.Version.match(/^1\.6/))) {
-      Array.prototype[key] = mixinIfMissing[key] ;
+      Array.prototype[key] = mixinIfMissing[key];
     }
   }
 
   // Apply other methods...
-  SC.mixin(Array.prototype, alwaysMixin) ;
+  SC.mixin(Array.prototype, alwaysMixin);
 
-})() ;
+})();
 
