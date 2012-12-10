@@ -330,10 +330,6 @@ SC.RenderContext = SC.Builder.create(
       cq.attr('id', value);
     }
 
-    // flush jQuery buffers
-    jQuery.Buffer.flush();
-
-
     // now cleanup element...
     elem = this._elem = null ;
     return this.prevObject || this ;
@@ -543,8 +539,8 @@ SC.RenderContext = SC.Builder.create(
     Adds the specified className to the current tag, if it does not already
     exist.  This method has no effect if there is no open tag.
 
-    If there is an element backing this RenderContext, buffered jQuery is
-    used to perform the update.
+    If there is an element backing this RenderContext, jQuery is used to
+    perform the update.
 
     @param {String|Array} nameOrClasses the class name or an array of classes
     @returns {SC.RenderContext} receiver
@@ -590,7 +586,7 @@ SC.RenderContext = SC.Builder.create(
     no effect if there is not an open tag.
 
     If there is an actual DOM element backing this render context,
-    the modification will be written immediately to a buffered jQuery instance.
+    the modification will be written immediately to a jQuery instance.
 
     @param {String} className the class to add
     @returns {SC.RenderContext} receiver
@@ -626,7 +622,7 @@ SC.RenderContext = SC.Builder.create(
   */
   resetClassNames: function() {
     if (this._elem) {
-      this.$().resetClassNames();
+      this.$().removeClass();
       return this;
     }
 
@@ -642,9 +638,6 @@ SC.RenderContext = SC.Builder.create(
     whether they should be there or not.
 
     This is far more efficient than using addClass/removeClass.
-
-    If this context represents an element, this uses the buffered jQuery to
-    ensure all planned DOM operations stay in-sync.
 
     @param {String|Hash} className class name or hash of classNames + bools
     @param {Boolean} shouldAdd for class name if a string was passed
@@ -708,13 +701,6 @@ SC.RenderContext = SC.Builder.create(
     @returns {Hash|SC.RenderContext} styles hash or receiver
   */
   styles: function(styles, cloneOnModify) {
-    if (this._elem) {
-      if (styles) {
-        this.$().resetStyles().css(styles);
-      }
-      return this.$().styles();
-    }
-
     var attr, regex, match;
     if (styles === undefined) {
 
@@ -948,7 +934,7 @@ SC.RenderContext = SC.Builder.create(
    */
   $: function(sel) {
     var ret, elem = this._elem;
-    ret = !elem ? SC.$.buffer([]) : (sel === undefined) ? SC.$.buffer(elem) : SC.$.buffer(sel, elem);
+    ret = !elem ? SC.$([]) : (sel === undefined) ? SC.$(elem) : SC.$(sel, elem);
     elem = null;
     return ret;
   },
