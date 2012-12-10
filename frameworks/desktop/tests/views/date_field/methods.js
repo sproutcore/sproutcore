@@ -168,24 +168,3 @@ test("test updateValue method", function() {
   view3.updateValue('%y', 0);
   equals(view3.get('fieldValue'), '00-01-01 11:20:55', 'Field value should be equal - Date & Time');
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
