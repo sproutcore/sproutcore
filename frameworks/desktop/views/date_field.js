@@ -235,7 +235,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
         break;
         case '%y':
           key = 'year';
-          prefix = '20';
+          max = 99;
         break;
         case '%m':
           key = 'month';
@@ -270,15 +270,17 @@ SC.DateFieldView = SC.TextFieldView.extend(
         lastValue = (lastValue<10 ? '0' : '') + lastValue;
       }
 
+      if (lastValue.length > length) lastValue = lastValue.substr(-length);
+
       // We remove the first character and add the new one at the end of the string
       lastValue = lastValue.slice(1) + pressedKey;
       newValue = parseInt(lastValue);
-      
+
       // If the value is allow, we update the value
       if (newValue <= max && newValue >= min) {
         var hash = {};
         hash[key] = newValue;
-        
+
         this.set('value', value.adjust(hash, NO));
       }
       
