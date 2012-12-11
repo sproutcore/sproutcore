@@ -533,6 +533,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     // If this is an unordered enumerable, we have no way
     // of knowing which indices changed. Instead, we just
     // invalidate the whole array.
+    this.arrayContentWillChange(0, oldlen, newlen);
     this.arrayContentDidChange(0, oldlen, newlen);
     this.enumerableContentDidChange(0, oldlen - 1);
     this.endPropertyChanges();
