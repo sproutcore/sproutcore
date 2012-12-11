@@ -70,51 +70,51 @@ SC.RenderContext = SC.Builder.create(
     @param {String|DOMElement} tagNameOrElement
     @returns {SC.RenderContext} receiver
   */
-  init: function(tagNameOrElement, prevContext) {
-    var strings, tagNameOrElementIsString;
+  init: function (tagNameOrElement, prevContext) {
+    var tagNameOrElementIsString;
 
     // if a prevContext was passed, setup with that first...
     if (prevContext) {
-      this.prevObject = prevContext ;
-      this.strings    = prevContext.strings ;
-      this.offset     = prevContext.length + prevContext.offset ;
+      this.prevObject = prevContext;
+      this.strings    = prevContext.strings;
+      this.offset     = prevContext.length + prevContext.offset;
     }
 
-    if (!this.strings) this.strings = [] ;
+    if (!this.strings) this.strings = [];
 
     // if tagName is string, just setup for rendering new tagName
     if (tagNameOrElement === undefined) {
-      tagNameOrElement = 'div' ;
-      tagNameOrElementIsString = YES ;
+      tagNameOrElement = 'div';
+      tagNameOrElementIsString = YES;
     }
     else if (tagNameOrElement === 'div'  ||  tagNameOrElement === 'label'  ||  tagNameOrElement === 'a') {
       // Fast path for common tags.
-      tagNameOrElementIsString = YES ;
+      tagNameOrElementIsString = YES;
     }
     else if (SC.typeOf(tagNameOrElement) === SC.T_STRING) {
-      tagNameOrElement = tagNameOrElement.toLowerCase() ;
-      tagNameOrElementIsString = YES ;
+      tagNameOrElement = tagNameOrElement.toLowerCase();
+      tagNameOrElementIsString = YES;
     }
 
     if (tagNameOrElementIsString) {
-      this._tagName     = tagNameOrElement ;
-      this._needsTag    = YES ; // used to determine if end() needs to wrap tag
-      this.needsContent = YES ;
+      this._tagName     = tagNameOrElement;
+      this._needsTag    = YES; // used to determine if end() needs to wrap tag
+      this.needsContent = YES;
 
       // increase length of all contexts to leave space for opening tag
       var c = this;
-      while(c) { c.length++; c = c.prevObject; }
+      while (c) { c.length++; c = c.prevObject; }
 
       this.strings.push(null);
       this._selfClosing = this.SELF_CLOSING.contains(tagNameOrElement);
     }
     else {
-      this._elem        = tagNameOrElement ;
-      this._needsTag    = NO ;
-      this.length       = 0 ;
-      this.needsContent = NO ;
+      this._elem        = tagNameOrElement;
+      this._needsTag    = NO;
+      this.length       = 0;
+      this.needsContent = NO;
     }
-    return this ;
+    return this;
   },
 
   // ..........................................................
@@ -178,9 +178,9 @@ SC.RenderContext = SC.Builder.create(
     @param {Number} idx the index
     @returns {String|Array}
   */
-  get: function(idx) {
+  get: function (idx) {
     var strings = this.strings || [];
-    return (idx === undefined) ? strings.slice(this.offset, this.length) : strings[idx+this.offset];
+    return (idx === undefined) ? strings.slice(this.offset, this.length) : strings[idx + this.offset];
   },
 
   /**
@@ -190,17 +190,17 @@ SC.RenderContext = SC.Builder.create(
     @param {String} line the liene to add to the string.
     @returns {SC.RenderContext} receiver
   */
-  push: function(line) {
+  push: function (line) {
     var strings = this.strings, len = arguments.length;
     if (!strings) this.strings = strings = []; // create array lazily
 
     if (len > 1) {
-      strings.push.apply(strings, arguments) ;
+      strings.push.apply(strings, arguments);
     } else strings.push(line);
 
     // adjust string length for context and all parents...
     var c = this;
-    while(c) { c.length += len; c = c.prevObject; }
+    while (c) { c.length += len; c = c.prevObject; }
 
     this.needsContent = YES;
 
@@ -211,15 +211,15 @@ SC.RenderContext = SC.Builder.create(
     Pushes the passed string onto the array, but first escapes the string
     to ensure that no user-entered HTML is processed as HTML.
 
-    @param {String} line one or mroe lines of text to add
+    @param {String} line one or more lines of text to add
     @returns {SC.RenderContext} receiver
   */
-  text: function(line) {
-    var len = arguments.length, idx=0;
-    for(idx=0;idx<len;idx++) {
+  text: function (line) {
+    var len = arguments.length, idx = 0;
+    for (idx = 0; idx < len; idx++) {
       this.push(SC.RenderContext.escapeHTML(arguments[idx]));
     }
-    return this ;
+    return this;
   },
 
   /**
@@ -229,12 +229,12 @@ SC.RenderContext = SC.Builder.create(
     @param {String} joinChar optional string to use in joins. def empty string
     @returns {String} joined string
   */
-  join: function(joinChar) {
+  join: function (joinChar) {
     // generate tag if needed...
     if (this._needsTag) this.end();
 
     var strings = this.strings;
-    return strings ? strings.join(joinChar || '') : '' ;
+    return strings ? strings.join(joinChar || '') : '';
   },
 
   // ..........................................................
@@ -247,7 +247,7 @@ SC.RenderContext = SC.Builder.create(
 
     @returns {SC.RenderContext} new context
   */
-  begin: function(tagNameOrElement) {
+  begin: function (tagNameOrElement) {
     return SC.RenderContext(tagNameOrElement, this);
   },
 
@@ -258,22 +258,22 @@ SC.RenderContext = SC.Builder.create(
 
     @returns {DOMElement} the element
   */
-  element: function() {
+  element: function () {
     return this._elem ? this._elem : SC.$(this.join())[0];
   },
 
   /**
     Removes an element with the passed id in the currently managed element.
   */
-  remove: function(elementId) {
-    if (!elementId) return ;
+  remove: function (elementId) {
+    if (!elementId) return;
 
-    var el, elem = this._elem ;
-    if (!elem || !elem.removeChild) return ;
+    var el, elem = this._elem;
+    if (!elem || !elem.removeChild) return;
 
-    el = document.getElementById(elementId) ;
+    el = document.getElementById(elementId);
     if (el) {
-      el = elem.removeChild(el) ;
+      el = elem.removeChild(el);
       el = null;
     }
   },
@@ -291,7 +291,7 @@ SC.RenderContext = SC.Builder.create(
 
     @returns {SC.RenderContext} previous context or null if top
   */
-  update: function() {
+  update: function () {
     var elem = this._elem,
         mode = this.updateMode,
         cq, value, factory, cur, next;
@@ -300,26 +300,26 @@ SC.RenderContext = SC.Builder.create(
 
     if (!elem) {
       // throw "Cannot update context because there is no source element";
-      return ;
+      return;
     }
 
     cq = this.$();
 
     // replace innerHTML
-    if (this.length>0) {
+    if (this.length > 0) {
       this._innerHTMLReplaced = YES;
       if (mode === SC.MODE_REPLACE) {
         cq.html(this.join());
       } else {
         factory = elem.cloneNode(false);
-        factory.innerHTML = this.join() ;
-        cur = factory.firstChild ;
-        while(cur) {
-          next = cur.nextSibling ;
+        factory.innerHTML = this.join();
+        cur = factory.firstChild;
+        while (cur) {
+          next = cur.nextSibling;
           elem.insertBefore(cur, next);
-          cur = next ;
+          cur = next;
         }
-        cur = next = factory = null ; // cleanup
+        cur = next = factory = null; // cleanup
       }
     }
 
@@ -331,8 +331,8 @@ SC.RenderContext = SC.Builder.create(
     }
 
     // now cleanup element...
-    elem = this._elem = null ;
-    return this.prevObject || this ;
+    elem = this._elem = null;
+    return this.prevObject || this;
   },
 
   // these are temporary objects are reused by end() to avoid memory allocs.
@@ -349,7 +349,7 @@ SC.RenderContext = SC.Builder.create(
 
     @returns {SC.RenderContext}
   */
-  end: function() {
+  end: function () {
     // NOTE: If you modify this method, be careful to consider memory usage
     // and performance here.  This method is called frequently during renders
     // and we want it to be as fast as possible.
@@ -357,17 +357,17 @@ SC.RenderContext = SC.Builder.create(
     // generate opening tag.
 
     // get attributes first.  Copy in className + styles...
-    var tag = '', styleStr='', pair, joined, key , value,
+    var tag = '', styleStr = '', key, value,
         attrs = this._attrs, className = this._classNames,
         id = this._id, styles = this._styles, strings, selfClosing;
 
     // add tag to tag array
-    tag = '<' + this._tagName ;
+    tag = '<' + this._tagName;
 
     // add any attributes...
     if (attrs || className || styles || id) {
-      if (!attrs) attrs = this._DEFAULT_ATTRS ;
-      if (id) attrs.id = id ;
+      if (!attrs) attrs = this._DEFAULT_ATTRS;
+      if (id) attrs.id = id;
       // old versions of safari (5.0)!!!! throw an error if we access
       // attrs.class. meh...
       if (className) attrs['class'] = className.join(' ');
@@ -375,29 +375,31 @@ SC.RenderContext = SC.Builder.create(
       // add in styles.  note how we avoid memory allocs here to keep things
       // fast...
       if (styles) {
-        for(key in styles) {
-          if(!styles.hasOwnProperty(key)) continue ;
+        for (key in styles) {
+          if (!styles.hasOwnProperty(key)) continue;
           value = styles[key];
           if (value === null) continue; // skip empty styles
           if (typeof value === SC.T_NUMBER && !SC.NON_PIXEL_PROPERTIES.contains(key)) value += "px";
-          styleStr = styleStr + this._dasherizeStyleName(key)+": "+value + "; ";
+          styleStr = styleStr + this._dasherizeStyleName(key) + ": " + value + "; ";
         }
         attrs.style = styleStr;
       }
 
       // now convert attrs hash to tag array...
       tag = tag + ' '; // add space for joining0
-      for(key in attrs) {
-        if (!attrs.hasOwnProperty(key)) continue ;
+      for (key in attrs) {
+        if (!attrs.hasOwnProperty(key)) continue;
         value = attrs[key];
-        if (value === null) continue ; // skip empty attrs
+        if (value === null) continue; // skip empty attrs
         tag = tag + key + '="' + value + '" ';
       }
 
       // if we are using the DEFAULT_ATTRS temporary object, make sure we
       // reset.
       if (attrs === this._DEFAULT_ATTRS) {
-        delete attrs.style;  delete attrs['class']; delete attrs.id;
+        delete attrs.style;
+        delete attrs['class'];
+        delete attrs.id;
       }
 
     }
@@ -405,8 +407,8 @@ SC.RenderContext = SC.Builder.create(
     // this is self closing if there is no content in between and selfClosing
     // is not set to false.
     strings = this.strings;
-    selfClosing = (this._selfClosing === NO) ? NO : (this.length === 1) ;
-    tag = tag + (selfClosing ? ' />' : '>') ;
+    selfClosing = (this._selfClosing === NO) ? NO : (this.length === 1);
+    tag = tag + (selfClosing ? ' />' : '>');
 
     strings[this.offset] = tag;
 
@@ -416,12 +418,12 @@ SC.RenderContext = SC.Builder.create(
 
       // increase length of receiver and all parents
       var c = this;
-      while(c) { c.length++; c = c.prevObject; }
+      while (c) { c.length++; c = c.prevObject; }
     }
 
     // if there was a source element, cleanup to avoid memory leaks
     this._elem = null;
-    return this.prevObject || this ;
+    return this.prevObject || this;
   },
 
   /**
@@ -431,7 +433,7 @@ SC.RenderContext = SC.Builder.create(
     @param {Hash} opts optional tag options.  defaults to empty options.
     @returns {SC.RenderContext} receiver
   */
-  tag: function(tagName, opts) {
+  tag: function (tagName, opts) {
     return this.begin(tagName, opts).end();
   },
 
@@ -445,14 +447,14 @@ SC.RenderContext = SC.Builder.create(
     @param {String} tagName pass to set tag name.
     @returns {String|SC.RenderContext} tag name or receiver
   */
-  tagName: function(tagName) {
+  tagName: function (tagName) {
     if (tagName === undefined) {
       if (!this._tagName && this._elem) this._tagName = this._elem.tagName;
       return this._tagName;
     } else {
       this._tagName = tagName;
       this._tagNameDidChange = YES;
-      return this ;
+      return this;
     }
   },
 
@@ -462,10 +464,10 @@ SC.RenderContext = SC.Builder.create(
     @param {String} idName the id or set
     @returns {String|SC.RenderContext} id or receiver
   */
-  id: function(idName) {
+  id: function (idName) {
     if (idName === undefined) {
       if (!this._id && this._elem) this._id = this._elem.id;
-      return this._id ;
+      return this._id;
     } else {
       this._id = idName;
       this._idDidChange = YES;
@@ -493,10 +495,10 @@ SC.RenderContext = SC.Builder.create(
     @param {Boolean} cloneOnModify
     @returns {Array|SC.RenderContext} classNames array or receiver
   */
-  classNames: function(classNames, cloneOnModify) {
+  classNames: function (classNames, cloneOnModify) {
     if (this._elem) {
       if (classNames) {
-        this.$().resetClassNames().addClass(classNames);
+        this.resetClassNames().addClass(classNames);
         return this;
       } else {
         return this.$().attr('class').split(' ');
@@ -506,18 +508,18 @@ SC.RenderContext = SC.Builder.create(
     if (classNames === undefined) {
       if (this._cloneClassNames) {
         this._classNames = (this._classNames || []).slice();
-        this._cloneClassNames = NO ;
+        this._cloneClassNames = NO;
       }
 
       // if there are no class names, create an empty array but don't modify.
       if (!this._classNames) this._classNames = [];
 
-      return this._classNames ;
+      return this._classNames;
     } else {
-      this._classNames = classNames ;
-      this._cloneClassNames = cloneOnModify || NO ;
-      this._classNamesDidChange = YES ;
-      return this ;
+      this._classNames = classNames;
+      this._cloneClassNames = cloneOnModify || NO;
+      this._classNamesDidChange = YES;
+      return this;
     }
   },
 
@@ -528,7 +530,7 @@ SC.RenderContext = SC.Builder.create(
     @param {String} className the class name
     @returns {Boolean}
   */
-  hasClass: function(className) {
+  hasClass: function (className) {
     if (this._elem) {
       return this.$().hasClass(className);
     }
@@ -545,9 +547,9 @@ SC.RenderContext = SC.Builder.create(
     @param {String|Array} nameOrClasses the class name or an array of classes
     @returns {SC.RenderContext} receiver
   */
-  addClass: function(nameOrClasses) {
-    if(nameOrClasses === undefined || nameOrClasses === null) {
-      SC.Logger.warn('You are adding an undefined or empty class'+ this.toString());
+  addClass: function (nameOrClasses) {
+    if (nameOrClasses === undefined || nameOrClasses === null) {
+      SC.Logger.warn('You are adding an undefined or empty class' + this.toString());
       return this;
     }
 
@@ -561,19 +563,19 @@ SC.RenderContext = SC.Builder.create(
       return this;
     }
 
-    var classNames = this.classNames() ; // handles cloning ,etc.
-    if(SC.typeOf(nameOrClasses) === SC.T_STRING){
-      if (classNames.indexOf(nameOrClasses)<0) {
+    var classNames = this.classNames(); // handles cloning ,etc.
+    if (SC.typeOf(nameOrClasses) === SC.T_STRING) {
+      if (classNames.indexOf(nameOrClasses) < 0) {
         classNames.push(nameOrClasses);
-        this._classNamesDidChange = YES ;
+        this._classNamesDidChange = YES;
       }
     } else {
       var cl;
-      for(var i = 0, iLen= nameOrClasses.length; i<iLen; i++){
+      for (var i = 0, iLen = nameOrClasses.length; i < iLen; i++) {
         cl = nameOrClasses[i];
-        if (classNames.indexOf(cl)<0) {
+        if (classNames.indexOf(cl) < 0) {
           classNames.push(cl);
-          this._classNamesDidChange = YES ;
+          this._classNamesDidChange = YES;
         }
       }
     }
@@ -591,24 +593,24 @@ SC.RenderContext = SC.Builder.create(
     @param {String} className the class to add
     @returns {SC.RenderContext} receiver
   */
-  removeClass: function(className) {
+  removeClass: function (className) {
     if (this._elem) {
       this.$().removeClass(className);
       return this;
     }
 
     var classNames = this._classNames, idx;
-    if (classNames && (idx=classNames.indexOf(className))>=0) {
+    if (classNames && (idx = classNames.indexOf(className)) >= 0) {
       if (this._cloneClassNames) {
         classNames = this._classNames = classNames.slice();
-        this._cloneClassNames = NO ;
+        this._cloneClassNames = NO;
       }
 
       // if className is found, just null it out.  This will end up adding an
       // extra space to the generated HTML but it is faster than trying to
       // recompact the array.
       classNames[idx] = null;
-      this._classNamesDidChange = YES ;
+      this._classNamesDidChange = YES;
     }
 
     return this;
@@ -620,14 +622,14 @@ SC.RenderContext = SC.Builder.create(
 
     @returns {SC.RenderContext} receiver
   */
-  resetClassNames: function() {
+  resetClassNames: function () {
     if (this._elem) {
       this.$().removeClass();
       return this;
     }
 
     this._classNames = [];
-    this._classNamesDidChange = YES ;
+    this._classNamesDidChange = YES;
     return this;
   },
 
@@ -643,7 +645,7 @@ SC.RenderContext = SC.Builder.create(
     @param {Boolean} shouldAdd for class name if a string was passed
     @returns {SC.RenderContext} receiver
   */
-  setClass: function(className, shouldAdd) {
+  setClass: function (className, shouldAdd) {
     if (this._elem) {
       this.$().setClass(className, shouldAdd);
       return this;
@@ -656,28 +658,28 @@ SC.RenderContext = SC.Builder.create(
       return shouldAdd ? this.addClass(className) : this.removeClass(className);
     // bulk form
     } else {
-      classNames = this._classNames ;
+      classNames = this._classNames;
       if (!classNames) classNames = this._classNames = [];
 
       if (this._cloneClassNames) {
         classNames = this._classNames = classNames.slice();
-        this._cloneClassNames = NO ;
+        this._cloneClassNames = NO;
       }
 
       didChange = NO;
-      for(key in className) {
-        if (!className.hasOwnProperty(key)) continue ;
+      for (key in className) {
+        if (!className.hasOwnProperty(key)) continue;
         idx = classNames.indexOf(key);
         if (className[key]) {
-          if (idx<0) { classNames.push(key); didChange = YES; }
+          if (idx < 0) { classNames.push(key); didChange = YES; }
         } else {
-          if (idx>=0) { classNames[idx] = null; didChange = YES; }
+          if (idx >= 0) { classNames[idx] = null; didChange = YES; }
         }
       }
       if (didChange) this._classNamesDidChange = YES;
     }
 
-    return this ;
+    return this;
   },
 
   // ..........................................................
@@ -692,7 +694,7 @@ SC.RenderContext = SC.Builder.create(
     to be applied to the element on rendering.
 
     Optionally you can also pass YES to the cloneOnModify param to cause the
-    styles has to be cloned before it is edited.  This is useful if you want
+    styles hash to be cloned before it is edited.  This is useful if you want
     to start with a shared style hash and then optionally modify it for each
     context.
 
@@ -700,66 +702,81 @@ SC.RenderContext = SC.Builder.create(
     @param {Boolean} cloneOnModify
     @returns {Hash|SC.RenderContext} styles hash or receiver
   */
-  styles: function(styles, cloneOnModify) {
-    var attr, regex, match;
-    if (styles === undefined) {
+  styles: function (styles, cloneOnModify) {
+    var attr, regex, match, jqElem;
 
-      // no styles are defined yet but we do have a source element.  Lazily
-      // extract styles from element.
-      if (!this._styles && this._elem) {
-        // parse style...
-        attr = this.$().attr('style');
+    // If we have an element, apply the styles directly to the element or if
+    // no styles, get them from the element.
+    if (this._elem) {
+      jqElem = this.$();
 
-        if (attr && (attr = attr.toString()).length>0) {
+      if (styles) {
+        // Remove all current styles and apply the new styles to the element.
+        jqElem.attr('style', '').css(styles);
+        this._styles = styles;
+
+        // Clone the styles if requested.
+        if (cloneOnModify) {
+          this._styles = SC.clone(this._styles);
+        }
+
+        this._stylesDidChange = YES;
+      } else if (!this._styles) {
+        // Get the styles from the element.
+        attr = jqElem.attr('style');
+
+        if (attr && (attr = attr.toString()).length > 0) {
           // Ensure attributes are lower case for IE
-          if(SC.browser.name === SC.BROWSER.ie) {
+          if (SC.browser.name === SC.BROWSER.ie) {
             attr = attr.toLowerCase();
           }
           styles = {};
 
-          regex = this._STYLE_REGEX ;
+          regex = this._STYLE_REGEX;
           regex.lastIndex = 0;
 
-          while(match = regex.exec(attr)) styles[this._camelizeStyleName(match[1])] = match[2];
+          while (match = regex.exec(attr)) {
+            styles[this._camelizeStyleName(match[1])] = match[2];
+          }
 
           this._styles = styles;
-          this._cloneStyles = NO;
-
         } else {
+          // No styles on the element.
           this._styles = {};
-        }
-
-      // if there is no element or we do have styles, possibly clone them
-      // before returning.
-      } else {
-        if (!this._styles) {
-          this._styles = {};
-        } else {
-          if (this._cloneStyles) {
-            this._styles = SC.clone(this._styles);
-            this._cloneStyles = NO ;
-          }
         }
       }
 
-      return this._styles ;
+      return this._styles;
+    } else if (styles) {
+      // Set the styles if passed.
+      this._styles = styles;
 
-    // set the styles if passed.
+      // Clone the styles if requested.
+      if (cloneOnModify) {
+        this._styles = SC.clone(this._styles);
+      }
+
+      this._stylesDidChange = YES;
+
+      return this;
     } else {
-      this._styles = styles ;
-      this._cloneStyles = cloneOnModify || NO ;
-      this._stylesDidChange = YES ;
-      return this ;
+      // Get the current value of styles on the render context.
+      if (!this._styles) {
+        // Set the styles if it doesnt exist already.
+        this._styles = {};
+      }
+
+      return this._styles;
     }
   },
 
-  _deleteComboStyles: function(styles, key) {
+  _deleteComboStyles: function (styles, key) {
     var comboStyles = SC.COMBO_STYLES[key],
         didChange = NO, tmp;
 
     if (comboStyles) {
 
-      for (var idx=0, idxLen = comboStyles.length; idx < idxLen; idx++) {
+      for (var idx = 0, idxLen = comboStyles.length; idx < idxLen; idx++) {
         tmp = comboStyles[idx];
         if (styles[tmp]) {
           delete styles[tmp];
@@ -774,7 +791,7 @@ SC.RenderContext = SC.Builder.create(
     Clears all of the tag's styles.
     @returns {SC.RenderContext} receiver
    */
-  resetStyles: function() {
+  resetStyles: function () {
     this.styles({});
     return this;
   },
@@ -789,7 +806,7 @@ SC.RenderContext = SC.Builder.create(
     @param {String|Number} value style value if string name was passed
     @returns {SC.RenderContext} receiver
   */
-  addStyle: function(nameOrStyles, value) {
+  addStyle: function (nameOrStyles, value) {
     if (this._elem) {
       this.$().css(nameOrStyles, value);
       return this;
@@ -807,16 +824,16 @@ SC.RenderContext = SC.Builder.create(
       } else { // writer
         didChange = this._deleteComboStyles(styles, nameOrStyles);
         if (styles[nameOrStyles] !== value) {
-          styles[nameOrStyles] = value ;
-          didChange = YES ;
+          styles[nameOrStyles] = value;
+          didChange = YES;
         }
         if (didChange) this._stylesDidChange = YES;
       }
 
     // bulk form
     } else {
-      for(key in nameOrStyles) {
-        if (!nameOrStyles.hasOwnProperty(key)) continue ;
+      for (key in nameOrStyles) {
+        if (!nameOrStyles.hasOwnProperty(key)) continue;
         didChange = didChange || this._deleteComboStyles(styles, key);
         value = nameOrStyles[key];
         if (styles[key] !== value) {
@@ -824,10 +841,10 @@ SC.RenderContext = SC.Builder.create(
           didChange = YES;
         }
       }
-      if (didChange) this._stylesDidChange = YES ;
+      if (didChange) this._stylesDidChange = YES;
     }
 
-    return this ;
+    return this;
   },
 
   /**
@@ -839,7 +856,7 @@ SC.RenderContext = SC.Builder.create(
     @param {String} styleName
     @returns {SC.RenderContext} receiver
   */
-  removeStyle: function(styleName) {
+  removeStyle: function (styleName) {
     if (this._elem) {
       this.$().css(styleName, null);
       return this;
@@ -852,7 +869,7 @@ SC.RenderContext = SC.Builder.create(
     var styles = this.styles();
     if (styles[styleName]) {
       styles[styleName] = null;
-      this._stylesDidChange = YES ;
+      this._stylesDidChange = YES;
     }
   },
 
@@ -869,15 +886,15 @@ SC.RenderContext = SC.Builder.create(
     @param {String} value attribute value if attribute name was passed
     @returns {SC.RenderContext} receiver
   */
-  attr: function(nameOrAttrs, value) {
+  attr: function (nameOrAttrs, value) {
     if (this._elem) {
       this.$().attr(nameOrAttrs, value);
       return this;
     }
 
 
-    var key, attrs = this._attrs, didChange = NO ;
-    if (!attrs) this._attrs = attrs = {} ;
+    var key, attrs = this._attrs, didChange = NO;
+    if (!attrs) this._attrs = attrs = {};
 
     // simple form
     if (typeof nameOrAttrs === SC.T_STRING) {
@@ -885,25 +902,25 @@ SC.RenderContext = SC.Builder.create(
         return attrs[nameOrAttrs];
       } else { // setter
         if (attrs[nameOrAttrs] !== value) {
-          attrs[nameOrAttrs] = value ;
-          this._attrsDidChange = YES ;
+          attrs[nameOrAttrs] = value;
+          this._attrsDidChange = YES;
         }
       }
 
     // bulk form
     } else {
-      for(key in nameOrAttrs) {
-        if (!nameOrAttrs.hasOwnProperty(key)) continue ;
+      for (key in nameOrAttrs) {
+        if (!nameOrAttrs.hasOwnProperty(key)) continue;
         value = nameOrAttrs[key];
         if (attrs[key] !== value) {
-          attrs[key] = value ;
-          didChange = YES ;
+          attrs[key] = value;
+          didChange = YES;
         }
       }
-      if (didChange) this._attrsDidChange = YES ;
+      if (didChange) this._attrsDidChange = YES;
     }
 
-    return this ;
+    return this;
   },
 
   /**
@@ -915,7 +932,7 @@ SC.RenderContext = SC.Builder.create(
     @param {String} value attribute value if attribute name was passed
     @returns {SC.RenderContext} receiver
   */
-  removeAttr: function(name) {
+  removeAttr: function (name) {
     if (this._elem) {
       this.$().removeAttr(name);
       return this;
@@ -932,7 +949,7 @@ SC.RenderContext = SC.Builder.create(
 
     Renderers may use this to modify DOM.
    */
-  $: function(sel) {
+  $: function (sel) {
     var ret, elem = this._elem;
     ret = !elem ? SC.$([]) : (sel === undefined) ? SC.$(elem) : SC.$(sel, elem);
     elem = null;
@@ -942,13 +959,13 @@ SC.RenderContext = SC.Builder.create(
 
   /** @private
   */
-  _camelizeStyleName: function(name) {
+  _camelizeStyleName: function (name) {
     // IE wants the first letter lowercase so we can allow normal behavior
     var needsCap = name.match(/^-(webkit|moz|o)-/),
         camelized = SC.String.camelize(name);
 
     if (needsCap) {
-      return camelized.substr(0,1).toUpperCase() + camelized.substr(1);
+      return camelized.substr(0, 1).toUpperCase() + camelized.substr(1);
     } else {
       return camelized;
     }
@@ -957,9 +974,9 @@ SC.RenderContext = SC.Builder.create(
   /** @private
     Converts camelCased style names to dasherized forms
   */
-  _dasherizeStyleName: function(name) {
+  _dasherizeStyleName: function (name) {
     var dasherized = SC.String.dasherize(name);
-    if (dasherized.match(/^(webkit|moz|ms|o)-/)) { dasherized = '-'+dasherized; }
+    if (dasherized.match(/^(webkit|moz|ms|o)-/)) { dasherized = '-' + dasherized; }
     return dasherized;
   }
 
@@ -975,27 +992,30 @@ SC.RenderContext.fn.html = SC.RenderContext.fn.push;
 */
 SC.RenderContext.fn.css = SC.RenderContext.fn.addStyle;
 
-(function() {
-  var _escapeHTMLRegex = /[&<>]/g, _escapeHTMLMethod = function(match) {
-    switch(match) {
-      case '&': return '&amp;';
-      case '<': return '&lt;';
-      case '>': return '&gt;';
+(function () {
+  var _escapeHTMLRegex = /[&<>]/g, _escapeHTMLMethod = function (match) {
+    switch (match) {
+    case '&':
+      return '&amp;';
+    case '<':
+      return '&lt;';
+    case '>':
+      return '&gt;';
     }
   };
 
-/**
-  Helper method escapes the passed string to ensure HTML is displayed as
-  plain text.  You should make sure you pass all user-entered data through
-  this method to avoid errors.  You can also do this with the text() helper
-  method on a render context.
+  /**
+    Helper method escapes the passed string to ensure HTML is displayed as
+    plain text.  You should make sure you pass all user-entered data through
+    this method to avoid errors.  You can also do this with the text() helper
+    method on a render context.
 
-  @param {String|Number} text value to escape
-  @returns {String} string with all HTML values properly escaped
-*/
-SC.RenderContext.escapeHTML = function(text) {
+    @param {String|Number} text value to escape
+    @returns {String} string with all HTML values properly escaped
+  */
+  SC.RenderContext.escapeHTML = function (text) {
     if (!text) return '';
     if (SC.typeOf(text) === SC.T_NUMBER) { text = text.toString(); }
     return text.replace(_escapeHTMLRegex, _escapeHTMLMethod);
-};
+  };
 })();

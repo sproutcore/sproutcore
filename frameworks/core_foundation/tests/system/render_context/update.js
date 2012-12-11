@@ -171,7 +171,7 @@ module("SC.RenderContext#update - style", {
 test("does not change styles if retrieved but not edited", function() {
   context.styles();
   context.update();
-  var style = SC.$(elem).attr("style");
+  var style = SC.$(elem).attr("style").trim();
   if (!style.match(/;$/)) style += ';' ;
 
   equals(style.toLowerCase(), "color: red;", "style");
@@ -183,8 +183,8 @@ test("replaces style name if styles edited", function() {
 
   // Browsers return single attribute styles differently, sometimes with a trailing ';'
   // sometimes, without one. Normalize it here.
-  var style = SC.$(elem).attr("style");
-  if (!style.match(/;$/)) style += ';' ;
+  var style = SC.$(elem).attr("style").trim();
+  if (!style.match(/;\s{0,1}$/)) style += ';' ;
 
   equals(style.toLowerCase(), "color: black;", "attribute");
 });
@@ -197,24 +197,23 @@ test("set styles override style attr", function() {
 
   // Browsers return single attribute styles differently, sometimes with a trailing ';'
   // sometimes, without one. Normalize it here.
-  var style = SC.$(elem).attr("style");
+  var style = SC.$(elem).attr("style").trim();
   if (!style.match(/;$/)) style += ';' ;
 
   equals(style.toLowerCase(), "color: black;", "attribute");
 });
 
 test("set styles handle custom browser attributes", function() {
-  context.styles({ mozColumnCount: '3', webkitColumnCount: '3', oColumnCount: '3', msColumnCount: '3' });
+  context.styles({ columnCount: '3', mozColumnCount: '3', webkitColumnCount: '3', oColumnCount: '3', msColumnCount: '3' });
   context.update();
 
   // Browsers return single attribute styles differently, sometimes with a trailing ';'
   // sometimes, without one. Normalize it here.
-  var style = SC.$(elem).attr("style");
+  var style = SC.$(elem).attr("style").trim();
   if (!style.match(/;$/)) style += ';' ;
 
   // Older Gecko completely ignores css attributes that it doesn't understand.
-  if(SC.browser.isMozilla &&
-      SC.browser.compare(SC.browser.engineVersion, '2.0') < 0) equals(style, "-moz-column-count: 3;");
-  else if (SC.browser.isIE) equals(style, "-webkit-column-count: 3; -moz-column-count: 3; -o-column-count: 3; -ms-column-count: 3;");
-  else equals(style, "-moz-column-count: 3; -webkit-column-count: 3; -o-column-count: 3; -ms-column-count: 3;");
+  if(SC.browser.isMozilla) equals(style, "-moz-column-count: 3;");
+  else if (SC.browser.isIE) equals(style, "-ms-column-count: 3;");
+  else if (SC.browser.engine === SC.ENGINE.webkit) equals(style, "-webkit-column-count: 3;");
 });
