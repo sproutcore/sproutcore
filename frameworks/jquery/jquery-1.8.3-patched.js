@@ -1,3 +1,12 @@
+/**
+ Patch to prevent security warnings in IE due to malformed HTML in the jQuery
+ tests.  If toStaticHTML() exists we use it to sanitize the HTML in IE.  If
+ it doesn't exist, we simply return the HTML as is.
+ */
+if (typeof toStaticHTML === 'undefined') {
+	toStaticHTML = function (html) { return html; };
+}
+
 /*!
  * jQuery JavaScript Library v1.8.3
  * http://jquery.com/
@@ -1241,7 +1250,6 @@ jQuery.extend({
 	}
 });
 jQuery.support = (function() {
-
 	var support,
 		all,
 		a,
@@ -1257,7 +1265,7 @@ jQuery.support = (function() {
 
 	// Setup
 	div.setAttribute( "className", "t" );
-	div.innerHTML = "  <link/><table></table><a href='/a'>a</a><input type='checkbox'/>";
+	div.innerHTML = toStaticHTML("  <link/><table></table><a href='/a'>a</a><input type='checkbox'/>");
 
 	// Support tests won't run in some limited or non-browser environments
 	all = div.getElementsByTagName("*");
@@ -3846,7 +3854,7 @@ var cachedruns,
 	assertUsableName = assert(function( div ) {
 		// Inject content
 		div.id = expando + 0;
-		div.innerHTML = "<a name='" + expando + "'></a><div name='" + expando + "'></div>";
+		div.innerHTML = toStaticHTML("<a name='" + expando + "'></a><div name='" + expando + "'></div>");
 		docElem.insertBefore( div, docElem.firstChild );
 
 		// Test
@@ -5222,7 +5230,7 @@ if ( document.querySelectorAll ) {
 
 			// Opera 10-12/IE9 - ^= $= *= and empty values
 			// Should not select anything
-			div.innerHTML = "<p test=''></p>";
+			div.innerHTML = toStaticHTML("<p test=''></p>");
 			if ( div.querySelectorAll("[test^='']").length ) {
 				rbuggyQSA.push( "[*^$]=" + whitespace + "*(?:\"\"|'')" );
 			}
