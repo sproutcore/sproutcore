@@ -48,7 +48,6 @@ SC.BaseTheme.imageRenderDelegate = SC.RenderDelegate.create({
 
     if (imageValue && type === SC.IMAGE_TYPE_CSS_CLASS) {
       context.addClass(imageValue);
-      this._last_class = imageValue;
     }
 
     if (toolTip) {
@@ -70,10 +69,10 @@ SC.BaseTheme.imageRenderDelegate = SC.RenderDelegate.create({
     jquery = jquery.find('img');
     jquery.attr('src', image.src);
 
-    if (imageValue !== this._last_class) jquery.setClass(this._last_class, NO);
-    if (imageValue) {
-      jquery.addClass(imageValue);
-      this._last_class = imageValue;
+    if (SC.none(imageValue)) {
+      jquery.removeClass();
+    } else if(!jquery.hasClass(imageValue)) {
+      jquery.attr('class', imageValue); // clears all classes and sets the class attribute to imageValue
     }
 
     if (toolTip) {
