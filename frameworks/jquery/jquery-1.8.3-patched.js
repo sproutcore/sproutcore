@@ -1,10 +1,11 @@
 /**
  Patch to prevent security warnings in IE due to malformed HTML in the jQuery
- tests.  If toStaticHTML() exists we use it to sanitize the HTML in IE.  If
- it doesn't exist, we simply return the HTML as is.
+ tests.  If MSApp exists we use its execUnsafeLocalFunction function to allow
+ the jQuery tests to run without throwing annoying browser warnings.  If it
+ doesn't exist we simply run the function.
  */
-if (typeof toStaticHTML === 'undefined') {
-	toStaticHTML = function (html) { return html; };
+if (typeof MSApp === 'undefined') {
+	MSApp = { execUnsafeLocalFunction: function (func) { return func(); } };
 }
 
 /*!
@@ -1249,7 +1250,7 @@ jQuery.extend({
 		return deferred.promise();
 	}
 });
-jQuery.support = (function() {
+jQuery.support = MSApp.execUnsafeLocalFunction(function() {
 	var support,
 		all,
 		a,
@@ -1265,7 +1266,7 @@ jQuery.support = (function() {
 
 	// Setup
 	div.setAttribute( "className", "t" );
-	div.innerHTML = toStaticHTML("  <link/><table></table><a href='/a'>a</a><input type='checkbox'/>");
+	div.innerHTML = "  <link/><table></table><a href='/a'>a</a><input type='checkbox'/>";
 
 	// Support tests won't run in some limited or non-browser environments
 	all = div.getElementsByTagName("*");
@@ -1513,7 +1514,7 @@ jQuery.support = (function() {
 	all = a = select = opt = input = fragment = div = null;
 
 	return support;
-})();
+});
 var rbrace = /(?:\{[\s\S]*\}|\[[\s\S]*\])$/,
 	rmultiDash = /([A-Z])/g;
 
@@ -3851,24 +3852,26 @@ var cachedruns,
 
 	// Check if getElementById returns elements by name
 	// Check if getElementsByName privileges form controls or returns elements by ID
-	assertUsableName = assert(function( div ) {
-		// Inject content
-		div.id = expando + 0;
-		div.innerHTML = toStaticHTML("<a name='" + expando + "'></a><div name='" + expando + "'></div>");
-		docElem.insertBefore( div, docElem.firstChild );
+	assertUsableName = assert(function() {
+		MSApp.execUnsafeLocalFunction(function( div ) {
+			// Inject content
+			div.id = expando + 0;
+			div.innerHTML = "<a name='" + expando + "'></a><div name='" + expando + "'></div>";
+			docElem.insertBefore( div, docElem.firstChild );
 
-		// Test
-		var pass = document.getElementsByName &&
-			// buggy browsers will return fewer than the correct 2
-			document.getElementsByName( expando ).length === 2 +
-			// buggy browsers will return more than the correct 0
-			document.getElementsByName( expando + 0 ).length;
-		assertGetIdNotName = !document.getElementById( expando );
+			// Test
+			var pass = document.getElementsByName &&
+				// buggy browsers will return fewer than the correct 2
+				document.getElementsByName( expando ).length === 2 +
+				// buggy browsers will return more than the correct 0
+				document.getElementsByName( expando + 0 ).length;
+			assertGetIdNotName = !document.getElementById( expando );
 
-		// Cleanup
-		docElem.removeChild( div );
+			// Cleanup
+			docElem.removeChild( div );
 
-		return pass;
+			return pass;
+		});
 	});
 
 // If slice is not available, provide a backup
@@ -5226,21 +5229,23 @@ if ( document.querySelectorAll ) {
 			}
 		});
 
-		assert(function( div ) {
+		assert(function() {
+			MSApp.execUnsafeLocalFunction(function( div ) {
 
-			// Opera 10-12/IE9 - ^= $= *= and empty values
-			// Should not select anything
-			div.innerHTML = toStaticHTML("<p test=''></p>");
-			if ( div.querySelectorAll("[test^='']").length ) {
-				rbuggyQSA.push( "[*^$]=" + whitespace + "*(?:\"\"|'')" );
-			}
+				// Opera 10-12/IE9 - ^= $= *= and empty values
+				// Should not select anything
+				div.innerHTML = "<p test=''></p>";
+				if ( div.querySelectorAll("[test^='']").length ) {
+					rbuggyQSA.push( "[*^$]=" + whitespace + "*(?:\"\"|'')" );
+				}
 
-			// FF 3.5 - :enabled/:disabled and hidden elements (hidden elements are still enabled)
-			// IE8 throws error here (do not put tests after this one)
-			div.innerHTML = "<input type='hidden'/>";
-			if ( !div.querySelectorAll(":enabled").length ) {
-				rbuggyQSA.push(":enabled", ":disabled");
-			}
+				// FF 3.5 - :enabled/:disabled and hidden elements (hidden elements are still enabled)
+				// IE8 throws error here (do not put tests after this one)
+				div.innerHTML = "<input type='hidden'/>";
+				if ( !div.querySelectorAll(":enabled").length ) {
+					rbuggyQSA.push(":enabled", ":disabled");
+				}
+			});
 		});
 
 		// rbuggyQSA always contains :focus, so no need for a length check
