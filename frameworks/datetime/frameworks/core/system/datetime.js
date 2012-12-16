@@ -1193,7 +1193,7 @@ SC.DateTime.mixin(SC.Comparable,
 
     var ret = diff/divider;
 
-    return ret>0?Math.floor(ret):Math.ceil(ret);
+    return Math.round(ret);
   }
 
 

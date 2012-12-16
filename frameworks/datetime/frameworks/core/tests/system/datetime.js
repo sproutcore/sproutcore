@@ -433,7 +433,7 @@ test('difference', function() {
   equals(SC.DateTime.difference(SC.DateTime.parse('2010-12-18', '%Y-%m-%d'), SC.DateTime.parse('2010-12-09', '%Y-%m-%d'), 'd'), -9);
   equals(SC.DateTime.difference(SC.DateTime.parse('2010-12-09 02:00:00', '%Y-%m-%d %H:%M:%S'), SC.DateTime.parse('2010-12-09 01:00:00', '%Y-%m-%d %H:%M:%S'), 'H'), -1);
   equals(SC.DateTime.difference(SC.DateTime.parse('2010-12-09 01:00:00', '%Y-%m-%d %H:%M:%S'), SC.DateTime.parse('2010-12-09 01:10:00', '%Y-%m-%d %H:%M:%S'), 'H'), 0);
-  equals(SC.DateTime.difference(SC.DateTime.parse('2010-12-09 01:00:00', '%Y-%m-%d %H:%M:%S'), SC.DateTime.parse('2010-12-09 01:50:00', '%Y-%m-%d %H:%M:%S'), 'H'), 0);
+  equals(SC.DateTime.difference(SC.DateTime.parse('2010-12-09 01:00:00', '%Y-%m-%d %H:%M:%S'), SC.DateTime.parse('2010-12-09 01:50:00', '%Y-%m-%d %H:%M:%S'), 'H'), 1);
   equals(SC.DateTime.difference(SC.DateTime.parse('2010-12-09 01:01:00', '%Y-%m-%d %H:%M:%S'), SC.DateTime.parse('2010-12-09 01:10:10', '%Y-%m-%d %H:%M:%S'), 'M'), 9);
   equals(SC.DateTime.difference(SC.DateTime.parse('2010-12-09 01:00:00', '%Y-%m-%d %H:%M:%S'), SC.DateTime.parse('2010-12-09 01:00:20', '%Y-%m-%d %H:%M:%S'), 'S'), 20);
   equals(SC.DateTime.difference(SC.DateTime.parse('2010-12-09 01:10:00', '%Y-%m-%d %H:%M:%S'), SC.DateTime.parse('2010-12-09 01:00:00', '%Y-%m-%d %H:%M:%S'), 'S'), -600);
