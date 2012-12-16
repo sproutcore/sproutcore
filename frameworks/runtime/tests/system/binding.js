@@ -499,4 +499,34 @@ test("The binding transforms in both directions", function() {
   toObject.set('numberValue', 3);
   SC.Binding.flushPendingChanges();
   equals(fromObject.get('stringValue'), '3A');
+
+  stop(1000);
+  setTimeout(function() {
+    equals(toObject.get('numberValue'), 3);
+    start();
+  }, 10);
+});
+
+
+module("Binding transforms sync", {
+  setup: function() {
+    fromObject = SC.Object.create({ fromValue: 1 });
+    toObject = SC.Object.create({ toValue: 1 });
+    binding = SC.Binding.transform(function(value) {
+      return ((SC.typeOf(value) === SC.T_NUMBER) && (value < 10)) ? 10 : value ;
+    }).from("fromValue", fromObject).to("toValue", toObject).connect();
+  }
+});
+
+test("The binding transforms sync the from value", function() {
+  // Set in one direction
+  fromObject.set('fromValue', 9);
+  SC.Binding.flushPendingChanges();
+  equals(toObject.get('toValue'), 10);
+
+  stop(1000);
+  setTimeout(function() {
+    equals(fromObject.get('fromValue'), 10);
+    start();
+  }, 10);
 });

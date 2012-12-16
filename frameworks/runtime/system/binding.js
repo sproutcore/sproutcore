@@ -505,7 +505,8 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     should be called just before using this._bindingValue.
   */
   _computeBindingValue: function() {
-    var source = this._bindingSource,
+    var that = this,
+        source = this._bindingSource,
         key    = this._bindingKey,
         v, idx;
 
@@ -520,6 +521,26 @@ SC.Binding = /** @scope SC.Binding.prototype */{
       for(idx=0;idx<len;idx++) {
         transform = transforms[idx] ;
         v = transform(v, isForward, this) ;
+      }
+
+      if (!this._oneWay && this._syncTransformedValue && this._bindingValue !== v) {
+        setTimeout(function() { 
+          that._fromTarget.setPathIfChanged(that._fromPropertyKey, v) ;
+        }, 1);
+
+        //@if(debug)
+        var _lastSyncTimestamp = new Date().getTime();
+
+        if (this._lastSyncTimestamp - 10 < _lastSyncTimestamp) {
+          SC.warn("Developer Warning: It looks like a binding is running into an infinite sync loop. Try to set your binding oneWay or set the syncTransformedValue parameter of your transform method to NO. fromPropertyKey: '%@' - bindingValue: '%@' - transformedBindingValue: '%@'.".fmt(that._fromPropertyKey, this._bindingValue, v));
+
+          if (!this._warnCount) this._warnCount = 0;
+          this._warnCount++;
+          if (this._warnCount > 100) throw 'Maximum call stack size exceeded.';
+        }
+
+        this._lastSyncTimestamp = _lastSyncTimestamp;
+        //@endif
       }
     }
 
@@ -770,9 +791,11 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     resetTransform() first.
 
     @param {Function} transformFunc the transform function.
+    @param {Boolean} syncTransformedValue Pass NO if you don't want the transformed value
+    to be sync with the "from" object.
     @returns {SC.Binding} this
   */
-  transform: function(transformFunc) {
+  transform: function(transformFunc, syncTransformedValue) {
     var binding = (this === SC.Binding) ? this.beget() : this ;
     var t = binding._transforms ;
 
@@ -786,6 +809,9 @@ SC.Binding = /** @scope SC.Binding.prototype */{
 
     // add the transform function
     t.push(transformFunc) ;
+
+    binding._syncTransformedValue = (syncTransformedValue === undefined) ? YES : syncTransformedValue ;
+
     return binding;
   },
 
@@ -849,7 +875,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     if (placeholder === undefined) {
       placeholder = SC.MULTIPLE_PLACEHOLDER ;
     }
-    return this.from(fromPath).transform(function(value, isForward, binding) {
+    return this.oneWay(fromPath).transform(function(value, isForward, binding) {
       if (value && value.isEnumerable) {
         var len = value.get('length');
         value = (len>1) ? placeholder : (len<=0) ? null : value.firstObject();
@@ -868,7 +894,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   */
   notEmpty: function(fromPath, placeholder) {
     if (placeholder === undefined) placeholder = SC.EMPTY_PLACEHOLDER ;
-    return this.from(fromPath).transform(function(value, isForward, binding) {
+    return this.oneWay(fromPath).transform(function(value, isForward, binding) {
       if (SC.none(value) || (value === '') || (SC.isArray(value) && (value.get ? value.get('length') : value.length)=== 0)) {
         value = placeholder ;
       }
@@ -886,7 +912,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   */
   notNull: function(fromPath, placeholder) {
     if (placeholder === undefined) placeholder = SC.EMPTY_PLACEHOLDER ;
-    return this.from(fromPath).transform(function(value, isForward, binding) {
+    return this.oneWay(fromPath).transform(function(value, isForward, binding) {
       if (SC.none(value)) value = placeholder ;
       return value ;
     }) ;
@@ -900,7 +926,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @returns {SC.Binding} this
   */
   multiple: function(fromPath) {
-    return this.from(fromPath).transform(function(value, isForward, binding) {
+    return this.oneWay(fromPath).transform(function(value, isForward, binding) {
       if (!SC.isArray(value)) value = (value == null) ? [] : [value] ;
       return value ;
     }) ;
@@ -915,7 +941,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @returns {SC.Binding} this
   */
   bool: function(fromPath) {
-    return this.from(fromPath).transform(function(value, isForward, binding) {
+    return this.oneWay(fromPath).transform(function(value, isForward, binding) {
       var t = SC.typeOf(value) ;
       if (t === SC.T_ERROR) return value ;
       return (t == SC.T_ARRAY) ? (value.length > 0) : (value === '') ? NO : !!value ;
@@ -988,7 +1014,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @returns {SC.Binding} this
   */
   not: function(fromPath) {
-    return this.from(fromPath).transform(function(value, isForward, binding) {
+    return this.oneWay(fromPath).transform(function(value, isForward, binding) {
       var t = SC.typeOf(value) ;
       if (t === SC.T_ERROR) return value ;
       return !((t == SC.T_ARRAY) ? (value.length > 0) : (value === '') ? NO : !!value) ;
@@ -1002,7 +1028,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @returns {SC.Binding} this
   */
   isNull: function(fromPath) {
-    return this.from(fromPath).transform(function(value, isForward, binding) {
+    return this.oneWay(fromPath).transform(function(value, isForward, binding) {
       var t = SC.typeOf(value) ;
       return (t === SC.T_ERROR) ? value : SC.none(value) ;
     });
