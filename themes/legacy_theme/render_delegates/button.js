@@ -10,7 +10,7 @@ sc_require("theme");
 */
 SC.LegacyTheme.buttonRenderDelegate = SC.RenderDelegate.create({
   className: 'button',
-  
+
   /**
     Called when we need to create the HTML that represents the button.
 
@@ -33,12 +33,12 @@ SC.LegacyTheme.buttonRenderDelegate = SC.RenderDelegate.create({
     context.setClass('cancel', dataSource.get('isCancel') || 0);
 
     if (toolTip) {
-      context.attr('title', toolTip);
-      context.attr('alt', toolTip);
+      context.setAttr('title', toolTip);
+      context.setAttr('alt', toolTip);
     }
 
     // addressing accessibility
-    context.attr('aria-pressed', isActive);
+    context.setAttr('aria-pressed', isActive);
 
     // Specify a minimum width for the inner part of the button.
     minWidth = (minWidth ? "style='min-width: " + minWidth + "px'" : '');
@@ -47,11 +47,11 @@ SC.LegacyTheme.buttonRenderDelegate = SC.RenderDelegate.create({
     // Create the inner label element that contains the text and, optionally,
     // an icon.
     context = context.begin('label').addClass('sc-button-label');
-    
+
     // NOTE: we don't add the label class names because button styles its own label.
     theme.labelRenderDelegate.render(dataSource, context);
     context = context.end();
-    
+
     context.push("</span>");
 
     if (dataSource.get('supportFocusRing')) {
@@ -85,5 +85,5 @@ SC.LegacyTheme.buttonRenderDelegate = SC.RenderDelegate.create({
     jquery.attr('aria-pressed', isActive);
     theme.labelRenderDelegate.update(dataSource, jquery.find('label'));
   }
-  
+
 });

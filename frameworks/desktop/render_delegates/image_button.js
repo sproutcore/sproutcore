@@ -19,8 +19,8 @@ SC.BaseTheme.imageButtonRenderDelegate = SC.RenderDelegate.create({
     context.addClass('no-min-width');
 
     if (toolTip) {
-      context.attr('title', toolTip);
-      context.attr('alt', toolTip);
+      context.setAttr('title', toolTip);
+      context.setAttr('alt', toolTip);
     }
 
     if (image) {

@@ -61,8 +61,8 @@ SC.BaseTheme.canvasImageRenderDelegate = SC.RenderDelegate.create({
     var width = dataSource.get('width') || 0,
         height = dataSource.get('height') || 0;
 
-    context.attr('width', width);
-    context.attr('height', height);
+    context.setAttr('width', width);
+    context.setAttr('height', height);
   },
 
   update: function(dataSource, jquery) {

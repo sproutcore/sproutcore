@@ -8,31 +8,31 @@
 /**
   Renders and updates the DOM representation of a radio button (a single button,
   not the group).
-  
+
   Expected Properties
   -----------------------------------
-  
+
    - `isSelected`
    - `isActive`
    - `isMixed`
    - `isEnabled`
    - `title`
-  
+
   Optional Properties
   -----------------------------------
-  
+
    - `width` -- an optional width of the radio button
    - `labelRenderDelegate` properties
-  
+
 */
 SC.BaseTheme.radioRenderDelegate = SC.RenderDelegate.create({
   className: 'radio',
-  
+
   render: function(dataSource, context) {
     this.addSizeClassName(dataSource, context);
 
     var theme = dataSource.get('theme');
-    
+
     var isSelected = dataSource.get('isSelected'),
         width = dataSource.get('width'),
         labelId = SC.guidFor(dataSource) + '-label';
@@ -45,12 +45,12 @@ SC.BaseTheme.radioRenderDelegate = SC.RenderDelegate.create({
     });
 
     //accessing accessibility
-    context.attr('role', 'radio');
-    context.attr('aria-checked', isSelected);
-    context.attr('aria-labelledby', labelId);
-    context.attr('aria-disabled', dataSource.get('isEnabled') ? 'false' : 'true');
+    context.setAttr('role', 'radio');
+    context.setAttr('aria-checked', isSelected);
+    context.setAttr('aria-labelledby', labelId);
+    context.setAttr('aria-disabled', dataSource.get('isEnabled') ? 'false' : 'true');
 
-    if (width) context.css('width', width);
+    if (width) context.setStyle('width', width);
 
     context.push('<span class = "button"></span>');
 

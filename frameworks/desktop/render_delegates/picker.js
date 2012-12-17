@@ -9,7 +9,7 @@ sc_require('render_delegates/panel');
 
 SC.BaseTheme.pickerRenderDelegate = SC.RenderDelegate.create({
   className: 'picker',
-  
+
   render: function(dataSource, context) {
     var panelRenderDelegate = dataSource.get('theme').panelRenderDelegate;
 
@@ -24,11 +24,11 @@ SC.BaseTheme.pickerRenderDelegate = SC.RenderDelegate.create({
       context.addClass(pointerPosition);
     }
   },
-  
+
   update: function(dataSource, $) {
     var panelRenderDelegate = dataSource.get('theme').panelRenderDelegate;
     panelRenderDelegate.update(dataSource, $);
-    
+
     var preferType = dataSource.get('preferType');
     var pointerPosition = dataSource.get('pointerPos');
     var pointerPositionY = dataSource.get('pointerPosY');

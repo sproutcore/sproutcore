@@ -7,19 +7,19 @@
 sc_require("theme");
 /**
   Renders and updates the DOM representation of a slider.
-  
+
   Parameters
   -------------------------
   Requires the following parameters:
-  
+
   - value: a value from 0 to 1.
   - frame: containing the frame in which the slider is being drawn.
 */
 
 SC.LegacyTheme.sliderRenderDelegate = SC.RenderDelegate.create({
-  
+
   className: 'slider',
-  
+
   render: function(dataSource, context) {
     this.addSizeClassName(dataSource, context);
 
@@ -29,20 +29,20 @@ SC.LegacyTheme.sliderRenderDelegate = SC.RenderDelegate.create({
         valueNow    = dataSource.get('ariaValue');
 
     //addressing accessibility
-    context.attr('aria-valuemax', valueMax);
-    context.attr('aria-valuemin', valueMin);
-    context.attr('aria-valuenow', valueNow);
-    context.attr('aria-valuetext', valueNow);
-    context.attr('aria-orientation', 'horizontal');
+    context.setAttr('aria-valuemax', valueMax);
+    context.setAttr('aria-valuemin', valueMin);
+    context.setAttr('aria-valuenow', valueNow);
+    context.setAttr('aria-valuetext', valueNow);
+    context.setAttr('aria-orientation', 'horizontal');
 
     context.push('<span class="sc-inner">',
                   '<span class="sc-leftcap"></span>',
                   '<span class="sc-rightcap"></span>',
-                  '<img src="', blankImage, 
+                  '<img src="', blankImage,
                   '" class="sc-handle" style="left: ', dataSource.get('value'), '%" />',
                   '</span>');
   },
-  
+
   update: function(dataSource, jquery) {
     this.updateSizeClassName(dataSource, jquery);
 
@@ -63,5 +63,5 @@ SC.LegacyTheme.sliderRenderDelegate = SC.RenderDelegate.create({
     }
 
   }
-  
+
 });

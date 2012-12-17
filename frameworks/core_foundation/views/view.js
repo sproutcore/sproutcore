@@ -691,7 +691,7 @@ SC.CoreView.reopen(
   },
 
   _renderLayerSettings: function(context, firstTime) {
-    context.resetClassNames();
+    context.resetClasses();
     context.resetStyles();
 
     this.applyAttributesToContext(context);
@@ -710,12 +710,12 @@ SC.CoreView.reopen(
     if (this.get('isFirstResponder')) { context.addClass('focus'); }
 
     context.id(this.get('layerId'));
-    context.attr('role', this.get('ariaRole'));
+    context.setAttr('role', this.get('ariaRole'));
 
     var _ariaHidden = this.get('ariaHidden');
-    if(_ariaHidden!==null){
-      if(_ariaHidden === NO) context.removeAttr('aria-hidden');
-      else context.attr('aria-hidden', _ariaHidden);
+    if (_ariaHidden !== null) {
+      if (_ariaHidden === NO) context.removeAttr('aria-hidden');
+      else context.setAttr('aria-hidden', _ariaHidden);
     }
   },
 

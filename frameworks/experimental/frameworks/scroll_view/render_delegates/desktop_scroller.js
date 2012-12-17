@@ -36,22 +36,22 @@ SC.BaseTheme.desktopScrollerRenderDelegate = SC.RenderDelegate.create({
       '</div>');
 
 
-    context.attr('aria-orientation',
+    context.setAttr('aria-orientation',
                  (layoutDirection === SC.LAYOUT_VERTICAL) ? 'vertical' : 'horizontal');
-    context.attr('aria-valuemax', dataSource.get('maximum'));
-    context.attr('aria-valuemin', dataSource.get('minimum'));
-    context.attr('aria-valuenow', dataSource.get('value'));
-    context.attr('aria-controls', dataSource.get('controlsId'));
+    context.setAttr('aria-valuemax', dataSource.get('maximum'));
+    context.setAttr('aria-valuemin', dataSource.get('minimum'));
+    context.setAttr('aria-valuenow', dataSource.get('value'));
+    context.setAttr('aria-controls', dataSource.get('controlsId'));
   },
 
-  update: function (dataSource, context) {
+  update: function (dataSource, jquery) {
     var layoutDirection = dataSource.get('layoutDirection'),
         isVertical = layoutDirection === SC.LAYOUT_VERTICAL,
         isHorizontal = layoutDirection === SC.LAYOUT_HORIZONTAL,
         controlsAreHidden = dataSource.get('controlsHidden'),
         thumb, K = 'desktopScrollerRenderDelegate';
 
-    context.setClass({
+    jquery.setClass({
       'sc-vertical': isVertical,
       'sc-horizontal': isHorizontal,
       disabled: !dataSource.get('isEnabled'),
@@ -59,24 +59,24 @@ SC.BaseTheme.desktopScrollerRenderDelegate = SC.RenderDelegate.create({
     });
 
     if (dataSource.didChangeFor(K, 'maximum')) {
-      context.attr('aria-valuemax', dataSource.get('maximum'));
+      jquery.attr('aria-valuemax', dataSource.get('maximum'));
     }
 
     if (dataSource.didChangeFor(K, 'minimum')) {
-      context.attr('aria-valuemin', dataSource.get('minimum'));
+      jquery.attr('aria-valuemin', dataSource.get('minimum'));
     }
 
     if (dataSource.didChangeFor(K, 'value')) {
-      context.attr('aria-valuenow', dataSource.get('value'));
+      jquery.attr('aria-valuenow', dataSource.get('value'));
     }
 
     if (dataSource.didChangeFor(K, 'controlsId')) {
-      context.attr('aria-controls', dataSource.get('controlsId'));
+      jquery.attr('aria-controls', dataSource.get('controlsId'));
     }
 
     // Don't bother if the controls are hidden.
     if (!controlsAreHidden) {
-      thumb = context.find('.thumb');
+      thumb = jquery.find('.thumb');
 
       if (dataSource.didChangeFor(K, 'thumbPosition')) {
         thumb.css(layoutDirection === SC.LAYOUT_VERTICAL ?

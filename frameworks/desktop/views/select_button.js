@@ -81,7 +81,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
   /**
      Key used to extract icons from the objects array
-     
+
      @type String
      @default null
   */
@@ -89,7 +89,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
   /**
     Key used to indicate if the item is to be enabled
-    
+
     @type String
     @default "isEnabled"
   */
@@ -121,7 +121,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
   /**
     Menu attached to the `selectButton`
-    
+
     @type SC.View
     @default SC.MenuView
   */
@@ -240,7 +240,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
   /**
     customView used to draw the menu
-    
+
     @type SC.View
     @default null
   */
@@ -248,7 +248,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
   /**
     CSS classes applied to customView
-    
+
     @type String
     @default null
   */
@@ -256,7 +256,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
   /**
     customView menu offset width
-    
+
     @type Number
     @default 0
   */
@@ -280,18 +280,18 @@ SC.SelectButtonView = SC.ButtonView.extend(
   /**
     This is a property to enable/disable focus rings in buttons.
     For `select_button` we are making it a default.
-    
+
     @type Boolean
     @default YES
   */
   supportFocusRing: YES,
-  
+
   /**
     @type Boolean
     @default NO
   */
   isContextMenuEnabled: NO,
-  
+
 
   /**@private
     Left Alignment based on the size of the button
@@ -420,7 +420,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
       //Check if item is enabled
       itemEnabled = (isEnabledKey) ? (object.get ?
       object.get(isEnabledKey) : object[isEnabledKey]) : object ;
-      
+
       if(NO !== itemEnabled) itemEnabled = YES ;
 
       //Set the first item from the list as default selected item
@@ -458,7 +458,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
     }, this ) ;
 
     if(firstTime) {
-      context.attr('aria-haspopup', 'true') ;
+      context.setAttr('aria-haspopup', 'true') ;
       this.invokeLast(function() {
         var value = this.get('value') ;
         if(SC.none(value)) {
@@ -473,16 +473,16 @@ SC.SelectButtonView = SC.ButtonView.extend(
     this.changeSelectButtonPreferMatrix(this.itemIdx) ;
 
   },
-  
+
   /** @private
     Compares the the two values.
-    
-    This function can be overridden if the value of the Select Button field 
+
+    This function can be overridden if the value of the Select Button field
     is an object.
   */
   _equals: function(value1, value2) {
     var ret = YES;
-    if (value1 && SC.typeOf(value1) === SC.T_HASH && 
+    if (value1 && SC.typeOf(value1) === SC.T_HASH &&
         value2 && SC.typeOf(value2) === SC.T_HASH) {
       for(var key in value1) {
         if(value1[key] !== value2[key]) ret = NO;
@@ -490,18 +490,18 @@ SC.SelectButtonView = SC.ButtonView.extend(
     }
     else ret = (value1 === value2);
     return ret;
-  }, 
+  },
 
   /** @private
     Button action handler
-    
+
     @param {DOMMouseEvent} evt mouseup event that triggered the action
   */
   _action: function(evt) {
     var buttonLabel, menuWidth, scrollWidth, lastMenuWidth, offsetWidth,
       items, elementOffsetWidth, largestMenuWidth, item, element, idx,
       value, itemList, menuControlSize, menuHeightPadding, customView,
-      customMenuView, menu, itemsLength, dummyMenuItemView, 
+      customMenuView, menu, itemsLength, dummyMenuItemView,
       menuItemViewEscapeHTML, menuWidthOffset, body;
 
     buttonLabel = this.$('.sc-button-label')[0] ;
@@ -548,7 +548,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
         className = 'sc-view sc-pane sc-panel sc-palette sc-picker sc-menu select-button menu sc-scroll-view sc-menu-scroll-view sc-container-view sc-menu-item menu-item value sc-regular-size' ;
     className = customViewClassName ? (className + ' ' + customViewClassName) : className ;
 
-    dummyMenuItemView = (this.get('customView') || SC.MenuItemView).create(); 
+    dummyMenuItemView = (this.get('customView') || SC.MenuItemView).create();
     menuItemViewEscapeHTML = dummyMenuItemView.get('escapeHTML') ;
     body = document.body;
     for (idx = 0, itemsLength = items.length; idx < itemsLength; ++idx) {
@@ -731,14 +731,14 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
     // One mouseUp, we'll use this value to determine how long the mouse was
     // pressed.
-    
+
     // we need to keep track that we opened it just now in case we get the
     // mouseUp before render finishes. If it is 0, then we know we have not
     // waited long enough.
     this._menuRenderedTimestamp = 0;
-    
+
     var self = this;
-    
+
     // setTimeout guarantees that all rendering is done. The browser will even
     // have rendered by this point.
     setTimeout(function() {
@@ -888,7 +888,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
   _button_isSelectedDidChange: function() {
 
   }.observes('isSelected'),
-  
+
   /** @private */
   didAppendToDocument: function() {}
 

@@ -44,7 +44,7 @@ SC.BaseTheme.imageRenderDelegate = SC.RenderDelegate.create({
 
     // Place the img within a div, so that we may scale & offset the img
     context = context.begin('img');
-    context.attr('src', image.src);
+    context.setAttr('src', image.src);
 
     if (imageValue && type === SC.IMAGE_TYPE_CSS_CLASS) {
       context.addClass(imageValue);
@@ -52,8 +52,8 @@ SC.BaseTheme.imageRenderDelegate = SC.RenderDelegate.create({
     }
 
     if (toolTip) {
-      context.attr('title', toolTip);
-      context.attr('alt', toolTip);
+      context.setAttr('title', toolTip);
+      context.setAttr('alt', toolTip);
     }
 
     // Adjust the layout of the img

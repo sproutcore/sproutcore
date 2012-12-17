@@ -46,10 +46,10 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
     }
 
     // make accessible
-    context.attr('aria-valuemax', valueMax);
-    context.attr('aria-valuemin', valueMin);
-    context.attr('aria-valuenow', valueNow);
-    context.attr('aria-valuetext', valueNow);
+    context.setAttr('aria-valuemax', valueMax);
+    context.setAttr('aria-valuemin', valueMin);
+    context.setAttr('aria-valuenow', valueNow);
+    context.setAttr('aria-valuetext', valueNow);
 
     context.setClass({
       indeterminate:isIndeterminate,
@@ -64,13 +64,13 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
     context = context.end();
 
     context = context.begin('div').addClass('content');
-    context.css('width', (value * 100) + "%");
+    context.setStyle('width', (value * 100) + "%");
     this.includeSlices(dataSource, context, SC.THREE_SLICE);
     context = context.end();
   },
 
-  update:function (dataSource, context) {
-    this.updateSizeClassName(dataSource, context);
+  update:function (dataSource, jQuery) {
+    this.updateSizeClassName(dataSource, jQuery);
 
     var theme = dataSource.get('theme'),
       value,
@@ -83,10 +83,10 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
       isVisibleInWindow = dataSource.get('isVisibleInWindow');
 
     // make accessible
-    context.attr('aria-valuemax', valueMax);
-    context.attr('aria-valuemin', valueMin);
-    context.attr('aria-valuenow', valueNow);
-    context.attr('aria-valuetext', valueNow);
+    jQuery.attr('aria-valuemax', valueMax);
+    jQuery.attr('aria-valuemin', valueMin);
+    jQuery.attr('aria-valuenow', valueNow);
+    jQuery.attr('aria-valuetext', valueNow);
 
     if (isIndeterminate) {
       value = 1;
@@ -94,7 +94,7 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
       value = dataSource.get('value');
     }
 
-    context.setClass({
+    jQuery.setClass({
       indeterminate:isIndeterminate,
       running:isRunning && isIndeterminate,
       disabled:!isEnabled,
@@ -102,27 +102,27 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
       'sc-complete':(value >= 1 && !isIndeterminate)
     });
 
-    context.find('.content').css('width', (value * 100) + "%");
+    jQuery.find('.content').css('width', (value * 100) + "%");
 
     // fallback for browsers that don't support css transitions
     if(!SC.platform.supportsCSSTransitions) {
-      if (!this._queue[context[0].id]) {
-        this._queue[context[0].id] = {
+      if (!this._queue[jQuery[0].id]) {
+        this._queue[jQuery[0].id] = {
           offset:0,
-          element:SC.$(context).find('.content .middle'),
+          element:SC.$(jQuery).find('.content .middle'),
           shouldAnimate:false
         };
       }
 
       if (isIndeterminate && isRunning && isVisibleInWindow) {
         // save offset in the queue and request animation
-        this._queue[context[0].id].shouldAnimate = true;
+        this._queue[jQuery[0].id].shouldAnimate = true;
         this.animate(dataSource);
       } else if (!isIndeterminate) {
         // Clear out our custom background-position when isIndeterminate toggles.
-        this._queue[context[0].id].element.css('background-position', '');
+        this._queue[jQuery[0].id].element.css('background-position', '');
       } else {
-        this._queue[context[0].id].shouldAnimate = false;
+        this._queue[jQuery[0].id].shouldAnimate = false;
       }
     }
   },

@@ -8,7 +8,7 @@
 
 SC.BaseTheme.disclosureRenderDelegate = SC.RenderDelegate.create({
   className: 'disclosure',
-  
+
   render: function(dataSource, context) {
     this.addSizeClassName(dataSource, context);
 
@@ -19,22 +19,22 @@ SC.BaseTheme.disclosureRenderDelegate = SC.RenderDelegate.create({
     var labelId = SC.guidFor(dataSource) + "-label";
 
     //addressing accessibility
-    context.attr('aria-expanded', value);
-    context.attr('aria-labelledby', labelId);
+    context.setAttr('aria-expanded', value);
+    context.setAttr('aria-labelledby', labelId);
 
     if (dataSource.get('isSelected')) context.addClass('sel');
-    
+
     var state = '';
     state += dataSource.get('isSelected') ? 'open' : 'closed';
     if (dataSource.get('isActive')) state += ' active';
-    
+
     context.push('<img src = "' + SC.BLANK_IMAGE_URL + '" class = "disclosure button ' + state + '" />');
 
     context = context.begin('span').addClass(labelClassNames).id(labelId);
     theme.labelRenderDelegate.render(dataSource, context);
     context = context.end();
   },
-  
+
   update: function(dataSource, jquery) {
     this.updateSizeClassName(dataSource, jquery);
 

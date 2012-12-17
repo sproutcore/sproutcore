@@ -982,8 +982,10 @@ SC.View.reopen(
     original(context);
 
     if (this.get('useStaticLayout')) { context.addClass('sc-static-layout'); }
-    if (this.get('backgroundColor')) {
-      context.css('backgroundColor', this.get('backgroundColor'));
+
+    var backgroundColor = this.get('backgroundColor');
+    if (backgroundColor) {
+      context.setStyle('backgroundColor', backgroundColor);
     }
   }.enhance()
 });

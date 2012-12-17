@@ -29,11 +29,11 @@ SC.BaseTheme.sliderRenderDelegate = SC.RenderDelegate.create({
         valueNow    = dataSource.get('ariaValue');
 
     //addressing accessibility
-    context.attr('aria-valuemax', valueMax);
-    context.attr('aria-valuemin', valueMin);
-    context.attr('aria-valuenow', valueNow);
-    if(valueMin !== 0 || valueMax !== 100) context.attr('aria-valuetext', valueNow);
-    context.attr('aria-orientation', 'horizontal');
+    context.setAttr('aria-valuemax', valueMax);
+    context.setAttr('aria-valuemin', valueMin);
+    context.setAttr('aria-valuenow', valueNow);
+    if(valueMin !== 0 || valueMax !== 100) context.setAttr('aria-valuetext', valueNow);
+    context.setAttr('aria-orientation', 'horizontal');
 
     context = context.begin('span').addClass('track');
     this.includeSlices(dataSource, context, SC.THREE_SLICE);

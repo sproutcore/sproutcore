@@ -306,13 +306,13 @@ SC.ScrollerView = SC.View.extend(
       this.renderThumb(context, layoutDirection, thumbLength, thumbPosition);
 
       //addressing accessibility
-      context.attr('aria-orientation', ariaOrientation);
+      context.setAttr('aria-orientation', ariaOrientation);
 
       //addressing accessibility
-      context.attr('aria-valuemax', this.get('maximum'));
-      context.attr('aria-valuemin', this.get('minimum'));
-      context.attr('aria-valuenow', this.get('value'));
-      context.attr('aria-controls' , parentView.getPath('contentView.layerId'));
+      context.setAttr('aria-valuemax', this.get('maximum'));
+      context.setAttr('aria-valuemin', this.get('minimum'));
+      context.setAttr('aria-valuenow', this.get('value'));
+      context.setAttr('aria-controls' , parentView.getPath('contentView.layerId'));
 
     } else {
       // The HTML has already been generated, so all we have to do is
@@ -326,7 +326,7 @@ SC.ScrollerView = SC.View.extend(
       this.adjustThumb(thumbElement, thumbPosition, thumbLength);
 
       //addressing accessibility
-      context.attr('aria-valuenow', this.get('value'));
+      context.setAttr('aria-valuenow', this.get('value'));
 
     }
   },

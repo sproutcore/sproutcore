@@ -11,7 +11,7 @@
  */
 SC.BaseTheme.popupButtonRenderDelegate = SC.BaseTheme.buttonRenderDelegate.create({
   render: function(dataSource, context) {
-    context.attr('aria-haspopup', 'true');
+    context.setAttr('aria-haspopup', 'true');
     sc_super();
   },
 

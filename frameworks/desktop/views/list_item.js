@@ -930,7 +930,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     classArray.push(className,'icon');
     context.begin('img')
             .addClass(classArray)
-            .attr('src', url)
+            .setAttr('src', url)
             .end();
   },
 
@@ -968,7 +968,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     classArray.push('right-icon',className);
     context.begin('img')
       .addClass(classArray)
-      .attr('src', url)
+      .setAttr('src', url)
     .end();
   },
 
