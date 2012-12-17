@@ -969,7 +969,7 @@ SC.View.reopen(
   */
   renderLayout: function(context, firstTime) {
     this.get('layoutStyleCalculator').willRenderAnimations();
-    context.addStyle(this.get('layoutStyle'));
+    context.setStyle(this.get('layoutStyle'));
     this.get('layoutStyleCalculator').didRenderAnimations();
   },
 
