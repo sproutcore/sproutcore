@@ -22,9 +22,9 @@ test("should replace opening tag with string and add closing tag, leaving middle
   equals(context.get(2), "</div>", "closing tag");
 });
 
-test("should emit any CSS class names included in the tag opts.classNames array", function() {
-  context.classNames("foo bar".w()).end();
-  ok(context.get(0).match(/class=\"foo bar\"/), '<div> has class attr') ;
+test("should emit any CSS class names included in the tag opts.addClass array", function() {
+  context.addClass("foo bar".w()).end();
+  ok(context.get(0).match(/class=\"(?:bar|foo)\s*(?:foo|bar)\s*\"/), '<div> has classes foo bar') ;
 });
 
 test("should emit id in tag opts.id", function() {
@@ -33,34 +33,34 @@ test("should emit id in tag opts.id", function() {
 });
 
 test("should emit style in tag if opts.styles is defined", function() {
-  context.styles({ alpha: "beta", foo: "bar" }).end();
+  context.setStyle({ alpha: "beta", foo: "bar" }).end();
   ok(context.get(0).match(/style=\"alpha: beta; foo: bar; \"/), '<div> has style="alpha: beta; foo: bar; "');
 });
 
 test("should emit style with custom browser attributes", function() {
-  context.styles({ mozColumnCount: '3', webkitColumnCount: '3', oColumnCount: '3', msColumnCount: '3' }).end();
+  context.setStyle({ mozColumnCount: '3', webkitColumnCount: '3', oColumnCount: '3', msColumnCount: '3' }).end();
   ok(context.get(0).match('<div style="-moz-column-count: 3; -webkit-column-count: 3; -o-column-count: 3; -ms-column-count: 3; " >'),
                             '<div> has style="-moz-column-count: 3; -webkit-column-count: 3, -o-column-count: 3, -ms-column-count: 3; "');
 });
 
 test("should write arbitrary attrs has in opts", function() {
-  context.attr({ foo: "bar", bar: "baz" }).end();
+  context.setAttr({ foo: "bar", bar: "baz" }).end();
   ok(context.get(0).match(/foo=\"bar\"/), 'has foo="bar"');
   ok(context.get(0).match(/bar=\"baz\"/), 'has bar="baz"');
 });
 
-test("classNames should override attrs.class", function() {
-  context.classNames("foo".w()).attr({ "class": "bar" }).end();
+test("addClass should override attrs.class", function() {
+  context.addClass("foo".w()).setAttr({ "class": "bar" }).end();
   ok(context.get(0).match(/class=\"foo\"/), 'has class="foo"');
 });
 
 test("opts.id should override opts.attrs.id", function() {
-  context.id("foo").attr({ id: "bar" }).end();
+  context.id("foo").setAttr({ id: "bar" }).end();
   ok(context.get(0).match(/id=\"foo\"/), 'has id="foo"');
 });
 
 test("opts.styles should override opts.attrs.style", function() {
-  context.styles({ foo: "foo" }).attr({ style: "bar: bar" }).end();
+  context.setStyle({ foo: "foo" }).setAttr({ style: "bar: bar" }).end();
   ok(context.get(0).match(/style=\"foo: foo; \"/), 'has style="foo: foo; "');
 });
 
@@ -82,7 +82,7 @@ test("emits self closing tag if tag has no content and c._selfClosing !== NO", f
 
 test("emits two tags even if tag has no content if opts.selfClosing == NO", function() {
   context._selfClosing = NO;
-  
+
   context.end();
   equals(context.length, 2, "has two lines");
   equals(context.get(0), "<div>", "has opening tag");
@@ -97,15 +97,15 @@ test("does NOT emit self closing tag if it has content, even if opts.selfClosing
 });
 
 test("it should make sure to clear reused temporary attributes object", function() {
-  
+
   // generate one tag...
   context.begin('input')
     .id("foo")
-    .styles({ foo: "bar" })
-    .classNames("foo bar".w())
+    .setStyle({ foo: "bar" })
+    .addClass("foo bar".w())
     .push("line")
-  .end(); 
-  
+  .end();
+
   // generate second tag...will reuse internal temporary attrs object.
   context.begin('input').id("bar").end();
   var str = context.get(context.length-1);
@@ -116,7 +116,7 @@ test("it should work when nested more than one level deep", function() {
   context.begin().id("foo")
     .begin().id("bar").end()
   .end();
-  
+
   var str = context.join('');
   ok(str.match(/id="foo"/), 'has foo');
   ok(str.match(/id="bar"/), 'has bar');

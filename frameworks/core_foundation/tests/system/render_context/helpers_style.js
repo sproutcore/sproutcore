@@ -24,19 +24,13 @@ test("returns empty hash if no current styles", function() {
 
 test("styles(hash) replaces styles", function() {
   var styles = { foo: 'bar' };
-  equals(context.styles(styles), context, "returns receiver");
+  equals(context.setStyle(styles), context, "returns receiver");
   same(context.styles(), styles, 'Styles');
-});
-
-test("returns styles if set", function() {
-  var styles = { foo: 'bar' };
-  context.styles(styles);
-  equals(context.styles(), styles, 'styles');
 });
 
 test("clone on next retrieval if styles(foo) set with cloneOnModify=YES", function() {
   var styles = { foo: 'bar' };
-  context.styles(styles, YES);
+  context.setStyle(styles);
 
   var result = context.styles();
   ok(result !== styles, "styles is NOT same instance");
@@ -65,7 +59,7 @@ test("extracts styles from element on first retrieval", function() {
 //
 module("SC.RenderContext#addStyle", {
   setup: function() {
-    context = SC.RenderContext().styles({ foo: 'foo' }) ;
+    context = SC.RenderContext().setStyle({ foo: 'foo' }) ;
   }
 });
 
@@ -96,13 +90,9 @@ test("should assign all styles if a hash is passed", function() {
   same(context.styles(), { foo: 'bar', bar: 'bar' }, 'has same styles');
 });
 
-test("css() should be an alias for addStyle()", function() {
-  equals(SC.RenderContext.fn.css, SC.RenderContext.fn.addStyle, 'methods');
-});
-
 test("addStyle should remove properties that are part of combo properties", function(){
   SC.COMBO_STYLES = { foo: 'fooSub'.w() };
-  context.styles({ foo: 'foo', fooSub: 'bar' });
+  context.setStyle({ foo: 'foo', fooSub: 'bar' });
   equals(context.styles().fooSub, 'bar', 'proper starting values');
   context.addStyle('foo', 'bar');
   equals(context.styles().foo, 'bar', 'foo has new value');

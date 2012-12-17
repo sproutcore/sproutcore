@@ -107,8 +107,7 @@ SC.RenderContext = SC.Builder.create(
 
       this.strings.push(null);
       this._selfClosing = this.SELF_CLOSING.contains(tagNameOrElement);
-    }
-    else {
+    } else {
       this._elem        = tagNameOrElement;
       this._needsTag    = NO;
       this.length       = 0;
@@ -183,11 +182,37 @@ SC.RenderContext = SC.Builder.create(
     return (idx === undefined) ? strings.slice(this.offset, this.length) : strings[idx + this.offset];
   },
 
-  /**
-    Adds a string to the render context for later joining.  Note that you can
-    pass multiple arguments to this method and each item will be pushed.
+  /** @deprecated */
+  html: function (line) {
+    //@if(debug)
+    SC.warn("Developer Warning: SC.RenderContext:html() is no longer used to push HTML strings.  Please use `push()` instead.");
+    //@endif
+    return this.push(line);
+  },
 
-    @param {String} line the liene to add to the string.
+  /**
+    Adds a string to the render context for later joining and insertion.  To
+    HTML escape the string, see the similar text() method instead.
+
+    Note: You can pass multiple string arguments to this method and each will
+    be pushed.
+
+    When used in render() for example,
+
+        MyApp.MyView = SC.View.extend({
+
+          innerText: '',
+
+          render: function (context) {
+            var innerText = this.get('innerText');
+
+            // This will be pushed into the DOM all at once.
+            context.push('<div class="inner-div">', innerText, '<span class="inner-span">**</span></div>');
+          }
+
+        });
+
+    @param {String} line the HTML to add to the context
     @returns {SC.RenderContext} receiver
   */
   push: function (line) {
@@ -196,7 +221,9 @@ SC.RenderContext = SC.Builder.create(
 
     if (len > 1) {
       strings.push.apply(strings, arguments);
-    } else strings.push(line);
+    } else {
+      strings.push(line);
+    }
 
     // adjust string length for context and all parents...
     var c = this;
@@ -208,23 +235,45 @@ SC.RenderContext = SC.Builder.create(
   },
 
   /**
-    Pushes the passed string onto the array, but first escapes the string
-    to ensure that no user-entered HTML is processed as HTML.
+    Pushes the passed string to the render context for later joining and
+    insertion, but first escapes the string to ensure that no user-entered HTML
+    is processed as HTML.  To push the string without escaping, see the similar
+    push() method instead.
 
-    @param {String} line one or more lines of text to add
+    Note: You can pass multiple string arguments to this method and each will
+    be escaped and pushed.
+
+    When used in render() for example,
+
+        MyApp.MyView = SC.View.extend({
+
+          userText: '<script src="http://maliciousscripts.com"></script>',
+
+          render: function (context) {
+            var userText = this.get('userText');
+
+            // Pushes "&lt;script src="http://maliciousscripts.com"&gt;&lt;/script&gt;" in the DOM
+            context.text(userText);
+          }
+
+        });
+
+    @param {String} line the text to add to the context
     @returns {SC.RenderContext} receiver
   */
-  text: function (line) {
-    var len = arguments.length, idx = 0;
+  text: function () {
+    var len = arguments.length,
+      idx = 0;
+
     for (idx = 0; idx < len; idx++) {
       this.push(SC.RenderContext.escapeHTML(arguments[idx]));
     }
+
     return this;
   },
 
   /**
-    Joins the strings together, returning the result.  But first, this will
-    end any open tags.
+    Joins the strings together, closes any open tags and returns the final result.
 
     @param {String} joinChar optional string to use in joins. def empty string
     @returns {String} joined string
@@ -358,7 +407,7 @@ SC.RenderContext = SC.Builder.create(
 
     // get attributes first.  Copy in className + styles...
     var tag = '', styleStr = '', key, value,
-        attrs = this._attrs, className = this._classNames,
+        attrs = this._attrs, className = this._classes,
         id = this._id, styles = this._styles, strings, selfClosing;
 
     // add tag to tag array
@@ -479,204 +528,213 @@ SC.RenderContext = SC.Builder.create(
   // CSS CLASS NAMES SUPPORT
   //
 
-  /**
-    Reads the current classNames array or sets the array if a param is passed.
-    Note that if you get the classNames array and then modify it, you MUST
-    call this method again to set the array or else it may not be copied to
-    the element.
-
-    If you do pass a classNames array, you can also pass YES for the
-    cloneOnModify param.  This will cause the context to clone the class names
-    before making any further edits.  This is useful is you have a shared
-    array of class names you want to start with but edits should not change
-    the shared array.
-
-    @param {Array} classNames array
-    @param {Boolean} cloneOnModify
-    @returns {Array|SC.RenderContext} classNames array or receiver
-  */
-  classNames: function (classNames, cloneOnModify) {
-    if (this._elem) {
-      if (classNames) {
-        this.resetClassNames().addClass(classNames);
-        return this;
-      } else {
-        return this.$().attr('class').split(' ');
-      }
-    }
-
-    if (classNames === undefined) {
-      if (this._cloneClassNames) {
-        this._classNames = (this._classNames || []).slice();
-        this._cloneClassNames = NO;
-      }
-
-      // if there are no class names, create an empty array but don't modify.
-      if (!this._classNames) this._classNames = [];
-
-      return this._classNames;
+  /** @deprecated */
+  classNames: function (deprecatedArg) {
+    if (deprecatedArg) {
+      //@if(debug)
+      SC.warn("Developer Warning: SC.RenderContext:classNames() (renamed to classes()) is no longer used to set classes, only to retrieve them.  Please use `setClass()` instead.");
+      //@endif
+      return this.setClass(deprecatedArg);
     } else {
-      this._classNames = classNames;
-      this._cloneClassNames = cloneOnModify || NO;
-      this._classNamesDidChange = YES;
-      return this;
+      //@if(debug)
+      SC.warn("Developer Warning: SC.RenderContext:classNames() has been renamed to classes() to better match the API of setClass() and resetClasses().  Please use `classes()` instead.");
+      //@endif
+      return this.classes();
     }
+  },
+
+  /**
+    Retrieves the class names for the current context.
+
+    @returns {Array} classNames array
+  */
+  classes: function () {
+    if (!this._classes) {
+      if (this._elem) {
+        // Get the classes from the element.
+        var attr = this.$().attr('class');
+
+        if (attr && (attr = attr.toString()).length > 0) {
+          this._classes = attr.split(/\s/);
+        } else {
+          // No class on the element.
+          this._classes = [];
+        }
+      } else {
+        this._classes = [];
+      }
+    }
+
+    return this._classes;
+  },
+
+  /**
+    Adds a class or classes to the current context.
+
+    This is a convenience method that simply calls setClass(nameOrClasses, YES).
+
+    @param {String|Array} nameOrClasses a class name or an array of class names
+    @returns {SC.RenderContext} receiver
+  */
+  addClass: function (nameOrClasses) {
+    // Convert arrays into objects for use by setClass
+    if (SC.typeOf(nameOrClasses) === SC.T_ARRAY) {
+      for (var i = 0, length = nameOrClasses.length, obj = {}; i < length; i++) {
+        obj[nameOrClasses[i]] = YES;
+      }
+      nameOrClasses = obj;
+    }
+
+    return this.setClass(nameOrClasses, YES);
+  },
+
+  /**
+    Removes the specified class name from the current context.
+
+    This is a convenience method that simply calls setClass(name, NO).
+
+    @param {String} name the class to remove
+    @returns {SC.RenderContext} receiver
+  */
+  removeClass: function (name) {
+    return this.setClass(name, NO);
+  },
+
+  /**
+    Sets or unsets class names on the current context.
+
+    You can either pass a single class name and a boolean indicating whether
+    the value should be added or removed, or you can pass a hash with all
+    the class names you want to add or remove with a boolean indicating
+    whether they should be there or not.
+
+    When used in render() for example,
+
+        MyApp.MyView = SC.View.extend({
+
+          isAdministrator: NO,
+
+          render: function (context) {
+            var isAdministrator = this.get('isAdministrator');
+
+            // Sets the 'is-admin' class appropriately.
+            context.setClass('is-admin', isAdministrator);
+          }
+
+        });
+
+    @param {String|Hash} nameOrClasses either a single class name or a hash of class names with boolean values indicating whether to add or remove the class
+    @param {Boolean} shouldAdd if a single class name for nameOrClasses is passed, this
+    @returns {SC.RenderContext} receiver
+  */
+  setClass: function (nameOrClasses, shouldAdd) {
+    var didChange = NO,
+      classes = this.classes();
+
+    // Add the updated classes to the internal classes object.
+    if (SC.typeOf(nameOrClasses) === SC.T_ARRAY) {
+      //@if(debug)
+      SC.warn("Developer Warning: SC.RenderContext:setClass() should not be passed an array of class names.  To remain compatible with calls to the deprecated classNames() function, all classes on the current context will be replaced with the given array, but it would be more accurate in the future to call resetClasses() and addClass() or setClass(hash) instead.  Please update your code accordingly.");
+      //endif
+      this.resetClasses();
+      classes = this.classes();
+
+      for (var i = 0, length = nameOrClasses.length; i < length; i++) {
+        didChange = this._setClass(classes, nameOrClasses[i], YES) || didChange;
+      }
+    } else if (SC.typeOf(nameOrClasses) === SC.T_HASH) {
+      for (var name in nameOrClasses) {
+        if (!nameOrClasses.hasOwnProperty(name)) continue;
+
+        shouldAdd = nameOrClasses[name];
+        didChange = this._setClass(classes, name, shouldAdd) || didChange;
+      }
+    } else {
+      didChange = this._setClass(classes, nameOrClasses, shouldAdd);
+    }
+
+    if (didChange) {
+      this._classesDidChange = YES;
+
+      // Apply the styles to the element if we have one already.
+      if (this._elem) {
+        this.$().attr('class', classes.join(' '));
+      }
+    }
+
+    return this;
+  },
+
+  /** @private */
+  _setClass: function (classes, name, shouldAdd) {
+    var didChange = NO,
+      idx;
+
+    idx = classes.indexOf(name);
+    if (idx >= 0 && !shouldAdd) {
+      classes.splice(idx, 1);
+      didChange = YES;
+    } else if (idx < 0 && shouldAdd) {
+      classes.push(name);
+      didChange = YES;
+    }
+
+    return didChange;
   },
 
   /**
     Returns YES if the outer tag current has the passed class name, NO
     otherwise.
 
-    @param {String} className the class name
+    @param {String} name the class name
     @returns {Boolean}
   */
-  hasClass: function (className) {
+  hasClass: function (name) {
     if (this._elem) {
-      return this.$().hasClass(className);
+      return this.$().hasClass(name);
     }
-    return this.classNames().indexOf(className) >= 0;
+
+    return this.classes().indexOf(name) >= 0;
   },
 
-  /**
-    Adds the specified className to the current tag, if it does not already
-    exist.  This method has no effect if there is no open tag.
-
-    If there is an element backing this RenderContext, jQuery is used to
-    perform the update.
-
-    @param {String|Array} nameOrClasses the class name or an array of classes
-    @returns {SC.RenderContext} receiver
-  */
-  addClass: function (nameOrClasses) {
-    if (nameOrClasses === undefined || nameOrClasses === null) {
-      SC.Logger.warn('You are adding an undefined or empty class' + this.toString());
-      return this;
-    }
-
-    if (this._elem) {
-      if (SC.typeOf(nameOrClasses) === SC.T_STRING) {
-        this.$().addClass(nameOrClasses);
-      } else {
-        var idx, len = nameOrClasses.length;
-        for (idx = 0; idx < len; idx++) this.$().addClass(nameOrClasses[idx]);
-      }
-      return this;
-    }
-
-    var classNames = this.classNames(); // handles cloning ,etc.
-    if (SC.typeOf(nameOrClasses) === SC.T_STRING) {
-      if (classNames.indexOf(nameOrClasses) < 0) {
-        classNames.push(nameOrClasses);
-        this._classNamesDidChange = YES;
-      }
-    } else {
-      var cl;
-      for (var i = 0, iLen = nameOrClasses.length; i < iLen; i++) {
-        cl = nameOrClasses[i];
-        if (classNames.indexOf(cl) < 0) {
-          classNames.push(cl);
-          this._classNamesDidChange = YES;
-        }
-      }
-    }
-
-    return this;
-  },
-
-  /**
-    Removes the specified className from the current tag.  This method has
-    no effect if there is not an open tag.
-
-    If there is an actual DOM element backing this render context,
-    the modification will be written immediately to a jQuery instance.
-
-    @param {String} className the class to add
-    @returns {SC.RenderContext} receiver
-  */
-  removeClass: function (className) {
-    if (this._elem) {
-      this.$().removeClass(className);
-      return this;
-    }
-
-    var classNames = this._classNames, idx;
-    if (classNames && (idx = classNames.indexOf(className)) >= 0) {
-      if (this._cloneClassNames) {
-        classNames = this._classNames = classNames.slice();
-        this._cloneClassNames = NO;
-      }
-
-      // if className is found, just null it out.  This will end up adding an
-      // extra space to the generated HTML but it is faster than trying to
-      // recompact the array.
-      classNames[idx] = null;
-      this._classNamesDidChange = YES;
-    }
-
-    return this;
-  },
-
-  /**
-    Removes all classnames from the context. If the context represents an
-    element, this will be handled in CoreQuery.
-
-    @returns {SC.RenderContext} receiver
-  */
+  /** @deprecated */
   resetClassNames: function () {
-    if (this._elem) {
-      this.$().removeClass();
-      return this;
-    }
-
-    this._classNames = [];
-    this._classNamesDidChange = YES;
-    return this;
+    //@if(debug)
+    SC.warn("Developer Warning: SC.RenderContext:resetClassNames() has been renamed to resetClasses to better match the API of classes(GET) and setClass(SET).  Please use `resetClasses()` instead.");
+    //@endif
+    return this.resetClasses();
   },
 
   /**
-    You can either pass a single class name and a boolean indicating whether
-    the value should be added or removed, or you can pass a hash with all
-    the class names you want to add or remove with a boolean indicating
-    whether they should be there or not.
+    Removes all class names from the context.
 
-    This is far more efficient than using addClass/removeClass.
+    Be aware that setClass() only effects the class names specified.  If there
+    are existing class names that are not modified by a call to setClass(), they
+    will remain on the context.  For example, if you call addClass('a') and
+    addClass('b') followed by setClass({ b:NO }), the 'b' class will be
+    removed, but the 'a' class will be unaffected.
 
-    @param {String|Hash} className class name or hash of classNames + bools
-    @param {Boolean} shouldAdd for class name if a string was passed
+    If you want to call setClass() or addClass() to replace all classes, you
+    should call this method first.
+
     @returns {SC.RenderContext} receiver
   */
-  setClass: function (className, shouldAdd) {
-    if (this._elem) {
-      this.$().setClass(className, shouldAdd);
-      return this;
-    }
+  resetClasses: function () {
+    var didChange = NO,
+      classes = this.classes();
 
-    var classNames, idx, key, didChange;
+    // Check for changes.
+    didChange = classes.length;
 
-    // simple form
-    if (shouldAdd !== undefined) {
-      return shouldAdd ? this.addClass(className) : this.removeClass(className);
-    // bulk form
-    } else {
-      classNames = this._classNames;
-      if (!classNames) classNames = this._classNames = [];
+    // Reset.
+    this._classes = [];
+    if (didChange) {
+      this._classesDidChange = YES;
 
-      if (this._cloneClassNames) {
-        classNames = this._classNames = classNames.slice();
-        this._cloneClassNames = NO;
+      // Apply the styles to the element if we have one already.
+      if (this._elem) {
+        this.$().attr('class', '');
       }
-
-      didChange = NO;
-      for (key in className) {
-        if (!className.hasOwnProperty(key)) continue;
-        idx = classNames.indexOf(key);
-        if (className[key]) {
-          if (idx < 0) { classNames.push(key); didChange = YES; }
-        } else {
-          if (idx >= 0) { classNames[idx] = null; didChange = YES; }
-        }
-      }
-      if (didChange) this._classNamesDidChange = YES;
     }
 
     return this;
@@ -686,96 +744,174 @@ SC.RenderContext = SC.Builder.create(
   // CSS Styles Support
   //
 
+  /** @private */
   _STYLE_REGEX: /-?\s*([^:\s]+)\s*:\s*([^;]+)\s*;?/g,
 
   /**
-    Retrieves or sets the current styles for the outer tag.  If you retrieve
-    the styles hash to edit it, you must set the hash again in order for it
-    to be applied to the element on rendering.
+    Retrieves the current styles for the context.
 
-    Optionally you can also pass YES to the cloneOnModify param to cause the
-    styles hash to be cloned before it is edited.  This is useful if you want
-    to start with a shared style hash and then optionally modify it for each
-    context.
-
-    @param {Hash} styles styles hash
-    @param {Boolean} cloneOnModify
-    @returns {Hash|SC.RenderContext} styles hash or receiver
+    @returns {Object} styles hash
   */
-  styles: function (styles, cloneOnModify) {
-    var attr, regex, match, jqElem;
+  styles: function (deprecatedArg) {
+    // Fast path!
+    if (deprecatedArg) {
+      //@if(debug)
+      SC.warn("Developer Warning: SC.RenderContext:styles() is no longer used to set styles, only to retrieve them.  Please use `setStyle(%@)` instead.".fmt(deprecatedArg));
+      //@endif
+      return this.setStyle(deprecatedArg);
+    }
 
-    // If we have an element, apply the styles directly to the element or if
-    // no styles, get them from the element.
-    if (this._elem) {
-      jqElem = this.$();
-
-      if (styles) {
-        // Remove all current styles and apply the new styles to the element.
-        jqElem.attr('style', '').css(styles);
-        this._styles = styles;
-
-        // Clone the styles if requested.
-        if (cloneOnModify) {
-          this._styles = SC.clone(this._styles);
-        }
-
-        this._stylesDidChange = YES;
-      } else if (!this._styles) {
+    if (!this._styles) {
+      if (this._elem) {
         // Get the styles from the element.
-        attr = jqElem.attr('style');
+        var attr = this.$().attr('style');
 
         if (attr && (attr = attr.toString()).length > 0) {
           // Ensure attributes are lower case for IE
           if (SC.browser.name === SC.BROWSER.ie) {
             attr = attr.toLowerCase();
           }
-          styles = {};
+          var styles = {},
+            match,
+            regex = this._STYLE_REGEX;
 
-          regex = this._STYLE_REGEX;
           regex.lastIndex = 0;
-
           while (match = regex.exec(attr)) {
             styles[this._camelizeStyleName(match[1])] = match[2];
           }
 
           this._styles = styles;
         } else {
-          // No styles on the element.
+          // No style on the element.
           this._styles = {};
         }
-      }
-
-      return this._styles;
-    } else if (styles) {
-      // Set the styles if passed.
-      this._styles = styles;
-
-      // Clone the styles if requested.
-      if (cloneOnModify) {
-        this._styles = SC.clone(this._styles);
-      }
-
-      this._stylesDidChange = YES;
-
-      return this;
-    } else {
-      // Get the current value of styles on the render context.
-      if (!this._styles) {
-        // Set the styles if it doesnt exist already.
+      } else {
         this._styles = {};
       }
-
-      return this._styles;
     }
+
+    return this._styles;
   },
 
+  /**
+    Adds the specified style to the current context.
+
+    This is a convenience method that simply calls setStyle(nameOrStyles, value).
+
+    @param {String|Object} nameOrStyles the name of a style or a hash of style names with values
+    @param {String|Number} value style value if a single style name for nameOrStyles is passed
+    @returns {SC.RenderContext} receiver
+  */
+  addStyle: function (nameOrStyles, value) {
+    //@if(debug)
+    // Notify when this function isn't being used properly (in debug mode only).
+    /*jshint eqnull:true*/
+    if (SC.typeOf(nameOrStyles) === SC.T_STRING && value == null) {
+      SC.warn("Developer Warning: SC.RenderContext:addStyle is not meant to be used to remove attributes by setting the value to null or undefined.  It would be more correct to use setStyle(%@, %@).".fmt(nameOrStyles, value));
+    }
+    //@endif
+    return this.setStyle(nameOrStyles, value);
+  },
+
+  /**
+    Removes the specified style from the current context.
+
+    This is a convenience method that simply calls setStyle(name, undefined).
+
+    @param {String} styleName the name of the style to remove
+    @returns {SC.RenderContext} receiver
+  */
+  removeStyle: function (styleName) {
+    return this.setStyle(styleName);
+  },
+
+  /** @deprecated */
+  css: function (nameOrStyles, value) {
+    //@if(debug)
+    SC.warn("Developer Warning: In order to simplify the API to a few core functions, SC.RenderContext:css() has been deprecated in favor of setStyle which performs the same function.  Please use `setStyle(%@, %@)` instead.".fmt(nameOrStyles, value));
+    //@endif
+    return this.setStyle(nameOrStyles, value);
+  },
+
+  /**
+    Sets or unsets a style or styles on the context.
+
+    Passing a value will set the value for the given style name, passing a null
+    or undefined value will unset any current value for the given style name and
+    remove it.
+
+    Be aware that setStyle() only effects the styles specified.  If there
+    are existing styles that are not modified by a call to setStyle(), they
+    will remain on the context.  For example, if you call addStyle('margin-left', 10)
+    and addStyle('margin-right', 10) followed by setClass({ 'margin-right': null }),
+    the 'margin-right' style will be removed, but the 'margin-left' style will
+    be unaffected.
+
+    If you want to call setStyle() or addStyle() to replace all styles, you
+    should call resetStyles() method first.
+
+    When used in render() for example,
+
+        MyApp.MyView = SC.View.extend({
+
+          textColor: 'blue',
+
+          // By default this syle will not appear since the value is null.
+          fontFamily: null,
+
+          render: function (context) {
+            var textColor = this.get('textColor'),
+              fontFamily = this.get('fontFamily');
+
+            // Set the `color` and `fontFamily` styles.
+            context.setStyle({
+              color: textColor,
+              fontFamily: fontFamily
+            });
+          }
+        });
+
+    @param {String|Object} nameOrStyles the name of a style or a hash of style names with values
+    @param {String|Number} [value] style value if a single style name for nameOrStyles is passed
+    @returns {SC.RenderContext} receiver
+  */
+  setStyle: function (nameOrStyles, value) {
+    var didChange = NO,
+      styles = this.styles();
+
+    // Add the updated styles to the internal styles object.
+    if (SC.typeOf(nameOrStyles) === SC.T_HASH) {
+      for (var key in nameOrStyles) {
+        if (!nameOrStyles.hasOwnProperty(key)) continue;
+
+        value = nameOrStyles[key];
+
+        didChange = this._deleteComboStyles(styles, key) || didChange;
+        didChange = this._setOnHash(styles, key, value) || didChange;
+      }
+    } else {
+      didChange = this._deleteComboStyles(styles, nameOrStyles);
+      didChange = this._setOnHash(styles, nameOrStyles, value) || didChange;
+    }
+
+    if (didChange) {
+      this._stylesDidChange = YES;
+
+      // Apply the styles to the element if we have one already.
+      if (this._elem) {
+        this.$().attr('style', '').css(styles);
+      }
+    }
+
+    return this;
+  },
+
+  /** @private */
   _deleteComboStyles: function (styles, key) {
     var comboStyles = SC.COMBO_STYLES[key],
         didChange = NO, tmp;
 
     if (comboStyles) {
-
       for (var idx = 0, idxLen = comboStyles.length; idx < idxLen; idx++) {
         tmp = comboStyles[idx];
         if (styles[tmp]) {
@@ -784,93 +920,68 @@ SC.RenderContext = SC.Builder.create(
         }
       }
     }
+
+    return didChange;
+  },
+
+  /** @private Sets or unsets the key:value on the hash and returns whether a change occurred. */
+  _setOnHash: function (hash, key, value) {
+    /*jshint eqnull:true*/
+    var cur = hash[key],
+      didChange = NO;
+
+    if (cur == null && value != null) {
+      hash[key] = value;
+      didChange = YES;
+    } else if (cur != null && value == null) {
+      delete hash[key];
+      didChange = YES;
+    } else if (cur != value) {
+      hash[key] = value;
+      didChange = YES;
+    }
+
     return didChange;
   },
 
   /**
-    Clears all of the tag's styles.
+    Removes all styles from the context.
+
+    Be aware that setStyle() only effects the styles specified.  If there
+    are existing styles that are not modified by a call to setStyle(), they
+    will remain on the context.  For example, if you call addStyle('margin-left', 10)
+    and addStyle('margin-right', 10) followed by setClass({ 'margin-right': null }),
+    the 'margin-right' style will be removed, but the 'margin-left' style will
+    be unaffected.
+
+    If you want to call setStyle() or addStyle() to replace all styles, you
+    should call this method first.
+
     @returns {SC.RenderContext} receiver
    */
   resetStyles: function () {
-    this.styles({});
-    return this;
-  },
+    var didChange = NO,
+      styles = this.styles();
 
+    // Check for changes (i.e. are there any properties in the object).
+    for (var key in styles) {
+      if (!styles.hasOwnProperty(key)) continue;
 
-  /**
-    Apply the passed styles to the tag.  You can pass either a single key
-    value pair or a hash of styles.  Note that if you set a style on an
-    existing element, it will replace any existing styles on the element.
-
-    @param {String|Hash} nameOrStyles the style name or a hash of styles
-    @param {String|Number} value style value if string name was passed
-    @returns {SC.RenderContext} receiver
-  */
-  addStyle: function (nameOrStyles, value) {
-    if (this._elem) {
-      this.$().css(nameOrStyles, value);
-      return this;
+      didChange = YES;
     }
 
-    // get the current hash of styles.  This will extract the styles and
-    // clone them if needed.  This will get the actual styles hash so we can
-    // edit it directly.
-    var key, didChange = NO, styles = this.styles();
-
-    // simple form
-    if (typeof nameOrStyles === SC.T_STRING) {
-      if (value === undefined) { // reader
-        return styles[nameOrStyles];
-      } else { // writer
-        didChange = this._deleteComboStyles(styles, nameOrStyles);
-        if (styles[nameOrStyles] !== value) {
-          styles[nameOrStyles] = value;
-          didChange = YES;
-        }
-        if (didChange) this._stylesDidChange = YES;
-      }
-
-    // bulk form
-    } else {
-      for (key in nameOrStyles) {
-        if (!nameOrStyles.hasOwnProperty(key)) continue;
-        didChange = didChange || this._deleteComboStyles(styles, key);
-        value = nameOrStyles[key];
-        if (styles[key] !== value) {
-          styles[key] = value;
-          didChange = YES;
-        }
-      }
-      if (didChange) this._stylesDidChange = YES;
-    }
-
-    return this;
-  },
-
-  /**
-    Removes the named style from the style hash.
-
-    Note that if you delete a style, the style will not actually be removed
-    from the style hash.  Instead, its value will be set to null.
-
-    @param {String} styleName
-    @returns {SC.RenderContext} receiver
-  */
-  removeStyle: function (styleName) {
-    if (this._elem) {
-      this.$().css(styleName, null);
-      return this;
-    }
-
-    // avoid case where no styles have been defined
-    if (!this._styles) return this;
-
-    // get styles hash.  this will clone if needed.
-    var styles = this.styles();
-    if (styles[styleName]) {
-      styles[styleName] = null;
+    // Reset.
+    this._styles = {};
+    if (didChange) {
       this._stylesDidChange = YES;
+
+      // Apply the styles to the element if we have one already.
+      if (this._elem) {
+        this.$().attr('style', '');
+      }
     }
+
+    return this;
   },
 
   // ..........................................................
@@ -878,65 +989,178 @@ SC.RenderContext = SC.Builder.create(
   //
 
   /**
-    Sets the named attribute on the tag.  Note that if you set the 'class'
-    attribute or the 'styles' attribute, it will be ignored.  Use the
-    relevant class name and style methods instead.
+    Retrieves the current attributes for the context, less the class and style
+    attributes.
 
-    @param {String|Hash} nameOrAttrs the attr name or hash of attrs.
-    @param {String} value attribute value if attribute name was passed
-    @returns {SC.RenderContext} receiver
+    If you retrieve the attributes hash to edit it, you must pass the hash back
+    to setAttr in order for it to be applied to the element on rendering.
+
+    Use classes() or styles() to get those specific attributes.
+
+    @returns {Object} attributes hash
   */
+  attrs: function () {
+    if (!this._attrs) {
+      if (this._elem) {
+        // Get the attributes from the element.
+        var attrs = {},
+          elAttrs = this._elem.attributes,
+          length = elAttrs.length;
+
+        for (var i = 0, attr, name; i < length; i++) {
+          attr = elAttrs.item(i);
+          name = attr.nodeName;
+          if (name.match(/^(?!class|style).*$/i)) {
+            attrs[name] = attr.nodeValue;
+          }
+        }
+
+        this._attrs = attrs;
+      } else {
+        this._attrs = {};
+      }
+    }
+
+    return this._attrs;
+  },
+
+  /** @deprecated */
   attr: function (nameOrAttrs, value) {
-    if (this._elem) {
-      this.$().attr(nameOrAttrs, value);
-      return this;
-    }
+    // Fast path.
+    if (nameOrAttrs) {
 
-
-    var key, attrs = this._attrs, didChange = NO;
-    if (!attrs) this._attrs = attrs = {};
-
-    // simple form
-    if (typeof nameOrAttrs === SC.T_STRING) {
-      if (value === undefined) { // getter
-        return attrs[nameOrAttrs];
-      } else { // setter
-        if (attrs[nameOrAttrs] !== value) {
-          attrs[nameOrAttrs] = value;
-          this._attrsDidChange = YES;
-        }
+      if (SC.typeOf(nameOrAttrs) === SC.T_HASH || value !== undefined) {
+        //@if(debug)
+        SC.warn("Developer Warning: SC.RenderContext:attr() is no longer used to set attributes.  Please use `setAttr()` instead, which matches the API of setClass() and setStyle().");
+        //@endif
+        return this.setAttr(nameOrAttrs, value);
+      } else {
+        //@if(debug)
+        SC.warn("Developer Warning: SC.RenderContext:attr() is no longer used to get an attribute.  Please use `attrs()` instead to retrieve the hash and check properties on it directly, which matches the API of classes() and styles().");
+        //@endif
+        return this.attrs()[nameOrAttrs];
       }
-
-    // bulk form
-    } else {
-      for (key in nameOrAttrs) {
-        if (!nameOrAttrs.hasOwnProperty(key)) continue;
-        value = nameOrAttrs[key];
-        if (attrs[key] !== value) {
-          attrs[key] = value;
-          didChange = YES;
-        }
-      }
-      if (didChange) this._attrsDidChange = YES;
     }
+    //@if(debug)
+    SC.warn("Developer Warning: SC.RenderContext:attr() is no longer used to get attributes.  Please use `attrs()` instead, which matches the API of classes() and styles().");
+    //@endif
 
-    return this;
+    return this.attrs();
   },
 
   /**
-    Sets the named attribute on the tag.  Note that if you set the 'class'
-    attribute or the 'styles' attribute, it will be ignored.  Use the
-    relevant class name and style methods instead.
+    Adds the specified attribute to the current context.
 
-    @param {String|Hash} nameOrAttrs the attr name or hash of attrs.
-    @param {String} value attribute value if attribute name was passed
+    This is a convenience method that simply calls setAttr(nameOrAttrs, value).
+
+    @param {String|Object} nameOrAttrs the name of an attribute or a hash of attribute names with values
+    @param {String|Number} value attribute value if a single attribute name for nameOrAttrs is passed
+    @returns {SC.RenderContext} receiver
+  */
+  addAttr: function (nameOrAttrs, value) {
+    //@if(debug)
+    // Notify when this function isn't being used properly (in debug mode only).
+    /*jshint eqnull:true*/
+    if (SC.typeOf(nameOrAttrs) === SC.T_STRING && value == null) {
+      SC.warn("Developer Warning: SC.RenderContext:addAttr is not meant to be used to remove attributes by setting the value to null or undefined.  It would be more correct to use setAttr(%@, %@).".fmt(nameOrAttrs, value));
+    }
+    //@endif
+    return this.setAttr(nameOrAttrs, value);
+  },
+
+  /**
+    Removes the specified attribute from the current context.
+
+    This is a convenience method that simply calls setAttr(name, undefined).
+
+    @param {String} styleName the name of the attribute to remove
     @returns {SC.RenderContext} receiver
   */
   removeAttr: function (name) {
-    if (this._elem) {
-      this.$().removeAttr(name);
-      return this;
+    //@if(debug)
+    // Notify when this function isn't being used properly (in debug mode only).
+    if (name.match(/^(class|style)$/i)) {
+      SC.error("Developer Error: SC.RenderContext:removeAttr is not meant to be used to remove the style or class attribute.  You should use resetClasses() or resetStyles().");
     }
+    //@endif
+
+    return this.setAttr(name);
+  },
+
+  /**
+    Sets or unsets an attribute or attributes on the context.  Passing a value
+    will set the value for the given attribute name, passing a null or undefined
+    value will unset any current value for the given attribute name and remove
+    it.
+
+    When used in render() for example,
+
+        MyApp.MyView = SC.View.extend({
+
+          // By default this syle will not appear since the value is null.
+          title: null,
+
+          render: function (context) {
+            var title = this.get('title');
+
+            // Set the `title` and `data-test` attributes.
+            context.setAttr({
+              title: title,
+              'data-test': SC.buildMode === 'test'
+            });
+          }
+        });
+
+    @param {String|Object} nameOrAttrs the name of an attribute or a hash of attribute names with values
+    @param {String} [value] attribute value if a single attribute name for nameOrAttrs is passed
+    @returns {SC.RenderContext} receiver
+  */
+  setAttr: function (nameOrAttrs, value) {
+    var didChange = NO,
+      attrs = this.attrs(),
+      key;
+
+    //@if(debug)
+    // Add some developer support to prevent improper use (in debug mode only).
+    var foundImproperUse = NO;
+    if (SC.typeOf(nameOrAttrs) === SC.T_HASH) {
+
+      for (key in nameOrAttrs) {
+        if (key.match(/^(class|style)$/i)) {
+          foundImproperUse = YES;
+        }
+      }
+    } else if (nameOrAttrs.match(/^(class|style)$/i)) {
+      foundImproperUse = YES;
+    }
+
+    if (foundImproperUse) {
+      SC.error("Developer Error: setAttr() is not meant to set class or style attributes.  Only classes and styles added with their relevant methods will be used.  Please use setClass() or setStyle().");
+    }
+    //@endif
+
+    // Add the updated attrs to the internal attrs object.
+    if (SC.typeOf(nameOrAttrs) === SC.T_HASH) {
+      for (key in nameOrAttrs) {
+        if (!nameOrAttrs.hasOwnProperty(key)) continue;
+
+        value = nameOrAttrs[key];
+        didChange = this._setOnHash(attrs, key, value) || didChange;
+      }
+    } else {
+      didChange = this._setOnHash(attrs, nameOrAttrs, value);
+    }
+
+    if (didChange) {
+      this._attrsDidChange = YES;
+
+      // Apply the attrs to the element if we have one already.
+      if (this._elem) {
+        this.$().attr(nameOrAttrs, value);
+      }
+    }
+
+    return this;
   },
 
   //
@@ -981,16 +1205,6 @@ SC.RenderContext = SC.Builder.create(
   }
 
 });
-
-/**
-  html is an alias for push().  Makes the object more CoreQuery like
-*/
-SC.RenderContext.fn.html = SC.RenderContext.fn.push;
-
-/**
-  css is an alias for addStyle().  This this object more CoreQuery like.
-*/
-SC.RenderContext.fn.css = SC.RenderContext.fn.addStyle;
 
 (function () {
   var _escapeHTMLRegex = /[&<>]/g, _escapeHTMLMethod = function (match) {

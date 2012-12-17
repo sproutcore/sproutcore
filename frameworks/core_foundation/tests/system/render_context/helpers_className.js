@@ -10,55 +10,55 @@
 var context = null;
 
 // ..........................................................
-// classNames()
-// 
-module("SC.RenderContext#classNames", {
+// classes()
+//
+module("SC.RenderContext#classes", {
   setup: function() {
     context = SC.RenderContext() ;
   }
 });
 
 test("returns empty array if no current class names", function() {
-  same(context.classNames(), [], 'classNames') ;
+  same(context.classes(), [], 'classes') ;
 });
 
-test("classNames(array) updates class names", function() {
+test("addClass(array) updates class names", function() {
   var cl = 'bar baz'.w();
-  equals(context.classNames(cl), context, "returns receiver");
-  same(context.classNames(), cl, 'class names');
+  equals(context.addClass(cl), context, "returns receiver");
+  same(context.classes(), cl, 'class names');
 });
 
-test("returns classNames if set", function() {
-  context.classNames('bar'.w());
-  same(context.classNames(), ['bar'], 'classNames');
+test("returns classes if set", function() {
+  context.addClass('bar');
+  same(context.classes(), ['bar'], 'classNames');
 });
 
-test("clone on next retrieval if classNames(foo) set with cloneOnModify=YES", function() {
+test("clone on retrieval if addClass(array) set", function() {
   var cl = 'foo bar'.w();
-  context.classNames(cl, YES);
-  
-  var result = context.classNames();
+  context.addClass(cl);
+
+  var result = context.classes();
   ok(result !== cl, "class name is NOT same instance");
   same(result, cl, "but arrays are equivalent");
-  
-  equals(result, context.classNames(), "2nd retrieval is same instance");
+
+  equals(result, context.classes(), "2nd retrieval is same instance");
 });
 
 test("extracts class names from element on first retrieval", function() {
   var elem = document.createElement('div');
   SC.$(elem).attr('class', 'foo bar');
   context = SC.RenderContext(elem);
-  
-  var result = context.classNames();
+
+  var result = context.classes();
   same(result, ['foo', 'bar'], 'extracted class names');
 });
 
 // ..........................................................
 // hasClass()
-// 
+//
 module("SC.RenderContext#hasClass", {
   setup: function() {
-    context = SC.RenderContext().classNames('foo bar'.w()) ;
+    context = SC.RenderContext().addClass('foo bar'.w()) ;
   }
 });
 
@@ -72,7 +72,7 @@ test("should return false if context classNames does not have class name", funct
 
 test("should return false if context has no classNames", function() {
   context = context.begin('div');
-  ok(context.classNames().length===0, 'precondition - context has no classNames');
+  ok(context.classes().length === 0, 'precondition - context has no classNames');
   equals(NO, context.hasClass('foo'), 'should not have foo');
 });
 
@@ -81,7 +81,7 @@ test("should return false if context has no classNames", function() {
 //
 module("SC.RenderContext#addClass", {
   setup: function() {
-    context = SC.RenderContext().classNames(['foo']) ;
+    context = SC.RenderContext().addClass('foo') ;
   }
 });
 
@@ -91,33 +91,33 @@ test("should return receiver", function() {
 
 test("should add class name to existing classNames array on currentTag", function() {
   context.addClass('bar');
-  same(context.classNames(), ['foo', 'bar'], 'has classes');
-  equals(context._classNamesDidChange, YES, "note did change");
+  same(context.classes(), ['foo', 'bar'], 'has classes');
+  equals(context._classesDidChange, YES, "note did change");
 });
 
 test("should only add class name once - does nothing if name already in array", function() {
-  same(context.classNames(), ['foo'], 'precondition - has foo classname');
-  context._classNamesDidChange = NO; // reset  to pretend once not modified
-  
+  same(context.classes(), ['foo'], 'precondition - has foo classname');
+  context._classesDidChange = NO; // reset  to pretend once not modified
+
   context.addClass('foo');
-  same(context.classNames(), ['foo'], 'no change');
-  equals(context._classNamesDidChange, NO, "note did not change");
+  same(context.classes(), ['foo'], 'no change');
+  equals(context._classesDidChange, NO, "note did not change");
 });
 
 // ..........................................................
 // removeClass()
-// 
+//
 module("SC.RenderContext#removeClass", {
   setup: function() {
-    context = SC.RenderContext().classNames(['foo', 'bar']) ;
+    context = SC.RenderContext().addClass(['foo', 'bar']) ;
   }
 });
 
 test("should remove class if already in classNames array", function() {
-  ok(context.classNames().indexOf('foo')>=0, "precondition - has foo");
-  
+  ok(context.classes().indexOf('foo')>=0, "precondition - has foo");
+
   context.removeClass('foo');
-  ok(context.classNames().indexOf('foo')<0, "does not have foo");
+  ok(context.classes().indexOf('foo')<0, "does not have foo");
 });
 
 test('should return receiver', function() {
@@ -125,25 +125,25 @@ test('should return receiver', function() {
 });
 
 test("should do nothing if class name not in array", function() {
-  context._classNamesDidChange = NO; // reset to pretend not modified
+  context._classesDidChange = NO; // reset to pretend not modified
   context.removeClass('imaginary');
-  same(context.classNames(), 'foo bar'.w(), 'did not change');
-  equals(context._classNamesDidChange, NO, "note did not change");
+  same(context.classes(), 'foo bar'.w(), 'did not change');
+  equals(context._classesDidChange, NO, "note did not change");
 });
 
 test("should do nothing if there are no class names", function() {
   context = context.begin();
-  same(context.classNames(), [], 'precondition - no class names');
-  context._classNamesDidChange = NO; // reset to pretend not modified
-  
+  same(context.classes(), [], 'precondition - no class names');
+  context._classesDidChange = NO; // reset to pretend not modified
+
   context.removeClass('foo');
-  same(context.classNames(), [], 'still no class names -- and no errors');
-  equals(context._classNamesDidChange, NO, "note did not change");
+  same(context.classes(), [], 'still no class names -- and no errors');
+  equals(context._classesDidChange, NO, "note did not change");
 });
 
 // ..........................................................
 // setClass
-// 
+//
 module("SC.RenderContext#setClass", {
   setup: function() {
     context = SC.RenderContext().addClass('foo') ;
