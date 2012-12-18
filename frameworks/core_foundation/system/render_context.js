@@ -635,7 +635,7 @@ SC.RenderContext = SC.Builder.create(
     if (SC.typeOf(nameOrClasses) === SC.T_ARRAY) {
       //@if(debug)
       SC.warn("Developer Warning: SC.RenderContext:setClass() should not be passed an array of class names.  To remain compatible with calls to the deprecated classNames() function, all classes on the current context will be replaced with the given array, but it would be more accurate in the future to call resetClasses() and addClass() or setClass(hash) instead.  Please update your code accordingly.");
-      //endif
+      //@endif
       this.resetClasses();
       classes = this.classes();
 
