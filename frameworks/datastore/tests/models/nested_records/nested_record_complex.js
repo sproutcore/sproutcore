@@ -246,6 +246,7 @@ function() {
 
   // Test Child Record creation
   oldP = testParent.get('person');
+  oldKey = oldP.get('id');
   testParent.set('person', {
     type: 'Person',
     name: 'Al Gore',
@@ -266,7 +267,6 @@ function() {
   storeRef = store.find(NestedRecord.Person, key);
   ok(storeRef, 'after a set() with an object, checking that the store has the instance of the child record with proper primary key');
   equals(p, storeRef, "after a set with an object, checking the parent reference is the same as the direct store reference");
-  oldKey = oldP.get('id');
   ok((oldKey === key), 'check to see that the old child record has the same key as the new child record');
 
   // Check for changes on the child bubble to the parent.
