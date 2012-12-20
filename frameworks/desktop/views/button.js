@@ -394,7 +394,7 @@ SC.ButtonView = SC.View.extend(SC.Control,
     // Invoke the actual action method after a small delay to give the user a
     // chance to see the highlight. This is especially important if the button
     // closes a pane, for example.
-    this.invokeLater('triggerAction', 200, evt);
+    this.invokeLater('triggerAction', SC.ButtonView.TRIGGER_DELAY, evt);
     return YES;
   },
 
@@ -871,7 +871,13 @@ SC.ButtonView = SC.View.extend(SC.Control,
 
 }) ;
 
+/**
+  How long to wait before triggering the action.
 
+  @constant
+  @type {Number}
+*/
+SC.ButtonView.TRIGGER_DELAY = 200;
 
 /**
   The delay after which "click" behavior should transition to "click and hold"
