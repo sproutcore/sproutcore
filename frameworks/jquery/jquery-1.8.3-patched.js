@@ -3852,8 +3852,8 @@ var cachedruns,
 
 	// Check if getElementById returns elements by name
 	// Check if getElementsByName privileges form controls or returns elements by ID
-	assertUsableName = assert(function() {
-		MSApp.execUnsafeLocalFunction(function( div ) {
+	assertUsableName = assert(function(div) {
+		MSApp.execUnsafeLocalFunction(function() {
 			// Inject content
 			div.id = expando + 0;
 			div.innerHTML = "<a name='" + expando + "'></a><div name='" + expando + "'></div>";
@@ -5229,8 +5229,8 @@ if ( document.querySelectorAll ) {
 			}
 		});
 
-		assert(function() {
-			MSApp.execUnsafeLocalFunction(function( div ) {
+		assert(function(div) {
+			MSApp.execUnsafeLocalFunction(function() {
 
 				// Opera 10-12/IE9 - ^= $= *= and empty values
 				// Should not select anything
