@@ -10,8 +10,8 @@
 sc_require('system/plan');
 
 /** @static
-  The runner will automatically run the default CoreTest.plan when the 
-  document is fully loaded.  It will also act as a delegate on the plan, 
+  The runner will automatically run the default CoreTest.plan when the
+  document is fully loaded.  It will also act as a delegate on the plan,
   logging the output to the screen or console.
 
   @since SproutCore 1.0
@@ -19,7 +19,7 @@ sc_require('system/plan');
 
 
 CoreTest.Runner = {
-  
+
   /**
     The CoreTest plan.  If not set, a default plan will be created.
   */
@@ -32,20 +32,20 @@ CoreTest.Runner = {
     var len = arguments.length,
         ret = CoreTest.beget(this),
         idx ;
-        
+
     for(idx=0;idx<len;idx++) CoreTest.mixin(ret, arguments[len]);
     if (!ret.plan) ret.plan = CoreTest.Plan.create({ delegate: ret });
     window.resizeTo(1400, 800);
-    Q$(window).load(function() { ret.begin(); });      
+    Q$(document).ready(function() { ret.begin(); });
     return ret ;
   },
-  
+
   begin: function() {
     var plan = CoreTest.plan;
     plan.delegate = this;
     plan.run();
   },
-  
+
   planDidBegin: function(plan) {
     // setup the report DOM element.
     var str = [
@@ -87,7 +87,7 @@ CoreTest.Runner = {
     this.report.find('.useragent').html(navigator.userAgent);
     this.logq = this.report.find('tbody');
     this.testCount = 0 ;
-    
+
     // listen to change event
     var runner = this;
     this.hidePassedCheckbox = this.report.find('.hide-passed input');
@@ -102,10 +102,10 @@ CoreTest.Runner = {
 
     Q$('body').append(this.report);
   },
-  
+
   hidePassedTestsDidChange: function() {
     var checked = this.hidePassedCheckbox.is(':checked');
-        
+
     if (checked) {
       this.logq.addClass('hide-clean');
     } else {
@@ -120,22 +120,22 @@ CoreTest.Runner = {
 
   planDidFinish: function(plan, r) {
     this.flush();
-    
+
     var result = this.report.find('.testresult .status');
     var str = CoreTest.fmt('<span>Completed %@ tests in %@ msec. </span>'
-              +'<span class="total">%@</span> total assertions: ', r.tests, 
+              +'<span class="total">%@</span> total assertions: ', r.tests,
               r.runtime, r.total);
-    
+
     if (r.passed > 0) {
       str += CoreTest.fmt('&nbsp;<span class="passed">%@ passed</span>', r.passed);
     }
-    
+
     if (r.failed > 0) {
       str += CoreTest.fmt('&nbsp;<span class="failed">%@ failed</span>', r.failed);
     }
 
     if (r.errors > 0) {
-      str += CoreTest.fmt('&nbsp;<span class="errors">%@ error%@</span>', 
+      str += CoreTest.fmt('&nbsp;<span class="errors">%@ error%@</span>',
             r.errors, (r.errors !== 1 ? 's' : ''));
     }
 
@@ -153,15 +153,15 @@ CoreTest.Runner = {
       this.report.find('.hide-passed').addClass('disabled')
         .find('input').attr('disabled', true);
       if (this.errors) this.errors.length = 0;
-    }     
+    }
     if(CoreTest.showUI) Q$('.core-test').css("right", "360px");
     result.html(str);
-    
+
     CoreTest.finished = true;
-    
+
     if (this.errors) CoreTest.errors=this.errors.join('');
 
-    
+
     // Unload the SproutCore event system so that the user can select the text
     // of the various events.  (It is handy when looking at failed tests.)
     if (SC  &&  SC.Event  &&  SC.Event.unload) {
@@ -171,17 +171,17 @@ CoreTest.Runner = {
       catch (e) {}
     }
   },
-  
+
   planDidRecord: function(plan, module, test, assertions, timings) {
-    var name = test, 
-        s    = { passed: 0, failed: 0, errors: 0, warnings: 0 }, 
-        len  = assertions.length, 
-        clean = '', 
+    var name = test,
+        s    = { passed: 0, failed: 0, errors: 0, warnings: 0 },
+        len  = assertions.length,
+        clean = '',
         idx, cur, q;
-    
+
     for(idx=0;idx<len;idx++) s[assertions[idx].result]++;
     if ((s.failed + s.errors + s.warnings) === 0) clean = "clean" ;
-    
+
     if (module) name = module.replace(/\n/g, '<br />') + " module: " + test ;
     name = CoreTest.fmt('%@ - %@msec', name, timings.total_end - timings.total_begin);
     // place results into a single string to append all at once.
@@ -209,15 +209,15 @@ CoreTest.Runner = {
           '<th style="background:grey; color:white" class="desc" colspan="2">'+
           '%@ (<span class="passed">%@</span>, <span class="failed">%@</span>'+
           ', <span class="errors">%@</span>, <span class="warnings">%@</span>'+
-          ')</th></tr>', clean, name, s.passed, s.failed, s.errors, s.warnings));  
+          ')</th></tr>', clean, name, s.passed, s.failed, s.errors, s.warnings));
     }
-    
+
     len = assertions.length;
     for(idx=0;idx<len;idx++) {
       cur = assertions[idx];
       clean = cur.result === CoreTest.OK ? 'clean' : 'dirty';
       logstr.push(CoreTest.fmt('<tr class="%@"><td class="desc">%@</td>'
-          +'<td class="action %@">%@</td></tr>', clean, cur.message, cur.result, 
+          +'<td class="action %@">%@</td></tr>', clean, cur.message, cur.result,
           (cur.result || '').toUpperCase()));
       if(clean=='dirty'){
         this.errors.push(CoreTest.fmt('<tr class="%@"><td class="desc">%@</td>'
@@ -225,11 +225,11 @@ CoreTest.Runner = {
         (cur.result || '').toUpperCase()));
       }
     }
-    
+
     this.testCount++;
     this.resultStr = CoreTest.fmt("Running – Completed %@ tests so far.", this.testCount);
   },
-  
+
   // called when the plan takes a break.  Good time to flush HTML output.
   planDidPause: function(plan) {
     if(!this._cacheResultSelector){
@@ -242,17 +242,17 @@ CoreTest.Runner = {
 
     if (this.showProgress) { this.flush(); }
   },
-  
+
   // flush any pending HTML changes...
   flush: function() {
     var logstr = this.logstr,
         resultStr = this.resultStr,
         result = this.report.find('.testresult .status');
-        
+
     if (logstr) this.logq.append(this.logstr.join('')) ;
-    
+
     if (resultStr) result.html(resultStr);
     this.resultStr = this.logstr = null ;
   }
-  
+
 };
