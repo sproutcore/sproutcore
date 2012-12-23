@@ -824,8 +824,8 @@ SC.Object.prototype = {
   },
 
   /**
-    Invokes the passed method once at the end of the current runloop,
-    before any other methods (including events) are processed. This is useful
+    Invokes the passed method once at the end of the current run of the run loop,
+    before any other methods (including new events) are processed. This is useful
     for situations where you know you need to update something, but due to
     the way the run loop works, you can't actually do the update until the
     run loop has completed.
@@ -872,29 +872,13 @@ SC.Object.prototype = {
   },
 
   /**
-    Invokes the passed method once at the beginning of the next runloop,
-    before any other methods (including events) are processed. This is useful
-    for situations where you know you need to update something, but due to
-    the way the run loop works, you can't actually do the update until the
-    run loop has completed.
+    Invokes the passed target/method pair once at the beginning of the next
+    run of the run loop, before any other methods (including events) are
+    processed.  Use this to defer painting to make views more responsive or
+    to ensure that the layer has been updated before using it.
 
-    A simple example is setting the selection on a collection controller to a
-    newly created object. Because the collection controller won't have its
-    content collection updated until later in the run loop, setting the
-    selection immediately will have no effect. In this situation, you could do
-    this instead:
-
-          // Creates a new MyRecord object and sets the selection of the
-          // myRecord collection controller to the new object.
-          createObjectAction: function(sender, evt) {
-            // create a new record and add it to the store
-            var obj = MyRecord.newRecord() ;
-
-            // update the collection controller's selection
-            MyApp.myRecordCollectionController.invokeNext( function() {
-              this.set('selection', [obj]) ;
-            });
-          }
+    If you call this with the same target/method pair multiple times it will
+    only invoke the pair only once at the beginning of the next runloop.
 
     Note that in development mode only, the object and method that call this
     method will be recorded, for help in debugging scheduled code.
@@ -932,7 +916,7 @@ SC.Object.prototype = {
   */
   concatenatedProperties: ['concatenatedProperties', 'initMixin', 'destroyMixin']
 
-} ;
+};
 
 // bootstrap the constructor for SC.Object.
 SC.Object.prototype.constructor = SC.Object;

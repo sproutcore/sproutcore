@@ -252,17 +252,14 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
 
   /**
     Invokes the passed target/method pair once at the beginning of the next
-    runloop, before any other methods (including events) are processed.
-    Use this to defer painting to make views more responsive.
+    run of the run loop, before any other methods (including events) are
+    processed.  Use this to defer painting to make views more responsive.
 
     If you call this with the same target/method pair multiple times it will
     only invoke the pair only once at the beginning of the next runloop.
 
     Usually you will not call this method directly but use invokeNext()
     defined on SC.Object.
-
-    Note that in development mode only, the object and method that call this
-    method will be recorded, for help in debugging scheduled code.
 
     @param {Object} target
     @param {Function} method
