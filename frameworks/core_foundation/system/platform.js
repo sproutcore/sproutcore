@@ -6,6 +6,15 @@
 // ==========================================================================
 
 /**
+  A constant indicating an unsupported method, property or other.
+
+  @static
+  @constant
+*/
+SC.UNSUPPORTED = '_sc_unsupported';
+
+
+/**
   This platform object allows you to conditionally support certain HTML5
   features.
 
@@ -19,11 +28,11 @@ SC.platform = SC.Object.create({
 
     @property
   */
-  scrollbarSize: function() {
+  scrollbarSize: function () {
     var tester = document.createElement("DIV"),
         child;
     tester.innerHTML = "<div style='height:1px;'></div>";
-    tester.style.cssText="position:absolute;width:100px;height:100px;overflow-y:visible;";
+    tester.style.cssText = "position:absolute;width:100px;height:100px;overflow-y:visible;";
 
     child = tester.childNodes[0];
     document.body.appendChild(tester);
@@ -32,7 +41,7 @@ SC.platform = SC.Object.create({
     var withScroller = child.innerWidth || child.clientWidth;
     document.body.removeChild(tester);
 
-    return noScroller-withScroller;
+    return noScroller - withScroller;
 
   }.property().cacheable(),
 
@@ -70,26 +79,19 @@ SC.platform = SC.Object.create({
   pinchToZoom:  SC.browser.os === SC.OS.ios,
 
   /**
-    YES if the current browser supports the `placeholder` attribute in `input` elements.
-  */
-  input: {
-    placeholder: ('placeholder' in document.createElement('input'))
-  },
-
-  /**
     A hash that contains properties that indicate support for new HTML5
     input attributes.
 
     For example, to test to see if the placeholder attribute is supported,
     you would verify that SC.platform.input.placeholder is YES.
   */
-  input: function(attributes) {
+  input: function (attributes) {
     var ret = {},
         len = attributes.length,
         elem = document.createElement('input'),
         attr, idx;
 
-    for (idx=0; idx < len; idx++) {
+    for (idx = 0; idx < len; idx++) {
       attr = attributes[idx];
 
       ret[attr] = !!(attr in elem);
@@ -109,15 +111,15 @@ SC.platform = SC.Object.create({
   standalone: !!navigator.standalone,
 
 
-  /**
-    Prefix for browser specific CSS attributes. Calculated later.
+  /** @deprecated Since version 1.10. Use SC.browser.cssPrefix.
+    Prefix for browser specific CSS attributes.
   */
-  cssPrefix: null,
+  cssPrefix: SC.browser.cssPrefix,
 
-  /**
-    Prefix for browser specific CSS attributes when used in the DOM. Calculated later.
+  /** @deprecated Since version 1.10. Use SC.browser.domPrefix.
+    Prefix for browser specific CSS attributes when used in the DOM.
   */
-  domCSSPrefix: null,
+  domCSSPrefix: SC.browser.domPrefix,
 
   /**
     Call this method to swap out the default mouse handlers with proxy methods
@@ -125,7 +127,7 @@ SC.platform = SC.Object.create({
 
     This is useful if you are debugging touch functionality on the desktop.
   */
-  simulateTouchEvents: function() {
+  simulateTouchEvents: function () {
     // Touch events are supported natively, no need for this.
     if (this.touch) {
       // @if (debug)
@@ -165,7 +167,7 @@ SC.platform = SC.Object.create({
 
     @param {Array} events Array of strings representing the events to remove
   */
-  removeEvents: function(events) {
+  removeEvents: function (events) {
     var idx, len = events.length, key;
     for (idx = 0; idx < len; idx++) {
       key = events[idx];
@@ -179,7 +181,7 @@ SC.platform = SC.Object.create({
     @param {String} evt The event to replace
     @param {Function} replacement The method that should be called instead
   */
-  replaceEvent: function(evt, replacement) {
+  replaceEvent: function (evt, replacement) {
     SC.Event.remove(document, evt, SC.RootResponder.responder, SC.RootResponder.responder[evt]);
     SC.Event.add(document, evt, this, replacement);
   },
@@ -190,13 +192,13 @@ SC.platform = SC.Object.create({
 
     If the altKey is depressed and pinch center not yet established, we will capture the mouse position.
   */
-  _simtouch_mousemove: function(evt) {
+  _simtouch_mousemove: function (evt) {
     if (!this._mousedown) {
       /*
         we need to capture when was the first spot that the altKey was pressed and use it as
         the center point of a pinch
        */
-      if(evt.altKey && this._pinchCenter === null) {
+      if (evt.altKey && this._pinchCenter === null) {
         this._pinchCenter = {
           pageX: evt.pageX,
           pageY: evt.pageY,
@@ -205,7 +207,7 @@ SC.platform = SC.Object.create({
           clientX: evt.clientX,
           clientY: evt.clientY
         };
-      } else if(!evt.altKey && this._pinchCenter !== null){
+      } else if (!evt.altKey && this._pinchCenter !== null) {
         this._pinchCenter = null;
       }
       return NO;
@@ -219,7 +221,7 @@ SC.platform = SC.Object.create({
     When simulating touch events, this method is called when mousedown events
     are received.
   */
-  _simtouch_mousedown: function(evt) {
+  _simtouch_mousedown: function (evt) {
     this._mousedown = YES;
 
     var manufacturedEvt = this.manufactureTouchEvent(evt, 'touchstart');
@@ -230,7 +232,7 @@ SC.platform = SC.Object.create({
     When simulating touch events, this method is called when mouseup events
     are received.
   */
-  _simtouch_mouseup: function(evt) {
+  _simtouch_mouseup: function (evt) {
     var manufacturedEvt = this.manufactureTouchEvent(evt, 'touchend'),
         ret = SC.RootResponder.responder.touchend(manufacturedEvt);
 
@@ -254,7 +256,7 @@ SC.platform = SC.Object.create({
     @param {String} type the type of event (e.g., touchstart)
     @returns {Event} the mouse event with an added changedTouches array
   */
-  manufactureTouchEvent: function(evt, type) {
+  manufactureTouchEvent: function (evt, type) {
     var realTouch, virtualTouch, realTouchIdentifier = this._simtouch_counter;
 
     realTouch = {
@@ -273,10 +275,9 @@ SC.platform = SC.Object.create({
     /*
       simulate pinch gesture
      */
-    if(evt.altKey && this._pinchCenter !== null)
-    {
+    if (evt.altKey && this._pinchCenter !== null) {
       //calculate the mirror position of the virtual touch
-      var pageX = this._pinchCenter.pageX + this._pinchCenter.pageX - evt.pageX ,
+      var pageX = this._pinchCenter.pageX + this._pinchCenter.pageX - evt.pageX,
           pageY = this._pinchCenter.pageY + this._pinchCenter.pageY - evt.pageY,
           screenX = this._pinchCenter.screenX + this._pinchCenter.screenX - evt.screenX,
           screenY = this._pinchCenter.screenY + this._pinchCenter.screenY - evt.screenY,
@@ -296,7 +297,7 @@ SC.platform = SC.Object.create({
         clientY: clientY
       };
 
-      evt.touches = [ realTouch , virtualTouch];
+      evt.touches = [realTouch, virtualTouch];
     }
     evt.changedTouches = evt.touches;
 
@@ -304,19 +305,24 @@ SC.platform = SC.Object.create({
   },
 
   /**
-    Whether the browser supports CSS transitions. Calculated later.
+    Whether the browser supports CSS animations.
   */
-  supportsCSSTransitions: NO,
+  supportsCSSAnimations: SC.browser.experimentalStyleNameFor('animation') !== SC.UNSUPPORTED,
 
   /**
-    Whether the browser supports 2D CSS transforms. Calculated later.
+    Whether the browser supports CSS transitions.
   */
-  supportsCSSTransforms: NO,
+  supportsCSSTransitions: SC.browser.experimentalStyleNameFor('transition') !== SC.UNSUPPORTED,
 
   /**
-    Whether the browser can properly handle 3D CSS transforms. Calculated later.
+    Whether the browser supports 2D CSS transforms.
   */
-  supportsCSS3DTransforms: NO,
+  supportsCSSTransforms: SC.browser.experimentalStyleNameFor('transform') !== SC.UNSUPPORTED,
+
+  /**
+    Whether the browser can properly handle 3D CSS transforms.
+  */
+  supportsCSS3DTransforms: SC.browser.experimentalStyleNameFor('perspective') !== SC.UNSUPPORTED,
 
   /**
     Whether the browser supports the application cache.
@@ -326,7 +332,7 @@ SC.platform = SC.Object.create({
   /**
     Whether the browser supports the hashchange event.
   */
-  supportsHashChange: function() {
+  supportsHashChange: function () {
     // Code copied from Modernizr which copied code from YUI (MIT licenses)
     // documentMode logic from YUI to filter out IE8 Compat Mode which false positives
     return ('onhashchange' in window) && (document.documentMode === undefined || document.documentMode > 7);
@@ -335,21 +341,21 @@ SC.platform = SC.Object.create({
   /**
     Whether the browser supports HTML5 history.
   */
-  supportsHistory: function() {
+  supportsHistory: function () {
     return !!(window.history && window.history.pushState);
   }(),
 
   /**
     Whether the browser supports IndexedDB.
   */
-  supportsIndexedDB: function() {
-    return !!(window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB || window.msIndexedDB || window.oIndexedDB);
+  supportsIndexedDB: function () {
+    return !!(window.indexedDB || window[SC.browser.domPrefix + 'IndexedDB']);
   }(),
 
   /**
     Whether the browser supports the canvas element.
   */
-  supportsCanvas: function() {
+  supportsCanvas: function () {
     return !!document.createElement('canvas').getContext;
   }(),
 
@@ -364,21 +370,6 @@ SC.platform = SC.Object.create({
   supportsWebSQL: ('openDatabase' in window),
 
   /**
-    The name of the transitionend event on this platform.  Calculated later.
-  */
-  transitionEndEventName: 'transitionend',
-
-  /**
-    The prefix of the transition style on this platform.  Calculated later.
-  */
-  transitionPrefix: '',
-
-  /**
-    The prefix of the transform style on this platform.  Calculated later.
-  */
-  transformPrefix: '',
-
-  /**
     Because iOS is slow to dispatch the window.onorientationchange event,
     we use the window size to determine the orientation on iOS devices
     and desktop environments when SC.platform.touch is YES (ie. when
@@ -391,12 +382,12 @@ SC.platform = SC.Object.create({
 
   /**
     Does this browser support the Apache Cordova (formerly phonegap) runtime?
-    
-    This requires that you (the engineer) manually include the cordova 
+
+    This requires that you (the engineer) manually include the cordova
     javascript library for the appropriate platform (Android, iOS, etc)
     in your code. There are various methods of doing this; creating your own
-    platform-specific index.rhtml is probably the easiest option. 
-    
+    platform-specific index.rhtml is probably the easiest option.
+
     WARNING: Using the javascript_libs Buildfile option for the cordova include
     will NOT work. The library will be included after your application code,
     by which time this property will already have been evaluated.
@@ -405,94 +396,199 @@ SC.platform = SC.Object.create({
     @see http://incubator.apache.org/cordova/
     @default NO
   */
-  // Check for the global cordova property. 
+  // Check for the global cordova property.
   cordova: (typeof window.cordova !== "undefined")
 
 });
 
-/* Calculate CSS Prefixes */
 
-(function(){
-  var userAgent = navigator.userAgent.toLowerCase();
-  if ((/webkit/).test(userAgent)) {
-    SC.platform.cssPrefix = 'webkit';
-    SC.platform.domCSSPrefix = 'Webkit';
-  } else if((/opera/).test( userAgent )) {
-    SC.platform.cssPrefix = 'opera';
-    SC.platform.domCSSPrefix = 'O';
-  } else if((/msie/).test( userAgent ) && !(/opera/).test( userAgent )) {
-    SC.platform.cssPrefix = 'ms';
-    SC.platform.domCSSPrefix = 'ms';
-  } else if((/mozilla/).test( userAgent ) && !(/(compatible|webkit)/).test( userAgent )) {
-    SC.platform.cssPrefix = 'moz';
-    SC.platform.domCSSPrefix = 'Moz';
-  }
-})();
+/** @private
+  Test the transition and animation event names of this platform.  We could hard
+  code event names into the framework, but at some point things would change and
+  we would get it wrong.  Instead we perform actual tests to find out the proper
+  names and only add the proper listeners.
+*/
+(function () {
+  // This will add 4 different variations of the named event listener and clean
+  // them up again.
+  // Note: we pass in capitalizedEventName, because we can't just capitalize
+  // the standard event name.  For example, in WebKit the standard transitionend
+  // event is named webkitTransitionEnd, not webkitTransitionend.
+  var executeTest = function (el, standardEventName, capitalizedEventName, cleanUpFunc) {
+    var domPrefix = SC.browser.domPrefix,
+      lowerDomPrefix = domPrefix.toLowerCase(),
+      eventNameKey = standardEventName + 'EventName',
+      callback = function (evt) {
+        var domPrefix = SC.browser.domPrefix,
+          lowerDomPrefix = domPrefix.toLowerCase(),
+          eventNameKey = standardEventName + 'EventName';
 
-/* Calculate transform support */
+        // Remove all the event listeners.
+        el.removeEventListener(standardEventName, callback, NO);
+        el.removeEventListener(lowerDomPrefix + standardEventName, callback, NO);
+        el.removeEventListener(lowerDomPrefix + capitalizedEventName, callback, NO);
+        el.removeEventListener(domPrefix + capitalizedEventName, callback, NO);
 
-(function(){
-  // a test element
-  var el = document.createElement("div");
+        // The cleanup timer re-uses this function and doesn't pass evt.
+        if (evt) {
+          SC.platform[eventNameKey] = evt.type;
 
-  // the css and javascript to test
-  var css_browsers = ["-o-", "-ms-", "-moz-", "-webkit-"],
-      test_browsers = ["O", "ms", "Moz", "Webkit"],
-      transEndEventNames = {
-         Webkit: 'webkitTransitionEnd',
-         Moz: 'transitionend',
-         O: 'oTransitionEnd',
-         ms: 'MsTransitionEnd'
+          // Don't allow the event to bubble, because SC.RootResponder will be
+          // adding event listeners as soon as the testing is complete.  It is
+          // important that SC.RootResponder's listeners don't catch the last
+          // test event.
+          evt.stopPropagation();
+        }
+
+        // Call the clean up function, pass in success state.
+        if (cleanUpFunc) { cleanUpFunc(!!evt); }
+        jQuery.holdReady(NO);
       };
 
-  // prepare css
-  var css = "", i = null, cssBrowser, iLen;
-  for (i = 0, iLen = css_browsers.length; i < iLen; i++) {
-    cssBrowser = css_browsers[i];
-    css += cssBrowser + "transition: all 1s linear;";
-    css += cssBrowser + "transform: translate(1px, 1px);";
-    css += cssBrowser + "perspective: 500px;";
+    // Set the initial value as unsupported.
+    SC.platform[eventNameKey] = SC.UNSUPPORTED;
+
+    // Try the various implementations.
+    // ex. transitionend, webkittransitionend, webkitTransitionEnd, WebkitTransitionEnd
+    el.addEventListener(standardEventName, callback, NO);
+    el.addEventListener(lowerDomPrefix + standardEventName, callback, NO);
+    el.addEventListener(lowerDomPrefix + capitalizedEventName, callback, NO);
+    el.addEventListener(domPrefix + capitalizedEventName, callback, NO);
+
+    // Clean up when we can be sure that testing is complete.  This can't be
+    // too short or the events will not have fired.
+    setTimeout(function () {
+      var success = SC.platform[eventNameKey] !== SC.UNSUPPORTED;
+
+      if (!success) {
+        // This is highly unlikely and should not occur, but continue on without support.
+        SC.warn('Unable to add a listener for %@ on this browser, it does not appear to be supported.'.fmt(standardEventName));
+
+        // Call back anyway to do the cleanup.
+        callback();
+      }
+
+      callback = null;
+    }, 100);
+
+    // Delay the ready event for the tests to complete.
+    jQuery.holdReady(YES);
+  };
+
+  // Set up and execute the transition event test.
+  if (SC.platform.supportsCSSTransitions) {
+    var transitionEl = document.createElement('div');
+
+    transitionEl.style[SC.browser.experimentalStyleNameFor('transition')] = 'all 1ms linear';
+    executeTest(transitionEl, 'transitionend', 'TransitionEnd', function (success) {
+      // If an end event never fired, we can't really support CSS transitions in SproutCore.
+      if (!success) {
+        SC.platform.supportsCSSTransitions = NO;
+      }
+
+      transitionEl.parentNode.removeChild(transitionEl);
+      transitionEl = null;
+    });
+
+    // Append the test element.
+    document.documentElement.appendChild(transitionEl);
+
+    // Break execution to allow the browser to update the DOM before altering the style.
+    setTimeout(function () {
+      transitionEl.style.opacity = '0';
+    });
   }
 
-  // set css text
-  el.style.cssText = css;
+  // Set up and execute the animation event test.
+  if (SC.platform.supportsCSSAnimations) {
+    var animationEl = document.createElement('div'),
+      keyframeprefix = SC.browser.experimentalStyleNameFor('animation') === 'animation' ? '' : SC.browser.cssPrefix,
+      keyframes = '@' + keyframeprefix + 'keyframes _sc_animation_test { from { opacity: 1; } to { opacity: 0; }}';
 
-  // Ensure that any browsers that drop the prefix continue to pass.
-  if (el.style.transition !== undefined) SC.platform.supportsCSSTransitions = YES;
-  if (el.style.transform !== undefined) SC.platform.supportsCSSTransforms = YES;
-  if (el.style.perspective !== undefined || el.style.perspectiveProperty !== undefined) SC.platform.supportsCSSTransitions = YES;
+    // Add a test animation rule to the first stylesheet (or create a stylesheet).
+    if (document.styleSheets && document.styleSheets.length) {
+      document.styleSheets[0].insertRule(keyframes, 0);
+    } else {
+      var style = document.createElement('style');
+      style.innerHTML = keyframes;
+      document.getElementsByTagName('head')[0].appendChild(style);
+    }
 
-  // test
-  var testBrowser;
-  for (i = 0, iLen=test_browsers.length; i < iLen; i++) {
-    testBrowser = test_browsers[i];
-    if (!SC.platform.supportsCSSTransitions && el.style[testBrowser + "Transition"] !== undefined) {
-      // Determine the proper transition style names for this browser
-      SC.platform.transitionPrefix = testBrowser;
-      SC.platform.transitionEndEventName = transEndEventNames[testBrowser];
-      SC.platform.supportsCSSTransitions = YES;
-    }
+    // Set up and execute the animation event test.
+    // NOTE: If the duration is too short, it will fail to iterate.
+    animationEl.style[SC.browser.experimentalStyleNameFor('animation')] = '_sc_animation_test 1ms linear';
 
-    if (!SC.platform.supportsCSSTransforms && el.style[testBrowser + "Transform"] !== undefined) {
-      SC.platform.transformPrefix = css_browsers[i];
-      SC.platform.supportsCSSTransforms = YES;
-    }
+    // NOTE: We could test start, but it's extra work and easier just to test the end
+    // and infer the start event name from it.  Keeping this code for example.
+    // executeTest(animationEl, 'animationstart', 'AnimationStart', function (success) {
+    //   // If an iteration start never fired, we can't really support CSS transitions in SproutCore.
+    //   if (!success) {
+    //     SC.platform.supportsCSSAnimations = NO;
+    //   }
+    // });
 
-    if (!SC.platform.supportsCSS3DTransforms && (el.style[testBrowser + "Perspective"] !== undefined || el.style[testBrowser + "PerspectiveProperty"] !== undefined)) {
-      SC.platform.supportsCSS3DTransforms = YES;
-    }
+    // NOTE: Testing iteration event support proves very problematic.  Many
+    // browsers can't iterate less than several milliseconds which means we
+    // have to wait too long to find out this event name.  Instead we test
+    // the end only and infer the iteration event name from it. Keeping this
+    // code for example, but it wont' work reliably unless the animation style
+    // is something like '_sc_animation_test 30ms linear' (i.e. ~60ms wait time)
+    // executeTest(animationEl, 'animationiteration', 'AnimationIteration', function (success) {
+    //   // If an iteration event never fired, we can't really support CSS transitions in SproutCore.
+    //   if (!success) {
+    //     SC.platform.supportsCSSAnimations = NO;
+    //   }
+    // });
+
+    executeTest(animationEl, 'animationend', 'AnimationEnd', function (success) {
+      // If an end event never fired, we can't really support CSS animations in SproutCore.
+      if (success) {
+        // Infer the start and iteration event names.
+        var domPrefix = SC.browser.domPrefix,
+          lowerDomPrefix = domPrefix.toLowerCase(),
+          endEventName = SC.platform.animationendEventName;
+
+        switch (endEventName) {
+        case lowerDomPrefix + 'animationend':
+          SC.platform.animationstartEventName = lowerDomPrefix + 'animationstart';
+          SC.platform.animationiterationEventName = lowerDomPrefix + 'animationiteration';
+          break;
+        case lowerDomPrefix + 'AnimationEnd':
+          SC.platform.animationstartEventName = lowerDomPrefix + 'AnimationStart';
+          SC.platform.animationiterationEventName = lowerDomPrefix + 'AnimationIteration';
+          break;
+        case domPrefix + 'AnimationEnd':
+          SC.platform.animationstartEventName = domPrefix + 'AnimationStart';
+          SC.platform.animationiterationEventName = domPrefix + 'AnimationIteration';
+          break;
+        default:
+          SC.platform.animationstartEventName = 'animationstart';
+          SC.platform.animationiterationEventName = 'animationiteration';
+        }
+
+      } else {
+        SC.platform.supportsCSSAnimations = NO;
+      }
+
+      // Clean up.  Don't blindly remove the same index, instead find the test
+      // rule's index for sure. (optimized for the index to be still where it was inserted)
+      outer:
+      for (var i = 0, iLength = document.styleSheets.length, styleSheet; i < iLength; i++) {
+        styleSheet = document.styleSheets[i];
+        for (var j = 0, jLength = styleSheet.cssRules.length, rule; j < jLength; j++) {
+          rule = styleSheet.cssRules[j];
+          if (rule.name === '_sc_animation_test') {
+            styleSheet.deleteRule(j);
+            break outer;
+          }
+        }
+      }
+
+      animationEl.parentNode.removeChild(animationEl);
+      animationEl = null;
+    });
+
+    // Break execution to allow the browser to update the DOM before altering the style.
+    document.documentElement.appendChild(animationEl);
   }
-
-  // unfortunately, we need a bit more to know FOR SURE that 3D is allowed
-  // Commented out unless someone can determine why is this code here?
-  // try{
-  //   if (window.media && window.media.matchMedium) {
-  //     if (!window.media.matchMedium('(-webkit-transform-3d)')) SC.platform.supportsCSS3DTransforms = NO;
-  //   } else if(window.styleMedia && window.styleMedia.matchMedium) {
-  //     if (!window.styleMedia.matchMedium('(-webkit-transform-3d)')) SC.platform.supportsCSS3DTransforms = NO;
-  //   }
-  // }catch(e){
-  //   //Catch to support IE9 exception
-  //   SC.platform.supportsCSS3DTransforms = NO;
-  // }
 })();

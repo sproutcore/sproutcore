@@ -29,14 +29,14 @@ SC.mixin(SC.browser,
     @param other {String} The version to compare against.
     @return {Number} The difference between the versions at the first difference.
   */
-  compare: function(version, other) {
+  compare: function (version, other) {
     var coerce,
         parts,
         tests;
 
     // Ensure that the versions are Strings.
     if (typeof version === 'number' || typeof other === 'number') {
-      SC.warn('SC.browser.compare(): Versions compared against Numbers may not provide accurate results.  Use a String of decimal separated Numbers instead.')
+      SC.warn('SC.browser.compare(): Versions compared against Numbers may not provide accurate results.  Use a String of decimal separated Numbers instead.');
       version = String(version);
       other = String(other);
     }
@@ -95,6 +95,167 @@ SC.mixin(SC.browser,
     }
 
     return 0;
+  },
+
+
+  /**
+    This simple method allows you to more safely use experimental properties and
+    methods in current and future browsers.
+
+    Using browser specific methods and properties is a risky coding practice.
+    With sufficient testing, you may be able to match prefixes to today's
+    browsers, but this is prone to error and not future proof.  For instance,
+    if a property becomes standard and the browser drops the prefix, your code
+    could suddenly stop working.
+
+    Instead, use SC.browser.experimentalNameFor(target, standardName), which
+    will check the existence of the standard name on the target and if not found
+    will try different camel-cased versions of the name with the current
+    browser's prefix appended.
+
+    If it is still not found, SC.UNSUPPORTED will be returned, allowing
+    you a chance to recover from the lack of browser support.
+
+    Note that `experimentalNameFor` is not really meant for determining browser
+    support, only to ensure that using browser prefixed properties and methods
+    is safe.  Instead, SC.platform provides several properties that can be used
+    to determine support for a certain platform feature, which should be
+    used before calling `experimentalNameFor` to safely use the feature.
+
+    For example,
+
+        // Checks for IndexedDB support first on the current platform.
+        if (SC.platform.supportsIndexedDB) {
+          var db = window.indexedDB,
+            // Example return values: 'getDatabaseNames', 'webkitGetDatabaseNames', 'MozGetDatabaseNames', SC.UNSUPPORTED.
+            getNamesMethod = SC.browser.experimentalNameFor(db, 'getDatabaseNames'),
+            names;
+
+            if (getNamesMethod === SC.UNSUPPORTED) {
+              // Work without it.
+            } else {
+              names = db[getNamesMethod](...);
+            }
+        } else {
+          // Work without it.
+        }
+
+    @param target {Object} The target for the method.
+    @param methodName {String} The standard name of the property or method we wish to check on the target.
+    @returns Return value of the method or SC.UNSUPPORTED if no method found.
+  */
+  experimentalNameFor: function (target, standardName) {
+    /*jshint eqnull:true*/
+    var cachedNames = this._cachedNames,
+      targetGuid = SC.guidFor(target);
+
+    // Fast path & cache initialization.
+    if (!cachedNames) {
+      cachedNames = this._cachedNames = {};
+      cachedNames[targetGuid] = {};
+    } else if (!cachedNames[targetGuid]) {
+      cachedNames[targetGuid] = {};
+    } else if (cachedNames[targetGuid][standardName]) {
+      return cachedNames[targetGuid][standardName];
+    }
+
+    // Test the property name.
+    var ret = standardName;
+
+    // ex. window.indexedDB.getDatabaseNames
+    if (target[ret] == null) {
+      // ex. window.WebKitCSSMatrix
+      ret = SC.browser.classPrefix + standardName.capitalize();
+      if (target[ret] == null) {
+        // No need to check if the prefix is the same for properties and classes
+        if (SC.browser.domPrefix === SC.browser.classPrefix) {
+          // Always show a warning so that production usage information has a
+          // better chance of filtering back to the developer(s).
+          SC.warn("SC.browser.experimentalNameFor(): target, %@, does not have property `%@` or `%@`.".fmt(target, standardName, ret));
+          ret = SC.UNSUPPORTED;
+        } else {
+          // ex. window.indexedDB.webkitGetDatabaseNames
+          ret = SC.browser.domPrefix + standardName.capitalize();
+          if (target[ret] == null) {
+            // Always show a warning so that production usage information has a
+            // better chance of filtering back to the developer(s).
+            SC.warn("SC.browser.experimentalNameFor(): target, %@, does not have property `%@`, '%@' or `%@`.".fmt(target, standardName, SC.browser.classPrefix + standardName.capitalize(), ret));
+            ret = SC.UNSUPPORTED;
+          }
+        }
+      }
+    }
+
+    // Cache the experimental property name (even SC.UNSUPPORTED) for quick repeat access.
+    cachedNames[targetGuid][standardName] = ret;
+
+    return ret;
+  },
+
+  /**
+    This method returns safe style names for current and future browsers.
+
+    Using browser specific style prefixes is a risky coding practice.  With
+    sufficient testing, you may be able to match styles across today's most
+    popular browsers, but this is a lot of work and not future proof.  For
+    instance, if a browser drops the prefix and supports the standard style
+    name, your code will suddenly stop working.
+
+    Instead, use SC.browser.experimentalStyleNameFor(standardStyleName), which
+    will test support for the standard style name and if not found will try the
+    prefixed version with the current browser's prefix appended.
+
+    Note: the proper style name is only determined once per standard style
+    name and cached.  Therefore, calling experimentalStyleNameFor repeatedly
+    has no performance effect.
+
+    For example,
+
+        var boxShadowName = SC.browser.experimentalStyleNameFor('boxShadow'),
+          el = document.createElement('div');
+
+        // `boxShadowName` may be "boxShadow", "WebkitBoxShadow", "msBoxShadow", etc. depending on the browser support.
+        el.style[boxShadowName] = "rgb(0,0,0) 0px 3px 5px";
+
+    @param standardStyleName {String} The standard name of the experimental style as it should be un-prefixed.  This is the DOM property name, which is camel-cased.
+    @returns Future-proof style name for use in the current browser or SC.UNSUPPORTED if no style support found.
+  */
+  experimentalStyleNameFor: function (standardStyleName) {
+    // Test the style name.
+    var el = this._testEl;
+
+    // Create a test element and cache it for repeated use.
+    if (!el) { el = this._testEl = document.createElement("div"); }
+
+    return this.experimentalNameFor(el.style, standardStyleName);
+  },
+
+  /**
+    This method returns safe CSS names for current and future browsers.
+
+    For example,
+
+        var boxShadowCSS = SC.browser.experimentalCSSNameFor('boxShadow'),
+          el = document.createElement('div');
+
+        // `boxShadowCSS` may be "box-shadow", "-webkit-box-shadow", "-ms-box-shadow", etc. depending on the browser support.
+        el.style.cssText = boxShadowCSS + " rgb(0,0,0) 0px 3px 5px";
+
+    @param standardStyleName {String} The standard name of the experimental style as it should be un-prefixed.  This is the DOM property name, which is camel-cased.
+    @returns Future-proof CSS name for use in the current browser or SC.UNSUPPORTED if no style support found.
+  */
+  experimentalCSSNameFor: function (standardStyleName) {
+    var ret = standardStyleName.camelize(),
+      styleName = this.experimentalStyleNameFor(standardStyleName);
+
+    if (styleName === SC.UNSUPPORTED) {
+      ret = SC.UNSUPPORTED;
+    } else if (styleName !== standardStyleName) {
+      // If the DOM property is prefixed, then the CSS name should be prefixed.
+      ret = SC.browser.cssPrefix + ret;
+    }
+
+    return ret;
   }
 
 });

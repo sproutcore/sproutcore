@@ -26,6 +26,36 @@ SC.BROWSER = {
 };
 
 /**
+  The list of browser specific object prefixes, these are matched to the
+  browser engine.
+
+  @static
+  @constant
+*/
+SC.CLASS_PREFIX = {
+  gecko: 'Moz',
+  opera: 'O',
+  presto: 'O',
+  trident: 'Ms', // Note the uppercase 'M'
+  webkit: 'WebKit' // Note the uppercase 'K'
+};
+
+/**
+  The list of browser specific CSS prefixes, these are matched to the
+  browser engine.
+
+  @static
+  @constant
+*/
+SC.CSS_PREFIX = {
+  gecko: '-moz-',
+  opera: '-o-',
+  presto: '-o-',
+  trident: '-ms-',
+  webkit: '-webkit-'
+};
+
+/**
   The list of devices that are automatically identified.
 
   @static
@@ -39,6 +69,21 @@ SC.DEVICE = {
   iphone: 'iphone',
   ipod: 'ipod',
   mobile: 'mobile'
+};
+
+/**
+  The list of browser specific DOM prefixes, these are matched to the
+  browser engine.
+
+  @static
+  @constant
+*/
+SC.DOM_PREFIX = {
+  gecko: 'Moz',
+  opera: 'O',
+  presto: 'O',
+  trident: 'ms',
+  webkit: 'Webkit'
 };
 
 /**
@@ -76,7 +121,7 @@ SC.OS = {
 
   @private
 */
-SC.detectBrowser = function(userAgent, language) {
+SC.detectBrowser = function (userAgent, language) {
   var browser = {},
       device,
       engineAndVersion,
@@ -93,8 +138,8 @@ SC.detectBrowser = function(userAgent, language) {
 
   // Calculations to determine the device.  See SC.DEVICE.
   device =
-    userAgent.match( new RegExp('(android|ipad|iphone|ipod|blackberry)') ) ||
-    userAgent.match( new RegExp('(mobile)') ) ||
+    userAgent.match(new RegExp('(android|ipad|iphone|ipod|blackberry)')) ||
+    userAgent.match(new RegExp('(mobile)')) ||
     ['', SC.DEVICE.desktop];
 
   /**
@@ -115,15 +160,15 @@ SC.detectBrowser = function(userAgent, language) {
 
   nameAndVersion =
     // Match the specific names first, avoiding commonly spoofed browsers.
-    userAgent.match( new RegExp('(opera|chrome|firefox|android|blackberry)' + conExp + numExp) ) ||
-    userAgent.match( new RegExp('(ie|safari)' + conExp + numExp) ) ||
+    userAgent.match(new RegExp('(opera|chrome|firefox|android|blackberry)' + conExp + numExp)) ||
+    userAgent.match(new RegExp('(ie|safari)' + conExp + numExp)) ||
     ['', SC.BROWSER.unknown, '0'];
 
   // If the device is an iOS device, use SC.BROWSER.safari for browser.name.
   if (isIOSDevice) { nameAndVersion[1] = SC.BROWSER.safari; }
 
   // If a `Version` number is found, use that over the `Name` number
-  override = userAgent.match( new RegExp('(version)' + conExp + numExp) );
+  override = userAgent.match(new RegExp('(version)' + conExp + numExp));
   if (override) { nameAndVersion[2] = override[2]; }
   // If there is no `Version` in Safari, don't use the Safari number since it is
   // the Webkit number.
@@ -146,8 +191,8 @@ SC.detectBrowser = function(userAgent, language) {
   // Calculations to determine the engine and version.  See SC.ENGINE.
   engineAndVersion =
     // Match the specific engines first, avoiding commonly spoofed browsers.
-    userAgent.match( new RegExp('(presto)' + conExp + numExp) ) ||
-    userAgent.match( new RegExp('(opera|trident|webkit|gecko)' + conExp + numExp) ) ||
+    userAgent.match(new RegExp('(presto)' + conExp + numExp)) ||
+    userAgent.match(new RegExp('(opera|trident|webkit|gecko)' + conExp + numExp)) ||
     ['', SC.BROWSER.unknown, '0'];
 
   // If the browser is SC.BROWSER.ie, use SC.ENGINE.trident.
@@ -160,7 +205,7 @@ SC.detectBrowser = function(userAgent, language) {
   if (override) { engineAndVersion[2] = browser.version; }
 
   // If a `rv` number is found, use that over the engine number.
-  override = userAgent.match( new RegExp('(rv)' + conExp + numExp) );
+  override = userAgent.match(new RegExp('(rv)' + conExp + numExp));
   if (override) { engineAndVersion[2] = override[2]; }
 
 
@@ -177,6 +222,30 @@ SC.detectBrowser = function(userAgent, language) {
   */
   browser.engineVersion = engineAndVersion[2];
 
+  /**
+    The prefix of browser specific methods on this platform.
+
+    @name SC.browser.domPrefix
+    @type String
+  */
+  browser.domPrefix = SC.DOM_PREFIX[browser.engine];
+
+  /**
+    The prefix of browser specific properties on this platform.
+
+    @name SC.browser.classPrefix
+    @type String
+  */
+  browser.classPrefix = SC.CLASS_PREFIX[browser.engine];
+
+  /**
+    The prefix of browser specific CSS properties on this platform.
+
+    @name SC.browser.cssPrefix
+    @type String
+  */
+  browser.cssPrefix = SC.CSS_PREFIX[browser.engine];
+
 
   // If we don't know the name of the browser, use the name of the engine.
   if (browser.name === SC.BROWSER.unknown) { browser.name = browser.engine; }
@@ -184,10 +253,10 @@ SC.detectBrowser = function(userAgent, language) {
   // Calculations to determine the os and version.  See SC.OS.
   osAndVersion =
     // Match the specific names first, avoiding commonly spoofed os's.
-    userAgent.match( new RegExp('(blackberry)') ) ||
-    userAgent.match( new RegExp('(android|iphone(?: os)|windows(?: nt))' + conExp + numExp) ) ||
-    userAgent.match( new RegExp('(os|mac(?: os)(?: x))' + conExp + numExp) ) ||
-    userAgent.match( new RegExp('(linux)') ) ||
+    userAgent.match(new RegExp('(blackberry)')) ||
+    userAgent.match(new RegExp('(android|iphone(?: os)|windows(?: nt))' + conExp + numExp)) ||
+    userAgent.match(new RegExp('(os|mac(?: os)(?: x))' + conExp + numExp)) ||
+    userAgent.match(new RegExp('(linux)')) ||
     [null, SC.BROWSER.unknown, '0'];
 
   // Normalize the os name.
@@ -450,10 +519,15 @@ SC.detectBrowser = function(userAgent, language) {
     - browser.osVersion               ex. '10.6'
     - browser.engine                  ex. SC.ENGINE.webkit
     - browser.engineVersion           ex. '533.29'
+    - browser.cssPrefix               ex. '-webkit-'
+    - browser.classPrefix            ex. 'WebKit'
+    - browser.domPrefix               ex. 'webkit'
 
   Note: User agent sniffing does not provide guaranteed results and spoofing may
   affect the accuracy.  Therefore, as a general rule, it is much better
-  to rely on the browser's verified capabilities in SC.platform.
+  to rely on the browser's verified capabilities in SC.platform. But if you must
+  write browser specific code, understand that SC.browser does an exceptional
+  job at identifying the current browser.
 
   Based on the unit test samples, the most stable browser properties appear to
   be `engine` and `engineVersion`.
