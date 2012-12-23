@@ -375,7 +375,7 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
 });
 
 
-//@if (debug)
+//@if(debug)
  /**
   Will return the recent stack as a hash with numerical keys, for nice output
   in some browsers’ debuggers.  The “recent” stack is capped at 6 entries.
@@ -395,8 +395,7 @@ SC._getRecentStack = function () {
     // Skip ourselves!
     if (first) {
       first = NO;
-    }
-    else {
+    } else {
       functionName = currentFunction.displayName || currentFunction.toString().substring(0, 40);
       stack[i++]   = functionName;
     }
