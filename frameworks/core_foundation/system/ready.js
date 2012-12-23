@@ -5,11 +5,10 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/*global main */
 
 SC.BENCHMARK_LOG_READY = YES;
 
-sc_require('system/event') ;
+sc_require('system/event');
 
 SC.mixin({
   isReady: NO,
@@ -43,30 +42,30 @@ SC.mixin({
     @param method {Function} method name or function to execute
     @returns {SC}
   */
-  ready: function(target, method) {
+  ready: function (target, method) {
     var queue = SC._readyQueue;
 
     // normalize
     if (method === undefined) {
-      method = target; target = null ;
+      method = target;
+      target = null;
     } else if (SC.typeOf(method) === SC.T_STRING) {
-      method = target[method] ;
+      method = target[method];
     }
 
-    if(SC.isReady) {
-      jQuery(document).ready(function() { method.call(target); });
-    }
-    else {
-      if(!queue) SC._readyQueue = [];
-      SC._readyQueue.push(function() { method.call(target); });
+    if (SC.isReady) {
+      jQuery(document).ready(function () { method.call(target); });
+    } else {
+      if (!queue) SC._readyQueue = [];
+      SC._readyQueue.push(function () { method.call(target); });
     }
 
-    return this ;
+    return this;
   },
 
   onReady: {
-    done: function() {
-      if(SC.isReady) return;
+    done: function () {
+      if (SC.isReady) return;
 
       SC.isReady = true;
 
@@ -82,19 +81,19 @@ SC.mixin({
 
       var queue = SC._readyQueue, idx, len;
 
-      if(queue) {
-        for(idx=0,len=queue.length;idx<len;idx++) {
+      if (queue) {
+        for (idx = 0, len = queue.length; idx < len; idx++) {
           queue[idx].call();
         }
         SC._readyQueue = null;
       }
 
-      if(window.main && !SC.suppressMain && (SC.mode === SC.APP_MODE)) { window.main(); }
+      if (window.main && !SC.suppressMain && (SC.mode === SC.APP_MODE)) { window.main(); }
       SC.RunLoop.end();
     }
   }
 
-}) ;
+});
 
 // let apps ignore the regular onReady handling if they need to
 if (!SC.suppressOnReady) {
