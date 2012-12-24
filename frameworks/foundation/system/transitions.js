@@ -331,12 +331,12 @@ SC.mixin(SC.ContainerView,
       width = frame.width;
 
       if (currentContent) {
+        // If another transition is pushed on, adjust its start position.
+        var liveAdjustments = currentContent.get('liveAdjustments');
         currentContent.adjust({ bottom: null, right: null, height: height, width: width });
 
-        // If another transition is pushed on, adjust the start position
-        jqueryEl = currentContent.$();
-        adjustLeft += parseFloat(jqueryEl.css('left'));
-        adjustTop += parseFloat(jqueryEl.css('top'));
+        adjustLeft += liveAdjustments.left;
+        adjustTop += liveAdjustments.top;
       }
 
       if (newContent) {
@@ -365,7 +365,9 @@ SC.mixin(SC.ContainerView,
 
       // Don't reset the newContent if it is just being animated off by another
       // newer content.
-      if (newContent && !newContent.layoutStyleCalculator._activeAnimations[key]) {
+      if (newContent &&
+          newContent.layoutStyleCalculator._activeAnimations &&
+          !newContent.layoutStyleCalculator._activeAnimations[key]) {
         newContent.set('layout', { bottom: 0, left: 0, right: 0, top: 0 });
       }
 
