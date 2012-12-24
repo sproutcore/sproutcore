@@ -10,6 +10,7 @@ sc_require("views/view/layout");
 sc_require("views/view/layout_style");
 
 SC.View.reopen({
+
   /**
     Setting wantsAcceleratedLayer to YES will use transforms to move the
     layer when available. On some platforms transforms are hardware accelerated.
@@ -19,28 +20,8 @@ SC.View.reopen({
   /**
     Specifies whether transforms can be used to move the layer.
   */
-  hasAcceleratedLayer: function(){
-    if (this.get('wantsAcceleratedLayer') && SC.platform.supportsCSS3DTransforms) {
-      var layout = this.get('layout'),
-          animations = layout.animate,
-          AUTO = SC.LAYOUT_AUTO,
-          key;
+  hasAcceleratedLayer: function () {
+    return (SC.platform.supportsCSSTransforms && this.get('wantsAcceleratedLayer') && this.get('isFixedLayout'));
+  }.property('wantsAcceleratedLayer', 'isFixedLayout').cacheable()
 
-      if (animations && (animations.top || animations.left)) {
-        for (key in animations) {
-          // If we're animating other transforms at different speeds, don't use acceleratedLayer
-          if (SC.CSS_TRANSFORM_MAP[key] &&
-              ((animations.top &&
-                animations.top.duration !== animations[key].duration) ||
-               (animations.left &&
-                animations.left.duration !== animations[key].duration))) {
-            return NO;
-          }
-        }
-      }
-
-      return this.get('isFixedLayout');
-    }
-    return NO;
-  }.property('wantsAcceleratedLayer').cacheable()
 });

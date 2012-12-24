@@ -824,24 +824,21 @@ SC.View.reopen(
           previousHeight = previousLayout.height;
           if (previousLayout !== undefined) {
             currentHeight = currentLayout.height;
-            if (previousHeight === currentHeight) didResize = NO;
+            if (previousHeight === currentHeight) {
+              didResize = NO;
+            }
           }
         }
       }
     }
 
-    this.beginPropertyChanges() ;
-    this.notifyPropertyChange('hasAcceleratedLayer');
-    this.notifyPropertyChange('layoutStyle') ;
     if (didResize) {
       this.viewDidResize();
-    }
-    else {
+    } else {
       // Even if we didn't resize, our frame might have changed.
       // viewDidResize() handles this in the other case.
       this._viewFrameDidChange();
     }
-    this.endPropertyChanges() ;
 
     // notify layoutView...
     var layoutView = this.get('layoutView');
