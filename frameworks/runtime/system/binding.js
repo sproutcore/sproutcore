@@ -875,7 +875,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     if (placeholder === undefined) {
       placeholder = SC.MULTIPLE_PLACEHOLDER ;
     }
-    return this.oneWay(fromPath).transform(function(value, isForward, binding) {
+    return this.from(fromPath).transform(function(value, isForward, binding) {
       if (value && value.isEnumerable) {
         var len = value.get('length');
         value = (len>1) ? placeholder : (len<=0) ? null : value.firstObject();
@@ -894,7 +894,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   */
   notEmpty: function(fromPath, placeholder) {
     if (placeholder === undefined) placeholder = SC.EMPTY_PLACEHOLDER ;
-    return this.oneWay(fromPath).transform(function(value, isForward, binding) {
+    return this.from(fromPath).transform(function(value, isForward, binding) {
       if (SC.none(value) || (value === '') || (SC.isArray(value) && (value.get ? value.get('length') : value.length)=== 0)) {
         value = placeholder ;
       }
@@ -912,7 +912,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   */
   notNull: function(fromPath, placeholder) {
     if (placeholder === undefined) placeholder = SC.EMPTY_PLACEHOLDER ;
-    return this.oneWay(fromPath).transform(function(value, isForward, binding) {
+    return this.from(fromPath).transform(function(value, isForward, binding) {
       if (SC.none(value)) value = placeholder ;
       return value ;
     }) ;
@@ -926,7 +926,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @returns {SC.Binding} this
   */
   multiple: function(fromPath) {
-    return this.oneWay(fromPath).transform(function(value, isForward, binding) {
+    return this.from(fromPath).transform(function(value, isForward, binding) {
       if (!SC.isArray(value)) value = (value == null) ? [] : [value] ;
       return value ;
     }) ;
@@ -941,7 +941,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @returns {SC.Binding} this
   */
   bool: function(fromPath) {
-    return this.oneWay(fromPath).transform(function(value, isForward, binding) {
+    return this.from(fromPath).transform(function(value, isForward, binding) {
       var t = SC.typeOf(value) ;
       if (t === SC.T_ERROR) return value ;
       return (t == SC.T_ARRAY) ? (value.length > 0) : (value === '') ? NO : !!value ;
