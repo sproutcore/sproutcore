@@ -295,6 +295,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   */
   segmentViewClass: SC.SegmentView,
 
+  valueAlwaysMultiple: NO,
 
   /** @private
     The following properties are used to map items to child views. Item keys
@@ -1085,15 +1086,17 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     }
 
     // normalize back to non-array form
-    switch(value.get('length')) {
-      case 0:
-        value = null;
-        break;
-      case 1:
-        value = value.objectAt(0);
-        break;
-      default:
-        break;
+    if (!this.get('valueAlwaysMultiple')) {
+      switch(value.get('length')) {
+        case 0:
+          value = null;
+          break;
+        case 1:
+          value = value.objectAt(0);
+          break;
+        default:
+          break;
+      }
     }
 
     // also, trigger target if needed.
