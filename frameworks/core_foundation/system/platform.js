@@ -469,7 +469,7 @@ SC.platform = SC.Object.create({
       }
 
       callback = null;
-    }, 100);
+    }, 500);
 
     // Delay the ready event for the tests to complete.
     jQuery.holdReady(YES);
@@ -515,7 +515,6 @@ SC.platform = SC.Object.create({
     }
 
     // Set up and execute the animation event test.
-    // NOTE: If the duration is too short, it will fail to iterate.
     animationEl.style[SC.browser.experimentalStyleNameFor('animation')] = '_sc_animation_test 1ms linear';
 
     // NOTE: We could test start, but it's extra work and easier just to test the end
