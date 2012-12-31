@@ -321,7 +321,6 @@ SC.mixin(SC.ContainerView,
       var adjustLeft = 0,
         adjustTop = 0,
         frame = container.get('frame'),
-        jqueryEl,
         left = 0,
         top = 0,
         height,
@@ -335,19 +334,26 @@ SC.mixin(SC.ContainerView,
         var liveAdjustments = currentContent.get('liveAdjustments');
         currentContent.adjust({ bottom: null, right: null, height: height, width: width });
 
-        adjustLeft += liveAdjustments.left;
-        adjustTop += liveAdjustments.top;
+        adjustLeft = liveAdjustments.left;
+        adjustTop = liveAdjustments.top;
       }
 
       if (newContent) {
         switch (options.direction) {
-        case 'right': left = -width + adjustLeft; break;
-        case 'up': top = height + adjustTop; break;
-        case 'down': top = -height + adjustTop; break;
-        default: left = width + adjustLeft;
+        case 'right':
+          left = -width + adjustLeft;
+          break;
+        case 'up':
+          top = height + adjustTop;
+          break;
+        case 'down':
+          top = -height + adjustTop;
+          break;
+        default:
+          left = width + adjustLeft;
         }
 
-        newContent.adjust({ bottom: null, left: left, right: null, top: top, height: height, width: width });
+        newContent.adjust({ bottom: null, right: null, left: left, top: top, height: height, width: width });
         container.appendChild(newContent);
       }
     },

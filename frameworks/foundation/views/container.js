@@ -296,7 +296,6 @@ SC.ContainerView = SC.View.extend(
     var currentContent = this._currentContent,
       currentTransition = this._currentTransition,
       options,
-      self = this,
       shouldDestroyCurrentContent,
       transition = this.get('transition');
 
@@ -325,15 +324,15 @@ SC.ContainerView = SC.View.extend(
       transition.run(this, currentContent, newContent, options, function () {
         // Clean up the transition.
         if (transition.teardown) {
-          transition.teardown(self, currentContent, newContent, options);
+          transition.teardown(this, currentContent, newContent, options);
         }
 
         // Clean up view we created.
         if (shouldDestroyCurrentContent) { currentContent.destroy(); }
 
-        self._lastContent = newContent;
-        if (--self._transitionCount === 0) { // remember, -- decrements the value and returns updated value
-          self.set('isTransitioning', false);
+        this._lastContent = newContent;
+        if (--this._transitionCount === 0) { // remember, -- decrements the value and returns updated value
+          this.set('isTransitioning', false);
         }
       });
 
