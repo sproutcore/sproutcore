@@ -400,7 +400,7 @@
     module('ACCELERATED LAYOUT VARIATIONS', {
       setup: function(){
         commonSetup.setup();
-        child.wantsAcceleratedLayer = YES;
+        child.set('wantsAcceleratedLayer', YES);
       },
 
       teardown: commonSetup.teardown
@@ -415,7 +415,7 @@
       var with_f = { x: 10, y: 10, width: 50, height: 50} ;
 
       performLayoutTest(layout, no_f, s, with_f, s, YES) ;
-    }) ;
+    });
 
     test("layout {top, left, bottom, right}", function() {
 
