@@ -36,7 +36,9 @@ SC.mixin(SC.browser,
 
     // Ensure that the versions are Strings.
     if (typeof version === 'number' || typeof other === 'number') {
-      SC.warn('SC.browser.compare(): Versions compared against Numbers may not provide accurate results.  Use a String of decimal separated Numbers instead.');
+      //@if(debug)
+      SC.warn('Developer Warning: SC.browser.compare(): Versions compared against Numbers may not provide accurate results.  Use a String of decimal separated Numbers instead.');
+      //@endif
       version = String(version);
       other = String(other);
     }
@@ -75,10 +77,12 @@ SC.mixin(SC.browser,
   // which could cause unexpected results.  As well, there was no way to
   // compare the actual browser version or OS version.
   compareVersion: function () {
-    SC.warn('SC.browser.compareVersion() has been deprecated.  Please ' +
+    //@if(debug)
+    SC.warn('Developer Warning: SC.browser.compareVersion() has been deprecated.  Please ' +
         'use SC.browser.compare() instead.  Example: ' +
         'SC.browser.compareVersion(16,0,912) < 0 becomes ' +
         'SC.browser.compare(SC.browser.engineVersion, \'16.0.912\').');
+    //@endif
 
     if (this._versionSplit === undefined) {
       var coerce = function (part) {
