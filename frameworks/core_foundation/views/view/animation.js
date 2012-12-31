@@ -204,6 +204,7 @@ SC.View.reopen(
       optionsDidChange = NO,
       hash, layout,
       optionsType,
+      pendingAnimations = this._pendingAnimations,
       timing;
 
     //@if(debug)
@@ -254,7 +255,7 @@ SC.View.reopen(
       SC.warn("Developer Warning: SC.View:animate() was called with a duration of 0 seconds.  The view will be adjusted and the callback will fire immediately in the next run loop.");
       //@endif
       this.adjust(hash);
-      this.layoutStyleCalculator.runAnimationCallback(options, null, NO);
+      this.runAnimationCallback(options, null, NO);
       return this;
     }
 
@@ -277,18 +278,39 @@ SC.View.reopen(
       this._prevLayout = SC.clone(this.get('layout'));
     }
 
-    // Get the layout (may be a partially adjusted one already queued up).
-    layout = this._animateLayout || this.get('layout'); // SC.clone(this._prevLayout); //
-    if (!layout.animate) { layout.animate = {}; }
+    if (!pendingAnimations) { pendingAnimations = this._pendingAnimations = {}; }
 
-    // Very similar to #adjust
+    // Get the layout (may be a partially adjusted one already queued up).
+    layout = this._animateLayout || this.get('layout');
+
+    // Handle old style rotation.
+    if (!SC.none(hash.rotate)) {
+      //@if(debug)
+      SC.Logger.warn('Developer Warning: Please animate rotateX instead of rotate.');
+      //@endif
+      if (SC.none(hash.rotateX)) {
+        hash.rotateX = hash.rotate;
+      }
+      delete hash.rotate;
+    }
+
+    // Go through the new animated properties and check for conflicts with
+    // previous calls to animate and changes to the current layout.
     for (var property in hash) {
       // Fast path.
-      if (!hash.hasOwnProperty(property) || !SC.ANIMATABLE_PROPERTIES[property]) { continue; }
+      if (!hash.hasOwnProperty(property) || !SC.ANIMATABLE_PROPERTIES[property]) {
+
+        //@if(debug)
+        if (!SC.ANIMATABLE_PROPERTIES[property]) {
+          SC.warn("Developer Warning: The property `%@` is not animatable using SC.View:animate().".fmt(property));
+        }
+        //@endif
+        continue;
+      }
 
       value = hash[property];
       cur = layout[property];
-      curAnim = layout.animate[property];
+      curAnim = pendingAnimations[property];
 
       if (SC.none(value)) { throw "Can only animate to an actual value!"; }
 
@@ -298,7 +320,7 @@ SC.View.reopen(
           curAnim.timing !== options.timing ||
           curAnim.delay !== options.delay)) {
         optionsDidChange = YES;
-        this.layoutStyleCalculator.runAnimationCallback(curAnim, null, YES);
+        this.runAnimationCallback(curAnim, null, YES);
       }
 
       if (cur !== value) {
@@ -307,7 +329,7 @@ SC.View.reopen(
       }
 
       // Always update the animate hash to the newest options which may have been altered before this was applied.
-      layout.animate[property] = options;
+      pendingAnimations[property] = options;
     }
 
     // Only animate to new values.
@@ -317,7 +339,7 @@ SC.View.reopen(
       // Always run the animation asynchronously so that the original layout is guaranteed to be applied to the DOM.
       this.invokeNext('_animate');
     } else if (!optionsDidChange) {
-      this.layoutStyleCalculator.runAnimationCallback(options, null, NO);
+      this.runAnimationCallback(options, null, NO);
     }
 
     return this;
@@ -344,9 +366,12 @@ SC.View.reopen(
     @returns this
   */
   cancelAnimation: function (finalPosition) {
-    var layout,
-      layoutStyleCalculator = this.layoutStyleCalculator,
+    var activeAnimations = this._activeAnimations,
+      layout,
       didCancel = NO;
+
+    // Fast path!
+    if (!activeAnimations) { return didCancel; }
 
     switch (finalPosition) {
     case SC.ANIMATION_POSITION.original:
@@ -361,15 +386,50 @@ SC.View.reopen(
     }
 
     // Immediately remove the animation styles while calling the callbacks.
-    didCancel = layoutStyleCalculator.cancelAnimation();
+    for (var key in activeAnimations) {
+      didCancel = YES;
+
+      // Run the callback.
+      this.runAnimationCallback(activeAnimations[key], null, YES);
+
+      // Remove the animation style without triggering a layout change.
+      this.removeAnimationFromLayout(key, YES);
+
+      // Update the animation hash.
+      delete activeAnimations[key];
+    }
+
+    // Adjust to final position.
     if (didCancel && layout) {
       this.adjust(layout);
     }
 
     // Clean up.
     delete this._prevLayout;
+    delete this._activeAnimations;
 
     return this;
+  },
+
+  /** @private
+    This method is called after the layout style is applied to the layer.  If
+    the platform didn't support CSS transitions, the callbacks will be fired
+    immediately and the animations removed from the queue.
+  */
+  didRenderAnimations: function () {
+
+    // Transitions not supported
+    if (!SC.platform.supportsCSSTransitions) {
+      var pendingAnimations = this._pendingAnimations;
+
+      for (var key in pendingAnimations) {
+        this.runAnimationCallback(pendingAnimations[key], null, NO);
+        this.removeAnimationFromLayout(key, NO);
+      }
+
+      // Reset the placeholder variables now that the layout style has been applied.
+      this._activeAnimations = this._pendingAnimations = null;
+    }
   },
 
   /** @private
@@ -392,8 +452,7 @@ SC.View.reopen(
     @returns {Object}
   */
   liveAdjustments: function () {
-    var layoutStyleCalculator = this.layoutStyleCalculator,
-      activeAnimations = layoutStyleCalculator._activeAnimations,
+    var activeAnimations = this._activeAnimations,
       jqueryEl = this.$(),
       ret = {},
       transformKey = SC.browser.experimentalCSSNameFor('transform');
@@ -422,6 +481,27 @@ SC.View.reopen(
     return ret;
   }.property(),
 
+  /** @private Removes the animation CSS from the layer style. */
+  removeAnimationFromLayout: function (propertyName, updateStyle) {
+    var activeAnimations = this._activeAnimations,
+      layer = this.get('layer');
+
+    if (!!layer && updateStyle) {
+      var layout = this.get('layout'),
+        transformKey = SC.browser.experimentalCSSNameFor('transform'),
+        updatedCSS = [];
+
+      // Calculate the transition CSS that should remain.
+      for (var key in activeAnimations) {
+        if (key !== propertyName) {
+          updatedCSS.push(activeAnimations[key].css);
+        }
+      }
+
+      layer.style[SC.browser.experimentalStyleNameFor('transition')] = updatedCSS.join(', ');
+    }
+  },
+
   /** @deprecated
     Resets animation, stopping all existing animations.
   */
@@ -434,20 +514,88 @@ SC.View.reopen(
     return this.cancelAnimation();
   },
 
-  /**
+  /** @private */
+  runAnimationCallback: function (animation, evt, cancelled) {
+    var method = animation.method,
+      target = animation.target;
+
+    if (method) {
+      // We're using invokeNext so we don't trigger any layout changes from
+      // the callback until the current layout is updated.
+      this.invokeNext(function () {
+        method.call(target, { event: evt, view: this, isCancelled: cancelled });
+      }, this);
+
+      // Always clear the method from the hash to prevent it being called
+      // multiple times for animations in the group.
+      delete animation.method;
+      delete animation.target;
+    }
+  },
+
+  /** @private
     Called when animation ends, should not usually be called manually
   */
   transitionDidEnd: function (evt) {
-    var layoutStyleCalculator = this.layoutStyleCalculator,
-      activeAnimations = layoutStyleCalculator._activeAnimations;
+    var propertyName = evt.originalEvent.propertyName,
+      activeAnimations = this._activeAnimations,
+      animation = activeAnimations ? activeAnimations[propertyName] : null;
 
-    // Removes the animation for this event's property
-    layoutStyleCalculator.transitionDidEnd(evt);
+    if (animation) {
+      // Run the callback.
+      this.runAnimationCallback(animation, evt, NO);
 
-    // If no more animations exist, do our cleanup.
-    if (!activeAnimations) {
-      // Clean up.
-      delete this._prevLayout;
+      // Remove the animation style without triggering a layout change.
+      this.removeAnimationFromLayout(propertyName, YES);
+
+      // Update the animation hash.
+      delete activeAnimations[propertyName];
+
+      // Clean up the internal hash.
+      this._activeAnimationsLength -= 1;
+      if (this._activeAnimationsLength === 0) {
+        delete this._activeAnimations;
+        delete this._prevLayout;
+      }
+    }
+  },
+
+  /** @private
+   This method is called before the layout style is applied to the layer.  If
+   animations have been defined for the view, they will be included in
+   this._pendingAnimations.  This method will clear out any conflicts between
+   pending and active animations.
+   */
+  willRenderAnimations: function () {
+    if (SC.platform.supportsCSSTransitions) {
+      var pendingAnimations = this._pendingAnimations;
+
+      if (pendingAnimations) {
+        var activeAnimations = this._activeAnimations;
+
+        if (!activeAnimations) {
+          this._activeAnimationsLength = 0;
+          activeAnimations = {};
+        }
+
+        for (var key in pendingAnimations) {
+          if (!pendingAnimations.hasOwnProperty(key)) { continue; }
+
+          var activeAnimation = activeAnimations[key],
+            pendingAnimation = pendingAnimations[key];
+
+          if (activeAnimation) {
+            this.runAnimationCallback(activeAnimation, null, YES);
+          }
+
+          activeAnimations[key] = pendingAnimation;
+          this._activeAnimationsLength += 1;
+        }
+
+        this._activeAnimations = activeAnimations;
+        this._pendingAnimations = null;
+      }
     }
   }
+
 });

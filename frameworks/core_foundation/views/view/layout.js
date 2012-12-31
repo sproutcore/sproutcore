@@ -69,9 +69,6 @@ SC.View.reopen(
   init: function(original) {
     original();
 
-    // TODO: This makes it impossible to override
-    this.layoutStyleCalculator = SC.View.LayoutStyleCalculator.create({ view: this });
-
     this._previousLayout = this.get('layout');
   }.enhance(),
 
@@ -783,33 +780,15 @@ SC.View.reopen(
         didResize      = YES,
         previousWidth, previousHeight, currentWidth, currentHeight;
 
-
-    // Handle old style rotation
+    // Handle old style rotation.
     if (!SC.none(currentLayout.rotate)) {
+      //@if(debug)
+      SC.Logger.warn('Developer Warning: Please set rotateX instead of rotate.');
+      //@endif
       if (SC.none(currentLayout.rotateX)) {
         currentLayout.rotateX = currentLayout.rotate;
-        SC.Logger.warn('Please set rotateX instead of rotate');
       }
-    }
-    if (!SC.none(currentLayout.rotateX)) {
-      currentLayout.rotate = currentLayout.rotateX;
-    } else {
       delete currentLayout.rotate;
-    }
-
-    var animations = currentLayout.animations;
-    if (animations) {
-      if (!SC.none(animations.rotate)) {
-        if (SC.none(animations.rotateX)) {
-          animations.rotateX = animations.rotate;
-          SC.Logger.warn('Please animate rotateX instead of rotate');
-        }
-      }
-      if (!SC.none(animations.rotateX)) {
-        animations.rotate = animations.rotateX;
-      } else {
-        delete animations.rotate;
-      }
     }
 
     if (previousLayout  &&  previousLayout !== currentLayout) {
@@ -839,6 +818,9 @@ SC.View.reopen(
       // viewDidResize() handles this in the other case.
       this._viewFrameDidChange();
     }
+
+    // Notify that the layout style has changed.
+    this.notifyPropertyChange('layoutStyle');
 
     // notify layoutView...
     var layoutView = this.get('layoutView');
@@ -965,12 +947,9 @@ SC.View.reopen(
     @test in layoutChildViews
   */
   renderLayout: function(context, firstTime) {
-    // Getting the layoutStyle sets up internal variables that willRenderAnimations uses.  This is not good code structure.
-    var layoutStyle = this.get('layoutStyle');
-
-    this.get('layoutStyleCalculator').willRenderAnimations(layoutStyle);
-    context.setStyle(layoutStyle);
-    this.get('layoutStyleCalculator').didRenderAnimations(layoutStyle);
+    this.willRenderAnimations();
+    context.setStyle(this.get('layoutStyle'));
+    this.didRenderAnimations();
   },
 
   _renderLayerSettings: function(original, context, firstTime) {
