@@ -308,8 +308,7 @@ SC.View.LayoutStyleCalculator = {
   _calculateAnimations: function (style, animations, hasAcceleratedLayer) {
     /*jshint eqnull:true*/
     var key,
-      shouldTranslate,
-      transitions = [];
+      shouldTranslate;
 
     // Handle transforms
     if (hasAcceleratedLayer) {
@@ -349,8 +348,9 @@ SC.View.LayoutStyleCalculator = {
 
     // Handle animations
     if (animations) {
-
       if (SC.platform.supportsCSSTransitions) {
+        var transitions = [];
+
         for (key in animations) {
           var animation = animations[key],
             isTransformProperty = !!SC.CSS_TRANSFORM_MAP[key],

@@ -281,7 +281,7 @@ SC.View.reopen(
     if (!pendingAnimations) { pendingAnimations = this._pendingAnimations = {}; }
 
     // Get the layout (may be a partially adjusted one already queued up).
-    layout = this._animateLayout || this.get('layout');
+    layout = this._animateLayout || SC.clone(this.get('layout'));
 
     // Handle old style rotation.
     if (!SC.none(hash.rotate)) {
@@ -334,7 +334,7 @@ SC.View.reopen(
 
     // Only animate to new values.
     if (valueDidChange) {
-      this._animateLayout = SC.clone(layout);
+      this._animateLayout = layout;
 
       // Always run the animation asynchronously so that the original layout is guaranteed to be applied to the DOM.
       this.invokeNext('_animate');
@@ -347,6 +347,8 @@ SC.View.reopen(
 
   /** @private */
   _animate: function () {
+    this.willRenderAnimations();
+
     // Apply the animation layout.
     this.set('layout', this._animateLayout);
 
@@ -387,20 +389,21 @@ SC.View.reopen(
 
     // Immediately remove the animation styles while calling the callbacks.
     for (var key in activeAnimations) {
+      var animation = activeAnimations[key];
       didCancel = YES;
 
-      // Run the callback.
-      this.runAnimationCallback(activeAnimations[key], null, YES);
+      // Update the animation hash.  Do this first, so callbacks can check for active animations.
+      delete activeAnimations[key];
 
       // Remove the animation style without triggering a layout change.
       this.removeAnimationFromLayout(key, YES);
 
-      // Update the animation hash.
-      delete activeAnimations[key];
+      // Run the callback.
+      this.runAnimationCallback(animation, null, YES);
     }
 
     // Adjust to final position.
-    if (didCancel && layout) {
+    if (didCancel && !!layout) {
       this.adjust(layout);
     }
 
@@ -423,8 +426,8 @@ SC.View.reopen(
       var pendingAnimations = this._pendingAnimations;
 
       for (var key in pendingAnimations) {
-        this.runAnimationCallback(pendingAnimations[key], null, NO);
         this.removeAnimationFromLayout(key, NO);
+        this.runAnimationCallback(pendingAnimations[key], null, NO);
       }
 
       // Reset the placeholder variables now that the layout style has been applied.
@@ -457,24 +460,26 @@ SC.View.reopen(
       ret = {},
       transformKey = SC.browser.experimentalCSSNameFor('transform');
 
-    for (var key in activeAnimations) {
-      if (key === transformKey) {
-        var matrix = jqueryEl.css(key),
-          CSSMatrixClass = SC.browser.experimentalNameFor(window, 'CSSMatrix');
+    if (activeAnimations) {
+      for (var key in activeAnimations) {
+        if (key === transformKey) {
+          var matrix = jqueryEl.css(key),
+            CSSMatrixClass = SC.browser.experimentalNameFor(window, 'CSSMatrix');
 
-        if (CSSMatrixClass !== SC.UNSUPPORTED) {
-          matrix = new window[CSSMatrixClass](matrix);
-          ret.left = matrix.m41;
-          ret.top = matrix.m42;
-        } else {
-          matrix = matrix.match(/^matrix\((.*)\)$/)[1].split(/,\s*/);
-          if (matrix) {
-            ret.left = matrix[4];
-            ret.top = matrix[5];
+          if (CSSMatrixClass !== SC.UNSUPPORTED) {
+            matrix = new window[CSSMatrixClass](matrix);
+            ret.left = parseInt(matrix.m41, 10);
+            ret.top = parseInt(matrix.m42, 10);
+          } else {
+            matrix = matrix.match(/^matrix\((.*)\)$/)[1].split(/,\s*/);
+            if (matrix) {
+              ret.left = parseInt(matrix[4], 10);
+              ret.top = parseInt(matrix[5], 10);
+            }
           }
+        } else {
+          ret[key] = parseInt(jqueryEl.css(key), 10);
         }
-      } else {
-        ret[key] = parseInt(jqueryEl.css(key), 10);
       }
     }
 
@@ -487,9 +492,7 @@ SC.View.reopen(
       layer = this.get('layer');
 
     if (!!layer && updateStyle) {
-      var layout = this.get('layout'),
-        transformKey = SC.browser.experimentalCSSNameFor('transform'),
-        updatedCSS = [];
+      var updatedCSS = [];
 
       // Calculate the transition CSS that should remain.
       for (var key in activeAnimations) {
@@ -542,14 +545,14 @@ SC.View.reopen(
       animation = activeAnimations ? activeAnimations[propertyName] : null;
 
     if (animation) {
-      // Run the callback.
-      this.runAnimationCallback(animation, evt, NO);
+      // Update the animation hash.  Do this first, so callbacks can check for active animations.
+      delete activeAnimations[propertyName];
 
       // Remove the animation style without triggering a layout change.
       this.removeAnimationFromLayout(propertyName, YES);
 
-      // Update the animation hash.
-      delete activeAnimations[propertyName];
+      // Run the callback.
+      this.runAnimationCallback(animation, evt, NO);
 
       // Clean up the internal hash.
       this._activeAnimationsLength -= 1;

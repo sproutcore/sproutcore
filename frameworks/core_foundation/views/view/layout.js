@@ -947,7 +947,6 @@ SC.View.reopen(
     @test in layoutChildViews
   */
   renderLayout: function(context, firstTime) {
-    this.willRenderAnimations();
     context.setStyle(this.get('layoutStyle'));
     this.didRenderAnimations();
   },
