@@ -139,7 +139,9 @@ SC.ContainerView = SC.View.extend(
     may be used for a given transition and to see what the default options are,
     see the documentation for the transition plugin being used.
 
-    For example, SC.ContainerView.PUSH accepts options like:
+    Most transitions will accept a duration and timing option, but may
+    also use other options.  For example, SC.ContainerView.PUSH accepts options
+    like:
 
         transitionOptions: {
           direction: 'left',
@@ -181,14 +183,15 @@ SC.ContainerView = SC.View.extend(
     is clipped.
    */
   clippingFrame: function () {
-    var frame = this.get('frame'),
-      ret = sc_super(),
-      transition = this.get('transition');
+    var contentStatecharts = this._contentStatecharts,
+      frame = this.get('frame'),
+      ret = sc_super();
 
     // Allow for a modified clippingFrame while transitioning.
-    if (transition && this.get('isTransitioning')) {
-      if (transition.transitionClippingFrame) {
-        ret = transition.transitionClippingFrame(this, ret, this.get('transitionOptions'));
+    if (this.get('isTransitioning')) {
+      // Each transition may adjust the clippingFrame to accommodate itself.
+      for (var i = contentStatecharts.length - 1; i >= 0; i--) {
+        ret = contentStatecharts[i].transitionClippingFrame(ret);
       }
     } else {
       ret.width = frame.width;
@@ -219,41 +222,31 @@ SC.ContainerView = SC.View.extend(
 
   /** @private */
   destroy: function () {
+    var contentStatecharts = this._contentStatecharts;
+
+    // Exit all the statecharts immediately. This mutates the array!
+    for (var i = contentStatecharts.length - 1; i >= 0; i--) {
+      contentStatecharts[i].set('transition', null);
+      contentStatecharts[i].doExit();
+    }
+
     var contentView = this.get('contentView');
 
-    // Unregister ourself as the parent of the content and remove our internal reference to it.
+    // Remove our internal reference to the current content.
     this.removeChild(contentView);
     this._currentContent = null;
 
-    // If we created the content view, we should destroy it.
-    if (this._instantiatedLastView) {
-      contentView.destroy();
-    }
-
     return sc_super();
-  },
-
-  /** @private */
-  init: function () {
-    sc_super();
-
-    this._transitionCount = 0;
   },
 
   /** @private
     Invoked whenever the nowShowing property changes.  This will try to find
     the new content if possible and set it.  If you set nowShowing to an
     empty string or null, then the current content will be cleared.
-
-    If you set the content manually, the nowShowing property will be set to
-    SC.CONTENT_SET_DIRECTLY.
   */
   nowShowingDidChange: function () {
     // This code turns this.nowShowing into a view object by any means necessary.
     var content = this.get('nowShowing');
-
-    // If nowShowing was changed because the content was set directly, then do nothing.
-    if (content === SC.CONTENT_SET_DIRECTLY) { return; }
 
     // If it's a string, try to turn it into the object it references...
     if (SC.typeOf(content) === SC.T_STRING && content.length > 0) {
@@ -270,7 +263,7 @@ SC.ContainerView = SC.View.extend(
     if (SC.typeOf(content) === SC.T_CLASS) {
       if (content.kindOf(SC.CoreView)) {
         content = this.createChildView(content);
-        this._instantiatedNewView = YES;
+        this._createdContent = YES;
       } else {
         content = null;
       }
@@ -283,6 +276,27 @@ SC.ContainerView = SC.View.extend(
     this.set('contentView', content);
   }.observes('nowShowing'),
 
+  /** @private Called by new content statechart to indicate that it is ready. */
+  statechartReady: function () {
+    var contentStatecharts = this._contentStatecharts;
+
+    // Exit all the other statecharts immediately.  This mutates the array!
+    for (var i = contentStatecharts.length - 2; i >= 0; i--) {
+      contentStatecharts[i].set('transition', null);
+      contentStatecharts[i].doExit();
+    }
+
+    this.set('isTransitioning', NO);
+  },
+
+  /** @private Called by content statecharts to indicate that they have exited. */
+  statechartEnded: function (statechart) {
+    var contentStatecharts = this._contentStatecharts;
+
+    // Remove the statechart.
+    contentStatecharts.removeObject(statechart);
+  },
+
   /** @private
     Replaces any child views with the passed new content.
 
@@ -293,65 +307,256 @@ SC.ContainerView = SC.View.extend(
     @param {SC.View} newContent the new content view or null.
   */
   replaceContent: function (newContent) {
-    var currentContent = this._currentContent,
-      currentTransition = this._currentTransition,
-      options,
-      shouldDestroyCurrentContent,
+    var contentStatecharts,
+      currentContent = this._currentContent,
+      options = this.get('transitionOptions') || {},
+      transition = this.get('transition'),
+      newStatechart,
+      newTransition = transition;
+
+    // Create a statechart for the new content.
+    contentStatecharts = this._contentStatecharts;
+    if (!contentStatecharts) { contentStatecharts = this._contentStatecharts = []; }
+
+    // Call doExit on all current content statecharts.  Any statecharts in the
+    // process of exiting may accelerate their exits.
+    for (var i = contentStatecharts.length - 1; i >= 0; i--) {
+      contentStatecharts[i].doExit();
+    }
+
+    // Don't set the transition if nowShowing was already set in order to
+    // prevent transitioning in of content that is already there.
+    if (this._nowShowingAlreadySet) {
+      newTransition = null;
+    }
+
+    // Add the new content statechart, which will enter automatically.
+    newStatechart = SC.ContainerContentStatechart.create({
+      container: this,
+      content: newContent,
+      options: options,
+      previousContent: currentContent,
+      shouldDestroy: this._createdContent,
+      transition: newTransition
+    });
+    contentStatecharts.pushObject(newStatechart);
+
+    // Set the transition now that the new statechart has entered.
+    if (this._nowShowingAlreadySet) {
+      newStatechart.set('transition', transition);
+    }
+
+    // Track the current view.
+    this._currentContent = newContent;
+
+    // Track that we are transitioning.
+    this.set('isTransitioning', YES);
+  }
+
+});
+
+
+/** @private
+  In order to support transitioning views in and out of the container view,
+  each content view needs its own simple statechart.  This is required, because
+  while only one view will ever be transitioning in, several views may be in
+  the process of transitioning out.  See the 'SC.ContainerView Statechart.graffle'
+  file in the repository.
+*/
+SC.ContainerContentStatechart = SC.Object.extend({
+
+  // ------------------------------------------------------------------------
+  // Properties
+  //
+
+  container: null,
+
+  content: null,
+
+  previousContent: null,
+
+  options: null,
+
+  shouldDestroy: false,
+
+  state: 'none',
+
+  transition: null,
+
+  // ------------------------------------------------------------------------
+  // Methods
+  //
+
+  init: function () {
+    sc_super();
+
+    // Default entry state.
+    this.gotoEnteringState();
+  },
+
+  transitionClippingFrame: function (clippingFrame) {
+    var container = this.get('container'),
+      options = this.get('options'),
       transition = this.get('transition');
 
-    // Take note now if we need to destroy the current contentView after it is replaced (i.e. we created it).
-    shouldDestroyCurrentContent = (this._instantiatedLastView === YES);
-
-    // Reset for next time
-    this._instantiatedLastView = this._instantiatedNewView;
-    this._instantiatedNewView = NO;
-
-    if (transition && !this._nowShowingAlreadySet) {
-      options = this.get('transitionOptions') || {};
-
-      // If a transition is in progress, give the plugin a chance to cancel it.
-      if (this.get('isTransitioning') && currentTransition.cancel) {
-        currentTransition.cancel(this, this._lastContent, currentContent, options);
-      } else {
-        this.set('isTransitioning', true);
-      }
-
-      this._transitionCount++;
-      if (transition.setup) {
-        transition.setup(this, currentContent, newContent, options);
-      }
-
-      transition.run(this, currentContent, newContent, options, function () {
-        // Clean up the transition.
-        if (transition.teardown) {
-          transition.teardown(this, currentContent, newContent, options);
-        }
-
-        // Clean up view we created.
-        if (shouldDestroyCurrentContent) { currentContent.destroy(); }
-
-        this._lastContent = newContent;
-        if (--this._transitionCount === 0) { // remember, -- decrements the value and returns updated value
-          this.set('isTransitioning', false);
-        }
-      });
-
+    if (!!transition) {
+      return transition.transitionClippingFrame(container, clippingFrame, options);
     } else {
-      // The basic transition just swaps the content in place.
-      if (newContent) {
-        this.appendChild(newContent);
-      }
+      return clippingFrame;
+    }
+  },
 
-      if (currentContent) {
-        if (this.childViews.contains(currentContent)) { this.removeChild(currentContent); }
-        if (shouldDestroyCurrentContent) { currentContent.destroy(); }
+  // ------------------------------------------------------------------------
+  // Actions & Events
+  //
+
+  entered: function () {
+    if (this.state === 'entering') {
+      this.gotoReadyState();
+    //@if(debug)
+    } else {
+      SC.error('Developer Error: SC.ContainerView should not receive an internal entered event while not in entering state.');
+    //@endif
+    }
+  },
+
+  doExit: function () {
+    if (this.state !== 'exited') {
+      this.gotoExitingState();
+    //@if(debug)
+    } else {
+      SC.error('Developer Error: SC.ContainerView should not receive an internal doExit event while in exited state.');
+    //@endif
+    }
+  },
+
+  exited: function () {
+    if (this.state === 'exiting') {
+      this.gotoExitedState();
+    //@if(debug)
+    } else {
+      SC.error('Developer Error: SC.ContainerView should not receive an internal exited event while not in exiting state.');
+    //@endif
+    }
+  },
+
+  // ------------------------------------------------------------------------
+  // States
+  //
+
+  // Entering
+  gotoEnteringState: function () {
+    var container = this.get('container'),
+      content = this.get('content'),
+      previousContent = this.get('previousContent'),
+      options = this.get('options'),
+      transition = this.get('transition');
+
+    // Assign the state.
+    this.state = 'entering';
+
+    container.appendChild(content);
+
+    if (!!content && !!transition) {
+      if (!!transition.willBuildInToView) {
+        transition.willBuildInToView(container, content, previousContent, options);
+      }
+      if (!!transition.buildInToView) {
+        transition.buildInToView(this, container, content, previousContent, options);
+      }
+    } else {
+      this.entered();
+    }
+  },
+
+  // Exiting
+  gotoExitingState: function () {
+    var container = this.get('container'),
+      content = this.get('content'),
+      exitCount = this._exitCount,
+      options = this.get('options'),
+      transition = this.get('transition');
+
+    if (!!content && !!transition) {
+      if (this.state === 'entering') {
+        if (!!transition.buildInDidCancel) {
+          transition.buildInDidCancel(container, content, options);
+        }
+      } else if (this.state === 'exiting') {
+        if (!!transition.buildOutDidCancel) {
+          transition.buildOutDidCancel(container, content, options);
+        }
       }
     }
 
-    // Track the current view and transition (may be null).
-    this._lastContent = currentContent;
-    this._currentContent = newContent;
-    this._currentTransition = transition;
+    // Assign the state.
+    this.state = 'exiting';
+
+    if (!!content && !!transition) {
+      // Re-entering the exiting state may need to accelerate the transition, pass the count to the plugin.
+      if (!exitCount) { exitCount = this._exitCount = 1; }
+
+      if (!!transition.willBuildOutFromView) {
+        transition.willBuildOutFromView(container, content, options, exitCount);
+      }
+
+      if (!!transition.buildOutFromView) {
+        transition.buildOutFromView(this, container, content, options, exitCount);
+      }
+
+      // Increment the exit count each time doExit is called.
+      this._exitCount += 1;
+    } else {
+      this.exited();
+    }
+  },
+
+  // Exited
+  gotoExitedState: function () {
+    var container = this.get('container'),
+      content = this.get('content'),
+      options = this.get('options'),
+      shouldDestroy = this.get('shouldDestroy'),
+      transition = this.get('transition');
+
+    if (!!content) {
+      if (transition) {
+        if (!!transition.didBuildOutFromView) {
+          transition.didBuildOutFromView(container, content, options);
+        }
+      }
+
+      container.removeChild(content);
+      if (shouldDestroy) {
+        content.destroy();
+      }
+    }
+
+    // Send ended event to container view statechart.
+    container.statechartEnded(this);
+
+    // Assign the state.
+    this.state = 'exited';
+  },
+
+  // Ready
+  gotoReadyState: function () {
+    var container = this.get('container'),
+      content = this.get('content'),
+      options = this.get('options'),
+      transition = this.get('transition');
+
+    if (content && transition) {
+      if (!!transition.didBuildInToView) {
+        transition.didBuildInToView(container, content, options);
+      }
+    }
+
+    // Send ready event to container view statechart.
+    container.statechartReady();
+
+    // Assign the state.
+    this.state = 'ready';
   }
 
 });

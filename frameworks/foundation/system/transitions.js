@@ -1,6 +1,6 @@
 // ==========================================================================
 // Project:   SproutCore
-// Copyright: @2012 7x7 Software, Inc.
+// Copyright: @2013 7x7 Software, Inc.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 sc_require('views/container');
@@ -35,38 +35,41 @@ SC.mixin(SC.ContainerView,
   DISSOLVE: {
 
     /** @private */
-    run: function (container, currentContent, newContent, options, onComplete) {
-      if (currentContent) {
+    willBuildInToView: function (container, content, previousContent, options) {
+      content.adjust({ opacity: 0 });
+    },
+
+    /** @private */
+    buildInToView: function (statechart, container, content, previousContent, options) {
+      content.animate('opacity', 1, {
+        duration: options.duration || 0.4,
+        timing: options.timing || 'ease'
+      }, function (data) {
+        // We may already be in exiting state by the time we transition in.
+        if (statechart.get('state') === 'entering') {
+          statechart.entered();
+        }
+      });
+    },
+
+    /** @private */
+    buildOutFromView: function (statechart, container, content, options, exitCount) {
+      // We can call this transition repeatedly without effecting the current exit transition.
+      if (exitCount == 1) {
         // Fade the current content at the same time.
-        currentContent.animate('opacity', 0, {
+        content.animate('opacity', 0, {
           duration: options.duration || 0.4,
           timing: options.timing || 'ease'
-        }, onComplete);
-      }
-
-      if (newContent) {
-        newContent.animate('opacity', 1, {
-          duration: options.duration || 0.4,
-          timing: options.timing || 'ease'
-        }, currentContent ? undefined : onComplete);
+        }, function (data) {
+          statechart.exited();
+        });
       }
     },
 
     /** @private */
-    setup: function (container, currentContent, newContent, options) {
-      if (newContent) {
-        newContent.adjust({ opacity: 0 });
-        container.appendChild(newContent);
-      }
-    },
-
-    /** @private */
-    teardown: function (container, currentContent, newContent, options) {
-      if (currentContent) {
-        // Reset the opacity in case this view is used elsewhere.
-        currentContent.adjust({ opacity: 1 });
-        container.removeChild(currentContent);
-      }
+    didBuildOutFromView: function (container, content, options) {
+      // Reset the opacity in case this view is used elsewhere.
+      content.adjust({ opacity: 1 });
     }
 
   },
@@ -99,7 +102,25 @@ SC.mixin(SC.ContainerView,
   FADE_COLOR: {
 
     /** @private */
-    run: function (container, currentContent, newContent, options, onComplete) {
+    willBuildInToView: function (container, content, previousContent, options) {
+      var color,
+        colorView;
+
+      content.adjust({ opacity: 0 });
+
+      // Create a color view to fade through.
+      color = SC.Color.from(options.color || 'black');
+      colorView = SC.View.create({
+        layout: { opacity: 0, zIndex: 1 },
+        render: function (context) {
+          context.addStyle('background-color', color.get('cssText'));
+        }
+      });
+      container.appendChild(colorView);
+    },
+
+    /** @private */
+    buildInToView: function (statechart, container, content, previousContent, options) {
       var childViews = container.get('childViews'),
         colorView;
 
@@ -111,49 +132,23 @@ SC.mixin(SC.ContainerView,
         timing: options.timing || 'ease-in'
       }, function () {
         // Show new content, then fade the color out.
-        if (newContent) {
-          newContent.adjust('opacity', 1);
-        }
+        content.adjust('opacity', 1);
 
         colorView.animate('opacity', 0, {
           duration: options.duration * 0.5 || 0.4,
           timing: options.timing || 'ease-in'
-        }, function () {
+        }, function (data) {
           // It's best to clean up the colorView here rather than try to find it again on teardown,
           // since multiple color views could be added.
-          container.removeChild(colorView);
-          colorView.destroy();
-          onComplete();
+          container.removeChild(this);
+          this.destroy();
+
+          // We may already be in exiting state by the time we transition in.
+          if (statechart.get('state') === 'entering') {
+            statechart.entered();
+          }
         });
       });
-    },
-
-    /** @private */
-    setup: function (container, currentContent, newContent, options) {
-      var color,
-        colorView;
-
-      if (newContent) {
-        newContent.adjust({ opacity: 0 });
-        container.appendChild(newContent);
-      }
-
-      // Create a color view to fade through.
-      color = SC.Color.from(options.color || 'black');
-      colorView = SC.View.create({
-        layout: { opacity: 0 },
-        render: function (context) {
-          context.addStyle('background-color', color.get('cssText'));
-        }
-      });
-      container.appendChild(colorView);
-    },
-
-    /** @private */
-    teardown: function (container, currentContent, newContent, options) {
-      if (currentContent) {
-        container.removeChild(currentContent);
-      }
     }
 
   },
@@ -192,25 +187,7 @@ SC.mixin(SC.ContainerView,
   MOVE_IN: {
 
     /** @private */
-    run: function (container, currentContent, newContent, options, onComplete) {
-      var key,
-        value;
-
-      switch (options.direction) {
-      case 'right': key = 'left'; break;
-      case 'up': key = 'top'; break;
-      case 'down': key = 'top'; break;
-      default: key = 'left';
-      }
-
-      newContent.animate(key, 0, {
-        duration: options.duration || 0.4,
-        timing: options.timing || 'ease'
-      }, onComplete);
-    },
-
-    /** @private */
-    setup: function (container, currentContent, newContent, options) {
+    willBuildInToView: function (container, content, previousContent, options) {
       var frame = container.get('frame'),
         left,
         top,
@@ -220,28 +197,63 @@ SC.mixin(SC.ContainerView,
       height = frame.height;
       width = frame.width;
 
-      if (newContent) {
-        switch (options.direction) {
-        case 'right': left = -width; break;
-        case 'up': top = height; break;
-        case 'down': top = -height; break;
-        default: left = width;
-        }
-
-        newContent.adjust({ bottom: null, left: left || 0, right: null, top: top || 0, height: height, width: width });
-        container.appendChild(newContent);
+      switch (options.direction) {
+      case 'right':
+        left = -width;
+        break;
+      case 'up':
+        top = height;
+        break;
+      case 'down':
+        top = -height;
+        break;
+      default:
+        left = width;
       }
+
+      content.adjust({ bottom: null, left: left || 0, right: null, top: top || 0, height: height, width: width });
     },
 
     /** @private */
-    teardown: function (container, currentContent, newContent, options) {
-      if (newContent) {
-        newContent.set('layout', { bottom: 0, left: 0, right: 0, top: 0 });
+    buildInToView: function (statechart, container, content, previousContent, options) {
+      var key,
+        value;
+
+      switch (options.direction) {
+      case 'right':
+        key = 'left';
+        break;
+      case 'up':
+        key = 'top';
+        break;
+      case 'down':
+        key = 'top';
+        break;
+      default:
+        key = 'left';
       }
 
-      if (currentContent) {
-        container.removeChild(currentContent);
-      }
+      content.animate(key, 0, {
+        duration: options.duration || 0.4,
+        timing: options.timing || 'ease'
+      }, function (data) {
+        // We may already be in exiting state by the time we transition in.
+        if (statechart.get('state') === 'entering') {
+          statechart.entered();
+        }
+      });
+    },
+
+    /** @private */
+    didBuildInToView: function (container, content, options) {
+      // Convert to a flexible layout.
+      content.adjust({ bottom: 0, right: 0, height: null, width: null });
+    },
+
+    /** @private */
+    didBuildOutFromView: function (container, content, options) {
+      // Convert to a flexible layout (in case we never fully entered).
+      content.adjust({ bottom: 0, right: 0, height: null, width: null });
     }
   },
 
@@ -277,10 +289,98 @@ SC.mixin(SC.ContainerView,
   PUSH: {
 
     /** @private */
-    run: function (container, currentContent, newContent, options, onComplete) {
+    willBuildInToView: function (container, content, previousContent, options) {
+      var adjustLeft = 0,
+        adjustTop = 0,
+        frame = container.get('frame'),
+        left = 0,
+        top = 0,
+        height,
+        width;
+
+      height = frame.height;
+      width = frame.width;
+
+      // Push on to the edge of whatever the current position of previous content is.
+      if (previousContent) {
+        var layout = previousContent.get('layout');
+
+        adjustLeft = layout.left;
+        adjustTop = layout.top;
+      }
+
+      switch (options.direction) {
+      case 'right':
+        left = -width + adjustLeft;
+        break;
+      case 'up':
+        top = height + adjustTop;
+        break;
+      case 'down':
+        top = -height + adjustTop;
+        break;
+      default:
+        left = width + adjustLeft;
+      }
+
+      // Convert to an animatable layout.
+      content.adjust({ bottom: null, right: null, left: left, top: top, height: height, width: width });
+    },
+
+    /** @private */
+    buildInToView: function (statechart, container, content, previousContent, options) {
+      var key;
+
+      switch (options.direction) {
+      case 'up':
+        key = 'top';
+        break;
+      case 'down':
+        key = 'top';
+        break;
+      default:
+        key = 'left';
+      }
+
+      content.animate(key, 0, {
+        duration: options.duration || 0.4,
+        timing: options.timing || 'ease'
+      }, function (data) {
+        if (!data.isCancelled) {
+          statechart.entered();
+        }
+      });
+    },
+
+    /** @private */
+    buildInDidCancel:  function (container, content, options) {
+      // Stop where we are.
+      content.cancelAnimation(SC.ANIMATION_POSITION.current);
+    },
+
+    /** @private */
+    didBuildInToView: function (container, content, options) {
+      // Convert to a flexible layout.
+      content.adjust({ bottom: 0, right: 0, height: null, width: null });
+    },
+
+    /** @private */
+    willBuildOutFromView: function (container, content, options) {
+      var frame = container.get('frame'),
+        height,
+        width;
+
+      height = frame.height;
+      width = frame.width;
+
+      // Convert to an animatable layout.
+      content.adjust({ bottom: null, right: null, height: height, width: width });
+    },
+
+    /** @private */
+    buildOutFromView: function (statechart, container, content, options, exitCount) {
       var frame = container.get('frame'),
         key,
-        callback,
         value;
 
       switch (options.direction) {
@@ -301,85 +401,26 @@ SC.mixin(SC.ContainerView,
         value = -frame.width;
       }
 
-      if (currentContent) {
-        currentContent.animate(key, value, {
-          duration: options.duration || 0.4,
-          timing: options.timing || 'ease'
-        }, onComplete);
-      }
-
-      if (newContent) {
-        newContent.animate(key, 0, {
-          duration: options.duration || 0.4,
-          timing: options.timing || 'ease'
-        }, currentContent ? undefined : onComplete);
-      }
-    },
-
-    /** @private */
-    setup: function (container, currentContent, newContent, options) {
-      var adjustLeft = 0,
-        adjustTop = 0,
-        frame = container.get('frame'),
-        left = 0,
-        top = 0,
-        height,
-        width;
-
-      height = frame.height;
-      width = frame.width;
-
-      if (currentContent) {
-        // If another transition is pushed on, adjust its start position.
-        var liveAdjustments = currentContent.get('liveAdjustments');
-        currentContent.adjust({ bottom: null, right: null, height: height, width: width });
-
-        adjustLeft = liveAdjustments.left;
-        adjustTop = liveAdjustments.top;
-      }
-
-      if (newContent) {
-        switch (options.direction) {
-        case 'right':
-          left = -width + adjustLeft;
-          break;
-        case 'up':
-          top = height + adjustTop;
-          break;
-        case 'down':
-          top = -height + adjustTop;
-          break;
-        default:
-          left = width + adjustLeft;
+      content.animate(key, value * exitCount, {
+        duration: options.duration || 0.4,
+        timing: options.timing || 'ease'
+      }, function (data) {
+        if (!data.isCancelled) {
+          statechart.exited();
         }
-
-        newContent.adjust({ bottom: null, right: null, left: left, top: top, height: height, width: width });
-        container.appendChild(newContent);
-      }
+      });
     },
 
     /** @private */
-    teardown: function (container, currentContent, newContent, options) {
-      var key;
+    buildOutDidCancel: function (container, content, options) {
+      // Stop where we are.
+      content.cancelAnimation(SC.ANIMATION_POSITION.current);
+    },
 
-      switch (options.direction) {
-      case 'right': key = 'left'; break;
-      case 'up': key = 'top'; break;
-      case 'down': key = 'top'; break;
-      default: key = 'left';
-      }
-
-      // Don't reset the newContent if it is just being animated off by another
-      // newer content.
-      if (newContent &&
-          newContent.layoutStyleCalculator._activeAnimations &&
-          !newContent.layoutStyleCalculator._activeAnimations[key]) {
-        newContent.set('layout', { bottom: 0, left: 0, right: 0, top: 0 });
-      }
-
-      if (currentContent) {
-        container.removeChild(currentContent);
-      }
+    /** @private */
+    didBuildOutFromView: function (container, content, options) {
+      // Convert to a flexible layout.
+      content.adjust({ bottom: 0, right: 0, height: null, width: null });
     },
 
     /** @private */
@@ -441,41 +482,7 @@ SC.mixin(SC.ContainerView,
   REVEAL: {
 
     /** @private */
-    run: function (container, currentContent, newContent, options, onComplete) {
-      var frame = container.get('frame'),
-        key,
-        value;
-
-      switch (options.direction) {
-      case 'right':
-        key = 'left';
-        value = -frame.width;
-        break;
-      case 'up':
-        key = 'top';
-        value = -frame.height;
-        break;
-      case 'down':
-        key = 'top';
-        value = frame.height;
-        break;
-      default:
-        key = 'left';
-        value = frame.width;
-      }
-
-      if (currentContent) {
-        currentContent.animate(key, value, {
-          duration: options.duration || 0.4,
-          timing: options.timing || 'ease'
-        }, onComplete);
-      } else {
-        onComplete();
-      }
-    },
-
-    /** @private */
-    setup: function (container, currentContent, newContent, options) {
+    willBuildOutFromView: function (container, content, options, exitCount) {
       var frame = container.get('frame'),
         height,
         width;
@@ -483,19 +490,52 @@ SC.mixin(SC.ContainerView,
       height = frame.height;
       width = frame.width;
 
-      if (currentContent) {
-        currentContent.adjust({ bottom: null, right: null, height: height, width: width });
-      }
-
-      container.insertBefore(newContent, currentContent);
+      // Convert to a fixed layout. Put this view on top.
+      content.adjust({ bottom: null, right: null, height: height, width: width, zIndex: exitCount });
     },
 
     /** @private */
-    teardown: function (container, currentContent, newContent, options) {
-      if (currentContent) {
-        currentContent.set('layout', { bottom: 0, left: 0, right: 0, top: 0 });
-        container.removeChild(currentContent);
+    buildOutFromView: function (statechart, container, content, options, exitCount) {
+      // We can call this transition repeatedly without effecting the current exit transition.
+      if (exitCount === 1) {
+        var frame = container.get('frame'),
+          key,
+          value;
+
+        switch (options.direction) {
+        case 'right':
+          key = 'left';
+          value = -frame.width;
+          break;
+        case 'up':
+          key = 'top';
+          value = -frame.height;
+          break;
+        case 'down':
+          key = 'top';
+          value = frame.height;
+          break;
+        default:
+          key = 'left';
+          value = frame.width;
+        }
+
+        content.animate(key, value, {
+          duration: options.duration || 0.4,
+          timing: options.timing || 'ease'
+        }, function (data) {
+          if (!data.isCancelled) {
+            statechart.exited();
+          }
+        });
       }
+    },
+
+    /** @private */
+    didBuildOutFromView: function (container, content, options) {
+      // Convert to a flexible layout.
+      content.adjust({ bottom: 0, right: 0, height: null, width: null, zIndex: null });
     }
+
   }
 });
