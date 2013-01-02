@@ -673,6 +673,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       }
     }
 
+    this.records = {};
+    this.childRecords = {};
+    this.parentRecords = {};
+
     this.set('hasChanges', NO);
   },
 
@@ -1264,6 +1268,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       that.unloadRecord(null, null, storeKey, newStatus);
     });
 
+    this.unregisterChildFromParent(storeKey, YES);
+
     return this ;
   },
 
@@ -1446,29 +1452,43 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   /**
     Unregister the Child Record from its Parent.  This will cause the Child
     Record to be removed from the store.
+
+    @param {Number} childStoreKey storeKey to unregister
+    @param {Boolean} [isParent] used internally by unloadRecord to unregister all child records
   */
-  unregisterChildFromParent: function(childStoreKey) {
-    var crs, oldPk;
+  unregisterChildFromParent: function(childStoreKey, isParent) {
+    var crs, oldPk, storeKeys,
+        recordType = this.recordTypeFor(childStoreKey),
+        id = this.idFor(childStoreKey),
+        that = this;
 
-    // Check the child to see if it has a parent
-    crs = this.childRecords;
+    if (!isParent) {
+      // Check the child to see if it has a parent
+      crs = this.childRecords;
 
-    // Remove the parent's connection to the child.  This doesn't remove the
-    // parent store key from the cache of parent store keys if the parent
-    // no longer has any other registered children, because the amount of effort
-    // to determine that would not be worth the miniscule memory savings.
-    oldPk = crs[childStoreKey];
-    if (oldPk) {
-      delete this.parentRecords[oldPk][childStoreKey];
+      if (crs) {
+        // Remove the parent's connection to the child.  This doesn't remove the
+        // parent store key from the cache of parent store keys if the parent
+        // no longer has any other registered children, because the amount of effort
+        // to determine that would not be worth the miniscule memory savings.
+        oldPk = crs[childStoreKey];
+        if (oldPk) {
+          delete this.parentRecords[oldPk][childStoreKey];
+        }
+
+        // Remove the child.
+        // 1. from the cache of data hashes
+        // 2. from the cache of record objects
+        // 3. from the cache of child record store keys
+        this.removeDataHash(childStoreKey);
+        delete this.records[childStoreKey];
+        delete crs[childStoreKey];
+      }
     }
 
-    // Remove the child.
-    // 1. from the cache of data hashes
-    // 2. from the cache of record objects
-    // 3. from the cache of child record store keys
-    this.removeDataHash(childStoreKey);
-    delete this.records[childStoreKey];
-    delete crs[childStoreKey];
+    this._propagateToChildren(childStoreKey, function(storeKey) {
+      that.unregisterChildFromParent(storeKey);
+    });
   },
 
   /**
