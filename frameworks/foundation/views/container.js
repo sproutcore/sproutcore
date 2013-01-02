@@ -309,10 +309,12 @@ SC.ContainerView = SC.View.extend(
   replaceContent: function (newContent) {
     var contentStatecharts,
       currentContent = this._currentContent,
-      options = this.get('transitionOptions') || {},
       transition = this.get('transition'),
       newStatechart,
       newTransition = transition;
+
+    // Track that we are transitioning.
+    this.set('isTransitioning', YES);
 
     // Create a statechart for the new content.
     contentStatecharts = this._contentStatecharts;
@@ -334,10 +336,8 @@ SC.ContainerView = SC.View.extend(
     newStatechart = SC.ContainerContentStatechart.create({
       container: this,
       content: newContent,
-      options: options,
       previousContent: currentContent,
-      shouldDestroy: this._createdContent,
-      transition: newTransition
+      shouldDestroy: this._createdContent
     });
     contentStatecharts.pushObject(newStatechart);
 
@@ -349,8 +349,8 @@ SC.ContainerView = SC.View.extend(
     // Track the current view.
     this._currentContent = newContent;
 
-    // Track that we are transitioning.
-    this.set('isTransitioning', YES);
+    // Clean up!
+    this._createdContent = NO;
   }
 
 });
@@ -375,13 +375,9 @@ SC.ContainerContentStatechart = SC.Object.extend({
 
   previousContent: null,
 
-  options: null,
-
   shouldDestroy: false,
 
   state: 'none',
-
-  transition: null,
 
   // ------------------------------------------------------------------------
   // Methods
@@ -396,8 +392,8 @@ SC.ContainerContentStatechart = SC.Object.extend({
 
   transitionClippingFrame: function (clippingFrame) {
     var container = this.get('container'),
-      options = this.get('options'),
-      transition = this.get('transition');
+      options = container.get('transitionOptions') || {},
+      transition = container.get('transition');
 
     if (!!transition) {
       return transition.transitionClippingFrame(container, clippingFrame, options);
@@ -449,13 +445,15 @@ SC.ContainerContentStatechart = SC.Object.extend({
     var container = this.get('container'),
       content = this.get('content'),
       previousContent = this.get('previousContent'),
-      options = this.get('options'),
-      transition = this.get('transition');
+      options = container.get('transitionOptions') || {},
+      transition = container.get('transition');
 
     // Assign the state.
     this.state = 'entering';
 
-    container.appendChild(content);
+    if (!!content) {
+      container.appendChild(content);
+    }
 
     if (!!content && !!transition) {
       if (!!transition.willBuildInToView) {
@@ -474,8 +472,8 @@ SC.ContainerContentStatechart = SC.Object.extend({
     var container = this.get('container'),
       content = this.get('content'),
       exitCount = this._exitCount,
-      options = this.get('options'),
-      transition = this.get('transition');
+      options = container.get('transitionOptions') || {},
+      transition = container.get('transition');
 
     if (!!content && !!transition) {
       if (this.state === 'entering') {
@@ -515,9 +513,9 @@ SC.ContainerContentStatechart = SC.Object.extend({
   gotoExitedState: function () {
     var container = this.get('container'),
       content = this.get('content'),
-      options = this.get('options'),
+      options = container.get('transitionOptions') || {},
       shouldDestroy = this.get('shouldDestroy'),
-      transition = this.get('transition');
+      transition = container.get('transition');
 
     if (!!content) {
       if (transition) {
@@ -543,8 +541,8 @@ SC.ContainerContentStatechart = SC.Object.extend({
   gotoReadyState: function () {
     var container = this.get('container'),
       content = this.get('content'),
-      options = this.get('options'),
-      transition = this.get('transition');
+      options = container.get('transitionOptions') || {},
+      transition = container.get('transition');
 
     if (content && transition) {
       if (!!transition.didBuildInToView) {
