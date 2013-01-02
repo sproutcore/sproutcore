@@ -7,3 +7,5 @@ config :menu, :required => [:'experimental/scroll_view']
 config :polymorphism, :required => :datastore
 
 config :split_view, :required => :foundation
+
+config :task, :required => :core_foundation
