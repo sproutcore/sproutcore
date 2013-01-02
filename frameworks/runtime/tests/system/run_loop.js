@@ -214,3 +214,21 @@ test("Using invokeNext should result in an additional run of the run loop immedi
     });
   });
 });
+
+/**
+  There was a regression where unscheduling a run loop failed to clear out the
+  internal state and therefore further scheduling of the run loop failed.
+*/
+test("Using unscheduleRunLoop should not prevent scheduleRunLoop from working.", function () {
+  SC.run(function () {
+    var now = new Date(),
+      newTimeoutID,
+      timeoutID;
+
+    timeoutID = SC.RunLoop.currentRunLoop.scheduleRunLoop(now);
+    SC.RunLoop.currentRunLoop.unscheduleRunLoop();
+    newTimeoutID = SC.RunLoop.currentRunLoop.scheduleRunLoop(now);
+
+    ok(timeoutID !== newTimeoutID, "should not be the same timeout id after unscheduling");
+  });
+});

@@ -366,9 +366,10 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
 
   /** @private Unschedule the run loop that is scheduled for the given timeoutID */
   unscheduleRunLoop: function () {
-    // Don't unschedule if the
+    // Don't unschedule if the timeout is shared with an invokeNext timeout.
     if (!this._invokeNextTimeout) {
       clearTimeout(this._timeout);
+      this._timeout = this._timeoutAt = null; // cleanup
     }
   }
 
