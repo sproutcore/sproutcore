@@ -3,7 +3,7 @@
 // Copyright: @2012 7x7 Software, Inc.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-/*globals module, test, ok, equals*/
+/*global module, test, ok, equals*/
 
 
 var containerView,
@@ -26,12 +26,14 @@ module("SC.ContainerView Transitions", {
       });
 
       pane = SC.Pane.create({
-       layout: { width: 200, height: 200, left: 0, top: 0 },
-       childViews: [containerView]
+        layout: { width: 200, height: 200, left: 0, top: 0 },
+        childViews: [containerView]
       }).append();
     });
 
-    containerView.awake();
+    SC.run(function () {
+      containerView.awake();
+    });
   },
 
   teardown: function () {
@@ -59,67 +61,83 @@ test("Test that the isTransitioning property of container view updates according
   // Pause the test execution.
   window.stop(2000);
 
-  containerView.set('transition', SC.ContainerView.PUSH);
-  containerView.set('nowShowing', view2);
+  SC.run(function () {
+    containerView.set('transition', SC.ContainerView.PUSH);
+    containerView.set('nowShowing', view2);
+  });
 
   ok(containerView.get('isTransitioning'), "Container view should indicate that it is transitioning.");
 
-  SC.run(function() {
-    setTimeout(function() {
-      SC.run(function() {
-        ok(!containerView.get('isTransitioning'), "Container view should not indicate that it is transitioning.");
-      });
+  setTimeout(function () {
+    ok(!containerView.get('isTransitioning'), "Container view should not indicate that it is transitioning.");
 
-      window.start();
-    }, 1000);
-  });
+    window.start();
+  }, 1000);
 });
 
 test("Test that the container view calls the proper transition plugin methods.", function () {
-  var cancelCalled = 0,
-    setupCalled = 0,
-    teardownCalled = 0,
-    runCalled = 0,
+  var willBuildInToViewCalled = 0,
+    buildInToViewCalled = 0,
+    buildInDidCancelCalled = 0,
+    didBuildInToViewCalled = 0,
+    willBuildOutFromViewCalled = 0,
+    buildOutFromViewCalled = 0,
+    buildOutDidCancelCalled = 0,
+    didBuildOutFromViewCalled = 0,
     plugin;
 
   // Pause the test execution.
   window.stop(2000);
 
   plugin = {
-    cancel: function () { cancelCalled++; },
-    setup: function () { setupCalled++; },
-    teardown: function () { teardownCalled++; },
-    run: function (a, b, c, d, onComplete) {
-      runCalled++;
+    willBuildInToView: function () { willBuildInToViewCalled++; },
+    buildInToView: function (statechart) {
+      buildInToViewCalled++;
 
-      setTimeout(function() {
-        onComplete();
+      setTimeout(function () {
+        statechart.entered();
       }, 200);
-    }
+    },
+    buildInDidCancel: function () { buildInDidCancelCalled++; },
+    didBuildInToView: function () { didBuildInToViewCalled++; },
+    willBuildOutFromView: function () { willBuildOutFromViewCalled++; },
+    buildOutFromView: function (statechart) {
+      buildOutFromViewCalled++;
+
+      setTimeout(function () {
+        statechart.exited();
+      }, 200);
+    },
+    buildOutDidCancel: function () { buildOutDidCancelCalled++; },
+    didBuildOutFromView: function () { didBuildOutFromViewCalled++; }
   };
 
   containerView.set('transition', plugin);
   containerView.set('nowShowing', view2);
-  equals(cancelCalled, 0, "cancel() should have been called this many times");
-  equals(setupCalled, 1, "setup() should have been called this many times");
-  equals(runCalled, 0, "run() should have been called this many times");
-  equals(teardownCalled, 0, "teardown() should have been called this many times");
+  equals(willBuildInToViewCalled, 1, "willBuildInToViewCalled() should have been called this many times");
+  equals(willBuildOutFromViewCalled, 1, "willBuildOutFromViewCalled() should have been called this many times");
+  equals(buildInToViewCalled, 1, "buildInToViewCalled() should have been called this many times");
+  equals(buildOutFromViewCalled, 1, "buildOutFromViewCalled() should have been called this many times");
+  equals(buildInDidCancelCalled, 0, "buildInDidCancelCalled() should have been called this many times");
+  equals(buildOutDidCancelCalled, 0, "buildOutDidCancelCalled() should have been called this many times");
+  equals(didBuildInToViewCalled, 0, "didBuildInToViewCalled() should have been called this many times");
+  equals(didBuildOutFromViewCalled, 0, "didBuildOutFromViewCalled() should have been called this many times");
 
-  SC.run(function() {
-    setTimeout(function() {
-      equals(cancelCalled, 0, "cancel() should have been called this many times");
-      equals(setupCalled, 1, "setup() should have been called this many times");
-      equals(runCalled, 1, "run() should have been called this many times");
-      equals(teardownCalled, 0, "teardown() should have been called this many times");
-    }, 50);
+  SC.run(function () {
+    setTimeout(function () {
+      equals(buildInDidCancelCalled, 0, "buildInDidCancelCalled() should have been called this many times");
+      equals(buildOutDidCancelCalled, 0, "buildOutDidCancelCalled() should have been called this many times");
+      equals(didBuildInToViewCalled, 0, "didBuildInToViewCalled() should have been called this many times");
+      equals(didBuildOutFromViewCalled, 0, "didBuildOutFromViewCalled() should have been called this many times");
+    }, 100);
   });
 
-  setTimeout(function() {
-    equals(cancelCalled, 0, "cancel() should have been called this many times");
-    equals(setupCalled, 1, "setup() should have been called this many times");
-    equals(runCalled, 1, "run() should have been called this many times");
-    equals(teardownCalled, 1, "teardown() should have been called this many times");
+  setTimeout(function () {
+    equals(buildInDidCancelCalled, 0, "buildInDidCancelCalled() should have been called this many times");
+    equals(buildOutDidCancelCalled, 0, "buildOutDidCancelCalled() should have been called this many times");
+    equals(didBuildInToViewCalled, 1, "didBuildInToViewCalled() should have been called this many times");
+    equals(didBuildOutFromViewCalled, 1, "didBuildOutFromViewCalled() should have been called this many times");
 
     window.start();
-  }, 250);
+  }, 300);
 });
