@@ -27,7 +27,7 @@ SC.ANIMATABLE_PROPERTIES = {
 */
 SC.ANIMATION_POSITION = {
   /** @const
-    The original layout of the view before calling animate.
+    The previous layout of the view before calling animate.
 
     For example,
 
@@ -35,11 +35,11 @@ SC.ANIMATION_POSITION = {
         myView.animate('left', 300, { duration: 1.5 });
 
         // later..
-        myView.cancelAnimation(SC.ANIMATION_POSITION.original);
+        myView.cancelAnimation(SC.ANIMATION_POSITION.start);
 
         myView.get('layout'); // => { left: 0, top: 0, width: 100, bottom: 0 }
   */
-  original: 1,
+  start: 1,
 
   /** @const
     The current layout of the view while it is animating.
@@ -56,7 +56,7 @@ SC.ANIMATION_POSITION = {
   current: 2,
 
   /** @const
-    The final layout of the view after calling animate.
+    The final layout of the view if the animation completed.
 
     For example,
 
@@ -64,10 +64,10 @@ SC.ANIMATION_POSITION = {
         myView.animate('left', 300, { duration: 1.5 });
 
         // later..
-        myView.cancelAnimation(SC.ANIMATION_POSITION.final);
+        myView.cancelAnimation(SC.ANIMATION_POSITION.end);
         myView.get('layout'); // => { left: 300, top: 0, width: 100, bottom: 0 }
   */
-  final: 3
+  end: 3
 };
 
 SC.View.reopen(
@@ -358,13 +358,13 @@ SC.View.reopen(
 
   /**
     Cancels the animation, adjusting the view's layout to one of three positions
-    depending on the value of the finalPosition parameter of either the final,
-    current or original layout.  For details @see SC.ANIMATION_POSITION.
+    depending on the value of the finalPosition parameter of either the start,
+    current or end layout.  For details @see SC.ANIMATION_POSITION.
 
     Note: The animation callbacks will still be called with the data object's
     isCancelled property set to YES.
 
-    @param [finalPosition] {SC.ANIMATION_POSITION} The layout to immediately adjust the view to.  SC.ANIMATION_POSITION.final by default.
+    @param [finalPosition] {SC.ANIMATION_POSITION} The layout to immediately adjust the view to.  SC.ANIMATION_POSITION.end by default.
     @returns this
   */
   cancelAnimation: function (finalPosition) {
@@ -376,8 +376,8 @@ SC.View.reopen(
     if (!activeAnimations) { return didCancel; }
 
     switch (finalPosition) {
-    case SC.ANIMATION_POSITION.original:
-      // Revert back to the original layout.
+    case SC.ANIMATION_POSITION.start:
+      // Revert back to the start layout.
       layout = this._prevLayout;
       break;
     case SC.ANIMATION_POSITION.current:
@@ -510,7 +510,7 @@ SC.View.reopen(
   */
   resetAnimation: function () {
     //@if(debug)
-    // Reset gives the connotation that the animation would go back to the original layout, but that is not the case.
+    // Reset gives the connotation that the animation would go back to the start layout, but that is not the case.
     SC.warn('Developer Warning: resetAnimation() has been renamed to cancelAnimation().  Please rename all calls to resetAnimation() with cancelAnimation().');
     //@endif
 
