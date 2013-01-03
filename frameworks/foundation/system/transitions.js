@@ -35,12 +35,12 @@ SC.mixin(SC.ContainerView,
   DISSOLVE: {
 
     /** @private */
-    willBuildInToView: function (container, content, previousContent, options) {
+    willBuildInToView: function (container, content, previousStatechart, options) {
       content.adjust({ opacity: 0 });
     },
 
     /** @private */
-    buildInToView: function (statechart, container, content, previousContent, options) {
+    buildInToView: function (statechart, container, content, previousStatechart, options) {
       content.animate('opacity', 1, {
         duration: options.duration || 0.4,
         timing: options.timing || 'ease'
@@ -102,7 +102,7 @@ SC.mixin(SC.ContainerView,
   FADE_COLOR: {
 
     /** @private */
-    willBuildInToView: function (container, content, previousContent, options) {
+    willBuildInToView: function (container, content, previousStatechart, options) {
       var color,
         colorView;
 
@@ -120,7 +120,7 @@ SC.mixin(SC.ContainerView,
     },
 
     /** @private */
-    buildInToView: function (statechart, container, content, previousContent, options) {
+    buildInToView: function (statechart, container, content, previousStatechart, options) {
       var childViews = container.get('childViews'),
         colorView;
 
@@ -187,7 +187,7 @@ SC.mixin(SC.ContainerView,
   MOVE_IN: {
 
     /** @private */
-    willBuildInToView: function (container, content, previousContent, options) {
+    willBuildInToView: function (container, content, previousStatechart, options) {
       var frame = container.get('frame'),
         left,
         top,
@@ -215,7 +215,7 @@ SC.mixin(SC.ContainerView,
     },
 
     /** @private */
-    buildInToView: function (statechart, container, content, previousContent, options) {
+    buildInToView: function (statechart, container, content, previousStatechart, options) {
       var key,
         value;
 
@@ -289,7 +289,7 @@ SC.mixin(SC.ContainerView,
   PUSH: {
 
     /** @private */
-    willBuildInToView: function (container, content, previousContent, options) {
+    willBuildInToView: function (container, content, previousStatechart, options) {
       var adjustLeft = 0,
         adjustTop = 0,
         frame = container.get('frame'),
@@ -302,11 +302,11 @@ SC.mixin(SC.ContainerView,
       width = frame.width;
 
       // Push on to the edge of whatever the current position of previous content is.
-      if (previousContent) {
-        var layout = previousContent.get('layout');
+      if (previousStatechart && previousStatechart.get('content')) {
+        var adjustments = previousStatechart.getPath('content.liveAdjustments');
 
-        adjustLeft = layout.left;
-        adjustTop = layout.top;
+        adjustLeft = adjustments.left || 0;
+        adjustTop = adjustments.top || 0;
       }
 
       switch (options.direction) {
@@ -328,7 +328,7 @@ SC.mixin(SC.ContainerView,
     },
 
     /** @private */
-    buildInToView: function (statechart, container, content, previousContent, options) {
+    buildInToView: function (statechart, container, content, previousStatechart, options) {
       var key;
 
       switch (options.direction) {
@@ -346,16 +346,11 @@ SC.mixin(SC.ContainerView,
         duration: options.duration || 0.4,
         timing: options.timing || 'ease'
       }, function (data) {
-        if (!data.isCancelled) {
+        // We may already be in exiting state by the time we transition in.
+        if (statechart.get('state') === 'entering') {
           statechart.entered();
         }
       });
-    },
-
-    /** @private */
-    buildInDidCancel:  function (container, content, options) {
-      // Stop where we are.
-      content.cancelAnimation(SC.ANIMATION_POSITION.current);
     },
 
     /** @private */
@@ -409,12 +404,6 @@ SC.mixin(SC.ContainerView,
           statechart.exited();
         }
       });
-    },
-
-    /** @private */
-    buildOutDidCancel: function (container, content, options) {
-      // Stop where we are.
-      content.cancelAnimation(SC.ANIMATION_POSITION.current);
     },
 
     /** @private */

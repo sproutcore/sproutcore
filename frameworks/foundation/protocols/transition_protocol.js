@@ -25,10 +25,10 @@ SC.TransitionProtocol = {
 
     @param {SC.ContainerView} container The SC.ContainerView using this plugin.
     @param {SC.View} content The new view added to the container.
-    @param {SC.View} previousContent The current view in the container.
+    @param {SC.View} previousStatechart The current content statechart in the container.
     @param {Object} options Options to modify the transition.
   */
-  willBuildInToView: function (container, content, previousContent, options) {},
+  willBuildInToView: function (container, content, previousStatechart, options) {},
 
   /**
     This optional method is called to transition the new content in.
@@ -39,10 +39,10 @@ SC.TransitionProtocol = {
     @param {SC.ContainerContentStatechart} statechart The statechart for the content view.
     @param {SC.ContainerView} container The SC.ContainerView using this plugin.
     @param {SC.View} content The new view added to the container.
-    @param {SC.View} previousContent The current view in the container.
+    @param {SC.View} previousStatechart The current content statechart in the container.
     @param {Object} options Options to modify the transition.
   */
-  buildInToView: function (statechart, container, content, previousContent, options) {},
+  buildInToView: function (statechart, container, content, previousStatechart, options) {},
 
   /**
     This optional method is called to cancel an active entrance transition.

@@ -166,10 +166,7 @@ SC.ContainerView = SC.View.extend(
     sc_super();
 
     if (this.get('nowShowing')) {
-      // Prevent the initial awake from transitioning in.
-      this._nowShowingAlreadySet = true;
       this.nowShowingDidChange();
-      delete this._nowShowingAlreadySet;
     }
   },
 
@@ -230,11 +227,8 @@ SC.ContainerView = SC.View.extend(
       contentStatecharts[i].doExit();
     }
 
-    var contentView = this.get('contentView');
-
-    // Remove our internal reference to the current content.
-    this.removeChild(contentView);
-    this._currentContent = null;
+    // Remove our internal reference to the statecharts.
+    this._contentStatecharts = this._currentStatechart = null;
 
     return sc_super();
   },
@@ -280,7 +274,7 @@ SC.ContainerView = SC.View.extend(
   statechartReady: function () {
     var contentStatecharts = this._contentStatecharts;
 
-    // Exit all the other statecharts immediately.  This mutates the array!
+    // Exit all other remaining statecharts immediately.  This mutates the array!
     for (var i = contentStatecharts.length - 2; i >= 0; i--) {
       contentStatecharts[i].set('transition', null);
       contentStatecharts[i].doExit();
@@ -308,10 +302,8 @@ SC.ContainerView = SC.View.extend(
   */
   replaceContent: function (newContent) {
     var contentStatecharts,
-      currentContent = this._currentContent,
-      transition = this.get('transition'),
-      newStatechart,
-      newTransition = transition;
+      currentStatechart = this._currentStatechart,
+      newStatechart;
 
     // Track that we are transitioning.
     this.set('isTransitioning', YES);
@@ -326,28 +318,17 @@ SC.ContainerView = SC.View.extend(
       contentStatecharts[i].doExit();
     }
 
-    // Don't set the transition if nowShowing was already set in order to
-    // prevent transitioning in of content that is already there.
-    if (this._nowShowingAlreadySet) {
-      newTransition = null;
-    }
-
     // Add the new content statechart, which will enter automatically.
     newStatechart = SC.ContainerContentStatechart.create({
       container: this,
       content: newContent,
-      previousContent: currentContent,
+      previousStatechart: currentStatechart,
       shouldDestroy: this._createdContent
     });
     contentStatecharts.pushObject(newStatechart);
 
-    // Set the transition now that the new statechart has entered.
-    if (this._nowShowingAlreadySet) {
-      newStatechart.set('transition', transition);
-    }
-
-    // Track the current view.
-    this._currentContent = newContent;
+    // Track the current statechart.
+    this._currentStatechart = newStatechart;
 
     // Clean up!
     this._createdContent = NO;
@@ -373,7 +354,7 @@ SC.ContainerContentStatechart = SC.Object.extend({
 
   content: null,
 
-  previousContent: null,
+  previousStatechart: null,
 
   shouldDestroy: false,
 
@@ -444,7 +425,7 @@ SC.ContainerContentStatechart = SC.Object.extend({
   gotoEnteringState: function () {
     var container = this.get('container'),
       content = this.get('content'),
-      previousContent = this.get('previousContent'),
+      previousStatechart = this.get('previousStatechart'),
       options = container.get('transitionOptions') || {},
       transition = container.get('transition');
 
@@ -455,12 +436,13 @@ SC.ContainerContentStatechart = SC.Object.extend({
       container.appendChild(content);
     }
 
-    if (!!content && !!transition) {
+    // Don't transition unless there is a previous statechart.
+    if (!!previousStatechart && !!content && !!transition) {
       if (!!transition.willBuildInToView) {
-        transition.willBuildInToView(container, content, previousContent, options);
+        transition.willBuildInToView(container, content, previousStatechart, options);
       }
       if (!!transition.buildInToView) {
-        transition.buildInToView(this, container, content, previousContent, options);
+        transition.buildInToView(this, container, content, previousStatechart, options);
       }
     } else {
       this.entered();
