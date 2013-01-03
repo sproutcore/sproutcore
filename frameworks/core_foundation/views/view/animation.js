@@ -66,6 +66,13 @@ SC.View.reopen(
     }
 
     if (callback) { options.callback = callback; }
+    else if (options.callback) {
+      //@if(debug)
+        // Provide a little developer support if they are doing something that should be considered wrong.
+        SC.warn("Developer Warning: The callback method should be given as an argument not as part of the options object.  Future versions of SproutCore will no longer support having the callback in the options hash.  See discussion at:  https://github.com/sproutcore/sproutcore/issues/861.");
+      //@endif
+      callback = options.callback;
+    }
 
     // In the case of zero duration, just adjust and call the callback.
     if (options.duration === 0) {
