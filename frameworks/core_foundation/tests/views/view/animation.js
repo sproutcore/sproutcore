@@ -373,7 +373,7 @@ if (SC.platform.supportsCSSTransitions) {
     };
 
     SC.run(function () {
-      view.animate('rotateX', 45, 1).animate('scale', 2, 2);
+      view.animate('rotateX', 45, { duration: 1 }).animate('scale', 2, { duration: 2 });
     });
 
     setTimeout(function () {

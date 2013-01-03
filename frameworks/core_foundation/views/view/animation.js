@@ -243,23 +243,23 @@ SC.View.reopen(
     }
 
     optionsType = SC.typeOf(options);
+    // This support should be deprecated.  Too much argument overloading.
     if (optionsType === SC.T_NUMBER) {
       //@if(debug)
       // Provide a little developer support if they are doing something that should be considered wrong.
       SC.warn("Developer Warning: The duration should be given as a property of the options object.");
       //@endif
-      // This support should be deprecated.  Too much argument overloading.
       options = { duration: options };
     } else if (optionsType !== SC.T_HASH) {
       throw "Must provide options hash!";
     }
 
-    //@if(debug)
-    // Provide a little developer support if they are doing something that should be considered wrong.
-    SC.warn("Developer Warning: The callback method should be given as an argument not as part of the options object.");
-    //@endif
     // This support should be deprecated.  Too much argument overloading.
     if (options.callback) {
+      //@if(debug)
+      // Provide a little developer support if they are doing something that should be considered wrong.
+      SC.warn("Developer Warning: The callback method should be given as an argument not as part of the options object.");
+      //@endif
       method = options.callback;
       delete options.callback;
     }
