@@ -1,7 +1,11 @@
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// License:   Licensed under MIT license (see license.js)
+// ==========================================================================
 sc_require("views/view");
 sc_require("views/view/layout_style");
 
-/**
+/** @private
   Properties that can be animated
   (Hash for faster lookup)
 */
@@ -22,56 +26,76 @@ SC.ANIMATABLE_PROPERTIES = {
   rotateZ: YES
 };
 
-/** @const
-  Positions that the view's layout can be set to if it's animation is cancelled.
+
+/**
+  States that the view's layout can be set to if its animation is cancelled.
+
+  ### START
+
+  The previous layout of the view before calling animate.
+
+  For example,
+
+      myView.set('layout', { left: 0, top: 0, width: 100, bottom: 0 });
+      myView.animate('left', 300, { duration: 1.5 });
+
+      // later..
+      myView.cancelAnimation(SC.LayoutState.START);
+
+      myView.get('layout'); // => { left: 0, top: 0, width: 100, bottom: 0 }
+
+  ### CURRENT
+
+  The current layout of the view while it is animating.
+
+  For example,
+
+      myView.set('layout', { left: 0, top: 0, width: 100, bottom: 0 });
+      myView.animate('left', 300, { duration: 1.5 });
+
+      // later..
+      myView.cancelAnimation(SC.LayoutState.CURRENT);
+      myView.get('layout'); // => { left: 150, top: 0, width: 100, bottom: 0 }
+
+  ### END
+
+  The final layout of the view if the animation completed.
+
+  For example,
+
+      myView.set('layout', { left: 0, top: 0, width: 100, bottom: 0 });
+      myView.animate('left', 300, { duration: 1.5 });
+
+      // later..
+      myView.cancelAnimation(SC.LayoutState.END);
+      myView.get('layout'); // => { left: 300, top: 0, width: 100, bottom: 0 }
+
+  @readonly
+  @enum {Number}
 */
-SC.ANIMATION_POSITION = {
-  /** @const
-    The previous layout of the view before calling animate.
-
-    For example,
-
-        myView.set('layout', { left: 0, top: 0, width: 100, bottom: 0 });
-        myView.animate('left', 300, { duration: 1.5 });
-
-        // later..
-        myView.cancelAnimation(SC.ANIMATION_POSITION.start);
-
-        myView.get('layout'); // => { left: 0, top: 0, width: 100, bottom: 0 }
-  */
-  start: 1,
-
-  /** @const
-    The current layout of the view while it is animating.
-
-    For example,
-
-        myView.set('layout', { left: 0, top: 0, width: 100, bottom: 0 });
-        myView.animate('left', 300, { duration: 1.5 });
-
-        // later..
-        myView.cancelAnimation(SC.ANIMATION_POSITION.current);
-        myView.get('layout'); // => { left: 150, top: 0, width: 100, bottom: 0 }
-  */
-  current: 2,
-
-  /** @const
-    The final layout of the view if the animation completed.
-
-    For example,
-
-        myView.set('layout', { left: 0, top: 0, width: 100, bottom: 0 });
-        myView.animate('left', 300, { duration: 1.5 });
-
-        // later..
-        myView.cancelAnimation(SC.ANIMATION_POSITION.end);
-        myView.get('layout'); // => { left: 300, top: 0, width: 100, bottom: 0 }
-  */
-  end: 3
+SC.LayoutState = {
+  START: 1,
+  CURRENT: 2,
+  END: 3
 };
+
 
 SC.View.reopen(
   /** @scope SC.View.prototype */ {
+
+  /**
+    Method protocol.
+
+    The method you provide to SC.View.prototype.animate should accept the
+    following parameter(s).
+
+    @name animateCallback
+    @function
+    @param {object} animationResult The result of the animation.
+    @param {boolean} animationResult.isCancelled Whether the animation was cancelled or not.
+    @param {event} [animationResult.evt] The transitionend event if it exists.
+    @param {SC.View} animationResult.view The animated view.
+  */
 
   /**
     Animate a group of layout properties using CSS animations.
@@ -112,7 +136,7 @@ SC.View.reopen(
 
     To execute code when the transition completes, you may provide an optional
     target and/or method.  When the given group of transitions completes,
-    the callback function will be called once and passed a data object with
+    the callback function will be called once and passed a animationResult object with
     properties containing the event, the view and a boolean isCancelled which
     indicates if the animation had been cancelled or not.  The format of the
     target and method follows the standard SproutCore format, where if the
@@ -125,7 +149,7 @@ SC.View.reopen(
         myView.animate(
           { top: 200, left: 200 },  // properties
           { duration: 0.75 }, // options
-          function (data) {  // method
+          function (animationResult) {  // method
             // `this` will be myView
           }
         );
@@ -144,7 +168,11 @@ SC.View.reopen(
     the ongoing animation callback firing immediately with isCancelled set to
     YES and adjusting the transition to accomodate the new settings.
 
-    # A note about Hardware Acceleration.
+    Note: This may not work if you are not using SproutCore for view layout,
+    which means you should not use `animate` if the view has `useStaticLayout`
+    set to YES.
+
+    ### A note about Hardware Acceleration.
 
     If a view has a fixed layout (i.e. view.get('isFixedLayout') == YES) then
     it will be eligible for hardware accelerated position transitions. Having a
@@ -175,27 +203,16 @@ SC.View.reopen(
           myView.adjust({ right: -width, bottom: 10 });
         });
 
-    Note: This may not work if you are not using SproutCore for view layout,
-    which means you should not use it if the view has useStaticLayout set to YES.
-
-    @param {Object} properties Hash of property names with final layout values.
-    @param {Object} options Hash of transition options.
-    @param {Object} [target] The target for the method.  If not provided, the target will be the view itself.
-    @params {Function|String} [method] The method to run when the transition completes.  May be a function or a property path.
-    @returns {SC.View} receiver
-  */
-  animate: function () {
-    // Overloaded function.  This exists to make the documentation clearer.
-  },
-
-  /**
-    Animate a given property using CSS animations.
-
-    @param {String} key The layout property name.
-    @param {Number} value The new layout property value.
-    @param {Object} options Hash of transition options.
-    @param {Object} [target] The target for the method.  If not provided, the target will be the view itself.
-    @params {Function|String} [method] The method to run when the transition completes.  May be a function or a property path.
+    @param {object|string} properties Hash of property names with new layout values or a single property name.
+    @param {number} [value] The new layout value for a single property (only provide if the first parameter is a string).
+    @param {object} options Hash of transition options.
+    @param {number} options.duration The duration of the transition in seconds.
+    @param {string|array} options.timing The transition timing function.  This may be a predefined CSS timing
+      function (e.g. 'linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out') or
+      it may be an array of values to make a cubic bezier (e.g. [0, 0, 0.58, 1.0]).
+    @param {number} options.delay The transition delay in seconds.
+    @param {object} [target=this] The target for the method.
+    @param {animateCallback|string} [method] The method to run when the transition completes.  May be a function or a property path.
     @returns {SC.View} receiver
   */
   animate: function (key, value, options, target, method) {
@@ -357,17 +374,22 @@ SC.View.reopen(
   },
 
   /**
-    Cancels the animation, adjusting the view's layout to one of three positions
-    depending on the value of the finalPosition parameter of either the start,
-    current or end layout.  For details @see SC.ANIMATION_POSITION.
+    Cancels the animation, adjusting the view's layout immediately to one of
+    three values depending on the `layoutState` parameter.
 
-    Note: The animation callbacks will still be called with the data object's
+    If no `layoutState` is given or if SC.LayoutState.END is given, the view
+    will be adjusted to its final layout.  If SC.LayoutState.START is given,
+    the view will be adjusted back to its initial layout and if
+    SC.LayoutState.CURRENT is given, the view will stop at its current layout
+    value, which will be some transient value between the start and end values.
+
+    Note: The animation callbacks will be called with the animationResult object's
     isCancelled property set to YES.
 
-    @param [finalPosition] {SC.ANIMATION_POSITION} The layout to immediately adjust the view to.  SC.ANIMATION_POSITION.end by default.
-    @returns this
+    @param {SC.LayoutState} [layoutState=SC.LayoutState.END] The layout to immediately adjust the view to.
+    @returns {SC.View} this
   */
-  cancelAnimation: function (finalPosition) {
+  cancelAnimation: function (layoutState) {
     var activeAnimations = this._activeAnimations,
       layout,
       didCancel = NO;
@@ -375,12 +397,12 @@ SC.View.reopen(
     // Fast path!
     if (!activeAnimations) { return didCancel; }
 
-    switch (finalPosition) {
-    case SC.ANIMATION_POSITION.start:
+    switch (layoutState) {
+    case SC.LayoutState.START:
       // Revert back to the start layout.
       layout = this._prevLayout;
       break;
-    case SC.ANIMATION_POSITION.current:
+    case SC.LayoutState.CURRENT:
       // Stop at the current layout.
       layout = this.get('liveAdjustments');
       break;

@@ -437,7 +437,7 @@ if (SC.platform.supportsCSSTransitions) {
     }, 50);
   });
 
-  test("Test that cancelAnimation(SC.ANIMATION_POSITION.current) removes the animation style, stops at the current position and fires the callback with isCancelled set.", function () {
+  test("Test that cancelAnimation(SC.LayoutState.CURRENT) removes the animation style, stops at the current position and fires the callback with isCancelled set.", function () {
     stop(2000);
 
     expect(9);
@@ -456,7 +456,7 @@ if (SC.platform.supportsCSSTransitions) {
         equals(style.top, '100px', 'Tests the top style after animate');
         equals(style.width, '400px', 'Tests the width style after animate');
         equals(transitionFor(view), 'left 0.5s ease 0s, top 0.5s ease 0s, width 0.5s ease 0s', 'Tests the CSS transition property');
-        view.cancelAnimation(SC.ANIMATION_POSITION.current);
+        view.cancelAnimation(SC.LayoutState.CURRENT);
       });
     }, 100);
 
@@ -471,7 +471,7 @@ if (SC.platform.supportsCSSTransitions) {
     }, 200);
   });
 
-  test("Test that cancelAnimation(SC.ANIMATION_POSITION.start) removes the animation style, returns to the start position and fires the callback with isCancelled set.", function () {
+  test("Test that cancelAnimation(SC.LayoutState.START) removes the animation style, returns to the start position and fires the callback with isCancelled set.", function () {
     stop(2000);
 
     expect(9);
@@ -490,7 +490,7 @@ if (SC.platform.supportsCSSTransitions) {
         equals(style.top, '100px', 'Tests the top style after animate');
         equals(style.width, '400px', 'Tests the width style after animate');
         equals(transitionFor(view), 'left 0.5s ease 0s, top 0.5s ease 0s, width 0.5s ease 0s', 'Tests the CSS transition property');
-        view.cancelAnimation(SC.ANIMATION_POSITION.start);
+        view.cancelAnimation(SC.LayoutState.START);
       });
     }, 100);
 
@@ -661,7 +661,7 @@ if (SC.platform.supportsCSSTransitions) {
       }, 350);
     });
 
-    test("Test that cancelAnimation(SC.ANIMATION_POSITION.current) removes the animation style, stops at the current position and fires the callback with isCancelled set.", function () {
+    test("Test that cancelAnimation(SC.LayoutState.CURRENT) removes the animation style, stops at the current position and fires the callback with isCancelled set.", function () {
       stop(2000);
 
 
@@ -686,7 +686,7 @@ if (SC.platform.supportsCSSTransitions) {
           equals(style.top, '0px', 'Tests the top style after animate');
           equals(style.width, '400px', 'Tests the width style after animate');
 
-          view.cancelAnimation(SC.ANIMATION_POSITION.current);
+          view.cancelAnimation(SC.LayoutState.CURRENT);
         });
       }, 250);
 
@@ -706,7 +706,7 @@ if (SC.platform.supportsCSSTransitions) {
       }, 350);
     });
 
-    test("Test that cancelAnimation(SC.ANIMATION_POSITION.start) removes the animation style, goes back to the start position and fires the callback with isCancelled set.", function () {
+    test("Test that cancelAnimation(SC.LayoutState.START) removes the animation style, goes back to the start position and fires the callback with isCancelled set.", function () {
       stop(2000);
 
       // expect(12);
@@ -732,7 +732,7 @@ if (SC.platform.supportsCSSTransitions) {
           equals(transform[1], '100',  "Test translateY after animate.");
 
           equals(transitionFor(view), SC.browser.experimentalCSSNameFor('transform') + ' 0.5s ease 0s, width 0.5s ease 0s', 'Tests the CSS transition property');
-          view.cancelAnimation(SC.ANIMATION_POSITION.start);
+          view.cancelAnimation(SC.LayoutState.START);
         });
       }, 250);
 

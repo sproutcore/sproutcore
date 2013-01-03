@@ -11,8 +11,8 @@ window.SC = window.SC || { MODULE_INFO: {}, LAZY_INSTANTIATION: {} };
 /**
   The list of browsers that are automatically identified.
 
-  @static
-  @constant
+  @readonly
+  @enum
 */
 SC.BROWSER = {
   android: 'android',
@@ -29,8 +29,8 @@ SC.BROWSER = {
   The list of browser specific object prefixes, these are matched to the
   browser engine.
 
-  @static
-  @constant
+  @readonly
+  @enum
 */
 SC.CLASS_PREFIX = {
   gecko: 'Moz',
@@ -44,8 +44,8 @@ SC.CLASS_PREFIX = {
   The list of browser specific CSS prefixes, these are matched to the
   browser engine.
 
-  @static
-  @constant
+  @readonly
+  @enum
 */
 SC.CSS_PREFIX = {
   gecko: '-moz-',
@@ -58,8 +58,8 @@ SC.CSS_PREFIX = {
 /**
   The list of devices that are automatically identified.
 
-  @static
-  @constant
+  @readonly
+  @enum
 */
 SC.DEVICE = {
   android: 'android',
@@ -75,8 +75,8 @@ SC.DEVICE = {
   The list of browser specific DOM prefixes, these are matched to the
   browser engine.
 
-  @static
-  @constant
+  @readonly
+  @enum
 */
 SC.DOM_PREFIX = {
   gecko: 'Moz',
@@ -89,8 +89,8 @@ SC.DOM_PREFIX = {
 /**
   The list of browser engines that are automatically identified.
 
-  @static
-  @constant
+  @readonly
+  @enum
 */
 SC.ENGINE = {
   gecko: 'gecko',
@@ -103,8 +103,8 @@ SC.ENGINE = {
 /**
   The list of operating systems that are automatically identified.
 
-  @static
-  @constant
+  @readonly
+  @enum
 */
 SC.OS = {
   android: 'android',
@@ -144,7 +144,7 @@ SC.detectBrowser = function (userAgent, language) {
 
   /**
     @name SC.browser.device
-    @type {SC.DEVICE}
+    @type SC.DEVICE|SC.BROWSER.unknown
   */
   browser.device = device[1];
 
@@ -177,7 +177,7 @@ SC.detectBrowser = function (userAgent, language) {
 
   /**
     @name SC.browser.name
-    @type {SC.BROWSER}
+    @type SC.BROWSER|SC.BROWSER.unknown
   */
   browser.name = nameAndVersion[1];
 
@@ -211,8 +211,7 @@ SC.detectBrowser = function (userAgent, language) {
 
   /**
     @name SC.browser.engine
-    @type {SC.ENGINE}
-    @type {SC.BROWSER.unknown}
+    @type SC.ENGINE|SC.BROWSER.unknown
   */
   browser.engine = engineAndVersion[1];
 
@@ -270,8 +269,7 @@ SC.detectBrowser = function (userAgent, language) {
 
   /**
     @name SC.browser.os
-    @type {SC.OS}
-    @type {SC.BROWSER.unknown}
+    @type SC.OS|SC.BROWSER.unknown
   */
   browser.os = osAndVersion[1];
 
@@ -487,19 +485,8 @@ SC.detectBrowser = function (userAgent, language) {
   browser.countryCode = language.split('-')[1] ? language.split('-')[1].toLowerCase() : undefined;
 
   /** @deprecated Since version 1.7. Use browser.name.  See SC.BROWSER for possible values.
-    Possible values:
-
-      - 'ie'
-      - 'mozilla'
-      - 'chrome'
-      - 'safari'
-      - 'opera'
-      - 'mobile-safari'
-      - 'unknown'
-
     @name SC.browser.current
     @type String
-    @default 'unknown'
   */
   browser.current = browser.name;
 
