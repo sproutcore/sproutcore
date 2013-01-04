@@ -223,8 +223,7 @@ SC.ContainerView = SC.View.extend(
 
     // Exit all the statecharts immediately. This mutates the array!
     for (var i = contentStatecharts.length - 1; i >= 0; i--) {
-      contentStatecharts[i].set('transition', null);
-      contentStatecharts[i].doExit();
+      contentStatecharts[i].doExit(true);
     }
 
     // Remove our internal reference to the statecharts.
@@ -276,8 +275,7 @@ SC.ContainerView = SC.View.extend(
 
     // Exit all other remaining statecharts immediately.  This mutates the array!
     for (var i = contentStatecharts.length - 2; i >= 0; i--) {
-      contentStatecharts[i].set('transition', null);
-      contentStatecharts[i].doExit();
+      contentStatecharts[i].doExit(true);
     }
 
     this.set('isTransitioning', NO);
@@ -397,9 +395,9 @@ SC.ContainerContentStatechart = SC.Object.extend({
     }
   },
 
-  doExit: function () {
+  doExit: function (immediately) {
     if (this.state !== 'exited') {
-      this.gotoExitingState();
+      this.gotoExitingState(immediately);
     //@if(debug)
     } else {
       SC.error('Developer Error: SC.ContainerView should not receive an internal doExit event while in exited state.');
@@ -450,14 +448,14 @@ SC.ContainerContentStatechart = SC.Object.extend({
   },
 
   // Exiting
-  gotoExitingState: function () {
+  gotoExitingState: function (immediately) {
     var container = this.get('container'),
       content = this.get('content'),
       exitCount = this._exitCount,
       options = container.get('transitionOptions') || {},
       transition = container.get('transition');
 
-    if (!!content && !!transition) {
+    if (!immediately && !!content && !!transition) {
       if (this.state === 'entering') {
         if (!!transition.buildInDidCancel) {
           transition.buildInDidCancel(container, content, options);
@@ -472,7 +470,7 @@ SC.ContainerContentStatechart = SC.Object.extend({
     // Assign the state.
     this.state = 'exiting';
 
-    if (!!content && !!transition) {
+    if (!immediately && !!content && !!transition) {
       // Re-entering the exiting state may need to accelerate the transition, pass the count to the plugin.
       if (!exitCount) { exitCount = this._exitCount = 1; }
 

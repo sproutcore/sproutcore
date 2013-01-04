@@ -26,7 +26,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2013-01-02 17:43:02 +0000</string>
+	<string>2013-01-04 04:56:36 +0000</string>
 	<key>Modifier</key>
 	<string>Tyler Keating</string>
 	<key>NotesVisible</key>
@@ -1367,7 +1367,7 @@ enter:
 			<array>
 				<dict>
 					<key>Bounds</key>
-					<string>{{523.28092967257385, 316.50001430511526}, {48, 24}}</string>
+					<string>{{512.44899940808523, 316.50001430511526}, {156, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1393,7 +1393,7 @@ enter:
 						<key>ID</key>
 						<integer>103</integer>
 						<key>Position</key>
-						<real>0.228907510638237</real>
+						<real>0.29259568452835083</real>
 						<key>RotationType</key>
 						<integer>0</integer>
 					</dict>
@@ -1421,7 +1421,8 @@ enter:
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\i\fs24 \cf0 do 
-\i0\b exit}</string>
+\i0\b exit 
+\b0 (immediately=false)}</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -1452,7 +1453,7 @@ enter:
 					<key>Points</key>
 					<array>
 						<string>{471.000004529953, 328.50001430511526}</string>
-						<string>{660.50000055879354, 480}</string>
+						<string>{735.50000055879354, 480.00001525878906}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1588,7 +1589,7 @@ enter:
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\f0\fs24 \cf0 Each content view has its own SC.ContainerContentStatechart statechart that is generated when the view is added.  The content view statecharts are managed by the container view.}</string>
+\f0\fs24 \cf0 Each content view has its own SC.ContainerContentStatechart statechart that is generated when the view is added.  The content statecharts are managed by the container view.}</string>
 						<key>VerticalPad</key>
 						<integer>0</integer>
 					</dict>
@@ -1600,7 +1601,7 @@ enter:
 					<array>
 						<dict>
 							<key>Bounds</key>
-							<string>{{895, 597}, {11, 11}}</string>
+							<string>{{1036, 596.75001525878906}, {11, 11}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>ID</key>
@@ -1651,7 +1652,7 @@ enter:
 						</dict>
 						<dict>
 							<key>Bounds</key>
-							<string>{{890, 592}, {21, 21}}</string>
+							<string>{{1031, 591.75001525878906}, {21, 21}}</string>
 							<key>Class</key>
 							<string>ShapedGraphic</string>
 							<key>ID</key>
@@ -1703,7 +1704,7 @@ enter:
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{631.09999929914534, 606}, {48, 24}}</string>
+					<string>{{587.16434411783644, 608}, {156, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1729,7 +1730,7 @@ enter:
 						<key>ID</key>
 						<integer>94</integer>
 						<key>Position</key>
-						<real>0.57944595813751221</real>
+						<real>0.65222305059432983</real>
 						<key>RotationType</key>
 						<integer>0</integer>
 					</dict>
@@ -1757,7 +1758,8 @@ enter:
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\i\fs24 \cf0 do 
-\i0\b exit}</string>
+\i0\b exit 
+\b0 (immediately=false)}</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -1786,12 +1788,12 @@ enter:
 					<key>OrthogonalBarPoint</key>
 					<string>{0, 0}</string>
 					<key>OrthogonalBarPosition</key>
-					<real>-1</real>
+					<real>58.549999237060547</real>
 					<key>Points</key>
 					<array>
-						<string>{623.00000000000034, 547.49998390674591}</string>
-						<string>{643, 618}</string>
-						<string>{698, 570}</string>
+						<string>{698.00000000000034, 547.49999916553497}</string>
+						<string>{569, 620}</string>
+						<string>{773, 570.00001525878906}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1828,7 +1830,7 @@ enter:
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{810.39999961853027, 537.74099797950396}, {43, 24}}</string>
+					<string>{{918.39999961853027, 549.60677392056527}, {43, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1854,7 +1856,7 @@ enter:
 						<key>ID</key>
 						<integer>92</integer>
 						<key>Position</key>
-						<real>0.42396274209022522</real>
+						<real>0.4933876097202301</real>
 						<key>RotationType</key>
 						<integer>0</integer>
 					</dict>
@@ -1908,11 +1910,11 @@ enter:
 					<key>OrthogonalBarPoint</key>
 					<string>{0, 0}</string>
 					<key>OrthogonalBarPosition</key>
-					<real>46.599998474121094</real>
+					<real>79.599998474121094</real>
 					<key>Points</key>
 					<array>
-						<string>{773, 525.00001430511531}</string>
-						<string>{890, 602.5}</string>
+						<string>{848, 525.00002956390438}</string>
+						<string>{1031, 602.25001525878906}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1949,7 +1951,7 @@ enter:
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{512.01835942534308, 512.99999965183065}, {48, 24}}</string>
+					<string>{{500.81554004600673, 513.00000468024848}, {156, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1975,7 +1977,7 @@ enter:
 						<key>ID</key>
 						<integer>90</integer>
 						<key>Position</key>
-						<real>0.42396268248558044</real>
+						<real>0.47263514995574951</real>
 						<key>RotationType</key>
 						<integer>0</integer>
 					</dict>
@@ -2003,7 +2005,8 @@ enter:
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\i\fs24 \cf0 do 
-\i0\b exit}</string>
+\i0\b exit 
+\b0 (immediately=false)}</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -2034,7 +2037,7 @@ enter:
 					<key>Points</key>
 					<array>
 						<string>{472.00000000000006, 525.00001430511531}</string>
-						<string>{623.00000000000034, 524.99997854232788}</string>
+						<string>{698.00000000000034, 524.99999380111694}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -2251,7 +2254,7 @@ enter:
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{623, 480}, {150, 90}}</string>
+					<string>{{698, 480.00001525878906}, {150, 90}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FontInfo</key>
@@ -2500,7 +2503,7 @@ Exiting}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{248, 175}, {724, 471}}</string>
+					<string>{{208, 174.75001525878906}, {944, 471}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
