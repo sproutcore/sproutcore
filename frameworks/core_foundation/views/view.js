@@ -1132,6 +1132,11 @@ SC.CoreView.reopen(
 
     // Register the view for event handling. This hash is used by
     // SC.RootResponder to dispatch incoming events.
+    //@if(debug)
+    if (SC.View.views[this.get('layerId')]) {
+      SC.error("Developer Error: A view with layerId, '%@', already exists.  Each view must have a unique layerId.".fmt(this.get('layerId')));
+    }
+    //@endif
     SC.View.views[this.get('layerId')] = this;
 
     // setup classNames
