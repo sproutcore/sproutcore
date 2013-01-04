@@ -342,17 +342,73 @@ test("adding a record to a many-to-many; bar side", function() {
 
 
 test("adding a record to a many-to-many; foo side", function() {
-  ok(foo2.get('barToMany').indexOf(bar3) < 0, 'PRECOND - foo1.barToMany should NOT contain bar3');
+  ok(foo2.get('barToMany').indexOf(bar3) < 0, 'PRECOND - foo2.barToMany should NOT contain bar3');
   ok(bar3.get('fooToMany').indexOf(foo2) < 0, 'PRECOND - bar3.fooToMany should NOT contain foo1');
   checkAllClean(foo2, bar3);
   
   foo2.get('barToMany').pushObject(bar3);
 
-  ok(foo2.get('barToMany').indexOf(bar3) >= 0, 'foo1.barToMany should contain bar3');
-  ok(bar3.get('fooToMany').indexOf(foo2) >= 0, 'bar1.fooToMany should contain foo3');
+  ok(foo2.get('barToMany').indexOf(bar3) >= 0, 'foo2.barToMany should contain bar3');
+  ok(bar3.get('fooToMany').indexOf(foo2) >= 0, 'bar3.fooToMany should contain foo2');
 
-  equals(foo2.get('status'), SC.Record.READY_DIRTY, 'foo1.status should be READY_DIRTY');
-  equals(bar1.get('status'), SC.Record.READY_CLEAN, 'bar3.status should be READY_CLEAN');
+  equals(foo2.get('status'), SC.Record.READY_DIRTY, 'foo2.status should be READY_DIRTY');
+  equals(bar1.get('status'), SC.Record.READY_CLEAN, 'bar1.status should be READY_CLEAN');
+});
+
+test("reset a many-to-many; bar side", function() {
+  equals(foo1.get('barToMany').get('length'), 1, 'PRECOND - foo1.barToMany.length should be 1');
+  equals(bar1.get('fooToMany').get('length'), 2, 'PRECOND - bar1.fooToMany.length should be 2');
+
+  bar1.set('fooToMany', []);
+
+  equals(foo1.get('barToMany').get('length'), 0, 'foo1.barToMany.length should be 0');
+  equals(bar1.get('fooToMany').get('length'), 0, 'bar1.fooToMany.length should be 1');
+});
+
+test("reset a many-to-many; foo side", function() {
+  equals(foo1.get('barToMany').get('length'), 1, 'PRECOND - foo1.barToMany.length should be 1');
+  equals(bar1.get('fooToMany').get('length'), 2, 'PRECOND - bar1.fooToMany.length should be 2');
+
+  foo1.set('barToMany', []);
+
+  equals(foo1.get('barToMany').get('length'), 0, 'foo1.barToMany.length should be 0');
+  equals(bar1.get('fooToMany').get('length'), 1, 'bar1.fooToMany.length should be 1');
+});
+
+test("set an array of records to a many-to-many; bar side", function() {
+  ok(foo3.get('barToMany').indexOf(bar1) < 0, 'PRECOND - foo3.barToMany should NOT contain bar1');
+  ok(bar1.get('fooToMany').indexOf(foo3) < 0, 'PRECOND - bar1.fooToMany should NOT contain foo3');
+
+  bar1.set('fooToMany', [foo2, foo3]);
+
+  ok(foo2.get('barToMany').indexOf(bar1) >= 0, 'foo2.barToMany should contain bar1');
+  ok(foo3.get('barToMany').indexOf(bar1) >= 0, 'foo3.barToMany should contain bar1');
+  ok(bar1.get('fooToMany').indexOf(foo2) >= 0, 'bar1.fooToMany should contain foo2');
+  ok(bar1.get('fooToMany').indexOf(foo3) >= 0, 'bar1.fooToMany should contain foo3');
+  ok(foo1.get('barToMany').indexOf(bar1) < 0, 'foo1.barToMany should NOT contain bar1');
+  ok(bar1.get('fooToMany').indexOf(foo1) < 0, 'bar1.fooToMany should NOT contain foo1');
+
+  equals(foo2.get('status'), SC.Record.READY_CLEAN, 'foo2.status should be READY_CLEAN');
+  equals(foo3.get('status'), SC.Record.READY_DIRTY, 'foo3.status should be READY_DIRTY');
+  equals(bar1.get('status'), SC.Record.READY_CLEAN, 'bar1.status should be READY_CLEAN');
+});
+
+test("set an array of records to a many-to-many; foo side", function() {
+  ok(bar3.get('fooToMany').indexOf(foo1) < 0, 'PRECOND - bar3.fooToMany should NOT contain foo1');
+  ok(foo1.get('barToMany').indexOf(bar3) < 0, 'PRECOND - foo1.barToMany should NOT contain bar3');
+
+  foo1.set('barToMany', [bar2, bar3]);
+
+  ok(bar2.get('fooToMany').indexOf(foo1) >= 0, 'bar2.fooToMany should contain foo1');
+  ok(bar3.get('fooToMany').indexOf(foo1) >= 0, 'foo2.fooToMany should contain foo1');
+  ok(foo1.get('barToMany').indexOf(bar2) >= 0, 'foo1.barToMany should contain bar2');
+  ok(foo1.get('barToMany').indexOf(bar3) >= 0, 'foo1.barToMany should contain bar3');
+  ok(foo1.get('barToMany').indexOf(bar1) < 0, 'foo1.fooToMany should NOT contain bar1');
+  ok(bar1.get('fooToMany').indexOf(foo1) < 0, 'bar1.barToMany should NOT contain foo1');
+
+  equals(bar2.get('status'), SC.Record.READY_CLEAN, 'bar2.status should be READY_CLEAN');
+  equals(foo1.get('status'), SC.Record.READY_DIRTY, 'foo1.status should be READY_DIRTY');
+  equals(bar3.get('status'), SC.Record.READY_CLEAN, 'bar3.status should be READY_CLEAN');
 });
 
 // ..........................................................
@@ -394,7 +450,7 @@ test("removing a record from a one-to-many; other-side", function() {
 test("add a record to a one-to-many; many-side", function() {
   ok(foo1.get('barToOne').indexOf(bar3) < 0, 'PRECOND - foo1.barToOne should NOT contain bar3');
   equals(bar3.get('fooToOne'), null, 'PRECOND - bar3.fooToOne should eq null');
-  checkAllClean(foo1, bar1);
+  checkAllClean(foo1, bar3);
   
   foo1.get('barToOne').pushObject(bar3);
 
@@ -410,9 +466,25 @@ test("add a record to a one-to-many; many-side", function() {
 test("add a record to a one-to-many; one-side", function() {
   ok(foo1.get('barToOne').indexOf(bar3) < 0, 'PRECOND - foo1.barToOne should NOT contain bar3');
   equals(bar3.get('fooToOne'), null, 'PRECOND - bar3.fooToOne should eq null');
-  checkAllClean(foo1, bar1);
+  checkAllClean(foo1, bar3);
   
   bar3.set('fooToOne', foo1);
+
+  ok(foo1.get('barToOne').indexOf(bar3) >= 0, 'foo1.barToOne should contain bar3');
+  equals(bar3.get('fooToOne'), foo1, 'bar3.fooToOne should eq foo1');
+
+  equals(foo1.get('status'), SC.Record.READY_CLEAN, 'foo1.status should be READY_CLEAN');
+  equals(bar3.get('status'), SC.Record.READY_DIRTY, 'bar3.status should be READY_DIRTY');
+  
+});
+
+
+test("set a record to a one-to-many; many-side", function() {
+  ok(foo1.get('barToOne').indexOf(bar3) < 0, 'PRECOND - foo1.barToOne should NOT contain bar3');
+  equals(bar3.get('fooToOne'), null, 'PRECOND - bar3.fooToOne should eq null');
+  checkAllClean(foo1, bar3);
+  
+  foo1.set('barToOne', [bar3]);
 
   ok(foo1.get('barToOne').indexOf(bar3) >= 0, 'foo1.barToOne should contain bar3');
   equals(bar3.get('fooToOne'), foo1, 'bar3.fooToOne should eq foo1');

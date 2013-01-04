@@ -53,7 +53,7 @@ SC.SingleAttribute = SC.RecordAttribute.extend(
   */
   call: function(record, key, newRec) {
     var attrKey = this.get('key') || key,
-        inverseKey, isMaster, oldRec, attr, ret, nvalue;
+        inverseKey, oldRec, attr, ret, nvalue;
 
     // WRITE
     if (newRec !== undefined && this.get('isEditable')) {

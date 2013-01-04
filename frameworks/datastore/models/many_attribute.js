@@ -110,6 +110,62 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
   },
 
   /**
+    @private - implements support for handling inverse relationships.
+  */
+  call: function(record, key, newRecords) {
+    var attrKey = this.get('key') || key,
+        inverseKey, oldRecords, oldRecord, newRecord, len, ret, nvalue;
+
+    // WRITE
+    if (newRecords !== undefined && this.get('isEditable')) {
+
+      // can only take array
+      if (newRecords && SC.typeOf(newRecords) !== SC.T_ARRAY) {
+        throw "%@ is not an array".fmt(newRecords);
+      }
+
+      inverseKey = this.get('inverse');
+
+      // if we have an inverse relationship, get the inverse records and  
+      // notify them of what is happening.
+      if (inverseKey) {
+        oldRecords = SC.A(this._scsa_call(record, key));
+
+        len = oldRecords.get('length');
+        for(var i=0;i<len;i++) {
+          oldRecord = oldRecords.objectAt(i);
+
+          if (newRecords.indexOf(oldRecord) === -1) {
+            record.get(key).removeObject(oldRecord);
+          }
+        }
+
+        len = newRecords.get('length');
+        for(var i=0;i<len;i++) {
+          newRecord = newRecords.objectAt(i);
+
+          if (oldRecords.indexOf(newRecord) === -1) {
+            record.get(key).pushObject(newRecord)
+          }
+        }
+      }
+
+      // careful: don't overwrite value here.  we want the return value to
+      // cache.
+      nvalue = this.fromType(record, key, newRecords) ; // convert to attribute.
+      record.writeAttribute(attrKey, nvalue, !this.get('isMaster'));
+      ret = newRecords ;
+
+    // READ
+    } else ret = this._scsa_call(record, key, newRecords);
+
+    return ret ;
+  },
+
+  /** @private - save original call() impl */
+  _scsa_call: SC.RecordAttribute.prototype.call,
+
+  /**
     Called by an inverse relationship whenever the receiver is no longer part
     of the relationship.  If this matches the inverse setting of the attribute
     then it will update itself accordingly.
