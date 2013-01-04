@@ -965,14 +965,18 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
       // …then the redraws…
       for (i = 0, len = viewsToRedraw.length;  i < len;  ++i) {
         idx = viewsToRedraw[i];
-        existing = itemViews ? itemViews[idx] : null;
+        existing = itemViews[idx];
+
+        // Because the new view will get the same layerId as the old view, we need
+        // to remove the old view first.
+        containerView.removeChild(existing);
+        existing.destroy();
+
+        // Insert the replacement view before the following view.
+        existing = (idx === len - 1) ? null : itemViews[idx + 1];
         view = this.itemViewForContentIndex(idx, YES);
 
-        // if the existing view has a layer, remove it immediately from
-        // the parent.  This is necessary because the old and new views
-        // will use the same layerId
-        existing.destroyLayer();
-        containerView.replaceChild(view, existing);
+        containerView.insertBefore(view, existing);
       }
 
       // …and finally the creations.
