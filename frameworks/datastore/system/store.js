@@ -548,9 +548,15 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Store} receiver
   */
   writeStatus: function(storeKey, newStatus) {
+    var that = this,
+        ret;
     // use writeDataHash for now to handle optimistic lock.  maximize code
     // reuse.
-    return this.writeDataHash(storeKey, null, newStatus);
+    ret = this.writeDataHash(storeKey, null, newStatus);
+    this._propagateToChildren(storeKey, function(storeKey) {
+      that.writeStatus(storeKey, newStatus);
+    });
+    return ret;
   },
 
   /**
@@ -1572,8 +1578,12 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         // 2. from the cache of record objects
         // 3. from the cache of child record store keys
         this.removeDataHash(childStoreKey);
-        delete this.records[childStoreKey];
-    delete childRecords[childStoreKey];
+        if (this.records) {
+          delete this.records[childStoreKey];
+        }
+        delete childRecords[childStoreKey];
+      }
+    }
 
     // 4. from the cache of ids
     // 5. from the cache of store keys
