@@ -129,6 +129,7 @@
   	font-weight: bold;
   	border: 1px #888 solid;
   	letter-spacing: -1px;
+    border-radius: 7px;
   	-webkit-border-radius: 7px;
   	-moz-border-radius: 7px;
   }

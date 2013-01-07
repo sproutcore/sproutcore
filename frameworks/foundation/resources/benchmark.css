@@ -71,6 +71,7 @@
   border: 1px solid #CC6633; 
   background-color: #FFCC33; 
   background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#FFCD82), to(#DE9C00));
+  border-radius: 4px;
   -moz-border-radius: 4px;
   -webkit-border-radius: 4px;
   line-height: 14px;

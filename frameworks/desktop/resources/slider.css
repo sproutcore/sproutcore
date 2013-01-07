@@ -8,10 +8,10 @@
   	right: 8px;
   	height: 5px;
   	top: 6px;
-  	background: gray ;
+  	background: gray;
+    border-radius: 3px;
   	-webkit-border-radius: 3px;
   	-moz-border-radius: 3px;
-  	border-radius: 3px;
     .sc-leftcap{
       display: none;
     }
@@ -24,9 +24,10 @@
   	width: 12px;
   	margin-left: -9px;
   	top: -4px;
-  	position: absolute ;
+  	position: absolute;
   	background: black;
-  	border-radius:6px;
-  	-moz-border-radius:6px;
+  	border-radius: 6px;
+    -webkit-border-radius: 6px;
+  	-moz-border-radius: 6px;
   }
 }
