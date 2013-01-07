@@ -74,6 +74,28 @@ SC.Draggable = /** @scope SC.Draggable.prototype */{
   },
 
   /**
+    Returns true if the target view of the event exists and has a truthy isTextSelectable
+
+    @param evt The event
+    @return {Boolean}
+  */
+  _drag_targetHasSelectableText: function(evt) {
+    var targetView = SC.RootResponder.responder.targetViewForEvent(evt);
+
+    return !!(targetView && targetView.isTextSelectable);
+  },
+
+  /**
+    Returns true if we should handle a drag.
+
+    @param evt The event
+    @return {Boolean}
+  */
+  _drag_shouldHandleDrag: function(evt) {
+    return !this.get('isAnchored') && !this._drag_targetHasSelectableText(evt);
+  },
+
+  /**
     The drag code will modify the existing layout by the difference between each drag event so for the first one store
     the original mouse down position.
 
@@ -83,7 +105,7 @@ SC.Draggable = /** @scope SC.Draggable.prototype */{
   _drag_mouseDown: function(evt) {
     this._drag_cachedMouseX = evt.pageX;
     this._drag_cachedMouseY = evt.pageY;
-    return YES;
+    return this._drag_shouldHandleDrag(evt);
   },
 
   /**
@@ -107,7 +129,7 @@ SC.Draggable = /** @scope SC.Draggable.prototype */{
     this._drag_cachedMouseX = evt.pageX;
     this._drag_cachedMouseY = evt.pageY;
 
-    if (this.get('isAnchored')) {
+    if (!this._drag_shouldHandleDrag(evt)) {
       return NO;
     }
 
