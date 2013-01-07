@@ -215,7 +215,7 @@ SC.TabView = SC.View.extend(
     });
 
     this.containerView = this.createChildView(containerView) ;
-    
+
     //  The segmentedView managed by this tab view.  Note that this TabView uses
     //  a custom segmented view.  You can access this view but you cannot change
     // it.
@@ -250,10 +250,10 @@ SC.TabView = SC.View.extend(
     });
 
     this.segmentedView = this.createChildView(this.segmentedView) ;
-    
-    childViews.push(this.segmentedView);
+
     childViews.push(this.containerView);
-    
+    childViews.push(this.segmentedView);
+
     this.set('childViews', childViews);
     return this;
   },

@@ -373,7 +373,7 @@ if (SC.platform.supportsCSSTransitions) {
     };
 
     SC.run(function () {
-      view.animate('rotateX', 45, 1).animate('scale', 2, 2);
+      view.animate('rotateX', 45, { duration: 1 }).animate('scale', 2, { duration: 2 });
     });
 
     setTimeout(function () {
@@ -437,7 +437,7 @@ if (SC.platform.supportsCSSTransitions) {
     }, 50);
   });
 
-  test("Test that cancelAnimation(SC.ANIMATION_POSITION.current) removes the animation style, stops at the current position and fires the callback with isCancelled set.", function () {
+  test("Test that cancelAnimation(SC.LayoutState.CURRENT) removes the animation style, stops at the current position and fires the callback with isCancelled set.", function () {
     stop(2000);
 
     expect(9);
@@ -456,7 +456,7 @@ if (SC.platform.supportsCSSTransitions) {
         equals(style.top, '100px', 'Tests the top style after animate');
         equals(style.width, '400px', 'Tests the width style after animate');
         equals(transitionFor(view), 'left 0.5s ease 0s, top 0.5s ease 0s, width 0.5s ease 0s', 'Tests the CSS transition property');
-        view.cancelAnimation(SC.ANIMATION_POSITION.current);
+        view.cancelAnimation(SC.LayoutState.CURRENT);
       });
     }, 100);
 
@@ -466,6 +466,40 @@ if (SC.platform.supportsCSSTransitions) {
       ok((parseInt(style.left, 10) > 0) && (parseInt(style.left, 10) < 100), 'Tests the left style after cancel');
       ok((parseInt(style.top, 10) > 0) && (parseInt(style.top, 10) < 100), 'Tests the top style after cancel');
       ok((parseInt(style.width, 10) > 100) && (parseInt(style.width, 10) < 400), 'Tests the width style after cancel');
+      equals(transitionFor(view), '', 'Tests the CSS transition property');
+      start();
+    }, 200);
+  });
+
+  test("Test that cancelAnimation(SC.LayoutState.START) removes the animation style, returns to the start position and fires the callback with isCancelled set.", function () {
+    stop(2000);
+
+    expect(9);
+
+    SC.run(function () {
+      view.animate({ left: 100, top: 100, width: 400 }, 0.500, function (data) {
+        ok(data.isCancelled, "The isCancelled property of the data should be true.");
+      });
+    });
+
+    setTimeout(function () {
+      SC.run(function () {
+        var style = styleFor(view);
+
+        equals(style.left, '100px', 'Tests the left style after animate');
+        equals(style.top, '100px', 'Tests the top style after animate');
+        equals(style.width, '400px', 'Tests the width style after animate');
+        equals(transitionFor(view), 'left 0.5s ease 0s, top 0.5s ease 0s, width 0.5s ease 0s', 'Tests the CSS transition property');
+        view.cancelAnimation(SC.LayoutState.START);
+      });
+    }, 100);
+
+    setTimeout(function () {
+      var style = styleFor(view);
+
+      equals(style.left, '0px', 'Tests the left style after cancel');
+      equals(style.top, '0px', 'Tests the top style after cancel');
+      equals(style.width, '100px', 'Tests the width style after animate');
       equals(transitionFor(view), '', 'Tests the CSS transition property');
       start();
     }, 200);
@@ -627,7 +661,7 @@ if (SC.platform.supportsCSSTransitions) {
       }, 350);
     });
 
-    test("Test that cancelAnimation(SC.ANIMATION_POSITION.current) removes the animation style, stops at the current position and fires the callback with isCancelled set.", function () {
+    test("Test that cancelAnimation(SC.LayoutState.CURRENT) removes the animation style, stops at the current position and fires the callback with isCancelled set.", function () {
       stop(2000);
 
 
@@ -652,7 +686,7 @@ if (SC.platform.supportsCSSTransitions) {
           equals(style.top, '0px', 'Tests the top style after animate');
           equals(style.width, '400px', 'Tests the width style after animate');
 
-          view.cancelAnimation(SC.ANIMATION_POSITION.current);
+          view.cancelAnimation(SC.LayoutState.CURRENT);
         });
       }, 250);
 
@@ -672,7 +706,7 @@ if (SC.platform.supportsCSSTransitions) {
       }, 350);
     });
 
-    test("Test that cancelAnimation(SC.ANIMATION_POSITION.original) removes the animation style, goes back to the original position and fires the callback with isCancelled set.", function () {
+    test("Test that cancelAnimation(SC.LayoutState.START) removes the animation style, goes back to the start position and fires the callback with isCancelled set.", function () {
       stop(2000);
 
       // expect(12);
@@ -698,7 +732,7 @@ if (SC.platform.supportsCSSTransitions) {
           equals(transform[1], '100',  "Test translateY after animate.");
 
           equals(transitionFor(view), SC.browser.experimentalCSSNameFor('transform') + ' 0.5s ease 0s, width 0.5s ease 0s', 'Tests the CSS transition property');
-          view.cancelAnimation(SC.ANIMATION_POSITION.original);
+          view.cancelAnimation(SC.LayoutState.START);
         });
       }, 250);
 

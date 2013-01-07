@@ -15,19 +15,19 @@ module("SC.Theme", {
     // make and register Ace
     Ace = SC.Theme.create({
       name: 'ace',
-      "classNames": ["ace"]
+      classNames: ["ace"]
     });
     SC.Theme.addTheme(Ace);
-    
+
     // Dark
     Dark = Ace.subtheme("dark");
-    
+
     // Capsule
     Capsule = Ace.subtheme("capsule");
   },
-  
+
   teardown: function() {
-    
+
   }
 });
 
@@ -36,7 +36,7 @@ function themeIs(themeInstance, shouldBe, classNames) {
   ok(themeInstance === shouldBe, "Correct theme");
   if (!themeInstance) return;
 
-  var isOk = same(themeInstance.classNames, SC.Set.create(classNames), "Correct class names.");
+  var isOk = same(themeInstance.classNames, classNames, "Correct class names.");
 }
 
 test("Calling SC.Theme.find finds proper theme.", function(){
@@ -72,7 +72,7 @@ test("Calling find on a subtheme instance finds the proper theme.", function(){
   themeIs(capsule.baseTheme, Capsule, ["ace", "capsule"]);
 
   // and now we are testing said specialization
-  themeIs(capsule, capsule, ["ace", "dark", "capsule"]);
+  themeIs(capsule, capsule, ["ace", "capsule", "dark"]);
 });
 
 

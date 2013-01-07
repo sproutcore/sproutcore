@@ -25,9 +25,9 @@ SC.mixin(SC.browser,
       SC.browser.compare('1.08', '1.8') == 0
       SC.browser.compare('1.1.1', '1.1.004') == -3
 
-    @param version {String} One of SC.browser.version, SC.browser.engineVersion or SC.browser.osVersion
-    @param other {String} The version to compare against.
-    @return {Number} The difference between the versions at the first difference.
+    @param {String} version One of SC.browser.version, SC.browser.engineVersion or SC.browser.osVersion
+    @param {String} other The version to compare against.
+    @returns {Number} The difference between the versions at the first difference.
   */
   compare: function (version, other) {
     var coerce,
@@ -61,7 +61,8 @@ SC.mixin(SC.browser,
     return 0;
   },
 
-  /** @deprecated Since 1.7. Use SC.browser.compare(version, otherVersion) instead.
+  /**
+    @deprecated Since 1.7. Use SC.browser.compare(version, otherVersion) instead.
 
     Pass any number of arguments, and this will check them against the browser
     version split on ".".  If any of them are not equal, return the inequality.
@@ -144,9 +145,9 @@ SC.mixin(SC.browser,
           // Work without it.
         }
 
-    @param target {Object} The target for the method.
-    @param methodName {String} The standard name of the property or method we wish to check on the target.
-    @returns Return value of the method or SC.UNSUPPORTED if no method found.
+    @param {object} target The target for the method.
+    @param {string} standardName The standard name of the property or method we wish to check on the target.
+    @returns {string} The name of the property or method on the target or SC.UNSUPPORTED if no method found.
   */
   experimentalNameFor: function (target, standardName) {
     /*jshint eqnull:true*/
@@ -221,8 +222,8 @@ SC.mixin(SC.browser,
         // `boxShadowName` may be "boxShadow", "WebkitBoxShadow", "msBoxShadow", etc. depending on the browser support.
         el.style[boxShadowName] = "rgb(0,0,0) 0px 3px 5px";
 
-    @param standardStyleName {String} The standard name of the experimental style as it should be un-prefixed.  This is the DOM property name, which is camel-cased.
-    @returns Future-proof style name for use in the current browser or SC.UNSUPPORTED if no style support found.
+    @param {string} standardStyleName The standard name of the experimental style as it should be un-prefixed.  This is the DOM property name, which is camel-cased.
+    @returns {string} Future-proof style name for use in the current browser or SC.UNSUPPORTED if no style support found.
   */
   experimentalStyleNameFor: function (standardStyleName) {
     // Test the style name.
@@ -245,8 +246,8 @@ SC.mixin(SC.browser,
         // `boxShadowCSS` may be "box-shadow", "-webkit-box-shadow", "-ms-box-shadow", etc. depending on the browser support.
         el.style.cssText = boxShadowCSS + " rgb(0,0,0) 0px 3px 5px";
 
-    @param standardStyleName {String} The standard name of the experimental style as it should be un-prefixed.  This is the DOM property name, which is camel-cased.
-    @returns Future-proof CSS name for use in the current browser or SC.UNSUPPORTED if no style support found.
+    @param {string} standardStyleName The standard name of the experimental style as it should be un-prefixed.  This is the DOM property name, which is camel-cased.
+    @returns {string} Future-proof CSS name for use in the current browser or SC.UNSUPPORTED if no style support found.
   */
   experimentalCSSNameFor: function (standardStyleName) {
     var ret = standardStyleName.camelize(),

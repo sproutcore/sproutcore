@@ -239,7 +239,7 @@ SC.View.reopen(
     if (renderDelegate && renderDelegate.className) {
       context.addClass(renderDelegate.className);
     }
-    
+
     // @if(debug)
     if (renderDelegate && renderDelegate.name) {
       SC.Logger.error("Render delegates now use 'className' instead of 'name'.");
@@ -247,21 +247,21 @@ SC.View.reopen(
     }
     // @endif
   }.enhance(),
-  
+
 
   /**
     Invokes a method on the render delegate, if one is present and it implements
     that method.
-    
+
     @param {String} method The name of the method to call.
     @param arg One or more arguments.
   */
   invokeRenderDelegateMethod: function(method, args) {
     var renderDelegate = this.get('renderDelegate');
     if (!renderDelegate) return undefined;
-    
+
     if (SC.typeOf(renderDelegate[method]) !== SC.T_FUNCTION) return undefined;
-    
+
     args = SC.$A(arguments);
     args.shift();
     args.unshift(this.get('renderDelegateProxy'));
@@ -377,9 +377,9 @@ SC.View._RenderDelegateProxy = {
   Generates a computed property that will look up the specified property from
   the view's render delegate, if present. You may specify a default value to
   return if there is no such property or is no render delegate.
-  
+
   The generated property is read+write, so it may be overridden.
-  
+
   @param {String} propertyName The name of the property to get from the render delegate..
   @param {Value} def The default value to use if the property is not present.
 */
@@ -402,7 +402,7 @@ SC.propertyFromRenderDelegate = function(propertyName, def) {
     }
 
     if (ret !== undefined) return ret;
-    
+
     return def;
   }.property('renderDelegate').cacheable();
 };
