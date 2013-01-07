@@ -2,6 +2,8 @@ $theme.master-detail {
   background: #333;
   
   &.round-toolbars $theme.toolbar {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
     -webkit-border-top-left-radius: 10px;
     -webkit-border-top-right-radius: 10px;
     -moz-border-radius-topleft: 10px;
@@ -19,6 +21,8 @@ $theme.master-detail {
   }
   
   &.round-toolbars > .sc-view {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
     -webkit-border-top-left-radius: 10px;
     -webkit-border-top-right-radius: 10px;
     -moz-border-radius-topleft: 10px;
