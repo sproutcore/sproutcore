@@ -62,6 +62,7 @@
     height: 12px;
     left: 6px;
     top: 5px;
+    border-radius: 2px;
     -webkit-border-radius: 2px;
     -moz-border-radius: 2px;
     &.inactive {
