@@ -154,12 +154,9 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
       // cache.
       nvalue = this.fromType(record, key, newRecords) ; // convert to attribute.
       record.writeAttribute(attrKey, nvalue, !this.get('isMaster'));
-      ret = newRecords ;
+    } 
 
-    // READ
-    } else ret = this._scsa_call(record, key, newRecords);
-
-    return ret ;
+    return this._scsa_call(record, key);
   },
 
   /** @private - save original call() impl */
