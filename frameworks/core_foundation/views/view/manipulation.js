@@ -112,8 +112,9 @@ SC.View.reopen(
     if (this.willAddChild) { this.willAddChild(view, beforeView) ; }
     if (view.willAddToParent) { view.willAddToParent(this, beforeView) ; }
 
-    // set parentView of child
+    // set parentView/owner of child
     view.set('parentView', this);
+    view.set('owner', this);
 
     // add to childView's array.
     var idx, childViews = this.get('childViews') ;
