@@ -870,4 +870,50 @@
       ok(expectedStyleAttr.indexOf(styleAttr[i]) >= 0, "Test the expected style attribute includes `%@` found in the actual style attribute.".fmt(styleAttr[i]));
     }
   });
+
+
+  module("OTHER LAYOUT STYLE TESTS", {
+    setup: function () {
+
+      SC.run(function () {
+        // create basic view
+        view = SC.View.create({});
+
+        pane = SC.Pane.create({
+          layout: { centerX: 0, centerY: 0, width: 400, height: 400 },
+          childViews: [view]
+        }).append();
+      });
+    },
+
+    teardown: function () {
+      pane.remove();
+      pane = view = null;
+    }
+  })
+
+
+
+  /*
+    There was a regression where switching from a centered layout to a non-centered
+    layout failed to remove the margin style.
+  */
+  test("Switching from centered to non-centered layouts.", function() {
+    var styleAttr;
+
+    SC.run(function () {
+      view.set('layout', { centerX: 10, centerY: 10, width: 60, height: 60 });
+    });
+
+    SC.run(function () {
+      view.set('layout', { left: 10, top: 10, width: 60, height: 60 });
+    });
+
+    styleAttr = view.$().attr('style');
+    styleAttr = styleAttr.split(/;\s*/).filter(function (o) { return o; });
+    expectedStyleAttr = ['left: 10px', 'top: 10px', 'width: 60px', 'height: 60px'];
+    for (i = styleAttr.length - 1; i >= 0; i--) {
+      ok(expectedStyleAttr.indexOf(styleAttr[i]) >= 0, "Test the expected style attribute includes `%@` found in the actual style attribute.".fmt(styleAttr[i]));
+    }
+  });
 })();

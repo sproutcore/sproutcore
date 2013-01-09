@@ -40,7 +40,10 @@ SC.View.LayoutStyleCalculator = {
   /** @private */
   _prepareStyle: function (layout) {
     /*jshint eqnull:true */
-    var style = {};
+    var style = {
+      marginLeft: null,
+      marginTop: null
+    };
 
     // Position and size.
     style.bottom = layout.bottom;
