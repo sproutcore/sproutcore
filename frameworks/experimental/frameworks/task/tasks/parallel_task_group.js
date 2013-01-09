@@ -35,19 +35,20 @@ sc_require("enum/state");
  * 		
  * 		startTask : function() {
  * 			var firstTask = this.get('myFirstTask');
- * 			SC.Event.add(firstTask, SC.TaskEvent.FINISHED, this, &quot;_firstTaskComplete&quot;);
+ * 			firstTask.addEventListener(SC.TaskEvent.FINISHED, this, &quot;_firstTaskComplete&quot;);
  * 
  * 			sc_super();
  * 		},
  * 
  * 		_firstTaskComplete : function(event) {
  *			// Do something
- * 			SC.Event.remove(firstTask, SC.TaskEvent.FINISHED, this, &quot;_firstTaskComplete&quot;);
+ *      var firstTask = this.get('myFirstTask');
+ * 			firstTask.removeEventListener(SC.TaskEvent.FINISHED, this, &quot;_firstTaskComplete&quot;);
  * 		}
  * });
  * 
- * SC.TaskEvent.add(myTaskGroup, &quot;complete&quot;, myObj, &quot;_onTaskComplete&quot;);
- * SC.TaskEvent.add(myTaskGroup, &quot;error&quot;, myObj, &quot;_onTaskError&quot;);
+ * myTaskGroup.addEventListener(&quot;complete&quot;, myObj, &quot;_onTaskComplete&quot;);
+ * myTaskGroup.addEventListener(&quot;error&quot;, myObj, &quot;_onTaskError&quot;);
  * 
  * myTaskGroup.start();
  * 
@@ -112,20 +113,16 @@ SC.ParallelTaskGroup = SC.TaskGroup.extend({
 	 * @param task
 	 */
 	handleTaskAdded : function(task) {
-		console.warn('handleTaskAdded');
 		var state = this.get('state'), K = SC.TaskState, isRewinding = this.get('isRewinding');
 
 		if (isRewinding) {
 			return;
 		}
-		console.warn(1);
 		if (state == K.ACTIVE) {
 			// Group is already active so we must start the new task immediately
-			console.warn(2);
 			this.startChildTask(task);
 		} else if (state == K.SUSPENDED) {
 			// Add the new task to the activeTasks List so it will be started when resuming the TaskGroup
-			console.warn(3);
 			this.addActiveTask(task);
 		}
 	},

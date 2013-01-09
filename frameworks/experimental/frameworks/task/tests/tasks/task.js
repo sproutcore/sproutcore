@@ -47,14 +47,7 @@ var TaskReceiver = {
 		this._expectedEvents = [];
 
 		if (this._task) {
-			SC.Event.remove(this._task, SC.TaskEvent.START, this, "_onTaskEvent");
-			SC.Event.remove(this._task, SC.TaskEvent.COMPLETE, this, "_onTaskEvent");
-			SC.Event.remove(this._task, SC.TaskEvent.SUSPEND, this, "_onTaskEvent");
-			SC.Event.remove(this._task, SC.TaskEvent.RESUME, this, "_onTaskEvent");
-			SC.Event.remove(this._task, SC.TaskEvent.CANCEL, this, "_onTaskEvent");
-			SC.Event.remove(this._task, SC.TaskEvent.ERROR, this, "_onTaskEvent");
-			SC.Event.remove(this._task, SC.TaskEvent.REWIND, this, "_onTaskEvent");
-
+		  this._task.destroy();
 			this._task = null;
 		}
 	},
@@ -62,13 +55,13 @@ var TaskReceiver = {
 	listen : function(task) {
 		this._task = task;
 
-		SC.Event.add(task, SC.TaskEvent.START, this, "_onTaskEvent");
-		SC.Event.add(task, SC.TaskEvent.COMPLETE, this, "_onTaskEvent");
-		SC.Event.add(task, SC.TaskEvent.SUSPEND, this, "_onTaskEvent");
-		SC.Event.add(task, SC.TaskEvent.RESUME, this, "_onTaskEvent");
-		SC.Event.add(task, SC.TaskEvent.CANCEL, this, "_onTaskEvent");
-		SC.Event.add(task, SC.TaskEvent.ERROR, this, "_onTaskEvent");
-		SC.Event.add(task, SC.TaskEvent.REWIND, this, "_onTaskEvent");
+		this._task.addEventListener(SC.TaskEvent.START, this, "_onTaskEvent");
+		this._task.addEventListener(SC.TaskEvent.COMPLETE, this, "_onTaskEvent");
+		this._task.addEventListener(SC.TaskEvent.SUSPEND, this, "_onTaskEvent");
+		this._task.addEventListener(SC.TaskEvent.RESUME, this, "_onTaskEvent");
+		this._task.addEventListener(SC.TaskEvent.CANCEL, this, "_onTaskEvent");
+		this._task.addEventListener(SC.TaskEvent.ERROR, this, "_onTaskEvent");
+		this._task.addEventListener(SC.TaskEvent.REWIND, this, "_onTaskEvent");
 	},
 
 	assertAllEventsFired : function() {
@@ -164,7 +157,9 @@ test("Demonstrate the suspend/resume lifecycle with isSuspendable as true.", fun
 	TaskReceiver.addExpectedEvent(SC.TaskEvent.RESUME, SC.TaskState.ACTIVE);
 	TaskReceiver.addExpectedEvent(SC.TaskEvent.COMPLETE, SC.TaskState.FINISHED);
 	TaskReceiver.listen(task);
+	console.warn('start');
 	task.start();
+  console.warn('complete');
 	TaskReceiver.assertAllEventsFired();
 });
 
