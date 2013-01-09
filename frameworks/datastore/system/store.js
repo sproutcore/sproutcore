@@ -1364,7 +1364,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       that.unloadRecord(null, null, storeKey, newStatus);
     });
 
-    this.unregisterChildFromParent(storeKey, YES);
+    this.unregisterChildFromParent(storeKey);
 
     return this ;
   },
@@ -1561,26 +1561,26 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         id = this.idFor(childStoreKey),
         that = this;
 
-      // Check the child to see if it has a parent
+    // Check the child to see if it has a parent
     childRecords = this.childRecords;
 
-        // Remove the parent's connection to the child.  This doesn't remove the
-        // parent store key from the cache of parent store keys if the parent
-        // no longer has any other registered children, because the amount of effort
-        // to determine that would not be worth the miniscule memory savings.
+      // Remove the parent's connection to the child.  This doesn't remove the
+      // parent store key from the cache of parent store keys if the parent
+      // no longer has any other registered children, because the amount of effort
+      // to determine that would not be worth the miniscule memory savings.
     oldPk = childRecords[childStoreKey];
         if (oldPk) {
           delete this.parentRecords[oldPk][childStoreKey];
-        }
+      }
 
-        // Remove the child.
-        // 1. from the cache of data hashes
-        // 2. from the cache of record objects
-        // 3. from the cache of child record store keys
-        this.removeDataHash(childStoreKey);
+    // Remove the child.
+    // 1. from the cache of data hashes
+    // 2. from the cache of record objects
+    // 3. from the cache of child record store keys
+    this.removeDataHash(childStoreKey);
         if (this.records) {
           delete this.records[childStoreKey];
-        }
+    }
         delete childRecords[childStoreKey];
       }
     }
