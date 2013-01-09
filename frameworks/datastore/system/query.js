@@ -219,6 +219,20 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     return ret.freeze() ;
   }.property('recordType', 'recordTypes').cacheable(),
 
+  /**
+    Destroys the query.
+
+    @return {*}
+  */
+  destroy: function() {
+    var q = SC.Query._scq_queriesWithExpandedRecordTypes;
+    if (q) {
+      q.remove(this);
+    }
+
+    return sc_super();
+  },
+
   /** @private
     expands a single record type into the set. called recursively
   */

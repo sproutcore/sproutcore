@@ -177,7 +177,8 @@ SC._ChainObserver.prototype = {
   destroyChain: function() {
 
     // remove observer
-    var obj = this.object ;
+    var obj = this.object,
+        kvoKey;
     if (obj) {
       if (this.property === '@each' && this.next && obj._removeContentObserver) {
         obj._removeContentObserver(this);
@@ -191,6 +192,15 @@ SC._ChainObserver.prototype = {
     if (this.next) this.next.destroyChain() ;
 
     // and clear left overs...
+    kvoKey = SC.keyFor('_kvo_content_observers', this.property);
+    if (obj && obj[kvoKey] && obj[kvoKey].contains(this)) {
+      if (obj._removeContentObserver) {
+        obj._removeContentObserver(this);
+      } else {
+        obj._kvo_for(kvoKey).removeObject(this);
+      }
+    }
+
     this.next = this.target = this.method = this.object = this.context = this.root = this.masterTarget = this.masterMethod = null;
     return null ;
   }

@@ -194,6 +194,10 @@ SC.View.reopen(
     oldView.endPropertyChanges();
     view.endPropertyChanges();
 
+    if (view !== oldView) {
+      oldView.destroy();
+    }
+
     return this;
   },
 

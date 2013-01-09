@@ -995,10 +995,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         SC.Benchmark.start(bench = "%@#reloadIfNeeded (Full)".fmt(this), YES);
       }
 
-      // truncate cached item views since they will all be removed from the
-      // container anyway.
-      if (itemViews) itemViews.length = 0;
-
       views = containerView.get('childViews');
       if (views) views = views.copy();
 
@@ -1033,6 +1029,19 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         }
       }
 
+      if (itemViews) {
+        for (i = 0, len = itemViews.length; i < len; ++i) {
+          view = itemViews[i];
+          if (view && !view.isDestroyed) {
+            isGroupView = view.get('isGroupView');
+            viewPool = isGroupView ? this._GROUP_VIEW_POOL : this._VIEW_POOL;
+            if (!viewPool || !viewPool.contains(view)) {
+              view.destroy();
+            }
+          }
+        }
+        itemViews.length = 0;
+      }
 
       // Only after the children are removed should we create the new views.
       // We do this in order to maximize the change of re-use should the view
@@ -3158,6 +3167,10 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
       this._content.removeObserver('length', this, this.contentLengthDidChange);
     }
     this.removeContentRangeObserver();
+
+    // Remove observer on selection - this is cleaning up what _cv_selectionDidChange is setting up
+    if (this._cv_selection) this._cv_selection.removeObserver('[]', this, this._cv_selectionContentDidChange);
+    this._cv_selection = null;
 
     return ret;
   },

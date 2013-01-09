@@ -833,8 +833,43 @@ SC.MenuPane = SC.PickerPane.extend(
       ret.push(item);
     }
 
+    this._cleanUpDisplayItems();
+
+    this._displayItems = ret;
+
     return ret;
   }.property('items').cacheable(),
+
+  /**
+    Destroys previously created display items.
+
+    @private
+  */
+  _cleanUpDisplayItems: function() {
+    var i,
+        len,
+        displayItem;
+    if (this._displayItems) {
+      for (i = 0, len = this._displayItems.length; i < len; ++i) {
+        displayItem = this._displayItems.objectAt(i);
+        if (displayItem && !displayItem.isDestroyed) {
+          displayItem.destroy();
+        }
+      }
+    }
+    this._displayItems = null;
+  },
+
+  /**
+    Destroys the menu.
+
+    @return {*}
+  */
+  destroy: function() {
+    var ret = sc_super();
+    this._cleanUpDisplayItems();
+    return ret;
+  },
 
   _sc_menu_itemsDidChange: function() {
     var views = this.get('menuItemViews');

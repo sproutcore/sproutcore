@@ -124,15 +124,11 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
     var templateName = this.get('inverseTemplateName'),
         template = this.get('templates').get(templateName);
 
-    if (!template) {
-      //@if(debug)
-      if (templateName) {
-        SC.Logger.warn('%@ - Unable to find template "%@".'.fmt(this, templateName));
-      }
-      //@endif
-
-      return function() { return ''; };
+    //@if(debug)
+    if (!template && templateName) {
+      SC.Logger.warn('%@ - Unable to find template "%@".'.fmt(this, templateName));
     }
+    //@endif
 
     return template;
   }.property('inverseTemplateName').cacheable(),
@@ -320,7 +316,8 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
     }
 
     var inverseTemplate = this.get('inverseTemplate');
-    if (childViews.get('length') === 0 && inverseTemplate) {
+    if(childViews.get('length') === 0 && !SC.empty(inverseTemplate) &&
+        !(SC.typeOf(inverseTemplate) === SC.T_FUNCTION && SC.empty(inverseTemplate()))) {
       childView = this.createChildView(SC.TemplateView.extend({
         template: inverseTemplate,
         content: this
