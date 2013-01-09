@@ -32,19 +32,20 @@ sc_require("enum/state");
  * 		
  * 		startTask : function() {
  * 			var firstTask = this.get('myFirstTask');
- * 			SC.Event.add(firstTask, SC.TaskEvent.FINISHED, this, &quot;_firstTaskComplete&quot;);
+ * 			firstTask.addEventListener(SC.TaskEvent.FINISHED, this, &quot;_firstTaskComplete&quot;);
  * 			
  * 			sc_super();
  * 		},
  * 
  * 		_firstTaskComplete : function(event) {
  *			// Do something
- * 			SC.Event.remove(firstTask, SC.TaskEvent.FINISHED, this, &quot;_firstTaskComplete&quot;);
+ *      var firstTask = this.get('myFirstTask');
+ *      firstTask.addEventListener(SC.TaskEvent.FINISHED, this, &quot;_firstTaskComplete&quot;);
  * 		}
  * });
  * 
- * SC.TaskEvent.add(myTaskGroup, &quot;complete&quot;, myObj, &quot;_onTaskComplete&quot;);
- * SC.TaskEvent.add(myTaskGroup, &quot;error&quot;, myObj, &quot;_onTaskError&quot;);
+ * myTaskGroup.addEventListener(&quot;complete&quot;, myObj, &quot;_onTaskComplete&quot;);
+ * myTaskGroup.addEventListener(&quot;error&quot;, myObj, &quot;_onTaskError&quot;);
  * 
  * myTaskGroup.start();
  * 
