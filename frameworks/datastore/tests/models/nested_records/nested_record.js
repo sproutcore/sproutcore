@@ -621,7 +621,7 @@ test("Reloading the parent record uses same child record.", function() {
 
   cacheLength = 0;
   for (key in store.records) { cacheLength += 1; }
-  equals(cacheLength, 3, 'there should be three records cached in the store');
+  equals(cacheLength, 2, 'there should be two records cached in the store');
 
   cacheLength = 0;
   for (key in store.dataHashes) { if (store.dataHashes[key] !== null) cacheLength += 1; }
@@ -629,7 +629,7 @@ test("Reloading the parent record uses same child record.", function() {
 
   // Reload the record
   SC.RunLoop.begin();
-  store.loadRecord(NestedRecord.ParentRecordTest, {
+  parentStoreKey = store.loadRecord(NestedRecord.ParentRecordTest, {
       name: 'Parent Name 3',
       info: {
         type: 'ChildRecordTest',
@@ -640,6 +640,7 @@ test("Reloading the parent record uses same child record.", function() {
     parentId);
   SC.RunLoop.end();
 
+  testParent3 = store.materializeRecord(parentStoreKey);
   child = testParent3.get('info');
   equals(testParent3.get('status'), SC.Record.READY_CLEAN, 'parent status should be READY_CLEAN');
   equals(child.get('status'), SC.Record.READY_CLEAN, 'child status should be READY_CLEAN');
