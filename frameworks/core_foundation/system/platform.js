@@ -44,6 +44,8 @@ SC.platform = SC.Object.create({
      - Android is assumed to support touch, but incorrectly reports that it does not.
      - See: https://github.com/Modernizr/Modernizr/issues/84 for a discussion on detecting
        touch capability.
+     - See: https://github.com/highslide-software/highcharts.com/issues/1331 for a discussion 
+       about why we need to check if ontouchstart is null in addition to check if it's defined
   */
   /**
     YES if the current device supports touch events, NO otherwise.
@@ -53,7 +55,7 @@ SC.platform = SC.Object.create({
 
     @property {Boolean}
   */
-  touch: 'ontouchstart' in window || SC.browser.name === SC.BROWSER.android,
+  touch: !SC.none(window.ontouchstart) || SC.browser.name === SC.BROWSER.android,
 
   /**
     YES if the current browser supports bounce on scroll.
