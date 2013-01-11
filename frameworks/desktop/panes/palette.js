@@ -26,9 +26,10 @@ sc_require('panes/panel');
   They provide a better user experience than modal panel.
   
   @extends SC.PanelPane
+  @extends SC.Draggable
   @since SproutCore 1.0
 */
-SC.PalettePane = SC.PanelPane.extend(
+SC.PalettePane = SC.PanelPane.extend(SC.Draggable,
 /** @scope SC.PalettePane.prototype */ {
   
   /**
@@ -50,47 +51,5 @@ SC.PalettePane = SC.PanelPane.extend(
     @type SC.View
     @default SC.ModalPane
   */
-  modalPane: SC.ModalPane,
-  
-  /**
-    @type Boolean
-    @default NO
-  */
-  isAnchored: NO,
-  
-  /** @private */
-  _mouseOffsetX: null,
-
-  /** @private */
-  _mouseOffsetY: null,
-
-  /** @private
-    Drag & drop palette to new position.
-  */
-  mouseDown: function(evt) {
-    var f=this.get('frame');
-    this._mouseOffsetX = f ? (f.x - evt.pageX) : 0;
-    this._mouseOffsetY = f ? (f.y - evt.pageY) : 0;
-    return YES;
-  },
-
-  /** @private */
-  mouseDragged: function(evt) {
-    if(!this.isAnchored) {
-      this.set('layout', { width: this.layout.width, height: this.layout.height, left: this._mouseOffsetX + evt.pageX, top: this._mouseOffsetY + evt.pageY });
-      this.updateLayout();
-    }
-    return YES;
-  },
-  
-  /** @private */
-  touchStart: function(evt){
-    return this.mouseDown(evt);
-  },
-  
-  /** @private */
-  touchesDragged: function(evt){
-    return this.mouseDragged(evt);
-  }
-
+  modalPane: SC.ModalPane
 });
