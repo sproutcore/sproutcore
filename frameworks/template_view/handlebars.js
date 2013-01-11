@@ -690,6 +690,7 @@ Handlebars.SafeString.prototype.toString = function() {
 
 (function() {
   var escape = {
+    "&": "&amp;",
     "<": "&lt;",
     ">": "&gt;",
     '"': "&quot;",
@@ -697,7 +698,7 @@ Handlebars.SafeString.prototype.toString = function() {
     "`": "&#x60;"
   };
 
-  var badChars = /&(?!\w+;)|[<>"'`]/g;
+  var badChars = /[&<>"'`]/g;
   var possible = /[&<>"'`]/;
 
   var escapeChar = function(chr) {
