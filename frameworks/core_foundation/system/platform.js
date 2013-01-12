@@ -570,15 +570,19 @@ SC.platform = SC.Object.create({
       }
 
       // Clean up.  Don't blindly remove the same index, instead find the test
-      // rule's index for sure. (optimized for the index to be still where it was inserted)
+      // rule's index for sure. (optimized for the index to still be where it was inserted)
       outer:
-      for (var i = 0, iLength = document.styleSheets.length, styleSheet; i < iLength; i++) {
-        styleSheet = document.styleSheets[i];
-        for (var j = 0, jLength = styleSheet.cssRules.length, rule; j < jLength; j++) {
-          rule = styleSheet.cssRules[j];
-          if (rule.name === '_sc_animation_test') {
-            styleSheet.deleteRule(j);
-            break outer;
+      for (var i = 0, iLength = document.styleSheets.length; i < iLength; i++) {
+        var styleSheet = document.styleSheets[i],
+          cssRules = styleSheet.cssRules;
+
+        if (cssRules) {
+          for (var j = 0, jLength = cssRules.length, rule; j < jLength; j++) {
+            rule = styleSheet.cssRules[j];
+            if (rule.name === '_sc_animation_test') {
+              styleSheet.deleteRule(j);
+              break outer;
+            }
           }
         }
       }
