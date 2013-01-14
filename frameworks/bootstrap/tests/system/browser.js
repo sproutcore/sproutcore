@@ -41,7 +41,7 @@ var userAgents = {
     device: SC.DEVICE.desktop,
     name: SC.BROWSER.chrome,
     version: '16.0.912.36',
-    os: SC.OS.windows,
+    os: SC.OS.win,
     osVersion: '6.1',
     engine: SC.ENGINE.webkit,
     engineVersion: '535.7'
@@ -62,7 +62,7 @@ var userAgents = {
     device: SC.DEVICE.desktop,
     name: SC.BROWSER.opera,
     version: '8.65',
-    os: SC.OS.windows,
+    os: SC.OS.win,
     osVersion: '5.1',
     engine: SC.ENGINE.opera,
     engineVersion: '8.65'
@@ -71,7 +71,7 @@ var userAgents = {
     device: SC.DEVICE.desktop,
     name: SC.BROWSER.opera,
     version: '10.62',
-    os: SC.OS.windows,
+    os: SC.OS.win,
     osVersion: '6.1',
     engine: SC.ENGINE.presto,
     engineVersion: '2.6.30'
@@ -80,7 +80,7 @@ var userAgents = {
     device: SC.DEVICE.desktop,
     name: SC.BROWSER.opera,
     version: '11.51',
-    os: SC.OS.windows,
+    os: SC.OS.win,
     osVersion: '5.1',
     engine: SC.ENGINE.presto,
     engineVersion: '2.9.168'
@@ -89,7 +89,7 @@ var userAgents = {
     device: SC.DEVICE.desktop,
     name: SC.BROWSER.opera,
     version: '12.00',
-    os: SC.OS.windows,
+    os: SC.OS.win,
     osVersion: '6.1',
     engine: SC.ENGINE.presto,
     engineVersion: '2.9.181'
@@ -119,7 +119,7 @@ var userAgents = {
     device: SC.DEVICE.desktop,
     name: SC.BROWSER.ie,
     version: '7.0',
-    os: SC.OS.windows,
+    os: SC.OS.win,
     osVersion: '6.0',
     engine: SC.ENGINE.trident,
     engineVersion: '7.0'
@@ -128,7 +128,7 @@ var userAgents = {
     device: SC.DEVICE.desktop,
     name: SC.BROWSER.ie,
     version: '8.0',
-    os: SC.OS.windows,
+    os: SC.OS.win,
     osVersion: '6.0',
     engine: SC.ENGINE.trident,
     engineVersion: '4.0'
@@ -137,7 +137,7 @@ var userAgents = {
     device: SC.DEVICE.desktop,
     name: SC.BROWSER.ie,
     version: '9.0',
-    os: SC.OS.windows,
+    os: SC.OS.win,
     osVersion: '9.0',
     engine: SC.ENGINE.trident,
     engineVersion: '9.0'
@@ -146,7 +146,7 @@ var userAgents = {
     device: SC.DEVICE.desktop,
     name: SC.BROWSER.ie,
     version: '10.0',
-    os: SC.OS.windows,
+    os: SC.OS.win,
     osVersion: '6.1',
     engine: SC.ENGINE.trident,
     engineVersion: '6.0'
@@ -155,7 +155,7 @@ var userAgents = {
     device: SC.DEVICE.desktop,
     name: SC.BROWSER.ie,
     version: '10.6',
-    os: SC.OS.windows,
+    os: SC.OS.win,
     osVersion: '6.1',
     engine: SC.ENGINE.trident,
     engineVersion: '5.0'
@@ -164,10 +164,19 @@ var userAgents = {
     device: SC.DEVICE.desktop,
     name: SC.BROWSER.ie,
     version: '10.0',
-    os: SC.OS.windows,
+    os: SC.OS.win,
     osVersion: '6.2',
     engine: SC.ENGINE.trident,
     engineVersion: '6.0'
+  },
+  "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)": {
+    device: SC.DEVICE.desktop,
+    name: SC.BROWSER.ie,
+    version: '9.0',
+    os: SC.OS.win,
+    osVersion: '6.1',
+    engine: SC.ENGINE.trident,
+    engineVersion: '5.0'
   },
 
 // MOZILLA
@@ -176,7 +185,7 @@ var userAgents = {
     device: SC.DEVICE.desktop,
     name: SC.ENGINE.gecko,
     version: '0',
-    os: SC.OS.windows,
+    os: SC.OS.win,
     osVersion: '6.1',
     engine: SC.ENGINE.gecko,
     engineVersion: '2.0b4'
@@ -215,7 +224,7 @@ var userAgents = {
     device: SC.DEVICE.desktop,
     name: SC.BROWSER.firefox,
     version: '3.5.13',
-    os: SC.OS.windows,
+    os: SC.OS.win,
     osVersion: '6.1',
     engine: SC.ENGINE.gecko,
     engineVersion: '1.9.1.13'
@@ -224,7 +233,7 @@ var userAgents = {
     device: SC.DEVICE.desktop,
     name: SC.BROWSER.firefox,
     version: '3.6.10',
-    os: SC.OS.windows,
+    os: SC.OS.win,
     osVersion: '6.1',
     engine: SC.ENGINE.gecko,
     engineVersion: '1.9.2.10'
@@ -233,7 +242,7 @@ var userAgents = {
     device: SC.DEVICE.desktop,
     name: SC.BROWSER.firefox,
     version: '4.0b7pre',
-    os: SC.OS.windows,
+    os: SC.OS.win,
     osVersion: '6.1',
     engine: SC.ENGINE.gecko,
     engineVersion: '2.0b7pre'
@@ -242,7 +251,7 @@ var userAgents = {
     device: SC.DEVICE.desktop,
     name: SC.BROWSER.firefox,
     version: '6.0',
-    os: SC.OS.windows,
+    os: SC.OS.win,
     osVersion: '6.1',
     engine: SC.ENGINE.gecko,
     engineVersion: '6.0'
@@ -299,7 +308,7 @@ var userAgents = {
     device: SC.DEVICE.desktop,
     name: SC.BROWSER.safari,
     version: '4.1',
-    os: SC.OS.windows,
+    os: SC.OS.win,
     osVersion: '5.0',
     engine: SC.ENGINE.webkit,
     engineVersion: '533.16'
@@ -308,7 +317,7 @@ var userAgents = {
     device: SC.DEVICE.desktop,
     name: SC.BROWSER.safari,
     version: '5.0.1',
-    os: SC.OS.windows,
+    os: SC.OS.win,
     osVersion: '5.2',
     engine: SC.ENGINE.webkit,
     engineVersion: '533.17.8'
@@ -317,7 +326,7 @@ var userAgents = {
     device: SC.DEVICE.desktop,
     name: SC.BROWSER.safari,
     version: '5.0.2',
-    os: SC.OS.windows,
+    os: SC.OS.win,
     osVersion: '6.1',
     engine: SC.ENGINE.webkit,
     engineVersion: '533.18.1'
@@ -326,7 +335,7 @@ var userAgents = {
     device: SC.DEVICE.desktop,
     name: SC.BROWSER.safari,
     version: '5.0.3',
-    os: SC.OS.windows,
+    os: SC.OS.win,
     osVersion: '6.0',
     engine: SC.ENGINE.webkit,
     engineVersion: '533.19.4'
@@ -335,7 +344,7 @@ var userAgents = {
     device: SC.DEVICE.desktop,
     name: SC.BROWSER.safari,
     version: '5.0.4',
-    os: SC.OS.windows,
+    os: SC.OS.win,
     osVersion: '6.1',
     engine: SC.ENGINE.webkit,
     engineVersion: '533.20.25'
@@ -485,6 +494,9 @@ for (var userAgent in userAgents) {
     browser = SC.detectBrowser(userAgent);
     expected = userAgents[userAgent];
     for (var key in expected) {
+      if ( !browser.hasOwnProperty(key) || browser[key] == null) {
+        ok(false,"Property %@ not set, expected %@".fmt(key, expected[key]));
+      }
       if (browser[key] && typeof browser[key] !== "function") {
         equals(browser[key], expected[key], "'" + key + "' should be '" + expected[key] + "'");
       }
