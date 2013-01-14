@@ -973,7 +973,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         existing.destroy();
 
         // Insert the replacement view before the following view.
-        existing = (idx === len - 1) ? null : itemViews[idx + 1];
+        existing = itemViews[idx + 1]; // may result in undefined, but insertBefore treats this the same as null
         view = this.itemViewForContentIndex(idx, YES);
 
         containerView.insertBefore(view, existing);
