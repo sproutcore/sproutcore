@@ -689,7 +689,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     @param eventType {String} the event type
   */
   _addEventListener: function(elem, eventType, useCapture) {
-    var listener, special = this.special[eventType] ;
+    var listener, listenerCount, special = this.special[eventType] ;
 
 		if (!useCapture) {
 			useCapture = NO;
@@ -709,6 +709,8 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
        function() {
          return SC.Event.handle.apply(SC.Event._elements[guid], arguments);
       }) ;
+      listenerCount = SC.data(elem, "listenerCount") || 0;
+      SC.data(elem, "listenerCount", ++listenerCount);
 
       // Bind the global event handler to the element
       if (elem.addEventListener) {
@@ -741,9 +743,19 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     @param eventType {String} the event type
   */
   _removeEventListener: function(elem, eventType) {
-    var listener, special = SC.Event.special[eventType] ;
+    var listener, listenerCount, special = SC.Event.special[eventType] ;
     if (!special || (special.teardown.call(elem)===NO)) {
-      listener = SC.data(elem, "listener") ;
+      listener = SC.data(elem, "listener");
+      listenerCount = SC.data(elem, "listenerCount") || 0;
+
+      // Prevent memory leaks.
+      if (listenerCount <= 1) {
+        SC.removeData(elem, "listener");
+        SC.removeData(elem, "listenerCount");
+      } else {
+        SC.data(elem, "listenerCount", --listenerCount);
+      }
+
       if (listener) {
         if (elem.removeEventListener) {
           elem.removeEventListener(eventType, listener, NO);

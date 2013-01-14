@@ -75,6 +75,7 @@ SC._ChainObserver.prototype = {
   // current property changes, the next observer will be notified.
   next: null,
 
+  // root observer in the chain
   root: null,
 
   // if not null, this is the final target observer.
@@ -82,6 +83,17 @@ SC._ChainObserver.prototype = {
 
   // if not null, this is the final target method
   method: null,
+
+  // if not null, this is the context object to pass to method
+  context: null,
+
+  // if not null, this is the final target observer.
+  // this is only set on the root of the chain.
+  masterTarget: null,
+
+  // if not null, this is the final target method.
+  // this is only set on the root of the chain.
+  masterMethod: null,
 
   // an accessor method that traverses the list and finds the tail
   tail: function() {
@@ -165,7 +177,8 @@ SC._ChainObserver.prototype = {
   destroyChain: function() {
 
     // remove observer
-    var obj = this.object ;
+    var obj = this.object,
+        kvoKey;
     if (obj) {
       if (this.property === '@each' && this.next && obj._removeContentObserver) {
         obj._removeContentObserver(this);
@@ -179,7 +192,16 @@ SC._ChainObserver.prototype = {
     if (this.next) this.next.destroyChain() ;
 
     // and clear left overs...
-    this.next = this.target = this.method = this.object = this.context = null;
+    kvoKey = SC.keyFor('_kvo_content_observers', this.property);
+    if (obj && obj[kvoKey] && obj[kvoKey].contains(this)) {
+      if (obj._removeContentObserver) {
+        obj._removeContentObserver(this);
+      } else {
+        obj._kvo_for(kvoKey).removeObject(this);
+      }
+    }
+
+    this.next = this.target = this.method = this.object = this.context = this.root = this.masterTarget = this.masterMethod = null;
     return null ;
   }
 

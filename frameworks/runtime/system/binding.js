@@ -389,13 +389,13 @@ SC.Binding = /** @scope SC.Binding.prototype */{
       }
     }
     this._fromObserverData = [path, this, this.fromPropertyDidChange, root];
-    SC.Observers.addObserver.apply(SC.Observers, this._fromObserverData);
+    this._actualFromTuple = SC.Observers.addObserver.apply(SC.Observers, this._fromObserverData);
 
     // try to connect the to side
     if (!this._oneWay) {
       path = this._toPropertyPath; root = this._toRoot ;
       this._toObserverData = [path, this, this.toPropertyDidChange, root];
-      SC.Observers.addObserver.apply(SC.Observers, this._toObserverData);
+      this._actualToTuple = SC.Observers.addObserver.apply(SC.Observers, this._toObserverData);
     }
 
     if (bench) SC.Benchmark.end("SC.Binding.connect()");
@@ -416,6 +416,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @returns {SC.Binding} this
   */
   disconnect: function() {
+    var removedFrom, removedTo;
     if (!this.isConnected) return this; // nothing to do.
 
     // if connection is still pending, just cancel
@@ -425,14 +426,25 @@ SC.Binding = /** @scope SC.Binding.prototype */{
       SC.Binding._connectQueue.remove(this) ;
     // connection is completed, disconnect.
     } else {
-      SC.Observers.removeObserver.apply(SC.Observers, this._fromObserverData);
+      removedFrom = SC.Observers.removeObserver.apply(SC.Observers, this._fromObserverData);
+      if(!removedFrom && this._actualFromTuple && this._actualFromTuple[0] && this._actualFromTuple[0].removeObserver &&
+        this._fromObserverData) {
+        this._actualFromTuple[0].removeObserver(this._actualFromTuple[1], this._fromObserverData[1], this._fromObserverData[2]);
+      }
+
       if (!this._oneWay) {
-        SC.Observers.removeObserver.apply(SC.Observers, this._toObserverData);
+        removedTo = SC.Observers.removeObserver.apply(SC.Observers, this._toObserverData);
+        if(!removedTo && this._actualToTuple && this._actualToTuple[0] && this._actualToTuple[0].removeObserver &&
+          this._toObserverData) {
+          this._actualToTuple[0].removeObserver(this._actualToTuple[1], this._toObserverData[1], this._toObserverData[2]);
+        }
       }
 
       // Remove ourselves from the change queue (if we are in it).
       SC.Binding._changeQueue.remove(this);
     }
+
+    this._actualFromTuple = this._actualToTuple = null;
 
     this.isConnected = NO ;
     return this ;
@@ -624,6 +636,9 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     binding value from one side to the other.
   */
   applyBindingValue: function() {
+    // do nothing if not connected
+    if (!this.isConnected) return;
+
     // compute the binding targets if needed.
     this._computeBindingTargets() ;
     this._computeBindingValue();

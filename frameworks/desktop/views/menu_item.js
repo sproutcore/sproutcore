@@ -113,6 +113,20 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     return this.getContentProperty('itemCheckboxKey');
   }.property(),
 
+  /** @private */
+  _subMenuToDelete: null,
+
+  /**
+   * Cleans up the previous subMenu to prevent memory leaks
+   * @private
+   */
+  _cleanupPreviousSubMenu: function() {
+    if (this._subMenuToDelete) {
+      this._subMenuToDelete.destroy();
+      this._subMenuToDelete = null;
+    }
+  },
+
   /**
     This menu item's submenu, if it exists.
 
@@ -124,6 +138,8 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     var content = this.get('content'), menuItems, parentMenu;
 
     if (!content) return null;
+    
+    this._cleanupPreviousSubMenu();
 
     parentMenu = this.get('parentMenu');
     menuItems = content.get(parentMenu.itemSubMenuKey );
@@ -134,7 +150,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
         menuItems.set('parentMenu', parentMenu);
         return menuItems;
       } else {
-        return SC.MenuPane.create({
+        return this._subMenuToDelete = SC.MenuPane.create({
           layout: { width: 200 },
           items: menuItems,
           isModal: NO,
@@ -162,6 +178,14 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
   init: function() {
     sc_super();
     this.contentDidChange();
+  },
+
+  /** @private
+   Clean up memory at destruction
+   */
+  destroy: function() {
+    this._cleanupPreviousSubMenu();
+    return sc_super();
   },
 
   /** @private

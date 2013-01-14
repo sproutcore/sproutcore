@@ -431,6 +431,7 @@ SC.Set = SC.mixin({},
   destroy: function() {
     this.isFrozen = NO ; // unfreeze to return to pool
     if (!this.isObservable) SC.Set._pool.push(this.clear());
+    else this.destroyObservable();
     return this;
   },
 

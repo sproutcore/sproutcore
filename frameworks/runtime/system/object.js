@@ -334,9 +334,6 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
     ret.__sc_super__ = this.prototype;
     SC.generateGuid(ret, "sc"); // setup guid
 
-    ret.subclasses = SC.Set.create();
-    this.subclasses.add(ret); // now we can walk a class hierarchy
-
     // setup new prototype and add properties to it
     var base = (ret.prototype = SC.beget(this.prototype)),
         idx, len = arguments.length;
@@ -422,14 +419,6 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
     @type Boolean
   */
   isClass: YES,
-
-  /**
-    Set of subclasses that extend from this class.  You can observe this
-    array if you want to be notified when the object is extended.
-
-    @type SC.Set
-  */
-  subclasses: SC.Set.create(),
 
   /** @private */
   toString: function() { return SC._object_className(this); },

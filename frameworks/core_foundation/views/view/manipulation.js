@@ -112,8 +112,9 @@ SC.View.reopen(
     if (this.willAddChild) { this.willAddChild(view, beforeView) ; }
     if (view.willAddToParent) { view.willAddToParent(this, beforeView) ; }
 
-    // set parentView of child
+    // set parentView/owner of child
     view.set('parentView', this);
+    view.set('owner', this);
 
     // add to childView's array.
     var idx, childViews = this.get('childViews') ;
@@ -193,6 +194,10 @@ SC.View.reopen(
     oldView.endPropertyChanges();
     view.endPropertyChanges();
 
+    if (view !== oldView) {
+      oldView.destroy();
+    }
+
     return this;
   },
 
@@ -204,13 +209,21 @@ SC.View.reopen(
     @returns {SC.View} receiver
   */
   replaceAllChildren: function(views) {
-    var len = views.get('length'), idx;
+    var len = views.get('length'),
+        childViews = this.get('childViews'),
+        toDestroy, idx;
+
+    toDestroy = childViews.filter(function(view) {
+      return !views.contains(view);
+    });
 
     this.beginPropertyChanges();
     this.destroyLayer().removeAllChildren();
     for(idx=0;idx<len;idx++) { this.appendChild(views.objectAt(idx)); }
     this.replaceLayer();
     this.endPropertyChanges();
+
+    toDestroy.invoke('destroy');
 
     return this ;
   },

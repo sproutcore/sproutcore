@@ -1147,6 +1147,16 @@ SC.IndexSet = SC.mixin({},
     return this;
   },
 
+  /**
+    Call to destroy this object when you are finished with it.
+
+    @returns {SC.IndexSet} receiver
+  */
+  destroy: function() {
+    this.destroyObservable();
+    return this;
+  },
+
 
   // .......................................
   // PRIVATE

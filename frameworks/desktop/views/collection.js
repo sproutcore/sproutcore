@@ -995,10 +995,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         SC.Benchmark.start(bench = "%@#reloadIfNeeded (Full)".fmt(this), YES);
       }
 
-      // truncate cached item views since they will all be removed from the
-      // container anyway.
-      if (itemViews) itemViews.length = 0;
-
       views = containerView.get('childViews');
       if (views) views = views.copy();
 
@@ -1033,6 +1029,19 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         }
       }
 
+      if (itemViews) {
+        for (i = 0, len = itemViews.length; i < len; ++i) {
+          view = itemViews[i];
+          if (view && !view.isDestroyed) {
+            isGroupView = view.get('isGroupView');
+            viewPool = isGroupView ? this._GROUP_VIEW_POOL : this._VIEW_POOL;
+            if (!viewPool || !viewPool.contains(view)) {
+              view.destroy();
+            }
+          }
+        }
+        itemViews.length = 0;
+      }
 
       // Only after the children are removed should we create the new views.
       // We do this in order to maximize the change of re-use should the view
@@ -3133,6 +3142,37 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     this._sccv_lastNowShowing = this.get('nowShowing').clone();
     if (this.content) this._cv_contentDidChange();
     if (this.selection) this._cv_selectionDidChange();
+  },
+
+  /** @private
+    Clean up memory at destruction
+  */
+  destroy: function(layerId) {
+    var ret = sc_super();
+
+    if (this._sc_itemViews) {
+      this._sc_itemViews.invoke('destroy');
+      this._sc_itemViews = null;
+    }
+    if (this._GROUP_VIEW_POOL) {
+      this._GROUP_VIEW_POOL.invoke('destroy');
+      this._GROUP_VIEW_POOL = null;
+    }
+    if (this._VIEW_POOL) {
+      this._VIEW_POOL.invoke('destroy');
+      this._VIEW_POOL = null;
+    }
+
+    if (this._content) {
+      this._content.removeObserver('length', this, this.contentLengthDidChange);
+    }
+    this.removeContentRangeObserver();
+
+    // Remove observer on selection - this is cleaning up what _cv_selectionDidChange is setting up
+    if (this._cv_selection) this._cv_selection.removeObserver('[]', this, this._cv_selectionContentDidChange);
+    this._cv_selection = null;
+
+    return ret;
   },
 
   /** @private

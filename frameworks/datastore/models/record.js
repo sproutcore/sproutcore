@@ -1316,6 +1316,14 @@ SC.Record.mixin( /** @scope SC.Record */ {
   */
   _nextChildKey: 0,
 
+  /**
+    @private
+    Set of subclasses that extend from this class.
+
+    @type SC.Set
+  */
+  _subclasses: SC.Set.create(),
+
   // ..........................................................
   // CLASS METHODS
   //
@@ -1498,6 +1506,10 @@ SC.Record.mixin( /** @scope SC.Record */ {
   /** @private - enhance extend to notify SC.Query as well. */
   extend: function() {
     var ret = SC.Object.extend.apply(this, arguments);
+
+    ret._subclasses = SC.Set.create();
+    this._subclasses.add(ret); // now we can walk a class hierarchy
+
     if(SC.Query) SC.Query._scq_didDefineRecordType(ret);
     return ret ;
   }

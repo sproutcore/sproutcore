@@ -60,3 +60,14 @@ test("JSON encoding an SC.Record should encode the attributes", function(){
 
   same(MyApp.json, result, "original = encoded record");
 });
+
+test("_subclasses should contain defined subclasses", function() {
+  var Bar = MyApp.Foo.extend();
+
+  ok(MyApp.Foo._subclasses.contains(Bar), 'MyApp.Foo._subclasses should contain Bar');
+
+  equals(Bar._subclasses.get('length'), 0, 'Bar._subclasses should be empty');
+
+  var Baz = Bar.extend();
+  ok(Bar._subclasses.contains(Baz), 'Bar._subclasses should contain Baz');
+});

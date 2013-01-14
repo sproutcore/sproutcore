@@ -1126,18 +1126,20 @@ SC.CoreView.reopen(
   */
   init: function() {
     var parentView = this.get('parentView'),
-        path, root, lp, displayProperties ;
+        path, root, lp, displayProperties, layerId;
 
     sc_super();
+
+    layerId = this._lastLayerId = this.get('layerId');
 
     // Register the view for event handling. This hash is used by
     // SC.RootResponder to dispatch incoming events.
     //@if(debug)
-    if (SC.View.views[this.get('layerId')]) {
-      SC.error("Developer Error: A view with layerId, '%@', already exists.  Each view must have a unique layerId.".fmt(this.get('layerId')));
+    if (SC.View.views[layerId]) {
+      SC.error("Developer Error: A view with layerId, '%@', already exists.  Each view must have a unique layerId.".fmt(layerId));
     }
     //@endif
-    SC.View.views[this.get('layerId')] = this;
+    SC.View.views[layerId] = this;
 
     // setup classNames
     this.classNames = this.get('classNames').slice();
@@ -1274,6 +1276,7 @@ SC.CoreView.reopen(
   removeChild: function(view) {
     // update parent node
     view.set('parentView', null) ;
+    view.set('owner', null);
 
     // remove view from childViews array.
     var childViews = this.get('childViews'),
@@ -1329,6 +1332,9 @@ SC.CoreView.reopen(
   },
 
   _destroy: function() {
+    var layerId = this.get('layerId'),
+        guid = SC.guidFor(this);
+
     // destroy the layer -- this will avoid each child view destroying
     // the layer over and over again...
     this.destroyLayer() ;
@@ -1341,7 +1347,10 @@ SC.CoreView.reopen(
     }
 
     // next remove view from global hash
-    delete SC.View.views[this.get('layerId')] ;
+    delete SC.View.views[layerId];
+    if (layerId !== guid) {
+      delete SC.View.views[guid];
+    }
     delete this._CQ ;
     delete this.page ;
 
