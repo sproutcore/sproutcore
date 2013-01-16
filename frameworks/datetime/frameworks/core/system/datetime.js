@@ -315,10 +315,10 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
 
     The format parameter can contain the following characters:
 
-      - %a -- The abbreviated weekday name (``Sun'')
-      - %A -- The full weekday name (``Sunday'')
-      - %b -- The abbreviated month name (``Jan'')
-      - %B -- The full month name (``January'')
+      - %a -- The abbreviated weekday name ("Sun")
+      - %A -- The full weekday name ("Sunday")
+      - %b -- The abbreviated month name ("Jan")
+      - %B -- The full month name ("January")
       - %c -- The preferred local date and time representation
       - %d -- Day of the month (01..31)
       - %D -- Day of the month (0..31)
@@ -330,7 +330,7 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
       - %j -- Day of the year (001..366)
       - %m -- Month of the year (01..12)
       - %M -- Minute of the hour (00..59)
-      - %p -- Meridian indicator (``AM'' or ``PM'')
+      - %p -- Meridian indicator ("AM" or "PM")
       - %S -- Second of the minute (00..60)
       - %s -- Milliseconds of the second (000..999)
       - %U -- Week number of the current year,
@@ -345,7 +345,7 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
       - %y -- Year without a century (00..99)
       - %Y -- Year with century
       - %Z -- Time zone (ISO 8601 formatted)
-      - %% -- Literal ``%'' character
+      - %% -- Literal "%" character
 
     The Elapsed date format is a special, SproutCore specific formatting
     feature which will return an accurate-ish, human readable indication
