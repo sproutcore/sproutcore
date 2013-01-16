@@ -25,12 +25,12 @@ function timeShouldBeEqualToHash(t, h, message) {
   if (h === undefined) h = options;
   if (h.timezone === undefined) h.timezone = SC.DateTime.timezone;
   if (message === undefined) message = "%@ of time should be equal to hash";
-  
+
   if (t === null) {
     ok(false, 'Time should not be null');
     return;
   }
-    
+
   equals(t.get('year'), h.year , message.fmt('year'));
   equals(t.get('month'), h.month, message.fmt('month'));
   equals(t.get('day'), h.day, message.fmt('day'));
@@ -60,7 +60,7 @@ test('_toMilliseconds()', function() {
   // Check the default behavior
   equals(dt._toMilliseconds(null, ms, timezone), ms, "Should equal start milliseconds when no options hash provided");
   equals(dt._toMilliseconds({}, ms, timezone), ms, "Should equal start milliseconds when empty options hash provided");
-  
+
   // Test a completely defined date/time hash with no specified start milliseconds.
   equals(dt._toMilliseconds(options, null, options.timezone), ms, "Milliseconds should express the parsed options hash");
 
@@ -99,7 +99,7 @@ test('create with local time milliseconds', function() {
     millisecond: d.getMilliseconds(),
     timezone: d.getTimezoneOffset()
   };
-  
+
   dt = SC.DateTime.create(d.getTime()); // init a DateTime using that date's milliseconds
   timeShouldBeEqualToHash(dt, hash);
 
@@ -162,7 +162,7 @@ test('Adjust with hashes expressed in various time zones', function() {
     timeShouldBeEqualToHash(dt.adjust({ minute:       1 }), { year: options.year, month: options.month, day: options.day, hour: options.hour, minute: 1, second: 0, millisecond: 0, timezone: timezone});
     timeShouldBeEqualToHash(dt.adjust({ second:      12 }), { year: options.year, month: options.month, day: options.day, hour: options.hour, minute: options.minute, second: 12, millisecond: 0, timezone: timezone});
     timeShouldBeEqualToHash(dt.adjust({ millisecond: 18 }), { year: options.year, month: options.month, day: options.day, hour: options.hour, minute: options.minute, second: options.second, millisecond: 18, timezone: timezone});
-    
+
     // Test taking each to time zone 0.  Manually calculate what the hour should be
     // then test that a call to get() returns that value.
     newHour = Math.floor((options.hour + 48 + (timezone / 60)) % 24); // small hack -- add 48 hours to ensure positive results when adding negative time zone offsets (doesn't affect the calculation since we mod by 24)
@@ -172,11 +172,11 @@ test('Adjust with hashes expressed in various time zones', function() {
 
 test('advance', function() {
   var o = options;
-  
+
   timeShouldBeEqualToHash(
     dt.advance({ year: 1, month: 1, day: 1, hour: 1, minute: 1, second: 1, millisecond: 1 }),
     { year: o.year + 1, month: o.month + 1, day: o.day + 1, hour: o.hour + 1, minute: o.minute + 1, second: o.second + 1, millisecond: o.millisecond + 1, timezone: o.timezone });
-  
+
   timeShouldBeEqualToHash(dt.advance({year:         1}), { year: o.year + 1, month: o.month, day: o.day, hour: o.hour, minute: o.minute, second: o.second, millisecond: o.millisecond, timezone: o.timezone });
   timeShouldBeEqualToHash(dt.advance({month:        1}), { year: o.year, month: o.month + 1, day: o.day, hour: o.hour, minute: o.minute, second: o.second, millisecond: o.millisecond, timezone: o.timezone });
   timeShouldBeEqualToHash(dt.advance({day:          1}), { year: o.year, month: o.month, day: o.day + 1, hour: o.hour, minute: o.minute, second: o.second, millisecond: o.millisecond, timezone: o.timezone });
@@ -184,7 +184,7 @@ test('advance', function() {
   timeShouldBeEqualToHash(dt.advance({minute:       1}), { year: o.year, month: o.month, day: o.day, hour: o.hour, minute: o.minute + 1, second: o.second, millisecond: o.millisecond, timezone: o.timezone });
   timeShouldBeEqualToHash(dt.advance({second:       1}), { year: o.year, month: o.month, day: o.day, hour: o.hour, minute: o.minute, second: o.second + 1, millisecond: o.millisecond, timezone: o.timezone });
   timeShouldBeEqualToHash(dt.advance({millisecond:  1}), { year: o.year, month: o.month, day: o.day, hour: o.hour, minute: o.minute, second: o.second, millisecond: o.millisecond + 1, timezone: o.timezone });
-  
+
   // Convert time from CEST to UTC, then UTC to UTC+05:30 (Mumbai)
   var h = { year: 1985, month: 5, day: 8, hour: 1, minute: 0, second: 22, millisecond: 925, timezone: -120 };
   var t = SC.DateTime.create(h);
@@ -199,7 +199,7 @@ test('advance', function() {
 
 test('compare', function() {
   var exception = null;
-  
+
   equals(SC.DateTime.isComparable, YES, "SC.DateTime is comparable");
   equals(SC.compare(dt, dt), 0, "A DateTime instance is equal to itself via compare()");
   equals(dt.isEqual(dt), YES, "A DateTime instance is equal to itself via isEqual()");
@@ -214,7 +214,7 @@ test('compare', function() {
     SC.DateTime.create({year: 1985, month: 5, day: 7, hour: 23, minute: 0, second: 22, millisecond: 925, timezone:    0}),
     SC.DateTime.create({year: 1985, month: 5, day: 8, hour:  1, minute: 0, second: 22, millisecond: 925, timezone: -120})),
     0, "The expressions of the same date in two different time zones are considered equal");
-  
+
   try {
     equals(SC.DateTime.compareDate(
       SC.DateTime.create({year: 1985, month: 5, day: 7, hour: 23, minute: 0, second: 22, millisecond: 925, timezone:    0}),
@@ -229,9 +229,9 @@ test('compare', function() {
 
 test('Format', function() {
   equals(
-    dt.toFormattedString('%a %A %b %B %d %D %h %H %I %j %m %M %p %S %w %y %Y %%a %E %e'),
-    'Sat Saturday Jun June 08 8 4 04 04 159 06 00 AM 22 6 85 1985 %a');
-  
+    dt.toFormattedString('%a %A %b %B %d %D %h %H %I %j %m %M %p %S %w %y %Y %%a %E'),
+    'Sat Saturday Jun June 08 8 4 04 04 159 06 00 AM 22 6 85 1985 %a ');
+
   equals(dt.toFormattedString('%Z'), formatTimezone(dt.get('timezone')));
   equals(dt.adjust({ timezone:    0 }).toFormattedString('%Y-%m-%d %H:%M:%S %Z'), '1985-06-08 05:00:22 +00:00');
   equals(dt.adjust({ timezone: -120 }).toFormattedString('%Y-%m-%d %H:%M:%S %Z'), '1985-06-08 07:00:22 +02:00');
@@ -246,11 +246,11 @@ test('fancy getters', function() {
   equals(SC.DateTime.create({ year: 1900, month: 1, day: 1 }).get('isLeapYear'), NO);
   equals(SC.DateTime.create({ year: 2000, month: 1, day: 1 }).get('isLeapYear'), YES);
   equals(SC.DateTime.create({ year: 2004, month: 1, day: 1 }).get('isLeapYear'), YES);
-  
+
   equals(dt.get('daysInMonth'), 30); // june
   equals(SC.DateTime.create({ year: 2000, month: 2, day: 1 }).get('daysInMonth'), 29);
   equals(SC.DateTime.create({ year: 2001, month: 2, day: 1 }).get('daysInMonth'), 28);
-  
+
   equals(dt.get('dayOfYear'), 159);
   equals(SC.DateTime.create({ year: 2000, month: 12, day: 31 }).get('dayOfYear'), 366);
   equals(SC.DateTime.create({ year: 2001, month: 12, day: 31 }).get('dayOfYear'), 365);
@@ -266,19 +266,19 @@ test('fancy getters', function() {
   equals(dt.get('lastMonday'), dt.advance({ day: -5 }), 'dt.advance(day: -5)');
   equals(dt.get('nextFriday'), dt.advance({ day: 6 }), 'dt.advance(day: 6)');
   equals(dt.get('lastWednesday'), dt.advance({ day: -3 }), 'dt.advance(day: -3)');
-  
+
   equals(
     SC.DateTime.create({ year: 2010, month: 9, day: 29, hour: 0, minute: 30, timezone: -120 }).adjust({ day: 1 }).get('lastMonday').toISO8601(),
     "2010-08-30T00:30:00+02:00");
 });
- 
+
 test('parse', function() {
   timeShouldBeEqualToHash(
     SC.DateTime.parse('08/05/1985 01:00:22 %a', '%d/%m/%Y %H:%M:%S %%a'),
     { year: 1985, month: 5, day: 8, hour: 1, minute: 0, second: 22, millisecond: 0 });
   timeShouldBeEqualToHash(
     SC.DateTime.parse('08/05/1985 01:00:22 PM', '%d/%m/%Y %H:%M:%S %p'),
-    { year: 1985, month: 5, day: 8, hour: 13, minute: 0, second: 22, millisecond: 0 }); 
+    { year: 1985, month: 5, day: 8, hour: 13, minute: 0, second: 22, millisecond: 0 });
   timeShouldBeEqualToHash(
     SC.DateTime.parse('Wed 08 May 1985 01:00:22 AM', '%a %d %b %Y %H:%M:%S %p'),
     { year: 1985, month: 5, day: 8, hour: 1, minute: 0, second: 22, millisecond: 0 });
@@ -302,7 +302,7 @@ test('parse', function() {
     'Should be able to have single digit for month, day, hour, minute, second');
   timeShouldBeEqualToHash(
     SC.DateTime.parse('70-01-01 00:00:00', '%y-%m-%d %H:%M:%S'),
-    { year: 2070, month: 1, day: 1, hour: 0, minute: 0, second: 0, millisecond: 0 }); 
+    { year: 2070, month: 1, day: 1, hour: 0, minute: 0, second: 0, millisecond: 0 });
   timeShouldBeEqualToHash(
     SC.DateTime.parse('71-01-01 00:00:00', '%y-%m-%d %H:%M:%S'),
     { year: 1971, month: 1, day: 1, hour: 0, minute: 0, second: 0, millisecond: 0 });
@@ -352,7 +352,7 @@ test('binding', function() {
 });
 
 test('cache', function() {
-  
+
   SC.DateTime.create(options);
   var cache_length_1 = SC.keys(SC.DateTime._dt_cache).length;
   SC.DateTime.create(options);
@@ -360,7 +360,7 @@ test('cache', function() {
   equals(
     cache_length_1, cache_length_2,
     "Creating twice the same datetime should not modify the cache's length");
-  
+
   var dates = [];
   for (var i = 0; i < 3*SC.DateTime._DT_CACHE_MAX_LENGTH; i++) {
     dates[i] = SC.DateTime.create(i);
@@ -373,16 +373,16 @@ test('cache', function() {
 
 test('timezones', function() {
   var o = options;
-  
+
   options.timezone = 0;
   timeShouldBeEqualToHash(SC.DateTime.create(options), options);
-  
+
   options.timezone = -120;
   timeShouldBeEqualToHash(SC.DateTime.create(options), options);
 
   options.timezone = 330;
   timeShouldBeEqualToHash(SC.DateTime.create(options), options);
-  
+
   options.timezone = 0; // note that test dates will now be created at timezone 0
   dt = SC.DateTime.create(options);
 
@@ -397,7 +397,7 @@ test('timezones', function() {
 
 test('extend', function() {
   var dateTimeExt = SC.DateTime.extend();
-  
+
   // Should parse and produce a date object that is an instance of 'dateTimeExt'
   var parsedDateTimeExt = dateTimeExt.parse('2011-10-15T21:30:00Z');
   ok(SC.instanceOf(parsedDateTimeExt, dateTimeExt), 'Correctly produced an instance of the extended type.');
@@ -410,19 +410,19 @@ test('extend', function() {
 test('elapsed', function() {
   var dateTimeTest = SC.DateTime.create();
   equals(Math.round(dateTimeTest.get('elapsed') / 1000), 0);
-  
+
   // Modify the current time by 20 seconds;
   dateTimeTest = SC.DateTime.create().advance({
     second: -20
   });
   equals(Math.round(dateTimeTest.get('elapsed') / 1000), 20);
-  
+
   // Modify the current time by -120 seconds;
   dateTimeTest = SC.DateTime.create().advance({
     second: 120
   });
   equals(Math.round(dateTimeTest.get('elapsed') / 1000), -120);
-  
+
 });
 
 test('difference', function() {

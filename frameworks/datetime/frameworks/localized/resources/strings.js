@@ -41,5 +41,5 @@ SC.stringsFor('English', {
   '_SC.DateTime.monthAgo' : 'About a month ago',
   '_SC.DateTime.monthsAgo' : '%e months ago',
   '_SC.DateTime.yearAgo' : 'Last year',
-  '_SC.DateTime.yearsAgo' : '%e years ago',
+  '_SC.DateTime.yearsAgo' : '%e years ago'
 });
