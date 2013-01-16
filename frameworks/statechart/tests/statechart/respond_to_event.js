@@ -399,3 +399,19 @@ test("try to perform 'yellow' on statechart -- current states X and Y", function
   ok(!stateZ.get('handledEvent'), 'state Z did not handle event yellow');
   ok(!root.get('handledEvent'), 'root not did handle event yellow');
 });
+
+test("Check destroyed statechart does not respond to events", function() {
+  ok(statechart.respondsTo('foo'), 'statechart should respond to foo before destroyed');
+  ok(statechart.respondsTo('eventA'), 'statechart should respond to eventA before destroyed');
+  ok(statechart.respondsTo('eventB'), 'statechart should respond to eventB before destroyed');
+  ok(!statechart.respondsTo('foox'), 'statechart should not respond to foox before destroyed');
+  ok(!statechart.respondsTo('eventC'), 'statechart should not respond to eventC before destroyed');
+
+  statechart.destroy();
+
+  ok(!statechart.respondsTo('foo'), 'statechart should not respond to foo after destroyed');
+  ok(!statechart.respondsTo('eventA'), 'statechart should not respond to eventA after destroyed');
+  ok(!statechart.respondsTo('eventB'), 'statechart should not respond to eventB after destroyed');
+  ok(!statechart.respondsTo('foox'), 'statechart should not respond to foox after destroyed');
+  ok(!statechart.respondsTo('eventC'), 'statechart should not respond to eventC after destroyed');
+});

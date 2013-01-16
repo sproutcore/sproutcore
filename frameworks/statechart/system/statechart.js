@@ -353,6 +353,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
     root.destroy();
     this.set('rootState', null);
+    this.notifyPropertyChange('currentStates');
   },
 
   /**
@@ -439,7 +440,9 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     @returns {Array} the current states
   */
   currentStates: function() {
-    return this.getPath('rootState.currentSubstates');
+    var ret = this.getPath('rootState.currentSubstates');
+    if (!ret) { ret = []; }
+    return ret;
   }.property().cacheable(),
   
   /**
