@@ -279,6 +279,7 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
     Generic getter.
 
     The properties you can get are:
+
       - `year`
       - `month` (January is 1, contrary to JavaScript Dates for which January is 0)
       - `day`
@@ -315,37 +316,37 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
 
     The format parameter can contain the following characters:
 
-      - %a -- The abbreviated weekday name ("Sun")
-      - %A -- The full weekday name ("Sunday")
-      - %b -- The abbreviated month name ("Jan")
-      - %B -- The full month name ("January")
-      - %c -- The preferred local date and time representation
-      - %d -- Day of the month (01..31)
-      - %D -- Day of the month (0..31)
-      - %E -- Elapsed time, according to localized text formatting strings. See below.
-      - %h -- Hour of the day, 24-hour clock (0..23)
-      - %H -- Hour of the day, 24-hour clock (00..23)
-      - %i -- Hour of the day, 12-hour clock (1..12)
-      - %I -- Hour of the day, 12-hour clock (01..12)
-      - %j -- Day of the year (001..366)
-      - %m -- Month of the year (01..12)
-      - %M -- Minute of the hour (00..59)
-      - %p -- Meridian indicator ("AM" or "PM")
-      - %S -- Second of the minute (00..60)
-      - %s -- Milliseconds of the second (000..999)
-      - %U -- Week number of the current year,
+      - `%a` -- The abbreviated weekday name ("Sun")
+      - `%A` -- The full weekday name ("Sunday")
+      - `%b` -- The abbreviated month name ("Jan")
+      - `%B` -- The full month name ("January")
+      - `%c` -- The preferred local date and time representation
+      - `%d` -- Day of the month (01..31)
+      - `%D` -- Day of the month (0..31)
+      - `%E` -- Elapsed time, according to localized text formatting strings. See below.
+      - `%h` -- Hour of the day, 24-hour clock (0..23)
+      - `%H` -- Hour of the day, 24-hour clock (00..23)
+      - `%i` -- Hour of the day, 12-hour clock (1..12)
+      - `%I` -- Hour of the day, 12-hour clock (01..12)
+      - `%j` -- Day of the year (001..366)
+      - `%m` -- Month of the year (01..12)
+      - `%M` -- Minute of the hour (00..59)
+      - `%p` -- Meridian indicator ("AM" or "PM")
+      - `%S` -- Second of the minute (00..60)
+      - `%s` -- Milliseconds of the second (000..999)
+      - `%U` -- Week number of the current year,
           starting with the first Sunday as the first
           day of the first week (00..53)
-      - %W -- Week number of the current year,
+      - `%W` -- Week number of the current year,
           starting with the first Monday as the first
           day of the first week (00..53)
-      - %w -- Day of the week (Sunday is 0, 0..6)
-      - %x -- Preferred representation for the date alone, no time
-      - %X -- Preferred representation for the time alone, no date
-      - %y -- Year without a century (00..99)
-      - %Y -- Year with century
-      - %Z -- Time zone (ISO 8601 formatted)
-      - %% -- Literal "%" character
+      - `%w` -- Day of the week (Sunday is 0, 0..6)
+      - `%x` -- Preferred representation for the date alone, no time
+      - `%X` -- Preferred representation for the time alone, no date
+      - `%y` -- Year without a century (00..99)
+      - `%Y` -- Year with century
+      - `%Z` -- Time zone (ISO 8601 formatted)
+      - `%%` -- Literal "%" character
 
     The Elapsed date format is a special, SproutCore specific formatting
     feature which will return an accurate-ish, human readable indication
