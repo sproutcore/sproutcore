@@ -127,7 +127,10 @@ SC.ContentValueSupport = {
       var contentKey;
 
       for(contentKey in contentKeys) {
-        if(key === '*' || key === this.getDelegateProperty(contentKey, this, this.get('displayDelegate'), contentKeys)) return this.updatePropertyFromContent(contentKeys[contentKey], key, contentKey, target);
+        if(key === '*' || key === this.getDelegateProperty(contentKey, this, this.get('displayDelegate'), contentKeys)) {
+          this.updatePropertyFromContent(contentKeys[contentKey], key, contentKey, target);
+        }
+        return this;
       }
     }
 
