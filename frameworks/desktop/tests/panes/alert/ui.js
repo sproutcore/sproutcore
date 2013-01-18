@@ -19,7 +19,8 @@ module("SC.AlertPane UI", {
 
 var pane ;
 
-function evaluatePane(pane, message, description, caption, button1Title, button2Title, button3Title, iconClass, themeName) {
+function evaluatePane(pane, message, description, caption, button1Title, button2Title, button3Title, iconClass, themeName,
+    button1ToolTip, button2ToolTip, button3ToolTip, button1LayerId, button2LayerId, button3LayerId, defaultButton, cancelButton) {
   // wrapper
   ok(pane.get('isVisibleInWindow'), 'pane.isVisibleInWindow should be YES');
   ok(pane.$().hasClass('sc-alert'), 'pane should have sc-alert class');
@@ -75,6 +76,72 @@ function evaluatePane(pane, message, description, caption, button1Title, button2
     ok(button3.$().hasClass('sc-hidden'), 'pane.div button3 should be hidden');
   }
 
+  if (button1ToolTip) {
+    equals(button1.$('label').prop('title'), button1ToolTip, 'pane.div.div button1 should have custom toolTip %@'.fmt(button1ToolTip));
+  } else {
+    equals(button1.$('label').prop('title'), '', 'pane.div.div button1 should have default toolTip BLANK');
+  }
+  if (button2ToolTip) {
+    equals(button2.$('label').prop('title'), button2ToolTip, 'pane.div.div button2 should have custom toolTip %@'.fmt(button2ToolTip));
+  } else {
+    equals(button2.$('label').prop('title'), '', 'pane.div.div button2 should have default toolTip BLANK');
+  }
+  if (button3ToolTip) {
+    equals(button3.$('label').prop('title'), button3ToolTip, 'pane.div.div button3 should have custom toolTip %@'.fmt(button3ToolTip));
+  } else {
+    equals(button3.$('label').prop('title'), '', 'pane.div.div button3 should have default toolTip BLANK');
+  }
+
+  if (button1LayerId) {
+    equals(button1.$().prop('id'), button1LayerId, 'pane.div.div button1 should have custom layerId %@'.fmt(button1LayerId));
+  } else {
+    ok(button1.$().prop('id').indexOf('sc') === 0, 'pane.div.div button1 should have default layerId');
+  }
+  if (button2LayerId) {
+    equals(button2.$().prop('id'), button2LayerId, 'pane.div.div button2 should have custom layerId %@'.fmt(button2LayerId));
+  } else {
+    ok(button2.$().prop('id').indexOf('sc') === 0, 'pane.div.div button2 should have default layerId');
+  }
+  if (button3LayerId) {
+    equals(button3.$().prop('id'), button3LayerId, 'pane.div.div button3 should have custom layerId %@'.fmt(button3LayerId));
+  } else {
+    ok(button3.$().prop('id').indexOf('sc') === 0, 'pane.div.div button3 should have default layerId');
+  }
+
+  if (defaultButton == null) defaultButton = 1;
+  if (defaultButton === 1) {
+    ok(button1.$().hasClass('def'), 'pane.div.div button1 should be default');
+  } else {
+    ok(!button1.$().hasClass('def'), 'pane.div.div button1 should not be default');
+  }
+  if (defaultButton === 2) {
+    ok(button2.$().hasClass('def'), 'pane.div.div button2 should be default');
+  } else {
+    ok(!button2.$().hasClass('def'), 'pane.div.div button2 should not be default');
+  }
+  if (defaultButton === 3) {
+    ok(button3.$().hasClass('def'), 'pane.div.div button3 should be default');
+  } else {
+    ok(!button3.$().hasClass('def'), 'pane.div.div button3 should not be default');
+  }
+
+  if (cancelButton == null) cancelButton = 2;
+    if (cancelButton === 1) {
+      ok(button1.$().hasClass('cancel'), 'pane.div.div button1 should be cancel');
+    } else {
+      ok(!button1.$().hasClass('cancel'), 'pane.div.div button1 should not be cancel');
+    }
+    if (cancelButton === 2) {
+      ok(button2.$().hasClass('cancel'), 'pane.div.div button2 should be cancel');
+    } else {
+      ok(!button2.$().hasClass('cancel'), 'pane.div.div button2 should not be cancel');
+    }
+    if (cancelButton === 3) {
+      ok(button3.$().hasClass('cancel'), 'pane.div.div button3 should be cancel');
+    } else {
+      ok(!button3.$().hasClass('cancel'), 'pane.div.div button3 should not be cancel');
+    }
+
   if (!themeName) themeName = 'capsule';
   ok(button1.$().hasClass(themeName), 'pane.div.div button1 should have class ' + themeName);
   ok(button2.$().hasClass(themeName), 'pane.div.div button2 should have class ' + themeName);
@@ -95,6 +162,28 @@ test("AlertPane.show with icon, message, description, caption and 3 buttons", fu
     ]
   });
   evaluatePane(pane, "AlertPane.message", 'AlertPane.description', 'AlertPane.caption', "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', 'sc-icon-tools-24');
+  pane.dismiss();
+  pane.destroy();
+});
+
+test("AlertPane.show with 3 buttons with isDefault, isCancel, toolTip, and layerId", function () {
+  pane = SC.AlertPane.show({
+    message: 'AlertPane.message',
+    description: 'AlertPane.description',
+    caption: 'AlertPane.caption',
+    icon: 'sc-icon-tools-24',
+    delegate: this,
+    buttons: [
+      { title: 'okButtonTitle', toolTip: 'okButtonToolTip', layerId: 'okButtonLayerId', isCancel: true },
+      { title: 'cancelButtonTitle', toolTip: 'cancelButtonToolTip', layerId: 'cancelButtonLayerId' },
+      { title: 'extraButtonTitle', toolTip: 'extraButtonToolTip', layerId: 'extraButtonLayerId', isDefault: true }
+    ]
+  });
+  evaluatePane(pane, "AlertPane.message", 'AlertPane.description', 'AlertPane.caption',
+    "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', 'sc-icon-tools-24', null,
+    'okButtonToolTip', 'cancelButtonToolTip', 'extraButtonToolTip',
+    'okButtonLayerId', 'cancelButtonLayerId', 'extraButtonLayerId',
+    3, 1);
   pane.dismiss();
   pane.destroy();
 });

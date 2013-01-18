@@ -59,6 +59,8 @@ SC.BUTTON3_STATUS = 'button3';
 
   In addition to passing a message, description and caption, you can also customize
   the title of the button 1 (OK) and add an optional button 2 and 3 (Cancel or Extra).
+  Additionally, you can provide a toolTip and layerId for each button, as well as specify
+  which button should be the default button and the cancel button.
 
    - button1 -- 1st button from the right. default:OK
    - button2 -- 2nd button from the right. Optional. Could be Cancel or 2nd action.
@@ -88,6 +90,19 @@ SC.BUTTON3_STATUS = 'button3';
         caption: "Try again in a few minutes.",
         buttons: [
           { title: "Try Again" }
+        ]
+      });
+
+  Show an AlertPane with fully customized buttons:
+
+      SC.AlertPane.show({
+        message: "Could not load calendar",
+        description: "Your internet connection may be unavailable or our servers may be down.",
+        caption: "Try again in a few minutes.",
+        buttons: [
+          { title: "Try Again", toolTip: "Retry the connection", layerId: "try-again-button", isDefault: true },
+          { title: "Cancel", toolTip: "Cancel the action", layerId: "cancel-button", isCancel: true },
+          { title: "More Info...", toolTip: "Get more info", layerId: "more-info-button" }
         ]
       });
 
@@ -430,29 +445,47 @@ SC.AlertPane.mixin(
     @param {Hash} args
     @return {SC.AlertPane} the pane shown
   */
-  show: function(args) {
+  show: function (args) {
     // normalize the arguments if this is a deprecated call
     args = SC.AlertPane._argumentsCall.apply(this, arguments);
 
     var pane = this.create(args),
         idx = 0,
         buttons = args.buttons,
-        buttonView, title, action, target, themeName;
+        buttonView, layerId, title, toolTip, action, target, themeName,
+        isDefault, isCancel, hasDefault, hasCancel;
 
-    if(buttons) {
-      buttons.forEach(function(button) {
+    if (buttons) {
+      // Determine if any button specifies isDefault/isCancel.
+      hasDefault = !!buttons.findProperty('isDefault');
+      hasCancel = !!buttons.findProperty('isCancel');
+
+      buttons.forEach(function (button) {
         idx++;
-        if(!button) return;
+        if (!button) return;
         buttonView = pane.get('button%@'.fmt(idx));
 
+        layerId = button.layerId;
         title = button.title;
+        toolTip = button.toolTip;
         action = button.action;
         target = button.target;
         themeName = args.themeName || 'capsule';
 
-        buttonView.set('title'.fmt(idx), title);
-        if(action) buttonView.set('customAction'.fmt(idx), action);
-        if(target) buttonView.set('customTarget'.fmt(idx), target);
+        // If any button has the isDefault/isCancel flags set, we
+        // explicitly cast the button's flag to bool, ensuring that this
+        // overrides the default. Otherwise, we use undefined so we skip
+        // setting the property, ensuring the default value is used.
+        isDefault = hasDefault ? !!button.isDefault : undefined;
+        isCancel = hasCancel ? !!button.isCancel : undefined;
+
+        buttonView.set('title', title);
+        if (toolTip) buttonView.set('toolTip', toolTip);
+        if (action) buttonView.set('customAction', action);
+        if (target) buttonView.set('customTarget', target);
+        if (layerId !== undefined) { buttonView.set('layerId', layerId); }
+        if (isDefault !== undefined) { buttonView.set('isDefault', isDefault); }
+        if (isCancel !== undefined) { buttonView.set('isCancel', isCancel); }
         buttonView.set('isVisible', !!title);
         buttonView.set('themeName', themeName);
       });
