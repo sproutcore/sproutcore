@@ -7,6 +7,7 @@
   }
 
   &.for-sc-panel {
+    position: fixed;
     background: black;
     opacity: 0.3;
     -moz-opacity: 0.3;
