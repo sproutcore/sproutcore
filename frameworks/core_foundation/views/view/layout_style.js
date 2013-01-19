@@ -56,10 +56,10 @@ SC.View.LayoutStyleCalculator = {
     style.width = layout.width;
 
     // Borders.
-    style.borderTop = layout.borderTop !== undefined ? layout.borderTop : layout.border;
-    style.borderRight = layout.borderRight !== undefined ? layout.borderRight : layout.border;
-    style.borderBottom = layout.borderBottom !== undefined ? layout.borderBottom : layout.border;
-    style.borderLeft = layout.borderLeft !== undefined ? layout.borderLeft : layout.border;
+    style.borderTopWidth = layout.borderTop !== undefined ? layout.borderTop : layout.border;
+    style.borderRightWidth = layout.borderRight !== undefined ? layout.borderRight : layout.border;
+    style.borderBottomWidth = layout.borderBottom !== undefined ? layout.borderBottom : layout.border;
+    style.borderLeftWidth = layout.borderLeft !== undefined ? layout.borderLeft : layout.border;
 
     // Minimum and maximum size.
     style.maxHeight = (layout.maxHeight === undefined) ? null : layout.maxHeight;
@@ -142,8 +142,8 @@ SC.View.LayoutStyleCalculator = {
       start      = 'left';
       finish     = 'right';
       size       = 'width';
-      startBorder  = 'borderLeft';
-      finishBorder = 'borderRight';
+      startBorder  = 'borderLeftWidth';
+      finishBorder = 'borderRightWidth';
       hasStart   = state.hasLeft;
       hasFinish  = state.hasRight;
       hasSize    = state.hasWidth;
@@ -152,8 +152,8 @@ SC.View.LayoutStyleCalculator = {
       start      = 'top';
       finish     = 'bottom';
       size       = 'height';
-      startBorder  = 'borderTop';
-      finishBorder = 'borderBottom';
+      startBorder  = 'borderTopWidth';
+      finishBorder = 'borderBottomWidth';
       hasStart   = state.hasTop;
       hasFinish  = state.hasBottom;
       hasSize    = state.hasHeight;
@@ -167,8 +167,8 @@ SC.View.LayoutStyleCalculator = {
       finishBorderVal = this._cssNumber(style[finishBorder]),
       sizeNum = style[size];
 
-    style[startBorder + 'Width'] = startBorderVal || null;
-    style[finishBorder + 'Width'] = finishBorderVal || null;
+    style[startBorder] = startBorderVal || null;
+    style[finishBorder] = finishBorderVal || null;
 
     // This is a normal number
     if (sizeNum >= 1) { sizeNum -= (startBorderVal + finishBorderVal); }
@@ -201,16 +201,16 @@ SC.View.LayoutStyleCalculator = {
       start  = 'left';
       finish = 'right';
       margin = 'marginLeft';
-      startBorder  = 'borderLeft';
-      finishBorder = 'borderRight';
+      startBorder  = 'borderLeftWidth';
+      finishBorder = 'borderRightWidth';
     } else {
       size   = 'height';
       center = 'centerY';
       start  = 'top';
       finish = 'bottom';
       margin = 'marginTop';
-      startBorder  = 'borderTop';
-      finishBorder = 'borderBottom';
+      startBorder  = 'borderTopWidth';
+      finishBorder = 'borderBottomWidth';
     }
 
     style[start] = "50%";
@@ -222,8 +222,8 @@ SC.View.LayoutStyleCalculator = {
       sizeIsPercent = SC.isPercentage(sizeValue),
       value;
 
-    style[startBorder + 'Width'] = startBorderVal || null;
-    style[finishBorder + 'Width'] = finishBorderVal || null;
+    style[startBorder] = startBorderVal || null;
+    style[finishBorder] = finishBorderVal || null;
 
     // If > 1 then it should be a normal number value
     if (sizeValue > 1) { sizeValue -= (startBorderVal + finishBorderVal); }
@@ -240,7 +240,7 @@ SC.View.LayoutStyleCalculator = {
     }
 
     style[size] = this._cssNumber(sizeValue) || 0;
-    style[finish] = null;
+    style[finish] = style[center] = null;
   },
 
   // return "auto" for "auto", null for null, converts 0.XY into "XY%".
