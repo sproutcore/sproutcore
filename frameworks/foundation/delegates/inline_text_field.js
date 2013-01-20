@@ -6,7 +6,7 @@
 
 /**
   @namespace
-  
+
   This is the default InlineEditorDelegate for SC.LabelView. The default editor
   is an SC.InlineTextFieldView.
 
@@ -16,7 +16,7 @@
   acquire if the active editor could not be discarded.
 
   Each time an editor is required, it instantiates it and appends it to the same
-  pane as the view being edited. The editor is responsible for positioning
+  parentView as the view being edited. The editor is responsible for positioning
   itself correctly in its beginEditing method.
 
   @since SproutCore 1.0
@@ -35,8 +35,8 @@ SC.InlineTextFieldDelegate = /** @scope SC.InlineTextFieldDelegate */{
     and if that fails attempting to dismiss. If that fails, the acquire fails
     and returns null.
 
-    Otherwise, it creates the editor as a child of the client view's pane and
-    returns it.
+    Otherwise, it creates the editor as a child of the client view's parentView
+    and returns it.
 
     The default editor is an SC.InlineTextFieldView. The client view may
     customize this by setting a different inlineEditor as its exampleEditor
@@ -45,13 +45,13 @@ SC.InlineTextFieldDelegate = /** @scope SC.InlineTextFieldDelegate */{
     @param {SC.InlineEditable} label the label that is requesting an editor
     @returns {SC.InlineEditor} the editor the label should use to edit
   */
-  acquireEditor: function(label) {
+  acquireEditor: function (label) {
     var editor = this.editor;
 
-    if(editor) {
+    if (editor) {
       // attempt to end editing on the previous editor and return null if unable
       // to end editing successfully
-      if(editor.get('isEditing') && !editor.commitEditing() && !editor.discardEditing()) return null;
+      if (editor.get('isEditing') && !editor.commitEditing() && !editor.discardEditing()) return null;
 
       // now release it
       this.releaseEditor(editor);
@@ -59,14 +59,14 @@ SC.InlineTextFieldDelegate = /** @scope SC.InlineTextFieldDelegate */{
 
     // default to SC.InlineTextFieldView
     var exampleEditor = label.exampleEditor ? label.exampleEditor : SC.InlineTextFieldView,
-    pane = label.get('pane');
+    parentView = label.get('parentView');
 
     // set ourself as the delegate for the editor
-    editor = this.editor = pane.createChildView(exampleEditor, {
+    editor = this.editor = parentView.createChildView(exampleEditor, {
       inlineEditorDelegate: this
     });
 
-    pane.appendChild(editor);
+    parentView.appendChild(editor);
 
     return editor;
   },
@@ -79,7 +79,7 @@ SC.InlineTextFieldDelegate = /** @scope SC.InlineTextFieldDelegate */{
     @params {SC.InlineEditor} editor the editor that should be cleaned up
     @returns {Boolean} whether the cleanup succeeded
   */
-  releaseEditor: function(editor) {
+  releaseEditor: function (editor) {
     editor.removeFromParent();
 
     this.editor = null;
