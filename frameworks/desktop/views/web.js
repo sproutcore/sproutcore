@@ -42,7 +42,8 @@ SC.WebView = SC.View.extend(SC.Control, {/** @scope SC.WebView.prototype */
     @param {Boolean} firstTime
   */
   render: function(context, firstTime) {
-    var src = this.get('value'), iframe;
+    var src = this.get('value') || '',
+      iframe;
 
     if (firstTime) {
       context.push('<iframe src="' + src +
