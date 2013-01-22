@@ -23,6 +23,7 @@
     }
   }).add("auto resize", SC.WebView, {
     value: sc_static('iframe'),
+    includeImage: sc_static('a_sample_image.jpg'), // this simply ensures that the image is added to the build
     shouldAutoResize: YES,
     layout: {
       width: 250,
@@ -107,4 +108,5 @@
       start();
     });
   });
+
 })();
