@@ -13,3 +13,4 @@ Gemfile*
 *.orig
 .sass-cache/
 .strobe/
+*.iml

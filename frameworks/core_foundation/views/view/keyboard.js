@@ -45,9 +45,9 @@ SC.View.reopen(
 
   /**
     Invoked just after the responder gains key responder status.
-    By default, it calls focus on the view root element. For accessibility 
+    By default, it calls focus on the view root element. For accessibility
     purposes.
-  
+
     @param {SC.Responder} responder
   */
   didBecomeKeyResponderFrom: function(responder) {},
@@ -123,7 +123,6 @@ SC.View.reopen(
         idx = -1, view ;
     while (!ret && (++idx < len)) {
       view = childViews[idx];
-
       ret = view.tryToPerform('performKeyEquivalent', keystring, evt);
     }
 
