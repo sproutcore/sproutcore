@@ -65,3 +65,13 @@ test("Destroying a view, should also destroy its binding objects", function () {
   ok(!v.hasObserverFor('foo'), "The view should no longer have an observer on 'foo'");
   ok(!v2.hasObserverFor('bar'), "The child view should no longer have an observer on 'bar'");
 });
+
+test('Resigns firstResponder when destroyed.', function() {
+  var pane = SC.Pane.create();
+  var v = SC.View.create({ parentView: pane, acceptsFirstResponder: YES });
+  v.becomeFirstResponder();
+  ok(v.get('isFirstResponder'), 'view starts as firstResponder.');
+  v.destroy();
+  ok(!v.get('isFirstResponder'), 'destroying view resigns firstResponder.');
+});
+
