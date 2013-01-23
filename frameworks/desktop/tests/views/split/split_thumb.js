@@ -1,15 +1,15 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
-// Copyright: ©2006-2010 Sprout Systems, Inc. and contributors.
-//            portions copyright ©2011 Apple Inc.
+// Copyright: ©2006-2011 Strobe Inc. and contributors.
+//            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
 /*
   Tests SplitView Thumb views. Specifically, event handling.
-  
+
   Tests:
-  
+
   - mouse events
   - movesChild calculation
   - that mouse events move movesChild
@@ -35,8 +35,8 @@ module("SplitView Thumb", {
       }),
       right: SC.View.extend(SC.SplitChild, SC.SplitThumb, { name: 'right', size: 100 }),
 
-      layout: { 
-        left: 0, top: 0, 
+      layout: {
+        left: 0, top: 0,
         width: 520,
         height: 300
       },

@@ -7,59 +7,23 @@
 
 /**
   @class
+  @deprecated Use a normal view and mix-in SC.SplitThumb.
 
-  A ThumbView works in concert with SC.SplitView to adjust the divider 
-  position from an arbitrary subview of the SplitView. Simply make an
-  instance of ThumbView a child somewhere in the childViews (or 
-  descendants) of the split view and add the path to the ThumbView to the
-  SplitView's thumbViews array.
-  
-  SplitView will automatically set the splitView property of the views in
-  its thumbViews array.
+  Kept to allow a modicum of backwards-compatibility. Please use
+  a normal view and mix in SC.SplitThumb instead.
 
   @extends SC.View
-  @author Erich Ocean
+  @author Alex Iskander
   @test in split
 */
-SC.ThumbView = SC.View.extend(
+SC.ThumbView = SC.View.extend(SC.SplitThumb,
 /** @scope SC.ThumbView.prototype */ {
-
-  /**
-    @type Array
-    @default ['sc-thumb-view']
-    @see SC.View#classNames
-  */
   classNames: ['sc-thumb-view'],
-  
-  /**
-    Enable this thumb view to control its parent split view.
-    
-    @type Boolean
-    @default YES
-  */
-  isEnabled: YES,
-  
-  /** @private */
-  isEnabledBindingDefault: SC.Binding.bool(),
-  
-  /** @private */
-  prepareContext: function(context, firstTime) {
-    var splitView = this.get('splitView') ;
-    if (splitView) this.set('cursor', splitView.get('thumbViewCursor')) ;
-    return sc_super() ;
-  },
-  
-  /** @private */
-  mouseDown: function(evt) {
-    if (!this.get('isEnabled')) return NO ;
-    
-    var splitView = this.get('splitView');
-    return (splitView) ? splitView.mouseDownInThumbView(evt, this) : sc_super();
-  },
-  
-  /** @private */
-  touchStart: function(evt) {
-    return this.mouseDown(evt);
-  }
 
+  init: function() {
+    sc_super();
+    //@if(debug)
+    SC.warn("SC.ThumbView is deprecated. Please use a normal SC.View and mix in SC.SplitThumb instead.");
+    //@endif
+  }
 });
