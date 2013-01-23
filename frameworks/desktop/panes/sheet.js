@@ -47,8 +47,6 @@ SC.SheetPane = SC.PanelPane.extend(
      */
     modalPane: SC.ModalPane,
 
-    _state: 'NO_VIEW', // no view
-
     /**
      * Duration in seconds
      * @type {Number}
@@ -101,12 +99,10 @@ SC.SheetPane = SC.PanelPane.extend(
     slideDown: function (callback) {
       var height = this._computeHeight();
       this.adjust('top', -height);
-      this.invokeLast(function () {
-        this.animate('top', 0, {
-          duration: this.get('duration'),
-          timing: this.get('timing'),
-          callback: callback
-        });
+      this.animate('top', 0, {
+        duration: this.get('duration'),
+        timing: this.get('timing'),
+        callback: callback
       });
     },
 
@@ -130,17 +126,4 @@ SC.SheetPane = SC.PanelPane.extend(
 
   });
 
-SC.SheetPane.mixin(
-  /** @scope SC.SheetPane */ {
 
-    ANIMATABLE_AVAILABLE: NO,
-
-    // states for view animation
-    NO_VIEW: 'NO_VIEW',
-    ANIMATING: 'ANIMATING',
-    READY: 'READY',
-
-    SLIDE_DOWN: 'SLIDEDOWN',
-    SLIDE_UP: 'SLIDEUP'
-
-  });
