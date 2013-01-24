@@ -9,12 +9,12 @@
   @namespace
   Child views of SplitViews should use this mixin to get their positioning
   logic and default settings.
-
+  
   By default, SplitView merely sets the position and size properties on its
-  child views. This mixin observes the position and size properties and
+  child views. This mixin observes the position and size properties and 
   calls adjust().
 */
-SC.SplitChild =
+SC.SplitChild = 
   /** @scope SC.SplitChild.prototype */{
   /**
    * Set to YES if your Split Child is a divider view.
@@ -22,7 +22,7 @@ SC.SplitChild =
    * @type Boolean
   */
   isSplitDivider: NO,
-
+  
   /**
    * The minimum size for the SC.SplitView child. This view will
    * be unable to be resized smaller than this size.
@@ -38,13 +38,13 @@ SC.SplitChild =
    * be unable to be resized to a size larger than this value.
    *
    * If undefined, there is no limit.
-   *
+   * 
    * @default 100
    *
    * @type {Number}
   */
   maximumSize: undefined,
-
+  
   /**
    * The current size of the SC.SplitView child. Use this to set the default
    * size.
@@ -58,7 +58,7 @@ SC.SplitChild =
    * @type Number
   */
   size: undefined,
-
+  
   /**
    * [RO] The current position of the SC.SplitView. This is read-only, and is set
    * by the SplitView as it positions the views.
@@ -66,10 +66,10 @@ SC.SplitChild =
    * @type Number
   */
   position: 0,
-
+  
   /**
    * An amount to add to the position when adjusting layout.
-   *
+   * 
    * For example, if SC.SplitView positions this view at 100, and
    * positionOffset is -5, the view's layout will will have a position of 95.
    *
@@ -81,14 +81,14 @@ SC.SplitChild =
    * @type Number
   */
   positionOffset: SC.propertyFromRenderDelegate('splitPositionOffset', 0),
-
+  
   /**
    * An amount to add to the assigned size when adjusting layout.
-   *
+   * 
    * For example, if SC.SplitView gives this view a size of 1, but the
    * sizeOffset is 10, the view's layout will be given a width or height of 11.
    *
-   * This can be used in conjunction with positionOffset to make dividers
+   * This can be used in conjunction with positionOffset to make dividers 
    * overlap the other views in the SplitView to have a larger grab area.
    *
    * TODO: Get this value from theme.
@@ -105,7 +105,7 @@ SC.SplitChild =
    * @type {Boolean}
   */
   canCollapse: NO,
-
+  
   /**
    * If the user attempts to resize the view to a size below this number,
    * the view will collapse.
@@ -124,7 +124,7 @@ SC.SplitChild =
    *   SC.RESIZE_AUTOMATIC views have already been resized as much as possible.
    * - SC.FIXED_SIZE: Never resize.
    *
-   * If you specify an autoResizeStyle, it will be used. If you leave it at `undefined`,
+   * If you specify an autoResizeStyle, it will be used. If you leave it at `undefined`, 
    * it will look at `size`: if a `size` is supplied, it will use `SC.RESIZE_MANUAL`; otherwise
    * it will use `SC.RESIZE_AUTOMATIC`.
    *
@@ -141,7 +141,7 @@ SC.SplitChild =
    * @type Boolean
   */
   compensatesForMovement: YES,
-
+  
   /**
    * When NO, the view can only be adjusted when the user drags a divider
    * immediately adjacent to it. If YES, the view can be adjusted indirectly
@@ -158,18 +158,15 @@ SC.SplitChild =
    * @type {Boolean}
   */
   allowsIndirectAdjustments: YES,
-
-  initMixin: function () {
-    this.splitChildLayoutDidChange();
-  },
-
+  
+  
   //
   // Positioning logic
   //
-  _scsvc_positionOrSizeDidChange: function () {
+  _scsvc_positionOrSizeDidChange: function() {
     this.invokeOnce('splitChildLayoutDidChange');
   }.observes('position', 'size'),
-
+  
   /**
    * Called when either the position or size of the child has changed, and layout
    * needs to be updated accordingly. You may override this method to take into
@@ -181,31 +178,30 @@ SC.SplitChild =
    * make it only set left/width or top/height.
    *
   */
-  splitChildLayoutDidChange: function () {
+  splitChildLayoutDidChange: function() {
     var split = this.get('splitView');
     if (!split) return;
-
+    
     var position = this.get('position') + this.get('positionOffset'),
         size = this.get('size') + this.get('sizeOffset');
-
+    
+    
     if (split.get('layoutDirection') === SC.LAYOUT_HORIZONTAL) {
       this.set('layout', {
         left: position,
         width: size,
-        top: 0,
-        bottom: 0
+        top: 0, bottom: 0
       });
     } else {
       this.set('layout', {
         top: position,
         height: size,
-        right: 0,
-        left: 0
+        right: 0, left: 0
       });
     }
   },
-
-
+  
+  
   /**
    * The SplitView that contains the child views to be adjusted.
    *
@@ -217,10 +213,25 @@ SC.SplitChild =
    *
    * @property SC.SplitView
   */
-  splitView: function () {
-    var view = this.get('parentView');
-    while (view && !view.isSplitView) view = view.get('parentView');
-    return view;
-  }.property('parentView').cacheable()
-
+  splitView: function() {
+    var view = this.get('parentView') ;
+    while (view && !view.isSplitView) view = view.get('parentView') ;
+    return view ;
+  }.property('parentView').cacheable(),
+  
+  /**
+   * The layoutDirection of the SplitView. This is observed so that we
+   * can update positioning if the layoutDirection changes but the position
+   * and size properties do not.
+   *
+   * @type {LayoutDirection}
+  */
+  // NOTE: While an edge case, this is implemented because it makes it _much_
+  // easier to write the sample in the Test Controls app.
+  splitViewLayoutDirection: null,
+  splitViewLayoutDirectionBinding: SC.Binding.oneWay('*splitView.layoutDirection'),
+  
+  splitViewLayoutDirectionDidChange: function() {
+    this.invokeOnce('splitChildLayoutDidChange');
+  }.observes('splitViewLayoutDirection')
 };

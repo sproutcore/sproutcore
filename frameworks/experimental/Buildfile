@@ -5,3 +5,5 @@ config :scroll_view, :required => [:runtime, :foundation, :desktop]
 config :menu, :required => [:'experimental/scroll_view']
 
 config :polymorphism, :required => :datastore
+
+config :split_view, :required => :foundation

@@ -5,35 +5,54 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('mixins/split_child');
-sc_require('mixins/split_thumb');
 
 /**
   @class
 
-  A SplitDividerView sits between any two other views in a SplitView.
-  The SplitDivider mixes in SC.SplitThumb to allow the user to drag
-  it around. The dragging process will cause SC.SplitView to adjust
-  other children as needed.
+  A SplitDividerView displays a divider between two views within a SplitView.
+  Clicking and dragging the divider will change the thickness of each view
+  either to the top/left or bottom/right of the divider.
+
+  Double-clicking on the SplitDividerView will try to collapse the first
+  view within the SplitView that has property canCollapse set to true,
+  so it is not visible, unless you have canCollapse disabled on the SplitView.
+
+  This view must be a direct child of the split view it works with. It must
+  be surrounded by two other views.
 
   @extends SC.View
+  @author Charles Jolley
+  @author Lawrence Pit
+  @author Erich Ocean
+  @test in split
 */
-SC.SplitDividerView = SC.View.extend(SC.SplitChild, SC.SplitThumb,
-{
-  /** @scope SC.SplitDividerView.prototype */
+SC.SplitDividerView = SC.View.extend(
+/** @scope SC.SplitDividerView.prototype */ {
+
+  /**
+    @type Array
+    @default ['sc-split-divider-view']
+    @see SC.View#classNames
+  */
   classNames: ['sc-split-divider-view'],
+  
+  /** @private */
 
-  // set to prevent SC.SplitView from automatically creating dividers
-  // to sit between this divider and another view.
-  isSplitDivider: YES,
-
-  // NOTE: 'sc-fixed-size' is only hard-coded because SC.SplitView requires
-  // this file, and SC.FIXED_SIZE is defined inside SC.SplitView.
-  autoResizeStyle: 'sc-fixed-size',
-
-  movesSibling: SC.MOVES_CHILD,
-
-  size: SC.propertyFromRenderDelegate('dividerSize', 10),
-
-  renderDelegateName: 'splitDividerRenderDelegate'
+  /** @private */
+  mouseDown: function(evt) {
+    var splitView = this.get('splitView');
+    return (splitView) ? splitView.mouseDownInThumbView(evt, this) : sc_super();
+  },
+  
+  /** @private */
+  doubleClick: function(evt) {
+    var splitView = this.get('splitView');
+    return (splitView) ? splitView.doubleClickInThumbView(evt, this) : sc_super();
+  },
+  
+  /** @private */
+  touchStart: function(evt){
+    return this.mouseDown(evt);
+  }
+  
 });
