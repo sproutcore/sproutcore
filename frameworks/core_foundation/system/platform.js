@@ -53,7 +53,7 @@ SC.platform = SC.Object.create({
      - Android is assumed to support touch, but incorrectly reports that it does not.
      - See: https://github.com/Modernizr/Modernizr/issues/84 for a discussion on detecting
        touch capability.
-     - See: https://github.com/highslide-software/highcharts.com/issues/1331 for a discussion 
+     - See: https://github.com/highslide-software/highcharts.com/issues/1331 for a discussion
        about why we need to check if ontouchstart is null in addition to check if it's defined
   */
   /**
@@ -456,22 +456,6 @@ SC.platform = SC.Object.create({
     el.addEventListener(lowerDomPrefix + standardEventName, callback, NO);
     el.addEventListener(lowerDomPrefix + capitalizedEventName, callback, NO);
     el.addEventListener(domPrefix + capitalizedEventName, callback, NO);
-
-    // Clean up when we can be sure that testing is complete.  This can't be
-    // too short or the events will not have fired.
-    setTimeout(function () {
-      var success = SC.platform[eventNameKey] !== SC.UNSUPPORTED;
-
-      if (!success) {
-        // This is highly unlikely and should not occur, but continue on without support.
-        SC.warn('Unable to add a listener for %@ on this browser, it does not appear to be supported.'.fmt(standardEventName));
-
-        // Call back anyway to do the cleanup.
-        callback();
-      }
-
-      callback = null;
-    }, 500);
 
     // Delay the ready event for the tests to complete.
     jQuery.holdReady(YES);
