@@ -184,6 +184,19 @@ SC.mixin(Function.prototype,
   */
   observes: function(propertyPaths) {
     return SC.Function.observes(this, arguments);
+  },
+  
+  /**
+  Stolen from here: http://ejohn.org/blog/partial-functions-in-javascript/
+  
+  allows for partial application of functions eg:
+  
+  ['10', '10', '10'].map(parseInt.partial(undefined, 10));
+
+    @returns {Function} the partially applied funciton.
+  */
+  partial: function(){
+	  return SC.Function.partial.apply(this, arguments);
   }
 
 });
