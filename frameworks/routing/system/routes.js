@@ -348,7 +348,7 @@ SC.routes = SC.Object.create(
 
      - 'users/:action/:id'
      - ':controller/show/:id'
-     - ':controller/ *url' (ignore the space, because of jslint)
+     - ':controller/*url'
 
     @param {String} route the route to be registered
     @param {Object} target the object on which the method will be called, or
