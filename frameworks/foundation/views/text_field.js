@@ -1154,7 +1154,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     // validate keyDown...
     // do not validate on touch, as it prevents return.
     if ((this.performValidateKeyDown(evt) || SC.platform.touch) && !maxLengthReached) {
-      this._isKeyDown = YES;
       evt.allowDefault();
     } else {
       evt.stop();
@@ -1189,8 +1188,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   */
   insertNewline: function(evt) {
     if (this.get('isTextArea') || evt.isIMEInput) {
-      evt.allowDefault();
-      return YES;
+      return this.insertText(null, evt);
     } else {
       return NO ;
     }
@@ -1226,7 +1224,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     // element's values won't be updated until after this event is finished
     // processing.
     this.notifyPropertyChange('selection');
-    this._isKeyDown = NO;
     evt.allowDefault();
     return YES;
   },
