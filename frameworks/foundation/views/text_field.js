@@ -1154,7 +1154,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     // validate keyDown...
     // do not validate on touch, as it prevents return.
     if ((this.performValidateKeyDown(evt) || SC.platform.touch) && !maxLengthReached) {
-      this._isKeyDown = YES;
       evt.allowDefault();
     } else {
       evt.stop();
@@ -1171,14 +1170,50 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   },
 
   /** @private */
+  deleteBackward: function(evt) {
+    return this.insertText(null, evt);
+  },
+
+  /** @private */
+  deleteForward: function(evt) {
+    return this.insertText(null, evt);
+  },
+
+  /**
+    @private
+
+    Invoked when the user presses return.  If this is a multi-line field,
+    then allow the newine to proceed.  Otherwise, try to commit the
+    edit.
+  */
+  insertNewline: function(evt) {
+    if (this.get('isTextArea') || evt.isIMEInput) {
+      return this.insertText(null, evt);
+    } else {
+      return NO ;
+    }
+  },
+
+  /** @private */
   insertTab: function(evt) {
     // Don't handle if default tabbing hasn't been enabled.
     if (!this.get('defaultTabbingEnabled')) return NO;
     // Otherwise, handle.
-    var view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
+    var view = this.get('nextValidKeyView');
     if (view) view.becomeFirstResponder();
     else evt.allowDefault();
     return YES ; // handled
+  },
+
+  /** @private */
+  insertBacktab: function(evt) {
+    // Don't handle if default tabbing hasn't been enabled.
+    if (!this.get('defaultTabbingEnabled')) return NO;
+    // Otherwise, handle.
+    var view = this.get('previousValidKeyView');
+    if (view) view.becomeFirstResponder();
+    else evt.allowDefault();
+    return YES; // handled
   },
 
   keyUp: function (evt) {
@@ -1189,7 +1224,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     // element's values won't be updated until after this event is finished
     // processing.
     this.notifyPropertyChange('selection');
-    this._isKeyDown = NO;
     evt.allowDefault();
     return YES;
   },
