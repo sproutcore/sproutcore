@@ -17,16 +17,13 @@ sc_require('views/list_item');
 */
 SC.DRAG_REORDER = 0x0010;
 
-/**
-  @static
+//@if(debug)
+/** @deprecated
   @static
   @default NO
 */
 SC.BENCHMARK_RELOAD = NO;
-
-/*
-  TODO Document SC.CollectionView
-*/
+//@endif
 
 /**
   @class
@@ -869,7 +866,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     var content = this.get('content'),
         i, len, existing,
         layout  = this.computeLayout(),
+        //@if(debug)
         bench   = SC.BENCHMARK_RELOAD,
+        //@endif
         nowShowing = this.get('nowShowing'),
         itemViews  = this._sc_itemViews,
         containerView = this.get('containerView') || this,
@@ -896,9 +895,12 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
     // if an index set, just update indexes
     if (invalid.isIndexSet) {
+      //@if(debug)
       if (bench) {
+        SC.warn("SC.BENCHMARK_RELOAD is deprecated as it is an internal property for improving SC.CollectionView, not for using it.")
         SC.Benchmark.start(bench = "%@#reloadIfNeeded (Partial)".fmt(this), YES);
       }
+      //@endif
 
       // Each of these arrays holds indexes.
       viewsToRemove = [];
@@ -985,14 +987,16 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         containerView.insertBefore(view, null);   // Equivalent to 'append()', but avoids one more function call
       }
 
-
+      //@if(debug)
       if (bench) SC.Benchmark.end(bench);
-
+      //@endif
     // if set is NOT defined, replace entire content with nowShowing
     } else {
+      //@if(debug)
       if (bench) {
         SC.Benchmark.start(bench = "%@#reloadIfNeeded (Full)".fmt(this), YES);
       }
+      //@endif
 
       // For all previous views that can be re-used, return them to the pool.
       if (itemViews) {
@@ -1001,20 +1005,20 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
           if (existing) {
             isGroupView = existing.get('isGroupView');
-          shouldReuse = isGroupView ? shouldReuseGroupViews : shouldReuseViews;
-          if (shouldReuse) {
-            viewPool = isGroupView ? this._GROUP_VIEW_POOL : this._VIEW_POOL;
+            shouldReuse = isGroupView ? shouldReuseGroupViews : shouldReuseViews;
+            if (shouldReuse) {
+              viewPool = isGroupView ? this._GROUP_VIEW_POOL : this._VIEW_POOL;
 
               viewPool.push(existing);
 
-            // Because it's possible that we'll return this view to the pool
-            // and then immediately re-use it, there's the potential that the
-            // layer will not be correctly destroyed, because that support
-            // (built into removeChild) is coalesced at the runloop, and we
-            // will likely change the layerId when re-using the view.  So
-            // we'll destroy the layer now.
+              // Because it's possible that we'll return this view to the pool
+              // and then immediately re-use it, there's the potential that the
+              // layer will not be correctly destroyed, because that support
+              // (built into removeChild) is coalesced at the runloop, and we
+              // will likely change the layerId when re-using the view.  So
+              // we'll destroy the layer now.
               existing.destroyLayer();
-          } else {
+            } else {
               existing.destroy();
 
               // Remove the view from the cache
@@ -1034,9 +1038,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
       containerView.replaceAllChildren(views);
 
-
+      //@if(debug)
       if (bench) SC.Benchmark.end(bench);
-
+      //@endif
     }
 
     // adjust my own layout if computed
@@ -2460,8 +2464,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     }
 
     // if we do have a selection, then figure out how to extend it.
-    var content = this.get('content'),
-        min     = sel.get('min'),
+    var min     = sel.get('min'),
         max     = sel.get('max') - 1,
         anchor  = this._selectionAnchor;
     if (SC.none(anchor)) anchor = -1;
