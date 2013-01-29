@@ -12,9 +12,9 @@ module("SC.CollectionView.reload", {
     content = "1 2 3 4 5 6 7 8 9 10".w().map(function(x) {
       return SC.Object.create({ value: x });
     });
-    
+
     view = SC.CollectionView.create({
-      content: content, 
+      content: content,
 
       isVisibleInWindow: YES
     });
@@ -23,9 +23,9 @@ module("SC.CollectionView.reload", {
 
 /*
   Verifies that the item views for the passed collection view match exactly the
-  content array passed.  If shouldShowAllContent is also YES then verifies 
+  content array passed.  If shouldShowAllContent is also YES then verifies
   that the nowShowing range is showing the entire content range.
-  
+
   @param {SC.CollectionView} view the view to test
   @param {SC.Array} content the content array
   @param {Boolean} shouldShowAllContent
@@ -37,13 +37,13 @@ function verifyItemViews(view, content, shouldShowAllContent, testName) {
       childViews = view.get('childViews');
 
   if (testName === undefined) testName='';
-  
+
   if (shouldShowAllContent) {
     ok(nowShowing.isEqual(SC.IndexSet.create(0, content.get('length'))), '%@ nowShowing (%@) should equal (0..%@)'.fmt(testName, nowShowing, content.get('length')-1));
   }
-  
+
   equals(childViews.get('length'), nowShowing.get('length'), '%@ view.childViews.length should match nowShowing.length'.fmt(testName));
-  
+
   // childViews should be in same order as nowShowing indexes at all times.
   var iter= 0;
   nowShowing.forEach(function(idx) {
@@ -53,27 +53,27 @@ function verifyItemViews(view, content, shouldShowAllContent, testName) {
     if (itemView) {
       equals(itemView.get('content'), item, '%@ childViews[%@].content should equal content[%@]'.fmt(testName, iter,idx));
     }
-    iter++;    
+    iter++;
   });
 }
 
 // ..........................................................
 // BASIC TESTS
-// 
+//
 
 test("should only reload when isVisibleInWindow", function() {
 
   view.set('isVisibleInWindow', NO);
   //view.isVisibleInWindow = NO ;
-  
+
   var len = view.getPath('childViews.length');
-  
+
   SC.run(function() {
     view.reload();
   });
 
   equals(view.getPath('childViews.length'), len, 'view.childViews.length should not change while offscreen');
-  
+
   SC.RunLoop.begin();
   view.set('isVisibleInWindow', YES);
   SC.RunLoop.end();
@@ -102,39 +102,39 @@ test("reload(index set) should update item view for items in index only", functi
 
   // make sure views are loaded first time
   SC.run(function() { view.reload(); });
-  
+
   // now get a couple of child views.
   var cv1 = view.childViews[1], cv2 = view.childViews[3];
-  
+
   // and then reload them
   SC.run(function() { view.reload(SC.IndexSet.create(1).add(3)); });
-  
+
   ok(cv1 !== view.childViews[1], 'view.childViews[1] should be new instance after view.reload(<1,3>) actual: %@ expected: %@'.fmt(view.childViews[1], cv1));
   ok(cv2 !== view.childViews[3], 'view.childViews[3] should be new instance after view.reload(<1,3>) actual: %@ expected: %@'.fmt(view.childViews[3], cv2));
-  
+
   // verify integrity
   verifyItemViews(view, content, YES);
 });
 
 test("adding items to content should reload item views at end", function() {
 
-  SC.run(function() { 
-    content.pushObject(SC.Object.create()); 
+  SC.run(function() {
+    content.pushObject(SC.Object.create());
   });
   verifyItemViews(view, content, YES);
 });
 
 test("removing items from content should remove item views", function() {
 
-  SC.run(function() { 
-    content.popObject(); 
+  SC.run(function() {
+    content.popObject();
   });
   verifyItemViews(view, content, YES);
 });
 
 // ..........................................................
 // SPECIAL CASES
-// 
+//
 
 test("remove and readd item", function() {
   // first remove an item.
@@ -161,17 +161,17 @@ test("reloading should only render nowShowing component", function() {
   var expected = SC.IndexSet.create(0,2).add(6);
 
   view = SC.CollectionView.create({
-    content: content, 
+    content: content,
     computeNowShowing: function() {
       return expected;
     },
     isVisibleInWindow: YES
   });
-  
+
   SC.RunLoop.begin();
   view.reload();
   SC.RunLoop.end();
-  
+
   same(view.get('nowShowing'), expected, 'precond - should have limited now showing');
   equals(view.get('childViews').get('length'), expected.get('length'), 'should only render number of child views in IndexSet');
 });
