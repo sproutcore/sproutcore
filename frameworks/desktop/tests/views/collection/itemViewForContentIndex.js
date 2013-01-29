@@ -9,10 +9,10 @@ var view, del, content ;
 
 module("SC.CollectionView.itemViewForContentIndex", {
   setup: function() {
-    content = "a b c".w().map(function(x) { 
+    content = "a b c".w().map(function(x) {
       return SC.Object.create({ title: x });
     });
-    
+
     del = {
       fixture: {
         isEnabled: YES,
@@ -20,19 +20,19 @@ module("SC.CollectionView.itemViewForContentIndex", {
         outlineLevel: 3,
         disclosureState: SC.LEAF_NODE
       },
-      
-      contentIndexIsEnabled: function() { 
-        return this.fixture.isEnabled; 
-      },
-      
-      contentIndexIsSelected: function() { 
-        return this.fixture.isSelected; 
+
+      contentIndexIsEnabled: function() {
+        return this.fixture.isEnabled;
       },
 
-      contentIndexOutlineLevel: function() { 
-        return this.fixture.outlineLevel; 
+      contentIndexIsSelected: function() {
+        return this.fixture.isSelected;
       },
-      
+
+      contentIndexOutlineLevel: function() {
+        return this.fixture.outlineLevel;
+      },
+
       contentIndexDisclosureState: function() {
         return this.fixture.disclosureState ;
       }
@@ -41,37 +41,37 @@ module("SC.CollectionView.itemViewForContentIndex", {
     // NOTE: delegate methods above are added here.
     view = SC.CollectionView.create(del, {
       content: content,
-      
+
       layoutForContentIndex: function(contentIndex) {
         return this.fixtureLayout ;
       },
-      
+
       fixtureLayout: { left: 0, right: 0, top:0, bottom: 0 },
-      
+
       groupExampleView: SC.View.extend(), // custom for testing
-      
+
       exampleView: SC.View.extend(), // custom for testing
-      
+
       testAsGroup: NO,
-      
+
       contentIndexIsGroup: function() { return this.testAsGroup; },
-      
+
       contentGroupIndexes: function() {
         if (this.testAsGroup) {
           return SC.IndexSet.create(0, this.get('length'));
         } else return null ;
       },
-      
+
       fixtureNowShowing: SC.IndexSet.create(0,3),
       computeNowShowing: function() {
         return this.fixtureNowShowing;
       }
-      
+
     });
-    
+
     // add in delegate mixin
     del = SC.mixin({}, SC.CollectionContent, del);
-    
+
   }
 });
 
@@ -85,27 +85,27 @@ function shouldMatchFixture(itemView, fixture) {
 
 test("creating basic item view", function() {
   var itemView = view.itemViewForContentIndex(1);
-  
+
   // should use exampleView
   ok(itemView, 'should return itemView');
   ok(itemView.kindOf(view.exampleView), 'itemView %@ should be kindOf %@'.fmt(itemView, view.exampleView));
-  
+
   // set added properties
   equals(itemView.get('content'), content.objectAt(1), 'itemView.content should be set to content item');
   equals(itemView.get('contentIndex'), 1, 'itemView.contentIndex should be set');
   equals(itemView.get('owner'), view, 'itemView.owner should be collection view');
   equals(itemView.get('displayDelegate'), view, 'itemView.displayDelegate should be collection view');
   equals(itemView.get('parentView'), view, 'itemView.parentView should be collection view');
-  
+
   // test data from delegate
   shouldMatchFixture(itemView, view.fixture);
 });
 
 test("returning item from cache", function() {
-  
+
   var itemView1 = view.itemViewForContentIndex(1);
   ok(itemView1, 'precond - first call returns an item view');
-  
+
   var itemView2 = view.itemViewForContentIndex(1);
   equals(itemView2, itemView1, 'retrieving multiple times should same instance');
 
@@ -115,12 +115,12 @@ test("returning item from cache", function() {
 
   var itemView4 = view.itemViewForContentIndex(1, NO);
   equals(itemView4, itemView3, 'itemViewForContentIndex(1) [no reload] should return newly cached item after recache');
-  
+
 });
 
 // ..........................................................
 // ALTERNATE WAYS TO GET AN EXAMPLE VIEW
-// 
+//
 
 test("contentExampleViewKey is set and content has property", function() {
   var CustomView = SC.View.extend();
@@ -156,7 +156,7 @@ test("contentExampleViewKey is set and content property is empty", function() {
 
 // ..........................................................
 // GROUP EXAMPLE VIEW
-// 
+//
 
 test("delegate says content is group", function() {
   view.testAsGroup = YES ;
@@ -168,7 +168,7 @@ test("delegate says content is group", function() {
 
 test("contentGroupExampleViewKey is set and content has property", function() {
   view.testAsGroup = YES ;
-  
+
   var CustomView = SC.View.extend();
   var obj = content.objectAt(1);
   obj.set('foo', CustomView);
@@ -209,12 +209,12 @@ test("contentGroupExampleViewKey is set and content property is empty", function
 
 test("_contentGroupIndexes's cache should be properly invalidated", function() {
   view.testAsGroup = YES;
-  
+
   // force setup of range observers
   view.updateContentRangeObserver();
-  
+
   ok(view.get('_contentGroupIndexes').isEqual(SC.IndexSet.create(0, 3)), "contentGroupIndexes should have correct initial value");
-    
+
   view.get('content').removeAt(2, 1);
   ok(view.get('_contentGroupIndexes').isEqual(SC.IndexSet.create(0, 2)), "contentGroupIndexes should have updated value after deletion");
 });
@@ -222,12 +222,12 @@ test("_contentGroupIndexes's cache should be properly invalidated", function() {
 
 // ..........................................................
 // DELEGATE SUPPORT
-// 
+//
 
 test("consults delegate if set", function() {
   view.fixture = null; //break to make sure this is not used
   view.delegate = del;
-  
+
   var itemView = view.itemViewForContentIndex(1);
   ok(itemView, 'returns item view');
   shouldMatchFixture(itemView, del.fixture);
@@ -236,9 +236,9 @@ test("consults delegate if set", function() {
 test("consults content if implements mixin and delegate not set", function() {
   view.fixture = null; //break to make sure this is not used
   view.delegate = null;
-  
+
   SC.mixin(content, del) ; // add delegate methods to content
-  
+
   var itemView = view.itemViewForContentIndex(1);
   ok(itemView, 'returns item view');
   shouldMatchFixture(itemView, content.fixture);
@@ -250,7 +250,7 @@ test("prefers delegate over content if both implement mixin", function() {
   view.delegate = del;
   SC.mixin(content, del) ; // add delegate methods to content
   content.fixture = null ; //break
-  
+
   var itemView = view.itemViewForContentIndex(1);
   ok(itemView, 'returns item view');
   shouldMatchFixture(itemView, del.fixture);
@@ -258,12 +258,12 @@ test("prefers delegate over content if both implement mixin", function() {
 
 // ..........................................................
 // SPECIAL CASES
-// 
+//
 
 test("after making an item visible then invisible again", function() {
 
   view.isVisibleInWindow = YES ;
-  
+
   // STEP 1- setup with some nowShowing
   SC.run(function() {
     view.set('fixtureNowShowing', SC.IndexSet.create(1));
@@ -272,8 +272,8 @@ test("after making an item visible then invisible again", function() {
   equals(view.get('childViews').length, 1, 'precond - should have a child view');
 
   var itemView = view.itemViewForContentIndex(1);
-  equals(itemView.get('parentView'), view, 'itemView has parent view');
-  
+  equals(itemView.get('parentView'), view, 'itemView has parent view after some nowShowing');
+
   // STEP 2- setup with NONE visible
   SC.run(function() {
     view.set('fixtureNowShowing', SC.IndexSet.create());
@@ -282,7 +282,7 @@ test("after making an item visible then invisible again", function() {
   equals(view.get('childViews').length, 0, 'precond - should have no childview');
 
   itemView = view.itemViewForContentIndex(1);
-  equals(itemView.get('parentView'), view, 'itemView has parent view');
+  equals(itemView.get('parentView'), view, 'itemView has parent view after none visible');
 
 
   // STEP 3- go back to nowShowing
@@ -293,8 +293,8 @@ test("after making an item visible then invisible again", function() {
   equals(view.get('childViews').length, 1, 'precond - should have a child view');
 
   itemView = view.itemViewForContentIndex(1);
-  equals(itemView.get('parentView'), view, 'itemView has parent view');
-  
+  equals(itemView.get('parentView'), view, 'itemView has parent view after back to some nowShowing');
+
 });
 
 
