@@ -927,7 +927,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
       // Now that we know what operations we need to perform, let's perform
       // all the removals first…
-      for (i = 0, len = viewsToRemove.length;  i < len;  ++i) {
+      for (i = 0, len = viewsToRemove.length;  i < len; i++) {
         idx = viewsToRemove[i];
         existing = itemViews ? itemViews[idx] : null;
         delete itemViews[idx];
@@ -963,7 +963,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
       }
 
       // …then the redraws…
-      for (i = 0, len = viewsToRedraw.length;  i < len;  ++i) {
+      for (i = 0, len = viewsToRedraw.length;  i < len; i++) {
         idx = viewsToRedraw[i];
         existing = itemViews[idx];
 
@@ -973,14 +973,14 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         existing.destroy();
 
         // Insert the replacement view before the following view.
-        existing = (idx === len - 1) ? null : itemViews[idx + 1];
+        existing = (idx === itemViews.length - 1) ? null : itemViews[idx + 1];
         view = this.itemViewForContentIndex(idx, YES);
 
         containerView.insertBefore(view, existing);
       }
 
       // …and finally the creations.
-      for (i = 0, len = viewsToCreate.length;  i < len;  ++i) {
+      for (i = 0, len = viewsToCreate.length;  i < len; i++) {
         idx = viewsToCreate[i];
         view = this.itemViewForContentIndex(idx, YES);
         containerView.insertBefore(view, null);   // Equivalent to 'append()', but avoids one more function call
