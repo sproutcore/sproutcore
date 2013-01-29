@@ -909,7 +909,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         // get the existing item view, if there is one
         existing = itemViews ? itemViews[idx] : null;
 
-
         // if nowShowing, then reload the item view.
         if (nowShowing.contains(idx)) {
           if (existing && existing.parentView === containerView) {
@@ -995,30 +994,18 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         SC.Benchmark.start(bench = "%@#reloadIfNeeded (Full)".fmt(this), YES);
       }
 
-      // truncate cached item views since they will all be removed from the
-      // container anyway.
-      if (itemViews) itemViews.length = 0;
-
-      views = containerView.get('childViews');
-      if (views) views = views.copy();
-
-      // below is an optimized version of:
-      //this.replaceAllChildren(views);
-      containerView.beginPropertyChanges();
-      // views = containerView.get('views');
-      if (this.willRemoveAllChildren) this.willRemoveAllChildren();
-      containerView.destroyLayer().removeAllChildren();
-
       // For all previous views that can be re-used, return them to the pool.
-      if (views) {
-        for (i = 0, len = views.length;  i < len;  ++i) {
-          view = views[i];
-          isGroupView = view.get('isGroupView');
+      if (itemViews) {
+        for (i = 0, len = itemViews.length;  i < len;  ++i) {
+          existing = itemViews[i];
+
+          if (existing) {
+            isGroupView = existing.get('isGroupView');
           shouldReuse = isGroupView ? shouldReuseGroupViews : shouldReuseViews;
           if (shouldReuse) {
             viewPool = isGroupView ? this._GROUP_VIEW_POOL : this._VIEW_POOL;
 
-            viewPool.push(view);
+              viewPool.push(existing);
 
             // Because it's possible that we'll return this view to the pool
             // and then immediately re-use it, there's the potential that the
@@ -1026,26 +1013,27 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
             // (built into removeChild) is coalesced at the runloop, and we
             // will likely change the layerId when re-using the view.  So
             // we'll destroy the layer now.
-            view.destroyLayer();
+              existing.destroyLayer();
           } else {
-            view.destroy();
+              existing.destroy();
+
+              // Remove the view from the cache
+              delete itemViews[i];
+            }
           }
         }
       }
 
-
       // Only after the children are removed should we create the new views.
-      // We do this in order to maximize the change of re-use should the view
+      // We do this in order to maximize the chance of re-use should the view
       // be marked as such.
       views = [];
       nowShowing.forEach(function (idx) {
         views.push(this.itemViewForContentIndex(idx, YES));
       }, this);
 
+      containerView.replaceAllChildren(views);
 
-      containerView.set('childViews', views); // quick swap
-      containerView.replaceLayer();
-      containerView.endPropertyChanges();
 
       if (bench) SC.Benchmark.end(bench);
 
