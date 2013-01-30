@@ -11,7 +11,7 @@ SC.View.reopen(
   /**
     Handles changes in the layer id.
   */
-  layerIdDidChange: function() {
+  layerIdDidChange: function () {
     var layer  = this.get('layer'),
         lid    = this.get('layerId'),
         lastId = this._lastLayerId;
@@ -44,12 +44,12 @@ SC.View.reopen(
 
     @returns {SC.View} receiver
   */
-  parentViewDidChange: function() {
-    this.recomputeIsVisibleInWindow() ;
+  parentViewDidChange: function () {
+    this.recomputeIsVisibleInWindow();
 
     this.resetBuildState();
-    this.set('layerLocationNeedsUpdate', YES) ;
-    this.invokeOnce(this.updateLayerLocationIfNeeded) ;
+    this.set('layerLocationNeedsUpdate', YES);
+    this.invokeOnce(this.updateLayerLocationIfNeeded);
 
     // We also need to iterate down through the view hierarchy and invalidate
     // all our child view's caches for 'pane', since it could have changed.
@@ -60,7 +60,7 @@ SC.View.reopen(
 
     this._invalidatePaneCacheForSelfAndAllChildViews();
 
-    return this ;
+    return this;
   },
 
   /** @private
@@ -73,11 +73,11 @@ SC.View.reopen(
   */
   _invalidatePaneCacheForSelfAndAllChildViews: function () {
     var childView, childViews = this.get('childViews'),
-        len = childViews.length, idx ;
+        len = childViews.length, idx;
 
     this.notifyPropertyChange('pane');
 
-    for (idx=0; idx<len; ++idx) {
+    for (idx = 0; idx < len; ++idx) {
       childView = childViews[idx];
       if (childView._invalidatePaneCacheForSelfAndAllChildViews) {
         childView._invalidatePaneCacheForSelfAndAllChildViews();
@@ -104,27 +104,27 @@ SC.View.reopen(
     @param {SC.View} beforeView
     @returns {SC.View} the receiver
   */
-  insertBefore: function(view, beforeView) {
+  insertBefore: function (view, beforeView) {
     view.beginPropertyChanges(); // limit notifications
 
     // remove view from old parent if needed.  Also notify views.
-    if (view.get('parentView')) { view.removeFromParent() ; }
-    if (this.willAddChild) { this.willAddChild(view, beforeView) ; }
-    if (view.willAddToParent) { view.willAddToParent(this, beforeView) ; }
+    if (view.get('parentView')) { view.removeFromParent(); }
+    if (this.willAddChild) { this.willAddChild(view, beforeView); }
+    if (view.willAddToParent) { view.willAddToParent(this, beforeView); }
 
     // set parentView of child
     view.set('parentView', this);
 
     // add to childView's array.
-    var idx, childViews = this.get('childViews') ;
+    var idx, childViews = this.get('childViews');
     if (childViews.needsClone) { this.set(childViews = []); }
     idx = (beforeView) ? childViews.indexOf(beforeView) : childViews.length;
-    if (idx<0) { idx = childViews.length ; }
-    childViews.insertAt(idx, view) ;
+    if (idx<0) { idx = childViews.length; }
+    childViews.insertAt(idx, view);
 
     // The DOM will need some fixing up, note this on the view.
-    if(view.parentViewDidChange) view.parentViewDidChange();
-    if(view.layoutDidChange) view.layoutDidChange();
+    if (view.parentViewDidChange) view.parentViewDidChange();
+    if (view.layoutDidChange) view.layoutDidChange();
 
     view.endPropertyChanges();
 
@@ -132,38 +132,38 @@ SC.View.reopen(
     // doesn't complete until the end of the RunLoop
     // There may be better ways to do this than with invokeLast,
     // but it's the best I can do for now - PDW
-    this.invokeLast(function(){
+    this.invokeLast(function () {
       var pane = view.get('pane');
-      if(pane && pane.get('isPaneAttached')) {
+      if (pane && pane.get('isPaneAttached')) {
         view._notifyDidAppendToDocument();
       }
     });
 
     // Even though its layer has not necessarily been created, the child views
     // are added immediately. Hence notify views immediately.
-    if (this.didAddChild) { this.didAddChild(view, beforeView) ; }
-    if (view.didAddToParent) { view.didAddToParent(this, beforeView) ; }
+    if (this.didAddChild) { this.didAddChild(view, beforeView); }
+    if (view.didAddToParent) { view.didAddToParent(this, beforeView); }
 
-    return this ;
+    return this;
   },
 
-  removeChild: function(original, view) {
+  removeChild: function (original, view) {
     if (!view) { return this; } // nothing to do
     if (view.parentView !== this) {
       throw "%@.removeChild(%@) must belong to parent".fmt(this,view);
     }
     // notify views
-    if (view.willRemoveFromParent) { view.willRemoveFromParent() ; }
-    if (this.willRemoveChild) { this.willRemoveChild(view) ; }
+    if (view.willRemoveFromParent) { view.willRemoveFromParent(); }
+    if (this.willRemoveChild) { this.willRemoveChild(view); }
 
     original(view);
 
     // The DOM will need some fixing up, note this on the view.
-    if(view.parentViewDidChange) view.parentViewDidChange() ;
+    if (view.parentViewDidChange) view.parentViewDidChange();
 
     // notify views
     if (this.didRemoveChild) { this.didRemoveChild(view); }
-    if (view.didRemoveFromParent) { view.didRemoveFromParent(this) ; }
+    if (view.didRemoveFromParent) { view.didRemoveFromParent(this); }
 
     return this;
   }.enhance(),
@@ -180,13 +180,13 @@ SC.View.reopen(
     @param view {SC.View} the view to remove from the DOM.
     @returns {SC.View} the receiver
   */
-  replaceChild: function(view, oldView) {
+  replaceChild: function (view, oldView) {
     // suspend notifications
     view.beginPropertyChanges();
     oldView.beginPropertyChanges();
     this.beginPropertyChanges();
 
-    this.insertBefore(view,oldView).removeChild(oldView) ;
+    this.insertBefore(view,oldView).removeChild(oldView);
 
     // resume notifications
     this.endPropertyChanges();
@@ -203,16 +203,16 @@ SC.View.reopen(
     @param {Array} views views you want to add
     @returns {SC.View} receiver
   */
-  replaceAllChildren: function(views) {
+  replaceAllChildren: function (views) {
     var len = views.get('length'), idx;
 
     this.beginPropertyChanges();
     this.destroyLayer().removeAllChildren();
-    for(idx=0;idx<len;idx++) { this.appendChild(views.objectAt(idx)); }
+    for (idx = 0; idx < len; idx++) { this.appendChild(views.objectAt(idx)); }
     this.replaceLayer();
     this.endPropertyChanges();
 
-    return this ;
+    return this;
   },
 
   /**
@@ -222,7 +222,7 @@ SC.View.reopen(
     @param view {SC.View} the view to insert
     @returns {SC.View} the receiver
   */
-  appendChild: function(view) {
+  appendChild: function (view) {
     return this.insertBefore(view, null);
   },
 
@@ -234,7 +234,7 @@ SC.View.reopen(
     Call this to append a child while building it in. If the child is not
     buildable, this is the same as calling appendChild.
   */
-  buildInChild: function(view) {
+  buildInChild: function (view) {
     view.willBuildInToView(this);
     this.appendChild(view);
     view.buildInToView(this);
@@ -244,7 +244,7 @@ SC.View.reopen(
     Call to remove a child after building it out. If the child is not buildable,
     this will simply call removeChild.
   */
-  buildOutChild: function(view) {
+  buildOutChild: function (view) {
     view.buildOutFromView(this);
   },
 
@@ -252,14 +252,14 @@ SC.View.reopen(
     Called by child view when build in finishes. By default, does nothing.
 
   */
-  buildInDidFinishFor: function(child) {
+  buildInDidFinishFor: function (child) {
   },
 
   /**
     @private
     Called by child view when build out finishes. By default removes the child view.
   */
-  buildOutDidFinishFor: function(child) {
+  buildOutDidFinishFor: function (child) {
     this.removeChild(child);
   },
 
@@ -276,14 +276,14 @@ SC.View.reopen(
   /**
     Implement this, and call didFinishBuildIn when you are done.
   */
-  buildIn: function() {
+  buildIn: function () {
     this.buildInDidFinish();
   },
 
   /**
     Implement this, and call didFinishBuildOut when you are done.
   */
-  buildOut: function() {
+  buildOut: function () {
     this.buildOutDidFinish();
   },
 
@@ -292,7 +292,7 @@ SC.View.reopen(
 
     It is usually called before a build in, by the parent view.
   */
-  resetBuild: function() {
+  resetBuild: function () {
 
   },
 
@@ -303,7 +303,7 @@ SC.View.reopen(
 
     This is basically called whenever build in happens.
   */
-  buildOutDidCancel: function() {
+  buildOutDidCancel: function () {
 
   },
 
@@ -315,14 +315,14 @@ SC.View.reopen(
     So, any timers or anything you had going, you can cancel.
     Then buildOut will happen.
   */
-  buildInDidCancel: function() {
+  buildInDidCancel: function () {
 
   },
 
   /**
     Call this when you have built in.
   */
-  buildInDidFinish: function() {
+  buildInDidFinish: function () {
     this.isBuildingIn = NO;
     this._buildingInTo.buildInDidFinishFor(this);
     this._buildingInTo = null;
@@ -331,7 +331,7 @@ SC.View.reopen(
   /**
     Call this when you have finished building out.
   */
-  buildOutDidFinish: function() {
+  buildOutDidFinish: function () {
     this.isBuildingOut = NO;
     this._buildingOutFrom.buildOutDidFinishFor(this);
     this._buildingOutFrom = null;
@@ -340,7 +340,7 @@ SC.View.reopen(
   /**
     Usually called by parentViewDidChange, this resets the build state (calling resetBuild in the process).
   */
-  resetBuildState: function() {
+  resetBuildState: function () {
     if (this.isBuildingIn) {
       this.buildInDidCancel();
       this.isBuildingIn = NO;
@@ -365,7 +365,7 @@ SC.View.reopen(
 
     Mostly, this cancels any build out _before_ the view is removed through parent change.
   */
-  willBuildInToView: function(view) {
+  willBuildInToView: function (view) {
     // stop any current build outs (and if we need to, we also need to build in again)
     if (this.isBuildingOut) {
       this.buildOutDidCancel();
@@ -376,7 +376,7 @@ SC.View.reopen(
     @private (semi)
     Called by building parent view's buildInChild method.
   */
-  buildInToView: function(view) {
+  buildInToView: function (view) {
     // if we are already building in, do nothing.
     if (this.isBuildingIn) { return; }
 
@@ -392,7 +392,7 @@ SC.View.reopen(
 
     The supplied view should always be the parent view.
   */
-  buildOutFromView: function(view) {
+  buildOutFromView: function (view) {
     // if we are already building out, do nothing.
     if (this.isBuildingOut) { return; }
 
