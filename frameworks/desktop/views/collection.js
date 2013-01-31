@@ -71,8 +71,17 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   // PROPERTIES
   //
 
-  /**
+  /** @deprecated
     If `YES`, uses the experimental fast `CollectionView` path.
+
+    *Note* The performance improvements in the experimental code have been
+    integrated directly into SC.CollectionView.  If you have set this property
+    to true, you should set it to false and refer to the class documentation
+    explaining how to modify the performance boost behavior if necessary.
+
+    Generally, no modifications should be necessary and you should see an
+    immediate performance improvement in all collections, especially on
+    mobile devices.
 
     @type Boolean
     @default NO
@@ -2943,7 +2952,13 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   /** @private */
   init: function () {
     sc_super();
-    if (this.useFastPath) this.mixin(SC.CollectionFastPath);
+    if (this.useFastPath) {
+      //@if(debug)
+      // Deprecation warning for those that were using SC.CollectionFastPath.
+      SC.warn("Developer Warning: useFastPath has been deprecated.  The performance improvements have been integrated directly into SC.CollectionView as the default behavior.  Please disable the useFastPath property and refer to the SC.CollectionView documentation for more information.");
+      //@endif
+      this.mixin(SC.CollectionFastPath);
+    }
     if (this.get('canReorderContent')) this._cv_canReorderContentDidChange();
     this._sccv_lastNowShowing = this.get('nowShowing').clone();
     if (this.content) this._cv_contentDidChange();
