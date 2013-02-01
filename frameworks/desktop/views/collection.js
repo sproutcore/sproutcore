@@ -692,16 +692,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   }.property('delegate', 'content').cacheable(),
 
 
-  /** @private
-    A cache of the `contentGroupIndexes` value returned by the delegate.  This
-    is frequently accessed and usually involves creating an `SC.IndexSet`
-    object, so it's worthwhile to cache.
-  */
-  _contentGroupIndexes: function () {
-    return this.get('contentDelegate').contentGroupIndexes(this, this.get('content'));
-  }.property('contentDelegate', 'content').cacheable(),
-
-
   // ..........................................................
   // CONTENT CHANGES
   //
@@ -3082,7 +3072,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     var attrs = this._TMP_ATTRS,
       content = this.get('content'),
       del = this.get('contentDelegate'),
-      isGroupView = del.contentIndexIsGroup(this, content, idx),
+      isGroupView = this._contentIndexIsGroup(idx),
       isEnabled = del.contentIndexIsEnabled(this, content, idx),
       isSelected = del.contentIndexIsSelected(this, content, idx),
       outlineLevel = del.contentIndexOutlineLevel(this, content, idx),
@@ -3098,7 +3088,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     attrs.isVisibleInWindow = isVisibleInWindow;
     attrs.layerId = this.layerIdFor(idx);
     attrs.owner = attrs.displayDelegate = this;
-    // attrs.parentView = parentView;   // Same here; shouldn't be needed
     attrs.page = this.page;
     attrs.outlineLevel = outlineLevel;
 
@@ -3112,14 +3101,39 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   },
 
   /** @private
-    Determines the example view for a content index. There are two optional
-    parameters that will speed things up: `contentObject` and `isGroupView`.
-    If you don't supply them, they must be computed.
+    A cache of the `contentGroupIndexes` value returned by the delegate.  This
+    is frequently accessed and usually involves creating an `SC.IndexSet`
+    object, so it's worthwhile to cache.
+  */
+  _contentGroupIndexes: function () {
+    return this.get('contentDelegate').contentGroupIndexes(this, this.get('content'));
+  }.property('contentDelegate', 'content').cacheable(),
+
+  /** @private
+    Rather than calling contentIndexIsGroup on the delegate each time, first
+    check if there are even any contentGroupIndexes.
+  */
+  _contentIndexIsGroup: function (idx) {
+    var groupIndexes = this.get('_contentGroupIndexes');
+
+    // If there are groupIndexes and the given index is within them, check
+    // with the delegate.
+    if (groupIndexes && groupIndexes.contains(idx)) {
+      var del = this.get('contentDelegate'),
+        items = this.get('content');
+
+      return del.contentIndexIsGroup(this, items, idx);
+    } else {
+      return false;
+    }
+  },
+
+  /** @private
+    Determines the example view for a content index.
   */
   _exampleViewForItem: function (item, idx) {
     var key, ExampleView,
-      del = this.get('contentDelegate'),
-      isGroupView = del.contentIndexIsGroup(this, this.get('content'), idx);
+      isGroupView = this._contentIndexIsGroup(idx);
 
     if (isGroupView) {
       // so, if it is indeed a group view, we go that route to get the example view
@@ -3166,7 +3180,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     itemView.set('layout', attrs.layout);
     itemView.set('disclosureState', attrs.disclosureState);
     itemView.set('isVisibleInWindow', attrs.isVisibleInWindow);
-    // itemView.set('isGroupView', attrs.isGroupView);
+    itemView.set('isGroupView', attrs.isGroupView);
     // itemView.set('page', this.page);
     itemView.set('content', attrs.content);
     itemView.endPropertyChanges();
