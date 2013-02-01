@@ -20,19 +20,37 @@ SC.DRAG_REORDER = 0x0010;
 /**
   @class
 
-  Renders a collection of views from a source array of model objects.
+  This class renders a collection of views based on the items array set
+  as its content.  You will not use this class directly as it does not
+  order the views in any manner.  Instead you will want to subclass
+  SC.CollectionView or use one of its existing subclasses in SproutCore
+  such as SC.ListView, which renders items in a vertical list or SC.GridView,
+  which renders items in a grid.
 
-  The `CollectionView` is the root view class for rendering collections of
-  views based on a source array of objects.  It can automatically create the
-  and layout the views, including displaying them in groups.  It also
-  handles event input for the entire collection.
+  To use a CollectionView subclass, just create the view and set the 'content'
+  property to an array of objects.  The collection view will create instances of
+  the given exampleView class for each item in the array.  You can also bind to
+  the selection property if you want to monitor the current selection.
 
-  To use `CollectionView`, just create the view and set the 'content' property
-  to an array of objects.  (Note that if you setup a binding, it will
-  always transform content to an array.)  The view will create instances of
-  exampleView to render the array.  You can also bind to the selection
-  property if you want to monitor selection. (be sure to set the isEnabled
-  property to allow selection.)
+  # Extreme Performance
+
+  SC.CollectionView does not just naively render one view per item and
+  instead is aggressively optimized to allow for collections of
+  hundreds of thousands of items to perform as fast as only a few items.  In
+  order to achieve this, first it only creates views and elements for the items
+  currently visible.  Therefore, when overriding SC.CollectionView, it is
+  critically important to implement `contentIndexesInRect` which should return
+  only the indexes of those items that should appear within the visible rect.
+  By returning only the indexes that are visible, SC.CollectionView can represent
+  enormous collections with only a few views and elements.
+
+  The second optimization, is that SC.CollectionView will pool and reuse the
+  few views and elements that it does need to create.  Creating and destroying
+  views incrementally hurts performance, so by reusing the same views over and
+  over, the view can much more quickly alter the set of visible views.  As well,
+  inserting and removing elements from the DOM takes more time than simply
+  modifying the contents of the same elements over and over, which allows us to
+  leave the DOM tree untouched.
 
   @extends SC.View
   @extends SC.CollectionViewDelegate
@@ -312,6 +330,35 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
      - `content` -- The content object from the content array your view should display
      - `isEnabled` -- True if the view should appear enabled
      - `isSelected` -- True if the view should appear selected
+
+    # Working with View and Element Pooling
+
+    As noted in the SC.CollectionView description above, by default the few
+    instances that are needed of the exampleView class will be created and then
+    reused.  Reusing an exampleView means that the content, isSelected, isEnabled,
+    contentIndex, isVisibleInWindow, layout and layerId properties
+    will be updated as an existing view is pulled from the pool to be displayed.
+
+    If your custom exampleView class has trouble being reused, you may want to
+    implement the `sleepInPool` and `awakeFromPool` methods in your exampleView.
+    These two methods will be called on the view, one before it is pooled,
+    sleepInPool, and the other before it is unpooled, awakeFromPool.  For
+    example, if your item views have images and there is a delay for new
+    images to appear, you may want to use sleepInPool to ensure the previous
+    image is unloaded so it doesn't appear momentarily while the new image loads.
+
+    Also, if the rendered output of your exampleView does not update properly you
+    can disable reuse of the layer by setting `isLayerReusable` to false.  This
+    will reduce the performance of your collection though and it is recommended
+    that you instead look at ways to properly update the existing layer as the
+    content changes.
+
+    Finally, if you really don't want view or element reuse at all, you may
+    disable them both by setting `isReusable` to false in your exampleView class.
+    Your collection will still benefit greatly from incremental rendering, but
+    it will perform slightly less well than with optimal re-use.
+
+    # Event handling
 
     In general you do not want your child views to actually respond to mouse
     and keyboard events themselves.  It is better to let the collection view
