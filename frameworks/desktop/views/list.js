@@ -76,6 +76,9 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
   */
   acceptsFirstResponder: YES,
 
+  /** @private SC.CollectionView.prototype */
+  exampleView: SC.ListItemView,
+
   /**
     If set to YES, the default theme will show alternating rows
     for the views this ListView created through exampleView property.
