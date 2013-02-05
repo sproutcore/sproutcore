@@ -287,3 +287,17 @@ test("from state g, go to state h using 'parentState' syntax", function() {
   equals(monitor.matchSequence().begin().exited('g').entered('h').end(), 
     true, 'sequence should be exited[g], entered[h]');
 });
+
+test("cancel state transition", function() {
+  stateG.stateCanBecomeExited = function() { return NO; };
+  equals(statechart.gotoState('h'), SC.GOTOSTATE_CANCELED, 'state g should cancel state transition');
+  equals(statechart.stateIsCurrentState('g'), true, 'state g should be current state');
+
+  stateG.stateCanBecomeExited = function() { return YES; };
+  stateC.stateCanBecomeExited = function() { return NO; };
+  equals(statechart.gotoState('h'), SC.GOTOSTATE_COMPLETE, 'state c should not cancel state transition');
+  equals(statechart.stateIsCurrentState('h'), true, 'state h should be current state');
+
+  equals(statechart.gotoState('i'), SC.GOTOSTATE_CANCELED, 'state c should cancel state transition');
+  equals(statechart.stateIsCurrentState('h'), true, 'state h should be current state');
+});

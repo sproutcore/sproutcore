@@ -558,12 +558,12 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   gotoState: function(state, fromCurrentState, useHistory, context) {
     if (!this.get('statechartIsInitialized')) {
       this.statechartLogError("can not go to state %@. statechart has not yet been initialized".fmt(state));
-      return;
+      return SC.GOTOSTATE_ERROR;
     }
     
     if (this.get('isDestroyed')) {
       this.statechartLogError("can not go to state %@. statechart is destroyed".fmt(this));
-      return;
+      return SC.GOTOSTATE_ERROR;
     }
     
     var args = this._processGotoStateArgs(arguments);
@@ -580,13 +580,15 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
         rootState = this.get('rootState'),
         paramState = state,
         paramFromCurrentState = fromCurrentState,
-        msg;
+        msg,
+        statesCanBeExited,
+        stateTransitionSuspended = NO;
     
     state = this.getState(state);
     
     if (SC.none(state)) {
       this.statechartLogError("Can not to goto state %@. Not a recognized state in statechart".fmt(paramState));
-      return;
+      return SC.GOTOSTATE_ERROR;
     }
     
     if (this._gotoStateLocked) {
@@ -600,7 +602,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
         context: context
       });
       
-      return;
+      return SC.GOTOSTATE_PENDING;
     }
     
     // Lock the current state transition so that no other requested state transition 
@@ -614,7 +616,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
         msg = "Can not to goto state %@. %@ is not a recognized current state in statechart";
         this.statechartLogError(msg.fmt(paramState, paramFromCurrentState));
         this._gotoStateLocked = NO;
-        return;
+        return SC.GOTOSTATE_ERROR;
       }
     } 
     else {
@@ -651,14 +653,13 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
       if (pivotState.get('substatesAreConcurrent') && pivotState !== state) {
         this.statechartLogError("Can not go to state %@ from %@. Pivot state %@ has concurrent substates.".fmt(state, fromCurrentState, pivotState));
         this._gotoStateLocked = NO;
-        return;
+        return SC.GOTOSTATE_ERROR;
       }
     }
     
     // Collect what actions to perform for the state transition process
     var gotoStateActions = [];
-    
-    
+
     // Go ahead and find states that are to be exited
     this._traverseStatesToExit(exitStates.shift(), exitStates, pivotState, gotoStateActions);
     
@@ -669,10 +670,19 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
       this._traverseStatesToExit(pivotState, [], null, gotoStateActions);
       this._traverseStatesToEnter(pivotState, null, null, useHistory, gotoStateActions);
     }
-    
-    // Collected all the state transition actions to be performed. Now execute them.
-    this._gotoStateActions = gotoStateActions;
-    this._executeGotoStateActions(state, gotoStateActions, null, context);
+
+    // Check with the states that will be exited to see if any disallow the transition.
+    statesCanBeExited = this._canStatesBeExited(gotoStateActions, state, fromCurrentState, useHistory, context);
+
+    if (statesCanBeExited) {
+      // Collected all the state transition actions to be performed. Now execute them.
+      this._gotoStateActions = gotoStateActions;
+      stateTransitionSuspended = this._executeGotoStateActions(state, gotoStateActions, null, context);
+    } else {
+      this._cleanupStateTransition();
+    }
+
+    return (statesCanBeExited ? (stateTransitionSuspended ? SC.GOTOSTATE_SUSPENDED : SC.GOTOSTATE_COMPLETE) : SC.GOTOSTATE_CANCELED);
   },
   
   /**
@@ -740,7 +750,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
         }; 
         
         actionResult.tryToPerform(action.state);
-        return;
+        return YES;
       }
     }
     
@@ -755,6 +765,8 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     }
     
     this._cleanupStateTransition();
+
+    return NO;
   },
   
   /** @private */
@@ -1192,6 +1204,37 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
         this._traverseConcurrentStatesToEnter(state.get('substates'), nextState, useHistory, gotoStateActions);
       }
     }
+  },
+
+  /** @private
+    Invokes `stateCanBecomeExited` on each state that is about to be traversed for `gotoState`.
+    If any of these return NO, the `gotoState` will be canceled. The parameters that were passed
+    to `gotoState` will be passed to `stateCanBecomeExited`. This allows the method to retry the
+    state transition later.
+
+    @param {Object[]} gotoStateActions current gotoStateActions to check
+    @param {SC.State} toState gotoState parameter
+    @param {SC.State} fromCurrentState gotoState parameter
+    @param {Boolean} useHistory gotoState parameter
+    @param {Object} context gotoState parameter
+    @return {Boolean} YES if all states can be exited; otherwise NO
+  */
+  _canStatesBeExited: function(gotoStateActions, toState, fromCurrentState, useHistory, context) {
+    var ret = YES,
+        i = 0,
+        len = gotoStateActions.length,
+        action,
+        state;
+
+    for (; i < len && ret; ++i) {
+      action = gotoStateActions[i].action;
+      state = gotoStateActions[i].state;
+      if (action === SC.EXIT_STATE) {
+        ret = state.stateCanBecomeExited(toState, fromCurrentState, useHistory, context);
+      }
+    }
+
+    return ret;
   },
   
   /** @override
@@ -1682,7 +1725,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   
 };
 
-SC.mixin(SC.StatechartManager, SC.StatechartDelegate, SC.DelegateSupport); 
+SC.mixin(SC.StatechartManager, SC.StatechartDelegate, SC.DelegateSupport);
 
 /** 
   The default name given to a statechart's root state
@@ -1694,6 +1737,11 @@ SC.ROOT_STATE_NAME = "__ROOT_STATE__";
 */
 SC.EXIT_STATE = 0;
 SC.ENTER_STATE = 1;
+SC.GOTOSTATE_ERROR = 0;
+SC.GOTOSTATE_CANCELED = 1;
+SC.GOTOSTATE_PENDING = 2;
+SC.GOTOSTATE_SUSPENDED = 3;
+SC.GOTOSTATE_COMPLETE = 4;
 
 /**
   A Startchart class. 

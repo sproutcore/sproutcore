@@ -1239,6 +1239,20 @@ SC.State = SC.Object.extend(
     this._isExitingState = NO;
   },
 
+  /**
+    Allows the state to indicate to the statechart that it cannot currently be exited.
+
+    @see SC.StatechartManager#gotoState
+    @param {SC.State} state gotoState parameter
+    @param {SC.State} fromCurrentState gotoState parameter
+    @param {SC.State} useHistory gotoState parameter
+    @param {SC.State} context gotoState parameter
+    @return {Boolean} YES if state can be exited; otherwise NO
+  */
+  stateCanBecomeExited: function(state, fromCurrentState, useHistory, context) {
+    return YES;
+  },
+
   /** @private
 
     Used to setup all the state observer handlers. Should be done when
