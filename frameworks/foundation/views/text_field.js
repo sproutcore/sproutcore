@@ -860,6 +860,10 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     }
   },
 
+  didAppendToDocument: function() {
+    this._fixupTextLayout();
+  },
+
   /** @private
     Apply proper text layout to sc-hints and inputs.
    */
@@ -1027,6 +1031,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     }
     else {
       this.$('.hint').removeClass('sc-hidden');
+      this._fixupTextLayout();
     }
   }.observes('value'),
 
