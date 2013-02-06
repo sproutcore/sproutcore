@@ -447,7 +447,7 @@ SC.SplitView = SC.View.extend(
 
   /** @private */
   renderLayout: function(context, firstTime) {
-    if (firstTime || this._recalculateDivider) {
+    if (firstTime) {
 
       var layoutDirection = this.get('layoutDirection'),
           frame = this.get('frame'),
@@ -462,14 +462,6 @@ SC.SplitView = SC.View.extend(
       }
 
       dividerThickness = !SC.none(dividerThickness) ? dividerThickness : 7;
-
-      // Turn a flag on to recalculate the splitting if the desired thickness
-      // is a percentage
-      if (this._recalculateDivider === undefined && desiredThickness < 1) {
-        this._recalculateDivider = YES;
-      } else if (this._recalculateDivider) {
-        this._recalculateDivider = NO;
-      }
 
       if (elem[0]) {
         splitViewThickness = (layoutDirection === SC.LAYOUT_HORIZONTAL) ? elem[0].offsetWidth : elem[0].offsetHeight;
