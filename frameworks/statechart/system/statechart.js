@@ -361,12 +361,12 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   */
   initStatechart: function() {
     if (this.get('statechartIsInitialized')) return;
-    
+
     this._gotoStateLocked = NO;
     this._sendEventLocked = NO;
     this._pendingStateTransitions = [];
     this._pendingSentEvents = [];
-    
+
     this.sendAction = this.sendEvent;
     
     if (this.get('monitorIsActive')) {
@@ -689,7 +689,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   gotoStateSuspended: function() {
     return this._gotoStateLocked && !!this._gotoStateSuspendedPoint;
   }.property(),
-  
+
   /**
     Resumes an active goto state transition process that has been suspended.
   */
@@ -702,7 +702,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     var point = this._gotoStateSuspendedPoint;
     this._executeGotoStateActions(point.gotoState, point.actions, point.marker, point.context);
   },
-  
+
   /** @private */
   _executeGotoStateActions: function(gotoState, actions, marker, context) {
     var action = null,
@@ -764,13 +764,15 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     this._gotoStateActions = null;
     this._gotoStateLocked = NO;
     this._flushPendingStateTransition();
+    // Check the flags so we only flush if the events will actually get sent.
+    if (!this._sendEventLocked && !this._gotoStateLocked) { this._flushPendingSentEvents(); }
   },
   
   /** @private */
   _exitState: function(state, context) {
     var parentState;
     
-    if (state.get('currentSubstates').indexOf(state) >= 0) {  
+    if (state.get('currentSubstates').indexOf(state) >= 0) {
       parentState = state.get('parentState');
       while (parentState) {
         parentState.get('currentSubstates').removeObject(state);
@@ -963,6 +965,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     }
     
     var statechartHandledEvent = NO,
+        result = this,
         eventHandled = NO,
         currentStates = this.get('currentStates').slice(),
         checkedStates = {},
@@ -970,8 +973,8 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
         i = 0,
         state = null,
         trace = this.get('allowStatechartTracing');
-    
-    if (this._sendEventLocked || this._goStateLocked) {
+
+    if (this._sendEventLocked || this._gotoStateLocked) {
       // Want to prevent any actions from being processed by the states until 
       // they have had a chance to handle the most immediate action or completed 
       // a state transition
@@ -983,7 +986,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
       return;
     }
-    
+
     this._sendEventLocked = YES;
     
     if (trace) {
@@ -1008,14 +1011,20 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     // Now that all the states have had a chance to process the 
     // first event, we can go ahead and flush any pending sent events.
     this._sendEventLocked = NO;
-    
+
     if (trace) {
       if (!statechartHandledEvent) this.statechartLogTrace("No state was able handle event %@".fmt(event));
       this.statechartLogTrace("END sendEvent: '%@'".fmt(event));
     }
-    
-    var result = this._flushPendingSentEvents();
-    
+
+    // Check if the flags are unlocked. These means any pending events
+    // will successfully send, so go ahead and flush. Otherwise, events
+    // would become out of order since the first event would get shifted,
+    // then pushed.
+    if (!this._sendEventLocked && !this._gotoStateLocked) {
+      result = this._flushPendingSentEvents();
+    }
+
     return statechartHandledEvent ? this : (result ? this : null);
   },
   
