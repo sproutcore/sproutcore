@@ -288,11 +288,11 @@ SC.detectBrowser = function (userAgent, language) {
   // only maintain the 7 identifiable properties listed above:  device, name,
   // version, os, osVersion, engine and engineVersion.
 
-  /** @deprecated Since version 1.7. Use browser.os === SC.OS.windows.
+  /** @deprecated Since version 1.7. Use browser.os === SC.OS.win.
     @name SC.browser.isWindows
     @type Boolean
   */
-  browser.windows = browser.isWindows = browser.os === SC.OS.windows;
+  browser.windows = browser.isWindows = browser.os === SC.OS.win;
 
   /** @deprecated Since version 1.7. Use browser.os === SC.OS.mac.
     @name SC.browser.isMac
