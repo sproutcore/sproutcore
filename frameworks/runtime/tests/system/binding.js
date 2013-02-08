@@ -539,4 +539,10 @@ test("The binding transforms in both directions", function() {
   toObject.set('numberValue', 3);
   SC.Binding.flushPendingChanges();
   equals(fromObject.get('stringValue'), '3A');
+
+  stop(100);
+  setTimeout(function() {
+    equals(toObject.get('numberValue'), 3);
+    start();
+  }, 10);
 });
