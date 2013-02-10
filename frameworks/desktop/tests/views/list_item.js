@@ -158,6 +158,18 @@ var pane = SC.ControlTestPane.design({ height: 32 })
     contentValueKey: "title",
     contentUnreadCountKey:  "count",
     outlineLevel: 2
+  })) 
+
+  .add("right icon", SC.ListItemView.design(SC.ActionSupport,{
+    content: SC.Object.create({
+      title: "List Item",
+      icon: "sc-icon-folder-16"
+    }),
+    contentValueKey: "title",
+    hasContentRightIcon: YES,
+    contentRightIconKey: "icon",
+    rightIconAction: "doOnRightIconAction",
+    rightIconTarget: "onRightIconTarget"
   })) ;
 
 // ..........................................................
@@ -247,6 +259,18 @@ function branch(view, visible) {
     equals(branchCQ.hasClass('branch-visible'), visible, 'is visible');
   }
 }
+
+function rightIcon(view, hasIt) {
+  var cq = view.$(), rightIconCQ = cq.find('.right-icon');
+  if (hasIt) {
+    ok(cq.hasClass('has-right-icon'), "should have has-right-icon class");
+    equals(rightIconCQ.size(), 1, 'should have right icon');
+  } else {
+    ok(!cq.hasClass('has-right-icon'), "should not have has-right-icon class");
+    equals(rightIconCQ.size(), 0, 'should not have branch') ;
+  }
+}
+
 
 // ..........................................................
 // Test Basic Setup
@@ -402,5 +426,38 @@ test("changing count value should update display", function() {
 
   adjustContent(view, 'count', 0);
   count(view, null); // verify change
+});
+
+test("right icon action dom", function() {
+  // basic does not have right icon and action
+  var view = pane.view('basic');
+  rightIcon(view, false);
+  
+  // has right icon and action
+  view = pane.view('right icon');
+  rightIcon(view, true);
+});
+
+test("right icon action event", function() {
+  var spiedRootResponder = { sendAction: function(){} };
+  var sendActionSpy = CoreTest.spyOn(spiedRootResponder, 'sendAction');
+
+  var view = pane.view('right icon'),
+      spyPane = SC.Object.create({
+        rootResponder: spiedRootResponder
+      });
+
+  view.pane=spyPane;
+
+  var expectedAction = view.get("rightIconAction");
+  var expectedTarget = view.get("rightIconTarget");
+  var target = view.$('.right-icon').get(0);
+  var evt = { target: target };
+  view.mouseDown(evt);
+  view.mouseUp(evt);
+
+  ok(expectedAction === "doOnRightIconAction", 'expectedAction should have been doOnRightIconAction');
+  ok(sendActionSpy.wasCalled, 'action should have been called');
+  ok(sendActionSpy.wasCalledWith(expectedAction,expectedTarget,view,spyPane), 'should have triggered the action with these arguments');
 });
 

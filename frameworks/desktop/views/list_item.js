@@ -565,6 +565,16 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
   /** @private */
   _removeRightIconActiveState: function () {
     this.$('img.right-icon').removeClass('active');
+
+    var pane = this.get('pane'),
+        del = this.displayDelegate,
+        target = this.getDelegateProperty('rightIconTarget', del),
+        action = this.getDelegateProperty('rightIconAction', del);
+
+    if (action && pane) {
+       pane.rootResponder.sendAction(action, target, this, pane);
+    }
+
   },
 
   /** @private
