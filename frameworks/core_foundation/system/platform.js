@@ -466,6 +466,8 @@ SC.platform = SC.Object.create({
     var transitionEl = document.createElement('div');
 
     transitionEl.style[SC.browser.experimentalStyleNameFor('transition')] = 'all 1ms linear';
+
+    // Test transition events.
     executeTest(transitionEl, 'transitionend', 'TransitionEnd', function (success) {
       // If an end event never fired, we can't really support CSS transitions in SproutCore.
       if (!success) {
@@ -488,12 +490,19 @@ SC.platform = SC.Object.create({
   // Set up and execute the animation event test.
   if (SC.platform.supportsCSSAnimations) {
     var animationEl = document.createElement('div'),
+      cssRules,
       keyframeprefix = SC.browser.experimentalStyleNameFor('animation') === 'animation' ? '' : SC.browser.cssPrefix,
-      keyframes = '@' + keyframeprefix + 'keyframes _sc_animation_test { from { opacity: 1; } to { opacity: 0; }}';
+      keyframes = '@' + keyframeprefix + 'keyframes _sc_animation_test { from { opacity: 1; } to { opacity: 0; }}',
+      styleSheets = document.stylesheets;
 
     // Add a test animation rule to the first stylesheet (or create a stylesheet).
-    if (document.styleSheets && document.styleSheets.length) {
-      document.styleSheets[0].insertRule(keyframes, 0);
+    if (styleSheets && styleSheets.length) {
+      var idx = 0;
+
+      cssRules = styleSheets[0].cssRules;
+      if (cssRules) { idx = cssRules.length; }
+
+      styleSheets[0].insertRule(keyframes, idx);
     } else {
       var style = document.createElement('style');
       style.innerHTML = keyframes;
@@ -525,6 +534,7 @@ SC.platform = SC.Object.create({
     //   }
     // });
 
+    // Test animation events.
     executeTest(animationEl, 'animationend', 'AnimationEnd', function (success) {
       // If an end event never fired, we can't really support CSS animations in SproutCore.
       if (success) {
@@ -556,14 +566,14 @@ SC.platform = SC.Object.create({
       }
 
       // Clean up.  Don't blindly remove the same index, instead find the test
-      // rule's index for sure. (optimized for the index to still be where it was inserted)
+      // rule's index for sure. (optimized for the rule to still be where it was inserted)
       outer:
       for (var i = 0, iLength = document.styleSheets.length; i < iLength; i++) {
         var styleSheet = document.styleSheets[i],
           cssRules = styleSheet.cssRules;
 
         if (cssRules) {
-          for (var j = 0, jLength = cssRules.length, rule; j < jLength; j++) {
+          for (var j = cssRules.length - 1; j >= 0; j--) {
             rule = styleSheet.cssRules[j];
             if (rule.name === '_sc_animation_test') {
               styleSheet.deleteRule(j);
