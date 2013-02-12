@@ -259,6 +259,16 @@ SC.PopupButtonView = SC.ButtonView.extend({
     }
 
     return sc_super();
+  },
+
+  /** @private */
+  touchStart: function(evt) {
+    return this.mouseDown(evt);
+  },
+
+  /** @private */
+  touchEnd: function(evt) {
+    return this.mouseUp(evt);
   }
 });
 
