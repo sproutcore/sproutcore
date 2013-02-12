@@ -1255,7 +1255,7 @@ SC.DateTime.mixin(SC.Comparable,
   @returns {SC.Binding} this
 */
 SC.Binding.dateTime = function(format) {
-  return this.transform(function(value, binding) {
+  return this.oneWay().transform(function(value, binding) {
     return value ? value.toFormattedString(format) : null;
   });
 };

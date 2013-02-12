@@ -1031,7 +1031,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
       var t = SC.typeOf(v) ;
       if (t === SC.T_ERROR) return v ;
       return !((t == SC.T_ARRAY) ? (v.length > 0) : (v === '') ? NO : !!v) ;
-    }) ;
+    }, NO) ;
   },
 
   /**
@@ -1041,7 +1041,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @returns {SC.Binding} this
   */
   isNull: function(fromPath) {
-    return this.from(fromPath).transform(function(v) {
+    return this.from(fromPath).oneWay().transform(function(v) {
       var t = SC.typeOf(v) ;
       return (t === SC.T_ERROR) ? v : SC.none(v) ;
     });
