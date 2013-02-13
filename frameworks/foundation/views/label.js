@@ -208,9 +208,17 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditable,
     If isEditable is set to true, opens the inline text editor view.
 
     @param {DOMMouseEvent} evt DOM event
-
   */
-  doubleClick: function( evt ) { return this.beginEditing(); },
+  mouseDown: function(evt) {
+    return evt.clickCount === 2;
+  },
+
+  mouseUp: function(evt) {
+    if (evt.clickCount === 2) {
+      return this.beginEditing();
+    }
+    return false;
+  },
 
   /*
   * @method
