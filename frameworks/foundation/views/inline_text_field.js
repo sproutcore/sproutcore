@@ -234,50 +234,35 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
   * @param {Hash} optional custom frame
   * @param {Boolean} if the view is a member of a collection
   */
-	positionOverTargetView: function(target, isCollection, pane, frame, elem) {
-    var isIE7;
-
+	positionOverTargetView: function(target, isCollection, pane, exampleFrame, elem) {
     if(!pane) pane = target.get('pane');
 
     if(!elem) elem = target.$()[0];
 
+    var layout = {},
+        paneElem = pane.$()[0],
+        targetLayout = target.get('layout'),
+        frame = SC.offset(elem, 'parent');
+
     // if we weren't given a frame, build one from the target
-    if(!frame) {
-      var tempFrame = target.get('frame');
+    if(!exampleFrame) exampleFrame = targetLayout;
 
-      frame = SC.offset(elem);
+    layout.height = exampleFrame.height;
+    layout.width = exampleFrame.width;
 
-      frame.height = tempFrame.height;
-      frame.width = tempFrame.width;
+    layout.top = frame.y - paneElem.offsetTop;
+    layout.left = frame.x - paneElem.offsetLeft - 1;
+
+    if (isCollection) {
+      layout.top += targetLayout.top-exampleFrame.height/2;
+      layout.left += targetLayout.left;
     }
 
-    var layout={},
-		paneElem = pane.$()[0],
-		tarLayout = target.get('layout');
-
-    layout.height = frame.height;
-    layout.width = frame.width;
-
-    isIE7 = SC.browser.isIE &&
-        SC.browser.compare(SC.browser.engineVersion, '7') === 0;
-    if (isCollection && tarLayout.left) {
-      layout.left=frame.x-tarLayout.left-paneElem.offsetLeft-1;
-      if(isIE7) layout.left--;
-    } else {
-      layout.left=frame.x-paneElem.offsetLeft-1;
-      if(isIE7) layout.left--;
-    }
-
-    if (isCollection && tarLayout.top) {
-      layout.top=frame.y-tarLayout.top-paneElem.offsetTop;
-      if(isIE7) layout.top=layout.top-2;
-    } else {
-      layout.top=frame.y-paneElem.offsetTop;
-      if(isIE7) layout.top=layout.top-2;
-    }
+    if (!SC.none(targetLayout.centerX)) layout.left -= targetLayout.width/2;
+    if (!SC.none(targetLayout.centerY)) layout.top -= targetLayout.height/2;
 
     this.set('layout', layout);
-	},
+  },
 
   /*
   * Flag indicating whether the editor is allowed to use multiple lines.
