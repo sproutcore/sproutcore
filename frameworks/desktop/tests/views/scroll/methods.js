@@ -133,6 +133,17 @@ test("Scrolling relative to the current possition of the container view", functi
   });
 });
 
+test("Scrolling to a rectangle", function () {
+  equals(view.get('horizontalScrollOffset'), 0, "Initial horizontal offset must be zero");
+  equals(view.get('verticalScrollOffset'), 0, "Initial vertical offset must be zero");
+
+  SC.run(function () {
+    view.scrollToRect({ x: 100, y: 100, width: 2000, height: 2000 });
+    equals(view.get('horizontalScrollOffset'), 100, "After scrolling to rect, horizontal offset must be 100");
+    equals(view.get('verticalScrollOffset'), 100, "After scrolling to rect, vertical offset must be 100");
+  });
+});
+
 test("Scrolling through line by line", function () {
   var line = 3;
   equals(view.get('horizontalScrollOffset'), 0, "Initial horizontal offset must be zero");
