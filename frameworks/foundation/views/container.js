@@ -222,8 +222,10 @@ SC.ContainerView = SC.View.extend(
     var contentStatecharts = this._contentStatecharts;
 
     // Exit all the statecharts immediately. This mutates the array!
-    for (var i = contentStatecharts.length - 1; i >= 0; i--) {
-      contentStatecharts[i].doExit(true);
+    if (contentStatecharts) {
+      for (var i = contentStatecharts.length - 1; i >= 0; i--) {
+        contentStatecharts[i].doExit(true);
+      }
     }
 
     // Remove our internal reference to the statecharts.
