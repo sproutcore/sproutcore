@@ -1778,12 +1778,6 @@ SC.RootResponder = SC.Object.extend(
 
     if (view) fr = view.getPath('pane.firstResponder');
 
-    // some fields like SC.InlineTextFieldView need to blur on any click, even
-    // if it's not on a control that can be focused
-    // TODO: remove this when focus behavior is improved
-    if (fr && fr.get('blurOnMouseDown') && fr !== view) {
-      fr.resignFirstResponder(evt);
-    }
     view = this._mouseDownView = this.sendEvent('mouseDown', evt, view);
     if (view && view.respondsTo('mouseDragged')) this._mouseCanDrag = YES;
 
