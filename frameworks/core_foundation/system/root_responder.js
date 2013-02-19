@@ -1744,8 +1744,6 @@ SC.RootResponder = SC.Object.extend(
   //
 
   mousedown: function (evt) {
-    var fr;
-
     if (SC.platform.touch) {
       evt.allowDefault();
       this._lastMouseDownCustomHandling = YES;
@@ -1770,13 +1768,6 @@ SC.RootResponder = SC.Object.extend(
     this._lastMouseDownY = evt.clientY;
 
     var view = this.targetViewForEvent(evt);
-
-    // InlineTextField needs to loose firstResponder whenever you click outside
-    // the view. This is a special case as textfields are not supposed to loose
-    // focus unless you click on a list, another textfield or an special
-    // view/control.
-
-    if (view) fr = view.getPath('pane.firstResponder');
 
     view = this._mouseDownView = this.sendEvent('mouseDown', evt, view);
     if (view && view.respondsTo('mouseDragged')) this._mouseCanDrag = YES;
