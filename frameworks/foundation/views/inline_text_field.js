@@ -95,15 +95,6 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
   */
   _topOffsetForFirefoxCursorFix: 0,
 
-  /**
-    Tells RootResponder to blur us when there is a mousedown anywhere else.
-
-    @type Boolean
-    @default YES
-  */
-  // TODO: remove this when focus behavior is improved
-  blurOnMouseDown: YES,
-
   /*
   * @private
   * @method
@@ -235,32 +226,22 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
   * @param {Boolean} if the view is a member of a collection
   */
 	positionOverTargetView: function(target, isCollection, pane, exampleFrame, elem) {
-    if(!pane) pane = target.get('pane');
+    var targetLayout = target.get('layout'),
+        layout = {};
+    
+    // In case where the label is part of an SC.ListItemView
+    if (exampleFrame && elem) {
+      var frame = SC.offset(elem, 'parent');
 
-    if(!elem) elem = target.$()[0];
-
-    var layout = {},
-        paneElem = pane.$()[0],
-        targetLayout = target.get('layout'),
-        frame = SC.offset(elem, 'parent');
-
-    // if we weren't given a frame, build one from the target
-    if(!exampleFrame) exampleFrame = targetLayout;
-
-    layout.height = exampleFrame.height;
-    layout.width = exampleFrame.width;
-
-    layout.top = frame.y - paneElem.offsetTop;
-    layout.left = frame.x - paneElem.offsetLeft - 1;
-
-    if (isCollection) {
-      layout.top += targetLayout.top-exampleFrame.height/2;
-      layout.left += targetLayout.left;
+      layout.top = targetLayout.top + frame.y - exampleFrame.height/2;
+      layout.left = targetLayout.left + frame.x;
+      layout.height = exampleFrame.height;
+      layout.width = exampleFrame.width;
     }
-
-    if (!SC.none(targetLayout.centerX)) layout.left -= targetLayout.width/2;
-    if (!SC.none(targetLayout.centerY)) layout.top -= targetLayout.height/2;
-
+    else {
+      layout = SC.copy(targetLayout);
+    }
+    
     this.set('layout', layout);
   },
 
@@ -295,6 +276,8 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
     var pane = label.get('pane'), elem = this.get('exampleElement');
 
     this.beginPropertyChanges();
+
+    if (label.multiline) this.set('multiline', label.multiline);
 
     // if we have an exampleElement we need to make sure it's an actual
     // DOM element not a jquery object
