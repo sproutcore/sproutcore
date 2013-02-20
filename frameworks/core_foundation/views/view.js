@@ -603,7 +603,7 @@ SC.CoreView.reopen(
       }
     }
 
-    parentNode = parentView = node = nextNode = null ; // avoid memory leaks
+    parentNode = parentView = node = nextNode = null; // avoid memory leaks
 
     this.set('layerLocationNeedsUpdate', NO) ;
 
@@ -1393,7 +1393,10 @@ SC.CoreView.reopen(
         }
 
         if (!view) {
-          SC.Logger.error ("No view with name "+key+" has been found in "+this.toString());
+          //@if(debug)
+          SC.warn("Developer Warning: The child view named '@%' was not found in the view, %@.  This child view will be ignored.".fmt(key, this));
+          //@endif
+
           // skip this one.
           continue;
         }
