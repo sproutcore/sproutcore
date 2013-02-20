@@ -137,6 +137,16 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   length: 0,
 
   /**
+    The maximum number of item views to pool at a time.
+
+    This value is generally the optimalPoolSize, unless the collection view
+    indicates that it needs a larger
+  */
+  maxPoolSize: function () {
+
+  }.property('optimalPoolSize', 'tempPoolSize').cacheable(),
+
+  /**
     The set of indexes that are currently tracked by the collection view.
     This property is used to determine the range of items the collection view
     should monitor for changes.
@@ -157,6 +167,20 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   nowShowing: function () {
     return this.computeNowShowing();
   }.property('length', 'clippingFrame').cacheable(),
+
+  /**
+    The optimum number of item views to pool at a time.  If only one item
+    goes out of view as one item comes into view, the pool only needs to
+    be one item big.  However, collection views that show a block of items at
+    a time will want to use a larger optimum pool size.
+
+    Note that each different type of exampleView or groupExampleView has its
+    own pool, but this number is shared amongst them all.
+
+    @type Number
+    @default 1
+  */
+  optimalPoolSize: 1,
 
   /**
     Indexes of selected content objects.  This `SC.SelectionSet` is modified
@@ -923,6 +947,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     // replace
     if (invalid.isIndexSet && invalid.contains(nowShowing)) invalid = YES;
     if (this.willReload) this.willReload(invalid === YES ? null : invalid);
+    console.log('%@ reloadIfNeeded(): %@'.fmt(this, invalid));
 
     // if an index set, just update indexes
     if (invalid.isIndexSet) {
@@ -1083,6 +1108,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
     // If we weren't able to re-use a view, then create a new one.
     if (!ret) {
+      // console.log('creating item %@'.fmt(idx));
       ret = this.createItemView(exampleView, idx, attrs);
       containerView.insertBefore(ret, null);   // Equivalent to 'append()', but avoids one more function call
     }
@@ -3192,15 +3218,19 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
       exampleView,
       items = this.get('content'),
       item = items.objectAt(idx),
-      pool;
+      layout,
+      pool,
+      wasPooled = false;
 
     exampleView = this._exampleViewForItem(item, idx);
     if (SC.none(exampleView.isReusable) || exampleView.isReusable) {
       // If the exampleView is reusable, send the view to its pool.
       pool = this._poolForExampleView(exampleView);
 
+      // Don't bother pooling more than the max number in each pool.
+      if (pool.length < this.get('optimalPoolSize')) {
       //@if(debug)
-      // Add a big of developer support if they are migrating over from SC.CollectionFastPath
+        // Add a bit of developer support if they are migrating over from SC.CollectionFastPath
       if (itemView.hibernateInPool) {
         SC.error("Developer Error: Item views that want to do clean up before being pooled should implement sleepInPool.");
       }
@@ -3214,8 +3244,21 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
       if (!SC.none(exampleView.isLayerReusable) && !exampleView.isLayerReusable) {
         itemView.destroyLayer();
         itemView.set('layerLocationNeedsUpdate', YES);
-      }
     } else {
+          // If the layer is sticking around, be sure to move it aside.
+          layout = this.layoutForContentIndex(idx);
+          itemView.adjust(layout);
+
+          // This includes ensuring that the id of views in the pool don't clash
+          // with views that are used outside of it.
+          itemView.set('layerId', SC.generateGuid(null, 'pool-'));
+        }
+
+        wasPooled = true;
+      }
+    }
+
+    if (!wasPooled) {
       containerView.removeChild(itemView);
       itemView.destroy();
     }
