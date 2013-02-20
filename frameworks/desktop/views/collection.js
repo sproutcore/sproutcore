@@ -369,9 +369,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     to give it the chance to perform its own selection housekeeping.
 
     @type SC.View
-    @default null
+    @default SC.View
   */
-  exampleView: null,
+  exampleView: SC.View,
 
   /**
     If set, this key will be used to get the example view for a given
