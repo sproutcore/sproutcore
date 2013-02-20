@@ -30,7 +30,7 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditable,
 
   classNames: ['sc-label-view'],
 
-  displayProperties: ['displayTitle', 'textAlign', 'fontWeight', 'icon', 'escapeHTML', 'needsEllipsis', 'hint', 'toolTip'],
+  displayProperties: ['displayTitle', 'textAlign', 'fontWeight', 'icon', 'escapeHTML', 'needsEllipsis', 'hint', 'hintEnabled', 'toolTip'],
 
   /**
     The delegate that gets notified of events related to the editing process. Set
