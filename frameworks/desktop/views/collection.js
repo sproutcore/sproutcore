@@ -2992,7 +2992,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     if (this.useFastPath) {
       //@if(debug)
       // Deprecation warning for those that were using SC.CollectionFastPath.
-      SC.warn("Developer Warning: useFastPath has been deprecated.  The performance improvements have been integrated directly into SC.CollectionView as the default behavior.  Please disable the useFastPath property and refer to the SC.CollectionView documentation for more information.");
+      SC.warn("Developer Warning: SC.CollectionView `useFastPath` has been deprecated.  The performance improvements have been integrated directly into SC.CollectionView as the default behavior.  Please disable the useFastPath property and refer to the SC.CollectionView documentation for more information.");
       //@endif
       this.mixin(SC.CollectionFastPath);
     }
@@ -3172,7 +3172,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   _reconfigureItemView: function (itemView, attrs) {
     itemView.beginPropertyChanges();
     itemView.set('contentIndex', attrs.contentIndex);
-    // itemView.set('parentView', attrs.parentView);
     itemView.set('layerId', attrs.layerId);
     itemView.set('isEnabled', attrs.isEnabled);
     itemView.set('isSelected', attrs.isSelected);
@@ -3181,7 +3180,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     itemView.set('disclosureState', attrs.disclosureState);
     itemView.set('isVisibleInWindow', attrs.isVisibleInWindow);
     itemView.set('isGroupView', attrs.isGroupView);
-    // itemView.set('page', this.page);
     itemView.set('content', attrs.content);
     itemView.endPropertyChanges();
   },
