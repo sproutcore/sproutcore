@@ -318,6 +318,9 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     // find the smallest index changed; invalidate everything past it
     if (indexes && indexes.isIndexSet) indexes = indexes.get('min');
     this.reload(SC.IndexSet.create(indexes, len-indexes));
+
+    // If the row height changes, our entire layout needs to change.
+    this.invokeOnce('adjustLayout');
     return this ;
   },
 
@@ -329,7 +332,7 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     items in the collection are not in a completely random order relative to layout)
   */
   _sclv_lengthDidChange: function() {
-    this.adjust(this.computeLayout());
+    this.invokeOnce('adjustLayout');
   }.observes('length'),
 
   // ..........................................................
@@ -345,7 +348,7 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     var ret = this._sclv_layout;
     if (!ret) ret = this._sclv_layout = {};
     ret.minHeight = this.rowOffsetForContentIndex(this.get('length'));
-    this.set('calculatedHeight',ret.minHeight);
+    this.set('calculatedHeight', ret.minHeight);
     return ret ;
   },
 

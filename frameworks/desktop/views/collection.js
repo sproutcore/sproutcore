@@ -466,6 +466,15 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   //
 
   /**
+    Adjusts the layout of the view according to the computed layout.  Call
+    this method to apply the computed layout to the view.
+  */
+  adjustLayout: function () {
+    var layout = this.computeLayout();
+    if (layout) { this.adjust(layout); }
+  },
+
+  /**
     Override to return the computed layout dimensions of the collection view.
     You can omit any dimensions you don't care about setting in your
     computed value.
@@ -756,7 +765,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   contentLengthDidChange: function () {
     var content = this.get('content');
     this.set('length', content ? content.get('length') : 0);
-    this.computeLayout();
+    this.invokeOnce('adjustLayout');
   },
 
   /** @private
@@ -864,19 +873,18 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     this._invalidIndexes = NO;
 
     var content = this.get('content'),
-        i, len, existing,
-        layout  = this.computeLayout(),
-        //@if(debug)
-        bench   = SC.BENCHMARK_RELOAD,
-        //@endif
-        nowShowing = this.get('nowShowing'),
-        itemViews  = this._sc_itemViews,
-        containerView = this.get('containerView') || this,
-        exampleView, groupExampleView,
-        shouldReuseViews, shouldReuseGroupViews, shouldReuse,
-        viewsToRemove, viewsToRedraw, viewsToCreate,
-        views, idx, view, layer, viewPool,
-        del, groupIndexes, isGroupView;
+      i, len, existing,
+      //@if(debug)
+      bench   = SC.BENCHMARK_RELOAD,
+      //@endif
+      nowShowing = this.get('nowShowing'),
+      itemViews  = this._sc_itemViews,
+      containerView = this.get('containerView') || this,
+      exampleView, groupExampleView,
+      shouldReuseViews, shouldReuseGroupViews, shouldReuse,
+      viewsToRemove, viewsToRedraw, viewsToCreate,
+      views, idx, view, layer, viewPool,
+      del, groupIndexes, isGroupView;
 
     // if the set is defined but it contains the entire nowShowing range, just
     // replace
@@ -951,7 +959,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
           // will likely change the layerId when re-using the view.  So
           // we'll destroy the layer now.
           existing.destroyLayer();
-        }
+      }
 
         // We don't want the old layer hanging around, even if we are going
         // to reuse it.
@@ -1003,7 +1011,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         for (i = 0, len = itemViews.length;  i < len;  ++i) {
           existing = itemViews[i];
 
-          if (existing) {
+        if (existing) {
             isGroupView = existing.get('isGroupView');
             shouldReuse = isGroupView ? shouldReuseGroupViews : shouldReuseViews;
             if (shouldReuse) {
@@ -1023,8 +1031,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
               // Remove the view from the cache
               delete itemViews[i];
-            }
-          }
+        }
+      }
         }
       }
 
@@ -1043,8 +1051,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
       //@endif
     }
 
-    // adjust my own layout if computed
-    if (layout) this.adjust(layout);
     if (this.didReload) this.didReload(invalid === YES ? null : invalid);
 
     return this;
@@ -1183,10 +1189,10 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         }
         else {
           ret.set('layout', E.prototype.layout);
-        }
+      }
         ret.set('content', item);
         ret.endPropertyChanges();
-      }
+    }
     }
 
     // If we weren't able to re-use a view, then create a new one.
@@ -1212,7 +1218,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         attrs.layout = layout;
       } else {
         delete attrs.layout;
-      }
+    }
 
       ret = this.createItemView(E, idx, attrs);
     }
@@ -3190,7 +3196,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     } else if (SC.typeOf(view.action) == SC.T_FUNCTION) {
       return view.action(evt);
     }
-  }
+    }
 
 
 });
