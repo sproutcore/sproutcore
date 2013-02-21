@@ -80,7 +80,7 @@ test('displayItems', function() {
 
   menu.menuHeight = 1;
   menu.set('items', strings);
-  equals(1, menu.displayItemsCount, 'displayItems should change when items array changes');
+  equals(menu.displayItemsCount, 2, 'displayItems should change when items array changes');
   ok(menu.get('menuHeight') > 1, 'menuHeight should be recalculated when displayItems changes');
 
   output = menu.get('displayItems')[0];
