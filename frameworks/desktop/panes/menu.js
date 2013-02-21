@@ -747,15 +747,22 @@ SC.MenuPane = SC.PickerPane.extend(
 
 
   destroy: function () {
+    var ret = sc_super();
+
     // Clean up previous enumerable observer.
     if (this._sc_menu_items) {
       this._sc_menu_items.removeObserver('[]', this, '_sc_menu_itemPropertiesDidChange');
     }
 
+    // Destroy the menu view we created.  The scroll view's container will NOT
+    // destroy this because it receives it already instantiated.
+    this._menuView.destroy();
+
     // Clean up caches.
     this._sc_menu_items = null;
+    this._menuView = null;
 
-    sc_super();
+    return ret;
   },
 
   /**
