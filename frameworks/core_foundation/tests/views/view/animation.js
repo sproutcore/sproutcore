@@ -794,3 +794,29 @@ test("should still run callback", function () {
   });
   SC.RunLoop.end();
 });
+
+module("Animating in the next run loop", commonSetup);
+
+test("Calling animate while flusing the invokeNext queue should not throw an exception", function () {
+  try {
+    SC.run(function () {
+      view.invokeNext(function () {
+        this.animate({ top: 250 }, { duration: 1 });
+      });
+
+      view.animate({ top: 200 }, { duration: 1 });
+    });
+
+    SC.run(function () {
+      // The first call to _animate and the function with animate in it run.
+    });
+
+    SC.run(function () {
+      // The second call to _animate from the function with animate in it.
+    });
+  } catch (ex) {
+    ok(false, "failure");
+  }
+
+  ok(true, "success");
+});

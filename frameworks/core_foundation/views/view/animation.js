@@ -378,13 +378,18 @@ SC.View.reopen(
 
   /** @private */
   _animate: function () {
-    this.willRenderAnimations();
+    // Check for _animateLayout.  If an invokeNext call to animate *this* occurs
+    // while flushing the invokeNext queue *before* this method runs, an extra
+    // call to _animate will run.  Has unit test.
+    if (this._animateLayout) {
+      this.willRenderAnimations();
 
-    // Apply the animation layout.
-    this.set('layout', this._animateLayout);
+      // Apply the animation layout.
+      this.set('layout', this._animateLayout);
 
-    // Clear the layout cache value.
-    delete this._animateLayout;
+      // Clear the layout cache value.
+      delete this._animateLayout;
+    }
   },
 
   /**
