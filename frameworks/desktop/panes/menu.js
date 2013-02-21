@@ -747,6 +747,10 @@ SC.MenuPane = SC.PickerPane.extend(
 
 
   destroy: function () {
+    this.get('menuItemViews').forEach(function(menuItemView) {
+      menuItemView.destroy();
+    });
+    
     // Clean up previous enumerable observer.
     if (this._sc_menu_items) {
       this._sc_menu_items.removeObserver('[]', this, '_sc_menu_itemPropertiesDidChange');
