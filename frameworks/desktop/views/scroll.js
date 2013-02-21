@@ -1780,9 +1780,10 @@ SC.ScrollView = SC.View.extend({
     var contentView = this._scroll_contentView;
 
     if (contentView) {
-      contentView.addObserver('frame', this, this.contentViewFrameDidChange);
-      contentView.addObserver('calculatedWidth', this, this.contentViewFrameDidChange);
-      contentView.addObserver('calculatedHeight', this, this.contentViewFrameDidChange);
+      contentView.addObserver('frame', this, 'contentViewFrameDidChange');
+      contentView.addObserver('calculatedWidth', this, 'contentViewFrameDidChange');
+      contentView.addObserver('calculatedHeight', this, 'contentViewFrameDidChange');
+      contentView.addObserver('layer', this, 'contentViewLayerDidChange');
     }
 
     if (this.get('isVisibleInWindow')) this._scsv_registerAutoscroll();
@@ -1802,27 +1803,25 @@ SC.ScrollView = SC.View.extend({
   */
   contentViewDidChange: function () {
     var newView = this.get('contentView'),
-        oldView = this._scroll_contentView,
-        frameObserver = this.contentViewFrameDidChange,
-        layerObserver = this.contentViewLayerDidChange;
+        oldView = this._scroll_contentView;
 
     if (newView !== oldView) {
 
       // stop observing old content view
       if (oldView) {
-        oldView.removeObserver('calculatedWidth', this, this.contentViewFrameDidChange);
-        oldView.removeObserver('calculatedHeight', this, this.contentViewFrameDidChange);
-        oldView.removeObserver('frame', this, frameObserver);
-        oldView.removeObserver('layer', this, layerObserver);
+        oldView.removeObserver('calculatedWidth', this, 'contentViewFrameDidChange');
+        oldView.removeObserver('calculatedHeight', this, 'contentViewFrameDidChange');
+        oldView.removeObserver('frame', this, 'contentViewFrameDidChange');
+        oldView.removeObserver('layer', this, 'contentViewLayerDidChange');
       }
 
       // update cache
       this._scroll_contentView = newView;
       if (newView) {
-        newView.addObserver('frame', this, frameObserver);
-        newView.addObserver('calculatedWidth', this, this.contentViewFrameDidChange);
-        newView.addObserver('calculatedHeight', this, this.contentViewFrameDidChange);
-        newView.addObserver('layer', this, layerObserver);
+        newView.addObserver('frame', this, 'contentViewFrameDidChange');
+        newView.addObserver('calculatedWidth', this, 'contentViewFrameDidChange');
+        newView.addObserver('calculatedHeight', this, 'contentViewFrameDidChange');
+        newView.addObserver('layer', this, 'contentViewLayerDidChange');
       }
 
       // replace container
