@@ -134,3 +134,12 @@ test('menuItemViewForContentIndex', function() {
   var view = menu.menuItemViewForContentIndex(0);
   equals(items[0].title, view.$('.value').text(), 'menu item views should match content items');
 });
+
+test('destroy', function(){
+  menu.popup();
+  menu.destroy();
+
+  var menuItemView = menu.get('menuItemViews')[0];
+
+  ok(menuItemView.get('isDestroyed'), 'destroying the menu also destroys the childItems.');
+});
