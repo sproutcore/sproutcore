@@ -1857,8 +1857,6 @@ SC.ScrollView = SC.View.extend({
     scroller maximum and optionally update the scroller visibility if the
     size of the contentView changes.  We don't care about the origin since
     that is tracked separately from the offset values.
-
-    @param {Boolean} force (optional)  Re-calculate everything even if the contentView’s frame didn’t change size
   */
   contentViewFrameDidChange: function(force) {
     var view   = this.get('contentView'),
@@ -1879,7 +1877,7 @@ SC.ScrollView = SC.View.extend({
     height *= scale;
 
     // cache out scroll settings...
-    if (!force && (width === this._scroll_contentWidth) && (height === this._scroll_contentHeight)) return ;
+    if ((width === this._scroll_contentWidth) && (height === this._scroll_contentHeight)) return;
     this._scroll_contentWidth  = width;
     this._scroll_contentHeight = height;
 
@@ -1940,7 +1938,8 @@ SC.ScrollView = SC.View.extend({
     scrollers, etc.
   */
   frameDidChange: function () {
-    this.contentViewFrameDidChange(YES);
+    this._scroll_contentWidth = this._scroll_contentHeight = null;
+    this.contentViewFrameDidChange();
   }.observes('frame'),
 
   /** @private
