@@ -1377,39 +1377,45 @@ SC.CoreView.reopen(
   createChildViews: function() {
     var childViews = this.get('childViews'),
         len        = childViews.length,
-        idx, key, views, view ;
+        isNoLongerValid = false,
+        idx, key, views, view;
 
-    this.beginPropertyChanges() ;
+    this.beginPropertyChanges();
 
     // swap the array
-    for (idx=0; idx<len; ++idx) {
-      if (key = (view = childViews[idx])) {
+    for (idx = 0; idx < len; ++idx) {
+      key = view = childViews[idx];
 
-        // is this is a key name, lookup view class
-        if (typeof key === SC.T_STRING) {
-          view = this[key];
-        } else {
-          key = null ;
-        }
-
-        if (!view) {
-          //@if(debug)
-          SC.warn("Developer Warning: The child view named '@%' was not found in the view, %@.  This child view will be ignored.".fmt(key, this));
-          //@endif
-
-          // skip this one.
-          continue;
-        }
-
-        // createChildView creates the view if necessary, but also sets
-        // important properties, such as parentView
-        view = this.createChildView(view) ;
-        if (key) { this[key] = view ; } // save on key name if passed
+      // is this is a key name, lookup view class
+      if (typeof key === SC.T_STRING) {
+        view = this[key];
+      } else {
+        key = null;
       }
+
+      if (!view) {
+        //@if(debug)
+        SC.warn("Developer Warning: The child view named '%@' was not found in the view, %@.  This child view will be ignored.".fmt(key, this));
+        //@endif
+
+        // skip this one.
+        isNoLongerValid = true;
+        childViews[idx] = null;
+        continue;
+      }
+
+      // createChildView creates the view if necessary, but also sets
+      // important properties, such as parentView
+      view = this.createChildView(view);
+      if (key) { this[key] = view; } // save on key name if passed
+
       childViews[idx] = view;
     }
 
-    this.endPropertyChanges() ;
+    // Set childViews to be only the valid array.
+    if (isNoLongerValid) { this.set('childViews', childViews.compact()); }
+
+    this.endPropertyChanges();
     return this ;
   },
 
