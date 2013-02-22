@@ -411,6 +411,35 @@ test("set an array of records to a many-to-many; foo side", function() {
   equals(bar3.get('status'), SC.Record.READY_CLEAN, 'bar3.status should be READY_CLEAN');
 });
 
+test("set an SC.ManyArray to a many-to-many; foo side", function() {
+  ok(bar1.get('fooToMany').indexOf(foo1) >= 0, 'PRECOND - bar1.fooToMany should contain foo1');
+  ok(bar2.get('fooToMany').indexOf(foo1) < 0, 'PRECOND - bar2.fooToMany should NOT contain foo1');
+  ok(foo1.get('barToMany').indexOf(bar2) < 0, 'PRECOND - foo1.barToMany should NOT contain bar2');
+
+  foo1.get('barToMany').pushObject(bar3);
+
+  ok(foo1.get('barToMany').indexOf(bar3) >= 0, 'foo1.barToMany should contain bar3');
+  ok(bar3.get('fooToMany').indexOf(foo1) >= 0, 'bar3.fooToMany should contain foo1');
+
+  foo1.set('barToMany', foo2.get('barToMany'));
+
+  ok(bar2.get('fooToMany').indexOf(foo1) >= 0, 'bar2.fooToMany should contain foo1');
+  ok(foo1.get('barToMany').indexOf(bar2) >= 0, 'foo1.barToMany should contain bar2');
+  ok(foo1.get('barToMany').indexOf(bar3) < 0, 'foo1.barToMany should NOT contain bar3');
+  ok(bar3.get('fooToMany').indexOf(foo1) < 0, 'bar3.fooToMany should NOT contain foo1');
+});
+
+test("set null to a many-to-many; foo side", function() {
+  foo1.set('barToMany', null);
+
+  ok(foo1.getPath('barToMany.length') === 0, 'foo1.barToMany.length should be 0');
+  ok(bar1.get('fooToMany').indexOf(foo1) < 0, 'bar1.fooToMany should NOT contain foo1');
+  ok(bar2.get('fooToMany').indexOf(foo1) < 0, 'bar2.fooToMany should NOT contain foo1');
+
+  equals(foo1.get('status'), SC.Record.READY_DIRTY, 'foo1.status should be READY_DIRTY');
+  equals(bar1.get('status'), SC.Record.READY_CLEAN, 'bar1.status should be READY_CLEAN');
+});
+
 // ..........................................................
 // ONE-TO-MANY RELATIONSHIPS
 // 

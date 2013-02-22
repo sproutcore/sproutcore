@@ -120,9 +120,11 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
     if (newRecords !== undefined && this.get('isEditable')) {
 
       // can only take array
-      if (newRecords && SC.typeOf(newRecords) !== SC.T_ARRAY) {
+      if (newRecords && !newRecords.isSCArray) {
         throw "%@ is not an array".fmt(newRecords);
       }
+
+      if (newRecords === null) newRecords = [];
 
       inverseKey = this.get('inverse');
 
