@@ -118,13 +118,13 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
 
     // WRITE
     if (newRecords !== undefined && this.get('isEditable')) {
+      // Allow null values to remove all the relationships
+      if (newRecords === null) newRecords = [];
 
       // can only take array
-      if (newRecords && !newRecords.isSCArray) {
+      if (!newRecords.isSCArray) {
         throw "%@ is not an array".fmt(newRecords);
       }
-
-      if (newRecords === null) newRecords = [];
 
       inverseKey = this.get('inverse');
 
