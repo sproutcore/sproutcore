@@ -27,19 +27,13 @@
     &.shortcutkey span.value {
       right: 55px;
     }
-    &.has-sub-menu {
-      margin-right: 20px;
-      &:after {
-        content:'';
-        position: absolute;
-        right: -10px;
-        top: 5px;
-        width: 0; 
-        height: 0; 
-        border-top: 5px solid transparent;
-        border-bottom: 5px solid transparent;
-        border-left: 5px solid black;
-      }
+    span.has-branch {
+      position: absolute;
+      right: 10px;
+      top: 5px; 
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      border-left: 5px solid black;
     }
   }
   &.disabled{

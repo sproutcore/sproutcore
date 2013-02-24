@@ -213,7 +213,6 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
       }
 
       if (this.get('hasSubMenu')) {
-        context.addClass('has-sub-menu');
         this.renderBranch(context);
       }
 
