@@ -638,12 +638,12 @@ SC.View.reopen(
         borderBottom = this._effectiveBorderFor('borderBottom', layout),
         borderLeft = this._effectiveBorderFor('borderLeft', layout);
 
-    return {
+    return frame ? {
       x: frame.x - borderLeft,
       y: frame.y - borderTop,
       width: frame.width + borderLeft + borderRight,
       height: frame.height + borderTop + borderBottom
-    };
+    } : null;
   }.property('frame').cacheable(),
 
   /**
