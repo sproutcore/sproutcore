@@ -36,7 +36,7 @@ SC.View.reopen(
   /** @scope SC.View.prototype */ {
 
   /**
-    Set to YES to indicate the view has visibility support added.
+    Set to YES to indicate the view has layout support added.
   */
   hasLayout: YES,
 
@@ -200,6 +200,7 @@ SC.View.reopen(
      - borderRight: right border
      - borderBottom: bottom border
      - borderLeft: bottom left
+     - opacity: the opacity of the view
      - zIndex: position above or below other views
 
     Note that you can only use certain combinations to set layout.  For
@@ -716,7 +717,7 @@ SC.View.reopen(
   //
   // -> View A.beginXXX()
   //   -> View B.beginXXX()
-  //     -> View C.begitXXX()
+  //     -> View C.beginXXX()
   //   -> View D.beginXXX()
   //
   // ...later on, endXXX methods are called in reverse order of beginXXX...
@@ -796,7 +797,7 @@ SC.View.reopen(
     // not, then there's no need to invalidate the frames of our child views.
     var previousLayout = this._previousLayout,
         currentLayout  = this.get('layout'),
-        didResize      = true;
+        didResize = true;
 
     // Handle old style rotation.
     if (!SC.none(currentLayout.rotate)) {
@@ -809,13 +810,16 @@ SC.View.reopen(
       delete currentLayout.rotate;
     }
 
-    if (previousLayout && previousLayout !== currentLayout) {
-      // Check to see whether the view's width or height has changed.
+    // We test the new layout to see if we believe it will affect the view's frame.
+    // Since all the child view frames may depend on the parent's frame, it's
+    // best only to notify a frame change when it actually happens.
+    if (previousLayout && !SC.none(previousLayout.width) && !SC.none(previousLayout.height) && previousLayout !== currentLayout) {
       var currentTest,
         previousTest;
 
       // This code already exists in _adjustForBorder, so we use it to test the effective width/height.
-      previousTest = this._adjustForBorder({ x: 0, y: 0, width: previousLayout.width || 0, height: previousLayout.height || 0 },
+      // TODO: consider checking min/max sizes
+      previousTest = this._adjustForBorder({ x: 0, y: 0, width: previousLayout.width, height: previousLayout.height },
         previousLayout);
       currentTest = this._adjustForBorder({ x: 0, y: 0, width: currentLayout.width || 0, height: currentLayout.height || 0 },
         currentLayout);
@@ -828,8 +832,8 @@ SC.View.reopen(
     if (didResize) {
       this.viewDidResize();
     } else {
-      // Even if we didn't resize, our frame might have changed.
-      // viewDidResize() handles this in the other case.
+      // Even if we didn't resize, our frame may have changed
+      // TODO: consider checking for position changes by testing the resulting frame against the cached frame.  This is difficult to do.
       this._viewFrameDidChange();
     }
 
@@ -846,6 +850,7 @@ SC.View.reopen(
       }
     }
 
+    // Cache the last layout to fine-tune notifications when the layout changes.
     this._previousLayout = currentLayout;
 
     return this;
