@@ -732,7 +732,7 @@ SC.IndexSet = SC.mixin({},
         lim     = start + length ; // stop
 
     while (loc < lim) {
-      // make sure we are in current rnage
+      // make sure we are in current range
       while ((next !== 0) && (next <= loc)) {
         start = next ;
         next  = Math.abs(content[start]) ;
