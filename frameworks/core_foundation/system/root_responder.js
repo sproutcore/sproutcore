@@ -1744,8 +1744,6 @@ SC.RootResponder = SC.Object.extend(
   //
 
   mousedown: function (evt) {
-    var fr;
-
     if (SC.platform.touch) {
       evt.allowDefault();
       this._lastMouseDownCustomHandling = YES;
@@ -1771,19 +1769,6 @@ SC.RootResponder = SC.Object.extend(
 
     var view = this.targetViewForEvent(evt);
 
-    // InlineTextField needs to loose firstResponder whenever you click outside
-    // the view. This is a special case as textfields are not supposed to loose
-    // focus unless you click on a list, another textfield or an special
-    // view/control.
-
-    if (view) fr = view.getPath('pane.firstResponder');
-
-    // some fields like SC.InlineTextFieldView need to blur on any click, even
-    // if it's not on a control that can be focused
-    // TODO: remove this when focus behavior is improved
-    if (fr && fr.get('blurOnMouseDown') && fr !== view) {
-      fr.resignFirstResponder(evt);
-    }
     view = this._mouseDownView = this.sendEvent('mouseDown', evt, view);
     if (view && view.respondsTo('mouseDragged')) this._mouseCanDrag = YES;
 

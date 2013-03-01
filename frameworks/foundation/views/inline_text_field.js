@@ -95,15 +95,6 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
   */
   _topOffsetForFirefoxCursorFix: 0,
 
-  /**
-    Tells RootResponder to blur us when there is a mousedown anywhere else.
-
-    @type Boolean
-    @default YES
-  */
-  // TODO: remove this when focus behavior is improved
-  blurOnMouseDown: YES,
-
   /*
   * @private
   * @method
@@ -234,50 +225,25 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
   * @param {Hash} optional custom frame
   * @param {Boolean} if the view is a member of a collection
   */
-	positionOverTargetView: function(target, isCollection, pane, frame, elem) {
-    var isIE7;
+	positionOverTargetView: function(target, isCollection, pane, exampleFrame, elem) {
+    var targetLayout = target.get('layout'),
+        layout = {};
+    
+    // In case where the label is part of an SC.ListItemView
+    if (exampleFrame && elem) {
+      var frame = SC.offset(elem, 'parent');
 
-    if(!pane) pane = target.get('pane');
-
-    if(!elem) elem = target.$()[0];
-
-    // if we weren't given a frame, build one from the target
-    if(!frame) {
-      var tempFrame = target.get('frame');
-
-      frame = SC.offset(elem);
-
-      frame.height = tempFrame.height;
-      frame.width = tempFrame.width;
+      layout.top = targetLayout.top + frame.y - exampleFrame.height/2;
+      layout.left = targetLayout.left + frame.x;
+      layout.height = exampleFrame.height;
+      layout.width = exampleFrame.width;
     }
-
-    var layout={},
-		paneElem = pane.$()[0],
-		tarLayout = target.get('layout');
-
-    layout.height = frame.height;
-    layout.width = frame.width;
-
-    isIE7 = SC.browser.isIE &&
-        SC.browser.compare(SC.browser.engineVersion, '7') === 0;
-    if (isCollection && tarLayout.left) {
-      layout.left=frame.x-tarLayout.left-paneElem.offsetLeft-1;
-      if(isIE7) layout.left--;
-    } else {
-      layout.left=frame.x-paneElem.offsetLeft-1;
-      if(isIE7) layout.left--;
+    else {
+      layout = SC.copy(targetLayout);
     }
-
-    if (isCollection && tarLayout.top) {
-      layout.top=frame.y-tarLayout.top-paneElem.offsetTop;
-      if(isIE7) layout.top=layout.top-2;
-    } else {
-      layout.top=frame.y-paneElem.offsetTop;
-      if(isIE7) layout.top=layout.top-2;
-    }
-
+    
     this.set('layout', layout);
-	},
+  },
 
   /*
   * Flag indicating whether the editor is allowed to use multiple lines.
@@ -310,6 +276,8 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
     var pane = label.get('pane'), elem = this.get('exampleElement');
 
     this.beginPropertyChanges();
+
+    if (label.multiline) this.set('multiline', label.multiline);
 
     // if we have an exampleElement we need to make sure it's an actual
     // DOM element not a jquery object
