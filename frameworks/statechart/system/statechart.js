@@ -1696,7 +1696,7 @@ SC.EXIT_STATE = 0;
 SC.ENTER_STATE = 1;
 
 /**
-  A Startchart class.
+  A Statechart class.
 */
 SC.Statechart = SC.Object.extend(SC.StatechartManager, {
   autoInitStatechart: NO
