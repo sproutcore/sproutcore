@@ -678,7 +678,6 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
       exampleFrame: f,
       exampleElement: el,
       multiline: NO,
-      isCollection: YES,
       validator: validator,
       escapeHTML: escapeHTML
     });
