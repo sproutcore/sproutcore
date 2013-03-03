@@ -826,10 +826,10 @@ SC.CoreView.reopen(
       type = typeof attributeValue;
 
       if (type === 'string' || type === 'number') {
-        context.attr(attribute, attributeValue);
+        context.setAttr(attribute, attributeValue);
       } else if (attributeValue && type === 'boolean') {
         // Apply boolean attributes in the form attribute="attribute"
-        context.attr(attribute, attribute);
+        context.setAttr(attribute, attribute);
       }
     }, this);
   },
