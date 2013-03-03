@@ -3190,6 +3190,40 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   },
 
   /** @private
+    Override to compute the hidden layout of the itemView for the content at the
+    specified idnex.  This layout will be applied when it is moved to the
+    pool for reuse and should be completely outside the visible portion
+    of the collection.
+
+    By default this layout is determined using the normal layout for the item.
+    If the regular layout has a height, the pooled layout will be one height
+    off the top (for top positioned) or off the bottom (for bottom positioned)
+    and if the regular layout has a width, the pooled layout will be one
+    width off the left (for left positioned) or off the right (for right
+    positioned).
+
+    @param Number contentIndex the index of the item in the content
+    @returns Object a view layout
+  */
+  _poolLayoutForContentIndex: function (contentIndex) {
+    var layout = this.layoutForContentIndex(contentIndex);
+
+    if (layout && layout.height) {
+      if (layout.top) { layout.top = -layout.height; }
+      else { layout.bottom = -layout.height; }
+    } else if (layout && layout.width) {
+      if (layout.left) { layout.left = -layout.width; }
+      else { layout.right = -layout.width; }
+    } else {
+      // There is not really a valid layout for a collection.  Just shape it and
+      // place it out of view.
+      layout = { left: -100, width: 100, top: -100, height: 100 };
+    }
+
+    return layout;
+  },
+
+  /** @private
     Configures an existing item view with new attributes.
 
     @param {SC.View} itemView
@@ -3246,7 +3280,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         itemView.set('layerLocationNeedsUpdate', YES);
     } else {
           // If the layer is sticking around, be sure to move it aside.
-          layout = this.layoutForContentIndex(idx);
+          layout = this._poolLayoutForContentIndex(idx);
           itemView.adjust(layout);
 
           // This includes ensuring that the id of views in the pool don't clash
