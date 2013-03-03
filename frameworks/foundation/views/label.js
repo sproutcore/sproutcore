@@ -205,8 +205,8 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditable,
 
   /** @private */
   mouseDown: function(evt) {
-    // Capture the event if it's a double click.
-    return evt.clickCount === 2;
+    // Capture the event if it's a double click and we are editable.
+    return this.get('isEditable') && evt.clickCount === 2;
   },
 
   /** @private If isEditable is set to true, opens the inline text editor view. */
