@@ -52,13 +52,15 @@ module("SC.GridView - drag and drop", pane.standardSetup());
 
 test("drag on default grid view", function() {
   var ev,
+    frame,
     itemView,
     layer,
     gridView = pane.view("basic").get('contentView');
 
   itemView = gridView.itemViewForContentIndex(0);
+  frame = itemView.get('frame');
   layer = itemView.get('layer');
-  ev = SC.Event.simulateEvent(layer, 'mousedown');
+  ev = SC.Event.simulateEvent(layer, 'mousedown', { clientX: frame.x, clientY: frame.y });
   SC.Event.trigger(layer, 'mousedown', [ev]);
 
   ev = SC.Event.simulateEvent(layer, 'mousemove');
@@ -74,6 +76,7 @@ test("drag on default grid view", function() {
 
 test("drag on grid view with SC.DROP_ON support", function() {
   var ev,
+    frame,
     itemView,
     layer,
     gridView = pane.view("basic").get('contentView');
@@ -88,8 +91,10 @@ test("drag on grid view with SC.DROP_ON support", function() {
   }));
 
   itemView = gridView.itemViewForContentIndex(0);
+  frame = itemView.get('frame');
   layer = itemView.get('layer');
-  ev = SC.Event.simulateEvent(layer, 'mousedown');
+
+  ev = SC.Event.simulateEvent(layer, 'mousedown', { clientX: frame.x, clientY: frame.y });
   SC.Event.trigger(layer, 'mousedown', [ev]);
 
   var f = function() {
@@ -97,14 +102,12 @@ test("drag on grid view with SC.DROP_ON support", function() {
       itemView2,
       point;
 
-    SC.RunLoop.begin();
     ev = SC.Event.simulateEvent(layer, 'mousemove');
     SC.Event.trigger(layer, 'mousemove', [ev]);
 
     equals(gridView.get('dragContent').content, gridView.get('content'), "dragContent.content should be equal to the GridView's content");
     ok(gridView.get('dragContent').indexes.isEqual(SC.IndexSet.create(0)), "dragContent.indexes should be equal to indexes equal to [{0}]");
 
-    SC.RunLoop.end();
 
     // Drag over 2nd item
     itemView2 = gridView.itemViewForContentIndex(1);
@@ -135,10 +138,10 @@ test("drag on grid view with SC.DROP_ON support", function() {
     ev = SC.Event.simulateEvent(layer, 'mouseup');
     SC.Event.trigger(layer, 'mouseup', [ev]);
 
-    window.start();
+    start();
   };
 
-  stop(); // stops the test runner
   setTimeout(f, 200);
+  stop(700); // stops the test runner
 });
 
