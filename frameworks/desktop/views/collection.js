@@ -3263,22 +3263,22 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
       // Don't bother pooling more than the max number in each pool.
       if (pool.length < this.get('optimalPoolSize')) {
-      //@if(debug)
+        //@if(debug)
         // Add a bit of developer support if they are migrating over from SC.CollectionFastPath
-      if (itemView.hibernateInPool) {
-        SC.error("Developer Error: Item views that want to do clean up before being pooled should implement sleepInPool.");
-      }
-      //@endif
+        if (itemView.hibernateInPool) {
+          SC.error("Developer Error: Item views that want to do clean up before being pooled should implement sleepInPool.");
+        }
+        //@endif
 
-      // Give the view a chance to do some clean up before sleeping.
-      if (itemView.sleepInPool) { itemView.sleepInPool(this); }
-      pool.push(itemView);
+        // Give the view a chance to do some clean up before sleeping.
+        if (itemView.sleepInPool) { itemView.sleepInPool(this); }
+        pool.push(itemView);
 
-      // If the exampleView's layer isn't reusable, destroy it.
-      if (!SC.none(exampleView.isLayerReusable) && !exampleView.isLayerReusable) {
-        itemView.destroyLayer();
-        itemView.set('layerLocationNeedsUpdate', YES);
-    } else {
+        // If the exampleView's layer isn't reusable, destroy it.
+        if (!SC.none(exampleView.isLayerReusable) && !exampleView.isLayerReusable) {
+          itemView.destroyLayer();
+          itemView.set('layerLocationNeedsUpdate', YES);
+        } else {
           // If the layer is sticking around, be sure to move it aside.
           layout = this._poolLayoutForContentIndex(idx);
           itemView.adjust(layout);
