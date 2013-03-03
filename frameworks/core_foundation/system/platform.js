@@ -463,9 +463,10 @@ SC.platform = SC.Object.create({
 
   // Set up and execute the transition event test.
   if (SC.platform.supportsCSSTransitions) {
-    var transitionEl = document.createElement('div');
+    var transitionEl = document.createElement('div'),
+      transitionStyleName = SC.browser.experimentalStyleNameFor('transition');
 
-    transitionEl.style[SC.browser.experimentalStyleNameFor('transition')] = 'all 1ms linear';
+    transitionEl.style[transitionStyleName] = 'all 1ms linear';
 
     // Test transition events.
     executeTest(transitionEl, 'transitionend', 'TransitionEnd', function (success) {
@@ -490,27 +491,15 @@ SC.platform = SC.Object.create({
   // Set up and execute the animation event test.
   if (SC.platform.supportsCSSAnimations) {
     var animationEl = document.createElement('div'),
-      cssRules,
-      keyframeprefix = SC.browser.experimentalStyleNameFor('animation') === 'animation' ? '' : SC.browser.cssPrefix,
-      keyframes = '@' + keyframeprefix + 'keyframes _sc_animation_test { from { opacity: 1; } to { opacity: 0; }}',
-      styleSheets = document.stylesheets;
+      animationStyleName = SC.browser.experimentalStyleNameFor('animation'),
+      keyframeprefix = animationStyleName === 'animation' ? '' : SC.browser.cssPrefix,
+      keyframes = '@' + keyframeprefix + 'keyframes _sc_animation_test { from { opacity: 1; } to { opacity: 0; } }';
 
-    // Add a test animation rule to the first stylesheet (or create a stylesheet).
-    if (styleSheets && styleSheets.length) {
-      var idx = 0;
-
-      cssRules = styleSheets[0].cssRules;
-      if (cssRules) { idx = cssRules.length; }
-
-      styleSheets[0].insertRule(keyframes, idx);
-    } else {
-      var style = document.createElement('style');
-      style.innerHTML = keyframes;
-      document.getElementsByTagName('head')[0].appendChild(style);
-    }
+    // Add a test animation rule scoped to the test element.
+    animationEl.innerHTML = '<style scoped="scoped">' + keyframes + '</style>';
 
     // Set up and execute the animation event test.
-    animationEl.style[SC.browser.experimentalStyleNameFor('animation')] = '_sc_animation_test 1ms linear';
+    animationEl.style[animationStyleName] = '_sc_animation_test 1ms linear';
 
     // NOTE: We could test start, but it's extra work and easier just to test the end
     // and infer the start event name from it.  Keeping this code for example.
@@ -565,24 +554,7 @@ SC.platform = SC.Object.create({
         SC.platform.supportsCSSAnimations = NO;
       }
 
-      // Clean up.  Don't blindly remove the same index, instead find the test
-      // rule's index for sure. (optimized for the rule to still be where it was inserted)
-      outer:
-      for (var i = 0, iLength = document.styleSheets.length; i < iLength; i++) {
-        var styleSheet = document.styleSheets[i],
-          cssRules = styleSheet.cssRules;
-
-        if (cssRules) {
-          for (var j = cssRules.length - 1; j >= 0; j--) {
-            rule = styleSheet.cssRules[j];
-            if (rule.name === '_sc_animation_test') {
-              styleSheet.deleteRule(j);
-              break outer;
-            }
-          }
-        }
-      }
-
+      // Clean up.
       animationEl.parentNode.removeChild(animationEl);
       animationEl = null;
     });
