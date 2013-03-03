@@ -203,22 +203,14 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditable,
     return hintVal ;
   }.property('hint').cacheable(),
 
-  /**
-    Event dispatcher callback.
-    If isEditable is set to true, opens the inline text editor view.
-
-    @param {DOMMouseEvent} evt DOM event
-  */
+  /** @private */
   mouseDown: function(evt) {
+    // Capture the event if it's a double click.
     return evt.clickCount === 2;
   },
 
-  mouseUp: function(evt) {
-    if (evt.clickCount === 2) {
-      return this.beginEditing();
-    }
-    return false;
-  },
+  /** @private If isEditable is set to true, opens the inline text editor view. */
+  doubleClick: function (evt) { return this.beginEditing(); },
 
   /*
   * @method
