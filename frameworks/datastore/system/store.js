@@ -782,6 +782,34 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     }
     return this ;
   },
+  
+  /** @private
+    Gathers all storekeys for which a conflict exists between the nested store 
+    and the receiver store.
+    @param {SC.Store} the nested store to test against
+    @param {Array}    the array of changes
+    @returns {false}  when no conflicts exist
+    @returns {Array}  when conflicts exists, an array with conflicting storeKeys is returned
+  */
+  
+  _commitConflictsFromNestedStore: function(nestedStore,changes){
+    var ret = [], locks = nestedStore.locks;
+    var len = changes.length, revs = this.revisions, i, storeKey, lock, rev ;
+    if (locks && revs) {
+      for(i=0;i<len;i++) {
+        storeKey = changes[i];
+        lock = locks[storeKey] || 1;
+        rev  = revs[storeKey] || 1;
+
+        // if the save revision for the item does not match the current rev
+        // the someone has changed the data hash in this store and we have
+        // a conflict. 
+        if (lock < rev) ret.push(storeKey);
+      }   
+    }
+    if(ret.length === 0) return false;
+    else return ret;
+  },
 
   // ..........................................................
   // HIGH-LEVEL RECORD API
