@@ -43,7 +43,7 @@ sc_require('models/record');
   computationally heavy to match a large dataset to a query. To avoid the
   browser from ever showing a slow script timer in this scenario, the query
   matching is by default paced at 100ms. If query matching takes longer than
-  100ms, it will chunk the work with setTimeout to avoid too much computation
+  100ms, it will chunk the work with invokeNext to avoid too much computation
   to happen in one runloop.
 
 
@@ -575,18 +575,13 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
     // if we reach our threshold of pacing we need to schedule the rest of the
     // storeKeys to also be updated
-    if(storeKeysToPace.length>0) {
-      var self = this;
-      // use setTimeout here to guarantee that we hit the next runloop,
-      // and not the same runloop which the invoke* methods do not guarantee
-      window.setTimeout(function() {
-        SC.run(function() {
-          if(!self || self.get('isDestroyed')) return;
-          self.set('needsFlush', YES);
-          self._scq_changedStoreKeys = SC.IndexSet.create().addEach(storeKeysToPace);
-          self.flush();
-        });
-      }, 1);
+    if (storeKeysToPace.length > 0) {
+      this.invokeNext(function () {
+        if (!this || this.get('isDestroyed')) return;
+        this.set('needsFlush', YES);
+        this._scq_changedStoreKeys = SC.IndexSet.create().addEach(storeKeysToPace);
+        this.flush();
+      });
     }
 
     // clear set of changed store keys
@@ -757,7 +752,7 @@ SC.RecordArray.mixin(/** @scope SC.RecordArray.prototype */{
   /**
     Number of milliseconds to allow a query matching to run for. If this number
     is exceeded, the query matching will be paced so as to not lock up the
-    browser (by essentially splitting the work with a setTimeout)
+    browser (by essentially splitting the work with an invokeNext)
 
     @type Number
   */
