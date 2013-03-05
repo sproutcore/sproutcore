@@ -944,7 +944,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
     var attrs,
       items = this.get('content'),
-      item,
       i, len, existing,
       nowShowing = this.get('nowShowing'),
       itemViews = this._sc_itemViews || [],
@@ -1000,8 +999,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         idx = viewsToRedraw[i];
 
         existing = itemViews[idx];
-        item = items.objectAt(idx);
-        attrs = this._attrsForItem(item, idx);
+        attrs = this._attrsForContentIndex(idx);
         this._reconfigureItemView(existing, attrs);
         existing.updateLayerIfNeeded();
       }
@@ -1089,7 +1087,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
       prototype;
 
     // Set up the attributes for the view.
-    attrs = this._attrsForItem(item, idx);
+    attrs = this._attrsForContentIndex(idx);
 
     // If the view is reusable and there is an appropriate view inside the
     // pool, simply reuse it to avoid having to create a new view.
@@ -3103,9 +3101,10 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     }
   },
 
-  _attrsForItem: function (item, idx) {
+  _attrsForContentIndex: function (idx) {
     var attrs = this._TMP_ATTRS,
       del = this.get('contentDelegate'),
+      items = this.get('content'),
       isGroupView = this._contentIndexIsGroup(idx),
       isEnabled = del.contentIndexIsEnabled(this, items, idx),
       isSelected = del.contentIndexIsSelected(this, items, idx),
@@ -3113,7 +3112,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
       disclosureState = del.contentIndexDisclosureState(this, items, idx);
 
     attrs.contentIndex = idx;
-    attrs.content = item;
+    attrs.content = items.objectAt(idx);
     attrs.disclosureState = disclosureState;
     attrs.isEnabled = isEnabled;
     attrs.isSelected = isSelected;
@@ -3268,10 +3267,10 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     if (itemView.get('content') === item) {
       // Get the example view that was used for the item view (not necessarily
       // the same example view for the new content at the same index).
-    exampleView = this._exampleViewForItem(item, idx);
+      exampleView = this._exampleViewForItem(item, idx);
       if (SC.none(exampleView.prototype.isReusable) || exampleView.prototype.isReusable) {
-      // If the exampleView is reusable, send the view to its pool.
-      pool = this._poolForExampleView(exampleView);
+        // If the exampleView is reusable, send the view to its pool.
+        pool = this._poolForExampleView(exampleView);
 
         //@if(debug)
         // Add a bit of developer support if they are migrating over from SC.CollectionFastPath
