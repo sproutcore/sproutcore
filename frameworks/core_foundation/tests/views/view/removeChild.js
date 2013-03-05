@@ -9,11 +9,15 @@
 // .......................................................
 // removeChild()
 //
-  
+
 var parent, child;
 module("SC.View#removeChild", {
 	setup: function() {
-		parent = SC.View.create({ childViews: [SC.View] });
+		parent = SC.View.create({ childViews: [
+      SC.View.extend({
+        updateLayerLocationIfNeeded: CoreTest.stub('updateLayerLocationIfNeeded', SC.View.prototype.updateLayerLocationIfNeeded)
+      })
+    ] });
 		child = parent.childViews[0];
 	}
 });
@@ -35,11 +39,11 @@ test("sets parentView property to null", function() {
 });
 
 test("does nothing if passed null", function() {
-  
+
   // monkey patch callbacks to make sure nothing runs.
   var callCount = 0;
   parent.willRemoveChild = parent.didRemoveChild = function() { callCount++; };
-  
+
   parent.removeChild(null);
   equals(callCount, 0, 'did not invoke callbacks');
 });
@@ -53,7 +57,7 @@ test("invokes child.willRemoveFromParent before removing if defined", function()
     equals(child.get('parentView'), parent, 'still in parent');
     callCount++;
   };
-  
+
   parent.removeChild(child);
   equals(callCount, 1, 'invoked callback');
 });
@@ -64,12 +68,12 @@ test("invokes parent.willRemoveChild before removing if defined", function() {
   var callCount = 0;
   parent.willRemoveChild = function(view) {
     equals(view, child, 'passed child as param');
-    
+
     // verify invoked BEFORE removal
     equals(child.get('parentView'), parent, 'still in parent');
     callCount++;
   };
-  
+
   parent.removeChild(child);
   equals(callCount, 1, 'invoked callback');
 });
@@ -86,7 +90,7 @@ test("invokes child.didRemoveFromParent AFTER removing if defined", function() {
     ok(!child.get('parentView'), 'no longer in parent');
     callCount++;
   };
-  
+
   parent.removeChild(child);
   equals(callCount, 1, 'invoked callback');
 });
@@ -97,12 +101,12 @@ test("invokes parent.didRemoveChild before removing if defined", function() {
   var callCount = 0;
   parent.didRemoveChild = function(view) {
     equals(view, child, 'passed child as param');
-    
+
     // verify invoked BEFORE removal
     ok(!child.get('parentView'), 'no longer in parent');
     callCount++;
   };
-  
+
   parent.removeChild(child);
   equals(callCount, 1, 'invoked callback');
 });
@@ -112,7 +116,7 @@ test("invokes parentViewDidChange() on child view.  this is used by the view int
 	// monkey patch to test
 	var callCount = 0;
 	child.parentViewDidChange = function() { callCount++; };
-	
+
 	parent.removeChild(child);
 	equals(callCount, 1, 'invoked parentViewDidChange');
 });
@@ -122,13 +126,45 @@ test("should not move layer immediately", function() {
 
   parent.createLayer();
 
-	var parentLayer = parent.get('layer'), childLayer = child.get('layer');  
+	var parentLayer = parent.get('layer'), childLayer = child.get('layer');
   ok(parentLayer, 'precond - parent has layer');
   ok(childLayer, 'precond - child has layer');
   equals(childLayer.parentNode, parentLayer, 'child layer belong to parent');
-  
+
   parent.removeChild(child);
   equals(childLayer.parentNode, parentLayer, 'child layer belong to parent');
+});
+
+/**
+  There was an issue that if you destroyed a child view, it would destroy its
+  layer and remove itself from the parent, which in turn invoked updateLayerLocationIfNeeded
+  in parentViewDidChange.  If before updateLayerLocationIfNeeded ran a new
+  child was created with the same layer id, when updateLayerLocationIfNeeded
+  ran it would remove the new layer from the parent.
+
+  The solution was that if a view is destroyed, don't invoke updateLayerLocationIfNeeded.
+*/
+test("Removing a view and creating a view with the same layerId in the should not result in the new view's layer being removed from the parent.", function () {
+  var callCount = 0;
+  // child.updateLayerLocationIfNeeded = function() { callCount++; };
+
+  SC.run(function () {
+    parent.removeChild(child);
+  });
+
+  child.updateLayerLocationIfNeeded.expect(1);
+
+  SC.run(function () {
+    parent.appendChild(child);
+  });
+
+  child.updateLayerLocationIfNeeded.expect(2);
+
+  SC.run(function () {
+    child.destroy();
+  });
+
+  child.updateLayerLocationIfNeeded.expect(2);
 });
 
 // .......................................................
@@ -136,16 +172,16 @@ test("should not move layer immediately", function() {
 //
 var view;
 module("SC.View#removeAllChildren", {
- setup: function() { 
-  view = SC.View.create({
-    childViews: [SC.View, SC.View, SC.View]
-  });
- }
+  setup: function() {
+    view = SC.View.create({
+      childViews: [SC.View, SC.View, SC.View]
+    });
+  }
 });
 
 test("removes all child views", function() {
   equals(view.childViews.length, 3, 'precond - has child views');
-  
+
   view.removeAllChildren();
   equals(view.childViews.length, 0, 'removed all children');
 });
@@ -153,17 +189,17 @@ test("removes all child views", function() {
 test("returns receiver", function() {
 	equals(view.removeAllChildren(), view, 'receiver');
 });
-  
+
 // .......................................................
 // removeFromParent()
 //
 module("SC.View#removeFromParent");
 
 test("removes view from parent view", function() {
-  var parent = SC.View.create({ childViews: [SC.View] });
-  var child = parent.childViews[0];
+  parent = SC.View.create({ childViews: [SC.View] });
+  child = parent.childViews[0];
   ok(child.get('parentView'), 'precond - has parentView');
-  
+
   child.removeFromParent();
   ok(!child.get('parentView'), 'no longer has parentView');
   ok(parent.childViews.indexOf(child)<0, 'no longer in parent childViews');
@@ -175,15 +211,14 @@ test("returns receiver", function() {
 
 test("does nothing if not in parentView", function() {
   var callCount = 0;
-  var child = SC.View.create();
+  child = SC.View.create();
 
 	// monkey patch for testing...
-	child.willRemoveFromParent = function() { callCount++; };  
+	child.willRemoveFromParent = function() { callCount++; };
 	ok(!child.get('parentView'), 'precond - has no parent');
-	
+
 	child.removeFromParent();
 	equals(callCount, 0, 'did not invoke callback');
 });
-
 
 

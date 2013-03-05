@@ -53,11 +53,11 @@ SC.View.reopen(
     @returns {SC.View} receiver
   */
   parentViewDidChange: function () {
-    this.recomputeIsVisibleInWindow();
+      this.recomputeIsVisibleInWindow();
 
     this.resetBuildState();
-    this.set('layerLocationNeedsUpdate', YES);
-    this.invokeOnce(this.updateLayerLocationIfNeeded);
+      this.set('layerLocationNeedsUpdate', YES);
+      this.invokeOnce(this.updateLayerLocationIfNeeded);
 
     // We also need to iterate down through the view hierarchy and invalidate
     // all our child view's caches for 'pane', since it could have changed.
@@ -167,7 +167,11 @@ SC.View.reopen(
     original(view);
 
     // The DOM will need some fixing up, note this on the view.
-    if (view.parentViewDidChange) view.parentViewDidChange();
+    // But don't update the layer location if it's already destroyed (i.e. it
+    // no longer has a layer), because if a new layer with the same id were
+    // created before updateLayerLocationIfNeeded runs, we would inadvertently
+    // remove the new layer.
+    if (!view.get('isDestroyed') && view.parentViewDidChange) view.parentViewDidChange();
 
     // notify views
     if (this.didRemoveChild) { this.didRemoveChild(view); }
