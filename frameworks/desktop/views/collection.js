@@ -360,8 +360,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     As noted in the SC.CollectionView description above, by default the few
     instances that are needed of the exampleView class will be created and then
     reused.  Reusing an exampleView means that the content, isSelected, isEnabled,
-    contentIndex, isVisibleInWindow, layout and layerId properties
-    will be updated as an existing view is pulled from the pool to be displayed.
+    contentIndex, layout and layerId properties will be updated as an existing
+    view is pulled from the pool to be displayed.
 
     If your custom exampleView class has trouble being reused, you may want to
     implement the `sleepInPool` and `awakeFromPool` methods in your exampleView.
@@ -857,6 +857,14 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
       this._content.removeObserver('length', this, lfunc);
     }
 
+    // Destroy all pooled views.
+    if (this._pools) {
+      for (var key in this._pools) {
+        this._pools[key].invoke('destroy');
+      }
+      delete this._pools;
+    }
+
     // cache
     this._content = content;
 
@@ -966,14 +974,14 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         existing = itemViews[idx];
 
         if (nowShowing.contains(idx)) {
-          if (existing) { // && existing.parentView === containerView
+          if (existing) {
             // Exists and still showing.
             viewsToRedraw.push(idx);
           } else {
             // Doesn't exist and now showing.
             viewsToCreate.push(idx);
           }
-        } else if (existing) { // && existing.parentView === containerView
+        } else if (existing) {
           // Exists and no longer showing.
           viewsToRemove.push(idx);
         }
@@ -1077,7 +1085,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
       exampleView,
       items = this.get('content'),
       item = items.objectAt(idx),
-      pool;
+      pool,
+      prototype;
 
     // Set up the attributes for the view.
     attrs = this._attrsForItem(item, idx);
@@ -1085,7 +1094,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     // If the view is reusable and there is an appropriate view inside the
     // pool, simply reuse it to avoid having to create a new view.
     exampleView = this._exampleViewForItem(item, idx);
-    if (SC.none(exampleView.isReusable) || exampleView.isReusable) {
+    prototype = exampleView.prototype;
+    if (SC.none(prototype.isReusable) || prototype.isReusable) {
       pool = this._poolForExampleView(exampleView);
 
       // Is there a view we can re-use?
@@ -1164,7 +1174,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   },
 
   /**
-    Extracts the content index from the passed layerID.  If the layer id does
+    Extracts the content index from the passed layerId.  If the layer id does
     not belong to the receiver or if no value could be extracted, returns NO.
 
     @param {String} id the layer id
@@ -3076,7 +3086,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
       if (pane) {
         pane.rootResponder.sendAction(action, target, this, pane, context);
       }
-      // SC.app.sendAction(action, target, this);
 
     // if no action is specified, then trigger the support action,
     // if supported.
@@ -3096,14 +3105,12 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
   _attrsForItem: function (item, idx) {
     var attrs = this._TMP_ATTRS,
-      content = this.get('content'),
       del = this.get('contentDelegate'),
       isGroupView = this._contentIndexIsGroup(idx),
-      isEnabled = del.contentIndexIsEnabled(this, content, idx),
-      isSelected = del.contentIndexIsSelected(this, content, idx),
-      outlineLevel = del.contentIndexOutlineLevel(this, content, idx),
-      disclosureState = del.contentIndexDisclosureState(this, content, idx),
-      isVisibleInWindow = this.isVisibleInWindow;
+      isEnabled = del.contentIndexIsEnabled(this, items, idx),
+      isSelected = del.contentIndexIsSelected(this, items, idx),
+      outlineLevel = del.contentIndexOutlineLevel(this, items, idx),
+      disclosureState = del.contentIndexDisclosureState(this, items, idx);
 
     attrs.contentIndex = idx;
     attrs.content = item;
@@ -3111,7 +3118,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     attrs.isEnabled = isEnabled;
     attrs.isSelected = isSelected;
     attrs.isGroupView = isGroupView;
-    attrs.isVisibleInWindow = isVisibleInWindow;
     attrs.layerId = this.layerIdFor(idx);
     attrs.owner = attrs.displayDelegate = this;
     attrs.page = this.page;
@@ -3184,9 +3190,10 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     @param {SC.View} exampleView
   */
   _poolForExampleView: function (exampleView) {
-    var poolKey = "_pool_" + SC.guidFor(exampleView);
-    if (!this[poolKey]) this[poolKey] = [];
-    return this[poolKey];
+    var poolKey = SC.guidFor(exampleView);
+    if (!this._pools) { this._pools = {}; }
+    if (!this._pools[poolKey]) this._pools[poolKey] = [];
+    return this._pools[poolKey];
   },
 
   /** @private
@@ -3231,16 +3238,14 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   */
   _reconfigureItemView: function (itemView, attrs) {
     itemView.beginPropertyChanges();
+    itemView.set('content', attrs.content);
     itemView.set('contentIndex', attrs.contentIndex);
-    itemView.set('layerId', attrs.layerId);
     itemView.set('isEnabled', attrs.isEnabled);
     itemView.set('isSelected', attrs.isSelected);
-    itemView.set('outlineLevel', attrs.outlineLevel);
+    itemView.set('layerId', attrs.layerId);
     itemView.set('layout', attrs.layout);
+    itemView.set('outlineLevel', attrs.outlineLevel);
     itemView.set('disclosureState', attrs.disclosureState);
-    itemView.set('isVisibleInWindow', attrs.isVisibleInWindow);
-    itemView.set('isGroupView', attrs.isGroupView);
-    itemView.set('content', attrs.content);
     itemView.endPropertyChanges();
   },
 
@@ -3254,15 +3259,20 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
       item = items.objectAt(idx),
       layout,
       pool,
+      prototype,
       wasPooled = false;
 
+    // Don't pool views whose content has changed, because if the example
+    // view used is different than the new content, we would pool the wrong
+    // type of view.
+    if (itemView.get('content') === item) {
+      // Get the example view that was used for the item view (not necessarily
+      // the same example view for the new content at the same index).
     exampleView = this._exampleViewForItem(item, idx);
-    if (SC.none(exampleView.isReusable) || exampleView.isReusable) {
+      if (SC.none(exampleView.prototype.isReusable) || exampleView.prototype.isReusable) {
       // If the exampleView is reusable, send the view to its pool.
       pool = this._poolForExampleView(exampleView);
 
-      // Don't bother pooling more than the max number in each pool.
-      if (pool.length < this.get('optimalPoolSize')) {
         //@if(debug)
         // Add a bit of developer support if they are migrating over from SC.CollectionFastPath
         if (itemView.hibernateInPool) {
@@ -3272,14 +3282,16 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
         // Give the view a chance to do some clean up before sleeping.
         if (itemView.sleepInPool) { itemView.sleepInPool(this); }
+
         pool.push(itemView);
 
         // If the exampleView's layer isn't reusable, destroy it.
-        if (!SC.none(exampleView.isLayerReusable) && !exampleView.isLayerReusable) {
+        prototype = exampleView.prototype;
+        if (!SC.none(prototype.isLayerReusable) && !prototype.isLayerReusable) {
           itemView.destroyLayer();
           itemView.set('layerLocationNeedsUpdate', YES);
         } else {
-          // If the layer is sticking around, be sure to move it aside.
+          // If the layer is sticking around, be sure to move it out of view.
           layout = this._poolLayoutForContentIndex(idx);
           itemView.adjust(layout);
 
