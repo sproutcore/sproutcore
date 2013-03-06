@@ -3265,8 +3265,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     // view used is different than the new content, we would pool the wrong
     // type of view.
     if (itemView.get('content') === item) {
-      // Get the example view that was used for the item view (not necessarily
-      // the same example view for the new content at the same index).
+
       exampleView = this._exampleViewForItem(item, idx);
       if (SC.none(exampleView.prototype.isReusable) || exampleView.prototype.isReusable) {
         // If the exampleView is reusable, send the view to its pool.
@@ -3275,7 +3274,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         //@if(debug)
         // Add a bit of developer support if they are migrating over from SC.CollectionFastPath
         if (itemView.hibernateInPool) {
-          SC.error("Developer Error: Item views that want to do clean up before being pooled should implement sleepInPool.");
+          SC.error("Developer Error: Item views that want to do clean up before being pooled should implement sleepInPool not hibernateInPool.  This will be temporarily fixed up for development mode only, but must be changed before production.");
+          itemView.sleepInPool = itemView.hibernateInPool;
         }
         //@endif
 
