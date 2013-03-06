@@ -1079,8 +1079,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     var attrs,
       containerView = this.get('containerView') || this,
       exampleView,
-      items = this.get('content'),
-      item = items.objectAt(idx),
       pool,
       prototype;
 
@@ -1089,7 +1087,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
     // If the view is reusable and there is an appropriate view inside the
     // pool, simply reuse it to avoid having to create a new view.
-    exampleView = this._exampleViewForItem(item, idx);
+    exampleView = this._exampleViewForContentIndex(idx);
     prototype = exampleView.prototype;
     if (SC.none(prototype.isReusable) || prototype.isReusable) {
       pool = this._poolForExampleView(exampleView);
@@ -3159,11 +3157,13 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   /** @private
     Determines the example view for a content index.
   */
-  _exampleViewForItem: function (item, idx) {
-    var key, ExampleView,
-      isGroupView = this._contentIndexIsGroup(idx);
+  _exampleViewForContentIndex: function (idx) {
+    var key,
+      ExampleView,
+      items = this.get('content'),
+      item = items.objectAt(idx);
 
-    if (isGroupView) {
+    if (this._contentIndexIsGroup(idx)) {
       // so, if it is indeed a group view, we go that route to get the example view
       key = this.get('contentGroupExampleViewKey');
       if (key && item) ExampleView = item.get(key);
@@ -3251,7 +3251,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   _removeItemView: function (itemView, idx) {
     var exampleView,
       items = this.get('content'),
-      item = items.objectAt(idx),
       layout,
       pool,
       prototype,
@@ -3260,9 +3259,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     // Don't pool views whose content has changed, because if the example
     // view used is different than the new content, we would pool the wrong
     // type of view.
-    if (itemView.get('content') === item) {
+    if (items && itemView.get('content') === items.objectAt(idx)) {
 
-      exampleView = this._exampleViewForItem(item, idx);
+      exampleView = this._exampleViewForContentIndex(idx);
       if (SC.none(exampleView.prototype.isReusable) || exampleView.prototype.isReusable) {
         // If the exampleView is reusable, send the view to its pool.
         pool = this._poolForExampleView(exampleView);
