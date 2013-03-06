@@ -943,7 +943,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     this._invalidIndexes = NO;
 
     var attrs,
-      items = this.get('content'),
       i, len, existing,
       nowShowing = this.get('nowShowing'),
       itemViews = this._sc_itemViews || [],
@@ -954,7 +953,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     // replace
     if (invalid.isIndexSet && invalid.contains(nowShowing)) invalid = YES;
     if (this.willReload) this.willReload(invalid === YES ? null : invalid);
-    console.log('%@ reloadIfNeeded(): %@'.fmt(this, invalid));
 
     // if an index set, just update indexes
     if (invalid.isIndexSet) {
@@ -1116,7 +1114,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
     // If we weren't able to re-use a view, then create a new one.
     if (!ret) {
-      // console.log('creating item %@'.fmt(idx));
       ret = this.createItemView(exampleView, idx, attrs);
       containerView.insertBefore(ret, null);   // Equivalent to 'append()', but avoids one more function call
     }
@@ -3138,7 +3135,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   */
   _contentGroupIndexes: function () {
     return this.get('contentDelegate').contentGroupIndexes(this, this.get('content'));
-  }.property('contentDelegate', 'content').cacheable(),
+  }.property('contentDelegate').cacheable(),
 
   /** @private
     Rather than calling contentIndexIsGroup on the delegate each time, first
@@ -3252,8 +3249,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     Removes the item view, pooling it for re-use if possible.
   */
   _removeItemView: function (itemView, idx) {
-    var containerView = this.get('containerView') || this,
-      exampleView,
+    var exampleView,
       items = this.get('content'),
       item = items.objectAt(idx),
       layout,
@@ -3293,18 +3289,17 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
           // If the layer is sticking around, be sure to move it out of view.
           layout = this._poolLayoutForContentIndex(idx);
           itemView.adjust(layout);
-
-          // This includes ensuring that the id of views in the pool don't clash
-          // with views that are used outside of it.
-          itemView.set('layerId', SC.generateGuid(null, 'pool-'));
         }
+
+        // Ensure that the id of views in the pool don't clash with ids that
+        // are used outside of it.
+        itemView.set('layerId', SC.generateGuid(null, 'pool-'));
 
         wasPooled = true;
       }
     }
 
     if (!wasPooled) {
-      containerView.removeChild(itemView);
       itemView.destroy();
     }
 
