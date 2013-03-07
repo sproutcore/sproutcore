@@ -137,16 +137,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   length: 0,
 
   /**
-    The maximum number of item views to pool at a time.
-
-    This value is generally the optimalPoolSize, unless the collection view
-    indicates that it needs a larger
-  */
-  maxPoolSize: function () {
-
-  }.property('optimalPoolSize', 'tempPoolSize').cacheable(),
-
-  /**
     The set of indexes that are currently tracked by the collection view.
     This property is used to determine the range of items the collection view
     should monitor for changes.
@@ -167,20 +157,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   nowShowing: function () {
     return this.computeNowShowing();
   }.property('length', 'clippingFrame').cacheable(),
-
-  /**
-    The optimum number of item views to pool at a time.  If only one item
-    goes out of view as one item comes into view, the pool only needs to
-    be one item big.  However, collection views that show a block of items at
-    a time will want to use a larger optimum pool size.
-
-    Note that each different type of exampleView or groupExampleView has its
-    own pool, but this number is shared amongst them all.
-
-    @type Number
-    @default 1
-  */
-  optimalPoolSize: 1,
 
   /**
     Indexes of selected content objects.  This `SC.SelectionSet` is modified
