@@ -53,6 +53,18 @@ SC.AutoResizingMenuPane = SC.MenuPane.extend(
   menuWidthPadding: SC.propertyFromRenderDelegate('menuWidthPadding', 0),
 
   /**
+    The view class to use when creating new menu item views.
+
+    The menu pane will automatically create an instance of the view class you
+    set here for each item in the `items` array. You may provide your own
+    subclass for this property to display the customized content.
+
+    @type SC.View
+    @default SC.AutoResizingMenuItemView
+  */
+  exampleView: SC.AutoResizingMenuItemView,
+
+  /**
     @private
     In addition to the normal init, we need to schedule an automatic resize.
   */
