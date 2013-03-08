@@ -155,7 +155,10 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     @observes clippingFrame
   */
   nowShowing: function () {
-    return this.computeNowShowing();
+    // If there is an in-scroll clipping frame, use it.
+    var clippingFrame = this._inScrollClippingFrame || this.get('clippingFrame');
+
+    return this.computeNowShowing(clippingFrame);
   }.property('length', 'clippingFrame').cacheable(),
 
   /**
@@ -588,8 +591,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
     @returns {SC.IndexSet} new now showing range
   */
-  computeNowShowing: function () {
-    var r = this.contentIndexesInRect(this.get('clippingFrame'));
+  computeNowShowing: function (clippingFrame) {
+    var r = this.contentIndexesInRect(clippingFrame);
     if (!r) r = this.get('allContentIndexes'); // default show all
 
     // make sure the index set doesn't contain any indexes greater than the
@@ -901,16 +904,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     You can call this method at any time to actually force the reload to
     happen immediately if any item views need to be reloaded.
 
-    Note that this method will also invoke two other callback methods if you
-    define them on your subclass:
-
-      - *willReload()* is called just before the items are reloaded
-      - *didReload()* is called just after items are reloaded
-
-    You can use these two methods to setup and teardown caching, which may
-    reduce overall cost of a reload.  Each method will be passed an index set
-    of items that are reloaded or null if all items are reloaded.
-
     @returns {SC.CollectionView} receiver
   */
   reloadIfNeeded: function () {
@@ -928,7 +921,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     // if the set is defined but it contains the entire nowShowing range, just
     // replace
     if (invalid.isIndexSet && invalid.contains(nowShowing)) invalid = YES;
-    if (this.willReload) this.willReload(invalid === YES ? null : invalid);
 
     // if an index set, just update indexes
     if (invalid.isIndexSet) {
@@ -1003,8 +995,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         this.itemViewForContentIndex(idx, YES);
       }, this);
     }
-
-    if (this.didReload) this.didReload(invalid === YES ? null : invalid);
 
     return this;
   },
@@ -2927,6 +2917,49 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   },
 
   // ..........................................................
+  // SCROLLING
+  //
+
+  /** @private SC.ScrollView */
+  touchScrollDidStart: function () {
+    var clippingFrame = this.get('clippingFrame');
+
+    // Create the in-scroll clipping frame that will be used while touch scrolling.
+    this._inScrollClippingFrame = {
+      x: clippingFrame.x,
+      y: clippingFrame.y,
+      width: clippingFrame.width,
+      height: clippingFrame.height
+    };
+  },
+
+  /** @private SC.ScrollView */
+  touchScrollDidChange: function(left, top) {
+    // Fast path!  Don't try to update too soon.
+    if (Date.now() - this._lastTouchScrollTime < 30) { return; }
+
+    var inScrollClippingFrame = this._inScrollClippingFrame;
+
+    // Update the in-scroll clipping frame with the new values.
+    inScrollClippingFrame.x = left;
+    inScrollClippingFrame.y = top;
+
+    // Indicate that nowShowing should be re-computed (this will use the
+    // in-scroll clipping frame when it does).
+    this.notifyPropertyChange('nowShowing');
+    this.invokeOnce('_cv_nowShowingDidChange');
+
+    // Track the last time we updated.
+    this._lastTouchScrollTime = Date.now();
+  },
+
+  /** @private SC.ScrollView */
+  touchScrollDidEnd: function () {
+    // Clean up so that the regular clippingFrame is used again.
+    this._inScrollClippingFrame = null;
+  },
+
+  // ..........................................................
   // INTERNAL SUPPORT
   //
 
@@ -2994,6 +3027,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   /** @private */
   init: function () {
     sc_super();
+
     if (this.useFastPath) {
       //@if(debug)
       // Deprecation warning for those that were using SC.CollectionFastPath.
@@ -3001,8 +3035,17 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
       //@endif
       this.mixin(SC.CollectionFastPath);
     }
+
+    //@if(debug)
+    if (this.willReload || this.didReload) {
+      // Deprecation warning for willReload and didReload.  These don't seem to serve any purpose.
+      SC.warn("Developer Warning: SC.CollectionView no longer calls willReload and didReload on its subclasses because it includes item view and layer pooling in itself by default.")
+    }
+    //@endif
+
     if (this.get('canReorderContent')) this._cv_canReorderContentDidChange();
     this._sccv_lastNowShowing = this.get('nowShowing').clone();
+
     if (this.content) this._cv_contentDidChange();
     if (this.selection) this._cv_selectionDidChange();
   },
