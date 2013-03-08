@@ -6,7 +6,7 @@
 /*globals module ok equals same test MyApp */
 
 var store, child, storeKey, json;
-module("SC.Store#commitConflictsFromNestedStore", {
+module("SC.Store#_commitConflictsFromNestedStore", {
   setup: function() {
     SC.RunLoop.begin();
 
