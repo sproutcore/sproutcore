@@ -2285,26 +2285,26 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     // var itemView = this.itemViewForEvent(touch),
     var itemView = this._touchSelectedView,
         contentIndex = itemView ? itemView.get('contentIndex') : -1,
-        isSelected = NO, sel;
+        isSelected = NO, sel, shouldSelect;
 
     if (!this.get('isEnabled')) return contentIndex > -1;
-
-    // Remove fake selection in case our contentIndex is -1, a select event will add it back
-    if (itemView) { itemView.set('isSelected', NO); }
 
     if (contentIndex > -1) {
       if (this.get('useToggleSelection')) {
         sel = this.get('selection');
         isSelected = sel && sel.containsObject(itemView.get('content'));
+        shouldSelect = !isSelected;
       }
+      else
+        shouldSelect = true;
 
-      if (isSelected) {
-        this.deselect(contentIndex);
-      } else {
+      if (shouldSelect) {
         this.select(contentIndex, NO);
 
         // If actOnSelect is implemented, the action will be fired.
         this._cv_performSelectAction(itemView, touch, 0);
+      } else {
+        this.deselect(contentIndex);
       }
     }
 
