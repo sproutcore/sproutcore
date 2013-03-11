@@ -212,7 +212,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
         len       = recs ? (recs.get ? recs.get('length') : recs.length) : 0,
         i, keys;
 
-    if (!storeKeys) throw "Unable to edit an SC.RecordArray that does not have its storeKeys property set.";
+    if (!storeKeys) throw new Error("Unable to edit an SC.RecordArray that does not have its storeKeys property set.");
 
     if (!this.get('isEditable')) throw SC.RecordArray.NOT_EDITABLE;
 

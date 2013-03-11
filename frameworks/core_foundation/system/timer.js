@@ -381,7 +381,7 @@ SC.Timer = SC.Object.extend(
         if (action && SC.typeOf(action) == SC.T_FUNCTION) {
           action.call(target, this) ;
         } else {
-          throw '%@: Timer could not find a function at %@'.fmt(this, this.action) ;
+          throw new Error('%@: Timer could not find a function at %@'.fmt(this, this.action));
         }
 
       // otherwise, try to execute action direction on target or send down

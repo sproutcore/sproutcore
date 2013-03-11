@@ -26,7 +26,7 @@ SC.StatechartSequenceMatcher = SC.Object.extend({
     this.endSequence();
     
     if (this._stack.length > 0) {
-      throw "can not match sequence. sequence matcher has been left in an invalid state";
+      throw new Error("can not match sequence. sequence matcher has been left in an invalid state");
     }
     
     var monitor = this.statechartMonitor,

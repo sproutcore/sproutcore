@@ -251,7 +251,7 @@ SC.View.reopen(
       //@endif
       options = { duration: options };
     } else if (optionsType !== SC.T_HASH) {
-      throw "Must provide options hash!";
+      throw new Error("Must provide options hash!");
     }
 
     // This support should be deprecated.  Too much argument overloading.
@@ -343,7 +343,7 @@ SC.View.reopen(
       cur = layout[property];
       curAnim = pendingAnimations[property];
 
-      if (SC.none(value)) { throw "Can only animate to an actual value!"; }
+      if (SC.none(value)) { throw new Error("Can only animate to an actual value!"); }
 
       // If the new adjustment changes the previous adjustment's options before
       // it has rendered, overwrite the previous adjustment.

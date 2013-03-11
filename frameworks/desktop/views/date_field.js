@@ -158,7 +158,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
     // Parse the string format to retrieve and build
     // a TextSelection array ordered to support tabs behaviour
     if (SC.empty(ft)) {
-      throw 'The format string is empty, and must be a valid string.';
+      throw new Error('The format string is empty, and must be a valid string.');
     }
 
     var pPos, key, keyPos, startAt = 0, nPos = 0, oPos = 0;
@@ -169,7 +169,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
 
       keyPos = _dt.indexOf(key);
       if (keyPos === -1) {
-        throw "SC.DateFieldView: The format's key '%@' is not supported.".fmt(key);
+        throw new Error("SC.DateFieldView: The format's key '%@' is not supported.".fmt(key));
       }
       nPos = nPos + pPos - oPos;
       arr.push(SC.Object.create({

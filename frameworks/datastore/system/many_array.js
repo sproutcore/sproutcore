@@ -224,7 +224,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
   replace: function(idx, amt, recs) {
 
     if (!this.get('isEditable')) {
-      throw "%@.%@[] is not editable".fmt(this.get('record'), this.get('propertyName'));
+      throw new Error("%@.%@[] is not editable".fmt(this.get('record'), this.get('propertyName')));
     }
 
     var storeIds = this.get('editableStoreIds'),

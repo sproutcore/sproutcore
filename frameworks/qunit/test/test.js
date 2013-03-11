@@ -231,13 +231,13 @@ test("raises",function() {
 	
 	raises(
 		function() {
-			throw "error"
+			throw new Error("error")
 		}
 	);
 	
 	raises(
 		function() {
-			throw "error"
+			throw new Error("error")
 		},
 		'raises with just a message, no expected'
 	);

@@ -199,7 +199,7 @@ SC.AutoResize = {
   initMixin: function() {
     // @if (debug)
     if (!this.get('supportsAutoResize')) {
-      throw "View `%@` does not support automatic resize. See documentation for SC.AutoResize".fmt(this);
+      throw new Error("View `%@` does not support automatic resize. See documentation for SC.AutoResize".fmt(this));
     }
     // @endif
   },

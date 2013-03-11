@@ -164,7 +164,7 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
 
     // normalize
     if (start === undefined && length === undefined) {
-      if (!source) throw "Must pass params to SC.SelectionSet.add()";
+      if (!source) throw new Error("Must pass params to SC.SelectionSet.add()");
       if (source.isIndexSet) return this.add(source.source, source);
       if (source.isSelectionSet) {
         sets = source._sets;
@@ -224,7 +224,7 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
 
     // normalize
     if (start === undefined && length === undefined) {
-      if (!source) throw "Must pass params to SC.SelectionSet.remove()";
+      if (!source) throw new Error("Must pass params to SC.SelectionSet.remove()");
       if (source.isIndexSet) return this.remove(source.source, source);
       if (source.isSelectionSet) {
         sets = source._sets;

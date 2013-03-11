@@ -107,7 +107,7 @@ SC.Gesturable = {
       
       // if it was not found, well, that's an error.
       if (!g) {
-        throw "Could not find gesture named '" + gestures[idx] + "' on view.";
+        throw new Error("Could not find gesture named '" + gestures[idx] + "' on view.");
       }
       
       // if it is a class, instantiate (it really ought to be a class...)

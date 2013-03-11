@@ -183,7 +183,7 @@ SC.Locale = SC.Object.extend({
         // specified an additional hash and it has the same key, we'll throw an
         // error.
         if (additionalHash  &&  additionalHash[layoutKey]) {
-          throw "locLayout():  There is a localized value for the key '" + key + "' but a value for '" + layoutKey + "' was also specified in the non-localized hash";
+          throw new Error("locLayout():  There is a localized value for the key '" + key + "' but a value for '" + layoutKey + "' was also specified in the non-localized hash");
         }
 
         ret[layoutKey] = value;

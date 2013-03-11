@@ -85,7 +85,7 @@ SC.IndexSet = SC.mixin({},
     // This is here because `create` doesn't follow the
     // idiomatic SC convention of passing in an object literal to `create`.
     if (start && !(SC.typeOf(start) === SC.T_NUMBER || start.isIndexSet)) {
-      throw "SC.IndexSet does not accept `%@` as a parameter to `create`. Take a look at the function signature for proper usage.".fmt(start);
+      throw new Error("SC.IndexSet does not accept `%@` as a parameter to `create`. Take a look at the function signature for proper usage.".fmt(start));
     }
     // @endif
 
@@ -1002,7 +1002,7 @@ SC.IndexSet = SC.mixin({},
   */
   indexOf: function (object, startAt) {
     var source  = this.source;
-    if (!source) throw "%@.indexOf() requires source".fmt(this);
+    if (!source) throw new Error("%@.indexOf() requires source".fmt(this));
 
     var len     = source.get('length'),
 
@@ -1031,7 +1031,7 @@ SC.IndexSet = SC.mixin({},
   */
   lastIndexOf: function (object, startAt) {
     var source  = this.source;
-    if (!source) throw "%@.lastIndexOf() requires source".fmt(this);
+    if (!source) throw new Error("%@.lastIndexOf() requires source".fmt(this));
 
     // start with the last index in the set
     var len     = source.get('length'),
@@ -1064,7 +1064,7 @@ SC.IndexSet = SC.mixin({},
   */
   forEachObject: function (callback, target) {
     var source  = this.source;
-    if (!source) throw "%@.forEachObject() requires source".fmt(this);
+    if (!source) throw new Error("%@.forEachObject() requires source".fmt(this));
 
     var content = this._content,
         cur     = 0,
@@ -1100,7 +1100,7 @@ SC.IndexSet = SC.mixin({},
   */
   addObject: function (object, firstOnly) {
     var source  = this.source;
-    if (!source) throw "%@.addObject() requires source".fmt(this);
+    if (!source) throw new Error("%@.addObject() requires source".fmt(this));
 
     var len = source.get('length'),
         cur = 0, idx;
@@ -1147,7 +1147,7 @@ SC.IndexSet = SC.mixin({},
   */
   removeObject: function (object, firstOnly) {
     var source  = this.source;
-    if (!source) throw "%@.removeObject() requires source".fmt(this);
+    if (!source) throw new Error("%@.removeObject() requires source".fmt(this));
 
     var len = source.get('length'),
         cur = 0, idx;
@@ -1209,7 +1209,7 @@ SC.IndexSet = SC.mixin({},
         cur  = Math.abs(next);
         next = content[cur];
       } else {
-        throw "Developer Error: You may not iterate an infinite range in SC.IndexSet.";
+        throw new Error("Developer Error: You may not iterate an infinite range in SC.IndexSet.");
       }
     }
     return this;
