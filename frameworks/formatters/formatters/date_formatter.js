@@ -15,28 +15,28 @@
 */
 SC.DateFormatter = function(date, f) {
   if (!date) {
-    throw "No date passed to date formatter.";
+    throw new Error("No date passed to date formatter.");
   } else if (!date.getFullYear) {
-    throw "Object passed to date formatter was not a date!";
+    throw new Error("Object passed to date formatter was not a date!");
   }
   
   // f is expected to be a character, potentially repeated.
   // What we do is figure out what letter, and how many times it is repeated.
   // we also sanity-check.
   if (!f) {
-    throw "No formatting string passed to date formatter. Date: " + date;
+    throw new Error("No formatting string passed to date formatter. Date: " + date);
   }
   
   var len = f.length, first = f[0], idx;
   for (idx = 1; idx < len; idx++) {
     if (f[idx] !== first) {
-      throw "Invalid format string for a date; all characters must be the same: " + f + "; date: " + date;
+      throw new Error("Invalid format string for a date; all characters must be the same: " + f + "; date: " + date);
     }
   }
   
   var formatter = SC.DateFormatter[first];
   if (!formatter) {
-    throw "No formatter `" + first + "` exists for date: " + date;
+    throw new Error("No formatter `" + first + "` exists for date: " + date);
   }
   
   return formatter(date, len);
@@ -57,7 +57,7 @@ SC.DateFormatter.G = function(date, count) {
   } else if (count === 5) {
     return (era + ".Letter").loc();
   } else {
-    throw "Invalid era format: expected at most 5 digits; found " + count + ".";
+    throw new Error("Invalid era format: expected at most 5 digits; found " + count + ".");
   }
 };
 
@@ -111,7 +111,7 @@ SC.DateFormatter.Q = function(date, count, isStandAlone) {
   } else if (count == 4) {
     return (quarterName + ".Full").loc();
   } else {
-    throw "Unrecognized number of characters for quarter: " + count;
+    throw new Error("Unrecognized number of characters for quarter: " + count);
   }
 };
 
@@ -152,7 +152,7 @@ SC.DateFormatter.M = function(date, count, isStandAlone) {
   } else if (count === 5) {
     return (monthName + ".Letter").loc();
   } else {
-    throw "The number of Ms or Ls must be from 1 to 5. Supplied: " + count;
+    throw new Error("The number of Ms or Ls must be from 1 to 5. Supplied: " + count);
   }
 };
 
@@ -161,17 +161,17 @@ SC.DateFormatter.L = function(date, count) {
 };
 
 // OMITTED: l; used only with Chinese calendar.
-SC.DateFormatter.l = function() { throw "`l` date formatter not implemented."; };
+SC.DateFormatter.l = function() { throw new Error("`l` date formatter not implemented."); };
 
 //
 // Omitted for now: Week Number
 //
 SC.DateFormatter.w = function(date, count) {
-  throw "Week number currently not supported for date formatting.";
+  throw new Error("Week number currently not supported for date formatting.");
 };
 
 SC.DateFormatter.W = function(date, count) {
-  throw "Week number currently not supported for date formatting.";
+  throw new Error("Week number currently not supported for date formatting.");
 };
 
 //
@@ -198,13 +198,13 @@ SC.DateFormatter.D = function(date, count) {
 
 SC.DateFormatter.F = function(date, count) {
   // day of week in month; for instance, 2 if it is the second wednesday in the month.
-  throw "Day of week in month (F) is not supported in date formatting";
+  throw new Error("Day of week in month (F) is not supported in date formatting");
 };
 
 SC.DateFormatter.g = function(date, count) {
   // Julian day, modified: should be based on local timezone,
   // and, more than that, local timezone midnight (not noon)
-  throw "Julian day not supported in date formatting.";
+  throw new Error("Julian day not supported in date formatting.");
 };
 
 //
@@ -244,7 +244,7 @@ SC.DateFormatter.e = function(date, count, isStandAlone) {
   } else if (count === 5) {
     return (dayName + ".Letter").loc();
   } else {
-    throw "Unrecognized number of `e`s, `c`s, or `E`s in date format string.";
+    throw new Error("Unrecognized number of `e`s, `c`s, or `E`s in date format string.");
   }
 };
 
@@ -259,7 +259,7 @@ SC.DateFormatter.c = function(date, count) {
 //
 SC.DateFormatter.a = function(date, count) {
   if (count !== 1) {
-    throw "`a` can only be included in a date format string once.";
+    throw new Error("`a` can only be included in a date format string once.");
   }
   
   var name = "SC.Date.Period." + (date.getHours() > 11 ? "PM" : "AM");
@@ -345,7 +345,7 @@ SC.DateFormatter.z =
 SC.DateFormatter.Z = 
 SC.DateFormatter.v = 
 SC.DateFormatter.V = function(date, count) {
-  throw "Timezone not supported in date format strings.";
+  throw new Error("Timezone not supported in date format strings.");
 };
 
 

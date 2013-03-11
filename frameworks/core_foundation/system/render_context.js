@@ -348,7 +348,7 @@ SC.RenderContext = SC.Builder.create(
     this._innerHTMLReplaced = NO;
 
     if (!elem) {
-      // throw "Cannot update context because there is no source element";
+      // throw new Error("Cannot update context because there is no source element");
       return;
     }
 

@@ -7,7 +7,7 @@
 
 if(SC.Button) {
   SC.Button.initMixin = function(){
-    throw "SC.Button is deprecated as a mixin and is now a subclass of SC.TemplateView. Subclass SC.ButtonView instead.";
+    throw new Error("SC.Button is deprecated as a mixin and is now a subclass of SC.TemplateView. Subclass SC.ButtonView instead.");
   };
 }
 

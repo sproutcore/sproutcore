@@ -1368,13 +1368,13 @@ SC.Query.mixin( /** @scope SC.Query */ {
     // normalize recordType
     if (typeof recordType === SC.T_STRING) {
       ret = SC.objectForPropertyPath(recordType);
-      if (!ret) throw "%@ did not resolve to a class".fmt(recordType);
+      if (!ret) throw new Error("%@ did not resolve to a class".fmt(recordType));
       recordType = ret ;
     } else if (recordType && recordType.isEnumerable) {
       ret = [];
       recordType.forEach(function(t) {
         if (typeof t === SC.T_STRING) t = SC.objectForPropertyPath(t);
-        if (!t) throw "cannot resolve record types: %@".fmt(recordType);
+        if (!t) throw new Error("cannot resolve record types: %@".fmt(recordType));
         ret.push(t);
       }, this);
       recordType = ret ;

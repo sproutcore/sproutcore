@@ -158,7 +158,7 @@ SC.View.reopen(
   removeChild: function (original, view) {
     if (!view) { return this; } // nothing to do
     if (view.parentView !== this) {
-      throw "%@.removeChild(%@) must belong to parent".fmt(this,view);
+      throw new Error("%@.removeChild(%@) must belong to parent".fmt(this,view));
     }
     // notify views
     if (view.willRemoveFromParent) { view.willRemoveFromParent(); }

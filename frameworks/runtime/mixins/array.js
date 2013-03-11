@@ -55,7 +55,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
       *idx*
   */
   replace: function(idx, amt, objects) {
-    throw "replace() must be implemented to support SC.Array" ;
+    throw new Error("replace() must be implemented to support SC.Array");
   },
 
   /**

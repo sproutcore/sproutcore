@@ -582,7 +582,7 @@ SC.Drag = SC.Object.extend(
   */
   _getDragView: function() {
     if (!this.dragView) {
-      if (!this.source || !this.source.isView) throw "Source can't be used as dragView, because it's not a view.";
+      if (!this.source || !this.source.isView) throw new Error("Source can't be used as dragView, because it's not a view.");
       this.dragView = this.source;
     }
     return this.dragView;

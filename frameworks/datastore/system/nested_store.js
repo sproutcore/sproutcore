@@ -118,7 +118,7 @@ SC.NestedStore = SC.Store.extend(
   */
   find: function(query) {
     if (query && query.isQuery && query.get('location') !== SC.Query.LOCAL) {
-      throw "SC.Store#find() can only accept LOCAL queries in nested stores";
+      throw new Error("SC.Store#find() can only accept LOCAL queries in nested stores");
     }
     return sc_super();
   },

@@ -463,7 +463,7 @@ CoreTest.Plan = {
   */
   pass: function(msg) {
     var w = this.working ;
-    if (!w) throw "pass("+msg+") called outside of a working test";
+    if (!w) throw new Error("pass("+msg+") called outside of a working test");
     w.assertions.push({ message: msg, result: CoreTest.OK });
     return this ;
   },
@@ -474,7 +474,7 @@ CoreTest.Plan = {
   */
   fail: function(msg) {
     var w = this.working ;
-    if (!w) throw "fail("+msg+") called outside of a working test";
+    if (!w) throw new Error("fail("+msg+") called outside of a working test");
     w.assertions.push({ message: msg, result: CoreTest.FAIL });
     return this ;
   },
@@ -485,7 +485,7 @@ CoreTest.Plan = {
   */
   warn: function(msg) {
     var w = this.working ;
-    if (!w) throw "warn("+msg+") called outside of a working test";
+    if (!w) throw new Error("warn("+msg+") called outside of a working test");
     w.assertions.push({ message: msg, result: CoreTest.WARN });
     return this ;
   },
@@ -496,7 +496,7 @@ CoreTest.Plan = {
   */
   error: function(msg, e) {
     var w = this.working ;
-    if (!w) throw "error("+msg+") called outside of a working test";
+    if (!w) throw new Error("error("+msg+") called outside of a working test");
 
     if(e && typeof console != "undefined" && console.error && console.warn ) {
       console.error(msg);

@@ -113,7 +113,7 @@ SC.StatePathMatcher = SC.Object.extend(
       if (part.indexOf('~') >= 0) {
         part = part.split('~');
         if (part.length > 2) {
-          throw "Invalid use of '~' at part %@".fmt(i);
+          throw new Error("Invalid use of '~' at part %@".fmt(i));
         }
         token = SC.StatePathMatcher._ExpandToken.create({
           start: part[0], end: part[1]
@@ -122,7 +122,7 @@ SC.StatePathMatcher = SC.Object.extend(
       
       else if (part === 'this') {
         if (tokens.length > 0) {
-          throw "Invalid use of 'this' at part %@".fmt(i);
+          throw new Error("Invalid use of 'this' at part %@".fmt(i));
         }
         token = SC.StatePathMatcher._ThisToken.create();
       }

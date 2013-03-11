@@ -941,7 +941,7 @@ SC.Record = SC.Object.extend(
 
     // When all else fails throw and exception.
     if (!recordType || !SC.kindOf(recordType, SC.Record)) {
-      throw 'SC.Child: Error during transform: Invalid record type.';
+      throw new Error('SC.Child: Error during transform: Invalid record type.');
     }
 
     return recordType;
@@ -960,7 +960,7 @@ SC.Record = SC.Object.extend(
 
     hash = hash || {}; // init if needed
 
-    if (SC.none(store)) throw 'Error: during the creation of a child record: NO STORE ON PARENT!';
+    if (SC.none(store)) throw new Error('Error: during the creation of a child record: NO STORE ON PARENT!');
 
     // Check for a primary key in the child record hash and if not found, then
     // check for a custom id generation function and if we still have no id,
@@ -1425,8 +1425,8 @@ SC.Record.mixin( /** @scope SC.Record */ {
 
   _throwUnlessRecordTypeDefined: function(recordType, relationshipType) {
     if (!recordType) {
-      throw "Attempted to create " + relationshipType + " attribute with " +
-            "undefined recordType. Did you forget to sc_require a dependency?";
+      throw new Error("Attempted to create " + relationshipType + " attribute with " +
+            "undefined recordType. Did you forget to sc_require a dependency?");
     }
   },
 
