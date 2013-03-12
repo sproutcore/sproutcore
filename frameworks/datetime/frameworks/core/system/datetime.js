@@ -1009,26 +1009,26 @@ SC.DateTime.mixin(SC.Comparable,
           case 'A': check.dayOfWeek = scanner.scanArray(this.dayNames); break;
           case 'b': opts.month = scanner.scanArray(this.abbreviatedMonthNames) + 1; break;
           case 'B': opts.month = scanner.scanArray(this.monthNames) + 1; break;
-          case 'c': throw "%c is not implemented";
+          case 'c': throw new Error("%c is not implemented");
           case 'd':
           case 'D': opts.day = scanner.scanInt(1, 2); break;
-          case 'e': throw "%e is not implemented";
-          case 'E': throw "%E is not implemented";
+          case 'e': throw new Error("%e is not implemented");
+          case 'E': throw new Error("%E is not implemented");
           case 'h':
           case 'H': opts.hour = scanner.scanInt(1, 2); break;
           case 'i':
           case 'I': opts.hour = scanner.scanInt(1, 2); break;
-          case 'j': throw "%j is not implemented";
+          case 'j': throw new Error("%j is not implemented");
           case 'm': opts.month = scanner.scanInt(1, 2); break;
           case 'M': opts.minute = scanner.scanInt(1, 2); break;
           case 'p': opts.meridian = scanner.scanArray(this.AMPMNames); break;
           case 'S': opts.second = scanner.scanInt(1, 2); break;
           case 's': opts.millisecond = scanner.scanInt(1, 3); break;
-          case 'U': throw "%U is not implemented";
-          case 'W': throw "%W is not implemented";
-          case 'w': throw "%w is not implemented";
-          case 'x': throw "%x is not implemented";
-          case 'X': throw "%X is not implemented";
+          case 'U': throw new Error("%U is not implemented");
+          case 'W': throw new Error("%W is not implemented");
+          case 'w': throw new Error("%w is not implemented");
+          case 'x': throw new Error("%x is not implemented");
+          case 'X': throw new Error("%X is not implemented");
           case 'y': opts.year = scanner.scanInt(2); opts.year += (opts.year > 70 ? 1900 : 2000); break;
           case 'Y': opts.year = scanner.scanInt(4); break;
           case 'Z':
@@ -1178,7 +1178,7 @@ SC.DateTime.mixin(SC.Comparable,
                        0 if a == b
   */
   compare: function(a, b) {
-    if (SC.none(a) || SC.none(b)) throw "You must pass two valid dates to compare()";
+    if (SC.none(a) || SC.none(b)) throw new Error("You must pass two valid dates to compare()");
     var ma = a.get('milliseconds');
     var mb = b.get('milliseconds');
     return ma < mb ? -1 : ma === mb ? 0 : 1;
@@ -1198,7 +1198,7 @@ SC.DateTime.mixin(SC.Comparable,
       don't have the same timezone
   */
   compareDate: function(a, b) {
-    if (SC.none(a) || SC.none(b)) throw "You must pass two valid dates to compareDate()";
+    if (SC.none(a) || SC.none(b)) throw new Error("You must pass two valid dates to compareDate()");
     if (a.get('timezone') !== b.get('timezone')) throw SC.DATETIME_COMPAREDATE_TIMEZONE_ERROR;
     var ma = a.adjust({hour: 0}).get('milliseconds');
     var mb = b.adjust({hour: 0}).get('milliseconds');
@@ -1217,7 +1217,7 @@ SC.DateTime.mixin(SC.Comparable,
     @param {String} format the interval to get the difference in
   */
   difference: function(a, b, format) {
-    if (SC.none(a) || SC.none(b)) throw "You must pass two valid dates to difference()";
+    if (SC.none(a) || SC.none(b)) throw new Error("You must pass two valid dates to difference()");
     var ma = a.get('milliseconds'),
         mb = b.get('milliseconds'),
         diff = mb - ma,

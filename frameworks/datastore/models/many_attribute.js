@@ -99,7 +99,7 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
   fromType: function(record, key, value) {
     var ret = [];
 
-    if(!SC.isArray(value)) throw "Expects toMany attribute to be an array";
+    if(!SC.isArray(value)) throw new Error("Expects toMany attribute to be an array");
 
     var len = value.get('length');
     for(var i=0;i<len;i++) {

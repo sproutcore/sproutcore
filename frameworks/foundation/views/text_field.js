@@ -441,7 +441,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       // The client is setting the value.  Make sure the new value is a text
       // selection object.
       if (!value  ||  !value.kindOf  ||  !value.kindOf(SC.TextSelection)) {
-        throw "When setting the selection, you must specify an SC.TextSelection instance.";
+        throw new Error("When setting the selection, you must specify an SC.TextSelection instance.");
       }
 
       if (element) {

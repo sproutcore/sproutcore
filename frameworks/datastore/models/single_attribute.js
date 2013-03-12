@@ -60,7 +60,7 @@ SC.SingleAttribute = SC.RecordAttribute.extend(
 
       // can only take other records or null
       if (newRec && !SC.kindOf(newRec, SC.Record)) {
-        throw "%@ is not an instance of SC.Record".fmt(newRec);
+        throw new Error("%@ is not an instance of SC.Record".fmt(newRec));
       }
 
       inverseKey = this.get('inverse');

@@ -282,13 +282,13 @@ SC.Validator.mixin(/** @scope SC.Validator */ {
       validatorKey = SC.String.classify(validatorKey);
       var validatorClass = SC.Validator[validatorKey] ;
       if (SC.none(validatorClass)) {
-        throw "validator %@ not found for %@".fmt(validatorKey, field) ;
+        throw new Error("validator %@ not found for %@".fmt(validatorKey, field));
       } else if (name) {
 
         // if a key was also passed, then find the validator in the list of
         // validators for the form.  Otherwise, just create a new instance.
         if (!form) {
-          throw "named validator (%@) could not be found for field %@ because the field does not belong to a form".fmt(name,field) ;
+          throw new Error("named validator (%@) could not be found for field %@ because the field does not belong to a form".fmt(name,field));
         }
         
         if (!form._validatorHash) form._validatorHash = {} ;

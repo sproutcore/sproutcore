@@ -1194,7 +1194,7 @@ SC.mixin(SC.Animatable, {
         if (action && SC.typeOf(action) == SC.T_FUNCTION) {
           action.call(target, callback.source);
         } else {
-          throw 'SC.Animator could not find a function at %@'.fmt(callback.action) ;
+          throw new Error('SC.Animator could not find a function at %@'.fmt(callback.action));
         }
 
       // otherwise, try to execute action direction on target or send down

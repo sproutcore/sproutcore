@@ -42,7 +42,7 @@ SC.Comparable = {
     @returns {Integer} the result of the comparison
   */
   compare: function(a, b) {
-    throw "%@.compare() is not implemented".fmt(this.toString());
+    throw new Error("%@.compare() is not implemented".fmt(this.toString()));
   }
 
 };

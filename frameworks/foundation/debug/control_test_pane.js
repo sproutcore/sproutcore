@@ -74,7 +74,7 @@ SC.ControlTestPane = SC.Pane.extend(
   */
   view: function(keyName) { 
     var idx = this._views[keyName];
-    if (!idx) throw "SC.ControlTestPane does not have a view named %@".fmt(keyName);
+    if (!idx) throw new Error("SC.ControlTestPane does not have a view named %@".fmt(keyName));
     return this.childViews[idx].childViews[0]; 
   },
   
@@ -182,7 +182,7 @@ SC.ControlTestPane.standardSetup = function() {
 */
 SC.ControlTestPane.view = function(viewKey) {
   var pane = this._pane || this._showPane ;
-  if (!pane) throw "view() cannot be called on a class";
+  if (!pane) throw new Error("view() cannot be called on a class");
   return pane.view(viewKey);
 };
 

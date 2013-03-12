@@ -214,7 +214,7 @@ SC.mixin( /** @scope SC */ {
     padding = 0;
 
     if (!element) {
-      throw "measureString requires a string measurement environment to be set up. Did you mean metricsForString?";
+      throw new Error("measureString requires a string measurement environment to be set up. Did you mean metricsForString?");
     }
 
     // since the string has already been escaped (if the user wants it to be),

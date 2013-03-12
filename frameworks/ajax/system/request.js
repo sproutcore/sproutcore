@@ -389,9 +389,9 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
     // is synchronous (because it wouldn't work).
     var timeout = this.get('timeout');
     if (timeout && !this.get('isAsynchronous')) {
-      throw "Timeout values cannot be used with synchronous requests";
+      throw new Error("Timeout values cannot be used with synchronous requests");
     } else if (timeout === 0) {
-      throw "The timeout value must either not be specified or must be greater than 0";
+      throw new Error("The timeout value must either not be specified or must be greater than 0");
     }
 
     if (body) { this.set('body', body); }

@@ -308,7 +308,7 @@ SC.Set = SC.mixin({},
   addEach: function(objects) {
     if (this.isFrozen) throw SC.FROZEN_ERROR;
     if (!objects || !objects.isEnumerable) {
-      throw "%@.addEach must pass enumerable".fmt(this);
+      throw new Error("%@.addEach must pass enumerable".fmt(this));
     }
 
     var idx, isObservable = this.isObservable ;
@@ -396,7 +396,7 @@ SC.Set = SC.mixin({},
   removeEach: function(objects) {
     if (this.isFrozen) throw SC.FROZEN_ERROR;
     if (!objects || !objects.isEnumerable) {
-      throw "%@.addEach must pass enumerable".fmt(this);
+      throw new Error("%@.addEach must pass enumerable".fmt(this));
     }
 
     var idx, isObservable = this.isObservable ;
