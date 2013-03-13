@@ -410,7 +410,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
 
     // Legacy support for actions that are functions
     if (SC.typeOf(action) === SC.T_FUNCTION) {
-      action.apply(target, [rootMenu]);
+      action.apply(target, [this]);
       //@if(debug)
       SC.Logger.warn('Support for menu item action functions has been deprecated. Please use target and action.');
       //@endif
