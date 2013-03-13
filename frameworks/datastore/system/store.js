@@ -2127,13 +2127,14 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // push each record
     for(idx=0;idx<len;idx++) {
       dataHash = dataHashes.objectAt(idx);
-      if (isArray) {
-        recordType = recordTypes.objectAt(idx) || SC.Record;
-        primaryKey = recordType.prototype.primaryKey ;
+      if (dataHash) {
+        if (isArray) {
+          recordType = recordTypes.objectAt(idx) || SC.Record;
+          primaryKey = recordType.prototype.primaryKey ;
+        }
+        id = (ids) ? ids.objectAt(idx) : dataHash[primaryKey];
+        ret[idx] = this.loadRecord(recordType, dataHash, id);
       }
-      id = (ids) ? ids.objectAt(idx) : dataHash[primaryKey];
-      ret[idx] = this.loadRecord(recordType, dataHash, id);
-
     }
 
     // return storeKeys
