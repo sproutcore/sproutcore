@@ -2063,7 +2063,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {SC.Record} recordType the record type
     @param {Array} dataHash to update
     @param {Array} id optional.  if not passed lookup on the hash
-    @returns {String} store keys assigned to these id
+    @returns {String} the store key associated with the loaded record
   */
   loadRecord: function(recordType, dataHash, id) {
     var K       = SC.Record,
