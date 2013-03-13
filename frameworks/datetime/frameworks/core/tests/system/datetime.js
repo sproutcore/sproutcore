@@ -238,6 +238,41 @@ test('Format', function() {
   equals(dt.adjust({ timezone:  420 }).toFormattedString('%Y-%m-%d %H:%M:%S %Z'), '1985-06-07 22:00:22 -07:00'); // the previous day
 });
 
+
+//test('Properly Computes Suffix in toFormattedString', function(){
+//  equals(SC.DateTime.create({day: 1}).get('suffix'), 'st');
+//  equals(SC.DateTime.create({day: 2}).get('suffix'), 'nd');
+//  equals(SC.DateTime.create({day: 3}).get('suffix'), 'rd');
+//  equals(SC.DateTime.create({day: 4}).get('suffix'), 'th');
+//  equals(SC.DateTime.create({day: 5}).get('suffix'), 'th');
+//  equals(SC.DateTime.create({day: 6}).get('suffix'), 'th');
+//  equals(SC.DateTime.create({day: 7}).get('suffix'), 'th');
+//  equals(SC.DateTime.create({day: 8}).get('suffix'), 'th');
+//  equals(SC.DateTime.create({day: 9}).get('suffix'), 'th');
+//  equals(SC.DateTime.create({day: 10}).get('suffix'), 'th');
+//  equals(SC.DateTime.create({day: 11}).get('suffix'), 'th');
+//  equals(SC.DateTime.create({day: 12}).get('suffix'), 'th');
+//  equals(SC.DateTime.create({day: 13}).get('suffix'), 'th');
+//  equals(SC.DateTime.create({day: 14}).get('suffix'), 'th');
+//  equals(SC.DateTime.create({day: 15}).get('suffix'), 'th');
+//  equals(SC.DateTime.create({day: 16}).get('suffix'), 'th');
+//  equals(SC.DateTime.create({day: 17}).get('suffix'), 'th');
+//  equals(SC.DateTime.create({day: 18}).get('suffix'), 'th');
+//  equals(SC.DateTime.create({day: 19}).get('suffix'), 'th');
+//  equals(SC.DateTime.create({day: 20}).get('suffix'), 'th');
+//  equals(SC.DateTime.create({day: 21}).get('suffix'), 'st');
+//  equals(SC.DateTime.create({day: 22}).get('suffix'), 'nd');
+//  equals(SC.DateTime.create({day: 23}).get('suffix'), 'rd');
+//  equals(SC.DateTime.create({day: 24}).get('suffix'), 'th');
+//  equals(SC.DateTime.create({day: 25}).get('suffix'), 'th');
+//  equals(SC.DateTime.create({day: 26}).get('suffix'), 'th');
+//  equals(SC.DateTime.create({day: 27}).get('suffix'), 'th');
+//  equals(SC.DateTime.create({day: 28}).get('suffix'), 'th');
+//  equals(SC.DateTime.create({day: 29}).get('suffix'), 'th');
+//  equals(SC.DateTime.create({day: 30}).get('suffix'), 'th');
+//  equals(SC.DateTime.create({day: 31}).get('suffix'), 'th');
+//});
+
 test('fancy getters', function() {
   equals(dt.get('isLeapYear'), NO);
 

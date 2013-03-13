@@ -421,6 +421,18 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
     return this.constructor._toFormattedString(SC.DATETIME_ISO8601, this._ms, this.timezone);
   },
 
+   /**
+     Returns the suffix of the date for use in english eg 21st 22nd 22rd
+    speech.
+
+    @return {String}
+   */
+  suffix: function(){
+
+
+     return '';
+   }.property(),
+
   /**
     @private
 
