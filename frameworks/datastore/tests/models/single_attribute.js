@@ -291,7 +291,7 @@ test("adding toOne pointing to non existing class should throw error", function(
       foo: SC.Record.toOne(MyApp.DoesNotExist)
     });
   } catch (x) {
-    message = x;
+    message = x.message;
   }
 
   same(message, 'Attempted to create toOne attribute with undefined recordType. Did you forget to sc_require a dependency?');
@@ -304,7 +304,7 @@ test("adding toMany pointing to non existing class should throw error", function
       foo: SC.Record.toMany(MyApp.DoesNotExist)
     });
   } catch (x) {
-    message = x;
+    message = x.message;
   }
 
   same(message, 'Attempted to create toMany attribute with undefined recordType. Did you forget to sc_require a dependency?');
