@@ -1337,9 +1337,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     } else if (status & K.BUSY) {
       throw K.BUSY_ERROR ;
 
-    // if new status, destroy but leave in clean state
+    // if new status, destroy in clean state
     } else if (status === K.READY_NEW) {
       status = K.DESTROYED_CLEAN ;
+      this.removeDataHash(storeKey, status) ;
 
     // otherwise, destroy in dirty state
     } else status = K.DESTROYED_DIRTY ;
