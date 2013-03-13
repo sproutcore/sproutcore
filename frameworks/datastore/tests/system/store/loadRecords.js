@@ -97,4 +97,24 @@
       ok(store.peekStatus(storeKey) & SC.Record.READY_CLEAN, "Record is in SC.Record.READY_CLEAN state after loading into store for index %@".fmt(index));
     });
   });
+  
+  test("loadRecords with nulls loads new records in store", function() {
+    var peopleWithNulls = people.slice(),
+        storeKeys = [], didFail = false;
+
+    peopleWithNulls.push(null);
+
+    try {
+      storeKeys = store.loadRecords(Person, peopleWithNulls);
+    } catch (e) {
+      didFail = true;
+    }
+
+    ok(!didFail, "Loading records from a hash array with null records doesn't fail.");
+
+    // Slight cheat here: people's length is the same as peopleWithNulls's length sans the null.
+    equals(storeKeys.length, people.length, "The number of records loaded equals the number of valid hashes submitted.");
+
+  });
+
 })();
