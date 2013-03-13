@@ -968,7 +968,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
 
   /** @private
-    Will ask all record arrays that have been returned from `findAll`
+    Will ask all record arrays that have been returned from `find`
     with an `SC.Query` to check their arrays with the new `storeKey`s
 
     @param {SC.IndexSet} storeKeys set of storeKeys that changed

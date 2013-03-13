@@ -16,7 +16,7 @@ sc_require('models/record');
   your application can work with.
 
   Normally you do not create `RecordArray`s yourself.  Instead, a
-  `RecordArray` is returned when you call `SC.Store.findAll()`, already
+  `RecordArray` is returned when you call `SC.Store.find()`, already
   properly configured. You can usually just work with the `RecordArray`
   instance just like any other array.
 

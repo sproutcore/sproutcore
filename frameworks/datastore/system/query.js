@@ -22,10 +22,10 @@ sc_require('models/record');
 
       q.contains(record)
 
-  To find all records of your store, that match query q, use findAll with
+  To find all records of your store, that match query q, use find with
   query q as argument:
 
-      r = MyApp.store.findAll(q)
+      r = MyApp.store.find(q)
 
   `r` will be a record array containing all matching records.
   To limit the query to a record type of `MyApp.MyModel`,

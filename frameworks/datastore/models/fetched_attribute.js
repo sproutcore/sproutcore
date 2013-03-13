@@ -14,14 +14,14 @@ sc_require('models/record_attribute');
   when you request it.  Normally getting a property value with this attribute
   applied will cause call the `find()` method on the record store passing
   the attribute record type as the query key along with the property value,
-  owner record, and property key name as parameters. 
-  
-  The DataSource you hook up to your store must know how to load this kind 
+  owner record, and property key name as parameters.
+
+  The DataSource you hook up to your store must know how to load this kind
   of relationship for this fetched property to work properly.
-  
+
   The return value is usually an `SC.RecordArray` that will populate with the
   record data so that you can display it.
-  
+
   @extends SC.RecordAttribute
   @since SproutCore 1.0
 */
@@ -29,9 +29,9 @@ SC.FetchedAttribute = SC.RecordAttribute.extend(
   /** @scope SC.FetchedAttribute.prototype */ {
 
   /**
-    Define the param key that will be passed to the `findAll` method on the
+    Define the param key that will be passed to the `find` method on the
     store.  If `null`, the param will not be sent.  Defaults to `'link'`
-    
+
     @property {String}
   */
   paramValueKey: 'link',
@@ -39,43 +39,43 @@ SC.FetchedAttribute = SC.RecordAttribute.extend(
   /**
     Define the param key used to send the parent record.  If `null`, the param
     will not be sent.  Defaults to '`owner'`.
-    
+
     @property {String}
   */
   paramOwnerKey: 'owner',
-  
+
   /**
-    Define the param key used to send the key name used to reference this 
+    Define the param key used to send the key name used to reference this
     attribute.  If `null`, the param will not be sent.  Defaults to `"rel"`
-    
+
     @property {String}
   */
   paramRelKey: 'rel',
-  
+
   /**
-    Optional query key to pass to findAll.  Otherwise type class will be 
+    Optional query key to pass to find.  Otherwise type class will be
     passed.
-    
+
     @property {String}
   */
   queryKey: null,
 
-  /** 
-    Fetched attributes are not editable 
-    
+  /**
+    Fetched attributes are not editable
+
     @property {Boolean}
   */
-  isEditable: NO,  
-  
+  isEditable: NO,
+
   // ..........................................................
   // LOW-LEVEL METHODS
-  // 
-  
-  /**  @private - adapted for fetching. do findAll */
+  //
+
+  /**  @private - adapted for fetching. do find */
   toType: function(record, key, value) {
     var store = record.get('store');
     if (!store) return null ; // nothing to do
-    
+
     var paramValueKey = this.get('paramValueKey'),
         paramOwnerKey = this.get('paramOwnerKey'),
         paramRelKey   = this.get('paramRelKey'),
@@ -86,15 +86,15 @@ SC.FetchedAttribute = SC.RecordAttribute.extend(
     if (paramValueKey) params[paramValueKey] = value ;
     if (paramOwnerKey) params[paramOwnerKey] = record ;
     if (paramRelKey)   params[paramRelKey]   = this.get('key') || key ;
-    
+
     // make request - should return SC.RecordArray instance
-    return store.findAll(queryKey, params);
+    return store.find(queryKey, params);
   },
 
   /** @private - fetched attributes are read only. */
   fromType: function(record, key, value) {
     return value;
   }
-  
+
 }) ;
 

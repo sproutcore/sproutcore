@@ -470,12 +470,6 @@ SC.NestedStore = SC.Store.extend(
     return this.get('parentStore').queryFor(recordType, conditions, params);
   },
 
-  /** @private - adapt for nested store */
-  findAll: function(recordType, conditions, params, recordArray, _store) {
-    if (!_store) _store = this;
-    return this.get('parentStore').findAll(recordType, conditions, params, recordArray, _store);
-  },
-
   // ..........................................................
   // CORE RECORDS API
   //
