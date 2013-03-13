@@ -5,8 +5,6 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('system/Number');
-
 SC.supplement(Number.prototype, {
 
   /**
@@ -14,10 +12,23 @@ SC.supplement(Number.prototype, {
    *
    * eg: 1 => st, 2 => 2nd
    *
-   * Delegates to the current locale to try and localize it, otherwise uses
-   * english.
+   *
+   * If the current Locale exists (which it almost always does except for in
+   * testing) we try and delegate to it. Otherwise we use this inner anonymous
+   * function (to prevent further mucking with the prototype)
+   *
    */
   ordinal: function () {
-    return SC.Locale.currentLocale.ordinalForNumber(this);
+
+    var _ordinal = function (number) {
+      var d = number % 10;
+      return (~~(number % 100 / 10) === 1) ? 'th' :
+        (d === 1) ? 'st' :
+          (d === 2) ? 'nd' :
+            (d === 3) ? 'rd' : 'th';
+    };
+
+    return SC.Local ? SC.Locale.currentLocale.ordinalForNumber(this) : _ordinal(this);
   }
+
 });
