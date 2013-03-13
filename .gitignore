@@ -5,6 +5,7 @@
 .gitattributes
 *.swp
 *.swo
+*.iml
 themes/sc_ace/resources/slices/
 tmp/
 bin

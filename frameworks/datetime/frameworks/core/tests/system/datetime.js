@@ -238,6 +238,26 @@ test('Format', function() {
   equals(dt.adjust({ timezone:  420 }).toFormattedString('%Y-%m-%d %H:%M:%S %Z'), '1985-06-07 22:00:22 -07:00'); // the previous day
 });
 
+/**
+ * This test only tests english (the default) because Locale is not loaded as
+ * part of this test (bummer)
+ */
+test('Properly Computes day ordinal in toFormattedString', function(){
+  [1, 21, 31].forEach(function(day){
+    equals(SC.DateTime.create({month: 3, day: day}).toFormattedString('%o'), 'st');
+  });
+  [2, 22].forEach(function(day){
+    equals(SC.DateTime.create({month: 3, day: day}).toFormattedString('%o'), 'nd');
+  });
+  [3, 23].forEach(function(day){
+    equals(SC.DateTime.create({month: 3, day: day}).toFormattedString('%o'), 'rd');
+  });
+
+  [4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,24,25,26,27,28,29,30].forEach(function(day){
+    equals(SC.DateTime.create({month: 3, day: day}).toFormattedString('%o'), 'th');
+  });
+});
+
 test('fancy getters', function() {
   equals(dt.get('isLeapYear'), NO);
 

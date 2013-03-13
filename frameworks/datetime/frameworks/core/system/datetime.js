@@ -421,6 +421,16 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
     return this.constructor._toFormattedString(SC.DATETIME_ISO8601, this._ms, this.timezone);
   },
 
+   /**
+     Returns the suffix of the date for use in english eg 21st 22nd 22rd
+    speech.
+
+    @return {String}
+   */
+  dayOrdinal: function(){
+     return this.get('day').ordinal();
+   }.property(),
+
   /**
     @private
 
@@ -1120,6 +1130,7 @@ SC.DateTime.mixin(SC.Comparable,
       case 'j': return this._pad(this._get('dayOfYear'), 3);
       case 'm': return this._pad(this._get('month'));
       case 'M': return this._pad(this._get('minute'));
+      case 'o': return this._get('day').ordinal();
       case 'p': return this._get('hour') > 11 ? this.AMPMNames[1] : this.AMPMNames[0];
       case 'S': return this._pad(this._get('second'));
       case 's': return this._pad(this._get('millisecond'), 3);
@@ -1152,7 +1163,7 @@ SC.DateTime.mixin(SC.Comparable,
     // need to move into local time zone for these calculations
     this._setCalcState(start - (timezone * 60000), 0); // so simulate a shifted 'UTC' time
 
-    return format.replace(/\%([aAbBcdeEDhHiIjmMpsSUWwxXyYZ\%])/g, function() {
+    return format.replace(/\%([aAbBcdeEDhHiIjmMopsSUWwxXyYZ\%])/g, function() {
       var v = that.__toFormattedString.call(that, arguments, start, timezone);
       return v;
     });

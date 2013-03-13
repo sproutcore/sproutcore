@@ -77,6 +77,13 @@ SC.Locale = SC.Object.extend({
     return "SC.Locale["+this.language+"]"+SC.guidFor(this) ;
   },
 
+
+  ordinalForNumber: function(number){
+    var englishFunction = SC.Locale._numberOrdinalFunctions.en,
+      currentFunction = SC.Locale._numberOrdinalFunctions[this.language] || englishFunction;
+    return currentFunction(number);
+  },
+
   /**
     Returns the localized version of the string or the string if no match
     was found.
@@ -226,10 +233,10 @@ SC.Locale.mixin(/** @scope SC.Locale */ {
     var autodetect = (String.useAutodetectedLanguage !== undefined) ? String.useAutodetectedLanguage : this.useAutodetectedLanguage;
     var preferred = (String.preferredLanguage !== undefined) ? String.preferredLanguage : this.preferredLanguage ;
 
+
     // determine the language
     var lang = ((autodetect) ? SC.browser.language : null) || preferred || SC.browser.language || 'en';
     lang = SC.Locale.normalizeLanguage(lang) ;
-
     // get the locale class.  If a class cannot be found, fall back to generic
     // language then to english.
     var klass = this.localeClassFor(lang) ;
@@ -387,6 +394,24 @@ SC.Locale.mixin(/** @scope SC.Locale */ {
     ret.options = SC.Locale.options ;
     ret.toString = SC.Locale.toString ;
     return ret ;
+  },
+
+  /**
+   * Contains the ordinal functions for each language, these functions are
+   * expected to take a number as the type and return a string
+   *
+   *
+   */
+  _numberOrdinalFunctions: {
+
+    en: function(number) {
+      var d = number % 10;
+      return (~~ (number % 100 / 10) === 1) ? 'th' :
+             (d === 1) ? 'st' :
+             (d === 2) ? 'nd' :
+             (d === 3) ? 'rd' : 'th';
+    }
+
   }
 
 }) ;
@@ -404,9 +429,7 @@ SC.Locale.locales = {
   de: SC.Locale.extend({ _deprecatedLanguageCodes: ['German'] }),
   ja: SC.Locale.extend({ _deprecatedLanguageCodes: ['Japanese', 'jp'] }),
   es: SC.Locale.extend({ _deprecatedLanguageCodes: ['Spanish'] })
-} ;
-
-
+};
 
 
 /**
