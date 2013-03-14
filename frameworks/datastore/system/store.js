@@ -2417,53 +2417,81 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   // stores.  This is why these methods are implemented here instead of
   // directly on `Query` or `RecordArray` objects.
 
-  /**
-    Sets the passed array of storeKeys as the new data for the query.  You
-    can call this at any time for a remote query to update its content.  If
-    you want to use incremental loading, then pass a `SparseArray` object.
-
-    If the query you pass is not a REMOTE query, then this method will raise
-    an exception.  This will also implicitly transition the query state to
-    `SC.Record.READY`.
-
-    If you called `loadRecords()` before to load the actual content, you can
-    call this method with the return value of that method to actually set the
-    storeKeys on the result.
+  /** @deprecated
 
     @param {SC.Query} query the query you are loading.  must be remote.
     @param {SC.Array} storeKeys array of store keys
     @returns {SC.Store} receiver
   */
   loadQueryResults: function(query, storeKeys) {
+    //@if(debug)
     if (query.get('location') === SC.Query.LOCAL) {
-      throw new Error("Cannot load query results for a local query");
+      throw new Error("Developer Error: You should not call loadQueryResults with a local query.  You need to use dataSourceDidFetchQuery instead.");
+    } else {
+      SC.warn("Developer Warning: loadQueryResults has been deprecated in favor of using dataSourceDidFetchQuery for both local and remote queries.  With remote queries, include the store keys when calling dataSourceDidFetchQuery.");
     }
+    //@endif
 
-    var recArray = this._findQuery(query, YES, NO);
-    if (recArray) recArray.set('storeKeys', storeKeys);
-    this.dataSourceDidFetchQuery(query);
-
-    return this ;
+    return this.dataSourceDidFetchQuery(query, storeKeys);
   },
 
   /**
     Called by your data source whenever you finish fetching the results of a
-    query.  This will put the query into a READY state if it was loading.
+    query.  This will put the record array for the query into a READY_CLEAN
+    state if it was previously loading or refreshing.
 
-    Note that if the query is a REMOTE query, then you must separately load
-    the results into the query using `loadQueryResults()`.  If the query is
-    LOCAL, then the query will update automatically with any new records you
-    added to the store.
+    # Handling REMOTE queries
 
-    @param {SC.Query} query the query you fetched
+    Note that if the query is REMOTE, then you must first load the results
+    into the store using `loadRecords()` and pass the ordered array of store
+    keys returned by `loadRecords()` into this method.
+
+    For example,
+
+        storeKeys = store.loadRecords(body.contacts);
+        store.dataSourceDidFetchQuery(query, storeKeys);
+
+    # Automatic updates
+
+    When you call this method the record array for the query will notify that
+    its contents have changed.  If the query is LOCAL then the contents will
+    update automatically to include any new records you added to the store.
+    If the query is REMOTE the contents will update to be the ordered records
+    for the passed in store keys.
+
+    # Incremental loading for REMOTE queries
+
+    If you want to support incremental loading, then pass an SC.SparseArray
+    object to hold the store keys.  This will allow you to load results
+    incrementally and provide more store keys as you do.
+
+    See the SC.SparseArray documentation for more information.
+
+    @param {SC.Query} query The query you fetched
+    @param {Array} [storeKeys] Ordered array of store keys as returned by a remote query.  NOTE: Required for remote queries.
     @returns {SC.Store} receiver
   */
-  dataSourceDidFetchQuery: function(query) {
-    return this._scstore_dataSourceDidFetchQuery(query, YES);
+  dataSourceDidFetchQuery: function (query, storeKeys) {
+    var recArray = this._findQuery(query, YES, NO);
+
+    // Set the ordered array of store keys for remote queries.
+    if (recArray && query.get('isRemote')) {
+      //@if(debug)
+      // Prevent confusion between local and remote requests.
+      if (SC.none(storeKeys)) {
+        throw new Error("Developer Error: The storeKeys argument in dataSourceDidFetchQuery is not optional for remote queries.  For a remote query you must include the ordered array of store keys for the loaded records (even if it's an empty array).");
+      }
+      //@endif
+
+      recArray.set('storeKeys', storeKeys);
+    }
+
+    return this._scstore_dataSourceDidFetchQuery(query);
   },
 
-  _scstore_dataSourceDidFetchQuery: function(query, createIfNeeded) {
-    var recArray     = this._findQuery(query, createIfNeeded, NO),
+  /** @private */
+  _scstore_dataSourceDidFetchQuery: function (query) {
+    var recArray     = this._findQuery(query, NO, NO),
         nestedStores = this.get('nestedStores'),
         loc          = nestedStores ? nestedStores.get('length') : 0;
 
@@ -2471,11 +2499,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     if (recArray) recArray.storeDidFetchQuery(query);
 
     // notify nested stores
-    while(--loc >= 0) {
-      nestedStores[loc]._scstore_dataSourceDidFetchQuery(query, NO);
+    while (--loc >= 0) {
+      nestedStores[loc]._scstore_dataSourceDidFetchQuery(query);
     }
 
-    return this ;
+    return this;
   },
 
   /**
