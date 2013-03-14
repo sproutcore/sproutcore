@@ -488,6 +488,26 @@ SC.MenuPane = SC.PickerPane.extend(
   menuItemKeys: ['itemTitleKey', 'itemValueKey', 'itemIsEnabledKey', 'itemIconKey', 'itemSeparatorKey', 'itemActionKey', 'itemCheckboxKey', 'itemShortCutKey', 'itemHeightKey', 'itemSubMenuKey', 'itemKeyEquivalentKey', 'itemTargetKey', 'itemLayerIdKey'],
 
   // ..........................................................
+  // DEFAULT PROPERTIES
+  //
+
+  /*
+    If an item doesn't specify a target, this is used. (Only used if an action is found and is not a function.)
+
+    @type String
+    @default null
+  */
+  target: null,
+
+  /*
+    If an item doesn't specify an action, this is used.
+
+    @type String
+    @default null
+  */
+  action: null,
+
+  // ..........................................................
   // INTERNAL PROPERTIES
   //
 
