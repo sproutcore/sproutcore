@@ -420,7 +420,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
 
     // return result or compare by storeKey
     if (result !== 0) return result ;
-    else return SC.compare(record1.get('storeKey'),record2.get('storeKey'));
+    else return SC.compare(record1.get('storeKey'), record2.get('storeKey'));
   },
 
   /** @private
@@ -1350,11 +1350,11 @@ SC.Query.mixin( /** @scope SC.Query */ {
 
     @param {String} location the query location.
     @param {SC.Record|Array} recordType the record type or types.
-    @param {String} conditions optional conditions
-    @param {Hash} params optional params. or pass multiple args.
+    @param {String} [conditions] The conditions string.
+    @param {Object} [parameters] The parameters object.
     @returns {SC.Query}
   */
-  build: function(location, recordType, conditions, params) {
+  build: function(location, recordType, conditions, parameters) {
 
     var opts = null,
         ret, cache, key, tmp;
@@ -1380,17 +1380,17 @@ SC.Query.mixin( /** @scope SC.Query */ {
       recordType = ret ;
     } else if (!recordType) recordType = SC.Record; // find all records
 
-    if (params === undefined) params = null;
+    if (parameters === undefined) parameters = null;
     if (conditions === undefined) conditions = null;
 
-    // normalize other params. if conditions is just a hash, treat as opts
-    if (!params && (typeof conditions !== SC.T_STRING)) {
+    // normalize other parameters. if conditions is just a hash, treat as opts
+    if (!parameters && (typeof conditions !== SC.T_STRING)) {
       opts = conditions;
       conditions = null ;
     }
 
     // special case - easy to cache.
-    if (!params && !opts) {
+    if (!parameters && !opts) {
 
       tmp = SC.Query._scq_recordTypeCache;
       if (!tmp) tmp = SC.Query._scq_recordTypeCache = {};
@@ -1425,9 +1425,9 @@ SC.Query.mixin( /** @scope SC.Query */ {
         opts.recordTypes = recordType;
       } else opts.recordType = recordType;
 
-      // set conditions and params if needed
+      // set conditions and parameters if needed
       if (conditions) opts.conditions = conditions;
-      if (params) opts.parameters = params;
+      if (parameters) opts.parameters = parameters;
 
       ret = SC.Query.create(opts).freeze();
     }
@@ -1440,25 +1440,40 @@ SC.Query.mixin( /** @scope SC.Query */ {
     the parameters you can pass to this method, see `SC.Query.build()`.
 
     @param {SC.Record|Array} recordType the record type or types.
-    @param {String} conditions optional conditions
-    @param {Hash} params optional params. or pass multiple args.
+    @param {String} [conditions] The conditions string.
+    @param {Object} [parameters] The parameters object.
     @returns {SC.Query}
   */
-  local: function(recordType, conditions, params) {
-    return this.build(SC.Query.LOCAL, recordType, conditions, params);
+  local: function(recordType, conditions, parameters) {
+    return this.build(SC.Query.LOCAL, recordType, conditions, parameters);
   },
 
   /**
-    Returns a `REMOTE` query with the passed options.  For a full description of
-    the parameters you can pass to this method, see `SC.Query.build()`.
+    Returns a `REMOTE` query with the passed options.
+
+    For example,
+
+        // The data source can alter the parameters of its request using
+        // the value of `query.beginsWith`.
+        query = SC.Query.remote(MyApp.Person, { beginsWith: 'T' });
 
     @param {SC.Record|Array} recordType the record type or types.
-    @param {String} conditions optional conditions
-    @param {Hash} params optional params. or pass multiple args.
+    @param {Object} [options] Additional options to be included in the query.
     @returns {SC.Query}
   */
-  remote: function(recordType, conditions, params) {
-    return this.build(SC.Query.REMOTE, recordType, conditions, params);
+  remote: function(recordType, options, oldParameters) {
+    // This used to have arguments: conditions and params.  Because both
+    // conditions and params are optional, the developer may be passing in null
+    // conditions with a params object in order to use query.parameters or they
+    // may be passing a conditions object which ended up becoming direct
+    // properties of the query.
+    // Long story short, argument overloading continues to suck ass!
+    // @if(debug)
+    if (SC.none(options) && !SC.none(oldParameters) || SC.typeOf(options) === SC.T_STRING) {
+      SC.warn("Developer Warning: Remote queries should not include conditions and parameters, these properties are unique to local queries.  To pass options for a remote query to the data source, please pass an object as the second argument to `remote` and access the object's properties directly.");
+    }
+    // @endif
+    return this.build(SC.Query.REMOTE, recordType, options, oldParameters);
   },
 
   /** @private
