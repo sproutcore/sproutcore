@@ -1032,6 +1032,10 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     @returns {SC.View} instantiated view
   */
   itemViewForContentIndex: function (idx, rebuild) {
+    if (idx < 0) {
+      throw new Error("Cannot find an itemView with a contentIndex of "+idx);
+    }
+
     var ret;
 
     // Use an existing view for this index if we have it.
