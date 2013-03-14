@@ -2880,21 +2880,3 @@ SC.Store.mixin(/** @scope SC.Store.prototype */{
   }
 
 });
-
-
-/** @private */
-SC.Store.prototype.nextStoreIndex = 1;
-
-// ..........................................................
-// COMPATIBILITY
-//
-
-/** @private
-  global store is used only for deprecated compatibility methods.  Don't use
-  this in real code.
-*/
-SC.Store._getDefaultStore = function() {
-  var store = this._store;
-  if(!store) this._store = store = SC.Store.create();
-  return store;
-};
