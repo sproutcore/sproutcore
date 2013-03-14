@@ -341,9 +341,8 @@ test("Setting the selection to a null value should fail", function() {
   var thrownException = null;
   try {
     view.set('selection', null);
-  }
-  catch(e) {
-    thrownException = e;
+  } catch(e) {
+    thrownException = e.message;
   }
   ok(thrownException.indexOf !== undefined, 'an exception should have been thrown');
   if (thrownException.indexOf !== undefined) {
@@ -359,9 +358,8 @@ test("Setting the selection to a non-SC.TextSelection value should fail", functi
   var thrownException = null;
   try {
     view.set('selection', {start: 0, end: 0});
-  }
-  catch(e) {
-    thrownException = e;
+  } catch(e) {
+    thrownException = e.message;
   }
   ok(thrownException.indexOf !== undefined, 'an exception should have been thrown');
   if (thrownException.indexOf !== undefined) {
