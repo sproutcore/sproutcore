@@ -8,22 +8,22 @@
 /**
   @class SC.CSSStyle
 
-  A css style object represents a css style that is part of a single css rule 
+  A css style object represents a css style that is part of a single css rule
   in a single css style sheet.
-  
+
   @extends SC.Object
 */
 SC.CSSStyle = SC.Object.extend(
 /** @scope SC.CSSStyle.prototype */ {
-  
+
   /**
-    @property {String} a css string representing the style property
+    @type String a css string representing the style property
   */
   style: '',
-  
+
   /**
     @property {SC.CSSRule} the rule this style is part of
   */
   rule: null
-  
+
 });

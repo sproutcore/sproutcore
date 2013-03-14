@@ -15,7 +15,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
     If the tag is a list ('ul' or 'ol') each item will be wrapped into a 'li' tag.
     If the tag is a table ('table', 'thead', 'tbody') each item will be wrapped into a 'tr' tag.
 
-    @property {String}
+    @type String
     @default ul
   */
   tagName: 'ul',
@@ -124,7 +124,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
   /**
     The name of a template to lookup if no inverse template is provided.
 
-    @property {String}
+    @type String
   */
   inverseTemplateName: null,
 

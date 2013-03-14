@@ -14,7 +14,8 @@
 SC.UNSUPPORTED = '_sc_unsupported';
 
 
-/**
+/** @class
+
   This platform object allows you to conditionally support certain HTML5
   features.
 
@@ -26,7 +27,7 @@ SC.platform = SC.Object.create({
   /**
     The size of scrollbars in this browser.
 
-    @property
+    @type Number
   */
   scrollbarSize: function () {
     var tester = document.createElement("DIV"),
@@ -62,21 +63,21 @@ SC.platform = SC.Object.create({
     You can simulate touch events in environments that don't support them by
     calling SC.platform.simulateTouchEvents() from your browser's console.
 
-    @property {Boolean}
+    @type Boolean
   */
   touch: !SC.none(window.ontouchstart) || SC.browser.name === SC.BROWSER.android,
 
   /**
     YES if the current browser supports bounce on scroll.
 
-    @property {Boolean}
+    @type Boolean
   */
   bounceOnScroll: SC.browser.os === SC.OS.ios,
 
   /**
     YES if the current browser supports pinch to zoom.
 
-    @property {Boolean}
+    @type Boolean
   */
   pinchToZoom:  SC.browser.os === SC.OS.ios,
 
@@ -86,6 +87,8 @@ SC.platform = SC.Object.create({
 
     For example, to test to see if the placeholder attribute is supported,
     you would verify that SC.platform.input.placeholder is YES.
+
+    @type Array
   */
   input: function (attributes) {
     var ret = {},
@@ -108,7 +111,8 @@ SC.platform = SC.Object.create({
 
     For example, if the user has saved your web application to their home
     screen on an iPhone OS-based device, this property will be true.
-    @property {Boolean}
+
+    @type Boolean
   */
   standalone: !!navigator.standalone,
 
@@ -308,31 +312,43 @@ SC.platform = SC.Object.create({
 
   /**
     Whether the browser supports CSS animations.
+
+    @type Boolean
   */
   supportsCSSAnimations: SC.browser.experimentalStyleNameFor('animation') !== SC.UNSUPPORTED,
 
   /**
     Whether the browser supports CSS transitions.
+
+    @type Boolean
   */
   supportsCSSTransitions: SC.browser.experimentalStyleNameFor('transition') !== SC.UNSUPPORTED,
 
   /**
     Whether the browser supports 2D CSS transforms.
+
+    @type Boolean
   */
   supportsCSSTransforms: SC.browser.experimentalStyleNameFor('transform') !== SC.UNSUPPORTED,
 
   /**
     Whether the browser can properly handle 3D CSS transforms.
+
+    @type Boolean
   */
   supportsCSS3DTransforms: SC.browser.experimentalStyleNameFor('perspective') !== SC.UNSUPPORTED,
 
   /**
     Whether the browser supports the application cache.
+
+    @type Boolean
   */
   supportsApplicationCache: ('applicationCache' in window),
 
   /**
     Whether the browser supports the hashchange event.
+
+    @type Boolean
   */
   supportsHashChange: function () {
     // Code copied from Modernizr which copied code from YUI (MIT licenses)
@@ -342,6 +358,8 @@ SC.platform = SC.Object.create({
 
   /**
     Whether the browser supports HTML5 history.
+
+    @type Boolean
   */
   supportsHistory: function () {
     return !!(window.history && window.history.pushState);
@@ -349,6 +367,8 @@ SC.platform = SC.Object.create({
 
   /**
     Whether the browser supports IndexedDB.
+
+    @type Boolean
   */
   supportsIndexedDB: function () {
     return !!(window.indexedDB || window[SC.browser.domPrefix + 'IndexedDB']);
@@ -356,6 +376,8 @@ SC.platform = SC.Object.create({
 
   /**
     Whether the browser supports the canvas element.
+
+    @type Boolean
   */
   supportsCanvas: function () {
     return !!document.createElement('canvas').getContext;
@@ -363,11 +385,15 @@ SC.platform = SC.Object.create({
 
   /**
     Whether the browser supports the orientationchange event.
+
+    @type Boolean
   */
   supportsOrientationChange: ('onorientationchange' in window),
 
   /**
     Whether the browser supports WebSQL.
+
+    @type Boolean
   */
   supportsWebSQL: ('openDatabase' in window),
 
@@ -377,8 +403,7 @@ SC.platform = SC.Object.create({
     and desktop environments when SC.platform.touch is YES (ie. when
     SC.platform.simulateTouchEvents has been called)
 
-    @property {Boolean}
-    @default NO
+    @type Boolean
   */
   windowSizeDeterminesOrientation: SC.browser.os === SC.OS.ios || !('onorientationchange' in window),
 
@@ -394,9 +419,8 @@ SC.platform = SC.Object.create({
     will NOT work. The library will be included after your application code,
     by which time this property will already have been evaluated.
 
-    @property {Boolean}
+    @type Boolean
     @see http://incubator.apache.org/cordova/
-    @default NO
   */
   // Check for the global cordova property.
   cordova: (typeof window.cordova !== "undefined")

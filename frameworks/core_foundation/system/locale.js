@@ -396,7 +396,7 @@ SC.Locale.mixin(/** @scope SC.Locale */ {
   by your own application.  See the SC.Locale class definition for the
   various properties you can set on your own locales.
 
-  @property {Hash}
+  @type Hash
 */
 SC.Locale.locales = {
   en: SC.Locale.extend({ _deprecatedLanguageCodes: ['English'] }),

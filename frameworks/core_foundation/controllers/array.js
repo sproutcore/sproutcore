@@ -46,7 +46,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     ArrayController will wrap the item in an array in an attempt to normalize
     the result.
 
-    @property {SC.Array}
+    @type SC.Array
   */
   content: null,
 
@@ -54,7 +54,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     Makes the array editable or not.  If this is set to NO, then any attempts
     at changing the array content itself will throw an exception.
 
-    @property {Boolean}
+    @type Boolean
   */
   isEditable: YES,
 
@@ -90,7 +90,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
 
     If you pass a function, it should be suitable for use in compare().
 
-    @property {String|Array|Function}
+    @type String|Array|Function
   */
   orderBy: null,
 
@@ -99,7 +99,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     in an array and publish it.  Otherwise, it will treat single content like
     null content.
 
-    @property {Boolean}
+    @type Boolean
   */
   allowsSingleContent: YES,
 
@@ -112,7 +112,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     removeObject() will still destroy the object in question as well as
     removing it from the parent array.
 
-    @property {Boolean}
+    @type Boolean
   */
   destroyOnRemoval: NO,
 
@@ -121,7 +121,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     Depending on how you have your ArrayController configured, this property
     may be one of several different values.
 
-    @property {SC.Array}
+    @type SC.Array
   */
   arrangedObjects: function() {
     return this;
@@ -132,7 +132,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     remove content.  You can delete content only if the content is not single
     content and isEditable is YES.
 
-    @property {Boolean}
+    @type Boolean
   */
   canRemoveContent: function() {
     var content = this.get('content'), ret;
@@ -149,7 +149,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     real SC.Array-like object.  You cannot reorder content when orderBy is
     non-null.
 
-    @property {Boolean}
+    @type Boolean
   */
   canReorderContent: function() {
     var content = this.get('content'), ret;
@@ -166,7 +166,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     use the addObject() or pushObject() methods.  All other methods imply
     reordering and will fail.
 
-    @property {Boolean}
+    @type Boolean
   */
   canAddContent: function() {
     var content = this.get('content'), ret ;
@@ -182,7 +182,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     even an empty array.  Returns NO if the content is null or not enumerable
     and allowsSingleContent is NO.
 
-    @property {Boolean}
+    @type Boolean
   */
   hasContent: function() {
     var content = this.get('content');
@@ -194,7 +194,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     Returns the current status property for the content.  If the content does
     not have a status property, returns SC.Record.READY.
 
-    @property {Number}
+    @type Number
   */
   status: function() {
     var content = this.get('content'),
@@ -261,7 +261,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   /**
     Compute the length of the array based on the observable content
 
-    @property {Number}
+    @type Number
   */
   length: function() {
     var content = this._scac_observableContent();

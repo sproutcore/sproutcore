@@ -143,7 +143,7 @@ SC.Timer = SC.Object.extend(
     want to leave this set, but if you plan to use bindings or observers with
     this timer, then you must set isPooled to NO to avoid reusing your timer.
 
-    @property {Boolean}
+    @type Boolean
   */
   isPooled: NO,
 
@@ -243,7 +243,7 @@ SC.Timer = SC.Object.extend(
     property resets each time the timer fires.  Returns -1 if the timer
     cannot fire again.
 
-    @property {Time}
+    @type Time
   */
   fireTime: function() {
     if (!this.get('isValid')) { return -1 ; }  // not valid - can't fire
@@ -319,10 +319,10 @@ SC.Timer = SC.Object.extend(
   invalidate: function() {
     this.beginPropertyChanges();
     this.set('isValid', NO);
-    
+
     var runLoop = SC.RunLoop.currentRunLoop;
     if(runLoop) runLoop.cancelTimer(this);
-    
+
     this.action = this.target = null ; // avoid memory leaks
     this.endPropertyChanges();
 

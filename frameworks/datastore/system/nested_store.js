@@ -562,7 +562,7 @@ SC.NestedStore = SC.Store.extend(
   // ..........................................................
   // DATA SOURCE CALLBACKS
   //
-  // Mathods called by the data source on the store
+  // Methods called by the data source on the store
 
   /** @private - adapt for nested store */
   dataSourceDidCancel: function(storeKey) {

@@ -417,7 +417,7 @@ SC.View.reopen(
 
     Computes the layout style settings needed for the current anchor.
 
-    @property {Object}
+    @type Object
     @readOnly
   */
   layoutStyle: function () {

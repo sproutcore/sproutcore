@@ -40,14 +40,14 @@ SC.TemplateView = SC.CoreView.extend(
     +SC.TEMPLATES+ hash. Usually this hash will be populated for you
     automatically when you include +.handlebars+ files in your project.
 
-    @property {String}
+    @type String
   */
   templateName: null,
 
   /**
     The hash in which to look for +templateName+. Defaults to SC.TEMPLATES.
 
-    @property {Object}
+    @type Object
   */
   templates: SC.TEMPLATES,
 
@@ -59,7 +59,7 @@ SC.TemplateView = SC.CoreView.extend(
     In general, you should set the +templateName+ property instead of setting
     the template yourself.
 
-    @property {Function}
+    @type Function
   */
   template: function(key, value) {
     if (value !== undefined) {
@@ -91,7 +91,7 @@ SC.TemplateView = SC.CoreView.extend(
 
     By default, this will be the view itself.
 
-    @property {Object}
+    @type Object
   */
   context: function(key, value) {
     if (value !== undefined) {

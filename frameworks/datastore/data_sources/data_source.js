@@ -8,7 +8,7 @@
 /**
   Indicates a value has a mixed state of both on and off.
 
-  @property {String}
+  @type String
 */
 SC.MIXED_STATE = '__MIXED__';
 

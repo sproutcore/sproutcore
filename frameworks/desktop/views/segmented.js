@@ -239,7 +239,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
 
   /**
     The key that contains the layerId for each item.
-    @property {String}
+    @type String
   */
   itemLayerIdKey: null,
 

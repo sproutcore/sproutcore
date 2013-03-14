@@ -36,7 +36,7 @@ SC.View.reopen(
     is used by the SC.View hierarchy to relay window visibility changes up
     and down the chain.
 
-    @property {Boolean} parentViewIsVisible
+    @param {Boolean} parentViewIsVisible
     @returns {SC.View} receiver
   */
   recomputeIsVisibleInWindow: function(parentViewIsVisible) {

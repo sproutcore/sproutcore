@@ -73,12 +73,12 @@ SC.Cursor = SC.Object.extend(
     its cursor property defined.
 
     @readOnly
-    @property {String} the css class name updated by this cursor
+    @type String the css class name updated by this cursor
   */
   className: null,
 
   /**
-    @property {String} the cursor value, can be 'url("path/to/cursor")'
+    @type String the cursor value, can be 'url("path/to/cursor")'
   */
   cursorStyle: SC.DEFAULT_CURSOR,
 

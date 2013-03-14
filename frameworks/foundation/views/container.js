@@ -86,7 +86,7 @@ SC.ContainerView = SC.View.extend(
     You should observe this property in order to delay any updates to the new
     content until the transition is complete.
 
-    @property {Boolean}
+    @type Boolean
     @default NO
     @readonly
   */
@@ -149,7 +149,7 @@ SC.ContainerView = SC.View.extend(
           timing: 'linear'
         }
 
-    @property {Object}
+    @type Object
     @default null
   */
   transitionOptions: null,

@@ -67,7 +67,7 @@ SC.TreeController = SC.ObjectController.extend(SC.SelectionSupport,
     use this property directly.  Instead, work on the tree content using the
     TreeController like you would any other ObjectController.
 
-    @property {SC.Array}
+    @type SC.Array
   */
   arrangedObjects: function() {
     var ret, content = this.get('content');

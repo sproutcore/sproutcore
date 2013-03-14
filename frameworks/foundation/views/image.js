@@ -75,13 +75,13 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
   canLoadInBackground: NO,
 
   /**
-    @property {Image}
+    @type Image
     @default SC.BLANK_IMAGE
   */
   image: SC.BLANK_IMAGE,
 
   /**
-    @property {String}
+    @type String
     @default null
   */
   imageValue: function() {
@@ -93,7 +93,7 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
     The frame for the inner img element or for the canvas to draw within, altered according to the scale
     and align properties provided by SC.InnerFrame.
 
-    @property {Object}
+    @type Object
   */
   innerFrame: function() {
     var image = this.get('image'),
@@ -109,7 +109,7 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
   /**
     If YES, any specified toolTip will be localized before display.
 
-    @property {Boolean}
+    @type Boolean
     @default YES
   */
   localize: YES,
@@ -122,7 +122,7 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
     constants: SC.IMAGE_STATE_NONE, SC.IMAGE_STATE_LOADING,
     SC.IMAGE_STATE_LOADED, SC.IMAGE_STATE_FAILED
 
-    @property {String}
+    @type String
   */
   status: SC.IMAGE_STATE_NONE,
 
@@ -130,7 +130,7 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
     Will be one of the following constants: SC.IMAGE_TYPE_URL or
     SC.IMAGE_TYPE_CSS_CLASS
 
-    @property {String}
+    @type String
     @observes imageValue
   */
   type: function() {
@@ -146,7 +146,7 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
     benefit, canvas images are less easily copied, which is generally in line
     with acting as an 'application'.
 
-    @property {Boolean}
+    @type Boolean
     @default YES if supported
     @since SproutCore 1.5
   */
@@ -158,7 +158,7 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
     If YES, image view will use the SC.imageQueue to control loading.  This
     setting is generally preferred.
 
-    @property {Boolean}
+    @type Boolean
     @default YES
   */
   useImageQueue: YES,
@@ -178,7 +178,7 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
     Note that if you provide a URL, it must contain at least one '/' as this
     is how we autodetect URLs.
 
-    @property {String}
+    @type String
   */
   value: null,
 

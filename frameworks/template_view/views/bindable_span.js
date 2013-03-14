@@ -18,7 +18,7 @@ SC._BindableSpan = SC.TemplateView.extend(
    Internet Explorer 7, a <span> tag is used to ensure that inline elements are
    not rendered with display: block.
 
-   @property {String}
+   @type String
   */
   tagName: 'span',
 
@@ -27,7 +27,7 @@ SC._BindableSpan = SC.TemplateView.extend(
     +inverseTemplate+ should be rendered. This should be a function that takes
     a value and returns a Boolean.
 
-    @property {Function}
+    @type Function
   */
   shouldDisplayFunc: null,
 
@@ -41,21 +41,21 @@ SC._BindableSpan = SC.TemplateView.extend(
     outside the block. This would be NO when used with +{{#with foo}}+ because
     the template should receive the object found by evaluating +foo+.
 
-    @property {Boolean}
+    @type Boolean
   */
   preserveContext: NO,
 
   /**
     The template to render when +shouldDisplayFunc+ evaluates to YES.
 
-    @property {Function}
+    @type Function
   */
   displayTemplate: null,
 
   /**
     The template to render when +shouldDisplayFunc+ evaluates to NO.
 
-    @property {Function}
+    @type Function
   */
   inverseTemplate: null,
 
@@ -66,7 +66,7 @@ SC._BindableSpan = SC.TemplateView.extend(
     In addition, if +preserveContext+ is NO, this object will be passed to the
     template when rendering.
 
-    @property {String}
+    @type String
   */
   property: null,
 

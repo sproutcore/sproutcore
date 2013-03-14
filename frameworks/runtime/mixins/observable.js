@@ -15,7 +15,7 @@ sc_require('private/chain_observer');
   Set to YES to have all observing activity logged to the SC.Logger.  This
   should be used for debugging only.
 
-  @property {Boolean}
+  @type Boolean
 */
 SC.LOG_OBSERVERS = NO ;
 
@@ -143,7 +143,7 @@ SC.Observable = /** @scope SC.Observable.prototype */{
   /**
     Walk like that ol' duck
 
-    @property {Boolean}
+    @type Boolean
   */
   isObservable: YES,
 

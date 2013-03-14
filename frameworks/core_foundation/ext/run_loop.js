@@ -16,7 +16,7 @@ SC.RunLoop = SC.RunLoop.extend(
     All timers scheduled during this run loop will begin executing as if
     they were scheduled at this time.
 
-    @property {Number}
+    @type Number
   */
   startTime: function() {
     if (!this._start) { this._start = Date.now(); }

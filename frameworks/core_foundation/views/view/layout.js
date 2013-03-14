@@ -48,7 +48,7 @@ SC.View.reopen(
     element.  If you plan to create many view instances it is probably better
     to use CSS.
 
-    @property {String}
+    @type String
   */
   backgroundColor: null,
 
@@ -58,7 +58,7 @@ SC.View.reopen(
     Activates use of brower's static layout. To activate, set this
     property to YES.
 
-    @property {Boolean}
+    @type Boolean
   */
   useStaticLayout: NO,
 
@@ -861,7 +861,7 @@ SC.View.reopen(
     views.  Normally this property is set automatically whenever the layout
     property for a child view changes.
 
-    @property {Boolean}
+    @type Boolean
   */
   childViewsNeedLayout: NO,
 

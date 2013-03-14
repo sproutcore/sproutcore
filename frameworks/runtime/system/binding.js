@@ -13,7 +13,7 @@ sc_require('system/object');
   the console.  This should be disabled in production code.  Note that you
   can also enable this from the console or temporarily.
 
-  @property {Boolean}
+  @type Boolean
 */
 SC.LOG_BINDINGS = NO ;
 
@@ -21,7 +21,7 @@ SC.LOG_BINDINGS = NO ;
   Performance parameter.  This will benchmark the time spent firing each
   binding.
 
-  @property {Boolean}
+  @type Boolean
 */
 SC.BENCHMARK_BINDING_NOTIFICATIONS = NO ;
 
@@ -29,28 +29,28 @@ SC.BENCHMARK_BINDING_NOTIFICATIONS = NO ;
   Performance parameter.  This will benchmark the time spend configuring each
   binding.
 
-  @property {Boolean}
+  @type Boolean
 */
 SC.BENCHMARK_BINDING_SETUP = NO;
 
 /**
   Default placeholder for multiple values in bindings.
 
-  @property {String}
+  @type String
 */
 SC.MULTIPLE_PLACEHOLDER = '@@MULT@@' ;
 
 /**
   Default placeholder for null values in bindings.
 
-  @property {String}
+  @type String
 */
 SC.NULL_PLACEHOLDER = '@@NULL@@' ;
 
 /**
   Default placeholder for empty values in bindings.
 
-  @property {String}
+  @type String
 */
 SC.EMPTY_PLACEHOLDER = '@@EMPTY@@' ;
 
@@ -441,7 +441,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   /**
     Indicates when the binding has been destroyed.
 
-    @property {Boolean}
+    @type Boolean
     @default NO
   */
   isDestroyed: NO,

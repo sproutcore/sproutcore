@@ -21,7 +21,7 @@ sc_require('mixins/responder_context');
 /**
   Indicates a value has a mixed state of both on and off.
 
-  @property {String}
+  @type String
 */
 SC.MIXED_STATE = '__MIXED__' ;
 
@@ -99,7 +99,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
 
   /**
     Returns YES for easy detection of when you reached the pane.
-    @property {Boolean}
+    @type Boolean
   */
   isPane: YES,
 
@@ -214,14 +214,14 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     for certain types of panes.  For example, a palette may never want to
     become key.  The default value is YES.
 
-    @property {Boolean}
+    @type Boolean
   */
   acceptsKeyPane: YES,
 
   /**
     This is set to YES when your pane is currently the target of key events.
 
-    @property {Boolean}
+    @type Boolean
   */
   isKeyPane: NO,
 
@@ -372,7 +372,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     Returns YES whenever the pane has been set as the main pane for the
     application.
 
-    @property {Boolean}
+    @type Boolean
   */
   isMainPane: NO,
 
@@ -537,7 +537,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   /**
     YES when the pane is currently attached to a document DOM.  Read only.
 
-    @property {Boolean}
+    @type Boolean
     @readOnly
   */
   isPaneAttached: NO,
