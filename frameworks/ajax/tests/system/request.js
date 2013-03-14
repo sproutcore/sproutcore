@@ -244,9 +244,8 @@ test("Timeouts - SC.Request didReceive callback", function() {
   // Sanity check - Should throw an error if we try to set a timeout of 0s.
   try {
     SC.Request.getUrl(url).set('timeout', 0).send();
-  }
-  catch (e) {
-    message = e;
+  } catch (e) {
+    message = e.message;
   }
   ok(message && message.indexOf("The timeout value must either not be specified or must be greater than 0") !== -1, 'An error should be thrown when the timeout value is 0 ms');
 
@@ -255,7 +254,7 @@ test("Timeouts - SC.Request didReceive callback", function() {
     SC.Request.getUrl(url).set('isAsynchronous', NO).set('timeout', 10).send();
   }
   catch (e2) {
-    message = e2;
+    message = e2.message;
   }
   ok(message && message.indexOf("Timeout values cannot be used with synchronous requests") !== -1, 'An error should be thrown when trying to use a timeout with a synchronous request');
 
