@@ -885,7 +885,7 @@ SC.PickerPane = SC.PalettePane.extend(
     else {
       // Setting the value.
       if (!value) {
-        throw "You must set 'anchorElement' to either a view or a DOM element";
+        throw new Error("You must set 'anchorElement' to either a view or a DOM element");
       }
       else if (value.isView) {
         this._anchorView        = value;

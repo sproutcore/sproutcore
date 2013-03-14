@@ -152,7 +152,7 @@ SC.View.reopen(
     if (renderDelegateName) {
       renderDelegate = this.get('theme')[renderDelegateName];
       if (!renderDelegate) {
-        throw "%@: Unable to locate render delegate \"%@\" in theme.".fmt(this, renderDelegateName);
+        throw new Error("%@: Unable to locate render delegate \"%@\" in theme.".fmt(this, renderDelegateName));
       }
 
       return renderDelegate;

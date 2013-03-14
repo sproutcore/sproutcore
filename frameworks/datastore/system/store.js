@@ -869,28 +869,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     }
   },
 
-  /** @private
-    DEPRECATED used find() instead.
-
-    This method will accept a record type or query and return a record array
-    matching the results.  This method was commonly used prior to SproutCore
-    1.0.  It has been deprecated in favor of a single `find()` method instead.
-
-    For compatibility, this method will continue to work in SproutCore 1.0 but
-    it will raise a warning.  It will be removed in a future version of
-    SproutCore.
-  */
-  findAll: function(recordType, conditions, params) {
-    SC.Logger.warn("SC.Store#findAll() will be removed in a future version of SproutCore.  Use SC.Store#find() instead");
-
-    if (!recordType || !recordType.isQuery) {
-      recordType = SC.Query.local(recordType, conditions, params);
-    }
-
-    return this._findQuery(recordType, YES, YES);
-  },
-
-
+  /** @private */
   _findQuery: function(query, createIfNeeded, refreshIfNew) {
 
     // lookup the local RecordArray for this query.
@@ -916,6 +895,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     return ret ;
   },
 
+  /** @private */
   _findRecord: function(recordType, id) {
 
     var storeKey ;
@@ -988,7 +968,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
 
   /** @private
-    Will ask all record arrays that have been returned from `findAll`
+    Will ask all record arrays that have been returned from `find`
     with an `SC.Query` to check their arrays with the new `storeKey`s
 
     @param {SC.IndexSet} storeKeys set of storeKeys that changed
@@ -1039,6 +1019,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     return ret ;
   },
 
+  /** @private */
   _TMP_REC_ATTRS: {},
 
   /**
@@ -1356,9 +1337,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     } else if (status & K.BUSY) {
       throw K.BUSY_ERROR ;
 
-    // if new status, destroy but leave in clean state
+    // if new status, destroy in clean state
     } else if (status === K.READY_NEW) {
       status = K.DESTROYED_CLEAN ;
+      this.removeDataHash(storeKey, status) ;
 
     // otherwise, destroy in dirty state
     } else status = K.DESTROYED_DIRTY ;
@@ -2942,20 +2924,4 @@ SC.Store.updateRecords = function(dataHashes, dataSource, recordType, isLoaded) 
 */
 SC.Store.find = function(guid, recordType) {
   return this._getDefaultStore().find(recordType, guid);
-};
-
-/** @private
-
-  DEPRECATED
-
-  Passes through to `findAll` on default store.  This is included only for
-  compatibility.  You should use the newer `findAll()` defined on `SC.Store`
-  instead.
-
-  @param {Hash} filter search parameters
-  @param {SC.Record} recordType type of record to find
-  @returns {SC.RecordArray} result set
-*/
-SC.Store.findAll = function(filter, recordType) {
-  return this._getDefaultStore().findAll(filter, recordType);
 };

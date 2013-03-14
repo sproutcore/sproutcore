@@ -447,7 +447,7 @@ SC.RunLoop.begin = function () {
 SC.RunLoop.end = function () {
   var runLoop = this.currentRunLoop;
   if (!runLoop) {
-    throw "SC.RunLoop.end() called outside of a runloop!";
+    throw new Error("SC.RunLoop.end() called outside of a runloop!");
   }
   runLoop.endRunLoop();
   return this;

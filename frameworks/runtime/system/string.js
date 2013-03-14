@@ -33,7 +33,7 @@ SC.String = /** @scope SC.String.prototype */ {
     // formatters are optional
     if (formatter) value = formatter(value, arg);
     else if (arg) {
-      throw "String.fmt was given a formatting string, but key `" + key + "` has no formatter! String: " + string;
+      throw new Error("String.fmt was given a formatting string, but key `" + key + "` has no formatter! String: " + string);
     }
     
     return value;
@@ -93,7 +93,7 @@ SC.String = /** @scope SC.String.prototype */ {
     return string.replace(/%\{(.*?)\}/g, function(match, propertyPath) {
       hasHadNamedArguments = YES;
       if (!data) {
-        throw "Cannot use named parameters with `fmt` without a data hash. String: '" + string + "'";
+        throw new Error("Cannot use named parameters with `fmt` without a data hash. String: '" + string + "'");
       }
 
       var ret = SC.String._scs_valueForKey(propertyPath, data, string);
@@ -103,7 +103,7 @@ SC.String = /** @scope SC.String.prototype */ {
       else { return match; }
     }).replace(/%@([0-9]+)?/g, function(match, index) {
       if (hasHadNamedArguments) {
-        throw "Invalid attempt to use both named parameters and indexed parameters. String: '" + string + "'";
+        throw new Error("Invalid attempt to use both named parameters and indexed parameters. String: '" + string + "'");
       }
       index = index ? parseInt(index, 10) - 1 : i++;
       if(args[index]!==undefined) return args[index];

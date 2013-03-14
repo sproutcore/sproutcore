@@ -12,14 +12,14 @@
 // See comments for some pointers on what to do next.
 //
 TestRunner.main = function main() {
-  
+
   // setup views
   TestRunner.getPath('mainPage.mainPane').append() ;
 
   TestRunner.makeFirstResponder(TestRunner.START);
 
   // load initial data
-  //var targets = TestRunner.store.findAll(CoreTools.Target);
+  //var targets = TestRunner.store.find(CoreTools.Target);
   //TestRunner.targetsController.set('content', targets);
 
 } ;

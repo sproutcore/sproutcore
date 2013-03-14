@@ -14,7 +14,7 @@ module("SC.Store#destroyRecord", {
     SC.RunLoop.begin();
 
     store = SC.Store.create();
-    
+
     json1 = {
       guid: "destroyGUID1",
       string: "string",
@@ -51,7 +51,7 @@ module("SC.Store#destroyRecord", {
       number: 23,
       bool:   YES
     };
-    
+
     storeKey1 = SC.Store.generateStoreKey();
     store.writeDataHash(storeKey1, json1, SC.Record.BUSY_DESTROYING);
     storeKey2 = SC.Store.generateStoreKey();
@@ -75,11 +75,11 @@ test("Check for different states after/before executing destroyRecord", function
   store.destroyRecord(undefined, undefined, storeKey1);
   status = store.readStatus( storeKey1);
   equals(status, SC.Record.BUSY_DESTROYING, "the status shouldn't have changed. It should be BUSY_DESTROYING ");
-  
+
   store.destroyRecord(undefined, undefined, storeKey2);
   status = store.readStatus( storeKey2);
   equals(status, SC.Record.DESTROYED, "the status shouldn't have changed. It should be DESTROYED ");
-  
+
   try{
     store.destroyRecord(undefined, undefined, storeKey3);
     msg='';
@@ -87,7 +87,7 @@ test("Check for different states after/before executing destroyRecord", function
     msg=error1.message;
   }
   equals(msg, SC.Record.NOT_FOUND_ERROR.message, "destroyRecord should throw the following error");
-  
+
   try{
     store.destroyRecord(undefined, undefined, storeKey4);
     msg='';
@@ -95,16 +95,17 @@ test("Check for different states after/before executing destroyRecord", function
     msg=error2.message;
   }
   equals(msg, SC.Record.BUSY_ERROR.message, "destroyRecord should throw the following error");
-  
+
   store.destroyRecord(undefined, undefined, storeKey5);
-  status = store.readStatus( storeKey5);
+  status = store.readStatus(storeKey5);
+  equals(store.dataHashes[storeKey5], null, "the data hash should be removed");
   equals(status, SC.Record.DESTROYED_CLEAN, "the status should have changed to DESTROYED_CLEAN ");
-  
+
   store.destroyRecord(undefined, undefined, storeKey6);
   status = store.readStatus( storeKey6);
   equals(status, SC.Record.DESTROYED_DIRTY, "the status should have changed to DESTROYED_DIRTY ");
-  
+
   equals(store.changelog.length, 1, "The changelog has the following number of entries:");
-  
-  
+
+
 });

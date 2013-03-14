@@ -104,7 +104,7 @@ sc_require('ext/handlebars');
         }
       } );
     } else {
-      throw "Cannot use boundIf helper without a block.";
+      throw new Error("Cannot use boundIf helper without a block.");
     }
   });
 })();

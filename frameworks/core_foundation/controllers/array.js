@@ -218,12 +218,12 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     @returns {SC.ArrayController} receiver
   */
   addObject: function(object) {
-    if (!this.get('canAddContent')) { throw "%@ cannot add content".fmt(this); }
+    if (!this.get('canAddContent')) { throw new Error("%@ cannot add content".fmt(this)); }
 
     var content = this.get('content');
     if (content.isSCArray) { content.pushObject(object); }
     else if (content.addObject) { content.addObject(object); }
-    else { throw "%@.content does not support addObject".fmt(this); }
+    else { throw new Error("%@.content does not support addObject".fmt(this)); }
 
     return this;
   },
@@ -240,7 +240,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   */
   removeObject: function(object) {
     if (!this.get('canRemoveContent')) {
-      throw "%@ cannot remove content".fmt(this);
+      throw new Error("%@ cannot remove content".fmt(this));
     }
 
     var content = this.get('content');
@@ -283,10 +283,10 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     // check for various conditions before a replace is allowed
     if (!objects || objects.get('length')===0) {
       if (!this.get('canRemoveContent')) {
-        throw "%@ cannot remove objects from the current content".fmt(this);
+        throw new Error("%@ cannot remove objects from the current content".fmt(this));
       }
     } else if (!this.get('canReorderContent')) {
-      throw "%@ cannot add or reorder the current content".fmt(this);
+      throw new Error("%@ cannot add or reorder the current content".fmt(this));
     }
 
     // if we can do this, then just forward the change.  This should fire
@@ -361,7 +361,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     var orderBy = this.get('orderBy');
     if (!orderBy) {
       if (content.isSCArray) { return (this._scac_cached = content) ; }
-      else { throw "%@.orderBy is required for unordered content".fmt(this); }
+      else { throw new Error("%@.orderBy is required for unordered content".fmt(this)); }
     }
 
     // all remaining enumerables must be sorted.
@@ -374,7 +374,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     } else if(type === SC.T_FUNCTION) {
       func = orderBy;
     } else if(type !== SC.T_ARRAY) {
-      throw "%@.orderBy must be Array, String, or Function".fmt(this);
+      throw new Error("%@.orderBy must be Array, String, or Function".fmt(this));
     }
 
     // generate comparison function if needed - use orderBy

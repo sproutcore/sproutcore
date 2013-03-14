@@ -10,7 +10,7 @@ var store, fds, storeKey1,storeKey2;
 module("SC.FixturesDataSource", {
   setup: function() {
     SC.RunLoop.begin();
-    
+
     var Sample = (window.Sample= SC.Object.create());
     Sample.File = SC.Record.extend({ test:'hello'});
 
@@ -26,10 +26,10 @@ module("SC.FixturesDataSource", {
     { guid: '150', name: 'Birthday Invitation.pdf', fileType: 'file', url: '/emily_parker/Documents/Birthday%20Invitation', isDirectory: false, parent: '11', createdAt: 'October 17, 2007', modifiedAt: 'October 21, 2007', filetype: 'pdf', isShared: false},
     { guid: '136', name: 'Software', fileType: 'software', url: '/emily_parker/Software', isDirectory: true, parent: '10', children: 'Collection', createdAt: 'June 15, 2007', modifiedAt: 'June 15, 2007', filetype: 'directory', isShared: true, sharedAt: 'October 15, 2007', sharedUntil: 'March 31, 2008', sharedUrl: '2fhty', isPasswordRequired: true}
     ];
-    
+
     store = SC.Store.create().from(SC.Record.fixtures);
   },
-  
+
   teardown: function() {
     SC.RunLoop.end();
   }
@@ -39,10 +39,10 @@ test("Verify find() loads all fixture data", function() {
 
   var result = store.find(Sample.File),
       rec, storeKey, dataHash;
-  
+
   ok(result, 'should return a result');
   equals(result.get('length'), Sample.File.FIXTURES.get('length'), 'should return records for each item in FIXTURES');
-  
+
   // verify storeKeys actually return Records
   var idx, len = result.get('length'), expected = [];
   for(idx=0;idx<len;idx++) {
@@ -51,13 +51,13 @@ test("Verify find() loads all fixture data", function() {
     dataHash = storeKey ? store.readDataHash(storeKey) : null;
 
     ok(!!dataHash, 'storeKey at result[%@] (%@) should return dataHash'.fmt(idx, storeKey));
-    
+
     expected.push(rec); // save record for later test
   }
-  
-  // verify multiple calls to findAll() returns SAME data
+
+  // verify multiple calls to find() returns SAME data
   result = store.find(Sample.File);
-  
+
   equals(result.get('length'), expected.length, 'second result should have same length as first');
   len = result.get('length');
   for(idx=0;idx<len;idx++) {
@@ -76,10 +76,10 @@ test("Destroy a record and commit", function() {
   var ret      = store.find(Sample.File, "136"),
       storeKey = ret.get('storeKey'),
       fixtures = store.get('dataSource');
-      
+
   ok(ret, 'precond - must have record in store');
   ok(fixtures.fixtureForStoreKey(store, storeKey), 'precond - fixtures should have data for record');
-  
+
   store.destroyRecord(Sample.File, "136");
   store.commitRecords();
   ok(!fixtures.fixtureForStoreKey(store, storeKey), 'fixtures should no longer have data for record');
@@ -90,7 +90,7 @@ test("Create a record and commit it", function() {
   var fixtures = store.get('dataSource'),
       dataHash = { guid: '200', name: 'Software', fileType: 'software', url: '/emily_parker/Software', isDirectory: true, parent: '10', children: 'Collection', createdAt: 'June 15, 2007', modifiedAt: 'June 15, 2007', filetype: 'directory', isShared: true, sharedAt: 'October 15, 2007', sharedUntil: 'March 31, 2008', sharedUrl: '2fhty', isPasswordRequired: true },
       storeKey ;
-  
+
   store.createRecord(Sample.File, dataHash) ;
   store.commitRecords();
 
@@ -103,7 +103,7 @@ test("Update and commit a record", function() {
 
   var rec      = store.find(Sample.File, "10"),
       storeKey = Sample.File.storeKeyFor("10"),
-      fixtures = store.get('dataSource'), 
+      fixtures = store.get('dataSource'),
       fixture = fixtures.fixtureForStoreKey(store, storeKey);
 
   equals(fixture.name, rec.get('name'), 'precond - fixture state should match name');
@@ -118,5 +118,5 @@ test("Update and commit a record", function() {
 
   fixture = fixtures.fixtureForStoreKey(store, storeKey);
   equals(fixture.name, rec.get('name'), 'fixture state should update to match new name');
-    
+
 });

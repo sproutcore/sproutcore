@@ -389,9 +389,9 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
     // is synchronous (because it wouldn't work).
     var timeout = this.get('timeout');
     if (timeout && !this.get('isAsynchronous')) {
-      throw "Timeout values cannot be used with synchronous requests";
+      throw new Error("Timeout values cannot be used with synchronous requests");
     } else if (timeout === 0) {
-      throw "The timeout value must either not be specified or must be greater than 0";
+      throw new Error("The timeout value must either not be specified or must be greater than 0");
     }
 
     if (body) { this.set('body', body); }
@@ -669,13 +669,27 @@ SC.Request.manager = SC.Object.create(
     @returns {Boolean} YES if any items were cancelled.
   */
   cancelAll: function() {
-    if (this.get('pending').length || this.get('inflight').length) {
-      this.set('pending', []);
-      this.get('inflight').forEach(function(r) { r.cancel(); });
-      this.set('inflight', []);
-      return YES;
-    }
+    var pendingLen = this.getPath('pending.length'),
+      inflightLen = this.getPath('inflight.length'),
+      inflight = this.get('inflight'),
+      pending = this.get('pending');
 
+    if(pendingLen || inflightLen) {
+      // Iterate backwards.
+      for( var i = inflightLen - 1; i >= 0; i--) {
+        // This will 'eventually' try to remove the request from
+        // inflight, but it's not fast enough for us.
+        var r = inflight.objectAt(i);
+        r.cancel();
+      }
+      
+      // Manually scrub the arrays without screwing up memory pointers.
+      pending.replace(0, pendingLen);
+      inflight.replace(0, inflightLen);
+      
+      return YES;
+      
+    }
     return NO;
   },
 

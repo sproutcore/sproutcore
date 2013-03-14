@@ -244,9 +244,8 @@ test("Timeouts - SC.Request didReceive callback", function() {
   // Sanity check - Should throw an error if we try to set a timeout of 0s.
   try {
     SC.Request.getUrl(url).set('timeout', 0).send();
-  }
-  catch (e) {
-    message = e;
+  } catch (e) {
+    message = e.message;
   }
   ok(message && message.indexOf("The timeout value must either not be specified or must be greater than 0") !== -1, 'An error should be thrown when the timeout value is 0 ms');
 
@@ -255,7 +254,7 @@ test("Timeouts - SC.Request didReceive callback", function() {
     SC.Request.getUrl(url).set('isAsynchronous', NO).set('timeout', 10).send();
   }
   catch (e2) {
-    message = e2;
+    message = e2.message;
   }
   ok(message && message.indexOf("Timeout values cannot be used with synchronous requests") !== -1, 'An error should be thrown when trying to use a timeout with a synchronous request');
 
@@ -551,4 +550,37 @@ test("Test upload event listeners on successful request.", function() {
   response = request.send(body);
 
   stop() ; // stops the test runner - wait for response
+});
+
+
+test("Test manager.cancelAll.", function() {
+  var manager = SC.Request.manager, max = manager.get('maxRequests');
+  // Make sure we're clear.
+  SC.Request.manager.cancelAll();
+  
+  // Get a copy of the previous arrays, since they're overwritten on clear.
+  var inflight = manager.get('inflight');
+  var pending = manager.get('pending');
+  
+  // Generate > 6 requests
+  for( var i = 0; i < max * 2; i++) {
+    SC.Request.getUrl('/').send();
+  }
+  
+  equals(inflight.get('length'), max, "There must be %@ inflight requests".fmt(max));
+  equals(pending.get('length'), max, "There must be %@ pending requests".fmt(max));
+  
+  SC.Request.manager.cancelAll();
+
+  // Demonstrates memory pointer matches
+  equals(inflight, manager.getPath('inflight'), "Arrays must be identical");
+  equals(pending, manager.getPath('pending'), "Arrays must be identical");
+  
+  // Demonstrates that all previous requests have been cleared.
+  equals(inflight.get('length'), 0, "There must be 0 inflight requests in the old array".fmt(max));
+  equals(pending.get('length'), 0, "There must be 0 pending requests in the old array".fmt(max));
+  
+  // Demonstrates that the manager doesn't know about any requests.
+  equals(manager.getPath('inflight.length'), 0, "There must be 0 inflight requests".fmt(max));
+  equals(manager.getPath('pending.length'), 0, "There must be 0 pending requests".fmt(max));
 });

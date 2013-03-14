@@ -118,7 +118,7 @@ SC.NestedStore = SC.Store.extend(
   */
   find: function(query) {
     if (query && query.isQuery && query.get('location') !== SC.Query.LOCAL) {
-      throw "SC.Store#find() can only accept LOCAL queries in nested stores";
+      throw new Error("SC.Store#find() can only accept LOCAL queries in nested stores");
     }
     return sc_super();
   },
@@ -468,12 +468,6 @@ SC.NestedStore = SC.Store.extend(
   /** @private - adapt for nested store */
   queryFor: function(recordType, conditions, params) {
     return this.get('parentStore').queryFor(recordType, conditions, params);
-  },
-
-  /** @private - adapt for nested store */
-  findAll: function(recordType, conditions, params, recordArray, _store) {
-    if (!_store) _store = this;
-    return this.get('parentStore').findAll(recordType, conditions, params, recordArray, _store);
   },
 
   // ..........................................................

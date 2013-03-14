@@ -137,7 +137,7 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     }
 
     if (!del) {
-      throw "Internal Inconsistancy: ListView must always have CollectionRowDelegate";
+      throw new Error("Internal Inconsistancy: ListView must always have CollectionRowDelegate");
     }
 
     del.addObserver('rowHeight', this, func);
