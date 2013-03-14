@@ -551,3 +551,36 @@ test("Test upload event listeners on successful request.", function() {
 
   stop() ; // stops the test runner - wait for response
 });
+
+
+test("Test manager.cancelAll.", function() {
+  var manager = SC.Request.manager, max = manager.get('maxRequests');
+  // Make sure we're clear.
+  SC.Request.manager.cancelAll();
+  
+  // Get a copy of the previous arrays, since they're overwritten on clear.
+  var inflight = manager.get('inflight');
+  var pending = manager.get('pending');
+  
+  // Generate > 6 requests
+  for( var i = 0; i < max * 2; i++) {
+    SC.Request.getUrl('/').send();
+  }
+  
+  equals(inflight.get('length'), max, "There must be %@ inflight requests".fmt(max));
+  equals(pending.get('length'), max, "There must be %@ pending requests".fmt(max));
+  
+  SC.Request.manager.cancelAll();
+
+  // Demonstrates memory pointer matches
+  equals(inflight, manager.getPath('inflight'), "Arrays must be identical");
+  equals(pending, manager.getPath('pending'), "Arrays must be identical");
+  
+  // Demonstrates that all previous requests have been cleared.
+  equals(inflight.get('length'), 0, "There must be 0 inflight requests in the old array".fmt(max));
+  equals(pending.get('length'), 0, "There must be 0 pending requests in the old array".fmt(max));
+  
+  // Demonstrates that the manager doesn't know about any requests.
+  equals(manager.getPath('inflight.length'), 0, "There must be 0 inflight requests".fmt(max));
+  equals(manager.getPath('pending.length'), 0, "There must be 0 pending requests".fmt(max));
+});
