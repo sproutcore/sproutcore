@@ -1501,13 +1501,15 @@ SC.ScrollView = SC.View.extend({
 
   /** @private */
   startDecelerationAnimation: function (evt) {
-    var touch = this.touch;
+    var touch = this.touch, self = this;
     touch.decelerationVelocity = {
       x: touch.scrollVelocity.x * 10,
       y: touch.scrollVelocity.y * 10
     };
 
-    this.decelerateAnimation();
+      window.requestAnimationFrame(function(){
+          self.decelerateAnimation();
+      });
   },
 
   /** @private
@@ -1710,9 +1712,9 @@ SC.ScrollView = SC.View.extend({
     // (so we may calculate elapsed time) and the timeout we are creating, so we may cancel it in future.
     var self = this;
     touch.lastEventTime = Date.now();
-    this.touch.timeout = setTimeout(function () {
-      SC.run(self.decelerateAnimation(), self);
-    }, 30);
+      window.requestAnimationFrame(function(){
+          SC.run(self.decelerateAnimation(), self);
+      });
   },
 
   // ..........................................................
