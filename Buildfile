@@ -49,7 +49,6 @@ config :"experimental/split_view", :test_required => [:desktop]
 
 # WRAPPER FRAMEWORKS
 config :sproutcore, :required => [:desktop, :datastore, :statechart]
-config :animation, :required => :foundation
 
 config :qunit, :required => []
 config :testing, :required => [:jquery], :test_required => [], :debug_required => []
@@ -88,7 +87,7 @@ config :ace,
 
 # CONFIGURE APPS
 config :core_tools, :required => [
-  :desktop, :datastore, :animation, "sproutcore/experimental/forms",
+  :desktop, :datastore, "sproutcore/experimental/forms",
   "sproutcore/ace",
 
   # The SC apps will use the experimental version of these controls:
