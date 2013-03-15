@@ -1,9 +1,9 @@
-.sc-button-view.sc-checkbox-view img {
+.sc-button-view.sc-checkbox-view .sc-button-label .icon {
   margin-right: 4px;
   top: -1px;
   left: 0;
 }
 
-.sc-button-view.sc-checkbox-view.sc-small-size img {
+.sc-button-view.sc-checkbox-view.sc-small-size .sc-button-label .icon {
   top: -2px;
 }

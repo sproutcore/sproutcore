@@ -131,7 +131,7 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
       // to the image tag. Display a blank image so that the user can add
       // background image using CSS.
       } else {
-        icon = '<img src="'+SC.BLANK_IMAGE_URL+'" alt="" class="icon '+icon+'" />';
+        icon = '<span class="icon '+icon+'"></span>';
       }
     }
 

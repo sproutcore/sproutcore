@@ -1,7 +1,10 @@
-.sc-button-label {
-  vertical-align: top;
-}
+.sc-radio-view {
+  .sc-button-label {
+    vertical-align: top;
+  }
 
-.sc-button-label img {
-  margin-right: 4px;
+  .sc-button-label .icon {
+    display: inline-block;
+    margin-right: 4px;
+  }
 }

@@ -5,7 +5,7 @@
 	vertical-align: middle;
 }
 
-.sc-theme .sc-checkbox-view .label {
+.sc-theme .sc-checkbox-view .sc-button-label {
 	position: absolute ;
 	left: 20px;
 	top: 0;
@@ -14,7 +14,7 @@
 	line-height: 18px;
 }
  
-.sc-theme .sc-checkbox-view.icon img.icon {
+.sc-theme .sc-checkbox-view.icon .icon {
 	position: relative;
 	vertical-align: middle;
 	top: -2px;

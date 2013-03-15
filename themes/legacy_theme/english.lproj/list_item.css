@@ -31,7 +31,7 @@
 
 /* @group Disclosure */
 
-.sc-list-item-view img.disclosure {
+.sc-list-item-view .disclosure {
 	position: absolute ;
 	left: -11px;
 	top: 50%;
@@ -42,25 +42,25 @@
 	background-position: -16px -1614px ;
 }
 
-.sc-list-item-view img.disclosure.open {
+.sc-list-item-view .disclosure.open {
 	background-position: 0px -1597px ;
 }
 
-.sc-list-item-view img.disclosure.active {
+.sc-list-item-view .disclosure.active {
 	background-position: -0px -1630px ;
 }
 
-.sc-list-item-view img.disclosure.open.active {
+.sc-list-item-view .disclosure.open.active {
 	background-position: -16px -1597px ;
 }
 
-.sc-list-item-view.disabled img.disclosure,
-.sc-list-item-view.disabled img.disclosure.active {
+.sc-list-item-view.disabled .disclosure,
+.sc-list-item-view.disabled .disclosure.active {
 	background-position: -16px -1630px ;
 }
 
-.sc-list-item-view.disabled img.disclosure.open,
-.sc-list-item-view.disabled img.disclosure.open.active {
+.sc-list-item-view.disabled .disclosure.open,
+.sc-list-item-view.disabled .disclosure.open.active {
 	background-position: 0px -1613px ;
 }
 

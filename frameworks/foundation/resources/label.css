@@ -4,7 +4,8 @@
   text-align: left;
   white-space: pre-line;      /* Allow strings to include '\n' characters, etc., like many other UI frameworks */
 
-  &.icon img {
+  .icon {
+    display: inline-block;
   	position: relative;
   	vertical-align: middle;
   }

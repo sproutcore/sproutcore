@@ -27,12 +27,12 @@ $theme.sc-segment-view {
     line-height: 18px;
     margin-left: 9px;
     margin-right: 10px;
-  }
 
-  img.icon {
-    height: 12px;
-    top: 2px;
-    width: 12px;
+    .icon {
+      height: 12px;
+      top: 2px;
+      width: 12px;
+    }
   }
 
   &.sc-first-segment .left {

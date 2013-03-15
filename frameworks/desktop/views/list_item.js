@@ -912,21 +912,13 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
   */
   renderIcon: function (context, icon) {
     // get a class name and url to include if relevant
-    var url = null, className = null, classArray = [];
+    var classArray = ['icon'];
     if (icon && SC.ImageView.valueIsUrl(icon)) {
-      url = icon;
-      className = '';
+      context.begin('img').addClass(classArray).setAttr('src', icon).end();
     } else {
-      className = icon;
-      url = SC.BLANK_IMAGE_URL;
+      classArray.push(icon);
+      context.begin('span').addClass(classArray).end();
     }
-
-    // generate the img element...
-    classArray.push(className, 'icon');
-    context.begin('img')
-            .addClass(classArray)
-            .setAttr('src', url)
-            .end();
   },
 
   /** @private
@@ -952,23 +944,13 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
   */
   renderRightIcon: function (context, icon) {
     // get a class name and url to include if relevant
-    var url = null,
-      className = null,
-      classArray = [];
+    var classArray = ['right-icon'];
     if (icon && SC.ImageView.valueIsUrl(icon)) {
-      url = icon;
-      className = '';
+      context.begin('img').addClass(classArray).setAttr('src', icon).end();
     } else {
-      className = icon;
-      url = SC.BLANK_IMAGE_URL;
+      classArray.push(icon);
+      context.begin('span').addClass(classArray).end();
     }
-
-    // generate the img element...
-    classArray.push('right-icon', className);
-    context.begin('img')
-      .addClass(classArray)
-      .setAttr('src', url)
-    .end();
   },
 
   /** @private
@@ -994,7 +976,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     @returns {void}
   */
   renderAction: function (context, actionClassName) {
-    context.push('<img src="', SC.BLANK_IMAGE_URL, '" class="action" />');
+    context.push('<span class="action"></span>');
   },
 
   /** @private

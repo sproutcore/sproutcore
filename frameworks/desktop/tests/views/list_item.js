@@ -188,7 +188,7 @@ function label(view, labelText) {
 }
 
 function icon(view, spriteName) {
-  var cq = view.$(), iconCQ = cq.find('img.icon');
+  var cq = view.$(), iconCQ = cq.find('.icon');
   if (spriteName === null) {
     ok(!cq.hasClass('has-icon'), "should not have has-icon class");
     equals(iconCQ.size(), 0, 'should not have image');

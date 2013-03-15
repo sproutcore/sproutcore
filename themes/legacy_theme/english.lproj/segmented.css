@@ -6,7 +6,7 @@
 	outline: none;
 }
 
-.sc-theme .sc-segment-view img.icon {
+.sc-theme .sc-segment-view .sc-button-label .icon {
 	position: relative;
 	vertical-align: middle;
 	top: -2px;
@@ -15,7 +15,7 @@
 	width: 16px;
 }
 
-.sc-theme .sc-segmented-view.disabled .sc-segment-view img.icon {
+.sc-theme .sc-segmented-view.disabled .sc-segment-view .sc-button-label .icon {
 	opacity: 0.5;
 	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)"; 
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);

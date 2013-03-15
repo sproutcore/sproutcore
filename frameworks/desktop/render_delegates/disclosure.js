@@ -28,7 +28,7 @@ SC.BaseTheme.disclosureRenderDelegate = SC.RenderDelegate.create({
     state += dataSource.get('isSelected') ? 'open' : 'closed';
     if (dataSource.get('isActive')) state += ' active';
 
-    context.push('<img src = "' + SC.BLANK_IMAGE_URL + '" class = "disclosure button ' + state + '" />');
+    context.push('<span class="disclosure button ' + state + '"></span>');
 
     context = context.begin('span').addClass(labelClassNames).id(labelId);
     theme.labelRenderDelegate.render(dataSource, context);
@@ -46,7 +46,7 @@ SC.BaseTheme.disclosureRenderDelegate = SC.RenderDelegate.create({
 
     if (dataSource.get('isSelected')) jquery.addClass('sel');
 
-    jquery.find('img').setClass({
+    jquery.find('.disclosure').setClass({
       open: dataSource.get('isSelected'),
       closed: !dataSource.get('isSelected'),
       active: dataSource.get('isActive')

@@ -8,7 +8,7 @@
   padding: 0;
 }
 
-.sc-theme .sc-button-view.icon img.icon {
+.sc-theme .sc-button-view.icon .icon {
   position: relative;
   vertical-align: middle;
   top: -2px;

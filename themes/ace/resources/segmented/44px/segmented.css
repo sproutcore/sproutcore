@@ -31,12 +31,12 @@ $theme.sc-segment-view {
     text-shadow: 0px 1px 1px white;
     margin-left: 9px;
     margin-right: 10px;
-  }
-
-  img.icon {
-    height: 24px;
-    top: 9px;
-    width: 24px;
+    
+    .icon {
+      height: 24px;
+      top: 9px;
+      width: 24px;
+    }
   }
 
   &.sc-first-segment .left {

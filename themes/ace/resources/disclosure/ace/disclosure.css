@@ -9,7 +9,7 @@ $theme.disclosure {
     left: 18px;
   }
   
-  img.disclosure.button {
+  .disclosure.button {
     width: 14px;
     height: 14px;
     &.open    { @include slice("disclosure_open.png"); }

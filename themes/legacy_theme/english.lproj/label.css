@@ -2,7 +2,7 @@
 
 /* SC.LabelView - sc-theme support */
 
-.sc-theme .sc-label-view img.icon {
+.sc-theme .sc-label-view .icon {
 	top: -2px;
 	margin-left: 2px;
 	margin-right: 4px;
