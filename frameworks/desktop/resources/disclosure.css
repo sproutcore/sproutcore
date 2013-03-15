@@ -1,8 +1,9 @@
 /* SC.DisclosureView - sc-theme */
 
-.sc-button-view.sc-disclosure-view {
+.sc-disclosure-view {
   background: transparent;
-  img.disclosure.button {
+  .disclosure.button {
+    display: inline-block;
   	width: 16px;
   	height: 16px;
   	position: absolute;

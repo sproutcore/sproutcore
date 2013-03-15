@@ -14,10 +14,6 @@
     }
   }
 
-  img.icon {
-    position: relative;
-  }
-
   /* Style for an individual segment. */
   .sc-segment-view {
     background: #DDD;
