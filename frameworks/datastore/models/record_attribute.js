@@ -150,7 +150,7 @@ SC.RecordAttribute = SC.Object.extend(
     Note that you will have to take care of destroying the created record
     once all relationships are removed from it.
 
-    @property {Boolean}
+    @type Boolean
     @default NO
    */
   lazilyInstantiate: NO,

@@ -65,7 +65,7 @@ SC.ObjectController = SC.Controller.extend(
     Usually your content object should implement the SC.Observable mixin, but
     this is not required.  All SC.Object-based objects support SC.Observable
 
-    @property {Object}
+    @type Object
   */
   content: null,
 
@@ -79,7 +79,7 @@ SC.ObjectController = SC.Controller.extend(
     If NO, then setting content to an enumerable with multiple items will be
     treated like setting a null value.  hasContent will be NO.
 
-    @property {Boolean}
+    @type Boolean
   */
   allowsMultipleContent: NO,
 
@@ -89,7 +89,7 @@ SC.ObjectController = SC.Controller.extend(
     with a single item.  Array's or enumerables with multiple items will
     normally make this property NO unless allowsMultipleContent is YES.
 
-    @property {Boolean}
+    @type Boolean
   */
   hasContent: function() {
     return !SC.none(this.get('observableContent'));
@@ -100,7 +100,7 @@ SC.ObjectController = SC.Controller.extend(
     itself does not do anything with this property but subclasses will
     respect it when modifying content.
 
-    @property {Boolean}
+    @type Boolean
   */
   isEditable: YES,
 
@@ -115,7 +115,7 @@ SC.ObjectController = SC.Controller.extend(
     Note that if you set the content to an enumerable which itself contains
     enumerables and allowsMultipleContent is NO, this will become null.
 
-    @property {Object}
+    @type Object
   */
   observableContent: function() {
     var content = this.get('content'),
@@ -190,8 +190,8 @@ SC.ObjectController = SC.Controller.extend(
     you can override this method to do some other kind of processing if
     needed.
 
-    @property {String} key key being retrieved
-    @property {Object} value value to set or undefined if reading only
+    @param {String} key key being retrieved
+    @param {Object} value value to set or undefined if reading only
     @returns {Object} property value
   */
   unknownProperty: function(key,value) {
@@ -229,7 +229,7 @@ SC.ObjectController = SC.Controller.extend(
     // setter
     } else {
       if (!this.get('isEditable')) {
-        throw "%@.%@ is not editable".fmt(this,key);
+        throw new Error("%@.%@ is not editable".fmt(this,key));
       }
 
       if (content.isEnumerable) content.setEach(key, value);

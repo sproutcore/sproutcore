@@ -4,7 +4,7 @@
 //            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-sc_require('views/list') ;
+sc_require('views/list');
 
 
 /** @class
@@ -37,7 +37,7 @@ SC.GridView = SC.ListView.extend(
     @default { left:0, right:0, top:0, bottom:0 }
     @see SC.View#layout
   */
-  layout: { left:0, right:0, top:0, bottom:0 },
+  layout: { left: 0, right: 0, top: 0, bottom: 0 },
 
   /**
     The common row height for grid items.
@@ -81,34 +81,35 @@ SC.GridView = SC.ListView.extend(
   insertionOrientation: SC.HORIZONTAL_ORIENTATION,
 
   /** @private */
-  itemsPerRow: function() {
-    var f = this.get('frame'),
-        columnWidth = this.get('columnWidth') || 0 ;
+  itemsPerRow: function () {
+    var frameWidth = this.get('frame').width,
+      columnWidth = this.get('columnWidth') || 0;
 
-    return (columnWidth <= 0) ? 1 : Math.floor(f.width / columnWidth) ;
-  }.property('frame', 'columnWidth').cacheable(),
+    return (columnWidth < 1) ? 1 : Math.floor(frameWidth / columnWidth);
+  }.property('columnWidth', '_frameWidth').cacheable(),
 
   /** @private
     Find the contentIndexes to display in the passed rect. Note that we
     ignore the width of the rect passed since we need to have a single
     contiguous range.
   */
-  contentIndexesInRect: function(rect) {
-    var rowHeight = this.get('rowHeight') || 48 ,
+  contentIndexesInRect: function (rect) {
+    var rowHeight = this.get('rowHeight') || 48,
         itemsPerRow = this.get('itemsPerRow'),
         min = Math.floor(SC.minY(rect) / rowHeight) * itemsPerRow,
-        max = Math.ceil(SC.maxY(rect) / rowHeight) * itemsPerRow ;
-    return SC.IndexSet.create(min, max-min);
+        max = Math.ceil(SC.maxY(rect) / rowHeight) * itemsPerRow;
+    return SC.IndexSet.create(min, max - min);
   },
 
   /** @private */
-  layoutForContentIndex: function(contentIndex) {
+  layoutForContentIndex: function (contentIndex) {
     var rowHeight = this.get('rowHeight') || 48,
         frameWidth = this.get('frame').width,
         itemsPerRow = this.get('itemsPerRow'),
-        columnWidth = Math.floor(frameWidth/itemsPerRow),
+        columnWidth = Math.floor(frameWidth / itemsPerRow),
         row = Math.floor(contentIndex / itemsPerRow),
-        col = contentIndex - (itemsPerRow*row) ;
+        col = contentIndex - (itemsPerRow * row);
+
     return {
       left: col * columnWidth,
       top: row * rowHeight,
@@ -121,20 +122,20 @@ SC.GridView = SC.ListView.extend(
     Overrides default CollectionView method to compute the minimum height
     of the list view.
   */
-  computeLayout: function() {
+  computeLayout: function () {
     var content = this.get('content'),
-        count = (content) ? content.get('length') : 0,
-        rowHeight = this.get('rowHeight') || 48,
-        itemsPerRow = this.get('itemsPerRow'),
-        rows = Math.ceil(count / itemsPerRow) ;
+      count = (content) ? content.get('length') : 0,
+      rowHeight = this.get('rowHeight') || 48,
+      itemsPerRow = this.get('itemsPerRow'),
+      rows = Math.ceil(count / itemsPerRow);
 
     // use this cached layout hash to avoid allocing memory...
-    var ret = this._cachedLayoutHash ;
+    var ret = this._cachedLayoutHash;
     if (!ret) ret = this._cachedLayoutHash = {};
 
     // set minHeight
-    ret.minHeight = rows * rowHeight ;
-    this.calculatedHeight = ret.minHeight;
+    ret.minHeight = rows * rowHeight;
+    this.set('calculatedHeight', ret.minHeight);
     return ret;
   },
 
@@ -144,13 +145,13 @@ SC.GridView = SC.ListView.extend(
   insertionPointClass: SC.View.extend({
     classNames: ['grid-insertion-point'],
 
-    render: function(context, firstTime) {
-      if (firstTime) context.push('<span class="anchor"></span>') ;
+    render: function (context, firstTime) {
+      if (firstTime) context.push('<span class="anchor"></span>');
     }
   }),
 
   /** @private */
-  showInsertionPoint: function(itemView, dropOperation) {
+  showInsertionPoint: function (itemView, dropOperation) {
     if (!itemView) return;
 
     // if drop on, then just add a class...
@@ -173,15 +174,15 @@ SC.GridView = SC.ListView.extend(
         // If there was an item that was the target of the drop previously, be
         // sure to clear it.
         this._lastDropOnView.set('isDropTarget', NO);
-        this._lastDropOnView = null ;
+        this._lastDropOnView = null;
       }
 
       if (!this._insertionPointView) {
-        this._insertionPointView = this.insertionPointClass.create() ;
+        this._insertionPointView = this.insertionPointClass.create();
       }
 
-      var insertionPoint = this._insertionPointView ;
-      var itemViewFrame = itemView.get('frame') ;
+      var insertionPoint = this._insertionPointView;
+      var itemViewFrame = itemView.get('frame');
       var f = { height: itemViewFrame.height - 6,
             x: itemViewFrame.x,
             y: itemViewFrame.y + 6,
@@ -189,18 +190,18 @@ SC.GridView = SC.ListView.extend(
           };
 
       if (!SC.rectsEqual(insertionPoint.get('frame'), f)) {
-        insertionPoint.set('frame', f) ;
+        insertionPoint.set('frame', f);
       }
 
       if (insertionPoint.parentNode !== itemView.parentNode) {
-        itemView.parentNode.appendChild(insertionPoint) ;
+        itemView.parentNode.appendChild(insertionPoint);
       }
     }
 
   },
 
   /** @see SC.CollectionView#hideInsertionPoint */
-  hideInsertionPoint: function() {
+  hideInsertionPoint: function () {
     // If there was an item that was the target of the drop previously, be
     // sure to clear it.
     if (this._lastDropOnView) {
@@ -208,38 +209,38 @@ SC.GridView = SC.ListView.extend(
       this._lastDropOnView = null;
     }
 
-    var view = this._insertionPointView ;
+    var view = this._insertionPointView;
     if (view) view.removeFromParent().destroy();
     this._insertionPointView = null;
   },
 
   /** @private */
-  insertionIndexForLocation: function(loc, dropOperation) {
+  insertionIndexForLocation: function (loc, dropOperation) {
     var f = this.get('frame'),
         sf = this.get('clippingFrame'),
         itemsPerRow = this.get('itemsPerRow'),
         columnWidth = Math.floor(f.width / itemsPerRow),
-        row = Math.floor((loc.y - f.y - sf.y) / this.get('rowHeight')) ;
+        row = Math.floor((loc.y - f.y - sf.y) / this.get('rowHeight'));
 
     var retOp = SC.DROP_BEFORE,
         offset = (loc.x - f.x - sf.x),
         col = Math.floor(offset / columnWidth),
-        percentage = (offset / columnWidth) - col ;
+        percentage = (offset / columnWidth) - col;
 
     // if the dropOperation is SC.DROP_ON and we are in the center 60%
     // then return the current item.
     if (dropOperation === SC.DROP_ON) {
-      if (percentage > 0.80) col++ ;
+      if (percentage > 0.80) col++;
       if ((percentage >= 0.20) && (percentage <= 0.80)) {
         retOp = SC.DROP_ON;
       }
     } else {
-      if (percentage > 0.45) col++ ;
+      if (percentage > 0.45) col++;
     }
 
     // convert to index
-    var ret= (row*itemsPerRow) + col ;
-    return [ret, retOp] ;
+    var ret = (row * itemsPerRow) + col;
+    return [ret, retOp];
   },
 
   /** @private
@@ -249,30 +250,42 @@ SC.GridView = SC.ListView.extend(
 
     Update all of their layouts if necessary.
   */
-  _gv_frameDidChange: function() {
+  _gv_frameDidChange: function () {
     var frame = this.get('frame'),
-      width;
+      lastFrameWidth = this._lastFrameWidth,
+      width = frame.width;
 
-    // Changes to the width of the frame is the only variable that
-    // alters the layout of item views.
-    width = frame.width;
-    if (this._lastFrameWidth && width !== this._lastFrameWidth) {
-      this.notifyPropertyChange('itemsPerRow');
-
-      var idx,
-        itemView,
+    // A change to the width of the frame is the only variable that
+    // alters the layout of item views and our computed layout.
+    if (lastFrameWidth && width !== lastFrameWidth) {
+      var itemView,
         nowShowing = this.get('nowShowing');
 
-      // Only loop through the now showing indexes, if the content is sparsely
-      // loaded we could inadvertently trigger reloading unneeded content.
-      nowShowing.forEach(function(idx) {
+      // Internal property used to indicate a possible itemsPerRow change.  This
+      // is better than having itemsPerRow dependent on frame which changes frequently.
+      this.set('_frameWidth', width);
+
+      // Only loop through the now showing indexes, if the content was sparsely
+      // loaded we would inadvertently load all the content.
+      nowShowing.forEach(function (idx) {
         itemView = this.itemViewForContentIndex(idx);
         itemView.adjust(this.layoutForContentIndex(idx));
       }, this);
     }
 
-    // Cache the last width in order to check for differences.
     this._lastFrameWidth = width;
-  }.observes('frame')
+  }.observes('frame'),
+
+  /** @private Recompute our layout if itemsPerRow actually changes. */
+  _gv_itemsPerRowDidChange: function () {
+    var itemsPerRow = this.get('itemsPerRow'),
+      lastItemsPerRow = this._lastItemsPerRow || 0;
+
+    if (itemsPerRow !== lastItemsPerRow) {
+      this.invokeOnce('adjustLayout');
+    }
+
+    this._lastItemsPerRow = itemsPerRow;
+  }.observes('itemsPerRow')
 
 });

@@ -64,14 +64,6 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
   //
 
   /**
-    The content object the list item will display.
-
-    @type SC.Object
-    @default null
-  */
-  content: null,
-
-  /**
     The index of the content object in the ListView to which this
     ListItemView belongs.
 
@@ -688,7 +680,6 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
       exampleFrame: f,
       exampleElement: el,
       multiline: NO,
-      isCollection: YES,
       validator: validator,
       escapeHTML: escapeHTML
     });

@@ -41,7 +41,7 @@ SC.View.reopen(
     A child view without a cursor of its own inherits its parent's cursor by
     default.  Set this to NO to prevent this behavior.
 
-    @property {Boolean}
+    @type Boolean
   */
   shouldInheritCursor: YES
 

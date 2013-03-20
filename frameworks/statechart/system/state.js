@@ -29,21 +29,21 @@ SC.State = SC.Object.extend(
   /**
     The name of the state
 
-    @property {String}
+    @type String
   */
   name: null,
 
   /**
     This state's parent state. Managed by the statechart
 
-    @property {State}
+    @type State
   */
   parentState: null,
 
   /**
     This state's history state. Can be null. Managed by the statechart.
 
-    @property {State}
+    @type State
   */
   historyState: null,
 
@@ -69,14 +69,14 @@ SC.State = SC.Object.extend(
     Used to indicates if this state's immediate substates are to be
     concurrent (orthogonal) to each other.
 
-    @property {Boolean}
+    @type Boolean
   */
   substatesAreConcurrent: NO,
 
   /**
     The immediate substates of this state. Managed by the statechart.
 
-    @property {Array}
+    @type Array
   */
   substates: null,
 
@@ -84,7 +84,7 @@ SC.State = SC.Object.extend(
     The statechart that this state belongs to. Assigned by the owning
     statechart.
 
-    @property {Statechart}
+    @type Statechart
   */
   statechart: null,
 
@@ -106,7 +106,7 @@ SC.State = SC.Object.extend(
     An array of this state's substates that are currently entered. Managed by
     the statechart.
 
-    @property {Array}
+    @type Array
   */
   enteredSubstates: null,
 
@@ -135,7 +135,7 @@ SC.State = SC.Object.extend(
 
     @see SC.StatechartManager#trace
 
-    @property {Boolean}
+    @type Boolean
   */
   trace: function() {
     var key = this.getPath('statechart.statechartTraceKey');
@@ -149,7 +149,7 @@ SC.State = SC.Object.extend(
 
     @see SC.StatechartManager#owner
 
-    @property {SC.Object}
+    @type SC.Object
   */
   owner: function() {
     var sc = this.get('statechart'),
@@ -162,7 +162,7 @@ SC.State = SC.Object.extend(
     Returns the statechart's assigned delegate. A statechart delegate is one
     that adheres to the {@link SC.StatechartDelegate} mixin.
 
-    @property {SC.Object}
+    @type SC.Object
 
     @see SC.StatechartDelegate
   */
@@ -185,7 +185,7 @@ SC.State = SC.Object.extend(
     are used since they will inadvertenly stall the location value from
     propogating immediately.
 
-    @property {String}
+    @type String
 
     @see SC.StatechartDelegate#statechartUpdateLocationForState
     @see SC.StatechartDelegate#statechartAcquireLocationForState
@@ -904,7 +904,7 @@ SC.State = SC.Object.extend(
   /**
     Indicates if this state is the root state of the statechart.
 
-    @property {Boolean}
+    @type Boolean
   */
   isRootState: function() {
     return this.getPath('statechart.rootState') === this;
@@ -913,7 +913,7 @@ SC.State = SC.Object.extend(
   /**
     Indicates if this state is a current state of the statechart.
 
-    @property {Boolean}
+    @type Boolean
   */
   isCurrentState: function() {
     return this.stateIsCurrentSubstate(this);
@@ -922,7 +922,7 @@ SC.State = SC.Object.extend(
   /**
     Indicates if this state is a concurrent state
 
-    @property {Boolean}
+    @type Boolean
   */
   isConcurrentState: function() {
     return this.getPath('parentState.substatesAreConcurrent');
@@ -1351,7 +1351,7 @@ SC.State = SC.Object.extend(
     state if "foo" and the parent state's name is "bar" where bar's
     parent state is the root state, then the full path is "bar.foo"
 
-    @property {String}
+    @type String
   */
   fullPath: function() {
     var root = this.getPath('statechart.rootState');

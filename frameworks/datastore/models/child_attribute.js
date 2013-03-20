@@ -38,7 +38,7 @@ SC.ChildAttribute = SC.RecordAttribute.extend(
         recordType  = this.get('typeClass');
 
     if (!record) {
-      throw 'SC.Child: Error during transform: Unable to retrieve parent record.';
+      throw new Error('SC.Child: Error during transform: Unable to retrieve parent record.');
     }
     if (!SC.none(value)) ret = record.registerNestedRecord(value, key);
 

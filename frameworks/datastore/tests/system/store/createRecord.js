@@ -240,3 +240,20 @@ test("Initializing default values with keyed attributes", function() {
   ok(store.readDataHash(sk2)['array_key'] !== store.readDataHash(sk1)['array_key'], "the default value for 'array' is a copy not a reference");
   ok(store.readDataHash(sk2)['funcDef_key'] !== store.readDataHash(sk1)['funcDef_key'], "the default value for 'funcDef' is a copy not a reference");
 });
+
+test("The data hash of the record should be correct BEFORE the status changes.", function () {
+  var rec1;
+
+  //create record
+  rec1 = store.createRecord(MyRecordType, { string: "Pre-create" }, 'test-status');
+  rec1.commitRecord();
+
+  rec1.addObserver('status', function () {
+    if (this.get('status') === SC.Record.READY_CLEAN) {
+      equals(this.get('id'), 'new-id', "The id attribute should be correct since the status has updated.");
+      equals(this.get('string'), "Post-create", "The string attribute should be correct since the status has updated.");
+    }
+  });
+
+  store.dataSourceDidComplete(rec1.get('storeKey'), { string: "Post-create" }, 'new-id');
+});

@@ -14,7 +14,8 @@
 SC.UNSUPPORTED = '_sc_unsupported';
 
 
-/**
+/** @class
+
   This platform object allows you to conditionally support certain HTML5
   features.
 
@@ -26,7 +27,7 @@ SC.platform = SC.Object.create({
   /**
     The size of scrollbars in this browser.
 
-    @property
+    @type Number
   */
   scrollbarSize: function () {
     var tester = document.createElement("DIV"),
@@ -62,21 +63,21 @@ SC.platform = SC.Object.create({
     You can simulate touch events in environments that don't support them by
     calling SC.platform.simulateTouchEvents() from your browser's console.
 
-    @property {Boolean}
+    @type Boolean
   */
   touch: !SC.none(window.ontouchstart) || SC.browser.name === SC.BROWSER.android,
 
   /**
     YES if the current browser supports bounce on scroll.
 
-    @property {Boolean}
+    @type Boolean
   */
   bounceOnScroll: SC.browser.os === SC.OS.ios,
 
   /**
     YES if the current browser supports pinch to zoom.
 
-    @property {Boolean}
+    @type Boolean
   */
   pinchToZoom:  SC.browser.os === SC.OS.ios,
 
@@ -86,6 +87,8 @@ SC.platform = SC.Object.create({
 
     For example, to test to see if the placeholder attribute is supported,
     you would verify that SC.platform.input.placeholder is YES.
+
+    @type Array
   */
   input: function (attributes) {
     var ret = {},
@@ -108,7 +111,8 @@ SC.platform = SC.Object.create({
 
     For example, if the user has saved your web application to their home
     screen on an iPhone OS-based device, this property will be true.
-    @property {Boolean}
+
+    @type Boolean
   */
   standalone: !!navigator.standalone,
 
@@ -308,31 +312,43 @@ SC.platform = SC.Object.create({
 
   /**
     Whether the browser supports CSS animations.
+
+    @type Boolean
   */
   supportsCSSAnimations: SC.browser.experimentalStyleNameFor('animation') !== SC.UNSUPPORTED,
 
   /**
     Whether the browser supports CSS transitions.
+
+    @type Boolean
   */
   supportsCSSTransitions: SC.browser.experimentalStyleNameFor('transition') !== SC.UNSUPPORTED,
 
   /**
     Whether the browser supports 2D CSS transforms.
+
+    @type Boolean
   */
   supportsCSSTransforms: SC.browser.experimentalStyleNameFor('transform') !== SC.UNSUPPORTED,
 
   /**
     Whether the browser can properly handle 3D CSS transforms.
+
+    @type Boolean
   */
   supportsCSS3DTransforms: SC.browser.experimentalStyleNameFor('perspective') !== SC.UNSUPPORTED,
 
   /**
     Whether the browser supports the application cache.
+
+    @type Boolean
   */
   supportsApplicationCache: ('applicationCache' in window),
 
   /**
     Whether the browser supports the hashchange event.
+
+    @type Boolean
   */
   supportsHashChange: function () {
     // Code copied from Modernizr which copied code from YUI (MIT licenses)
@@ -342,6 +358,8 @@ SC.platform = SC.Object.create({
 
   /**
     Whether the browser supports HTML5 history.
+
+    @type Boolean
   */
   supportsHistory: function () {
     return !!(window.history && window.history.pushState);
@@ -349,6 +367,8 @@ SC.platform = SC.Object.create({
 
   /**
     Whether the browser supports IndexedDB.
+
+    @type Boolean
   */
   supportsIndexedDB: function () {
     return !!(window.indexedDB || window[SC.browser.domPrefix + 'IndexedDB']);
@@ -356,6 +376,8 @@ SC.platform = SC.Object.create({
 
   /**
     Whether the browser supports the canvas element.
+
+    @type Boolean
   */
   supportsCanvas: function () {
     return !!document.createElement('canvas').getContext;
@@ -363,11 +385,15 @@ SC.platform = SC.Object.create({
 
   /**
     Whether the browser supports the orientationchange event.
+
+    @type Boolean
   */
   supportsOrientationChange: ('onorientationchange' in window),
 
   /**
     Whether the browser supports WebSQL.
+
+    @type Boolean
   */
   supportsWebSQL: ('openDatabase' in window),
 
@@ -377,8 +403,7 @@ SC.platform = SC.Object.create({
     and desktop environments when SC.platform.touch is YES (ie. when
     SC.platform.simulateTouchEvents has been called)
 
-    @property {Boolean}
-    @default NO
+    @type Boolean
   */
   windowSizeDeterminesOrientation: SC.browser.os === SC.OS.ios || !('onorientationchange' in window),
 
@@ -394,9 +419,8 @@ SC.platform = SC.Object.create({
     will NOT work. The library will be included after your application code,
     by which time this property will already have been evaluated.
 
-    @property {Boolean}
+    @type Boolean
     @see http://incubator.apache.org/cordova/
-    @default NO
   */
   // Check for the global cordova property.
   cordova: (typeof window.cordova !== "undefined")
@@ -463,9 +487,12 @@ SC.platform = SC.Object.create({
 
   // Set up and execute the transition event test.
   if (SC.platform.supportsCSSTransitions) {
-    var transitionEl = document.createElement('div');
+    var transitionEl = document.createElement('div'),
+      transitionStyleName = SC.browser.experimentalStyleNameFor('transition');
 
-    transitionEl.style[SC.browser.experimentalStyleNameFor('transition')] = 'all 1ms linear';
+    transitionEl.style[transitionStyleName] = 'all 1ms linear';
+
+    // Test transition events.
     executeTest(transitionEl, 'transitionend', 'TransitionEnd', function (success) {
       // If an end event never fired, we can't really support CSS transitions in SproutCore.
       if (!success) {
@@ -488,20 +515,15 @@ SC.platform = SC.Object.create({
   // Set up and execute the animation event test.
   if (SC.platform.supportsCSSAnimations) {
     var animationEl = document.createElement('div'),
-      keyframeprefix = SC.browser.experimentalStyleNameFor('animation') === 'animation' ? '' : SC.browser.cssPrefix,
-      keyframes = '@' + keyframeprefix + 'keyframes _sc_animation_test { from { opacity: 1; } to { opacity: 0; }}';
+      animationStyleName = SC.browser.experimentalStyleNameFor('animation'),
+      keyframeprefix = animationStyleName === 'animation' ? '' : SC.browser.cssPrefix,
+      keyframes = '@' + keyframeprefix + 'keyframes _sc_animation_test { from { opacity: 1; } to { opacity: 0; } }';
 
-    // Add a test animation rule to the first stylesheet (or create a stylesheet).
-    if (document.styleSheets && document.styleSheets.length) {
-      document.styleSheets[0].insertRule(keyframes, 0);
-    } else {
-      var style = document.createElement('style');
-      style.innerHTML = keyframes;
-      document.getElementsByTagName('head')[0].appendChild(style);
-    }
+    // Add a test animation rule scoped to the test element.
+    animationEl.innerHTML = '<style scoped="scoped">' + keyframes + '</style>';
 
     // Set up and execute the animation event test.
-    animationEl.style[SC.browser.experimentalStyleNameFor('animation')] = '_sc_animation_test 1ms linear';
+    animationEl.style[animationStyleName] = '_sc_animation_test 1ms linear';
 
     // NOTE: We could test start, but it's extra work and easier just to test the end
     // and infer the start event name from it.  Keeping this code for example.
@@ -525,6 +547,7 @@ SC.platform = SC.Object.create({
     //   }
     // });
 
+    // Test animation events.
     executeTest(animationEl, 'animationend', 'AnimationEnd', function (success) {
       // If an end event never fired, we can't really support CSS animations in SproutCore.
       if (success) {
@@ -555,24 +578,7 @@ SC.platform = SC.Object.create({
         SC.platform.supportsCSSAnimations = NO;
       }
 
-      // Clean up.  Don't blindly remove the same index, instead find the test
-      // rule's index for sure. (optimized for the index to still be where it was inserted)
-      outer:
-      for (var i = 0, iLength = document.styleSheets.length; i < iLength; i++) {
-        var styleSheet = document.styleSheets[i],
-          cssRules = styleSheet.cssRules;
-
-        if (cssRules) {
-          for (var j = 0, jLength = cssRules.length, rule; j < jLength; j++) {
-            rule = styleSheet.cssRules[j];
-            if (rule.name === '_sc_animation_test') {
-              styleSheet.deleteRule(j);
-              break outer;
-            }
-          }
-        }
-      }
-
+      // Clean up.
       animationEl.parentNode.removeChild(animationEl);
       animationEl = null;
     });

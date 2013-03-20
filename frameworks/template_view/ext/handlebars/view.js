@@ -12,7 +12,7 @@ SC.Handlebars.ViewHelper = SC.Object.create({
     if (path.isClass || path.isObject) {
       newView = path;
       if (!newView) {
-        throw "Null or undefined object was passed to the #view helper. Did you mean to pass a property path string?";
+        throw new Error("Null or undefined object was passed to the #view helper. Did you mean to pass a property path string?");
       }
     } else {
       // Path is relative, look it up with this view as the root
@@ -25,7 +25,7 @@ SC.Handlebars.ViewHelper = SC.Object.create({
           newView = SC.getPath(path);
         }
       }
-      if (!newView) { throw "Unable to find view at path '" + path + "'"; }
+      if (!newView) { throw new Error("Unable to find view at path '" + path + "'"); }
     }
 
     if (hash.id) { hash.layerId = hash.id; }

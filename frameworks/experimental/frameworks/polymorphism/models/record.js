@@ -30,7 +30,7 @@
       Polymorphic record types must have unique GUIDs for all
       subclasses.
 
-      @property {Boolean}
+      @type Boolean
       @default NO
     */
     isPolymorphic: NO,
@@ -67,7 +67,7 @@
         SC.Store.recordTypesByStoreKey[ret] = this;
 
         // Each Record must keep track of its own storeKeys so that a find at any level on the same ID
-        // doesn't generate new storeKeys.  Plus it will be faster than always running back up to the 
+        // doesn't generate new storeKeys.  Plus it will be faster than always running back up to the
         // superclass method to retrieve the key.
         storeKeys[id] = ret;
       }

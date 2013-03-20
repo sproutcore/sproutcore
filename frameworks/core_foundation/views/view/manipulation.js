@@ -4,9 +4,17 @@ SC.View.reopen(
   /** @scope SC.View.prototype */{
 
   /**
-    This code exists to make it possible to pool SC.Views. We are not going to pool SC.Views in Amber
+    This code exists to make it possible to pool SC.Views.
     */
   _lastLayerId: null,
+
+  /** @private */
+  init: function (original) {
+    original();
+
+    // Set up the cached layerId if it has been set on create.
+    this._lastLayerId = this.get('layerId');
+  }.enhance(),
 
   /**
     Handles changes in the layer id.
@@ -45,11 +53,11 @@ SC.View.reopen(
     @returns {SC.View} receiver
   */
   parentViewDidChange: function () {
-    this.recomputeIsVisibleInWindow();
+      this.recomputeIsVisibleInWindow();
 
     this.resetBuildState();
-    this.set('layerLocationNeedsUpdate', YES);
-    this.invokeOnce(this.updateLayerLocationIfNeeded);
+      this.set('layerLocationNeedsUpdate', YES);
+      this.invokeOnce(this.updateLayerLocationIfNeeded);
 
     // We also need to iterate down through the view hierarchy and invalidate
     // all our child view's caches for 'pane', since it could have changed.
@@ -150,7 +158,7 @@ SC.View.reopen(
   removeChild: function (original, view) {
     if (!view) { return this; } // nothing to do
     if (view.parentView !== this) {
-      throw "%@.removeChild(%@) must belong to parent".fmt(this,view);
+      throw new Error("%@.removeChild(%@) must belong to parent".fmt(this,view));
     }
     // notify views
     if (view.willRemoveFromParent) { view.willRemoveFromParent(); }
@@ -159,7 +167,11 @@ SC.View.reopen(
     original(view);
 
     // The DOM will need some fixing up, note this on the view.
-    if (view.parentViewDidChange) view.parentViewDidChange();
+    // But don't update the layer location if it's already destroyed (i.e. it
+    // no longer has a layer), because if a new layer with the same id were
+    // created before updateLayerLocationIfNeeded runs, we would inadvertently
+    // remove the new layer.
+    if (!view.get('isDestroyed') && view.parentViewDidChange) view.parentViewDidChange();
 
     // notify views
     if (this.didRemoveChild) { this.didRemoveChild(view); }

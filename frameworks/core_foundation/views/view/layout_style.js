@@ -225,9 +225,7 @@ SC.View.LayoutStyleCalculator = {
     style[startBorder] = startBorderVal || null;
     style[finishBorder] = finishBorderVal || null;
 
-    // If > 1 then it should be a normal number value
-    if (sizeValue > 1) { sizeValue -= (startBorderVal + finishBorderVal); }
-
+    // Calculate the margin offset used to center the value along this axis.
     if (SC.none(sizeValue)) {
       //@if(debug)
       // This error message happens whenever width or height is not set.
@@ -238,6 +236,9 @@ SC.View.LayoutStyleCalculator = {
       value = centerValue - sizeValue / 2;
       style[margin] = (sizeIsPercent) ? Math.floor(value * 100) + "%" : Math.floor(value);
     }
+
+    // If > 1 then it's a pixel value, in which case we shrink it to accommodate the borders.
+    if (sizeValue > 1) { sizeValue -= (startBorderVal + finishBorderVal); }
 
     style[size] = this._cssNumber(sizeValue) || 0;
     style[finish] = style[center] = null;
@@ -416,7 +417,7 @@ SC.View.reopen(
 
     Computes the layout style settings needed for the current anchor.
 
-    @property {Object}
+    @type Object
     @readOnly
   */
   layoutStyle: function () {

@@ -784,7 +784,7 @@ SC.Event.prototype = {
     This allows a generic event handler to notice if you want to provide
     detailed control over how the browser handles the real event.
 
-    @property {Boolean}
+    @type Boolean
   */
   hasCustomEventHandling: NO,
 
@@ -875,7 +875,7 @@ SC.Event.prototype = {
   /**
     Always YES to indicate the event was normalized.
 
-    @property {Boolean}
+    @type Boolean
   */
   normalized: YES,
 

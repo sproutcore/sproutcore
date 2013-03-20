@@ -179,7 +179,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   /**
     Indicates if this statechart has been initialized
 
-    @property {Boolean}
+    @type Boolean
   */
   statechartIsInitialized: NO,
 
@@ -226,7 +226,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
     @see #rootState
 
-    @property {String}
+    @type String
   */
   initialState: null,
 
@@ -239,7 +239,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
     @see #rootState
 
-    @property {Boolean}
+    @type Boolean
   */
   statesAreConcurrent: NO,
 
@@ -248,7 +248,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     the monitor will be active, otherwise the monitor will not be used. Useful for debugging
     purposes.
 
-    @property {Boolean}
+    @type Boolean
   */
   monitorIsActive: NO,
 
@@ -264,7 +264,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     Used to specify what property (key) on the statechart should be used as the trace property. By
     default the property is 'trace'.
 
-    @property {String}
+    @type String
   */
   statechartTraceKey: 'trace',
 
@@ -274,7 +274,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
     @see #statechartTraceKey
 
-    @property {Boolean}
+    @type Boolean
   */
   trace: NO,
 
@@ -282,7 +282,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     Used to specify what property (key) on the statechart should be used as the owner property. By
     default the property is 'owner'.
 
-    @property {String}
+    @type String
   */
   statechartOwnerKey: 'owner',
 
@@ -292,7 +292,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
     @see #statechartOwnerKey
 
-    @property {SC.Object}
+    @type SC.Object
   */
   owner: null,
 
@@ -301,7 +301,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     object after it has been created. If YES then initStatechart will be
     called automatically, otherwise it will not.
 
-    @property {Boolean}
+    @type Boolean
   */
   autoInitStatechart: YES,
 
@@ -312,7 +312,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     While designing and debugging your statechart, it's best to keep this value false.
     In production you can then suppress the warning messages.
 
-    @property {Boolean}
+    @type Boolean
   */
   suppressStatechartWarnings: NO,
 
@@ -320,7 +320,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     A statechart delegate used by the statechart and the states that the statechart
     manages. The value assigned must adhere to the {@link SC.StatechartDelegate} mixin.
 
-    @property {SC.Object}
+    @type SC.Object
 
     @see SC.StatechartDelegate
   */
@@ -1696,7 +1696,7 @@ SC.EXIT_STATE = 0;
 SC.ENTER_STATE = 1;
 
 /**
-  A Startchart class.
+  A Statechart class.
 */
 SC.Statechart = SC.Object.extend(SC.StatechartManager, {
   autoInitStatechart: NO

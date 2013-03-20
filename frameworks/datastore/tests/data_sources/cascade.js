@@ -23,8 +23,8 @@ module("SC.CascadeDataSource", {
         return YES;
       },
 
-      retriveRecords: function () {
-        ok(true, "retriveRecords should be handled by baz");
+      retrieveRecords: function () {
+        ok(true, "retrieveRecords should be handled by baz");
         return NO;
       },
 
@@ -47,8 +47,8 @@ module("SC.CascadeDataSource", {
         return NO;
       },
 
-      retriveRecords: function () {
-        ok(true, "retriveRecords should be handled by baz");
+      retrieveRecords: function () {
+        ok(true, "retrieveRecords should be handled by baz");
         return NO;
       },
 
@@ -124,7 +124,7 @@ test("Verify dataSource returns 'YES' when handled by a child dataSource for fet
   ok(Sample.dataSource.fetch(store, 'query'), "fetch should be handled by bar");
 });
 
-test("Verify dataSource returns 'YES' when handled by a child dataSource for retriveRecords", function () {
+test("Verify dataSource returns 'YES' when handled by a child dataSource for retrieveRecords", function () {
   ok(Sample.dataSource.retrieveRecords(store, [0], ['id']), "retrieveRecords should be handled by baz");
 });
 

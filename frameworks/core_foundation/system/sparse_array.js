@@ -51,7 +51,7 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     The length of the sparse array.  The delegate for the array should set
     this length.
 
-    @property {Number}
+    @type Number
   */
   length: function() {
     var del = this.delegate ;
@@ -92,7 +92,7 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     If this value is set to larger than 1, then the sparse array will always
     fit a requested index into a range of this size and request it.
 
-    @property {Number}
+    @type Number
   */
   rangeWindowSize: 1,
 
@@ -133,6 +133,8 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
   */
   objectAt: function(idx, omitMaterializing) {
     var content = this._sa_content, ret ;
+
+    if (idx >= this.get('length')) return undefined;
     if (!content) content = this._sa_content = [] ;
     if ((ret = content[idx]) === undefined) {
       if(!omitMaterializing) this.requestIndex(idx);
@@ -317,15 +319,15 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     var c, ret, del = this.delegate ;
     if (del && del.sparseArrayDidRequestIndexOf) {
       ret = del.sparseArrayDidRequestIndexOf(this, obj);
-    } 
-    
+    }
+
     if (SC.none(ret)) {
       c = this._sa_content ;
       if (!c) c = this._sa_content = [] ;
       ret = c.indexOf(obj) ;
     }
     return ret;
-  },  
+  },
 
   // ..........................................................
   // EDITING
@@ -368,15 +370,15 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
       this._length += delta;
       this.propertyDidChange('length');
     }
-    
+
     // Both arrayContentDidChange and enumerableContentDidChange will invoke
-    // "this.notifyPropertyChange('[]')". To prevent multiple notifications 
+    // "this.notifyPropertyChange('[]')". To prevent multiple notifications
     // these calls are made as grouped property changes.
     this.beginPropertyChanges();
     this.arrayContentDidChange(idx, amt, len) ;
     this.enumerableContentDidChange(idx, amt, delta) ;
     this.endPropertyChanges();
-    
+
     return this ;
   },
 

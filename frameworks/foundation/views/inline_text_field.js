@@ -95,15 +95,6 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
   */
   _topOffsetForFirefoxCursorFix: 0,
 
-  /**
-    Tells RootResponder to blur us when there is a mousedown anywhere else.
-
-    @type Boolean
-    @default YES
-  */
-  // TODO: remove this when focus behavior is improved
-  blurOnMouseDown: YES,
-
   /*
   * @private
   * @method
@@ -222,62 +213,43 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
   /*
   * @method
   *
-  * Positions the editor over the passed view.
+  * Positions the editor over the target view.
   *
   * If you want to tweak the positioning of the editor, you may pass a custom
   * frame for it to position itself on.
-  *
-  * Additionally, if your view is a member of a collectionView, the isCollection
-  * flag should be set to YES.
   *
   * @param {SC.View} the view to be positioned over
   * @param {Hash} optional custom frame
   * @param {Boolean} if the view is a member of a collection
   */
-	positionOverTargetView: function(target, isCollection, pane, frame, elem) {
-    var isIE7;
+	positionOverTargetView: function(target, exampleFrame, elem, _oldExampleFrame, _oldElem) {
+    var targetLayout = target.get('layout'),
+        layout = {};
 
-    if(!pane) pane = target.get('pane');
+    // Deprecates isCollection and pane arguments by fixing them up if they appear.
+    if (!SC.none(_oldExampleFrame)) {
+      exampleFrame = _oldExampleFrame;
+      elem = _oldElem;
 
-    if(!elem) elem = target.$()[0];
-
-    // if we weren't given a frame, build one from the target
-    if(!frame) {
-      var tempFrame = target.get('frame');
-
-      frame = SC.offset(elem);
-
-      frame.height = tempFrame.height;
-      frame.width = tempFrame.width;
+      // @if(debug)
+      SC.warn("Developer Warning: the isCollection and pane arguments have been deprecated and can be removed.  The inline text field will now position itself within the same parent element as the target, thus removing the necessity to calculate the position of the target relative to the pane.");
+      // @endif
     }
 
-    var layout={},
-		paneElem = pane.$()[0],
-		tarLayout = target.get('layout');
+    // In case where the label is part of an SC.ListItemView
+    if (exampleFrame && elem) {
+      var frame = SC.offset(elem, 'parent');
 
-    layout.height = frame.height;
-    layout.width = frame.width;
-
-    isIE7 = SC.browser.isIE &&
-        SC.browser.compare(SC.browser.engineVersion, '7') === 0;
-    if (isCollection && tarLayout.left) {
-      layout.left=frame.x-tarLayout.left-paneElem.offsetLeft-1;
-      if(isIE7) layout.left--;
+      layout.top = targetLayout.top + frame.y - exampleFrame.height/2;
+      layout.left = targetLayout.left + frame.x;
+      layout.height = exampleFrame.height;
+      layout.width = exampleFrame.width;
     } else {
-      layout.left=frame.x-paneElem.offsetLeft-1;
-      if(isIE7) layout.left--;
-    }
-
-    if (isCollection && tarLayout.top) {
-      layout.top=frame.y-tarLayout.top-paneElem.offsetTop;
-      if(isIE7) layout.top=layout.top-2;
-    } else {
-      layout.top=frame.y-paneElem.offsetTop;
-      if(isIE7) layout.top=layout.top-2;
+      layout = SC.copy(targetLayout);
     }
 
     this.set('layout', layout);
-	},
+  },
 
   /*
   * Flag indicating whether the editor is allowed to use multiple lines.
@@ -311,6 +283,8 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
 
     this.beginPropertyChanges();
 
+    if (label.multiline) this.set('multiline', label.multiline);
+
     // if we have an exampleElement we need to make sure it's an actual
     // DOM element not a jquery object
     if(elem) {
@@ -324,7 +298,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
 
     this.updateStyle(elem);
 
-    this.positionOverTargetView(label, this.get('isCollection'), pane, this.get('exampleFrame'), elem);
+    this.positionOverTargetView(label, this.get('exampleFrame'), elem);
 
     this._previousFirstResponder = pane ? pane.get('firstResponder') : null;
     this.becomeFirstResponder();
@@ -384,7 +358,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
   keyDown: function(evt) {
     var ret = this.interpretKeyEvents(evt) ;
     this.fieldValueDidChange(true);
-    return !ret ? NO : ret ;
+    return !ret ? NO : ret;
   },
 
   /** @private */

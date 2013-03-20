@@ -86,7 +86,7 @@ SC.ContainerView = SC.View.extend(
     You should observe this property in order to delay any updates to the new
     content until the transition is complete.
 
-    @property {Boolean}
+    @type Boolean
     @default NO
     @readonly
   */
@@ -149,7 +149,7 @@ SC.ContainerView = SC.View.extend(
           timing: 'linear'
         }
 
-    @property {Object}
+    @type Object
     @default null
   */
   transitionOptions: null,
@@ -222,8 +222,10 @@ SC.ContainerView = SC.View.extend(
     var contentStatecharts = this._contentStatecharts;
 
     // Exit all the statecharts immediately. This mutates the array!
-    for (var i = contentStatecharts.length - 1; i >= 0; i--) {
-      contentStatecharts[i].doExit(true);
+    if (contentStatecharts) {
+      for (var i = contentStatecharts.length - 1; i >= 0; i--) {
+        contentStatecharts[i].doExit(true);
+      }
     }
 
     // Remove our internal reference to the statecharts.

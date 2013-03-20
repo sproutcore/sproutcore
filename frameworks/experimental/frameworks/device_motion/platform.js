@@ -10,53 +10,53 @@ SC.mixin(SC.platform,
 
   /**
     YES if the ondeviceorientation event on window is supported.
-    
-    @property {Boolean}
+
+    @type Boolean
     @default NO
   */
   supportsGyroscope: ('ondeviceorientation' in window),
-  
+
   /**
     YES if the ondeviceorientation event on window has actually been
     fired. Some platforms have the event but will never fire it.
-    
-    @property {Boolean}
+
+    @type Boolean
     @default NO
   */
   hasGyroscope: NO,
-  
+
   /**
     YES if the ondevicemotion event on window is supported.
-    
-    @property {Boolean}
+
+    @type Boolean
     @default NO
   */
   supportsAccelerometer: ('ondevicemotion' in window),
-  
+
   /**
     YES if the ondevicemotion event on window has actually been
     fired. Some platforms have the event but will never fire it.
-    
-    @property {Boolean}
+
+    @type Boolean
     @default NO
   */
   hasAccelerometer: NO,
-  
+
   /*
     TODO [CC] Find out the actual values on a multitude of devices.
               We would want this to be a 'normal' use value...
   */
   /**
-    @property {Number}
+    @type Number
     @default -10
   */
   accelerationMinimum: function() {
     // we may want finer grained control of this by platform later
     return -10;
   }(),
-  
+
   /**
-    @property {Number}
+    @type Number
     @default 10
   */
   accelerationMaximum: function() {

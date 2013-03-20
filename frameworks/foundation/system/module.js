@@ -67,7 +67,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
     // If we couldn't find anything in the SC.MODULE_INFO hash, we don't have any record of the
     // requested module.
     if (!module) {
-      throw "SC.Module: could not find module '%@'".fmt(moduleName) ;
+      throw new Error("SC.Module: could not find module '%@'".fmt(moduleName));
     }
 
     // If this module was in the middle of being prefetched, we now need to
@@ -226,7 +226,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
     method = this._methodForMethodNameInTarget(methodName, target);
 
     if (!method) {
-      throw "SC.Module: could not find callback for lazily instantiated module '%@'".fmt(moduleName);
+      throw new Error("SC.Module: could not find callback for lazily instantiated module '%@'".fmt(moduleName));
     }
   },
 
@@ -368,7 +368,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
       dependencyName = dependencies[idx];
       module = SC.MODULE_INFO[dependencyName];
 
-      if (!module) throw "SC.loadModule: Unable to find dependency %@ for module %@.".fmt(dependencyName, moduleName);
+      if (!module) throw new Error("SC.loadModule: Unable to find dependency %@ for module %@.".fmt(dependencyName, moduleName));
 
       if (!module.isReady) {
         return NO;
@@ -400,7 +400,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
 
         // Try to find dependent module in MODULE_INFO
         if (!requiredModule) {
-          throw "SC.Module: could not find required module '%@' for module '%@'".fmt(requiredModuleName, moduleName) ;
+          throw new Error("SC.Module: could not find required module '%@' for module '%@'".fmt(requiredModuleName, moduleName));
         } else {
 
           // Required module has been requested but hasn't loaded yet.
@@ -456,7 +456,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
           target = this._targetForTargetName(targetName);
           method = this._methodForMethodNameInTarget(methodName, target);
         } else {
-          throw "SC.Module: could not find callback for '%@'".fmt(moduleName);
+          throw new Error("SC.Module: could not find callback for '%@'".fmt(moduleName));
         }
       }
 

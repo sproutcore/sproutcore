@@ -304,7 +304,7 @@ SC.SplitView = SC.View.extend(
 
       switch (autoresizeBehavior) {
         case SC.RESIZE_BOTH:
-          throw "SC.RESIZE_BOTH is currently unsupported.";
+          throw new Error("SC.RESIZE_BOTH is currently unsupported.");
         case SC.RESIZE_TOP_LEFT:
           layout.right = bottomRightThickness + dividerThickness;
           delete layout.width;
@@ -322,7 +322,7 @@ SC.SplitView = SC.View.extend(
 
       switch (autoresizeBehavior) {
         case SC.RESIZE_BOTH:
-          throw "SC.RESIZE_BOTH is currently unsupported.";
+          throw new Error("SC.RESIZE_BOTH is currently unsupported.");
         case SC.RESIZE_TOP_LEFT:
           layout.bottom = bottomRightThickness + dividerThickness;
           delete layout.height;
@@ -348,7 +348,7 @@ SC.SplitView = SC.View.extend(
 
         switch (autoresizeBehavior) {
           case SC.RESIZE_BOTH:
-            throw "SC.RESIZE_BOTH is currently unsupported.";
+            throw new Error("SC.RESIZE_BOTH is currently unsupported.");
             // delete layout.left ;
             // delete layout.right ;
             // layout.centerX = topLeftThickness + (dividerThickness / 2) ;
@@ -375,7 +375,7 @@ SC.SplitView = SC.View.extend(
 
         switch (autoresizeBehavior) {
           case SC.RESIZE_BOTH:
-            throw "SC.RESIZE_BOTH is currently unsupported.";
+            throw new Error("SC.RESIZE_BOTH is currently unsupported.");
             // delete layout.top ;
             // delete layout.bottom ;
             // delete layout.centerX ;
@@ -410,7 +410,7 @@ SC.SplitView = SC.View.extend(
 
       switch (autoresizeBehavior) {
         case SC.RESIZE_BOTH:
-          throw "SC.RESIZE_BOTH is currently unsupported.";
+          throw new Error("SC.RESIZE_BOTH is currently unsupported.");
         case SC.RESIZE_BOTTOM_RIGHT:
           layout.left = topLeftThickness + dividerThickness;
           delete layout.width;
@@ -427,7 +427,7 @@ SC.SplitView = SC.View.extend(
 
       switch (autoresizeBehavior) {
         case SC.RESIZE_BOTH:
-          throw "SC.RESIZE_BOTH is currently unsupported.";
+          throw new Error("SC.RESIZE_BOTH is currently unsupported.");
         case SC.RESIZE_BOTTOM_RIGHT:
           layout.top = topLeftThickness + dividerThickness;
           delete layout.height;

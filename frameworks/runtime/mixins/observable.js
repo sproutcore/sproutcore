@@ -15,7 +15,7 @@ sc_require('private/chain_observer');
   Set to YES to have all observing activity logged to the SC.Logger.  This
   should be used for debugging only.
 
-  @property {Boolean}
+  @type Boolean
 */
 SC.LOG_OBSERVERS = NO ;
 
@@ -143,7 +143,7 @@ SC.Observable = /** @scope SC.Observable.prototype */{
   /**
     Walk like that ol' duck
 
-    @property {Boolean}
+    @type Boolean
   */
   isObservable: YES,
 
@@ -743,7 +743,7 @@ SC.Observable = /** @scope SC.Observable.prototype */{
       if (!target) target = this ;
 
       if (typeof method === "string") method = target[method] ;
-      if (!method) throw "You must pass a method to addObserver()" ;
+      if (!method) throw new Error("You must pass a method to addObserver()");
 
       // Normalize key...
       key = key.toString() ;
@@ -799,7 +799,7 @@ SC.Observable = /** @scope SC.Observable.prototype */{
       if (!target) target = this ;
 
       if (typeof method === "string") method = target[method] ;
-      if (!method) throw "You must pass a method to removeObserver()" ;
+      if (!method) throw new Error("You must pass a method to removeObserver()");
 
       // if the key contains a '.', this is a chained observer.
       key = key.toString() ;
@@ -1027,7 +1027,7 @@ SC.Observable = /** @scope SC.Observable.prototype */{
       case SC.OBSERVES_HANDLER_REMOVE:
         action = "removeObserver"; break;
       default:
-        throw "invalid action provided: " + action;
+        throw new Error("invalid action provided: " + action);
       }
 
       dotIndex = path.indexOf('.');

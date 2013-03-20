@@ -11,39 +11,35 @@ sc_require('models/record');
 /**
   @class
 
-  This permits you to perform queries on your data store,
-  written in a SQL-like language. Here is a simple example:
+  This class permits you to perform queries on your data store or a remote
+  data store. Here is a simple example of a local query:
 
-      q = SC.Query.create({
+      query = SC.Query.create({
         conditions: "firstName = 'Jonny' AND lastName = 'Cash'"
-      })
+      });
 
-  You can check if a certain record matches the query by calling
+  To find all records of your store, that match the query, use find with
+  the query as an argument:
 
-      q.contains(record)
+      records = MyApp.store.find(query);
 
-  To find all records of your store, that match query q, use findAll with
-  query q as argument:
-
-      r = MyApp.store.findAll(q)
-
-  `r` will be a record array containing all matching records.
+  `records` will be a record array containing all matching records.
   To limit the query to a record type of `MyApp.MyModel`,
   you can specify the type as a property of the query like this:
 
-      q = SC.Query.create({
+      query = SC.Query.create({
         conditions: "firstName = 'Jonny' AND lastName = 'Cash'",
         recordType: MyApp.MyModel
-      })
+      });
 
-  Calling `find()` like above will now return only records of type t.
+  Calling `find()` like above will now return only records of type MyApp.MyModel.
   It is recommended to limit your query to a record type, since the query will
-  have to look for matching records in the whole store, if no record type
+  have to look for matching records in the whole store if no record type
   is given.
 
   You can give an order, which the resulting records should follow, like this:
 
-      q = SC.Query.create({
+      query = SC.Query.create({
         conditions: "firstName = 'Jonny' AND lastName = 'Cash'",
         recordType: MyApp.MyModel,
         orderBy: "lastName, year DESC"
@@ -53,6 +49,10 @@ sc_require('models/record');
   by writing `'DESC'` behind the property name like in the example above.
   If no order is given, or records are equal in respect to a given order,
   records will be ordered by their storeKey.
+
+  You can check if a certain record matches the query by calling
+
+      query.contains(record);
 
   SproutCore Query Language
   =====
@@ -130,12 +130,6 @@ sc_require('models/record');
 
       SC.Query.registerComparison(property_name, comparison_for_this_property);
 
-  Examples
-
-  Some example queries:
-
-  TODO add examples
-
   @extends SC.Object
   @extends SC.Copyable
   @extends SC.Freezable
@@ -166,7 +160,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
 
   /**
     Optional orderBy parameters.  This can be a string of keys, optionally
-    beginning with the strings `"DESC "` or `"ASC "` to select descending or
+    ending with the strings `" DESC"` or `" ASC"` to select descending or
     ascending order.
 
     Alternatively, you can specify a comparison function, in which case the
@@ -420,7 +414,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
 
     // return result or compare by storeKey
     if (result !== 0) return result ;
-    else return SC.compare(record1.get('storeKey'),record2.get('storeKey'));
+    else return SC.compare(record1.get('storeKey'), record2.get('storeKey'));
   },
 
   /** @private
@@ -1350,11 +1344,11 @@ SC.Query.mixin( /** @scope SC.Query */ {
 
     @param {String} location the query location.
     @param {SC.Record|Array} recordType the record type or types.
-    @param {String} conditions optional conditions
-    @param {Hash} params optional params. or pass multiple args.
+    @param {String} [conditions] The conditions string.
+    @param {Object} [parameters] The parameters object.
     @returns {SC.Query}
   */
-  build: function(location, recordType, conditions, params) {
+  build: function(location, recordType, conditions, parameters) {
 
     var opts = null,
         ret, cache, key, tmp;
@@ -1368,29 +1362,29 @@ SC.Query.mixin( /** @scope SC.Query */ {
     // normalize recordType
     if (typeof recordType === SC.T_STRING) {
       ret = SC.objectForPropertyPath(recordType);
-      if (!ret) throw "%@ did not resolve to a class".fmt(recordType);
+      if (!ret) throw new Error("%@ did not resolve to a class".fmt(recordType));
       recordType = ret ;
     } else if (recordType && recordType.isEnumerable) {
       ret = [];
       recordType.forEach(function(t) {
         if (typeof t === SC.T_STRING) t = SC.objectForPropertyPath(t);
-        if (!t) throw "cannot resolve record types: %@".fmt(recordType);
+        if (!t) throw new Error("cannot resolve record types: %@".fmt(recordType));
         ret.push(t);
       }, this);
       recordType = ret ;
     } else if (!recordType) recordType = SC.Record; // find all records
 
-    if (params === undefined) params = null;
+    if (parameters === undefined) parameters = null;
     if (conditions === undefined) conditions = null;
 
-    // normalize other params. if conditions is just a hash, treat as opts
-    if (!params && (typeof conditions !== SC.T_STRING)) {
+    // normalize other parameters. if conditions is just a hash, treat as opts
+    if (!parameters && (typeof conditions !== SC.T_STRING)) {
       opts = conditions;
       conditions = null ;
     }
 
     // special case - easy to cache.
-    if (!params && !opts) {
+    if (!parameters && !opts) {
 
       tmp = SC.Query._scq_recordTypeCache;
       if (!tmp) tmp = SC.Query._scq_recordTypeCache = {};
@@ -1425,9 +1419,9 @@ SC.Query.mixin( /** @scope SC.Query */ {
         opts.recordTypes = recordType;
       } else opts.recordType = recordType;
 
-      // set conditions and params if needed
+      // set conditions and parameters if needed
       if (conditions) opts.conditions = conditions;
-      if (params) opts.parameters = params;
+      if (parameters) opts.parameters = parameters;
 
       ret = SC.Query.create(opts).freeze();
     }
@@ -1436,29 +1430,61 @@ SC.Query.mixin( /** @scope SC.Query */ {
   },
 
   /**
-    Returns a `LOCAL` query with the passed options.  For a full description of
-    the parameters you can pass to this method, see `SC.Query.build()`.
+    Returns a `LOCAL` query with the passed properties.
+
+    For example,
+
+        // Show all the accounts with a value greater than 100.
+        query = SC.Query.local(MyApp.Account, {
+          conditions: 'value > {amt}',
+          parameters: { amt: 100 },
+          orderBy: 'value DESC'
+        });
 
     @param {SC.Record|Array} recordType the record type or types.
-    @param {String} conditions optional conditions
-    @param {Hash} params optional params. or pass multiple args.
+    @param {Object} [properties] Additional properties to be added to the query.
     @returns {SC.Query}
   */
-  local: function(recordType, conditions, params) {
-    return this.build(SC.Query.LOCAL, recordType, conditions, params);
+  local: function(recordType, properties, oldParameters) {
+    //@if(debug)
+    // We are going to remove all argument overloading in the framework.  It adds
+    // code bloat, increased complexity, edge case errors and makes
+    // memorizing the API difficult.  Rather than support a long list of
+    // arguments that we can't safely collapse, it makes more sense to just
+    // accept a properties object as the proper argument.
+    if (SC.none(properties) && !SC.none(oldParameters) || SC.typeOf(properties) === SC.T_STRING) {
+      SC.warn("Developer Warning: Passing a conditions string and parameters object to SC.Query.local has been deprecated.  Please use a properties hash as per the documentation.");
+    }
+    //@endif
+    return this.build(SC.Query.LOCAL, recordType, properties, oldParameters);
   },
 
   /**
-    Returns a `REMOTE` query with the passed options.  For a full description of
-    the parameters you can pass to this method, see `SC.Query.build()`.
+    Returns a `REMOTE` query with the passed properties.
+
+    For example,
+
+        // The data source can alter its remote request using the value of
+        // `query.beginsWith`.
+        query = SC.Query.remote(MyApp.Person, { beginsWith: 'T' });
 
     @param {SC.Record|Array} recordType the record type or types.
-    @param {String} conditions optional conditions
-    @param {Hash} params optional params. or pass multiple args.
+    @param {Object} [properties] Additional properties to be added to the query.
     @returns {SC.Query}
   */
-  remote: function(recordType, conditions, params) {
-    return this.build(SC.Query.REMOTE, recordType, conditions, params);
+  remote: function(recordType, properties, oldParameters) {
+    // This used to have arguments: conditions and params.  Because both
+    // conditions and params are optional, the developer may be passing in null
+    // conditions with a params object in order to use query.parameters or they
+    // may be passing a conditions object which ended up becoming direct
+    // properties of the query.
+    // Long story short, argument overloading continues to suck ass!
+    // @if(debug)
+    if (SC.none(properties) && !SC.none(oldParameters) || SC.typeOf(properties) === SC.T_STRING) {
+      SC.warn("Developer Warning: SC.Query.remote should not include conditions and parameters arguments.  These properties are unique to local queries.  To add properties to a remote query for the data source to use, please pass a properties hash as the second argument to `remote`.");
+    }
+    // @endif
+    return this.build(SC.Query.REMOTE, recordType, properties, oldParameters);
   },
 
   /** @private

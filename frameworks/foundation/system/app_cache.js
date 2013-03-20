@@ -155,7 +155,7 @@ SC.appCache = SC.Object.create(
     This property is undefined until it can be determined that a new version exists
     or doesn't exist and if it does exist, whether it is valid or not.
 
-    @property {Boolean}
+    @type Boolean
     @default undefined
     @readonly
     */
@@ -186,7 +186,7 @@ SC.appCache = SC.Object.create(
     This property is undefined until it can be determined that the application
     has been cached or not cached.
 
-    @property {Boolean}
+    @type Boolean
     @default undefined
     @readonly
     */
@@ -218,7 +218,7 @@ SC.appCache = SC.Object.create(
     should check isNewVersionValid after determining that hasNewVersion is
     true.
 
-    @property {Boolean}
+    @type Boolean
     @default undefined
     @readonly
     */
@@ -246,7 +246,7 @@ SC.appCache = SC.Object.create(
   /**
     The interval in milliseconds to poll for updates when shouldPoll is true.
 
-    @property {Number}
+    @type Number
     @default 1800000 (30 minutes)
     */
   interval: 1800000,
@@ -254,7 +254,7 @@ SC.appCache = SC.Object.create(
   /**
     The progress of the application cache between 0.0 (0%) and 1.0 (100%).
 
-    @property {Number}
+    @type Number
     @default 0.0
     */
   progress: 0,
@@ -271,7 +271,7 @@ SC.appCache = SC.Object.create(
     Updates are run using the background task queue, so as to pose the smallest
     detriment possible to performance.
 
-    @property {Boolean}
+    @type Boolean
     @default false
     */
   shouldPoll: function (key, value) {
@@ -321,7 +321,7 @@ SC.appCache = SC.Object.create(
     Because of the various interpretations these statuses can mean, you will
     likely find it easier to use the helper properties on SC.appCache instead.
 
-    @property {Number}
+    @type Number
     @default 0
     */
   status: 0,

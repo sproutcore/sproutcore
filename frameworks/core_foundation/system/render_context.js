@@ -125,7 +125,7 @@ SC.RenderContext = SC.Builder.create(
   /**
     The current working array of strings.
 
-    @property {Array}
+    @type Array
   */
   strings: null,
 
@@ -133,7 +133,7 @@ SC.RenderContext = SC.Builder.create(
     this initial offset into the strings array where this context instance
     has its opening tag.
 
-    @property {Number}
+    @type Number
   */
   offset: 0,
 
@@ -141,7 +141,7 @@ SC.RenderContext = SC.Builder.create(
     the current number of strings owned by the context, including the opening
     tag.
 
-    @property {Number}
+    @type Number
   */
   length: 0,
 
@@ -154,7 +154,7 @@ SC.RenderContext = SC.Builder.create(
     You probably do not want to change this property unless you know what you
     are doing.
 
-    @property {String}
+    @type String
   */
   updateMode: SC.MODE_REPLACE,
 
@@ -348,7 +348,7 @@ SC.RenderContext = SC.Builder.create(
     this._innerHTMLReplaced = NO;
 
     if (!elem) {
-      // throw "Cannot update context because there is no source element";
+      // throw new Error("Cannot update context because there is no source element");
       return;
     }
 

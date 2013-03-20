@@ -25,7 +25,7 @@ SC.View.reopen(
 
     Example: themeName: 'ace'
 
-    @property {String}
+    @type String
   */
   themeName: null,
 
@@ -37,7 +37,7 @@ SC.View.reopen(
     This property is private for the time being.
 
     @private
-    @property {String}
+    @type String
   */
   baseThemeName: null,
 
@@ -138,7 +138,7 @@ SC.View.reopen(
 
     You can also set the render delegate by using the 'renderDelegateName' property.
 
-    @property {Object}
+    @type Object
   */
   renderDelegate: function(key, value) {
     if (value) { this._setRenderDelegate = value; }
@@ -152,7 +152,7 @@ SC.View.reopen(
     if (renderDelegateName) {
       renderDelegate = this.get('theme')[renderDelegateName];
       if (!renderDelegate) {
-        throw "%@: Unable to locate render delegate \"%@\" in theme.".fmt(this, renderDelegateName);
+        throw new Error("%@: Unable to locate render delegate \"%@\" in theme.".fmt(this, renderDelegateName));
       }
 
       return renderDelegate;

@@ -248,7 +248,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     // adjust the start location based on branches, possibly passing on to an
     // observer.
     if (this.get('isHeaderVisible')) cur--; // exclude my own header item
-    if (cur < 0) throw "Tree Item cannot replace itself";
+    if (cur < 0) throw new Error("Tree Item cannot replace itself");
 
     // remove branch lengths.  If the adjusted start location lands inside of
     // another branch, then just let that observer handle it.
@@ -295,10 +295,10 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     // ok, now that we are adjusted, get the children and forward the replace
     // call on.  if there are no children, bad news...
     var children = this.get('children');
-    if (!children) throw "cannot replace() tree item with no children";
+    if (!children) throw new Error("cannot replace() tree item with no children");
 
     if ((amt < 0) || (max>children.get('length'))) {
-      throw "replace() range must lie within a single tree item";
+      throw new Error("replace() range must lie within a single tree item");
     }
 
     children.replace(cur, amt, objects, operation);
@@ -688,7 +688,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     // begin all properties on item if there is one.  This will allow us to
     // track important property changes.
     var item = this.get('item');
-    if (!item) throw "SC.TreeItemObserver.item cannot be null";
+    if (!item) throw new Error("SC.TreeItemObserver.item cannot be null");
 
     item.addObserver('*', this, this._itemPropertyDidChange);
     this._itemPropertyDidChange(item, '*');

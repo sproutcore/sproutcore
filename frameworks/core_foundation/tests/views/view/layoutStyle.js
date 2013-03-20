@@ -644,7 +644,7 @@
     var layout = { centerX: 10, centerY: 10, width: 60, height: 60, border: 2 };
     var no_f = { x: 12, y: 12, width: 56, height: 56 } ;
     var with_f = { x: 82, y: 82, width: 56, height: 56 } ;
-    var s = { marginLeft: -18, marginTop: -18, width: 56, height: 56, top: "50%", left: "50%",
+    var s = { marginLeft: -20, marginTop: -20, width: 56, height: 56, top: "50%", left: "50%",
               borderTopWidth: 2, borderRightWidth: 2, borderBottomWidth: 2, borderLeftWidth: 2 } ;
 
     performLayoutTest(layout, no_f, s, with_f, s, NO) ;

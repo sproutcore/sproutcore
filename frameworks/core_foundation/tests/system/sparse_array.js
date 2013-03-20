@@ -45,6 +45,32 @@ test("objectAt() should get the object at the specified index",function() {
 	equals(arr[3],spArray.objectAt(3),'fourth object');
 });
 
+test("objectAt() beyond the length should return undefined and not attempt to retrieve the index.", function () {
+  var delegateObject = {
+        count: 0,
+
+        sparseArrayDidRequestIndex: function(sparseArray, idx) {
+          this.count++;
+          sparseArray.provideObjectAtIndex(idx, "foo");
+        }
+
+      },
+    sparseArray = SC.SparseArray.create({
+      delegate: delegateObject
+    });
+
+  equals(sparseArray.objectAt(0), undefined, "There should not be an item beyond the length of the sparse array.");
+  equals(delegateObject.count, 0, "The index beyond the length should not be requested on the delegate.");
+
+  // Update the length.
+  sparseArray.provideLength(100);
+  equals(sparseArray.objectAt(0), 'foo', "There should be an item within the length of the sparse array.");
+  equals(delegateObject.count, 1, "The index within the length should be requested on the delegate.");
+
+  equals(sparseArray.objectAt(100), undefined, "There should not be an item beyond the length of the sparse array.");
+  equals(delegateObject.count, 1, "The index beyond the length should not be requested on the delegate.");
+});
+
 module("SC.replace",{
 	setup: function() {
 		// create objects...
@@ -113,30 +139,30 @@ test("should work with @each dependent keys", function() {
 test("modifying a range should not require the rest of the array to refetch", function() {
   var del = {
     cnt: 0,
-    
+
     sparseArrayDidRequestIndex: function(sparseArray, idx) {
       this.cnt++;
       sparseArray.provideObjectAtIndex(idx, "foo");
     },
-    
+
     sparseArrayDidRequestLength: function(sparseArray) {
       sparseArray.provideLength(100);
     },
-    
+
     // make editable
     sparseArrayShouldReplace: function() { return YES; }
-    
+
   };
-  
+
   var ary = SC.SparseArray.create({
     delegate: del
   });
-  
+
   equals(ary.objectAt(10), 'foo', 'precond - should provide foo');
   equals(del.cnt, 1, 'precond - should invoke sparseArrayDidRequestIndex() one time');
-  
+
   del.cnt = 0;
-  
+
   ary.removeAt(5); // delete an item before 10
   equals(ary.objectAt(9), 'foo', 'should provide foo at index after delete');
   equals(del.cnt, 0, 'should NOT invoke sparseArrayRequestIndex() since it was provided already');
@@ -145,7 +171,7 @@ test("modifying a range should not require the rest of the array to refetch", fu
 test("Check that requestIndex works with a rangeWindowSize larger than 1", function() {
 	var ary = SC.SparseArray.array(10) ;
 	var didRequestRange=NO;
-	
+
 	var DummyDelegate = SC.Object.extend({
     content: [], // source array
 
@@ -158,7 +184,7 @@ test("Check that requestIndex works with a rangeWindowSize larger than 1", funct
     },
 
     sparseArrayDidRequestIndexOf: function(sparseArray, object) {
-      return this.content.indexOf(object);    
+      return this.content.indexOf(object);
     },
 
     sparseArrayShouldReplace: function(sparseArray, idx, amt, objects) {
@@ -180,24 +206,24 @@ test("Check that requestIndex works with a rangeWindowSize larger than 1", funct
 
 // ..........................................................
 // definedIndexes
-// 
+//
 
 test("definedIndexes", function() {
   var ary = SC.SparseArray.array(10);
   ary.provideObjectAtIndex(5, "foo");
-  
+
   var expected = SC.IndexSet.create().add(5);
   same(ary.definedIndexes(), expected, 'definedIndexes() should return all defined indexes');
-  
+
   same(ary.definedIndexes(SC.IndexSet.create().add(2, 10)), expected, 'definedIndexes([2..11]) should return indexes within');
-  
+
   same(ary.definedIndexes(SC.IndexSet.create().add(2)), SC.IndexSet.EMPTY, 'definedIndexes([2]) should return empty set (since does not overlap with defined index)');
-  
+
 });
 
 // ..........................................................
 // TEST SC.ARRAY COMPLIANCE
-// 
+//
 
 var DummyDelegate = SC.Object.extend({
   content: [], // source array
@@ -205,20 +231,20 @@ var DummyDelegate = SC.Object.extend({
   sparseArrayDidRequestLength: function(sparseArray) {
     sparseArray.provideLength(this.content.length);
   },
-  
+
   sparseArrayDidRequestIndex: function(sparseArray, index) {
     sparseArray.provideObjectAtIndex(index, this.content[index]);
   },
-  
+
   sparseArrayDidRequestIndexOf: function(sparseArray, object) {
-    return this.content.indexOf(object);    
+    return this.content.indexOf(object);
   },
-  
+
   sparseArrayShouldReplace: function(sparseArray, idx, amt, objects) {
     this.content.replace(idx, amt, objects) ; // keep internal up-to-date
     return YES ; // allow anything
   }
-  
+
 });
 
 SC.ArraySuite.generate("SC.SparseArray", {

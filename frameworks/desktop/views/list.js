@@ -76,6 +76,9 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
   */
   acceptsFirstResponder: YES,
 
+  /** @private SC.CollectionView.prototype */
+  exampleView: SC.ListItemView,
+
   /**
     If set to YES, the default theme will show alternating rows
     for the views this ListView created through exampleView property.
@@ -134,7 +137,7 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     }
 
     if (!del) {
-      throw "Internal Inconsistancy: ListView must always have CollectionRowDelegate";
+      throw new Error("Internal Inconsistancy: ListView must always have CollectionRowDelegate");
     }
 
     del.addObserver('rowHeight', this, func);
@@ -318,6 +321,9 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     // find the smallest index changed; invalidate everything past it
     if (indexes && indexes.isIndexSet) indexes = indexes.get('min');
     this.reload(SC.IndexSet.create(indexes, len-indexes));
+
+    // If the row height changes, our entire layout needs to change.
+    this.invokeOnce('adjustLayout');
     return this ;
   },
 
@@ -329,7 +335,7 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     items in the collection are not in a completely random order relative to layout)
   */
   _sclv_lengthDidChange: function() {
-    this.adjust(this.computeLayout());
+    this.invokeOnce('adjustLayout');
   }.observes('length'),
 
   // ..........................................................
@@ -345,7 +351,7 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     var ret = this._sclv_layout;
     if (!ret) ret = this._sclv_layout = {};
     ret.minHeight = this.rowOffsetForContentIndex(this.get('length'));
-    this.set('calculatedHeight',ret.minHeight);
+    this.set('calculatedHeight', ret.minHeight);
     return ret ;
   },
 

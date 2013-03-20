@@ -8,16 +8,16 @@
 /**
   Indicates that the collection view expects to accept a drop ON the specified
   item.
-  
-  @property {Number}
+
+  @type Number
 */
 SC.DROP_ON = 0x01 ;
 
 /**
-  Indicates that the collection view expects to accept a drop BEFORE the 
+  Indicates that the collection view expects to accept a drop BEFORE the
   specified item.
-  
-  @property {Number}
+
+  @type Number
 */
 SC.DROP_BEFORE = 0x02 ;
 
@@ -25,16 +25,16 @@ SC.DROP_BEFORE = 0x02 ;
   Indicates that the collection view expects to accept a drop AFTER the
   specified item.  This is treated just like SC.DROP_BEFORE is most views
   except for tree lists.
-  
-  @property {Number}
+
+  @type Number
 */
 SC.DROP_AFTER = 0x04 ;
 
 /**
-  Indicates that the collection view want's to know which operations would 
+  Indicates that the collection view want's to know which operations would
   be allowed for either drop operation.
-  
-  @property {Number}
+
+  @type Number
 */
 SC.DROP_ANY = 0x07 ;
 
@@ -90,34 +90,34 @@ SC.ALIGN_BOTTOM_RIGHT = 'bottom-right';
 
 
 SC.mixin(/** @lends SC */ {
-  
+
   /**
     Reads or writes data from a global cache.  You can use this facility to
     store information about an object without actually adding properties to
     the object itself.  This is needed especially when working with DOM,
     which can leak easily in IE.
-    
+
     To read data, simply pass in the reference element (used as a key) and
     the name of the value to read.  To write, also include the data.
-    
+
     You can also just pass an object to retrieve the entire cache.
-    
+
     @param elem {Object} An object or Element to use as scope
     @param name {String} Optional name of the value to read/write
     @param data {Object} Optional data.  If passed, write.
     @returns {Object} the value of the named data
   */
   data: $.data,
-  
+
   /**
     Removes data from the global cache.  This is used throughout the
     framework to hold data without creating memory leaks.
-    
-    You can remove either a single item on the cache or all of the cached 
+
+    You can remove either a single item on the cache or all of the cached
     data for an object.
-    
+
     @param elem {Object} An object or Element to use as scope
-    @param name {String} optional name to remove. 
+    @param name {String} optional name to remove.
     @returns {Object} the value or cache that was removed
   */
   removeData: $.removeData,

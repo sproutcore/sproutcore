@@ -39,7 +39,7 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
     `toMany()` relationship as well. Modifying this many array will modify
     the `inverse` property as well.
 
-    @property {String}
+    @type String
   */
   inverse: null,
 
@@ -50,7 +50,7 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
     property also set. Only one of the inverse relationships should be marked
     as master so you can control which record should be committed.
 
-    @property {Boolean}
+    @type Boolean
   */
   isMaster: YES,
 
@@ -99,7 +99,7 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
   fromType: function(record, key, value) {
     var ret = [];
 
-    if(!SC.isArray(value)) throw "Expects toMany attribute to be an array";
+    if(!SC.isArray(value)) throw new Error("Expects toMany attribute to be an array");
 
     var len = value.get('length');
     for(var i=0;i<len;i++) {

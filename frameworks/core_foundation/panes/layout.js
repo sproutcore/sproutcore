@@ -11,7 +11,7 @@ SC.Pane.reopen(
   /**
     Last known window size.
 
-    @property {Rect}
+    @type Rect
   */
   currentWindowSize: null,
 

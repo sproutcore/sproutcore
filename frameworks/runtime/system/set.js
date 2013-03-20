@@ -169,21 +169,21 @@ SC.Set = SC.mixin({},
   /**
     Walk like a duck
 
-    @property {Boolean}
+    @type Boolean
   */
   isSet: YES,
 
   /**
     This property will change as the number of objects in the set changes.
 
-    @property {Number}
+    @type Number
   */
   length: 0,
 
   /**
     Returns the first object in the set or null if the set is empty
 
-    @property {Object}
+    @type Object
   */
   firstObject: function() {
     return (this.length > 0) ? this[0] : undefined ;
@@ -308,7 +308,7 @@ SC.Set = SC.mixin({},
   addEach: function(objects) {
     if (this.isFrozen) throw SC.FROZEN_ERROR;
     if (!objects || !objects.isEnumerable) {
-      throw "%@.addEach must pass enumerable".fmt(this);
+      throw new Error("%@.addEach must pass enumerable".fmt(this));
     }
 
     var idx, isObservable = this.isObservable ;
@@ -396,7 +396,7 @@ SC.Set = SC.mixin({},
   removeEach: function(objects) {
     if (this.isFrozen) throw SC.FROZEN_ERROR;
     if (!objects || !objects.isEnumerable) {
-      throw "%@.addEach must pass enumerable".fmt(this);
+      throw new Error("%@.addEach must pass enumerable".fmt(this));
     }
 
     var idx, isObservable = this.isObservable ;

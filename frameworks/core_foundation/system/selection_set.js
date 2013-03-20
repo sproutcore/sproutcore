@@ -23,14 +23,14 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
   /**
     Walk like a duck.
 
-    @property {Boolean}
+    @type Boolean
   */
   isSelectionSet: YES,
 
   /**
     Total number of indexes in the selection set
 
-    @property {Number}
+    @type Number
   */
   length: function() {
     var ret     = 0,
@@ -49,7 +49,7 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
     A set of all the source objects used in the selection set.  This
     property changes automatically as you add or remove index sets.
 
-    @property {SC.Array}
+    @type SC.Array
   */
   sources: function() {
     var ret  = [],
@@ -164,7 +164,7 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
 
     // normalize
     if (start === undefined && length === undefined) {
-      if (!source) throw "Must pass params to SC.SelectionSet.add()";
+      if (!source) throw new Error("Must pass params to SC.SelectionSet.add()");
       if (source.isIndexSet) return this.add(source.source, source);
       if (source.isSelectionSet) {
         sets = source._sets;
@@ -224,7 +224,7 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
 
     // normalize
     if (start === undefined && length === undefined) {
-      if (!source) throw "Must pass params to SC.SelectionSet.remove()";
+      if (!source) throw new Error("Must pass params to SC.SelectionSet.remove()");
       if (source.isIndexSet) return this.remove(source.source, source);
       if (source.isSelectionSet) {
         sets = source._sets;

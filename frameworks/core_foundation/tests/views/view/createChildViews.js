@@ -50,6 +50,8 @@ test("should not error when there is a dud view name in childViews list.", funct
   var v = SC.View.create({
     childViews: [
       'nonExistantClassName',       // string - should NOT be called
+      null,                       // null - should NOT be called
+      '',                         // empty string - should NOT be called
       'customClassName'          // string - should be called
     ],
     // this should be used for the 'customClassName' item above
@@ -65,6 +67,7 @@ test("should not error when there is a dud view name in childViews list.", funct
 
   // createChildViews() is called automatically during create.
   same(called, [2], 'called createChildView for correct children');
+  equals(v.getPath('childViews.length'), 1, "The childViews array should not contain any invalid childViews after creation.");
 });
 
 test("should not throw error when there is an extra space in the childViews list", function() {

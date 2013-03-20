@@ -34,7 +34,7 @@ SC.VideoView = SC.View.extend(
 
   /**
     Video view className.
-    @property {String}
+    @type String
   */
   classNames: 'sc-video-view',
 
@@ -42,13 +42,13 @@ SC.VideoView = SC.View.extend(
     Properties that trigger a re render of the view. If the value changes, it
     means that the video url changed.
 
-    @property {Array}
+    @type Array
   */
   displayProperties: ['value', 'shouldAutoResize'],
 
   /**
     Reference to the video object once is created.
-    @property {Object}
+    @type Object
   */
 
   videoObject:null,
@@ -57,14 +57,14 @@ SC.VideoView = SC.View.extend(
     Array containing the technologies and the order to load them depending
     availability
 
-    @property {Array}
+    @type Array
   */
   degradeList: ['html5','quicktime', 'flash'],
 
   /**
      Current time in secs
-     
-     @property {Number}
+
+     @type Number
    */
   currentTime : function(key, value) {
     if (!SC.empty(value) && this._currentTime != value) {
@@ -77,66 +77,66 @@ SC.VideoView = SC.View.extend(
 
   /**
      Current time in secs
-     
-     @property {Number}
+
+     @type Number
      @private
    */
   _currentTime : 0,
-  
-  /** 
+
+  /**
     Duration in secs
-    @property {Number}
+    @type Number
   */
   duration: 0, //video duration in secs
 
   /**
     Volume. The value should be between 0 and 1
-    @property {Number}
+    @type Number
   */
   volume:0, //volume value from 0 to 1
 
   /**
     Tells you if the video is paused or not.
-    @property {Boolean}
+    @type Boolean
   */
   paused: YES, //is the video paused
 
   /**
     Tells you if the video is loaded.
-    @property {Boolean}
+    @type Boolean
   */
 
   loaded: NO, //has the video loaded
 
   /**
     Indicates if the video has reached the end
-    @property {Boolean}
+    @type Boolean
   */
 
   ended: NO, //did the video finished playing
 
   /**
     Indicates if the video is ready to be played.
-    @property {Boolean}
+    @type Boolean
   */
 
   canPlay: NO, //can the video be played
 
   /**
     Width of the video in pixels.
-    @property {Number}
+    @type Number
   */
   videoWidth:0,
 
   /**
     Width of the video in pixels.
-    @property {Number}
+    @type Number
   */
   videoHeight:0,
 
   /**
     Flag to enable captions if available.
-    @property {Boolean}
+    @type Boolean
   */
   captionsEnabled: NO,
 
@@ -146,7 +146,7 @@ SC.VideoView = SC.View.extend(
 
   /**
     Formatted currentTime. (00:00)
-    @property {String}
+    @type String
   */
   time: function(){
     var currentTime=this.get('currentTime'),
@@ -526,7 +526,7 @@ SC.VideoView = SC.View.extend(
   }.observes('paused'),
 
   /**
-    Called when currentTime changes. Notifies the different technologies 
+    Called when currentTime changes. Notifies the different technologies
     then new currentTime.
 
     @returns {void}
@@ -543,8 +543,8 @@ SC.VideoView = SC.View.extend(
       vid.setTime(this.get('currentTime'));
     }
   },
-  
-  /** 
+
+  /**
     Set the volume of the video.
 
     @returns {void}
@@ -664,7 +664,7 @@ SC.VideoView = SC.View.extend(
 
 });
 
-/** 
+/**
   Hash to store references to the different flash videos.
 */
 SC.VideoView.flashViews={};

@@ -5,8 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/**
-  @namespace
+/** @deprecated
 
   An experimental `CollectionView` mixin that makes it extremely fast under
   certain circumstances, including for mobile devices.
