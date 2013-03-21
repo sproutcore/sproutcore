@@ -45,6 +45,7 @@ config :statechart,      :required => [:core_foundation], :test_required => [:co
 config :ajax,            :required => [:runtime, :core_foundation]
 config :designer,        :required => [:runtime, :foundation, :desktop]
 
+config :"experimental/select_view", :test_required => [:desktop]
 config :"experimental/split_view", :test_required => [:desktop]
 
 # WRAPPER FRAMEWORKS
