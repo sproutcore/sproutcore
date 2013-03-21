@@ -8,14 +8,14 @@ module("SelectView - Selected Item", {
   setup: function() {
     pane = SC.Pane.create();
 
-    obj = SC.Object.create({title: 'Lost', value: 'Found'});
+    obj = SC.Object.create({title: 'Lost', value: 'Found' });
 
     View = SC.SelectView.extend({
       items: [
-        {title: 'Hello', value: 'hi'},
-        {title: 'Yo', value: 'Jimbo'},
+        {title: 'Hello', value: 'hi', icon: 'hi' },
+        {title: 'Yo', value: 'Jimbo', icon: 'jimbo' },
         obj,
-        {title: 'The Greate American Flee Market', value: 'aFilm'}
+        {title: 'The Greate American Flee Market', value: 'aFilm', icon: 'a-film'}
       ],
 
       itemTitleKey: 'title',
@@ -34,12 +34,13 @@ function createView(settings) {
   return view;
 }
 
-test("defaultTitle used when no item is selected", function() {
+test("defaultTitle and defaultIcon used when no item is selected", function() {
   SC.RunLoop.begin();
-  var view = createView({ defaultTitle: "Bonjour" });
+  var view = createView({ defaultTitle: "Bonjour", defaultIcon: "bonjour" });
   SC.RunLoop.end();
 
   equals(view.get('title'), "Bonjour", "Title is the default title");
+  equals(view.get('icon'), "bonjour", "Icon is the default icon");
 });
 
 test("defaultTitle is NOT used when an item IS selected at startup", function() {
@@ -104,6 +105,7 @@ test("changing value changes the selected item", function() {
 
   ok(view.get('selectedItem') !== null, "Selected item is no longer null");
   equals(view.get('title'), "Yo", "Title has changed");
+  equals(view.get('icon'), "jimbo", "Icon has changed");
 });
 
 test("changing value to a value not in the list deselects", function() {

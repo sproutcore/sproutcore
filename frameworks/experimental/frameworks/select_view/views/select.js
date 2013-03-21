@@ -238,13 +238,22 @@ SC.SelectView = SC.PopupButtonView.extend({
   }.property('selectedItem').cacheable(),
 
   /**
+    The icon to show when no item is selected.
+
+    @property
+    @type String
+    @default ""
+  */
+  defaultIcon: null,
+
+  /**
     The icon of the button, derived from the selected item.
   */
   icon: function() {
     var sel = this.get('selectedItem');
 
     if (!sel) {
-      return null;
+      return this.get('defaultIcon');
     } else if (sel.get) {
       return sel.get(this.get('itemIconKey') || 'icon');
     } else if (SC.typeOf(sel) == SC.T_HASH) {
