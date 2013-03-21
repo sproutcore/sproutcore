@@ -363,7 +363,7 @@ SC.CoreView.reopen(
 
     // If this view uses static layout, then notify that the frame (likely)
     // changed.
-    if (this.useStaticLayout) { this.viewDidResize(); }
+    if (this.get('useStaticLayout')) { this.viewDidResize(); }
 
     if (this.didUpdateLayer) { this.didUpdateLayer(); } // call to update DOM
     if(this.designer && this.designer.viewDidUpdateLayer) {
