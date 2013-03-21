@@ -187,5 +187,25 @@ test("value does not change when an SC.Object item's value changes when that ite
 
 });
 
+test("title changes when items are changed", function() {
+  SC.RunLoop.begin();
+  var view = createView({ value: "Found" });
+  SC.RunLoop.end();
 
+  equals(view.get('title'), "Lost", "Title starts at that of selected item");
+
+  SC.RunLoop.begin();
+  view.set('items', [{title: 'Finally found', value: 'Found'}]);
+  SC.RunLoop.end();
+
+  equals(view.get('title'), "Finally found", "Title changed");
+
+  SC.RunLoop.begin();
+  view.set('items', [{title: 'Hello', value: 'hi'}]);
+  SC.RunLoop.end();
+
+  equals(view.get('title'), "", "Title is empty");
+  equals(view.get('value'), "Found", "Value has not changed");
+
+});
 

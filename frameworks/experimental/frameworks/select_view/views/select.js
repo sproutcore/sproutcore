@@ -260,7 +260,7 @@ SC.SelectView = SC.PopupButtonView.extend({
 
     // if we got here, this means no item is selected
     this.setIfChanged('selectedItem', null);
-  }.observes('value'),
+  }.observes('value', 'items'),
 
   /**
     SelectView must set the selectView property on the menu so that the menu's
