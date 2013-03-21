@@ -238,6 +238,23 @@ SC.SelectView = SC.PopupButtonView.extend({
   }.property('selectedItem').cacheable(),
 
   /**
+    The icon of the button, derived from the selected item.
+  */
+  icon: function() {
+    var sel = this.get('selectedItem');
+
+    if (!sel) {
+      return null;
+    } else if (sel.get) {
+      return sel.get(this.get('itemIconKey') || 'icon');
+    } else if (SC.typeOf(sel) == SC.T_HASH) {
+      return sel[this.get('itemIconKey') || 'icon'];
+    } else {
+      return sel;
+    }
+  }.property('selectedItem').cacheable(),
+
+  /**
     * When the value changes, we need to update selectedItem.
     * @private
   */
