@@ -664,7 +664,7 @@ SC.View.reopen(
     // If this view uses static layout, our "do we think the frame changed?"
     // result of isFixedLayout is not applicable and we simply have to assume
     // that the frame may have changed.
-    sizeMayHaveChanged = this.useStaticLayout || !this.get('isFixedSize');
+    sizeMayHaveChanged = this.get('useStaticLayout') || !this.get('isFixedSize');
     positionMayHaveChanged = !this.get('isFixedPosition');
 
     if (sizeMayHaveChanged) {
@@ -949,7 +949,7 @@ SC.View.reopen(
 
       // If this view uses static layout, then notify if the frame changed.
       // (viewDidResize will do a comparison)
-      if (this.useStaticLayout) this.viewDidResize();
+      if (this.get('useStaticLayout')) this.viewDidResize();
     }
     layer = null;
     return this;
