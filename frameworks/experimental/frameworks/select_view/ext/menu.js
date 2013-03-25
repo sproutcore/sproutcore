@@ -70,8 +70,6 @@ SC.AutoResizingMenuPane = SC.MenuPane.extend(
   */
   init: function() {
     sc_super();
-    
-    this.set('exampleView', SC.AutoResizingMenuItemView);
 
     if (this.get('shouldAutoResize')) {
       this.invokeOnce('_updateMenuWidth');
