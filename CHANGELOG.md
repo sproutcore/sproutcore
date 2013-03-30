@@ -249,6 +249,8 @@ tests that enforce the one-record-array-per-query contract.
 1.9.2 - BUG FIX RELEASE
 ----------
 
+* No longer modifies the underlying items given to an SC.SegmentedView with an
+  overflow menu directly so that we don't invariably dirty the original object.
 * Fixes regression in IE7 and IE8 which caused XHR requests to fail to notify. 
   Also fixes unit tests to pass in IE7+.
 * Fixes debug images and test iframe.html being included in builds. These files 
