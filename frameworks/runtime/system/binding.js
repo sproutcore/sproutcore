@@ -538,7 +538,8 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     should be called just before using this._bindingValue.
   */
   _computeBindingValue: function() {
-    var source = this._bindingSource,
+    var that = this,
+        source = this._bindingSource,
         key    = this._bindingKey,
         v, idx;
 
@@ -552,6 +553,29 @@ SC.Binding = /** @scope SC.Binding.prototype */{
       for(idx=0;idx<len;idx++) {
         transform = transforms[idx] ;
         v = transform(v, this) ;
+      }
+      
+      // If the transforms has changed the value, we need to re-sync the "from" property 
+      // and the "to" property.
+      if (!this._oneWay && this._syncTransformedValue && this._bindingValue !== v) {
+        setTimeout(function() { 
+          that._toTarget.setPathIfChanged(that._toPropertyKey, v);
+          that._fromTarget.setPathIfChanged(that._fromPropertyKey, v);
+        }, 1);
+
+        //@if(debug)
+        var _lastSyncTimestamp = new Date().getTime();
+
+        if (this._lastSyncTimestamp + 10 > _lastSyncTimestamp) {
+          SC.warn("Developer Warning: It looks like a binding is running into an infinite sync loop. Try to set your binding oneWay or set the syncTransformedValue parameter of your transform method to NO. fromPropertyKey: '%@' - bindingValue: '%@' - transformedBindingValue: '%@'.".fmt(that._fromPropertyKey, this._bindingValue, v));
+
+          if (!this._warnCount) this._warnCount = 0;
+          this._warnCount++;
+          if (this._warnCount > 100) throw 'Maximum call stack size exceeded.';
+        }
+
+        this._lastSyncTimestamp = _lastSyncTimestamp;
+        //@endif
       }
     }
 
@@ -777,10 +801,14 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     extending a binding and want to reset the transforms, you can call
     resetTransform() first.
 
-    @param {Function} transformFunc the transform function.
+    @param {Function} [transformFunc] the transform function.
+    @param {Boolean} [syncTransformedValue] Pass NO if you don't want the transformed 
+    value to be sync back in the case where the transform did change the value. This
+    can be useful if you use the isForward parameter to serve differents values to each 
+    parts of the binding. Default is YES.
     @returns {SC.Binding} this
   */
-  transform: function(transformFunc) {
+  transform: function(transformFunc, syncTransformedValue) {
     var binding = (this === SC.Binding) ? this.beget() : this ;
     var t = binding._transforms ;
 
@@ -794,6 +822,9 @@ SC.Binding = /** @scope SC.Binding.prototype */{
 
     // add the transform function
     t.push(transformFunc) ;
+
+    binding._syncTransformedValue = (syncTransformedValue === undefined) ? YES : syncTransformedValue ;
+    
     return binding;
   },
 
@@ -1000,7 +1031,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
       var t = SC.typeOf(v) ;
       if (t === SC.T_ERROR) return v ;
       return !((t == SC.T_ARRAY) ? (v.length > 0) : (v === '') ? NO : !!v) ;
-    }) ;
+    }, NO) ;
   },
 
   /**
@@ -1010,7 +1041,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @returns {SC.Binding} this
   */
   isNull: function(fromPath) {
-    return this.from(fromPath).transform(function(v) {
+    return this.from(fromPath).oneWay().transform(function(v) {
       var t = SC.typeOf(v) ;
       return (t === SC.T_ERROR) ? v : SC.none(v) ;
     });
