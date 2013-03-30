@@ -130,7 +130,7 @@ SC.EMPTY_PLACEHOLDER = '@@EMPTY@@' ;
   not allow Integers less than ten.  Note that it checks the value of the
   bindings and allows all other values to pass:
 
-        valueBinding: SC.Binding.transform(function(value, binding) {
+        valueBinding: SC.Binding.transform(function(value, isForward, binding) {
           return ((SC.typeOf(value) === SC.T_NUMBER) && (value < 10)) ? 10 : value;
         }).from("MyApp.someController.value")
 
@@ -141,7 +141,7 @@ SC.EMPTY_PLACEHOLDER = '@@EMPTY@@' ;
   be not less than the passed minimum:
 
       SC.Binding.notLessThan = function(minValue) {
-        return this.transform(function(value, binding) {
+        return this.transform(function(value, isForward, binding) {
           return ((SC.typeOf(value) === SC.T_NUMBER) && (value < minValue)) ? minValue : value ;
         }) ;
       } ;
@@ -538,7 +538,8 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     should be called just before using this._bindingValue.
   */
   _computeBindingValue: function() {
-    var source = this._bindingSource,
+    var that = this,
+        source = this._bindingSource,
         key    = this._bindingKey,
         v, idx;
 
@@ -548,10 +549,34 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     var transforms = this._transforms;
     if (transforms) {
       var len = transforms.length,
+          isForward = this.isForward(),
           transform;
+
       for(idx=0;idx<len;idx++) {
         transform = transforms[idx] ;
-        v = transform(v, this) ;
+        v = transform(v, isForward, this);
+      }
+
+      if (this._bindingValue !== v && this._syncTransformedValue) {
+        setTimeout(function() {
+          if (isForward) {
+            if (!that._oneWay && that._fromTarget) that._fromTarget.setPathIfChanged(that._fromPropertyKey, v);
+          } 
+          else {
+            if (that._toTarget) that._toTarget.setPathIfChanged(that._toPropertyKey, v);
+          }
+        }, 1);
+
+        //@if(debug)
+        var _lastSyncTimestamp = new Date().getTime();
+        if (this._lastSyncTimestamp + 10 > _lastSyncTimestamp) {
+          SC.warn("Developer Warning: Your binding already sync 10ms ago. Don't you forget to set your binding oneWay ? If you use a transform function with isForward to serve differents values to each parts of the binding, set syncTransformedValue to NO. fromPropertyKey: '%@' - originalValue: '%@' - transformedValue: '%@'.".fmt(that._fromPropertyKey, this._bindingValue, v));
+          this._warnCount++;
+          if (this._warnCount > 10) throw new Error('Maximum call stack size exceeded.');
+        }
+        else this._warnCount = 0;
+        this._lastSyncTimestamp = _lastSyncTimestamp;
+        //@endif
       }
     }
 
@@ -638,7 +663,11 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     if (!this._oneWay && this._fromTarget) {
       if (log) SC.Logger.log("%@: %@ -> %@".fmt(this, v, tv)) ;
       if (bench) SC.Benchmark.start(this.toString() + "->") ;
-      this._fromTarget.setPathIfChanged(this._fromPropertyKey, v) ;
+      if (this.isForward()) {
+        this._fromTarget.setPathIfChanged(this._fromPropertyKey, v) ;
+      } else {
+        this._fromTarget.setPathIfChanged(this._fromPropertyKey, tv) ;
+      }
       if (bench) SC.Benchmark.end(this.toString() + "->") ;
     }
 
@@ -646,7 +675,11 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     if (this._toTarget) {
       if (log) SC.Logger.log("%@: %@ <- %@".fmt(this, v, tv)) ;
       if (bench) SC.Benchmark.start(this.toString() + "<-") ;
-      this._toTarget.setPathIfChanged(this._toPropertyKey, tv) ;
+      if (this.isForward()) {
+        this._toTarget.setPathIfChanged(this._toPropertyKey, tv) ;
+      } else {
+        this._toTarget.setPathIfChanged(this._toPropertyKey, v) ;
+      }
       if (bench) SC.Benchmark.start(this.toString() + "<-") ;
     }
   },
@@ -741,6 +774,19 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   },
 
   /**
+    Returns the direction of the binding.  If isForward is YES, then the value   
+    being passed came from the "from" side of the binding (i.e. the "Binding.path" 
+    you named).  If isForward is NO, then the value came from the "to" side (i.e. 
+    the property you named with "propertyBinding").  You can vary your transform 
+    behavior if you are based on the direction of the change.
+    
+    @returns {Boolean}
+  */
+  isForward: function() {
+    return this._fromTarget === this._bindingSource;
+  },
+
+  /**
     Configures the binding as one way.  A one-way binding will relay changes
     on the "from" side to the "to" side, but not the other way around.  This
     means that if you change the "to" side directly, the "from" side may have
@@ -777,10 +823,14 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     extending a binding and want to reset the transforms, you can call
     resetTransform() first.
 
-    @param {Function} transformFunc the transform function.
+    @param {Function} [transformFunc] the transform function.
+    @param {Boolean} [syncTransformedValue] Pass NO if the transform can change the value 
+      and if you don't want the transformed value to be sync. This can be useful if you use
+      the isForward parameter to serve differents values to each parts of the binding. 
+      Default is YES.
     @returns {SC.Binding} this
   */
-  transform: function(transformFunc) {
+  transform: function(transformFunc, syncTransformedValue) {
     var binding = (this === SC.Binding) ? this.beget() : this ;
     var t = binding._transforms ;
 
@@ -794,6 +844,9 @@ SC.Binding = /** @scope SC.Binding.prototype */{
 
     // add the transform function
     t.push(transformFunc) ;
+
+    binding._syncTransformedValue = (syncTransformedValue === undefined) ? YES : syncTransformedValue ;
+
     return binding;
   },
 
@@ -996,7 +1049,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @returns {SC.Binding} this
   */
   not: function(fromPath) {
-    return this.from(fromPath).transform(function(v) {
+    return this.oneWay(fromPath).transform(function(v) {
       var t = SC.typeOf(v) ;
       if (t === SC.T_ERROR) return v ;
       return !((t == SC.T_ARRAY) ? (v.length > 0) : (v === '') ? NO : !!v) ;
@@ -1010,7 +1063,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @returns {SC.Binding} this
   */
   isNull: function(fromPath) {
-    return this.from(fromPath).transform(function(v) {
+    return this.oneWay(fromPath).transform(function(v) {
       var t = SC.typeOf(v) ;
       return (t === SC.T_ERROR) ? v : SC.none(v) ;
     });

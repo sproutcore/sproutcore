@@ -16,7 +16,7 @@ SC.designPage = SC.Page.create({
     container: SC.DesignerDropTarget.design({
       layout: {top: 20, left: 20, right: 20, bottom: 83},
       classNames: ['design'],
-      contentViewBinding: SC.Binding.transform(function(value, binding){
+      contentViewBinding: SC.Binding.transform(function(value, isForward, binding){
         return value && value.kindOf && value.kindOf(SC.View) ? value : null;
       }).from('SC.designController.view')
     }),
