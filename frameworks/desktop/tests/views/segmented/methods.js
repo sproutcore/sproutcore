@@ -7,7 +7,7 @@
 
 /*global module test htmlbody ok equals same stop start */
 
-var iconURL= "http://www.freeiconsweb.com/Icons/16x16_people_icons/People_046.gif";
+var iconURL= sc_static('sc-icon-info-16.png');
 var pane, view;
 
 module("SC.SegmentedView", {
