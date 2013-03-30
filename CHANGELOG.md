@@ -249,6 +249,8 @@ tests that enforce the one-record-array-per-query contract.
 1.9.2 - BUG FIX RELEASE
 ----------
 
+* Fixes regression in IE7 and IE8 which caused XHR requests to fail to notify. 
+  Also fixes unit tests to pass in IE7+.
 * Fixes debug images and test iframe.html being included in builds. These files 
   (one of which is 2.5MB) would get included into every build, because they were 
   at the wrong path. I removed the apple logo which appears unused in the tests 
