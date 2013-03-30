@@ -9,27 +9,27 @@
 // ========================================================================
 /*globals module, test, ok, isObj, equals, expects */
 
-var url, request, contents ;
+var url, request, contents;
 
 module("SC.Request", {
 
   setup: function() {
     url = sc_static("file_exists.json");
     request = SC.Request.getUrl(url);
-    contents = null ;
+    contents = null;
   },
 
   teardown: function() {
-    url = request = contents;
+    url = request = contents = null;
   }
 
 });
 
 test("Basic Requirements", function() {
-  ok(SC.Request, "SC.Request is defined") ;
-  ok("" !== url, "url variable is not empty") ;
-  ok(request !== null, "request object is not null") ;
-  ok(contents === null, "contents is null" ) ;
+  ok(SC.Request, "SC.Request is defined");
+  ok("" !== url, "url variable is not empty");
+  ok(request !== null, "request object is not null");
+  ok(contents === null, "contents is null" );
 });
 
 test("Default properties are correct for different types of requests.", function() {
@@ -40,7 +40,26 @@ test("Default properties are correct for different types of requests.", function
     req1, req2, req3, req4, req5;
 
     // use this document for creating XML
-    xmlBody = document.implementation.createDocument(null, null, null);
+    if (document.implementation.createDocument) {
+      xmlBody = document.implementation.createDocument(null, null, null);
+    } else if (typeof (ActiveXObject) != "undefined") {
+      // Use ActiveXObject for IE prior to version 9.
+      var progIDs = [
+        "Msxml2.DOMDocument.6.0",
+        "Msxml2.DOMDocument.5.0",
+        "Msxml2.DOMDocument.4.0",
+        "Msxml2.DOMDocument.3.0",
+        "MSXML2.DOMDocument",
+        "MSXML.DOMDocument"
+      ];
+
+      for (var i = 0; i < progIDs.length; i++) {
+        try {
+          xmlBody = new ActiveXObject(progIDs[i]);
+          break;
+        } catch(e) {}
+      }
+    }
 
     // function that creates the XML structure
     function o() {
@@ -120,16 +139,16 @@ test("Test Asynchronous GET Request", function() {
   ok(response !== null, 'request.send() should return a response object');
   ok(response.get('status')<0, 'response should still not have a return code since this should be async');
 
-  stop() ; // stops the test runner - wait for response
+  stop(2500); // stops the test runner - wait for response
 });
 
 test("Test Synchronous GET Request", function() {
   request.set("isAsynchronous", NO);
   var response = request.send();
 
-  ok(response !== null, 'send() should return response') ;
+  ok(response !== null, 'send() should return response');
   ok(SC.$ok(response), 'contents should not be an error ');
-  equals(response.get('body'), '{"message": "Yay!"}', 'should match retrieved message') ;
+  equals(response.get('body'), '{"message": "Yay!"}', 'should match retrieved message');
 });
 
 test("Test Asynchronous GET Request, auto-deserializing JSON", function() {
@@ -152,7 +171,7 @@ test("Test Asynchronous GET Request, auto-deserializing JSON", function() {
 
   request.send();
 
-  stop() ; // stops the test runner
+  stop(2500); // stops the test runner
 
 });
 
@@ -180,7 +199,7 @@ test("Test auto-deserializing malformed JSON", function() {
 
   request.send();
 
-  stop();
+  stop(2500);
 });
 
 test("Test Synchronous GET Request, auto-deserializing JSON", function() {
@@ -189,9 +208,9 @@ test("Test Synchronous GET Request, auto-deserializing JSON", function() {
 
   var response = request.send();
 
-  ok(response !== null, 'response should not be null') ;
+  ok(response !== null, 'response should not be null');
   ok(SC.ok(response), 'contents should not be an error');
-  same(response.get('body'), {"message": "Yay!"}, 'contents should have message') ;
+  same(response.get('body'), {"message": "Yay!"}, 'contents should have message');
 });
 
 
@@ -224,11 +243,11 @@ test("Test Multiple Asynchronous GET Request - two immediate, and two in serial"
   SC.Request.getUrl(url).notify(this, observer).send();
   SC.Request.getUrl(url).notify(this, observer).send();
 
-  stop() ; // stops the test runner
+  stop(2500); // stops the test runner
   setTimeout( function(){
     equals(requestCount, 6, "requestCount should be 6");
     equals(responseCount, 6, "responseCount should be 6");
-    window.start() ; // starts the test runner
+    window.start(); // starts the test runner
   }, 2000);
 });
 
@@ -244,8 +263,7 @@ test("Timeouts - SC.Request didReceive callback", function() {
   // Sanity check - Should throw an error if we try to set a timeout of 0s.
   try {
     SC.Request.getUrl(url).set('timeout', 0).send();
-  }
-  catch (e) {
+  } catch (e) {
     message = e;
   }
   ok(message && message.indexOf("The timeout value must either not be specified or must be greater than 0") !== -1, 'An error should be thrown when the timeout value is 0 ms');
@@ -299,7 +317,7 @@ test("Timeouts - SC.Request didReceive callback", function() {
   SC.RunLoop.end();
 
   // Stop the test runner and wait for a timeout or a response.
-  stop();
+  stop(2500);
 
   // In case we never receive a timeout, just start unit testing again after
   // 500ms.
@@ -331,7 +349,7 @@ test("Timeouts - Status listener callback", function() {
   timeoutRequest.send();
   SC.RunLoop.end();
 
-  stop() ; // stops the test runner
+  stop(2500); // stops the test runner
 
   // in case nothing works
   checkstop = setTimeout(function() {
@@ -364,7 +382,7 @@ test("Test Multiple listeners per single status response", function() {
   ok(response !== null, 'request.send() should return a response object');
   ok(response.get('status')<0, 'response should still not have a return code since this should be async');
 
-  stop() ; // stops the test runner - wait for response
+  stop(2500); // stops the test runner - wait for response
 });
 
 
@@ -380,8 +398,6 @@ test("Multiple arguments passed to notify()", function() {
     equals(a, 'a', "Listener called with argument 'a'");
     equals(b, 'b', "Listener called with argument 'b'");
     equals(c, 'c', "Listener called with argument 'c'");
-
-    window.start();
   }, 'a', 'b', 'c');
 
   request.notify(200, this, function(response, a, b, c) {
@@ -394,7 +410,7 @@ test("Multiple arguments passed to notify()", function() {
 
   response = request.send();
 
-  stop() ; // stops the test runner - wait for response
+  stop(2500); // stops the test runner - wait for response
 });
 
 
@@ -428,10 +444,12 @@ test("Test event listeners on successful request.", function() {
   request.notify(200, this, function(response) {
     status = response.status;
 
-    ok(loadstart, "Received a loadstart event.");
-    ok(progress, "Received a progress event.");
-    ok(load, "Received a load event.");
-    ok(loadend, "Received a loadend event.");
+    if (window.XMLHttpRequestProgressEvent) {
+      ok(loadstart, "Received a loadstart event.");
+      ok(progress, "Received a progress event.");
+      ok(load, "Received a load event.");
+      ok(loadend, "Received a loadend event.");
+    }
     ok(!abort, "Did not receive an abort event.");
     ok(!error, "Did not receive an error event.");
     ok(!timeout, "Did not receive a timeout event.");
@@ -442,59 +460,56 @@ test("Test event listeners on successful request.", function() {
 
   response = request.send();
 
-  stop() ; // stops the test runner - wait for response
+  stop(2500); // stops the test runner - wait for response
 });
 
+if (window.XMLHttpRequestProgressEvent) {
+  test("Test event listeners on aborted request.", function() {
+    var abort = false,
+      error = false,
+      load = false,
+      loadend = false,
+      loadstart = false,
+      progress = false,
+      response,
+      status,
+      timeout = false;
 
-test("Test event listeners on aborted request.", function() {
-  var abort = false,
-    error = false,
-    load = false,
-    loadend = false,
-    loadstart = false,
-    progress = false,
-    response,
-    status,
-    timeout = false;
+    request.notify("loadstart", this, function(evt) {
+      loadstart = true;
+    });
 
-  request.notify("loadstart", this, function(evt) {
-    loadstart = true;
+    request.notify("abort", this, function(evt) {
+      abort = true;
+    });
+
+    request.notify("progress", this, function(evt) {
+      progress = true;
+
+      // Cancel it before it completes.
+      response.cancel();
+    });
+
+    request.notify("loadend", this, function(evt) {
+      loadend = true;
+
+      ok(loadstart, "Received a loadstart event.");
+      ok(progress, "Received a progress event.");
+      ok(abort, "Received an abort event.");
+      ok(!load, "Did not receive a load event.");
+      ok(loadend, "Received a loadend event.");
+      ok(!error, "Did not receive an error event.");
+      ok(!timeout, "Did not receive a timeout event.");
+      equals(status, undefined, "Did not receive a status notification.");
+
+      window.start();
+    });
+
+    response = request.send();
+
+    stop(2500); // stops the test runner - wait for response
   });
-
-  request.notify("progress", this, function(evt) {
-    progress = true;
-
-    // Cancel it before it completes.
-    response.cancel();
-  });
-
-  request.notify("abort", this, function(evt) {
-    abort = true;
-  });
-
-  request.notify("loadend", this, function(evt) {
-    loadend = true;
-
-    ok(loadstart, "Received a loadstart event.");
-    ok(progress, "Received a progress event.");
-    ok(abort, "Received an abort event.");
-    ok(!load, "Did not receive a load event.");
-    ok(loadend, "Received a loadend event.");
-    ok(!error, "Did not receive an error event.");
-    ok(!timeout, "Did not receive a timeout event.");
-    equals(status, undefined, "Did not receive a status notification.");
-
-    window.start();
-  });
-
-  request.notify(this, function(response) {
-    status = response.status;
-  });
-
-  response = request.send();
-
-  stop(); // stops the test runner - wait for response
-});
+}
 
 test("Test upload event listeners on successful request.", function() {
   var abort = false,
@@ -530,10 +545,12 @@ test("Test upload event listeners on successful request.", function() {
   request.notify(200, this, function(response) {
     status = response.status;
 
-    ok(loadstart, "Received a loadstart event.");
-    ok(progress, "Received a progress event.");
-    ok(load, "Received a load event.");
-    ok(loadend, "Received a loadend event.");
+    if (window.XMLHttpRequestProgressEvent) {
+      ok(loadstart, "Received a loadstart event.");
+      ok(progress, "Received a progress event.");
+      ok(load, "Received a load event.");
+      ok(loadend, "Received a loadend event.");
+    }
     ok(!abort, "Did not receive an abort event.");
     ok(!error, "Did not receive an error event.");
     ok(!timeout, "Did not receive a timeout event.");
@@ -544,11 +561,11 @@ test("Test upload event listeners on successful request.", function() {
 
   // Make a significant body object.
   var i;
-  for (i = 10000; i >= 0; i--) {
+  for (i = 2000; i >= 0; i--) {
     body['k' + i] = 'v' + i;
   }
 
-  response = request.send(body);
+  response = request.send(JSON.stringify(body));
 
-  stop() ; // stops the test runner - wait for response
+  stop(2500); // stops the test runner - wait for response
 });
