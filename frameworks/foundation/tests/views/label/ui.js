@@ -19,6 +19,11 @@ var pane = SC.ControlTestPane.design()
     isEnabled: NO
   })
 
+  .add("hint", SC.LabelView, {
+    hint: 'Get on with it!',
+    isEditable: true
+  })
+
   .add("selectable", SC.LabelView, {
     value:'hello',
     isTextSelectable: YES
@@ -173,6 +178,14 @@ test("Check that the title is set or not and if it is in the appropriate element
 
   viewElem=pane.view('undefined value').$();
   equals(viewElem.text(), '', 'has correct empty value set');
+});
+
+test("The hint property should appear if the label is editable and has no value.", function () {
+  var viewElem = pane.view('hint').$();
+
+  viewElem = viewElem.find('.sc-hint');
+  equals(viewElem.length, 1, "has an .sc-hint span inside");
+  equals(viewElem.text(), 'Get on with it!', 'has correct hint value set');
 });
 
 })();
