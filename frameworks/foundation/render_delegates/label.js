@@ -106,7 +106,6 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
   htmlForTitleAndIcon: function(dataSource) {
     var title = dataSource.get('title'),
         hint = dataSource.get('hint'),
-        hintEnabled = dataSource.get('hintEnabled'),
         escapeHTML = dataSource.get('escapeHTML'),
         icon = dataSource.get('icon') || '';
 
@@ -115,9 +114,8 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
     if (title && escapeHTML) {
       title = SC.RenderContext.escapeHTML(title) ;
     }
-
-    if (hintEnabled && hint && !title) {
-      if (escapeHTML) hint = SC.RenderContext.escapeHTML(hint);
+      if (escapeHTML) { hint = SC.RenderContext.escapeHTML(hint); }
+    if (hint && !title) {
       title = "<span class='sc-hint'>" + hint + "</span>";
     }
 
