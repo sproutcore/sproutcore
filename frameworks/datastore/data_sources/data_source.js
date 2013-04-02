@@ -194,7 +194,7 @@ SC.MIXED_STATE = '__MIXED__';
 
    * `dataSourceDidFetchQuery(query)` &mdash; the data source must call this when
      it has completed fetching any related data for the query. This returns the
-     query results (record array) status into a `READY` state.
+     query results (i.e. the record array) status into a `READY` state.
    * `dataSourceDidErrorQuery(query, error)` &mdash; the data source should call
      this if it encounters an error in executing the query. This puts the query
      results into an `ERROR` state.
