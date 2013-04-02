@@ -628,7 +628,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
     customView = menu.menuItemViewForContentIndex(this.get('itemIdx'));
     menu.set('currentMenuItem', customView) ;
-    if (customView) customView.becomeFirstResponder();
+    if (customView) customView.becomeFirstResponder(evt);
 
     this.set('isActive', YES);
     return YES ;
@@ -722,7 +722,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
     if (!this.get('isEnabled')) return YES ; // handled event, but do nothing
     this.set('isActive', YES);
     this._isMouseDown = YES;
-    this.becomeFirstResponder() ;
+    this.becomeFirstResponder(evt) ;
     this._action() ;
 
     // Store the current timestamp. We register the timestamp after a setTimeout
@@ -871,14 +871,14 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
   insertTab: function(evt) {
     var view = this.get('nextValidKeyView');
-    if (view) view.becomeFirstResponder();
+    if (view) view.becomeFirstResponder(evt);
     else evt.allowDefault();
     return YES ; // handled
   },
 
   insertBacktab: function(evt) {
     var view = this.get('previousValidKeyView');
-    if (view) view.becomeFirstResponder();
+    if (view) view.becomeFirstResponder(evt);
     else evt.allowDefault();
     return YES ; // handled
   },

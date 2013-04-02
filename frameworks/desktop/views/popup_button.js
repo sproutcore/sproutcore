@@ -211,7 +211,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
       });
     }, 1);
 
-    this.becomeFirstResponder();
+    this.becomeFirstResponder(evt);
 
     return YES ;
   },

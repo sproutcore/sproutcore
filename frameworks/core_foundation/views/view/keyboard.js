@@ -23,7 +23,7 @@ SC.View.reopen(
 
     @param {SC.Responder} responder
   */
-  willLoseKeyResponderTo: function(responder) {},
+  willLoseKeyResponderTo: function(responder, evt) {},
 
   /**
     This method is invoked just before you become the key responder.  The
@@ -35,13 +35,13 @@ SC.View.reopen(
 
     @param {SC.Responder} responder
   */
-  willBecomeKeyResponderFrom: function(responder) {},
+  willBecomeKeyResponderFrom: function(responder, evt) {},
 
   /**
     Invokved just after the responder loses key responder status.
     @param {SC.Responder} responder
   */
-  didLoseKeyResponderTo: function(responder) {},
+  didLoseKeyResponderTo: function(responder, evt) {},
 
   /**
     Invoked just after the responder gains key responder status.
@@ -50,7 +50,7 @@ SC.View.reopen(
   
     @param {SC.Responder} responder
   */
-  didBecomeKeyResponderFrom: function(responder) {},
+  didBecomeKeyResponderFrom: function(responder, evt) {},
 
   /**
     This method will process a key input event, attempting to convert it to

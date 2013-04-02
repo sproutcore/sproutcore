@@ -109,7 +109,7 @@ SC.CheckboxView = SC.ButtonView.extend(
 
     if (evt.which === 9 || evt.keyCode === 9) {
       var view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
-      if(view) view.becomeFirstResponder();
+      if(view) view.becomeFirstResponder(evt);
       else evt.allowDefault();
       return YES ; // handled
     }

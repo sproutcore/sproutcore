@@ -87,7 +87,7 @@ SC.TextFieldSupport = /** @scope SC.TextFieldSupport */{
   },
 
   focusIn: function(event) {
-    this.becomeFirstResponder();
+    this.becomeFirstResponder(event);
     this.tryToPerform('focus', event);
   },
 
