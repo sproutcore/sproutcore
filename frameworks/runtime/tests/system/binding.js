@@ -372,7 +372,8 @@ module("Binding transforms", {
       booleanValue: NO,
       numericValue: 42,
       stringValue: 'forty-two',
-      arrayValue: [4, 2]
+      arrayValue: [4, 2],
+      undefinedValue: undefined
     });
     // temporarily set up two source objects in the SC namespace so we can
     // use property paths to access them
@@ -386,6 +387,24 @@ module("Binding transforms", {
     SC.testControllerB.destroy();
     delete SC.testControllerB;
   }
+});
+
+test('Binding sync when only transformed value has changed', function () {
+  var toObject;
+  SC.run(function () {
+    toObject = SC.Object.create({
+      transformedValue: null,
+      transformedValueBinding: SC.Binding.oneWay('SC.testControllerA.undefinedValue').transform(function (value, binding) {
+        if (value === undefined) {
+          return 'VALUE IS UNDEFINED';
+        } else {
+          return value;
+        }
+      })
+    });
+  });
+
+  equals(toObject.get('transformedValue'), 'VALUE IS UNDEFINED', 'value is undefined, so bound value should be');
 });
 
 test("ALL THE OTHER BINDING TRANSFORMS.");

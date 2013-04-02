@@ -43,12 +43,12 @@ test("SC.Pane should only render once when appended.", function () {
     },
 
     child: SC.View.extend({
-      childValueBinding: SC.Binding.oneWay('.pane.paneValue').transform(
-        function (paneValue) {
-          equals(paneValue, 'bar', "Bound value should be set once to 'bar'");
+      childValueBinding: SC.Binding.oneWay('.pane.paneValue'),
 
-          return paneValue;
-        }),
+      childValueDidChange: function () {
+        equals(this.get('childValue'), 'bar', "Bound value should be set once to 'bar'");
+      }.observes('childValue'),
+
       render: function () {
         ok(true, 'Render was called once on child.');
       }
