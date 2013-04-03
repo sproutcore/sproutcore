@@ -440,9 +440,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     @returns {Array} the current states
   */
   currentStates: function() {
-    var ret = this.getPath('rootState.currentSubstates');
-    if (!ret) { ret = []; }
-    return ret;
+    return this.getPath('rootState.currentSubstates');
   }.property().cacheable(),
 
   /**
@@ -961,7 +959,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   sendEvent: function(event, arg1, arg2) {
 
     if (this.get('isDestroyed')) {
-      this.statechartLogError("can send event %@. statechart is destroyed".fmt(event));
+      this.statechartLogError("can not send event %@. statechart is destroyed".fmt(event));
       return;
     }
 
@@ -1206,6 +1204,12 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     @returns {Boolean}
   */
   respondsTo: function(event) {
+    // Fast path!
+    if (this.get('isDestroyed')) {
+      this.statechartLogError("can not respond to event %@. statechart is destroyed".fmt(event));
+      return false;
+    }
+
     var currentStates = this.get('currentStates'),
         len = currentStates.get('length'),
         i = 0, state = null;
