@@ -372,17 +372,17 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   */
   itemsDidChange: function () {
     var items = this.get('items') || [],
-      localItem,                        // Used to avoid altering the original items
-      previousItem,
-      childViews = this.get('childViews'),
-      childView,
-      overflowView = childViews.lastObject(),
-      value = this.get('value'),        // The value can change if items that were once selected are removed
-      isSelected,
-      itemKeys = this.get('itemKeys'),
-      itemKey,
-      segmentViewClass = this.get('segmentViewClass'),
-      i, j;
+        localItem,                        // Used to avoid altering the original items
+        previousItem,
+        childViews = this.get('childViews'),
+        childView,
+        overflowView = this.get('overflowView'),
+        value = this.get('value'),        // The value can change if items that were once selected are removed
+        isSelected,
+        itemKeys = this.get('itemKeys'),
+        itemKey,
+        segmentViewClass = this.get('segmentViewClass'),
+        i, j;
 
     // Update childViews
     if (childViews.get('length') - 1 > items.get('length')) {   // We've lost segments (ie. childViews)
@@ -565,7 +565,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
 
     if (this.get('isVisibleInWindow')) {
       // Make all the views visible so that they can be measured
-      overflowView = childViews.lastObject();
+      overflowView = this.get('overflowView');
       overflowView.set('isVisible', YES);
 
       for (var i = childViews.get('length') - 1; i >= 0; i--) {
@@ -588,7 +588,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     var childViews = this.get('childViews'),
         childView,
         value = this.get('value'),
-        overflowView = childViews.lastObject(),
+        overflowView = this.get('overflowView'),
         isHorizontal = this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL,
         layoutProperty = isHorizontal ? 'width' : 'height',
         visibleDim = isHorizontal ? this.$().width() : this.$().height(),  // The inner width/height of the div
@@ -598,6 +598,11 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         wantsAutoResize = this.get('shouldAutoResize'),
         canAutoResize = !SC.none(this.getPath('layout.%@'.fmt(layoutProperty))),
         willAutoResize = wantsAutoResize && canAutoResize;
+
+    // If child views and cachedDims lengths are out of sync here, it means adjustOverflow
+    // got called in between itemsDidChange and remeasure. Since we know that the remeasure is
+    // scheduled, just return and let the remeasure + adjustOverflow happen later.
+    if (childViews.get('length') !== this.cachedDims.length + 1) { return; }
 
     // This variable is useful to optimize when we are overflowing
     isOverflowing = NO;
@@ -1244,7 +1249,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         overflowItemsLength,
         childViews = this.get('childViews'),
         overflowIndex = Infinity,
-        overflowView = childViews.lastObject(),
+        overflowView = this.get('overflowView'),
         childView;
 
     // The index where childViews are all overflowed
