@@ -1466,10 +1466,13 @@ SC.CoreView.reopen(
     Used to block the contextMenu per view.
 
     @param evt {SC.Event} the contextmenu event
-    @returns YES if the contextmenu can show up
+    @returns YES if the contextmenu will be allowed to show up
   */
   contextMenu: function(evt) {
-    if (this.get('isContextMenuEnabled')) { return YES; }
+    if (this.get('isContextMenuEnabled')) {
+      evt.allowDefault();
+      return YES;
+    }
   }
 
 });

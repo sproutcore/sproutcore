@@ -2017,8 +2017,13 @@ SC.RootResponder = SC.Object.extend(
   drag: function() { return false; },
 
   contextmenu: function(evt) {
-    var view = this.targetViewForEvent(evt) ;
-    return this.sendEvent('contextMenu', evt, view);
+    var view = this.targetViewForEvent(evt);
+
+    // Determine if any views took responsibility for the event.
+    view = this.sendEvent('contextMenu', evt, view);
+    ret = view ? evt.hasCustomEventHandling : YES;
+
+    return ret;
   },
 
   // ..........................................................
