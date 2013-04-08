@@ -204,15 +204,15 @@ SC.mixin(SC.browser,
     sufficient testing, you may be able to match styles across today's most
     popular browsers, but this is a lot of work and not future proof.  For
     instance, if a browser drops the prefix and supports the standard style
-    name, your code will suddenly stop working.
+    name, your code will suddenly stop working.  This happens ALL the time!
 
     Instead, use SC.browser.experimentalStyleNameFor(standardStyleName), which
     will test support for the standard style name and if not found will try the
     prefixed version with the current browser's prefix appended.
 
     Note: the proper style name is only determined once per standard style
-    name and cached.  Therefore, calling experimentalStyleNameFor repeatedly
-    has no performance effect.
+    name tested and then cached.  Therefore, calling experimentalStyleNameFor
+    repeatedly has no performance detriment.
 
     For example,
 
@@ -222,7 +222,7 @@ SC.mixin(SC.browser,
         // `boxShadowName` may be "boxShadow", "WebkitBoxShadow", "msBoxShadow", etc. depending on the browser support.
         el.style[boxShadowName] = "rgb(0,0,0) 0px 3px 5px";
 
-    @param {string} standardStyleName The standard name of the experimental style as it should be un-prefixed.  This is the DOM property name, which is camel-cased.
+    @param {string} standardStyleName The standard name of the experimental style as it should be un-prefixed.  This is the DOM property name, which is camel-cased (ex. boxShadow)
     @returns {string} Future-proof style name for use in the current browser or SC.UNSUPPORTED if no style support found.
   */
   experimentalStyleNameFor: function (standardStyleName) {
@@ -236,28 +236,43 @@ SC.mixin(SC.browser,
   },
 
   /**
-    This method returns safe CSS names for current and future browsers.
+    This method returns safe CSS attribute names for current and future browsers.
+
+    Using browser specific CSS prefixes is a risky coding practice.  With
+    sufficient testing, you may be able to match attributes across today's most
+    popular browsers, but this is a lot of work and not future proof.  For
+    instance, if a browser drops the prefix and supports the standard CSS
+    name, your code will suddenly stop working.  This happens ALL the time!
+
+    Instead, use SC.browser.experimentalCSSNameFor(standardCSSName), which
+    will test support for the standard CSS name and if not found will try the
+    prefixed version with the current browser's prefix appended.
+
+    Note: the proper CSS name is only determined once per standard CSS
+    name tested and then cached.  Therefore, calling experimentalCSSNameFor
+    repeatedly has no performance detriment.
 
     For example,
 
-        var boxShadowCSS = SC.browser.experimentalCSSNameFor('boxShadow'),
+        var boxShadowCSS = SC.browser.experimentalCSSNameFor('box-shadow'),
           el = document.createElement('div');
 
-        // `boxShadowCSS` may be "box-shadow", "-webkit-box-shadow", "-ms-box-shadow", etc. depending on the browser support.
+        // `boxShadowCSS` may be "box-shadow", "-webkit-box-shadow", "-ms-box-shadow", etc. depending on the current browser.
         el.style.cssText = boxShadowCSS + " rgb(0,0,0) 0px 3px 5px";
 
-    @param {string} standardStyleName The standard name of the experimental style as it should be un-prefixed.  This is the DOM property name, which is camel-cased.
+    @param {string} standardCSSName The standard name of the experimental CSS attribute as it should be un-prefixed (ex. box-shadow).
     @returns {string} Future-proof CSS name for use in the current browser or SC.UNSUPPORTED if no style support found.
   */
-  experimentalCSSNameFor: function (standardStyleName) {
-    var ret = standardStyleName.camelize(),
+  experimentalCSSNameFor: function (standardCSSName) {
+    var ret = standardCSSName,
+      standardStyleName = standardCSSName.camelize(),
       styleName = this.experimentalStyleNameFor(standardStyleName);
 
     if (styleName === SC.UNSUPPORTED) {
       ret = SC.UNSUPPORTED;
     } else if (styleName !== standardStyleName) {
       // If the DOM property is prefixed, then the CSS name should be prefixed.
-      ret = SC.browser.cssPrefix + ret;
+      ret = SC.browser.cssPrefix + standardCSSName;
     }
 
     return ret;
