@@ -25,6 +25,11 @@
   	color: rgba(50,50,50,0.5);
   }
 
+  /* Allow ellipsis to be used with single line strings (through 'needsEllipsis: true') */
+  &.ellipsis {
+    white-space: nowrap;
+  }
+
   &.sc-large-size {
   	font-size: 18px;
   }

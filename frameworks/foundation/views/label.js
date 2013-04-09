@@ -80,6 +80,18 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditable,
   localizeBindingDefault: SC.Binding.oneWay().bool(),
 
   /**
+    If set to true, the label element will include the 'ellipsis' class, which
+    by default sets the 'white-space' style to 'nowrap' and the 'text-overflow'
+    style to 'ellipsis'.
+
+    Note that this does NOT work with multi-line text.
+
+    @type Boolean
+    @default false
+   */
+  needsEllipsis: false,
+
+  /**
     Set this to a validator or to a function and the value
     will be passed through it before being set.
 
