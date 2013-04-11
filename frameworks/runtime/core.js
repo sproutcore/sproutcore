@@ -39,7 +39,7 @@ window.SproutCore = window.SproutCore || SC ;
 // rest of the methods go into the mixin defined below.
 
 /**
-  @version 1.9.1
+  @version 1.9.2
   @namespace
 
   All SproutCore methods and functions are defined
