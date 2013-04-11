@@ -249,6 +249,13 @@ tests that enforce the one-record-array-per-query contract.
 1.9.2 - BUG FIX RELEASE
 ----------
 
+* Softens the build tools dependency requirements from being ultra-pessimistic (i.e. within a minor version) to being pessimistic (i.e. within a major version).
+* Fixes 'repeat' slice for @2x version. It was incorrectly appending @2x to the end of the whole path (ex. /resources/images/image-sliced-from.png@2x instead of /resources/images/image-sliced-from@2x.png).
+* Fixes incorrectly named "responder" generator to "state" generator for generating SC.State subclasses.
+* Fixes the snake case generator for "sproutcore gen", so that names like 'SCProject' get properly transformed to 'sc_project' and not 's_c_project'.
+* Added support for background-size property in Buildtools spriting, this is required for spriting to work properly in retina firefox.
+* Fixes inconsistencies and improper syntax in several templates created with "sproutcore gen".
+* Fixes missing stylesheet warnings on a clean app generated with "sproutcore gen app" or "sproutcore gen statechart_app" by adding a default stylesheet to the app.  Also adds a default stylesheet to a design, when using "sproutcore gen design" (i.e. an SC.Page resource)
 * Fixes improper binary search used by SC.ManyArray addInverseRecord that resulted in an infinite loop.
 * Fixes bug that allowed the context menu to appear regardless of overriding contextMenu in a view or setting SC.CONTEXT_MENU_ENABLED or isContextMenuEnabled to false. This makes the context menu event handling behave the same as the key, mouse, etc. event handling.
 * Fixes actions: deleteForward, deleteBackward, moveLeft, moveRight, selectAll, moveUp and moveDown to be always handled by the TextFieldView element when it has focus.
