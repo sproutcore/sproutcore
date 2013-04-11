@@ -249,6 +249,11 @@ tests that enforce the one-record-array-per-query contract.
 1.9.2 - BUG FIX RELEASE
 ----------
 
+* Fixes improper binary search used by SC.ManyArray addInverseRecord that resulted in an infinite loop.
+* Fixes bug that allowed the context menu to appear regardless of overriding contextMenu in a view or setting SC.CONTEXT_MENU_ENABLED or isContextMenuEnabled to false. This makes the context menu event handling behave the same as the key, mouse, etc. event handling.
+* Fixes actions: deleteForward, deleteBackward, moveLeft, moveRight, selectAll, moveUp and moveDown to be always handled by the TextFieldView element when it has focus.
+* Fixes SC.TextFieldView to insert a new line when the enter key is pressed on a text area.
+* Fixes the hint value for SC.LabelView so that it will appear when the label has no value and isEditable is true. Includes unit test.
 * No longer modifies the underlying items given to an SC.SegmentedView with an
   overflow menu directly so that we don't invariably dirty the original object.
 * Fixes regression in IE7 and IE8 which caused XHR requests to fail to notify. 
