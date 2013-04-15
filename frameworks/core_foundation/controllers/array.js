@@ -214,8 +214,8 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     If the source content does not support adding an object, then this method
     will throw an exception.
 
-    @param {Object} object the object to add
-    @returns {SC.ArrayController} receiver
+    @param {Object} object The object to add to the array.
+    @returns {SC.ArrayController} The receiver.
   */
   addObject: function(object) {
     if (!this.get('canAddContent')) { throw new Error("%@ cannot add content".fmt(this)); }

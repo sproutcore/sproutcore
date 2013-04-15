@@ -5,7 +5,7 @@
 // ==========================================================================
 
 
-/** @static
+/** @namespace
   This protocol defines the allowable transition plugin methods.
 
   SC.ContainerView uses transition plugins to setup, execute and cleanup the

@@ -135,12 +135,12 @@ SC.AppCacheTask = SC.Task.extend({
   The following are some excellent resources on the application cache that were
   used to develop this class:
 
-  {@link <a href="https://developer.mozilla.org/en-US/docs/HTML/Using_the_application_cache">Using the application cache - HTML | MDN</a> }
-  {@link <a href="http://appcachefacts.info">Appcache Facts</a>}
-  {@link <a href="http://diveintohtml5.info/offline.html">Offline Web Applications - Dive Into HTML5</a>}
+  - [Using the application cache - HTML | MDN](https://developer.mozilla.org/en-US/docs/HTML/Using_the_application_cache)
+  - [Appcache Facts](http://appcachefacts.info)
+  - [Offline Web Applications - Dive Into HTML5](http://diveintohtml5.info/offline.html)
 
   @extends SC.Object
-  @since Sproutcore 1.10
+  @since Version 1.10
 */
 SC.appCache = SC.Object.create(
 /** @scope SC.appCache.prototype */{
@@ -155,6 +155,7 @@ SC.appCache = SC.Object.create(
     This property is undefined until it can be determined that a new version exists
     or doesn't exist and if it does exist, whether it is valid or not.
 
+    @field
     @type Boolean
     @default undefined
     @readonly
@@ -186,6 +187,7 @@ SC.appCache = SC.Object.create(
     This property is undefined until it can be determined that the application
     has been cached or not cached.
 
+    @field
     @type Boolean
     @default undefined
     @readonly
@@ -218,6 +220,7 @@ SC.appCache = SC.Object.create(
     should check isNewVersionValid after determining that hasNewVersion is
     true.
 
+    @field
     @type Boolean
     @default undefined
     @readonly
@@ -271,6 +274,7 @@ SC.appCache = SC.Object.create(
     Updates are run using the background task queue, so as to pose the smallest
     detriment possible to performance.
 
+    @field
     @type Boolean
     @default false
     */
@@ -331,7 +335,7 @@ SC.appCache = SC.Object.create(
   //
 
   /** @private */
-  _appCacheDidProgress: function(evt) {
+  _appCacheDidProgress: function (evt) {
     evt = evt.originalEvent;
     if (evt.lengthComputable) {
       this.set('progress', evt.loaded / evt.total);
@@ -350,29 +354,29 @@ SC.appCache = SC.Object.create(
     // Clear all previous event listeners.
     SC.Event.remove(appCache);
     switch (status) {
-      case appCache.UNCACHED: // UNCACHED == 0
-        break;
-      case appCache.IDLE: // IDLE == 1
-        this.set('progress', 1);
-        break;
-      case appCache.CHECKING: // CHECKING == 2
-        SC.Event.add(appCache, 'downloading', this, '_appCacheStatusDidChange');
-        SC.Event.add(appCache, 'noupdate', this, '_appCacheStatusDidChange');
-        SC.Event.add(appCache, 'error', this, '_appCacheStatusDidChange');
-        break;
-      case appCache.DOWNLOADING: // DOWNLOADING == 3
-        SC.Event.add(appCache, 'progress', this, '_appCacheDidProgress');
-        SC.Event.add(appCache, 'cached', this, '_appCacheStatusDidChange');
-        SC.Event.add(appCache, 'updateready', this, '_appCacheStatusDidChange');
-        SC.Event.add(appCache, 'error', this, '_appCacheStatusDidChange');
-        break;
-      case appCache.UPDATEREADY:  // UPDATEREADY == 4
-        break;
-      case appCache.OBSOLETE: // OBSOLETE == 5
-        break;
-      default:
-        SC.error('Unknown application cache status: %@'.fmt(appCache.status));
-        break;
+    case appCache.UNCACHED: // UNCACHED == 0
+      break;
+    case appCache.IDLE: // IDLE == 1
+      this.set('progress', 1);
+      break;
+    case appCache.CHECKING: // CHECKING == 2
+      SC.Event.add(appCache, 'downloading', this, '_appCacheStatusDidChange');
+      SC.Event.add(appCache, 'noupdate', this, '_appCacheStatusDidChange');
+      SC.Event.add(appCache, 'error', this, '_appCacheStatusDidChange');
+      break;
+    case appCache.DOWNLOADING: // DOWNLOADING == 3
+      SC.Event.add(appCache, 'progress', this, '_appCacheDidProgress');
+      SC.Event.add(appCache, 'cached', this, '_appCacheStatusDidChange');
+      SC.Event.add(appCache, 'updateready', this, '_appCacheStatusDidChange');
+      SC.Event.add(appCache, 'error', this, '_appCacheStatusDidChange');
+      break;
+    case appCache.UPDATEREADY:  // UPDATEREADY == 4
+      break;
+    case appCache.OBSOLETE: // OBSOLETE == 5
+      break;
+    default:
+      SC.error('Unknown application cache status: %@'.fmt(appCache.status));
+      break;
     }
 
     // Update our status.
@@ -380,7 +384,7 @@ SC.appCache = SC.Object.create(
   },
 
   /** @private Adds a task to check for application updates to the background task queue. */
-  _checkForUpdates: function (timer) {
+  _checkForUpdates: function () {
     var task = this._task;
 
     if (this.get('status') === window.applicationCache.IDLE) {
