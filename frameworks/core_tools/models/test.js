@@ -4,7 +4,7 @@
 // ==========================================================================
 /*globals CoreTools */
 
-/** @class
+/**
 
   (Document your Model here)
 
@@ -15,12 +15,12 @@ CoreTools.Test = SC.Record.extend(
 /** @scope CoreTools.Test.prototype */ {
 
   primaryKey: "url",
-  
+
   /**
     The filename for this test.
   */
   filename: SC.Record.attr(String),
-  
+
   /**
     The test URL.
   */
@@ -44,5 +44,5 @@ CoreTools.Test = SC.Record.extend(
     computed based on whether the test is a summary of other tests or not.
   */
   isRunnable: YES
-  
+
 }) ;

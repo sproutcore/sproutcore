@@ -4,7 +4,7 @@
 // ==========================================================================
 /*globals CoreTools */
 
-/** @class
+/**
 
   Describes a target in the build system.
 
