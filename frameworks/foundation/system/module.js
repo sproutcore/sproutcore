@@ -284,6 +284,12 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
 
       if (url.length > 0) {
         if (SC.LOG_MODULE_LOADING) SC.debug("SC.Module: Loading CSS file in '%@' -> '%@'", moduleName, url);
+
+        // if we are on a retina device lets load the retina style sheet instead
+        if (window.devicePixelRatio > 1 || window.location.search.indexOf("2x") > -1) {
+            url = url.replace('.css', '@2x.css')
+        }
+
         el = document.createElement('link') ;
         el.setAttribute('href', url) ;
         el.setAttribute('rel', "stylesheet") ;
