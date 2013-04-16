@@ -630,7 +630,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
         autocorrectString = ' autocorrect=' + (!autoCorrect ? '"off"' : '"true"');
       }
 
-      if (autoCorrect != null) {
+      if (autoCapitalize != null) {
         autocapitalizeString = ' autocapitalize=' + (!autoCapitalize ? '"off"' : '"true"');
       }
 
