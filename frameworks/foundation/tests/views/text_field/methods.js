@@ -116,20 +116,20 @@ test("isBrowserFocusable should set tab index", function() {
   ok(view.$input().attr('tabindex') === "-1", 'unfocusable field should have unfocusable tab index');
 });
 
-test("autoCapitalize=YES should add autocapitalize", function() {
+test("autoCapitalize=YES should add autocapitalize='sentences'", function() {
   SC.RunLoop.begin();
   view.set('autoCapitalize', YES);
   view.displayDidChange();
   SC.RunLoop.end();
-  ok(view.$input().attr('autocapitalize') !== "off", 'should have an autocapitalize attribute');
+  ok(view.$input().attr('autocapitalize') === "sentences", 'should have an autocapitalize attribute set to "sentences"');
 });
 
-test("autoCapitalize=NO should add autocapitalize='off'", function() {
+test("autoCapitalize=NO should add autocapitalize='none'", function() {
   SC.RunLoop.begin();
   view.set('autoCapitalize', NO);
   view.displayDidChange();
   SC.RunLoop.end();
-  ok(view.$input().attr('autocapitalize') === "off", 'should have an autocapitalize attribute set to "off"');
+  ok(view.$input().attr('autocapitalize') === "none", 'should have an autocapitalize attribute set to "none"');
 });
 
 test("autoCapitalize=null should not add autocapitalize", function() {
@@ -140,12 +140,12 @@ test("autoCapitalize=null should not add autocapitalize", function() {
   ok(!view.$input().attr('autocapitalize'), 'should not have an autocapitalize attribute set');
 });
 
-test("autoCorrect=YES should add autocorrect", function() {
+test("autoCorrect=YES should add autocorrect='on'", function() {
   SC.RunLoop.begin();
   view.set('autoCorrect', YES);
   view.displayDidChange();
   SC.RunLoop.end();
-  ok(view.$input().attr('autocorrect') !== "off", 'should have an autocorrect attribute');
+  ok(view.$input().attr('autocorrect') === "on", 'should have an autocorrect attribute set to "on"');
 });
 
 test("autoCorrect=NO should add autocorrect='off'", function() {

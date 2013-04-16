@@ -627,11 +627,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       spellCheckString = this.get('spellCheckEnabled') ? ' spellcheck="true"' : ' spellcheck="false"';
 
       if (autoCorrect != null) {
-        autocorrectString = ' autocorrect=' + (!autoCorrect ? '"off"' : '"true"');
+        autocorrectString = ' autocorrect=' + (!autoCorrect ? '"off"' : '"on"');
       }
 
       if (autoCapitalize != null) {
-        autocapitalizeString = ' autocapitalize=' + (!autoCapitalize ? '"off"' : '"true"');
+        autocapitalizeString = ' autocapitalize=' + (!autoCapitalize ? '"none"' : '"sentences"');
       }
 
       if (!isBrowserFocusable) {
@@ -732,13 +732,13 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       }
 
       if (autoCorrect != null) {
-        input.attr('autoCorrect', !autoCorrect ? 'off' : 'true');
+        input.attr('autoCorrect', !autoCorrect ? 'off' : 'on');
       } else {
         input.attr('autoCorrect', null);
       }
 
       if (autoCapitalize != null) {
-        input.attr('autoCapitalize', !autoCapitalize ? 'off' : 'true');
+        input.attr('autoCapitalize', !autoCapitalize ? 'none' : 'sentences');
       } else {
         input.attr('autoCapitalize', null);
       }
