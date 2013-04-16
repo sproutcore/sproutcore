@@ -114,6 +114,17 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   isBrowserFocusable: YES,
 
   /**
+    Specifies a regular expression against which the input value should be
+    checked. Do not include a slash at the start or end of the pattern. The
+    pattern must match the entire value, not just a portion of the value, but
+    is not checked if the value is empty.
+
+    @type String
+    @default null
+   */
+  pattern: null,
+
+  /**
     Whether the browser should automatically correct the input.
 
     When `autoCorrect` is set to `null`, the browser will use
@@ -611,10 +622,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
         isTextArea = this.get('isTextArea'),
         isEnabled = this.get('isEnabled'),
         isEditable = this.get('isEditable'),
+        pattern = this.get('pattern'),
         autoCorrect = this.get('autoCorrect'),
         autoCapitalize = this.get('autoCapitalize'),
         isBrowserFocusable = this.get('isBrowserFocusable'),
-        spellCheckString='', autocapitalizeString='', autocorrectString='',
+        spellCheckString='', patternString='', autocapitalizeString='', autocorrectString='',
         name, adjustmentStyle, type, hintElements, element, paddingElementStyle,
         fieldClassNames, isOldSafari, activeState, browserFocusable;
 
@@ -633,6 +645,10 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       name = this.get('layerId');
 
       spellCheckString = this.get('spellCheckEnabled') ? ' spellcheck="true"' : ' spellcheck="false"';
+
+      if (pattern != null) {
+        patternString = ' pattern="' + pattern + '"';
+      }
 
       if (autoCorrect != null) {
         autocorrectString = ' autocorrect=' + (!autoCorrect ? '"off"' : '"on"');
@@ -706,8 +722,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
         context.push('<input aria-label="' + hint + '" class="'+fieldClassNames+'" type="'+ type+
                       '" name="'+ name + '" '+ activeState + ' value="'+ value + '"' +
                       hintString + spellCheckString+ browserFocusable +
-                      ' maxlength="'+ maxLength+ '" '+autocorrectString+' ' +
-                      autocapitalizeString+'/></div>') ;
+                      ' maxlength="'+ maxLength+ '" ' + patternString +' ' +
+                      autocorrectString+' ' + autocapitalizeString+'/></div>') ;
       }
     }
     else {
@@ -742,6 +758,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
           }
         }
       }
+
+      input.attr('pattern', pattern);
 
       if (autoCorrect != null) {
         input.attr('autoCorrect', !autoCorrect ? 'off' : 'on');

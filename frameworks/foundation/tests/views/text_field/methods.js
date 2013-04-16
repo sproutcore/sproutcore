@@ -116,6 +116,22 @@ test("isBrowserFocusable should set tab index", function() {
   ok(view.$input().attr('tabindex') === "-1", 'unfocusable field should have unfocusable tab index');
 });
 
+test("pattern='\d*' should add pattern='\d*'", function() {
+  SC.RunLoop.begin();
+  view.set('pattern', "\d*");
+  view.displayDidChange();
+  SC.RunLoop.end();
+  ok(view.$input().attr('pattern') === "\d*", 'should have a pattern attribute set to "\d*"');
+});
+
+test("pattern=null should not add pattern", function() {
+  SC.RunLoop.begin();
+  view.set('pattern', null);
+  view.displayDidChange();
+  SC.RunLoop.end();
+  ok(!view.$input().attr('pattern'), 'should not have a pattern attribute set');
+});
+
 test("autoCapitalize='none' should add autocapitalize='none'", function() {
   SC.RunLoop.begin();
   view.set('autoCapitalize', "none");
