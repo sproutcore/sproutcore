@@ -155,6 +155,17 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   autoCapitalize: YES,
 
   /**
+    Whether the browser should automatically complete the input.
+
+    When `autoComplete` is set to `null`, the browser will use
+    the system defaults.
+
+    @type Boolean
+    @default null
+   */
+  autoComplete: null,
+
+  /**
     Localizes the hint if necessary.
 
     @field
@@ -625,8 +636,10 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
         pattern = this.get('pattern'),
         autoCorrect = this.get('autoCorrect'),
         autoCapitalize = this.get('autoCapitalize'),
+        autoComplete = this.get('autoComplete'),
         isBrowserFocusable = this.get('isBrowserFocusable'),
-        spellCheckString='', patternString='', autocapitalizeString='', autocorrectString='',
+        spellCheckString='', patternString='', autocapitalizeString='',
+        autocorrectString='', autocompleteString='',
         name, adjustmentStyle, type, hintElements, element, paddingElementStyle,
         fieldClassNames, isOldSafari, activeState, browserFocusable;
 
@@ -660,6 +673,10 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
         } else {
           autocapitalizeString = ' autocapitalize=' + autoCapitalize;
         }
+      }
+
+      if (autoComplete != null) {
+        autocompleteString = ' autocomplete=' + (!autoComplete ? '"off"' : '"on"');
       }
 
       if (!isBrowserFocusable) {
@@ -723,7 +740,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
                       '" name="'+ name + '" '+ activeState + ' value="'+ value + '"' +
                       hintString + spellCheckString+ browserFocusable +
                       ' maxlength="'+ maxLength+ '" ' + patternString +' ' +
-                      autocorrectString+' ' + autocapitalizeString+'/></div>') ;
+                      autocorrectString+' ' + autocapitalizeString+ ' ' + autocompleteString +
+                      '/></div>') ;
       }
     }
     else {
@@ -775,6 +793,12 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
         }
       } else {
         input.attr('autoCapitalize', null);
+      }
+
+      if (autoComplete != null) {
+        input.attr('autoComplete', !autoComplete ? 'off' : 'on');
+      } else {
+        input.attr('autoComplete', null);
       }
 
       if (!hintOnFocus && SC.platform.input.placeholder) input.attr('placeholder', hint);
