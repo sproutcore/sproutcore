@@ -874,32 +874,6 @@ SC.CoreView.reopen(
   },
 
   /**
-  @private
-
-    Invoked by createLayer() and updateLayer() to actually render a context.
-    This method calls the render() method on your view along with any
-    renderMixin() methods supplied by mixins you might have added.
-
-    You should not override this method directly. Nor should you call it. It is OLD.
-
-    @param {SC.RenderContext} context the render context
-    @param {Boolean} firstTime YES if this is creating a layer
-    @returns {void}
-  */
-  prepareContext: function(context, firstTime) {
-    // eventually, firstTime will be removed because it is ugly.
-    // for now, we will sense whether we are doing things the ugly way or not.
-    // if ugly, we will allow updates through.
-    if (firstTime !== false) { firstTime = YES; } // the GOOD code path :)
-
-    if (firstTime) {
-      this.renderToContext(context);
-    } else {
-      this.updateLayer(context);
-    }
-  },
-
-  /**
     Your render method should invoke this method to render any child views,
     especially if this is the first time the view will be rendered.  This will
     walk down the childView chain, rendering all of the children in a nested
