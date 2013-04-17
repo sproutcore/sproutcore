@@ -315,12 +315,12 @@ SC.appCache = SC.Object.create(
     This is a KVO mapping of window.applicationCache.status.  Possible values
     are:
 
-    window.applicationCache.UNCACHED
-    window.applicationCache.IDLE
-    window.applicationCache.CHECKING
-    window.applicationCache.DOWNLOADING
-    window.applicationCache.UPDATEREADY
-    window.applicationCache.OBSOLETE
+    * window.applicationCache.UNCACHED
+    * window.applicationCache.IDLE
+    * window.applicationCache.CHECKING
+    * window.applicationCache.DOWNLOADING
+    * window.applicationCache.UPDATEREADY
+    * window.applicationCache.OBSOLETE
 
     Because of the various interpretations these statuses can mean, you will
     likely find it easier to use the helper properties on SC.appCache instead.

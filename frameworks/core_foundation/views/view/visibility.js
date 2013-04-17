@@ -28,7 +28,7 @@ SC.View.reopen(
     Recomputes the isVisibleInWindow property based on the visibility of the
     view and its parent.  If the recomputed value differs from the current
     isVisibleInWindow state, this method will also call
-    recomputIsVisibleInWindow() on its child views as well.  As an optional
+    recomputeIsVisibleInWindow() on its child views as well.  As an optional
     optimization, you can pass the isVisibleInWindow state of the parentView
     if you already know it.
 
