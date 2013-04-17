@@ -37,6 +37,11 @@ SC.ContentValueSupport = {
     // setup content observing if needed.
     this._control_contentKeysDidChange();
   },
+
+  /** @private */
+  destroyMixin: function() {
+    this.set('content', null);
+  },
   
   /**
     The value represented by this control.

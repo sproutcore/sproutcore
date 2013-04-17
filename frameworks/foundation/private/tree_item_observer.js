@@ -744,6 +744,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     observing on the children array so that changes can propogate outward.
   */
   _childrenDidChange: function() {
+    if (this.isDestroyed) { return; }
     var state = this.get('disclosureState'),
         cur   = state === SC.BRANCH_OPEN ? this.get('children') : null,
         last  = this._children,

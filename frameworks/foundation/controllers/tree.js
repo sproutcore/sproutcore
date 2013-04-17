@@ -71,6 +71,7 @@ SC.TreeController = SC.ObjectController.extend(SC.SelectionSupport,
   */
   arrangedObjects: function() {
     var ret, content = this.get('content');
+    this._clearArrangedObjects();
     if (content) {
       ret = SC.TreeItemObserver.create({ item: content, delegate: this });
       ret.bind('allowsSelection', this, 'allowsSelection');
@@ -87,6 +88,15 @@ SC.TreeController = SC.ObjectController.extend(SC.SelectionSupport,
   //
 
   /**
+    Clears arrangedObjects when destroyed.
+    @returns {*}
+  */
+  destroy: function() {
+    this._clearArrangedObjects();
+    return sc_super();
+  },
+
+  /**
     @private
 
     Manually invalidate the arrangedObjects cache so that we can teardown
@@ -97,12 +107,22 @@ SC.TreeController = SC.ObjectController.extend(SC.SelectionSupport,
   _sctc_invalidateArrangedObjects: function() {
     this.propertyWillChange('arrangedObjects');
 
-    var ret = this._sctc_arrangedObjects;
-    if (ret) ret.destroy();
-    this._sctc_arrangedObjects = null;
+    this._clearArrangedObjects();
 
     this.propertyDidChange('arrangedObjects');
   }.observes('content', 'treeItemIsExpandedKey', 'treeItemChildrenKey', 'treeItemIsGrouped'),
+
+  /**
+    @private
+
+    Destroy arrangedObjects.
+  */
+  _clearArrangedObjects: function() {
+    if (this._sctc_arrangedObjects) {
+      this._sctc_arrangedObjects.destroy();
+    }
+    this._sctc_arrangedObjects = null;
+  },
 
   _sctc_arrangedObjectsContentDidChange: function() {
     this.updateSelectionAfterContentChange();
