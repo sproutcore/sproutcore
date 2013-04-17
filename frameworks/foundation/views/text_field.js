@@ -125,12 +125,20 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   autoCorrect: YES,
 
   /**
-    Whether the browser should automatically capitalize the input.
+    Specifies the auto-capitalization behavior. Possible values are:
+
+    - none: do not autocapitalize
+    - sentences: autocapitalize the first letter of each sentence
+    - words: autocapitalize the first letter of each word
+    - characters: autocapitalize all characters
+
+    Boolean values are also supported, with a false value interpreted as
+    `none` and a true value as `sentences`.
 
     When `autoCapitalize` is set to `null`, the browser will use
     the system defaults.
 
-    @type Boolean
+    @type String
     @default YES
    */
   autoCapitalize: YES,
@@ -631,7 +639,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       }
 
       if (autoCapitalize != null) {
-        autocapitalizeString = ' autocapitalize=' + (!autoCapitalize ? '"none"' : '"sentences"');
+        if (SC.typeOf(autoCapitalize) === 'boolean') {
+          autocapitalizeString = ' autocapitalize=' + (!autoCapitalize ? '"none"' : '"sentences"');
+        } else {
+          autocapitalizeString = ' autocapitalize=' + autoCapitalize;
+        }
       }
 
       if (!isBrowserFocusable) {
@@ -738,7 +750,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       }
 
       if (autoCapitalize != null) {
-        input.attr('autoCapitalize', !autoCapitalize ? 'none' : 'sentences');
+        if (SC.typeOf(autoCapitalize) == 'boolean') {
+          input.attr('autoCapitalize', !autoCapitalize ? 'none' : 'sentences');
+        } else {
+          input.attr('autoCapitalize', autoCapitalize);
+        }
       } else {
         input.attr('autoCapitalize', null);
       }
