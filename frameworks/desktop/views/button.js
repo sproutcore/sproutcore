@@ -480,16 +480,11 @@ SC.ButtonView = SC.View.extend(SC.Control,
   */
   renderDelegateName: 'buttonRenderDelegate',
 
-   contentKeys: {
-     'contentValueKey': 'value',
-     'contentTitleKey': 'title',
-     'contentIconKey': 'icon'
-   },
-
-  /** @private - when title changes, dirty display. */
-  _button_displayObserver: function() {
-    this.displayDidChange();
-  }.observes('title', 'icon', 'value'),
+  contentKeys: {
+    'contentValueKey': 'value',
+    'contentTitleKey': 'title',
+    'contentIconKey': 'icon'
+  },
 
   /**
     Handle a key equivalent if set.  Trigger the default action for the
