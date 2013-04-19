@@ -132,6 +132,83 @@ SC.CoreView.reopen(
   */
   childViews: SC.EMPTY_CHILD_VIEWS_ARRAY,
 
+  /**
+    The child view layout plugin to use when laying out child views.
+
+    You can set this property to a child layout plugin object to
+    automatically set and adjust the layouts of this view's child views
+    according to some specific layout style.  For instance, SproutCore includes
+    two such plugins, SC.View.VERTICAL_STACK and SC.View.HORIZONTAL_STACK.
+
+    SC.View.VERTICAL_STACK will arrange child views in order in a vertical
+    stack, which only requires that the height of each child view be specified.
+    Likewise, SC.View.HORIZONTAL_STACK does the same in the horizontal
+    direction, which requires that the width of each child view be specified.
+
+    Where child layout plugins are extremely useful, besides simplifying
+    the amount of layout code you need to write, is that they can update the
+    layouts automatically as things change.  For more details and examples,
+    please see the documentation for SC.View.VERTICAL_STACK and
+    SC.View.HORIZONTAL_STACK.
+
+    To define your own child view layout plugin, simply create an object that
+    conforms to the SC.ChildViewLayoutProtocol protocol.
+
+    **Note** This should only be set once and is not bindable.
+
+    @type Object
+    @default null
+   */
+  childViewLayout: null,
+
+  /**
+    The options for the given child view layout plugin.
+
+    These options are specific to the current child layout plugin being used and
+    are used to modify the applied layouts.  For example, SC.View.VERTICAL_STACK
+    accepts options like:
+
+        childViewLayoutOptions: {
+          paddingAfter: 20,
+          paddingBefore: 20,
+          spacing: 10
+        }
+
+    To determine what options may be used for a given plugin and to see what the
+    default options are, please refer to the documentation for the child layout
+    plugin being used.
+
+    @type Object
+    @default null
+  */
+  childViewLayoutOptions: null,
+
+  /**
+    Whether the child views should be monitored for changes that affect the
+    current child view layout.
+
+    When true and using a childViewLayout plugin, the child views will be
+    observed for changes that would change the layout of all the child views.
+    For example, when using SC.View.VERTICAL_STACK, if any child view's height
+    or visibility changes, the view will adjust the other child views
+    accordingly.
+
+    @type Boolean
+    @default true
+  */
+  isChildViewLayoutLive: true,
+
+  /**
+    Called by observers on child views when a property of the child view
+    changes in such a manner that requires the child view layout to be
+    reapplied.
+  */
+  childViewLayoutNeedsUpdate: function () {
+    var childViewLayout = this.childViewLayout;
+
+    childViewLayout.adjustChildViews(this);
+  },
+
   // ..........................................................
   // LAYER SUPPORT
   //
