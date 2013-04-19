@@ -5,6 +5,203 @@
 // ==========================================================================
 sc_require('views/container');
 
+SC.mixin(SC.View,
+/** @scope SC.View.prototype */ {
+
+  /** @class
+
+    @extends SC.TransitionProtocol
+    @see SC.View#animate for other timing functions.
+    @since Version 1.10
+  */
+  FADE_IN: {
+
+    /** @private */
+    setup: function (parentView, view, beforeView, options) {
+      view.adjust({ opacity: 0 });
+    },
+
+    /** @private */
+    run: function (parentView, view, beforeView, options) {
+      view.animate('opacity', 1, {
+        duration: options.duration || 4.4,
+        timing: options.timing || 'ease'
+      }, function (data) {
+        // Only send the 'adopted' event if the view is still in the 'adopting' state by the time it transitions in.
+        if (view._parentingState === 'adopting') {
+          view._adopted();
+        }
+      });
+    }
+
+  },
+
+  /** @class
+
+    @extends SC.TransitionProtocol
+    @see SC.View#animate for other timing functions.
+    @since Version 1.10
+  */
+  FADE_OUT: {
+
+    /** @private */
+    run: function (parentView, view, options) {
+      view.animate('opacity', 0, {
+        duration: options.duration || 4.4,
+        timing: options.timing || 'ease'
+      }, function (data) {
+        // Only send the 'orphaned' event if the view is still in the 'orphaning' state by the time it transitions out.
+        if (view._parentingState === 'orphaning') {
+          view._orphaned();
+        }
+      });
+    },
+
+    /** @private */
+    teardown: function (parentView, view, options) {
+      // Reset the opacity in case this view is used elsewhere.
+      view.adjust({ opacity: 1 });
+    }
+
+  },
+
+  /** @class
+
+    @extends SC.TransitionProtocol
+    @see SC.View#animate for other timing functions.
+    @since Version 1.10
+  */
+  MOVE_IN: {
+
+    /** @private */
+    setup: function (parentView, view, beforeView, options) {
+      var parentFrame = parentView.get('borderFrame'),
+        viewFrame = view.get('borderFrame'),
+        left,
+        top,
+        height,
+        width;
+
+      height = parentFrame.height;
+      width = parentFrame.width;
+
+      switch (options.direction) {
+      case 'right':
+        left = -width;
+        break;
+      case 'up':
+        top = height;
+        break;
+      case 'down':
+        top = -height;
+        break;
+      default:
+        left = width;
+      }
+
+      // Cache the final layout and frame, so that we can reset everything.
+      view._preSetupFrame = viewFrame;
+      view._preSetupLayout = SC.clone(view.get('layout'));
+      view.adjust({ bottom: null, left: left || viewFrame.x, right: null, top: top || viewFrame.y, height: viewFrame.height, width: viewFrame.width });
+    },
+
+    /** @private */
+    run: function (parentView, view, beforeView, options) {
+      var viewFrame = view._preSetupFrame,
+        key,
+        value;
+
+      if (options.direction === 'up' || options.direction === 'down') {
+        key = 'top';
+        value = viewFrame.y;
+      } else {
+        key = 'left';
+        value = viewFrame.x;
+      }
+
+      view.animate(key, value, {
+        duration: options.duration || 4.4,
+        timing: options.timing || 'ease'
+      }, function (data) {
+        // Only send the 'adopted' event if the view is still in the 'adopting' state by the time it transitions in.
+        if (view._parentingState === 'adopted') {
+          view._adopted();
+        }
+      });
+    },
+
+    teardown: function (parentView, view, beforeView, options) {
+      // Convert to previous layout.
+      view.adjust(view._preSetupLayout);
+      view._preSetupLayout = null;
+    }
+
+  },
+
+  /** @class
+
+    @extends SC.TransitionProtocol
+    @see SC.View#animate for other timing functions.
+    @since Version 1.10
+  */
+  MOVE_OUT: {
+
+    /** @private */
+    setup: function (parentView, view, options) {
+      var viewFrame = view.get('borderFrame'),
+        left = viewFrame.x,
+        top = viewFrame.y,
+        height = viewFrame.height,
+        width = viewFrame.width;
+
+      view._preSetupLayout = SC.clone(view.get('layout'));
+      view.adjust({ centerX: null, centerY: null, bottom: null, left: left, right: null, top: top, height: height, width: width });
+    },
+
+    /** @private */
+    run: function (parentView, view, options) {
+      var viewFrame = view.get('borderFrame'),
+        parentFrame = parentView.get('borderFrame'),
+        key, value;
+
+      switch (options.direction) {
+      case 'right':
+        key = 'left';
+        value = -viewFrame.width;
+        break;
+      case 'up':
+        key = 'top';
+        value = -viewFrame.height;
+        break;
+      case 'down':
+        key = 'top';
+        value = parentFrame.height;
+        break;
+      default:
+        key = 'left';
+        value = parentFrame.width;
+      }
+
+      view.animate(key, value, {
+        duration: options.duration || 4.4,
+        timing: options.timing || 'ease'
+      }, function (data) {
+        // Only send the 'orphaned' event if the view is still in the 'orphaning' state by the time it transitions out.
+        if (view._parentingState === 'orphaning') {
+          view._orphaned();
+        }
+      });
+    },
+
+    teardown: function (parentView, view, options) {
+      // Convert to previous layout.
+      view.adjust(view._preSetupLayout);
+      view._preSetupLayout = null;
+    }
+  }
+
+});
+
 
 // This adds transition engine constants to SC.ContainerView.
 SC.mixin(SC.ContainerView,
