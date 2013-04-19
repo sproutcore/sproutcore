@@ -9,11 +9,11 @@
 sc_require('system/browser');
 sc_require('system/event');
 sc_require('system/cursor');
-sc_require('system/responder') ;
+sc_require('system/responder');
 sc_require('system/theme');
 
-sc_require('system/string') ;
-sc_require('views/view/base') ;
+sc_require('system/string');
+sc_require('views/view/base');
 
 
 /**
@@ -72,10 +72,10 @@ SC.CoreView.reopen(
     The current pane.
     @property {SC.Pane}
   */
-  pane: function() {
-    var view = this ;
-    while (view && !view.isPane) { view = view.get('parentView') ; }
-    return view ;
+  pane: function () {
+    var view = this;
+    while (view && !view.isPane) { view = view.get('parentView'); }
+    return view;
   }.property('parentView').cacheable(),
 
   /**
@@ -225,9 +225,9 @@ SC.CoreView.reopen(
 
     @type DOMElement the layer
   */
-  layer: function(key, value) {
+  layer: function (key, value) {
     if (value !== undefined) {
-      this._view_layer = value ;
+      this._view_layer = value;
 
     // no layer...attempt to discover it...
     } else {
@@ -238,7 +238,7 @@ SC.CoreView.reopen(
         this._view_layer = value = this.findLayerInParentLayer(parent);
       }
     }
-    return value ;
+    return value;
   }.property('isVisibleInWindow').cacheable(),
 
   /**
@@ -248,11 +248,11 @@ SC.CoreView.reopen(
     @param {String} sel a CoreQuery-compatible selector string
     @returns {SC.CoreQuery} the CoreQuery object for the DOM node
   */
-  $: function(sel) {
-    var layer = this.get('layer') ;
+  $: function (sel) {
+    var layer = this.get('layer');
 
-    if(!layer) { return SC.$(); }
-    else if(sel === undefined) { return SC.$(layer); }
+    if (!layer) { return SC.$(); }
+    else if (sel === undefined) { return SC.$(layer); }
     else { return SC.$(sel, layer); }
   },
 
@@ -264,8 +264,8 @@ SC.CoreView.reopen(
 
     @type DOMElement the container layer
   */
-  containerLayer: function() {
-    return this.get('layer') ;
+  containerLayer: function () {
+    return this.get('layer');
   }.property('layer').cacheable(),
 
   /**
@@ -276,10 +276,10 @@ SC.CoreView.reopen(
     @type String
     @readOnly
   */
-  layerId: function(key, value) {
+  layerId: function (key, value) {
     if (value) { this._layerId = value; }
     if (this._layerId) { return this._layerId; }
-    return SC.guidFor(this) ;
+    return SC.guidFor(this);
   }.property().cacheable(),
 
   /**
@@ -292,7 +292,7 @@ SC.CoreView.reopen(
     @param {DOMElement} parentLayer the parent's DOM layer
     @returns {DOMElement} the discovered layer
   */
-  findLayerInParentLayer: function(parentLayer) {
+  findLayerInParentLayer: function (parentLayer) {
     var id = "#" + this.get('layerId');
     return jQuery(id, parentLayer)[0] || jQuery(id)[0];
   },
@@ -303,11 +303,11 @@ SC.CoreView.reopen(
 
     @property {SC.View} view
   */
-  isDescendantOf: function(view) {
+  isDescendantOf: function (view) {
     var parentView = this.get('parentView');
 
-    if(this === view) { return YES; }
-    else if(parentView) { return parentView.isDescendantOf(view); }
+    if (this === view) { return YES; }
+    else if (parentView) { return parentView.isDescendantOf(view); }
     else { return NO; }
   },
 
@@ -318,10 +318,12 @@ SC.CoreView.reopen(
 
     @returns {SC.View} receiver
   */
-  displayDidChange: function() {
-    this.set('layerNeedsUpdate', YES) ;
-    return this;
-  },
+  // displayDidChange: function () {
+  //   console.log("%@ - displayDidChange()".fmt(this));
+  //   this.set('layerNeedsUpdate', YES);
+
+  //   return this;
+  // },
 
   /**
     Marks the view as needing a display update if the isVisible property changes.
@@ -330,9 +332,9 @@ SC.CoreView.reopen(
     into its own observer so that it can be overridden with additional
     functionality if the visibility module is applied to SC.View.
   */
-  _sc_isVisibleDidChange: function() {
-    this.displayDidChange();
-  }.observes('isVisible'),
+  // _sc_isVisibleDidChange: function () {
+  //   this.displayDidChange();
+  // }.observes('isVisible'),
 
   /**
     Setting this property to YES will cause the updateLayerIfNeeded method to
@@ -349,9 +351,9 @@ SC.CoreView.reopen(
     Schedules the updateLayerIfNeeded method to run at the end of the runloop
     if layerNeedsUpdate is set to YES.
   */
-  _view_layerNeedsUpdateDidChange: function() {
+  _view_layerNeedsUpdateDidChange: function () {
     if (this.get('layerNeedsUpdate')) {
-      this.invokeOnce(this.updateLayerIfNeeded) ;
+      this.invokeOnce(this._doUpdate);
     }
   }.observes('layerNeedsUpdate'),
 
@@ -372,21 +374,21 @@ SC.CoreView.reopen(
     @returns {SC.View} receiver
     @test in updateLayer
   */
-  updateLayerIfNeeded: function(skipIsVisibleInWindowCheck) {
-    var needsUpdate  = this.get('layerNeedsUpdate'),
-        shouldUpdate = needsUpdate  &&  (skipIsVisibleInWindowCheck || this.get('isVisibleInWindow'));
-    if (shouldUpdate) {
-      // only update a layer if it already exists
-      if (this.get('layer')) {
-        this.beginPropertyChanges() ;
-        this.set('layerNeedsUpdate', NO) ;
-        this.updateLayer() ;
-        this.endPropertyChanges() ;
-      }
-    }
+  // updateLayerIfNeeded: function (skipIsVisibleInWindowCheck) {
+  //   var needsUpdate  = this.get('layerNeedsUpdate'),
+  //       shouldUpdate = needsUpdate  &&  (skipIsVisibleInWindowCheck || this.get('isVisibleInWindow'));
+  //   if (shouldUpdate) {
+  //     // only update a layer if it already exists
+  //     if (this.get('layer')) {
+  //       this.beginPropertyChanges();
+  //       this.set('layerNeedsUpdate', NO);
+  //       this.updateLayer();
+  //       this.endPropertyChanges();
+  //     }
+  //   }
 
-    return this ;
-  },
+  //   return this;
+  // },
 
   /**
     This is the core method invoked to update a view layer whenever it has
@@ -407,51 +409,52 @@ SC.CoreView.reopen(
 
     @returns {SC.View} receiver
   */
-  updateLayer: function(optionalContext) {
-    var mixins, idx, len, hasLegacyRenderMethod;
+  // updateLayer: function (optionalContext) {
+  //   var mixins, idx, len, hasLegacyRenderMethod;
 
-    var context = optionalContext || this.renderContext(this.get('layer')) ;
-    this._renderLayerSettings(context, NO);
+  //   var context = optionalContext || this.renderContext(this.get('layer'));
+  //   this._renderLayerSettings(context, NO);
 
-    // If the render method takes two parameters, we assume that it is a
-    // legacy implementation that takes context and firstTime. If it has only
-    // one parameter, we assume it is the render delegates style that requires
-    // only context. Note that, for backwards compatibility, the default
-    // SC.View implementation of render uses the old style.
-    hasLegacyRenderMethod = !this.update;
-    // Call render with firstTime set to NO to indicate an update, rather than
-    // full re-render, should be performed.
-    if (hasLegacyRenderMethod) {
-      this.render(context, NO);
-    }
-    else {
-      this.update(context.$());
-    }
-    if (mixins = this.renderMixin) {
-      len = mixins.length;
-      for(idx=0; idx<len; ++idx) { mixins[idx].call(this, context, NO) ; }
-    }
+  //   // If the render method takes two parameters, we assume that it is a
+  //   // legacy implementation that takes context and firstTime. If it has only
+  //   // one parameter, we assume it is the render delegates style that requires
+  //   // only context. Note that, for backwards compatibility, the default
+  //   // SC.View implementation of render uses the old style.
+  //   hasLegacyRenderMethod = !this.update;
+  //   // Call render with firstTime set to NO to indicate an update, rather than
+  //   // full re-render, should be performed.
+  //   if (hasLegacyRenderMethod) {
+  //     this.render(context, NO);
+  //   }
+  //   else {
+  //     this.update(context.$());
+  //   }
+  //   if (mixins = this.renderMixin) {
+  //     len = mixins.length;
+  //     for (idx = 0; idx < len; ++idx) { mixins[idx].call(this, context, NO); }
+  //   }
 
-    context.update() ;
-    if (context._innerHTMLReplaced) {
-      var pane = this.get('pane');
-      if(pane && pane.get('isPaneAttached')) {
-        this._notifyDidAppendToDocument();
-      }
-    }
+  //   context.update();
+  //   if (context._innerHTMLReplaced) {
+  //     var pane = this.get('pane');
+  //     if (pane && pane.get('isPaneAttached')) {
+  //       // this._notifyDidAppendToDocument();
+  //     }
+  //   }
 
-    // If this view uses static layout, then notify that the frame (likely)
-    // changed.
-    if (this.useStaticLayout) { this.viewDidResize(); }
+  //   // If this view uses static layout, then notify that the frame (likely)
+  //   // changed.
+  //   if (this.useStaticLayout) { this.viewDidResize(); }
 
-    if (this.didUpdateLayer) { this.didUpdateLayer(); } // call to update DOM
-    if(this.designer && this.designer.viewDidUpdateLayer) {
-      this.designer.viewDidUpdateLayer(); //let the designer know
-    }
-    return this ;
-  },
+  //   if (this.didUpdateLayer) { this.didUpdateLayer(); } // call to update DOM
+  //   if (this.designer && this.designer.viewDidUpdateLayer) {
+  //     this.designer.viewDidUpdateLayer(); //let the designer know
+  //   }
+  //   return this;
+  // },
 
-  parentViewDidResize: function() {
+  /** @private */
+  parentViewDidResize: function () {
     if (!this.get('hasLayout')) { this.notifyPropertyChange('frame'); }
     this.viewDidResize();
   },
@@ -460,7 +463,7 @@ SC.CoreView.reopen(
     Override this in a child class to define behavior that should be invoked
     when a parent's view was resized.
    */
-  viewDidResize: function() {},
+  viewDidResize: function () {},
 
   /**
     Creates a new renderContext with the passed tagName or element.  You
@@ -469,8 +472,8 @@ SC.CoreView.reopen(
 
     @returns {SC.RenderContext}
   */
-  renderContext: function(tagNameOrElement) {
-    return SC.RenderContext(tagNameOrElement) ;
+  renderContext: function (tagNameOrElement) {
+    return SC.RenderContext(tagNameOrElement);
   },
 
   /**
@@ -485,63 +488,63 @@ SC.CoreView.reopen(
 
     @returns {SC.View} receiver
   */
-  createLayer: function() {
-    if (this.get('layer')) { return this ; } // nothing to do
+  createLayer: function () {
+    // if (this.get('layer')) { return this; } // nothing to do
 
-    var context = this.renderContext(this.get('tagName')) ;
+    var context = this.renderContext(this.get('tagName'));
 
     // now prepare the content like normal.
-    this.renderToContext(context) ;
-    this.set('layer', context.element()) ;
+    this.renderToContext(context);
+    this.set('layer', context.element());
 
     // now notify the view and its child views..
-    this._notifyDidCreateLayer() ;
+    // this._notifyDidCreateLayer();
 
-    return this ;
+    return this;
   },
 
   /** @private -
     Invokes the receivers didCreateLayer() method if it exists and then
     invokes the same on all child views.
   */
-  _notifyDidCreateLayer: function() {
-    this.notifyPropertyChange('layer');
+  // _notifyDidCreateLayer: function () {
+  //   this.notifyPropertyChange('layer');
 
-    if (this.get('useStaticLayout')) this.viewDidResize();
+  //   if (this.get('useStaticLayout')) this.viewDidResize();
 
-    if (this.didCreateLayer) { this.didCreateLayer() ; }
+  //   if (this.didCreateLayer) { this.didCreateLayer(); }
 
-    // and notify others
-    var mixins = this.didCreateLayerMixin, len, idx,
-        childViews = this.get('childViews'),
-        childView;
-    if (mixins) {
-      len = mixins.length ;
-      for (idx=0; idx<len; ++idx) { mixins[idx].call(this) ; }
-    }
+  //   // and notify others
+  //   var mixins = this.didCreateLayerMixin, len, idx,
+  //       childViews = this.get('childViews'),
+  //       childView;
+  //   if (mixins) {
+  //     len = mixins.length;
+  //     for (idx=0; idx<len; ++idx) { mixins[idx].call(this); }
+  //   }
 
-    len = childViews.length ;
-    for (idx=0; idx<len; ++idx) {
-      childView = childViews[idx];
-      if (!childView) { continue; }
+  //   len = childViews.length;
+  //   for (idx=0; idx<len; ++idx) {
+  //     childView = childViews[idx];
+  //     if (!childView) { continue; }
 
-      // A parent view creating a layer might result in the creation of a
-      // child view's DOM node being created via a render context without
-      // createLayer() being invoked on the child.  In such cases, if anyone
-      // had requested 'layer' and it was cached as null, we need to
-      // invalidate it.
-      childView.notifyPropertyChange('layer');
+  //     // A parent view creating a layer might result in the creation of a
+  //     // child view's DOM node being created via a render context without
+  //     // createLayer() being invoked on the child.  In such cases, if anyone
+  //     // had requested 'layer' and it was cached as null, we need to
+  //     // invalidate it.
+  //     childView.notifyPropertyChange('layer');
 
-      // A strange case, that a childView's frame won't be correct before
-      // we have a layer, if the childView doesn't have a fixed layout
-      // and we are using static layout.
-      if (this.get('useStaticLayout')) {
-        if (!childView.get('isFixedLayout')) { childView.viewDidResize(); }
-      }
+  //     // A strange case, that a childView's frame won't be correct before
+  //     // we have a layer, if the childView doesn't have a fixed layout
+  //     // and we are using static layout.
+  //     if (this.get('useStaticLayout')) {
+  //       if (!childView.get('isFixedLayout')) { childView.viewDidResize(); }
+  //     }
 
-      childView._notifyDidCreateLayer() ;
-    }
-  },
+  //     childView._notifyDidCreateLayer();
+  //   }
+  // },
 
   /**
     Destroys any existing layer along with the layer for any child views as
@@ -561,19 +564,19 @@ SC.CoreView.reopen(
 
     @returns {SC.View} receiver
   */
-  destroyLayer: function() {
-    var layer = this.get('layer') ;
+  destroyLayer: function () {
+    var layer = this.get('layer');
     if (layer) {
 
       // Now notify the view and its child views.  It will also set the
       // layer property to null.
-      this._notifyWillDestroyLayer() ;
+      this._notifyWillDestroyLayer();
 
       // do final cleanup
-      if (layer.parentNode) { layer.parentNode.removeChild(layer) ; }
-      layer = null ;
+      if (layer.parentNode) { layer.parentNode.removeChild(layer); }
+      layer = null;
     }
-    return this ;
+    return this;
   },
 
   /**
@@ -582,9 +585,9 @@ SC.CoreView.reopen(
 
     @returns {SC.View} receiver
   */
-  replaceLayer: function() {
+  replaceLayer: function () {
     this.destroyLayer();
-    this.set('layerLocationNeedsUpdate', YES) ;
+    this.set('layerLocationNeedsUpdate', YES);
     this.invokeOnce(this.updateLayerLocationIfNeeded);
   },
 
@@ -592,9 +595,9 @@ SC.CoreView.reopen(
     If the parent view has changed, we need to insert this
     view's layer into the layer of the new parent view.
   */
-  parentViewDidChange: function() {
+  parentViewDidChange: function () {
     this.parentViewDidResize();
-    this.updateLayerLocation();
+    // this.updateLayerLocation();
   },
 
   /**
@@ -615,11 +618,11 @@ SC.CoreView.reopen(
     @returns {SC.View} receiver
     @test in updateLayerLocation
   */
-  updateLayerLocationIfNeeded: function(force) {
+  updateLayerLocationIfNeeded: function (force) {
     if (this.get('layerLocationNeedsUpdate')) {
-      this.updateLayerLocation() ;
+      // this.updateLayerLocation();
     }
-    return this ;
+    return this;
   },
 
   /**
@@ -629,12 +632,12 @@ SC.CoreView.reopen(
 
     @returns {SC.View} receiver
   */
-  updateLayerLocation: function() {
+  updateLayerLocation: function () {
     // collect some useful value
     // if there is no node for some reason, just exit
     var node = this.get('layer'),
         parentView = this.get('parentView'),
-        parentNode = parentView ? parentView.get('containerLayer') : null ;
+        parentNode = parentView ? parentView.get('containerLayer') : null;
 
     // remove node from current parentNode if the node does not match the new
     // parent node.
@@ -658,18 +661,18 @@ SC.CoreView.reopen(
     // CASE 5: parentView has layer, view has layer.  move layer
     } else {
       if (!node) {
-        this.createLayer() ;
-        node = this.get('layer') ;
+        this.createLayer();
+        node = this.get('layer');
         if (!node) { return; } // can't do anything without a node.
       }
 
       var siblings = parentView.get('childViews'),
           nextView = siblings.objectAt(siblings.indexOf(this)+1),
-          nextNode = (nextView) ? nextView.get('layer') : null ;
+          nextNode = (nextView) ? nextView.get('layer') : null;
 
       // before we add to parent node, make sure that the nextNode exists...
       if (nextView && (!nextNode || nextNode.parentNode!==parentNode)) {
-        nextView.updateLayerLocationIfNeeded() ;
+        nextView.updateLayerLocationIfNeeded();
 
         // just in case it still couldn't generate the layer, force to null, because
         // IE doesn't support insertBefore(blah, undefined) in version IE9.
@@ -678,37 +681,35 @@ SC.CoreView.reopen(
 
       // add to parentNode if needed.
       if ((node.parentNode!==parentNode) || (node.nextSibling!==nextNode)) {
-        parentNode.insertBefore(node, nextNode) ;
+        parentNode.insertBefore(node, nextNode);
       }
     }
 
     parentNode = parentView = node = nextNode = null; // avoid memory leaks
 
-    this.set('layerLocationNeedsUpdate', NO) ;
+    this.set('layerLocationNeedsUpdate', NO);
 
-    return this ;
+    return this;
   },
 
   /** @private -
     Invokes willDestroyLayer() on view and child views.  Then sets layer to
     null for receiver.
   */
-  _notifyWillDestroyLayer: function() {
-    if (this.willDestroyLayer) { this.willDestroyLayer() ; }
+  _notifyWillDestroyLayer: function () {
+    if (this.willDestroyLayer) { this.willDestroyLayer(); }
     var mixins = this.willDestroyLayerMixin, len, idx,
-        childViews = this.get('childViews') ;
+        childViews = this.get('childViews');
     if (mixins) {
-      len = mixins.length ;
-      for (idx=0; idx<len; ++idx) { mixins[idx].call(this) ; }
+      len = mixins.length;
+      for (idx=0; idx<len; ++idx) { mixins[idx].call(this); }
     }
 
-    len = childViews.length ;
-    for (idx=0; idx<len; ++idx) { childViews[idx]._notifyWillDestroyLayer() ; }
+    len = childViews.length;
+    for (idx=0; idx<len; ++idx) { childViews[idx]._notifyWillDestroyLayer(); }
 
-    this.set('layer', null) ;
+    this.set('layer', null);
   },
-
-
 
   /**
     @private
@@ -723,11 +724,11 @@ SC.CoreView.reopen(
     @param {SC.RenderContext} context the render context.
     @param {Boolean} firstTime Provided for compatibility when rendering legacy views only.
   */
-  renderToContext: function(context, firstTime) {
+  renderToContext: function (context, firstTime) {
     var hasLegacyRenderMethod, mixins, idx, len;
 
-    this.beginPropertyChanges() ;
-    this.set('layerNeedsUpdate', NO) ;
+    this.beginPropertyChanges();
+    // this.set('layerNeedsUpdate', NO);
 
     if (SC.none(firstTime)) { firstTime = YES; }
 
@@ -763,20 +764,20 @@ SC.CoreView.reopen(
 
     if (mixins = this.renderMixin) {
       len = mixins.length;
-      for(idx=0; idx<len; ++idx) { mixins[idx].call(this, context, firstTime) ; }
+      for (idx = 0; idx < len; ++idx) { mixins[idx].call(this, context, firstTime); }
     }
 
-    this.endPropertyChanges() ;
+    this.endPropertyChanges();
   },
 
-  _renderLayerSettings: function(context, firstTime) {
+  _renderLayerSettings: function (context, firstTime) {
     context.resetClasses();
     context.resetStyles();
 
     this.applyAttributesToContext(context);
   },
 
-  applyAttributesToContext: function(context) {
+  applyAttributesToContext: function (context) {
     if (!this.get('layer')) {
       this._applyClassNameBindings();
       this._applyAttributeBindings(context);
@@ -806,7 +807,7 @@ SC.CoreView.reopen(
     observer to update the view's element if the bound property ever changes
     in the future.
   */
-  _applyClassNameBindings: function() {
+  _applyClassNameBindings: function () {
     var classBindings = this.get('classNameBindings'),
         classNames = this.get('classNames'),
         dasherizedClass;
@@ -816,7 +817,7 @@ SC.CoreView.reopen(
     // Loop through all of the configured bindings. These will be either
     // property names ('isUrgent') or property paths relative to the view
     // ('content.isUrgent')
-    classBindings.forEach(function(property) {
+    classBindings.forEach(function (property) {
 
       // Variable in which the old class value is saved. The observer function
       // closes over this variable, so it knows which string to remove when
@@ -825,7 +826,7 @@ SC.CoreView.reopen(
 
       // Set up an observer on the context. If the property changes, toggle the
       // class name.
-      var observer = function() {
+      var observer = function () {
         // Get the current value of the property
         var newClass = this._classStringForProperty(property);
         var elem = this.$();
@@ -872,16 +873,16 @@ SC.CoreView.reopen(
 
     @param {SC.RenderBuffer} buffer
   */
-  _applyAttributeBindings: function(context) {
+  _applyAttributeBindings: function (context) {
     var attributeBindings = this.get('attributeBindings'),
         attributeValue, elem, type;
 
     if (!attributeBindings) { return; }
 
-    attributeBindings.forEach(function(attribute) {
+    attributeBindings.forEach(function (attribute) {
       // Create an observer to add/remove/change the attribute if the
       // JavaScript property changes.
-      var observer = function() {
+      var observer = function () {
         elem = this.$();
         var currentValue = elem.attr(attribute);
         attributeValue = this.get(attribute);
@@ -922,7 +923,7 @@ SC.CoreView.reopen(
     For example, if the view has property `isUrgent` that evaluates to true,
     passing `isUrgent` to this method will return `"is-urgent"`.
   */
-  _classStringForProperty: function(property) {
+  _classStringForProperty: function (property) {
     var split = property.split(':'), className = split[1];
     property = split[0];
 
@@ -961,14 +962,14 @@ SC.CoreView.reopen(
     @returns {SC.RenderContext} the render context
     @test in render
   */
-  renderChildViews: function(context, firstTime) {
-    var cv = this.get('childViews'), len = cv.length, idx, view ;
+  renderChildViews: function (context, firstTime) {
+    var cv = this.get('childViews'), len = cv.length, idx, view;
     for (idx=0; idx<len; ++idx) {
-      view = cv[idx] ;
+      view = cv[idx];
       if (!view) { continue; }
-      context = context.begin(view.get('tagName')) ;
+      context = context.begin(view.get('tagName'));
       view.renderToContext(context, firstTime);
-      context = context.end() ;
+      context = context.end();
     }
     this._didRenderChildViews = YES;
 
@@ -978,35 +979,41 @@ SC.CoreView.reopen(
   /** @private -
     override to add support for theming or in your view
   */
-  render: function() { },
+  render: function () { },
 
   /** @private -
-    Invokes the receivers didAppendLayerToDocument() method if it exists and
+    Invokes the receivers didAppendToDocument() method if it exists and
     then invokes the same on all child views.
   */
 
-  _notifyDidAppendToDocument: function() {
-    if (!this.get('hasLayout')) { this.notifyPropertyChange('frame'); }
-    if (this.didAppendToDocument) { this.didAppendToDocument(); }
+  // _notifyDidAppendToDocument: function () {
+  //   if (!this.get('hasLayout')) { this.notifyPropertyChange('frame'); }
+  //   if (this.didAppendToDocument) { this.didAppendToDocument(); }
 
-    var i=0, child, childLen, children = this.get('childViews');
-    for(i=0, childLen=children.length; i<childLen; i++) {
-      child = children[i];
-      if(child._notifyDidAppendToDocument){
-        child._notifyDidAppendToDocument();
-      }
-    }
-  },
+  //   var i = 0, childView, childViews = this.get('childViews');
+  //   for (var i = childViews.length - 1; i >= 0; i--) {
+  //   // for (i = 0, childLen = children.length; i < childLen; i++) {
+  //     childView = childViews[i];
 
-  childViewsObserver: function(){
-    var childViews = this.get('childViews'), i, iLen, child;
-    for(i=0, iLen = childViews.length; i<iLen; i++){
-      child = childViews[i];
-      if(child._notifyDidAppendToDocument){
-        child._notifyDidAppendToDocument();
-      }
-    }
-  }.observes('childViews'),
+  //     // if (childView.get('isOrphan')) {
+  //     //   childView._doAdopt(this, null);
+  //     // }
+
+  //     if (childView._notifyDidAppendToDocument) {
+  //       childView._notifyDidAppendToDocument();
+  //     }
+  //   }
+  // },
+
+  // childViewsObserver: function () {
+  //   var childViews = this.get('childViews'), i, iLen, child;
+  //   for (i = 0, iLen = childViews.length; i < iLen; i++) {
+  //     child = childViews[i];
+  //     if (child._notifyDidAppendToDocument) {
+  //       child._notifyDidAppendToDocument();
+  //     }
+  //   }
+  // }.observes('childViews'),
 
   // ..........................................................
   // STANDARD RENDER PROPERTIES
@@ -1031,7 +1038,7 @@ SC.CoreView.reopen(
 
         attributeBindings: ['aria-valuenow', 'disabled'],
 
-        'aria-valuenow': function() {
+        'aria-valuenow': function () {
           return this.get('value');
         }.property('value').cacheable(), // adds 'aria-valuenow="{value}"' attribute
 
@@ -1101,7 +1108,7 @@ SC.CoreView.reopen(
 
     @type String
   */
-  displayToolTip: function() {
+  displayToolTip: function () {
     var ret = this.get('toolTip');
     return (ret && this.get('localize')) ? SC.String.loc(ret) : (ret || '');
   }.property('toolTip','localize').cacheable(),
@@ -1153,8 +1160,8 @@ SC.CoreView.reopen(
   /** @property
     The nextResponder is usually the parentView.
   */
-  nextResponder: function() {
-    return this.get('parentView') ;
+  nextResponder: function () {
+    return this.get('parentView');
   }.property('parentView').cacheable(),
 
 
@@ -1177,17 +1184,18 @@ SC.CoreView.reopen(
      - register the view with the global views hash, which is used for event
        dispatch
   */
-  init: function() {
-    var parentView = this.get('parentView'),
-        path, root, lp, displayProperties ;
+  init: function () {
+    var childViews,
+      childViewLayout = this.childViewLayout,
+      displayProperties;
 
     sc_super();
 
     // Register the view for event handling. This hash is used by
     // SC.RootResponder to dispatch incoming events.
-    //@if(debug)
+    //@if (debug)
     if (SC.View.views[this.get('layerId')]) {
-      SC.error("Developer Error: A view with layerId, '%@', already exists.  Each view must have a unique layerId.".fmt(this.get('layerId')));
+      throw new Error("Developer Error: A view with layerId, '%@', already exists.  Each view must have a unique layerId.".fmt(this.get('layerId')));
     }
     //@endif
     SC.View.views[this.get('layerId')] = this;
@@ -1196,15 +1204,25 @@ SC.CoreView.reopen(
     this.classNames = this.get('classNames').slice();
 
     // setup child views.  be sure to clone the child views array first
-    this.childViews = this.get('childViews').slice() ;
-    this.createChildViews() ; // setup child Views
+    childViews = this.childViews = this.get('childViews').slice();
+    this.createChildViews(); // setup child Views
+
+    // Apply an automatic child view layout if it is defined.
+    if (childViewLayout) {
+      childViewLayout.adjustChildViews(this);
+
+      if (this.get('isChildViewLayoutLive')) {
+        this.addObserver('childViewLayoutOptions', this, 'childViewLayoutNeedsUpdate');
+        childViewLayout.beginObserving(this);
+      }
+    }
 
     // register display property observers ..
     // TODO: Optimize into class setup
-    displayProperties = this.get('displayProperties') ;
-    for(var i=0, l=displayProperties.length; i<l; i++) {
-      this.addObserver(displayProperties[i], this, this.displayDidChange);
-    }
+    // displayProperties = this.get('displayProperties');
+    // for (var i = 0, l = displayProperties.length; i < l; i++) {
+    //   this.addObserver(displayProperties[i], this, this.displayDidChange);
+    // }
   },
 
   /**
@@ -1219,12 +1237,12 @@ SC.CoreView.reopen(
 
     @returns {void}
   */
-  awake: function() {
+  awake: function () {
     sc_super();
-    var childViews = this.get('childViews'), len = childViews.length, idx ;
-    for (idx=0; idx<len; ++idx) {
-      if (!childViews[idx]) { continue ; }
-      childViews[idx].awake() ;
+    var childViews = this.get('childViews'), len = childViews.length, idx;
+    for (idx = 0; idx < len; ++idx) {
+      if (!childViews[idx]) { continue; }
+      childViews[idx].awake();
     }
   },
 
@@ -1235,8 +1253,8 @@ SC.CoreView.reopen(
     @type Rect
     @test in layoutStyle
   */
-  frame: function() {
-    return this.computeFrameWithParentFrame(null) ;
+  frame: function () {
+    return this.computeFrameWithParentFrame(null);
   }.property('useStaticLayout').cacheable(),    // We depend on the layout, but layoutDidChange will call viewDidResize to check the frame for us
 
   /**
@@ -1248,7 +1266,7 @@ SC.CoreView.reopen(
 
     @returns {Rect} the computed frame
   */
-  computeFrameWithParentFrame: function() {
+  computeFrameWithParentFrame: function () {
     var layer,                            // The view's layer
         pv = this.get('parentView'),      // The view's parent view (if it exists)
         f;                                // The layer's coordinates in the document
@@ -1286,7 +1304,7 @@ SC.CoreView.reopen(
 
     @type Rect
   */
-  clippingFrame: function() {
+  clippingFrame: function () {
     var f = this.get('frame'),
         ret = f,
         pv, cf;
@@ -1308,12 +1326,12 @@ SC.CoreView.reopen(
     This method is invoked whenever the clippingFrame changes, notifying
     each child view that its clippingFrame has also changed.
   */
-  _sc_view_clippingFrameDidChange: function() {
-    var cvs = this.get('childViews'), len = cvs.length, idx, cv ;
-    for (idx=0; idx<len; ++idx) {
-      cv = cvs[idx] ;
+  _sc_view_clippingFrameDidChange: function () {
+    var cvs = this.get('childViews'), len = cvs.length, idx, cv;
+    for (idx = 0; idx < len; ++idx) {
+      cv = cvs[idx];
 
-      cv.notifyPropertyChange('clippingFrame') ;
+      cv.notifyPropertyChange('clippingFrame');
       cv._sc_view_clippingFrameDidChange();
     }
   },
@@ -1321,32 +1339,38 @@ SC.CoreView.reopen(
   /**
     Removes the child view from the parent view.
 
-    @param {SC.View} view
+    Note that if the child view uses a transitionOut plugin, it will not be
+    fully removed until the transition completes.  To force the view to remove
+    immediately you can pass true as the optional `immediately` argument.
+
+    @param {SC.View} view The view to remove as a child view.
+    @param {Boolean} [immediately=false] Forces the child view to be removed immediately regardless if it uses a transitionOut plugin.
     @returns {SC.View} receiver
   */
-  removeChild: function(view) {
-    // update parent node
-    view.set('parentView', null) ;
+  removeChild: function (view, immediately) {
+    view._doOrphan(immediately);
 
-    // remove view from childViews array.
-    var childViews = this.get('childViews'),
-        idx = childViews.indexOf(view) ;
-    if (idx>=0) { childViews.removeAt(idx); }
-
-    return this ;
+    return this;
   },
 
   /**
     Removes all children from the parentView.
 
+    Note that if any child view uses a transitionOut plugin, it will not be
+    fully removed until the transition completes.  To force all child views to
+    remove immediately you can pass true as the optional `immediately` argument.
+
+    @param {Boolean} [immediately=false] Forces all child views to be removed immediately regardless if any uses a transitionOut plugin.
     @returns {SC.View} receiver
   */
-  removeAllChildren: function() {
-    var childViews = this.get('childViews'), view ;
-    while (view = childViews.objectAt(childViews.get('length')-1)) {
-      this.removeChild(view) ;
+  removeAllChildren: function (immediately) {
+    var childViews = this.get('childViews'), view;
+
+    for (var i = childViews.get('length') - 1; i >= 0; i--) {
+      this.removeChild(childViews.objectAt(i), immediately);
     }
-    return this ;
+
+    return this;
   },
 
   /**
@@ -1355,10 +1379,10 @@ SC.CoreView.reopen(
 
     @returns {SC.View} receiver
   */
-  removeFromParent: function() {
-    var parent = this.get('parentView') ;
-    if (parent) { parent.removeChild(this) ; }
-    return this ;
+  removeFromParent: function () {
+    var parent = this.get('parentView');
+    if (parent) { parent.removeChild(this); }
+    return this;
   },
 
   /**
@@ -1367,7 +1391,7 @@ SC.CoreView.reopen(
     sure that the DOM element managed by the view can be released by the
     memory manager.
   */
-  destroy: function() {
+  destroy: function () {
     var ret;
     // Fast path!
     if (this.get('isDestroyed')) { return this; }
@@ -1381,22 +1405,22 @@ SC.CoreView.reopen(
     return ret;
   },
 
-  _destroy: function() {
+  _destroy: function () {
     // destroy the layer -- this will avoid each child view destroying
     // the layer over and over again...
-    this.destroyLayer() ;
+    this.destroyLayer();
 
     // first destroy any children.
-    var childViews = this.get('childViews'), len = childViews.length, idx ;
+    var childViews = this.get('childViews'), len = childViews.length, idx;
     if (len) {
-      childViews = childViews.slice() ;
-      for (idx=0; idx<len; ++idx) { childViews[idx].destroy() ; }
+      childViews = childViews.slice();
+      for (idx = 0; idx < len; ++idx) { childViews[idx].destroy(); }
     }
 
     // next remove view from global hash
-    delete SC.View.views[this.get('layerId')] ;
-    delete this._CQ ;
-    delete this.page ;
+    delete SC.View.views[this.get('layerId')];
+    delete this._CQ;
+    delete this.page;
 
     // remove from parent if found.
     if (this.get('parentView')) { this.removeFromParent(); }
@@ -1427,11 +1451,11 @@ SC.CoreView.reopen(
 
     @returns {SC.View} receiver
   */
-  createChildViews: function() {
+  createChildViews: function () {
     var childViews = this.get('childViews'),
         len        = childViews.length,
         isNoLongerValid = false,
-        idx, key, views, view;
+        idx, key, view;
 
     this.beginPropertyChanges();
 
@@ -1447,7 +1471,7 @@ SC.CoreView.reopen(
       }
 
       if (!view) {
-        //@if(debug)
+        //@if (debug)
         SC.warn("Developer Warning: The child view named '%@' was not found in the view, %@.  This child view will be ignored.".fmt(key, this));
         //@endif
 
@@ -1469,7 +1493,7 @@ SC.CoreView.reopen(
     if (isNoLongerValid) { this.set('childViews', childViews.compact()); }
 
     this.endPropertyChanges();
-    return this ;
+    return this;
   },
 
   /**
@@ -1484,30 +1508,30 @@ SC.CoreView.reopen(
     @returns {SC.View} new instance
     @test in createChildViews
   */
-  createChildView: function(view, attrs) {
+  createChildView: function (view, attrs) {
     if (!view.isClass) {
       attrs = view;
     } else {
       // attrs should always exist...
-      if (!attrs) { attrs = {} ; }
+      if (!attrs) { attrs = {}; }
       // clone the hash that was given so we do not pollute it if it's being reused
       else { attrs = SC.clone(attrs); }
     }
 
-    attrs.owner = attrs.parentView = this ;
+    attrs.owner = attrs.parentView = this;
 
     // We need to set isVisibleInWindow before the init method is called on the view
     // The prototype check is a bit hackish and should be revisited - PDW
-    if (view.isClass && view.prototype.hasVisibility) {
-      attrs.isVisibleInWindow = this.get('isVisibleInWindow');
-    }
+    // if (view.isClass && view.prototype.hasVisibility) {
+    //   attrs.isVisibleInWindow = this.get('isVisibleInWindow');
+    // }
 
-    if (!attrs.page) { attrs.page = this.page ; }
+    if (!attrs.page) { attrs.page = this.page; }
 
     // Now add this to the attributes and create.
     if (view.isClass) { view = view.create(attrs); }
 
-    return view ;
+    return view;
   },
 
   /** walk like a duck */
@@ -1530,7 +1554,7 @@ SC.CoreView.reopen(
     @param evt {SC.Event} the selectstart event
     @returns YES if selectable
   */
-  selectStart: function(evt) {
+  selectStart: function (evt) {
     return this.get('isTextSelectable');
   },
 
@@ -1540,7 +1564,7 @@ SC.CoreView.reopen(
     @param evt {SC.Event} the contextmenu event
     @returns YES if the contextmenu will be allowed to show up
   */
-  contextMenu: function(evt) {
+  contextMenu: function (evt) {
     if (this.get('isContextMenuEnabled')) {
       evt.allowDefault();
       return YES;
@@ -1563,7 +1587,7 @@ SC.CoreView.mixin(/** @scope SC.CoreView.prototype */ {
     @returns {Class} SC.View subclass to create
     @function
   */
-  design: function() {
+  design: function () {
     if (this.isDesign) {
       // @if (debug)
       SC.Logger.warn("Developer Warning: .design() was called twice for %@.".fmt(this));
@@ -1572,14 +1596,14 @@ SC.CoreView.mixin(/** @scope SC.CoreView.prototype */ {
     }
 
     var ret = this.extend.apply(this, arguments);
-    ret.isDesign = YES ;
+    ret.isDesign = YES;
     if (SC.ViewDesigner) {
       SC.ViewDesigner.didLoadDesign(ret, this, SC.A(arguments));
     }
-    return ret ;
+    return ret;
   },
 
-  extend: function() {
+  extend: function () {
     var last = arguments[arguments.length - 1];
 
     if (last && !SC.none(last.theme)) {
@@ -1593,71 +1617,71 @@ SC.CoreView.mixin(/** @scope SC.CoreView.prototype */ {
   /**
     Helper applies the layout to the prototype.
   */
-  layout: function(layout) {
-    this.prototype.layout = layout ;
-    return this ;
+  layout: function (layout) {
+    this.prototype.layout = layout;
+    return this;
   },
 
   /**
     Helper applies the classNames to the prototype
   */
-  classNames: function(sc) {
+  classNames: function (sc) {
     sc = (this.prototype.classNames || []).concat(sc);
     this.prototype.classNames = sc;
-    return this ;
+    return this;
   },
 
   /**
     Help applies the tagName
   */
-  tagName: function(tg) {
+  tagName: function (tg) {
     this.prototype.tagName = tg;
-    return this ;
+    return this;
   },
 
   /**
     Helper adds the childView
   */
-  childView: function(cv) {
+  childView: function (cv) {
     var childViews = this.prototype.childViews || [];
     if (childViews === this.superclass.prototype.childViews) {
       childViews = childViews.slice();
     }
-    childViews.push(cv) ;
+    childViews.push(cv);
     this.prototype.childViews = childViews;
-    return this ;
+    return this;
   },
 
   /**
     Helper adds a binding to a design
   */
-  bind: function(keyName, path) {
+  bind: function (keyName, path) {
     var p = this.prototype, s = this.superclass.prototype;
-    var bindings = p._bindings ;
+    var bindings = p._bindings;
     if (!bindings || bindings === s._bindings) {
-      bindings = p._bindings = (bindings || []).slice() ;
+      bindings = p._bindings = (bindings || []).slice();
     }
 
     keyName = keyName + "Binding";
-    p[keyName] = path ;
+    p[keyName] = path;
     bindings.push(keyName);
 
-    return this ;
+    return this;
   },
 
   /**
     Helper sets a generic property on a design.
   */
-  prop: function(keyName, value) {
+  prop: function (keyName, value) {
     this.prototype[keyName] = value;
-    return this ;
+    return this;
   },
 
   /**
     Used to construct a localization for a view.  The default implementation
     will simply return the passed attributes.
   */
-  localization: function(attrs, rootElement) {
+  localization: function (attrs, rootElement) {
     // add rootElement
     if (rootElement) attrs.rootElement = SC.$(rootElement)[0];
     return attrs;
@@ -1673,21 +1697,21 @@ SC.CoreView.mixin(/** @scope SC.CoreView.prototype */ {
     @param {Hash} attrs
     @returns {SC.View} instance
   */
-  viewFor: function(element, attrs) {
+  viewFor: function (element, attrs) {
     var args = SC.$A(arguments); // prepare to edit
     if (SC.none(element)) {
       args.shift(); // remove if no element passed
-    } else args[0] = { rootElement: SC.$(element)[0] } ;
-    var ret = this.create.apply(this, arguments) ;
+    } else args[0] = { rootElement: SC.$(element)[0] };
+    var ret = this.create.apply(this, arguments);
     args = args[0] = null;
-    return ret ;
+    return ret;
   },
 
   /**
     Create a new view with the passed attributes hash.  If you have the
     Designer module loaded, this will also create a peer designer if needed.
   */
-  create: function() {
+  create: function () {
     var last = arguments[arguments.length - 1];
 
     if (last && last.theme) {
@@ -1699,7 +1723,7 @@ SC.CoreView.mixin(/** @scope SC.CoreView.prototype */ {
     if (SC.ViewDesigner) {
       SC.ViewDesigner.didCreateView(ret, SC.$A(arguments));
     }
-    return ret ;
+    return ret;
   },
 
   /**
@@ -1713,11 +1737,11 @@ SC.CoreView.mixin(/** @scope SC.CoreView.prototype */ {
     @param rootElement {String} optional rootElement with prepped HTML
     @returns {SC.View} receiver
   */
-  loc: function(loc) {
+  loc: function (loc) {
     var childLocs = loc.childViews;
     delete loc.childViews; // clear out child views before applying to attrs
 
-    this.applyLocalizedAttributes(loc) ;
+    this.applyLocalizedAttributes(loc);
     if (SC.ViewDesigner) {
       SC.ViewDesigner.didLoadLocalization(this, SC.$A(arguments));
     }
@@ -1725,7 +1749,7 @@ SC.CoreView.mixin(/** @scope SC.CoreView.prototype */ {
     // apply localization recursively to childViews
     var childViews = this.prototype.childViews, idx = childViews.length,
       viewClass;
-    while(--idx>=0) {
+    while (--idx >= 0) {
       viewClass = childViews[idx];
       loc = childLocs[idx];
       if (loc && viewClass && typeof viewClass === SC.T_STRING) SC.String.loc(viewClass, loc);
@@ -1738,13 +1762,13 @@ SC.CoreView.mixin(/** @scope SC.CoreView.prototype */ {
     Internal method actually updates the localized attributes on the view
     class.  This is overloaded in design mode to also save the attributes.
   */
-  applyLocalizedAttributes: function(loc) {
-    SC.mixin(this.prototype, loc) ;
+  applyLocalizedAttributes: function (loc) {
+    SC.mixin(this.prototype, loc);
   },
 
   views: {}
 
-}) ;
+});
 
 // .......................................................
 // OUTLET BUILDER
@@ -1756,24 +1780,24 @@ SC.CoreView.mixin(/** @scope SC.CoreView.prototype */ {
   define an outlet that points to another view or object.  The root object
   used for the path will be the receiver.
 */
-SC.outlet = function(path, root) {
-  return function(key) {
-    return (this[key] = SC.objectForPropertyPath(path, (root !== undefined) ? root : this)) ;
+SC.outlet = function (path, root) {
+  return function (key) {
+    return (this[key] = SC.objectForPropertyPath(path, (root !== undefined) ? root : this));
   }.property();
 };
 
 /** @private on unload clear cached divs. */
-SC.CoreView.unload = function() {
+SC.CoreView.unload = function () {
   // delete view items this way to ensure the views are cleared.  The hash
   // itself may be owned by multiple view subclasses.
   var views = SC.View.views;
   if (views) {
-   for(var key in views) {
-     if (!views.hasOwnProperty(key)) continue ;
-     delete views[key];
-   }
+    for (var key in views) {
+      if (!views.hasOwnProperty(key)) continue;
+      delete views[key];
+    }
   }
-} ;
+};
 
 /**
   @class
@@ -1830,6 +1854,6 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
 });
 
 //unload views for IE, trying to collect memory.
-if(SC.browser.isIE) SC.Event.add(window, 'unload', SC.View, SC.View.unload) ;
+if (SC.browser.isIE) SC.Event.add(window, 'unload', SC.View, SC.View.unload);
 
 

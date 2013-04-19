@@ -109,6 +109,9 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   */
   page: null,
 
+  /** @private Indicate that this is a root view, which can be appended without a parent. */
+  _isRootView: true,
+
   // .......................................................
   // ROOT RESPONDER SUPPORT
   //
@@ -483,11 +486,29 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @returns {SC.Pane} receiver
    */
   insert: function(fn) {
+    this._doRender();
+    // Render the layer.
+    // this.createLayer();
+
+    // // Notify rendered.
+    // this._rendered();
+
+    // this._state = 'unattached_child';
+    // this._cascadeStateToChildViews();
+
     var layer = this.get('layer');
-    if (!layer) { layer = this.createLayer().get('layer'); }
+    // if (!layer) { layer = this.createLayer().get('layer'); }
 
     fn(layer);
-    if (!this.get('isPaneAttached')) { this.paneDidAttach(); }
+
+    // if (!this.get('isPaneAttached')) { this.paneDidAttach(); }
+
+    // Notify attached.
+    // this._attached();
+
+    // this._state = 'attached_visible';
+    // this._cascadeStateToChildViews();
+
     return this;
   },
 
@@ -499,8 +520,10 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @returns {SC.Pane} receiver
   */
   appendTo: function(elem) {
-    return this.insert(function(layer) {
-      jQuery(elem).append(layer);
+    var self = this;
+    return this.insert(function() {
+      // jQuery(elem).append(layer);
+      self._doAttach(elem);
     });
   },
 
@@ -508,8 +531,10 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     Called when the pane is attached to a DOM element in a window, this will
     change the view status to be visible in the window and also register
     with the rootResponder.
+
+    Previously `paneDidAttach()`
   */
-  paneDidAttach: function() {
+  didAppendToDocument: function() {
     // hook into root responder
     var responder = (this.rootResponder = SC.RootResponder.responder);
     responder.panes.add(this);
@@ -519,11 +544,10 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     this.recomputeDependentProperties();
 
     // notify that the layers have been appended to the document
-    this._notifyDidAppendToDocument();
+    // this._notifyDidAppendToDocument();
 
     // handle intercept if needed
     this._addIntercept();
-    return this ;
   },
 
   /**
@@ -651,6 +675,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     // 'sc-hidden' class to the layer because of the "don't update the layer if
     // we're not visible in the window" check.  If any of our parent views
     // became visible, our layer would incorrectly be shown!
+    // TODO: We should be able to remove this hack with statechart.
     this.updateLayerIfNeeded(YES);
 
     return this;
@@ -667,6 +692,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   /** @private */
   init: function() {
     // Backwards compatibility
+    // TODO: REMOVE THIS
     if (this.hasTouchIntercept === YES) {
       SC.Logger.warn("Do not set hasTouchIntercept directly. Use wantsTouchIntercept instead.");
       this.hasTouchIntercept = SC.platform.touch;
@@ -674,13 +700,15 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
 
     // if a layer was set manually then we will just attach to existing
     // HTML.
-    var hasLayer = !!this.get('layer') ;
-    sc_super() ;
-    if (hasLayer) this.paneDidAttach();
+    var hasLayer = !!this.get('layer');
+    sc_super();
+    if (hasLayer) {
+      this.set('_state', 'attached_orphan');
+      this._attached();
+    }
   },
 
   /** @private */
   classNames: ['sc-pane']
 
-}) ;
-
+});

@@ -52,24 +52,24 @@ SC.View.reopen(
 
     @returns {SC.View} receiver
   */
-  parentViewDidChange: function () {
-      this.recomputeIsVisibleInWindow();
+  // parentViewDidChange: function () {
+  //   this.recomputeIsVisibleInWindow();
 
-    this.resetBuildState();
-      this.set('layerLocationNeedsUpdate', YES);
-      this.invokeOnce(this.updateLayerLocationIfNeeded);
+  //   this.resetBuildState();
+  //   this.set('layerLocationNeedsUpdate', YES);
+  //   this.invokeOnce(this.updateLayerLocationIfNeeded);
 
-    // We also need to iterate down through the view hierarchy and invalidate
-    // all our child view's caches for 'pane', since it could have changed.
-    //
-    // Note:  In theory we could try to avoid this invalidation if we
-    //        do this only in cases where we "know" the 'pane' value might
-    //        have changed, but those cases are few and far between.
+  //   // We also need to iterate down through the view hierarchy and invalidate
+  //   // all our child view's caches for 'pane', since it could have changed.
+  //   //
+  //   // Note:  In theory we could try to avoid this invalidation if we
+  //   //        do this only in cases where we "know" the 'pane' value might
+  //   //        have changed, but those cases are few and far between.
 
-    this._invalidatePaneCacheForSelfAndAllChildViews();
+  //   this._invalidatePaneCacheForSelfAndAllChildViews();
 
-    return this;
-  },
+  //   return this;
+  // },
 
   /** @private
     We want to cache the 'pane' property, but it's impossible for us to
@@ -115,24 +115,7 @@ SC.View.reopen(
   insertBefore: function (view, beforeView) {
     view.beginPropertyChanges(); // limit notifications
 
-    // remove view from old parent if needed.  Also notify views.
-    if (view.get('parentView')) { view.removeFromParent(); }
-    if (this.willAddChild) { this.willAddChild(view, beforeView); }
-    if (view.willAddToParent) { view.willAddToParent(this, beforeView); }
-
-    // set parentView of child
-    view.set('parentView', this);
-
-    // add to childView's array.
-    var idx, childViews = this.get('childViews');
-    if (childViews.needsClone) { this.set(childViews = []); }
-    idx = (beforeView) ? childViews.indexOf(beforeView) : childViews.length;
-    if (idx<0) { idx = childViews.length; }
-    childViews.insertAt(idx, view);
-
-    // The DOM will need some fixing up, note this on the view.
-    if (view.parentViewDidChange) view.parentViewDidChange();
-    if (view.layoutDidChange) view.layoutDidChange();
+    view._doAdopt(this, beforeView);
 
     view.endPropertyChanges();
 
@@ -140,17 +123,12 @@ SC.View.reopen(
     // doesn't complete until the end of the RunLoop
     // There may be better ways to do this than with invokeLast,
     // but it's the best I can do for now - PDW
-    this.invokeLast(function () {
-      var pane = view.get('pane');
-      if (pane && pane.get('isPaneAttached')) {
-        view._notifyDidAppendToDocument();
-      }
-    });
-
-    // Even though its layer has not necessarily been created, the child views
-    // are added immediately. Hence notify views immediately.
-    if (this.didAddChild) { this.didAddChild(view, beforeView); }
-    if (view.didAddToParent) { view.didAddToParent(this, beforeView); }
+    // this.invokeLast(function () {
+    //   var pane = view.get('pane');
+    //   if (pane && pane.get('isPaneAttached')) {
+    //     view._notifyDidAppendToDocument();
+    //   }
+    // });
 
     return this;
   },
@@ -158,24 +136,15 @@ SC.View.reopen(
   removeChild: function (original, view) {
     if (!view) { return this; } // nothing to do
     if (view.parentView !== this) {
-      throw new Error("%@.removeChild(%@) must belong to parent".fmt(this,view));
+      throw new Error("%@.removeChild(%@) must belong to parent".fmt(this, view));
     }
+
     // notify views
+    // TODO: Deprecate these notifications.
     if (view.willRemoveFromParent) { view.willRemoveFromParent(); }
     if (this.willRemoveChild) { this.willRemoveChild(view); }
 
     original(view);
-
-    // The DOM will need some fixing up, note this on the view.
-    // But don't update the layer location if it's already destroyed (i.e. it
-    // no longer has a layer), because if a new layer with the same id were
-    // created before updateLayerLocationIfNeeded runs, we would inadvertently
-    // remove the new layer.
-    if (!view.get('isDestroyed') && view.parentViewDidChange) view.parentViewDidChange();
-
-    // notify views
-    if (this.didRemoveChild) { this.didRemoveChild(view); }
-    if (view.didRemoveFromParent) { view.didRemoveFromParent(this); }
 
     return this;
   }.enhance(),
@@ -198,7 +167,7 @@ SC.View.reopen(
     oldView.beginPropertyChanges();
     this.beginPropertyChanges();
 
-    this.insertBefore(view,oldView).removeChild(oldView);
+    this.insertBefore(view, oldView).removeChild(oldView);
 
     // resume notifications
     this.endPropertyChanges();
@@ -219,6 +188,7 @@ SC.View.reopen(
     var len = views.get('length'), idx;
 
     this.beginPropertyChanges();
+    // this._doDetach();
     this.destroyLayer().removeAllChildren();
     for (idx = 0; idx < len; idx++) { this.appendChild(views.objectAt(idx)); }
     this.replaceLayer();
@@ -237,6 +207,104 @@ SC.View.reopen(
   appendChild: function (view) {
     return this.insertBefore(view, null);
   },
+
+  // ..........................................................
+  // TRANSITION SUPPORT
+  //
+
+  /**
+    The transition plugin to use when this view is appended to a parent.
+
+    SC.View uses a pluggable transition architecture where the transition setup,
+    execution and cleanup can be handled by a specified transition plugin.
+
+    There are a number of pre-built transtion in plugins available:
+
+      SC.View.BOUNCE_IN
+      SC.View.FADE_IN
+      SC.View.FLIP_IN
+      SC.View.MOVE_IN
+      SC.View.SCALE_IN
+
+    You can even provide your own custom transition plugins.  Just create a
+    transition object that conforms to the SC.TransitionProtocol protocol.
+
+    @type Object (SC.TransitionProtocol)
+    @default null
+    @since Version 1.10
+  */
+  transitionIn: null,
+
+  /**
+    The options for the given transition in plugin.
+
+    These options are specific to the current transition plugin used and are
+    used to modify the transition animation.  To determine what options
+    may be used for a given plugin and to see what the default options are,
+    see the documentation for the transition plugin being used.
+
+    Most transitions will accept a duration and timing option, but may
+    also use other options.  For example, SC.View.MOVE_IN accepts options
+    like:
+
+        transitionInOptions: {
+          direction: 'left',
+          duration: 0.25,
+          timing: 'ease-in-out'
+        }
+
+    @type Object
+    @default null
+    @since Version 1.10
+  */
+  transitionInOptions: null,
+
+  /**
+    The transition plugin to use when this view is removed from its parent.
+
+    SC.View uses a pluggable transition architecture where the transition setup,
+    execution and cleanup can be handled by a specified transition plugin.
+
+    There are a number of pre-built transition out plugins available:
+
+      SC.View.BOUNCE_OUT
+      SC.View.FADE_OUT
+      SC.View.FLIP_OUT
+      SC.View.MOVE_OUT
+      SC.View.SCALE_OUT
+
+    You can even provide your own custom transition plugins.  Just create a
+    transition object that conforms to the SC.TransitionProtocol protocol.
+
+    @type Object (SC.TransitionProtocol)
+    @default null
+    @since Version 1.10
+  */
+  transitionOut: null,
+
+  /**
+    The options for the given transition out plugin.
+
+    These options are specific to the current transition plugin used and are
+    used to modify the transition animation.  To determine what options
+    may be used for a given plugin and to see what the default options are,
+    see the documentation for the transition plugin being used.
+
+    Most transitions will accept a duration and timing option, but may
+    also use other options.  For example, SC.View.MOVE_OUT accepts options
+    like:
+
+        transitionOutOptions: {
+          direction: 'right',
+          duration: 0.15,
+          timing: 'ease-in'
+        }
+
+    @type Object
+    @default null
+    @since Version 1.10
+  */
+  transitionOutOptions: null,
 
   ///
   /// BUILDING IN/OUT
