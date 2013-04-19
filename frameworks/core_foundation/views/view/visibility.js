@@ -101,7 +101,7 @@ SC.View.reopen(
   /** @private
     Whenever the view's visibility changes, we need to recompute whether it is
     actually visible inside the window (a view is only visible in the window
-    if it is marked as visibile and its parent view is as well), in addition
+    if it is marked as visible and its parent view is as well), in addition
     to updating the layer accordingly.
   */
   _sc_isVisibleDidChange: function() {
