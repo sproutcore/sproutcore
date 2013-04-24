@@ -332,9 +332,14 @@ SC.CoreView.reopen(
     into its own observer so that it can be overridden with additional
     functionality if the visibility module is applied to SC.View.
   */
-  // _sc_isVisibleDidChange: function () {
-  //   this.displayDidChange();
-  // }.observes('isVisible'),
+  _sc_isVisibleDidChange: function () {
+    console.log('_sc_isVisibleDidChange');
+    if (this.get('isVisible')) {
+      this._doShow();
+    } else {
+      this._doHide();
+    }
+  }.observes('isVisible'),
 
   /**
     Setting this property to YES will cause the updateLayerIfNeeded method to
@@ -353,7 +358,7 @@ SC.CoreView.reopen(
   */
   _view_layerNeedsUpdateDidChange: function () {
     if (this.get('layerNeedsUpdate')) {
-      this.invokeOnce(this._doUpdate);
+      this.invokeOnce(this._doUpdateContent);
     }
   }.observes('layerNeedsUpdate'),
 
@@ -565,17 +570,18 @@ SC.CoreView.reopen(
     @returns {SC.View} receiver
   */
   destroyLayer: function () {
-    var layer = this.get('layer');
-    if (layer) {
+    this._doDestroyLayer();
+    // var layer = this.get('layer');
+    // if (layer) {
 
-      // Now notify the view and its child views.  It will also set the
-      // layer property to null.
-      this._notifyWillDestroyLayer();
+    //   // Now notify the view and its child views.  It will also set the
+    //   // layer property to null.
+    //   // this._notifyWillDestroyLayer();
 
-      // do final cleanup
-      if (layer.parentNode) { layer.parentNode.removeChild(layer); }
-      layer = null;
-    }
+    //   // do final cleanup
+    //   if (layer.parentNode) { layer.parentNode.removeChild(layer); }
+    //   layer = null;
+    // }
     return this;
   },
 
@@ -632,84 +638,84 @@ SC.CoreView.reopen(
 
     @returns {SC.View} receiver
   */
-  updateLayerLocation: function () {
-    // collect some useful value
-    // if there is no node for some reason, just exit
-    var node = this.get('layer'),
-        parentView = this.get('parentView'),
-        parentNode = parentView ? parentView.get('containerLayer') : null;
+  // updateLayerLocation: function () {
+  //   // collect some useful value
+  //   // if there is no node for some reason, just exit
+  //   var node = this.get('layer'),
+  //       parentView = this.get('parentView'),
+  //       parentNode = parentView ? parentView.get('containerLayer') : null;
 
-    // remove node from current parentNode if the node does not match the new
-    // parent node.
-    if (node && node.parentNode && node.parentNode !== parentNode) {
-      node.parentNode.removeChild(node);
-    }
+  //   // remove node from current parentNode if the node does not match the new
+  //   // parent node.
+  //   if (node && node.parentNode && node.parentNode !== parentNode) {
+  //     node.parentNode.removeChild(node);
+  //   }
 
-    // CASE 1: no new parentView.  just remove from parent (above).
-    if (!parentView) {
-      if (node && node.parentNode) { node.parentNode.removeChild(node); }
+  //   // CASE 1: no new parentView.  just remove from parent (above).
+  //   if (!parentView) {
+  //     if (node && node.parentNode) { node.parentNode.removeChild(node); }
 
-    // CASE 2: parentView has no layer, view has layer.  destroy layer
-    // CASE 3: parentView has no layer, view has no layer, nothing to do
-    } else if (!parentNode) {
-      if (node) {
-        if (node.parentNode) { node.parentNode.removeChild(node); }
-        this.destroyLayer();
-      }
+  //   // CASE 2: parentView has no layer, view has layer.  destroy layer
+  //   // CASE 3: parentView has no layer, view has no layer, nothing to do
+  //   } else if (!parentNode) {
+  //     if (node) {
+  //       if (node.parentNode) { node.parentNode.removeChild(node); }
+  //       this.destroyLayer();
+  //     }
 
-    // CASE 4: parentView has layer, view has no layer.  create layer & add
-    // CASE 5: parentView has layer, view has layer.  move layer
-    } else {
-      if (!node) {
-        this.createLayer();
-        node = this.get('layer');
-        if (!node) { return; } // can't do anything without a node.
-      }
+  //   // CASE 4: parentView has layer, view has no layer.  create layer & add
+  //   // CASE 5: parentView has layer, view has layer.  move layer
+  //   } else {
+  //     if (!node) {
+  //       this.createLayer();
+  //       node = this.get('layer');
+  //       if (!node) { return; } // can't do anything without a node.
+  //     }
 
-      var siblings = parentView.get('childViews'),
-          nextView = siblings.objectAt(siblings.indexOf(this)+1),
-          nextNode = (nextView) ? nextView.get('layer') : null;
+  //     var siblings = parentView.get('childViews'),
+  //         nextView = siblings.objectAt(siblings.indexOf(this)+1),
+  //         nextNode = (nextView) ? nextView.get('layer') : null;
 
-      // before we add to parent node, make sure that the nextNode exists...
-      if (nextView && (!nextNode || nextNode.parentNode!==parentNode)) {
-        nextView.updateLayerLocationIfNeeded();
+  //     // before we add to parent node, make sure that the nextNode exists...
+  //     if (nextView && (!nextNode || nextNode.parentNode!==parentNode)) {
+  //       nextView.updateLayerLocationIfNeeded();
 
-        // just in case it still couldn't generate the layer, force to null, because
-        // IE doesn't support insertBefore(blah, undefined) in version IE9.
-        nextNode = nextView.get('layer') || null;
-      }
+  //       // just in case it still couldn't generate the layer, force to null, because
+  //       // IE doesn't support insertBefore(blah, undefined) in version IE9.
+  //       nextNode = nextView.get('layer') || null;
+  //     }
 
-      // add to parentNode if needed.
-      if ((node.parentNode!==parentNode) || (node.nextSibling!==nextNode)) {
-        parentNode.insertBefore(node, nextNode);
-      }
-    }
+  //     // add to parentNode if needed.
+  //     if ((node.parentNode!==parentNode) || (node.nextSibling!==nextNode)) {
+  //       parentNode.insertBefore(node, nextNode);
+  //     }
+  //   }
 
-    parentNode = parentView = node = nextNode = null; // avoid memory leaks
+  //   parentNode = parentView = node = nextNode = null; // avoid memory leaks
 
-    this.set('layerLocationNeedsUpdate', NO);
+  //   this.set('layerLocationNeedsUpdate', NO);
 
-    return this;
-  },
+  //   return this;
+  // },
 
   /** @private -
     Invokes willDestroyLayer() on view and child views.  Then sets layer to
     null for receiver.
   */
-  _notifyWillDestroyLayer: function () {
-    if (this.willDestroyLayer) { this.willDestroyLayer(); }
-    var mixins = this.willDestroyLayerMixin, len, idx,
-        childViews = this.get('childViews');
-    if (mixins) {
-      len = mixins.length;
-      for (idx=0; idx<len; ++idx) { mixins[idx].call(this); }
-    }
+  // _notifyWillDestroyLayer: function () {
+  //   if (this.willDestroyLayer) { this.willDestroyLayer(); }
+  //   var mixins = this.willDestroyLayerMixin, len, idx,
+  //       childViews = this.get('childViews');
+  //   if (mixins) {
+  //     len = mixins.length;
+  //     for (idx=0; idx<len; ++idx) { mixins[idx].call(this); }
+  //   }
 
-    len = childViews.length;
-    for (idx=0; idx<len; ++idx) { childViews[idx]._notifyWillDestroyLayer(); }
+  //   len = childViews.length;
+  //   for (idx=0; idx<len; ++idx) { childViews[idx]._notifyWillDestroyLayer(); }
 
-    this.set('layer', null);
-  },
+  //   this.set('layer', null);
+  // },
 
   /**
     @private
@@ -786,7 +792,7 @@ SC.CoreView.reopen(
     context.addClass(this.get('classNames'));
 
     if (this.get('isTextSelectable')) { context.addClass('allow-select'); }
-    if (!this.get('isVisible')) { context.addClass('sc-hidden'); }
+    // if (!this.get('isVisible')) { context.addClass('sc-hidden'); }
     if (this.get('isFirstResponder')) { context.addClass('focus'); }
 
     context.id(this.get('layerId'));

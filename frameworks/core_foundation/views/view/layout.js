@@ -793,6 +793,7 @@ SC.View.reopen(
     @returns {SC.View} receiver
   */
   layoutDidChange: function () {
+    console.log('%@ - layoutDidChange'.fmt(this));
     // Did our layout change in a way that could cause us to be resized?  If
     // not, then there's no need to invalidate the frames of our child views.
     var previousLayout = this._previousLayout,
@@ -837,18 +838,20 @@ SC.View.reopen(
       this._viewFrameDidChange();
     }
 
+    this.invokeOnce(this._doUpdateLayout);
+
     // Notify that the layout style has changed.
-    this.notifyPropertyChange('layoutStyle');
+    // this.notifyPropertyChange('layoutStyle');
 
     // notify layoutView...
-    var layoutView = this.get('layoutView');
-    if (layoutView) {
-      layoutView.set('childViewsNeedLayout', YES);
-      layoutView.layoutDidChangeFor(this);
-      if (layoutView.get('childViewsNeedLayout')) {
-        layoutView.invokeOnce(layoutView.layoutChildViewsIfNeeded);
-      }
-    }
+    // var layoutView = this.get('layoutView');
+    // if (layoutView) {
+    //   layoutView.set('childViewsNeedLayout', YES);
+    //   layoutView.layoutDidChangeFor(this);
+    //   if (layoutView.get('childViewsNeedLayout')) {
+    //     layoutView.invokeOnce(layoutView.layoutChildViewsIfNeeded);
+    //   }
+    // }
 
     // Cache the last layout to fine-tune notifications when the layout changes.
     this._previousLayout = currentLayout;
@@ -894,7 +897,7 @@ SC.View.reopen(
     Called your layout method if the view currently needs to layout some
     child views.
 
-    @param {Boolean} isVisible if true assume view is visible even if it is not.
+    @param {Boolean} force if true assume view is visible even if it is not.
     @returns {SC.View} receiver
     @test in layoutChildViews
   */
@@ -940,20 +943,21 @@ SC.View.reopen(
     @returns {SC.View} receiver
     @test in layoutChildViews
   */
-  updateLayout: function () {
-    var layer = this.get('layer'), context;
-    if (layer) {
-      context = this.renderContext(layer);
-      this.renderLayout(context, NO);
-      context.update();
+  // updateLayout: function () {
+  //   console.log('%@ - updateLayout'.fmt(this));
+  //   var layer = this.get('layer'), context;
+  //   if (layer) {
+  //     context = this.renderContext(layer);
+  //     this.renderLayout(context, NO);
+  //     context.update();
 
-      // If this view uses static layout, then notify if the frame changed.
-      // (viewDidResize will do a comparison)
-      if (this.useStaticLayout) this.viewDidResize();
-    }
-    layer = null;
-    return this;
-  },
+  //     // If this view uses static layout, then notify if the frame changed.
+  //     // (viewDidResize will do a comparison)
+  //     if (this.useStaticLayout) this.viewDidResize();
+  //   }
+  //   layer = null;
+  //   return this;
+  // },
 
   /**
     Default method called by the layout view to actually apply the current
