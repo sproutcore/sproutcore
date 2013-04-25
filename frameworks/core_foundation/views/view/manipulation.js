@@ -115,6 +115,8 @@ SC.View.reopen(
   insertBefore: function (view, beforeView) {
     view.beginPropertyChanges(); // limit notifications
 
+    // Reset any views that are already building in or out.
+    if (view.resetBuildState) { view.resetBuildState(); }
     view._doAdopt(this, beforeView);
 
     view.endPropertyChanges();
