@@ -60,6 +60,30 @@ SC.CoreView.reopen(
   }.property('_state').cacheable(),
 
   /**
+    Whether the attached view is invisible or becoming invisible because of
+    a hidden ancestor.
+
+    @field
+    @type Boolean
+    @default false
+    @readonly
+  */
+  isHiddenByAncestor: false,
+
+  /**
+    Whether the attached view is invisible or becoming invisible because it
+    hid itself.
+
+    @field
+    @type Boolean
+    @default false
+    @readonly
+  */
+  isHiddenBySelf: function () {
+    return this.get('isHidden') && !this.get('isHiddenByAncestor');
+  }.property('_state', 'isHiddenByAncestor').cacheable(),
+
+  /**
     Whether the view's layer exists or not.
 
     When the view's layer is created, this value will be true.
@@ -103,7 +127,7 @@ SC.CoreView.reopen(
 
   /** @private Adopt this view action. */
   _doAdopt: function (parentView, beforeView) {
-    console.log('%@:%@ - _doAdopt'.fmt(this, this.get('_state')));
+    // console.log('%@:%@ - _doAdopt'.fmt(this, this.get('_state')));
     var curParentView = this.get('parentView'),
       handled = true;
 
@@ -129,7 +153,7 @@ SC.CoreView.reopen(
 
   /** @private Attach this view action. */
   _doAttach: function (parentNode, nextNode) {
-    console.log('%@:%@ - _doAttach'.fmt(this, this.get('_state')));
+    // console.log('%@:%@ - _doAttach'.fmt(this, this.get('_state')));
     var state = this.get('_state'),
       handled = true;
 
@@ -144,11 +168,10 @@ SC.CoreView.reopen(
 
   /** @private Orphan this view action. */
   _doDestroyLayer: function () {
-    console.log('%@:%@ - _doDestroyLayer'.fmt(this, this.get('_state')));
-    var isRendered = this.get('isRendered'),
-      handled = true;
+    // console.log('%@:%@ - _doDestroyLayer'.fmt(this, this.get('_state')));
+    var handled = true;
 
-    if (isRendered) {
+    if (this.get('_state') === 'unattached') {
       this._executeDoDestroyLayer();
     } else {
       handled = false;
@@ -159,7 +182,7 @@ SC.CoreView.reopen(
 
   /** @private Detach this view action. */
   _doDetach: function (immediately) {
-    console.log('%@:%@ - _doDetach'.fmt(this, this.get('_state')));
+    // console.log('%@:%@ - _doDetach'.fmt(this, this.get('_state')));
     var isAttached = this.get('isAttached'),
       isShown = this.get('isShown'),
       transitionOut = this.get('transitionOut'),
@@ -168,7 +191,7 @@ SC.CoreView.reopen(
     if (isAttached) {
       if (isShown && transitionOut && !immediately) {
         // In the shown states, attempt to build out unless told otherwise.
-        this._gotoBuildingOutState();
+        this._gotoAttachedBuildingOutState();
       } else {
         this._executeDoDetach();
       }
@@ -181,22 +204,19 @@ SC.CoreView.reopen(
 
   /** @private Hide this view action. */
   _doHide: function () {
-    console.log('%@ - _doHide'.fmt(this));
+    console.log('%@:%@ - _doHide'.fmt(this, this.get('_state')));
     var isShown = this.get('isShown'),
       parentView = this.get('parentView'),
       // Views without a parent are not limited by a parent's isShown property.
       isParentShown = parentView ? parentView.get('isShown') : true,
-      transitionHide = this.get('transitionShow'),
+      state = this.get('state'),
       handled = true;
 
     if (isShown && isParentShown) {
-      this._executeDoUpdateVisibility();
-
-      if (transitionHide) {
-        this._gotoHidingState();
-      } else {
-        this._gotoHiddenState();
-      }
+      this._executeDoHide();
+    } else if (state === 'unattached') {
+      // Queue the update.
+      this._visibilityNeedsUpdate = true;
     } else {
       handled = false;
     }
@@ -206,7 +226,7 @@ SC.CoreView.reopen(
 
   /** @private Orphan this view action. */
   _doOrphan: function () {
-    console.log('%@:%@ - _doOrphan'.fmt(this, this.get('_state')));
+    // console.log('%@:%@ - _doOrphan'.fmt(this, this.get('_state')));
     var parentView = this.get('parentView'),
       handled = true;
 
@@ -221,7 +241,7 @@ SC.CoreView.reopen(
 
   /** @private Render this view action. */
   _doRender: function () {
-    console.log('%@.%@ - _doRender'.fmt(this, this.get('_state')));
+    // console.log('%@.%@ - _doRender'.fmt(this, this.get('_state')));
     var isRendered = this.get('isRendered'),
       handled = true;
 
@@ -241,28 +261,14 @@ SC.CoreView.reopen(
       parentView = this.get('parentView'),
       // Views without a parent are not limited by a parent's isShown property.
       isParentShown = parentView ? parentView.get('isShown') : true,
-      transitionShow = this.get('transitionShow'),
+      state = this.get('state'),
       handled = true;
 
-    // Note that showing may not actually "show" anything if the parent is not visible, but it will
-    // put the child in the correct state.
     if (isHidden && isParentShown) {
-      // this.set('isVisibleInWindow', this.get('isVisible') && this.getPath('parentView.isVisibleInWindow'));
-      if (this._contentNeedsUpdate) {
-        this._executeDoUpdate();
-      }
-      if (this._layoutNeedsUpdate) {
-        this._executeDoUpdateLayout();
-      }
-      // if (this._visibilityNeedsUpdate) {
-      this._executeDoUpdateVisibility();
-      // }
-
-      if (transitionShow) {
-        this._gotoShowingState();
-      } else {
-        this._gotoShownState();
-      }
+      this._executeDoShow();
+    } else if (state === 'unattached') {
+      // Queue the update.
+      this._visibilityNeedsUpdate = true;
     } else {
       handled = false;
     }
@@ -280,7 +286,7 @@ SC.CoreView.reopen(
     if (isRendered) {
       if (state === 'attached_shown' || force) {
         // Only in the attached_shown state do we allow updates without being forced.
-        this._executeDoUpdate();
+        this._executeDoUpdateContent();
       } else {
         // Otherwise mark the view as needing an update when we enter the attached_shown state again.
         this._contentNeedsUpdate = true;
@@ -302,7 +308,7 @@ SC.CoreView.reopen(
     if (isRendered) {
       if (state === 'attached_shown' || force) {
         // Only in the attached_shown state do we allow updates without being forced.
-        this._executeDoUpdate();
+        this._executeDoUpdateLayout();
       } else {
         // Otherwise mark the view as needing an update when we enter the attached_shown state again.
         this._layoutNeedsUpdate = true;
@@ -320,44 +326,52 @@ SC.CoreView.reopen(
 
   /** @private The 'adopted' event. */
   _adopted: function (beforeView) {
-    // console.log("    %@:%@ - adopted".fmt(this, this.get('_state')));
+    console.log("    %@:%@ - adopted".fmt(this, this.get('_state')));
     var parentView = this.get('parentView');
 
     // Notify.
     if (parentView.didAddChild) { parentView.didAddChild(this, beforeView); }
     if (this.didAddToParent) { this.didAddToParent(parentView, beforeView); }
 
-    if (this.get('isRendered')) {
-      // Bypass the unattached state for adopted views.
-      if (parentView.get('isAttached')) {
-        var parentNode, nextNode, nextView, siblings;
+    if (this.get('isAttached')) {
 
-        parentNode = parentView.get('containerLayer');
-        siblings = parentView.get('childViews');
-        nextView = siblings.objectAt(siblings.indexOf(this) + 1);
-        nextNode = (nextView) ? nextView.get('layer') : null;
+      // Our frame will change once we've been adopted to a parent.
+      if (!this.get('hasLayout')) { this.notifyPropertyChange('frame'); }
+      else { this.layoutDidChange(); }
 
-        this._executeDoAttach(parentNode, nextNode);
-      }
     } else {
-      // Bypass the unrendered state for adopted views.
-      if (parentView.get('isRendered')) {
-        this._executeDoRender();
+
+      // Our frame will change once we've been adopted to a parent.
+      if (this.get('hasLayout')) { this.layoutDidChange(); }
+
+      if (this.get('isRendered')) {
+
+        // Bypass the unattached state for adopted views.
+        if (parentView.get('isAttached')) {
+          var parentNode, nextNode, nextView, siblings;
+
+          parentNode = parentView.get('containerLayer');
+          siblings = parentView.get('childViews');
+          nextView = siblings.objectAt(siblings.indexOf(this) + 1);
+          nextNode = (nextView) ? nextView.get('layer') : null;
+
+          this._executeDoAttach(parentNode, nextNode);
+        }
+      } else {
+
+        // Bypass the unrendered state for adopted views.
+        if (parentView.get('isRendered')) {
+          this._executeDoRender();
+        }
       }
+
     }
   },
 
   /** @private The 'attached' event. */
   _attached: function () {
-    // Route.
-    // this._route('_attached');
-    // console.log('%@ - attached'.fmt(this));
-    // Update the isVisibleInWindow property (Note that this function recurses).
-    // this.set('isVisibleInWindow', this.get('isVisible') && this.getPath('parentView.isVisibleInWindow'));
-
-    // Notify.
-    if (!this.get('hasLayout')) { this.notifyPropertyChange('frame'); }
-    if (this.didAppendToDocument) { this.didAppendToDocument(); }
+    // Notify attached (on self and child views).
+    this._parentAttached();
 
     // Route.
     var isVisible = this.get('isVisible'),
@@ -366,56 +380,27 @@ SC.CoreView.reopen(
       isParentShown = parentView ? parentView.get('isShown') : true,
       transitionIn = this.get('transitionIn');
 
-    // console.log("    %@:%@ - attached (isVisible: %@, isParentShown: %@, transitionIn: %@)".fmt(this, this.get('_state'), isVisible, isParentShown, transitionIn));
-    if (isVisible && isParentShown) { // isVisibleInWindow
-      if (this._contentNeedsUpdate) {
-        this._executeDoUpdate();
-      }
-      if (this._layoutNeedsUpdate) {
-        this._executeDoUpdateLayout();
-      }
-      if (this._visibilityNeedsUpdate) {
-        this._executeDoUpdateVisibility();
-      }
+    // console.log("    %@:%@ - attached (isVisible: %@, isParentShown: %@)".fmt(this, this.get('_state'), isVisible, isParentShown));
+    if (isVisible && isParentShown) {
+      // Notify shown (on self and child views).
+      this._parentShown();
 
-      // this._cascadeShowStateToChildViews
       if (transitionIn) {
-        this._gotoBuildingInState();
+        this._gotoAttachedBuildingInState();
       } else {
-        this._gotoShownState();
+        this._gotoAttachedShownState();
       }
     } else {
-      this._gotoHiddenState();
+      // If our parent is already hidden, then update isHiddenByAncestor.
+      if (!isParentShown) {
+        this.set('isHiddenByAncestor', true);
+      }
+
+      // Notify hidden (only on child views).
+      this._cascadeEventToChildViews('_parentHidden');
+
+      this._gotoAttachedHiddenState();
     }
-
-    // Cascade the event to child views.
-    this._cascadeEventToChildViews('_attached');
-  },
-
-  /** @private The 'builtIn' event. */
-  _builtIn: function () {
-    var transitionIn = this.get('transitionIn'),
-      options = this.get('transitionInOptions') || {};
-
-    // Clean up the transition if the plugin supports it.
-    if (!!transitionIn.teardown) {
-      transitionIn.teardown(this, options);
-    }
-
-    this._gotoShownState();
-  },
-
-  /** @private The 'builtOut' event. */
-  _builtOut: function () {
-    var transitionOut = this.get('transitionOut'),
-      options = this.get('transitionOutOptions') || {};
-
-    // Clean up the transition if the plugin supports it.
-    if (!!transitionOut.teardown) {
-      transitionOut.teardown(this, options);
-    }
-
-    this._executeDoDetach();
   },
 
   /** @private The 'detached' event. */
@@ -435,8 +420,8 @@ SC.CoreView.reopen(
     this._cascadeEventToChildViews('_detaching');
   },
 
-  /** @private The 'hidden' event. */
-  _hidden: function () {
+  /** @private The 'didTransitionHide' event. */
+  _didTransitionHide: function () {
     var transitionHide = this.get('transitionHide'),
       options = this.get('transitionHideOptions') || {};
 
@@ -445,7 +430,48 @@ SC.CoreView.reopen(
       transitionHide.teardown(this, options);
     }
 
-    this._gotoHiddenState();
+    // Route.
+    this._gotoAttachedHiddenState();
+  },
+
+  /** @private The 'didTransitionOut' event. */
+  _didTransitionIn: function () {
+    var transitionIn = this.get('transitionIn'),
+      options = this.get('transitionInOptions') || {};
+
+    // Clean up the transition if the plugin supports it.
+    if (!!transitionIn.teardown) {
+      transitionIn.teardown(this, options);
+    }
+
+    this._gotoAttachedShownState();
+  },
+
+  /** @private The 'didTransitionShow' event. */
+  _didTransitionShow: function () {
+    var transitionShow = this.get('transitionShow'),
+      options = this.get('transitionShowOptions') || {};
+
+    // Clean up the transition if the plugin supports it.
+    if (!!transitionShow.teardown) {
+      transitionShow.teardown(this, options);
+    }
+
+    // Route.
+    this._gotoAttachedShownState();
+  },
+
+  /** @private The 'didTransitionOut' event. */
+  _didTransitionOut: function () {
+    var transitionOut = this.get('transitionOut'),
+      options = this.get('transitionOutOptions') || {};
+
+    // Clean up the transition if the plugin supports it.
+    if (!!transitionOut.teardown) {
+      transitionOut.teardown(this, options);
+    }
+
+    this._executeDoDetach();
   },
 
   /** @private The 'layerDestroyed' event. */
@@ -496,6 +522,76 @@ SC.CoreView.reopen(
     // remove the new layer.
     // TODO: We should be able to avoid this hack with statechart.
     // if (!this.get('isDestroyed') && this.parentViewDidChange) this.parentViewDidChange();
+
+    if (this.get('isAttached')) {
+
+      // Our frame will change once we've been removed from a parent.
+      if (!this.get('hasLayout')) { this.notifyPropertyChange('frame'); }
+      else { this.layoutDidChange(); }
+
+    } else {
+
+      // Our frame will change once we've been removed from a parent.
+      if (this.get('hasLayout')) { this.layoutDidChange(); }
+
+    }
+  },
+
+  /** @private The 'parentAttached' cascading event. */
+  _parentAttached: function () {
+    // Notify.
+    if (!this.get('hasLayout')) { this.notifyPropertyChange('frame'); }
+    else { this.layoutDidChange(); }
+    if (this.didAppendToDocument) { this.didAppendToDocument(); }
+
+    // Cascade the event to child views.
+    this._cascadeEventToChildViews('_parentAttached');
+  },
+
+  /** @private The 'parentHidden' cascading event. */
+  _parentHidden: function () {
+    this.set('isHiddenByAncestor', true);
+
+    // Route.
+    this._gotoAttachedHiddenState();
+
+    // Cascade the event to child views.
+    this._cascadeEventToChildViews('_parentHidden');
+  },
+
+  /** @private The 'parentShown' cascading event. */
+  _parentShown: function () {
+    this.set('isHiddenByAncestor', false);
+
+    if (this.get('isVisible')) {
+
+      // Update the content of the layer if necessary.
+      if (this._contentNeedsUpdate) {
+        this._executeDoUpdateContent();
+      }
+
+      // Update the layout style of the layer if necessary.
+      if (this._layoutNeedsUpdate) {
+        this._executeDoUpdateLayout();
+      }
+
+      // Update the visibility of the layer if necessary.
+      if (this._visibilityNeedsUpdate) {
+        this._executeDoUpdateVisibility();
+      }
+
+      // Route.
+      this._gotoAttachedShownState();
+
+      // Cascade the event to child views.
+      this._cascadeEventToChildViews('_parentShown');
+    } else {
+      // Route.
+      this._gotoAttachedHiddenState();
+
+      // Cascade the event to child views.
+      this._cascadeEventToChildViews('_parentHidden');
+    }
   },
 
   /** @private The 'rendered' event. */
@@ -557,31 +653,6 @@ SC.CoreView.reopen(
 
     // Cascade the event to child views.
     this._cascadeEventToChildViews('_rendered');
-
-    // Bypass the unattached state for adopted views.
-    var parentView = this.get('parentView');
-    if (parentView && parentView.get('isAttached')) {
-      var parentNode = parentView.get('containerLayer'),
-        siblings = parentView.get('childViews'),
-        nextView = siblings.objectAt(siblings.indexOf(this) + 1),
-        nextNode = (nextView) ? nextView.get('layer') : null;
-
-      this._executeDoAttach(parentNode, nextNode);
-    }
-  },
-
-  /** @private The 'shown' event. */
-  _shown: function () {
-    var transitionShow = this.get('transitionShow'),
-      options = this.get('transitionShowOptions') || {};
-
-    // Clean up the transition if the plugin supports it.
-    if (!!transitionShow.teardown) {
-      transitionShow.teardown(this, options);
-    }
-
-    // Route.
-    this._gotoShownState();
   },
 
   /** @private The 'updatedContent' event. */
@@ -619,7 +690,10 @@ SC.CoreView.reopen(
   //
 
   /** @private */
-  _gotoBuildingInState: function () {
+  _gotoAttachedBuildingInState: function () {
+    // Backwards compatibility.
+    this.set('isVisibleInWindow', true);
+
     // Update the state.
     this.set('_state', 'attached_building_in');
 
@@ -637,7 +711,10 @@ SC.CoreView.reopen(
   },
 
   /** @private */
-  _gotoBuildingOutState: function () {
+  _gotoAttachedBuildingOutState: function () {
+    // Backwards compatibility.
+    this.set('isVisibleInWindow', false);
+
     // Update the state.
     this.set('_state', 'attached_building_out');
 
@@ -655,15 +732,20 @@ SC.CoreView.reopen(
   },
 
   /** @private */
-  _gotoHiddenState: function () {
+  _gotoAttachedHiddenState: function () {
+    // Backwards compatibility.
+    this.set('isVisibleInWindow', false);
+
     // Update the state.
     this.set('_state', 'attached_hidden');
-    // this._cascadeStateToChildViews();
-    // console.log("%@:%@".fmt(this, this.get('_state')));
+    console.log("%@, enter state:%@".fmt(this, this.get('_state')));
   },
 
   /** @private */
-  _gotoHidingState: function () {
+  _gotoAttachedHidingState: function () {
+    // Backwards compatibility.
+    this.set('isVisibleInWindow', false);
+
     // Update the state.
     this.set('_state', 'attached_hiding');
 
@@ -677,11 +759,17 @@ SC.CoreView.reopen(
 
     // Execute the transition.
     transitionHide.run(this, options);
-    // console.log("%@:%@".fmt(this, this.get('_state')));
+    console.log("%@, enter state:%@".fmt(this, this.get('_state')));
   },
 
   /** @private */
-  _gotoShowingState: function () {
+  _gotoAttachedShowingState: function () {
+    // Backwards compatibility.
+    this.set('isVisibleInWindow', true);
+
+    // Update the state.
+    this.set('_state', 'attached_showing');
+
     var transitionShow = this.get('transitionShow'),
       options = this.get('transitionShowOptions') || {};
 
@@ -692,33 +780,31 @@ SC.CoreView.reopen(
 
     // Execute the transition.
     transitionShow.run(this, options);
+    console.log("%@, enter state:%@".fmt(this, this.get('_state')));
+  },
+
+  /** @private */
+  _gotoAttachedShownState: function () {
+    // Backwards compatibility.
+    this.set('isVisibleInWindow', true);
 
     // Update the state.
-    this.set('_state', 'attached_showing');
-    // console.log("%@:%@".fmt(this, this.get('_state')));
+    this.set('_state', 'attached_shown');
+    console.log("%@, enter state:%@".fmt(this, this.get('_state')));
   },
 
   /** @private */
   _gotoUnattachedState: function () {
     // Update the state.
     this.set('_state', 'unattached');
-    // this._cascadeStateToChildViews();
-    // console.log("%@:%@".fmt(this, this.get('_state')));
+    console.log("%@, enter state:%@".fmt(this, this.get('_state')));
   },
 
   /** @private */
   _gotoUnrenderedState: function () {
     // Update the state.
     this.set('_state', 'unrendered');
-    // this._cascadeStateToChildViews();
-    // console.log("%@:%@".fmt(this, this.get('_state')));
-  },
-
-  /** @private */
-  _gotoShownState: function () {
-    // Update the state.
-    this.set('_state', 'attached_shown');
-    // console.log("%@:%@".fmt(this, this.get('_state')));
+    console.log("%@, enter state:%@".fmt(this, this.get('_state')));
   },
 
   // ------------------------------------------------------------------------
@@ -743,24 +829,6 @@ SC.CoreView.reopen(
     }
   },
 
-  /** @private Update the state for all childViews */
-  _cascadeStateToChildViews: function () {
-    var childView, childViews = this.get('childViews'),
-      state = this.get('_state');
-
-    for (var i = childViews.length - 1; i >= 0; i--) {
-      childView = childViews[i];
-
-      // We allow missing childViews in the array so ignore them.
-      if (!childView) { continue; }
-
-      childView.set('_state', state);
-
-      // Recurse through all possible child views.
-      childView._cascadeStateToChildViews();
-    }
-  },
-
   /** @private */
   _executeDoAdopt: function (parentView, beforeView) {
     console.log("  %@:%@ - _executeDoAdopt".fmt(this, this.get('_state')));
@@ -779,10 +847,6 @@ SC.CoreView.reopen(
     idx = (beforeView) ? childViews.indexOf(beforeView) : childViews.length;
     if (idx < 0) { idx = childViews.length; }
     childViews.insertAt(idx, this);
-
-    // The DOM will need some fixing up, note this on the view.
-    // if (this.parentViewDidChange) this.parentViewDidChange();
-    // if (this.layoutDidChange) this.layoutDidChange();
 
     // Notify adopted.
     this._adopted(beforeView);
@@ -817,9 +881,7 @@ SC.CoreView.reopen(
     // Notify destroying layer.
     this._layerDestroying();
 
-    // Destroy the layer and remove.
-    var layer = this.get('layer');
-    layer.parentNode.removeChild(layer);
+    // Remove the layer.
     this.set('layer', null);
 
     // Notify layer destroyed.
@@ -837,6 +899,25 @@ SC.CoreView.reopen(
 
     // Notify detached.
     this._detached();
+  },
+
+  /** @private */
+  _executeDoHide: function () {
+    console.log("  %@:%@ - _executeDoHide".fmt(this, this.get('_state')));
+    // Cascade the event to child views.
+    this._cascadeEventToChildViews('_parentHidden');
+
+    // Update the visibility of the layer.
+    if (this._visibilityNeedsUpdate) {
+      this._executeDoUpdateVisibility();
+    }
+
+    // Route.
+    if (this.get('transitionHide')) {
+      this._gotoAttachedHidingState();
+    } else {
+      this._gotoAttachedHiddenState();
+    }
   },
 
   /** @private */
@@ -870,14 +951,44 @@ SC.CoreView.reopen(
   _executeDoRender: function () {
     console.log("  %@:%@ - _executeDoRender".fmt(this, this.get('_state')));
     // Render the layer.
-    this.createLayer();
+    // this.createLayer();
+    var context = this.renderContext(this.get('tagName'));
+    this.renderToContext(context);
+    this.set('layer', context.element());
 
     // Notify rendered.
     this._rendered();
+
+    // Bypass the unattached state for adopted views.
+    var parentView = this.get('parentView');
+    if (parentView && parentView.get('isAttached')) {
+      var parentNode = parentView.get('containerLayer'),
+        siblings = parentView.get('childViews'),
+        nextView = siblings.objectAt(siblings.indexOf(this) + 1),
+        nextNode = (nextView) ? nextView.get('layer') : null;
+
+      this._executeDoAttach(parentNode, nextNode);
+    }
   },
 
   /** @private */
-  _executeDoUpdate: function () {
+  _executeDoShow: function () {
+    console.log("  %@:%@ - _executeDoShow".fmt(this, this.get('_state')));
+    // Cascade the event to child views.
+    this._cascadeEventToChildViews('_parentShown');
+
+    // Update the visibility of the layer.
+    this._executeDoUpdateVisibility();
+
+    if (this.get('transitionShow')) {
+      this._gotoAttachedShowingState();
+    } else {
+      this._gotoAttachedShownState();
+    }
+  },
+
+  /** @private */
+  _executeDoUpdateContent: function () {
     var mixins = this.renderMixin, idx, len,
       context = this.renderContext(this.get('layer'));
 
@@ -935,7 +1046,7 @@ SC.CoreView.reopen(
   /** @private */
   _executeDoUpdateVisibility: function () {
     var context = this.renderContext(this.get('layer'));
-    context.setClass('sc-hidden', this.get('isVisible'));
+    context.setClass('sc-hidden', ! this.get('isVisible'));
     context.update();
 
     // Reset that an update is required.
@@ -943,7 +1054,7 @@ SC.CoreView.reopen(
 
     // Notify updated.
     this._updatedVisibility();
-  },
+  }
 
 });
 
