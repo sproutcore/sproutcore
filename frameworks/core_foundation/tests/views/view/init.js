@@ -8,43 +8,53 @@
 
 module("SC.View#init");
 
-test("registers view in the global views hash using layerId for event targeted", function() {
+test("registers view in the global views hash using layerId for event targeted", function () {
   var v = SC.View.create();
   equals(SC.View.views[v.get('layerId')], v, 'registers view');
 });
 
-test("adds displayDidChange observer on all display properties", function() {
-  var didChange = NO ;
+test("adds displayDidChange observer on all display properties (when rendered)", function () {
+  var didChange = NO;
   var v = SC.View.create({
     // override just to make sure the registration works...
-    displayDidChange: function() { didChange = YES ; },
-    
+    displayDidChange: function () { didChange = YES; },
+
     displayProperties: 'foo bar'.w(),
-    
+
     foo: 'foo',
     bar: 'bar'
   });
-  
+
   v.set('foo', 'baz');
-  ok(didChange, 'didChange on set(foo)');
-  didChange = NO ;
-  
+  ok(!didChange, '!didChange on set(foo) before view is rendered');
+  didChange = NO;
+
   v.set('bar', 'baz');
-  ok(didChange, 'didChange on set(bar)');
+  ok(!didChange, '!didChange on set(bar) before view is rendered');
+
+  // Render the view.
+  v._doRender();
+
+  v.set('foo', 'buz');
+  ok(didChange, 'didChange on set(foo) after view is rendered');
+  didChange = NO;
+
+  v.set('bar', 'buz');
+  ok(didChange, 'didChange on set(bar) after view is rendered');
 });
 
-test("invokes createChildViews()", function() {
-  var didInvoke = NO ;
+test("invokes createChildViews()", function () {
+  var didInvoke = NO;
   var v = SC.View.create({
     // override just for test
-    createChildViews: function() { didInvoke = YES; }
+    createChildViews: function () { didInvoke = YES; }
   });
   ok(didInvoke, 'did invoke createChildViews()');
 });
 
-test("does NOT create layer", function() {
+test("does NOT create layer", function () {
   var v = SC.View.create();
-  equals(v.get('layer'), null, 'did not create layer');  
+  equals(v.get('layer'), null, 'did not create layer');
 });
 
 

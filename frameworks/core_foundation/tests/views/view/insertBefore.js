@@ -47,20 +47,6 @@ test("insertBefore(child, otherChild) inserts child before other child view", fu
   equals(parent.childViews[0], child, 'child inserted before other child');
 });
 
-test("if child belongs to another parent view, child will be removed from other parent when added to new parent", function() {
-
-	// create child view that belongs to a parent already
-  var oldParent = SC.View.create({ childViews:[SC.View] });
-  child = oldParent.childViews[0];
-
-	ok(child, 'precond - got child');
-  ok(child.get('parentView'), 'precond - child has a parent view');
-
-  parent.insertBefore(child, null);
-  ok(oldParent.childViews.indexOf(child)<0, 'oldParent no longer has childView');
-  equals(child.get('parentView'), parent, 'child has new parent view');
-});
-
 test("invokes willAddChild() on receiver if defined before adding child" ,function() {
 
   // monkey patch to test
@@ -153,33 +139,6 @@ test("invokes didAddToParent() on child view if defined after adding child" ,fun
   equals(callCount, 1, 'invoked');
 });
 
-test("invokes parentViewDidChange() on child view.  this is used by the view internals to update layer loc", function() {
-
-	// monkey patch to test
-	var callCount = 0;
-	child.parentViewDidChange = function() { callCount++; };
-
-	parent.insertBefore(child, null);
-	equals(callCount, 1, 'invoked parentViewDidChange');
-
-  var coreView = SC.CoreView.create();
-  parent.insertBefore(coreView, null);
-  equals(parent.get('childViews').lastObject(), coreView, "inserts SC.CoreView");
-});
-
-test("invokes layoutDidChange() on child view", function() {
-
-	// monkey patch to test
-	var callCount = 0;
-	child.layoutDidChange = function() { callCount++; };
-
-	parent.insertBefore(child, null);
-	equals(callCount, 1, 'invoked layoutDidChange');
-
-  var coreView = SC.CoreView.create();
-  parent.insertBefore(coreView, null);
-  equals(parent.get('childViews').lastObject(), coreView, "inserts SC.CoreView");
-});
 // VERIFY LAYER CHANGES ARE DEFERRED
 test("should not move layer immediately", function() {
 

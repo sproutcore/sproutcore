@@ -25,7 +25,7 @@ test("invokes renderLayerSettings() and then updates layer element", function() 
     }
   });
   view.createLayer();
-  view.updateLayer();
+  view.updateLayer(true);
   ok(view.$().attr('class').indexOf('did-update-2')>=0, 'has class name added by render()');
 });
 
