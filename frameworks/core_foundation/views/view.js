@@ -43,6 +43,18 @@ SC.EMPTY_CHILD_VIEWS_ARRAY.needsClone = YES;
 SC.CoreView.reopen(
 /** @scope SC.View.prototype */ {
 
+  /**
+    An array of the properties of this class that will be concatenated when
+    also present on subclasses.
+
+    For example, displayProperties is a concatenated property.  SC.CoreView
+    defines displayProperties as ['ariaHidden'] and its subclass SC.View
+    defines the same property as ['isFirstResponder'].  Therefore, the
+    actual displayProperties on SC.View becomes ['ariaHidden', 'isFirstResponder'].
+
+    @type Array
+    @default ['outlets', 'displayProperties', 'classNames', 'renderMixin', 'didCreateLayerMixin', 'willDestroyLayerMixin', 'classNameBindings', 'attributeBindings']
+  */
   concatenatedProperties: ['outlets', 'displayProperties', 'classNames', 'renderMixin', 'didCreateLayerMixin', 'willDestroyLayerMixin', 'classNameBindings', 'attributeBindings'],
 
   /**
@@ -55,8 +67,8 @@ SC.CoreView.reopen(
     http://www.w3.org/TR/wai-aria/roles#roles_categorization
 
     @type String
+    @default null
   */
-
   ariaRole: null,
 
   /**
@@ -64,17 +76,22 @@ SC.CoreView.reopen(
     http://www.w3.org/TR/wai-aria/roles#roles_categorization
 
     @type String
+    @default null
   */
-
   ariaHidden: null,
 
   /**
     The current pane.
-    @property {SC.Pane}
+
+    @field
+    @type SC.Pane
+    @default null
   */
   pane: function () {
     var view = this;
+
     while (view && !view.isPane) { view = view.get('parentView'); }
+
     return view;
   }.property('parentView').cacheable(),
 
@@ -82,38 +99,51 @@ SC.CoreView.reopen(
     The page this view was instantiated from.  This is set by the page object
     during instantiation.
 
-    @property {SC.Page}
+    @type SC.Page
+    @default null
   */
   page: null,
 
   /**
     If the view is currently inserted into the DOM of a parent view, this
     property will point to the parent of the view.
+
+    @type SC.View
+    @default null
   */
   parentView: null,
 
   /**
-    The isVisible property determines if the view is shown in the view
-    hierarchy it is a part of. A view can have isVisible == YES and still have
-    isVisibleInWindow == NO. This occurs, for instance, when a parent view has
-    isVisible == NO. Default is YES.
+    The isVisible property determines if the view should be displayed or not.
+    You should set this property to show or hide a view that has been appended
+    to the DOM.
 
-    The isVisible property is considered part of the layout and so changing it
-    will trigger a layout update.
+    If you also set a transitionShow or transitionHide plugin, then when
+    isVisible changes, the appropriate transition will execute as the view's
+    visibility changes.
+
+    Note that isVisible can be set to true and the view may still not be
+    "visible" in the window.  This can occur if:
+
+      1. the view is not attached to the DOM.
+      2. the view has a view ancestor with isVisible set to false.
 
     @type Boolean
+    @see SC.View#isShown
+    @see SC.View#isHidden
+    @default true
   */
-  isVisible: YES,
+  isVisible: true,
   isVisibleBindingDefault: SC.Binding.bool(),
 
   /**
-    Whether the view should be displayed. This is always YES,
-    unless the visibility module is added to SC.View.
+    To determine actual visibility of a view use the `isAttached`, `isShown`
+    and `isHidden` properties.
 
-    If the visibility module is added, this property will be used to
-    optimize certain behaviors on the view. For example, updates to the
-    view layer will not be performed until the view becomes visible
-    in the window.
+    @see SC.View#isAttached
+    @see SC.View#isShown
+    @see SC.View#isHidden
+    @deprecated Version 1.10
   */
   isVisibleInWindow: YES,
 
@@ -318,12 +348,11 @@ SC.CoreView.reopen(
 
     @returns {SC.View} receiver
   */
-  // displayDidChange: function () {
-  //   console.log("%@ - displayDidChange()".fmt(this));
-  //   this.set('layerNeedsUpdate', YES);
+  displayDidChange: function () {
+    this.invokeOnce(this._doUpdateContent);
 
-  //   return this;
-  // },
+    return this;
+  },
 
   /**
     Marks the view as needing a display update if the isVisible property changes.
@@ -333,11 +362,11 @@ SC.CoreView.reopen(
     functionality if the visibility module is applied to SC.View.
   */
   _sc_isVisibleDidChange: function () {
-    console.log('_sc_isVisibleDidChange');
+    this._visibilityNeedsUpdate = true;
     if (this.get('isVisible')) {
-      this._doShow();
+      this.invokeOnce(this._doShow);
     } else {
-      this._doHide();
+      this.invokeOnce(this._doHide);
     }
   }.observes('isVisible'),
 
@@ -379,21 +408,17 @@ SC.CoreView.reopen(
     @returns {SC.View} receiver
     @test in updateLayer
   */
-  // updateLayerIfNeeded: function (skipIsVisibleInWindowCheck) {
-  //   var needsUpdate  = this.get('layerNeedsUpdate'),
-  //       shouldUpdate = needsUpdate  &&  (skipIsVisibleInWindowCheck || this.get('isVisibleInWindow'));
-  //   if (shouldUpdate) {
-  //     // only update a layer if it already exists
-  //     if (this.get('layer')) {
-  //       this.beginPropertyChanges();
-  //       this.set('layerNeedsUpdate', NO);
-  //       this.updateLayer();
-  //       this.endPropertyChanges();
-  //     }
-  //   }
+  updateLayerIfNeeded: function (skipIsVisibleInWindowCheck) {
+    //@if(debug)
+    if (skipIsVisibleInWindowCheck) {
+      SC.warn("Developer Warning: The `skipIsVisibleInWindowCheck` argument of updateLayerIfNeeded is not supported and will be ignored.");
+    }
+    //@endif
 
-  //   return this;
-  // },
+    this._doUpdateContent(false);
+
+    return this;
+  },
 
   /**
     This is the core method invoked to update a view layer whenever it has
@@ -410,53 +435,14 @@ SC.CoreView.reopen(
     do not want your render() method called when updating a layer, then you
     should override this method instead.
 
-    @param optionalContext provided only for backwards-compatibility.
-
+    @param {Boolean} force Force the update to the layer immediately even if the view is not in a shown state.
     @returns {SC.View} receiver
   */
-  // updateLayer: function (optionalContext) {
-  //   var mixins, idx, len, hasLegacyRenderMethod;
+  updateLayer: function (force) {
+    this._doUpdateContent(force);
 
-  //   var context = optionalContext || this.renderContext(this.get('layer'));
-  //   this._renderLayerSettings(context, NO);
-
-  //   // If the render method takes two parameters, we assume that it is a
-  //   // legacy implementation that takes context and firstTime. If it has only
-  //   // one parameter, we assume it is the render delegates style that requires
-  //   // only context. Note that, for backwards compatibility, the default
-  //   // SC.View implementation of render uses the old style.
-  //   hasLegacyRenderMethod = !this.update;
-  //   // Call render with firstTime set to NO to indicate an update, rather than
-  //   // full re-render, should be performed.
-  //   if (hasLegacyRenderMethod) {
-  //     this.render(context, NO);
-  //   }
-  //   else {
-  //     this.update(context.$());
-  //   }
-  //   if (mixins = this.renderMixin) {
-  //     len = mixins.length;
-  //     for (idx = 0; idx < len; ++idx) { mixins[idx].call(this, context, NO); }
-  //   }
-
-  //   context.update();
-  //   if (context._innerHTMLReplaced) {
-  //     var pane = this.get('pane');
-  //     if (pane && pane.get('isPaneAttached')) {
-  //       // this._notifyDidAppendToDocument();
-  //     }
-  //   }
-
-  //   // If this view uses static layout, then notify that the frame (likely)
-  //   // changed.
-  //   if (this.useStaticLayout) { this.viewDidResize(); }
-
-  //   if (this.didUpdateLayer) { this.didUpdateLayer(); } // call to update DOM
-  //   if (this.designer && this.designer.viewDidUpdateLayer) {
-  //     this.designer.viewDidUpdateLayer(); //let the designer know
-  //   }
-  //   return this;
-  // },
+    return this;
+  },
 
   /** @private */
   parentViewDidResize: function () {
@@ -494,62 +480,10 @@ SC.CoreView.reopen(
     @returns {SC.View} receiver
   */
   createLayer: function () {
-    // if (this.get('layer')) { return this; } // nothing to do
-
-    var context = this.renderContext(this.get('tagName'));
-
-    // now prepare the content like normal.
-    this.renderToContext(context);
-    this.set('layer', context.element());
-
-    // now notify the view and its child views..
-    // this._notifyDidCreateLayer();
+    this._doRender();
 
     return this;
   },
-
-  /** @private -
-    Invokes the receivers didCreateLayer() method if it exists and then
-    invokes the same on all child views.
-  */
-  // _notifyDidCreateLayer: function () {
-  //   this.notifyPropertyChange('layer');
-
-  //   if (this.get('useStaticLayout')) this.viewDidResize();
-
-  //   if (this.didCreateLayer) { this.didCreateLayer(); }
-
-  //   // and notify others
-  //   var mixins = this.didCreateLayerMixin, len, idx,
-  //       childViews = this.get('childViews'),
-  //       childView;
-  //   if (mixins) {
-  //     len = mixins.length;
-  //     for (idx=0; idx<len; ++idx) { mixins[idx].call(this); }
-  //   }
-
-  //   len = childViews.length;
-  //   for (idx=0; idx<len; ++idx) {
-  //     childView = childViews[idx];
-  //     if (!childView) { continue; }
-
-  //     // A parent view creating a layer might result in the creation of a
-  //     // child view's DOM node being created via a render context without
-  //     // createLayer() being invoked on the child.  In such cases, if anyone
-  //     // had requested 'layer' and it was cached as null, we need to
-  //     // invalidate it.
-  //     childView.notifyPropertyChange('layer');
-
-  //     // A strange case, that a childView's frame won't be correct before
-  //     // we have a layer, if the childView doesn't have a fixed layout
-  //     // and we are using static layout.
-  //     if (this.get('useStaticLayout')) {
-  //       if (!childView.get('isFixedLayout')) { childView.viewDidResize(); }
-  //     }
-
-  //     childView._notifyDidCreateLayer();
-  //   }
-  // },
 
   /**
     Destroys any existing layer along with the layer for any child views as
@@ -571,17 +505,7 @@ SC.CoreView.reopen(
   */
   destroyLayer: function () {
     this._doDestroyLayer();
-    // var layer = this.get('layer');
-    // if (layer) {
 
-    //   // Now notify the view and its child views.  It will also set the
-    //   // layer property to null.
-    //   // this._notifyWillDestroyLayer();
-
-    //   // do final cleanup
-    //   if (layer.parentNode) { layer.parentNode.removeChild(layer); }
-    //   layer = null;
-    // }
     return this;
   },
 
@@ -602,8 +526,9 @@ SC.CoreView.reopen(
     view's layer into the layer of the new parent view.
   */
   parentViewDidChange: function () {
-    this.parentViewDidResize();
-    // this.updateLayerLocation();
+    //@if(debug)
+    SC.warn("Developer Warning: parentViewDidChange has been deprecated.  Please use the notification methods willAddChild, didAddChild, willRemoveChild or didRemoveChild on the parent or willAddToParent, didAddToParent, willRemoveFromParent or didRemoveFromParent on the child to perform updates when the parent/child status changes.")
+    //@endif
   },
 
   /**
@@ -620,14 +545,14 @@ SC.CoreView.reopen(
     the end of a run loop if you have called parentViewDidChange() at some
     point.
 
-    @param {Boolean} force This property is ignored.
     @returns {SC.View} receiver
     @test in updateLayerLocation
   */
-  updateLayerLocationIfNeeded: function (force) {
+  updateLayerLocationIfNeeded: function () {
     if (this.get('layerLocationNeedsUpdate')) {
-      // this.updateLayerLocation();
+      this.updateLayerLocation();
     }
+
     return this;
   },
 
@@ -636,86 +561,16 @@ SC.CoreView.reopen(
     hierarchy.  This method will update the underlying DOM-location of the
     layer so that it reflects the new location.
 
+    @deprecated Version 1.10
     @returns {SC.View} receiver
   */
-  // updateLayerLocation: function () {
-  //   // collect some useful value
-  //   // if there is no node for some reason, just exit
-  //   var node = this.get('layer'),
-  //       parentView = this.get('parentView'),
-  //       parentNode = parentView ? parentView.get('containerLayer') : null;
+  updateLayerLocation: function () {
+    //@if(debug)
+    SC.warn("SC.View.prototype.updateLayerLocation is no longer used and has been deprecated.  See the SC.View statechart code for more details on attaching and detaching layers.");
+    //@endif
 
-  //   // remove node from current parentNode if the node does not match the new
-  //   // parent node.
-  //   if (node && node.parentNode && node.parentNode !== parentNode) {
-  //     node.parentNode.removeChild(node);
-  //   }
-
-  //   // CASE 1: no new parentView.  just remove from parent (above).
-  //   if (!parentView) {
-  //     if (node && node.parentNode) { node.parentNode.removeChild(node); }
-
-  //   // CASE 2: parentView has no layer, view has layer.  destroy layer
-  //   // CASE 3: parentView has no layer, view has no layer, nothing to do
-  //   } else if (!parentNode) {
-  //     if (node) {
-  //       if (node.parentNode) { node.parentNode.removeChild(node); }
-  //       this.destroyLayer();
-  //     }
-
-  //   // CASE 4: parentView has layer, view has no layer.  create layer & add
-  //   // CASE 5: parentView has layer, view has layer.  move layer
-  //   } else {
-  //     if (!node) {
-  //       this.createLayer();
-  //       node = this.get('layer');
-  //       if (!node) { return; } // can't do anything without a node.
-  //     }
-
-  //     var siblings = parentView.get('childViews'),
-  //         nextView = siblings.objectAt(siblings.indexOf(this)+1),
-  //         nextNode = (nextView) ? nextView.get('layer') : null;
-
-  //     // before we add to parent node, make sure that the nextNode exists...
-  //     if (nextView && (!nextNode || nextNode.parentNode!==parentNode)) {
-  //       nextView.updateLayerLocationIfNeeded();
-
-  //       // just in case it still couldn't generate the layer, force to null, because
-  //       // IE doesn't support insertBefore(blah, undefined) in version IE9.
-  //       nextNode = nextView.get('layer') || null;
-  //     }
-
-  //     // add to parentNode if needed.
-  //     if ((node.parentNode!==parentNode) || (node.nextSibling!==nextNode)) {
-  //       parentNode.insertBefore(node, nextNode);
-  //     }
-  //   }
-
-  //   parentNode = parentView = node = nextNode = null; // avoid memory leaks
-
-  //   this.set('layerLocationNeedsUpdate', NO);
-
-  //   return this;
-  // },
-
-  /** @private -
-    Invokes willDestroyLayer() on view and child views.  Then sets layer to
-    null for receiver.
-  */
-  // _notifyWillDestroyLayer: function () {
-  //   if (this.willDestroyLayer) { this.willDestroyLayer(); }
-  //   var mixins = this.willDestroyLayerMixin, len, idx,
-  //       childViews = this.get('childViews');
-  //   if (mixins) {
-  //     len = mixins.length;
-  //     for (idx=0; idx<len; ++idx) { mixins[idx].call(this); }
-  //   }
-
-  //   len = childViews.length;
-  //   for (idx=0; idx<len; ++idx) { childViews[idx]._notifyWillDestroyLayer(); }
-
-  //   this.set('layer', null);
-  // },
+    return this;
+  },
 
   /**
     @private
@@ -792,7 +647,7 @@ SC.CoreView.reopen(
     context.addClass(this.get('classNames'));
 
     if (this.get('isTextSelectable')) { context.addClass('allow-select'); }
-    // if (!this.get('isVisible')) { context.addClass('sc-hidden'); }
+    if (!this.get('isVisible')) { context.addClass('sc-hidden'); }
     if (this.get('isFirstResponder')) { context.addClass('focus'); }
 
     context.id(this.get('layerId'));
@@ -970,7 +825,7 @@ SC.CoreView.reopen(
   */
   renderChildViews: function (context, firstTime) {
     var cv = this.get('childViews'), len = cv.length, idx, view;
-    for (idx=0; idx<len; ++idx) {
+    for (idx = 0; idx < len; ++idx) {
       view = cv[idx];
       if (!view) { continue; }
       context = context.begin(view.get('tagName'));
@@ -1053,6 +908,7 @@ SC.CoreView.reopen(
         // ...
 
     @type Array
+    @default null
   */
   attributeBindings: null,
 
@@ -1063,6 +919,7 @@ SC.CoreView.reopen(
     must destroy and recreate the view layer.
 
     @type String
+    @default 'div'
   */
   tagName: 'div',
 
@@ -1071,6 +928,7 @@ SC.CoreView.reopen(
     names are used in addition to any defined on the view's superclass.
 
     @type Array
+    @default []
   */
   classNames: [],
 
@@ -1117,7 +975,7 @@ SC.CoreView.reopen(
   displayToolTip: function () {
     var ret = this.get('toolTip');
     return (ret && this.get('localize')) ? SC.String.loc(ret) : (ret || '');
-  }.property('toolTip','localize').cacheable(),
+  }.property('toolTip', 'localize').cacheable(),
 
   /**
     Determines if the user can select text within the view.  Normally this is
@@ -1192,8 +1050,7 @@ SC.CoreView.reopen(
   */
   init: function () {
     var childViews,
-      childViewLayout = this.childViewLayout,
-      displayProperties;
+      childViewLayout = this.childViewLayout;
 
     sc_super();
 
@@ -1370,7 +1227,7 @@ SC.CoreView.reopen(
     @returns {SC.View} receiver
   */
   removeAllChildren: function (immediately) {
-    var childViews = this.get('childViews'), view;
+    var childViews = this.get('childViews');
 
     for (var i = childViews.get('length') - 1; i >= 0; i--) {
       this.removeChild(childViews.objectAt(i), immediately);
@@ -1398,23 +1255,26 @@ SC.CoreView.reopen(
     memory manager.
   */
   destroy: function () {
-    var ret;
     // Fast path!
     if (this.get('isDestroyed')) { return this; }
 
     // Do generic destroy. It takes care of mixins and sets isDestroyed to YES.
     // Do this first, since it cleans up bindings that may apply to parentView
     // (which we will soon null out).
-    ret = sc_super();
+    var ret = sc_super();
+
     this._destroy();
 
     return ret;
   },
 
   _destroy: function () {
-    // destroy the layer -- this will avoid each child view destroying
-    // the layer over and over again...
-    this.destroyLayer();
+    // Remove the layer if attached.
+    this._doDetach();
+
+    // Destroy the layer if rendered. This will avoid each child view destroying
+    // the layer over and over again.
+    this._doDestroyLayer();
 
     // first destroy any children.
     var childViews = this.get('childViews'), len = childViews.length, idx;
@@ -1725,7 +1585,7 @@ SC.CoreView.mixin(/** @scope SC.CoreView.prototype */ {
       delete last.theme;
     }
 
-    var C=this, ret = new C(arguments);
+    var C = this, ret = new C(arguments);
     if (SC.ViewDesigner) {
       SC.ViewDesigner.didCreateView(ret, SC.$A(arguments));
     }
