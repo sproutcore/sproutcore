@@ -8,30 +8,31 @@
 
 // ..........................................................
 // createChildViews()
-// 
+//
 var view, parentDom, childDom, layerId ;
 module("SC.View#findLayerInParentLayer", {
   setup: function() {
-    
+
     layerId = 'foo-123';
-    
+
     // manually construct a test layer.  next childDom a few layers deep
     childDom = document.createElement('div');
     SC.$(childDom).attr('id', layerId);
-    
+
     var intermediate = document.createElement('div');
     intermediate.appendChild(childDom);
-    
+
     parentDom = document.createElement('div');
     parentDom.appendChild(intermediate);
     intermediate = null;
-    
-    
+
+
     // setup view w/ layerId
     view = SC.View.create({ layerId: layerId });
   },
-  
+
   teardown: function() {
+    view.destroy();
     view = parentDom = childDom = layerId = null;
   }
 });
