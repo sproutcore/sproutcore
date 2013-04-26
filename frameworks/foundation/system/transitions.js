@@ -23,14 +23,18 @@ SC.mixin(SC.View,
 
     /** @private */
     run: function (view, options) {
+      var transition = this;
+
       view.animate('opacity', 1, {
         delay: options.delay || 0,
-        duration: options.duration || 4.4,
+        duration: options.duration || 0.4,
         timing: options.timing || 'ease'
       }, function (data) {
-        // Only send the '_didTransitionIn' event if the view is still in the 'attached_building_in' state by the time it transitions in.
-        if (view.get('_state') === 'attached_building_in') {
-          view._didTransitionIn();
+        // Only send the '_didTransitionIn' event if the view is still in the 'attached_building_in' or 'attached_showing' state by the time it transitions in.
+        var state = this.get('_state');
+
+        if (state === 'attached_building_in' || state === 'attached_showing') {
+          this._didTransitionIn(transition, options);
         }
       });
     }
@@ -47,14 +51,18 @@ SC.mixin(SC.View,
 
     /** @private */
     run: function (view, options) {
+      var transition = this;
+
       view.animate('opacity', 0, {
         delay: options.delay || 0,
-        duration: options.duration || 4.4,
+        duration: options.duration || 0.4,
         timing: options.timing || 'ease'
       }, function (data) {
-        // Only send the '_didTransitionOut' event if the view is still in the 'attached_building_out' state by the time it transitions in.
-        if (view.get('_state') === 'attached_building_out') {
-          view._didTransitionOut();
+        // Only send the '_didTransitionOut' event if the view is still in the 'attached_building_out' or 'attached_hiding' state by the time it transitions out.
+        var state = this.get('_state');
+
+        if (state === 'attached_building_out' || state === 'attached_hiding') {
+          this._didTransitionOut(transition, options);
         }
       });
     },
@@ -119,7 +127,8 @@ SC.mixin(SC.View,
     run: function (view, options) {
       var viewFrame = view._preSetupFrame,
         key,
-        value;
+        value,
+        transition = this;
 
       if (options.direction === 'up' || options.direction === 'down') {
         key = 'top';
@@ -131,12 +140,14 @@ SC.mixin(SC.View,
 
       view.animate(key, value, {
         delay: options.delay || 0,
-        duration: options.duration || 4.4,
+        duration: options.duration || 0.4,
         timing: options.timing || 'ease'
       }, function (data) {
-        // Only send the '_didTransitionIn' event if the view is still in the 'attached_building_in' state by the time it transitions in.
-        if (view.get('_state') === 'attached_building_in') {
-          view._didTransitionIn();
+        // Only send the '_didTransitionIn' event if the view is still in the 'attached_building_in' or 'attached_showing' state by the time it transitions in.
+        var state = this.get('_state');
+
+        if (state === 'attached_building_in' || state === 'attached_showing') {
+          this._didTransitionIn(transition, options);
         }
       });
     },
@@ -174,7 +185,8 @@ SC.mixin(SC.View,
       var viewFrame = view.get('borderFrame'),
         parentView = view.get('parentView'),
         parentFrame,
-        key, value;
+        key, value,
+        transition = this;
 
       // If there is no parentView, use the window's frame.
       if (parentView) {
@@ -203,12 +215,14 @@ SC.mixin(SC.View,
 
       view.animate(key, value, {
         delay: options.delay || 0,
-        duration: options.duration || 4.4,
+        duration: options.duration || 0.4,
         timing: options.timing || 'ease'
       }, function (data) {
-        // Only send the '_didTransitionOut' event if the view is still in the 'attached_building_out' state by the time it transitions in.
-        if (view.get('_state') === 'attached_building_out') {
-          view._didTransitionOut();
+        // Only send the '_didTransitionOut' event if the view is still in the 'attached_building_out' or 'attached_hiding' state by the time it transitions out.
+        var state = this.get('_state');
+
+        if (state === 'attached_building_out' || state === 'attached_hiding') {
+          this._didTransitionOut(transition, options);
         }
       });
     },
