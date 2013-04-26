@@ -504,21 +504,27 @@ SC.CoreView.reopen(
     @returns {SC.View} receiver
   */
   destroyLayer: function () {
+    // We allow you to call destroy layer, but you should really detach first.
+    if (this.get('isAttached')) {
+      //@if(debug)
+      SC.warn("Developer Warning: You should properly remove a view first before calling destroyLayer on it.  For example, by calling `remove()` on a pane or `removeChild()` on a child view.  This view, %@, will be detached from the DOM and its layer destroyed.".fmt(this));
+      //@endif
+      this._doDetach();
+    }
+
     this._doDestroyLayer();
 
     return this;
   },
 
   /**
-    Destroys and recreates the current layer.  This can be more efficient than
-    modifying individual child views.
+    Destroys and recreates the current layer.  Doing this on a parent view can
+    be more efficient than modifying individual child views independently.
 
     @returns {SC.View} receiver
   */
   replaceLayer: function () {
-    this.destroyLayer();
-    this.set('layerLocationNeedsUpdate', YES);
-    this.invokeOnce(this.updateLayerLocationIfNeeded);
+    return this.destroyLayer().createLayer();
   },
 
   /**
