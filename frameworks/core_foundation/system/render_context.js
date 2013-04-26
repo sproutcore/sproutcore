@@ -345,7 +345,7 @@ SC.RenderContext = SC.Builder.create(
         mode = this.updateMode,
         cq, value, factory, cur, next;
 
-    this._innerHTMLReplaced = NO;
+    // this._innerHTMLReplaced = NO;
 
     if (!elem) {
       // throw new Error("Cannot update context because there is no source element");
@@ -356,7 +356,7 @@ SC.RenderContext = SC.Builder.create(
 
     // replace innerHTML
     if (this.length > 0) {
-      this._innerHTMLReplaced = YES;
+      // this._innerHTMLReplaced = YES;
       if (mode === SC.MODE_REPLACE) {
         cq.html(this.join());
       } else {
