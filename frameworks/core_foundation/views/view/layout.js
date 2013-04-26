@@ -793,7 +793,6 @@ SC.View.reopen(
     @returns {SC.View} receiver
   */
   layoutDidChange: function () {
-    console.log('%@ - layoutDidChange'.fmt(this));
     // Did our layout change in a way that could cause us to be resized?  If
     // not, then there's no need to invalidate the frames of our child views.
     var previousLayout = this._previousLayout,
@@ -839,19 +838,6 @@ SC.View.reopen(
     }
 
     this.invokeOnce(this._doUpdateLayout);
-
-    // Notify that the layout style has changed.
-    // this.notifyPropertyChange('layoutStyle');
-
-    // notify layoutView...
-    // var layoutView = this.get('layoutView');
-    // if (layoutView) {
-    //   layoutView.set('childViewsNeedLayout', YES);
-    //   layoutView.layoutDidChangeFor(this);
-    //   if (layoutView.get('childViewsNeedLayout')) {
-    //     layoutView.invokeOnce(layoutView.layoutChildViewsIfNeeded);
-    //   }
-    // }
 
     // Cache the last layout to fine-tune notifications when the layout changes.
     this._previousLayout = currentLayout;
@@ -901,9 +887,9 @@ SC.View.reopen(
     @returns {SC.View} receiver
     @test in layoutChildViews
   */
-  layoutChildViewsIfNeeded: function (isVisible) {
-    if (!isVisible) isVisible = this.get('isVisibleInWindow');
-    if (isVisible && this.get('childViewsNeedLayout')) {
+  layoutChildViewsIfNeeded: function (force) {
+    if (!force) force = this.get('isVisibleInWindow');
+    if (force && this.get('childViewsNeedLayout')) {
       this.set('childViewsNeedLayout', NO);
       this.layoutChildViews();
     }
@@ -940,24 +926,15 @@ SC.View.reopen(
     You will not usually override this method, but you may call it if you
     implement layoutChildViews() in a view yourself.
 
+    @param {Boolean} force Force the update to the layer's layout style immediately even if the view is not in a shown state.  Otherwise the style will be updated when the view returns to a shown state.
     @returns {SC.View} receiver
     @test in layoutChildViews
   */
-  // updateLayout: function () {
-  //   console.log('%@ - updateLayout'.fmt(this));
-  //   var layer = this.get('layer'), context;
-  //   if (layer) {
-  //     context = this.renderContext(layer);
-  //     this.renderLayout(context, NO);
-  //     context.update();
+  updateLayout: function (force) {
+    this._doUpdateLayout(force);
 
-  //     // If this view uses static layout, then notify if the frame changed.
-  //     // (viewDidResize will do a comparison)
-  //     if (this.useStaticLayout) this.viewDidResize();
-  //   }
-  //   layer = null;
-  //   return this;
-  // },
+    return this;
+  },
 
   /**
     Default method called by the layout view to actually apply the current
