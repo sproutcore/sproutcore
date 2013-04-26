@@ -124,7 +124,8 @@ SC.CoreView.reopen(
       curParentView = false;
     }
 
-    if (!curParentView) {
+    // You can adopt childViews that have you set as parent, but have not yet been fully adopted.
+    if (!curParentView || this.get('childViews').indexOf(this) < 0) {
       this._executeDoAdopt(parentView, beforeView);
     } else {
       handled = false;
