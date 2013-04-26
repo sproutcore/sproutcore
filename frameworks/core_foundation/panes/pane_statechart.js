@@ -13,28 +13,28 @@ SC.Pane.reopen({
 
   /** @private */
   _executeDoAttach: function (parentNode, nextNode) {
-    sc_super();
-
     // hook into root responder
     var responder = (this.rootResponder = SC.RootResponder.responder);
     responder.panes.add(this);
 
     // Legacy.
     this.set('isPaneAttached', YES);
+    this.paneDidAttach();
 
+    // Legacy?
     this.recomputeDependentProperties();
+    this.set('currentWindowSize', responder.currentWindowSize);
 
     // handle intercept if needed
     this._addIntercept();
+
+    sc_super();
   },
 
   /** @private */
   _executeDoDetach: function () {
     // remove intercept
     this._removeIntercept();
-
-    // resign keyPane status, if we had it
-    this.resignKeyPane();
 
     // remove the pane
     var rootResponder = this.rootResponder;

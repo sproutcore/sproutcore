@@ -109,9 +109,6 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   */
   page: null,
 
-  /** @private Indicate that this is a root view, which can be appended without a parent. */
-  _isRootView: true,
-
   // .......................................................
   // ROOT RESPONDER SUPPORT
   //
