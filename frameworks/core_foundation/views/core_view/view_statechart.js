@@ -42,24 +42,7 @@ SC.CoreView.reopen(
     return state.indexOf('attached') === 0;
   }.property('_state').cacheable(),
 
-  /**
-    Whether the attached view is invisible or becoming invisible.
-
-    When the view is hidden in the window, this value will be true.  Note that
-    this only applies to rendered and attached views and if the view is
-    transitioning in, this value will be false.
-
-    @field
-    @type Boolean
-    @default false
-    @readonly
-  */
-  isHidden: function () {
-    var state = this.get('_state');
-    return state === 'attached_hidden' || state === 'attached_hiding';
-  }.property('_state').cacheable(),
-
-  /**
+  /** @private
     Whether the attached view is invisible or becoming invisible because of
     a hidden ancestor.
 
@@ -68,9 +51,9 @@ SC.CoreView.reopen(
     @default false
     @readonly
   */
-  isHiddenByAncestor: false,
+  _isHiddenByAncestor: false,
 
-  /**
+  /** @private
     Whether the attached view is invisible or becoming invisible because it
     hid itself.
 
@@ -79,9 +62,9 @@ SC.CoreView.reopen(
     @default false
     @readonly
   */
-  isHiddenBySelf: function () {
-    return this.get('isHidden') && !this.get('isHiddenByAncestor');
-  }.property('_state', 'isHiddenByAncestor').cacheable(),
+  _isHiddenBySelf: function () {
+    return !this.get('isShown') && !this.get('_isHiddenByAncestor');
+  }.property('_state', '_isHiddenByAncestor').cacheable(),
 
   /**
     Whether the view's layer exists or not.
@@ -907,17 +890,6 @@ SC.CoreView.reopen(
 
     // Notify orphaned.
     this._orphaned(parentView);
-
-    // Route.
-    // if (this.get('isRendered')) {
-    //   if (this.get('isAttached')) {
-    //     this._gotoAttachedOrphanState();
-    //   } else {
-    //     this._gotoUnattachedOrphanState();
-    //   }
-    // } else {
-    //   this._gotoUnrenderedOrphanState();
-    // }
   },
 
   /** @private */
