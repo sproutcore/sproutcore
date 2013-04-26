@@ -340,24 +340,24 @@ SC.RootResponder = SC.Object.extend(
     (removing sc-blur).  Also notify panes.
   */
   focus: function(evt) {
-
     if (!this.get('hasFocus')) {
       SC.$('body').addClass('sc-focus').removeClass('sc-blur');
 
-      // If the app is getting focus again set the first responder to the first
-      // valid firstResponder view in the view's tree
-      if(!SC.TABBING_ONLY_INSIDE_DOCUMENT && !SC.browser.isIE8OrLower){
-        var keyPane = SC.RootResponder.responder.get('keyPane');
-        if (keyPane) {
-          var nextValidKeyView = keyPane.get('nextValidKeyView');
-          if (nextValidKeyView) keyPane.makeFirstResponder(nextValidKeyView);
-        }
-      }
-
       SC.run(function() {
+        // If the app is getting focus again set the first responder to the first
+        // valid firstResponder view in the view's tree
+        if(!SC.TABBING_ONLY_INSIDE_DOCUMENT && !SC.browser.isIE8OrLower){
+          var keyPane = SC.RootResponder.responder.get('keyPane');
+          if (keyPane) {
+            var nextValidKeyView = keyPane.get('nextValidKeyView');
+            if (nextValidKeyView) keyPane.makeFirstResponder(nextValidKeyView);
+          }
+        }
+
         this.set('hasFocus', YES);
       }, this);
     }
+
     return YES ; // allow default
   },
 
