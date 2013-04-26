@@ -3,10 +3,10 @@
 // Copyright: @2013 7x7 Software, Inc.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-sc_require('views/container');
+
 
 SC.mixin(SC.View,
-/** @scope SC.View.prototype */ {
+  /** @scope SC.View */ {
 
   /** @class
 
@@ -17,19 +17,20 @@ SC.mixin(SC.View,
   FADE_IN: {
 
     /** @private */
-    setup: function (parentView, view, beforeView, options) {
+    setup: function (view, options) {
       view.adjust({ opacity: 0 });
     },
 
     /** @private */
-    run: function (parentView, view, beforeView, options) {
+    run: function (view, options) {
       view.animate('opacity', 1, {
+        delay: options.delay || 0,
         duration: options.duration || 4.4,
         timing: options.timing || 'ease'
       }, function (data) {
-        // Only send the 'adopted' event if the view is still in the 'adopting' state by the time it transitions in.
-        if (view._parentingState === 'adopting') {
-          view._adopted();
+        // Only send the '_didTransitionIn' event if the view is still in the 'attached_building_in' state by the time it transitions in.
+        if (view.get('_state') === 'attached_building_in') {
+          view._didTransitionIn();
         }
       });
     }
@@ -45,20 +46,21 @@ SC.mixin(SC.View,
   FADE_OUT: {
 
     /** @private */
-    run: function (parentView, view, options) {
+    run: function (view, options) {
       view.animate('opacity', 0, {
+        delay: options.delay || 0,
         duration: options.duration || 4.4,
         timing: options.timing || 'ease'
       }, function (data) {
-        // Only send the 'orphaned' event if the view is still in the 'orphaning' state by the time it transitions out.
-        if (view._parentingState === 'orphaning') {
-          view._orphaned();
+        // Only send the '_didTransitionOut' event if the view is still in the 'attached_building_out' state by the time it transitions in.
+        if (view.get('_state') === 'attached_building_out') {
+          view._didTransitionOut();
         }
       });
     },
 
     /** @private */
-    teardown: function (parentView, view, options) {
+    teardown: function (view, options) {
       // Reset the opacity in case this view is used elsewhere.
       view.adjust({ opacity: 1 });
     }
@@ -74,20 +76,28 @@ SC.mixin(SC.View,
   MOVE_IN: {
 
     /** @private */
-    setup: function (parentView, view, beforeView, options) {
-      var parentFrame = parentView.get('borderFrame'),
+    setup: function (view, options) {
+      var parentView = view.get('parentView'),
+        parentFrame,
         viewFrame = view.get('borderFrame'),
         left,
         top,
         height,
         width;
 
+      // If there is no parentView, use the window's frame.
+      if (parentView) {
+        parentFrame = parentView.get('borderFrame');
+      } else {
+        parentFrame = SC.RootResponder.responder.currentWindowSize;
+      }
+
       height = parentFrame.height;
       width = parentFrame.width;
 
       switch (options.direction) {
-      case 'right':
-        left = -width;
+      case 'left':
+        left = width;
         break;
       case 'up':
         top = height;
@@ -96,7 +106,7 @@ SC.mixin(SC.View,
         top = -height;
         break;
       default:
-        left = width;
+        left = -width;
       }
 
       // Cache the final layout and frame, so that we can reset everything.
@@ -106,7 +116,7 @@ SC.mixin(SC.View,
     },
 
     /** @private */
-    run: function (parentView, view, beforeView, options) {
+    run: function (view, options) {
       var viewFrame = view._preSetupFrame,
         key,
         value;
@@ -120,17 +130,18 @@ SC.mixin(SC.View,
       }
 
       view.animate(key, value, {
+        delay: options.delay || 0,
         duration: options.duration || 4.4,
         timing: options.timing || 'ease'
       }, function (data) {
-        // Only send the 'adopted' event if the view is still in the 'adopting' state by the time it transitions in.
-        if (view._parentingState === 'adopted') {
-          view._adopted();
+        // Only send the '_didTransitionIn' event if the view is still in the 'attached_building_in' state by the time it transitions in.
+        if (view.get('_state') === 'attached_building_in') {
+          view._didTransitionIn();
         }
       });
     },
 
-    teardown: function (parentView, view, beforeView, options) {
+    teardown: function (view, options) {
       // Convert to previous layout.
       view.adjust(view._preSetupLayout);
       view._preSetupLayout = null;
@@ -147,7 +158,7 @@ SC.mixin(SC.View,
   MOVE_OUT: {
 
     /** @private */
-    setup: function (parentView, view, options) {
+    setup: function (view, options) {
       var viewFrame = view.get('borderFrame'),
         left = viewFrame.x,
         top = viewFrame.y,
@@ -159,15 +170,23 @@ SC.mixin(SC.View,
     },
 
     /** @private */
-    run: function (parentView, view, options) {
+    run: function (view, options) {
       var viewFrame = view.get('borderFrame'),
-        parentFrame = parentView.get('borderFrame'),
+        parentView = view.get('parentView'),
+        parentFrame,
         key, value;
 
+      // If there is no parentView, use the window's frame.
+      if (parentView) {
+        parentFrame = parentView.get('borderFrame');
+      } else {
+        parentFrame = SC.RootResponder.responder.currentWindowSize;
+      }
+
       switch (options.direction) {
-      case 'right':
+      case 'left':
         key = 'left';
-        value = -viewFrame.width;
+        value = parentFrame.width;
         break;
       case 'up':
         key = 'top';
@@ -179,21 +198,22 @@ SC.mixin(SC.View,
         break;
       default:
         key = 'left';
-        value = parentFrame.width;
+        value = -viewFrame.width;
       }
 
       view.animate(key, value, {
+        delay: options.delay || 0,
         duration: options.duration || 4.4,
         timing: options.timing || 'ease'
       }, function (data) {
-        // Only send the 'orphaned' event if the view is still in the 'orphaning' state by the time it transitions out.
-        if (view._parentingState === 'orphaning') {
-          view._orphaned();
+        // Only send the '_didTransitionOut' event if the view is still in the 'attached_building_out' state by the time it transitions in.
+        if (view.get('_state') === 'attached_building_out') {
+          view._didTransitionOut();
         }
       });
     },
 
-    teardown: function (parentView, view, options) {
+    teardown: function (view, options) {
       // Convert to previous layout.
       view.adjust(view._preSetupLayout);
       view._preSetupLayout = null;
