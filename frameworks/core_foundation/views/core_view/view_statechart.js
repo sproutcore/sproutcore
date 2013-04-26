@@ -147,11 +147,11 @@ SC.CoreView.reopen(
     return handled;
   },
 
-  /** @private Orphan this view action. */
+  /** @private Destroy the layer of this view action. */
   _doDestroyLayer: function () {
     var handled = true;
 
-    if (this.get('_state') === 'unattached') {
+    if (this.get('isRendered') && !this.get('isAttached')) {
       this._executeDoDestroyLayer();
     } else {
       handled = false;
@@ -187,14 +187,13 @@ SC.CoreView.reopen(
       parentView = this.get('parentView'),
       // Views without a parent are not limited by a parent's isShown property.
       isParentShown = parentView ? parentView.get('isShown') : true,
-      state = this.get('state'),
       handled = true;
 
     if (isShown && isParentShown) {
       this._executeDoHide();
-    } else if (state === 'unattached') {
-      // Queue the update.
-      this._visibilityNeedsUpdate = true;
+    } else if (this.get('isRendered')) {
+      // Queue the update if the view has been rendered.
+      if (this.get('isVisible')) { this._visibilityNeedsUpdate = true; }
     } else {
       handled = false;
     }
@@ -232,18 +231,18 @@ SC.CoreView.reopen(
 
   /** @private Show this view action. */
   _doShow: function () {
-    var isHidden = this.get('isHidden'),
+    var isAttached = this.get('isAttached'),
+      isShown = this.get('isShown'),
       parentView = this.get('parentView'),
       // Views without a parent are not limited by a parent's isShown property.
       isParentShown = parentView ? parentView.get('isShown') : true,
-      state = this.get('state'),
       handled = true;
 
-    if (isHidden && isParentShown) {
+    if (isAttached && !isShown && isParentShown) {
       this._executeDoShow();
-    } else if (state === 'unattached') {
-      // Queue the update.
-      this._visibilityNeedsUpdate = true;
+    } else if (this.get('isRendered')) {
+      // Queue the update if the view has been rendered.
+      if (!this.get('isVisible')) { this._visibilityNeedsUpdate = true; }
     } else {
       handled = false;
     }
@@ -258,8 +257,9 @@ SC.CoreView.reopen(
       handled = true;
 
     if (isRendered) {
-      if (isShown || force) {
-        // Only in the attached_shown state do we allow updates without being forced.
+      if (isShown || this.get('_state') === 'attached_hiding' ||
+          this.get('_state') === 'attached_building_out' || force) {
+        // Only in the visible states do we allow updates without being forced.
         this._executeDoUpdateContent();
       } else {
         // Otherwise mark the view as needing an update when we enter a shown state again.
@@ -279,8 +279,9 @@ SC.CoreView.reopen(
       handled = true;
 
     if (isRendered) {
-      if (isShown || force) {
-        // Only in the attached_shown state do we allow updates without being forced.
+      if (isShown || this.get('_state') === 'attached_hiding' ||
+          this.get('_state') === 'attached_building_out' || force) {
+        // Only in the visible states do we allow updates without being forced.
         this._executeDoUpdateLayout();
       } else {
         // Otherwise mark the view as needing an update when we enter a shown state again.
@@ -355,9 +356,9 @@ SC.CoreView.reopen(
       // Notify shown (on self and child views).
       this._parentShown();
     } else {
-      // If our parent is already hidden, then update isHiddenByAncestor.
+      // If our parent is already hidden, then update _isHiddenByAncestor.
       if (!isParentShown) {
-        this.set('isHiddenByAncestor', true);
+        this.set('_isHiddenByAncestor', true);
       }
 
       // Notify hidden (only on child views).
@@ -384,58 +385,36 @@ SC.CoreView.reopen(
     this._cascadeEventToChildViews('_detaching');
   },
 
-  /** @private The 'didTransitionHide' event. */
-  _didTransitionHide: function () {
-    var transitionHide = this.get('transitionHide'),
-      options = this.get('transitionHideOptions') || {};
+  /** @private The 'didTransitionOut' event. */
+  _didTransitionIn: function (transition, options) {
+    var state = this.get('_state');
 
     // Clean up the transition if the plugin supports it.
-    if (!!transitionHide.teardown) {
-      transitionHide.teardown(this, options);
+    if (transition.teardown) {
+      transition.teardown(this, options || {});
     }
 
     // Route.
-    this._gotoAttachedHiddenState();
+    if (state === 'attached_building_in' || state === 'attached_showing') {
+      this._gotoAttachedShownState();
+    }
   },
 
   /** @private The 'didTransitionOut' event. */
-  _didTransitionIn: function () {
-    var transitionIn = this.get('transitionIn'),
-      options = this.get('transitionInOptions') || {};
+  _didTransitionOut: function (transition, options) {
+    var state = this.get('_state');
 
     // Clean up the transition if the plugin supports it.
-    if (!!transitionIn.teardown) {
-      transitionIn.teardown(this, options);
-    }
-
-    this._gotoAttachedShownState();
-  },
-
-  /** @private The 'didTransitionShow' event. */
-  _didTransitionShow: function () {
-    var transitionShow = this.get('transitionShow'),
-      options = this.get('transitionShowOptions') || {};
-
-    // Clean up the transition if the plugin supports it.
-    if (!!transitionShow.teardown) {
-      transitionShow.teardown(this, options);
+    if (transition.teardown) {
+      transition.teardown(this, options || {});
     }
 
     // Route.
-    this._gotoAttachedShownState();
-  },
-
-  /** @private The 'didTransitionOut' event. */
-  _didTransitionOut: function () {
-    var transitionOut = this.get('transitionOut'),
-      options = this.get('transitionOutOptions') || {};
-
-    // Clean up the transition if the plugin supports it.
-    if (!!transitionOut.teardown) {
-      transitionOut.teardown(this, options);
+    if (state === 'attached_building_out') {
+      this._executeDoDetach();
+    } else if (state === 'attached_hiding') {
+      this._gotoAttachedHiddenState();
     }
-
-    this._executeDoDetach();
   },
 
   /** @private The 'layerDestroyed' event. */
@@ -513,7 +492,7 @@ SC.CoreView.reopen(
 
   /** @private The 'parentHidden' cascading event. */
   _parentHidden: function () {
-    this.set('isHiddenByAncestor', true);
+    this.set('_isHiddenByAncestor', true);
 
     // Route.
     this._gotoAttachedHiddenState();
@@ -524,7 +503,7 @@ SC.CoreView.reopen(
 
   /** @private The 'parentShown' cascading event. */
   _parentShown: function () {
-    this.set('isHiddenByAncestor', false);
+    this.set('_isHiddenByAncestor', false);
 
     if (this.get('isVisible')) {
       var transitionIn = this.get('transitionIn');
@@ -668,7 +647,7 @@ SC.CoreView.reopen(
       options = this.get('transitionInOptions') || {};
 
     // Prep the transition if the plugin supports it.
-    if (!!transitionIn.setup) {
+    if (transitionIn.setup) {
       transitionIn.setup(this, options);
     }
 
@@ -678,9 +657,6 @@ SC.CoreView.reopen(
 
   /** @private */
   _gotoAttachedBuildingOutState: function () {
-    // Backwards compatibility.
-    this.set('isVisibleInWindow', false);
-
     // Update the state.
     this.set('_state', 'attached_building_out');
 
@@ -688,7 +664,7 @@ SC.CoreView.reopen(
       options = this.get('transitionOutOptions') || {};
 
     // Prep the transition if the plugin supports it.
-    if (!!transitionOut.setup) {
+    if (transitionOut.setup) {
       transitionOut.setup(this, options);
     }
 
@@ -717,7 +693,7 @@ SC.CoreView.reopen(
       options = this.get('transitionHideOptions') || {};
 
     // Prep the transition if the plugin supports it.
-    if (!!transitionHide.setup) {
+    if (transitionHide.setup) {
       transitionHide.setup(this, options);
     }
 
@@ -737,7 +713,7 @@ SC.CoreView.reopen(
       options = this.get('transitionShowOptions') || {};
 
     // Prep the transition if the plugin supports it.
-    if (!!transitionShow.setup) {
+    if (transitionShow.setup) {
       transitionShow.setup(this, options);
     }
 
