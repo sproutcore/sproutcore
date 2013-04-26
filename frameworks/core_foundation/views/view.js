@@ -1206,28 +1206,70 @@ SC.CoreView.reopen(
   },
 
   /**
-    Removes the child view from the parent view.
+    Removes the child view from the parent view *and* detaches it from the DOM.
+    This does *not* remove the child view's layer (i.e. the node still exists,
+    but is no longer in the DOM) and does *not* destroy the child view (i.e.
+    it can still be re-used).
 
     Note that if the child view uses a transitionOut plugin, it will not be
-    fully removed until the transition completes.  To force the view to remove
-    immediately you can pass true as the optional `immediately` argument.
+    fully detached until the transition completes.  To force the view to detach
+    immediately you can pass true for the optional `immediately` argument.
+
+    If you wish to remove the child and discard it, use `removeChildAndDestroy`.
 
     @param {SC.View} view The view to remove as a child view.
     @param {Boolean} [immediately=false] Forces the child view to be removed immediately regardless if it uses a transitionOut plugin.
+    @see SC.View#removeChildAndDestroy
     @returns {SC.View} receiver
   */
   removeChild: function (view, immediately) {
-    view._doOrphan(immediately);
+    view._doDetach(immediately);
+    view._doOrphan();
 
     return this;
   },
 
   /**
-    Removes all children from the parentView.
+    Removes the child view from the parent view, detaches it from the DOM *and*
+    destroys the view and its layer.
+
+    Note that if the child view uses a transitionOut plugin, it will not be
+    fully detached and destroyed until the transition completes.  To force the
+    view to detach immediately you can pass true for the optional `immediately`
+    argument.
+
+    If you wish to remove the child and keep it for further re-use, use
+    `removeChild`.
+
+    @param {SC.View} view The view to remove as a child view and destroy.
+    @param {Boolean} [immediately=false] Forces the child view to be removed and destroyed immediately regardless if it uses a transitionOut plugin.
+    @see SC.View#removeChild
+    @returns {SC.View} receiver
+  */
+  removeChildAndDestroy: function (view, immediately) {
+    view._doDetach(immediately);
+
+    // If the view will transition out, wait for the transition to complete
+    // before destroying the view entirely.
+    if (view.get('transitionOut') && !immediately) {
+      view.addObserver('_state', this, this._destroyChildView);
+    } else {
+      view._destroy(); // Destroys the layer and the view.
+    }
+
+    return this;
+  },
+
+  /**
+    Removes all children from the parentView *and* destroys them and their
+    layers.
 
     Note that if any child view uses a transitionOut plugin, it will not be
     fully removed until the transition completes.  To force all child views to
     remove immediately you can pass true as the optional `immediately` argument.
+
+    Tip: If you know that there are no transitions for the child views,
+    you should pass true to optimize the document removal.
 
     @param {Boolean} [immediately=false] Forces all child views to be removed immediately regardless if any uses a transitionOut plugin.
     @returns {SC.View} receiver
@@ -1235,8 +1277,37 @@ SC.CoreView.reopen(
   removeAllChildren: function (immediately) {
     var childViews = this.get('childViews');
 
-    for (var i = childViews.get('length') - 1; i >= 0; i--) {
-      this.removeChild(childViews.objectAt(i), immediately);
+    // OPTIMIZATION!
+    // If we know that we're removing all children and we are rendered, lets do the document cleanup in one sweep.
+    if (immediately && this.get('isRendered')) {
+      var layer,
+        parentNode;
+
+      // If attached, detach and track our parent node so we can re-attach.
+      if (this.get('isAttached')) {
+        layer = this.get('layer');
+        parentNode = layer.parentNode;
+
+        this._doDetach();
+      }
+
+      // Destroy our layer and thus all the children's layers in one move.
+      this.destroyLayer();
+
+      // Remove all the children.
+      for (var i = childViews.get('length') - 1; i >= 0; i--) {
+        this.removeChildAndDestroy(childViews.objectAt(i), immediately);
+      }
+
+      // Recreate our layer (now empty).
+      this.createLayer();
+
+      // Reattach our layer.
+      if (parentNode) { this._doAttach(parentNode); }
+    } else {
+      for (var i = childViews.get('length') - 1; i >= 0; i--) {
+        this.removeChildAndDestroy(childViews.objectAt(i), immediately);
+      }
     }
 
     return this;
@@ -1251,14 +1322,31 @@ SC.CoreView.reopen(
   removeFromParent: function () {
     var parent = this.get('parentView');
     if (parent) { parent.removeChild(this); }
+
     return this;
   },
 
+  /** @private Observer for child views that are being discarded after transitioning out. */
+  _destroyChildView: function (view) {
+    var state = view.get('_state');
+
+    // Commence destroying of the view once it is detached.
+    if (!view.get('isAttached')) {
+      view.destroy();
+    }
+  },
+
   /**
+    Completely destroys a view instance so that it may be garbage collected.
+
     You must call this method on a view to destroy the view (and all of its
-    child views). This will remove the view from any parent node, then make
-    sure that the DOM element managed by the view can be released by the
-    memory manager.
+    child views). This will remove the view from any parent, detach the
+    view's layer from the DOM if it is attached and clear the view's layer
+    if it is rendered.
+
+    Once a view is destroyed it can *not* be reused.
+
+    @returns {SC.View} receiver
   */
   destroy: function () {
     // Fast path!
@@ -1274,9 +1362,13 @@ SC.CoreView.reopen(
     return ret;
   },
 
+  /** @private */
   _destroy: function () {
-    // Remove the layer if attached.
-    this._doDetach();
+    // Orphan the view if adopted.
+    this._doOrphan();
+
+    // Remove the layer if attached (ignores transitionOut).
+    this._doDetach(true);
 
     // Destroy the layer if rendered. This will avoid each child view destroying
     // the layer over and over again.
@@ -1294,10 +1386,8 @@ SC.CoreView.reopen(
     delete this._CQ;
     delete this.page;
 
-    // remove from parent if found.
-    if (this.get('parentView')) { this.removeFromParent(); }
-
     // clear owner.
+    // TODO: Deprecate owner in this sense.
     this.set('owner', null);
 
     return this;

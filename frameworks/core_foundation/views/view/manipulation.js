@@ -131,17 +131,55 @@ SC.View.reopen(
     Replaces the current array of child views with the new array of child
     views.
 
-    @param {Array} views views you want to add
+    This will remove *and* destroy all of the existing child views and their
+    layers.
+
+    Warning: The new array must be made of *child* views (i.e. created using
+    this.createChildView() on the parent).
+
+    @param {Array} newChildViews Child views you want to add
     @returns {SC.View} receiver
   */
-  replaceAllChildren: function (views) {
-    var len = views.get('length'), idx;
-
+  replaceAllChildren: function (newChildViews) {
     this.beginPropertyChanges();
-    // this._doDetach();
-    this.destroyLayer().removeAllChildren();
-    for (idx = 0; idx < len; idx++) { this.appendChild(views.objectAt(idx)); }
-    this.replaceLayer();
+
+    // If rendered, destroy our layer so we can re-render.
+    if (this.get('isRendered')) {
+      var layer = this.get('layer'),
+        parentNode;
+
+      // If attached, detach and track our parent node so we can re-attach.
+      if (this.get('isAttached')) {
+        parentNode = layer.parentNode;
+
+        // We don't allow for transitioning out at this time.
+        // TODO: support transition out of child views.
+        this._doDetach(true);
+      }
+
+      // Destroy our layer in one move.
+      this.destroyLayer();
+    }
+
+    // Remove the current child views.
+    // We aren't rendered at this point so it bypasses the optimization in
+    // removeAllChildren that would recreate the layer.  We would rather add the
+    // new childViews before recreating the layer.
+    this.removeAllChildren(true);
+
+    // Add the new children.
+    for (var i = 0, len = newChildViews.get('length'); i < len; i++) {
+      this.appendChild(newChildViews.objectAt(i));
+    }
+
+    // We were rendered previously.
+    if (layer) {
+      // Recreate our layer (now empty).
+      this.createLayer();
+
+      // Reattach our layer.
+      if (parentNode) { this._doAttach(parentNode); }
+    }
     this.endPropertyChanges();
 
     return this;
