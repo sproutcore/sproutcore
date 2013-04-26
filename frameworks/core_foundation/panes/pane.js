@@ -524,27 +524,17 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     });
   },
 
-  /** @private
-    Called when the pane is attached to a DOM element in a window, this will
-    change the view status to be visible in the window and also register
-    with the rootResponder.
+  /**
+    This has been deprecated and may cause issues when used.  Please use
+    didAppendToDocument instead, which is not defined by SC.Pane (i.e. you
+    don't need to call sc_super when implementing didAppendToDocument in direct
+    subclasses of SC.Pane).
 
-    Previously `paneDidAttach()`
+    @deprecated Version 1.10
   */
-  didAppendToDocument: function() {
-    // hook into root responder
-    var responder = (this.rootResponder = SC.RootResponder.responder);
-    responder.panes.add(this);
-
-    this.set('isPaneAttached', YES);
-
-    this.recomputeDependentProperties();
-
-    // notify that the layers have been appended to the document
-    // this._notifyDidAppendToDocument();
-
-    // handle intercept if needed
-    this._addIntercept();
+  paneDidAttach: function () {
+    // Does nothing.  Left here so that subclasses that implement the method
+    // and call sc_super() won't fail.
   },
 
   /**
