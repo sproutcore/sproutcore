@@ -41,59 +41,7 @@ SC.View.reopen(
     }
   }.observes("layerId"),
 
-  /**
-    This method is called whenever the receiver's parentView has changed.
-    The default implementation of this method marks the view's display
-    location as dirty so that it will update at the end of the run loop.
-
-    You will not usually need to override or call this method yourself, though
-    if you manually patch the parentView hierarchy for some reason, you should
-    call this method to notify the view that it's parentView has changed.
-
-    @returns {SC.View} receiver
-  */
-  // parentViewDidChange: function () {
-  //   this.recomputeIsVisibleInWindow();
-
-  //   this.resetBuildState();
-  //   this.set('layerLocationNeedsUpdate', YES);
-  //   this.invokeOnce(this.updateLayerLocationIfNeeded);
-
-  //   // We also need to iterate down through the view hierarchy and invalidate
-  //   // all our child view's caches for 'pane', since it could have changed.
-  //   //
-  //   // Note:  In theory we could try to avoid this invalidation if we
-  //   //        do this only in cases where we "know" the 'pane' value might
-  //   //        have changed, but those cases are few and far between.
-
-  //   this._invalidatePaneCacheForSelfAndAllChildViews();
-
-  //   return this;
-  // },
-
-  /** @private
-    We want to cache the 'pane' property, but it's impossible for us to
-    declare a dependence on all properties that can affect the value.  (For
-    example, if our grandparent gets attached to a new pane, our pane will
-    have changed.)  So when there's the potential for the pane changing, we
-    need to invalidate the caches for all our child views, and their child
-    views, and so on.
-  */
-  _invalidatePaneCacheForSelfAndAllChildViews: function () {
-    var childView, childViews = this.get('childViews'),
-        len = childViews.length, idx;
-
-    this.notifyPropertyChange('pane');
-
-    for (idx = 0; idx < len; ++idx) {
-      childView = childViews[idx];
-      if (childView._invalidatePaneCacheForSelfAndAllChildViews) {
-        childView._invalidatePaneCacheForSelfAndAllChildViews();
-      }
-    }
-  },
-
-  // ..........................................................
+  // ------------------------------------------------------------------------
   // LAYER LOCATION
   //
 
@@ -210,111 +158,15 @@ SC.View.reopen(
     return this.insertBefore(view, null);
   },
 
-  // ..........................................................
-  // TRANSITION SUPPORT
+  // ------------------------------------------------------------------------
+  // BUILDING IN/OUT
   //
-
-  /**
-    The transition plugin to use when this view is appended to a parent.
-
-    SC.View uses a pluggable transition architecture where the transition setup,
-    execution and cleanup can be handled by a specified transition plugin.
-
-    There are a number of pre-built transtion in plugins available:
-
-      SC.View.BOUNCE_IN
-      SC.View.FADE_IN
-      SC.View.FLIP_IN
-      SC.View.MOVE_IN
-      SC.View.SCALE_IN
-
-    You can even provide your own custom transition plugins.  Just create a
-    transition object that conforms to the SC.TransitionProtocol protocol.
-
-    @type Object (SC.TransitionProtocol)
-    @default null
-    @since Version 1.10
-  */
-  transitionIn: null,
-
-  /**
-    The options for the given transition in plugin.
-
-    These options are specific to the current transition plugin used and are
-    used to modify the transition animation.  To determine what options
-    may be used for a given plugin and to see what the default options are,
-    see the documentation for the transition plugin being used.
-
-    Most transitions will accept a duration and timing option, but may
-    also use other options.  For example, SC.View.MOVE_IN accepts options
-    like:
-
-        transitionInOptions: {
-          direction: 'left',
-          duration: 0.25,
-          timing: 'ease-in-out'
-        }
-
-    @type Object
-    @default null
-    @since Version 1.10
-  */
-  transitionInOptions: null,
-
-  /**
-    The transition plugin to use when this view is removed from its parent.
-
-    SC.View uses a pluggable transition architecture where the transition setup,
-    execution and cleanup can be handled by a specified transition plugin.
-
-    There are a number of pre-built transition out plugins available:
-
-      SC.View.BOUNCE_OUT
-      SC.View.FADE_OUT
-      SC.View.FLIP_OUT
-      SC.View.MOVE_OUT
-      SC.View.SCALE_OUT
-
-    You can even provide your own custom transition plugins.  Just create a
-    transition object that conforms to the SC.TransitionProtocol protocol.
-
-    @type Object (SC.TransitionProtocol)
-    @default null
-    @since Version 1.10
-  */
-  transitionOut: null,
-
-  /**
-    The options for the given transition out plugin.
-
-    These options are specific to the current transition plugin used and are
-    used to modify the transition animation.  To determine what options
-    may be used for a given plugin and to see what the default options are,
-    see the documentation for the transition plugin being used.
-
-    Most transitions will accept a duration and timing option, but may
-    also use other options.  For example, SC.View.MOVE_OUT accepts options
-    like:
-
-        transitionOutOptions: {
-          direction: 'right',
-          duration: 0.15,
-          timing: 'ease-in'
-        }
-
-    @type Object
-    @default null
-    @since Version 1.10
-  */
-  transitionOutOptions: null,
-
-  ///
-  /// BUILDING IN/OUT
-  ///
 
   /**
     Call this to append a child while building it in. If the child is not
     buildable, this is the same as calling appendChild.
+
+    @deprecated Version 1.10
   */
   buildInChild: function (view) {
     view.willBuildInToView(this);
@@ -325,6 +177,8 @@ SC.View.reopen(
   /**
     Call to remove a child after building it out. If the child is not buildable,
     this will simply call removeChild.
+
+    @deprecated Version 1.10
   */
   buildOutChild: function (view) {
     view.buildOutFromView(this);
@@ -333,6 +187,7 @@ SC.View.reopen(
   /**
     Called by child view when build in finishes. By default, does nothing.
 
+    @deprecated Version 1.10
   */
   buildInDidFinishFor: function (child) {
   },
@@ -347,25 +202,39 @@ SC.View.reopen(
 
   /**
     Whether the view is currently building in.
+
+    @deprecated Version 1.10
   */
   isBuildingIn: NO,
 
   /**
     Whether the view is currently building out.
+
+    @deprecated Version 1.10
   */
   isBuildingOut: NO,
 
   /**
     Implement this, and call didFinishBuildIn when you are done.
+
+    @deprecated Version 1.10
   */
   buildIn: function () {
+    //@if(debug)
+    SC.warn("The SC.View build methods have been deprecated in favor of the transition plugins.  To build in a view, please provide a transitionIn plugin (many are pre-built in SproutCore) and to build out a view, please provide a transitionOut plugin.");
+    //@endif
     this.buildInDidFinish();
   },
 
   /**
     Implement this, and call didFinishBuildOut when you are done.
+
+    @deprecated Version 1.10
   */
   buildOut: function () {
+    //@if(debug)
+    SC.warn("The SC.View build methods have been deprecated in favor of the transition plugins.  To build in a view, please provide a transitionIn plugin (many are pre-built in SproutCore) and to build out a view, please provide a transitionOut plugin.");
+    //@endif
     this.buildOutDidFinish();
   },
 
@@ -373,6 +242,7 @@ SC.View.reopen(
     This should reset (without animation) any internal states; sometimes called before.
 
     It is usually called before a build in, by the parent view.
+    @deprecated Version 1.10
   */
   resetBuild: function () {
 
@@ -384,6 +254,8 @@ SC.View.reopen(
     anything.
 
     This is basically called whenever build in happens.
+
+    @deprecated Version 1.10
   */
   buildOutDidCancel: function () {
 
@@ -396,6 +268,8 @@ SC.View.reopen(
     If build in was cancelled, it means build out is probably happening.
     So, any timers or anything you had going, you can cancel.
     Then buildOut will happen.
+
+    @deprecated Version 1.10
   */
   buildInDidCancel: function () {
 
@@ -403,6 +277,8 @@ SC.View.reopen(
 
   /**
     Call this when you have built in.
+
+    @deprecated Version 1.10
   */
   buildInDidFinish: function () {
     this.isBuildingIn = NO;
@@ -412,6 +288,8 @@ SC.View.reopen(
 
   /**
     Call this when you have finished building out.
+
+    @deprecated Version 1.10
   */
   buildOutDidFinish: function () {
     this.isBuildingOut = NO;
@@ -421,6 +299,8 @@ SC.View.reopen(
 
   /**
     Usually called by parentViewDidChange, this resets the build state (calling resetBuild in the process).
+
+    @deprecated Version 1.10
   */
   resetBuildState: function () {
     if (this.isBuildingIn) {
