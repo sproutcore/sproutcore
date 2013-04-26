@@ -848,40 +848,6 @@ SC.CoreView.reopen(
   */
   render: function () { },
 
-  /** @private -
-    Invokes the receivers didAppendToDocument() method if it exists and
-    then invokes the same on all child views.
-  */
-
-  // _notifyDidAppendToDocument: function () {
-  //   if (!this.get('hasLayout')) { this.notifyPropertyChange('frame'); }
-  //   if (this.didAppendToDocument) { this.didAppendToDocument(); }
-
-  //   var i = 0, childView, childViews = this.get('childViews');
-  //   for (var i = childViews.length - 1; i >= 0; i--) {
-  //   // for (i = 0, childLen = children.length; i < childLen; i++) {
-  //     childView = childViews[i];
-
-  //     // if (childView.get('isOrphan')) {
-  //     //   childView._doAdopt(this, null);
-  //     // }
-
-  //     if (childView._notifyDidAppendToDocument) {
-  //       childView._notifyDidAppendToDocument();
-  //     }
-  //   }
-  // },
-
-  // childViewsObserver: function () {
-  //   var childViews = this.get('childViews'), i, iLen, child;
-  //   for (i = 0, iLen = childViews.length; i < iLen; i++) {
-  //     child = childViews[i];
-  //     if (child._notifyDidAppendToDocument) {
-  //       child._notifyDidAppendToDocument();
-  //     }
-  //   }
-  // }.observes('childViews'),
-
   // ..........................................................
   // STANDARD RENDER PROPERTIES
   //
