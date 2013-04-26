@@ -2,7 +2,7 @@ sc_require("views/view");
 
 
 SC.CoreView.reopen(
-  /** @scope SC.CoreView */ {
+  /** @scope SC.CoreView.prototype */ {
 
   // ------------------------------------------------------------------------
   // Properties
@@ -15,11 +15,11 @@ SC.CoreView.reopen(
     * unattached
     * attached (wrapper state)
     ** attached_shown
+    ** attached_hidden
     ** attached_building_in
     ** attached_building_out
-    ** attached_hiding
-    ** attached_hidden
     ** attached_showing
+    ** attached_hiding
 
     @type String
     @default 'unrendered'
@@ -271,15 +271,15 @@ SC.CoreView.reopen(
   /** @private Update this view's contents action. */
   _doUpdateContent: function (force) {
     var isRendered = this.get('isRendered'),
-      state = this.get('_state'),
+      isShown = this.get('isShown'),
       handled = true;
 
     if (isRendered) {
-      if (state === 'attached_shown' || force) {
+      if (isShown || force) {
         // Only in the attached_shown state do we allow updates without being forced.
         this._executeDoUpdateContent();
       } else {
-        // Otherwise mark the view as needing an update when we enter the attached_shown state again.
+        // Otherwise mark the view as needing an update when we enter a shown state again.
         this._contentNeedsUpdate = true;
       }
     } else {
@@ -292,15 +292,15 @@ SC.CoreView.reopen(
   /** @private Update this view's layout action. */
   _doUpdateLayout: function (force) {
     var isRendered = this.get('isRendered'),
-      state = this.get('_state'),
+      isShown = this.get('isShown'),
       handled = true;
 
     if (isRendered) {
-      if (state === 'attached_shown' || force) {
+      if (isShown || force) {
         // Only in the attached_shown state do we allow updates without being forced.
         this._executeDoUpdateLayout();
       } else {
-        // Otherwise mark the view as needing an update when we enter the attached_shown state again.
+        // Otherwise mark the view as needing an update when we enter a shown state again.
         this._layoutNeedsUpdate = true;
       }
     } else {
@@ -366,18 +366,11 @@ SC.CoreView.reopen(
     var isVisible = this.get('isVisible'),
       parentView = this.get('parentView'),
       // Views without a parent are not limited by a parent's isShown property.
-      isParentShown = parentView ? parentView.get('isShown') : true,
-      transitionIn = this.get('transitionIn');
+      isParentShown = parentView ? parentView.get('isShown') : true;
 
     if (isVisible && isParentShown) {
       // Notify shown (on self and child views).
       this._parentShown();
-
-      if (transitionIn) {
-        this._gotoAttachedBuildingInState();
-      } else {
-        this._gotoAttachedShownState();
-      }
     } else {
       // If our parent is already hidden, then update isHiddenByAncestor.
       if (!isParentShown) {
@@ -551,6 +544,7 @@ SC.CoreView.reopen(
     this.set('isHiddenByAncestor', false);
 
     if (this.get('isVisible')) {
+      var transitionIn = this.get('transitionIn');
 
       // Update the content of the layer if necessary.
       if (this._contentNeedsUpdate) {
@@ -568,7 +562,11 @@ SC.CoreView.reopen(
       }
 
       // Route.
-      this._gotoAttachedShownState();
+      if (transitionIn) {
+        this._gotoAttachedBuildingInState();
+      } else {
+        this._gotoAttachedShownState();
+      }
 
       // Cascade the event to child views.
       this._cascadeEventToChildViews('_parentShown');
