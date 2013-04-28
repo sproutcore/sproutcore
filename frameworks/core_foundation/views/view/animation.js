@@ -396,6 +396,41 @@ SC.View.reopen(
     }
   },
 
+  /** @private
+    Animates through the given frames.
+
+    @param {Array} frames The array of frame objects.
+    @param {AnimateCallback} callback The callback function to call when the final frame is done animating.
+    @param {Number} initialDelay The delay before the first frame begins animating.
+    @returns {SC.View} receiver
+  */
+  // TODO: Do this using CSS animations instead.
+  _animateFrames: function (frames, callback, initialDelay, count) {
+    // Normalize the private argument `count`.
+    if (SC.none(count)) { count = 0; }
+
+    var frame = frames[count];
+
+    this.animate(frame.value, {
+      delay: initialDelay,
+      duration: frame.duration,
+      timing: frame.timing
+    }, function (data) {
+      count += 1;
+
+      // Keep iterating while frames exist and the animations weren't cancelled.
+      if (!data.isCancelled && count < frames.length) {
+        // Only delay on the first animation.  Increase count to the next frame.
+        this._animateFrames(frames, callback, 0, count);
+      } else {
+        // Done.
+        callback(data);
+      }
+    });
+
+    return this;
+  },
+
   /**
     Cancels the animation, adjusting the view's layout immediately to one of
     three values depending on the `layoutState` parameter.
