@@ -26,7 +26,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2013-04-26 17:45:20 +0000</string>
+	<string>2013-04-27 05:21:47 +0000</string>
 	<key>Modifier</key>
 	<string>Tyler Keating</string>
 	<key>NotesVisible</key>
@@ -14550,6 +14550,8 @@ Notice how do
 							</dict>
 							<key>CornerRadius</key>
 							<real>9</real>
+							<key>Pattern</key>
+							<integer>1</integer>
 							<key>Width</key>
 							<real>2</real>
 						</dict>
@@ -14981,6 +14983,8 @@ Hiding}</string>
 							</dict>
 							<key>CornerRadius</key>
 							<real>9</real>
+							<key>Pattern</key>
+							<integer>1</integer>
 							<key>Width</key>
 							<real>2</real>
 						</dict>
@@ -15765,6 +15769,8 @@ Showing}</string>
 							</dict>
 							<key>CornerRadius</key>
 							<real>9</real>
+							<key>Pattern</key>
+							<integer>1</integer>
 							<key>Width</key>
 							<real>2</real>
 						</dict>
@@ -16369,6 +16375,8 @@ Building Out}</string>
 							</dict>
 							<key>CornerRadius</key>
 							<real>9</real>
+							<key>Pattern</key>
+							<integer>1</integer>
 							<key>Width</key>
 							<real>2</real>
 						</dict>
@@ -16572,7 +16580,7 @@ Building In}</string>
 	<key>WindowInfo</key>
 	<dict>
 		<key>CurrentSheet</key>
-		<integer>0</integer>
+		<integer>1</integer>
 		<key>ExpandedCanvases</key>
 		<array/>
 		<key>Frame</key>
@@ -16588,7 +16596,7 @@ Building In}</string>
 		<key>SidebarWidth</key>
 		<integer>161</integer>
 		<key>VisibleRegion</key>
-		<string>{{439, 336}, {1759, 964}}</string>
+		<string>{{176, 349}, {1759, 964}}</string>
 		<key>Zoom</key>
 		<real>1</real>
 		<key>ZoomValues</key>
