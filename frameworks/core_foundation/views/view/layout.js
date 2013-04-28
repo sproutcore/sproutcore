@@ -946,18 +946,15 @@ SC.View.reopen(
     @returns {void}
     @test in layoutChildViews
   */
-  renderLayout: function (context, firstTime) {
+  renderLayout: function (context) {
     context.setStyle(this.get('layoutStyle'));
     this.didRenderAnimations();
   },
 
-  _renderLayerSettings: function (original, context, firstTime) {
-    original(context, firstTime);
-    this.renderLayout(context, firstTime);
-  }.enhance(),
-
   applyAttributesToContext: function (original, context) {
     original(context);
+
+    this.renderLayout(context);
 
     if (this.get('useStaticLayout')) { context.addClass('sc-static-layout'); }
 

@@ -570,81 +570,47 @@ SC.CoreView.reopen(
     a context.
 
     @param {SC.RenderContext} context the render context.
-    @param {Boolean} firstTime Provided for compatibility when rendering legacy views only.
   */
-  renderToContext: function (context, firstTime) {
-    var hasLegacyRenderMethod, mixins, idx, len;
+  renderToContext: function (context) {
+    var mixins, idx, len;
 
     this.beginPropertyChanges();
-    // this.set('layerNeedsUpdate', NO);
 
-    if (SC.none(firstTime)) { firstTime = YES; }
+    context.id(this.get('layerId'));
+    context.setAttr('role', this.get('ariaRole'));
 
-    this._renderLayerSettings(context, firstTime);
+    // Set up the classNameBindings and attributeBindings observers.
+    this._applyClassNameBindings();
+    this._applyAttributeBindings(context);
 
-    // If the render method takes two parameters, we assume that it is a
-    // legacy implementation that takes context and firstTime. If it has only
-    // one parameter, we assume it is the render delegates style that requires
-    // only context. Note that, for backwards compatibility, the default
-    // SC.View implementation of render uses the old style.
-    hasLegacyRenderMethod = !this.update;
+    context.addClass(this.get('classNames'));
 
-    // Let the render method handle rendering. If we have a render delegate
-    // object set, it will be used there.
-    if (hasLegacyRenderMethod) {
-      this.render(context, firstTime);
-    }
-    // This view implements the render delegate protocol.
-    else {
-      if (firstTime) {
-        this.render(context);
-      } else {
-        this.update(context.$());
-      }
+    if (this.get('isTextSelectable')) { context.addClass('allow-select'); }
+
+    if (!this.get('isVisible')) {
+      context.addClass('sc-hidden');
+      context.setAttr('aria-hidden', 'true')
     }
 
-    // If we've made it this far and renderChildViews() was never called,
-    // render any child views now.
-    if (firstTime && !this._didRenderChildViews) { this.renderChildViews(context, firstTime); }
-    // Reset the flag so that if the layer is recreated we re-render the child views
-    this._didRenderChildViews = NO;
+    // Call applyAttributesToContext so that subclasses that override it can
+    // insert further attributes.
+    this.applyAttributesToContext(context);
 
+    // We pass true for the second argument to support the old style of render.
+    this.render(context, true);
+    this.renderChildViews(context);
 
     if (mixins = this.renderMixin) {
       len = mixins.length;
-      for (idx = 0; idx < len; ++idx) { mixins[idx].call(this, context, firstTime); }
+      for (idx = 0; idx < len; ++idx) { mixins[idx].call(this, context, true); }
     }
 
     this.endPropertyChanges();
   },
 
-  _renderLayerSettings: function (context, firstTime) {
-    context.resetClasses();
-    context.resetStyles();
-
-    this.applyAttributesToContext(context);
-  },
-
+  /** Apply the attributes to the context. */
   applyAttributesToContext: function (context) {
-    if (!this.get('layer')) {
-      this._applyClassNameBindings();
-      this._applyAttributeBindings(context);
-    }
 
-    context.addClass(this.get('classNames'));
-
-    if (this.get('isTextSelectable')) { context.addClass('allow-select'); }
-    if (!this.get('isVisible')) { context.addClass('sc-hidden'); }
-    if (this.get('isFirstResponder')) { context.addClass('focus'); }
-
-    context.id(this.get('layerId'));
-    context.setAttr('role', this.get('ariaRole'));
-
-    var _ariaHidden = this.get('ariaHidden');
-    if (_ariaHidden !== null) {
-      if (_ariaHidden === NO) context.removeAttr('aria-hidden');
-      else context.setAttr('aria-hidden', _ariaHidden);
-    }
   },
 
   /**
@@ -806,20 +772,18 @@ SC.CoreView.reopen(
     way.
 
     @param {SC.RenderContext} context the context
-    @param {Boolean} firstName true if the layer is being created
     @returns {SC.RenderContext} the render context
     @test in render
   */
-  renderChildViews: function (context, firstTime) {
+  renderChildViews: function (context) {
     var cv = this.get('childViews'), len = cv.length, idx, view;
     for (idx = 0; idx < len; ++idx) {
       view = cv[idx];
       if (!view) { continue; }
       context = context.begin(view.get('tagName'));
-      view.renderToContext(context, firstTime);
+      view.renderToContext(context);
       context = context.end();
     }
-    this._didRenderChildViews = YES;
 
     return context;
   },
@@ -1265,8 +1229,6 @@ SC.CoreView.reopen(
 
   /** @private Observer for child views that are being discarded after transitioning out. */
   _destroyChildView: function (view) {
-    var state = view.get('_state');
-
     // Commence destroying of the view once it is detached.
     if (!view.get('isAttached')) {
       view.destroy();

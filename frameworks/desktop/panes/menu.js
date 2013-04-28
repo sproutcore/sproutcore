@@ -569,7 +569,6 @@ SC.MenuPane = SC.PickerPane.extend(
     be the key pane when attached.
   */
   didAppendToDocument: function () {
-    console.log('didAppendToDocument()');
     this.becomeMenuPane();
   },
 
@@ -581,7 +580,6 @@ SC.MenuPane = SC.PickerPane.extend(
     detached.
   */
   willRemoveFromDocument: function () {
-    console.log('willRemoveFromDocument()');
     var parentMenu = this.get('parentMenu');
 
     this.set('currentMenuItem', null);
