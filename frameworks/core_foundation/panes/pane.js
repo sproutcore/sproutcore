@@ -656,7 +656,6 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     var hasLayer = !!this.get('layer');
     sc_super();
     if (hasLayer) {
-      this.set('_state', 'attached_orphan');
       this._attached();
     }
   },
