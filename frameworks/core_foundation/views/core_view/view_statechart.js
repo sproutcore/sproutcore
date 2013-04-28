@@ -534,7 +534,7 @@ SC.CoreView.reopen(
 
   /** @private The 'parentShown' cascading event. */
   _parentShown: function () {
-    console.log("%@ - _parentShown".fmt(this));
+    // console.log("%@ - _parentShown".fmt(this));
     this.set('_isHiddenByAncestor', false);
 
     if (this.get('isVisible')) {
@@ -701,7 +701,7 @@ SC.CoreView.reopen(
 
   /** @private */
   _gotoAttachedHidingState: function () {
-    console.log('%@ - entered hiding state'.fmt(this));
+    // console.log('%@ - entered hiding state'.fmt(this));
     // Update the state.
     this.set('_state', 'attached_hiding');
 
