@@ -414,11 +414,11 @@ SC.View.reopen(
   */
   cancelAnimation: function (layoutState) {
     var activeAnimations = this._activeAnimations,
+      pendingAnimations = this._pendingAnimations,
+      animation,
+      key,
       layout,
       didCancel = NO;
-
-    // Fast path!
-    if (!activeAnimations) { return didCancel; }
 
     switch (layoutState) {
     case SC.LayoutState.START:
@@ -432,9 +432,21 @@ SC.View.reopen(
     default:
     }
 
+    // Immediately remove the pending animations while calling the callbacks.
+    for (key in pendingAnimations) {
+      animation = pendingAnimations[key];
+      didCancel = YES;
+
+      // Update the animation hash.  Do this first, so callbacks can check for active animations.
+      delete pendingAnimations[key];
+
+      // Run the callback.
+      this.runAnimationCallback(animation, null, YES);
+    }
+
     // Immediately remove the animation styles while calling the callbacks.
-    for (var key in activeAnimations) {
-      var animation = activeAnimations[key];
+    for (key in activeAnimations) {
+      animation = activeAnimations[key];
       didCancel = YES;
 
       // Update the animation hash.  Do this first, so callbacks can check for active animations.
@@ -455,6 +467,7 @@ SC.View.reopen(
     // Clean up.
     delete this._prevLayout;
     delete this._activeAnimations;
+    delete this._pendingAnimations;
 
     return this;
   },
