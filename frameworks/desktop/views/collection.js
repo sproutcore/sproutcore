@@ -1069,7 +1069,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         if (ret.awakeFromPool) { ret.awakeFromPool(this); }
 
         // Recreate the layer if it was destroyed.
-        if (!ret.get('isRendered')) {
+        if (!ret.get('_isRendered')) {
           ret.invokeOnce(ret._doRender);
         }
       }

@@ -12,12 +12,10 @@ SC.View.reopen(
 
   /**
     This property has been deprecated in favor of the SC.View maintained
-    properties:  `isAttached`, `isShown` and `isHidden`. To determine actual
-    visibility of a view use these properties.
+    state. To determine actual visibility of a view use the currentState
+    property.
 
-    @see SC.View#isAttached
-    @see SC.View#isShown
-    @see SC.View#isHidden
+    @see SC.View#currentState
     @default false
     @deprecated Version 1.10
   */

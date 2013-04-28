@@ -112,8 +112,6 @@ SC.CoreView.reopen(
 
   /**
     The isVisible property determines if the view should be displayed or not.
-    You should set this property to show or hide a view that has been appended
-    to the DOM.
 
     If you also set a transitionShow or transitionHide plugin, then when
     isVisible changes, the appropriate transition will execute as the view's
@@ -122,24 +120,20 @@ SC.CoreView.reopen(
     Note that isVisible can be set to true and the view may still not be
     "visible" in the window.  This can occur if:
 
-      1. the view is not attached to the DOM.
+      1. the view is not attached to the document.
       2. the view has a view ancestor with isVisible set to false.
 
     @type Boolean
-    @see SC.View#isShown
-    @see SC.View#isHidden
+    @see SC.View#currentState
     @default true
   */
   isVisible: true,
   isVisibleBindingDefault: SC.Binding.bool(),
 
   /**
-    To determine actual visibility of a view use the `isAttached`, `isShown`
-    and `isHidden` properties.
+    To determine actual visibility of a view use the `currentState` property.
 
-    @see SC.View#isAttached
-    @see SC.View#isShown
-    @see SC.View#isHidden
+    @see SC.View#currentState
     @deprecated Version 1.10
   */
   isVisibleInWindow: YES,
@@ -580,6 +574,7 @@ SC.CoreView.reopen(
     context.setAttr('role', this.get('ariaRole'));
 
     // Set up the classNameBindings and attributeBindings observers.
+    // TODO: CLEAN UP!!
     this._applyClassNameBindings();
     this._applyAttributeBindings(context);
 
@@ -1153,7 +1148,7 @@ SC.CoreView.reopen(
     // If the view will transition out, wait for the transition to complete
     // before destroying the view entirely.
     if (view.get('transitionOut') && !immediately) {
-      view.addObserver('_state', this, this._destroyChildView);
+      view.addObserver('isAttached', this, this._destroyChildView);
     } else {
       view._destroy(); // Destroys the layer and the view.
     }
@@ -1180,7 +1175,7 @@ SC.CoreView.reopen(
 
     // OPTIMIZATION!
     // If we know that we're removing all children and we are rendered, lets do the document cleanup in one sweep.
-    if (immediately && this.get('isRendered')) {
+    if (immediately && this.get('_isRendered')) {
       var layer,
         parentNode;
 
@@ -1231,6 +1226,7 @@ SC.CoreView.reopen(
   _destroyChildView: function (view) {
     // Commence destroying of the view once it is detached.
     if (!view.get('isAttached')) {
+      view.removeObserver('isAttached', this, this._destroyChildView);
       view.destroy();
     }
   },

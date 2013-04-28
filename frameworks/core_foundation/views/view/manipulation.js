@@ -144,7 +144,7 @@ SC.View.reopen(
     this.beginPropertyChanges();
 
     // If rendered, destroy our layer so we can re-render.
-    if (this.get('isRendered')) {
+    if (this.get('_isRendered')) {
       var layer = this.get('layer'),
         parentNode;
 
