@@ -108,7 +108,7 @@ SC.mixin(SC.View,
         { value: bounce1, duration: duration, timing: 'ease-out' },
         { value: value, duration: duration, timing: 'ease-in' },
         { value: bounce2, duration: duration, timing: 'ease-out' },
-        { value: value, duration: duration, timing: 'ease-in' }
+        { value: value, duration: duration, timing: 'ease-in-out' }
       ];
 
       callback = function () {
@@ -214,7 +214,7 @@ SC.mixin(SC.View,
       }
 
       // Split the duration evenly per frame.
-      duration = options.duration || 0.4;
+      duration = options.duration || 0.6;
       duration = duration * 0.2;
 
       // Define the frames.
@@ -222,7 +222,7 @@ SC.mixin(SC.View,
         { value: bounce1, duration: duration, timing: 'ease-out' },
         { value: startValue, duration: duration, timing: 'ease-in' },
         { value: bounce2, duration: duration, timing: 'ease-out' },
-        { value: startValue, duration: duration, timing: 'ease-in' },
+        { value: startValue, duration: duration, timing: 'ease-in-out' },
         { value: finalValue, duration: duration, timing: 'ease-in' }
       ];
 
