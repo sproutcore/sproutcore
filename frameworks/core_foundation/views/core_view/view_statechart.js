@@ -862,9 +862,15 @@ SC.CoreView.reopen(
     // Cancel conflicting transitions.
     // TODO: We could possibly cancel to SC.LayoutState.CURRENT if we know that a transitionHide animation is going to run.
     if (state === 'attached_building_in') {
+      //@if(debug)
+      SC.warn("Developer Warning: The view, %@, was hidden before it could finish transitioning in.  The transitionIn animation was cancelled.");
+      //@endif
       transition = this.get('transitionIn');
       options = this.get('transitionInOptions') || {};
     } else if (state === 'attached_showing') {
+      //@if(debug)
+      SC.warn("Developer Warning: The view, %@, was hidden before it could finish being shown.  The transitionShow animation was cancelled.");
+      //@endif
       transition = this.get('transitionShow');
       options = this.get('transitionShowOptions') || {};
     }
@@ -933,6 +939,9 @@ SC.CoreView.reopen(
     // Cancel conflicting transitions.
     // TODO: We could possibly cancel to SC.LayoutState.CURRENT if we know that a transitionShow animation is going to run.
     if (state === 'attached_hiding') {
+      //@if(debug)
+      SC.warn("Developer Warning: The view, %@, was shown before it could finish hiding.  The transitionHide animation was cancelled.");
+      //@endif
       transition = this.get('transitionHide');
       options = this.get('transitionHideOptions') || {};
 
