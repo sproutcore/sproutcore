@@ -20,6 +20,14 @@
 SC.SceneView = SC.ContainerView.extend(
 /** @scope SC.SceneView.prototype */ {
 
+  //@if(debug)
+  init: function () {
+    sc_super();
+
+    SC.warn("Developer Warning: SC.SceneView has been deprecated.  Please use the transition property of SC.ContainerView for animated view swapping.");
+  },
+  //@endif
+
   /**
     Array of scene names.  Scenes will slide on and off screen in the order
     that you specify them here.  That is, if you shift from a scene at index
