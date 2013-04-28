@@ -371,6 +371,10 @@ SC.CoreView.reopen(
 
   /** @private The 'detached' event. */
   _detached:  function () {
+    // Stop observing isVisible & isFirstResponder.
+    this.removeObserver('isVisible', this, this._isVisibleDidChange);
+    this.removeObserver('isFirstResponder', this, this._isFirstResponderDidChange);
+
     //Route.
     this._gotoUnattachedState();
 
@@ -497,6 +501,9 @@ SC.CoreView.reopen(
 
     // Route.
     this._gotoAttachedHiddenState();
+    // Begin observing isVisible & isFirstResponder.
+    this.addObserver('isVisible', this, this._isVisibleDidChange);
+    this.addObserver('isFirstResponder', this, this._isFirstResponderDidChange);
 
     // Cascade the event to child views.
     this._cascadeEventToChildViews('_parentHidden');
@@ -965,15 +972,64 @@ SC.CoreView.reopen(
 
   /** @private */
   _executeDoUpdateVisibility: function () {
-    var context = this.renderContext(this.get('layer'));
-    context.setClass('sc-hidden', ! this.get('isVisible'));
-    context.update();
+    var isVisible = this.get('isVisible');
+
+    this.$().setClass('sc-hidden', !isVisible);
+    this.$().attr('aria-hidden', !isVisible);
 
     // Reset that an update is required.
     this._visibilityNeedsUpdate = false;
 
     // Notify updated.
     this._updatedVisibility();
+  },
+
+  /** @private */
+  _executeQueuedUpdates: function () {
+    // Update the content of the layer if necessary.
+    if (this._contentNeedsUpdate) {
+      this._executeDoUpdateContent();
+    }
+
+    // Update the layout style of the layer if necessary.
+    if (this._layoutNeedsUpdate) {
+      this._executeDoUpdateLayout();
+    }
+
+    // Update the visibility of the layer if necessary.
+    if (this._visibilityNeedsUpdate) {
+      this._executeDoUpdateVisibility();
+    }
+  },
+
+
+  /** @private
+    Marks the view as needing a visibility update if the isVisible property
+    changes.
+
+    This observer is connected when the view is attached and disconnected
+    when the view is detached.
+  */
+  _isVisibleDidChange: function () {
+    this._visibilityNeedsUpdate = true;
+
+    if (this.get('isVisible')) {
+      this._doShow();
+    } else {
+      this._doHide();
+    }
+  },
+
+  /** @private
+    Adds the 'focus' class to the view.
+
+    This observer is connected when the view is attached and disconnected
+    when the view is detached.
+  */
+  _isFirstResponderDidChange: function () {
+    var isFirstResponder = this.get('isFirstResponder');
+
+    this.$().setClass('focus', isFirstResponder);
   }
 
 });

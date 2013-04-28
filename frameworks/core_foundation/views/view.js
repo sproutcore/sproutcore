@@ -47,11 +47,6 @@ SC.CoreView.reopen(
     An array of the properties of this class that will be concatenated when
     also present on subclasses.
 
-    For example, displayProperties is a concatenated property.  SC.CoreView
-    defines displayProperties as ['ariaHidden'] and its subclass SC.View
-    defines the same property as ['isFirstResponder'].  Therefore, the
-    actual displayProperties on SC.View becomes ['ariaHidden', 'isFirstResponder'].
-
     @type Array
     @default ['outlets', 'displayProperties', 'classNames', 'renderMixin', 'didCreateLayerMixin', 'willDestroyLayerMixin', 'classNameBindings', 'attributeBindings']
   */
@@ -72,11 +67,13 @@ SC.CoreView.reopen(
   ariaRole: null,
 
   /**
-    The full list of valid WAI-ARIA roles is available at:
-    http://www.w3.org/TR/wai-aria/roles#roles_categorization
+    The aria-hidden role is managed appropriately by the internal view's
+    statechart.  When the view is not currently displayed the aria-hidden
+    attribute will be set to true.
 
     @type String
     @default null
+    @deprecated Version 1.10
   */
   ariaHidden: null,
 
@@ -353,22 +350,6 @@ SC.CoreView.reopen(
 
     return this;
   },
-
-  /**
-    Marks the view as needing a display update if the isVisible property changes.
-
-    Note that this behavior is identical to a display property. It is broken out
-    into its own observer so that it can be overridden with additional
-    functionality if the visibility module is applied to SC.View.
-  */
-  _sc_isVisibleDidChange: function () {
-    this._visibilityNeedsUpdate = true;
-    if (this.get('isVisible')) {
-      this.invokeOnce(this._doShow);
-    } else {
-      this.invokeOnce(this._doHide);
-    }
-  }.observes('isVisible'),
 
   /**
     Setting this property to YES will cause the updateLayerIfNeeded method to
@@ -978,16 +959,13 @@ SC.CoreView.reopen(
     Delegate's API.
 
     Implementation note:  'isVisible' is also effectively a display property,
-    but it is not declared as such because the same effect is implemented
-    inside _sc_isVisibleDidChange().  This avoids having two observers on
-    'isVisible', which is:
-      a.  More efficient
-      b.  More correct, because we can guarantee the order of operations
+    but it is not declared as such because it is observed separately in
+    order to manage the view's internal state.
 
     @type Array
     @readOnly
   */
-  displayProperties: ['ariaHidden'],
+  displayProperties: [],
 
   // .......................................................
   // SC.RESPONDER SUPPORT
@@ -1051,13 +1029,6 @@ SC.CoreView.reopen(
         childViewLayout.beginObserving(this);
       }
     }
-
-    // register display property observers ..
-    // TODO: Optimize into class setup
-    // displayProperties = this.get('displayProperties');
-    // for (var i = 0, l = displayProperties.length; i < l; i++) {
-    //   this.addObserver(displayProperties[i], this, this.displayDidChange);
-    // }
   },
 
   /**
@@ -1778,7 +1749,7 @@ SC.CoreView.unload = function () {
 SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
   classNames: ['sc-view'],
 
-  displayProperties: ['isFirstResponder']
+  displayProperties: []
 });
 
 //unload views for IE, trying to collect memory.
