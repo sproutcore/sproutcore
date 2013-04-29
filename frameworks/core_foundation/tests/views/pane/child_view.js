@@ -27,6 +27,9 @@ test("SC.Pane should not attempt to recompute visibility on child views that do 
 
   ok(!errored, "appending a pane with child views without visibility does not result in an error");
   pane.remove();
+
+  // Clean up.
+  pane.destroy();
 });
 
 test("SC.Pane should only render once when appended.", function () {
@@ -62,4 +65,7 @@ test("SC.Pane should only render once when appended.", function () {
   pane.remove();
 
   expect(3);
+
+  // Clean up.
+  pane.destroy();
 });

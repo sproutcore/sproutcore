@@ -11,9 +11,9 @@
 
 // ..........................................................
 // BASE TESTS
-// 
-// These tests exercise the API.  See below for tests that cover edge 
-// conditions.  If you find a bug, we recommend that you add a test in the 
+//
+// These tests exercise the API.  See below for tests that cover edge
+// conditions.  If you find a bug, we recommend that you add a test in the
 // edge case section.
 
 (function() {
@@ -28,6 +28,7 @@
 
     teardown: function() {
       pane.remove();
+      pane.destroy();
     }
   });
 

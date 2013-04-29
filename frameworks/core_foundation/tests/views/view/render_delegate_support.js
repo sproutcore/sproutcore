@@ -7,7 +7,7 @@
 /*global module test equals context ok same */
 
 // .......................................................
-//  render() 
+//  render()
 //
 module("SC.View#render");
 
@@ -22,16 +22,19 @@ test("Supports backwards-compatible render method", function() {
   });
 
   view.createLayer();
-  
+
   view.render = function(context, firstTime) {
     renderCallCount++;
     ok(context._STYLE_REGEX, 'passes RenderContext');
     equals(firstTime, NO, 'passes NO for firstTime');
   };
-  
+
   view.updateLayer();
-  
+
   equals(renderCallCount, 2, 'render should have been called twice');
+
+  // Clean up.
+  view.destroy();
 });
 
 test("Treats a view as its own render delegate", function() {
@@ -47,21 +50,24 @@ test("Treats a view as its own render delegate", function() {
     },
 
     update: function(elem) {
-     ok(elem.jquery, 'passes a jQuery object as first parameter'); 
+     ok(elem.jquery, 'passes a jQuery object as first parameter');
      updateCallCount++;
     }
   });
-  
+
   view.createLayer();
   view.updateLayer();
   equals(renderCallCount, 1, "calls render once");
   equals(updateCallCount, 1, "calls update once");
+
+  // Clean up.
+  view.destroy();
 });
 
 test("Passes data source as first parameter if render delegate is not the view", function() {
   var renderCallCount = 0,
       updateCallCount = 0;
-      
+
   var view;
 
   var renderDelegate = SC.Object.create({
@@ -74,9 +80,9 @@ test("Passes data source as first parameter if render delegate is not the view",
 
     update: function(dataSource, elem) {
       equals(dataSource, view.get('renderDelegateProxy'), "passes view's render delegate proxy as data source");
-      ok(elem.jquery, "passes a jQuery object as first parameter"); 
+      ok(elem.jquery, "passes a jQuery object as first parameter");
       updateCallCount++;
-    }  
+    }
   });
 
   view = SC.View.create({
@@ -87,6 +93,9 @@ test("Passes data source as first parameter if render delegate is not the view",
   view.updateLayer();
   equals(renderCallCount, 1, "calls render once");
   equals(updateCallCount, 1, "calls update once");
+
+  // Clean up.
+  view.destroy();
 });
 
 test("Extending view with render delegate by implementing old render method", function() {
@@ -108,10 +117,10 @@ test("Extending view with render delegate by implementing old render method", fu
       sc_super();
     }
   });
-  
+
   childView.createLayer();
   childView.updateLayer();
-  
+
   equals(renderCalls, 1, "calls render on render delegate once");
   equals(updateCalls, 1, "calls update on render delegates once");
 });
@@ -121,42 +130,42 @@ test("Views that do not override render should render their child views", functi
 
   var parentView = SC.View.design({
     childViews: 'newStyle oldStyle renderDelegateView'.w(),
-    
+
     newStyle: SC.View.design({
       render: function(context) {
         newStyleCount++;
       },
-      
+
       update: function() {
         // no op
       }
     }),
-    
+
     oldStyle: SC.View.design({
       render: function(context, firstTime) {
         oldStyleCount++;
       }
     }),
-    
+
     renderDelegateView: SC.View.design({
       renderDelegate: SC.Object.create({
         render: function(dataSource, context) {
           ok(dataSource.isViewRenderDelegateProxy, "Render delegate should get passed a view's proxy for its data source");
           renderDelegateCount++;
         },
-        
+
         update: function() {
           // no op
         }
       })
     })
   });
-  
+
   parentView = parentView.create();
-  
+
   parentView.createLayer();
   parentView.updateLayer();
-  
+
   equals(newStyleCount, 1, "calls render on new style view once");
   equals(oldStyleCount, 1, "calls render on old style view once");
   equals(renderDelegateCount, 1, "calls render on render delegate once");

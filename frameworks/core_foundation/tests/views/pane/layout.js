@@ -15,13 +15,14 @@ module("SC.Pane#layout", {
     });
     pane.append();
   },
-  
+
   teardown: function() {
     pane.remove();
+    pane.destroy();
   }
 });
 
-test("make sure that a call to adjust actually adjusts the view's size", function() {  
+test("make sure that a call to adjust actually adjusts the view's size", function() {
   SC.RunLoop.begin();
   pane.adjust({ width: 100, height: 50 });
   SC.RunLoop.end();

@@ -42,6 +42,7 @@ var commonSetup = {
 
   teardown: function () {
     pane.remove();
+    pane.destroy();
   }
 };
 

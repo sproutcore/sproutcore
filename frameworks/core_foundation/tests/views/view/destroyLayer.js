@@ -77,6 +77,8 @@ test("returns receiver", function () {
   no longer has a parent view and would return undefined for its `layer`.
 
   This left elements in the DOM.
+
+  UPDATE:  The addition of the SC.View statechart prevents this from happening.
 */
 test("Tests that if the childView's layer was never cached and the childView is removed, it should still destroy the childView's layer", function () {
   var childView,
@@ -99,7 +101,12 @@ test("Tests that if the childView's layer was never cached and the childView is 
   ok(document.getElementById(layerId), 'child layer should be in the DOM');
   ok(!childView._view_layer, 'child view should not have cached its layer');
   view.removeChild(childView);
-  ok(document.getElementById(layerId), 'child layer should be in the DOM');
+  // Before SC.View states, this would be the case
+  // ok(document.getElementById(layerId), 'child layer should be in the DOM');
+  ok(!document.getElementById(layerId), 'child layer should not be in the DOM');
   childView.destroy();
   ok(!document.getElementById(layerId), 'child layer should not be in the DOM');
+
+  pane.remove();
+  pane.destroy();
 });

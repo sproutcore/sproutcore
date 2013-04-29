@@ -22,9 +22,10 @@ module("SC.View#clippingFrame", {
     a = pane.childViews[0];
     aa = a.childViews[0];
   },
-  
-  teardown: function() { 
+
+  teardown: function() {
     pane.remove();
+    pane.destroy();
     pane = a = aa = null ;
     SC.RunLoop.end();
     clearHtmlbody();
@@ -47,7 +48,7 @@ test("clippingFrame === frame w/ 0 offset if not partially hidden", function() {
 
 test("cuts off top of frame", function() {
   var result, expected;
-  
+
   a.adjust('top', -50);
   result = a.get('clippingFrame'); expected = a.get('frame');
   expected.x = 0 ; expected.y = 50 ; expected.height = 50 ;
@@ -60,7 +61,7 @@ test("cuts off top of frame", function() {
 
 test("cuts off bottom of frame", function() {
   var result, expected;
-  
+
   a.adjust('top', 150);
   result = a.get('clippingFrame'); expected = a.get('frame');
   expected.x = 0 ; expected.y = 0 ; expected.height = 50 ;
@@ -73,7 +74,7 @@ test("cuts off bottom of frame", function() {
 
 test("cuts off left of frame", function() {
   var result, expected;
-  
+
   a.adjust('left', -50);
   result = a.get('clippingFrame'); expected = a.get('frame');
   expected.y = 0 ; expected.x = 50 ; expected.width = 50 ;
@@ -86,7 +87,7 @@ test("cuts off left of frame", function() {
 
 test("cuts off right of frame", function() {
   var result, expected;
-  
+
   a.adjust('left', 150);
   result = a.get('clippingFrame'); expected = a.get('frame');
   expected.y = 0 ; expected.x = 0 ; expected.width = 50 ;
@@ -99,19 +100,19 @@ test("cuts off right of frame", function() {
 
 test("notifies receiver and each child if parent clipping frame changes", function() {
   var callCount = 0;
-  
+
   // setup observers
   function observer() { callCount++; }
   a.addObserver('clippingFrame', observer);
   aa.addObserver('clippingFrame', observer);
-  
+
   // now, adjust layout of child so that clipping frame will change...
   a.adjust('top', -50);
-  
+
   // IMPORTANT:  If this test fails because the callCount is > 2 it means that
   // when you set the layout, the frame is getting invalidated more than once.
   // This should not happen.  If this is the case, fix the view code so that
-  // it does not invalidate frame more than once before you change this 
+  // it does not invalidate frame more than once before you change this
   // number.
   equals(callCount, 2, 'should invoke observer on child and nested child');
 });

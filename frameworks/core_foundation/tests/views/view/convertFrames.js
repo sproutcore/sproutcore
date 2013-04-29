@@ -9,8 +9,8 @@
 
 // ..........................................................
 // COMMON SETUP CODE
-// 
-var pane, a, b, aa, aaa, bb, f ; 
+//
+var pane, a, b, aa, aaa, bb, f ;
 var A_LEFT = 10, A_TOP = 10, B_LEFT = 100, B_TOP = 100;
 
 function setupFrameViews() {
@@ -30,19 +30,20 @@ function setupFrameViews() {
       .childView(SC.View.design()
         .layout({ top: B_TOP, left: B_LEFT, width: 10, height: 10 })))
     .create();
-        
+
   a = pane.childViews[0];
   b = pane.childViews[1];
   aa = a.childViews[0];
   aaa = aa.childViews[0];
   bb = b.childViews[0];
-  
+
   f = { x: 10, y: 10, width: 10, height: 10 };
   pane.append();
 }
 
 function teardownFrameViews() {
   pane.remove() ;
+  pane.destroy();
   pane = a = aa = aaa = b = bb = null ;
   clearHtmlbody();
 }
