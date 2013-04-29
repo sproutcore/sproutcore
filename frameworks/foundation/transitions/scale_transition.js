@@ -13,10 +13,10 @@ SC.mixin(SC.View,
     @extends SC.TransitionProtocol
     @since Version 1.10
   */
-  SCALE_IN: {
+  SCALE: {
 
     /** @private */
-    setup: function (view, options) {
+    setupIn: function (view, options) {
       // Cache the original scale on the view, so that we can reset properly.
       view._preScaleInScale = view.get('layout').scale;
 
@@ -24,7 +24,7 @@ SC.mixin(SC.View,
     },
 
     /** @private */
-    run: function (view, options) {
+    runIn: function (view, options) {
       var transition = this;
 
       view.animate('scale', view._preScaleInScale || 1, {
@@ -37,38 +37,28 @@ SC.mixin(SC.View,
     },
 
     /** @private */
-    cancel: function (view, options) {
+    cancelIn: function (view, options) {
       view.cancelAnimation();
       this.teardown(view, options);
     },
 
     /** @private */
-    teardown: function (view, options) {
+    teardownIn: function (view, options) {
       // Reset the scale to its original value (may be undefined).
       view.adjust({ scale: view._preScaleInScale || null });
 
       // Clean up.
       delete view._preScaleInScale;
-    }
-
-  },
-
-  /** @class
-
-    @extends SC.TransitionProtocol
-    @see SC.View#animate for other timing functions.
-    @since Version 1.10
-  */
-  SCALE_OUT: {
+    },
 
     /** @private */
-    setup: function (view, options) {
+    setupOut: function (view, options) {
       // Cache the original scale on the view, so that we can reset properly.
       view._preScaleOutScale = view.get('layout').scale;
     },
 
     /** @private */
-    run: function (view, options) {
+    runOut: function (view, options) {
       var transition = this;
 
       view.animate('scale', 0, {
@@ -81,13 +71,13 @@ SC.mixin(SC.View,
     },
 
     /** @private */
-    cancel: function (view, options) {
+    cancelOut: function (view, options) {
       view.cancelAnimation();
       this.teardown(view, options);
     },
 
     /** @private */
-    teardown: function (view, options) {
+    teardownOut: function (view, options) {
       // Reset the scale to its original value (may be undefined).
       view.adjust({ scale: view._preScaleOutScale || null });
 

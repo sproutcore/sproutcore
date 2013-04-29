@@ -14,10 +14,10 @@ SC.mixin(SC.View,
     @see SC.View#animate for other timing functions.
     @since Version 1.10
   */
-  MOVE_IN: {
+  MOVE: {
 
     /** @private */
-    setup: function (view, options) {
+    setupIn: function (view, options) {
       var parentView = view.get('parentView'),
         parentFrame,
         viewFrame = view.get('borderFrame'),
@@ -26,6 +26,11 @@ SC.mixin(SC.View,
         height,
         width;
 
+      // Cache the original layout and frame on the view, so that we can reset properly.
+      view._preMoveInFrame = viewFrame;
+      view._preMoveInLayout = SC.clone(view.get('layout'));
+
+      console.log("%@ layout: %@".fmt(view, SC.stringFromLayout(view._preMoveInLayout)));
       // If there is no parentView, use the window's frame.
       if (parentView) {
         parentFrame = parentView.get('borderFrame');
@@ -50,14 +55,12 @@ SC.mixin(SC.View,
         left = -width;
       }
 
-      // Cache the original layout and frame on the view, so that we can reset properly.
-      view._preMoveInFrame = viewFrame;
-      view._preMoveInLayout = SC.clone(view.get('layout'));
+      // Convert to a HW accelerated layout.
       view.adjust({ bottom: null, left: left || viewFrame.x, right: null, top: top || viewFrame.y, height: viewFrame.height, width: viewFrame.width });
     },
 
     /** @private */
-    run: function (view, options) {
+    runIn: function (view, options) {
       var viewFrame = view._preMoveInFrame,
         key,
         value,
@@ -81,33 +84,23 @@ SC.mixin(SC.View,
     },
 
     /** @private */
-    cancel: function (view, options) {
+    cancelIn: function (view, options) {
       view.cancelAnimation();
       this.teardown(view, options);
     },
 
     /** @private */
-    teardown: function (view, options) {
+    teardownIn: function (view, options) {
       // Reset the layout to its original value.
-      view.adjust(view._preMoveInLayout);
+      view.set('layout', view._preMoveInLayout);
 
       // Clean up.
       view._preMoveInLayout = null;
       view._preMoveInFrame = null;
-    }
-
-  },
-
-  /** @class
-
-    @extends SC.TransitionProtocol
-    @see SC.View#animate for other timing functions.
-    @since Version 1.10
-  */
-  MOVE_OUT: {
+    },
 
     /** @private */
-    setup: function (view, options) {
+    setupOut: function (view, options) {
       var viewFrame = view.get('borderFrame'),
         left = viewFrame.x,
         top = viewFrame.y,
@@ -119,7 +112,7 @@ SC.mixin(SC.View,
     },
 
     /** @private */
-    run: function (view, options) {
+    runOut: function (view, options) {
       var viewFrame = view.get('borderFrame'),
         parentView = view.get('parentView'),
         parentFrame,
@@ -161,15 +154,15 @@ SC.mixin(SC.View,
     },
 
     /** @private */
-    cancel: function (view, options) {
+    cancelOut: function (view, options) {
       view.cancelAnimation();
       this.teardown(view, options);
     },
 
     /** @private */
-    teardown: function (view, options) {
+    teardownOut: function (view, options) {
       // Convert to previous layout.
-      view.adjust(view._preMoveOutLayout);
+      view.set('layout', view._preMoveOutLayout);
 
       // Clean up.
       view._preMoveOutLayout = null;

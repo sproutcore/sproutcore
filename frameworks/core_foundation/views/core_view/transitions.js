@@ -59,15 +59,14 @@ SC.CoreView.reopen(
     SC.View uses a pluggable transition architecture where the transition setup,
     execution and cleanup can be handled by a specified transition plugin.
 
-    There are a number of pre-built transition out plugins available in the
+    There are a number of pre-built transition plugins available in the
     foundation framework:
 
-      SC.View.BOUNCE_OUT
-      SC.View.FADE_OUT
-      SC.View.MOVE_OUT
-      SC.View.POP_OUT
-      SC.View.SCALE_OUT
-      SC.View.SPRING_OUT
+      SC.View.BOUNCE
+      SC.View.FADE
+      SC.View.MOVE
+      SC.View.SCALE
+      SC.View.SPRING
 
     You can even provide your own custom transition plugins.  Just create a
     transition object that conforms to the SC.TransitionProtocol protocol.
@@ -87,7 +86,7 @@ SC.CoreView.reopen(
     see the documentation for the transition plugin being used.
 
     Most transitions will accept a duration and timing option, but may
-    also use other options.  For example, SC.View.MOVE_OUT accepts options
+    also use other options.  For example, SC.View.MOVE accepts options
     like:
 
         transitionOutOptions: {
@@ -109,15 +108,14 @@ SC.CoreView.reopen(
     SC.CoreView uses a pluggable transition architecture where the transition setup,
     execution and cleanup can be handled by a specified transition plugin.
 
-    There are a number of pre-built transition show plugins available in the
+    There are a number of pre-built transition plugins available in the
     foundation framework:
 
-      SC.View.BOUNCE_IN
-      SC.View.FADE_IN
-      SC.View.MOVE_IN
-      SC.View.POP_IN
-      SC.View.SCALE_IN
-      SC.View.SPRING_IN
+      SC.View.BOUNCE
+      SC.View.FADE
+      SC.View.MOVE
+      SC.View.SCALE
+      SC.View.SPRING
 
     You can even provide your own custom transition plugins.  Just create a
     transition object that conforms to the SC.TransitionProtocol protocol.
@@ -137,7 +135,7 @@ SC.CoreView.reopen(
     see the documentation for the transition plugin being used.
 
     Most transitions will accept a duration and timing option, but may
-    also use other options.  For example, SC.View.MOVE_IN accepts options
+    also use other options.  For example, SC.View.MOVE accepts options
     like:
 
         transitionShowOptions: {
@@ -158,15 +156,14 @@ SC.CoreView.reopen(
     SC.View uses a pluggable transition architecture where the transition setup,
     execution and cleanup can be handled by a specified transition plugin.
 
-    There are a number of pre-built transition hide plugins available in the
+    There are a number of pre-built transition plugins available in the
     foundation framework:
 
-      SC.View.BOUNCE_OUT
-      SC.View.FADE_OUT
-      SC.View.MOVE_OUT
-      SC.View.POP_OUT
-      SC.View.SCALE_OUT
-      SC.View.SPRING_OUT
+      SC.View.BOUNCE
+      SC.View.FADE
+      SC.View.MOVE
+      SC.View.SCALE
+      SC.View.SPRING
 
     You can even provide your own custom transition plugins.  Just create a
     transition object that conforms to the SC.TransitionProtocol protocol.
@@ -186,7 +183,7 @@ SC.CoreView.reopen(
     see the documentation for the transition plugin being used.
 
     Most transitions will accept a duration and timing option, but may
-    also use other options.  For example, SC.View.MOVE_OUT accepts options
+    also use other options.  For example, SC.View.MOVE accepts options
     like:
 
         transitionHideOptions: {

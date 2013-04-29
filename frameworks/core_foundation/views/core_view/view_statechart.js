@@ -470,8 +470,8 @@ SC.CoreView.reopen(
     var state = this.get('currentState');
 
     // Clean up the transition if the plugin supports it.
-    if (transition.teardown) {
-      transition.teardown(this, options);
+    if (transition.teardownIn) {
+      transition.teardownIn(this, options);
     }
 
     // Route.
@@ -485,8 +485,8 @@ SC.CoreView.reopen(
     var state = this.get('currentState');
 
     // Clean up the transition if the plugin supports it.
-    if (transition.teardown) {
-      transition.teardown(this, options);
+    if (transition.teardownOut) {
+      transition.teardownOut(this, options);
     }
 
     // Route.
@@ -739,12 +739,12 @@ SC.CoreView.reopen(
       options = this.get('transitionInOptions') || {};
 
     // Prep the transition if the plugin supports it.
-    if (transitionIn.setup) {
-      transitionIn.setup(this, options);
+    if (transitionIn.setupIn) {
+      transitionIn.setupIn(this, options);
     }
 
     // Execute the transition.
-    transitionIn.run(this, options);
+    transitionIn.runIn(this, options);
   },
 
   /** @private */
@@ -756,12 +756,12 @@ SC.CoreView.reopen(
       options = this.get('transitionOutOptions') || {};
 
     // Prep the transition if the plugin supports it.
-    if (transitionOut.setup) {
-      transitionOut.setup(this, options);
+    if (transitionOut.setupOut) {
+      transitionOut.setupOut(this, options);
     }
 
     // Execute the transition.
-    transitionOut.run(this, options);
+    transitionOut.runOut(this, options);
   },
 
   /** @private */
@@ -793,12 +793,12 @@ SC.CoreView.reopen(
       options = this.get('transitionHideOptions') || {};
 
     // Prep the transition if the plugin supports it.
-    if (transitionHide.setup) {
-      transitionHide.setup(this, options);
+    if (transitionHide.setupOut) {
+      transitionHide.setupOut(this, options);
     }
 
     // Execute the transition.
-    transitionHide.run(this, options);
+    transitionHide.runOut(this, options);
   },
 
   /** @private */
@@ -811,12 +811,12 @@ SC.CoreView.reopen(
       options = this.get('transitionShowOptions') || {};
 
     // Prep the transition if the plugin supports it.
-    if (transitionShow.setup) {
-      transitionShow.setup(this, options);
+    if (transitionShow.setupIn) {
+      transitionShow.setupIn(this, options);
     }
 
     // Execute the transition.
-    transitionShow.run(this, options);
+    transitionShow.runIn(this, options);
   },
 
   /** @private */

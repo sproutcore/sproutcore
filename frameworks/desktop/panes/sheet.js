@@ -61,7 +61,7 @@ SC.SheetPane = SC.PanelPane.extend(
     timing: 'ease-in-out',
 
     /** @private */
-    transitionIn: SC.View.MOVE_IN,
+    transitionIn: SC.View.MOVE,
 
     /** @private */
     transitionInOptions: function () {
@@ -74,7 +74,7 @@ SC.SheetPane = SC.PanelPane.extend(
 
 
     /** @private */
-    transitionOut: SC.View.MOVE_OUT,
+    transitionOut: SC.View.MOVE,
 
     /** @private */
     transitionOutOptions: function () {

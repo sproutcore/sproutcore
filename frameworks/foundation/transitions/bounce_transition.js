@@ -13,10 +13,10 @@ SC.mixin(SC.View,
     @extends SC.TransitionProtocol
     @since Version 1.10
   */
-  BOUNCE_IN: {
+  BOUNCE: {
 
     /** @private */
-    setup: function (view, options) {
+    setupIn: function (view, options) {
       var parentView = view.get('parentView'),
         parentFrame,
         viewFrame = view.get('borderFrame'),
@@ -56,7 +56,7 @@ SC.mixin(SC.View,
     },
 
     /** @private */
-    run: function (view, options) {
+    runIn: function (view, options) {
       var layout = view.get('layout'),
         bounciness = options.bounciness || 0.25,
         bounce,
@@ -120,32 +120,23 @@ SC.mixin(SC.View,
     },
 
     /** @private */
-    cancel: function (view, options) {
+    cancelIn: function (view, options) {
       view.cancelAnimation();
       this.teardown(view, options);
     },
 
     /** @private */
-    teardown: function (view, options) {
+    teardownIn: function (view, options) {
       // Reset the layout to its original value.
-      view.adjust(view._preBounceInLayout);
+      view.set('layout', view._preBounceInLayout);
 
       // Clean up.
       view._preBounceInLayout = null;
       view._preBounceInFrame = null;
-    }
-
-  },
-
-  /** @class
-
-    @extends SC.TransitionProtocol
-    @since Version 1.10
-  */
-  BOUNCE_OUT: {
+    },
 
     /** @private */
-    setup: function (view, options) {
+    setupOut: function (view, options) {
       var viewFrame = view.get('borderFrame'),
         left = viewFrame.x,
         top = viewFrame.y,
@@ -157,7 +148,7 @@ SC.mixin(SC.View,
     },
 
     /** @private */
-    run: function (view, options) {
+    runOut: function (view, options) {
       var bounciness = options.bounciness || 0.25,
         bounce,
         bounceValue,
@@ -231,15 +222,15 @@ SC.mixin(SC.View,
     },
 
     /** @private */
-    cancel: function (view, options) {
+    cancelOut: function (view, options) {
       view.cancelAnimation();
       this.teardown(view, options);
     },
 
     /** @private */
-    teardown: function (view, options) {
+    teardownOut: function (view, options) {
       // Convert to previous layout.
-      view.adjust(view._preBounceOutLayout);
+      view.set('layout', view._preBounceOutLayout);
 
       // Clean up.
       view._preBounceOutLayout = null;
