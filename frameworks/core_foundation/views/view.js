@@ -604,7 +604,12 @@ SC.CoreView.reopen(
 
     // We pass true for the second argument to support the old style of render.
     this.render(context, true);
-    this.renderChildViews(context);
+
+    // If we've made it this far and renderChildViews() was never called,
+    // render any child views now.
+    if (!this._didRenderChildViews) { this.renderChildViews(context); }
+    // Reset the flag so that if the layer is recreated we re-render the child views.
+    this._didRenderChildViews = false;
 
     if (mixins = this.renderMixin) {
       len = mixins.length;
@@ -790,6 +795,10 @@ SC.CoreView.reopen(
       view.renderToContext(context);
       context = context.end();
     }
+
+    // Track that renderChildViews was called in case it was called directly
+    // in a render method.
+    this._didRenderChildViews = true;
 
     return context;
   },
