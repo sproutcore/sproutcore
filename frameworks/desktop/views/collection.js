@@ -1032,14 +1032,22 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     @returns {SC.View} instantiated view
   */
   itemViewForContentIndex: function (idx, rebuild) {
-    var ret;
+    var ret,
+      views;
 
-    // Use an existing view for this index if we have it.
-    var views = this._sc_itemViews;
-    if (!views) {
-      views = this._sc_itemViews = [];
-    } else if (!rebuild && (ret = views[idx])) {
-      return ret;
+    // Initialize internal views cache.
+    views = this._sc_itemViews;
+    if (!views) { views = this._sc_itemViews = []; }
+
+    // Use an existing view for this index if we have it and aren't rebuilding all.
+    ret = views[idx];
+    if (ret) {
+      if (rebuild) {
+        ret.destroy();
+        ret = null;
+      } else {
+        return ret;
+      }
     }
 
     var attrs,
