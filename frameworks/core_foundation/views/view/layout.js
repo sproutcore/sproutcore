@@ -837,7 +837,19 @@ SC.View.reopen(
       this._viewFrameDidChange();
     }
 
-    this.invokeOnce(this._doUpdateLayout);
+    // Notify layoutView/parentView.
+    var layoutView = this.get('layoutView');
+    if (layoutView) {
+      layoutView.set('childViewsNeedLayout', YES);
+      layoutView.layoutDidChangeFor(this);
+
+      // Check if childViewsNeedLayout is still true.
+      if (layoutView.get('childViewsNeedLayout')) {
+        layoutView.invokeOnce(layoutView.layoutChildViewsIfNeeded);
+      }
+    } else {
+      this.invokeOnce(this._doUpdateLayout);
+    }
 
     // Cache the last layout to fine-tune notifications when the layout changes.
     this._previousLayout = currentLayout;
@@ -888,11 +900,11 @@ SC.View.reopen(
     @test in layoutChildViews
   */
   layoutChildViewsIfNeeded: function (force) {
-    if (!force) force = this.get('isVisibleInWindow');
-    if (force && this.get('childViewsNeedLayout')) {
+    if (this.get('childViewsNeedLayout')) {
       this.set('childViewsNeedLayout', NO);
-      this.layoutChildViews();
+      this.layoutChildViews(force);
     }
+
     return this;
   },
 
@@ -902,17 +914,19 @@ SC.View.reopen(
     own layout updating method if you want, though usually the better option
     is to override the layout method from the parent view.
 
-    The default implementation of this method simply calls the renderLayout()
+    The default implementation of this method simply calls the updateLayout()
     method on the views that need layout.
 
+    @param {Boolean} force Force the update to the layer's layout style immediately even if the view is not in a shown state.  Otherwise the style will be updated when the view returns to a shown state.
     @returns {void}
   */
-  layoutChildViews: function () {
+  layoutChildViews: function (force) {
     var set = this._needLayoutViews,
-        len = set ? set.length : 0,
-        i;
+      len = set ? set.length : 0,
+      i;
+
     for (i = 0; i < len; ++i) {
-      set[i].updateLayout();
+      set[i].updateLayout(force);
     }
     set.clear(); // reset & reuse
   },
@@ -948,7 +962,6 @@ SC.View.reopen(
   */
   renderLayout: function (context) {
     context.setStyle(this.get('layoutStyle'));
-    this.didRenderAnimations();
   },
 
   applyAttributesToContext: function (original, context) {
