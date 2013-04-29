@@ -28,12 +28,16 @@ module('ContentDisplay', {
 });
 
 test('should dirty layer when content changes', function () {
-  view.set('content', contentB);
+  SC.run(function () {
+    view.set('content', contentB);
+  });
   ok(view.get('layerNeedsUpdate'));
 });
 
 test('should dirty layer when any of contentDisplayProperties change', function () {
-  contentA.set('foo', 'newFoo');
+  SC.run(function () {
+    contentA.set('foo', 'newFoo');
+  });
   ok(view.get('layerNeedsUpdate'));
 });
 
@@ -46,7 +50,9 @@ test('should stop observing old content when content changes', function () {
 test('should begin observing new content when content changes', function () {
   view.set('content', contentB);
   view.set('layerNeedsUpdate', NO);
-  contentB.set('bar', 'newBar');
+  SC.run(function () {
+    contentB.set('bar', 'newBar');
+  });
   ok(view.get('layerNeedsUpdate'));
 });
 

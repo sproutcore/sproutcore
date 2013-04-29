@@ -32,7 +32,7 @@
   pane.add("cleans-up-views", SC.ContainerView, {
     nowShowing: 'uninstantiatedView',
 
-    uninstantiatedView: SC.View.design({})
+    uninstantiatedView: SC.View
   });
 
     // .add("disabled - single selection", SC.ListView, {
@@ -152,15 +152,15 @@
 
     var contentView = view.get('contentView');
     SC.run(function() { view.set('nowShowing', SC.View.create()); });
-    equals(contentView.isDestroyed, YES, "should have destroyed the view it instantiated (from path)");
+    equals(contentView.isDestroyed, YES, "should have destroyed the previous view it instantiated (from path)");
 
     contentView = view.get('contentView');
-    SC.run(function() { view.set('nowShowing', SC.View.design()); });
-    equals(contentView.isDestroyed, NO, "should not have destroyed the view because it was already instantiated");
+    SC.run(function() { view.set('nowShowing', SC.View.extend()); });
+    equals(contentView.isDestroyed, NO, "should not have destroyed the previous view because it was already instantiated");
 
     contentView = view.get('contentView');
     SC.run(function() { view.set('nowShowing', null); });
-    equals(contentView.isDestroyed, YES, "should have destroyed the view it instantiated (from class)");
+    equals(contentView.isDestroyed, YES, "should have destroyed the previous view it instantiated (from class)");
   });
 
 })();
