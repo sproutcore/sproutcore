@@ -2963,14 +2963,12 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   //
 
   /** @private - when we become visible, reload if needed. */
-  _cv_isVisibleInWindowDidChange: function () {
-    if (this.get('isVisibleInWindow')) {
-      if (this._invalidIndexes) this.invokeOnce(this.reloadIfNeeded);
-      if (this._invalidSelection) {
-        this.invokeOnce(this.reloadSelectionIndexesIfNeeded);
-      }
+  willShowInDocument: function () {
+    if (this._invalidIndexes) this.invokeOnce(this.reloadIfNeeded);
+    if (this._invalidSelection) {
+      this.invokeOnce(this.reloadSelectionIndexesIfNeeded);
     }
-  }.observes('isVisibleInWindow'),
+  },
 
 
   /**
