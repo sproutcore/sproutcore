@@ -1172,7 +1172,7 @@ SC.CoreView.reopen(
     if (view.get('transitionOut') && !immediately) {
       view.addObserver('isAttached', this, this._destroyChildView);
     } else {
-      view._destroy(); // Destroys the layer and the view.
+      view.destroy(); // Destroys the layer and the view.
     }
 
     return this;
