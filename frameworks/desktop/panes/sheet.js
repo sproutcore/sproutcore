@@ -60,69 +60,30 @@ SC.SheetPane = SC.PanelPane.extend(
      */
     timing: 'ease-in-out',
 
-    /**
-     Displays the pane.  SheetPane will calculate the height of your pane, draw it offscreen, then
-     animate it down so that it is attached to the top of the viewport.
-
-     @returns {SC.SheetPane} receiver
-     */
-    append: function () {
-      this.slideDown();
-      return sc_super();
-    },
-
-    /**
-     Animates the sheet up, then removes it from the DOM once it is hidden from view.
-
-     @returns {SC.SheetPane} receiver
-     */
-    remove: function () {
-      // We want the functionality of `SC.PanelPane.remove()`, but we only want it once the animation is complete.
-      // Store the reference to the superclass function, and it call it after the transition is complete.
-      var that = this, args = arguments;
-      this.slideUp(function () {
-        args.callee.base.apply(that, args);
-      });
-      return this;
-    },
-
-    /** @private
-     Once the pane has been rendered out to the DOM, begin the animation.
-     */
-    paneDidAttach: function () {
-      var ret = sc_super();
-      this.invokeLast(this.slideDown, this);
-      return ret;
-    },
+    /** @private */
+    transitionIn: SC.View.MOVE_IN,
 
     /** @private */
-    slideDown: function (callback) {
-      var height = this._computeHeight();
-      this.adjust('top', -height);
-      this.animate('top', 0, {
+    transitionInOptions: function () {
+      return {
+        direction: 'down',
         duration: this.get('duration'),
-        timing: this.get('timing'),
-        callback: callback
-      });
-    },
+        timing: this.get('timing')
+      };
+    }.property('timing', 'duration').cacheable(),
+
 
     /** @private */
-    slideUp: function (callback) {
-      var height = this._computeHeight();
-      this.animate('top', -height, {
-        duration: this.get('duration'),
-        timing: this.get('timing'),
-        callback: callback
-      });
-    },
+    transitionOut: SC.View.MOVE_OUT,
 
-    _computeHeight: function () {
-      var layout = this.get('layout');
-      if (!layout.height || !layout.top) {
-        layout = SC.View.convertLayoutToAnchoredLayout(layout, this.computeParentDimensions());
-      }
-      return layout.height;
-    }
+    /** @private */
+    transitionOutOptions: function () {
+      return {
+        direction: 'up',
+        duration: this.get('duration'),
+        timing: this.get('timing')
+      };
+    }.property('timing', 'duration').cacheable()
 
   });
 
