@@ -336,6 +336,9 @@ SC.CoreView.reopen(
       isShown = this.get('isShown'),
       handled = true;
 
+    // Legacy.
+    this.set('layerNeedsUpdate', true);
+
     if (_isRendered) {
       if (isShown ||
         this.get('currentState') === SC.CoreView.State.ATTACHED_HIDING ||
@@ -1107,6 +1110,9 @@ SC.CoreView.reopen(
     //     this._notifyDidAppendToDocument();
     //   }
     // }
+
+    // Legacy.
+    this.set('layerNeedsUpdate', false);
 
     // Reset that an update is required.
     this._contentNeedsUpdate = false;
