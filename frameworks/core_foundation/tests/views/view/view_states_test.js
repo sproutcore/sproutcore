@@ -34,7 +34,7 @@ test("Test unrendered state.", function () {
   equals(view.currentState, SC.CoreView.State.UNRENDERED, "A newly created view should be in the state");
   ok(!view.get('isAttached'), "isAttached should be false");
   ok(!view.get('_isRendered'), "_isRendered should be false");
-  ok(!view.get('isShown'), "isShown should be false");
+  ok(!view.get('isVisibleInWindow'), "isVisibleInWindow should be false");
 
   // _doAttach(document.body)
   // _doDestroyLayer()
@@ -97,7 +97,7 @@ test("Test unattached state.", function () {
   equals(view.currentState, SC.CoreView.State.UNATTACHED, "A newly created view that is rendered should be in the state");
   ok(!view.get('isAttached'), "isAttached should be false");
   ok(view.get('_isRendered'), "_isRendered should be true");
-  ok(!view.get('isShown'), "isShown should be false");
+  ok(!view.get('isVisibleInWindow'), "isVisibleInWindow should be false");
 
   // _doAttach(document.body)
   // _doDestroyLayer()
@@ -183,7 +183,7 @@ test("Test attached_shown state.", function () {
   equals(view.currentState, SC.CoreView.State.ATTACHED_SHOWN, "A newly created orphan view that is rendered and attached should be in the state");
   ok(view.get('isAttached'), "isAttached should be true");
   ok(view.get('_isRendered'), "_isRendered should be true");
-  ok(view.get('isShown'), "isShown should be true");
+  ok(view.get('isVisibleInWindow'), "isVisibleInWindow should be true");
 
   // _doAttach(document.body)
   // _doDestroyLayer()
@@ -269,7 +269,7 @@ test("Test adding a child brings that child to the same state as the parent.", f
   equals(child.currentState, SC.CoreView.State.UNRENDERED, "A newly created child view of unrendered parent's child view should be in the state");
   ok(!view.get('_isRendered'), "_isRendered should be false");
   ok(!view.get('isAttached'), "isAttached should be false");
-  ok(!view.get('isShown'), "isShown should be false");
+  ok(!view.get('isVisibleInWindow'), "isVisibleInWindow should be false");
 
   // Render the view.
   view._doRender();
@@ -277,7 +277,7 @@ test("Test adding a child brings that child to the same state as the parent.", f
   equals(child.currentState, SC.CoreView.State.UNATTACHED, "A rendered child view of unrendered parent's child view should be in the state");
   ok(view.get('_isRendered'), "_isRendered should be true");
   ok(!view.get('isAttached'), "isAttached should be false");
-  ok(!view.get('isShown'), "isShown should be false");
+  ok(!view.get('isVisibleInWindow'), "isVisibleInWindow should be false");
 
   // Attach the view.
   view._doAttach(document.body);
@@ -285,7 +285,7 @@ test("Test adding a child brings that child to the same state as the parent.", f
   equals(child.currentState, SC.CoreView.State.ATTACHED_HIDDEN, "An attached child view of unrendered parent's child view should be in the state");
   ok(view.get('_isRendered'), "_isRendered should be true");
   ok(view.get('isAttached'), "isAttached should be true");
-  ok(!view.get('isShown'), "isShown should be false");
+  ok(!view.get('isVisibleInWindow'), "isVisibleInWindow should be false");
 
   // Reset
   view.destroy();
@@ -299,7 +299,7 @@ test("Test adding a child brings that child to the same state as the parent.", f
   equals(child.currentState, SC.CoreView.State.UNATTACHED, "A newly created child view of unattached parent's child view should be in the state");
   ok(view.get('_isRendered'), "_isRendered should be true");
   ok(!view.get('isAttached'), "isAttached should be false");
-  ok(!view.get('isShown'), "isShown should be false");
+  ok(!view.get('isVisibleInWindow'), "isVisibleInWindow should be false");
 
   // Attach the view.
   view._doAttach(document.body);
@@ -307,7 +307,7 @@ test("Test adding a child brings that child to the same state as the parent.", f
   equals(child.currentState, SC.CoreView.State.ATTACHED_HIDDEN, "An attached child view of unattached parent's child view should be in the state");
   ok(view.get('_isRendered'), "_isRendered should be true");
   ok(view.get('isAttached'), "isAttached should be true");
-  ok(!view.get('isShown'), "isShown should be false");
+  ok(!view.get('isVisibleInWindow'), "isVisibleInWindow should be false");
 
   // Reset
   view.destroy();
@@ -321,7 +321,7 @@ test("Test adding a child brings that child to the same state as the parent.", f
   equals(child.currentState, SC.CoreView.State.ATTACHED_SHOWN, "A newly created child view of unattached parent's child view should be in the state");
   ok(view.get('_isRendered'), "_isRendered should be true");
   ok(view.get('isAttached'), "isAttached should be true");
-  ok(view.get('isShown'), "isShown should be true");
+  ok(view.get('isVisibleInWindow'), "isVisibleInWindow should be true");
 
 
   // CLEAN UP
@@ -341,7 +341,7 @@ test("Test showing and hiding parent updates child views.", function () {
   equals(parent.currentState, SC.CoreView.State.ATTACHED_SHOWN, "A newly created parent that is attached should be in the state");
   equals(view.currentState, SC.CoreView.State.ATTACHED_SHOWN, "A newly created child view of unattached parent should be in the state");
   equals(child.currentState, SC.CoreView.State.ATTACHED_SHOWN, "A newly created child view of unattached parent's child view should be in the state");
-  ok(view.get('isShown'), "isShown should be true");
+  ok(view.get('isVisibleInWindow'), "isVisibleInWindow should be true");
   ok(!view.get('_isHiddenBySelf'), "_isHiddenBySelf should be false");
   ok(!view.get('_isHiddenByAncestor'), "_isHiddenByAncestor should be false");
 
@@ -352,7 +352,7 @@ test("Test showing and hiding parent updates child views.", function () {
   equals(child.currentState, SC.CoreView.State.ATTACHED_HIDDEN, "A child view of attached_hidden parent's child view should be in the state");
   ok(parent.get('_isHiddenBySelf'), "_isHiddenBySelf of child should be true");
   ok(!parent.get('_isHiddenByAncestor'), "_isHiddenByAncestor of child should be false");
-  ok(!view.get('isShown'), "isShown should be false");
+  ok(!view.get('isVisibleInWindow'), "isVisibleInWindow should be false");
   ok(!view.get('_isHiddenBySelf'), "_isHiddenBySelf should be false now");
   ok(view.get('_isHiddenByAncestor'), "_isHiddenByAncestor should be true now");
 
@@ -389,7 +389,7 @@ test("Test showing and hiding parent updates child views.", function () {
   // Add child to already hidden parent.
   equals(view.currentState, SC.CoreView.State.ATTACHED_HIDDEN, "A child view of attached_hidden parent should be in the state");
   equals(child.currentState, SC.CoreView.State.ATTACHED_HIDDEN, "A child view of attached_hidden parent's child view should be in the state");
-  ok(!view.get('isShown'), "isShown should be false");
+  ok(!view.get('isVisibleInWindow'), "isVisibleInWindow should be false");
   ok(!view.get('_isHiddenBySelf'), "_isHiddenBySelf should be false on add");
   ok(view.get('_isHiddenByAncestor'), "_isHiddenByAncestor should be true on add");
 
@@ -430,8 +430,8 @@ test("Test isVisible integration with shown and hidden state.", function () {
   equals(parent.currentState, SC.CoreView.State.ATTACHED_SHOWN, "A parent that is attached should be in the state");
   equals(view.currentState, SC.CoreView.State.ATTACHED_HIDDEN, "A child view of attached_shown parent with isVisible false should be in the state");
   equals(child.currentState, SC.CoreView.State.ATTACHED_HIDDEN, "A child view of attached_shown parent with isVisible false's child view should be in the state");
-  ok(!view.get('isShown'), "isShown should be false");
-  ok(!child.get('isShown'), "isShown of child should be false");
+  ok(!view.get('isVisibleInWindow'), "isVisibleInWindow should be false");
+  ok(!child.get('isVisibleInWindow'), "isVisibleInWindow of child should be false");
   ok(view.get('_isHiddenBySelf'), "_isHiddenBySelf should be true");
   ok(!view.get('_isHiddenByAncestor'), "_isHiddenByAncestor should be false");
   ok(!child.get('_isHiddenBySelf'), "_isHiddenBySelf of child should be false");
@@ -443,8 +443,8 @@ test("Test isVisible integration with shown and hidden state.", function () {
   });
   equals(view.currentState, SC.CoreView.State.ATTACHED_SHOWN, "A child view of attached_shown parent with isVisible true should be in the state");
   equals(child.currentState, SC.CoreView.State.ATTACHED_SHOWN, "A child view of attached_shown parent with isVisible true's child view should be in the state");
-  ok(view.get('isShown'), "isShown should be true");
-  ok(child.get('isShown'), "isShown of child should be true");
+  ok(view.get('isVisibleInWindow'), "isVisibleInWindow should be true");
+  ok(child.get('isVisibleInWindow'), "isVisibleInWindow of child should be true");
   ok(!view.get('_isHiddenBySelf'), "_isHiddenBySelf should be false");
   ok(!view.get('_isHiddenByAncestor'), "_isHiddenByAncestor should be false");
   ok(!child.get('_isHiddenBySelf'), "_isHiddenBySelf of child should be false");
@@ -463,8 +463,8 @@ test("Test isVisible integration with shown and hidden state.", function () {
   equals(parent.currentState, SC.CoreView.State.ATTACHED_HIDDEN, "A parent that is attached with isVisible false should be in the state");
   equals(view.currentState, SC.CoreView.State.ATTACHED_HIDDEN, "A child view of attached with isVisible false parent should be in the state");
   equals(child.currentState, SC.CoreView.State.ATTACHED_HIDDEN, "A child view of attached with isVisible false parent's child view should be in the state");
-  ok(!view.get('isShown'), "isShown should be false");
-  ok(!child.get('isShown'), "isShown of child should be false");
+  ok(!view.get('isVisibleInWindow'), "isVisibleInWindow should be false");
+  ok(!child.get('isVisibleInWindow'), "isVisibleInWindow of child should be false");
   ok(!view.get('_isHiddenBySelf'), "_isHiddenBySelf should be false");
   ok(view.get('_isHiddenByAncestor'), "_isHiddenByAncestor should be true");
   ok(!child.get('_isHiddenBySelf'), "_isHiddenBySelf of child should be false");
@@ -478,8 +478,8 @@ test("Test isVisible integration with shown and hidden state.", function () {
   equals(parent.currentState, SC.CoreView.State.ATTACHED_SHOWN, "A parent that is attached with isVisible true should be in the state");
   equals(view.currentState, SC.CoreView.State.ATTACHED_HIDDEN, "A child view of attached with isVisible true parent with isVisible false should be in the state");
   equals(child.currentState, SC.CoreView.State.ATTACHED_HIDDEN, "A child view of attached with isVisible true parent with isVisible false's child view should be in the state");
-  ok(!view.get('isShown'), "isShown should be false");
-  ok(!child.get('isShown'), "isShown of child should be false");
+  ok(!view.get('isVisibleInWindow'), "isVisibleInWindow should be false");
+  ok(!child.get('isVisibleInWindow'), "isVisibleInWindow of child should be false");
   ok(view.get('_isHiddenBySelf'), "_isHiddenBySelf should be true");
   ok(!view.get('_isHiddenByAncestor'), "_isHiddenByAncestor should be false");
   ok(!child.get('_isHiddenBySelf'), "_isHiddenBySelf of child should be false");
@@ -497,8 +497,8 @@ test("Test isVisible integration with shown and hidden state.", function () {
   view._doAdopt(parent);
   equals(view.currentState, SC.CoreView.State.ATTACHED_HIDDEN, "A child view added to attached with isVisible true parent with isVisible false should be in the state");
   equals(child.currentState, SC.CoreView.State.ATTACHED_HIDDEN, "A child view added to attached with isVisible true parent with isVisible false's child view should be in the state");
-  ok(!view.get('isShown'), "isShown should be false");
-  ok(!child.get('isShown'), "isShown of child should be false");
+  ok(!view.get('isVisibleInWindow'), "isVisibleInWindow should be false");
+  ok(!child.get('isVisibleInWindow'), "isVisibleInWindow of child should be false");
   ok(view.get('_isHiddenBySelf'), "_isHiddenBySelf should be true");
   ok(!view.get('_isHiddenByAncestor'), "_isHiddenByAncestor should be false");
   ok(!child.get('_isHiddenBySelf'), "_isHiddenBySelf of child should be false");

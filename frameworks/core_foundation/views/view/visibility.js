@@ -11,17 +11,6 @@ SC.View.reopen(
   hasVisibility: YES,
 
   /**
-    This property has been deprecated in favor of the SC.View maintained
-    state. To determine actual visibility of a view use the currentState
-    property.
-
-    @see SC.View#currentState
-    @default false
-    @deprecated Version 1.10
-  */
-  isVisibleInWindow: false,
-
-  /**
    By default we don't disable the context menu. Overriding this property
    can enable/disable the context menu per view.
   */

@@ -152,14 +152,6 @@ SC.CoreView.reopen(
   isVisible: true,
   isVisibleBindingDefault: SC.Binding.bool(),
 
-  /**
-    To determine actual visibility of a view use the `currentState` property.
-
-    @see SC.View#currentState
-    @deprecated Version 1.10
-  */
-  isVisibleInWindow: YES,
-
   // ..........................................................
   // CHILD VIEW SUPPORT
   //
@@ -492,9 +484,6 @@ SC.CoreView.reopen(
   destroyLayer: function () {
     // We allow you to call destroy layer, but you should really detach first.
     if (this.get('isAttached')) {
-      //@if(debug)
-      SC.warn("Developer Warning: You should properly remove a view first before calling destroyLayer on it.  For example, by calling `remove()` on a pane or `removeChild()` on a child view.  This view, %@, will be detached from the DOM and its layer destroyed.".fmt(this));
-      //@endif
       this._doDetach();
     }
 

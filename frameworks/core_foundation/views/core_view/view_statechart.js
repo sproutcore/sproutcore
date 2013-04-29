@@ -134,7 +134,7 @@ SC.CoreView.reopen(
     @readonly
   */
   _isHiddenBySelf: function () {
-    return !this.get('isShown') && !this.get('_isHiddenByAncestor');
+    return !this.get('isVisibleInWindow') && !this.get('_isHiddenByAncestor');
   }.property('currentState', '_isHiddenByAncestor').cacheable(),
 
   /** @private
@@ -154,24 +154,25 @@ SC.CoreView.reopen(
   }.property('currentState'),
 
   /**
-    Whether the attached view is fully shown or becoming fully shown.
+    Whether the view is fully shown, becoming fully shown or not.
 
     When the view is shown in the window, this value will be true.  Note that
     this only applies to rendered and attached views and if the view is
-    transitioning out or hiding, this value will be false.
+    transitioning out or hiding, this value will be also false.
 
     This is not necessarily the same as `isVisible` although the two properties
     are related.  For instance, it's possible to set `isVisible` to `true` and
-    still have `isShown` be `false` or vice versa due to the `isShown` state of
-    the view's parent view.  Therefore, `isShown` represents the actual visible
-    state of the view and `isVisible` is used to attempt to alter that state.
+    still have `isVisibleInWindow` be `false` or vice versa due to the
+    `isVisibleInWindow` state of the view's parent view.  Therefore,
+    `isVisibleInWindow` represents the actual visible state of the view and
+    `isVisible` is used to attempt to alter that state.
 
     @field
     @type Boolean
     @default false
     @readonly
   */
-  isShown: function () {
+  isVisibleInWindow: function () {
     var state = this.get('currentState');
     return state === SC.CoreView.State.ATTACHED_SHOWN ||
       state === SC.CoreView.State.ATTACHED_SHOWING ||
@@ -243,12 +244,12 @@ SC.CoreView.reopen(
   /** @private Detach this view action. */
   _doDetach: function (immediately) {
     var isAttached = this.get('isAttached'),
-      isShown = this.get('isShown'),
+      isVisibleInWindow = this.get('isVisibleInWindow'),
       transitionOut = this.get('transitionOut'),
       handled = true;
 
     if (isAttached) {
-      if (isShown && transitionOut && !immediately) {
+      if (isVisibleInWindow && transitionOut && !immediately) {
         // In the shown states, attempt to build out unless told otherwise.
         this._gotoAttachedBuildingOutState();
       } else {
@@ -263,13 +264,13 @@ SC.CoreView.reopen(
 
   /** @private Hide this view action. */
   _doHide: function () {
-    var isShown = this.get('isShown'),
+    var isVisibleInWindow = this.get('isVisibleInWindow'),
       parentView = this.get('parentView'),
-      // Views without a parent are not limited by a parent's isShown property.
-      isParentShown = parentView ? parentView.get('isShown') : true,
+      // Views without a parent are not limited by a parent's isVisibleInWindow property.
+      isParentShown = parentView ? parentView.get('isVisibleInWindow') : true,
       handled = true;
 
-    if (isShown && isParentShown) {
+    if (isVisibleInWindow && isParentShown) {
       this._executeDoHide();
     } else if (this.get('_isRendered')) {
       // Queue the update if the view has been rendered.
@@ -312,13 +313,13 @@ SC.CoreView.reopen(
   /** @private Show this view action. */
   _doShow: function () {
     var isAttached = this.get('isAttached'),
-      isShown = this.get('isShown'),
+      isVisibleInWindow = this.get('isVisibleInWindow'),
       parentView = this.get('parentView'),
-      // Views without a parent are not limited by a parent's isShown property.
-      isParentShown = parentView ? parentView.get('isShown') : true,
+      // Views without a parent are not limited by a parent's isVisibleInWindow property.
+      isParentShown = parentView ? parentView.get('isVisibleInWindow') : true,
       handled = true;
 
-    if (isAttached && !isShown && isParentShown) {
+    if (isAttached && !isVisibleInWindow && isParentShown) {
       this._executeDoShow();
     } else if (this.get('_isRendered')) {
       // Queue the update if the view has been rendered.
@@ -333,14 +334,14 @@ SC.CoreView.reopen(
   /** @private Update this view's contents action. */
   _doUpdateContent: function (force) {
     var _isRendered = this.get('_isRendered'),
-      isShown = this.get('isShown'),
+      isVisibleInWindow = this.get('isVisibleInWindow'),
       handled = true;
 
     // Legacy.
     this.set('layerNeedsUpdate', true);
 
     if (_isRendered) {
-      if (isShown ||
+      if (isVisibleInWindow ||
         this.get('currentState') === SC.CoreView.State.ATTACHED_HIDING ||
         this.get('currentState') === SC.CoreView.State.ATTACHED_BUILDING_OUT ||
         force) {
@@ -360,11 +361,11 @@ SC.CoreView.reopen(
   /** @private Update this view's layout action. */
   _doUpdateLayout: function (force) {
     var _isRendered = this.get('_isRendered'),
-      isShown = this.get('isShown'),
+      isVisibleInWindow = this.get('isVisibleInWindow'),
       handled = true;
 
     if (_isRendered) {
-      if (isShown ||
+      if (isVisibleInWindow ||
         this.get('currentState') === SC.CoreView.State.ATTACHED_HIDING ||
         this.get('currentState') === SC.CoreView.State.ATTACHED_BUILDING_OUT ||
         force) {
@@ -436,8 +437,8 @@ SC.CoreView.reopen(
     // Route.
     var isVisible = this.get('isVisible'),
       parentView = this.get('parentView'),
-      // Views without a parent are not limited by a parent's isShown property.
-      isParentShown = parentView ? parentView.get('isShown') : true;
+      // Views without a parent are not limited by a parent's isVisibleInWindow property.
+      isParentShown = parentView ? parentView.get('isVisibleInWindow') : true;
 
     if (isVisible && isParentShown) {
       // Notify shown (on self and child views).
@@ -617,7 +618,6 @@ SC.CoreView.reopen(
 
   /** @private The 'parentShown' cascading event. */
   _parentShown: function () {
-    // console.log("%@ - _parentShown".fmt(this));
     this.set('_isHiddenByAncestor', false);
 
     if (this.get('isVisible')) {
@@ -648,9 +648,6 @@ SC.CoreView.reopen(
     if (this.get('isVisible')) {
       // Update before showing.
       this._executeQueuedUpdates();
-
-      // Notify.
-      if (this.willShowInDocument) { this.willShowInDocument(); }
 
       // Cascade to child views.
       this._callOnChildViews('_prepareToShow');
@@ -753,9 +750,6 @@ SC.CoreView.reopen(
 
   /** @private */
   _gotoAttachedBuildingInState: function () {
-    // Backwards compatibility.
-    this.set('isVisibleInWindow', true);
-
     // Update the state.
     this.set('currentState', SC.CoreView.State.ATTACHED_BUILDING_IN);
 
@@ -773,9 +767,6 @@ SC.CoreView.reopen(
 
   /** @private */
   _gotoAttachedBuildingOutState: function () {
-    // Backwards compatibility.
-    this.set('isVisibleInWindow', false);
-
     // Update the state.
     this.set('currentState', SC.CoreView.State.ATTACHED_BUILDING_OUT);
 
@@ -793,10 +784,6 @@ SC.CoreView.reopen(
 
   /** @private */
   _gotoAttachedHiddenState: function () {
-    // console.log('%@ - entered hidden state'.fmt(this));
-    // Backwards compatibility.
-    this.set('isVisibleInWindow', false);
-
     // Update the visibility of the layer.
     if (this._visibilityNeedsUpdate) {
       this._executeDoUpdateVisibility();
@@ -814,7 +801,6 @@ SC.CoreView.reopen(
 
   /** @private */
   _gotoAttachedHidingState: function () {
-    // console.log('%@ - entered hiding state'.fmt(this));
     // Update the state.
     this.set('currentState', SC.CoreView.State.ATTACHED_HIDING);
 
@@ -832,10 +818,6 @@ SC.CoreView.reopen(
 
   /** @private */
   _gotoAttachedShowingState: function () {
-    // Backwards compatibility.
-    this.set('isVisibleInWindow', true);
-
-    // console.log('%@ - entered showing state'.fmt(this));
     // Update the state.
     this.set('currentState', SC.CoreView.State.ATTACHED_SHOWING);
 
@@ -853,10 +835,6 @@ SC.CoreView.reopen(
 
   /** @private */
   _gotoAttachedShownState: function () {
-    // Backwards compatibility.
-    this.set('isVisibleInWindow', true);
-
-    // console.log('%@ - entered shown state'.fmt(this));
     // Notify.
     if (this.didShowInDocument) { this.didShowInDocument(); }
 
@@ -869,9 +847,6 @@ SC.CoreView.reopen(
 
   /** @private */
   _gotoUnattachedState: function () {
-    // Backwards compatibility.
-    this.set('isVisibleInWindow', false);
-
     // Update the state.
     this.set('currentState', SC.CoreView.State.UNATTACHED);
   },
@@ -977,7 +952,6 @@ SC.CoreView.reopen(
 
   /** @private */
   _executeDoHide: function () {
-    // console.log('_executeDoHide');
     var state = this.get('currentState'),
       transition,
       options;
@@ -1152,6 +1126,9 @@ SC.CoreView.reopen(
 
   /** @private */
   _executeQueuedUpdates: function () {
+    // Notify.
+    if (this.willShowInDocument) { this.willShowInDocument(); }
+
     // Update the content of the layer if necessary.
     if (this._contentNeedsUpdate) {
       this._executeDoUpdateContent();
