@@ -20,7 +20,7 @@ sc_require('mixins/editable');
   @extends SC.Editable
   @author Charles Jolley
  */
-SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
+SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   /** @scope SC.TextFieldView.prototype */ {
 
   classNames: ['sc-text-field-view'],

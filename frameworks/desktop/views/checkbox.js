@@ -8,20 +8,20 @@
 /** @class
 
   Represents a Checkbox Button.
-  
+
   The view is an `SC.ButtonView` put into toggle mode and with the 'theme' property
   set to "checkbox".
-  
+
   Rendering
   ----------------------------
   SC.ButtonView delegates its rendering to its theme. As the theme is set
   to "checkbox", the way the checkbox renders (including DOM) will actually
   be different than SC.ButtonView's.
-  
+
   @extends SC.ButtonView
   @since SproutCore 1.0
 */
-SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout,
+SC.CheckboxView = SC.ButtonView.extend(
 /** @scope SC.CheckboxView.prototype */ {
 
   /**
@@ -41,7 +41,7 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout,
 
   // no special theme for Checkbox; button defaults to 'square', so we have to stop that.
   themeName: null,
-  
+
   /**
     @type String
     @default 'checkboxRenderDelegate'
@@ -50,15 +50,15 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout,
 
   /**
     Ellipsis is disabled by default to allow multiline text
-    
+
     @type Boolean
     @default NO
   */
   needsEllipsis: NO,
-  
+
   /**
     `YES` if `isEnabled` is `YES`, `NO` otherwise
-    
+
     @type Boolean
     @default NO
     @observes isEnabled
@@ -67,13 +67,13 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout,
     if (SC.FOCUS_ALL_CONTROLS) { return this.get('isEnabled'); }
     return NO;
   }.property('isEnabled'),
-  
+
   /** @private */
   _toggleValue: function(){
     var isOn = this.get('value') === this.get('toggleOnValue');
     this.set('value', isOn ? this.get('toggleOffValue') : this.get('toggleOnValue'));
   },
-  
+
   /** @private */
   mouseDown: function(evt) {
     if(!this.get('isEnabled')) return YES;
@@ -82,7 +82,7 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout,
     if (evt && this.get('acceptsFirstResponder')) evt.allowDefault();
     return YES;
   },
-  
+
   /** @private */
   mouseUp: function(evt) {
     if(!this.get('isEnabled')) return YES;
@@ -101,7 +101,7 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout,
     return YES;
 
   },
-  
+
   /** @private */
   keyDown: function(evt) {
     // handle tab key
@@ -130,17 +130,17 @@ SC.CheckboxView = SC.ButtonView.extend(SC.StaticLayout,
 
     return NO;
   },
-  
-  
-  
+
+
+
   /** @private */
   touchStart: function(evt) {
     return this.mouseDown(evt);
   },
-  
+
   /** @private */
   touchEnd: function(evt) {
     return this.mouseUp(evt);
   }
-    
+
 });

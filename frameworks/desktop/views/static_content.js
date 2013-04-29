@@ -26,7 +26,7 @@
   @since SproutCore 1.2
   @author Tom Dale
 */
-SC.StaticContentView = SC.View.extend(SC.StaticLayout,
+SC.StaticContentView = SC.View.extend(
 /** @scope SC.StaticContentView.prototype */ {
 
   /**
