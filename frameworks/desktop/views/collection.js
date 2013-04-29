@@ -1060,7 +1060,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
       // Is there a view we can re-use?
       if (pool.length > 0) {
-        ret = pool.pop();
+        ret = pool.shift();
 
         // Reconfigure the view.
         this._reconfigureItemView(ret, attrs);
@@ -3301,11 +3301,10 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         prototype = exampleView.prototype;
         if (!SC.none(prototype.isLayerReusable) && !prototype.isLayerReusable) {
           itemView.destroyLayer();
-          itemView.set('layerLocationNeedsUpdate', YES);
         } else {
           // If the layer is sticking around, be sure to move it out of view.
           layout = this._poolLayoutForContentIndex(idx);
-          itemView.adjust(layout);
+          itemView.set('layout', layout);
         }
 
         // Ensure that the id of views in the pool don't clash with ids that
