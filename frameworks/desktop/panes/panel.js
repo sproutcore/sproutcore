@@ -215,6 +215,13 @@ SC.PanelPane = SC.Pane.extend(
   }.observes('isModal'),
 
   /**
+    Called when the pane is shown.  Takes on key pane status.
+  */
+  didShowInDocument: function () {
+   this.becomeKeyPane();
+  },
+
+  /**
     Called when the pane is attached.  Takes on key pane status.
   */
   didAppendToDocument: function () {
@@ -226,6 +233,13 @@ SC.PanelPane = SC.Pane.extend(
   */
   willRemoveFromDocument: function () {
     this.resignKeyPane();
+  },
+
+  /**
+    Called when the pane is about to be hidden.  Resigns key pane status.
+  */
+  willHideInDocument: function () {
+   this.resignKeyPane();
   },
 
   displayProperties: ['ariaLabel', 'ariaLabelledBy', 'ariaDescribedBy']
