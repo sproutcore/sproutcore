@@ -10,15 +10,14 @@ SC.CoreView.reopen(
     SC.CoreView uses a pluggable transition architecture where the transition setup,
     execution and cleanup can be handled by a specified transition plugin.
 
-    There are a number of pre-built transition in plugins available in the
+    There are a number of pre-built transition plugins available in the
     foundation framework:
 
-      SC.View.BOUNCE_IN
-      SC.View.FADE_IN
-      SC.View.MOVE_IN
-      SC.View.POP_IN
-      SC.View.SCALE_IN
-      SC.View.SPRING_IN
+      SC.View.BOUNCE
+      SC.View.FADE
+      SC.View.MOVE
+      SC.View.SCALE
+      SC.View.SPRING
 
     You can even provide your own custom transition plugins.  Just create a
     transition object that conforms to the SC.TransitionProtocol protocol.
