@@ -396,7 +396,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
           value = null;
         }
 
-        this.removeChild(childView);
+        this.removeChildAndDestroy(childView);
       }
 
       // Update our value which may have changed

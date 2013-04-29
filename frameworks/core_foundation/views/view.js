@@ -78,6 +78,28 @@ SC.CoreView.reopen(
   ariaHidden: null,
 
   /**
+    Whether this view was created by its parent view or not.
+
+    Several views are given child view classes or instances to automatically
+    append and remove.  In the case that the view was provided an instance,
+    when it removes the instance and no longer needs it, it should not destroy
+    the instance because it was created by someone else.
+
+    On the other hand if the view was given a class that it creates internal
+    instances from, then it should destroy those instances properly to avoid
+    memory leaks.
+
+    This property should be set by any view that is creating internal child
+    views so that it can properly remove them later.  Note that if you use
+    `createChildView`, this property is set automatically for you.
+
+    @type Boolean
+    @see SC.View#createChildView
+    @default false
+  */
+  createdByParent: false,
+
+  /**
     The current pane.
 
     @field
@@ -1360,8 +1382,11 @@ SC.CoreView.reopen(
     automatically configure the correct settings on the new view instance to
     act as a child of the parent.
 
-    @param {Class} viewClass
-    @param {Hash} attrs optional attributes to add
+    If the given view is a class, then createdByParent will be set to true on
+    the returned instance.
+
+    @param {Class} view A view class to create or view instance to prepare.
+    @param {Object} [attrs={}] attributes to add
     @returns {SC.View} new instance
     @test in createChildViews
   */
@@ -1386,7 +1411,12 @@ SC.CoreView.reopen(
     if (!attrs.page) { attrs.page = this.page; }
 
     // Now add this to the attributes and create.
-    if (view.isClass) { view = view.create(attrs); }
+    if (view.isClass) {
+      // Track that we created this view.
+      attrs.createdByParent = true;
+
+      view = view.create(attrs);
+    }
 
     return view;
   },

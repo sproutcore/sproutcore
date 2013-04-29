@@ -508,20 +508,22 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
           classNames = previousView.get('classNames') ;
           classNames = classNames.without('sc-text-field-accessory-view') ;
           previousView.set('classNames', classNames) ;
-          this.removeChild(previousView) ;
-          previousView = null ;
-          this['_'+viewProperty] = null ;
+
+          if (previousView.createdByParent) {
+            this.removeChildAndDestroy(previousView);
+          } else {
+            this.removeChild(previousView);
+          }
+
+          // Tidy up.
+          previousView = this['_'+viewProperty] = this['_created' + viewProperty] = null;
         }
 
         // If there's a new accessory view to add, do so now.
         if (accessoryView) {
           // If the user passed in a class rather than an instance, create an
           // instance now.
-          if (accessoryView.isClass) {
-            accessoryView = accessoryView.create({
-              layoutView: this
-            }) ;
-          }
+          accessoryView = this.createChildView(accessoryView);
 
           // Add in the "sc-text-field-accessory-view" class name so that the
           // z-index gets set correctly.
@@ -1190,33 +1192,33 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     }
     return NO;
   },
-  
+
   /** @private */
-  deleteForward: function(evt) { 
+  deleteForward: function(evt) {
     evt.allowDefault();
     return YES;
   },
 
   /** @private */
-  deleteBackward: function(evt) { 
+  deleteBackward: function(evt) {
     evt.allowDefault();
     return YES;
   },
 
   /** @private */
-  moveLeft: function(evt) { 
+  moveLeft: function(evt) {
     evt.allowDefault();
     return YES;
   },
 
   /** @private */
-  moveRight: function(evt) { 
+  moveRight: function(evt) {
     evt.allowDefault();
     return YES;
   },
 
   /** @private */
-  selectAll: function(evt) { 
+  selectAll: function(evt) {
     evt.allowDefault();
     return YES;
   },
@@ -1238,7 +1240,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     }
     return NO;
   },
-  
+
   keyUp: function (evt) {
     if (SC.browser.isMozilla &&
         evt.keyCode === SC.Event.KEY_RETURN) { this.fieldValueDidChange(); }

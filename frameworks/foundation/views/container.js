@@ -265,14 +265,10 @@ SC.ContainerView = SC.View.extend(
     }
 
     // If it's an uninstantiated view, then attempt to instantiate it.
-    // (Uninstantiated views have a create() method; instantiated ones do not.)
-    if (SC.typeOf(content) === SC.T_CLASS) {
-      if (content.kindOf(SC.CoreView)) {
-        content = this.createChildView(content);
-        this._createdContent = YES;
-      } else {
-        content = null;
-      }
+    if (content.kindOf(SC.CoreView)) {
+      content = this.createChildView(content);
+    } else {
+      content = null;
     }
 
     // If content has not been turned into a view by now, it's hopeless.
@@ -333,16 +329,12 @@ SC.ContainerView = SC.View.extend(
     newStatechart = SC.ContainerContentStatechart.create({
       container: this,
       content: newContent,
-      previousStatechart: currentStatechart,
-      shouldDestroy: this._createdContent
+      previousStatechart: currentStatechart
     });
     contentStatecharts.pushObject(newStatechart);
 
     // Track the current statechart.
     this._currentStatechart = newStatechart;
-
-    // Clean up!
-    this._createdContent = NO;
   }
 
 });
@@ -366,8 +358,6 @@ SC.ContainerContentStatechart = SC.Object.extend({
   content: null,
 
   previousStatechart: null,
-
-  shouldDestroy: false,
 
   state: 'none',
 
@@ -507,7 +497,6 @@ SC.ContainerContentStatechart = SC.Object.extend({
     var container = this.get('container'),
       content = this.get('content'),
       options = container.get('transitionOptions') || {},
-      shouldDestroy = this.get('shouldDestroy'),
       transition = container.get('transition');
 
     if (!!content) {
@@ -517,9 +506,10 @@ SC.ContainerContentStatechart = SC.Object.extend({
         }
       }
 
-      container.removeChild(content);
-      if (shouldDestroy) {
-        content.destroy();
+      if (content.createdByParent) {
+        container.removeChildAndDestroy(content);
+      } else {
+        container.removeChild(content);
       }
     }
 
