@@ -33,16 +33,15 @@ SC.Pane.reopen({
 
   /** @private */
   _executeDoDetach: function () {
+    sc_super();
+
     // remove intercept
     this._removeIntercept();
 
     // remove the pane
     var rootResponder = this.rootResponder;
-    if (this.get('isMainPane')) rootResponder.makeMainPane(null);
     rootResponder.panes.remove(this);
     this.rootResponder = null;
-
-    sc_super();
   }
 
 });
