@@ -265,14 +265,11 @@ SC.ContainerView = SC.View.extend(
     }
 
     // If it's an uninstantiated view, then attempt to instantiate it.
-    if (content.kindOf(SC.CoreView)) {
+    if (content && content.kindOf(SC.CoreView)) {
       content = this.createChildView(content);
     } else {
       content = null;
     }
-
-    // If content has not been turned into a view by now, it's hopeless.
-    if (content && !(content instanceof SC.CoreView)) { content = null; }
 
     // Sets the content.
     this.set('contentView', content);
