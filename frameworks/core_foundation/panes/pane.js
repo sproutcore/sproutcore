@@ -139,7 +139,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
 
     // walk up the responder chain looking for a method to handle the event
     if (!target) target = this.get('firstResponder');
-    while(target) {
+    while (target) {
       if (action === 'touchStart') {
         // first, we must check that the target is not already touch responder
         // if it is, we don't want to have "found" it; that kind of recursion is sure to
@@ -263,9 +263,11 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   */
   makeFirstResponder: function (original, view, evt) {
     // firstResponder should never be null
-    if(!view) view = this;
+    if (!view) view = this;
 
-    var current=this.get('firstResponder'), isKeyPane=this.get('isKeyPane');
+    var current = this.get('firstResponder'),
+      isKeyPane = this.get('isKeyPane');
+
     if (current === view) return this; // nothing to do
     if (SC.platform.touch && view && view.kindOf(SC.TextFieldView) && !view.get('focused')) return this;
 
@@ -289,13 +291,14 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
 
     original(view, evt);
 
-    if(current) current.endPropertyChanges();
-    if(view) view.endPropertyChanges();
+    if (current) current.endPropertyChanges();
+    if (view) view.endPropertyChanges();
 
     // and notify again if needed.
     if (isKeyPane) {
       if (view) {
-        view.tryToPerform('didBecomeKeyResponderFrom', current); }
+        view.tryToPerform('didBecomeKeyResponderFrom', current);
+      }
       if (current) {
         current.tryToPerform('didLoseKeyResponderTo', view);
       }
@@ -486,7 +489,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     var self = this;
 
     return this.insert(function () {
-      self._doAttach(elem);
+      self._doAttach(jQuery(elem)[0]);
     });
   },
 
@@ -507,7 +510,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     This method is called after the pane is attached and before child views
     are notified that they were appended to the document. Override this
     method to recompute properties that depend on the pane's existence
-    in the DOM but must be run prior to child view notification.
+    in the document but must be run prior to child view notification.
    */
   recomputeDependentProperties: function () {},
 
@@ -528,7 +531,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   /**
     Returns YES if wantsTouchIntercept and this is a touch platform.
   */
-  hasTouchIntercept: function (){
+  hasTouchIntercept: function () {
     return this.get('wantsTouchIntercept') && SC.platform.touch;
   }.property('wantsTouchIntercept').cacheable(),
 
@@ -543,6 +546,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   */
   touchZ: 99,
 
+  /** @private */
   _addIntercept: function () {
     if (this.get('hasTouchIntercept')) {
       var div = document.createElement("div");
@@ -561,6 +565,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     }
   },
 
+  /** @private */
   _removeIntercept: function () {
     if (this._touchIntercept) {
       document.body.removeChild(this._touchIntercept);
@@ -568,70 +573,14 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     }
   },
 
+  /** @private */
   hideTouchIntercept: function () {
     if (this._touchIntercept) this._touchIntercept.style.display = "none";
   },
 
+  /** @private */
   showTouchIntercept: function () {
     if (this._touchIntercept) this._touchIntercept.style.display = "block";
-  },
-
-  /**
-    Updates the isVisibleInWindow state on the pane and its childViews if
-    necessary.  This works much like SC.View's default implementation, but it
-    does not need a parentView to function.
-
-    @returns {SC.Pane} receiver
-  */
-  recomputeIsVisibleInWindow: function () {
-    if (this.get('designer') && SC.suppressMain) return sc_super();
-    var previous = this.get('isVisibleInWindow'),
-        current  = this.get('isVisible') && this.get('isPaneAttached');
-
-    // If our visibility has changed, then set the new value and notify our
-    // child views to update their value.
-    if (previous !== current) {
-      this.set('isVisibleInWindow', current);
-
-      var childViews = this.get('childViews'), len = childViews.length, idx, view;
-      for(idx=0;idx<len;idx++) {
-        view = childViews[idx];
-        if (view.recomputeIsVisibleInWindow) {
-          view.recomputeIsVisibleInWindow(current);
-        }
-      }
-
-
-      // For historical reasons, we'll also layout the child views if
-      // necessary.
-      if (current) {
-        if (this.get('childViewsNeedLayout')) {
-          this.invokeOnce(this.layoutChildViewsIfNeeded);
-        }
-      }
-      else {
-        // Also, if we were previously visible and were the key pane, resign
-        // it.  This more appropriately belongs in a 'isVisibleInWindow'
-        // observer or some such helper method because this work is not
-        // strictly related to computing the visibility, but view performance
-        // is critical, so avoiding the extra observer is worthwhile.
-        if (this.get('isKeyPane')) { this.resignKeyPane(); }
-      }
-    }
-
-    // If we're in this function, then that means one of our ancestor views
-    // changed, or changed its 'isVisibleInWindow' value.  That means that if
-    // we are out of sync with the layer, then we need to update our state
-    // now.
-    //
-    // For example, say we're isVisible=NO, but we have not yet added the
-    // 'sc-hidden' class to the layer because of the "don't update the layer if
-    // we're not visible in the window" check.  If any of our parent views
-    // became visible, our layer would incorrectly be shown!
-    // TODO: We should be able to remove this hack with statechart.
-    this.updateLayerIfNeeded(YES);
-
-    return this;
   },
 
   /** @private */

@@ -62,7 +62,7 @@ SC.MainPane = SC.Pane.extend({
     var responder = this.rootResponder;
 
     responder.makeMainPane(this);
-    // if (!responder.get('keyRootView')) responder.makeKeyPane(this);
+    this.becomeKeyPane();
   },
 
   /**
@@ -72,6 +72,7 @@ SC.MainPane = SC.Pane.extend({
     var responder = this.rootResponder;
 
     responder.makeMainPane(null);
+    this.resignKeyPane();
   },
 
   /** @private */
