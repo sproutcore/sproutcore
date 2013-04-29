@@ -15,21 +15,22 @@ module("SC.SplitView",{
 	pane = SC.MainPane.create({
 	  childViews: [ SC.SplitView.extend() ]
 	});
-	pane.append(); // make sure there is a layer...	    
+	pane.append(); // make sure there is a layer...
 	SC.RunLoop.end();
-	
+
 	view = pane.childViews[0];
   },
-    	
+
   teardown: function() {
     pane.remove();
+    pane.destroy
     pane = view = null ;
-  }		
+  }
 });
 
 test("the views are collapsible", function() {
 	equals(YES,view.canCollapseView(view.get('topLeftView')),'the top left view is collapsable');
-	equals(YES,view.canCollapseView(view.get('bottomRightView')),'the bottom right view is collapsable');	
+	equals(YES,view.canCollapseView(view.get('bottomRightView')),'the bottom right view is collapsable');
 	equals(YES,view.splitViewCanCollapse(view,view.get('topLeftView')),'should return true');
 	view.set('canCollapseViews','NO');
 });
@@ -52,21 +53,21 @@ test("Layout direction is Vertical",function() {
 test("Cursor remains correct after drag", function() {
   view.set('layoutDirection', SC.LAYOUT_HORIZONTAL) ;
   equals(view.getPath('thumbViewCursor.cursorStyle'), "ew-resize", 'The Cursor is');
- 	
+
  	// Trigger the action
  	var elem = view.getPath('dividerView.layer');
- 	SC.Event.trigger(elem, 'mousedown'); 	
+ 	SC.Event.trigger(elem, 'mousedown');
  	SC.Event.trigger(elem, 'mouseup');
-  
+
   equals(view.getPath('thumbViewCursor.cursorStyle'), "ew-resize",'The Cursor is');
 });
 
-// 
+//
 // test("performing the mouse up event", function() {
 // 	var elem = thumb.get('layer');
 // 	SC.Event.trigger(elem, 'mouseUp');
 // });
 
-// 	
+//
 // module("TODO: Test SC.SplitDividerView Methods");
 // module("TODO: Test SC.ThumbView Methods");
