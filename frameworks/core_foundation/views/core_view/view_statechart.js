@@ -190,7 +190,7 @@ SC.CoreView.reopen(
     if (curParentView && curParentView !== parentView) {
       //@if(debug)
       // This should be avoided, because using the same view instance without explicitly orphaning it first is a dangerous practice.
-      SC.warn("Developer Warning: You should not adopt the view %@ to a new parent without removing it from its old parent first.".fmt(this));
+      SC.warn("Developer Warning: You should not adopt the view, %@, to a new parent without removing it from its old parent first.".fmt(this));
       //@endif
 
       // Force orphaning the view.
@@ -198,7 +198,8 @@ SC.CoreView.reopen(
       curParentView = false;
     }
 
-    // You can adopt childViews that have you set as parent, but have not yet been fully adopted.
+    // You can adopt childViews that have you set as their parent (i.e. created
+    // with createChildView()), but have not yet been fully adopted.
     if (!curParentView || this.get('childViews').indexOf(this) < 0) {
       this._executeDoAdopt(parentView, beforeView);
     } else {
@@ -216,6 +217,10 @@ SC.CoreView.reopen(
     if (state === SC.CoreView.State.UNATTACHED) {
       this._executeDoAttach(parentNode, nextNode);
     } else {
+      //@if(debug)
+      // This should be avoided, because moving the view layer without explicitly removing it first is a dangerous practice.
+      SC.warn("Developer Warning: You can not attach the view, %@, to a new node without properly detaching it first.".fmt(this));
+      //@endif
       handled = false;
     }
 
@@ -584,9 +589,6 @@ SC.CoreView.reopen(
       // Update before showing.
       this._executeQueuedUpdates();
 
-      // Backwards compatibility.
-      this.set('isVisibleInWindow', true);
-
       // Route.
       if (transitionIn) {
         this._gotoAttachedBuildingInState();
@@ -646,9 +648,6 @@ SC.CoreView.reopen(
 
       // Notify.
       if (this.willShowInDocument) { this.willShowInDocument(); }
-
-      // Backwards compatibility.
-      this.set('isVisibleInWindow', true);
 
       // Cascade to child views.
       this._callOnChildViews('_prepareToShow');
@@ -771,6 +770,9 @@ SC.CoreView.reopen(
 
   /** @private */
   _gotoAttachedBuildingOutState: function () {
+    // Backwards compatibility.
+    this.set('isVisibleInWindow', false);
+
     // Update the state.
     this.set('currentState', SC.CoreView.State.ATTACHED_BUILDING_OUT);
 
@@ -789,7 +791,6 @@ SC.CoreView.reopen(
   /** @private */
   _gotoAttachedHiddenState: function () {
     // console.log('%@ - entered hidden state'.fmt(this));
-
     // Backwards compatibility.
     this.set('isVisibleInWindow', false);
 
@@ -828,6 +829,9 @@ SC.CoreView.reopen(
 
   /** @private */
   _gotoAttachedShowingState: function () {
+    // Backwards compatibility.
+    this.set('isVisibleInWindow', true);
+
     // console.log('%@ - entered showing state'.fmt(this));
     // Update the state.
     this.set('currentState', SC.CoreView.State.ATTACHED_SHOWING);
@@ -846,6 +850,9 @@ SC.CoreView.reopen(
 
   /** @private */
   _gotoAttachedShownState: function () {
+    // Backwards compatibility.
+    this.set('isVisibleInWindow', true);
+
     // console.log('%@ - entered shown state'.fmt(this));
     // Notify.
     if (this.didShowInDocument) { this.didShowInDocument(); }
@@ -859,6 +866,9 @@ SC.CoreView.reopen(
 
   /** @private */
   _gotoUnattachedState: function () {
+    // Backwards compatibility.
+    this.set('isVisibleInWindow', false);
+
     // Update the state.
     this.set('currentState', SC.CoreView.State.UNATTACHED);
   },
@@ -1067,7 +1077,7 @@ SC.CoreView.reopen(
 
   /** @private */
   _executeDoUpdateContent: function () {
-    var mixins = this.renderMixin, idx, len,
+    var mixins = this.renderMixin,
       context = this.renderContext(this.get('layer'));
 
     // If there is no update method, fallback to calling render with extra
@@ -1080,8 +1090,8 @@ SC.CoreView.reopen(
 
     // Call renderMixin methods.
     if (mixins) {
-      len = mixins.length;
-      for (idx = 0; idx < len; ++idx) {
+      var len = mixins.length;
+      for (var idx = 0; idx < len; ++idx) {
         mixins[idx].call(this, context, false);
       }
     }
@@ -1101,24 +1111,22 @@ SC.CoreView.reopen(
     // Reset that an update is required.
     this._contentNeedsUpdate = false;
 
-    // TODO: Deprecate layerNeedsUpdate and remove this.
-    this.set('layerNeedsUpdate', NO);
-
     // Notify updated.
     this._updatedContent();
   },
 
   /** @private */
   _executeDoUpdateLayout: function () {
-    var context = this.renderContext(this.get('layer'));
+    var context;
 
+    context = this.renderContext(this.get('layer'));
     context.setStyle(this.get('layoutStyle'));
     context.update();
 
     // Reset that an update is required.
     this._layoutNeedsUpdate = false;
 
-    // Notify updated.
+    // Notify updated (cascades).
     this._updatedLayout();
   },
 
