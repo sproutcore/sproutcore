@@ -608,9 +608,6 @@ SC.CoreView.reopen(
 
     // Route.
     this._gotoAttachedHiddenState();
-
-    // Cascade the event to child views.
-    this._callOnChildViews('_parentHidden');
   },
 
   /** @private The 'parentShown' cascading event. */
@@ -619,17 +616,42 @@ SC.CoreView.reopen(
     this.set('_isHiddenByAncestor', false);
 
     if (this.get('isVisible')) {
-      // Update before showing.
-      this._executeQueuedUpdates();
-
-      // Backwards compatibility.
-      this.set('isVisibleInWindow', true);
+      // Notify.
+      if (this.didShowInDocument) { this.didShowInDocument(); }
 
       // Route.
       this._gotoAttachedShownState();
 
-      // Cascade the event to child views.
+      // Cascade to child views.
       this._callOnChildViews('_parentShown');
+    }
+  },
+
+  /** @private Prepares for hiding. */
+  _prepareToHide: function () {
+    if (this.get('isVisible')) {
+      // Notify.
+      if (this.willHideInDocument) { this.willHideInDocument(); }
+
+      // Cascade to child views.
+      this._callOnChildViews('_prepareToHide');
+    }
+  },
+
+  /** @private Prepares for display by executing all queued updates. */
+  _prepareToShow: function () {
+    if (this.get('isVisible')) {
+      // Update before showing.
+      this._executeQueuedUpdates();
+
+      // Notify.
+      if (this.willShowInDocument) { this.willShowInDocument(); }
+
+      // Backwards compatibility.
+      this.set('isVisibleInWindow', true);
+
+      // Cascade to child views.
+      this._callOnChildViews('_prepareToShow');
     }
   },
 
@@ -776,7 +798,10 @@ SC.CoreView.reopen(
       this._executeDoUpdateVisibility();
     }
 
-    // Cascade the event to child views.
+    // Notify.
+    if (this.didHideInDocument) { this.didHideInDocument(); }
+
+    // Notify child views (cascades back through this method).
     this._callOnChildViews('_parentHidden');
 
     // Update the state.
@@ -822,6 +847,12 @@ SC.CoreView.reopen(
   /** @private */
   _gotoAttachedShownState: function () {
     // console.log('%@ - entered shown state'.fmt(this));
+    // Notify.
+    if (this.didShowInDocument) { this.didShowInDocument(); }
+
+    // Notify child views (cascades).
+    this._callOnChildViews('_parentShown');
+
     // Update the state.
     this.set('currentState', SC.CoreView.State.ATTACHED_SHOWN);
   },
@@ -898,6 +929,7 @@ SC.CoreView.reopen(
       // add to parentNode if needed.
       // if ((node.parentNode !== parentNode) || (node.nextSibling !== nextNode)) {
     // jQuery(elem).append(layer)
+    // jQuery(parentNode).insertBefore(nextNode);
     parentNode.insertBefore(node, nextNode);
     // }
 
@@ -936,6 +968,9 @@ SC.CoreView.reopen(
     var state = this.get('currentState'),
       transition,
       options;
+
+    // Prepare to hide (cascades).
+    this._prepareToHide();
 
     // Cancel conflicting transitions.
     // TODO: We could possibly cancel to SC.LayoutState.CURRENT if we know that a transitionHide animation is going to run.
@@ -1008,11 +1043,8 @@ SC.CoreView.reopen(
       transition,
       options;
 
-    // Cascade the event to child views.
-    this._callOnChildViews('_parentShown');
-
-    // Update before showing.
-    this._executeQueuedUpdates();
+    // Prepare for display (cascades).
+    this._prepareToShow();
 
     // Cancel conflicting transitions.
     // TODO: We could possibly cancel to SC.LayoutState.CURRENT if we know that a transitionShow animation is going to run.
@@ -1025,9 +1057,6 @@ SC.CoreView.reopen(
 
       if (transition.cancel) { transition.cancel(this, options); }
     }
-
-    // Backwards compatibility.
-    this.set('isVisibleInWindow', true);
 
     if (this.get('transitionShow')) {
       this._gotoAttachedShowingState();
