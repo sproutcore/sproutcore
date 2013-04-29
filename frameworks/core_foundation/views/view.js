@@ -422,11 +422,10 @@ SC.CoreView.reopen(
     do not want your render() method called when updating a layer, then you
     should override this method instead.
 
-    @param {Boolean} force Force the update to the layer immediately even if the view is not in a shown state.
     @returns {SC.View} receiver
   */
-  updateLayer: function (force) {
-    this._doUpdateContent(force);
+  updateLayer: function () {
+    this._doUpdateContent(true);
 
     return this;
   },
