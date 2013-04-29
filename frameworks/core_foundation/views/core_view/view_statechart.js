@@ -105,12 +105,12 @@ SC.CoreView.reopen(
   */
   isAttached: function () {
     var state = this.get('currentState');
-    return state === SC.CoreView.State.ATTACHED_SHOWN
-      || state === SC.CoreView.State.ATTACHED_HIDDEN
-      || state === SC.CoreView.State.ATTACHED_BUILDING_IN
-      || state === SC.CoreView.State.ATTACHED_BUILDING_OUT
-      || state === SC.CoreView.State.ATTACHED_SHOWING
-      || state === SC.CoreView.State.ATTACHED_HIDING;
+    return state === SC.CoreView.State.ATTACHED_SHOWN ||
+      state === SC.CoreView.State.ATTACHED_HIDDEN ||
+      state === SC.CoreView.State.ATTACHED_BUILDING_IN ||
+      state === SC.CoreView.State.ATTACHED_BUILDING_OUT ||
+      state === SC.CoreView.State.ATTACHED_SHOWING ||
+      state === SC.CoreView.State.ATTACHED_HIDING;
   }.property('currentState').cacheable(),
 
   /** @private
@@ -173,9 +173,9 @@ SC.CoreView.reopen(
   */
   isShown: function () {
     var state = this.get('currentState');
-    return state === SC.CoreView.State.ATTACHED_SHOWN
-      || state === SC.CoreView.State.ATTACHED_SHOWING
-      || state === SC.CoreView.State.ATTACHED_BUILDING_IN;
+    return state === SC.CoreView.State.ATTACHED_SHOWN ||
+      state === SC.CoreView.State.ATTACHED_SHOWING ||
+      state === SC.CoreView.State.ATTACHED_BUILDING_IN;
   }.property('currentState').cacheable(),
 
   // ------------------------------------------------------------------------
@@ -332,10 +332,10 @@ SC.CoreView.reopen(
       handled = true;
 
     if (_isRendered) {
-      if (isShown
-        || this.get('currentState') === SC.CoreView.State.ATTACHED_HIDING
-        || this.get('currentState') === SC.CoreView.State.ATTACHED_BUILDING_OUT
-        || force) {
+      if (isShown ||
+        this.get('currentState') === SC.CoreView.State.ATTACHED_HIDING ||
+        this.get('currentState') === SC.CoreView.State.ATTACHED_BUILDING_OUT ||
+        force) {
         // Only in the visible states do we allow updates without being forced.
         this._executeDoUpdateContent();
       } else {
@@ -356,10 +356,10 @@ SC.CoreView.reopen(
       handled = true;
 
     if (_isRendered) {
-      if (isShown
-        || this.get('currentState') === SC.CoreView.State.ATTACHED_HIDING
-        || this.get('currentState') === SC.CoreView.State.ATTACHED_BUILDING_OUT
-        || force) {
+      if (isShown ||
+        this.get('currentState') === SC.CoreView.State.ATTACHED_HIDING ||
+        this.get('currentState') === SC.CoreView.State.ATTACHED_BUILDING_OUT ||
+        force) {
         // Only in the visible states do we allow updates without being forced.
         this._executeDoUpdateLayout();
       } else {
