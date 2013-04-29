@@ -368,39 +368,26 @@ SC.CoreView.reopen(
   },
 
   /**
-    Setting this property to YES will cause the updateLayerIfNeeded method to
-    be invoked at the end of the runloop.  You can also force a view to update
-    sooner by calling updateLayerIfNeeded() directly.  The method will update
-    the layer only if this property is YES.
+    This property has no effect and is deprecated.
 
+    To cause a view to update immediately, you should just call updateLayer or
+    updateLayerIfNeeded.  To cause a view to update at the end of the run loop
+    before any invokeLast functions run, you should call displayDidChange.
+
+    @deprecated Version 1.10
     @type Boolean
     @test in updateLayer
   */
   layerNeedsUpdate: NO,
 
-  /** @private
-    Schedules the updateLayerIfNeeded method to run at the end of the runloop
-    if layerNeedsUpdate is set to YES.
-  */
-  _view_layerNeedsUpdateDidChange: function () {
-    if (this.get('layerNeedsUpdate')) {
-      this.invokeOnce(this._doUpdateContent);
-    }
-  }.observes('layerNeedsUpdate'),
-
   /**
-    Updates the layer only if the view is visible onscreen and if
-    layerNeedsUpdate is set to YES.  Normally you will not invoke this method
-    directly.  Instead you set the layerNeedsUpdate property to YES and this
-    method will be called once at the end of the runloop.
+    Updates the view's layer if the view is in a shown state.  Otherwise, the
+    view will be updated the next time it enters a shown state.
 
-    If you need to update view's layer sooner than the end of the runloop, you
-    can call this method directly.  If your view is not visible in the window
-    but you want it to update anyway, then call this method, passing YES for
-    the 'skipIsVisibleInWindowCheck' parameter.
-
-    You should not override this method.  Instead override updateLayer() or
-    render().
+    This is the same behavior as `displayDidChange` except that calling
+    `updateLayerIfNeeded` will attempt to update each time it is called,
+    while `displayDidChange` will only attempt to update the layer once per run
+    loop.
 
     @returns {SC.View} receiver
     @test in updateLayer
@@ -411,7 +398,6 @@ SC.CoreView.reopen(
       SC.warn("Developer Warning: The `skipIsVisibleInWindowCheck` argument of updateLayerIfNeeded is not supported and will be ignored.");
     }
     //@endif
-
     this._doUpdateContent(false);
 
     return this;
@@ -538,23 +524,23 @@ SC.CoreView.reopen(
     Set to YES when the view's layer location is dirty.  You can call
     updateLayerLocationIfNeeded() to clear this flag if it is set.
 
+    @deprecated Version 1.10
     @type Boolean
   */
   layerLocationNeedsUpdate: NO,
 
   /**
     Calls updateLayerLocation(), but only if the view's layer location
-    currently needs to be updated.  This method is called automatically at
-    the end of a run loop if you have called parentViewDidChange() at some
-    point.
+    currently needs to be updated.
 
+    @deprecated Version 1.10
     @returns {SC.View} receiver
     @test in updateLayerLocation
   */
   updateLayerLocationIfNeeded: function () {
-    if (this.get('layerLocationNeedsUpdate')) {
-      this.updateLayerLocation();
-    }
+    //@if(debug)
+    SC.warn("SC.View.prototype.updateLayerLocationIfNeeded is no longer used and has been deprecated.  See the SC.View statechart code for more details on attaching and detaching layers.");
+    //@endif
 
     return this;
   },
