@@ -30,7 +30,6 @@ SC.mixin(SC.View,
       view._preMoveInFrame = viewFrame;
       view._preMoveInLayout = SC.clone(view.get('layout'));
 
-      console.log("%@ layout: %@".fmt(view, SC.stringFromLayout(view._preMoveInLayout)));
       // If there is no parentView, use the window's frame.
       if (parentView) {
         parentFrame = parentView.get('borderFrame');
