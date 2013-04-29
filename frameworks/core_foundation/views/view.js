@@ -355,9 +355,13 @@ SC.CoreView.reopen(
   },
 
   /**
-    This method is invoked whenever a display property changes.  It will set
-    the layerNeedsUpdate method to YES.  If you need to perform additional
-    setup whenever the display changes, you can override this method as well.
+    This method is invoked whenever a display property changes and updates
+    the view's content once at the end of the run loop before any invokeLast
+    functions run.
+
+    To cause the view to be updated you can call this method directly and
+    if you need to perform additional setup whenever the display changes, you
+    can override this method as well.
 
     @returns {SC.View} receiver
   */
@@ -1110,10 +1114,12 @@ SC.CoreView.reopen(
   },
 
   /**
-    Removes the child view from the parent view *and* detaches it from the DOM.
+    Removes the child view from the parent view *and* detaches it from the
+    document.
+
     This does *not* remove the child view's layer (i.e. the node still exists,
-    but is no longer in the DOM) and does *not* destroy the child view (i.e.
-    it can still be re-used).
+    but is no longer in the document) and does *not* destroy the child view
+    (i.e. it can still be re-attached to the document).
 
     Note that if the child view uses a transitionOut plugin, it will not be
     fully detached until the transition completes.  To force the view to detach
@@ -1134,8 +1140,8 @@ SC.CoreView.reopen(
   },
 
   /**
-    Removes the child view from the parent view, detaches it from the DOM *and*
-    destroys the view and its layer.
+    Removes the child view from the parent view, detaches it from the document
+    *and* destroys the view and its layer.
 
     Note that if the child view uses a transitionOut plugin, it will not be
     fully detached and destroyed until the transition completes.  To force the
