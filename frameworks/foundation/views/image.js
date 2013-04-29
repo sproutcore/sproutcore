@@ -237,9 +237,9 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
 
     @observes layer
   */
-  layerDidChange: function() {
-    if (this.get('useCanvas')) this.set('layerNeedsUpdate', YES);
-  }.observes('layer'),
+  didCreateLayer: function() {
+    if (this.get('useCanvas')) { this.updateLayer(); }
+  },
 
 
   // ..........................................................
