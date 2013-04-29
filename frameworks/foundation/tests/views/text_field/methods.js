@@ -42,7 +42,7 @@ module("SC.TextFieldView",{
   },
 
   teardown: function() {
-      pane.remove();
+      pane.destroy();
       pane = view = null ;
     }
 });
