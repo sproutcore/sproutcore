@@ -967,7 +967,8 @@ SC.View.reopen(
   applyAttributesToContext: function (original, context) {
     original(context);
 
-    this.renderLayout(context);
+    // Have to pass 'true' for second argument for legacy.
+    this.renderLayout(context, true);
 
     if (this.get('useStaticLayout')) { context.addClass('sc-static-layout'); }
 
