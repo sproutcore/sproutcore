@@ -499,7 +499,22 @@ SC.CoreView.reopen(
     @returns {SC.View} receiver
   */
   replaceLayer: function () {
-    return this.destroyLayer().createLayer();
+    var layer, parentNode;
+
+    // If attached, detach and track our parent node so we can re-attach.
+    if (this.get('isAttached')) {
+      layer = this.get('layer');
+      parentNode = layer.parentNode;
+
+      this._doDetach();
+    }
+
+    this.destroyLayer().createLayer();
+
+    // Reattach our layer (if we have a parentView this is done automatically).
+    if (parentNode && !this.get('isAttached')) { this._doAttach(parentNode); }
+
+    return this;
   },
 
   /**
@@ -1210,7 +1225,7 @@ SC.CoreView.reopen(
       this.createLayer();
 
       // Reattach our layer.
-      if (parentNode) { this._doAttach(parentNode); }
+      if (parentNode && !this.get('isAttached')) { this._doAttach(parentNode); }
     } else {
       for (var i = childViews.get('length') - 1; i >= 0; i--) {
         this.removeChildAndDestroy(childViews.objectAt(i), immediately);
