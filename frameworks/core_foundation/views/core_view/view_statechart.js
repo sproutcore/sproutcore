@@ -986,9 +986,6 @@ SC.CoreView.reopen(
 
   /** @private */
   _executeQueuedUpdates: function () {
-    // Notify.
-    if (this.willShowInDocument) { this.willShowInDocument(); }
-
     // Update the content of the layer if necessary.
     if (this._contentNeedsUpdate) {
       this._executeDoUpdateContent();
@@ -998,6 +995,9 @@ SC.CoreView.reopen(
     if (this._visibilityNeedsUpdate) {
       this._executeDoUpdateVisibility();
     }
+
+    // Notify after updates are done.
+    if (this.willShowInDocument) { this.willShowInDocument(); }
   },
 
   /** @private
