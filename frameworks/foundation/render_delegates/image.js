@@ -42,24 +42,27 @@ SC.BaseTheme.imageRenderDelegate = SC.RenderDelegate.create({
         type = dataSource.get('type') || SC.IMAGE_TYPE_URL,
         toolTip = dataSource.get('toolTip');
 
-    // Place the img within a div, so that we may scale & offset the img
-    context = context.begin('img');
-    context.setAttr('src', image.src);
+    // Leave the inner content empty while the type is unknown.
+    if (type !== SC.IMAGE_TYPE_NONE) {
+      // Place the img within a div, so that we may scale & offset the img
+      context = context.begin('img');
+      context.setAttr('src', image.src);
 
-    if (imageValue && type === SC.IMAGE_TYPE_CSS_CLASS) {
-      context.addClass(imageValue);
-      this._last_class = imageValue;
+      if (imageValue && type === SC.IMAGE_TYPE_CSS_CLASS) {
+        context.addClass(imageValue);
+        this._last_class = imageValue;
+      }
+
+      if (toolTip) {
+        context.setAttr('title', toolTip);
+        context.setAttr('alt', toolTip);
+      }
+
+      // Adjust the layout of the img
+      context.addStyle(this.imageStyles(dataSource));
+
+      context = context.end();
     }
-
-    if (toolTip) {
-      context.setAttr('title', toolTip);
-      context.setAttr('alt', toolTip);
-    }
-
-    // Adjust the layout of the img
-    context.addStyle(this.imageStyles(dataSource));
-
-    context = context.end();
   },
 
   update: function(dataSource, jquery) {
@@ -70,7 +73,7 @@ SC.BaseTheme.imageRenderDelegate = SC.RenderDelegate.create({
     jquery = jquery.find('img');
     jquery.attr('src', image.src);
 
-    if (imageValue !== this._last_class) jquery.setClass(this._last_class, NO);
+    if (imageValue !== this._last_class) jquery.removeClass(this._last_class);
     if (imageValue) {
       jquery.addClass(imageValue);
       this._last_class = imageValue;
@@ -86,7 +89,7 @@ SC.BaseTheme.imageRenderDelegate = SC.RenderDelegate.create({
   },
 
   imageStyles: function(dataSource) {
-    var innerFrame = dataSource.get('innerFrame');
+    var innerFrame = dataSource._view.get('innerFrame');
     return {
       'position': 'absolute',
       'left': Math.round(innerFrame.x),
