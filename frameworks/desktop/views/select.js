@@ -381,7 +381,6 @@ SC.SelectView = SC.ButtonView.extend(
     @private
   */
   render: function (context,firstTime) {
-    sc_super();
 
     var escapeHTML, items, len, nameKey, iconKey, valueKey, separatorKey, showCheckbox,
         currentSelectedVal, shouldLocalize, isSeparator, itemList, isChecked,
@@ -562,6 +561,9 @@ SC.SelectView = SC.ButtonView.extend(
     //Set the preference matrix for the menu pane
     this.changeSelectPreferMatrix(this.get("_itemIdx"));
 
+    // If we're going to do such a stupid render function where we set properties
+    // on ourself, then we should use those properties in this pass.
+    sc_super();
   },
 
   /**
