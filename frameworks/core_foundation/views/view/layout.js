@@ -976,7 +976,138 @@ SC.View.reopen(
     if (backgroundColor) {
       context.setStyle('backgroundColor', backgroundColor);
     }
-  }.enhance()
+  }.enhance(),
+
+  /** @private Update this view's layout action. */
+  _doUpdateLayout: function (force) {
+    var isRendered = this.get('_isRendered'),
+      isVisibleInWindow = this.get('isVisibleInWindow'),
+      handled = true;
+
+    if (isRendered) {
+      if (isVisibleInWindow ||
+        this.get('currentState') === SC.CoreView.State.ATTACHED_HIDING ||
+        this.get('currentState') === SC.CoreView.State.ATTACHED_BUILDING_OUT ||
+        force) {
+        // Only in the visible states do we allow updates without being forced.
+        this._executeDoUpdateLayout();
+      } else {
+        // Otherwise mark the view as needing an update when we enter a shown state again.
+        this._layoutNeedsUpdate = true;
+      }
+    } else {
+      handled = false;
+    }
+
+    return handled;
+  },
+
+  /** @private */
+  _executeDoUpdateLayout: function () {
+    var context;
+
+    context = this.renderContext(this.get('layer'));
+    context.setStyle(this.get('layoutStyle'));
+    context.update();
+
+    // Reset that an update is required.
+    this._layoutNeedsUpdate = false;
+
+    // Notify updated (cascades).
+    this._updatedLayout();
+  },
+
+  /** @private Override. */
+  _executeQueuedUpdates: function () {
+    sc_super();
+
+    // Update the layout style of the layer if necessary.
+    if (this._layoutNeedsUpdate) {
+      this._executeDoUpdateLayout();
+    }
+  },
+
+  /** @private Override: Notify on attached. */
+  _notifyAttached: function () {
+    // If we are using static layout then we don't know the frame until appended to the document.
+    if (this.get('useStaticLayout')) {
+      // We call viewDidResize so that it calls parentViewDidResize on all child views.
+      this.viewDidResize();
+    }
+
+    // Notify.
+    if (this.didAppendToDocument) { this.didAppendToDocument(); }
+
+    // Begin observing isVisible & isFirstResponder.
+    this.addObserver('isVisible', this, this._isVisibleDidChange);
+    this.addObserver('isFirstResponder', this, this._isFirstResponderDidChange);
+
+    // Cascade the event to child views.
+    this._callOnChildViews('_notifyAttached');
+  },
+
+  /** @private Override: The 'adopted' event. */
+  _adopted: function (beforeView) {
+    var parentView = this.get('parentView');
+
+    // Notify.
+    if (parentView.didAddChild) { parentView.didAddChild(this, beforeView); }
+    if (this.didAddToParent) { this.didAddToParent(parentView, beforeView); }
+
+    // Our frame may change once we've been adopted to a parent.
+    this.layoutDidChange();
+
+    if (!this.get('isAttached')) {
+
+      if (this.get('_isRendered')) {
+
+        // Bypass the unattached state for adopted views.
+        if (parentView.get('isAttached')) {
+          var parentNode, nextNode, nextView, siblings;
+
+          parentNode = parentView.get('containerLayer');
+          siblings = parentView.get('childViews');
+          nextView = siblings.objectAt(siblings.indexOf(this) + 1);
+          nextNode = (nextView) ? nextView.get('layer') : null;
+
+          this._executeDoAttach(parentNode, nextNode);
+        }
+      } else {
+
+        // Bypass the unrendered state for adopted views.
+        if (parentView.get('_isRendered')) {
+          this._executeDoRender();
+        }
+      }
+
+    }
+  },
+
+  /** @private Override: The 'orphaned' event. */
+  _orphaned: function (oldParentView) {
+    // Notify.
+    if (oldParentView.didRemoveChild) { oldParentView.didRemoveChild(this); }
+    if (this.didRemoveFromParent) { this.didRemoveFromParent(oldParentView); }
+
+    // Our frame may change once we've been removed from a parent.
+    this.layoutDidChange();
+  },
+
+  /** @private Extension: The 'updatedContent' event. */
+  _updatedContent: function () {
+    sc_super();
+
+    // If this view uses static layout, then notify that the frame (likely)
+    // changed.
+    if (this.useStaticLayout) { this.viewDidResize(); }
+  },
+
+  /** @private The 'updatedLayout' event. */
+  _updatedLayout: function () {
+    // Notify.
+    this.didRenderAnimations();
+  }
+
 });
 
 SC.View.mixin(

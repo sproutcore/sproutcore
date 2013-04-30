@@ -298,10 +298,9 @@ SC.CoreView.reopen(
 
   /** @private Render this view action. */
   _doRender: function () {
-    var _isRendered = this.get('_isRendered'),
-      handled = true;
+    var handled = true;
 
-    if (!_isRendered) {
+    if (!this.get('_isRendered')) {
       this._executeDoRender();
     } else {
       handled = false;
@@ -333,14 +332,13 @@ SC.CoreView.reopen(
 
   /** @private Update this view's contents action. */
   _doUpdateContent: function (force) {
-    var _isRendered = this.get('_isRendered'),
-      isVisibleInWindow = this.get('isVisibleInWindow'),
+    var isVisibleInWindow = this.get('isVisibleInWindow'),
       handled = true;
 
     // Legacy.
     this.set('layerNeedsUpdate', true);
 
-    if (_isRendered) {
+    if (this.get('_isRendered')) {
       if (isVisibleInWindow ||
         this.get('currentState') === SC.CoreView.State.ATTACHED_HIDING ||
         this.get('currentState') === SC.CoreView.State.ATTACHED_BUILDING_OUT ||
@@ -350,30 +348,6 @@ SC.CoreView.reopen(
       } else {
         // Otherwise mark the view as needing an update when we enter a shown state again.
         this._contentNeedsUpdate = true;
-      }
-    } else {
-      handled = false;
-    }
-
-    return handled;
-  },
-
-  /** @private Update this view's layout action. */
-  _doUpdateLayout: function (force) {
-    var _isRendered = this.get('_isRendered'),
-      isVisibleInWindow = this.get('isVisibleInWindow'),
-      handled = true;
-
-    if (_isRendered) {
-      if (isVisibleInWindow ||
-        this.get('currentState') === SC.CoreView.State.ATTACHED_HIDING ||
-        this.get('currentState') === SC.CoreView.State.ATTACHED_BUILDING_OUT ||
-        force) {
-        // Only in the visible states do we allow updates without being forced.
-        this._executeDoUpdateLayout();
-      } else {
-        // Otherwise mark the view as needing an update when we enter a shown state again.
-        this._layoutNeedsUpdate = true;
       }
     } else {
       handled = false;
@@ -395,15 +369,9 @@ SC.CoreView.reopen(
     if (this.didAddToParent) { this.didAddToParent(parentView, beforeView); }
 
     if (this.get('isAttached')) {
-
-      // Our frame will change once we've been adopted to a parent.
-      if (!this.get('hasLayout')) { this.notifyPropertyChange('frame'); }
-      else { this.layoutDidChange(); }
-
+      // Our frame may change once we've been adopted to a parent.
+      this.notifyPropertyChange('frame');
     } else {
-
-      // Our frame will change once we've been adopted to a parent.
-      if (this.get('hasLayout')) { this.layoutDidChange(); }
 
       if (this.get('_isRendered')) {
 
@@ -431,18 +399,26 @@ SC.CoreView.reopen(
 
   /** @private The 'attached' event. */
   _attached: function () {
-    // Notify attached (on self and child views).
-    this._parentAttached();
-
-    // Route.
+    // Route before notify.
     var isVisible = this.get('isVisible'),
       parentView = this.get('parentView'),
       // Views without a parent are not limited by a parent's isVisibleInWindow property.
-      isParentShown = parentView ? parentView.get('isVisibleInWindow') : true;
+      isParentShown = parentView ? parentView.get('isVisibleInWindow') : true,
+      transitionIn;
 
     if (isVisible && isParentShown) {
-      // Notify shown (on self and child views).
-      this._parentAttachedShown();
+      // Update before showing.
+      this._executeQueuedUpdates();
+
+      transitionIn = this.get('transitionIn');
+      if (transitionIn) {
+        this._gotoAttachedBuildingInState();
+      } else {
+        this._gotoAttachedShownState();
+      }
+
+      // Update and route the child views.
+      this._callOnChildViews('_routeOnParentAttachedShown');
     } else {
       // If our parent is already hidden, then update _isHiddenByAncestor.
       if (!isParentShown) {
@@ -451,6 +427,9 @@ SC.CoreView.reopen(
 
       this._gotoAttachedHiddenState();
     }
+
+    // Notify attached (on self and child views) now that we are all in an attached state..
+    this._notifyAttached();
   },
 
   /** @private The 'detached' event. */
@@ -464,14 +443,6 @@ SC.CoreView.reopen(
 
     // Cascade the event to child views.
     this._callOnChildViews('_detached');
-  },
-
-  /** @private The 'detaching' event. */
-  _detaching:  function () {
-    if (this.willRemoveFromDocument) { this.willRemoveFromDocument(); }
-
-    // Cascade the event to child views.
-    this._callOnChildViews('_detaching');
   },
 
   /** @private The 'didTransitionOut' event. */
@@ -545,67 +516,6 @@ SC.CoreView.reopen(
     // Notify.
     if (oldParentView.didRemoveChild) { oldParentView.didRemoveChild(this); }
     if (this.didRemoveFromParent) { this.didRemoveFromParent(oldParentView); }
-
-    // The DOM will need some fixing up, note this on the view.
-    // But don't update the layer location if it's already destroyed (i.e. it
-    // no longer has a layer), because if a new layer with the same id were
-    // created before updateLayerLocationIfNeeded runs, we would inadvertently
-    // remove the new layer.
-    // TODO: We should be able to avoid this hack with statechart.
-    // if (!this.get('isDestroyed') && this.parentViewDidChange) this.parentViewDidChange();
-
-    if (this.get('isAttached')) {
-
-      // Our frame will change once we've been removed from a parent.
-      if (!this.get('hasLayout')) { this.notifyPropertyChange('frame'); }
-      else { this.layoutDidChange(); }
-
-    } else {
-
-      // Our frame will change once we've been removed from a parent.
-      if (this.get('hasLayout')) { this.layoutDidChange(); }
-
-    }
-  },
-
-  /** @private The 'parentAttached' cascading event. */
-  _parentAttached: function () {
-    // Notify.
-    if (!this.get('hasLayout')) { this.notifyPropertyChange('frame'); }
-    else { this.layoutDidChange(); }
-    if (this.didAppendToDocument) { this.didAppendToDocument(); }
-
-    // Begin observing isVisible & isFirstResponder.
-    this.addObserver('isVisible', this, this._isVisibleDidChange);
-    this.addObserver('isFirstResponder', this, this._isFirstResponderDidChange);
-
-    // Cascade the event to child views.
-    this._callOnChildViews('_parentAttached');
-  },
-
-  /** @private The 'parentAttachedShown' cascading event. */
-  _parentAttachedShown: function () {
-    this.set('_isHiddenByAncestor', false);
-
-    if (this.get('isVisible')) {
-      var transitionIn = this.get('transitionIn');
-
-      // Update before showing.
-      this._executeQueuedUpdates();
-
-      // Route.
-      if (transitionIn) {
-        this._gotoAttachedBuildingInState();
-      } else {
-        this._gotoAttachedShownState();
-      }
-
-      // Cascade the event to child views.
-      this._callOnChildViews('_parentAttachedShown');
-    } else {
-      // Route.
-      this._gotoAttachedHiddenState();
-    }
   },
 
   /** @private The 'parentHidden' cascading event. */
@@ -660,84 +570,71 @@ SC.CoreView.reopen(
       len, idx,
       mixins = this.didCreateLayerMixin;
 
-    // TODO: we should be able to fix this with states
-    // this.notifyPropertyChange('layer');
+    if (!this.get('_isRendered')) {
+      // TODO: we should be able to fix this with states
+      // this.notifyPropertyChange('layer');
 
-    // TODO: we should be able to fix this with states
-    // if (this.get('useStaticLayout')) this.viewDidResize();
+      // Route.
+      this._gotoUnattachedState();
 
-    // Send notice that the layer was created.
-    if (this.didCreateLayer) { this.didCreateLayer(); }
-    if (mixins) {
-      len = mixins.length;
-      for (idx = 0; idx < len; ++idx) {
-        mixins[idx].call(this);
+      // TODO: we should be able to fix this with states
+      // if (this.get('useStaticLayout')) this.viewDidResize();
+
+      // Send notice that the layer was created.
+      if (this.didCreateLayer) { this.didCreateLayer(); }
+      if (mixins) {
+        len = mixins.length;
+        for (idx = 0; idx < len; ++idx) {
+          mixins[idx].call(this);
+        }
       }
-    }
 
-    // Register display property observers.
-    displayProperties = this.get('displayProperties');
-    for (idx = 0, len = displayProperties.length; idx < len; idx++) {
-      this.addObserver(displayProperties[idx], this, this.displayDidChange);
-    }
+      // Register display property observers.
+      displayProperties = this.get('displayProperties');
+      for (idx = 0, len = displayProperties.length; idx < len; idx++) {
+        this.addObserver(displayProperties[idx], this, this.displayDidChange);
+      }
 
-    // var childView, childViews = this.get('childViews');
-    // for (var i = childViews.length - 1; i >= 0; i--) {
-    //   childView = childViews[i];
+      // var childView, childViews = this.get('childViews');
+      // for (var i = childViews.length - 1; i >= 0; i--) {
+      //   childView = childViews[i];
 
-    //   // We allow missing childViews in the array so ignore them.
-    //   if (!childView) { continue; }
+      //   // We allow missing childViews in the array so ignore them.
+      //   if (!childView) { continue; }
 
-      // A parent view creating a layer might result in the creation of a
-      // child view's DOM node being created via a render context without
-      // createLayer() being invoked on the child.  In such cases, if anyone
-      // had requested 'layer' and it was cached as null, we need to
-      // invalidate it.
-      // TODO: we should be able to fix this with states
-      // childView.notifyPropertyChange('layer');
+        // A parent view creating a layer might result in the creation of a
+        // child view's DOM node being created via a render context without
+        // createLayer() being invoked on the child.  In such cases, if anyone
+        // had requested 'layer' and it was cached as null, we need to
+        // invalidate it.
+        // TODO: we should be able to fix this with states
+        // childView.notifyPropertyChange('layer');
 
-      // A strange case, that a childView's frame won't be correct before
-      // we have a layer, if the childView doesn't have a fixed layout
-      // and we are using static layout.
-      // TODO: we should be able to fix this with states
-      // if (this.get('useStaticLayout')) {
-      //   if (!childView.get('isFixedLayout')) { childView.viewDidResize(); }
+        // A strange case, that a childView's frame won't be correct before
+        // we have a layer, if the childView doesn't have a fixed layout
+        // and we are using static layout.
+        // TODO: we should be able to fix this with states
+        // if (this.get('useStaticLayout')) {
+        //   if (!childView.get('isFixedLayout')) { childView.viewDidResize(); }
+        // }
+
+      //   childView._rendered();
       // }
 
-    //   childView._rendered();
-    // }
+      // Cascade the event to child views.
+      this._callOnChildViews('_rendered');
+    }
 
-    // Route.
-    this._gotoUnattachedState();
-
-    // Cascade the event to child views.
-    this._callOnChildViews('_rendered');
   },
 
   /** @private The 'updatedContent' event. */
   _updatedContent: function () {
-    // If this view uses static layout, then notify that the frame (likely)
-    // changed.
-    if (this.useStaticLayout) { this.viewDidResize(); }
-
+    // Notify.
     if (this.didUpdateLayer) { this.didUpdateLayer(); }
 
     if (this.designer && this.designer.viewDidUpdateLayer) {
       this.designer.viewDidUpdateLayer(); //let the designer know
     }
-  },
-
-  /** @private The 'updatedLayout' event. */
-  _updatedLayout: function () {
-    // Notify.
-    this.didRenderAnimations();
-
-    // If this view uses static layout, then notify if the frame changed.
-    // (viewDidResize will do a comparison)
-    if (this.useStaticLayout) this.viewDidResize();
-
-    // Cascade the event to child views.
-    this._callOnChildViews('_updatedLayout');
   },
 
   /** @private The 'updatedVisibility' event. */
@@ -940,7 +837,7 @@ SC.CoreView.reopen(
   /** @private */
   _executeDoDetach: function () {
     // Notify detaching.
-    this._detaching();
+    this._notifyDetaching();
 
     // Detach the layer.
     var node = this.get('layer');
@@ -1096,21 +993,6 @@ SC.CoreView.reopen(
   },
 
   /** @private */
-  _executeDoUpdateLayout: function () {
-    var context;
-
-    context = this.renderContext(this.get('layer'));
-    context.setStyle(this.get('layoutStyle'));
-    context.update();
-
-    // Reset that an update is required.
-    this._layoutNeedsUpdate = false;
-
-    // Notify updated (cascades).
-    this._updatedLayout();
-  },
-
-  /** @private */
   _executeDoUpdateVisibility: function () {
     var isVisible = this.get('isVisible');
 
@@ -1134,17 +1016,11 @@ SC.CoreView.reopen(
       this._executeDoUpdateContent();
     }
 
-    // Update the layout style of the layer if necessary.
-    if (this._layoutNeedsUpdate) {
-      this._executeDoUpdateLayout();
-    }
-
     // Update the visibility of the layer if necessary.
     if (this._visibilityNeedsUpdate) {
       this._executeDoUpdateVisibility();
     }
   },
-
 
   /** @private
     Marks the view as needing a visibility update if the isVisible property
@@ -1173,6 +1049,55 @@ SC.CoreView.reopen(
     var isFirstResponder = this.get('isFirstResponder');
 
     this.$().toggleClass('focus', isFirstResponder);
+  },
+
+  /** @private Route on parent attached and shown. */
+  _routeOnParentAttachedShown: function () {
+    this.set('_isHiddenByAncestor', false);
+
+    if (this.get('isVisible')) {
+      var transitionIn = this.get('transitionIn');
+
+      // Update before showing.
+      this._executeQueuedUpdates();
+
+      // Route.
+      if (transitionIn) {
+        this._gotoAttachedBuildingInState();
+      } else {
+        this._gotoAttachedShownState();
+      }
+
+      // Cascade the event to child views.
+      this._callOnChildViews('_routeOnParentAttachedShown');
+    } else {
+      // Route.
+      this._gotoAttachedHiddenState();
+    }
+  },
+
+  /** @private Notify on attached. */
+  _notifyAttached: function () {
+    // If we don't have the layout module then we don't know the frame until appended to the document.
+    this.notifyPropertyChange('frame');
+
+    // Notify.
+    if (this.didAppendToDocument) { this.didAppendToDocument(); }
+
+    // Begin observing isVisible & isFirstResponder.
+    this.addObserver('isVisible', this, this._isVisibleDidChange);
+    this.addObserver('isFirstResponder', this, this._isFirstResponderDidChange);
+
+    // Cascade the event to child views.
+    this._callOnChildViews('_notifyAttached');
+  },
+
+  /** @private Notify on detaching. */
+  _notifyDetaching:  function () {
+    if (this.willRemoveFromDocument) { this.willRemoveFromDocument(); }
+
+    // Cascade the event to child views.
+    this._callOnChildViews('_notifyDetaching');
   }
 
 });
