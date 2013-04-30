@@ -79,7 +79,7 @@ test("should add a 'sc-hidden' class to a template view when isVisible is true",
 
   view.set('template', function() { return "foo"; });
 
-  view.createLayer();
+  view.createLayer()._doAttach(document.body);
   ok(!view.$().hasClass('sc-hidden'), "does not have hidden class applied");
 
   SC.run(function() { view.set('isVisible', NO); });
@@ -98,7 +98,7 @@ test("should add a 'sc-hidden' class to template views if isVisible is false bef
 
   view.set('template', function() { return "foo"; });
 
-  view.createLayer();
+  view.createLayer()._doAttach(document.body);
   ok(view.$().hasClass('sc-hidden'), "adds hidden class when rendering");
   $(document.body).append(view.$());
   ok(!view.$().is(':visible'), "should be hidden when hidden class is added");

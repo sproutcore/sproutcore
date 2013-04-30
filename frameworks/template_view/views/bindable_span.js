@@ -174,7 +174,7 @@ SC._BindableSpan = SC.TemplateView.extend(
     elem = context.element();
     this.$().replaceWith(elem);
     this.set('layer', elem);
-    this._notifyDidCreateLayer();
+    this._rendered();
   }
 });
 
