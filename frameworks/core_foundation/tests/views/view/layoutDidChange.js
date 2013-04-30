@@ -19,8 +19,14 @@ test("notifies layoutStyle & frame change", function () {
   SC.run(function () {
     view.layoutDidChange();
   });
+
   equals(callCount,1,'should trigger observers for layoutStyle');
   view.createLayer()._doAttach(document.body);
+
+  SC.run(function () {
+    view.layoutDidChange();
+  });
+
   equals(callCount,2,'should trigger observers for frame when attached to the document');
 
   // Clean up.

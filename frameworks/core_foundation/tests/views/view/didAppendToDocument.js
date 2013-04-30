@@ -69,7 +69,7 @@ test("Check that didAppendToDocument gets called at the right moment", function 
 // or parentViewDidResize.  A weird case, but we prevent it from failing anyhow.
 test("Check that childView is updated if the pane has a static layout and view doesn't have a fixed layout", function () {
   var childFrame,
-      wrongFrame = {x:0, y:0, width: 0, height: 0},
+      wrongFrame = { x:0, y:0, width: 0, height: 0 },
       correctFrame;
 
   pane.set('useStaticLayout', YES);
