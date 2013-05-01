@@ -975,7 +975,7 @@ SC.CoreView.reopen(
     var isVisible = this.get('isVisible');
 
     this.$().toggleClass('sc-hidden', !isVisible);
-    this.$().attr('aria-hidden', !isVisible);
+    this.$().attr('aria-hidden', isVisible ? null : true);
 
     // Reset that an update is required.
     this._visibilityNeedsUpdate = false;
