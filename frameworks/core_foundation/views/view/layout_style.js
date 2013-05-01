@@ -144,7 +144,7 @@ SC.View.LayoutStyleCalculator = {
     throw error;
   },
 
-
+  /** @private */
   _calculatePosition: function (style, state, direction) {
     var start, finish, size,
       hasStart, hasFinish, hasSize, hasMaxSize,
@@ -257,6 +257,7 @@ SC.View.LayoutStyleCalculator = {
     style[finish] = style[center] = null;
   },
 
+  /** @private */
   // return "auto" for "auto", null for null, converts 0.XY into "XY%".
   // otherwise returns the original number, rounded down
   _cssNumber: function (val) {

@@ -54,7 +54,7 @@ SC.mixin(SC.View,
         left = -width;
       }
 
-      // Convert to a HW accelerated layout.
+      // Convert to a HW accelerate-able layout.
       view.adjust({ bottom: null, left: left || viewFrame.x, right: null, top: top || viewFrame.y, height: viewFrame.height, width: viewFrame.width });
     },
 
