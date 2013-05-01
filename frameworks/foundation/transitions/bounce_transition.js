@@ -112,7 +112,7 @@ SC.mixin(SC.View,
       ];
 
       callback = function () {
-        view._didTransitionIn(transition, options);
+        view.didTransitionIn(transition, options);
       };
 
       // Animate through the frames.
@@ -214,7 +214,7 @@ SC.mixin(SC.View,
       ];
 
       callback = function () {
-        view._didTransitionOut(transition, options);
+        view.didTransitionOut(transition, options);
       };
 
       // Animate through the frames.

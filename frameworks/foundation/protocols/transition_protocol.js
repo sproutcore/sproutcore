@@ -12,7 +12,7 @@
   swapping between views and expects the given transition plugin object
   to implement the methods in this protocol.
 */
-SC.TransitionProtocol = {
+SC.SwapTransitionProtocol = {
 
   /**
     This optional method is called to set up the entrance transition.

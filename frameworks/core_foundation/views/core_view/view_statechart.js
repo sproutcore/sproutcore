@@ -445,8 +445,15 @@ SC.CoreView.reopen(
     this._callOnChildViews('_detached');
   },
 
-  /** @private The 'didTransitionOut' event. */
-  _didTransitionIn: function (transition, options) {
+  /**
+    This method is called by transition plugins when the incoming or showing
+    transition completes.  You should only use this method if implementing a
+    custom transition plugin.
+
+    @param {SC.TransitionProtocol} transition The transition plugin used.
+    @param {Object} options The original options used.  One of transitionShowOptions or transitionInOptions.
+  */
+  didTransitionIn: function (transition, options) {
     var state = this.get('currentState');
 
     // Clean up the transition if the plugin supports it.
@@ -460,8 +467,15 @@ SC.CoreView.reopen(
     }
   },
 
-  /** @private The 'didTransitionOut' event. */
-  _didTransitionOut: function (transition, options) {
+  /**
+    This method is called by transition plugins when the outgoing or hiding
+    transition completes.  You should only use this method if implementing a
+    custom transition plugin.
+
+    @param {SC.TransitionProtocol} transition The transition plugin used.
+    @param {Object} options The original options used.  One of transitionHideOptions or transitionOutOptions.
+  */
+  didTransitionOut: function (transition, options) {
     var state = this.get('currentState');
 
     // Clean up the transition if the plugin supports it.
