@@ -886,20 +886,20 @@ SC.RenderContext = SC.Builder.create(
 
         value = nameOrStyles[key];
 
-        didChange = this._deleteComboStyles(styles, key) || didChange;
+        didChange = this._deleteComboStyles(nameOrStyles, key) || didChange;
         didChange = this._setOnHash(styles, key, value) || didChange;
       }
     } else {
-      didChange = this._deleteComboStyles(styles, nameOrStyles);
+      didChange = this._deleteComboStyles(nameOrStyles, value);
       didChange = this._setOnHash(styles, nameOrStyles, value) || didChange;
     }
 
     if (didChange) {
-      this._stylesDidChange = YES;
 
-      // Apply the styles to the element if we have one already.
+      // Set the styles on the element if we have one already.
       if (this._elem) {
-        this.$().attr('style', '').css(styles);
+        // Note: jQuery .css doesn't remove old styles
+        this.$().css(styles);
       }
     }
 
@@ -934,7 +934,8 @@ SC.RenderContext = SC.Builder.create(
       hash[key] = value;
       didChange = YES;
     } else if (cur != null && value == null) {
-      delete hash[key];
+      // Unset using '' so that jQuery will remove the value, null is not reliable (ex. WebkitTransform)
+      hash[key] = '';
       didChange = YES;
     } else if (cur != value) {
       hash[key] = value;
@@ -973,8 +974,6 @@ SC.RenderContext = SC.Builder.create(
     // Reset.
     this._styles = {};
     if (didChange) {
-      this._stylesDidChange = YES;
-
       // Apply the styles to the element if we have one already.
       if (this._elem) {
         this.$().attr('style', '');
