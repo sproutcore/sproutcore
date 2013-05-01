@@ -886,11 +886,11 @@ SC.RenderContext = SC.Builder.create(
 
         value = nameOrStyles[key];
 
-        didChange = this._deleteComboStyles(nameOrStyles, key) || didChange;
+        didChange = this._deleteComboStyles(styles, key) || didChange;
         didChange = this._setOnHash(styles, key, value) || didChange;
       }
     } else {
-      didChange = this._deleteComboStyles(nameOrStyles, value);
+      didChange = this._deleteComboStyles(styles, nameOrStyles);
       didChange = this._setOnHash(styles, nameOrStyles, value) || didChange;
     }
 

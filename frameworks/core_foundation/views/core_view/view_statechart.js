@@ -509,22 +509,6 @@ SC.CoreView.reopen(
     this._callOnChildViews('_layerDestroyed');
   },
 
-  /** @private The 'layerDestroying' event. */
-  _layerDestroying: function () {
-    // Notify.
-    if (this.willDestroyLayer) { this.willDestroyLayer(); }
-    var mixins = this.willDestroyLayerMixin, len, idx;
-    if (mixins) {
-      len = mixins.length;
-      for (idx = 0; idx < len; ++idx) {
-        mixins[idx].call(this);
-      }
-    }
-
-    // Cascade the event to child views.
-    this._callOnChildViews('_layerDestroying');
-  },
-
   /** @private The 'orphaned' event. */
   _orphaned: function (oldParentView) {
     // Notify.
@@ -619,20 +603,6 @@ SC.CoreView.reopen(
     this._callOnChildViews('_rendered');
   },
 
-  /** @private The 'updatedContent' event. */
-  _updatedContent: function () {
-    // Notify.
-    if (this.didUpdateLayer) { this.didUpdateLayer(); }
-
-    if (this.designer && this.designer.viewDidUpdateLayer) {
-      this.designer.viewDidUpdateLayer(); //let the designer know
-    }
-  },
-
-  /** @private The 'updatedVisibility' event. */
-  _updatedVisibility: function () {
-  },
-
   // ------------------------------------------------------------------------
   // States
   //
@@ -678,14 +648,14 @@ SC.CoreView.reopen(
       this._executeDoUpdateVisibility();
     }
 
+    // Update the state.
+    this.set('currentState', SC.CoreView.State.ATTACHED_HIDDEN);
+
     // Notify.
     if (this.didHideInDocument) { this.didHideInDocument(); }
 
     // Notify child views (cascades back through this method).
     this._callOnChildViews('_parentHidden');
-
-    // Update the state.
-    this.set('currentState', SC.CoreView.State.ATTACHED_HIDDEN);
   },
 
   /** @private */
@@ -724,11 +694,11 @@ SC.CoreView.reopen(
 
   /** @private */
   _gotoAttachedShownState: function () {
-    // Notify.
-    if (this.didShowInDocument) { this.didShowInDocument(); }
-
     // Update the state.
     this.set('currentState', SC.CoreView.State.ATTACHED_SHOWN);
+
+    // Notify.
+    if (this.didShowInDocument) { this.didShowInDocument(); }
   },
 
   /** @private */
@@ -813,13 +783,13 @@ SC.CoreView.reopen(
 
   /** @private */
   _executeDoDestroyLayer: function () {
-    // Notify destroying layer.
-    this._layerDestroying();
+    // Notify destroying layer (cascades).
+    this._notifyDestroying();
 
     // Remove the layer.
     this.set('layer', null);
 
-    // Notify layer destroyed.
+    // Notify layer destroyed (cascades).
     this._layerDestroyed();
   },
 
@@ -967,12 +937,6 @@ SC.CoreView.reopen(
     this.applyAttributesToContext(context);
 
     context.update();
-    // if (context._innerHTMLReplaced) {
-    //   var pane = this.get('pane');
-    //   if (pane && pane.get('isPaneAttached')) {
-    //     this._notifyDidAppendToDocument();
-    //   }
-    // }
 
     // Legacy.
     this.set('layerNeedsUpdate', false);
@@ -980,8 +944,12 @@ SC.CoreView.reopen(
     // Reset that an update is required.
     this._contentNeedsUpdate = false;
 
-    // Notify updated.
-    this._updatedContent();
+    // Notify.
+    if (this.didUpdateLayer) { this.didUpdateLayer(); }
+
+    if (this.designer && this.designer.viewDidUpdateLayer) {
+      this.designer.viewDidUpdateLayer(); //let the designer know
+    }
   },
 
   /** @private */
@@ -993,9 +961,6 @@ SC.CoreView.reopen(
 
     // Reset that an update is required.
     this._visibilityNeedsUpdate = false;
-
-    // Notify updated.
-    this._updatedVisibility();
   },
 
   /** @private */
@@ -1043,6 +1008,46 @@ SC.CoreView.reopen(
     this.$().toggleClass('focus', isFirstResponder);
   },
 
+  /** @private Notify on attached. */
+  _notifyAttached: function () {
+    // If we don't have the layout module then we don't know the frame until appended to the document.
+    this.notifyPropertyChange('frame');
+
+    // Notify.
+    if (this.didAppendToDocument) { this.didAppendToDocument(); }
+
+    // Begin observing isVisible & isFirstResponder.
+    this.addObserver('isVisible', this, this._isVisibleDidChange);
+    this.addObserver('isFirstResponder', this, this._isFirstResponderDidChange);
+
+    // Cascade the event to child views.
+    this._callOnChildViews('_notifyAttached');
+  },
+
+  /** @private Notify on destroying. */
+  _notifyDestroying: function () {
+    // Notify.
+    if (this.willDestroyLayer) { this.willDestroyLayer(); }
+    var mixins = this.willDestroyLayerMixin, len, idx;
+    if (mixins) {
+      len = mixins.length;
+      for (idx = 0; idx < len; ++idx) {
+        mixins[idx].call(this);
+      }
+    }
+
+    // Cascade the event to child views.
+    this._callOnChildViews('_notifyDestroying');
+  },
+
+  /** @private Notify on detaching. */
+  _notifyDetaching:  function () {
+    if (this.willRemoveFromDocument) { this.willRemoveFromDocument(); }
+
+    // Cascade the event to child views.
+    this._callOnChildViews('_notifyDetaching');
+  },
+
   /** @private Route on parent attached and shown. */
   _routeOnParentAttachedShown: function () {
     this.set('_isHiddenByAncestor', false);
@@ -1075,30 +1080,6 @@ SC.CoreView.reopen(
       // Cascade the event to child views.
       this._callOnChildViews('_routeOnParentShown');
     }
-  },
-
-  /** @private Notify on attached. */
-  _notifyAttached: function () {
-    // If we don't have the layout module then we don't know the frame until appended to the document.
-    this.notifyPropertyChange('frame');
-
-    // Notify.
-    if (this.didAppendToDocument) { this.didAppendToDocument(); }
-
-    // Begin observing isVisible & isFirstResponder.
-    this.addObserver('isVisible', this, this._isVisibleDidChange);
-    this.addObserver('isFirstResponder', this, this._isFirstResponderDidChange);
-
-    // Cascade the event to child views.
-    this._callOnChildViews('_notifyAttached');
-  },
-
-  /** @private Notify on detaching. */
-  _notifyDetaching:  function () {
-    if (this.willRemoveFromDocument) { this.willRemoveFromDocument(); }
-
-    // Cascade the event to child views.
-    this._callOnChildViews('_notifyDetaching');
   }
 
 });

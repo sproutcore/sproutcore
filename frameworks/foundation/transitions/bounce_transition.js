@@ -201,7 +201,7 @@ SC.mixin(SC.View,
       }
 
       // Split the duration evenly per frame.
-      duration = options.duration || 0.4;
+      duration = options.duration || 0.6;
       duration = duration * 0.2;
 
       // Define the frames.
