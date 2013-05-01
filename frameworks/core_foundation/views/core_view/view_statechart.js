@@ -1034,7 +1034,6 @@ SC.CoreView.reopen(
     this.set('_isHiddenByAncestor', false);
 
     if (this.get('isVisible')) {
-      console.log('%@ - attached by parent'.fmt(this));
       // Route.
       var transitionIn = this.get('transitionIn');
       if (transitionIn) {

@@ -18,7 +18,7 @@ SC.mixin(SC.View,
     /** @private */
     setupIn: function (view, options) {
       // Cache the original scale on the view, so that we can reset properly.
-      view._preScaleInScale = view.get('layout').scale;
+      view._preScaleInScale = view.get('layout').scale || null;
 
       view.adjust({ scale: 0 });
     },
@@ -45,7 +45,7 @@ SC.mixin(SC.View,
     /** @private */
     teardownIn: function (view, options) {
       // Reset the scale to its original value (may be undefined).
-      view.adjust({ scale: view._preScaleInScale || null });
+      view.adjust({ scale: view._preScaleInScale });
 
       // Clean up.
       delete view._preScaleInScale;
