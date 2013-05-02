@@ -848,7 +848,7 @@ SC.View.reopen(
         layoutView.invokeOnce(layoutView.layoutChildViewsIfNeeded);
       }
     } else {
-      this.invokeOnce(this._doUpdateLayout);
+      this.invokeOnce(this.updateLayout);
     }
 
     // Cache the last layout to fine-tune notifications when the layout changes.
