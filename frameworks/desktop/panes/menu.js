@@ -292,7 +292,9 @@ SC.MenuPane = SC.PickerPane.extend(
     // interpreted in keyUp.
     this.set('defaultResponder', this);
     this.endPropertyChanges();
-    this._hideOverflow();
+
+    // Prevent body overflow (we don't want to overflow because of shadows).
+    SC.bodyOverflowArbitrator.requestHidden(this, true);
 
     this.append();
   },
