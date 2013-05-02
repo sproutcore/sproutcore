@@ -20,8 +20,8 @@ SC.Pane.reopen(
 
     @returns {Rect} current window size
   */
-  computeParentDimensions: function(frame) {
-    if(this.get('designer') && SC.suppressMain) { return sc_super(); }
+  computeParentDimensions: function (frame) {
+    if (this.get('designer') && SC.suppressMain) { return sc_super(); }
 
     var wDim = {x: 0, y: 0, width: 1000, height: 1000},
         layout = this.get('layout');
@@ -64,9 +64,9 @@ SC.Pane.reopen(
   },
 
   /** @private Disable caching due to an known bug in SC. */
-  frame: function() {
-    if(this.get('designer') && SC.suppressMain) { return sc_super(); }
-    return this.computeFrameWithParentFrame(null) ;
+  frame: function () {
+    if (this.get('designer') && SC.suppressMain) { return sc_super(); }
+    return this.computeFrameWithParentFrame(null);
   }.property(),
 
   /**
@@ -78,11 +78,11 @@ SC.Pane.reopen(
     @param {Rect} newSize the new window size
     @returns {SC.Pane} receiver
   */
-  windowSizeDidChange: function(oldSize, newSize) {
+  windowSizeDidChange: function (oldSize, newSize) {
     this.set('currentWindowSize', newSize);
     this.setBodyOverflowIfNeeded();
     this.parentViewDidResize(); // start notifications.
-    return this ;
+    return this;
   },
 
   /**
@@ -98,18 +98,21 @@ SC.Pane.reopen(
     multiple different panes, the panes could fight over whether it gets
     an overflow if care isn't taken!
 
-    @param {Boolean} [force] force a style to be set even if there are
-                             no minimums.
+    @param {Boolean} [force=false] force a style to be set even if there are no minimums.
+    @returns {void}
   */
-  setBodyOverflowIfNeeded: function(force) {
+  setBodyOverflowIfNeeded: function (force) {
     //Code to get rid of Lion rubberbanding.
     var layout = this.get('layout'),
         size = this.get('currentWindowSize');
-    if(!layout || !size || !size.width || !size.height) return;
+
+    if (!layout || !size || !size.width || !size.height) return;
+
     var minW = layout.minWidth,
-        minH = layout.minHeight;
-    if(force===true || minW || minH) {
-      if( (minH && size.height<minH) || (minW && size.width<minW) ) {
+      minH = layout.minHeight;
+
+    if (force === true || minW || minH) {
+      if ((minH && size.height < minH) || (minW && size.width < minW)) {
         SC.bodyOverflowArbitrator.requestVisible(this);
       } else {
         SC.bodyOverflowArbitrator.requestHidden(this);
@@ -117,14 +120,17 @@ SC.Pane.reopen(
     }
   },
 
-  /** @private */
-  paneLayoutDidChange: function() {
-    this.invokeOnce(this.updateLayout);
-    this.setBodyOverflowIfNeeded();
-  }.observes('layout'),
+  /**
+    Stops controlling the body overflow according to the needs of this pane.
 
-  recomputeDependentProperties: function(original) {
-    this.set('currentWindowSize', this.rootResponder.computeWindowSize()) ;
+    @returns {void}
+  */
+  unsetBodyOverflowIfNeeded: function () {
+    SC.bodyOverflowArbitrator.withdrawRequest(this);
+  },
+
+  recomputeDependentProperties: function (original) {
+    this.set('currentWindowSize', this.rootResponder.computeWindowSize());
     original();
   }.enhance()
 });

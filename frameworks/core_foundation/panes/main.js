@@ -32,37 +32,19 @@ sc_require('panes/visibility');
 */
 SC.MainPane = SC.Pane.extend({
   /** @private */
-  layout: { top: 0, left: 0, bottom: 0, right: 0, minHeight:200, minWidth:200 },
-
-  init:function(){
-    var wDim = {x: 0, y: 0, width: 1000, height: 1000},
-        layout = this.get('layout'), isOverflowing = false;
-
-    //Initial computation to get ride of Lion rubberbanding.
-    if (document && document.body) {
-      wDim.width = document.body.clientWidth;
-      wDim.height = document.body.clientHeight;
-
-      if( layout.minHeight || layout.minWidth ) {
-        if( (layout.minHeight && wDim.height<layout.minHeight) || (layout.minWidth && wDim.width<layout.minWidth) ) {
-          SC.bodyOverflowArbitrator.requestVisible(this);
-        } else {
-          // to avoid Lion rubberbanding
-          SC.bodyOverflowArbitrator.requestHidden(this);
-        }
-      }
-    }
-    sc_super();
-  },
+  layout: { minHeight: 200, minWidth: 200 },
 
   /**
     Called when the pane is attached.  Takes on main pane status.
    */
-  didAppendToDocument: function() {
+  didAppendToDocument: function () {
     var responder = this.rootResponder;
 
     responder.makeMainPane(this);
     this.becomeKeyPane();
+
+    // Update the body overflow on attach.
+    this.setBodyOverflowIfNeeded();
   },
 
   /**
@@ -71,8 +53,19 @@ SC.MainPane = SC.Pane.extend({
   willRemoveFromDocument: function () {
     var responder = this.rootResponder;
 
+    // Stop controlling the body overflow on detach.
+    this.unsetBodyOverflowIfNeeded();
+
     responder.makeMainPane(null);
     this.resignKeyPane();
+  },
+
+  /** @private The 'updatedLayout' event. */
+  _updatedLayout: function () {
+    sc_super();
+
+    // If by chance the minHeight or minWidth changed we would need to alter the body overflow request.
+    this.setBodyOverflowIfNeeded();
   },
 
   /** @private */
