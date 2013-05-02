@@ -860,7 +860,6 @@ SC.CoreView.reopen(
   /** @private */
   _executeDoRender: function () {
     // Render the layer.
-    // this.createLayer();
     var context = this.renderContext(this.get('tagName'));
     this.renderToContext(context);
     this.set('layer', context.element());

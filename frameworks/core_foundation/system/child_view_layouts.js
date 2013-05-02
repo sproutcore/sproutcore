@@ -8,7 +8,7 @@ sc_require('views/view');
 
 // This adds child layout plugin constants to SC.View.
 SC.mixin(SC.View,
-  /** @scope SC.View.prototype */ {
+  /** @scope SC.View */ {
 
   /**
     This child layout plugin automatically positions the view's child views in a
@@ -130,7 +130,7 @@ SC.mixin(SC.View,
 
         });
 
-    ### A note about spacing
+    ### A Note About Spacing
 
     Note that the spacing attribute becomes the minimum margin between child
     views, without explicitly overriding it from both sides using `marginBottom`
@@ -195,7 +195,7 @@ SC.mixin(SC.View,
         marginBottom = lastMargin || spacing;
       }
 
-      // Adjust our frame to fit as well, this ensures that SC.ScrollView updates.
+      // Adjust our frame to fit as well, this ensures that scrolling works.
       paddingAfter = Math.max(lastMargin, paddingAfter);
       if (view.getPath('layout.height') !== position) {
         if (animateOptions) {

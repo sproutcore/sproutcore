@@ -14,7 +14,7 @@ SC.mixin(SC.View,
     @see SC.View#animate for other timing functions.
     @since Version 1.10
   */
-  MOVE: {
+  SLIDE: {
 
     /** @private */
     setupIn: function (view, options) {
