@@ -47,6 +47,12 @@ SC.PalettePane = SC.PanelPane.extend(
   isModal: NO,
 
   /**
+    @type SC.View
+    @default SC.ModalPane
+  */
+  modalPane: SC.ModalPane,
+  
+  /**
     @type Boolean
     @default NO
   */
