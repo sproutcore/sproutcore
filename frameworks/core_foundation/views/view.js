@@ -999,7 +999,7 @@ SC.CoreView.reopen(
     var childView,
       childViews = this.get('childViews'),
       method,
-      shouldStop;
+      shouldContinue;
 
     // Could have support for arguments, but accessing Arguments and using apply is slower than using call, so avoid it.
     // args = SC.$A(arguments).slice(1);

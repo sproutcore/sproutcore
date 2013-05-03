@@ -170,6 +170,7 @@ test("Test unattached state.", function () {
   view.destroy();
 });
 
+
 /**
   Test the state, in particular supported actions.
   */
@@ -415,9 +416,8 @@ test("Test showing and hiding parent updates child views.", function () {
 });
 
 test("Test hiding with transitionHide", function () {
-  var handled,
-    child = SC.View.create(),
-    transitionHide = { runOut: function (view) {} },
+  var child = SC.View.create(),
+    transitionHide = { runOut: function () {} },
     view = SC.View.create({ childViews: [child] });
 
   // Set up.
@@ -579,3 +579,4 @@ test("Test adding a hidden child view to attached shown parent.", function () {
   ok(!child.get('_isHiddenBySelf'), "_isHiddenBySelf of child should be false");
   ok(child.get('_isHiddenByAncestor'), "_isHiddenByAncestor of child should be true");
 });
+
