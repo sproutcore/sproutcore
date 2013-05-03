@@ -1213,28 +1213,26 @@ SC.CoreView.reopen(
     // (which we will soon null out).
     var ret = sc_super();
 
-    // Immediately orphan the view if adopted.
-    this._doOrphan();
+    // If our parent is already destroyed, then we can defer destroying ourself
+    // and our own child views momentarily.
+    if (this.getPath('parentView.isDestroyed')) {
+      // Complete the destroy in a bit.
+      this.invokeNext(this._destroy);
+    } else {
+      // Immediately remove the layer if attached (ignores transitionOut). This
+      // will detach the layer for all child views as well.
+      this._doDetach(true);
 
-    // Immediately remove the layer if attached (ignores transitionOut). This
-    // will avoid each child view detaching the layer over and over again.
-    this._doDetach(true);
+      // Clear the layer if rendered.  This will clear all child views layer
+      // references as well.
+      this._doDestroyLayer();
 
-    // Immediately remove view from global hash.
+      // Complete the destroy.
+      this._destroy();
+    }
+
+    // Remove the view from the global hash.
     delete SC.View.views[this.get('layerId')];
-
-    // Complete less critical cleanup.
-    // TODO: consider deferring this
-    this._destroy();
-
-    return ret;
-  },
-
-  /** @private */
-  _destroy: function () {
-
-    // Clear the layer if rendered.
-    this._doDestroyLayer();
 
     // Destroy any children.  Loop backwards since childViews will shrink.
     var childViews = this.get('childViews');
@@ -1242,13 +1240,17 @@ SC.CoreView.reopen(
       childViews[i].destroy();
     }
 
-    delete this.page;
+    return ret;
+  },
 
-    // Clear owner.
+  /** @private */
+  _destroy: function () {
+    // Orphan the view if adopted.
+    this._doOrphan();
+
     // TODO: Deprecate owner in this sense.
     this.set('owner', null);
-
-    return this;
+    delete this.page;
   },
 
   /**
