@@ -1049,9 +1049,6 @@ SC.View.reopen(
     // Begin observing isVisible & isFirstResponder.
     this.addObserver('isVisible', this, this._isVisibleDidChange);
     this.addObserver('isFirstResponder', this, this._isFirstResponderDidChange);
-
-    // Cascade the event to child views.
-    this._callOnChildViews('_notifyAttached');
   },
 
   /** @private Override: The 'adopted' event (uses _checkForResize so our childViews are notified if our frame changes). */

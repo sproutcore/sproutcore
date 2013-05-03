@@ -994,6 +994,33 @@ SC.CoreView.reopen(
     }
   },
 
+  /** @private Call the method recursively on all child views. */
+  _callOnChildViews: function (methodName) {
+    var childView,
+      childViews = this.get('childViews'),
+      method,
+      shouldStop;
+
+    // Could have support for arguments, but accessing Arguments and using apply is slower than using call, so avoid it.
+    // args = SC.$A(arguments).slice(1);
+    for (var i = childViews.length - 1; i >= 0; i--) {
+      childView = childViews[i];
+
+      // We allow missing childViews in the array so ignore them.
+      if (!childView) { continue; }
+
+      // Look up the method on the child.
+      method = childView[methodName];
+      // method.apply(childView, args);  This is slower.
+      shouldContinue = method.call(childView);
+
+      // Recurse.
+      if (shouldContinue === undefined || shouldContinue) {
+        childView._callOnChildViews(methodName);
+      }
+    }
+  },
+
   /**
     The clipping frame returns the visible portion of the view, taking into
     account the clippingFrame of the parent view.  Keep in mind that
@@ -1029,7 +1056,6 @@ SC.CoreView.reopen(
   */
   _sc_view_clippingFrameDidChange: function () {
     this.notifyPropertyChange('clippingFrame');
-    this._callOnChildViews('_sc_view_clippingFrameDidChange');
   },
 
   /**
