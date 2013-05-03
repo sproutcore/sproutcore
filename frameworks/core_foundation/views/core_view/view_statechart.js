@@ -259,16 +259,9 @@ SC.CoreView.reopen(
     var handled = true;
 
     if (this.get('_isRendered') && !this.get('isAttached')) {
-      // Notify destroying layer (on self and all child views).
-      this._notifyDestroying();
-      this._callOnChildViews('_notifyDestroying');
-
-      // Remove the layer.
-      this.set('layer', null);
-
-      // Indicate layer destroyed (on self and all child views).
-      this._layerDestroyed();
-      this._callOnChildViews('_layerDestroyed');
+      // Remove our reference to the layer (our self and all our child views).
+      this._executeDoDestroyLayer();
+      this._callOnChildViews('_executeDoDestroyLayer');
     } else {
       handled = false;
     }
@@ -818,6 +811,36 @@ SC.CoreView.reopen(
   //
 
   /** @private */
+  _executeDoDestroyLayer: function () {
+    var displayProperties,
+      idx, len,
+      mixins;
+
+    // Notify.
+    if (this.willDestroyLayer) { this.willDestroyLayer(); }
+
+    mixins = this.willDestroyLayerMixin;
+    if (mixins) {
+      len = mixins.length;
+      for (idx = 0; idx < len; ++idx) {
+        mixins[idx].call(this);
+      }
+    }
+
+    // Remove the layer reference.
+    this.set('layer', null);
+
+    // Unregister display property observers.
+    displayProperties = this.get('displayProperties');
+    for (idx = 0, len = displayProperties.length; idx < len; idx++) {
+      this.removeObserver(displayProperties[idx], this, this.displayDidChange);
+    }
+
+    // Route.
+    this._gotoUnrenderedState();
+  },
+
+  /** @private */
   _executeDoDetach: function () {
     // Detach the layer.
     var node = this.get('layer');
@@ -938,38 +961,9 @@ SC.CoreView.reopen(
     this.addObserver('isFirstResponder', this, this._isFirstResponderDidChange);
   },
 
-  /** @private Notify on destroying. */
-  _notifyDestroying: function () {
-    // Notify.
-    if (this.willDestroyLayer) { this.willDestroyLayer(); }
-
-    var mixins = this.willDestroyLayerMixin, len, idx;
-    if (mixins) {
-      len = mixins.length;
-      for (idx = 0; idx < len; ++idx) {
-        mixins[idx].call(this);
-      }
-    }
-  },
-
   /** @private Notify on detaching. */
   _notifyDetaching: function () {
     if (this.willRemoveFromDocument) { this.willRemoveFromDocument(); }
-  },
-
-  /** @private The 'layerDestroyed' event. */
-  _layerDestroyed: function () {
-    var displayProperties,
-      idx, len;
-
-    // Unregister display property observers.
-    displayProperties = this.get('displayProperties');
-    for (idx = 0, len = displayProperties.length; idx < len; idx++) {
-      this.removeObserver(displayProperties[idx], this, this.displayDidChange);
-    }
-
-    // Route.
-    this._gotoUnrenderedState();
   },
 
   /** @private Route on parent hidden. */

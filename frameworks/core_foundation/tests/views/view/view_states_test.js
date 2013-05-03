@@ -244,6 +244,26 @@ test("Test attached_shown state.", function () {
 });
 
 
+test("Calling destroy layer, clears the layer from all child views.",  function () {
+  var child = SC.View.create(),
+    view = SC.View.create({ childViews: [child] });
+
+  view._doAdopt(parent);
+  parent._doRender();
+
+  ok(parent.get('layer'), "The parent should have a reference to the layer.");
+  ok(view.get('layer'), "The view should have a reference to the layer.");
+  ok(child.get('layer'), "The child should have a reference to the layer.");
+
+  parent._doDestroyLayer();
+  equals(parent.get('layer'), null, "The parent should not have a reference to the layer.");
+  equals(view.get('layer'), null, "The view should not have a reference to the layer.");
+  equals(child.get('layer'), null, "The child should not have a reference to the layer.");
+
+  // CLEAN UP
+  view.destroy();
+});
+
 /** Test the SC.View state propagation to child views. */
 module("SC.View Adoption", {
 
