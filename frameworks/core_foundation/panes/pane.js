@@ -469,7 +469,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
    */
   insert: function (fn) {
     // Render the layer.
-    this._doRender();
+    this.createLayer();
 
     // Pass the layer to the callback (TODO: why?)
     var layer = this.get('layer');
