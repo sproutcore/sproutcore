@@ -235,21 +235,8 @@ SC.CoreView.reopen(
     if (state === SC.CoreView.State.UNATTACHED) {
       var node = this.get('layer');
 
-      // before we add to parent node, make sure that the nextNode exists...
-      // if (nextView && (!nextNode || nextNode.parentNode!==parentNode)) {
-      //   nextView.updateLayerLocationIfNeeded();
-
-      //   // just in case it still couldn't generate the layer, force to null, because
-      //   // IE doesn't support insertBefore(blah, undefined) in version IE9.
-      //   nextNode = nextView.get('layer') || null;
-      // }
-
-      // add to parentNode if needed.
-      // if ((node.parentNode !== parentNode) || (node.nextSibling !== nextNode)) {
-      // jQuery(elem).append(layer)
-      // jQuery(parentNode).insertBefore(nextNode);
-      parentNode.insertBefore(node, nextNode);
-      // }
+      // IE doesn't support insertBefore(blah, undefined) in version IE9.
+      parentNode.insertBefore(node, nextNode || null);
 
       // Notify attached.
       this._attached();
