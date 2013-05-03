@@ -1021,7 +1021,7 @@ SC.View.reopen(
     // Reset that an update is required.
     this._layoutNeedsUpdate = false;
 
-    // Notify updated (cascades).
+    // Notify updated.
     this._updatedLayout();
   },
 
@@ -1091,14 +1091,12 @@ SC.View.reopen(
     if (this.didAddToParent) { this.didAddToParent(parentView, beforeView); }
   },
 
-  /** @private Override: The 'orphaned' event. */
+  /** @private Extension: The 'orphaned' event. */
   _orphaned: function (oldParentView) {
-    // Notify.
-    if (oldParentView.didRemoveChild) { oldParentView.didRemoveChild(this); }
-    if (this.didRemoveFromParent) { this.didRemoveFromParent(oldParentView); }
+    sc_super();
 
     // Our frame may change once we've been removed from a parent.
-    this.layoutDidChange();
+    this._checkForResize();
   },
 
   /** @private Extension: The 'updatedContent' event. */
