@@ -707,7 +707,7 @@ SC.View.reopen(
   */
   _viewFrameDidChange: function () {
     this.notifyPropertyChange('frame');
-    this._sc_view_clippingFrameDidChange();
+    this._callOnChildViews('_sc_view_clippingFrameDidChange');
   },
 
   // Implementation note: As a general rule, paired method calls, such as
@@ -793,11 +793,7 @@ SC.View.reopen(
     @returns {SC.View} receiver
   */
   layoutDidChange: function () {
-    // Did our layout change in a way that could cause us to be resized?  If
-    // not, then there's no need to invalidate the frames of our child views.
-    var previousLayout = this._previousLayout,
-        currentLayout  = this.get('layout'),
-        didResize = true;
+    var currentLayout  = this.get('layout');
 
     // Handle old style rotation.
     if (!SC.none(currentLayout.rotate)) {
@@ -809,6 +805,34 @@ SC.View.reopen(
       }
       delete currentLayout.rotate;
     }
+
+    // Optimize notifications depending on if we resized or just moved.
+    this._checkForResize();
+
+    // Notify layoutView/parentView.
+    var layoutView = this.get('layoutView');
+    if (layoutView) {
+      layoutView.set('childViewsNeedLayout', YES);
+      layoutView.layoutDidChangeFor(this);
+
+      // Check if childViewsNeedLayout is still true.
+      if (layoutView.get('childViewsNeedLayout')) {
+        layoutView.invokeOnce(layoutView.layoutChildViewsIfNeeded);
+      }
+    } else {
+      this.invokeOnce(this.updateLayout);
+    }
+
+    return this;
+  },
+
+  /** @private */
+  _checkForResize: function () {
+    // Did our layout change in a way that could cause us to be resized?  If
+    // not, then there's no need to invalidate the frames of our child views.
+    var previousLayout = this._previousLayout,
+        currentLayout  = this.get('layout'),
+        didResize = true;
 
     // We test the new layout to see if we believe it will affect the view's frame.
     // Since all the child view frames may depend on the parent's frame, it's
@@ -837,24 +861,8 @@ SC.View.reopen(
       this._viewFrameDidChange();
     }
 
-    // Notify layoutView/parentView.
-    var layoutView = this.get('layoutView');
-    if (layoutView) {
-      layoutView.set('childViewsNeedLayout', YES);
-      layoutView.layoutDidChangeFor(this);
-
-      // Check if childViewsNeedLayout is still true.
-      if (layoutView.get('childViewsNeedLayout')) {
-        layoutView.invokeOnce(layoutView.layoutChildViewsIfNeeded);
-      }
-    } else {
-      this.invokeOnce(this.updateLayout);
-    }
-
     // Cache the last layout to fine-tune notifications when the layout changes.
     this._previousLayout = currentLayout;
-
-    return this;
   },
 
   /**
@@ -1027,7 +1035,7 @@ SC.View.reopen(
     }
   },
 
-  /** @private Override: Notify on attached. */
+  /** @private Override: Notify on attached (avoids notify of frame changed). */
   _notifyAttached: function () {
     // If we are using static layout then we don't know the frame until appended to the document.
     if (this.get('useStaticLayout')) {
@@ -1046,16 +1054,12 @@ SC.View.reopen(
     this._callOnChildViews('_notifyAttached');
   },
 
-  /** @private Override: The 'adopted' event. */
+  /** @private Override: The 'adopted' event (uses _checkForResize so our childViews are notified if our frame changes). */
   _adopted: function (beforeView) {
     var parentView = this.get('parentView');
 
-    // Notify.
-    if (parentView.didAddChild) { parentView.didAddChild(this, beforeView); }
-    if (this.didAddToParent) { this.didAddToParent(parentView, beforeView); }
-
     // Our frame may change once we've been adopted to a parent.
-    this.layoutDidChange();
+    this._checkForResize();
 
     if (!this.get('isAttached')) {
 
@@ -1070,17 +1074,21 @@ SC.View.reopen(
           nextView = siblings.objectAt(siblings.indexOf(this) + 1);
           nextNode = (nextView) ? nextView.get('layer') : null;
 
-          this._executeDoAttach(parentNode, nextNode);
+          this._doAttach(parentNode, nextNode);
         }
       } else {
 
         // Bypass the unrendered state for adopted views.
         if (parentView.get('_isRendered')) {
-          this._executeDoRender();
+          this._doRender();
         }
       }
 
     }
+
+    // Notify.
+    if (parentView.didAddChild) { parentView.didAddChild(this, beforeView); }
+    if (this.didAddToParent) { this.didAddToParent(parentView, beforeView); }
   },
 
   /** @private Override: The 'orphaned' event. */

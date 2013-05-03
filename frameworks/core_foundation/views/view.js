@@ -446,7 +446,7 @@ SC.CoreView.reopen(
   */
   parentViewDidChange: function () {
     //@if(debug)
-    SC.warn("Developer Warning: parentViewDidChange has been deprecated.  Please use the notification methods willAddChild, didAddChild, willRemoveChild or didRemoveChild on the parent or willAddToParent, didAddToParent, willRemoveFromParent or didRemoveFromParent on the child to perform updates when the parent/child status changes.")
+    SC.warn("Developer Warning: parentViewDidChange has been deprecated.  Please use the notification methods willAddChild, didAddChild, willRemoveChild or didRemoveChild on the parent or willAddToParent, didAddToParent, willRemoveFromParent or didRemoveFromParent on the child to perform updates when the parent/child status changes.");
     //@endif
   },
 
@@ -522,7 +522,7 @@ SC.CoreView.reopen(
 
     if (!this.get('isVisible')) {
       context.addClass('sc-hidden');
-      context.setAttr('aria-hidden', 'true')
+      context.setAttr('aria-hidden', 'true');
     }
 
     // Call applyAttributesToContext so that subclasses that override it can
@@ -1028,13 +1028,8 @@ SC.CoreView.reopen(
     each child view that its clippingFrame has also changed.
   */
   _sc_view_clippingFrameDidChange: function () {
-    var cvs = this.get('childViews'), len = cvs.length, idx, cv;
-    for (idx = 0; idx < len; ++idx) {
-      cv = cvs[idx];
-
-      cv.notifyPropertyChange('clippingFrame');
-      cv._sc_view_clippingFrameDidChange();
-    }
+    this.notifyPropertyChange('clippingFrame');
+    this._callOnChildViews('_sc_view_clippingFrameDidChange');
   },
 
   /**
@@ -1109,7 +1104,9 @@ SC.CoreView.reopen(
     @returns {SC.View} receiver
   */
   removeAllChildren: function (immediately) {
-    var childViews = this.get('childViews');
+    var childViews = this.get('childViews'),
+      len = childViews.get('length'),
+      i;
 
     // OPTIMIZATION!
     // If we know that we're removing all children and we are rendered, lets do the document cleanup in one sweep.
@@ -1129,7 +1126,7 @@ SC.CoreView.reopen(
       this.destroyLayer();
 
       // Remove all the children.
-      for (var i = childViews.get('length') - 1; i >= 0; i--) {
+      for (i = len - 1; i >= 0; i--) {
         this.removeChildAndDestroy(childViews.objectAt(i), immediately);
       }
 
@@ -1139,7 +1136,7 @@ SC.CoreView.reopen(
       // Reattach our layer.
       if (parentNode && !this.get('isAttached')) { this._doAttach(parentNode); }
     } else {
-      for (var i = childViews.get('length') - 1; i >= 0; i--) {
+      for (i = len - 1; i >= 0; i--) {
         this.removeChildAndDestroy(childViews.objectAt(i), immediately);
       }
     }
@@ -1190,6 +1187,18 @@ SC.CoreView.reopen(
     // (which we will soon null out).
     var ret = sc_super();
 
+    // Immediately orphan the view if adopted.
+    this._doOrphan();
+
+    // Immediately remove the layer if attached (ignores transitionOut). This
+    // will avoid each child view detaching the layer over and over again.
+    this._doDetach(true);
+
+    // Immediately remove view from global hash.
+    delete SC.View.views[this.get('layerId')];
+
+    // Complete less critical cleanup.
+    // TODO: consider deferring this
     this._destroy();
 
     return ret;
@@ -1197,29 +1206,19 @@ SC.CoreView.reopen(
 
   /** @private */
   _destroy: function () {
-    // Orphan the view if adopted.
-    this._doOrphan();
 
-    // Remove the layer if attached (ignores transitionOut).
-    this._doDetach(true);
-
-    // Destroy the layer if rendered. This will avoid each child view destroying
-    // the layer over and over again.
+    // Clear the layer if rendered.
     this._doDestroyLayer();
 
-    // first destroy any children.
-    var childViews = this.get('childViews'), len = childViews.length, idx;
-    if (len) {
-      childViews = childViews.slice();
-      for (idx = 0; idx < len; ++idx) { childViews[idx].destroy(); }
+    // Destroy any children.  Loop backwards since childViews will shrink.
+    var childViews = this.get('childViews');
+    for (var i = childViews.length - 1; i >= 0; i--) {
+      childViews[i].destroy();
     }
 
-    // next remove view from global hash
-    delete SC.View.views[this.get('layerId')];
-    delete this._CQ;
     delete this.page;
 
-    // clear owner.
+    // Clear owner.
     // TODO: Deprecate owner in this sense.
     this.set('owner', null);
 

@@ -12,7 +12,7 @@ sc_require("panes/pane");
 SC.Pane.reopen({
 
   /** @private */
-  _executeDoAttach: function (parentNode, nextNode) {
+  _attached: function () {
     // hook into root responder
     var responder = (this.rootResponder = SC.RootResponder.responder);
     responder.panes.add(this);
@@ -32,7 +32,7 @@ SC.Pane.reopen({
   },
 
   /** @private */
-  _executeDoDetach: function () {
+  _detached: function () {
     sc_super();
 
     // remove intercept

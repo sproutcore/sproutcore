@@ -151,7 +151,7 @@ SC.CoreView.reopen(
   // NOTE: This property is of little value, so it's private in case we decide to toss it.
   _isRendered: function () {
     return this.get('currentState') !== SC.CoreView.State.UNRENDERED;
-  }.property('currentState'),
+  }.property('currentState').cacheable(),
 
   /**
     Whether the view is fully shown, becoming fully shown or not.
@@ -195,14 +195,31 @@ SC.CoreView.reopen(
       //@endif
 
       // Force orphaning the view.
-      this._executeDoOrphan();
+      this._doOrphan();
       curParentView = false;
     }
 
     // You can adopt childViews that have you set as their parent (i.e. created
     // with createChildView()), but have not yet been fully adopted.
     if (!curParentView || this.get('childViews').indexOf(this) < 0) {
-      this._executeDoAdopt(parentView, beforeView);
+      var idx,
+        childViews = parentView.get('childViews');
+
+      // Send notifications.
+      if (parentView.willAddChild) { parentView.willAddChild(this, beforeView); }
+      if (this.willAddToParent) { this.willAddToParent(parentView, beforeView); }
+
+      // Set parentView.
+      this.set('parentView', parentView);
+
+      // Add to the new parent's childViews array.
+      if (childViews.needsClone) { parentView.set(childViews = []); }
+      idx = (beforeView) ? childViews.indexOf(beforeView) : childViews.length;
+      if (idx < 0) { idx = childViews.length; }
+      childViews.insertAt(idx, this);
+
+      // Notify adopted.
+      this._adopted(beforeView);
     } else {
       handled = false;
     }
@@ -216,7 +233,26 @@ SC.CoreView.reopen(
       handled = true;
 
     if (state === SC.CoreView.State.UNATTACHED) {
-      this._executeDoAttach(parentNode, nextNode);
+      var node = this.get('layer');
+
+      // before we add to parent node, make sure that the nextNode exists...
+      // if (nextView && (!nextNode || nextNode.parentNode!==parentNode)) {
+      //   nextView.updateLayerLocationIfNeeded();
+
+      //   // just in case it still couldn't generate the layer, force to null, because
+      //   // IE doesn't support insertBefore(blah, undefined) in version IE9.
+      //   nextNode = nextView.get('layer') || null;
+      // }
+
+      // add to parentNode if needed.
+      // if ((node.parentNode !== parentNode) || (node.nextSibling !== nextNode)) {
+      // jQuery(elem).append(layer)
+      // jQuery(parentNode).insertBefore(nextNode);
+      parentNode.insertBefore(node, nextNode);
+      // }
+
+      // Notify attached.
+      this._attached();
     } else {
       //@if(debug)
       // This should be avoided, because moving the view layer without explicitly removing it first is a dangerous practice.
@@ -233,7 +269,14 @@ SC.CoreView.reopen(
     var handled = true;
 
     if (this.get('_isRendered') && !this.get('isAttached')) {
-      this._executeDoDestroyLayer();
+      // Notify destroying layer (cascades).
+      this._notifyDestroying();
+
+      // Remove the layer.
+      this.set('layer', null);
+
+      // Indicate layer destroyed (cascades).
+      this._layerDestroyed();
     } else {
       handled = false;
     }
@@ -244,12 +287,13 @@ SC.CoreView.reopen(
   /** @private Detach this view action. */
   _doDetach: function (immediately) {
     var isAttached = this.get('isAttached'),
-      isVisibleInWindow = this.get('isVisibleInWindow'),
-      transitionOut = this.get('transitionOut'),
       handled = true;
 
     if (isAttached) {
-      if (isVisibleInWindow && transitionOut && !immediately) {
+      // Notify detaching (cascades).
+      this._notifyDetaching();
+
+      if (!immediately && this.get('isVisibleInWindow') && this.get('transitionOut')) {
         // In the shown states, attempt to build out unless told otherwise.
         this._gotoAttachedBuildingOutState();
       } else {
@@ -271,7 +315,37 @@ SC.CoreView.reopen(
       handled = true;
 
     if (isVisibleInWindow && isParentShown) {
-      this._executeDoHide();
+      var state = this.get('currentState'),
+        transition,
+        options;
+
+      // Prepare to hide (cascades).
+      this._prepareToHide();
+
+      // Cancel conflicting transitions.
+      // TODO: We could possibly cancel to SC.LayoutState.CURRENT if we know that a transitionHide animation is going to run.
+      if (state === SC.CoreView.State.ATTACHED_BUILDING_IN) {
+        //@if(debug)
+        SC.warn("Developer Warning: The view, %@, was hidden before it could finish transitioning in.  The transitionIn animation was cancelled.".fmt(this));
+        //@endif
+        transition = this.get('transitionIn');
+        options = this.get('transitionInOptions') || {};
+      } else if (state === SC.CoreView.State.ATTACHED_SHOWING) {
+        //@if(debug)
+        SC.warn("Developer Warning: The view, %@, was hidden before it could finish being shown.  The transitionShow animation was cancelled.".fmt(this));
+        //@endif
+        transition = this.get('transitionShow');
+        options = this.get('transitionShowOptions') || {};
+      }
+
+      if (transition && transition.cancel) { transition.cancel(this, options); }
+
+      // Route.
+      if (this.get('transitionHide')) {
+        this._gotoAttachedHidingState();
+      } else {
+        this._gotoAttachedHiddenState();
+      }
     } else if (this.get('_isRendered')) {
       // Queue the update if the view has been rendered.
       if (this.get('isVisible')) { this._visibilityNeedsUpdate = true; }
@@ -288,7 +362,17 @@ SC.CoreView.reopen(
       handled = true;
 
     if (parentView) {
-      this._executeDoOrphan();
+      var childViews = parentView.get('childViews'),
+        idx = childViews.indexOf(this);
+
+      // Completely remove the view from its parent.
+      this.set('parentView', null);
+
+      // Remove view from old parent's childViews array.
+      if (idx >= 0) { childViews.removeAt(idx); }
+
+      // Notify orphaned.
+      this._orphaned(parentView);
     } else {
       handled = false;
     }
@@ -301,7 +385,24 @@ SC.CoreView.reopen(
     var handled = true;
 
     if (!this.get('_isRendered')) {
-      this._executeDoRender();
+      // Render the layer.
+      var context = this.renderContext(this.get('tagName'));
+      this.renderToContext(context);
+      this.set('layer', context.element());
+
+      // Notify rendered.
+      this._rendered();
+
+      // Bypass the unattached state for adopted views.
+      var parentView = this.get('parentView');
+      if (parentView && parentView.get('isAttached')) {
+        var parentNode = parentView.get('containerLayer'),
+          siblings = parentView.get('childViews'),
+          nextView = siblings.objectAt(siblings.indexOf(this) + 1),
+          nextNode = (nextView) ? nextView.get('layer') : null;
+
+        this._doAttach(parentNode, nextNode);
+      }
     } else {
       handled = false;
     }
@@ -319,7 +420,33 @@ SC.CoreView.reopen(
       handled = true;
 
     if (isAttached && !isVisibleInWindow && isParentShown) {
-      this._executeDoShow();
+      var state = this.get('currentState'),
+        transition,
+        options;
+
+      // Prepare for display (cascades).
+      this._prepareToShow();
+
+      // Cancel conflicting transitions.
+      // TODO: We could possibly cancel to SC.LayoutState.CURRENT if we know that a transitionShow animation is going to run.
+      if (state === SC.CoreView.State.ATTACHED_HIDING) {
+        //@if(debug)
+        SC.warn("Developer Warning: The view, %@, was shown before it could finish hiding.  The transitionHide animation was cancelled.".fmt(this));
+        //@endif
+        transition = this.get('transitionHide');
+        options = this.get('transitionHideOptions') || {};
+
+        if (transition.cancel) { transition.cancel(this, options); }
+      }
+
+      if (this.get('transitionShow')) {
+        this._gotoAttachedShowingState();
+      } else {
+        this._gotoAttachedShownState();
+      }
+
+      // Update and route the child views.
+      this._callOnChildViews('_routeOnParentShown');
     } else if (this.get('_isRendered')) {
       // Queue the update if the view has been rendered.
       if (!this.get('isVisible')) { this._visibilityNeedsUpdate = true; }
@@ -364,10 +491,6 @@ SC.CoreView.reopen(
   _adopted: function (beforeView) {
     var parentView = this.get('parentView');
 
-    // Notify.
-    if (parentView.didAddChild) { parentView.didAddChild(this, beforeView); }
-    if (this.didAddToParent) { this.didAddToParent(parentView, beforeView); }
-
     if (this.get('isAttached')) {
       // Our frame may change once we've been adopted to a parent.
       this.notifyPropertyChange('frame');
@@ -384,17 +507,20 @@ SC.CoreView.reopen(
           nextView = siblings.objectAt(siblings.indexOf(this) + 1);
           nextNode = (nextView) ? nextView.get('layer') : null;
 
-          this._executeDoAttach(parentNode, nextNode);
+          this._doAttach(parentNode, nextNode);
         }
       } else {
 
         // Bypass the unrendered state for adopted views.
         if (parentView.get('_isRendered')) {
-          this._executeDoRender();
+          this._doRender();
         }
       }
-
     }
+
+    // Notify.
+    if (parentView.didAddChild) { parentView.didAddChild(this, beforeView); }
+    if (this.didAddToParent) { this.didAddToParent(parentView, beforeView); }
   },
 
   /** @private The 'attached' event. */
@@ -736,178 +862,13 @@ SC.CoreView.reopen(
   },
 
   /** @private */
-  _executeDoAdopt: function (parentView, beforeView) {
-    var idx,
-      childViews = parentView.get('childViews');
-
-    // Send notifications.
-    if (parentView.willAddChild) { parentView.willAddChild(this, beforeView); }
-    if (this.willAddToParent) { this.willAddToParent(parentView, beforeView); }
-
-    // Set parentView.
-    this.set('parentView', parentView);
-
-    // Add to the new parent's childViews array.
-    if (childViews.needsClone) { parentView.set(childViews = []); }
-    idx = (beforeView) ? childViews.indexOf(beforeView) : childViews.length;
-    if (idx < 0) { idx = childViews.length; }
-    childViews.insertAt(idx, this);
-
-    // Notify adopted.
-    this._adopted(beforeView);
-  },
-
-  /** @private */
-  _executeDoAttach: function (parentNode, nextNode) {
-    var node = this.get('layer');
-
-      // before we add to parent node, make sure that the nextNode exists...
-      // if (nextView && (!nextNode || nextNode.parentNode!==parentNode)) {
-      //   nextView.updateLayerLocationIfNeeded();
-
-      //   // just in case it still couldn't generate the layer, force to null, because
-      //   // IE doesn't support insertBefore(blah, undefined) in version IE9.
-      //   nextNode = nextView.get('layer') || null;
-      // }
-
-      // add to parentNode if needed.
-      // if ((node.parentNode !== parentNode) || (node.nextSibling !== nextNode)) {
-    // jQuery(elem).append(layer)
-    // jQuery(parentNode).insertBefore(nextNode);
-    parentNode.insertBefore(node, nextNode);
-    // }
-
-    // Notify attached.
-    this._attached();
-  },
-
-  /** @private */
-  _executeDoDestroyLayer: function () {
-    // Notify destroying layer (cascades).
-    this._notifyDestroying();
-
-    // Remove the layer.
-    this.set('layer', null);
-
-    // Notify layer destroyed (cascades).
-    this._layerDestroyed();
-  },
-
-  /** @private */
   _executeDoDetach: function () {
-    // Notify detaching.
-    this._notifyDetaching();
-
     // Detach the layer.
     var node = this.get('layer');
     node.parentNode.removeChild(node);
 
     // Notify detached.
     this._detached();
-  },
-
-  /** @private */
-  _executeDoHide: function () {
-    var state = this.get('currentState'),
-      transition,
-      options;
-
-    // Prepare to hide (cascades).
-    this._prepareToHide();
-
-    // Cancel conflicting transitions.
-    // TODO: We could possibly cancel to SC.LayoutState.CURRENT if we know that a transitionHide animation is going to run.
-    if (state === SC.CoreView.State.ATTACHED_BUILDING_IN) {
-      //@if(debug)
-      SC.warn("Developer Warning: The view, %@, was hidden before it could finish transitioning in.  The transitionIn animation was cancelled.".fmt(this));
-      //@endif
-      transition = this.get('transitionIn');
-      options = this.get('transitionInOptions') || {};
-    } else if (state === SC.CoreView.State.ATTACHED_SHOWING) {
-      //@if(debug)
-      SC.warn("Developer Warning: The view, %@, was hidden before it could finish being shown.  The transitionShow animation was cancelled.".fmt(this));
-      //@endif
-      transition = this.get('transitionShow');
-      options = this.get('transitionShowOptions') || {};
-    }
-
-    if (transition && transition.cancel) { transition.cancel(this, options); }
-
-    // Route.
-    if (this.get('transitionHide')) {
-      this._gotoAttachedHidingState();
-    } else {
-      this._gotoAttachedHiddenState();
-    }
-  },
-
-  /** @private */
-  _executeDoOrphan: function () {
-    var parentView = this.get('parentView'),
-      childViews = parentView.get('childViews'),
-      idx = childViews.indexOf(this);
-
-    // Completely remove the view from its parent.
-    this.set('parentView', null);
-
-    // Remove view from old parent's childViews array.
-    if (idx >= 0) { childViews.removeAt(idx); }
-
-    // Notify orphaned.
-    this._orphaned(parentView);
-  },
-
-  /** @private */
-  _executeDoRender: function () {
-    // Render the layer.
-    var context = this.renderContext(this.get('tagName'));
-    this.renderToContext(context);
-    this.set('layer', context.element());
-
-    // Notify rendered.
-    this._rendered();
-
-    // Bypass the unattached state for adopted views.
-    var parentView = this.get('parentView');
-    if (parentView && parentView.get('isAttached')) {
-      var parentNode = parentView.get('containerLayer'),
-        siblings = parentView.get('childViews'),
-        nextView = siblings.objectAt(siblings.indexOf(this) + 1),
-        nextNode = (nextView) ? nextView.get('layer') : null;
-
-      this._executeDoAttach(parentNode, nextNode);
-    }
-  },
-
-  /** @private */
-  _executeDoShow: function () {
-    var state = this.get('currentState'),
-      transition,
-      options;
-
-    // Prepare for display (cascades).
-    this._prepareToShow();
-
-    // Cancel conflicting transitions.
-    // TODO: We could possibly cancel to SC.LayoutState.CURRENT if we know that a transitionShow animation is going to run.
-    if (state === SC.CoreView.State.ATTACHED_HIDING) {
-      //@if(debug)
-      SC.warn("Developer Warning: The view, %@, was shown before it could finish hiding.  The transitionHide animation was cancelled.".fmt(this));
-      //@endif
-      transition = this.get('transitionHide');
-      options = this.get('transitionHideOptions') || {};
-
-      if (transition.cancel) { transition.cancel(this, options); }
-    }
-
-    if (this.get('transitionShow')) {
-      this._gotoAttachedShowingState();
-    } else {
-      this._gotoAttachedShownState();
-    }
-
-    // Update and route the child views.
-    this._callOnChildViews('_routeOnParentShown');
   },
 
   /** @private */
@@ -1027,6 +988,7 @@ SC.CoreView.reopen(
   _notifyDestroying: function () {
     // Notify.
     if (this.willDestroyLayer) { this.willDestroyLayer(); }
+
     var mixins = this.willDestroyLayerMixin, len, idx;
     if (mixins) {
       len = mixins.length;
@@ -1040,7 +1002,7 @@ SC.CoreView.reopen(
   },
 
   /** @private Notify on detaching. */
-  _notifyDetaching:  function () {
+  _notifyDetaching: function () {
     if (this.willRemoveFromDocument) { this.willRemoveFromDocument(); }
 
     // Cascade the event to child views.
