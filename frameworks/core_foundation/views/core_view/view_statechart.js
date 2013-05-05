@@ -1,64 +1,117 @@
 sc_require("views/view");
 
+
+SC.CoreView.mixin(
+  /** @scope SC.CoreView */ {
+
 /**
-  Possible view states.
+    The view has been created.
 
-  # UNRENDERED
+    @static
+    @constant
+  */
+  IS_CREATED: 0x0200, // 512
 
-  The view has been created but has not been rendered (i.e. has a layer) or
-  attached (i.e. appended to the document).
+  /**
+    The view has been rendered.
 
-  # UNATTACHED
+    @static
+    @constant
+  */
+  IS_RENDERED: 0x0100, // 256
 
+  /**
+    The view has been attached.
+
+    @static
+    @constant
+  */
+  IS_ATTACHED: 0x0080, // 128
+
+  /**
+    The view is visible in the display.
+
+    @static
+    @constant
+  */
+  IS_SHOWN: 0x0040, // 64
+
+  /**
+    The view has been created, but has not been rendered or attached.
+
+    @static
+    @constant
+  */
+  UNRENDERED: 0x0200, // 512
+
+  /**
   The view has been created and rendered, but has not been attached
   (i.e. appended to the document).
 
-  # ATTACHED_SHOWN
+    @static
+    @constant
+  */
+  UNATTACHED: 0x0300, // 768
 
+  /**
   The view has been created, rendered and attached and is visible in the
   display.
 
-  # ATTACHED_HIDDEN
+    @static
+    @constant
+  */
+  ATTACHED_SHOWN: 0x03C0, // 960
 
+  /**
   The view has been created, rendered and attached, but is not visible in the
   display.
 
-  # ATTACHED_BUILDING_IN
+    @static
+    @constant
+  */
+  ATTACHED_HIDDEN: 0x0380, // 896
 
+  /**
   The view has been created, rendered and attached and is visible in the
   display.  It is currently transitioning according to the transitionIn
   property before being fully shown (i.e ATTACHED_SHOWN).
 
-  # ATTACHED_BUILDING_OUT
+    @static
+    @constant
+  */
+  ATTACHED_BUILDING_IN: 0x03C1, // 961
 
-  The view has been created, rendered and attached and is visible in the
-  display.  It is currently transitioning according to the transitionOut
-  property before being detached (i.e. removed from the document).
+  /**
+    The view has been created, rendered and attached.  It is currently
+    transitioning according to the transitionOut property before being
+    detached (i.e. removed from the document).
 
-  # ATTACHED_SHOWING
+    @static
+    @constant
+  */
+  ATTACHED_BUILDING_OUT: 0x0381, // 897
 
+  /**
   The view has been created, rendered and attached and is visible in the
   display.  It is currently transitioning according to the transitionShow
   property before being fully shown (i.e ATTACHED_SHOWN).
 
-  # ATTACHED_HIDING
+    @static
+    @constant
+  */
+  ATTACHED_SHOWING: 0x03C2, // 962
 
-  The view has been created, rendered and attached and is visible in the
-  display.  It is currently transitioning according to the transitionHide
-  property before being fully hidden (i.e ATTACHED_HIDDEN).
+  /**
+    The view has been created, rendered and attached.  It is currently
+    transitioning according to the transitionHide property before being fully
+    hidden.
 
-  @enum
+    @static
+    @constant
 */
-SC.CoreView.State = {
-  UNRENDERED: 'unrendered',
-  UNATTACHED: 'unattached',
-  ATTACHED_SHOWN: 'at_shown',
-  ATTACHED_HIDDEN: 'at_hidden',
-  ATTACHED_BUILDING_IN: 'at_in',
-  ATTACHED_BUILDING_OUT: 'at_out',
-  ATTACHED_SHOWING: 'at_showing',
-  ATTACHED_HIDING: 'at_hiding'
-};
+  ATTACHED_HIDING: 0x0382 // 898
+
+});
 
 
 SC.CoreView.reopen(
@@ -78,20 +131,20 @@ SC.CoreView.reopen(
 
     Views have several possible states:
 
-    * SC.CoreView.State.UNRENDERED
-    * SC.CoreView.State.UNATTACHED
-    * SC.CoreView.State.ATTACHED_SHOWN
-    * SC.CoreView.State.ATTACHED_HIDDEN
-    * SC.CoreView.State.ATTACHED_BUILDING_IN
-    * SC.CoreView.State.ATTACHED_BUILDING_OUT
-    * SC.CoreView.State.ATTACHED_SHOWING
-    * SC.CoreView.State.ATTACHED_HIDING
+    * SC.CoreView.UNRENDERED
+    * SC.CoreView.UNATTACHED
+    * SC.CoreView.ATTACHED_SHOWN
+    * SC.CoreView.ATTACHED_HIDDEN
+    * SC.CoreView.ATTACHED_BUILDING_IN
+    * SC.CoreView.ATTACHED_BUILDING_OUT
+    * SC.CoreView.ATTACHED_SHOWING
+    * SC.CoreView.ATTACHED_HIDING
 
     @type String
-    @default SC.CoreView.State.UNRENDERED
+    @default SC.CoreView.UNRENDERED
     @readonly
   */
-  currentState: SC.CoreView.State.UNRENDERED,
+  currentState: SC.CoreView.UNRENDERED,
 
   /**
     Whether the view's layer is attached to the document or not.
@@ -105,12 +158,7 @@ SC.CoreView.reopen(
   */
   isAttached: function () {
     var state = this.get('currentState');
-    return state === SC.CoreView.State.ATTACHED_SHOWN ||
-      state === SC.CoreView.State.ATTACHED_HIDDEN ||
-      state === SC.CoreView.State.ATTACHED_BUILDING_IN ||
-      state === SC.CoreView.State.ATTACHED_BUILDING_OUT ||
-      state === SC.CoreView.State.ATTACHED_SHOWING ||
-      state === SC.CoreView.State.ATTACHED_HIDING;
+    return state & SC.CoreView.IS_ATTACHED;
   }.property('currentState').cacheable(),
 
   //@if(debug)
@@ -152,7 +200,7 @@ SC.CoreView.reopen(
   */
   // NOTE: This property is of little value, so it's private in case we decide to toss it.
   _isRendered: function () {
-    return this.get('currentState') !== SC.CoreView.State.UNRENDERED;
+    return this.get('currentState') !== SC.CoreView.UNRENDERED;
   }.property('currentState').cacheable(),
 
   /**
@@ -176,9 +224,9 @@ SC.CoreView.reopen(
   */
   isVisibleInWindow: function () {
     var state = this.get('currentState');
-    return state === SC.CoreView.State.ATTACHED_SHOWN ||
-      state === SC.CoreView.State.ATTACHED_SHOWING ||
-      state === SC.CoreView.State.ATTACHED_BUILDING_IN;
+    return state === SC.CoreView.ATTACHED_SHOWN ||
+      state === SC.CoreView.ATTACHED_SHOWING ||
+      state === SC.CoreView.ATTACHED_BUILDING_IN;
   }.property('currentState').cacheable(),
 
   // ------------------------------------------------------------------------
@@ -234,7 +282,7 @@ SC.CoreView.reopen(
     var state = this.get('currentState'),
       handled = true;
 
-    if (state === SC.CoreView.State.UNATTACHED) {
+    if (state === SC.CoreView.UNATTACHED) {
       var node = this.get('layer');
 
       // IE doesn't support insertBefore(blah, undefined) in version IE9.
@@ -311,13 +359,13 @@ SC.CoreView.reopen(
 
       // Cancel conflicting transitions.
       // TODO: We could possibly cancel to SC.LayoutState.CURRENT if we know that a transitionHide animation is going to run.
-      if (state === SC.CoreView.State.ATTACHED_BUILDING_IN) {
+      if (state === SC.CoreView.ATTACHED_BUILDING_IN) {
         //@if(debug)
         SC.warn("Developer Warning: The view, %@, was hidden before it could finish transitioning in.  The transitionIn animation was cancelled.".fmt(this));
         //@endif
         transition = this.get('transitionIn');
         options = this.get('transitionInOptions') || {};
-      } else if (state === SC.CoreView.State.ATTACHED_SHOWING) {
+      } else if (state === SC.CoreView.ATTACHED_SHOWING) {
         //@if(debug)
         SC.warn("Developer Warning: The view, %@, was hidden before it could finish being shown.  The transitionShow animation was cancelled.".fmt(this));
         //@endif
@@ -421,7 +469,7 @@ SC.CoreView.reopen(
 
       // Cancel conflicting transitions.
       // TODO: We could possibly cancel to SC.LayoutState.CURRENT if we know that a transitionShow animation is going to run.
-      if (state === SC.CoreView.State.ATTACHED_HIDING) {
+      if (state === SC.CoreView.ATTACHED_HIDING) {
         //@if(debug)
         SC.warn("Developer Warning: The view, %@, was shown before it could finish hiding.  The transitionHide animation was cancelled.".fmt(this));
         //@endif
@@ -459,8 +507,8 @@ SC.CoreView.reopen(
 
     if (this.get('_isRendered')) {
       if (isVisibleInWindow ||
-        this.get('currentState') === SC.CoreView.State.ATTACHED_HIDING ||
-        this.get('currentState') === SC.CoreView.State.ATTACHED_BUILDING_OUT ||
+        this.get('currentState') === SC.CoreView.ATTACHED_HIDING ||
+        this.get('currentState') === SC.CoreView.ATTACHED_BUILDING_OUT ||
         force) {
         // Only in the visible states do we allow updates without being forced.
         this._executeDoUpdateContent();
@@ -582,7 +630,7 @@ SC.CoreView.reopen(
     }
 
     // Route.
-    if (state === SC.CoreView.State.ATTACHED_BUILDING_IN || state === SC.CoreView.State.ATTACHED_SHOWING) {
+    if (state === SC.CoreView.ATTACHED_BUILDING_IN || state === SC.CoreView.ATTACHED_SHOWING) {
       this._gotoAttachedShownState();
     }
   },
@@ -604,9 +652,9 @@ SC.CoreView.reopen(
     }
 
     // Route.
-    if (state === SC.CoreView.State.ATTACHED_BUILDING_OUT) {
+    if (state === SC.CoreView.ATTACHED_BUILDING_OUT) {
       this._executeDoDetach();
-    } else if (state === SC.CoreView.State.ATTACHED_HIDING) {
+    } else if (state === SC.CoreView.ATTACHED_HIDING) {
       this._gotoAttachedHiddenState();
 
       // Update and route the child views.
@@ -706,7 +754,7 @@ SC.CoreView.reopen(
   /** @private */
   _gotoAttachedBuildingInState: function () {
     // Update the state.
-    this.set('currentState', SC.CoreView.State.ATTACHED_BUILDING_IN);
+    this.set('currentState', SC.CoreView.ATTACHED_BUILDING_IN);
 
     var transitionIn = this.get('transitionIn'),
       options = this.get('transitionInOptions') || {};
@@ -723,7 +771,7 @@ SC.CoreView.reopen(
   /** @private */
   _gotoAttachedBuildingOutState: function () {
     // Update the state.
-    this.set('currentState', SC.CoreView.State.ATTACHED_BUILDING_OUT);
+    this.set('currentState', SC.CoreView.ATTACHED_BUILDING_OUT);
 
     var transitionOut = this.get('transitionOut'),
       options = this.get('transitionOutOptions') || {};
@@ -745,7 +793,7 @@ SC.CoreView.reopen(
     }
 
     // Update the state.
-    this.set('currentState', SC.CoreView.State.ATTACHED_HIDDEN);
+    this.set('currentState', SC.CoreView.ATTACHED_HIDDEN);
 
     // Notify.
     if (this.didHideInDocument) { this.didHideInDocument(); }
@@ -754,7 +802,7 @@ SC.CoreView.reopen(
   /** @private */
   _gotoAttachedHidingState: function () {
     // Update the state.
-    this.set('currentState', SC.CoreView.State.ATTACHED_HIDING);
+    this.set('currentState', SC.CoreView.ATTACHED_HIDING);
 
     var transitionHide = this.get('transitionHide'),
       options = this.get('transitionHideOptions') || {};
@@ -771,7 +819,7 @@ SC.CoreView.reopen(
   /** @private */
   _gotoAttachedShowingState: function () {
     // Update the state.
-    this.set('currentState', SC.CoreView.State.ATTACHED_SHOWING);
+    this.set('currentState', SC.CoreView.ATTACHED_SHOWING);
 
     var transitionShow = this.get('transitionShow'),
       options = this.get('transitionShowOptions') || {};
@@ -788,7 +836,7 @@ SC.CoreView.reopen(
   /** @private */
   _gotoAttachedShownState: function () {
     // Update the state.
-    this.set('currentState', SC.CoreView.State.ATTACHED_SHOWN);
+    this.set('currentState', SC.CoreView.ATTACHED_SHOWN);
 
     // Notify.
     if (this.didShowInDocument) { this.didShowInDocument(); }
@@ -797,13 +845,13 @@ SC.CoreView.reopen(
   /** @private */
   _gotoUnattachedState: function () {
     // Update the state.
-    this.set('currentState', SC.CoreView.State.UNATTACHED);
+    this.set('currentState', SC.CoreView.UNATTACHED);
   },
 
   /** @private */
   _gotoUnrenderedState: function () {
     // Update the state.
-    this.set('currentState', SC.CoreView.State.UNRENDERED);
+    this.set('currentState', SC.CoreView.UNRENDERED);
   },
 
   // ------------------------------------------------------------------------

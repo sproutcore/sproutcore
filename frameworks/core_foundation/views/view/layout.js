@@ -994,8 +994,8 @@ SC.View.reopen(
 
     if (isRendered) {
       if (isVisibleInWindow ||
-        this.get('currentState') === SC.CoreView.State.ATTACHED_HIDING ||
-        this.get('currentState') === SC.CoreView.State.ATTACHED_BUILDING_OUT ||
+        this.get('currentState') === SC.CoreView.ATTACHED_HIDING ||
+        this.get('currentState') === SC.CoreView.ATTACHED_BUILDING_OUT ||
         force) {
         // Only in the visible states do we allow updates without being forced.
         this._executeDoUpdateLayout();
