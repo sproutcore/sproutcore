@@ -55,7 +55,7 @@ SC.TransitionProtocol = {
     @param {SC.View} view The view being transitioned.
     @param {Object} options Options to modify the transition.  As set by transitionShowOptions or transitionInOptions.
   */
-  runIn: function (view, options) {},
+  runIn: function (view, options, context) {},
 
   /**
     This method is called to transition the view out or hidden (i.e.
@@ -68,7 +68,7 @@ SC.TransitionProtocol = {
     @param {SC.View} view The view being transitioned.
     @param {Object} options Options to modify the transition.  As set by transitionHideOptions or transitionOutOptions.
   */
-  runOut: function (view, options) {},
+  runOut: function (view, options, context) {},
 
   /**
     This optional method is called to cancel an active entrance transition.

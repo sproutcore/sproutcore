@@ -281,6 +281,7 @@ SC.CoreView.reopen(
     @returns {SC.View} receiver
   */
   displayDidChange: function () {
+    // Filter the input channel.
     this.invokeOnce(this._doUpdateContent);
 
     return this;
@@ -995,7 +996,7 @@ SC.CoreView.reopen(
   },
 
   /** @private Call the method recursively on all child views. */
-  _callOnChildViews: function (methodName) {
+  _callOnChildViews: function (methodName, shouldRecurse, context) {
     var childView,
       childViews = this.get('childViews'),
       method,
@@ -1012,11 +1013,11 @@ SC.CoreView.reopen(
       // Look up the method on the child.
       method = childView[methodName];
       // method.apply(childView, args);  This is slower.
-      shouldContinue = method.call(childView);
+      shouldContinue = method.call(childView, context);
 
       // Recurse.
-      if (shouldContinue === undefined || shouldContinue) {
-        childView._callOnChildViews(methodName);
+      if (shouldRecurse && (shouldContinue === undefined || shouldContinue)) {
+        childView._callOnChildViews(methodName, true, context);
       }
     }
   },
@@ -1079,7 +1080,14 @@ SC.CoreView.reopen(
   */
   removeChild: function (view, immediately) {
     view._doDetach(immediately);
-    view._doOrphan();
+
+    // If the view will transition out, wait for the transition to complete
+    // before orphaning the view entirely.
+    if (view.get('transitionOut') && !immediately) {
+      view.addObserver('isAttached', this, this._orphanChildView);
+    } else {
+      view._doOrphan();
+    }
 
     return this;
   },
@@ -1189,6 +1197,15 @@ SC.CoreView.reopen(
     if (!view.get('isAttached')) {
       view.removeObserver('isAttached', this, this._destroyChildView);
       view.destroy();
+    }
+  },
+
+  /** @private Observer for child views that are being orphaned after transitioning out. */
+  _orphanChildView: function (view) {
+    // Commence orphaning of the view once it is detached.
+    if (!view.get('isAttached')) {
+      view.removeObserver('isAttached', this, this._orphanChildView);
+      view._doOrphan();
     }
   },
 

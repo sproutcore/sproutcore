@@ -994,8 +994,6 @@ SC.View.reopen(
 
     if (isRendered) {
       if (isVisibleInWindow ||
-        this.get('currentState') === SC.CoreView.ATTACHED_HIDING ||
-        this.get('currentState') === SC.CoreView.ATTACHED_BUILDING_OUT ||
         force) {
         // Only in the visible states do we allow updates without being forced.
         this._executeDoUpdateLayout();
@@ -1045,10 +1043,6 @@ SC.View.reopen(
 
     // Notify.
     if (this.didAppendToDocument) { this.didAppendToDocument(); }
-
-    // Begin observing isVisible & isFirstResponder.
-    this.addObserver('isVisible', this, this._isVisibleDidChange);
-    this.addObserver('isFirstResponder', this, this._isFirstResponderDidChange);
   },
 
   /** @private Override: The 'adopted' event (uses _checkForResize so our childViews are notified if our frame changes). */
