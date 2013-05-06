@@ -37,6 +37,14 @@ SC.CoreView.mixin(
   IS_SHOWN: 0x0040, // 64
 
   /**
+    The view is invisible in the display.
+
+    @static
+    @constant
+  */
+  IS_HIDDEN: 0x0020, // 32
+
+  /**
     The view has been created, but has not been rendered or attached.
 
     @static
@@ -69,7 +77,16 @@ SC.CoreView.mixin(
     @static
     @constant
   */
-  ATTACHED_HIDDEN: 0x0380, // 896
+  ATTACHED_HIDDEN: 0x03A0, // 928
+
+  /**
+    The view has been created, rendered and attached, but is not visible in the
+    display due to being hidden by a parent view.
+
+    @static
+    @constant
+  */
+  ATTACHED_HIDDEN_BY_PARENT: 0x03A1, // 929
 
   /**
   The view has been created, rendered and attached and is visible in the
@@ -92,6 +109,17 @@ SC.CoreView.mixin(
   ATTACHED_BUILDING_OUT: 0x0381, // 897
 
   /**
+    The view has been created, rendered and attached.  It is currently
+    transitioning according to the transitionOut property before being
+    detached (i.e. removed from the document) because a parent view is
+    being detached.
+
+    @static
+    @constant
+  */
+  ATTACHED_BUILDING_OUT_BY_PARENT: 0x0382, // 898
+
+  /**
   The view has been created, rendered and attached and is visible in the
   display.  It is currently transitioning according to the transitionShow
   property before being fully shown (i.e ATTACHED_SHOWN).
@@ -109,7 +137,7 @@ SC.CoreView.mixin(
     @static
     @constant
 */
-  ATTACHED_HIDING: 0x0382 // 898
+  ATTACHED_HIDING: 0x03A2 // 930
 
 });
 
@@ -135,8 +163,10 @@ SC.CoreView.reopen(
     * SC.CoreView.UNATTACHED
     * SC.CoreView.ATTACHED_SHOWN
     * SC.CoreView.ATTACHED_HIDDEN
+    * SC.CoreView.ATTACHED_HIDDEN_BY_PARENT
     * SC.CoreView.ATTACHED_BUILDING_IN
     * SC.CoreView.ATTACHED_BUILDING_OUT
+    * SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT
     * SC.CoreView.ATTACHED_SHOWING
     * SC.CoreView.ATTACHED_HIDING
 
