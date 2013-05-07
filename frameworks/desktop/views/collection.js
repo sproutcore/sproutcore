@@ -1003,7 +1003,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   _TMP_ATTRS: {},
 
   /** @private */
-  _COLLECTION_CLASS_NAMES: ['sc-collection-item'],
+  _COLLECTION_CLASS_NAMES: ['sc-collection-item', 'sc-item'],
 
   /** @private */
   _GROUP_COLLECTION_CLASS_NAMES: ['sc-collection-item', 'sc-group-item'],
