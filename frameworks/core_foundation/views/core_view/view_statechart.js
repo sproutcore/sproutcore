@@ -650,10 +650,9 @@ SC.CoreView.reopen(
       transition.teardownIn(this, options);
     }
 
-    // Notify.
-    if (this.didShowInDocument) { this.didShowInDocument(); }
-
     if (state === SC.CoreView.ATTACHED_SHOWING) {
+      // Notify.
+      if (this.didShowInDocument) { this.didShowInDocument(); }
       this._callOnChildViews('_parentDidShowInDocument');
 
       // Route.
@@ -1139,12 +1138,13 @@ SC.CoreView.reopen(
       this._cancelShownTransitions();
 
       // Notify.
-      // if (this.willHideInDocument) { this.willHideInDocument(); }
+      if (this.willHideInDocument) { this.willHideInDocument(); }
 
       // Route.
       this._gotoAttachedHiddenByParentState();
 
-      // if (this.didHideInDocument) { this.didHideInDocument(); }
+      // Notify.
+      if (this.didHideInDocument) { this.didHideInDocument(); }
     } else if (state === SC.CoreView.ATTACHED_HIDING) {
       // We were hiding, but our parent is going to hide before we can finish.
       this._cancelHidingTransition();
@@ -1164,7 +1164,7 @@ SC.CoreView.reopen(
       this._gotoAttachedShownState();
 
       // Notify.
-      // if (this.didShowInDocument) { this.didShowInDocument(); }
+      if (this.didShowInDocument) { this.didShowInDocument(); }
     } else {
       // There's no need to continue to further child views.
       return false;

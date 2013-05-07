@@ -2970,7 +2970,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   // INTERNAL SUPPORT
   //
 
-  /** @private - when we become visible, reload if needed. */
+  /** @private - when we are about to become visible, reload if needed. */
   willShowInDocument: function () {
     if (this._invalidIndexes) this.invokeOnce(this.reloadIfNeeded);
     if (this._invalidSelection) {
@@ -2978,6 +2978,13 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     }
   },
 
+  /** @private - when we are added, reload if needed. */
+  didAppendToDocument: function () {
+    if (this._invalidIndexes) this.invokeOnce(this.reloadIfNeeded);
+    if (this._invalidSelection) {
+      this.invokeOnce(this.reloadSelectionIndexesIfNeeded);
+    }
+  },
 
   /**
     Default delegate method implementation, returns YES if isSelectable
