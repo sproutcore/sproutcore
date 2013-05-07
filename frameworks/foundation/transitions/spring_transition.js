@@ -56,7 +56,7 @@ SC.mixin(SC.View,
     },
 
     /** @private */
-    runIn: function (view, options) {
+    runIn: function (view, options, context) {
       var layout = view.get('layout'),
         springiness = options.springiness || 0.25,
         spring,
@@ -116,7 +116,7 @@ SC.mixin(SC.View,
       ];
 
       callback = function () {
-        view.didTransitionIn(transition, options);
+        view.didTransitionIn(transition, options, context);
       };
 
       // Animate through the frames.
@@ -152,7 +152,7 @@ SC.mixin(SC.View,
     },
 
     /** @private */
-    runOut: function (view, options) {
+    runOut: function (view, options, context) {
       var springiness = options.springiness || 0.25,
         callback,
         duration,
@@ -210,7 +210,7 @@ SC.mixin(SC.View,
       ];
 
       callback = function () {
-        view.didTransitionOut(transition, options);
+        view.didTransitionOut(transition, options, context);
       };
 
       // Animate through the frames.

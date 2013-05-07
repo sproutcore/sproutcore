@@ -1083,7 +1083,7 @@ SC.CoreView.reopen(
 
     // If the view will transition out, wait for the transition to complete
     // before orphaning the view entirely.
-    if (view.get('transitionOut') && !immediately) {
+    if (!immediately && view.get('currentState') === SC.CoreView.ATTACHED_BUILDING_OUT) {
       view.addObserver('isAttached', this, this._orphanChildView);
     } else {
       view._doOrphan();

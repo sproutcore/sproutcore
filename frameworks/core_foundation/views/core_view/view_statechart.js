@@ -676,20 +676,27 @@ SC.CoreView.reopen(
   didTransitionOut: function (transition, options, context) {
     var state = this.get('currentState');
 
-    // Clean up the transition if the plugin supports it.
-    if (transition.teardownOut) {
-      transition.teardownOut(this, options);
-    }
-
     // Route.
-    if (state === SC.CoreView.ATTACHED_BUILDING_OUT) {
+    if (state === SC.CoreView.ATTACHED_BUILDING_OUT ||
+      state === SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT) {
       // Decrement shared build out count.
       context._buildingOutCount--;
 
+      if (!context._completedBuildOuts) { context._completedBuildOuts = []; }
+      context._completedBuildOuts.push(this);
+      context._completedBuildOuts.push(transition);
+      context._completedBuildOuts.push(options);
+
       if (context._buildingOutCount === 0) {
+        context._cleanUpAllBuildOuts();
         this._executeDoDetach();
       }
     } else if (state === SC.CoreView.ATTACHED_HIDING) {
+      // Clean up the transition if the plugin supports it.
+      if (transition.teardownOut) {
+        transition.teardownOut(this, options);
+      }
+
       // Clear out any child views that are transitioning before we hide.
       this._callOnChildViews('_parentWillHideInDocument');
 
@@ -702,6 +709,26 @@ SC.CoreView.reopen(
       // Route.
       this._gotoAttachedHiddenState();
     }
+  },
+
+  /** @private */
+  _cleanUpAllBuildOuts: function () {
+    var i,
+      len = this._completedBuildOuts.length;
+
+    for (i = 0; i < len; i = i + 3) {
+      var view = this._completedBuildOuts[i],
+        transition = this._completedBuildOuts[i + 1],
+        options = this._completedBuildOuts[i + 2];
+
+      // Clean up the transition if the plugin supports it.
+      if (transition.teardownOut) {
+        transition.teardownOut(view, options);
+      }
+    }
+
+    // Clean up.
+    this._completedBuildOuts = null;
   },
 
   /** @private The 'orphaned' event. */

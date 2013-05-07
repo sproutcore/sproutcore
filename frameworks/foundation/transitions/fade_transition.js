@@ -25,7 +25,7 @@ SC.mixin(SC.View,
     },
 
     /** @private */
-    runIn: function (view, options) {
+    runIn: function (view, options, context) {
       var transition = this;
 
       view.animate('opacity', 1, {
@@ -33,7 +33,7 @@ SC.mixin(SC.View,
         duration: options.duration || 0.4,
         timing: options.timing || 'ease'
       }, function (data) {
-        this.didTransitionIn(transition, options);
+        this.didTransitionIn(transition, options, context);
       });
     },
 
@@ -59,7 +59,7 @@ SC.mixin(SC.View,
     },
 
     /** @private */
-    runOut: function (view, options) {
+    runOut: function (view, options, context) {
       var transition = this;
 
       view.animate('opacity', 0, {
@@ -67,7 +67,7 @@ SC.mixin(SC.View,
         duration: options.duration || 0.4,
         timing: options.timing || 'ease'
       }, function (data) {
-        this.didTransitionOut(transition, options);
+        this.didTransitionOut(transition, options, context);
       });
     },
 
