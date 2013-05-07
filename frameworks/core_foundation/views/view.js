@@ -996,7 +996,7 @@ SC.CoreView.reopen(
   },
 
   /** @private Call the method recursively on all child views. */
-  _callOnChildViews: function (methodName, shouldRecurse, context) {
+  _callOnChildViews: function (methodName, context) {
     var childView,
       childViews = this.get('childViews'),
       method,
@@ -1016,8 +1016,8 @@ SC.CoreView.reopen(
       shouldContinue = method.call(childView, context);
 
       // Recurse.
-      if (shouldRecurse && (shouldContinue === undefined || shouldContinue)) {
-        childView._callOnChildViews(methodName, true, context);
+      if (shouldContinue === undefined || shouldContinue) {
+        childView._callOnChildViews(methodName, context);
       }
     }
   },

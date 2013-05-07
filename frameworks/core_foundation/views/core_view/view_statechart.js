@@ -305,11 +305,11 @@ SC.CoreView.reopen(
       this._routeOnAttached();
 
       // Give child views a chance to notify and update state.
-      this._callOnChildViews('_parentDidAppendToDocument', true);
+      this._callOnChildViews('_parentDidAppendToDocument');
     } else if (state === SC.CoreView.ATTACHED_BUILDING_OUT) {
       this._cancelBuildingOutTransition();
 
-      this._callOnChildViews('_parentDidCancelBuildOut', true);
+      this._callOnChildViews('_parentDidCancelBuildOut');
 
       // Route.
       this._routeOnAttached();
@@ -331,7 +331,7 @@ SC.CoreView.reopen(
     if (this.get('_isRendered') && !this.get('isAttached')) {
       // Remove our reference to the layer (our self and all our child views).
       this._executeDoDestroyLayer();
-      this._callOnChildViews('_executeDoDestroyLayer', true);
+      this._callOnChildViews('_executeDoDestroyLayer');
     } else {
       handled = false;
     }
@@ -362,7 +362,7 @@ SC.CoreView.reopen(
         // only when they're all done.
         this._buildingOutCount = 0;
 
-        this._callOnChildViews('_parentWillBuildOutFromDocument', true, this);
+        this._callOnChildViews('_parentWillBuildOutFromDocument', this);
 
         if (transitionOut) {
           var options = this.get('transitionOutOptions') || {};
@@ -421,7 +421,7 @@ SC.CoreView.reopen(
         this._gotoAttachedHidingState();
       } else {
         // Clear out any child views that are transitioning before we hide.
-        this._callOnChildViews('_parentWillHideInDocument', true);
+        this._callOnChildViews('_parentWillHideInDocument');
 
         // Note that visibility update is NOT conditional for this view.
         this._executeUpdateVisibility();
@@ -484,7 +484,7 @@ SC.CoreView.reopen(
 
       // Notify rendered (on self and all child views).
       this._rendered();
-      this._callOnChildViews('_rendered', true);
+      this._callOnChildViews('_rendered');
 
       // Bypass the unattached state for adopted views.
       var parentView = this.get('parentView');
@@ -521,7 +521,7 @@ SC.CoreView.reopen(
           shouldExecute = true;
 
           // Notify will show.
-          this._callOnChildViews('_parentWillShowInDocument', true);
+          this._callOnChildViews('_parentWillShowInDocument');
           if (this.willShowInDocument) { this.willShowInDocument(); }
         } else {
           // Queue the visibility update for the next time we display.
@@ -552,7 +552,7 @@ SC.CoreView.reopen(
 
         // Notify.
         if (this.didShowInDocument) { this.didShowInDocument(); }
-        this._callOnChildViews('_parentDidShowInDocument', true);
+        this._callOnChildViews('_parentDidShowInDocument');
 
         this._gotoAttachedShownState();
       }
@@ -654,7 +654,7 @@ SC.CoreView.reopen(
     if (this.didShowInDocument) { this.didShowInDocument(); }
 
     if (state === SC.CoreView.ATTACHED_SHOWING) {
-      this._callOnChildViews('_parentDidShowInDocument', true);
+      this._callOnChildViews('_parentDidShowInDocument');
 
       // Route.
       this._gotoAttachedShownState();
@@ -691,7 +691,7 @@ SC.CoreView.reopen(
       }
     } else if (state === SC.CoreView.ATTACHED_HIDING) {
       // Clear out any child views that are transitioning before we hide.
-      this._callOnChildViews('_parentWillHideInDocument', true);
+      this._callOnChildViews('_parentWillHideInDocument');
 
       // Note that visibility update is NOT conditional for this view.
       this._executeUpdateVisibility();
@@ -899,7 +899,7 @@ SC.CoreView.reopen(
   /** @private Detach the view. */
   _executeDoDetach: function () {
     // Give child views a chance to clean up any transitions and to notify.
-    this._callOnChildViews('_parentWillRemoveFromDocument', true);
+    this._callOnChildViews('_parentWillRemoveFromDocument');
 
     // Detach the layer.
     var node = this.get('layer');
@@ -1193,7 +1193,7 @@ SC.CoreView.reopen(
       if (transition.cancel) { transition.cancel(this, options); }
 
       // Clear out any child views that are transitioning before we hide.
-      this._callOnChildViews('_parentWillHideInDocument', true);
+      this._callOnChildViews('_parentWillHideInDocument');
 
       // We didn't quite hide in time so update visibility and be done.
       this._executeUpdateVisibility();
