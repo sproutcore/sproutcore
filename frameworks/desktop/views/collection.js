@@ -69,9 +69,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
   /**
     @type Array
-    @default ['hasFirstResponder', 'isEnabled', 'isActive']
+    @default ['hasFirstResponder', 'isActive']
   */
-  displayProperties: ['hasFirstResponder', 'isEnabled', 'isActive'],
+  displayProperties: ['hasFirstResponder', 'isActive'],
 
   /**
     @type String
@@ -89,7 +89,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   // PROPERTIES
   //
 
-  /** @deprecated
+  /**
     If `YES`, uses the experimental fast `CollectionView` path.
 
     *Note* The performance improvements in the experimental code have been
@@ -102,6 +102,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     mobile devices.
 
     @type Boolean
+    @deprecated Version 1.10
     @default NO
   */
   useFastPath: NO,
@@ -867,6 +868,19 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     SC.IndexSet.
   */
   _invalidIndexes: NO,
+
+  /** @private
+    Because changing isEnabled requires reloading the items, we observe this
+    separately from the displayProperties in order to properly reload as well
+    as update the view itself.
+  */
+  _isEnabledDidChange: function () {
+    // Standard display property behavior.  Call displayDidChange.
+    this.displayDidChange();
+
+    // Reload the nowShowing indexes.
+    this.reload();
+  }.observes('isEnabled'),
 
   /**
     Regenerates the item views for the content items at the specified indexes.
