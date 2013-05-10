@@ -64,7 +64,7 @@ SC.ImageButtonView = SC.ButtonView.extend(
     @default 'imageButtonRenderDelegate'
   */
   renderDelegateName: 'imageButtonRenderDelegate',
-  
+
   /**
     @type Array
     @default ['image']
@@ -73,10 +73,10 @@ SC.ImageButtonView = SC.ButtonView.extend(
 
   /**
     A class name that will be applied to the img tag of the button.
-    
+
     @type String
     @default null
   */
   image: null
 
-}) ;
+});
