@@ -2029,6 +2029,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   mouseDown: function (ev) {
     var content = this.get('content');
 
+    // Fast path!
     if (!content) return this.get('isSelectable');
 
     var itemView      = this.itemViewForEvent(ev),
@@ -2136,13 +2137,19 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   mouseUp: function (ev) {
     var view = this.itemViewForEvent(ev),
         info = this.mouseDownInfo,
-        content = this.get('content'),
-        contentIndex = view ? view.get('contentIndex') : -1,
-        sel, isSelected, canEdit, itemView, idx,
-        allowsMultipleSel = content.get('allowsMultipleSelection');
+        content = this.get('content');
+
+    // Fast path!
+    if (!content) {
+      this._cleanupMouseDown();
+      return true;
+    }
+
+    var contentIndex = view ? view.get('contentIndex') : -1,
+      sel, isSelected, canEdit, itemView, idx,
+      allowsMultipleSel = content.get('allowsMultipleSelection');
 
     if (!this.get('isEnabled')) return contentIndex > -1;
-
     if (!this.get('isSelectable')) return NO;
 
     if (this.get('useToggleSelection')) {
@@ -2955,7 +2962,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   },
 
   /** @private SC.ScrollView */
-  touchScrollDidChange: function(left, top) {
+  touchScrollDidChange: function (left, top) {
     // Fast path!  Don't try to update too soon.
     if (Date.now() - this._lastTouchScrollTime < 30) { return; }
 
