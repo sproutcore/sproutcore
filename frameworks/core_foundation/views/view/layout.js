@@ -52,8 +52,6 @@ SC.View.reopen(
   */
   backgroundColor: null,
 
-  displayProperties: ['backgroundColor'],
-
   /**
     Activates use of brower's static layout. To activate, set this
     property to YES.
