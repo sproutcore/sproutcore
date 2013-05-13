@@ -96,7 +96,7 @@ SC.mixin( /** @scope SC */ {
       return "(null)";
     }
     else {
-      return '{x:'+r.x+', y:'+r.y+', width:'+r.width+', height:'+r.height+'}';
+      return '{ x:'+r.x+', y:'+r.y+', width:'+r.width+', height:'+r.height+' }';
     }
   }
 

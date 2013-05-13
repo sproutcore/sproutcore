@@ -50,7 +50,7 @@ SC.mixin( /** @scope SC */ {
       }
     }
 
-    return '{' + keyValues.join(', ') + '}';
+    return '{ ' + keyValues.join(', ') + ' }';
   },
 
   /**
