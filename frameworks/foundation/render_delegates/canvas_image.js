@@ -68,10 +68,10 @@ SC.BaseTheme.canvasImageRenderDelegate = SC.RenderDelegate.create({
   update: function(dataSource, jquery) {
     var elem = jquery[0],
         image = dataSource.get('image'),
-        frame = dataSource._view.get('frame'),
+        frame = dataSource.get('frame'),
         frameWidth = frame.width,
         frameHeight = frame.height,
-        innerFrame = dataSource._view.get('innerFrame'),
+        innerFrame = dataSource.get('innerFrame'),
         backgroundColor = dataSource.get('backgroundColor'),
         renderState = dataSource.get('renderState'),
         context;

@@ -23,7 +23,7 @@ SC.BaseTheme.imageButtonRenderDelegate = SC.RenderDelegate.create({
       context.addClass(image);
 
       // Track the image class used so that we can remove it when it changes.
-      dataSource._view._cachedImage = image;
+      dataSource.renderState._cachedImage = image;
     }
   },
 
@@ -41,11 +41,11 @@ SC.BaseTheme.imageButtonRenderDelegate = SC.RenderDelegate.create({
       image = dataSource.get('image');
 
       // Remove the last image class and add the new one.
-      $.removeClass(dataSource._view._cachedImage);
+      $.removeClass(dataSource.renderState._cachedImage);
       $.addClass(image);
 
       // Track the image class used so that we can remove it when it changes.
-      dataSource._view._cachedImage = image;
+      dataSource.renderState._cachedImage = image;
     }
   }
 });

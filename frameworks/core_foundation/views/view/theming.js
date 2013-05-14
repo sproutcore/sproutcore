@@ -274,9 +274,8 @@ SC.View.reopen(
   @private
   View Render Delegate Proxies are tool SC.Views use to:
 
-  a) limit properties the render delegate can access to the displayProperties
-  b) look up 'display*' ('displayTitle' instead of 'title') to help deal with
-     differences between the render delegate's API and the view's.
+  - look up 'display*' ('displayTitle' instead of 'title') to help deal with
+    differences between the render delegate's API and the view's.
 
   RenderDelegateProxies are fully valid data sources for render delegates. They
   act as proxies to the view, interpreting the .get and .didChangeFor commands
@@ -286,8 +285,10 @@ SC.View.reopen(
 */
 SC.View._RenderDelegateProxy = {
 
+  //@if(debug)
   // for testing:
   isViewRenderDelegateProxy: YES,
+  //@endif
 
   /**
     Creates a View Render Delegate Proxy for the specified view.
@@ -328,10 +329,6 @@ SC.View._RenderDelegateProxy = {
     for instance, if the render delegate asks for 'title', this will
     look for 'displayTitle' in the view's displayProperties array.
 
-    If the property is not in `displayProperties`, but a property
-    is defined on the view, an error will be thrown to assist in
-    debugging.
-
    @param {String} property The name of the property the render delegate needs.
    @returns The value.
   */
@@ -342,11 +339,9 @@ SC.View._RenderDelegateProxy = {
 
     if (this._displayPropertiesLookup[displayProperty]) {
       return this._view.get(displayProperty);
-    } else if (this._displayPropertiesLookup[property]) {
+    } else {
       return this._view.get(property);
     }
-
-    return undefined;
   },
 
   /**
@@ -364,7 +359,7 @@ SC.View._RenderDelegateProxy = {
 
       if (this._displayPropertiesLookup[displayProperty]) {
         if (this._view.didChangeFor(context, displayProperty)) { return YES; }
-      } else if (this._displayPropertiesLookup[property]) {
+      } else {
         if (this._view.didChangeFor(context, property)) { return YES; }
       }
     }

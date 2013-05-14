@@ -89,7 +89,7 @@ SC.BaseTheme.imageRenderDelegate = SC.RenderDelegate.create({
   },
 
   imageStyles: function(dataSource) {
-    var innerFrame = dataSource._view.get('innerFrame');
+    var innerFrame = dataSource.get('innerFrame');
     return {
       'position': 'absolute',
       'left': Math.round(innerFrame.x),
