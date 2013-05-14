@@ -42,9 +42,12 @@ SC.View.reopen(
     @observes isEnabled
   */
   _sc_view_isEnabledDidChange: function(){
-    if(!this.get('isEnabled') && this.get('isFirstResponder')){
+    if (!this.get('isEnabled') && this.get('isFirstResponder')) {
       this.resignFirstResponder();
     }
+
+    // isEnabled acts as a display property
+    this.displayDidChange();
   }.observes('isEnabled'),
 
   applyAttributesToContext: function(original, context) {
