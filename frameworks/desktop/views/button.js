@@ -456,16 +456,15 @@ SC.ButtonView = SC.View.extend(SC.Control,
     The following properties affect how `SC.ButtonView` is rendered, and will
     cause the view to be rerendered if they change.
 
+    Note: 'value', 'isDefault', 'isCancel' are also display properties, but are
+    observed separately.
+
     @type Array
-    @default [
-      'icon', 'displayTitle', 'value', 'displayToolTip', 'isDefault', 'isCancel',
-      'escapeHTML', 'needsEllipsis', 'tooltip', 'supportFocusRing'
-    ]
+    @default ['icon', 'displayTitle', 'displayToolTip', 'escapeHTML', 'needsEllipsis', 'tooltip', 'supportFocusRing', 'buttonBehavior']
   */
   displayProperties: [
-    'icon', 'displayTitle', 'value', 'displayToolTip', 'isDefault', 'isCancel',
-    'escapeHTML', 'needsEllipsis', 'tooltip', 'supportFocusRing',
-    'buttonBehavior'
+    'icon', 'displayTitle', 'displayToolTip', 'escapeHTML', 'needsEllipsis',
+    'tooltip', 'supportFocusRing', 'buttonBehavior'
   ],
 
   /**
@@ -567,6 +566,9 @@ SC.ButtonView = SC.View.extend(SC.Control,
     var value = this.get('value'),
         state = this.computeIsSelectedForValue(value);
     this.set('isSelected', state) ; // set new state...
+
+    // value acts as a display property
+    this.displayDidChange();
   }.observes('value'),
 
   /** @private
@@ -616,6 +618,9 @@ SC.ButtonView = SC.View.extend(SC.Control,
       // Restore the default key equivalent
       this.set('keyEquivalent', this._defaultKeyEquivalent);
     }
+
+    // isDefault and isCancel act as display properties
+    this.displayDidChange();
   }.observes('isDefault', 'isCancel'),
 
   /** @private
