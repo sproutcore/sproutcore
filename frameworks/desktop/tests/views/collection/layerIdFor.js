@@ -29,6 +29,19 @@ test("10 index", function() {
   equals(view.contentIndexForLayerId(layerId), 10, 'should parse out idx');
 });
 
+test("with custom layerId", function () {
+  var layerId,
+      contentIndex;
+  view.set('layerId', 'my-custom-layer-id');
+  layerId = view.layerIdFor(10);
+  ok(layerId.indexOf('my-custom-layer-id') === 0, 'index layerId uses custom layerId prefix');
+  contentIndex = view.contentIndexForLayerId(layerId);
+  equals(contentIndex, 10, 'should parse out index from content index layerId');
+
+  contentIndex = view.contentIndexForLayerId('my-custom-layer-id-100');
+  equals(contentIndex, 100, 'should parse out index with custom layerId');
+});
+
 // ..........................................................
 // TEST SPECIAL PARSING CASES
 // 
@@ -62,4 +75,3 @@ test("parse empty string", function() {
 test("parse garbage", function() {
   equals(view.contentIndexForLayerId(234), null, 'should return null');
 });
-
