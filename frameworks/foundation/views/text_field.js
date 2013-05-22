@@ -1288,7 +1288,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     // The caret/selection could have moved.  In some browsers, though, the
     // element's values won't be updated until after this event is finished
     // processing.
-    this.notifyPropertyChange('selection');
+    this.invokeNext(this._textField_selectionDidChange);
+
     return sc_super();
   },
 
