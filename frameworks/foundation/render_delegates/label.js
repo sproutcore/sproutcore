@@ -29,7 +29,6 @@ sc_require('render_delegates/render_delegate');
   - escapeHTML: whether the HTML should be escaped to prevent XSS attacks
     and the like.
   - textAlign
-  - fontWeight
   - needsEllipsis: Whether an ellipsis (...) should be added after the title
     if the title is too long.
 */
@@ -50,7 +49,6 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
             in the next release
     */
     context.addStyle({
-      fontWeight: dataSource.get('fontWeight') || null,
       textAlign: dataSource.get('textAlign') || null
     });
 
@@ -74,7 +72,6 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
             in the next release
     */
     jquery.css({
-      fontWeight: dataSource.get('fontWeight') || null,
       textAlign: dataSource.get('textAlign') || null
     });
 

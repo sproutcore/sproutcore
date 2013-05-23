@@ -60,17 +60,6 @@ var pane = SC.ControlTestPane.design()
      controlSize: SC.TINY_CONTROL_SIZE
   })
 
-  .add("bold", SC.LabelView, {
-     value: "hello",
-     fontWeight: SC.BOLD_WEIGHT
-  })
-
-  .add("bold height", SC.LabelView, {
-     value: "hello",
-     fontWeight: SC.BOLD_WEIGHT,
-     height: 16
-  })
-
   .add("editable", SC.LabelView, {
      value: "double click me",
      isEditable: YES
@@ -105,8 +94,6 @@ test("Check that all Label are visible", function() {
   ok(pane.view('regular size').get('isVisibleInWindow'), 'title,icon,default.isVisibleInWindow should be YES');
   ok(pane.view('small size').get('isVisibleInWindow'), 'title.icon,selected.isVisibleInWindow should be YES');
   ok(pane.view('tiny size').get('isVisibleInWindow'), 'title,toolTip.isVisibleInWindow should be YES');
-  ok(pane.view('bold').get('isVisibleInWindow'), 'title,toolTip.isVisibleInWindow should be YES');
-  ok(pane.view('bold height').get('isVisibleInWindow'), 'title,toolTip.isVisibleInWindow should be YES');
   ok(pane.view('editable').get('isVisibleInWindow'), 'title,toolTip.isVisibleInWindow should be YES');
   ok(pane.view('null value').get('isVisibleInWindow'), 'null value.isVisibleInWindow should be YES');
 });
@@ -156,13 +143,6 @@ test("Check that all labels have the right classes and styles set", function() {
   ok(viewElem.hasClass('sc-label-view'), 'title,icon,default.hasClass(sc-label-view) should be YES');
   ok(viewElem.hasClass('sc-regular-size'), 'title,icon,default.hasClass(sc-regular-size) should be YES');
   ok(!viewElem.hasClass('disabled'), 'title,icon,default.hasClass(disabled) should be NO');
-
-  viewElem=pane.view('bold').$();
-  ok(viewElem.hasClass('sc-view'), 'title,icon,selected.hasClass(sc-view) should be YES');
-  ok(viewElem.hasClass('sc-label-view'), 'title,icon,selected.hasClass(sc-label-view) should be YES');
-  ok(!viewElem.hasClass('icon'), 'title,icon,selected.hasClass(icon) should be YES');
-  ok(!viewElem.hasClass('disabled'), 'title,icon,selected.hasClass(disabled) should be NO');
-  ok(viewElem[0].style.fontWeight === 'bold', 'bold view should have bold fontWeight');
 });
 
 

@@ -463,8 +463,7 @@ SC.Benchmark = {
       title: SC.LabelView.extend({
         classNames: ['sc-benchmark-title'],
         layout: { left: 20, top: 23, right: 200, height: 30 },
-        value: ((appName) ? appName : 'SproutCore Application') + (' - Total Captured Time: ' + chartCapturedTime +' ms - Points Captured: ' + chartLen),
-        fontWeight: 'bold'
+        value: ((appName) ? appName : 'SproutCore Application') + (' - Total Captured Time: ' + chartCapturedTime +' ms - Points Captured: ' + chartLen)
       })
 
     }).append();
@@ -523,7 +522,7 @@ SC.Benchmark = {
 
   // ..........................................................
   // Internal Support
-  // 
+  //
 
   /** @private
     Loads data from both the browser's own event hash and SC's pre-load event hash.
