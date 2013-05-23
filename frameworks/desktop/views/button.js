@@ -166,8 +166,6 @@ SC.ButtonView = SC.View.extend(SC.Control,
   */
   title: "",
 
-  tooltip: "",
-
   /**
     If set, the title property will be updated automatically
     from the content using the key you specify.
