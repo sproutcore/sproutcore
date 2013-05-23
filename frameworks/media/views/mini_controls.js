@@ -14,10 +14,10 @@ SC.MiniMediaControlsView = SC.View.extend(
 /** @scope SC.MiniMediaControlsView.prototype */{
 
   target: null,
-  
+
   childViews: ['playButton', 'timeView', 'minusLabelView', 'volumeView'],
   classNames: ['sc-media-controls'],
-  
+
   playObserver: function(){
     if(this.getPath('target.paused')){
       this.get('playButton').set('icon', 'play');
@@ -25,8 +25,8 @@ SC.MiniMediaControlsView = SC.View.extend(
       this.get('playButton').set('icon', 'stop');
     }
   }.observes('*target.paused'),
-  
-  
+
+
   playButton: SC.ButtonView.design({
     title: '',
     titleMinWidth: 35,
@@ -38,20 +38,19 @@ SC.MiniMediaControlsView = SC.View.extend(
     renderStyle: 'renderImage',
     theme: ''
   }),
-  
+
   timeView: SC.LabelView.design({
     layout: { top: 0, left: 20, width: 60, height:20},
     classNames: 'time',
-    textAlign: SC.ALIGN_CENTER,
     valueBinding: '*owner.target.time'
   }),
-  
+
   minusLabelView: SC.LabelView.design({
     layout: { top: 0, left: 80, width: 20, height:20},
     value: '',
     icon: 'minus'
   }),
-  
+
   volumeView: SC.MediaSlider.design({
     layout: { top: 0, left: 100, right: 10, height:20},
     value:0,
