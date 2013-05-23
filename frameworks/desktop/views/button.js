@@ -79,6 +79,21 @@ SC.ButtonView = SC.View.extend(SC.Control,
   classNames: ['sc-button-view'],
 
   /**
+    Whether the title and toolTip will be escaped to avoid HTML injection attacks
+    or not.
+
+    You should only disable this option if you are sure you are displaying
+    non-user generated text.
+
+    Note: this is not an observed display property.  If you change it after
+    rendering, you should call `displayDidChange` on the view to update the layer.
+
+    @type Boolean
+    @default true
+   */
+  escapeHTML: true,
+
+  /**
     The theme to apply to the button. By default, a subtheme with the name of
     'square' is created for backwards-compatibility.
 
@@ -198,6 +213,9 @@ SC.ButtonView = SC.View.extend(SC.Control,
     If YES, button will attempt to display an ellipsis if the title cannot
     fit inside of the visible area. This feature is not available on all
     browsers.
+
+    Note: this is not an observed display property.  If you change it after
+    rendering, you should call `displayDidChange` on the view to update the layer.
 
     @type Boolean
     @default YES
@@ -458,12 +476,9 @@ SC.ButtonView = SC.View.extend(SC.Control,
     observed separately.
 
     @type Array
-    @default ['icon', 'displayTitle', 'displayToolTip', 'escapeHTML', 'needsEllipsis', 'tooltip', 'supportFocusRing', 'buttonBehavior']
+    @default ['icon', 'displayTitle', 'displayToolTip', 'supportFocusRing', 'buttonBehavior']
   */
-  displayProperties: [
-    'icon', 'displayTitle', 'displayToolTip', 'escapeHTML', 'needsEllipsis',
-    'tooltip', 'supportFocusRing', 'buttonBehavior'
-  ],
+  displayProperties: ['icon', 'displayTitle', 'displayToolTip', 'supportFocusRing', 'buttonBehavior'],
 
   /**
     The name of the render delegate in the theme that should be used to

@@ -29,7 +29,7 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditable,
 
   classNames: ['sc-label-view'],
 
-  displayProperties: ['displayTitle', 'displayHint', 'escapeHTML', 'textAlign', 'fontWeight', 'icon', 'needsEllipsis', 'toolTip'],
+  displayProperties: ['displayTitle', 'displayHint', 'displayToolTip', 'icon'],
 
   /**
     The delegate that gets notified of events related to the editing process. Set
@@ -54,16 +54,19 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditable,
   exampleEditor: SC.InlineTextFieldView,
 
   /**
+    Whether the value, hint and toolTip will be escaped to avoid HTML injection
+    attacks or not.
 
+    You should only disable this option if you are sure you are displaying
+    non-user generated text.
 
-  /**
-    If true, value will be escaped to avoid scripting attacks.
+    Note: this is not an observed display property.  If you change it after
+    rendering, you should call `displayDidChange` on the view to update the layer.
 
-    This is a default value that can be overridden by the
-    settings on the owner view.
+    @type Boolean
+    @default true
   */
-  escapeHTML: YES,
-  escapeHTMLBindingDefault: SC.Binding.oneWay().bool(),
+  escapeHTML: true,
 
   /**
     If true, then the value will be localized.
@@ -77,7 +80,10 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditable,
     by default sets the 'white-space' style to 'nowrap' and the 'text-overflow'
     style to 'ellipsis'.
 
-    Note that this does NOT work with multi-line text.
+    Note: that this does NOT work with multi-line text.
+
+    Note: this is not an observed display property.  If you change it after
+    rendering, you should call `displayDidChange` on the view to update the layer.
 
     @type Boolean
     @default false
@@ -124,6 +130,9 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditable,
 
   /**
     Set the alignment of the label view.
+
+    Note: this is not an observed display property.  If you change it after
+    rendering, you should call `displayDidChange` on the view to update the layer.
 
     @type String SC.ALIGN_LEFT|SC.ALIGN_CENTER|SC.ALIGN_RIGHT
     @default null
