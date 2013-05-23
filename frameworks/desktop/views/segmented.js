@@ -1164,11 +1164,19 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     Presents the popup menu containing overflowed segments.
   */
   showOverflowMenu: function () {
-    var childViews = this.get('childViews'),
+    var self = this,
+        childViews = this.get('childViews'),
+        itemValueKey = this.get('itemValueKey'),
+        itemLayerIdKey = this.get('itemLayerIdKey'),
         overflowItems = this.overflowItems,
         overflowItemsLength,
         startIndex,
-        isArray, value;
+        isArray,
+        value,
+        item,
+        layerId,
+        layer,
+        overflowElement;
 
     // Check the currently selected item if it is in overflowItems
     overflowItemsLength = overflowItems.get('length');
@@ -1177,8 +1185,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     value = this.get('value');
     isArray = SC.isArray(value);
     for (var i = 0; i < overflowItemsLength; i++) {
-      var item = overflowItems.objectAt(i),
-          itemValueKey = this.get('itemValueKey');
+      item = overflowItems.objectAt(i);
 
       if (isArray ? value.indexOf(item.get(itemValueKey)) >= 0 : value === item.get(itemValueKey)) {
         item.set('isChecked', YES);
@@ -1188,11 +1195,17 @@ SC.SegmentedView = SC.View.extend(SC.Control,
 
       // Track the matching segment index
       item.set('index', startIndex + i);
+
+      // Add '-overflow-menu-item' to the existing layer id (if set),
+      // and use that as the layer id on the menu. This prevents the original
+      // segment from being removed when the menu closes.
+      layerId = item.get(itemLayerIdKey);
+      if (layerId) {
+        item.set('overflowLayerId', layerId + '-overflow-menu-item');
+      }
     }
 
     // TODO: we can't pass a shortcut key to the menu, because it isn't a property of SegmentedView (yet?)
-    var self = this;
-
     var menu = SC.MenuPane.create({
       layout: { width: 200 },
       items: overflowItems,
@@ -1201,6 +1214,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       itemIsEnabledKey: this.get('itemIsEnabledKey'),
       itemKeyEquivalentKey: this.get('itemKeyEquivalentKey'),
       itemCheckboxKey: 'isChecked',
+      itemLayerIdKey: 'overflowLayerId',
 
       // We need to be able to update our overflow segment even if the user clicks outside of the menu.  Since
       // there is no callback method or observable property when the menu closes, override modalPaneDidClick().
@@ -1215,8 +1229,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       }
     });
 
-    var layer = this.get('layer');
-    var overflowElement = layer.childNodes[layer.childNodes.length - 1];
+    layer = this.get('layer');
+    overflowElement = layer.childNodes[layer.childNodes.length - 1];
     menu.popup(overflowElement);
 
     menu.addObserver("selectedItem", this, 'selectOverflowItem');
