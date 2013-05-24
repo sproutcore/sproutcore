@@ -5,13 +5,13 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('core') ;
-sc_require('mixins/observable') ;
+sc_require('core');
+sc_require('mixins/observable');
 sc_require('private/observer_queue');
-sc_require('mixins/array') ;
+sc_require('mixins/array');
 sc_require('system/set');
 
-/*globals $$sel */
+/*global*/
 
 SC.BENCHMARK_OBJECTS = NO;
 
@@ -37,10 +37,10 @@ SC._detect_base = function _detect_base(func, parent, name) {
     // weird edge-case (when a class is enhanced after first used),
     // we'll leave it off for now unless profiling demonstrates that
     // it's a hotspot.
-    //if(base && func === base) { func.base = function() {}; }
+    //if(base && func === base) { func.base = function () {}; }
     //else { func.base = base; }
 
-    if(func.isEnhancement) {
+    if (func.isEnhancement) {
       args = Array.prototype.slice.call(arguments, 1);
     } else {
       args = arguments;
@@ -70,21 +70,25 @@ SC._object_extend = function _object_extend(base, ext, proto) {
   base._kvo_cloned = null;
 
   // get some common vars
-  var key, idx, len, cur, cprops = base.concatenatedProperties, K = SC.K,
-      p1,p2;
+  var key, idx, cur,
+    cprops = base.concatenatedProperties,
+    K = SC.K,
+    p1, p2;
 
   // first, save any concat props.  use old or new array or concat
-  idx = (cprops) ? cprops.length : 0 ;
-  var concats = (idx>0) ? {} : null;
-  while(--idx>=0) {
-    key = cprops[idx]; p1 = base[key]; p2 = ext[key];
+  idx = (cprops) ? cprops.length : 0;
+  var concats = (idx > 0) ? {} : null;
+  while (--idx >= 0) {
+    key = cprops[idx];
+    p1 = base[key];
+    p2 = ext[key];
 
     if (p1) {
       if (!(p1 instanceof Array)) p1 = SC.$A(p1);
-      concats[key] = (p2) ? p1.concat(p2) : p2 ;
+      concats[key] = (p2) ? p1.concat(p2) : p2;
     } else {
       if (!(p2 instanceof Array)) p2 = SC.$A(p2);
-      concats[key] = p2 ;
+      concats[key] = p2;
     }
   }
 
@@ -99,19 +103,19 @@ SC._object_extend = function _object_extend(base, ext, proto) {
   // outlets are treated a little differently because you can manually
   // name outlets in the passed in hash. If this is the case, then clone
   // the array first.
-  var outlets = base.outlets, clonedOutlets = NO ;
+  var outlets = base.outlets, clonedOutlets = NO;
   if (ext.outlets) {
     outlets = (outlets || SC.EMPTY_ARRAY).concat(ext.outlets);
-    clonedOutlets = YES ;
+    clonedOutlets = YES;
   }
 
   // now copy properties, add superclass to func.
-  for(key in ext) {
+  for (key in ext) {
 
     if (key === '_kvo_cloned') continue; // do not copy
 
     // avoid copying builtin methods
-    if (!ext.hasOwnProperty(key)) continue ;
+    if (!ext.hasOwnProperty(key)) continue;
 
     // get the value.  use concats if defined
     value = (concats.hasOwnProperty(key) ? concats[key] : null) || ext[key];
@@ -119,8 +123,8 @@ SC._object_extend = function _object_extend(base, ext, proto) {
     // Possibly add to a bindings.
     if (key.length > 7 && key.slice(-7) === "Binding") {
       if (!clonedBindings) {
-        bindings = (bindings || SC.EMPTY_ARRAY).slice() ;
-        clonedBindings = YES ;
+        bindings = (bindings || SC.EMPTY_ARRAY).slice();
+        clonedBindings = YES;
       }
 
       if (bindings === null) bindings = (base._bindings || SC.EMPTY_ARRAY).slice();
@@ -138,14 +142,14 @@ SC._object_extend = function _object_extend(base, ext, proto) {
         }
       }
       //@endif
-      bindings[bindings.length] = key ;
+      bindings[bindings.length] = key;
 
     // Also add observers, outlets, and properties for functions...
     } else if (value && (value instanceof Function)) {
 
       // add super to funcs.  Be sure not to set the base of a func to
       // itself to avoid infinite loops.
-      if (!value.superclass && (value !== (cur=base[key]))) {
+      if (!value.superclass && (value !== (cur = base[key]))) {
         value.superclass = cur || K;
         value.base = proto ? SC._detect_base(value, proto, key) : cur || K;
       }
@@ -153,17 +157,18 @@ SC._object_extend = function _object_extend(base, ext, proto) {
       // handle regular observers
       if (value.propertyPaths) {
         if (!clonedObservers) {
-          observers = (observers || SC.EMPTY_ARRAY).slice() ;
-          clonedObservers = YES ;
+          observers = (observers || SC.EMPTY_ARRAY).slice();
+          clonedObservers = YES;
         }
-        observers[observers.length] = key ;
+        observers[observers.length] = key;
 
       // handle local properties
       }
 
-      if (paths = value.localPropertyPaths) {
+      paths = value.localPropertyPaths;
+      if (paths) {
         pathLoc = paths.length;
-        while(--pathLoc >= 0) {
+        while (--pathLoc >= 0) {
           local = base._kvo_for(SC.keyFor('_kvo_local', paths[pathLoc]), SC.CoreSet);
           local.add(key);
           base._kvo_for('_kvo_observed_keys', SC.CoreSet).add(paths[pathLoc]);
@@ -174,10 +179,10 @@ SC._object_extend = function _object_extend(base, ext, proto) {
 
       if (value.dependentKeys) {
         if (!clonedProperties) {
-          properties = (properties || SC.EMPTY_ARRAY).slice() ;
-          clonedProperties = YES ;
+          properties = (properties || SC.EMPTY_ARRAY).slice();
+          clonedProperties = YES;
         }
-        properties[properties.length] = key ;
+        properties[properties.length] = key;
 
       // handle outlets
       }
@@ -185,9 +190,9 @@ SC._object_extend = function _object_extend(base, ext, proto) {
       if (value.autoconfiguredOutlet) {
         if (!clonedOutlets) {
           outlets = (outlets || SC.EMPTY_ARRAY).slice();
-          clonedOutlets = YES ;
+          clonedOutlets = YES;
         }
-        outlets[outlets.length] = key ;
+        outlets[outlets.length] = key;
       }
 
       if (value.isEnhancement) {
@@ -196,7 +201,7 @@ SC._object_extend = function _object_extend(base, ext, proto) {
     }
 
     // copy property
-    base[key] = value ;
+    base[key] = value;
   }
 
   // Manually set base on toString() because some JS engines (such as IE8) do
@@ -204,30 +209,31 @@ SC._object_extend = function _object_extend(base, ext, proto) {
   if (ext.hasOwnProperty('toString')) {
     key = 'toString';
     // get the value.  use concats if defined
-    value = (concats.hasOwnProperty(key) ? concats[key] : null) || ext[key] ;
-    if (!value.superclass && (value !== (cur=base[key]))) {
-      value.superclass = value.base = cur || K ;
+    value = (concats.hasOwnProperty(key) ? concats[key] : null) || ext[key];
+    if (!value.superclass && (value !== (cur = base[key]))) {
+      value.superclass = value.base = cur || K;
     }
     // copy property
-    base[key] = value ;
+    base[key] = value;
   }
 
 
   // copy bindings, observers, and properties
   base._bindings = bindings || [];
-  base._observers = observers || [] ;
-  base._properties = properties || [] ;
+  base._observers = observers || [];
+  base._properties = properties || [];
   base.outlets = outlets || [];
 
-  return base ;
-} ;
+  return base;
+};
 
-SC._enhance = function(originalFunction, enhancement) {
-  return function() {
+
+SC._enhance = function (originalFunction, enhancement) {
+  return function () {
     var args = Array.prototype.slice.call(arguments, 0),
         self = this;
 
-    args.unshift(function() { return originalFunction.apply(self, arguments); });
+    args.unshift(function () { return originalFunction.apply(self, arguments); });
     return enhancement.apply(this, args);
   };
 };
@@ -255,12 +261,12 @@ SC._enhance = function(originalFunction, enhancement) {
   ===
 
   You can create a SproutCore object just like any other object...
-  obj = new SC.Object() ;
+  obj = new SC.Object();
 
   @extends SC.Observable
   @since SproutCore 1.0
 */
-SC.Object = function(props) {
+SC.Object = function (props) {
   this.__sc_super__ = SC.Object.prototype;
   return this._object_init(props);
 };
@@ -277,10 +283,10 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
     @param {Hash} props the properties you want to add.
     @returns {Object} receiver
   */
-  mixin: function(props) {
-    var len = arguments.length, loc ;
-    for(loc =0;loc<len;loc++) SC.mixin(this, arguments[loc]);
-    return this ;
+  mixin: function () {
+    var len = arguments.length, loc;
+    for (loc = 0; loc < len; loc++) SC.mixin(this, arguments[loc]);
+    return this;
   },
 
   // ..........................................
@@ -311,20 +317,20 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
     @param {Hash} props the methods of properties you want to add
     @returns {Class} A new object class
   */
-  extend: function(props) {
+  extend: function () {
     //@if(debug)
-    var bench = SC.BENCHMARK_OBJECTS ;
-    if (bench) SC.Benchmark.start('SC.Object.extend') ;
+    var bench = SC.BENCHMARK_OBJECTS;
+    if (bench) SC.Benchmark.start('SC.Object.extend');
     //@endif
 
     // build a new constructor and copy class methods.  Do this before
     // adding any other properties so they are not overwritten by the copy.
-    var prop, ret = function(props) {
+    var prop, ret = function (props) {
       this.__sc_super__ = ret.prototype;
       return this._object_init(props);
-    } ;
-    for(prop in this) {
-      if (!this.hasOwnProperty(prop)) continue ;
+    };
+    for (prop in this) {
+      if (!this.hasOwnProperty(prop)) continue;
       ret[prop] = this[prop];
     }
 
@@ -332,7 +338,7 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
     if (this.hasOwnProperty('toString')) ret.toString = this.toString;
 
     // now setup superclass, guid
-    ret.superclass = this ;
+    ret.superclass = this;
     ret.__sc_super__ = this.prototype;
     SC.generateGuid(ret, "sc"); // setup guid
 
@@ -343,8 +349,8 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
     var base = (ret.prototype = SC.beget(this.prototype)),
         idx, len = arguments.length;
 
-    for(idx=0;idx<len;idx++) {
-      SC._object_extend(base, arguments[idx], ret.__sc_super__) ;
+    for (idx = 0; idx < len; idx++) {
+      SC._object_extend(base, arguments[idx], ret.__sc_super__);
     }
     base.constructor = ret; // save constructor
 
@@ -352,16 +358,16 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
     if (bench) SC.Benchmark.end('SC.Object.extend');
     //@endif
 
-    return ret ;
+    return ret;
   },
 
   // Tested in ../tests/system/object/enhance.js
-  reopen: function(props) {
+  reopen: function (props) {
     var ret;
     ret = SC._object_extend(this.prototype, props, this.__sc_super__);
 
     if (this.subclasses) {
-      this.subclasses.forEach(function(subclass, idx) {
+      this.subclasses.forEach(function (subclass, idx) {
         //@if(debug)
         // Turned Off, SC.View.reopen() makes this too obnoxious. SC.warn("Developer Warning: %@ was re-opened after subclasses were defined.  We're still registering the additions to all subclasses of %@, but it would be safer to reopen() %@ before subclassing it.".fmt(this, this, this));
         //@endif
@@ -414,12 +420,13 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
 
     @returns {SC.Object} new instance of the receiver class.
   */
-  create: function() {
-    var C=this, ret = new C(arguments);
+  create: function () {
+    var C = this, ret = new C(arguments);
+
     if (SC.ObjectDesigner) {
       SC.ObjectDesigner.didCreateObject(ret, SC.$A(arguments));
     }
-    return ret ;
+    return ret;
   },
   /**
     Walk like a duck.  You can use this to quickly test classes.
@@ -437,7 +444,7 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
   subclasses: SC.Set.create(),
 
   /** @private */
-  toString: function() { return SC._object_className(this); },
+  toString: function () { return SC._object_className(this); },
 
   // ..........................................
   // PROPERTY SUPPORT METHODS
@@ -459,11 +466,11 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
     @param {Class} scClass class to compare
     @returns {Boolean}
   */
-  subclassOf: function(scClass) {
-    if (this === scClass) return NO ;
-    var t = this ;
-    while(t = t.superclass) if (t === scClass) return YES ;
-    return NO ;
+  subclassOf: function (scClass) {
+    if (this === scClass) return NO;
+    var t = this;
+    while (t = t.superclass) if (t === scClass) return YES;
+    return NO;
   },
 
   /**
@@ -473,7 +480,7 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
     @param {Class} scClass class to compare
     @returns {Boolean}
   */
-  hasSubclass: function(scClass) {
+  hasSubclass: function (scClass) {
     return (scClass && scClass.subclassOf) ? scClass.subclassOf(this) : NO;
   },
 
@@ -494,8 +501,8 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
     @param {Class} scClass class to compare
     @returns {Boolean}
   */
-  kindOf: function(scClass) {
-    return (this === scClass) || this.subclassOf(scClass) ;
+  kindOf: function (scClass) {
+    return (this === scClass) || this.subclassOf(scClass);
   },
 
   // ..........................................................
@@ -509,7 +516,7 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
     @returns {Class} SC.Object subclass to create
     @function
   */
-  design: function() {
+  design: function () {
     if (this.isDesign) {
       // @if (debug)
       SC.Logger.warn("SC.Object#design called twice for %@.".fmt(this));
@@ -518,13 +525,14 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
     }
 
     var ret = this.extend.apply(this, arguments);
-    ret.isDesign = YES ;
+    ret.isDesign = YES;
     if (SC.ObjectDesigner) {
       SC.ObjectDesigner.didLoadDesign(ret, this, SC.A(arguments));
     }
-    return ret ;
+    return ret;
   }
-}) ;
+
+});
 
 // ..........................................
 // DEFAULT OBJECT INSTANCE
@@ -541,18 +549,20 @@ SC.Object.prototype = {
     @param {Array} extensions an array-like object with hashes to apply.
     @returns {Object} receiver
   */
-  _object_init: function(extensions) {
+  _object_init: function (extensions) {
     // apply any new properties
-    var idx, len = (extensions) ? extensions.length : 0;
-    for(idx=0;idx<len;idx++) { SC._object_extend(this, extensions[idx], this.__sc_super__) ; }
-    SC.generateGuid(this, "sc") ; // add guid
-    this.init() ; // call real init
+    var idx,
+      len = (extensions) ? extensions.length : 0;
+    for (idx = 0; idx < len; idx++) { SC._object_extend(this, extensions[idx], this.__sc_super__); }
+    SC.generateGuid(this, "sc"); // add guid
+    this.init(); // call real init
 
     // Call 'initMixin' methods to automatically setup modules.
-    var inits = this.initMixin; len = (inits) ? inits.length : 0 ;
-    for(idx=0;idx < len; idx++) inits[idx].call(this);
+    var inits = this.initMixin;
+    len = (inits) ? inits.length : 0;
+    for (idx = 0; idx < len; idx++) inits[idx].call(this);
 
-    return this ; // done!
+    return this; // done!
   },
 
   /**
@@ -571,7 +581,7 @@ SC.Object.prototype = {
           var MyClass = SC.Object.extend({
              extraMixin: null,
 
-             init: function() {
+             init: function () {
                this.mixin(this.extraMixin);
                sc_super();
              }
@@ -579,23 +589,23 @@ SC.Object.prototype = {
 
           var ExampleMixin = { foo: "bar" };
 
-          var instance = MyClass.create({ extraMixin: ExampleMixin }) ;
+          var instance = MyClass.create({ extraMixin: ExampleMixin });
 
           instance.get('foo') => "bar"
 
     @param {Hash} ext a hash to copy.  Only one.
     @returns {Object} receiver
   */
-  mixin: function() {
+  mixin: function () {
     var idx, len = arguments.length, init;
-    for(idx=0;idx<len;idx++) SC._object_extend(this, arguments[idx]);
+    for (idx = 0; idx < len; idx++) SC._object_extend(this, arguments[idx]);
 
     // Reset the observable initialized status so that we can setup any new observables.
     this._observableInited = NO;
     this.initObservable();
 
     // Call initMixin
-    for(idx=0;idx<len;idx++) {
+    for (idx = 0; idx < len; idx++) {
       init = arguments[idx].initMixin;
       if (init) init.call(this);
     }
@@ -616,9 +626,9 @@ SC.Object.prototype = {
 
 
   */
-  init: function() {
+  init: function () {
     this.initObservable();
-    return this ;
+    return this;
   },
 
   /**
@@ -640,18 +650,18 @@ SC.Object.prototype = {
 
     @returns {SC.Object} receiver
   */
-  destroy: function() {
+  destroy: function () {
     if (this.get('isDestroyed')) return this; // nothing to do
     this.set('isDestroyed', YES);
 
     // destroy any mixins
-    var idx, inits = this.destroyMixin, len = (inits) ? inits.length : 0 ;
-    for(idx=0;idx < len; idx++) inits[idx].call(this);
+    var idx, inits = this.destroyMixin, len = (inits) ? inits.length : 0;
+    for (idx = 0; idx < len; idx++) inits[idx].call(this);
 
     // destroy observables.
     this.destroyObservable();
 
-    return this ;
+    return this;
   },
 
   /**
@@ -667,7 +677,7 @@ SC.Object.prototype = {
     @param {String} methodName the property name to check
     @returns {Boolean}
   */
-  respondsTo: function( methodName ) {
+  respondsTo: function (methodName) {
     return !!(this[methodName] instanceof Function);
   },
 
@@ -684,7 +694,7 @@ SC.Object.prototype = {
     @param {Object} arg2
     @returns {Boolean} YES if handled, NO if not handled
   */
-  tryToPerform: function(methodName, arg1, arg2) {
+  tryToPerform: function (methodName, arg1, arg2) {
     return this.respondsTo(methodName) && (this[methodName](arg1, arg2) !== NO);
   },
 
@@ -704,17 +714,17 @@ SC.Object.prototype = {
           SC.Object.create({
 
             // DOES NOT WORK IN SAFARI 2 OR EARLIER
-            method1: function() {
+            method1: function () {
               this.superclass();
             },
 
             // REQUIRES SC-BUILD TOOLS
-            method2: function() {
+            method2: function () {
               sc_super();
             },
 
             // WORKS ANYTIME
-            method3: function() {
+            method3: function () {
               arguments.callee.base.apply(this, arguments);
             }
           });
@@ -722,7 +732,7 @@ SC.Object.prototype = {
     @param {*args} args any arguments you want to pass along.
     @returns {Object} return value from super
   */
-  superclass: function(args) {
+  superclass: function () {
     var caller = arguments.callee.caller;
     if (!caller) throw new Error("superclass cannot determine the caller method");
     return caller.superclass ? caller.superclass.apply(this, arguments) : null;
@@ -746,8 +756,8 @@ SC.Object.prototype = {
     @param {Class} scClass the class
     @returns {Boolean}
   */
-  instanceOf: function(scClass) {
-    return this.constructor === scClass ;
+  instanceOf: function (scClass) {
+    return this.constructor === scClass;
   },
 
   /**
@@ -768,18 +778,18 @@ SC.Object.prototype = {
     @param {Class} scClass the class
     @returns {Boolean}
   */
-  kindOf: function(scClass) { return this.constructor.kindOf(scClass); },
+  kindOf: function (scClass) { return this.constructor.kindOf(scClass); },
 
   /** @private */
-  toString: function() {
+  toString: function () {
     if (!this._object_toString) {
       // only cache the string if the klass name is available
       var klassName = SC._object_className(this.constructor),
           string = klassName + ":" + SC.guidFor(this);
-      if (klassName) this._object_toString = string ;
-      else return string ;
+      if (klassName) this._object_toString = string;
+      else return string;
     }
-    return this._object_toString ;
+    return this._object_toString;
   },
 
   /**
@@ -789,7 +799,7 @@ SC.Object.prototype = {
 
 
   */
-  awake: function() {
+  awake: function () {
     var outlets = this.outlets,
         i, len, outlet;
     for (i = 0, len = outlets.length;  i < len;  ++i) {
@@ -811,7 +821,7 @@ SC.Object.prototype = {
     @param {Function|String} method method or method name
     @returns {SC.Object} receiver
   */
-  invokeOnce: function(method) {
+  invokeOnce: function (method) {
     //@if(debug)
     // If we're logging deferred calls, send along the information that needs to
     // be recorded.
@@ -843,13 +853,13 @@ SC.Object.prototype = {
 
           // Creates a new MyRecord object and sets the selection of the
           // myRecord collection controller to the new object.
-          createObjectAction: function(sender, evt) {
+          createObjectAction: function (sender, evt) {
             // create a new record and add it to the store
-            var obj = MyRecord.newRecord() ;
+            var obj = MyRecord.newRecord();
 
             // update the collection controller's selection
-            MyApp.myRecordCollectionController.invokeLast( function() {
-              this.set('selection', [obj]) ;
+            MyApp.myRecordCollectionController.invokeLast( function () {
+              this.set('selection', [obj]);
             });
           }
 
@@ -859,13 +869,13 @@ SC.Object.prototype = {
     @param {Function|String} method method or method name
     @returns {SC.Object} receiver
   */
-  invokeLast: function(method) {
+  invokeLast: function (method) {
     //@if(debug)
     // If we're logging deferred calls, send along the information that needs to
     // be recorded.
     var originatingTarget, originatingMethod, originatingStack;
     if (SC.LOG_DEFERRED_CALLS) {
-      originatingTarget = this ;
+      originatingTarget = this;
       originatingStack  = SC._getRecentStack();
       originatingMethod = originatingStack[0];
     }
@@ -891,13 +901,13 @@ SC.Object.prototype = {
     @param {Function|String} method method or method name
     @returns {SC.Object} receiver
    */
-  invokeNext: function(method) {
+  invokeNext: function (method) {
     //@if(debug)
     // If we're logging deferred calls, send along the information that needs to
     // be recorded.
     var originatingTarget, originatingMethod, originatingStack;
     if (SC.LOG_DEFERRED_CALLS) {
-      originatingTarget = this ;
+      originatingTarget = this;
       originatingStack  = SC._getRecentStack();
       originatingMethod = originatingStack[0];
     }
@@ -927,7 +937,7 @@ SC.Object.prototype = {
 SC.Object.prototype.constructor = SC.Object;
 
 // Add observable to mixin
-SC.mixin(SC.Object.prototype, SC.Observable) ;
+SC.mixin(SC.Object.prototype, SC.Observable);
 
 // ..........................................................
 // CLASS NAME SUPPORT
@@ -940,32 +950,32 @@ SC.mixin(SC.Object.prototype, SC.Observable) ;
 */
 function findClassNames() {
 
-  if (SC._object_foundObjectClassNames) return ;
-  SC._object_foundObjectClassNames = true ;
+  if (SC._object_foundObjectClassNames) return;
+  SC._object_foundObjectClassNames = true;
 
   var seen = [],
       detectedSC = false;
-  var searchObject = function(root, object, levels) {
+  var searchObject = function (root, object, levels) {
 
     var path, value, type;
-    levels-- ;
+    levels--;
 
     // not the fastest, but safe
-    if (seen.indexOf(object) >= 0) return ;
-    seen.push(object) ;
+    if (seen.indexOf(object) >= 0) return;
+    seen.push(object);
 
-    for(var key in object) {
-      if (key == '__scope__') continue ;
-      if (key == 'superclass') continue ;
-      if (key == '__SC__') key = 'SC' ;
-      if (!key.match(/^[A-Z0-9]/)) continue ;
+    for (var key in object) {
+      if (key == '__scope__') continue;
+      if (key == 'superclass') continue;
+      if (key == '__SC__') key = 'SC';
+      if (!key.match(/^[A-Z0-9]/)) continue;
       if (key == 'SC') {
         if (detectedSC) continue;
         detectedSC = true;
       }
 
-      path = (root) ? [root,key].join('.') : key ;
-      value = object[key] ;
+      path = (root) ? [root, key].join('.') : key;
+      value = object[key];
 
       try {
         type = SC.typeOf(value);
@@ -974,25 +984,25 @@ function findClassNames() {
         break;
       }
 
-      switch(type) {
+      switch (type) {
       case SC.T_CLASS:
         if (!value._object_className) value._object_className = path;
-        if (levels>=0) searchObject(path, value, levels) ;
-        break ;
+        if (levels >= 0) searchObject(path, value, levels);
+        break;
 
       case SC.T_OBJECT:
-        if (levels>=0) searchObject(path, value, levels) ;
-        break ;
+        if (levels >= 0) searchObject(path, value, levels);
+        break;
 
       case SC.T_HASH:
-        if (((root) || (path==='SC')) && (levels>=0)) searchObject(path, value, levels) ;
-        break ;
+        if (((root) || (path === 'SC')) && (levels >= 0)) searchObject(path, value, levels);
+        break;
 
       default:
         break;
       }
     }
-  } ;
+  };
 
   // Fix for IE 7 and 8 in order to detect the SC global variable. When you create
   // a global variable in IE, it is not added to the window object like in other
@@ -1004,8 +1014,8 @@ function findClassNames() {
   //
   //   window.MyApp = window.MyApp || SC.Object.create({ ... })
   //
-  window['__SC__'] = SC;
-  searchObject(null, window, 2) ;
+  window.__SC__ = SC;
+  searchObject(null, window, 2);
 }
 
 /**
@@ -1016,9 +1026,9 @@ function findClassNames() {
   @param {Class} scClass the class
   @returns {Boolean} if object1 is instance of class
 */
-SC.instanceOf = function(scObject, scClass) {
-  return !!(scObject && scObject.constructor === scClass) ;
-} ;
+SC.instanceOf = function (scObject, scClass) {
+  return !!(scObject && scObject.constructor === scClass);
+};
 
 /**
   Same as the instance method, but lets you check kindOf without having to
@@ -1028,7 +1038,7 @@ SC.instanceOf = function(scObject, scClass) {
   @param {Class} scClass the class to check
   @returns {Boolean} if object is an instance of class or subclass
 */
-SC.kindOf = function(scObject, scClass) {
+SC.kindOf = function (scObject, scClass) {
   if (scObject && !scObject.isClass) scObject = scObject.constructor;
   return !!(scObject && scObject.kindOf && scObject.kindOf(scClass));
 };
@@ -1039,15 +1049,15 @@ SC.kindOf = function(scObject, scClass) {
 
   This method is used to allow classes to determine their own name.
 */
-SC._object_className = function(obj) {
+SC._object_className = function (obj) {
   if (SC.isReady === NO) return ''; // class names are not available until ready
-  if (!obj._object_className) findClassNames() ;
-  if (obj._object_className) return obj._object_className ;
+  if (!obj._object_className) findClassNames();
+  if (obj._object_className) return obj._object_className;
 
   // if no direct classname was found, walk up class chain looking for a
   // match.
-  var ret = obj ;
-  while(ret && !ret._object_className) ret = ret.superclass;
+  var ret = obj;
+  while (ret && !ret._object_className) ret = ret.superclass;
   return (ret && ret._object_className) ? ret._object_className : 'Anonymous';
-} ;
+};
 
