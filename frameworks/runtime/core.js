@@ -4,13 +4,13 @@
 //            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-/*global jQuery, require */
+/*global jQuery, require, console */
 
 // These commands are used by the build tools to control load order.  On the
 // client side these are a no-op.
-if (!window.require) { window.require = function require(){}; }
+if (!window.require) { window.require = function require() {}; }
 if (!window.sc_require) { window.sc_require = require; }
-if (!window.sc_resource) {window.sc_resource = function sc_resource(){}; }
+if (!window.sc_resource) { window.sc_resource = function sc_resource() {}; }
 sc_require('license');
 
 // ........................................
@@ -26,7 +26,7 @@ window.NO = false;
 // does not support it
 if (typeof console === 'undefined') {
   window.console = {};
-  console.log = console.info = console.warn = console.error = function (){};
+  console.log = console.info = console.warn = console.error = function () {};
 }
 
 window.SC = window.SC || {};
@@ -78,25 +78,25 @@ SC.VERSION = 'Edge';
   @static
 */
 SC._baseMixin = function (override) {
-  var args = Array.prototype.slice.call(arguments, 1), src,
+  var args = Array.prototype.slice.call(arguments, 1),
   // copy reference to target object
       target = args[0] || {},
       idx = 1,
-      length = args.length ,
-      options, copy , key;
+      length = args.length,
+      options, copy, key;
 
   // Handle case where we have only one item...extend SC
   if (length === 1) {
     target = this || {};
-    idx=0;
+    idx = 0;
   }
 
   for (; idx < length; idx++) {
     if (!(options = args[idx])) continue;
-    for(key in options) {
+    for (key in options) {
       if (!options.hasOwnProperty(key)) continue;
       copy = options[key];
-      if (target===copy) continue; // prevent never-ending loop
+      if (target === copy) continue; // prevent never-ending loop
       if (copy !== undefined && (override || (target[key] === undefined))) target[key] = copy;
     }
     // Manually copy toString() because some JS engines do not enumerate it
@@ -234,6 +234,7 @@ SC.mixin(/** @scope window.SC.prototype */ {
     @returns {Boolean}
   */
   none: function (obj) {
+    /*jshint eqnull:true */
     return obj == null;
   },
 
@@ -351,7 +352,7 @@ SC.mixin(/** @scope window.SC.prototype */ {
     if (type === SC.T_NUMBER || type === SC.T_STRING) {
       cache = this._guidCaches[type];
       ret   = cache[obj];
-      if(!ret) {
+      if (!ret) {
         ret        = "st" + (jQuery.uuid++);
         cache[obj] = ret;
       }
@@ -424,10 +425,10 @@ SC.mixin(/** @scope window.SC.prototype */ {
   */
   hashFor: function () {
     var l = arguments.length,
-        h = '',
-        obj, f, i;
+      h = '',
+      obj, f, i;
 
-    for (i=0; i<l; ++i) {
+    for (i = 0; i < l; ++i) {
       obj = arguments[i];
       h += (obj && (f = obj.hash) && (typeof f === SC.T_FUNCTION)) ? f.call(obj) : this.guidFor(obj);
     }
@@ -443,7 +444,7 @@ SC.mixin(/** @scope window.SC.prototype */ {
     @returns {Boolean} YES if the two have equal hash code values.
 
   */
-  isEqual: function (a,b) {
+  isEqual: function (a, b) {
     // QUESTION: is there a compelling performance reason to special-case
     // undefined here?
     return this.hashFor(a) === this.hashFor(b);
@@ -659,7 +660,7 @@ SC.mixin(/** @scope window.SC.prototype */ {
   */
   keys: function (obj) {
     var ret = [];
-    for(var key in obj) ret.push(key);
+    for (var key in obj) ret.push(key);
     return ret;
   },
 
@@ -673,7 +674,7 @@ SC.mixin(/** @scope window.SC.prototype */ {
   */
   inspect: function (obj) {
     var v, ret = [];
-    for(var key in obj) {
+    for (var key in obj) {
       v = obj[key];
       if (v === 'toString') continue; // ignore useless items
       if (SC.typeOf(v) === SC.T_FUNCTION) v = "function () { ... }";
@@ -705,11 +706,11 @@ SC.mixin(/** @scope window.SC.prototype */ {
     var key;
     var stopAt = path.indexOf('*');
     if (stopAt < 0) stopAt = path.lastIndexOf('.');
-    key = (stopAt >= 0) ? path.slice(stopAt+1) : path;
+    key = (stopAt >= 0) ? path.slice(stopAt + 1) : path;
 
     // convert path to object.
     var obj = this.objectForPropertyPath(path, root, stopAt);
-    return (obj && key) ? [obj,key] : null;
+    return (obj && key) ? [obj, key] : null;
   },
 
   /**
