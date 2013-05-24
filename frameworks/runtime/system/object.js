@@ -312,8 +312,10 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
     @returns {Class} A new object class
   */
   extend: function(props) {
+    //@if(debug)
     var bench = SC.BENCHMARK_OBJECTS ;
     if (bench) SC.Benchmark.start('SC.Object.extend') ;
+    //@endif
 
     // build a new constructor and copy class methods.  Do this before
     // adding any other properties so they are not overwritten by the copy.
@@ -346,7 +348,10 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
     }
     base.constructor = ret; // save constructor
 
-    if (bench) SC.Benchmark.end('SC.Object.extend') ;
+    //@if(debug)
+    if (bench) SC.Benchmark.end('SC.Object.extend');
+    //@endif
+
     return ret ;
   },
 
