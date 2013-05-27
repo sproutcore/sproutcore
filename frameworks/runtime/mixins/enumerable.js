@@ -838,7 +838,8 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
     // or lastObject properties changed, thus making them independently observable.
     if (!SC.none(start)) {
       if (start === 0) this.notifyPropertyChange('firstObject');
-      if (!SC.none(length) && start + length === this.get('length') - 1) this.notifyPropertyChange('lastObject');
+      //Issue #980
+      if (!SC.none(length) && start + length >= this.get('length') - 1) this.notifyPropertyChange('lastObject');
     }
 
     this.notifyPropertyChange('[]');
