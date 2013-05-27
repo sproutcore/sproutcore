@@ -49,6 +49,19 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     @type SC.Array
   */
   content: null,
+  /**
+   Helper method returns the last object from a collection.
+  */
+  lastObject: function () {
+      return this.content? this.content.get('lastObject') : null;
+  }.property(),
+
+  /**
+  Helper method returns the first object from a collection.
+  **/
+  firstObject: function () {
+      return this.content? this.content.get('firstObject') : null;
+  }.property(),
 
   /**
     Makes the array editable or not.  If this is set to NO, then any attempts
