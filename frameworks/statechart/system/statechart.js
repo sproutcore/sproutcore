@@ -367,7 +367,6 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   },
 
   /* END DEBUG ONLY PROPERTIES AND METHODS */
-
   //@endif
 
   // Walk like a duck
