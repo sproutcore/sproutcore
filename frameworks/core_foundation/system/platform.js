@@ -519,8 +519,8 @@ SC.platform = SC.Object.create({
       keyframeprefix = animationStyleName === 'animation' ? '' : SC.browser.cssPrefix,
       keyframes = '@' + keyframeprefix + 'keyframes _sc_animation_test { from { opacity: 1; } to { opacity: 0; } }';
 
-    // Add a test animation rule scoped to the test element.
-    animationEl.innerHTML = '<style scoped="scoped">' + keyframes + '</style>';
+    // Add a test animation style.
+    animationEl.innerHTML = '<style>' + keyframes + '</style>';
 
     // Set up and execute the animation event test.
     animationEl.style[animationStyleName] = '_sc_animation_test 1ms linear';
