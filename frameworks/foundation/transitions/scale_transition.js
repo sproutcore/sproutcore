@@ -39,7 +39,7 @@ SC.mixin(SC.View,
     /** @private */
     cancelIn: function (view, options) {
       view.cancelAnimation();
-      this.teardown(view, options);
+      this.teardownIn(view, options);
     },
 
     /** @private */
@@ -73,7 +73,7 @@ SC.mixin(SC.View,
     /** @private */
     cancelOut: function (view, options) {
       view.cancelAnimation();
-      this.teardown(view, options);
+      this.teardownOut(view, options);
     },
 
     /** @private */
