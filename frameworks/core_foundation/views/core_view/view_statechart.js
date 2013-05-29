@@ -1197,7 +1197,7 @@ SC.CoreView.reopen(
     var transition = this.get('transitionOut'),
       options = this.get('transitionOutOptions') || {};
 
-    if (transition.cancel) { transition.cancel(this, options); }
+    if (transition.cancelOut) { transition.cancelOut(this, options); }
 
     // Remove the shared building out count if it exists.
     this._buildingOutCount = null;
@@ -1217,7 +1217,7 @@ SC.CoreView.reopen(
       var transition = this.get('transitionHide'),
         options = this.get('transitionHideOptions') || {};
 
-      if (transition.cancel) { transition.cancel(this, options); }
+      if (transition.cancelOut) { transition.cancelOut(this, options); }
 
       // Clear out any child views that are transitioning before we hide.
       this._callOnChildViews('_parentWillHideInDocument');
@@ -1247,7 +1247,7 @@ SC.CoreView.reopen(
       transition = this.get('transitionShow');
       options = this.get('transitionShowOptions') || {};
 
-      if (transition.cancel) { transition.cancel(this, options); }
+      if (transition.cancelIn) { transition.cancelIn(this, options); }
     } else {
       if (state === SC.CoreView.ATTACHED_BUILDING_IN) {
         //@if(debug)
@@ -1256,7 +1256,7 @@ SC.CoreView.reopen(
         transition = this.get('transitionIn');
         options = this.get('transitionInOptions') || {};
 
-        if (transition.cancel) { transition.cancel(this, options); }
+        if (transition.cancelIn) { transition.cancelIn(this, options); }
       }
     }
   },
