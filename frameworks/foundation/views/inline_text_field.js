@@ -356,18 +356,6 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
     this.mouseDown(e);
   },
 
-  /** @private */
-  keyDown: function(evt) {
-    var ret = this.interpretKeyEvents(evt) ;
-    this.fieldValueDidChange(true);
-    return !ret ? NO : ret;
-  },
-
-  /** @private */
-  insertText: null,
-
-  //keyUp: function() { return true; },
-
   _scitf_blurInput: function() {
     var el = this.$input()[0];
     if (el) el.blur();
