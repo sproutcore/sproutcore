@@ -90,6 +90,7 @@ sc_require('mixins/inline_editor');
 SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
 /** @scope SC.InlineTextFieldView.prototype */ {
   classNames: ['inline-editor'],
+
   /**
     Over-write magic number from SC.TextFieldView
   */
@@ -279,7 +280,8 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
   beginEditing: function(original, label) {
 		if(!original(label)) return NO;
 
-    var pane = label.get('pane'), elem = this.get('exampleElement');
+    var pane = label.get('pane'),
+      elem = this.get('exampleElement');
 
     this.beginPropertyChanges();
 
@@ -287,7 +289,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
 
     // if we have an exampleElement we need to make sure it's an actual
     // DOM element not a jquery object
-    if(elem) {
+    if (elem) {
       if(elem.length) elem = elem[0];
     }
 
@@ -410,7 +412,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
   },
 
   // Invoked when the user presses return.  If this is a multi-line field,
-  // then allow the new line to proceed by calling the super class. 
+  // then allow the new line to proceed by calling the super class.
   // Otherwise, try to commit the edit.
   /** @private */
   insertNewline: function(evt) {
