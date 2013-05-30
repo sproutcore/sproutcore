@@ -50,7 +50,9 @@ module("SC.CollectionView.itemViewForContentIndex", {
 
       groupExampleView: SC.View.extend(), // custom for testing
 
-      exampleView: SC.View.extend(), // custom for testing
+      exampleView: SC.View.extend({
+        isReusable: false
+      }), // custom for testing
 
       testAsGroup: NO,
 
