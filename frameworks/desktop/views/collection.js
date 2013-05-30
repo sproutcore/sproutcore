@@ -179,7 +179,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     Allow user to select content using the mouse and keyboard.
 
     Set this property to `NO` to disallow the user from selecting items. If you
-    have items in your `selectedIndexes property, they will still be reflected
+    have items in your `selectedIndexes` property, they will still be reflected
     visually.
 
     @type Boolean
@@ -196,7 +196,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     The collection view will set the `isEnabled` property of its item views to
     reflect the same view of this property.  Whenever ``isEnabled` is false,
     the collection view will also be not selectable or editable, regardless of
-    the settings for isEditable` & `isSelectable`.
+    the settings for `isEditable` & `isSelectable`.
 
     @type Boolean
     @default YES
@@ -209,11 +209,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   /**
     Allow user to edit content views.
 
-    The collection view will set the `isEditable` property on its item views to
-    reflect the same value of this property.  Whenever `isEditable` is false,
-    the user will not be able to reorder, add, or delete items regardless of
-    the `canReorderContent` and `canDeleteContent` and `isDropTarget`
-    properties.
+    Whenever `isEditable` is false, the user will not be able to reorder, add,
+    or delete items regardless of the `canReorderContent` and `canDeleteContent`
+    and `isDropTarget` properties.
 
     @type Boolean
     @default YES
@@ -226,7 +224,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   /**
     Allow user to reorder items using drag and drop.
 
-    If true, the user will can use drag and drop to reorder items in the list.
+    If true, the user can use drag and drop to reorder items in the list.
     If you also accept drops, this will allow the user to drop items into
     specific points in the list.  Otherwise items will be added to the end.
 
@@ -771,6 +769,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     } else {
       var func = this.contentRangeDidChange;
       observer = content.addRangeObserver(nowShowing, this, func, null);
+
+      // Cache the range observer so we can clean it up later.
       this._cv_contentRangeObserver = observer;
     }
 
