@@ -194,7 +194,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     Enable or disable the view.
 
     The collection view will set the `isEnabled` property of its item views to
-    reflect the same view of this property.  Whenever ``isEnabled` is false,
+    reflect the same view of this property.  Whenever `isEnabled` is false,
     the collection view will also be not selectable or editable, regardless of
     the settings for `isEditable` & `isSelectable`.
 
@@ -229,7 +229,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     specific points in the list.  Otherwise items will be added to the end.
 
     When canReorderContent is true, item views will have the `isReorderable`
-    property set to true.
+    property set to true (if the `isEditable` is true on the collection).
 
     @type Boolean
     @default NO
@@ -246,7 +246,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     key.  Otherwise deletes will not be permitted.
 
     When canDeleteContent is true, item views will have the `isDeletable`
-    property set to true.
+    property set to true (if the `isEditable` is true on the collection).
 
     @type Boolean
     @default NO
@@ -262,7 +262,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     the `beginEditing()` method.
 
     When canEditContent is true, item views will have the `isEditable`
-    property set to true.
+    property set to true (if the `isEditable` is true on the collection).
 
     @type Boolean
   */
@@ -1690,7 +1690,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   */
   deleteSelection: function () {
     // perform some basic checks...
-    if (!this.get('canDeleteContent')) return NO;
+    if (!this.get('isEditable') || !this.get('canDeleteContent')) return NO;
 
     var sel     = this.get('selection'),
         content = this.get('content'),
@@ -2451,7 +2451,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     if ((Date.now() - info.at) < 123) return YES;
 
     // OK, they must be serious, decide if a drag will be allowed.
-    if (del.collectionViewShouldBeginDrag(this)) {
+    if (this.get('isEditable') && del.collectionViewShouldBeginDrag(this)) {
 
       // First, get the selection to drag.  Drag an array of selected
       // items appearing in this collection, in the order of the
