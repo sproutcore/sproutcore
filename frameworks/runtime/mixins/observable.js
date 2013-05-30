@@ -945,6 +945,9 @@ SC.Observable = /** @scope SC.Observable.prototype */{
       @returns {Object} this
     */
     destroyObservable: function() {
+      var keys, len, loc, key, observer, propertyPaths, propertyPathsLength,
+        ploc, path;
+
       // Destroy bindings
       this.bindings.invoke('destroy');
       delete this.bindings;
