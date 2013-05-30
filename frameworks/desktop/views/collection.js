@@ -946,12 +946,10 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     if (!invalid || !this.get('isVisibleInWindow')) return this; // delay
     this._invalidIndexes = NO;
 
-    var attrs,
-      i, len, existing,
+    var len, existing,
       nowShowing = this.get('nowShowing'),
       itemViews = this._sc_itemViews || [],
-      viewsToRemove, viewsToRedraw, viewsToCreate,
-      idx, view;
+      idx;
 
     // if the set is defined but it contains the entire nowShowing range, just
     // replace
@@ -960,11 +958,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     // if an index set, just update indexes
     if (invalid.isIndexSet) {
 
-      // Each of these arrays holds indexes.
-      viewsToRemove = [];
-      viewsToRedraw = [];
-      viewsToCreate = [];
-
       // Go through the invalid indexes and determine if the matching views
       // should be redrawn (exists and still showing), should be created (
       // doesn't exist and now showing) or should be destroyed (exists and no
@@ -972,44 +965,16 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
       invalid.forEach(function (idx) {
         // Get the existing item view, if there is one.
         existing = itemViews[idx];
-
-        if (nowShowing.contains(idx)) {
           if (existing) {
-            // Exists and still showing.
-            viewsToRedraw.push(idx);
-          } else {
-            // Doesn't exist and now showing.
-            viewsToCreate.push(idx);
-          }
-        } else if (existing) {
-          // Exists and no longer showing.
-          viewsToRemove.push(idx);
-        }
-      }, this);
-
-      // Process the removals.
-      for (i = 0, len = viewsToRemove.length;  i < len; i++) {
-        idx = viewsToRemove[i];
-        existing = itemViews[idx];
-
+          // Exists so remove it (may send to pool).
         this._removeItemView(existing, idx);
       }
 
-      // Process the redraws.
-      for (i = 0, len = viewsToRedraw.length;  i < len; i++) {
-        idx = viewsToRedraw[i];
-
-        existing = itemViews[idx];
-        attrs = this._attrsForContentIndex(idx);
-        this._reconfigureItemView(existing, attrs);
-        existing.updateLayerIfNeeded();
+        // Create it (may fetch from pool).
+        if (nowShowing.contains(idx)) {
+          this.itemViewForContentIndex(idx, YES);
       }
-
-      // Process the creations.
-      for (i = 0, len = viewsToCreate.length;  i < len; i++) {
-        idx = viewsToCreate[i];
-        view = this.itemViewForContentIndex(idx, YES);
-      }
+      }, this);
 
     // if set is NOT defined, replace entire content with nowShowing
     } else {

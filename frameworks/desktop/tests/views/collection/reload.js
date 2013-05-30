@@ -51,6 +51,9 @@ module("SC.CollectionView.reload (attached)", {
 
     view = SC.CollectionView.create({
       content: content,
+      exampleView: SC.View.extend({
+        isReusable: false
+      }),
 
       // STUB: reload
       reload: CoreTest.stub('reload', SC.CollectionView.prototype.reload)
@@ -91,12 +94,11 @@ function verifyItemViews(view, content, shouldShowAllContent, testName) {
 
   equals(childViews.get('length'), nowShowing.get('length'), '%@ view.childViews.length should match nowShowing.length'.fmt(testName));
 
-  // childViews should be in same order as nowShowing indexes at all times.
   var iter= 0;
   nowShowing.forEach(function(idx) {
-    var itemView = childViews.objectAt(iter),
+    var itemView = view.itemViewForContentIndex(idx),
         item     = content.objectAt(idx);
-    ok(itemView, 'childViews[%@] should have itemView'.fmt(iter));
+
     if (itemView) {
       equals(itemView.get('content'), item, '%@ childViews[%@].content should equal content[%@]'.fmt(testName, iter,idx));
     }
