@@ -397,9 +397,9 @@ SC.RootResponder = SC.Object.extend(
     return YES ; // allow default
   },
 
-  dragDidStart: function(drag) {
-    this._mouseDownView = drag ;
-    this._drag = drag ;
+  dragDidStart: function (drag) {
+    this._mouseDownView = drag;
+    this._drag = drag;
   },
 
   // .......................................................
@@ -1117,9 +1117,11 @@ SC.RootResponder = SC.Object.extend(
     var target = touch.targetView, view = target,
         chain = [], idx, len;
 
+    //@if(debug)
     if (SC.LOG_TOUCH_EVENTS) {
       SC.Logger.info('  -- Received one touch on %@'.fmt(target.toString()));
     }
+    //@endif
     // work up the chain until we get the root
     while (view && (view !== startingPoint)) {
       chain.unshift(view);
@@ -1129,11 +1131,15 @@ SC.RootResponder = SC.Object.extend(
     // work down the chain
     for (len = chain.length, idx = 0; idx < len; idx++) {
       view = chain[idx];
+      //@if(debug)
       if (SC.LOG_TOUCH_EVENTS) SC.Logger.info('  -- Checking %@ for captureTouch response…'.fmt(view.toString()));
+      //@endif
 
       // see if it captured the touch
       if (view.tryToPerform('captureTouch', touch)) {
+        //@if(debug)
         if (SC.LOG_TOUCH_EVENTS) SC.Logger.info('   -- Making %@ touch responder because it returns YES to captureTouch'.fmt(view.toString()));
+        //@endif
 
         // if so, make it the touch's responder
         this.makeTouchResponder(touch, view, shouldStack, YES); // triggers touchStart/Cancel/etc. event.
@@ -1141,7 +1147,10 @@ SC.RootResponder = SC.Object.extend(
       }
     }
 
+    //@if(debug)
     if (SC.LOG_TOUCH_EVENTS) SC.Logger.info("   -- Didn't find a view that returned YES to captureTouch, so we're calling touchStart");
+    //@endif
+
     // if we did not capture the touch (obviously we didn't)
     // we need to figure out what view _will_
     // Thankfully, makeTouchResponder does exactly that: starts at the view it is supplied and keeps calling startTouch
@@ -1450,7 +1459,9 @@ SC.RootResponder = SC.Object.extend(
         touchEntry.type = 'touchend';
         touchEntry.event = evt;
 
+        //@if(debug)
         if (SC.LOG_TOUCH_EVENTS) SC.Logger.info('-- Received touch end');
+        //@endif
         if (touchEntry.hidesTouchIntercept) {
           touchEntry.unhideTouchIntercept();
           hidesTouchIntercept = YES;
@@ -1789,59 +1800,64 @@ SC.RootResponder = SC.Object.extend(
     sent.
   */
   mouseup: function(evt) {
-    var clickOrDoubleClickDidTrigger=NO;
+    var clickOrDoubleClickDidTrigger = NO,
+      dragView = this._drag;
+
     if (SC.platform.touch) {
       evt.allowDefault();
       this._lastMouseUpCustomHandling = YES;
       return YES;
     }
 
-    if (this._drag) {
-      this._drag.tryToPerform('mouseUp', evt) ;
-      this._drag = null ;
-    }
+    if (dragView) {
+      SC.run(function() {
+        dragView.tryToPerform('mouseUp', evt);
+      });
+    } else {
 
-    var handler = null, view = this._mouseDownView,
+      var handler = null,
+        view = this._mouseDownView,
         targetView = this.targetViewForEvent(evt);
 
-    // record click count.
-    evt.clickCount = this._clickCount ;
+      // record click count.
+      evt.clickCount = this._clickCount ;
 
-    // attempt the mouseup call only if there's a target.
-    // don't want a mouseup going to anyone unless they handled the mousedown...
-    if (view) {
-      handler = this.sendEvent('mouseUp', evt, view) ;
+      // attempt the mouseup call only if there's a target.
+      // don't want a mouseup going to anyone unless they handled the mousedown...
+      if (view) {
+        handler = this.sendEvent('mouseUp', evt, view) ;
 
-      // try doubleClick
-      if (!handler && (this._clickCount === 2)) {
-        handler = this.sendEvent('doubleClick', evt, view) ;
-        clickOrDoubleClickDidTrigger = YES;
+        // try doubleClick
+        if (!handler && (this._clickCount === 2)) {
+          handler = this.sendEvent('doubleClick', evt, view) ;
+          clickOrDoubleClickDidTrigger = YES;
+        }
+
+        // try single click
+        if (!handler) {
+          handler = this.sendEvent('click', evt, view) ;
+          clickOrDoubleClickDidTrigger = YES;
+        }
       }
 
-      // try single click
-      if (!handler) {
-        handler = this.sendEvent('click', evt, view) ;
-        clickOrDoubleClickDidTrigger = YES;
-      }
-    }
+      // try whoever's under the mouse if we haven't handle the mouse up yet
+      if (!handler && !clickOrDoubleClickDidTrigger) {
 
-    // try whoever's under the mouse if we haven't handle the mouse up yet
-    if (!handler && !clickOrDoubleClickDidTrigger) {
+        // try doubleClick
+        if (this._clickCount === 2) {
+          handler = this.sendEvent('doubleClick', evt, targetView);
+        }
 
-      // try doubleClick
-      if (this._clickCount === 2) {
-        handler = this.sendEvent('doubleClick', evt, targetView);
-      }
-
-      // try singleClick
-      if (!handler) {
-        handler = this.sendEvent('click', evt, targetView) ;
+        // try singleClick
+        if (!handler) {
+          handler = this.sendEvent('click', evt, targetView) ;
+        }
       }
     }
 
     // cleanup
     this._mouseCanDrag = NO;
-    this._mouseDownView = null;
+    this._mouseDownView = this._drag = null;
 
     // Save timestamp of mouseup at last possible moment.
     // (This is used to calculate double click events)
@@ -1918,20 +1934,21 @@ SC.RootResponder = SC.Object.extend(
     this._lastMoveY = evt.clientY;
 
     SC.run(function() {
+      var dragView = this._drag;
+
        // make sure the view gets focus no matter what.  FF is inconsistent
        // about this.
       // this.focus();
        // only do mouse[Moved|Entered|Exited|Dragged] if not in a drag session
        // drags send their own events, e.g. drag[Moved|Entered|Exited]
-       if (this._drag) {
+       if (dragView) {
          //IE triggers mousemove at the same time as mousedown
-         if(SC.browser.isIE){
+         if (SC.browser.isIE){
            if (this._lastMouseDownX !== evt.clientX || this._lastMouseDownY !== evt.clientY) {
-             this._drag.tryToPerform('mouseDragged', evt);
+             dragView.tryToPerform('mouseDragged', evt);
            }
-         }
-         else {
-           this._drag.tryToPerform('mouseDragged', evt);
+         } else {
+           dragView.tryToPerform('mouseDragged', evt);
          }
        } else {
          var lh = this._lastHovered || [] , nh = [] , exited, loc, len,
