@@ -1085,7 +1085,7 @@ SC.View.reopen(
     sc_super();
 
     // Our frame may change once we've been removed from a parent.
-    this._checkForResize();
+    if (!this.isDestroyed) { this._checkForResize(); }
   },
 
   /** @private Extension: The 'updatedContent' event. */
