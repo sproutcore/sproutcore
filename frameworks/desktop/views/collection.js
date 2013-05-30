@@ -228,6 +228,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     If you also accept drops, this will allow the user to drop items into
     specific points in the list.  Otherwise items will be added to the end.
 
+    When canReorderContent is true, item views will have the `isReorderable`
+    property set to true.
+
     @type Boolean
     @default NO
   */
@@ -242,6 +245,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     If true the user will be allowed to delete selected items using the delete
     key.  Otherwise deletes will not be permitted.
 
+    When canDeleteContent is true, item views will have the `isDeletable`
+    property set to true.
+
     @type Boolean
     @default NO
   */
@@ -254,6 +260,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     Allow user to edit the content by double clicking on it or hitting return.
     This will only work if isEditable is `YES` and the item view implements
     the `beginEditing()` method.
+
+    When canEditContent is true, item views will have the `isEditable`
+    property set to true.
 
     @type Boolean
   */
@@ -326,20 +335,28 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     your own subclass for this property to display the type of content you
     want.
 
-    For best results, the view you set here should understand the following
-    properties:
+    The view you set here should understand the following properties, which
+    it can use to alter its display:
 
-     - `content` -- The content object from the content array your view should display
-     - `isEnabled` -- True if the view should appear enabled
-     - `isSelected` -- True if the view should appear selected
+    - `content` -- The content object from the content array your view should
+      display.
+    - `isEnabled` -- False if the view should appear disabled.
+    - `isSelected` -- True if the view should appear selected.
+    - `contentIndex` -- The current index of the view's content.
+    - `isEditable` -- True if the view should appear editable by clicking on it
+      or hitting the Return key.
+    - `isReorderable` -- True if the view should appear reorderable by dragging
+      it.
+    - `isDeletable` -- True if the view should appear deletable, by clicking on
+      a delete button within it or hitting the Delete key.
 
     # Working with View and Element Pooling
 
     As noted in the SC.CollectionView description above, by default the few
     instances that are needed of the exampleView class will be created and then
     reused.  Reusing an exampleView means that the content, isSelected, isEnabled,
-    contentIndex, layout and layerId properties will be updated as an existing
-    view is pulled from the pool to be displayed.
+    isEditable, isReorderable, isDeletable and contentIndex properties will be
+    updated as an existing view is pulled from the pool to be displayed.
 
     If your custom exampleView class has trouble being reused, you may want to
     implement the `sleepInPool` and `awakeFromPool` methods in your exampleView.
@@ -873,6 +890,10 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     Because changing isEnabled requires reloading the items, we observe this
     separately from the displayProperties in order to properly reload as well
     as update the view itself.
+
+    We also need to reload if isEditable, canEditContent, canReorderContent or
+    canDeleteContent change and since a display update on the collection view is
+    so minor, we just do it here.
   */
   _isEnabledDidChange: function () {
     // Standard display property behavior.  Call displayDidChange.
@@ -880,7 +901,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
     // Reload the nowShowing indexes.
     this.reload();
-  }.observes('isEnabled'),
+  }.observes('isEnabled', 'isEditable', 'canEditContent', 'canReorderContent', 'canDeleteContent'),
 
   /**
     Regenerates the item views for the content items at the specified indexes.
@@ -3153,6 +3174,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
       del = this.get('contentDelegate'),
       items = this.get('content'),
       isGroupView = this._contentIndexIsGroup(idx),
+      isEditable = this.get('isEditable') && this.get('canEditContent'),
+      isReorderable = this.get('isEditable') && this.get('canReorderContent'),
+      isDeletable = this.get('isEditable') && this.get('canDeleteContent'),
       isEnabled = del.contentIndexIsEnabled(this, items, idx),
       isSelected = del.contentIndexIsSelected(this, items, idx),
       outlineLevel = del.contentIndexOutlineLevel(this, items, idx),
@@ -3162,6 +3186,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     attrs.content = items.objectAt(idx);
     attrs.disclosureState = disclosureState;
     attrs.isEnabled = isEnabled;
+    attrs.isEditable = isEditable;
+    attrs.isReorderable = isReorderable;
+    attrs.isDeletable = isDeletable;
     attrs.isSelected = isSelected;
     attrs.isGroupView = isGroupView;
     attrs.layerId = this.layerIdFor(idx);
@@ -3289,6 +3316,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     itemView.set('content', attrs.content);
     itemView.set('contentIndex', attrs.contentIndex);
     itemView.set('isEnabled', attrs.isEnabled);
+    itemView.set('isEditable', attrs.isEditable);
+    itemView.set('isReorderable', attrs.isReorderable);
+    itemView.set('isDeletable', attrs.isDeletable);
     itemView.set('isSelected', attrs.isSelected);
     itemView.set('layerId', attrs.layerId);
     itemView.set('layout', attrs.layout);
