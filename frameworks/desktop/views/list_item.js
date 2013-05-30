@@ -722,6 +722,10 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     original();
   }.enhance(),
 
+  /** SC.ListItemView is not able to update itself in place at this time. */
+  // TODO: add update: support.
+  isReusable: false,
+
   /** @private
     Fills the passed html-array with strings that can be joined to form the
     innerHTML of the receiver element.  Also populates an array of classNames
