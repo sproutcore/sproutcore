@@ -32,7 +32,7 @@ sc_require('render_delegates/render_delegate');
           property. One of
             - SC.SCALE_NONE
             - SC.FILL
-            - SC.FILL_PROPORTIONALLY
+            - SC.BEST_FILL
             - SC.BEST_FIT
             - SC.BEST_FIT_DOWN_ONLY
             - percentage {Number}

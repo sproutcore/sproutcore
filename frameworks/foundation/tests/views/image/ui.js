@@ -187,15 +187,15 @@
         }
 
         SC.run(function () {
-          imageView.set('scale', SC.FILL_PROPORTIONALLY);
+          imageView.set('scale', SC.BEST_FILL);
         });
 
         innerFrame = imageView.get('innerFrame');
-        equals(innerFrame.width, 588, "SC.FILL_PROPORTIONALLY width");
-        equals(innerFrame.height, 130, "SC.FILL_PROPORTIONALLY height");
+        equals(innerFrame.width, 588, "SC.BEST_FILL width");
+        equals(innerFrame.height, 130, "SC.BEST_FILL height");
         if (testImg) {
-          equals(imgEl.css('width'), "588px", "SC.FILL_PROPORTIONALLY width");
-          equals(imgEl.css('height'), "130px", "SC.FILL_PROPORTIONALLY height");
+          equals(imgEl.css('width'), "588px", "SC.BEST_FILL width");
+          equals(imgEl.css('height'), "130px", "SC.BEST_FILL height");
         }
 
         SC.run(function () {
