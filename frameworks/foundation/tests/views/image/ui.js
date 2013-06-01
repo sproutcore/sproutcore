@@ -8,7 +8,7 @@
 /*global module test ok equals stop */
 
 (function () {
-  var logoURL = sc_static('images/sproutcore.png');
+  var logoURL = sc_static('images/sproutcore-256.png');
 
   var pane = SC.ControlTestPane.design()
     .add("image_loaded", SC.ImageView, {
