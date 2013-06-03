@@ -570,8 +570,7 @@ SC.CoreView.reopen(
     this.set('layerNeedsUpdate', true);
 
     if (this.get('_isRendered')) {
-      if (isVisibleInWindow ||
-        force) {
+      if (isVisibleInWindow || force) {
         // Only in the visible states do we allow updates without being forced.
         this._executeDoUpdateContent();
       } else {
@@ -1041,6 +1040,9 @@ SC.CoreView.reopen(
 
   /** @private Routes according to parent did append. */
   _parentDidAppendToDocument: function () {
+    // Run any queued updates.
+    this._executeQueuedUpdates();
+
     this._notifyAttached();
     this._routeOnAttached();
   },
