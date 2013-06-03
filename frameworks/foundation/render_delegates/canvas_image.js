@@ -57,15 +57,23 @@ SC.BaseTheme.canvasImageRenderDelegate = SC.RenderDelegate.create({
     We don't have an element yet, so we do the minimal necessary setup
     here.
   */
-  render: function(dataSource, context) {
+  render: function (dataSource, context) {
     var width = dataSource.get('width') || 0,
-        height = dataSource.get('height') || 0;
+        height = dataSource.get('height') || 0,
+        type = dataSource.get('type') || SC.IMAGE_TYPE_URL,
+        value = dataSource.get('value');
+
+    // Support for CSS sprites (TODO: Remove this)
+    if (value && type === SC.IMAGE_TYPE_CSS_CLASS) {
+      context.addClass(value);
+      this._last_class = value;
+    }
 
     context.setAttr('width', width);
     context.setAttr('height', height);
   },
 
-  update: function(dataSource, jquery) {
+  update: function (dataSource, jquery) {
     var elem = jquery[0],
         image = dataSource.get('image'),
         frame = dataSource.get('frame'),
@@ -74,38 +82,54 @@ SC.BaseTheme.canvasImageRenderDelegate = SC.RenderDelegate.create({
         innerFrame = dataSource.get('innerFrame'),
         backgroundColor = dataSource.get('backgroundColor'),
         renderState = dataSource.get('renderState'),
-        context;
+        context,
+        type = dataSource.get('type') || SC.IMAGE_TYPE_URL,
+        value = dataSource.get('value');
 
-    // We only care about specific values, check specifically for what matters
-    var innerFrameDidChange = ![innerFrame.x, innerFrame.y, innerFrame.width, innerFrame.height].isEqual(renderState._lastInnerFrameValues),
-        elemSizeDidChange = ![elem.width, elem.height].isEqual(renderState._lastElemSizeValues),
-        backgroundDidChange = dataSource.didChangeFor('canvasImageRenderDelegate', 'backgroundColor'),
-        imageDidChange = dataSource.didChangeFor('canvasImageRenderDelegate', 'image') || (image && image.complete) !== renderState._lastImageComplete;
+    // Support for CSS sprites (TODO: Remove this)
+    if (value !== this._last_class) jquery.removeClass(this._last_class);
+    if (value && type === SC.IMAGE_TYPE_CSS_CLASS) {
+      jquery.addClass(value);
+      this._last_class = value;
 
-    if (elemSizeDidChange || innerFrameDidChange || backgroundDidChange || imageDidChange) {
-
+      // Clear it in case it was a URL previously
       if (elem && elem.getContext) {
-        elem.height = frameHeight;
-        elem.width = frameWidth;
-
         context = elem.getContext('2d');
-
         context.clearRect(0, 0, frameWidth, frameHeight);
-
-        if (backgroundColor) {
-          context.fillStyle = backgroundColor;
-          context.fillRect(0, 0, frameWidth, frameHeight);
-        }
-
-        if (image && image.complete) {
-          context.drawImage(image, Math.floor(innerFrame.x), Math.floor(innerFrame.y), Math.floor(innerFrame.width), Math.floor(innerFrame.height));
-        }
       }
+    } else {
 
-      // Update caches
-      renderState._lastInnerFrameValues = [innerFrame.x, innerFrame.y, innerFrame.width, innerFrame.height];
-      renderState._lastElemSizeValues = [elem.width, elem.height];
-      renderState._lastImageComplete = image && image.complete;
+      // We only care about specific values, check specifically for what matters
+      var innerFrameDidChange = ![innerFrame.x, innerFrame.y, innerFrame.width, innerFrame.height].isEqual(renderState._lastInnerFrameValues),
+          elemSizeDidChange = ![elem.width, elem.height].isEqual(renderState._lastElemSizeValues),
+          backgroundDidChange = dataSource.didChangeFor('canvasImageRenderDelegate', 'backgroundColor'),
+          imageDidChange = dataSource.didChangeFor('canvasImageRenderDelegate', 'image') || (image && image.complete) !== renderState._lastImageComplete;
+
+      if (elemSizeDidChange || innerFrameDidChange || backgroundDidChange || imageDidChange) {
+
+        if (elem && elem.getContext) {
+          elem.height = frameHeight;
+          elem.width = frameWidth;
+
+          context = elem.getContext('2d');
+
+          context.clearRect(0, 0, frameWidth, frameHeight);
+
+          if (backgroundColor) {
+            context.fillStyle = backgroundColor;
+            context.fillRect(0, 0, frameWidth, frameHeight);
+          }
+
+          if (image && image.complete) {
+            context.drawImage(image, Math.floor(innerFrame.x), Math.floor(innerFrame.y), Math.floor(innerFrame.width), Math.floor(innerFrame.height));
+          }
+        }
+
+        // Update caches
+        renderState._lastInnerFrameValues = [innerFrame.x, innerFrame.y, innerFrame.width, innerFrame.height];
+        renderState._lastElemSizeValues = [elem.width, elem.height];
+        renderState._lastImageComplete = image && image.complete;
+      }
     }
   }
 

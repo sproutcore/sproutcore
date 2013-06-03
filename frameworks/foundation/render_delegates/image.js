@@ -36,9 +36,9 @@ sc_require('render_delegates/render_delegate');
 SC.BaseTheme.imageRenderDelegate = SC.RenderDelegate.create({
   className: 'image',
 
-  render: function(dataSource, context) {
+  render: function (dataSource, context) {
     var image = dataSource.get('image'),
-        imageValue = dataSource.get('imageValue'),
+        value = dataSource.get('value'),
         type = dataSource.get('type') || SC.IMAGE_TYPE_URL,
         toolTip = dataSource.get('toolTip');
 
@@ -48,9 +48,10 @@ SC.BaseTheme.imageRenderDelegate = SC.RenderDelegate.create({
       context = context.begin('img');
       context.setAttr('src', image.src);
 
-      if (imageValue && type === SC.IMAGE_TYPE_CSS_CLASS) {
-        context.addClass(imageValue);
-        this._last_class = imageValue;
+      // Support for CSS sprites (TODO: Remove this)
+      if (value && type === SC.IMAGE_TYPE_CSS_CLASS) {
+        context.addClass(value);
+        this._last_class = value;
       }
 
       if (toolTip) {
@@ -65,18 +66,24 @@ SC.BaseTheme.imageRenderDelegate = SC.RenderDelegate.create({
     }
   },
 
-  update: function(dataSource, jquery) {
+  update: function (dataSource, jquery) {
     var image = dataSource.get('image'),
-        imageValue = dataSource.get('imageValue'),
+        value = dataSource.get('value'),
+        type = dataSource.get('type') || SC.IMAGE_TYPE_URL,
         toolTip = dataSource.get('toolTip');
 
     jquery = jquery.find('img');
-    jquery.attr('src', image.src);
 
-    if (imageValue !== this._last_class) jquery.removeClass(this._last_class);
-    if (imageValue) {
-      jquery.addClass(imageValue);
-      this._last_class = imageValue;
+    // Support for CSS sprites (TODO: Remove this)
+    if (value !== this._last_class) jquery.removeClass(this._last_class);
+    if (value && type === SC.IMAGE_TYPE_CSS_CLASS) {
+      jquery.addClass(value);
+      this._last_class = value;
+
+      // Clear it in case it was set previously.
+      jquery.attr('src', '');
+    } else {
+      jquery.attr('src', image.src);
     }
 
     if (toolTip) {
@@ -88,7 +95,7 @@ SC.BaseTheme.imageRenderDelegate = SC.RenderDelegate.create({
     jquery.css(this.imageStyles(dataSource));
   },
 
-  imageStyles: function(dataSource) {
+  imageStyles: function (dataSource) {
     var innerFrame = dataSource.get('innerFrame');
     return {
       'position': 'absolute',
