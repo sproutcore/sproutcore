@@ -250,6 +250,11 @@ SC.NestedStore = SC.Store.extend(
     return parentStore ? parentStore.readQueryError(query) : null;
   },
 
+  /** @private - adapt for nested store */
+  chainAutonomousStore: function(attrs, newStoreClass) {
+    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+  },
+
   // ..........................................................
   // CORE ATTRIBUTE API
   //
@@ -541,22 +546,34 @@ SC.NestedStore = SC.Store.extend(
 
   /** @private - adapt for nested store */
   commitRecords: function(recordTypes, ids, storeKeys) {
-    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+    if( this.get( "dataSource" ) )
+      return sc_super();
+    else
+      throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
   },
 
   /** @private - adapt for nested store */
   commitRecord: function(recordType, id, storeKey) {
-    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+    if( this.get( "dataSource" ) )
+      return sc_super();
+    else
+      throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
   },
 
   /** @private - adapt for nested store */
   cancelRecords: function(recordTypes, ids, storeKeys) {
-    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+    if( this.get( "dataSource" ) )
+      return sc_super();
+    else
+      throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
   },
 
   /** @private - adapt for nested store */
   cancelRecord: function(recordType, id, storeKey) {
-    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+    if( this.get( "dataSource" ) )
+      return sc_super();
+    else
+      throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
   },
 
   // ..........................................................
@@ -566,22 +583,34 @@ SC.NestedStore = SC.Store.extend(
 
   /** @private - adapt for nested store */
   dataSourceDidCancel: function(storeKey) {
-    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+    if( this.get( "dataSource" ) )
+      return sc_super();
+    else
+      throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
   },
 
   /** @private - adapt for nested store */
   dataSourceDidComplete: function(storeKey, dataHash, newId) {
-    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+    if( this.get( "dataSource" ) )
+      return sc_super();
+    else
+      throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
   },
 
   /** @private - adapt for nested store */
   dataSourceDidDestroy: function(storeKey) {
-    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+    if( this.get( "dataSource" ) )
+      return sc_super();
+    else
+      throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
   },
 
   /** @private - adapt for nested store */
   dataSourceDidError: function(storeKey, error) {
-    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+    if( this.get( "dataSource" ) )
+      return sc_super();
+    else
+      throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
   },
 
   // ..........................................................
@@ -590,17 +619,26 @@ SC.NestedStore = SC.Store.extend(
 
   /** @private - adapt for nested store */
   pushRetrieve: function(recordType, id, dataHash, storeKey) {
-    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+    if( this.get( "dataSource" ) )
+      return sc_super();
+    else
+      throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
   },
 
   /** @private - adapt for nested store */
   pushDestroy: function(recordType, id, storeKey) {
-    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+    if( this.get( "dataSource" ) )
+      return sc_super();
+    else
+      throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
   },
 
   /** @private - adapt for nested store */
   pushError: function(recordType, id, error, storeKey) {
-    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+    if( this.get( "dataSource" ) )
+      return sc_super();
+    else
+      throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
   }
 
 }) ;
