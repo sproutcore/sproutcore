@@ -18,6 +18,8 @@
 SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
   /** @scope SC.ChildArray.prototype */ {
 
+  isChildArray: true, // walk like a duck...
+
   /**
     If set, it is the default record `recordType`
 
@@ -27,22 +29,21 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
   defaultRecordType: null,
 
   /**
-    If set, the parent record will be notified whenever the array changes so that
-    it can change its own state
+    If this array changes, the parentObject will be notified in order to change its own state.
+    Always set.
 
     @default null
     @type {SC.Record}
   */
-  record: null,
+  parentObject: null,
 
   /**
-    If set will be used by the many array to get an editable version of the
-    `storeId`s from the owner.
+    The attribute on the parent this array represents
 
     @default null
     @type String
   */
-  propertyName: null,
+  parentAttribute: null,
 
   /**
     Actual references to the hashes
@@ -60,8 +61,8 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @property
   */
   store: function() {
-    return this.getPath('record.store');
-  }.property('record').cacheable(),
+    return this.getPath('parentObject.store');
+  }.property('parentObject').cacheable(),
 
   /**
     The storeKey for the parent record of this many array.  Editing this
@@ -71,8 +72,8 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @property
   */
   storeKey: function() {
-    return this.getPath('record.storeKey');
-  }.property('record').cacheable(),
+    return this.getPath('parentObject.storeKey');
+  }.property('parentObject').cacheable(),
 
   /**
     Returns the storeIds in read only mode.  Avoids modifying the record
@@ -82,7 +83,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @property
   */
   readOnlyChildren: function() {
-    return this.get('record').readAttribute(this.get('propertyName'));
+    return this.get('parentObject').readAttribute(this.get('parentAttribute'));
   }.property(),
 
   /**
@@ -93,18 +94,114 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @property
   */
   editableChildren: function() {
-    var store    = this.get('store'),
-        storeKey = this.get('storeKey'),
-        pname    = this.get('propertyName'),
-        ret, hash;
+    var parent = this.get('parentObject'),
+        parentAttr = this.get('parentAttribute'),
+        ret;
 
-    ret = store.readEditableProperty(storeKey, pname);
-    if (!ret) {
-      hash = store.readEditableDataHash(storeKey);
-      ret = hash[pname] = [];
-    }
+    ret = parent.readEditableAttribute(parentAttr);
+    if(!ret) ret = [];
+    if(ret !== this._prevChildren) this.recordPropertyDidChange();
 
-    return ret ;
+    return ret;
+
+  }.property(),
+
+  /**
+    Convenience method to create a new subrecord.
+
+    @type {SC.Record} Record model
+    @type {hash} hash to create record from
+    @property
+  */
+  createNestedRecord: function(recType,hash){
+    var parent = this.get('parentObject'),
+        pattr  = this.get('parentAttribute'),
+        rec;
+
+    rec = parent.createNestedRecord(recType,hash,pattr,this); // add ourselves as parent
+    // update the cache while we can to prevent materializing of the same record
+    if(this._records){
+      this._records.push(rec);
+    } else this._records = [rec];
+    this.enumerableContentDidChange();
+    return rec;
+  },
+
+   /**
+    Convenience method to create a set of new subrecords. Wraps #createNestedRecord.
+
+    @type {SC.Record}
+    @type {SC.Array} array of hashes to create records from
+    @property
+  */
+
+  createNestedRecords: function(recType,hashes){
+    var parent = this.get('parentObject'),
+        pattr  = this.get('parentAttribute'),
+        recs;
+
+    recs = parent.createNestedRecords(recType,hashes,pattr,this);
+    return recs;
+  },
+
+
+  /**
+   * read the attribute of key on the parent
+   * @param  {String} key
+   * @return {any} property of the parentObjects attributes
+   */
+  readAttribute: function(key){
+    var parent = this.get('parentObject');
+    if(!parent) throw new Error("ChildArray without a parentObject? this is a bug");
+    return parent.readAttribute(key);
+  },
+
+  /**
+   * Internal method for updating the underlying data hash
+   * @param  {Array} keyStack: the stack with keys until now
+   * @param  {any} value: value that needs to be written
+   * @param  {boolean} ignoreDidChange: don't trigger observers
+   * @return {[type]}
+   */
+  _writeAttribute: function(keyStack, value, ignoreDidChange) {
+    var parent = this.get('parentObject');
+    if(!parent) throw new Error("ChildArray without a parent? this is a bug");
+    return parent._writeAttribute(keyStack, value, ignoreDidChange);
+  },
+
+  /**
+   * called whenever a record did change
+   * @param  {String} key
+   * @return {[type]}
+   */
+  recordDidChange: function(key){
+    var parent = this.get('parentObject');
+    if(!parent) throw new Error("ChildArray without a parent? this is a bug");
+    return parent.recordDidChange(key);
+  },
+
+  /**
+   * Returns attributes of the underlying array
+   * @return {Array} with attributes
+   */
+  attributes: function(){
+    var parent = this.get('parentObject'),
+        parentAttr = this.get('parentAttribute'),
+        attrs;
+
+    if(!parent) throw new Error("ChildArray without a parent? this is a bug");
+    attrs = parent.get('attributes');
+    if(attrs) return attrs[parentAttr];
+    else return attrs;
+  }.property(),
+
+  /**
+   * Return the status of the underlying record
+   * @return {Number} enumerated in SC.Record
+   */
+  status: function(){
+    var parent = this.get('parentObject');
+    if(parent) return parent.get('status');
   }.property(),
 
   // ..........................................................
@@ -132,8 +229,8 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
   objectAt: function(idx) {
     var recs      = this._records,
         children = this.get('readOnlyChildren'),
-        hash, ret, pname = this.get('propertyName'),
-        parent = this.get('record');
+        hash, ret, pname = this.get('parentAttribute'),
+        parent = this.get('parentObject');
     var len = children ? children.length : 0;
 
     if (!children) return undefined; // nothing to do
@@ -146,40 +243,45 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     if (!hash) return undefined;
 
     // not in cache, materialize
-    recs[idx] = ret = parent.registerNestedRecord(hash, pname, pname+'.'+idx);
+    recs[idx] = ret = parent.materializeNestedRecord(hash, pname, this);
 
     return ret;
   },
 
   /**
-    Pass through to the underlying array.  The passed in objects must be
-    records, which can be converted to `storeId`s.
+    Pass through to the underlying array.  The passed in objects can be
+    records, which can be converted to `storeId`s, but they can also
+    be simple hashes, which will then be inserted
 
     @param {Number} idx index of the object to replace.
     @param {Number} amt number of records to replace starting at idx.
     @param {Number} recs array with records to replace.
-    @returns {SC.Record} The record if found or undefined.
+    @returns {SC.ChildArray} The current array
 
   */
   replace: function(idx, amt, recs) {
     var children = this.get('editableChildren'),
         len      = recs ? (recs.get ? recs.get('length') : recs.length) : 0,
-        record   = this.get('record'), newRecs,
-        pname    = this.get('propertyName'),
+        record   = this.get('parentObject'), newRecs,
+
+        pname    = this.get('parentAttribute'),
         cr, recordType;
 
     newRecs = this._processRecordsToHashes(recs);
-
-    // notify that the record did change...
-    if (newRecs !== this._prevChildren){
-      this._performRecordPropertyChange(null, false);
+    // calling replace on the children would result in KVO stuff on an attribute hash, and we don't want that
+    if (!recs || recs.length === 0) {
+      children.splice(idx, amt) ;
+    } else {
+      var args = [idx, amt].concat(newRecs) ;
+      children.splice.apply(children,args)
     }
-    children.replace(idx, amt, newRecs);
+
+    // remove item from _records cache, to leave them to be materialized the next time
+    if(this._records) this._records.replace(idx,amt); // we can do replace here, as _records are SC.Record instances
+    record.writeAttribute(pname,children);
+    // notify that the record did change...
     record.recordDidChange(pname);
-
-    // Update the enumerable, [], property (including firstObject and lastObject)
-    this.enumerableContentDidChange(idx, amt, len - amt);
-
+    this.enumerableContentDidChange();
     return this;
   },
 
@@ -194,11 +296,9 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     var store, sk;
     recs = recs || [];
     recs.forEach( function(me, idx){
-      if (me.isNestedRecord){
-        store = me.get('store');
-        sk = me.storeKey;
-        recs[idx] = store.readDataHash(sk);
-      }
+      store = me.get('store');
+      sk = me.storeKey;
+      recs[idx] = store.readDataHash(sk);
     });
 
     return recs;
@@ -217,61 +317,13 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
   // INTERNAL SUPPORT
   //
 
-  /**
+  /** @deprecated
     Invoked whenever the children array changes.  Observes changes.
 
     @param {SC.Array} keys optional
     @returns {SC.ChildArray} itself.
   */
   recordPropertyDidChange: function(keys) {
-    this._performRecordPropertyChange(keys, true);
-    return this;
-  },
-
-  /** @private
-    Invoked when the object is changed from the parent or an outside source
-
-    will cause the entire array to reset
-
-    @param {SC.Array} keys optional
-    @param {Boolean} doReset optional
-    @returns {SC.ChildArray} itself.
-  */
-  _performRecordPropertyChange: function(keys, doReset){
-    if (keys && !keys.contains(this.get('propertyName'))) return this;
-
-    var children = this.get('readOnlyChildren'), oldLen = 0, newLen = 0;
-    var prev = this._prevChildren, f = this._childrenContentDidChange;
-    doReset = SC.none(doReset) ? true : doReset;
-
-    if (children === prev) return this; // nothing to do
-
-    if (prev) {
-      prev.removeArrayObservers({
-        target: this,
-        willChange: this.arrayContentWillChange,
-        didChange: f
-      });
-
-      oldLen = prev.get('length');
-    }
-
-    if (children) {
-      children.addArrayObservers({
-        target: this,
-        willChange: this.arrayContentWillChange,
-        didChange: f
-      });
-
-      newLen = children.get('length');
-    }
-    this._prevChildren = children;
-
-    if (doReset){
-      this.arrayContentWillChange(0, oldLen, newLen);
-      this._childrenContentDidChange(0, oldLen, newLen);
-    }
-
     return this;
   },
 
@@ -287,13 +339,14 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
   */
   _childrenContentDidChange: function(start, removedCount, addedCount) {
     this._records = null ; // clear cache
-    this.arrayContentDidChange(start, removedCount, addedCount);
+    //this.arrayContentDidChange(start, removedCount, addedCount);
+    this.enumerableContentDidChange(); // not sure what would be wise here regarding new changes
   },
 
-  /** @private */
-  init: function() {
-    sc_super();
-    this.recordPropertyDidChange();
-  }
+  // /** @private */
+  // init: function() {
+  //   sc_super();
+  //   this.recordPropertyDidChange();
+  // }
 
 }) ;

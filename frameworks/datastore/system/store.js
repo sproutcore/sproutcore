@@ -147,10 +147,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       newStoreClass = SC.NestedStore;
     }
 
-    // Replicate parent records references
-    attrs.childRecords = this.childRecords ? SC.clone(this.childRecords) : {};
-    attrs.parentRecords = this.parentRecords ? SC.clone(this.parentRecords) : {};
-
     var ret    = newStoreClass.create(attrs),
         nested = this.nestedStores;
 
@@ -269,16 +265,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   queryErrors: null,
 
-  /**
-    A hash of child Records and there immediate parents
-  */
-  childRecords: null,
-
-  /**
-    A hash of parent records with registered children
-  */
-  parentRecords: null,
-
   // ..........................................................
   // CORE ATTRIBUTE API
   //
@@ -393,48 +379,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     if (!editables) editables = this.editables = [];
     editables[storeKey] = 1 ; // use number for dense array support
 
-    var processedPaths={};
-    // Update the child record hashes in place.
-    if (!SC.none(this.parentRecords) ) {
-      var children = this.parentRecords[storeKey] || {},
-        childHash;
-
-      for (var key in children) {
-        if (children.hasOwnProperty(key)) {
-          if (hash) {
-            var childPath = children[key];
-            childPath = childPath.split('.');
-            if (childPath.length > 1) {
-              childHash = hash[childPath[0]][childPath[1]];
-            } else {
-              childHash = hash[childPath[0]];
-            }
-
-            if(!processedPaths[hash[childPath[0]]]){
-                // update data hash: required to push changes beyond the first nesting level
-                this.writeDataHash(key, childHash, status);
-            }
-            if(childPath.length > 1 && ! processedPaths[hash[childPath[0]]]) {
-                // save it so that we don't processed it over and over
-                processedPaths[hash[childPath[0]]]=true;
-                
-                // force fetching of all children records by invoking the children_attribute wrapper code
-                // and then interating the list in an empty loop
-                // Ugly, but there's basically no other way to do it at the moment, other than
-                // leaving this broken as it was before
-                var that=this;
-                this.invokeLast(function(){
-                    that.records[storeKey].get(childPath[0]).forEach(function(it){});    
-                });
-            }
-          } else {
-            this.writeDataHash(key, null, status);
-          }
-        }
-      }
-    }
-
-    return this;
+    return this ;
   },
 
   /**
@@ -535,15 +480,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       storeKey = storeKeys;
     }
 
-    var that = this;
     for(idx=0;idx<len;idx++) {
       if (isArray) storeKey = storeKeys[idx];
       this.revisions[storeKey] = rev;
       this._notifyRecordPropertyChange(storeKey, statusOnly, key);
-
-      this._propagateToChildren(storeKey, function (storeKey) {
-        that.dataHashDidChange(storeKey, null, statusOnly, key);
-      });
     }
 
     return this ;
@@ -744,23 +684,18 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // OK, no locking issues.  So let's just copy them changes.
     // get local reference to values.
     var len = changes.length, i, storeKey, myDataHashes, myStatuses,
-      myEditables, myRevisions, myParentRecords, myChildRecords,
-      chDataHashes, chStatuses, chRevisions, chParentRecords, chChildRecords;
+      myEditables, myRevisions, chDataHashes, chStatuses, chRevisions;
 
     myRevisions     = this.revisions ;
     myDataHashes    = this.dataHashes;
     myStatuses      = this.statuses;
     myEditables     = this.editables ;
-    myParentRecords = this.parentRecords ? this.parentRecords : this.parentRecords ={} ;
-    myChildRecords  = this.childRecords ? this.childRecords : this.childRecords = {} ;
 
     // setup some arrays if needed
     if (!myEditables) myEditables = this.editables = [] ;
     chDataHashes    = nestedStore.dataHashes;
     chRevisions     = nestedStore.revisions ;
     chStatuses      = nestedStore.statuses;
-    chParentRecords = nestedStore.parentRecords || {};
-    chChildRecords  = nestedStore.childRecords || {};
 
     for(i=0;i<len;i++) {
       storeKey = changes[i];
@@ -769,8 +704,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       myDataHashes[storeKey]    = chDataHashes[storeKey];
       myStatuses[storeKey]      = chStatuses[storeKey];
       myRevisions[storeKey]     = chRevisions[storeKey];
-      myParentRecords[storeKey] = chParentRecords[storeKey];
-      myChildRecords[storeKey]  = chChildRecords[storeKey];
 
       myEditables[storeKey] = 0 ; // always make dataHash no longer editable
 
@@ -1304,12 +1237,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     this.removeDataHash(storeKey, status);
     this.dataHashDidChange(storeKey);
 
-    // Handle all the child Records
-    var that = this;
-    this._propagateToChildren(storeKey, function (storeKey) {
-      that.unloadRecord(null, null, storeKey, newStatus);
-    });
-
     return this ;
   },
 
@@ -1416,11 +1343,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       this.invokeLast(this.commitRecords);
     }
 
-    var that = this;
-    this._propagateToChildren(storeKey, function (storeKey){
-      that.destroyRecord(null, null, storeKey);
-    });
-
     return this ;
   },
 
@@ -1463,101 +1385,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       }
     }
     return this ;
-  },
-
-  /**
-    register a Child Record to the parent
-  */
-  registerChildToParent: function (parentStoreKey, childStoreKey, path) {
-    var parentRecords, childRecords, oldPk, oldChildren, pkRef;
-
-    // Check the child to see if it has a parent
-    childRecords = this.childRecords || {};
-    parentRecords = this.parentRecords || {};
-
-    // first rid of the old parent
-    oldPk = childRecords[childStoreKey];
-    if (oldPk) {
-      oldChildren = parentRecords[oldPk];
-      delete oldChildren[childStoreKey];
-      // this.recordDidChange(null, null, oldPk, key);
-    }
-    pkRef = parentRecords[parentStoreKey] || {};
-    pkRef[childStoreKey] = path || YES;
-    parentRecords[parentStoreKey] = pkRef;
-    childRecords[childStoreKey] = parentStoreKey;
-
-    // sync the status of the child
-    this.writeStatus(childStoreKey, this.statuses[parentStoreKey]);
-    this.childRecords = childRecords;
-    this.parentRecords = parentRecords;
-  },
-
-  /**
-    Unregister the Child Record from its Parent.  This will cause the Child
-    Record to be removed from the store.
-  */
-  unregisterChildFromParent: function (childStoreKey) {
-    var childRecords, oldPk;
-
-    // Check the child to see if it has a parent
-    childRecords = this.childRecords;
-
-    // Remove the parent's connection to the child.  This doesn't remove the
-    // parent store key from the cache of parent store keys if the parent
-    // no longer has any other registered children, because the amount of effort
-    // to determine that would not be worth the miniscule memory savings.
-    oldPk = childRecords[childStoreKey];
-    if (oldPk) {
-      delete this.parentRecords[oldPk][childStoreKey];
-    }
-
-    // Remove the child.
-    // 1. from the cache of data hashes
-    // 2. from the cache of record objects
-    // 3. from the cache of child record store keys
-    this.removeDataHash(childStoreKey);
-    delete this.records[childStoreKey];
-    delete childRecords[childStoreKey];
-  },
-
-  /**
-    materialize the parent when passing in a store key for the child
-  */
-  materializeParentRecord: function (childStoreKey){
-    var pk, crs;
-    if (SC.none(childStoreKey)) return null;
-    crs = this.childRecords;
-    pk = crs ? this.childRecords[childStoreKey] : null ;
-    if (SC.none(pk)) return null;
-
-    return this.materializeRecord(pk);
-  },
-
-  /**
-    function for retrieving a parent record key
-
-		@param {Number} storeKey The store key of the parent
-  */
-  parentStoreKeyExists: function (storeKey){
-    if (SC.none(storeKey)) return ;
-    var crs = this.childRecords || {};
-    return crs[storeKey];
-  },
-
-  /**
-    function that propagates a function call to all children
-  */
-  _propagateToChildren: function (storeKey, func) {
-    // Handle all the child Records
-    if ( SC.none(this.parentRecords) ) return;
-    var children = this.parentRecords[storeKey] || {};
-    if (SC.none(func)) return;
-    for (var key in children) {
-      // for .. in makes the key a String, but be sure to pass a Number to the
-      // function.
-      if (children.hasOwnProperty(key)) func(parseInt(key, 10));
-    }
   },
 
   /**
