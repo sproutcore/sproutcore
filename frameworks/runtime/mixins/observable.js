@@ -758,7 +758,7 @@ SC.Observable = /** @scope SC.Observable.prototype */{
 
         // Save in set for chain observers.
         this._kvo_for(SC.keyFor('_kvo_chains', key)).push(chain);
-
+        this._kvo_for('_kvo_observed_chain_keys', SC.CoreSet).add(key);
       // Create observers if needed...
       } else {
 
@@ -824,6 +824,9 @@ SC.Observable = /** @scope SC.Observable.prototype */{
             }
           }
           chains.removeAt(toRemove);
+          if (chains.length === 0) {
+            this._kvo_for('_kvo_observed_chain_keys', SC.CoreSet).remove(key);
+          }
           toRemove = null;
         }
 
@@ -953,7 +956,8 @@ SC.Observable = /** @scope SC.Observable.prototype */{
       if (!this._observableInited) return this;
 
       var loc, keys, key, len, observer, propertyPaths, propertyPathsLength,
-          ploc, path, chainDependents, chain;
+          ploc, path, chainDependents, chain, j, jlen, kvoKey, observers,
+          observerSet, chains;
 
       // Destroy bindings
       this.bindings.invoke('destroy');
@@ -974,6 +978,36 @@ SC.Observable = /** @scope SC.Observable.prototype */{
       }
       delete this._observers;
 
+      // Loop through observers and remove them
+      if (this._kvo_observed_keys) {
+        if (keys = this._kvo_for('_kvo_observed_keys')) {
+          for (loc = keys.length - 1; loc >= 0; --loc) {
+            key = keys[loc];
+            kvoKey = SC.keyFor('_kvo_observers', key);
+            if (this[kvoKey]) {
+              observerSet = this._kvo_for(kvoKey);
+              if (observerSet) {
+                observers = observerSet.getMembers();
+                for (j = 0, jlen = observers.length; j < jlen; ++j) {
+                  observer = observers[j];
+                  if (observer) {
+                    this.removeObserver(key, observer[0], observer[1]);
+                  }
+                }
+              }
+            } else {
+              kvoKey = SC.keyFor('_kvo_local', key);
+              if (this[kvoKey]) {
+                observerSet = this._kvo_for(kvoKey);
+                if (observerSet) {
+                  observerSet.remove(key);
+                }
+              }
+            }
+          }
+        }
+      }
+
       // Deactivate property chains
       if (chainDependents = this._kvo_chain_dependents) {
         for (loc = 0, len = chainDependents.length; loc < len; ++loc) {
@@ -982,6 +1016,27 @@ SC.Observable = /** @scope SC.Observable.prototype */{
         }
       }
       delete this._kvo_chain_dependents;
+
+      // Destroy outstanding property chains
+      if (this._kvo_observed_chain_keys) {
+        if (keys = this._kvo_for('_kvo_observed_chain_keys')) {
+          for (loc = keys.length - 1; loc >= 0; --loc) {
+            key = keys[loc];
+            kvoKey = SC.keyFor('_kvo_chains', key);
+            if (this[kvoKey]) {
+              chains = this._kvo_for(kvoKey);
+              if (chains) {
+                for (j = chains.length - 1; j >= 0; j = Math.min(j, chains.length) - 1) {
+                  chain = chains[j];
+                  if (chain) {
+                    this.removeObserver(key, chain.masterTarget, chain.masterMethod);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
 
       return this;
     },
