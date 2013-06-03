@@ -168,9 +168,11 @@ SC.InnerFrame = {
         result.y = destHeight - sourceHeight;
         break;
       default: // SC.ALIGN_CENTER || SC.ALIGN_MIDDLE
+        //@if(debug)
         if (align !== SC.ALIGN_CENTER && align !== SC.ALIGN_MIDDLE) {
           SC.Logger.warn("SC.InnerFrame: The align '%@' was not understood.  Align must be one of SC.ALIGN_CENTER/SC.ALIGN_MIDDLE, SC.ALIGN_LEFT, SC.ALIGN_RIGHT, SC.ALIGN_TOP, SC.ALIGN_BOTTOM, SC.ALIGN_TOP_LEFT, SC.ALIGN_TOP_RIGHT, SC.ALIGN_BOTTOM_LEFT or SC.ALIGN_BOTTOM_RIGHT.".fmt(align));
         }
+        //@endif
         result.x = (destWidth / 2) - (sourceWidth / 2);
         result.y = (destHeight / 2) - (sourceHeight / 2);
     }
