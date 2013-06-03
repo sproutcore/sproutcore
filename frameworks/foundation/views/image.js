@@ -272,21 +272,20 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
       this.replaceLayer();
     }
 
-    if (!SC.empty(value)) {
+    // Reset the backing image object every time.
+    this.set('image', SC.BLANK_IMAGE);
 
-      if (type !== SC.IMAGE_TYPE_CSS_CLASS) {
-        // While the new image is loading use SC.BLANK_IMAGE as a placeholder
-        this.set('image', SC.BLANK_IMAGE);
-        this.set('status', SC.IMAGE_STATE_LOADING);
+    if (type == SC.IMAGE_TYPE_URL) {
+      // Load the image.
+      this.set('status', SC.IMAGE_STATE_LOADING);
 
-        // order: image cache, normal load
-        if (!this._loadImageUsingCache()) {
-          this._loadImage();
-        }
+      // order: image cache, normal load
+      if (!this._loadImageUsingCache()) {
+        this._loadImage();
       }
     }
 
-    // We need to track the type so that we can recreate the layer if necessary.
+    // We need to track the type so that we can replace the layer if necessary.
     this._cachedType = type;
   }.observes('value'),
 
