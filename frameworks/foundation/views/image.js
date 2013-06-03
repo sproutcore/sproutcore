@@ -264,13 +264,7 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
   */
   _valueDidChange: function () {
     var value = this.get('value'),
-      cachedType = this._cachedType || SC.IMAGE_TYPE_NONE,
       type = this.get('type');
-
-    // If the type of image has changed, we need to recreate the layer.
-    if (type !== cachedType && this.get('_isRendered')) {
-      this.replaceLayer();
-    }
 
     // Reset the backing image object every time.
     this.set('image', SC.BLANK_IMAGE);
@@ -284,9 +278,6 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
         this._loadImage();
       }
     }
-
-    // We need to track the type so that we can replace the layer if necessary.
-    this._cachedType = type;
   }.observes('value'),
 
   /** @private
