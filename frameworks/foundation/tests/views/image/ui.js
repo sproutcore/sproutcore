@@ -8,11 +8,12 @@
 /*global module test ok equals stop */
 
 (function () {
-  var logoURL = sc_static('images/sproutcore-256.png');
+  var logoURL = sc_static('test-image.png');
 
   var pane = SC.ControlTestPane.design()
     .add("image_loaded", SC.ImageView, {
-      value: logoURL, layout : { width: 200, height: 300 },
+      value: logoURL,
+      layout : { width: 200, height: 300 },
       useImageQueue: NO,
       useCanvas: NO
     })
@@ -26,12 +27,18 @@
       useCanvas: YES,
       value: logoURL
     })
+    .add('canvas_not_loaded', SC.ImageView, {
+      layout: { width: 200, height: 300 },
+      useCanvas: YES
+    })
     .add("image_not_loaded", SC.ImageView, {
-      value: null, layout : { width: 200, height: 300 },
+      value: null,
+      layout : { width: 200, height: 300 },
       useCanvas: NO
     })
     .add("empty_image", SC.ImageView, {
-      value: null, layout : { width: 200, height: 300 }
+      value: null,
+      layout : { width: 200, height: 300 }
     })
     .add('image_holder', SC.View, {
       layout: { width: 200, height: 200 }
@@ -223,16 +230,19 @@
         }
 
         SC.run(function () {
-          imageView.set('layout', { top: 0, left: 0, width: 147, height: 90 });
+          if (!imageView.useStaticLayout) {
+            imageView.set('layout', { top: 0, left: 0, width: 147, height: 90 });
+
+            innerFrame = imageView.get('innerFrame');
+            equals(innerFrame.width, 147, "SC.BEST_FIT_DOWN_ONLY width (smaller size frame)");
+            equals(innerFrame.height, 33, "SC.BEST_FIT_DOWN_ONLY height (smaller size frame)");
+            if (testImg) {
+              equals(imgEl.css('width'), "147px", "SC.BEST_FIT_DOWN_ONLY width (smaller size frame)");
+              equals(imgEl.css('height'), "33px", "SC.BEST_FIT_DOWN_ONLY height (smaller size frame)");
+            }
+          }
         });
 
-        innerFrame = imageView.get('innerFrame');
-        equals(innerFrame.width, 147, "SC.BEST_FIT_DOWN_ONLY width (smaller size frame)");
-        equals(innerFrame.height, 33, "SC.BEST_FIT_DOWN_ONLY height (smaller size frame)");
-        if (testImg) {
-          equals(imgEl.css('width'), "147px", "SC.BEST_FIT_DOWN_ONLY width (smaller size frame)");
-          equals(imgEl.css('height'), "33px", "SC.BEST_FIT_DOWN_ONLY height (smaller size frame)");
-        }
 
         window.start(); // starts the test runner
       }, 150);
@@ -261,12 +271,18 @@
     var imageHolder = pane.view('image_holder'),
         imageView;
 
-    // The logo is 294x60
+    // The logo is 271x60
     imageView = SC.ImageView.create({
       value: logoURL + "?lastmod=" + Math.round(Math.random() * 100000),
-      layout: { top: 0, left: 0, width: 588, height: 90 },
+      // layout: { top: 0, left: 0, width: 588, height: 90 },
       useCanvas: NO,
-      useStaticLayout: YES
+      useStaticLayout: YES,
+
+      render: function (context) {
+        context.setStyle({ width: 588, height: 90 });
+
+        sc_super();
+      }
     });
 
     testScale(imageView);
@@ -280,7 +296,7 @@
     var imageHolder = pane.view('image_holder'),
         imageView;
 
-    // The logo is 294x60
+    // The logo is 271x60
     imageView = SC.ImageView.create({
       value: logoURL + "?lastmod=" + Math.round(Math.random() * 100000),
       layout: { top: 0, left: 0, width: 588, height: 90 }
@@ -297,11 +313,16 @@
     var imageHolder = pane.view('image_holder'),
         imageView;
 
-    // The logo is 294x60
+    // The logo is 271x60
     imageView = SC.ImageView.create({
       value: logoURL + "?lastmod=" + Math.round(Math.random() * 100000),
-      layout: { top: 0, left: 0, width: 588, height: 90 },
-      useStaticLayout: YES
+      useStaticLayout: YES,
+
+      render: function (context) {
+        context.setStyle({ width: 588, height: 90 });
+
+        sc_super();
+      }
     });
 
     testScale(imageView);
@@ -529,8 +550,41 @@
     ok(!viewElem.hasClass('another-sprite'), "When value removed, element has old class removed");
   });
 
-  test("Changing the type of image view updates the layer appropriately", function () {
-    var view = pane.view('empty_image'),
+  test("Changing the type of image view updates the layer appropriately (with canvas)", function () {
+    var view = pane.view('canvas_not_loaded'),
+      jqEl = view.$(),
+      el = jqEl[0],
+      jqImgEl,
+      imgEl;
+
+    equals(el.innerHTML, '', "The empty image should have no inner HTML.");
+    equals(el.tagName, 'CANVAS', "The empty image should be a CANVAS");
+
+    // Set a sprite value.
+    SC.run(function () {
+      view.set('value', 'sprite-class');
+    });
+
+    jqEl = view.$();
+
+    ok(jqEl.hasClass('sprite-class'), "The sprite image should have sprite-class class.");
+    equals(el.innerHTML, '', "The sprite image should have no inner HTML.");
+
+    // Set a URL value.
+    SC.run(function () {
+      view.set('value', logoURL);
+    });
+
+    jqEl = view.$();
+    el = jqEl[0];
+
+    ok(!jqEl.hasClass('sprite-class'), "The url image should no longer have sprite-class class.");
+    equals(el.innerHTML, '', "The url image should have no inner HTML.");
+    equals(el.tagName, 'CANVAS', "The url image should be a CANVAS");
+  });
+
+  test("Changing the type of image view updates the layer appropriately (without canvas)", function () {
+    var view = pane.view('image_not_loaded'),
       jqEl = view.$(),
       el = jqEl[0],
       jqImgEl,
@@ -544,23 +598,20 @@
       view.set('value', 'sprite-class');
     });
 
-    jqEl = view.$();
-    el = jqEl[0];
-    jqImgEl = jqEl.find('img');
-    imgEl = jqImgEl[0];
+    jqEl = view.$('img');
 
-    equals(jqImgEl.length, 1, "The div should have an img element now.");
+    ok(jqEl.hasClass('sprite-class'), "The sprite image should have sprite-class class.");
 
     // Set a URL value.
     SC.run(function () {
       view.set('value', logoURL);
     });
 
-    jqEl = view.$();
+    jqEl = view.$('img');
     el = jqEl[0];
 
-    equals(el.innerHTML, '', "The url image should have no inner HTML.");
-    equals(el.tagName, 'CANVAS', "The url image should be a CANVAS");
+    ok(!jqEl.hasClass('sprite-class'), "The url image should no longer have sprite-class class.");
+    equals(el.tagName, 'IMG', "The url image should be a IMG");
   });
 })();
 
