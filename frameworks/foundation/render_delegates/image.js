@@ -38,32 +38,29 @@ SC.BaseTheme.imageRenderDelegate = SC.RenderDelegate.create({
 
   render: function (dataSource, context) {
     var image = dataSource.get('image'),
-        value = dataSource.get('value'),
-        type = dataSource.get('type') || SC.IMAGE_TYPE_URL,
-        toolTip = dataSource.get('toolTip');
+      value = dataSource.get('value'),
+      type = dataSource.get('type') || SC.IMAGE_TYPE_URL,
+      toolTip = dataSource.get('toolTip');
 
-    // Leave the inner content empty while the type is unknown.
-    if (type !== SC.IMAGE_TYPE_NONE) {
-      // Place the img within a div, so that we may scale & offset the img
-      context = context.begin('img');
-      context.setAttr('src', image.src);
+    // Place the img within a div, so that we may scale & offset the img
+    context = context.begin('img');
+    context.setAttr('src', image.src);
 
-      // Support for CSS sprites (TODO: Remove this)
-      if (value && type === SC.IMAGE_TYPE_CSS_CLASS) {
-        context.addClass(value);
-        dataSource.renderState._last_class = value;
-      }
-
-      if (toolTip) {
-        context.setAttr('title', toolTip);
-        context.setAttr('alt', toolTip);
-      }
-
-      // Adjust the layout of the img
-      context.addStyle(this.imageStyles(dataSource));
-
-      context = context.end();
+    // Support for CSS sprites (TODO: Remove this)
+    if (value && type === SC.IMAGE_TYPE_CSS_CLASS) {
+      context.addClass(value);
+      dataSource.renderState._last_class = value;
     }
+
+    if (toolTip) {
+      context.setAttr('title', toolTip);
+      context.setAttr('alt', toolTip);
+    }
+
+    // Adjust the layout of the img
+    context.addStyle(this.imageStyles(dataSource));
+
+    context = context.end();
   },
 
   update: function (dataSource, jquery) {
@@ -75,16 +72,13 @@ SC.BaseTheme.imageRenderDelegate = SC.RenderDelegate.create({
 
     jquery = jquery.find('img');
 
+    jquery.attr('src', image.src);
+
     // Support for CSS sprites (TODO: Remove this)
     if (lastClass) jquery.removeClass(lastClass);
     if (value && type === SC.IMAGE_TYPE_CSS_CLASS) {
       jquery.addClass(value);
       dataSource.renderState._last_class = value;
-
-      // Clear it in case it was set previously.
-      jquery.attr('src', '');
-    } else {
-      jquery.attr('src', image.src);
     }
 
     if (toolTip) {
