@@ -51,7 +51,7 @@ SC.BaseTheme.imageRenderDelegate = SC.RenderDelegate.create({
       // Support for CSS sprites (TODO: Remove this)
       if (value && type === SC.IMAGE_TYPE_CSS_CLASS) {
         context.addClass(value);
-        this._last_class = value;
+        dataSource.renderState._last_class = value;
       }
 
       if (toolTip) {
@@ -68,17 +68,18 @@ SC.BaseTheme.imageRenderDelegate = SC.RenderDelegate.create({
 
   update: function (dataSource, jquery) {
     var image = dataSource.get('image'),
-        value = dataSource.get('value'),
-        type = dataSource.get('type') || SC.IMAGE_TYPE_URL,
-        toolTip = dataSource.get('toolTip');
+      lastClass = dataSource.renderState._last_class,
+      value = dataSource.get('value'),
+      type = dataSource.get('type') || SC.IMAGE_TYPE_URL,
+      toolTip = dataSource.get('toolTip');
 
     jquery = jquery.find('img');
 
     // Support for CSS sprites (TODO: Remove this)
-    if (value !== this._last_class) jquery.removeClass(this._last_class);
+    if (lastClass) jquery.removeClass(lastClass);
     if (value && type === SC.IMAGE_TYPE_CSS_CLASS) {
       jquery.addClass(value);
-      this._last_class = value;
+      dataSource.renderState._last_class = value;
 
       // Clear it in case it was set previously.
       jquery.attr('src', '');
