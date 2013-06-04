@@ -69,9 +69,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
   /**
     @type Array
-    @default ['hasFirstResponder', 'isActive']
+    @default ['isActive']
   */
-  displayProperties: ['hasFirstResponder', 'isActive'],
+  displayProperties: ['isActive'],
 
   /**
     @type String
@@ -873,7 +873,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     // notify all items changed
     this.contentLengthDidChange();
     this.contentRangeDidChange(content, null, '[]', null);
-
   }.observes('content'),
 
   // ..........................................................
@@ -887,18 +886,10 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   _invalidIndexes: NO,
 
   /** @private
-    Because changing isEnabled requires reloading the items, we observe this
-    separately from the displayProperties in order to properly reload as well
-    as update the view itself.
-
-    We also need to reload if isEditable, canEditContent, canReorderContent or
-    canDeleteContent change and since a display update on the collection view is
-    so minor, we just do it here.
+    We need to reload if isEnabled, isEditable, canEditContent, canReorderContent or
+    canDeleteContent change.
   */
   _isEnabledDidChange: function () {
-    // Standard display property behavior.  Call displayDidChange.
-    this.displayDidChange();
-
     // Reload the nowShowing indexes.
     this.reload();
   }.observes('isEnabled', 'isEditable', 'canEditContent', 'canReorderContent', 'canDeleteContent'),
