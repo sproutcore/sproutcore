@@ -341,7 +341,13 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     // if (SC.browser.name === SC.BROWSER.ie && elem.setInterval) elem = window;
 
     var handlers, key, events = SC.data(elem, "sc_events") ;
-    if (!events) return this ; // nothing to do if no events are registered
+    if (!events) {
+      // Ensure that the element has been removed from _elements to prevent leaks
+      delete this._elements[SC.guidFor(elem)];
+
+      // Nothing else to do since no events are registered
+      return this;
+    }
 
     // if no type is provided, remove all types for this element.
     if (eventType === undefined) {
