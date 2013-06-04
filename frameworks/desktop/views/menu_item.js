@@ -93,7 +93,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     if (localize && ret) ret = SC.String.loc(ret);
 
     return ret || '';
-  }.property('content.title').cacheable(),
+  }.property().cacheable(),
 
   /**
     The tooltip from the content property.
@@ -107,7 +107,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     if (localize && ret) ret = SC.String.loc(ret);
 
     return ret || '';
-  }.property('content.toolTip').cacheable(),
+  }.property().cacheable(),
 
   /**
     Whether the item is enabled or not.
@@ -117,7 +117,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
   isEnabled: function () {
     return this.getContentProperty('itemIsEnabledKey') !== NO &&
            this.getContentProperty('itemSeparatorKey') !== YES;
-  }.property('content.isEnabled').cacheable(),
+  }.property().cacheable(),
 
   /**
     The icon from the content property.
@@ -126,7 +126,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
   */
   icon: function () {
     return this.getContentProperty('itemIconKey');
-  }.property('content.icon').cacheable(),
+  }.property().cacheable(),
 
   /**
     YES if this menu item represents a separator, NO otherwise.
@@ -135,7 +135,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
   */
   isSeparator: function () {
     return this.getContentProperty('itemSeparatorKey') === YES;
-  }.property('content.isSeparator').cacheable(),
+  }.property().cacheable(),
 
   /**
     The shortcut from the content property.
@@ -144,7 +144,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
   */
   shortcut: function () {
     return this.getContentProperty('itemShortCutKey');
-  }.property('content.shortcut'),
+  }.property().cacheable(),
 
   /**
     YES if the menu item should include a check next to it.
@@ -153,7 +153,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
   */
   isChecked: function () {
     return this.getContentProperty('itemCheckboxKey');
-  }.property('content.isChecked').cacheable(),
+  }.property().cacheable(),
 
   /**
     This menu item's submenu, if it exists.
@@ -184,7 +184,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     }
 
     return null;
-  }.property('content.subMenu').cacheable(),
+  }.property().cacheable(),
 
   /**
     @type Boolean
