@@ -29,6 +29,10 @@ SC.mixin( /** @scope SC */ {
       - minHeight: a minimum height
       - maxWidth: a maximum width
       - maxHeight: a maximum height
+      - rotateX
+      - rotateY
+      - rotateZ
+      - scale
 
     @param layout {Hash} The layout hash to stringify.
     @returns {String} A string representation of the layout hash.
@@ -40,7 +44,8 @@ SC.mixin( /** @scope SC */ {
     var keys = ['maxHeight', 'maxWidth', 'minHeight', 'minWidth', 'centerY',
                 'centerX', 'width', 'height', 'bottom', 'right', 'top',
                 'left', 'zIndex', 'opacity', 'border', 'borderLeft',
-                'borderRight', 'borderTop', 'borderBottom'],
+                'borderRight', 'borderTop', 'borderBottom', 'rotateX',
+                'rotateY', 'rotateZ', 'scale'],
         keyValues = [], key,
         i = keys.length;
     while (--i >= 0) {
