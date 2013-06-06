@@ -16,73 +16,30 @@ SC.mixin(SC.View,
   SCALE: {
 
     /** @private */
-    setupIn: function (view, options) {
-      // Cache the original scale on the view, so that we can reset properly.
-      view._preScaleInScale = view.get('layout').scale || null;
-
-      view.adjust({ scale: 0 });
+    setupIn: function (view, options, inPlace) {
+      view.adjust({ scale: inPlace ? view.get('layout').scale || 0 : 0 });
     },
 
     /** @private */
-    runIn: function (view, options, context) {
-      var transition = this;
-
-      view.animate('scale', view._preScaleInScale || 1, {
+    runIn: function (view, options, finalLayout, finalFrame) {
+      view.animate('scale', finalLayout.scale || 1, {
         delay: options.delay || 0,
         duration: options.duration || 0.4,
         timing: options.timing || 'ease'
       }, function (data) {
-        this.didTransitionIn(transition, options, context);
+        this.didTransitionIn();
       });
     },
 
     /** @private */
-    cancelIn: function (view, options) {
-      view.cancelAnimation();
-      this.teardownIn(view, options);
-    },
-
-    /** @private */
-    teardownIn: function (view, options) {
-      // Reset the scale to its original value (may be undefined).
-      view.adjust({ scale: view._preScaleInScale });
-
-      // Clean up.
-      delete view._preScaleInScale;
-    },
-
-    /** @private */
-    setupOut: function (view, options) {
-      // Cache the original scale on the view, so that we can reset properly.
-      view._preScaleOutScale = view.get('layout').scale;
-    },
-
-    /** @private */
-    runOut: function (view, options, context) {
-      var transition = this;
-
+    runOut: function (view, options) {
       view.animate('scale', 0, {
         delay: options.delay || 0,
         duration: options.duration || 0.4,
         timing: options.timing || 'ease'
       }, function (data) {
-        this.didTransitionOut(transition, options, context);
+        this.didTransitionOut();
       });
-    },
-
-    /** @private */
-    cancelOut: function (view, options) {
-      view.cancelAnimation();
-      this.teardownOut(view, options);
-    },
-
-    /** @private */
-    teardownOut: function (view, options) {
-      // Reset the scale to its original value (may be undefined).
-      view.adjust({ scale: view._preScaleOutScale || null });
-
-      // Clean up.
-      delete view._preScaleOutScale;
     }
 
   }

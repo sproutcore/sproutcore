@@ -32,7 +32,7 @@ SC.Pane.reopen({
   },
 
   /** @private */
-  _notifyDetaching: function () {
+  _notifyDetached: function () {
     sc_super();
 
     // remove intercept

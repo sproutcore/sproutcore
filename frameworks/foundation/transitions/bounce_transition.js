@@ -16,7 +16,7 @@ SC.mixin(SC.View,
   BOUNCE: {
 
     /** @private */
-    setupIn: function (view, options) {
+    setupIn: function (view, options, inPlace) {
       var parentView = view.get('parentView'),
         parentFrame,
         viewFrame = view.get('borderFrame'),
@@ -25,73 +25,72 @@ SC.mixin(SC.View,
         height,
         width;
 
-      // If there is no parentView, use the window's frame.
-      if (parentView) {
-        parentFrame = parentView.get('borderFrame');
+
+      if (inPlace) {
+        // Move from the current position.
       } else {
-        parentFrame = SC.RootResponder.responder.currentWindowSize;
+        // If there is no parentView, use the window's frame.
+        if (parentView) {
+          parentFrame = parentView.get('borderFrame');
+        } else {
+          parentFrame = SC.RootResponder.responder.currentWindowSize;
+        }
+
+        height = parentFrame.height;
+        width = parentFrame.width;
+
+        switch (options.direction) {
+        case 'left':
+          left = width;
+          break;
+        case 'up':
+          top = height;
+          break;
+        case 'down':
+          top = -height;
+          break;
+        default:
+          left = -width;
+        }
       }
 
-      height = parentFrame.height;
-      width = parentFrame.width;
-
-      switch (options.direction) {
-      case 'left':
-        left = width;
-        break;
-      case 'up':
-        top = height;
-        break;
-      case 'down':
-        top = -height;
-        break;
-      default:
-        left = -width;
-      }
-
-      // Cache the original layout and frame on the view, so that we can reset properly.
-      view._preBounceInFrame = viewFrame;
-      view._preBounceInLayout = SC.clone(view.get('layout'));
-      view.adjust({ bottom: null, left: left || viewFrame.x, right: null, top: top || viewFrame.y, height: viewFrame.height, width: viewFrame.width });
+      view.adjust({ centerX: null, centerY: null, bottom: null, left: left || viewFrame.x, right: null, top: top || viewFrame.y, height: viewFrame.height, width: viewFrame.width });
     },
 
     /** @private */
-    runIn: function (view, options, context) {
+    runIn: function (view, options, finalLayout, finalFrame) {
       var layout = view.get('layout'),
         bounciness = options.bounciness || 0.25,
         bounce,
-        callback,
         duration,
         frames,
         finalValue,
-        value, bounce1, bounce2,
-        viewFrame = view._preBounceInFrame,
-        transition = this;
+        value, bounce1, bounce2;
 
       switch (options.direction) {
       case 'left':
-        finalValue = viewFrame.x;
+        finalValue = finalFrame.x;
         value = { left: finalValue };
         bounce = -(finalValue - layout.left) * bounciness;
         bounce1 = { left: finalValue + bounce };
         bounce2 = { left: finalValue + (bounce * 0.5) };
         break;
       case 'up':
-        finalValue = viewFrame.y;
+        finalValue = finalFrame.y;
         value = { top: finalValue };
         bounce = -(finalValue - layout.top) * bounciness;
         bounce1 = { top: finalValue + bounce };
         bounce2 = { top: finalValue + (bounce * 0.5) };
         break;
       case 'down':
-        finalValue = viewFrame.y;
+        finalValue = finalFrame.y;
         value = { top: finalValue };
         bounce = (layout.top - finalValue) * bounciness;
         bounce1 = { top: finalValue + bounce };
         bounce2 = { top: finalValue + (bounce * 0.5) };
         break;
       default:
-        finalValue = viewFrame.x;
+        finalValue = finalFrame.x;
         value = { left: finalValue };
         bounce = (layout.left - finalValue) * bounciness;
         bounce1 = { left: finalValue + bounce };
@@ -111,28 +110,12 @@ SC.mixin(SC.View,
         { value: value, duration: duration, timing: 'ease-in-out' }
       ];
 
-      callback = function () {
-        view.didTransitionIn(transition, options, context);
+      var callback = function () {
+        view.didTransitionIn();
       };
 
       // Animate through the frames.
       view._animateFrames(frames, callback, options.delay || 0);
-    },
-
-    /** @private */
-    cancelIn: function (view, options) {
-      view.cancelAnimation();
-      this.teardownIn(view, options);
-    },
-
-    /** @private */
-    teardownIn: function (view, options) {
-      // Reset the layout to its original value.
-      view.set('layout', view._preBounceInLayout);
-
-      // Clean up.
-      view._preBounceInLayout = null;
-      view._preBounceInFrame = null;
     },
 
     /** @private */
@@ -143,25 +126,22 @@ SC.mixin(SC.View,
         height = viewFrame.height,
         width = viewFrame.width;
 
-      view._preBounceOutLayout = SC.clone(view.get('layout'));
       view.adjust({ centerX: null, centerY: null, bottom: null, left: left, right: null, top: top, height: height, width: width });
     },
 
     /** @private */
-    runOut: function (view, options, context) {
+    runOut: function (view, options, finalLayout, finalFrame) {
       var bounciness = options.bounciness || 0.25,
         bounce,
         bounceValue,
         bounceValue2,
-        callback,
         duration,
         finalValue,
         layout = view.get('layout'),
         viewFrame = view.get('borderFrame'),
         parentView = view.get('parentView'),
         parentFrame,
-        startValue,
-        transition = this;
+        startValue;
 
       // If there is no parentView, use the window's frame.
       if (parentView) {
@@ -213,28 +193,14 @@ SC.mixin(SC.View,
         { value: finalValue, duration: duration, timing: 'ease-in' }
       ];
 
-      callback = function () {
-        view.didTransitionOut(transition, options, context);
+      var callback = function () {
+        view.didTransitionOut();
       };
 
       // Animate through the frames.
       view._animateFrames(frames, callback, options.delay || 0);
-    },
-
-    /** @private */
-    cancelOut: function (view, options) {
-      view.cancelAnimation();
-      this.teardownOut(view, options);
-    },
-
-    /** @private */
-    teardownOut: function (view, options) {
-      // Convert to previous layout.
-      view.set('layout', view._preBounceOutLayout);
-
-      // Clean up.
-      view._preBounceOutLayout = null;
     }
+
   }
 
 });

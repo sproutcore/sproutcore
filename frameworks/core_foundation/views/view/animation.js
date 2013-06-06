@@ -561,8 +561,23 @@ SC.View.reopen(
 
           if (CSSMatrixClass !== SC.UNSUPPORTED) {
             matrix = new window[CSSMatrixClass](matrix);
-            ret.left = parseInt(matrix.m41, 10);
-            ret.top = parseInt(matrix.m42, 10);
+
+            // Calculate rotateX
+            ret.rotateX = Math.atan2(matrix.m32, matrix.m33) * (180 / Math.PI);
+
+            // Calculate rotateY
+            ret.rotateY = Math.atan2(-matrix.m31, Math.sqrt(Math.pow(matrix.m32, 2) + Math.pow(matrix.m33, 2))) * (180 / Math.PI);
+
+            // Calculate rotateZ
+            ret.rotateZ = -Math.atan2(matrix.m21, matrix.m11) * (180 / Math.PI);
+
+            // Calculate scaleX
+            ret.scale = Math.sqrt(Math.pow(matrix.m11, 2) + Math.pow(matrix.m12, 2) + Math.pow(matrix.m13, 2));
+            if (matrix.m11 < 0) ret.scale = ret.scale * -1;
+
+            // Retrieve translateX & translateY
+            if (matrix.m14 > 0) { ret.left = matrix.m14; }
+            if (matrix.m24 > 0) { ret.top = matrix.m24; }
           } else {
             matrix = matrix.match(/^matrix\((.*)\)$/)[1].split(/,\s*/);
             if (matrix) {

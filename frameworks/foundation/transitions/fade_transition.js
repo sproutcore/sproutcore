@@ -17,73 +17,30 @@ SC.mixin(SC.View,
   FADE: {
 
     /** @private */
-    setupIn: function (view, options) {
-      // Cache the original opacity on the view, so that we can reset properly.
-      view._preFadeInOpacity = view.get('layout').opacity;
-
-      view.adjust({ opacity: 0 });
+    setupIn: function (view, options, inPlace) {
+      view.adjust({ opacity: inPlace ? view.get('layout').opacity || 0 : 0 });
     },
 
     /** @private */
-    runIn: function (view, options, context) {
-      var transition = this;
-
-      view.animate('opacity', 1, {
+    runIn: function (view, options, finalLayout, finalFrame) {
+      view.animate('opacity', finalLayout.opacity || 1, {
         delay: options.delay || 0,
         duration: options.duration || 0.4,
         timing: options.timing || 'ease'
       }, function (data) {
-        this.didTransitionIn(transition, options, context);
+        this.didTransitionIn();
       });
     },
 
     /** @private */
-    cancelIn: function (view, options) {
-      view.cancelAnimation();
-      this.teardownIn(view, options);
-    },
-
-    /** @private */
-    teardownIn: function (view, options) {
-      // Reset the opacity to its original value (may be undefined).
-      view.adjust({ opacity: view._preFadeInOpacity || null });
-
-      // Clean up.
-      delete view._preFadeInOpacity;
-    },
-
-    /** @private */
-    setupOut: function (view, options) {
-      // Cache the original opacity on the view, so that we can reset properly.
-      view._preFadeOutOpacity = view.get('layout').opacity;
-    },
-
-    /** @private */
-    runOut: function (view, options, context) {
-      var transition = this;
-
+    runOut: function (view, options) {
       view.animate('opacity', 0, {
         delay: options.delay || 0,
         duration: options.duration || 0.4,
         timing: options.timing || 'ease'
       }, function (data) {
-        this.didTransitionOut(transition, options, context);
+        this.didTransitionOut();
       });
-    },
-
-    /** @private */
-    cancelOut: function (view, options) {
-      view.cancelAnimation();
-      this.teardownOut(view, options);
-    },
-
-    /** @private */
-    teardownOut: function (view, options) {
-      // Reset the opacity to its original value (may be undefined).
-      view.adjust({ opacity: view._preFadeOutOpacity || null });
-
-      // Clean up.
-      delete view._preFadeOutOpacity;
     }
 
   }

@@ -16,7 +16,7 @@ SC.mixin(SC.View,
   SPRING: {
 
     /** @private */
-    setupIn: function (view, options) {
+    setupIn: function (view, options, inPlace) {
       var parentView = view.get('parentView'),
         parentFrame,
         viewFrame = view.get('borderFrame'),
@@ -25,53 +25,51 @@ SC.mixin(SC.View,
         height,
         width;
 
-      // If there is no parentView, use the window's frame.
-      if (parentView) {
-        parentFrame = parentView.get('borderFrame');
+      if (inPlace) {
+        // Move from the current position.
       } else {
-        parentFrame = SC.RootResponder.responder.currentWindowSize;
+        // If there is no parentView, use the window's frame.
+        if (parentView) {
+          parentFrame = parentView.get('borderFrame');
+        } else {
+          parentFrame = SC.RootResponder.responder.currentWindowSize;
+        }
+
+        height = parentFrame.height;
+        width = parentFrame.width;
+
+        switch (options.direction) {
+        case 'left':
+          left = width;
+          break;
+        case 'up':
+          top = height;
+          break;
+        case 'down':
+          top = -height;
+          break;
+        default:
+          left = -width;
+        }
       }
 
-      height = parentFrame.height;
-      width = parentFrame.width;
-
-      switch (options.direction) {
-      case 'left':
-        left = width;
-        break;
-      case 'up':
-        top = height;
-        break;
-      case 'down':
-        top = -height;
-        break;
-      default:
-        left = -width;
-      }
-
-      // Cache the original layout and frame on the view, so that we can reset properly.
-      view._preSpringInFrame = viewFrame;
-      view._preSpringInLayout = SC.clone(view.get('layout'));
-      view.adjust({ bottom: null, left: left || viewFrame.x, right: null, top: top || viewFrame.y, height: viewFrame.height, width: viewFrame.width });
+      view.adjust({ centerX: null, centerY: null, bottom: null, left: left || viewFrame.x, right: null, top: top || viewFrame.y, height: viewFrame.height, width: viewFrame.width });
     },
 
     /** @private */
-    runIn: function (view, options, context) {
+    runIn: function (view, options, finalLayout, finalFrame) {
       var layout = view.get('layout'),
         springiness = options.springiness || 0.25,
         spring,
-        callback,
         duration,
         frames,
         finalValue,
         spring1, spring2, spring3,
-        value,
-        viewFrame = view._preSpringInFrame,
-        transition = this;
+        value;
 
       switch (options.direction) {
       case 'left':
-        finalValue = viewFrame.x;
+        finalValue = finalFrame.x;
         value = { left: finalValue };
         spring = (layout.left - finalValue) * springiness;
         spring1 = { left: finalValue - spring };
@@ -79,7 +77,7 @@ SC.mixin(SC.View,
         spring3 = { left: finalValue - (spring * 0.25) };
         break;
       case 'up':
-        finalValue = viewFrame.y;
+        finalValue = finalFrame.y;
         value = { top: finalValue };
         spring = (layout.top - finalValue) * springiness;
         spring1 = { top: finalValue - spring };
@@ -87,7 +85,7 @@ SC.mixin(SC.View,
         spring3 = { top: finalValue - (spring * 0.25) };
         break;
       case 'down':
-        finalValue = viewFrame.y;
+        finalValue = finalFrame.y;
         value = { top: finalValue };
         spring = (finalValue - layout.top) * springiness;
         spring1 = { top: finalValue + spring };
@@ -95,7 +93,7 @@ SC.mixin(SC.View,
         spring3 = { top: finalValue + (spring * 0.25) };
         break;
       default:
-        finalValue = viewFrame.x;
+        finalValue = finalFrame.x;
         value = { left: finalValue };
         spring = (finalValue - layout.left) * springiness;
         spring1 = { left: finalValue + spring };
@@ -115,28 +113,12 @@ SC.mixin(SC.View,
         { value: value, duration: duration, timing: 'ease-in-out' }
       ];
 
-      callback = function () {
-        view.didTransitionIn(transition, options, context);
+      var callback = function () {
+        view.didTransitionIn();
       };
 
       // Animate through the frames.
       view._animateFrames(frames, callback, options.delay || 0);
-    },
-
-    /** @private */
-    cancelIn: function (view, options) {
-      view.cancelAnimation();
-      this.teardownIn(view, options);
-    },
-
-    /** @private */
-    teardownIn: function (view, options) {
-      // Reset the layout to its original value.
-      view.set('layout', view._preSpringInLayout);
-
-      // Clean up.
-      view._preSpringInLayout = null;
-      view._preSpringInFrame = null;
     },
 
     /** @private */
@@ -147,14 +129,12 @@ SC.mixin(SC.View,
         height = viewFrame.height,
         width = viewFrame.width;
 
-      view._preSpringOutLayout = SC.clone(view.get('layout'));
       view.adjust({ centerX: null, centerY: null, bottom: null, left: left, right: null, top: top, height: height, width: width });
     },
 
     /** @private */
-    runOut: function (view, options, context) {
+    runOut: function (view, options, finalLayout, finalFrame) {
       var springiness = options.springiness || 0.25,
-        callback,
         duration,
         finalValue,
         layout = view.get('layout'),
@@ -162,8 +142,7 @@ SC.mixin(SC.View,
         parentView = view.get('parentView'),
         parentFrame,
         spring,
-        spring1, spring2,
-        transition = this;
+        spring1, spring2;
 
       // If there is no parentView, use the window's frame.
       if (parentView) {
@@ -209,27 +188,12 @@ SC.mixin(SC.View,
         { value: finalValue, duration: duration, timing: 'ease-in' }
       ];
 
-      callback = function () {
-        view.didTransitionOut(transition, options, context);
+      var callback = function () {
+        view.didTransitionOut();
       };
 
       // Animate through the frames.
       view._animateFrames(frames, callback, options.delay || 0);
-    },
-
-    /** @private */
-    cancelOut: function (view, options) {
-      view.cancelAnimation();
-      this.teardownOut(view, options);
-    },
-
-    /** @private */
-    teardownOut: function (view, options) {
-      // Convert to previous layout.
-      view.set('layout', view._preSpringOutLayout);
-
-      // Clean up.
-      view._preSpringOutLayout = null;
     }
   }
 });

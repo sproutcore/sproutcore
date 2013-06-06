@@ -26,8 +26,9 @@ SC.TransitionProtocol = {
 
     @param {SC.View} view The view being transitioned.
     @param {Object} options Options to modify the transition.  As set by transitionShowOptions or transitionInOptions.
+    @param {Boolean} inPlace Whether the transition should start with the current layout of the view, because a previous transition was cancelled in place.
   */
-  setupIn: function (view, options) {},
+  setupIn: function (view, options, inPlace) {},
 
   /**
     This optional method is called to set up the exit transition (i.e.
@@ -41,8 +42,9 @@ SC.TransitionProtocol = {
 
     @param {SC.View} view The view being transitioned.
     @param {Object} options Options to modify the transition.  As set by transitionHideOptions or transitionOutOptions.
+    @param {Boolean} inPlace Whether the transition should start with the current layout of the view, because a previous transition was cancelled in place.
   */
-  setupOut: function (view, options) {},
+  setupOut: function (view, options, inPlace) {},
 
   /**
     This method is called to transition the view in or visible (i.e.
@@ -54,8 +56,10 @@ SC.TransitionProtocol = {
 
     @param {SC.View} view The view being transitioned.
     @param {Object} options Options to modify the transition.  As set by transitionShowOptions or transitionInOptions.
+    @param {Object} finalLayout The final layout of the view, which may be different than the starting layout of the view if a previous transition was cancelled in place.
+    @param {Object} finalFrame The final frame of the view, which may be different than the starting frame of the view if a previous transition was cancelled in place.
   */
-  runIn: function (view, options, context) {},
+  runIn: function (view, options, finalLayout, finalFrame) {},
 
   /**
     This method is called to transition the view out or hidden (i.e.
@@ -67,55 +71,9 @@ SC.TransitionProtocol = {
 
     @param {SC.View} view The view being transitioned.
     @param {Object} options Options to modify the transition.  As set by transitionHideOptions or transitionOutOptions.
+    @param {Object} finalLayout The final layout of the view, which may be different than the starting layout of the view if a previous transition was cancelled in place.
+    @param {Object} finalFrame The final frame of the view, which may be different than the starting frame of the view if a previous transition was cancelled in place.
   */
-  runOut: function (view, options, context) {},
-
-  /**
-    This optional method is called to cancel an active entrance transition.
-
-    Use this method to stop the animation and immediately clean up the view.
-
-    @param {SC.View} view The view being transitioned.
-    @param {Object} options Options to modify the transition.  As set by transitionShowOptions or transitionInOptions.
-  */
-  cancelIn:  function (view, options) {},
-
-  /**
-    This optional method is called to cancel an active exit transition.
-
-    Use this method to stop the animation and immediately clean up the view.
-
-    @param {SC.View} view The view being transitioned.
-    @param {Object} options Options to modify the transition.  As set by transitionHideOptions or transitionOutOptions.
-  */
-  cancelOut:  function (view, options) {},
-
-  /**
-    This optional method is called to clean up the entrance transition after
-    completion.
-
-    Use this method to adjust the layout view after the transition completes.
-    For example, you may need to adjust the layout from a temporary fixed
-    layout (i.e. { left: 0, top: 0, width: 100, height: 200 }) back to its
-    original flexible layout (i.e. { left: 0, top: 0, right: 0, bottom: 0 }).
-
-    @param {SC.View} view The view being transitioned.
-    @param {Object} options Options to modify the transition.  As set by transitionShowOptions or transitionInOptions.
-  */
-  teardownIn: function (view, options) {},
-
-  /**
-    This optional method is called to clean up the exit transition after
-    completion.
-
-    Use this method to adjust the layout view after the transition completes.
-    For example, you may need to adjust the layout from a temporary fixed
-    layout (i.e. { left: 0, top: 0, width: 100, height: 200 }) back to its
-    original flexible layout (i.e. { left: 0, top: 0, right: 0, bottom: 0 }).
-
-    @param {SC.View} view The view being transitioned.
-    @param {Object} options Options to modify the transition.  As set by transitionHideOptions or transitionOutOptions.
-  */
-  teardownOut: function (view, options) {}
+  runOut: function (view, options, finalLayout, finalFrame) {}
 
 };
