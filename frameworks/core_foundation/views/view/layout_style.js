@@ -7,6 +7,9 @@ sc_require('views/view/animation');
   Map to CSS Transforms
 */
 
+// The scale transform must be last in order to decompose the transformation matrix.
+SC.CSS_TRANSFORM_NAMES = ['rotateX', 'rotateY', 'rotateZ', 'scale'];
+
 SC.CSS_TRANSFORM_MAP = {
   rotate: function () {
     return null;
@@ -87,11 +90,14 @@ SC.View.LayoutStyleCalculator = {
         transforms = [],
         transformMap = SC.CSS_TRANSFORM_MAP;
 
-      // normalizing transforms like rotateX: 5 to rotateX(5deg)
-      for (var transformName in transformMap) {
-        var layoutTransform = layout[transformName];
+      // The order of the transforms is important so that we can decompose them
+      // from the transformation matrix later if necessary.
+      for (var i = 0, len = SC.CSS_TRANSFORM_NAMES.length; i < len; i++) {
+        var transformName = SC.CSS_TRANSFORM_NAMES[i],
+          layoutTransform = layout[transformName];
 
         if (layoutTransform != null) {
+          // normalizing transforms like rotateX: 5 to rotateX(5deg)
           transforms.push(transformMap[transformName](layoutTransform));
         }
       }
@@ -331,9 +337,10 @@ SC.View.LayoutStyleCalculator = {
     // Handle transforms
     if (hasAcceleratedLayer) {
       shouldTranslate = YES;
+
+      // If we're animating other transforms at different speeds, don't use acceleratedLayer
       if (animations && (animations.top || animations.left)) {
         for (key in animations) {
-          // If we're animating other transforms at different speeds, don't use acceleratedLayer
           if (SC.CSS_TRANSFORM_MAP[key] &&
               ((animations.top &&
                 animations.top.duration !== animations[key].duration) ||
