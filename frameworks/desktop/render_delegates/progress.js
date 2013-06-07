@@ -17,7 +17,6 @@ SC.BaseTheme.PROGRESS_OFFSET_RANGE = 42;
 
  - `isIndeterminate`
  - `isRunning`
- - `isEnabled`
  - `isVisibleInWindow`
  - `value`
 
@@ -54,7 +53,6 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
     context.setClass({
       indeterminate:isIndeterminate,
       running:dataSource.get('isRunning') && isIndeterminate,
-      disabled:!dataSource.get('isEnabled'),
       'sc-empty':(value <= 0),
       'sc-complete':(value >= 1 && !isIndeterminate)
     });
@@ -79,7 +77,6 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
       valueNow = dataSource.get('ariaValue'),
       isIndeterminate = dataSource.get('isIndeterminate'),
       isRunning = dataSource.get('isRunning'),
-      isEnabled = dataSource.get('isEnabled'),
       isVisibleInWindow = dataSource.get('isVisibleInWindow');
 
     // make accessible
@@ -97,7 +94,6 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
     jQuery.setClass({
       indeterminate:isIndeterminate,
       running:isRunning && isIndeterminate,
-      disabled:!isEnabled,
       'sc-empty':(value <= 0),
       'sc-complete':(value >= 1 && !isIndeterminate)
     });

@@ -43,10 +43,10 @@ SC.ScrollerView = SC.View.extend(
 
   /**
     @type Array
-    @default 'thumbPosition thumbLength isEnabled controlsHidden'.w()
+    @default 'thumbPosition thumbLength controlsHidden'.w()
     @see SC.View#displayProperties
   */
-  displayProperties: ['thumbPosition', 'thumbLength', 'isEnabled', 'controlsHidden'],
+  displayProperties: ['thumbPosition', 'thumbLength', 'controlsHidden'],
 
   /**
     The WAI-ARIA role for scroller view.
@@ -286,7 +286,6 @@ SC.ScrollerView = SC.View.extend(
     }
 
     // The appearance of the scroller changes if disabled
-    classNames['disabled'] = !this.get('isEnabled');
     // Whether to hide the thumb and buttons
     classNames['controls-hidden'] = this.get('controlsHidden');
 
@@ -933,8 +932,6 @@ SC.TouchScrollerView = SC.ScrollerView.extend(
         break;
     }
 
-    // The appearance of the scroller changes if disabled
-    if (!this.get('isEnabled')) classNames.push('disabled');
     // Whether to hide the thumb and buttons
     if (this.get('controlsHidden')) classNames.push('controls-hidden');
 

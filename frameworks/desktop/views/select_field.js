@@ -27,10 +27,10 @@ SC.SelectFieldView = SC.FieldView.extend(
 
   /**
     @type Array
-    @default ['objects','nameKey','valueKey','isEnabled']
+    @default ['objects','nameKey','valueKey']
     @see SC.View#displayProperties
   */
-  displayProperties: ['objects','nameKey','valueKey','isEnabled'],
+  displayProperties: ['objects','nameKey','valueKey'],
 
   /**
     Reflects the value of `isEnabled`.

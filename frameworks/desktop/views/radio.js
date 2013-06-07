@@ -90,10 +90,10 @@ SC.RadioView = SC.View.extend(SC.Control,
 
   /** 
     @type Array
-    @default ['displayItems', 'isEnabled', 'layoutDirection']
+    @default ['displayItems', 'layoutDirection']
     @see SC.View#displayProperties
   */
-  displayProperties: ['displayItems', 'isEnabled', 'layoutDirection'],
+  displayProperties: ['displayItems', 'layoutDirection'],
   
   /**
     @type String

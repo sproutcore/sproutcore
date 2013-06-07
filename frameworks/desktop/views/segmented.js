@@ -92,12 +92,6 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   value: null,
 
   /**
-    @type Boolean
-    @default YES
-  */
-  isEnabled: YES,
-
-  /**
     If YES, clicking a selected button again will deselect it, setting the
     segmented views value to null.
 

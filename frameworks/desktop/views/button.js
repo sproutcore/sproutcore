@@ -464,10 +464,6 @@ SC.ButtonView = SC.View.extend(SC.Control,
   */
   ariaRole: 'button',
 
-  // display properties that should automatically cause a refresh.
-  // isCancel and isDefault also cause a refresh but this is implemented as
-  // a separate observer (see below)
-
   /**
     The following properties affect how `SC.ButtonView` is rendered, and will
     cause the view to be rerendered if they change.

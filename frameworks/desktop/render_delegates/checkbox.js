@@ -20,7 +20,6 @@
 
    - `isSelected`
    - `isActive`
-   - `isEnabled`
    - `title`
 
   Optional parameters include all parameters for the `labelRenderDelegate`.
@@ -33,14 +32,13 @@ SC.BaseTheme.checkboxRenderDelegate = SC.RenderDelegate.create({
     this.addSizeClassName(dataSource, context);
 
     var theme = dataSource.get('theme'),
-        ariaLabel, labelId;
+      labelId;
 
     // the label id is used so we can set the aria labelledby attribute
     labelId = SC.guidFor(dataSource) + "-label";
 
     var isSelected = dataSource.get('isSelected') || NO;
     var isActive = dataSource.get('isActive');
-    var isDisabled = !dataSource.get('isEnabled');
 
     var ariaIsSelected;
     if (isSelected === SC.MIXED_STATE) ariaIsSelected = 'mixed';
@@ -53,8 +51,7 @@ SC.BaseTheme.checkboxRenderDelegate = SC.RenderDelegate.create({
 
     context.setClass({
       'sel': isSelected,
-      'active': isActive,
-      'disabled': isDisabled
+      'active': isActive
     });
 
     context.push('<span class = "button"></span>');
@@ -71,7 +68,6 @@ SC.BaseTheme.checkboxRenderDelegate = SC.RenderDelegate.create({
 
     var isSelected = dataSource.get('isSelected');
     var isActive = dataSource.get('isActive');
-    var isDisabled = !dataSource.get('isEnabled');
 
     var ariaIsSelected;
     if (isSelected === SC.MIXED_STATE) ariaIsSelected = 'mixed';
@@ -89,8 +85,7 @@ SC.BaseTheme.checkboxRenderDelegate = SC.RenderDelegate.create({
     // add class names
     jquery.setClass({
       'sel': isSelected,
-      'active': isActive,
-      'disabled': isDisabled
+      'active': isActive
     });
   }
 });

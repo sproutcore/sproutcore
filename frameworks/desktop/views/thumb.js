@@ -31,17 +31,6 @@ SC.ThumbView = SC.View.extend(
   */
   classNames: ['sc-thumb-view'],
 
-  /**
-    Enable this thumb view to control its parent split view.
-
-    @type Boolean
-    @default YES
-  */
-  isEnabled: YES,
-
-  /** @private */
-  isEnabledBindingDefault: SC.Binding.bool(),
-
   /** @private */
   render: function(context, firstTime) {
     var splitView = this.get('splitView') ;

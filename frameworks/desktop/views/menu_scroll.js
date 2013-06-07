@@ -152,7 +152,6 @@ SC.MenuScrollerView = SC.ScrollerView.extend(
       var direction = this.get('scrollDown') ? 'arrowDown' : 'arrowUp' ;
       context.push('<span class="scrollArrow '+direction+'">&nbsp;</span>') ;
     } 
-    context.setClass('disabled', !this.get('isEnabled')) ;
   },
   
   /** @private */

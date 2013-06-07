@@ -47,13 +47,6 @@ SC.SegmentView = SC.View.extend(SC.Control,
 
   /**
     @type Boolean
-    @default YES
-    @see SC.Control#isEnabled
-  */
-  isEnabled: YES,
-
-  /**
-    @type Boolean
     @default NO
     @see SC.Control#isActive
   */
@@ -67,16 +60,16 @@ SC.SegmentView = SC.View.extend(SC.Control,
   isSelected: NO,
 
   /**
-    Change the layout direction to make this a vertical segment instead of horizontal ones. 
+    Change the layout direction to make this a vertical segment instead of horizontal ones.
     Possible values:
-    
+
       - SC.LAYOUT_HORIZONTAL
       - SC.LAYOUT_VERTICAL
-    
+
     @type String
     @default SC.LAYOUT_HORIZONTAL
   */
-  layoutDirection: SC.LAYOUT_HORIZONTAL,   
+  layoutDirection: SC.LAYOUT_HORIZONTAL,
 
   /**
     @type String
@@ -110,7 +103,7 @@ SC.SegmentView = SC.View.extend(SC.Control,
 
   // ..........................................................
   // Properties
-  // 
+  //
 
   /**
     @type String
@@ -158,7 +151,7 @@ SC.SegmentView = SC.View.extend(SC.Control,
 
   /**
     Localized title.
-    
+
     @field
     @type String
     @default ""
