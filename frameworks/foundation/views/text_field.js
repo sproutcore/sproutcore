@@ -649,7 +649,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
         autocapitalizeString = ' autocapitalize=' + (!autoCapitalize ? '"off"' : '"true"');
       }
 
-      if (isBrowserFocusable) {
+      if (!isBrowserFocusable) {
         browserFocusable = 'tabindex="-1"';
       }
         // if hint is on and we don't want it to show on focus, create one
