@@ -1372,7 +1372,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         groupIndexes = this.get('_contentGroupIndexes'),
         sel;
 
-    if (!this.get('isSelectable') || !this.get('isEnabled')) return this;
+    if (!this.get('isSelectable') || !this.get('isEnabledInPane')) return this;
 
     // normalize
     if (SC.typeOf(indexes) === SC.T_NUMBER) {
@@ -1429,7 +1429,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         content = this.get('content'),
         del     = this.get('selectionDelegate');
 
-    if (!this.get('isSelectable') || !this.get('isEnabled')) return this;
+    if (!this.get('isSelectable') || !this.get('isEnabledInPane')) return this;
     if (!sel || sel.get('length') === 0) return this; // nothing to do
 
     // normalize
@@ -2014,7 +2014,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         info, anchor, sel, isSelected, modifierKeyPressed, didSelect = NO,
         allowsMultipleSel = content.get('allowsMultipleSelection');
 
-    if (!this.get('isEnabled')) return contentIndex > -1;
+    if (!this.get('isEnabledInPane')) return contentIndex > -1;
 
     if (!this.get('isSelectable')) return NO;
 
@@ -2126,7 +2126,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
       sel, isSelected, canEdit, itemView, idx,
       allowsMultipleSel = content.get('allowsMultipleSelection');
 
-    if (!this.get('isEnabled')) return contentIndex > -1;
+    if (!this.get('isEnabledInPane')) return contentIndex > -1;
     if (!this.get('isSelectable')) return NO;
 
     if (this.get('useToggleSelection')) {
@@ -2246,7 +2246,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     var itemView = this.itemViewForEvent(touch),
         contentIndex = itemView ? itemView.get('contentIndex') : -1;
 
-    if (!this.get('isEnabled')) return contentIndex > -1;
+    if (!this.get('isEnabledInPane')) return contentIndex > -1;
 
     // become first responder if possible.
     this.becomeFirstResponder();
@@ -2292,7 +2292,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         contentIndex = itemView ? itemView.get('contentIndex') : -1,
         isSelected = NO, sel;
 
-    if (!this.get('isEnabled')) return contentIndex > -1;
+    if (!this.get('isEnabledInPane')) return contentIndex > -1;
 
     // Remove fake selection in case our contentIndex is -1, a select event will add it back
     if (itemView) { itemView.set('isSelected', NO); }

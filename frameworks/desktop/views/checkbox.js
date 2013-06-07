@@ -57,16 +57,16 @@ SC.CheckboxView = SC.ButtonView.extend(
   needsEllipsis: NO,
 
   /**
-    `YES` if `isEnabled` is `YES`, `NO` otherwise
+    `YES` if `isEnabledInPane` is `YES`, `NO` otherwise
 
     @type Boolean
     @default NO
-    @observes isEnabled
+    @observes isEnabledInPane
   */
   acceptsFirstResponder: function() {
-    if (SC.FOCUS_ALL_CONTROLS) { return this.get('isEnabled'); }
+    if (SC.FOCUS_ALL_CONTROLS) { return this.get('isEnabledInPane'); }
     return NO;
-  }.property('isEnabled'),
+  }.property('isEnabledInPane'),
 
   /** @private */
   _toggleValue: function(){
@@ -76,7 +76,7 @@ SC.CheckboxView = SC.ButtonView.extend(
 
   /** @private */
   mouseDown: function(evt) {
-    if(!this.get('isEnabled')) return YES;
+    if(!this.get('isEnabledInPane')) return YES;
     this.set('isActive', YES);
     this._isMouseDown = YES;
     if (evt && this.get('acceptsFirstResponder')) evt.allowDefault();
@@ -85,7 +85,7 @@ SC.CheckboxView = SC.ButtonView.extend(
 
   /** @private */
   mouseUp: function(evt) {
-    if(!this.get('isEnabled')) return YES;
+    if(!this.get('isEnabledInPane')) return YES;
 
     this.set('isActive', NO);
     this._isMouseDown = NO;
@@ -105,7 +105,7 @@ SC.CheckboxView = SC.ButtonView.extend(
   /** @private */
   keyDown: function(evt) {
     // handle tab key
-    if(!this.get('isEnabled')) return YES;
+    if(!this.get('isEnabledInPane')) return YES;
 
     if (evt.which === 9 || evt.keyCode === 9) {
       var view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');

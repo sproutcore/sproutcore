@@ -64,11 +64,11 @@ SC.PopupButtonView = SC.ButtonView.extend(
     @default null
   */
   menu: null,
-  
+
   /**
     If YES and the menu is a class, this will cause a task that will instantiate the menu
     to be added to SC.backgroundTaskQueue.
-    
+
     @type Boolean
     @default NO
   */
@@ -77,7 +77,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
   // ..........................................................
   // INTERNAL SUPPORT
   //
-  
+
   /** @private
     If necessary, adds the loading of the menu to the background task queue.
   */
@@ -88,23 +88,23 @@ SC.PopupButtonView = SC.ButtonView.extend(
       SC.backgroundTaskQueue.push(SC.PopupButtonMenuLoader.create({ popupButton: this }));
     }
   },
-  
+
   /** @private
     Sets up binding on the menu, removing any old ones if necessary.
   */
   _setupMenu: function() {
     var menu = this.get('instantiatedMenu');
-    
+
     // clear existing bindings
     if (this.isActiveBinding) this.isActiveBinding.disconnect();
     this.isActiveBinding = null;
-    
+
     // if there is a menu
     if (menu && !menu.isClass) {
       this.isActiveBinding = this.bind('isActive', menu, 'isVisibleInWindow');
     }
   },
-  
+
   /** @private
     Setup the bindings for menu...
   */
@@ -116,40 +116,40 @@ SC.PopupButtonView = SC.ButtonView.extend(
     isActive is NO, but when the menu is instantiated, it is bound to the menu's isVisibleInWindow property.
   */
   isActive: NO,
-  
+
   /** @private
     Instantiates the menu if it is not already instantiated.
   */
   _instantiateMenu: function() {
     // get menu
     var menu = this.get('menu');
-    
+
     // if it is already instantiated or does not exist, we cannot do anything
     if (!menu || !menu.isClass) return;
-    
+
     // create
     this.menu = menu.create();
-    
+
     // setup
     this._setupMenu();
   },
-  
+
   /** @private
     The guaranteed-instantiated menu.
   */
   instantiatedMenu: function() {
     // get the menu
     var menu = this.get('menu');
-    
+
     // if it is a class, we need to instantiate it
     if (menu && menu.isClass) {
       // do so
       this._instantiateMenu();
-      
+
       // get the new version of the local
       menu = this.get('menu');
     }
-    
+
     // return
     return menu;
   }.property('menu').cacheable(),
@@ -182,7 +182,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
   */
   mouseDown: function(evt) {
     // If disabled, handle mouse down but ignore it.
-    if (!this.get('isEnabled')) return YES ;
+    if (!this.get('isEnabledInPane')) return YES ;
 
     this._isMouseDown = YES;
 
@@ -194,14 +194,14 @@ SC.PopupButtonView = SC.ButtonView.extend(
 
     // One mouseUp, we'll use this value to determine how long the mouse was
     // pressed.
-    
+
     // we need to keep track that we opened it just now in case we get the
     // mouseUp before render finishes. If it is 0, then we know we have not
     // waited long enough.
     this._menuRenderedTimestamp = 0;
-    
+
     var self = this;
-    
+
     // setTimeout guarantees that all rendering is done. The browser will even
     // have rendered by this point.
     setTimeout(function() {
@@ -238,7 +238,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
         menu = this.get('instantiatedMenu'),
         touch = SC.platform.touch,
         targetMenuItem;
-    
+
     // normalize the previousTimestamp: if it is 0, it might as well be now.
     // 0 means that we have not even triggered the nearly-immediate saving of timestamp.
     if (previousTimestamp === 0) previousTimestamp = Date.now();
@@ -290,7 +290,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
     @param {SC.Event} evt
   */
   performKeyEquivalent: function(charCode, evt) {
-    if (!this.get('isEnabled')) return NO ;
+    if (!this.get('isEnabledInPane')) return NO ;
     var menu = this.get('instantiatedMenu') ;
 
     return (!!menu && menu.performKeyEquivalent(charCode, evt, YES)) ;

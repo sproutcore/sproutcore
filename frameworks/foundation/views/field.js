@@ -264,11 +264,11 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     return YES;
   },
 
-  /** tied to the isEnabled state */
+  /** tied to the isEnabledInPane state */
   acceptsFirstResponder: function() {
-    if (SC.FOCUS_ALL_CONTROLS) { return this.get('isEnabled'); }
+    if (SC.FOCUS_ALL_CONTROLS) { return this.get('isEnabledInPane'); }
     return NO;
-  }.property('isEnabled'),
+  }.property('isEnabledInPane'),
 
   _addChangeEvent: function() {
     SC.Event.add(this.$input(), 'change', this, this._field_fieldValueDidChange);

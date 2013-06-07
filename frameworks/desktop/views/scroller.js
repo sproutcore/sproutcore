@@ -546,7 +546,7 @@ SC.ScrollerView = SC.View.extend(
     @param evt {SC.Event} the mousedown event
   */
   mouseDown: function(evt) {
-    if (!this.get('isEnabled')) return NO;
+    if (!this.get('isEnabledInPane')) return NO;
 
     // keep note of altIsDown for later.
     this._altIsDown = evt.altKey;
@@ -677,6 +677,8 @@ SC.ScrollerView = SC.View.extend(
     @param evt {SC.Event} the mousedragged event
   */
   mouseDragged: function(evt) {
+    if (!this.get('isEnabledInPane')) return NO;
+
     var value, length, delta, thumbPosition,
         target = evt.target,
         thumbPositionAtDragStart = this._thumbPositionAtDragStart,

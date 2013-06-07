@@ -40,7 +40,7 @@ SC.ThumbView = SC.View.extend(
 
   /** @private */
   mouseDown: function(evt) {
-    if (!this.get('isEnabled')) return NO ;
+    if (!this.get('isEnabledInPane')) return NO ;
 
     var splitView = this.get('splitView');
     return (splitView) ? splitView.mouseDownInThumbView(evt, this) : sc_super();

@@ -29,8 +29,8 @@ SC.SelectView = SC.ButtonView.extend(
     @default YES
   */
   acceptsFirstResponder: function () {
-    return this.get('isEnabled');
-  }.property('isEnabled'),
+    return this.get('isEnabledInPane');
+  }.property('isEnabledInPane'),
 
   /**
     If true, titles will be escaped to avoid scripting attacks.
@@ -773,7 +773,7 @@ SC.SelectView = SC.ButtonView.extend(
     Holding down the button should display the menu pane.
   */
   mouseDown: function (evt) {
-    if (!this.get('isEnabled')) return YES; // handled event, but do nothing
+    if (!this.get('isEnabledInPane')) return YES; // handled event, but do nothing
     this.set('isActive', YES);
     this._isMouseDown = YES;
     this.becomeFirstResponder();

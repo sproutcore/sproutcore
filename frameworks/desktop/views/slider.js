@@ -119,7 +119,7 @@ SC.SliderView = SC.View.extend(SC.Control,
   _isMouseDown: NO,
 
   mouseDown: function(evt) {
-    if (!this.get('isEnabled')) return YES; // nothing to do...
+    if (!this.get('isEnabledInPane')) return YES; // nothing to do...
     this.set('isActive', YES);
     this._isMouseDown = YES ;
     return this._triggerHandle(evt, YES);
@@ -139,7 +139,7 @@ SC.SliderView = SC.View.extend(SC.Control,
   },
 
   mouseWheel: function(evt) {
-    if (!this.get('isEnabled')) return YES;
+    if (!this.get('isEnabledInPane')) return YES;
     var min = this.get('minimum'),
         max = this.get('maximum'),
         step = this.get('step'),
@@ -209,11 +209,11 @@ SC.SliderView = SC.View.extend(SC.Control,
     return YES ;
   },
 
-  /** tied to the isEnabled state */
+  /** tied to the isEnabledInPane state */
   acceptsFirstResponder: function() {
-    if (SC.FOCUS_ALL_CONTROLS) { return this.get('isEnabled'); }
+    if (SC.FOCUS_ALL_CONTROLS) { return this.get('isEnabledInPane'); }
     return NO;
-  }.property('isEnabled'),
+  }.property('isEnabledInPane'),
 
   keyDown: function(evt) {
      // handle tab key
