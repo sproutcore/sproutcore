@@ -994,10 +994,10 @@ SC.View.reopen(
       if (isVisibleInWindow ||
         force) {
         // Only in the visible states do we allow updates without being forced.
-        this._executeDoUpdateLayout();
+        this._doUpdateLayoutStyle();
       } else {
         // Otherwise mark the view as needing an update when we enter a shown state again.
-        this._layoutNeedsUpdate = true;
+        this._layoutStyleNeedsUpdate = true;
       }
     } else {
       handled = false;
@@ -1007,7 +1007,7 @@ SC.View.reopen(
   },
 
   /** @private */
-  _executeDoUpdateLayout: function () {
+  _doUpdateLayoutStyle: function () {
     var context;
 
     context = this.renderContext(this.get('layer'));
@@ -1015,21 +1015,21 @@ SC.View.reopen(
     context.update();
 
     // Reset that an update is required.
-    this._layoutNeedsUpdate = false;
+    this._layoutStyleNeedsUpdate = false;
 
     // Notify updated.
     this._updatedLayout();
   },
 
-  /** @private Override. */
-  _executeQueuedUpdates: function () {
-    sc_super();
+  /** @private Enhance. */
+  _executeQueuedUpdates: function (original) {
+    original();
 
     // Update the layout style of the layer if necessary.
-    if (this._layoutNeedsUpdate) {
-      this._executeDoUpdateLayout();
+    if (this._layoutStyleNeedsUpdate) {
+      this._doUpdateLayoutStyle();
     }
-  },
+  }.enhance(),
 
   /** @private Override: Notify on attached (avoids notify of frame changed). */
   _notifyAttached: function () {

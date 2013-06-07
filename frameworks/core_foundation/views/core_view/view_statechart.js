@@ -340,8 +340,8 @@ SC.CoreView.reopen(
       var node = this.get('layer');
 
       // Update before showing (note that visibility update is NOT conditional for this view).
-      if (this._visibilityNeedsUpdate) {
-        this._executeUpdateVisibility();
+      if (this._visibleStyleNeedsUpdate) {
+        this._doUpdateVisibleStyle();
       }
       this._executeQueuedUpdates();
 
@@ -482,12 +482,12 @@ SC.CoreView.reopen(
     case SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT: // FAST PATH!
     case SC.CoreView.ATTACHED_BUILDING_OUT: // FAST PATH!
       // Queue the visibility update for the next time we display.
-      this._visibilityNeedsUpdate = true;
+      this._visibleStyleNeedsUpdate = true;
 
       return true;
     case SC.CoreView.ATTACHED_HIDDEN_BY_PARENT: // FAST PATH!
       // Queue the visibility update for the next time we display.
-      this._visibilityNeedsUpdate = true;
+      this._visibleStyleNeedsUpdate = true;
 
       this._gotoAttachedHiddenState();
 
@@ -516,7 +516,7 @@ SC.CoreView.reopen(
         this._callOnChildViews('_parentWillHideInDocument');
 
         // Note that visibility update is NOT conditional for this view.
-        this._executeUpdateVisibility();
+        this._doUpdateVisibleStyle();
 
         // Notify.
         if (this.didHideInDocument) { this.didHideInDocument(); }
@@ -604,27 +604,26 @@ SC.CoreView.reopen(
     case SC.CoreView.UNRENDERED: // FAST PATH!
     case SC.CoreView.UNATTACHED: // FAST PATH!
       // Queue the visibility update for the next time we display.
-      this._visibilityNeedsUpdate = true;
+      this._visibleStyleNeedsUpdate = true;
       return true;
     case SC.CoreView.ATTACHED_HIDDEN:
-        if (isParentShown) {
-          // Update before showing (note that visibility update is NOT conditional for this view).
-          this._executeUpdateVisibility();
-        // shouldExecute = true;
+      if (isParentShown) {
+        // Update before showing (note that visibility update is NOT conditional for this view).
+        this._doUpdateVisibleStyle();
 
-          // Notify will show.
-          this._callOnChildViews('_parentWillShowInDocument');
+        // Notify will show.
+        this._callOnChildViews('_parentWillShowInDocument');
 
-          if (this.willShowInDocument) { this.willShowInDocument(); }
-        } else {
-          // Queue the visibility update for the next time we display.
-          this._visibilityNeedsUpdate = true;
+        if (this.willShowInDocument) { this.willShowInDocument(); }
+      } else {
+        // Queue the visibility update for the next time we display.
+        this._visibleStyleNeedsUpdate = true;
 
-          // Route.
-          this._gotoAttachedHiddenByParentState();
+        // Route.
+        this._gotoAttachedHiddenByParentState();
 
         return true;
-        }
+      }
       break;
     case SC.CoreView.ATTACHED_HIDING:
       if (!transitionShow) {
@@ -786,7 +785,7 @@ SC.CoreView.reopen(
       this._callOnChildViews('_parentWillHideInDocument');
 
       // Note that visibility update is NOT conditional for this view.
-      this._executeUpdateVisibility();
+      this._doUpdateVisibleStyle();
 
       // Notify.
       if (this.didHideInDocument) { this.didHideInDocument(); }
@@ -935,6 +934,17 @@ SC.CoreView.reopen(
   },
 
   /** @private */
+  _doUpdateVisibleStyle: function () {
+    var isVisible = this.get('isVisible');
+
+    this.$().toggleClass('sc-hidden', !isVisible);
+    this.$().attr('aria-hidden', isVisible ? null : true);
+
+    // Reset that an update is required.
+    this._visibleStyleNeedsUpdate = false;
+  },
+
+  /** @private */
   _executeDoDestroyLayer: function () {
     var displayProperties,
       idx, len,
@@ -1026,17 +1036,6 @@ SC.CoreView.reopen(
     if (this.designer && this.designer.viewDidUpdateLayer) {
       this.designer.viewDidUpdateLayer(); //let the designer know
     }
-  },
-
-  /** @private */
-  _executeUpdateVisibility: function () {
-    var isVisible = this.get('isVisible');
-
-    this.$().toggleClass('sc-hidden', !isVisible);
-    this.$().attr('aria-hidden', isVisible ? null : true);
-
-    // Reset that an update is required.
-    this._visibilityNeedsUpdate = false;
   },
 
   /** @private */
@@ -1248,7 +1247,7 @@ SC.CoreView.reopen(
       this._cancelTransition();
 
       // We didn't quite hide in time so indicate that visibility needs update next time we display.
-      this._visibilityNeedsUpdate = true;
+      this._visibleStyleNeedsUpdate = true;
 
       // Route.
       this._gotoAttachedHiddenState();
@@ -1292,8 +1291,8 @@ SC.CoreView.reopen(
 
     if (state === SC.CoreView.ATTACHED_HIDDEN_BY_PARENT) {
       // Update before showing.
-      if (this._visibilityNeedsUpdate) {
-        this._executeUpdateVisibility();
+      if (this._visibleStyleNeedsUpdate) {
+        this._doUpdateVisibleStyle();
       }
 
       this._executeQueuedUpdates();

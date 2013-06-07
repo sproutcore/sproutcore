@@ -455,8 +455,8 @@ module("SC.View isVisible integration with shown and hidden state", {
       view = SC.View.create({
         // STUB: _executeDoUpdateContent
         _executeDoUpdateContent: CoreTest.stub('_executeDoUpdateContent', SC.CoreView.prototype._executeDoUpdateContent),
-        // STUB: _executeUpdateVisibility
-        _executeUpdateVisibility: CoreTest.stub('_executeUpdateVisibility', SC.CoreView.prototype._executeUpdateVisibility),
+        // STUB: _doUpdateVisibleStyle
+        _doUpdateVisibleStyle: CoreTest.stub('_doUpdateVisibleStyle', SC.CoreView.prototype._doUpdateVisibleStyle),
 
         childViews: [child],
         displayProperties: ['foo'],
@@ -481,7 +481,7 @@ test("Test showing and hiding a hidden view in same run loop should not update v
   });
 
   view._executeDoUpdateContent.expect(0);
-  view._executeUpdateVisibility.expect(1);
+  view._doUpdateVisibleStyle.expect(1);
 
   // Hide the view using isVisible.
   SC.run(function () {
@@ -503,7 +503,7 @@ test("Test showing and hiding a hidden view in same run loop should not update v
   });
 
   view._executeDoUpdateContent.expect(0);
-  view._executeUpdateVisibility.expect(1);
+  view._doUpdateVisibleStyle.expect(1);
 });
 
 test("Test hiding and showing a shown view in same run loop should not update visibility.", function () {
@@ -528,7 +528,7 @@ test("Test hiding and showing a shown view in same run loop should not update vi
   });
 
   view._executeDoUpdateContent.expect(1);
-  view._executeUpdateVisibility.expect(0);
+  view._doUpdateVisibleStyle.expect(0);
 });
 
 
@@ -563,7 +563,7 @@ test("Test showing and hiding a hiding view in same run loop should not update v
   });
 
   view._executeDoUpdateContent.expect(1);
-  view._executeUpdateVisibility.expect(0);
+  view._doUpdateVisibleStyle.expect(0);
 });
 
 test("Test hiding and showing a showing view in same run loop should not update visibility.", function () {
@@ -601,7 +601,7 @@ test("Test hiding and showing a showing view in same run loop should not update 
   });
 
   view._executeDoUpdateContent.expect(1);
-  view._executeUpdateVisibility.expect(2);
+  view._doUpdateVisibleStyle.expect(2);
 });
 
 
