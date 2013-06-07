@@ -4,7 +4,7 @@
 //            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-/*globals Welcome */
+/*global Welcome */
 
 /**
 
@@ -22,9 +22,9 @@ Welcome = SC.Object.create(
 
   store: SC.Store.create().from('CoreTools.DataSource'),
 
-  displayTitle: function() {
+  displayTitle: function () {
     var hostname = (window.location.hostname || 'localhost').toString();
     return hostname.match(/sproutcore\.com/) ? "SproutCore Demos".loc() : "SproutCore Developer Tools";
   }.property().cacheable()
 
-}) ;
+});

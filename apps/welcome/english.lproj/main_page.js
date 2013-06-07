@@ -2,7 +2,7 @@
 // Project:   Welcome - mainPage
 // Copyright: ©2011 Apple Inc.
 // ==========================================================================
-/*globals Welcome */
+/*global Welcome */
 
 // This page describes the main user interface for your application.
 Welcome.mainPage = SC.Page.design({
@@ -15,18 +15,15 @@ Welcome.mainPage = SC.Page.design({
 
     contentView: SC.View.design({
       layout: { width: 280, height: 340, centerX: 0, centerY: 0 },
-      childViews: 'heading appSelector launchApplication'.w(),
+      childViews: ['heading', 'appSelector', 'launchApplication'],
 
-      heading: SC.View.design({
+      heading: SC.ImageView.design({
         layout: { width: 271, centerX: 0, top: 0, height: 60 },
-        tagName: 'img',
-        render: function(context, firstTime) {
-          context.setAttr('src', sc_static('images/sproutcore'));
-        }
+        value: sc_static('images/sproutcore.png')
       }),
 
       appSelector: SC.View.design({
-        layout: {top:80, left:0, right:0, bottom:46},
+        layout: { top: 80, left: 0, right: 0, bottom: 46 },
         childViews: 'scrollView'.w(),
         classNames: 'app-selector',
 
@@ -37,9 +34,9 @@ Welcome.mainPage = SC.Page.design({
           contentView: SC.ListView.design({
             rowHeight: 40,
 
-            contentBinding: "Welcome.targetsController.appsOnly",
+            contentBinding: SC.Binding.oneWay("Welcome.targetsController.appsOnly"),
             selectionBinding: "Welcome.targetsController.selection",
-            isEnabledBinding: "Welcome.targetsController.canLoadApp",
+            isEnabledBinding: SC.Binding.oneWay("Welcome.targetsController.canLoadApp"),
 
             contentValueKey: "displayName",
             contentIconKey: "targetIcon",
@@ -52,8 +49,8 @@ Welcome.mainPage = SC.Page.design({
       }),
 
       launchApplication: SC.ButtonView.design({
-        layout: {bottom:0, height:30, width:160, centerX:0},
-        isEnabledBinding: "Welcome.targetsController.launchEnabled",
+        layout: { bottom: 0, height: 30, width: 160, centerX: 0 },
+        isEnabledBinding: SC.Binding.oneWay("Welcome.targetsController.launchEnabled"),
         controlSize: SC.HUGE_CONTROL_SIZE,
         title: "Launch Application",
         isDefault: YES,

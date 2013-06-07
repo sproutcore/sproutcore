@@ -2,7 +2,7 @@
 // Project:   Welcome.targetsController
 // Copyright: ©2011 Apple Inc.
 // ==========================================================================
-/*globals CoreTools Welcome */
+/*global CoreTools Welcome */
 
 /**
 
@@ -16,30 +16,30 @@ Welcome.targetsController = SC.ArrayController.create(
   /**
     Call this method whenever you want to reload the targets from the server.
   */
-  reload: function() {
+  reload: function () {
     var targets = Welcome.store.find(CoreTools.TARGETS_QUERY);
     this.set('content', targets);
   },
 
-  appsOnly: function() {
-    return this.filter(function(t) {
+  appsOnly: function () {
+    return this.filter(function (t) {
       return t.get('kind') === 'app' && !t.get('name').match(/sproutcore\/(welcome|experimental)/);
     }).sortProperty('sortKind', 'displayName');
   }.property('[]').cacheable(),
 
-  loadApplication: function() {
+  loadApplication: function () {
     var app = this.get('selection').firstObject(),
         url = app ? app.get('appUrl') : null;
 
     if (url) {
       this.set('canLoadApp', NO);
-      this.invokeLater(function() {
+      this.invokeLater(function () {
         window.location.href = url; // load new app
       });
     }
   },
 
-  launchEnabled: function() {
+  launchEnabled: function () {
     var canLoadApp = this.get('canLoadApp'),
         selection = this.get('selection'),
         selectedObject = selection.firstObject();
@@ -52,4 +52,4 @@ Welcome.targetsController = SC.ArrayController.create(
   allowsEmptySelection: NO,
   allowsMultipleSelection: NO
 
-}) ;
+});
