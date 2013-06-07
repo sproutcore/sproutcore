@@ -471,7 +471,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   // INTERNAL SUPPORT
   //
 
-  displayProperties: ['isBrowserFocusable','formattedHint', 'fieldValue', 'isEditing', 'isEditable', 'leftAccessoryView', 'rightAccessoryView', 'isTextArea'],
+  // Note: isEnabled is required here because it is used in the render function.
+  displayProperties: ['isBrowserFocusable','formattedHint', 'fieldValue', 'isEditing', 'isEditable', 'isEnabled', 'leftAccessoryView', 'rightAccessoryView', 'isTextArea'],
 
   createChildViews: function () {
     sc_super();
@@ -652,7 +653,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       if (!isBrowserFocusable) {
         browserFocusable = 'tabindex="-1"';
       }
-        // if hint is on and we don't want it to show on focus, create one
+
+      // if hint is on and we don't want it to show on focus, create one
       if (SC.platform.input.placeholder && !hintOnFocus) {
         hintString = ' placeholder="' + hint + '"';
       }
