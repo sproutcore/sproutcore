@@ -211,8 +211,10 @@ test("Store#pushRetrieve for parent updates the child records", function () {
   ok(nr, "Got nested record");
   equals(nr.get('name'), 'Dir 2', "Dir id:2 has correct name");
 
-  store.pushRetrieve(null, null, newDataHash, storeKeys[0]);
-  store.flush();
+  SC.run(function () {
+    store.pushRetrieve(null, null, newDataHash, storeKeys[0]);
+    store.flush();
+  });
   equals(parent.get('name'), 'Dir 1 Changed', 'Dir id:1 name was changed');
   equals(nr.get('name'), 'Dir 2 Changed', "Dir id:2 name was changed");
 });

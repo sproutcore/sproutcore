@@ -84,13 +84,13 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {SC.DataSource|String} dataSource the data source
     @returns {SC.Store} receiver
   */
-  from: function(dataSource) {
+  from: function (dataSource) {
     this.set('dataSource', dataSource);
     return this ;
   },
 
   // lazily convert data source to real object
-  _getDataSource: function() {
+  _getDataSource: function () {
     var ret = this.get('dataSource');
     if (typeof ret === SC.T_STRING) {
       ret = SC.requiredObjectForPropertyPath(ret);
@@ -108,7 +108,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {SC.DataSource...} dataSource one or more data source arguments
     @returns {SC.Store} receiver
   */
-  cascade: function(dataSource) {
+  cascade: function (dataSource) {
     var dataSources = SC.A(arguments) ;
     dataSource = SC.CascadeDataSource.create({
       dataSources: dataSources
@@ -134,7 +134,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Class} newStoreClass optional the class of the newly-created nested store (defaults to SC.NestedStore)
     @returns {SC.NestedStore} new nested store chained to receiver
   */
-  chain: function(attrs, newStoreClass) {
+  chain: function (attrs, newStoreClass) {
     if (!attrs) attrs = {};
     attrs.parentStore = this;
 
@@ -166,7 +166,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     @returns {SC.Store} receiver
   */
-  willDestroyNestedStore: function(nestedStore) {
+  willDestroyNestedStore: function (nestedStore) {
     if (this.nestedStores) {
       this.nestedStores.removeObject(nestedStore);
     }
@@ -180,7 +180,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {SC.Store} store store instance
     @returns {Boolean} YES if belongs
   */
-  hasNestedStore: function(store) {
+  hasNestedStore: function (store) {
     while(store && (store !== this)) store = store.get('parentStore');
     return store === this ;
   },
@@ -293,7 +293,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Number} storeKey the store key
     @returns {Number} edit status
   */
-  storeKeyEditState: function(storeKey) {
+  storeKeyEditState: function (storeKey) {
     var editables = this.editables, locks = this.locks;
     return (editables && editables[storeKey]) ? SC.Store.EDITABLE : SC.Store.LOCKED ;
   },
@@ -306,7 +306,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Number} storeKey key to retrieve
     @returns {Hash} data hash or null
   */
-  readDataHash: function(storeKey) {
+  readDataHash: function (storeKey) {
     return this.dataHashes[storeKey];
   },
 
@@ -321,7 +321,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Number} storeKey the store key to retrieve
     @returns {Hash} the attributes hash
   */
-  readEditableDataHash: function(storeKey) {
+  readEditableDataHash: function (storeKey) {
     // read the value - if there is no hash just return; nothing to do
     var ret = this.dataHashes[storeKey];
     if (!ret) return ret ; // nothing to do.
@@ -346,7 +346,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {String} propertyName property to read
     @returns {Object} editable property value
   */
-  readEditableProperty: function(storeKey, propertyName) {
+  readEditableProperty: function (storeKey, propertyName) {
     var hash      = this.readEditableDataHash(storeKey),
         editables = this.editables[storeKey], // get editable info...
         ret       = hash[propertyName];
@@ -382,7 +382,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {String} status the new hash status
     @returns {SC.Store} receiver
   */
-  writeDataHash: function(storeKey, hash, status) {
+  writeDataHash: function (storeKey, hash, status) {
 
     // update dataHashes and optionally status.
     if (hash) this.dataHashes[storeKey] = hash;
@@ -418,7 +418,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {String} status optional new status
     @returns {SC.Store} receiver
   */
-  removeDataHash: function(storeKey, status) {
+  removeDataHash: function (storeKey, status) {
      // don't use delete -- that will allow parent dataHash to come through
     this.dataHashes[storeKey] = null;
     this.statuses[storeKey] = status || SC.Record.EMPTY;
@@ -437,7 +437,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Number} storeKey the store key
     @returns {Number} status
   */
-  readStatus: function(storeKey) {
+  readStatus: function (storeKey) {
     // use readDataHash to handle optimistic locking.  this could be inlined
     // but for now this minimized copy-and-paste code.
     this.readDataHash(storeKey);
@@ -452,7 +452,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Number} storeKey the store key
     @returns {Number} status
   */
-  peekStatus: function(storeKey) {
+  peekStatus: function (storeKey) {
     return this.statuses[storeKey] || SC.Record.EMPTY;
   },
 
@@ -466,7 +466,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {SC.Error} error optional error object
     @returns {SC.Store} receiver
   */
-  writeStatus: function(storeKey, newStatus) {
+  writeStatus: function (storeKey, newStatus) {
     // use writeDataHash for now to handle optimistic lock.  maximize code
     // reuse.
     return this.writeDataHash(storeKey, null, newStatus);
@@ -484,7 +484,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {String} key that changed (optional)
     @returns {SC.Store} receiver
   */
-  dataHashDidChange: function(storeKeys, rev, statusOnly, key) {
+  dataHashDidChange: function (storeKeys, rev, statusOnly, key) {
 
     // update the revision for storeKey.  Use generateStoreKey() because that
     // guarantees a universally (to this store hierarchy anyway) unique
@@ -506,7 +506,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       this.revisions[storeKey] = rev;
       this._notifyRecordPropertyChange(storeKey, statusOnly, key);
 
-      this._propagateToChildren(storeKey, function(storeKey){
+      this._propagateToChildren(storeKey, function (storeKey) {
         that.dataHashDidChange(storeKey, null, statusOnly, key);
       });
     }
@@ -518,7 +518,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     Will push all changes to a the recordPropertyChanges property
     and execute `flush()` once at the end of the runloop.
   */
-  _notifyRecordPropertyChange: function(storeKey, statusOnly, key) {
+  _notifyRecordPropertyChange: function (storeKey, statusOnly, key) {
 
     var records      = this.records,
         nestedStores = this.get('nestedStores'),
@@ -599,7 +599,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     @returns {SC.Store} receiver
   */
-  flush: function() {
+  flush: function () {
     if (!this.recordPropertyChanges) return this;
 
     var changes              = this.recordPropertyChanges,
@@ -610,7 +610,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         recordTypes = SC.CoreSet.create(),
         rec, recordType, statusOnly, idx, len, storeKey, keys;
 
-    storeKeys.forEach(function(storeKey) {
+    storeKeys.forEach(function (storeKey) {
       if (records.contains(storeKey)) {
         statusOnly = hasDataChanges.contains(storeKey) ? NO : YES;
         rec = this.records[storeKey];
@@ -649,7 +649,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     @returns {SC.Store} receiver
   */
-  reset: function() {
+  reset: function () {
 
     // create a new empty data store
     this.dataHashes = {} ;
@@ -702,7 +702,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Boolean} force
     @returns {SC.Store} receiver
   */
-  commitChangesFromNestedStore: function(nestedStore, changes, force) {
+  commitChangesFromNestedStore: function (nestedStore, changes, force) {
     // first, check for optimistic locking problems
     if (!force) this._verifyLockRevisions(changes, nestedStore.locks);
 
@@ -766,7 +766,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {SC.Set} locks the locks to verify
     @returns {SC.Store} receiver
   */
-  _verifyLockRevisions: function(changes, locks) {
+  _verifyLockRevisions: function (changes, locks) {
     var len = changes.length, revs = this.revisions, i, storeKey, lock, rev ;
     if (locks && revs) {
       for(i=0;i<len;i++) {
@@ -848,7 +848,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {String} id the id to load
     @returns {SC.Record} record instance or null
   */
-  find: function(recordType, id) {
+  find: function (recordType, id) {
 
     // if recordType is passed as string, find object
     if (SC.typeOf(recordType)===SC.T_STRING) {
@@ -870,7 +870,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
 
   /** @private */
-  _findQuery: function(query, createIfNeeded, refreshIfNew) {
+  _findQuery: function (query, createIfNeeded, refreshIfNew) {
 
     // lookup the local RecordArray for this query.
     var cache = this._scst_recordArraysByQuery,
@@ -896,7 +896,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
 
   /** @private */
-  _findRecord: function(recordType, id) {
+  _findRecord: function (recordType, id) {
 
     var storeKey ;
 
@@ -932,7 +932,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {SC.RecordArray} recordArray the record array
     @returns {SC.Store} receiver
   */
-  recordArrayWillDestroy: function(recordArray) {
+  recordArrayWillDestroy: function (recordArray) {
     var cache = this._scst_recordArraysByQuery,
         set   = this.get('recordArrays');
 
@@ -952,7 +952,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {SC.Query} query the record array query to refresh
     @returns {SC.Store} receiver
   */
-  refreshQuery: function(query) {
+  refreshQuery: function (query) {
     if (!query) throw new Error("refreshQuery() requires a query");
 
     var cache    = this._scst_recordArraysByQuery,
@@ -975,11 +975,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {SC.Set} recordTypes
     @returns {SC.Store} receiver
   */
-  _notifyRecordArrays: function(storeKeys, recordTypes) {
+  _notifyRecordArrays: function (storeKeys, recordTypes) {
     var recordArrays = this.get('recordArrays');
     if (!recordArrays) return this;
 
-    recordArrays.forEach(function(recArray) {
+    recordArrays.forEach(function (recArray) {
       if (recArray) recArray.storeDidChangeStoreKeys(storeKeys, recordTypes);
     }, this);
 
@@ -1000,7 +1000,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {SC.Record} recordType the record type
     @returns {SC.Array} array instance - usually SC.RecordArray
   */
-  recordsFor: function(recordType) {
+  recordsFor: function (recordType) {
     var storeKeys     = [],
         storeKeysById = recordType.storeKeysById(),
         id, storeKey, ret;
@@ -1035,7 +1035,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Number} storeKey The storeKey for the dataHash.
     @returns {SC.Record} Returns a record instance.
   */
-  materializeRecord: function(storeKey) {
+  materializeRecord: function (storeKey) {
     var records = this.records, ret, recordType, attrs;
 
     // look up in cached records
@@ -1098,7 +1098,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     @returns {SC.Record} Returns the created record
   */
-  createRecord: function(recordType, dataHash, id) {
+  createRecord: function (recordType, dataHash, id) {
     var primaryKey, prototype, storeKey, status, K = SC.Record, changelog, defaultVal, ret;
 
     //initialize dataHash if necessary
@@ -1206,7 +1206,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Array} ids (optional) ids to assign to records
     @returns {Array} array of materialized record instances.
   */
-  createRecords: function(recordTypes, dataHashes, ids) {
+  createRecords: function (recordTypes, dataHashes, ids) {
     var ret = [], recordType, id, isArray, len = dataHashes.length, idx ;
     isArray = SC.typeOf(recordTypes) === SC.T_ARRAY;
     if (!isArray) recordType = recordTypes;
@@ -1230,7 +1230,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Number} storeKey (optional) if passed, ignores recordType and id
     @returns {SC.Store} receiver
   */
-  unloadRecord: function(recordType, id, storeKey, newStatus) {
+  unloadRecord: function (recordType, id, storeKey, newStatus) {
     if (storeKey === undefined) storeKey = recordType.storeKeyFor(id);
     var status = this.readStatus(storeKey), K = SC.Record;
     newStatus = newStatus || K.EMPTY;
@@ -1251,7 +1251,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     // Handle all the child Records
     var that = this;
-    this._propagateToChildren(storeKey, function(storeKey){
+    this._propagateToChildren(storeKey, function (storeKey) {
       that.unloadRecord(null, null, storeKey, newStatus);
     });
 
@@ -1278,7 +1278,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Array} storeKeys (optional) store keys to unload
     @returns {SC.Store} receiver
   */
-  unloadRecords: function(recordTypes, ids, storeKeys, newStatus) {
+  unloadRecords: function (recordTypes, ids, storeKeys, newStatus) {
     var len, isArray, idx, id, recordType, storeKey;
 
     if (storeKeys === undefined) {
@@ -1321,7 +1321,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Number} storeKey (optional) if passed, ignores recordType and id
     @returns {SC.Store} receiver
   */
-  destroyRecord: function(recordType, id, storeKey) {
+  destroyRecord: function (recordType, id, storeKey) {
     if (storeKey === undefined) storeKey = recordType.storeKeyFor(id);
     var status = this.readStatus(storeKey), changelog, K = SC.Record;
 
@@ -1362,7 +1362,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     }
 
     var that = this;
-    this._propagateToChildren(storeKey, function(storeKey){
+    this._propagateToChildren(storeKey, function (storeKey){
       that.destroyRecord(null, null, storeKey);
     });
 
@@ -1389,7 +1389,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Array} storeKeys (optional) store keys to destroy
     @returns {SC.Store} receiver
   */
-  destroyRecords: function(recordTypes, ids, storeKeys) {
+  destroyRecords: function (recordTypes, ids, storeKeys) {
     var len, isArray, idx, id, recordType, storeKey;
     if(storeKeys===undefined){
       len = ids.length;
@@ -1413,43 +1413,46 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   /**
     register a Child Record to the parent
   */
-  registerChildToParent: function(parentStoreKey, childStoreKey, path){
-    var prs, crs, oldPk, oldChildren, pkRef;
+  registerChildToParent: function (parentStoreKey, childStoreKey, path) {
+    var parentRecords, childRecords, oldPk, oldChildren, pkRef;
+
     // Check the child to see if it has a parent
-    crs = this.childRecords || {};
-    prs = this.parentRecords || {};
+    childRecords = this.childRecords || {};
+    parentRecords = this.parentRecords || {};
+
     // first rid of the old parent
-    oldPk = crs[childStoreKey];
-    if (oldPk){
-      oldChildren = prs[oldPk];
+    oldPk = childRecords[childStoreKey];
+    if (oldPk) {
+      oldChildren = parentRecords[oldPk];
       delete oldChildren[childStoreKey];
       // this.recordDidChange(null, null, oldPk, key);
     }
-    pkRef = prs[parentStoreKey] || {};
+    pkRef = parentRecords[parentStoreKey] || {};
     pkRef[childStoreKey] = path || YES;
-    prs[parentStoreKey] = pkRef;
-    crs[childStoreKey] = parentStoreKey;
+    parentRecords[parentStoreKey] = pkRef;
+    childRecords[childStoreKey] = parentStoreKey;
+
     // sync the status of the child
     this.writeStatus(childStoreKey, this.statuses[parentStoreKey]);
-    this.childRecords = crs;
-    this.parentRecords = prs;
+    this.childRecords = childRecords;
+    this.parentRecords = parentRecords;
   },
 
   /**
     Unregister the Child Record from its Parent.  This will cause the Child
     Record to be removed from the store.
   */
-  unregisterChildFromParent: function(childStoreKey) {
-    var crs, oldPk;
+  unregisterChildFromParent: function (childStoreKey) {
+    var childRecords, oldPk;
 
     // Check the child to see if it has a parent
-    crs = this.childRecords;
+    childRecords = this.childRecords;
 
     // Remove the parent's connection to the child.  This doesn't remove the
     // parent store key from the cache of parent store keys if the parent
     // no longer has any other registered children, because the amount of effort
     // to determine that would not be worth the miniscule memory savings.
-    oldPk = crs[childStoreKey];
+    oldPk = childRecords[childStoreKey];
     if (oldPk) {
       delete this.parentRecords[oldPk][childStoreKey];
     }
@@ -1460,13 +1463,13 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // 3. from the cache of child record store keys
     this.removeDataHash(childStoreKey);
     delete this.records[childStoreKey];
-    delete crs[childStoreKey];
+    delete childRecords[childStoreKey];
   },
 
   /**
     materialize the parent when passing in a store key for the child
   */
-  materializeParentRecord: function(childStoreKey){
+  materializeParentRecord: function (childStoreKey){
     var pk, crs;
     if (SC.none(childStoreKey)) return null;
     crs = this.childRecords;
@@ -1481,7 +1484,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
 		@param {Number} storeKey The store key of the parent
   */
-  parentStoreKeyExists: function(storeKey){
+  parentStoreKeyExists: function (storeKey){
     if (SC.none(storeKey)) return ;
     var crs = this.childRecords || {};
     return crs[storeKey];
@@ -1490,7 +1493,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   /**
     function that propagates a function call to all children
   */
-  _propagateToChildren: function(storeKey, func){
+  _propagateToChildren: function (storeKey, func) {
     // Handle all the child Records
     if ( SC.none(this.parentRecords) ) return;
     var children = this.parentRecords[storeKey] || {};
@@ -1514,7 +1517,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Boolean} if the change is to statusOnly (optional)
     @returns {SC.Store} receiver
   */
-  recordDidChange: function(recordType, id, storeKey, key, statusOnly) {
+  recordDidChange: function (recordType, id, storeKey, key, statusOnly) {
     if (storeKey === undefined) storeKey = recordType.storeKeyFor(id);
     var status = this.readStatus(storeKey), changelog, K = SC.Record;
 
@@ -1571,7 +1574,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Array} storeKeys (optional) store keys to destroy
     @returns {SC.Store} receiver
   */
-  recordsDidChange: function(recordTypes, ids, storeKeys) {
+  recordsDidChange: function (recordTypes, ids, storeKeys) {
      var len, isArray, idx, id, recordType, storeKey;
       if(storeKeys===undefined){
         len = ids.length;
@@ -1611,7 +1614,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Function|Array} callback function or array of functions
     @returns {Array} storeKeys to be retrieved
   */
-  retrieveRecords: function(recordTypes, ids, storeKeys, isRefresh, callbacks) {
+  retrieveRecords: function (recordTypes, ids, storeKeys, isRefresh, callbacks) {
 
     var source  = this._getDataSource(),
         isArray = SC.typeOf(recordTypes) === SC.T_ARRAY,
@@ -1703,7 +1706,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @private
     stores the callbacks for the storeKeys that are inflight
   **/
-  _setCallbackForStoreKey: function(storeKey, callback, hasCallbackArray, storeKeys){
+  _setCallbackForStoreKey: function (storeKey, callback, hasCallbackArray, storeKeys){
     var queue = this._callback_queue;
     if(hasCallbackArray) queue[storeKey] = {callback: callback, otherKeys: storeKeys};
     else queue[storeKey] = callback;
@@ -1713,7 +1716,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     retreives and calls callback for `storkey` if exists
     also handles if a single callback is need for one key
   **/
-  _retreiveCallbackForStoreKey: function(storeKey){
+  _retreiveCallbackForStoreKey: function (storeKey){
     var queue = this._callback_queue,
         callback = queue[storeKey],
         allFinished, keys;
@@ -1725,13 +1728,13 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       else if(SC.typeOf(callback) == SC.T_HASH){
         callback.completed = YES;
         keys = callback.storeKeys;
-        keys.forEach(function(key){
+        keys.forEach(function (key){
           if(!queue[key].completed) allFinished = YES;
         });
         if(allFinished){
           callback.callback.call(); // args?
           //cleanup
-          keys.forEach(function(key){
+          keys.forEach(function (key){
             delete queue[key];
           });
         }
@@ -1744,7 +1747,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @private
 
   */
-  _cancelCallback: function(storeKey){
+  _cancelCallback: function (storeKey){
     var queue = this._callback_queue;
     if(queue[storeKey]){
       delete queue[storeKey];
@@ -1770,7 +1773,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Function} callback (optional)
     @returns {Number} storeKey that was retrieved
   */
-  retrieveRecord: function(recordType, id, storeKey, isRefresh, callback) {
+  retrieveRecord: function (recordType, id, storeKey, isRefresh, callback) {
     var array = this._TMP_RETRIEVE_ARRAY,
         ret;
 
@@ -1799,7 +1802,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Function} callback (optional) when refresh completes
     @returns {Boolean} YES if the retrieval was a success.
   */
-  refreshRecord: function(recordType, id, storeKey, callback) {
+  refreshRecord: function (recordType, id, storeKey, callback) {
     return !!this.retrieveRecord(recordType, id, storeKey, YES, callback);
   },
 
@@ -1814,7 +1817,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Function} callback (optional) when refresh completes
     @returns {Boolean} YES if the retrieval was a success.
   */
-  refreshRecords: function(recordTypes, ids, storeKeys, callback) {
+  refreshRecords: function (recordTypes, ids, storeKeys, callback) {
     var ret = this.retrieveRecords(recordTypes, ids, storeKeys, YES, callback);
     return ret && ret.length>0;
   },
@@ -1836,7 +1839,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     @returns {Boolean} if the action was succesful.
   */
-  commitRecords: function(recordTypes, ids, storeKeys, params, callbacks) {
+  commitRecords: function (recordTypes, ids, storeKeys, params, callbacks) {
     var source    = this._getDataSource(),
         isArray   = SC.typeOf(recordTypes) === SC.T_ARRAY,
         hasCallbackArray = SC.typeOf(callbacks) === SC.T_ARRAY,
@@ -1931,7 +1934,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Function|Array} callback function or array of functions
     @returns {Boolean} if the action was successful.
   */
-  commitRecord: function(recordType, id, storeKey, params, callback) {
+  commitRecord: function (recordType, id, storeKey, params, callback) {
     var array = this._TMP_RETRIEVE_ARRAY,
         ret ;
     if (id === undefined && storeKey === undefined ) return NO;
@@ -1959,7 +1962,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Array} storeKeys (optional) store keys to destroy
     @returns {SC.Store} the store.
   */
-  cancelRecords: function(recordTypes, ids, storeKeys) {
+  cancelRecords: function (recordTypes, ids, storeKeys) {
     var source  = this._getDataSource(),
         isArray = SC.typeOf(recordTypes) === SC.T_ARRAY,
         K       = SC.Record,
@@ -2004,7 +2007,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Array} storeKeys (optional) store keys to destroy
     @returns {SC.Store} the store.
   */
-  cancelRecord: function(recordType, id, storeKey) {
+  cancelRecord: function (recordType, id, storeKey) {
     var array = this._TMP_RETRIEVE_ARRAY,
         ret ;
 
@@ -2047,7 +2050,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Array} id optional.  if not passed lookup on the hash
     @returns {String} store keys assigned to these id
   */
-  loadRecord: function(recordType, dataHash, id) {
+  loadRecord: function (recordType, dataHash, id) {
     var K       = SC.Record,
         ret, primaryKey, storeKey;
 
@@ -2093,7 +2096,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Array} ids optional array of ids.  if not passed lookup on hashes
     @returns {Array} store keys assigned to these ids
   */
-  loadRecords: function(recordTypes, dataHashes, ids) {
+  loadRecords: function (recordTypes, dataHashes, ids) {
     var isArray = SC.typeOf(recordTypes) === SC.T_ARRAY,
         len     = dataHashes.get('length'),
         ret     = [],
@@ -2129,7 +2132,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     @returns {SC.Error} SC.Error or undefined if no error associated with the record.
   */
-  readError: function(storeKey) {
+  readError: function (storeKey) {
     var errors = this.recordErrors ;
     return errors ? errors[storeKey] : undefined ;
   },
@@ -2141,7 +2144,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     @returns {SC.Error} SC.Error or undefined if no error associated with the query.
   */
-  readQueryError: function(query) {
+  readQueryError: function (query) {
     var errors = this.queryErrors ;
     return errors ? errors[SC.guidFor(query)] : undefined ;
   },
@@ -2158,7 +2161,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Number} storeKey record store key to cancel
     @returns {SC.Store} receiver
   */
-  dataSourceDidCancel: function(storeKey) {
+  dataSourceDidCancel: function (storeKey) {
     var status = this.readStatus(storeKey),
         K      = SC.Record;
 
@@ -2214,7 +2217,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Object} newId optional new id to replace the old one
     @returns {SC.Store} receiver
   */
-  dataSourceDidComplete: function(storeKey, dataHash, newId) {
+  dataSourceDidComplete: function (storeKey, dataHash, newId) {
     var status = this.readStatus(storeKey), K = SC.Record, statusOnly;
 
     // EMPTY, ERROR, READY_CLEAN, READY_NEW, READY_DIRTY, DESTROYED_CLEAN,
@@ -2253,7 +2256,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Number} storeKey record store key to cancel
     @returns {SC.Store} receiver
   */
-  dataSourceDidDestroy: function(storeKey) {
+  dataSourceDidDestroy: function (storeKey) {
     var status = this.readStatus(storeKey), K = SC.Record;
 
     // EMPTY, ERROR, READY_CLEAN, READY_NEW, READY_DIRTY, DESTROYED_CLEAN,
@@ -2286,7 +2289,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {SC.Error} error [optional] an SC.Error instance to associate with storeKey
     @returns {SC.Store} receiver
   */
-  dataSourceDidError: function(storeKey, error) {
+  dataSourceDidError: function (storeKey, error) {
     var status = this.readStatus(storeKey), errors = this.recordErrors, K = SC.Record;
 
     // EMPTY, ERROR, READY_CLEAN, READY_NEW, READY_DIRTY, DESTROYED_CLEAN,
@@ -2329,15 +2332,15 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Number} storeKey optional store key.
     @returns {Number|Boolean} storeKey if push was allowed, NO if not
   */
-  pushRetrieve: function(recordType, id, dataHash, storeKey) {
+  pushRetrieve: function (recordType, id, dataHash, storeKey) {
     var K = SC.Record, status;
 
-    if(storeKey===undefined) storeKey = recordType.storeKeyFor(id);
+    if (storeKey === undefined) storeKey = recordType.storeKeyFor(id);
     status = this.readStatus(storeKey);
-    if(status==K.EMPTY || status==K.ERROR || status==K.READY_CLEAN || status==K.DESTROYED_CLEAN) {
+    if (status == K.EMPTY || status == K.ERROR || status == K.READY_CLEAN || status == K.DESTROYED_CLEAN) {
 
       status = K.READY_CLEAN;
-      if(dataHash===undefined) this.writeStatus(storeKey, status) ;
+      if (dataHash === undefined) this.writeStatus(storeKey, status) ;
       else this.writeDataHash(storeKey, dataHash, status) ;
 
       if (id && this.idFor(storeKey) !== id) SC.Store.replaceIdFor(storeKey, id);
@@ -2358,7 +2361,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Number} storeKey optional store key.
     @returns {Number|Boolean} storeKey if push was allowed, NO if not
   */
-  pushDestroy: function(recordType, id, storeKey) {
+  pushDestroy: function (recordType, id, storeKey) {
     var K = SC.Record, status;
 
     if(storeKey===undefined){
@@ -2385,7 +2388,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Number} storeKey optional store key.
     @returns {Number|Boolean} storeKey if push was allowed, NO if not
   */
-  pushError: function(recordType, id, error, storeKey) {
+  pushError: function (recordType, id, error, storeKey) {
     var K = SC.Record, status, errors = this.recordErrors;
 
     if(storeKey===undefined) storeKey = recordType.storeKeyFor(id);
@@ -2423,7 +2426,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {SC.Array} storeKeys array of store keys
     @returns {SC.Store} receiver
   */
-  loadQueryResults: function(query, storeKeys) {
+  loadQueryResults: function (query, storeKeys) {
     //@if(debug)
     if (query.get('location') === SC.Query.LOCAL) {
       throw new Error("Developer Error: You should not call loadQueryResults with a local query.  You need to use dataSourceDidFetchQuery instead.");
@@ -2514,11 +2517,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {SC.Query} query the query you cancelled
     @returns {SC.Store} receiver
   */
-  dataSourceDidCancelQuery: function(query) {
+  dataSourceDidCancelQuery: function (query) {
     return this._scstore_dataSourceDidCancelQuery(query, YES);
   },
 
-  _scstore_dataSourceDidCancelQuery: function(query, createIfNeeded) {
+  _scstore_dataSourceDidCancelQuery: function (query, createIfNeeded) {
     var recArray     = this._findQuery(query, createIfNeeded, NO),
         nestedStores = this.get('nestedStores'),
         loc          = nestedStores ? nestedStores.get('length') : 0;
@@ -2543,7 +2546,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {SC.Error} error [optional] an SC.Error instance to associate with query
     @returns {SC.Store} receiver
   */
-  dataSourceDidErrorQuery: function(query, error) {
+  dataSourceDidErrorQuery: function (query, error) {
     var errors = this.queryErrors;
 
     // Add the error to the array of query errors (for lookup later on if necessary).
@@ -2555,7 +2558,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     return this._scstore_dataSourceDidErrorQuery(query, YES);
   },
 
-  _scstore_dataSourceDidErrorQuery: function(query, createIfNeeded) {
+  _scstore_dataSourceDidErrorQuery: function (query, createIfNeeded) {
     var recArray     = this._findQuery(query, createIfNeeded, NO),
         nestedStores = this.get('nestedStores'),
         loc          = nestedStores ? nestedStores.get('length') : 0;
@@ -2576,13 +2579,13 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   //
 
   /** @private */
-  init: function() {
+  init: function () {
     sc_super();
     this.reset();
   },
 
 
-  toString: function() {
+  toString: function () {
     // Include the name if the client has specified one.
     var name = this.get('name');
     if (!name) {
@@ -2605,7 +2608,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Number} storeKey the store key
     @returns {String} primaryKey value
   */
-  idFor: function(storeKey) {
+  idFor: function (storeKey) {
     return SC.Store.idFor(storeKey);
   },
 
@@ -2615,7 +2618,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Number} storeKey the store key
     @returns {SC.Record} record instance
   */
-  recordTypeFor: function(storeKey) {
+  recordTypeFor: function (storeKey) {
     return SC.Store.recordTypeFor(storeKey) ;
   },
 
@@ -2627,7 +2630,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {String} primaryKey the primary key
     @returns {Number} storeKey
   */
-  storeKeyFor: function(recordType, primaryKey) {
+  storeKeyFor: function (recordType, primaryKey) {
     return recordType.storeKeyFor(primaryKey);
   },
 
@@ -2640,7 +2643,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {String} primaryKey the primary key
     @returns {Number} a storeKey.
   */
-  storeKeyExists: function(recordType, primaryKey) {
+  storeKeyExists: function (recordType, primaryKey) {
     return recordType.storeKeyExists(primaryKey);
   },
 
@@ -2651,7 +2654,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {SC.Record} recordType
     @returns {Array} set of storeKeys
   */
-  storeKeysFor: function(recordType) {
+  storeKeysFor: function (recordType) {
     var ret = [],
         isEnum = recordType && recordType.isEnumerable,
         recType, storeKey, isMatch ;
@@ -2676,7 +2679,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     @returns {Array} set of storeKeys
   */
-  storeKeys: function() {
+  storeKeys: function () {
     var ret = [], storeKey;
     if(!this.statuses) return ret;
 
@@ -2696,7 +2699,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Number} storeKey
     @returns {String}
   */
-  statusString: function(storeKey) {
+  statusString: function (storeKey) {
     var rec = this.materializeRecord(storeKey);
     return rec.statusString();
   }
@@ -2794,7 +2797,7 @@ SC.Store.mixin(/** @scope SC.Store.prototype */{
 
     @type Number
   */
-  generateStoreKey: function() { return this.nextStoreKey++; },
+  generateStoreKey: function () { return this.nextStoreKey++; },
 
   /**
     Given a `storeKey` returns the `primaryKey` associated with the key.
@@ -2803,7 +2806,7 @@ SC.Store.mixin(/** @scope SC.Store.prototype */{
     @param {Number} storeKey the store key
     @returns {String} the primary key or null
   */
-  idFor: function(storeKey) {
+  idFor: function (storeKey) {
     return this.idsByStoreKey[storeKey] ;
   },
 
@@ -2814,7 +2817,7 @@ SC.Store.mixin(/** @scope SC.Store.prototype */{
     @param {Number} storeKey the store key
     @returns {SC.Query} query query object
   */
-  queryFor: function(storeKey) {
+  queryFor: function (storeKey) {
     return this.queriesByStoreKey[storeKey];
   },
 
@@ -2828,7 +2831,7 @@ SC.Store.mixin(/** @scope SC.Store.prototype */{
     @param {Number} storeKey the store key
     @returns {SC.Record} the record type
   */
-  recordTypeFor: function(storeKey) {
+  recordTypeFor: function (storeKey) {
     return this.recordTypesByStoreKey[storeKey];
   },
 
@@ -2841,7 +2844,7 @@ SC.Store.mixin(/** @scope SC.Store.prototype */{
     @param {String} newPrimaryKey the new primary key
     @returns {SC.Store} receiver
   */
-  replaceIdFor: function(storeKey, newId) {
+  replaceIdFor: function (storeKey, newId) {
     var oldId = this.idsByStoreKey[storeKey],
         recordType, storeKeys;
 
@@ -2874,7 +2877,7 @@ SC.Store.mixin(/** @scope SC.Store.prototype */{
     @param {SC.Record} recordType a record class
     @returns {SC.Store} receiver
   */
-  replaceRecordTypeFor: function(storeKey, recordType) {
+  replaceRecordTypeFor: function (storeKey, recordType) {
     this.recordTypesByStoreKey[storeKey] = recordType;
     return this ;
   }

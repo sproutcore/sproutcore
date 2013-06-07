@@ -521,7 +521,7 @@ SC.CoreView.reopen(
         // Notify.
         if (this.didHideInDocument) { this.didHideInDocument(); }
 
-      this._callOnChildViews('_parentDidHideInDocument');
+        this._callOnChildViews('_parentDidHideInDocument');
 
         // Route.
         this._gotoAttachedHiddenState();
@@ -633,7 +633,7 @@ SC.CoreView.reopen(
     default:
     }
 
-      this._executeQueuedUpdates();
+    this._executeQueuedUpdates();
 
     if (transitionShow) {
       this._transitionShow();
