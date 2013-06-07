@@ -20,7 +20,7 @@ sc_require('mixins/editable');
   @extends SC.Editable
   @author Charles Jolley
  */
-SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
+SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   /** @scope SC.TextFieldView.prototype */ {
 
   classNames: ['sc-text-field-view'],
@@ -352,7 +352,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     This property indicates if the value in the text field can be changed.
     If set to `NO`, a `readOnly` attribute will be added to the DOM Element.
 
-    Note if `isEnabled` is `NO` this property will have no effect.
+    Note if `isEnabledInPane` is `NO` this property will have no effect.
 
     @type Boolean
     @default YES
@@ -479,8 +479,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   },
 
   acceptsFirstResponder: function () {
-    return this.get('isEnabled');
-  }.property('isEnabled'),
+    return this.get('isEnabledInPane');
+  }.property('isEnabledInPane'),
 
   accessoryViewObserver: function () {
     var classNames,
@@ -508,20 +508,22 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
           classNames = previousView.get('classNames') ;
           classNames = classNames.without('sc-text-field-accessory-view') ;
           previousView.set('classNames', classNames) ;
-          this.removeChild(previousView) ;
-          previousView = null ;
-          this['_'+viewProperty] = null ;
+
+          if (previousView.createdByParent) {
+            this.removeChildAndDestroy(previousView);
+          } else {
+            this.removeChild(previousView);
+          }
+
+          // Tidy up.
+          previousView = this['_'+viewProperty] = this['_created' + viewProperty] = null;
         }
 
         // If there's a new accessory view to add, do so now.
         if (accessoryView) {
           // If the user passed in a class rather than an instance, create an
           // instance now.
-          if (accessoryView.isClass) {
-            accessoryView = accessoryView.create({
-              layoutView: this
-            }) ;
-          }
+          accessoryView = this.createChildView(accessoryView);
 
           // Add in the "sc-text-field-accessory-view" class name so that the
           // z-index gets set correctly.
@@ -557,7 +559,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
           // right-justify the view.
           if (!layout.right) layout.right = 0 ;
 
-          rightAccessoryView.adjust({ layout: layout }) ;
+          rightAccessoryView.adjust(layout) ;
         }
       }
     }
@@ -1181,6 +1183,64 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     return YES ; // handled
   },
 
+  // If this is a multi-line field, then allow the new line to proceed.
+  /** @private */
+  insertNewline: function(evt) {
+    if (this.get('isTextArea')) {
+      evt.allowDefault();
+      return YES; // handled
+    }
+    return NO;
+  },
+
+  /** @private */
+  deleteForward: function(evt) {
+    evt.allowDefault();
+    return YES;
+  },
+
+  /** @private */
+  deleteBackward: function(evt) {
+    evt.allowDefault();
+    return YES;
+  },
+
+  /** @private */
+  moveLeft: function(evt) {
+    evt.allowDefault();
+    return YES;
+  },
+
+  /** @private */
+  moveRight: function(evt) {
+    evt.allowDefault();
+    return YES;
+  },
+
+  /** @private */
+  selectAll: function(evt) {
+    evt.allowDefault();
+    return YES;
+  },
+
+  /** @private */
+  moveUp: function(evt) {
+    if (this.get('isTextArea')) {
+      evt.allowDefault();
+      return YES;
+    }
+    return NO;
+  },
+
+  /** @private */
+  moveDown: function(evt) {
+    if (this.get('isTextArea')) {
+      evt.allowDefault();
+      return YES;
+    }
+    return NO;
+  },
+
   keyUp: function (evt) {
     if (SC.browser.isMozilla &&
         evt.keyCode === SC.Event.KEY_RETURN) { this.fieldValueDidChange(); }
@@ -1198,7 +1258,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     var fieldValue = this.get('fieldValue'); // use 'fieldValue' since we want actual text
     this._txtFieldMouseDown=YES;
     this.becomeFirstResponder();
-    if (!this.get('isEnabled')) {
+    if (!this.get('isEnabledInPane')) {
       evt.stop();
       return YES;
     } else {
@@ -1213,7 +1273,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     // processing.
     this.notifyPropertyChange('selection');
 
-    if (!this.get('isEnabled')) {
+    if (!this.get('isEnabledInPane')) {
       evt.stop();
       return YES;
     }

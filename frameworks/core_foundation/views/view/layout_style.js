@@ -7,6 +7,9 @@ sc_require('views/view/animation');
   Map to CSS Transforms
 */
 
+// The scale transform must be last in order to decompose the transformation matrix.
+SC.CSS_TRANSFORM_NAMES = ['rotateX', 'rotateY', 'rotateZ', 'scale'];
+
 SC.CSS_TRANSFORM_MAP = {
   rotate: function () {
     return null;
@@ -37,13 +40,21 @@ SC.CSS_TRANSFORM_MAP = {
 /** @private */
 SC.View.LayoutStyleCalculator = {
 
+  /** @private If the value is undefined, make it null. */
+  _valueOrNull: function (value) {
+    return value === undefined ? null : value;
+  },
+
   /** @private */
   _prepareStyle: function (layout) {
     /*jshint eqnull:true */
-    var style = {
-      marginLeft: null,
-      marginTop: null
-    };
+    // It's important to provide null defaults to reset any previous style when
+    // this is applied.
+    var commonBorder = this._valueOrNull(layout.border),
+      style = {
+        marginLeft: null,
+        marginTop: null
+      };
 
     // Position and size.
     style.bottom = layout.bottom;
@@ -56,39 +67,47 @@ SC.View.LayoutStyleCalculator = {
     style.width = layout.width;
 
     // Borders.
-    style.borderTopWidth = layout.borderTop !== undefined ? layout.borderTop : layout.border;
-    style.borderRightWidth = layout.borderRight !== undefined ? layout.borderRight : layout.border;
-    style.borderBottomWidth = layout.borderBottom !== undefined ? layout.borderBottom : layout.border;
-    style.borderLeftWidth = layout.borderLeft !== undefined ? layout.borderLeft : layout.border;
+    style.borderTopWidth = layout.borderTop !== undefined ? layout.borderTop : commonBorder;
+    style.borderRightWidth = layout.borderRight !== undefined ? layout.borderRight : commonBorder;
+    style.borderBottomWidth = layout.borderBottom !== undefined ? layout.borderBottom : commonBorder;
+    style.borderLeftWidth = layout.borderLeft !== undefined ? layout.borderLeft : commonBorder;
 
     // Minimum and maximum size.
-    style.maxHeight = (layout.maxHeight === undefined) ? null : layout.maxHeight;
-    style.maxWidth = (layout.maxWidth === undefined) ? null : layout.maxWidth;
-    style.minWidth = (layout.minWidth === undefined) ? null : layout.minWidth;
-    style.minHeight = (layout.minHeight === undefined) ? null : layout.minHeight;
+    style.maxHeight = this._valueOrNull(layout.maxHeight);
+    style.maxWidth = this._valueOrNull(layout.maxWidth);
+    style.minWidth = this._valueOrNull(layout.minWidth);
+    style.minHeight = this._valueOrNull(layout.minHeight);
 
     // the toString here is to ensure that it doesn't get px added to it
-    style.zIndex  = (layout.zIndex  != null) ? layout.zIndex.toString() : null;
+    style.zIndex  = (layout.zIndex != null) ? layout.zIndex.toString() : null;
     style.opacity = (layout.opacity != null) ? layout.opacity.toString() : null;
 
-    style.backgroundPosition = (layout.backgroundPosition != null) ? layout.backgroundPosition : null;
+    style.backgroundPosition = this._valueOrNull(layout.backgroundPosition);
 
-    // Handle transforms
+    // Handle transforms (including reset).
     if (SC.platform.supportsCSSTransforms) {
       var transformAttribute = SC.browser.experimentalStyleNameFor('transform'),
         transforms = [],
         transformMap = SC.CSS_TRANSFORM_MAP;
 
-      // normalizing transforms like rotateX: 5 to rotateX(5deg)
-      for (var transformName in transformMap) {
-        var layoutTransform = layout[transformName];
+      // The order of the transforms is important so that we can decompose them
+      // from the transformation matrix later if necessary.
+      for (var i = 0, len = SC.CSS_TRANSFORM_NAMES.length; i < len; i++) {
+        var transformName = SC.CSS_TRANSFORM_NAMES[i],
+          layoutTransform = layout[transformName];
 
         if (layoutTransform != null) {
+          // normalizing transforms like rotateX: 5 to rotateX(5deg)
           transforms.push(transformMap[transformName](layoutTransform));
         }
       }
 
       style[transformAttribute] = transforms.length > 0 ? transforms.join(' ') : null;
+    }
+
+    // Reset any transitions.
+    if (SC.platform.supportsCSSTransitions) {
+      style[SC.browser.experimentalStyleNameFor('transition')] = null;
     }
 
     // for ie, we will NOT use alpha. It is just a source of pain.
@@ -131,7 +150,7 @@ SC.View.LayoutStyleCalculator = {
     throw error;
   },
 
-
+  /** @private */
   _calculatePosition: function (style, state, direction) {
     var start, finish, size,
       hasStart, hasFinish, hasSize, hasMaxSize,
@@ -167,8 +186,8 @@ SC.View.LayoutStyleCalculator = {
       finishBorderVal = this._cssNumber(style[finishBorder]),
       sizeNum = style[size];
 
-    style[startBorder] = startBorderVal || null;
-    style[finishBorder] = finishBorderVal || null;
+    style[startBorder] = startBorderVal;
+    style[finishBorder] = finishBorderVal;
 
     // This is a normal number
     if (sizeNum >= 1) { sizeNum -= (startBorderVal + finishBorderVal); }
@@ -222,8 +241,8 @@ SC.View.LayoutStyleCalculator = {
       sizeIsPercent = SC.isPercentage(sizeValue),
       value;
 
-    style[startBorder] = startBorderVal || null;
-    style[finishBorder] = finishBorderVal || null;
+    style[startBorder] = startBorderVal;
+    style[finishBorder] = finishBorderVal;
 
     // Calculate the margin offset used to center the value along this axis.
     if (SC.none(sizeValue)) {
@@ -244,6 +263,7 @@ SC.View.LayoutStyleCalculator = {
     style[finish] = style[center] = null;
   },
 
+  /** @private */
   // return "auto" for "auto", null for null, converts 0.XY into "XY%".
   // otherwise returns the original number, rounded down
   _cssNumber: function (val) {
@@ -317,9 +337,10 @@ SC.View.LayoutStyleCalculator = {
     // Handle transforms
     if (hasAcceleratedLayer) {
       shouldTranslate = YES;
+
+      // If we're animating other transforms at different speeds, don't use acceleratedLayer
       if (animations && (animations.top || animations.left)) {
         for (key in animations) {
-          // If we're animating other transforms at different speeds, don't use acceleratedLayer
           if (SC.CSS_TRANSFORM_MAP[key] &&
               ((animations.top &&
                 animations.top.duration !== animations[key].duration) ||
@@ -417,7 +438,7 @@ SC.View.reopen(
 
     Computes the layout style settings needed for the current anchor.
 
-    @property {Object}
+    @type Object
     @readOnly
   */
   layoutStyle: function () {

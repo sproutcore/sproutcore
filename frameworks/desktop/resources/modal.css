@@ -1,7 +1,9 @@
 /** SC.ModalPane Support */
 
 .sc-pane.sc-modal {
+  position: fixed;
   z-index: 100;
+
   .msie &{
     background-image: url('.');
   }

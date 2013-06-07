@@ -27,21 +27,21 @@ SC.SelectFieldView = SC.FieldView.extend(
 
   /**
     @type Array
-    @default ['objects','nameKey','valueKey','isEnabled']
+    @default ['objects','nameKey','valueKey']
     @see SC.View#displayProperties
   */
-  displayProperties: ['objects','nameKey','valueKey','isEnabled'],
+  displayProperties: ['objects','nameKey','valueKey'],
 
   /**
-    Reflects the value of `isEnabled`.
+    Reflects the value of `isEnabledInPane`.
 
     @field
     @type Boolean
     @default YES
   */
   acceptsFirstResponder: function() {
-    return this.get('isEnabled');
-  }.property('isEnabled'),
+    return this.get('isEnabledInPane');
+  }.property('isEnabledInPane'),
 
   /**
     @type String
@@ -303,7 +303,7 @@ SC.SelectFieldView = SC.FieldView.extend(
 
   /** @private */
   mouseDown: function(evt) {
-    if (!this.get('isEnabled')) {
+    if (!this.get('isEnabledInPane')) {
       evt.stop();
       return YES;
     } else return sc_super();

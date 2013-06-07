@@ -52,13 +52,13 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
   // Don't apply this role until each image view can assign a non-empty string value for @aria-label <rdar://problem/9941887>
   // ariaRole: 'img',
 
-  displayProperties: ['frame', 'image', 'innerFrame', 'toolTip', 'imageValue', 'type'],
+  displayProperties: ['align', 'scale', 'value', 'displayToolTip'],
 
-  renderDelegateName: function() {
+  renderDelegateName: function () {
     return (this.get('useCanvas') ? 'canvasImage' : 'image') + "RenderDelegate";
   }.property('useCanvas').cacheable(),
 
-  tagName: function() {
+  tagName: function () {
     return this.get('useCanvas') ? 'canvas' : 'div';
   }.property('useCanvas').cacheable(),
 
@@ -74,34 +74,26 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
   */
   canLoadInBackground: NO,
 
-  /**
-    @property {Image}
+  /** @private
+    @type Image
     @default SC.BLANK_IMAGE
   */
   image: SC.BLANK_IMAGE,
 
-  /**
-    @property {String}
-    @default null
-  */
-  imageValue: function() {
-    var value = this.get('value');
-    return value && value.isEnumerable ? value.firstObject() : value;
-  }.property('value').cacheable(),
 
-  /**
+  /** @private
     The frame for the inner img element or for the canvas to draw within, altered according to the scale
     and align properties provided by SC.InnerFrame.
 
-    @property {Object}
+    @type Object
   */
-  innerFrame: function() {
+  innerFrame: function () {
     var image = this.get('image'),
-        imageWidth = image.width,
-        imageHeight = image.height,
-        frame = this.get('frame');
+      imageWidth = image.width,
+      imageHeight = image.height,
+      frame = this.get('frame');
 
-    if (SC.none(frame)) return {x: 0, y: 0, width: 0, height: 0};  // frame is 'null' until rendered when useStaticLayout === YES
+    if (SC.none(frame)) return { x: 0, y: 0, width: 0, height: 0 };  // frame is 'null' until rendered when useStaticLayout === YES
 
     return this.innerFrameForSize(imageWidth, imageHeight, frame.width, frame.height);
   }.property('align', 'image', 'scale', 'frame').cacheable(),
@@ -109,7 +101,7 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
   /**
     If YES, any specified toolTip will be localized before display.
 
-    @property {Boolean}
+    @type Boolean
     @default YES
   */
   localize: YES,
@@ -122,7 +114,7 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
     constants: SC.IMAGE_STATE_NONE, SC.IMAGE_STATE_LOADING,
     SC.IMAGE_STATE_LOADED, SC.IMAGE_STATE_FAILED
 
-    @property {String}
+    @type String
   */
   status: SC.IMAGE_STATE_NONE,
 
@@ -130,35 +122,36 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
     Will be one of the following constants: SC.IMAGE_TYPE_URL or
     SC.IMAGE_TYPE_CSS_CLASS
 
-    @property {String}
-    @observes imageValue
+    @type String
+    @observes value
   */
-  type: function() {
-    var imageValue = this.get('imageValue');
-    if (SC.ImageView.valueIsUrl(imageValue)) return SC.IMAGE_TYPE_URL;
-    else if (!SC.none(imageValue)) return SC.IMAGE_TYPE_CSS_CLASS;
+  type: function () {
+    var value = this.get('value');
+
+    if (SC.ImageView.valueIsUrl(value)) return SC.IMAGE_TYPE_URL;
+    else if (!SC.none(value)) return SC.IMAGE_TYPE_CSS_CLASS;
     return SC.IMAGE_TYPE_NONE;
-  }.property('imageValue').cacheable(),
+  }.property('value').cacheable(),
 
   /**
-    The canvas element is more performant than the img element, since we can
+    The canvas element performs better than the img element since we can
     update the canvas image without causing browser reflow.  As an additional
     benefit, canvas images are less easily copied, which is generally in line
     with acting as an 'application'.
 
-    @property {Boolean}
+    @type Boolean
     @default YES if supported
     @since SproutCore 1.5
   */
-  useCanvas: function() {
-    return SC.platform.supportsCanvas && !this.get('useStaticLayout') && this.get('type') !== SC.IMAGE_TYPE_CSS_CLASS;
+  useCanvas: function () {
+    return SC.platform.supportsCanvas && !this.get('useStaticLayout');
   }.property('useStaticLayout', 'type').cacheable(),
 
   /**
     If YES, image view will use the SC.imageQueue to control loading.  This
     setting is generally preferred.
 
-    @property {Boolean}
+    @type Boolean
     @default YES
   */
   useImageQueue: YES,
@@ -178,7 +171,7 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
     Note that if you provide a URL, it must contain at least one '/' as this
     is how we autodetect URLs.
 
-    @property {String}
+    @type String
   */
   value: null,
 
@@ -187,27 +180,23 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
 
     @returns {void}
   */
-  // Note: SC.View's updateLayer() will call viewDidResize() if useStaticLayout is true.  The result of this
-  // is that since our display depends on the frame, when the view or parent view resizes, viewDidResize
-  // notifies that the frame has changed, so we update our view, which calls viewDidResize, which notifies
-  // that the frame has changed, so we update our view, etc. in an infinite loop.
-  viewDidResize: function() {
-    // 'frame' as a property is cached and won't yet be updated, however calling notifyPropertyChange on 'frame'
-    // causes the aforementioned infinite loop.  Instead, measure the frame ourselves and only notify if it has
-    // changed width or height
-    var layer = this.get('layer'),
-        width,
-        height;
+  viewDidResize: function () {
+    sc_super();
 
-    if (layer) {
-      width = layer.offsetWidth;
-      height = layer.offsetHeight;
-
-      if (this._cachedWidth !== width || this._cachedHeight !== height) {
-        this.notifyPropertyChange('frame');
-        this._cachedWidth = width;
-        this._cachedHeight = height;
+    // Note: SC.View's updateLayer() will call viewDidResize() if useStaticLayout is true.  The result of this
+    // is that since our display depends on the frame, when the view or parent view resizes, viewDidResize
+    // notifies that the frame has changed, so we update our view, which calls viewDidResize, which notifies
+    // that the frame has changed, so we update our view, etc. in an infinite loop.
+    if (this.get('useStaticLayout')) {
+      if (this._updatingOnce) {
+        this._updatingOnce = false;
+      } else {
+        // Allow a single update when the view resizes to avoid an infinite loop.
+        this._updatingOnce = true;
+        this.updateLayerIfNeeded();
       }
+    } else {
+      this.updateLayerIfNeeded();
     }
   },
 
@@ -215,13 +204,17 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
   // Methods
   //
 
-  init: function() {
+  /** @private */
+  init: function () {
     sc_super();
 
-    this._image_valueDidChange();
+    // Start loading the image immediately on creation.
+    this._valueDidChange();
 
     if (this.get('useImageCache') !== undefined) {
-      SC.Logger.warn("%@ has useImageCache set, please set useImageQueue instead".fmt(this));
+      //@if(debug)
+      SC.warn("Developer Warning: %@ has useImageCache set, please set useImageQueue instead".fmt(this));
+      //@endif
       this.set('useImageQueue', this.get('useImageCache'));
     }
   },
@@ -232,15 +225,34 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
   //
 
   /**
-    When the layer changes, we need to tell the view to render its stuff
-    as the canvas won't work without this
+    Called when the element is attached to the document.
 
-    @observes layer
+    If the image uses static layout (i.e. we don't know the frame beforehand),
+    then this method will call updateLayerIfNeeded in order to adjust the inner
+    frame of the image according to its rendered frame.
   */
-  layerDidChange: function() {
-    if (this.get('useCanvas')) this.set('layerNeedsUpdate', YES);
-  }.observes('layer'),
+  didAppendToDocument: function () {
+    // If using static layout, we can still support image scaling and aligning,
+    // but we need to do it post-render.
+    if (this.get('useStaticLayout')) {
+      // Call updateLayer manually, because we can't have innerFrame be a
+      // display property.  It causes an infinite loop with static layout.
+      this.updateLayerIfNeeded();
+    }
+  },
 
+  /**
+    Called when the element is created.
+
+    If the view is using a canvas element, then we can not draw to the canvas
+    until it exists.  This method will call updateLayerIfNeeded in order to draw
+    to the canvas.
+  */
+  didCreateLayer: function () {
+    if (this.get('useCanvas')) {
+      this.updateLayerIfNeeded();
+    }
+  },
 
   // ..........................................................
   // Value handling
@@ -250,36 +262,32 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
     Whenever the value changes, update the image state and possibly schedule
     an image to load.
   */
-  _image_valueDidChange: function() {
-    var value = this.get('imageValue'),
-        type = this.get('type');
+  _valueDidChange: function () {
+    var value = this.get('value'),
+      type = this.get('type');
 
-    // check to see if our value has changed
-    if (value !== this._iv_value) {
-      this._iv_value = value;
+    // Reset the backing image object every time.
+    this.set('image', SC.BLANK_IMAGE);
 
-      this.set('image', SC.BLANK_IMAGE);
+    if (type == SC.IMAGE_TYPE_URL) {
+      // Load the image.
+      this.set('status', SC.IMAGE_STATE_LOADING);
 
-      if (type !== SC.IMAGE_TYPE_CSS_CLASS) {
-        // While the new image is loading use SC.BLANK_IMAGE as a placeholder
-        this.set('status', SC.IMAGE_STATE_LOADING);
-
-        // order: image cache, normal load
-        if (!this._loadImageUsingCache()) {
-          this._loadImage();
-        }
+      // order: image cache, normal load
+      if (!this._loadImageUsingCache()) {
+        this._loadImage();
       }
     }
-  }.observes('imageValue'),
+  }.observes('value'),
 
   /** @private
-    Tries to load the image value using the SC.imageQueue object. If the imageValue is not
+    Tries to load the image value using the SC.imageQueue object. If the value is not
     a URL, it won't attempt to load it using this method.
 
     @returns YES if loading using SC.imageQueue, NO otherwise
   */
-  _loadImageUsingCache: function() {
-    var value = this.get('imageValue'),
+  _loadImageUsingCache: function () {
+    var value = this.get('value'),
         type = this.get('type');
 
     // now update local state as needed....
@@ -293,8 +301,9 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
     return NO;
   },
 
-  _loadImageUsingCacheDidComplete: function(url, image) {
-    var value = this.get('imageValue');
+  /** @private */
+  _loadImageUsingCacheDidComplete: function (url, image) {
+    var value = this.get('value');
 
     if (value === url) {
       if (SC.ok(image)) {
@@ -311,8 +320,8 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
 
     @returns YES if it will load, NO otherwise
   */
-  _loadImage: function() {
-    var value = this.get('imageValue'),
+  _loadImage: function () {
+    var value = this.get('value'),
         type = this.get('type'),
         that = this,
         image,
@@ -321,14 +330,14 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
     if (type === SC.IMAGE_TYPE_URL) {
       image = new Image();
 
-      var errorFunc = function() {
-        SC.run(function() {
+      var errorFunc = function () {
+        SC.run(function () {
           that._loadImageDidComplete(value, SC.$error("SC.Image.FailedError", "Image", -101));
         });
       };
 
-      var loadFunc = function() {
-        SC.run(function() {
+      var loadFunc = function () {
+        SC.run(function () {
           that._loadImageDidComplete(value, image);
         });
       };
@@ -349,8 +358,9 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
     return NO;
   },
 
-  _loadImageDidComplete: function(url, image) {
-    var value = this.get('imageValue');
+  /** @private */
+  _loadImageDidComplete: function (url, image) {
+    var value = this.get('value');
 
     if (value === url) {
       if (SC.ok(image)) {
@@ -361,23 +371,24 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
     }
   },
 
-  didLoad: function(image) {
+  didLoad: function (image) {
     this.set('status', SC.IMAGE_STATE_LOADED);
     if (!image) image = SC.BLANK_IMAGE;
     this.set('image', image);
+    this.displayDidChange();
   },
 
-  didError: function(error) {
+  didError: function (error) {
     this.set('status', SC.IMAGE_STATE_FAILED);
     this.set('image', SC.BLANK_IMAGE);
   }
 
-}) ;
+});
 
 /**
   Returns YES if the passed value looks like an URL and not a CSS class
   name.
 */
-SC.ImageView.valueIsUrl = function(value) {
-  return value && SC.typeOf(value)===SC.T_STRING ? value.indexOf('/') >= 0 : NO ;
-} ;
+SC.ImageView.valueIsUrl = function (value) {
+  return value && SC.typeOf(value) === SC.T_STRING ? value.indexOf('/') >= 0 : NO;
+};

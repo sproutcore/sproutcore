@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/*globals SC */
+/*global SC */
 
 sc_require('system/state');
 sc_require('mixins/statechart_delegate');
@@ -170,6 +170,205 @@ sc_require('mixins/statechart_delegate');
 
 SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
+  //@if(debug)
+  /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */
+
+  /** @private @property */
+  allowStatechartTracing: function() {
+    var key = this.get('statechartTraceKey');
+    return this.get(key);
+  }.property().cacheable(),
+
+  /** @private */
+  _statechartTraceDidChange: function() {
+    this.notifyPropertyChange('allowStatechartTracing');
+  },
+
+  /**
+    @property
+
+    Returns an object containing current detailed information about
+    the statechart. This is primarily used for diagnostic/debugging
+    purposes.
+
+    Detailed information includes:
+
+      - current states
+      - state transition information
+      - event handling information
+
+    NOTE: This is only available in debug mode!
+
+    @returns {Hash}
+  */
+  details: function() {
+    var details = {
+      'initialized': this.get('statechartIsInitialized')
+    };
+
+    if (this.get('name')) {
+      details['name'] = this.get('name');
+    }
+
+    if (!this.get('statechartIsInitialized')) {
+      return details;
+    }
+
+    details['current-states'] = [];
+    this.get('currentStates').forEach(function(state) {
+      details['current-states'].push(state.get('fullPath'));
+    });
+
+    var stateTransition = {
+      active: this.get('gotoStateActive'),
+      suspended: this.get('gotoStateSuspended')
+    };
+
+    if (this._gotoStateActions) {
+      stateTransition['transition-sequence'] = [];
+      var actions = this._gotoStateActions,
+          actionToStr = function(action) {
+            var actionName = action.action === SC.ENTER_STATE ? "enter" : "exit";
+            return "%@ %@".fmt(actionName, action.state.get('fullPath'));
+          };
+
+      actions.forEach(function(action) {
+        stateTransition['transition-sequence'].push(actionToStr(action));
+      });
+
+      stateTransition['current-transition'] = actionToStr(this._currentGotoStateAction);
+    }
+
+    details['state-transition'] = stateTransition;
+
+    if (this._stateHandleEventInfo) {
+      var info = this._stateHandleEventInfo;
+      details['handling-event'] = {
+        state: info.state.get('fullPath'),
+        event: info.event,
+        handler: info.handler
+      };
+    } else {
+      details['handling-event'] = false;
+    }
+
+    return details;
+  }.property(),
+
+  /**
+    Returns a formatted string of detailed information about this statechart. Useful
+    for diagnostic/debugging purposes.
+
+    @returns {String}
+
+    NOTE: This is only available in debug mode!
+
+    @see #details
+  */
+  toStringWithDetails: function() {
+    var str = "",
+        header = this.toString(),
+        details = this.get('details');
+
+    str += header + "\n";
+    str += this._hashToString(details, 2);
+
+    return str;
+  },
+
+  /** @private */
+  _hashToString: function(hash, indent) {
+    var str = "";
+
+    for (var key in hash) {
+      var value = hash[key];
+      if (value instanceof Array) {
+        str += this._arrayToString(key, value, indent) + "\n";
+      }
+      else if (value instanceof Object) {
+        str += "%@%@:\n".fmt(' '.mult(indent), key);
+        str += this._hashToString(value, indent + 2);
+      }
+      else {
+        str += "%@%@: %@\n".fmt(' '.mult(indent), key, value);
+      }
+    }
+
+    return str;
+  },
+
+  /** @private */
+  _arrayToString: function(key, array, indent) {
+    if (array.length === 0) {
+      return "%@%@: []".fmt(' '.mult(indent), key);
+    }
+
+    var str = "%@%@: [\n".fmt(' '.mult(indent), key);
+
+    array.forEach(function(item, idx) {
+      str += "%@%@\n".fmt(' '.mult(indent + 2), item);
+    }, this);
+
+    str += ' '.mult(indent) + "]";
+
+    return str;
+  },
+
+  /**
+    Indicates whether to use a monitor to monitor that statechart's activities. If true then
+    the monitor will be active, otherwise the monitor will not be used. Useful for debugging
+    purposes.
+
+    NOTE: This is only available in debug mode!
+
+    @type Boolean
+  */
+  monitorIsActive: NO,
+
+  /**
+    A statechart monitor that can be used to monitor this statechart. Useful for debugging purposes.
+    A monitor will only be used if monitorIsActive is true.
+
+    NOTE: This is only available in debug mode!
+
+    @property {SC.StatechartMonitor}
+  */
+  monitor: null,
+
+  /**
+    Used to specify what property (key) on the statechart should be used as the trace property. By
+    default the property is 'trace'.
+
+    NOTE: This is only available in debug mode!
+
+    @type String
+  */
+  statechartTraceKey: 'trace',
+
+  /**
+    Indicates whether to trace the statecharts activities. If true then the statechart will output
+    its activites to the browser's JS console. Useful for debugging purposes.
+
+    NOTE: This is only available in debug mode!
+
+    @see #statechartTraceKey
+
+    @type Boolean
+  */
+  trace: NO,
+
+  /**
+    Used to log a statechart trace message
+
+    NOTE: This is only available in debug mode!
+  */
+  statechartLogTrace: function(msg) {
+    SC.Logger.info("%@: %@".fmt(this.get('statechartLogPrefix'), msg));
+  },
+
+  /* END DEBUG ONLY PROPERTIES AND METHODS */
+  //@endif
+
   // Walk like a duck
   isResponderContext: YES,
 
@@ -179,7 +378,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   /**
     Indicates if this statechart has been initialized
 
-    @property {Boolean}
+    @type Boolean
   */
   statechartIsInitialized: NO,
 
@@ -226,7 +425,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
     @see #rootState
 
-    @property {String}
+    @type String
   */
   initialState: null,
 
@@ -239,50 +438,15 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
     @see #rootState
 
-    @property {Boolean}
+    @type Boolean
   */
   statesAreConcurrent: NO,
-
-  /**
-    Indicates whether to use a monitor to monitor that statechart's activities. If true then
-    the monitor will be active, otherwise the monitor will not be used. Useful for debugging
-    purposes.
-
-    @property {Boolean}
-  */
-  monitorIsActive: NO,
-
-  /**
-    A statechart monitor that can be used to monitor this statechart. Useful for debugging purposes.
-    A monitor will only be used if monitorIsActive is true.
-
-    @property {SC.StatechartMonitor}
-  */
-  monitor: null,
-
-  /**
-    Used to specify what property (key) on the statechart should be used as the trace property. By
-    default the property is 'trace'.
-
-    @property {String}
-  */
-  statechartTraceKey: 'trace',
-
-  /**
-    Indicates whether to trace the statecharts activities. If true then the statechart will output
-    its activites to the browser's JS console. Useful for debugging purposes.
-
-    @see #statechartTraceKey
-
-    @property {Boolean}
-  */
-  trace: NO,
 
   /**
     Used to specify what property (key) on the statechart should be used as the owner property. By
     default the property is 'owner'.
 
-    @property {String}
+    @type String
   */
   statechartOwnerKey: 'owner',
 
@@ -292,7 +456,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
     @see #statechartOwnerKey
 
-    @property {SC.Object}
+    @type SC.Object
   */
   owner: null,
 
@@ -301,7 +465,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     object after it has been created. If YES then initStatechart will be
     called automatically, otherwise it will not.
 
-    @property {Boolean}
+    @type Boolean
   */
   autoInitStatechart: YES,
 
@@ -312,7 +476,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     While designing and debugging your statechart, it's best to keep this value false.
     In production you can then suppress the warning messages.
 
-    @property {Boolean}
+    @type Boolean
   */
   suppressStatechartWarnings: NO,
 
@@ -320,7 +484,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     A statechart delegate used by the statechart and the states that the statechart
     manages. The value assigned must adhere to the {@link SC.StatechartDelegate} mixin.
 
-    @property {SC.Object}
+    @type SC.Object
 
     @see SC.StatechartDelegate
   */
@@ -346,13 +510,17 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   },
 
   destroyMixin: function() {
-    var root = this.get('rootState'),
-        traceKey = this.get('statechartTraceKey');
+    var root = this.get('rootState');
+
+    //@if(debug)
+    var traceKey = this.get('statechartTraceKey');
 
     this.removeObserver(traceKey, this, '_statechartTraceDidChange');
+    //@endif
 
     root.destroy();
     this.set('rootState', null);
+    this.notifyPropertyChange('currentStates');
   },
 
   /**
@@ -369,20 +537,22 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
     this.sendAction = this.sendEvent;
 
+    //@if(debug)
     if (this.get('monitorIsActive')) {
       this.set('monitor', SC.StatechartMonitor.create({ statechart: this }));
     }
 
-    var traceKey = this.get('statechartTraceKey');
+    var traceKey = this.get('statechartTraceKey'),
+      trace = this.get('allowStatechartTracing');
 
     this.addObserver(traceKey, this, '_statechartTraceDidChange');
     this._statechartTraceDidChange();
 
-    var trace = this.get('allowStatechartTracing'),
-        rootState = this.get('rootState'),
-        msg;
-
     if (trace) this.statechartLogTrace("BEGIN initialize statechart");
+    //@endif
+
+    var rootState = this.get('rootState'),
+        msg;
 
     // If no root state was explicitly defined then try to construct
     // a root state class
@@ -421,7 +591,9 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     this.set('statechartIsInitialized', YES);
     this.gotoState(rootState);
 
+    //@if(debug)
     if (trace) this.statechartLogTrace("END initialize statechart");
+    //@endif
   },
 
   /**
@@ -576,8 +748,6 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     var pivotState = null,
         exitStates = [],
         enterStates = [],
-        trace = this.get('allowStatechartTracing'),
-        rootState = this.get('rootState'),
         paramState = state,
         paramFromCurrentState = fromCurrentState,
         msg;
@@ -624,6 +794,8 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
       if (!fromCurrentState) fromCurrentState = this.get('firstCurrentState');
     }
 
+    //@if(debug)
+    var trace = this.get('allowStatechartTracing');
     if (trace) {
       this.statechartLogTrace("BEGIN gotoState: %@".fmt(state));
       msg = "starting from current state: %@";
@@ -633,6 +805,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
       msg = msg.fmt(this.getPath('currentStates.length') > 0 ? this.get('currentStates') : '---');
       this.statechartLogTrace(msg);
     }
+    //@endif
 
     // If there is a current state to start the transition process from, then determine what
     // states are to be exited
@@ -647,7 +820,9 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     pivotState = this._findPivotState(exitStates, enterStates);
 
     if (pivotState) {
+      //@if(debug)
       if (trace) this.statechartLogTrace("pivot state = %@".fmt(pivotState));
+      //@endif
       if (pivotState.get('substatesAreConcurrent') && pivotState !== state) {
         this.statechartLogError("Can not go to state %@ from %@. Pivot state %@ has concurrent substates.".fmt(state, fromCurrentState, pivotState));
         this._gotoStateLocked = NO;
@@ -749,10 +924,12 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     this.notifyPropertyChange('enteredStates');
     this.endPropertyChanges();
 
+    //@if(debug)
     if (this.get('allowStatechartTracing')) {
       this.statechartLogTrace("current states after: %@".fmt(this.get('currentStates')));
       this.statechartLogTrace("END gotoState: %@".fmt(gotoState));
     }
+    //@endif
 
     this._cleanupStateTransition();
   },
@@ -784,9 +961,11 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
       parentState = parentState.get('parentState');
     }
 
+    //@if(debug)
     if (this.get('allowStatechartTracing')) {
       this.statechartLogTrace("<-- exiting state: %@".fmt(state));
     }
+    //@endif
 
     state.set('currentSubstates', []);
 
@@ -794,7 +973,9 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     var result = this.exitState(state, context);
     state.stateDidBecomeExited(context);
 
+    //@if(debug)
     if (this.get('monitorIsActive')) this.get('monitor').pushExitedState(state);
+    //@endif
 
     state._traverseStatesToExit_skipState = NO;
 
@@ -833,13 +1014,17 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
       parentState = parentState.get('parentState');
     }
 
+    //@if(debug)
     if (this.get('allowStatechartTracing')) this.statechartLogTrace("--> entering state: %@".fmt(state));
+    //@endif
 
     state.stateWillBecomeEntered(context);
     var result = this.enterState(state, context);
     state.stateDidBecomeEntered(context);
 
+    //@if(debug)
     if (this.get('monitorIsActive')) this.get('monitor').pushEnteredState(state);
+    //@endif
 
     return result;
   },
@@ -958,7 +1143,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   sendEvent: function(event, arg1, arg2) {
 
     if (this.get('isDestroyed')) {
-      this.statechartLogError("can send event %@. statechart is destroyed".fmt(event));
+      this.statechartLogError("can not send event %@. statechart is destroyed".fmt(event));
       return;
     }
 
@@ -968,8 +1153,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
         checkedStates = {},
         len = 0,
         i = 0,
-        state = null,
-        trace = this.get('allowStatechartTracing');
+        state = null;
 
     if (this._sendEventLocked || this._goStateLocked) {
       // Want to prevent any actions from being processed by the states until
@@ -986,9 +1170,12 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
     this._sendEventLocked = YES;
 
+    //@if(debug)
+    var trace = this.get('allowStatechartTracing');
     if (trace) {
       this.statechartLogTrace("BEGIN sendEvent: '%@'".fmt(event));
     }
+    //@endif
 
     len = currentStates.get('length');
     for (; i < len; i += 1) {
@@ -1009,10 +1196,12 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     // first event, we can go ahead and flush any pending sent events.
     this._sendEventLocked = NO;
 
+    //@if(debug)
     if (trace) {
       if (!statechartHandledEvent) this.statechartLogTrace("No state was able handle event %@".fmt(event));
       this.statechartLogTrace("END sendEvent: '%@'".fmt(event));
     }
+    //@endif
 
     var result = this._flushPendingSentEvents();
 
@@ -1093,8 +1282,6 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   _traverseStatesToExit: function(state, exitStatePath, stopState, gotoStateActions) {
     if (!state || state === stopState) return;
 
-    var trace = this.get('allowStatechartTracing');
-
     // This state has concurrent substates. Therefore we have to make sure we
     // exit them up to this state before we can go any further up the exit chain.
     if (state.get('substatesAreConcurrent')) {
@@ -1131,8 +1318,6 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   */
   _traverseStatesToEnter: function(state, enterStatePath, pivotState, useHistory, gotoStateActions) {
     if (!state) return;
-
-    var trace = this.get('allowStatechartTracing');
 
     // We do not want to enter states in the enter path until the pivot state has been reached. After
     // the pivot state has been reached, then we can go ahead and actually enter states.
@@ -1203,6 +1388,12 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     @returns {Boolean}
   */
   respondsTo: function(event) {
+    // Fast path!
+    if (this.get('isDestroyed')) {
+      this.statechartLogError("can not respond to event %@. statechart is destroyed".fmt(event));
+      return false;
+    }
+
     var currentStates = this.get('currentStates'),
         len = currentStates.get('length'),
         i = 0, state = null;
@@ -1298,7 +1489,8 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
       return;
     }
 
-    args = SC.A(arguments); args.shift();
+    args = SC.A(arguments);
+    args.shift();
 
     var len = args.length,
         arg = len > 0 ? args[len - 1] : null,
@@ -1370,11 +1562,13 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   },
 
   /** @private */
+  //@if(debug)
   _monitorIsActiveDidChange: function() {
     if (this.get('monitorIsActive') && SC.none(this.get('monitor'))) {
       this.set('monitor', SC.StatechartMonitor.create());
     }
   }.observes('monitorIsActive'),
+  //@endif
 
   /** @private
     Will process the arguments supplied to the gotoState method.
@@ -1511,13 +1705,6 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   },
 
   /**
-    Used to log a statechart trace message
-  */
-  statechartLogTrace: function(msg) {
-    SC.Logger.info("%@: %@".fmt(this.get('statechartLogPrefix'), msg));
-  },
-
-  /**
     Used to log a statechart error message
   */
   statechartLogError: function(msg) {
@@ -1541,144 +1728,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     else prefix = "%@<%@, %@>".fmt(className, name, SC.guidFor(this));
 
     return prefix;
-  }.property().cacheable(),
-
-  /** @private @property */
-  allowStatechartTracing: function() {
-    var key = this.get('statechartTraceKey');
-    return this.get(key);
-  }.property().cacheable(),
-
-  /** @private */
-  _statechartTraceDidChange: function() {
-    this.notifyPropertyChange('allowStatechartTracing');
-  },
-
-  /**
-    @property
-
-    Returns an object containing current detailed information about
-    the statechart. This is primarily used for diagnostic/debugging
-    purposes.
-
-    Detailed information includes:
-
-      - current states
-      - state transtion information
-      - event handling information
-
-    @returns {Hash}
-  */
-  details: function() {
-    var details = {
-      'initialized': this.get('statechartIsInitialized')
-    };
-
-    if (this.get('name')) {
-      details['name'] = this.get('name');
-    }
-
-    if (!this.get('statechartIsInitialized')) {
-      return details;
-    }
-
-    details['current-states'] = [];
-    this.get('currentStates').forEach(function(state) {
-      details['current-states'].push(state.get('fullPath'));
-    });
-
-    var stateTransition = {
-      active: this.get('gotoStateActive'),
-      suspended: this.get('gotoStateSuspended')
-    };
-
-    if (this._gotoStateActions) {
-      stateTransition['transition-sequence'] = [];
-      var actions = this._gotoStateActions,
-          actionToStr = function(action) {
-            var actionName = action.action === SC.ENTER_STATE ? "enter" : "exit";
-            return "%@ %@".fmt(actionName, action.state.get('fullPath'));
-          };
-
-      actions.forEach(function(action) {
-        stateTransition['transition-sequence'].push(actionToStr(action));
-      });
-
-      stateTransition['current-transition'] = actionToStr(this._currentGotoStateAction);
-    }
-
-    details['state-transition'] = stateTransition;
-
-    if (this._stateHandleEventInfo) {
-      var info = this._stateHandleEventInfo;
-      details['handling-event'] = {
-        state: info.state.get('fullPath'),
-        event: info.event,
-        handler: info.handler
-      };
-    } else {
-      details['handling-event'] = false;
-    }
-
-    return details;
-  }.property(),
-
-  /**
-    Returns a formatted string of detailed information about this statechart. Useful
-    for diagnostic/debugging purposes.
-
-    @returns {String}
-
-    @see #details
-  */
-  toStringWithDetails: function() {
-    var str = "",
-        header = this.toString(),
-        details = this.get('details');
-
-    str += header + "\n";
-    str += this._hashToString(details, 2);
-
-    return str;
-  },
-
-  /** @private */
-  _hashToString: function(hash, indent) {
-    var str = "";
-
-    for (var key in hash) {
-      var value = hash[key];
-      if (value instanceof Array) {
-        str += this._arrayToString(key, value, indent) + "\n";
-      }
-      else if (value instanceof Object) {
-        str += "%@%@:\n".fmt(' '.mult(indent), key);
-        str += this._hashToString(value, indent + 2);
-      }
-      else {
-        str += "%@%@: %@\n".fmt(' '.mult(indent), key, value);
-      }
-    }
-
-    return str;
-  },
-
-  /** @private */
-  _arrayToString: function(key, array, indent) {
-    if (array.length === 0) {
-      return "%@%@: []".fmt(' '.mult(indent), key);
-    }
-
-    var str = "%@%@: [\n".fmt(' '.mult(indent), key);
-
-    array.forEach(function(item, idx) {
-      str += "%@%@\n".fmt(' '.mult(indent + 2), item);
-    }, this);
-
-    str += ' '.mult(indent) + "]";
-
-    return str;
-  }
+  }.property().cacheable()
 
 };
 

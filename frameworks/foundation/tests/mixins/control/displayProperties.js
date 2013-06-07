@@ -9,11 +9,12 @@
 var view ;
 module("SC.Control#displayProperties", {
   setup: function() {
-    view = SC.View.create(SC.Control, { 
-        isVisibleInWindow: YES 
+    view = SC.View.create(SC.Control, {
+        isVisibleInWindow: YES
     }).createLayer();
+    view._doAttach(document.body);
   },
-  
+
   teardown: function() {
     view.destroy();
   }
@@ -39,7 +40,7 @@ test("setting isSelected to ON removes sel class name", function() {
   view.set('isSelected', YES);
   SC.RunLoop.end();
   ok(view.$().hasClass('sel'), 'precond - should have sel class');
-  
+
   SC.RunLoop.begin();
   view.set('isSelected', NO);
   SC.RunLoop.end();

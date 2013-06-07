@@ -26,24 +26,56 @@
 SC.State = SC.Object.extend(
   /** @lends SC.State.prototype */ {
 
+  //@if(debug)
+  /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */
+
+  /**
+    Indicates if this state should trace actions. Useful for debugging
+    purposes. Managed by the statechart.
+
+    @see SC.StatechartManager#trace
+
+    @type Boolean
+  */
+  trace: function() {
+    var key = this.getPath('statechart.statechartTraceKey');
+    return this.getPath('statechart.%@'.fmt(key));
+  }.property().cacheable(),
+
+  /** @private */
+  _statechartTraceDidChange: function() {
+    this.notifyPropertyChange('trace');
+  },
+
+  /**
+    Used to log a state trace message
+  */
+  stateLogTrace: function(msg) {
+    var sc = this.get('statechart');
+    sc.statechartLogTrace("%@: %@".fmt(this, msg));
+  },
+
+  /* END DEBUG ONLY PROPERTIES AND METHODS */
+  //@endif
+
   /**
     The name of the state
 
-    @property {String}
+    @type String
   */
   name: null,
 
   /**
     This state's parent state. Managed by the statechart
 
-    @property {State}
+    @type State
   */
   parentState: null,
 
   /**
     This state's history state. Can be null. Managed by the statechart.
 
-    @property {State}
+    @type State
   */
   historyState: null,
 
@@ -69,14 +101,14 @@ SC.State = SC.Object.extend(
     Used to indicates if this state's immediate substates are to be
     concurrent (orthogonal) to each other.
 
-    @property {Boolean}
+    @type Boolean
   */
   substatesAreConcurrent: NO,
 
   /**
     The immediate substates of this state. Managed by the statechart.
 
-    @property {Array}
+    @type Array
   */
   substates: null,
 
@@ -84,7 +116,7 @@ SC.State = SC.Object.extend(
     The statechart that this state belongs to. Assigned by the owning
     statechart.
 
-    @property {Statechart}
+    @type Statechart
   */
   statechart: null,
 
@@ -106,7 +138,7 @@ SC.State = SC.Object.extend(
     An array of this state's substates that are currently entered. Managed by
     the statechart.
 
-    @property {Array}
+    @type Array
   */
   enteredSubstates: null,
 
@@ -130,26 +162,13 @@ SC.State = SC.Object.extend(
   representRoute: null,
 
   /**
-    Indicates if this state should trace actions. Useful for debugging
-    purposes. Managed by the statechart.
-
-    @see SC.StatechartManager#trace
-
-    @property {Boolean}
-  */
-  trace: function() {
-    var key = this.getPath('statechart.statechartTraceKey');
-    return this.getPath('statechart.%@'.fmt(key));
-  }.property().cacheable(),
-
-  /**
     Indicates who the owner is of this state. If not set on the statechart
     then the owner is the statechart, otherwise it is the assigned
     object. Managed by the statechart.
 
     @see SC.StatechartManager#owner
 
-    @property {SC.Object}
+    @type SC.Object
   */
   owner: function() {
     var sc = this.get('statechart'),
@@ -162,7 +181,7 @@ SC.State = SC.Object.extend(
     Returns the statechart's assigned delegate. A statechart delegate is one
     that adheres to the {@link SC.StatechartDelegate} mixin.
 
-    @property {SC.Object}
+    @type SC.Object
 
     @see SC.StatechartDelegate
   */
@@ -185,7 +204,7 @@ SC.State = SC.Object.extend(
     are used since they will inadvertenly stall the location value from
     propogating immediately.
 
-    @property {String}
+    @type String
 
     @see SC.StatechartDelegate#statechartUpdateLocationForState
     @see SC.StatechartDelegate#statechartAcquireLocationForState
@@ -217,23 +236,29 @@ SC.State = SC.Object.extend(
     // which adds a noticable increase in initialization time.
 
     var sc = this.get('statechart'),
-        ownerKey = sc ? sc.get('statechartOwnerKey') : null,
-        traceKey = sc ? sc.get('statechartTraceKey') : null;
+        ownerKey = sc ? sc.get('statechartOwnerKey') : null;
 
     if (sc) {
       sc.addObserver(ownerKey, this, '_statechartOwnerDidChange');
+
+      //@if(debug)
+      var traceKey = sc ? sc.get('statechartTraceKey') : null;
       sc.addObserver(traceKey, this, '_statechartTraceDidChange');
+      //@endif
     }
   },
 
   destroy: function() {
     var sc = this.get('statechart'),
-        ownerKey = sc ? sc.get('statechartOwnerKey') : null,
-        traceKey = sc ? sc.get('statechartTraceKey') : null;
+        ownerKey = sc ? sc.get('statechartOwnerKey') : null;
 
     if (sc) {
       sc.removeObserver(ownerKey, this, '_statechartOwnerDidChange');
+
+      //@if(debug)
+      var traceKey = sc ? sc.get('statechartTraceKey') : null;
       sc.removeObserver(traceKey, this, '_statechartTraceDidChange');
+      //@endif
     }
 
     var substates = this.get('substates');
@@ -253,7 +278,10 @@ SC.State = SC.Object.extend(
     this.set('initialSubstate', null);
     this.set('statechart', null);
 
+    //@if(debug)
     this.notifyPropertyChange('trace');
+    //@endif
+
     this.notifyPropertyChange('owner');
 
     this._registeredEventHandlers = null;
@@ -424,9 +452,11 @@ SC.State = SC.Object.extend(
     var context = this.createStateRouteHandlerContext(attr);
 
     if (del.statechartShouldStateHandleTriggeredRoute(sc, this, context)) {
+      //@if(debug)
       if (this.get('trace') && loc) {
         this.stateLogTrace("will handle route '%@'".fmt(loc));
       }
+      //@endif
       this.handleTriggeredRoute(context);
     } else {
       del.statechartStateCancelledHandlingTriggeredRoute(sc, this, context);
@@ -904,7 +934,7 @@ SC.State = SC.Object.extend(
   /**
     Indicates if this state is the root state of the statechart.
 
-    @property {Boolean}
+    @type Boolean
   */
   isRootState: function() {
     return this.getPath('statechart.rootState') === this;
@@ -913,7 +943,7 @@ SC.State = SC.Object.extend(
   /**
     Indicates if this state is a current state of the statechart.
 
-    @property {Boolean}
+    @type Boolean
   */
   isCurrentState: function() {
     return this.stateIsCurrentSubstate(this);
@@ -922,7 +952,7 @@ SC.State = SC.Object.extend(
   /**
     Indicates if this state is a concurrent state
 
-    @property {Boolean}
+    @type Boolean
   */
   isConcurrentState: function() {
     return this.getPath('parentState.substatesAreConcurrent');
@@ -1062,9 +1092,11 @@ SC.State = SC.Object.extend(
         });
   */
   tryToHandleEvent: function(event, arg1, arg2) {
+    //@if(debug)
+    var trace = this.get('trace');
+    //@endif
 
-    var trace = this.get('trace'),
-        sc = this.get('statechart'),
+    var sc = this.get('statechart'),
         ret;
 
     // First check if the name of the event is the same as a registered event handler. If so,
@@ -1081,7 +1113,9 @@ SC.State = SC.Object.extend(
 
     // Now begin by trying a basic method on the state to respond to the event
     if (SC.typeOf(this[event]) === SC.T_FUNCTION) {
+      //@if(debug)
       if (trace) this.stateLogTrace("will handle event '%@'".fmt(event));
+      //@endif
       sc.stateWillTryToHandleEvent(this, event, event);
       ret = (this[event](arg1, arg2) !== NO);
       sc.stateDidTryToHandleEvent(this, event, event, ret);
@@ -1091,7 +1125,9 @@ SC.State = SC.Object.extend(
     // Try an event handler that is associated with an event represented as a string
     var handler = this._registeredStringEventHandlers[event];
     if (handler) {
+      //@if(debug)
       if (trace) this.stateLogTrace("%@ will handle event '%@'".fmt(handler.name, event));
+      //@endif
       sc.stateWillTryToHandleEvent(this, event, handler.name);
       ret = (handler.handler.call(this, event, arg1, arg2) !== NO);
       sc.stateDidTryToHandleEvent(this, event, handler.name, ret);
@@ -1106,7 +1142,9 @@ SC.State = SC.Object.extend(
     for (; i < len; i += 1) {
       handler = this._registeredRegExpEventHandlers[i];
       if (event.match(handler.regexp)) {
+        //@if(debug)
         if (trace) this.stateLogTrace("%@ will handle event '%@'".fmt(handler.name, event));
+        //@endif
         sc.stateWillTryToHandleEvent(this, event, handler.name);
         ret = (handler.handler.call(this, event, arg1, arg2) !== NO);
         sc.stateDidTryToHandleEvent(this, event, handler.name, ret);
@@ -1117,7 +1155,9 @@ SC.State = SC.Object.extend(
     // Final attempt. If the state has an unknownEvent function then invoke it to
     // handle the event
     if (SC.typeOf(this['unknownEvent']) === SC.T_FUNCTION) {
+      //@if(debug)
       if (trace) this.stateLogTrace("unknownEvent will handle event '%@'".fmt(event));
+      //@endif
       sc.stateWillTryToHandleEvent(this, event, 'unknownEvent');
       ret = (this.unknownEvent(event, arg1, arg2) !== NO);
       sc.stateDidTryToHandleEvent(this, event, 'unknownEvent', ret);
@@ -1351,7 +1391,7 @@ SC.State = SC.Object.extend(
     state if "foo" and the parent state's name is "bar" where bar's
     parent state is the root state, then the full path is "bar.foo"
 
-    @property {String}
+    @type String
   */
   fullPath: function() {
     var root = this.getPath('statechart.rootState');
@@ -1374,21 +1414,8 @@ SC.State = SC.Object.extend(
   }.observes('*currentSubstates.[]'),
 
   /** @private */
-  _statechartTraceDidChange: function() {
-    this.notifyPropertyChange('trace');
-  },
-
-  /** @private */
   _statechartOwnerDidChange: function() {
     this.notifyPropertyChange('owner');
-  },
-
-  /**
-    Used to log a state trace message
-  */
-  stateLogTrace: function(msg) {
-    var sc = this.get('statechart');
-    sc.statechartLogTrace("%@: %@".fmt(this, msg));
   },
 
   /**

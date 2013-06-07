@@ -16,12 +16,20 @@ test('isDestroyed works.', function() {
 });
 
 test('childViews specified as classes are also destroyed.', function() {
-  var v = SC.View.create({ childViews: [ SC.View ] }),
-      v2 = v.childViews[0];
+  var v = SC.View.create({ childViews: [ SC.View.extend({ childViews: [ SC.View ] }) ] }),
+      v2 = v.childViews[0],
+      v3 = v2.childViews[0];
+
   v.destroy();
   ok(v2.get('isDestroyed'), 'destroying a parent also destroys a child, mwaha.');
-  ok(!v2.get('parentView'), 'destroying a parent removes the parentView reference from the child.');
-  ok(v2.get('owner') === null, 'destroying a parent removes the owner reference from the child.');
+  ok(v3.get('isDestroyed'), 'destroying a parent also destroys a grandchild, mwaha.');
+
+  SC.run(function() {
+    ok(!v2.get('parentView'), 'destroying a parent removes the parentView reference from the child.');
+    ok(v2.get('owner') === null, 'destroying a parent removes the owner reference from the child.');
+    ok(!v3.get('parentView'), 'destroying a parent removes the parentView reference from the grandchild.');
+    ok(v3.get('owner') === null, 'destroying a parent removes the owner reference from the grandchild.');
+  });
 });
 
 test('childViews specified as instances are also destroyed.', function() {
@@ -29,8 +37,11 @@ test('childViews specified as instances are also destroyed.', function() {
       v = SC.View.create({ childViews: [v2] });
   v.destroy();
   ok(v2.get('isDestroyed'), 'destroying a parent also destroys a child, mwaha.');
-  ok(!v2.get('parentView'), 'destroying a parent removes the parentView reference from the child.');
-  ok(v2.get('owner') === null, 'destroying a parent removes the owner reference from the child.');
+
+  SC.run(function() {
+    ok(!v2.get('parentView'), 'destroying a parent removes the parentView reference from the child.');
+    ok(v2.get('owner') === null, 'destroying a parent removes the owner reference from the child.');
+  });
 });
 
 /**

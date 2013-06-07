@@ -89,7 +89,7 @@ SC.View.reopen(
     The method you provide to SC.View.prototype.animate should accept the
     following parameter(s).
 
-    @name animateCallback
+    @name AnimateCallback
     @function
     @param {object} animationResult The result of the animation.
     @param {boolean} animationResult.isCancelled Whether the animation was cancelled or not.
@@ -105,20 +105,27 @@ SC.View.reopen(
     should contain the names of the layout properties to animate with the new
     layout values as values.
 
+    # Options
+
     To control the transition, you must provide an options object that contains
     at least the duration property and optionally the timing and delay
     properties.  The options properties are as follows:
 
-    duration:
-      The duration of the transition in seconds.
+    - duration: The duration of the transition in seconds.
 
-    timing:
-      The transition timing function.  This may be a predefined CSS timing
+    - timing: The transition timing function.  This may be a predefined CSS timing
       function (e.g. 'linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out') or
       it may be an array of values to make a cubic bezier (e.g. [0, 0, 0.58, 1.0]).
+      The default value is 'ease'.
 
-    delay:
-      The transition delay in seconds.
+      ** 'linear' - Specifies a transition effect with the same speed from start to end (equivalent to cubic-bezier(0,0,1,1))
+      ** 'ease' -  Specifies a transition effect with a slow start, then fast, then end slowly (equivalent to cubic-bezier(0.25,0.1,0.25,1))
+      ** 'ease-in' - Specifies a transition effect with a slow start (equivalent to cubic-bezier(0.42,0,1,1))
+      ** 'ease-out' -  Specifies a transition effect with a slow end (equivalent to cubic-bezier(0,0,0.58,1))
+      ** 'ease-in-out' - Specifies a transition effect with a slow start and end (equivalent to cubic-bezier(0.42,0,0.58,1))
+      ** 'cubic-bezier(n,n,n,n)' - Define your own values in the cubic-bezier function. Possible values are numeric values from 0 to 1
+
+    - delay: The transition delay in seconds.
 
     For example,
 
@@ -134,10 +141,12 @@ SC.View.reopen(
           { duration: 0.75, timing: 'ease-out', delay: 0.5 } // options
         );
 
+    # Callbacks
+
     To execute code when the transition completes, you may provide an optional
     target and/or method.  When the given group of transitions completes,
-    the callback function will be called once and passed a animationResult object with
-    properties containing the event, the view and a boolean isCancelled which
+    the callback function will be called once and passed an animationResult object with
+    properties containing the `event`, the `view` and a boolean `isCancelled` which
     indicates if the animation had been cancelled or not.  The format of the
     target and method follows the standard SproutCore format, where if the
     target is not given then the view itself will be the target.  The
@@ -166,19 +175,19 @@ SC.View.reopen(
     calling animate in a manner that would effect an ongoing animation (i.e.
     animating left again while it is still in transition) will result in
     the ongoing animation callback firing immediately with isCancelled set to
-    YES and adjusting the transition to accomodate the new settings.
+    true and adjusting the transition to accomodate the new settings.
 
     Note: This may not work if you are not using SproutCore for view layout,
     which means you should not use `animate` if the view has `useStaticLayout`
-    set to YES.
+    set to true.
 
-    ### A note about Hardware Acceleration.
+    ## A note about Hardware Acceleration.
 
-    If a view has a fixed layout (i.e. view.get('isFixedLayout') == YES) then
+    If a view has a fixed layout (i.e. view.get('isFixedLayout') == true) then
     it will be eligible for hardware accelerated position transitions. Having a
     fixed layout, simply means that the view has a fixed size (width and height)
     and a fixed position (left and top).  If the view is eligible for hardware
-    acceleration, it must also set wantsAcceleratedLayer to YES for animate to
+    acceleration, it must also set wantsAcceleratedLayer to true for animate to
     use hardware accelerated transitions when animating its position.
 
     Occassionally, you may wish to animate a view with a non-fixed layout.  To
@@ -197,22 +206,17 @@ SC.View.reopen(
         width = frame.width;
         myView.adjust({ right: null, bottom: null, height: height, width: width });
 
-        // Animate (will be hardware accelerated if myView.get('wantsAcceleratedLayout') is YES).
+        // Animate (will be hardware accelerated if myView.get('wantsAcceleratedLayout') is true).
         myView.animate('left', width, { duration: 1 }, function () {
           // Revert back to flexible layout.
           myView.adjust({ right: -width, bottom: 10 });
         });
 
-    @param {object|string} properties Hash of property names with new layout values or a single property name.
-    @param {number} [value] The new layout value for a single property (only provide if the first parameter is a string).
-    @param {object} options Hash of transition options.
-    @param {number} options.duration The duration of the transition in seconds.
-    @param {string|array} options.timing The transition timing function.  This may be a predefined CSS timing
-      function (e.g. 'linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out') or
-      it may be an array of values to make a cubic bezier (e.g. [0, 0, 0.58, 1.0]).
-    @param {number} options.delay The transition delay in seconds.
-    @param {object} [target=this] The target for the method.
-    @param {animateCallback|string} [method] The method to run when the transition completes.  May be a function or a property path.
+    @param {Object|String} properties Hash of property names with new layout values or a single property name.
+    @param {Number} [value] The new layout value for a single property (only provide if the first parameter is a String).
+    @param {Object} options Hash of transition options.
+    @param {Object} [target=this] The target for the method.
+    @param {AnimateCallback|String} [method] The method to run when the transition completes.  May be a function or a property path.
     @returns {SC.View} receiver
   */
   animate: function (key, value, options, target, method) {
@@ -392,6 +396,41 @@ SC.View.reopen(
     }
   },
 
+  /** @private
+    Animates through the given frames.
+
+    @param {Array} frames The array of frame objects.
+    @param {AnimateCallback} callback The callback function to call when the final frame is done animating.
+    @param {Number} initialDelay The delay before the first frame begins animating.
+    @returns {SC.View} receiver
+  */
+  // TODO: Do this using CSS animations instead.
+  _animateFrames: function (frames, callback, initialDelay, count) {
+    // Normalize the private argument `count`.
+    if (SC.none(count)) { count = 0; }
+
+    var frame = frames[count];
+
+    this.animate(frame.value, {
+      delay: initialDelay,
+      duration: frame.duration,
+      timing: frame.timing
+    }, function (data) {
+      count += 1;
+
+      // Keep iterating while frames exist and the animations weren't cancelled.
+      if (!data.isCancelled && count < frames.length) {
+        // Only delay on the first animation.  Increase count to the next frame.
+        this._animateFrames(frames, callback, 0, count);
+      } else {
+        // Done.
+        callback(data);
+      }
+    });
+
+    return this;
+  },
+
   /**
     Cancels the animation, adjusting the view's layout immediately to one of
     three values depending on the `layoutState` parameter.
@@ -410,11 +449,11 @@ SC.View.reopen(
   */
   cancelAnimation: function (layoutState) {
     var activeAnimations = this._activeAnimations,
+      pendingAnimations = this._pendingAnimations,
+      animation,
+      key,
       layout,
       didCancel = NO;
-
-    // Fast path!
-    if (!activeAnimations) { return didCancel; }
 
     switch (layoutState) {
     case SC.LayoutState.START:
@@ -428,9 +467,21 @@ SC.View.reopen(
     default:
     }
 
+    // Immediately remove the pending animations while calling the callbacks.
+    for (key in pendingAnimations) {
+      animation = pendingAnimations[key];
+      didCancel = YES;
+
+      // Update the animation hash.  Do this first, so callbacks can check for active animations.
+      delete pendingAnimations[key];
+
+      // Run the callback.
+      this.runAnimationCallback(animation, null, YES);
+    }
+
     // Immediately remove the animation styles while calling the callbacks.
-    for (var key in activeAnimations) {
-      var animation = activeAnimations[key];
+    for (key in activeAnimations) {
+      animation = activeAnimations[key];
       didCancel = YES;
 
       // Update the animation hash.  Do this first, so callbacks can check for active animations.
@@ -451,6 +502,7 @@ SC.View.reopen(
     // Clean up.
     delete this._prevLayout;
     delete this._activeAnimations;
+    delete this._pendingAnimations;
 
     return this;
   },
@@ -509,8 +561,23 @@ SC.View.reopen(
 
           if (CSSMatrixClass !== SC.UNSUPPORTED) {
             matrix = new window[CSSMatrixClass](matrix);
-            ret.left = parseInt(matrix.m41, 10);
-            ret.top = parseInt(matrix.m42, 10);
+
+            // Calculate rotateX
+            ret.rotateX = Math.atan2(matrix.m32, matrix.m33) * (180 / Math.PI);
+
+            // Calculate rotateY
+            ret.rotateY = Math.atan2(-matrix.m31, Math.sqrt(Math.pow(matrix.m32, 2) + Math.pow(matrix.m33, 2))) * (180 / Math.PI);
+
+            // Calculate rotateZ
+            ret.rotateZ = -Math.atan2(matrix.m21, matrix.m11) * (180 / Math.PI);
+
+            // Calculate scaleX
+            ret.scale = Math.sqrt(Math.pow(matrix.m11, 2) + Math.pow(matrix.m12, 2) + Math.pow(matrix.m13, 2));
+            if (matrix.m11 < 0) ret.scale = ret.scale * -1;
+
+            // Retrieve translateX & translateY
+            if (matrix.m14 > 0) { ret.left = matrix.m14; }
+            if (matrix.m24 > 0) { ret.top = matrix.m24; }
           } else {
             matrix = matrix.match(/^matrix\((.*)\)$/)[1].split(/,\s*/);
             if (matrix) {

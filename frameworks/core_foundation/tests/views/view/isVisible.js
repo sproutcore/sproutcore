@@ -16,44 +16,44 @@
 
 // ..........................................................
 // BASE TESTS
-// 
-// These tests exercise the API.  See below for tests that cover edge 
-// conditions.  If you find a bug, we recommend that you add a test in the 
+//
+// These tests exercise the API.  See below for tests that cover edge
+// conditions.  If you find a bug, we recommend that you add a test in the
 // edge case section.
 
-var FRAME = { x: 10, y: 10, width: 30, height: 30 } ;
+var FRAME = { x: 10, y: 10, width: 30, height: 30 };
 
-var pane, view ; // test globals
+var pane, view; // test globals
 
-module("isVisibleInWindow", {
-  
+module("isVisible", {
+
   setup: function() {
-    pane = SC.MainPane.create() ;
-    view = SC.View.create() ; 
+    pane = SC.MainPane.create();
+    view = SC.View.create();
   },
-  
+
   teardown: function() {
-    view = null ;
-    pane.remove() ;
-    pane = null ;
+    view.destroy();
+    pane.remove().destroy();
+    pane = view = null;
   }
-  
+
 });
 
 test("a new view should not be visible initially", function() {
-  ok(view.get('isVisible'), "view.get('isVisible') === NO") ;
+  ok(view.get('isVisible'), "view.get('isVisible') === NO");
 });
 
 test("adding a new view to a visible pane should make it visible", function() {
-  ok(view.get('isVisible'), "view.get('isVisible') === YES") ;
-  ok(pane.get('isVisible'), "pane.get('isVisible') === YES") ;
+  ok(view.get('isVisible'), "view.get('isVisible') === YES");
+  ok(pane.get('isVisible'), "pane.get('isVisible') === YES");
   SC.RunLoop.begin();
-  pane.appendChild(view) ;
-  pane.append() ;
+  pane.appendChild(view);
+  pane.append();
   view.set('isVisible', NO);
   SC.RunLoop.end();
-  ok(!view.get('isVisible'), "after pane.appendChild(view), view.get('isVisible') === YES") ;
-  ok(view.$().hasClass('sc-hidden'), "after view.set('isVisible', NO), view.$().hasClass('sc-hidden') should be true") ;
+  ok(!view.get('isVisible'), "after pane.appendChild(view), view.get('isVisible') === YES");
+  ok(view.$().hasClass('sc-hidden'), "after view.set('isVisible', NO), view.$().hasClass('sc-hidden') should be true");
 });
 
 test("a view with visibility can have a child view without visibility", function() {
@@ -70,12 +70,12 @@ test("a view with visibility can have a child view without visibility", function
 
   try {
     pane.append();
-    pane.remove();
+    pane.remove().destroy();
   } catch(e) {
     errored = true;
   } finally {
     try {
-      pane.remove();
+      pane.remove().destroy();
     } catch(e2) {
       errored = true;
     }

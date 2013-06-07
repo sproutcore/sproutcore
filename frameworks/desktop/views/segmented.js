@@ -52,9 +52,9 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     @default YES
   */
   acceptsFirstResponder: function() {
-    if (SC.FOCUS_ALL_CONTROLS) { return this.get('isEnabled'); }
+    if (SC.FOCUS_ALL_CONTROLS) { return this.get('isEnabledInPane'); }
     return NO;
-  }.property('isEnabled').cacheable(),
+  }.property('isEnabledInPane').cacheable(),
 
   /**
     @type String
@@ -90,12 +90,6 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     @default null
   */
   value: null,
-
-  /**
-    @type Boolean
-    @default YES
-  */
-  isEnabled: YES,
 
   /**
     If YES, clicking a selected button again will deselect it, setting the
@@ -239,7 +233,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
 
   /**
     The key that contains the layerId for each item.
-    @property {String}
+    @type String
   */
   itemLayerIdKey: null,
 
@@ -396,7 +390,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
           value = null;
         }
 
-        this.removeChild(childView);
+        this.removeChildAndDestroy(childView);
       }
 
       // Update our value which may have changed
@@ -812,7 +806,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         overflowIndex = childViews.get('length') - 1,
         index;
 
-    if (!this.get('isEnabled')) return YES; // nothing to do
+    if (!this.get('isEnabledInPane')) return YES; // nothing to do
 
     index = this.displayItemIndexForEvent(evt);
     if (index >= 0) {
@@ -927,7 +921,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         overflowIndex = childViews.get('length') - 1,
         index;
 
-    if (!this.get('isEnabled')) return YES; // nothing to do
+    if (!this.get('isEnabledInPane')) return YES; // nothing to do
 
     index = this.displayItemIndexForEvent(touch);
 

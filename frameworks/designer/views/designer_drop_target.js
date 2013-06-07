@@ -4,37 +4,36 @@
 // ==========================================================================
 /*globals SC */
 /*jslint evil: true*/
-/** 
-  @class
+/**
   This View is used by Greenhouse when application is in design mode
-  
-  
+
+
   @extends SC.ContainerView
 */
 SC.DesignerDropTarget = SC.ContainerView.extend(
   /** @scope SC.DesignerDropTarget.prototype */ {
-  
+
   inGlobalOffset: YES,
-  
+
   // ..........................................................
   // Key Events
-  // 
+  //
   acceptsFirstResponder: YES,
-  
+
   keyDown: function(evt) {
     return this.interpretKeyEvents(evt);
   },
-  
+
   keyUp: function(evt) {
-    return YES; 
+    return YES;
   },
-  
+
   deleteForward: function(evt){
     var c = SC.designsController.getPath('page.designController');
     if(c) c.deleteSelection();
     return YES;
   },
-  
+
   deleteBackward: function(evt){
     var c = SC.designsController.getPath('page.designController');
     if(c) c.deleteSelection();
@@ -44,64 +43,64 @@ SC.DesignerDropTarget = SC.ContainerView.extend(
   moveLeft: function(sender, evt) {
     return YES;
   },
-  
-  moveRight: function(sender, evt) {   
+
+  moveRight: function(sender, evt) {
     return YES;
   },
-  
+
   moveUp: function(sender, evt) {
     return YES;
   },
-  
+
   moveDown: function(sender, evt) {
     return YES;
   },
 
   // ..........................................................
   // Drag and drop code
-  // 
+  //
   isDropTarget: YES,
-  
+
   targetIsInIFrame: YES,
-  
+
   dragStarted: function(drag, evt) {
   },
-  
+
   dragEntered: function(drag, evt) {
   },
-  
+
   dragUpdated: function(drag, evt) {},
-  
+
   dragExited: function(drag, evt) {},
-  
+
   dragEnded: function(drag, evt) {},
-  
 
-  computeDragOperations: function(drag, evt) { 
-    return SC.DRAG_ANY; 
+
+  computeDragOperations: function(drag, evt) {
+    return SC.DRAG_ANY;
   },
-  
 
-  acceptDragOperation: function(drag, op) { 
+
+  acceptDragOperation: function(drag, op) {
     var data = drag.dataForType('SC.Object'),
         scClass = eval(data.get('scClass'));
     return scClass.kindOf(SC.View);
   },
-  
+
   /**
     Called to actually perform the drag operation.
-    
+
     Override this method to actually perform the drag operation.  This method
     is only called if you returned `YES` in `acceptDragOperation()`.
-    
+
     Return the operation that was actually performed or `SC.DRAG_NONE` if the
     operation was aborted.
-    
+
     The default implementation returns `SC.DRAG_NONE`
-    
+
     @param {SC.Drag} drag The drag instance managing this drag
     @param {DragOp} op The proposed drag operation. A drag constant.
-    
+
     @return {DragOp} Drag Operation actually performed
   */
   performDragOperation: function(drag, op) {
@@ -137,8 +136,8 @@ SC.DesignerDropTarget = SC.ContainerView.extend(
       //cv.appendChild(newView);
     }
     page.get('designController').select(newView.get('designer'));
-    return SC.DRAG_ANY; 
+    return SC.DRAG_ANY;
   }
-  
-  
+
+
 });

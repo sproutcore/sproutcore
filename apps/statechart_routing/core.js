@@ -4,10 +4,10 @@
 // ==========================================================================
 /*globals Test */
 
-/** @namespace
+/**
 
   My cool new app.  Describe your application.
-  
+
   @extends SC.Object
 */
 Test = SC.Application.create(
@@ -17,9 +17,9 @@ Test = SC.Application.create(
   VERSION: '0.1.0',
 
   store: SC.Store.create().from(SC.Record.fixtures),
-  
+
   MODE_FOO: 0,
-  
+
   MODE_BAR: 1
-  
+
 }) ;

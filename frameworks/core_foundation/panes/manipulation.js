@@ -17,8 +17,11 @@ SC.Pane.reopen(
     @returns {SC.Pane} receiver
   */
   prependTo: function(elem) {
-    return this.insert(function(layer) {
-      jQuery(elem).prepend(layer);
+    var self = this;
+
+    return this.insert(function () {
+      var el = jQuery(elem)[0];
+      self._doAttach(el, el.firstChild);
     });
   },
 

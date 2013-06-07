@@ -44,10 +44,10 @@ SC.ProgressView = SC.View.extend(SC.Control,
 
   /**
     @type Array
-    @default ['displayValue', 'ariaValue', 'minimum', 'maximum', 'isEnabled', 'isIndeterminate', 'isRunning', 'isVisibleInWindow']
+    @default ['displayValue', 'ariaValue', 'minimum', 'maximum', 'isIndeterminate', 'isRunning', 'isVisibleInWindow']
     @see SC.View#displayProperties
   */
-  displayProperties: ['displayValue', 'ariaValue', 'minimum', 'maximum', 'isEnabled', 'isIndeterminate', 'isRunning', 'isVisibleInWindow'],
+  displayProperties: ['displayValue', 'ariaValue', 'minimum', 'maximum', 'isIndeterminate', 'isRunning', 'isVisibleInWindow'],
 
   /**
     @type String

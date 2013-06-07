@@ -9,7 +9,7 @@
 /**
   Standard Error that should be raised when you try to modify a frozen object.
 
-  @property {Error}
+  @type Error
 */
 SC.FROZEN_ERROR = new Error("Cannot modify a frozen object");
 
@@ -75,7 +75,7 @@ SC.Freezable = /** @scope SC.Freezable.prototype */ {
   /**
     Walk like a duck.
 
-    @property {Boolean}
+    @type Boolean
   */
   isFreezable: YES,
 
@@ -83,7 +83,7 @@ SC.Freezable = /** @scope SC.Freezable.prototype */ {
     Set to YES when the object is frozen.  Use this property to detect whether
     your object is frozen or not.
 
-    @property {Boolean}
+    @type Boolean
   */
   isFrozen: NO,
 

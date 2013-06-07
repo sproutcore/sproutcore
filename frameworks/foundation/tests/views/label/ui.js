@@ -19,6 +19,11 @@ var pane = SC.ControlTestPane.design()
     isEnabled: NO
   })
 
+  .add("hint", SC.LabelView, {
+    hint: 'Get on with it!',
+    isEditable: true
+  })
+
   .add("selectable", SC.LabelView, {
     value:'hello',
     isTextSelectable: YES
@@ -29,14 +34,8 @@ var pane = SC.ControlTestPane.design()
     value: "hello"
   })
 
-  .add("centered", SC.LabelView, {
+  .add("icon", SC.LabelView, {
      value: "hello",
-     textAlign: SC.ALIGN_CENTER
-  })
-
-  .add("centered,icon", SC.LabelView, {
-     value: "hello",
-     textAlign: SC.ALIGN_CENTER ,
      icon: iconURL
   })
 
@@ -53,17 +52,6 @@ var pane = SC.ControlTestPane.design()
   .add("tiny size", SC.LabelView, {
      value: "hello",
      controlSize: SC.TINY_CONTROL_SIZE
-  })
-
-  .add("bold", SC.LabelView, {
-     value: "hello",
-     fontWeight: SC.BOLD_WEIGHT
-  })
-
-  .add("bold height", SC.LabelView, {
-     value: "hello",
-     fontWeight: SC.BOLD_WEIGHT,
-     height: 16
   })
 
   .add("editable", SC.LabelView, {
@@ -86,8 +74,8 @@ module('SC.LabelView ui', {
     pane.standardSetup().setup();
   },
   teardown: function(){
-    clearHtmlbody();
     pane.standardSetup().teardown();
+    clearHtmlbody();
   }
 });
 
@@ -95,13 +83,10 @@ test("Check that all Label are visible", function() {
   ok(pane.view('basic').get('isVisibleInWindow'), 'basic.isVisibleInWindow should be YES');
   ok(pane.view('disabled').get('isVisibleInWindow'), 'title.isVisibleInWindow should be YES');
   ok(pane.view('selectable').get('isVisibleInWindow'), 'icon.isVisibleInWindow should be YES');
-  ok(pane.view('centered').get('isVisibleInWindow'), 'title,icon.isVisibleInWindow should be YES');
-  ok(pane.view('centered,icon').get('isVisibleInWindow'), 'title,icon,disabled.isVisibleInWindow should be YES');
+  ok(pane.view('icon').get('isVisibleInWindow'), 'title,icon,disabled.isVisibleInWindow should be YES');
   ok(pane.view('regular size').get('isVisibleInWindow'), 'title,icon,default.isVisibleInWindow should be YES');
   ok(pane.view('small size').get('isVisibleInWindow'), 'title.icon,selected.isVisibleInWindow should be YES');
   ok(pane.view('tiny size').get('isVisibleInWindow'), 'title,toolTip.isVisibleInWindow should be YES');
-  ok(pane.view('bold').get('isVisibleInWindow'), 'title,toolTip.isVisibleInWindow should be YES');
-  ok(pane.view('bold height').get('isVisibleInWindow'), 'title,toolTip.isVisibleInWindow should be YES');
   ok(pane.view('editable').get('isVisibleInWindow'), 'title,toolTip.isVisibleInWindow should be YES');
   ok(pane.view('null value').get('isVisibleInWindow'), 'null value.isVisibleInWindow should be YES');
 });
@@ -132,32 +117,17 @@ test("Check that all labels have the right classes and styles set", function() {
   ok(viewElem.hasClass('icon'), 'view element should have "icon" class');
   ok(viewElem.find('img').hasClass('icon'), 'img element inside view should have "icon" class');
 
-  viewElem=pane.view('centered').$();
-  ok(viewElem.hasClass('sc-view'), 'title,icon.hasClass(sc-view) should be YES');
-  ok(viewElem.hasClass('sc-label-view'), 'title,icon.hasClass(sc-label-view) should be YES');
-  ok(!viewElem.hasClass('icon'), 'title,icon.hasClass(icon) should be YES');
-  ok(!viewElem.hasClass('disabled'), 'title,icon.hasClass(disabled) should be NO');
-  ok(viewElem.css('textAlign') === 'center', 'centered should have center textAlign');
-
-  viewElem=pane.view('centered,icon').$();
+  viewElem=pane.view('icon').$();
   ok(viewElem.hasClass('sc-view'), 'title,icon,disabled.hasClass(sc-view) should be YES');
   ok(viewElem.hasClass('sc-label-view'), 'title,icon,disabled.hasClass(sc-label-view) should be YES');
   ok(viewElem.hasClass('icon'), 'title,icon,disabled.hasClass(icon) should be YES');
   ok(!viewElem.hasClass('disabled'), 'title,icon,disabled.hasClass(disabled) should be YES');
-  ok(viewElem.css('textAlign') === 'center', 'centered,icon should have center textAlign');
 
   viewElem=pane.view('regular size').$();
   ok(viewElem.hasClass('sc-view'), 'title,icon,default.hasClass(sc-view) should be YES');
   ok(viewElem.hasClass('sc-label-view'), 'title,icon,default.hasClass(sc-label-view) should be YES');
   ok(viewElem.hasClass('sc-regular-size'), 'title,icon,default.hasClass(sc-regular-size) should be YES');
   ok(!viewElem.hasClass('disabled'), 'title,icon,default.hasClass(disabled) should be NO');
-
-  viewElem=pane.view('bold').$();
-  ok(viewElem.hasClass('sc-view'), 'title,icon,selected.hasClass(sc-view) should be YES');
-  ok(viewElem.hasClass('sc-label-view'), 'title,icon,selected.hasClass(sc-label-view) should be YES');
-  ok(!viewElem.hasClass('icon'), 'title,icon,selected.hasClass(icon) should be YES');
-  ok(!viewElem.hasClass('disabled'), 'title,icon,selected.hasClass(disabled) should be NO');
-  ok(viewElem[0].style.fontWeight === 'bold', 'bold view should have bold fontWeight');
 });
 
 
@@ -165,7 +135,7 @@ test("Check that the title is set or not and if it is in the appropriate element
   var viewElem=pane.view('basic').$();
   equals(viewElem.text(), 'hello', 'has a value set');
 
-  viewElem=pane.view('centered,icon').$('img');
+  viewElem=pane.view('icon').$('img');
   ok((viewElem!==null), 'should have an image corresponding to an icon');
 
   viewElem=pane.view('null value').$();
@@ -173,6 +143,14 @@ test("Check that the title is set or not and if it is in the appropriate element
 
   viewElem=pane.view('undefined value').$();
   equals(viewElem.text(), '', 'has correct empty value set');
+});
+
+test("The hint property should appear if the label is editable and has no value.", function () {
+  var viewElem = pane.view('hint').$();
+
+  viewElem = viewElem.find('.sc-hint');
+  equals(viewElem.length, 1, "has an .sc-hint span inside");
+  equals(viewElem.text(), 'Get on with it!', 'has correct hint value set');
 });
 
 })();

@@ -33,8 +33,8 @@ module("SC.PickerPane UI", {
     anchor.standardSetup().setup();
   },
   teardown: function(){
-    clearHtmlbody();
     anchor.standardSetup().teardown();
+    clearHtmlbody();
   }
 });
 

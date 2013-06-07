@@ -50,7 +50,9 @@ module("SC.CollectionView.itemViewForContentIndex", {
 
       groupExampleView: SC.View.extend(), // custom for testing
 
-      exampleView: SC.View.extend(), // custom for testing
+      exampleView: SC.View.extend({
+        isReusable: false
+      }), // custom for testing
 
       testAsGroup: NO,
 
@@ -297,4 +299,56 @@ test("after making an item visible then invisible again", function() {
 
 });
 
+// Editable Item Views.
 
+test("canDeleteContent sets isDeletable on the item views so they can visually indicate it", function () {
+  var itemView;
+
+  view.set('canDeleteContent', true);
+  itemView = view.itemViewForContentIndex(1);
+  equals(itemView.get('isDeletable'), true, 'itemView has isDeletable');
+
+  view.isVisibleInWindow = YES;
+  SC.run(function () {
+    view.set('isEditable', false);
+  });
+
+  view.set('isEditable', false);
+  itemView = view.itemViewForContentIndex(1);
+  equals(itemView.get('isDeletable'), false, 'itemView has isDeletable');
+});
+
+
+test("canEditContent sets isEditable on the item views so they can visually indicate it", function () {
+  var itemView;
+
+  view.set('canEditContent', true);
+  itemView = view.itemViewForContentIndex(1);
+  equals(itemView.get('isEditable'), true, 'itemView has isEditable');
+
+  view.isVisibleInWindow = YES;
+  SC.run(function () {
+    view.set('isEditable', false);
+  });
+
+  itemView = view.itemViewForContentIndex(1);
+  equals(itemView.get('isEditable'), false, 'itemView has isEditable');
+});
+
+
+test("canReorderContent sets isReorderable on the item views so they can visually indicate it", function () {
+  var itemView;
+
+  view.set('canReorderContent', true);
+  itemView = view.itemViewForContentIndex(1);
+  equals(itemView.get('isReorderable'), true, 'itemView has isReorderable');
+
+  view.isVisibleInWindow = YES;
+  SC.run(function () {
+    view.set('isEditable', false);
+  });
+
+  view.set('isEditable', false);
+  itemView = view.itemViewForContentIndex(1);
+  equals(itemView.get('isReorderable'), false, 'itemView has isReorderable');
+});

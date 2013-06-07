@@ -27,7 +27,7 @@ SC.FILL = "fill";
   @type String
   @constant
 */
-SC.FILL_PROPORTIONALLY = "fillProportionally";
+SC.FILL_PROPORTIONALLY = SC.BEST_FILL = "best-fill";
 
 /**
   Stretch/shrink the shape to fit the frame while maintaining aspect ratio, such that the
@@ -36,7 +36,7 @@ SC.FILL_PROPORTIONALLY = "fillProportionally";
   @type String
   @constant
 */
-SC.BEST_FIT = "fitBest";
+SC.BEST_FIT = "best-fit";
 
 /**
   Shrink the shape to fit the frame while maintaining aspect ratio, such that
@@ -46,7 +46,7 @@ SC.BEST_FIT = "fitBest";
   @type String
   @constant
 */
-SC.BEST_FIT_DOWN_ONLY = "fitBestDown";
+SC.BEST_FIT_DOWN_ONLY = "best-fit-down";
 
 /**
   @namespace
@@ -103,7 +103,7 @@ SC.InnerFrame = {
     scaleY = destHeight / sourceHeight;
 
     switch (scale) {
-      case SC.FILL_PROPORTIONALLY:
+      case SC.BEST_FILL:
         scale = scaleX > scaleY ? scaleX : scaleY;
         break;
       case SC.BEST_FIT:
@@ -121,7 +121,7 @@ SC.InnerFrame = {
         break;
       default: // Number
         if (isNaN(window.parseFloat(scale)) || (window.parseFloat(scale) <= 0)) {
-          SC.Logger.warn("SC.InnerFrame: The scale '%@' was not understood.  Scale must be one of SC.FILL, SC.FILL_PROPORTIONALLY, SC.BEST_FIT, SC.BEST_FIT_DOWN_ONLY or a positive number greater than 0.00.".fmt(scale));
+          SC.Logger.warn("SC.InnerFrame: The scale '%@' was not understood.  Scale must be one of SC.FILL, SC.BEST_FILL, SC.BEST_FIT, SC.BEST_FIT_DOWN_ONLY or a positive number greater than 0.00.".fmt(scale));
 
           // Don't attempt to scale or offset the image
           return result;
@@ -168,9 +168,11 @@ SC.InnerFrame = {
         result.y = destHeight - sourceHeight;
         break;
       default: // SC.ALIGN_CENTER || SC.ALIGN_MIDDLE
+        //@if(debug)
         if (align !== SC.ALIGN_CENTER && align !== SC.ALIGN_MIDDLE) {
           SC.Logger.warn("SC.InnerFrame: The align '%@' was not understood.  Align must be one of SC.ALIGN_CENTER/SC.ALIGN_MIDDLE, SC.ALIGN_LEFT, SC.ALIGN_RIGHT, SC.ALIGN_TOP, SC.ALIGN_BOTTOM, SC.ALIGN_TOP_LEFT, SC.ALIGN_TOP_RIGHT, SC.ALIGN_BOTTOM_LEFT or SC.ALIGN_BOTTOM_RIGHT.".fmt(align));
         }
+        //@endif
         result.x = (destWidth / 2) - (sourceWidth / 2);
         result.y = (destHeight / 2) - (sourceHeight / 2);
     }
@@ -180,10 +182,10 @@ SC.InnerFrame = {
 
   /**
     Determines how the shape will scale to fit within its containing space. Possible values:
-    
+
       - SC.SCALE_NONE
       - SC.FILL
-      - SC.FILL_PROPORTIONALLY
+      - SC.BEST_FILL
       - SC.BEST_FIT
       - SC.BEST_FIT_DOWN_ONLY
 

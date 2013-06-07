@@ -29,7 +29,7 @@ SC.FixturesDataSource = SC.DataSource.extend(
     local storage, for example, then you should set this property to NO to
     accurately simulate the behavior of your actual data source.
 
-    @property {Boolean}
+    @type Boolean
   */
   simulateRemoteResponse: NO,
 
@@ -44,7 +44,7 @@ SC.FixturesDataSource = SC.DataSource.extend(
      - 100: simulates the latency to a "nearby" server (i.e. same part of the world).  Suitable for simulating locally hosted servers or servers with multiple data centers around the world.
      - 50: simulates the latency to an edge cache node when using a CDN.  Life is really good if you can afford this kind of setup.
 
-    @property {Number}
+    @type Number
   */
   latency: 50,
 

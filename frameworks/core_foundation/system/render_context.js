@@ -17,7 +17,7 @@ SC.MODE_APPEND = 'append';
 SC.MODE_PREPEND = 'prepend';
 
 /** list of numeric properties that should not have 'px' appended */
-SC.NON_PIXEL_PROPERTIES = ['zIndex', 'fontWeight', 'opacity'];
+SC.NON_PIXEL_PROPERTIES = ['zIndex', 'opacity'];
 
 /** a list of styles that get expanded into multiple properties, add more as you discover them */
 SC.COMBO_STYLES = {
@@ -125,7 +125,7 @@ SC.RenderContext = SC.Builder.create(
   /**
     The current working array of strings.
 
-    @property {Array}
+    @type Array
   */
   strings: null,
 
@@ -133,7 +133,7 @@ SC.RenderContext = SC.Builder.create(
     this initial offset into the strings array where this context instance
     has its opening tag.
 
-    @property {Number}
+    @type Number
   */
   offset: 0,
 
@@ -141,7 +141,7 @@ SC.RenderContext = SC.Builder.create(
     the current number of strings owned by the context, including the opening
     tag.
 
-    @property {Number}
+    @type Number
   */
   length: 0,
 
@@ -154,7 +154,7 @@ SC.RenderContext = SC.Builder.create(
     You probably do not want to change this property unless you know what you
     are doing.
 
-    @property {String}
+    @type String
   */
   updateMode: SC.MODE_REPLACE,
 
@@ -345,7 +345,7 @@ SC.RenderContext = SC.Builder.create(
         mode = this.updateMode,
         cq, value, factory, cur, next;
 
-    this._innerHTMLReplaced = NO;
+    // this._innerHTMLReplaced = NO;
 
     if (!elem) {
       // throw new Error("Cannot update context because there is no source element");
@@ -356,7 +356,7 @@ SC.RenderContext = SC.Builder.create(
 
     // replace innerHTML
     if (this.length > 0) {
-      this._innerHTMLReplaced = YES;
+      // this._innerHTMLReplaced = YES;
       if (mode === SC.MODE_REPLACE) {
         cq.html(this.join());
       } else {
@@ -895,11 +895,11 @@ SC.RenderContext = SC.Builder.create(
     }
 
     if (didChange) {
-      this._stylesDidChange = YES;
 
-      // Apply the styles to the element if we have one already.
+      // Set the styles on the element if we have one already.
       if (this._elem) {
-        this.$().attr('style', '').css(styles);
+        // Note: jQuery .css doesn't remove old styles
+        this.$().css(styles);
       }
     }
 
@@ -934,7 +934,8 @@ SC.RenderContext = SC.Builder.create(
       hash[key] = value;
       didChange = YES;
     } else if (cur != null && value == null) {
-      delete hash[key];
+      // Unset using '' so that jQuery will remove the value, null is not reliable (ex. WebkitTransform)
+      hash[key] = '';
       didChange = YES;
     } else if (cur != value) {
       hash[key] = value;
@@ -973,8 +974,6 @@ SC.RenderContext = SC.Builder.create(
     // Reset.
     this._styles = {};
     if (didChange) {
-      this._stylesDidChange = YES;
-
       // Apply the styles to the element if we have one already.
       if (this._elem) {
         this.$().attr('style', '');

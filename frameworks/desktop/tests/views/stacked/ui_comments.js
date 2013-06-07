@@ -7,7 +7,7 @@
 
 /* Test SC.StackedView with a Comments example. */
 
-var CommentView = SC.View.extend(SC.StaticLayout, SC.Control, {
+var CommentView = SC.View.extend(SC.Control, {
 
   useStaticLayout: YES,
 
@@ -67,7 +67,7 @@ var CommentView = SC.View.extend(SC.StaticLayout, SC.Control, {
     layout: { left: 0, top: 0, right: 0, height: 18 }
   }),
 
-  commentLabel: SC.LabelView.extend(SC.StaticLayout, {
+  commentLabel: SC.LabelView.extend({
     useStaticLayout: YES,
     tagName: "p"
   }),

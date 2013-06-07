@@ -111,16 +111,6 @@ test("invokes parent.didRemoveChild before removing if defined", function() {
   equals(callCount, 1, 'invoked callback');
 });
 
-test("invokes parentViewDidChange() on child view.  this is used by the view internals to update layer loc", function() {
-
-	// monkey patch to test
-	var callCount = 0;
-	child.parentViewDidChange = function() { callCount++; };
-
-	parent.removeChild(child);
-	equals(callCount, 1, 'invoked parentViewDidChange');
-});
-
 // VERIFY LAYER CHANGES ARE DEFERRED
 test("should not move layer immediately", function() {
 
@@ -133,38 +123,6 @@ test("should not move layer immediately", function() {
 
   parent.removeChild(child);
   equals(childLayer.parentNode, parentLayer, 'child layer belong to parent');
-});
-
-/**
-  There was an issue that if you destroyed a child view, it would destroy its
-  layer and remove itself from the parent, which in turn invoked updateLayerLocationIfNeeded
-  in parentViewDidChange.  If before updateLayerLocationIfNeeded ran a new
-  child was created with the same layer id, when updateLayerLocationIfNeeded
-  ran it would remove the new layer from the parent.
-
-  The solution was that if a view is destroyed, don't invoke updateLayerLocationIfNeeded.
-*/
-test("Removing a view and creating a view with the same layerId in the should not result in the new view's layer being removed from the parent.", function () {
-  var callCount = 0;
-  // child.updateLayerLocationIfNeeded = function() { callCount++; };
-
-  SC.run(function () {
-    parent.removeChild(child);
-  });
-
-  child.updateLayerLocationIfNeeded.expect(1);
-
-  SC.run(function () {
-    parent.appendChild(child);
-  });
-
-  child.updateLayerLocationIfNeeded.expect(2);
-
-  SC.run(function () {
-    child.destroy();
-  });
-
-  child.updateLayerLocationIfNeeded.expect(2);
 });
 
 // .......................................................

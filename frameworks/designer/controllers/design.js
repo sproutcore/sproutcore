@@ -9,7 +9,7 @@
 // ==========================================================================
 /*globals SC */
 
-/** @class
+/**
 
   (Document Your Controller Here)
 
@@ -20,7 +20,7 @@ SC.designController = SC.ObjectController.create(
 
   contentBinding: 'SC.designsController.selection',
   contentBindingDefault: SC.Binding.single(),
-  
+
   viewSelected: function(){
     var c = this.get('content'), pane, designer, pageController;
     if(c){

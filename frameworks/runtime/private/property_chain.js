@@ -35,7 +35,7 @@ SC._PropertyChain = SC.Object.extend(
   /**
     The object represented by this node in the chain.
 
-    @property {Object}
+    @type Object
   */
   object: null,
 
@@ -43,7 +43,7 @@ SC._PropertyChain = SC.Object.extend(
     The key on the previous object in the chain that contains the object
     represented by this node in the chain.
 
-    @property {String}
+    @type String
   */
   property: null,
 
@@ -52,14 +52,14 @@ SC._PropertyChain = SC.Object.extend(
     object which contains the +toInvalidate+ property that will be invalidated
     if +property+ changes.
 
-    @property {Object}
+    @type Object
   */
   target: null,
 
   /**
     The property of +target+ to invalidate when +property+ changes.
 
-    @property {String}
+    @type String
   */
   toInvalidate: null,
 
@@ -67,7 +67,7 @@ SC._PropertyChain = SC.Object.extend(
     The property key on +object+ that contains the object represented by the
     next node in the chain.
 
-    @property {String}
+    @type String
   */
   nextProperty: null,
 
@@ -112,8 +112,8 @@ SC._PropertyChain = SC.Object.extend(
   },
 
   /**
-    Removes this segment of the chain from the object it represents. This is 
-    usually called when the object represented by the previous segment in the 
+    Removes this segment of the chain from the object it represents. This is
+    usually called when the object represented by the previous segment in the
     chain changes.
   */
   deactivate: function() {

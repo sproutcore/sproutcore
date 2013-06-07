@@ -191,7 +191,7 @@ SC.InlineEditable = {
     @params {SC.InlineEditor} the editor for the view
     @params {Object} the initial value of the editor
   */
-  inlineEditorWillCommmitEditing: function(editor, value, editable) {
+  inlineEditorWillCommitEditing: function(editor, value, editable) {
     if(this.inlineEditorWillEndEditing) this.inlineEditorWillEndEditing(editor, value);
   },
 

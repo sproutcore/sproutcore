@@ -6,12 +6,12 @@
 // ==========================================================================
 /*globals Welcome */
 
-/** @namespace
-  
+/**
+
   The Welcome app is displayed when you load the root URL and the dev server
-  is visible.  It will fetch the list of targets from the server and list 
+  is visible.  It will fetch the list of targets from the server and list
   them.
-  
+
   @extends SC.Object
 */
 Welcome = SC.Object.create(
@@ -19,9 +19,9 @@ Welcome = SC.Object.create(
 
   NAMESPACE: 'Welcome',
   VERSION: '1.0.0',
-  
+
   store: SC.Store.create().from('CoreTools.DataSource'),
-  
+
   displayTitle: function() {
     var hostname = (window.location.hostname || 'localhost').toString();
     return hostname.match(/sproutcore\.com/) ? "SproutCore Demos".loc() : "SproutCore Developer Tools";

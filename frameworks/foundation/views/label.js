@@ -9,8 +9,7 @@ sc_require('mixins/inline_editable');
 sc_require('mixins/inline_editor_delegate');
 sc_require('delegates/inline_text_field');
 
-SC.REGULAR_WEIGHT = 'normal';
-SC.BOLD_WEIGHT = 'bold';
+
 /**
   @class
 
@@ -30,7 +29,7 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditable,
 
   classNames: ['sc-label-view'],
 
-  displayProperties: ['displayTitle', 'textAlign', 'fontWeight', 'icon', 'escapeHTML', 'needsEllipsis', 'hint', 'toolTip'],
+  displayProperties: ['displayTitle', 'displayHint', 'displayToolTip', 'icon'],
 
   /**
     The delegate that gets notified of events related to the editing process. Set
@@ -55,22 +54,19 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditable,
   exampleEditor: SC.InlineTextFieldView,
 
   /**
-    Specify the font weight for this.  You may pass SC.REGULAR_WEIGHT, or SC.BOLD_WEIGHT.
+    Whether the value, hint and toolTip will be escaped to avoid HTML injection
+    attacks or not.
 
-    @property {String} SC.REGULAR_WEIGHT|SC.BOLD_WEIGHT
-    @default null
-    @deprecated Use CSS instead.
+    You should only disable this option if you are sure you are displaying
+    non-user generated text.
+
+    Note: this is not an observed display property.  If you change it after
+    rendering, you should call `displayDidChange` on the view to update the layer.
+
+    @type Boolean
+    @default true
   */
-  fontWeight: null,
-
-  /**
-    If true, value will be escaped to avoid scripting attacks.
-
-    This is a default value that can be overridden by the
-    settings on the owner view.
-  */
-  escapeHTML: YES,
-  escapeHTMLBindingDefault: SC.Binding.oneWay().bool(),
+  escapeHTML: true,
 
   /**
     If true, then the value will be localized.
@@ -78,6 +74,21 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditable,
   */
   localize: NO,
   localizeBindingDefault: SC.Binding.oneWay().bool(),
+
+  /**
+    If set to true, the label element will include the 'ellipsis' class, which
+    by default sets the 'white-space' style to 'nowrap' and the 'text-overflow'
+    style to 'ellipsis'.
+
+    Note: that this does NOT work with multi-line text.
+
+    Note: this is not an observed display property.  If you change it after
+    rendering, you should call `displayDidChange` on the view to update the layer.
+
+    @type Boolean
+    @default false
+   */
+  needsEllipsis: false,
 
   /**
     Set this to a validator or to a function and the value
@@ -103,14 +114,11 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditable,
   */
   hint: null,
 
-  /*
-    Whether hint should be shown or not. By default this is tied to isEditable
-    so the hint will only show if isEditable is YES.
-
-    @type Boolean
-    @property
-  */
+  /** @deprecated */
   hintEnabled: function() {
+    //@if(debug)
+    SC.warn("Developer Warning: The hintEnabled property of SC.LabelView is deprecated.  Please simply get the isEditable property to determine if the hint will be displayed instead.");
+    //@endif
     return this.get('isEditable');
   }.property('isEditable').cacheable(),
 
@@ -123,7 +131,10 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditable,
   /**
     Set the alignment of the label view.
 
-    @property {String} SC.ALIGN_LEFT|SC.ALIGN_CENTER|SC.ALIGN_RIGHT
+    Note: this is not an observed display property.  If you change it after
+    rendering, you should call `displayDidChange` on the view to update the layer.
+
+    @type String SC.ALIGN_LEFT|SC.ALIGN_CENTER|SC.ALIGN_RIGHT
     @default null
     @deprecated Use CSS instead.
   */
@@ -144,17 +155,17 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditable,
   /**
     The name of the theme's SC.LabelView render delegate.
 
-    @property {String}
+    @type String
   */
   renderDelegateName: 'labelRenderDelegate',
 
   /**
-    [RO] The value that will actually be displayed.
+    The value that will actually be displayed.
 
     This property is dynamically computed by applying localization,
     string conversion and other normalization utilities.
 
-    @field
+    @type String
   */
   displayTitle: function() {
     var value, formatter;
@@ -187,20 +198,37 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditable,
     // 4. Localize
     if (value && this.getDelegateProperty('localize', this.displayDelegate)) value = SC.String.loc(value) ;
 
-    return value ;
+    return value;
   }.property('value', 'localize', 'formatter').cacheable(),
 
-
   /**
-    [RO] The hint value that will actually be displayed.
+    The hint that will actually be displayed depending on localization and
+    sanitizing (or not).
 
-    This property is dynamically computed by applying localization
-    and other normalization utilities.
-
+    @type String
   */
+  displayHint: function () {
+    var hint = this.get('hint'),
+      isEditable = this.get('isEditable');
+
+    if (isEditable) {
+      if (hint && this.getDelegateProperty('localize', this.displayDelegate)) {
+        hint = SC.String.loc(hint);
+      }
+    } else {
+      hint = null;
+    }
+
+    return hint;
+  }.property('hint', 'localize', 'isEditable').cacheable(),
+
+  /** @deprecated */
   hintValue: function() {
+    //@if(debug)
+    SC.warn("Developer Warning: The hintValue property of SC.LabelView is deprecated.  Please simply get the hint or displayHint (localized) property instead.");
+    //@endif
     var hintVal = this.get('hint');
-    return hintVal ;
+    return hintVal;
   }.property('hint').cacheable(),
 
   /** @private */

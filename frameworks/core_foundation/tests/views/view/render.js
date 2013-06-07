@@ -41,12 +41,14 @@ test("default implementation invokes renderChildViews if firstTime = YES", funct
   equals(rendered, 1, 'rendered the child');
   equals(parentRendered, 1);
 
-  view.updateLayer();
+  view.updateLayer(true);
   equals(rendered, 1, 'didn\'t call render again');
   equals(parentRendered, 1, 'didn\'t call the parent\'s render again');
-  equals(parentUpdated, 1, 'called the parent\'t update');
+  equals(parentUpdated, 1, 'called the parent\'s update');
   equals(updated, 0, 'didn\'t call the child\'s update');
 
+  // Clean up.
+  view.destroy();
 });
 
 test("default implementation does not invoke renderChildViews if explicitly rendered in render method", function() {
@@ -81,12 +83,14 @@ test("default implementation does not invoke renderChildViews if explicitly rend
   equals(parentRendered, 1);
   equals(view.$('div').length, 1);
 
-  view.updateLayer();
+  view.updateLayer(true);
   equals(rendered, 1, 'didn\'t call render again');
   equals(parentRendered, 1, 'didn\'t call the parent\'s render again');
-  equals(parentUpdated, 1, 'called the parent\'t update');
+  equals(parentUpdated, 1, 'called the parent\'s update');
   equals(updated, 0, 'didn\'t call the child\'s update');
 
+  // Clean up.
+  view.destroy();
 });
 
 test("should invoke renderChildViews if layer is destroyed then re-rendered", function() {
@@ -126,6 +130,8 @@ test("should invoke renderChildViews if layer is destroyed then re-rendered", fu
   equals(parentRendered, 2);
   equals(view.$('div').length, 1);
 
+  // Clean up.
+  view.destroy();
 });
 // .......................................................
 // renderChildViews()
@@ -173,6 +179,8 @@ test("creates a context and then invokes renderToContext or updateLayer on each 
   equals(view.renderChildViews(curContext, curFirstTime), curContext, 'returns context');
   equals(runCount, 3, 'updateLayer() invoked for each child view');
 
+  // Clean up.
+  view.destroy();
 });
 
 test("creates a context and then invokes renderChildViews to call renderToContext on each childView", function() {
@@ -200,4 +208,6 @@ test("creates a context and then invokes renderChildViews to call renderToContex
   view.renderChildViews(curContext);
   equals(runCount, 3, 'renderToContext() invoked for each child view');
 
+  // Clean up.
+  view.destroy();
 });

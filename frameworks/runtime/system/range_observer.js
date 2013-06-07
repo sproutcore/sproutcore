@@ -25,7 +25,7 @@ SC.RangeObserver = /** @scope SC.RangeObserver.prototype */{
   /**
     Walk like a duck.
 
-    @property {Boolean}
+    @type Boolean
   */
   isRangeObserver: YES,
 

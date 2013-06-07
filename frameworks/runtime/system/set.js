@@ -169,21 +169,21 @@ SC.Set = SC.mixin({},
   /**
     Walk like a duck
 
-    @property {Boolean}
+    @type Boolean
   */
   isSet: YES,
 
   /**
     This property will change as the number of objects in the set changes.
 
-    @property {Number}
+    @type Number
   */
   length: 0,
 
   /**
     Returns the first object in the set or null if the set is empty
 
-    @property {Object}
+    @type Object
   */
   firstObject: function() {
     return (this.length > 0) ? this[0] : undefined ;

@@ -61,15 +61,15 @@ SC.ButtonView = SC.View.extend(SC.Control,
 /** @scope SC.ButtonView.prototype */ {
 
   /**
-    Tied to the isEnabled state
+    Tied to the isEnabledInPane state
 
     @type Boolean
     @default YES
   */
   acceptsFirstResponder: function() {
-    if (SC.FOCUS_ALL_CONTROLS) { return this.get('isEnabled'); }
+    if (SC.FOCUS_ALL_CONTROLS) { return this.get('isEnabledInPane'); }
     return NO;
-  }.property('isEnabled'),
+  }.property('isEnabledInPane'),
 
   /**
     @type Array
@@ -77,6 +77,21 @@ SC.ButtonView = SC.View.extend(SC.Control,
     @see SC.View#classNames
   */
   classNames: ['sc-button-view'],
+
+  /**
+    Whether the title and toolTip will be escaped to avoid HTML injection attacks
+    or not.
+
+    You should only disable this option if you are sure you are displaying
+    non-user generated text.
+
+    Note: this is not an observed display property.  If you change it after
+    rendering, you should call `displayDidChange` on the view to update the layer.
+
+    @type Boolean
+    @default true
+   */
+  escapeHTML: true,
 
   /**
     The theme to apply to the button. By default, a subtheme with the name of
@@ -166,8 +181,6 @@ SC.ButtonView = SC.View.extend(SC.Control,
   */
   title: "",
 
-  tooltip: "",
-
   /**
     If set, the title property will be updated automatically
     from the content using the key you specify.
@@ -200,6 +213,9 @@ SC.ButtonView = SC.View.extend(SC.Control,
     If YES, button will attempt to display an ellipsis if the title cannot
     fit inside of the visible area. This feature is not available on all
     browsers.
+
+    Note: this is not an observed display property.  If you change it after
+    rendering, you should call `displayDidChange` on the view to update the layer.
 
     @type Boolean
     @default YES
@@ -386,7 +402,7 @@ SC.ButtonView = SC.View.extend(SC.Control,
   */
   triggerActionAfterDelay: function(evt) {
     // If this button is disabled, we have nothing to do
-    if (!this.get('isEnabled')) return NO;
+    if (!this.get('isEnabledInPane')) return NO;
 
     // Set active state of the button so it appears highlighted
     this.set('isActive', YES);
@@ -448,25 +464,17 @@ SC.ButtonView = SC.View.extend(SC.Control,
   */
   ariaRole: 'button',
 
-  // display properties that should automatically cause a refresh.
-  // isCancel and isDefault also cause a refresh but this is implemented as
-  // a separate observer (see below)
-
   /**
     The following properties affect how `SC.ButtonView` is rendered, and will
     cause the view to be rerendered if they change.
 
+    Note: 'value', 'isDefault', 'isCancel' are also display properties, but are
+    observed separately.
+
     @type Array
-    @default [
-      'icon', 'displayTitle', 'value', 'displayToolTip', 'isDefault', 'isCancel',
-      'escapeHTML', 'needsEllipsis', 'tooltip', 'supportFocusRing'
-    ]
+    @default ['icon', 'displayTitle', 'displayToolTip', 'supportFocusRing', 'buttonBehavior']
   */
-  displayProperties: [
-    'icon', 'displayTitle', 'value', 'displayToolTip', 'isDefault', 'isCancel',
-    'escapeHTML', 'needsEllipsis', 'tooltip', 'supportFocusRing',
-    'buttonBehavior'
-  ],
+  displayProperties: ['icon', 'displayTitle', 'displayToolTip', 'supportFocusRing', 'buttonBehavior'],
 
   /**
     The name of the render delegate in the theme that should be used to
@@ -480,16 +488,11 @@ SC.ButtonView = SC.View.extend(SC.Control,
   */
   renderDelegateName: 'buttonRenderDelegate',
 
-   contentKeys: {
-     'contentValueKey': 'value',
-     'contentTitleKey': 'title',
-     'contentIconKey': 'icon'
-   },
-
-  /** @private - when title changes, dirty display. */
-  _button_displayObserver: function() {
-    this.displayDidChange();
-  }.observes('title', 'icon', 'value'),
+  contentKeys: {
+    'contentValueKey': 'value',
+    'contentTitleKey': 'title',
+    'contentIconKey': 'icon'
+  },
 
   /**
     Handle a key equivalent if set.  Trigger the default action for the
@@ -503,7 +506,7 @@ SC.ButtonView = SC.View.extend(SC.Control,
     //If this is not visible
     if (!this.get('isVisibleInWindow')) return NO;
 
-    if (!this.get('isEnabled')) return NO;
+    if (!this.get('isEnabledInPane')) return NO;
     var equiv = this.get('keyEquivalent');
 
     // button has defined a keyEquivalent and it matches!
@@ -572,6 +575,9 @@ SC.ButtonView = SC.View.extend(SC.Control,
     var value = this.get('value'),
         state = this.computeIsSelectedForValue(value);
     this.set('isSelected', state) ; // set new state...
+
+    // value acts as a display property
+    this.displayDidChange();
   }.observes('value'),
 
   /** @private
@@ -621,6 +627,9 @@ SC.ButtonView = SC.View.extend(SC.Control,
       // Restore the default key equivalent
       this.set('keyEquivalent', this._defaultKeyEquivalent);
     }
+
+    // isDefault and isCancel act as display properties
+    this.displayDidChange();
   }.observes('isDefault', 'isCancel'),
 
   /** @private
@@ -629,7 +638,7 @@ SC.ButtonView = SC.View.extend(SC.Control,
   mouseDown: function(evt) {
     var buttonBehavior = this.get('buttonBehavior');
 
-    if (!this.get('isEnabled')) return YES ; // handled event, but do nothing
+    if (!this.get('isEnabledInPane')) return YES ; // handled event, but do nothing
     this.set('isActive', YES);
     this._isMouseDown = YES;
 
@@ -667,12 +676,12 @@ SC.ButtonView = SC.View.extend(SC.Control,
     ON mouse up, trigger the action only if we are enabled and the mouse was released inside of the view.
   */
   mouseUp: function(evt) {
-    if (this._isMouseDown) this.set('isActive', NO); // track independently in case isEnabled has changed
+    if (this._isMouseDown) this.set('isActive', NO); // track independently in case isEnabledInPane has changed
     this._isMouseDown = false;
 
     if (this.get('buttonBehavior') !== SC.HOLD_BEHAVIOR) {
       var inside = this.$().within(evt.target);
-      if (inside && this.get('isEnabled')) this._action(evt) ;
+      if (inside && this.get('isEnabledInPane')) this._action(evt) ;
     }
 
     return YES ;
@@ -682,7 +691,7 @@ SC.ButtonView = SC.View.extend(SC.Control,
   touchStart: function(touch){
     var buttonBehavior = this.get('buttonBehavior');
 
-    if (!this.get('isEnabled')) return YES ; // handled event, but do nothing
+    if (!this.get('isEnabledInPane')) return YES ; // handled event, but do nothing
     this.set('isActive', YES);
 
     if (buttonBehavior === SC.HOLD_BEHAVIOR) {
@@ -715,10 +724,10 @@ SC.ButtonView = SC.View.extend(SC.Control,
   /** @private */
   touchEnd: function(touch){
     this._touch_exited = NO;
-    this.set('isActive', NO); // track independently in case isEnabled has changed
+    this.set('isActive', NO); // track independently in case isEnabledInPane has changed
 
     if (this.get('buttonBehavior') !== SC.HOLD_BEHAVIOR) {
-      if (this.touchIsInBoundary(touch) && this.get('isEnabled')) {
+      if (this.touchIsInBoundary(touch) && this.get('isEnabledInPane')) {
         this._action();
       }
     }
@@ -730,7 +739,7 @@ SC.ButtonView = SC.View.extend(SC.Control,
   /** @private */
   keyDown: function(evt) {
     // handle tab key
-     if(!this.get('isEnabled')) return YES;
+     if(!this.get('isEnabledInPane')) return YES;
     if (evt.which === 9 || evt.keyCode === 9) {
       var view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
       if(view) view.becomeFirstResponder();

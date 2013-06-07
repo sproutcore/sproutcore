@@ -15,7 +15,6 @@
    - `isSelected`
    - `isActive`
    - `isMixed`
-   - `isEnabled`
    - `title`
 
   Optional Properties
@@ -40,8 +39,7 @@ SC.BaseTheme.radioRenderDelegate = SC.RenderDelegate.create({
     context.setClass({
       active: dataSource.get('isActive'),
       mixed: dataSource.get('isMixed'),
-      sel: dataSource.get('isSelected'),
-      disabled: !dataSource.get('isEnabled')
+      sel: dataSource.get('isSelected')
     });
 
     //accessing accessibility
@@ -71,8 +69,7 @@ SC.BaseTheme.radioRenderDelegate = SC.RenderDelegate.create({
     jquery.setClass({
       active: dataSource.get('isActive'),
       mixed: dataSource.get('isMixed'),
-      sel: dataSource.get('isSelected'),
-      disabled: !dataSource.get('isEnabled')
+      sel: dataSource.get('isSelected')
     });
 
     jquery.attr('aria-disabled', dataSource.get('isEnabled') ? 'false' : 'true');

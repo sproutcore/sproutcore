@@ -1,23 +1,23 @@
 /*globals Test */
 
 Test.loginPage = SC.Page.create({
-  
+
   mainPane: SC.MainPane.design({
-    
+
     childViews: 'mainView'.w(),
-    
+
     mainView: SC.View.design({
-      
+
       childViews: 'headerView usernameView passwordView footerView'.w(),
-      
+
       layout: { centerX: 0, centerY: 0, width: 300, height: 150 },
-      
+
       headerView: SC.LabelView.design({
+        classNames: ['header-label'],
         layout: { top: 0, left: 0, right: 0, height: 30 },
-        value: 'Login',
-        textAlign: SC.ALIGN_CENTER
+        value: 'Login'
       }),
-      
+
       usernameView: SC.View.design({
         childViews: 'labelView textfieldView'.w(),
         layout: { top: 30, left: 0, right: 0, height: 30 },
@@ -30,7 +30,7 @@ Test.loginPage = SC.Page.create({
           valueBinding: 'Test.loginController.username'
         })
       }),
-      
+
       passwordView: SC.View.design({
         childViews: 'labelView textfieldView'.w(),
         layout: { top: 60, left: 0, right: 0, height: 30 },
@@ -43,7 +43,7 @@ Test.loginPage = SC.Page.create({
           valueBinding: 'Test.loginController.password'
         })
       }),
-      
+
       footerView: SC.View.design({
         childViews: 'buttonView'.w(),
         layout: { top: 120, left: 0, right: 0, bottom: 0 },
@@ -53,9 +53,9 @@ Test.loginPage = SC.Page.create({
           action: 'login'
         })
       })
-      
+
     })
-    
+
   })
-  
+
 });

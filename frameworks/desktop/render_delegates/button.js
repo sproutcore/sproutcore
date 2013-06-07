@@ -102,7 +102,7 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
     @param {SC.RenderContext} jquery the jQuery object representing the HTML representation of the button
   */
   update: function(dataSource, jquery) {
-    var isToggle = (dataSource.get('buttonBehavior')===SC.TOGGLE_BEHAVIOR);
+    var isToggle = (dataSource.get('buttonBehavior') === SC.TOGGLE_BEHAVIOR);
 
     this.updateSizeClassName(dataSource, jquery);
 
@@ -112,9 +112,11 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
 
 
     var isDefault = dataSource.get('isDefault'),
-        isCancel = dataSource.get('isCancel');if(dataSource.get('isSegment')){
+        isCancel = dataSource.get('isCancel');
+
+    if (dataSource.get('isSegment')) {
       jquery.attr('aria-selected', dataSource.get('isSelected').toString());
-    }else if(isToggle){
+    } else if (isToggle) {
       jquery.attr('aria-pressed', dataSource.get('isActive').toString());
     }
 

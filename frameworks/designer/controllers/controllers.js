@@ -10,7 +10,7 @@
 // ==========================================================================
 /*globals SC */
 
-/** @class
+/**
 
   in suppressMain mode all controllers files register with this array controller
 
@@ -18,6 +18,6 @@
 */
 SC.controllersController = SC.ArrayController.create(
 /** @scope SC.controllersController.prototype */ {
-  
-  
+
+
 }) ;

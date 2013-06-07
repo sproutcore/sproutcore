@@ -42,6 +42,7 @@ var commonSetup = {
 
   teardown: function () {
     pane.remove();
+    pane.destroy();
   }
 };
 
@@ -63,25 +64,11 @@ if (SC.platform.supportsCSSTransitions) {
     }, 5);
   });
 
-
-  test("should accept shorthand notation", function () {
-    stop(2000);
-    SC.RunLoop.begin();
-    view.animate('left', 100, 1);
-    SC.RunLoop.end();
-
-    setTimeout(function () {
-      equals(transitionFor(view), 'left 1s ease 0s', 'add transition');
-
-      start();
-    }, 5);
-  });
-
   test("callbacks work in general", function () {
     stop(2000);
 
     SC.run(function () {
-      view.animate('left', 100, 0.500, function () {
+      view.animate('left', 100, { duration: 0.5 }, function () {
         ok(true, "Callback was called.");
         equals(view, this, "`this` should be the view");
 
@@ -103,7 +90,7 @@ if (SC.platform.supportsCSSTransitions) {
     });
 
     SC.run(function () {
-      view.animate('left', 100, 0.500, ob, 'callback');
+      view.animate('left', 100, { duration: 0.5 }, ob, 'callback');
     });
   });
 
@@ -111,7 +98,7 @@ if (SC.platform.supportsCSSTransitions) {
     stop(2000);
 
     SC.RunLoop.begin();
-    view.animate('left', 100, 0.500, function (data) {
+    view.animate('left', 100, { duration: 0.5 }, function (data) {
       // TODO: Test this better
       ok(data.event, "has event");
       equals(data.view, view, "view is correct");
@@ -168,7 +155,7 @@ if (SC.platform.supportsCSSTransitions) {
     stop(2000);
 
     SC.RunLoop.begin();
-    view.animate({ top: 100, left: 100 }, 1);
+    view.animate({ top: 100, left: 100 }, { duration: 1 });
     SC.RunLoop.end();
 
     setTimeout(function () {
@@ -188,7 +175,7 @@ if (SC.platform.supportsCSSTransitions) {
     expect(1);
 
     SC.run(function () {
-      view.animate({ top: 100, left: 100, width: 400 }, 0.50, function () {
+      view.animate({ top: 100, left: 100, width: 400 }, { duration: 0.5 }, function () {
         ok(stopped, 'callback called back');
         if (stopped) {
           stopped = false;
@@ -210,7 +197,7 @@ if (SC.platform.supportsCSSTransitions) {
     expect(1);
 
     SC.run(function () {
-      view.animate('top', view.getPath('layout.top'), 0.50, function () {
+      view.animate('top', view.getPath('layout.top'), { duration: 0.5 }, function () {
         ok(true, 'callback called back');
 
         start();
@@ -224,7 +211,7 @@ if (SC.platform.supportsCSSTransitions) {
     expect(1);
 
     SC.RunLoop.begin();
-    view.animate('top', 20, 0, function () {
+    view.animate('top', 20, { duration: 0 }, function () {
       ok(true, 'callback called back');
       start();
     });
@@ -237,11 +224,11 @@ if (SC.platform.supportsCSSTransitions) {
     expect(2);
 
     SC.run(function () {
-      view.animate('top', 100, 0.250, function () {
+      view.animate('top', 100, { duration: 0.25 }, function () {
         ok(true, 'top finished');
       });
 
-      view.animate('left', 100, 0.500, function () {
+      view.animate('left', 100, { duration: 0.5 }, function () {
         ok(true, 'left finished');
         start();
       });
@@ -255,7 +242,7 @@ if (SC.platform.supportsCSSTransitions) {
     expect(6);
 
     SC.run(function () {
-      view.animate('top', 100, 0.500, function (data) {
+      view.animate('top', 100, { duration: 0.5 }, function (data) {
         // Test the order to ensure that this is the proper callback that is used.
         equals(order, 0, 'should be called first');
         order = 1;
@@ -263,7 +250,7 @@ if (SC.platform.supportsCSSTransitions) {
       });
 
       // Test calling animate twice in the same run loop.
-      view.animate('top', 100, 0.750, function (data) {
+      view.animate('top', 100, { duration: 0.75 }, function (data) {
         // Test the order to ensure that this is the proper callback that is used.
         equals(order, 1, 'should be called second');
         order = 2;
@@ -273,7 +260,7 @@ if (SC.platform.supportsCSSTransitions) {
 
     setTimeout(function () {
       SC.run(function () {
-        view.animate('top', 0, 0.750, function (data) {
+        view.animate('top', 0, { duration: 0.75 }, function (data) {
           // Test the order to ensure that this is the proper callback that is used.
           equals(order, 2, 'should be called third');
           equals(data.isCancelled, false, 'third not cancelled');
@@ -289,7 +276,7 @@ if (SC.platform.supportsCSSTransitions) {
 
     SC.run(function () {
       // this triggers the initial layoutStyle code
-      view.animate('left', 79, 0.500, function (data) {
+      view.animate('left', 79, { duration: 0.5 }, function (data) {
         callbacks++;
         wasCancelled = data.isCancelled;
       });
@@ -333,12 +320,12 @@ if (SC.platform.supportsCSSTransitions) {
     };
 
     SC.RunLoop.begin();
-    view.animate('left', 75, 0.2);
+    view.animate('left', 75, { duration: 0.2 });
     SC.RunLoop.end();
 
     setTimeout(function () {
       SC.RunLoop.begin();
-      view.animate('top', 50, 0.2);
+      view.animate('top', 50, { duration: 0.2 });
       SC.RunLoop.end();
     }, 400);
 
@@ -394,7 +381,7 @@ if (SC.platform.supportsCSSTransitions) {
     stop(2000);
 
     SC.RunLoop.begin();
-    view.animate({ top: 100, scale: 2 }, 0.500);
+    view.animate({ top: 100, scale: 2 }, { duration: 0.5 });
     SC.RunLoop.end();
 
     setTimeout(function () {
@@ -411,7 +398,7 @@ if (SC.platform.supportsCSSTransitions) {
     expect(7);
 
     SC.run(function () {
-      view.animate({ left: 100 }, 0.500, function (data) {
+      view.animate({ left: 100 }, { duration: 0.5 }, function (data) {
         ok(data.isCancelled, "The isCancelled property of the data should be true.");
       });
     });
@@ -443,7 +430,7 @@ if (SC.platform.supportsCSSTransitions) {
     expect(9);
 
     SC.run(function () {
-      view.animate({ left: 100, top: 100, width: 400 }, 0.500, function (data) {
+      view.animate({ left: 100, top: 100, width: 400 }, { duration: 0.5 }, function (data) {
         ok(data.isCancelled, "The isCancelled property of the data should be true.");
       });
     });
@@ -477,7 +464,7 @@ if (SC.platform.supportsCSSTransitions) {
     expect(9);
 
     SC.run(function () {
-      view.animate({ left: 100, top: 100, width: 400 }, 0.500, function (data) {
+      view.animate({ left: 100, top: 100, width: 400 }, { duration: 0.5 }, function (data) {
         ok(data.isCancelled, "The isCancelled property of the data should be true.");
       });
     });
@@ -518,7 +505,7 @@ if (SC.platform.supportsCSSTransitions) {
       stop(2000);
 
       SC.RunLoop.begin();
-      view.animate('top', 100, 1);
+      view.animate('top', 100, { duration: 1 });
       SC.RunLoop.end();
 
       setTimeout(function () {
@@ -533,7 +520,7 @@ if (SC.platform.supportsCSSTransitions) {
 
       SC.RunLoop.begin();
       view.adjust({ height: null, bottom: 0 });
-      view.animate('top', 100, 1);
+      view.animate('top', 100, { duration: 1 });
       SC.RunLoop.end();
 
       setTimeout(function () {
@@ -547,7 +534,7 @@ if (SC.platform.supportsCSSTransitions) {
       stop(1000);
 
       SC.RunLoop.begin();
-      view.animate('top', 100, 1).animate('rotateX', 45, 1);
+      view.animate('top', 100, { duration: 1 }).animate('rotateX', 45, { duration: 1 });
       SC.RunLoop.end();
 
       setTimeout(function () {
@@ -565,7 +552,7 @@ if (SC.platform.supportsCSSTransitions) {
       stop(1000);
 
       SC.RunLoop.begin();
-      view.animate('rotateX', 45, 2).animate('top', 100, 1);
+      view.animate('rotateX', 45, { duration: 2 }).animate('top', 100, { duration: 1 });
       SC.RunLoop.end();
 
       setTimeout(function () {
@@ -582,7 +569,7 @@ if (SC.platform.supportsCSSTransitions) {
       stop(1000);
 
       SC.run(function () {
-        view.animate({ top: 100, left: 100, scale: 2 }, 0.25, function () {
+        view.animate({ top: 100, left: 100, scale: 2 }, { duration: 0.25 }, function () {
           ok(true);
 
           start();
@@ -595,7 +582,7 @@ if (SC.platform.supportsCSSTransitions) {
 
       SC.RunLoop.begin();
       // we set width to the same value, but we change height
-      view.animate({width: 100, height: 50}, 0.5, function () { callbacks++; });
+      view.animate({width: 100, height: 50}, { duration: 0.5 }, function () { callbacks++; });
       SC.RunLoop.end();
 
       ok(callbacks === 0, "precond - callback should not have been run yet");
@@ -609,7 +596,7 @@ if (SC.platform.supportsCSSTransitions) {
         equals(callbacks, 1, "callback should have been run once, for height change");
 
         SC.RunLoop.begin();
-        view.animate('width', 50, 0.5);
+        view.animate('width', 50, { duration: 0.5 });
         SC.RunLoop.end();
 
         equals(callbacks, 1, "callback should still have only been called once, even though width has now been animated");
@@ -620,7 +607,7 @@ if (SC.platform.supportsCSSTransitions) {
       stop(2000);
 
       SC.run(function () {
-        view.animate({ left: 100, top: 100, width: 400 }, 0.500, function (data) {
+        view.animate({ left: 100, top: 100, width: 400 }, { duration: 0.5 }, function (data) {
           ok(data.isCancelled, "The isCancelled property of the data should be true.");
         });
       });
@@ -666,7 +653,7 @@ if (SC.platform.supportsCSSTransitions) {
 
 
       SC.run(function () {
-        view.animate({ left: 100, top: 100, width: 400 }, 0.5, function (data) {
+        view.animate({ left: 100, top: 100, width: 400 }, { duration: 0.5 }, function (data) {
           ok(data.isCancelled, "The isCancelled property of the data should be true.");
         });
       });
@@ -712,7 +699,7 @@ if (SC.platform.supportsCSSTransitions) {
       // expect(12);
 
       SC.run(function () {
-        view.animate({ left: 100, top: 100, width: 400 }, 0.500, function (data) {
+        view.animate({ left: 100, top: 100, width: 400 }, { duration: 0.5 }, function (data) {
           ok(data.isCancelled, "The isCancelled property of the data should be true.");
         });
       });
@@ -773,7 +760,7 @@ module("ANIMATION WITHOUT TRANSITIONS", {
 test("should update layout", function () {
   stop(2000);
   SC.RunLoop.begin();
-  view.animate('left', 100, 1);
+  view.animate('left', 100, { duration: 1 });
   SC.RunLoop.end();
 
   setTimeout(function () {
@@ -788,7 +775,7 @@ test("should still run callback", function () {
   expect(1);
 
   SC.RunLoop.begin();
-  view.animate({ top: 200, left: 100 }, 1, function () {
+  view.animate({ top: 200, left: 100 }, { duration: 1 }, function () {
     ok(true, "callback called");
     start();
   });

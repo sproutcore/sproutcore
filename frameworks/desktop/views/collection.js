@@ -69,9 +69,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
   /**
     @type Array
-    @default ['hasFirstResponder', 'isEnabled', 'isActive']
+    @default ['isActive']
   */
-  displayProperties: ['hasFirstResponder', 'isEnabled', 'isActive'],
+  displayProperties: ['isActive'],
 
   /**
     @type String
@@ -89,7 +89,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   // PROPERTIES
   //
 
-  /** @deprecated
+  /**
     If `YES`, uses the experimental fast `CollectionView` path.
 
     *Note* The performance improvements in the experimental code have been
@@ -102,6 +102,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     mobile devices.
 
     @type Boolean
+    @deprecated Version 1.10
     @default NO
   */
   useFastPath: NO,
@@ -178,7 +179,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     Allow user to select content using the mouse and keyboard.
 
     Set this property to `NO` to disallow the user from selecting items. If you
-    have items in your `selectedIndexes property, they will still be reflected
+    have items in your `selectedIndexes` property, they will still be reflected
     visually.
 
     @type Boolean
@@ -193,9 +194,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     Enable or disable the view.
 
     The collection view will set the `isEnabled` property of its item views to
-    reflect the same view of this property.  Whenever ``isEnabled` is false,
+    reflect the same view of this property.  Whenever `isEnabled` is false,
     the collection view will also be not selectable or editable, regardless of
-    the settings for isEditable` & `isSelectable`.
+    the settings for `isEditable` & `isSelectable`.
 
     @type Boolean
     @default YES
@@ -208,11 +209,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   /**
     Allow user to edit content views.
 
-    The collection view will set the `isEditable` property on its item views to
-    reflect the same value of this property.  Whenever `isEditable` is false,
-    the user will not be able to reorder, add, or delete items regardless of
-    the `canReorderContent` and `canDeleteContent` and `isDropTarget`
-    properties.
+    Whenever `isEditable` is false, the user will not be able to reorder, add,
+    or delete items regardless of the `canReorderContent` and `canDeleteContent`
+    and `isDropTarget` properties.
 
     @type Boolean
     @default YES
@@ -225,9 +224,12 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   /**
     Allow user to reorder items using drag and drop.
 
-    If true, the user will can use drag and drop to reorder items in the list.
+    If true, the user can use drag and drop to reorder items in the list.
     If you also accept drops, this will allow the user to drop items into
     specific points in the list.  Otherwise items will be added to the end.
+
+    When canReorderContent is true, item views will have the `isReorderable`
+    property set to true (if the `isEditable` is true on the collection).
 
     @type Boolean
     @default NO
@@ -243,6 +245,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     If true the user will be allowed to delete selected items using the delete
     key.  Otherwise deletes will not be permitted.
 
+    When canDeleteContent is true, item views will have the `isDeletable`
+    property set to true (if the `isEditable` is true on the collection).
+
     @type Boolean
     @default NO
   */
@@ -255,6 +260,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     Allow user to edit the content by double clicking on it or hitting return.
     This will only work if isEditable is `YES` and the item view implements
     the `beginEditing()` method.
+
+    When canEditContent is true, item views will have the `isEditable`
+    property set to true (if the `isEditable` is true on the collection).
 
     @type Boolean
   */
@@ -327,20 +335,28 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     your own subclass for this property to display the type of content you
     want.
 
-    For best results, the view you set here should understand the following
-    properties:
+    The view you set here should understand the following properties, which
+    it can use to alter its display:
 
-     - `content` -- The content object from the content array your view should display
-     - `isEnabled` -- True if the view should appear enabled
-     - `isSelected` -- True if the view should appear selected
+    - `content` -- The content object from the content array your view should
+      display.
+    - `isEnabled` -- False if the view should appear disabled.
+    - `isSelected` -- True if the view should appear selected.
+    - `contentIndex` -- The current index of the view's content.
+    - `isEditable` -- True if the view should appear editable by clicking on it
+      or hitting the Return key.
+    - `isReorderable` -- True if the view should appear reorderable by dragging
+      it.
+    - `isDeletable` -- True if the view should appear deletable, by clicking on
+      a delete button within it or hitting the Delete key.
 
     # Working with View and Element Pooling
 
     As noted in the SC.CollectionView description above, by default the few
     instances that are needed of the exampleView class will be created and then
     reused.  Reusing an exampleView means that the content, isSelected, isEnabled,
-    contentIndex, layout and layerId properties will be updated as an existing
-    view is pulled from the pool to be displayed.
+    isEditable, isReorderable, isDeletable and contentIndex properties will be
+    updated as an existing view is pulled from the pool to be displayed.
 
     If your custom exampleView class has trouble being reused, you may want to
     implement the `sleepInPool` and `awakeFromPool` methods in your exampleView.
@@ -770,6 +786,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     } else {
       var func = this.contentRangeDidChange;
       observer = content.addRangeObserver(nowShowing, this, func, null);
+
+      // Cache the range observer so we can clean it up later.
       this._cv_contentRangeObserver = observer;
     }
 
@@ -855,7 +873,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     // notify all items changed
     this.contentLengthDidChange();
     this.contentRangeDidChange(content, null, '[]', null);
-
   }.observes('content'),
 
   // ..........................................................
@@ -867,6 +884,15 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     SC.IndexSet.
   */
   _invalidIndexes: NO,
+
+  /** @private
+    We need to reload if isEnabled, isEditable, canEditContent, canReorderContent or
+    canDeleteContent change.
+  */
+  _isEnabledDidChange: function () {
+    // Reload the nowShowing indexes.
+    this.reload();
+  }.observes('isEnabled', 'isEditable', 'canEditContent', 'canReorderContent', 'canDeleteContent'),
 
   /**
     Regenerates the item views for the content items at the specified indexes.
@@ -911,12 +937,10 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     if (!invalid || !this.get('isVisibleInWindow')) return this; // delay
     this._invalidIndexes = NO;
 
-    var attrs,
-      i, len, existing,
+    var len, existing,
       nowShowing = this.get('nowShowing'),
       itemViews = this._sc_itemViews || [],
-      viewsToRemove, viewsToRedraw, viewsToCreate,
-      idx, view;
+      idx;
 
     // if the set is defined but it contains the entire nowShowing range, just
     // replace
@@ -925,11 +949,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     // if an index set, just update indexes
     if (invalid.isIndexSet) {
 
-      // Each of these arrays holds indexes.
-      viewsToRemove = [];
-      viewsToRedraw = [];
-      viewsToCreate = [];
-
       // Go through the invalid indexes and determine if the matching views
       // should be redrawn (exists and still showing), should be created (
       // doesn't exist and now showing) or should be destroyed (exists and no
@@ -937,44 +956,16 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
       invalid.forEach(function (idx) {
         // Get the existing item view, if there is one.
         existing = itemViews[idx];
-
-        if (nowShowing.contains(idx)) {
           if (existing) {
-            // Exists and still showing.
-            viewsToRedraw.push(idx);
-          } else {
-            // Doesn't exist and now showing.
-            viewsToCreate.push(idx);
-          }
-        } else if (existing) {
-          // Exists and no longer showing.
-          viewsToRemove.push(idx);
-        }
-      }, this);
-
-      // Process the removals.
-      for (i = 0, len = viewsToRemove.length;  i < len; i++) {
-        idx = viewsToRemove[i];
-        existing = itemViews[idx];
-
+          // Exists so remove it (may send to pool).
         this._removeItemView(existing, idx);
       }
 
-      // Process the redraws.
-      for (i = 0, len = viewsToRedraw.length;  i < len; i++) {
-        idx = viewsToRedraw[i];
-
-        existing = itemViews[idx];
-        attrs = this._attrsForContentIndex(idx);
-        this._reconfigureItemView(existing, attrs);
-        existing.updateLayerIfNeeded();
+        // Create it (may fetch from pool).
+        if (nowShowing.contains(idx)) {
+          this.itemViewForContentIndex(idx, YES);
       }
-
-      // Process the creations.
-      for (i = 0, len = viewsToCreate.length;  i < len; i++) {
-        idx = viewsToCreate[i];
-        view = this.itemViewForContentIndex(idx, YES);
-      }
+      }, this);
 
     // if set is NOT defined, replace entire content with nowShowing
     } else {
@@ -1003,7 +994,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   _TMP_ATTRS: {},
 
   /** @private */
-  _COLLECTION_CLASS_NAMES: ['sc-collection-item'],
+  _COLLECTION_CLASS_NAMES: ['sc-collection-item', 'sc-item'],
 
   /** @private */
   _GROUP_COLLECTION_CLASS_NAMES: ['sc-collection-item', 'sc-group-item'],
@@ -1032,14 +1023,22 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     @returns {SC.View} instantiated view
   */
   itemViewForContentIndex: function (idx, rebuild) {
-    var ret;
+    var ret,
+      views;
 
-    // Use an existing view for this index if we have it.
-    var views = this._sc_itemViews;
-    if (!views) {
-      views = this._sc_itemViews = [];
-    } else if (!rebuild && (ret = views[idx])) {
-      return ret;
+    // Initialize internal views cache.
+    views = this._sc_itemViews;
+    if (!views) { views = this._sc_itemViews = []; }
+
+    // Use an existing view for this index if we have it and aren't rebuilding all.
+    ret = views[idx];
+    if (ret) {
+      if (rebuild) {
+        ret.destroy();
+        ret = null;
+      } else {
+        return ret;
+      }
     }
 
     var attrs,
@@ -1060,7 +1059,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
       // Is there a view we can re-use?
       if (pool.length > 0) {
-        ret = pool.pop();
+        ret = pool.shift();
 
         // Reconfigure the view.
         this._reconfigureItemView(ret, attrs);
@@ -1069,9 +1068,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         if (ret.awakeFromPool) { ret.awakeFromPool(this); }
 
         // Recreate the layer if it was destroyed.
-        if (!ret.get('layer')) {
-          ret.set('layerLocationNeedsUpdate', true);
-          ret.invokeOnce(ret.updateLayerLocationIfNeeded);
+        if (!ret.get('_isRendered')) {
+          ret.invokeOnce(ret._doRender);
         }
       }
     }
@@ -1374,7 +1372,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         groupIndexes = this.get('_contentGroupIndexes'),
         sel;
 
-    if (!this.get('isSelectable') || !this.get('isEnabled')) return this;
+    if (!this.get('isSelectable') || !this.get('isEnabledInPane')) return this;
 
     // normalize
     if (SC.typeOf(indexes) === SC.T_NUMBER) {
@@ -1431,7 +1429,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         content = this.get('content'),
         del     = this.get('selectionDelegate');
 
-    if (!this.get('isSelectable') || !this.get('isEnabled')) return this;
+    if (!this.get('isSelectable') || !this.get('isEnabledInPane')) return this;
     if (!sel || sel.get('length') === 0) return this; // nothing to do
 
     // normalize
@@ -1683,7 +1681,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   */
   deleteSelection: function () {
     // perform some basic checks...
-    if (!this.get('canDeleteContent')) return NO;
+    if (!this.get('isEditable') || !this.get('canDeleteContent')) return NO;
 
     var sel     = this.get('selection'),
         content = this.get('content'),
@@ -2008,6 +2006,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   mouseDown: function (ev) {
     var content = this.get('content');
 
+    // Fast path!
     if (!content) return this.get('isSelectable');
 
     var itemView      = this.itemViewForEvent(ev),
@@ -2015,7 +2014,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         info, anchor, sel, isSelected, modifierKeyPressed, didSelect = NO,
         allowsMultipleSel = content.get('allowsMultipleSelection');
 
-    if (!this.get('isEnabled')) return contentIndex > -1;
+    if (!this.get('isEnabledInPane')) return contentIndex > -1;
 
     if (!this.get('isSelectable')) return NO;
 
@@ -2115,13 +2114,19 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   mouseUp: function (ev) {
     var view = this.itemViewForEvent(ev),
         info = this.mouseDownInfo,
-        content = this.get('content'),
-        contentIndex = view ? view.get('contentIndex') : -1,
-        sel, isSelected, canEdit, itemView, idx,
-        allowsMultipleSel = content.get('allowsMultipleSelection');
+        content = this.get('content');
 
-    if (!this.get('isEnabled')) return contentIndex > -1;
+    // Fast path!
+    if (!content) {
+      this._cleanupMouseDown();
+      return true;
+    }
 
+    var contentIndex = view ? view.get('contentIndex') : -1,
+      sel, isSelected, canEdit, itemView, idx,
+      allowsMultipleSel = content.get('allowsMultipleSelection');
+
+    if (!this.get('isEnabledInPane')) return contentIndex > -1;
     if (!this.get('isSelectable')) return NO;
 
     if (this.get('useToggleSelection')) {
@@ -2241,7 +2246,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     var itemView = this.itemViewForEvent(touch),
         contentIndex = itemView ? itemView.get('contentIndex') : -1;
 
-    if (!this.get('isEnabled')) return contentIndex > -1;
+    if (!this.get('isEnabledInPane')) return contentIndex > -1;
 
     // become first responder if possible.
     this.becomeFirstResponder();
@@ -2287,7 +2292,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         contentIndex = itemView ? itemView.get('contentIndex') : -1,
         isSelected = NO, sel, shouldSelect;
 
-    if (!this.get('isEnabled')) return contentIndex > -1;
+    if (!this.get('isEnabledInPane')) return contentIndex > -1;
 
     if (contentIndex > -1) {
       if (this.get('useToggleSelection')) {
@@ -2437,7 +2442,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     if ((Date.now() - info.at) < 123) return YES;
 
     // OK, they must be serious, decide if a drag will be allowed.
-    if (del.collectionViewShouldBeginDrag(this)) {
+    if (this.get('isEditable') && del.collectionViewShouldBeginDrag(this)) {
 
       // First, get the selection to drag.  Drag an array of selected
       // items appearing in this collection, in the order of the
@@ -2934,7 +2939,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   },
 
   /** @private SC.ScrollView */
-  touchScrollDidChange: function(left, top) {
+  touchScrollDidChange: function (left, top) {
     // Fast path!  Don't try to update too soon.
     if (Date.now() - this._lastTouchScrollTime < 30) { return; }
 
@@ -2963,16 +2968,21 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   // INTERNAL SUPPORT
   //
 
-  /** @private - when we become visible, reload if needed. */
-  _cv_isVisibleInWindowDidChange: function () {
-    if (this.get('isVisibleInWindow')) {
-      if (this._invalidIndexes) this.invokeOnce(this.reloadIfNeeded);
-      if (this._invalidSelection) {
-        this.invokeOnce(this.reloadSelectionIndexesIfNeeded);
-      }
+  /** @private - when we are about to become visible, reload if needed. */
+  willShowInDocument: function () {
+    if (this._invalidIndexes) this.invokeOnce(this.reloadIfNeeded);
+    if (this._invalidSelection) {
+      this.invokeOnce(this.reloadSelectionIndexesIfNeeded);
     }
-  }.observes('isVisibleInWindow'),
+  },
 
+  /** @private - when we are added, reload if needed. */
+  didAppendToDocument: function () {
+    if (this._invalidIndexes) this.invokeOnce(this.reloadIfNeeded);
+    if (this._invalidSelection) {
+      this.invokeOnce(this.reloadSelectionIndexesIfNeeded);
+    }
+  },
 
   /**
     Default delegate method implementation, returns YES if isSelectable
@@ -3120,6 +3130,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
       del = this.get('contentDelegate'),
       items = this.get('content'),
       isGroupView = this._contentIndexIsGroup(idx),
+      isEditable = this.get('isEditable') && this.get('canEditContent'),
+      isReorderable = this.get('isEditable') && this.get('canReorderContent'),
+      isDeletable = this.get('isEditable') && this.get('canDeleteContent'),
       isEnabled = del.contentIndexIsEnabled(this, items, idx),
       isSelected = del.contentIndexIsSelected(this, items, idx),
       outlineLevel = del.contentIndexOutlineLevel(this, items, idx),
@@ -3129,6 +3142,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     attrs.content = items.objectAt(idx);
     attrs.disclosureState = disclosureState;
     attrs.isEnabled = isEnabled;
+    attrs.isEditable = isEditable;
+    attrs.isReorderable = isReorderable;
+    attrs.isDeletable = isDeletable;
     attrs.isSelected = isSelected;
     attrs.isGroupView = isGroupView;
     attrs.layerId = this.layerIdFor(idx);
@@ -3256,6 +3272,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     itemView.set('content', attrs.content);
     itemView.set('contentIndex', attrs.contentIndex);
     itemView.set('isEnabled', attrs.isEnabled);
+    itemView.set('isEditable', attrs.isEditable);
+    itemView.set('isReorderable', attrs.isReorderable);
+    itemView.set('isDeletable', attrs.isDeletable);
     itemView.set('isSelected', attrs.isSelected);
     itemView.set('layerId', attrs.layerId);
     itemView.set('layout', attrs.layout);
@@ -3302,11 +3321,10 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         prototype = exampleView.prototype;
         if (!SC.none(prototype.isLayerReusable) && !prototype.isLayerReusable) {
           itemView.destroyLayer();
-          itemView.set('layerLocationNeedsUpdate', YES);
         } else {
           // If the layer is sticking around, be sure to move it out of view.
           layout = this._poolLayoutForContentIndex(idx);
-          itemView.adjust(layout);
+          itemView.set('layout', layout);
         }
 
         // Ensure that the id of views in the pool don't clash with ids that

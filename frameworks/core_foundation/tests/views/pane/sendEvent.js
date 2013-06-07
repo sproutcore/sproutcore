@@ -14,7 +14,7 @@ module("SC.Pane#sendEvent", {
       callCount++ ;
       equals(theEvent, evt, 'should pass event');
     };
-    
+
     defaultResponder = SC.Object.create({ defaultEvent: handler });
     pane = SC.Pane.create({
       defaultResponder: defaultResponder,
@@ -33,9 +33,10 @@ module("SC.Pane#sendEvent", {
     ok(barView.barEvent, 'has barEvent handler');
 
     evt = SC.Object.create(); // mock
-  }, 
-  
+  },
+
   teardown: function() {
+    pane.destroy();
     pane = fooView = barView = defaultResponder = evt = null ;
   }
 });
@@ -66,7 +67,7 @@ test("when invoked with target = nested view", function() {
   handler = pane.sendEvent('imaginary', evt, barView);
   equals(callCount, 0, 'should not invoke handler');
   equals(handler, null, 'should return no responder');
-  
+
 });
 
 
@@ -80,7 +81,7 @@ test("when invoked with target = middle view", function() {
   equals(callCount, 0, 'should not invoke handler');
   equals(handler, null, 'should return no responder');
 
-  // test event handler on target 
+  // test event handler on target
   callCount = 0;
   handler = pane.sendEvent('fooEvent', evt, fooView);
   equals(callCount, 1, 'should invoke handler');
@@ -97,7 +98,7 @@ test("when invoked with target = middle view", function() {
   handler = pane.sendEvent('imaginary', evt, fooView);
   equals(callCount, 0, 'should not invoke handler');
   equals(handler, null, 'should return no responder');
-  
+
 });
 
 
@@ -111,7 +112,7 @@ test("when invoked with target = pane", function() {
   equals(callCount, 0, 'should not invoke handler');
   equals(handler, null, 'should return no responder');
 
-  // test event handler on target 
+  // test event handler on target
   callCount = 0;
   handler = pane.sendEvent('fooEvent', evt, pane);
   equals(callCount, 0, 'should not invoke handler');
@@ -128,7 +129,7 @@ test("when invoked with target = pane", function() {
   handler = pane.sendEvent('imaginary', evt, pane);
   equals(callCount, 0, 'should not invoke handler');
   equals(handler, null, 'should return no responder');
-  
+
 });
 
 
@@ -138,14 +139,14 @@ test("when invoked with target = null", function() {
 
   // should start @ first responder
   pane.firstResponder = fooView;
-  
+
   // test event handler on child view of target
   callCount = 0;
   handler = pane.sendEvent('barEvent', evt);
   equals(callCount, 0, 'should not invoke handler');
   equals(handler, null, 'should return no responder');
 
-  // test event handler on target 
+  // test event handler on target
   callCount = 0;
   handler = pane.sendEvent('fooEvent', evt);
   equals(callCount, 1, 'should invoke handler');
@@ -162,12 +163,12 @@ test("when invoked with target = null", function() {
   handler = pane.sendEvent('imaginary', evt);
   equals(callCount, 0, 'should not invoke handler');
   equals(handler, null, 'should return no responder');
-  
+
   // test event handler on pane itself
   callCount = 0;
   handler = pane.sendEvent('paneEvent', evt);
   equals(callCount, 1, 'should invoke handler on pane');
-  equals(handler, pane, 'should return pane as responder that handled event');  
+  equals(handler, pane, 'should return pane as responder that handled event');
 
 });
 
@@ -177,14 +178,14 @@ test("when invoked with target = null, no default or first responder", function(
   // no first or default responder
   pane.set('firstResponder', null);
   pane.set('defaultResponder', null);
-    
+
   // test event handler on child view of target
   callCount = 0;
   handler = pane.sendEvent('barEvent', evt);
   equals(callCount, 0, 'should not invoke handler');
   equals(handler, null, 'should return no responder');
 
-  // test event handler on target 
+  // test event handler on target
   callCount = 0;
   handler = pane.sendEvent('fooEvent', evt);
   equals(callCount, 0, 'should not invoke handler');
@@ -195,12 +196,12 @@ test("when invoked with target = null, no default or first responder", function(
   handler = pane.sendEvent('imaginary', evt);
   equals(callCount, 0, 'should not invoke handler');
   equals(handler, null, 'should return no responder');
-  
+
   // test event handler on pane itself
   callCount = 0;
   handler = pane.sendEvent('paneEvent', evt);
   equals(callCount, 1, 'should invoke handler on pane');
-  equals(handler, pane, 'should return pane as responder that handled event');  
+  equals(handler, pane, 'should return pane as responder that handled event');
 
 });
 

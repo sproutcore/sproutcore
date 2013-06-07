@@ -35,28 +35,28 @@ SC.SelectionSupport = {
   /**
     Walk like a duck.
 
-    @property {Boolean}
+    @type Boolean
   */
   hasSelectionSupport: YES,
 
   /**
     If YES, selection is allowed. Default is YES.
 
-    @property {Boolean}
+    @type Boolean
   */
   allowsSelection: YES,
 
   /**
     If YES, multiple selection is allowed. Default is YES.
 
-    @property {Boolean}
+    @type Boolean
   */
   allowsMultipleSelection: YES,
 
   /**
     If YES, allow empty selection Default is YES.
 
-    @property {Boolean}
+    @type Boolean
   */
   allowsEmptySelection: YES,
 
@@ -138,7 +138,7 @@ SC.SelectionSupport = {
   /**
     YES if the receiver currently has a non-zero selection.
 
-    @property {Boolean}
+    @type Boolean
   */
   hasSelection: function() {
     var sel = this.get('selection');

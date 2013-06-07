@@ -29,7 +29,6 @@ sc_require('render_delegates/render_delegate');
   - escapeHTML: whether the HTML should be escaped to prevent XSS attacks
     and the like.
   - textAlign
-  - fontWeight
   - needsEllipsis: Whether an ellipsis (...) should be added after the title
     if the title is too long.
 */
@@ -40,8 +39,12 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
   render: function(dataSource, context) {
     this.addSizeClassName(dataSource, context);
 
-    var toolTip = dataSource.get('toolTip');
+    var toolTip = dataSource.get('toolTip'),
+      escapeHTML = dataSource.get('escapeHTML');
+
     if (toolTip) {
+      // Escape the title if needed. This prevents potential XSS attacks.
+      if (escapeHTML) { toolTip = SC.RenderContext.escapeHTML(toolTip); }
       context.setAttr('title', toolTip);
     }
 
@@ -50,7 +53,6 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
             in the next release
     */
     context.addStyle({
-      fontWeight: dataSource.get('fontWeight') || null,
       textAlign: dataSource.get('textAlign') || null
     });
 
@@ -74,15 +76,16 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
             in the next release
     */
     jquery.css({
-      fontWeight: dataSource.get('fontWeight') || null,
       textAlign: dataSource.get('textAlign') || null
     });
+    var toolTip = dataSource.get('toolTip'),
+      escapeHTML = dataSource.get('escapeHTML');
 
-    var toolTip = dataSource.get('toolTip');
     if (toolTip) {
+      // Escape the title if needed. This prevents potential XSS attacks.
+      if (escapeHTML) { toolTip = SC.RenderContext.escapeHTML(toolTip); }
       jquery.attr('title', toolTip);
-    }
-    else {
+    } else {
       jquery.removeAttr('title');
     }
 
@@ -106,18 +109,17 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
   htmlForTitleAndIcon: function(dataSource) {
     var title = dataSource.get('title'),
         hint = dataSource.get('hint'),
-        hintEnabled = dataSource.get('hintEnabled'),
         escapeHTML = dataSource.get('escapeHTML'),
         icon = dataSource.get('icon') || '';
 
-    // Escape the title of the button if needed. This prevents potential
-    // XSS attacks.
+    // Escape the body if needed. This prevents potential XSS attacks.
     if (title && escapeHTML) {
       title = SC.RenderContext.escapeHTML(title) ;
     }
 
-    if (hintEnabled && hint && !title) {
-      if (escapeHTML) hint = SC.RenderContext.escapeHTML(hint);
+    // Escape the hint if needed. This prevents potential XSS attacks.
+    if (hint && escapeHTML) { hint = SC.RenderContext.escapeHTML(hint); }
+    if (hint && !title) {
       title = "<span class='sc-hint'>" + hint + "</span>";
     }
 

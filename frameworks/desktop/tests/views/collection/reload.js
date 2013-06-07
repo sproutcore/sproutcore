@@ -7,17 +7,67 @@
 
 var view, content ;
 
-module("SC.CollectionView.reload", {
-  setup: function() {
+module("SC.CollectionView#reload (unattached)", {
+  setup: function () {
+    content = "1 2 3 4 5 6 7 8 9 10".w().map(function(x) {
+      return SC.Object.create({ value: x });
+    });
+
+    view = SC.CollectionView.create({
+      content: content
+    });
+  },
+
+  teardown: function () {
+    view.destroy();
+    view = content = null;
+  }
+});
+
+
+test("should only reload when isVisibleInWindow", function() {
+  var len = view.getPath('childViews.length');
+
+  SC.run(function() {
+    view.reload();
+  });
+
+  equals(view.getPath('childViews.length'), len, 'view.childViews.length should not change while offscreen');
+
+  SC.run(function() {
+    view.createLayer();
+    view._doAttach(document.body);
+  });
+
+  equals(view.getPath('childViews.length'), content.get('length'), 'view.childViews.length should change when moved onscreen if reload is pending');
+});
+
+
+module("SC.CollectionView.reload (attached)", {
+  setup: function () {
     content = "1 2 3 4 5 6 7 8 9 10".w().map(function(x) {
       return SC.Object.create({ value: x });
     });
 
     view = SC.CollectionView.create({
       content: content,
+      exampleView: SC.View.extend({
+        isReusable: false
+      }),
 
-      isVisibleInWindow: YES
+      // STUB: reload
+      reload: CoreTest.stub('reload', SC.CollectionView.prototype.reload)
     });
+
+    SC.run(function() {
+      view.createLayer();
+      view._doAttach(document.body);
+    });
+  },
+
+  teardown: function () {
+    view.destroy();
+    view = content = null;
   }
 });
 
@@ -36,7 +86,7 @@ function verifyItemViews(view, content, shouldShowAllContent, testName) {
   var nowShowing = view.get('nowShowing'),
       childViews = view.get('childViews');
 
-  if (testName === undefined) testName='';
+  if (testName === undefined) testName = '';
 
   if (shouldShowAllContent) {
     ok(nowShowing.isEqual(SC.IndexSet.create(0, content.get('length'))), '%@ nowShowing (%@) should equal (0..%@)'.fmt(testName, nowShowing, content.get('length')-1));
@@ -44,12 +94,11 @@ function verifyItemViews(view, content, shouldShowAllContent, testName) {
 
   equals(childViews.get('length'), nowShowing.get('length'), '%@ view.childViews.length should match nowShowing.length'.fmt(testName));
 
-  // childViews should be in same order as nowShowing indexes at all times.
   var iter= 0;
   nowShowing.forEach(function(idx) {
-    var itemView = childViews.objectAt(iter),
+    var itemView = view.itemViewForContentIndex(idx),
         item     = content.objectAt(idx);
-    ok(itemView, 'childViews[%@] should have itemView'.fmt(iter));
+
     if (itemView) {
       equals(itemView.get('content'), item, '%@ childViews[%@].content should equal content[%@]'.fmt(testName, iter,idx));
     }
@@ -61,39 +110,28 @@ function verifyItemViews(view, content, shouldShowAllContent, testName) {
 // BASIC TESTS
 //
 
-test("should only reload when isVisibleInWindow", function() {
-
-  view.set('isVisibleInWindow', NO);
-  //view.isVisibleInWindow = NO ;
-
-  var len = view.getPath('childViews.length');
-
-  SC.run(function() {
-    view.reload();
-  });
-
-  equals(view.getPath('childViews.length'), len, 'view.childViews.length should not change while offscreen');
-
-  SC.RunLoop.begin();
-  view.set('isVisibleInWindow', YES);
-  SC.RunLoop.end();
-
-  equals(view.getPath('childViews.length'), content.get('length'), 'view.childViews.length should change when moved onscreen if reload is pending');
-});
-
 test("should automatically reload if content is set when collection view is first created", function() {
   ok(view.get('content'), 'precond - should have content');
-  SC.RunLoop.begin();
-  SC.RunLoop.end();
 
+  verifyItemViews(view, content, YES);
+});
+
+test("should automatically reload if isEnabled changes", function() {
+  ok(view.get('content'), 'precond - should have content');
+
+  view.reload.reset();
+  view.set('isEnabled', false);
+  view.reload.expect(1);
+  view.set('isEnabled', true);
+  view.reload.expect(2);
   verifyItemViews(view, content, YES);
 });
 
 test("reload(null) should generate item views for all items", function() {
 
-  SC.RunLoop.begin();
-  view.reload();
-  SC.RunLoop.end(); // allow reload to run
+  SC.run(function() {
+    view.reload();
+  });
 
   verifyItemViews(view, content, YES);
 });
@@ -101,7 +139,9 @@ test("reload(null) should generate item views for all items", function() {
 test("reload(index set) should update item view for items in index only", function() {
 
   // make sure views are loaded first time
-  SC.run(function() { view.reload(); });
+  SC.run(function() {
+    view.reload();
+  });
 
   // now get a couple of child views.
   var cv1 = view.childViews[1], cv2 = view.childViews[3];
@@ -117,7 +157,6 @@ test("reload(index set) should update item view for items in index only", functi
 });
 
 test("adding items to content should reload item views at end", function() {
-
   SC.run(function() {
     content.pushObject(SC.Object.create());
   });
@@ -125,7 +164,6 @@ test("adding items to content should reload item views at end", function() {
 });
 
 test("removing items from content should remove item views", function() {
-
   SC.run(function() {
     content.popObject();
   });
@@ -157,21 +195,3 @@ test("remove and readd item", function() {
 
 });
 
-test("reloading should only render nowShowing component", function() {
-  var expected = SC.IndexSet.create(0,2).add(6);
-
-  view = SC.CollectionView.create({
-    content: content,
-    computeNowShowing: function() {
-      return expected;
-    },
-    isVisibleInWindow: YES
-  });
-
-  SC.RunLoop.begin();
-  view.reload();
-  SC.RunLoop.end();
-
-  same(view.get('nowShowing'), expected, 'precond - should have limited now showing');
-  equals(view.get('childViews').get('length'), expected.get('length'), 'should only render number of child views in IndexSet');
-});

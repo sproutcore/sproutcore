@@ -816,7 +816,7 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
     For plain enumerables, this property is read only.  SC.Array overrides
     this method.
 
-    @property {SC.Array}
+    @type SC.Array
   */
   '[]': function (key, value) { return this; }.property(),
 

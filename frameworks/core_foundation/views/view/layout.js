@@ -48,17 +48,15 @@ SC.View.reopen(
     element.  If you plan to create many view instances it is probably better
     to use CSS.
 
-    @property {String}
+    @type String
   */
   backgroundColor: null,
-
-  displayProperties: ['backgroundColor'],
 
   /**
     Activates use of brower's static layout. To activate, set this
     property to YES.
 
-    @property {Boolean}
+    @type Boolean
   */
   useStaticLayout: NO,
 
@@ -707,7 +705,7 @@ SC.View.reopen(
   */
   _viewFrameDidChange: function () {
     this.notifyPropertyChange('frame');
-    this._sc_view_clippingFrameDidChange();
+    this._callOnChildViews('_sc_view_clippingFrameDidChange');
   },
 
   // Implementation note: As a general rule, paired method calls, such as
@@ -793,11 +791,7 @@ SC.View.reopen(
     @returns {SC.View} receiver
   */
   layoutDidChange: function () {
-    // Did our layout change in a way that could cause us to be resized?  If
-    // not, then there's no need to invalidate the frames of our child views.
-    var previousLayout = this._previousLayout,
-        currentLayout  = this.get('layout'),
-        didResize = true;
+    var currentLayout  = this.get('layout');
 
     // Handle old style rotation.
     if (!SC.none(currentLayout.rotate)) {
@@ -809,6 +803,34 @@ SC.View.reopen(
       }
       delete currentLayout.rotate;
     }
+
+    // Optimize notifications depending on if we resized or just moved.
+    this._checkForResize();
+
+    // Notify layoutView/parentView.
+    var layoutView = this.get('layoutView');
+    if (layoutView) {
+      layoutView.set('childViewsNeedLayout', YES);
+      layoutView.layoutDidChangeFor(this);
+
+      // Check if childViewsNeedLayout is still true.
+      if (layoutView.get('childViewsNeedLayout')) {
+        layoutView.invokeOnce(layoutView.layoutChildViewsIfNeeded);
+      }
+    } else {
+      this.invokeOnce(this.updateLayout);
+    }
+
+    return this;
+  },
+
+  /** @private */
+  _checkForResize: function () {
+    // Did our layout change in a way that could cause us to be resized?  If
+    // not, then there's no need to invalidate the frames of our child views.
+    var previousLayout = this._previousLayout,
+        currentLayout  = this.get('layout'),
+        didResize = true;
 
     // We test the new layout to see if we believe it will affect the view's frame.
     // Since all the child view frames may depend on the parent's frame, it's
@@ -837,23 +859,8 @@ SC.View.reopen(
       this._viewFrameDidChange();
     }
 
-    // Notify that the layout style has changed.
-    this.notifyPropertyChange('layoutStyle');
-
-    // notify layoutView...
-    var layoutView = this.get('layoutView');
-    if (layoutView) {
-      layoutView.set('childViewsNeedLayout', YES);
-      layoutView.layoutDidChangeFor(this);
-      if (layoutView.get('childViewsNeedLayout')) {
-        layoutView.invokeOnce(layoutView.layoutChildViewsIfNeeded);
-      }
-    }
-
     // Cache the last layout to fine-tune notifications when the layout changes.
     this._previousLayout = currentLayout;
-
-    return this;
   },
 
   /**
@@ -861,7 +868,7 @@ SC.View.reopen(
     views.  Normally this property is set automatically whenever the layout
     property for a child view changes.
 
-    @property {Boolean}
+    @type Boolean
   */
   childViewsNeedLayout: NO,
 
@@ -894,16 +901,16 @@ SC.View.reopen(
     Called your layout method if the view currently needs to layout some
     child views.
 
-    @param {Boolean} isVisible if true assume view is visible even if it is not.
+    @param {Boolean} force if true assume view is visible even if it is not.
     @returns {SC.View} receiver
     @test in layoutChildViews
   */
-  layoutChildViewsIfNeeded: function (isVisible) {
-    if (!isVisible) isVisible = this.get('isVisibleInWindow');
-    if (isVisible && this.get('childViewsNeedLayout')) {
+  layoutChildViewsIfNeeded: function (force) {
+    if (this.get('childViewsNeedLayout')) {
       this.set('childViewsNeedLayout', NO);
-      this.layoutChildViews();
+      this.layoutChildViews(force);
     }
+
     return this;
   },
 
@@ -913,17 +920,19 @@ SC.View.reopen(
     own layout updating method if you want, though usually the better option
     is to override the layout method from the parent view.
 
-    The default implementation of this method simply calls the renderLayout()
+    The default implementation of this method simply calls the updateLayout()
     method on the views that need layout.
 
+    @param {Boolean} force Force the update to the layer's layout style immediately even if the view is not in a shown state.  Otherwise the style will be updated when the view returns to a shown state.
     @returns {void}
   */
-  layoutChildViews: function () {
+  layoutChildViews: function (force) {
     var set = this._needLayoutViews,
-        len = set ? set.length : 0,
-        i;
+      len = set ? set.length : 0,
+      i;
+
     for (i = 0; i < len; ++i) {
-      set[i].updateLayout();
+      set[i].updateLayout(force);
     }
     set.clear(); // reset & reuse
   },
@@ -937,21 +946,13 @@ SC.View.reopen(
     You will not usually override this method, but you may call it if you
     implement layoutChildViews() in a view yourself.
 
+    @param {Boolean} force Force the update to the layer's layout style immediately even if the view is not in a shown state.  Otherwise the style will be updated when the view returns to a shown state.
     @returns {SC.View} receiver
     @test in layoutChildViews
   */
-  updateLayout: function () {
-    var layer = this.get('layer'), context;
-    if (layer) {
-      context = this.renderContext(layer);
-      this.renderLayout(context, NO);
-      context.update();
+  updateLayout: function (force) {
+    this._doUpdateLayout(force);
 
-      // If this view uses static layout, then notify if the frame changed.
-      // (viewDidResize will do a comparison)
-      if (this.useStaticLayout) this.viewDidResize();
-    }
-    layer = null;
     return this;
   },
 
@@ -965,18 +966,15 @@ SC.View.reopen(
     @returns {void}
     @test in layoutChildViews
   */
-  renderLayout: function (context, firstTime) {
+  renderLayout: function (context) {
     context.setStyle(this.get('layoutStyle'));
-    this.didRenderAnimations();
   },
-
-  _renderLayerSettings: function (original, context, firstTime) {
-    original(context, firstTime);
-    this.renderLayout(context, firstTime);
-  }.enhance(),
 
   applyAttributesToContext: function (original, context) {
     original(context);
+
+    // Have to pass 'true' for second argument for legacy.
+    this.renderLayout(context, true);
 
     if (this.get('useStaticLayout')) { context.addClass('sc-static-layout'); }
 
@@ -984,7 +982,127 @@ SC.View.reopen(
     if (backgroundColor) {
       context.setStyle('backgroundColor', backgroundColor);
     }
-  }.enhance()
+  }.enhance(),
+
+  /** @private Update this view's layout action. */
+  _doUpdateLayout: function (force) {
+    var isRendered = this.get('_isRendered'),
+      isVisibleInWindow = this.get('isVisibleInWindow'),
+      handled = true;
+
+    if (isRendered) {
+      if (isVisibleInWindow ||
+        force) {
+        // Only in the visible states do we allow updates without being forced.
+        this._doUpdateLayoutStyle();
+      } else {
+        // Otherwise mark the view as needing an update when we enter a shown state again.
+        this._layoutStyleNeedsUpdate = true;
+      }
+    } else {
+      handled = false;
+    }
+
+    return handled;
+  },
+
+  /** @private */
+  _doUpdateLayoutStyle: function () {
+    var context;
+
+    context = this.renderContext(this.get('layer'));
+    context.setStyle(this.get('layoutStyle'));
+    context.update();
+
+    // Reset that an update is required.
+    this._layoutStyleNeedsUpdate = false;
+
+    // Notify updated.
+    this._updatedLayout();
+  },
+
+  /** @private Enhance. */
+  _executeQueuedUpdates: function (original) {
+    original();
+
+    // Update the layout style of the layer if necessary.
+    if (this._layoutStyleNeedsUpdate) {
+      this._doUpdateLayoutStyle();
+    }
+  }.enhance(),
+
+  /** @private Override: Notify on attached (avoids notify of frame changed). */
+  _notifyAttached: function () {
+    // If we are using static layout then we don't know the frame until appended to the document.
+    if (this.get('useStaticLayout')) {
+      // We call viewDidResize so that it calls parentViewDidResize on all child views.
+      this.viewDidResize();
+    }
+
+    // Notify.
+    if (this.didAppendToDocument) { this.didAppendToDocument(); }
+  },
+
+  /** @private Override: The 'adopted' event (uses _checkForResize so our childViews are notified if our frame changes). */
+  _adopted: function (beforeView) {
+    var parentView = this.get('parentView');
+
+    // Our frame may change once we've been adopted to a parent.
+    this._checkForResize();
+
+    if (!this.get('isAttached')) {
+
+      if (this.get('_isRendered')) {
+
+        // Bypass the unattached state for adopted views.
+        if (parentView.get('isAttached')) {
+          var parentNode, nextNode, nextView, siblings;
+
+          parentNode = parentView.get('containerLayer');
+          siblings = parentView.get('childViews');
+          nextView = siblings.objectAt(siblings.indexOf(this) + 1);
+          nextNode = (nextView) ? nextView.get('layer') : null;
+
+          this._doAttach(parentNode, nextNode);
+        }
+      } else {
+
+        // Bypass the unrendered state for adopted views.
+        if (parentView.get('_isRendered')) {
+          this._doRender();
+        }
+      }
+
+    }
+
+    // Notify.
+    if (parentView.didAddChild) { parentView.didAddChild(this, beforeView); }
+    if (this.didAddToParent) { this.didAddToParent(parentView, beforeView); }
+  },
+
+  /** @private Extension: The 'orphaned' event. */
+  _orphaned: function (oldParentView) {
+    sc_super();
+
+    // Our frame may change once we've been removed from a parent.
+    if (!this.isDestroyed) { this._checkForResize(); }
+  },
+
+  /** @private Extension: The 'updatedContent' event. */
+  _updatedContent: function () {
+    sc_super();
+
+    // If this view uses static layout, then notify that the frame (likely)
+    // changed.
+    if (this.useStaticLayout) { this.viewDidResize(); }
+  },
+
+  /** @private The 'updatedLayout' event. */
+  _updatedLayout: function () {
+    // Notify.
+    this.didRenderAnimations();
+  }
+
 });
 
 SC.View.mixin(

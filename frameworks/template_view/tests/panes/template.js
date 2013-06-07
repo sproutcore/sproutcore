@@ -16,6 +16,7 @@ test("Template panes append a main pane to the document body", function() {
   equals(pane.$('#template-panes-are-so-cool').length, 1, "creates a view with the passed id");
 
   pane.remove();
+  pane.destroy();
 });
 
 test("Template panes should be awoken", function(){
@@ -32,4 +33,5 @@ test("Template panes should be awoken", function(){
   SC.MainPane.prototype.awake = originalAwake;
 
   ok(didAwake, "should have awoken the pane");
+  pane.destroy();
 });

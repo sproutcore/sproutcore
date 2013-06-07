@@ -15,7 +15,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
     If the tag is a list ('ul' or 'ol') each item will be wrapped into a 'li' tag.
     If the tag is a table ('table', 'thead', 'tbody') each item will be wrapped into a 'tr' tag.
 
-    @property {String}
+    @type String
     @default ul
   */
   tagName: 'ul',
@@ -46,7 +46,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
   */
   init: function() {
     var templateCollectionView = sc_super();
-    this._sctcv_contentDidChange();
+
     return templateCollectionView;
   },
 
@@ -59,8 +59,10 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
     if (this._sctcv_layerCreated) { return; }
     this._sctcv_layerCreated = true;
 
+    // Have to call this here, because we need to render before adding
+    // childViews so that itemViewTemplate is set by the template function.
     var content = this.get('content');
-    if(content) {
+    if (content) {
       this.arrayContentDidChange(0, 0, content.get('length'));
     }
   },
@@ -124,7 +126,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
   /**
     The name of a template to lookup if no inverse template is provided.
 
-    @property {String}
+    @type String
   */
   inverseTemplateName: null,
 
@@ -171,9 +173,6 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
     needed.
   */
   _sctcv_contentDidChange: function() {
-
-    this.$().empty();
-
     var oldContent = this._content, oldLen = 0;
     var content = this.get('content'), newLen = 0;
 
@@ -206,7 +205,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
     // If the contents were empty before and this template collection has an empty view
     // remove it now.
     var emptyView = this.get('emptyView');
-    if (emptyView) { emptyView.$().remove(); emptyView.removeFromParent(); emptyView.destroy(); }
+    if (emptyView) { emptyView.destroy(); }
 
     // Loop through child views that correspond with the removed items.
     // Note that we loop from the end of the array to the beginning because
@@ -217,8 +216,6 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
     for (idx = start+removedCount-1; idx >= start; idx--) {
       childView = childViews[idx];
       if(childView) {
-        childView.$().remove();
-        childView.removeFromParent();
         childView.destroy();
       }
     }
@@ -243,7 +240,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
         itemViewClass = this.get('itemViewClass'),
         childViews    = this.get('childViews'),
         addedViews    = [],
-        renderFunc, childView, itemOptions, elem, insertAtElement, item, itemElem, idx, len;
+        renderFunc, childView, itemOptions, elem = this.$(), insertAtElement, item, itemElem, idx, len;
 
     if (content) {
       var addedObjects = content.slice(start, start+addedCount);
@@ -252,8 +249,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
       // each item.
       itemOptions = this.get('itemViewOptions') || {};
 
-      elem = this.$();
-      insertAtElement = elem.find('li')[start-1] || null;
+      // insertAtElement = elem.find('li')[start-1] || null;
       len = addedObjects.get('length');
 
       // TODO: This logic is duplicated from the view helper. Refactor
@@ -288,13 +284,8 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
           childView.set('context', childView.get(contextProperty));
         }
 
-        itemElem = childView.createLayer().$();
-        if (!insertAtElement) {
-          elem.append(itemElem);
-        } else {
-          itemElem.insertAfter(insertAtElement);
-        }
-        insertAtElement = itemElem;
+        // Have to create child views manually.
+        childView.createLayer()._doAttach(elem[0]);
 
         addedViews.push(childView);
       }
@@ -309,7 +300,10 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
         content: this
       }));
       this.set('emptyView', childView);
-      childView.createLayer().$().appendTo(elem);
+
+      // Have to create child views manually.
+      childView.createLayer()._doAttach(elem[0]);
+
       this.childViews = [childView];
     }
 

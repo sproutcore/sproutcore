@@ -28,9 +28,9 @@ SC.SelectView = SC.ButtonView.extend(
     @type Boolean
     @default YES
   */
-  acceptsFirstResponder: function() {
-    return this.get('isEnabled');
-  }.property('isEnabled'),
+  acceptsFirstResponder: function () {
+    return this.get('isEnabledInPane');
+  }.property('isEnabledInPane'),
 
   /**
     If true, titles will be escaped to avoid scripting attacks.
@@ -338,7 +338,7 @@ SC.SelectView = SC.ButtonView.extend(
 
     @private
   */
-  leftAlign: function() {
+  leftAlign: function () {
     switch (this.get('controlSize')) {
       case SC.TINY_CONTROL_SIZE:
         return SC.SelectView.TINY_OFFSET_X;
@@ -361,18 +361,18 @@ SC.SelectView = SC.ButtonView.extend(
     @param {SC.Array} objects the unsorted array of objects to display.
     @returns {SC.Array} sorted array of objects
   */
-  sortObjects: function(objects) {
-    if(!this.get('disableSort')){
-      var nameKey = this.get('itemSortKey') || this.get('itemTitleKey') ;
-      objects = objects.sort(function(a,b) {
+  sortObjects: function (objects) {
+    if (!this.get('disableSort')){
+      var nameKey = this.get('itemSortKey') || this.get('itemTitleKey');
+      objects = objects.sort(function (a,b) {
         if (nameKey) {
-          a = a.get ? a.get(nameKey) : a[nameKey] ;
-          b = b.get ? b.get(nameKey) : b[nameKey] ;
+          a = a.get ? a.get(nameKey) : a[nameKey];
+          b = b.get ? b.get(nameKey) : b[nameKey];
         }
-        return (a<b) ? -1 : ((a>b) ? 1 : 0) ;
-      }) ;
+        return (a<b) ? -1 : ((a>b) ? 1 : 0);
+      });
     }
-    return objects ;
+    return objects;
   },
 
   /**
@@ -380,45 +380,44 @@ SC.SelectView = SC.ButtonView.extend(
 
     @private
   */
-  render: function(context,firstTime) {
-    sc_super();
+  render: function (context,firstTime) {
 
-    var escapeHTML, layoutWidth, items, len, nameKey, iconKey, valueKey, separatorKey, showCheckbox,
+    var escapeHTML, items, len, nameKey, iconKey, valueKey, separatorKey, showCheckbox,
         currentSelectedVal, shouldLocalize, isSeparator, itemList, isChecked,
         idx, name, icon, value, item, itemEnabled, isEnabledKey, emptyName, isSameRecord;
 
-    items = this.get('items') || [] ;
-    items = this.sortObjects(items) ;
-    len = items.length ;
+    items = this.get('items') || [];
+    items = this.sortObjects(items);
+    len = items.length;
 
     //Get the nameKey, iconKey and valueKey set by the user
-    nameKey = this.get('itemTitleKey') ;
-    iconKey = this.get('itemIconKey') ;
-    valueKey = this.get('itemValueKey') ;
+    nameKey = this.get('itemTitleKey');
+    iconKey = this.get('itemIconKey');
+    valueKey = this.get('itemValueKey');
     separatorKey = this.get('itemSeparatorKey');
-    showCheckbox = this.get('showCheckbox') ;
+    showCheckbox = this.get('showCheckbox');
     isEnabledKey = this.get('itemIsEnabledKey');
     escapeHTML = this.get('escapeHTML');
 
     //get the current selected value
-    currentSelectedVal = this.get('value') ;
+    currentSelectedVal = this.get('value');
 
     // get the localization flag.
-    shouldLocalize = this.get('localize') ;
+    shouldLocalize = this.get('localize');
 
     //itemList array to set the menu items
-    itemList = [] ;
+    itemList = [];
 
     //to set the 'checkbox' property of menu items
-    isChecked = YES ;
+    isChecked = YES;
 
     //index for finding the first item in the list
-    idx = 0 ;
+    idx = 0;
 
     // Add the empty name to the list if applicable
     emptyName = this.get('emptyName');
 
-    if(!SC.none(emptyName)) {
+    if (!SC.none(emptyName)) {
       emptyName = shouldLocalize ? SC.String.loc(emptyName) : emptyName;
       emptyName = escapeHTML ? SC.RenderContext.escapeHTML(emptyName) : emptyName;
 
@@ -433,7 +432,7 @@ SC.SelectView = SC.ButtonView.extend(
         action: 'displaySelectedItem'
       });
 
-      if(SC.none(currentSelectedVal)) {
+      if (SC.none(currentSelectedVal)) {
         this.set('title', emptyName);
       }
 
@@ -441,144 +440,146 @@ SC.SelectView = SC.ButtonView.extend(
       itemList.push(item);
     }
 
-    items.forEach(function(object) {
-    if (object || object === 0) {
-      //@if(debug)
-      // TODO: Remove in 1.11 and 2.0
-      // Help the developer if they were relying on the previously misleading
-      // default value of itemSeparatorKey.  We need to ensure that the change
-      // is backwards compatible with apps prior to 1.10.
-      if (separatorKey === 'isSeparator') {
-        if ((object.get && SC.none(object.get('isSeparator')) && object.get('separator')) || (SC.none(object.isSeparator) && object.separator)) {
-          SC.warn("Developer Warning: the default value of itemSeparatorKey has been changed from 'separator' to 'isSeparator' to match the documentation.  Please update your select item properties to 'isSeparator: YES' to remove this warning.");
-          if (object.set) { object.set('isSeparator', object.get('separator')); }
-          else { object.isSeparator = object.separator; }
-        }
-      }
-      //@endif
-
-      // get the separator
-      isSeparator = separatorKey ? (object.get ? object.get(separatorKey) : object[separatorKey]) : NO;
-
-        if (!isSeparator) {
-        //Get the name value. If value key is not specified convert obj
-        //to string
-        name = nameKey ? (object.get ?
-          object.get(nameKey) : object[nameKey]) : object.toString();
-
-        //@if(debug)
-        // Help the developer if they don't define a matching itemTitleKey.
-        if (!name) {
-          SC.warn("Developer Warning: SC.SelectView: Every item, other than separator items, should have the '%@' property defined!".fmt(nameKey));
-          name = '';
+    items.forEach(function (object) {
+      if (object || object === 0) {
+        //@if (debug)
+        // TODO: Remove in 1.11 and 2.0
+        // Help the developer if they were relying on the previously misleading
+        // default value of itemSeparatorKey.  We need to ensure that the change
+        // is backwards compatible with apps prior to 1.10.
+        if (separatorKey === 'isSeparator') {
+          if ((object.get && SC.none(object.get('isSeparator')) && object.get('separator')) || (SC.none(object.isSeparator) && object.separator)) {
+            SC.warn("Developer Warning: the default value of itemSeparatorKey has been changed from 'separator' to 'isSeparator' to match the documentation.  Please update your select item properties to 'isSeparator: YES' to remove this warning.");
+            if (object.set) { object.set('isSeparator', object.get('separator')); }
+            else { object.isSeparator = object.separator; }
+          }
         }
         //@endif
-        // localize name if specified.
-        name = shouldLocalize ? SC.String.loc(name) : name ;
-        name = escapeHTML ? SC.RenderContext.escapeHTML(name) : name;
 
-        //Get the icon value
-        icon = iconKey ? (object.get ?
-          object.get(iconKey) : object[iconKey]) : null ;
-        if (SC.none(object[iconKey])) icon = null ;
+        // get the separator
+        isSeparator = separatorKey ? (object.get ? object.get(separatorKey) : object[separatorKey]) : NO;
 
-        // get the value using the valueKey or the object
-        value = valueKey ? (object.get ?
-          object.get(valueKey) : object[valueKey]) : object ;
+          if (!isSeparator) {
+          //Get the name value. If value key is not specified convert obj
+          //to string
+          name = nameKey ? (object.get ?
+            object.get(nameKey) : object[nameKey]) : object.toString();
 
-        if (!SC.none(currentSelectedVal) && !SC.none(value)) {
+          //@if (debug)
+          // Help the developer if they don't define a matching itemTitleKey.
+          if (!name) {
+            SC.warn("Developer Warning: SC.SelectView: Every item, other than separator items, should have the '%@' property defined!".fmt(nameKey));
+            name = '';
+          }
+          //@endif
+          // localize name if specified.
+          name = shouldLocalize ? SC.String.loc(name) : name;
+          name = escapeHTML ? SC.RenderContext.escapeHTML(name) : name;
 
-          // If the objects in question are records, we should just their storeKeys
-          isSameRecord = false;
-          if (SC.kindOf(currentSelectedVal, SC.Record) && SC.kindOf(value, SC.Record)) {
-            isSameRecord = currentSelectedVal.get('storeKey') === value.get('storeKey');
+          //Get the icon value
+          icon = iconKey ? (object.get ?
+            object.get(iconKey) : object[iconKey]) : null;
+          if (SC.none(object[iconKey])) icon = null;
+
+          // get the value using the valueKey or the object
+          value = valueKey ? (object.get ?
+            object.get(valueKey) : object[valueKey]) : object;
+
+          if (!SC.none(currentSelectedVal) && !SC.none(value)) {
+
+            // If the objects in question are records, we should just their storeKeys
+            isSameRecord = false;
+            if (SC.kindOf(currentSelectedVal, SC.Record) && SC.kindOf(value, SC.Record)) {
+              isSameRecord = currentSelectedVal.get('storeKey') === value.get('storeKey');
+            }
+
+            if (currentSelectedVal === value || isSameRecord) {
+              this.set('title', name);
+              this.set('icon', icon);
+            }
           }
 
-          if (currentSelectedVal === value || isSameRecord) {
-            this.set('title', name);
-            this.set('icon', icon);
+          //Check if the item is currentSelectedItem or not
+          if (value === this.get('value')) {
+
+            //set the _itemIdx - To change the prefMatrix accordingly.
+            this.set('_itemIdx', idx);
+            isChecked = !showCheckbox ? NO : YES;
+          }
+          else {
+            isChecked = NO;
+          }
+
+          // Check if the item is enabled
+          itemEnabled = (object.get ? object.get(isEnabledKey) : object[isEnabledKey]);
+          if (NO !== itemEnabled) itemEnabled = YES;
+
+          // Set the first non-separator selectable item from the list as the
+          // default selected item
+          if (SC.none(this._defaultVal) && itemEnabled) {
+            this._defaultVal = value;
+            this._defaultTitle = name;
+            this._defaultIcon = icon;
           }
         }
 
-        //Check if the item is currentSelectedItem or not
-        if(value === this.get('value')) {
+        item = SC.Object.create({
+          isSeparator: isSeparator,
+          title: name,
+          icon: icon,
+          value: value,
+          isEnabled: itemEnabled,
+          checkbox: isChecked,
+          target: this,
+          action: 'displaySelectedItem'
+        });
 
-          //set the _itemIdx - To change the prefMatrix accordingly.
-          this.set('_itemIdx', idx) ;
-          isChecked = !showCheckbox ? NO : YES ;
-        }
-        else {
-          isChecked = NO ;
-        }
+        //Set the items in the itemList array
+        itemList.push(item);
 
-        // Check if the item is enabled
-        itemEnabled = (object.get ? object.get(isEnabledKey) : object[isEnabledKey]);
-        if (NO !== itemEnabled) itemEnabled = YES;
-
-        // Set the first non-separator selectable item from the list as the
-        // default selected item
-        if (SC.none(this._defaultVal) && itemEnabled) {
-          this._defaultVal = value ;
-          this._defaultTitle = name ;
-          this._defaultIcon = icon ;
-        }
       }
 
-      item = SC.Object.create({
-        isSeparator: isSeparator,
-        title: name,
-        icon: icon,
-        value: value,
-        isEnabled: itemEnabled,
-        checkbox: isChecked,
-        target: this,
-        action: 'displaySelectedItem'
-      }) ;
+      idx += 1;
 
-      //Set the items in the itemList array
-      itemList.push(item);
+      this.set('_itemList', itemList);
+    }, this );
 
-    }
-
-    idx += 1 ;
-
-    this.set('_itemList', itemList) ;
-    }, this ) ;
-
-    if(firstTime) {
-      this.invokeLast(function() {
-        var value = this.get('value') ;
-        if(SC.none(value)) {
-          if(SC.none(emptyName)) {
-            this.set('value', this._defaultVal) ;
-            this.set('title', this._defaultTitle) ;
-            this.set('icon', this._defaultIcon) ;
+    if (firstTime) {
+      this.invokeLast(function () {
+        var value = this.get('value');
+        if (SC.none(value)) {
+          if (SC.none(emptyName)) {
+            this.set('value', this._defaultVal);
+            this.set('title', this._defaultTitle);
+            this.set('icon', this._defaultIcon);
           }
-          else this.set('title', emptyName) ;
+          else this.set('title', emptyName);
         }
       });
     }
 
     //Set the preference matrix for the menu pane
-    this.changeSelectPreferMatrix(this.get("_itemIdx")) ;
+    this.changeSelectPreferMatrix(this.get("_itemIdx"));
 
+    // If we're going to do such a stupid render function where we set properties
+    // on ourself, then we should use those properties in this pass.
+    sc_super();
   },
 
   /**
     @private
     @param {DOMMouseEvent} evt mouseup event that triggered the action
   */
-  _action: function( evt )
-  {
+  _action: function (evt) {
     var buttonLabel, menuWidth, scrollWidth, lastMenuWidth, offsetWidth,
-      items, elementOffsetWidth, largestMenuWidth, item, element, idx,
+      items, elementOffsetWidth, largestMenuWidth, item, idx,
       value, itemList, menuControlSize, menuHeightPadding, customView,
       menu, itemsLength, itemIdx, escapeHTML;
 
-    buttonLabel = this.$('.sc-button-label')[0] ;
+    buttonLabel = this.$('.sc-button-label')[0];
 
-    var menuWidthOffset = SC.SelectView.MENU_WIDTH_OFFSET ;
-    if(!this.get('isDefaultPosition')) {
+    var menuWidthOffset = SC.SelectView.MENU_WIDTH_OFFSET;
+    if (!this.get('isDefaultPosition')) {
       switch (this.get('controlSize')) {
         case SC.TINY_CONTROL_SIZE:
           menuWidthOffset += SC.SelectView.TINY_POPUP_MENU_WIDTH_OFFSET;
@@ -598,58 +599,58 @@ SC.SelectView = SC.ButtonView.extend(
       }
     }
     // Get the length of the text on the button in pixels
-    menuWidth = this.get('layer').offsetWidth + menuWidthOffset ;
+    menuWidth = this.get('layer').offsetWidth + menuWidthOffset;
 
     // Get the length of the text on the button in pixels
-    menuWidth = this.get('layer').offsetWidth ;
-    scrollWidth = buttonLabel.scrollWidth ;
-    lastMenuWidth = this.get('lastMenuWidth') ;
-    if(scrollWidth) {
+    menuWidth = this.get('layer').offsetWidth;
+    scrollWidth = buttonLabel.scrollWidth;
+    lastMenuWidth = this.get('lastMenuWidth');
+    if (scrollWidth) {
        // Get the original width of the label in the button
-       offsetWidth = buttonLabel.offsetWidth ;
-       if(scrollWidth && offsetWidth) {
-          menuWidth = menuWidth + scrollWidth - offsetWidth ;
+       offsetWidth = buttonLabel.offsetWidth;
+       if (scrollWidth && offsetWidth) {
+          menuWidth = menuWidth + scrollWidth - offsetWidth;
        }
     }
     if (!lastMenuWidth || (menuWidth > lastMenuWidth)) {
-      lastMenuWidth = menuWidth ;
+      lastMenuWidth = menuWidth;
     }
 
-    items = this.get('_itemList') ;
+    items = this.get('_itemList');
 
-    var customViewClassName = this.get('customViewClassName') ;
-    var customViewMenuOffsetWidth = this.get('customViewMenuOffsetWidth') ;
-    var className = 'sc-view sc-pane sc-panel sc-palette sc-picker sc-menu select-button sc-scroll-view sc-menu-scroll-view sc-container-view menuContainer sc-button-view sc-menu-item sc-regular-size' ;
-    className = customViewClassName ? (className + ' ' + customViewClassName) : className ;
+    var customViewClassName = this.get('customViewClassName');
+    // var customViewMenuOffsetWidth = this.get('customViewMenuOffsetWidth');
+    var className = 'sc-view sc-pane sc-panel sc-palette sc-picker sc-menu select-button sc-scroll-view sc-menu-scroll-view sc-container-view menuContainer sc-button-view sc-menu-item sc-regular-size';
+    className = customViewClassName ? (className + ' ' + customViewClassName) : className;
 
     SC.prepareStringMeasurement("", className);
     for (idx = 0, itemsLength = items.length; idx < itemsLength; ++idx) {
       //getting the width of largest menu item
-      item = items.objectAt(idx) ;
+      item = items.objectAt(idx);
       elementOffsetWidth = SC.measureString(item.title).width;
 
       if (!largestMenuWidth || (elementOffsetWidth > largestMenuWidth)) {
-        largestMenuWidth = elementOffsetWidth ;
+        largestMenuWidth = elementOffsetWidth;
       }
     }
     SC.teardownStringMeasurement();
 
     lastMenuWidth = (largestMenuWidth + this.menuItemPadding > lastMenuWidth) ?
-                      largestMenuWidth + this.menuItemPadding : lastMenuWidth ;
+                      largestMenuWidth + this.menuItemPadding : lastMenuWidth;
 
     // Get the window size width and compare with the lastMenuWidth.
     // If it is greater than windows width then reduce the maxwidth by 25px
     // so that the ellipsis property is enabled by default
     var maxWidth = SC.RootResponder.responder.get('currentWindowSize').width;
-    if(lastMenuWidth > maxWidth) {
-      lastMenuWidth = (maxWidth - 25) ;
+    if (lastMenuWidth > maxWidth) {
+      lastMenuWidth = (maxWidth - 25);
     }
 
-    this.set('lastMenuWidth',lastMenuWidth) ;
-    value = this.get('value') ;
-    itemList = this.get('_itemList') ;
-    menuControlSize = this.get('controlSize') ;
-    menuHeightPadding = this.get('menuPaneHeightPadding') ;
+    this.set('lastMenuWidth',lastMenuWidth);
+    value = this.get('value');
+    itemList = this.get('_itemList');
+    menuControlSize = this.get('controlSize');
+    menuHeightPadding = this.get('menuPaneHeightPadding');
     escapeHTML = this.get('escapeHTML');
 
     // get the user defined custom view
@@ -691,11 +692,11 @@ SC.SelectView = SC.ButtonView.extend(
       layout: { width: lastMenuWidth },
       controlSize: menuControlSize,
       itemWidth: lastMenuWidth
-    }) ;
+    });
 
     // no menu to toggle... bail...
-    if (!menu) return NO ;
-    menu.popup(this, this.preferMatrix) ;
+    if (!menu) return NO;
+    menu.popup(this, this.preferMatrix);
     this.set('menu', menu);
 
     itemIdx = this._itemIdx;
@@ -706,13 +707,13 @@ SC.SelectView = SC.ButtonView.extend(
     }
 
     this.set('isActive', YES);
-    return YES ;
+    return YES;
   },
 
   /** @private
      Action method for the select button menu items
   */
-  displaySelectedItem: function(menuView) {
+  displaySelectedItem: function (menuView) {
     var currentItem = menuView.get("selectedItem");
 
     this.set("value", currentItem.get("value"));
@@ -725,8 +726,8 @@ SC.SelectView = SC.ButtonView.extend(
      position menu such that the selected item in the menu will be
      place aligned to the item on the button when menu is opened.
   */
-  changeSelectPreferMatrix: function() {
-    var controlSizeTuning = 0, customMenuItemHeight = 0 ;
+  changeSelectPreferMatrix: function () {
+    var controlSizeTuning = 0, customMenuItemHeight = 0;
     switch (this.get('controlSize')) {
       case SC.TINY_CONTROL_SIZE:
         controlSizeTuning = SC.SelectView.TINY_OFFSET_Y;
@@ -750,21 +751,20 @@ SC.SelectView = SC.ButtonView.extend(
         break;
     }
 
-    var preferMatrixAttributeTop = controlSizeTuning ,
-      itemIdx = this.get('_itemIdx') ,
-      leftAlign = this.get('leftAlign'), defPreferMatrix, tempPreferMatrix ;
+    var preferMatrixAttributeTop = controlSizeTuning,
+      itemIdx = this.get('_itemIdx'),
+      leftAlign = this.get('leftAlign'), defPreferMatrix, tempPreferMatrix;
 
-    if(this.get('isDefaultPosition')) {
-      defPreferMatrix = [1, 0, 3] ;
-      this.set('preferMatrix', defPreferMatrix) ;
-    }
-    else {
-      if(itemIdx) {
+    if (this.get('isDefaultPosition')) {
+      defPreferMatrix = [1, 0, 3];
+      this.set('preferMatrix', defPreferMatrix);
+    } else {
+      if (itemIdx) {
         preferMatrixAttributeTop = itemIdx * customMenuItemHeight +
-          controlSizeTuning ;
+          controlSizeTuning;
       }
-      tempPreferMatrix = [leftAlign, -preferMatrixAttributeTop, 2] ;
-      this.set('preferMatrix', tempPreferMatrix) ;
+      tempPreferMatrix = [leftAlign, -preferMatrixAttributeTop, 2];
+      this.set('preferMatrix', tempPreferMatrix);
     }
   },
 
@@ -772,13 +772,13 @@ SC.SelectView = SC.ButtonView.extend(
     @private
     Holding down the button should display the menu pane.
   */
-  mouseDown: function(evt) {
-    if (!this.get('isEnabled')) return YES ; // handled event, but do nothing
+  mouseDown: function (evt) {
+    if (!this.get('isEnabledInPane')) return YES; // handled event, but do nothing
     this.set('isActive', YES);
     this._isMouseDown = YES;
-    this.becomeFirstResponder() ;
-    this._action() ;
-    return YES ;
+    this.becomeFirstResponder();
+    this._action();
+    return YES;
   },
 
   /** @private
@@ -797,8 +797,8 @@ SC.SelectView = SC.ButtonView.extend(
     @param {SC.Event} evt
     @returns {Boolean}
   */
-  mouseUp: function(evt) {
-    var menu = this.get('menu'), targetMenuItem, success;
+  mouseUp: function (evt) {
+    var menu = this.get('menu'), targetMenuItem;
 
     if (menu) {
       targetMenuItem = menu.getPath('rootMenu.targetMenuItem');
@@ -828,7 +828,7 @@ SC.SelectView = SC.ButtonView.extend(
   /** @private
     Override mouseExited to not remove the active state on mouseexit.
   */
-  mouseExited: function() {
+  mouseExited: function () {
     return YES;
   },
 
@@ -836,7 +836,7 @@ SC.SelectView = SC.ButtonView.extend(
     @private
     Handle Key event - Down arrow key
   */
-  keyDown: function(event) {
+  keyDown: function (event) {
     if ( this.interpretKeyEvents(event) ) {
       return YES;
     }
@@ -849,13 +849,13 @@ SC.SelectView = SC.ButtonView.extend(
     @private
     Pressing the Up or Down arrow key should display the menu pane
   */
-  interpretKeyEvents: function(event) {
+  interpretKeyEvents: function (event) {
     if (event) {
       if ((event.keyCode === 38 || event.keyCode === 40)) {
-        this._action() ;
+        this._action();
       }
       else if (event.keyCode === 27) {
-        this.resignFirstResponder() ;
+        this.resignFirstResponder();
       }
     }
     return sc_super();
@@ -865,11 +865,11 @@ SC.SelectView = SC.ButtonView.extend(
     Override the button isSelectedDidChange function in order to not perform any action
     on selecting the select_button
   */
-  _button_isSelectedDidChange: function() {
+  _button_isSelectedDidChange: function () {
 
   }.observes('isSelected')
 
-}) ;
+});
 
 /**
   @static

@@ -5,21 +5,15 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/*global module test htmlbody ok equals same */
+/*global module test ok equals stop */
 
-(function() {
-  var logoURL = sc_static('images/sproutcore.png');
-  var sampleURLs = [ "http://www.public-domain-image.com/cache/nature-landscapes-public-domain-images-pictures/canyon-public-domain-images-pictures/zion-hiker-the-sweetie-hiking-in-zion-narrows_w725_h544.jpg",
-"http://www.public-domain-image.com/cache/people-public-domain-images-pictures/children-kids-public-domain-images-pictures/children-playing_w562_h725.jpg",
-"http://www.public-domain-image.com/cache/architecture-public-domain-images-pictures/fountain-public-domain-images-pictures/water-fountain-in-park_w725_h544.jpg", "http://www.public-domain-image.com/cache/nature-landscapes-public-domain-images-pictures/canyon-public-domain-images-pictures/winter-at-bryce-canyon_w725_h544.jpg", "http://www.public-domain-image.com/cache/fauna-animals-public-domain-images-pictures/prairie-dog-public-domain-images-pictures/prairie-dog-pups_w725_h483.jpg", "http://www.public-domain-image.com/cache/fauna-animals-public-domain-images-pictures/prairie-dog-public-domain-images-pictures/prairie-rattlesnake-crotalus-viridis_w725_h484.jpg", "http://www.public-domain-image.com/cache/fauna-animals-public-domain-images-pictures/tigers-public-domain-images-pictures/bengal-tiger_w725_h486.jpg", "http://www.public-domain-image.com/cache/nature-landscapes-public-domain-images-pictures/field-public-domain-images-pictures/wooden-logs-in-field_w725_h483.jpg", "http://www.public-domain-image.com/cache/nature-landscapes-public-domain-images-pictures/field-public-domain-images-pictures/wheat-yellow-in-field_w725_h544.jpg", "http://www.public-domain-image.com/cache/nature-landscapes-public-domain-images-pictures/field-public-domain-images-pictures/vineyards_w725_h544.jpg", "http://www.public-domain-image.com/cache/nature-landscapes-public-domain-images-pictures/autumn-public-domain-images-pictures/old-trees-with-leaves-on-ground-in-autumn_w725_h484.jpg", "http://www.public-domain-image.com/cache/nature-landscapes-public-domain-images-pictures/canyon-public-domain-images-pictures/yaki-point-at-the-grand-canyon_w725_h547.jpg", "http://www.public-domain-image.com/cache/nature-landscapes-public-domain-images-pictures/canyon-public-domain-images-pictures/grand-canyons-overlook-railings-pointing_w725_h544.jpg", "http://www.public-domain-image.com/cache/nature-landscapes-public-domain-images-pictures/coast-public-domain-images-pictures/sand-ocean-tidepools-sea-swimming-swimmers-waves_w725_h544.jpg", "http://www.public-domain-image.com/cache/nature-landscapes-public-domain-images-pictures/coast-public-domain-images-pictures/waves-breaking-rocks_w725_h544.jpg", "http://www.public-domain-image.com/cache/nature-landscapes-public-domain-images-pictures/sand-public-domain-images-pictures/sand-footstep_w725_h482.jpg"];
+(function () {
+  var logoURL = sc_static('test-image.png');
 
   var pane = SC.ControlTestPane.design()
-    .add("image_not_loaded", SC.ImageView, {
-      value: null, layout : { width: 200, height: 300 },
-      useCanvas: NO
-    })
     .add("image_loaded", SC.ImageView, {
-      value: logoURL, layout : { width: 200, height: 300 },
+      value: logoURL,
+      layout : { width: 200, height: 300 },
       useImageQueue: NO,
       useCanvas: NO
     })
@@ -33,19 +27,34 @@
       useCanvas: YES,
       value: logoURL
     })
+    .add('canvas_not_loaded', SC.ImageView, {
+      layout: { width: 200, height: 300 },
+      useCanvas: YES
+    })
+    .add("image_not_loaded", SC.ImageView, {
+      value: null,
+      layout : { width: 200, height: 300 },
+      useCanvas: NO
+    })
+    .add("empty_image", SC.ImageView, {
+      value: null,
+      layout : { width: 200, height: 300 }
+    })
     .add('image_holder', SC.View, {
       layout: { width: 200, height: 200 }
     });
 
   module('SC.ImageView ui', pane.standardSetup());
 
-  test("Verify that all the rendering properties of an image that is being loaded are correct", function() {
+  test("Verify that all the rendering properties of an image that is being loaded are correct", function () {
     var imageView = pane.view('image_not_loaded'),
         url;
 
     ok(imageView.get('isVisibleInWindow'), 'image_not_loaded is visible in window');
 
-    imageView.set('value', logoURL);
+    SC.run(function () {
+      imageView.set('value', logoURL);
+    });
     ok(imageView.get('status') !== SC.IMAGE_STATE_LOADED, 'PRECOND - status should not be loaded (status=%@)'.fmt(imageView.get('status')));
     ok(imageView.get('status') === SC.IMAGE_STATE_LOADING, 'PRECOND - status should be loading (status=%@)'.fmt(imageView.get('status')));
 
@@ -53,17 +62,17 @@
     ok((url.indexOf('base64')!=-1) || (url.indexOf('blank.gif')!=-1), "The src should be blank URL. url = %@".fmt(url));
   });
 
-  test("Verify that all the rendering properties of an image that is loaded are correct", function() {
+  test("Verify that all the rendering properties of an image that is loaded are correct", function () {
     var imageView = pane.view('image_loaded'),
         imgEl;
 
     ok(imageView.get('isVisibleInWindow'), 'image_loaded is visible in window');
 
-    imageView.addObserver('status', this, function() {
+    imageView.addObserver('status', this, function () {
       equals(SC.IMAGE_STATE_LOADED, imageView.get('status'), 'status should be loaded');
 
       // Status has changed, but the observer fires immediately, so pause in order to have the DOM updated
-      setTimeout(function() {
+      setTimeout(function () {
         imgEl = imageView.$('img');
         ok(imgEl.attr('src').indexOf(logoURL) !== 0, "img src should be set to logoURL");
 
@@ -74,16 +83,18 @@
     stop();
   });
 
-  test("Verify that the tooltip is correctly being set as both the title and attribute (disabling localization for this test)", function() {
+  test("Verify that the tooltip is correctly being set as both the title and attribute (disabling localization for this test)", function () {
     var imageView = pane.view('image_loaded'),
         testToolTip = 'This is a test tooltip',
         imgEl;
 
-    imageView.set('localization', NO);
-    imageView.set('toolTip', testToolTip);
+    SC.run(function () {
+      imageView.set('localization', NO);
+      imageView.set('toolTip', testToolTip);
+    });
 
-    imageView.addObserver('status', this, function() {
-      setTimeout(function() {
+    imageView.addObserver('status', this, function () {
+      setTimeout(function () {
         imgEl = imageView.$('img');
         equals(imgEl.attr('title'), testToolTip, "title attribute");
         equals(imgEl.attr('alt'), testToolTip, "alt attribute");
@@ -96,7 +107,7 @@
   });
 
 
-  test("Verify canvas rendering and properties", function() {
+  test("Verify canvas rendering and properties", function () {
     var view = pane.view('image_canvas'),
         canvasEl = view.$();
 
@@ -104,7 +115,7 @@
     equals(canvasEl.attr('height'), 300, "The height of the canvas element should be set");
   });
 
-  test("Using imageQueue", function() {
+  test("Using imageQueue", function () {
     var imageHolder = pane.view('image_holder'),
         imageView1,
         imageView2,
@@ -131,12 +142,12 @@
     });
 
     // The second image should load first and the first not be loaded yet
-    imageView2.addObserver('status', this, function() {
+    imageView2.addObserver('status', this, function () {
       equals(imageView2.get('status'), SC.IMAGE_STATE_LOADED, 'imageView2 status on imageView2 status change');
       equals(imageView1.get('status'), SC.IMAGE_STATE_LOADING, 'imageView1 status on imageView2 status change');
     });
 
-    imageView1.addObserver('status', this, function() {
+    imageView1.addObserver('status', this, function () {
       equals(imageView2.get('status'), SC.IMAGE_STATE_LOADED, 'imageView2 status on imageView1 status change');
       equals(imageView1.get('status'), SC.IMAGE_STATE_LOADED, 'imageView1 status on imageView1 status change');
 
@@ -151,9 +162,10 @@
     stop();
 
     // Default is SC.FILL
-    imageView.addObserver('status', this, function() {
+    imageView.addObserver('status', this, function () {
+
       // Status has changed, but the observer fires immediately, so pause in order to have the DOM updated
-      setTimeout(function() {
+      setTimeout(function () {
         var imgEl,
             innerFrame,
             testImg = !imageView.get('useCanvas');
@@ -169,9 +181,9 @@
           equals(imgEl.css('height'), "90px", "SC.FILL height");
         }
 
-        SC.RunLoop.begin();
-        imageView.set('scale', SC.SCALE_NONE);
-        SC.RunLoop.end();
+        SC.run(function () {
+          imageView.set('scale', SC.SCALE_NONE);
+        });
 
         innerFrame = imageView.get('innerFrame');
         equals(innerFrame.width, 271, "SC.SCALE_NONE width");
@@ -181,21 +193,21 @@
           equals(imgEl.css('height'), "60px", "SC.SCALE_NONE height");
         }
 
-        SC.RunLoop.begin();
-        imageView.set('scale', SC.FILL_PROPORTIONALLY);
-        SC.RunLoop.end();
+        SC.run(function () {
+          imageView.set('scale', SC.BEST_FILL);
+        });
 
         innerFrame = imageView.get('innerFrame');
-        equals(innerFrame.width, 588, "SC.FILL_PROPORTIONALLY width");
-        equals(innerFrame.height, 130, "SC.FILL_PROPORTIONALLY height");
+        equals(innerFrame.width, 588, "SC.BEST_FILL width");
+        equals(innerFrame.height, 130, "SC.BEST_FILL height");
         if (testImg) {
-          equals(imgEl.css('width'), "588px", "SC.FILL_PROPORTIONALLY width");
-          equals(imgEl.css('height'), "130px", "SC.FILL_PROPORTIONALLY height");
+          equals(imgEl.css('width'), "588px", "SC.BEST_FILL width");
+          equals(imgEl.css('height'), "130px", "SC.BEST_FILL height");
         }
 
-        SC.RunLoop.begin();
-        imageView.set('scale', SC.BEST_FIT);
-        SC.RunLoop.end();
+        SC.run(function () {
+          imageView.set('scale', SC.BEST_FIT);
+        });
 
         innerFrame = imageView.get('innerFrame');
         equals(innerFrame.width, 407, "SC.BEST_FIT width");
@@ -205,9 +217,9 @@
           equals(imgEl.css('height'), "90px", "SC.BEST_FIT height");
         }
 
-        SC.RunLoop.begin();
-        imageView.set('scale', SC.BEST_FIT_DOWN_ONLY);
-        SC.RunLoop.end();
+        SC.run(function () {
+          imageView.set('scale', SC.BEST_FIT_DOWN_ONLY);
+        });
 
         innerFrame = imageView.get('innerFrame');
         equals(innerFrame.width, 271, "SC.BEST_FIT_DOWN_ONLY width (larger frame)");
@@ -217,24 +229,27 @@
           equals(imgEl.css('height'), "60px", "SC.BEST_FIT_DOWN_ONLY height (larger frame)");
         }
 
-        SC.RunLoop.begin();
-        imageView.set('layout', { top: 0, left: 0, width: 147, height: 90 });
-        SC.RunLoop.end();
+        SC.run(function () {
+          if (!imageView.useStaticLayout) {
+            imageView.set('layout', { top: 0, left: 0, width: 147, height: 90 });
 
-        innerFrame = imageView.get('innerFrame');
-        equals(innerFrame.width, 147, "SC.BEST_FIT_DOWN_ONLY width (smaller size frame)");
-        equals(innerFrame.height, 33, "SC.BEST_FIT_DOWN_ONLY height (smaller size frame)");
-        if (testImg) {
-          equals(imgEl.css('width'), "147px", "SC.BEST_FIT_DOWN_ONLY width (smaller size frame)");
-          equals(imgEl.css('height'), "33px", "SC.BEST_FIT_DOWN_ONLY height (smaller size frame)");
-        }
+            innerFrame = imageView.get('innerFrame');
+            equals(innerFrame.width, 147, "SC.BEST_FIT_DOWN_ONLY width (smaller size frame)");
+            equals(innerFrame.height, 33, "SC.BEST_FIT_DOWN_ONLY height (smaller size frame)");
+            if (testImg) {
+              equals(imgEl.css('width'), "147px", "SC.BEST_FIT_DOWN_ONLY width (smaller size frame)");
+              equals(imgEl.css('height'), "33px", "SC.BEST_FIT_DOWN_ONLY height (smaller size frame)");
+            }
+          }
+        });
+
 
         window.start(); // starts the test runner
-      }, 100);
+      }, 150);
     });
   }
 
-  test("Scaling images (img)", function() {
+  test("Scaling images (img)", function () {
     var imageHolder = pane.view('image_holder'),
         imageView;
 
@@ -247,31 +262,41 @@
 
     testScale(imageView);
 
-    imageHolder.appendChild(imageView);
+    SC.run(function () {
+      imageHolder.appendChild(imageView);
+    });
   });
 
-  test("Scaling images (img) with static layout", function() {
+  test("Scaling images (img) with static layout", function () {
     var imageHolder = pane.view('image_holder'),
         imageView;
 
-    // The logo is 294x60
+    // The logo is 271x60
     imageView = SC.ImageView.create({
       value: logoURL + "?lastmod=" + Math.round(Math.random() * 100000),
-      layout: { top: 0, left: 0, width: 588, height: 90 },
+      // layout: { top: 0, left: 0, width: 588, height: 90 },
       useCanvas: NO,
-      useStaticLayout: YES
+      useStaticLayout: YES,
+
+      render: function (context) {
+        context.setStyle({ width: 588, height: 90 });
+
+        sc_super();
+      }
     });
 
     testScale(imageView);
 
-    imageHolder.appendChild(imageView);
+    SC.run(function () {
+      imageHolder.appendChild(imageView);
+    });
   });
 
-  test("Scaling images (canvas)", function() {
+  test("Scaling images (canvas)", function () {
     var imageHolder = pane.view('image_holder'),
         imageView;
 
-    // The logo is 294x60
+    // The logo is 271x60
     imageView = SC.ImageView.create({
       value: logoURL + "?lastmod=" + Math.round(Math.random() * 100000),
       layout: { top: 0, left: 0, width: 588, height: 90 }
@@ -279,32 +304,41 @@
 
     testScale(imageView);
 
-    imageHolder.appendChild(imageView);
+    SC.run(function () {
+      imageHolder.appendChild(imageView);
+    });
   });
 
-  test("Scaling images (canvas) with static layout", function() {
+  test("Scaling images (canvas) with static layout", function () {
     var imageHolder = pane.view('image_holder'),
         imageView;
 
-    // The logo is 294x60
+    // The logo is 271x60
     imageView = SC.ImageView.create({
       value: logoURL + "?lastmod=" + Math.round(Math.random() * 100000),
-      layout: { top: 0, left: 0, width: 588, height: 90 },
-      useStaticLayout: YES
+      useStaticLayout: YES,
+
+      render: function (context) {
+        context.setStyle({ width: 588, height: 90 });
+
+        sc_super();
+      }
     });
 
     testScale(imageView);
 
-    imageHolder.appendChild(imageView);
+    SC.run(function () {
+      imageHolder.appendChild(imageView);
+    });
   });
 
   function testAlign(imageView) {
     stop();
 
     // Default is SC.FILL
-    imageView.addObserver('status', this, function() {
+    imageView.addObserver('status', this, function () {
       // Status has changed, but the observer fires immediately, so pause in order to have the DOM updated
-      setTimeout(function() {
+      setTimeout(function () {
         var imgEl,
             innerFrame,
             testImg = !imageView.get('useCanvas');
@@ -419,7 +453,7 @@
     });
   }
 
-  test("Aligning images (img)", function() {
+  test("Aligning images (img)", function () {
     var imageHolder = pane.view('image_holder'),
         imageView;
 
@@ -433,10 +467,12 @@
 
     testAlign(imageView);
 
-    imageHolder.appendChild(imageView);
+    SC.run(function () {
+      imageHolder.appendChild(imageView);
+    });
   });
 
-  test("Aligning images (img) with static layout", function() {
+  test("Aligning images (img) with static layout", function () {
     var imageHolder = pane.view('image_holder'),
         imageView;
 
@@ -451,10 +487,12 @@
 
     testAlign(imageView);
 
-    imageHolder.appendChild(imageView);
+    SC.run(function () {
+      imageHolder.appendChild(imageView);
+    });
   });
 
-  test("Aligning images (canvas)", function() {
+  test("Aligning images (canvas)", function () {
     var imageHolder = pane.view('image_holder'),
         imageView;
 
@@ -467,10 +505,12 @@
 
     testAlign(imageView);
 
-    imageHolder.appendChild(imageView);
+    SC.run(function () {
+      imageHolder.appendChild(imageView);
+    });
   });
 
-  test("Aligning images (canvas) with static layout", function() {
+  test("Aligning images (canvas) with static layout", function () {
     var imageHolder = pane.view('image_holder'),
         imageView;
 
@@ -484,27 +524,94 @@
 
     testAlign(imageView);
 
-    imageHolder.appendChild(imageView);
+    SC.run(function () {
+      imageHolder.appendChild(imageView);
+    });
   });
 
-  test("CSS class is applied for ImageView using a sprite for value", function() {
+  test("CSS class is applied for ImageView using a sprite for value", function () {
     var view = pane.view('sprite_image'),
         viewElem = view.$('img');
 
     ok(viewElem.hasClass('sprite-class'), "element given correct class");
 
-    SC.run(function() {
+    SC.run(function () {
       view.set('value', 'another-sprite');
     });
 
     ok(!viewElem.hasClass('sprite-class'), "When value changed, element has old class removed");
     ok(viewElem.hasClass('another-sprite'), "When value changed, element has new class added");
 
-    SC.run(function() {
+    SC.run(function () {
       view.set('value', null);
     });
 
+    viewElem = view.$('img');
     ok(!viewElem.hasClass('another-sprite'), "When value removed, element has old class removed");
+  });
+
+  test("Changing the type of image view updates the layer appropriately (with canvas)", function () {
+    var view = pane.view('canvas_not_loaded'),
+      jqEl = view.$(),
+      el = jqEl[0],
+      jqImgEl,
+      imgEl;
+
+    equals(el.innerHTML, '', "The empty image should have no inner HTML.");
+    equals(el.tagName, 'CANVAS', "The empty image should be a CANVAS");
+
+    // Set a sprite value.
+    SC.run(function () {
+      view.set('value', 'sprite-class');
+    });
+
+    jqEl = view.$();
+
+    ok(jqEl.hasClass('sprite-class'), "The sprite image should have sprite-class class.");
+    equals(el.innerHTML, '', "The sprite image should have no inner HTML.");
+
+    // Set a URL value.
+    SC.run(function () {
+      view.set('value', logoURL);
+    });
+
+    jqEl = view.$();
+    el = jqEl[0];
+
+    ok(!jqEl.hasClass('sprite-class'), "The url image should no longer have sprite-class class.");
+    equals(el.innerHTML, '', "The url image should have no inner HTML.");
+    equals(el.tagName, 'CANVAS', "The url image should be a CANVAS");
+  });
+
+  test("Changing the type of image view updates the layer appropriately (without canvas)", function () {
+    var view = pane.view('image_not_loaded'),
+      jqEl = view.$(),
+      el = jqEl[0],
+      jqImgEl,
+      imgEl;
+
+    equals(el.innerHTML, '', "The empty image should have no inner HTML.");
+    equals(el.tagName, 'DIV', "The empty image should be a DIV");
+
+    // Set a sprite value.
+    SC.run(function () {
+      view.set('value', 'sprite-class');
+    });
+
+    jqEl = view.$('img');
+
+    ok(jqEl.hasClass('sprite-class'), "The sprite image should have sprite-class class.");
+
+    // Set a URL value.
+    SC.run(function () {
+      view.set('value', logoURL);
+    });
+
+    jqEl = view.$('img');
+    el = jqEl[0];
+
+    ok(!jqEl.hasClass('sprite-class'), "The url image should no longer have sprite-class class.");
+    equals(el.tagName, 'IMG', "The url image should be a IMG");
   });
 })();
 

@@ -76,8 +76,8 @@ module('SC.ButtonView ui', {
     pane.standardSetup().setup();
   },
   teardown: function(){
-    clearHtmlbody();
     pane.standardSetup().teardown();
+    clearHtmlbody();
   }
 });
 

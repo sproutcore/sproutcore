@@ -866,6 +866,8 @@ SC.ScrollView = SC.View.extend({
 
   /** @private */
   mouseWheel: function (evt) {
+    if (!this.get('isEnabledInPane')) return NO;
+
     var horizontalScrollOffset = this.get('horizontalScrollOffset'),
         maximumHorizontalScrollOffset = this.get('maximumHorizontalScrollOffset'),
         maximumVerticalScrollOffset = this.get('maximumVerticalScrollOffset'),

@@ -12,15 +12,15 @@ sc_require('css/css_rule') ;
 
   A style sheet object wraps a document style sheet object. `C.CSSStyleSheet`
   will re-use stylesheet objects as needed.
-  
+
   @extends SC.Object
 */
 SC.CSSStyleSheet = SC.Object.extend(
 /** @scope SC.CSSStyleSheet.prototype */ {
-  
+
   init: function() {
     sc_super() ;
-    
+
     var ss = this.styleSheet ;
     if (!ss) {
       // create the stylesheet object the hard way (works everywhere)
@@ -30,23 +30,23 @@ SC.CSSStyleSheet = SC.Object.extend(
       if (!head) head = document.documentElement ; // fix for Opera
       head.appendChild(ss) ;
     }
-    
+
     // cache this object for later
     var ssObjects = this.constructor.styleSheets ;
     if (!ssObjects) ssObjects = this.constructor.styleSheets = {} ;
     ssObjects[SC.guidFor(ss)] ;
-    
+
     // create rules array
     var rules = ss.rules || SC.EMPTY_ARRAY ;
     var array = SC.SparseArray.create(rules.length) ;
     array.delegate = this ;
     this.rules = array ;
-    
+
     return this ;
   },
-  
+
   /**
-    @property {Boolean} YES if the stylesheet is enabled.
+    @type Boolean YES if the stylesheet is enabled.
   */
   isEnabled: function(key, val) {
     if (val !== undefined) {
@@ -55,18 +55,18 @@ SC.CSSStyleSheet = SC.Object.extend(
     return !this.styleSheet.disabled ;
   }.property(),
   isEnabledBindingDefault: SC.Binding.bool(),
-  
+
   /**
     **DO NOT MODIFY THIS OBJECT DIRECTLY!!!!** Use the methods defined on this
-    object to update properties of the style sheet; otherwise, your changes 
+    object to update properties of the style sheet; otherwise, your changes
     will not be reflected.
-    
-    @property {CSSStyleSheet} RO
+
+    @type CSSStyleSheet RO
   */
   styleSheet: null,
-  
+
   /**
-    @property {String}
+    @type String
   */
   href: function(key, val) {
     if (val !== undefined) {
@@ -74,9 +74,9 @@ SC.CSSStyleSheet = SC.Object.extend(
     }
     else return this.styleSheet.href ;
   }.property(),
-  
+
   /**
-    @property {String}
+    @type String
   */
   title: function(key, val) {
     if (val !== undefined) {
@@ -84,19 +84,19 @@ SC.CSSStyleSheet = SC.Object.extend(
     }
     else return this.styleSheet.title ;
   }.property(),
-  
+
   /**
-    @property {SC.Array} contains SC.CSSRule objects
+    @type SC.Array contains SC.CSSRule objects
   */
   rules: null,
-  
+
   /**
     You can also insert and remove rules on the rules property array.
   */
   insertRule: function(rule) {
     var rules = this.get('rules') ;
   },
-  
+
   /**
     You can also insert and remove rules on the rules property array.
   */
@@ -104,13 +104,13 @@ SC.CSSStyleSheet = SC.Object.extend(
     var rules = this.get('rules') ;
     rules.removeObject(rule) ;
   },
-  
+
   // TODO: implement a destroy method
-  
+
   /**
     @private
-    
-    Invoked by the sparse array whenever it needs a particular index 
+
+    Invoked by the sparse array whenever it needs a particular index
     provided.  Provide the content for the index.
   */
   sparseArrayDidRequestIndex: function(array, idx) {
@@ -118,48 +118,48 @@ SC.CSSStyleSheet = SC.Object.extend(
     var rules = this.styleSheet.rules || SC.EMPTY_ARRAY ;
     var rule = rules[idx] ;
     if (rule) {
-      array.provideContentAtIndex(idx, SC.CSSRule.create({ 
+      array.provideContentAtIndex(idx, SC.CSSRule.create({
         rule: rule,
         styleSheet: this
-      })); 
+      }));
     }
   },
-  
+
   /** @private synchronize the browser's rules array with our own */
   sparseArrayDidReplace: function(array, idx, amt, objects) {
     var cssRules = objects.collect(function(obj) { return obj.rule; }) ;
     this.styleSheet.rules.replace(idx, amt, cssRules) ;
   }
-  
+
 });
 
 SC.mixin(SC.CSSStyleSheet,
 /** SC.CSSStyleSheet */{
-  
+
   /**
     Find a stylesheet object by name or href. If by name, `.css` will be
     appended automatically.
-    
+
         var ss = SC.CSSStyleSheet.find('style.css') ;
         var ss2 = SC.CSSStyleSheet.find('style') ; // same thing
         sc_assert(ss === ss2) ; // SC.CSSStyleSheet objects are stable
-    
+
     @param {String} nameOrUrl a stylesheet name or href to find
     @returns {SC.CSSStyleSheet} null if not found
   */
   find: function(nameOrUrl) {
     var isUrl = nameOrUrl ? nameOrUrl.indexOf('/') >= 0 : NO ;
-    
+
     if (!nameOrUrl) return null ; // no name or url? fail!
-    
+
     if (!isUrl && nameOrUrl.indexOf('.css') == -1) {
       nameOrUrl = nameOrUrl + '.css' ;
     }
-    
+
     // initialize styleSheet cache
     var ssObjects = this.styleSheets ;
     if (!ssObjects) ssObjects = this.styleSheets = {} ;
-    
+
     var styleSheets = document.styleSheets ;
     var ss, ssName, ssObject, guid ;
     for (var idx=0, len=styleSheets.length; idx < len; ++idx) {
@@ -193,7 +193,7 @@ SC.mixin(SC.CSSStyleSheet,
     }
     return null ; // stylesheet not found
   },
-  
+
   styleSheets: null
-  
+
 });

@@ -249,6 +249,22 @@ tests that enforce the one-record-array-per-query contract.
 1.9.2 - BUG FIX RELEASE
 ----------
 
+* Softens the build tools dependency requirements from being ultra-pessimistic (i.e. within a minor version) to being pessimistic (i.e. within a major version).
+* Fixes 'repeat' slice for @2x version. It was incorrectly appending @2x to the end of the whole path (ex. /resources/images/image-sliced-from.png@2x instead of /resources/images/image-sliced-from@2x.png).
+* Fixes incorrectly named "responder" generator to "state" generator for generating SC.State subclasses.
+* Fixes the snake case generator for "sproutcore gen", so that names like 'SCProject' get properly transformed to 'sc_project' and not 's_c_project'.
+* Added support for background-size property in Buildtools spriting, this is required for spriting to work properly in retina firefox.
+* Fixes inconsistencies and improper syntax in several templates created with "sproutcore gen".
+* Fixes missing stylesheet warnings on a clean app generated with "sproutcore gen app" or "sproutcore gen statechart_app" by adding a default stylesheet to the app.  Also adds a default stylesheet to a design, when using "sproutcore gen design" (i.e. an SC.Page resource)
+* Fixes improper binary search used by SC.ManyArray addInverseRecord that resulted in an infinite loop.
+* Fixes bug that allowed the context menu to appear regardless of overriding contextMenu in a view or setting SC.CONTEXT_MENU_ENABLED or isContextMenuEnabled to false. This makes the context menu event handling behave the same as the key, mouse, etc. event handling.
+* Fixes actions: deleteForward, deleteBackward, moveLeft, moveRight, selectAll, moveUp and moveDown to be always handled by the TextFieldView element when it has focus.
+* Fixes SC.TextFieldView to insert a new line when the enter key is pressed on a text area.
+* Fixes the hint value for SC.LabelView so that it will appear when the label has no value and isEditable is true. Includes unit test.
+* No longer modifies the underlying items given to an SC.SegmentedView with an
+  overflow menu directly so that we don't invariably dirty the original object.
+* Fixes regression in IE7 and IE8 which caused XHR requests to fail to notify. 
+  Also fixes unit tests to pass in IE7+.
 * Fixes debug images and test iframe.html being included in builds. These files 
   (one of which is 2.5MB) would get included into every build, because they were 
   at the wrong path. I removed the apple logo which appears unused in the tests 
@@ -1387,25 +1403,25 @@ more, please see frameworks/experimental/README.md.
 * Support for extending classes after they've been created with the
 reopen()/enhance() combo. For more, see: [this
 discussion](http://groups.google.com/group/sproutcore-dev/browse_thread/thread/d65ad54d6fddef5d)
-	- This change may break existing code if you call sc_super() in your mixins.
-	If your app throws exceptions after updating, please see [this post](http://groups.google.com/group/sproutcore-dev/browse_thread/thread/cc6a97e6133cb8cc).
+  - This change may break existing code if you call sc_super() in your mixins.
+  If your app throws exceptions after updating, please see [this post](http://groups.google.com/group/sproutcore-dev/browse_thread/thread/cc6a97e6133cb8cc).
 * Added SC.TemplateView and Handlebars. These allow you to specify the content
 of your views using templates.
-	- {{#view}} helper allows you to define child views
-	- {{#bind}} helper allows you to render a property, and automatically update DOM if that
-	property ever changes.
-	- {{#collection}} helpers allows you to render a simple collection of items
-	using templates
-	- SC.TextFieldSupport and SC.CheckboxSupport mixins for SC.TemplateViews
-	that wrap <input> elements.
+  - {{#view}} helper allows you to define child views
+  - {{#bind}} helper allows you to render a property, and automatically update DOM if that
+  property ever changes.
+  - {{#collection}} helpers allows you to render a simple collection of items
+  using templates
+  - SC.TextFieldSupport and SC.CheckboxSupport mixins for SC.TemplateViews
+  that wrap <input> elements.
 * Split SC.View into units of functionality. SC.View remains functionally the
 same, but you can now use SC.CoreView, a light-weight subset of SC.View.
 * SC.ImageView will use a <canvas> tag on platforms that support it, which
 improves performance significantly.
 * SC.SegmentedView now creates an overflow menu if there are too many segments
 to display.
-	- Class names for SC.SegmentedView have been cleaned up. You may need to
-	update your CSS if you were theming SC.SegmentedView.
+  - Class names for SC.SegmentedView have been cleaned up. You may need to
+  update your CSS if you were theming SC.SegmentedView.
 * You can now observe the contents of enumerables using the special `@each`
 key.
 * Dependent keys can accept property paths. For example, you can say

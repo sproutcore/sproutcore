@@ -429,8 +429,8 @@ SC.IndexSet = SC.mixin({},
     Adds the specified range of indexes to the set.  You can also pass another
     IndexSet to union the contents of the index set with the receiver.
 
-    @param {Number} start index, Range, or another IndexSet
-    @param {Number} length optional length of range.
+    @param {Number} start Start index, Range, or another IndexSet
+    @param {Number} [length=1] The length of range.
     @returns {SC.IndexSet} receiver
   */
   add: function (start, length) {

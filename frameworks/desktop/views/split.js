@@ -12,7 +12,7 @@ SC.RESIZE_TOP_LEFT = 'resize-top-left';
 SC.RESIZE_BOTTOM_RIGHT = 'resize-bottom-right';
 
 /**
-  @class
+  @deprecated
 
   A split view is used to show views that the user can resize or collapse.
   To use a split view you need to set a topLeftView, a bottomRightView and,
@@ -69,6 +69,14 @@ SC.RESIZE_BOTTOM_RIGHT = 'resize-bottom-right';
 */
 SC.SplitView = SC.View.extend(
 /** @scope SC.SplitView.prototype */ {
+
+  //@if(debug)
+  init: function () {
+    sc_super();
+
+    SC.warn("Developer Warning: The regular SC.SplitView has been deprecated in favor of the new version available in the experimental framework.  To switch to the new SC.SplitView please require :'sproutcore/experimental/split_view' in your Buildfile.");
+  },
+  //@endif
 
   classNames: ['sc-split-view'],
 

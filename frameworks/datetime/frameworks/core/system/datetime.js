@@ -251,7 +251,7 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
     Note that passing only a time zone does not affect the actual milliseconds since
     Jan 1, 1970, only the time zone in which it is expressed when displayed.
 
-    @see SC.DateTime#create for the list of options you can pass
+    @see SC.DateTime.create for the list of options you can pass
     @returns {SC.DateTime} copy of receiver
   */
   adjust: function(options, resetCascadingly) {
@@ -267,7 +267,7 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
     Returns a new `SC.DateTime` object advanced according the the given parameters.
     Don't use floating point values, it might give unpredictable results.
 
-    @see SC.DateTime#create for the list of options you can pass
+    @see SC.DateTime.create for the list of options you can pass
     @param {Hash} options the amount of date/time to advance the receiver
     @returns {DateTime} copy of the receiver
   */

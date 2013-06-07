@@ -8,13 +8,13 @@
 /**
   @class
 
-  A `ManyArray` is used to map an array of record ids back to their 
+  A `ManyArray` is used to map an array of record ids back to their
   record objects which will be materialized from the owner store on demand.
-  
-  Whenever you create a `toMany()` relationship, the value returned from the 
+
+  Whenever you create a `toMany()` relationship, the value returned from the
   property will be an instance of `ManyArray`.  You can generally customize the
   behavior of ManyArray by passing settings to the `toMany()` helper.
-  
+
   @extends SC.Enumerable
   @extends SC.Array
   @since SproutCore 1.0
@@ -53,7 +53,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
   /**
     The `ManyAttribute` that created this array.
-  
+
     @default null
     @type SC.ManyAttribute
   */
@@ -71,7 +71,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
   }.property('record').cacheable(),
 
   /**
-    The `storeKey` for the parent record of this many array.  Editing this 
+    The `storeKey` for the parent record of this many array.  Editing this
     array will place the parent record into a `READY_DIRTY` state.
 
     @type Number
@@ -83,7 +83,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
 
   /**
-    Returns the `storeId`s in read-only mode.  Avoids modifying the record 
+    Returns the `storeId`s in read-only mode.  Avoids modifying the record
     unnecessarily.
 
     @type SC.Array
@@ -95,9 +95,9 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
 
   /**
-    Returns an editable array of `storeId`s.  Marks the owner records as 
-    modified. 
-    
+    Returns an editable array of `storeId`s.  Marks the owner records as
+    modified.
+
     @type {SC.Array}
     @property
   */
@@ -176,7 +176,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
   /** @private
     Returned length is a pass-through to the `storeIds` array.
-    
+
     @type Number
     @property
   */
@@ -231,7 +231,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
         len      = recs ? (recs.get ? recs.get('length') : recs.length) : 0,
         record   = this.get('record'),
         pname    = this.get('propertyName'),
-        i, keys, ids, toRemove, inverse, attr, inverseRecord;
+        i, ids, toRemove, inverse, attr, inverseRecord;
 
     // map to store keys
     ids = [] ;
@@ -326,11 +326,11 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @param {SC.Record} inverseRecord the record this array is a part of
     @returns {SC.ManyArray} receiver
   */
-  addInverseRecord: function(inverseRecord) {
-
+  addInverseRecord: function (inverseRecord) {
+    // Fast path!
     if (!inverseRecord) return this;
-    var id = inverseRecord.get('id'),
-        storeIds = this.get('editableStoreIds'),
+
+    var storeIds = this.get('editableStoreIds'),
         orderBy  = this.get('orderBy'),
         len      = storeIds.get('length'),
         idx, record;
@@ -348,26 +348,32 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return this;
   },
 
-  /** @private
-      binary search to find insertion location
-  */
-  _findInsertionLocation: function(rec, min, max, orderBy) {
-    var idx   = min+Math.floor((max-min)/2),
+  /** @private binary search to find insertion location */
+  _findInsertionLocation: function (rec, min, max, orderBy) {
+    var idx   = min + Math.floor((max - min) / 2),
         cur   = this.objectAt(idx),
         order = this._compare(rec, cur, orderBy);
+
     if (order < 0) {
-      if (idx===0) return idx;
-      else return this._findInsertionLocation(rec, 0, idx, orderBy);
+      // The location is before the first index.
+      if (idx === 0) return idx;
+
+      // The location is in the lower subset.
+      else return this._findInsertionLocation(rec, 0, idx - 1, orderBy);
     } else if (order > 0) {
-      if (idx >= max) return idx;
-      else return this._findInsertionLocation(rec, idx, max, orderBy);
-    } else return idx;
+      // The location is after the current index.
+      if (idx >= max) return idx + 1;
+
+      // The location is in the upper subset.
+      else return this._findInsertionLocation(rec, idx + 1, max, orderBy);
+    } else {
+      // The location is the current index.
+      return idx;
+    }
   },
 
-  /** @private
-      function to compare to objects
-  */
-  _compare: function(a, b, orderBy) {
+  /** @private function to compare two objects*/
+  _compare: function (a, b, orderBy) {
     var t = SC.typeOf(orderBy),
         ret, idx, len;
 

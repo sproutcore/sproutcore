@@ -80,7 +80,7 @@ SC.Response = SC.Object.extend(
   originalRequest: function() {
     var ret = this.get('request');
     while (ret.get('source')) { ret = ret.get('source'); }
-    return ret ;
+    return ret;
   }.property('request').cacheable(),
 
   /**
@@ -128,7 +128,7 @@ SC.Response = SC.Object.extend(
     @observes request
   */
   isXML: function() {
-    return this.getPath('request.isXML') || NO ;
+    return this.getPath('request.isXML') || NO;
   }.property('request').cacheable(),
 
   /**
@@ -324,9 +324,9 @@ SC.Response = SC.Object.extend(
   */
   cancel: function() {
     if (!this.get('isCancelled')) {
-      this.set('isCancelled', YES) ;
-      this.cancelTransport() ;
-      SC.Request.manager.transportDidClose(this) ;
+      this.set('isCancelled', YES);
+      this.cancelTransport();
+      SC.Request.manager.transportDidClose(this);
     }
   },
 
@@ -349,8 +349,8 @@ SC.Response = SC.Object.extend(
         if (!proceed) { return; }
 
         // Set our value to an error.
-        var error = SC.$error("HTTP Request timed out", "Request", 0) ;
-        error.set("errorValue", this) ;
+        var error = SC.$error("HTTP Request timed out", "Request", 0);
+        error.set("errorValue", this);
         this.set('isError', YES);
         this.set('errorObject', error);
         this.set('status', 0);
@@ -411,7 +411,7 @@ SC.Response = SC.Object.extend(
     if (!handled && baseStat !== status) { handled = this._notifyListeners(listeners, baseStat); }
     if (!handled && status !== 0) { handled = this._notifyListeners(listeners, 0); }
 
-    return this ;
+    return this;
   },
 
   /**
@@ -513,7 +513,7 @@ SC.XHRResponse = SC.Response.extend(
     rawRequest = this.createRequest();
     this.set('rawRequest', rawRequest);
 
-  // configure async callback - differs per browser...
+    // configure async callback - differs per browser...
     async = !!request.get('isAsynchronous');
 
     if (async) {
@@ -549,8 +549,8 @@ SC.XHRResponse = SC.Response.extend(
         }
 
         SC.Event.add(rawRequest, 'loadend', this, this.finishRequest);
-      } else if (window.XMLHttpRequest) {
-        // XMLHttpRequest Level 1
+      } else if (window.XMLHttpRequest && rawRequest.addEventListener) {
+        // XMLHttpRequest Level 1 + support for addEventListener (IE prior to version 9.0 lacks support for addEventListener)
         SC.Event.add(rawRequest, 'readystatechange', this, this.finishRequest);
       } else {
         transport = this;
@@ -570,12 +570,12 @@ SC.XHRResponse = SC.Response.extend(
     // headers need to be set *after* the open call.
     headers = this.getPath('request.headers');
     for (var headerKey in headers) {
-      rawRequest.setRequestHeader(headerKey, headers[headerKey]) ;
+      rawRequest.setRequestHeader(headerKey, headers[headerKey]);
     }
 
     // now send the actual request body - for sync requests browser will
     // block here
-    rawRequest.send(this.getPath('request.encodedBody')) ;
+    rawRequest.send(this.getPath('request.encodedBody'));
     if (!async) { this.finishRequest(); }
 
     return rawRequest;
@@ -643,7 +643,7 @@ SC.XHRResponse = SC.Response.extend(
           }
 
           error = SC.$error(msg || "HTTP Request failed", "Request", status);
-          error.set("errorValue", this) ;
+          error.set("errorValue", this);
           this.set('isError', YES);
           this.set('errorObject', error);
         }
@@ -654,7 +654,7 @@ SC.XHRResponse = SC.Response.extend(
 
       // Avoid memory leaks
       if (window.XMLHttpRequestProgressEvent) {
-        // XMLHttpReqeust Level 2
+        // XMLHttpRequest Level 2
 
         SC.Event.remove(rawRequest, 'loadend', this, this.finishRequest);
 
@@ -679,8 +679,8 @@ SC.XHRResponse = SC.Response.extend(
             }
           }
         }
-      } else if (window.XMLHttpRequest) {
-        // XMLHttpReqeust Level 1
+      } else if (window.XMLHttpRequest && rawRequest.addEventListener) {
+        // XMLHttpRequest Level 1 + support for addEventListener (IE prior to version 9.0 lacks support for addEventListener)
         SC.Event.remove(rawRequest, 'readystatechange', this, this.finishRequest);
       } else {
         rawRequest.onreadystatechange = null;

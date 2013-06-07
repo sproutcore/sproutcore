@@ -90,6 +90,7 @@ sc_require('mixins/inline_editor');
 SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
 /** @scope SC.InlineTextFieldView.prototype */ {
   classNames: ['inline-editor'],
+
   /**
     Over-write magic number from SC.TextFieldView
   */
@@ -279,7 +280,8 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
   beginEditing: function(original, label) {
 		if(!original(label)) return NO;
 
-    var pane = label.get('pane'), elem = this.get('exampleElement');
+    var pane = label.get('pane'),
+      elem = this.get('exampleElement');
 
     this.beginPropertyChanges();
 
@@ -287,7 +289,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
 
     // if we have an exampleElement we need to make sure it's an actual
     // DOM element not a jquery object
-    if(elem) {
+    if (elem) {
       if(elem.length) elem = elem[0];
     }
 
@@ -354,18 +356,6 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
     this.mouseDown(e);
   },
 
-  /** @private */
-  keyDown: function(evt) {
-    var ret = this.interpretKeyEvents(evt) ;
-    this.fieldValueDidChange(true);
-    return !ret ? NO : ret;
-  },
-
-  /** @private */
-  insertText: null,
-
-  //keyUp: function() { return true; },
-
   _scitf_blurInput: function() {
     var el = this.$input()[0];
     if (el) el.blur();
@@ -409,31 +399,14 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
     return YES;
   },
 
-  // do it here instead of waiting on the binding to make sure the UI
-  // updates immediately.
-  /** @private */
-  fieldValueDidChange: function(partialChange) {
-    arguments.callee.base.call(this, partialChange) ;
-    //this.resizeToFit(this.getFieldValue()) ;
-  },
-
-  // invoked when the user presses return.  If this is a multi-line field,
-  // then allow the newine to proceed.  Otherwise, try to commit the
-  // edit.
+  // Invoked when the user presses return.  If this is a multi-line field,
+  // then allow the new line to proceed by calling the super class.
+  // Otherwise, try to commit the edit.
   /** @private */
   insertNewline: function(evt) {
     if (this.get('isTextArea')) {
-      evt.allowDefault();
-      return arguments.callee.base.call(this, evt) ;
+      return sc_super();
     } else {
-      // TODO : this is a work around. There is a bug where the
-      // last character would get dropped
-      // if the editing was completed by pressing return
-      // needs to be fixed
-      if (this.get('value') != this.$input().val()) {
-        this.set('value', this.$input().val());
-      }
-
       this.commitEditing() ;
       return YES ;
     }
@@ -463,173 +436,5 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
       if(prev && prev.beginEditing) prev.beginEditing();
     }
     return YES ;
-  },
-
-  /** @private */
-  deleteForward: function(evt) {
-    evt.allowDefault();
-    return YES;
-  },
-
-  /** @private */
-  deleteBackward: function(evt) {
-    evt.allowDefault();
-    return YES ;
   }
 });
-
-/*
-* These class methods allow you to manage an editor without implementing
-* SC.Editable. They exist for backwards compatibility and should no longer be
-* used.
-*/
-SC.mixin(SC.InlineTextFieldView, {
-  inlineEditorDelegate: SC.InlineTextFieldDelegate,
-
-  label: null,
-  editor: null,
-
-  /*
-  * @method
-  *
-  * This method creates a singleton editor editing your view. Delegate methods
-  * will be called on your view as normal.
-  *
-  * To trigger compatibility mode, call this method with a hash of options. The
-  * required options are:
-  *
-        SC.InlineTextFieldView.beginEditing({
-          delegate: myView,
-          frame: myView.get('frame'),
-          exampleElement: myView.$()
-        }) ;
-  *
-     - `delegate` -- The view that should be notified of events on the editor.
-     - `frame` -- The frame of the view that you want the editor to position itself over.
-     - `exampleElement` -- A DOM element to use when copying styles.
-
-  * Other options may be passed to further customize the editor:
-  *
-     - `multiline` -- If YES then the hitting return will add to the value instead of exiting the inline editor.
-     - `commitOnBlur` -- If YES then blurring will commit the value, otherwise it will discard the current value.  Defaults to YES.
-     - `validator` -- Validator to be attached to the field.
-
-    The editor expects your source view to implement the InlineTextFieldViewDelegate protocol.
-
-    @params {Object} a hash of options or the view to edit
-    @returns {Boolean} whether editing began successfully
-  */
-  beginEditing: function(label) {
-    var del, editor, options, value, labelProxy;
-
-    // for backwards compatibility, we allow you to pass an options hash with options that will be set on the editor
-    if(SC.typeOf(label) === SC.T_HASH) {
-      options = label;
-
-      if(!options.delegate || !options.exampleElement || !options.frame) {
-        SC.error("Delegate, exampleElement, and frame options are required.");
-        return NO;
-      }
-
-      label = options.delegate;
-      value = options.value;
-    }
-
-    else {
-      value = label.get('value');
-    }
-
-    labelProxy = SC.beget(label);
-
-    // these functions may have side effects, so they need to have their
-    // this reference assigned to the original object before proxying
-    labelProxy.mixin({
-      inlineEditorWillBeginEditing: function() {
-        if(label.inlineEditorWillBeginEditing) label.inlineEditorWillBeginEditing.apply(label, arguments);
-      },
-
-      inlineEditorDidBeginEditing: function() {
-        if(label.inlineEditorDidBeginEditing) label.inlineEditorDidBeginEditing.apply(label, arguments);
-      },
-
-      inlineEditorWillCommitEditing: function(editor, value, editable) {
-        if(label.inlineEditorWillCommitEditing) label.inlineEditorWillCommitEditing(editor, value, editable);
-        if(label.inlineEditorWillEndEditing) label.inlineEditorWillEndEditing(editor, value);
-      },
-
-      inlineEditorDidCommitEditing: function(editor, value, editable) {
-        if(label.inlineEditorDidCommitEditing) label.inlineEditorDidCommitEditing(editor, value, editable);
-        if(label.inlineEditorDidEndEditing) label.inlineEditorDidEndEditing(editor, value);
-
-        SC.InlineTextFieldView._endEditing();
-      },
-
-      inlineEditorWillDiscardEditing: function(editor, editable) {
-        if(label.inlineEditorWillDiscardEditing) label.inlineEditorWillDiscardEditing(editor, editable);
-        if(label.inlineEditorWillEndEditing) label.inlineEditorWillEndEditing(editor, this.get('value'));
-      },
-
-      inlineEditorDidDiscardEditing: function(editor, editable) {
-        if(label.inlineEditorDidDiscardEditing) label.inlineEditorDidDiscardEditing(editor, editable);
-        if(label.inlineEditorDidEndEditing) label.inlineEditorDidEndEditing(editor, this.get('value'));
-
-        SC.InlineTextFieldView._endEditing();
-      }
-    });
-
-    if(label.inlineEditorShouldBeginEditing && !label.inlineEditorShouldBeginEditing(label, value)) return NO;
-
-    this.editor = editor = this.inlineEditorDelegate.acquireEditor(label);
-
-    editor.set('value', value);
-
-    if(options) {
-      editor.set('exampleElement', options.exampleElement);
-      editor.set('exampleFrame', options.frame);
-      editor.set('multiline', options.multiline);
-      editor.set('escapeHTML', options.escapeHTML);
-      editor.set('isCollection', options.isCollection);
-      editor.set('commitOnBLur', options.commitOnBlur);
-      editor.set('validator', options.validator);
-    }
-
-    if(editor) return editor.beginEditing(labelProxy);
-    else return NO;
-  },
-
-  /*
-  * @method
-  *
-  * Ends editing on the current editor and saves the value back to the
-  * view being edited.
-  *
-  * @returns {Boolean} whether the editor was allowed to commit successfully
-  */
-  commitEditing: function() {
-    return this.inlineEditorDelegate.editor ? this.inlineEditorDelegate.editor.commitEditing() : NO;
-  },
-
-  /*
-  * @method
-  *
-  * Ends editing on the current editor without saving the value.
-  *
-  * @returns {Boolean} whether the editor was allowed to discard successfully
-  */
-  discardEditing: function() {
-    return this.inlineEditorDelegate.editor ? this.inlineEditorDelegate.editor.discardEditing() : NO;
-  },
-
-  /*
-  * @private
-  * @method
-  *
-  * Cleans up the current editor and editing context.
-  */
-  _endEditing: function() {
-    this.inlineEditorDelegate.releaseEditor(this.editor);
-
-    this.editor = null;
-  }
-});
-

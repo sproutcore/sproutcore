@@ -9,7 +9,7 @@ sc_require('views/controls');
 sc_require('views/mini_controls');
 sc_require('media_capabilities');
 
-/** 
+/**
   @class
 
   Renders a audioView using different technologies like HTML5 audio tag,
@@ -34,7 +34,7 @@ SC.AudioView = SC.View.extend(
 
   /**
     Audio view className.
-    @property {String}
+    @type String
   */
   classNames: 'sc-audio-view',
 
@@ -42,13 +42,13 @@ SC.AudioView = SC.View.extend(
     Properties that trigger a re render of the view. If the value changes, it
     means that the audio url changed.
 
-    @property {Array}
+    @type Array
   */
   displayProperties: ['value', 'shouldAutoResize'],
 
   /**
     Reference to the audio object once is created.
-    @property {Object}
+    @type Object
   */
 
   audioObject:null,
@@ -57,14 +57,14 @@ SC.AudioView = SC.View.extend(
     Array containing the technologies and the order to load them depending
     availability
 
-    @property {Array}
+    @type Array
   */
   degradeList: ['html5','quicktime', 'flash'],
 
   /**
      Current time in secs
-     
-     @property {Number}
+
+     @type Number
    */
   currentTime : function(key, value) {
     if (!SC.empty(value) && this._currentTime != value) {
@@ -77,47 +77,47 @@ SC.AudioView = SC.View.extend(
 
   /**
      Current time in secs
-     
-     @property {Number}
+
+     @type Number
      @private
    */
   _currentTime : 0,
-  
-  /** 
+
+  /**
     Duration in secs
-    @property {Number}
+    @type Number
   */
   duration: 0, //audio duration in secs
 
   /**
     Volume. The value should be between 0 and 1
-    @property {Number}
+    @type Number
   */
   volume:0, //volume value from 0 to 1
 
   /**
     Tells you if the audio is paused or not.
-    @property {Boolean}
+    @type Boolean
   */
   paused: YES, //is the audio paused
 
   /**
     Tells you if the audio is loaded.
-    @property {Boolean}
+    @type Boolean
   */
 
   loaded: NO, //has the audio loaded
 
   /**
     Indicates if the audio has reached the end
-    @property {Boolean}
+    @type Boolean
   */
 
   ended: NO, //did the audio finished playing
 
   /**
     Indicates if the audio is ready to be played.
-    @property {Boolean}
+    @type Boolean
   */
 
   canPlay: NO, //can the audio be played
@@ -126,7 +126,7 @@ SC.AudioView = SC.View.extend(
 
   /**
     Formatted currentTime. (00:00)
-    @property {String}
+    @type String
   */
   time: function(){
     var currentTime=this.get('currentTime'),
@@ -448,7 +448,7 @@ SC.AudioView = SC.View.extend(
   }.observes('paused'),
 
   /**
-    Called when currentTime changes. Notifies the different technologies 
+    Called when currentTime changes. Notifies the different technologies
     then new currentTime.
 
     @returns {void}

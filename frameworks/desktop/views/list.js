@@ -653,19 +653,6 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     return [index, dropOperation];
   },
 
-  /** @private */
-  mouseWheel: function(evt) {
-    // The following commits changes in a list item that is being edited,
-    // if the list is scrolled.
-    var inlineEditor = SC.InlineTextFieldView.editor;
-    if(inlineEditor && inlineEditor.get('isEditing')){
-      if(inlineEditor.get('delegate').get('displayDelegate')===this){
-        SC.InlineTextFieldView.commitEditing();
-      }
-    }
-    return NO ;
-  },
-
   // ..........................................................
   // INTERNAL SUPPORT
   //

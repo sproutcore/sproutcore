@@ -292,28 +292,11 @@ SC.MenuPane = SC.PickerPane.extend(
     // interpreted in keyUp.
     this.set('defaultResponder', this);
     this.endPropertyChanges();
-    this._hideOverflow();
+
+    // Prevent body overflow (we don't want to overflow because of shadows).
+    SC.bodyOverflowArbitrator.requestHidden(this, true);
 
     this.append();
-  },
-
-  /**
-    Removes the menu from the screen.
-
-    @returns {SC.MenuPane} receiver
-  */
-  remove: function () {
-    var parentMenu = this.get('parentMenu');
-
-    this.set('currentMenuItem', null);
-    this.closeOpenMenus();
-    this.resignMenuPane();
-
-    if (parentMenu) {
-      parentMenu.becomeMenuPane();
-    }
-
-    return sc_super();
   },
 
   // ..........................................................
@@ -541,6 +524,7 @@ SC.MenuPane = SC.PickerPane.extend(
   },
 
   displayProperties: ['controlSize'],
+
   renderDelegateName: 'menuRenderDelegate',
 
   /**
@@ -574,38 +558,39 @@ SC.MenuPane = SC.PickerPane.extend(
     menuView.replaceAllChildren(menuItemViews);
     scroll.set('contentView', menuView);
 
+
     this.childViews = [scroll];
 
     return this;
   },
 
   /**
-    When the pane is attached to a DOM element in the window, set up the
-    view to be visible in the window and register with the `RootResponder`.
+    Called when the pane is attached.  Takes on menu pane status.
 
     We don't call `sc_super()` here because `PanelPane` sets the current pane to
     be the key pane when attached.
-
-    @returns {SC.MenuPane} receiver
   */
-  paneDidAttach: function () {
-    // hook into root responder
-    var responder = (this.rootResponder = SC.RootResponder.responder);
-    responder.panes.add(this);
-
-    // set currentWindowSize
-    this.set('currentWindowSize', responder.computeWindowSize());
-
-    // update my own location
-    this.set('isPaneAttached', YES);
-    this.parentViewDidChange();
-
-    //notify that the layers have been appended to the document
-    this._notifyDidAppendToDocument();
-
+  didAppendToDocument: function () {
     this.becomeMenuPane();
+  },
 
-    return this;
+  /**
+    Called when the pane is detached.  Closes all submenus and resigns menu pane
+    status.
+
+    We don't call `sc_super()` here because `PanelPane` resigns key pane when
+    detached.
+  */
+  willRemoveFromDocument: function () {
+    var parentMenu = this.get('parentMenu');
+
+    this.set('currentMenuItem', null);
+    this.closeOpenMenus();
+    this.resignMenuPane();
+
+    if (parentMenu) {
+      parentMenu.becomeMenuPane();
+    }
   },
 
   /**
@@ -617,6 +602,7 @@ SC.MenuPane = SC.PickerPane.extend(
   */
   becomeMenuPane: function () {
     if (this.rootResponder) this.rootResponder.makeMenuPane(this);
+
     return this;
   },
 
@@ -628,6 +614,7 @@ SC.MenuPane = SC.PickerPane.extend(
   */
   resignMenuPane: function () {
     if (this.rootResponder) this.rootResponder.makeMenuPane(null);
+
     return this;
   },
 
@@ -636,9 +623,6 @@ SC.MenuPane = SC.PickerPane.extend(
 
     This computed property parses `displayItems` and constructs an
     `SC.MenuItemView` (or whatever class you have set as the `exampleView`) for every item.
-
-    This calls createMenuItemViews. If you want to override this property, override
-    that method.
 
     This calls createMenuItemViews. If you want to override this property, override
     that method.
@@ -668,6 +652,7 @@ SC.MenuPane = SC.PickerPane.extend(
         len;
 
     if (!items) return views; // return an empty array
+
     heightKey = this.get('itemHeightKey');
     separatorKey = this.get('itemSeparatorKey');
     exampleViewKey = this.get('itemExampleViewKey');

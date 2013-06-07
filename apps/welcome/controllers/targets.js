@@ -4,7 +4,7 @@
 // ==========================================================================
 /*globals CoreTools Welcome */
 
-/** @class
+/**
 
   Manages the list of targets
 

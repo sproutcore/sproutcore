@@ -42,6 +42,7 @@ module("SC.DateFieldView", {
 
   teardown: function() {
     pane.remove();
+    pane.destroy();
     pane = view0 = view1 = view2 = null;
   }
 });

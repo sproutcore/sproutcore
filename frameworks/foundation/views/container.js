@@ -14,6 +14,8 @@
   nowShowing property to the property path of a view in your page and the
   view will be found and swapped in for you.
 
+  # Animated Transitions
+
   To animate the transition between views, you can provide a transition
   plugin to SC.ContainerView.  There are several common transitions pre-built
   and if you want to create your own, the SC.TransitionProtocol defines the
@@ -21,11 +23,11 @@
 
   The transitions included with SC.ContainerView are:
 
-    SC.ContainerView.DISSOLVE - fades between the two views
-    SC.ContainerView.FADE_COLOR - fades out to a color and then in to the new view
-    SC.ContainerView.MOVE_IN - moves the new view in over top of the old view
-    SC.ContainerView.PUSH - pushes the old view out with the new view
-    SC.ContainerView.REVEAL - moves the old view out revealing the new view underneath
+    - SC.ContainerView.DISSOLVE - fades between the two views
+    - SC.ContainerView.FADE_COLOR - fades out to a color and then in to the new view
+    - SC.ContainerView.MOVE_IN - moves the new view in over top of the old view
+    - SC.ContainerView.PUSH - pushes the old view out with the new view
+    - SC.ContainerView.REVEAL - moves the old view out revealing the new view underneath
 
   To use a transition plugin, simply set it as the value of the container view's
   transition property.
@@ -64,7 +66,12 @@ SC.ContainerView = SC.View.extend(
   // Properties
   //
 
-  /** @private */
+  /**
+    @type Array
+    @default ['sc-container-view']
+    @see SC.View#classNames
+    @see SC.Object#concatenatedProperties
+  */
   classNames: ['sc-container-view'],
 
   /**
@@ -73,7 +80,8 @@ SC.ContainerView = SC.View.extend(
     than 'null', the container view will automatically change the contentView
     to reflect view indicated by the value.
 
-    @property {SC.View}
+    @type SC.View
+    @default null
   */
   contentView: null,
 
@@ -86,9 +94,9 @@ SC.ContainerView = SC.View.extend(
     You should observe this property in order to delay any updates to the new
     content until the transition is complete.
 
-    @property {Boolean}
-    @default NO
-    @readonly
+    @type Boolean
+    @default false
+    @since Version 1.10
   */
   isTransitioning: NO,
 
@@ -101,7 +109,8 @@ SC.ContainerView = SC.View.extend(
     (e.g. "MyApp.anotherPage.anotherView"), then the path will be followed
     from the top-level.
 
-    @property {String, SC.View}
+    @type String|SC.View
+    @default null
   */
   nowShowing: null,
 
@@ -109,7 +118,7 @@ SC.ContainerView = SC.View.extend(
   renderDelegateName: 'containerRenderDelegate',
 
   /**
-    The transition to use when swapping views.
+    The transition plugin to use when swapping views.
 
     SC.ContainerView uses a pluggable transition architecture where the
     transition setup, animation and cleanup can be handled by a specified
@@ -126,13 +135,14 @@ SC.ContainerView = SC.View.extend(
     You can even provide your own custom transition plugins.  Just create a
     transition object that conforms to the SC.TransitionProtocol protocol.
 
-    @property {SC.Transition}
+    @type Object (SC.TransitionProtocol)
     @default null
+    @since Version 1.10
   */
   transition: null,
 
   /**
-    The options for the given transition.
+    The options for the given transition plugin.
 
     These options are specific to the current transition plugin used and are
     used to modify the transition animation.  To determine what options
@@ -149,8 +159,9 @@ SC.ContainerView = SC.View.extend(
           timing: 'linear'
         }
 
-    @property {Object}
+    @type Object
     @default null
+    @since Version 1.10
   */
   transitionOptions: null,
 
@@ -254,18 +265,11 @@ SC.ContainerView = SC.View.extend(
     }
 
     // If it's an uninstantiated view, then attempt to instantiate it.
-    // (Uninstantiated views have a create() method; instantiated ones do not.)
-    if (SC.typeOf(content) === SC.T_CLASS) {
-      if (content.kindOf(SC.CoreView)) {
-        content = this.createChildView(content);
-        this._createdContent = YES;
-      } else {
-        content = null;
-      }
+    if (content && content.kindOf(SC.CoreView)) {
+      content = this.createChildView(content);
+    } else {
+      content = null;
     }
-
-    // If content has not been turned into a view by now, it's hopeless.
-    if (content && !(content instanceof SC.CoreView)) { content = null; }
 
     // Sets the content.
     this.set('contentView', content);
@@ -322,16 +326,12 @@ SC.ContainerView = SC.View.extend(
     newStatechart = SC.ContainerContentStatechart.create({
       container: this,
       content: newContent,
-      previousStatechart: currentStatechart,
-      shouldDestroy: this._createdContent
+      previousStatechart: currentStatechart
     });
     contentStatecharts.pushObject(newStatechart);
 
     // Track the current statechart.
     this._currentStatechart = newStatechart;
-
-    // Clean up!
-    this._createdContent = NO;
   }
 
 });
@@ -355,8 +355,6 @@ SC.ContainerContentStatechart = SC.Object.extend({
   content: null,
 
   previousStatechart: null,
-
-  shouldDestroy: false,
 
   state: 'none',
 
@@ -496,7 +494,6 @@ SC.ContainerContentStatechart = SC.Object.extend({
     var container = this.get('container'),
       content = this.get('content'),
       options = container.get('transitionOptions') || {},
-      shouldDestroy = this.get('shouldDestroy'),
       transition = container.get('transition');
 
     if (!!content) {
@@ -506,9 +503,10 @@ SC.ContainerContentStatechart = SC.Object.extend({
         }
       }
 
-      container.removeChild(content);
-      if (shouldDestroy) {
-        content.destroy();
+      if (content.createdByParent) {
+        container.removeChildAndDestroy(content);
+      } else {
+        container.removeChild(content);
       }
     }
 

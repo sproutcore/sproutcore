@@ -25,7 +25,7 @@ SC.AutoResizingMenuPane = SC.MenuPane.extend(
 
     This property must be set before instantiation; any changes after instantiation
     will not function properly.
-    
+
     @property
     @type {Boolean}
     @default YES
@@ -34,20 +34,20 @@ SC.AutoResizingMenuPane = SC.MenuPane.extend(
 
   /**
     The minimum width for this menu if it is to be automatically resized.
-    
+
     If no value is specified, it will be determined from the controlSize.
-    
-    @property {Number}
+
+    @type Number
     @default minimumMenuWidth from render delegate, or 0.
   */
   minimumMenuWidth: SC.propertyFromRenderDelegate('minimumMenuWidth', 0),
 
   /**
     The amount to add to any calculated width.
-    
+
     If no value is specified, it will be determined from the controlSize.
-    
-    @property {Number}
+
+    @type Number
     @default menuWidthPadding from render delegate, or 0
   */
   menuWidthPadding: SC.propertyFromRenderDelegate('menuWidthPadding', 0),
@@ -58,7 +58,7 @@ SC.AutoResizingMenuPane = SC.MenuPane.extend(
   */
   init: function() {
     sc_super();
-    
+
     this.set('exampleView', SC.AutoResizingMenuItemView);
 
     if (this.get('shouldAutoResize')) {

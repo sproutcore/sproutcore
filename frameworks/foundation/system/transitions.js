@@ -3,34 +3,25 @@
 // Copyright: @2013 7x7 Software, Inc.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-sc_require('views/container');
 
 
 // This adds transition engine constants to SC.ContainerView.
 SC.mixin(SC.ContainerView,
 /** @scope SC.ContainerView.prototype */ {
 
-  /**
+  /** @class
     Provides dissolve transitions to SC.ContainerView.  The new content will
     fade in as the old content fades out of the view.
 
     To modify the dissolve animation, you can set the following transition
     options:
 
-      - duration
-      - timing
+      - duration {Number} the number of seconds for the animation.  Default: 0.4
+      - timing {String} the animation timing function.  Default: 'ease'
 
-    Duration is 0.4 by default and may be any Number indication the number of
-    seconds for the animation.
-
-    Timing is 'ease' by default and may be any of:
-
-      'linear' - Specifies a transition effect with the same speed from start to end (equivalent to cubic-bezier(0,0,1,1))
-      'ease' -  Specifies a transition effect with a slow start, then fast, then end slowly (equivalent to cubic-bezier(0.25,0.1,0.25,1))
-      'ease-in' - Specifies a transition effect with a slow start (equivalent to cubic-bezier(0.42,0,1,1))
-      'ease-out' -  Specifies a transition effect with a slow end (equivalent to cubic-bezier(0,0,0.58,1))
-      'ease-in-out' - Specifies a transition effect with a slow start and end (equivalent to cubic-bezier(0.42,0,0.58,1))
-      'cubic-bezier(n,n,n,n)' - Define your own values in the cubic-bezier function. Possible values are numeric values from 0 to 1
+    @extends SC.TransitionProtocol
+    @see SC.View#animate for other timing functions.
+    @since Version 1.10
   */
   DISSOLVE: {
 
@@ -74,30 +65,20 @@ SC.mixin(SC.ContainerView,
 
   },
 
-  /**
+  /** @class
     Provides fade through color transitions to SC.ContainerView.  The old
     content will fade out to a color and the new content will then fade in.
 
     To modify the fade through color animation, you can set the following
     transition options:
 
-      - color
-      - duration
-      - timing
+      - color {String} any valid CSS Color.  Default: 'black'
+      - duration {Number} the number of seconds for the animation.  Default: 0.4
+      - timing {String} the animation timing function.  Default: 'ease'
 
-    Color is 'black' by default and may be any valid CSS color.
-
-    Duration is 0.8 by default and may be any Number indication the number of
-    seconds for the animation.
-
-    Timing is 'ease-in' by default and may be any of:
-
-      'linear' - Specifies a transition effect with the same speed from start to end (equivalent to cubic-bezier(0,0,1,1))
-      'ease' -  Specifies a transition effect with a slow start, then fast, then end slowly (equivalent to cubic-bezier(0.25,0.1,0.25,1))
-      'ease-in' - Specifies a transition effect with a slow start (equivalent to cubic-bezier(0.42,0,1,1))
-      'ease-out' -  Specifies a transition effect with a slow end (equivalent to cubic-bezier(0,0,0.58,1))
-      'ease-in-out' - Specifies a transition effect with a slow start and end (equivalent to cubic-bezier(0.42,0,0.58,1))
-      'cubic-bezier(n,n,n,n)' - Define your own values in the cubic-bezier function. Possible values are numeric values from 0 to 1
+    @extends SC.TransitionProtocol
+    @see SC.View#animate for other timing functions.
+    @since Version 1.10
   */
   FADE_COLOR: {
 
@@ -154,35 +135,24 @@ SC.mixin(SC.ContainerView,
   },
 
 
-  /**
+  /** @class
     Provides move in transitions to SC.ContainerView.  The new content will
     move in over top of the old content.
 
     To modify the move in animation, you can set the following transition
     options:
 
-      - direction
-      - duration
-      - timing
+      - direction {String} the direction to move new content in.  Default: 'left'.
+        ** 'left' - moves new content from the right to the left
+        ** 'right' - moves new content from the left to the right
+        ** 'up' - moves new content from the bottom to the top
+        ** 'down' - moves new content from the top to the bottom
+      - duration {Number} the number of seconds for the animation.  Default: 0.4
+      - timing {String} the animation timing function.  Default: 'ease'
 
-    Direction is 'left' by default, but may be any of:
-
-      'left' - moves new content from the right to the left
-      'right' - moves new content from the left to the right
-      'up' - moves new content from the bottom to the top
-      'down' - moves new content from the top to the bottom
-
-    Duration is 0.4 by default and may be any Number indication the number of
-    seconds for the animation.
-
-    Timing is 'ease' by default and may be any of:
-
-      'linear' - Specifies a transition effect with the same speed from start to end (equivalent to cubic-bezier(0,0,1,1))
-      'ease' -  Specifies a transition effect with a slow start, then fast, then end slowly (equivalent to cubic-bezier(0.25,0.1,0.25,1))
-      'ease-in' - Specifies a transition effect with a slow start (equivalent to cubic-bezier(0.42,0,1,1))
-      'ease-out' -  Specifies a transition effect with a slow end (equivalent to cubic-bezier(0,0,0.58,1))
-      'ease-in-out' - Specifies a transition effect with a slow start and end (equivalent to cubic-bezier(0.42,0,0.58,1))
-      'cubic-bezier(n,n,n,n)' - Define your own values in the cubic-bezier function. Possible values are numeric values from 0 to 1
+    @extends SC.TransitionProtocol
+    @see SC.View#animate for other timing functions.
+    @since Version 1.10
   */
   MOVE_IN: {
 
@@ -257,34 +227,23 @@ SC.mixin(SC.ContainerView,
     }
   },
 
-  /**
+  /** @class
     Provides push transitions to SC.ContainerView.  The new content will push
     the old content out of the view.
 
     To modify the push animation, you can set the following transition options:
 
-      - direction
-      - duration
-      - timing
+      - direction {String} the direction to push new content in.  Default: 'left'
+        ** 'left' - pushes new content from the right to the left
+        ** 'right' - pushes new content from the left to the right
+        ** 'up' - pushes new content from the bottom to the top
+        ** 'down' - pushes new content from the top to the bottom
+      - duration {Number} the number of seconds for the animation.  Default: 0.4
+      - timing {String} the animation timing function.  Default: 'ease'
 
-    Direction is 'left' by default, but may be any of:
-
-      'left' - pushes new content from the right to the left
-      'right' - pushes new content from the left to the right
-      'up' - pushes new content from the bottom to the top
-      'down' - pushes new content from the top to the bottom
-
-    Duration is 0.4 by default and may be any Number indication the number of
-    seconds for the animation.
-
-    Timing is 'ease' by default and may be any of:
-
-      'linear' - Specifies a transition effect with the same speed from start to end (equivalent to cubic-bezier(0,0,1,1))
-      'ease' -  Specifies a transition effect with a slow start, then fast, then end slowly (equivalent to cubic-bezier(0.25,0.1,0.25,1))
-      'ease-in' - Specifies a transition effect with a slow start (equivalent to cubic-bezier(0.42,0,1,1))
-      'ease-out' -  Specifies a transition effect with a slow end (equivalent to cubic-bezier(0,0,0.58,1))
-      'ease-in-out' - Specifies a transition effect with a slow start and end (equivalent to cubic-bezier(0.42,0,0.58,1))
-      'cubic-bezier(n,n,n,n)' - Define your own values in the cubic-bezier function. Possible values are numeric values from 0 to 1
+    @extends SC.TransitionProtocol
+    @see SC.View#animate for other timing functions.
+    @since Version 1.10
   */
   PUSH: {
 
@@ -438,35 +397,24 @@ SC.mixin(SC.ContainerView,
     }
   },
 
-  /**
+  /** @class
     Provides reveal transitions to SC.ContainerView.  The old content will
     move out revealing the new content underneath.
 
     To modify the reveal animation, you can set the following transition
     options:
 
-      - direction
-      - duration
-      - timing
+      - direction {String} The direction to move old content off.  Default: 'left'
+        ** 'left' - moves old content off to the left
+        ** 'right' - moves old content off to the right
+        ** 'up' - moves old content off to the top
+        ** 'down' - moves old content off to the bottom
+      - duration {Number} the number of seconds for the animation.  Default: 0.4
+      - timing {String} the animation timing function.  Default: 'ease'
 
-    Direction is 'left' by default, but may be any of:
-
-      'left' - moves old content off to the left
-      'right' - moves old content off to the right
-      'up' - moves old content off to the top
-      'down' - moves old content off to the bottom
-
-    Duration is 0.4 by default and may be any Number indication the number of
-    seconds for the animation.
-
-    Timing is 'ease' by default and may be any of:
-
-      'linear' - Specifies a transition effect with the same speed from start to end (equivalent to cubic-bezier(0,0,1,1))
-      'ease' -  Specifies a transition effect with a slow start, then fast, then end slowly (equivalent to cubic-bezier(0.25,0.1,0.25,1))
-      'ease-in' - Specifies a transition effect with a slow start (equivalent to cubic-bezier(0.42,0,1,1))
-      'ease-out' -  Specifies a transition effect with a slow end (equivalent to cubic-bezier(0,0,0.58,1))
-      'ease-in-out' - Specifies a transition effect with a slow start and end (equivalent to cubic-bezier(0.42,0,0.58,1))
-      'cubic-bezier(n,n,n,n)' - Define your own values in the cubic-bezier function. Possible values are numeric values from 0 to 1
+    @extends SC.TransitionProtocol
+    @see SC.View#animate for other timing functions.
+    @since Version 1.10
   */
   REVEAL: {
 
@@ -527,4 +475,5 @@ SC.mixin(SC.ContainerView,
     }
 
   }
+
 });

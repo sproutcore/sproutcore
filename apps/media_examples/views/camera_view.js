@@ -6,17 +6,16 @@
 /*globals MediaExamples */
 
 /**
- * @class
- * 
+ *
  * (Document Your View Here)
- * 
+ *
  * @extends SC.View
  */
 MediaExamples.CameraView = SC.View.extend(
 /** @scope MediaExamples.CameraView.prototype */
 {
   childViews: ['infoBox', 'labelView'],
-  
+
   infoBox: MediaExamples.CapabilitiesView.extend({
     layout: {
       right: 10,
@@ -25,7 +24,7 @@ MediaExamples.CameraView = SC.View.extend(
       width: 150
     }
   }),
-  
+
   labelView: SC.LabelView.extend({
     tagName: "h1",
     layout: {

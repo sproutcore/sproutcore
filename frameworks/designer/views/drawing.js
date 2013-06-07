@@ -1,4 +1,4 @@
-/** @class
+/**
   This View is used by Greenhouse when application is in design mode
   This is a Drawing View:
   If you want to draw a new shape you can pass in the information:

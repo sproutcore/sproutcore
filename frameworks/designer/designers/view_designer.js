@@ -76,7 +76,7 @@ SC.ViewDesigner = SC.Object.extend(
     Alternatively, you can override the `encodeChildViewsDesign()` and
     `encodeChildViewsLoc()` methods.
 
-    @property {Boolean}
+    @type Boolean
   */
   encodeChildViews: YES,
 

@@ -5,14 +5,14 @@
 // ==========================================================================
 
 
-/** @static
+/** @namespace
   This protocol defines the allowable transition plugin methods.
 
   SC.ContainerView uses transition plugins to setup, execute and cleanup the
   swapping between views and expects the given transition plugin object
   to implement the methods in this protocol.
 */
-SC.TransitionProtocol = {
+SC.SwapTransitionProtocol = {
 
   /**
     This optional method is called to set up the entrance transition.

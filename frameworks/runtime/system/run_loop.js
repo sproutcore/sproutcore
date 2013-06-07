@@ -147,6 +147,17 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
     @returns {SC.RunLoop} receiver
   */
   invokeOnce: function (target, method) {
+    //@if(debug)
+    // Calling invokeOnce outside of a run loop causes problems when coupled
+    // with time dependent methods invokeNext and invokeLater, because the
+    // time dependent methods execute at the start of the next run of the run
+    // loop and may fire before the invokeOnce code in this case.
+    var isRunLoopInProgress = this.get('isRunLoopInProgress');
+    if (!isRunLoopInProgress) {
+      SC.warn("Developer Warning: invokeOnce called outside of the run loop.  This can cause problems in production code if not addressed.  You likely need to wrap some event handling code within SC.run(...).");
+      console.trace();
+    }
+    //@endif
     // normalize
     if (method === undefined) {
       method = target;
@@ -208,6 +219,18 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
     @returns {SC.RunLoop} receiver
   */
   invokeLast: function (target, method) {
+    //@if(debug)
+    // Calling invokeLast outside of a run loop causes problems when coupled
+    // with time dependent methods invokeNext and invokeLater, because the
+    // time dependent methods execute at the start of the next run of the run
+    // loop and may fire before the invokeLast code in this case.
+    var isRunLoopInProgress = this.get('isRunLoopInProgress');
+    if (!isRunLoopInProgress) {
+      SC.warn("Developer Warning: invokeLast called outside of the run loop.  This can cause problems in production code if not addressed.  You likely need to wrap some event handling code within SC.run(...).");
+      console.trace();
+    }
+    //@endif
+
     // normalize
     if (method === undefined) {
       method = target;

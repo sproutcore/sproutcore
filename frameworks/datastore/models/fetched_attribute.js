@@ -32,7 +32,7 @@ SC.FetchedAttribute = SC.RecordAttribute.extend(
     Define the param key that will be passed to the `find` method on the
     store.  If `null`, the param will not be sent.  Defaults to `'link'`
 
-    @property {String}
+    @type String
   */
   paramValueKey: 'link',
 
@@ -40,7 +40,7 @@ SC.FetchedAttribute = SC.RecordAttribute.extend(
     Define the param key used to send the parent record.  If `null`, the param
     will not be sent.  Defaults to '`owner'`.
 
-    @property {String}
+    @type String
   */
   paramOwnerKey: 'owner',
 
@@ -48,7 +48,7 @@ SC.FetchedAttribute = SC.RecordAttribute.extend(
     Define the param key used to send the key name used to reference this
     attribute.  If `null`, the param will not be sent.  Defaults to `"rel"`
 
-    @property {String}
+    @type String
   */
   paramRelKey: 'rel',
 
@@ -56,14 +56,14 @@ SC.FetchedAttribute = SC.RecordAttribute.extend(
     Optional query key to pass to find.  Otherwise type class will be
     passed.
 
-    @property {String}
+    @type String
   */
   queryKey: null,
 
   /**
     Fetched attributes are not editable
 
-    @property {Boolean}
+    @type Boolean
   */
   isEditable: NO,
 

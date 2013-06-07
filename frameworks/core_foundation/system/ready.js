@@ -17,14 +17,14 @@ SC.mixin({
     Allows apps to avoid automatically attach the ready handlers if they
     want to by setting this flag to YES
 
-    @property {Boolean}
+    @type Boolean
   */
   suppressOnReady: SC.suppressOnReady ? YES : NO,
 
   /**
     Allows apps to avoid automatically invoking main() when onReady is called
 
-    @property {Boolean}
+    @type Boolean
   */
   suppressMain: SC.suppressMain ? YES : NO,
 

@@ -51,7 +51,7 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     The length of the sparse array.  The delegate for the array should set
     this length.
 
-    @property {Number}
+    @type Number
   */
   length: function() {
     var del = this.delegate ;
@@ -92,7 +92,7 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     If this value is set to larger than 1, then the sparse array will always
     fit a requested index into a range of this size and request it.
 
-    @property {Number}
+    @type Number
   */
   rangeWindowSize: 1,
 

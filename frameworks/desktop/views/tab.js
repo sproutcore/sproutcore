@@ -74,12 +74,6 @@ SC.TabView = SC.View.extend(
   items: [],
 
   /**
-    @type Boolean
-    @default YES
-  */
-  isEnabled: YES,
-
-  /**
     @type String
     @default null
   */

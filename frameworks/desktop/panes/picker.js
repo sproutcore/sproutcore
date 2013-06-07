@@ -384,7 +384,10 @@ SC.PickerPane = SC.PalettePane.extend(
     if (pointerOffset) this.set('pointerOffset',pointerOffset) ;
     this.endPropertyChanges();
     this.positionPane();
-    this._hideOverflow();
+
+    // Prevent body overflow (we don't want to overflow because of shadows).
+    SC.bodyOverflowArbitrator.requestHidden(this, true);
+
     return this.append();
   },
 
@@ -867,9 +870,12 @@ SC.PickerPane = SC.PalettePane.extend(
     if (this.repositionOnWindowResize) this.positionPane();
   },
 
-  remove: function(){
-    if(this.get('isVisibleInWindow') && this.get('isPaneAttached')) this._withdrawOverflowRequest();
+  remove: function() {
+    // Allow body overflow again.
+    SC.bodyOverflowArbitrator.withdrawRequest(this);
+
     this._removeScrollObservers();
+
     return sc_super();
   },
 
@@ -898,30 +904,6 @@ SC.PickerPane = SC.PalettePane.extend(
     }
   }.property('layer').cacheable(),
 
-
-
-  /** @private
-    Internal method to hide the overflow on the body to make sure we don't
-    show scrollbars when the picker has shadows, as it's really annoying.
-  */
-  _hideOverflow: function(){
-    var body = SC.$(document.body),
-        main = SC.$('.sc-main'),
-        minWidth = parseInt(main.css('minWidth'),0),
-        minHeight = parseInt(main.css('minHeight'),0),
-        windowSize = SC.RootResponder.responder.get('currentWindowSize');
-    if(windowSize.width>=minWidth && windowSize.height>=minHeight){
-      SC.bodyOverflowArbitrator.requestHidden(this);
-    }
-  },
-
-  /** @private
-    Internal method to show the overflow on the body to make sure we don't
-    show scrollbars when the picker has shadows, as it's really annoying.
-  */
-  _withdrawOverflowRequest: function(){
-    SC.bodyOverflowArbitrator.withdrawRequest(this);
-  },
 
   /** @private
     Detect if view is inside a scroll view. Do this by traversing parent view
