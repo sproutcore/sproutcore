@@ -228,6 +228,16 @@ SC.View.reopen(
     }
   },
 
+  applyAttributesToContext: function (original, context) {
+    original(context);
+
+    if (!this.get('isEnabled')) {
+      context.addClass('disabled');
+      context.setAttr('aria-disabled', 'true');
+    }
+
+  }.enhance(),
+
   /** @private */
   _gotoEnabledState: function () {
     this.set('enabledState', SC.CoreView.ENABLED);
