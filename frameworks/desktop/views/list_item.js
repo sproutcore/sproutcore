@@ -796,6 +796,12 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
       key = this.getDelegateProperty('contentRightIconKey', del);
       value = (key && content) ? (content.get ? content.get(key) : content[key]) : null;
 
+      if (value) {
+        this.renderRightIcon(working, value);
+        classArray.push('has-right-icon');
+      }
+    } else if (this.get('rightIcon')){
+      value = this.get('rightIcon');
       this.renderRightIcon(working, value);
       classArray.push('has-right-icon');
     }
