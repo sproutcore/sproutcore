@@ -800,7 +800,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
         this.renderRightIcon(working, value);
         classArray.push('has-right-icon');
       }
-    } else if (this.get('rightIcon')){
+    } else if (this.get('rightIcon')) {
       value = this.get('rightIcon');
       this.renderRightIcon(working, value);
       classArray.push('has-right-icon');
