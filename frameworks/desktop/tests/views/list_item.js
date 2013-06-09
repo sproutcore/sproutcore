@@ -15,6 +15,7 @@ var pane = SC.ControlTestPane.design({ height: 32 })
   .add("full", SC.ListItemView.design({
     content: SC.Object.create({
       icon: "sc-icon-folder-16",
+      rightIcon: "sc-icon-help-16",
       title: "List Item",
       checkbox: YES,
       count: 23,
@@ -22,11 +23,13 @@ var pane = SC.ControlTestPane.design({ height: 32 })
     }),
 
     hasContentIcon:  YES,
+    hasContentRightIcon:  YES,
     hasContentBranch: YES,
 
     contentValueKey: "title",
     contentCheckboxKey: 'checkbox',
     contentIconKey:  "icon",
+    contentRightIconKey:  "rightIcon",
     contentUnreadCountKey: 'count',
     contentIsBranchKey: 'branch',
 
@@ -37,6 +40,7 @@ var pane = SC.ControlTestPane.design({ height: 32 })
   .add("full - sel", SC.ListItemView.design({
     content: SC.Object.create({
       icon: "sc-icon-folder-16",
+      rightIcon: "sc-icon-help-16",
       title: "List Item",
       checkbox: YES,
       count: 23,
@@ -46,6 +50,7 @@ var pane = SC.ControlTestPane.design({ height: 32 })
     isSelected: YES,
 
     hasContentIcon:  YES,
+    hasContentRightIcon:  YES,
     hasContentBranch: YES,
 
     contentValueKey: "title",
@@ -56,6 +61,7 @@ var pane = SC.ControlTestPane.design({ height: 32 })
 
     contentCheckboxKey: 'checkbox',
     contentIconKey:  "icon",
+    contentRightIconKey:  "rightIcon",
     contentUnreadCountKey: 'count',
     contentIsBranchKey: 'branch',
 
@@ -106,6 +112,53 @@ var pane = SC.ControlTestPane.design({ height: 32 })
     }),
 
     icon: "sc-icon-info-16",
+
+    contentValueKey: "title"
+  }))
+
+  .add("rightIcon", SC.ListItemView.design({
+    content: SC.Object.create({
+      title: "List Item",
+      rightIcon: "sc-icon-help-16"
+    }),
+
+    contentValueKey: "title",
+
+    contentRightIconKey:  "rightIcon",
+    hasContentRightIcon:  YES
+
+  }))
+
+  .add("rightIcon - noRightIcon", SC.ListItemView.design({
+    content: SC.Object.create({
+      title: "List Item"
+    }),
+    contentValueKey: "title",
+    contentRightIconKey:  "rightIcon",
+    hasContentRightIcon:  YES
+  }))
+
+  .add("rightIcon - contentAndView", SC.ListItemView.design({
+    content: SC.Object.create({
+      title: "List Item",
+      rightIcon: "sc-icon-help-16"
+    }),
+
+    rightIcon: "sc-icon-favorite-16",
+
+    contentValueKey: "title",
+
+    contentRightIconKey:  "rightIcon",
+    hasContentRightIcon:  YES
+
+  }))
+
+  .add("rightIcon - view", SC.ListItemView.design({
+    content: SC.Object.create({
+      title: "List Item"
+    }),
+
+    rightIcon: "sc-icon-favorite-16",
 
     contentValueKey: "title"
   }))
@@ -199,6 +252,18 @@ function icon(view, spriteName) {
   }
 }
 
+function rightIcon(view, spriteName) {
+  var cq = view.$(), iconCQ = cq.find('img.right-icon');
+  if (spriteName === null) {
+    ok(!cq.hasClass('has-right-icon'), "should not have has-right-icon class");
+    equals(iconCQ.size(), 0, 'should not have image');
+  } else {
+    ok(cq.hasClass('has-right-icon'), "should have has-right-icon class");
+    equals(iconCQ.size(), 1, 'should have right-icon');
+    ok(iconCQ.hasClass(spriteName), 'icon should have class name %@'.fmt(spriteName));
+  }
+}
+
 function disclosure(view, state) {
   var cq = view.$(), disclosureCQ = cq.find('.sc-disclosure-view');
   if (state === null) {
@@ -259,6 +324,7 @@ test("basic", function() {
 
   basic(view, NO, NO);
   icon(view, null);
+  rightIcon(view, null);
   label(view, 'List Item');
   disclosure(view, null);
   checkbox(view, null);
@@ -270,6 +336,7 @@ test("full", function() {
   var view = pane.view('full');
   basic(view, NO, NO);
   icon(view, 'sc-icon-folder-16');
+  rightIcon(view, 'sc-icon-help-16');
   label(view, 'List Item');
   disclosure(view, YES);
   checkbox(view, YES);
@@ -281,6 +348,7 @@ test("full - sel", function() {
   var view = pane.view('full - sel');
   basic(view, YES, NO);
   icon(view, 'sc-icon-folder-16');
+  rightIcon(view, 'sc-icon-help-16');
   label(view, 'List Item');
   disclosure(view, YES);
   checkbox(view, YES);
@@ -306,6 +374,26 @@ test("icon defined in view and in content", function() {
 test("icon defined only in view", function() {
   var view = pane.view('icon - view');
   icon(view, 'sc-icon-info-16');
+});
+
+test("rightIcon", function() {
+  var view = pane.view('rightIcon');
+  rightIcon(view, 'sc-icon-help-16');
+});
+
+test("rightIcon defined but not in view or content", function() {
+  var view = pane.view('rightIcon - noRightIcon');
+  rightIcon(view, null);
+});
+
+test("rightIcon defined in view and in content", function() {
+  var view = pane.view('rightIcon - contentAndView');
+  rightIcon(view, 'sc-icon-help-16');
+});
+
+test("rightIcon defined only in view", function() {
+  var view = pane.view('rightIcon - view');
+  rightIcon(view, 'sc-icon-favorite-16');
 });
 
 test('disclosure', function() {
