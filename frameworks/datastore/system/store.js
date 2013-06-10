@@ -159,6 +159,35 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     return ret ;
   },
 
+  /**
+    Creates an autonomous nested store that is connected to the data source.
+    Use this kind of nested store to ensure that all records that are committed into main store are first of all committed on the server.
+
+    ns = store.chainAutonomousStore();
+    ... perform changes into the nested store
+    ns.commitRecords( ...,callback );
+    or...
+    newRecord.commitRecord( ..., callback );
+
+    into the callback method:
+      if transaction successful, commit the changes into the main store and destroy:
+        ns.commitChanges();
+        ns.destroy();
+
+      if not successful, handle the error, allow corrections if needed, etc.
+
+    @param {Hash} attrs optional attributes to set on new store
+    @param {Class} newStoreClass optional the class of the newly-created nested store (defaults to SC.NestedStore)
+    @returns {SC.NestedStore} new nested store chained to receiver
+  */
+  chainAutonomousStore: function(attrs, newStoreClass) {
+    var newAttrs = attrs ? SC.clone( attrs ) : {};
+    var source  = this._getDataSource();
+
+    newAttrs.dataSource = source;
+    return this.chain( newAttrs, newStoreClass );
+  },
+
   /** @private
 
     Called by a nested store just before it is destroyed so that the parent
