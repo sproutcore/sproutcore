@@ -1274,7 +1274,9 @@ SC.CoreView.reopen(
 
   /** @private Routes according to parent did show. */
   _parentDidShowInDocument: function () {
-    if (this.get('isVisible')) {
+    var state = this.get('viewState');
+
+    if (state === SC.CoreView.ATTACHED_HIDDEN_BY_PARENT) {
       // Route.
       this._gotoAttachedShownState();
 
