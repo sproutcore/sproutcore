@@ -89,7 +89,7 @@ SC.EMPTY_PLACEHOLDER = '@@EMPTY@@' ;
 
   You can also chain helper methods to build custom bindings like so:
 
-        valueBinding: SC.Binding.single("MyApp.someController.title").notEmpty("(EMPTY)")
+        valueBinding: SC.Binding.single("MyApp.someController.title").notEmpty(null,"(EMPTY)")
 
   This will force the value of MyApp.someController.title to be a single value
   and then check to see if the value is "empty" (null, undefined, empty array,
