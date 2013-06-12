@@ -928,18 +928,17 @@ SC.RenderContext = SC.Builder.create(
   _setOnHash: function (hash, key, value) {
     /*jshint eqnull:true*/
     var cur = hash[key],
-      didChange = NO;
+      didChange = true;
 
     if (cur == null && value != null) {
       hash[key] = value;
-      didChange = YES;
     } else if (cur != null && value == null) {
       // Unset using '' so that jQuery will remove the value, null is not reliable (ex. WebkitTransform)
       hash[key] = '';
-      didChange = YES;
     } else if (cur != value) {
       hash[key] = value;
-      didChange = YES;
+    } else {
+      didChange = false;
     }
 
     return didChange;
