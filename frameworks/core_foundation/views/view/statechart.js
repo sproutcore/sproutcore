@@ -1,4 +1,4 @@
-sc_require("views/view");
+sc_require("views/view/base");
 
 
 SC.CoreView.mixin(
@@ -244,6 +244,7 @@ SC.CoreView.reopen(
   // ------------------------------------------------------------------------
   // Actions (Locked down to the proper state)
   //
+
 
   /** @private Adopt this view action. */
   _doAdopt: function (parentView, beforeView) {
