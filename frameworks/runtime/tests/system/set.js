@@ -33,6 +33,16 @@ test("SC.Set.create() should create empty set", function() {
   equals(set.length, 0) ;
 });
 
+
+test("SC.Set.getEach() should work", function () {
+  var set = SC.Set.create([a,b,c]),
+    names = set.getEach('name');
+
+  ok(names.contains("a"), "Set.getEach array should contain 'a'");
+  ok(names.contains("b"), "Set.getEach array should contain 'b'");
+  ok(names.contains("c"), "Set.getEach array should contain 'c'");
+});
+
 test("SC.Set.create([1,2,3]) should create set with three items in them", function() {
   var set = SC.Set.create([a,b,c]) ;
   equals(set.length, 3) ;

@@ -46,7 +46,7 @@ sc_require('mixins/copyable');
   @since SproutCore 1.0
 */
 SC.IndexSet = SC.mixin({},
-  SC.Enumerable, SC.Observable, SC.Freezable, SC.Copyable,
+  SC.Observable, SC.Enumerable, SC.Freezable, SC.Copyable,
 /** @scope SC.IndexSet.prototype */ {
 
   /** @private

@@ -122,8 +122,8 @@ sc_require('mixins/copyable');
   @since SproutCore 1.0
 */
 SC.Set = SC.mixin({},
-  SC.Enumerable,
   SC.Observable,
+  SC.Enumerable,
   SC.Freezable,
 /** @scope SC.Set.prototype */ {
 
