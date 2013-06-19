@@ -2,7 +2,7 @@
 // Project:   TestRunner.targetsController
 // Copyright: ©2011 Apple Inc.
 // ==========================================================================
-/*globals TestRunner */
+/*global TestRunner */
 
 /**
 
@@ -15,27 +15,22 @@ TestRunner.targetsController = SC.ArrayController.create(
 /** @scope TestRunner.targetsController.prototype */ {
 
   /**
-    Call this method whenever you want to reload the targets from the server.
-  */
-  reload: function() {
-    var targets = TestRunner.store.find(CoreTools.TARGETS_QUERY);
-    this.set('content', targets);
-  },
-
-  /**
     Generates the root array of children objects whenever the target content
     changes.  Used in a tree node.
   */
-  sourceRoot: function() {
+  sourceRoot: function () {
 
     // break targets into their respective types.  Items that should not be
     // visible at the top level will not have a sort kind
     var kinds = {}, keys = [], kind, targets, ret;
 
-    this.forEach(function(target) {
-      if (kind = target.get('sortKind')) {
+    this.forEach(function (target) {
+      kind = target.get('sortKind');
+
+      if (kind) {
         targets = kinds[kind];
-        if (!targets) kinds[kind] = targets = [];
+        if (!targets) { kinds[kind] = targets = []; }
+
         targets.push(target);
         if (keys.indexOf(kind) < 0) keys.push(kind);
       }
@@ -52,7 +47,7 @@ TestRunner.targetsController = SC.ArrayController.create(
 
     // once divided into kinds, create group nodes for each kind
     ret = [];
-    keys.forEach(function(kind) {
+    keys.forEach(function (kind) {
       targets = kinds[kind];
 
       var defKey = "SourceList.%@.isExpanded".fmt(kind),
@@ -64,7 +59,7 @@ TestRunner.targetsController = SC.ArrayController.create(
         children: targets.sortProperty('kind', 'displayName'),
 
         isExpandedDefaultKey: defKey,
-        isExpandedDidChange: function() {
+        isExpandedDidChange: function () {
           TestRunner.userDefaults.set(this.get('isExpandedDefaultKey'), this.get('isExpanded'));
         }.observes('isExpanded')
       }));
@@ -77,10 +72,10 @@ TestRunner.targetsController = SC.ArrayController.create(
   /**
     Send event when targets load.
   */
-  statusDidChange: function() {
-    TestRunner.sendAction('targetsDidChange');
+  statusDidChange: function () {
+    if (this.get('status') === SC.Record.READY_CLEAN) {
+      TestRunner.statechart.resumeGotoState();
+    }
   }.observes('status')
 
-}) ;
-
-TestRunner.targetsController.addProbe('state');
+});

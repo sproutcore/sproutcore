@@ -45,4 +45,4 @@ CoreTools.Test = SC.Record.extend(
   */
   isRunnable: YES
 
-}) ;
+});

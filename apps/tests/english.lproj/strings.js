@@ -17,12 +17,14 @@ SC.stringsFor('English', {
   "Kind.module": "Modules",
   "Kind.theme": "Themes",
 
+  "_All": "All",
   "_Test Runner" : "Test Runner",
   "_No Targets" : "No Targets",
   "_No Tests" : "No Tests",
   "_Loading Targets" : "Loading Targets",
   "_No Target Selected" : "No Target Selected",
   "_Loading Tests" : "Loading Tests",
-  "_Window Title" : "Test Runner - %@",
+  "_Window Title" : "Test Runner – %@",
+  "_Window Test Title": "Test Runner – %@/%@",
   "_No Target" : "No Target"
 }) ;

@@ -2,7 +2,7 @@
 // Project:   TestRunner.sourceController
 // Copyright: ©2011 Apple Inc.
 // ==========================================================================
-/*globals TestRunner */
+/*global TestRunner */
 
 /**
 
@@ -15,15 +15,15 @@
 TestRunner.sourceController = SC.TreeController.create(
 /** @scope TestRunner.sourceController.prototype */ {
 
-  contentBinding: 'TestRunner.targetsController.sourceRoot',
+  contentBinding: SC.Binding.oneWay('TestRunner.targetsController.sourceRoot'),
   treeItemChildrenKey: "children",
   treeItemIsExpandedKey: "isExpanded",
-  treeItemIsGrouped: YES,
+  treeItemIsGrouped: true,
 
-  allowsMultipleSelection: NO,
-  allowsEmptySelection: NO,
+  allowsMultipleSelection: false,
+  allowsEmptySelection: true,
 
   // used to set the thickness of the sidebar.  bound here.
   sidebarThickness: 200  // set default thickness in pixels
 
-}) ;
+});

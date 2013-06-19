@@ -2,7 +2,7 @@
 // Project:   TestRunner.targetController
 // Copyright: ©2011 Apple Inc.
 // ==========================================================================
-/*globals TestRunner */
+/*global TestRunner */
 
 /**
 
@@ -15,12 +15,6 @@
 TestRunner.targetController = SC.ObjectController.create(
 /** @scope TestRunner.targetController.prototype */ {
 
-  contentBinding: 'TestRunner.sourceController.selection',
+  contentBinding: SC.Binding.oneWay('TestRunner.targetsController.selection').single()
 
-  nameDidChange: function() {
-    var name = this.get('name');
-    if (name) name = name.slice(1);
-    document.title = "_Window Title".loc(name || '_No Target'.loc());
-  }.observes('name')
-
-}) ;
+});
