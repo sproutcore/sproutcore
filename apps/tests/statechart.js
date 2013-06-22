@@ -12,7 +12,7 @@
 */
 TestRunner.statechart = SC.Object.create(SC.StatechartManager, {
 
-  trace: YES,
+  trace: false,
 
   rootState: SC.State.extend({
     initialSubstate: 'loadingTargets',
