@@ -21,11 +21,11 @@ test("isVisible changes should update views that are instantiated in a page", fu
           layout: { centerY: -10, height: 24, left: 0, right: 0 },
           value: "PrefPane"
         })
-      })  
+      })
     })
   }) ;
-  
-  
+
+
   var pp = page.get('inspector');
   pp.append();
   SC.RunLoop.begin().end();
@@ -37,6 +37,6 @@ test("isVisible changes should update views that are instantiated in a page", fu
   SC.RunLoop.begin().end();
   var res = pp.childViews[0].childViews[0].$().hasClass('sc-hidden');
   ok(res, "The view (isVisible) has been properly rerendered even though it was part of a page, the pane was detached and the visibility was changed while detached");
- 
-  pp.remove(); 
+
+  pp.remove();
 });

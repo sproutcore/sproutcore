@@ -340,10 +340,6 @@ SC.CoreView.reopen(
     case SC.CoreView.UNATTACHED:
       var node = this.get('layer');
 
-      // Update before showing (note that visibility update is NOT conditional for this view).
-      if (this._visibleStyleNeedsUpdate) {
-        this._doUpdateVisibleStyle();
-      }
       this._executeQueuedUpdates();
 
       // Attach to parentNode
@@ -476,10 +472,10 @@ SC.CoreView.reopen(
 
     switch (state) {
     case SC.CoreView.UNRENDERED: // FAST PATH!
-    case SC.CoreView.UNATTACHED: // FAST PATH!
     case SC.CoreView.ATTACHED_HIDDEN: // FAST PATH!
     case SC.CoreView.ATTACHED_HIDING: // FAST PATH!
       return false;
+    case SC.CoreView.UNATTACHED: // FAST PATH!
     case SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT: // FAST PATH!
     case SC.CoreView.ATTACHED_BUILDING_OUT: // FAST PATH!
       // Queue the visibility update for the next time we display.
@@ -1041,6 +1037,12 @@ SC.CoreView.reopen(
 
   /** @private */
   _executeQueuedUpdates: function () {
+
+    // Update visibility style if necessary.
+    if (this._visibleStyleNeedsUpdate) {
+      this._doUpdateVisibleStyle();
+    }
+
     // Update the content of the layer if necessary.
     if (this._contentNeedsUpdate) {
       // Use the action so that it checks for the proper state.
@@ -1093,6 +1095,8 @@ SC.CoreView.reopen(
 
   /** @private Routes according to parent did append. */
   _parentDidAppendToDocument: function () {
+    this._doUpdateVisibility();
+
     // Run any queued updates.
     this._executeQueuedUpdates();
 
@@ -1293,11 +1297,6 @@ SC.CoreView.reopen(
     var state = this.get('viewState');
 
     if (state === SC.CoreView.ATTACHED_HIDDEN_BY_PARENT) {
-      // Update before showing.
-      if (this._visibleStyleNeedsUpdate) {
-        this._doUpdateVisibleStyle();
-      }
-
       this._executeQueuedUpdates();
 
       // Notify.
