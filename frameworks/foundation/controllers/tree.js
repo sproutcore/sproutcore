@@ -69,17 +69,25 @@ SC.TreeController = SC.ObjectController.extend(SC.SelectionSupport,
 
     @type SC.Array
   */
-  arrangedObjects: function() {
-    var ret, content = this.get('content');
+  arrangedObjects: function () {
+    var content = this.get('content'),
+      ret;
+
     if (content) {
       ret = SC.TreeItemObserver.create({ item: content, delegate: this });
       ret.bind('allowsSelection', this, 'allowsSelection');
       ret.bind('allowsMultipleSelection', this, 'allowsMultipleSelection');
       ret.bind('allowsEmptySelection', this, 'allowsEmptySelection');
-    } else ret = null; // empty!
-    this._sctc_arrangedObjects = ret ;
 
-    return ret ;
+      ret.addObserver('[]', this, this._sctc_arrangedObjectsContentDidChange);
+    } else {
+      ret = null; // empty!
+    }
+
+    // Cache the current tree item observer, so we have it when it changes.
+    this._sctc_arrangedObjects = ret;
+
+    return ret;
   }.property().cacheable(),
 
   // ..........................................................
@@ -94,19 +102,23 @@ SC.TreeController = SC.ObjectController.extend(SC.SelectionSupport,
     immediately instead of waiting on some other component to get
     arrangedObjects again.
   */
-  _sctc_invalidateArrangedObjects: function() {
+  _sctc_invalidateArrangedObjects: function () {
     this.propertyWillChange('arrangedObjects');
 
+    // Clean up!  Destroy the previous tree item observer.
     var ret = this._sctc_arrangedObjects;
-    if (ret) ret.destroy();
+    if (ret) { ret.destroy(); }
     this._sctc_arrangedObjects = null;
 
     this.propertyDidChange('arrangedObjects');
+
+    // Fix up the selection with the new arrangedObjects.
+    this.updateSelectionAfterContentChange();
   }.observes('content', 'treeItemIsExpandedKey', 'treeItemChildrenKey', 'treeItemIsGrouped'),
 
-  _sctc_arrangedObjectsContentDidChange: function() {
+  _sctc_arrangedObjectsContentDidChange: function () {
     this.updateSelectionAfterContentChange();
-  }.observes('*arrangedObjects.[]'),
+  },
 
   canSelectGroups: NO,
 
@@ -117,19 +129,19 @@ SC.TreeController = SC.ObjectController.extend(SC.SelectionSupport,
     a brute force approach right now; we assume you probably don't have a lot
     of groups up front.
   */
-  firstSelectableObject: function() {
+  firstSelectableObject: function () {
     var objects = this.get('arrangedObjects'),
         indexes, len, idx     = 0;
 
     if (!objects) return null; // fast track
 
     // other fast track. if you want something fancier use collectionViewDelegate
-    if(this.get('canSelectGroups')) return objects.get('firstObject');
+    if (this.get('canSelectGroups')) return objects.get('firstObject');
 
     indexes = objects.contentGroupIndexes(null, objects);
     len = objects.get('length');
-    while(indexes.contains(idx) && (idx<len)) idx++;
-    return idx>=len ? null : objects.objectAt(idx);
+    while (indexes.contains(idx) && (idx < len)) idx++;
+    return idx >= len ? null : objects.objectAt(idx);
   }.property()
 
 });
