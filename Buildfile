@@ -87,23 +87,22 @@ config :ace,
 
 # CONFIGURE APPS
 config :core_tools, :required => [
-  :desktop, :datastore, "sproutcore/experimental/forms",
-  "sproutcore/ace",
-
-  # The SC apps will use the experimental version of these controls:
-  "sproutcore/experimental/select_view"
+  :desktop,
+  :datastore
 ]
 
 # mode :debug do
 #   config :core_tools, :combine_javascript => false
 # end
 
-%w(tests welcome).each do |app_target|
-  config app_target,
-    :required => [:desktop, :datastore, :core_tools],
-    :theme => :ace
+config :welcome,
+  :required => [:core_tools],
+  :theme => :ace
 
-  # mode :debug do
-  #   config app_target, :combine_javascript => false
-  # end
-end
+config :tests,
+  :required => [:statechart, :core_tools],
+  :theme => :ace
+
+# mode :debug do
+#   config app_target, :combine_javascript => false
+# end
