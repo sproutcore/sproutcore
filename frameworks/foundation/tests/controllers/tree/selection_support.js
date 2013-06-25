@@ -41,13 +41,13 @@ module("Test SC.SelectionSupport mixin with TreeController.", {
         displayName: 'Vegetables',
         treeItemChildren: vegetables
       });
-      
+
     content = SC.Object.create(SC.TreeItemContent, {
       treeItemIsGrouped: YES,
       treeItemIsExpanded: YES,
       treeItemChildren: [fruitGroup, vegetableGroup]
     });
-    
+
     controller = SC.TreeController.create({
       treeItemIsGrouped: NO,
       content: content
@@ -79,7 +79,7 @@ function() {
   // Reorder the content
   // content.treeItemChildren.sort(function(a,b) { return b > a; });
   // controller.set('orderBy', 'DESC title');
-  // 
+  //
   // equals(controller.get('firstSelectableObject'), content.treeItemChildren[4], 'first selectable object should be the first object in arrangedObjects (changed order)');
 });
 
@@ -339,28 +339,53 @@ function() {
   ok(indexSet === null, 'selection set should not have an indexSet');
 });
 
+/**
+  Test that selection is cleared if the content is nulled.
+
+  There was a bug that setting the content of a tree controller to null would
+  throw an exception.
+*/
+test("SC.TreeController(SC.SelectionSupport) selection cleared if content is removed.",
+function() {
+  var newObject1, newObject2, selectionSet, source, indexSet;
+
+  // Select 3 items
+  controller.selectObjects([content.treeItemChildren[0].treeItemChildren[1], content.treeItemChildren[0].treeItemChildren[2], content.treeItemChildren[1].treeItemChildren[0]], NO);
+
+  selectionSet = controller.get('selection');
+  equals(selectionSet.get('length'), 3, 'selection set should length 1');
+  ok(selectionSet.containsObject(content.treeItemChildren[1].treeItemChildren[0]), 'selection should contain the first content object of the second group');
+
+  // Clear out the content of the tree controller.
+  controller.set('content', null);
+
+  // Selection should be empty.
+  selectionSet = controller.get('selection');
+  equals(selectionSet.get('length'), 0, 'selection set should have length 0');
+});
+
 test("SC.TreeController(SC.SelectionSupport) selection settings should persist between controller and tree item observer",
 function() {
   var treeItemObserver = controller.get('arrangedObjects');
-  
+
   SC.RunLoop.begin();
   controller.set('allowsSelection', YES);
   controller.set('allowsMultipleSelection', YES);
   controller.set('allowsEmptySelection', YES);
   SC.RunLoop.end();
-  
+
   equals(treeItemObserver.get('allowsSelection'), YES, 'allowsSelection on the treeItemObserver should be YES');
   equals(treeItemObserver.get('allowsMultipleSelection'), YES, 'allowsMultipleSelection on the treeItemObserver should be YES');
   equals(treeItemObserver.get('allowsEmptySelection'), YES, 'allowsEmptySelection on the treeItemObserver should be YES');
-  
+
   SC.RunLoop.begin();
   controller.set('allowsSelection', NO);
   controller.set('allowsMultipleSelection', NO);
   controller.set('allowsEmptySelection', NO);
   SC.RunLoop.end();
-  
+
   equals(treeItemObserver.get('allowsSelection'), NO, 'allowsSelection on the treeItemObserver should be NO');
   equals(treeItemObserver.get('allowsMultipleSelection'), NO, 'allowsMultipleSelection on the treeItemObserver should be NO');
   equals(treeItemObserver.get('allowsEmptySelection'), NO, 'allowsEmptySelection on the treeItemObserver should be NO');
-  
+
 });
