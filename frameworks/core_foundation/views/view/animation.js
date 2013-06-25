@@ -111,7 +111,7 @@ SC.View.reopen(
     at least the duration property and optionally the timing and delay
     properties.  The options properties are as follows:
 
-    - duration: The duration of the transition in seconds.
+    - duration: The duration of the transition in seconds.  The default value is 0.25.
 
     - timing: The transition timing function.  This may be a predefined CSS timing
       function (e.g. 'linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out') or
@@ -125,7 +125,7 @@ SC.View.reopen(
       ** 'ease-in-out' - Specifies a transition effect with a slow start and end (equivalent to cubic-bezier(0.42,0,0.58,1))
       ** 'cubic-bezier(n,n,n,n)' - Define your own values in the cubic-bezier function. Possible values are numeric values from 0 to 1
 
-    - delay: The transition delay in seconds.
+    - delay: The transition delay in seconds.  The default value is 0.
 
     For example,
 
