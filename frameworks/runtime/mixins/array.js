@@ -808,7 +808,6 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
       chainObserver.root.tails.pushObject(observer.tail());
     }
 
-    observer.propertyDidChange();
 
     // Maintain a list of observers on the item so we can remove them
     // if it is removed from the enumerable.
@@ -842,7 +841,11 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     var kvoKey = SC.keyFor('_kvo_content_observers', key);
     this._kvo_for(kvoKey).push(chainObserver);
 
-    // set up chained observers on the initial content
+    // Add an observer on the '[]' property of this array.
+    var observer = chainObserver.tail();
+    this.addObserver('[]', observer, observer.propertyDidChange);
+
+    // Set up chained observers on the initial content
     this._setupContentObservers(0, chainObserver.object.get('length'));
   },
 
@@ -859,6 +862,10 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     var observers, kvoKey;
     var observedKeys = this._kvo_content_observed_keys;
     var key = chainObserver.next.property;
+
+    // Clean up the observer on the '[]' property of this array.
+    var observer = chainObserver.tail();
+    this.removeObserver('[]', observer, observer.propertyDidChange);
 
     if (observedKeys.contains(key)) {
 
