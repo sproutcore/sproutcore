@@ -29,19 +29,22 @@ SC._ChainObserver = function (property, root) {
   this.root = root || this;
 };
 
-// This is the primary entry point.  Configures the chain.
-SC._ChainObserver.createChain = function (rootObject, path, target, method, context) {
+/** @private
+  This is the primary entry point.  Configures the chain.
 
+  @param {String} path The property path for the chain.  Ex. 'propA.propB.propC.@each.propD'
+  */
+SC._ChainObserver.createChain = function (rootObject, path, target, method, context) {
   // First we create the chain.
-  var parts = path.split('.'),
-      root  = new SC._ChainObserver(parts[0]),
+  var parts = path.split('.'), // ex. ['propA', 'propB', '@each', 'propC']
+      root  = new SC._ChainObserver(parts[0]), // ex. _ChainObserver({ property: 'propA' })
       tail  = root;
 
-  for (var i = 1, l = parts.length; i < l; i++) {
+  for (var i = 1, len = parts.length; i < len; i++) {
     tail = tail.next = new SC._ChainObserver(parts[i], root);
   }
 
-  var tails = root.tails = [tail];
+  var tails = root.tails = [tail]; // ex. [_ChainObserver({ property: 'propC' })]
 
   // Now root has the first observer and tail has the last one.
   // Feed the rootObject into the front to setup the chain...
@@ -49,8 +52,7 @@ SC._ChainObserver.createChain = function (rootObject, path, target, method, cont
   root.objectDidChange(rootObject);
 
   tails.forEach(function (tail) {
-    // Finally, set the target/method on the tail so that future changes will
-    // trigger.
+    // Finally, set the target/method on the tail so that future changes will trigger.
     tail.target = target;
     tail.method = method;
     tail.context = context;
@@ -172,6 +174,7 @@ SC._ChainObserver.prototype = {
       if (this.property === '@each' && this.next && obj._removeContentObserver) {
         obj._removeContentObserver(this);
       }
+
       if (obj.removeObserver) {
         obj.removeObserver(this.property, this, this.propertyDidChange);
       }
