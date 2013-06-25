@@ -13,64 +13,64 @@ SC.Function = /** @scope SC.Function.prototype */{
   /**
     @see Function.prototype.property
   */
-  property: function(fn, keys) {
-    fn.dependentKeys = SC.$A(keys) ;
-    var guid = SC.guidFor(fn) ;
-    fn.cacheKey = "__cache__" + guid ;
-    fn.lastSetValueKey = "__lastValue__" + guid ;
-    fn.isProperty = true ;
-    return fn ;
+  property: function (fn, keys) {
+    fn.dependentKeys = SC.$A(keys);
+    var guid = SC.guidFor(fn);
+    fn.cacheKey = "__cache__" + guid;
+    fn.lastSetValueKey = "__lastValue__" + guid;
+    fn.isProperty = true;
+    return fn;
   },
 
   /**
     @see Function.prototype.cacheable
   */
-  cacheable: function(fn, aFlag) {
-    fn.isProperty = true ;  // also make a property just in case
-    if (!fn.dependentKeys) fn.dependentKeys = [] ;
-    fn.isCacheable = (aFlag === undefined) ? true : aFlag ;
-    return fn ;
+  cacheable: function (fn, aFlag) {
+    fn.isProperty = true;  // also make a property just in case
+    if (!fn.dependentKeys) fn.dependentKeys = [];
+    fn.isCacheable = (aFlag === undefined) ? true : aFlag;
+    return fn;
   },
 
   /**
     @see Function.prototype.idempotent
   */
-  idempotent: function(fn, aFlag) {
+  idempotent: function (fn, aFlag) {
     fn.isProperty = true;  // also make a property just in case
-    if (!fn.dependentKeys) this.dependentKeys = [] ;
-    fn.isVolatile = (aFlag === undefined) ? true : aFlag ;
-    return fn ;
+    if (!fn.dependentKeys) this.dependentKeys = [];
+    fn.isVolatile = (aFlag === undefined) ? true : aFlag;
+    return fn;
   },
 
   /**
     @see Function.prototype.enhance
   */
-  enhance: function(fn) {
+  enhance: function (fn) {
     fn.isEnhancement = true;
-    return fn ;
+    return fn;
   },
 
   /**
     @see Function.prototype.observes
   */
-  observes: function(fn, propertyPaths) {
+  observes: function (fn, propertyPaths) {
     // sort property paths into local paths (i.e just a property name) and
     // full paths (i.e. those with a . or * in them)
-    var loc = propertyPaths.length, local = null, paths = null ;
-    while(--loc >= 0) {
-      var path = propertyPaths[loc] ;
+    var loc = propertyPaths.length, local = null, paths = null;
+    while (--loc >= 0) {
+      var path = propertyPaths[loc];
       // local
-      if ((path.indexOf('.')<0) && (path.indexOf('*')<0)) {
-        if (!local) local = fn.localPropertyPaths = [] ;
+      if ((path.indexOf('.') < 0) && (path.indexOf('*') < 0)) {
+        if (!local) local = fn.localPropertyPaths = [];
         local.push(path);
 
       // regular
       } else {
-        if (!paths) paths = fn.propertyPaths = [] ;
-        paths.push(path) ;
+        if (!paths) paths = fn.propertyPaths = [];
+        paths.push(path);
       }
     }
-    return fn ;
+    return fn;
   }
 
 };
