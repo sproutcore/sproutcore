@@ -956,15 +956,15 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
       invalid.forEach(function (idx) {
         // Get the existing item view, if there is one.
         existing = itemViews[idx];
-          if (existing) {
+        if (existing) {
           // Exists so remove it (may send to pool).
-        this._removeItemView(existing, idx);
-      }
+          this._removeItemView(existing, idx);
+        }
 
         // Create it (may fetch from pool).
         if (nowShowing.contains(idx)) {
           this.itemViewForContentIndex(idx, YES);
-      }
+        }
       }, this);
 
     // if set is NOT defined, replace entire content with nowShowing
@@ -3049,7 +3049,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     //@if(debug)
     if (this.willReload || this.didReload) {
       // Deprecation warning for willReload and didReload.  These don't seem to serve any purpose.
-      SC.warn("Developer Warning: SC.CollectionView no longer calls willReload and didReload on its subclasses because it includes item view and layer pooling in itself by default.")
+      SC.warn("Developer Warning: SC.CollectionView no longer calls willReload and didReload on its subclasses because it includes item view and layer pooling in itself by default.");
     }
     //@endif
 
