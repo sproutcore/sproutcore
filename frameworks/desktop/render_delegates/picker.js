@@ -10,34 +10,47 @@ sc_require('render_delegates/panel');
 SC.BaseTheme.pickerRenderDelegate = SC.RenderDelegate.create({
   className: 'picker',
 
-  render: function(dataSource, context) {
+  render: function (dataSource, context) {
     var panelRenderDelegate = dataSource.get('theme').panelRenderDelegate;
 
     panelRenderDelegate.render(dataSource, context);
 
-    var preferType = dataSource.get('preferType');
-    var pointerPosition = dataSource.get('pointerPos');
-    var pointerPositionY = dataSource.get('pointerPosY');
+    var preferType = dataSource.get('preferType'),
+      pointerPosition = dataSource.get('pointerPos');
 
     if (preferType == SC.PICKER_POINTER || preferType == SC.PICKER_MENU_POINTER) {
-      context.push('<div class="sc-pointer ' + pointerPosition + '" style="margin-top: ' + pointerPositionY + 'px"></div>');
+      context.push('<div class="sc-pointer ' + pointerPosition + '"></div>');
       context.addClass(pointerPosition);
+
+      // Track the last pointerPosition used so that we can remove it when it changes.
+      dataSource.renderState._lastPointerPosition = pointerPosition;
     }
   },
 
-  update: function(dataSource, $) {
+  update: function (dataSource, $) {
     var panelRenderDelegate = dataSource.get('theme').panelRenderDelegate;
+
     panelRenderDelegate.update(dataSource, $);
 
-    var preferType = dataSource.get('preferType');
-    var pointerPosition = dataSource.get('pointerPos');
-    var pointerPositionY = dataSource.get('pointerPosY');
+    var preferType = dataSource.get('preferType'),
+      pointerPosition = dataSource.get('pointerPos');
 
     if (preferType == SC.PICKER_POINTER || preferType == SC.PICKER_MENU_POINTER) {
-      var el = $.find('.sc-pointer');
-      el.attr('class', "sc-pointer "+pointerPosition);
-      el.attr('style', "margin-top: "+pointerPositionY+"px");
-      $.addClass(pointerPosition);
+      var lastPointerPosition = dataSource.renderState._lastPointerPosition;
+
+      if (lastPointerPosition !== pointerPosition) {
+        var el = $.find('.sc-pointer');
+
+        // Totally overwrite the pointer class.
+        el.attr('class', "sc-pointer " + pointerPosition);
+
+        // Update the view layer class
+        $.removeClass(lastPointerPosition);
+        $.addClass(pointerPosition);
+
+        // Track the last pointerPosition used so that we can remove it when it changes.
+        dataSource.renderState._lastPointerPosition = pointerPosition;
+      }
     }
 
   }
