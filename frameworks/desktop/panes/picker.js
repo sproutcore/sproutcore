@@ -337,7 +337,7 @@ SC.PickerPane = SC.PalettePane.extend(
   */
   extraRightOffset: function () {
     //@if (debug)
-    SC.warn('SC.PickerPane#extraRightOffset is deprecated, please use the windowPadding property.');
+    SC.warn('SC.PickerPane#extraRightOffset is deprecated.  The pointer will position itself automatically.');
     //@endif
 
     return this.get('windowPadding');
