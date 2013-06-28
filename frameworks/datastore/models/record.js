@@ -449,8 +449,8 @@ SC.Record = SC.Object.extend(
 
       // If the key is the primaryKey of the record, we need to tell the store
       // about the change.
-      if (key===this.get('primaryKey')) {
-        SC.Store.replaceIdFor(storeKey, value) ;
+      if (key === this.get('primaryKey')) {
+        SC.Store.replaceIdFor(storeKey, value);
         this.propertyDidChange('id'); // Reset computed value
       }
 

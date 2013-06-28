@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-(function() {
+(function () {
   var oldExtend = SC.Record.extend;
 
   SC.mixin(SC.Record,
@@ -47,7 +47,7 @@
 
       @see SC.Record.storeKeyFor
     */
-    storeKeyFor: function(id) {
+    storeKeyFor: function (id) {
       var storeKeys = this.storeKeysById(),
           ret = storeKeys[id],
           superclass = this.superclass;
@@ -72,14 +72,14 @@
         storeKeys[id] = ret;
       }
 
-      return ret ;
+      return ret;
     },
 
     // ..........................................................
     // Internal Support
     //
 
-    extend: function() {
+    extend: function () {
       var ret = oldExtend.apply(this, arguments);
 
       if (ret.prototype.hasOwnProperty('isPolymorphic')) {
