@@ -6,9 +6,9 @@
 /*globals module ok equals same test MyApp */
 
 (function() {
-  
+
   var store, Person, Male, Female, colin, maggie;
-  
+
   module("Polymorphic SC.Record - Simple", {
     setup: function() {
       SC.RunLoop.begin();
@@ -34,6 +34,7 @@
         guid: '2'
       });
     },
+
     teardown: function() {
       store = Person = Male = Female = colin = maggie = null;
       SC.RunLoop.end();
@@ -73,4 +74,17 @@
     }
   });
 
+  test("Changing the 'id' updates the storeKeys for all types of the same record", function () {
+    var person1 = store.find(Person, '1'),
+      person2 = store.find(Person, '2');
+
+    equals(person1, colin, "find on Person record type with guid 1 should return male record");
+    colin.set('id', 'x');
+    person1 = store.find(Person, '1');
+
+    ok(person1 !== colin, "find on Person record type with guid 1 should not work anymore");
+
+    person1 = store.find(Person, 'x');
+    equals(person1, colin, "find on Person record type with guid x should return male record");
+  });
 })();
