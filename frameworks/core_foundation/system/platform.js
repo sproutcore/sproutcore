@@ -63,9 +63,17 @@ SC.platform = SC.Object.create({
     You can simulate touch events in environments that don't support them by
     calling SC.platform.simulateTouchEvents() from your browser's console.
 
+    Note! The support for "touch" is a browser property and can't be relied on
+    to determine if the device is actually a "touch" device or if the device
+    actually uses touch events.  There are instances where "touch" devices will
+    not send touch events or will send touch and mouse events together and
+    there are instances where "non-touch" devices will support touch events.
+
+    It is recommended that you do not use this property at this time.
+
     @type Boolean
   */
-  touch: !SC.none(window.ontouchstart) || SC.browser.name === SC.BROWSER.android,
+  touch: !SC.none(window.ontouchstart) || SC.browser.name === SC.BROWSER.android || 'ontouchstart' in document.documentElement,
 
   /**
     YES if the current browser supports bounce on scroll.
