@@ -144,19 +144,19 @@ SC.View.reopen(
     this.beginPropertyChanges();
 
     // If rendered, destroy our layer so we can re-render.
-    if (this.get('_isRendered')) {
-      var layer = this.get('layer');
+    // if (this.get('_isRendered')) {
+    //   var layer = this.get('layer');
 
-      // If attached, detach and track our parent node so we can re-attach.
-      if (this.get('isAttached')) {
-        // We don't allow for transitioning out at this time.
-        // TODO: support transition out of child views.
-        this._doDetach(true);
-      }
+    //   // If attached, detach and track our parent node so we can re-attach.
+    //   if (this.get('isAttached')) {
+    //     // We don't allow for transitioning out at this time.
+    //     // TODO: support transition out of child views.
+    //     this._doDetach(true);
+    //   }
 
-      // Destroy our layer in one move.
-      this.destroyLayer();
-    }
+    //   // Destroy our layer in one move.
+    //   this.destroyLayer();
+    // }
 
     // Remove the current child views.
     // We aren't rendered at this point so it bypasses the optimization in
@@ -170,10 +170,10 @@ SC.View.reopen(
     }
 
     // We were rendered previously.
-    if (layer) {
-      // Recreate our layer (now empty).
-      this.createLayer();
-    }
+    // if (layer) {
+    //   // Recreate our layer (now empty).
+    //   this.createLayer();
+    // }
     this.endPropertyChanges();
 
     return this;
