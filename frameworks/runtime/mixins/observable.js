@@ -895,10 +895,18 @@ SC.Observable = /** @scope SC.Observable.prototype */{
         key = keys[loc];
         observer = this[key];
         propertyPaths = observer.propertyPaths;
+        // console.log(' - initObservable: key: ' + key + ', propertyPaths: ' + propertyPaths);
         propertyPathsLength = (propertyPaths) ? propertyPaths.length : 0;
         for (ploc = 0 ; ploc < propertyPathsLength; ploc++) {
           path = propertyPaths[ploc];
           this.addObservesHandler(observer, path);
+
+          console.log('   found observed path: ' + path + ', base[path]: ' + this.constructor.prototype.getPath(path) + ', this[path]: ' + this.getPath(path));
+          // if (this.constructor.prototype.getPath(path) !== this.getPath(path)) {
+          //   var changes = this._kvo_changes;
+          //   if (!changes) changes = this._kvo_changes = SC.CoreSet.create();
+          //   changes.add(path);
+          // }
         }
       }
     }
@@ -938,6 +946,26 @@ SC.Observable = /** @scope SC.Observable.prototype */{
     // Clean up these properties once they have been used.
     delete this._bindings;
     delete this._properties;
+
+    if (this._kvo_observed_keys) {
+      this._kvo_observed_keys.forEach(function (key) {
+        // if (this.constructor.isObservable) {
+          console.log('   found observed key: ' + key + ', base[key]: ' + this.constructor.prototype[key] + ', this[key]: ' + this[key]);
+          if ( this.constructor.prototype[key] !== this[key]) {
+            var changes = this._kvo_changes;
+            if (!changes) changes = this._kvo_changes = SC.CoreSet.create();
+            changes.add(key);
+          }
+        // }
+      }, this);
+      //   // this.propertyDidChange(key);
+      //   var changes = this._kvo_changes;
+      //   if (!changes) changes = this._kvo_changes = SC.CoreSet.create();
+      //   changes.add(key);
+      // }
+
+      this._notifyPropertyObservers();
+    }
 
     return this;
   },

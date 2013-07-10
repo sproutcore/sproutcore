@@ -18,6 +18,7 @@ var object, ObjectC, ObjectD, objectA, objectB ;
 module("object.get()", {
 
   setup: function() {
+
     object = SC.Object.create({
 
       normal: 'value',
@@ -274,6 +275,7 @@ test("should call unknownProperty with value when property is undefined", functi
 
 module("Computed properties", {
   setup: function() {
+
     object = SC.Object.create({
 
       // REGULAR
@@ -589,7 +591,12 @@ module("Observable objects & object properties ", {
   setup: function() {
     window.NormalArray = [1,2,3,4,5];
 
-    object = SC.Object.create({
+    var Klass = SC.Object.extend({
+      normal: null,
+      normalArray: null
+    });
+
+    object = Klass.create({
 
       normal: 'value',
       abnormal: 'zeroValue',
@@ -623,7 +630,7 @@ module("Observable objects & object properties ", {
       }.observes('normal'),
 
       testArrayObserver:function(){
-        this.abnormal = 'notifiedObserver';
+        this.abnormal = 'notifiedStarObserver';
       }.observes('*normalArray.[]'),
 
       testArrayObserver2:function(){
@@ -638,9 +645,14 @@ module("Observable objects & object properties ", {
   },
 
   teardown: function() {
-    window.NormalArray = null;
+    object.destroy();
+    window.NormalArray = Klass = object = null;
   }
 
+});
+
+test('observers run on initialization because the dependent property/property path changed', function () {
+  equals(object.get('abnormal'), 'removedObserver', "The observer should have run on initialization");
 });
 
 test('incrementProperty and decrementProperty',function(){
@@ -663,14 +675,14 @@ test('toggle function, should be boolean',function(){
   equals(object.toggleProperty('toggleVal',undefined,undefined),object.get('toggleVal'));
 });
 
-test('should not notify the observers of a property automatically',function(){
-  object.set('normal', 'doNotNotifyObserver');
-  equals(object.abnormal,'zeroValue')  ;
-});
+// test('should not notify the observers of a property automatically',function(){
+//   object.set('normal', 'doNotNotifyObserver');
+//   equals(object.abnormal,'zeroValue')  ;
+// });
 
 test('should notify array observer when object\'s array changes',function(){
   object.normalArray.replace(0,0,6);
-  equals(object.abnormal, 'notifiedObserver', 'testArrayObserver should be notified');
+  equals(object.abnormal, 'notifiedStarObserver', 'testArrayObserver should be notified');
   equals(object.abnormal2, 'notifiedObserver', 'testArrayObserver2 should be notified');
   equals(object.abnormal3, 'zeroValue', 'testArrayObserver3 should not be notified');
 });
