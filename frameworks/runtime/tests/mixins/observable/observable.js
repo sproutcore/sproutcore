@@ -1027,7 +1027,7 @@ test("destroying an observable should remove binding objects and clear observer 
     targetGuid1, targetGuid2;
 
   targetGuid1 = SC.guidFor(object);
-  targetGuid2 = SC.guidFor(object.myValue1Binding);
+  targetGuid2 = SC.guidFor(object.bindings[0]);
   observerSet1 = TestNS._kvo_observers_value1;
   observerSet2 = TestNS._kvo_observers_value2;
   equals(observerSet1.members.length, 1, "The length of the members array on TestNS._kvo_observers_value1 should be");
