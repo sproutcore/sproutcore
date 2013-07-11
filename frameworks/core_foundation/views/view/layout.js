@@ -67,6 +67,19 @@ SC.View.reopen(
     original();
 
     this._previousLayout = this.get('layout');
+
+    // Apply the automatic child view layout if it is defined.
+    var childViewLayout = this.childViewLayout;
+    if (childViewLayout) {
+      childViewLayout.adjustChildViews(this);
+
+      // Observer the child views if the layout is live.
+      if (this.get('isChildViewLayoutLive')) {
+        this.addObserver('childViewLayoutOptions', this, this.layoutDidChange);
+        childViewLayout.beginObservingChildViews(this);
+      }
+    }
+
   }.enhance(),
 
   /** @private */
@@ -891,6 +904,8 @@ SC.View.reopen(
   */
   layoutDidChangeFor: function (childView) {
     var set = this._needLayoutViews;
+
+    // Track this view.
     if (!set) set = this._needLayoutViews = SC.CoreSet.create();
     set.add(childView);
   },
@@ -905,8 +920,11 @@ SC.View.reopen(
   */
   layoutChildViewsIfNeeded: function (force) {
     if (this.get('childViewsNeedLayout')) {
-      this.set('childViewsNeedLayout', NO);
       this.layoutChildViews(force);
+
+      // Set this to false after the layout completes.
+      console.log('%@ - reset childViewsNeedLayout to NO'.fmt(this));
+      this.set('childViewsNeedLayout', NO);
     }
 
     return this;
@@ -925,9 +943,22 @@ SC.View.reopen(
     @returns {void}
   */
   layoutChildViews: function (force) {
-    var set = this._needLayoutViews,
+    var childViewLayout = this.childViewLayout,
+      set = this._needLayoutViews,
       len = set ? set.length : 0,
       i;
+
+    // If using a childViewLayout plugin, when one child layout changes, all
+    // other child layouts must be adjusted, but only if the childView
+    // participates in automatic layout.
+    // if (childView.get('useAbsoluteLayout') || childView.get('useStaticLayout') || !childView.get('isVisible') || !childViewLayout) {
+    if (childViewLayout) {
+      // Adjust all other child views right now.
+      // Note: this will add the affected child views to the set so they will be updated only once in this run loop
+      // set.addEach(
+      childViewLayout.adjustChildViews(this);
+      // );
+    }
 
     for (i = 0; i < len; ++i) {
       set[i].updateLayout(force);
@@ -981,6 +1012,100 @@ SC.View.reopen(
       context.setStyle('backgroundColor', backgroundColor);
     }
   }.enhance(),
+
+  // ------------------------------------------------------------------------
+  // Child View Layouts
+  //
+
+  /**
+    The child view layout plugin to use when laying out child views.
+
+    You can set this property to a child layout plugin object to
+    automatically set and adjust the layouts of this view's child views
+    according to some specific layout style.  For instance, SproutCore includes
+    two such plugins, SC.View.VERTICAL_STACK and SC.View.HORIZONTAL_STACK.
+
+    SC.View.VERTICAL_STACK will arrange child views in order in a vertical
+    stack, which only requires that the height of each child view be specified.
+    Likewise, SC.View.HORIZONTAL_STACK does the same in the horizontal
+    direction, which requires that the width of each child view be specified.
+
+    Where child layout plugins are extremely useful, besides simplifying
+    the amount of layout code you need to write, is that they can update the
+    layouts automatically as things change.  For more details and examples,
+    please see the documentation for SC.View.VERTICAL_STACK and
+    SC.View.HORIZONTAL_STACK.
+
+    To define your own child view layout plugin, simply create an object that
+    conforms to the SC.ChildViewLayoutProtocol protocol.
+
+    **Note** This should only be set once and is not bindable.
+
+    @type Object
+    @default null
+   */
+  childViewLayout: null,
+
+  /**
+    The options for the given child view layout plugin.
+
+    These options are specific to the current child layout plugin being used and
+    are used to modify the applied layouts.  For example, SC.View.VERTICAL_STACK
+    accepts options like:
+
+        childViewLayoutOptions: {
+          paddingAfter: 20,
+          paddingBefore: 20,
+          spacing: 10
+        }
+
+    To determine what options may be used for a given plugin and to see what the
+    default options are, please refer to the documentation for the child layout
+    plugin being used.
+
+    @type Object
+    @default null
+  */
+  childViewLayoutOptions: null,
+
+  /**
+    Whether the child views should be monitored for changes that affect the
+    current child view layout.
+
+    When true and using a childViewLayout plugin, the child views will be
+    observed for changes that would effect the layout of all the child views.
+    For example, when using SC.View.VERTICAL_STACK, if any child view's height
+    or visibility changes, the view will adjust the other child views
+    accordingly.
+
+    @type Boolean
+    @default true
+  */
+  isChildViewLayoutLive: true,
+
+  /**
+    Called by observers on child views when a property of the child view
+    changes in such a manner that requires the child view layout to be
+    reapplied.
+
+    @returns {void}
+  */
+  // childViewLayoutNeedsUpdate: function () {
+  //   // Invoke once so if multiple children invalidate in a single run loop,
+  //   // we still only recalculate once.
+  //   this.invokeOnce(this._adjustChildViewLayout);
+  // },
+
+  /** @private */
+  // _adjustChildViewLayout: function () {
+  //   var childViewLayout = this.childViewLayout;
+
+  //   childViewLayout.adjustChildViews(this);
+  // },
+
+  // ------------------------------------------------------------------------
+  // Statechart
+  //
 
   /** @private Update this view's layout action. */
   _doUpdateLayout: function (force) {
@@ -1099,7 +1224,58 @@ SC.View.reopen(
   _updatedLayout: function () {
     // Notify.
     this.didRenderAnimations();
-  }
+  },
+
+  // ------------------------------------------------------------------------
+  // Transitions
+  //
+
+  /**
+    The transition plugin to use when this view is moved by adjusting its left
+    and/or top layout.
+
+    SC.CoreView uses a pluggable transition architecture where the transition
+    setup, execution and cleanup can be handled by a specified plugin.
+
+    There are a number of pre-built transition plugins for moving available in
+    the foundation framework:
+
+      SC.View.SLIDE
+      SC.View.BOUNCE
+      SC.View.SPRING
+
+    You can even provide your own custom transition plugins.  Just create a
+    transition object that conforms to the SC.TransitionProtocol protocol.
+
+    @type Object (SC.TransitionProtocol)
+    @default null
+    @since Version 1.10
+  */
+  transitionMove: null,
+
+  /**
+    The options for the given transitionMove plugin.
+
+    These options are specific to the current transition plugin used and are
+    used to modify the transition animation.  To determine what options
+    may be used for a given plugin and to see what the default options are,
+    see the documentation for the transition plugin being used.
+
+    Most transitions will accept a duration and timing option, but may
+    also use other options.  For example, SC.View.SLIDE accepts options
+    like:
+
+        transitionShowOptions: {
+          direction: 'left',
+          duration: 0.25,
+          timing: 'ease-in-out'
+        }
+
+    @type Object
+    @default null
+    @since Version 1.10
+  */
+  transitionMoveOptions: null
 
 });
 
