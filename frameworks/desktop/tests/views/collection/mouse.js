@@ -9,13 +9,13 @@ var view, content, contentController, pane, actionCalled = 0;
 
 module("SC.CollectionView Mouse Events", {
   setup: function() {
-    
+
     SC.RunLoop.begin();
-    
+
     content = "1 2 3 4 5 6 7 8 9 10".w().map(function(x) {
       return SC.Object.create({ value: x });
     });
-    
+
     contentController = SC.ArrayController.create({
       content: content,
       allowsMultipleSelection: YES
@@ -25,40 +25,38 @@ module("SC.CollectionView Mouse Events", {
       content: contentController,
 
       layout: { top: 0, left: 0, width: 300, height: 500 },
-      
+
       layoutForContentIndex: function(idx) {
         return { left: 0, right: 0, top: idx * 50, height: 50 };
       },
-      
+
       isVisibleInWindow: YES,
       acceptsFirstResponder: YES,
       action: function() {
         actionCalled++;
       }
     });
-    
+
     pane = SC.MainPane.create();
     pane.appendChild(view);
     pane.append();
 
     SC.RunLoop.end();
   },
-  
+
   teardown: function() {
-    SC.RunLoop.begin();
-    pane.remove();
+    pane.destroy();
     actionCalled = 0;
-    SC.RunLoop.end();
   }
 });
 
-/* 
+/*
   Simulates clicking on the specified index.  If you pass verify as YES or NO
   also verifies that the item view is subsequently selected or not.
-  
+
   @param {SC.CollectionView} view the view
   @param {Number} index the index to click on
-  @param {Boolean} shiftKey simulate shift key pressed 
+  @param {Boolean} shiftKey simulate shift key pressed
   @param {Boolean} ctrlKey simulate ctrlKey pressed
   @param {SC.SelectionSet} expected expected selection
   @param {Number} delay delay before running the test (optional)
@@ -66,39 +64,39 @@ module("SC.CollectionView Mouse Events", {
 */
 function clickOn(view, index, shiftKey, ctrlKey, expected, delay) {
   var itemView = view.itemViewForContentIndex(index),
-      layer    = itemView.get('layer'), 
-      opts     = { shiftKey: shiftKey, ctrlKey: ctrlKey }, 
+      layer    = itemView.get('layer'),
+      opts     = { shiftKey: shiftKey, ctrlKey: ctrlKey },
       sel, ev, modifiers;
-      
+
   ok(layer, 'precond - itemView[%@] should have layer'.fmt(index));
-  
+
   ev = SC.Event.simulateEvent(layer, 'mousedown', opts);
   SC.Event.trigger(layer, 'mousedown', [ev]);
 
   ev = SC.Event.simulateEvent(layer, 'mouseup', opts);
   SC.Event.trigger(layer, 'mouseup', [ev]);
-  
+
   if (expected !== undefined) {
     var f = function() {
       SC.RunLoop.begin();
       sel = view.get('selection');
-      
+
       modifiers = [];
       if (shiftKey) modifiers.push('shift');
       if (ctrlKey) modifiers.push('ctrl');
       modifiers = modifiers.length > 0 ? modifiers.join('+') : 'no modifiers';
-      
+
       ok(expected ? expected.isEqual(sel) : expected === sel, 'should have selection: %@ after click with %@ on item[%@], actual: %@'.fmt(expected, modifiers, index, sel));
       SC.RunLoop.end();
       if (delay) window.start() ; // starts the test runner
     };
-    
+
     if (delay) {
       stop() ; // stops the test runner
       setTimeout(f, delay) ;
     } else f() ;
   }
-  
+
   layer = itemView = null ;
 }
 
@@ -131,7 +129,7 @@ function selectionFromIndexSet(indexSet) {
 
 // ..........................................................
 // basic click
-// 
+//
 
 test("clicking on an item should select it", function() {
   clickOn(view, 3, NO, NO, selectionFromIndex(3));
@@ -168,7 +166,7 @@ test("clicking on a collection view with null content should not throw an error"
 
 // ..........................................................
 // ctrl-click mouse down
-// 
+//
 
 test("ctrl-clicking on unselected item should add to selection", function() {
   clickOn(view,3, NO, YES, selectionFromIndex(3));
@@ -184,7 +182,7 @@ test("ctrl-clicking on selected item should remove from selection", function() {
 
 // ..........................................................
 // shift-click mouse down
-// 
+//
 
 test("shift-clicking on an item below should extend the selection", function() {
   clickOn(view, 3, NO, NO, selectionFromIndex(3));
@@ -270,6 +268,8 @@ test("click on an item when isSelectable is false doesn't do anything", function
 });
 
 test("click on an item when isEnabled is false doesn't do anything", function() {
-  view.set('isEnabled', NO);
+  SC.run(function () {
+    view.set('isEnabled', NO);
+  });
   clickOn(view, 1, NO, NO, null);
 });

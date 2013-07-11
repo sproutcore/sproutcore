@@ -1,54 +1,27 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
-// Copyright: ©2006-2011 Strobe Inc. and contributors.
+// Copyright: ©2006-2010 Sprout Systems, Inc. and contributors.
 //            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
 /**
   @class
+  @deprecated Use a normal view and mix-in SC.SplitThumb.
 
-  A ThumbView works in concert with SC.SplitView to adjust the divider
-  position from an arbitrary subview of the SplitView. Simply make an
-  instance of ThumbView a child somewhere in the childViews (or
-  descendants) of the split view and add the path to the ThumbView to the
-  SplitView's thumbViews array.
-
-  SplitView will automatically set the splitView property of the views in
-  its thumbViews array.
+  Kept to allow a modicum of backwards-compatibility. Please use
+  a normal view and mix in SC.SplitThumb instead.
 
   @extends SC.View
-  @author Erich Ocean
+  @author Alex Iskander
   @test in split
 */
-SC.ThumbView = SC.View.extend(
+SC.ThumbView = SC.View.extend(SC.SplitThumb,
 /** @scope SC.ThumbView.prototype */ {
-
-  /**
-    @type Array
-    @default ['sc-thumb-view']
-    @see SC.View#classNames
-  */
   classNames: ['sc-thumb-view'],
-
-  /** @private */
-  render: function(context, firstTime) {
-    var splitView = this.get('splitView') ;
-    if (splitView) this.set('cursor', splitView.get('thumbViewCursor')) ;
-    return sc_super() ;
-  },
-
-  /** @private */
-  mouseDown: function(evt) {
-    if (!this.get('isEnabledInPane')) return NO ;
-
-    var splitView = this.get('splitView');
-    return (splitView) ? splitView.mouseDownInThumbView(evt, this) : sc_super();
-  },
-
-  /** @private */
-  touchStart: function(evt) {
-    return this.mouseDown(evt);
+  
+  init: function() {
+    sc_super();
+    console.warn("SC.ThumbView is deprecated. Please use a normal view and mix in SC.SplitThumb instead.");
   }
-
 });

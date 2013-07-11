@@ -13,7 +13,7 @@ sc_require('system/responder');
 sc_require('system/theme');
 
 sc_require('system/string');
-sc_require('views/view/base');
+sc_require('views/view/statechart');
 
 
 /**
@@ -1144,36 +1144,36 @@ SC.CoreView.reopen(
 
     // OPTIMIZATION!
     // If we know that we're removing all children and we are rendered, lets do the document cleanup in one sweep.
-    if (immediately && this.get('_isRendered')) {
-      var layer,
-        parentNode;
+    // if (immediately && this.get('_isRendered')) {
+    //   var layer,
+    //     parentNode;
 
-      // If attached, detach and track our parent node so we can re-attach.
-      if (this.get('isAttached')) {
-        layer = this.get('layer');
-        parentNode = layer.parentNode;
+    //   // If attached, detach and track our parent node so we can re-attach.
+    //   if (this.get('isAttached')) {
+    //     layer = this.get('layer');
+    //     parentNode = layer.parentNode;
 
-        this._doDetach();
-      }
+    //     this._doDetach();
+    //   }
 
-      // Destroy our layer and thus all the children's layers in one move.
-      this.destroyLayer();
+    //   // Destroy our layer and thus all the children's layers in one move.
+    //   this.destroyLayer();
 
-      // Remove all the children.
+    //   // Remove all the children.
+    //   for (i = len - 1; i >= 0; i--) {
+    //     this.removeChildAndDestroy(childViews.objectAt(i), immediately);
+    //   }
+
+    //   // Recreate our layer (now empty).
+    //   this.createLayer();
+
+    //   // Reattach our layer.
+    //   if (parentNode && !this.get('isAttached')) { this._doAttach(parentNode); }
+    // } else {
       for (i = len - 1; i >= 0; i--) {
         this.removeChildAndDestroy(childViews.objectAt(i), immediately);
       }
-
-      // Recreate our layer (now empty).
-      this.createLayer();
-
-      // Reattach our layer.
-      if (parentNode && !this.get('isAttached')) { this._doAttach(parentNode); }
-    } else {
-      for (i = len - 1; i >= 0; i--) {
-        this.removeChildAndDestroy(childViews.objectAt(i), immediately);
-      }
-    }
+    // }
 
     return this;
   },

@@ -2,7 +2,7 @@
 // Project:   Welcome
 // Copyright: ©2011 Apple Inc.
 // ==========================================================================
-/*globals Welcome */
+/*global Welcome */
 
 // This is the function that will start your app running.  The default
 // implementation will load any fixtures you have created then instantiate
@@ -12,8 +12,8 @@
 // See comments for some pointers on what to do next.
 //
 Welcome.main = function main() {
-  Welcome.getPath('mainPage.mainPane').append() ;
+  Welcome.getPath('mainPage.mainPane').append();
   Welcome.targetsController.reload();
-} ;
+};
 
 function main() { Welcome.main(); }

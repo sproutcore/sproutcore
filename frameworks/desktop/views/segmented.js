@@ -82,11 +82,16 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     The value of the segmented view.
 
     The SegmentedView's value will always be the value of the currently
-    selected button.  Setting this value will change the selected button.
+    selected button or buttons.  Setting this value will change the selected
+    button or buttons.
+
     If you set this value to something that has no matching button, then
     no buttons will be selected.
 
-    @type Object
+    Note: if allowsMultipleSelection is set to true, then the value must be
+    an Array.
+
+    @type Object | Array
     @default null
   */
   value: null,
@@ -752,7 +757,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       var view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
       if(view) view.becomeFirstResponder();
       else evt.allowDefault();
-      return YES ; // handled
+      return YES; // handled
     }
 
     // handle arrow keys
@@ -776,7 +781,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         } else {
           this.triggerItemAtIndex(0);
         }
-        return YES ; // handled
+        return YES; // handled
 
       // Select from the right to the left
       } else if (evt.which === 37 || evt.which === 38) {
@@ -935,7 +940,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       else this._isTouching = YES;
     }
 
-    return YES ;
+    return YES;
   },
 
   /** @private */
@@ -1039,55 +1044,46 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   triggerItemAtIndex: function(index) {
     var childViews = this.get('childViews'),
         childView,
-        sel, value, val, empty, mult;
+        childValue, value, allowEmpty, allowMult;
 
     childView = childViews.objectAt(index);
 
     if (!childView.get('isEnabled')) return this; // nothing to do!
 
-    empty = this.get('allowsEmptySelection');
-    mult = this.get('allowsMultipleSelection');
+    allowEmpty = this.get('allowsEmptySelection');
+    allowMult = this.get('allowsMultipleSelection');
 
     // get new value... bail if not enabled. Also save original for later.
-    sel = childView.get('value');
-    value = val = this.get('value') ;
-
-    if (SC.empty(value)) {
-      value = [];
-    } else if (!SC.isArray(value)) {
-      value = [value]; // force to array
-    }
+    childValue = childView.get('value');
+    value = this.get('value');
 
     // if we do not allow multiple selection, either replace the current
     // selection or deselect it
-    if (!mult) {
+    if (!allowMult) {
       // if we allow empty selection and the current value is the same as
       // the selected value, then deselect it.
-      if (empty && (value.get('length')===1) && (value.objectAt(0)===sel)) {
-        value = [];
-
-      // otherwise, simply replace the value.
-      } else value = [sel] ;
-
-    // if we do allow multiple selection, then add or remove item to the array.
-    } else {
-      if (value.indexOf(sel) >= 0) {
-        if (value.get('length')>1 || (value.objectAt(0)!==sel) || empty) {
-          value = value.without(sel);
-        }
-      } else value = value.concat([sel]) ;
-    }
-
-    // normalize back to non-array form
-    switch(value.get('length')) {
-      case 0:
+      if (allowEmpty && value === childValue) {
         value = null;
-        break;
-      case 1:
-        value = value.objectAt(0);
-        break;
-      default:
-        break;
+      } else {
+        // otherwise, simply replace the value.
+        value = childValue;
+      }
+    } else {
+      // Lazily create the value array.
+      if (!value) {
+        value = [];
+      } else if (!SC.isArray(value)) {
+        value = [value];
+      }
+
+      // if we do allow multiple selection, then add or remove item to the array.
+      if (value.indexOf(childValue) >= 0) {
+        if (value.get('length') > 1 || (value.objectAt(0) !== childValue) || allowEmpty) {
+          value = value.without(childValue);
+        }
+      } else {
+        value.push(childValue);
+      }
     }
 
     // also, trigger target if needed.
@@ -1103,17 +1099,17 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       if (targetKey) {
         target = item.get ? item.get(targetKey) : item[targetKey];
       }
-      if (resp) resp.sendAction(action, target, this, this.get('pane'),value);
+      if (resp) resp.sendAction(action, target, this, this.get('pane'), value);
     }
 
-    if(val !== undefined && (!action || this.get('selectSegmentWhenTriggeringAction'))) {
+    if (value !== undefined && (!action || this.get('selectSegmentWhenTriggeringAction'))) {
       this.set('value', value);
     }
 
     // if an action/target is defined on self use that also
-    action =this.get('action');
+    action = this.get('action');
     if (action && resp) {
-      resp.sendAction(action, this.get('target'), this, this.get('pane'),value);
+      resp.sendAction(action, this.get('target'), this, this.get('pane'), value);
     }
   },
 

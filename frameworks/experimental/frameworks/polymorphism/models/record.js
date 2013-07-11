@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-(function() {
+(function () {
   var oldExtend = SC.Record.extend;
 
   SC.mixin(SC.Record,
@@ -47,7 +47,7 @@
 
       @see SC.Record.storeKeyFor
     */
-    storeKeyFor: function(id) {
+    storeKeyFor: function (id) {
       var storeKeys = this.storeKeysById(),
           ret = storeKeys[id],
           superclass = this.superclass;
@@ -72,14 +72,14 @@
         storeKeys[id] = ret;
       }
 
-      return ret ;
+      return ret;
     },
 
     // ..........................................................
     // Internal Support
     //
 
-    extend: function() {
+    extend: function () {
       var ret = oldExtend.apply(this, arguments);
 
       if (ret.prototype.hasOwnProperty('isPolymorphic')) {
@@ -88,7 +88,47 @@
       }
 
       return ret;
+    },
+
+    /** @private Updates the storeKey cache on the oldId with the newId. */
+    _propagateNewId: function (oldId, newId) {
+      var superclass = this.superclass;
+
+      if (this.isPolymorphic && superclass.isPolymorphic && superclass !== SC.Record) {
+        var storeKeys = superclass.storeKeysById(),
+          storeKey = storeKeys[oldId];
+
+        delete storeKeys[oldId];
+        storeKeys[newId] = storeKey;
+
+        superclass._propagateNewId(oldId, newId);
+      }
     }
 
   });
 })();
+
+
+SC.Record.reopen({
+
+  /**
+    Because the storeKeys per id are stored on each class of the polymorphic
+    record, whenever the id changes, we have to update the caches.
+    */
+  id: function (key, value) {
+    if (value !== undefined) {
+      var storeKey = this.get('storeKey'),
+        oldId = SC.Store.idsByStoreKey[storeKey],
+        recordType = this.get('store').recordTypeFor(storeKey);
+
+      // Propagate the new id to all superclasses.
+      recordType._propagateNewId(oldId, value);
+
+      this.writeAttribute(this.get('primaryKey'), value);
+      return value;
+    } else {
+      return SC.Store.idFor(this.storeKey);
+    }
+  }.property('storeKey').cacheable()
+
+});

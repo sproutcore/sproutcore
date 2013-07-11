@@ -471,7 +471,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   // INTERNAL SUPPORT
   //
 
-  displayProperties: ['isBrowserFocusable','formattedHint', 'fieldValue', 'isEditing', 'isEditable', 'leftAccessoryView', 'rightAccessoryView', 'isTextArea'],
+  // Note: isEnabled is required here because it is used in the render function.
+  displayProperties: ['isBrowserFocusable','formattedHint', 'fieldValue', 'isEditing', 'isEditable', 'isEnabled', 'leftAccessoryView', 'rightAccessoryView', 'isTextArea'],
 
   createChildViews: function () {
     sc_super();
@@ -489,7 +490,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
         accessoryView;
 
     for (i=0; i<len; i++) {
-      viewProperty = viewProperties[i] ;
+      viewProperty = viewProperties[i];
 
       // Is there an accessory view specified?
       previousView = this['_'+viewProperty] ;
@@ -525,6 +526,13 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
           // instance now.
           accessoryView = this.createChildView(accessoryView);
 
+          // Fix up right accessory views to be right positioned.
+          if (viewProperty === 'rightAccessoryView') {
+            var layout = accessoryView.get('layout');
+
+            accessoryView.adjust({ left: null, right: layout.right || 0 });
+          }
+
           // Add in the "sc-text-field-accessory-view" class name so that the
           // z-index gets set correctly.
           classNames = accessoryView.get('classNames') ;
@@ -542,29 +550,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       }
     }
   }.observes('leftAccessoryView', 'rightAccessoryView'),
-
-  layoutChildViewsIfNeeded: function (isVisible) {
-    // For the right accessory view, adjust the positioning such that the view
-    // is right-justified, unless 'right' is specified.
-    if (!isVisible) isVisible = this.get('isVisibleInWindow') ;
-    if (isVisible && this.get('childViewsNeedLayout')) {
-      var rightAccessoryView = this.get('rightAccessoryView') ;
-      if (rightAccessoryView  &&  rightAccessoryView.get) {
-        var layout = rightAccessoryView.get('layout') ;
-        if (layout) {
-          // Clear out any 'left' value.
-          layout.left = null;
-
-          // Unless the user specified a 'right' value, specify a default to
-          // right-justify the view.
-          if (!layout.right) layout.right = 0 ;
-
-          rightAccessoryView.adjust(layout) ;
-        }
-      }
-    }
-    sc_super() ;
-  },
 
   render: function (context, firstTime) {
     sc_super() ;
@@ -649,10 +634,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
         autocapitalizeString = ' autocapitalize=' + (!autoCapitalize ? '"off"' : '"true"');
       }
 
-      if (isBrowserFocusable) {
+      if (!isBrowserFocusable) {
         browserFocusable = 'tabindex="-1"';
       }
-        // if hint is on and we don't want it to show on focus, create one
+
+      // if hint is on and we don't want it to show on focus, create one
       if (SC.platform.input.placeholder && !hintOnFocus) {
         hintString = ' placeholder="' + hint + '"';
       }

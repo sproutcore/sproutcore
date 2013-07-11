@@ -3,13 +3,14 @@
  *
  * @author Evin Grano
  */
+/*global ok, equals, test, module */
 
 // ..........................................................
 // Basic Set up needs to move to the setup and teardown
 //
 var NestedRecord, store, storeKeys;
 
-var initModels = function(){
+var initModels = function () {
   NestedRecord.Directory = SC.Record.extend({
     /** Child Record Namespace */
     nestedRecordNamespace: NestedRecord,
@@ -28,7 +29,7 @@ var initModels = function(){
 //
 module("Data Store Tests for Nested Records", {
 
-  setup: function() {
+  setup: function () {
     NestedRecord = SC.Object.create({
       store: SC.Store.create()
     });
@@ -69,7 +70,7 @@ module("Data Store Tests for Nested Records", {
     SC.RunLoop.end();
   },
 
-  teardown: function() {
+  teardown: function () {
     delete NestedRecord.Directory;
     delete NestedRecord.File;
     NestedRecord = null;
@@ -77,7 +78,7 @@ module("Data Store Tests for Nested Records", {
   }
 });
 
-test("Proper Initialization",function() {
+test("Proper Initialization", function () {
   var first, second;
   equals(storeKeys.get('length'), 2, "number of primary store keys should be 2");
 
@@ -92,7 +93,7 @@ test("Proper Initialization",function() {
   ok(SC.instanceOf(second, NestedRecord.File), "second record is a instance of a NestedRecord.File Object");
 });
 
-test("Proper Status",function() {
+test("Proper Status", function () {
   var first, second;
 
   // First
@@ -104,7 +105,7 @@ test("Proper Status",function() {
   equals(second.get('status'), SC.Record.READY_CLEAN, 'second record has a READY_CLEAN State');
 });
 
-test("Can Push onto child array",function() {
+test("Can Push onto child array", function () {
   var first, contents;
 
   // First
@@ -112,7 +113,7 @@ test("Can Push onto child array",function() {
   first = first.get('contents').objectAt(0);
   contents = first.get('contents');
   equals(contents.get('length'), 2, "should have two items");
-  contents.forEach(function(f){
+  contents.forEach(function (f) {
     ok(SC.instanceOf(f, NestedRecord.File), "should be a NestedRecord.File");
     ok(f.get('name'), "should have a name property");
   });
@@ -120,7 +121,7 @@ test("Can Push onto child array",function() {
   contents.pushObject({type: 'File', name: 'File 4', id: 12});
 
   equals(contents.get('length'), 3, "should have three items");
-  contents.forEach(function(f){
+  contents.forEach(function (f) {
     ok(SC.instanceOf(f, NestedRecord.File), "should be a NestedRecord.File");
     ok(f.get('name'), "should have a name property");
     equals(f.get('status'), SC.Record.READY_DIRTY, 'second record has a READY_CLEAN State');
@@ -129,7 +130,7 @@ test("Can Push onto child array",function() {
 
 });
 
-test("Use in Nested Store", function(){
+test("Use in Nested Store", function () {
   var nstore, dir, c, file,
       pk, id, nFile, nDir;
 
@@ -177,4 +178,43 @@ test("Use in Nested Store", function(){
   equals(file.get('status'), SC.Record.READY_DIRTY, 'Base > File id:1 has a READY_DIRTY State');
   equals(file.get('name'), 'Change Name', "Base > File id:1 has actually changed to name of 'Changed Name'");
 
+});
+
+test("Store#pushRetrieve for parent updates the child records", function () {
+  var parent = store.materializeRecord(storeKeys[0]),
+    nr = parent.get('contents').firstObject(),
+    newDataHash = {
+      type: 'Directory',
+      name: 'Dir 1 Changed',
+      guid: 1,
+      contents: [
+        {
+          type: 'Directory',
+          name: 'Dir 2 Changed',
+          guid: 2,
+          contents: [
+            {
+              type: 'File',
+              guid: 3,
+              name: 'File 1'
+            },
+            {
+              type: 'File',
+              guid: 4,
+              name: 'File 2'
+            }
+          ]
+        }
+      ]
+    };
+
+  ok(nr, "Got nested record");
+  equals(nr.get('name'), 'Dir 2', "Dir id:2 has correct name");
+
+  SC.run(function () {
+    store.pushRetrieve(null, null, newDataHash, storeKeys[0]);
+    store.flush();
+  });
+  equals(parent.get('name'), 'Dir 1 Changed', 'Dir id:1 name was changed');
+  equals(nr.get('name'), 'Dir 2 Changed', "Dir id:2 name was changed");
 });

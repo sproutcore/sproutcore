@@ -270,7 +270,6 @@ test("Test shouldInheritEnabled.", function () {
   });
 });
 
-
 test("Test toggling isEnabled adds/removes disabled class.", function () {
   parent.createLayer();
   parent._doAttach(document.body);
@@ -327,4 +326,16 @@ test("Test optimized display update.", function () {
 
   parent._doDetach();
   parent.destroyLayer();
+});
+
+test("initializing with isEnabled: false, should still add the proper class on append", function() {
+  var newView = SC.View.create({
+    isEnabled: false
+  });
+
+  parent.createLayer();
+  parent._doAttach(document.body);
+  parent.appendChild(newView);
+
+  ok(newView.$().hasClass('disabled'), "An initialized as disabled view should have disabled class on append.");
 });

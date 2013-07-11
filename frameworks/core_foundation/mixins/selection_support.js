@@ -234,7 +234,13 @@ SC.SelectionSupport = {
     // Remove any selection set objects that are no longer in the content
     indexSet = selectionSet.indexSetForSource(arrangedObjects);
     if ((indexSet && (indexSet.get('length') !== selectionSet.get('length'))) || (!indexSet && (selectionSet.get('length') > 0))) { // then the selection content has changed
-      selectionSet = selectionSet.copy().constrain(arrangedObjects).freeze();
+      if (arrangedObjects) {
+        // Constrain the current selection set to matches in arrangedObjects.
+        selectionSet = selectionSet.copy().constrain(arrangedObjects).freeze();
+      } else {
+        // No arrangedObjects, so clear the selection.
+        selectionSet = SC.SelectionSet.EMPTY;
+      }
       this.set('selection', selectionSet);
     }
 

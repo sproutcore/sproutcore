@@ -4,7 +4,7 @@
 //            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-/*globals TestRunner */
+/*global TestRunner */
 
 sc_require('views/offset_checkbox');
 
@@ -18,18 +18,18 @@ TestRunner.mainPage = SC.Page.design({
   */
   mainPane: SC.MainPane.design({
 
-    defaultResponder: "TestRunner",
+    defaultResponder: TestRunner.statechart,
 
     // when defining a generic view, just name the properties holding your
     // child views here.  the w() helper is like calling split(' ')
-    childViews: 'splitView toolbarView'.w(),
+    childViews: ['splitView', 'toolbarView'],
 
     // This is the main split view on the top of the screen.  Note that
     // since SC.SplitView defines a few special types of views you don't need
     // to define a childViews array.
     splitView: SC.SplitView.design({
 
-      layout: { left: 0, top: 0, right: 0, bottom: 32 },
+      layout: { bottom: 36 },
 
       topLeftView: SC.ScrollView.design(SC.SplitChild, {
 
@@ -37,20 +37,19 @@ TestRunner.mainPage = SC.Page.design({
 
         hasHorizontalScroller: NO, // disable horizontal scrolling
         contentView: SC.SourceListView.design({
-          contentBinding: "TestRunner.sourceController.arrangedObjects",
-          selectionBinding: "TestRunner.sourceController.selection",
-          contentValueKey: "displayName",
-          hasContentIcon: YES,
-          contentIconKey:  "targetIcon",
-
-          action: 'selectTarget'
+          action: 'selectTarget',
+          actOnSelect: true,
+          contentBinding: SC.Binding.oneWay('TestRunner.sourceController.arrangedObjects'),
+          selectionBinding: 'TestRunner.targetsController.selection',
+          contentValueKey: 'displayName',
+          hasContentIcon: true,
+          contentIconKey:  'targetIcon'
         })
       }),
 
-      bottomRightView: SC.SceneView.design(SC.SplitChild, {
+      bottomRightView: SC.ContainerView.design(SC.SplitChild, {
         autoResizeStyle: SC.RESIZE_AUTOMATIC,
-        scenes: "testsMaster testsDetail".w(),
-        nowShowingBinding: "TestRunner.currentScene"
+        nowShowingBinding: SC.Binding.oneWay("TestRunner.currentScene")
       })
     }),
 
@@ -59,36 +58,37 @@ TestRunner.mainPage = SC.Page.design({
     // them and let them layout themselves.
     toolbarView: SC.ToolbarView.design({
 
-      anchorLocation: SC.ANCHOR_BOTTOM,
+      layout: { bottom: 0, borderTop: 1, height: 36, zIndex: 2 },
 
-      childViews: 'logo continuousIntegrationCheckbox runTestsButton'.w(),
-      classNames: 'bottom-toolbar',
+      childViews: ['logo', 'runTestsButton'], // , 'continuousIntegrationCheckbox'
 
       logo: SC.View.design({
-        layout: { left: 0, top: 0, bottom: 0, width: 200 },
-        classNames: 'app-title',
+        layout: { width: 200 },
+        classNames: ['app-title'],
         tagName: 'h1',
-        render: function(context, firstTime) {
-          var img_url = sc_static('images/sproutcore-logo');
+        render: function (context) {
+          var img_url = sc_static('images/sproutcore-32.png');
           context.push('<img src="%@" />'.fmt(img_url));
           context.push('<span>', "_Test Runner".loc(), "</span>");
         }
       }),
 
+      // Disabled
       continuousIntegrationCheckbox: TestRunner.OffsetCheckboxView.design({
         title: "Continuous Integration",
-        offsetBinding: "TestRunner.sourceController.sidebarThickness",
+        offsetBinding: SC.Binding.oneWay("TestRunner.sourceController.sidebarThickness"),
         valueBinding: "TestRunner.testsController.useContinuousIntegration",
-        isEnabledBinding: "TestRunner.testsController.isShowingTests",
+        isEnabledBinding: SC.Binding.oneWay("TestRunner.testsController.length").bool(),
         layout: { height: 18, centerY: 1, width: 170, left: 206 }
       }),
 
       runTestsButton: SC.ButtonView.design({
-        title: "Run Tests",
-        isEnabledBinding: "TestRunner.testsController.isShowingTests",
+        action: 'runTests',
+        title: "Reload",
+        // isEnabledBinding: SC.Binding.oneWay("TestRunner.testsController.length").bool(),
+        isVisibleBinding: SC.Binding.oneWay('TestRunner.testController.content').bool(),
         layout: { height: 24, centerY: 0, width: 90, right: 12 }
       })
-
 
     })
   }),
@@ -97,12 +97,9 @@ TestRunner.mainPage = SC.Page.design({
     childViews: "labelView".w(),
 
     labelView: SC.LabelView.design({
-      layout: { centerX: 0, centerY: 0, height: 24, width: 200 },
-      textAlign: SC.ALIGN_CENTER,
-      controlSize: SC.HUGE_CONTROL_SIZE,
-      classNames: "center-label",
+      layout: { centerX: 0, centerY: 0, height: 24, width: 200, opacity: 0.8 },
       controlSize: SC.LARGE_CONTROL_SIZE,
-      // TODO: fontWeight: SC.BOLD_WEIGHT,
+      classNames: ['center-label'],
       value: "_Loading Targets".loc()
     })
   }),
@@ -111,11 +108,9 @@ TestRunner.mainPage = SC.Page.design({
     childViews: "labelView".w(),
 
     labelView: SC.LabelView.design({
-      layout: { centerX: 0, centerY: 0, height: 24, width: 200 },
-      textAlign: SC.ALIGN_CENTER,
-      classNames: "center-label",
+      layout: { centerX: 0, centerY: 0, height: 24, width: 200, opacity: 0.8 },
+      classNames: ['center-label'],
       controlSize: SC.LARGE_CONTROL_SIZE,
-      // TODO: fontWeight: SC.BOLD_WEIGHT,
       value: "_No Targets".loc()
     })
   }),
@@ -124,11 +119,9 @@ TestRunner.mainPage = SC.Page.design({
     childViews: "labelView".w(),
 
     labelView: SC.LabelView.design({
-      layout: { centerX: 0, centerY: 0, height: 24, width: 200 },
-      textAlign: SC.ALIGN_CENTER,
-      classNames: "center-label",
+      layout: { centerX: 0, centerY: 0, height: 24, width: 200, opacity: 0.8 },
+      classNames: ['center-label'],
       controlSize: SC.LARGE_CONTROL_SIZE,
-      // TODO: fontWeight: SC.BOLD_WEIGHT,
       value: "_No Tests".loc()
     })
   }),
@@ -137,24 +130,20 @@ TestRunner.mainPage = SC.Page.design({
     childViews: "labelView".w(),
 
     labelView: SC.LabelView.design({
-      layout: { centerX: 0, centerY: 0, height: 24, width: 200 },
-      textAlign: SC.ALIGN_CENTER,
-      classNames: "center-label",
+      layout: { centerX: 0, centerY: 0, height: 24, width: 200, opacity: 0.8 },
+      classNames: ['center-label'],
       controlSize: SC.LARGE_CONTROL_SIZE,
-      // TODO: fontWeight: SC.BOLD_WEIGHT,
       value: "_Loading Tests".loc()
     })
   }),
 
   testsNone: SC.View.design({
-    childViews: "labelView".w(),
+    childViews: ['labelView'],
 
     labelView: SC.LabelView.design({
-      layout: { centerX: 0, centerY: 0, height: 24, width: 200 },
-      textAlign: SC.ALIGN_CENTER,
-      classNames: "center-label",
+      layout: { centerX: 0, centerY: 0, height: 24, width: 200, opacity: 0.8 },
+      classNames: ['center-label'],
       controlSize: SC.LARGE_CONTROL_SIZE,
-      // TODO: fontWeight: SC.BOLD_WEIGHT,
       value: "_No Target Selected".loc()
     })
   }),
@@ -172,8 +161,8 @@ TestRunner.mainPage = SC.Page.design({
 
       // bind to the testsController, which is an ArrayController managing the
       // tests for the currently selected target.
-      contentBinding: "TestRunner.testsController.arrangedObjects",
-      selectionBinding: "TestRunner.testsController.selection",
+      contentBinding: SC.Binding.oneWay('TestRunner.testsController.arrangedObjects'),
+      selectionBinding: 'TestRunner.testsController.selection',
 
       // configure the display options for the item itself.  The row height is
       // larger to make this look more like a menu.  Also by default show
@@ -200,13 +189,13 @@ TestRunner.mainPage = SC.Page.design({
   }),
 
   testsDetail: SC.View.design({
-    childViews: "navigationView webView".w(),
+    childViews: ['navigationView', 'webView'],
 
     navigationView: SC.ToolbarView.design({
       classNames: 'navigation-bar',
 
-      layout: { top: 0, left: 0, right: 0, height: 32 },
-      childViews: "backButton locationLabel".w(),
+      layout: { borderBottom: 1, top: 0, left: 0, right: 0, height: 34, zIndex: 2 },
+      childViews: ['backButton', 'locationLabel'],
 
       backButton: SC.ButtonView.design({
         layout: { left: 8, centerY: 0, width: 80, height: 24 },
@@ -215,16 +204,16 @@ TestRunner.mainPage = SC.Page.design({
       }),
 
       locationLabel: SC.LabelView.design({
-        layout: { right: 8, centerY: -2, height: 16, left: 100 },
-        textAlign: SC.ALIGN_RIGHT,
-        valueBinding: "TestRunner.detailController.displayName"
+        classNames: ['location-label'],
+        layout: { right: 10, centerY: 0, height: 16, left: 100 },
+        valueBinding: SC.Binding.oneWay("TestRunner.testController.displayName")
       })
 
     }),
 
     webView: SC.WebView.design({
-      layout: { top: 33, left: 2, right: 0, bottom: 0 },
-      valueBinding: SC.Binding.oneWay("TestRunner.detailController.uncachedUrl")
+      layout: { top: 34, left: 2, right: 0, bottom: 0 },
+      valueBinding: SC.Binding.oneWay("TestRunner.testController.uncachedUrl")
     })
   })
 

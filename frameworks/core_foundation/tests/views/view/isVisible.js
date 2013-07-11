@@ -44,6 +44,18 @@ test("a new view should not be visible initially", function() {
   ok(view.get('isVisible'), "view.get('isVisible') === NO");
 });
 
+test("initializing with isVisible: false, should still add the proper class on append", function() {
+  var newView = SC.View.create({
+    isVisible: false
+  });
+
+  SC.RunLoop.begin();
+  pane.append();
+  pane.appendChild(newView);
+  SC.RunLoop.end();
+  ok(newView.$().hasClass('sc-hidden'), "newView.$().hasClass('sc-hidden') should be true");
+});
+
 test("adding a new view to a visible pane should make it visible", function() {
   ok(view.get('isVisible'), "view.get('isVisible') === YES");
   ok(pane.get('isVisible'), "pane.get('isVisible') === YES");

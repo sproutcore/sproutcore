@@ -13,7 +13,7 @@
 CoreTools.DataSource = SC.DataSource.extend({
 
   /**
-    Fetch a group of records from the data source.  Knows how to fetch 
+    Fetch a group of records from the data source.  Knows how to fetch
     a list of targets and tests.
   */
   fetch: function(store, query) {
@@ -26,45 +26,45 @@ CoreTools.DataSource = SC.DataSource.extend({
         ret = this.fetchTests(store, query);
         break;
     }
-    
+
     return ret;
   },
-  
+
   // ..........................................................
   // FETCHING TARGETS
-  // 
-  
+  //
+
   /**
     Fetch the actual targets.  Only understands how to handle a remote query.
   */
   fetchTargets: function(store, query) {
-    
-    if (!query.get('isRemote')) return NO ; 
-    
+
+    if (!query.get('isRemote')) return NO ;
+
     SC.Request.getUrl(CoreTools.attachUrlPrefix('/sc/targets.json'))
       .set('isJSON', YES)
       .notify(this, 'fetchTargetsDidComplete', { query: query, store: store })
       .send();
     return YES ;
   },
-  
+
   fetchTargetsDidComplete: function(request, opts) {
     var response = request.get('response'),
         query    = opts.query,
         store    = opts.store,
         storeKeys;
-        
+
     if (!SC.$ok(response)) {
       console.error("TODO: Add handler when fetching targets fails");
     } else {
       storeKeys = store.loadRecords(CoreTools.Target, response);
-      store.loadQueryResults(query, storeKeys);
+      store.dataSourceDidFetchQuery(query, storeKeys);
     }
   },
-  
+
   // ..........................................................
   // FETCHING TESTS
-  // 
+  //
 
   /**
     Load tests for a particular URL.  Only understands local querys with a
@@ -72,28 +72,28 @@ CoreTools.DataSource = SC.DataSource.extend({
   */
   fetchTests: function(store, query) {
     var url = query.get('url') ;
-        
+
     if (!query.get('isRemote') || !url) return NO ; // not handled
-    
+
     SC.Request.getUrl(url)
       .set('isJSON', YES)
       .notify(this, 'fetchTestsDidComplete', { query: query, store: store })
       .send();
     return YES ;
   },
-  
+
   fetchTestsDidComplete: function(request, opts) {
     var response = request.get('response'),
         store    = opts.store,
         query    = opts.query,
         storeKeys;
-        
+
     if (!SC.$ok(response)) {
       console.error("TODO: Add handler when fetching tests fails");
     } else {
       storeKeys = store.loadRecords(CoreTools.Test, response);
-      store.loadQueryResults(query, storeKeys); // notify query loaded
+      store.dataSourceDidFetchQuery(query, storeKeys); // notify query loaded
     }
   }
-  
+
 });

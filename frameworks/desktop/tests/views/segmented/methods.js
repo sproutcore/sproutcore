@@ -7,7 +7,7 @@
 
 /*global module test htmlbody ok equals same stop start */
 
-var iconURL= "http://www.freeiconsweb.com/Icons/16x16_people_icons/People_046.gif";
+var iconURL = sc_static("sproutcore-32.png");
 var pane, view;
 
 module("SC.SegmentedView", {
@@ -60,3 +60,39 @@ test("Check that properties are mapped correctly", function() {
   equals(childViews[0].index, 0, 'Computed properties should match');
 });
 
+
+test("Check the values of value", function() {
+  equals(SC.isArray(view.get('value')), true, "the value should initially be an array");
+  equals(view.getPath('value.length'), 2, "the value array should have 2 items in it");
+  view.triggerItemAtIndex(1);
+  equals(SC.isArray(view.get('value')), false, "the value should not be an array if allowsMultipleSelection is false");
+  equals(view.get('value'), "Item2", "the second item should be selected.");
+
+  view.set('allowsMultipleSelection', true);
+  view.triggerItemAtIndex(2);
+  equals(SC.isArray(view.get('value')), true, "the value should be an array if allowsMultipleSelection is true");
+  equals(view.getPath('value.length'), 2, "the value array should have 2 items in it");
+  view.triggerItemAtIndex(1);
+  equals(view.getPath('value.length'), 1, "the value array should have 1 item in it");
+  view.triggerItemAtIndex(2);
+  equals(view.getPath('value.length'), 1, "the value array should have 1 items in it, because allowsEmptySelection is false");
+
+  view.set('allowsEmptySelection', true);
+  view.triggerItemAtIndex(2);
+  equals(view.getPath('value.length'), 0, "the value array should have 0 items in it,  because allowsEmptySelection is true");
+
+  view.set('allowsMultipleSelection', false);
+  view.triggerItemAtIndex(1);
+  equals(SC.isArray(view.get('value')), false, "the value should not be an array if allowsMultipleSelection is false again");
+  equals(view.get('value'), "Item2", "the second item should be selected.");
+  view.triggerItemAtIndex(2);
+  equals(view.get('value'), "Item3", "the third item should be selected.");
+
+  view.set('allowsEmptySelection', false);
+  view.triggerItemAtIndex(2);
+  equals(view.get('value'), "Item3", "the third item should still be selected, because allowsEmptySelection is false");
+
+  view.set('allowsEmptySelection', true);
+  view.triggerItemAtIndex(2);
+  equals(view.get('value'), null, "the value should go to null if allowsMultipleSelection is false and allowsEmptySelection is true.");
+});

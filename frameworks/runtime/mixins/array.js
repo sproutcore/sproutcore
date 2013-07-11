@@ -54,7 +54,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
       An array of zero or more objects that should be inserted into the array at
       *idx*
   */
-  replace: function(idx, amt, objects) {
+  replace: function (idx, amt, objects) {
     throw new Error("replace() must be implemented to support SC.Array");
   },
 
@@ -65,15 +65,15 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     @param {Number} startAt optional starting location to search, default 0
     @returns {Number} index of -1 if not found
   */
-  indexOf: function(object, startAt) {
+  indexOf: function (object, startAt) {
     var idx, len = this.get('length');
 
     if (startAt === undefined) startAt = 0;
     else startAt = (startAt < 0) ? Math.ceil(startAt) : Math.floor(startAt);
     if (startAt < 0) startAt += len;
 
-    for(idx=startAt;idx<len;idx++) {
-      if (this.objectAt(idx, YES) === object) return idx ;
+    for (idx = startAt; idx < len; idx++) {
+      if (this.objectAt(idx, YES) === object) return idx;
     }
     return -1;
   },
@@ -85,15 +85,15 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     @param {Number} startAt optional starting location to search, default 0
     @returns {Number} index of -1 if not found
   */
-  lastIndexOf: function(object, startAt) {
+  lastIndexOf: function (object, startAt) {
     var idx, len = this.get('length');
 
-    if (startAt === undefined) startAt = len-1;
+    if (startAt === undefined) startAt = len - 1;
     else startAt = (startAt < 0) ? Math.ceil(startAt) : Math.floor(startAt);
     if (startAt < 0) startAt += len;
 
-    for(idx=startAt;idx>=0;idx--) {
-      if (this.objectAt(idx) === object) return idx ;
+    for (idx = startAt; idx >= 0; idx--) {
+      if (this.objectAt(idx) === object) return idx;
     }
     return -1;
   },
@@ -108,8 +108,8 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
       The index of the item to return.  If idx exceeds the current length,
       return null.
   */
-  objectAt: function(idx) {
-    if (idx < 0) return undefined ;
+  objectAt: function (idx) {
+    if (idx < 0) return undefined;
     if (idx >= this.get('length')) return undefined;
     return this.get(idx);
   },
@@ -123,11 +123,11 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
 
     This property overrides the default property defined in SC.Enumerable.
   */
-  '[]': function(key, value) {
+  '[]': function (key, value) {
     if (value !== undefined) {
-      this.replace(0, this.get('length'), value) ;
+      this.replace(0, this.get('length'), value);
     }
-    return this ;
+    return this;
   }.property(),
 
   /**
@@ -137,10 +137,10 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     @param {Number} idx index of insert the object at.
     @param {Object} object object to insert
   */
-  insertAt: function(idx, object) {
-    if (idx > this.get('length')) throw SC.OUT_OF_RANGE_EXCEPTION ;
-    this.replace(idx,0,[object]) ;
-    return this ;
+  insertAt: function (idx, object) {
+    if (idx > this.get('length')) throw SC.OUT_OF_RANGE_EXCEPTION;
+    this.replace(idx, 0, [object]);
+    return this;
   },
 
   /**
@@ -155,8 +155,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     @param {Number} length length of passing range
     @returns {Object} receiver
   */
-  removeAt: function(start, length) {
-
+  removeAt: function (start, length) {
     var delta = 0, // used to shift range
         empty = [];
 
@@ -168,35 +167,35 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
 
       // fast case
       if (length === undefined) {
-        this.replace(start,1,empty);
-        return this ;
+        this.replace(start, 1, empty);
+        return this;
       } else {
         start = SC.IndexSet.create(start, length);
       }
     }
 
     this.beginPropertyChanges();
-    start.forEachRange(function(start, length) {
-      start -= delta ;
-      delta += length ;
+    start.forEachRange(function (start, length) {
+      start -= delta;
+      delta += length;
       this.replace(start, length, empty); // remove!
     }, this);
     this.endPropertyChanges();
 
-    return this ;
+    return this;
   },
 
   /**
     Search the array of this object, removing any occurrences of it.
     @param {object} obj object to remove
   */
-  removeObject: function(obj) {
+  removeObject: function (obj) {
     var loc = this.get('length') || 0;
-    while(--loc >= 0) {
-      var curObject = this.objectAt(loc) ;
-      if (curObject == obj) this.removeAt(loc) ;
+    while (--loc >= 0) {
+      var curObject = this.objectAt(loc);
+      if (curObject == obj) this.removeAt(loc);
     }
-    return this ;
+    return this;
   },
 
   /**
@@ -206,9 +205,9 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     @param {SC.Enumerable} objects the objects to remove
     @returns {SC.Array} receiver
   */
-  removeObjects: function(objects) {
+  removeObjects: function (objects) {
     this.beginPropertyChanges();
-    objects.forEach(function(obj) { this.removeObject(obj); }, this);
+    objects.forEach(function (obj) { this.removeObject(obj); }, this);
     this.endPropertyChanges();
     return this;
   },
@@ -225,13 +224,13 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     @param endIndex {Integer} (Optional) index to end the slice at.
     @returns {Array} New array with specified slice
   */
-  slice: function(beginIndex, endIndex) {
+  slice: function (beginIndex, endIndex) {
     var ret = [];
-    var length = this.get('length') ;
-    if (SC.none(beginIndex)) beginIndex = 0 ;
-    if (SC.none(endIndex) || (endIndex > length)) endIndex = length ;
-    while(beginIndex < endIndex) ret[ret.length] = this.objectAt(beginIndex++) ;
-    return ret ;
+    var length = this.get('length');
+    if (SC.none(beginIndex)) beginIndex = 0;
+    if (SC.none(endIndex) || (endIndex > length)) endIndex = length;
+    while (beginIndex < endIndex) ret[ret.length] = this.objectAt(beginIndex++);
+    return ret;
   },
 
   /**
@@ -242,9 +241,9 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
 
     @return {Object} The passed object
   */
-  pushObject: function(obj) {
-    this.insertAt(this.get('length'), obj) ;
-    return obj ;
+  pushObject: function (obj) {
+    this.insertAt(this.get('length'), obj);
+    return obj;
   },
 
 
@@ -255,9 +254,9 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     @param {SC.Enumerable} objects the objects to add
     @returns {SC.Array} receiver
   */
-  pushObjects: function(objects) {
+  pushObjects: function (objects) {
     this.beginPropertyChanges();
-    objects.forEach(function(obj) { this.pushObject(obj); }, this);
+    objects.forEach(function (obj) { this.pushObject(obj); }, this);
     this.endPropertyChanges();
     return this;
   },
@@ -268,13 +267,13 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
 
     @return {Object} The popped object
   */
-  popObject: function() {
-    var len = this.get('length') ;
-    if (len === 0) return null ;
+  popObject: function () {
+    var len = this.get('length');
+    if (len === 0) return null;
 
-    var ret = this.objectAt(len-1) ;
-    this.removeAt(len-1) ;
-    return ret ;
+    var ret = this.objectAt(len - 1);
+    this.removeAt(len - 1);
+    return ret;
   },
 
   /**
@@ -283,11 +282,11 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
 
     @return {Object} The shifted object
   */
-  shiftObject: function() {
-    if (this.get('length') === 0) return null ;
-    var ret = this.objectAt(0) ;
-    this.removeAt(0) ;
-    return ret ;
+  shiftObject: function () {
+    if (this.get('length') === 0) return null;
+    var ret = this.objectAt(0);
+    this.removeAt(0);
+    return ret;
   },
 
   /**
@@ -297,9 +296,9 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     @param {Object} obj the object to add
     @return {Object} The passed object
   */
-  unshiftObject: function(obj) {
-    this.insertAt(0, obj) ;
-    return obj ;
+  unshiftObject: function (obj) {
+    this.insertAt(0, obj);
+    return obj;
   },
 
   /**
@@ -309,9 +308,9 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     @param {SC.Enumerable} objects the objects to add
     @returns {SC.Array} receiver
   */
-  unshiftObjects: function(objects) {
+  unshiftObjects: function (objects) {
     this.beginPropertyChanges();
-    objects.forEach(function(obj) { this.unshiftObject(obj); }, this);
+    objects.forEach(function (obj) { this.unshiftObject(obj); }, this);
     this.endPropertyChanges();
     return this;
   },
@@ -322,17 +321,17 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     @param {Array} ary The array you want to compare to
     @returns {Boolean} true if they are equal.
   */
-  isEqual: function(ary) {
-    if (!ary) return false ;
+  isEqual: function (ary) {
+    if (!ary) return false;
     if (ary == this) return true;
 
-    var loc = ary.get('length') ;
-    if (loc != this.get('length')) return false ;
+    var loc = ary.get('length');
+    if (loc != this.get('length')) return false;
 
-    while(--loc >= 0) {
-      if (!SC.isEqual(ary.objectAt(loc), this.objectAt(loc))) return false ;
+    while (--loc >= 0) {
+      if (!SC.isEqual(ary.objectAt(loc), this.objectAt(loc))) return false;
     }
-    return true ;
+    return true;
   },
 
   /**
@@ -341,7 +340,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
 
     @returns {Array} The new, compact array
   */
-  compact: function() { return this.without(null); },
+  compact: function () { return this.without(null); },
 
   /**
     Generates a new array with the contents of the old array, sans the passed
@@ -350,13 +349,13 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     @param {Object} value The value you want to be removed
     @returns {Array} The new, filtered array
   */
-  without: function(value) {
-    if (this.indexOf(value)<0) return this; // value not present.
-    var ret = [] ;
-    this.forEach(function(k) {
+  without: function (value) {
+    if (this.indexOf(value) < 0) return this; // value not present.
+    var ret = [];
+    this.forEach(function (k) {
       if (k !== value) ret[ret.length] = k;
-    }) ;
-    return ret ;
+    });
+    return ret;
   },
 
   /**
@@ -365,12 +364,12 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
 
     @returns {Array} The new, de-duped array
   */
-  uniq: function() {
-    var ret = [] ;
-    this.forEach(function(k){
-      if (ret.indexOf(k)<0) ret[ret.length] = k;
+  uniq: function () {
+    var ret = [];
+    this.forEach(function (k) {
+      if (ret.indexOf(k) < 0) ret[ret.length] = k;
     });
-    return ret ;
+    return ret;
   },
 
   /**
@@ -380,9 +379,9 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
 
     @returns {Array}
    */
-  flatten: function() {
+  flatten: function () {
     var ret = [];
-    this.forEach(function(k) {
+    this.forEach(function (k) {
       if (k && k.isEnumerable) {
         ret = ret.pushObjects(k.flatten());
       } else {
@@ -400,7 +399,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
 
     @returns {Number}
   */
-  max: function() {
+  max: function () {
     return Math.max.apply(Math, this);
   },
 
@@ -412,7 +411,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
 
     @returns {Number}
   */
-  min: function() {
+  min: function () {
     return Math.min.apply(Math, this);
   },
 
@@ -424,7 +423,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     @param {Object} object to look for
     @returns {Boolean}
   */
-  contains: function(obj){
+  contains: function (obj) {
     return this.indexOf(obj) >= 0;
   },
 
@@ -450,28 +449,28 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     @param {Object} context optional context
     @returns {SC.RangeObserver} range observer
   */
-  addRangeObserver: function(indexes, target, method, context) {
+  addRangeObserver: function (indexes, target, method, context) {
     var rangeob = this._array_rangeObservers;
-    if (!rangeob) rangeob = this._array_rangeObservers = SC.CoreSet.create() ;
+    if (!rangeob) rangeob = this._array_rangeObservers = SC.CoreSet.create();
 
     // The first time a range observer is added, cache the current length so
     // we can properly notify observers the first time through
-    if (this._array_oldLength===undefined) {
-      this._array_oldLength = this.get('length') ;
+    if (this._array_oldLength === undefined) {
+      this._array_oldLength = this.get('length');
     }
 
-    var C = this.rangeObserverClass ;
+    var C = this.rangeObserverClass;
     var isDeep = NO; //disable this feature for now
-    var ret = C.create(this, indexes, target, method, context, isDeep) ;
+    var ret = C.create(this, indexes, target, method, context, isDeep);
     rangeob.add(ret);
 
     // first time a range observer is added, begin observing the [] property
     if (!this._array_isNotifyingRangeObservers) {
-      this._array_isNotifyingRangeObservers = YES ;
+      this._array_isNotifyingRangeObservers = YES;
       this.addObserver('[]', this, this._array_notifyRangeObservers);
     }
 
-    return ret ;
+    return ret;
   },
 
   /**
@@ -486,7 +485,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     @param {SC.IndexSet} indexes new indexes to observe
     @returns {SC.RangeObserver} the range observer (or a new one)
   */
-  updateRangeObserver: function(rangeObserver, indexes) {
+  updateRangeObserver: function (rangeObserver, indexes) {
     return rangeObserver.update(this, indexes);
   },
 
@@ -500,22 +499,22 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     @param {SC.RangeObserver} rangeObserver the range observer
     @returns {SC.RangeObserver} updated range observer or null
   */
-  removeRangeObserver: function(rangeObserver) {
+  removeRangeObserver: function (rangeObserver) {
     var ret = rangeObserver.destroy(this);
     var rangeob = this._array_rangeObservers;
-    if (rangeob) rangeob.remove(rangeObserver) ; // clear
-    return ret ;
+    if (rangeob) rangeob.remove(rangeObserver); // clear
+    return ret;
   },
 
-  addArrayObservers: function(options) {
+  addArrayObservers: function (options) {
     this._modifyObserverSet('add', options);
   },
 
-  removeArrayObservers: function(options) {
+  removeArrayObservers: function (options) {
     this._modifyObserverSet('remove', options);
   },
 
-  _modifyObserverSet: function(method, options) {
+  _modifyObserverSet: function (method, options) {
     var willChangeObservers, didChangeObservers;
 
     var target     = options.target || this;
@@ -538,7 +537,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     didChangeObservers[method](target, didChange, context);
   },
 
-  arrayContentWillChange: function(start, removedCount, addedCount) {
+  arrayContentWillChange: function (start, removedCount, addedCount) {
     this._teardownContentObservers(start, removedCount);
 
     var member, members, membersLen, idx;
@@ -557,15 +556,15 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     }
   },
 
-  arrayContentDidChange: function(start, removedCount, addedCount) {
+  arrayContentDidChange: function (start, removedCount, addedCount) {
     var rangeob = this._array_rangeObservers,
-        newlen, length, changes ;
+      length, changes;
 
     this.beginPropertyChanges();
     this.notifyPropertyChange('length'); // flush caches
 
     // schedule info for range observers
-    if (rangeob && rangeob.length>0) {
+    if (rangeob && rangeob.length > 0) {
       changes = this._array_rangeChanges;
       if (!changes) { changes = this._array_rangeChanges = SC.IndexSet.create(); }
       if (removedCount === addedCount) {
@@ -605,10 +604,10 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
       }
     }
 
-    this.notifyPropertyChange('[]') ;
+    this.notifyPropertyChange('[]');
     this.endPropertyChanges();
 
-    return this ;
+    return this;
   },
 
   /**
@@ -621,23 +620,23 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     @param {Array} addedObjects the array of objects that have been added
     @param {Array} removedObjects the array of objects that have been removed
   */
-  _setupContentObservers: function(start, addedCount) {
+  _setupContentObservers: function (start, addedCount) {
     var observedKeys = this._kvo_for('_kvo_content_observed_keys', SC.CoreSet);
     var addedObjects;
     var kvoKey;
 
     // Only setup and teardown enumerable observers if we have keys to observe
     if (observedKeys.get('length') > 0) {
-      addedObjects = this.slice(start, start+addedCount);
+      addedObjects = this.slice(start, start + addedCount);
 
       var self = this;
       // added and resume the chain observer.
-      observedKeys.forEach(function(key) {
+      observedKeys.forEach(function (key) {
         kvoKey = SC.keyFor('_kvo_content_observers', key);
 
         // Get all original ChainObservers associated with the key
-        self._kvo_for(kvoKey).forEach(function(observer) {
-          addedObjects.forEach(function(item) {
+        self._kvo_for(kvoKey).forEach(function (observer) {
+          addedObjects.forEach(function (item) {
             self._resumeChainObservingForItemWithChainObserver(item, observer);
           });
         });
@@ -645,23 +644,23 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     }
   },
 
-  _teardownContentObservers: function(start, removedCount) {
+  _teardownContentObservers: function (start, removedCount) {
     var observedKeys = this._kvo_for('_kvo_content_observed_keys', SC.CoreSet);
     var removedObjects;
     var kvoKey;
 
     // Only setup and teardown enumerable observers if we have keys to observe
     if (observedKeys.get('length') > 0) {
-      removedObjects = this.slice(start, start+removedCount);
+      removedObjects = this.slice(start, start + removedCount);
 
       // added and resume the chain observer.
-      observedKeys.forEach(function(key) {
+      observedKeys.forEach(function (key) {
         kvoKey = SC.keyFor('_kvo_content_observers', key);
 
         // Loop through removed objects and remove any enumerable observers that
         // belong to them.
-        removedObjects.forEach(function(item) {
-          item._kvo_for(kvoKey).forEach(function(observer) {
+        removedObjects.forEach(function (item) {
+          item._kvo_for(kvoKey).forEach(function (observer) {
             observer.destroyChain();
           });
         });
@@ -669,11 +668,11 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     }
   },
 
-  teardownEnumerablePropertyChains: function(removedObjects) {
+  teardownEnumerablePropertyChains: function (removedObjects) {
     var chains = this._kvo_enumerable_property_chains;
 
     if (chains) {
-      chains.forEach(function(chain) {
+      chains.forEach(function (chain) {
         var idx, len = removedObjects.get('length'),
             chainGuid = SC.guidFor(chain),
             clonedChain, item, kvoChainList = '_kvo_enumerable_property_clones';
@@ -688,7 +687,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
         }
       }, this);
     }
-    return this ;
+    return this;
   },
 
   /**
@@ -699,11 +698,11 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     @param {Object[]} removedObjects the objected being removed from the enumerable
     @returns {Object} receiver
   */
-  setupEnumerablePropertyChains: function(addedObjects) {
+  setupEnumerablePropertyChains: function (addedObjects) {
     var chains = this._kvo_enumerable_property_chains;
 
     if (chains) {
-      chains.forEach(function(chain) {
+      chains.forEach(function (chain) {
         var idx, len = addedObjects.get('length');
 
         chain.notifyPropertyDidChange();
@@ -714,7 +713,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
         }
       }, this);
     }
-    return this ;
+    return this;
   },
 
   /**
@@ -727,12 +726,12 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     @param {String} property the property being listened for on this object
     @param {SC._PropertyChain} chain the chain to clone to items
   */
-  registerDependentKeyWithChain: function(property, chain) {
+  registerDependentKeyWithChain: function (property, chain) {
     // Get the set of all existing property chains that should
     // be propagated to enumerable contents. If that set doesn't
     // exist yet, _kvo_for() will create it.
     var kvoChainList = '_kvo_enumerable_property_chains',
-        chains, item, clone, cloneList;
+        chains;
 
     chains = this._kvo_for(kvoChainList, SC.CoreSet);
 
@@ -741,7 +740,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     // it to the new object.
     chains.add(chain);
 
-    this.forEach(function(item) {
+    this.forEach(function (item) {
       this._clonePropertyChainToItem(chain, item);
     }, this);
   },
@@ -752,7 +751,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     @param {SC._PropertyChain} chain
     @param {Object} item
   */
-  _clonePropertyChainToItem: function(chain, item) {
+  _clonePropertyChainToItem: function (chain, item) {
     var clone        = SC.clone(chain),
         kvoCloneList = '_kvo_enumerable_property_clones',
         cloneList;
@@ -772,12 +771,11 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     @param {String} property
     @param {SC._PropertyChain} chain
   */
-  removeDependentKeyWithChain: function(property, chain) {
-    var kvoChainList = '_kvo_enumerable_property_chains',
-        kvoCloneList = '_kvo_enumerable_property_clones',
-        chains, item, clone, cloneList;
+  removeDependentKeyWithChain: function (property, chain) {
+    var kvoCloneList = '_kvo_enumerable_property_clones',
+        clone, cloneList;
 
-    this.forEach(function(item) {
+    this.forEach(function (item) {
       item.removeDependentKeyWithChain(property, chain);
 
       cloneList = item[kvoCloneList];
@@ -796,7 +794,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     @param {Object} item The element
     @param {SC._ChainObserver} chainObserver the chain segment to begin from
   */
-  _resumeChainObservingForItemWithChainObserver: function(item, chainObserver) {
+  _resumeChainObservingForItemWithChainObserver: function (item, chainObserver) {
     var observer = SC.clone(chainObserver.next);
     var key = observer.property;
 
@@ -806,11 +804,10 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
 
     // if we're in the initial chained observer setup phase, add the tail
     // of the current observer segment to the list of tracked tails.
-    if(chainObserver.root.tails) {
+    if (chainObserver.root.tails) {
       chainObserver.root.tails.pushObject(observer.tail());
     }
 
-    observer.propertyDidChange();
 
     // Maintain a list of observers on the item so we can remove them
     // if it is removed from the enumerable.
@@ -834,7 +831,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
 
     @param {SC._ChainObserver} chainObserver the chain observer to propagate
   */
-  _addContentObserver: function(chainObserver) {
+  _addContentObserver: function (chainObserver) {
     var key = chainObserver.next.property;
 
     // Add the key to a set so we know what we are observing
@@ -844,7 +841,11 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     var kvoKey = SC.keyFor('_kvo_content_observers', key);
     this._kvo_for(kvoKey).push(chainObserver);
 
-    // set up chained observers on the initial content
+    // Add an observer on the '[]' property of this array.
+    var observer = chainObserver.tail();
+    this.addObserver('[]', observer, observer.propertyDidChange);
+
+    // Set up chained observers on the initial content
     this._setupContentObservers(0, chainObserver.object.get('length'));
   },
 
@@ -857,10 +858,14 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     @param {SC._ChainObserver} chainObserver the chain observer to propagate
   */
 
-  _removeContentObserver: function(chainObserver) {
+  _removeContentObserver: function (chainObserver) {
     var observers, kvoKey;
     var observedKeys = this._kvo_content_observed_keys;
     var key = chainObserver.next.property;
+
+    // Clean up the observer on the '[]' property of this array.
+    var observer = chainObserver.tail();
+    this.removeObserver('[]', observer, observer.propertyDidChange);
 
     if (observedKeys.contains(key)) {
 
@@ -881,19 +886,19 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     Observer fires whenever the '[]' property changes.  If there are
     range observers, will notify observers of change.
   */
-  _array_notifyRangeObservers: function() {
+  _array_notifyRangeObservers: function () {
     var rangeob = this._array_rangeObservers,
         changes = this._array_rangeChanges,
         len     = rangeob ? rangeob.length : 0,
-        idx, cur;
+        idx;
 
     if (len > 0 && changes && changes.length > 0) {
-      for(idx=0;idx<len;idx++) rangeob[idx].rangeDidChange(changes);
+      for (idx = 0; idx < len; idx++) rangeob[idx].rangeDidChange(changes);
       changes.clear(); // reset for later notifications
     }
   }
 
-} ;
+};
 
 /**
   @namespace

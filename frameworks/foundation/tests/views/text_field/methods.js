@@ -105,6 +105,17 @@ test("isEnabled=YES isEditable=YES should not add disable or readOnly attribute"
   ok(!view.$input().attr('readOnly'), 'should not have readOnly attribute');
 });
 
+test("isBrowserFocusable should set tab index", function() {
+  SC.RunLoop.begin();
+  view.set('isBrowserFocusable', YES);
+  SC.RunLoop.end();
+  ok(view.$input().attr('tabindex') !== "-1", 'focusable field should not have unfocusable tab index');
+  SC.RunLoop.begin();
+  view.set('isBrowserFocusable', NO);
+  SC.RunLoop.end();
+  ok(view.$input().attr('tabindex') === "-1", 'unfocusable field should have unfocusable tab index');
+});
+
 test("autoCapitalize=YES should add autocapitalize", function() {
   SC.RunLoop.begin();
   view.set('autoCapitalize', YES);

@@ -24,34 +24,38 @@
 //    })
 //  })
 //
-SC._ChainObserver = function(property, root) {
-  this.property = property ;
-  this.root = root || this ;
-} ;
+SC._ChainObserver = function (property, root) {
+  this.property = property;
+  this.root = root || this;
+};
 
-// This is the primary entry point.  Configures the chain.
-SC._ChainObserver.createChain = function(rootObject, path, target, method, context) {
+/** @private
+  This is the primary entry point.  Configures the chain.
 
+  @param {String} path The property path for the chain.  Ex. 'propA.propB.propC.@each.propD'
+  */
+SC._ChainObserver.createChain = function (rootObject, path, target, method, context) {
   // First we create the chain.
-  var parts = path.split('.'),
-      root  = new SC._ChainObserver(parts[0]),
+  var parts = path.split('.'), // ex. ['propA', 'propB', '@each', 'propC']
+      root  = new SC._ChainObserver(parts[0]), // ex. _ChainObserver({ property: 'propA' })
       tail  = root;
 
-  for(var i=1, l=parts.length; i<l; i++) {
-    tail = tail.next = new SC._ChainObserver(parts[i], root) ;
+  for (var i = 1, len = parts.length; i < len; i++) {
+    tail = tail.next = new SC._ChainObserver(parts[i], root);
   }
 
-  var tails = root.tails = [tail];
+  var tails = root.tails = [tail]; // ex. [_ChainObserver({ property: 'propC' })]
 
   // Now root has the first observer and tail has the last one.
   // Feed the rootObject into the front to setup the chain...
   // do this BEFORE we set the target/method so they will not be triggered.
   root.objectDidChange(rootObject);
 
-  tails.forEach(function(tail) {
-    // Finally, set the target/method on the tail so that future changes will
-    // trigger.
-    tail.target = target; tail.method = method ; tail.context = context ;
+  tails.forEach(function (tail) {
+    // Finally, set the target/method on the tail so that future changes will trigger.
+    tail.target = target;
+    tail.method = method;
+    tail.context = context;
   });
 
   // no need to hold onto references to the tails; if the underlying
@@ -59,7 +63,7 @@ SC._ChainObserver.createChain = function(rootObject, path, target, method, conte
   root.tails = null;
 
   // and return the root to save
-  return root ;
+  return root;
 };
 
 SC._ChainObserver.prototype = {
@@ -84,12 +88,12 @@ SC._ChainObserver.prototype = {
   method: null,
 
   // an accessor method that traverses the list and finds the tail
-  tail: function() {
-    if(this._tail) { return this._tail; }
+  tail: function () {
+    if (this._tail) { return this._tail; }
 
     var tail = this;
 
-    while(tail.next) {
+    while (tail.next) {
       tail = tail.next;
     }
 
@@ -99,7 +103,7 @@ SC._ChainObserver.prototype = {
 
   // invoked when the source object changes.  removes observer on old
   // object, sets up new observer, if needed.
-  objectDidChange: function(newObject) {
+  objectDidChange: function (newObject) {
     if (newObject === this.object) return; // nothing to do.
 
     // if an old object, remove observer on it.
@@ -112,7 +116,7 @@ SC._ChainObserver.prototype = {
     }
 
     // if a new object, add observer on it...
-    this.object = newObject ;
+    this.object = newObject;
 
     // when [].propName is used, we will want to set up observers on each item
     // added to the Enumerable, and remove them when the item is removed from
@@ -131,56 +135,57 @@ SC._ChainObserver.prototype = {
       }
 
       // now, notify myself that my property value has probably changed.
-      this.propertyDidChange() ;
+      this.propertyDidChange();
     }
   },
 
   // the observer method invoked when the observed property changes.
-  propertyDidChange: function() {
+  propertyDidChange: function () {
     // get the new value
-    var object = this.object ;
-    var property = this.property ;
-    var value = (object && object.get) ? object.get(property) : null ;
+    var object = this.object;
+    var property = this.property;
+    var value = (object && object.get) ? object.get(property) : null;
 
     // if we have a next object in the chain, notify it that its object
     // did change...
-    if (this.next) { this.next.objectDidChange(value) ; }
+    if (this.next) { this.next.objectDidChange(value); }
 
     // if we have a target/method, call it.
     var target  = this.target,
         method  = this.method,
-        context = this.context ;
+        context = this.context;
 
     if (target && method) {
-      var rev = object ? object.propertyRevision : null ;
+      var rev = object ? object.propertyRevision : null;
       if (context) {
         method.call(target, object, property, value, context, rev);
       } else {
-        method.call(target, object, property, value, rev) ;
+        method.call(target, object, property, value, rev);
       }
     }
   },
 
   // teardown the chain...
-  destroyChain: function() {
+  destroyChain: function () {
 
     // remove observer
-    var obj = this.object ;
+    var obj = this.object;
     if (obj) {
       if (this.property === '@each' && this.next && obj._removeContentObserver) {
         obj._removeContentObserver(this);
       }
+
       if (obj.removeObserver) {
-        obj.removeObserver(this.property, this, this.propertyDidChange) ;
+        obj.removeObserver(this.property, this, this.propertyDidChange);
       }
     }
 
     // destroy next item in chain
-    if (this.next) this.next.destroyChain() ;
+    if (this.next) this.next.destroyChain();
 
     // and clear left overs...
     this.next = this.target = this.method = this.object = this.context = null;
-    return null ;
+    return null;
   }
 
-} ;
+};

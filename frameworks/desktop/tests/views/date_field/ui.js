@@ -362,8 +362,8 @@ test("Adding right accessory view", function() {
   view.set('rightAccessoryView', accessoryView);
   SC.RunLoop.end();
 
-  ok(view.get('rightAccessoryView').get('layout').left === null, "right accessory view created with 'left' rather than 'right' in layout should have layout.left set to null");
-  ok(view.get('rightAccessoryView').get('layout').right === 0, "right accessory view created with 'left' rather than 'right' in layout should have layout.right set to 0");
+  equals(view.get('rightAccessoryView').get('layout').left, null, "right accessory view created with 'left' rather than 'right' in layout should have layout.left");
+  equals(view.get('rightAccessoryView').get('layout').right, 0, "right accessory view created with 'left' rather than 'right' in layout should have layout.right");
 
 
   // Test removing the accessory view.

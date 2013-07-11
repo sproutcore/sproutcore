@@ -116,7 +116,7 @@ test("should work with @each dependent keys", function() {
       return this.get('content').reduce(function(prev, item) {
         return prev + item.get('value');
       }, 0);
-    }.property('content.@each.value'),
+    }.property('content.@each.value').cacheable(),
 
     content: array
   });

@@ -178,6 +178,7 @@ SC.AutoResize = {
           calculatedWidth = maxWidth;
         }
         this.set('calculatedWidth', calculatedWidth);
+
         this.adjust('width', calculatedWidth);
       }
 
@@ -190,7 +191,7 @@ SC.AutoResize = {
       }
     }
 
-  }.observes('shouldAutoResize', 'measuredSize', 'autoResizePadding', 'maxWidth', 'minWidth', 'shouldResizeWidth', 'shouldResizeHeight'),
+  }.observes('shouldAutoResize', 'measuredSize', 'autoResizePadding', 'maxWidth', 'maxHeight', 'shouldResizeWidth', 'shouldResizeHeight'),
 
   /**
     @private
@@ -452,7 +453,28 @@ SC.AutoResize = {
     orig();
 
     this.scheduleMeasurement();
+  }.enhance(),
+
+  /** @private
+    If the view has a transitionIn property, we have to delay the transition
+    setup and execution until after we measure.  In order to prevent a brief
+    flash of the view, we ensure it is hidden while it is being measured and
+    adjusted.
+
+    TODO: consider making the measurement state a formal SC.View state
+  */
+  _transitionIn: function (original) {
+    // In order to allow views to measure and adjust themselves on append, we
+    // can't transition until after the measurement is done.
+    var preTransitionOpacity = this.get('layout').opacity || 1;
+
+    this.adjust('opacity', 0);
+    this.invokeNext(function () {
+      this.adjust('opacity', preTransitionOpacity);
+      original();
+    });
   }.enhance()
+
 };
 
 /**

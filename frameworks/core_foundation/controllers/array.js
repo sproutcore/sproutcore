@@ -123,7 +123,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
 
     @type SC.Array
   */
-  arrangedObjects: function() {
+  arrangedObjects: function () {
     return this;
   }.property().cacheable(),
 
@@ -134,13 +134,13 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
 
     @type Boolean
   */
-  canRemoveContent: function() {
+  canRemoveContent: function () {
     var content = this.get('content'), ret;
     ret = !!content && this.get('isEditable') && this.get('hasContent');
     if (ret) {
       return !content.isEnumerable ||
              (SC.typeOf(content.removeObject) === SC.T_FUNCTION);
-    } else return NO ;
+    } else return NO;
   }.property('content', 'isEditable', 'hasContent'),
 
   /**
@@ -151,7 +151,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
 
     @type Boolean
   */
-  canReorderContent: function() {
+  canReorderContent: function () {
     var content = this.get('content'), ret;
     ret = !!content && this.get('isEditable') && !this.get('orderBy');
     return ret && !!content.isSCArray;
@@ -168,13 +168,13 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
 
     @type Boolean
   */
-  canAddContent: function() {
-    var content = this.get('content'), ret ;
+  canAddContent: function () {
+    var content = this.get('content'), ret;
     ret = content && this.get('isEditable') && content.isEnumerable;
     if (ret) {
       return (SC.typeOf(content.addObject) === SC.T_FUNCTION) ||
              (SC.typeOf(content.pushObject) === SC.T_FUNCTION);
-    } else return NO ;
+    } else return NO;
   }.property('content', 'isEditable'),
 
   /**
@@ -184,7 +184,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
 
     @type Boolean
   */
-  hasContent: function() {
+  hasContent: function () {
     var content = this.get('content');
     return !!content &&
            (!!content.isEnumerable || !!this.get('allowsSingleContent'));
@@ -196,7 +196,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
 
     @type Number
   */
-  status: function() {
+  status: function () {
     var content = this.get('content'),
         ret = content ? content.get('status') : null;
     return ret ? ret : SC.Record.READY;
@@ -217,7 +217,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     @param {Object} object The object to add to the array.
     @returns {SC.ArrayController} The receiver.
   */
-  addObject: function(object) {
+  addObject: function (object) {
     if (!this.get('canAddContent')) { throw new Error("%@ cannot add content".fmt(this)); }
 
     var content = this.get('content');
@@ -238,7 +238,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     @param {Object} object the object to remove
     @returns {SC.ArrayController} receiver
   */
-  removeObject: function(object) {
+  removeObject: function (object) {
     if (!this.get('canRemoveContent')) {
       throw new Error("%@ cannot remove content".fmt(this));
     }
@@ -263,7 +263,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
 
     @type Number
   */
-  length: function() {
+  length: function () {
     var content = this._scac_observableContent();
     return content ? content.get('length') : 0;
   }.property().cacheable(),
@@ -271,17 +271,17 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   /** @private
     Returns the object at the specified index based on the observable content
   */
-  objectAt: function(idx) {
+  objectAt: function (idx) {
     var content = this._scac_observableContent();
-    return content ? content.objectAt(idx) : undefined ;
+    return content ? content.objectAt(idx) : undefined;
   },
 
   /** @private
     Forwards a replace on to the content, but only if reordering is allowed.
   */
-  replace: function(start, amt, objects) {
+  replace: function (start, amt, objects) {
     // check for various conditions before a replace is allowed
-    if (!objects || objects.get('length')===0) {
+    if (!objects || objects.get('length') === 0) {
       if (!this.get('canRemoveContent')) {
         throw new Error("%@ cannot remove objects from the current content".fmt(this));
       }
@@ -293,15 +293,16 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     // updates back up the stack, updating rangeObservers, etc.
     var content = this.get('content'); // note: use content, not observable
     var objsToDestroy = [], i, objsLen;
-    if (this.get('destroyOnRemoval')){
-      for(i=0; i<amt; i++){
-        objsToDestroy.push(content.objectAt(i+start));
+
+    if (this.get('destroyOnRemoval')) {
+      for (i = 0; i < amt; i++) {
+        objsToDestroy.push(content.objectAt(i + start));
       }
     }
 
     if (content) { content.replace(start, amt, objects); }
 
-    for(i=0, objsLen = objsToDestroy.length; i<objsLen; i++){
+    for (i = 0, objsLen = objsToDestroy.length; i < objsLen; i++) {
 
       objsToDestroy[i].destroy();
     }
@@ -310,7 +311,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     return this;
   },
 
-  indexOf: function(object, startAt) {
+  indexOf: function (object, startAt) {
     var content = this._scac_observableContent();
     return content ? content.indexOf(object, startAt) : -1;
   },
@@ -320,7 +321,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   //
 
   /** @private */
-  init: function() {
+  init: function () {
     sc_super();
     this._scac_contentDidChange();
   },
@@ -342,11 +343,11 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
 
     @returns {SC.Array} observable or null
   */
-  _scac_observableContent: function() {
+  _scac_observableContent: function () {
     var ret = this._scac_cached;
     if (ret) { return ret; }
 
-    var content = this.get('content'), func, len, order;
+    var content = this.get('content'), func, order;
 
     // empty content
     if (SC.none(content)) { return (this._scac_cached = []); }
@@ -360,7 +361,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     // no-wrap
     var orderBy = this.get('orderBy');
     if (!orderBy) {
-      if (content.isSCArray) { return (this._scac_cached = content) ; }
+      if (content.isSCArray) { return (this._scac_cached = content); }
       else { throw new Error("%@.orderBy is required for unordered content".fmt(this)); }
     }
 
@@ -369,19 +370,19 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     // build array - then sort it
     var type = SC.typeOf(orderBy);
 
-    if(type === SC.T_STRING) {
+    if (type === SC.T_STRING) {
       orderBy = [orderBy];
-    } else if(type === SC.T_FUNCTION) {
+    } else if (type === SC.T_FUNCTION) {
       func = orderBy;
-    } else if(type !== SC.T_ARRAY) {
+    } else if (type !== SC.T_ARRAY) {
       throw new Error("%@.orderBy must be Array, String, or Function".fmt(this));
     }
 
     // generate comparison function if needed - use orderBy
-    func = func || function(a,b) {
+    func = func || function (a, b) {
       var status, key, match, valueA, valueB;
 
-      for(var i=0, l=orderBy.get('length'); i<l && !status; i++) {
+      for (var i = 0, l = orderBy.get('length'); i < l && !status; i++) {
         key = orderBy.objectAt(i);
 
         if (key.search(/(ASC|DESC)/) === 0) {
@@ -402,13 +403,13 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
         status = SC.compare(valueA, valueB) * order;
       }
 
-      return status ;
+      return status;
     };
 
-    return (this._scac_cached = content.toArray().sort(func)) ;
+    return (this._scac_cached = content.toArray().sort(func));
   },
 
-  propertyWillChange: function(key) {
+  propertyWillChange: function (key) {
     if (key === 'content') {
       this.arrayContentWillChange(0, this.get('length'), 0);
     } else {
@@ -416,19 +417,19 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     }
   },
 
-  _scac_arrayContentWillChange: function(start, removed, added) {
+  _scac_arrayContentWillChange: function (start, removed, added) {
     this.arrayContentWillChange(start, removed, added);
     if (this._kvo_enumerable_property_chains) {
-      var removedObjects = this.slice(start, start+removed);
+      var removedObjects = this.slice(start, start + removed);
       this.teardownEnumerablePropertyChains(removedObjects);
     }
   },
 
-  _scac_arrayContentDidChange: function(start, removed, added) {
+  _scac_arrayContentDidChange: function (start, removed, added) {
     this._scac_cached = NO;
     this.arrayContentDidChange(start, removed, added);
     if (this._kvo_enumerable_property_chains) {
-      var addedObjects = this.slice(start, start+added);
+      var addedObjects = this.slice(start, start + added);
       this.setupEnumerablePropertyChains(addedObjects);
     }
     this.updateSelectionAfterContentChange();
@@ -438,14 +439,14 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     Whenever content changes, setup and teardown observers on the content
     as needed.
   */
-  _scac_contentDidChange: function() {
+  _scac_contentDidChange: function () {
 
     this._scac_cached = NO; // invalidate observable content
 
     var content     = this.get('content'),
-        orders      = !!this.get('orderBy'),
+        // orders      = !!this.get('orderBy'),
         lastContent = this._scac_content,
-        oldlen      = this._scac_length || 0,
+        // oldlen      = this._scac_length || 0,
         didChange   = this._scac_arrayContentDidChange,
         willChange  = this._scac_arrayContentWillChange,
         sfunc       = this._scac_contentStatusDidChange,
@@ -473,7 +474,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
 
     // save new cached values
     this._scac_cached = NO;
-    this._scac_content = content ;
+    this._scac_content = content;
 
     // setup new observer
     // also, calculate new length.  do it manually instead of using
@@ -522,7 +523,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     This is called whenever the content enumerable changes or whenever orderBy
     changes.
   */
-  _scac_enumerableDidChange: function() {
+  _scac_enumerableDidChange: function () {
     var content = this.get('content'), // use content directly
         newlen  = content ? content.get('length') : 0,
         oldlen  = this._scac_length;
@@ -542,7 +543,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   /** @private
     Whenever the content "status" property changes, relay out.
   */
-  _scac_contentStatusDidChange: function() {
+  _scac_contentStatusDidChange: function () {
     this.notifyPropertyChange('status');
   }
 

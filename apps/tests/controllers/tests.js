@@ -2,7 +2,7 @@
 // Project:   TestRunner.testsController
 // Copyright: ©2011 Apple Inc.
 // ==========================================================================
-/*globals TestRunner */
+/*global TestRunner */
 
 /**
 
@@ -13,21 +13,17 @@
 TestRunner.testsController = SC.ArrayController.create(
 /** @scope TestRunner.testsController.prototype */ {
 
-  contentBinding: "TestRunner.targetController.tests",
+  contentBinding: SC.Binding.oneWay('TestRunner.targetController.tests'),
 
   /**
     Enables/disables continuous integration mode.
   */
   useContinuousIntegration: NO,
 
-  /**
-    Whenever we are actually showing the tests, then controls are enabled.
-    Set to YES when in READY_LIST mode.
-  */
-  isShowingTests: YES,
-
-  statusDidChange: function() {
-    TestRunner.sendAction('testsDidChange');
+  statusDidChange: function () {
+    if (this.get('status') === SC.Record.READY_CLEAN) {
+      TestRunner.statechart.resumeGotoState();
+    }
   }.observes('status')
 
-}) ;
+});

@@ -40,8 +40,6 @@ SC.View.reopen(
   */
   hasLayout: YES,
 
-  concatenatedProperties: ["layoutProperties"],
-
   /**
     Optional background color.  Will be applied to the view's element if
     set.  This property is intended for one-off views that need a background
