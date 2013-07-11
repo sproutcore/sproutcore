@@ -183,6 +183,40 @@ if (SC.platform.supportsCSSTransitions) {
     }, 5);
   });
 
+  test("animating height with a centerY layout should also animate margin-top", function () {
+    stop(2000);
+
+    SC.RunLoop.begin();
+    view.adjust({ top: null, centerY: 0 });
+    view.animate({ height: 10 }, { duration: 1 });
+    SC.RunLoop.end();
+
+    setTimeout(function () {
+      equals(transitionFor(view), 'height 1s ease 0s, margin-top 1s ease 0s', 'should add height and margin-top transitions');
+      equals(view.get('layout').height, 10, 'height');
+      equals(view.get('layout').centerY, 0, 'centerY');
+
+      start();
+    }, 5);
+  });
+
+  test("animating width with a centerX layout should also animate margin-left", function () {
+    stop(2000);
+
+    SC.RunLoop.begin();
+    view.adjust({ left: null, centerX: 0 });
+    view.animate({ width: 10 }, { duration: 1 });
+    SC.RunLoop.end();
+
+    setTimeout(function () {
+      equals(transitionFor(view), 'width 1s ease 0s, margin-left 1s ease 0s', 'should add width and margin-left transitions');
+      equals(view.get('layout').width, 10, 'width');
+      equals(view.get('layout').centerX, 0, 'centerX');
+
+      start();
+    }, 5);
+  });
+
   // Pretty sure this does the job
   test("callbacks should be called only once for a grouped animation", function () {
     stop(2000);

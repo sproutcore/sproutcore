@@ -362,13 +362,21 @@ SC.View.reopen(
         valueDidChange = YES;
         layout[property] = value;
 
-      // Always update the animate hash to the newest options which may have been altered before this was applied.
-      pendingAnimations[property] = options;
-    }
+        // Always update the animate hash to the newest options which may have been altered before this was applied.
+        pendingAnimations[property] = options;
+      }
     }
 
     // Only animate to new values.
     if (valueDidChange) {
+      // When animating height or width with centerX or centerY, we need to animate the margin property also to get a smooth change.
+      if (!SC.none(pendingAnimations.height) && !SC.none(layout.centerY) && SC.none(pendingAnimations.centerY)) {
+        pendingAnimations.centerY = options;
+      }
+      if (!SC.none(pendingAnimations.width) && !SC.none(layout.centerX) && SC.none(pendingAnimations.centerX)) {
+        pendingAnimations.centerX = options;
+      }
+
       this._animateLayout = layout;
 
       // Always run the animation asynchronously so that the original layout is guaranteed to be applied to the DOM.
@@ -655,7 +663,7 @@ SC.View.reopen(
     // Fix up the centerX & centerY properties.
     if (propertyName === 'margin-left') { propertyName = 'centerX'; }
     if (propertyName === 'margin-top') { propertyName = 'centerY'; }
-      animation = activeAnimations ? activeAnimations[propertyName] : null;
+    animation = activeAnimations ? activeAnimations[propertyName] : null;
 
     if (animation) {
       // Update the animation hash.  Do this first, so callbacks can check for active animations.
