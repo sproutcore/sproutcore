@@ -167,6 +167,22 @@ if (SC.platform.supportsCSSTransitions) {
     }, 5);
   });
 
+  test("should not animate any keys that don't change", function () {
+    stop(2000);
+
+    SC.RunLoop.begin();
+    view.animate({ top: 0, left: 100 }, { duration: 1 });
+    SC.RunLoop.end();
+
+    setTimeout(function () {
+      equals(transitionFor(view), 'left 1s ease 0s', 'should only add left transition');
+      equals(0, view.get('layout').top, 'top is 0');
+      equals(100, view.get('layout').left, 'left is 100');
+
+      start();
+    }, 5);
+  });
+
   // Pretty sure this does the job
   test("callbacks should be called only once for a grouped animation", function () {
     stop(2000);

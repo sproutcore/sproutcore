@@ -358,13 +358,13 @@ SC.View.reopen(
         this.runAnimationCallback(curAnim, null, YES);
       }
 
-      if (cur !== value) {
+      if (cur !== value || optionsDidChange) {
         valueDidChange = YES;
         layout[property] = value;
-      }
 
       // Always update the animate hash to the newest options which may have been altered before this was applied.
       pendingAnimations[property] = options;
+    }
     }
 
     // Only animate to new values.
