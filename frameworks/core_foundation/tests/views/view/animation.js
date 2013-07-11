@@ -703,7 +703,7 @@ if (SC.platform.supportsCSSTransitions) {
 
 
       SC.run(function () {
-        view.animate({ left: 100, top: 100, width: 400 }, { duration: 0.5 }, function (data) {
+        view.animate({ left: 200, top: 200, width: 400 }, { duration: 1 }, function (data) {
           ok(data.isCancelled, "The isCancelled property of the data should be true.");
         });
       });
@@ -715,9 +715,9 @@ if (SC.platform.supportsCSSTransitions) {
           transform = transform.match(/\d+/g);
 
           // We need to check these separately because in some cases we'll also have translateZ, this way we don't have to worry about it
-          equals(transform[0], '100',  "Test translateX after animate.");
-          equals(transform[1], '100',  "Test translateY after animate.");
-          equals(transitionFor(view), SC.browser.experimentalCSSNameFor('transform') + ' 0.5s ease 0s, width 0.5s ease 0s', 'Tests the CSS transition property');
+          equals(transform[0], '200',  "Test translateX after animate.");
+          equals(transform[1], '200',  "Test translateY after animate.");
+          equals(transitionFor(view), SC.browser.experimentalCSSNameFor('transform') + ' 1s ease 0s, width 1s ease 0s', 'Tests the CSS transition property');
 
           equals(style.left, '0px', 'Tests the left style after animate');
           equals(style.top, '0px', 'Tests the top style after animate');
@@ -728,19 +728,17 @@ if (SC.platform.supportsCSSTransitions) {
       }, 250);
 
       setTimeout(function () {
-        var style = styleFor(view);
-
-        var transform = style[SC.browser.experimentalStyleNameFor('transform')];
-        transform = transform.match(/\d+/g);
+        var style = styleFor(view),
+          layout = view.get('layout');
 
         equals(transitionFor(view), '', 'Tests that there is no CSS transition property after cancel');
 
         // We need to check these separately because in some cases we'll also have translateZ, this way we don't have to worry about it
-        ok((parseInt(transform[0], 10) > 0) && (parseInt(transform[0], 10) < 100), 'Tests the left style, %@, after cancel is greater than 0 and less than 100'.fmt(style.left));
-        ok((parseInt(transform[1], 10) > 0) && (parseInt(transform[1], 10) < 100), 'Tests the top style, %@, after cancel is greater than 0 and less than 100'.fmt(style.top));
-        ok((parseInt(style.width, 10) > 100) && (parseInt(style.width, 10) < 400), 'Tests the width style, %@, after cancel is greater than 0 and less than 100'.fmt(style.width));
+        ok((layout.left > 0) && (layout.left < 200), 'Tests the left style, %@, after cancel is greater than 0 and less than 200'.fmt(style.left));
+        ok((layout.top > 0) && (layout.top < 200), 'Tests the top style, %@, after cancel is greater than 0 and less than 200'.fmt(style.top));
+        ok((parseInt(style.width, 10) > 100) && (parseInt(style.width, 10) < 400), 'Tests the width style, %@, after cancel is greater than 100 and less than 400'.fmt(style.width));
         start();
-      }, 350);
+      }, 750);
     });
 
     test("Test that cancelAnimation(SC.LayoutState.START) removes the animation style, goes back to the start position and fires the callback with isCancelled set.", function () {
