@@ -6,7 +6,6 @@
 sc_require('views/view');
 
 
-// This adds child layout plugin constants to SC.View.
 SC.mixin(SC.View,
   /** @scope SC.View */ {
 
@@ -103,11 +102,12 @@ SC.mixin(SC.View,
         });
 
     If `resizeToFit` is set to `false`, the view will not adjust itself to fit
-    its child views.  This means that the view must have a height component in
-    its layout.  This also means that you can ignore the last child view's
-    layout height if you want it to stretch to fill the parent view.
+    its child views.  This means that when `resizeToFit` is false, the view should
+    specify its height component in its layout.  This also means that you can
+    ignore the last child view's layout height if you want the last child view
+    to stretch to fill the parent view.
 
-        For example,
+    For example,
 
         MyApp.MyView = SC.View.extend({
 
@@ -140,7 +140,7 @@ SC.mixin(SC.View,
 
           sectionC: SC.View.design({
             // Actual layout will become { left: 10, right: 10, top: 170, bottom: 20 }
-            layout: { left: 10, right: 10} // Don't need to specify layout.top, layout.bottom or layout.height, this is automatic.
+            layout: { left: 10, right: 10 } // Don't need to specify layout.top, layout.bottom or layout.height, this is automatic.
           })
 
         });
@@ -156,7 +156,7 @@ SC.mixin(SC.View,
       - useStaticLayout - Don't include this child view in automatic layout.  This child view uses relative positioning and is not eligible for automatic layout.
       - isVisible - Non-visible child views are not included in the stack.
 
-      For example,
+    For example,
 
         MyApp.MyView = SC.View.extend({
 
@@ -200,23 +200,25 @@ SC.mixin(SC.View,
 
     Note that the spacing attribute in `childViewLayoutOptions` becomes the
     _minimum margin between child views, without explicitly overriding it from
-    both sides using `marginBottom` and `marginTop`_.  For example, if `spacing`
-    is 25, setting `marginBottom` to 10 on a child view will not result in the
+    both sides using `marginAfter` and `marginBefore`_.  For example, if `spacing`
+    is 25, setting `marginAfter` to 10 on a child view will not result in the
     next child view being 10px below it, unless the next child view also
-    specified `marginTop` as 10.
+    specified `marginBefore` as 10.
 
     What this means is that it takes less configuration if you set `spacing` to
     be the _smallest margin you wish to exist between child views_ and then use
-    the overrides to _grow the margin_ if necessary.  For example, if `spacing`
-    is 5, setting `marginBottom` to 10 on a child view will result in the next
-    child view being 10px below it, without having to also specify `marginTop`
+    the overrides to grow the margin if necessary.  For example, if `spacing`
+    is 5, setting `marginAfter` to 10 on a child view will result in the next
+    child view being 10px below it, without having to also specify `marginBefore`
     on that next child view.
 
+    @extends SC.ChildViewLayoutProtocol
+    @since Version 1.10
   */
   VERTICAL_STACK: {
 
     /** @private */
-    observedProperties: ['marginTop', 'marginBottom', 'isVisible'],
+    observedProperties: ['marginBefore', 'marginAfter', 'isVisible'],
 
     /** @private */
     layoutChildViews: function (view) {
@@ -224,7 +226,7 @@ SC.mixin(SC.View,
         options = view.get('childViewLayoutOptions') || {},
         resizeToFit = SC.none(options.resizeToFit) ? true : options.resizeToFit,
         lastMargin = 0, // Used to avoid adding spacing to the final margin.
-        marginBottom = options.paddingBefore || 0,
+        marginAfter = options.paddingBefore || 0,
         paddingAfter = options.paddingAfter || 0,
         position = 0,
         spacing = options.spacing || 0,
@@ -233,7 +235,7 @@ SC.mixin(SC.View,
       for (i = 0, len = childViews.get('length'); i < len; i++) {
         var childView = childViews.objectAt(i),
           layout,
-          marginTop;
+          marginBefore;
 
         // Ignore child views with useAbsoluteLayout true, useStaticLayout true or that are not visible.
         if (!childView.get('isVisible') ||
@@ -252,8 +254,8 @@ SC.mixin(SC.View,
         //@endif
 
         // Determine the top margin.
-        marginTop = childView.get('marginTop') || 0;
-        position += Math.max(marginBottom, marginTop);
+        marginBefore = childView.get('marginBefore') || 0;
+        position += Math.max(marginAfter, marginBefore);
 
         if (layout.top !== position) {
           childView.adjust('top', position);
@@ -266,8 +268,8 @@ SC.mixin(SC.View,
         position += childView.getPath('borderFrame.height');
 
         // Determine the bottom margin.
-        lastMargin = childView.get('marginBottom') || 0;
-        marginBottom = lastMargin || spacing;
+        lastMargin = childView.get('marginAfter') || 0;
+        marginAfter = lastMargin || spacing;
       }
 
       // Adjust our frame to fit as well, this ensures that scrolling works.
