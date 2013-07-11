@@ -1382,12 +1382,12 @@ SC.CoreView.reopen(
       this._setupTransition();
     }
 
-    // Set up the outgoing transition.
+    // Set up the hiding transition.
     if (transitionHide.setupOut) {
       transitionHide.setupOut(this, options, inPlace);
     }
 
-    // Execute the outgoing transition.
+    // Execute the hiding transition.
     transitionHide.runOut(this, options, this._preTransitionLayout, this._preTransitionFrame);
   },
 
@@ -1461,12 +1461,12 @@ SC.CoreView.reopen(
       this._setupTransition();
     }
 
-    // Set up the outgoing transition.
+    // Set up the showing transition.
     if (transitionShow.setupIn) {
       transitionShow.setupIn(this, options, inPlace);
     }
 
-    // Execute the outgoing transition.
+    // Execute the showing transition.
     transitionShow.runIn(this, options, this._preTransitionLayout, this._preTransitionFrame);
   },
 
