@@ -650,6 +650,11 @@ SC.View.reopen(
   transitionDidEnd: function (evt) {
     var propertyName = evt.originalEvent.propertyName,
       activeAnimations = this._activeAnimations,
+      animation;
+
+    // Fix up the centerX & centerY properties.
+    if (propertyName === 'margin-left') { propertyName = 'centerX'; }
+    if (propertyName === 'margin-top') { propertyName = 'centerY'; }
       animation = activeAnimations ? activeAnimations[propertyName] : null;
 
     if (animation) {
