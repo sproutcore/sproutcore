@@ -71,12 +71,14 @@ SC.View.reopen(
     // Apply the automatic child view layout if it is defined.
     var childViewLayout = this.childViewLayout;
     if (childViewLayout) {
-      childViewLayout.adjustChildViews(this);
+      childViewLayout.layoutChildViews(this);
 
       // Observer the child views if the layout is live.
       if (this.get('isChildViewLayoutLive')) {
-        this.addObserver('childViewLayoutOptions', this, this.layoutDidChange);
-        childViewLayout.beginObservingChildViews(this);
+        this.addObserver('childViewLayout', this, this.childViewLayoutDidChange);
+        this.addObserver('childViewLayoutOptions', this, this.childViewLayoutDidChange);
+
+        this.setupChildViewsForLiveChildViewLayout();
       }
     }
 
@@ -922,8 +924,6 @@ SC.View.reopen(
     if (this.get('childViewsNeedLayout')) {
       this.layoutChildViews(force);
 
-      // Set this to false after the layout completes.
-      console.log('%@ - reset childViewsNeedLayout to NO'.fmt(this));
       this.set('childViewsNeedLayout', NO);
     }
 
@@ -944,26 +944,31 @@ SC.View.reopen(
   */
   layoutChildViews: function (force) {
     var childViewLayout = this.childViewLayout,
-      set = this._needLayoutViews,
-      len = set ? set.length : 0,
-      i;
+      set, len, i;
 
-    // If using a childViewLayout plugin, when one child layout changes, all
-    // other child layouts must be adjusted, but only if the childView
-    // participates in automatic layout.
-    // if (childView.get('useAbsoluteLayout') || childView.get('useStaticLayout') || !childView.get('isVisible') || !childViewLayout) {
+    // Allow the child view layout plugin to layout all child views.
     if (childViewLayout) {
       // Adjust all other child views right now.
       // Note: this will add the affected child views to the set so they will be updated only once in this run loop
-      // set.addEach(
-      childViewLayout.adjustChildViews(this);
-      // );
+      childViewLayout.layoutChildViews(this);
     }
 
-    for (i = 0; i < len; ++i) {
+    // Retreive these values after they may have been updated by adjustments by
+    // the childViewLayout plugin.
+    set = this._needLayoutViews;
+    len = set ? set.length : 0;
+    for (i = 0, len; i < len; ++i) {
       set[i].updateLayout(force);
     }
     set.clear(); // reset & reuse
+  },
+
+  /** @private Called when the child view layout plugin or options change. */
+  childViewLayoutDidChange: function () {
+    this.set('childViewsNeedLayout', true);
+
+    // Filter the input channel.
+    this.invokeOnce(this.layoutChildViewsIfNeeded);
   },
 
   /**
@@ -1069,39 +1074,45 @@ SC.View.reopen(
   childViewLayoutOptions: null,
 
   /**
-    Whether the child views should be monitored for changes that affect the
-    current child view layout.
+    Whether the view and its child views should be monitored for changes that
+    affect the current child view layout.
 
-    When true and using a childViewLayout plugin, the child views will be
-    observed for changes that would effect the layout of all the child views.
-    For example, when using SC.View.VERTICAL_STACK, if any child view's height
-    or visibility changes, the view will adjust the other child views
-    accordingly.
+    When `true` and using a childViewLayout plugin, the view and its child views
+    will be observed for any changes that would affect the layout of all the
+    child views.  For example, if `isChildViewLayout` is true and using
+    SC.View.VERTICAL_STACK, if any child view's height or visibility changes
+    all of the child views will be re-adjusted.
+
+    If you only want to automatically layout the child views once, you can
+    set this to `false` to improve performance.
 
     @type Boolean
     @default true
   */
   isChildViewLayoutLive: true,
 
-  /**
-    Called by observers on child views when a property of the child view
-    changes in such a manner that requires the child view layout to be
-    reapplied.
-
-    @returns {void}
-  */
-  // childViewLayoutNeedsUpdate: function () {
-  //   // Invoke once so if multiple children invalidate in a single run loop,
-  //   // we still only recalculate once.
-  //   this.invokeOnce(this._adjustChildViewLayout);
-  // },
-
   /** @private */
-  // _adjustChildViewLayout: function () {
-  //   var childViewLayout = this.childViewLayout;
+  setupChildViewsForLiveChildViewLayout: function () {
+    var childViewLayout = this.childViewLayout,
+      childViews, observedProperties;
 
-  //   childViewLayout.adjustChildViews(this);
-  // },
+    if (childViewLayout) {
+      observedProperties = childViewLayout.observedProperties || [];
+
+      childViews = this.get('childViews');
+      for (var i = 0, len = observedProperties.length; i < len; i++) {
+        var observedProperty = observedProperties[i];
+
+        for (var j = 0, jlen = childViews.get('length'); j < jlen; j++) {
+          var childView = childViews.objectAt(j);
+          if (!childView.get('useAbsoluteLayout') && !childView.get('useStaticLayout')) {
+            childView.addObserver(observedProperty, this, this.childViewLayoutDidChange);
+          }
+        }
+
+      }
+    }
+  },
 
   // ------------------------------------------------------------------------
   // Statechart
