@@ -601,11 +601,14 @@ SC.Drag = SC.Object.extend(
       classNames: ['sc-ghost-view'],
       layout: { top: frame.y, left: frame.x, width: frame.width, height: frame.height },
       owner: this,
+      wantsAcceleratedLayer: dragView.get('wantsAcceleratedLayer'),
+
       didCreateLayer: function () {
         if (dragView) {
           var layer = dragView.get('layer');
           if (layer) {
             layer = layer.cloneNode(true);
+
             // Make sure the layer we put in the ghostView wrapper is not displaced.
             layer.style.top = "0px";
             layer.style.left = "0px";
