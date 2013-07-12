@@ -217,8 +217,8 @@ SC.mixin(SC.View,
   */
   VERTICAL_STACK: {
 
-    /** @private */
-    observedProperties: ['marginBefore', 'marginAfter', 'isVisible'],
+    /** @private Properties to observe on child views that affect the overall child view layout. */
+    childLayoutProperties: ['marginBefore', 'marginAfter', 'isVisible'],
 
     /** @private */
     layoutChildViews: function (view) {

@@ -72,14 +72,18 @@ SC.View.reopen(
     // Apply the automatic child view layout if it is defined.
     var childViewLayout = this.childViewLayout;
     if (childViewLayout) {
-      childViewLayout.layoutChildViews(this);
+      // Layout the child views once.
+      this.set('childViewsNeedLayout', true);
+      this.layoutChildViewsIfNeeded();
 
-      // Observer the child views if the layout is live.
+      // If the child view layout is live, start observing affecting properties.
       if (this.get('isChildViewLayoutLive')) {
-        this.addObserver('childViewLayout', this, this.childViewLayoutDidChange);
-        this.addObserver('childViewLayoutOptions', this, this.childViewLayoutDidChange);
+        this.addObserver('childViews.[]', this, this._cvl_childViewsDidChange);
+        // DISABLED. this.addObserver('childViewLayout', this, this._cvl_childViewLayoutDidChange);
+        this.addObserver('childViewLayoutOptions', this, this._cvl_childViewLayoutDidChange);
 
-        this.setupChildViewsForLiveChildViewLayout();
+        // Initialize the child views.
+        this._cvl_setupChildViewsLiveLayout();
       }
     }
 
@@ -996,19 +1000,70 @@ SC.View.reopen(
     // Retreive these values after they may have been updated by adjustments by
     // the childViewLayout plugin.
     set = this._needLayoutViews;
-    len = set ? set.length : 0;
-    for (i = 0, len; i < len; ++i) {
-      set[i].updateLayout(force);
+    if (set) {
+      for (i = 0, len = set.length; i < len; ++i) {
+        set[i].updateLayout(force);
+      }
+
+      set.clear(); // reset & reuse
     }
-    set.clear(); // reset & reuse
   },
 
   /** @private Called when the child view layout plugin or options change. */
-  childViewLayoutDidChange: function () {
+  _cvl_childViewLayoutDidChange: function () {
     this.set('childViewsNeedLayout', true);
 
     // Filter the input channel.
     this.invokeOnce(this.layoutChildViewsIfNeeded);
+  },
+
+  /** @private Called when the child views change. */
+  _cvl_childViewsDidChange: function () {
+    this._cvl_teardownChildViewsLiveLayout();
+    this._cvl_setupChildViewsLiveLayout();
+
+    this.set('childViewsNeedLayout', true);
+
+    // Filter the input channel.
+    this.invokeOnce(this.layoutChildViewsIfNeeded);
+  },
+
+  /** @private Add observers to the child views for automatic child view layout. */
+  _cvl_setupChildViewsLiveLayout: function () {
+    var childViewLayout = this.childViewLayout,
+      childViews,
+      childLayoutProperties = childViewLayout.childLayoutProperties || [];
+
+    // Create a reference to the current child views so that we can clean them if they change.
+    childViews = this._cvl_childViews = this.get('childViews');
+    for (var i = 0, len = childLayoutProperties.length; i < len; i++) {
+      var observedProperty = childLayoutProperties[i];
+
+      for (var j = 0, jlen = childViews.get('length'); j < jlen; j++) {
+        var childView = childViews.objectAt(j);
+        if (!childView.get('useAbsoluteLayout') && !childView.get('useStaticLayout')) {
+          childView.addObserver(observedProperty, this, this._cvl_childViewLayoutDidChange);
+        }
+      }
+    }
+  },
+
+  /** @private Remove observers from the child views for automatic child view layout. */
+  _cvl_teardownChildViewsLiveLayout: function () {
+    var childViewLayout = this.childViewLayout,
+      childViews = this._cvl_childViews || [],
+      childLayoutProperties = childViewLayout.childLayoutProperties || [];
+
+    for (var i = 0, len = childLayoutProperties.length; i < len; i++) {
+      var observedProperty = childLayoutProperties[i];
+
+      for (var j = 0, jlen = childViews.get('length'); j < jlen; j++) {
+        var childView = childViews.objectAt(j);
+        if (!childView.get('useAbsoluteLayout') && !childView.get('useStaticLayout')) {
+          childView.removeObserver(observedProperty, this, this._cvl_childViewLayoutDidChange);
+        }
+      }
+    }
   },
 
   /**
@@ -1130,29 +1185,6 @@ SC.View.reopen(
     @default true
   */
   isChildViewLayoutLive: true,
-
-  /** @private */
-  setupChildViewsForLiveChildViewLayout: function () {
-    var childViewLayout = this.childViewLayout,
-      childViews, observedProperties;
-
-    if (childViewLayout) {
-      observedProperties = childViewLayout.observedProperties || [];
-
-      childViews = this.get('childViews');
-      for (var i = 0, len = observedProperties.length; i < len; i++) {
-        var observedProperty = observedProperties[i];
-
-        for (var j = 0, jlen = childViews.get('length'); j < jlen; j++) {
-          var childView = childViews.objectAt(j);
-          if (!childView.get('useAbsoluteLayout') && !childView.get('useStaticLayout')) {
-            childView.addObserver(observedProperty, this, this.childViewLayoutDidChange);
-          }
-        }
-
-      }
-    }
-  },
 
   // ------------------------------------------------------------------------
   // Statechart
