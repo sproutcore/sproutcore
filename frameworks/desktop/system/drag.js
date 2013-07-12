@@ -623,13 +623,15 @@ SC.Drag = SC.Object.extend(
     recorded by when the drag started.
   */
   _positionGhostView: function (evt) {
-    var loc = this.get('location') ;
+    var ghostView = this.ghostView,
+      loc;
+
+    if (ghostView) {
+      loc = this.get('location');
+
       loc.x -= this.ghostOffset.x;
       loc.y -= this.ghostOffset.y;
-    var gV = this.ghostView;
-    if(gV) {
-      gV.adjust({ top: loc.y, left: loc.x }) ;
-      gV.invokeOnce('updateLayout') ;
+      ghostView.adjust({ top: loc.y, left: loc.x });
     }
   },
 
