@@ -536,13 +536,6 @@ SC.Drag = SC.Object.extend(
       SC.Logger.error('Exception in SC.Drag.mouseUp(acceptDragOperation|performDragOperation): %@'.fmt(e));
     }
 
-    try {
-      // notify last drop target that the drag exited, to allow it to cleanup
-      if (target && target.dragExited) target.dragExited(this, evt);
-    } catch (ex) {
-      SC.Logger.error('Exception in SC.Drag.mouseUp(target.dragExited): %@'.fmt(ex));
-    }
-
     // notify all drop targets that the drag ended
     var ary = this._dropTargets();
     for (var idx = 0, len = ary.length; idx < len; idx++) {
@@ -594,12 +587,16 @@ SC.Drag = SC.Object.extend(
   _createGhostView: function () {
     var that  = this,
         dragView = this._getDragView(),
-        frame = dragView.get('frame'),
-        view;
+        frame = dragView.get('borderFrame'),
+        layout = dragView.get('layout'),
+        ghostLayout, view;
+
+    // Create a fixed layout for the ghost view.
+    ghostLayout = { top: frame.y, left: frame.x, width: frame.width, height: frame.height };
 
     view = this.ghostView = SC.Pane.create({
       classNames: ['sc-ghost-view'],
-      layout: { top: frame.y, left: frame.x, width: frame.width, height: frame.height },
+      layout: ghostLayout,
       owner: this,
       wantsAcceleratedLayer: dragView.get('wantsAcceleratedLayer'),
 
@@ -612,6 +609,8 @@ SC.Drag = SC.Object.extend(
             // Make sure the layer we put in the ghostView wrapper is not displaced.
             layer.style.top = "0px";
             layer.style.left = "0px";
+            layer.style.bottom = "0px";
+            layer.style.right = "0px";
             this.get('layer').appendChild(layer);
           }
         }
