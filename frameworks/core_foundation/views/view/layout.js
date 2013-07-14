@@ -192,9 +192,6 @@ SC.View.reopen(
       var transitionAdjust = this.get('transitionAdjust');
 
       if (this.get('viewState') & SC.CoreView.IS_SHOWN && transitionAdjust) {
-        // Route.
-        this._gotoAttachedAdjustingState();
-
         // Run the adjust transition.
         this._transitionAdjust(layout);
       } else {
@@ -207,31 +204,15 @@ SC.View.reopen(
 
   /** @private Attempts to run a transition adjust, ensuring any showing transitions are stopped in place. */
   _transitionAdjust: function (layout) {
-    var state = this.get('viewState'),
-      transitionAdjust = this.get('transitionAdjust'),
+    var transitionAdjust = this.get('transitionAdjust'),
       options = this.get('transitionAdjustOptions') || {};
-
-    if (state === SC.CoreView.ATTACHED_SHOWING) {
-      this.cancelAnimation(SC.LayoutState.CURRENT);
-    }
 
     // Execute the adjusting transition.
     transitionAdjust.runAdjust(this, options, layout);
   },
 
-  didTransitionAdjust: function () {
-    var state = this.get('viewState');
-
-    if (state === SC.View.ATTACHED_ADJUSTING) {
-      // Route.
-      this._gotoAttachedShownState();
-    }
-  },
-
   /** @private */
-  _gotoAttachedAdjustingState: function () {
-    // Update the state.
-    this.set('viewState', SC.View.ATTACHED_ADJUSTING);
+  didTransitionAdjust: function () {
   },
 
   /**
@@ -866,7 +847,7 @@ SC.View.reopen(
 
     // Notify layoutView/parentView, unless we are transitioning.
     var layoutView = this.get('layoutView');
-    if (layoutView && this.get('viewState') !== SC.View.ATTACHED_ADJUSTING) {
+    if (layoutView) {
       layoutView.set('childViewsNeedLayout', YES);
       layoutView.layoutDidChangeFor(this);
 
@@ -1364,16 +1345,6 @@ SC.View.reopen(
 
 SC.View.mixin(
   /** @scope SC.View */ {
-
-  /**
-    The view has been created, rendered and attached and is visible in the
-    display.  It is currently transitioning according to the `transitionAdjust`
-    property.
-
-    @static
-    @constant
-  */
-  ATTACHED_ADJUSTING: 0x03C3, // 963
 
   /**
     Convert any layout to a Top, Left, Width, Height layout
