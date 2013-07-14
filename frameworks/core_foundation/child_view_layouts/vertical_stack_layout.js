@@ -273,9 +273,9 @@ SC.mixin(SC.View,
       }
 
       // Adjust our frame to fit as well, this ensures that scrolling works.
-      paddingAfter = Math.max(lastMargin, paddingAfter);
+      position += Math.max(lastMargin, paddingAfter);
       if (resizeToFit && view.getPath('layout.height') !== position) {
-        view.adjust('height', position + paddingAfter);
+        view.adjust('height', position);
       }
     }
 
