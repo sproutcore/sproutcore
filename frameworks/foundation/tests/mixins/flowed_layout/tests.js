@@ -171,11 +171,11 @@ var checkSteps = [
       }
 
       ok(
-        equal, 
-        "Actual: " + 
-        str(cv.get('layout')) + "; expected: " + 
+        equal,
+        "Actual: " +
+        str(cv.get('layout')) + "; expected: " +
         str(expect) + "; canWrap: " + view.get('canWrap') + "; " +
-        "orientation: " + view.get('layoutDirection') + "; " + 
+        "orientation: " + view.get('layoutDirection') + "; " +
         "layout: " + str(view.get('layout'))
       );
     }
@@ -218,6 +218,9 @@ test("Basic flow", function() {
     })
   });
 
+  view._doRender();
+  view._doAttach(document.body);
+
   var expect = {
     wrap: {
       400: [
@@ -247,6 +250,8 @@ test("Basic flow", function() {
   };
 
   checkPositions(view, expect);
+
+  view.destroy();
 });
 
 module("FlowedLayout -- Alignment");
@@ -268,6 +273,9 @@ test("Align center", function() {
       layout: { width: 200, height: 100 }
     })
   });
+
+  view._doRender();
+  view._doAttach(document.body);
 
   var expect = {
     wrap: {
@@ -310,6 +318,7 @@ test("Align center", function() {
   expect.noWrap['400'][2].left = 300;
 
   checkPositions(view, expect);
+  view.destroy();
 });
 
 test("Align right", function() {
@@ -330,6 +339,9 @@ test("Align right", function() {
       layout: { width: 200, height: 100 }
     })
   });
+
+  view._doRender();
+  view._doAttach(document.body);
 
   var expect = {
     wrap: {
@@ -372,6 +384,7 @@ test("Align right", function() {
   expect.noWrap['400'][2].left = 200;
 
   checkPositions(view, expect);
+  view.destroy();
 });
 
 test("Align justify", function() {
@@ -392,6 +405,9 @@ test("Align justify", function() {
       layout: { width: 200, height: 100 }
     })
   });
+
+  view._doRender();
+  view._doAttach(document.body);
 
   var expect = {
     wrap: {
@@ -436,6 +452,7 @@ test("Align justify", function() {
   expect.noWrap['600'][2].left = 400;
 
   checkPositions(view, expect);
+  view.destroy();
 });
 
 module("FlowedLayout - Flags");
@@ -458,6 +475,9 @@ test("flowPadding", function() {
       layout: { width: 200, height: 100 }
     })
   });
+
+  view._doRender();
+  view._doAttach(document.body);
 
   var expect = {
     wrap: {
@@ -518,6 +538,7 @@ test("flowPadding", function() {
 
   checkPositions(view, expect);
 
+  view.destroy();
 });
 
 test("FlowedLayout - defaultFlowSpacing", function() {
@@ -538,6 +559,9 @@ test("FlowedLayout - defaultFlowSpacing", function() {
       layout: { width: 200, height: 100 }
     })
   });
+
+  view._doRender();
+  view._doAttach(document.body);
 
   var expect = {
     wrap: {
@@ -590,6 +614,7 @@ test("FlowedLayout - defaultFlowSpacing", function() {
   expect.noWrap[600] = expect.noWrap[400] = expect.wrap[600];
 
   checkPositions(view, expect);
+  view.destroy();
 });
 
 module("FlowedLayout - Child View Flags");
@@ -641,6 +666,9 @@ test("startsNewRow", function() {
     }
   };
 
+  view._doRender();
+  view._doAttach(document.body);
+
   checkPositions(view, expect);
 
   SC.RunLoop.begin();
@@ -658,6 +686,7 @@ test("startsNewRow", function() {
 
   checkPositions(view, expect);
 
+  view.destroy();
 });
 
 test("flowSpacing", function() {
@@ -678,6 +707,9 @@ test("flowSpacing", function() {
       layout: { width: 200, height: 100 }
     })
   });
+
+  view._doRender();
+  view._doAttach(document.body);
 
   var expect = {
     wrap: {
@@ -727,6 +759,7 @@ test("flowSpacing", function() {
 
   checkPositions(view, expect);
 
+  view.destroy();
 });
 
 test("fillHeight", function() {
@@ -747,6 +780,9 @@ test("fillHeight", function() {
       layout: { width: 200, height: 100 }
     })
   });
+
+  view._doRender();
+  view._doAttach(document.body);
 
   var expect = {
     wrap: {
@@ -789,6 +825,7 @@ test("fillHeight", function() {
 
   checkPositions(view, expect);
 
+  view.destroy();
 });
 
 
@@ -810,6 +847,9 @@ test("isSpacer", function() {
       layout: { width: 200, height: 100 }
     })
   });
+
+  view._doRender();
+  view._doAttach(document.body);
 
   var expect = {
     wrap: {
@@ -856,6 +896,7 @@ test("isSpacer", function() {
 
   checkPositions(view, expect);
 
+  view.destroy();
 });
 
 test("undefined and null can be passed for both defaultFlowSpacing and child's flowSpacing", function() {
@@ -874,6 +915,9 @@ test("undefined and null can be passed for both defaultFlowSpacing and child's f
       layout: { width: 200, height: 100 }
     })
   });
+
+  view._doRender();
+  view._doAttach(document.body);
 
   var expect = {
     wrap: {
@@ -909,5 +953,6 @@ test("undefined and null can be passed for both defaultFlowSpacing and child's f
 
   checkPositions(view, expect);
 
+  view.destroy();
 });
 
