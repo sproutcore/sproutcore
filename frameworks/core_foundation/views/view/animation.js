@@ -358,17 +358,25 @@ SC.View.reopen(
         this.runAnimationCallback(curAnim, null, YES);
       }
 
-      if (cur !== value) {
+      if (cur !== value || optionsDidChange) {
         valueDidChange = YES;
         layout[property] = value;
-      }
 
-      // Always update the animate hash to the newest options which may have been altered before this was applied.
-      pendingAnimations[property] = options;
+        // Always update the animate hash to the newest options which may have been altered before this was applied.
+        pendingAnimations[property] = options;
+      }
     }
 
     // Only animate to new values.
     if (valueDidChange) {
+      // When animating height or width with centerX or centerY, we need to animate the margin property also to get a smooth change.
+      if (!SC.none(pendingAnimations.height) && !SC.none(layout.centerY) && SC.none(pendingAnimations.centerY)) {
+        pendingAnimations.centerY = options;
+      }
+      if (!SC.none(pendingAnimations.width) && !SC.none(layout.centerX) && SC.none(pendingAnimations.centerX)) {
+        pendingAnimations.centerX = options;
+      }
+
       this._animateLayout = layout;
 
       // Always run the animation asynchronously so that the original layout is guaranteed to be applied to the DOM.
@@ -576,8 +584,8 @@ SC.View.reopen(
             if (matrix.m11 < 0) ret.scale = ret.scale * -1;
 
             // Retrieve translateX & translateY
-            if (matrix.m14 > 0) { ret.left = matrix.m14; }
-            if (matrix.m24 > 0) { ret.top = matrix.m24; }
+            if (matrix.e > 0) { ret.left = matrix.e; }
+            if (matrix.f > 0) { ret.top = matrix.f; }
           } else {
             matrix = matrix.match(/^matrix\((.*)\)$/)[1].split(/,\s*/);
             if (matrix) {
@@ -650,7 +658,12 @@ SC.View.reopen(
   transitionDidEnd: function (evt) {
     var propertyName = evt.originalEvent.propertyName,
       activeAnimations = this._activeAnimations,
-      animation = activeAnimations ? activeAnimations[propertyName] : null;
+      animation;
+
+    // Fix up the centerX & centerY properties.
+    if (propertyName === 'margin-left') { propertyName = 'centerX'; }
+    if (propertyName === 'margin-top') { propertyName = 'centerY'; }
+    animation = activeAnimations ? activeAnimations[propertyName] : null;
 
     if (animation) {
       // Update the animation hash.  Do this first, so callbacks can check for active animations.

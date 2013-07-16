@@ -405,6 +405,9 @@ SC.View.LayoutStyleCalculator = {
             }
           }
 
+          // Fix up the centerX & centerY properties.
+          if (key === 'centerX') { key = 'margin-left'; }
+          if (key === 'centerY') { key = 'margin-top'; }
 
           // We're actually storing the css for the animation on layout.animate[key].css
           animation.css = key + " " + animation.duration + "s " + animation.timing + " " + animation.delay + "s";

@@ -733,15 +733,6 @@ SC.CoreView.reopen(
     return handled;
   },
 
-  /** @private */
-  _doUpdateVisibility: function () {
-    if (this.get('isVisible')) {
-      this._doShow();
-    } else {
-      this._doHide();
-    }
-  },
-
   // ------------------------------------------------------------------------
   // Events
   //
@@ -1087,8 +1078,11 @@ SC.CoreView.reopen(
     when the view is detached.
   */
   _isVisibleDidChange: function () {
-    // Filter the input channel.
-    this.invokeOnce(this._doUpdateVisibility);
+    if (this.get('isVisible')) {
+      this._doShow();
+    } else {
+      this._doHide();
+    }
   },
 
   /** @private
@@ -1123,8 +1117,6 @@ SC.CoreView.reopen(
 
   /** @private Routes according to parent did append. */
   _parentDidAppendToDocument: function () {
-    this._doUpdateVisibility();
-
     // Run any queued updates.
     this._executeQueuedUpdates();
 
@@ -1246,22 +1238,23 @@ SC.CoreView.reopen(
     }
   },
 
+  /** @private Routes according to parent did hide. */
   _parentDidHideInDocument: function () {
     var state = this.get('viewState');
 
     switch (state) {
     case SC.CoreView.UNRENDERED: // FAST PATH!
     case SC.CoreView.UNATTACHED: // FAST PATH!
-    // case SC.CoreView.UNATTACHED_BY_PARENT:
-    // case SC.CoreView.ATTACHED_BUILDING_IN:
-    // case SC.CoreView.ATTACHED_SHOWING:
-    // case SC.CoreView.ATTACHED_HIDING:
-    // case SC.CoreView.ATTACHED_BUILDING_OUT:
-    // case SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT:
+    case SC.CoreView.UNATTACHED_BY_PARENT:
+    case SC.CoreView.ATTACHED_HIDING:
+    case SC.CoreView.ATTACHED_BUILDING_OUT:
+    case SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT:
     case SC.CoreView.ATTACHED_HIDDEN: // FAST PATH!
+    case SC.CoreView.ATTACHED_HIDDEN_BY_PARENT:
       // There's no need to continue to further child views.
       return false;
-    // case SC.CoreView.ATTACHED_HIDDEN_BY_PARENT:
+    case SC.CoreView.ATTACHED_BUILDING_IN:
+    case SC.CoreView.ATTACHED_SHOWING:
     case SC.CoreView.ATTACHED_SHOWN:
       break;
     default:
@@ -1382,12 +1375,12 @@ SC.CoreView.reopen(
       this._setupTransition();
     }
 
-    // Set up the outgoing transition.
+    // Set up the hiding transition.
     if (transitionHide.setupOut) {
       transitionHide.setupOut(this, options, inPlace);
     }
 
-    // Execute the outgoing transition.
+    // Execute the hiding transition.
     transitionHide.runOut(this, options, this._preTransitionLayout, this._preTransitionFrame);
   },
 
@@ -1461,12 +1454,12 @@ SC.CoreView.reopen(
       this._setupTransition();
     }
 
-    // Set up the outgoing transition.
+    // Set up the showing transition.
     if (transitionShow.setupIn) {
       transitionShow.setupIn(this, options, inPlace);
     }
 
-    // Execute the outgoing transition.
+    // Execute the showing transition.
     transitionShow.runIn(this, options, this._preTransitionLayout, this._preTransitionFrame);
   },
 

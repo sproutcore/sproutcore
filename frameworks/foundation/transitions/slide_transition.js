@@ -16,6 +16,20 @@ SC.mixin(SC.View,
   */
   SLIDE: {
 
+    /** @private */
+    runAdjust: function (view, options, finalLayout) {
+      var key,
+        value;
+
+      view.animate(finalLayout, {
+        delay: options.delay || 0,
+        duration: options.duration || 0.4,
+        timing: options.timing || 'ease'
+      }, function (data) {
+        this.didTransitionAdjust();
+      });
+    },
+
     /** @private Starts from outside of parent unless inPlace is true. */
     setupIn: function (view, options, inPlace) {
       var parentView = view.get('parentView'),
@@ -61,8 +75,7 @@ SC.mixin(SC.View,
     /** @private */
     runIn: function (view, options, finalLayout, finalFrame) {
       var key,
-        value,
-        transition = this;
+        value;
 
       if (options.direction === 'up' || options.direction === 'down') {
         key = 'top';
@@ -97,8 +110,7 @@ SC.mixin(SC.View,
       var viewFrame = view.get('borderFrame'),
         parentView = view.get('parentView'),
         parentFrame,
-        key, value,
-        transition = this;
+        key, value;
 
       // If there is no parentView, use the window's frame.
       if (parentView) {
