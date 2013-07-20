@@ -1205,7 +1205,7 @@ SC.RenderContext = SC.Builder.create(
 });
 
 (function () {
-  var _escapeHTMLRegex = /[&<>]/g, _escapeHTMLMethod = function (match) {
+  var _escapeHTMLRegex = /[<>]|&(?![\d\w#]{1,7};)/g, _escapeHTMLMethod = function (match) {
     switch (match) {
     case '&':
       return '&amp;';
