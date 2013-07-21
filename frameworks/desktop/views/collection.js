@@ -132,6 +132,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   /**
     The current length of the content.
 
+    @readonly
     @type Number
     @default 0
   */
@@ -816,7 +817,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
   /**
     Called whenever the content length changes.  This will invalidate the
-    length property of the view itself causing the nowShowing to recompute
+    length property of the view itself causing the `nowShowing` to recompute
     which will in turn update the UI accordingly.
 
     @returns {void}
