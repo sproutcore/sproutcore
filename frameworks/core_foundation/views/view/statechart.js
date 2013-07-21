@@ -604,10 +604,23 @@ SC.CoreView.reopen(
   },
 
   /** @private Render this view action. */
-  _doRender: function () {
-    var handled = true;
 
-    if (!this.get('_isRendered')) {
+  _doRender: function () {
+    var state = this.get('viewState');
+
+    switch (state) {
+    case SC.CoreView.ATTACHED_SHOWING: // FAST PATHS!
+    case SC.CoreView.ATTACHED_SHOWN:
+    case SC.CoreView.ATTACHED_HIDING:
+    case SC.CoreView.ATTACHED_HIDDEN:
+    case SC.CoreView.ATTACHED_HIDDEN_BY_PARENT:
+    case SC.CoreView.ATTACHED_BUILDING_IN:
+    case SC.CoreView.ATTACHED_BUILDING_OUT:
+    case SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT:
+    case SC.CoreView.UNATTACHED:
+    case SC.CoreView.UNATTACHED_BY_PARENT:
+      return false;
+    case SC.CoreView.UNRENDERED:
       // Render the layer.
       var context = this.renderContext(this.get('tagName'));
 
@@ -623,7 +636,7 @@ SC.CoreView.reopen(
 
       // Bypass the unattached state for adopted views.
       var parentView = this.get('parentView');
-      if (parentView) {
+      if (parentView && parentView.get('_isRendered')) {
         var parentNode = parentView.get('containerLayer'),
           siblings = parentView.get('childViews'),
           nextView = siblings.objectAt(siblings.indexOf(this) + 1),
@@ -635,11 +648,8 @@ SC.CoreView.reopen(
         this._doAttach(parentNode, nextNode);
       }
 
-    } else {
-      handled = false;
+      return true;
     }
-
-    return handled;
   },
 
   /** @private Show this view action. */
