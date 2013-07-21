@@ -11,11 +11,12 @@ module('SC.Pane-SC.Page') ;
 
 test("isVisible changes should update views that are instantiated in a page", function() {
   var page = SC.Page.design({
+
     inspector: SC.PickerPane.design({
       layout: { width: 300, height: 300, centerX: 0 },
       contentView: SC.View.extend({
         layout: { top: 0, left: 0, bottom: 0, right: 0 },
-        childViews: 'labelView'.w(),
+        childViews: ['labelView'],
 
         labelView: SC.LabelView.extend({
           layout: { centerY: -10, height: 24, left: 0, right: 0 },
@@ -23,7 +24,8 @@ test("isVisible changes should update views that are instantiated in a page", fu
         })
       })
     })
-  }) ;
+
+  });
 
 
   var pp = page.get('inspector');

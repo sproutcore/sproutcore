@@ -179,14 +179,14 @@ SC.CoreView.reopen(
     * SC.CoreView.UNRENDERED
     * SC.CoreView.UNATTACHED
     * SC.CoreView.UNATTACHED_BY_PARENT
+    * SC.CoreView.ATTACHED_SHOWING
     * SC.CoreView.ATTACHED_SHOWN
+    * SC.CoreView.ATTACHED_HIDING
     * SC.CoreView.ATTACHED_HIDDEN
     * SC.CoreView.ATTACHED_HIDDEN_BY_PARENT
     * SC.CoreView.ATTACHED_BUILDING_IN
     * SC.CoreView.ATTACHED_BUILDING_OUT
     * SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT
-    * SC.CoreView.ATTACHED_SHOWING
-    * SC.CoreView.ATTACHED_HIDING
 
     @type String
     @default SC.CoreView.UNRENDERED
@@ -866,6 +866,10 @@ SC.CoreView.reopen(
 
     //   childView._rendered();
     // }
+
+    // Begin observing isVisible & isFirstResponder.
+    this.addObserver('isVisible', this, this._isVisibleDidChange);
+    this.addObserver('isFirstResponder', this, this._isFirstResponderDidChange);
   },
 
   // ------------------------------------------------------------------------
@@ -986,6 +990,10 @@ SC.CoreView.reopen(
       this.removeObserver(displayProperties[idx], this, this.displayDidChange);
     }
 
+    // Stop observing isVisible & isFirstResponder.
+    this.removeObserver('isVisible', this, this._isVisibleDidChange);
+    this.removeObserver('isFirstResponder', this, this._isFirstResponderDidChange);
+
     // Route.
     this._gotoUnrenderedState();
   },
@@ -998,10 +1006,6 @@ SC.CoreView.reopen(
     // Detach the layer.
     var node = this.get('layer');
     node.parentNode.removeChild(node);
-
-    // Stop observing isVisible & isFirstResponder.
-    this.removeObserver('isVisible', this, this._isVisibleDidChange);
-    this.removeObserver('isFirstResponder', this, this._isFirstResponderDidChange);
 
     // Notify.
     this._notifyDetached();
@@ -1219,10 +1223,6 @@ SC.CoreView.reopen(
     default:
       // Attached and not in a transitionary state.
     }
-
-    // Stop observing isVisible & isFirstResponder.
-    this.removeObserver('isVisible', this, this._isVisibleDidChange);
-    this.removeObserver('isFirstResponder', this, this._isFirstResponderDidChange);
   },
 
   /** @private Routes according to parent did detach. */
@@ -1468,10 +1468,6 @@ SC.CoreView.reopen(
     var parentView = this.get('parentView'),
       // Views without a parent are not limited by a parent's current state.
       isParentShown = parentView ? parentView.get('viewState') & SC.CoreView.IS_SHOWN : true;
-
-    // Begin observing isVisible & isFirstResponder.
-    this.addObserver('isVisible', this, this._isVisibleDidChange);
-    this.addObserver('isFirstResponder', this, this._isFirstResponderDidChange);
 
     // Route.
     if (this.get('isVisible')) {
