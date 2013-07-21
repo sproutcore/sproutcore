@@ -41,4 +41,6 @@ test("isVisible changes should update views that are instantiated in a page", fu
   ok(res, "The view (isVisible) has been properly rerendered even though it was part of a page, the pane was detached and the visibility was changed while detached");
 
   pp.remove();
+
+  page.destroy();
 });

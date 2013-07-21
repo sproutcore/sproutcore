@@ -11,7 +11,7 @@ module("SC.PanelPane UI");
 
 var pane ;
 
-test("verify panel content container is visible at correct location with right size", function() { 
+test("verify panel content container is visible at correct location with right size", function() {
   pane = SC.PanelPane.create({
     layout: { width: 400, height: 200, centerX: 0, centerY: 0 },
     contentView: SC.View.extend({
@@ -23,7 +23,7 @@ test("verify panel content container is visible at correct location with right s
   ok(pane.$().hasClass('sc-panel'), 'pane should have sc-panel class');
   ok(pane.childViews[0].get('isVisibleInWindow'), 'pane.div.isVisibleInWindow should be YES');
   ok(pane.childViews[0].$().hasClass('sc-view'), 'pane.div should have sc-view class');
-  
+
   var pw = pane.layout.width;
   var ph = pane.layout.height;
   var ret = pane.layoutStyle();
@@ -36,6 +36,7 @@ test("verify panel content container is visible at correct location with right s
   equals(ret.marginTop, -ph/2+'px', 'pane should shift-top %@ px'.fmt(-ph/2));
 
   pane.remove();
+  pane.destroy();
 }) ;
 
 test("Verify panel pane has aria role set", function() {
@@ -49,7 +50,7 @@ test("Verify panel pane has aria role set", function() {
   equals(pane.$().attr('role'), 'dialog', "panel pane has role attribute set");
 
   pane.remove();
-
+  pane.destroy();
 });
 
 test("Verify panel pane has aria-label attribute set, when ariaLabel is provided", function() {
@@ -64,6 +65,6 @@ test("Verify panel pane has aria-label attribute set, when ariaLabel is provided
   equals(pane.$().attr('aria-label'), 'Panel is labelled by this value for voiceover', "panel pane has aria-labelledby attribute set");
 
   pane.remove();
-
+  pane.destroy();
 });
 

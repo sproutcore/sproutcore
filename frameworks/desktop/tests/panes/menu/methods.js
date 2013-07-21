@@ -46,7 +46,8 @@ module('SC.MenuPane Methods', {
     menu.remove();
     anchor.remove();
     if (!menu.isDestroyed) { menu.destroy(); }
-    menu = null;
+    anchor.destroy();
+    menu = anchor = null;
   }
 });
 

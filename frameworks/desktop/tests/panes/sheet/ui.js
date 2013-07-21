@@ -9,10 +9,8 @@
 
 module("SC.SheetPane UI");
 
-var slidePane;
-
 test("verify sheet pane slide down works", function() {
-  slidePane = SC.SheetPane.create({
+  var slidePane = SC.SheetPane.create({
     layout: { width: 400, height: 200, centerX: 0 },
     contentView: SC.LabelView.extend({
       escapeHTML: NO,
@@ -38,9 +36,14 @@ test("verify sheet pane slide down works", function() {
     ok(slidePane.childViews[0].$().hasClass('sc-view'), 'pane.div should have sc-view class');
     SC.RunLoop.begin();
     slidePane.remove();
+    slidePane.destroy();
     SC.RunLoop.end();
+
     window.start();
   };
-  stop();
+
+  stop(800);
+
   setTimeout(f, 400);
-}) ;
+
+});
