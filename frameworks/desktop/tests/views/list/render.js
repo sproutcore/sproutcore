@@ -31,12 +31,6 @@ module("SC.ListView.render", {
         return { left: 0, right: 0, top: idx * 50, height: 50 };
       },
       
-      didReload: CoreTest.stub("didReload"),
-      
-      _cv_isVisibleInWindowDidChange: CoreTest.stub("_cv_isVisibleInWindowDidChange", function() {
-        SC.ListView.prototype._cv_isVisibleInWindowDidChange.apply(this, arguments) ;
-      }),
-      
       _cv_nowShowingDidChange: CoreTest.stub("_cv_nowShowingDidChange", function() {
         SC.ListView.prototype._cv_nowShowingDidChange.apply(this, arguments) ;
       }),
@@ -47,8 +41,6 @@ module("SC.ListView.render", {
       
       // reset stubs
       reset: function() {
-        this.didReload.reset();
-        this._cv_isVisibleInWindowDidChange.reset();
         this._cv_nowShowingDidChange.reset();
         renderFunc.reset();
       }
@@ -64,9 +56,10 @@ module("SC.ListView.render", {
   
   teardown: function() {
     SC.RunLoop.begin();
-    pane.remove();
-    SC.RunLoop.end();
     view.reset();
+    pane.remove();
+    pane.destroy();
+    SC.RunLoop.end();
   }
   
 });
@@ -74,14 +67,6 @@ module("SC.ListView.render", {
 // ..........................................................
 // BASIC TESTS
 // 
-
-test("didReload() should only be called once with a static content array", function() {
-  view.didReload.expect(1);
-});
-
-test("_cv_isVisibleInWindowDidChange() should only be called once with a static content array", function() {
-  view._cv_isVisibleInWindowDidChange.expect(1);
-});
 
 test("list item render() should only be called once per item view a static content array", function() {
   renderFunc.expect(10);
