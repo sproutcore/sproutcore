@@ -378,7 +378,7 @@ var pane;
       var overflowEl = segments[segments.length - 1];
       ok($(overflowEl).hasClass('sc-overflow-segment'), 'overflow segment should have .sc-overflow-segment class');
       var overflowLabelEl = $(overflowEl).find('label')[0];
-      equals(overflowLabelEl.innerText, "&raquo;", 'there should be "&raquo;" text in the overflow segment');
+      equals(overflowLabelEl.innerHTML, "»", 'there should be "»" text in the overflow segment');
     };
 
     var lastIsSegment = function(sv, text) {
@@ -388,7 +388,7 @@ var pane;
       var lastEl = segments[segments.length - 2];
       ok(!$(lastEl).hasClass('sc-overflow-segment'), 'last segment should not have .sc-overflow-segment class');
       var lastLabelEl = $(lastEl).find('label')[0];
-      equals(lastLabelEl.innerText, text, 'there should be "' + text + '" text in the last segment');
+      equals(lastLabelEl.innerHTML, text, 'there should be "' + text + '" text in the last segment');
     };
 
     // the last item should be an overflow segment (ie. has .sc-overflow-segment class and text "&raquo")
