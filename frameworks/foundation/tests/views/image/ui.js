@@ -230,7 +230,7 @@
         }
 
         SC.run(function () {
-          if (!imageView.useStaticLayout) {
+          if (!imageView.get('useStaticLayout')) {
             imageView.set('layout', { top: 0, left: 0, width: 147, height: 90 });
 
             innerFrame = imageView.get('innerFrame');
