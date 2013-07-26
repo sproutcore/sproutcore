@@ -1078,9 +1078,7 @@ SC.CoreView.reopen(
 
     // Update the content of the layer if necessary.
     if (this._contentNeedsUpdate) {
-      // Use the action so that it checks for the proper state.
-      // this._doUpdateContent();
-      this.invokeOnce(this._executeDoUpdateContent);
+      this._executeDoUpdateContent();
     }
   },
 
