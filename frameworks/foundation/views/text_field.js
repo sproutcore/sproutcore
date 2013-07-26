@@ -626,11 +626,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
 
       spellCheckString = this.get('spellCheckEnabled') ? ' spellcheck="true"' : ' spellcheck="false"';
 
-      if (autoCorrect != null) {
+      if (!SC.none(autoCorrect)) {
         autocorrectString = ' autocorrect=' + (!autoCorrect ? '"off"' : '"on"');
       }
 
-      if (autoCapitalize != null) {
+      if (!SC.none(autoCapitalize)) {
         autocapitalizeString = ' autocapitalize=' + (!autoCapitalize ? '"none"' : '"sentences"');
       }
 
@@ -731,13 +731,13 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
         }
       }
 
-      if (autoCorrect != null) {
+      if (!SC.none(autoCorrect)) {
         input.attr('autoCorrect', !autoCorrect ? 'off' : 'on');
       } else {
         input.attr('autoCorrect', null);
       }
 
-      if (autoCapitalize != null) {
+      if (!SC.none(autoCapitalize)) {
         input.attr('autoCapitalize', !autoCapitalize ? 'none' : 'sentences');
       } else {
         input.attr('autoCapitalize', null);
