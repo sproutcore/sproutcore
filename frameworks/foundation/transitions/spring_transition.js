@@ -10,13 +10,13 @@ SC.mixin(SC.View,
 
   /** @class
 
-    @extends SC.TransitionProtocol
+    @extends SC.ViewTransitionProtocol
     @since Version 1.10
   */
-  SPRING: {
+  SPRING_IN: {
 
     /** @private */
-    setupIn: function (view, options, inPlace) {
+    setup: function (view, options, inPlace) {
       var parentView = view.get('parentView'),
         parentFrame,
         viewFrame = view.get('borderFrame'),
@@ -57,7 +57,7 @@ SC.mixin(SC.View,
     },
 
     /** @private */
-    runIn: function (view, options, finalLayout, finalFrame) {
+    run: function (view, options, finalLayout, finalFrame) {
       var layout = view.get('layout'),
         springiness = options.springiness || 0.25,
         spring,
@@ -107,10 +107,10 @@ SC.mixin(SC.View,
 
       // Define the frames.
       frames = [
-        { value: spring1, duration: duration, timing: 'ease-out' },
-        { value: spring2, duration: duration, timing: 'ease-in-out' },
-        { value: spring3, duration: duration, timing: 'ease-in-out' },
-        { value: value, duration: duration, timing: 'ease-in-out' }
+        { value: spring1, duration: duration, timing: 'ease-out' }, // Overshoot.
+        { value: spring2, duration: duration, timing: 'ease-in-out' }, // Overshoot back.
+        { value: spring3, duration: duration, timing: 'ease-in-out' }, // Overshoot.
+        { value: value, duration: duration, timing: 'ease-in-out' } // Hit target.
       ];
 
       var callback = function () {
@@ -119,10 +119,18 @@ SC.mixin(SC.View,
 
       // Animate through the frames.
       view._animateFrames(frames, callback, options.delay || 0);
-    },
+    }
+  },
+
+  /** @class
+
+    @extends SC.ViewTransitionProtocol
+    @since Version 1.10
+  */
+  SPRING_OUT: {
 
     /** @private */
-    setupOut: function (view, options) {
+    setup: function (view, options) {
       var viewFrame = view.get('borderFrame'),
         left = viewFrame.x,
         top = viewFrame.y,
@@ -133,7 +141,7 @@ SC.mixin(SC.View,
     },
 
     /** @private */
-    runOut: function (view, options, finalLayout, finalFrame) {
+    run: function (view, options, finalLayout, finalFrame) {
       var springiness = options.springiness || 0.25,
         duration,
         finalValue,

@@ -10,18 +10,18 @@ SC.mixin(SC.View,
 
   /** @class
 
-    @extends SC.TransitionProtocol
+    @extends SC.ViewTransitionProtocol
     @since Version 1.10
   */
-  SCALE: {
+  SCALE_IN: {
 
     /** @private */
-    setupIn: function (view, options, inPlace) {
+    setup: function (view, options, inPlace) {
       view.adjust({ scale: inPlace ? view.get('layout').scale || 0 : 0 });
     },
 
     /** @private */
-    runIn: function (view, options, finalLayout, finalFrame) {
+    run: function (view, options, finalLayout, finalFrame) {
       view.animate('scale', finalLayout.scale || 1, {
         delay: options.delay || 0,
         duration: options.duration || 0.4,
@@ -29,10 +29,18 @@ SC.mixin(SC.View,
       }, function (data) {
         this.didTransitionIn();
       });
-    },
+    }
+  },
+
+  /** @class
+
+    @extends SC.ViewTransitionProtocol
+    @since Version 1.10
+  */
+  SCALE_OUT: {
 
     /** @private */
-    runOut: function (view, options) {
+    run: function (view, options) {
       view.animate('scale', 0, {
         delay: options.delay || 0,
         duration: options.duration || 0.4,

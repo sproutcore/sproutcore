@@ -752,7 +752,7 @@ SC.CoreView.reopen(
     transition completes.  You should only use this method if implementing a
     custom transition plugin.
 
-    @param {SC.TransitionProtocol} transition The transition plugin used.
+    @param {SC.ViewTransitionProtocol} transition The transition plugin used.
     @param {Object} options The original options used.  One of transitionShowOptions or transitionInOptions.
   */
   didTransitionIn: function () {
@@ -779,7 +779,7 @@ SC.CoreView.reopen(
     transition completes.  You should only use this method if implementing a
     custom transition plugin.
 
-    @param {SC.TransitionProtocol} transition The transition plugin used.
+    @param {SC.ViewTransitionProtocol} transition The transition plugin used.
     @param {Object} options The original options used.  One of transitionHideOptions or transitionOutOptions.
   */
   didTransitionOut: function () {
@@ -1384,12 +1384,12 @@ SC.CoreView.reopen(
     }
 
     // Set up the hiding transition.
-    if (transitionHide.setupOut) {
-      transitionHide.setupOut(this, options, inPlace);
+    if (transitionHide.setup) {
+      transitionHide.setup(this, options, inPlace);
     }
 
     // Execute the hiding transition.
-    transitionHide.runOut(this, options, this._preTransitionLayout, this._preTransitionFrame);
+    transitionHide.run(this, options, this._preTransitionLayout, this._preTransitionFrame);
   },
 
   /** @private Attempts to run a transition in, ensuring any outgoing transitions are stopped in place. */
@@ -1410,12 +1410,12 @@ SC.CoreView.reopen(
     }
 
     // Set up the incoming transition.
-    if (transitionIn.setupIn) {
-      transitionIn.setupIn(this, options, inPlace);
+    if (transitionIn.setup) {
+      transitionIn.setup(this, options, inPlace);
     }
 
     // Execute the incoming transition.
-    transitionIn.runIn(this, options, this._preTransitionLayout, this._preTransitionFrame);
+    transitionIn.run(this, options, this._preTransitionLayout, this._preTransitionFrame);
   },
 
   /** @private Attempts to run a transition out, ensuring any incoming transitions are stopped in place. */
@@ -1440,12 +1440,12 @@ SC.CoreView.reopen(
     owningView._buildingOutCount++;
 
     // Set up the outgoing transition.
-    if (transitionOut.setupOut) {
-      transitionOut.setupOut(this, options, inPlace);
+    if (transitionOut.setup) {
+      transitionOut.setup(this, options, inPlace);
     }
 
     // Execute the outgoing transition.
-    transitionOut.runOut(this, options, this._preTransitionLayout, this._preTransitionFrame);
+    transitionOut.run(this, options, this._preTransitionLayout, this._preTransitionFrame);
   },
 
   /** @private Attempts to run a transition show, ensuring any hiding transitions are stopped in place. */
@@ -1463,12 +1463,12 @@ SC.CoreView.reopen(
     }
 
     // Set up the showing transition.
-    if (transitionShow.setupIn) {
-      transitionShow.setupIn(this, options, inPlace);
+    if (transitionShow.setup) {
+      transitionShow.setup(this, options, inPlace);
     }
 
     // Execute the showing transition.
-    transitionShow.runIn(this, options, this._preTransitionLayout, this._preTransitionFrame);
+    transitionShow.run(this, options, this._preTransitionLayout, this._preTransitionFrame);
   },
 
   /** @private */

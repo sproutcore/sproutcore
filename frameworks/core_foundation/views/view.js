@@ -1432,16 +1432,16 @@ SC.CoreView.reopen(
     There are a number of pre-built transition plugins available in the
     foundation framework:
 
-      SC.View.BOUNCE
-      SC.View.FADE
-      SC.View.SLIDE
-      SC.View.SCALE
-      SC.View.SPRING
+      SC.View.BOUNCE_IN
+      SC.View.FADE_IN
+      SC.View.SLIDE_IN
+      SC.View.SCALE_IN
+      SC.View.SPRING_IN
 
     You can even provide your own custom transition plugins.  Just create a
-    transition object that conforms to the SC.TransitionProtocol protocol.
+    transition object that conforms to the SC.ViewTransitionProtocol protocol.
 
-    @type Object (SC.TransitionProtocol)
+    @type Object (SC.ViewTransitionProtocol)
     @default null
     @since Version 1.10
   */
@@ -1480,16 +1480,16 @@ SC.CoreView.reopen(
     There are a number of pre-built transition plugins available in the
     foundation framework:
 
-      SC.View.BOUNCE
-      SC.View.FADE
-      SC.View.SLIDE
-      SC.View.SCALE
-      SC.View.SPRING
+      SC.View.BOUNCE_OUT
+      SC.View.FADE_OUT
+      SC.View.SLIDE_OUT
+      SC.View.SCALE_OUT
+      SC.View.SPRING_OUT
 
     You can even provide your own custom transition plugins.  Just create a
-    transition object that conforms to the SC.TransitionProtocol protocol.
+    transition object that conforms to the SC.ViewTransitionProtocol protocol.
 
-    @type Object (SC.TransitionProtocol)
+    @type Object (SC.ViewTransitionProtocol)
     @default null
     @since Version 1.10
   */
@@ -1529,16 +1529,16 @@ SC.CoreView.reopen(
     There are a number of pre-built transition plugins available in the
     foundation framework:
 
-      SC.View.BOUNCE
-      SC.View.FADE
-      SC.View.SLIDE
-      SC.View.SCALE
-      SC.View.SPRING
+      SC.View.BOUNCE_IN
+      SC.View.FADE_IN
+      SC.View.SLIDE_IN
+      SC.View.SCALE_IN
+      SC.View.SPRING_IN
 
     You can even provide your own custom transition plugins.  Just create a
-    transition object that conforms to the SC.TransitionProtocol protocol.
+    transition object that conforms to the SC.ViewTransitionProtocol protocol.
 
-    @type Object (SC.TransitionProtocol)
+    @type Object (SC.ViewTransitionProtocol)
     @default null
     @since Version 1.10
   */
@@ -1577,16 +1577,16 @@ SC.CoreView.reopen(
     There are a number of pre-built transition plugins available in the
     foundation framework:
 
-      SC.View.BOUNCE
-      SC.View.FADE
-      SC.View.SLIDE
-      SC.View.SCALE
-      SC.View.SPRING
+      SC.View.BOUNCE_OUT
+      SC.View.FADE_OUT
+      SC.View.SLIDE_OUT
+      SC.View.SCALE_OUT
+      SC.View.SPRING_OUT
 
     You can even provide your own custom transition plugins.  Just create a
-    transition object that conforms to the SC.TransitionProtocol protocol.
+    transition object that conforms to the SC.ViewTransitionProtocol protocol.
 
-    @type Object (SC.TransitionProtocol)
+    @type Object (SC.ViewTransitionProtocol)
     @default null
     @since Version 1.10
   */

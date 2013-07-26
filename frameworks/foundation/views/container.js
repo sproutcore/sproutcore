@@ -16,9 +16,9 @@
 
   # Animated Transitions
 
-  To animate the transition between views, you can provide a transition
+  To animate the transition between views, you can provide a transitionSwap
   plugin to SC.ContainerView.  There are several common transitions pre-built
-  and if you want to create your own, the SC.TransitionProtocol defines the
+  and if you want to create your own, the SC.ViewTransitionProtocol defines the
   methods to implement.
 
   The transitions included with SC.ContainerView are:
@@ -29,30 +29,30 @@
     - SC.ContainerView.PUSH - pushes the old view out with the new view
     - SC.ContainerView.REVEAL - moves the old view out revealing the new view underneath
 
-  To use a transition plugin, simply set it as the value of the container view's
-  transition property.
+  To use a transitionSwap plugin, simply set it as the value of the container view's
+  `transitionSwap` property.
 
   For example,
 
       container = SC.ContainerView.create({
-        transition: SC.ContainerView.PUSH
+        transitionSwap: SC.ContainerView.PUSH
       });
 
-  Since each transition plugin predefines a unique animation, SC.ContainerView
-  provides the transitionOptions property to allow for modifications to the
-  transition animation.
+  Since each transitionSwap plugin predefines a unique animation, SC.ContainerView
+  provides the transitionSwapOptions property to allow for modifications to the
+  animation.
 
   For example,
 
       container = SC.ContainerView.create({
-        transition: SC.ContainerView.PUSH,
-        transitionOptions: {
+        transitionSwap: SC.ContainerView.PUSH,
+        transitionSwapOptions: {
           duration: 1.25,    // Use a longer duration then default
           direction: 'up'    // Push the old content up
         }
       });
 
-  All the predefined transition plugins take options to modify the default
+  All the predefined transitionSwap plugins take options to modify the default
   duration and timing of the animation and to see what other options are
   available, refer to the documentation of the plugin.
 
@@ -118,11 +118,11 @@ SC.ContainerView = SC.View.extend(
   renderDelegateName: 'containerRenderDelegate',
 
   /**
-    The transition plugin to use when swapping views.
+    The transitionSwap plugin to use when swapping views.
 
     SC.ContainerView uses a pluggable transition architecture where the
     transition setup, animation and cleanup can be handled by a specified
-    transition plugin.
+    transitionSwap plugin.
 
     There are a number of pre-built plugins available:
 
@@ -132,19 +132,19 @@ SC.ContainerView = SC.View.extend(
       SC.ContainerView.PUSH
       SC.ContainerView.REVEAL
 
-    You can even provide your own custom transition plugins.  Just create a
-    transition object that conforms to the SC.TransitionProtocol protocol.
+    You can even provide your own custom transitionSwap plugins.  Just create an
+    object that conforms to the SC.SwapTransitionProtocol protocol.
 
-    @type Object (SC.TransitionProtocol)
+    @type Object (SC.SwapTransitionProtocol)
     @default null
     @since Version 1.10
   */
-  transition: null,
+  transitionSwap: null,
 
   /**
-    The options for the given transition plugin.
+    The options for the given transitionSwap plugin.
 
-    These options are specific to the current transition plugin used and are
+    These options are specific to the current transitionSwap plugin used and are
     used to modify the transition animation.  To determine what options
     may be used for a given transition and to see what the default options are,
     see the documentation for the transition plugin being used.
@@ -153,7 +153,7 @@ SC.ContainerView = SC.View.extend(
     also use other options.  For example, SC.ContainerView.PUSH accepts options
     like:
 
-        transitionOptions: {
+        transitionSwapOptions: {
           direction: 'left',
           duration: 0.25,
           timing: 'linear'
@@ -163,7 +163,7 @@ SC.ContainerView = SC.View.extend(
     @default null
     @since Version 1.10
   */
-  transitionOptions: null,
+  transitionSwapOptions: null,
 
   // ------------------------------------------------------------------------
   // Methods
@@ -371,11 +371,11 @@ SC.ContainerContentStatechart = SC.Object.extend({
 
   transitionClippingFrame: function (clippingFrame) {
     var container = this.get('container'),
-      options = container.get('transitionOptions') || {},
-      transition = container.get('transition');
+      options = container.get('transitionSwapOptions') || {},
+      transitionSwap = container.get('transitionSwap');
 
-    if (!!transition) {
-      return transition.transitionClippingFrame(container, clippingFrame, options);
+    if (!!transitionSwap) {
+      return transitionSwap.transitionClippingFrame(container, clippingFrame, options);
     } else {
       return clippingFrame;
     }
@@ -424,8 +424,8 @@ SC.ContainerContentStatechart = SC.Object.extend({
     var container = this.get('container'),
       content = this.get('content'),
       previousStatechart = this.get('previousStatechart'),
-      options = container.get('transitionOptions') || {},
-      transition = container.get('transition');
+      options = container.get('transitionSwapOptions') || {},
+      transitionSwap = container.get('transitionSwap');
 
     // Assign the state.
     this.state = 'entering';
@@ -435,12 +435,12 @@ SC.ContainerContentStatechart = SC.Object.extend({
     }
 
     // Don't transition unless there is a previous statechart.
-    if (!!previousStatechart && !!content && !!transition) {
-      if (!!transition.willBuildInToView) {
-        transition.willBuildInToView(container, content, previousStatechart, options);
+    if (!!previousStatechart && !!content && !!transitionSwap) {
+      if (!!transitionSwap.willBuildInToView) {
+        transitionSwap.willBuildInToView(container, content, previousStatechart, options);
       }
-      if (!!transition.buildInToView) {
-        transition.buildInToView(this, container, content, previousStatechart, options);
+      if (!!transitionSwap.buildInToView) {
+        transitionSwap.buildInToView(this, container, content, previousStatechart, options);
       }
     } else {
       this.entered();
@@ -452,17 +452,17 @@ SC.ContainerContentStatechart = SC.Object.extend({
     var container = this.get('container'),
       content = this.get('content'),
       exitCount = this._exitCount,
-      options = container.get('transitionOptions') || {},
-      transition = container.get('transition');
+      options = container.get('transitionSwapOptions') || {},
+      transitionSwap = container.get('transitionSwap');
 
-    if (!immediately && !!content && !!transition) {
+    if (!immediately && !!content && !!transitionSwap) {
       if (this.state === 'entering') {
-        if (!!transition.buildInDidCancel) {
-          transition.buildInDidCancel(container, content, options);
+        if (!!transitionSwap.buildInDidCancel) {
+          transitionSwap.buildInDidCancel(container, content, options);
         }
       } else if (this.state === 'exiting') {
-        if (!!transition.buildOutDidCancel) {
-          transition.buildOutDidCancel(container, content, options);
+        if (!!transitionSwap.buildOutDidCancel) {
+          transitionSwap.buildOutDidCancel(container, content, options);
         }
       }
     }
@@ -470,16 +470,16 @@ SC.ContainerContentStatechart = SC.Object.extend({
     // Assign the state.
     this.state = 'exiting';
 
-    if (!immediately && !!content && !!transition) {
+    if (!immediately && !!content && !!transitionSwap) {
       // Re-entering the exiting state may need to accelerate the transition, pass the count to the plugin.
       if (!exitCount) { exitCount = this._exitCount = 1; }
 
-      if (!!transition.willBuildOutFromView) {
-        transition.willBuildOutFromView(container, content, options, exitCount);
+      if (!!transitionSwap.willBuildOutFromView) {
+        transitionSwap.willBuildOutFromView(container, content, options, exitCount);
       }
 
-      if (!!transition.buildOutFromView) {
-        transition.buildOutFromView(this, container, content, options, exitCount);
+      if (!!transitionSwap.buildOutFromView) {
+        transitionSwap.buildOutFromView(this, container, content, options, exitCount);
       }
 
       // Increment the exit count each time doExit is called.
@@ -493,13 +493,13 @@ SC.ContainerContentStatechart = SC.Object.extend({
   gotoExitedState: function () {
     var container = this.get('container'),
       content = this.get('content'),
-      options = container.get('transitionOptions') || {},
-      transition = container.get('transition');
+      options = container.get('transitionSwapOptions') || {},
+      transitionSwap = container.get('transitionSwap');
 
     if (!!content) {
-      if (transition) {
-        if (!!transition.didBuildOutFromView) {
-          transition.didBuildOutFromView(container, content, options);
+      if (transitionSwap) {
+        if (!!transitionSwap.didBuildOutFromView) {
+          transitionSwap.didBuildOutFromView(container, content, options);
         }
       }
 
@@ -521,12 +521,12 @@ SC.ContainerContentStatechart = SC.Object.extend({
   gotoReadyState: function () {
     var container = this.get('container'),
       content = this.get('content'),
-      options = container.get('transitionOptions') || {},
-      transition = container.get('transition');
+      options = container.get('transitionSwapOptions') || {},
+      transitionSwap = container.get('transitionSwap');
 
-    if (content && transition) {
-      if (!!transition.didBuildInToView) {
-        transition.didBuildInToView(container, content, options);
+    if (content && transitionSwap) {
+      if (!!transitionSwap.didBuildInToView) {
+        transitionSwap.didBuildInToView(container, content, options);
       }
     }
 

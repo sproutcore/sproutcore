@@ -208,7 +208,7 @@ SC.View.reopen(
       options = this.get('transitionAdjustOptions') || {};
 
     // Execute the adjusting transition.
-    transitionAdjust.runAdjust(this, options, layout);
+    transitionAdjust.run(this, options, layout);
   },
 
   /** @private */
@@ -1295,30 +1295,35 @@ SC.View.reopen(
   //
 
   /**
-    The transition plugin to use when this view is moved by adjusting its left
-    and/or top layout.
+    The transition plugin to use when this view is moved or resized by adjusting
+    its layout.
 
     SC.CoreView uses a pluggable transition architecture where the transition
-    setup, execution and cleanup can be handled by a specified plugin.
+    setup, execution and cleanup can be handled by a plugin.  This allows you
+    to create complex transition animations and share them across all your views
+    with only a single line of code.
 
-    There are a number of pre-built transition plugins for moving available in
-    the foundation framework:
+    There are a number of pre-built transition adjust plugins available in
+    the SproutCore foundation framework:
 
-      SC.View.SLIDE
-      SC.View.BOUNCE
-      SC.View.SPRING
+      SC.View.SMOOTH_ADJUST
+      SC.View.BOUNCE_ADJUST
+      SC.View.SPRING_ADJUST
 
-    You can even provide your own custom transition plugins.  Just create a
-    transition object that conforms to the SC.TransitionProtocol protocol.
+    To create a custom transition plugin simply create a regular JavaScript
+    object that conforms to the SC.ViewTransitionProtocol protocol.
 
-    @type Object (SC.TransitionProtocol)
+    NOTE: When creating custom transition adjust plugins, be aware that SC.View
+    will not call the `setup` method of the plugin, only the `run` method.
+
+    @type Object (SC.ViewTransitionProtocol)
     @default null
     @since Version 1.10
   */
   transitionAdjust: null,
 
   /**
-    The options for the given transitionAdjust plugin.
+    The options for the given `transitionAdjust` plugin.
 
     These options are specific to the current transition plugin used and are
     used to modify the transition animation.  To determine what options
@@ -1326,13 +1331,14 @@ SC.View.reopen(
     see the documentation for the transition plugin being used.
 
     Most transitions will accept a duration and timing option, but may
-    also use other options.  For example, SC.View.SLIDE accepts options
+    also use other options.  For example, SC.View.BOUNCE_ADJUST accepts options
     like:
 
         transitionAdjustOptions: {
-          direction: 'left',
+          bounciness: 0.5, // how much the adjustment should bounce back each time
+          bounces: 4, // the number of bounces
           duration: 0.25,
-          timing: 'ease-in-out'
+          delay: 1
         }
 
     @type Object
