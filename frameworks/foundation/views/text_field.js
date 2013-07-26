@@ -732,15 +732,15 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       }
 
       if (!SC.none(autoCorrect)) {
-        input.attr('autoCorrect', !autoCorrect ? 'off' : 'on');
+        input.attr('autocorrect', !autoCorrect ? 'off' : 'on');
       } else {
-        input.attr('autoCorrect', null);
+        input.attr('autocorrect', null);
       }
 
       if (!SC.none(autoCapitalize)) {
-        input.attr('autoCapitalize', !autoCapitalize ? 'none' : 'sentences');
+        input.attr('autocapitalize', !autoCapitalize ? 'none' : 'sentences');
       } else {
-        input.attr('autoCapitalize', null);
+        input.attr('autocapitalize', null);
       }
 
       if (!hintOnFocus && SC.platform.input.placeholder) input.attr('placeholder', hint);
