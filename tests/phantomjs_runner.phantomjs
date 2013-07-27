@@ -23,10 +23,10 @@ function waitFor(testFx, onReady, timeOutMillis) {
 
 var env = require('system').env;
 
-var travis=env['TRAVIS_JOB_ID']?:false,
-    verbose=env['VERBOSE']?:false,
-    port=env['PORT']?:4020,
-    host=env['IP']?:"127.0.0.1";
+var travis=env['TRAVIS_JOB_ID']?env['TRAVIS_JOB_ID']:false,
+    verbose=env['VERBOSE']?env['VERBOSE']:false,
+    port=env['PORT']?env['PORT']:4020,
+    host=env['IP']?env['IP']:"127.0.0.1";
 
 var page = require('webpage').create();
 page.viewportSize = { width: 1024, height: 768 };
