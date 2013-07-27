@@ -23,17 +23,17 @@ function waitFor(testFx, onReady, timeOutMillis) {
 
 var env = require('system').env;
 
-var travis=env['TRAVIS_JOB_ID']?env['TRAVIS_JOB_ID']:false,
-    verbose=env['VERBOSE']?env['VERBOSE']:false,
-    port=env['PORT']?env['PORT']:4020,
-    host=env['IP']?env['IP']:"127.0.0.1";
+var travis=env['TRAVIS_JOB_ID']?:false,
+    verbose=env['VERBOSE']?:false,
+    port=env['PORT']?:4020,
+    host=env['IP']?:"127.0.0.1";
 
 var page = require('webpage').create();
 page.viewportSize = { width: 1024, height: 768 };
 // Chrome/Linux
-page.settings.userAgent = "Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.71 Safari/537.36";
+// page.settings.userAgent = "Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.71 Safari/537.36";
 
-if(!travis && verbose)
+if(!travis && verbose) {
   page.onError = function(err, stack) {
     console.log("CONSOLE ERROR: "+err);
   };
