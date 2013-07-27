@@ -252,8 +252,6 @@ var urls=[
     {url:'sproutcore/runtime/en/current/tests/private/observer_queue.html'},
     {url:'sproutcore/testing/en/current/tests/stub_method.html'},
     {url:'sproutcore/testing/en/current/tests/spy_on.html'},
-    {url:'sproutcore/datetime/frameworks/core/en/current/tests/system/datetime.html'},
-    {url:'sproutcore/datetime/frameworks/localized/en/current/tests/system/datetime.html'},
     {url:'sproutcore/datastore/en/current/tests/data_sources/cascade.html'},
     {url:'sproutcore/datastore/en/current/tests/data_sources/data_source.html'},
     {url:'sproutcore/datastore/en/current/tests/data_sources/fixtures.html'},
