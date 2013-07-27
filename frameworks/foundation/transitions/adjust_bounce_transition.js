@@ -10,6 +10,13 @@ SC.mixin(SC.View,
 
   /** @class
 
+    To modify the bounce animation, you may set the following transition
+    options in `transitionAdjustOptions`:
+
+      - bounces {Number} the number of bounce back iterations.  Default: 2
+      - bounciness {Number} the bounce coefficient.  Default: 0.25
+      - duration {Number} the number of seconds for the animation.  Default: 0.4
+
     @extends SC.ViewTransitionProtocol
     @see SC.View#animate for other timing functions.
     @since Version 1.10

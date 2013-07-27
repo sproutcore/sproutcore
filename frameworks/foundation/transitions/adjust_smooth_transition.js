@@ -10,6 +10,11 @@ SC.mixin(SC.View,
 
   /** @class
 
+    To modify the smooth animation, you may set the following transition
+    options in `transitionAdjustOptions`:
+
+      - duration {Number} the number of seconds for the animation.  Default: 0.4
+
     @extends SC.ViewTransitionProtocol
     @see SC.View#animate for other timing functions.
     @since Version 1.10

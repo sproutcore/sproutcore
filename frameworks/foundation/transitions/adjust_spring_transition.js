@@ -10,6 +10,13 @@ SC.mixin(SC.View,
 
   /** @class
 
+    To modify the spring animation, you may set the following transition
+    options in `transitionAdjustOptions`:
+
+      - springs {Number} the number of spring back iterations.  Default: 4
+      - springiness {Number} the spring coefficient.  Default: 0.25
+      - duration {Number} the number of seconds for the animation.  Default: 0.4
+
     @extends SC.ViewTransitionProtocol
     @see SC.View#animate for other timing functions.
     @since Version 1.10
