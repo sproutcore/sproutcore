@@ -18,7 +18,7 @@ function waitFor(testFx, onReady, timeOutMillis) {
                     clearInterval(interval); //< Stop this interval
                 }
             }
-        }, 500); //< repeat check every 500ms
+        }, 250); //< repeat check every 250ms
 };
 
 var env = require('system').env;
@@ -35,11 +35,10 @@ page.settings.userAgent = "Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHT
 
 if(!travis && verbose)
   page.onError = function(err, stack) {
-    console.log("page onError: "+err);
+    console.log("CONSOLE ERROR: "+err);
   };
 
   page.onConsoleMessage = function(msg, lineNum, sourceId) {
-    //console.log('CONSOLE: ' + msg + ' (from line #' + lineNum + ' in "' + sourceId + '")');
     console.log('CONSOLE: ' + msg);
   };
 }
