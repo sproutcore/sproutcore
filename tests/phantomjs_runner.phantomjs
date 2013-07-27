@@ -36,7 +36,7 @@ page.onConsoleMessage = function(msg, lineNum, sourceId) {
     console.log('CONSOLE: ' + msg);
 };
 
-page.open('http://localhost:8080/sproutcore/desktop/en/current/tests/views/segmented/ui.html', function (status) {
+page.open('http://localhost:4020/sproutcore/desktop/en/current/tests/views/segmented/ui.html', function (status) {
     // Check for page load success
     if (status !== "success") {
         console.log("Unable to access network");
