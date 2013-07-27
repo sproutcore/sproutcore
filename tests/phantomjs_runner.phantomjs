@@ -374,8 +374,8 @@ var urls=[
     {url:'sproutcore/statechart/en/current/tests/statechart/methods/invoke_state_method.html'},
     {url:'sproutcore/statechart/en/current/tests/statechart/owner.html'},
     {url:'sproutcore/statechart/en/current/tests/statechart/respond_to_event.html'},
-    {url:'sproutcore/statechart/en/current/tests/private/state_path_matcher.html'},
-    {url:'sproutcore/experimental/frameworks/select_view/en/current/tests/views/popup_button/menu_setup.html'},
+    {url:'sproutcore/statechart/en/current/tests/private/state_path_matcher.html'},/*
+    {url:'sproutcore/experimental/en/current/tests/frameworks/select_view/views/popup_button/menu_setup.html'},
     {url:'sproutcore/experimental/frameworks/select_view/en/current/tests/views/popup_button/show_menu.html'},
     {url:'sproutcore/experimental/frameworks/select_view/en/current/tests/views/select/selected_item.html'},
     {url:'sproutcore/experimental/frameworks/select_view/en/current/tests/views/select/menu_width.html'},
@@ -392,7 +392,7 @@ var urls=[
     {url:'sproutcore/experimental/frameworks/menu/en/current/tests/menu/scroll.html'},
     {url:'sproutcore/experimental/frameworks/scroll_view/en/current/tests/scroll/methods.html'},
     {url:'sproutcore/experimental/frameworks/scroll_view/en/current/tests/scroll/ui.html'},
-    {url:'sproutcore/experimental/frameworks/scroll_view/en/current/tests/scroll/integration.html'},
+    {url:'sproutcore/experimental/frameworks/scroll_view/en/current/tests/scroll/integration.html'},*/
     {url:'sproutcore/desktop/en/current/tests/panes/select_button/methods.html'},
     {url:'sproutcore/desktop/en/current/tests/panes/select_button/ui.html'},
     {url:'sproutcore/desktop/en/current/tests/panes/picker/methods.html'},
