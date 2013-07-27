@@ -1,0 +1,70 @@
+function waitFor(testFx, onReady, timeOutMillis) {
+    var maxtimeOutMillis = timeOutMillis ? timeOutMillis : 30000, //< Default Max Timout is 30s
+        start = new Date().getTime(),
+        condition = false,
+        interval = setInterval(function() {
+            if ( (new Date().getTime() - start < maxtimeOutMillis) && !condition ) {
+                // If not time-out yet and condition not yet fulfilled
+                condition = (typeof(testFx) === "string" ? eval(testFx) : testFx()); //< defensive code
+            } else {
+                if(!condition) {
+                    // If condition still not fulfilled (timeout but condition is 'false')
+                    console.log("'waitFor()' timeout ("+(new Date().getTime() - start)+"ms elapsed)");
+                    phantom.exit(-1);
+                } else {
+                    // Condition fulfilled (timeout and/or condition is 'true')
+                    console.log("'waitFor()' finished in " + (new Date().getTime() - start) + "ms.");
+                    typeof(onReady) === "string" ? eval(onReady) : onReady(); //< Do what it's supposed to do once the condition is fulfilled
+                    clearInterval(interval); //< Stop this interval
+                }
+            }
+        }, 500); //< repeat check every 500ms
+};
+
+
+var page = require('webpage').create();
+page.viewportSize = { width: 1024, height: 768 };
+// Chrome/Linux
+page.settings.userAgent = "Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.71 Safari/537.36";
+
+page.onError = function(err, stack) {
+    console.log("page onError: "+err);
+};
+
+page.onConsoleMessage = function(msg, lineNum, sourceId) {
+    //console.log('CONSOLE: ' + msg + ' (from line #' + lineNum + ' in "' + sourceId + '")');
+    console.log('CONSOLE: ' + msg);
+};
+
+page.open('http://localhost:8080/sproutcore/desktop/en/current/tests/views/segmented/ui.html', function (status) {
+    // Check for page load success
+    if (status !== "success") {
+        console.log("Unable to access network");
+        phantom.exit(-1);
+    } else {
+        waitFor(function() {
+            // Check in the page if a specific element is now visible
+            return page.evaluate(function() {
+                return $("span.status").text().indexOf("Running – Completed") == -1 ;
+            });
+        }, function() {
+           console.log("Checking results of tests...");
+           console.log("Saved screenshot in example.png");
+           page.render('example.png');
+           // checking outcome
+           var resultText = page.evaluate(function() {
+                return $("span.status").text();
+           });
+           if(resultText.indexOf("failed")!=-1) {
+              console.log("Tests failed: "+resultText);
+              phantom.exit(1);
+           } else if(resultText.indexOf("error")!=-1) {
+              console.log("Tests failed: "+resultText);
+              phantom.exit(2);
+           } else {
+              console.log("Tests passed: "+resultText);
+           }
+           phantom.exit(0);
+        });        
+    }
+});
