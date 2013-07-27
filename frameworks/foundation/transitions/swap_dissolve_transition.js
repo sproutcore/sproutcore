@@ -27,13 +27,11 @@ SC.mixin(SC.ContainerView,
 
     /** @private */
     willBuildInToView: function (container, content, previousStatechart, options) {
-      console.log('willBuildInToView');
       content.adjust({ opacity: 0 });
     },
 
     /** @private */
     buildInToView: function (statechart, container, content, previousStatechart, options) {
-      console.log('buildInToView');
       content.animate('opacity', 1, {
         duration: options.duration || 0.4,
         timing: options.timing || 'ease'
@@ -47,7 +45,6 @@ SC.mixin(SC.ContainerView,
 
     /** @private */
     buildOutFromView: function (statechart, container, content, options, exitCount) {
-      console.log('buildOutFromView');
       // We can call this transition repeatedly without effecting the current exit transition.
       if (exitCount == 1) {
         // Fade the current content at the same time.
@@ -62,7 +59,6 @@ SC.mixin(SC.ContainerView,
 
     /** @private */
     didBuildOutFromView: function (container, content, options) {
-      console.log('didBuildOutFromView');
       // Reset the opacity in case this view is used elsewhere.
       content.adjust({ opacity: 1 });
     }
