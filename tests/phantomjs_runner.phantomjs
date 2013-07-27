@@ -21,22 +21,30 @@ function waitFor(testFx, onReady, timeOutMillis) {
         }, 500); //< repeat check every 500ms
 };
 
+var env = require('system').env;
+
+var travis=env['TRAVIS_JOB_ID']?:false,
+    verbose=env['VERBOSE']?:false,
+    port=env['PORT']?:4020,
+    host=env['IP']?:"127.0.0.1";
 
 var page = require('webpage').create();
 page.viewportSize = { width: 1024, height: 768 };
 // Chrome/Linux
 page.settings.userAgent = "Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.71 Safari/537.36";
 
-page.onError = function(err, stack) {
+if(!travis && verbose)
+  page.onError = function(err, stack) {
     console.log("page onError: "+err);
-};
+  };
 
-page.onConsoleMessage = function(msg, lineNum, sourceId) {
+  page.onConsoleMessage = function(msg, lineNum, sourceId) {
     //console.log('CONSOLE: ' + msg + ' (from line #' + lineNum + ' in "' + sourceId + '")');
     console.log('CONSOLE: ' + msg);
-};
+  };
+}
 
-page.open('http://localhost:4020/sproutcore/desktop/en/current/tests/views/segmented/ui.html', function (status) {
+page.open('http://'+host+':'+port+'/sproutcore/desktop/en/current/tests/views/segmented/ui.html', function (status) {
     // Check for page load success
     if (status !== "success") {
         console.log("Unable to access network");

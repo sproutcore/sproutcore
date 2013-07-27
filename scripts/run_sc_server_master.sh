@@ -23,6 +23,12 @@ mkdir frameworks
 cd frameworks
 ln -s ${OLD_PWD} sproutcore
 cd ..
-( ../bin/sc-server --host=${IP} --port=${PORT} --allow-from-ips=${ALLOW_IPS:-"*.*.*.*"} & ) || /bin/true
+if [ -z ${TRAVIS_JOB_ID} ]; then
+    # running under travis, daemonize
+    ( ../bin/sc-server --host=${IP} --port=${PORT} --allow-from-ips=${ALLOW_IPS:-"*.*.*.*"} & ) || /bin/true
+else
+    # not running under travis, stay in foreground until stopped
+    ../bin/sc-server --host=${IP} --port=${PORT} --allow-from-ips=${ALLOW_IPS:-"*.*.*.*"}
+fi
 cd ${OLD_PWD}
 #rm -rf ${WD}
