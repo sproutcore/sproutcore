@@ -63,8 +63,8 @@ page.open('http://localhost:4020/sproutcore/desktop/en/current/tests/views/segme
               phantom.exit(2);
            } else {
               console.log("Tests passed: "+resultText);
+              phantom.exit(0);
            }
-           phantom.exit(0);
         });        
     }
 });
