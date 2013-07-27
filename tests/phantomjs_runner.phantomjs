@@ -13,7 +13,6 @@ function waitFor(testFx, onReady, timeOutMillis) {
                     phantom.exit(-1);
                 } else {
                     // Condition fulfilled (timeout and/or condition is 'true')
-                    console.log("'waitFor()' finished in " + (new Date().getTime() - start) + "ms.");
                     typeof(onReady) === "string" ? eval(onReady) : onReady(); //< Do what it's supposed to do once the condition is fulfilled
                     clearInterval(interval); //< Stop this interval
                 }
@@ -503,14 +502,22 @@ var urls=[
 ];
 
 var outcome=0;
-var webpage = require('webpage')
+var webpage = require('webpage');
+
+function logResult(r) {
+    // output coloring
+    var red, blue, reset;
+    red   = '\033[31m';
+    green  = '\033[32m';
+    reset = '\033[0m';
+    console.log( (r.status === 0 ? green : red ) + r.url + reset + " (" + r.status + "): " + r.resultText);
+}
 
 function runTest(idx, cb) {
     if(idx==urls.length) {
         cb.apply();
     }
     var url=urls[idx].url;
-    console.log('http://'+host+':'+port+'/'+url);
     var page = webpage.create();
     page.viewportSize = { width: 1024, height: 768 };
     // Chrome/Linux
@@ -518,8 +525,9 @@ function runTest(idx, cb) {
     page.open('http://'+host+':'+port+'/'+url, function (status) {
         // Check for page load success
         if (status !== "success") {
-            console.log("["+url+"] tests failed: unable to access page");
+            urls[idx].resultText="unable to access page";
             urls[idx].status=-1; outcome=1;
+            logResult(urls[idx]);
             page.close();
             runTest(++idx,cb);
         } else {
@@ -535,15 +543,13 @@ function runTest(idx, cb) {
                 });
                 urls[idx].resultText=resultText;
                 if(resultText.indexOf("failed")!=-1) {
-                  console.log("["+url+" tests failed: "+resultText);
                   urls[idx].status=1; outcome=1;
                 } else if(resultText.indexOf("error")!=-1) {
-                  console.log("["+url+" tests failed: "+resultText);
                   urls[idx].status=2; outcome=1;
                 } else {
-                  console.log("["+url+" tests passed: "+resultText);
                   urls[idx].status=0;
                 }
+                logResult(urls[idx]);
                 page.close();
                 runTest(++idx,cb);
             });        
