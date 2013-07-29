@@ -925,6 +925,10 @@ SC.CoreView.reopen(
     // setup child views.  be sure to clone the child views array first
     childViews = this.childViews = this.get('childViews').slice();
     this.createChildViews(); // setup child Views
+
+    this.viewState = SC.CoreViewStatechart.create({
+      owner: this
+    });
   },
 
   /**
@@ -1022,6 +1026,30 @@ SC.CoreView.reopen(
     }
   },
 
+  /** @private Send the event recursively to all child view's internal statecharts. */
+  _sendStateEventToChildViews: function (statechartName, eventName) {
+    var childView,
+      childViews = this.get('childViews'),
+      statechart,
+      shouldContinue;
+
+    for (var i = childViews.length - 1; i >= 0; i--) {
+      childView = childViews[i];
+
+      // We allow missing childViews in the array so ignore them.
+      if (!childView) { continue; }
+
+      // Look up the method on the child.
+      statechart = childView[statechartName];
+      shouldContinue = statechart.sendEvent(eventName);
+
+      // Recurse.
+      if (shouldContinue !== null) {
+        childView._sendStateEventToChildViews(statechartName, eventName);
+      }
+    }
+  },
+
   /**
     The clipping frame returns the visible portion of the view, taking into
     account the clippingFrame of the parent view.  Keep in mind that
@@ -1110,6 +1138,7 @@ SC.CoreView.reopen(
     @returns {SC.View} receiver
   */
   removeChildAndDestroy: function (view, immediately) {
+    console.log("%@ - removeChildAndDestroy(%@)".fmt(this, view));
     view._doDetach(immediately);
 
     // If the view will transition out, wait for the transition to complete
@@ -1170,9 +1199,9 @@ SC.CoreView.reopen(
     //   // Reattach our layer.
     //   if (parentNode && !this.get('isAttached')) { this._doAttach(parentNode); }
     // } else {
-      for (i = len - 1; i >= 0; i--) {
-        this.removeChildAndDestroy(childViews.objectAt(i), immediately);
-      }
+    for (i = len - 1; i >= 0; i--) {
+      this.removeChildAndDestroy(childViews.objectAt(i), immediately);
+    }
     // }
 
     return this;

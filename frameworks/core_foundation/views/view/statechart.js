@@ -1,7 +1,7 @@
 sc_require("views/view/base");
 
 
-SC.CoreView.mixin(
+SC.Object.mixin(
   /** @scope SC.CoreView */ {
 
   /**
@@ -51,6 +51,18 @@ SC.CoreView.mixin(
     @constant
   */
   IS_HIDDEN: 0x0020, // 32
+
+  /**
+    The view has a parent view.
+
+    Use a logical AND (single `&`) to test adopted status.  For example,
+
+        view.get('viewState') & SC.CoreView.IS_ADOPTED
+
+    @static
+    @constant
+  */
+  IS_ADOPTED: 0x0010, // 16
 
   /**
     The view has been created, but has not been rendered or attached.
@@ -254,7 +266,6 @@ SC.CoreView.reopen(
   // Actions (Locked down to the proper state)
   //
 
-
   /** @private Adopt this view action. */
   _doAdopt: function (parentView, beforeView) {
     var curParentView = this.get('parentView'),
@@ -273,7 +284,7 @@ SC.CoreView.reopen(
 
     // You can adopt childViews that have you set as their parent (i.e. created
     // with createChildView()), but have not yet been fully adopted.
-    if (!curParentView || this.get('childViews').indexOf(this) < 0) {
+    if (!curParentView || curParentView.get('childViews').indexOf(this) < 0) {
       var idx,
         childViews = parentView.get('childViews');
 
@@ -289,7 +300,6 @@ SC.CoreView.reopen(
       idx = (beforeView) ? childViews.indexOf(beforeView) : childViews.length;
       if (idx < 0) { idx = childViews.length; }
       childViews.insertAt(idx, this);
-
 
       if (this.get('isAttached')) {
         // Our frame may change once we've been adopted to a parent.
@@ -333,6 +343,7 @@ SC.CoreView.reopen(
     var state = this.get('viewState'),
       transitionIn = this.get('transitionIn'),
       parentView;
+    console.log("%@:%@ - _doAttach()".fmt(this, this.get('viewState')));
 
     switch (state) {
     case SC.CoreView.ATTACHED_HIDING: // FAST PATH!
@@ -414,6 +425,7 @@ SC.CoreView.reopen(
   /** @private Destroy the layer of this view action. */
   _doDestroyLayer: function () {
     var handled = true;
+    console.log("%@:%@ - _doDestroyLayer()".fmt(this, this.get('viewState')));
 
     if (this.get('_isRendered') && !this.get('isAttached')) {
       // Remove our reference to the layer (our self and all our child views).
@@ -431,6 +443,7 @@ SC.CoreView.reopen(
     var state = this.get('viewState'),
       transitionOut = this.get('transitionOut');
 
+    console.log("%@:%@ - _doDetach()".fmt(this, state));
     switch (state) {
     case SC.CoreView.UNRENDERED: // FAST PATH!
     case SC.CoreView.UNATTACHED: // FAST PATH!
