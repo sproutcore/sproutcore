@@ -145,3 +145,47 @@ test("drag on list view with SC.DROP_ON support", function() {
   setTimeout(f, 200);
 });
 
+test("insertion point on list view", function() {
+  var ev,
+    itemView,
+    layer,
+    listView = pane.view("basic").get('contentView');
+
+  listView.set('canReorderContent', YES);
+
+  itemView = listView.itemViewForContentIndex(0);
+  layer = itemView.get('layer');
+  ev = SC.Event.simulateEvent(layer, 'mousedown');
+  SC.Event.trigger(layer, 'mousedown', [ev]);
+
+  var f = function() {
+    var itemView2,
+      point;
+
+    SC.RunLoop.begin();
+    ev = SC.Event.simulateEvent(layer, 'mousemove');
+    SC.Event.trigger(layer, 'mousemove', [ev]);
+
+    // Drag over 2nd item
+    itemView2 = listView.itemViewForContentIndex(1);
+    layer = itemView2.get('layer');
+    point = SC.offset(layer);
+
+    ev = SC.Event.simulateEvent(layer, 'mousemove', { pageX: point.x + 1, pageY: point.y + 1 });
+    SC.Event.trigger(layer, 'mousemove', [ev]);
+
+    ok(listView._insertionPointView, "An insertion point should have been added.");
+
+    // Clean up
+    ev = SC.Event.simulateEvent(layer, 'mouseup');
+    SC.Event.trigger(layer, 'mouseup', [ev]);
+
+    equals(listView._insertionPointView, null, "The insertion point should have been destroyed.");
+
+    window.start();
+  };
+
+  stop(); // stops the test runner
+  setTimeout(f, 200);
+});
+
