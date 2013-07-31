@@ -145,7 +145,7 @@ test("drag on grid view with SC.DROP_ON support", function() {
   stop(700); // stops the test runner
 });
 
-test("insertion point on grid view", function() {
+test("insertion point when drag on grid view", function() {
   var ev,
     frame,
     itemView,
@@ -178,13 +178,61 @@ test("insertion point on grid view", function() {
     ev = SC.Event.simulateEvent(layer, 'mousemove', { pageX: point.x + 1, pageY: point.y + 1 });
     SC.Event.trigger(layer, 'mousemove', [ev]);
 
-    ok(gridView._insertionPointView, "An insertion point should have been added.");
+    ok(gridView._insertionPointView, "An insertion point should have been added");
 
     // Clean up
     ev = SC.Event.simulateEvent(layer, 'mouseup');
     SC.Event.trigger(layer, 'mouseup', [ev]);
 
-    equals(gridView._insertionPointView, null, "The insertion point should have been destroyed.");
+    equals(gridView._insertionPointView, null, "The insertion point should have been destroyed");
+
+    start();
+  };
+
+  stop(); // stops the test runner
+  setTimeout(f, 200);
+});
+
+test("insertion point when cancel drag on grid view", function() {
+  var ev,
+    frame,
+    itemView,
+    layer,
+    gridView = pane.view("basic").get('contentView');
+
+  // Configure the view to accept drop on.
+  gridView.set('canReorderContent', YES);
+
+  itemView = gridView.itemViewForContentIndex(0);
+  frame = itemView.get('frame');
+  layer = itemView.get('layer');
+
+  ev = SC.Event.simulateEvent(layer, 'mousedown', { clientX: frame.x, clientY: frame.y });
+  SC.Event.trigger(layer, 'mousedown', [ev]);
+
+  var f = function() {
+    var halfWidth,
+      itemView2,
+      point;
+
+    ev = SC.Event.simulateEvent(layer, 'mousemove');
+    SC.Event.trigger(layer, 'mousemove', [ev]);
+
+    // Drag over 2nd item
+    itemView2 = gridView.itemViewForContentIndex(1);
+    layer = itemView2.get('layer');
+    point = SC.offset(layer);
+
+    ev = SC.Event.simulateEvent(layer, 'mousemove', { pageX: point.x + 1, pageY: point.y + 1 });
+    SC.Event.trigger(layer, 'mousemove', [ev]);
+
+    ok(gridView._insertionPointView, "An insertion point should have been added");
+
+    // cancel drag
+    ev = SC.Event.simulateEvent(layer, 'keydown', { keyCode: 27 });
+    SC.Event.trigger(layer, 'keydown', [ev]);
+
+    equals(gridView._insertionPointView, null, "The insertion point should have been destroyed");
 
     start();
   };
