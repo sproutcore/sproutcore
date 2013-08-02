@@ -22,9 +22,7 @@ SC.mixin(SC.View,
         parentFrame,
         viewFrame = view.get('borderFrame'),
         left,
-        top,
-        height,
-        width;
+        top;
 
       if (inPlace) {
         // Move from the current position.
@@ -36,21 +34,18 @@ SC.mixin(SC.View,
           parentFrame = SC.RootResponder.responder.currentWindowSize;
         }
 
-        height = parentFrame.height;
-        width = parentFrame.width;
-
         switch (options.direction) {
         case 'left':
-          left = width;
+          left = parentFrame.width;
           break;
         case 'up':
-          top = height;
+          top = parentFrame.height;
           break;
         case 'down':
-          top = -height;
+          top = -viewFrame.height;
           break;
         default:
-          left = -width;
+          left = -viewFrame.width;
         }
       }
 

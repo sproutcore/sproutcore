@@ -59,7 +59,6 @@ SC.mixin(SC.View,
           } else {
             frames[i].value[key] = finalValue + spring; // Overshoot forward.
           }
-          console.log('frame: %@: %@'.fmt(key, frames[i].value[key]));
 
           // Cut back the spring amount after each spring
           spring = Math.round(spring * 0.5);
