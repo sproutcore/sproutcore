@@ -299,7 +299,7 @@ SC.CoreView.reopen(
         if (this.get('_isRendered')) {
 
           // Bypass the unattached state for adopted views.
-          if (parentView.get('isAttached')) {
+          if (parentView.get('_isRendered')) {
             var parentNode, nextNode, nextView, siblings;
 
             parentNode = parentView.get('containerLayer');
