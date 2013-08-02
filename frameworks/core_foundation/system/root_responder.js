@@ -1662,7 +1662,9 @@ SC.RootResponder = SC.Object.extend(
 
       // attempt key equivalent if key not handled
       if (!ret) {
-        ret = !this.attemptKeyEquivalent(evt) ;
+        SC.run(function() {
+          ret = !this.attemptKeyEquivalent(evt);
+        }, this);
       } else {
         ret = evt.hasCustomEventHandling ;
         if (ret) forceBlock = NO ; // code asked explicitly to let delete go
