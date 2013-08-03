@@ -8,6 +8,7 @@
 /*global SC */
 
 sc_require('system/state');
+sc_require('mixins/delegate_support');
 sc_require('mixins/statechart_delegate');
 
 /**

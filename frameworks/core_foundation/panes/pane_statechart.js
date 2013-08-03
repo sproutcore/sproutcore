@@ -12,7 +12,7 @@ sc_require("panes/pane");
 SC.Pane.reopen({
 
   /** @private */
-  _notifyAttached: function () {
+  didAppendToDocument: function () {
     // hook into root responder
     var responder = (this.rootResponder = SC.RootResponder.responder);
     responder.panes.add(this);
@@ -32,8 +32,9 @@ SC.Pane.reopen({
   },
 
   /** @private */
-  _notifyDetached: function () {
-    sc_super();
+  willRemoveFromDocument: function () {
+    // Legacy.
+    this.set('isPaneAttached', NO);
 
     // remove intercept
     this._removeIntercept();

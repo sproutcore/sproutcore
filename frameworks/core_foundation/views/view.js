@@ -13,7 +13,7 @@ sc_require('system/responder');
 sc_require('system/theme');
 
 sc_require('system/string');
-sc_require('views/view/statechart');
+sc_require('views/view/view_statechart');
 
 
 /**
@@ -382,7 +382,7 @@ SC.CoreView.reopen(
     @returns {SC.View} receiver
   */
   createLayer: function () {
-    this._doRender();
+    this.viewState.sendEvent('doRender');
 
     return this;
   },
@@ -1027,7 +1027,7 @@ SC.CoreView.reopen(
   },
 
   /** @private Send the event recursively to all child view's internal statecharts. */
-  _sendStateEventToChildViews: function (statechartName, eventName) {
+  _sendStateEventToChildViews: function (statechartName, eventName, context) {
     var childView,
       childViews = this.get('childViews'),
       statechart,
@@ -1045,7 +1045,7 @@ SC.CoreView.reopen(
 
       // Recurse.
       if (shouldContinue !== null) {
-        childView._sendStateEventToChildViews(statechartName, eventName);
+        childView._sendStateEventToChildViews(statechartName, eventName, context);
       }
     }
   },

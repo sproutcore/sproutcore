@@ -489,7 +489,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     var self = this;
 
     return this.insert(function () {
-      self._doAttach(jQuery(elem)[0]);
+      self.viewState.sendEvent('doAttach', jQuery(elem)[0]);
     });
   },
 

@@ -1,7 +1,7 @@
 sc_require("views/view/base");
 
 
-SC.Object.mixin(
+SC.CoreView.mixin(
   /** @scope SC.CoreView */ {
 
   /**
