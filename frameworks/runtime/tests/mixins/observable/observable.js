@@ -9,7 +9,7 @@
 // ========================================================================
 /*globals module test ok isObj equals expects Namespace */
 
-var object, ObjectC, ObjectD, objectA, objectB ;
+var object, ObjectC, ObjectD, objectA, objectB, objectE, objectF ;
 
 // ..........................................................
 // GET()
@@ -828,6 +828,41 @@ test("removing an observer inside of an observer shouldn’t cause any problems"
   equals(encounteredError, NO);
 });
 
+
+module("object.hasObserverFor", {
+  setup: function() {
+    objectA = SC.Object.create({
+      internalObject: SC.Object.create({
+        chainedKey: 'value'
+      }),
+      key: 'value',
+      observingMethod: function() {
+        // nothin to see here
+      }.observes('key', '.objectF.chainedKey'),
+      counter: 0
+    });
+    objectB = SC.Object.create({
+      observingMethod: function() {
+        // nothin to see here
+      }
+    });
+  }
+});
+test('hasObserverFor correctly identifies local observers.', function() {
+  objectA.addObserver('key', 'observingMethod');
+  ok(objectA.hasObserverFor('key'), "Object has an observer for 'key'.");
+  ok(objectA.hasObserverFor('key', 'observingMethod'), "Object's observingMethod is the observer for 'key'.");
+});
+test('hasObserverFor correctly identifies remote observers.', function() {
+  objectA.addObserver('key', objectB, 'observingMethod');
+  ok(objectA.hasObserverFor('key'), "Object has an observer for 'key'.");
+  ok(objectA.hasObserverFor('key', objectB, 'observingMethod'), "Second object's observingMethod is the observer for 'key'.");
+});
+test('hasObserverFor correctly identifies chained observers.', function() {
+  objectA.addObserver('.internalObject.key', 'observingMethod');
+  ok(objectA.hasObserverFor('internalObject.key'), "Object has an observer for '.internalObject.key'.");
+  ok(objectA.hasObserverFor('internalObject.key', 'observingMethod'), "Object's observingMethod is the observer for '.internalObject.key'.");
+});
 
 
 module("Bind function ", {

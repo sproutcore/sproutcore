@@ -918,18 +918,77 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     an expensive action until someone begins observing a particular property
     on the object.
 
+    Optionally, you may pass a method or method and target to check for the
+    presence of a particular observer. You can use this to avoid creating
+    duplicate observers in situations where that's likely.
+
     @param {String} key key to check
+    @param {Object|Function|String} target or method (optional)
+    @param {Function|String} method (optional)
     @returns {Boolean}
   */
-  hasObserverFor: function (key) {
+  hasObserverFor: function (key, target, method) {
     SC.Observers.flush(this); // hookup as many observers as possible.
 
     var observers = this[SC.keyFor('_kvo_observers', key)],
-      locals = this[SC.keyFor('_kvo_local', key)];
+        chains = this._kvo_for(SC.keyFor('_kvo_for', key)),
+        locals = this[SC.keyFor('_kvo_local', key)],
+        isChain = key.indexOf('.') >= 0;
 
-    if (locals && locals.length > 0) return YES;
-    if (observers && observers.getMembers().length > 0) return YES;
-    return NO;
+    // Fast path: no target/method.
+    if (SC.none(target) && SC.none(method)) {
+      if (locals && locals.length > 0) return YES;
+      if (!isChain && observers && observers.getMembers().length > 0) return YES;
+      if (isChain && chains && chains.length > 0) return YES;
+      return NO;
+    }
+
+    // Slow path: target/method.
+    // Normalize between (key, method) and (key, target, method).
+    if (method === undefined) {
+      method = target;
+      target = this;
+    }
+    if (typeof method === "string") method = target[method];
+    if (!method) throw new Error("If present, the method argument of hasObserverFor must be (or refer to) a function.");
+    if (!target) target = this;
+
+    // Declare our iterators.
+    var i, len;
+
+    // Check remote chains.
+    if (isChain) {
+      if (!chains || !chains.length) return NO;
+      len = chains.length;
+      for (i = 0; i < len; i++) {
+        if (chains[i][0].masterTarget === target && chains[i][0].masterMethod === method) return YES;
+      }
+      return NO;
+    }
+    // Check locals.
+    else if (!target || target === this) {
+      if (!locals) return NO;
+      len = locals.length;
+      for (i = 0; i < len; i++) {
+        if (this[locals[i]] === method) return YES;
+      }
+      return NO;
+    }
+    // Check remotes.
+    else {
+      if (!observers || !observers.members) return NO;
+
+      len = observers.members.length;
+      var member;
+      for (i = 0; i < len; i++) {
+        member = observers.members[i];
+        // If this is a non-chained observer, the first item is the target and the second is the method.
+        if (member[0] === target && member[1] === method) return YES;
+      }
+      return NO;
+    }
+    // TODO: Remote chains.
+
   },
 
   /**
