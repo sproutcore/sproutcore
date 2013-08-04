@@ -11,7 +11,6 @@
     color: white;
     text-shadow: none;
     border-bottom: 0px none;
-    z-index: 10;
   }
   
   $theme.workspace {
@@ -29,8 +28,6 @@
       @include slices("popover_notoolbar.png", $left: 30, $top: 34, $bottom: 34, $right: 30, $fill: 1 1, $skip: middle);
 
       .middle { display: none }
-      
-      div { z-index: 5; }
     }
     
     &.top-toolbar .popover-background {
