@@ -1,15 +1,16 @@
+@import "compass/css3";
+
 @theme(popover) {
   $theme.picker {
     background: none;
   }
 
   $theme.toolbar {
+    @include box-shadow(none);
     background: none;
     color: white;
     text-shadow: none;
     border-bottom: 0 none;
-    -webkit-box-shadow: none;
-    -moz-box-shadow: none;
     z-index: 10;
   }
 
