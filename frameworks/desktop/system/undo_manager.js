@@ -39,7 +39,7 @@ SC.UndoManager = SC.Object.extend(
     @default null
   */
   undoActionName: function() { 
-    return this.undoStack ? this.undoStack.name : null ;
+    return this.undoStack ? this.undoStack.name : null;
   }.property('undoStack'),
   
   /** 
@@ -50,7 +50,7 @@ SC.UndoManager = SC.Object.extend(
     @default null
   */
   redoActionName: function() { 
-    return this.redoStack ? this.redoStack.name : null ;
+    return this.redoStack ? this.redoStack.name : null;
   }.property('redoStack'),
 
   /** 
@@ -125,9 +125,9 @@ SC.UndoManager = SC.Object.extend(
       groups, this is not necessary.
   */
   registerUndo: function(func, name) {
-    this.beginUndoGroup(name) ;
-    this._activeGroup.actions.push(func) ;
-    this.endUndoGroup(name) ;
+    this.beginUndoGroup(name);
+    this._activeGroup.actions.push(func);
+    this.endUndoGroup(name);
   },
 
   /**
@@ -146,14 +146,14 @@ SC.UndoManager = SC.Object.extend(
   beginUndoGroup: function(name) {
     // is a group already active? Just increment the counter.
     if (this._activeGroup) {
-      this.groupingLevel++ ;
+      this.groupingLevel++;
       
     // otherwise, create a new active group.  
     } else {
-      var stack = this.isUndoing ? 'redoStack' : 'undoStack' ;
-      this._activeGroup = { name: name, actions: [], prev: this.get(stack) } ;
-      this.set(stack, this._activeGroup) ;
-      this.groupingLevel = 1 ;
+      var stack = this.isUndoing ? 'redoStack' : 'undoStack';
+      this._activeGroup = { name: name, actions: [], prev: this.get(stack) };
+      this.set(stack, this._activeGroup);
+      this.groupingLevel = 1;
     }
   },
  
@@ -165,15 +165,15 @@ SC.UndoManager = SC.Object.extend(
   */
   endUndoGroup: function(name) {
     // if more than one groups are active, just decrement the counter.
-    if (!this._activeGroup) raise("endUndoGroup() called outside group.") ;
+    if (!this._activeGroup) raise("endUndoGroup() called outside group.");
     if (this.groupingLevel > 1) {
-      this.groupingLevel-- ;
+      this.groupingLevel--;
       
     // otherwise, close out the current group.
     } else {
-      this._activeGroup = null ; this.groupingLevel = 0 ;
+      this._activeGroup = null; this.groupingLevel = 0;
     }
-    this.propertyDidChange(this.isUndoing ? 'redoStack' : 'undoStack') ;
+    this.propertyDidChange(this.isUndoing ? 'redoStack' : 'undoStack');
   },
 
   /**
@@ -186,8 +186,8 @@ SC.UndoManager = SC.Object.extend(
     @throws {Error} If there is no active group
   */
   setActionName: function(name) {
-    if (!this._activeGroup) raise("setActionName() called outside group.") ;
-    this._activeGroup.name = name ;
+    if (!this._activeGroup) raise("setActionName() called outside group.");
+    this._activeGroup.name = name;
   },
   
   // --------------------------------
@@ -205,20 +205,20 @@ SC.UndoManager = SC.Object.extend(
   
   /** @private */
   _undoOrRedo: function(stack, state) {
-    if (this._activeGroup) return false ;
+    if (this._activeGroup) return false;
     if (this.get(stack) == null) return true; // noting to do.
 
-    this.set(state, true) ;
-    var group = this.get(stack) ;
-    this.set(stack, group.prev) ;
-    var action ;
+    this.set(state, true);
+    var group = this.get(stack);
+    this.set(stack, group.prev);
+    var action;
 
     var useGroup = group.actions.length > 1; 
-    if (useGroup) this.beginUndoGroup(group.name) ;
+    if (useGroup) this.beginUndoGroup(group.name);
     while(action = group.actions.pop()) { action(); }
-    if (useGroup) this.endUndoGroup(group.name) ;
+    if (useGroup) this.endUndoGroup(group.name);
     
-    this.set(state, false) ;
+    this.set(state, false);
   }
   
-}) ;
+});
