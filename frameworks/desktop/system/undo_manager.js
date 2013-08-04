@@ -96,6 +96,15 @@ SC.UndoManager = SC.Object.extend(
   redo: function() {
     this._undoOrRedo('redoStack','isRedoing');
   },
+
+  /** 
+    Use this property to group your undo events. If the lapse between
+    two events is less than the specified value, both actions will be grouped.
+    
+    @type Number in milliseconds
+    @default 0
+  */
+  groupLapse: 0,
   
   /**
     @type Boolean
@@ -125,9 +134,27 @@ SC.UndoManager = SC.Object.extend(
       groups, this is not necessary.
   */
   registerUndo: function(func, name) {
+    this.prepareUndoGroup();
     this.beginUndoGroup(name);
     this._activeGroup.actions.push(func);
     this.endUndoGroup(name);
+  },
+
+  /**
+    If the groupLapse property is more than 0 ms and the last undo event has occur 
+    in less than groupLapse milliseconds after the last one, 
+    we reuse the last undo group to group the actions.
+  */
+  prepareUndoGroup: function() {
+    var groupLapse = this.get('groupLapse');
+
+    if (groupLapse > 0 && !this.isUndoing) {
+      var now = Date.now();
+      if (now - this._lastChangeTime < groupLapse) {
+        this._activeGroup = this.get('undoStack');
+      }
+      this._lastChangeTime = now;
+    } 
   },
 
   /**
@@ -196,6 +223,9 @@ SC.UndoManager = SC.Object.extend(
   
   /** @private */
   _activeGroup: null,
+
+  /** @private */
+  _lastChangeTime: 0,
   
   /** @private */
   undoStack: null,
