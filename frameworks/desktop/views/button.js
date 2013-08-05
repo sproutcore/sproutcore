@@ -17,7 +17,7 @@ SC.TOGGLE_BEHAVIOR = 'toggle';
   @constant
   @type String
 */
-SC.PUSH_BEHAVIOR =   'push';
+SC.PUSH_BEHAVIOR = 'push';
 
 /**
   @static
