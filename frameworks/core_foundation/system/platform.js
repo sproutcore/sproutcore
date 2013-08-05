@@ -56,6 +56,10 @@ SC.platform = SC.Object.create({
        touch capability.
      - See: https://github.com/highslide-software/highcharts.com/issues/1331 for a discussion
        about why we need to check if ontouchstart is null in addition to check if it's defined
+     - The test for window._phantom provides support for phantomjs, the headless WebKit browser
+       used in Travis-CI, and which incorredtly (see above) identifies itself as a touch browser.
+       For more information on CI see https://github.com/sproutcore/sproutcore/pull/1025
+       For discussion of the phantomjs touch issue see https://github.com/ariya/phantomjs/issues/10375
   */
   /**
     YES if the current device supports touch events, NO otherwise.
@@ -73,7 +77,7 @@ SC.platform = SC.Object.create({
 
     @type Boolean
   */
-  touch: !SC.none(window.ontouchstart) || SC.browser.name === SC.BROWSER.android || 'ontouchstart' in document.documentElement,
+  touch: ( !SC.none(window.ontouchstart) || SC.browser.name === SC.BROWSER.android || 'ontouchstart' in document.documentElement ) && SC.none(window._phantom),
 
   /**
     YES if the current browser supports bounce on scroll.
