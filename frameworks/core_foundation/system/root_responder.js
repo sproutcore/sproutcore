@@ -1953,7 +1953,7 @@ SC.RootResponder = SC.Object.extend(
            dragView.tryToPerform('mouseDragged', evt);
          }
        } else {
-         var lh = this._lastHovered || [] , nh = [] , exited, loc, len,
+         var lh = this._lastHovered || [] , nh = [], loc, len,
              view = this.targetViewForEvent(evt) ;
          // first collect all the responding view starting with the
          // target view from the given mouse move event
@@ -1965,8 +1965,7 @@ SC.RootResponder = SC.Object.extend(
          // responding chain
          for (loc=0, len=lh.length; loc < len; loc++) {
            view = lh[loc] ;
-           exited = view.respondsTo('mouseExited');
-           if (exited && nh.indexOf(view) === -1) {
+           if (nh.indexOf(view) === -1) {
              view.tryToPerform('mouseExited', evt);
            }
          }
