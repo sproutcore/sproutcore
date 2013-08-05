@@ -8,6 +8,7 @@
 sc_require('ext/function');
 sc_require('system/object');
 
+//@if(debug)
 /**
   Debug parameter you can turn on.  This will log all bindings that fire to
   the console.  This should be disabled in production code.  Note that you
@@ -32,6 +33,7 @@ SC.BENCHMARK_BINDING_NOTIFICATIONS = NO ;
   @type Boolean
 */
 SC.BENCHMARK_BINDING_SETUP = NO;
+//@endif
 
 /**
   Default placeholder for multiple values in bindings.
@@ -359,10 +361,12 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     if (!this._connectionPending) return; //nothing to do
     this._connectionPending = NO ;
 
-    var path, root,
-        bench = SC.BENCHMARK_BINDING_SETUP;
+    var path, root;
 
+    //@if(debug)
+    var bench = SC.BENCHMARK_BINDING_SETUP;
     if (bench) SC.Benchmark.start("SC.Binding.connect()");
+    //endif
 
     // try to connect the from side.
     // as a special behavior, if the from property path begins with either a
@@ -398,14 +402,20 @@ SC.Binding = /** @scope SC.Binding.prototype */{
       SC.Observers.addObserver.apply(SC.Observers, this._toObserverData);
     }
 
+    //@if(debug)
     if (bench) SC.Benchmark.end("SC.Binding.connect()");
+    //@endif
 
     // now try to sync if needed
     if (this._syncOnConnect) {
       this._syncOnConnect = NO ;
+      //@if(debug)
       if (bench) SC.Benchmark.start("SC.Binding.connect().sync");
+      //@endif
       this.sync();
+      //@if(debug)
       if (bench) SC.Benchmark.end("SC.Binding.connect().sync");
+      //@endif
     }
   },
 
@@ -580,7 +590,6 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     SC.Observers.suspendPropertyObserving();
 
     var didFlush = NO,
-        log = SC.LOG_BINDINGS,
         // connect any bindings
         queue, binding;
 
@@ -592,7 +601,9 @@ SC.Binding = /** @scope SC.Binding.prototype */{
 
     // loop through the changed queue...
     while ((queue = this._changeQueue).length > 0) {
-      if (log) SC.Logger.log("Begin: Trigger changed bindings") ;
+      //@if(debug)
+      if (SC.LOG_BINDINGS) SC.Logger.log("Begin: Trigger changed bindings") ;
+      //@endif
 
       didFlush = YES ;
 
@@ -609,7 +620,9 @@ SC.Binding = /** @scope SC.Binding.prototype */{
       // now loop back and see if there are additional changes pending in the
       // active queue.  Repeat this until all bindings that need to trigger
       // have triggered.
-      if (log) SC.Logger.log("End: Trigger changed bindings") ;
+      //@if(debug)
+      if (SC.LOG_BINDINGS) SC.Logger.log("End: Trigger changed bindings") ;
+      //@endif
     }
 
     // clean up
@@ -629,25 +642,41 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     this._computeBindingValue();
 
     var v = this._bindingValue,
-        tv = this._transformedBindingValue,
-        bench = SC.BENCHMARK_BINDING_NOTIFICATIONS,
-        log = SC.LOG_BINDINGS ;
+        tv = this._transformedBindingValue;
+
+    //@if(debug)
+    var bench = SC.BENCHMARK_BINDING_NOTIFICATIONS,
+      log = SC.LOG_BINDINGS;
+    //@endif
 
     // the from property value will always be the binding value, update if
     // needed.
     if (!this._oneWay && this._fromTarget) {
+      //@if(debug)
       if (log) SC.Logger.log("%@: %@ -> %@".fmt(this, v, tv)) ;
       if (bench) SC.Benchmark.start(this.toString() + "->") ;
+      //@endif
+
       this._fromTarget.setPathIfChanged(this._fromPropertyKey, v) ;
+
+      //@if(debug)
       if (bench) SC.Benchmark.end(this.toString() + "->") ;
+      //@endif
     }
 
     // update the to value with the transformed value if needed.
     if (this._toTarget) {
+
+      //@if(debug)
       if (log) SC.Logger.log("%@: %@ <- %@".fmt(this, v, tv)) ;
       if (bench) SC.Benchmark.start(this.toString() + "<-") ;
+      //@endif
+
       this._toTarget.setPathIfChanged(this._toPropertyKey, tv) ;
+
+      //@if(debug)
       if (bench) SC.Benchmark.start(this.toString() + "<-") ;
+      //@endif
     }
   },
 
