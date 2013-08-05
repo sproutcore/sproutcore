@@ -371,10 +371,16 @@ SC.View.reopen(
     if (valueDidChange) {
       // When animating height or width with centerX or centerY, we need to animate the margin property also to get a smooth change.
       if (!SC.none(pendingAnimations.height) && !SC.none(layout.centerY) && SC.none(pendingAnimations.centerY)) {
-        pendingAnimations.centerY = options;
+        // Don't animate less than 2px difference b/c the margin-top value won't differ.
+        if (Math.abs(hash.height - this.get('layout').height) >= 2) {
+          pendingAnimations.centerY = options;
+        }
       }
       if (!SC.none(pendingAnimations.width) && !SC.none(layout.centerX) && SC.none(pendingAnimations.centerX)) {
-        pendingAnimations.centerX = options;
+        // Don't animate less than 2px difference b/c the margin-left value won't differ.
+        if (Math.abs(hash.width - this.get('layout').width) >= 2) {
+          pendingAnimations.centerX = options;
+        }
       }
 
       this._animateLayout = layout;

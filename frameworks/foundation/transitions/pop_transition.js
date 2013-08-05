@@ -10,17 +10,17 @@ SC.mixin(SC.View,
 
   /** @class
 
-    @extends SC.TransitionProtocol
+    @extends SC.ViewTransitionProtocol
     @since Version 1.10
   */
-  POP: {
+  POP_IN: {
     /** @private */
-    setupIn: function (view, options, inPlace) {
+    setup: function (view, options, inPlace) {
       view.adjust({ scale: inPlace ? view.get('layout').scale || 0 : 0 });
     },
 
     /** @private */
-    runIn: function (view, options, finalLayout, finalFrame) {
+    run: function (view, options, finalLayout, finalFrame) {
       var bigScale,
         duration,
         frames,
@@ -43,10 +43,18 @@ SC.mixin(SC.View,
 
       // Animate through the frames.
       view._animateFrames(frames, callback, options.delay || 0);
-    },
+    }
+  },
+
+  /** @class
+
+    @extends SC.ViewTransitionProtocol
+    @since Version 1.10
+  */
+  POP_OUT: {
 
     /** @private */
-    runOut: function (view, options) {
+    run: function (view, options) {
       var bigScale,
         duration,
         frames,

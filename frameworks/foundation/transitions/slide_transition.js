@@ -10,35 +10,19 @@ SC.mixin(SC.View,
 
   /** @class
 
-    @extends SC.TransitionProtocol
+    @extends SC.ViewTransitionProtocol
     @see SC.View#animate for other timing functions.
     @since Version 1.10
   */
-  SLIDE: {
-
-    /** @private */
-    runAdjust: function (view, options, finalLayout) {
-      var key,
-        value;
-
-      view.animate(finalLayout, {
-        delay: options.delay || 0,
-        duration: options.duration || 0.4,
-        timing: options.timing || 'ease'
-      }, function (data) {
-        this.didTransitionAdjust();
-      });
-    },
+  SLIDE_IN: {
 
     /** @private Starts from outside of parent unless inPlace is true. */
-    setupIn: function (view, options, inPlace) {
+    setup: function (view, options, inPlace) {
       var parentView = view.get('parentView'),
         parentFrame,
         viewFrame = view.get('borderFrame'),
         left,
-        top,
-        height,
-        width;
+        top;
 
       if (inPlace) {
         // Move from the current position.
@@ -50,21 +34,18 @@ SC.mixin(SC.View,
           parentFrame = SC.RootResponder.responder.currentWindowSize;
         }
 
-        height = parentFrame.height;
-        width = parentFrame.width;
-
         switch (options.direction) {
         case 'left':
-          left = width;
+          left = parentFrame.width;
           break;
         case 'up':
-          top = height;
+          top = parentFrame.height;
           break;
         case 'down':
-          top = -height;
+          top = -viewFrame.height;
           break;
         default:
-          left = -width;
+          left = -viewFrame.width;
         }
       }
 
@@ -73,7 +54,7 @@ SC.mixin(SC.View,
     },
 
     /** @private */
-    runIn: function (view, options, finalLayout, finalFrame) {
+    run: function (view, options, finalLayout, finalFrame) {
       var key,
         value;
 
@@ -92,10 +73,19 @@ SC.mixin(SC.View,
       }, function (data) {
         this.didTransitionIn();
       });
-    },
+    }
+  },
+
+  /** @class
+
+    @extends SC.ViewTransitionProtocol
+    @see SC.View#animate for other timing functions.
+    @since Version 1.10
+  */
+  SLIDE_OUT: {
 
     /** @private Starts from current position. */
-    setupOut: function (view, options) {
+    setup: function (view, options) {
       var viewFrame = view.get('borderFrame'),
         left = viewFrame.x,
         top = viewFrame.y,
@@ -106,7 +96,7 @@ SC.mixin(SC.View,
     },
 
     /** @private */
-    runOut: function (view, options, finalLayout, finalFrame) {
+    run: function (view, options, finalLayout, finalFrame) {
       var viewFrame = view.get('borderFrame'),
         parentView = view.get('parentView'),
         parentFrame,

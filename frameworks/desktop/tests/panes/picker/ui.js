@@ -53,7 +53,8 @@ test("verify default picker pane content container is visible at correct locatio
   });
   paneDefault.popup(anchor.view('anchor'), SC.PICKER);
   evaluatePicker(paneDefault);
-  //paneDefault.remove();
+  paneDefault.remove();
+  paneDefault.destroy();
 }) ;
 
 test("verify menu picker pane content container is visible at correct location with right size", function() {
@@ -65,7 +66,8 @@ test("verify menu picker pane content container is visible at correct location w
   });
   paneMenu.popup(anchor.view('anchor'), SC.PICKER_MENU);
   evaluatePicker(paneMenu);
-  //paneMenu.remove();
+  paneMenu.remove();
+  paneMenu.destroy();
 }) ;
 
 test("verify fixed picker pane content container is visible at correct location with right size", function() {
@@ -77,7 +79,8 @@ test("verify fixed picker pane content container is visible at correct location 
   });
   paneFixed.popup(anchor.view('anchor'), SC.PICKER_FIXED);
   evaluatePicker(paneFixed);
-  //paneFixed.remove();
+  paneFixed.remove();
+  paneFixed.destroy();
 }) ;
 
 test("verify pointer picker pane content container is visible at correct location with right size", function() {
@@ -89,5 +92,6 @@ test("verify pointer picker pane content container is visible at correct locatio
   });
   panePointer.popup(anchor.view('anchor'), SC.PICKER_POINTER, [3,0,1,2,2]);
   evaluatePicker(panePointer);
-  //panePointer.remove();
+  panePointer.remove();
+  panePointer.destroy();
 }) ;

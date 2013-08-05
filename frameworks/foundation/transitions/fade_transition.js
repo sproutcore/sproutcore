@@ -10,19 +10,19 @@ SC.mixin(SC.View,
 
   /** @class
 
-    @extends SC.TransitionProtocol
+    @extends SC.ViewTransitionProtocol
     @see SC.View#animate for other timing functions.
     @since Version 1.10
   */
-  FADE: {
+  FADE_IN: {
 
     /** @private */
-    setupIn: function (view, options, inPlace) {
+    setup: function (view, options, inPlace) {
       view.adjust({ opacity: inPlace ? view.get('layout').opacity || 0 : 0 });
     },
 
     /** @private */
-    runIn: function (view, options, finalLayout, finalFrame) {
+    run: function (view, options, finalLayout, finalFrame) {
       view.animate('opacity', finalLayout.opacity || 1, {
         delay: options.delay || 0,
         duration: options.duration || 0.4,
@@ -30,10 +30,19 @@ SC.mixin(SC.View,
       }, function (data) {
         this.didTransitionIn();
       });
-    },
+    }
+  },
+
+  /** @class
+
+    @extends SC.ViewTransitionProtocol
+    @see SC.View#animate for other timing functions.
+    @since Version 1.10
+  */
+  FADE_OUT: {
 
     /** @private */
-    runOut: function (view, options) {
+    run: function (view, options) {
       view.animate('opacity', 0, {
         delay: options.delay || 0,
         duration: options.duration || 0.4,

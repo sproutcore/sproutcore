@@ -10,21 +10,22 @@ var view, exampleView;
 module("SC.CollectionFastPath", {
   setup: function() {
 
-    view = SC.CollectionView.create({
-      content: "a b c d e f".w().map(function(x) {
-        return SC.Object.create({ title: x });
-      }),
-      useFastPath: YES
+    SC.run(function () {
+      view = SC.CollectionView.create({
+        content: "a b c d e f".w().map(function(x) {
+          return SC.Object.create({ title: x });
+        }),
+        // STUB: reloadIfNeeded
+        reloadIfNeeded: CoreTest.stub('reloadIfNeeded', SC.CollectionView.prototype.reloadIfNeeded)
+      });
     });
 
-    exampleView = SC.View.extend({
-      isPoolable: YES,
-      layerIsCacheable: YES
-    });
+    exampleView = SC.View.extend({});
 
   },
 
   teardown: function() {
+    view.destroy();
     view = exampleView = null;
   }
 });
@@ -40,6 +41,8 @@ test("Calling itemViewForContentIndex() before the Collection is visible.", func
   try {
     var itemView = view.itemViewForContentIndex(0);
     ok(true, 'Requesting itemViewForContentIndex() should not throw an exception prior to reloadIfNeeded being called.');
+
+    view.reloadIfNeeded.expect(0);
   } catch (ex) {
     ok(false, 'Requesting itemViewForContentIndex() should not throw an exception prior to reloadIfNeeded being called.');
   }
@@ -47,9 +50,12 @@ test("Calling itemViewForContentIndex() before the Collection is visible.", func
   // The next test just shows how that when isVisibleInWindow changes, causing
   // reloadIfNeeded to be called, then the request would succeed.
   try {
-    SC.RunLoop.begin();
-    view.set('isVisibleInWindow', YES);
-    SC.RunLoop.end();
+    SC.run(function () {
+      view.createLayer();
+      view._doAttach(document.body);
+    });
+
+    view.reloadIfNeeded.expect(1);
     itemView = view.itemViewForContentIndex(0);
     ok(true, 'Requesting itemViewForContentIndex() should not throw an exception after reloadIfNeeded being called.');
   } catch (ex) {

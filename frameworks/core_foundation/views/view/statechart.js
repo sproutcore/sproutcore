@@ -179,14 +179,14 @@ SC.CoreView.reopen(
     * SC.CoreView.UNRENDERED
     * SC.CoreView.UNATTACHED
     * SC.CoreView.UNATTACHED_BY_PARENT
+    * SC.CoreView.ATTACHED_SHOWING
     * SC.CoreView.ATTACHED_SHOWN
+    * SC.CoreView.ATTACHED_HIDING
     * SC.CoreView.ATTACHED_HIDDEN
     * SC.CoreView.ATTACHED_HIDDEN_BY_PARENT
     * SC.CoreView.ATTACHED_BUILDING_IN
     * SC.CoreView.ATTACHED_BUILDING_OUT
     * SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT
-    * SC.CoreView.ATTACHED_SHOWING
-    * SC.CoreView.ATTACHED_HIDING
 
     @type String
     @default SC.CoreView.UNRENDERED
@@ -299,7 +299,7 @@ SC.CoreView.reopen(
         if (this.get('_isRendered')) {
 
           // Bypass the unattached state for adopted views.
-          if (parentView.get('isAttached')) {
+          if (parentView.get('_isRendered')) {
             var parentNode, nextNode, nextView, siblings;
 
             parentNode = parentView.get('containerLayer');
@@ -604,10 +604,23 @@ SC.CoreView.reopen(
   },
 
   /** @private Render this view action. */
-  _doRender: function () {
-    var handled = true;
 
-    if (!this.get('_isRendered')) {
+  _doRender: function () {
+    var state = this.get('viewState');
+
+    switch (state) {
+    case SC.CoreView.ATTACHED_SHOWING: // FAST PATHS!
+    case SC.CoreView.ATTACHED_SHOWN:
+    case SC.CoreView.ATTACHED_HIDING:
+    case SC.CoreView.ATTACHED_HIDDEN:
+    case SC.CoreView.ATTACHED_HIDDEN_BY_PARENT:
+    case SC.CoreView.ATTACHED_BUILDING_IN:
+    case SC.CoreView.ATTACHED_BUILDING_OUT:
+    case SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT:
+    case SC.CoreView.UNATTACHED:
+    case SC.CoreView.UNATTACHED_BY_PARENT:
+      return false;
+    case SC.CoreView.UNRENDERED:
       // Render the layer.
       var context = this.renderContext(this.get('tagName'));
 
@@ -623,7 +636,7 @@ SC.CoreView.reopen(
 
       // Bypass the unattached state for adopted views.
       var parentView = this.get('parentView');
-      if (parentView) {
+      if (parentView && parentView.get('_isRendered')) {
         var parentNode = parentView.get('containerLayer'),
           siblings = parentView.get('childViews'),
           nextView = siblings.objectAt(siblings.indexOf(this) + 1),
@@ -635,11 +648,8 @@ SC.CoreView.reopen(
         this._doAttach(parentNode, nextNode);
       }
 
-    } else {
-      handled = false;
+      return true;
     }
-
-    return handled;
   },
 
   /** @private Show this view action. */
@@ -742,7 +752,7 @@ SC.CoreView.reopen(
     transition completes.  You should only use this method if implementing a
     custom transition plugin.
 
-    @param {SC.TransitionProtocol} transition The transition plugin used.
+    @param {SC.ViewTransitionProtocol} transition The transition plugin used.
     @param {Object} options The original options used.  One of transitionShowOptions or transitionInOptions.
   */
   didTransitionIn: function () {
@@ -769,7 +779,7 @@ SC.CoreView.reopen(
     transition completes.  You should only use this method if implementing a
     custom transition plugin.
 
-    @param {SC.TransitionProtocol} transition The transition plugin used.
+    @param {SC.ViewTransitionProtocol} transition The transition plugin used.
     @param {Object} options The original options used.  One of transitionHideOptions or transitionOutOptions.
   */
   didTransitionOut: function () {
@@ -866,6 +876,10 @@ SC.CoreView.reopen(
 
     //   childView._rendered();
     // }
+
+    // Begin observing isVisible & isFirstResponder.
+    this.addObserver('isVisible', this, this._isVisibleDidChange);
+    this.addObserver('isFirstResponder', this, this._isFirstResponderDidChange);
   },
 
   // ------------------------------------------------------------------------
@@ -986,6 +1000,10 @@ SC.CoreView.reopen(
       this.removeObserver(displayProperties[idx], this, this.displayDidChange);
     }
 
+    // Stop observing isVisible & isFirstResponder.
+    this.removeObserver('isVisible', this, this._isVisibleDidChange);
+    this.removeObserver('isFirstResponder', this, this._isFirstResponderDidChange);
+
     // Route.
     this._gotoUnrenderedState();
   },
@@ -998,10 +1016,6 @@ SC.CoreView.reopen(
     // Detach the layer.
     var node = this.get('layer');
     node.parentNode.removeChild(node);
-
-    // Stop observing isVisible & isFirstResponder.
-    this.removeObserver('isVisible', this, this._isVisibleDidChange);
-    this.removeObserver('isFirstResponder', this, this._isFirstResponderDidChange);
 
     // Notify.
     this._notifyDetached();
@@ -1064,9 +1078,7 @@ SC.CoreView.reopen(
 
     // Update the content of the layer if necessary.
     if (this._contentNeedsUpdate) {
-      // Use the action so that it checks for the proper state.
-      // this._doUpdateContent();
-      this.invokeOnce(this._executeDoUpdateContent);
+      this._executeDoUpdateContent();
     }
   },
 
@@ -1219,10 +1231,6 @@ SC.CoreView.reopen(
     default:
       // Attached and not in a transitionary state.
     }
-
-    // Stop observing isVisible & isFirstResponder.
-    this.removeObserver('isVisible', this, this._isVisibleDidChange);
-    this.removeObserver('isFirstResponder', this, this._isFirstResponderDidChange);
   },
 
   /** @private Routes according to parent did detach. */
@@ -1376,12 +1384,12 @@ SC.CoreView.reopen(
     }
 
     // Set up the hiding transition.
-    if (transitionHide.setupOut) {
-      transitionHide.setupOut(this, options, inPlace);
+    if (transitionHide.setup) {
+      transitionHide.setup(this, options, inPlace);
     }
 
     // Execute the hiding transition.
-    transitionHide.runOut(this, options, this._preTransitionLayout, this._preTransitionFrame);
+    transitionHide.run(this, options, this._preTransitionLayout, this._preTransitionFrame);
   },
 
   /** @private Attempts to run a transition in, ensuring any outgoing transitions are stopped in place. */
@@ -1402,12 +1410,12 @@ SC.CoreView.reopen(
     }
 
     // Set up the incoming transition.
-    if (transitionIn.setupIn) {
-      transitionIn.setupIn(this, options, inPlace);
+    if (transitionIn.setup) {
+      transitionIn.setup(this, options, inPlace);
     }
 
     // Execute the incoming transition.
-    transitionIn.runIn(this, options, this._preTransitionLayout, this._preTransitionFrame);
+    transitionIn.run(this, options, this._preTransitionLayout, this._preTransitionFrame);
   },
 
   /** @private Attempts to run a transition out, ensuring any incoming transitions are stopped in place. */
@@ -1432,12 +1440,12 @@ SC.CoreView.reopen(
     owningView._buildingOutCount++;
 
     // Set up the outgoing transition.
-    if (transitionOut.setupOut) {
-      transitionOut.setupOut(this, options, inPlace);
+    if (transitionOut.setup) {
+      transitionOut.setup(this, options, inPlace);
     }
 
     // Execute the outgoing transition.
-    transitionOut.runOut(this, options, this._preTransitionLayout, this._preTransitionFrame);
+    transitionOut.run(this, options, this._preTransitionLayout, this._preTransitionFrame);
   },
 
   /** @private Attempts to run a transition show, ensuring any hiding transitions are stopped in place. */
@@ -1455,12 +1463,12 @@ SC.CoreView.reopen(
     }
 
     // Set up the showing transition.
-    if (transitionShow.setupIn) {
-      transitionShow.setupIn(this, options, inPlace);
+    if (transitionShow.setup) {
+      transitionShow.setup(this, options, inPlace);
     }
 
     // Execute the showing transition.
-    transitionShow.runIn(this, options, this._preTransitionLayout, this._preTransitionFrame);
+    transitionShow.run(this, options, this._preTransitionLayout, this._preTransitionFrame);
   },
 
   /** @private */
@@ -1468,10 +1476,6 @@ SC.CoreView.reopen(
     var parentView = this.get('parentView'),
       // Views without a parent are not limited by a parent's current state.
       isParentShown = parentView ? parentView.get('viewState') & SC.CoreView.IS_SHOWN : true;
-
-    // Begin observing isVisible & isFirstResponder.
-    this.addObserver('isVisible', this, this._isVisibleDidChange);
-    this.addObserver('isFirstResponder', this, this._isFirstResponderDidChange);
 
     // Route.
     if (this.get('isVisible')) {

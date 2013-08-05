@@ -50,6 +50,8 @@ test("check default action on pane#mouseDown", function() {
   pane.mouseDown({ pageX: 0, pageY: 0 });
 
   ok(!pane.get('isVisibleInWindow'), 'pane.isVisibleInWindow should be NO after mouseDown');
+
+  pane.destroy();
 }) ;
 
 test("check action on pane#mouseDown with removeAction set", function() {
@@ -74,6 +76,8 @@ test("check action on pane#mouseDown with removeAction set", function() {
 
   ok(!pane.get('isVisibleInWindow'), 'pane.isVisibleInWindow should be NO after mouseDown');
   ok(pane.get('fooInvoked'), 'pane.fooInvoked should be YES after mouseDown');
+
+  pane.destroy();
 }) ;
 
 test("check action on pane#mouseDown with removeAction and removeTarget set", function() {
@@ -95,4 +99,6 @@ test("check action on pane#mouseDown with removeAction and removeTarget set", fu
   ok(!pane.get('isVisibleInWindow'), 'pane.isVisibleInWindow should be NO after mouseDown');
   ok(target.get('fooInvoked'), 'target.fooInvoked should be YES');
   ok(target.get('sender'), pane, 'target.sender should be pane');
+
+  pane.destroy();
 }) ;

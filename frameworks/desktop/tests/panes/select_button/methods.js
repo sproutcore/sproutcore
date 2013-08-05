@@ -53,12 +53,12 @@ module("SC.SelectButtonView",{
           nameKey: 'title',
           sortKey: 'pos'
         }),
-        
+
         //view5
         SC.SelectButtonView.extend({
           objects: ["My","New", "List"]
         }),
-        
+
         //view6
         SC.SelectButtonView.extend({
           objects: ["My","New", "List"],
@@ -74,14 +74,15 @@ module("SC.SelectButtonView",{
     view4 = pane.childViews[3] ;
     view5 = pane.childViews[4] ;
     view6 = pane.childViews[5] ;
-    
+
     pane.append(); // make sure there is a layer...
     SC.RunLoop.end();
   },
 
   //teardown
   teardown: function() {
-    pane.remove() ;
+    pane.remove();
+    pane.destroy();
     pane = view = null ;
   }
 });
