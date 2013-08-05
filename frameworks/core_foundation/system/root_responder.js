@@ -1627,7 +1627,7 @@ SC.RootResponder = SC.Object.extend(
     // If user presses the escape key while we are in the middle of a
     // drag operation, cancel the drag operation and handle the event.
     if (keyCode === 27 && this._drag) {
-      this._drag.cancelDrag();
+      this._drag.cancelDrag(evt);
       this._drag = null;
       this._mouseDownView = null;
       return YES;
