@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/sproutcore/sproutcore.png)](https://travis-ci.org/sproutcore/sproutcore)
+
 SproutCore HTML5 Application Framework
 ======================================
 
@@ -6,7 +8,7 @@ in the web browser using only native HTML5 features. With SproutCore, you can
 build rich, interactive applications in the web in less code than most simple
 web pages require today.
 
-The easiest way to get started with SproutCore is using the Abbot build tools
+The easiest way to get started with SproutCore is using the build tools
 included with the SproutCore package when you install it from the Ruby gem.
 Please see the Getting Started documentation on the
 [SproutCore website](http://www.sproutcore.com/) for more information.
@@ -14,6 +16,7 @@ Please see the Getting Started documentation on the
 For additional SproutCore user support, join the sproutcore@googlegroups.com
 mailing list and for those interested in working on the framework itself, please
 join sproutcore-dev@googlegroups.com.
+
 
 ## Contributors
 
