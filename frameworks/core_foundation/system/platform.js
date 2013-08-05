@@ -73,7 +73,7 @@ SC.platform = SC.Object.create({
 
     @type Boolean
   */
-  touch: !SC.none(window.ontouchstart) || SC.browser.name === SC.BROWSER.android || 'ontouchstart' in document.documentElement,
+  touch: SC.none(window._phantom) && ( !SC.none(window.ontouchstart) || SC.browser.name === SC.BROWSER.android || 'ontouchstart' in document.documentElement ),
 
   /**
     YES if the current browser supports bounce on scroll.
