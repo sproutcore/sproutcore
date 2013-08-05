@@ -114,6 +114,17 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   isBrowserFocusable: YES,
 
   /**
+    Specifies a regular expression against which the input value should be
+    checked. Do not include a slash at the start or end of the pattern. The
+    pattern must match the entire value, not just a portion of the value, but
+    is not checked if the value is empty.
+
+    @type String
+    @default null
+   */
+  pattern: null,
+
+  /**
     Whether the browser should automatically correct the input.
 
     When `autoCorrect` is set to `null`, the browser will use
@@ -125,15 +136,34 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   autoCorrect: YES,
 
   /**
-    Whether the browser should automatically capitalize the input.
+    Specifies the auto-capitalization behavior. Possible values are:
+
+    - none: do not autocapitalize
+    - sentences: autocapitalize the first letter of each sentence
+    - words: autocapitalize the first letter of each word
+    - characters: autocapitalize all characters
+
+    Boolean values are also supported, with a false value interpreted as
+    `none` and a true value as `sentences`.
 
     When `autoCapitalize` is set to `null`, the browser will use
     the system defaults.
 
-    @type Boolean
+    @type String
     @default YES
    */
   autoCapitalize: YES,
+
+  /**
+    Whether the browser should automatically complete the input.
+
+    When `autoComplete` is set to `null`, the browser will use
+    the system defaults.
+
+    @type Boolean
+    @default null
+   */
+  autoComplete: null,
 
   /**
     Localizes the hint if necessary.
@@ -603,10 +633,13 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
         isTextArea = this.get('isTextArea'),
         isEnabled = this.get('isEnabled'),
         isEditable = this.get('isEditable'),
+        pattern = this.get('pattern'),
         autoCorrect = this.get('autoCorrect'),
         autoCapitalize = this.get('autoCapitalize'),
+        autoComplete = this.get('autoComplete'),
         isBrowserFocusable = this.get('isBrowserFocusable'),
-        spellCheckString='', autocapitalizeString='', autocorrectString='',
+        spellCheckString='', patternString='', autocapitalizeString='',
+        autocorrectString='', autocompleteString='',
         name, adjustmentStyle, type, hintElements, element, paddingElementStyle,
         fieldClassNames, isOldSafari, activeState, browserFocusable;
 
@@ -626,12 +659,24 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
 
       spellCheckString = this.get('spellCheckEnabled') ? ' spellcheck="true"' : ' spellcheck="false"';
 
-      if (autoCorrect != null) {
-        autocorrectString = ' autocorrect=' + (!autoCorrect ? '"off"' : '"true"');
+      if (pattern != null) {
+        patternString = ' pattern="' + pattern + '"';
       }
 
       if (autoCorrect != null) {
-        autocapitalizeString = ' autocapitalize=' + (!autoCapitalize ? '"off"' : '"true"');
+        autocorrectString = ' autocorrect=' + (!autoCorrect ? '"off"' : '"on"');
+      }
+
+      if (autoCapitalize != null) {
+        if (SC.typeOf(autoCapitalize) === 'boolean') {
+          autocapitalizeString = ' autocapitalize=' + (!autoCapitalize ? '"none"' : '"sentences"');
+        } else {
+          autocapitalizeString = ' autocapitalize=' + autoCapitalize;
+        }
+      }
+
+      if (autoComplete != null) {
+        autocompleteString = ' autocomplete=' + (!autoComplete ? '"off"' : '"on"');
       }
 
       if (!isBrowserFocusable) {
@@ -694,8 +739,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
         context.push('<input aria-label="' + hint + '" class="'+fieldClassNames+'" type="'+ type+
                       '" name="'+ name + '" '+ activeState + ' value="'+ value + '"' +
                       hintString + spellCheckString+ browserFocusable +
-                      ' maxlength="'+ maxLength+ '" '+autocorrectString+' ' +
-                      autocapitalizeString+'/></div>') ;
+                      ' maxlength="'+ maxLength+ '" ' + patternString +' ' +
+                      autocorrectString+' ' + autocapitalizeString+ ' ' + autocompleteString +
+                      '/></div>') ;
       }
     }
     else {
@@ -731,16 +777,28 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
         }
       }
 
+      input.attr('pattern', pattern);
+
       if (autoCorrect != null) {
-        input.attr('autoCorrect', !autoCorrect ? 'off' : 'true');
+        input.attr('autoCorrect', !autoCorrect ? 'off' : 'on');
       } else {
         input.attr('autoCorrect', null);
       }
 
       if (autoCapitalize != null) {
-        input.attr('autoCapitalize', !autoCapitalize ? 'off' : 'true');
+        if (SC.typeOf(autoCapitalize) == 'boolean') {
+          input.attr('autoCapitalize', !autoCapitalize ? 'none' : 'sentences');
+        } else {
+          input.attr('autoCapitalize', autoCapitalize);
+        }
       } else {
         input.attr('autoCapitalize', null);
+      }
+
+      if (autoComplete != null) {
+        input.attr('autoComplete', !autoComplete ? 'off' : 'on');
+      } else {
+        input.attr('autoComplete', null);
       }
 
       if (!hintOnFocus && SC.platform.input.placeholder) input.attr('placeholder', hint);

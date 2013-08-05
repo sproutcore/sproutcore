@@ -116,20 +116,68 @@ test("isBrowserFocusable should set tab index", function() {
   ok(view.$input().attr('tabindex') === "-1", 'unfocusable field should have unfocusable tab index');
 });
 
-test("autoCapitalize=YES should add autocapitalize", function() {
+test("pattern='\d*' should add pattern='\d*'", function() {
+  SC.RunLoop.begin();
+  view.set('pattern', "\d*");
+  view.displayDidChange();
+  SC.RunLoop.end();
+  ok(view.$input().attr('pattern') === "\d*", 'should have a pattern attribute set to "\d*"');
+});
+
+test("pattern=null should not add pattern", function() {
+  SC.RunLoop.begin();
+  view.set('pattern', null);
+  view.displayDidChange();
+  SC.RunLoop.end();
+  ok(!view.$input().attr('pattern'), 'should not have a pattern attribute set');
+});
+
+test("autoCapitalize='none' should add autocapitalize='none'", function() {
+  SC.RunLoop.begin();
+  view.set('autoCapitalize', "none");
+  view.displayDidChange();
+  SC.RunLoop.end();
+  ok(view.$input().attr('autocapitalize') === "none", 'should have an autocapitalize attribute set to "none"');
+});
+
+test("autoCapitalize='sentences' should add autocapitalize='sentences'", function() {
+  SC.RunLoop.begin();
+  view.set('autoCapitalize', "sentences");
+  view.displayDidChange();
+  SC.RunLoop.end();
+  ok(view.$input().attr('autocapitalize') === "sentences", 'should have an autocapitalize attribute set to "sentences"');
+});
+
+test("autoCapitalize='words' should add autocapitalize='words'", function() {
+  SC.RunLoop.begin();
+  view.set('autoCapitalize', "words");
+  view.displayDidChange();
+  SC.RunLoop.end();
+  ok(view.$input().attr('autocapitalize') === "words", 'should have an autocapitalize attribute set to "words"');
+});
+
+test("autoCapitalize='characters' should add autocapitalize='characters'", function() {
+  SC.RunLoop.begin();
+  view.set('autoCapitalize', "characters");
+  view.displayDidChange();
+  SC.RunLoop.end();
+  ok(view.$input().attr('autocapitalize') === "characters", 'should have an autocapitalize attribute set to "characters"');
+});
+
+test("autoCapitalize=YES should add autocapitalize='sentences'", function() {
   SC.RunLoop.begin();
   view.set('autoCapitalize', YES);
   view.displayDidChange();
   SC.RunLoop.end();
-  ok(view.$input().attr('autocapitalize') !== "off", 'should have an autocapitalize attribute');
+  ok(view.$input().attr('autocapitalize') === "sentences", 'should have an autocapitalize attribute set to "sentences"');
 });
 
-test("autoCapitalize=NO should add autocapitalize='off'", function() {
+test("autoCapitalize=NO should add autocapitalize='none'", function() {
   SC.RunLoop.begin();
   view.set('autoCapitalize', NO);
   view.displayDidChange();
   SC.RunLoop.end();
-  ok(view.$input().attr('autocapitalize') === "off", 'should have an autocapitalize attribute set to "off"');
+  ok(view.$input().attr('autocapitalize') === "none", 'should have an autocapitalize attribute set to "none"');
 });
 
 test("autoCapitalize=null should not add autocapitalize", function() {
@@ -140,12 +188,12 @@ test("autoCapitalize=null should not add autocapitalize", function() {
   ok(!view.$input().attr('autocapitalize'), 'should not have an autocapitalize attribute set');
 });
 
-test("autoCorrect=YES should add autocorrect", function() {
+test("autoCorrect=YES should add autocorrect='on'", function() {
   SC.RunLoop.begin();
   view.set('autoCorrect', YES);
   view.displayDidChange();
   SC.RunLoop.end();
-  ok(view.$input().attr('autocorrect') !== "off", 'should have an autocorrect attribute');
+  ok(view.$input().attr('autocorrect') === "on", 'should have an autocorrect attribute set to "on"');
 });
 
 test("autoCorrect=NO should add autocorrect='off'", function() {
@@ -162,6 +210,30 @@ test("autoCorrect=null should not add autocorrect", function() {
   view.displayDidChange();
   SC.RunLoop.end();
   ok(!view.$input().attr('autocorrect'), 'should not have an autocorrect attribute set');
+});
+
+test("autoComplete=YES should add autocomplete='on'", function() {
+  SC.RunLoop.begin();
+  view.set('autoComplete', YES);
+  view.displayDidChange();
+  SC.RunLoop.end();
+  ok(view.$input().attr('autocomplete') === "on", 'should have an autocomplete attribute set to "on"');
+});
+
+test("autoComplete=NO should add autocomplete='off'", function() {
+  SC.RunLoop.begin();
+  view.set('autoComplete', NO);
+  view.displayDidChange();
+  SC.RunLoop.end();
+  ok(view.$input().attr('autocomplete') === "off", 'should have an autocomplete attribute set to "off"');
+});
+
+test("autoComplete=null should not add autocomplete", function() {
+  SC.RunLoop.begin();
+  view.set('autoComplete', null);
+  view.displayDidChange();
+  SC.RunLoop.end();
+  ok(!view.$input().attr('autocomplete'), 'should not have an autocomplete attribute set');
 });
 
 /**
