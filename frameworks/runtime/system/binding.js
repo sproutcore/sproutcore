@@ -16,7 +16,7 @@ sc_require('system/object');
 
   @type Boolean
 */
-SC.LOG_BINDINGS = NO ;
+SC.LOG_BINDINGS = NO;
 
 /**
   Performance parameter.  This will benchmark the time spent firing each
@@ -24,7 +24,7 @@ SC.LOG_BINDINGS = NO ;
 
   @type Boolean
 */
-SC.BENCHMARK_BINDING_NOTIFICATIONS = NO ;
+SC.BENCHMARK_BINDING_NOTIFICATIONS = NO;
 
 /**
   Performance parameter.  This will benchmark the time spend configuring each
@@ -40,21 +40,21 @@ SC.BENCHMARK_BINDING_SETUP = NO;
 
   @type String
 */
-SC.MULTIPLE_PLACEHOLDER = '@@MULT@@' ;
+SC.MULTIPLE_PLACEHOLDER = '@@MULT@@';
 
 /**
   Default placeholder for null values in bindings.
 
   @type String
 */
-SC.NULL_PLACEHOLDER = '@@NULL@@' ;
+SC.NULL_PLACEHOLDER = '@@NULL@@';
 
 /**
   Default placeholder for empty values in bindings.
 
   @type String
 */
-SC.EMPTY_PLACEHOLDER = '@@EMPTY@@' ;
+SC.EMPTY_PLACEHOLDER = '@@EMPTY@@';
 
 
 /**
@@ -132,7 +132,7 @@ SC.EMPTY_PLACEHOLDER = '@@EMPTY@@' ;
   not allow Integers less than ten.  Note that it checks the value of the
   bindings and allows all other values to pass:
 
-        valueBinding: SC.Binding.transform(function(value, binding) {
+        valueBinding: SC.Binding.transform(function (value, binding) {
           return ((SC.typeOf(value) === SC.T_NUMBER) && (value < 10)) ? 10 : value;
         }).from("MyApp.someController.value")
 
@@ -142,11 +142,11 @@ SC.EMPTY_PLACEHOLDER = '@@EMPTY@@' ;
   below adds a new helper called notLessThan() which will limit the value to
   be not less than the passed minimum:
 
-      SC.Binding.notLessThan = function(minValue) {
-        return this.transform(function(value, binding) {
-          return ((SC.typeOf(value) === SC.T_NUMBER) && (value < minValue)) ? minValue : value ;
-        }) ;
-      } ;
+      SC.Binding.notLessThan = function (minValue) {
+        return this.transform(function (value, binding) {
+          return ((SC.typeOf(value) === SC.T_NUMBER) && (value < minValue)) ? minValue : value;
+        });
+      };
 
   You could specify this in your core.js file, for example.  Then anywhere in
   your application you can use it to define bindings like so:
@@ -209,14 +209,14 @@ SC.EMPTY_PLACEHOLDER = '@@EMPTY@@' ;
   examples above, during init, SproutCore objects will effectively call
   something like this on your binding:
 
-        binding = this.valueBinding.beget().to("value", this) ;
+        binding = this.valueBinding.beget().to("value", this);
 
   This creates a new binding instance based on the template you provide, and
   sets the to path to the "value" property of the new object.  Now that the
   binding is fully configured with a "from" and a "to", it simply needs to be
   connected to become active.  This is done through the connect() method:
 
-        binding.connect() ;
+        binding.connect();
 
   Now that the binding is connected, it will observe both the from and to side
   and relay changes.
@@ -232,7 +232,7 @@ SC.EMPTY_PLACEHOLDER = '@@EMPTY@@' ;
   You could also use the bind() helper method provided by SC.Object. (This is
   the same method used by SC.Object.init() to setup your bindings):
 
-        MyApp.anotherObject.bind("value", "MyApp.someController.value") ;
+        MyApp.anotherObject.bind("value", "MyApp.someController.value");
 
   Both of these code fragments have the same effect as doing the most friendly
   form of binding creation like so:
@@ -243,7 +243,7 @@ SC.EMPTY_PLACEHOLDER = '@@EMPTY@@' ;
 
           // OTHER CODE FOR THIS OBJECT...
 
-        }) ;
+        });
 
   SproutCore's built in binding creation method make it easy to automatically
   create bindings for you.  You should always use the highest-level APIs
@@ -264,21 +264,21 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @param {String} [fromPath]
     @returns {SC.Binding} new binding instance
   */
-  beget: function(fromPath) {
-    var ret = SC.beget(this) ;
+  beget: function (fromPath) {
+    var ret = SC.beget(this);
     ret.parentBinding = this;
-    if (fromPath !== undefined) ret = ret.from(fromPath) ;
-    return ret ;
+    if (fromPath !== undefined) ret = ret.from(fromPath);
+    return ret;
   },
 
   /**
     Returns a builder function for compatibility.
   */
-  builder: function() {
+  builder: function () {
     var binding = this,
-        ret = function(fromProperty) { return binding.beget().from(fromProperty); };
-    ret.beget = function() { return binding.beget(); } ;
-    return ret ;
+        ret = function (fromProperty) { return binding.beget().from(fromProperty); };
+    ret.beget = function () { return binding.beget(); };
+    return ret;
   },
 
   /**
@@ -296,19 +296,19 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @param {Object} [root] root object to use when resolving the path.
     @returns {SC.Binding} this
   */
-  from: function(propertyPath, root) {
+  from: function (propertyPath, root) {
 
     // if the propertyPath is null/undefined, return this.  This allows the
     // method to be called from other methods when the fromPath might be
     // optional. (cf single(), multiple())
-    if (!propertyPath) return this ;
+    if (!propertyPath) return this;
 
     // beget if needed.
-    var binding = (this === SC.Binding) ? this.beget() : this ;
-    binding._fromPropertyPath = propertyPath ;
-    binding._fromRoot = root ;
-    binding._fromTuple = null ;
-    return binding ;
+    var binding = (this === SC.Binding) ? this.beget() : this;
+    binding._fromPropertyPath = propertyPath;
+    binding._fromRoot = root;
+    binding._fromTuple = null;
+    return binding;
   },
 
   /**
@@ -320,13 +320,13 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @param {Object} [root] root object to use when resolving the path.
     @returns {SC.Binding} this
   */
-  to: function(propertyPath, root) {
+  to: function (propertyPath, root) {
     // beget if needed.
-    var binding = (this === SC.Binding) ? this.beget() : this ;
-    binding._toPropertyPath = propertyPath ;
-    binding._toRoot = root ;
-    binding._toTuple = null ; // clear out any existing one.
-    return binding ;
+    var binding = (this === SC.Binding) ? this.beget() : this;
+    binding._toPropertyPath = propertyPath;
+    binding._toRoot = root;
+    binding._toTuple = null; // clear out any existing one.
+    return binding;
   },
 
   /**
@@ -336,14 +336,14 @@ SC.Binding = /** @scope SC.Binding.prototype */{
 
     @returns {SC.Binding} this
   */
-  connect: function() {
+  connect: function () {
     // If the binding is already connected, do nothing.
-    if (this.isConnected) return this ;
-    this.isConnected = YES ;
-    this._connectionPending = YES ; // its connected but not really...
-    this._syncOnConnect = YES ;
+    if (this.isConnected) return this;
+    this.isConnected = YES;
+    this._connectionPending = YES; // its connected but not really...
+    this._syncOnConnect = YES;
 
-    SC.Binding._connectQueue.add(this) ;
+    SC.Binding._connectQueue.add(this);
 
     if (!SC.RunLoop.isRunLoopInProgress()) {
       this._scheduleSync();
@@ -357,9 +357,9 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     to give you time to setup your entire object graph before the bindings
     try to activate.
   */
-  _connect: function() {
+  _connect: function () {
     if (!this._connectionPending) return; //nothing to do
-    this._connectionPending = NO ;
+    this._connectionPending = NO;
 
     var path, root;
 
@@ -375,7 +375,8 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     //
     // contentBinding: "*owner.value"
     //
-    path = this._fromPropertyPath; root = this._fromRoot ;
+    path = this._fromPropertyPath;
+    root = this._fromRoot;
 
     if (typeof path === "string") {
 
@@ -383,13 +384,13 @@ SC.Binding = /** @scope SC.Binding.prototype */{
       // toRoot the default root.
       if (path.indexOf('.') === 0) {
         path = path.slice(1);
-        if (!root) root = this._toRoot ;
+        if (!root) root = this._toRoot;
 
       // if the first character is a '*', then setup a tuple since this is a
       // chained path.
       } else if (path.indexOf('*') === 0) {
-        path = [this._fromRoot || this._toRoot, path.slice(1)] ;
-        root = null ;
+        path = [this._fromRoot || this._toRoot, path.slice(1)];
+        root = null;
       }
     }
     this._fromObserverData = [path, this, this.fromPropertyDidChange, root];
@@ -397,7 +398,8 @@ SC.Binding = /** @scope SC.Binding.prototype */{
 
     // try to connect the to side
     if (!this._oneWay) {
-      path = this._toPropertyPath; root = this._toRoot ;
+      path = this._toPropertyPath;
+      root = this._toRoot;
       this._toObserverData = [path, this, this.toPropertyDidChange, root];
       SC.Observers.addObserver.apply(SC.Observers, this._toObserverData);
     }
@@ -408,7 +410,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
 
     // now try to sync if needed
     if (this._syncOnConnect) {
-      this._syncOnConnect = NO ;
+      this._syncOnConnect = NO;
       //@if(debug)
       if (bench) SC.Benchmark.start("SC.Binding.connect().sync");
       //@endif
@@ -425,14 +427,14 @@ SC.Binding = /** @scope SC.Binding.prototype */{
 
     @returns {SC.Binding} this
   */
-  disconnect: function() {
+  disconnect: function () {
     if (!this.isConnected) return this; // nothing to do.
 
     // if connection is still pending, just cancel
     if (this._connectionPending) {
-      this._connectionPending = NO ;
+      this._connectionPending = NO;
 
-      SC.Binding._connectQueue.remove(this) ;
+      SC.Binding._connectQueue.remove(this);
     // connection is completed, disconnect.
     } else {
       SC.Observers.removeObserver.apply(SC.Observers, this._fromObserverData);
@@ -444,8 +446,8 @@ SC.Binding = /** @scope SC.Binding.prototype */{
       SC.Binding._changeQueue.remove(this);
     }
 
-    this.isConnected = NO ;
-    return this ;
+    this.isConnected = NO;
+    return this;
   },
 
   /**
@@ -462,7 +464,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
 
     @private
   */
-  destroy: function() {
+  destroy: function () {
     // If we're already destroyed, there's nothing to do.
     if (this.isDestroyed) return;
 
@@ -486,15 +488,15 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @param {Object} target The object that contains the key
     @param {String} key The name of the property which changed
   */
-  fromPropertyDidChange: function(target, key) {
+  fromPropertyDidChange: function (target, key) {
     var v = target ? target.get(key) : null;
 
     // if the new value is different from the current binding value, then
     // schedule to register an update.
     if (v !== this._bindingValue || key === '[]') {
 
-      this._setBindingValue(target, key) ;
-      SC.Binding._changeQueue.add(this) ; // save for later.
+      this._setBindingValue(target, key);
+      SC.Binding._changeQueue.add(this); // save for later.
 
       this._scheduleSync();
     }
@@ -513,32 +515,32 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @param {Object} target The object that contains the key
     @param {String} key The name of the property which changed
   */
-  toPropertyDidChange: function(target, key) {
+  toPropertyDidChange: function (target, key) {
     if (this._oneWay) return; // nothing to do
 
-    var v = target.get(key) ;
+    var v = target.get(key);
 
     // if the new value is different from the current binding value, then
     // schedule to register an update.
     if (v !== this._transformedBindingValue) {
-      this._setBindingValue(target, key) ;
-      SC.Binding._changeQueue.add(this) ; // save for later.
+      this._setBindingValue(target, key);
+      SC.Binding._changeQueue.add(this); // save for later.
 
       this._scheduleSync();
     }
   },
 
-  _scheduleSync: function() {
+  _scheduleSync: function () {
     if (SC.RunLoop.isRunLoopInProgress() || SC.Binding._syncScheduled) { return; }
     SC.Binding._syncScheduled = YES;
-    setTimeout(function() { SC.run(); SC.Binding._syncScheduled = NO; }, 1);
+    setTimeout(function () { SC.run(); SC.Binding._syncScheduled = NO; }, 1);
   },
 
   /** @private
     Saves the source location for the binding value.  This will be used later
     to actually update the binding value.
   */
-  _setBindingValue: function(source, key) {
+  _setBindingValue: function (source, key) {
     this._bindingSource = source;
     this._bindingKey    = key;
   },
@@ -547,7 +549,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     Updates the binding value from the current binding source if needed.  This
     should be called just before using this._bindingValue.
   */
-  _computeBindingValue: function() {
+  _computeBindingValue: function () {
     var source = this._bindingSource,
         key    = this._bindingKey,
         v, idx;
@@ -559,15 +561,15 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     if (transforms) {
       var len = transforms.length,
           transform;
-      for(idx=0;idx<len;idx++) {
-        transform = transforms[idx] ;
-        v = transform(v, this) ;
+      for (idx = 0; idx < len; idx++) {
+        transform = transforms[idx];
+        v = transform(v, this);
       }
     }
 
     // if error objects are not allowed, and the value is an error, then
     // change it to null.
-    if (this._noError && SC.typeOf(v) === SC.T_ERROR) v = null ;
+    if (this._noError && SC.typeOf(v) === SC.T_ERROR) v = null;
 
     this._transformedBindingValue = v;
   },
@@ -582,63 +584,63 @@ SC.Binding = /** @scope SC.Binding.prototype */{
 
     @returns {Boolean} YES if changes were flushed.
   */
-  flushPendingChanges: function() {
+  flushPendingChanges: function () {
 
     // don't allow flushing more than one at a time
     if (this._isFlushing) return NO;
-    this._isFlushing = YES ;
+    this._isFlushing = YES;
     SC.Observers.suspendPropertyObserving();
 
     var didFlush = NO,
         // connect any bindings
         queue, binding;
 
-    while((queue = this._connectQueue).length >0) {
-      this._connectQueue = this._alternateConnectQueue ;
-      this._alternateConnectQueue = queue ;
-      while(binding = queue.pop()) binding._connect() ;
+    while ((queue = this._connectQueue).length > 0) {
+      this._connectQueue = this._alternateConnectQueue;
+      this._alternateConnectQueue = queue;
+      while (binding = queue.pop()) binding._connect();
     }
 
     // loop through the changed queue...
     while ((queue = this._changeQueue).length > 0) {
       //@if(debug)
-      if (SC.LOG_BINDINGS) SC.Logger.log("Begin: Trigger changed bindings") ;
+      if (SC.LOG_BINDINGS) SC.Logger.log("Begin: Trigger changed bindings");
       //@endif
 
-      didFlush = YES ;
+      didFlush = YES;
 
       // first, swap the change queues.  This way any binding changes that
       // happen while we flush the current queue can be queued up.
-      this._changeQueue = this._alternateChangeQueue ;
-      this._alternateChangeQueue = queue ;
+      this._changeQueue = this._alternateChangeQueue;
+      this._alternateChangeQueue = queue;
 
       // next, apply any bindings in the current queue.  This may cause
       // additional bindings to trigger, which will end up in the new active
       // queue.
-      while(binding = queue.pop()) binding.applyBindingValue() ;
+      while (binding = queue.pop()) binding.applyBindingValue();
 
       // now loop back and see if there are additional changes pending in the
       // active queue.  Repeat this until all bindings that need to trigger
       // have triggered.
       //@if(debug)
-      if (SC.LOG_BINDINGS) SC.Logger.log("End: Trigger changed bindings") ;
+      if (SC.LOG_BINDINGS) SC.Logger.log("End: Trigger changed bindings");
       //@endif
     }
 
     // clean up
-    this._isFlushing = NO ;
+    this._isFlushing = NO;
     SC.Observers.resumePropertyObserving();
 
-    return didFlush ;
+    return didFlush;
   },
 
   /**
     This method is called at the end of the Run Loop to relay the changed
     binding value from one side to the other.
   */
-  applyBindingValue: function() {
+  applyBindingValue: function () {
     // compute the binding targets if needed.
-    this._computeBindingTargets() ;
+    this._computeBindingTargets();
     this._computeBindingValue();
 
     var v = this._bindingValue,
@@ -653,14 +655,14 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     // needed.
     if (!this._oneWay && this._fromTarget) {
       //@if(debug)
-      if (log) SC.Logger.log("%@: %@ -> %@".fmt(this, v, tv)) ;
-      if (bench) SC.Benchmark.start(this.toString() + "->") ;
+      if (log) SC.Logger.log("%@: %@ -> %@".fmt(this, v, tv));
+      if (bench) SC.Benchmark.start(this.toString() + "->");
       //@endif
 
-      this._fromTarget.setPathIfChanged(this._fromPropertyKey, v) ;
+      this._fromTarget.setPathIfChanged(this._fromPropertyKey, v);
 
       //@if(debug)
-      if (bench) SC.Benchmark.end(this.toString() + "->") ;
+      if (bench) SC.Benchmark.end(this.toString() + "->");
       //@endif
     }
 
@@ -668,14 +670,14 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     if (this._toTarget) {
 
       //@if(debug)
-      if (log) SC.Logger.log("%@: %@ <- %@".fmt(this, v, tv)) ;
-      if (bench) SC.Benchmark.start(this.toString() + "<-") ;
+      if (log) SC.Logger.log("%@: %@ <- %@".fmt(this, v, tv));
+      if (bench) SC.Benchmark.start(this.toString() + "<-");
       //@endif
 
-      this._toTarget.setPathIfChanged(this._toPropertyKey, tv) ;
+      this._toTarget.setPathIfChanged(this._toPropertyKey, tv);
 
       //@if(debug)
-      if (bench) SC.Benchmark.start(this.toString() + "<-") ;
+      if (bench) SC.Benchmark.start(this.toString() + "<-");
       //@endif
     }
   },
@@ -689,21 +691,21 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     This method is useful when you are dynamically connecting bindings to a
     network of objects that may have already been initialized.
   */
-  sync: function() {
+  sync: function () {
 
     // do nothing if not connected
     if (!this.isConnected) return this;
 
     // connection is pending, just note that we should sync also
     if (this._connectionPending) {
-      this._syncOnConnect = YES ;
+      this._syncOnConnect = YES;
 
     // we are connected, go ahead and sync
     } else {
-      this._computeBindingTargets() ;
+      this._computeBindingTargets();
       var target = this._fromTarget,
-          key = this._fromPropertyKey ;
-      if (!target || !key) return this ; // nothing to do
+          key = this._fromPropertyKey;
+      if (!target || !key) return this; // nothing to do
 
       // Let's check for whether target is a valid observable with getPath.
       // Common cases might have it be a Window or a DOM object.
@@ -715,56 +717,59 @@ SC.Binding = /** @scope SC.Binding.prototype */{
       }
 
       // get the new value
-      var v = target.getPath(key) ;
+      var v = target.getPath(key);
 
       // if the new value is different from the current binding value, then
       // schedule to register an update.
       if (v !== this._bindingValue || key === '[]') {
-        this._setBindingValue(target, key) ;
-        SC.Binding._changeQueue.add(this) ; // save for later.
+        this._setBindingValue(target, key);
+        SC.Binding._changeQueue.add(this); // save for later.
       }
     }
 
-    return this ;
+    return this;
   },
 
   // set if you call sync() when the binding connection is still pending.
   _syncOnConnect: NO,
 
-  _computeBindingTargets: function() {
+  _computeBindingTargets: function () {
+    var path, root, tuple;
+
     if (!this._fromTarget) {
-
-      var path, root, tuple ;
-
       // if the fromPropertyPath begins with a . or * then we may use the
       // toRoot as the root object.  Similar code exists in connect() so if
       // you make a change to one be sure to update the other.
-      path = this._fromPropertyPath; root = this._fromRoot ;
+      path = this._fromPropertyPath;
+      root = this._fromRoot;
       if (typeof path === "string") {
 
         // static path beginning with the toRoot
         if (path.indexOf('.') === 0) {
-          path = path.slice(1) ; // remove the .
+          path = path.slice(1); // remove the .
           if (!root) root = this._toRoot; // use the toRoot optionally
 
         // chained path beginning with toRoot.  Setup a tuple
         } else if (path.indexOf('*') === 0) {
           path = [root || this._toRoot, path.slice(1)];
-          root = null ;
+          root = null;
         }
       }
 
-      tuple = SC.tupleForPropertyPath(path, root) ;
+      tuple = SC.tupleForPropertyPath(path, root);
       if (tuple) {
-        this._fromTarget = tuple[0]; this._fromPropertyKey = tuple[1] ;
+        this._fromTarget = tuple[0];
+        this._fromPropertyKey = tuple[1];
       }
     }
 
     if (!this._toTarget) {
-      path = this._toPropertyPath; root = this._toRoot ;
-      tuple = SC.tupleForPropertyPath(path, root) ;
+      path = this._toPropertyPath;
+      root = this._toRoot;
+      tuple = SC.tupleForPropertyPath(path, root);
       if (tuple) {
-        this._toTarget = tuple[0]; this._toPropertyKey = tuple[1] ;
+        this._toTarget = tuple[0];
+        this._toPropertyKey = tuple[1];
       }
     }
   },
@@ -779,18 +784,20 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @param {Boolean} [aFlag] Pass NO to set the binding back to two-way
     @returns {SC.Binding} this
   */
-  oneWay: function(fromPath, aFlag) {
+  oneWay: function (fromPath, aFlag) {
 
     // If fromPath is a bool but aFlag is undefined, swap.
     if ((aFlag === undefined) && (SC.typeOf(fromPath) === SC.T_BOOL)) {
-      aFlag = fromPath; fromPath = null ;
+      aFlag = fromPath;
+      fromPath = null;
     }
 
     // beget if needed.
-    var binding = this.from(fromPath) ;
-    if (binding === SC.Binding) binding = binding.beget() ;
-    binding._oneWay = (aFlag === undefined) ? YES : aFlag ;
-    return binding ;
+    var binding = this.from(fromPath);
+    if (binding === SC.Binding) binding = binding.beget();
+    binding._oneWay = (aFlag === undefined) ? YES : aFlag;
+
+    return binding;
   },
 
   /**
@@ -798,7 +805,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
 
     The function you pass must have the following signature:
 
-          function(value) {} ;
+          function (value) {};
 
     It must return either the transformed value or an error object.
 
@@ -809,20 +816,20 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @param {Function} transformFunc the transform function.
     @returns {SC.Binding} this
   */
-  transform: function(transformFunc) {
-    var binding = (this === SC.Binding) ? this.beget() : this ;
-    var t = binding._transforms ;
+  transform: function (transformFunc) {
+    var binding = (this === SC.Binding) ? this.beget() : this;
+    var t = binding._transforms;
 
     // clone the transform array if this comes from the parent
     if (t && (t === binding.parentBinding._transform)) {
-      t = binding._transforms = t.slice() ;
+      t = binding._transforms = t.slice();
     }
 
     // create the transform array if needed.
-    if (!t) t = binding._transforms = [] ;
+    if (!t) t = binding._transforms = [];
 
     // add the transform function
-    t.push(transformFunc) ;
+    t.push(transformFunc);
     return binding;
   },
 
@@ -833,9 +840,10 @@ SC.Binding = /** @scope SC.Binding.prototype */{
 
     @returns {SC.Binding} this
   */
-  resetTransforms: function() {
-    var binding = (this === SC.Binding) ? this.beget() : this ;
-    binding._transforms = null ; return binding ;
+  resetTransforms: function () {
+    var binding = (this === SC.Binding) ? this.beget() : this;
+    binding._transforms = null;
+    return binding;
   },
 
   /**
@@ -850,17 +858,19 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @param {Boolean} [aFlag] Pass NO to allow error objects again.
     @returns {SC.Binding} this
   */
-  noError: function(fromPath, aFlag) {
+  noError: function (fromPath, aFlag) {
     // If fromPath is a bool but aFlag is undefined, swap.
     if ((aFlag === undefined) && (SC.typeOf(fromPath) === SC.T_BOOL)) {
-      aFlag = fromPath; fromPath = null ;
+      aFlag = fromPath;
+      fromPath = null;
     }
 
     // beget if needed.
-    var binding = this.from(fromPath) ;
-    if (binding === SC.Binding) binding = binding.beget() ;
-    binding._noError = (aFlag === undefined) ? YES : aFlag ;
-    return binding ;
+    var binding = this.from(fromPath);
+    if (binding === SC.Binding) binding = binding.beget();
+    binding._noError = (aFlag === undefined) ? YES : aFlag;
+
+    return binding;
   },
 
   /**
@@ -882,17 +892,17 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @param {Object} [placeholder] placeholder value.
     @returns {SC.Binding} this
   */
-  single: function(fromPath, placeholder) {
+  single: function (fromPath, placeholder) {
     if (placeholder === undefined) {
-      placeholder = SC.MULTIPLE_PLACEHOLDER ;
+      placeholder = SC.MULTIPLE_PLACEHOLDER;
     }
-    return this.from(fromPath).transform(function(value, isForward) {
+    return this.from(fromPath).transform(function (value, isForward) {
       if (value && value.isEnumerable) {
         var len = value.get('length');
-        value = (len>1) ? placeholder : (len<=0) ? null : value.firstObject();
+        value = (len > 1) ? placeholder : (len <= 0) ? null : value.firstObject();
       }
-      return value ;
-    }) ;
+      return value;
+    });
   },
 
   /**
@@ -903,14 +913,14 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @param {Object} [placeholder]
     @returns {SC.Binding} this
   */
-  notEmpty: function(fromPath, placeholder) {
-    if (placeholder === undefined) placeholder = SC.EMPTY_PLACEHOLDER ;
-    return this.from(fromPath).transform(function(value, isForward) {
-      if (SC.none(value) || (value === '') || (SC.isArray(value) && (value.get ? value.get('length') : value.length)=== 0)) {
-        value = placeholder ;
+  notEmpty: function (fromPath, placeholder) {
+    if (placeholder === undefined) placeholder = SC.EMPTY_PLACEHOLDER;
+    return this.from(fromPath).transform(function (value, isForward) {
+      if (SC.none(value) || (value === '') || (SC.isArray(value) && (value.get ? value.get('length') : value.length) === 0)) {
+        value = placeholder;
       }
-      return value ;
-    }) ;
+      return value;
+    });
   },
 
   /**
@@ -921,12 +931,12 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @param {Object} [placeholder]
     @returns {SC.Binding} this
   */
-  notNull: function(fromPath, placeholder) {
-    if (placeholder === undefined) placeholder = SC.EMPTY_PLACEHOLDER ;
-    return this.from(fromPath).transform(function(value, isForward) {
-      if (SC.none(value)) value = placeholder ;
-      return value ;
-    }) ;
+  notNull: function (fromPath, placeholder) {
+    if (placeholder === undefined) placeholder = SC.EMPTY_PLACEHOLDER;
+    return this.from(fromPath).transform(function (value, isForward) {
+      if (SC.none(value)) value = placeholder;
+      return value;
+    });
   },
 
   /**
@@ -936,11 +946,12 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @param {String} [fromPath]
     @returns {SC.Binding} this
   */
-  multiple: function(fromPath) {
-    return this.from(fromPath).transform(function(value) {
-      if (!SC.isArray(value)) value = (value == null) ? [] : [value] ;
-      return value ;
-    }) ;
+  multiple: function (fromPath) {
+    return this.from(fromPath).transform(function (value) {
+      /*jshint eqnull:true*/
+      if (!SC.isArray(value)) value = (value == null) ? [] : [value];
+      return value;
+    });
   },
 
   /**
@@ -951,12 +962,12 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @param {String} [fromPath]
     @returns {SC.Binding} this
   */
-  bool: function(fromPath) {
-    return this.from(fromPath).transform(function(v) {
-      var t = SC.typeOf(v) ;
-      if (t === SC.T_ERROR) return v ;
-      return (t == SC.T_ARRAY) ? (v.length > 0) : (v === '') ? NO : !!v ;
-    }) ;
+  bool: function (fromPath) {
+    return this.from(fromPath).transform(function (v) {
+      var t = SC.typeOf(v);
+      if (t === SC.T_ERROR) return v;
+      return (t == SC.T_ARRAY) ? (v.length > 0) : (v === '') ? NO : !!v;
+    });
   },
 
   /**
@@ -976,14 +987,14 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @param {String} pathA The first part of the conditional
     @param {String} pathB The second part of the conditional
   */
-  and: function(pathA, pathB) {
+  and: function (pathA, pathB) {
 
     // create an object to do the logical computation
     var gate = SC.Object.create({
       valueABinding: pathA,
       valueBBinding: pathB,
 
-      and: function() {
+      and: function () {
         return (this.get('valueA') && this.get('valueB'));
       }.property('valueA', 'valueB').cacheable()
     });
@@ -1002,14 +1013,14 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @param {String} pathA The first part of the conditional
     @param {String} pathB The second part of the conditional
   */
-  or: function(pathA, pathB) {
+  or: function (pathA, pathB) {
 
     // create an object to the logical computation
     var gate = SC.Object.create({
       valueABinding: pathA,
       valueBBinding: pathB,
 
-      or: function() {
+      or: function () {
         return (this.get('valueA') || this.get('valueB'));
       }.property('valueA', 'valueB').cacheable()
     });
@@ -1024,12 +1035,12 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @param {String} [fromPath]
     @returns {SC.Binding} this
   */
-  not: function(fromPath) {
-    return this.from(fromPath).transform(function(v) {
-      var t = SC.typeOf(v) ;
-      if (t === SC.T_ERROR) return v ;
-      return !((t == SC.T_ARRAY) ? (v.length > 0) : (v === '') ? NO : !!v) ;
-    }) ;
+  not: function (fromPath) {
+    return this.from(fromPath).transform(function (v) {
+      var t = SC.typeOf(v);
+      if (t === SC.T_ERROR) return v;
+      return !((t == SC.T_ARRAY) ? (v.length > 0) : (v === '') ? NO : !!v);
+    });
   },
 
   /**
@@ -1038,27 +1049,27 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @param {String} [fromPath]
     @returns {SC.Binding} this
   */
-  isNull: function(fromPath) {
-    return this.from(fromPath).transform(function(v) {
-      var t = SC.typeOf(v) ;
-      return (t === SC.T_ERROR) ? v : SC.none(v) ;
+  isNull: function (fromPath) {
+    return this.from(fromPath).transform(function (v) {
+      var t = SC.typeOf(v);
+      return (t === SC.T_ERROR) ? v : SC.none(v);
     });
   },
 
-  toString: function() {
-    var from = this._fromRoot ? "<%@>:%@".fmt(this._fromRoot,this._fromPropertyPath) : this._fromPropertyPath;
+  toString: function () {
+    var from = this._fromRoot ? "<%@>:%@".fmt(this._fromRoot, this._fromPropertyPath) : this._fromPropertyPath;
 
-    var to = this._toRoot ? "<%@>:%@".fmt(this._toRoot,this._toPropertyPath) : this._toPropertyPath;
+    var to = this._toRoot ? "<%@>:%@".fmt(this._toRoot, this._toPropertyPath) : this._toPropertyPath;
 
     var oneWay = this._oneWay ? '[oneWay]' : '';
     return "SC.Binding%@(%@ -> %@)%@".fmt(SC.guidFor(this), from, to, oneWay);
   }
-} ;
+};
 
 /**
   Shorthand method to define a binding.  This is the same as calling:
 
         SC.binding(path) = SC.Binding.from(path)
 */
-SC.binding = function(path, root) { return SC.Binding.from(path,root); } ;
+SC.binding = function (path, root) { return SC.Binding.from(path, root); };
 
