@@ -32,7 +32,7 @@ module("SC.SliderView Methods", {
 
 test("changing value of the slider will change its left position", function() {
   equals(view.get('value'), 50, 'precond - value should be 50');
-  equals(view.$('.sc-handle').css('left'), '50%', 'left of sc-handle should be 50%');
+  equals(parseInt(view.$('.sc-handle').css('left')) / view.$().width(), .5, 'left of sc-handle should be 50%');
 
   var elem = view.get('layer');
 
@@ -41,7 +41,7 @@ test("changing value of the slider will change its left position", function() {
   SC.RunLoop.end();
 
   equals(view.get('value'), 100, 'value should now be 100');
-  equals(view.$('.sc-handle').css('left'), '100%', 'left of sc-handle should be 100%');
+  equals(parseInt(view.$('.sc-handle').css('left')) / view.$().width(), 1, 'left of sc-handle should be 100%');
 
 });
 
@@ -56,7 +56,7 @@ test("going over maximum slider limit", function() {
 
   // TODO: should we allow setting value higher then maximum?
   equals(view.get('value'), 150, 'value should now be 150');
-  equals(view.$('.sc-handle').css('left'), '100%', 'left of sc-handle should be 100%');
+  equals(parseInt(view.$('.sc-handle').css('left')) / view.$().width(), 1, 'left of sc-handle should be 100%');
 });
 
 test("going below minimum slider limit", function() {
@@ -70,5 +70,5 @@ test("going below minimum slider limit", function() {
 
   // TODO: should we allow setting value lower then minimum?
   equals(view.get('value'), -10, 'value should now be -10');
-  equals(view.$('.sc-handle').css('left'), '0%', 'left of sc-handle should be 0%');
+  equals(parseInt(view.$('.sc-handle').css('left')) / view.$().width(), 0, 'left of sc-handle should be 0%');
 });
