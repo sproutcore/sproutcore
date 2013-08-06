@@ -142,6 +142,15 @@ var userAgents = {
     engine: SC.ENGINE.trident,
     engineVersion: '9.0'
   },
+  "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)": {
+    device: SC.DEVICE.desktop,
+    name: SC.BROWSER.ie,
+    version: '9.0',
+    os: SC.OS.win,
+    osVersion: '6.1',
+    engine: SC.ENGINE.trident,
+    engineVersion: '5.0'
+  },
   "Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; WOW64; Trident/6.0)": {
     device: SC.DEVICE.desktop,
     name: SC.BROWSER.ie,
@@ -169,14 +178,23 @@ var userAgents = {
     engine: SC.ENGINE.trident,
     engineVersion: '6.0'
   },
-  "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)": {
+  "Mozilla/5.0 (compatible; MSIE 10.6; Windows NT 6.1; Trident/5.0; InfoPath.2; SLCC1; .NET CLR 3.0.4506.2152; .NET CLR 3.5.30729; .NET CLR 2.0.50727) 3gpp-gba UNTRUSTED/1.0": {
     device: SC.DEVICE.desktop,
     name: SC.BROWSER.ie,
-    version: '9.0',
+    version: '10.6',
     os: SC.OS.win,
     osVersion: '6.1',
     engine: SC.ENGINE.trident,
     engineVersion: '5.0'
+  },
+  "Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko": {
+    device: SC.DEVICE.desktop,
+    name: SC.BROWSER.ie,
+    version: '11.0',
+    os: SC.OS.win,
+    osVersion: '6.3',
+    engine: SC.ENGINE.trident,
+    engineVersion: '7.0'
   },
 
 // MOZILLA
