@@ -418,7 +418,7 @@ SC.Drag = SC.Object.extend(
 
     if (target && target.dragExited) target.dragExited(this, this._lastMouseDraggedEvent);
 
-    this.endDrag(evt);
+    this.endDrag(evt, SC.DRAG_NONE);
   },
 
   /** @private
@@ -428,9 +428,11 @@ SC.Drag = SC.Object.extend(
     ghost view, but does not notify the drop target of a drop.
 
     @param {Event} evt
+    @param {DragOp} op The drag operation that was performed. One of
+      SC.DRAG_COPY, SC.DRAG_MOVE, SC.DRAG_LINK, or SC.DRAG_NONE.
   */
-  endDrag: function (evt) {
-    var op = this.get('location');
+  endDrag: function (evt, op) {
+    var loc = this.get('location');
 
     // notify all drop targets that the drag ended
     var ary = this._dropTargets();
@@ -562,7 +564,7 @@ SC.Drag = SC.Object.extend(
       SC.Logger.error('Exception in SC.Drag.mouseUp(acceptDragOperation|performDragOperation): %@'.fmt(e));
     }
 
-    this.endDrag(evt);
+    this.endDrag(evt, op);
   },
 
   /** @private */
