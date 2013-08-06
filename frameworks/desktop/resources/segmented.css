@@ -14,9 +14,7 @@
     }
   }
 
-  img.icon {
-    position: relative;
-  }
+  
 
   /* Style for an individual segment. */
   .sc-segment-view {
@@ -25,6 +23,15 @@
     display: inline-block;
     position: relative;
     text-align: center;
+    
+    .sc-button-label {
+      vertical-align: top;
+      .icon {
+        display: inline-block;
+        position: relative;
+        margin-right: 4px;
+      }
+    }
 
     &:focus {
       outline: none;

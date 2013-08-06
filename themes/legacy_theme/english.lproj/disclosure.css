@@ -4,7 +4,7 @@
 
 /* @group basic */
 
-.sc-theme .sc-button-view.sc-disclosure-view img.button {
+.sc-theme .sc-button-view.sc-disclosure-view > .button {
 	width: 12px;
 	height: 12px;
 	left: 0;
@@ -13,11 +13,11 @@
 } 
 
 
-.sc-theme .sc-button-view.sc-disclosure-view.sel img.button {
+.sc-theme .sc-button-view.sc-disclosure-view.sel > .button {
 	background-position: 0px -1597px ;
 }
 
-.sc-theme .sc-button-view.sc-disclosure-view img.button {
+.sc-theme .sc-button-view.sc-disclosure-view > .button {
 	background-position: -16px -1614px ;
 }
 
@@ -29,11 +29,11 @@
 
 /* @group disabled */
 
-.sc-theme .sc-button-view.sc-disclosure-view.sel.disabled img.button {
+.sc-theme .sc-button-view.sc-disclosure-view.sel.disabled > .button {
 	background-position: 0px -1613px ;
 }
 
-.sc-theme .sc-button-view.sc-disclosure-view.disabled img.button {
+.sc-theme .sc-button-view.sc-disclosure-view.disabled > .button {
 	background-position: -16px -1630px ;
 }
 
@@ -41,11 +41,11 @@
 
 /* @group active */
 
-.sc-theme .sc-button-view.sc-disclosure-view.sel.active img.button {
+.sc-theme .sc-button-view.sc-disclosure-view.sel.active > .button {
 	background-position: -16px -1597px ;
 }
 
-.sc-theme .sc-button-view.sc-disclosure-view.active img.button {
+.sc-theme .sc-button-view.sc-disclosure-view.active > .button {
 	background-position: -0px -1630px ;
 }
 

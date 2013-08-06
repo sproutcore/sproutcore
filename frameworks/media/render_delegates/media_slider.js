@@ -19,7 +19,6 @@ SC.BaseTheme.mediaSliderRenderDelegate = SC.RenderDelegate.create({
   render: function(dataSource, context) {
     this.addSizeClassName(dataSource, context);
 
-    var blankImage = SC.BLANK_IMAGE_URL;
     var valueMax = dataSource.get('maximum');
     var valueMin = dataSource.get('minimum');
     var valueNow = dataSource.get('ariaValue');
@@ -38,7 +37,7 @@ SC.BaseTheme.mediaSliderRenderDelegate = SC.RenderDelegate.create({
     context = context.begin('span').addClass('track');
     this.includeSlices(dataSource, context, SC.THREE_SLICE);
     context.push('<span class="sc-loaded-ranges"></span>');
-    context.push('<img src="' + blankImage + '" class="sc-handle" style="left: ' + dataSource.get('value') + '%" />' + '</span>');
+    context.push('<span class="sc-handle" style="left: ' + dataSource.get('value') + '%"></span>');
 
     context = context.end();
 

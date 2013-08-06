@@ -53,7 +53,8 @@
 	color: rgba(0,0,0,0.5);
 }
 
-.sc-theme .sc-radio-view img.icon {
+.sc-theme .sc-radio-view .sc-button-label .icon {
+	display: inline-block;
 	position: relative;
 	vertical-align: middle;
 	top: -2px;
@@ -63,8 +64,8 @@
 	width: 16px;
 }
 
-.sc-theme .sc-radio-view.disabled img.icon,
-.sc-theme .sc-radio-view .sc-radio-button.disabled img.icon {
+.sc-theme .sc-radio-view.disabled .sc-button-label .icon,
+.sc-theme .sc-radio-view .sc-radio-button.disabled .sc-button-label .icon {
 	opacity: 0.5;
 	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)"; 
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
