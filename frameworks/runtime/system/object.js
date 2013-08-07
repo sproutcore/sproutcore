@@ -120,7 +120,7 @@ SC._object_extend = function _object_extend(base, ext, proto) {
     // get the value.  use concats if defined
     value = (concats.hasOwnProperty(key) ? concats[key] : null) || ext[key];
 
-    // Possibly add to a bindings.
+    // Possibly add to bindings.
     if (key.length > 7 && key.slice(-7) === "Binding") {
       if (!clonedBindings) {
         bindings = (bindings || SC.EMPTY_ARRAY).slice();

@@ -35,6 +35,9 @@ SC.Pane.reopen({
   _notifyDetached: function () {
     sc_super();
 
+    // Legacy.
+    this.set('isPaneAttached', NO);
+
     // remove intercept
     this._removeIntercept();
 

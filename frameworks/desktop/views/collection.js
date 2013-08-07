@@ -2781,9 +2781,18 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
   /**
     Implements the SC.DropTarget protocol.  Hides any visible insertion
-    point and clears some cached values.
+    point and clears some cached values. 
   */
   dragExited: function () {
+    this.hideInsertionPoint();
+    this._lastInsertionIndex = this._lastDropOperation = null;
+  },
+
+  /**
+    Implements the SC.DropTarget protocol.  Hides any visible insertion
+    point and clears some cached values.
+  */
+  dragEnded: function () {
     this.hideInsertionPoint();
     this._lastInsertionIndex = this._lastDropOperation = null;
   },

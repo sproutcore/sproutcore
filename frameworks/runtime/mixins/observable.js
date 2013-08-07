@@ -911,10 +911,9 @@ SC.Observable = /** @scope SC.Observable.prototype */{
         key = keys[loc];
         value = this[key];
         propertyKey = key.slice(0, -7); // contentBinding => content
-        this.bind(propertyKey, value);
 
-        // Clear the set up variable.
-        delete this[key];
+        // Replace the short form property with the new binding object.
+        this[key] = this.bind(propertyKey, value);
       }
     }
 

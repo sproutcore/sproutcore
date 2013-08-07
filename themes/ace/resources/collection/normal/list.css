@@ -18,3 +18,21 @@ $theme.collection {
     background: #bcd7ec;
   }
 }
+
+$theme.sc-list-insertion-point {
+  overflow: visible;
+  background-color: #9ABAC9;
+  z-index: 1000;
+}
+
+$theme.sc-list-insertion-point > .anchor {
+  position: absolute;
+  width: 8px;
+  top: -3px;
+  left: -4px;
+  height: 8px;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+  background-color: #9ABAC9;
+}
