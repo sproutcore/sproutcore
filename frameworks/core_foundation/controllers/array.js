@@ -440,13 +440,10 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     as needed.
   */
   _scac_contentDidChange: function () {
-
     this._scac_cached = NO; // invalidate observable content
 
     var content     = this.get('content'),
-        // orders      = !!this.get('orderBy'),
         lastContent = this._scac_content,
-        // oldlen      = this._scac_length || 0,
         didChange   = this._scac_arrayContentDidChange,
         willChange  = this._scac_arrayContentWillChange,
         sfunc       = this._scac_contentStatusDidChange,
@@ -513,6 +510,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     this._scac_contentStatusDidChange();
 
     this.arrayContentDidChange(0, 0, newlen);
+    this.enumerableContentDidChange(0, newlen - 1);
     this.updateSelectionAfterContentChange();
   }.observes('content'),
 

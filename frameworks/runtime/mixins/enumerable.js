@@ -825,7 +825,7 @@ SC.Reducers = /** @scope SC.Reducers.prototype */ {
     This will notify any observers watching for content changes.  If you are
     implementing an ordered enumerable (such as an Array), also pass the
     start and length values so that it can be used to notify range observers.
-    Passing start and length values will also ensures that the computed
+    Passing start and length values will also ensure that the computed
     properties `firstObject` and `lastObject` are updated.
 
     @param {Number} [start] start offset for the content change
