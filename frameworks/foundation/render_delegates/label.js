@@ -37,14 +37,12 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
   className: 'label',
 
   render: function(dataSource, context) {
+    var toolTip = dataSource.get('toolTip');
+
     this.addSizeClassName(dataSource, context);
 
-    var toolTip = dataSource.get('toolTip'),
-      escapeHTML = dataSource.get('escapeHTML');
-
+    // Set the toolTip.
     if (toolTip) {
-      // Escape the title if needed. This prevents potential XSS attacks.
-      if (escapeHTML) { toolTip = SC.RenderContext.escapeHTML(toolTip); }
       context.setAttr('title', toolTip);
     }
 
@@ -69,6 +67,8 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
   },
 
   update: function(dataSource, jquery) {
+    var toolTip = dataSource.get('toolTip');
+
     this.updateSizeClassName(dataSource, jquery);
 
     /*
@@ -78,12 +78,9 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
     jquery.css({
       textAlign: dataSource.get('textAlign') || null
     });
-    var toolTip = dataSource.get('toolTip'),
-      escapeHTML = dataSource.get('escapeHTML');
 
+    // Update the toolTip.
     if (toolTip) {
-      // Escape the title if needed. This prevents potential XSS attacks.
-      if (escapeHTML) { toolTip = SC.RenderContext.escapeHTML(toolTip); }
       jquery.attr('title', toolTip);
     } else {
       jquery.removeAttr('title');

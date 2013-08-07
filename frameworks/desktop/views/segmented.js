@@ -265,6 +265,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   /**
     The title to use for the overflow segment if it appears.
 
+    NOTE: This will not be HTML escaped and must never be assigned to user inserted text!
+
     @type String
     @default '&raquo;'
   */
@@ -276,7 +278,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     @type String
     @default 'More&hellip;'
   */
-  overflowToolTip: 'More&hellip;',
+  overflowToolTip: 'More…',
 
   /**
     The icon to use for the overflow segment if it appears.
@@ -322,6 +324,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
 
     overflowView = this.get('segmentViewClass').create({
       controlSize: this.get('controlSize'),
+      escapeHTML: false,
       localize: this.get('localize'),
       title: title,
       toolTip: toolTip,
