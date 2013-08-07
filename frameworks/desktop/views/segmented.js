@@ -353,17 +353,17 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   */
   itemsDidChange: function () {
     var items = this.get('items') || [],
-        localItem,                        // Used to avoid altering the original items
-        previousItem,
-        childViews = this.get('childViews'),
-        childView,
-        overflowView = childViews.lastObject(),
-        value = this.get('value'),        // The value can change if items that were once selected are removed
-        isSelected,
-        itemKeys = this.get('itemKeys'),
-        itemKey,
-        segmentViewClass = this.get('segmentViewClass'),
-        i, j;
+      localItem,                        // Used to avoid altering the original items
+      previousItem,
+      childViews = this.get('childViews'),
+      childView,
+      overflowView = childViews.lastObject(),
+      value = this.get('value'),        // The value can change if items that were once selected are removed
+      isSelected,
+      itemKeys = this.get('itemKeys'),
+      itemKey,
+      segmentViewClass = this.get('segmentViewClass'),
+      i, j;
 
     // Update childViews
     if (childViews.get('length') - 1 > items.get('length')) {   // We've lost segments (ie. childViews)
@@ -504,13 +504,11 @@ SC.SegmentedView = SC.View.extend(SC.Control,
 
       // Update the childView
       childView.updateItem(this, item);
-    } else {
-      SC.Logger.warn("Item content change was observed on item without matching segment child view.");
-    }
 
-    // Reset our measurements (which depend on width/height or title) and adjust visible views
-    if (this.get('shouldHandleOverflow')) {
-      this.invokeLast(this.remeasure);
+      // Reset our measurements (which depend on width/height or title) and adjust visible views
+      if (this.get('shouldHandleOverflow')) {
+        this.invokeLast(this.remeasure);
+      }
     }
   },
 
@@ -523,7 +521,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
 
     // Only overflow if we've gone below the minimum dimension required to fit all the segments
     if (this.get('shouldHandleOverflow') && (this.isOverflowing || visibleDim <= this.cachedMinimumDim)) {
-      this.adjustOverflow();
+      this.invokeLast(this.remeasure);
     }
   },
 
@@ -542,6 +540,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   */
   remeasure: function () {
     if (!this.get('shouldHandleOverflow')) { return; }
+
     var childViews = this.get('childViews'),
         overflowView;
 
@@ -553,7 +552,6 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       for (var i = childViews.get('length') - 1; i >= 0; i--) {
         childViews.objectAt(i).set('isVisible', YES);
       }
-
 
       this.cachedDims = this.segmentDimensions();
       this.cachedOverflowDim = this.overflowSegmentDim();
