@@ -3126,10 +3126,10 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   collectionViewShouldBeginDrag: function(view) {
     // On non-touch platforms, support canReorderContent.
     if (!SC.platform.touch && this.get('canReorderContent')) return YES;
-    // Support mouse event isDragHandle flag.
-    if (this.mouseDownInfo && this.mouseDownInfo.ev && this.mouseDownInfo.ev.isDragHandle) return YES;
-    // Support touch event isDragHandle flag.
-    if (this.touchStartInfo && this.touchStartInfo.ev && this.touchStartInfo.ev.isDragHandle) return YES;
+    // Support mouse event doesWantDrag flag.
+    if (this.mouseDownInfo && this.mouseDownInfo.ev && this.mouseDownInfo.ev.doesWantDrag) return YES;
+    // Support touch event doesWantDrag flag.
+    if (this.touchStartInfo && this.touchStartInfo.ev && this.touchStartInfo.ev.doesWantDrag) return YES;
     // Otherwise...
     return NO;
   },
