@@ -81,3 +81,16 @@ test("register grouped undo", function() {
   undoManager.redo();
   equals(count, 2, "2 actions should have been redo");
 });
+
+test("set action name", function() {
+  var undoManager = SC.UndoManager.create();
+
+  undoManager.setActionName('group1');
+  undoManager.registerUndo();
+
+  equals(undoManager.get('undoActionName'), null, "The name of the undo stack should be null");
+
+  undoManager.setActionName('group1');
+
+  equals(undoManager.get('undoActionName'), 'group1', "The name of the undo stack should be 'group1'");
+});
