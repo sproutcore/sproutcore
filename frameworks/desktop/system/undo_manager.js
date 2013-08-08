@@ -192,7 +192,7 @@ SC.UndoManager = SC.Object.extend(
   */
   endUndoGroup: function(name) {
     // if more than one groups are active, just decrement the counter.
-    if (!this._activeGroup) raise("endUndoGroup() called outside group.");
+    if (!this._activeGroup) SC.Logger.error("endUndoGroup() called outside group.");
     if (this.groupingLevel > 1) {
       this.groupingLevel--;
       
@@ -213,7 +213,7 @@ SC.UndoManager = SC.Object.extend(
     @throws {Error} If there is no active group
   */
   setActionName: function(name) {
-    if (!this._activeGroup) raise("setActionName() called outside group.");
+    if (!this._activeGroup) SC.Logger.error("setActionName() called outside group.");
     this._activeGroup.name = name;
   },
   
