@@ -40,7 +40,7 @@ SC.UndoManager = SC.Object.extend(
   */
   undoActionName: function () { 
     return this.undoStack ? this.undoStack.name : null;
-  }.property('undoStack'),
+  }.property('undoStack').cacheable(),
   
   /** 
     Use this property to build your Redo menu name.
@@ -51,7 +51,7 @@ SC.UndoManager = SC.Object.extend(
   */
   redoActionName: function () { 
     return this.redoStack ? this.redoStack.name : null;
-  }.property('redoStack'),
+  }.property('redoStack').cacheable(),
 
   /** 
     True if there is an undo action on the stack.
@@ -65,7 +65,7 @@ SC.UndoManager = SC.Object.extend(
   canUndo: function () { 
     // instead of this.undoStack !== null && this.undoStack !== undefined
     return this.undoStack != null;
-  }.property('undoStack'),
+  }.property('undoStack').cacheable(),
   
   /** 
     True if there is an redo action on the stack. Use to validate your menu item.
@@ -77,7 +77,7 @@ SC.UndoManager = SC.Object.extend(
   canRedo: function () { 
     // instead of this.redoStack !== null && this.redoStack !== undefined
     return this.redoStack != null; 
-  }.property('redoStack'),
+  }.property('redoStack').cacheable(),
   
   /**
     Tries to undo the last action. Fails if an undo group is currently open.
