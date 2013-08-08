@@ -19,15 +19,17 @@ test("notifies layoutStyle & frame change", function () {
   SC.run(function () {
     view.layoutDidChange();
   });
-
-  equals(callCount,1,'should trigger observers for layoutStyle');
+  equals(callCount,1,'should trigger observers for layoutDidChange');
+  
   view.createLayer()._doAttach(document.body);
-
+  // After publickeating introduction of the new internal statechart for views when a view has been
+  // attached to the document it fires a 'frame' property change
+  equals(callCount,2,'_doAttach should trigger observers for frame when attached to the document');
+  
   SC.run(function () {
     view.layoutDidChange();
   });
-
-  equals(callCount,2,'should trigger observers for frame when attached to the document');
+  equals(callCount,3,'should trigger observers again when layoutDidChange is called');
 
   // Clean up.
   view.destroy();
