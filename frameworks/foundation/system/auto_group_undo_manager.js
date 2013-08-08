@@ -36,9 +36,7 @@ SC.AutoGroupUndoManager = SC.UndoManager.extend({
     @see SC.AutoGroupUndoManager.registerUndo
   */
   registerUndo: function(original, func, name) {
-    if (this.shouldUseCurrentGroup()) { console.log('Message', this._activeGroup); 
-
-
+    if (this.shouldUseCurrentGroup()) {
       this.registerGroupedUndo(func);
     }
     else {
@@ -54,9 +52,7 @@ SC.AutoGroupUndoManager = SC.UndoManager.extend({
   shouldUseCurrentGroup: function() {
     var activeGroup = this._activeGroup;
     if (activeGroup && !this.isUndoing) {
-      var groupLapse = this.get('groupLapse');
-
-      console.log(Date.now() - activeGroup.timeStamp,  groupLapse); 
+      var groupLapse = this.get('groupLapse'); 
       return (Date.now() - activeGroup.timeStamp) < groupLapse;
     }
     return false;
