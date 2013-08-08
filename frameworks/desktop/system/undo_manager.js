@@ -171,7 +171,7 @@ SC.UndoManager = SC.Object.extend(
   beginUndoGroup: function(name) {
     if (this._activeGroup) {
       //@if(debug)
-      SC.error("beginUndoGroup() called inside group.");
+      SC.warn("beginUndoGroup() called inside group.");
       //@endif
       return;
     }
@@ -190,10 +190,10 @@ SC.UndoManager = SC.Object.extend(
   endUndoGroup: function(name) {
     if (!this._activeGroup) {
       //@if(debug)
-      SC.error("endUndoGroup() called outside group.");
+      SC.warn("endUndoGroup() called outside group.");
       //@endif
     }
-    
+
     this._activeGroup = null;
     this.propertyDidChange(this.isUndoing ? 'redoStack' : 'undoStack');
   },
@@ -208,7 +208,12 @@ SC.UndoManager = SC.Object.extend(
     @throws {Error} If there is no active group
   */
   setActionName: function(name) {
-    if (!this._activeGroup) SC.error("setActionName() called outside group.");
+    if (!this._activeGroup) {
+      //@if(debug)
+      SC.warn("setActionName() called outside group.");
+      //@endif
+      return;
+    }
     this._activeGroup.name = name;
   },
   
