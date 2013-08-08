@@ -246,9 +246,8 @@ SC.UndoManager = SC.Object.extend(
         action();
         this.registerGroupedUndo(action, group.name);
       }
-      
-      this.set(state, false);
     }
+    this.set(state, false);
   }
   
 });

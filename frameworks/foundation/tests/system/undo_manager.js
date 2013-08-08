@@ -47,6 +47,7 @@ test("register undo", function () {
   equals(undoManager.get('undoActionName'), 'group1', "The name of the undo stack should be 'group1'");
 
   undoManager.undo();
+  undoManager.undo();
 
   equals(count, 3, "3 actions should have been undo");
   ok(!undoManager.get('canUndo'), "We shouldn't be able to undo");
