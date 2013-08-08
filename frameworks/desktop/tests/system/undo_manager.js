@@ -94,3 +94,19 @@ test("set action name", function() {
 
   equals(undoManager.get('undoActionName'), 'group1', "The name of the undo stack should be 'group1'");
 });
+
+test("reset", function() {
+  var undoManager = SC.UndoManager.create();
+
+  undoManager.registerUndo(function() {});
+  undoManager.registerUndo(function() {});
+  undoManager.undo();
+
+  ok(undoManager.get('canUndo'), "We should be able to undo");
+  ok(undoManager.get('canRedo'), "We should be able to redo");
+
+  undoManager.reset();
+
+  ok(!undoManager.get('canUndo'), "We shouldn't be able to undo");
+  ok(!undoManager.get('canRedo'), "We shouldn't be able to redo");
+});
