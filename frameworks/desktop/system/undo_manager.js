@@ -97,14 +97,13 @@ SC.UndoManager = SC.Object.extend(
     this._undoOrRedo('redoStack','isRedoing');
   },
 
-  /** 
-    Use this property to group your undo events. If the lapse between
-    two events is less than the specified value, both actions will be grouped.
-    
-    @type Number in milliseconds
-    @default 0
+  /**
+    Resets the undo and redo stacks.
   */
-  groupLapse: 0,
+  reset: function() {
+    this.set('undoStack', null);
+    this.set('redoStack', null);
+  },
   
   /**
     @type Boolean
@@ -117,9 +116,6 @@ SC.UndoManager = SC.Object.extend(
     @default NO
   */
   isRedoing: NO, 
-  
-  /** @private */
-  groupingLevel: 0,
   
   // --------------------------------
   // SIMPLE REGISTRATION
@@ -134,27 +130,29 @@ SC.UndoManager = SC.Object.extend(
       groups, this is not necessary.
   */
   registerUndo: function(func, name) {
-    this.prepareUndoGroup();
+    if (this._activeGroup) {
+      this.endUndoGroup();
+    }
     this.beginUndoGroup(name);
-    this._activeGroup.actions.push(func);
-    this.endUndoGroup(name);
+    this.registerGroupedUndo(func);
   },
 
-  /**
-    If the groupLapse property is more than 0 ms and the last undo event has occur 
-    in less than groupLapse milliseconds after the last one, 
-    we reuse the last undo group to group the actions.
-  */
-  prepareUndoGroup: function() {
-    var groupLapse = this.get('groupLapse');
 
-    if (groupLapse > 0 && !this.isUndoing) {
-      var now = Date.now();
-      if (now - this._lastChangeTime < groupLapse) {
-        this._activeGroup = this.get('undoStack');
-      }
-      this._lastChangeTime = now;
-    } 
+  /**
+    This is how you add new undo events to the current stack. 
+    
+    @param {Function} func A prebound function to be invoked when the undo executes.
+    @param {String} name An optional name for the undo.  If a group is already 
+      created, this is not necessary.
+  */
+  registerGroupedUndo: function(func, name) {
+    if (!this._activeGroup) {
+      this.registerUndo(func, name);
+    }
+    else {
+      this._activeGroup.actions.push(func);
+      this._activeGroup.timeStamp = Date.now();
+    }
   },
 
   /**
@@ -171,17 +169,16 @@ SC.UndoManager = SC.Object.extend(
     @param {String} name
   */
   beginUndoGroup: function(name) {
-    // is a group already active? Just increment the counter.
     if (this._activeGroup) {
-      this.groupingLevel++;
-      
-    // otherwise, create a new active group.  
-    } else {
-      var stack = this.isUndoing ? 'redoStack' : 'undoStack';
-      this._activeGroup = { name: name, actions: [], prev: this.get(stack) };
-      this.set(stack, this._activeGroup);
-      this.groupingLevel = 1;
+      //@if(debug)
+      SC.error("beginUndoGroup() called inside group.");
+      //@endif
+      return;
     }
+
+    var stack = this.isUndoing ? 'redoStack' : 'undoStack';
+    this._activeGroup = { name: name, actions: [], prev: this.get(stack), timeStamp: Date.now() };
+    this.set(stack, this._activeGroup);
   },
  
   /**
@@ -191,15 +188,13 @@ SC.UndoManager = SC.Object.extend(
     @see beginUndoGroup()
   */
   endUndoGroup: function(name) {
-    // if more than one groups are active, just decrement the counter.
-    if (!this._activeGroup) SC.Logger.error("endUndoGroup() called outside group.");
-    if (this.groupingLevel > 1) {
-      this.groupingLevel--;
-      
-    // otherwise, close out the current group.
-    } else {
-      this._activeGroup = null; this.groupingLevel = 0;
+    if (!this._activeGroup) {
+      //@if(debug)
+      SC.error("endUndoGroup() called outside group.");
+      //@endif
     }
+    
+    this._activeGroup = null;
     this.propertyDidChange(this.isUndoing ? 'redoStack' : 'undoStack');
   },
 
@@ -213,7 +208,7 @@ SC.UndoManager = SC.Object.extend(
     @throws {Error} If there is no active group
   */
   setActionName: function(name) {
-    if (!this._activeGroup) SC.Logger.error("setActionName() called outside group.");
+    if (!this._activeGroup) SC.error("setActionName() called outside group.");
     this._activeGroup.name = name;
   },
   
@@ -223,9 +218,6 @@ SC.UndoManager = SC.Object.extend(
   
   /** @private */
   _activeGroup: null,
-
-  /** @private */
-  _lastChangeTime: 0,
   
   /** @private */
   undoStack: null,
@@ -235,20 +227,22 @@ SC.UndoManager = SC.Object.extend(
   
   /** @private */
   _undoOrRedo: function(stack, state) {
-    if (this._activeGroup) return false;
-    if (this.get(stack) == null) return true; // noting to do.
+    if (this._activeGroup) this.endUndoGroup();
 
     this.set(state, true);
-    var group = this.get(stack);
-    this.set(stack, group.prev);
-    var action;
+    var group = this.get(stack),
+      action;
 
-    var useGroup = group.actions.length > 1; 
-    if (useGroup) this.beginUndoGroup(group.name);
-    while(action = group.actions.pop()) { action(); }
-    if (useGroup) this.endUndoGroup(group.name);
-    
-    this.set(state, false);
+    if (group) {
+      this.set(stack, group.prev);
+
+      while(action = group.actions.pop()) { 
+        action();
+        this.registerGroupedUndo(action, group.name);
+      }
+      
+      this.set(state, false);
+    }
   }
   
 });
