@@ -531,7 +531,7 @@ function runTest(idx, cb) {
                 // Check in the page if a specific element is now visible
                 return page.evaluate(function() {
                     var statusText = $("span.status").text();
-                    return statusText.indexOf("Running – Completed") == -1 && statusText.indexOf("Running...") != -1;
+                    return statusText.indexOf("Running – Completed") == -1 && statusText.indexOf("Running...") == -1;
                 });
             }, function() {
                 // checking outcome
