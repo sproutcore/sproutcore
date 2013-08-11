@@ -486,8 +486,6 @@ var urls=[
     {url:'sproutcore/desktop/en/current/tests/views/disclosure/methods.html'},
     {url:'sproutcore/desktop/en/current/tests/views/disclosure/ui.html'},
     {url:'sproutcore/desktop/en/current/tests/integration/dialog.html'},
-    {url:'sproutcore/desktop/en/current/tests/mixins/border.html'},
-    {url:'sproutcore/desktop/en/current/tests/mixins/collection_fast_path.html'},
     {url:'sproutcore/bootstrap/en/current/tests/system/browser.html'},
     {url:'sproutcore/template_view/en/current/tests/panes/template.html'},
     {url:'sproutcore/template_view/en/current/tests/views/template/collection.html'},
@@ -532,7 +530,8 @@ function runTest(idx, cb) {
             waitFor(function() {
                 // Check in the page if a specific element is now visible
                 return page.evaluate(function() {
-                    return $("span.status").text().indexOf("Running – Completed") == -1 ;
+                    var statusText = $("span.status").text();
+                    return statusText.indexOf("Running – Completed") == -1 && statusText.indexOf("Running...") != -1;
                 });
             }, function() {
                 // checking outcome
