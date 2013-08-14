@@ -498,63 +498,79 @@ var urls=[
 ];
 
 var outcome=0;
+var failed=0;
 var webpage = require('webpage');
 
-function logResult(r) {
+function logResult(r,i) {
     // output coloring
     var red, blue, reset;
     red   = '\033[31m';
     green  = '\033[32m';
     reset = '\033[0m';
-    console.log( (r.status === 0 ? green : red ) + r.url + reset + " (" + r.status + "): " + r.resultText);
+    console.log( "[" + (i+1) +"/"+ urls.length + "] " + (r.status === 0 ? green : red ) + r.url + reset + " (" + r.status + "): " + r.resultText);
 }
 
 function runTest(idx, cb) {
     if(idx==urls.length) {
         cb.apply();
+        return;
     }
     var url=urls[idx].url;
     var page = webpage.create();
     page.viewportSize = { width: 1024, height: 768 };
     // Chrome/Linux
     //page.settings.userAgent = "Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.71 Safari/537.36";
-    page.open('http://'+host+':'+port+'/'+url, function (status) {
+    page.open('http://'+host+':'+port+'/'+url, function (status) {  
+        if(urls[idx].open) return;
+        
+        // mark page as opened
+        urls[idx].open = true;
+
         // Check for page load success
         if (status !== "success") {
-            urls[idx].resultText="unable to access page";
+            urls[idx].open=false;
+            urls[idx].resultText="unable to access page: "+status;
             urls[idx].status=-1; outcome=1;
-            logResult(urls[idx]);
+            logResult(urls[idx], idx);
             page.close();
             runTest(++idx,cb);
         } else {
             waitFor(function() {
                 // Check in the page if a specific element is now visible
-                return page.evaluate(function() {
+                return urls[idx].open && page.evaluate(function() {
                     var statusText = $("span.status").text();
                     return statusText.indexOf("Running – Completed") == -1 && statusText.indexOf("Running...") == -1;
                 });
             }, function() {
-                // checking outcome
-                var resultText = page.evaluate(function() {
-                    return $("span.status").text();
-                });
-                urls[idx].resultText=resultText;
-                if(resultText.indexOf("failed")!=-1) {
-                  urls[idx].status=1; outcome=1;
-                } else if(resultText.indexOf("error")!=-1) {
-                  urls[idx].status=2; outcome=1;
-                } else {
-                  urls[idx].status=0;
+                // sometimes the callback could be called more than once,
+                // in that case check that we have not run through the test already
+                if(urls[idx].open) {
+                    // close the test
+                    urls[idx].open=false;
+                    
+                    // checking outcome
+                    var resultText = page.evaluate(function() {
+                        return $("span.status").text();
+                    });
+                    urls[idx].resultText=resultText;
+                    if(resultText.indexOf("failed")!=-1) {
+                      urls[idx].status=1; outcome=1; failed++;
+                    } else if(resultText.indexOf("error")!=-1) {
+                      urls[idx].status=2; outcome=1; failed++;
+                    } else {
+                      urls[idx].status=0;
+                    }
+                    logResult(urls[idx], idx);
+                    page.close();
+                    runTest(++idx,cb);
                 }
-                logResult(urls[idx]);
-                page.close();
-                runTest(++idx,cb);
             });        
         }
     });
 }
 
 runTest(0, function() {
+    console.log(urls.length + " tests run, " + failed + "failures.");
     phantom.exit(outcome);
 });
 
