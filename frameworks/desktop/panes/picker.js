@@ -997,7 +997,10 @@ SC.PickerPane = SC.PalettePane.extend(
                       offsetKey[3] + overlapTuningY];
 
         this.set('pointerOffset', offset);
-        this.set('windowPadding', K.WINDOW_PADDING);
+        // TODO: What to do about this?
+        if (SC.none(this.get('windowPadding'))) {
+          this.set('windowPadding', K.WINDOW_PADDING);
+        }
       }
     } else {
       // TODO: What to do about this?
