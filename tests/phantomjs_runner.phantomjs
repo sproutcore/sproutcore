@@ -520,7 +520,8 @@ function runTest(idx, cb) {
     page.viewportSize = { width: 1024, height: 768 };
     // Chrome/Linux
     //page.settings.userAgent = "Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.71 Safari/537.36";
-    page.open('http://'+host+':'+port+'/'+url, function (status) {  
+    page.open('http://'+host+':'+port+'/'+url, function (status) {
+        // detect and skip multiple callbacks calls
         if(urls[idx].open) return;
         
         // mark page as opened
@@ -530,7 +531,7 @@ function runTest(idx, cb) {
         if (status !== "success") {
             urls[idx].open=false;
             urls[idx].resultText="unable to access page: "+status;
-            urls[idx].status=-1; outcome=1;
+            urls[idx].status=-1; outcome=1; failed++;
             logResult(urls[idx], idx);
             page.close();
             runTest(++idx,cb);
@@ -570,7 +571,12 @@ function runTest(idx, cb) {
 }
 
 runTest(0, function() {
-    console.log(urls.length + " tests run, " + failed + "failures.");
+    console.log("\n"+urls.length + " tests run, " + failed + " failures:\n");
+    for(var i=0,l=urls.length;i<l;i++) {
+        if(urls[i].status!==0) {
+            logResult(urls[i], i);
+        }
+    }
     phantom.exit(outcome);
 });
 
