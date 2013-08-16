@@ -21,11 +21,13 @@ function waitFor(testFx, onReady, timeOutMillis) {
 };
 
 var env = require('system').env;
+var args = require('system').args;
 
 var travis=env['TRAVIS_JOB_ID']?env['TRAVIS_JOB_ID']:false,
     verbose=env['VERBOSE']?env['VERBOSE']:false,
     port=env['PORT']?env['PORT']:4020,
-    host=env['IP']?env['IP']:"127.0.0.1";
+    host=env['IP']?env['IP']:"127.0.0.1",
+    filter=(args.length === 2 ? new RegExp(args[1]) : false);
 
 if(!travis && verbose) {
   page.onError = function(err, stack) {
@@ -516,64 +518,70 @@ function runTest(idx, cb) {
         return;
     }
     var url=urls[idx].url;
-    var page = webpage.create();
-    page.viewportSize = { width: 1024, height: 768 };
-    // Chrome/Linux
-    //page.settings.userAgent = "Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.71 Safari/537.36";
-    page.open('http://'+host+':'+port+'/'+url, function (status) {
-        // detect and skip multiple callbacks calls
-        if(urls[idx].open) return;
-        
-        // mark page as opened
-        urls[idx].open = true;
-
-        // Check for page load success
-        if (status !== "success") {
-            urls[idx].open=false;
-            urls[idx].resultText="unable to access page: "+status;
-            urls[idx].status=-1; outcome=1; failed++;
-            logResult(urls[idx], idx);
-            page.close();
-            runTest(++idx,cb);
-        } else {
-            waitFor(function() {
-                // Check in the page if a specific element is now visible
-                return urls[idx].open && page.evaluate(function() {
-                    var statusText = $("span.status").text();
-                    return statusText.indexOf("Running – Completed") == -1 && statusText.indexOf("Running...") == -1;
-                });
-            }, function() {
-                // sometimes the callback could be called more than once,
-                // in that case check that we have not run through the test already
-                if(urls[idx].open) {
-                    // close the test
-                    urls[idx].open=false;
-                    
-                    // checking outcome
-                    var resultText = page.evaluate(function() {
-                        return $("span.status").text();
+    if (filter && url.match(filter)) {
+        var page = webpage.create();
+        page.viewportSize = { width: 1024, height: 768 };
+        // Chrome/Linux
+        //page.settings.userAgent = "Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.71 Safari/537.36";
+        page.open('http://'+host+':'+port+'/'+url, function (status) {
+            // detect and skip multiple callbacks calls
+            if(urls[idx].open) return;
+            
+            // mark page as opened
+            urls[idx].open = true;
+    
+            // Check for page load success
+            if (status !== "success") {
+                urls[idx].open=false;
+                urls[idx].resultText="unable to access page: "+status;
+                urls[idx].status=-1; outcome=1; failed++;
+                logResult(urls[idx], idx);
+                page.close();
+                runTest(++idx,cb);
+            } else {
+                waitFor(function() {
+                    // Check in the page if a specific element is now visible
+                    return urls[idx].open && page.evaluate(function() {
+                        var statusText = $("span.status").text();
+                        return statusText.indexOf("Running – Completed") == -1 && statusText.indexOf("Running...") == -1;
                     });
-                    urls[idx].resultText=resultText;
-                    if(resultText.indexOf("failed")!=-1) {
-                      urls[idx].status=1; outcome=1; failed++;
-                    } else if(resultText.indexOf("error")!=-1) {
-                      urls[idx].status=2; outcome=1; failed++;
-                    } else {
-                      urls[idx].status=0;
+                }, function() {
+                    // sometimes the callback could be called more than once,
+                    // in that case check that we have not run through the test already
+                    if(urls[idx].open) {
+                        // close the test
+                        urls[idx].open=false;
+                        
+                        // checking outcome
+                        var resultText = page.evaluate(function() {
+                            return $("span.status").text();
+                        });
+                        urls[idx].resultText=resultText;
+                        if(resultText.indexOf("failed")!=-1) {
+                          urls[idx].status=1; outcome=1; failed++;
+                        } else if(resultText.indexOf("error")!=-1) {
+                          urls[idx].status=2; outcome=1; failed++;
+                        } else {
+                          urls[idx].status=0;
+                        }
+                        logResult(urls[idx], idx);
+                        page.close();
+                        runTest(++idx,cb);
                     }
-                    logResult(urls[idx], idx);
-                    page.close();
-                    runTest(++idx,cb);
-                }
-            });        
-        }
-    });
+                });        
+            }
+        });
+    } else {
+        // skip this test and try the next
+        urls[idx].status=-2;
+        runTest(++idx,cb);
+    }
 }
 
 runTest(0, function() {
     console.log("\n"+urls.length + " tests run, " + failed + " failures:\n");
     for(var i=0,l=urls.length;i<l;i++) {
-        if(urls[i].status!==0) {
+        if( urls[i].status!==-2 && urls[i].status!==0 ) {
             logResult(urls[i], i);
         }
     }
