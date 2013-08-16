@@ -535,8 +535,8 @@ SC.CoreView.reopen(
 
       return true;
     case SC.CoreView.ATTACHED_HIDDEN_BY_PARENT: // FAST PATH!
-      // Queue the visibility update for the next time we display.
-      this._visibleStyleNeedsUpdate = true;
+      // Note that visibility update is NOT conditional for this view.
+      this._doUpdateVisibleStyle();
 
       this._gotoAttachedHiddenState();
 
@@ -561,7 +561,7 @@ SC.CoreView.reopen(
       // Route.
       this._gotoAttachedHidingState();
     } else {
-    // Clear out any child views that are still transitioning before we hide.
+      // Clear out any child views that are still transitioning before we hide.
       this._callOnChildViews('_parentWillHideInDocument');
 
       // Note that visibility update is NOT conditional for this view.
