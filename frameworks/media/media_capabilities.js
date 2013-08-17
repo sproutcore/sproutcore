@@ -41,9 +41,9 @@ SC.mediaCapabilities = SC.Object.create({});
     }
     
     var doc = document.createElement('audio');
-    isAudioSupported = !!doc.canPlayType;
+    var isAudioSupported = !!doc.canPlayType;
     delete doc;
-    SC.mediaCapabilities.isHTML5AudioSupported = YES;
+    SC.mediaCapabilities.isHTML5AudioSupported = isAudioSupported;
     
   } catch(e) {
   }
@@ -62,9 +62,9 @@ SC.mediaCapabilities = SC.Object.create({});
     }
     
     var doc = document.createElement('video');
-    isVideoSupported = !!doc.canPlayType;
+    var isVideoSupported = !!doc.canPlayType;
     delete doc;
-    SC.mediaCapabilities.isHTML5VideoSupported = YES;
+    SC.mediaCapabilities.isHTML5VideoSupported = isVideoSupported;
   } catch(e) {
   }
   
