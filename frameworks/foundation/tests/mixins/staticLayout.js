@@ -136,14 +136,12 @@ test("Test SC.StaticLayout frame support", function() {
   
   equals(child.get('frame'), null, "View's frame property will be null when useStaticLayout is YES and layer is not attached to DOM.");
   
-  parent.createLayer();
-  var layer = parent.get('layer');
-  document.body.appendChild(layer);
-  
   SC.RunLoop.begin();
-  parent.appendChild(child);
+  child._doRender();
+  child._doAttach(document.body);
   SC.RunLoop.end();
   
+  ok(child.get('layout') === SC.View.prototype.layout, "Hit fast path when useStaticLayout && no layout specified");
   ok(SC.typeOf(child.get('frame')) === SC.T_HASH, "View's frame property will be an object when useStaticLayout is YES and layer is attached to DOM.");
 });
 
