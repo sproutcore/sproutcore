@@ -374,7 +374,7 @@ SC.ContainerContentStatechart = SC.Object.extend({
       options = container.get('transitionSwapOptions') || {},
       transitionSwap = container.get('transitionSwap');
 
-    if (transitionSwap && transitionClippingFrame) {
+    if (transitionSwap && transitionSwap.transitionClippingFrame) {
       return transitionSwap.transitionClippingFrame(container, clippingFrame, options);
     } else {
       return clippingFrame;
