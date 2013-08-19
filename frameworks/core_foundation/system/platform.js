@@ -4,6 +4,7 @@
 //            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
+/*global jQuery*/
 
 /**
   A constant indicating an unsupported method, property or other.
@@ -77,7 +78,7 @@ SC.platform = SC.Object.create({
 
     @type Boolean
   */
-  touch: ( !SC.none(window.ontouchstart) || SC.browser.name === SC.BROWSER.android || 'ontouchstart' in document.documentElement ) && SC.none(window._phantom),
+  touch: (!SC.none(window.ontouchstart) || SC.browser.name === SC.BROWSER.android || 'ontouchstart' in document.documentElement) && SC.none(window._phantom),
 
   /**
     YES if the current browser supports bounce on scroll.
@@ -500,7 +501,7 @@ SC.platform = SC.Object.create({
   // Set up and execute the transition event test.
   if (SC.platform.supportsCSSTransitions) {
     var transitionEl = document.createElement('div'),
-      transitionStyleName = SC.browser.experimentalStyleNameFor('transition');
+      transitionStyleName = SC.browser.experimentalStyleNameFor('transition', 'all 1ms linear');
 
     transitionEl.style[transitionStyleName] = 'all 1ms linear';
 
@@ -527,15 +528,19 @@ SC.platform = SC.Object.create({
   // Set up and execute the animation event test.
   if (SC.platform.supportsCSSAnimations) {
     var animationEl = document.createElement('div'),
-      animationStyleName = SC.browser.experimentalStyleNameFor('animation'),
-      keyframeprefix = animationStyleName === 'animation' ? '' : SC.browser.cssPrefix,
-      keyframes = '@' + keyframeprefix + 'keyframes _sc_animation_test { from { opacity: 1; } to { opacity: 0; } }';
+      keyframes,
+      prefixedKeyframes;
 
-    // Add a test animation style.
-    animationEl.innerHTML = '<style>' + keyframes + '</style>';
+    // Generate both the regular and prefixed version of the style.
+    keyframes = '@keyframes _sc_animation_test { from { opacity: 1; } to { opacity: 0; } }';
+    prefixedKeyframes = '@' + SC.browser.cssPrefix + 'keyframes _sc_prefixed_animation_test { from { opacity: 1; } to { opacity: 0; } }';
+
+    // Add test animation styles.
+    animationEl.innerHTML = '<style>' + keyframes + '\n' + prefixedKeyframes + '</style>';
 
     // Set up and execute the animation event test.
-    animationEl.style[animationStyleName] = '_sc_animation_test 1ms linear';
+    animationEl.style.animation = '_sc_animation_test 1ms linear';
+    animationEl.style[SC.browser.domPrefix + 'Animation'] = '_sc_prefixed_animation_test 5ms linear';
 
     // NOTE: We could test start, but it's extra work and easier just to test the end
     // and infer the start event name from it.  Keeping this code for example.
