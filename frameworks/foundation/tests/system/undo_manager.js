@@ -172,5 +172,51 @@ test("set action name", function () {
   equals(undoManager.get('undoActionName'), 'group1', "The name of the undo stack should be 'group1'");
 });
 
+test("restrict number of groups", function () {
+  var undoManager = SC.UndoManager.create({
+      levelsOfUndo: 2
+    }),
+    obj = SC.Object.create({
+      undoManager: undoManager,
+      value: 0,
+      valDidChange: function() {
+        var that = this,
+          value = this.get('value')-1;
+        undoManager.registerUndo(function () { that.set('value', value); });
+      }.observes('value')
+    }),
+    computeStackLength = function(stack) {
+      var length = 1;
+      while(stack = stack.prev) {
+        length++;
+      }
+      return length;
+    },
+    length;
+
+  obj.incrementProperty('value');
+  obj.incrementProperty('value');
+  obj.incrementProperty('value');
+  obj.incrementProperty('value');
+  obj.incrementProperty('value');
+
+  equals(obj.get('value'), 5, "value should be 5");
+
+  length = computeStackLength(undoManager.undoStack);
+  equals(length, 3, "The undo stack length should be 3");
+
+  undoManager.endUndoGroup();
+
+  length = computeStackLength(undoManager.undoStack);
+  equals(length, 2, "The undo stack length should be 2");
+
+  undoManager.undo();
+  undoManager.undo();
+
+  ok(!undoManager.get('canUndo'), "We shouldn't be able to undo");
+
+  length = computeStackLength(undoManager.redoStack);
+  equals(length, 2, "The redo stack length should be 2");
+});
 
 

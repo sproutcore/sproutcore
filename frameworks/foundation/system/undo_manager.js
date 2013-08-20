@@ -105,6 +105,15 @@ SC.UndoManager = SC.Object.extend(
     this.set('undoStack', null);
     this.set('redoStack', null);
   },
+
+  /**
+    The maximum number of undo groups the receiver holds.
+    The undo stack is unlimited by default.
+
+    @type Number
+    @default 0
+  */
+  levelsOfUndo: 0,
   
   /**
     @type Boolean
@@ -196,6 +205,9 @@ SC.UndoManager = SC.Object.extend(
     @see beginUndoGroup()
   */
   endUndoGroup: function (name) {
+    var levelsOfUndo = this.get('levelsOfUndo'),
+      stackName = this.isUndoing ? 'redoStack' : 'undoStack';
+
     if (!this._activeGroup) {
       //@if(debug)
       SC.warn("endUndoGroup() called outside group.");
@@ -203,7 +215,18 @@ SC.UndoManager = SC.Object.extend(
     }
 
     this._activeGroup = null;
-    this.propertyDidChange(this.isUndoing ? 'redoStack' : 'undoStack');
+    this.propertyDidChange(stackName);
+
+    if (levelsOfUndo > 0) {
+      var stack = this[stackName],
+        i = 1;
+      while(stack = stack.prev) {
+        i++;
+        if (i >= levelsOfUndo) {
+          stack.prev = null;
+        }
+      }
+    }
   },
 
   /**
