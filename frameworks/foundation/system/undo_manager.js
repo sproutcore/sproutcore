@@ -131,10 +131,13 @@ SC.UndoManager = SC.Object.extend(
       groups, this is not necessary.
   */
   registerUndo: function (func, name) {
-    if (this._activeGroup) {
-      this.endUndoGroup();
+    if (!this.isUndoing && !this.isRedoing) {
+      if (this._activeGroup) {
+        this.endUndoGroup();
+      }
+      this.beginUndoGroup(name);
     }
-    this.beginUndoGroup(name);
+    
     this.registerGroupedUndo(func);
   },
 
@@ -153,6 +156,10 @@ SC.UndoManager = SC.Object.extend(
     else {
       this._activeGroup.actions.push(func);
       this._activeGroup.timeStamp = Date.now();
+    }
+
+    if (!this.isUndoing && !this.isRedoing) {
+      this.set('redoStack', null);
     }
   },
 
@@ -242,10 +249,11 @@ SC.UndoManager = SC.Object.extend(
     if (group) {
       this.set(stack, group.prev);
 
+      this.beginUndoGroup(group.name);
       while(action = group.actions.pop()) { 
         action();
-        this.registerGroupedUndo(action, group.name);
       }
+      this.endUndoGroup();
     }
     this.set(state, false);
   }
