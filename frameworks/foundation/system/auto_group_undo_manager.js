@@ -35,14 +35,14 @@ SC.AutoGroupUndoManager = SC.UndoManager.extend({
       groups, this is not necessary.
     @see SC.AutoGroupUndoManager.registerUndo
   */
-  registerUndo: function(original, func, name) {
+  registerUndo: function(func, name) {
     if (this.shouldUseCurrentGroup()) {
       this.registerGroupedUndo(func);
     }
     else {
-      original(func, name);
+      sc_super();
     }
-  }.enhance(),
+  },
 
   /**
     Return true if the current group should be used.

@@ -9,37 +9,42 @@ test("group by time", function() {
   var undoManager = SC.AutoGroupUndoManager.create({
         groupLapse: 50
       }),
-      count = 0,
-      undoFunc = function() {
-        count++;
-      };
+    obj = SC.Object.create({
+      undoManager: undoManager,
+      value: null,
+      valDidChange: function() {
+        var that = this,
+          value = this._value;
+        undoManager.registerUndo(function () { that.set('value', value); });
+        this._value = this.get('value');
+      }.observes('value')
+    });
 
-  undoManager.registerUndo(undoFunc);
-  undoManager.registerUndo(undoFunc);
+  obj.set('value', 'a');
+  obj.set('value', 'ab');
 
   undoManager.undo();
-  equals(count, 2, "every registered actions should have been undo");
+  equals(obj.get('value'), null, "every registered actions should have been undo");
 
-  count = 0;
   undoManager.redo();
-  equals(count, 2, "every registered actions should have been redo");
+  equals(obj.get('value'), 'ab', "every registered actions should have been redo");
 
 
 
+  obj.set('value', null);
   undoManager.reset();
-  count = 0;
 
-  undoManager.registerUndo(undoFunc);
+  obj.set('value', 'a');
 
   setTimeout(function() {
-    undoManager.registerUndo(undoFunc);console.log('1');  
+    obj.set('value', 'ab');
+    obj.set('value', 'abc');
 
     undoManager.undo();
-    equals(count, 2, "2 action should have been undo");
+    equals(obj.get('value'), null, "every registered actions should have been undo");
 
-    count = 0;
     undoManager.redo();
-    equals(count, 2, "2 action should have been redo");
+    equals(obj.get('value'), 'abc', "every registered actions should have been redo");
     
     start();
   }, 10);
@@ -50,24 +55,29 @@ test("group by time", function() {
 
 test("should not group by time", function() {
   var undoManager = SC.AutoGroupUndoManager.create({
-        groupLapse: 50
-      }),
-      count = 0,
-      undoFunc = function() {
-        count++;
-      };
+      groupLapse: 50
+    }),
+    obj = SC.Object.create({
+      undoManager: undoManager,
+      value: null,
+      valDidChange: function() {
+        var that = this,
+          value = this._value;
+        undoManager.registerUndo(function () { that.set('value', value); });
+        this._value = this.get('value');
+      }.observes('value')
+    });
 
-  undoManager.registerUndo(undoFunc);
+  obj.set('value', 'a');
 
   setTimeout(function() {
-    undoManager.registerUndo(undoFunc);
+    obj.set('value', 'ab');
 
     undoManager.undo();
-    equals(count, 1, "1 action should have been undo");
+    equals(obj.get('value'), 'a', "1 action should have been undo");
 
-    count = 0;
     undoManager.redo();
-    equals(count, 1, "1 action should have been redo");
+    equals(obj.get('value'), 'ab', "1 action should have been redo");
     
     start();
   }, 100);
