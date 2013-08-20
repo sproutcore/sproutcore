@@ -5,82 +5,158 @@
 
 module("SC.UndoManager");
 
-test("register undo", function () {
+test("simple undo case", function () {
   var undoManager = SC.UndoManager.create(),
-    count = 0,
-    undoFunc = function () {
-      count++;
-    };
+    obj = SC.Object.create({
+      undoManager: undoManager,
 
-  undoManager.registerUndo(undoFunc, 'group1');
+      value: null,
 
+      actionName: 0,
+
+      valDidChange: function() {
+        var that = this,
+          value = this._value;
+
+        undoManager.registerUndo(function () { that.set('value', value); }, this.actionName);
+
+        this._value = this.get('value');
+      }.observes('value')
+    });
+
+  obj.actionName = 'group1';
+  obj.set('value', 'a');
+  ok(undoManager.get('canUndo'), "We should be able to undo");
   equals(undoManager.get('undoActionName'), 'group1', "The name of the undo stack should be 'group1'");
 
-  undoManager.undo();
-  equals(count, 1, "the action should have been undo");
+  obj.actionName = 'group2';
+  obj.set('value', 'ab');
 
-  ok(undoManager.get('canRedo'), "We should be able to redo");
-  ok(!undoManager.get('canUndo'), "We shouldn't be able to undo");
-  equals(undoManager.get('redoActionName'), 'group1', "The name of the undo stack should be 'group1'");
-
-  count = 0;
-  undoManager.redo();
-  equals(count, 1, "the action should have been redo");
-
-  ok(undoManager.get('canUndo'), "We should be able to undo");
-  ok(!undoManager.get('canRedo'), "We shouldn't be able to redo");
-
-  count = 0;
-  undoManager.registerUndo(undoFunc, 'group2');
-  undoManager.registerUndo(undoFunc, 'group3');
-
+  obj.actionName = 'group3';
+  obj.set('value', 'abc');
   equals(undoManager.get('undoActionName'), 'group3', "The name of the undo stack should be 'group3'");
 
   undoManager.undo();
-
-  equals(undoManager.get('redoActionName'), 'group3', "The name of the redo stack should be 'group3'");
+  equals(obj.get('value'), 'ab', "val should be 'ab'");
+  ok(undoManager.get('canRedo'), "We should be able to redo");
   equals(undoManager.get('undoActionName'), 'group2', "The name of the undo stack should be 'group2'");
+  equals(undoManager.get('redoActionName'), 'group3', "The name of the redo stack should be 'group3'");
 
   undoManager.undo();
-
-  equals(undoManager.get('redoActionName'), 'group2', "The name of the redo stack should be 'group2'");
+  equals(obj.get('value'), 'a', "val should be 'a'");
   equals(undoManager.get('undoActionName'), 'group1', "The name of the undo stack should be 'group1'");
+  equals(undoManager.get('redoActionName'), 'group2', "The name of the redo stack should be 'group2'");
+
+  undoManager.redo();
+  equals(obj.get('value'), 'ab', "val should be 'ab'");
+  equals(undoManager.get('undoActionName'), 'group2', "The name of the undo stack should be 'group2'");
+  equals(undoManager.get('redoActionName'), 'group3', "The name of the redo stack should be 'group3'");
 
   undoManager.undo();
-  undoManager.undo();
+  equals(obj.get('value'), 'a', "val should be 'a'");
 
-  equals(count, 3, "3 actions should have been undo");
+  undoManager.undo();
+  equals(obj.get('value'), null, "val should be 'null'");
   ok(!undoManager.get('canUndo'), "We shouldn't be able to undo");
+  equals(undoManager.get('undoActionName'), null, "The name of the undo stack should be 'null'");
 
-  count = 0;
   undoManager.redo();
-  undoManager.redo();
-  undoManager.redo();
+  equals(obj.get('value'), 'a', "val should be 'a'");
 
-  equals(count, 3, "3 actions should have been redo");
+  undoManager.redo();
+  equals(obj.get('value'), 'ab', "val should be 'ab'");
+
+  undoManager.redo();
+  equals(obj.get('value'), 'abc', "val should be 'abc'");
+  ok(!undoManager.get('canRedo'), "We shouldn't be able to redo");
+
+  undoManager.undo();
+  undoManager.undo();
+  equals(obj.get('value'), 'a', "val should be 'a'");
+
+  obj.set('value', 'ad');
+  ok(!undoManager.get('canRedo'), "We shouldn't be able to redo");
+
+  undoManager.undo();
+  ok(undoManager.get('canUndo'), "We should be able to undo");
+  ok(undoManager.get('canRedo'), "We should be able to redo");
+
+  undoManager.reset();
+
+  ok(!undoManager.get('canUndo'), "We shouldn't be able to undo");
   ok(!undoManager.get('canRedo'), "We shouldn't be able to redo");
 });
 
-test("register grouped undo", function () {
+
+test("grouped undo case", function () {
   var undoManager = SC.UndoManager.create(),
-    count = 0,
-    undoFunc = function () {
-      count++;
-    };
+    obj = SC.Object.create({
+      undoManager: undoManager,
 
-  undoManager.registerUndo(undoFunc, 'group1');
-  undoManager.registerGroupedUndo(undoFunc);
+      value: null,
 
+      actionName: 0,
+
+      valDidChange: function() {
+        var that = this,
+          value = this._value,
+          actionName = this.actionName;
+
+        if (actionName === this._actionName) {
+          undoManager.registerGroupedUndo(function () { that.set('value', value); });
+        }
+        else {
+          undoManager.registerUndo(function () { that.set('value', value); }, actionName);
+        }
+
+        this._value = this.get('value');
+        this._actionName = actionName;
+      }.observes('value')
+    });
+
+  obj.actionName = 'group1';
+  obj.set('value', 'a');
+  ok(undoManager.get('canUndo'), "We should be able to undo");
   equals(undoManager.get('undoActionName'), 'group1', "The name of the undo stack should be 'group1'");
 
+  obj.actionName = 'group2';
+  obj.set('value', 'ab');
+  obj.set('value', 'abc');
+  equals(undoManager.get('undoActionName'), 'group2', "The name of the undo stack should be 'group2'");
+
+  obj.actionName = 'group3';
+  obj.set('value', 'abcd');
+
   undoManager.undo();
-  equals(count, 2, "2 actions should have been undo");
+  equals(obj.get('value'), 'abc', "val should be 'abc'");
+  ok(undoManager.get('canRedo'), "We should be able to redo");
+  equals(undoManager.get('undoActionName'), 'group2', "The name of the undo stack should be 'group2'");
+  equals(undoManager.get('redoActionName'), 'group3', "The name of the redo stack should be 'group3'");
 
-  equals(undoManager.get('redoActionName'), 'group1', "The name of the redo stack should be 'group1'");
+  undoManager.undo();
+  equals(obj.get('value'), 'a', "val should be 'a'");
 
-  count = 0;
   undoManager.redo();
-  equals(count, 2, "2 actions should have been redo");
+  equals(obj.get('value'), 'abc', "val should be 'abc'");
+
+  undoManager.undo();
+  equals(obj.get('value'), 'a', "val should be 'a'");
+
+  undoManager.undo();
+  equals(obj.get('value'), null, "val should be 'null'");
+  ok(!undoManager.get('canUndo'), "We shouldn't be able to undo");
+
+  undoManager.redo();
+  equals(obj.get('value'), 'a', "val should be 'a'");
+
+  undoManager.redo();
+  equals(obj.get('value'), 'abc', "val should be 'abc'");
+
+  undoManager.redo();
+  equals(obj.get('value'), 'abcd', "val should be 'abcd'");
+  ok(!undoManager.get('canRedo'), "We shouldn't be able to redo");
+
+  undoManager.redo();
 });
 
 test("set action name", function () {
@@ -96,18 +172,5 @@ test("set action name", function () {
   equals(undoManager.get('undoActionName'), 'group1', "The name of the undo stack should be 'group1'");
 });
 
-test("reset", function () {
-  var undoManager = SC.UndoManager.create();
 
-  undoManager.registerUndo(function () {});
-  undoManager.registerUndo(function () {});
-  undoManager.undo();
 
-  ok(undoManager.get('canUndo'), "We should be able to undo");
-  ok(undoManager.get('canRedo'), "We should be able to redo");
-
-  undoManager.reset();
-
-  ok(!undoManager.get('canUndo'), "We shouldn't be able to undo");
-  ok(!undoManager.get('canRedo'), "We shouldn't be able to redo");
-});
