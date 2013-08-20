@@ -6,8 +6,8 @@
 // ==========================================================================
 
 // standard browser cursor definitions
-SC.SYSTEM_CURSOR = 'default' ;
-SC.AUTO_CURSOR = SC.DEFAULT_CURSOR = 'auto' ;
+SC.DEFAULT_CURSOR = 'default' ;
+SC.AUTO_CURSOR = 'auto' ;
 SC.CROSSHAIR_CURSOR = 'crosshair' ;
 SC.HAND_CURSOR = SC.POINTER_CURSOR = 'pointer' ;
 SC.MOVE_CURSOR = 'move' ;
