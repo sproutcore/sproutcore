@@ -305,6 +305,25 @@ test("Binding with transforms, function to check the type of value", function ()
   equals(jon.get("value1"), bon2.get("val1"));
 });
 
+test("Adding transform does not affect parent binding", function () {
+  var A,
+      a,
+      b;
+
+  A = SC.Object.extend({
+    isEnabledBindingDefault: SC.Binding.oneWay().bool()
+  });
+
+  b = SC.Object.create({
+    isEnabled: YES
+  });
+
+  a = A.create();
+  a.bind('isEnabled', b, 'isEnabled').not();
+
+  ok(A.prototype.isEnabledBindingDefault._transforms !== a.bindings[0]._transforms, "transforms array not shared with parent binding");
+});
+
 test("two bindings to the same value should sync in the order they are initialized", function () {
 
   SC.LOG_BINDINGS = YES;
