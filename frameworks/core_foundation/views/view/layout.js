@@ -67,8 +67,6 @@ SC.View.reopen(
   init: function (original) {
     original();
 
-    this._previousLayout = this.get('layout');
-
     // Apply the automatic child view layout if it is defined.
     var childViewLayout = this.childViewLayout;
     if (childViewLayout) {
@@ -92,7 +90,7 @@ SC.View.reopen(
   /** @private */
   destroy: function (original) {
     // Clean up.
-    this._previousLayout = null;
+    this._previousFrame = null;
 
     return original();
   }.enhance(),
@@ -450,6 +448,19 @@ SC.View.reopen(
   },
 
   /**
+    Frame describes the current bounding rect for your view.  This is always
+    measured from the top-left corner of the parent view.
+
+    @type Rect
+    @test in layoutStyle
+    @see SC.CoreView.frame
+  */
+  frame: function () {
+    // If the frame has already been computed during the runloop, we use it
+    return this._currentFrame ? this._currentFrame : sc_super();
+  }.property('useStaticLayout').cacheable(),
+
+  /**
     Computes what the frame of this view would be if the parent were resized
     to the passed dimensions.  You can use this method to project the size of
     a frame based on the resize behavior of the parent.
@@ -705,10 +716,10 @@ SC.View.reopen(
 
     if (sizeMayHaveChanged) {
       // If our size isn't fixed, our frame may have changed and it will effect our child views.
-      this.viewDidResize();
+      this._checkForResize();
     } else if (positionMayHaveChanged) {
       // If our size is fixed but our position isn't, our frame may have changed, but it won't effect our child views.
-      this._viewFrameDidChange();
+      this._checkForFrameChange();
     }
   },
 
@@ -866,39 +877,70 @@ SC.View.reopen(
   _checkForResize: function () {
     // Did our layout change in a way that could cause us to be resized?  If
     // not, then there's no need to invalidate the frames of our child views.
-    var previousLayout = this._previousLayout,
-        currentLayout  = this.get('layout'),
-        didResize = true;
+    // We cache the current frame to avoid having to recompute during the same runloop
+    var frame = this._currentFrame = this.computeFrameWithParentFrame();
 
-    // We test the new layout to see if we believe it will affect the view's frame.
     // Since all the child view frames may depend on the parent's frame, it's
     // best only to notify a frame change when it actually happens.
-    if (previousLayout && !SC.none(previousLayout.width) && !SC.none(previousLayout.height) && previousLayout !== currentLayout) {
-      var currentTest,
-        previousTest;
+    if (this._didFrameResize(frame)) {
+      this.viewDidResize();
+    } 
+    // Even if we didn't resize, our frame may have changed
+    else if (this._didFrameChanges(frame)) {
+      this._viewFrameDidChange();
+    }
 
-      // This code already exists in _adjustForBorder, so we use it to test the effective width/height.
-      // TODO: consider checking min/max sizes
-      previousTest = this._adjustForBorder({ x: 0, y: 0, width: previousLayout.width, height: previousLayout.height },
-        previousLayout);
-      currentTest = this._adjustForBorder({ x: 0, y: 0, width: currentLayout.width || 0, height: currentLayout.height || 0 },
-        currentLayout);
+    // Delete the cached frame
+    this._currentFrame = null;
+  },
 
-      if (previousTest.width === currentTest.width && previousTest.height === currentTest.height) {
+  /** @private */
+  _checkForFrameChange: function() {
+    // We cache the current frame to avoid having to recompute during the same runloop
+    var frame = this._currentFrame = this.computeFrameWithParentFrame();
+
+    if (this._didFrameChanges(frame)) {
+      this._viewFrameDidChange();
+    }
+
+    // Delete the cached frame
+    this._currentFrame = null;
+  },
+
+  /** @private */
+  _didFrameChanges: function (_frame) {
+    var pf = this._previousFrame,
+      f = _frame ? _frame : this.computeFrameWithParentFrame(),
+      didResize = true;
+
+    if (pf) {
+      if (pf.x === f.x && pf.y === f.y && pf.width === f.width && pf.height === f.height) {
         didResize = false;
       }
     }
 
-    if (didResize) {
-      this.viewDidResize();
-    } else {
-      // Even if we didn't resize, our frame may have changed
-      // TODO: consider checking for position changes by testing the resulting frame against the cached frame.  This is difficult to do.
-      this._viewFrameDidChange();
+    // Cache the last layout to fine-tune notifications when the frames changes.
+    this._previousFrame = f;
+
+    return didResize;
+  },
+
+  /** @private */
+  _didFrameResize: function (_frame) {
+    var pf = this._previousFrame,
+      f = _frame ? _frame : this.computeFrameWithParentFrame(),
+      didResize = true;
+
+    if (pf) {
+      if (pf.width === f.width && pf.height === f.height) {
+        didResize = false;
+      }
     }
 
-    // Cache the last layout to fine-tune notifications when the layout changes.
-    this._previousLayout = currentLayout;
+    // Cache the last frame to fine-tune notifications when the frames changes.
+    this._previousFrame = f;
+
+    return didResize;
   },
 
   /**

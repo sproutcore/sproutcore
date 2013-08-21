@@ -66,11 +66,11 @@ test("removing a view from a visible pane should make it invisible again", funct
 // .......................................................
 // integration with updateLayer and layoutChildViews
 //
-test("_executeDoRender should not be invoked even if layer becomes dirty until isVisibleInWindow changes, then it should invoke", function() {
+test("_doRender should not be invoked even if layer becomes dirty until isVisibleInWindow changes, then it should invoke", function() {
 
 	var callCount = 0;
-	view._executeDoRender = function() {
-	  SC.View.prototype._executeDoRender.apply(this, arguments);
+	view._doRender = function() {
+	  SC.View.prototype._doRender.apply(this, arguments);
 	  callCount++;
 	};
 	ok(!view.get('isVisibleInWindow'), 'precond - view should not be visible to start');
@@ -78,34 +78,36 @@ test("_executeDoRender should not be invoked even if layer becomes dirty until i
 	SC.RunLoop.begin();
 	view.displayDidChange();
 	SC.RunLoop.end();
-	equals(callCount, 0, '_executeDoRender should not run b/c its not visible');
+	equals(callCount, 0, '_doRender should not run b/c its not visible');
 
 	SC.RunLoop.begin();
 	pane.appendChild(view); // make visible in window...
 	ok(view.get('isVisibleInWindow'), 'view should now be visible in window');
 	SC.RunLoop.end();
-	equals(callCount, 1, '_executeDoRender should exec now b/c the child was appended to a shown parent');
+	equals(callCount, 1, '_doRender should exec now b/c the child was appended to a shown parent');
 });
 
-test("_executeDoUpdateLayout should not be invoked even if layer needs layout until isVisibleInWindow changes, then it should invoke", function() {
+test("_doUpdateLayout should not be invoked even if layer needs layout until isVisibleInWindow changes, then it should invoke", function() {
 
 	var child = SC.View.create();
 	view.appendChild(child);
 
 	var callCount = 0;
-	view._executeDoUpdateLayout = function() { callCount++; };
+	child._updatedLayout = function() { callCount++; };
 	ok(!view.get('isVisibleInWindow'), 'precond - view should not be visible to start');
 
 	SC.RunLoop.begin();
+  child.updateLayout(); 
 	view.layoutDidChangeFor(child);
 	SC.RunLoop.end();
-	equals(callCount, 0, '_executeDoUpdateLayout should not run b/c its not shown');
+	equals(callCount, 0, '_doUpdateLayout should not run b/c its not shown');
 
 	SC.RunLoop.begin();
 	pane.appendChild(view); // make visible in window...
 	ok(view.get('isVisibleInWindow'), 'view should now be visible in window');
+  child.updateLayout();
 	SC.RunLoop.end();
-	equals(callCount, 1, '_executeDoUpdateLayout should exec now b/c the child was appended to a shown parent');
+	equals(callCount, 1, '_doUpdateLayout should exec now b/c the child was appended to a shown parent');
 });
 
 test("setting isVisible to NO should trigger a layer update to hide the view", function() {

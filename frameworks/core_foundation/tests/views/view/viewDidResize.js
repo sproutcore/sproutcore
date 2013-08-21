@@ -66,21 +66,21 @@ test("The view's frame should only notify changes when its layout changes if the
   equals(view2.get('frameCallCount'), 1, 'frame should have notified changing once.');
 
   SC.run(function () { view2.adjust('top', 0); });
-  equals(view2.get('frameCallCount'), 2, 'frame should have notified changing once.');
+  equals(view2.get('frameCallCount'), 1, 'frame should have notified changing once.');
 
   SC.run(function () { view2.adjust('height', 100); });
-  equals(view2.get('frameCallCount'), 3, 'frame should have notified changing twice.');
+  equals(view2.get('frameCallCount'), 2, 'frame should have notified changing twice.');
 
   // Tricky.
   SC.run(function () { view2.adjust({ 'height': 110, 'borderTop': 10, 'top': -10 }); });
-  equals(view2.get('frameCallCount'), 4, 'frame should have notified changing twice.');
+  equals(view2.get('frameCallCount'), 2, 'frame should have notified changing twice.');
 
   SC.run(function () { view2.adjust('width', null); });
-  equals(view2.get('frameCallCount'), 5, 'frame should have notified changing thrice.');
+  equals(view2.get('frameCallCount'), 3, 'frame should have notified changing thrice.');
 
   // Tricky.
   SC.run(function () { view2.adjust('width', 200); });
-  equals(view2.get('frameCallCount'), 6, 'frame should have notified changing thrice.');
+  equals(view2.get('frameCallCount'), 3, 'frame should have notified changing thrice.');
 });
 
 test("making sure that the frame value is correct inside viewDidResize()", function() {
@@ -169,7 +169,7 @@ test("When parentViewDidResize is called on a view, it should only notify on fra
   equals(view.frameCallCount, 1, 'should notify frame changed when isFixedPosition: %@ and isFixedSize: %@'.fmt(view.get('isFixedPosition'), view.get('isFixedSize')));
 
   // try with bottom align
-  view.set('layout', { top: 10, bottom: 10, height: 10, width: 10 });
+  view.set('layout', { left: 10, bottom: 10, height: 10, width: 10 });
   view.viewDidResize.reset(); view.frameCallCount = 0;
   parentView.adjust({ width: 50, height: 50 });
   view.viewDidResize.expect(0);

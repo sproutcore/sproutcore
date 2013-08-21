@@ -148,9 +148,10 @@ test("should not move layer immediately", function() {
   ok(parent.get('layer'), 'precond - parent has layer');
   ok(child.get('layer'), 'precond - child has layer');
 
-  parent.insertBefore(child, null);
   ok(child.get('layer').parentNode !== parent.get('layer'), 'did not move layer');
 
+  parent.insertBefore(child, null);
+  ok(child.get('layer').parentNode === parent.get('layer'), 'did move layer');
 });
 
 // .......................................................
