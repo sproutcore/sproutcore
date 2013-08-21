@@ -821,7 +821,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     var t = binding._transforms;
 
     // clone the transform array if this comes from the parent
-    if (t && (t === binding.parentBinding._transform)) {
+    if (t && (t === binding.parentBinding._transforms)) {
       t = binding._transforms = t.slice();
     }
 
