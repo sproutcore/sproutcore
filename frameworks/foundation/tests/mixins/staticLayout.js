@@ -44,7 +44,9 @@ function performLayoutTest(layout, no_f, no_s, with_f, with_s) {
   });
   
   // set layout
+  SC.RunLoop.begin();
   child.set('layout', layout) ;
+  SC.RunLoop.end();
 
   // test
   keys.forEach(function(key) {
@@ -117,13 +119,12 @@ test("Test that an exception is thrown when calling adjust and setting to auto",
   function(){
   var error=null;
   console.log('NOTE: The following error concerning width:auto is expected.');
-  parent.adjust('width', 'auto').adjust('height', 'auto');
   try{
-    parent.get('layoutStyle');
+    parent.adjust('width', 'auto').adjust('height', 'auto');
   }catch(e){
     error=e;
   }
-  equals(SC.T_ERROR,SC.typeOf(error),'Layout style functions should throw an '+
+  equals(SC.T_ERROR, SC.typeOf(error),'Layout style functions should throw an '+
   'error if width/height are set to auto but staticLayout is not enabled' + error );
       
    
@@ -135,12 +136,13 @@ test("Test SC.StaticLayout frame support", function() {
   });
   
   equals(child.get('frame'), null, "View's frame property will be null when useStaticLayout is YES and layer is not attached to DOM.");
-  
+
   parent.createLayer();
   var layer = parent.get('layer');
   document.body.appendChild(layer);
   
   SC.RunLoop.begin();
+  child.set('layout', { top: 0, left: 0, width: 'auto', height: 'auto' });
   parent.appendChild(child);
   SC.RunLoop.end();
   
