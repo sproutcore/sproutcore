@@ -366,7 +366,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     //@if(debug)
     var bench = SC.BENCHMARK_BINDING_SETUP;
     if (bench) SC.Benchmark.start("SC.Binding.connect()");
-    //endif
+    //@endif
 
     // try to connect the from side.
     // as a special behavior, if the from property path begins with either a
