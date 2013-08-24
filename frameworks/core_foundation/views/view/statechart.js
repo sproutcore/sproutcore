@@ -1320,16 +1320,30 @@ SC.CoreView.reopen(
 
   /** @private Routes according to parent did show. */
   _parentDidShowInDocument: function () {
+
+    return this._doShow();
+
     var state = this.get('viewState');
 
+    // If the view is hidden by parent, it should now be shown.
     if (state === SC.CoreView.ATTACHED_HIDDEN_BY_PARENT) {
       // Route.
       this._gotoAttachedShownState();
 
       // Notify.
       if (this.didShowInDocument) { this.didShowInDocument(); }
-    } else {
-      // There's no need to continue to further child views.
+    }
+    // If the view was hidden while we were away, we need to take action.
+    else if (state === SC.CoreView.ATTACHED_HIDDEN && this._visibleStyleNeedsUpdate) {
+      // Notify.
+      if (this.didHideInDocument) { this.didHideInDocument(); }
+
+      // Route.
+      this._gotoAttachedHidden();
+    }
+    // Otherwise there's no need to continue to further child views.
+    else {
+      
       return false;
     }
   },
@@ -1338,12 +1352,22 @@ SC.CoreView.reopen(
   _parentWillShowInDocument: function () {
     var state = this.get('viewState');
 
+    // If the view is hidden by parent, it will now be shown.
     if (state === SC.CoreView.ATTACHED_HIDDEN_BY_PARENT) {
       this._executeQueuedUpdates();
 
       // Notify.
       if (this.willShowInDocument) { this.willShowInDocument(); }
-    } else {
+    }
+    // If the view was hidden while we were away, we need to take action.
+    else if (state === SC.CoreView.ATTACHED_HIDDEN && this._visibleStyleNeedsUpdate) {
+      this._executeQueuedUpdates();
+
+      // Notify.
+      if (this.willHideInDocument) { this.willHideInDocument(); }
+    }
+    // Otherwise there's no need to continue to further child views.
+    else {
       // There's no need to continue to further child views.
       return false;
     }
