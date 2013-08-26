@@ -174,7 +174,7 @@ test("Replaces all children.  UNATTACHED parent view.", function () {
 
   equals(childViews.get('length'), 3, "There are this many child views originally");
 
-  jq = parentView.$();
+  jq = parentView.$('._wrapper');
   for (var i = 0, len = childViews.get('length'); i < len; i++) {
     childView = childViews.objectAt(i);
 
@@ -187,7 +187,7 @@ test("Replaces all children.  UNATTACHED parent view.", function () {
   childViews = parentView.get('childViews');
   equals(childViews.get('length'), 2, "There are this many child views after replaceAllChildren");
 
-  jq = parentView.$();
+  jq = parentView.$('._wrapper');
   for (i = 0, len = childViews.get('length'); i < len; i++) {
     childView = childViews.objectAt(i);
 
@@ -207,7 +207,7 @@ test("Replaces all children using containerLayer.  ATTACHED_SHOWN parent view.",
 
   equals(childViews.get('length'), 3, "There are this many child views originally");
 
-  jq = parentView.$();
+  jq = parentView.$('._wrapper');
   for (var i = 0, len = childViews.get('length'); i < len; i++) {
     childView = childViews.objectAt(i);
 
@@ -220,7 +220,7 @@ test("Replaces all children using containerLayer.  ATTACHED_SHOWN parent view.",
   childViews = parentView.get('childViews');
   equals(childViews.get('length'), 2, "There are this many child views after replaceAllChildren");
 
-  jq = parentView.$();
+  jq = parentView.$('._wrapper');
   for (i = 0, len = childViews.get('length'); i < len; i++) {
     childView = childViews.objectAt(i);
 
