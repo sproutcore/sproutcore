@@ -100,6 +100,8 @@ SC._PropertyChain = SC.Object.extend(
     // property so just skip registering it
     if (newObject && property!=='@each') {
       newObject.registerDependentKeyWithChain(property, this);
+    } else if (newObject) {
+      newObject.registerDependentKeyWithChain(this.next.get('property'), this.next);
     }
 
     // now - lookup the object for the next one...

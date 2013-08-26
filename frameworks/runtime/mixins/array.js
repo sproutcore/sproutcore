@@ -539,6 +539,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
 
   arrayContentWillChange: function (start, removedCount, addedCount) {
     this._teardownContentObservers(start, removedCount);
+    this.teardownEnumerablePropertyChains(this.slice(start, start + removedCount));
 
     var member, members, membersLen, idx;
     var target, action;
@@ -580,6 +581,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     }
 
     this._setupContentObservers(start, addedCount);
+    this.setupEnumerablePropertyChains(this.slice(start, start + addedCount));
 
     var member, members, membersLen, idx;
     var target, action;
