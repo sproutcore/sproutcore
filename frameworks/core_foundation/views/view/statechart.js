@@ -1035,14 +1035,6 @@ SC.CoreView.reopen(
     // If there is no update method, fallback to calling render with extra
     // firstTime argument set to false.
     if (!this.update) {
-      // TODO: deprecate this fully at some point (but run benchmarks first)
-      context.resetClasses();
-      context.resetStyles();
-
-      context.addClass(this.get('classNames'));
-
-      if (this.get('isTextSelectable')) { context.addClass('allow-select'); }
-
       this.render(context, false);
     } else {
       this.update(context.$());
