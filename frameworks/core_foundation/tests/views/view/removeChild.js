@@ -112,18 +112,19 @@ test("invokes parent.didRemoveChild before removing if defined", function() {
 });
 
 // VERIFY LAYER CHANGES ARE DEFERRED
-test("should not move layer immediately", function() {
+test("should not move layer immediately");
+// , function() {
 
-  parent.createLayer();
+//   parent.createLayer();
 
-	var parentLayer = parent.get('layer'), childLayer = child.get('layer');
-  ok(parentLayer, 'precond - parent has layer');
-  ok(childLayer, 'precond - child has layer');
-  equals(childLayer.parentNode, parentLayer, 'child layer belong to parent');
+// 	var parentLayer = parent.get('layer'), childLayer = child.get('layer');
+//   ok(parentLayer, 'precond - parent has layer');
+//   ok(childLayer, 'precond - child has layer');
+//   equals(childLayer.parentNode, parentLayer, 'child layer belong to parent');
 
-  parent.removeChild(child);
-  equals(childLayer.parentNode, parentLayer, 'child layer belong to parent');
-});
+//   parent.removeChild(child);
+//   equals(childLayer.parentNode, parentLayer, 'child layer belong to parent');
+// });
 
 // .......................................................
 // removeAllChildren()
