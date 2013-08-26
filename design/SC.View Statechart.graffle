@@ -26,7 +26,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2013-08-03 03:15:46 +0000</string>
+	<string>2013-08-26 17:29:33 +0000</string>
 	<key>Modifier</key>
 	<string>Tyler Keating</string>
 	<key>NotesVisible</key>
@@ -184,8 +184,9 @@ Child\
 \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 \cf0 \kerning1\expnd0\expndtw0 actions:\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\b0 - \cf2 doOrphan}</string>
+\b0 \cf0 - \cf2 doOrphan}</string>
 						<key>VerticalPad</key>
 						<integer>14</integer>
 					</dict>
@@ -259,8 +260,9 @@ Orphan\
 \cf0 \kerning1\expnd0\expndtw0 \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 \cf0 actions:\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\b0 - \cf2 doAdopt}</string>
+\b0 \cf0 - \cf2 doAdopt}</string>
 						<key>VerticalPad</key>
 						<integer>14</integer>
 					</dict>
@@ -329,8 +331,7 @@ ancestorDidDestroyLayer\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
 \fs24 \cf0 ancestorDidAttach\
-\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
-\cf0 ancestorWillDetach
+ancestorWillDetach
 \fs28 \
 
 \fs24 ancestorDidDetach
@@ -346,9 +347,8 @@ ancestorWillBuildIn\
 
 \fs24 \cf0 ancestorDidShow
 \fs28 \
-\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\fs24 \cf0 ancestorWillHide
+\fs24 ancestorWillHide
 \fs28 \
 
 \fs24 ancestorDidHide}</string>
@@ -433,7 +433,7 @@ doOrphan}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{2824, 1087}, {220, 126}}</string>
+					<string>{{2914, 1080}, {220, 126}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -477,8 +477,7 @@ doOrphan}</string>
 						<key>Text</key>
 						<string>{\rtf1\ansi\ansicpg1252\cocoartf1187\cocoasubrtf390
 \cocoascreenfonts1{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;\red127\green127\blue127;\red170\green0\blue225;\red0\green0\blue0;
-\red127\green127\blue127;}
+{\colortbl;\red255\green255\blue255;\red127\green127\blue127;\red170\green0\blue225;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\b\fs24 \cf0 Child
@@ -496,17 +495,17 @@ doOrphan}</string>
 \i0\b \cf0 \
 
 \i\b0 - 
-\i0 \cf3 doShow\cf4  (check parent state)
-\b \cf0 \
+\i0 \cf3 doShow\cf0  (check parent state)
+\b \
 
-\i\b0 - \cf5 doOrphan}</string>
+\i\b0 - \cf2 doOrphan}</string>
 						<key>VerticalPad</key>
 						<integer>14</integer>
 					</dict>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{749.72625732421875, 1376}, {296.5474853515625, 224}}</string>
+					<string>{{807.72625732421875, 1362}, {296.5474853515625, 224}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -550,8 +549,8 @@ doOrphan}</string>
 						<key>Text</key>
 						<string>{\rtf1\ansi\ansicpg1252\cocoartf1187\cocoasubrtf390
 \cocoascreenfonts1{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;\red127\green127\blue127;\red127\green127\blue127;\red170\green0\blue225;
-\red225\green29\blue0;\red225\green29\blue0;}
+{\colortbl;\red255\green255\blue255;\red127\green127\blue127;\red170\green0\blue225;\red225\green29\blue0;
+}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\b\fs24 \cf0 \expnd0\expndtw0\kerning0
@@ -567,38 +566,39 @@ actions:\
 \i\b0 - \cf2 doDestroyLayer
 \i0\b \cf0 \
 
-\i\b0 - \cf3 doDetach
+\i\b0 - \cf2 doDetach
 \i0\b \cf0 \
 
-\i\b0 - \cf3 doHide
+\i\b0 - \cf2 doHide
 \i0\b \cf0 \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\b0 \cf0 - \cf4 doOrphan\cf0  (cancel transition)\
+\b0 \cf0 - \cf3 doOrphan\cf0  (cancel transition)\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\b \
+\b \cf0 \
 events:
 \i\b0 \
 - 
-\b \cf5 ancestorWillDestroyLayer
+\b \cf4 ancestorWillDestroyLayer
 \b0 \cf0  (cancel transition)\
 - 
-\b \cf5 ancestorWillDetach
+\b \cf4 ancestorWillDetach
 \b0 \cf0  (cancel transition)\
 - 
-\b \cf6 ancestorWillHide
+\b \cf4 ancestorWillHide
 \i0\b0 \cf0  (cancel transition)
 \b \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\i\b0 \cf0 - \cf3 transitionDidEnd}</string>
+\i\b0 \cf0 - \cf2 transitionDidEnd}</string>
 						<key>VerticalPad</key>
 						<integer>14</integer>
 					</dict>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{512, 1390}, {220, 182}}</string>
+					<string>{{570, 1383}, {220, 182}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -656,8 +656,7 @@ events:
 						<key>Text</key>
 						<string>{\rtf1\ansi\ansicpg1252\cocoartf1187\cocoasubrtf390
 \cocoascreenfonts1{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;\red170\green0\blue225;\red127\green127\blue127;\red127\green127\blue127;
-}
+{\colortbl;\red255\green255\blue255;\red170\green0\blue225;\red127\green127\blue127;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\b\fs24 \cf0 \expnd0\expndtw0\kerning0
@@ -666,8 +665,9 @@ Orphan\
 \cf0 \kerning1\expnd0\expndtw0 \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 \cf0 actions:\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\b0 - \cf2 doAdopt\cf0  (cancel transition)
+\b0 \cf0 - \cf2 doAdopt\cf0  (cancel transition)
 \b \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
@@ -677,24 +677,24 @@ Orphan\
 \i\b0 - \cf3 doDestroyLayer
 \i0\b \cf0 \
 
-\i\b0 - \cf4 doDetach
+\i\b0 - \cf3 doDetach
 \i0\b \cf0 \
 
-\i\b0 - \cf4 doHide\
+\i\b0 - \cf3 doHide\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
 \i0\b \cf0 \
 events:\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\i\b0 \cf0 - \cf4 transitionDidEnd}</string>
+\i\b0 \cf0 - \cf3 transitionDidEnd}</string>
 						<key>VerticalPad</key>
 						<integer>14</integer>
 					</dict>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{2586, 1087}, {220, 126}}</string>
+					<string>{{2676, 1080}, {220, 126}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -745,7 +745,7 @@ events:\
 						<key>Text</key>
 						<string>{\rtf1\ansi\ansicpg1252\cocoartf1187\cocoasubrtf390
 \cocoascreenfonts1{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;\red127\green127\blue127;\red127\green127\blue127;}
+{\colortbl;\red255\green255\blue255;\red127\green127\blue127;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\b\fs24 \cf0 \expnd0\expndtw0\kerning0
@@ -761,20 +761,20 @@ Orphan
 \i\b0 \cf0 - \cf2 doAdopt
 \i0\b \cf0 \
 
-\i\b0 - \cf3 doDestroyLayer
+\i\b0 - \cf2 doDestroyLayer
 \i0\b \cf0 \
 
-\i\b0 - \cf3 doDetach
+\i\b0 - \cf2 doDetach
 \i0\b \cf0 \
 
-\i\b0 - \cf3 doShow}</string>
+\i\b0 - \cf2 doShow}</string>
 						<key>VerticalPad</key>
 						<integer>14</integer>
 					</dict>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{248.35165405273438, 1397}, {277.64834594726562, 224}}</string>
+					<string>{{274.17582702636719, 1362}, {277.64834594726562, 224}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -832,15 +832,16 @@ Orphan
 						<key>Text</key>
 						<string>{\rtf1\ansi\ansicpg1252\cocoartf1187\cocoasubrtf390
 \cocoascreenfonts1{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;\red127\green127\blue127;\red127\green127\blue127;\red170\green0\blue225;
-\red225\green29\blue0;}
+{\colortbl;\red255\green255\blue255;\red127\green127\blue127;\red170\green0\blue225;\red225\green29\blue0;
+}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\b\fs24 \cf0 \expnd0\expndtw0\kerning0
 Child
-\b0 \cf0 \kerning1\expnd0\expndtw0 \
+\b0 \kerning1\expnd0\expndtw0 \
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
-\b \
+\b \cf0 \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 \cf0 actions:\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
@@ -851,15 +852,15 @@ Child
 \i\b0 - \cf2 doDetach
 \i0\b \cf0 \
 
-\i\b0 - \cf3 doHide
+\i\b0 - \cf2 doHide
 \i0\b \cf0 \
 
 \i\b0 - \cf2 doShow
 \i0\b \cf0 \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\b0 \cf0 - \cf4 doOrphan\cf0  (cancel transition)
-\i \cf3 \
+\b0 \cf0 - \cf3 doOrphan\cf0  (cancel transition)
+\i \cf2 \
 
 \i0 \cf0 \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
@@ -867,27 +868,27 @@ Child
 \i\b \cf0 events:
 \b0 \
 - 
-\b \cf5 ancestorWillDestroyLayer
+\b \cf4 ancestorWillDestroyLayer
 \i0\b0 \cf0  (cancel transition)
 \i \
 - 
-\b \cf5 ancestorWillDetach
+\b \cf4 ancestorWillDetach
 \i0\b0 \cf0  (cancel transition)
 \i \
 - 
-\b \cf5 ancestorWillHide
+\b \cf4 ancestorWillHide
 \i0\b0 \cf0  (cancel transition)
 \b \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\i\b0 \cf0 - \cf3 transitionDidEnd}</string>
+\i\b0 \cf0 - \cf2 transitionDidEnd}</string>
 						<key>VerticalPad</key>
 						<integer>14</integer>
 					</dict>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{36, 1397}, {220, 182}}</string>
+					<string>{{36, 1383}, {220, 182}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -945,19 +946,20 @@ Child
 						<key>Text</key>
 						<string>{\rtf1\ansi\ansicpg1252\cocoartf1187\cocoasubrtf390
 \cocoascreenfonts1{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;\red170\green0\blue225;\red127\green127\blue127;\red127\green127\blue127;
-}
+{\colortbl;\red255\green255\blue255;\red170\green0\blue225;\red127\green127\blue127;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\b\fs24 \cf0 \expnd0\expndtw0\kerning0
 Orphan
-\b0 \cf0 \kerning1\expnd0\expndtw0 \
+\b0 \kerning1\expnd0\expndtw0 \
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
-\b \
+\b \cf0 \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 \cf0 actions:\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\b0 - \cf2 doAdopt\cf0  (cancel transition)
+\b0 \cf0 - \cf2 doAdopt\cf0  (cancel transition)
 \b \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
@@ -967,24 +969,24 @@ Orphan
 \i\b0 - \cf3 doDetach
 \i0\b \cf0 \
 
-\i\b0 - \cf4 doHide
+\i\b0 - \cf3 doHide
 \i0\b \cf0 \
 
-\i\b0 - \cf3 doShow\cf4 \
+\i\b0 - \cf3 doShow\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
 \i0\b \cf0 \
 events:\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\i\b0 \cf0 - \cf4 transitionDidEnd}</string>
+\i\b0 \cf0 - \cf3 transitionDidEnd}</string>
 						<key>VerticalPad</key>
 						<integer>14</integer>
 					</dict>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{1810, 1383}, {220, 196}}</string>
+					<string>{{1900, 1376}, {220, 196}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1046,8 +1048,7 @@ events:\
 						<key>Text</key>
 						<string>{\rtf1\ansi\ansicpg1252\cocoartf1187\cocoasubrtf390
 \cocoascreenfonts1{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;\red127\green127\blue127;\red127\green127\blue127;\red225\green29\blue0;
-}
+{\colortbl;\red255\green255\blue255;\red127\green127\blue127;\red225\green29\blue0;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\b\fs24 \cf0 \expnd0\expndtw0\kerning0
@@ -1067,7 +1068,7 @@ Child (Ancestors Visible)\
 \i\b0 - \cf2 doHide
 \i0\b \cf0 \
 
-\i\b0 - \cf3 doOrphan
+\i\b0 - \cf2 doOrphan
 \i0 \cf0 \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
@@ -1076,21 +1077,21 @@ events:\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
 \i\b0 \cf0 - 
-\b \cf4 ancestorDidDetach
+\b \cf3 ancestorDidDetach
 \i0 \cf0 \
 
 \i\b0 - 
-\b \cf4 ancestorDidHide
+\b \cf3 ancestorDidHide
 \b0 \cf0 \
 - 
-\b \cf4 ancestorWillBuildOut}</string>
+\b \cf3 ancestorWillBuildOut}</string>
 						<key>VerticalPad</key>
 						<integer>14</integer>
 					</dict>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{2285.75, 1376}, {290.0740966796875, 224}}</string>
+					<string>{{2375.9629516601562, 1362}, {290.0740966796875, 224}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1161,8 +1162,8 @@ events:\
 						<key>Text</key>
 						<string>{\rtf1\ansi\ansicpg1252\cocoartf1187\cocoasubrtf390
 \cocoascreenfonts1{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;\red127\green127\blue127;\red170\green0\blue225;\red0\green0\blue0;
-\red225\green29\blue0;\red225\green29\blue0;}
+{\colortbl;\red255\green255\blue255;\red127\green127\blue127;\red170\green0\blue225;\red225\green29\blue0;
+}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\b\fs24 \cf0 \expnd0\expndtw0\kerning0
@@ -1183,36 +1184,37 @@ Child (Ancestors Visible)\
 \i0\b \cf0 \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\b0 \cf0 - \cf3 doOrphan\cf0  (\cf4 cancel\cf0  transition)\
+\b0 \cf0 - \cf3 doOrphan\cf0  (cancel transition)\
 \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
 \i\b \cf0 events:
 \b0 \
 - 
-\b \cf5 ancestorWillBuildOut
+\b \cf4 ancestorWillBuildOut
 \i0\b0 \cf0  (swap transition)\
 - 
-\i\b \cf6 ancestorWillDestroyLayer
+\i\b \cf4 ancestorWillDestroyLayer
 \i0\b0 \cf0  (cancel transition)
 \i \
 - 
-\b \cf5 ancestorWillDetach
+\b \cf4 ancestorWillDetach
 \i0\b0 \cf0  (cancel transition)
 \i \
 - 
-\b \cf5 ancestorWillHide
+\b \cf4 ancestorWillHide
 \i0\b0 \cf0  (cancel transition)
 \b \
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\i\b0 - \cf2 transitionDidEnd}</string>
+\i\b0 \cf0 - \cf2 transitionDidEnd}</string>
 						<key>VerticalPad</key>
 						<integer>14</integer>
 					</dict>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{2047.9999999999998, 1397}, {220, 168}}</string>
+					<string>{{2138, 1390}, {220, 168}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1292,8 +1294,9 @@ Orphan\
 \cf0 \kerning1\expnd0\expndtw0 \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 \cf0 actions:\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\b0 - \cf2 doAdopt\cf0  (cancel transition)
+\b0 \cf0 - \cf2 doAdopt\cf0  (cancel transition)
 \b \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
@@ -1317,7 +1320,7 @@ events:\
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{1572, 1418}, {220, 126}}</string>
+					<string>{{1662, 1411}, {220, 126}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1401,9 +1404,8 @@ Orphan
 
 \i\b0 \cf0 - \cf2 doAdopt
 \i0\b \cf0 \
-\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\i\b0 \cf0 - \cf2 doDestroyLayer
+\i\b0 - \cf2 doDestroyLayer
 \i0\b \cf0 \
 
 \i\b0 - \cf2 doDetach
@@ -1416,7 +1418,7 @@ Orphan
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{1270.3296203613281, 1376}, {283.67037963867188, 210}}</string>
+					<string>{{1360.1648101806641, 1369}, {283.67037963867188, 210}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1475,7 +1477,7 @@ Orphan
 						<string>{\rtf1\ansi\ansicpg1252\cocoartf1187\cocoasubrtf390
 \cocoascreenfonts1{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
 {\colortbl;\red255\green255\blue255;\red127\green127\blue127;\red170\green0\blue225;\red225\green29\blue0;
-\red225\green29\blue0;\red127\green127\blue127;}
+}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\b\fs24 \cf0 \expnd0\expndtw0\kerning0
@@ -1506,23 +1508,23 @@ actions:\
 \i0\b0 \cf0  (cancel transition)
 \i \
 - 
-\b \cf5 ancestorWillDetach
+\b \cf4 ancestorWillDetach
 \i0\b0 \cf0  (cancel transition)
 \i \
 - 
-\b \cf5 ancestorWillHide
+\b \cf4 ancestorWillHide
 \i0\b0 \cf0  (cancel transition)
 \b \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\i\b0 \cf0 - \cf6 transitionDidEnd}</string>
+\i\b0 \cf0 - \cf2 transitionDidEnd}</string>
 						<key>VerticalPad</key>
 						<integer>14</integer>
 					</dict>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{1064, 1397}, {220, 168}}</string>
+					<string>{{1122, 1390}, {220, 168}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1580,8 +1582,7 @@ actions:\
 						<key>Text</key>
 						<string>{\rtf1\ansi\ansicpg1252\cocoartf1187\cocoasubrtf390
 \cocoascreenfonts1{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;\red170\green0\blue225;\red127\green127\blue127;\red127\green127\blue127;
-}
+{\colortbl;\red255\green255\blue255;\red170\green0\blue225;\red127\green127\blue127;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\b\fs24 \cf0 \expnd0\expndtw0\kerning0
@@ -1590,8 +1591,9 @@ Orphan\
 \cf0 \kerning1\expnd0\expndtw0 \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 \cf0 actions:\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\b0 - \cf2 doAdopt\cf0  (cancel transition)
+\b0 \cf0 - \cf2 doAdopt\cf0  (cancel transition)
 \b \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
@@ -1601,21 +1603,21 @@ Orphan\
 \i - \cf3 doDetach
 \i0\b \cf0 \
 
-\i\b0 - \cf3 doHide\cf4 \
+\i\b0 - \cf3 doHide\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
 \i0\b \cf0 \
 events:\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\i\b0 \cf0 - \cf4 transitionDidEnd}</string>
+\i\b0 \cf0 - \cf3 transitionDidEnd}</string>
 						<key>VerticalPad</key>
 						<integer>14</integer>
 					</dict>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{1453, 812}, {220, 112}}</string>
+					<string>{{1543, 812}, {220, 112}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1666,8 +1668,7 @@ events:\
 						<key>Text</key>
 						<string>{\rtf1\ansi\ansicpg1252\cocoartf1187\cocoasubrtf390
 \cocoascreenfonts1{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;\red170\green0\blue225;\red127\green127\blue127;\red127\green127\blue127;
-}
+{\colortbl;\red255\green255\blue255;\red170\green0\blue225;\red127\green127\blue127;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\b\fs24 \cf0 \expnd0\expndtw0\kerning0
@@ -1687,14 +1688,14 @@ Child
 \i\b0 - \cf3 doDestroyLayer
 \i0\b \cf0 \
 
-\i\b0 - \cf4 doOrphan}</string>
+\i\b0 - \cf3 doOrphan}</string>
 						<key>VerticalPad</key>
 						<integer>14</integer>
 					</dict>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{1215, 812}, {220, 112}}</string>
+					<string>{{1305, 812}, {220, 112}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1745,7 +1746,7 @@ Child
 						<key>Text</key>
 						<string>{\rtf1\ansi\ansicpg1252\cocoartf1187\cocoasubrtf390
 \cocoascreenfonts1{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;\red127\green127\blue127;\red127\green127\blue127;}
+{\colortbl;\red255\green255\blue255;\red127\green127\blue127;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\b\fs24 \cf0 \expnd0\expndtw0\kerning0
@@ -1761,15 +1762,15 @@ Orphan
 \i\b0 \cf0 - \cf2 doAdopt
 \i0\b \cf0 \
 
-\i\b0 - \cf3 doAttach\cf0 \
-- \cf3 doDestroyLayer}</string>
+\i\b0 - \cf2 doAttach\cf0 \
+- \cf2 doDestroyLayer}</string>
 						<key>VerticalPad</key>
 						<integer>14</integer>
 					</dict>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{2167, 544}, {220, 98}}</string>
+					<string>{{2257, 544}, {220, 98}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1820,7 +1821,7 @@ Orphan
 						<key>Text</key>
 						<string>{\rtf1\ansi\ansicpg1252\cocoartf1187\cocoasubrtf390
 \cocoascreenfonts1{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;\red127\green127\blue127;\red127\green127\blue127;}
+{\colortbl;\red255\green255\blue255;\red127\green127\blue127;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\b\fs24 \cf0 \expnd0\expndtw0\kerning0
@@ -1836,14 +1837,14 @@ Child
 \i\b0 \cf0 - \cf2 doRender
 \i0\b \cf0 \
 
-\i\b0 - \cf3 doOrphan}</string>
+\i\b0 - \cf2 doOrphan}</string>
 						<key>VerticalPad</key>
 						<integer>14</integer>
 					</dict>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{1929, 544}, {220, 98}}</string>
+					<string>{{2018.9999999999998, 544}, {220, 98}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1894,7 +1895,7 @@ Child
 						<key>Text</key>
 						<string>{\rtf1\ansi\ansicpg1252\cocoartf1187\cocoasubrtf390
 \cocoascreenfonts1{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;\red127\green127\blue127;\red127\green127\blue127;}
+{\colortbl;\red255\green255\blue255;\red127\green127\blue127;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\b\fs24 \cf0 \expnd0\expndtw0\kerning0
@@ -1910,14 +1911,14 @@ Orphan
 \i\b0 \cf0 - \cf2 doAdopt
 \i0\b \cf0 \
 
-\i\b0 - \cf3 doRender}</string>
+\i\b0 - \cf2 doRender}</string>
 						<key>VerticalPad</key>
 						<integer>14</integer>
 					</dict>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{2348, 1045}, {220, 196}}</string>
+					<string>{{2438, 1045}, {220, 196}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1971,16 +1972,17 @@ Orphan
 						<key>Text</key>
 						<string>{\rtf1\ansi\ansicpg1252\cocoartf1187\cocoasubrtf390
 \cocoascreenfonts1{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;\red127\green127\blue127;\red127\green127\blue127;\red170\green0\blue225;
-\red225\green29\blue0;}
+{\colortbl;\red255\green255\blue255;\red127\green127\blue127;\red170\green0\blue225;\red225\green29\blue0;
+}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\b\fs24 \cf0 Child (Ancestor Hidden or Unattached)\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
 \b0 \cf0 \
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\b actions:\
+\b \cf0 actions:\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
 \i\b0 \cf0 - \cf2 doDestroyLayer
@@ -1988,7 +1990,7 @@ Orphan
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
 \b0 \cf0 - 
-\i \cf3 doDetach\
+\i \cf2 doDetach\
 
 \i0 \cf0 - 
 \i \cf2 doHide
@@ -1996,7 +1998,7 @@ Orphan
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
 \i\b0 \cf0 - 
-\i0 \cf4 doOrphan\cf0  (go to shown)\
+\i0 \cf3 doOrphan\cf0  (go to shown)\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
 \b \cf0 \
@@ -2004,18 +2006,18 @@ events:\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
 \i\b0 \cf0 - 
-\b \cf5 ancestorDidAttach
+\b \cf4 ancestorDidAttach
 \i0 \cf0 \
 
 \i\b0 - 
-\b \cf5 ancestorDidShow}</string>
+\b \cf4 ancestorDidShow}</string>
 						<key>VerticalPad</key>
 						<integer>14</integer>
 					</dict>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{2047.9680328369141, 1045}, {282.06393432617188, 210}}</string>
+					<string>{{2137.9680328369141, 1038}, {282.06393432617188, 210}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2085,45 +2087,43 @@ events:\
 						<key>Text</key>
 						<string>{\rtf1\ansi\ansicpg1252\cocoartf1187\cocoasubrtf390
 \cocoascreenfonts1{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;\red170\green0\blue225;\red170\green0\blue225;\red225\green29\blue0;
-}
+{\colortbl;\red255\green255\blue255;\red170\green0\blue225;\red225\green29\blue0;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\b\fs24 \cf0 Child (Building Out with Ancestor)\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
-\
+\cf0 \
 actions:
-\i\b0 \cf0 \
+\i\b0 \
 - 
 \i0 \cf2 doDestroyLayer\cf0  (cancel transition)
 \i \
 - 
 \i0 \cf2 doDetach\cf0  (update transition)
-\i \cf0 \
-\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
-\cf0 - 
-\i0 \cf3 doHide\cf0  (cancel transition)
+\i \
+- 
+\i0 \cf2 doHide\cf0  (cancel transition)
 \b \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\b0 \cf0 - \cf3 doOrphan\cf0  (cancel transition)\
+\b0 \cf0 - \cf2 doOrphan\cf0  (cancel transition)\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\b \
+\b \cf0 \
 events:\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\i\b0 - 
-\b \cf4 ancestorWillBuildIn
+\i\b0 \cf0 - 
+\b \cf3 ancestorWillBuildIn
 \b0 \cf0  (swap transition)\
 - 
-\b \cf4 ancestorWillDestroyLayer
+\b \cf3 ancestorWillDestroyLayer
 \b0 \cf0  (cancel transition)\
 - 
-\b \cf4 ancestorWillDetach
-\b0 \cf0  (cancel transition)\cf0 \
+\b \cf3 ancestorWillDetach
+\b0 \cf0  (cancel transition)\
 - 
-\b \cf4 ancestorWillHide
+\b \cf3 ancestorWillHide
 \b0 \cf0  (cancel transition)}</string>
 						<key>VerticalPad</key>
 						<integer>14</integer>
@@ -2131,7 +2131,7 @@ events:\
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{1810, 1024}, {220, 238}}</string>
+					<string>{{1900, 1024}, {220, 238}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2197,12 +2197,12 @@ actions:\
 
 \b0 \cf0 - \cf2 doDestroyLayer\cf0  (cancel transition)
 \b \
+
+\b0 - \cf2 doDetach\cf0  (swap transition)\
+- \cf2 doHide\cf0  (cancel transition)\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\b0 \cf0 - \cf2 doDetach\cf0  (swap transition)\
-- \cf2 doHide\cf0  (cancel transition)\
-
-\b \
+\b \cf0 \
 events:\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
@@ -2214,7 +2214,7 @@ events:\
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{1572, 1087}, {220, 126}}</string>
+					<string>{{1662, 1080}, {220, 126}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2298,7 +2298,7 @@ actions:\
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{1318, 1073}, {220, 154}}</string>
+					<string>{{1392, 1066}, {220, 154}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2351,8 +2351,9 @@ actions:\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 \cf0 \
 actions:\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\b0 - \cf2 doDestroyLayer\cf0  (cancel transition)
+\b0 \cf0 - \cf2 doDestroyLayer\cf0  (cancel transition)
 \b \
 
 \b0 - \cf2 doDetach\cf0  (cancel transition)
@@ -2360,8 +2361,9 @@ actions:\
 
 \b0 - \cf2 doHide\cf0  (swap transition)\
 \
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\b events:\
+\b \cf0 events:\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
 \i\b0 \cf0 - 
@@ -2372,7 +2374,7 @@ actions:\
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{788, 1066}, {220, 168}}</string>
+					<string>{{846, 1059}, {220, 168}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2418,16 +2420,16 @@ actions:\
 						<key>Text</key>
 						<string>{\rtf1\ansi\ansicpg1252\cocoartf1187\cocoasubrtf390
 \cocoascreenfonts1{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;\red225\green29\blue0;\red170\green0\blue225;\red170\green0\blue225;
-}
+{\colortbl;\red255\green255\blue255;\red225\green29\blue0;\red170\green0\blue225;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\b\fs24 \cf0 Building Out\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 \cf0 \
 actions:\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\b0 - 
+\b0 \cf0 - 
 \b \cf2 doAttach
 \b0 \cf0  (swap transition)
 \b \
@@ -2435,12 +2437,13 @@ actions:\
 \b0 - \cf3 doDestroyLayer\cf0  (cancel transition)
 \b \
 
-\b0 - \cf4 doDetach\cf0  (no-op)
+\b0 - \cf3 doDetach\cf0  (no-op)
 \b \
 
-\b0 - \cf4 doHide\cf0  (cancel transition)\
+\b0 - \cf3 doHide\cf0  (cancel transition)\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\b \
+\b \cf0 \
 events:\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
@@ -2452,7 +2455,7 @@ events:\
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{2586, 812}, {220, 112}}</string>
+					<string>{{2676, 812}, {220, 112}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2515,7 +2518,7 @@ events:\
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{274, 1066}, {220, 168}}</string>
+					<string>{{303, 1059}, {220, 168}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2568,16 +2571,16 @@ events:\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 \cf0 \
 actions:\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\b0 - \cf2 doDestroyLayer\cf0  (cancel transition)\
+\b0 \cf0 - \cf2 doDestroyLayer\cf0  (cancel transition)\
 - \cf2 doDetach\cf0  (cancel transition)
 \b \
 
 \b0 - \cf2 doHide\cf0  (no-op)
 \b \
-\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\b0 \cf0 - 
+\b0 - 
 \b \cf3 doShow
 \b0 \cf0  (swap transition)\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
@@ -2594,7 +2597,7 @@ events:\
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{1691, 812}, {220, 112}}</string>
+					<string>{{1781, 812}, {220, 112}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2633,8 +2636,7 @@ events:\
 						<key>Text</key>
 						<string>{\rtf1\ansi\ansicpg1252\cocoartf1187\cocoasubrtf390
 \cocoascreenfonts1{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;\red127\green127\blue127;\red127\green127\blue127;\red225\green29\blue0;
-}
+{\colortbl;\red255\green255\blue255;\red127\green127\blue127;\red225\green29\blue0;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\b\fs24 \cf0 Visible\
@@ -2648,17 +2650,17 @@ actions:\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
 \b0 \cf0 - 
-\i \cf3 doDetach\
+\i \cf2 doDetach\
 
 \i0 \cf0 - 
-\b \cf4 doHide}</string>
+\b \cf3 doHide}</string>
 						<key>VerticalPad</key>
 						<integer>14</integer>
 					</dict>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{1691, 473.99999999999994}, {220, 238}}</string>
+					<string>{{1781, 473.99999999999994}, {220, 238}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2710,8 +2712,10 @@ enter:\
 \b0 \expnd0\expndtw0\kerning0
 - call `didAppendToDocument`\
 - send `
-\i ancestorDidAttach
-\i0 `\
+\i \expnd0\expndtw0\kerning0
+ancestorDidAttach
+\i0 \expnd0\expndtw0\kerning0
+`\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \b \cf0 \kerning1\expnd0\expndtw0 \
@@ -2743,7 +2747,7 @@ actions:\
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{1453, 544}, {220, 98}}</string>
+					<string>{{1543, 544}, {220, 98}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2805,8 +2809,9 @@ Unattached\
 \cf0 \kerning1\expnd0\expndtw0 \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 \cf0 actions:\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\b0 - 
+\b0 \cf0 - 
 \b \cf2 doAttach
 \b0 \cf0  (check transitionIn)
 \b \
@@ -2819,7 +2824,7 @@ Unattached\
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{1929, 233.99999999999997}, {220, 84}}</string>
+					<string>{{2018.9999999999998, 233.99999999999997}, {220, 84}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2876,12 +2881,13 @@ Unattached\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
 
 \f0\b\fs24 \cf0 \expnd0\expndtw0\kerning0
-Unrendered\cf0 \kerning1\expnd0\expndtw0 \
+Unrendered\kerning1\expnd0\expndtw0 \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 \cf0 \
 actions:\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\b0 - 
+\b0 \cf0 - 
 \b \cf2 doRender}</string>
 						<key>VerticalPad</key>
 						<integer>14</integer>
@@ -2889,7 +2895,7 @@ actions:\
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{1691, 178}, {220, 196}}</string>
+					<string>{{1781, 178}, {220, 196}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2942,18 +2948,23 @@ enter:\
 - start observing displayProperties\
 \
 
-\b exit:
-\b0 \
+\b \expnd0\expndtw0\kerning0
+exit:
+\b0 \expnd0\expndtw0\kerning0
+\
 - stop observing displayProperties\
 - 
-\i \ul perform destroy layer
-\i0 \ulnone \
+\i \expnd0\expndtw0\kerning0
+\ul perform destroy layer
+\i0 \expnd0\expndtw0\kerning0
+\ulnone \
 \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
 \b \cf0 \kerning1\expnd0\expndtw0 actions:\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 
-\b0 - 
+\b0 \cf0 - 
 \b \cf2 doDestroyLayer}</string>
 						<key>VerticalPad</key>
 						<integer>14</integer>
@@ -2961,7 +2972,7 @@ enter:\
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{1810, 36}, {220, 42}}</string>
+					<string>{{1900, 36}, {220, 42}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -3038,8 +3049,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 					<integer>203</integer>
 					<key>Points</key>
 					<array>
-						<string>{2744.8748713664504, 925.91051935901692}</string>
-						<string>{2879.8624664112235, 1085.8536868296012}</string>
+						<string>{2835.9928147786313, 925.89213736641921}</string>
+						<string>{2968.0963969591089, 1078.86929538508}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -3062,6 +3073,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 							<true/>
 							<key>TailArrow</key>
 							<string>0</string>
+							<key>Width</key>
+							<real>3</real>
 						</dict>
 					</dict>
 					<key>Tail</key>
@@ -3089,8 +3102,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 					<integer>200</integer>
 					<key>Points</key>
 					<array>
-						<string>{897.99999111570685, 1236.5}</string>
-						<string>{897.99999111570685, 1374.5}</string>
+						<string>{955.67510280700458, 1229.4999824406073}</string>
+						<string>{955.18306165948229, 1360.5000388840672}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -3113,6 +3126,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 							<true/>
 							<key>TailArrow</key>
 							<string>0</string>
+							<key>Width</key>
+							<real>3</real>
 						</dict>
 					</dict>
 					<key>Tail</key>
@@ -3140,8 +3155,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 					<integer>193</integer>
 					<key>Points</key>
 					<array>
-						<string>{826.28868853702204, 1235.9193235413757}</string>
-						<string>{698.65001507477461, 1388.8467802823736}</string>
+						<string>{884.19469301894117, 1228.918281171726}</string>
+						<string>{756.38765209921314, 1381.8451571805442}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -3193,8 +3208,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 					<integer>189</integer>
 					<key>Points</key>
 					<array>
-						<string>{2695.9998974251284, 926.49999999998545}</string>
-						<string>{2695.9996186318876, 1085.49999999906}</string>
+						<string>{2785.8910769109821, 926.49999575655909}</string>
+						<string>{2785.6080629928974, 1078.5000276718513}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -3246,8 +3261,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 					<integer>186</integer>
 					<key>Points</key>
 					<array>
-						<string>{384.77069852481048, 1236.499900734063}</string>
-						<string>{386.18736125799524, 1395.500056890136}</string>
+						<string>{412.85260123403549, 1229.4999964341694}</string>
+						<string>{412.62937301629478, 1360.5000079486222}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -3270,6 +3285,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 							<true/>
 							<key>TailArrow</key>
 							<string>0</string>
+							<key>Width</key>
+							<real>3</real>
 						</dict>
 					</dict>
 					<key>Tail</key>
@@ -3297,8 +3314,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 					<integer>185</integer>
 					<key>Points</key>
 					<array>
-						<string>{323.24974153941571, 1236.0422569196312}</string>
-						<string>{210.47331244435964, 1395.7706059433835}</string>
+						<string>{343.67714047847835, 1228.9459037091835}</string>
+						<string>{220.36071600744646, 1381.8325794248287}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -3350,8 +3367,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 					<integer>182</integer>
 					<key>Points</key>
 					<array>
-						<string>{1728.7585628534889, 1215.0297659853145}</string>
-						<string>{1848.659061683677, 1381.7821404088113}</string>
+						<string>{1818.5999447875233, 1208.032137782378}</string>
+						<string>{1938.09003214781, 1374.7854646430364}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -3374,6 +3391,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 							<true/>
 							<key>TailArrow</key>
 							<string>0</string>
+							<key>Width</key>
+							<real>3</real>
 						</dict>
 					</dict>
 					<key>Tail</key>
@@ -3401,8 +3420,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 					<integer>175</integer>
 					<key>Points</key>
 					<array>
-						<string>{2032.0711000422223, 1218.7671439424428}</string>
-						<string>{2284.5060617887975, 1389.42912616223}</string>
+						<string>{2122.0970256212759, 1215.7557822168894}</string>
+						<string>{2374.7021413963157, 1379.7073472860047}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -3425,6 +3444,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 							<true/>
 							<key>TailArrow</key>
 							<string>0</string>
+							<key>Width</key>
+							<real>3</real>
 						</dict>
 					</dict>
 					<key>Tail</key>
@@ -3452,8 +3473,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 					<integer>174</integer>
 					<key>Points</key>
 					<array>
-						<string>{2005.118559787694, 1264.0450029799285}</string>
-						<string>{2097.7508950029624, 1395.775160540594}</string>
+						<string>{2096.2825143268324, 1264.0356974062749}</string>
+						<string>{2185.2176164856628, 1388.7924015620888}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -3505,8 +3526,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 					<integer>170</integer>
 					<key>Points</key>
 					<array>
-						<string>{1681.9999938467022, 1215.5}</string>
-						<string>{1681.9999938467022, 1416.5}</string>
+						<string>{1771.9366519517641, 1208.4999988343316}</string>
+						<string>{1771.7422556349495, 1409.5000119260649}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -3558,8 +3579,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 					<integer>167</integer>
 					<key>Points</key>
 					<array>
-						<string>{1424.2071993896775, 1229.4971595938555}</string>
-						<string>{1417.2890473627065, 1374.5017333343933}</string>
+						<string>{1501.6941482957195, 1222.4999814404139}</string>
+						<string>{1501.136305173015, 1367.5000493851037}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -3582,6 +3603,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 							<true/>
 							<key>TailArrow</key>
 							<string>0</string>
+							<key>Width</key>
+							<real>3</real>
 						</dict>
 					</dict>
 					<key>Tail</key>
@@ -3609,8 +3632,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 					<integer>166</integer>
 					<key>Points</key>
 					<array>
-						<string>{1367.38970516566, 1228.9833317609796}</string>
-						<string>{1239.3701328192897, 1395.809980305894}</string>
+						<string>{1437.4967789873579, 1221.935862514536}</string>
+						<string>{1301.1132742795444, 1388.8352732394144}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -3662,8 +3685,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 					<integer>139</integer>
 					<key>Points</key>
 					<array>
-						<string>{1562.99622426621, 644.5000000017875}</string>
-						<string>{1562.984053939811, 810.50000012046746}</string>
+						<string>{1652.9372904707457, 644.49999819820505}</string>
+						<string>{1652.735158755605, 810.50001588801615}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -3686,6 +3709,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 							<true/>
 							<key>TailArrow</key>
 							<string>0</string>
+							<key>Width</key>
+							<real>3</real>
 						</dict>
 					</dict>
 					<key>Tail</key>
@@ -3713,8 +3738,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 					<integer>138</integer>
 					<key>Points</key>
 					<array>
-						<string>{1518.9531407386685, 643.89028957000528}</string>
-						<string>{1374.4316702699946, 810.86563365975837}</string>
+						<string>{1608.8975755316405, 643.88925202054463}</string>
+						<string>{1464.1920007744345, 810.86325744921191}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -3766,8 +3791,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 					<integer>135</integer>
 					<key>Points</key>
 					<array>
-						<string>{2072.0329503239873, 319.99926915596114}</string>
-						<string>{2239.3035295564073, 542.80053774795851}</string>
+						<string>{2162.0153681517104, 319.99965903684409}</string>
+						<string>{2329.1960747632943, 542.80178120755374}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -3790,6 +3815,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 							<true/>
 							<key>TailArrow</key>
 							<string>0</string>
+							<key>Width</key>
+							<real>3</real>
 						</dict>
 					</dict>
 					<key>Tail</key>
@@ -3817,8 +3844,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 					<integer>134</integer>
 					<key>Points</key>
 					<array>
-						<string>{2038.99875670859, 320.49999999992394}</string>
-						<string>{2038.9925542211065, 542.49999999316947}</string>
+						<string>{2128.9802462837047, 320.4999997059374}</string>
+						<string>{2128.8816996514893, 542.50000411075393}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -3870,8 +3897,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 					<integer>121</integer>
 					<key>Points</key>
 					<array>
-						<string>{1913.3057631851186, 915.05809793078254}</string>
-						<string>{2346.615240180693, 1096.6224204062282}</string>
+						<string>{2003.3060238091007, 915.02257292885145}</string>
+						<string>{2436.6160046540435, 1096.4496191727364}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -3921,8 +3948,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 					<integer>120</integer>
 					<key>Points</key>
 					<array>
-						<string>{1880.0729191584032, 925.46979716842361}</string>
-						<string>{2047.2401806265627, 1046.9661161614099}</string>
+						<string>{1971.735389683904, 925.44943955606777}</string>
+						<string>{2136.7414376357829, 1042.8639341824182}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -3972,8 +3999,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 					<integer>112</integer>
 					<key>Points</key>
 					<array>
-						<string>{1826.093408705658, 926.29630110999005}</string>
-						<string>{1867.1630023942973, 1021.7080256876086}</string>
+						<string>{1915.6120691807225, 926.30319239998835}</string>
+						<string>{1955.8899521914466, 1021.7169158620454}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -4023,8 +4050,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 					<integer>111</integer>
 					<key>Points</key>
 					<array>
-						<string>{1776.3968263674813, 926.30331902832177}</string>
-						<string>{1709.5570743417386, 1084.6966809716782}</string>
+						<string>{1865.6673560820091, 926.29284869180799}</string>
+						<string>{1799.8692312384881, 1077.7006586355653}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -4076,8 +4103,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 					<integer>110</integer>
 					<key>Points</key>
 					<array>
-						<string>{1724.9345057420746, 925.50768308679574}</string>
-						<string>{1531.8404447774103, 1071.4923003200079}</string>
+						<string>{1809.6217521905685, 925.44167798341516}</string>
+						<string>{1611.5686937368841, 1065.239477930744}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -4127,8 +4154,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 					<integer>109</integer>
 					<key>Points</key>
 					<array>
-						<string>{1688.6135548388429, 903.08017857986249}</string>
-						<string>{1010.3856069867301, 1114.7814873488039}</string>
+						<string>{1778.6015791373186, 901.05712851508133}</string>
+						<string>{1068.398361663805, 1109.9326523138427}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -4178,8 +4205,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 					<integer>108</integer>
 					<key>Points</key>
 					<array>
-						<string>{1913.3897359595849, 627.53316048284228}</string>
-						<string>{2583.6102640394829, 833.4668505788959}</string>
+						<string>{2003.3897159806565, 627.53649556994048}</string>
+						<string>{2673.6101250221204, 833.49007402482368}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -4229,8 +4256,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 					<integer>107</integer>
 					<key>Points</key>
 					<array>
-						<string>{1800.9488969265794, 714.49999968578959}</string>
-						<string>{1800.9089397894838, 809.50000300457896}</string>
+						<string>{1890.076703021849, 714.49992772304086}</string>
+						<string>{1889.3547750860628, 809.50098815640069}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -4282,8 +4309,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 					<integer>106</integer>
 					<key>Points</key>
 					<array>
-						<string>{1688.5480835300839, 890.37927897490238}</string>
-						<string>{496.45191646839362, 1127.6207020210136}</string>
+						<string>{1778.5421818837642, 888.92415860592018}</string>
+						<string>{525.457818356281, 1122.0758985938605}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -4333,8 +4360,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 					<integer>99</integer>
 					<key>Points</key>
 					<array>
-						<string>{1725.9123517465919, 375.99915246312992}</string>
-						<string>{1601.2649485259865, 542.00028538880804}</string>
+						<string>{1815.7614053395425, 375.99769319666439}</string>
+						<string>{1690.8662357900737, 541.99267094333118}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -4386,8 +4413,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 					<integer>98</integer>
 					<key>Points</key>
 					<array>
-						<string>{1800.9169830853521, 376.49999908029798}</string>
-						<string>{1800.8385093815787, 471.50000227857913}</string>
+						<string>{1889.539648414921, 376.49973604072227}</string>
+						<string>{1888.1591991806433, 471.50068312772817}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -4437,8 +4464,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 					<integer>209</integer>
 					<key>Points</key>
 					<array>
-						<string>{1932.603640574009, 80.19669060821893}</string>
-						<string>{2014.9773606139752, 231.80349713327664}</string>
+						<string>{2022.5897508472681, 80.197254402916485}</string>
+						<string>{2104.8715974265601, 231.80572950278426}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -4490,8 +4517,8 @@ Note: There are 10 determining states, which are states that are leaf nodes with
 					<integer>208</integer>
 					<key>Points</key>
 					<array>
-						<string>{1907.3898227018137, 80.196425189581362}</string>
-						<string>{1855.4155712296249, 175.80307746341757}</string>
+						<string>{1997.2987410907574, 80.192721371780095}</string>
+						<string>{1944.9410959994434, 175.7986989337183}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -14953,8 +14980,8 @@ doDetach}</string>
 					<real>-1</real>
 					<key>Points</key>
 					<array>
-						<string>{1502.1901268544593, 332}</string>
-						<string>{1277.4965261952207, 405.25000000000006}</string>
+						<string>{1502.1901268531374, 332}</string>
+						<string>{1277.4965261858288, 405.25000000000006}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -29444,8 +29471,8 @@ parent will detach (didTransitionIn)}</string>
 					<integer>135</integer>
 					<key>Points</key>
 					<array>
-						<string>{721.46541884318208, 815.42451470643812}</string>
-						<string>{835.544871023518, 840.3537075308883}</string>
+						<string>{721.46548414153187, 815.40455522233174}</string>
+						<string>{835.54799965664154, 840.31003780888375}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -29495,8 +29522,8 @@ parent will detach (didTransitionIn)}</string>
 					<integer>134</integer>
 					<key>Points</key>
 					<array>
-						<string>{721.50000000121975, 795.01222529651602}</string>
-						<string>{835.5000000939234, 795.02713100564904}</string>
+						<string>{721.5, 795.0000724334709}</string>
+						<string>{835.5, 795.00016074807718}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -30904,6 +30931,7 @@ call `didAppendToDocument`}</string>
 \f0\b\fs24 \cf0 \expnd0\expndtw0\kerning0
 Unattached\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
+\cf0 \expnd0\expndtw0\kerning0
 \
 enter:\
 
@@ -30976,8 +31004,6 @@ if parent rendered, attach to parent}</string>
 
 \f0\b\fs24 \cf0 \expnd0\expndtw0\kerning0
 Unrendered\
-\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc
-\cf0 \expnd0\expndtw0\kerning0
 \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 \cf0 \expnd0\expndtw0\kerning0
@@ -31344,8 +31370,8 @@ call `didCreateLayer`}</string>
 					<integer>121</integer>
 					<key>Points</key>
 					<array>
-						<string>{978.28869305910439, 596.64987542144149}</string>
-						<string>{1152.2121337193091, 711.17523664582791}</string>
+						<string>{978.29170715200587, 596.64982160688919}</string>
+						<string>{1152.2231282009504, 711.17508919745887}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -31395,8 +31421,8 @@ call `didCreateLayer`}</string>
 					<integer>120</integer>
 					<key>Points</key>
 					<array>
-						<string>{1006.8593227736046, 583.11982507295011}</string>
-						<string>{1102.5695636422463, 613.50983449283149}</string>
+						<string>{1006.8598258168034, 583.06208610088959}</string>
+						<string>{1102.57007555222, 613.39368057208742}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -31446,8 +31472,8 @@ call `didCreateLayer`}</string>
 					<integer>119</integer>
 					<key>Points</key>
 					<array>
-						<string>{989.87946723185394, 748.76839706486396}</string>
-						<string>{1123.2378836556356, 787.75630344124716}</string>
+						<string>{989.87954525466625, 748.76058859249792}</string>
+						<string>{1123.2750708805097, 787.74593023672048}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -31497,8 +31523,8 @@ call `didCreateLayer`}</string>
 					<integer>118</integer>
 					<key>Points</key>
 					<array>
-						<string>{969.51129706804568, 755.36421135514695}</string>
-						<string>{1153.5246029256004, 849.3180235768981}</string>
+						<string>{969.51327608263136, 755.3641727411964}</string>
+						<string>{1153.5330163703184, 849.31791367979633}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -31548,8 +31574,8 @@ call `didCreateLayer`}</string>
 					<integer>115</integer>
 					<key>Points</key>
 					<array>
-						<string>{1273.7318342145898, 137.04997435018382}</string>
-						<string>{1386.7293950995545, 163.28894190080584}</string>
+						<string>{1273.7318039790382, 137.05008131566422}</string>
+						<string>{1386.7293207234338, 163.2892043167783}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -31600,7 +31626,7 @@ call `didCreateLayer`}</string>
 					<key>Points</key>
 					<array>
 						<string>{1274, 118.99998140099147}</string>
-						<string>{1386.499999999997, 118.99998140099147}</string>
+						<string>{1386.5, 118.99998140099147}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -31652,8 +31678,8 @@ call `didCreateLayer`}</string>
 					<integer>113</integer>
 					<key>Points</key>
 					<array>
-						<string>{1273.7318344217915, 100.95002560170475}</string>
-						<string>{1386.7293948868687, 74.711058148587853}</string>
+						<string>{1273.731804186255, 100.94991863621803}</string>
+						<string>{1386.7293205107562, 74.710795732607565}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -31703,8 +31729,8 @@ call `didCreateLayer`}</string>
 					<integer>112</integer>
 					<key>Points</key>
 					<array>
-						<string>{1273.7285224428986, 385.0616426975522}</string>
-						<string>{1386.721357369448, 411.3175928647006}</string>
+						<string>{1273.7317894598254, 385.05013303919156}</string>
+						<string>{1386.72928473614, 411.28933114599761}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -31754,8 +31780,8 @@ call `didCreateLayer`}</string>
 					<integer>111</integer>
 					<key>Points</key>
 					<array>
-						<string>{1273.9999999998533, 367.0066063550654}</string>
-						<string>{1386.4999999943559, 367.01613475179397}</string>
+						<string>{1274, 367.00003007181715}</string>
+						<string>{1386.5, 367.00007344463046}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -31807,8 +31833,8 @@ call `didCreateLayer`}</string>
 					<integer>110</integer>
 					<key>Points</key>
 					<array>
-						<string>{1273.7319128082622, 348.95030251366569}</string>
-						<string>{1386.7295876742194, 322.7117374982825}</string>
+						<string>{1273.7318045352679, 348.94991986246907}</string>
+						<string>{1386.729321367126, 322.71079874144021}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -31858,8 +31884,8 @@ call `didCreateLayer`}</string>
 					<integer>109</integer>
 					<key>Points</key>
 					<array>
-						<string>{1007.0000000024016, 553.01159374153406}</string>
-						<string>{1119.5000000924611, 553.02532317230873}</string>
+						<string>{1007, 553.00007378006262}</string>
+						<string>{1119.5, 553.00016115118945}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -31909,8 +31935,8 @@ call `didCreateLayer`}</string>
 					<integer>108</integer>
 					<key>Points</key>
 					<array>
-						<string>{1006.9309882656013, 532.2786214892983}</string>
-						<string>{1119.5485116373166, 507.69665545946924}</string>
+						<string>{1006.9309692355996, 532.27565240705894}</string>
+						<string>{1119.5480223009235, 507.69026187105652}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -31960,8 +31986,8 @@ call `didCreateLayer`}</string>
 					<integer>107</integer>
 					<key>Points</key>
 					<array>
-						<string>{978.6378803522739, 509.35633323051434}</string>
-						<string>{1161.4228485985113, 389.6435482133723}</string>
+						<string>{978.63869490320826, 509.35634766218334}</string>
+						<string>{1161.4258209213417, 389.64365233777295}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -32013,8 +32039,8 @@ call `didCreateLayer`}</string>
 					<integer>106</integer>
 					<key>Points</key>
 					<array>
-						<string>{1005.894339111261, 512.0023874812008}</string>
-						<string>{1146.5202063655618, 450.60012542384476}</string>
+						<string>{1005.8951104713269, 512.00354162728866}</string>
+						<string>{1146.5285363369669, 450.60021231257298}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -32064,8 +32090,8 @@ call `didCreateLayer`}</string>
 					<integer>105</integer>
 					<key>Points</key>
 					<array>
-						<string>{1006.9309819702237, 263.72238217855505}</string>
-						<string>{1119.5483454469011, 288.30550559591262}</string>
+						<string>{1006.9309692124652, 263.72435394640968}</string>
+						<string>{1119.5480213888868, 288.30975183149729}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -32115,8 +32141,8 @@ call `didCreateLayer`}</string>
 					<integer>104</integer>
 					<key>Points</key>
 					<array>
-						<string>{1006.9999999999941, 242.99871876362565}</string>
-						<string>{1119.4999999997726, 242.99720151002447}</string>
+						<string>{1007, 242.99998219101531}</string>
+						<string>{1119.5, 242.99998219101531}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -32166,8 +32192,8 @@ call `didCreateLayer`}</string>
 					<integer>103</integer>
 					<key>Points</key>
 					<array>
-						<string>{1006.9309655342436, 222.27507770846259}</string>
-						<string>{1119.5479285586464, 197.68902410356401}</string>
+						<string>{1006.9309691435883, 222.27562997556419}</string>
+						<string>{1119.5480186735417, 197.69021357695146}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -32217,8 +32243,8 @@ call `didCreateLayer`}</string>
 					<integer>102</integer>
 					<key>Points</key>
 					<array>
-						<string>{1005.8951778187413, 202.00364256788356}</string>
-						<string>{1145.1545641699204, 141.20043934427139}</string>
+						<string>{1005.8951113208356, 202.00354310520331}</string>
+						<string>{1145.1538667572775, 141.20042477281936}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -32270,8 +32296,8 @@ call `didCreateLayer`}</string>
 					<integer>100</integer>
 					<key>Points</key>
 					<array>
-						<string>{699.5045632967682, 596.56078902166871}</string>
-						<string>{863.45477242158404, 696.43973576949588}</string>
+						<string>{699.51004799873067, 596.56069939759561}</string>
+						<string>{863.47260331020357, 696.4393008566733}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -32321,8 +32347,8 @@ call `didCreateLayer`}</string>
 					<integer>99</integer>
 					<key>Points</key>
 					<array>
-						<string>{722.79426567547682, 515.96033942280542}</string>
-						<string>{818.603022387485, 478.52427930198894}</string>
+						<string>{722.79416509999703, 515.95031894874637}</string>
+						<string>{818.60291969255752, 478.50409221287407}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -32374,8 +32400,8 @@ call `didCreateLayer`}</string>
 					<integer>98</integer>
 					<key>Points</key>
 					<array>
-						<string>{722.99999957964076, 553.0520498512717}</string>
-						<string>{817.00000166717109, 553.10355181074362}</string>
+						<string>{723, 553.00083944123173}</string>
+						<string>{817.00000000000023, 553.00167004624006}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -32425,8 +32451,8 @@ call `didCreateLayer`}</string>
 					<integer>97</integer>
 					<key>Points</key>
 					<array>
-						<string>{723.0000000064382, 242.98248278204241}</string>
-						<string>{817.00000020816799, 242.96514995581677}</string>
+						<string>{723, 242.99971748862399}</string>
+						<string>{817, 242.99943795105196}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -32476,8 +32502,8 @@ call `didCreateLayer`}</string>
 					<integer>96</integer>
 					<key>Points</key>
 					<array>
-						<string>{722.87951244251519, 215.26711127646624}</string>
-						<string>{839.25942619927162, 181.2497442518827}</string>
+						<string>{722.87954523324072, 215.27109813330122}</string>
+						<string>{839.27507157187415, 181.25407033629224}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -32529,8 +32555,8 @@ call `didCreateLayer`}</string>
 					<integer>95</integer>
 					<key>Points</key>
 					<array>
-						<string>{439.00000000443265, 397.9838842650243}</string>
-						<string>{551.5000001706577, 397.96064041646861}</string>
+						<string>{439, 397.99992664193326}</string>
+						<string>{551.5, 397.99982083702923}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -32582,8 +32608,8 @@ call `didCreateLayer`}</string>
 					<integer>94</integer>
 					<key>Points</key>
 					<array>
-						<string>{399.76749137738909, 375.49379097003987}</string>
-						<string>{553.05098758566703, 286.50607770988552}</string>
+						<string>{399.76869615287063, 375.49382786156463}</string>
+						<string>{553.0571081028894, 286.50617213615891}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -32633,8 +32659,8 @@ call `didCreateLayer`}</string>
 					<integer>93</integer>
 					<key>Points</key>
 					<array>
-						<string>{386.39187189368948, 576.01471854508077}</string>
-						<string>{580.54632533173674, 751.99268971864979}</string>
+						<string>{386.39225292184108, 576.01470115438406}</string>
+						<string>{580.54974126477703, 751.99264942280809}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -32686,8 +32712,8 @@ call `didCreateLayer`}</string>
 					<integer>92</integer>
 					<key>Points</key>
 					<array>
-						<string>{438.99999935960415, 553.05304294211703}</string>
-						<string>{533.00000218204661, 553.1169664901895}</string>
+						<string>{439, 553.00062821958659}</string>
+						<string>{533.00000000000023, 553.00138530472952}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -32737,8 +32763,8 @@ call `didCreateLayer`}</string>
 					<integer>91</integer>
 					<key>Points</key>
 					<array>
-						<string>{182.00850294274281, 497.88353985730106}</string>
-						<string>{289.84932007945156, 531.11813462066334}</string>
+						<string>{182.04874891243878, 497.88306527461441}</string>
+						<string>{289.95069430035096, 531.11694131501542}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -32788,8 +32814,8 @@ call `didCreateLayer`}</string>
 					<integer>90</integer>
 					<key>Points</key>
 					<array>
-						<string>{181.122334366964, 454.10588623865834}</string>
-						<string>{290.70235164463469, 419.89200294589966}</string>
+						<string>{181.17136595168904, 454.10647753038904}</string>
+						<string>{290.82801523667177, 419.89351498501293}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -32854,8 +32880,6 @@ call `didCreateLayer`}</string>
 				<real>18</real>
 				<key>circoSeparation</key>
 				<real>0.0</real>
-				<key>dotNodekSep</key>
-				<real>0.27777779102325439</real>
 				<key>dotRankSep</key>
 				<real>1.3888888359069824</real>
 				<key>layoutEngine</key>
@@ -33060,18 +33084,18 @@ show}</string>
 						dHJpbmcBlIQBKxV2aXNpYmlsaXR5
 						TmVlZHNVcGRhdGWGhAJpSQEVkoSE
 						hAxOU0RpY3Rpb25hcnkAlIQBaQSS
-						hJaWEE5TUGFyYWdyYXBoU3R5bGWG
-						koSEhBBOU1BhcmFncmFwaFN0eWxl
-						AJSEBENDQFMCAISEhAdOU0FycmF5
-						AJSZDJKEhIQJTlNUZXh0VGFiAJSE
-						AkNmAByGkoSfngA4hpKEn54AVIaS
-						hJ+eAHCGkoSfngCBjACGkoSfngCB
-						qACGkoSfngCBxACGkoSfngCB4ACG
-						koSfngCB/ACGkoSfngCBGAGGkoSf
-						ngCBNAGGkoSfngCBUAGGhoEACIQE
-						WzFmXYPNzEw9hpKElpYGTlNLZXJu
-						hpKEhIQITlNOdW1iZXIAhIQHTlNW
-						YWx1ZQCUhAEqhIQBZKMAhpKElpYG
+						hJaWBk5TS2VyboaShISECE5TTnVt
+						YmVyAISEB05TVmFsdWUAlIQBKoSE
+						AWSdAIaShJaWEE5TUGFyYWdyYXBo
+						U3R5bGWGkoSEhBBOU1BhcmFncmFw
+						aFN0eWxlAJSEBENDQFMCAISEhAdO
+						U0FycmF5AJSZDJKEhIQJTlNUZXh0
+						VGFiAJSEAkNmAByGkoSkogA4hpKE
+						pKIAVIaShKSiAHCGkoSkogCBjACG
+						koSkogCBqACGkoSkogCBxACGkoSk
+						ogCB4ACGkoSkogCB/ACGkoSkogCB
+						GAGGkoSkogCBNAGGkoSkogCBUAGG
+						hoEACIQEWzFmXYPNzEw9hpKElpYG
 						TlNGb250hpKEhIQGTlNGb250HpSZ
 						HIQFWzI4Y10GAAAAFAAAAP/+SABl
 						AGwAdgBlAHQAaQBjAGEAhAFmC4QB
@@ -34148,8 +34172,8 @@ this.willRemoveFromParent}</string>
 					<integer>488</integer>
 					<key>Points</key>
 					<array>
-						<string>{982.24283759555647, 986.17410366732304}</string>
-						<string>{495.99999999999989, 988.86161672240041}</string>
+						<string>{982.24283759555647, 986.17410365211776}</string>
+						<string>{495.99999999999989, 988.86161647248207}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -34194,8 +34218,8 @@ this.willRemoveFromParent}</string>
 					<integer>487</integer>
 					<key>Points</key>
 					<array>
-						<string>{1055.3190632584647, 983.46938817043758}</string>
-						<string>{432.6451795327124, 927.1927490234375}</string>
+						<string>{1055.3190632584644, 983.46938817071282}</string>
+						<string>{432.64517946194189, 927.1927490234375}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -34364,18 +34388,18 @@ this.willRemoveFromParent}</string>
 						dHJpbmcBlIQBKxZleGVjdXRlRG9V
 						cGRhdGVDb250ZW50hoQCaUkBFpKE
 						hIQMTlNEaWN0aW9uYXJ5AJSEAWkE
-						koSWlhBOU1BhcmFncmFwaFN0eWxl
-						hpKEhIQQTlNQYXJhZ3JhcGhTdHls
-						ZQCUhARDQ0BTAgCEhIQHTlNBcnJh
-						eQCUmQyShISECU5TVGV4dFRhYgCU
-						hAJDZgAchpKEn54AOIaShJ+eAFSG
-						koSfngBwhpKEn54AgYwAhpKEn54A
-						gagAhpKEn54AgcQAhpKEn54AgeAA
-						hpKEn54AgfwAhpKEn54AgRgBhpKE
-						n54AgTQBhpKEn54AgVABhoaBAAiE
-						BFsxZl2DzcxMPYaShJaWBk5TS2Vy
-						boaShISECE5TTnVtYmVyAISEB05T
-						VmFsdWUAlIQBKoSEAWSjAIaShJaW
+						koSWlgZOU0tlcm6GkoSEhAhOU051
+						bWJlcgCEhAdOU1ZhbHVlAJSEASqE
+						hAFknQCGkoSWlhBOU1BhcmFncmFw
+						aFN0eWxlhpKEhIQQTlNQYXJhZ3Jh
+						cGhTdHlsZQCUhARDQ0BTAgCEhIQH
+						TlNBcnJheQCUmQyShISECU5TVGV4
+						dFRhYgCUhAJDZgAchpKEpKIAOIaS
+						hKSiAFSGkoSkogBwhpKEpKIAgYwA
+						hpKEpKIAgagAhpKEpKIAgcQAhpKE
+						pKIAgeAAhpKEpKIAgfwAhpKEpKIA
+						gRgBhpKEpKIAgTQBhpKEpKIAgVAB
+						hoaBAAiEBFsxZl2DzcxMPYaShJaW
 						Bk5TRm9udIaShISEBk5TRm9udB6U
 						mRyEBVsyOGNdBgAAABQAAAD//kgA
 						ZQBsAHYAZQB0AGkAYwBhAIQBZguE
@@ -42020,18 +42044,18 @@ parentWillDetach}</string>
 						dHJpbmcBlIQBKxV2aXNpYmlsaXR5
 						TmVlZHNVcGRhdGWGhAJpSQEVkoSE
 						hAxOU0RpY3Rpb25hcnkAlIQBaQSS
-						hJaWEE5TUGFyYWdyYXBoU3R5bGWG
-						koSEhBBOU1BhcmFncmFwaFN0eWxl
-						AJSEBENDQFMCAISEhAdOU0FycmF5
-						AJSZDJKEhIQJTlNUZXh0VGFiAJSE
-						AkNmAByGkoSfngA4hpKEn54AVIaS
-						hJ+eAHCGkoSfngCBjACGkoSfngCB
-						qACGkoSfngCBxACGkoSfngCB4ACG
-						koSfngCB/ACGkoSfngCBGAGGkoSf
-						ngCBNAGGkoSfngCBUAGGhoEACIQE
-						WzFmXYPNzEw9hpKElpYGTlNLZXJu
-						hpKEhIQITlNOdW1iZXIAhIQHTlNW
-						YWx1ZQCUhAEqhIQBZKMAhpKElpYG
+						hJaWBk5TS2VyboaShISECE5TTnVt
+						YmVyAISEB05TVmFsdWUAlIQBKoSE
+						AWSdAIaShJaWEE5TUGFyYWdyYXBo
+						U3R5bGWGkoSEhBBOU1BhcmFncmFw
+						aFN0eWxlAJSEBENDQFMCAISEhAdO
+						U0FycmF5AJSZDJKEhIQJTlNUZXh0
+						VGFiAJSEAkNmAByGkoSkogA4hpKE
+						pKIAVIaShKSiAHCGkoSkogCBjACG
+						koSkogCBqACGkoSkogCBxACGkoSk
+						ogCB4ACGkoSkogCB/ACGkoSkogCB
+						GAGGkoSkogCBNAGGkoSkogCBUAGG
+						hoEACIQEWzFmXYPNzEw9hpKElpYG
 						TlNGb250hpKEhIQGTlNGb250HpSZ
 						HIQFWzI4Y10GAAAAFAAAAP/+SABl
 						AGwAdgBlAHQAaQBjAGEAhAFmC4QB
@@ -42542,8 +42566,8 @@ parentWillDetach}</string>
 					<real>40.253204345703125</real>
 					<key>Points</key>
 					<array>
-						<string>{2435.4935927277725, 627.95516787105839}</string>
-						<string>{2551, 609.28369367457731}</string>
+						<string>{2435.4935927277725, 627.95516787106919}</string>
+						<string>{2551, 609.28369367459027}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -43486,18 +43510,18 @@ show
 						dHJpbmcBlIQBKxV2aXNpYmlsaXR5
 						TmVlZHNVcGRhdGWGhAJpSQEVkoSE
 						hAxOU0RpY3Rpb25hcnkAlIQBaQSS
-						hJaWEE5TUGFyYWdyYXBoU3R5bGWG
-						koSEhBBOU1BhcmFncmFwaFN0eWxl
-						AJSEBENDQFMCAISEhAdOU0FycmF5
-						AJSZDJKEhIQJTlNUZXh0VGFiAJSE
-						AkNmAByGkoSfngA4hpKEn54AVIaS
-						hJ+eAHCGkoSfngCBjACGkoSfngCB
-						qACGkoSfngCBxACGkoSfngCB4ACG
-						koSfngCB/ACGkoSfngCBGAGGkoSf
-						ngCBNAGGkoSfngCBUAGGhoEACIQE
-						WzFmXYPNzEw9hpKElpYGTlNLZXJu
-						hpKEhIQITlNOdW1iZXIAhIQHTlNW
-						YWx1ZQCUhAEqhIQBZKMAhpKElpYG
+						hJaWBk5TS2VyboaShISECE5TTnVt
+						YmVyAISEB05TVmFsdWUAlIQBKoSE
+						AWSdAIaShJaWEE5TUGFyYWdyYXBo
+						U3R5bGWGkoSEhBBOU1BhcmFncmFw
+						aFN0eWxlAJSEBENDQFMCAISEhAdO
+						U0FycmF5AJSZDJKEhIQJTlNUZXh0
+						VGFiAJSEAkNmAByGkoSkogA4hpKE
+						pKIAVIaShKSiAHCGkoSkogCBjACG
+						koSkogCBqACGkoSkogCBxACGkoSk
+						ogCB4ACGkoSkogCB/ACGkoSkogCB
+						GAGGkoSkogCBNAGGkoSkogCBUAGG
+						hoEACIQEWzFmXYPNzEw9hpKElpYG
 						TlNGb250hpKEhIQGTlNGb250HpSZ
 						HIQFWzI4Y10GAAAAFAAAAP/+SABl
 						AGwAdgBlAHQAaQBjAGEAhAFmC4QB
@@ -43728,18 +43752,18 @@ hide}</string>
 						dHJpbmcBlIQBKxV2aXNpYmlsaXR5
 						TmVlZHNVcGRhdGWGhAJpSQEVkoSE
 						hAxOU0RpY3Rpb25hcnkAlIQBaQSS
-						hJaWEE5TUGFyYWdyYXBoU3R5bGWG
-						koSEhBBOU1BhcmFncmFwaFN0eWxl
-						AJSEBENDQFMCAISEhAdOU0FycmF5
-						AJSZDJKEhIQJTlNUZXh0VGFiAJSE
-						AkNmAByGkoSfngA4hpKEn54AVIaS
-						hJ+eAHCGkoSfngCBjACGkoSfngCB
-						qACGkoSfngCBxACGkoSfngCB4ACG
-						koSfngCB/ACGkoSfngCBGAGGkoSf
-						ngCBNAGGkoSfngCBUAGGhoEACIQE
-						WzFmXYPNzEw9hpKElpYGTlNLZXJu
-						hpKEhIQITlNOdW1iZXIAhIQHTlNW
-						YWx1ZQCUhAEqhIQBZKMAhpKElpYG
+						hJaWBk5TS2VyboaShISECE5TTnVt
+						YmVyAISEB05TVmFsdWUAlIQBKoSE
+						AWSdAIaShJaWEE5TUGFyYWdyYXBo
+						U3R5bGWGkoSEhBBOU1BhcmFncmFw
+						aFN0eWxlAJSEBENDQFMCAISEhAdO
+						U0FycmF5AJSZDJKEhIQJTlNUZXh0
+						VGFiAJSEAkNmAByGkoSkogA4hpKE
+						pKIAVIaShKSiAHCGkoSkogCBjACG
+						koSkogCBqACGkoSkogCBxACGkoSk
+						ogCB4ACGkoSkogCB/ACGkoSkogCB
+						GAGGkoSkogCBNAGGkoSkogCBUAGG
+						hoEACIQEWzFmXYPNzEw9hpKElpYG
 						TlNGb250hpKEhIQGTlNGb250HpSZ
 						HIQFWzI4Y10GAAAAFAAAAP/+SABl
 						AGwAdgBlAHQAaQBjAGEAhAFmC4QB
@@ -44077,18 +44101,18 @@ parentWillDetach}</string>
 						dHJpbmcBlIQBKxRleGVjdXRlUXVl
 						dWVkVXBkYXRlc4aEAmlJARSShISE
 						DE5TRGljdGlvbmFyeQCUhAFpBJKE
-						lpYQTlNQYXJhZ3JhcGhTdHlsZYaS
-						hISEEE5TUGFyYWdyYXBoU3R5bGUA
-						lIQEQ0NAUwIAhISEB05TQXJyYXkA
-						lJkMkoSEhAlOU1RleHRUYWIAlIQC
-						Q2YAHIaShJ+eADiGkoSfngBUhpKE
-						n54AcIaShJ+eAIGMAIaShJ+eAIGo
-						AIaShJ+eAIHEAIaShJ+eAIHgAIaS
-						hJ+eAIH8AIaShJ+eAIEYAYaShJ+e
-						AIE0AYaShJ+eAIFQAYaGgQAIhARb
-						MWZdg83MTD2GkoSWlgZOU0tlcm6G
-						koSEhAhOU051bWJlcgCEhAdOU1Zh
-						bHVlAJSEASqEhAFkowCGkoSWlgZO
+						lpYGTlNLZXJuhpKEhIQITlNOdW1i
+						ZXIAhIQHTlNWYWx1ZQCUhAEqhIQB
+						ZJ0AhpKElpYQTlNQYXJhZ3JhcGhT
+						dHlsZYaShISEEE5TUGFyYWdyYXBo
+						U3R5bGUAlIQEQ0NAUwIAhISEB05T
+						QXJyYXkAlJkMkoSEhAlOU1RleHRU
+						YWIAlIQCQ2YAHIaShKSiADiGkoSk
+						ogBUhpKEpKIAcIaShKSiAIGMAIaS
+						hKSiAIGoAIaShKSiAIHEAIaShKSi
+						AIHgAIaShKSiAIH8AIaShKSiAIEY
+						AYaShKSiAIE0AYaShKSiAIFQAYaG
+						gQAIhARbMWZdg83MTD2GkoSWlgZO
 						U0ZvbnSGkoSEhAZOU0ZvbnQelJkc
 						hAVbMjhjXQYAAAAUAAAA//5IAGUA
 						bAB2AGUAdABpAGMAYQCEAWYLhAFj
@@ -44959,18 +44983,18 @@ Building Out by Parent}</string>
 						dHJpbmcBlIQBKxV2aXNpYmlsaXR5
 						TmVlZHNVcGRhdGWGhAJpSQEVkoSE
 						hAxOU0RpY3Rpb25hcnkAlIQBaQSS
-						hJaWEE5TUGFyYWdyYXBoU3R5bGWG
-						koSEhBBOU1BhcmFncmFwaFN0eWxl
-						AJSEBENDQFMCAISEhAdOU0FycmF5
-						AJSZDJKEhIQJTlNUZXh0VGFiAJSE
-						AkNmAByGkoSfngA4hpKEn54AVIaS
-						hJ+eAHCGkoSfngCBjACGkoSfngCB
-						qACGkoSfngCBxACGkoSfngCB4ACG
-						koSfngCB/ACGkoSfngCBGAGGkoSf
-						ngCBNAGGkoSfngCBUAGGhoEACIQE
-						WzFmXYPNzEw9hpKElpYGTlNLZXJu
-						hpKEhIQITlNOdW1iZXIAhIQHTlNW
-						YWx1ZQCUhAEqhIQBZKMAhpKElpYG
+						hJaWBk5TS2VyboaShISECE5TTnVt
+						YmVyAISEB05TVmFsdWUAlIQBKoSE
+						AWSdAIaShJaWEE5TUGFyYWdyYXBo
+						U3R5bGWGkoSEhBBOU1BhcmFncmFw
+						aFN0eWxlAJSEBENDQFMCAISEhAdO
+						U0FycmF5AJSZDJKEhIQJTlNUZXh0
+						VGFiAJSEAkNmAByGkoSkogA4hpKE
+						pKIAVIaShKSiAHCGkoSkogCBjACG
+						koSkogCBqACGkoSkogCBxACGkoSk
+						ogCB4ACGkoSkogCB/ACGkoSkogCB
+						GAGGkoSkogCBNAGGkoSkogCBUAGG
+						hoEACIQEWzFmXYPNzEw9hpKElpYG
 						TlNGb250hpKEhIQGTlNGb250HpSZ
 						HIQFWzI4Y10GAAAAFAAAAP/+SABl
 						AGwAdgBlAHQAaQBjAGEAhAFmC4QB
@@ -45550,18 +45574,18 @@ hide}</string>
 						dHJpbmcBlIQBKxRleGVjdXRlUXVl
 						dWVkVXBkYXRlc4aEAmlJARSShISE
 						DE5TRGljdGlvbmFyeQCUhAFpBJKE
-						lpYQTlNQYXJhZ3JhcGhTdHlsZYaS
-						hISEEE5TUGFyYWdyYXBoU3R5bGUA
-						lIQEQ0NAUwIAhISEB05TQXJyYXkA
-						lJkMkoSEhAlOU1RleHRUYWIAlIQC
-						Q2YAHIaShJ+eADiGkoSfngBUhpKE
-						n54AcIaShJ+eAIGMAIaShJ+eAIGo
-						AIaShJ+eAIHEAIaShJ+eAIHgAIaS
-						hJ+eAIH8AIaShJ+eAIEYAYaShJ+e
-						AIE0AYaShJ+eAIFQAYaGgQAIhARb
-						MWZdg83MTD2GkoSWlgZOU0tlcm6G
-						koSEhAhOU051bWJlcgCEhAdOU1Zh
-						bHVlAJSEASqEhAFkowCGkoSWlgZO
+						lpYGTlNLZXJuhpKEhIQITlNOdW1i
+						ZXIAhIQHTlNWYWx1ZQCUhAEqhIQB
+						ZJ0AhpKElpYQTlNQYXJhZ3JhcGhT
+						dHlsZYaShISEEE5TUGFyYWdyYXBo
+						U3R5bGUAlIQEQ0NAUwIAhISEB05T
+						QXJyYXkAlJkMkoSEhAlOU1RleHRU
+						YWIAlIQCQ2YAHIaShKSiADiGkoSk
+						ogBUhpKEpKIAcIaShKSiAIGMAIaS
+						hKSiAIGoAIaShKSiAIHEAIaShKSi
+						AIHgAIaShKSiAIH8AIaShKSiAIEY
+						AYaShKSiAIE0AYaShKSiAIFQAYaG
+						gQAIhARbMWZdg83MTD2GkoSWlgZO
 						U0ZvbnSGkoSEhAZOU0ZvbnQelJkc
 						hAVbMjhjXQYAAAAUAAAA//5IAGUA
 						bAB2AGUAdABpAGMAYQCEAWYLhAFj
@@ -46043,18 +46067,18 @@ show}</string>
 						dHJpbmcBlIQBKxRleGVjdXRlUXVl
 						dWVkVXBkYXRlc4aEAmlJARSShISE
 						DE5TRGljdGlvbmFyeQCUhAFpBJKE
-						lpYQTlNQYXJhZ3JhcGhTdHlsZYaS
-						hISEEE5TUGFyYWdyYXBoU3R5bGUA
-						lIQEQ0NAUwIAhISEB05TQXJyYXkA
-						lJkMkoSEhAlOU1RleHRUYWIAlIQC
-						Q2YAHIaShJ+eADiGkoSfngBUhpKE
-						n54AcIaShJ+eAIGMAIaShJ+eAIGo
-						AIaShJ+eAIHEAIaShJ+eAIHgAIaS
-						hJ+eAIH8AIaShJ+eAIEYAYaShJ+e
-						AIE0AYaShJ+eAIFQAYaGgQAIhARb
-						MWZdg83MTD2GkoSWlgZOU0tlcm6G
-						koSEhAhOU051bWJlcgCEhAdOU1Zh
-						bHVlAJSEASqEhAFkowCGkoSWlgZO
+						lpYGTlNLZXJuhpKEhIQITlNOdW1i
+						ZXIAhIQHTlNWYWx1ZQCUhAEqhIQB
+						ZJ0AhpKElpYQTlNQYXJhZ3JhcGhT
+						dHlsZYaShISEEE5TUGFyYWdyYXBo
+						U3R5bGUAlIQEQ0NAUwIAhISEB05T
+						QXJyYXkAlJkMkoSEhAlOU1RleHRU
+						YWIAlIQCQ2YAHIaShKSiADiGkoSk
+						ogBUhpKEpKIAcIaShKSiAIGMAIaS
+						hKSiAIGoAIaShKSiAIHEAIaShKSi
+						AIHgAIaShKSiAIH8AIaShKSiAIEY
+						AYaShKSiAIE0AYaShKSiAIFQAYaG
+						gQAIhARbMWZdg83MTD2GkoSWlgZO
 						U0ZvbnSGkoSEhAZOU0ZvbnQelJkc
 						hAVbMjhjXQYAAAAUAAAA//5IAGUA
 						bAB2AGUAdABpAGMAYQCEAWYLhAFj
@@ -49479,8 +49503,8 @@ isHidden == false}</string>
 					<real>-1</real>
 					<key>Points</key>
 					<array>
-						<string>{2437.8800710753271, 711.13052881276417}</string>
-						<string>{2437.8800492460769, 737.0304702847319}</string>
+						<string>{2437.8800710753271, 711.13052881276406}</string>
+						<string>{2437.8800492460769, 737.03047028473202}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -49630,7 +49654,7 @@ isHidden == false}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{2217.5912846365968, 570.42619716385752}, {28, 24}}</string>
+					<string>{{2217.5912846365959, 570.42619716385752}, {28, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -49747,8 +49771,8 @@ isHidden == false}</string>
 					<real>41.452201843261719</real>
 					<key>Points</key>
 					<array>
-						<string>{2234.7175071339038, 529.52619754532725}</string>
-						<string>{2149.6178360149838, 636.23059754085773}</string>
+						<string>{2234.7175071339034, 529.52619754532725}</string>
+						<string>{2149.6178360149779, 636.23059754085773}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -49831,7 +49855,7 @@ isHidden == false}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{2730.290773744503, 241.01483028081162}, {28, 24}}</string>
+					<string>{{2730.2906739326959, 241.01479503201998}, {28, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -49907,8 +49931,8 @@ isHidden == false}</string>
 					<real>-1</real>
 					<key>Points</key>
 					<array>
-						<string>{2749.8837160978978, 238.49688758271688}</string>
-						<string>{2673.0680748924779, 253.01483028081162}</string>
+						<string>{2749.8836415344203, 238.49688758271691}</string>
+						<string>{2673.0680665548798, 253.01479503201998}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -50208,7 +50232,7 @@ isHidden == false}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{4212.1629238870719, 971.18322575413799}, {28, 24}}</string>
+					<string>{{4212.1629238873502, 971.18322575413799}, {28, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -50284,8 +50308,8 @@ isHidden == false}</string>
 					<real>7.2250289916992188</real>
 					<key>Points</key>
 					<array>
-						<string>{4213.768924260009, 964.28322613560772}</string>
-						<string>{4317.6405722434911, 1002.5332837687454}</string>
+						<string>{4213.7689242601937, 964.28322613560772}</string>
+						<string>{4317.6405722444597, 1002.5332837687454}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -50775,8 +50799,8 @@ isHidden == false}</string>
 					<real>0.39955428242683411</real>
 					<key>Points</key>
 					<array>
-						<string>{1494.8792973861471, 933.23090355185582}</string>
-						<string>{1515.7490982784007, 957.83001134945914}</string>
+						<string>{1494.8792973861541, 933.23090355185582}</string>
+						<string>{1515.7490982784166, 957.83001134945914}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -50898,8 +50922,8 @@ notify will hide in document}</string>
 					<real>4.3667607307434082</real>
 					<key>Points</key>
 					<array>
-						<string>{1520.616827785514, 1068.3635627108933}</string>
-						<string>{1542.1821910224799, 1100.897083393922}</string>
+						<string>{1520.6168277855138, 1068.3635627108933}</string>
+						<string>{1542.1821910224794, 1100.897083393922}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -51144,8 +51168,8 @@ notify did show in document}</string>
 					<real>18.737125396728516</real>
 					<key>Points</key>
 					<array>
-						<string>{1422.7001114721531, 1959.0555902924059}</string>
-						<string>{1483.8484895446327, 2020.3298395590455}</string>
+						<string>{1422.7001114721531, 1959.0555902924061}</string>
+						<string>{1483.8484895446325, 2020.3298395590452}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -51833,7 +51857,7 @@ notify will show in document}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{406.86017288030496, 851.13231492059572}, {35, 24}}</string>
+					<string>{{406.8601728803049, 851.13231492059572}, {35, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -51933,7 +51957,7 @@ YES}</string>
 					<key>Points</key>
 					<array>
 						<string>{395.87852162351851, 841.23231530206544}</string>
-						<string>{495.936317762567, 884.56919153170929}</string>
+						<string>{495.93631776256694, 884.56919153170929}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -53277,7 +53301,7 @@ isHidden == false}</string>
 					<key>Points</key>
 					<array>
 						<string>{2314.8212870471752, 407.27136489407116}</string>
-						<string>{2247.6904518958222, 511.52619754532725}</string>
+						<string>{2247.6904518958218, 511.52619754532725}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -53360,7 +53384,7 @@ isHidden == false}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{2191.3029004274385, 387.13065302534295}, {28, 24}}</string>
+					<string>{{2191.3029004274385, 387.13065302456238}, {28, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -53436,8 +53460,8 @@ isHidden == false}</string>
 					<real>58.664321899414062</real>
 					<key>Points</key>
 					<array>
-						<string>{2274.6164861856478, 399.13065302534295}</string>
-						<string>{2133.4878453367264, 401.76696098325596}</string>
+						<string>{2274.6164861856478, 399.13065302456238}</string>
+						<string>{2133.4878453367264, 401.76696098008057}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -53711,7 +53735,7 @@ isHidden == false}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{3261.5238514269804, 452.88743509098833}, {35, 24}}</string>
+					<string>{{3261.5238514282578, 452.88743509098833}, {35, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -53787,8 +53811,8 @@ isHidden == false}</string>
 					<real>14.149484634399414</real>
 					<key>Points</key>
 					<array>
-						<string>{3266.8490510885308, 438.98743547245806}</string>
-						<string>{3315.4362169830611, 491.08640411710553}</string>
+						<string>{3266.849051089052, 438.98743547245806}</string>
+						<string>{3315.4362169865999, 491.08640411710553}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -53812,7 +53836,7 @@ isHidden == false}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{3174.9938619020786, 444.88743509098833}, {28, 24}}</string>
+					<string>{{3174.993861900989, 444.88743509098833}, {28, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -53888,8 +53912,8 @@ isHidden == false}</string>
 					<real>5.9410581588745117</real>
 					<key>Points</key>
 					<array>
-						<string>{3236.271314965441, 438.98743547245806}</string>
-						<string>{3148.3173045750941, 474.66955104457293}</string>
+						<string>{3236.2713149650926, 438.98743547245806}</string>
+						<string>{3148.3173045733665, 474.66955104457293}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -54190,7 +54214,7 @@ isHidden == false}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{3948.4185796991101, 266.88677157705666}, {28, 24}}</string>
+					<string>{{3948.4185796991101, 266.88677160344008}, {28, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -54266,8 +54290,8 @@ isHidden == false}</string>
 					<real>61.962860107421875</real>
 					<key>Points</key>
 					<array>
-						<string>{3928.3081190005055, 278.88677157705666}</string>
-						<string>{4076.0338355886397, 286.07366690876984}</string>
+						<string>{3928.3081190005055, 278.88677160344008}</string>
+						<string>{4076.0338355886397, 286.07366698047321}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -54736,7 +54760,7 @@ isHidden == false}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{4532.8231345662707, 1055.3725853973813}, {35, 24}}</string>
+					<string>{{4532.8231345662834, 1055.3725853973815}, {35, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -54812,8 +54836,8 @@ isHidden == false}</string>
 					<real>45.426357269287109</real>
 					<key>Points</key>
 					<array>
-						<string>{4550.3231345662707, 1027.1831958705372}</string>
-						<string>{4562.5799608066018, 1141.8359071694888}</string>
+						<string>{4550.3231345662834, 1027.1831958705375}</string>
+						<string>{4562.5799608067819, 1141.8359071694886}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -54914,7 +54938,7 @@ isHidden == false}</string>
 					<key>Points</key>
 					<array>
 						<string>{4343.2212169545573, 1020.5332837687454}</string>
-						<string>{4355.0925753772417, 1114.2303890127055}</string>
+						<string>{4355.0925753772426, 1114.2303890127055}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -55057,7 +55081,7 @@ isHidden == false}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{4411.3781858486054, 1001.1534132734496}, {28, 24}}</string>
+					<string>{{4411.3781858486054, 1001.1534132462068}, {28, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -55133,8 +55157,8 @@ isHidden == false}</string>
 					<real>44.240039825439453</real>
 					<key>Points</key>
 					<array>
-						<string>{4392.5809231799958, 1013.1534132734496}</string>
-						<string>{4504.8609991321127, 1016.7555571118747}</string>
+						<string>{4392.5809231799958, 1013.1534132462068}</string>
+						<string>{4504.8609991321127, 1016.7555570240613}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -55199,7 +55223,7 @@ isHidden == false}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{3681.5066755967518, 268.62320545395829}, {28, 24}}</string>
+					<string>{{3681.506697054424, 268.62317300260611}, {28, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -55275,8 +55299,8 @@ isHidden == false}</string>
 					<real>35.902122497558594</real>
 					<key>Points</key>
 					<array>
-						<string>{3660.7038747029683, 280.62320545395829}</string>
-						<string>{3756.3081190005059, 277.50655039585547}</string>
+						<string>{3660.7038747029683, 280.62317300260611}</string>
+						<string>{3756.3081190005059, 277.50646101813624}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -55300,7 +55324,7 @@ isHidden == false}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{3594.3765560511933, 318.29988038554239}, {35, 24}}</string>
+					<string>{{3594.3765560513589, 318.29988038554239}, {35, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -55376,8 +55400,8 @@ isHidden == false}</string>
 					<real>19.59837532043457</real>
 					<key>Points</key>
 					<array>
-						<string>{3607.6351064762916, 298.39988076701212}</string>
-						<string>{3613.270290793821, 361.39662997354566}</string>
+						<string>{3607.6351064763335, 298.39988076701212}</string>
+						<string>{3613.270290794027, 361.39662997354566}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -55493,8 +55517,8 @@ or hiding state?}</string>
 					<real>10.868429183959961</real>
 					<key>Points</key>
 					<array>
-						<string>{584.55770508530384, 1070.8783456275041}</string>
-						<string>{592.12972099190381, 1116.4152029096642}</string>
+						<string>{584.55770508530122, 1070.8783456275041}</string>
+						<string>{592.12972099188823, 1116.4152029096642}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -55714,7 +55738,7 @@ or hiding state?}</string>
 					<key>Points</key>
 					<array>
 						<string>{525.65543990806077, 902.56919153170929}</string>
-						<string>{557.79112340450592, 934.92204723928387}</string>
+						<string>{557.79112340450558, 934.92204723928387}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -55852,8 +55876,8 @@ cancel transitionHide}</string>
 					<real>3.2689361572265625</real>
 					<key>Points</key>
 					<array>
-						<string>{567.73489305089845, 952.92204723928387}</string>
-						<string>{571.11986859245735, 983.25991874428041}</string>
+						<string>{567.73489305097667, 952.92204723928387}</string>
+						<string>{571.11986859279909, 983.25991874428041}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -56059,8 +56083,8 @@ parent will hide in document}</string>
 					<real>4.3667759895324707</real>
 					<key>Points</key>
 					<array>
-						<string>{1520.5344759974323, 975.83001134945914}</string>
-						<string>{1510.2314898879745, 1008.3635627108933}</string>
+						<string>{1520.5344759974325, 975.83001134945914}</string>
+						<string>{1510.2314898879761, 1008.3635627108933}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -56167,8 +56191,8 @@ parent will hide in document}</string>
 					<real>14.404112815856934</real>
 					<key>Points</key>
 					<array>
-						<string>{1743.499278633132, 972.1340129769535}</string>
-						<string>{1704.1757201304931, 1024.7422378163808}</string>
+						<string>{1743.4992781446795, 972.1340129769535}</string>
+						<string>{1704.1757183272209, 1024.7422378163808}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -56350,8 +56374,8 @@ isHidden == true}</string>
 					<real>3.2707564830780029</real>
 					<key>Points</key>
 					<array>
-						<string>{576.55745921550374, 1022.536833514565}</string>
-						<string>{581.573331343154, 1052.8783456275041}</string>
+						<string>{576.55745921552239, 1022.536833514565}</string>
+						<string>{581.5733313432014, 1052.8783456275041}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -56384,7 +56408,7 @@ isHidden == true}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{1659.2458414492833, 880.83382231423434}, {35, 24}}</string>
+					<string>{{1659.2458414491771, 880.83382231423434}, {35, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -56743,8 +56767,8 @@ notify did hide in document}</string>
 					<real>28.182954788208008</real>
 					<key>Points</key>
 					<array>
-						<string>{1654.7805259786219, 852.93382269570407}</string>
-						<string>{1737.8994760886515, 933.09973282702299}</string>
+						<string>{1654.7805259785903, 852.93382269570407}</string>
+						<string>{1737.8994760883372, 933.09973282702299}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -57225,8 +57249,8 @@ notify did hide in document}</string>
 					<real>12.077583312988281</real>
 					<key>Points</key>
 					<array>
-						<string>{1225.4265388485644, 156.19335876506372}</string>
-						<string>{1273.3817038857685, 157.59622881520505}</string>
+						<string>{1225.4265388485644, 156.18195207981782}</string>
+						<string>{1273.3817038857685, 157.57689445643024}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -57386,7 +57410,7 @@ isHidden == true}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{1319.5838832304344, 208.78772413156676}, {35, 24}}</string>
+					<string>{{1319.5838831841895, 208.78772413156676}, {35, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -57462,8 +57486,8 @@ isHidden == true}</string>
 					<real>40</real>
 					<key>Points</key>
 					<array>
-						<string>{1349.1900336877993, 168.88772451303649}</string>
-						<string>{1306.6127725116896, 272.68772018864684}</string>
+						<string>{1349.1900336769927, 168.88772451303649}</string>
+						<string>{1306.612772376247, 272.68772018864684}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -57730,7 +57754,7 @@ isHidden == true}</string>
 					<key>Points</key>
 					<array>
 						<string>{1130.9190769993677, 1512.1781778256566}</string>
-						<string>{1182.3720929898909, 1571.2866027614336}</string>
+						<string>{1182.3720929898905, 1571.2866027614336}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -57845,8 +57869,8 @@ isHidden == true}</string>
 					<real>-1</real>
 					<key>Points</key>
 					<array>
-						<string>{3259.5669559770522, 2585.3077864759807}</string>
-						<string>{3259.5669933875943, 2622.1892838463423}</string>
+						<string>{3259.5669559772641, 2585.3077864759807}</string>
+						<string>{3259.5669933886734, 2622.1892838463423}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -59582,7 +59606,7 @@ NO}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{2444.8261252459133, 358.75879332186793}, {28, 24}}</string>
+					<string>{{2444.8261252386915, 358.75879332186793}, {28, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -59658,8 +59682,8 @@ NO}</string>
 					<real>6.3062858581542969</real>
 					<key>Points</key>
 					<array>
-						<string>{2518.4646607189829, 352.85879370333765}</string>
-						<string>{2359.8266327318975, 389.27136489407121}</string>
+						<string>{2518.464660716118, 352.85879370333765}</string>
+						<string>{2359.8266327174424, 389.27136489407121}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -60523,8 +60547,8 @@ NO}</string>
 					<real>8.550013542175293</real>
 					<key>Points</key>
 					<array>
-						<string>{1017.9379991583542, 1826.9688667526298}</string>
-						<string>{1010.6751400297502, 1867.8688940271518}</string>
+						<string>{1017.9379991583542, 1826.9688667526295}</string>
+						<string>{1010.6751400297502, 1867.868894027152}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -60634,8 +60658,8 @@ NO}</string>
 					<real>5.6311821937561035</real>
 					<key>Points</key>
 					<array>
-						<string>{1032.7645123496279, 1065.834705253576}</string>
-						<string>{1074.8554997420974, 1100.8970692265661}</string>
+						<string>{1032.7645123496277, 1065.834705253576}</string>
+						<string>{1074.855499742097, 1100.8970692265661}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -60742,11 +60766,11 @@ NO}</string>
 					<key>OrthogonalBarPoint</key>
 					<string>{0, 0}</string>
 					<key>OrthogonalBarPosition</key>
-					<real>10.273528099060059</real>
+					<real>10.273529052734375</real>
 					<key>Points</key>
 					<array>
-						<string>{1102.9654019770035, 651.81019670524518}</string>
-						<string>{1123.5124588542985, 674.99798450202286}</string>
+						<string>{1102.9654022372254, 651.81019670524518}</string>
+						<string>{1123.5124597849613, 674.99798450202286}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -60909,8 +60933,8 @@ NO}</string>
 					<real>26.154045104980469</real>
 					<key>Points</key>
 					<array>
-						<string>{908.92363354537088, 288.65063204541008}</string>
-						<string>{882.25114845479231, 364.75872239712817}</string>
+						<string>{908.92363352173993, 288.65063204541008}</string>
+						<string>{882.25114833947168, 364.75872239712817}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -61003,7 +61027,7 @@ cancel transitionIn}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{357.57112971961686, 577.89395584948534}, {35, 24}}</string>
+					<string>{{357.57112971960595, 577.89395584948534}, {35, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -61102,8 +61126,8 @@ YES}</string>
 					<real>0.94023549556732178</real>
 					<key>Points</key>
 					<array>
-						<string>{397.95230896982287, 576.99395623095506}</string>
-						<string>{321.793543013288, 602.6744264699247}</string>
+						<string>{397.95230896981701, 576.99395623095506}</string>
+						<string>{321.79354301326532, 602.6744264699247}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -61661,8 +61685,8 @@ on child views}</string>
 					<real>13.157327651977539</real>
 					<key>Points</key>
 					<array>
-						<string>{2601.3050334301379, 2400.7746778439828}</string>
-						<string>{2605.0822593572161, 2450.8893314918973}</string>
+						<string>{2601.3050334300765, 2400.7746778439828}</string>
+						<string>{2605.0822593569978, 2450.8893314918973}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -61932,8 +61956,8 @@ on child views}</string>
 					<real>9.487055778503418</real>
 					<key>Points</key>
 					<array>
-						<string>{3598.9187729696882, 2305.1260026614341}</string>
-						<string>{3606.1142782065472, 2347.900113812887}</string>
+						<string>{3598.9187729696887, 2305.1260026614341}</string>
+						<string>{3606.1142782065481, 2347.900113812887}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -62682,7 +62706,7 @@ run layout update}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{239.06743038862828, 2079.3383969477131}, {35, 24}}</string>
+					<string>{{239.06743038862834, 2079.3383969477131}, {35, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -62781,8 +62805,8 @@ YES}</string>
 					<real>7.2007293701171875</real>
 					<key>Points</key>
 					<array>
-						<string>{201.77989241321694, 2072.4383973291829}</string>
-						<string>{343.0075981459517, 2110.639855011324}</string>
+						<string>{201.77989241321697, 2072.4383973291829}</string>
+						<string>{343.00759814595176, 2110.639855011324}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -64273,7 +64297,7 @@ notify will show in document}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{3343.2179720297586, 2309.703986930022}, {85, 24}}</string>
+					<string>{{3343.217972029759, 2309.703986930022}, {85, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -64369,7 +64393,7 @@ on child views}</string>
 					<key>Points</key>
 					<array>
 						<string>{3152.2241733575688, 2361.9895399307334}</string>
-						<string>{3534.1227941196726, 2296.0991513418276}</string>
+						<string>{3534.122794119673, 2296.0991513418276}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -64534,8 +64558,8 @@ isHidden == true}</string>
 					<real>-1</real>
 					<key>Points</key>
 					<array>
-						<string>{3067.0605130487775, 2241.9361485721706}</string>
-						<string>{3067.0604700606896, 2266.419039612791}</string>
+						<string>{3067.0605130673853, 2241.9361485721706}</string>
+						<string>{3067.0604701024895, 2266.419039612791}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -64995,7 +65019,7 @@ NO}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{995.39799543228139, 897.85747713040485}, {28, 24}}</string>
+					<string>{{995.3979954322815, 897.85747713040473}, {28, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -65071,8 +65095,8 @@ NO}</string>
 					<real>36.294536590576172</real>
 					<key>Points</key>
 					<array>
-						<string>{970.08592911567678, 909.85747713040485}</string>
-						<string>{1066.4750010970733, 912.35911466561049}</string>
+						<string>{970.08592911567689, 909.85747713040473}</string>
+						<string>{1066.4750010970736, 912.35911466561038}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -65705,7 +65729,7 @@ isHidden == false}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{2863.2952841704951, 1791.0892834648707}, {35, 24}}</string>
+					<string>{{2863.2952841704891, 1791.0892834648707}, {35, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -65781,8 +65805,8 @@ isHidden == false}</string>
 					<real>4.0554533004760742</real>
 					<key>Points</key>
 					<array>
-						<string>{2840.6265807041445, 1787.1892838463405}</string>
-						<string>{2956.9853656299888, 1819.1001901273009}</string>
+						<string>{2840.6265807041418, 1787.1892838463405}</string>
+						<string>{2956.9853656299765, 1819.1001901273009}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -67454,7 +67478,7 @@ in any shown state?}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{4023.3475931269872, 923.30367584811586}, {85, 24}}</string>
+					<string>{{4023.347643193616, 923.30367584811586}, {85, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -67549,8 +67573,8 @@ on child views}</string>
 					<integer>395</integer>
 					<key>Points</key>
 					<array>
-						<string>{3914.0336024590188, 910.73975338744935}</string>
-						<string>{4133.7052143010023, 946.28322613560772}</string>
+						<string>{3914.0336158841378, 910.73975338744935}</string>
+						<string>{4133.7052807456057, 946.28322613560772}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -67863,7 +67887,7 @@ on child views}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{3174.356009177975, 1131.8603417369638}, {28, 24}}</string>
+					<string>{{3174.3560091278478, 1131.8603416840504}, {28, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -67939,8 +67963,8 @@ on child views}</string>
 					<real>-1</real>
 					<key>Points</key>
 					<array>
-						<string>{3219.196797903141, 1120.7479923302265}</string>
-						<string>{3106.5883716785675, 1143.8603417369638}</string>
+						<string>{3219.1967978308867, 1120.7479923302265}</string>
+						<string>{3106.5883716785675, 1143.8603416840504}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -68372,7 +68396,7 @@ on child views}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{3283.3457476327171, 1149.6479919487567}, {35, 24}}</string>
+					<string>{{3283.3457476327203, 1149.6479919487567}, {35, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -68448,8 +68472,8 @@ on child views}</string>
 					<real>28.789646148681641</real>
 					<key>Points</key>
 					<array>
-						<string>{3268.824744091, 1120.7479923302265}</string>
-						<string>{3321.0700312011381, 1202.1272844113071}</string>
+						<string>{3268.8247440910004, 1120.7479923302265}</string>
+						<string>{3321.0700312011436, 1202.1272844113071}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -68634,7 +68658,7 @@ on child views}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{2613.763345327041, 503.42619716385752}, {35, 24}}</string>
+					<string>{{2613.7633453274534, 503.42619716385752}, {35, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -68694,7 +68718,7 @@ on child views}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{2536.7107249416204, 505.2869130299465}, {28, 24}}</string>
+					<string>{{2536.710724941619, 505.2869130299465}, {28, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -68811,8 +68835,8 @@ on child views}</string>
 					<real>20.882431030273438</real>
 					<key>Points</key>
 					<array>
-						<string>{2577.0047741949761, 482.52619754532725}</string>
-						<string>{2745.3572820182276, 548.09105895964683}</string>
+						<string>{2577.0047741950993, 482.52619754532725}</string>
+						<string>{2745.3572820192476, 548.09105895964683}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -68852,8 +68876,8 @@ on child views}</string>
 					<real>32.050006866455078</real>
 					<key>Points</key>
 					<array>
-						<string>{2550.7107249416204, 482.52619754532736}</string>
-						<string>{2519.6084973463817, 570.42621429964447}</string>
+						<string>{2550.710724941619, 482.52619754532736}</string>
+						<string>{2519.6084973463671, 570.42621429964447}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -69011,7 +69035,7 @@ isHidden == false}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{3357.4417546032973, 719.33366620577237}, {35, 24}}</string>
+					<string>{{3357.4417545902588, 719.33366620577237}, {35, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -69087,8 +69111,8 @@ isHidden == false}</string>
 					<real>35.903751373291016</real>
 					<key>Points</key>
 					<array>
-						<string>{3408.0304412644437, 669.64940187322952}</string>
-						<string>{3374.9417546032973, 765.25690566333139}</string>
+						<string>{3408.0304412633218, 669.64940187322952}</string>
+						<string>{3374.9417545902588, 765.25690566333139}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -69363,8 +69387,8 @@ isHidden == false}</string>
 					<real>-1</real>
 					<key>Points</key>
 					<array>
-						<string>{2810.8800710753271, 688.13052881276417}</string>
-						<string>{2810.8800492460769, 714.0304702847319}</string>
+						<string>{2810.8800710753271, 688.13052881276406}</string>
+						<string>{2810.8800492460769, 714.03047028473202}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -69388,7 +69412,7 @@ isHidden == false}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{3413.3301607907474, 223.09203632305639}, {35, 24}}</string>
+					<string>{{3413.3301607907406, 223.09203632305639}, {35, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -69464,8 +69488,8 @@ isHidden == false}</string>
 					<real>22.813009262084961</real>
 					<key>Points</key>
 					<array>
-						<string>{3436.8970989945215, 200.19203670452612}</string>
-						<string>{3397.988961781205, 269.61805519878976}</string>
+						<string>{3436.8970989945183, 200.19203670452612}</string>
+						<string>{3397.9889617811773, 269.61805519878976}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -69716,7 +69740,7 @@ isHidden == false}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{2826.2222353493462, 287.39315581867493}, {85, 24}}</string>
+					<string>{{2826.2222353497891, 287.39315581867493}, {85, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -69811,8 +69835,8 @@ on child views}</string>
 					<integer>218</integer>
 					<key>Points</key>
 					<array>
-						<string>{3116.9626071021726, 543.02380647297628}</string>
-						<string>{2806.6737524320465, 238.49688758271697}</string>
+						<string>{3116.9626071021885, 543.02380647297628}</string>
+						<string>{2806.6737524325958, 238.49688758271697}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -69895,7 +69919,7 @@ on child views}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{3463.7351887935392, 221.09203632305645}, {28, 24}}</string>
+					<string>{{3463.7351887935506, 221.09203632305645}, {28, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -69971,8 +69995,8 @@ on child views}</string>
 					<real>21.203922271728516</real>
 					<key>Points</key>
 					<array>
-						<string>{3458.149696600658, 200.19203670452617}</string>
-						<string>{3577.388292970405, 266.39988076701212}</string>
+						<string>{3458.149696600663, 200.19203670452617}</string>
+						<string>{3577.3882929704473, 266.39988076701212}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -69996,7 +70020,7 @@ on child views}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{3142.2780454365047, 630.23054613269937}, {35, 24}}</string>
+					<string>{{3142.2780454365038, 630.23054613269937}, {35, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -70056,7 +70080,7 @@ on child views}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{3284.934543481862, 621.23054613269937}, {28, 24}}</string>
+					<string>{{3284.9345434831484, 621.23054613269937}, {28, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -70214,8 +70238,8 @@ on child views}</string>
 					<real>15.999987602233887</real>
 					<key>Points</key>
 					<array>
-						<string>{3165.2061562627878, 614.3305465141691}</string>
-						<string>{3131.5597077769785, 670.13052094223565}</string>
+						<string>{3165.2061562627873, 614.3305465141691}</string>
+						<string>{3131.5597077769748, 670.13052094223565}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -70255,8 +70279,8 @@ on child views}</string>
 					<real>6.7594280242919922</real>
 					<key>Points</key>
 					<array>
-						<string>{3209.7627035161486, 614.3305465141691}</string>
-						<string>{3372.0155422636253, 651.64940187322952}</string>
+						<string>{3209.762703516541, 614.3305465141691}</string>
+						<string>{3372.0155422656449, 651.64940187322952}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -71031,7 +71055,7 @@ isHidden == false}</string>
 					<key>Points</key>
 					<array>
 						<string>{1084.0592999885812, 1118.8970692265661}</string>
-						<string>{1076.2340309046704, 1162.9047080996909}</string>
+						<string>{1076.2340309046701, 1162.9047080996909}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -71185,8 +71209,8 @@ notify did hide in document}</string>
 					<real>1.0318483114242554</real>
 					<key>Points</key>
 					<array>
-						<string>{903.46063027742639, 873.68312762967878}</string>
-						<string>{915.42321239031821, 899.54682341281034}</string>
+						<string>{903.46063027742639, 873.68312762967867}</string>
+						<string>{915.42321239031833, 899.54682341281045}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -72649,7 +72673,7 @@ notify did show in document}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{880.46808386823193, 2050.9753219824629}, {35, 24}}</string>
+					<string>{{880.46808386823204, 2050.9753219824624}, {35, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -72785,8 +72809,8 @@ notify did show in document}</string>
 					<real>28.742385864257812</real>
 					<key>Points</key>
 					<array>
-						<string>{899.22679639417333, 2022.0753223639326}</string>
-						<string>{864.14308646844381, 2103.3600933295106}</string>
+						<string>{899.22679639417345, 2022.0753223639324}</string>
+						<string>{864.14308646844393, 2103.3600933295102}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -73573,7 +73597,7 @@ isParentShown?}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{906.52439405748214, 192.13377861531151}, {35, 24}}</string>
+					<string>{{906.52439405748146, 192.13377861531151}, {35, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -73633,7 +73657,7 @@ isParentShown?}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{1011.918737987909, 149.79561935085991}, {28, 24}}</string>
+					<string>{{1011.918737987909, 149.79561892575879}, {28, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -73709,8 +73733,8 @@ isParentShown?}</string>
 					<real>40.664340972900391</real>
 					<key>Points</key>
 					<array>
-						<string>{982.29785830799085, 161.79561935085991}</string>
-						<string>{1087.4265388485644, 157.19464557326893}</string>
+						<string>{982.29785830799085, 161.79561892575879}</string>
+						<string>{1087.4265388485644, 157.19464437094487}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -73750,8 +73774,8 @@ isParentShown?}</string>
 					<real>26.140897750854492</real>
 					<key>Points</key>
 					<array>
-						<string>{924.02439405748214, 173.31211618931664}</string>
-						<string>{917.48588854070181, 249.393912616644}</string>
+						<string>{924.02439405748146, 173.31211618931664}</string>
+						<string>{917.48588854069567, 249.393912616644}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -74782,8 +74806,8 @@ isHidden == true}</string>
 					<real>5.3813333511352539</real>
 					<key>Points</key>
 					<array>
-						<string>{1366.0585372207659, 1906.4929241624241}</string>
-						<string>{1403.8720818689008, 1941.0555902924061}</string>
+						<string>{1366.0585372207654, 1906.4929241624241}</string>
+						<string>{1403.8720818689003, 1941.0555902924061}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -74829,11 +74853,11 @@ isHidden == true}</string>
 					<key>OrthogonalBarPoint</key>
 					<string>{0, 0}</string>
 					<key>OrthogonalBarPosition</key>
-					<real>23.071468353271484</real>
+					<real>23.071470260620117</real>
 					<key>Points</key>
 					<array>
-						<string>{1486.9321263591978, 1855.8182705430809}</string>
-						<string>{1416.9891904552953, 1871.162896136713}</string>
+						<string>{1486.9321223072104, 1855.8182637955906}</string>
+						<string>{1416.9891825317188, 1871.1628828453479}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -75294,7 +75318,7 @@ isHidden == true}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{1527.668861163093, 1625.7183243124184}, {28, 24}}</string>
+					<string>{{1527.668861163093, 1625.7183243132931}, {28, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -75374,8 +75398,8 @@ isHidden == true}</string>
 					<real>27.680349349975586</real>
 					<key>Points</key>
 					<array>
-						<string>{1507.3299651269449, 1637.7183243124184}</string>
-						<string>{1586.4906641536886, 1644.9381721862067}</string>
+						<string>{1507.3299651269449, 1637.7183243132931}</string>
+						<string>{1586.4906641536886, 1644.9381721880238}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -75769,7 +75793,7 @@ on child views}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{1348.6761938694665, 2454.0891945992325}, {85, 24}}</string>
+					<string>{{1348.6761938694663, 2454.0891945992325}, {85, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -75864,8 +75888,8 @@ on child views}</string>
 					<integer>417</integer>
 					<key>Points</key>
 					<array>
-						<string>{1066.0716837040684, 2538.0585024247143}</string>
-						<string>{1525.6476428301278, 2436.3208684106335}</string>
+						<string>{1066.0716837040682, 2538.0585024247143}</string>
+						<string>{1525.6476428301276, 2436.3208684106335}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -76486,8 +76510,8 @@ on child views}</string>
 					<real>1.8824536800384521</real>
 					<key>Points</key>
 					<array>
-						<string>{1559.4177480619144, 2569.1559455014926}</string>
-						<string>{1549.6235699917131, 2596.7208520801846}</string>
+						<string>{1559.4177480619146, 2569.1559455014926}</string>
+						<string>{1549.6235699917133, 2596.7208520801846}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -76656,6 +76680,8 @@ isHidden == false}</string>
 		<integer>0</integer>
 		<key>ExpandedCanvases</key>
 		<array/>
+		<key>Frame</key>
+		<string>{{1440, -180}, {1920, 1080}}</string>
 		<key>ListView</key>
 		<true/>
 		<key>OutlineWidth</key>
@@ -76666,6 +76692,8 @@ isHidden == false}</string>
 		<true/>
 		<key>SidebarWidth</key>
 		<integer>161</integer>
+		<key>VisibleRegion</key>
+		<string>{{981.31865303724624, 1.0989010672309589}, {1932.9669772592565, 1083.5164522897253}}</string>
 		<key>Zoom</key>
 		<real>0.9100000262260437</real>
 		<key>ZoomValues</key>
