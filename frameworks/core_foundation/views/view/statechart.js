@@ -1061,6 +1061,7 @@ SC.CoreView.reopen(
     this._contentNeedsUpdate = false;
 
     // Notify.
+    this.notifyPropertyChange('layer');
     if (this.didUpdateLayer) { this.didUpdateLayer(); }
 
     if (this.designer && this.designer.viewDidUpdateLayer) {
