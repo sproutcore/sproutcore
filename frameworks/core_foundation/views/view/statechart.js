@@ -1035,6 +1035,9 @@ SC.CoreView.reopen(
     // If there is no update method, fallback to calling render with extra
     // firstTime argument set to false.
     if (!this.update) {
+      context.resetClassNames();
+      context.resetStyles();
+
       this.render(context, false);
     } else {
       this.update(context.$());
