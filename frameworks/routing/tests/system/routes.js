@@ -35,7 +35,9 @@ module('SC.routes setup', {
 });
 
 test('Setup', function() {
-  equals(SC.routes._didSetup, YES, 'SC.routes should have been setup');
+  SC.run(function() {
+    equals(SC.routes._didSetup, YES, 'SC.routes should have been setup');
+  });
 });
 
 test('Initial route', function() {
