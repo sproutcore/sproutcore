@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/*global module test htmlbody ok equals same stop start */
+/*global module, test, htmlbody, ok, equals, same, stop, start */
 
 var pane = SC.ControlTestPane.design({ height: 32 })
   .add("basic", SC.ListItemView.design({
@@ -211,7 +211,7 @@ var pane = SC.ControlTestPane.design({ height: 32 })
     contentValueKey: "title",
     contentUnreadCountKey:  "count",
     outlineLevel: 2
-  })) ;
+  }));
 
 // ..........................................................
 // DETECTORS
@@ -266,6 +266,7 @@ function rightIcon(view, spriteName) {
 
 function disclosure(view, state) {
   var cq = view.$(), disclosureCQ = cq.find('.sc-disclosure-view');
+
   if (state === null) {
     ok(!cq.hasClass('has-disclosure'), "should not have has-disclosure class");
     equals(disclosureCQ.size(), 0, "should not have disclosure");
@@ -293,7 +294,7 @@ function count(view, cnt) {
   var cq = view.$(), countCQ = cq.find('.count');
   if (cnt === null) {
     ok(!cq.hasClass('has-count'), "should not have has-count class");
-    equals(countCQ.size(), 0, 'should not have count') ;
+    equals(countCQ.size(), 0, 'should not have count');
   } else {
     ok(cq.hasClass('has-count'), "should have has-count class");
     equals(countCQ.size(), 1, 'should have count');
@@ -305,7 +306,7 @@ function branch(view, visible) {
   var cq = view.$(), branchCQ = cq.find('.branch');
   if (visible === null) {
     ok(!cq.hasClass('has-branch'), "should not have has-branch class");
-    equals(branchCQ.size(), 0, 'should not have branch') ;
+    equals(branchCQ.size(), 0, 'should not have branch');
   } else {
     ok(cq.hasClass('has-branch'), "should have has-branch class");
     equals(branchCQ.size(), 1, 'should have branch');
@@ -319,7 +320,7 @@ function branch(view, visible) {
 
 module("SC.ListItemView UI", pane.standardSetup());
 
-test("basic", function() {
+test("basic", function () {
   var view = pane.view('basic');
 
   basic(view, NO, NO);
@@ -332,7 +333,7 @@ test("basic", function() {
   branch(view, null);
 });
 
-test("full", function() {
+test("full", function () {
   var view = pane.view('full');
   basic(view, NO, NO);
   icon(view, 'sc-icon-folder-16');
@@ -344,7 +345,7 @@ test("full", function() {
   branch(view, YES);
 });
 
-test("full - sel", function() {
+test("full - sel", function () {
   var view = pane.view('full - sel');
   basic(view, YES, NO);
   icon(view, 'sc-icon-folder-16');
@@ -356,76 +357,78 @@ test("full - sel", function() {
   branch(view, YES);
 });
 
-test("icon", function() {
+test("icon", function () {
   var view = pane.view('icon');
   icon(view, 'sc-icon-folder-16');
 });
 
-test("icon defined but not in view or content", function() {
+test("icon defined but not in view or content", function () {
   var view = pane.view('icon - noIcon');
   icon(view, null);
 });
 
-test("icon defined in view and in content", function() {
+test("icon defined in view and in content", function () {
   var view = pane.view('icon - contentandview');
   icon(view, 'sc-icon-folder-16');
 });
 
-test("icon defined only in view", function() {
+test("icon defined only in view", function () {
   var view = pane.view('icon - view');
   icon(view, 'sc-icon-info-16');
 });
 
-test("rightIcon", function() {
+test("rightIcon", function () {
   var view = pane.view('rightIcon');
   rightIcon(view, 'sc-icon-help-16');
 });
 
-test("rightIcon defined but not in view or content", function() {
+test("rightIcon defined but not in view or content", function () {
   var view = pane.view('rightIcon - noRightIcon');
   rightIcon(view, null);
 });
 
-test("rightIcon defined in view and in content", function() {
+test("rightIcon defined in view and in content", function () {
   var view = pane.view('rightIcon - contentAndView');
   rightIcon(view, 'sc-icon-help-16');
 });
 
-test("rightIcon defined only in view", function() {
+test("rightIcon defined only in view", function () {
   var view = pane.view('rightIcon - view');
   rightIcon(view, 'sc-icon-favorite-16');
 });
 
-test('disclosure', function() {
+test('disclosure', function () {
   disclosure(pane.view('disclosure - YES'), YES);
   disclosure(pane.view('disclosure - NO'), NO);
 });
 
-test('checkbox', function() {
+test('checkbox', function () {
   checkbox(pane.view('checkbox - YES'), YES);
   checkbox(pane.view('checkbox - NO'), NO);
 });
 
-test('count', function() {
+test('count', function () {
   // no count should show when count = 0;
   count(pane.view('count - 0'), null);
   count(pane.view('count - 10'), 10);
 });
 
-test("outline - 1", function() {
+test("outline - 1", function () {
   var v = pane.view('outline - 1'),
       indent = v.get('outlineIndent');
-  ok(indent>0, 'precond - outlineIndent property should be > 0 (actual: %@)'.fmt(indent));
 
-  equals(v.$('.sc-outline').css('left'), indent*1+16 + "px", 'sc-outline div should be offset by outline ammount');
+  ok(indent > 0, 'precond - outlineIndent property should be > 0 (actual: %@)'.fmt(indent));
+
+  equals(v.$('.sc-outline').css('left'), indent * 1 + 16 + "px", 'sc-outline div should be offset by outline ammount');
 });
 
-test("outline - 2", function() {
+test("outline - 2", function () {
   var v = pane.view('outline - 2'),
       indent = v.get('outlineIndent');
-  ok(indent>0, 'precond - outlineIndent property should be > 0 (actual: %@)'.fmt(indent));
 
-  equals(v.$('.sc-outline').css('left'), indent*2+16 + "px", 'sc-outline div should be offset by outline ammount');
+  ok(indent > 0, 'precond - outlineIndent property should be > 0 (actual: %@)'.fmt(indent));
+
+  equals(v.$('.sc-outline').css('left'), indent * 2 + 16 + "px", 'sc-outline div should be offset by outline ammount');
 });
 
 // ..........................................................
@@ -447,14 +450,14 @@ function adjustContent(view, key, value) {
   SC.RunLoop.end();
 }
 
-test("changing label should change display", function() {
+test("changing label should change display", function () {
   var view = pane.view('full');
   adjustContent(view, 'title', 'FOO');
   label(view, 'FOO'); // verify change
 });
 
 
-test("changing disclosure value should update display", function() {
+test("changing disclosure value should update display", function () {
   var view = pane.view('full');
   adjustView(view, 'disclosureState', SC.BRANCH_CLOSED);
   disclosure(view, NO);
@@ -468,7 +471,7 @@ test("changing disclosure value should update display", function() {
   disclosure(view, YES);
 });
 
-test("changing checkbox value should update display", function() {
+test("changing checkbox value should update display", function () {
   var view = pane.view('full');
   adjustContent(view, 'checkbox', NO);
   checkbox(view, NO); // verify change
@@ -482,7 +485,7 @@ test("changing checkbox value should update display", function() {
   checkbox(view, YES);
 });
 
-test("changing count value should update display", function() {
+test("changing count value should update display", function () {
   var view = pane.view('full');
 
   adjustContent(view, 'count', 100);
