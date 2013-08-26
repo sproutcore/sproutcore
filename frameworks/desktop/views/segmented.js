@@ -1078,7 +1078,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
           value = value.without(childValue);
         }
       } else {
-        value.push(childValue);
+        value = value.concat(childValue);
       }
     }
 
