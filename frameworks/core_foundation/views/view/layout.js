@@ -1231,39 +1231,8 @@ SC.View.reopen(
 
   /** @private Override: The 'adopted' event (uses _checkForResize so our childViews are notified if our frame changes). */
   _adopted: function (beforeView) {
-    var parentView = this.get('parentView');
-
     // Our frame may change once we've been adopted to a parent.
     this._checkForResize();
-
-    if (!this.get('isAttached')) {
-
-      if (this.get('_isRendered')) {
-
-        // Bypass the unattached state for adopted views.
-        if (parentView.get('isAttached')) {
-          var parentNode, nextNode, nextView, siblings;
-
-          parentNode = parentView.get('containerLayer');
-          siblings = parentView.get('childViews');
-          nextView = siblings.objectAt(siblings.indexOf(this) + 1);
-          nextNode = (nextView) ? nextView.get('layer') : null;
-
-          this._doAttach(parentNode, nextNode);
-        }
-      } else {
-
-        // Bypass the unrendered state for adopted views.
-        if (parentView.get('_isRendered')) {
-          this._doRender();
-        }
-      }
-
-    }
-
-    // Notify.
-    if (parentView.didAddChild) { parentView.didAddChild(this, beforeView); }
-    if (this.didAddToParent) { this.didAddToParent(parentView, beforeView); }
   },
 
   /** @private Extension: The 'orphaned' event. */

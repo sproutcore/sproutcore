@@ -275,7 +275,9 @@ SC.CoreView.reopen(
     // with createChildView()), but have not yet been fully adopted.
     if (!curParentView || this.get('childViews').indexOf(this) < 0) {
       var idx,
-        childViews = parentView.get('childViews');
+        childViews = parentView.get('childViews'),
+        parentViewState = parentView.get('viewState'),
+        parentNode, nextNode, nextView, siblings;
 
       // Send notifications.
       if (parentView.willAddChild) { parentView.willAddChild(this, beforeView); }
@@ -290,31 +292,48 @@ SC.CoreView.reopen(
       if (idx < 0) { idx = childViews.length; }
       childViews.insertAt(idx, this);
 
+      // Notify adopted (on self and all child views).
+      this._adopted();
 
-      if (this.get('isAttached')) {
-        // Our frame may change once we've been adopted to a parent.
-        this.notifyPropertyChange('frame');
-      } else {
 
-        if (this.get('_isRendered')) {
-
-          // Bypass the unattached state for adopted views.
-          if (parentView.get('_isRendered')) {
-            var parentNode, nextNode, nextView, siblings;
-
-            parentNode = parentView.get('containerLayer');
-            siblings = parentView.get('childViews');
-            nextView = siblings.objectAt(siblings.indexOf(this) + 1);
-            nextNode = (nextView) ? nextView.get('layer') : null;
-
-            this._doAttach(parentNode, nextNode);
-          }
-        } else {
-
+      switch (this.get('viewState')) {
+      case SC.CoreView.UNRENDERED:
+        switch (parentViewState) {
+        case SC.CoreView.UNRENDERED:
+          break;
+        default:
           // Bypass the unrendered state for adopted views.
-          if (parentView.get('_isRendered')) {
-            this._doRender();
-          }
+          this._doRender();
+        }
+        break;
+      case SC.CoreView.UNATTACHED:
+        switch (parentViewState) {
+        case SC.CoreView.UNRENDERED:
+          // Bring the child view down to the state of the parent.
+          this._doDestroyLayer();
+          break;
+        default:
+          parentNode = parentView.get('containerLayer');
+          siblings = parentView.get('childViews');
+          nextView = siblings.objectAt(siblings.indexOf(this) + 1);
+          nextNode = (nextView) ? nextView.get('layer') : null;
+
+          this._doAttach(parentNode, nextNode);
+        }
+        break;
+      default: // ATTACHED_X
+        switch (parentViewState) {
+        case SC.CoreView.UNRENDERED:
+          // Bring the child view down to the state of the parent.
+          this._doDestroyLayer();
+          break;
+        default:
+          parentNode = parentView.get('containerLayer');
+          siblings = parentView.get('childViews');
+          nextView = siblings.objectAt(siblings.indexOf(this) + 1);
+          nextNode = (nextView) ? nextView.get('layer') : null;
+
+          this._doAttach(parentNode, nextNode);
         }
       }
 
@@ -818,6 +837,12 @@ SC.CoreView.reopen(
       // Route.
       this._gotoAttachedHiddenState();
     }
+  },
+
+  /** @private The 'adopted' event. */
+  _adopted: function () {
+    // This has been moved to the _notifyAttached event.
+    // this.notifyPropertyChange('frame');
   },
 
   /** @private The 'orphaned' event. */
