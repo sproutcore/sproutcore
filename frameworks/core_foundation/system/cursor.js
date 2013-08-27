@@ -6,7 +6,9 @@
 // ==========================================================================
 
 // standard browser cursor definitions
-SC.DEFAULT_CURSOR = 'default';
+// TODO: remove extra constants in next version
+// TODO: consider adding theme cursors for custom behaviors like drag & drop
+SC.SYSTEM_CURSOR = SC.DEFAULT_CURSOR = 'default';
 SC.AUTO_CURSOR = 'auto';
 SC.CROSSHAIR_CURSOR = 'crosshair';
 SC.HAND_CURSOR = SC.POINTER_CURSOR = 'pointer';
@@ -115,7 +117,7 @@ SC.Cursor = SC.Object.extend(
 
 /** @private */
 SC.Cursor.sharedStyleSheet = function () {
-  var ssEl, 
+  var ssEl,
     head,
     ss = this._styleSheet;
 
