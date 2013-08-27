@@ -1178,8 +1178,7 @@ SC.View.reopen(
       handled = true;
 
     if (isRendered) {
-      if (isVisibleInWindow ||
-        force) {
+      if (isVisibleInWindow || force) {
         // Only in the visible states do we allow updates without being forced.
         this._doUpdateLayoutStyle();
       } else {

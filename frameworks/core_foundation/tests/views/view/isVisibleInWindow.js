@@ -7,7 +7,7 @@
 // ========================================================================
 // View metrics Unit Tests
 // ========================================================================
-/*globals module test ok isObj equals expects */
+/*global module, test, ok, equals */
 
 /**
   These tests verify that all view metrics -- frame, clippingFrame,
@@ -21,19 +21,17 @@
 // conditions.  If you find a bug, we recommend that you add a test in the
 // edge case section.
 
-var FRAME = { x: 10, y: 10, width: 30, height: 30 };
-
 var pane, view; // test globals
 
 module("isVisibleInWindow", {
 
-  setup: function() {
+  setup: function () {
     pane = SC.MainPane.create();
     pane.append();
     view = SC.View.create();
   },
 
-  teardown: function() {
+  teardown: function () {
     view.destroy();
     pane.remove().destroy();
     pane = null;
@@ -41,11 +39,11 @@ module("isVisibleInWindow", {
 
 });
 
-test("a new view should not be visible initially", function() {
+test("a new view should not be visible initially", function () {
   ok(!view.get('isVisibleInWindow'), "view.get('isVisibleInWindow') === NO");
 });
 
-test("adding a new view to a visible pane should make it visible", function() {
+test("adding a new view to a visible pane should make it visible", function () {
   ok(!view.get('isVisibleInWindow'), "view.get('isVisibleInWindow') === NO");
   ok(pane.get('isVisibleInWindow'), "pane.get('isVisibleInWindow') === YES");
 
@@ -53,7 +51,7 @@ test("adding a new view to a visible pane should make it visible", function() {
   ok(view.get('isVisibleInWindow'), "after pane.appendChild(view), view.get('isVisibleInWindow') === YES");
 });
 
-test("removing a view from a visible pane should make it invisible again", function() {
+test("removing a view from a visible pane should make it invisible again", function () {
   ok(!view.get('isVisibleInWindow'), "view.get('isVisibleInWindow') === NO");
   ok(pane.get('isVisibleInWindow'), "pane.get('isVisibleInWindow') === YES");
   pane.appendChild(view);
@@ -108,7 +106,7 @@ test("_executeDoUpdateLayout should not be invoked even if layer needs layout un
 	equals(callCount, 1, '_executeDoUpdateLayout should exec now b/c the child was appended to a shown parent');
 });
 
-test("setting isVisible to NO should trigger a layer update to hide the view", function() {
+test("setting isVisible to NO should trigger a layer update to hide the view", function () {
 
   SC.RunLoop.begin();
   pane.appendChild(view);

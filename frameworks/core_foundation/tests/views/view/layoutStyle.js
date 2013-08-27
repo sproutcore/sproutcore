@@ -134,7 +134,10 @@
     child.addObserver('frame', this, function () { didNotify = YES; });
     child.addObserver('layoutStyle', this, function () { didNotifyStyle = YES; });
 
-    child.set('layout', { left: 0, top: 10, bottom: 20, right: 50 });
+    SC.run(function () {
+      child.set('layout', { left: 0, top: 10, bottom: 20, right: 50 });
+    });
+
     ok(didNotify, "didNotify");
     ok(didNotifyStyle, 'didNotifyStyle');
   });
@@ -356,48 +359,74 @@
   }
 
   test("layout {rotateX}", function () {
-    child.adjust('rotateX', 45).updateLayout(true);
+    SC.run(function () {
+      child.adjust('rotateX', 45).updateLayout(true);
+    });
+
     equals(transformFor(child), 'rotateX(45deg)', 'transform attribute should be "rotateX(45deg)"');
   });
 
   test("layout {rotateY}", function () {
-    child.adjust('rotateY', 45).updateLayout(true);
+    SC.run(function () {
+      child.adjust('rotateY', 45).updateLayout(true);
+    });
     equals(transformFor(child), 'rotateY(45deg)', 'transform attribute should be "rotateY(45deg)"');
   });
 
   test("layout {rotateZ}", function () {
-    child.adjust('rotateZ', 45).updateLayout(true);
+    SC.run(function () {
+      child.adjust('rotateZ', 45).updateLayout(true);
+    });
+
     equals(transformFor(child), 'rotateZ(45deg)', 'transform attribute should be "rotateZ(45deg)"');
   });
 
   test("layout {rotate}", function () {
-    child.adjust('rotate', 45).updateLayout(true);
+    SC.run(function () {
+      child.adjust('rotate', 45).updateLayout(true);
+    });
+
     equals(transformFor(child), 'rotateX(45deg)', 'transform attribute should be "rotateX(45deg)"');
   });
 
   test("layout {rotateX} with units", function () {
-    child.adjust('rotateX', '1rad').updateLayout(true);
+    SC.run(function () {
+      child.adjust('rotateX', '1rad').updateLayout(true);
+    });
+
     equals(transformFor(child), 'rotateX(1rad)', 'transform attribute should be "rotateX(1rad)"');
   });
 
   test("layout {scale}", function () {
-    child.adjust('scale', 2).updateLayout(true);
+    SC.run(function () {
+      child.adjust('scale', 2).updateLayout(true);
+    });
+
     equals(transformFor(child), 'scale(2)', 'transform attribute should be "scale(2)"');
   });
 
   test("layout {scale} with multiple", function () {
-    child.adjust('scale', [2, 3]).updateLayout(true);
+    SC.run(function () {
+      child.adjust('scale', [2, 3]).updateLayout(true);
+    });
+
     equals(transformFor(child), 'scale(2, 3)', 'transform attribute should be "scale(2, 3)"');
   });
 
   test("layout {rotateX, scale}", function () {
-    child.adjust({ rotateX: 45, scale: 2 }).updateLayout(true);
+    SC.run(function () {
+      child.adjust({ rotateX: 45, scale: 2 }).updateLayout(true);
+    });
+
     equals(transformFor(child), 'rotateX(45deg) scale(2)', 'transform attribute should be "rotateX(45deg) scale(2)"');
   });
 
   test("layout {rotateX} update", function () {
-    child.adjust('rotateX', 45).updateLayout(true);
-    child.adjust('rotateX', 90).updateLayout(true);
+    SC.run(function () {
+      child.adjust('rotateX', 45).updateLayout(true);
+      child.adjust('rotateX', 90).updateLayout(true);
+    });
+
     equals(transformFor(child), 'rotateX(90deg)', 'transform attribute should be "rotateX(90deg)"');
   });
 
@@ -587,7 +616,10 @@
     var error = 'NONE';
     var layout = { centerX: 0.1, centerY: 0.1, width: 'auto', height: 'auto' };
 
-    child.set('layout', layout);
+    SC.run(function () {
+      child.set('layout', layout);
+    });
+
     try {
       child.layoutStyle();
     } catch (e) {
@@ -829,6 +861,7 @@
         // create basic view
         view = SC.View.create({
           useTopLayout: YES,
+
           layout: function () {
             if (this.get('useTopLayout')) {
               return { top: 10, left: 10, width: 100, height: 100 };
@@ -875,15 +908,16 @@
       ok(expectedStyleAttr.indexOf(styleAttr[i]) >= 0, "Test the expected style attribute includes `%@` found in the actual style attribute.".fmt(styleAttr[i]));
     }
 
-    view.set('useTopLayout', NO);
     SC.run(function () {
-      same(view.get('layout'), { bottom: 10, right: 10, width: 200, height: 50 }, "Test the value of the computed layout.");
-      layoutStyle = view.get('layoutStyle');
-      expectedLayoutStyle = { bottom: "10px", right: "10px", width: "200px", height: "50px" };
-      for (var key in layoutStyle) {
-        equals(layoutStyle[key], expectedLayoutStyle[key], "Test the value of %@ in the layout style.".fmt(key));
-      }
+      view.set('useTopLayout', NO);
     });
+
+    same(view.get('layout'), { bottom: 10, right: 10, width: 200, height: 50 }, "Test the value of the computed layout.");
+    layoutStyle = view.get('layoutStyle');
+    expectedLayoutStyle = { bottom: "10px", right: "10px", width: "200px", height: "50px" };
+    for (var key in layoutStyle) {
+      equals(layoutStyle[key], expectedLayoutStyle[key], "Test the value of %@ in the layout style.".fmt(key));
+    }
 
     styleAttr = view.$().attr('style');
     styleAttr = styleAttr.split(/;\s*/).filter(function (o) { return o; });
