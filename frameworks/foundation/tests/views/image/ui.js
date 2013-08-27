@@ -585,13 +585,13 @@
 
   test("Changing the type of image view updates the layer appropriately (without canvas)", function () {
     var view = pane.view('image_not_loaded'),
-      jqEl = view.$(),
+      jqEl = view.$('img'),
       el = jqEl[0],
       jqImgEl,
       imgEl;
-
-    equals(el.innerHTML, '', "The empty image should have no inner HTML.");
-    equals(el.tagName, 'DIV', "The empty image should be a DIV");
+    
+    ok(!jqEl.attr('class'), "The empty image should have no class.");
+    equals(el.tagName, 'IMG', "The empty image should be a IMG");
 
     // Set a sprite value.
     SC.run(function () {
@@ -608,10 +608,8 @@
     });
 
     jqEl = view.$('img');
-    el = jqEl[0];
 
     ok(!jqEl.hasClass('sprite-class'), "The url image should no longer have sprite-class class.");
-    equals(el.tagName, 'IMG', "The url image should be a IMG");
   });
 })();
 
