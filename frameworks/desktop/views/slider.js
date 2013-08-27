@@ -182,21 +182,6 @@ SC.SliderView = SC.View.extend(SC.Control,
     // convert to percentage
     loc = Math.max(0, Math.min(loc / width, 1));
 
-    // if the location is NOT in the general vicinity of the slider, we assume
-    // that the mouse pointer or touch is in the center of where the knob should be.
-    // otherwise, if we are starting, we need to do extra to add an offset
-    if (firstEvent) {
-      var value = this.get("value");
-      value = (value - min) / (max - min);
-
-      // if the value and the loc are within 16px
-      if (Math.abs(value * width - loc * width) < 16) this._offset = value - loc;
-      else this._offset = 0;
-    }
-
-    // add offset and constrain
-    loc = Math.max(0, Math.min(loc + this._offset, 1));
-
     // convert to value using minimum/maximum then constrain to steps
     loc = min + ((max-min)*loc);
     if (step !== 0) loc = Math.round(loc / step) * step ;
