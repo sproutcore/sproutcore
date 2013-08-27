@@ -626,12 +626,12 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
 
       spellCheckString = this.get('spellCheckEnabled') ? ' spellcheck="true"' : ' spellcheck="false"';
 
-      if (autoCorrect != null) {
-        autocorrectString = ' autocorrect=' + (!autoCorrect ? '"off"' : '"true"');
+      if (!SC.none(autoCorrect)) {
+        autocorrectString = ' autocorrect=' + (!autoCorrect ? '"off"' : '"on"');
       }
 
-      if (autoCorrect != null) {
-        autocapitalizeString = ' autocapitalize=' + (!autoCapitalize ? '"off"' : '"true"');
+      if (!SC.none(autoCapitalize)) {
+        autocapitalizeString = ' autocapitalize=' + (!autoCapitalize ? '"none"' : '"sentences"');
       }
 
       if (!isBrowserFocusable) {
@@ -731,16 +731,16 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
         }
       }
 
-      if (autoCorrect != null) {
-        input.attr('autoCorrect', !autoCorrect ? 'off' : 'true');
+      if (!SC.none(autoCorrect)) {
+        input.attr('autocorrect', !autoCorrect ? 'off' : 'on');
       } else {
-        input.attr('autoCorrect', null);
+        input.attr('autocorrect', null);
       }
 
-      if (autoCapitalize != null) {
-        input.attr('autoCapitalize', !autoCapitalize ? 'off' : 'true');
+      if (!SC.none(autoCapitalize)) {
+        input.attr('autocapitalize', !autoCapitalize ? 'none' : 'sentences');
       } else {
-        input.attr('autoCapitalize', null);
+        input.attr('autocapitalize', null);
       }
 
       if (!hintOnFocus && SC.platform.input.placeholder) input.attr('placeholder', hint);
