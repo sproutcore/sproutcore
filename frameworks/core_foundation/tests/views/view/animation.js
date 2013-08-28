@@ -221,8 +221,8 @@ if (SC.platform.supportsCSSTransitions) {
     stop(1000);
 
     SC.RunLoop.begin();
-    view.animate({ top: 50, left: 50, height: 150, width: 150 }, { duration: 1 });
     view.adjust({ top: 100, left: 100, height: 200, width: 200 });
+    view.animate({ top: 50, left: 50, height: 150, width: 150 }, { duration: 1 });
     SC.RunLoop.end();
 
     setTimeout(function () {
