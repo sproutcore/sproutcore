@@ -217,6 +217,23 @@ if (SC.platform.supportsCSSTransitions) {
     }, 5);
   });
 
+  test("handles adjust during the animation", function () {
+    stop(1000);
+
+    SC.RunLoop.begin();
+    view.animate({ top: 50, left: 50, height: 150, width: 150 }, { duration: 1 });
+    view.adjust({ top: 100, left: 100, height: 200, width: 200 });
+    SC.RunLoop.end();
+
+    setTimeout(function () {
+      equals(view.get('layout').top, 100, 'top is 100');
+      equals(view.get('layout').left, 100, 'left is 100');
+      equals(view.get('layout').width, 200, 'width is 200');
+      equals(view.get('layout').height, 200, 'height is 200');
+      start();
+    }, 5);
+  });
+
   // Pretty sure this does the job
   test("callbacks should be called only once for a grouped animation", function () {
     stop(2000);
