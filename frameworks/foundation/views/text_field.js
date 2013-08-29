@@ -10,6 +10,11 @@ sc_require('system/text_selection') ;
 sc_require('mixins/static_layout') ;
 sc_require('mixins/editable');
 
+SC.AUTOCAPITALIZE_NONE = 'none';
+SC.AUTOCAPITALIZE_SENTENCES = 'sentences';
+SC.AUTOCAPITALIZE_WORDS = 'words';
+SC.AUTOCAPITALIZE_CHARACTERS = 'characters';
+
 /**
   @class
 
@@ -125,15 +130,26 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   autoCorrect: YES,
 
   /**
-    Whether the browser should automatically capitalize the input.
+    Specifies the autocapitalization behavior.
+
+    Possible values are:
+
+     - `SC.AUTOCAPITALIZE_NONE` -- Do not autocapitalize.
+     - `SC.AUTOCAPITALIZE_SENTENCES` -- Autocapitalize the first letter of each
+       sentence.
+     - `SC.AUTOCAPITALIZE_WORDS` -- Autocapitalize the first letter of each word.
+     - `SC.AUTOCAPITALIZE_CHARACTERS` -- Autocapitalize all characters.
+
+    Boolean values are also supported, with YES interpreted as
+    `SC.AUTOCAPITALIZE_NONE` and NO as `SC.AUTOCAPITALIZE_SENTENCES`.
 
     When `autoCapitalize` is set to `null`, the browser will use
     the system defaults.
 
-    @type Boolean
-    @default YES
+    @type String SC.AUTOCAPITALIZE_NONE|SC.AUTOCAPITALIZE_SENTENCES|SC.AUTOCAPITALIZE_WORDS|SC.AUTOCAPITALIZE_CHARACTERS
+    @default SC.CAPITALIZE_SENTENCES
    */
-  autoCapitalize: YES,
+  autoCapitalize: SC.CAPITALIZE_SENTENCES,
 
   /**
     Localizes the hint if necessary.
@@ -631,7 +647,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       }
 
       if (!SC.none(autoCapitalize)) {
-        autocapitalizeString = ' autocapitalize=' + (!autoCapitalize ? '"none"' : '"sentences"');
+        if (SC.typeOf(autoCapitalize) === 'boolean') {
+          autocapitalizeString = ' autocapitalize=' + (!autoCapitalize ? '"none"' : '"sentences"');
+        } else {
+          autocapitalizeString = ' autocapitalize=' + autoCapitalize;
+        }
       }
 
       if (!isBrowserFocusable) {
@@ -738,7 +758,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       }
 
       if (!SC.none(autoCapitalize)) {
-        input.attr('autocapitalize', !autoCapitalize ? 'none' : 'sentences');
+        if (SC.typeOf(autoCapitalize) == 'boolean') {
+          input.attr('autocapitalize', !autoCapitalize ? 'none' : 'sentences');
+        } else {
+          input.attr('autocapitalize', autoCapitalize);
+        }
       } else {
         input.attr('autocapitalize', null);
       }
