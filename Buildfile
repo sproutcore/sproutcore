@@ -43,7 +43,7 @@ config :desktop,         :required => [:foundation]
 config :media,           :required => [:desktop]
 config :statechart,      :required => [:core_foundation], :test_required => [:core_foundation, :desktop, :routing]
 config :ajax,            :required => [:runtime, :core_foundation]
-config :designer,        :required => [:runtime, :foundation, :desktop]
+config :designer,        :required => [:runtime, :foundation, :desktop, :template_view]
 
 config :"experimental/split_view", :test_required => [:desktop]
 
