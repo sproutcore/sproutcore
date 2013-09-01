@@ -1,13 +1,127 @@
 CHANGE LOG
 ==========
 
-Edge
+1.10.0
 ----------
 
 ### CHANGES & FEATURES
 
-* Improves and adds documentation.
-* Sets SC.WebView src to '' instead of 'null' or 'undefined' when the value is null or undefined. Removes the "No matching entry in target" message when value of SC.WebView is cleared.
+* Improves and adds hundreds of lines of documentation.
+* Set SC.DEFAULT_CURSOR to 'default' instead of 'auto'.
+* Improves the ability of the SC.browser experimental name testing to succeed by adding a test value that can be used.
+* Masks all debug statements from SC.Binding using @if(debug).
+* travis ci integration.
+* Adds childViewLayout support.
+* Hides visible insertion point on drag end.
+* Passes the value of `wantsAcceleratedLayer` from the source view to the ghost view in SC.Drag allowing the ghost view layer to be positioned using transforms which are HW accelerated on some platforms.
+* You can now animate `centerX` and `centerY` adjustments. Adds support for automatically animating margin-left and margin-top when centerX or centerY layouts are used and the height or width changes. This makes centered height and width animations smooth.
+* Refactors the SC.PickerPane positioning code for SC.PICKER_POINTER and SC.MENU_POINTER.
+
+This code was essentially unreadable and did not even really work. There were lots of odd constants that affected the positioning and placement in strange ways. With this refactor, the picker pane properly positions itself on the most appropriate side and will slide itself up/down or left/right if it can in order to fit.
+
+- adds ability for pointer to automatically adjust its position as the pane shifts left/right or up/down regardless of its size
+- fixes pane positioning to take into account the borderFrame
+- adds private `windowPadding` property that ensures pickers are positioned a certain amount of distance from all edges of the screen
+- deprecates the extraRightOffset property since the pointer positions itself
+- fixes bug with render delegate that left the position class on the view after it changed
+* Adds retina versions of huge button, panel background and picker pointers.
+* Adds an '[]' observer to the array when an '@each.key' observer is used. Previously, changes to the array's membership would noisily call propertyDidChange while setting up key observers on each additional item. This change gets rid of this shotgun approach that resulted in multiple fires of the observer when adding multiple new items to the array. It also fixes the problem that removing items from the array also failed to call a change to the array.
+* Gives SC.TreeController the jshint treatment and also adds the arrangedObjects observer on demand, which removes the need for a chained observer (== slightly less memory, faster).
+* Rewrites a lot of the SproutCore TestRunner app.
+- functioning again
+- no longer showing experimental frameworks in the Frameworks section
+- no longer unable to go back from a test
+- reworked the statechart to use SC.Statechart
+- removed Continuous Integration checkbox because it doesn't do anything right now
+- hooked up "Reload" button to re-run a test suite without reloading the app
+- fixed the routing to be able to route to sub-frameworks
+* Makes SC.ToolbarView more intelligent about it's styling: not just styled appropriately for top alignment, layout adjusted to include a top or bottom border.
+* [internal] SC.Observable defines a helper method `getEach` for getting properties on a single object. This conflicts with SC.Enumerable's `getEach`, which means that you can't call getEach on an SC.Set like you would on an SC.Array implementation. Instead, when mixing in SC.Enumerable and SC.Observable to SC.Set, we should mix in SC.Observable first, so that SC.Enumerable's version of `getEach` wins.
+* Reworks the isEnabled addition in order to allow for the enabled state to actively cascade to child views. While you could previously use the `isEnabledInPane` property to determine if any ancestor view had been disabled, it was lazily computed and not bindable. With this change, `isEnabledInPane` is updated actively, which means that it can be used to update the child view's display if wanted. For example, a view gets the 'disabled' class if isEnabled is set to false, but it can also add isEnabledInPane as a displayProperty and use it to appear disabled if any ancestor becomes disabled.
+
+This cascading can be blocked by any child view by setting `shouldInheritEnabled` to false, which allows you to set isEnabled on the top pane, but keep a section of child views separately enabled.
+* [internal] Fixes from the Office for Prevention of Redundancy Office: the 'focus' and 'disabled' classes are set accordingly on all SC.View subclasses. This removes yet one more display observer from SC.CollectionView.
+* Adds SC.View.POP transition, refactors the transition states of SC.View to handle changes in state in order to flip a transition animation smoothly and adds support for cancelling rotation or scale animations in place.
+* Removes two display observers from SC.ImageView and drops undocumented support for setting the value of an image as an array (which was parsed out into a single value for some reason.
+* [internal] Adds support for sprite images based on canvas. This fixes a bug when changing between a sprite and a URL type with the same image that created duplicate elements in the DOM.
+* Removes some ugly unused images from the foundation framework and adds updated sproutcore assets which are more useful.
+* Renames SC.FILL_PROPORTIONALLY to SC.BEST_FILL. SC.FILL_PROPORTIONALLY is still supported but no longer documented.
+* Adds isEditable, isDeletable and isReorderable support for item views. The previous docs indicated that if isEditable of the collection was true, it would set the property on the item views. This was not the case, so there wasn't any way to have a list of items switch between a display mode to an editable mode. This change uses canEditContent, canDeleteContent and canReorderContent to indicate whether to add the respective properties to the item views. For example, this allows you to toggle canReorderContent to hide or show a drag handle on item views that have isReorderable as a display property.
+
+Note: Setting isEditable to false on the collection view overrides the three other properties.
+* [internal] Also escapes the tool tip for SC.LabelView, which could also be a potential avenue of attack for XSS.
+* [internal] Removes excess display property observers from SC.ButtonView (escapeHTML, needsEllipsis, tooltip) and SC.LabelView (escapeHTML, textAlign, fontWeight, needsEllipsis). In the case of escapeHTML and needsEllipsis, these are used in the update rendering, but it seems highly unlikely that the value will need to change on the fly. The docs have been updated to indicate how to support updating these values on the fly if necessary though. In the case of the other properties, they no longer exist on the views.
+* [internal] Removes several lines of statechart debugging code from non-debug builds.
+* [internal] Removes three extra observers from SC.ButtonView instances by using existing observers to also call displayDidChange.
+* [internal] Removes isEnabled displayProperty from SC.Control and instead makes it an effective display property of all SC.Views by calling displayDidChange in the existing isEnabled observer on all SC.Views.
+* Removes the restriction that render delegate data sources can only retrieve displayProperties properties. This restriction is not especially helpful, but worse than that, it forces us to have excess display properties, which means excess observers being set up and running although not every property that effects the display necessarily needs to be observed. For example, SC.ButtonView has several internal observers on properties that are also display properties. It's more efficient to use those same observers to call displayDidChange and not have the properties also be display properties.
+* Prevents exception when clicking on a collection without any content.
+* Removes backgroundColor observer from all SC.Views. If anyone actually uses this property AND needs it to update, they'll have to add the displayProperty themselves. There's no reason every other view in every other app needs this.
+* Adds 'sc-item' class to non-group collection items. Otherwise, you can apply styles to groups, to items and groups, but not items individually without adding class names to the exampleView.
+* Optimizes destroy of SC.View. This is a slow part of the view lifecycle, due to recursively running through every descendant and notifying willRemoveFromParent, didRemoveFromParent, willRemoveChild, didRemoveChild as well as searching through and clearing all of the childViews arrays. Instead, we destroy the topmost parent, including detaching and destroying the layer and clearing all references to the views from SC.View.views, but then we defer orphaning the childViews for the newly destroyed parent until the next run loop. This cuts the destroy time almost in half for the average view tree.
+* Improves item view pooling by shifting from the pool so that there is a good chance that the same item view will be returned for the current index that was pushed on due to a full reload.
+* Removes layer observer from SC.ImageView and use didCreateLayer callback instead.
+* Adds `createdByParent` property that is set to true when the view was instantiated by its parent through createChildView.
+Prevents memory leaks and simplifies the code of several views by using createdByParent to identify when the child view being removed was automatically created and should now be destroyed.
+* Adds willShowInDocument, willHideInDocument, didShowInDocument and didHideInDocument nofication callbacks. This allows you to do updates to the UI without needing to observe isVisible or currentState.
+* Changes SC.SheetPane to use transition plugins: 17 lines added, 56 lines removed!
+* Adds BOUNCE_IN/OUT and SCALE_IN/OUT transitions for SC.View
+* Removes a lot of redundancy in view rendering and updating. Previously, the update code would run applyAttributesToContext every time which would update several one shot properties: classNames, isTextSelectable, role and also update some properties that were doubly updated elsewhere: layerId, isVisible. Now the one-shot portions are done in renderToContext, which is strictly a first time render method.
+* Optimizes the observers on isVisible and isFirstResponder to be added when the view is attached and subsequently removed when the view is detached.
+Also deprecates ariaHidden and sets it properly according to isVisible + current view state.
+Adds _executeQueuedUpdates method to execute the content, layout and visibility updates when a view is about to be shown.
+* Adds more explicit documentation of what happens when calling removeChild and removeAllChildren.
+Adds method removeChildAndDestroy that will remove the child and discard it entirely.
+Adds optimization to removeAllChildren that will clear the parent's layer in one sweep rather than per child.
+Adds optimization to replaceAllChildren that will clear the parent's layer in one sweep, add the new children and create the new layer in one sweep rather than per child!
+* Removes many additional display observers.
+* Adds the transitions properties to SC.CoreView along with docs.
+* Adds view statechart code and tests
+* Adds debug mode only warnings if invokeOnce or invokeLast are called outside of a run loop.
+
+I encountered a weird bug while working in the console due to the fact that invokeOnce was running after invokeNext, which will never happen in the context of the run loop. A warning should help save developers from making similar mistakes.
+* Added retina stylesheet support to module loading, style sheets were being generated but not loading.
+* Removes extra array creation. Rather than create an array for no purpose other than for testing respondsTo when the statechart is destroyed, this change adds a gate check to the respondsTo method itself similar to what was already done with sendEvent and gotoState. [5763a62]
+* Some actions need to be always handle by a TextFieldView when it has the focus
+
+If a parentView of a TextFieldView handle deleteForward deleteBackward,
+moveLeft, moveRight, selectAll, moveUp or moveDown, the event will not
+be mapped to the TextFieldView.
+* Fixes some totally wrong documentation on SC.Query and deprecates the argument overloading in 'local' and 'remote' in favour of only passing the options hash. This makes for:
+
+• more memorizable methods right now
+
+and in the future when we are able to remove the normalization code,
+
+• less code
+• easier debugging
+• less chance for edge case bugs
+* Added documentation for a hidden feature where MenuPane can specify a global target/action for use with all of its items, as given passing mention in #945.
+* Improved perforamnce of scroll view on iOS significantly by using request animation frame.
+* All errors are actual Error objects, which provide more debuggable stack traces.
+* Removes SC.ListItemView as the default exampleView of SC.CollectionView. For one, SC.CollectionView should not be used un-extended so there's no reason to predefine this value and for two, this means that you can't blacklist out SC.ListItemView and keep SC.CollectionView.
+* Refactors SC.CollectionView to implement reusable item views and view layers. This support was built into the view already via an undocumented property, but didn't work correctly anyway. The same support could be found in the SC.CollectionFastPath mixin, but it was also poorly documented and difficult to use. Instead, the performance improvement has been re-implemented to be simpler than the version in SC.CFP and to actually work unlike the version in SC.CV and so that it will be seen by developers, it has been turned on by default.
+
+- Also removes some of the problems with itemViewForContentIndex as noted by internal comments.
+- Also removes the reloading benchmark, which was previously deprecated. Removing instead, because it doesn't even work, the call to SC.Benchmark.start was invalid.
+- This is a work-in-progress commit, there are more to come. Results so far:
+
+on reload all: previous version ~14.5ms, new version ~ 6.5ms
+on reload partial: previous version ~ 6.39ms, new version ~1.27ms
+* Requesting an index beyond the length of a sparse array should not trigger an index or range request on the delegate and just returned undefined. If you need to prime a sparse array to start loading without setting a length, it's best to use sparseArray.requestIndex(0).
+* Adds the concept of Infinity to SC.IndexSet. Although, the number of indexes will always be constrained to Number.MAX_SIZE, attempting to create a range even in the several hundreds of thousands would freeze the client, because it will attempt to generate hints every 256 items. Instead we can use the concept of infinity and don't try to hint the infinite range. For one, this allows for infinite arrays and infinite lists to be possible without using really large numbers that are very slow to hint.
+* Fixes SC.ScrollView's always updating scroller visibility and maximum scroll offsets. The code was supposed to only go through the process of determining scroller visibility and dimensions when forced (due to the scroll view's frame changing or when the content's cached width and height matches the current width and height of the content). The code assumed that the first argument would normally be undefined, but because the function is an observer method, the first argument is always the target of the observer. Therefore, the fast path conditional would always be false.
+
+This changes the code to instead clear out the cached content width and height before calling contentViewFrameDidChange, which will allow the code to run completely. Subsequent calls from the observed changes will be able to exit early based on the cached values.
+* Fixes SC.GridView's calculation of max height when its width changes. Previously, as the grid view was compressed or expanded, the layout of the grid view (maxHeight) would not update, which meant that scroll views would not adjust their scroll heights appropriately.
+
+This removes the computeLayout() call from the reloadIfNeeded method in SC.CollectionView. Since only certain events should require the layout to change (i.e. itemsPerRow changes in SC.GridView, row heights change in SC.ListView or the content length changes), we don't need to repeatedly run the computeLayout code every time we scroll a little bit.
+
+Adds adjustLayout method to SC.CollectionView which can be used with invokeOnce to adjust the view's layout when one of the previously mentioned events occurs.
+* Changes missing child view error to a warning, since we don't actually throw an exception. Also pulls the warning out of production code.
+* Removes z-index from SC.SelectView label for Ace. SproutCore styles should not use z-index and it's not needed in this case either.
+* New Sheet pane implemented with slick animations.
+* Sets SC.WebView src to '' instead of 'null' or 'undefined' when the value is null or undefined. Removes the "No matching entry in target" message when value of SC.WebView is cleared. [d1289cd]
 * Adds the inline text field to the view's parent rather than its pane. If any view in the chain from pane to the view's parent has a zIndex, the text field won't be visible. By adding it to the parent instead, there's a greater chance that nothing special will need to be done with the text field.
 * Add a difference method to SC.DateTime.  SC.DateTime.prototype.difference(a, b, format).
 
@@ -182,6 +296,20 @@ tests that enforce the one-record-array-per-query contract.
 
 ### DEPRECATIONS & REMOVALS
 
+* Removes the long deprecated SC.Border mixin. This capability was brought into SC.View several versions ago.
+* Fully deprecates SC.InlineTextField class methods, which were labeled as "should no longer be used". This should make inline text field debugging easier to do.
+* Fully deprecates the fontWeight attribute of SC.LabelView.
+* Deprecates most of the visibility module, since the visibility is more accurately and efficiently maintained by the statechart now.
+* Deprecates paneDidAttach from SC.Pane. SC.View already has a callback that does the same thing 'didAppendToDocument', which we should use to keep things simpler.
+* Deprecates SC.StaticLayout mixin.
+* Removes private unused SC.View.prototype.prepareContext method. As the comments pointed out you should not use this method it is OLD.
+* Deprecates store.loadQueryResults used for remote queries so that we can just use store.dataSourceDidFetchQuery for both local and remote queries. All the loadQueryResults method did was set the store keys on the record array and called dataSourceDidFetchQuery anyway. But having this extra function with a much different name is confusing for developers and requires checking if a query is local or remote before calling the matching method. Instead, we can just call the one method dataSourceDidFetchQuery for queries and optionally pass in the storeKeys for a remote query.
+
+Also added better documentation for using dataSourceDidFetchQuery.
+* Fully deprecates the animation sub-framework, since it has been fully implemented into SC.View:animate and significantly improved.
+* Removes long deprecated findAll method from SC.Store.
+* Deprecates useFastPath in SC.CollectionView (i.e. SC.CollectionFastPath) since the performance improvements have been baked in by default.
+* Deprecates SC.BENCHMARK_RELOAD as a public property of SC.CollectionView. This is a property used for developing and improving SC.CollectionView and doesn't need to be public. It also doesn't need to be included in production code. Anyone hacking on SC.CollectionView can add (and later remove) their own benchmarks while they are coding it.
 * Deprecates SC.platform.cssPrefix and SC.platform.domCSSPrefix in favor of
   SC.browser.cssPrefix, SC.browser.domPrefix and SC.browser.classPrefix. The css 
   prefix and dom prefix in SC.platform were calculated from the user agent, which 
@@ -204,6 +332,89 @@ tests that enforce the one-record-array-per-query contract.
 
 ### BUG FIXES
 
+* Fixes inability to specify the window padding on a PickerPane to a value other than the default.
+* Fixes escaped overflowTitle of SC.SegmentedView that showed '&raquo;' and invalid text of overflowToolTip that showed 'More&hellip;'. Also removes unnecessary escaping of `title` attributes on buttons and labels, because the browser doesn't render HTML inside of a `title` and removes invalid `alt` attribute on button divs.
+* Fixes SC.ArrayController so that firstObject, firstSelectableObject and lastObject update properly when swapping out the content. This also ensures that when allowsEmptySelection is false, that the selection changes to the new first object when the content is swapped.
+* Fixes SC.browser snorting of IE11
+* Fix values of text field autocorrect and autocapitalize
+
+According to:
+
+https://developer.apple.com/library/safari/#documentation/AppleApplications/Reference/SafariHTMLRef/Articles/Attributes.html
+
+The new values for 'autocorrect' are "off" and "on", and the values for
+'autocapitalize' are "none" and "sentences".
+* Fixes a bug that caused the drop target to have dragExited called when the drag ends and also improves the ghostView layout to match the actual size of the drag view.
+* Fixes animation bug where animating multiple keys in which some do not actually change value resulted in leftover animation styles.
+* Fixes polymorphic records so that you can change the id on the record. Previously, this would result in broken storeKey caches on the polymorphic superclasses, so the same record would appear with different ids depending on which class it is requested with.
+* Fixes exception when setting the content of an SC.TreeController (or any other object that nulls out arrangedObjects and mixes in SC.SelectionSupport). Fixes previous commits failing unit test.
+* Fixes bug #990: SC.ListItemView Doesn’t Render Right Icons of the View’s rightIcon Property
+
+The code for rendering a right icon was missing in the render method.
+It has been added. Additionally the first part has been adapted to the
+code for the (left) icon: In case of contentRightIconKey, it is only
+rendered if a value exits for that key.
+* Fixes SC.ImageButtonView to actually apply the image class to the wrapper div, thus removing the extra internal div and allowing the .active class to work like the docs say. Previously, there was no way to get an active version of the image used without also adding a custom class name to the button + the docs said you could and were wrong.
+* Fixes SC.CollectionView to reload when isEnabled changes. Otherwise, the isEnabled property isn't reset on the item views to match the value of the view itself. This was done by observing isEnabled separately from the other displayProperties so that we can also call reload().
+* Fixes placement of the run loop for focus event so that code changed when makeFirstResponder runs, it runs inside of the run loop.
+* TextField incorrectly sets initial isBrowserFocusable
+* Fixes SC.LabelView default style so that 'needsEllipsis: true' will work on single line labels. Also added the property to the SC.LabelView class with jsdoc explaining it.
+* Fixes improper binary search used by SC.ManyArray addInverseRecord that resulted in an infinite loop
+* Call notifyPropertyChange on currentStates when statechart is destroyed.
+
+The currentStates property was remaining cached after the statechart was
+destroyed. This meant that when respondsTo was called, it would still
+iterate through these now destroyed states, causing a crash.
+* Fixes bug that allowed the context menu to appear regardless of overriding contextMenu in a view or setting SC.CONTEXT_MENU_ENABLED or isContextMenuEnabled to false. This makes the context menu event handling behave the same as the key, mouse, etc. event handling. 
+* Fix SC.TextFieldView to insert a new line when the enter key is press on a text area
+
+A fix were already there for the SC.InlineTextFieldView class so I copy
+it into the TextFieldView class. I've updated the
+SC.InlineTextFieldView class so that it now call the super class in the
+case where it is a text area.
+
+I've also removed some useless code in the InlineTextFieldView class:
+- A fix in the insertNewline method which is not needed anymore
+- The method fieldValueDidChange which only call the super class
+* Fixes the hint value for SC.LabelView so that it will appear when the label has no value and isEditable is true. Includes unit test.
+* Added fix for incorrect loop in SC.Request.manager.cancelAll
+* Destroying a READY_NEW record puts it directly into DESTROYED_CLEAN state, but was failing to remove the data hash like would happen when we pushDestroy a record or call destroyRecord/dataSourceDidDestroy on a record.
+* Fixed issue with centerFoo + border layouts which calculated views' negative margins based on the view's inner size rather than the size including the border.
+* There was an issue that if you destroyed a child view, it would destroy its
+layer and remove itself from the parent, which in turn invoked updateLayerLocationIfNeeded
+in parentViewDidChange. If before updateLayerLocationIfNeeded ran a new
+child was created with the same layer id, when updateLayerLocationIfNeeded
+did run it would remove the new layer from the parent.
+
+The solution was that if a view is destroyed, don't invoke updateLayerLocationIfNeeded.
+* Fixes SC.Cursor's determination of its internal stylesheet object. Previously, it would just take the last stylesheet, but any style elements in the body would match this. Instead we find the stylesheet whose node matches the element we insert for the cursor object.
+* Fix SC.LabelView inline editing
+
+If an SC.LabelView is inside a collection view the doubleClick method
+can't be call because the collection will handle the mouseDown event.
+* Prevents exception when using borderFrame property with useStaticLayout views before they have rendered. Includes updated unit tests.
+- Fixes incorrect calculation of the borderFrame property in SC.View. It used the wrong names for the properties and didn't work at all.
+- Fixes frame failing to recompute if the border property of the layout is adjusted. Previously, layoutDidChange only checked for changes to the width or height layout properties to indicate that the frame has changed.
+- Adds unit tests that validate the frame and borderFrame when using border layouts.
+- Adds _effectiveBorderFor() function, which reduces the amount of repeated code to determine the border of any particular side
+- Also tidies the layout.js file a la jshint.
+* Fixes typo in warning message and makes SC.View:createChildViews behave as the warning indicates. If there is an invalid childView it will be ignored, which includes removing it from the childView's array so further iterations over childViews (eg. SC.View:awake) don't throw exceptions.
+
+- Also removes unnecessary conditional around the main body of the function.
+- Includes extra unit test.
+* Fixes memory leak in SC.MenuPane. It failed to destroy its internal menu view and that view's child views when the menu pane was destroyed. It also failed to remove the internal menu view reference.
+* Fixes problems with SC.MenuPane.
+
+- it will now observe the items array for changes to its contents, so if the items array object itself doesn't change we can still update the menu items
+- it no longer shares the default items array object with all instances of the menu pane
+- it no longer shares the internal key equivalents hash object with all instances of the menu pane
+- removes unused variables
+- fully deprecates support for an items object to be an array
+- improves jsdocs
+* Fixes incorrect code in SC.CollectionView reloadIfNeeded when reloading all indexes. The previous version would check the containerView's childViews and either pool them or destroy them, which doesn't work because itemViews can be created without being a child view of the container. So the same itemView would be created twice with the same layerId, which isn't so bad in this case, but not correct either. As well, the "optimized" replaceAllChildren implementation is almost exactly the same as the original replaceAllChildren. If we can really optimize replaceAllChildren by setting 'childViews' rather than appending them sequentially, why not do that in SC.View.prototype.replaceAllChildren?
+* Fixes debug images and test iframe.html being included in builds. These files (one of which is 2.5MB) would get included into every build, because they were at the wrong path. I removed the apple logo which appears unused in the tests and fixed the directory structure and file references so that 'a_sample_image.jpg' and 'iframe.html' don't get included in production builds.
+
+Note: this is especially a problem if you wanted to create an app manifest based on the contents of the built static directory. The client would have to download a 2.5MB debug image that is never used.
 * Fixes a regression with SC.CollectionView that occurred after a previous fix 
   to remove a view DOM leak. SC.CollectionView previously created a view with 
   the same layerId as the view to be replaced before replacing it, which only 
