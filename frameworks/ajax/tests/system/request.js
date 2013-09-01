@@ -382,7 +382,7 @@ test("Test Multiple listeners per single status response", function() {
   ok(response !== null, 'request.send() should return a response object');
   ok(response.get('status')<0, 'response should still not have a return code since this should be async');
 
-  stop(2500); // stops the test runner - wait for response
+  stop(10000); // stops the test runner - wait for response
 });
 
 
