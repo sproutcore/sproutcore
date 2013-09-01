@@ -9,7 +9,10 @@
 // ========================================================================
 /*globals module, test, ok, isObj, equals, expects */
 
-var url, request, contents;
+var url, request, contents, test_timeout=2500;
+if(window._phantom) {
+    test_timeout=5000;
+}
 
 module("SC.Request", {
 
@@ -135,11 +138,11 @@ test("Test Asynchronous GET Request", function() {
     window.start();
   });
 
+  stop(test_timeout); // stops the test runner - wait for response
+
   response = request.send();
   ok(response !== null, 'request.send() should return a response object');
   ok(response.get('status')<0, 'response should still not have a return code since this should be async');
-
-  stop(2500); // stops the test runner - wait for response
 });
 
 test("Test Synchronous GET Request", function() {
@@ -169,10 +172,9 @@ test("Test Asynchronous GET Request, auto-deserializing JSON", function() {
     window.start();
   });
 
+  stop(test_timeout); // stops the test runner
+
   request.send();
-
-  stop(2500); // stops the test runner
-
 });
 
 test("Test auto-deserializing malformed JSON", function() {
@@ -197,9 +199,9 @@ test("Test auto-deserializing malformed JSON", function() {
     window.start();
   });
 
-  request.send();
+  stop(test_timeout);
 
-  stop(2500);
+  request.send();
 });
 
 test("Test Synchronous GET Request, auto-deserializing JSON", function() {
@@ -243,7 +245,7 @@ test("Test Multiple Asynchronous GET Request - two immediate, and two in serial"
   SC.Request.getUrl(url).notify(this, observer).send();
   SC.Request.getUrl(url).notify(this, observer).send();
 
-  stop(2500); // stops the test runner
+  stop(test_timeout); // stops the test runner
   setTimeout( function(){
     equals(requestCount, 6, "requestCount should be 6");
     equals(responseCount, 6, "responseCount should be 6");
@@ -312,12 +314,12 @@ test("Timeouts - SC.Request didReceive callback", function() {
     }
   });
 
+  // Stop the test runner and wait for a timeout or a response.
+  stop(test_timeout);
+
   SC.RunLoop.begin();
   timeoutRequest.send();
   SC.RunLoop.end();
-
-  // Stop the test runner and wait for a timeout or a response.
-  stop(2500);
 
   // In case we never receive a timeout, just start unit testing again after
   // 500ms.
@@ -345,11 +347,11 @@ test("Timeouts - Status listener callback", function() {
     return YES;
   });
 
+  stop(test_timeout); // stops the test runner
+
   SC.RunLoop.begin();
   timeoutRequest.send();
   SC.RunLoop.end();
-
-  stop(2500); // stops the test runner
 
   // in case nothing works
   checkstop = setTimeout(function() {
@@ -378,11 +380,11 @@ test("Test Multiple listeners per single status response", function() {
     if (numResponses === 2) { window.start(); }
   });
 
+  stop(test_timeout*2); // stops the test runner - wait for response
+
   response = request.send();
   ok(response !== null, 'request.send() should return a response object');
   ok(response.get('status')<0, 'response should still not have a return code since this should be async');
-
-  stop(10000); // stops the test runner - wait for response
 });
 
 
@@ -408,9 +410,9 @@ test("Multiple arguments passed to notify()", function() {
     window.start();
   }, 'a', 'b', 'c');
 
-  response = request.send();
+  stop(test_timeout); // stops the test runner - wait for response
 
-  stop(2500); // stops the test runner - wait for response
+  response = request.send();
 });
 
 
@@ -458,9 +460,9 @@ test("Test event listeners on successful request.", function() {
     window.start();
   });
 
-  response = request.send();
+  stop(test_timeout); // stops the test runner - wait for response
 
-  stop(2500); // stops the test runner - wait for response
+  response = request.send();
 });
 
 if (window.XMLHttpRequestProgressEvent) {
@@ -505,9 +507,9 @@ if (window.XMLHttpRequestProgressEvent) {
       window.start();
     });
 
-    response = request.send();
+    stop(test_timeout); // stops the test runner - wait for response
 
-    stop(2500); // stops the test runner - wait for response
+    response = request.send();
   });
 }
 
@@ -565,9 +567,9 @@ test("Test upload event listeners on successful request.", function() {
     body['k' + i] = 'v' + i;
   }
 
-  response = request.send(JSON.stringify(body));
+  stop(test_timeout); // stops the test runner - wait for response
 
-  stop(2500); // stops the test runner - wait for response
+  response = request.send(JSON.stringify(body));
 });
 
 
