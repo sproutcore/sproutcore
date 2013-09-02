@@ -573,10 +573,10 @@ function runTest(idx, cb) {
                         urls[idx].resultText=resultText;
                         if(resultText.indexOf("failed")!=-1) {
                           urls[idx].status=TEST_FAILED; outcome=1; failed++;
-                          fs.write(idx+'.html', page.content, 'w');
+                          fs.write((idx+1)+'.html', page.content, 'w');
                         } else if(resultText.indexOf("error")!=-1) {
                           urls[idx].status=TEST_ERROR; outcome=1; failed++;
-                          fs.write(idx+'.html', page.content, 'w');
+                          fs.write((idx+1)+'.html', page.content, 'w');
                         } else {
                           urls[idx].status=TEST_PASSED;
                         }

@@ -369,16 +369,16 @@ test("Test Multiple listeners per single status response", function() {
   request.notify(200, this, function(response) {
     numResponses++;
     ok(true, "Received a response");
-
-    if (numResponses === 2) { window.start(); }
   });
 
   request.notify(200, this, function(response) {
     numResponses++;
     ok(true, "Received a response");
-
-    if (numResponses === 2) { window.start(); }
   });
+  
+  setTimeout(function() {
+    if (numResponses === 2) { window.start(); }
+  }, ((test_timeout*2 ) - 500));
 
   stop(test_timeout*2); // stops the test runner - wait for response
 
