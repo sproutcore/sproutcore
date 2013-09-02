@@ -30,16 +30,6 @@ var travis=env['TRAVIS_JOB_ID']?env['TRAVIS_JOB_ID']:false,
     host=env['IP']?env['IP']:"127.0.0.1",
     filter=(args.length === 2 ? new RegExp(args[1]) : false);
 
-if(!travis && verbose) {
-  page.onError = function(err, stack) {
-    console.log("CONSOLE ERROR: "+err);
-  };
-
-  page.onConsoleMessage = function(msg, lineNum, sourceId) {
-    console.log('CONSOLE: ' + msg);
-  };
-}
-
 var urls=[
     {url:'sproutcore/core_foundation/en/current/tests/views/pane/layout.html'},
     {url:'sproutcore/core_foundation/en/current/tests/views/pane/sendEvent.html'},
@@ -513,6 +503,19 @@ var outcome=0;
 var failed=0;
 var webpage = require('webpage');
 
+function configure(page) {
+    if(!travis && verbose) {
+      page.onError = function(err, stack) {
+        console.log("CONSOLE ERROR: "+err);
+      };
+    
+      page.onConsoleMessage = function(msg, lineNum, sourceId) {
+        console.log('CONSOLE: ' + msg);
+      };
+    }
+    return page;
+}
+
 function logResult(r,i) {
     // output coloring
     var red, blue, reset;
@@ -534,7 +537,7 @@ function runTest(idx, cb) {
     if (!filter || url.match(filter)) {
         run++;
         var page = webpage.create();
-        page.viewportSize = { width: 1024, height: 768 };
+        configure(page).viewportSize = { width: 1024, height: 768 };
         // Chrome/Linux
         //page.settings.userAgent = "Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.71 Safari/537.36";
         page.open('http://'+host+':'+port+'/'+url, function (status) {

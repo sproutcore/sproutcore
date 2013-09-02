@@ -388,6 +388,7 @@ test("Test Multiple listeners per single status response", function() {
     if (numResponses === 2) { window.start(); }
   }, ((test_timeout*5) - 500) );
 
+  // phantomjs (used in integration tests) needs a veeeery long timeout, just for this test
   stop(test_timeout*5); // stops the test runner - wait for response
 
   response = request.send();

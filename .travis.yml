@@ -3,7 +3,7 @@ rvm:
   - 1.9.3
 
 env:
-  - IP=127.0.0.1 PORT=4020 VERBOSE=false PASTEBIN=true
+  - IP=127.0.0.1 PORT=4020 VERBOSE=false PASTEBIN=
 
 install: true
 
@@ -12,7 +12,7 @@ before_script:
   - ./scripts/run_sc_server_master.sh
   - sleep 5 # give sc-server some time to start
 
-script: phantomjs tests/phantomjs_runner.phantomjs request
+script: phantomjs tests/phantomjs_runner.phantomjs
 
 after_script:
   - "test -z \"${PASTEBIN}\" || echo \"Sharing failures summaries on pastebin for 1 hour...\""
