@@ -368,21 +368,26 @@ test("Test Multiple listeners per single status response", function() {
 
   request.notify(200, this, function(response) {
     numResponses++;
-    ok(true, "Received a response");
+    ok(true, "Received a response on first listener");
   });
 
   request.notify(200, this, function(response) {
     numResponses++;
-    ok(true, "Received a response");
+    ok(true, "Received a response on second listener");
   });
   
   setTimeout(function() {
+    // give observers a chance to fire
+    //SC.RunLoop.begin(); SC.RunLoop.end();
+    
     if (numResponses === 2) { window.start(); }
-  }, ((test_timeout*2 ) - 500));
+  }, ((test_timeout*2) - 500));
 
   stop(test_timeout*2); // stops the test runner - wait for response
 
+  SC.RunLoop.begin(); 
   response = request.send();
+  SC.RunLoop.end();
   ok(response !== null, 'request.send() should return a response object');
   ok(response.get('status')<0, 'response should still not have a return code since this should be async');
 });
