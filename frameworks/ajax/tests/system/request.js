@@ -330,6 +330,9 @@ test("Timeouts - SC.Request didReceive callback", function() {
 });
 
 test("Timeouts - Status listener callback", function() {
+  // sanity check
+  equals(SC.Request.manager.inflight.length,0,"there should be no inflight requests");
+
   // Make sure timeouts actually fire, and fire when expected.
   // Point to local server so test works offline
   var timeoutRequest = SC.Request.getUrl("/"),
@@ -364,7 +367,10 @@ test("Test Multiple listeners per single status response", function() {
   var numResponses = 0;
   var response;
 
-  expect(5);
+  expect(8);
+  
+  // sanity check
+  equals(SC.Request.manager.inflight.length,0,"there should be no inflight requests");
 
   request.notify(200, this, function(response) {
     numResponses++;
@@ -377,17 +383,17 @@ test("Test Multiple listeners per single status response", function() {
   });
   
   setTimeout(function() {
-    equals(numResponses, 2, "got two notifications")
+    equals(SC.Request.manager.inflight.length,0,"there should be no inflight requests after the timeout");
+    equals(numResponses, 2, "got two notifications");
     if (numResponses === 2) { window.start(); }
   }, ((test_timeout*2) - 500) );
 
   stop(test_timeout*2); // stops the test runner - wait for response
 
-  SC.RunLoop.begin(); 
   response = request.send();
-  SC.RunLoop.end();
   ok(response !== null, 'request.send() should return a response object');
   ok(response.get('status')<0, 'response should still not have a return code since this should be async');
+  equals(SC.Request.manager.inflight.length,1,"there should be 1 inflight request after send()");
 });
 
 
@@ -398,6 +404,9 @@ test("Test Multiple listeners per single status response", function() {
 */
 test("Multiple arguments passed to notify()", function() {
   var response;
+  
+  // sanity check
+  equals(SC.Request.manager.inflight.length,0,"there should be no inflight requests");
 
   request.notify(this, function(response, a, b, c) {
     equals(a, 'a', "Listener called with argument 'a'");
