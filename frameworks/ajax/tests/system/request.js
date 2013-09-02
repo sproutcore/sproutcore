@@ -364,7 +364,7 @@ test("Test Multiple listeners per single status response", function() {
   var numResponses = 0;
   var response;
 
-  expect(4);
+  expect(5);
 
   request.notify(200, this, function(response) {
     numResponses++;
@@ -377,11 +377,9 @@ test("Test Multiple listeners per single status response", function() {
   });
   
   setTimeout(function() {
-    // give observers a chance to fire again
-    request.notify();
-    
+    equals(numResponses, 2, "got two notifications")
     if (numResponses === 2) { window.start(); }
-  }, ((test_timeout*2) - 500));
+  }, ((test_timeout*2) - 500) );
 
   stop(test_timeout*2); // stops the test runner - wait for response
 
