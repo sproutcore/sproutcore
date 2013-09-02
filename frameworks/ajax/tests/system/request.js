@@ -378,7 +378,7 @@ test("Test Multiple listeners per single status response", function() {
   
   setTimeout(function() {
     // give observers a chance to fire again
-    SC.RunLoop.begin(); SC.RunLoop.end();
+    request.notify();
     
     if (numResponses === 2) { window.start(); }
   }, ((test_timeout*2) - 500));
