@@ -14,4 +14,6 @@ before_script:
 
 script: phantomjs tests/phantomjs_runner.phantomjs
 
-after_script: echo "Sharing failures summaries on pastebin for 1 hour..."; for f in *.html ; do test -e $f && ( id=`basename $f .html`; echo -n "   ${id} : "; pastebin -f "$f" -e '1H' ) ; done
+after_script:
+  - echo "Sharing failures summaries on pastebin for 1 hour..."
+  - for f in *.html ; do test -e $f && ( id=`basename $f .html`; echo -n "   ${id} : "; pastebin -f "$f" -e '1H' ) ; done
