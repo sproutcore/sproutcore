@@ -22,6 +22,7 @@ function waitFor(testFx, onReady, timeOutMillis) {
 
 var env = require('system').env;
 var args = require('system').args;
+var fs = require('fs');
 
 var travis=env['TRAVIS_JOB_ID']?env['TRAVIS_JOB_ID']:false,
     verbose=env['VERBOSE']?env['VERBOSE']:false,
@@ -572,8 +573,10 @@ function runTest(idx, cb) {
                         urls[idx].resultText=resultText;
                         if(resultText.indexOf("failed")!=-1) {
                           urls[idx].status=TEST_FAILED; outcome=1; failed++;
+                          fs.write(idx+'.html', page.content, 'w');
                         } else if(resultText.indexOf("error")!=-1) {
                           urls[idx].status=TEST_ERROR; outcome=1; failed++;
+                          fs.write(idx+'.html', page.content, 'w');
                         } else {
                           urls[idx].status=TEST_PASSED;
                         }
