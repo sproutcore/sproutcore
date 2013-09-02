@@ -9,7 +9,10 @@
 // ========================================================================
 /*globals module, test, ok, isObj, equals, expects */
 
-var url, request, contents;
+var url, request, contents, test_timeout=2500;
+if(window._phantom) {
+    test_timeout=5000;
+}
 
 module("SC.Request", {
 
@@ -135,11 +138,11 @@ test("Test Asynchronous GET Request", function() {
     window.start();
   });
 
+  stop(test_timeout); // stops the test runner - wait for response
+
   response = request.send();
   ok(response !== null, 'request.send() should return a response object');
   ok(response.get('status')<0, 'response should still not have a return code since this should be async');
-
-  stop(2500); // stops the test runner - wait for response
 });
 
 test("Test Synchronous GET Request", function() {
@@ -169,10 +172,9 @@ test("Test Asynchronous GET Request, auto-deserializing JSON", function() {
     window.start();
   });
 
+  stop(test_timeout); // stops the test runner
+
   request.send();
-
-  stop(2500); // stops the test runner
-
 });
 
 test("Test auto-deserializing malformed JSON", function() {
@@ -197,9 +199,9 @@ test("Test auto-deserializing malformed JSON", function() {
     window.start();
   });
 
-  request.send();
+  stop(test_timeout);
 
-  stop(2500);
+  request.send();
 });
 
 test("Test Synchronous GET Request, auto-deserializing JSON", function() {
@@ -243,7 +245,7 @@ test("Test Multiple Asynchronous GET Request - two immediate, and two in serial"
   SC.Request.getUrl(url).notify(this, observer).send();
   SC.Request.getUrl(url).notify(this, observer).send();
 
-  stop(2500); // stops the test runner
+  stop(test_timeout); // stops the test runner
   setTimeout( function(){
     equals(requestCount, 6, "requestCount should be 6");
     equals(responseCount, 6, "responseCount should be 6");
@@ -312,12 +314,12 @@ test("Timeouts - SC.Request didReceive callback", function() {
     }
   });
 
+  // Stop the test runner and wait for a timeout or a response.
+  stop(test_timeout);
+
   SC.RunLoop.begin();
   timeoutRequest.send();
   SC.RunLoop.end();
-
-  // Stop the test runner and wait for a timeout or a response.
-  stop(2500);
 
   // In case we never receive a timeout, just start unit testing again after
   // 500ms.
@@ -328,6 +330,9 @@ test("Timeouts - SC.Request didReceive callback", function() {
 });
 
 test("Timeouts - Status listener callback", function() {
+  // sanity check
+  equals(SC.Request.manager.inflight.length,0,"there should be no inflight requests");
+
   // Make sure timeouts actually fire, and fire when expected.
   // Point to local server so test works offline
   var timeoutRequest = SC.Request.getUrl("/"),
@@ -345,11 +350,11 @@ test("Timeouts - Status listener callback", function() {
     return YES;
   });
 
+  stop(test_timeout); // stops the test runner
+
   SC.RunLoop.begin();
   timeoutRequest.send();
   SC.RunLoop.end();
-
-  stop(2500); // stops the test runner
 
   // in case nothing works
   checkstop = setTimeout(function() {
@@ -362,27 +367,34 @@ test("Test Multiple listeners per single status response", function() {
   var numResponses = 0;
   var response;
 
-  expect(4);
+  expect(8);
+  
+  // sanity check
+  equals(SC.Request.manager.inflight.length,0,"there should be no inflight requests");
 
   request.notify(200, this, function(response) {
     numResponses++;
-    ok(true, "Received a response");
-
-    if (numResponses === 2) { window.start(); }
+    ok(true, "Received a response on first listener");
   });
 
   request.notify(200, this, function(response) {
     numResponses++;
-    ok(true, "Received a response");
-
-    if (numResponses === 2) { window.start(); }
+    ok(true, "Received a response on second listener");
   });
+  
+  setTimeout(function() {
+    equals(SC.Request.manager.inflight.length,0,"there should be no inflight requests after the timeout");
+    equals(numResponses, 2, "got two notifications");
+    if (numResponses === 2) { window.start(); }
+  }, ((test_timeout*5) - 500) );
+
+  // phantomjs (used in integration tests) needs a veeeery long timeout, just for this test
+  stop(test_timeout*5); // stops the test runner - wait for response
 
   response = request.send();
   ok(response !== null, 'request.send() should return a response object');
   ok(response.get('status')<0, 'response should still not have a return code since this should be async');
-
-  stop(2500); // stops the test runner - wait for response
+  equals(SC.Request.manager.inflight.length,1,"there should be 1 inflight request after send()");
 });
 
 
@@ -393,6 +405,9 @@ test("Test Multiple listeners per single status response", function() {
 */
 test("Multiple arguments passed to notify()", function() {
   var response;
+  
+  // sanity check
+  equals(SC.Request.manager.inflight.length,0,"there should be no inflight requests");
 
   request.notify(this, function(response, a, b, c) {
     equals(a, 'a', "Listener called with argument 'a'");
@@ -408,9 +423,9 @@ test("Multiple arguments passed to notify()", function() {
     window.start();
   }, 'a', 'b', 'c');
 
-  response = request.send();
+  stop(test_timeout); // stops the test runner - wait for response
 
-  stop(2500); // stops the test runner - wait for response
+  response = request.send();
 });
 
 
@@ -458,9 +473,9 @@ test("Test event listeners on successful request.", function() {
     window.start();
   });
 
-  response = request.send();
+  stop(test_timeout); // stops the test runner - wait for response
 
-  stop(2500); // stops the test runner - wait for response
+  response = request.send();
 });
 
 if (window.XMLHttpRequestProgressEvent) {
@@ -505,9 +520,9 @@ if (window.XMLHttpRequestProgressEvent) {
       window.start();
     });
 
-    response = request.send();
+    stop(test_timeout); // stops the test runner - wait for response
 
-    stop(2500); // stops the test runner - wait for response
+    response = request.send();
   });
 }
 
@@ -565,9 +580,9 @@ test("Test upload event listeners on successful request.", function() {
     body['k' + i] = 'v' + i;
   }
 
-  response = request.send(JSON.stringify(body));
+  stop(test_timeout); // stops the test runner - wait for response
 
-  stop(2500); // stops the test runner - wait for response
+  response = request.send(JSON.stringify(body));
 });
 
 
