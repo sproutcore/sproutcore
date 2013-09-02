@@ -386,9 +386,9 @@ test("Test Multiple listeners per single status response", function() {
     equals(SC.Request.manager.inflight.length,0,"there should be no inflight requests after the timeout");
     equals(numResponses, 2, "got two notifications");
     if (numResponses === 2) { window.start(); }
-  }, ((test_timeout*2) - 500) );
+  }, ((test_timeout*5) - 500) );
 
-  stop(test_timeout*2); // stops the test runner - wait for response
+  stop(test_timeout*5); // stops the test runner - wait for response
 
   response = request.send();
   ok(response !== null, 'request.send() should return a response object');
