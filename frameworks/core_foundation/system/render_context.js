@@ -1205,7 +1205,12 @@ SC.RenderContext = SC.Builder.create(
 });
 
 (function () {
-  var _escapeHTMLRegex = /[&<>]/g, _escapeHTMLMethod = function (match) {
+  // this regex matches all <, > or &, unless & is immediately followed by at last 1 up to 7 alphanumeric
+  // characters and a ;. For instance:
+  // Some evil <script src="evil.js"> but this is legal &amp; these are not & &illegalese;
+  // would become:
+  // Some evil &lt;script src="evil.js"&gt; but this is legal &amp; these are not &amp; &amp;illegalese;
+  var _escapeHTMLRegex = /[<>]|&(?![\d\w#]{1,7};)/g, _escapeHTMLMethod = function (match) {
     switch (match) {
     case '&':
       return '&amp;';
@@ -1218,7 +1223,8 @@ SC.RenderContext = SC.Builder.create(
 
   /**
     Helper method escapes the passed string to ensure HTML is displayed as
-    plain text.  You should make sure you pass all user-entered data through
+    plain text while preserving HTML entities like &apos; , &agrave;, etc.
+    You should make sure you pass all user-entered data through
     this method to avoid errors.  You can also do this with the text() helper
     method on a render context.
 
