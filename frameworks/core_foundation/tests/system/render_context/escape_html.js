@@ -13,6 +13,14 @@ test("Escaping HTML", function() {
   equals(output, '&lt;p&gt;HTML!&lt;/p&gt;&lt;script&gt;alert(\'hi\');&lt;/script&gt; &amp; Hello, World!', "Properly escapes HTML");
 });
 
+module("Render Context--Escaping , preserve HTML entities like &apos;");
+test("Escaping HTML, preserve HTML entities", function() {
+  var input = "<p>HTML!</p><script>alert('hi');<" + "/script> &illegalese; & &amp; Hello, World!";
+  var output = SC.RenderContext.escapeHTML(input);
+  
+  equals(output, '&lt;p&gt;HTML!&lt;/p&gt;&lt;script&gt;alert(\'hi\');&lt;/script&gt; &amp;illegalese; &amp; &amp; Hello, World!', "Properly escapes HTML");
+});
+
 test("Tests stolen from Prototype.js", function() {
   var largeTextEscaped = '&lt;span&gt;test&lt;/span&gt;', 
       largeTextUnescaped = '<span>test</span>';
