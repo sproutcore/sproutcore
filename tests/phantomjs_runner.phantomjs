@@ -146,6 +146,7 @@ var urls=[
     {url:'sproutcore/foundation/en/current/tests/views/container/methods.html'},
     {url:'sproutcore/foundation/en/current/tests/views/container/transition_test.html'},
     {url:'sproutcore/foundation/en/current/tests/views/container/ui.html'},
+    {url:'sproutcore/foundation/en/current/tests/views/image/ui.html'},
     {url:'sproutcore/foundation/en/current/tests/delegates/inline_text_field/inline_text_field.html'},
     {url:'sproutcore/foundation/en/current/tests/system/utils/pointInElement.html'},
     {url:'sproutcore/foundation/en/current/tests/system/utils/range.html'},
