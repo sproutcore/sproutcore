@@ -598,7 +598,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     while ((queue = this._connectQueue).length > 0) {
       this._connectQueue = this._alternateConnectQueue;
       this._alternateConnectQueue = queue;
-      while (binding = queue.pop()) binding._connect();
+      while ((binding = queue.pop())) { binding._connect(); }
     }
 
     // loop through the changed queue...
@@ -617,7 +617,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
       // next, apply any bindings in the current queue.  This may cause
       // additional bindings to trigger, which will end up in the new active
       // queue.
-      while (binding = queue.pop()) binding.applyBindingValue();
+      while ((binding = queue.pop())) { binding.applyBindingValue(); }
 
       // now loop back and see if there are additional changes pending in the
       // active queue.  Repeat this until all bindings that need to trigger
