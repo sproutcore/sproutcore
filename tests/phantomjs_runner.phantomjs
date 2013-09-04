@@ -171,7 +171,6 @@ var urls=[
     {url:'sproutcore/foundation/en/current/tests/mixins/validatable/ui.html'},
     {url:'sproutcore/foundation/en/current/tests/mixins/content_value_support/content.html'},
     {url:'sproutcore/foundation/en/current/tests/mixins/inline_text_field/api.html'},
-    {url:'sproutcore/foundation/en/current/tests/mixins/inline_text_field/beginEditing.html'},
     {url:'sproutcore/foundation/en/current/tests/mixins/content_display.html'},
     {url:'sproutcore/foundation/en/current/tests/controllers/tree/selection_support.html'},
     {url:'sproutcore/foundation/en/current/tests/controllers/tree/outline_case.html'},
