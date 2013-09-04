@@ -62,7 +62,7 @@ test("Test that the isTransitioning property of container view updates according
   window.stop(2000);
 
   SC.run(function () {
-    containerView.set('transition', SC.ContainerView.PUSH);
+    containerView.set('transitionSwap', SC.ContainerView.PUSH);
     containerView.set('nowShowing', view2);
   });
 
@@ -112,7 +112,7 @@ test("Test that the container view calls the proper transition plugin methods.",
     didBuildOutFromView: function () { didBuildOutFromViewCalled++; }
   };
 
-  containerView.set('transition', plugin);
+  containerView.set('transitionSwap', plugin);
   containerView.set('nowShowing', view2);
   equals(willBuildInToViewCalled, 1, "willBuildInToViewCalled() should have been called this many times");
   equals(willBuildOutFromViewCalled, 1, "willBuildOutFromViewCalled() should have been called this many times");
