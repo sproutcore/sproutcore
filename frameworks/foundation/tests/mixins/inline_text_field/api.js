@@ -7,7 +7,7 @@
 
 /*global module test htmlbody ok equals same stop start Q$ */
 
-var field;
+var field, view;
 
 /**
   Track the public functions and properties of the class.  This will serve as an early warning
@@ -19,6 +19,7 @@ var field;
 */
 module("Test the public functions and properties of SC.InlineTextFieldView", {
   setup: function() {
+    view = SC.View.create(SC.InlineEditable, {});
     field = SC.InlineTextFieldView.create({});
   },
 
@@ -28,11 +29,11 @@ module("Test the public functions and properties of SC.InlineTextFieldView", {
 });
 
 
-test("contains all public class functions",
+test("does not contains all public class functions (this is backwards incompatible)",
 function() {
-  ok(SC.typeOf(SC.InlineTextFieldView['beginEditing']) === SC.T_FUNCTION, "should respond to beginEditing()");
-  ok(SC.typeOf(SC.InlineTextFieldView['commitEditing']) === SC.T_FUNCTION, "should respond to commitEditing()");
-  ok(SC.typeOf(SC.InlineTextFieldView['discardEditing']) === SC.T_FUNCTION, "should respond to discardEditing()");
+  ok(SC.none(SC.InlineTextFieldView['beginEditing']), "should not respond to beginEditing()");
+  ok(SC.none(SC.InlineTextFieldView['commitEditing']), "should not respond to commitEditing()");
+  ok(SC.none(SC.InlineTextFieldView['discardEditing']), "should not respond to discardEditing()");
 });
 
 
@@ -45,6 +46,12 @@ function() {
   ok(field.respondsTo('cancel'), "should respond to cancel()");
 });
 
+test("a view with SC.InlineEditable mixin contains all public functions",
+function() {
+  ok(view.respondsTo('beginEditing'), "should respond to beginEditing()");
+  ok(view.respondsTo('commitEditing'), "should respond to commitEditing()");
+  ok(view.respondsTo('discardEditing'), "should respond to discardEditing()");
+});
 
 test("contains all public properties",
 function() {
