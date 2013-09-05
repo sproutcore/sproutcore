@@ -145,7 +145,7 @@
   pane.verifyReadOnly = function verifyReadonly(view, isReadOnly) {
     var input = view.$('input');
 
-    if(isReadOnly) {
+    if (isReadOnly) {
       ok(input.attr('readOnly'), 'input should have readOnly attr');
     } else {
       ok(!input.attr('readOnly'), 'input should not have readOnly attr');

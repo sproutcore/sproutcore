@@ -35,7 +35,6 @@ SC.TextSelection = SC.Object.extend(SC.Copyable, SC.Freezable,
   */
   start: -1,
 
-
   /**
     The number of characters appearing to the left of the end of the
     selection.
@@ -47,45 +46,39 @@ SC.TextSelection = SC.Object.extend(SC.Copyable, SC.Freezable,
   */
   end: -1,
 
-
   /**
     The length of the selection.  This is equivalent to (end - start) and
     exists mainly as a convenience.
 
     @type Number
   */
-  length: function() {
-    var start = this.get('start') ;
-    var end   = this.get('end') ;
-    if ((start) === -1  ||  (end === -1)) {
-      return -1 ;
-    }
-    else {
-      return end - start ;
+  length: function () {
+    var start = this.get('start');
+    var end   = this.get('end');
+    if (start === -1 || end === -1) {
+      return -1;
+    } else {
+      return end - start;
     }
   }.property('start', 'end').cacheable(),
-
-
 
   // ..........................................................
   // INTERNAL SUPPORT
   //
 
-  init: function() {
+  init: function () {
     sc_super();
     this.freeze();
   },
 
-
-  copy: function() {
+  copy: function () {
     return SC.TextSelection.create({
       start: this.get('start'),
       end:   this.get('end')
     });
   },
 
-
-  toString: function() {
+  toString: function () {
     var length = this.get('length');
     if (length  &&  length > 0) {
       if (length === 1) {
@@ -99,5 +92,4 @@ SC.TextSelection = SC.Object.extend(SC.Copyable, SC.Freezable,
       return "[no text selected; caret at %@]".fmt(this.get('start'));
     }
   }
-
-}) ;
+});
