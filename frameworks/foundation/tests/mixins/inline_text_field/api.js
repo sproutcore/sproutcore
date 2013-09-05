@@ -13,7 +13,7 @@ var field, view;
   Track the public functions and properties of the class.  This will serve as an early warning
   when functions that people may depend on disappear between versions to ensure that we don't
   break promised support without proper deprecations.
-  
+
   tylerkeating: This is probably redundant since each of these functions and properties should
   be individually tested elsewhere.
 */
@@ -27,15 +27,6 @@ module("Test the public functions and properties of SC.InlineTextFieldView", {
     field = null;
   }
 });
-
-
-test("does not contains all public class functions (this is backwards incompatible)",
-function() {
-  ok(SC.none(SC.InlineTextFieldView['beginEditing']), "should not respond to beginEditing()");
-  ok(SC.none(SC.InlineTextFieldView['commitEditing']), "should not respond to commitEditing()");
-  ok(SC.none(SC.InlineTextFieldView['discardEditing']), "should not respond to discardEditing()");
-});
-
 
 test("contains all public functions",
 function() {
