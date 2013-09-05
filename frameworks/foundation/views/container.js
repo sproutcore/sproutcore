@@ -169,8 +169,8 @@ SC.ContainerView = SC.View.extend(
   // Methods
   //
 
-  /** Completes the view initialization. */
-  awake: function () {
+  /** @private */
+  init: function () {
     var view;
 
     sc_super();
