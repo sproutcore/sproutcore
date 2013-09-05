@@ -41,7 +41,14 @@ module("SC.Record.toMany array with data source", {
   }
 });
 
-test("when retrieving records with toMany association, it should call retrieveRecords once instead of calling retrieveRecord multiple times", function() {
+test("when retrieving records with toMany association, it should call retrieveRecords once instead of calling retrieveRecord multiple times");
+/** WON'T FIX AT THIS TIME.
+
+Yes, iterating a toMany attribute will call retrieveRecord for each individual index, but we cannot change this. If we tried to buffer all calls to retrieveRecord then we will break the existing contract that retrieveRecord and retrieveRecords will return immediately with storeKeys if the data source is going to handle it. Plus there are alternatives. The custom datasource could use invokeOnce and a temporary cache to buffer all calls to retrieveRecord in order to build a single request out of multiple ids. This is the most feasible, because it's highly dependent on the datasource/backend configuration. The other alternative is that the backend should return the related records when the main record is requested in a single request (again, highly dependent on the datasource/backend configuration).
+
+To do it within SproutCore itself would mean a big change along the lines of how every app works with the store and so it will certainly have to wait until a major version.
+
+, function() {
   var store = SC.Store.create().from("MyDataSource");
   SC.RunLoop.begin();
   store.loadRecords(MyApp.Project, [
@@ -61,3 +68,4 @@ test("when retrieving records with toMany association, it should call retrieveRe
   // retrieveRecords should be called only once
   same(store.get('dataSource').get('retrieveRecordsArguments').length, 1);
 });
+*/
