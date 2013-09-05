@@ -8,14 +8,7 @@
 sc_require('views/table');
 sc_require('views/table_header');
 
-/** @class
 
-  The head of a `SC.TableView`. It's a special row of the table that holds
-  the column header cells.
-
-  @extends SC.View
-  @since SproutCore 1.1
-*/
 SC.TableHeadView = SC.View.extend({
 /** @scope SC.TableHeadView.prototype */
 
