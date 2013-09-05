@@ -43,7 +43,7 @@ SC.RESIZE_AUTOMATIC = 'sc-automatic-resize';
   You can set up a split view like any other view in SproutCore:
 
       SplitView.design({
-        childViews: 'leftPanel rightPanel'.w(),
+        childViews: ['leftPanel', 'rightPanel'],
 
         leftPanel: SC.View.design(SC.SplitChild, {
           minimumSize: 200
