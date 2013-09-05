@@ -169,15 +169,25 @@ SC.ContainerView = SC.View.extend(
   // Methods
   //
 
-  /** @private
-    When a container view awakes, it will try to find the nowShowing, if
-    there is one, and set it as content if necessary.
-  */
+  /** Completes the view initialization. */
   awake: function () {
+    var view;
+
     sc_super();
 
     if (this.get('nowShowing')) {
+      // If nowShowing is directly set, invoke the instantiation of
+      // it as well.
       this.nowShowingDidChange();
+    } else {
+      // If contentView is directly set, then swap it into nowShowing so that it
+      // is properly instantiated and ready for swapping.
+      // Fixes: https://github.com/sproutcore/sproutcore/issues/1069
+      view = this.get('contentView');
+
+      if (view) {
+        this.set('nowShowing', view);
+      }
     }
   },
 
@@ -207,17 +217,6 @@ SC.ContainerView = SC.View.extend(
 
     return ret;
   }.property('parentView', 'frame').cacheable(),
-
-  /** @private */
-  createChildViews: function () {
-    // if contentView is defined, then create the content
-    var view = this.get('contentView');
-
-    if (view) {
-      view = this.contentView = this.createChildView(view);
-      this.childViews = [view];
-    }
-  },
 
   /** @private
     Invoked whenever the content property changes.  This method will simply
