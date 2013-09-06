@@ -32,7 +32,7 @@ module("SC.ListView.render", {
       layout: { top: 0, left: 0, width: 300, height: 500 },
       
       layoutForContentIndex: function(idx) {
-        return { left: 0, right: 0, top: 50, height: 50 };
+        return { left: 0, right: 0, top: idx * 50, height: 50 };
       },
       
       _cv_nowShowingDidChange: CoreTest.stub("_cv_nowShowingDidChange", function() {
