@@ -5,7 +5,10 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-// SC.LOG_BINDINGS = YES ;
+/* !!  these enable verbose logging, turn them on if you want to understand what's going on
+   in this test case !! */
+//SC.LOG_BINDINGS = YES ;
+//SC.LOG_DEFERRED_CALLS = YES;
 
 var view, content, pane ;
 
@@ -16,8 +19,9 @@ var renderFunc = CoreTest.stub("render", function() {
 module("SC.ListView.render", {
   
   setup: function() {
+          
     SC.RunLoop.begin();
-    
+
     content = "1 2 3 4 5 6 7 8 9 10".w().map(function(x) {
       return SC.Object.create({ value: x });
     });
@@ -36,7 +40,8 @@ module("SC.ListView.render", {
       }),
       
       exampleView: SC.ListItemView.extend({
-        render: renderFunc
+        render: renderFunc,
+        contentValueKey: "value"
       }),
       
       // reset stubs
@@ -46,19 +51,25 @@ module("SC.ListView.render", {
       }
       
     });
+
     
     pane = SC.MainPane.create();
+
     pane.appendChild(view);
     pane.append();
-    
+
     SC.RunLoop.end();
+
   },
   
   teardown: function() {
     SC.RunLoop.begin();
+    
     view.reset();
+    
     pane.remove();
     pane.destroy();
+    
     SC.RunLoop.end();
   }
   
@@ -68,10 +79,13 @@ module("SC.ListView.render", {
 // BASIC TESTS
 // 
 
-test("list item render() should only be called once per item view a static content array", function() {
-  renderFunc.expect(10);
+test("in a static content array list item render() should only be called twice * item view", function() {
+  // one call happens in the list view computeLayout() and one in mainpane layoutChildViewsIfNeeded
+  // turn on debugging by uncommenting the lines at the top of this test to see it in action
+  renderFunc.expect(20);
 });
 
-// test("_cv_nowShowingDidChange() should only be called once with a static content array", function() {
-//   view._cv_nowShowingDidChange.expect(1); // currently is 3...
-// });
+
+test("with a static content array _cv_nowShowingDidChange() should only be called 4 times", function() {
+   view._cv_nowShowingDidChange.expect(4);
+});
