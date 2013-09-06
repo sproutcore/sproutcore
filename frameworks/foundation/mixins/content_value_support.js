@@ -37,17 +37,26 @@ SC.ContentValueSupport = {
     // setup content observing if needed.
     this._control_contentKeysDidChange();
   },
-  
+
+  /** @private */
+  destroyMixin: function () {
+    // Remove old observers on self.
+    this._cleanup_old_observers();
+
+    // Remove old observers on content.
+    this._cleanup_old_content_observers();
+  },
+
   /**
     The value represented by this control.
-    
+
     Most controls represent a value of some type, such as a number, string
     or image URL.  This property should hold that value.  It is bindable
     and observable.  Changing this value will immediately change the
-    appearance of the control.  Likewise, editing the control 
+    appearance of the control.  Likewise, editing the control
     will immediately change this value.
-    
-    If instead of setting a single value on a control, you would like to 
+
+    If instead of setting a single value on a control, you would like to
     set a content object and have the control display a single property
     of that control, then you should use the content property instead.
 
@@ -55,23 +64,23 @@ SC.ContentValueSupport = {
     @default null
   */
   value: null,
-  
+
   /**
     The content object represented by this control.
-    
-    Often you need to use a control to display some single aspect of an 
+
+    Often you need to use a control to display some single aspect of an
     object, especially if you are using the control as an item view in a
     collection view.
-    
+
     In those cases, you can set the content and contentValueKey for the
     control.  This will cause the control to observe the content object for
-    changes to the value property and then set the value of that property 
+    changes to the value property and then set the value of that property
     on the "value" property of this object.
-    
-    Note that unless you are using this control as part of a form or 
+
+    Note that unless you are using this control as part of a form or
     collection view, then it would be better to instead bind the value of
     the control directly to a controller property.
-    
+
     @type SC.Object
     @default null
   */
@@ -92,29 +101,29 @@ SC.ContentValueSupport = {
   _default_contentKeys: {
     contentValueKey: 'value'
   },
-  
+
   /**
-    The property on the content object that would want to represent the 
+    The property on the content object that would want to represent the
     value of this control.  This property should only be set before the
     content object is first set.  If you have a displayDelegate, then
     you can also use the contentValueKey of the displayDelegate.
-    
+
     @type String
     @default null
   */
   contentValueKey: null,
-  
+
   /**
-    Invoked whenever any property on the content object changes.  
-    
+    Invoked whenever any property on the content object changes.
+
     The default implementation will update the value property of the view
     if the contentValueKey property has changed.  You can override this
     method to implement whatever additional changes you would like.
-    
-    The key will typically contain the name of the property that changed or 
+
+    The key will typically contain the name of the property that changed or
     '*' if the content object itself has changed.  You should generally do
     a total reset if '*' is changed.
-    
+
     @param {Object} target the content object
     @param {String} key the property that changes
     @returns {void}
@@ -137,13 +146,13 @@ SC.ContentValueSupport = {
   },
 
   /**
-    Helper method you can use from your own implementation of 
+    Helper method you can use from your own implementation of
     contentPropertyDidChange().  This method will look up the content key to
     extract a property and then update the property if needed.  If you do
-    not pass the content key or the content object, they will be computed 
+    not pass the content key or the content object, they will be computed
     for you.  It is more efficient, however, for you to compute these values
     yourself if you expect this method to be called frequently.
-    
+
     @param {String} prop local property to update
     @param {String} key the contentproperty that changed
     @param {String} contentKey the local property that contains the key
@@ -154,7 +163,7 @@ SC.ContentValueSupport = {
     var del, v;
 
     if (contentKey === undefined) contentKey = "content"+prop.capitalize()+"Key";
-    
+
     // prefer our own definition of contentKey
     if(this[contentKey]) contentKey = this.get(contentKey);
     // if we don't have one defined check the delegate
@@ -165,29 +174,29 @@ SC.ContentValueSupport = {
     // only bother setting value if the observer triggered for the correct key
     if (key === '*' || key === contentKey) {
       if (content === undefined) content = this.get('content');
-      
+
       if(content) v = content.get ? content.get(contentKey) : content[contentKey];
       else v = null;
 
       this.setIfChanged(prop, v) ;
     }
-    
+
     return this ;
   },
-  
+
   /**
     Relays changes to the value back to the content object if you are using
     a content object.
-    
+
     This observer is triggered whenever the value changes.  It will only do
     something if it finds you are using the content property and
     contentValueKey and the new value does not match the old value of the
-    content object.  
-    
+    content object.
+
     If you are using contentValueKey in some other way than typically
     implemented by this mixin, then you may want to override this method as
     well.
-    
+
     @returns {void}
   */
   updateContentWithValueObserver: function(target, key) {
@@ -230,43 +239,21 @@ SC.ContentValueSupport = {
   _old_contentKeys: null,
 
   /** @private
-    Observes when a content object has changed and handles notifying 
+    Observes when a content object has changed and handles notifying
     changes to the value of the content object.
 
     Optimized for the default case of only observing contentValueKey. If you use
     a custom value for contentKeys it will switch to using a CoreSet to track
     observed keys.
   */
-  _control_contentDidChange: function(target, key) {
+  _control_contentDidChange: function (target, key) {
     var content = this.get('content'),
     contentKeys = this.get('contentKeys'), contentKey,
-    old = this._control_content,
     oldKeys = this._old_contentValueKeys,
-    oldType = SC.typeOf(oldKeys),
     f = this.contentPropertyDidChange;
 
     // remove an observer from the old content if necessary
-    if (old && old.removeObserver && oldKeys) {
-      // default case
-      if(oldType === SC.T_STRING) {
-        old.removeObserver(oldKeys, this, f);
-
-        oldKeys = null;
-      }
-
-      // set case
-      else {
-        var i, len = oldKeys.get('length');
-
-        for(i = 0; i < len; i++) {
-          contentKey = oldKeys[i];
-
-          old.removeObserver(contentKey, this, f);
-        }
-
-        oldKeys.clear();
-      }
-    }
+    this._cleanup_old_content_observers();
 
     // add observer to new content if necessary.
     if (content && content.addObserver) {
@@ -311,9 +298,6 @@ SC.ContentValueSupport = {
     if(key) this.contentPropertyDidChange(content, key) ;
   }.observes('content'),
 
-  // holds the previous value of contentKeys
-  _old_contentKeys: null,
-
   /** @private
     Observes changes to contentKeys and sets up observers on the local keys to
     update the observers on the content object.
@@ -321,19 +305,13 @@ SC.ContentValueSupport = {
   _control_contentKeysDidChange: function() {
     var key, reverse = {},
     // if no hash is present, use the default contentValueKey -> value
-    contentKeys = this.get('contentKeys') || this._default_contentKeys, contentKey,
-    oldContentKeys = this._old_contentKeys,
+    contentKeys = this.get('contentKeys') || this._default_contentKeys,
+    contentKey,
     f = this._control_contentDidChange,
     reverseF = this.updateContentWithValueObserver;
 
-    // remove old observers
-    for(key in oldContentKeys) {
-      contentKey = oldContentKeys[key];
-
-      this.removeObserver(contentKey, this, reverseF);
-
-      this.removeObserver(key, this, f);
-    }
+    // Remove old observers.
+    this._cleanup_old_observers();
 
     // add new observers
     for(key in contentKeys) {
@@ -356,6 +334,53 @@ SC.ContentValueSupport = {
 
     // call the other observer now to update all the observers
     this._control_contentDidChange();
-  }.observes('contentKeys')
+  }.observes('contentKeys'),
+
+  /** @private */
+  _cleanup_old_content_observers: function () {
+    var old = this._control_content,
+      oldKeys = this._old_contentValueKeys,
+      oldType = SC.typeOf(oldKeys),
+      f = this.contentPropertyDidChange,
+      contentKey;
+
+    if (old && old.removeObserver && oldKeys) {
+      // default case
+      if(oldType === SC.T_STRING) {
+        old.removeObserver(oldKeys, this, f);
+
+        oldKeys = null;
+      }
+
+      // set case
+      else {
+        var i, len = oldKeys.get('length');
+
+        for(i = 0; i < len; i++) {
+          contentKey = oldKeys[i];
+
+          old.removeObserver(contentKey, this, f);
+        }
+
+        oldKeys.clear();
+      }
+    }
+  },
+
+  /** @private */
+  _cleanup_old_observers: function () {
+    var oldContentKeys = this._old_contentKeys,
+      f = this._control_contentDidChange,
+      reverseF = this.updateContentWithValueObserver,
+      contentKey, key;
+
+    // remove old observers
+    for(key in oldContentKeys) {
+      contentKey = oldContentKeys[key];
+
+      this.removeObserver(contentKey, this, reverseF);
+      this.removeObserver(key, this, f);
+    }
+  }
 };
 

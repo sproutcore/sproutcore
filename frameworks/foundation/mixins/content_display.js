@@ -10,33 +10,33 @@
 
   The SC.ContentDisplay mixin makes it easy to automatically update your view
   display whenever relevant properties on a content object change.  To use
-  this mixin, include it in your view and then add the names of the 
-  properties on the content object you want to trigger a displayDidChange() 
-  method on your view. Your updateDisplay() method will then be called at the 
+  this mixin, include it in your view and then add the names of the
+  properties on the content object you want to trigger a displayDidChange()
+  method on your view. Your updateDisplay() method will then be called at the
   end of the run loop.
-  
+
   ## Example
-  
-      MyApp.MyViewClass = SC.View.extend(SC.ContentDisplay, { 
+
+      MyApp.MyViewClass = SC.View.extend(SC.ContentDisplay, {
         contentDisplayProperties: 'title isEnabled hasChildren'.w(),
         ...
       });
-  
+
   @since SproutCore 1.0
 */
 SC.ContentDisplay = {
-  
+
   /** @private */
   concatenatedProperties: 'contentDisplayProperties',
 
   /** @private */
   displayProperties: ['content'],
-  
-  /** 
+
+  /**
     Add an array with the names of any property on the content object that
     should trigger an update of the display for your view.  Changes to the
     content object will only invoke your display method once per runloop.
-    
+
     @type Array
     @default []
   */
@@ -97,8 +97,8 @@ SC.ContentDisplay = {
     if (content) this._display_beginObservingContent(content);
 
     this.displayDidChange();
-  }.observes('content', 'contentDisplayProperties'),
-  
+  }.observes('content'),
+
   /** @private Invoked when properties on the content object change. */
   _display_contentPropertyDidChange: function(target, key, value, propertyRevision) {
     if (key === '*') {
@@ -109,5 +109,5 @@ SC.ContentDisplay = {
       if (ary && ary.indexOf(key)>=0) this.displayDidChange();
     }
   }
-  
+
 } ;
