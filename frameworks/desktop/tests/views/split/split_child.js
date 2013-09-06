@@ -23,45 +23,61 @@
 */
 
 
-var splitView;
+var pane, splitView;
 
 function setupSuite(layoutDirection) {
   module("SplitView - SplitChild (" + (layoutDirection === SC.LAYOUT_HORIZONTAL ? "HORIZONTAL" : "VERTICAL") + ")", {
+
     setup: function () {
-      SC.RunLoop.begin();
-      splitView = SC.SplitView.create({
-        childViews: [ 'left', 'middle', 'right' ],
+      SC.run(function () {
+        splitView = SC.SplitView.create({
+          childViews: [ 'left', 'middle', 'right' ],
 
-        left:  SC.View.extend(SC.SplitChild, { name: 'left', size: 100 }),
-        middle: SC.View.extend(SC.SplitChild, { name: 'middle', size: 300, positionOffset: -10, sizeOffset: 20 }),
-        right: SC.SplitView.extend(SC.SplitChild, {
-          name: 'right',
-          size: 100,
-          splitDividerView: null,
-          childViews: ['top', 'bottom'],
-          top: SC.View.extend(SC.SplitChild, { name: 'top', size: 100 }),
-          bottom: SC.View.extend(SC.SplitChild, { name: 'bottom', size: 400 })
-        }),
+          left:  SC.View.extend(SC.SplitChild, { name: 'left', size: 100 }),
 
-        layout: {
-          left: 0,
-          top: 0,
-          width: layoutDirection === SC.LAYOUT_HORIZONTAL ? 500 : 300,
-          height: layoutDirection === SC.LAYOUT_HORIZONTAL ? 300 : 500
-        },
+          middle: SC.View.extend(SC.SplitChild, { name: 'middle', size: 300, positionOffset: -10, sizeOffset: 20 }),
 
-        layoutDirection: layoutDirection,
+          right: SC.SplitView.extend(SC.SplitChild, {
+            name: 'right',
+            size: 100,
+            splitDividerView: null,
+            childViews: ['top', 'bottom'],
+            top: SC.View.extend(SC.SplitChild, { name: 'top', size: 100 }),
+            bottom: SC.View.extend(SC.SplitChild, { name: 'bottom', size: 400 })
+          }),
 
-        splitDividerView: null // in most of these tests, we are not checking the behavior of split dividers
+          layout: {
+            left: 0,
+            top: 0,
+            width: layoutDirection === SC.LAYOUT_HORIZONTAL ? 500 : 300,
+            height: layoutDirection === SC.LAYOUT_HORIZONTAL ? 300 : 500
+          },
+
+          layoutDirection: layoutDirection,
+
+          splitDividerView: null // in most of these tests, we are not checking the behavior of split dividers
+
+        });
+
+        pane = SC.Pane.create({
+          childViews: [splitView]
+        });
+        pane.append();
       });
-      SC.RunLoop.end();
+    },
+
+    teardown: function () {
+      pane.destroy();
+      pane = splitView = null;
     }
   });
 
   function verifyChildren(view) {
     var pos = 0;
+
     for (var i = 1; i < arguments.length; i++) {
       var child = view.childViews[i - 1];
+
       equals(child.get('position'), pos, "Correct position for view " + i);
       equals(child.get('size'), arguments[i], "Correct size for view " + i);
 
