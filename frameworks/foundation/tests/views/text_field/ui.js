@@ -420,7 +420,8 @@
     view.set('selection', newSelection);
 
     var fetchedSelection = view.get('selection');
-    ok(fetchedSelection.get('direction') === 'none', 'the selection direction should be none');
+    ok(!SC.platform.input.selectionDirection || fetchedSelection.get('direction') === 'none',
+        'the selection direction should be none');
   });
 
   test("Setting forward selection direction", function () {
@@ -433,7 +434,8 @@
     view.set('selection', newSelection);
 
     var fetchedSelection = view.get('selection');
-    ok(fetchedSelection.get('direction') === 'forward', 'the selection direction should be forward');
+    ok(!SC.platform.input.selectionDirection || fetchedSelection.get('direction') === 'forward',
+        'the selection direction should be forward');
   });
 
   test("Setting backward selection direction", function () {
@@ -446,7 +448,8 @@
     view.set('selection', newSelection);
 
     var fetchedSelection = view.get('selection');
-    ok(fetchedSelection.get('direction') === 'backward', 'the selection direction should be backward');
+    ok(!SC.platform.input.selectionDirection || fetchedSelection.get('direction') === 'backward',
+        'the selection direction should be backward');
   });
 
   test("Getting no selection direction", function () {
@@ -458,7 +461,8 @@
     fieldElement.setSelectionRange(2, 5, 'none');
 
     var fetchedSelection = view.get('selection');
-    ok(fetchedSelection.get('direction') === 'forward', 'the selection direction should default to forward');
+    ok(!SC.platform.input.selectionDirection || fetchedSelection.get('direction') === 'forward',
+        'the selection direction should default to forward');
   });
 
   test("Getting forward selection direction", function () {
@@ -470,7 +474,8 @@
     fieldElement.setSelectionRange(2, 5, 'forward');
 
     var fetchedSelection = view.get('selection');
-    ok(fetchedSelection.get('direction') === 'forward', 'the selection direction should be forward');
+    ok(!SC.platform.input.selectionDirection || fetchedSelection.get('direction') === 'forward',
+        'the selection direction should be forward');
   });
 
   test("Getting backward selection direction", function () {
@@ -482,7 +487,8 @@
     fieldElement.setSelectionRange(2, 5, 'backward');
 
     var fetchedSelection = view.get('selection');
-    ok(fetchedSelection.get('direction') === 'backward', 'the selection direction should be backward');
+    ok(!SC.platform.input.selectionDirection || fetchedSelection.get('direction') === 'backward',
+        'the selection direction should be backward');
   });
 
   test("Setting textarea selection direction", function () {
@@ -494,7 +500,8 @@
     view.set('selection', newSelection);
 
     var fetchedSelection = view.get('selection');
-    ok(fetchedSelection.get('direction') === 'backward', 'the selection direction should be backward');
+    ok(!SC.platform.input.selectionDirection || fetchedSelection.get('direction') === 'backward',
+        'the selection direction should be backward');
   });
 
   test("Getting textarea selection direction", function () {
@@ -505,7 +512,8 @@
     fieldElement.setSelectionRange(2, 5, 'backward');
 
     var fetchedSelection = view.get('selection');
-    ok(fetchedSelection.get('direction') === 'backward', 'the selection direction should be backward');
+    ok(!SC.platform.input.selectionDirection || fetchedSelection.get('direction') === 'backward',
+        'the selection direction should be backward');
   });
 
   // ..........................................................

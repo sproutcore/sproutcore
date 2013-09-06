@@ -414,13 +414,13 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
         } else {
           // In IE8, input elements don't have hasOwnProperty() defined.
           try {
-            if ('selectionStart' in element) {
+            if (SC.platform.input.selectionStart) {
               start = element.selectionStart;
             }
-            if ('selectionEnd' in element) {
+            if (SC.platform.input.selectionEnd) {
               end = element.selectionEnd;
             }
-            if ('selectionDirection' in element) {
+            if (SC.platform.input.selectionDirection) {
               direction = element.selectionDirection;
             }
           }
@@ -480,6 +480,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
             // In Firefox & IE when you call setSelectionRange on a hidden input it will throw weird
             // errors. Adding this to just ignore it.
             return null;
+          }
+
+          if (!SC.platform.input.selectionDirection) {
+            // Browser doesn't support selectionDirection, set it to 'none' so the wrong value is not cached.
+            value.set('direction', 'none');
           }
         } else {
           // Support Internet Explorer.
