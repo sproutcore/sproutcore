@@ -281,7 +281,11 @@ SC.CoreView.reopen(
     @returns {SC.View} receiver
   */
   displayDidChange: function () {
-    // Filter the input channel.
+    //@if (debug)
+    if (SC.LOG_VIEW_STATES) {
+      SC.Logger.log('%@:%@ — displayDidChange()'.fmt(this, this.get('viewState')));
+    }
+    //@endif
     this.invokeOnce(this._doUpdateContent);
 
     return this;
