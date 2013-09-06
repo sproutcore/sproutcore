@@ -276,13 +276,24 @@ SC.View.reopen(
   */
   isFixedPosition: function () {
     var layout = this.get('layout'),
+      hasLeft,
+      hasTop,
         ret;
 
     // Position is fixed if it has left + top !== SC.LAYOUT_AUTO
-    ret = (
-      ((layout.left !== undefined) && (layout.top !== undefined)) &&
-      ((layout.left !== SC.LAYOUT_AUTO) && (layout.top !== SC.LAYOUT_AUTO))
-    );
+    hasLeft = layout.left !== undefined;
+    if (!hasLeft) {
+      // Check for implied left. If there is a width, then there can't be a right or centerX.
+      hasLeft =  layout.width === undefined || (layout.width !== undefined && layout.right === undefined && layout.centerX === undefined);
+    }
+
+    hasTop = layout.top !== undefined;
+    if (!hasTop) {
+      // Check for implied top. If there is a height, then there can't be a bottom or centerY.
+      hasTop = layout.height === undefined || (layout.height !== undefined && layout.bottom === undefined && layout.centerY === undefined);
+    }
+
+    ret = (hasLeft && hasTop && layout.left !== SC.LAYOUT_AUTO && layout.top !== SC.LAYOUT_AUTO);
 
     // The position may appear fixed, but only if none of the values are percentages.
     if (ret) {
