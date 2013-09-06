@@ -33,7 +33,7 @@ SC.ContentValueSupport = {
   hasContentValueSupport: YES,
 
   /** @private */
-  initMixin: function() {
+  initMixin: function () {
     // setup content observing if needed.
     this._control_contentKeysDidChange();
   },
@@ -129,14 +129,14 @@ SC.ContentValueSupport = {
     @returns {void}
     @test in content
   */
-  contentPropertyDidChange: function(target, key) {
+  contentPropertyDidChange: function (target, key) {
     var contentKeys = this.get('contentKeys');
 
-    if(contentKeys) {
+    if (contentKeys) {
       var contentKey;
 
-      for(contentKey in contentKeys) {
-        if(key === '*' || key === this.getDelegateProperty(contentKey, this, this.get('displayDelegate'), contentKeys)) return this.updatePropertyFromContent(contentKeys[contentKey], key, contentKey, target);
+      for (contentKey in contentKeys) {
+        if (key === '*' || key === this.getDelegateProperty(contentKey, this, this.get('displayDelegate'), contentKeys)) return this.updatePropertyFromContent(contentKeys[contentKey], key, contentKey, target);
       }
     }
 
@@ -159,15 +159,15 @@ SC.ContentValueSupport = {
     @param {Object} content
     @returns {SC.Control} receiver
   */
-  updatePropertyFromContent: function(prop, key, contentKey, content) {
+  updatePropertyFromContent: function (prop, key, contentKey, content) {
     var del, v;
 
-    if (contentKey === undefined) contentKey = "content"+prop.capitalize()+"Key";
+    if (contentKey === undefined) contentKey = "content" + prop.capitalize() + "Key";
 
     // prefer our own definition of contentKey
-    if(this[contentKey]) contentKey = this.get(contentKey);
+    if (this[contentKey]) contentKey = this.get(contentKey);
     // if we don't have one defined check the delegate
-    else if((del = this.get('displayDelegate')) && (v = del[contentKey])) contentKey = del.get ? del.get(contentKey) : v;
+    else if ((del = this.get('displayDelegate')) && (v = del[contentKey])) contentKey = del.get ? del.get(contentKey) : v;
     // if we have no key we can't do anything so just short circuit out
     else return this;
 
@@ -175,13 +175,13 @@ SC.ContentValueSupport = {
     if (key === '*' || key === contentKey) {
       if (content === undefined) content = this.get('content');
 
-      if(content) v = content.get ? content.get(contentKey) : content[contentKey];
+      if (content) v = content.get ? content.get(contentKey) : content[contentKey];
       else v = null;
 
-      this.setIfChanged(prop, v) ;
+      this.setIfChanged(prop, v);
     }
 
-    return this ;
+    return this;
   },
 
   /**
@@ -199,12 +199,12 @@ SC.ContentValueSupport = {
 
     @returns {void}
   */
-  updateContentWithValueObserver: function(target, key) {
+  updateContentWithValueObserver: function (target, key) {
     var reverseContentKeys = this._reverseContentKeys;
 
     // if everything changed, iterate through and update them all
-    if(!key || key === '*') {
-      for(key in reverseContentKeys) {
+    if (!key || key === '*') {
+      for (key in reverseContentKeys) {
         this.updateContentWithValueObserver(this, key);
       }
     }
@@ -226,7 +226,7 @@ SC.ContentValueSupport = {
 
     // avoid re-writing inherited props
     else if (content[contentKey] !== value) {
-      content[contentKey] = value ;
+      content[contentKey] = value;
     }
   },
 
@@ -258,15 +258,15 @@ SC.ContentValueSupport = {
     // add observer to new content if necessary.
     if (content && content.addObserver) {
       // set case
-      if(contentKeys) {
+      if (contentKeys) {
         // lazily create the key set
-        if(!oldKeys) oldKeys = SC.CoreSet.create();
+        if (!oldKeys) oldKeys = SC.CoreSet.create();
 
         // add observers to each key
-        for(contentKey in contentKeys) {
+        for (contentKey in contentKeys) {
           contentKey = this.getDelegateProperty(contentKey, this, this.get('displayDelegate'));
 
-          if(contentKey) {
+          if (contentKey) {
             content.addObserver(contentKey, this, f);
 
             oldKeys.add(contentKey);
@@ -278,11 +278,11 @@ SC.ContentValueSupport = {
       else {
         contentKey = this.getDelegateProperty('contentValueKey', this, this.get('displayDelegate'));
 
-        if(contentKey) {
+        if (contentKey) {
           content.addObserver(contentKey, this, f);
 
           // if we had a set before, continue using it
-          if(oldKeys) oldKeys.add(contentKey);
+          if (oldKeys) oldKeys.add(contentKey);
           // otherwise just use a string
           else oldKeys = contentKey;
         }
@@ -290,19 +290,19 @@ SC.ContentValueSupport = {
     }
 
     // update previous values
-    this._control_content = content ;
+    this._control_content = content;
     this._old_contentValueKeys = oldKeys;
 
     // notify that value did change.
     key = (!key || key === 'content') ? '*' : this.get(key);
-    if(key) this.contentPropertyDidChange(content, key) ;
+    if (key) this.contentPropertyDidChange(content, key);
   }.observes('content'),
 
   /** @private
     Observes changes to contentKeys and sets up observers on the local keys to
     update the observers on the content object.
   */
-  _control_contentKeysDidChange: function() {
+  _control_contentKeysDidChange: function () {
     var key, reverse = {},
     // if no hash is present, use the default contentValueKey -> value
     contentKeys = this.get('contentKeys') || this._default_contentKeys,
@@ -314,7 +314,7 @@ SC.ContentValueSupport = {
     this._cleanup_old_observers();
 
     // add new observers
-    for(key in contentKeys) {
+    for (key in contentKeys) {
       contentKey = contentKeys[key];
 
       // build reverse mapping to update content with value
@@ -346,7 +346,7 @@ SC.ContentValueSupport = {
 
     if (old && old.removeObserver && oldKeys) {
       // default case
-      if(oldType === SC.T_STRING) {
+      if (oldType === SC.T_STRING) {
         old.removeObserver(oldKeys, this, f);
 
         oldKeys = null;
@@ -356,7 +356,7 @@ SC.ContentValueSupport = {
       else {
         var i, len = oldKeys.get('length');
 
-        for(i = 0; i < len; i++) {
+        for (i = 0; i < len; i++) {
           contentKey = oldKeys[i];
 
           old.removeObserver(contentKey, this, f);
@@ -375,7 +375,7 @@ SC.ContentValueSupport = {
       contentKey, key;
 
     // remove old observers
-    for(key in oldContentKeys) {
+    for (key in oldContentKeys) {
       contentKey = oldContentKeys[key];
 
       this.removeObserver(contentKey, this, reverseF);
