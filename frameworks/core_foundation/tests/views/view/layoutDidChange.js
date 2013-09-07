@@ -25,7 +25,9 @@ test("notifies layoutStyle & frame change", function () {
   equals(layoutStyleCallCount, 0, 'should not trigger observers for layoutStyle');
 
   // Attach to the document.
-  view.createLayer()._doAttach(document.body);
+  var parent = SC.Pane.create();
+  parent.append();
+  parent.appendChild(view);
 
   equals(frameCallCount, 2, 'should trigger observers for frame when attached to the document');
   equals(layoutStyleCallCount, 0, 'should still not trigger observers for layoutStyle');
@@ -39,6 +41,7 @@ test("notifies layoutStyle & frame change", function () {
 
   // Clean up.
   view.destroy();
+  parent.destroy();
 });
 
 test("invokes layoutDidChangeFor() on layoutView each time it is called", function () {
