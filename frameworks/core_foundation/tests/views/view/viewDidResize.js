@@ -166,28 +166,28 @@ test("When parentViewDidResize is called on a view, it should only notify on fra
   view.viewDidResize.reset(); view.frameCallCount = 0;
   parentView.adjust({ width: 60, height: 60 });
   view.viewDidResize.expect(0);
-  equals(view.frameCallCount, 1, 'should notify frame changed when isFixedPosition: %@ and isFixedSize: %@'.fmt(view.get('isFixedPosition'), view.get('isFixedSize')));
+  equals(view.frameCallCount, 1, 'right align: should notify frame changed when isFixedPosition: %@ and isFixedSize: %@'.fmt(view.get('isFixedPosition'), view.get('isFixedSize')));
 
   // try with bottom align
-  view.set('layout', { top: 10, bottom: 10, height: 10, width: 10 });
+  view.set('layout', { left: 10, bottom: 10, height: 10, width: 10 });
   view.viewDidResize.reset(); view.frameCallCount = 0;
   parentView.adjust({ width: 50, height: 50 });
   view.viewDidResize.expect(0);
-  equals(view.frameCallCount, 1, 'should notify frame changed when isFixedPosition: %@ and isFixedSize: %@'.fmt(view.get('isFixedPosition'), view.get('isFixedSize')));
+  equals(view.frameCallCount, 1, 'bottom align: should notify frame changed when isFixedPosition: %@ and isFixedSize: %@'.fmt(view.get('isFixedPosition'), view.get('isFixedSize')));
 
   // try with center horizontal align
   view.set('layout', { centerX: 10, top: 10, height: 10, width: 10 });
   view.viewDidResize.reset(); view.frameCallCount = 0;
   parentView.adjust({ width: 40, height: 40 });
   view.viewDidResize.expect(0);
-  equals(view.frameCallCount, 1, 'should notify frame changed when isFixedPosition: %@ and isFixedSize: %@'.fmt(view.get('isFixedPosition'), view.get('isFixedSize')));
+  equals(view.frameCallCount, 1, 'centerX: should notify frame changed when isFixedPosition: %@ and isFixedSize: %@'.fmt(view.get('isFixedPosition'), view.get('isFixedSize')));
 
   // try with center vertical align
   view.set('layout', { left: 10, centerY: 10, height: 10, width: 10 });
   view.viewDidResize.reset(); view.frameCallCount = 0;
   parentView.adjust({ width: 30, height: 30 });
   view.viewDidResize.expect(0);
-  equals(view.frameCallCount, 1, 'should notify frame changed when isFixedPosition: %@ and isFixedSize: %@'.fmt(view.get('isFixedPosition'), view.get('isFixedSize')));
+  equals(view.frameCallCount, 1, 'centerY: should notify frame changed when isFixedPosition: %@ and isFixedSize: %@'.fmt(view.get('isFixedPosition'), view.get('isFixedSize')));
 });
 
 // ..........................................................
