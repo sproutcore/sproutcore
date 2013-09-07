@@ -801,10 +801,6 @@ SC.CoreView.reopen(
     }
     //@endif
 
-
-    // Legacy.
-    this.set('layerNeedsUpdate', true);
-
     if (this.get('_isRendered')) {
       if (isVisibleInWindow || force) {
         // Only in the visible states do we allow updates without being forced.

@@ -290,6 +290,9 @@ SC.CoreView.reopen(
     // Don't run _doUpdateContent needlessly, because the view may render
     // before it is invoked, which would result in a needless update.
     if (this.get('_isRendered')) {
+      // Legacy.
+      this.set('layerNeedsUpdate', true);
+
       this.invokeOnce(this._doUpdateContent);
     }
 
