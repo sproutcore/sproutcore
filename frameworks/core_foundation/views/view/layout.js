@@ -278,7 +278,7 @@ SC.View.reopen(
     var layout = this.get('layout'),
       hasLeft,
       hasTop,
-        ret;
+      ret;
 
     // Position is fixed if it has left + top !== SC.LAYOUT_AUTO
     hasLeft = layout.left !== undefined;
@@ -1231,7 +1231,7 @@ SC.View.reopen(
   /** @private Override: Notify on attached (avoids notify of frame changed). */
   _notifyAttached: function () {
     // If we are using static layout then we don't know the frame until appended to the document.
-    if (this.get('useStaticLayout') || !this.get('isFixedLayout')) {
+    if (this.get('useStaticLayout')) {
       // We call viewDidResize so that it calls parentViewDidResize on all child views.
       this.viewDidResize();
     }
