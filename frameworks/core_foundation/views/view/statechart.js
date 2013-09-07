@@ -691,7 +691,7 @@ SC.CoreView.reopen(
       this.renderToContext(context);
       this.set('layer', context.element());
 
-      // Route.
+      // Route first.
       this._gotoUnattachedState();
 
       // Notify rendered (on self and all child views).
@@ -1246,11 +1246,11 @@ SC.CoreView.reopen(
 
   /** @private Updates according to parent did render. */
   _parentDidRender: function () {
+    // Route first.
+    this._gotoUnattachedByParentState();
+
     // Notify rendered.
     this._rendered();
-
-    // Route
-    this._gotoUnattachedByParentState();
   },
 
   /** @private Starts building out view if appropriate. */
