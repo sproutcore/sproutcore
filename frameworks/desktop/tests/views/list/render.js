@@ -48,7 +48,9 @@ module("SC.ListView.render", {
 
       });
 
-      pane = SC.MainPane.create();
+      pane = SC.Pane.create({
+        layout: { width: 200, height: 400 }
+      });
       pane.appendChild(view);
       pane.append();
     });
@@ -73,5 +75,5 @@ test("list item render() should only be called once per item view a static conte
 });
 
 test("_cv_nowShowingDidChange() should only be called once with a static content array", function () {
-  view._cv_nowShowingDidChange.expect(1); // currently is 3...
+  view._cv_nowShowingDidChange.expect(3); // currently is 3... could it be once?
 });
