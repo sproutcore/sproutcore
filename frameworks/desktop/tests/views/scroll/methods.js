@@ -14,49 +14,56 @@ module("SC.ScrollView", {
   setup: function () {
     SC.run(function () {
       pane = SC.MainPane.create({
-      childViews: [
-       SC.ScrollView.extend({
-         contentView: SC.ImageView.design({value: appleURL, layout: {height:4000, width:4000}})
-       }),
-       SC.ScrollView.extend({
-         contentView: SC.ImageView.design({value: appleURL, layout: {height:2000, width:2000}})
-       }),
-       SC.ScrollView.extend({
-          layout: { height: 400, width: 400 },
-          contentView: SC.View.design({
-            layout: { height: 500, width: 500 },
-            childViews: [
-              SC.ScrollView.design({
-                layout: { height: 200, width: 200, centerX: 0, centerY: 0 },
-                contentView: SC.ImageView.design({value: appleURL, layout: {height:300, width:300}})
-              })
-            ]
+        childViews: [
+          SC.ScrollView.extend({
+            contentView: SC.ImageView.design({ value: appleURL, layout: { height: 4000, width: 4000 }})
+          }),
+          SC.ScrollView.extend({
+            contentView: SC.ImageView.design({ value: appleURL, layout: { height: 2000, width: 2000 }})
+          }),
+          SC.ScrollView.extend({
+            layout: { height: 400, width: 400 },
+            contentView: SC.View.design({
+              layout: { height: 500, width: 500 },
+              childViews: [
+                SC.ScrollView.design({
+                  layout: { height: 200, width: 200, centerX: 0, centerY: 0 },
+                  contentView: SC.ImageView.design({ value: appleURL, layout: { height: 300, width: 300 }})
+                })
+              ]
+            })
           })
-       })
-       ],
+        ],
 
         expectedVertLine: function (line) {
-        var ret = view.get('verticalLineScroll')*line;
-        var alt = view.get('maximumVerticalScrollOffset');
-        ret = (ret > alt)? alt : ret;
+          var ret = view.get('verticalLineScroll') * line;
+          var alt = view.get('maximumVerticalScrollOffset');
+          ret = (ret > alt) ? alt : ret;
+
           return ret;
         },
+
         expectedHorzLine: function (line) {
-        var ret = view.get('horizontalLineScroll')*line;
-        var alt = view.get('maximumHorizontalScrollOffset');
-        ret = (ret > alt)? alt : ret;
+          var ret = view.get('horizontalLineScroll') * line;
+          var alt = view.get('maximumHorizontalScrollOffset');
+          ret = (ret > alt) ? alt : ret;
+
           return ret;
         },
+
         expectedVertPage: function (page) {
-        var ret = view.get('verticalPageScroll')*page;
-        var alt = view.get('maximumVerticalScrollOffset');
-        ret = (ret > alt)? alt : ret;
+          var ret = view.get('verticalPageScroll') * page;
+          var alt = view.get('maximumVerticalScrollOffset');
+          ret = (ret > alt) ? alt : ret;
+
           return ret;
         },
+
         expectedHorzPage: function (page) {
-        var ret = view.get('horizontalPageScroll')*page;
-        var alt = view.get('maximumHorizontalScrollOffset');
-        ret = (ret > alt)? alt : ret;
+          var ret = view.get('horizontalPageScroll') * page;
+          var alt = view.get('maximumHorizontalScrollOffset');
+          ret = (ret > alt) ? alt : ret;
+
           return ret;
         }
       });
@@ -80,7 +87,7 @@ module("SC.ScrollView", {
     SC.run(function () {
       pane.destroy();
     });
-    pane = view = null ;
+    pane = view = null;
   }
 });
 
@@ -89,34 +96,36 @@ module("SC.ScrollView", {
 test("Scrolling to a certain co-ordinate of the container view", function () {
   equals(view.get('horizontalScrollOffset'), 0, "Initial horizontal offset must be zero");
   equals(view.get('verticalScrollOffset'), 0, "Initial vertical offset must be zero");
+
   SC.run(function () {
     view.scrollTo(100, 100);
+    equals(view.get('horizontalScrollOffset'), 100, "After scrolling to 100, horizontal offset must be");
+    equals(view.get('verticalScrollOffset'), 100, "After scrolling to 100, vertical offset must be");
   });
-
-  equals(view.get('horizontalScrollOffset'), 100, "After scrolling to 100, horizontal offset must be");
-  equals(view.get('verticalScrollOffset'), 100, "After scrolling to 100, vertical offset must be");
 
   SC.run(function () {
     view.scrollTo(5000, 5000);
     equals(view.get('horizontalScrollOffset'), view.get('maximumHorizontalScrollOffset'), "After scrolling to 400, horizontal offset must be maximum");
     equals(view.get('verticalScrollOffset'), view.get('maximumVerticalScrollOffset'), "After scrolling to 400, vertical offset must be maximum");
   });
-
 });
 
 test("Scrolling relative to the current possition of the container view", function () {
   equals(view.get('horizontalScrollOffset'), 0, "Initial horizontal offset must be zero");
   equals(view.get('verticalScrollOffset'), 0, "Initial vertical offset must be zero");
+
   SC.run(function () {
     view.scrollBy(100, 100);
+    equals(view.get('horizontalScrollOffset'), 100, "After scrolling by 100, horizontal offset must be");
+    equals(view.get('verticalScrollOffset'), 100, "After scrolling by 100, vertical offset must be");
   });
-  equals(view.get('horizontalScrollOffset'), 100, "After scrolling by 100, horizontal offset must be");
-  equals(view.get('verticalScrollOffset'), 100, "After scrolling by 100, vertical offset must be");
+
   SC.run(function () {
     view.scrollBy(100, 100);
+    equals(view.get('horizontalScrollOffset'), 200, "After scrolling by 100, horizontal offset must be");
+    equals(view.get('verticalScrollOffset'), 200, "After scrolling by 100, vertical offset must be");
   });
-  equals(view.get('horizontalScrollOffset'), 200, "After scrolling by 100, horizontal offset must be");
-  equals(view.get('verticalScrollOffset'), 200, "After scrolling by 100, vertical offset must be");
+
   SC.run(function () {
     view.scrollBy(5000, 5000);
     equals(view.get('horizontalScrollOffset'), view.get('maximumHorizontalScrollOffset'), "After scrolling by 400, horizontal offset must be maximum");
@@ -139,7 +148,7 @@ test("Scrolling through line by line", function () {
 });
 
 test("maximumHorizontalScrollOffset() returns the maximum horizontal scroll dimension", function () {
-  var old_horizontalScrollOffset=2;
+  var old_horizontalScrollOffset = 2;
   var old_verticalScrollOffset = 2;
 
   SC.run(function () {
@@ -206,8 +215,8 @@ test("Mouse wheel events should only be captured if the scroll can scroll in the
 
 test("Mouse wheel events should only be captured if the scroll can scroll in the direction (both BOTTOM-RIGHT).", function () {
   SC.run(function () {
-    view3.scrollTo(114,114);
-    view4.scrollTo(114,114);
+    view3.scrollTo(114, 114);
+    view4.scrollTo(114, 114);
   });
 
     // Scrolling further right is not captured by either scroll view
@@ -232,8 +241,8 @@ test("Mouse wheel events not capturable by the inner scroll should bubble to the
       event;
 
   SC.run(function () {
-    view3.scrollTo(0,0);
-    view4.scrollTo(114,114);
+    view3.scrollTo(0, 0);
+    view4.scrollTo(114, 114);
   });
 
   window.stop();
@@ -255,8 +264,8 @@ test("Mouse wheel events not capturable by the inner scroll should bubble to the
       event;
 
   SC.run(function () {
-    view3.scrollTo(0,0);
-    view4.scrollTo(114,114);
+    view3.scrollTo(0, 0);
+    view4.scrollTo(114, 114);
   });
 
   window.stop();
@@ -278,8 +287,8 @@ test("Mouse wheel events not capturable by the inner scroll should bubble to the
       event;
 
   SC.run(function () {
-    view3.scrollTo(114,114);
-    view4.scrollTo(0,0);
+    view3.scrollTo(114, 114);
+    view4.scrollTo(0, 0);
 
     SC.Timer.schedule({ target: this, action: function () {
       equals(view4.get('horizontalScrollOffset'), 0, 'The inner scroll view should still have horizontalScrollOffset');
@@ -300,8 +309,8 @@ test("Mouse wheel events not capturable by the inner scroll should bubble to the
       event;
 
   SC.run(function () {
-    view3.scrollTo(114,114);
-    view4.scrollTo(0,0);
+    view3.scrollTo(114, 114);
+    view4.scrollTo(0, 0);
   });
 
   window.stop();
@@ -323,8 +332,8 @@ test("Mouse wheel events capturable by the inner scroll should not bubble to the
       event;
 
   SC.run(function () {
-    view3.scrollTo(0,0);
-    view4.scrollTo(0,0);
+    view3.scrollTo(0, 0);
+    view4.scrollTo(0, 0);
   });
 
   window.stop();
@@ -346,8 +355,8 @@ test("Mouse wheel events capturable by the inner scroll should not bubble to the
       event;
 
   SC.run(function () {
-    view3.scrollTo(114,114);
-    view4.scrollTo(114,114);
+    view3.scrollTo(114, 114);
+    view4.scrollTo(114, 114);
   });
 
   window.stop();
@@ -369,8 +378,8 @@ test("Mouse wheel events capturable by the inner scroll should not bubble to the
       event;
 
   SC.run(function () {
-    view3.scrollTo(114,114);
-    view4.scrollTo(114,114);
+    view3.scrollTo(114,  114);
+    view4.scrollTo(114,  114);
   });
 
   window.stop();
@@ -392,8 +401,8 @@ test("Mouse wheel events capturable by the inner scroll should not bubble to the
       event;
 
   SC.run(function () {
-    view3.scrollTo(0,0);
-    view4.scrollTo(0,0);
+    view3.scrollTo(0, 0);
+    view4.scrollTo(0, 0);
   });
 
   window.stop();
