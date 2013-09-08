@@ -28,6 +28,13 @@ SC.Pane.reopen({
     // handle intercept if needed
     this._addIntercept();
 
+    // If the layout is flexible (dependent on the window size), then the view
+    // will resize when appended.
+    if (!this.get('isFixedSize')) {
+      // We call viewDidResize so that it calls parentViewDidResize on all child views.
+      this.viewDidResize();
+    }
+
     sc_super();
   },
 

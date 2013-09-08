@@ -276,13 +276,24 @@ SC.View.reopen(
   */
   isFixedPosition: function () {
     var layout = this.get('layout'),
-        ret;
+      hasLeft,
+      hasTop,
+      ret;
 
     // Position is fixed if it has left + top !== SC.LAYOUT_AUTO
-    ret = (
-      ((layout.left !== undefined) && (layout.top !== undefined)) &&
-      ((layout.left !== SC.LAYOUT_AUTO) && (layout.top !== SC.LAYOUT_AUTO))
-    );
+    hasLeft = layout.left !== undefined;
+    if (!hasLeft) {
+      // Check for implied left. If there is a width, then there can't be a right or centerX.
+      hasLeft =  layout.width === undefined || (layout.width !== undefined && layout.right === undefined && layout.centerX === undefined);
+    }
+
+    hasTop = layout.top !== undefined;
+    if (!hasTop) {
+      // Check for implied top. If there is a height, then there can't be a bottom or centerY.
+      hasTop = layout.height === undefined || (layout.height !== undefined && layout.bottom === undefined && layout.centerY === undefined);
+    }
+
+    ret = (hasLeft && hasTop && layout.left !== SC.LAYOUT_AUTO && layout.top !== SC.LAYOUT_AUTO);
 
     // The position may appear fixed, but only if none of the values are percentages.
     if (ret) {
@@ -1220,7 +1231,7 @@ SC.View.reopen(
   /** @private Override: Notify on attached (avoids notify of frame changed). */
   _notifyAttached: function () {
     // If we are using static layout then we don't know the frame until appended to the document.
-    if (this.get('useStaticLayout') || !this.get('isFixedLayout')) {
+    if (this.get('useStaticLayout')) {
       // We call viewDidResize so that it calls parentViewDidResize on all child views.
       this.viewDidResize();
     }

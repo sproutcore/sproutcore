@@ -460,8 +460,6 @@ SC.PickerPane = SC.PalettePane.extend(
         this.set('anchorCached', anchor);
       }
 
-      if (anchor.x === 0 && anchor.y === 0) { return; }
-
       origin = SC.cloneRect(anchor);
 
       if (preferType) {

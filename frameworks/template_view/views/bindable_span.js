@@ -162,8 +162,8 @@ SC._BindableSpan = SC.TemplateView.extend(
     len = childViews.get('length');
     for (idx = len-1; idx >= 0; idx--){
       childView = childViews[idx];
-      childView.$().remove();
-      childView.removeFromParent();
+      // childView.$().remove();
+      // childView.removeFromParent();
       childView.destroy();
     }
 
@@ -175,6 +175,7 @@ SC._BindableSpan = SC.TemplateView.extend(
     this.$().replaceWith(elem);
     this.set('layer', elem);
     this._rendered();
+    this._callOnChildViews('_parentDidRender');
   }
 });
 

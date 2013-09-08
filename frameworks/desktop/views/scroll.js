@@ -1509,9 +1509,9 @@ SC.ScrollView = SC.View.extend({
       y: touch.scrollVelocity.y * 10
     };
 
-      window.requestAnimationFrame(function(){
-          self.decelerateAnimation();
-      });
+    window.requestAnimationFrame(function () {
+      self.decelerateAnimation();
+    });
   },
 
   /** @private
@@ -1714,9 +1714,9 @@ SC.ScrollView = SC.View.extend({
     // (so we may calculate elapsed time) and the timeout we are creating, so we may cancel it in future.
     var self = this;
     touch.lastEventTime = Date.now();
-      window.requestAnimationFrame(function(){
-          SC.run(self.decelerateAnimation(), self);
-      });
+    window.requestAnimationFrame(function () {
+      SC.run(self.decelerateAnimation(), self);
+    });
   },
 
   // ..........................................................
@@ -1791,6 +1791,9 @@ SC.ScrollView = SC.View.extend({
     }
 
     if (this.get('isVisibleInWindow')) this._scsv_registerAutoscroll();
+
+    // Initialize cache values.
+    this._scroll_contentWidth = this._scroll_contentHeight = null;
   },
 
   /** @private
@@ -1862,7 +1865,7 @@ SC.ScrollView = SC.View.extend({
     size of the contentView changes.  We don't care about the origin since
     that is tracked separately from the offset values.
   */
-  contentViewFrameDidChange: function(force) {
+  contentViewFrameDidChange: function (force) {
     var view   = this.get('contentView'),
         f      = (view) ? view.get('frame') : null,
         scale  = this._scale,

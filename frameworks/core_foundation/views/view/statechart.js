@@ -1,5 +1,10 @@
 sc_require("views/view/base");
 
+// When in debug mode, core developers can log the view state.
+//@if (debug)
+SC.LOG_VIEW_STATES = false;
+//@endif
+
 
 SC.CoreView.mixin(
   /** @scope SC.CoreView */ {
@@ -260,6 +265,12 @@ SC.CoreView.reopen(
     var curParentView = this.get('parentView'),
       handled = true;
 
+    //@if (debug)
+    if (SC.LOG_VIEW_STATES) {
+      SC.Logger.log('%@:%@ — _doAdopt(%@, %@)'.fmt(this, this.get('viewState'), parentView, beforeView));
+    }
+    //@endif
+
     if (curParentView && curParentView !== parentView) {
       //@if(debug)
       // This should be avoided, because using the same view instance without explicitly orphaning it first is a dangerous practice.
@@ -294,7 +305,6 @@ SC.CoreView.reopen(
 
       // Notify adopted (on self and all child views).
       this._adopted();
-
 
       switch (this.get('viewState')) {
       case SC.CoreView.UNRENDERED:
@@ -352,6 +362,12 @@ SC.CoreView.reopen(
     var state = this.get('viewState'),
       transitionIn = this.get('transitionIn'),
       parentView;
+
+    //@if (debug)
+    if (SC.LOG_VIEW_STATES) {
+      SC.Logger.log('%@:%@ — _doAttach(%@, %@)'.fmt(this, state, parentNode, nextNode));
+    }
+    //@endif
 
     switch (state) {
     case SC.CoreView.ATTACHED_HIDING: // FAST PATH!
@@ -434,6 +450,12 @@ SC.CoreView.reopen(
   _doDestroyLayer: function () {
     var handled = true;
 
+    //@if (debug)
+    if (SC.LOG_VIEW_STATES) {
+      SC.Logger.log('%@:%@ — _doDestroyLayer()'.fmt(this, this.get('viewState')));
+    }
+    //@endif
+
     if (this.get('_isRendered') && !this.get('isAttached')) {
       // Remove our reference to the layer (our self and all our child views).
       this._executeDoDestroyLayer();
@@ -449,6 +471,12 @@ SC.CoreView.reopen(
   _doDetach: function (immediately) {
     var state = this.get('viewState'),
       transitionOut = this.get('transitionOut');
+
+    //@if (debug)
+    if (SC.LOG_VIEW_STATES) {
+      SC.Logger.log('%@:%@ — _doDetach()'.fmt(this, state));
+    }
+    //@endif
 
     switch (state) {
     case SC.CoreView.UNRENDERED: // FAST PATH!
@@ -540,6 +568,12 @@ SC.CoreView.reopen(
     var state = this.get('viewState'),
       transitionHide = this.get('transitionHide');
 
+    //@if (debug)
+    if (SC.LOG_VIEW_STATES) {
+      SC.Logger.log('%@:%@ — _doHide()'.fmt(this, state));
+    }
+    //@endif
+
     switch (state) {
     case SC.CoreView.UNRENDERED: // FAST PATH!
     case SC.CoreView.ATTACHED_HIDDEN: // FAST PATH!
@@ -603,6 +637,12 @@ SC.CoreView.reopen(
     var parentView = this.get('parentView'),
       handled = true;
 
+    //@if (debug)
+    if (SC.LOG_VIEW_STATES) {
+      SC.Logger.log('%@:%@ — _doOrphan()'.fmt(this, this.get('viewState')));
+    }
+    //@endif
+
     if (parentView) {
       var childViews = parentView.get('childViews'),
         idx = childViews.indexOf(this);
@@ -623,9 +663,14 @@ SC.CoreView.reopen(
   },
 
   /** @private Render this view action. */
-
   _doRender: function () {
     var state = this.get('viewState');
+
+    //@if (debug)
+    if (SC.LOG_VIEW_STATES) {
+      SC.Logger.log('%@:%@ — _doRender()'.fmt(this, state));
+    }
+    //@endif
 
     switch (state) {
     case SC.CoreView.ATTACHED_SHOWING: // FAST PATHS!
@@ -646,7 +691,7 @@ SC.CoreView.reopen(
       this.renderToContext(context);
       this.set('layer', context.element());
 
-      // Route.
+      // Route first.
       this._gotoUnattachedState();
 
       // Notify rendered (on self and all child views).
@@ -678,6 +723,12 @@ SC.CoreView.reopen(
       // Views without a parent are not limited by a parent's current state.
       isParentShown = parentView ? parentView.get('viewState') & SC.CoreView.IS_SHOWN : true,
       transitionShow = this.get('transitionShow');
+
+    //@if (debug)
+    if (SC.LOG_VIEW_STATES) {
+      SC.Logger.log('%@:%@ — _doShow()'.fmt(this, state));
+    }
+    //@endif
 
     switch (state) {
     case SC.CoreView.ATTACHED_SHOWN: // FAST PATH!
@@ -744,8 +795,11 @@ SC.CoreView.reopen(
     var isVisibleInWindow = this.get('isVisibleInWindow'),
       handled = true;
 
-    // Legacy.
-    this.set('layerNeedsUpdate', true);
+    //@if (debug)
+    if (SC.LOG_VIEW_STATES) {
+      SC.Logger.log('%@:%@ — _doUpdateContent(%@)'.fmt(this, this.get('viewState'), force));
+    }
+    //@endif
 
     if (this.get('_isRendered')) {
       if (isVisibleInWindow || force) {
@@ -1188,11 +1242,11 @@ SC.CoreView.reopen(
 
   /** @private Updates according to parent did render. */
   _parentDidRender: function () {
+    // Route first.
+    this._gotoUnattachedByParentState();
+
     // Notify rendered.
     this._rendered();
-
-    // Route
-    this._gotoUnattachedByParentState();
   },
 
   /** @private Starts building out view if appropriate. */

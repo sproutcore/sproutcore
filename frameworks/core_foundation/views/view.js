@@ -281,8 +281,20 @@ SC.CoreView.reopen(
     @returns {SC.View} receiver
   */
   displayDidChange: function () {
-    // Filter the input channel.
-    this.invokeOnce(this._doUpdateContent);
+    //@if (debug)
+    if (SC.LOG_VIEW_STATES) {
+      SC.Logger.log('%@:%@ — displayDidChange()'.fmt(this, this.get('viewState')));
+    }
+    //@endif
+
+    // Don't run _doUpdateContent needlessly, because the view may render
+    // before it is invoked, which would result in a needless update.
+    if (this.get('_isRendered')) {
+      // Legacy.
+      this.set('layerNeedsUpdate', true);
+
+      this.invokeOnce(this._doUpdateContent);
+    }
 
     return this;
   },

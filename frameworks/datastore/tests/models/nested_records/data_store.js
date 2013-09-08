@@ -181,8 +181,7 @@ test("Use in Nested Store", function () {
 });
 
 test("Store#pushRetrieve for parent updates the child records", function () {
-  var parent = store.materializeRecord(storeKeys[0]),
-    nr = parent.get('contents').firstObject(),
+  var parent, nr,
     newDataHash = {
       type: 'Directory',
       name: 'Dir 1 Changed',
@@ -207,6 +206,11 @@ test("Store#pushRetrieve for parent updates the child records", function () {
         }
       ]
     };
+
+  SC.run(function () {
+    parent = store.materializeRecord(storeKeys[0]);
+    nr = parent.get('contents').firstObject();
+  });
 
   ok(nr, "Got nested record");
   equals(nr.get('name'), 'Dir 2', "Dir id:2 has correct name");
