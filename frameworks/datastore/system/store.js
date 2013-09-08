@@ -393,12 +393,33 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     if (!editables) editables = this.editables = [];
     editables[storeKey] = 1 ; // use number for dense array support
 
-    var that = this;
-    this._propagateToChildren(storeKey, function(storeKey){
-      that.writeDataHash(storeKey, null, status);
-    });
+    // Update the child record hashes in place.
+    if (!SC.none(this.parentRecords) ) {
+      var children = this.parentRecords[storeKey] || {},
+        childHash;
 
-    return this ;
+      for (var key in children) {
+
+        if (children.hasOwnProperty(key)) {
+
+          if (hash) {
+            var childPath = children[key];
+            childPath = childPath.split('.');
+            if (childPath.length > 1) {
+              childHash = hash[childPath[0]][childPath[1]];
+            } else {
+              childHash = hash[childPath[0]];
+            }
+
+            this.writeDataHash(key, childHash, status);
+          } else {
+            this.writeDataHash(key, null, status);
+          }
+        }
+      }
+    }
+
+    return this;
   },
 
   /**
