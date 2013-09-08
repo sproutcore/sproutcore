@@ -138,12 +138,9 @@ function setupSuite(layoutDirection) {
 
     var newLayoutDirection = layoutDirection === SC.LAYOUT_HORIZONTAL ? SC.LAYOUT_VERTICAL : SC.LAYOUT_HORIZONTAL;
 
-    SC.RunLoop.begin();
-    splitView.set(
-      'layoutDirection',
-      newLayoutDirection
-    );
-    SC.RunLoop.end();
+    SC.run(function () {
+      splitView.set('layoutDirection', newLayoutDirection);
+    });
 
     equals(splitView.get('layoutDirection'), newLayoutDirection);
 

@@ -178,10 +178,11 @@ SC.SplitView = SC.View.extend({
     }
   }.property('frame', 'layoutDirection').cacheable(),
 
-  viewDidResize: function(orig) {
+  viewDidResize: function () {
     this.scheduleTiling();
-    orig();
-  }.enhance(),
+
+    sc_super();
+  },
 
   layoutDirectionDidChange: function() {
     this.scheduleTiling();
