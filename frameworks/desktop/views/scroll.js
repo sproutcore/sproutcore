@@ -1791,6 +1791,9 @@ SC.ScrollView = SC.View.extend({
     }
 
     if (this.get('isVisibleInWindow')) this._scsv_registerAutoscroll();
+
+    // Initialize cache values.
+    this._scroll_contentWidth = this._scroll_contentHeight = null;
   },
 
   /** @private
