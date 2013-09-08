@@ -1390,9 +1390,6 @@ SC.CoreView.reopen(
       view = view.create(attrs);
     }
 
-    // Ensure that the view is configured properly now that it is adopted.
-    view._adopted();
-
     return view;
   },
 
