@@ -393,15 +393,14 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     if (!editables) editables = this.editables = [];
     editables[storeKey] = 1 ; // use number for dense array support
 
+    var processedPaths={};
     // Update the child record hashes in place.
     if (!SC.none(this.parentRecords) ) {
       var children = this.parentRecords[storeKey] || {},
         childHash;
 
       for (var key in children) {
-
         if (children.hasOwnProperty(key)) {
-
           if (hash) {
             var childPath = children[key];
             childPath = childPath.split('.');
@@ -411,7 +410,23 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
               childHash = hash[childPath[0]];
             }
 
-            this.writeDataHash(key, childHash, status);
+            if(!processedPaths[hash[childPath[0]]]){
+                // update data hash: required to push changes beyond the first nesting level
+                this.writeDataHash(key, childHash, status);
+            }
+            if(childPath.length > 1 && ! processedPaths[hash[childPath[0]]]) {
+                // save it so that we don't processed it over and over
+                processedPaths[hash[childPath[0]]]=true;
+                
+                // force fetching of all children records by invoking the children_attribute wrapper code
+                // and then interating the list in an empty loop
+                // Ugly, but there's basically no other way to do it at the moment, other than
+                // leaving this broken as it was before
+                var that=this;
+                this.invokeLast(function(){
+                    that.records[storeKey].get(childPath[0]).forEach(function(it){});    
+                });
+            }
           } else {
             this.writeDataHash(key, null, status);
           }
@@ -506,7 +521,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Store} receiver
   */
   dataHashDidChange: function (storeKeys, rev, statusOnly, key) {
-
     // update the revision for storeKey.  Use generateStoreKey() because that
     // guarantees a universally (to this store hierarchy anyway) unique
     // key value.
