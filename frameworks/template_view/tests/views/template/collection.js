@@ -165,7 +165,9 @@ test("should give its item views the classBinding specified by itemClassBinding"
     template: SC.Handlebars.compile('{{#collection "TemplateTests.itemClassBindingTestCollectionView" itemClassBinding="content.isBaz"}}foo{{/collection}}')
   });
 
-  view.createLayer();
+  SC.run(function () {
+    view.createLayer();
+  });
   equals(view.$('ul li.is-baz').length, 2, "adds class on initial rendering");
 
   SC.run(function() {
@@ -188,7 +190,9 @@ test("should pass item* property when created with a block", function() {
   var view = SC.TemplateView.create({
     template: SC.Handlebars.compile('{{#collection TemplateTests.CollectionTestView itemFoo="bar"}}baz{{/collection}}')
   });
-  view.createLayer();
+  SC.run(function () {
+    view.createLayer();
+  });
 
   var childViews = view.getPath('childViews.firstObject.childViews');
   childViews.forEach(function(childView, index) {
@@ -203,7 +207,9 @@ test("should pass item* property when created without a block", function() {
   var view = SC.TemplateView.create({
     template: SC.Handlebars.compile('{{collection TemplateTests.CollectionTestView itemFoo="bar"}}')
   });
-  view.createLayer();
+  SC.run(function () {
+    view.createLayer();
+  });
 
   var childViews = view.getPath('childViews.firstObject.childViews');
   childViews.forEach(function(childView, index) {
@@ -222,7 +228,9 @@ test("should work inside a bound {{#if}}", function() {
     shouldDisplay: true
   });
 
-  view.createLayer();
+  SC.run(function () {
+    view.createLayer();
+  });
   equals(view.$('ul li').length, 3, "renders collection when conditional is true");
 
   SC.run(function() { view.set('shouldDisplay', NO); });
