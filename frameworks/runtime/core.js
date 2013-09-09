@@ -59,7 +59,7 @@ window.SproutCore = window.SproutCore || SC;
 */
 SC = window.SC; // This is dumb but necessary for jsdoc to get it right
 
-SC.VERSION = 'Edge';
+SC.VERSION = '1.10.0';
 
 /**
   @private
