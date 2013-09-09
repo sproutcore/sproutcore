@@ -7,6 +7,8 @@ CHANGE LOG
 ### CHANGES & FEATURES
 
 * Improves and adds hundreds of lines of documentation.
+* Removes a developer warning when animating with a duration of 0, which can be valid if the duration is calculated. In any case, animating a duration of 0 has always been supported by SC.View.prototype.animate.
+* Improves the regular expression used by SC.RenderContext to escape strings so that HTML entities like &apos; or &agrave; are preserved.
 * Set SC.DEFAULT_CURSOR to 'default' instead of 'auto'.
 * Improves the ability of the SC.browser experimental name testing to succeed by adding a test value that can be used.
 * Masks all debug statements from SC.Binding using @if(debug).
@@ -332,6 +334,18 @@ Also added better documentation for using dataSourceDidFetchQuery.
 
 ### BUG FIXES
 
+* Fixes a problem which kept firstObject and lastObject referenced from an array controller from updating on replace. Also fixes a problem updating lastObject on an enumerable when replacing the last items and shrinking the collection.
+* Fixes a problem when using an SC.SplitView as a split child.
+* Fixes a bug that updating the parent record data hash failed to update the nested record hashes as well.
+* Fixes a problem with SC.ScrollView that required an additional frame change notification to work previously.
+* Fixes a problem where childViews incorrectly called viewDidResize one extra time when appended to the DOM. The views will already have run viewDidResize once on being adopted by a parentView.
+* Fixes a miscalculation of isFixedPosition that resulted in incorrect values when short form layouts were used (ex. specifying { width: 10, height: 10 } only which implies top: 0 and left: 0). This would have caused such views to return false for hasAcceleratedLayer even though they had set wantsAcceleratedLayer to true.
+* Prevents needless view updates when displayDidChange is called on an unrendered view. Normally, the actual update code handles the check to see if the view is rendered and can be updated, but if displayDidChange comes before a render, we would end up rendering and then updating. Now it checks to see if the view is rendered before attempting to update it at all.
+* Fixes a potentially huge memory leak when views that mix in SC.ContentValueSupport (or via SC.Control) will not remove all the content value observers from the content object when the view is destroyed. One result is that every time you scrolled a list of SC.ListItemViews back and forth it was appending more and more observers to the content.
+* Gives SC.InlineTextFieldView a default layout size of 0x0 so that it doesn't alter the scrollTop/scrollLeft of a parent view layer that allows overflow.
+* Fixed position of picker panes when the anchor has a frame origin of 0,0.
+* Fixes the initialization of SC.ContainerView when the contentView is already set.
+* Fixes typo in SC.Binding.transform causing transforms to be added to parent.
 * Fixes inability to specify the window padding on a PickerPane to a value other than the default.
 * Fixes escaped overflowTitle of SC.SegmentedView that showed '&raquo;' and invalid text of overflowToolTip that showed 'More&hellip;'. Also removes unnecessary escaping of `title` attributes on buttons and labels, because the browser doesn't render HTML inside of a `title` and removes invalid `alt` attribute on button divs.
 * Fixes SC.ArrayController so that firstObject, firstSelectableObject and lastObject update properly when swapping out the content. This also ensures that when allowsEmptySelection is false, that the selection changes to the new first object when the content is swapped.
