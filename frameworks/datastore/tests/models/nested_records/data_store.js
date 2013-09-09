@@ -230,3 +230,65 @@ test("Store#pushRetrieve for parent updates the child records", function () {
   equals(parent.get('name'), 'Dir 1 Changed', 'Dir id:1 name was changed');
   equals(nr.get('name'), 'Dir 2 Changed', "Dir id:2 name was changed");
 });
+
+test("Store#pushRetrieve for parent updates the child records, even on different path", function () {
+  SC.RunLoop.begin()
+  var parent = store.materializeRecord(storeKeys[0]),
+    nr = parent.get('contents').firstObject(),
+    newDataHash = {
+      type: 'Directory',
+      name: 'Dir 1 Changed',
+      guid: 1,
+      contents: [
+        {
+          type: 'Directory',
+          name: 'Dir 3',
+          guid: 5,
+          contents: [
+            {
+              type: 'File',
+              guid: 6,
+              name: 'File 6'
+            },
+            {
+              type: 'File',
+              guid: 7,
+              name: 'File 7'
+            }
+          ]
+        },
+        {
+          type: 'Directory',
+          name: 'Dir 2 Changed',
+          guid: 2,
+          contents: [
+            {
+              type: 'File',
+              guid: 3,
+              name: 'File 1'
+            },
+            {
+              type: 'File',
+              guid: 4,
+              name: 'File 2'
+            }
+          ]
+        }
+      ]
+    };
+
+  SC.run(function () {
+    parent = store.materializeRecord(storeKeys[0]);
+    nr = parent.get('contents').firstObject();
+  });
+
+  ok(nr, "Got nested record");
+  equals(nr.get('name'), 'Dir 2', "Dir id:2 has correct name");
+
+  store.pushRetrieve(null, null, newDataHash, storeKeys[0]);
+  store.flush();
+  SC.RunLoop.end()
+
+  equals(parent.get('name'), 'Dir 1 Changed', 'Dir id:1 name was changed');
+  equals(nr.get('name'), 'Dir 2 Changed', "Dir id:2 name was changed");
+});
