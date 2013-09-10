@@ -214,7 +214,7 @@ SC.View.reopen(
 
     @param {Object|String} properties Hash of property names with new layout values or a single property name.
     @param {Number} [value] The new layout value for a single property (only provide if the first parameter is a String).
-    @param {Object} options Hash of transition options.
+    @param {Number|Object} Duration or hash of transition options.
     @param {Object} [target=this] The target for the method.
     @param {AnimateCallback|String} [method] The method to run when the transition completes.  May be a function or a property path.
     @returns {SC.View} receiver
@@ -229,13 +229,14 @@ SC.View.reopen(
       timing;
 
     //@if(debug)
-    // Provide a little developer support if they are doing something that should be considered wrong.
+    // Provide a little developer support if they are doing something that may not work.
     if (this.get('useStaticLayout')) {
       SC.warn("Developer Warning: SC.View:animate() was called on a view with useStaticLayout and may not work.  If you are using CSS to layout the view (i.e. useStaticLayout: YES), then you should manage the animation manually.");
     }
     //@endif
 
     // Normalize arguments
+    // TODO: Revisit .animate() arguments re: overloading.
     if (typeof key === SC.T_STRING) {
       hash = {};
       hash[key] = value;
@@ -247,23 +248,13 @@ SC.View.reopen(
     }
 
     optionsType = SC.typeOf(options);
-    // This support should be deprecated.  Too much argument overloading.
     if (optionsType === SC.T_NUMBER) {
-      //@if(debug)
-      // Provide a little developer support if they are doing something that should be considered wrong.
-      SC.warn("Developer Warning: The duration should be given as a property of the options object.");
-      //@endif
       options = { duration: options };
     } else if (optionsType !== SC.T_HASH) {
       throw new Error("Must provide options hash!");
     }
 
-    // This support should be deprecated.  Too much argument overloading.
     if (options.callback) {
-      //@if(debug)
-      // Provide a little developer support if they are doing something that should be considered wrong.
-      SC.warn("Developer Warning: The callback method should be given as an argument not as part of the options object.");
-      //@endif
       method = options.callback;
       delete options.callback;
     }
