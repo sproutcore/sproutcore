@@ -197,6 +197,30 @@ test("autoCorrect=null should not add autocorrect", function() {
   ok(!view.$input().attr('autocorrect'), 'should not have an autocorrect attribute set');
 });
 
+test("autoComplete=YES should add autocomplete='on'", function() {
+  SC.RunLoop.begin();
+  view.set('autoComplete', YES);
+  view.displayDidChange();
+  SC.RunLoop.end();
+  ok(view.$input().attr('autocomplete') === "on", 'should have an autocomplete attribute set to "on"');
+});
+
+test("autoComplete=NO should add autocomplete='off'", function() {
+  SC.RunLoop.begin();
+  view.set('autoComplete', NO);
+  view.displayDidChange();
+  SC.RunLoop.end();
+  ok(view.$input().attr('autocomplete') === "off", 'should have an autocomplete attribute set to "off"');
+});
+
+test("autoComplete=null should not add autocomplete", function() {
+  SC.RunLoop.begin();
+  view.set('autoComplete', null);
+  view.displayDidChange();
+  SC.RunLoop.end();
+  ok(!view.$input().attr('autocomplete'), 'should not have an autocomplete attribute set');
+});
+
 /**
  SC.TextFieldView was extended to make use of interpretKeyEvents, which
  allows easy actions to be implemented based off of several key "keys".  This
