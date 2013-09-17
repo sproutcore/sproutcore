@@ -48,15 +48,15 @@ var args = processArgs(system.args.slice(1), system.env),
     urlRoot = 'http://' + args.host + ':' + args.port;
 
 /**
- * Processes command line arguments.
- *
- * Uses corresponding environment variables as the default values,
- * allowing override by the command line arguments.
- *
- * @param {Array.<string>} args Command line arguments (minus argv[0])
- * @param {Object} env Environment variables
- * @returns {{ travis: boolean, host: string, port: number, targetFilter: ?RegExp, testFilter: ?RegExp,
- *             experimental: boolean, verbose: boolean, veryVerbose: boolean, help: boolean }}
+  Processes command line arguments.
+
+  Uses corresponding environment variables as the default values,
+  allowing override by the command line arguments.
+
+  @param {Array.<string>} args Command line arguments (minus argv[0])
+  @param {Object} env Environment variables
+  @returns {{ travis: boolean, host: string, port: number, includeTargets: ?Array, excludeTargets: ?Array,
+              filter: ?RegExp, experimental: boolean, verbose: boolean, veryVerbose: boolean, help: boolean }}
  */
 function processArgs(args, env) {
   args = minimist(args, {
@@ -64,29 +64,42 @@ function processArgs(args, env) {
       travis: !!env.TRAVIS,
       host: env.HOST || 'localhost',
       port: env.PORT || 4020,
-      targetFilter: null,
-      testFilter: null,
+      includeTargets: null,
+      excludeTargets: null,
+      targetKinds: null,
+      filter: null,
       experimental: true,
       verbose: !!env.VERBOSE && !env.TRAVIS,
       veryVerbose: !!env.VERY_VERBOSE,
       help: false
     },
     alias: {
-      targetFilter: 'target-filter',
-      testFilter: 'test-filter',
+      includeTargets: 'include-targets',
+      excludeTargets: 'exclude-targets',
+      targetKinds: 'target-kinds',
       verbose: 'v',
       veryVerbose: ['V', 'very-verbose'],
       help: 'h'
     }
   });
 
-  if (typeof args.targetFilter === 'string') {
-    args.targetFilter = new RegExp(args.targetFilter);
+  if (typeof args.includeTargets === 'string') {
+    args.includeTargets = args.includeTargets.split(',');
   }
-  if (typeof args.testFilter === 'string') {
-    args.testFilter = new RegExp(args.testFilter);
+  if (typeof args.excludeTargets === 'string') {
+    args.excludeTargets = args.excludeTargets.split(',');
+  }
+  if (typeof args.targetKinds === 'string') {
+    args.targetKinds = args.targetKinds.split(',');
+  }
+  if (typeof args.filter === 'string') {
+    args.filter = new RegExp(args.filter);
   }
   args.verbose = args.verbose || args.veryVerbose;
+
+  if (args.includeTargets && args.excludeTargets) {
+    throw new Error('Cannot whitelist and blacklist targets at the same time');
+  }
 
   return args;
 }
@@ -173,8 +186,10 @@ function logSummary(allResults) {
 /**
   Filters targets.
 
-  If a targetFilter argument was given to the script, it will be used to do the filtering.
-  The name of the target as returned by abbot will be tested against the targetFilter regexp.
+  If includeTargets or excludeTargets arguments were given to the script,
+  they will be used to do the filtering.
+  If includeTargets was specified, only those targets will be included.
+  If excludeTargets was specified, all targets except those targets will be included.
   As a shortcut, the --no-experimental argument will filter out the /sproutcore/experimental
   frameworks.
 
@@ -185,16 +200,29 @@ function logSummary(allResults) {
   @returns {boolean} false if this target should be filtered out
 */
 function filterTarget(target) {
-  var include = !(/^\/sproutcore\/experimental/.test(target.name)) || args.experimental;
-  include = include && (args.targetFilter ? args.targetFilter.test(target.name) : true);
+  var include = true;
+
+  if (args.targetKinds && args.targetKinds.indexOf(target.kind) < 0) {
+    include = false;
+  }
+  if (args.excludeTargets && args.excludeTargets.indexOf(target.name) >= 0) {
+    include = false;
+  }
+  if (args.includeTargets && args.includeTargets.indexOf(target.name) < 0) {
+    include = false;
+  }
+  if (/^\/sproutcore\/experimental/.test(target.name) && !args.experimental) {
+    include = false;
+  }
+
   return include;
 }
 
 /**
   Filters tests.
 
-  If a testFilter argument was given to the script, it will be used to do the filtering.
-  The url of the test as returned by abbot will be tested against the testFilter regexp.
+  If a filter argument was given to the script, it will be used to do the filtering.
+  The url of the test as returned by abbot will be tested against the filter regexp.
 
   If a test is filtered out, it will be considered a skipped test. It will be considered
   when showing total tests, and will be logged as a skipped test.
@@ -203,7 +231,7 @@ function filterTarget(target) {
   @returns {boolean} false if this test should be filtered out
 */
 function filterTest(test) {
-  return args.testFilter ? args.testFilter.test(test.url) : true;
+  return args.filter ? args.filter.test(test.url) : true;
 }
 
 /**
@@ -691,8 +719,10 @@ if (!args.help) {
   console.log('');
   console.log('      --host, env[HOST]                  sc-server host [localhost]');
   console.log('      --port, env[PORT]                  sc-server port [4020]');
-  console.log('      --target-filter                    Regular expression to use to filter targets');
-  console.log('      --test-filter                      Regular expression to use to filter tests');
+  console.log('      --include-targets                  Comma-delimited list of targets to include');
+  console.log('      --exclude-targets                  Comma-delimited list of targets to exclude');
+  console.log('      --target-kinds                     Comma-delimited list of target kinds to include');
+  console.log('      --filter                           Regular expression to use to filter tests');
   console.log('      --[no-]experimetal                 Shortcut to control inclusion of experimental framework tests [true]');
   console.log('      --travis, env[TRAVIS]              Running under Travis CI [false]');
   console.log('  -v, --verbose, env[VERBOSE]            Log test assertion results [false]');
