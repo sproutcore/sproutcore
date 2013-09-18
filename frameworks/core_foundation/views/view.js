@@ -283,7 +283,7 @@ SC.CoreView.reopen(
   displayDidChange: function () {
     //@if (debug)
     if (SC.LOG_VIEW_STATES) {
-      SC.Logger.log('%@:%@ — displayDidChange()'.fmt(this, this.get('viewState')));
+      SC.Logger.log('%c%@:%@ — displayDidChange()'.fmt(this, this.get('viewState')), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
     //@endif
 

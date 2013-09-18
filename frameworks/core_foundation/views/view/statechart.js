@@ -3,6 +3,19 @@ sc_require("views/view/base");
 // When in debug mode, core developers can log the view state.
 //@if (debug)
 SC.LOG_VIEW_STATES = false;
+SC.LOG_VIEW_STATES_STYLE = {
+  0x0200: 'color: #67b7db; font-style: italic;', // UNRENDERED
+  0x0300: 'color: #67b7db; font-style: italic;', // UNATTACHED
+  0x0301: 'color: #67b7db; font-style: italic;', // UNATTACHED_BY_PARENT
+  0x03C0: 'color: #23abf5; font-style: italic;', // ATTACHED_SHOWN
+  0x03A0: 'color: #67b7db; font-style: italic;', // ATTACHED_HIDDEN
+  0x03A1: 'color: #67b7db; font-style: italic;', // ATTACHED_HIDDEN_BY_PARENT
+  0x03C1: 'color: #b800db; font-style: italic;', // ATTACHED_BUILDING_IN
+  0x0381: 'color: #b800db; font-style: italic;', // ATTACHED_BUILDING_OUT
+  0x0382: 'color: #b800db; font-style: italic;', // ATTACHED_BUILDING_OUT_BY_PARENT
+  0x03C2: 'color: #b800db; font-style: italic;', // ATTACHED_SHOWING
+  0x03A2: 'color: #b800db; font-style: italic;' // ATTACHED_HIDING
+};
 //@endif
 
 
@@ -167,6 +180,30 @@ SC.CoreView.mixin(
 SC.CoreView.reopen(
   /** @scope SC.CoreView.prototype */ {
 
+  //@if(debug)
+  /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */
+
+  /** @private Creates string representation of view, with view state. */
+  toString: function() {
+    return "%@ (%@)".fmt(sc_super(), this._viewStateString());
+  },
+
+  /** @private Creates string representation of view state.  */
+  _viewStateString: function() {
+    var ret = [], state = this.get('viewState');
+
+    for (var prop in SC.CoreView) {
+      if (prop.match(/[A-Z_]$/) && SC.CoreView[prop] === state) {
+        ret.push(prop);
+      }
+    }
+
+    return ret.join(" ");
+  },
+
+  /* END DEBUG ONLY PROPERTIES AND METHODS */
+  //@endif
+
   // ------------------------------------------------------------------------
   // Properties
   //
@@ -267,7 +304,7 @@ SC.CoreView.reopen(
 
     //@if (debug)
     if (SC.LOG_VIEW_STATES) {
-      SC.Logger.log('%@:%@ — _doAdopt(%@, %@)'.fmt(this, this.get('viewState'), parentView, beforeView));
+      SC.Logger.log('%c%@ — _doAdopt(%@, %@)'.fmt(this, parentView, beforeView), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
     //@endif
 
@@ -365,7 +402,7 @@ SC.CoreView.reopen(
 
     //@if (debug)
     if (SC.LOG_VIEW_STATES) {
-      SC.Logger.log('%@:%@ — _doAttach(%@, %@)'.fmt(this, state, parentNode, nextNode));
+      SC.Logger.log('%c%@ — _doAttach(%@, %@)'.fmt(this, parentNode, nextNode), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
     //@endif
 
@@ -452,7 +489,7 @@ SC.CoreView.reopen(
 
     //@if (debug)
     if (SC.LOG_VIEW_STATES) {
-      SC.Logger.log('%@:%@ — _doDestroyLayer()'.fmt(this, this.get('viewState')));
+      SC.Logger.log('%c%@ — _doDestroyLayer()'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
     //@endif
 
@@ -474,7 +511,7 @@ SC.CoreView.reopen(
 
     //@if (debug)
     if (SC.LOG_VIEW_STATES) {
-      SC.Logger.log('%@:%@ — _doDetach()'.fmt(this, state));
+      SC.Logger.log('%c%@ — _doDetach()'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
     //@endif
 
@@ -570,7 +607,7 @@ SC.CoreView.reopen(
 
     //@if (debug)
     if (SC.LOG_VIEW_STATES) {
-      SC.Logger.log('%@:%@ — _doHide()'.fmt(this, state));
+      SC.Logger.log('%c%@ — _doHide()'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
     //@endif
 
@@ -639,7 +676,7 @@ SC.CoreView.reopen(
 
     //@if (debug)
     if (SC.LOG_VIEW_STATES) {
-      SC.Logger.log('%@:%@ — _doOrphan()'.fmt(this, this.get('viewState')));
+      SC.Logger.log('%c%@:%@ — _doOrphan()'.fmt(this, this.get('viewState')), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
     //@endif
 
@@ -668,7 +705,7 @@ SC.CoreView.reopen(
 
     //@if (debug)
     if (SC.LOG_VIEW_STATES) {
-      SC.Logger.log('%@:%@ — _doRender()'.fmt(this, state));
+      SC.Logger.log('%c%@:%@ — _doRender()'.fmt(this, state), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
     //@endif
 
@@ -726,7 +763,7 @@ SC.CoreView.reopen(
 
     //@if (debug)
     if (SC.LOG_VIEW_STATES) {
-      SC.Logger.log('%@:%@ — _doShow()'.fmt(this, state));
+      SC.Logger.log('%c%@:%@ — _doShow()'.fmt(this, state), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
     //@endif
 
@@ -797,7 +834,7 @@ SC.CoreView.reopen(
 
     //@if (debug)
     if (SC.LOG_VIEW_STATES) {
-      SC.Logger.log('%@:%@ — _doUpdateContent(%@)'.fmt(this, this.get('viewState'), force));
+      SC.Logger.log('%c%@:%@ — _doUpdateContent(%@)'.fmt(this, this.get('viewState'), force), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
     //@endif
 
@@ -1297,6 +1334,7 @@ SC.CoreView.reopen(
     case SC.CoreView.UNATTACHED_BY_PARENT:
       // There's no need to continue to further child views.
       return false;
+    // Cancel any outstanding transitions.
     case SC.CoreView.ATTACHED_BUILDING_IN:
     case SC.CoreView.ATTACHED_SHOWING:
     case SC.CoreView.ATTACHED_HIDING:
