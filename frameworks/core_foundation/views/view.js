@@ -1899,6 +1899,9 @@ SC.CoreView.unload = function () {
      plugins which objects are not instantiated until you actually append the
      element to the DOM. This will allow you to do things like registering
      DOM events on flash or quicktime objects.
+   - `didRemoveFromDocument` -- If for example you've implemented transitionOut
+     on your view, you may want to delay any visual teardown (e.g. unsetting
+     controller content) until after the view has transitioned and been removed.
 
   @extends SC.Responder
   @extends SC.DelegateSupport
