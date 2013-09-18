@@ -12,7 +12,7 @@ sc_require("panes/pane");
 SC.Pane.reopen({
 
   /** @private */
-  _notifyAttached: function () {
+  _notifyDidAttach: function () {
     // hook into root responder
     var responder = (this.rootResponder = SC.RootResponder.responder);
     responder.panes.add(this);
@@ -39,7 +39,7 @@ SC.Pane.reopen({
   },
 
   /** @private */
-  _notifyDetached: function () {
+  _notifyWillDetach: function () {
     sc_super();
 
     // Legacy.

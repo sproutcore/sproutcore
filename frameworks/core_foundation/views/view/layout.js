@@ -1229,7 +1229,7 @@ SC.View.reopen(
   }.enhance(),
 
   /** @private Override: Notify on attached (avoids notify of frame changed). */
-  _notifyAttached: function () {
+  _notifyDidAttach: function () {
     // If we are using static layout then we don't know the frame until appended to the document.
     if (this.get('useStaticLayout')) {
       // We call viewDidResize so that it calls parentViewDidResize on all child views.
