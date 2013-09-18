@@ -1205,6 +1205,7 @@ SC.CoreView.reopen(
 
   /** @private Notify on detached. */
   _notifyDetached: function () {
+    if (this.didRemoveFromDocument) { this.didRemoveFromDocument(); }
   },
 
   /** @private Routes according to parent did append. */
