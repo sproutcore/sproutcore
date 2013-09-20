@@ -352,5 +352,5 @@ test("Store#pushRetrieve for parent updates the child records, works on first ob
   SC.RunLoop.end()
 
   equals(parent.get('name'), 'Dir 1 Changed', 'Dir id:1 name was changed');
-  equals(nr.get('name'), 'Dir 3', "First object name has changed");
+  equals(nr.get('name'), 'Dir 2 Changed', "First object name has changed");
 });
