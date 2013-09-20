@@ -179,7 +179,9 @@ test("Use in Nested Store", function () {
 
   // Fifth, double check that the change exists
   dir = store.find(NestedRecord.Directory, 1);
-  file = dir.get('contents').objectAt(0).get('contents').objectAt(0);
+  SC.run(function() {
+     file = dir.get('contents').objectAt(0).get('contents').objectAt(0);
+  });
   equals(dir.get('status'), SC.Record.READY_DIRTY, 'Base > Directory id:1 has a READY_DIRTY State');
   equals(file.get('status'), SC.Record.READY_DIRTY, 'Base > File id:1 has a READY_DIRTY State');
   equals(file.get('name'), 'Change Name', "Base > File id:1 has actually changed to name of 'Changed Name'");
@@ -215,10 +217,8 @@ test("Store#pushRetrieve for parent updates the child records", function () {
       ]
     };
 
-  SC.run(function () {
-    parent = store.materializeRecord(storeKeys[0]);
-    nr = parent.get('contents').firstObject();
-  });
+  parent = store.materializeRecord(storeKeys[0]);
+  nr = parent.get('contents').firstObject();
 
   ok(nr, "Got nested record");
   equals(nr.get('name'), 'Dir 2', "Dir id:2 has correct name");
@@ -277,10 +277,8 @@ test("Store#pushRetrieve for parent updates the child records, even on different
       ]
     };
 
-  SC.run(function () {
-    parent = store.materializeRecord(storeKeys[0]);
-    nr = store.find(NestedRecord.Directory,2);
-  });
+  parent = store.materializeRecord(storeKeys[0]);
+  nr = store.find(NestedRecord.Directory,2);
 
   ok(nr, "Got nested record");
   equals(nr.get('name'), 'Dir 2', "Dir id:2 has correct name");
@@ -339,10 +337,8 @@ test("Store#pushRetrieve for parent updates the child records, works on first ob
       ]
     };
 
-  SC.run(function () {
-    parent = store.materializeRecord(storeKeys[0]);
-    nr = parent.get('contents').firstObject();
-  });
+  parent = store.materializeRecord(storeKeys[0]);
+  nr = parent.get('contents').firstObject();
 
   ok(nr, "Got nested record");
   equals(nr.get('name'), 'Dir 2', "Dir id:2 has correct name");
