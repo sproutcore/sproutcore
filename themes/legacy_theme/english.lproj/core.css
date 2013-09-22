@@ -1,5 +1,5 @@
-/* 
-  This is the main SproutCore theme.  If you would prefer not to use this 
+/*
+  This is the main SproutCore theme.  If you would prefer not to use this
   theme, just set the theme option in your sc-config to another theme name.
 */
 
@@ -7,7 +7,7 @@
 body.sc-theme {
 	font: 12px/18px "Lucida Grande", "Lucida Sans", Verdana, Arial, sans-serif;
 	background-color: #57647f ;
-	padding: 0px;
+	padding: 0;
 }
 
 
@@ -25,19 +25,19 @@ body.sc-theme .sc-view.sc-bezel-border {
 }
 
 body.sc-theme .sc-view.sc-black-border {
-  border: 1px black solid; 
+  border: 1px black solid;
 }
 
 body.sc-theme .sc-view.sc-gray-border {
-  border: 1px #888 solid; 
+  border: 1px #888 solid;
 }
 
 body.sc-theme .sc-view.sc-bottom-border {
-  border-bottom: 1px #888 solid; 
+  border-bottom: 1px #888 solid;
 }
 
 body.sc-theme .sc-view.sc-top-border {
-  border-top: 1px #888 solid; 
+  border-top: 1px #888 solid;
 }
 
 /* @end */

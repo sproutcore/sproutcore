@@ -43,7 +43,7 @@
 }
 
 .sc-list-item-view img.disclosure.open {
-	background-position: 0px -1597px ;
+	background-position: 0 -1597px ;
 }
 
 .sc-list-item-view img.disclosure.active {
@@ -61,7 +61,7 @@
 
 .sc-list-item-view.disabled img.disclosure.open,
 .sc-list-item-view.disabled img.disclosure.open.active {
-	background-position: 0px -1613px ;
+	background-position: 0 -1613px ;
 }
 
 
@@ -70,13 +70,13 @@
 /* @group Branch */
 
 .sc-list-item-view .branch {
-	background-image: sc_static('icons/mini_454545'); 
+	background-image: sc_static('icons/mini_454545');
 	background-position: -32px 0;
 }
 
 .sc-list-item-view.sel .branch,
 .sc-list-item-view.active .branch {
-	background-image: sc_static('icons/mini_ffffff'); 
+	background-image: sc_static('icons/mini_ffffff');
 }
 
 /* @end */

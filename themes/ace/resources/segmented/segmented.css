@@ -12,40 +12,40 @@ $theme.sc-segmented-view {
 }
 
 $theme.sc-segment-view {
-  margin: 0px;
+  margin: 0;
   background: none;
-  border: 0px none;
+  border: 0 none;
   color: #555;
-  text-shadow: 0px 1px 1px white;
+  text-shadow: 0 1px 1px white;
   display:inline-block;
   zoom: 1;
   overflow:hidden;
   position: relative;
-  padding: 0px;
+  padding: 0;
 
   .ie7 & {
     display: inline;
   }
 
   /* The base style has a gray background added to the first and last segments. */
-  &.sc-first-segment { background: none;  margin: 0px; padding: 0px;}
-  &.sc-last-segment { background: none;  margin: 0px; padding: 0px; }
+  &.sc-first-segment { background: none;  margin: 0; padding: 0;}
+  &.sc-last-segment { background: none;  margin: 0; padding: 0; }
 
   .left {
     position: absolute;
-    left: 0px;
+    left: 0;
     zoom: 1;
   }
 
   .right {
     position: absolute;
-    right: 0px;
+    right: 0;
     zoom: 1;
   }
 
   .middle {
-    margin: 0px;
-    padding: 0px;
+    margin: 0;
+    padding: 0;
     padding-top:1px;
     vertical-align:top;
     zoom: 1;
@@ -58,7 +58,7 @@ $theme.sc-segment-view {
 
   &.active {
     color: #333;
-    text-shadow: 0px 1px 1px white;
+    text-shadow: 0 1px 1px white;
   }
 
   &.disabled {
@@ -72,13 +72,13 @@ $theme.sc-segment-view {
   &.sel {
     background:none;
     color: #fff;
-    text-shadow: 0px -1px 1px rgba(0,0,0,.5);
+    text-shadow: 0 -1px 1px rgba(0,0,0,.5);
   }
 
   &.sel.active {
     background:none;
     color: #fff;
-    text-shadow: 0px -1px 1px rgba(0,0,0,.5);
+    text-shadow: 0 -1px 1px rgba(0,0,0,.5);
   }
 
 }

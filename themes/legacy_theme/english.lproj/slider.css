@@ -38,7 +38,7 @@
 .sc-theme .sc-slider-view .sc-inner .sc-rightcap {
   display: block;
   position: absolute;
-  right: 0px;
+  right: 0;
   margin-right: -6px;
   width: 7px;
   top: 0;

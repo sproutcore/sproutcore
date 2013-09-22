@@ -17,7 +17,7 @@
 
 .sc-theme .sc-segmented-view.disabled .sc-segment-view img.icon {
 	opacity: 0.5;
-	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)"; 
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
   -moz-opacity: 0.5;
 }
@@ -29,7 +29,7 @@
 	top: 0;
 	height: 24px;
 	line-height: 24px;
-	text-shadow: #fff 0px 1px 0px;
+	text-shadow: #fff 0 1px 0;
 	margin-left: -1px;
 	text-decoration: none ;
 	color: black ;
@@ -81,7 +81,7 @@
 
 .sc-theme .sc-segmented-view .sc-segment-view label {
   background: static_url('images/sc-theme-repeat-x.png') repeat-x left -764px;
-  text-shadow: #fff 0px 1px 0px;
+  text-shadow: #fff 0 1px 0;
 }
 
 .sc-theme .sc-segmented-view .sc-segment-view.sc-middle-segment,
@@ -112,8 +112,8 @@
 
 .sc-theme .sc-segmented-view .sc-segment-view.active label {
   background: static_url('images/sc-theme-repeat-x.png') repeat-x left -889px;
-  text-shadow: #fff 0px 1px 0px;
-  text-shadow:  black 0px -1px 0px;
+  text-shadow: #fff 0 1px 0;
+  text-shadow:  black 0 -1px 0;
   color: white;
 }
 
@@ -180,7 +180,7 @@
 
 .sc-theme .sc-segmented-view .sc-segment-view.sel label {
   background: static_url('images/sc-theme-repeat-x.png') repeat-x left -1140px;
-  text-shadow:  black 0px -1px 0px;
+  text-shadow:  black 0 -1px 0;
   color: white;
 }
 
@@ -247,7 +247,7 @@
 
 .sc-theme .sc-segmented-view .sc-segment-view.active.sel label {
   background: static_url('images/sc-theme-repeat-x.png') repeat-x left -1266px;
-  text-shadow:  black 0px -1px 0px;
+  text-shadow:  black 0 -1px 0;
   color: white;
 }
 
