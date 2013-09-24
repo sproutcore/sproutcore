@@ -95,3 +95,27 @@ test("a view with visibility can have a child view without visibility", function
 
   ok(!errored, "Inserting a pane containing a child with visibility that itself has a child without visibility does not cause an error");
 });
+
+// Test for issue #1093.
+test("a view whose pane is removed during an isVisible transition gets correctly hidden", function() {
+  SC.RunLoop.begin();
+  var pane = SC.Pane.create({
+    childViews: ['childView'],
+    childView: SC.View.extend({
+      transitionHide: { run: function (view) {
+        view.animate('opacity', 0, 0.4, function () { this.didTransitionOut(); });
+      }}
+    })
+  });
+  pane.append();
+  pane.childView.set('isVisible', NO);
+  equals(pane.childView.get('viewState'), SC.CoreView.ATTACHED_HIDING, 'View is transitioning');
+  pane.remove();
+  SC.RunLoop.end();
+  SC.RunLoop.begin();
+  pane.append();
+  ok(pane.childView.$().hasClass('sc-hidden'), 'View was successfully hidden.')
+  pane.remove();
+  pane.destroy();
+  SC.RunLoop.end();
+});
