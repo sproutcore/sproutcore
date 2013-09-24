@@ -466,6 +466,7 @@ SC.View.reopen(
       layout = this.get('liveAdjustments');
       break;
     default:
+      layout = this._animateLayout;
     }
 
     // Immediately remove the pending animations while calling the callbacks.
@@ -504,6 +505,7 @@ SC.View.reopen(
     delete this._prevLayout;
     delete this._activeAnimations;
     delete this._pendingAnimations;
+    delete this._animateLayout;
 
     return this;
   },
