@@ -1416,10 +1416,15 @@ SC.CoreView.reopen(
     case SC.CoreView.UNATTACHED_BY_PARENT:
       // There's no need to continue to further child views.
       return false;
-    // Cancel any outstanding transitions.
-    case SC.CoreView.ATTACHED_BUILDING_IN:
+    // Cancel any outstanding isVisible transitions and mark for visibility update.
     case SC.CoreView.ATTACHED_SHOWING:
     case SC.CoreView.ATTACHED_HIDING:
+      this._cancelTransition();
+      this._teardownTransition();
+      this._visibleStyleNeedsUpdate = true;
+      break;
+    // Cancel any other outstanding transitions.
+    case SC.CoreView.ATTACHED_BUILDING_IN:
     case SC.CoreView.ATTACHED_BUILDING_OUT:
     case SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT:
       this._cancelTransition();
