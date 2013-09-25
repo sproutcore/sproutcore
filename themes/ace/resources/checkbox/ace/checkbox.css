@@ -1,6 +1,6 @@
 $theme.checkbox {
-  border: 0px none;
-  
+  border: 0 none;
+
   &.disabled {
     opacity: .5;
   }

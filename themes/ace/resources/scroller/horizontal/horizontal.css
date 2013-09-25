@@ -2,19 +2,19 @@
 $theme.sc-scroller-view.sc-horizontal {
   .track {
 	  position: absolute;
-  	left: 0px;
-  	right: 0px;
+  	left: 0;
+  	right: 0;
   	top: 0;
   	bottom: 0;
   	@include slice("track_and_arrows.png", $repeat: repeat-x, $width: 1, $left: 16);
   }
-  
+
   .cap {
   	position:absolute;
   	width: 16;
   	height: 14px;
   	width: 16px;
-  	left: 0px;
+  	left: 0;
     @include slice("track_and_arrows.png", $width: 16);
   }
 
@@ -33,7 +33,7 @@ $theme.sc-scroller-view.sc-horizontal {
   	@include slice("track_and_arrows.png", $right: 0, $width: 15);
   	width: 15px;
     height: 14px;
-    right: 0px;
+    right: 0;
   }
 
   /* Active */
@@ -62,7 +62,7 @@ $theme.sc-scroller-view.sc-horizontal {
   .thumb-left, .thumb-top {
   	position: absolute;
   	height: 14px;
-  	left: 0px;
+  	left: 0;
   	width: 10px;
   	@include slice("thumb.png", $width: 10);
   }

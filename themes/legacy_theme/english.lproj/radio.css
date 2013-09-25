@@ -17,7 +17,7 @@
 	position: relative ;
 	margin-right: 4px;
 	margin-top: -2px;
-	background: static_url('images/sc-theme-repeat-x.png') no-repeat 0px -776px;
+	background: static_url('images/sc-theme-repeat-x.png') no-repeat 0 -776px;
 }
 
 .sc-theme .sc-radio-view.sc-layout-vertical .sc-radio-button {
@@ -66,7 +66,7 @@
 .sc-theme .sc-radio-view.disabled img.icon,
 .sc-theme .sc-radio-view .sc-radio-button.disabled img.icon {
 	opacity: 0.5;
-	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)"; 
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
   -moz-opacity:0.5;
 }
@@ -105,7 +105,7 @@
 .sc-theme .sc-radio-view .sc-radio-button.mixed.disabled span.button,
 .sc-theme .sc-radio-view.disabled .sc-radio-button.mixed.active:hover span.button,
 .sc-theme .sc-radio-view .sc-radio-button.mixed.disabled span.button {
-	background: static_url('images/sc-theme-repeat-x.png') no-repeat 0px -308px;
+	background: static_url('images/sc-theme-repeat-x.png') no-repeat 0 -308px;
 }
 
 
@@ -114,7 +114,7 @@
 }
 
 .sc-theme .sc-radio-view .sc-radio-button.active.sel:hover span.button {
-	background: static_url('images/sc-theme-repeat-x.png') no-repeat 0px -226px;
+	background: static_url('images/sc-theme-repeat-x.png') no-repeat 0 -226px;
 }
 
 .sc-theme .sc-radio-view .sc-radio-button.mixed.active:hover span.button {

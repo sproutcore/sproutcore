@@ -1,4 +1,4 @@
-/* 
+/*
 First, a helper for other views so they can have the source list background.
 */
 $theme.source-list-background {
@@ -22,13 +22,13 @@ $theme.source-list-background {
       border-bottom: 1px solid #43638d;
       color: white;
       font-weight: bold;
-      text-shadow: 0px 1px 1px black;
+      text-shadow: 0 1px 1px black;
     }
 
     .sc-collection-item.sc-group-item {
       font-weight: bold;
       color: #4a4a4a;
-      text-shadow: 0px 1px 1px white;
+      text-shadow: 0 1px 1px white;
       font-size:12px;
     }
 

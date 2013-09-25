@@ -1,20 +1,20 @@
 /* Main */
 $theme.disclosure {
-  
-  border: 0px none;
+
+  border: 0 none;
   color: black;
-  text-shadow: white 0px 1px 1px;
-  
+  text-shadow: white 0 1px 1px;
+
   .sc-button-label {
     left: 18px;
   }
-  
+
   img.disclosure.button {
     width: 14px;
     height: 14px;
     &.open    { @include slice("disclosure_open.png"); }
     &.closed  { @include slice("disclosure_closed.png"); }
-    
+
     &.active {
       &.open    { @include slice("disclosure_open_active.png"); }
       &.closed  { @include slice("disclosure_closed_active.png"); }

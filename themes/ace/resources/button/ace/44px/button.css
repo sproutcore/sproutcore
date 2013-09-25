@@ -9,7 +9,7 @@
       color: #777;
       line-height: 24px;
       margin-top: 10px;
-      top: 0px;
+      top: 0;
       height: 24px;
     }
 
@@ -27,7 +27,7 @@
     &.sel, &.def {
       .sc-button-label {
         color:white;
-        text-shadow: 0px -1px 1px black;
+        text-shadow: 0 -1px 1px black;
       }
 
       @include slices("selected_button.png", $left: 3, $right: 3);

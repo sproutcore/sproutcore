@@ -1,22 +1,22 @@
 $indeterminate_anim_duration: 1s;
 
 $theme.progress {
-  border: 0px none;
+  border: 0 none;
   .track {
     position: absolute;
-    left: 0px;
-    right: 0px;
-    top: 0px;
-    bottom: 0px;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
 
     @include slices("progress_view_track.png", $left: 1, $right: 1);
   }
 
   .content {
     position: absolute;
-    left: 0px;
-    top: 0px;
-    bottom: 0px;
+    left: 0;
+    top: 0;
+    bottom: 0;
 
     /* width set in rendering */
     @include slices("progress_view_content.png", $left: 1, $right: 1);
@@ -83,45 +83,45 @@ $theme.progress {
 
 @-webkit-keyframes _sc_progressview_indeterminate {
     0% {
-        background-position:0px 0px;
+        background-position:0px 0;
     }
     100% {
-        background-position:42px 0px;
+        background-position:42px 0;
     }
 }
 
 @-moz-keyframes _sc_progressview_indeterminate {
     0% {
-        background-position:0px 0px;
+        background-position:0px 0;
     }
     100% {
-        background-position:42px 0px;
+        background-position:42px 0;
     }
 }
 
 @-ms-keyframes _sc_progressview_indeterminate {
     0% {
-        background-position:0px 0px;
+        background-position:0px 0;
     }
     100% {
-        background-position:42px 0px;
+        background-position:42px 0;
     }
 }
 
 @-o-keyframes _sc_progressview_indeterminate {
     0% {
-        background-position:0px 0px;
+        background-position:0px 0;
     }
     100% {
-        background-position:42px 0px;
+        background-position:42px 0;
     }
 }
 
 @keyframes _sc_progressview_indeterminate {
     0% {
-        background-position:0px 0px;
+        background-position:0px 0;
     }
     100% {
-        background-position:42px 0px;
+        background-position:42px 0;
     }
 }

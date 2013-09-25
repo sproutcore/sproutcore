@@ -4,12 +4,12 @@
 }
 
 .sc-menu-item div.checkbox {
-  background-image: sc_static('icons/mini_454545'); 
+  background-image: sc_static('icons/mini_454545');
   background-position: -66px -147px;
 }
 
 .sc-menu-item.focus div.checkbox {
-  background-image: sc_static('icons/mini_ffffff'); 
+  background-image: sc_static('icons/mini_ffffff');
 }
 
 .sc-theme .sc-menu-item .separator {
@@ -25,10 +25,10 @@
   right:5px;
   top: 2px;
   background: transparent sc_static('images/icons/mini_222222');
-  background-position: 0px -160px;
+  background-position: 0 -160px;
 }
 
 .sc-menu-item.focus span.has-branch {
   background: transparent sc_static('images/icons/mini_ffffff');
-  background-position: 0px -160px;
+  background-position: 0 -160px;
 }
