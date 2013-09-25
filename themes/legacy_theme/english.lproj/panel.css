@@ -5,11 +5,11 @@
 }
 
 .sc-theme .sc-pane.sc-panel > .top-left-edge {
-  background: static_url('images/panels/sprite-x.png') no-repeat 0px -120px;
+  background: static_url('images/panels/sprite-x.png') no-repeat 0 -120px;
 }
 
 .sc-theme .sc-pane.sc-panel > .bottom-left-edge {
-  background: static_url('images/panels/sprite-x.png') no-repeat 0px -160px;
+  background: static_url('images/panels/sprite-x.png') no-repeat 0 -160px;
 }
 
 .sc-theme .sc-pane.sc-panel > .bottom-right-edge {
@@ -17,17 +17,17 @@
 }
 
 .sc-theme .sc-pane.sc-panel > .top-edge {
-  background: static_url('images/panels/sprite-x.png') repeat-x 0px -230px;
+  background: static_url('images/panels/sprite-x.png') repeat-x 0 -230px;
 }
 
 .sc-theme .sc-pane.sc-panel > .bottom-edge {
-  background: static_url('images/panels/sprite-x.png') repeat-x 0px -210px;
+  background: static_url('images/panels/sprite-x.png') repeat-x 0 -210px;
 }
 
 .sc-theme .sc-pane.sc-panel > .left-edge {
-  background: static_url('images/panels/sprite-y.png') repeat-y 0px 0px;
+  background: static_url('images/panels/sprite-y.png') repeat-y 0 0;
 }
 
 .sc-theme .sc-pane.sc-panel > .right-edge {
-  background: static_url('images/panels/sprite-y.png') repeat-y -20px 0px;
+  background: static_url('images/panels/sprite-y.png') repeat-y -20px 0;
 }

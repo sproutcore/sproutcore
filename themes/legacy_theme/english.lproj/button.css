@@ -24,7 +24,7 @@
 /* @group Core */
 
 .sc-theme .sc-button-view.sc-regular-size.square {
-  text-shadow: #fff 0px 1px 0px;
+  text-shadow: #fff 0 1px 0;
   color: black ;
 }
 
@@ -35,11 +35,11 @@
 .sc-theme .sc-button-view.sc-regular-size.square .sc-button-label {
   display: block ;
   text-align: center;
-  padding: 0px 0px 7px 0px;
+  padding: 0 0 7px 0;
 }
 
 .sc-theme .sc-button-view.sc-regular-size.square.active .sc-button-label {
-  text-shadow:  black 0px -1px 0px;
+  text-shadow:  black 0 -1px 0;
   color: white;
 }
 
@@ -51,7 +51,7 @@
 .sc-theme .sc-button-view.sc-regular-size.square.def .sc-button-label,
 .sc-theme .sc-button-view.sc-regular-size.square.sel .sc-button-label {
 	color: white;
-	text-shadow: #2a569e 0px -1px 0px;
+	text-shadow: #2a569e 0 -1px 0;
 }
 
 .sc-theme .sc-button-view.sc-regular-size.square.def.disabled .sc-button-label,
@@ -80,9 +80,9 @@
 
 .sc-theme .sc-button-view.sc-regular-size.square .sc-button-label {
   height: 18px;
-  line-height: 24px;  
+  line-height: 24px;
   margin-left: 11px;
-  margin-right: 11px;  
+  margin-right: 11px;
   background: static_url('images/sc-theme-repeat-x.png') repeat-x -15px -764px;
 }
 
@@ -193,7 +193,7 @@
 	font-size:   12px;
 	height:      24px;
 	max-height:  24px;
-	text-shadow: #fff 0px 1px 0px;
+	text-shadow: #fff 0 1px 0;
   	text-align:  center;
  	background:  transparent static_url('images/sc-theme-repeat-x.png') no-repeat right -224px;
   color: black ;
@@ -211,11 +211,11 @@
  	background: transparent static_url('images/sc-theme-repeat-x.png') repeat-x left -764px;
   display: block ;
   text-align: center;
-  padding: 0px 0px 7px 0px;
+  padding: 0 0 7px 0;
   height: 24px;
   margin-left: 12px;
-  margin-right: 12px;  
-  line-height: 24px;  
+  margin-right: 12px;
+  line-height: 24px;
   text-shadow: none;
 }
 
@@ -237,7 +237,7 @@
 .sc-theme .sc-button-view.capsule.def .sc-button-label {
 	background: static_url('images/sc-theme-repeat-x.png') repeat-x 0 -1140px;
 	color: white;
-	text-shadow: #2a569e 0px -1px 0px;
+	text-shadow: #2a569e 0 -1px 0;
 }
 
 /* @end */
@@ -332,9 +332,9 @@
 
 .sc-theme .sc-button-view.focus div.focus-ring {
   visibility: visible;
-  right: 0px;
-  top: 0px;
-  left: 0px;
+  right: 0;
+  top: 0;
+  left: 0;
   bottom:0px;
   position: absolute;
 }
@@ -350,7 +350,7 @@
 .sc-theme .sc-button-view.popup.focus .focus-ring .focus-left {
   left: -2px;
   width: 10px;
-  background: transparent  static_url('images/sc-theme-repeat-x.png') no-repeat 0px -1685px;
+  background: transparent  static_url('images/sc-theme-repeat-x.png') no-repeat 0 -1685px;
 }
 
 .sc-theme .sc-button-view.square.focus .focus-ring .focus-right,
@@ -366,7 +366,7 @@
 .sc-theme .sc-button-view.popup.focus .focus-ring .focus-middle {
   left: 7px;
   right: 7px;
-  background: transparent  static_url('images/sc-theme-repeat-x.png') repeat-x 0px -1749px;
+  background: transparent  static_url('images/sc-theme-repeat-x.png') repeat-x 0 -1749px;
 }
 
 
@@ -375,7 +375,7 @@
 .sc-theme .sc-button-view.capsule div.focus-ring .focus-left {
   left: -3px;
   width: 16px;
-  background: transparent  static_url('images/sc-theme-repeat-x.png') no-repeat 0px -1783px;
+  background: transparent  static_url('images/sc-theme-repeat-x.png') no-repeat 0 -1783px;
 }
 
 .sc-theme .sc-button-view.capsule div.focus-ring .focus-right {
@@ -387,7 +387,7 @@
 .sc-theme .sc-button-view.capsule div.focus-ring .focus-middle {
   left: 13px;
   right: 13px;
-  background: transparent  static_url('images/sc-theme-repeat-x.png') repeat-x 0px -1847px;
+  background: transparent  static_url('images/sc-theme-repeat-x.png') repeat-x 0 -1847px;
 }
 
 

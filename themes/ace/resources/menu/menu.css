@@ -1,19 +1,19 @@
 $theme.menu {
   .sc-menu-scroll-view { background: transparent; }
-  
+
   .panel-background {
     background: transparent;
     position: absolute;
     top: -22px; right: -15px; bottom: -22px; left: -15px;
     @include slices("menu.png", $left: 25, $right: 25, $top: 25, $bottom: 25, $fill: 1 1);
   }
-  
+
   /* may want to make some of this control size dependent... */
-  
+
   .sc-menu-item {
     background: transparent;
-    border: 0px none;
-    
+    border: 0 none;
+
     .value {
       margin-left: 20px;
       line-height: 20px;
@@ -22,19 +22,19 @@ $theme.menu {
     .has-icon .value {
       margin-left: 44px;
     }
-    
+
     &.focus, a:hover {
       span { color: white; }
       @include slice("menu_item.png", $width: 1, $repeat: repeat-x);
-      text-shadow: 0px -1px 1px rgba(0, 0, 0, .6);
+      text-shadow: 0 -1px 1px rgba(0, 0, 0, .6);
     }
-    
+
     &.disabled a:hover, &.disabled.focus a:hover {
       span { color: #A0A0A0; }
       text-shadow: none;
       background: transparent;
     }
-    
+
     /* CHECKBOXES */
     .checkbox {
       position: absolute;
@@ -43,15 +43,15 @@ $theme.menu {
       width: 12px; height: 12px;
       @include slice(checkmark.png);
     }
-    
+
     &.focus .checkbox, &:hover .checkbox {
       top: 4px; /* NOTE THE SLIGHT DIFFERENCE */
       @include slice(checkmark_active.png);
     }
-    
+
     /* SEPARATORS */
     span.separator {
-      margin-left: 0px;
+      margin-left: 0;
       position: absolute;
       top: 2px;
       left: 1px;
@@ -60,22 +60,22 @@ $theme.menu {
       border-bottom: 1px solid rgb(200, 200, 200);
     }
   }
-  
+
   /* ARROWS */
   .sc-menu-scroller-view { background: transparent; }
-  
+
   .arrowUp {
     position: absolute;
     left: 50%; top: -3px; margin-left: -7px;
     height: 14px; width: 14px;
     @include slice(up.png);
   }
-  
+
   .arrowDown {
     position: absolute;
     left: 50%; bottom: -3px; margin-left: -7px;
     height: 14px; width: 14px;
     @include slice(down.png);
   }
-  
+
 }

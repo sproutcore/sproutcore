@@ -1,11 +1,11 @@
 /* @group SC.SplitView */
 
 .sc-theme .sc-horizontal .sc-split-divider-view {
-	background: static_url('images/sc-theme-ysprite.png') repeat-y 0px top;
+	background: static_url('images/sc-theme-ysprite.png') repeat-y 0 top;
 }
 
 .sc-theme .sc-vertical .sc-split-divider-view {
-	background: static_url('images/sc-theme-repeat-x.png') repeat-x 0px -1397px;
+	background: static_url('images/sc-theme-repeat-x.png') repeat-x 0 -1397px;
 }
 
 /* @end */
