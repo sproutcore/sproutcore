@@ -48,7 +48,9 @@ config :designer,        :required => [:runtime, :foundation, :desktop, :templat
 config :"experimental/split_view", :test_required => [:desktop]
 
 # WRAPPER FRAMEWORKS
-config :sproutcore, :required => [:desktop, :datastore, :statechart]
+config :sproutcore,
+  :required => [:desktop, :datastore, :statechart],
+  :exclude => ['phantomjs']
 
 config :qunit, :required => []
 config :testing, :required => [:jquery], :test_required => [], :debug_required => []

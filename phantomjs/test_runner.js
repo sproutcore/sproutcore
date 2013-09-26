@@ -1,8 +1,3 @@
-// Mark this file as a resource so that it is not included in the built framework code.
-if (typeof sc_resource === 'function') {
-  sc_resource('phantomjs/test_runner.js');
-}
-
  /**
   PhantomJS Unit Test Runner
 
