@@ -1,16 +1,21 @@
+// Mark this file as a resource so that it is not included in the built framework code.
+if (typeof sc_resource === 'function') {
+    sc_resource('phantomjs/minimist.js');
+}
+
 module.exports = function (args, opts) {
     if (!opts) opts = {};
-    
+
     var flags = { bools : {}, strings : {} };
-    
+
     [].concat(opts['boolean']).filter(Boolean).forEach(function (key) {
         flags.bools[key] = true;
     });
-    
+
     [].concat(opts.string).filter(Boolean).forEach(function (key) {
         flags.strings[key] = true;
     });
-    
+
     var aliases = {};
     Object.keys(opts.alias || {}).forEach(function (key) {
         aliases[key] = [].concat(opts.alias[key]);
@@ -20,28 +25,28 @@ module.exports = function (args, opts) {
             }));
         });
     });
-    
+
     var defaults = opts['default'] || {};
-    
+
     var argv = { _ : [] };
     Object.keys(flags.bools).forEach(function (key) {
         setArg(key, defaults[key] === undefined ? false : defaults[key]);
     });
-    
+
     function setArg (key, val) {
         var value = !flags.strings[key] && isNumber(val)
             ? Number(val) : val
         ;
         setKey(argv, key.split('.'), value);
-        
+
         (aliases[key] || []).forEach(function (x) {
             setKey(argv, x.split('.'), value);
         });
     }
-    
+
     for (var i = 0; i < args.length; i++) {
         var arg = args[i];
-        
+
         if (arg === '--') {
             argv._.push.apply(argv._, args.slice(i + 1));
             break;
@@ -76,23 +81,23 @@ module.exports = function (args, opts) {
         }
         else if (arg.match(/^-[^-]+/)) {
             var letters = arg.slice(1,-1).split('');
-            
+
             var broken = false;
             for (var j = 0; j < letters.length; j++) {
                 var next = arg.slice(j+2);
-                
+
                 if (next === '-') {
                     setArg(letters[j], next)
                     continue;
                 }
-                
+
                 if (/[A-Za-z]/.test(letters[j])
                 && /-?\d+(\.\d*)?(e-?\d+)?$/.test(next)) {
                     setArg(letters[j], next);
                     broken = true;
                     break;
                 }
-                
+
                 if (letters[j+1] && letters[j+1].match(/\W/)) {
                     setArg(letters[j], arg.slice(j+2));
                     broken = true;
@@ -102,10 +107,10 @@ module.exports = function (args, opts) {
                     setArg(letters[j], true);
                 }
             }
-            
+
             var key = arg.slice(-1)[0];
             if (!broken && key !== '-') {
-                
+
                 if (args[i+1] && !/^(-|--)[^-]/.test(args[i+1])
                 && !flags.bools[key]
                 && (aliases[key] ? !flags.bools[aliases[key]] : true)) {
@@ -127,17 +132,17 @@ module.exports = function (args, opts) {
             );
         }
     }
-    
+
     Object.keys(defaults).forEach(function (key) {
         if (!hasKey(argv, key.split('.'))) {
             setKey(argv, key.split('.'), defaults[key]);
-            
+
             (aliases[key] || []).forEach(function (x) {
                 setKey(argv, x.split('.'), defaults[key]);
             });
         }
     });
-    
+
     return argv;
 };
 
@@ -157,7 +162,7 @@ function setKey (obj, keys, value) {
         if (o[key] === undefined) o[key] = {};
         o = o[key];
     });
-    
+
     var key = keys[keys.length - 1];
     if (o[key] === undefined || typeof o[key] === 'boolean') {
         o[key] = value;

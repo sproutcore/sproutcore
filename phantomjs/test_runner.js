@@ -1,4 +1,9 @@
-/**
+// Mark this file as a resource so that it is not included in the built framework code.
+if (typeof sc_resource === 'function') {
+  sc_resource('phantomjs/test_runner.js');
+}
+
+ /**
   PhantomJS Unit Test Runner
 
   This script can be used to run the SproutCore unit tests using PhantomJS.
@@ -9,7 +14,7 @@
 
   Run like:
     phantomjs test_runner.js
- 
+
   Use -h to get help.
 */
 
