@@ -134,3 +134,25 @@ test("Test auto reconnection", function () {
     window.start();
   }, 50);
 });
+
+test("Test queue", function () {
+  var count = 0,
+    webSocket = SC.WebSocket.create({
+      onClose: function(closeEvent) {},
+    }).connect(),
+    socket = webSocket.socket;
+  
+
+  webSocket.socket.send =  function() { 
+    count++;
+  }
+
+  webSocket.send('message1');
+  webSocket.send('message2');
+
+  equals(webSocket.queue.length, 2, "2 messages should be in the queue");
+
+  socket.onopen();
+
+  equals(webSocket.queue, null, "the queue should be empty");
+});

@@ -236,7 +236,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate, {
     @returns {SC.WebSocket} 
   */
   send: function(message) {
-    if (this.isConnected && (SC.none(this.isAuth) || this.isAuth)) {
+    if (this.isConnected === true && this.isAuth !== false) {
       if (this.isJSON) {
         var message = JSON.stringify(message);
       }
@@ -264,7 +264,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate, {
     var ret = del.webSocketDidOpen(this, event);
     if (ret !== true) this._notifyListeners('onopen', event);
 
-    if (SC.none(this.isAuth)) this.fireQueue();
+    this.fireQueue();
   },
 
   /**
@@ -285,7 +285,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate, {
     }
 
     // If there is message in the queue, we fire them
-    if (this.isAuth) this.fireQueue();
+    this.fireQueue();
   },
 
   /**
@@ -334,14 +334,15 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate, {
      Send the messages from the queue.
   */
   fireQueue: function() {
-    var queue = SC.A(this.queue);
+    var queue = this.queue;
+    if (!queue || queue.length === 0) return;
+
+    queue = SC.A(queue);
     this.queue = null;
 
-    if (queue && queue.length > 0) {
-      for (var i = 0, len = queue.length; i < len; i++) {
-        var message = queue[i];
-        this.send(message);
-      }
+    for (var i = 0, len = queue.length; i < len; i++) {
+      var message = queue[i];
+      this.send(message);
     }
   },
 
