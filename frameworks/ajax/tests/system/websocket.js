@@ -156,3 +156,41 @@ test("Test queue", function () {
 
   equals(webSocket.queue, null, "the queue should be empty");
 });
+
+test("Test authentification", function () {
+  var count = 0,
+    webSocket = SC.WebSocket.create({
+      onClose: function(closeEvent) {},
+
+      delegate: SC.Object.create(SC.WebSocketDelegate, {
+        webSocketDidOpen: function (webSocket, event) { 
+          webSocket.send({ op: "auth", clientId: 'xxx' });
+          webSocket.set('isAuth', false);
+        },
+        webSocketDidReceiveMessage: function (webSocket, data) { 
+          if (data === 'isAuth') {
+            webSocket.set('isAuth', true);
+            return true;
+          }
+        },
+      })
+    }).connect(),
+    socket = webSocket.socket;
+  
+  webSocket.socket.send =  function() {}
+
+  ok(!webSocket.isAuth, "the connection should not be authentified");
+
+  socket.onopen();
+
+  webSocket.send('message1');
+
+  equals(webSocket.queue.length, 1, "1 message should be in the queue");
+
+  socket.onmessage({ data: 'isAuth' });
+
+  webSocket.send('message2');
+
+  ok(webSocket.isAuth, "the connection should be authentified");
+  equals(webSocket.queue, null, "the queue should be empty");
+});
