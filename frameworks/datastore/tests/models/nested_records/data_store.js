@@ -350,3 +350,66 @@ test("Store#pushRetrieve for parent updates the child records, works on first ob
   equals(parent.get('name'), 'Dir 1 Changed', 'Dir id:1 name was changed');
   equals(nr.get('name'), 'Dir 2 Changed', "First object name has changed");
 });
+
+test("Store#pushRetrieve for parent updates the child records, on paths nested more than 2 levels", function () {
+  SC.RunLoop.begin()
+  var parent = store.materializeRecord(storeKeys[0]),
+    nr = parent.get('contents').firstObject().get('contents').firstObject(),
+    newDataHash = {
+      type: 'Directory',
+      name: 'Dir 1 Changed',
+      guid: 1,
+      contents: [
+        {
+          type: 'Directory',
+          name: 'Dir 3',
+          guid: 5,
+          contents: [
+            {
+              type: 'File',
+              guid: 6,
+              name: 'File 6'
+            },
+            {
+              type: 'File',
+              guid: 7,
+              name: 'File 7'
+            }
+          ]
+        },
+        {
+          type: 'Directory',
+          name: 'Dir 2 Changed',
+          guid: 2,
+          contents: [
+            {
+              type: 'File',
+              guid: 3,
+              name: 'File 1 Changed'
+            },
+            {
+              type: 'File',
+              guid: 4,
+              name: 'File 2'
+            }
+          ]
+        }
+      ]
+    };
+  
+  ok(nr, "(deep walk) Got nested record");
+  equals(nr.get('name'), 'File 1', "(deep walk) File id:3 has correct name");
+
+  parent = store.materializeRecord(storeKeys[0]);
+  nr = store.find(NestedRecord.File,3);
+
+  ok(nr, "Got nested record");
+  equals(nr.get('name'), 'File 1', "File id:3 has correct name");
+
+  store.pushRetrieve(null, null, newDataHash, storeKeys[0]);
+  store.flush();
+  SC.RunLoop.end()
+
+  equals(parent.get('name'), 'Dir 1 Changed', 'Dir id:1 name was changed');
+  equals(nr.get('name'), 'File 1 Changed', "File id:3 name has changed");
+});

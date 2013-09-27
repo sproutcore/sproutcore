@@ -410,6 +410,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
               childHash = hash[childPath[0]];
             }
 
+            if(!processedPaths[hash[childPath[0]]]){
+                // update data hash: required to push changes beyond the first nesting level
+                this.writeDataHash(key, childHash, status);
+            }
             if(childPath.length > 1 && ! processedPaths[hash[childPath[0]]]) {
                 // save it so that we don't processed it over and over
                 processedPaths[hash[childPath[0]]]=true;
@@ -422,8 +426,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
                 this.invokeLast(function(){
                     that.records[storeKey].get(childPath[0]).forEach(function(it){});    
                 });
-            } else {
-                this.writeDataHash(key, childHash, status);
             }
           } else {
             this.writeDataHash(key, null, status);
