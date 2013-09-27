@@ -31,27 +31,39 @@ test("Test nofitications", function () {
       isJSON: false
     }).connect(),
     socket = webSocket.socket,
-    count = 0;
+    didNotifyOnOpen = didNotifySecondOnOpenListener = false,
+    didNotifyOnMessage = false,
+    didNotifyOnClose = didNotifySecondOnCloseListener = false,
+    didNotifyOnError = false;
 
   webSocket.notify('onopen', this, function(websocket, response, arg) {
     equals(response.type, 'open', "response type should be 'open'");
     equals(arg, 'arg', "arg should be 'arg'");
-    count++;
+    didNotifyOnOpen = true;
   }, 'arg');
+
+  webSocket.notify('onopen', this, function(websocket, response, arg) {
+    didNotifySecondOnOpenListener = true;
+  });
 
   webSocket.notify('onmessage', this, function(websocket, response) {
     equals(response.type, 'message', "response type should be 'message'");
-    count++;
+    didNotifyOnMessage = true;
   });
 
   webSocket.notify('onclose', this, function(websocket, response) {
     equals(response.type, 'close', "response type should be 'close'");
-    count++;
+    didNotifyOnClose = true;
+    return true;
+  });
+  
+  webSocket.notify('onclose', this, function(websocket, response) {
+    didNotifySecondOnCloseListener = true;
   });
 
   webSocket.notify('onerror', this, function(websocket, response) {
     equals(response.type, 'error', "response type should be 'error'");
-    count++;
+    didNotifyOnError = true;
   });
 
 
@@ -59,12 +71,16 @@ test("Test nofitications", function () {
   setTimeout(function () {
     socket.onopen({ type: 'open' });
     socket.onmessage({ data: { type: 'message' } });
+    socket.onclose({ type: 'close' });
+    socket.onerror({ type: 'error' });
 
-    // Automatically call by the WebSocket object because the connection will fail
-    // socket.onclose({ type: 'close' });
-    // socket.onerror({ type: 'error' });
+    ok(didNotifyOnOpen, "onopen listener should have been notified");
+    ok(didNotifySecondOnOpenListener, "second onopen listener should have been notified");
+    ok(didNotifyOnMessage, "onmessage listener should have been notified");
+    ok(didNotifyOnClose, "onclose listener should have been notified");
+    ok(!didNotifySecondOnCloseListener, "second onclose listener should not have been notified");
+    ok(didNotifyOnError, "onerror listener should have been notified");
 
-    equals(count, 4, "listeners should have been notified 4 times");
     window.start();
   }, 50);
 });
