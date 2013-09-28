@@ -154,14 +154,14 @@ SC.Record = SC.Object.extend(
     @property
     @dependsOn storeKey
   */
-  status: function() {
+  status: function () {
     var parent = this.get('parentObject');
-    if(parent){
-      if(this._sc_nestedrec_isDestroyed) return SC.Record.DESTROYED;
+    if (parent) {
+      if (this._sc_nestedrec_isDestroyed) return SC.Record.DESTROYED;
       else return parent.get('status');
     }
     else return this.get('store').readStatus(this.storeKey);
-  }.property('storeKey').cacheable(),
+  }.property('storeKey'),
 
   /**
     The store that owns this record.  All changes will be buffered into this
@@ -321,12 +321,21 @@ SC.Record = SC.Object.extend(
     @type Hash
     @property
   **/
-  readOnlyAttributes: function() {
+  readOnlyAttributes: function () {
     var parent = this.get('parentObject'),
-        parentAttr = this.get('parentAttribute');
-    if(parent){
-      if(this.get('isDestroyed')) return null;
-      else return parent.get('readOnlyAttributes').get(parentAttr);
+        parentAttr = this.get('parentAttribute'), attrs;
+    if (parent) {
+      if (this.get('isDestroyed')) return null;
+      //else return parent.get('readOnlyAttributes')[parentAttr];
+      //else return parent.readAttribute(parentAttr);
+      else {
+        attrs = parent.readAttribute(parentAttr);
+        if (parent.isChildArray) {
+          idx = parent.indexOf(this);
+          return attrs[idx];
+        }
+        return attrs;
+      }
     }
     else {
       var store    = this.get('store'),
@@ -336,6 +345,10 @@ SC.Record = SC.Object.extend(
       if (ret) ret = SC.clone(ret, YES);
       return ret;
     }
+  }.property(),
+
+  readEditableAttributes: function (){
+    return SC.clone(this.get('readOnlyAttributes'), YES);
   }.property(),
 
   /**
@@ -572,7 +585,7 @@ SC.Record = SC.Object.extend(
   */
   readAttribute: function(key) {
     var parent = this.get('parentObject'),
-      store,storeKey,attrs,idx,parentAttr;
+      store, storeKey, attrs, idx, parentAttr;
 
     if(!parent){
       store = this.get('store');
@@ -881,8 +894,11 @@ SC.Record = SC.Object.extend(
         key, valueForKey, typeClass, recHash, attrValue, normChild,  isRecord,
         isChild, defaultVal, keyForDataHash, attr;
 
-    var dataHash = store.readEditableDataHash(storeKey) || {};
-    recHash = store.readDataHash(storeKey);
+    //var dataHash = store.readEditableDataHash(storeKey) || {};
+    var dataHash = this.get('readEditableAttributes') || {};
+    if (!this.get('parentObject')) dataHash[primaryKey] = recordId; // only apply on top
+    //recHash = store.readDataHash(storeKey);
+    recHash = this.readOnlyAttributes();
 
     // For now we're going to be agnostic about whether ids should live in the
     // hash or not.
