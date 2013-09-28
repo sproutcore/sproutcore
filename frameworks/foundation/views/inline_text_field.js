@@ -96,6 +96,17 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
   */
   _topOffsetForFirefoxCursorFix: 0,
 
+  /**
+    The default size of the inline text field is 0 x 0 so that when it is
+    appended, but before it is positioned it doesn't fill the parent view
+    entirely.
+
+    This is important, because if the parent view layer allows overflow,
+    we could inadvertently alter the scrollTop or scrollLeft properties
+    of the layer.
+    */
+  layout: { height: 0, width: 0 },
+
   /*
   * @private
   * @method

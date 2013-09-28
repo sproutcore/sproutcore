@@ -428,6 +428,15 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   _scac_arrayContentDidChange: function (start, removed, added) {
     this._scac_cached = NO;
     this.arrayContentDidChange(start, removed, added);
+
+    // If the start & length are provided, we can also indicate if the firstObject
+    // or lastObject properties changed, thus making them independently observable.
+    if (!SC.none(start)) {
+      if (start === 0) this.notifyPropertyChange('firstObject');
+      var length = added + removed;
+      if (!SC.none(length) && start + length >= this.get('length') - 1) this.notifyPropertyChange('lastObject');
+    }
+
     if (this._kvo_enumerable_property_chains) {
       var addedObjects = this.slice(start, start + added);
       this.setupEnumerablePropertyChains(addedObjects);
@@ -440,13 +449,9 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     as needed.
   */
   _scac_contentDidChange: function () {
-
     this._scac_cached = NO; // invalidate observable content
-
     var content     = this.get('content'),
-        // orders      = !!this.get('orderBy'),
         lastContent = this._scac_content,
-        // oldlen      = this._scac_length || 0,
         didChange   = this._scac_arrayContentDidChange,
         willChange  = this._scac_arrayContentWillChange,
         sfunc       = this._scac_contentStatusDidChange,
@@ -513,6 +518,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     this._scac_contentStatusDidChange();
 
     this.arrayContentDidChange(0, 0, newlen);
+    this.enumerableContentDidChange(0, newlen - 1);
     this.updateSelectionAfterContentChange();
   }.observes('content'),
 

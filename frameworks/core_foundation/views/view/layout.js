@@ -276,13 +276,24 @@ SC.View.reopen(
   */
   isFixedPosition: function () {
     var layout = this.get('layout'),
-        ret;
+      hasLeft,
+      hasTop,
+      ret;
 
     // Position is fixed if it has left + top !== SC.LAYOUT_AUTO
-    ret = (
-      ((layout.left !== undefined) && (layout.top !== undefined)) &&
-      ((layout.left !== SC.LAYOUT_AUTO) && (layout.top !== SC.LAYOUT_AUTO))
-    );
+    hasLeft = layout.left !== undefined;
+    if (!hasLeft) {
+      // Check for implied left. If there is a width, then there can't be a right or centerX.
+      hasLeft =  layout.width === undefined || (layout.width !== undefined && layout.right === undefined && layout.centerX === undefined);
+    }
+
+    hasTop = layout.top !== undefined;
+    if (!hasTop) {
+      // Check for implied top. If there is a height, then there can't be a bottom or centerY.
+      hasTop = layout.height === undefined || (layout.height !== undefined && layout.bottom === undefined && layout.centerY === undefined);
+    }
+
+    ret = (hasLeft && hasTop && layout.left !== SC.LAYOUT_AUTO && layout.top !== SC.LAYOUT_AUTO);
 
     // The position may appear fixed, but only if none of the values are percentages.
     if (ret) {
@@ -1178,8 +1189,7 @@ SC.View.reopen(
       handled = true;
 
     if (isRendered) {
-      if (isVisibleInWindow ||
-        force) {
+      if (isVisibleInWindow || force) {
         // Only in the visible states do we allow updates without being forced.
         this._doUpdateLayoutStyle();
       } else {
@@ -1219,9 +1229,9 @@ SC.View.reopen(
   }.enhance(),
 
   /** @private Override: Notify on attached (avoids notify of frame changed). */
-  _notifyAttached: function () {
+  _notifyDidAttach: function () {
     // If we are using static layout then we don't know the frame until appended to the document.
-    if (this.get('useStaticLayout') || !this.get('isFixedLayout')) {
+    if (this.get('useStaticLayout')) {
       // We call viewDidResize so that it calls parentViewDidResize on all child views.
       this.viewDidResize();
     }
@@ -1232,39 +1242,8 @@ SC.View.reopen(
 
   /** @private Override: The 'adopted' event (uses _checkForResize so our childViews are notified if our frame changes). */
   _adopted: function (beforeView) {
-    var parentView = this.get('parentView');
-
     // Our frame may change once we've been adopted to a parent.
     this._checkForResize();
-
-    if (!this.get('isAttached')) {
-
-      if (this.get('_isRendered')) {
-
-        // Bypass the unattached state for adopted views.
-        if (parentView.get('isAttached')) {
-          var parentNode, nextNode, nextView, siblings;
-
-          parentNode = parentView.get('containerLayer');
-          siblings = parentView.get('childViews');
-          nextView = siblings.objectAt(siblings.indexOf(this) + 1);
-          nextNode = (nextView) ? nextView.get('layer') : null;
-
-          this._doAttach(parentNode, nextNode);
-        }
-      } else {
-
-        // Bypass the unrendered state for adopted views.
-        if (parentView.get('_isRendered')) {
-          this._doRender();
-        }
-      }
-
-    }
-
-    // Notify.
-    if (parentView.didAddChild) { parentView.didAddChild(this, beforeView); }
-    if (this.didAddToParent) { this.didAddToParent(parentView, beforeView); }
   },
 
   /** @private Extension: The 'orphaned' event. */

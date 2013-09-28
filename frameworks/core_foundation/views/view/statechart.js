@@ -1,5 +1,23 @@
 sc_require("views/view/base");
 
+// When in debug mode, core developers can log the view state.
+//@if (debug)
+SC.LOG_VIEW_STATES = false;
+SC.LOG_VIEW_STATES_STYLE = {
+  0x0200: 'color: #67b7db; font-style: italic;', // UNRENDERED
+  0x0300: 'color: #67b7db; font-style: italic;', // UNATTACHED
+  0x0301: 'color: #67b7db; font-style: italic;', // UNATTACHED_BY_PARENT
+  0x03C0: 'color: #23abf5; font-style: italic;', // ATTACHED_SHOWN
+  0x03A0: 'color: #67b7db; font-style: italic;', // ATTACHED_HIDDEN
+  0x03A1: 'color: #67b7db; font-style: italic;', // ATTACHED_HIDDEN_BY_PARENT
+  0x03C1: 'color: #b800db; font-style: italic;', // ATTACHED_BUILDING_IN
+  0x0381: 'color: #b800db; font-style: italic;', // ATTACHED_BUILDING_OUT
+  0x0382: 'color: #b800db; font-style: italic;', // ATTACHED_BUILDING_OUT_BY_PARENT
+  0x03C2: 'color: #b800db; font-style: italic;', // ATTACHED_SHOWING
+  0x03A2: 'color: #b800db; font-style: italic;' // ATTACHED_HIDING
+};
+//@endif
+
 
 SC.CoreView.mixin(
   /** @scope SC.CoreView */ {
@@ -162,6 +180,30 @@ SC.CoreView.mixin(
 SC.CoreView.reopen(
   /** @scope SC.CoreView.prototype */ {
 
+  //@if(debug)
+  /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */
+
+  /** @private Creates string representation of view, with view state. */
+  toString: function () {
+    return "%@ (%@)".fmt(sc_super(), this._viewStateString());
+  },
+
+  /** @private Creates string representation of view state.  */
+  _viewStateString: function () {
+    var ret = [], state = this.get('viewState');
+
+    for (var prop in SC.CoreView) {
+      if (prop.match(/[A-Z_]$/) && SC.CoreView[prop] === state) {
+        ret.push(prop);
+      }
+    }
+
+    return ret.join(" ");
+  },
+
+  /* END DEBUG ONLY PROPERTIES AND METHODS */
+  //@endif
+
   // ------------------------------------------------------------------------
   // Properties
   //
@@ -250,15 +292,21 @@ SC.CoreView.reopen(
       state !== SC.CoreView.ATTACHED_HIDDEN_BY_PARENT;
   }.property('viewState').cacheable(),
 
+
   // ------------------------------------------------------------------------
   // Actions (Locked down to the proper state)
   //
-
 
   /** @private Adopt this view action. */
   _doAdopt: function (parentView, beforeView) {
     var curParentView = this.get('parentView'),
       handled = true;
+
+    //@if (debug)
+    if (SC.LOG_VIEW_STATES) {
+      SC.Logger.log('%c%@ — _doAdopt(%@, %@)'.fmt(this, parentView, beforeView), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
+    }
+    //@endif
 
     if (curParentView && curParentView !== parentView) {
       //@if(debug)
@@ -275,9 +323,11 @@ SC.CoreView.reopen(
     // with createChildView()), but have not yet been fully adopted.
     if (!curParentView || this.get('childViews').indexOf(this) < 0) {
       var idx,
-        childViews = parentView.get('childViews');
+        childViews = parentView.get('childViews'),
+        parentViewState = parentView.get('viewState'),
+        parentNode, nextNode, nextView, siblings;
 
-      // Send notifications.
+      // Notify *will* (top-down from parent to children).
       if (parentView.willAddChild) { parentView.willAddChild(this, beforeView); }
       if (this.willAddToParent) { this.willAddToParent(parentView, beforeView); }
 
@@ -290,37 +340,53 @@ SC.CoreView.reopen(
       if (idx < 0) { idx = childViews.length; }
       childViews.insertAt(idx, this);
 
+      // Notify adopted (on self and all child views).
+      this._adopted();
 
-      if (this.get('isAttached')) {
-        // Our frame may change once we've been adopted to a parent.
-        this.notifyPropertyChange('frame');
-      } else {
-
-        if (this.get('_isRendered')) {
-
-          // Bypass the unattached state for adopted views.
-          if (parentView.get('_isRendered')) {
-            var parentNode, nextNode, nextView, siblings;
-
-            parentNode = parentView.get('containerLayer');
-            siblings = parentView.get('childViews');
-            nextView = siblings.objectAt(siblings.indexOf(this) + 1);
-            nextNode = (nextView) ? nextView.get('layer') : null;
-
-            this._doAttach(parentNode, nextNode);
-          }
-        } else {
-
+      switch (this.get('viewState')) {
+      case SC.CoreView.UNRENDERED:
+        switch (parentViewState) {
+        case SC.CoreView.UNRENDERED:
+          break;
+        default:
           // Bypass the unrendered state for adopted views.
-          if (parentView.get('_isRendered')) {
-            this._doRender();
-          }
+          this._doRender();
+        }
+        break;
+      case SC.CoreView.UNATTACHED:
+        switch (parentViewState) {
+        case SC.CoreView.UNRENDERED:
+          // Bring the child view down to the state of the parent.
+          this._doDestroyLayer();
+          break;
+        default:
+          parentNode = parentView.get('containerLayer');
+          siblings = parentView.get('childViews');
+          nextView = siblings.objectAt(siblings.indexOf(this) + 1);
+          nextNode = (nextView) ? nextView.get('layer') : null;
+
+          this._doAttach(parentNode, nextNode);
+        }
+        break;
+      default: // ATTACHED_X
+        switch (parentViewState) {
+        case SC.CoreView.UNRENDERED:
+          // Bring the child view down to the state of the parent.
+          this._doDestroyLayer();
+          break;
+        default:
+          parentNode = parentView.get('containerLayer');
+          siblings = parentView.get('childViews');
+          nextView = siblings.objectAt(siblings.indexOf(this) + 1);
+          nextNode = (nextView) ? nextView.get('layer') : null;
+
+          this._doAttach(parentNode, nextNode);
         }
       }
 
-      // Notify.
-      if (parentView.didAddChild) { parentView.didAddChild(this, beforeView); }
+      // Notify *did* (bottom-up from children to parent).
       if (this.didAddToParent) { this.didAddToParent(parentView, beforeView); }
+      if (parentView.didAddChild) { parentView.didAddChild(this, beforeView); }
     } else {
       handled = false;
     }
@@ -332,55 +398,18 @@ SC.CoreView.reopen(
   _doAttach: function (parentNode, nextNode) {
     var state = this.get('viewState'),
       transitionIn = this.get('transitionIn'),
-      parentView;
+      parentView,
+      isHandled = false;
+
+    //@if (debug)
+    if (SC.LOG_VIEW_STATES) {
+      SC.Logger.log('%c%@ — _doAttach(%@, %@)'.fmt(this, parentNode, nextNode), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
+    }
+    //@endif
 
     switch (state) {
-    case SC.CoreView.ATTACHED_HIDING: // FAST PATH!
-    case SC.CoreView.ATTACHED_HIDDEN: // FAST PATH!
-    case SC.CoreView.ATTACHED_HIDDEN_BY_PARENT: // FAST PATH!
-    case SC.CoreView.ATTACHED_BUILDING_IN: // FAST PATH!
-    case SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT: // FAST PATH!
-    case SC.CoreView.ATTACHED_SHOWING: // FAST PATH!
-    case SC.CoreView.ATTACHED_SHOWN: // FAST PATH!
-      //@if(debug)
-      // This should be avoided, because moving the view layer without explicitly removing it first is a dangerous practice.
-      SC.warn("Developer Warning: You can not attach the view, %@, to a new node without properly detaching it first.".fmt(this));
-      //@endif
-      return false;
-    case SC.CoreView.UNATTACHED_BY_PARENT:
-      //@if(debug)
-      SC.warn("Developer Warning: You can not attach the child view, %@, directly.".fmt(this));
-      //@endif
-      return false;
-    case SC.CoreView.UNRENDERED: // FAST PATH!
-      return false;
-    case SC.CoreView.ATTACHED_BUILDING_OUT:
-      // If already building out, we need to cancel and possibly build in.
-      this._callOnChildViews('_parentDidCancelBuildOut');
 
-      // Remove the shared building out count if it exists.
-      delete this._buildingOutCount;
-
-      // Note: We can be in ATTACHED_BUILDING_OUT state without a transition out while we wait for child views.
-      if (this.get('transitionOut')) {
-        if (transitionIn) {
-          this._transitionIn();
-
-          // Route.
-          this._gotoAttachedBuildingInState();
-        } else {
-          // Route first!
-          this._gotoAttachedShownState();
-
-          this._cancelTransition();
-        }
-      } else {
-
-        // Route.
-        this._gotoAttachedShownState();
-      }
-
-      break;
+    // Normal case: view is not attached and is being attached.
     case SC.CoreView.UNATTACHED:
       var node = this.get('layer');
 
@@ -392,98 +421,221 @@ SC.CoreView.reopen(
 
       parentView = this.get('parentView');
       if (!parentView || (parentView && parentView.get('isAttached'))) {
-        // Notify.
-        this._notifyAttached();
-
-        // Route.
+        // Update states after *will* and before *did* notifications!
         this._routeOnAttached();
 
         // Give child views a chance to notify and update state.
         this._callOnChildViews('_parentDidAppendToDocument');
+
+        // Notify *did* (bottom-up from children to parent).
+        this._notifyDidAttach();
       } else {
-        // Route.
+        // Update states after *will* and before *did* notifications!
         this._gotoUnattachedByParentState();
       }
+
+      isHandled = true;
       break;
-    default:
+
+    // Special case: view switched from building out to building in.
+    case SC.CoreView.ATTACHED_BUILDING_OUT:
+      // If already building out, we need to cancel and possibly build in.
+      this._callOnChildViews('_parentDidCancelBuildOut');
+
+      // Remove the shared building out count if it exists.
+      delete this._buildingOutCount;
+
+      // Note: We can be in ATTACHED_BUILDING_OUT state without a transition out while we wait for child views.
+      // Update states after *will* and before *did* notifications!
+      if (this.get('transitionOut')) {
+        if (transitionIn) {
+          this._transitionIn();
+
+          this._gotoAttachedBuildingInState();
+        } else {
+          // Update state first!
+          this._gotoAttachedShownState();
+
+          this._cancelTransition();
+        }
+      } else {
+
+        // Route.
+        this._gotoAttachedShownState();
+      }
+
+      isHandled = true;
+      break;
+
+    // Invalid states that have no effect.
+    case SC.CoreView.ATTACHED_HIDING:
+    case SC.CoreView.ATTACHED_HIDDEN:
+    case SC.CoreView.ATTACHED_HIDDEN_BY_PARENT:
+    case SC.CoreView.ATTACHED_BUILDING_IN:
+    case SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT:
+    case SC.CoreView.ATTACHED_SHOWING:
+    case SC.CoreView.UNRENDERED:
+      break;
+
+    // Improper states that have no effect, but should be discouraged.
+    case SC.CoreView.ATTACHED_SHOWN:
+      //@if(debug)
+      // This should be avoided, because moving the view layer without explicitly removing it first is a dangerous practice.
+      SC.warn("Developer Warning: You can not attach the view, %@, to a new node without properly detaching it first.".fmt(this));
+      //@endif
+      break;
+    case SC.CoreView.UNATTACHED_BY_PARENT:
+      //@if(debug)
+      SC.warn("Developer Warning: You can not attach the child view, %@, directly.".fmt(this));
+      //@endif
+      break;
     }
 
-    return true;
+    return isHandled;
   },
 
   /** @private Destroy the layer of this view action. */
   _doDestroyLayer: function () {
-    var handled = true;
+    var state = this.get('viewState'),
+      isHandled = false;
 
-    if (this.get('_isRendered') && !this.get('isAttached')) {
+    //@if (debug)
+    if (SC.LOG_VIEW_STATES) {
+      SC.Logger.log('%c%@ — _doDestroyLayer()'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
+    }
+    //@endif
+
+    switch (state) {
+
+    // Invalid states that have no effect.
+    case SC.CoreView.UNRENDERED:
+    case SC.CoreView.ATTACHED_HIDING:
+    case SC.CoreView.ATTACHED_HIDDEN:
+    case SC.CoreView.ATTACHED_HIDDEN_BY_PARENT:
+    case SC.CoreView.ATTACHED_BUILDING_IN:
+    case SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT:
+    case SC.CoreView.ATTACHED_SHOWING:
+    case SC.CoreView.ATTACHED_SHOWN:
+    case SC.CoreView.UNATTACHED_BY_PARENT:
+    case SC.CoreView.ATTACHED_BUILDING_OUT:
+      break;
+
+    // Normal case (SC.CoreView.UNATTACHED): view is rendered and its layer is being destroyed.
+    default:
+      // Notify *will* (top-down from parent to children).
+      this._notifyWillDestroyLayer();
+      this._callOnChildViews('_notifyWillDestroyLayer');
+
       // Remove our reference to the layer (our self and all our child views).
       this._executeDoDestroyLayer();
       this._callOnChildViews('_executeDoDestroyLayer');
-    } else {
-      handled = false;
+
+      // UNUSED.
+      // Notify *did* (bottom-up from children to parent).
+      // this._callOnChildViews('_notifyDidDestroyLayer');
+      // this._notifyDidDestroyLayer();
+
+      isHandled = true;
     }
 
-    return handled;
+    return isHandled;
   },
 
   /** @private Detach this view action. */
   _doDetach: function (immediately) {
     var state = this.get('viewState'),
-      transitionOut = this.get('transitionOut');
+      transitionOut = this.get('transitionOut'),
+      inPlace = false,
+      isHandled = true;
+
+    //@if (debug)
+    if (SC.LOG_VIEW_STATES) {
+      SC.Logger.log('%c%@ — _doDetach()'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
+    }
+    //@endif
 
     switch (state) {
-    case SC.CoreView.UNRENDERED: // FAST PATH!
-    case SC.CoreView.UNATTACHED: // FAST PATH!
-      return false;
-    case SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT: // FAST PATH!
-      if (immediately) {
-        // Don't wait for the build out to complete.
-        this._cancelTransition();
 
-        // Detach immediately.
-        this._executeDoDetach();
-      } else {
-        // TODO: take ownership of the building out of self and all childviews.  Super edge case stuff here..
-        this._gotoAttachedBuildingOutState();
-      }
+    // Normal case: Attached visible view being detached.
+    case SC.CoreView.ATTACHED_SHOWN:
+      break;
 
-      // Don't try to notify or run transition out code again.
-      return true;
-    case SC.CoreView.ATTACHED_BUILDING_OUT: // FAST PATH!
-      // If already building out, only cancel if immediately is set.
-      if (immediately) {
-        this._cancelTransition();
-
-        // Detach immediately.
-        this._executeDoDetach();
-      }
-
-      // Don't try to notify or run transition out code again.
-      return true;
+    // Normal case: Attached non-visible view being detached.
     case SC.CoreView.UNATTACHED_BY_PARENT:
     case SC.CoreView.ATTACHED_HIDDEN:
     case SC.CoreView.ATTACHED_HIDDEN_BY_PARENT:
       // No need to transition out, since we're hidden.
       immediately = true;
       break;
-    case SC.CoreView.ATTACHED_HIDING:
-      if (immediately || !transitionOut) {
-        this._cancelTransition();
-      }
+
+    // Near normal case: Attached showing view. We cancel the incoming animation
+    // rather than swapping to a build out (difficult to get right, because we lose track of the correct final layout).
+    case SC.CoreView.ATTACHED_SHOWING:
+      this.cancelAnimation(); // Fires didTransitionIn callback (state changes to ATTACHED_SHOWN/notifications sent).
       break;
+
+    // Near normal case: Attached hiding view. We cancel the outgoing animation
+    // rather than swapping to a build out (difficult to get right, because we lose track of the correct final layout).
+    case SC.CoreView.ATTACHED_HIDING:
+      this.cancelAnimation(); // Fires didTransitionOut callback (state changes to ATTACHED_HIDDEN/notifications sent).
+
+      // No need to transition out, since we're hidden.
+      immediately = true;
+      break;
+
+    // Near normal case: Attached building in view. We cancel the incoming
+    // animation and build out the view in place.
     case SC.CoreView.ATTACHED_BUILDING_IN:
       if (immediately || !transitionOut) {
-        this._cancelTransition();
+        this.cancelAnimation(); // Fires didTransitionIn callback (state changes to ATTACHED_SHOWN/notifications sent).
+      } else {
+        // Set the state manually so the callback doesn't do clean up and notify.
+        this._gotoAttachedShownState();
+
+        // Cancel the animation in place (setup properties still exist and will be cleared by transitionOut)
+        this.cancelAnimation(SC.LayoutState.CURRENT); // Fires didTransitionIn callback (no state change/no notifications).
+
+        // Transition out in place.
+        inPlace = true;
       }
       break;
-    case SC.CoreView.ATTACHED_SHOWING:
-    case SC.CoreView.ATTACHED_SHOWN:
+
+    // Special case: Already building out, because parent is building out. Stop
+    // the transition in place so that it can continue in place on its own.
+    case SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT: // FAST PATH!
+      // Note: *will* detach notice already sent.
+      this.cancelAnimation(SC.LayoutState.CURRENT); // Fires didTransitionOut callback (necessary to clean up parent view build out wait)
+
+      // Switch state to regular state (the view should only have been able to get to ATTACHED_BUILDING_OUT_BY_PARENT from ATTACHED_SHOWN).
+      this._gotoAttachedShownState();
+
+      // TODO: Grab the build out count for all child views of this view. What a nightmare for an edge case!
+
+      // Transition out in place.
+      inPlace = true;
+
       break;
-    default:
+
+    // Special case: Already building out. Fast path!
+    case SC.CoreView.ATTACHED_BUILDING_OUT:
+      // If immediately is passed, cancel the build out prematurely.
+      if (immediately) {
+        // Note: *will* detach notice already sent.
+        this.cancelAnimation(); // Fires didTransitionOut callback (state changes to UNATTACHED/notifications sent).
+      }
+
+      // Don't try to notify or run transition out code again.
+      return true;
+
+    // Invalid states that have no effect. Fast path!
+    case SC.CoreView.UNRENDERED:
+    case SC.CoreView.UNATTACHED:
+      return false;
     }
 
-    // Notify.
-    this._notifyDetaching();
+    // Notify *will* (top-down from parent to children). The children will be
+    // notified only when they are actually about to be removed.
+    // this._notifyWillDetach();
 
     if (immediately) {
       // Detach immediately.
@@ -498,12 +650,12 @@ SC.CoreView.reopen(
       this._callOnChildViews('_parentWillBuildOutFromDocument', this);
 
       if (transitionOut) {
-        this._transitionOut(this);
+        this._transitionOut(inPlace, this);
 
-        // Route.
+        // Update states after *will* and before *did* notifications!
         this._gotoAttachedBuildingOutState();
       } else if (this._buildingOutCount > 0) {
-      // Some children are building out, we will have to wait for them.
+        // Some children are building out, we will have to wait for them.
         this._gotoAttachedBuildingOutState();
       } else {
         delete this._buildingOutCount;
@@ -513,13 +665,19 @@ SC.CoreView.reopen(
       }
     }
 
-    return true;
+    return isHandled;
   },
 
   /** @private Hide this view action. */
   _doHide: function () {
     var state = this.get('viewState'),
       transitionHide = this.get('transitionHide');
+
+    //@if (debug)
+    if (SC.LOG_VIEW_STATES) {
+      SC.Logger.log('%c%@ — _doHide()'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
+    }
+    //@endif
 
     switch (state) {
     case SC.CoreView.UNRENDERED: // FAST PATH!
@@ -535,9 +693,10 @@ SC.CoreView.reopen(
 
       return true;
     case SC.CoreView.ATTACHED_HIDDEN_BY_PARENT: // FAST PATH!
-      // Queue the visibility update for the next time we display.
-      this._visibleStyleNeedsUpdate = true;
+      // Note that visibility update is NOT conditional for this state.
+      this._doUpdateVisibleStyle();
 
+      // Update states after *will* and before *did* notifications!
       this._gotoAttachedHiddenState();
 
       return true;
@@ -552,28 +711,27 @@ SC.CoreView.reopen(
     default:
     }
 
-    // Notify will hide.
+    // Notify *will* (top-down from parent to children).
     if (this.willHideInDocument) { this.willHideInDocument(); }
 
     if (transitionHide) {
       this._transitionHide();
 
-      // Route.
+      // Update states after *will* and before *did* notifications!
       this._gotoAttachedHidingState();
     } else {
-    // Clear out any child views that are still transitioning before we hide.
+      // Clear out any child views that are still transitioning before we hide.
       this._callOnChildViews('_parentWillHideInDocument');
 
-      // Note that visibility update is NOT conditional for this view.
-      this._doUpdateVisibleStyle();
+      // Note that visibility update is NOT conditional for this state.
+      this.invokeOnce(this._doUpdateVisibleStyle);
 
-      // Notify.
-      if (this.didHideInDocument) { this.didHideInDocument(); }
-
+      // Update states after *will* and before *did* notifications!
+      this._gotoAttachedHiddenState();
       this._callOnChildViews('_parentDidHideInDocument');
 
-      // Route.
-      this._gotoAttachedHiddenState();
+      // Notify *did* (bottom-up from children to parent).
+      if (this.didHideInDocument) { this.didHideInDocument(); }
     }
 
     return true;
@@ -583,6 +741,12 @@ SC.CoreView.reopen(
   _doOrphan: function () {
     var parentView = this.get('parentView'),
       handled = true;
+
+    //@if (debug)
+    if (SC.LOG_VIEW_STATES) {
+      SC.Logger.log('%c%@:%@ — _doOrphan()'.fmt(this, this.get('viewState')), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
+    }
+    //@endif
 
     if (parentView) {
       var childViews = parentView.get('childViews'),
@@ -604,9 +768,14 @@ SC.CoreView.reopen(
   },
 
   /** @private Render this view action. */
-
   _doRender: function () {
     var state = this.get('viewState');
+
+    //@if (debug)
+    if (SC.LOG_VIEW_STATES) {
+      SC.Logger.log('%c%@:%@ — _doRender()'.fmt(this, state), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
+    }
+    //@endif
 
     switch (state) {
     case SC.CoreView.ATTACHED_SHOWING: // FAST PATHS!
@@ -627,12 +796,12 @@ SC.CoreView.reopen(
       this.renderToContext(context);
       this.set('layer', context.element());
 
-      // Route.
+      // Update states after *will* and before *did* notifications!
       this._gotoUnattachedState();
 
-      // Notify rendered (on self and all child views).
-      this._rendered();
+      // Notify *did* (bottom-up from children to parent).
       this._callOnChildViews('_parentDidRender');
+      this._rendered();
 
       // Bypass the unattached state for adopted views.
       var parentView = this.get('parentView');
@@ -660,6 +829,12 @@ SC.CoreView.reopen(
       isParentShown = parentView ? parentView.get('viewState') & SC.CoreView.IS_SHOWN : true,
       transitionShow = this.get('transitionShow');
 
+    //@if (debug)
+    if (SC.LOG_VIEW_STATES) {
+      SC.Logger.log('%c%@:%@ — _doShow()'.fmt(this, state), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
+    }
+    //@endif
+
     switch (state) {
     case SC.CoreView.ATTACHED_SHOWN: // FAST PATH!
     case SC.CoreView.ATTACHED_SHOWING: // FAST PATH!
@@ -676,18 +851,17 @@ SC.CoreView.reopen(
       return true;
     case SC.CoreView.ATTACHED_HIDDEN:
       if (isParentShown) {
-        // Update before showing (note that visibility update is NOT conditional for this view).
+        // Update before showing (note that visibility update is NOT conditional for this state).
         this._doUpdateVisibleStyle();
 
-        // Notify will show.
+        // Notify *will* (top-down from parent to children).
         this._callOnChildViews('_parentWillShowInDocument');
-
         if (this.willShowInDocument) { this.willShowInDocument(); }
       } else {
         // Queue the visibility update for the next time we display.
         this._visibleStyleNeedsUpdate = true;
 
-        // Route.
+        // Update states after *will* and before *did* notifications!
         this._gotoAttachedHiddenByParentState();
 
         return true;
@@ -706,15 +880,15 @@ SC.CoreView.reopen(
     if (transitionShow) {
       this._transitionShow();
 
-      // Route.
+      // Update states after *will* and before *did* notifications!
       this._gotoAttachedShowingState();
     } else {
-      // Notify.
+      // Update states after *will* and before *did* notifications!
+      this._gotoAttachedShownState();
+
+      // Notify *did* (bottom-up from children to parent).
       if (this.didShowInDocument) { this.didShowInDocument(); }
       this._callOnChildViews('_parentDidShowInDocument');
-
-    // Route.
-      this._gotoAttachedShownState();
     }
 
     return true;
@@ -725,8 +899,11 @@ SC.CoreView.reopen(
     var isVisibleInWindow = this.get('isVisibleInWindow'),
       handled = true;
 
-    // Legacy.
-    this.set('layerNeedsUpdate', true);
+    //@if (debug)
+    if (SC.LOG_VIEW_STATES) {
+      SC.Logger.log('%c%@ — _doUpdateContent(%@)'.fmt(this, force), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
+    }
+    //@endif
 
     if (this.get('_isRendered')) {
       if (isVisibleInWindow || force) {
@@ -758,19 +935,24 @@ SC.CoreView.reopen(
   didTransitionIn: function () {
     var state = this.get('viewState');
 
+    //@if (debug)
+    if (SC.LOG_VIEW_STATES) {
+      SC.Logger.log('%c%@ — didTransitionIn()'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
+    }
+    //@endif
+
     if (state === SC.CoreView.ATTACHED_SHOWING ||
       state === SC.CoreView.ATTACHED_BUILDING_IN) {
       this._teardownTransition();
 
-      // Notify.
-      if (this.didShowInDocument) { this.didShowInDocument(); }
+      // Update states after *will* and before *did* notifications!
+      this._gotoAttachedShownState();
 
+      // Notify *did* (bottom-up from children to parent).
+      if (this.didShowInDocument) { this.didShowInDocument(); }
       if (state === SC.CoreView.ATTACHED_SHOWING) {
         this._callOnChildViews('_parentDidShowInDocument');
       }
-
-      // Route.
-      this._gotoAttachedShownState();
     }
   },
 
@@ -784,6 +966,12 @@ SC.CoreView.reopen(
   */
   didTransitionOut: function () {
     var state = this.get('viewState');
+
+    //@if (debug)
+    if (SC.LOG_VIEW_STATES) {
+      SC.Logger.log('%c%@ — didTransitionOut()'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
+    }
+    //@endif
 
     if (state === SC.CoreView.ATTACHED_BUILDING_OUT) {
       this._teardownTransition();
@@ -804,20 +992,25 @@ SC.CoreView.reopen(
     } else if (state === SC.CoreView.ATTACHED_HIDING) {
       this._teardownTransition();
 
-      // Clear out any child views that are transitioning before we hide.
+      // Notify *will* (top-down from parent to children).
       this._callOnChildViews('_parentWillHideInDocument');
 
-      // Note that visibility update is NOT conditional for this view.
+      // Note that visibility update is NOT conditional for this state.
       this._doUpdateVisibleStyle();
 
-      // Notify.
-      if (this.didHideInDocument) { this.didHideInDocument(); }
-
-      this._callOnChildViews('_parentDidHideInDocument');
-
-      // Route.
+      // Update states after *will* and before *did* notifications!
       this._gotoAttachedHiddenState();
+
+      // Notify *did* (bottom-up from children to parent).
+      this._callOnChildViews('_parentDidHideInDocument');
+      if (this.didHideInDocument) { this.didHideInDocument(); }
     }
+  },
+
+  /** @private The 'adopted' event. */
+  _adopted: function () {
+    // This has been moved to the _notifyDidAttach event.
+    // this.notifyPropertyChange('frame');
   },
 
   /** @private The 'orphaned' event. */
@@ -830,8 +1023,7 @@ SC.CoreView.reopen(
   /** @private The 'rendered' event. */
   _rendered: function () {
     var displayProperties,
-      len, idx,
-      mixins = this.didCreateLayerMixin;
+      len, idx;
 
     // Register display property observers.
     displayProperties = this.get('displayProperties');
@@ -839,17 +1031,12 @@ SC.CoreView.reopen(
       this.addObserver(displayProperties[idx], this, this.displayDidChange);
     }
 
+    // Begin observing isVisible & isFirstResponder.
+    this.addObserver('isVisible', this, this._isVisibleDidChange);
+    this.addObserver('isFirstResponder', this, this._isFirstResponderDidChange);
+
     // TODO: we should be able to fix this with states
     // if (this.get('useStaticLayout')) this.viewDidResize();
-
-    // Send notice that the layer was created.
-    if (this.didCreateLayer) { this.didCreateLayer(); }
-    if (mixins) {
-      len = mixins.length;
-      for (idx = 0; idx < len; ++idx) {
-        mixins[idx].call(this);
-      }
-    }
 
     // var childView, childViews = this.get('childViews');
     // for (var i = childViews.length - 1; i >= 0; i--) {
@@ -877,9 +1064,8 @@ SC.CoreView.reopen(
     //   childView._rendered();
     // }
 
-    // Begin observing isVisible & isFirstResponder.
-    this.addObserver('isVisible', this, this._isVisibleDidChange);
-    this.addObserver('isFirstResponder', this, this._isFirstResponderDidChange);
+    // Notify.
+    this._notifyDidRender();
   },
 
   // ------------------------------------------------------------------------
@@ -960,7 +1146,7 @@ SC.CoreView.reopen(
   _cancelTransition: function () {
     // Cancel conflicting transitions.
     this.cancelAnimation();
-    this._teardownTransition();
+    // this._teardownTransition();
   },
 
   /** @private */
@@ -974,22 +1160,10 @@ SC.CoreView.reopen(
     this._visibleStyleNeedsUpdate = false;
   },
 
-  /** @private */
+  /** @private Destroys the layer and updates the state. */
   _executeDoDestroyLayer: function () {
     var displayProperties,
-      idx, len,
-      mixins;
-
-    // Notify.
-    if (this.willDestroyLayer) { this.willDestroyLayer(); }
-
-    mixins = this.willDestroyLayerMixin;
-    if (mixins) {
-      len = mixins.length;
-      for (idx = 0; idx < len; ++idx) {
-        mixins[idx].call(this);
-      }
-    }
+      idx, len;
 
     // Remove the layer reference.
     this.set('layer', null);
@@ -1004,27 +1178,23 @@ SC.CoreView.reopen(
     this.removeObserver('isVisible', this, this._isVisibleDidChange);
     this.removeObserver('isFirstResponder', this, this._isFirstResponderDidChange);
 
-    // Route.
+    // Update states after *will* and before *did* notifications!
     this._gotoUnrenderedState();
   },
 
-  /** @private Detach the view. */
+  /** @private Detaches the view and updates the state. */
   _executeDoDetach: function () {
-    // Give child views a chance to clean up any transitions and to notify.
+    // Notify *will* (top-down from parent to children).
+    this._notifyWillDetach();
     this._callOnChildViews('_parentWillRemoveFromDocument');
 
     // Detach the layer.
     var node = this.get('layer');
     node.parentNode.removeChild(node);
 
-    // Notify.
-    this._notifyDetached();
-
-    // Give child views a chance to clean up any transitions and to notify.
-    this._callOnChildViews('_parentDidRemoveFromDocument');
-
-    // Route.
+    // Update states after *will* and before *did* notifications!
     this._gotoUnattachedState();
+    this._callOnChildViews('_parentDidRemoveFromDocument');
   },
 
   /** @private */
@@ -1061,6 +1231,7 @@ SC.CoreView.reopen(
     this._contentNeedsUpdate = false;
 
     // Notify.
+    this.notifyPropertyChange('layer');
     if (this.didUpdateLayer) { this.didUpdateLayer(); }
 
     if (this.designer && this.designer.viewDidUpdateLayer) {
@@ -1109,8 +1280,22 @@ SC.CoreView.reopen(
     this.$().toggleClass('focus', isFirstResponder);
   },
 
+  _notifyDidRender: function () {
+    var mixins = this.didCreateLayerMixin,
+      idx, len;
+
+    // Send notice that the layer was created.
+    if (this.didCreateLayer) { this.didCreateLayer(); }
+    if (mixins) {
+      len = mixins.length;
+      for (idx = 0; idx < len; ++idx) {
+        mixins[idx].call(this);
+      }
+    }
+  },
+
   /** @private Notify on attached. */
-  _notifyAttached: function () {
+  _notifyDidAttach: function () {
     // If we don't have the layout module then we don't know the frame until appended to the document.
     this.notifyPropertyChange('frame');
 
@@ -1119,12 +1304,24 @@ SC.CoreView.reopen(
   },
 
   /** @private Notify on detaching. */
-  _notifyDetaching: function () {
+  _notifyWillDetach: function () {
     if (this.willRemoveFromDocument) { this.willRemoveFromDocument(); }
   },
 
-  /** @private Notify on detached. */
-  _notifyDetached: function () {
+  /** @private Notify before destroying layer. */
+  _notifyWillDestroyLayer: function () {
+    var idx, len,
+      mixins;
+
+    mixins = this.willDestroyLayerMixin;
+    if (mixins) {
+      len = mixins.length;
+      for (idx = 0; idx < len; ++idx) {
+        mixins[idx].call(this);
+      }
+    }
+
+    if (this.willDestroyLayer) { this.willDestroyLayer(); }
   },
 
   /** @private Routes according to parent did append. */
@@ -1132,8 +1329,11 @@ SC.CoreView.reopen(
     // Run any queued updates.
     this._executeQueuedUpdates();
 
-    this._notifyAttached();
+    // Update states after *will* and before *did* notifications!
     this._routeOnAttached();
+
+    // Notify.
+    this._notifyDidAttach();
   },
 
   /** @private Updates according to parent did cancel build out. */
@@ -1145,12 +1345,12 @@ SC.CoreView.reopen(
       if (transitionIn) {
         this._transitionIn();
 
-        // Route.
+        // Update states after *will* and before *did* notifications!
         this._gotoAttachedBuildingInState();
       } else {
         this._cancelTransition();
 
-        // Route.
+        // Update states after *will* and before *did* notifications!
         this._gotoAttachedShownState();
       }
     } else if (state === SC.CoreView.ATTACHED_BUILDING_OUT || state &
@@ -1162,11 +1362,10 @@ SC.CoreView.reopen(
 
   /** @private Updates according to parent did render. */
   _parentDidRender: function () {
-    // Notify rendered.
-    this._rendered();
-
-    // Route
+    // Update states after *will* and before *did* notifications!
     this._gotoUnattachedByParentState();
+
+    this._rendered();
   },
 
   /** @private Starts building out view if appropriate. */
@@ -1181,25 +1380,25 @@ SC.CoreView.reopen(
     case SC.CoreView.ATTACHED_BUILDING_OUT:
     case SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT:
       // There's no need to continue to further child views.
-      return false;
+      // return false;
     case SC.CoreView.ATTACHED_HIDDEN:
     case SC.CoreView.ATTACHED_HIDDEN_BY_PARENT:
     case SC.CoreView.ATTACHED_HIDING:
-      // Notify.
-      this._notifyDetaching();
+      // Notify *will* (top-down from parent to children).
+      // this._notifyWillDetach();
 
       return false;
     case SC.CoreView.ATTACHED_SHOWING:
     case SC.CoreView.ATTACHED_BUILDING_IN:
     case SC.CoreView.ATTACHED_SHOWN:
-      // Notify.
-      this._notifyDetaching();
+      // Notify *will* (top-down from parent to children).
+      // this._notifyWillDetach();
 
       if (transitionOut) {
         this._owningView = owningView;
-        this._transitionOut(owningView);
+        this._transitionOut(false, owningView);
 
-        // Route.
+        // Update states after *will* and before *did* notifications!
         this._gotoAttachedBuildingOutByParentState();
       }
       return true;
@@ -1217,12 +1416,19 @@ SC.CoreView.reopen(
     case SC.CoreView.UNATTACHED_BY_PARENT:
       // There's no need to continue to further child views.
       return false;
-    case SC.CoreView.ATTACHED_BUILDING_IN:
+    // Cancel any outstanding isVisible transitions and mark for visibility update.
     case SC.CoreView.ATTACHED_SHOWING:
     case SC.CoreView.ATTACHED_HIDING:
+      this._cancelTransition();
+      this._teardownTransition();
+      this._visibleStyleNeedsUpdate = true;
+      break;
+    // Cancel any other outstanding transitions.
+    case SC.CoreView.ATTACHED_BUILDING_IN:
     case SC.CoreView.ATTACHED_BUILDING_OUT:
     case SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT:
       this._cancelTransition();
+      this._teardownTransition();
       break;
     case SC.CoreView.ATTACHED_HIDDEN:
     case SC.CoreView.ATTACHED_HIDDEN_BY_PARENT:
@@ -1231,6 +1437,9 @@ SC.CoreView.reopen(
     default:
       // Attached and not in a transitionary state.
     }
+
+    // Notify *will*.
+    this._notifyWillDetach();
   },
 
   /** @private Routes according to parent did detach. */
@@ -1238,7 +1447,7 @@ SC.CoreView.reopen(
     var state = this.get('viewState');
 
     if (state & SC.CoreView.IS_ATTACHED) {
-      this._notifyDetached();
+      // Update states after *will* and before *did* notifications!
       this._gotoUnattachedByParentState();
     } else {
       // There's no need to continue to further child views.
@@ -1268,11 +1477,11 @@ SC.CoreView.reopen(
     default:
     }
 
-    // Notify.
-    if (this.didHideInDocument) { this.didHideInDocument(); }
-
-    // Route.
+    // Update states after *will* and before *did* notifications!
     this._gotoAttachedHiddenByParentState();
+
+    // Notify *did* (bottom-up from children to parent).
+    if (this.didHideInDocument) { this.didHideInDocument(); }
   },
 
   /** @private Routes according to parent will hide. */
@@ -1289,15 +1498,17 @@ SC.CoreView.reopen(
       return false;
     case SC.CoreView.ATTACHED_HIDING: // FAST PATH!
       // Clear out any child views that are transitioning before we hide.
-      this._callOnChildViews('_parentWillHideInDocument');
+      // Notify *will* (top-down from parent to children).
+      // this._callOnChildViews('_parentWillHideInDocument');
 
+      // // Update states after *will* and before *did* notifications!
+      // this._gotoAttachedHiddenState();
+
+      // Cancel our hiding transition.
       this._cancelTransition();
 
       // We didn't quite hide in time so indicate that visibility needs update next time we display.
-      this._visibleStyleNeedsUpdate = true;
-
-      // Route.
-      this._gotoAttachedHiddenState();
+      // this._visibleStyleNeedsUpdate = true;
 
       return false;
     case SC.CoreView.ATTACHED_BUILDING_IN: // FAST PATH!
@@ -1314,7 +1525,7 @@ SC.CoreView.reopen(
       // Attached and not in a transitionary state.
     }
 
-    // Notify.
+    // Notify *will* (top-down from parent to children).
     if (this.willHideInDocument) { this.willHideInDocument(); }
   },
 
@@ -1323,10 +1534,10 @@ SC.CoreView.reopen(
     var state = this.get('viewState');
 
     if (state === SC.CoreView.ATTACHED_HIDDEN_BY_PARENT) {
-      // Route.
+      // Update states after *will* and before *did* notifications!
       this._gotoAttachedShownState();
 
-      // Notify.
+      // Notify *did* (bottom-up from children to parent).
       if (this.didShowInDocument) { this.didShowInDocument(); }
     } else {
       // There's no need to continue to further child views.
@@ -1341,7 +1552,7 @@ SC.CoreView.reopen(
     if (state === SC.CoreView.ATTACHED_HIDDEN_BY_PARENT) {
       this._executeQueuedUpdates();
 
-      // Notify.
+      // Notify *will* (top-down from parent to children).
       if (this.willShowInDocument) { this.willShowInDocument(); }
     } else {
       // There's no need to continue to further child views.
@@ -1419,20 +1630,11 @@ SC.CoreView.reopen(
   },
 
   /** @private Attempts to run a transition out, ensuring any incoming transitions are stopped in place. */
-  _transitionOut: function (owningView) {
-    var state = this.get('viewState'),
-      transitionOut = this.get('transitionOut'),
-      options = this.get('transitionOutOptions') || {},
-      inPlace = false;
+  _transitionOut: function (inPlace, owningView) {
+    var transitionOut = this.get('transitionOut'),
+      options = this.get('transitionOutOptions') || {};
 
-    switch (state) {
-    case SC.CoreView.ATTACHED_SHOWING:
-    case SC.CoreView.ATTACHED_HIDING:
-    case SC.CoreView.ATTACHED_BUILDING_IN:
-      this.cancelAnimation(SC.LayoutState.CURRENT);
-      inPlace = true;
-      break;
-    default:
+    if (!inPlace) {
       this._setupTransition();
     }
 
@@ -1477,7 +1679,7 @@ SC.CoreView.reopen(
       // Views without a parent are not limited by a parent's current state.
       isParentShown = parentView ? parentView.get('viewState') & SC.CoreView.IS_SHOWN : true;
 
-    // Route.
+    // Update states after *will* and before *did* notifications!
     if (this.get('isVisible')) {
       if (isParentShown) {
         // Route.

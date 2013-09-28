@@ -342,3 +342,24 @@ test("replacing content in an ArrayController propagates changes to bound arrang
   equals(obj.getPath('list.length'), 0, "binding has 0 items");
   equals(listChanged, 1, "listDidChange was called");
 });
+
+/**
+  There was a bug that when the content swapped out of an ArrayController with allowsEmptySelection
+  set to false, the selection would remain as the first object from the last content.
+  This was due to the firstObject (and lastObject) not being updated properly.
+*/
+test("SC.ArrayController(SC.SelectionSupport) selection updates properly when allowsEmptySelection is false and the content changes",
+function() {
+  var firstSelectableObject,
+    newObject = TestObject.create({
+        title: 'New Object'
+      });
+
+  // Disable allowing empty selection
+  controller.set('allowsEmptySelection', NO);
+  ok(controller.get('selection').containsObject(content[0]), 'selection should be the first original content object');
+
+  // Swap the content.
+  controller.set('content', [newObject]);
+  ok(controller.get('selection').containsObject(newObject), 'selection should be the first new content object');
+});

@@ -10,6 +10,11 @@ sc_require('system/text_selection') ;
 sc_require('mixins/static_layout') ;
 sc_require('mixins/editable');
 
+SC.AUTOCAPITALIZE_NONE = 'none';
+SC.AUTOCAPITALIZE_SENTENCES = 'sentences';
+SC.AUTOCAPITALIZE_WORDS = 'words';
+SC.AUTOCAPITALIZE_CHARACTERS = 'characters';
+
 /**
   @class
 
@@ -125,15 +130,26 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   autoCorrect: YES,
 
   /**
-    Whether the browser should automatically capitalize the input.
+    Specifies the autocapitalization behavior.
+
+    Possible values are:
+
+     - `SC.AUTOCAPITALIZE_NONE` -- Do not autocapitalize.
+     - `SC.AUTOCAPITALIZE_SENTENCES` -- Autocapitalize the first letter of each
+       sentence.
+     - `SC.AUTOCAPITALIZE_WORDS` -- Autocapitalize the first letter of each word.
+     - `SC.AUTOCAPITALIZE_CHARACTERS` -- Autocapitalize all characters.
+
+    Boolean values are also supported, with YES interpreted as
+    `SC.AUTOCAPITALIZE_NONE` and NO as `SC.AUTOCAPITALIZE_SENTENCES`.
 
     When `autoCapitalize` is set to `null`, the browser will use
     the system defaults.
 
-    @type Boolean
-    @default YES
+    @type String SC.AUTOCAPITALIZE_NONE|SC.AUTOCAPITALIZE_SENTENCES|SC.AUTOCAPITALIZE_WORDS|SC.AUTOCAPITALIZE_CHARACTERS
+    @default SC.CAPITALIZE_SENTENCES
    */
-  autoCapitalize: YES,
+  autoCapitalize: SC.CAPITALIZE_SENTENCES,
 
   /**
     Localizes the hint if necessary.
@@ -626,12 +642,16 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
 
       spellCheckString = this.get('spellCheckEnabled') ? ' spellcheck="true"' : ' spellcheck="false"';
 
-      if (autoCorrect != null) {
-        autocorrectString = ' autocorrect=' + (!autoCorrect ? '"off"' : '"true"');
+      if (!SC.none(autoCorrect)) {
+        autocorrectString = ' autocorrect=' + (!autoCorrect ? '"off"' : '"on"');
       }
 
-      if (autoCorrect != null) {
-        autocapitalizeString = ' autocapitalize=' + (!autoCapitalize ? '"off"' : '"true"');
+      if (!SC.none(autoCapitalize)) {
+        if (SC.typeOf(autoCapitalize) === 'boolean') {
+          autocapitalizeString = ' autocapitalize=' + (!autoCapitalize ? '"none"' : '"sentences"');
+        } else {
+          autocapitalizeString = ' autocapitalize=' + autoCapitalize;
+        }
       }
 
       if (!isBrowserFocusable) {
@@ -731,16 +751,20 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
         }
       }
 
-      if (autoCorrect != null) {
-        input.attr('autoCorrect', !autoCorrect ? 'off' : 'true');
+      if (!SC.none(autoCorrect)) {
+        input.attr('autocorrect', !autoCorrect ? 'off' : 'on');
       } else {
-        input.attr('autoCorrect', null);
+        input.attr('autocorrect', null);
       }
 
-      if (autoCapitalize != null) {
-        input.attr('autoCapitalize', !autoCapitalize ? 'off' : 'true');
+      if (!SC.none(autoCapitalize)) {
+        if (SC.typeOf(autoCapitalize) == 'boolean') {
+          input.attr('autocapitalize', !autoCapitalize ? 'none' : 'sentences');
+        } else {
+          input.attr('autocapitalize', autoCapitalize);
+        }
       } else {
-        input.attr('autoCapitalize', null);
+        input.attr('autocapitalize', null);
       }
 
       if (!hintOnFocus && SC.platform.input.placeholder) input.attr('placeholder', hint);

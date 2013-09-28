@@ -5,13 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/** @class
 
-  The default example view for a table row. Belongs to a SC.TableView.
-
-  @extends SC.View
-  @since SproutCore 1.1
-*/
 
 SC.TableRowView = SC.View.extend({
 /** @scope SC.TableRowView.prototype */

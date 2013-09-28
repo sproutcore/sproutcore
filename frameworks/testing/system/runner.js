@@ -170,6 +170,10 @@ CoreTest.Runner = {
       }
       catch (e) {}
     }
+
+    if (typeof window.callPhantom === 'function') {
+      window.callPhantom(r);
+    }
   },
 
   planDidRecord: function(plan, module, test, assertions, timings) {

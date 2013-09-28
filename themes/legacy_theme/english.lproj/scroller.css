@@ -113,12 +113,12 @@
 /* Active */
 .sc-theme .sc-view.sc-scroller-view.sc-horizontal .button-top:active,
 .sc-theme .sc-view.sc-scroller-view.sc-horizontal .button-top.active {
-	background: sc_static("images/sc-scroller-sprite") -26px 0px no-repeat;
+	background: sc_static("images/sc-scroller-sprite") -26px 0 no-repeat;
 }
 
 .sc-theme .sc-view.sc-scroller-view.sc-horizontal .button-bottom:active,
 .sc-theme .sc-view.sc-scroller-view.sc-horizontal .button-bottom.active {
-	background: sc_static("images/sc-scroller-sprite") 0px -14px no-repeat;
+	background: sc_static("images/sc-scroller-sprite") 0 -14px no-repeat;
 }
 
 /* Thumb */

@@ -5,20 +5,20 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/*global module test equals ok */
+/*global module, test, equals,ok */
 
-var parent;
+var parentView;
 
 /** Test the SC.View states. */
 module("SC.View States", {
 
   setup: function () {
-    parent = SC.View.create();
+    parentView = SC.View.create();
   },
 
   teardown: function () {
-    parent.destroy();
-    parent = null;
+    parentView.destroy();
+    parentView = null;
   }
 
 });
@@ -58,7 +58,9 @@ test("Test unrendered state.", function () {
   ok(!handled, "Calling _doDetach() should not be handled");
   equals(view.viewState, SC.CoreView.UNRENDERED, "Calling _doDetach() doesn't change state");
 
-  handled = view._doHide();
+  SC.run(function () {
+    handled = view._doHide();
+  });
   ok(!handled, "Calling _doHide() should not be handled");
   equals(view.viewState, SC.CoreView.UNRENDERED, "Calling _doHide() doesn't change state");
 
@@ -114,16 +116,18 @@ test("Test unattached state.", function () {
   ok(!handled, "Calling _doDetach() should not be handled");
   equals(view.viewState, SC.CoreView.UNATTACHED, "Calling _doDetach() doesn't change state");
 
-  handled = view._doHide();
-  ok(!handled, "Calling _doHide() should not be handled");
-  equals(view.viewState, SC.CoreView.UNATTACHED, "Calling _doHide() doesn't change state");
-
   handled = view._doRender();
   ok(!handled, "Calling _doRender() should not be handled");
   equals(view.viewState, SC.CoreView.UNATTACHED, "Calling _doRender() doesn't change state");
 
 
   // HANDLED ACTIONS
+
+  SC.run(function () {
+    handled = view._doHide();
+  });
+  ok(handled, "Calling _doHide() should be handled");
+  equals(view.viewState, SC.CoreView.UNATTACHED, "Calling _doHide() doesn't change state");
 
   handled = view._doShow();
   ok(handled, "Calling _doShow() should be handled");
@@ -161,7 +165,7 @@ test("Test unattached state.", function () {
   view._doRender();
 
   handled = view._doAttach(document.body);
-  ok(handled, "Calling _doAttach(document.body) with unrendered orphan parent should be handled");
+  ok(handled, "Calling _doAttach(document.body) with unrendered orphan parentView should be handled");
   equals(view.viewState, SC.CoreView.ATTACHED_SHOWN, "Calling _doAttach(document.body) changes state");
 
 
@@ -233,7 +237,9 @@ test("Test attached_shown state.", function () {
   view._doRender();
   view._doAttach(document.body);
 
-  handled = view._doHide();
+  SC.run(function () {
+    handled = view._doHide();
+  });
   ok(handled, "Calling _doHide() should be handled");
   equals(view.viewState, SC.CoreView.ATTACHED_HIDDEN, "Calling _doHide() changes state");
 
@@ -247,15 +253,15 @@ test("Calling destroy layer, clears the layer from all child views.",  function 
   var child = SC.View.create(),
     view = SC.View.create({ childViews: [child] });
 
-  view._doAdopt(parent);
-  parent._doRender();
+  view._doAdopt(parentView);
+  parentView._doRender();
 
-  ok(parent.get('layer'), "The parent should have a reference to the layer.");
+  ok(parentView.get('layer'), "The parentView should have a reference to the layer.");
   ok(view.get('layer'), "The view should have a reference to the layer.");
   ok(child.get('layer'), "The child should have a reference to the layer.");
 
-  parent._doDestroyLayer();
-  equals(parent.get('layer'), null, "The parent should not have a reference to the layer.");
+  parentView._doDestroyLayer();
+  equals(parentView.get('layer'), null, "The parentView should not have a reference to the layer.");
   equals(view.get('layer'), null, "The view should not have a reference to the layer.");
   equals(child.get('layer'), null, "The child should not have a reference to the layer.");
 
@@ -267,44 +273,44 @@ test("Calling destroy layer, clears the layer from all child views.",  function 
 module("SC.View Adoption", {
 
   setup: function () {
-    parent = SC.View.create();
+    parentView = SC.Pane.create();
   },
 
   teardown: function () {
-    parent.destroy();
-    parent = null;
+    parentView.destroy();
+    parentView = null;
   }
 
 });
 
 
-test("Test adding a child brings that child to the same state as the parent.", function () {
+test("Test adding a child brings that child to the same state as the parentView.", function () {
   var child = SC.View.create(),
     view = SC.View.create({ childViews: [child] });
 
   // Test expected state of the view.
-  view._doAdopt(parent);
-  equals(parent.viewState, SC.CoreView.UNRENDERED, "A newly created parent should be in the state");
-  equals(view.viewState, SC.CoreView.UNRENDERED, "A newly created child view of unrendered parent should be in the state");
-  equals(child.viewState, SC.CoreView.UNRENDERED, "A newly created child view of unrendered parent's child view should be in the state");
+  view._doAdopt(parentView);
+  equals(parentView.viewState, SC.CoreView.UNRENDERED, "A newly created parentView should be in the state");
+  equals(view.viewState, SC.CoreView.UNRENDERED, "A newly created child view of unrendered parentView should be in the state");
+  equals(child.viewState, SC.CoreView.UNRENDERED, "A newly created child view of unrendered parentView's child view should be in the state");
   ok(!view.get('_isRendered'), "_isRendered should be false");
   ok(!view.get('isAttached'), "isAttached should be false");
   ok(!view.get('isVisibleInWindow'), "isVisibleInWindow should be false");
 
   // Render the view.
   view._doRender();
-  equals(view.viewState, SC.CoreView.UNATTACHED, "A rendered child view of unrendered parent should be in the state");
-  equals(child.viewState, SC.CoreView.UNATTACHED, "A rendered child view of unrendered parent's child view should be in the state");
+  equals(view.viewState, SC.CoreView.UNATTACHED, "A rendered child view of unrendered parentView should be in the state");
+  equals(child.viewState, SC.CoreView.UNATTACHED_BY_PARENT, "A rendered child view of unrendered parentView's child view should be in the state");
   ok(view.get('_isRendered'), "_isRendered should be true");
   ok(!view.get('isAttached'), "isAttached should be false");
   ok(!view.get('isVisibleInWindow'), "isVisibleInWindow should be false");
 
   // Attach the view.
   view._doAttach(document.body);
-  equals(view.viewState, SC.CoreView.ATTACHED_HIDDEN_BY_PARENT, "An attached child view of unrendered parent should be in the state");
-  equals(child.viewState, SC.CoreView.ATTACHED_HIDDEN_BY_PARENT, "An attached child view of unrendered parent's child view should be in the state");
+  equals(view.viewState, SC.CoreView.UNATTACHED_BY_PARENT, "An attached child view of unrendered parentView should be in the state");
+  equals(child.viewState, SC.CoreView.UNATTACHED_BY_PARENT, "An attached child view of unrendered parentView's child view should be in the state");
   ok(view.get('_isRendered'), "_isRendered should be true");
-  ok(view.get('isAttached'), "isAttached should be true");
+  ok(!view.get('isAttached'), "isAttached should be false");
   ok(!view.get('isVisibleInWindow'), "isVisibleInWindow should be false");
 
   // Reset
@@ -312,21 +318,21 @@ test("Test adding a child brings that child to the same state as the parent.", f
   child = SC.View.create();
   view = SC.View.create({ childViews: [child] });
 
-  parent._doRender();
-  view._doAdopt(parent);
-  equals(parent.viewState, SC.CoreView.UNATTACHED, "A newly created parent that is rendered should be in the state");
-  equals(view.viewState, SC.CoreView.UNATTACHED, "A newly created child view of unattached parent should be in the state");
-  equals(child.viewState, SC.CoreView.UNATTACHED, "A newly created child view of unattached parent's child view should be in the state");
+  parentView._doRender();
+  view._doAdopt(parentView);
+  equals(parentView.viewState, SC.CoreView.UNATTACHED, "A newly created parentView that is rendered should be in the state");
+  equals(view.viewState, SC.CoreView.UNATTACHED_BY_PARENT, "A newly created child view of unattached parentView should be in the state");
+  equals(child.viewState, SC.CoreView.UNATTACHED_BY_PARENT, "A newly created child view of unattached parentView's child view should be in the state");
   ok(view.get('_isRendered'), "_isRendered should be true");
   ok(!view.get('isAttached'), "isAttached should be false");
   ok(!view.get('isVisibleInWindow'), "isVisibleInWindow should be false");
 
   // Attach the view.
   view._doAttach(document.body);
-  equals(view.viewState, SC.CoreView.ATTACHED_HIDDEN_BY_PARENT, "An attached child view of unattached parent should be in the state");
-  equals(child.viewState, SC.CoreView.ATTACHED_HIDDEN_BY_PARENT, "An attached child view of unattached parent's child view should be in the state");
+  equals(view.viewState, SC.CoreView.UNATTACHED_BY_PARENT, "An attached child view of unattached parentView should be in the state");
+  equals(child.viewState, SC.CoreView.UNATTACHED_BY_PARENT, "An attached child view of unattached parentView's child view should be in the state");
   ok(view.get('_isRendered'), "_isRendered should be true");
-  ok(view.get('isAttached'), "isAttached should be true");
+  ok(!view.get('isAttached'), "isAttached should be false");
   ok(!view.get('isVisibleInWindow'), "isVisibleInWindow should be false");
 
   // Reset
@@ -334,11 +340,11 @@ test("Test adding a child brings that child to the same state as the parent.", f
   child = SC.View.create();
   view = SC.View.create({ childViews: [child] });
 
-  parent._doAttach(document.body);
-  view._doAdopt(parent);
-  equals(parent.viewState, SC.CoreView.ATTACHED_SHOWN, "A newly created parent that is attached should be in the state");
-  equals(view.viewState, SC.CoreView.ATTACHED_SHOWN, "A newly created child view of attached parent should be in the state");
-  equals(child.viewState, SC.CoreView.ATTACHED_SHOWN, "A child of newly created view of attached parent should be in the state");
+  parentView._doAttach(document.body);
+  view._doAdopt(parentView);
+  equals(parentView.viewState, SC.CoreView.ATTACHED_SHOWN, "A newly created parentView that is attached should be in the state");
+  equals(view.viewState, SC.CoreView.ATTACHED_SHOWN, "A newly created child view of attached parentView should be in the state");
+  equals(child.viewState, SC.CoreView.ATTACHED_SHOWN, "A child of newly created view of attached parentView should be in the state");
   ok(view.get('_isRendered'), "_isRendered should be true");
   ok(view.get('isAttached'), "isAttached should be true");
   ok(view.get('isVisibleInWindow'), "isVisibleInWindow should be true");
@@ -349,68 +355,70 @@ test("Test adding a child brings that child to the same state as the parent.", f
 });
 
 
-test("Test showing and hiding parent updates child views.", function () {
+test("Test showing and hiding parentView updates child views.", function () {
   var handled,
     child = SC.View.create(),
     view = SC.View.create({ childViews: [child] });
 
   // Test expected state of the view.
-  parent._doRender();
-  parent._doAttach(document.body);
-  view._doAdopt(parent);
-  equals(parent.viewState, SC.CoreView.ATTACHED_SHOWN, "A newly created parent that is attached should be in the state");
-  equals(view.viewState, SC.CoreView.ATTACHED_SHOWN, "A newly created child view of unattached parent should be in the state");
-  equals(child.viewState, SC.CoreView.ATTACHED_SHOWN, "A newly created child view of unattached parent's child view should be in the state");
+  parentView._doRender();
+  parentView._doAttach(document.body);
+  view._doAdopt(parentView);
+  equals(parentView.viewState, SC.CoreView.ATTACHED_SHOWN, "A newly created parentView that is attached should be in the state");
+  equals(view.viewState, SC.CoreView.ATTACHED_SHOWN, "A newly created child view of unattached parentView should be in the state");
+  equals(child.viewState, SC.CoreView.ATTACHED_SHOWN, "A newly created child view of unattached parentView's child view should be in the state");
   ok(view.get('isVisibleInWindow'), "isVisibleInWindow should be true");
 
-  // Hide the parent.
-  parent._doHide();
-  equals(parent.viewState, SC.CoreView.ATTACHED_HIDDEN, "A hidden parent that is attached should be in the state");
-  equals(view.viewState, SC.CoreView.ATTACHED_HIDDEN_BY_PARENT, "A child view of attached_hidden parent should be in the state");
-  equals(child.viewState, SC.CoreView.ATTACHED_HIDDEN_BY_PARENT, "A child view of attached_hidden parent's child view should be in the state");
+  // Hide the parentView.
+  SC.run(function () {
+    parentView._doHide();
+  });
+  equals(parentView.viewState, SC.CoreView.ATTACHED_HIDDEN, "A hidden parentView that is attached should be in the state");
+  equals(view.viewState, SC.CoreView.ATTACHED_HIDDEN_BY_PARENT, "A child view of attached_hidden parentView should be in the state");
+  equals(child.viewState, SC.CoreView.ATTACHED_HIDDEN_BY_PARENT, "A child view of attached_hidden parentView's child view should be in the state");
   ok(!view.get('isVisibleInWindow'), "isVisibleInWindow should be false");
 
-  // Show the view.
-  handled = view._doShow();
-  ok(handled, "Calling _doShow() should be handled (queued).");
-  equals(view.viewState, SC.CoreView.ATTACHED_HIDDEN_BY_PARENT, "Calling _doShow() doesn't change state");
+  // Show the parentView/hide the view.
+  handled = parentView._doShow();
+  ok(handled, "Calling _doShow() on parentView should be handled");
+  equals(view.viewState, SC.CoreView.ATTACHED_SHOWN, "Calling _doShow() on parentView changes state on view.");
+  equals(child.viewState, SC.CoreView.ATTACHED_SHOWN, "Calling _doShow() on parentView changes state on child");
 
-  // Show the parent/hide the view.
-  handled = parent._doShow();
-  ok(handled, "Calling _doShow() on parent should be handled");
-  equals(view.viewState, SC.CoreView.ATTACHED_SHOWN, "Calling _doShow() on parent changes state on view.");
-  equals(child.viewState, SC.CoreView.ATTACHED_SHOWN, "Calling _doShow() on parent changes state on child");
-  handled = view._doHide();
+  SC.run(function () {
+    handled = view._doHide();
+  });
   ok(handled, "Calling _doHide() should be handled");
   equals(view.viewState, SC.CoreView.ATTACHED_HIDDEN, "Calling _doHide() on view changes state on view");
   equals(child.viewState, SC.CoreView.ATTACHED_HIDDEN_BY_PARENT, "Calling _doHide() on view changes state on child");
 
   // Reset
-  parent._doHide();
+  SC.run(function () {
+    parentView._doHide();
+  });
   view.destroy();
   child = SC.View.create();
   view = SC.View.create({ childViews: [child] });
-  view._doAdopt(parent);
+  view._doAdopt(parentView);
 
-  // Add child to already hidden parent.
-  equals(view.viewState, SC.CoreView.ATTACHED_HIDDEN_BY_PARENT, "A child view of attached_hidden parent should be in the state");
-  equals(child.viewState, SC.CoreView.ATTACHED_HIDDEN_BY_PARENT, "A child view of attached_hidden parent's child view should be in the state");
+  // Add child to already hidden parentView.
+  equals(view.viewState, SC.CoreView.ATTACHED_HIDDEN_BY_PARENT, "A child view of attached_hidden parentView should be in the state");
+  equals(child.viewState, SC.CoreView.ATTACHED_HIDDEN_BY_PARENT, "A child view of attached_hidden parentView's child view should be in the state");
   ok(!view.get('isVisibleInWindow'), "isVisibleInWindow should be false");
 
   // Reset
-  parent.destroy();
-  parent = SC.View.create();
-  parent._doRender();
+  parentView.destroy();
+  parentView = SC.View.create();
+  parentView._doRender();
   child = SC.View.create();
   view = SC.View.create({ childViews: [child] });
-  view._doAdopt(parent);
+  view._doAdopt(parentView);
 
-  // Attach a parent with children
-  equals(view.viewState, SC.CoreView.UNATTACHED, "A child view of unattached parent should be in the state");
-  equals(child.viewState, SC.CoreView.UNATTACHED, "A child view of unattached parent's child view should be in the state");
-  parent._doAttach(document.body);
-  equals(view.viewState, SC.CoreView.ATTACHED_SHOWN, "A child view of attached_shown parent should be in the state");
-  equals(child.viewState, SC.CoreView.ATTACHED_SHOWN, "A child view of attached_shown parent's child view should be in the state");
+  // Attach a parentView with children
+  equals(view.viewState, SC.CoreView.UNATTACHED_BY_PARENT, "A child view of unattached parentView should be in the state");
+  equals(child.viewState, SC.CoreView.UNATTACHED_BY_PARENT, "A child view of unattached parentView's child view should be in the state");
+  parentView._doAttach(document.body);
+  equals(view.viewState, SC.CoreView.ATTACHED_SHOWN, "A child view of attached_shown parentView should be in the state");
+  equals(child.viewState, SC.CoreView.ATTACHED_SHOWN, "A child view of attached_shown parentView's child view should be in the state");
 
   // CLEAN UP
   view.destroy();
@@ -418,22 +426,27 @@ test("Test showing and hiding parent updates child views.", function () {
 
 test("Test hiding with transitionHide", function () {
   var child = SC.View.create(),
-    transitionHide = { runOut: function () {} },
+    transitionHide = { run: function () {} },
     view = SC.View.create({ childViews: [child] });
 
   // Set up.
-  parent._doRender();
-  parent._doAttach(document.body);
-  view._doAdopt(parent);
+  parentView._doRender();
+  parentView._doAttach(document.body);
+  view._doAdopt(parentView);
 
-  // Hide the parent with transitionHide
-  parent.set('transitionHide', transitionHide);
-  parent._doHide();
-  ok(parent.get('isVisibleInWindow'), "isVisibleInWindow of parent should be false");
+  // Hide the parentView with transitionHide
+  parentView.set('transitionHide', transitionHide);
+  SC.run(function () {
+    parentView._doHide();
+  });
+  ok(parentView.get('isVisibleInWindow'), "isVisibleInWindow of parentView should be false");
   ok(view.get('isVisibleInWindow'), "isVisibleInWindow should be true");
   ok(child.get('isVisibleInWindow'), "isVisibleInWindow of child should be true");
-  parent.didTransitionOut(transitionHide);
-  ok(!parent.get('isVisibleInWindow'), "isVisibleInWindow of parent should be false after didTransitionOut");
+
+  SC.run(function () {
+    parentView.didTransitionOut();
+  });
+  ok(!parentView.get('isVisibleInWindow'), "isVisibleInWindow of parentView should be false after didTransitionOut");
   ok(!view.get('isVisibleInWindow'), "isVisibleInWindow should be false after didTransitionOut");
   ok(!child.get('isVisibleInWindow'), "isVisibleInWindow of child should be false after didTransitionOut");
 
@@ -447,9 +460,9 @@ module("SC.View isVisible integration with shown and hidden state", {
 
   setup: function () {
     SC.run(function () {
-      parent = SC.View.create();
-      parent._doRender();
-      parent._doAttach(document.body);
+      parentView = SC.View.create();
+      parentView._doRender();
+      parentView._doAttach(document.body);
 
       child = SC.View.create(),
       view = SC.View.create({
@@ -467,14 +480,14 @@ module("SC.View isVisible integration with shown and hidden state", {
 
   teardown: function () {
     view.destroy();
-    parent.destroy();
-    parent = null;
+    parentView.destroy();
+    parentView = null;
   }
 
 });
 
 test("Test showing and hiding a hidden view in same run loop should not update visibility or content.", function () {
-  view._doAdopt(parent);
+  view._doAdopt(parentView);
 
   SC.run(function () {
     view.set('isVisible', false);
@@ -493,31 +506,31 @@ test("Test showing and hiding a hidden view in same run loop should not update v
     ok(!child.get('isVisibleInWindow'), "isVisibleInWindow of child should be false");
 
     view.set('isVisible', true);
-    equals(view.viewState, SC.CoreView.ATTACHED_HIDDEN, "The view should now be in the state");
-    equals(child.viewState, SC.CoreView.ATTACHED_HIDDEN_BY_PARENT, "The child view should now be in the state");
+    equals(view.viewState, SC.CoreView.ATTACHED_SHOWN, "The view should now be in the state");
+    equals(child.viewState, SC.CoreView.ATTACHED_SHOWN, "The child view should now be in the state");
 
-    ok(!view.get('isVisibleInWindow'), "isVisibleInWindow should be true");
-    ok(!child.get('isVisibleInWindow'), "isVisibleInWindow of child should be true");
+    ok(view.get('isVisibleInWindow'), "isVisibleInWindow should be true");
+    ok(child.get('isVisibleInWindow'), "isVisibleInWindow of child should be true");
 
     view.set('isVisible', false);
   });
 
   view._executeDoUpdateContent.expect(0);
-  view._doUpdateVisibleStyle.expect(1);
+  view._doUpdateVisibleStyle.expect(3);
 });
 
 test("Test hiding and showing a shown view in same run loop should not update visibility.", function () {
-  view._doAdopt(parent);
+  view._doAdopt(parentView);
 
   // Hide the view using isVisible.
   SC.run(function () {
     view.set('foo', true);
     view.set('isVisible', false);
-    equals(view.viewState, SC.CoreView.ATTACHED_SHOWN, "The view should be in the state");
-    equals(child.viewState, SC.CoreView.ATTACHED_SHOWN, "The child view should be in the state");
+    equals(view.viewState, SC.CoreView.ATTACHED_HIDDEN, "The view should be in the state");
+    equals(child.viewState, SC.CoreView.ATTACHED_HIDDEN_BY_PARENT, "The child view should be in the state");
 
-    ok(view.get('isVisibleInWindow'), "isVisibleInWindow should be false");
-    ok(child.get('isVisibleInWindow'), "isVisibleInWindow of child should be false");
+    ok(!view.get('isVisibleInWindow'), "isVisibleInWindow should be false");
+    ok(!child.get('isVisibleInWindow'), "isVisibleInWindow of child should be false");
 
     view.set('isVisible', true);
     equals(view.viewState, SC.CoreView.ATTACHED_SHOWN, "The view should be in the state");
@@ -528,14 +541,14 @@ test("Test hiding and showing a shown view in same run loop should not update vi
   });
 
   view._executeDoUpdateContent.expect(1);
-  view._doUpdateVisibleStyle.expect(0);
+  view._doUpdateVisibleStyle.expect(2);
 });
 
 
 test("Test showing and hiding a hiding view in same run loop should not update visibility or content.", function () {
-  var transitionHide = { runOut: function () {} };
+  var transitionHide = { run: function () {} };
 
-  view._doAdopt(parent);
+  view._doAdopt(parentView);
 
   view.set('transitionHide', transitionHide);
 
@@ -553,7 +566,7 @@ test("Test showing and hiding a hiding view in same run loop should not update v
     ok(child.get('isVisibleInWindow'), "isVisibleInWindow of child should be true");
 
     view.set('isVisible', true);
-    equals(view.viewState, SC.CoreView.ATTACHED_HIDING, "The view should be in the state");
+    equals(view.viewState, SC.CoreView.ATTACHED_SHOWN, "The view should be in the state");
     equals(child.viewState, SC.CoreView.ATTACHED_SHOWN, "The child view should be in the state");
 
     ok(view.get('isVisibleInWindow'), "isVisibleInWindow should be true");
@@ -567,9 +580,9 @@ test("Test showing and hiding a hiding view in same run loop should not update v
 });
 
 test("Test hiding and showing a showing view in same run loop should not update visibility.", function () {
-  var transitionShow = { runIn: function () {} };
+  var transitionShow = { run: function () {} };
 
-  view._doAdopt(parent);
+  view._doAdopt(parentView);
 
   view.set('transitionShow', transitionShow);
 
@@ -591,29 +604,29 @@ test("Test hiding and showing a showing view in same run loop should not update 
     ok(!child.get('isVisibleInWindow'), "isVisibleInWindow of child should be false");
 
     view.set('isVisible', false);
-    equals(view.viewState, SC.CoreView.ATTACHED_SHOWING, "The view should be in the state");
+    equals(view.viewState, SC.CoreView.ATTACHED_HIDDEN, "The view should be in the state");
     equals(child.viewState, SC.CoreView.ATTACHED_HIDDEN_BY_PARENT, "The child view should be in the state");
 
-    ok(view.get('isVisibleInWindow'), "isVisibleInWindow should be true");
+    ok(!view.get('isVisibleInWindow'), "isVisibleInWindow should be false");
     ok(!child.get('isVisibleInWindow'), "isVisibleInWindow of child should be false");
 
     view.set('isVisible', true);
   });
 
   view._executeDoUpdateContent.expect(1);
-  view._doUpdateVisibleStyle.expect(2);
+  view._doUpdateVisibleStyle.expect(4);
 });
 
 
 test("Test hiding and showing an attached child view with child views.", function () {
-  view._doAdopt(parent);
+  view._doAdopt(parentView);
 
   // Hide the view using isVisible.
   SC.run(function () {
     view.set('isVisible', false);
   });
 
-  equals(parent.viewState, SC.CoreView.ATTACHED_SHOWN, "The parent view should be in the state");
+  equals(parentView.viewState, SC.CoreView.ATTACHED_SHOWN, "The parentView view should be in the state");
   equals(view.viewState, SC.CoreView.ATTACHED_HIDDEN, "The view should be in the state");
   equals(child.viewState, SC.CoreView.ATTACHED_HIDDEN_BY_PARENT, "The child view should be in the state");
   ok(!view.get('isVisibleInWindow'), "isVisibleInWindow should be false");
@@ -631,25 +644,25 @@ test("Test hiding and showing an attached child view with child views.", functio
 });
 
 
-test("Test hiding an attached parent view and then adding child views.", function () {
-  // Hide the parent using isVisible and then adopting child views.
+test("Test hiding an attached parentView view and then adding child views.", function () {
+  // Hide the parentView using isVisible and then adopting child views.
   SC.run(function () {
-    parent.set('isVisible', false);
-    view._doAdopt(parent);
+    parentView.set('isVisible', false);
+    view._doAdopt(parentView);
   });
 
-  equals(parent.viewState, SC.CoreView.ATTACHED_HIDDEN, "The parent view should be in the state");
+  equals(parentView.viewState, SC.CoreView.ATTACHED_HIDDEN, "The parentView view should be in the state");
   equals(view.viewState, SC.CoreView.ATTACHED_HIDDEN_BY_PARENT, "The view should be in the state");
   equals(child.viewState, SC.CoreView.ATTACHED_HIDDEN_BY_PARENT, "The child view should be in the state");
   ok(!view.get('isVisibleInWindow'), "isVisibleInWindow should be false");
   ok(!child.get('isVisibleInWindow'), "isVisibleInWindow of child should be false");
 
-  // Show the parent using isVisible.
+  // Show the parentView using isVisible.
   SC.run(function () {
-    parent.set('isVisible', true);
+    parentView.set('isVisible', true);
   });
 
-  equals(parent.viewState, SC.CoreView.ATTACHED_SHOWN, "The parent view should be in the state");
+  equals(parentView.viewState, SC.CoreView.ATTACHED_SHOWN, "The parentView view should be in the state");
   equals(view.viewState, SC.CoreView.ATTACHED_SHOWN, "The view should be in the state");
   equals(child.viewState, SC.CoreView.ATTACHED_SHOWN, "The child view should be in the state");
   ok(view.get('isVisibleInWindow'), "isVisibleInWindow should be false");
@@ -657,17 +670,17 @@ test("Test hiding an attached parent view and then adding child views.", functio
 });
 
 
-test("Test showing an attached parent view while hiding the child view.", function () {
+test("Test showing an attached parentView view while hiding the child view.", function () {
   SC.run(function () {
-    parent.set('isVisible', false);
-    view._doAdopt(parent);
+    parentView.set('isVisible', false);
+    view._doAdopt(parentView);
 
-    // Hide the view and then show the parent using isVisible.
+    // Hide the view and then show the parentView using isVisible.
     view.set('isVisible', false);
-    parent.set('isVisible', true);
+    parentView.set('isVisible', true);
   });
 
-  equals(parent.viewState, SC.CoreView.ATTACHED_SHOWN, "The parent view should be in the state");
+  equals(parentView.viewState, SC.CoreView.ATTACHED_SHOWN, "The parentView view should be in the state");
   equals(view.viewState, SC.CoreView.ATTACHED_HIDDEN, "The view should be in the state");
   equals(child.viewState, SC.CoreView.ATTACHED_HIDDEN_BY_PARENT, "The child view should be in the state");
   ok(!view.get('isVisibleInWindow'), "isVisibleInWindow should be false");
@@ -675,11 +688,11 @@ test("Test showing an attached parent view while hiding the child view.", functi
 });
 
 
-test("Test adding a hidden child view to attached shown parent.", function () {
-  // Hide the view with isVisible and then add to parent.
+test("Test adding a hidden child view to attached shown parentView.", function () {
+  // Hide the view with isVisible and then add to parentView.
   SC.run(function () {
     view.set('isVisible', false);
-    view._doAdopt(parent);
+    view._doAdopt(parentView);
   });
 
   equals(view.viewState, SC.CoreView.ATTACHED_HIDDEN, "The view should be in the state");

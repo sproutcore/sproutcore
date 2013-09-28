@@ -2,13 +2,10 @@ language: ruby
 rvm:
   - 1.9.3
 
-env:
-  - IP=127.0.0.1 PORT=4020 VERBOSE=false
-
 install: true
 
 before_script:
   - ./scripts/run_sc_server_master.sh
   - sleep 5 # give sc-server some time to start
 
-script: phantomjs tests/phantomjs_runner.phantomjs
+script: phantomjs phantomjs/test_runner.js --no-experimental --exclude-targets=/sproutcore/greenhouse

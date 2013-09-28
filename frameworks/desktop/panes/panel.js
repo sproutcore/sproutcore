@@ -201,11 +201,10 @@ SC.PanelPane = SC.Pane.extend(
   _isModalDidChange: function() {
     var pane, isModal = this.get('isModal');
     if (isModal) {
-       if (!this._isShowingModal && this.get('isVisibleInWindow') && (pane = this._modalPane())) {
-         this._isShowingModal = YES;
-         pane.paneWillAppend(this);
-       }
-
+      if (!this._isShowingModal && this.get('viewState') & SC.CoreView.IS_SHOWN && (pane = this._modalPane())) {
+        this._isShowingModal = YES;
+        pane.paneWillAppend(this);
+      }
     } else {
       if (this._isShowingModal && (pane = this._modalPane())) {
         this._isShowingModal = NO ;

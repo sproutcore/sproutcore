@@ -59,7 +59,7 @@ window.SproutCore = window.SproutCore || SC;
 */
 SC = window.SC; // This is dumb but necessary for jsdoc to get it right
 
-SC.VERSION = 'Edge';
+SC.VERSION = '1.10.0';
 
 /**
   @private
@@ -697,7 +697,7 @@ SC.mixin(/** @scope window.SC.prototype */ {
   */
   tupleForPropertyPath: function (path, root) {
     // if passed nothing, return nothing.
-    if (SC.none(path)) return null;
+    if (path == null) return null;
 
     // if the passed path is itself a tuple, return it
     if (typeof path === "object" && (path instanceof Array)) return path;
@@ -729,7 +729,7 @@ SC.mixin(/** @scope window.SC.prototype */ {
     if (!root) root = window;
 
     // faster method for strings
-    if (SC.typeOf(path) === SC.T_STRING) {
+    if (typeof path === "string") {
       if (stopAt === undefined) stopAt = path.length;
       loc = 0;
       while ((root) && (loc < stopAt)) {

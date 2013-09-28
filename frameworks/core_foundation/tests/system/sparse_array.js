@@ -103,37 +103,46 @@ test("element to be added is at idx < length of array ", function() {
 	equals(5, ary.get('length'), "length") ;
 });
 
-test("should work with @each dependent keys", function() {
-  var array = SC.SparseArray.create();
+test("should work with @each dependent keys");
+// Reduced this test to a warning, because we are not going to support using
+// @each with SC.SparseArray at this time.  It likely doesn't work as an observer
+// and certainly not as a property chain.
+// There is some code that will support this, but it would need to be refactored
+// to avoid loading every item in the sparse array in order to add observers
+// to them.
+// Checkout the team/publickeating/enumerable-property-chains-support branch for the relevant code.
 
-  array.pushObject(SC.Object.create({
-    value: 5
-  }));
-  array.provideLength(1);
+// , function() {
+//   var array = SC.SparseArray.create();
 
-  var obj = SC.Object.create({
-    total: function() {
-      return this.get('content').reduce(function(prev, item) {
-        return prev + item.get('value');
-      }, 0);
-    }.property('content.@each.value').cacheable(),
+//   array.pushObject(SC.Object.create({
+//     value: 5
+//   }));
+//   array.provideLength(1);
 
-    content: array
-  });
+//   var obj = SC.Object.create({
+//     total: function() {
+//       return this.get('content').reduce(function(prev, item) {
+//         return prev + item.get('value');
+//       }, 0);
+//     }.property('content.@each.value').cacheable(),
 
-  equals(obj.get('total'), 5, "precond - computes total of all objects");
+//     content: array
+//   });
 
-  array.pushObject(SC.Object.create({
-    value: 10
-  }));
+//   equals(obj.get('total'), 5, "precond - computes total of all objects");
 
-  equals(obj.get('total'), 15, "recomputes when a new object is added");
+//   array.pushObject(SC.Object.create({
+//     value: 10
+//   }));
 
-  array.objectAt(1).set('value', 15);
+//   equals(obj.get('total'), 15, "recomputes when a new object is added");
 
-  equals(obj.get('total'), 20, "recomputes when value property on child object changes");
+//   array.objectAt(1).set('value', 15);
 
-});
+//   equals(obj.get('total'), 20, "recomputes when value property on child object changes");
+
+// });
 
 
 test("modifying a range should not require the rest of the array to refetch", function() {

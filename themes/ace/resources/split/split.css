@@ -1,12 +1,12 @@
 /* TODO: when new SplitView lands, do this proper (\$theme.split-divider) */
 $theme.split-divider {
   background: transparent;
-  border: 0px none;
+  border: 0 none;
   z-index: 1;
 
   .line {
     background: #333;
-    border: 0px none;
+    border: 0 none;
     position: absolute;
   }
 
@@ -15,8 +15,8 @@ $theme.split-divider {
     .line {
       left: 5px;
       width: 1px;
-      top: 0px;
-      bottom: 0px;
+      top: 0;
+      bottom: 0;
     }
   }
 
@@ -24,8 +24,8 @@ $theme.split-divider {
     .line {
       top: 5px;
       height: 1px;
-      left: 0px;
-      right: 0px;
+      left: 0;
+      right: 0;
     }
   }
 }

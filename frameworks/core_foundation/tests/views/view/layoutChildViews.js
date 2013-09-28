@@ -41,7 +41,7 @@ test("calls renderLayout() on child views on views that need layout if they have
 //
 module("SC.View#updateLayout");
 
-test("if view has layout, calls _executeDoUpdateLayout", function() {
+test("if view has layout, calls _doUpdateLayoutStyle", function() {
 
 	// NOTE: renderLayout() is also called when a view's
 	// layer is first created.  We use isTesting below to
@@ -49,7 +49,7 @@ test("if view has layout, calls _executeDoUpdateLayout", function() {
 	// are actually doing layout.
 	var callCount = 0, isTesting = NO ;
 	var view = SC.View.create({
-		_executeDoUpdateLayout: function() {
+		_doUpdateLayoutStyle: function() {
 			callCount++;
 		}
 	});
@@ -58,10 +58,10 @@ test("if view has layout, calls _executeDoUpdateLayout", function() {
 	ok(view.get('layer'), 'precond - should have a layer');
 
 	view.updateLayout();
-	equals(callCount, 0, 'should not call _executeDoUpdateLayout() because the view isn\'t shown');
+	equals(callCount, 0, 'should not call _doUpdateLayoutStyle() because the view isn\'t shown');
 
 	view.updateLayout(true);
-	equals(callCount, 1, 'should call _executeDoUpdateLayout() because we force it');
+	equals(callCount, 1, 'should call _doUpdateLayoutStyle() because we force it');
 
 	// Clean up.
 	view.destroy();

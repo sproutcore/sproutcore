@@ -460,8 +460,6 @@ SC.PickerPane = SC.PalettePane.extend(
         this.set('anchorCached', anchor);
       }
 
-      if (anchor.x === 0 && anchor.y === 0) { return; }
-
       origin = SC.cloneRect(anchor);
 
       if (preferType) {
@@ -997,7 +995,10 @@ SC.PickerPane = SC.PalettePane.extend(
                       offsetKey[3] + overlapTuningY];
 
         this.set('pointerOffset', offset);
-        this.set('windowPadding', K.WINDOW_PADDING);
+        // TODO: What to do about this?
+        if (SC.none(this.get('windowPadding'))) {
+          this.set('windowPadding', K.WINDOW_PADDING);
+        }
       }
     } else {
       // TODO: What to do about this?

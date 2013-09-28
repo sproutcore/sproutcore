@@ -49,14 +49,13 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
   render: function(dataSource, context) {
     this.addSizeClassName(dataSource, context);
 
-    var labelContent,
-        toolTip     = dataSource.get('toolTip'),
-        isSelected  = dataSource.get('isSelected') || NO,
-        isActive    = dataSource.get('isActive') || NO,
-        isDefault   = dataSource.get('isDefault') || NO,
-        isCancel    = dataSource.get('isCancel') || NO,
-        isToggle    = (dataSource.get('buttonBehavior') === SC.TOGGLE_BEHAVIOR),
-        labelId     = SC.guidFor(dataSource) + '-label';
+    var toolTip     = dataSource.get('toolTip'),
+      isSelected  = dataSource.get('isSelected') || NO,
+      isActive    = dataSource.get('isActive') || NO,
+      isDefault   = dataSource.get('isDefault') || NO,
+      isCancel    = dataSource.get('isCancel') || NO,
+      isToggle    = (dataSource.get('buttonBehavior') === SC.TOGGLE_BEHAVIOR),
+      labelId     = SC.guidFor(dataSource) + '-label';
 
     context.setClass({
       'icon': !!dataSource.get('icon'),
@@ -66,9 +65,9 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
       'sel': isSelected
     });
 
+    // Set the toolTip.
     if (toolTip) {
       context.setAttr('title', toolTip);
-      context.setAttr('alt', toolTip);
     }
 
     this.includeSlices(dataSource, context, SC.THREE_SLICE);
@@ -102,7 +101,10 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
     @param {SC.RenderContext} jquery the jQuery object representing the HTML representation of the button
   */
   update: function(dataSource, jquery) {
-    var isToggle = (dataSource.get('buttonBehavior') === SC.TOGGLE_BEHAVIOR);
+    var isToggle = (dataSource.get('buttonBehavior') === SC.TOGGLE_BEHAVIOR),
+      isDefault = dataSource.get('isDefault'),
+      isCancel = dataSource.get('isCancel'),
+      toolTip = dataSource.get('toolTip');
 
     this.updateSizeClassName(dataSource, jquery);
 
@@ -110,17 +112,18 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
       jquery.addClass('active');
     }
 
-
-    var isDefault = dataSource.get('isDefault'),
-        isCancel = dataSource.get('isCancel');
-
     if (dataSource.get('isSegment')) {
       jquery.attr('aria-selected', dataSource.get('isSelected').toString());
     } else if (isToggle) {
       jquery.attr('aria-pressed', dataSource.get('isActive').toString());
     }
 
-    jquery.attr('title', dataSource.get('toolTip'));
+    // Update the toolTip.
+    if (toolTip) {
+      jquery.attr('title', toolTip);
+    } else {
+      jquery.removeAttr('title');
+    }
 
     jquery.setClass('icon', !!dataSource.get('icon'));
     jquery.setClass('def', !!isDefault);

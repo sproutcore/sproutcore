@@ -10,11 +10,11 @@
 	left: 0;
 	top: 3px;
 	background-image: static_url('images/sc-theme-repeat-x.png') ;
-} 
+}
 
 
 .sc-theme .sc-button-view.sc-disclosure-view.sel img.button {
-	background-position: 0px -1597px ;
+	background-position: 0 -1597px ;
 }
 
 .sc-theme .sc-button-view.sc-disclosure-view img.button {
@@ -30,7 +30,7 @@
 /* @group disabled */
 
 .sc-theme .sc-button-view.sc-disclosure-view.sel.disabled img.button {
-	background-position: 0px -1613px ;
+	background-position: 0 -1613px ;
 }
 
 .sc-theme .sc-button-view.sc-disclosure-view.disabled img.button {

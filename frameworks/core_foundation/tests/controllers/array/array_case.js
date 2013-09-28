@@ -168,6 +168,35 @@ test("arrangedObjects", function() {
   equals(controller.get("arrangedObjects"), controller, 'c.arrangedObjects should return receiver');
 });
 
+
+test("The computed properties firstObject, firstSelectableObject & lastObject should update when content changes.", function(){
+  equals(controller.get('firstObject'), content[0], 'first object should be the first object in content');
+  equals(controller.get('firstSelectableObject'), content[0], 'first selectable object should be the first object in content');
+  equals(controller.get('lastObject'), content[4], 'lastObject should be the last object in content');
+
+  // Reorder the content
+  var newObject = TestObject.create({ title: "BLAH" });
+  controller.set('content', [newObject]);
+
+  equals(controller.get('firstObject'), newObject, 'first object should be the new first object in content');
+  equals(controller.get('firstSelectableObject'), newObject, 'first selectable object should be the new first object in content');
+  equals(controller.get('lastObject'), newObject, 'lastObject should be the new last object in content');
+});
+
+test("The computed properties firstObject, firstSelectableObject & lastObject should update when content items change.", function(){
+  equals(controller.get('firstObject'), content[0], 'first object should be the first object in content');
+  equals(controller.get('firstSelectableObject'), content[0], 'first selectable object should be the first object in content');
+  equals(controller.get('lastObject'), content[4], 'lastObject should be the last object in content');
+
+  // Change the items.
+  var newObject = TestObject.create({ title: "BLAH" });
+  controller.replace(0, 5, [newObject]);
+
+  equals(controller.get('firstObject'), newObject, 'first object should be the new first object in content');
+  equals(controller.get('firstSelectableObject'), newObject, 'first selectable object should be the new first object in content');
+  equals(controller.get('lastObject'), newObject, 'lastObject should be the new last object in content');
+});
+
 test("array orderBy using String", function(){
   var testController = SC.ArrayController.create({
     content: content,

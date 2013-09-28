@@ -3,17 +3,17 @@
 // ==========================================================================
 /*globals SC */
 
-/** @class
+/**
   This View is used by Greenhouse when application is in design mode
   Used for displaying page items
 
   @extends SC.ListItemVIew
   @author Mike Ball
-  
+
 */
 
 SC.pageItemView = SC.ListItemView.extend(
-/** @scope SC.ListItemView.prototype */ { 
+/** @scope SC.ListItemView.prototype */ {
   isDropTarget: YES,
 
   dragEntered: function(drag, evt) {
@@ -22,42 +22,42 @@ SC.pageItemView = SC.ListItemView.extend(
 
   dragExited: function(drag, evt) {
     this.$().removeClass('highlight');
- 
+
   },
 
   dragEnded: function(drag, evt) {
     this.$().removeClass('highlight');
- 
+
   },
 
   /**
    Called when the drag needs to determine which drag operations are
    valid in a given area.
 
-   Override this method to return an OR'd mask of the allowed drag 
-   operations.  If the user drags over a droppable area within another 
-   droppable area, the drag will latch onto the deepest view that returns one 
+   Override this method to return an OR'd mask of the allowed drag
+   operations.  If the user drags over a droppable area within another
+   droppable area, the drag will latch onto the deepest view that returns one
    or more available operations.
 
    The default implementation returns `SC.DRAG_NONE`
 
    @param {SC.Drag} drag The current drag object
-   @param {SC.Event} evt The most recent mouse move event.  Use to get 
-     location 
-   @returns {DragOps} A mask of all the drag operations allowed or 
+   @param {SC.Event} evt The most recent mouse move event.  Use to get
+     location
+   @returns {DragOps} A mask of all the drag operations allowed or
      SC.DRAG_NONE
   */
-  computeDragOperations: function(drag, evt) { 
+  computeDragOperations: function(drag, evt) {
     if(drag.hasDataType('SC.Binding')){
       return SC.DRAG_LINK;
     }
-    return SC.DRAG_NONE; 
+    return SC.DRAG_NONE;
   },
 
   /**
    Called when the user releases the mouse.
 
-   This method gives your drop target one last opportunity to choose to 
+   This method gives your drop target one last opportunity to choose to
    accept the proposed drop operation.  You might use this method to
    perform fine-grained checks on the drop location, for example.
    Return true to accept the drop operation.
@@ -68,7 +68,7 @@ SC.pageItemView = SC.ListItemView.extend(
    @param {DragOp} op The proposed drag operation. A drag constant
 
    @return {Boolean} YES if operation is OK, NO to cancel.
-  */  
+  */
   acceptDragOperation: function(drag, op) { return YES; },
 
   /**
@@ -87,11 +87,11 @@ SC.pageItemView = SC.ListItemView.extend(
 
    @return {DragOp} Drag Operation actually performed
   */
-  performDragOperation: function(drag, op) { 
+  performDragOperation: function(drag, op) {
     var data = drag.dataForType('SC.Binding'), that = this;
     if(data && SC._Greenhouse){
       var actionObj = SC.Object.create({
-        type: 'Binding', 
+        type: 'Binding',
         source: data,
         target: that.get('content'),
         addItem: function(from, to, designAttrs){
@@ -99,7 +99,7 @@ SC.pageItemView = SC.ListItemView.extend(
           var value = that._propertyPathForProp(this.getPath('target.view.page'),this.getPath('target.view'));
           view[from+"Binding"] = designAttrs[from+"Binding"] = value+"."+to;
           view.propertyDidChange(from+"Binding");
-          
+
           var designer = view.get('designer');
           if(designer){
             designer.designProperties.pushObject(from+"Binding");
@@ -114,10 +114,10 @@ SC.pageItemView = SC.ListItemView.extend(
       return SC.DRAG_LINK;
     }
     else{
-      return SC.DRAG_NONE; 
+      return SC.DRAG_NONE;
     }
   },
-  
+
   _propertyPathForProp: function(page, prop){
     for(var key in page){
       if(page.hasOwnProperty(key)){
@@ -125,6 +125,6 @@ SC.pageItemView = SC.ListItemView.extend(
       }
     }
   }
-   
+
 });
 

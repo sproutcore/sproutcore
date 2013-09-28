@@ -4,38 +4,49 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/*global module test equals */
+/*global module, test, equals, ok */
 
-module("SC.View#layoutDidChange");
+module("SC.View.prototype.layoutDidChange");
 
 test("notifies layoutStyle & frame change", function () {
 
   var view = SC.View.create();
-  var callCount = 0;
+  var layoutStyleCallCount = 0, frameCallCount = 0;
 
-  view.addObserver('layoutStyle', function () { callCount++; });
-  view.addObserver('frame', function () { callCount++; });
+  view.addObserver('layoutStyle', function () { layoutStyleCallCount++; });
+  view.addObserver('frame', function () { frameCallCount++; });
 
   SC.run(function () {
+    // Manually indicate a layout change.
     view.layoutDidChange();
   });
 
-  equals(callCount,1,'should trigger observers for layoutStyle');
-  view.createLayer()._doAttach(document.body);
+  equals(frameCallCount, 1, 'should trigger observers for frame');
+  equals(layoutStyleCallCount, 0, 'should not trigger observers for layoutStyle');
+
+  // Attach to the document.
+  var parent = SC.Pane.create();
+  parent.append();
+  parent.appendChild(view);
+
+  equals(frameCallCount, 2, 'should trigger observers for frame when attached to the document');
+  equals(layoutStyleCallCount, 0, 'should still not trigger observers for layoutStyle');
 
   SC.run(function () {
-    view.layoutDidChange();
+    view.adjust('top', 20);
   });
 
-  equals(callCount,2,'should trigger observers for frame when attached to the document');
+  equals(frameCallCount, 3, 'should trigger observers for frame when attached to the document');
+  equals(layoutStyleCallCount, 1, 'should trigger observers for layoutStyle');
 
   // Clean up.
   view.destroy();
+  parent.destroy();
 });
 
 test("invokes layoutDidChangeFor() on layoutView each time it is called", function () {
 
-  var callCount = 0 ;
+  var callCount = 0;
   var layoutView = SC.View.create({
     layoutDidChangeFor: function (changedView) {
       equals(this.get('childViewsNeedLayout'), YES, 'should set childViewsNeedLayout to YES before calling layoutDidChangeFor()');
@@ -67,9 +78,9 @@ test("invokes layoutDidChangeFor() on layoutView each time it is called", functi
 
 test("invokes layoutChildViewsIfNeeded() on layoutView once per runloop", function () {
 
-  var callCount = 0 ;
+  var callCount = 0;
   var layoutView = SC.View.create({
-    layoutChildViewsIfNeeded: function (){
+    layoutChildViewsIfNeeded: function () {
       callCount++;
     }
   });
@@ -92,13 +103,13 @@ test("invokes layoutChildViewsIfNeeded() on layoutView once per runloop", functi
 
 test("should not invoke layoutChildViewsIfNeeded() if layoutDidChangeFor() sets childViewsNeedLayout to NO each time", function () {
 
-  var callCount = 0 ;
+  var callCount = 0;
   var layoutView = SC.View.create({
     layoutDidChangeFor: function () {
       this.set('childViewsNeedLayout', NO);
     },
 
-    layoutChildViewsIfNeeded: function (){
+    layoutChildViewsIfNeeded: function () {
       callCount++;
     }
   });
@@ -120,7 +131,10 @@ test("should not invoke layoutChildViewsIfNeeded() if layoutDidChangeFor() sets 
 
 test('returns receiver', function () {
   var view = SC.View.create();
-  equals(view.layoutDidChange(), view, 'should return receiver');
+
+  SC.run(function () {
+    equals(view.layoutDidChange(), view, 'should return receiver');
+  });
 
   // Clean up.
   view.destroy();
@@ -128,7 +142,7 @@ test('returns receiver', function () {
 
 test("is invoked whenever layout property changes", function () {
 
-  var callCount = 0 ;
+  var callCount = 0;
   var layoutView = SC.View.create({
     layoutDidChangeFor: function (changedView) {
       callCount++;
@@ -154,7 +168,7 @@ test("is invoked whenever layout property changes", function () {
 
 test("is invoked on parentView if no layoutView whenever layout property changes", function () {
 
-  var callCount = 0 ;
+  var callCount = 0;
   var parentView = SC.View.create({
     layoutDidChangeFor: function (changedView) {
       callCount++;
@@ -181,7 +195,10 @@ test("is invoked on parentView if no layoutView whenever layout property changes
 
 test("sets rotateX when rotate is set", function () {
   var view = SC.View.create({});
-  view.set('layout', { rotate: 45 });
+
+  SC.run(function () {
+    view.set('layout', { rotate: 45 });
+  });
 
   equals(view.get('layout').rotateX, 45, "should set rotateX");
 
@@ -189,9 +206,13 @@ test("sets rotateX when rotate is set", function () {
   view.destroy();
 });
 
-test("rotateX overrides rotate", function (){
+test("rotateX overrides rotate", function () {
   var view = SC.View.create({});
-  view.set('layout', { rotate: 45, rotateX: 90 });
+
+  SC.run(function () {
+    view.set('layout', { rotate: 45, rotateX: 90 });
+  });
+
   equals(view.get('layout').rotate, undefined, "should clear rotate for rotateX");
 
   // Clean up.

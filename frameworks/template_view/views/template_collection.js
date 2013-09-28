@@ -46,7 +46,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
   */
   init: function() {
     var templateCollectionView = sc_super();
-
+    this._sctcv_contentDidChange();
     return templateCollectionView;
   },
 
@@ -173,6 +173,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
     needed.
   */
   _sctcv_contentDidChange: function() {
+
     var oldContent = this._content, oldLen = 0;
     var content = this.get('content'), newLen = 0;
 
@@ -249,7 +250,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
       // each item.
       itemOptions = this.get('itemViewOptions') || {};
 
-      // insertAtElement = elem.find('li')[start-1] || null;
+      insertAtElement = elem.find('li')[start-1] || null;
       len = addedObjects.get('length');
 
       // TODO: This logic is duplicated from the view helper. Refactor
@@ -284,8 +285,13 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
           childView.set('context', childView.get(contextProperty));
         }
 
-        // Have to create child views manually.
-        childView.createLayer()._doAttach(elem[0]);
+        itemElem = childView.createLayer().$();
+        if (!insertAtElement) {
+          elem.append(itemElem);
+        } else {
+          itemElem.insertAfter(insertAtElement);
+        }
+        insertAtElement = itemElem;
 
         addedViews.push(childView);
       }
@@ -300,10 +306,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
         content: this
       }));
       this.set('emptyView', childView);
-
-      // Have to create child views manually.
-      childView.createLayer()._doAttach(elem[0]);
-
+      childView.createLayer().$().appendTo(elem);
       this.childViews = [childView];
     }
 

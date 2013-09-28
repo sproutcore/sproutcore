@@ -4,22 +4,22 @@ $theme.sc-touch-scroller-view.sc-vertical {
     background: none;
     display: none;
   }
-  
+
   .cap, .endcap {
     background: none;
     display: none;
   }
-  
+
   .button-top {
     background: none;
     display: none;
   }
-  
+
   .button-bottom {
     background: none;
     display: none;
   }
-  
+
   .button-top:active {
     background: none;
     display: none;
@@ -29,7 +29,7 @@ $theme.sc-touch-scroller-view.sc-vertical {
     background: none;
     display: none;
   }
-  
+
   .thumb {
     position: absolute;
     opacity: 0.5;
@@ -38,18 +38,18 @@ $theme.sc-touch-scroller-view.sc-vertical {
     height: 1044px;
     overflow: hidden;
   }
-  
+
   .thumb-top {
     -webkit-border-top-left-radius: 4px;
     -webkit-border-top-right-radius: 4px;
     position: absolute;
     width: 5px;
-    top: 0px;
+    top: 0;
     left: 5px;
     height: 10px;
     background: black;
   }
-  
+
   .thumb-clip {
     position: absolute;
     overflow:hidden;
@@ -58,32 +58,32 @@ $theme.sc-touch-scroller-view.sc-vertical {
     top: 10px;
     left: 5px;
   }
-  
+
   .thumb-inner {
     -webkit-transform: translate3d(0px,0px,0px);
     position: absolute;
-    left: 0px;
-    top: 0px;
+    left: 0;
+    top: 0;
     width: 5px;
     height: 1034px;
   }
-  
+
   .thumb-center {
     position: absolute;
     width: 5px;
-    left: 0px;
-    top: 0px;
+    left: 0;
+    top: 0;
     height: 1024px;
     background: black;
   }
-  
+
   .thumb-bottom {
     -webkit-border-bottom-left-radius: 4px;
     -webkit-border-bottom-right-radius: 4px;
     position: absolute;
     width: 5px;
     top: 1024px;
-    left: 0px;
+    left: 0;
     height: 10px;
     background: black;
   }

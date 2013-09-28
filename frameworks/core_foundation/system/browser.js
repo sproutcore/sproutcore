@@ -9,6 +9,22 @@
 SC.mixin(SC.browser,
 /** @scope SC.browser */ {
 
+  /** @private */
+  _testSupportFor: function (target, propertyName, testValue) {
+    /*jshint eqnull:true*/
+    var ret = target[propertyName] != null,
+      originalValue;
+
+    if (testValue != null) {
+      originalValue = target[propertyName];
+      target[propertyName] = testValue;
+      ret = target[propertyName] === testValue;
+      target[propertyName] = originalValue;
+    }
+
+    return ret;
+  },
+
   /**
     Version Strings should not be compared against Numbers.  For example,
     the version "1.20" is greater than "1.2" and less than "1.200", but as
@@ -145,12 +161,19 @@ SC.mixin(SC.browser,
           // Work without it.
         }
 
-    @param {object} target The target for the method.
-    @param {string} standardName The standard name of the property or method we wish to check on the target.
+    ## Improving deduction
+    Occasionally a target will appear to support a property, but will fail to
+    actually accept a value.  In order to ensure that the property doesn't just
+    exist but is also usable, you can provide an optional `testValue` that will
+    be temporarily assigned to the target to verify that the detected property
+    is usable.
+
+    @param {Object} target The target for the method.
+    @param {String} standardName The standard name of the property or method we wish to check on the target.
+    @param {String} [testValue] A value to temporarily assign to the property.
     @returns {string} The name of the property or method on the target or SC.UNSUPPORTED if no method found.
   */
-  experimentalNameFor: function (target, standardName) {
-    /*jshint eqnull:true*/
+  experimentalNameFor: function (target, standardName, testValue) {
     var cachedNames = this._cachedNames,
       targetGuid = SC.guidFor(target);
 
@@ -168,10 +191,10 @@ SC.mixin(SC.browser,
     var ret = standardName;
 
     // ex. window.indexedDB.getDatabaseNames
-    if (target[ret] == null) {
+    if (!this._testSupportFor(target, ret, testValue)) {
       // ex. window.WebKitCSSMatrix
       ret = SC.browser.classPrefix + standardName.capitalize();
-      if (target[ret] == null) {
+      if (!this._testSupportFor(target, ret, testValue)) {
         // No need to check if the prefix is the same for properties and classes
         if (SC.browser.domPrefix === SC.browser.classPrefix) {
           // Always show a warning so that production usage information has a
@@ -181,7 +204,7 @@ SC.mixin(SC.browser,
         } else {
           // ex. window.indexedDB.webkitGetDatabaseNames
           ret = SC.browser.domPrefix + standardName.capitalize();
-          if (target[ret] == null) {
+          if (!this._testSupportFor(target, ret, testValue)) {
             // Always show a warning so that production usage information has a
             // better chance of filtering back to the developer(s).
             SC.warn("SC.browser.experimentalNameFor(): target, %@, does not have property `%@`, '%@' or `%@`.".fmt(target, standardName, SC.browser.classPrefix + standardName.capitalize(), ret));
@@ -222,17 +245,24 @@ SC.mixin(SC.browser,
         // `boxShadowName` may be "boxShadow", "WebkitBoxShadow", "msBoxShadow", etc. depending on the browser support.
         el.style[boxShadowName] = "rgb(0,0,0) 0px 3px 5px";
 
+    ## Improving deduction
+    Occasionally a browser will appear to support a style, but will fail to
+    actually accept a value.  In order to ensure that the style doesn't just
+    exist but is also usable, you can provide an optional `testValue` that will
+    be used to verify that the detected style is usable.
+
     @param {string} standardStyleName The standard name of the experimental style as it should be un-prefixed.  This is the DOM property name, which is camel-cased (ex. boxShadow)
+    @param {String} [testValue] A value to temporarily assign to the style to ensure support.
     @returns {string} Future-proof style name for use in the current browser or SC.UNSUPPORTED if no style support found.
   */
-  experimentalStyleNameFor: function (standardStyleName) {
+  experimentalStyleNameFor: function (standardStyleName, testValue) {
     // Test the style name.
     var el = this._testEl;
 
     // Create a test element and cache it for repeated use.
     if (!el) { el = this._testEl = document.createElement("div"); }
 
-    return this.experimentalNameFor(el.style, standardStyleName);
+    return this.experimentalNameFor(el.style, standardStyleName, testValue);
   },
 
   /**
@@ -260,13 +290,20 @@ SC.mixin(SC.browser,
         // `boxShadowCSS` may be "box-shadow", "-webkit-box-shadow", "-ms-box-shadow", etc. depending on the current browser.
         el.style.cssText = boxShadowCSS + " rgb(0,0,0) 0px 3px 5px";
 
+    ## Improving deduction
+    Occasionally a browser will appear to support a style, but will fail to
+    actually accept a value.  In order to ensure that the style doesn't just
+    exist but is also usable, you can provide an optional `testValue` that will
+    be used to verify that the detected style is usable.
+
     @param {string} standardCSSName The standard name of the experimental CSS attribute as it should be un-prefixed (ex. box-shadow).
+    @param {String} [testValue] A value to temporarily assign to the style to ensure support.
     @returns {string} Future-proof CSS name for use in the current browser or SC.UNSUPPORTED if no style support found.
   */
-  experimentalCSSNameFor: function (standardCSSName) {
+  experimentalCSSNameFor: function (standardCSSName, testValue) {
     var ret = standardCSSName,
       standardStyleName = standardCSSName.camelize(),
-      styleName = this.experimentalStyleNameFor(standardStyleName);
+      styleName = this.experimentalStyleNameFor(standardStyleName, testValue);
 
     if (styleName === SC.UNSUPPORTED) {
       ret = SC.UNSUPPORTED;

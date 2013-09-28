@@ -756,8 +756,13 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     if (value !== SC.LEAF_NODE) {
       this.renderDisclosure(working, value);
       classArray.push('has-disclosure');
-    }
+    } else if (this._disclosureRenderSource) {
+      // If previously rendered a disclosure, clean up.
+      context.removeClass('has-disclosure');
+      this._disclosureRenderSource.destroy();
 
+      this._disclosureRenderSource = this._disclosureRenderDelegate = null;
+    }
 
     // handle checkbox
     key = this.getDelegateProperty('contentCheckboxKey', del);
@@ -766,6 +771,12 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
       if (value !== null) {
         this.renderCheckbox(working, value);
         classArray.push('has-checkbox');
+      } else if (this._checkboxRenderSource) {
+        // If previously rendered a checkbox, clean up.
+        context.removeClass('has-checkbox');
+        this._checkboxRenderSource.destroy();
+
+        this._checkboxRenderSource = this._checkboxRenderDelegate = null;
       }
     }
 
@@ -815,7 +826,10 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
       var valueLength = value.toString().length;
       var digitsLength = digits.length;
       var digit = (valueLength < digitsLength) ? digits[valueLength] : digits[digitsLength - 1];
-      classArray.push('has-count ' + digit + '-digit');
+      classArray.push('has-count', digit + '-digit');
+    } else {
+      // If previously rendered a count, clean up.
+      context.removeClass('has-count');
     }
 
     // handle action

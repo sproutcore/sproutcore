@@ -5,24 +5,25 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/*global module test htmlbody ok equals same stop start */
+/*global module, test, htmlbody, ok, equals, clearHtmlbody, $ */
 
 
 var pane;
-(function() {
+(function () {
   var iconURL = sc_static("sproutcore-32.png");
 
   pane = SC.ControlTestPane.design()
 
     .add("3_empty", SC.SegmentedView, {
-      items: [ '', '' , ''],
+      items: ['', '', ''],
       layout: { height: 25 }
     })
     .add("3_empty,icon", SC.SegmentedView, {
       items: [
-      { value: "", icon: iconURL },
-      { value: "", icon: iconURL },
-      { value: "", icon: iconURL }],
+        { value: "", icon: iconURL },
+        { value: "", icon: iconURL },
+        { value: "", icon: iconURL }
+      ],
       itemTitleKey: 'value',
       itemValueKey: 'value',
       itemIconKey: 'icon',
@@ -35,8 +36,9 @@ var pane;
     })
     .add("2_items,toolTip", SC.SegmentedView, {
       items: [
-      { value: "title1", toolTip: "this is title1's tip" },
-      { value: "title2", toolTip: "this is title2's tip" }],
+        { value: "title1", toolTip: "this is title1's tip" },
+        { value: "title2", toolTip: "this is title2's tip" }
+      ],
       itemTitleKey: 'value',
       itemValueKey: 'value',
       itemToolTipKey: 'toolTip',
@@ -50,20 +52,22 @@ var pane;
     })
     .add("3_items,2_sel,1_disabled", SC.SegmentedView, {
       items: [
-      { value: "Item1" },
-      { value: "Item2", isEnabled: false },
-      { value: "Item3" }],
+        { value: "Item1" },
+        { value: "Item2", isEnabled: false },
+        { value: "Item3" }
+      ],
       itemTitleKey: 'value',
       itemValueKey: 'value',
       itemIsEnabledKey: 'isEnabled',
-      value: ["Item1","Item2"],
+      value: ["Item1", "Item2"],
       layout: { height: 25 }
     })
     .add("3_items,icon,2_sel", SC.SegmentedView, {
       items: [
-      { value: "Item1", icon: iconURL },
-      { value: "Item2", icon: iconURL },
-      { value: "Item3", icon: iconURL }],
+        { value: "Item1", icon: iconURL },
+        { value: "Item2", icon: iconURL },
+        { value: "Item3", icon: iconURL }
+      ],
       itemTitleKey: 'value',
       itemValueKey: 'value',
       itemIconKey: 'icon',
@@ -72,22 +76,23 @@ var pane;
       layout: { height: 25 }
     })
     .add("3_items,2_sel,disabled", SC.SegmentedView, {
-       items: [
+      items: [
         { value: "Item1", icon: iconURL },
         { value: "Item2", icon: iconURL },
-        { value: "Item3", icon: iconURL }],
-        itemTitleKey: 'value',
-        itemValueKey: 'value',
-        itemIconKey: 'icon',
-        isEnabled: NO,
-        value: "Item1 Item3".w(),
-        layout: { height: 25 }
+        { value: "Item3", icon: iconURL }
+      ],
+      itemTitleKey: 'value',
+      itemValueKey: 'value',
+      itemIconKey: 'icon',
+      isEnabled: NO,
+      value: "Item1 Item3".w(),
+      layout: { height: 25 }
     })
     .add("3_items,1_sel,emptySel", SC.SegmentedView, {
       items: ["Item1", "Very Long Item", "Item 3"],
-        value: "Very Long Item",
-        allowsEmptySelection: YES,
-        layout: { height: 25 }
+      value: "Very Long Item",
+      allowsEmptySelection: YES,
+      layout: { height: 25 }
     })
     .add("3_items,2_sel,emptySel", SC.SegmentedView, {
       items: ["Item1", "Very Long Item", "Item 3"],
@@ -133,9 +138,10 @@ var pane;
     })
     .add("3_items,widths", SC.SegmentedView, {
       items: [
-      SC.Object.create({ value: "A", width: 70 }),
-      SC.Object.create({ value: "B", width: 70 }),
-      SC.Object.create({ value: "C", width: 70 })],
+        SC.Object.create({ value: "A", width: 70 }),
+        SC.Object.create({ value: "B", width: 70 }),
+        SC.Object.create({ value: "C", width: 70 })
+      ],
       itemTitleKey: 'value',
       itemValueKey: 'value',
       itemWidthKey: 'width',
@@ -143,11 +149,12 @@ var pane;
     })
     .add("5_items,widths,overflow", SC.SegmentedView, {
       items: [
-      { value: "A", width: 70 },
-      { value: "B", width: 70 },
-      { value: "C", width: 70 },
-      { value: "D", width: 70 },
-      { value: "E", width: 70 }],
+        { value: "A", width: 70 },
+        { value: "B", width: 70 },
+        { value: "C", width: 70 },
+        { value: "D", width: 70 },
+        { value: "E", width: 70 }
+      ],
       itemTitleKey: 'value',
       itemValueKey: 'value',
       itemWidthKey: 'width',
@@ -155,11 +162,12 @@ var pane;
     })
     .add("5_items,1_sel,widths,overflow", SC.SegmentedView, {
       items: [
-      { value: "A", width: 70 },
-      { value: "B", width: 70 },
-      { value: "C", width: 70 },
-      { value: "D", width: 70 },
-      { value: "E", width: 70 }],
+        { value: "A", width: 70 },
+        { value: "B", width: 70 },
+        { value: "C", width: 70 },
+        { value: "D", width: 70 },
+        { value: "E", width: 70 }
+      ],
       itemTitleKey: 'value',
       itemValueKey: 'value',
       itemWidthKey: 'width',
@@ -168,18 +176,18 @@ var pane;
     })
     .add("aria-role_tab,tablist", SC.SegmentedView, {
       items: [
-      {title: "Item 1"},
-      {title: "Item 2"},
-      {title: "Item 3"}
+        { title: "Item 1" },
+        { title: "Item 2" },
+        { title: "Item 3" }
       ],
       itemTitleKey: "title",
       layout: { height: 25 }
     })
     .add("aria-labelledby", SC.SegmentedView, {
       items: [
-      {title: "Item 1"},
-      {title: "Item 2"},
-      {title: "Item 3"}
+        { title: "Item 1" },
+        { title: "Item 2" },
+        { title: "Item 3" }
       ],
       itemTitleKey: "title",
       layout: { height: 25 }
@@ -189,17 +197,17 @@ var pane;
   // TEST VIEWS
   //
   module('SC.SegmentedView ui', {
-    setup: function(){
+    setup: function () {
       htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
       pane.standardSetup().setup();
     },
-    teardown: function(){
+    teardown: function () {
       pane.standardSetup().teardown();
       clearHtmlbody();
     }
   });
 
-  test("Check that all segmentedViews are visible", function() {
+  test("Check that all segmentedViews are visible", function () {
     ok(pane.view('3_empty').get('isVisibleInWindow'), '3_empty.isVisibleInWindow should be YES');
     ok(pane.view('3_empty,icon').get('isVisibleInWindow'), '3_empty,icon.isVisibleInWindow should be YES');
     ok(pane.view('3_items,1_sel').get('isVisibleInWindow'), '3_items,1_sel.isVisibleInWindow should be YES');
@@ -221,92 +229,90 @@ var pane;
   });
 
 
-  test("Check that all segments have the right classes set", function() {
-    var viewElem=pane.view('3_empty').$();
-    var segments=pane.view('3_empty').$('.sc-segment-view');
+  test("Check that all segments have the right classes set", function () {
+    var viewElem = pane.view('3_empty').$();
+    var segments = pane.view('3_empty').$('.sc-segment-view'),
+      seg;
 
     equals(segments.length, 4, 'precond - segmented view should have 4 segment elements (including overflow)');
 
     ok(viewElem.hasClass('sc-view'), '3_empty.hasClass(sc-view) should be YES');
     ok(viewElem.hasClass('sc-segmented-view'), '3_empty.hasClass(sc-segmented-view) should be YES');
-    for (var i=0, seglen=segments.length - 1; i<seglen; i++){
-      var seg=segments[i];
-      if(i===0){
-        ok((seg.className.indexOf('sc-first-segment')>=0), 'first segment has the right classname assigned.');
+    for (var i = 0, seglen = segments.length - 1; i < seglen; i++) {
+      seg = segments[i];
+      if (i === 0) {
+        ok((seg.className.indexOf('sc-first-segment') >= 0), 'first segment has the right classname assigned.');
       }
-      if(i===seglen-1){
-        ok((seg.className.indexOf('sc-last-segment')>=0), 'last segment has the right classname assigned.');
+      if (i === seglen - 1) {
+        ok((seg.className.indexOf('sc-last-segment') >= 0), 'last segment has the right classname assigned.');
       }
 
-      ok((seg.childNodes[3].className.indexOf('sc-button-label')>=0), 'segment '+i+' should have a label.');
+      ok((seg.childNodes[3].className.indexOf('sc-button-label') >= 0), 'segment ' + i + ' should have a label.');
 
-      if(i !== 0 && i < seglen-1) {
-        ok((seg.className.indexOf('sc-middle-segment')>=0), 'middle segments have the right classname assigned.');
+      if (i !== 0 && i < seglen - 1) {
+        ok((seg.className.indexOf('sc-middle-segment') >= 0), 'middle segments have the right classname assigned.');
       }
     }
 
-    viewElem=pane.view('3_items,1_sel,disabled').$();
+    viewElem = pane.view('3_items,1_sel,disabled').$();
     ok(viewElem.hasClass('disabled'), '3_items,1_sel,disabled should have the disabled class set');
 
-    viewElem=pane.view('3_items,2_sel,disabled').$();
+    viewElem = pane.view('3_items,2_sel,disabled').$();
     ok(viewElem.hasClass('disabled'), '3_items,2_sel,disabled should have the disabled class set');
 
-    seg=pane.view('3_items,2_sel,1_disabled').$('.sc-segment-view')[1];
+    seg = pane.view('3_items,2_sel,1_disabled').$('.sc-segment-view')[1];
     ok($(seg).hasClass('disabled'), '3_items,2_sel,1_disabled should have the disabled class set on the middle segment');
   });
 
 
-  test("Check that all segments have the right classes set (with icons)", function() {
-    var viewElem=pane.view('3_empty,icon').$();
-    var segments=pane.view('3_empty,icon').$('.sc-segment-view');
+  test("Check that all segments have the right classes set (with icons)", function () {
+    var viewElem = pane.view('3_empty,icon').$();
+    var segments = pane.view('3_empty,icon').$('.sc-segment-view');
 
     equals(segments.length, 4, 'precond - segmented view should have 4 segment elements (including overflow)');
 
     ok(viewElem.hasClass('sc-view'), '3_empty.hasClass(sc-view) should be YES');
     ok(viewElem.hasClass('sc-segmented-view'), '3_empty.hasClass(sc-segmented-view) should be YES');
-    for (var i=0, seglen=segments.length - 1; i<seglen; i++){
-      var seg=segments[i];
-      if(i===0){
-        ok((seg.className.indexOf('sc-first-segment')>=0), 'first segment has the right classname assigned.');
+    for (var i = 0, seglen = segments.length - 1; i < seglen; i++) {
+      var seg = segments[i];
+      if (i === 0) {
+        ok((seg.className.indexOf('sc-first-segment') >= 0), 'first segment has the right classname assigned.');
       }
-      if(i==seglen-1){
-        ok((seg.className.indexOf('sc-last-segment')>=0), 'last segment has the right classname assigned.');
+      if (i == seglen - 1) {
+        ok((seg.className.indexOf('sc-last-segment') >= 0), 'last segment has the right classname assigned.');
       }
-      ok((seg.childNodes[3].className.indexOf('sc-button-label')>=0), 'segment '+i+' should have a label.');
-      ok((seg.childNodes[3].childNodes[0].src.length>0), 'segment '+i+' should have an icon.');
+      ok((seg.childNodes[3].className.indexOf('sc-button-label') >= 0), 'segment ' + i + ' should have a label.');
+      ok((seg.childNodes[3].childNodes[0].src.length > 0), 'segment ' + i + ' should have an icon.');
 
-      if(i!==0 && i!=seglen-1){
-        ok((seg.className.indexOf('sc-middle-segment')>=0), 'middle segments have the right classname assigned.');
+      if (i !== 0 && i != seglen - 1) {
+        ok((seg.className.indexOf('sc-middle-segment') >= 0), 'middle segments have the right classname assigned.');
       }
     }
 
-    viewElem=pane.view('3_items,2_sel,disabled').$();
+    viewElem = pane.view('3_items,2_sel,disabled').$();
     ok(viewElem.hasClass('disabled'), '3_items,2_sel,disabled should have the disabled class set');
   });
 
-  test("No value set", function() {
-    var segments=pane.view('3_empty').$('.sc-segment-view');
-
-    // allow for a render to happen
-    SC.RunLoop.begin().end();
+  test("No value set", function () {
+    var segments = pane.view('3_empty').$('.sc-segment-view');
 
     equals(segments.length, 4, 'precond - segmented view should have 4 segment elements (including overflow)');
-    for (var i=0, ilen=segments.length; i<ilen; i++){
-      var seg=segments[i];
-      ok((seg.className.indexOf('sel')==-1), 'this element should not be selected.');
+    for (var i = 0, ilen = segments.length; i < ilen; i++) {
+      var seg = segments[i];
+      ok((seg.className.indexOf('sel') == -1), 'this element should not be selected.');
     }
 
   });
 
-  test("Check that two items are selected.", function() {
-    var segments=pane.view('3_items,icon,2_sel').$('.sc-segment-view');
-    var count=0;
+  test("Check that two items are selected.", function () {
+    var segments = pane.view('3_items,icon,2_sel').$('.sc-segment-view');
+    var count = 0;
 
     equals(segments.length, 4, 'precond - segmented view should have 4 segment elements (including overflow)');
 
-    for (var i=0, ilen=segments.length; i<ilen; i++){
-      var seg=segments[i];
-      if(seg.className.indexOf('sel')!=-1){
+    for (var i = 0, ilen = segments.length; i < ilen; i++) {
+      var seg = segments[i];
+      if (seg.className.indexOf('sel') != -1) {
         count++;
       }
     }
@@ -314,81 +320,80 @@ var pane;
 
   });
 
-  test("2_items,toolTip has toolTips assigned.", function() {
-    var segments=pane.view('2_items,toolTip').$('.sc-segment-view');
-    ok((segments[0].title=="this is title1's tip"), 'first segment has expected tool tip assigned.');
-    ok((segments[1].title=="this is title2's tip"), 'second segment has expected tool tip assigned.');
+  test("2_items,toolTip has toolTips assigned.", function () {
+    var segments = pane.view('2_items,toolTip').$('.sc-segment-view');
+    ok((segments[0].title == "this is title1's tip"), 'first segment has expected tool tip assigned.');
+    ok((segments[1].title == "this is title2's tip"), 'second segment has expected tool tip assigned.');
   });
 
-  test("Check the alignment styles for align property.", function() {
+  test("Check the alignment styles for align property.", function () {
     equals(pane.view("3_empty").$().css('text-align'), 'center', 'default align property should text-align the segmented-view to the center');
     equals(pane.view("3_items,leftAligned").$().css('text-align'), 'left', 'setting align: SC.ALIGN_LEFT should text-align the segmented-view to the left');
     equals(pane.view("3_items,rightAligned").$().css('text-align'), 'right', 'setting align: SC.ALIGN_LEFT should text-align the segmented-view to the left');
   });
 
-  test("Check that changing title re-renders the segments (for SC.Object items only).", function() {
+  test("Check that changing title re-renders the segments (for SC.Object items only).", function () {
     var sv = pane.view("3_items,widths");
-    var segments=sv.$('.sc-segment-view');
-    var defaults = ['A', 'B', 'C'];
-    for (var i=0, len=segments.length - 1; i < len; i++){
-      var segEl=segments[i];
-      var label=$(segEl).find('label')[0];
+    var segments = sv.$('.sc-segment-view');
+    var defaults = ['A', 'B', 'C'],
+      segEl,
+      label;
+
+    for (var i = 0, len = segments.length - 1; i < len; i++) {
+      segEl = segments[i];
+      label = $(segEl).find('label')[0];
       equals(label.innerHTML, defaults[i], 'there should be "' + defaults[i] + '" in the segment\'s label');
     }
 
     // change the title of the second item
     var items = sv.get('items');
-    items[1].set('value', 'Item 2');
+    SC.run(function () {
+      items[1].set('value', 'Item 2');
+    });
 
-    // allow for a render to happen
-    SC.RunLoop.begin().end();
-
-    segEl=segments[1];
-    label=$(segEl).find('label')[0];
+    segEl = segments[1];
+    label = $(segEl).find('label')[0];
     equals(label.innerHTML, "Item 2", 'there should be "Item 2" text in the second segment');
   });
 
-  test("Check that changing width re-renders the segments (for hash or object items only).", function() {
+  test("Check that changing width re-renders the segments (for hash or object items only).", function () {
     var sv = pane.view("3_items,widths");
-    var segments=sv.$('.sc-segment-view');
-    for (var i=0, len=segments.length - 1; i < len; i++){
-      var segEl=segments[i];
-      var width=$(segEl).css('width');
+    var segments = sv.$('.sc-segment-view'),
+      segEl, width;
+
+    for (var i = 0, len = segments.length - 1; i < len; i++) {
+      segEl = segments[i];
+      width = $(segEl).css('width');
       equals(width, "70px", 'the segment style width should be "70px"');
     }
 
     // change the width of the second item
     var items = sv.get('items');
-    items[1].set('width', 100);
+    SC.run(function () {
+      items[1].set('width', 100);
+    });
 
-    // allow for a render to happen
-    SC.RunLoop.begin().end();
-
-    segEl=segments[1];
-    width=$(segEl).css('width');
+    segEl = segments[1];
+    width = $(segEl).css('width');
     equals(width, "100px", 'the second segment style width should be "100px"');
   });
 
-  test("Check that overflow adds an overflow segment on view.", function() {
+  test("Check that overflow adds an overflow segment on view.", function () {
     var sv = pane.view("5_items,widths,overflow");
-    var lastIsOverflow = function(sv) {
-      SC.RunLoop.begin().end(); // allow for a render to happen
-
-      var segments=sv.$('.sc-segment-view');
+    var lastIsOverflow = function (sv) {
+      var segments = sv.$('.sc-segment-view');
       var overflowEl = segments[segments.length - 1];
       ok($(overflowEl).hasClass('sc-overflow-segment'), 'overflow segment should have .sc-overflow-segment class');
       var overflowLabelEl = $(overflowEl).find('label')[0];
-      equals(overflowLabelEl.innerText, "&raquo;", 'there should be "&raquo;" text in the overflow segment');
+      equals(overflowLabelEl.innerHTML, "»", 'there should be "»" text in the overflow segment');
     };
 
-    var lastIsSegment = function(sv, text) {
-      SC.RunLoop.begin().end(); // allow for a render to happen
-
-      var segments=sv.$('.sc-segment-view');
+    var lastIsSegment = function (sv, text) {
+      var segments = sv.$('.sc-segment-view');
       var lastEl = segments[segments.length - 2];
       ok(!$(lastEl).hasClass('sc-overflow-segment'), 'last segment should not have .sc-overflow-segment class');
       var lastLabelEl = $(lastEl).find('label')[0];
-      equals(lastLabelEl.innerText, text, 'there should be "' + text + '" text in the last segment');
+      equals(lastLabelEl.innerHTML, text, 'there should be "' + text + '" text in the last segment');
     };
 
     // the last item should be an overflow segment (ie. has .sc-overflow-segment class and text "&raquo")
@@ -402,109 +407,118 @@ var pane;
 
     // 1. remove the last two items (the last item should no longer be an overflow segment)
     var items = sv.get('items');
-    items.removeAt(items.length - 1);
-    items.removeAt(items.length - 1);
+    SC.run(function () {
+      items.removeAt(items.length - 1);
+      items.removeAt(items.length - 1);
+    });
     lastIsSegment(sv, "C");
 
     // 2. add an item (the last item should be an overflow segment again)
-    items.pushObject({value: 'X', width: 100});
+    SC.run(function () {
+      items.pushObject({value: 'X', width: 100});
+    });
     lastIsOverflow(sv);
 
     // 3. shrink the items (the last item should no longer be an overflow segment)
-    items.invoke('set', 'width', 50);
+    SC.run(function () {
+      items.invoke('set', 'width', 50);
+    });
     lastIsSegment(sv, "X");
 
     // 4. grow the items (the last item should be an overflow segment again)
-    items.invoke('set', 'width', 100);
+    SC.run(function () {
+      items.invoke('set', 'width', 100);
+    });
     lastIsOverflow(sv);
 
     // 5. shrink the items, but then shrink the segmented view
-    items.invoke('set', 'width', 50);
+    SC.run(function () {
+      items.invoke('set', 'width', 50);
+    });
     lastIsSegment(sv, "X");
-    sv.set('layout', {left: 75, right: 75, top: 0, height: 25});
-    sv.updateLayer();
-    SC.RunLoop.begin().end(); // allow for a render to happen (update layout)
-    sv.notifyPropertyChange('frame');
-    SC.RunLoop.begin().end(); // allow for a render to happen (measure the segments)
+
+    SC.run(function () {
+      sv.set('layout', {left: 75, right: 75, top: 0, height: 25});
+    });
     lastIsOverflow(sv);
   });
 
-  test("Check that the overflow segment is selected when overflowed items are selected.", function() {
+  test("Check that the overflow segment is selected when overflowed items are selected.", function () {
     var sv = pane.view("5_items,1_sel,widths,overflow");
-    var segments=sv.$('.sc-segment-view');
+    var segments = sv.$('.sc-segment-view');
 
     // the overflow item should be selected (because an overflowed item is selected)
     var overflowEl = segments[segments.length - 1];
     ok($(overflowEl).hasClass('sel'), 'overflow segment should have .sel class');
   });
 
-  test("Check that the segmented view and segments have aria roles set", function() {
-    var sv        = pane.view("aria-role_tab,tablist"),
+  test("Check that the segmented view and segments have aria roles set", function () {
+    var sv = pane.view("aria-role_tab,tablist"),
         viewElem  = sv.$(),
         segments, i, len, segmentViewElem, role;
 
     equals(viewElem.attr('role'), 'group', "The segmented view has aria role set");
 
     segments = sv.get('childViews');
-    for( i = 0, len = segments.length; i<len; ++i) {
+    for (i = 0, len = segments.length; i < len; ++i) {
       segmentViewElem = segments[i].$();
       role = segmentViewElem.attr('role');
-      equals(role, "button", "segment " + (i+1) + " have aria role set");
+      equals(role, "button", "segment " + (i + 1) + " have aria role set");
     }
   });
 
-  test("Check that the segments have aria-labelled attribute set", function() {
+  test("Check that the segments have aria-labelled attribute set", function () {
     var sv = pane.view('aria-labelledby'),
         segments = sv.get('childViews'),
         i, len, segmentViewElem, aria_labelledby, label;
 
-    for(i = 0, len = segments.length; i<len; ++i) {
+    for (i = 0, len = segments.length; i < len; ++i) {
       segmentViewElem = segments[i].$();
       label = segments[i].$('label.sc-button-label')[0];
       aria_labelledby = document.getElementById(segmentViewElem.attr('aria-labelledby'));
-      equals(aria_labelledby, label, "segment " + (i+1) + " has aria-labeledby pointing at button label");
+      equals(aria_labelledby, label, "segment " + (i + 1) + " has aria-labeledby pointing at button label");
     }
   });
 
-test("Check that mouse events change the active classes.", function() {
-  var view1, view2, view3, layer1, layer2, layer3, point, ev;
+  test("Check that mouse events change the active classes.", function () {
+    var view1, view2, view3, layer1, layer2, layer3, point, ev;
 
-  view1 = pane.view('3_items,2_sel,1_disabled').get('childViews').objectAt(0); // $('.sc-segment-view')[0];
-  layer1 = view1.get('layer');
-  point = SC.offset(layer1);
+    view1 = pane.view('3_items,2_sel,1_disabled').get('childViews').objectAt(0); // $('.sc-segment-view')[0];
+    layer1 = view1.get('layer');
+    point = SC.offset(layer1);
 
-  ev = SC.Event.simulateEvent(layer1, 'mousedown', { clientX: point.x, clientY: point.y });
-  SC.Event.trigger(layer1, 'mousedown', [ev]);
+    ev = SC.Event.simulateEvent(layer1, 'mousedown', { clientX: point.x, clientY: point.y });
+    SC.Event.trigger(layer1, 'mousedown', [ev]);
 
-  ok(view1.$().hasClass('active'), 'The first segment should have an active class on mousedown');
+    ok(view1.$().hasClass('active'), 'The first segment should have an active class on mousedown');
 
-  ev = SC.Event.simulateEvent(layer1, 'mousemove', { clientX: point.x + 1, clientY: point.y });
-  SC.Event.trigger(layer1, 'mousemove', [ev]);
+    ev = SC.Event.simulateEvent(layer1, 'mousemove', { clientX: point.x + 1, clientY: point.y });
+    SC.Event.trigger(layer1, 'mousemove', [ev]);
 
-  view2 = pane.view('3_items,2_sel,1_disabled').get('childViews').objectAt(1);
-  layer2 = view2.get('layer');
-  point = SC.offset(layer2);
+    view2 = pane.view('3_items,2_sel,1_disabled').get('childViews').objectAt(1);
+    layer2 = view2.get('layer');
+    point = SC.offset(layer2);
 
-  ev = SC.Event.simulateEvent(layer2, 'mousemove', { clientX: point.x + 1, clientY: point.y + 1 });
-  SC.Event.trigger(layer2, 'mousemove', [ev]);
+    ev = SC.Event.simulateEvent(layer2, 'mousemove', { clientX: point.x + 1, clientY: point.y + 1 });
+    SC.Event.trigger(layer2, 'mousemove', [ev]);
 
-  ok(!view1.$().hasClass('active'), 'The first segment should no longer have an active class on mouseExited (via mousemove)');
-  ok(!view2.$().hasClass('active'), 'The disabled second segment should not have an active class on mouseEntered (via mousemove)');
+    ok(!view1.$().hasClass('active'), 'The first segment should no longer have an active class on mouseExited (via mousemove)');
+    ok(!view2.$().hasClass('active'), 'The disabled second segment should not have an active class on mouseEntered (via mousemove)');
 
-  view3 = pane.view('3_items,2_sel,1_disabled').get('childViews').objectAt(2);
-  layer3 = view3.get('layer');
-  point = SC.offset(layer3);
+    view3 = pane.view('3_items,2_sel,1_disabled').get('childViews').objectAt(2);
+    layer3 = view3.get('layer');
+    point = SC.offset(layer3);
 
-  ev = SC.Event.simulateEvent(layer3, 'mousemove', { clientX: point.x + 1, clientY: point.y + 1 });
-  SC.Event.trigger(layer3, 'mousemove', [ev]);
+    ev = SC.Event.simulateEvent(layer3, 'mousemove', { clientX: point.x + 1, clientY: point.y + 1 });
+    SC.Event.trigger(layer3, 'mousemove', [ev]);
 
-  ok(view3.$().hasClass('active'), 'The third segment should have an active class on mouseMoved');
+    ok(view3.$().hasClass('active'), 'The third segment should have an active class on mouseMoved');
 
-  ev = SC.Event.simulateEvent(layer3, 'mouseup', { clientX: point.x + 1, clientY: point.y + 1 });
-  SC.Event.trigger(layer3, 'mouseup', [ev]);
+    ev = SC.Event.simulateEvent(layer3, 'mouseup', { clientX: point.x + 1, clientY: point.y + 1 });
+    SC.Event.trigger(layer3, 'mouseup', [ev]);
 
-  ok(!view1.$().hasClass('sel'), 'The first segment should lose its sel class on mouseUp');
-  ok(view3.$().hasClass('sel'), 'The third segment should have a sel class on mouseUp');
-});
+    ok(!view1.$().hasClass('sel'), 'The first segment should lose its sel class on mouseUp');
+    ok(view3.$().hasClass('sel'), 'The third segment should have a sel class on mouseUp');
+  });
 
 })();
