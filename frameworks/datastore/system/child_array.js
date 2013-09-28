@@ -60,7 +60,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @type SC.Store
     @property
   */
-  store: function() {
+  store: function () {
     return this.getPath('parentObject.store');
   }.property('parentObject').cacheable(),
 
@@ -71,7 +71,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @type Number
     @property
   */
-  storeKey: function() {
+  storeKey: function () {
     return this.getPath('parentObject.storeKey');
   }.property('parentObject').cacheable(),
 
@@ -82,7 +82,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @type SC.Array
     @property
   */
-  readOnlyChildren: function() {
+  readOnlyChildren: function () {
     return this.get('parentObject').readAttribute(this.get('parentAttribute'));
   }.property(),
 
@@ -93,14 +93,14 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @type {SC.Array}
     @property
   */
-  editableChildren: function() {
+  editableChildren: function () {
     var parent = this.get('parentObject'),
         parentAttr = this.get('parentAttribute'),
         ret;
 
     ret = parent.readEditableAttribute(parentAttr);
-    if(!ret) ret = [];
-    if(ret !== this._prevChildren) this.recordPropertyDidChange();
+    if (!ret) ret = [];
+    if (ret !== this._prevChildren) this.recordPropertyDidChange();
 
     return ret;
 
@@ -113,14 +113,14 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @type {hash} hash to create record from
     @property
   */
-  createNestedRecord: function(recType,hash){
+  createNestedRecord: function (recType, hash) {
     var parent = this.get('parentObject'),
         pattr  = this.get('parentAttribute'),
         rec;
 
-    rec = parent.createNestedRecord(recType,hash,pattr,this); // add ourselves as parent
+    rec = parent.createNestedRecord(recType, hash, pattr, this); // add ourselves as parent
     // update the cache while we can to prevent materializing of the same record
-    if(this._records){
+    if (this._records) {
       this._records.push(rec);
     } else this._records = [rec];
     this.enumerableContentDidChange();
@@ -135,12 +135,12 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @property
   */
 
-  createNestedRecords: function(recType,hashes){
+  createNestedRecords: function (recType, hashes) {
     var parent = this.get('parentObject'),
         pattr  = this.get('parentAttribute'),
         recs;
 
-    recs = parent.createNestedRecords(recType,hashes,pattr,this);
+    recs = parent.createNestedRecords(recType, hashes, pattr, this);
     return recs;
   },
 
@@ -150,9 +150,9 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
    * @param  {String} key
    * @return {any} property of the parentObjects attributes
    */
-  readAttribute: function(key){
+  readAttribute: function (key) {
     var parent = this.get('parentObject');
-    if(!parent) throw new Error("ChildArray without a parentObject? this is a bug");
+    if (!parent) throw new Error("ChildArray without a parentObject? this is a bug");
     return parent.readAttribute(key);
   },
 
@@ -163,9 +163,9 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
    * @param  {boolean} ignoreDidChange: don't trigger observers
    * @return {[type]}
    */
-  _writeAttribute: function(keyStack, value, ignoreDidChange) {
+  _writeAttribute: function (keyStack, value, ignoreDidChange) {
     var parent = this.get('parentObject');
-    if(!parent) throw new Error("ChildArray without a parent? this is a bug");
+    if (!parent) throw new Error("ChildArray without a parent? this is a bug");
     return parent._writeAttribute(keyStack, value, ignoreDidChange);
   },
 
@@ -174,9 +174,9 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
    * @param  {String} key
    * @return {[type]}
    */
-  recordDidChange: function(key){
+  recordDidChange: function (key) {
     var parent = this.get('parentObject');
-    if(!parent) throw new Error("ChildArray without a parent? this is a bug");
+    if (!parent) throw new Error("ChildArray without a parent? this is a bug");
     return parent.recordDidChange(key);
   },
 
@@ -184,14 +184,14 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
    * Returns attributes of the underlying array
    * @return {Array} with attributes
    */
-  attributes: function(){
+  attributes: function () {
     var parent = this.get('parentObject'),
         parentAttr = this.get('parentAttribute'),
         attrs;
 
-    if(!parent) throw new Error("ChildArray without a parent? this is a bug");
+    if (!parent) throw new Error("ChildArray without a parent? this is a bug");
     attrs = parent.get('attributes');
-    if(attrs) return attrs[parentAttr];
+    if (attrs) return attrs[parentAttr];
     else return attrs;
   }.property(),
 
@@ -199,9 +199,9 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
    * Return the status of the underlying record
    * @return {Number} enumerated in SC.Record
    */
-  status: function(){
+  status: function () {
     var parent = this.get('parentObject');
-    if(parent) return parent.get('status');
+    if (parent) return parent.get('status');
   }.property(),
 
   // ..........................................................
@@ -214,7 +214,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @type Number
     @property
   */
-  length: function() {
+  length: function () {
     var children = this.get('readOnlyChildren');
     return children ? children.length : 0;
   }.property('readOnlyChildren'),
@@ -226,7 +226,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @param {Number} idx index of the object to retrieve.
     @returns {SC.Record} The record if found or undefined.
   */
-  objectAt: function(idx) {
+  objectAt: function (idx) {
     var recs      = this._records,
         children = this.get('readOnlyChildren'),
         hash, ret, pname = this.get('parentAttribute'),
@@ -234,8 +234,8 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     var len = children ? children.length : 0;
 
     if (!children) return undefined; // nothing to do
-    if (recs && (ret=recs[idx])) return ret ; // cached
-    if (!recs) this._records = recs = [] ; // create cache
+    if (recs && (ret = recs[idx])) return ret; // cached
+    if (!recs) this._records = recs = []; // create cache
 
     // If not a good index return undefined
     if (idx >= len) return undefined;
@@ -259,7 +259,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @returns {SC.ChildArray} The current array
 
   */
-  replace: function(idx, amt, recs) {
+  replace: function (idx, amt, recs) {
     var children = this.get('editableChildren'),
         len      = recs ? (recs.get ? recs.get('length') : recs.length) : 0,
         record   = this.get('parentObject'), newRecs,
@@ -270,15 +270,15 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     newRecs = this._processRecordsToHashes(recs);
     // calling replace on the children would result in KVO stuff on an attribute hash, and we don't want that
     if (!recs || recs.length === 0) {
-      children.splice(idx, amt) ;
+      children.splice(idx, amt);
     } else {
-      var args = [idx, amt].concat(newRecs) ;
-      children.splice.apply(children,args)
+      var args = [idx, amt].concat(newRecs);
+      children.splice.apply(children, args);
     }
 
     // remove item from _records cache, to leave them to be materialized the next time
-    if(this._records) this._records.replace(idx,amt); // we can do replace here, as _records are SC.Record instances
-    record.writeAttribute(pname,children);
+    if (this._records) this._records.replace(idx, amt); // we can do replace here, as _records are SC.Record instances
+    record.writeAttribute(pname, children);
     // notify that the record did change...
     record.recordDidChange(pname);
     this.enumerableContentDidChange();
@@ -292,13 +292,20 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @param {SC.Array} recs records to be converted to hashes.
     @returns {SC.Array} array of hashes.
   */
-  _processRecordsToHashes: function(recs){
+  _processRecordsToHashes: function (recs) {
     var store, sk;
     recs = recs || [];
-    recs.forEach( function(me, idx){
-      store = me.get('store');
-      sk = me.storeKey;
-      recs[idx] = store.readDataHash(sk);
+    recs.forEach(function (me, idx) {
+      var hash;
+      if (me.get) {
+        store = me.get('store');
+        sk = me.get('storeKey');
+        hash = store.readDataHash(sk);
+      }
+      else {
+        hash = me;
+      }
+      recs[idx] = hash;
     });
 
     return recs;
@@ -307,9 +314,9 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
   /**
     Calls normalize on each object in the array
   */
-  normalize: function(){
-    this.forEach(function(child,id){
-      if(child.normalize) child.normalize();
+  normalize: function () {
+    this.forEach(function (child, id) {
+      if (child.normalize) child.normalize();
     });
   },
 
@@ -323,7 +330,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @param {SC.Array} keys optional
     @returns {SC.ChildArray} itself.
   */
-  recordPropertyDidChange: function(keys) {
+  recordPropertyDidChange: function (keys) {
     return this;
   },
 
@@ -337,11 +344,11 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @param {Number} value
     @param {Number} rev
   */
-  _childrenContentDidChange: function(start, removedCount, addedCount) {
-    this._records = null ; // clear cache
+  _childrenContentDidChange: function (start, removedCount, addedCount) {
+    this._records = null; // clear cache
     //this.arrayContentDidChange(start, removedCount, addedCount);
     this.enumerableContentDidChange(); // not sure what would be wise here regarding new changes
-  },
+  }
 
   // /** @private */
   // init: function() {
@@ -349,4 +356,4 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
   //   this.recordPropertyDidChange();
   // }
 
-}) ;
+});
