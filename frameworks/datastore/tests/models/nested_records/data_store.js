@@ -136,7 +136,7 @@ test("Can Push onto child array", function () {
 
 test("Use in Nested Store", function () {
   var nstore, dir, c, file,
-      pk, id, nFile, nDir;
+      pk, id, nFile, nDir, nC;
 
   // First, find the first file
   SC.run(function() { dir = store.find(NestedRecord.Directory, 1); });
@@ -158,7 +158,20 @@ test("Use in Nested Store", function () {
   SC.RunLoop.begin();
   pk = file.get('primaryKey');
   id = file.get(pk);
-  nFile = nstore.find(NestedRecord.File, id);
+  //nFile = nstore.find(NestedRecord.File, id);
+  // this no longer works because this record does not seperately exist anymore
+  // access has to go through the main record
+  nDir = nstore.find(NestedRecord.Directory, 1);
+  ok(nDir, "Nested > Directory id: 1 exists");
+  equals(nDir.get('name'), 'Dir 1', "Nested > Directory id:1 has a name of 'Dir 1'");
+  nC = nDir.get('contents');
+  ok(nC, "Nested > Content of Directory id:1 exists");
+  nDir = nC.objectAt(0);
+  ok(nDir, "Nested > Directory id:2 exists");
+  equals(nDir.get('name'), 'Dir 2', "Nested > Directory id:2 has a name of 'Dir 2'");
+  nC = dir.get('contents');
+  ok(nC, "Nested > Content of Directory id:2 exists");
+  nFile = c.objectAt(0);
   SC.RunLoop.end();
   ok(nFile, "Nested > File id:1 exists");
   equals(nFile.get('name'), 'File 1', "Nested > File id:1 has a name of 'File 1'");
