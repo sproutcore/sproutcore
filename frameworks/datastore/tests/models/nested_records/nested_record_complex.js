@@ -215,24 +215,11 @@ function() {
   ok(SC.kindOf(p, SC.Record), "(parent > child).get() creates an actual instance that is a kind of a SC.Record Object");
   ok(SC.instanceOf(p, NestedRecord.Person), "(parent > child).get() creates an actual instance of a Person Object");
 
-  // Check reference information
-  var pKey = p.get('id');
-  var storeRef = store.find(NestedRecord.Person, pKey);
-  ok(storeRef, 'checking that the store has the instance of the child record with proper primary key');
-  equals(p, storeRef, "checking the parent reference is the same as the direct store reference");
-  same(storeRef.get('attributes'), testParent.readAttribute('person'), "check that the ChildRecord's attributes are the same as the parent.person's readAttribute for the reference");
-
   var a = testParent.getPath('person.address');
   // Check Model Class information
   ok(SC.kindOf(a, SC.Record), "(parent > child > child) w/ getPath() creates an actual instance that is a kind of a SC.Record Object");
   ok(SC.instanceOf(a, NestedRecord.Address), "(parent > child > child) w/ getPath() creates an actual instance of an Address Object");
 
-  // Check reference information
-  var aKey = a.get('id');
-  storeRef = store.find(NestedRecord.Address, aKey);
-  ok(storeRef, 'checking that the store has the instance of the (parent > child > child) record with proper primary key');
-  equals(a, storeRef, "checking the (parent > child > child) reference is the same as the direct store reference");
-  same(storeRef.get('attributes'), p.readAttribute('address'), "check that the ChildRecord's attributes are the same as the (parent > child.address)'s readAttribute for the reference");
 });
 
 test("Basic Write",
@@ -247,7 +234,6 @@ function() {
 
   // Test Child Record creation
   oldP = testParent.get('person');
-  oldKey = oldP.get('id');
   testParent.set('person', {
     type: 'Person',
     name: 'Al Gore',
@@ -262,13 +248,6 @@ function() {
   // Check Model Class information
   ok(SC.kindOf(p, SC.Record), "set() with an object creates an actual instance that is a kind of a SC.Record Object");
   ok(SC.instanceOf(p, NestedRecord.Person), "set() with an object creates an actual instance of a ChildRecordTest Object");
-
-  // Check reference information
-  key = p.get('id');
-  storeRef = store.find(NestedRecord.Person, key);
-  ok(storeRef, 'after a set() with an object, checking that the store has the instance of the child record with proper primary key');
-  equals(p, storeRef, "after a set with an object, checking the parent reference is the same as the direct store reference");
-  ok((oldKey === key), 'check to see that the old child record has the same key as the new child record');
 
   // Check for changes on the child bubble to the parent.
   p.set('name', 'Child Name Change');
@@ -289,17 +268,14 @@ function() {
 
 test("Basic normalize()", function() {
   var pAttrs;
-
-  SC.run(function () {
-    testParent.set('person', {
-      type: 'Person',
-      name: 'Al Gore',
-      address: {
-        type: 'Address',
-        street: '123 Crazy St',
-        city: 'Khacki Pants'
-      }
-    });
+  testParent.set('person', {
+    type: 'Person',
+    name: 'Al Gore',
+    address: {
+      type: 'Address',
+      street: '123 Crazy St',
+      city: 'Khacki Pants'
+    }
   });
   testParent.normalize();
   pAttrs = testParent.get('attributes');
