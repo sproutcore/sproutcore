@@ -99,8 +99,10 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
         ret;
 
     ret = parent.readEditableAttribute(parentAttr);
-    if (!ret) ret = [];
-    if (ret !== this._prevChildren) this.recordPropertyDidChange();
+    if (!ret) {
+      ret = [];
+      this.recordPropertyDidChange();
+    }
 
     return ret;
 
@@ -123,7 +125,8 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     if (this._records) {
       this._records.push(rec);
     } else this._records = [rec];
-    this.enumerableContentDidChange();
+    //this.enumerableContentDidChange();
+    this.arrayContentDidChange(this.get('length'), 0, 1);
     return rec;
   },
 
@@ -261,9 +264,9 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
   */
   replace: function (idx, amt, recs) {
     var children = this.get('editableChildren'),
+        oldLen = children.get('length'),
         len      = recs ? (recs.get ? recs.get('length') : recs.length) : 0,
         record   = this.get('parentObject'), newRecs,
-
         pname    = this.get('parentAttribute'),
         cr, recordType;
 
@@ -277,11 +280,14 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     }
 
     // remove item from _records cache, to leave them to be materialized the next time
-    if (this._records) this._records.replace(idx, amt); // we can do replace here, as _records are SC.Record instances
+    if (this._records) {
+      this._records.replace(idx, amt); // we can do replace here, as _records are SC.Record instances
+    }
+    this.arrayContentWillChange(idx, amt, len);
     record.writeAttribute(pname, children);
     // notify that the record did change...
     record.recordDidChange(pname);
-    this.enumerableContentDidChange();
+    this._childrenContentDidChange(idx, amt, len);
     return this;
   },
 
@@ -324,15 +330,19 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
   // INTERNAL SUPPORT
   //
 
-  /** @deprecated
+  /**
     Invoked whenever the children array changes.  Observes changes.
 
     @param {SC.Array} keys optional
     @returns {SC.ChildArray} itself.
   */
   recordPropertyDidChange: function (keys) {
+    if (keys && !keys.contains(this.get('propertyName'))) return this;
+    this.arrayContentWillChange(0, 0, 0);
+    this._childrenContentDidChange(0, 0, 0);
     return this;
   },
+
 
   /** @private
     Invoked whenever the content of the children array changes.  This will
@@ -346,8 +356,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
   */
   _childrenContentDidChange: function (start, removedCount, addedCount) {
     this._records = null; // clear cache
-    //this.arrayContentDidChange(start, removedCount, addedCount);
-    this.enumerableContentDidChange(); // not sure what would be wise here regarding new changes
+    this.arrayContentDidChange(start, removedCount, addedCount);
   }
 
   // /** @private */
