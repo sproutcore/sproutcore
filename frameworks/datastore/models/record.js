@@ -48,10 +48,6 @@ SC.Record = SC.Object.extend(
 
     @returns {String}
   */
-<<<<<<< HEAD
-=======
-
->>>>>>> fixing errors with attributes and readOnlyAttributes. Formatting.
   toString: function () {
     // We won't use 'readOnlyAttributes' here because accessing them directly
     // avoids a SC.clone() -- we'll be careful not to edit anything.
@@ -842,18 +838,12 @@ SC.Record = SC.Object.extend(
         keys.forEach(function (k) { this.notifyPropertyChange(k); }, this);
         this.notifyPropertyChange('status');
         this.endPropertyChanges();
-<<<<<<< HEAD
-
-      } else {
-        this.allPropertiesDidChange();
-=======
         if (isParent) this.notifyChildren(keys);
       } else {
         this.allPropertiesDidChange();
         if (isParent) {
           this.notifyChildren();
         }
->>>>>>> fixing errors with attributes and readOnlyAttributes. Formatting.
       }
 
       // also notify manyArrays
