@@ -1685,7 +1685,11 @@ SC.CoreView.reopen(
         // Route.
         var transitionIn = this.get('transitionIn');
         if (transitionIn) {
-          this._transitionIn();
+          // invokeLast twice to be sure that the transition will be setup
+          // at the very end of the runloop
+          this.invokeLast(function() {
+            this.invokeLast('_transitionIn');
+          });
 
           this._gotoAttachedBuildingInState();
         } else {
