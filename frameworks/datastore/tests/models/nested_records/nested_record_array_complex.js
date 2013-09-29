@@ -489,7 +489,6 @@ test("Basic Array Functionality: unshiftObject", function() {
 });
 
 test("Test: normalization on complex nested records", function() {
-  debugger;
   var ppl, addresses, pAttrs;
   // Add something to the array
   ppl = testParent.get('people');
