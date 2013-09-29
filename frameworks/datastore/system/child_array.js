@@ -290,6 +290,28 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return ret;
   },
 
+  /** Invoked whenever the children array changes from the store
+
+  */
+
+  notifyChildren: function (prop) {
+    var d = function (obj) {
+      if (obj) {
+        if (!prop && obj.allPropertiesDidChange) obj.allPropertiesDidChange();
+        else {
+          if (obj.notifyPropertyChange) {
+            obj.notifyPropertyChange(prop);
+          }
+        }
+        if (obj.notifyChildren) {
+          obj.notifyChildren(prop);
+        }
+      }
+    };
+
+    this.forEach(d);
+    this.recordPropertyDidChange(prop);
+  },
 
   /** @private
     This is called by the parent record whenever its properties change. It is
