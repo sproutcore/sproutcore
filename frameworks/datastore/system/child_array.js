@@ -338,11 +338,37 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
   */
   recordPropertyDidChange: function (keys) {
     if (keys && !keys.contains(this.get('propertyName'))) return this;
-    this.arrayContentWillChange(0, 0, 0);
-    this._childrenContentDidChange(0, 0, 0);
+    var start = 0, removedCount = 0, addedCount = 0;
+    if (!keys) {
+      removedCount = addedCount = this.get('length');
+    }
+    this.arrayContentWillChange(start, removedCount, addedCount);
+    this._childrenContentDidChange(start, removedCount, addedCount);
     return this;
   },
 
+  /** Invoked whenever the children array changes from the store
+
+  */
+
+  notifyChildren: function (prop) {
+    var d = function (obj) {
+      if (obj) {
+        if (!prop && obj.allPropertiesDidChange) obj.allPropertiesDidChange();
+        else {
+          if (obj.notifyPropertyChange) {
+            obj.notifyPropertyChange(prop);
+          }
+        }
+        if (obj.notifyChildren) {
+          obj.notifyChildren(prop);
+        }
+      }
+    };
+
+    this.forEach(d);
+    this.recordPropertyDidChange(prop);
+  },
 
   /** @private
     Invoked whenever the content of the children array changes.  This will
@@ -355,7 +381,8 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @param {Number} rev
   */
   _childrenContentDidChange: function (start, removedCount, addedCount) {
-    this._records = null; // clear cache
+    // we cannot destroy the cache, we have to update it to not lose the references to the materialized childrecords
+    //this._records = null; // clear cache
     this.arrayContentDidChange(start, removedCount, addedCount);
   }
 
