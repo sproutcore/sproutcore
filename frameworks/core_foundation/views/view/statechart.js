@@ -1568,11 +1568,19 @@ SC.CoreView.reopen(
   },
 
   /** @private */
+  _adjustTransitionIfNeeded: function (key, value) {
+    if (this._preTransitionLayout && this._transitionIsSetup) {
+      this._adjustLayoutKey(this._preTransitionLayout, key, value);
+    }
+  },
+
+  /** @private */
   _teardownTransition: function () {
     // Reset the layout to its original value.
     this.set('layout', this._preTransitionLayout);
 
     // Clean up.
+    delete this._transitionIsSetup;
     delete this._preTransitionLayout;
     delete this._preTransitionFrame;
   },
@@ -1598,9 +1606,12 @@ SC.CoreView.reopen(
     if (transitionHide.setup) {
       transitionHide.setup(this, options, inPlace);
     }
+    this._transitionIsSetup = true;
 
     // Execute the hiding transition.
-    transitionHide.run(this, options, this._preTransitionLayout, this._preTransitionFrame);
+    this.invokeNext(function() {
+      transitionHide.run(this, options, this._preTransitionLayout, this._preTransitionFrame);
+    });
   },
 
   /** @private Attempts to run a transition in, ensuring any outgoing transitions are stopped in place. */
@@ -1624,9 +1635,12 @@ SC.CoreView.reopen(
     if (transitionIn.setup) {
       transitionIn.setup(this, options, inPlace);
     }
+    this._transitionIsSetup = true;
 
     // Execute the incoming transition.
-    transitionIn.run(this, options, this._preTransitionLayout, this._preTransitionFrame);
+    this.invokeNext(function() {
+      transitionIn.run(this, options, this._preTransitionLayout, this._preTransitionFrame);
+    });
   },
 
   /** @private Attempts to run a transition out, ensuring any incoming transitions are stopped in place. */
@@ -1645,9 +1659,12 @@ SC.CoreView.reopen(
     if (transitionOut.setup) {
       transitionOut.setup(this, options, inPlace);
     }
+    this._transitionIsSetup = true;
 
     // Execute the outgoing transition.
-    transitionOut.run(this, options, this._preTransitionLayout, this._preTransitionFrame);
+    this.invokeNext(function() {
+      transitionOut.run(this, options, this._preTransitionLayout, this._preTransitionFrame);
+    });
   },
 
   /** @private Attempts to run a transition show, ensuring any hiding transitions are stopped in place. */
@@ -1668,9 +1685,12 @@ SC.CoreView.reopen(
     if (transitionShow.setup) {
       transitionShow.setup(this, options, inPlace);
     }
+    this._transitionIsSetup = true;
 
     // Execute the showing transition.
-    transitionShow.run(this, options, this._preTransitionLayout, this._preTransitionFrame);
+    this.invokeNext(function() {
+      transitionShow.run(this, options, this._preTransitionLayout, this._preTransitionFrame);
+    });
   },
 
   /** @private */

@@ -143,54 +143,41 @@ SC.View.reopen(
     @returns {SC.View} receiver
   */
   adjust: function (key, value) {
-    var layout = this.get('layout'), didChange = NO, cur, hash;
-
     if (key === undefined) { return this; } // nothing to do.
-
-    // handle string case
+ 
+    var layout = this.get('layout'),
+        didChange = NO,
+        cur, hash;
+ 
+    // Normalize arguments.
     if (SC.typeOf(key) === SC.T_STRING) {
-      // this is copied from below
-      cur = layout[key];
-
-      if (value === undefined || cur == value) return this;
-
-      layout = SC.clone(layout);
-
-      if (value === null) {
-        delete layout[key];
-      } else {
-        layout[key] = value;
-      }
-
-      didChange = YES;
+      hash = {};
+      hash[key] = value;
     } else {
       hash = key;
-
-      for (key in hash) {
-        if (!hash.hasOwnProperty(key)) { continue; }
-
-        value = hash[key];
-        cur = layout[key];
-
-        if (value === undefined || cur == value) { continue; }
-
-        // only clone the layout the first time we see a change
-        if (!didChange) layout = SC.clone(layout);
-
-        if (value === null) {
-          delete layout[key];
-        } else {
-          layout[key] = value;
-        }
-
-        didChange = YES;
-      }
     }
+ 
+    for (key in hash) {
+      if (!hash.hasOwnProperty(key)) { continue; }
+ 
+      value = hash[key];
+      cur = layout[key];
+ 
+      if (value === undefined || cur == value) { continue; }
+ 
+      // only clone the layout the first time we see a change
+      if (!didChange) layout = SC.clone(layout);
+      
+      this._adjustLayoutKey(layout, key, value);
+      this._adjustTransitionIfNeeded(key, value);
 
+      didChange = YES;
+    }
+ 
     // now set adjusted layout
     if (didChange) {
       var transitionAdjust = this.get('transitionAdjust');
-
+ 
       if (this.get('viewState') & SC.CoreView.IS_SHOWN && transitionAdjust) {
         // Run the adjust transition.
         this._transitionAdjust(layout);
@@ -198,8 +185,17 @@ SC.View.reopen(
         this.set('layout', layout);
       }
     }
-
+ 
     return this;
+  },
+
+  /** @private */
+  _adjustLayoutKey: function (layout, key, value) {
+    if (value === null) {
+      delete layout[key];
+    } else {
+      layout[key] = value;
+    }
   },
 
   /** @private Attempts to run a transition adjust, ensuring any showing transitions are stopped in place. */
