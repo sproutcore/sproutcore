@@ -720,6 +720,35 @@ SC.Record = SC.Object.extend(
       record as dirty
     @returns {SC.Record} receiver
   */
+/*  writeAttribute: function(key, value, ignoreDidChange) {
+    var store    = this.get('store'),
+        storeKey = this.storeKey,
+        attrs;
+
+    attrs = store.readEditableDataHash(storeKey);
+    if (!attrs) throw SC.Record.BAD_STATE_ERROR;
+
+    // if value is the same, do not flag record as dirty
+    if (value !== attrs[key]) {
+      if(!ignoreDidChange) this.beginEditing();
+      attrs[key] = value;
+
+      // If the key is the primaryKey of the record, we need to tell the store
+      // about the change.
+      if (key === this.get('primaryKey')) {
+        SC.Store.replaceIdFor(storeKey, value);
+        this.propertyDidChange('id'); // Reset computed value
+      }
+
+      if(!ignoreDidChange) { this.endEditing(key); }
+      else {
+        // We must still inform the store of the change so that it can track the change across stores.
+        store.dataHashDidChange(storeKey, null, undefined, key);
+      }
+    }
+    return this ;
+  },
+*/
 
   writeAttribute: function (key, value, ignoreDidChange) {
     var keyStack = [],
@@ -734,19 +763,20 @@ SC.Record = SC.Object.extend(
     keyStack.push(key);
     didChange = this._writeAttribute(keyStack, value, ignoreDidChange);
 
-    if (key === this.get('primaryKey')) {
-      SC.Store.replaceIdFor(storeKey, value);
-      this.propertyDidChange('id'); // Reset computed value
-    }
-
-    if (!ignoreDidChange) {
-      if (didChange) this.endEditing(key);
+    if (didChange) {
+      if (key === this.get('primaryKey')) {
+        SC.Store.replaceIdFor(storeKey, value);
+        this.propertyDidChange('id'); // Reset computed value
+      }
+      if (!ignoreDidChange) {
+        this.endEditing(key);
+      }
       else {
         // We must still inform the store of the change so that it can track the change across stores.
         store.dataHashDidChange(storeKey, null, undefined, key);
       }
-
     }
+
     return this;
   },
 
