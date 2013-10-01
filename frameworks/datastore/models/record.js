@@ -530,10 +530,10 @@ SC.Record = SC.Object.extend(
 
     @return {SC.Record} receiver
    */
-  cancelEditing: function () {
-    this._editLevel--;
-    return this;
-  },
+  // cancelEditing: function () {
+  //   this._editLevel--;
+  //   return this;
+  // },
 
   /**
     Notifies the store of record changes if this matches a top level call to
@@ -657,7 +657,6 @@ SC.Record = SC.Object.extend(
         attrs,
         attrsToChange,
         lastKey,
-        origKeyStack,
         didChange = NO;
 
       if (parent) {
@@ -721,9 +720,12 @@ SC.Record = SC.Object.extend(
       record as dirty
     @returns {SC.Record} receiver
   */
+
   writeAttribute: function (key, value, ignoreDidChange) {
     var keyStack = [],
-        didChange;
+        didChange,
+        store = this.get('store'),
+        storeKey = this.get('storeKey');
 
     if (!ignoreDidChange) {
       this.beginEditing();
@@ -732,9 +734,18 @@ SC.Record = SC.Object.extend(
     keyStack.push(key);
     didChange = this._writeAttribute(keyStack, value, ignoreDidChange);
 
+    if (key === this.get('primaryKey')) {
+      SC.Store.replaceIdFor(storeKey, value);
+      this.propertyDidChange('id'); // Reset computed value
+    }
+
     if (!ignoreDidChange) {
       if (didChange) this.endEditing(key);
-      else this.cancelEditing();
+      else {
+        // We must still inform the store of the change so that it can track the change across stores.
+        store.dataHashDidChange(storeKey, null, undefined, key);
+      }
+
     }
     return this;
   },
