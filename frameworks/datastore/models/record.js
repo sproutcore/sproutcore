@@ -353,6 +353,19 @@ SC.Record = SC.Object.extend(
   */
   parentAttribute: null,
 
+
+  /**
+    Computed property for backwards compatability
+
+  */
+  parentRecord: function () {
+    var ret = this.get('parentObject');
+    if (ret.isChildArray) {
+      ret = ret.objectAt(ret.indexOf(this));
+    }
+    return ret;
+  }.property('parentObject').cacheable(),
+
   // ...............................
   // CRUD OPERATIONS
   //
@@ -428,6 +441,10 @@ SC.Record = SC.Object.extend(
     return this;
   },
 
+  /**
+    helper method to destroy the children of this record when ths record is being destroyed.
+   */
+
   _destroyChildren: function () {
     var i, item;
     for (i in this) {
@@ -439,9 +456,9 @@ SC.Record = SC.Object.extend(
   },
 
   /**
-   * notify the children of this record of a property change on the underlying hash
-   * @param  {String} prop
-   * @return {null}
+     notify the children of this record of a property change on the underlying hash
+     @param  {String} prop
+     @return {null}
    */
   notifyChildren: function (prop) {
     var i, item, obj;
@@ -523,17 +540,6 @@ SC.Record = SC.Object.extend(
     this._editLevel++;
     return this;
   },
-
-  /**
-    Roll out one level of editing in the event that no attributes were written. This can be nested
-    along with calls to beginEditing(), but should be done in place of endEditing().
-
-    @return {SC.Record} receiver
-   */
-  // cancelEditing: function () {
-  //   this._editLevel--;
-  //   return this;
-  // },
 
   /**
     Notifies the store of record changes if this matches a top level call to
@@ -720,35 +726,6 @@ SC.Record = SC.Object.extend(
       record as dirty
     @returns {SC.Record} receiver
   */
-/*  writeAttribute: function(key, value, ignoreDidChange) {
-    var store    = this.get('store'),
-        storeKey = this.storeKey,
-        attrs;
-
-    attrs = store.readEditableDataHash(storeKey);
-    if (!attrs) throw SC.Record.BAD_STATE_ERROR;
-
-    // if value is the same, do not flag record as dirty
-    if (value !== attrs[key]) {
-      if(!ignoreDidChange) this.beginEditing();
-      attrs[key] = value;
-
-      // If the key is the primaryKey of the record, we need to tell the store
-      // about the change.
-      if (key === this.get('primaryKey')) {
-        SC.Store.replaceIdFor(storeKey, value);
-        this.propertyDidChange('id'); // Reset computed value
-      }
-
-      if(!ignoreDidChange) { this.endEditing(key); }
-      else {
-        // We must still inform the store of the change so that it can track the change across stores.
-        store.dataHashDidChange(storeKey, null, undefined, key);
-      }
-    }
-    return this ;
-  },
-*/
 
   writeAttribute: function (key, value, ignoreDidChange) {
     var keyStack = [],
