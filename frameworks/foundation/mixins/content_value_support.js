@@ -135,8 +135,17 @@ SC.ContentValueSupport = {
     if (contentKeys) {
       var contentKey;
 
-      for (contentKey in contentKeys) {
-        if (key === '*' || key === this.getDelegateProperty(contentKey, this, this.get('displayDelegate'), contentKeys)) return this.updatePropertyFromContent(contentKeys[contentKey], key, contentKey, target);
+      for(contentKey in contentKeys) {
+
+        // if we found the specific contentKey, then just update that and we're done
+        if(key === this.getDelegateProperty(contentKey, this, this.get('displayDelegate'), contentKeys)) {
+          return this.updatePropertyFromContent(contentKeys[contentKey], key, contentKey, target);
+        }
+
+        // else if '*' is changed, then update for every contentKey
+        else if(key === '*') {
+          this.updatePropertyFromContent(contentKeys[contentKey], key, contentKey, target);
+        }
       }
     }
 
