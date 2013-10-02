@@ -8,14 +8,14 @@
 
 // ..........................................................
 // contentPropertyDidChange()
-// 
+//
 var view, content ;
 module('SC.ContentValueSupport#contentPropertyDidChange', {
   setup: function() {
     content = SC.Object.create();
     view = SC.View.create(SC.ContentValueSupport);
   },
-  
+
   teardown: function() {
     content = null;
     view.destroy();
@@ -25,7 +25,7 @@ module('SC.ContentValueSupport#contentPropertyDidChange', {
 test("invoked with key = * whenever content changes", function() {
   view.contentPropertyDidChange = function(target, key) {
     ok(target === content, 'should pass content object as target target=%@'.fmt(target));
-    equals(key, '*', 'should pass * as key');    
+    equals(key, '*', 'should pass * as key');
   };
   view.set('content', content);
 });
@@ -38,9 +38,9 @@ test("should not be invoked when arbitrary keys are changed", function() {
   };
 
   view.set('content', content);
-  
+
   isTesting = YES ;
-  
+
   content.set('foo', 'foo');
   content.set('bar', 'bar');
 
@@ -53,11 +53,11 @@ test("should no longer be invoked when a key is changed on a former content obje
     if (!isTesting) return ; //wait until testing should begin...
     ok(NO, 'should not invoke contentPropertyDidChange after content is removed');
   };
-  
+
   view.set('content', content);
   content.set('foo', 'foo');
   view.set('content', null);
-  
+
   isTesting= YES ;
   content.set('bar', 'bar');
 });
@@ -68,16 +68,60 @@ test("should fire even on a content object set when the object is created", func
     contentPropertyDidChange: function() { callCount++; },
     content: content
   });
-  
+
   equals(callCount, 1, 'should call contentPropertyDidChange on init to do initial setup');
-  
+
   content.set('foo', 'foo');
   equals(callCount, 1, 'should not call contentPropertyDidChange when changing content.foo');
 });
 
+test("should call updatePropertyFromContent for all properties when content changes", function() {
+  var originalContent = SC.Object.create({
+      contentFoo: 'foo1',
+      contentBar: 'bar1'
+  });
+
+  var fooUpdatedFromContent;
+  var barUpdatedFromContent;
+
+  var view = SC.View.create(SC.ContentValueSupport, {
+    updatePropertyFromContent: function(prop, key, contentKey, content) {
+      if (contentKey == 'contentFooKey')
+        fooUpdatedFromContent = content;
+      else if (contentKey == 'contentBarKey')
+        barUpdatedFromContent = content;
+    },
+    contentKeys: {
+      'contentFooKey': 'foo',
+      'contentBarKey': 'bar'
+    },
+    contentFooKey: 'contentFoo',
+    contentBarKey: 'contentBar',
+
+    content: null
+  });
+
+  view.set('content', originalContent);
+
+  ok(fooUpdatedFromContent === originalContent, 'Updated foo from original content');
+  ok(barUpdatedFromContent === originalContent, 'Updated bar from original content');
+
+  // set new content
+
+  var newContent = SC.Object.create({
+      contentFoo: 'foo2',
+      contentBar: 'bar2'
+  });
+
+  view.set('content', newContent);
+
+  ok(fooUpdatedFromContent === newContent, 'Updated foo from new content');
+  ok(barUpdatedFromContent === newContent, 'Updated bar from new content');
+});
+
 // ..........................................................
 // updatePropertyFromContent()
-// 
+//
 module("SC.ContentValueSupport#updatePropertyFromContent()", {
   setup: function() {
     content = SC.Object.create({ foo: "foo", bar: "bar" });
@@ -123,15 +167,15 @@ test("should be able to get value from a content object that is not SC.Object", 
 
 // ..........................................................
 // updateContentWithValueObserver()
-// 
+//
 module("SC.ContentValueSupport#updatePropertyFromContent()", {
   setup: function() {
     content = SC.Object.create({ foo: "foo", bar: "bar" });
-    view = SC.View.create(SC.ContentValueSupport, { 
+    view = SC.View.create(SC.ContentValueSupport, {
       value: "bar",
       content: content,
       contentValueKey: "bar",
-      displayDelegate: SC.Object.create({ contentValueKey: "foo" }) 
+      displayDelegate: SC.Object.create({ contentValueKey: "foo" })
     });
   },
   teardown: function() {
@@ -168,7 +212,7 @@ test("if contentValueKey is not set & displayDelegate not set, does nothing", fu
 
 // ..........................................................
 // updateContentWithValueObserver()
-// 
+//
 module("SC.ContentValueSupport#contentKeys", {
   setup: function() {
     this.count = 0;
