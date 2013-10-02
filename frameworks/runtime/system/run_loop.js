@@ -154,7 +154,7 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
     // loop and may fire before the invokeOnce code in this case.
     var isRunLoopInProgress = this.get('isRunLoopInProgress');
     if (!isRunLoopInProgress) {
-      SC.warn("Developer Warning: invokeOnce called outside of the run loop.  This can cause problems in production code if not addressed.  You likely need to wrap some event handling code within SC.run(...).");
+      SC.warn("Developer Warning: invokeOnce called outside of the run loop, which may cause unexpected problems. Check the stack trace below for what triggered this, and see http://blog.sproutcore.com/1-10-upgrade-invokefoo/ for more.");
       console.trace();
     }
     //@endif
@@ -226,7 +226,7 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
     // loop and may fire before the invokeLast code in this case.
     var isRunLoopInProgress = this.get('isRunLoopInProgress');
     if (!isRunLoopInProgress) {
-      SC.warn("Developer Warning: invokeLast called outside of the run loop.  This can cause problems in production code if not addressed.  You likely need to wrap some event handling code within SC.run(...).");
+      SC.warn("Developer Warning: invokeLast called outside of the run loop, which may cause unexpected problems. Check the stack trace below for what triggered this, and see http://blog.sproutcore.com/1-10-upgrade-invokefoo/ for more.");
       console.trace();
     }
     //@endif
