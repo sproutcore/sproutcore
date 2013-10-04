@@ -27,12 +27,8 @@ test("simulate SC.SheetPane transition", function () {
       duration: 0.1,
     },
 
-    render: function(context) {
-      sc_super();
-
-      this.invokeLast(function() {
-        this.adjust({ width: 500, height: 300 });
-      });
+    didCreateLayer: function() {
+      this.adjust({ width: 500, height: 300 });
     }
   });
 
