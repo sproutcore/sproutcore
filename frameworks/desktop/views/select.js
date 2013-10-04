@@ -334,6 +334,16 @@ SC.SelectView = SC.ButtonView.extend(
   supportFocusRing: YES,
 
   /**
+  * @private
+  * Overwritten to calculate the content corresponding to items configured at creation
+  */
+  init: function() {
+    sc_super();
+
+    this.itemsDidChange();
+  },
+
+  /**
     Left Alignment based on the size of the button
 
     @private
@@ -376,11 +386,11 @@ SC.SelectView = SC.ButtonView.extend(
   },
 
   /**
-    render method
+    Observer called whenever the items collection or an element of this collection changes
 
     @private
   */
-  render: function (context,firstTime) {
+  itemsDidChange: function() {
 
     var escapeHTML, items, len, nameKey, iconKey, valueKey, separatorKey, showCheckbox,
         currentSelectedVal, shouldLocalize, isSeparator, itemList, isChecked,
@@ -544,27 +554,19 @@ SC.SelectView = SC.ButtonView.extend(
       this.set('_itemList', itemList);
     }, this );
 
-    if (firstTime) {
-      this.invokeLast(function () {
-        var value = this.get('value');
-        if (SC.none(value)) {
-          if (SC.none(emptyName)) {
-            this.set('value', this._defaultVal);
-            this.set('title', this._defaultTitle);
-            this.set('icon', this._defaultIcon);
-          }
-          else this.set('title', emptyName);
-        }
-      });
+    var value = this.get('value');
+    if (SC.none(value)) {
+      if (SC.none(emptyName)) {
+        this.set('value', this._defaultVal);
+        this.set('title', this._defaultTitle);
+        this.set('icon', this._defaultIcon);
+      }
+      else this.set('title', emptyName);
     }
 
     //Set the preference matrix for the menu pane
-    this.changeSelectPreferMatrix(this.get("_itemIdx"));
-
-    // If we're going to do such a stupid render function where we set properties
-    // on ourself, then we should use those properties in this pass.
-    sc_super();
-  },
+    this.changeSelectPreferMatrix();
+  }.observes( '*items.[]' ),
 
   /**
     @private

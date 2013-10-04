@@ -121,7 +121,11 @@ test("Check if setting a value actually changes the selection value", function()
 
 //test10
 test('Setting the view\'s items should not result in an error.', function() {
-  try { view1.set('items', null); }
+  try {
+    SC.RunLoop.begin() ;
+    view1.set('items', null);
+    SC.RunLoop.end() ;
+  }
   catch (e) {
     ok(false, 'Nulling out items should not throw an error.');
   }
@@ -142,3 +146,13 @@ test("The properties for select button should take the specified values", functi
   equals(prop1,'custom-menu-item','Custom view class name should be custom-menu-item');
   equals(prop2,46,'Custom view menu off set width should be 46');
 });
+
+test("The content of the popup should be recalculated correctly when the list of items changes", function() {
+  equals(view3.get("_itemList")[2].title, "World", "The list should have on the 3rd position the title World");
+  SC.RunLoop.begin() ;
+  view4.get('items').insertAt( 0, { title: "Moving", pos: 0 } ) ;
+  view3.set('items', ["It", "Works", "Again"] );
+  SC.RunLoop.end() ;
+  equals(view4.get("_itemList")[0].title, "Moving", "The list should start with new item Moving");
+  equals(view3.get("_itemList")[2].title, "Again", "The list should have on the 3rd position the title Again");
+})
