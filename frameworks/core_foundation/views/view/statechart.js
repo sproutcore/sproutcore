@@ -744,7 +744,7 @@ SC.CoreView.reopen(
 
     //@if (debug)
     if (SC.LOG_VIEW_STATES) {
-      SC.Logger.log('%c%@:%@ — _doOrphan()'.fmt(this, this.get('viewState')), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
+      SC.Logger.log('%c%@ — _doOrphan()'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
     //@endif
 
@@ -773,7 +773,7 @@ SC.CoreView.reopen(
 
     //@if (debug)
     if (SC.LOG_VIEW_STATES) {
-      SC.Logger.log('%c%@:%@ — _doRender()'.fmt(this, state), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
+      SC.Logger.log('%c%@ — _doRender()'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
     //@endif
 
@@ -831,24 +831,13 @@ SC.CoreView.reopen(
 
     //@if (debug)
     if (SC.LOG_VIEW_STATES) {
-      SC.Logger.log('%c%@:%@ — _doShow()'.fmt(this, state), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
+      SC.Logger.log('%c%@ — _doShow()'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
     //@endif
 
     switch (state) {
-    case SC.CoreView.ATTACHED_SHOWN: // FAST PATH!
-    case SC.CoreView.ATTACHED_SHOWING: // FAST PATH!
-    case SC.CoreView.ATTACHED_HIDDEN_BY_PARENT: // FAST PATH!
-    case SC.CoreView.ATTACHED_BUILDING_IN: // FAST PATH!
-    case SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT: // FAST PATH!
-    case SC.CoreView.ATTACHED_BUILDING_OUT: // FAST PATH!
-      return false;
-    case SC.CoreView.UNRENDERED: // FAST PATH!
-    case SC.CoreView.UNATTACHED: // FAST PATH!
-    case SC.CoreView.UNATTACHED_BY_PARENT: // FAST PATH!
-      // Queue the visibility update for the next time we display.
-      this._visibleStyleNeedsUpdate = true;
-      return true;
+
+    // Normal case: view is hidden and is being shown.
     case SC.CoreView.ATTACHED_HIDDEN:
       if (isParentShown) {
         // Update before showing (note that visibility update is NOT conditional for this state).
@@ -867,11 +856,30 @@ SC.CoreView.reopen(
         return true;
       }
       break;
+
     case SC.CoreView.ATTACHED_HIDING:
       if (!transitionShow) {
         this._cancelTransition();
       }
       break;
+
+    // Special case: Layer exists but is not attached. Queue an update to the visibility style.
+    case SC.CoreView.UNATTACHED:
+    case SC.CoreView.UNATTACHED_BY_PARENT:
+      // Queue the visibility update for the next time we display.
+      this._visibleStyleNeedsUpdate = true;
+      return true;
+
+    // Invalid states that have no effect.
+    case SC.CoreView.UNRENDERED: // FAST PATH!
+    case SC.CoreView.ATTACHED_SHOWN: // FAST PATH!
+    case SC.CoreView.ATTACHED_SHOWING: // FAST PATH!
+    case SC.CoreView.ATTACHED_HIDDEN_BY_PARENT: // FAST PATH!
+    case SC.CoreView.ATTACHED_BUILDING_IN: // FAST PATH!
+    case SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT: // FAST PATH!
+    case SC.CoreView.ATTACHED_BUILDING_OUT: // FAST PATH!
+      return false;
+
     default:
     }
 
