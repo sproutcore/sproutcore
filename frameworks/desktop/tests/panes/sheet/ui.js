@@ -11,7 +11,7 @@ module("SC.SheetPane UI");
 
 test("verify sheet pane slide down works", function() {
   var slidePane = SC.SheetPane.create({
-    layout: { width: 400, height: 200, centerX: 0 },
+    layout: { width: 400, height: 200, top: 0, centerX: 0 },
     contentView: SC.LabelView.extend({
       escapeHTML: NO,
       value: '<h1>Slide Down!</h1>'
@@ -25,7 +25,8 @@ test("verify sheet pane slide down works", function() {
   var ph = layout.height;
   var ret = slidePane.layoutStyle();
 
-  slidePane.append();
+  SC.run(function() { slidePane.append(); });
+
   var f = function() {
     // make sure all fo the timers have had an opportunity to fire
     SC.RunLoop.begin().end();
