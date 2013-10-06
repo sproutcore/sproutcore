@@ -357,12 +357,26 @@ SC.ScrollerView = SC.View.extend(
 
   /** @private */
   touchScrollDidEnd: function(value) {
-    this.set("_touchScrollValue", NO);
+    SC.run(function () {
+      this.set("_touchScrollValue", NO);
+    }, this);
   },
+
+  /* @private Internal property used to track the rate of touch scroll change events. */
+  _lastTouchScrollTime: null,
 
   /** @private */
   touchScrollDidChange: function(value) {
-    this.set("_touchScrollValue", value);
+    // Fast path!  Don't try to update too soon.
+    if (Date.now() - this._lastTouchScrollTime < 30) { return; }
+
+    // TODO: perform a raw update that doesn't require the run loop.
+    SC.run(function () {
+      this.set("_touchScrollValue", value);
+    }, this);
+
+    // Track the last time we updated.
+    this._lastTouchScrollTime = Date.now();
   },
 
   // ..........................................................

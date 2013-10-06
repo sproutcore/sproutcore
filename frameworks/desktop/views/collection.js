@@ -2781,7 +2781,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
   /**
     Implements the SC.DropTarget protocol.  Hides any visible insertion
-    point and clears some cached values. 
+    point and clears some cached values.
   */
   dragExited: function () {
     this.hideInsertionPoint();
@@ -2945,6 +2945,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     };
   },
 
+  /* @private Internal property used to track the rate of touch scroll change events. */
+  _lastTouchScrollTime: null,
+
   /** @private SC.ScrollView */
   touchScrollDidChange: function (left, top) {
     // Fast path!  Don't try to update too soon.
@@ -2958,8 +2961,11 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
     // Indicate that nowShowing should be re-computed (this will use the
     // in-scroll clipping frame when it does).
-    this.notifyPropertyChange('nowShowing');
-    this.invokeOnce('_cv_nowShowingDidChange');
+    // TODO: perform a raw update that doesn't require the run loop.
+    SC.run(function () {
+      this.notifyPropertyChange('nowShowing');
+      this.invokeOnce('_cv_nowShowingDidChange');
+    }, this);
 
     // Track the last time we updated.
     this._lastTouchScrollTime = Date.now();
