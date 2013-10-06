@@ -64,6 +64,63 @@ if (SC.platform.supportsCSSTransitions) {
     }, 5);
   });
 
+  test("animate + adjust: no conflict", function () {
+    stop(1000);
+
+    SC.run(function () {
+      view.animate('left', 100, { duration: 0.1 });
+      view.adjust('top', 100);
+      view.adjust({ 'width': null, 'right': 100 });
+    });
+
+    setTimeout(function () {
+      equals(view.get('layout').left, 100, 'left is');
+      equals(view.get('layout').top, 100, 'top is');
+      equals(view.get('layout').right, 100, 'right is');
+      equals(view.get('layout').width, undefined, 'width is');
+
+      SC.run(function () {
+        view.animate('top', 200, { duration: 0.1 });
+        view.adjust('left', 0);
+        view.adjust({ 'width': 100, 'right': null });
+      });
+
+      setTimeout(function () {
+        equals(view.get('layout').left, 0, 'left is');
+        equals(view.get('layout').top, 200, 'top is');
+        equals(view.get('layout').right, undefined, 'right is');
+        equals(view.get('layout').width, 100, 'width is');
+
+        start();
+      }, 200);
+    }, 200);
+  });
+
+  test("animate + adjust: conflict", function () {
+    stop(1000);
+
+    SC.run(function () {
+      view.animate('left', 100, { duration: 0.1 });
+      view.adjust('left', 200);
+    });
+
+    setTimeout(function () {
+      equals(view.get('layout').left, 200, 'left is');
+
+      SC.run(function () {
+        view.animate('top', 200, { duration: 0.1 });
+        // Adjust back to current value should still cancel the animation.
+        view.adjust('top', 0);
+      });
+
+      setTimeout(function () {
+        equals(view.get('layout').top, 0, 'top is');
+
+        start();
+      }, 200);
+    }, 200);
+  });
+
   test("callbacks work in general", function () {
     stop(2000);
 
