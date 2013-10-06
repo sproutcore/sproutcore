@@ -627,11 +627,8 @@ SC.RootResponder = SC.Object.extend(
     @returns {void}
   */
   setup: function () {
-    // handle touch events
-    this.listenFor(['touchstart', 'touchmove', 'touchend', 'touchcancel'], document);
-
     // handle basic events
-    this.listenFor(['keydown', 'keyup', 'beforedeactivate', 'mousedown', 'mouseup', 'click', 'dblclick', 'mousemove', 'selectstart', 'contextmenu'], document)
+    this.listenFor(['touchstart', 'touchmove', 'touchend', 'touchcancel', 'keydown', 'keyup', 'beforedeactivate', 'mousedown', 'mouseup', 'click', 'dblclick', 'mousemove', 'selectstart', 'contextmenu'], document)
         .listenFor(['resize'], window);
 
     if (SC.browser.isIE8OrLower) this.listenFor(['focusin', 'focusout'], document);
