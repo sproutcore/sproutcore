@@ -51,6 +51,9 @@ SC.View.reopen(
   */
   backgroundColor: null,
 
+  /* @private Internal variable used to check for layout changes that resize. */
+  _previousLayout: null,
+
   /**
     Activates use of brower's static layout. To activate, set this
     property to YES.

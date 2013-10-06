@@ -83,6 +83,21 @@ SC.LayoutState = {
 SC.View.reopen(
   /** @scope SC.View.prototype */ {
 
+  /* @private Internal variable to store the active (i.e. applied) animations. */
+  _activeAnimations: null,
+
+  /* @private Internal variable to store the count of active animations. */
+  _activeAnimationsLength: null,
+
+  /* @private Internal variable to store the animation layout until the next run loop when it can be safely applied. */
+  _animateLayout: null,
+
+  /* @private Internal variable to store the pending (i.e. not yet applied) animations. */
+  _pendingAnimations: null,
+
+  /* @private Internal variable to store the previous layout for in case the animation is cancelled and meant to return to original point. */
+  _prevLayout: null,
+
   /**
     Method protocol.
 
@@ -393,7 +408,7 @@ SC.View.reopen(
       this.set('layout', this._animateLayout);
 
       // Clear the layout cache value.
-      delete this._animateLayout;
+      this._animateLayout = null;
     }
   },
 
@@ -502,10 +517,7 @@ SC.View.reopen(
     }
 
     // Clean up.
-    delete this._prevLayout;
-    delete this._activeAnimations;
-    delete this._pendingAnimations;
-    delete this._animateLayout;
+    this._prevLayout = this._activeAnimations = this._pendingAnimations = this._animateLayout = null;
 
     return this;
   },
@@ -598,11 +610,11 @@ SC.View.reopen(
   }.property(),
 
   /** @private Removes the animation CSS from the layer style. */
-  removeAnimationFromLayout: function (propertyName, updateStyle) {
+  removeAnimationFromLayout: function (propertyName, shouldUpdateStyle) {
     var activeAnimations = this._activeAnimations,
       layer = this.get('layer');
 
-    if (!!layer && updateStyle) {
+    if (!!layer && shouldUpdateStyle) {
       var updatedCSS = [];
 
       // Calculate the transition CSS that should remain.
@@ -673,8 +685,7 @@ SC.View.reopen(
       // Clean up the internal hash.
       this._activeAnimationsLength -= 1;
       if (this._activeAnimationsLength === 0) {
-        delete this._activeAnimations;
-        delete this._prevLayout;
+        this._activeAnimations = this._prevLayout = null;
       }
     }
   },
