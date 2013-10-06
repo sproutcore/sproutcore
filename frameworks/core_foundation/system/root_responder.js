@@ -1780,9 +1780,9 @@ SC.RootResponder = SC.Object.extend(
 
     // First, save the click count. The click count resets if the mouse down
     // event occurs more than 250 ms later than the mouse up event or more
-    // than 8 pixels away from the mouse down event.
+    // than 8 pixels away from the mouse down event or if the button used is different.
     this._clickCount += 1;
-    if (!this._lastMouseUpAt || ((Date.now() - this._lastMouseUpAt) > 250)) {
+    if (!this._lastMouseUpAt || this._lastClickWhich !== evt.which || ((Date.now() - this._lastMouseUpAt) > 250)) {
       this._clickCount = 1;
     } else {
       var deltaX = this._lastMouseDownX - evt.clientX,
@@ -1793,6 +1793,7 @@ SC.RootResponder = SC.Object.extend(
     }
     evt.clickCount = this._clickCount;
 
+    this._lastClickWhich = evt.which;
     this._lastMouseDownX = evt.clientX;
     this._lastMouseDownY = evt.clientY;
 
