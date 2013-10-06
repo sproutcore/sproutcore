@@ -150,6 +150,7 @@ SC.View.reopen(
 
     var layout = this.get('layout'),
         didChange = NO,
+        animateLayout = this._animateLayout,
         cur, hash;
 
     // Normalize arguments.
@@ -165,6 +166,22 @@ SC.View.reopen(
 
       value = hash[key];
       cur = layout[key];
+
+      // If a call to animate occurs in the same run loop, the animation layout
+      // would still be applied in the next run loop, potentially overriding this
+      // adjustment. So we need to fix up the animation layout.
+      if (animateLayout) {
+        if (value === null) {
+          delete animateLayout[key];
+        } else {
+          animateLayout[key] = value;
+        }
+
+        if (this._pendingAnimations[key]) {
+          // Adjusting a value that was previously about to be animated cancels the animation.
+          delete this._pendingAnimations[key];
+        }
+      }
 
       if (value === undefined || cur == value) { continue; }
 
