@@ -1269,7 +1269,6 @@ SC.RootResponder = SC.Object.extend(
     // As a workaround just let the browser to use the default behavior.
     if (this.ignoreTouchHandle(evt)) return YES;
 
-
     var hidingTouchIntercept = NO;
 
     SC.run(function () {
@@ -1769,12 +1768,6 @@ SC.RootResponder = SC.Object.extend(
   //
 
   mousedown: function (evt) {
-    if (SC.platform.touch) {
-      evt.allowDefault();
-      this._lastMouseDownCustomHandling = YES;
-      return YES;
-    }
-
     // First, save the click count. The click count resets if the mouse down
     // event occurs more than 250 ms later than the mouse up event or more
     // than 8 pixels away from the mouse down event or if the button used is different.
@@ -1819,12 +1812,6 @@ SC.RootResponder = SC.Object.extend(
     var clickOrDoubleClickDidTrigger = NO,
       dragView = this._drag,
       handler = null;
-
-    if (SC.platform.touch) {
-      evt.allowDefault();
-      this._lastMouseUpCustomHandling = YES;
-      return YES;
-    }
 
     if (dragView) {
       SC.run(function () {
@@ -1935,10 +1922,6 @@ SC.RootResponder = SC.Object.extend(
    trigger calls to mouseDragged.
   */
   mousemove: function (evt) {
-    if (SC.platform.touch) {
-      evt.allowDefault();
-      return YES;
-    }
 
     if (SC.browser.isIE) {
       if (this._lastMoveX === evt.clientX && this._lastMoveY === evt.clientY) return;
