@@ -2051,54 +2051,35 @@ SC.RootResponder = SC.Object.extend(
   // ..........................................................
   // ANIMATION HANDLING
   //
+
+  /* @private Handler for animationstart events. */
   animationstart: function (evt) {
-    var view;
-    try {
-      view = this.targetViewForEvent(evt);
-      this.sendEvent('animationDidStart', evt, view);
-    } catch (e) {
-      SC.Logger.warn('Exception during animationDidStart: %@'.fmt(e));
-      throw e;
-    }
+    var view = this.targetViewForEvent(evt);
+    this.sendEvent('animationDidStart', evt, view);
 
     return view ? evt.hasCustomEventHandling : YES;
   },
 
+  /* @private Handler for animationiteration events. */
   animationiteration: function (evt) {
-    var view;
-    try {
-      view = this.targetViewForEvent(evt);
-      this.sendEvent('animationDidIterate', evt, view);
-    } catch (e) {
-      SC.Logger.warn('Exception during animationDidIterate: %@'.fmt(e));
-      throw e;
-    }
+    var view = this.targetViewForEvent(evt);
+    this.sendEvent('animationDidIterate', evt, view);
 
     return view ? evt.hasCustomEventHandling : YES;
   },
 
+  /* @private Handler for animationend events. */
   animationend: function (evt) {
-    var view;
-    try {
-      view = this.targetViewForEvent(evt);
-      this.sendEvent('animationDidEnd', evt, view);
-    } catch (e) {
-      SC.Logger.warn('Exception during animationDidEnd: %@'.fmt(e));
-      throw e;
-    }
+    var view = this.targetViewForEvent(evt);
+    this.sendEvent('animationDidEnd', evt, view);
 
     return view ? evt.hasCustomEventHandling : YES;
   },
 
+  /* @private Handler for transitionend events. */
   transitionend: function (evt) {
-    var view;
-    try {
-      view = this.targetViewForEvent(evt);
-      this.sendEvent('transitionDidEnd', evt, view);
-    } catch (e) {
-      SC.Logger.warn('Exception during transitionDidEnd: %@'.fmt(e));
-      throw e;
-    }
+    var view = this.targetViewForEvent(evt);
+    this.sendEvent('transitionDidEnd', evt, view);
 
     return view ? evt.hasCustomEventHandling : YES;
   }
