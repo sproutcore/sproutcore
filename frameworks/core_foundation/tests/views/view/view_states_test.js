@@ -46,6 +46,10 @@ test("Test unrendered state.", function () {
   // _doUpdateLayout()
 
   // UNHANDLED ACTIONS
+  handled = view._doShow();
+  ok(!handled, "Calling _doShow() should not be handled");
+  equals(view.viewState, SC.CoreView.UNRENDERED, "Calling _doShow() doesn't change state");
+
   handled = view._doAttach(document.body);
   ok(!handled, "Calling _doAttach(document.body) should not be handled");
   equals(view.viewState, SC.CoreView.UNRENDERED, "Calling _doAttach(document.body) doesn't change state");
@@ -74,10 +78,6 @@ test("Test unrendered state.", function () {
 
 
   // HANDLED ACTIONS
-
-  handled = view._doShow();
-  ok(handled, "Calling _doShow() should be handled");
-  equals(view.viewState, SC.CoreView.UNRENDERED, "Calling _doShow() doesn't change state");
 
   handled = view._doRender();
   ok(handled, "Calling _doRender() should be handled");
