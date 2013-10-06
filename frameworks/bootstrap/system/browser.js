@@ -268,6 +268,7 @@ SC.detectBrowser = function (userAgent, language) {
   if (isIOSDevice) { os = SC.OS.ios; }
   else if (osAndVersion[1] === 'mac os x' || osAndVersion[1] === 'mac os') { os = SC.OS.mac; }
   else if (osAndVersion[1] === 'windows nt') { os = SC.OS.win; }
+  else { os = osAndVersion[1]; }
 
   // Normalize the os version.
   osAndVersion[2] = osAndVersion[2] ? osAndVersion[2].replace(/_/g, '.') : '0';
