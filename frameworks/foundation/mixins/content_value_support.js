@@ -247,13 +247,13 @@ SC.ContentValueSupport = {
     observed keys.
   */
   _control_contentDidChange: function (target, key) {
+    // remove an observer from the old content if necessary
+    this._cleanup_old_content_observers();
+
     var content = this.get('content'),
     contentKeys = this.get('contentKeys'), contentKey,
     oldKeys = this._old_contentValueKeys,
     f = this.contentPropertyDidChange;
-
-    // remove an observer from the old content if necessary
-    this._cleanup_old_content_observers();
 
     // add observer to new content if necessary.
     if (content && content.addObserver) {
@@ -349,7 +349,7 @@ SC.ContentValueSupport = {
       if (oldType === SC.T_STRING) {
         old.removeObserver(oldKeys, this, f);
 
-        oldKeys = null;
+        this._old_contentValueKeys = oldKeys = null;
       }
 
       // set case
