@@ -257,7 +257,7 @@ SC.GridView = SC.ListView.extend(
 
     // A change to the width of the frame is the only variable that
     // alters the layout of item views and our computed layout.
-    if (lastFrameWidth && width !== lastFrameWidth) {
+    if (!SC.none(lastFrameWidth) && width !== lastFrameWidth) {
       var itemView,
         nowShowing = this.get('nowShowing');
 

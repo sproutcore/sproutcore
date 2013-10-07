@@ -156,12 +156,14 @@ SC.AutoResize = {
   */
   measuredSizeDidChange: function() {
     var measuredSize = this.get('measuredSize'),
-    calculatedWidth = measuredSize.width, calculatedHeight = measuredSize.height,
-    paddingHeight, paddingWidth,
-    autoResizePadding = this.get('autoResizePadding') || 0,
-    maxWidth = this.get('maxWidth'), maxHeight = this.get('maxHeight');
+      calculatedWidth = measuredSize.width,
+      calculatedHeight = measuredSize.height,
+      paddingHeight, paddingWidth,
+      autoResizePadding = this.get('autoResizePadding') || 0,
+      maxWidth = this.get('maxWidth'),
+      maxHeight = this.get('maxHeight');
 
-    if(SC.typeOf(autoResizePadding) === SC.T_NUMBER) {
+    if (SC.typeOf(autoResizePadding) === SC.T_NUMBER) {
       paddingHeight = paddingWidth = autoResizePadding;
     } else {
       paddingHeight = autoResizePadding.height;
@@ -171,7 +173,7 @@ SC.AutoResize = {
     calculatedHeight += paddingHeight;
     calculatedWidth += paddingWidth;
 
-    if(this.get('shouldAutoResize')) {
+    if (this.get('shouldAutoResize')) {
       // if we are allowed to autoresize, adjust the layout
       if (this.get('shouldResizeWidth')) {
         if (maxWidth && calculatedWidth > maxWidth) {
@@ -254,7 +256,7 @@ SC.AutoResize = {
         cachedMetrics = this.get('_cachedMetrics'),
         maxFontSize = this.get('maxFontSize');
 
-    if(!layer) return;
+    if (!layer) return;
 
     // There are three special cases.
     //   - size is cached: the cached size is used with no measurement

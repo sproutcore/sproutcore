@@ -627,11 +627,8 @@ SC.RootResponder = SC.Object.extend(
     @returns {void}
   */
   setup: function () {
-    // handle touch events
-    this.listenFor(['touchstart', 'touchmove', 'touchend', 'touchcancel'], document);
-
     // handle basic events
-    this.listenFor(['keydown', 'keyup', 'beforedeactivate', 'mousedown', 'mouseup', 'click', 'dblclick', 'mousemove', 'selectstart', 'contextmenu'], document)
+    this.listenFor(['touchstart', 'touchmove', 'touchend', 'touchcancel', 'keydown', 'keyup', 'beforedeactivate', 'mousedown', 'mouseup', 'click', 'dblclick', 'mousemove', 'selectstart', 'contextmenu'], document)
         .listenFor(['resize'], window);
 
     if (SC.browser.isIE8OrLower) this.listenFor(['focusin', 'focusout'], document);
@@ -1272,7 +1269,6 @@ SC.RootResponder = SC.Object.extend(
     // As a workaround just let the browser to use the default behavior.
     if (this.ignoreTouchHandle(evt)) return YES;
 
-
     var hidingTouchIntercept = NO;
 
     SC.run(function () {
@@ -1772,17 +1768,11 @@ SC.RootResponder = SC.Object.extend(
   //
 
   mousedown: function (evt) {
-    if (SC.platform.touch) {
-      evt.allowDefault();
-      this._lastMouseDownCustomHandling = YES;
-      return YES;
-    }
-
     // First, save the click count. The click count resets if the mouse down
     // event occurs more than 250 ms later than the mouse up event or more
-    // than 8 pixels away from the mouse down event.
+    // than 8 pixels away from the mouse down event or if the button used is different.
     this._clickCount += 1;
-    if (!this._lastMouseUpAt || ((Date.now() - this._lastMouseUpAt) > 250)) {
+    if (!this._lastMouseUpAt || this._lastClickWhich !== evt.which || ((Date.now() - this._lastMouseUpAt) > 250)) {
       this._clickCount = 1;
     } else {
       var deltaX = this._lastMouseDownX - evt.clientX,
@@ -1793,6 +1783,7 @@ SC.RootResponder = SC.Object.extend(
     }
     evt.clickCount = this._clickCount;
 
+    this._lastClickWhich = evt.which;
     this._lastMouseDownX = evt.clientX;
     this._lastMouseDownY = evt.clientY;
 
@@ -1821,12 +1812,6 @@ SC.RootResponder = SC.Object.extend(
     var clickOrDoubleClickDidTrigger = NO,
       dragView = this._drag,
       handler = null;
-
-    if (SC.platform.touch) {
-      evt.allowDefault();
-      this._lastMouseUpCustomHandling = YES;
-      return YES;
-    }
 
     if (dragView) {
       SC.run(function () {
@@ -1937,10 +1922,6 @@ SC.RootResponder = SC.Object.extend(
    trigger calls to mouseDragged.
   */
   mousemove: function (evt) {
-    if (SC.platform.touch) {
-      evt.allowDefault();
-      return YES;
-    }
 
     if (SC.browser.isIE) {
       if (this._lastMoveX === evt.clientX && this._lastMoveY === evt.clientY) return;
@@ -2051,54 +2032,35 @@ SC.RootResponder = SC.Object.extend(
   // ..........................................................
   // ANIMATION HANDLING
   //
+
+  /* @private Handler for animationstart events. */
   animationstart: function (evt) {
-    var view;
-    try {
-      view = this.targetViewForEvent(evt);
-      this.sendEvent('animationDidStart', evt, view);
-    } catch (e) {
-      SC.Logger.warn('Exception during animationDidStart: %@'.fmt(e));
-      throw e;
-    }
+    var view = this.targetViewForEvent(evt);
+    this.sendEvent('animationDidStart', evt, view);
 
     return view ? evt.hasCustomEventHandling : YES;
   },
 
+  /* @private Handler for animationiteration events. */
   animationiteration: function (evt) {
-    var view;
-    try {
-      view = this.targetViewForEvent(evt);
-      this.sendEvent('animationDidIterate', evt, view);
-    } catch (e) {
-      SC.Logger.warn('Exception during animationDidIterate: %@'.fmt(e));
-      throw e;
-    }
+    var view = this.targetViewForEvent(evt);
+    this.sendEvent('animationDidIterate', evt, view);
 
     return view ? evt.hasCustomEventHandling : YES;
   },
 
+  /* @private Handler for animationend events. */
   animationend: function (evt) {
-    var view;
-    try {
-      view = this.targetViewForEvent(evt);
-      this.sendEvent('animationDidEnd', evt, view);
-    } catch (e) {
-      SC.Logger.warn('Exception during animationDidEnd: %@'.fmt(e));
-      throw e;
-    }
+    var view = this.targetViewForEvent(evt);
+    this.sendEvent('animationDidEnd', evt, view);
 
     return view ? evt.hasCustomEventHandling : YES;
   },
 
+  /* @private Handler for transitionend events. */
   transitionend: function (evt) {
-    var view;
-    try {
-      view = this.targetViewForEvent(evt);
-      this.sendEvent('transitionDidEnd', evt, view);
-    } catch (e) {
-      SC.Logger.warn('Exception during transitionDidEnd: %@'.fmt(e));
-      throw e;
-    }
+    var view = this.targetViewForEvent(evt);
+    this.sendEvent('transitionDidEnd', evt, view);
 
     return view ? evt.hasCustomEventHandling : YES;
   }

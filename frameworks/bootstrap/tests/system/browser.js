@@ -445,6 +445,15 @@ var userAgents = {
     engine: SC.ENGINE.webkit,
     engineVersion: '533.17.9'
   },
+  "Mozilla/5.0 (iPad; CPU OS 7_0 like Mac OS X) AppleWebKit/537.51.1 (KHTML, like Gecko) Version/7.0 Mobile/11A465 Safari/9537.53": {
+    device: SC.DEVICE.ipad,
+    name: SC.BROWSER.safari,
+    version: '7.0',
+    os: SC.OS.ios,
+    osVersion: '7.0',
+    engine: SC.ENGINE.webkit,
+    engineVersion: '537.51.1'
+  },
 
 // Android
 

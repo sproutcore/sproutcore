@@ -90,9 +90,10 @@ SC.ModalPane = SC.Pane.extend(
   */
   _hideShowTextfields: function(pane, focusable){
     var view;
-    for(view in SC.View.views){
+
+    for (view in SC.View.views) {
       view = SC.View.views[view];
-      if (view!==pane && view.get('pane')===pane && view.get('isTextField')){
+      if (view.get('isTextField') && view !== pane && view.get('pane') === pane) {
         if (focusable) {
           // Setting isBrowserFocusable back to YES. If we cached the previous
           // value, use that instead.

@@ -1,8 +1,32 @@
 CHANGE LOG
 ==========
 
-1.10.0
-----------
+1.10.0.0
+-----------
+
+### CHANGES & FEATURES
+
+* Allows adjust to be called after animate in the same run loop. Adjust can occur cleanly, which won't affect the animation or it can clash, in which case it will override the animation.
+* Improves internal code structure to support optimization by JS engines.
+* Makes the conditional that attempts to lock all textfields from receiving focus behind a modal pane, fail more quickly (this also prevents getting the pane on views that may not yet have a pane).
+
+### DEPRECATIONS & REMOVALS
+
+* Removes 26.6MB of design files from within the framework. This means that these files are no longer downloaded and duplicated in each clone of the framework nor are any of them included in the gem (although many were stripped out of the gem anyhow). These files are still available at https://github.com/sproutcore/design.
+
+### BUG FIXES
+
+* Removes the blockers that prevented all browsers that support touch events from using mouse events. Note: a browser's support of touch events is no indication of a touch capable device or even that the touch capable device will not need to send mouse events (via a plugged in mouse for example). When implementing touch support in a custom control, you should call evt.preventDefault in touchEnd to prevent additional mouse events from being sent by the browser.
+* Prevents extremely bizarre bug where an iPad will fail to detect the os in iOS, in spite of following the correct code path. The correct value is assigned to an array and then re-read from the same array a moment later. For some unknown reason, when the value is re-read from the array it would return the old value. Side effects of this are that all hacks looking for mobile safari would fail (including touch handling in text fields).
+* Fixes a regression in SC.ScrollView that threw an exception when beginning a new touch drag while a previous one was still decelerating.
+* Prevents successive clicks with two different mouse buttons from being considered a double click. 
+* Fixes a bad conditional that coerced 0 frame widths to a false value. This caused excessive reloads of SC.GridView.
+* Fixes #1093 issue where a view would fail to be hidden if its pane was removed mid-transition.
+* Fixes #1087 issue with triggering and canceling animation in same runloop.
+* Fixes bug where PanelPane's ModalPane would appear if isModal becomes true while the PanelPane is transitioning out.
+
+1.10.0.rc.1, 1.10.0.rc.2, 1.10.0.rc.3
+-----------
 
 ### CHANGES & FEATURES
 

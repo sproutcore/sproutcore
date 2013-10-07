@@ -42,6 +42,9 @@ Welcome.mainPage = SC.Page.design({
             contentIconKey: "targetIcon",
             hasContentIcon: YES,
 
+            // Show all the items for best performance since the list is short.
+            contentIndexesInRect: function () { return null; }.property().cacheable(),
+
             target: "Welcome.targetsController",
             action: "loadApplication"
           })

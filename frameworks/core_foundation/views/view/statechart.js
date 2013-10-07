@@ -208,6 +208,18 @@ SC.CoreView.reopen(
   // Properties
   //
 
+  /* @private Internal variable used to store the number of children building out while we wait to be detached. */
+  _buildingOutCount: null,
+
+  /* @private Internal variable used to track the original view being detached that we are delaying so that we can build out. */
+  _owningView: null,
+
+  /* @private Internal variable used to store the original layout before running an automatic transition. */
+  _preTransitionLayout: null,
+
+  /* @private Internal variable used to store the original frame before running an automatic transition. */
+  _preTransitionFrame: null,
+
   /**
     The current state of the view as managed by its internal statechart.
 
@@ -443,13 +455,15 @@ SC.CoreView.reopen(
       this._callOnChildViews('_parentDidCancelBuildOut');
 
       // Remove the shared building out count if it exists.
-      delete this._buildingOutCount;
+      this._buildingOutCount = null;
 
       // Note: We can be in ATTACHED_BUILDING_OUT state without a transition out while we wait for child views.
       // Update states after *will* and before *did* notifications!
       if (this.get('transitionOut')) {
         if (transitionIn) {
-          this._transitionIn();
+          // this.invokeNext(function () {
+            this._transitionIn();
+          // });
 
           this._gotoAttachedBuildingInState();
         } else {
@@ -650,7 +664,9 @@ SC.CoreView.reopen(
       this._callOnChildViews('_parentWillBuildOutFromDocument', this);
 
       if (transitionOut) {
-        this._transitionOut(inPlace, this);
+        // this.invokeNext(function () {
+          this._transitionOut(inPlace, this);
+        // });
 
         // Update states after *will* and before *did* notifications!
         this._gotoAttachedBuildingOutState();
@@ -658,7 +674,7 @@ SC.CoreView.reopen(
         // Some children are building out, we will have to wait for them.
         this._gotoAttachedBuildingOutState();
       } else {
-        delete this._buildingOutCount;
+        this._buildingOutCount = null;
 
         // Detach immediately.
         this._executeDoDetach();
@@ -715,10 +731,13 @@ SC.CoreView.reopen(
     if (this.willHideInDocument) { this.willHideInDocument(); }
 
     if (transitionHide) {
-      this._transitionHide();
-
       // Update states after *will* and before *did* notifications!
       this._gotoAttachedHidingState();
+
+      // this.invokeNext(function () {
+        this._transitionHide();
+      // });
+
     } else {
       // Clear out any child views that are still transitioning before we hide.
       this._callOnChildViews('_parentWillHideInDocument');
@@ -744,7 +763,7 @@ SC.CoreView.reopen(
 
     //@if (debug)
     if (SC.LOG_VIEW_STATES) {
-      SC.Logger.log('%c%@:%@ — _doOrphan()'.fmt(this, this.get('viewState')), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
+      SC.Logger.log('%c%@ — _doOrphan()'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
     //@endif
 
@@ -773,7 +792,7 @@ SC.CoreView.reopen(
 
     //@if (debug)
     if (SC.LOG_VIEW_STATES) {
-      SC.Logger.log('%c%@:%@ — _doRender()'.fmt(this, state), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
+      SC.Logger.log('%c%@ — _doRender()'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
     //@endif
 
@@ -831,24 +850,13 @@ SC.CoreView.reopen(
 
     //@if (debug)
     if (SC.LOG_VIEW_STATES) {
-      SC.Logger.log('%c%@:%@ — _doShow()'.fmt(this, state), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
+      SC.Logger.log('%c%@ — _doShow()'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
     //@endif
 
     switch (state) {
-    case SC.CoreView.ATTACHED_SHOWN: // FAST PATH!
-    case SC.CoreView.ATTACHED_SHOWING: // FAST PATH!
-    case SC.CoreView.ATTACHED_HIDDEN_BY_PARENT: // FAST PATH!
-    case SC.CoreView.ATTACHED_BUILDING_IN: // FAST PATH!
-    case SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT: // FAST PATH!
-    case SC.CoreView.ATTACHED_BUILDING_OUT: // FAST PATH!
-      return false;
-    case SC.CoreView.UNRENDERED: // FAST PATH!
-    case SC.CoreView.UNATTACHED: // FAST PATH!
-    case SC.CoreView.UNATTACHED_BY_PARENT: // FAST PATH!
-      // Queue the visibility update for the next time we display.
-      this._visibleStyleNeedsUpdate = true;
-      return true;
+
+    // Normal case: view is hidden and is being shown.
     case SC.CoreView.ATTACHED_HIDDEN:
       if (isParentShown) {
         // Update before showing (note that visibility update is NOT conditional for this state).
@@ -867,21 +875,42 @@ SC.CoreView.reopen(
         return true;
       }
       break;
+
     case SC.CoreView.ATTACHED_HIDING:
       if (!transitionShow) {
         this._cancelTransition();
       }
       break;
+
+    // Special case: Layer exists but is not attached. Queue an update to the visibility style.
+    case SC.CoreView.UNATTACHED:
+    case SC.CoreView.UNATTACHED_BY_PARENT:
+      // Queue the visibility update for the next time we display.
+      this._visibleStyleNeedsUpdate = true;
+      return true;
+
+    // Invalid states that have no effect.
+    case SC.CoreView.UNRENDERED: // FAST PATH!
+    case SC.CoreView.ATTACHED_SHOWN: // FAST PATH!
+    case SC.CoreView.ATTACHED_SHOWING: // FAST PATH!
+    case SC.CoreView.ATTACHED_HIDDEN_BY_PARENT: // FAST PATH!
+    case SC.CoreView.ATTACHED_BUILDING_IN: // FAST PATH!
+    case SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT: // FAST PATH!
+    case SC.CoreView.ATTACHED_BUILDING_OUT: // FAST PATH!
+      return false;
+
     default:
     }
 
     this._executeQueuedUpdates();
 
     if (transitionShow) {
-      this._transitionShow();
-
       // Update states after *will* and before *did* notifications!
       this._gotoAttachedShowingState();
+
+      // this.invokeNext(function () {
+        this._transitionShow();
+      // });
     } else {
       // Update states after *will* and before *did* notifications!
       this._gotoAttachedShownState();
@@ -987,7 +1016,7 @@ SC.CoreView.reopen(
         owningView._executeDoDetach();
 
         // Clean up.
-        delete this._owningView;
+        this._owningView = null;
       }
     } else if (state === SC.CoreView.ATTACHED_HIDING) {
       this._teardownTransition();
@@ -1343,7 +1372,9 @@ SC.CoreView.reopen(
 
     if (state === SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT) {
       if (transitionIn) {
-        this._transitionIn();
+        // this.invokeNext(function () {
+          this._transitionIn();
+        // });
 
         // Update states after *will* and before *did* notifications!
         this._gotoAttachedBuildingInState();
@@ -1396,7 +1427,10 @@ SC.CoreView.reopen(
 
       if (transitionOut) {
         this._owningView = owningView;
-        this._transitionOut(false, owningView);
+
+        // this.invokeNext(function () {
+          this._transitionOut(false, owningView);
+        // });
 
         // Update states after *will* and before *did* notifications!
         this._gotoAttachedBuildingOutByParentState();
@@ -1552,7 +1586,7 @@ SC.CoreView.reopen(
     if (state === SC.CoreView.ATTACHED_HIDDEN_BY_PARENT) {
       this._executeQueuedUpdates();
 
-      // Notify *will* (top-down from parent to children).
+      // Notify *will* (top-dow`n from parent to children).
       if (this.willShowInDocument) { this.willShowInDocument(); }
     } else {
       // There's no need to continue to further child views.
@@ -1573,8 +1607,8 @@ SC.CoreView.reopen(
     this.set('layout', this._preTransitionLayout);
 
     // Clean up.
-    delete this._preTransitionLayout;
-    delete this._preTransitionFrame;
+    this._preTransitionLayout = null;
+    this._preTransitionFrame = null;
   },
 
   /** @private Attempts to run a transition hide, ensuring any incoming transitions are stopped in place. */
@@ -1685,7 +1719,9 @@ SC.CoreView.reopen(
         // Route.
         var transitionIn = this.get('transitionIn');
         if (transitionIn) {
-          this._transitionIn();
+          // this.invokeNext(function () {
+            this._transitionIn();
+          // });
 
           this._gotoAttachedBuildingInState();
         } else {

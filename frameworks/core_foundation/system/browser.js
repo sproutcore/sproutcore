@@ -9,6 +9,12 @@
 SC.mixin(SC.browser,
 /** @scope SC.browser */ {
 
+  /* @private Internal property for the cache of pre-determined experimental names. */
+  _cachedNames: null,
+
+  /* @private Internal property for the test element used for style testing. */
+  _testEl: null,
+
   /** @private */
   _testSupportFor: function (target, propertyName, testValue) {
     /*jshint eqnull:true*/
