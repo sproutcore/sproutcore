@@ -129,7 +129,7 @@ SC.AutoResizingMenuPane = SC.MenuPane.extend(
       width = Math.max(width, view.get('measuredSize').width + this.get('menuWidthPadding'));
     }
 
-    this.adjust('width', width);
+    this.adjust({ 'width': width, height: this.get('menuHeight') });
     this.positionPane();
   }
 });
