@@ -1282,7 +1282,7 @@ SC.Record = SC.Object.extend(
   createNestedRecord: function (recordType, hash, key, parentObject) {
     var attrkey, cr, attrval,
         attrIsToMany = false,
-        attribute;
+        attribute, po;
 
     if (!key && SC.typeOf(recordType) === 'string') {
       key = recordType;
@@ -1296,48 +1296,44 @@ SC.Record = SC.Object.extend(
     }
     else attrkey = key;
 
-    SC.run(function () {
-      var po;
-      hash = hash || {}; // init if needed
+    hash = hash || {}; // init if needed
 
-      // this function also checks whether the child records hash already exists at the parents hash,
-      // because if not, it should write it
-      if (recordType.kindOf && recordType.kindOf(SC.Record)) {
-        po = this.get(key);
-        if (attrIsToMany && !parentObject && po && po.isChildArray) {
-          // figure out parentObject
-          parentObject = po;
-        }
-        cr = recordType.create({
-          parentObject: parentObject || this,
-          parentAttribute: attrkey,
-          isChildRecord: true
-        });
+    // this function also checks whether the child records hash already exists at the parents hash,
+    // because if not, it should write it
+    if (recordType.kindOf && recordType.kindOf(SC.Record)) {
+      po = this.get(key);
+      if (attrIsToMany && !parentObject && po && po.isChildArray) {
+        // figure out parentObject
+        parentObject = po;
       }
-      else cr = hash;
+      cr = recordType.create({
+        parentObject: parentObject || this,
+        parentAttribute: attrkey,
+        isChildRecord: true
+      });
+    }
+    else cr = hash;
 
-      attrval = this.readAttribute(attrkey);
-      this.propertyWillChange(key);
-      if (!attrval) { // create if it doesn't exist
-        if (attrIsToMany) {
-          this.writeAttribute(attrkey, [hash]); // create the array too
-        }
-        else {
-          this.writeAttribute(attrkey, hash);
-        }
+    attrval = this.readAttribute(attrkey);
+    this.propertyWillChange(key);
+    if (!attrval) { // create if it doesn't exist
+      if (attrIsToMany) {
+        this.writeAttribute(attrkey, [hash]); // create the array too
       }
-      else { // update
-        if (attrIsToMany) {
-          attrval.push(hash);
-          this.writeAttribute(attrkey, attrval);
-        }
-        else {
-          this.writeAttribute(attrkey, hash);
-        }
+      else {
+        this.writeAttribute(attrkey, hash);
       }
-      this.propertyDidChange(key);
-
-    }, this, true);
+    }
+    else { // update
+      if (attrIsToMany) {
+        attrval.push(hash);
+        this.writeAttribute(attrkey, attrval);
+      }
+      else {
+        this.writeAttribute(attrkey, hash);
+      }
+    }
+    this.propertyDidChange(key);
 
     return cr;
   },
