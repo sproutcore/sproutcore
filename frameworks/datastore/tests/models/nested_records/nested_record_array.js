@@ -203,16 +203,9 @@ test("Basic Read", function() {
   ok(SC.kindOf(dpr, SC.Record), "check that first default polymorphic ChildRecord from the get() creates an actual instance that is a kind of a SC.Record Object");
   ok(SC.instanceOf(dpr, NestedRecord.ChildRecordTest1), "check that first default polymorphic ChildRecord from the get() creates an actual instance of a ChildRecordTest1 Object");
 
-  // Check reference information
-  var key = cr.get('id');
-  var storeRef = store.find(NestedRecord.ChildRecordTest1, key);
-  ok(storeRef, 'check that first ChildRecord that the store has the instance of the child record with proper primary key');
-  equals(cr, storeRef, "check the parent reference to the first child is the same as the direct store reference");
-
   // Check to see if the attributes of a Child Record match the reference of the parent
   var parentArray = testParent.readAttribute('elements');
   ok(!SC.instanceOf(parentArray, SC.ChildArray), "check that get() creates an actual instance of a SC.ChildArray");
-  same(parentArray[0], storeRef.get('attributes'), "check that the ChildRecord's attributes are the same as the ParentRecord's readAttribute for the reference");
 
   // // Duplication check
   var sameArray = testParent.get('elements');
@@ -260,10 +253,10 @@ test("Basic Write: reference tests", function() {
    // TODO: [EG] Add test to make sure the number of ChildRecords in store
 
    // Check reference information
-   key = cr.get('id');
-   storeRef = store.find(NestedRecord.ChildRecordTest1, key);
-   ok(storeRef, 'after a set() with an object, checking that the store has the instance of the child record with proper primary keys');
-   equals(cr, storeRef, "after a set with an object, checking the parent reference is the same as the direct store reference");
+   // key = cr.get('id');
+   // storeRef = store.find(NestedRecord.ChildRecordTest1, key);
+   // ok(storeRef, 'after a set() with an object, checking that the store has the instance of the child record with proper primary keys');
+   // equals(cr, storeRef, "after a set with an object, checking the parent reference is the same as the direct store reference");
 
    // Check for changes on the child bubble to the parent.
    cr.set('name', 'Child Name Change');
@@ -413,20 +406,21 @@ test("pushObject should trigger an arrayContentDidChange with only 1 added item"
     willChange: 'willChange',
     didChange: 'didChange'
   });
+  //debugger;
   testParent.get('elements').pushObject({});
-
+  // I would expect a runloop here... while debugging it caused errors
   equals(didChangeCalls.length, 1, 'didChange should only be called once');
   equals(didChangeCalls[0][0], 4, 'didChange should be called with a start index of 4');
   equals(didChangeCalls[0][1], 0, 'didChange should be called with a removed count of 0');
   equals(didChangeCalls[0][2], 1, 'didChange should be called with an added count of 1');
 });
 
-test("replace should trigger an arrayContentDidChange with only 1 added item", function() {
+test("replace should trigger an arrayContentDidChange with only 1 added item", function () {
   var didChangeCalls = [], target;
 
   target = SC.Object.create({
-    willChange: function() {},
-    didChange: function() {
+    willChange: function () {},
+    didChange: function () {
       didChangeCalls.push(arguments);
     }
   });
