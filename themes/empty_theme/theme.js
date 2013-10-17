@@ -10,7 +10,7 @@
   @since SproutCore 1.1
 */
 SC.EmptyTheme = SC.BaseTheme.create({
-  name: 'sc-empty'
+  name: 'sc-empty-theme'
 });
 
 SC.Theme.addTheme(SC.EmptyTheme);
