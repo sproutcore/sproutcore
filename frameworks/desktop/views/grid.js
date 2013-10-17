@@ -177,27 +177,21 @@ SC.GridView = SC.ListView.extend(
         this._lastDropOnView = null;
       }
 
-      if (!this._insertionPointView) {
-        this._insertionPointView = this.insertionPointClass.create();
+      var insertionPoint = this._insertionPointView,
+          layout = SC.clone(itemView.get('layout'));
+
+      if (!insertionPoint) {
+        insertionPoint = this._insertionPointView = this.insertionPointClass.create();
       }
 
-      var insertionPoint = this._insertionPointView;
-      var itemViewFrame = itemView.get('frame');
-      var f = { height: itemViewFrame.height - 6,
-            x: itemViewFrame.x,
-            y: itemViewFrame.y + 6,
-            width: 0
-          };
+      layout.top += 6;
+      layout.height -= 6;
+      layout.left -= 1;
+      layout.width = 2;
 
-      if (!SC.rectsEqual(insertionPoint.get('frame'), f)) {
-        insertionPoint.set('frame', f);
-      }
-
-      if (insertionPoint.parentNode !== itemView.parentNode) {
-        itemView.parentNode.appendChild(insertionPoint);
-      }
+      insertionPoint.set('layout', layout);
+      this.appendChild(insertionPoint);
     }
-
   },
 
   /** @see SC.CollectionView#hideInsertionPoint */
