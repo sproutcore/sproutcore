@@ -8,6 +8,15 @@
 sc_require('ext/function');
 sc_require('private/observer_set');
 
+
+// When in debug mode, users can log deferred calls (such as .invokeOnce()) by
+// setting SC.LOG_DEFERRED_CALLS.  We'll declare the variable explicitly to make
+// life easier for people who want to enter it inside consoles that auto-
+// complete.
+//@if (debug)
+if (!SC.LOG_DEFERRED_CALLS) SC.LOG_DEFERRED_CALLS = false;
+//@endif
+
 /**
   @class
 
@@ -27,27 +36,18 @@ sc_require('private/observer_set');
   This is how you could write your mouseup handler in jQuery:
 
         $('#okButton').on('click', function () {
-          SC.RunLoop.begin();
+          SC.run(function () {
 
-          // handle click event...
+            // handle click event...
 
-          SC.RunLoop.end(); // allows bindings to trigger...
+          }); // allows bindings to trigger...
         });
 
   @extends SC.Object
   @since SproutCore 1.0
 */
-
-
-// When in debug mode, users can log deferred calls (such as .invokeOnce()) by
-// setting SC.LOG_DEFERRED_CALLS.  We'll declare the variable explicitly to make
-// life easier for people who want to enter it inside consoles that auto-
-// complete.
-//@if (debug)
-if (!SC.LOG_DEFERRED_CALLS) SC.LOG_DEFERRED_CALLS = false;
-//@endif
-
-SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
+SC.RunLoop = SC.Object.extend(
+  /** @scope SC.RunLoop.prototype */ {
 
   /**
     Call this method whenver you begin executing code.
