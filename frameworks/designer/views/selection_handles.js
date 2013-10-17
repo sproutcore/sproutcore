@@ -9,8 +9,7 @@
   This view draws selection handles for a given designer.  It will also
   forward any mouse events to the underlying designer.
 */
-SC.SelectionHandlesView = SC.View.extend(
-/** @scope SC.SelectionHandlesView.prototype */ {
+SC.SelectionHandlesView = SC.View.extend({
 
   /**
     The designer that owns this selection.  mouse and keyboard events are
