@@ -1700,11 +1700,13 @@ SC.ScrollView = SC.View.extend({
 
       // set the scale, vertical, and horizontal offsets to what they technically already are,
       // but don't know they are yet. This will finally update things like, say, the clipping frame.
-      this.beginPropertyChanges();
-      this.set("scale", this._scale);
-      this.set("verticalScrollOffset", this._scroll_verticalScrollOffset);
-      this.set("horizontalScrollOffset", this._scroll_horizontalScrollOffset);
-      this.endPropertyChanges();
+      SC.run(function () {
+        this.beginPropertyChanges();
+        this.set("scale", this._scale);
+        this.set("verticalScrollOffset", this._scroll_verticalScrollOffset);
+        this.set("horizontalScrollOffset", this._scroll_horizontalScrollOffset);
+        this.endPropertyChanges();
+      }, this);
 
       return;
     }
@@ -1719,7 +1721,7 @@ SC.ScrollView = SC.View.extend({
     var self = this;
     touch.lastEventTime = Date.now();
     touch.animationID = window.requestAnimationFrame(function () {
-      SC.run(self.decelerateAnimation(), self);
+      self.decelerateAnimation();
     });
   },
 
