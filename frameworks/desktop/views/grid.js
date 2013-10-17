@@ -140,13 +140,22 @@ SC.GridView = SC.ListView.extend(
   },
 
   /**
+    Default view class used to draw an insertion point, which uses CSS
+    styling to show a horizontal line.
+
+    This view's position (top & left) will be automatically adjusted to the
+    point of insertion.
+
+    @field
     @type SC.View
   */
   insertionPointClass: SC.View.extend({
-    classNames: ['grid-insertion-point'],
+    classNames: ['sc-grid-insertion-point'],
+
+    layout: { width: 2 },
 
     render: function (context, firstTime) {
-      if (firstTime) context.push('<span class="anchor"></span>');
+      if (firstTime) context.push('<div class="anchor"></div>');
     }
   }),
 
@@ -169,7 +178,6 @@ SC.GridView = SC.ListView.extend(
       }
 
     } else {
-
       if (this._lastDropOnView) {
         // If there was an item that was the target of the drop previously, be
         // sure to clear it.
@@ -177,27 +185,24 @@ SC.GridView = SC.ListView.extend(
         this._lastDropOnView = null;
       }
 
-      if (!this._insertionPointView) {
-        this._insertionPointView = this.insertionPointClass.create();
+      var insertionPoint = this._insertionPointView,
+        layout = itemView.get('layout'),
+        top, left;
+
+      if (!insertionPoint) {
+        insertionPoint = this._insertionPointView = this.insertionPointClass.create();
       }
 
-      var insertionPoint = this._insertionPointView;
-      var itemViewFrame = itemView.get('frame');
-      var f = { height: itemViewFrame.height - 6,
-            x: itemViewFrame.x,
-            y: itemViewFrame.y + 6,
-            width: 0
-          };
+      // Adjust the position of the insertion point.
+      top = layout.top;
+      left = layout.left;
+      if (dropOperation & SC.DROP_AFTER) left += layout.width;
+      height = layout.height;
 
-      if (!SC.rectsEqual(insertionPoint.get('frame'), f)) {
-        insertionPoint.set('frame', f);
-      }
-
-      if (insertionPoint.parentNode !== itemView.parentNode) {
-        itemView.parentNode.appendChild(insertionPoint);
-      }
+      // Adjust the position of the insertion point.
+      insertionPoint.adjust({ top: top, left: left, height: height });
+      this.appendChild(insertionPoint);
     }
-
   },
 
   /** @see SC.CollectionView#hideInsertionPoint */
