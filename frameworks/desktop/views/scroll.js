@@ -1984,7 +1984,11 @@ SC.ScrollView = SC.View.extend({
         forceHeight = mxVOffSet < vOffSet,
         forceWidth  = mxHOffSet < hOffSet;
     if (forceHeight || forceWidth) {
+      // Update the position of the content view to fit.
       this.forceDimensionsRecalculation(forceWidth, forceHeight, vOffSet, hOffSet);
+    } else {
+      // Reapply the position. Most importantly, this reapplies the touch transforms on the content view in case they were overwritten.
+      this.invokeLast(this.adjustElementScroll);
     }
 
     // send change notifications since they don't invalidate automatically
@@ -2048,7 +2052,8 @@ SC.ScrollView = SC.View.extend({
         this._applyCSSTransforms(content.get('layer'));
       }
 
-      if (content._viewFrameDidChange) { content._viewFrameDidChange(); }
+      // Notify the child that its frame is changing.
+      content.notifyPropertyChange('frame');
     }
 
     if (container && !SC.platform.touch) {
