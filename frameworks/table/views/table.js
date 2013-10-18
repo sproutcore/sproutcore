@@ -365,6 +365,9 @@ SC.TableView = SC.ListView.extend(SC.TableDelegate, {
     containerView.adjust('minHeight', minHeight);
     containerView.layoutDidChange();
 
+    // Set the calculatedHeight used by SC.ScrollView.
+    this.set('calculatedHeight', minHeight);
+
     //containerView.adjust('height', height);
     //containerView.layoutDidChange();
 
