@@ -25,19 +25,32 @@ SC.AutoMixin = {
     @private
     Override createChildViews to mix in the mixins defined in autoMixins.
   */
-  createChildView: function(v, attrs) {
-    if (!attrs) attrs = {};
+  createChildView: function(view, attrs) {
+    if (!view.isClass) {
+      attrs = view;
+    } else {
+      // attrs should always exist...
+      if (!attrs) { attrs = {}; }
+      // clone the hash that was given so we do not pollute it if it's being reused
+      else { attrs = SC.clone(attrs); }
+    }
+
     attrs.owner = attrs.parentView = this;
-    attrs.isVisibleInWindow = this.get('isVisibleInWindow');
     if (!attrs.page) attrs.page = this.page;
 
-    var applyMixins = this.get("autoMixins");
+    if (view.isClass) {
+      // Track that we created this view.
+      attrs.createdByParent = true;
 
-    applyMixins = SC.clone(applyMixins);
-    applyMixins.push(attrs);
+      var applyMixins = this.get("autoMixins");
 
-    v = v.create.apply(v, applyMixins);
-    return v;
+      applyMixins = SC.clone(applyMixins);
+      applyMixins.push(attrs);
+
+      view = view.create.apply(view, applyMixins);
+    }
+
+    return view;
   }
 
 };
