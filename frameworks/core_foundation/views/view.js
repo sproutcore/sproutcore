@@ -167,6 +167,16 @@ SC.CoreView.reopen(
   */
   childViews: SC.EMPTY_CHILD_VIEWS_ARRAY,
 
+  /**
+    Use this property to automatically mix in a collection of mixins into all
+    child views created by the view. This collection is applied during createChildView
+    @property
+
+    @type Array
+    @default null
+  */
+  autoMixins: null,
+
   // ..........................................................
   // LAYER SUPPORT
   //
@@ -1387,7 +1397,16 @@ SC.CoreView.reopen(
       // Track that we created this view.
       attrs.createdByParent = true;
 
-      view = view.create(attrs);
+      // Insert the autoMixins if defined
+      var applyMixins = this.autoMixins;
+
+      if (!!applyMixins) {
+        applyMixins = SC.clone(applyMixins);
+        applyMixins.push(attrs);
+        view = view.create.apply(view, applyMixins);
+      }
+      else
+        view = view.create(attrs);
     }
 
     return view;
