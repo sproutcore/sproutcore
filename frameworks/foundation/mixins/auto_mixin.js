@@ -6,6 +6,7 @@
 // ==========================================================================
 
 /**
+  @deprecated SC.AutoMixin is deprecated. Please use the property autoMixins of SC.View instead
   @namespace
 
   Use this mixin to automatically mix in a list of mixins into all
