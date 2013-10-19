@@ -99,7 +99,8 @@ SC.StackedView = SC.CollectionView.extend(
       height = layer ? (layer.offsetTop + layer.offsetHeight) : 1;
       layer = null; // avoid memory leaks
     }
-    this.adjust('height', height);
+    this.adjust('minHeight', height);
+    this.set('calculatedHeight', height);
   },
 
   // ..........................................................
