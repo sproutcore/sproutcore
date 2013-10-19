@@ -1088,7 +1088,6 @@ SC.ScrollView = SC.View.extend({
       -Math.round(this._scroll_verticalScrollOffset) +
       'px,0) ';
     transform += this._scale_css;
-
     if (layer) {
       var style = layer.style;
       style.webkitTransform = transform;
@@ -1788,26 +1787,12 @@ SC.ScrollView = SC.View.extend({
     // already been setup in prepareDisplay so we don't need to call
     // viewFrameDidChange...
     this._scroll_contentView = this.get('contentView');
-    var contentView = this._scroll_contentView,
-      hasCalculatedProperty = false;
+    var contentView = this._scroll_contentView;
 
     if (contentView) {
-      // Only add calculated width/height observers if the property exists on the view.
-      if (!SC.none(contentView.calculatedWidth)) {
-        contentView.addObserver('calculatedWidth', this, 'contentViewFrameDidChange');
-        hasCalculatedProperty = true;
-      }
-
-      if (!SC.none(contentView.calculatedHeight)) {
-        contentView.addObserver('calculatedHeight', this, 'contentViewFrameDidChange');
-        hasCalculatedProperty = true;
-      }
-
-      // Only add a frame observer if no calculated property exists on the view.
-      if (!hasCalculatedProperty) {
-        contentView.addObserver('frame', this, 'contentViewFrameDidChange');
-      }
-
+      contentView.addObserver('frame', this, 'contentViewFrameDidChange');
+      contentView.addObserver('calculatedWidth', this, 'contentViewFrameDidChange');
+      contentView.addObserver('calculatedHeight', this, 'contentViewFrameDidChange');
       contentView.addObserver('layer', this, 'contentViewLayerDidChange');
     }
 
@@ -1831,55 +1816,24 @@ SC.ScrollView = SC.View.extend({
   */
   contentViewDidChange: function () {
     var newView = this.get('contentView'),
-        oldView = this._scroll_contentView,
-        hasCalculatedProperty;
+        oldView = this._scroll_contentView;
 
     if (newView !== oldView) {
 
       // stop observing old content view
       if (oldView) {
-        hasCalculatedProperty = false;
-
-        // Only remove calculated width/height observers if the property exists on the view.
-        if (!SC.none(oldView.calculatedWidth)) {
-          oldView.removeObserver('calculatedWidth', this, 'contentViewFrameDidChange');
-          hasCalculatedProperty = true;
-        }
-
-        if (!SC.none(oldView.calculatedHeight)) {
-          oldView.removeObserver('calculatedHeight', this, 'contentViewFrameDidChange');
-          hasCalculatedProperty = true;
-        }
-
-        // Only remove a frame observer if no calculated property exists on the view.
-        if (!hasCalculatedProperty) {
-          oldView.removeObserver('frame', this, 'contentViewFrameDidChange');
-        }
-
+        oldView.removeObserver('calculatedWidth', this, 'contentViewFrameDidChange');
+        oldView.removeObserver('calculatedHeight', this, 'contentViewFrameDidChange');
+        oldView.removeObserver('frame', this, 'contentViewFrameDidChange');
         oldView.removeObserver('layer', this, 'contentViewLayerDidChange');
       }
 
       // update cache
       this._scroll_contentView = newView;
       if (newView) {
-        hasCalculatedProperty = false;
-
-        // Only add calculated width/height observers if the property exists on the view.
-        if (!SC.none(newView.calculatedWidth)) {
-          newView.addObserver('calculatedWidth', this, 'contentViewFrameDidChange');
-          hasCalculatedProperty = true;
-        }
-
-        if (!SC.none(newView.calculatedHeight)) {
-          newView.addObserver('calculatedHeight', this, 'contentViewFrameDidChange');
-          hasCalculatedProperty = true;
-        }
-
-        // Only add a frame observer if no calculated property exists on the view.
-        if (!hasCalculatedProperty) {
-          newView.addObserver('frame', this, 'contentViewFrameDidChange');
-        }
-
+        newView.addObserver('frame', this, 'contentViewFrameDidChange');
+        newView.addObserver('calculatedWidth', this, 'contentViewFrameDidChange');
+        newView.addObserver('calculatedHeight', this, 'contentViewFrameDidChange');
         newView.addObserver('layer', this, 'contentViewLayerDidChange');
       }
 
