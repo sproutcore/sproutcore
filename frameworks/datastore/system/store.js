@@ -170,16 +170,27 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     newRecord.commitRecord( ..., callback );
 
     into the callback method:
-      if the transaction is successful, commit the successful changes into the main store and destroy:
-        ns.commitSuccessfulChanges();
-        ns.destroy();
+      A. If using a transaction model: "all or nothing" where all rows are handled into a single transaction
 
-      Note: This kind of construct can be used to manage complex transactions involving several independent rows.
-      If only some of them have been accepted by the server, the overall transaction is only partially
-      successful therefore the nested store will contain rows with different statuses.
-      In such case, only the accepted rows should be pushed to the main store using commitSuccessfulChanges()
+         if the transaction is successful, commit the successful changes into the main store and destroy:
+           ns.commitSuccessfulChanges();
+           ns.destroy();
 
-      if not successful, handle the error, allow corrections if needed, etc.
+        if not successful, handle the error, allow corrections if needed, etc.
+
+      B. If using a transaction model: "independent rows" where the edited rows are independent and committed separately into the backend database
+         When only some of them have been accepted by the server, the overall transaction is only partially
+         successful therefore the nested store will contain rows with different statuses.
+         In such case, into the callback method only the accepted rows should be pushed to the main store using commitSuccessfulChanges()
+
+           ns.commitSuccessfulChanges();
+           ...
+         if some of the rows were not accepted by the backend, allow corrections, attempt another commit, etc.:
+           ns.commitRecords( ...,callback );
+           ... the callback will be invoked again
+
+         Important note: In the case of such configuration, in order to preserve the consistency of the main store with
+         the backend database, it is recommended to systematically call commitSuccessfulChanges() when receiving the answer from the server.
 
     @param {Hash} attrs optional attributes to set on new store
     @param {Class} newStoreClass optional the class of the newly-created nested store (defaults to SC.NestedStore)

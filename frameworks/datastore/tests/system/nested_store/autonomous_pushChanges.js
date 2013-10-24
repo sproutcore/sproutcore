@@ -151,16 +151,16 @@ test("record error status pushed from the server via an autonomous chained store
 });
 
 test("on commitSuccessfulChanges only the clean records from an autonomous chained store should be propagated to the main store", function() {
-  var parent, store, rec, rec2, pear1, pear2, peach1Key, peach2Key, peach1, peach2, orange1Key, orange2Key, orange1, orange2;
+  var parent, store, apple, apple2, pear1, pear2, peach1Key, peach2Key, peach1, peach2, orange1Key, orange2Key, orange1, orange2;
 
   parent = SC.Store.create().from(SC.Record.fixtures);
 
   SC.run(function() {
-    parent.loadRecords(Rec, [{ title: "foo", guid: 1 },{ title: "pear", guid: 2 },
+    parent.loadRecords(Rec, [{ title: "apple", guid: 1 },{ title: "pear", guid: 2 },
                              { title: "peach", guid: 3 },{ title: "orange", guid: 4 }]);
   });
 
-  rec = parent.find(Rec, 1);
+  apple = parent.find(Rec, 1);
   pear = parent.find(Rec, 2);
   peach = parent.find(Rec, 3);
   peach1Key = peach.storeKey;
@@ -173,7 +173,7 @@ test("on commitSuccessfulChanges only the clean records from an autonomous chain
   peach2 = store.find(Rec, 3);
   orange2 = store.find(Rec, 4);
 
-  store.pushRetrieve(Rec, 1, { title: "bar" });
+  store.pushRetrieve(Rec, 1, { title: "red apple" });
   pear2.set( "title", "big pear" );
 
   peach2Key = peach2.storeKey;
@@ -184,21 +184,20 @@ test("on commitSuccessfulChanges only the clean records from an autonomous chain
   SC.RunLoop.end();
 
   equals(store.get('hasChanges'), YES, 'chained store.hasChanges');
-  equals(rec.get('title'), 'foo', 'original rec.title should NOT change');
-  equals(rec.fired, NO, 'original rec.title should not have notified');
+  equals(apple.get('title'), 'apple', 'original apple.title should NOT change');
+  equals(apple.fired, NO, 'original apple.title should not have notified');
   equals(pear.get('title'), 'pear', 'original pear.title should NOT change');
   equals(pear.fired, NO, 'original pear.title should not have notified');
   equals(store.readStatus(peach2Key), SC.Record.DESTROYED_CLEAN, 'peach2 should be destroyed clean');
   equals(store.readStatus(orange2Key), SC.Record.DESTROYED_DIRTY, 'orange2 should be destroyed dirty');
 
   SC.RunLoop.begin();
-  rec.reset();
+  apple.reset();
   store.commitSuccessfulChanges();
-  store.destroy();
   SC.RunLoop.end();
 
-  equals(rec.get('title'), 'bar', 'original rec.title should change');
-  equals(rec.fired, YES, 'original rec.title should have notified');
+  equals(apple.get('title'), 'red apple', 'original apple.title should change');
+  equals(apple.fired, YES, 'original apple.title should have notified');
   equals(pear.get('title'), 'pear', 'original pear.title should NOT change');
   equals(pear.fired, NO, 'original pear.title should not have notified');
 
@@ -206,6 +205,28 @@ test("on commitSuccessfulChanges only the clean records from an autonomous chain
   equals(store.dataHashes[peach1Key], null, "the peach data hash should be removed from the main store");
   equals(peachStatus, SC.Record.DESTROYED_CLEAN, "the status of the peach record into main store should have changed to DESTROYED_CLEAN ");
 
-  var orangeStatus = store.readStatus(orange1Key);
+  var orangeStatus = parent.readStatus(orange1Key);
   equals(orangeStatus, SC.Record.READY_CLEAN, "the status of the orange record into main store should remain unchanged: READY_CLEAN ");
+
+  // attempt a new commitSuccessfulChanges
+  SC.RunLoop.begin();
+  apple.set( "title", "green apple" );
+  store.commitSuccessfulChanges();
+  SC.RunLoop.end();
+
+  apple2 = store.find(Rec, 1);
+  equals(apple2.get('title'), 'green apple', 'the nested store should fetch the apple data from the main store');
+
+  SC.RunLoop.begin();
+  apple.reset();
+  apple2.set( "title", "yellow apple" );
+  SC.RunLoop.end();
+
+  equals(apple2.get('title'), 'yellow apple', 'apple2  should still be editable into the nested store');
+  equals(apple.get('title'), 'green apple', 'original apple.title should NOT change');
+  equals(apple.fired, NO, 'original apple.title should not have notified');
+
+  SC.RunLoop.begin();
+  store.destroy();
+  SC.RunLoop.end();
 });

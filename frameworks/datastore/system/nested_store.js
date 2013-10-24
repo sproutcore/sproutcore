@@ -142,16 +142,22 @@ SC.NestedStore = SC.Store.extend(
   },
 
   /**
-    Propagate this store's successful changes to its parent (if exists).
-    This method is intended to be used only with autonomous nested stores,
-    that are able to communicate with a data source and perform server-side transactions
+    Propagate this store's successful changes to its parent (if exists). At the end, it clears the
+    local, private status of the committed records therefore the method can be called several times
+    until the full transaction is successful or editing is abandoned
 
     @param {Boolean} force if YES, does not check for conflicts first
     @returns {SC.Store} receiver
   */
   commitSuccessfulChanges: function(force) {
     if (this.get('hasChanges') && this.chainedChanges) {
-      var successfulChanges = this.chainedChanges.filter( function(storeKey) {
+      var chainedChanges = this.chainedChanges,
+          dataHashes = this.dataHashes,
+          revisions  = this.revisions,
+          statuses   = this.statuses,
+          editables  = this.editables,
+          locks      = this.locks;
+      var successfulChanges = chainedChanges.filter( function(storeKey) {
         var state = this.readStatus(storeKey);
 
         return state===SC.Record.READY_CLEAN || state===SC.Record.DESTROYED_CLEAN;
@@ -159,6 +165,22 @@ SC.NestedStore = SC.Store.extend(
       var pstore = this.get('parentStore');
 
       pstore.commitChangesFromNestedStore(this, successfulChanges, force);
+
+      // remove the local status so these records that have been successfully committed on the server
+      // are no longer retrieved from this nested store but from the parent
+      successfulChanges.forEach(function(storeKey)
+      {
+        if (dataHashes && dataHashes.hasOwnProperty(storeKey))
+          delete dataHashes[storeKey];
+        if (revisions && revisions.hasOwnProperty(storeKey))
+          delete revisions[storeKey];
+        if (editables) delete editables[storeKey];
+        if (locks) delete locks[storeKey];
+        if (statuses && statuses.hasOwnProperty(storeKey))
+          delete statuses[storeKey];
+        chainedChanges.remove( storeKey );
+      }, this );
+
     }
 
     return this;
