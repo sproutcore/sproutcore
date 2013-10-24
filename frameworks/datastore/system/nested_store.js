@@ -142,6 +142,29 @@ SC.NestedStore = SC.Store.extend(
   },
 
   /**
+    Propagate this store's successful changes to its parent (if exists).
+    This method is intended to be used only with autonomous nested stores,
+    that are able to communicate with a data source and perform server-side transactions
+
+    @param {Boolean} force if YES, does not check for conflicts first
+    @returns {SC.Store} receiver
+  */
+  commitSuccessfulChanges: function(force) {
+    if (this.get('hasChanges') && this.chainedChanges) {
+      var successfulChanges = this.chainedChanges.filter( function(storeKey) {
+        var state = this.readStatus(storeKey);
+
+        return state===SC.Record.READY_CLEAN || state===SC.Record.DESTROYED_CLEAN;
+      }, this );
+      var pstore = this.get('parentStore');
+
+      pstore.commitChangesFromNestedStore(this, successfulChanges, force);
+    }
+
+    return this;
+  },
+
+  /**
     Discard the changes made to this store and reset the store.
 
     @returns {SC.Store} receiver
