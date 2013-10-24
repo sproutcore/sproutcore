@@ -170,9 +170,14 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     newRecord.commitRecord( ..., callback );
 
     into the callback method:
-      if transaction successful, commit the changes into the main store and destroy:
-        ns.commitChanges();
+      if the transaction is successful, commit the successful changes into the main store and destroy:
+        ns.commitSuccessfulChanges();
         ns.destroy();
+
+      Note: This kind of construct can be used to manage complex transactions involving several independent rows.
+      If only some of them have been accepted by the server, the overall transaction is only partially
+      successful therefore the nested store will contain rows with different statuses.
+      In such case, only the accepted rows should be pushed to the main store using commitSuccessfulChanges()
 
       if not successful, handle the error, allow corrections if needed, etc.
 
