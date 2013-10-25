@@ -45,17 +45,11 @@ var pane = SC.ControlTestPane.design()
       contentCheckboxKey: "isDone",
       contentUnreadCountKey: "unread",
       rowHeight: 20,
-    })
-  })).add("cancelInsertion", SC.ScrollView.design({
-    layout: { left: 0, right: 0, top: 0, height: 300 },
-    contentView: SC.ListView.design({
-      content: ContentArray.create({ length: 5 }),
-      canReorderContent: true,
       _didCallDragEnded: false,
-      dragEnded: function(orig) {
+      dragEnded: function() {
         sc_super();
         this._didCallDragEnded = true;
-      }.enhance(),
+      }
     })
   }));
 
@@ -204,7 +198,9 @@ test("insertion point when cancel drag on list view", function() {
   var ev,
     itemView,
     layer,
-    listView = pane.view("cancelInsertion").get('contentView');
+    listView = pane.view("basic").get('contentView');
+
+  listView.set('canReorderContent', YES);
 
   itemView = listView.itemViewForContentIndex(0);
   layer = itemView.get('layer');

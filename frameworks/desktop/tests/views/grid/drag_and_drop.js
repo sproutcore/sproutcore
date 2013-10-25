@@ -44,18 +44,12 @@ var pane = SC.ControlTestPane.design()
       contentValueKey: "title",
       contentCheckboxKey: "isDone",
       contentUnreadCountKey: "unread",
-      rowHeight: 20
-    })
-  })).add("cancelInsertion", SC.ScrollView.design({
-    layout: { left: 0, right: 0, top: 0, height: 300 },
-    contentView: SC.GridView.design({
-      content: ContentArray.create({ length: 5 }),
-      canReorderContent: true,
+      rowHeight: 20,
       _didCallDragEnded: false,
-      dragEnded: function(orig) {
+      dragEnded: function() {
         sc_super();
         this._didCallDragEnded = true;
-      }.enhance(),
+      }
     })
   }));
 
@@ -209,7 +203,9 @@ test("insertion point when cancel drag on grid view", function() {
     frame,
     itemView,
     layer,
-    gridView = pane.view("cancelInsertion").get('contentView');
+    gridView = pane.view("basic").get('contentView');
+
+  gridView.set('canReorderContent', YES);
 
   itemView = gridView.itemViewForContentIndex(0);
   frame = itemView.get('frame');
