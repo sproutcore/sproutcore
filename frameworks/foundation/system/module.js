@@ -337,19 +337,19 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
       el.setAttribute('type', "text/javascript");
       el.setAttribute('src', url);
 
-      if (SC.browser.isIE) {
+      if (el.addEventListener) {
+        el.addEventListener('load', function () {
+          SC.run(function () {
+            SC.Module._moduleDidLoad(moduleName);
+          });
+        }, false);
+      } else if (el.readyState) {
         el.onreadystatechange = function () {
-          if (this.readyState == 'complete' || this.readyState == 'loaded') {
+          if (this.readyState === 'complete' || this.readyState === 'loaded') {
             SC.run(function () {
               SC.Module._moduleDidLoad(moduleName);
             });
           }
-        };
-      } else {
-        el.onload = function () {
-          SC.run(function () {
-            SC.Module._moduleDidLoad(moduleName);
-          });
         };
       }
 
