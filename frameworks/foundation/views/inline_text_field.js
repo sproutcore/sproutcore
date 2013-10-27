@@ -108,6 +108,13 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
   layout: { height: 0, width: 0 },
 
   /*
+    @private
+
+    Prevents the view from taking part in child view layout plugins.
+  */
+  useAbsoluteLayout: YES,
+
+  /*
   * @private
   * @method
   *
