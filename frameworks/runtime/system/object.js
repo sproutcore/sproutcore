@@ -948,8 +948,7 @@ SC.mixin(SC.Object.prototype, SC.Observable);
   through all the top-level properties looking for classes.  When it finds
   one, it saves the class path name.
 */
-function findClassNames() {
-
+SC.findClassNames = function () {
   if (SC._object_foundObjectClassNames) return;
   SC._object_foundObjectClassNames = true;
 
@@ -1051,7 +1050,7 @@ SC.kindOf = function (scObject, scClass) {
 */
 SC._object_className = function (obj) {
   if (SC.isReady === NO) return ''; // class names are not available until ready
-  if (!obj._object_className) findClassNames();
+  if (!obj._object_className) SC.findClassNames();
   if (obj._object_className) return obj._object_className;
 
   // if no direct classname was found, walk up class chain looking for a
