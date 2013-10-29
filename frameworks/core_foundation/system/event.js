@@ -705,6 +705,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
       var guid = SC.guidFor(elem) ;
       this._elements[guid] = elem;
 
+      // Either retrieve the previously cached listener or cache a new one.
       listener = SC.data(elem, "listener") || SC.data(elem, "listener",
        function() {
          return SC.Event.handle.apply(SC.Event._elements[guid], arguments);
@@ -743,6 +744,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
   _removeEventListener: function(elem, eventType) {
     var listener, special = SC.Event.special[eventType] ;
     if (!special || (special.teardown.call(elem)===NO)) {
+      // Retrieve the cached listener.
       listener = SC.data(elem, "listener") ;
       if (listener) {
         if (elem.removeEventListener) {
@@ -751,6 +753,9 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
           elem.detachEvent("on" + eventType, listener);
         }
       }
+
+      // Clean up the cached listener to prevent a memory leak.
+      SC.removeData(elem, 'listener');
     }
 
     elem = special = listener = null ;
