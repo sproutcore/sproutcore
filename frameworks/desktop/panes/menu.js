@@ -229,6 +229,14 @@ SC.MenuPane = SC.PickerPane.extend(
   isSubMenu: NO,
 
   /**
+    If true, title of menu items will be escaped to avoid scripting attacks.
+
+    @type Boolean
+    @default YES
+  */
+  escapeHTML: YES,
+
+  /**
     Whether the title of menu items should be localized before display.
 
     @type Boolean
@@ -657,7 +665,7 @@ SC.MenuPane = SC.PickerPane.extend(
         exampleViewKey, itemExampleView,
         height, heightKey, separatorKey, defaultHeight, separatorHeight,
         menuHeight, menuHeightPadding, keyEquivalentKey, keyEquivalent,
-        keyArray, idx, layerIdKey, propertiesHash,
+        keyArray, idx, layerIdKey, propertiesHash, escapeHTML,
         len;
 
     if (!items) return views; // return an empty array
@@ -669,6 +677,7 @@ SC.MenuPane = SC.PickerPane.extend(
     keyEquivalentKey = this.get('itemKeyEquivalentKey');
     separatorHeight = this.get('itemSeparatorHeight');
     layerIdKey = this.get('itemLayerIdKey');
+    escapeHTML = this.get('escapeHTML');
     menuHeightPadding = Math.floor(this.get('menuHeightPadding') / 2);
     menuHeight = menuHeightPadding;
 
@@ -697,7 +706,8 @@ SC.MenuPane = SC.PickerPane.extend(
         layout: { height: height, top: menuHeight },
         contentDisplayProperties: keyArray,
         content: item,
-        parentMenu: this
+        parentMenu: this,
+        escapeHTML: escapeHTML
       };
 
       if (item.get(layerIdKey)) {
