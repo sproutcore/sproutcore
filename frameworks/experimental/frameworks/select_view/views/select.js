@@ -101,6 +101,30 @@ SC.SelectView = SC.PopupButtonView.extend({
   */
   itemIsEnabledKey: "isEnabled",
 
+  /**
+    Set this to non-null to place an empty option at the top of the menu.
+
+    @property
+    @type String
+    @default null
+  */
+  emptyName: null,
+
+  /**
+    If true, titles will be escaped to avoid scripting attacks.
+
+    @type Boolean
+    @default YES
+  */
+  escapeHTML: YES,
+
+  /**
+    If true, the empty name and the default title will be localized.
+    
+    @type Boolean
+    @default YES
+  */
+  localize: YES,
 
   /**
    The menu that will pop up when this button is clicked.
@@ -212,15 +236,6 @@ SC.SelectView = SC.PopupButtonView.extend({
   },
 
   /**
-    The title to show when no item is selected.
-
-    @property
-    @type String
-    @default ""
-  */
-  defaultTitle: "",
-
-  /**
     The title of the button, derived from the selected item.
   */
   title: function() {
@@ -236,6 +251,16 @@ SC.SelectView = SC.PopupButtonView.extend({
       return sel;
     }
   }.property('selectedItem').cacheable(),
+
+  /** @private */
+  defaultTitle: function() {
+    var emptyName = this.get('emptyName');
+    if (emptyName) {
+      emptyName = this.get('localize') ? SC.String.loc(emptyName) : emptyName;
+      emptyName = this.get('escapeHTML') ? SC.RenderContext.escapeHTML(emptyName) : emptyName;
+    }
+    return emptyName || '';
+  }.property('emptyName').cacheable(),
 
   /**
     * When the value changes, we need to update selectedItem.
@@ -272,7 +297,10 @@ SC.SelectView = SC.PopupButtonView.extend({
     var attrs = {
       selectView: this,
       selectedItem: this.get('selectedItem'),
-      minimumMenuWidth: this.get('minimumMenuWidth')
+      minimumMenuWidth: this.get('minimumMenuWidth'),
+      emptyName: this.get('defaultTitle'),
+      escapeHTML: this.get('escapeHTML'),
+      localize: this.get('localize')
     };
 
     return klass.create(attrs);
