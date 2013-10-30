@@ -90,7 +90,7 @@ SC.SelectView = SC.PopupButtonView.extend({
     @type {String}
     @default null
   */
-  itemSeparatorKey: "separator",
+  itemSeparatorKey: "isSeparator",
 
   /**
     Key used to indicate if the item is to be enabled.
@@ -101,6 +101,39 @@ SC.SelectView = SC.PopupButtonView.extend({
   */
   itemIsEnabledKey: "isEnabled",
 
+  /**
+    Set this to non-null to place an empty option at the top of the menu.
+
+    @property
+    @type String
+    @default null
+  */
+  emptyName: null,
+
+  /**
+    If true, titles will be escaped to avoid scripting attacks.
+
+    @type Boolean
+    @default YES
+  */
+  escapeHTML: YES,
+
+  /**
+    If true, the empty name and the default title will be localized.
+    
+    @type Boolean
+    @default YES
+  */
+  localize: YES,
+
+  /**
+    if true, it means that no sorting will occur, items will appear
+    in the same order as in the array
+
+    @type Boolean
+    @default YES
+  */
+  disableSort: YES,
 
   /**
    The menu that will pop up when this button is clicked.
@@ -183,6 +216,7 @@ SC.SelectView = SC.PopupButtonView.extend({
     var sel = this.get('selectedItem'),
         last = this._scsv_lastSelection,
         titleKey = this.get('itemTitleKey') || 'title',
+        iconKey = this.get('itemIconKey') || 'icon',
         valueKey = this.get('itemValueKey') || 'value';
 
     // selected item could be a menu item from SC.MenuPane's displayItems, or it could
@@ -194,11 +228,13 @@ SC.SelectView = SC.PopupButtonView.extend({
     // add/remove observers for the title and value so we can invalidate.
     if (last && last.addObserver && sel !== last) {
       last.removeObserver(titleKey, this, this._scsv_selectedItemPropertyDidChange);
+      last.removeObserver(iconKey, this, this._scsv_selectedItemPropertyDidChange);
       last.removeObserver(valueKey, this, this._scsv_selectedItemPropertyDidChange);
     }
 
     if (sel && sel.addObserver && sel !== last) {
       sel.addObserver(titleKey, this, this._scsv_selectedItemPropertyDidChange);
+      sel.addObserver(iconKey, this, this._scsv_selectedItemPropertyDidChange);
       sel.addObserver(valueKey, this, this._scsv_selectedItemPropertyDidChange);
     }
 
@@ -208,17 +244,9 @@ SC.SelectView = SC.PopupButtonView.extend({
   // called when either title or value changes on the selected item
   _scsv_selectedItemPropertyDidChange: function(item) {
     this.notifyPropertyChange('title');
+    this.notifyPropertyChange('icon');
     this.set('value', item.get(this.get('itemValueKey') || 'value'));
   },
-
-  /**
-    The title to show when no item is selected.
-
-    @property
-    @type String
-    @default ""
-  */
-  defaultTitle: "",
 
   /**
     The title of the button, derived from the selected item.
@@ -237,28 +265,139 @@ SC.SelectView = SC.PopupButtonView.extend({
     }
   }.property('selectedItem').cacheable(),
 
+  /** @private */
+  defaultTitle: function() {
+    var emptyName = this.get('emptyName');
+    if (emptyName) {
+      emptyName = this.get('localize') ? SC.String.loc(emptyName) : emptyName;
+      emptyName = this.get('escapeHTML') ? SC.RenderContext.escapeHTML(emptyName) : emptyName;
+    }
+    return emptyName || '';
+  }.property('emptyName').cacheable(),
+
+  /**
+    The icon of the button, derived from the selected item.
+  */
+  icon: function() {
+    var sel = this.get('selectedItem');
+
+    if (!sel) {
+      return null;
+    } else if (sel.get) {
+      return sel.get(this.get('itemIconKey') || 'icon');
+    } else if (SC.typeOf(sel) == SC.T_HASH) {
+      return sel[this.get('itemIconKey') || 'icon'];
+    } else {
+      return sel;
+    }
+  }.property('selectedItem').cacheable(),
+
+  /**
+    Returns an array of normalized display items.
+
+    Adds the empty name to the items if applicable.
+
+    `displayItems` should never be set directly; instead, set `items` and
+    `displayItems` will update automatically.
+
+    @type Array
+    @returns {Array} array of display items.
+    @isReadOnly
+  */
+  displayItems: function () {
+    var items = this.get('items'),
+      emptyName = this.get('emptyName'),
+      len,
+      ret = [], idx, item, itemType;
+
+    if (!items) len = 0;
+    else len = items.get('length');
+
+    for (idx = 0; idx < len; idx++) {
+      item = items.objectAt(idx);
+
+      // fast track out if we can't do anything with this item
+      if (!item || (!ret.length && item[this.get('itemSeparatorKey')])) continue;
+
+      itemType = SC.typeOf(item);
+      if (itemType === SC.T_STRING) {
+        item = this._addDisplayItem(item, item);
+      } else if (itemType === SC.T_HASH) {
+        item = SC.Object.create(item);
+      }
+      item.contentIndex = idx;
+
+      ret.push(item);
+    }
+
+    ret = this.sortObjects(ret);
+
+    if (emptyName) {
+      if (len) ret.unshift(this._addDisplayItem(null, null, true));
+      ret.unshift(this._addDisplayItem(emptyName, null));
+    }
+
+    return ret;
+  }.property('items').cacheable(),
+
+  /** @private */
+  _addDisplayItem: function (title, value, isSeparator) {
+    var item = SC.Object.create();
+
+    item[this.get('itemTitleKey')] = title;
+    item[this.get('itemValueKey')] = value;
+    item[this.get('itemIsEnabledKey')] = true;
+    item[this.get('itemSeparatorKey')] = !!isSeparator;
+
+    return item;
+  },
+
+  /**
+
+    override this method to implement your own sorting of the menu. By
+    default, menu items are sorted using the value shown or the sortKey
+
+    @param {SC.Array} objects the unsorted array of objects to display.
+    @returns {SC.Array} sorted array of objects
+  */
+  sortObjects: function (objects) {
+    if (!this.get('disableSort')) {
+      var nameKey = this.get('itemSortKey') || this.get('itemTitleKey');
+      objects = objects.sort(function(a, b) {
+        if (nameKey) {
+          a = a.get ? a.get(nameKey) : a[nameKey];
+          b = b.get ? b.get(nameKey) : b[nameKey];
+        }
+        return (a<b) ? -1 : ((a>b) ? 1 : 0);
+      });
+    }
+    return objects;
+  },
+
   /**
     * When the value changes, we need to update selectedItem.
     * @private
   */
   _scsv_valueDidChange: function() {
-    var value = this.get('value');
+    var displayItems = this.get('displayItems');
+    if (!displayItems) return;
 
-    if (!this.get('items')) {
-      return;
-    }
+    var value = this.get('value'),
+      len = displayItems.get('length'), 
+      idx;
 
-    var items = this.get('items'), len = items.length, idx;
     for (idx = 0; idx < len; idx++) {
-      if (this._scsv_getValueForMenuItem(items[idx]) === value) {
-        this.setIfChanged('selectedItem', items[idx]);
+      var item = displayItems.objectAt(idx);
+      
+      if (this._scsv_getValueForMenuItem(item) === value) {
+        this.setIfChanged('selectedItem', item);
         return;
       }
     }
 
     // if we got here, this means no item is selected
     this.setIfChanged('selectedItem', null);
-  }.observes('value'),
+  }.observes('value', 'displayItems'),
 
   /**
     SelectView must set the selectView property on the menu so that the menu's
@@ -272,7 +411,9 @@ SC.SelectView = SC.PopupButtonView.extend({
     var attrs = {
       selectView: this,
       selectedItem: this.get('selectedItem'),
-      minimumMenuWidth: this.get('minimumMenuWidth')
+      minimumMenuWidth: this.get('minimumMenuWidth'),
+      escapeHTML: this.get('escapeHTML'),
+      localize: this.get('localize')
     };
 
     return klass.create(attrs);

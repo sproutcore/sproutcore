@@ -2,19 +2,22 @@ module("SelectViewMenu -- Bindings");
 
 function setValues(obj, props, toValue) {
   for (var idx = 0; idx < props.length; idx++) {
-    obj.set(props[idx], toValue);
+    var prop = props[idx];
+    if (prop === 'items') prop = 'displayItems';
+    obj.set(prop, toValue);
   }
 }
 
 function validateValues(obj, props, value) {
   for (var idx = 0; idx < props.length; idx++) {
-    equals(obj.get(props[idx]), value);
+    equals(obj.get(props[idx]), value, props[idx]);
   }
 }
 
 test("Proxying all properties from SelectView to MenuView works.", function() {
   var proxyProperties = [
     'items',
+    'target', 'action',
     'itemTitleKey', 'itemIsEnabledKey', 'itemValueKey', 'itemIconKey', 
     'itemHeightKey', 'itemSubMenuKey', 'itemSeparatorKey', 'itemTargetKey',
     'itemActionKey', 'itemCheckboxKey', 'itemShortCutKey',
