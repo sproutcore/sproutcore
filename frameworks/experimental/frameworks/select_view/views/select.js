@@ -294,17 +294,19 @@ SC.SelectView = SC.PopupButtonView.extend({
       return;
     }
 
-    var items = this.get('items'), len = items.length, idx;
+    var items = this.get('items'), len = items.get('length'), idx;
     for (idx = 0; idx < len; idx++) {
-      if (this._scsv_getValueForMenuItem(items[idx]) === value) {
-        this.setIfChanged('selectedItem', items[idx]);
+      var item = items.objectAt(idx);
+      
+      if (this._scsv_getValueForMenuItem(item) === value) {
+        this.setIfChanged('selectedItem', item);
         return;
       }
     }
 
     // if we got here, this means no item is selected
     this.setIfChanged('selectedItem', null);
-  }.observes('value'),
+  }.observes('value', 'items'),
 
   /**
     SelectView must set the selectView property on the menu so that the menu's
