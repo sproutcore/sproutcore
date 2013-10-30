@@ -255,6 +255,14 @@ SC.MenuPane = SC.PickerPane.extend(
   */
   isContextMenuEnabled: NO,
 
+  /**
+    Set this to non-null to place an empty option at the top of the menu.
+
+    @property
+    @type String
+    @default null
+  */
+  emptyName: null,
 
   // ..........................................................
   // METHODS
@@ -806,12 +814,19 @@ SC.MenuPane = SC.PickerPane.extend(
   */
   displayItems: function () {
     var items = this.get('items'),
+      emptyName = this.get('emptyName'),
       len,
       ret = [], idx, item, itemType;
 
     if (!items) return null;
 
     len = items.get('length');
+
+    if (emptyName) {
+      ret.push(this._createItem(emptyName, null));
+
+      if (len) ret.push(this._createItem(null, null, true));
+    }
 
     // Loop through the items property and transmute as needed, then
     // copy the new objects into the ret array.
@@ -823,10 +838,7 @@ SC.MenuPane = SC.PickerPane.extend(
 
       itemType = SC.typeOf(item);
       if (itemType === SC.T_STRING) {
-        item = SC.Object.create({ title: item,
-                                  value: item,
-                                  isEnabled: YES
-                               });
+        item = this._createItem(item, item);
       } else if (itemType === SC.T_HASH) {
         item = SC.Object.create(item);
       }
@@ -837,6 +849,17 @@ SC.MenuPane = SC.PickerPane.extend(
 
     return ret;
   }.property('items').cacheable(),
+
+  _createItem: function (title, value, isSeparator) {
+    var item = SC.Object.create();
+
+    item[this.get('itemTitleKey')] = title;
+    item[this.get('itemValueKey')] = value;
+    item[this.get('itemIsEnabledKey')] = true;
+    item[this.get('itemSeparatorKey')] = !!isSeparator;
+
+    return item;
+  },
 
   _sc_menu_itemsDidChange: function () {
     var items = this.get('items');
