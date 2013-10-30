@@ -80,7 +80,7 @@ SC.SelectViewMenu = {
   _svm_bindToProperties: [
     'items',
     'target', 'action',
-    'itemTitleKey', 'itemIsEnabledKey', 'itemValueKey', 'itemIconKey', 
+    'itemTitleKey', 'itemIsEnabledKey', 'itemValueKey', 'itemIconKey', 'itemSortKey', 
     'itemHeightKey', 'itemSubMenuKey', 'itemSeparatorKey', 'itemTargetKey',
     'itemActionKey', 'itemCheckboxKey', 'itemShortCutKey',
     'itemKeyEquivalentKey', 'itemDisableMenuFlashKey', 'minimumMenuWidth',

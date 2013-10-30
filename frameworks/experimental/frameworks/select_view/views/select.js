@@ -127,6 +127,15 @@ SC.SelectView = SC.PopupButtonView.extend({
   localize: YES,
 
   /**
+    if true, it means that no sorting will occur, items will appear
+    in the same order as in the array
+
+    @type Boolean
+    @default YES
+  */
+  disableSort: YES,
+
+  /**
    The menu that will pop up when this button is clicked.
 
    The default menu has its properties bound to the SC.SelectView,
@@ -323,7 +332,8 @@ SC.SelectView = SC.PopupButtonView.extend({
       minimumMenuWidth: this.get('minimumMenuWidth'),
       emptyName: this.get('defaultTitle'),
       escapeHTML: this.get('escapeHTML'),
-      localize: this.get('localize')
+      localize: this.get('localize'),
+      disableSort: this.get('disableSort')
     };
 
     return klass.create(attrs);

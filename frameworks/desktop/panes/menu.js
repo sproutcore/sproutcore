@@ -245,6 +245,15 @@ SC.MenuPane = SC.PickerPane.extend(
   localize: YES,
 
   /**
+    if true, it means that no sorting will occur, items will appear
+    in the same order as in the array
+
+    @type Boolean
+    @default YES
+  */
+  disableSort: YES,
+
+  /**
     Whether or not this menu pane should accept the “current menu pane”
     designation when visible, which is the highest-priority pane when routing
     events.  Generally you want this set to `YES` so that your menu pane can
@@ -354,6 +363,17 @@ SC.MenuPane = SC.PickerPane.extend(
     @commonTask Menu Item Properties
   */
   itemIconKey: 'icon',
+
+  /**
+    If you set this to a non-null value, then the value of this key will
+    be used to sort the items.  If this is not set, then itemTitleKey will
+    be used.
+
+    @property
+    @type: {String}
+    @default null
+  */
+  itemSortKey: null,
 
   /**
     The name of the property that contains the height for each item.
@@ -484,7 +504,7 @@ SC.MenuPane = SC.PickerPane.extend(
     @isReadOnly
     @type Array
   */
-  menuItemKeys: ['itemTitleKey', 'itemValueKey', 'itemIsEnabledKey', 'itemIconKey', 'itemSeparatorKey', 'itemActionKey', 'itemCheckboxKey', 'itemShortCutKey', 'itemHeightKey', 'itemSubMenuKey', 'itemKeyEquivalentKey', 'itemTargetKey', 'itemLayerIdKey'],
+  menuItemKeys: ['itemTitleKey', 'itemValueKey', 'itemIsEnabledKey', 'itemIconKey', 'itemSortKey', 'itemSeparatorKey', 'itemActionKey', 'itemCheckboxKey', 'itemShortCutKey', 'itemHeightKey', 'itemSubMenuKey', 'itemKeyEquivalentKey', 'itemTargetKey', 'itemLayerIdKey'],
 
   // ..........................................................
   // DEFAULT PROPERTIES
@@ -756,6 +776,27 @@ SC.MenuPane = SC.PickerPane.extend(
   },
 
   /**
+    override this method to implement your own sorting of the menu. By
+    default, menu items are sorted using the value shown or the sortKey
+
+    @param {SC.Array} objects the unsorted array of objects to display.
+    @returns {SC.Array} sorted array of objects
+  */
+  sortObjects: function (objects) {
+    if (!this.get('disableSort')) {
+      var nameKey = this.get('itemSortKey') || this.get('itemTitleKey');
+      objects = objects.sort(function(a, b) {
+        if (nameKey) {
+          a = a.get ? a.get(nameKey) : a[nameKey];
+          b = b.get ? b.get(nameKey) : b[nameKey];
+        }
+        return (a<b) ? -1 : ((a>b) ? 1 : 0);
+      });
+    }
+    return objects;
+  },
+
+  /**
     If this is a submenu, this property corresponds to the
     top-most parent menu. If this is the root menu, it returns
     itself.
@@ -856,6 +897,8 @@ SC.MenuPane = SC.PickerPane.extend(
 
       ret.push(item);
     }
+
+    ret = this.sortObjects(ret);
 
     return ret;
   }.property('items').cacheable(),
