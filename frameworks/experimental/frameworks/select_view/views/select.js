@@ -207,6 +207,7 @@ SC.SelectView = SC.PopupButtonView.extend({
     var sel = this.get('selectedItem'),
         last = this._scsv_lastSelection,
         titleKey = this.get('itemTitleKey') || 'title',
+        iconKey = this.get('itemIconKey') || 'icon',
         valueKey = this.get('itemValueKey') || 'value';
 
     // selected item could be a menu item from SC.MenuPane's displayItems, or it could
@@ -218,11 +219,13 @@ SC.SelectView = SC.PopupButtonView.extend({
     // add/remove observers for the title and value so we can invalidate.
     if (last && last.addObserver && sel !== last) {
       last.removeObserver(titleKey, this, this._scsv_selectedItemPropertyDidChange);
+      last.removeObserver(iconKey, this, this._scsv_selectedItemPropertyDidChange);
       last.removeObserver(valueKey, this, this._scsv_selectedItemPropertyDidChange);
     }
 
     if (sel && sel.addObserver && sel !== last) {
       sel.addObserver(titleKey, this, this._scsv_selectedItemPropertyDidChange);
+      sel.addObserver(iconKey, this, this._scsv_selectedItemPropertyDidChange);
       sel.addObserver(valueKey, this, this._scsv_selectedItemPropertyDidChange);
     }
 
@@ -232,6 +235,7 @@ SC.SelectView = SC.PopupButtonView.extend({
   // called when either title or value changes on the selected item
   _scsv_selectedItemPropertyDidChange: function(item) {
     this.notifyPropertyChange('title');
+    this.notifyPropertyChange('icon');
     this.set('value', item.get(this.get('itemValueKey') || 'value'));
   },
 
@@ -261,6 +265,23 @@ SC.SelectView = SC.PopupButtonView.extend({
     }
     return emptyName || '';
   }.property('emptyName').cacheable(),
+
+  /**
+    The icon of the button, derived from the selected item.
+  */
+  icon: function() {
+    var sel = this.get('selectedItem');
+
+    if (!sel) {
+      return null;
+    } else if (sel.get) {
+      return sel.get(this.get('itemIconKey') || 'icon');
+    } else if (SC.typeOf(sel) == SC.T_HASH) {
+      return sel[this.get('itemIconKey') || 'icon'];
+    } else {
+      return sel;
+    }
+  }.property('selectedItem').cacheable(),
 
   /**
     * When the value changes, we need to update selectedItem.
