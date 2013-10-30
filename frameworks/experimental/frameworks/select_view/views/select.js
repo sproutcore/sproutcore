@@ -90,7 +90,7 @@ SC.SelectView = SC.PopupButtonView.extend({
     @type {String}
     @default null
   */
-  itemSeparatorKey: "separator",
+  itemSeparatorKey: "isSeparator",
 
   /**
     Key used to indicate if the item is to be enabled.
