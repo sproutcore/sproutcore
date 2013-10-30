@@ -885,7 +885,7 @@ SC.MenuPane = SC.PickerPane.extend(
       item = items.objectAt(idx);
 
       // fast track out if we can't do anything with this item
-      if (!item) continue;
+      if (!item || (!ret.length && item[this.get('itemSeparatorKey')])) continue;
 
       itemType = SC.typeOf(item);
       if (itemType === SC.T_STRING) {
