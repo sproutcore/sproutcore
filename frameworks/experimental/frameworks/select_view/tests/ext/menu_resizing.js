@@ -1,7 +1,7 @@
 module("Menus -- Automatic Resizing");
 
 function createMenu(items) {
-  return SC.MenuPane.create({
+  return SC.AutoResizingMenuPane.create({
     items: items
   });
 }

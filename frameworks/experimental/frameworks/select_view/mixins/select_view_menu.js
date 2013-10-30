@@ -61,7 +61,7 @@ SC.SelectViewMenu = {
     @type {SC.MenuItemView}
     @default SC.MenuItemView subclass
   */
-  exampleView: SC.MenuItemView.extend({
+  exampleView: SC.AutoResizingMenuItemView.extend({
     isChecked: function() {
       // _lastIsChecked is used by the SelectViewMenu mixin above to determine whether
       // the isChecked property needs to be invalidated.
