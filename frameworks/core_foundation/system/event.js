@@ -383,10 +383,13 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
       // verify that there are still events registered on this element.  If
       // there aren't, cleanup the element completely to avoid memory leaks.
       key = null ;
-      for(key in events) break;
-      if(!key) {
+      for (key in events) break;
+      if (!key) {
         SC.removeData(elem, "sc_events") ;
         delete this._elements[SC.guidFor(elem)]; // important to avoid leaks
+
+        // Clean up the cached listener to prevent a memory leak.
+        SC.removeData(elem, 'listener');
       }
 
     }
@@ -753,9 +756,6 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
           elem.detachEvent("on" + eventType, listener);
         }
       }
-
-      // Clean up the cached listener to prevent a memory leak.
-      SC.removeData(elem, 'listener');
     }
 
     elem = special = listener = null ;
