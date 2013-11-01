@@ -82,7 +82,7 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
 
     // attempt to read from localStorage
     isIE7 = SC.browser.isIE &&
-        SC.browser.compare(SC.browser.engineVersion, '7') === 0;
+        SC.browser.compare(SC.browser.version, '7') === 0;
 
     if(isIE7) {
       localStorage=document.body;
@@ -149,7 +149,7 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
 
     // save to local storage
     isIE7 = SC.browser.isIE &&
-        SC.browser.compare(SC.browser.engineVersion, '7') === 0;
+        SC.browser.compare(SC.browser.version, '7') === 0;
 
     if(isIE7){
       localStorage=document.body;
@@ -218,7 +218,7 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     if (written) delete written[userKeyName];
 
     isIE7 = SC.browser.isIE &&
-        SC.browser.compare(SC.browser.engineVersion, '7') === 0;
+        SC.browser.compare(SC.browser.version, '7') === 0;
 
     if(isIE7){
        localStorage=document.body;
@@ -329,7 +329,7 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     this._scud_appDomain  = this.get('appDomain');
 
     isIE7 = SC.browser.isIE &&
-        SC.browser.compare(SC.browser.engineVersion, '7') === 0;
+        SC.browser.compare(SC.browser.version, '7') === 0;
 
     if(isIE7){
       //Add user behavior userData. This works in all versions of IE.
