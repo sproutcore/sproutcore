@@ -1280,6 +1280,13 @@ SC.Observable = /** @scope SC.Observable.prototype */{
   bind: function (toKey, target, method) {
     var binding, pathType;
 
+    //@if(debug)
+    // Developer support.
+    if (!target) {
+      throw new Error("Developer Error: Attempt to bind key `%@` to null or undefined target".fmt(toKey));
+    }
+    //@endif
+
     // normalize...
     if (method !== undefined) target = [target, method];
 
