@@ -622,9 +622,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
         autoCorrect = this.get('autoCorrect'),
         autoCapitalize = this.get('autoCapitalize'),
         isBrowserFocusable = this.get('isBrowserFocusable'),
-        spellCheckString='', autocapitalizeString='', autocorrectString='',
-        name, adjustmentStyle, type, hintElements, element, paddingElementStyle,
-        fieldClassNames, isOldSafari, activeState, browserFocusable;
+        spellCheckString = '', autocapitalizeString = '', autocorrectString = '',
+        name, adjustmentStyle, type, element, paddingElementStyle,
+        fieldClassNames, isOldSafari, activeStateString = '', browserFocusableString = '';
 
     context.setClass('text-area', isTextArea);
 
@@ -637,7 +637,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
 
     if (firstTime || this._forceRenderFirstTime) {
       this._forceRenderFirstTime = NO;
-      activeState = isEnabled ? (isEditable ? '' : 'readonly="readonly"') : 'disabled="disabled"' ;
+      activeStateString = isEnabled ? (isEditable ? '' : ' readonly="readonly"') : ' disabled="disabled"';
       name = this.get('layerId');
 
       spellCheckString = this.get('spellCheckEnabled') ? ' spellcheck="true"' : ' spellcheck="false"';
@@ -655,7 +655,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       }
 
       if (!isBrowserFocusable) {
-        browserFocusable = 'tabindex="-1"';
+        browserFocusableString = ' tabindex="-1"';
       }
 
       // if hint is on and we don't want it to show on focus, create one
@@ -692,13 +692,12 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
 
       // Render the input/textarea field itself, and close off the padding.
       if (isTextArea) {
-        context.push('<textarea aria-label="' + hint + '" aria-multiline="true" class="'+fieldClassNames+'" name="'+ name+
-                      '" '+ activeState + hintString +
-                      spellCheckString + autocorrectString + browserFocusable +
-                      autocapitalizeString + ' maxlength="'+ maxLength+ '">'+
-                      value+ '</textarea></div>') ;
-      }
-      else {
+        context.push('<textarea aria-label="' + hint + '" class="' + fieldClassNames + '" aria-multiline="true"' +
+                      '" name="' + name + '"' + activeStateString + hintString +
+                      spellCheckString + autocorrectString + autocapitalizeString +
+                      browserFocusableString + ' maxlength="' + maxLength +
+                      '">' + value + '</textarea></div>');
+      } else {
         type = this.get('type');
 
         // Internet Explorer won't let us change the type attribute later
@@ -711,11 +710,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
           type = 'password';
         }
 
-        context.push('<input aria-label="' + hint + '" class="'+fieldClassNames+'" type="'+ type+
-                      '" name="'+ name + '" '+ activeState + ' value="'+ value + '"' +
-                      hintString + spellCheckString+ browserFocusable +
-                      ' maxlength="'+ maxLength+ '" '+autocorrectString+' ' +
-                      autocapitalizeString+'/></div>') ;
+        context.push('<input aria-label="' + hint + '" class="' + fieldClassNames + '" type="' + type +
+                      '" name="' + name + '"' + activeStateString + hintString +
+                      spellCheckString + autocorrectString + autocapitalizeString +
+                      browserFocusableString + ' maxlength="' + maxLength +
+                      '" value="' + value + '"' + '/></div>');
       }
     }
     else {
