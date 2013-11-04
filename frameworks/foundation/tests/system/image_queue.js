@@ -13,8 +13,8 @@ var guardTimeout, firstGoodImageURL, secondGoodImageURL, badImageURL;
 module("Image Queue", {
   setup: function() {
 		guardTimeout = 30000;
-		firstGoodImageURL = sc_static('images/sproutcore-128.png');
-		secondGoodImageURL = sc_static('images/sproutcore-256.png');
+		firstGoodImageURL = sc_static('images/sproutcore-32.png');
+		secondGoodImageURL = sc_static('images/sproutcore-48.png');
 		badImageURL = "http://www.sproutcore.com/images/foobar.png";
 	}
 });
