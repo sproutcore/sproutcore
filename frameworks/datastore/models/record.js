@@ -42,12 +42,12 @@ SC.Record = SC.Object.extend(
 
   //@if(debug)
   /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */
+
   /** @private
     Creates string representation of record, with status.
 
     @returns {String}
   */
-
   toString: function() {
     // We won't use 'readOnlyAttributes' here because accessing them directly
     // avoids a SC.clone() -- we'll be careful not to edit anything.

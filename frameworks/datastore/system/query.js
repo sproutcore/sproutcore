@@ -139,6 +139,21 @@ sc_require('models/record');
 SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
   /** @scope SC.Query.prototype */ {
 
+  //@if(debug)
+  /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */
+
+  /* @private */
+  toString: function () {
+    var conditions = this.get('conditions'),
+      location = this.get('location'),
+      parameters = this.get('parameters');
+
+    return "%@.%@({ conditions: '%@', parameters: %@, … })".fmt(this.constructor.toString(), location, conditions, SC.inspect(parameters));
+  },
+
+  /* END DEBUG ONLY PROPERTIES AND METHODS */
+  //@endif
+
   // ..........................................................
   // PROPERTIES
   //
