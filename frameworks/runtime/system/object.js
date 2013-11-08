@@ -623,8 +623,6 @@ SC.Object.prototype = {
 
     Although the default init() method returns the receiver, the return
     value is ignored.
-
-
   */
   init: function () {
     this.initObservable();

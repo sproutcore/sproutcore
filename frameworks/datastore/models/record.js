@@ -48,7 +48,7 @@ SC.Record = SC.Object.extend(
 
     @returns {String}
   */
-  toString: function() {
+  toString: function () {
     // We won't use 'readOnlyAttributes' here because accessing them directly
     // avoids a SC.clone() -- we'll be careful not to edit anything.
     var attrs = this.get('store').readDataHash(this.get('storeKey'));
@@ -61,7 +61,7 @@ SC.Record = SC.Object.extend(
     @returns {String}
   */
 
-  statusString: function() {
+  statusString: function () {
     var ret = [], status = this.get('status');
 
     for(var prop in SC.Record) {

@@ -1057,7 +1057,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Record} Returns a record instance.
   */
   materializeRecord: function (storeKey) {
-    var records = this.records, ret, recordType, attrs;
+    var records = this.records,
+      //@if(debug)
+      updatingRecords = this.updatingRecords,
+      //@endif
+      ret, recordType, attrs;
 
     // look up in cached records
     if (!records) records = this.records = {}; // load cached records
@@ -1071,7 +1075,25 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     attrs = this._TMP_REC_ATTRS ;
     attrs.storeKey = storeKey ;
     attrs.store    = this ;
+
+    //@if(debug)
+    // Add some developer support to prevent a tough to diagnose bug that if
+    // materializeRecord is called during the creation of a record, the store
+    // will inadvertently create a duplicate record instance not because the
+    // actual instance won't have been cached to this.records yet.
+    if (!this.updatingRecords) { updatingRecords = this.updatingRecords = {}; }
+    if (updatingRecords[storeKey]) {
+      throw new Error("Developer Error: The record of type, %@, with storeKey, %@, was materialized a second time before the first call had finished. This will result in two separate instances of the same object being created and should be fixed. A likely cause is using `.observes` code in the record class, which can cause the record to be retrieved somehow while it is still being created.".fmt(recordType, storeKey));
+    }
+
+    updatingRecords[storeKey] = storeKey;
+    //@endif
+
     ret = records[storeKey] = recordType.create(attrs);
+
+    //@if(debug)
+    updatingRecords[storeKey] = null;
+    //@endif
 
     return ret ;
   },
