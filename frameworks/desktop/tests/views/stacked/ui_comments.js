@@ -4,6 +4,7 @@
 //            portions copyright @2011 Apple Inc.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
+/*global module, test, ok, equals, htmlbody, clearHtmlbody */
 
 /* Test SC.StackedView with a Comments example. */
 
@@ -27,7 +28,7 @@ var CommentView = SC.View.extend(SC.Control, {
 
   contentCommentKey: 'comment',
 
-  contentPropertyDidChange: function(target, key) {
+  contentPropertyDidChange: function (target, key) {
 
     // update everything!
     if (key === '*') {
@@ -41,16 +42,17 @@ var CommentView = SC.View.extend(SC.Control, {
     if (this.owner && this.owner.updateHeight) this.owner.updateHeight();
   },
 
-  updateFromLabel: function() {
+  updateFromLabel: function () {
     var content = this.get('content'),
         from    = content ? content.get('from') : 'Anonymous',
         date    = content ? content.get('date') : 'some date',
         str     = "%@ wrote %@: ".fmt(from, date);
     this.fromLabel.set('value', str);
-    return this ;
+
+    return this;
   },
 
-  updateCommentLabel: function() {
+  updateCommentLabel: function () {
     var content = this.get('content'),
         comment = content ? content.get('comment') : '(No Comment)';
     this.commentLabel.set('value', comment);
@@ -122,7 +124,7 @@ var extra = SC.Object.create({
 
 var pane = SC.ControlTestPane.design()
   .add("basic", SC.StackedView, {
-    layout: { top: 0, left: 0, right: 0, height: 600 },
+    layout: { top: 0, left: 0, right: 0 },
     content: content,
     exampleView: CommentView
   });
@@ -131,7 +133,7 @@ var pane = SC.ControlTestPane.design()
 // BASIC TESTS
 //
 module("Basic Tests", {
-  setup: function(){
+  setup: function () {
     htmlbody(["<style>",
       '.sc-stacked-view { border-bottom: 1px red solid; }',
       '.comment-view.sel { background-color: #ccc; }',
@@ -140,20 +142,20 @@ module("Basic Tests", {
     '</style>'].join("\n"));
     pane.standardSetup().setup();
   },
-  teardown: function(){
+  teardown: function () {
     pane.standardSetup().teardown();
     clearHtmlbody();
   }
 });
 
-test("removing an item should delete childView and adjust height", function() {
+test("removing an item should delete childView and adjust height", function () {
   var view = pane.view('basic'),
       item = content[0];
 
   equals(view.getPath('childViews.length'), content.length, 'precond - should have child views equal to current content');
   var oldHeight = view.get('frame').height; // save height.
 
-  SC.run(function() { content.removeAt(0); }); // remove first item
+  SC.run(function () { content.removeAt(0); }); // remove first item
 
 
   equals(view.getPath('childViews.length'), content.length, 'view should remove childView for removed content items');
@@ -161,20 +163,20 @@ test("removing an item should delete childView and adjust height", function() {
   ok(newHeight < oldHeight, 'view height should adjust to reflect new content. (old height: %@ current height: %@)'.fmt(oldHeight, newHeight));
 
   // restore old content
-  SC.run(function() { content.insertAt(0, item); });
+  SC.run(function () { content.insertAt(0, item); });
 
 });
 
-window.content = content ;
+window.content = content;
 
-test("inserting an item should add childView and adjust height", function() {
+test("inserting an item should add childView and adjust height", function () {
   var view = pane.view('basic'),
       item = extra; // we will insert another one
 
   equals(view.getPath('childViews.length'), content.length, 'precond - should have child views equal to current content');
   var oldHeight = view.get('frame').height; // save height.
 
-  SC.run(function() { content.pushObject(item); }); // add another item
+  SC.run(function () { content.pushObject(item); }); // add another item
 
 
   equals(view.getPath('childViews.length'), content.length, 'view should add childView for added content item');
@@ -182,11 +184,11 @@ test("inserting an item should add childView and adjust height", function() {
   ok(newHeight > oldHeight, 'view height should adjust to reflect new content. (old height: %@ current height: %@)'.fmt(oldHeight, newHeight));
 
   // restore
-  SC.run(function() { content.popObject(); });
+  SC.run(function () { content.popObject(); });
 });
 
 
-test("editing an item should automatically adjust the height", function() {
+test("editing an item should automatically adjust the height", function () {
   var view = pane.view('basic'),
       item = content[0],
       childView = view.childViews[0],
@@ -198,7 +200,7 @@ test("editing an item should automatically adjust the height", function() {
   var height = view.get('frame').height;  // save old height
 
   // change comment
-  SC.run(function() { item.set('comment', 'This is a new comment'); });
+  SC.run(function () { item.set('comment', 'This is a new comment'); });
 
   // should have updated UI and adjusted height of collection
   equals(childView.$().find('p').text(), 'This is a new comment', 'Item view should now contain comment');
@@ -207,7 +209,7 @@ test("editing an item should automatically adjust the height", function() {
   ok(newHeight < height, 'view height should adjust to reflect new content. (old height: %@ current height: %@)'.fmt(height, newHeight));
 
   // restore
-  SC.run(function() { item.set('comment', old); });
+  SC.run(function () { item.set('comment', old); });
 
   newHeight = view.get('frame').height;
   equals(newHeight, height, 'view height should restore to old height when content is edited again. (old height: %@ current height: %@)'.fmt(height, newHeight));
@@ -220,20 +222,20 @@ test("editing an item should automatically adjust the height", function() {
 
 // tests specific bug where a series of many edits strung together would
 // cause the height to get out of sync.
-test("adding, removing then editing items should still keep height the same", function() {
+test("adding, removing then editing items should still keep height the same", function () {
 
   var view = pane.view('basic'),
       item = content[0],
       old  = item.get('comment'),
       height = view.get('frame').height; // save old height
 
-  SC.run(function() { content.removeAt(0); });
-  SC.run(function() { content.insertAt(0, item); });
-  SC.run(function() { content.pushObject(extra); });
-  SC.run(function() { content.popObject(); });
+  SC.run(function () { content.removeAt(0); });
+  SC.run(function () { content.insertAt(0, item); });
+  SC.run(function () { content.pushObject(extra); });
+  SC.run(function () { content.popObject(); });
 
-  SC.run(function() { item.set('comment', 'Short comment'); });
-  SC.run(function() { item.set('comment', old); });
+  SC.run(function () { item.set('comment', 'Short comment'); });
+  SC.run(function () { item.set('comment', old); });
 
   var newHeight = view.get('frame').height;
   equals(newHeight, height, 'view height should restore to old height when content is edited again. (old height: %@ current height: %@)'.fmt(height, newHeight));

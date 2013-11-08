@@ -438,16 +438,19 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
   //
 
   /**
-    Default view class used to draw an insertion point.  The default
-    view will show a vertical line.  Any view you create
-    should expect an outlineLevel property set, which should impact your left
-    offset.
+    Default view class used to draw an insertion point, which uses CSS
+    styling to show a horizontal line.
+
+    This view's position (top & left) will be automatically adjusted to the
+    point of insertion.
 
     @field
     @type SC.View
   */
   insertionPointView: SC.View.extend({
     classNames: 'sc-list-insertion-point',
+
+    layout: { height: 2 },
 
     /** @private */
     render: function(context, firstTime) {
@@ -459,25 +462,17 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     Default implementation will show an insertion point
     @see SC.CollectionView#showInsertionPoint
   */
-  showInsertionPoint: function(itemView, dropOperation) {
-    var view = this._insertionPointView;
-    if (!view) {
-      view = this._insertionPointView
-           = this.get('insertionPointView').create();
-    }
-
+  showInsertionPoint: function (itemView, dropOperation) {
     var index  = itemView.get('contentIndex'),
-        len    = this.get('length'),
-        layout = SC.clone(itemView.get('layout')),
-        level  = itemView.get('outlineLevel'),
-        indent = itemView.get('outlineIndent') || 0,
-        group;
+      len = this.get('length'),
+      level  = itemView.get('outlineLevel'),
+      indent = itemView.get('outlineIndent') || 0;
 
     // show item indented if we are inserting at the end and the last item
     // is a group item.  This is a special case that should really be
     // converted into a more general protocol.
     if ((index >= len) && index>0) {
-      group = this.itemViewForContentIndex(len-1);
+      var group = this.itemViewForContentIndex(len - 1);
       if (group.get('isGroupView')) {
         level = 1;
         indent = group.get('outlineIndent');
@@ -499,7 +494,6 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
         this._lastDropOnView = itemView;
       }
     } else {
-
       if (this._lastDropOnView) {
         // If there was an item that was the target of the drop previously, be
         // sure to clear it.
@@ -507,15 +501,21 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
         this._lastDropOnView = null;
       }
 
-      if (dropOperation & SC.DROP_AFTER) layout.top += layout.height;
+      var insertionPoint = this._insertionPointView,
+        layout = itemView.get('layout'),
+        top, left;
 
-      layout.height = 2;
-      layout.right  = 0;
-      layout.left   = ((level+1) * indent) + 12;
-      delete layout.width;
+      if (!insertionPoint) {
+        insertionPoint = this._insertionPointView = this.get('insertionPointView').create();
+      }
 
-      view.set('layout', layout);
-      this.appendChild(view);
+      // Adjust the position of the insertion point.
+      top = layout.top;
+      if (dropOperation & SC.DROP_AFTER) top += layout.height;
+      left = ((level + 1) * indent) + 12;
+
+      insertionPoint.adjust({ top: top, left: left });
+      this.appendChild(insertionPoint);
     }
   },
 
@@ -558,8 +558,8 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     // if there are no indexes in the rect, then we need to either insert
     // before the top item or after the last item.  Figure that out by
     // computing both.
-    if (SC.none(index) || index<0) {
-      if ((len===0) || (loc.y <= this.rowOffsetForContentIndex(0))) index = 0;
+    if (SC.none(index) || index < 0) {
+      if ((len === 0) || (loc.y <= this.rowOffsetForContentIndex(0))) index = 0;
       else if (loc.y >= this.rowOffsetForContentIndex(len)) index = len;
     }
 
@@ -571,11 +571,11 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     // if we can drop on or not.
     if (dropOperation == SC.DROP_ON) {
       // editable size - reduce height by a bit to handle dropping
-      if (this.get('isEditable')) diff=Math.min(Math.floor((max-min)*0.2),5);
+      if (this.get('isEditable')) diff = Math.min(Math.floor((max - min) * 0.2), 5);
       else diff = 0;
 
       // if we're inside the range, then DROP_ON
-      if (loc.y >= (min+diff) || loc.y <= (max+diff)) {
+      if (loc.y >= (min + diff) || loc.y <= (max + diff)) {
         return [index, SC.DROP_ON];
       }
     }

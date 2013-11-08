@@ -1700,11 +1700,13 @@ SC.ScrollView = SC.View.extend({
 
       // set the scale, vertical, and horizontal offsets to what they technically already are,
       // but don't know they are yet. This will finally update things like, say, the clipping frame.
-      this.beginPropertyChanges();
-      this.set("scale", this._scale);
-      this.set("verticalScrollOffset", this._scroll_verticalScrollOffset);
-      this.set("horizontalScrollOffset", this._scroll_horizontalScrollOffset);
-      this.endPropertyChanges();
+      SC.run(function () {
+        this.beginPropertyChanges();
+        this.set("scale", this._scale);
+        this.set("verticalScrollOffset", this._scroll_verticalScrollOffset);
+        this.set("horizontalScrollOffset", this._scroll_horizontalScrollOffset);
+        this.endPropertyChanges();
+      }, this);
 
       return;
     }
@@ -1719,7 +1721,7 @@ SC.ScrollView = SC.View.extend({
     var self = this;
     touch.lastEventTime = Date.now();
     touch.animationID = window.requestAnimationFrame(function () {
-      SC.run(self.decelerateAnimation(), self);
+      self.decelerateAnimation();
     });
   },
 
@@ -1936,7 +1938,11 @@ SC.ScrollView = SC.View.extend({
         forceHeight = mxVOffSet < vOffSet,
         forceWidth  = mxHOffSet < hOffSet;
     if (forceHeight || forceWidth) {
+      // Update the position of the content view to fit.
       this.forceDimensionsRecalculation(forceWidth, forceHeight, vOffSet, hOffSet);
+    } else {
+      // Reapply the position. Most importantly, this reapplies the touch transforms on the content view in case they were overwritten.
+      this.invokeLast(this.adjustElementScroll);
     }
 
     // send change notifications since they don't invalidate automatically
@@ -2000,7 +2006,8 @@ SC.ScrollView = SC.View.extend({
         this._applyCSSTransforms(content.get('layer'));
       }
 
-      if (content._viewFrameDidChange) { content._viewFrameDidChange(); }
+      // Notify the child that its frame is changing.
+      content.notifyPropertyChange('frame');
     }
 
     if (container && !SC.platform.touch) {

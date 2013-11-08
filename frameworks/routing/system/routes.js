@@ -198,7 +198,18 @@ SC.routes = SC.Object.create(
     @type {String}
   */
   location: function(key, value) {
+    var lsk;
     this._skipRoute = NO;
+    if (value !== undefined) {
+      // The 'location' and 'informLocation' properties essentially
+      // represent a single property, but with different behavior
+      // when setting the value. Because of this, we manually
+      // update the cached value for the opposite property to
+      // ensure they remain in sync. You shouldn't do this in
+      // your own code unless you REALLY know what you are doing.
+      lsk = this.informLocation.lastSetValueKey;
+      if (lsk && this._kvo_cache) this._kvo_cache[lsk] = value;
+    }
     return this._extractLocation(key, value);
   }.property(),
 
@@ -207,17 +218,18 @@ SC.routes = SC.Object.create(
     you want to just change the location w/out triggering the routes
   */
   informLocation: function(key, value){
+    var lsk;
     this._skipRoute = YES;
-    // This is a very special case where this property
-    // has a very heavy influence on the 'location' property
-    // this is a case where you might want to use idempotent
-    // but you would take a performance hit because it is possible
-    // call set() multiple time and we don't want to take the extra
-    // cost, so we just invalidate the cached set() value ourselves
-    // you shouldn't do this in your own code unless you REALLY
-    // know what you are doing.
-    var lsk = this.location.lastSetValueKey;
-    if (lsk && this._kvo_cache) this._kvo_cache[lsk] = value;
+    if (value !== undefined) {
+      // The 'location' and 'informLocation' properties essentially
+      // represent a single property, but with different behavior
+      // when setting the value. Because of this, we manually
+      // update the cached value for the opposite property to
+      // ensure they remain in sync. You shouldn't do this in
+      // your own code unless you REALLY know what you are doing.
+      lsk = this.location.lastSetValueKey;
+      if (lsk && this._kvo_cache) this._kvo_cache[lsk] = value;
+    }
     return this._extractLocation(key, value);
   }.property(),
 

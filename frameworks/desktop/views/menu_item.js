@@ -5,8 +5,8 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('views/button') ;
-sc_require('views/separator') ;
+sc_require('views/button');
+sc_require('views/separator');
 
 /**
   @class
@@ -89,7 +89,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     @type Boolean
     @observes content
   */
-  isSeparator: function() {
+  isSeparator: function () {
     return this.getContentProperty('itemSeparatorKey') === YES;
   }.property('content').cacheable(),
 
@@ -98,7 +98,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     @type Boolean
     @observes content.isEnabled
   */
-  isEnabled: function() {
+  isEnabled: function () {
     return this.getContentProperty('itemIsEnabledKey') !== NO &&
            this.getContentProperty('itemSeparatorKey') !== YES;
   }.property('content.isEnabled').cacheable(),
@@ -109,7 +109,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     @type Boolean
     @property
   */
-  isChecked: function() {
+  isChecked: function () {
     return this.getContentProperty('itemCheckboxKey');
   }.property(),
 
@@ -120,13 +120,13 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     @type SC.MenuView
     @observes content
   */
-  subMenu: function() {
+  subMenu: function () {
     var content = this.get('content'), menuItems, parentMenu;
 
     if (!content) return null;
 
     parentMenu = this.get('parentMenu');
-    menuItems = content.get(parentMenu.itemSubMenuKey );
+    menuItems = content.get(parentMenu.itemSubMenuKey);
     if (menuItems) {
       if (SC.kindOf(menuItems, SC.MenuPane)) {
         menuItems.set('isModal', NO);
@@ -154,12 +154,12 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     @default NO
     @observes subMenu
   */
-  hasSubMenu: function() {
+  hasSubMenu: function () {
     return !!this.get('subMenu');
   }.property('subMenu').cacheable(),
 
   /** @private */
-  init: function() {
+  init: function () {
     sc_super();
     this.contentDidChange();
   },
@@ -177,14 +177,15 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     @param {Boolean} firstTime
     @returns {void}
   */
-  render: function(context, firstTime) {
+  render: function (context) {
     var content = this.get('content'),
-        key, val,
+        val,
         menu = this.get('parentMenu'),
         itemWidth = this.get('itemWidth') || menu.layout.width,
-        itemHeight = this.get('itemHeight') || SC.DEFAULT_MENU_ITEM_HEIGHT ;
-    this.set('itemWidth',itemWidth);
-    this.set('itemHeight',itemHeight);
+        itemHeight = this.get('itemHeight') || SC.DEFAULT_MENU_ITEM_HEIGHT;
+
+    this.set('itemWidth', itemWidth);
+    this.set('itemHeight', itemHeight);
 
     //addressing accessibility
     if (this.get('isSeparator')) {
@@ -237,19 +238,19 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
    @param {String} the source path of the image
    @returns {void}
   */
-  renderImage: function(context, image) {
+  renderImage: function (context, image) {
     // get a class name and url to include if relevant
 
-    var url, className ;
+    var url, className;
     if (image && SC.ImageView.valueIsUrl(image)) {
-      url = image ;
-      className = '' ;
+      url = image;
+      className = '';
     } else {
-      className = image ;
+      className = image;
       url = SC.BLANK_IMAGE_URL;
     }
     // generate the img element...
-    context.begin('img').addClass('image').addClass(className).setAttr('src', url).end() ;
+    context.begin('img').addClass('image').addClass(className).setAttr('src', url).end();
   },
 
   /** @private
@@ -261,11 +262,11 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
    @returns {void}
   */
 
-  renderLabel: function(context, label) {
+  renderLabel: function (context, label) {
     if (this.get('escapeHTML')) {
-      label = SC.RenderContext.escapeHTML(label) ;
+      label = SC.RenderContext.escapeHTML(label);
     }
-    context.push("<span class='value ellipsis'>"+label+"</span>") ;
+    context.push("<span class='value ellipsis'>" + label + "</span>");
   },
 
   /** @private
@@ -275,8 +276,8 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
    @param {SC.RenderContext} context the render context
    @returns {void}
   */
-  renderBranch: function(context) {
-    context.push('<span class="has-branch"></span>') ;
+  renderBranch: function (context) {
+    context.push('<span class="has-branch"></span>');
   },
 
   /** @private
@@ -287,19 +288,19 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
    @param {String} the shortcut key string to be displayed with menu item name
    @returns {void}
   */
-  renderShortcut: function(context, shortcut) {
-    context.push('<span class = "shortcut">' + shortcut + '</span>') ;
+  renderShortcut: function (context, shortcut) {
+    context.push('<span class = "shortcut">' + shortcut + '</span>');
   },
 
   /**
     This method will check whether the current Menu Item is still
     selected and then create a submenu accordingly.
   */
-  showSubMenu: function() {
-    var subMenu = this.get('subMenu') ;
-    if(subMenu) {
+  showSubMenu: function () {
+    var subMenu = this.get('subMenu');
+    if (subMenu) {
       subMenu.set('mouseHasEntered', NO);
-      subMenu.popup(this,[0,0,0]) ;
+      subMenu.popup(this, [0, 0, 0]);
     }
 
     this._subMenuTimer = null;
@@ -312,17 +313,17 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     @type String
     @observes content.title
   */
-  title: function() {
+  title: function () {
     var ret = this.getContentProperty('itemTitleKey'),
         localize = this.getPath('parentMenu.localize');
 
     if (localize && ret) ret = SC.String.loc(ret);
 
-    return ret||'';
+    return ret || '';
   }.property('content.title').cacheable(),
 
   /** @private */
-  getContentProperty: function(property) {
+  getContentProperty: function (property) {
     var content = this.get('content'),
         menu = this.get('parentMenu');
 
@@ -337,7 +338,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
   //
 
   /** @private */
-  mouseUp: function(evt) {
+  mouseUp: function (evt) {
     // SproutCore's event system will deliver the mouseUp event to the view
     // that got the mouseDown event, but for menus we want to track the mouse,
     // so we'll do our own dispatching.
@@ -346,7 +347,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     targetMenuItem = this.getPath('parentMenu.rootMenu.targetMenuItem');
 
     if (targetMenuItem) targetMenuItem.performAction();
-    return YES ;
+    return YES;
   },
 
   /** @private
@@ -358,7 +359,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
 
     @returns {Boolean}
   */
-  performAction: function() {
+  performAction: function () {
     // Clicking on a disabled menu item should close the menu.
     if (!this.get('isEnabled')) {
       this.getPath('parentMenu.rootMenu').remove();
@@ -395,7 +396,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
   /** @private
     Actually sends the action of the menu item to the target.
   */
-  sendAction: function() {
+  sendAction: function () {
     var action = this.getContentProperty('itemActionKey'),
         target = this.getContentProperty('itemTargetKey'),
         rootMenu = this.getPath('parentMenu.rootMenu'),
@@ -415,7 +416,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     // Legacy support for actions that are functions
     if (SC.typeOf(action) === SC.T_FUNCTION) {
       action.apply(target, [rootMenu]);
-      //@if(debug)
+      //@if (debug)
       SC.Logger.warn('Support for menu item action functions has been deprecated. Please use target and action.');
       //@endif
     } else {
@@ -437,7 +438,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     track of how many flashes have occurred, and calls itself until a maximum
     has been reached.
   */
-  flashHighlight: function() {
+  flashHighlight: function () {
     var flashCounter = this._flashCounter, layer = this.$();
     if (flashCounter % 2 === 0) {
       layer.addClass('focus');
@@ -452,12 +453,12 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
   },
 
   /** @private*/
-  mouseDown: function(evt) {
-    return YES ;
+  mouseDown: function (evt) {
+    return YES;
   },
 
   /** @private */
-  mouseEntered: function(evt) {
+  mouseEntered: function (evt) {
     var menu = this.get('parentMenu'),
         rootMenu = menu.get('rootMenu');
 
@@ -474,17 +475,17 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
       this.becomeFirstResponder();
     }
 
-    if(this.get('hasSubMenu')) {
-      this._subMenuTimer = this.invokeLater(this.showSubMenu, 100) ;
+    if (this.get('hasSubMenu')) {
+      this._subMenuTimer = this.invokeLater(this.showSubMenu, 100);
     }
 
-	  return YES;
+    return YES;
   },
 
   /** @private
     Set the focus based on whether the current menu item is selected or not.
   */
-  mouseExited: function(evt) {
+  mouseExited: function (evt) {
     var parentMenu, timer;
 
     // If we have a submenu, we need to give the user's mouse time to get
@@ -506,32 +507,32 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
       }
     }
 
-    return YES ;
+    return YES;
   },
 
   /** @private */
-  touchStart: function(evt){
+  touchStart: function (evt) {
     this.mouseEntered(evt);
     return YES;
   },
 
   /** @private */
-  touchEnd: function(evt){
+  touchEnd: function (evt) {
     return this.mouseUp(evt);
   },
 
   /** @private */
-  touchEntered: function(evt){
+  touchEntered: function (evt) {
     return this.mouseEntered(evt);
   },
 
   /** @private */
-  touchExited: function(evt){
+  touchExited: function (evt) {
     return this.mouseExited(evt);
   },
 
   /** @private */
-  checkMouseLocation: function() {
+  checkMouseLocation: function () {
     var subMenu = this.get('subMenu'), parentMenu = this.get('parentMenu'),
         currentMenuItem, previousMenuItem;
 
@@ -552,30 +553,30 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
   /** @private
     Call the moveUp function on the parent Menu
   */
-  moveUp: function(sender,evt) {
-    var menu = this.get('parentMenu') ;
-    if(menu) {
-      menu.moveUp(this) ;
+  moveUp: function (sender, evt) {
+    var menu = this.get('parentMenu');
+    if (menu) {
+      menu.moveUp(this);
     }
-    return YES ;
+    return YES;
   },
 
   /** @private
     Call the moveDown function on the parent Menu
   */
-  moveDown: function(sender,evt) {
-    var menu = this.get('parentMenu') ;
-    if(menu) {
-      menu.moveDown(this) ;
+  moveDown: function (sender, evt) {
+    var menu = this.get('parentMenu');
+    if (menu) {
+      menu.moveDown(this);
     }
-    return YES ;
+    return YES;
   },
 
   /** @private
     Call the function to create a branch
   */
-  moveRight: function(sender,evt) {
-    this.showSubMenu() ;
+  moveRight: function (sender, evt) {
+    this.showSubMenu();
     return YES;
   },
 
@@ -583,7 +584,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     Proxies insertText events to the parent menu so items can be selected
     by typing their titles.
   */
-  insertText: function(chr, evt) {
+  insertText: function (chr, evt) {
     var menu = this.get('parentMenu');
     if (menu) {
       menu.insertText(chr, evt);
@@ -591,60 +592,60 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
   },
 
   /** @private*/
-  keyDown: function(evt) {
-    return this.interpretKeyEvents(evt) ;
+  keyDown: function (evt) {
+    return this.interpretKeyEvents(evt);
   },
 
   /** @private*/
-  keyUp: function(evt) {
-    return YES ;
+  keyUp: function (evt) {
+    return YES;
   },
 
   /** @private*/
-  cancel: function(evt) {
+  cancel: function (evt) {
     this.getPath('parentMenu.rootMenu').remove();
-    return YES ;
+    return YES;
   },
 
   /** @private*/
-  didBecomeFirstResponder: function(responder) {
+  didBecomeFirstResponder: function (responder) {
     if (responder !== this) return;
-    var parentMenu = this.get('parentMenu') ;
-    if(parentMenu) {
-      parentMenu.set('currentSelectedMenuItem', this) ;
+    var parentMenu = this.get('parentMenu');
+    if (parentMenu) {
+      parentMenu.set('currentSelectedMenuItem', this);
     }
   },
 
   /** @private*/
-  willLoseFirstResponder: function(responder) {
+  willLoseFirstResponder: function (responder) {
     if (responder !== this) return;
-    var parentMenu = this.get('parentMenu') ;
-    if(parentMenu) {
-      parentMenu.set('currentSelectedMenuItem', null) ;
-      parentMenu.set('previousSelectedMenuItem', this) ;
+    var parentMenu = this.get('parentMenu');
+    if (parentMenu) {
+      parentMenu.set('currentSelectedMenuItem', null);
+      parentMenu.set('previousSelectedMenuItem', this);
     }
   },
 
   /** @private*/
-  insertNewline: function(sender, evt) {
-    this.mouseUp(evt) ;
+  insertNewline: function (sender, evt) {
+    this.mouseUp(evt);
   },
 
   /**
     Close the parent Menu and remove the focus of the current Selected
     Menu Item
   */
-  closeParent: function() {
-    this.$().removeClass('focus') ;
-    var menu = this.get('parentMenu') ;
-    if(menu) {
-      menu.remove() ;
+  closeParent: function () {
+    this.$().removeClass('focus');
+    var menu = this.get('parentMenu');
+    if (menu) {
+      menu.remove();
     }
   },
 
   /** @private*/
-  clickInside: function(frame, evt) {
-    return SC.pointInRect({ x: evt.pageX, y: evt.pageY }, frame) ;
+  clickInside: function (frame, evt) {
+    return SC.pointInRect({ x: evt.pageX, y: evt.pageY }, frame);
   },
 
 
@@ -656,19 +657,19 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     Add an observer to ensure that we invalidate our cached properties
     whenever the content object’s associated property changes.
   */
-  contentDidChange: function() {
+  contentDidChange: function () {
     var content    = this.get('content'),
         oldContent = this._content;
 
-    if (content === oldContent) return ;
+    if (content === oldContent) return;
 
     var f = this.contentPropertyDidChange;
     // remove an observer from the old content if necessary
-    if (oldContent  &&  oldContent.removeObserver) oldContent.removeObserver('*', this, f) ;
+    if (oldContent  &&  oldContent.removeObserver) oldContent.removeObserver('*', this, f);
 
     // add observer to new content if necessary.
-    this._content = content ;
-    if (content  &&  content.addObserver) content.addObserver('*', this, f) ;
+    this._content = content;
+    if (content  &&  content.addObserver) content.addObserver('*', this, f);
 
     // notify that value did change.
     this.contentPropertyDidChange(content, '*') ;
@@ -679,31 +680,31 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     Invalidate our cached property whenever the content object’s associated
     property changes.
   */
-  contentPropertyDidChange: function(target, key) {
+  contentPropertyDidChange: function (target, key) {
     // If the key that changed in the content is one of the fields for which
     // we (potentially) cache a value, update our cache.
-    var menu = this.get('parentMenu') ;
-    if (!menu) return ;
+    var menu = this.get('parentMenu');
+    if (!menu) return;
 
     var mapping           = SC.MenuItemView._contentPropertyToMenuItemPropertyMapping,
         contentProperties = SC.keys(mapping),
-        i, len, contentProperty, menuItemProperty ;
+        i, len, contentProperty, menuItemProperty;
 
 
     // Are we invalidating all keys?
     if (key === '*') {
       for (i = 0, len = contentProperties.length;  i < len;  ++i) {
-        contentProperty  = contentProperties[i] ;
-        menuItemProperty = mapping[contentProperty] ;
-        this.notifyPropertyChange(menuItemProperty) ;
+        contentProperty  = contentProperties[i];
+        menuItemProperty = mapping[contentProperty];
+        this.notifyPropertyChange(menuItemProperty);
       }
     }
     else {
       for (i = 0, len = contentProperties.length;  i < len;  ++i) {
-        contentProperty  = contentProperties[i] ;
+        contentProperty  = contentProperties[i];
         if (menu.get(contentProperty) === key) {
-          menuItemProperty = mapping[contentProperty] ;
-          this.notifyPropertyChange(menuItemProperty) ;
+          menuItemProperty = mapping[contentProperty];
+          this.notifyPropertyChange(menuItemProperty);
 
           // Note:  We won't break here in case the menu is set up to map
           //        multiple properties to the same content key.
@@ -712,7 +713,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     }
   }
 
-}) ;
+});
 
 
 // ..........................................................

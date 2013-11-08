@@ -44,7 +44,12 @@ var pane = SC.ControlTestPane.design()
       contentValueKey: "title",
       contentCheckboxKey: "isDone",
       contentUnreadCountKey: "unread",
-      rowHeight: 20
+      rowHeight: 20,
+      _didCallDragEnded: false,
+      dragEnded: function() {
+        sc_super();
+        this._didCallDragEnded = true;
+      }
     })
   }));
 
@@ -200,7 +205,6 @@ test("insertion point when cancel drag on grid view", function() {
     layer,
     gridView = pane.view("basic").get('contentView');
 
-  // Configure the view to accept drop on.
   gridView.set('canReorderContent', YES);
 
   itemView = gridView.itemViewForContentIndex(0);
@@ -233,6 +237,7 @@ test("insertion point when cancel drag on grid view", function() {
     SC.Event.trigger(layer, 'keydown', [ev]);
 
     equals(gridView._insertionPointView, null, "The insertion point should have been destroyed");
+    equals(gridView._didCallDragEnded, true, "dragEnded should have been call");
 
     start();
   };

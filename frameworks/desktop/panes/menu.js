@@ -539,7 +539,6 @@ SC.MenuPane = SC.PickerPane.extend(
     var scroll, menuView, menuItemViews;
 
     scroll = this._menuScrollView = this.createChildView(SC.MenuScrollView, {
-      borderStyle: SC.BORDER_NONE,
       controlSize: this.get('controlSize')
     });
 
@@ -554,10 +553,12 @@ SC.MenuPane = SC.PickerPane.extend(
     });
 
     menuItemViews = this.get('menuItemViews');
-    menuView.set('layout', { top: 0, left: 0, height : this.get('menuHeight')});
     menuView.replaceAllChildren(menuItemViews);
-    scroll.set('contentView', menuView);
 
+    // Adjust our menu view's layout to fit the calculated menu height.
+    menuView.set('layout', { top: 0, left: 0, height : this.get('menuHeight')});
+
+    scroll.set('contentView', menuView);
 
     this.childViews = [scroll];
 

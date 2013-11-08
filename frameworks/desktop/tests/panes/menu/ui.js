@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/*global module test htmlbody ok equals same stop start */
+/*global module, test, ok, equals, stop, start */
 
 var items = [
   { title: 'Menu Item', keyEquivalent: 'ctrl_shift_n' },
@@ -30,30 +30,34 @@ var menu;
 
 module('SC.MenuPane UI', {
   setup: function () {
-    menu = SC.MenuPane.create({
-      layout: { width: 206 },
+    SC.run(function () {
+      menu = SC.MenuPane.create({
+        layout: { width: 206 },
 
-      selectedItemChanged: function () {
-        this._selectedItemCount = (this._selectedItemCount||0)+1;
-      }.observes('selectedItem'),
+        selectedItemChanged: function () {
+          this._selectedItemCount = (this._selectedItemCount || 0) + 1;
+        }.observes('selectedItem'),
 
-      countAction: function () {
-        this._actionCount = (this._actionCount||0)+1;
-      }
+        countAction: function () {
+          this._actionCount = (this._actionCount || 0) + 1;
+        }
+      });
+
+      items[0].target = menu;
+      items[0].action = 'countAction';
+
+      items[1].action = function () {
+        menu._functionActionCount = (menu._functionActionCount || 0) + 1;
+      };
+
+      menu.set('items', items);
     });
-
-    items[0].target = menu;
-    items[0].action = 'countAction';
-
-    items[1].action = function () {
-      menu._functionActionCount = (menu._functionActionCount||0)+1;
-    };
-
-    menu.set('items', items);
   },
 
   teardown: function () {
-    menu.destroy();
+    SC.run(function () {
+      menu.destroy();
+    });
     menu = null;
   }
 });
@@ -78,7 +82,7 @@ function clickOn(view, shiftKey, ctrlKey) {
   ev = SC.Event.simulateEvent(layer, 'mouseup', opts);
   SC.Event.trigger(layer, 'mouseup', [ev]);
   SC.RunLoop.begin().end();
-  layer = null ;
+  layer = null;
 }
 
 /**
@@ -92,14 +96,14 @@ function clickOn(view, shiftKey, ctrlKey) {
 */
 function keyPressOn(view, keyCode, isKeyPress, shiftKey, ctrlKey) {
   var layer    = view.get('layer'),
-      opts     = {
-        shiftKey: !!shiftKey,
-        ctrlKey: !!ctrlKey,
-        keyCode: keyCode,
-        charCode: isKeyPress ? keyCode : 0,
-        which: keyCode
-      },
-      ev;
+    opts     = {
+      shiftKey: !!shiftKey,
+      ctrlKey: !!ctrlKey,
+      keyCode: keyCode,
+      charCode: isKeyPress ? keyCode : 0,
+      which: keyCode
+    },
+    ev;
 
   ok(layer, 'keyPressOn() precond - view %@ should have layer'.fmt(view.toString()));
 
@@ -114,11 +118,13 @@ function keyPressOn(view, keyCode, isKeyPress, shiftKey, ctrlKey) {
   ev = SC.Event.simulateEvent(layer, 'keyup', opts);
   SC.Event.trigger(layer, 'keyup', [ev]);
   SC.RunLoop.begin().end();
-  layer = null ;
+  layer = null;
 }
 
 test('Basic UI', function () {
-  menu.popup();
+  SC.run(function () {
+    menu.popup();
+  });
   ok(menu.$().hasClass('sc-menu'), 'pane should have "sc-menu" class');
   ok(menu.$().hasClass('sc-regular-size'), 'pane should have default control size class');
   ok(!menu.get('isSubMenu'), 'isSubMenu should be NO on menus that are not submenus');
@@ -133,7 +139,9 @@ test('Basic UI', function () {
     equals(selectedItem ? selectedItem.title : null, menuItem.get('content').title, 'selectedItem should be set to the content item that was clicked');
     equals(1, menu._selectedItemCount, 'selectedItem should only change once when a menu item is clicked');
     equals(1, menu._actionCount, 'action is fired once when menu item is clicked');
-    menu.remove();
+    SC.run(function () {
+      menu.remove();
+    });
     ok(!menu.get('isVisibleInWindow'), 'menu should not be visible after being removed');
     equals(menu.get('currentMenuItem'), null, 'currentMenuItem should be null after being removed');
     start();
@@ -147,35 +155,48 @@ test('Control size', function () {
     { title: 'Ya better better baby' }
   ];
 
-  smallPane = SC.MenuPane.create({
-    controlSize: SC.SMALL_CONTROL_SIZE,
-    items: items
+  SC.run(function () {
+    smallPane = SC.MenuPane.create({
+      controlSize: SC.SMALL_CONTROL_SIZE,
+      items: items
+    });
+
+    smallPane.popup();
   });
-  smallPane.popup();
   views = smallPane.get('menuItemViews');
 
   var small_constants = SC.BaseTheme.menuRenderDelegate['sc-small-size'];
   equals(views[0].get('frame').height, small_constants.itemHeight, 'should change itemHeight');
   equals(views[1].get('frame').height, small_constants.itemSeparatorHeight, 'should change itemSeparatorHeight');
-  equals(views[0].get('frame').y, small_constants.menuHeightPadding/2, 'should change menuHeightPadding');
-  smallPane.remove();
-
-  largePane = SC.MenuPane.create({
-    controlSize: SC.LARGE_CONTROL_SIZE,
-    items: items
+  equals(views[0].get('frame').y, small_constants.menuHeightPadding / 2, 'should change menuHeightPadding');
+  SC.run(function () {
+    smallPane.remove();
   });
-  largePane.popup();
+
+  SC.run(function () {
+    largePane = SC.MenuPane.create({
+      controlSize: SC.LARGE_CONTROL_SIZE,
+      items: items
+    });
+
+    largePane.popup();
+  });
   views = largePane.get('menuItemViews');
 
   var large_constants = SC.BaseTheme.menuRenderDelegate['sc-large-size'];
   equals(views[0].get('frame').height, large_constants.itemHeight, 'should change itemHeight');
   equals(views[1].get('frame').height, large_constants.itemSeparatorHeight, 'should change itemSeparatorHeight');
-  equals(views[0].get('frame').y, large_constants.menuHeightPadding/2, 'should change menuHeightPadding');
-  largePane.remove();
+  equals(views[0].get('frame').y, large_constants.menuHeightPadding / 2, 'should change menuHeightPadding');
+
+  SC.run(function () {
+    largePane.remove();
+  });
 });
 
-test('Legacy Function Support', function (){
-  menu.popup();
+test('Legacy Function Support', function () {
+  SC.run(function () {
+    menu.popup();
+  });
   var menuItem = menu.get('menuItemViews')[1], selectedItem;
   menuItem.mouseEntered();
   clickOn(menuItem, NO, NO);
@@ -184,41 +205,63 @@ test('Legacy Function Support', function (){
   setTimeout(function () {
     selectedItem = menu.get('selectedItem');
     equals(1, menu._functionActionCount, 'Function should be called if it is set as the action and the menu item is clicked');
-    menu.remove();
+
+    SC.run(function () {
+      menu.remove();
+    });
     start();
   }, 250);
 });
 
 test('Custom MenuItemView Class', function () {
   equals(menu.get('exampleView'), SC.MenuItemView, 'SC.MenuPane should generate SC.MenuItemViews by default');
-  var menu2 = SC.MenuPane.create({
-    exampleView: SC.MenuItemView.extend({
-      classNames: 'custom-menu-item'.w()
-    }),
+  var menu2;
 
-    items: items
+  SC.run(function () {
+    menu2 = SC.MenuPane.create({
+      exampleView: SC.MenuItemView.extend({
+        classNames: 'custom-menu-item'.w()
+      }),
+
+      items: items
+    });
+
+    menu2.popup();
   });
-  menu2.popup();
   ok(menu2.$('.custom-menu-item').length > 0, 'SC.MenuPane should generate instances of custom classes if exampleView is changed');
-  menu2.remove();
+  SC.run(function () {
+    menu2.remove();
+  });
 });
 
 
 test('Custom MenuItemView Class on an item using itemExampleViewKey', function () {
   equals(menu.get('exampleView'), SC.MenuItemView, 'SC.MenuPane should generate SC.MenuItemViews by default');
-  menu.popup();
+  SC.run(function () {
+    menu.popup();
+  });
   ok(menu.$('.custom-menu-item').length === 1, 'SC.MenuPane should generate one instance of a custom class if the item has an exampleView property');
-  ok($($('.sc-menu-item')[11]).hasClass('custom-menu-item'), 'The last menu item should have a custom class');
-  menu.remove();
+  ok(SC.$(SC.$('.sc-menu-item')[11]).hasClass('custom-menu-item'), 'The last menu item should have a custom class');
+
+  SC.run(function () {
+    menu.remove();
+  });
 });
 
 test('Basic Submenus', function () {
-  var smallMenu = SC.MenuPane.create({
-    controlSize: SC.SMALL_CONTROL_SIZE,
-    items: items
+  var smallMenu,
+    menuItem, subMenu;
+
+  SC.run(function () {
+    smallMenu = SC.MenuPane.create({
+      controlSize: SC.SMALL_CONTROL_SIZE,
+      items: items
+    });
+    menuItem = smallMenu.get('menuItemViews')[8];
+
+    smallMenu.popup();
   });
-  var menuItem = smallMenu.get('menuItemViews')[8], subMenu;
-  smallMenu.popup();
+
   menuItem.mouseEntered();
   SC.RunLoop.begin().end();
   ok(menuItem.get('hasSubMenu'), 'precond - menu item has a submenu');
@@ -229,7 +272,9 @@ test('Basic Submenus', function () {
     ok(subMenu.get('isVisibleInWindow'), 'submenu should open after 100ms delay');
     ok(subMenu.get('isSubMenu'), 'isSubMenu should be YES on submenus');
     ok(subMenu.get('controlSize'), SC.SMALL_CONTROL_SIZE, "submenu should inherit parent's controlSize");
-    smallMenu.remove();
+    SC.run(function () {
+      smallMenu.remove();
+    });
     ok(!subMenu.get('isVisibleInWindow'), 'submenus should close if their parent menu is closed');
     start();
   }, 150);
@@ -239,34 +284,52 @@ test('Menu Item Localization', function () {
   ok(menu.get('localize'), 'menu panes should be localized by default');
   var locMenu, items;
 
-  SC.stringsFor('en', { 'Localized.Text': 'LOCALIZED TEXT' } );
+  SC.stringsFor('en', { 'Localized.Text': 'LOCALIZED TEXT' });
   items = [ 'Localized.Text' ];
 
-  locMenu = SC.MenuPane.create({
-    layout: { width: 200 },
-    items: items,
-    localize: NO
-  });
-  locMenu.popup();
-  equals('Localized.Text', locMenu.$('.sc-menu-item .value').text(), 'Menu item titles should not be localized if localize is NO');
-  locMenu.remove();
+  SC.run(function () {
+    locMenu = SC.MenuPane.create({
+      layout: { width: 200 },
+      items: items,
+      localize: NO
+    });
 
-  locMenu = SC.MenuPane.create({
-    items: items,
-    localize: YES
+    locMenu.popup();
   });
-  locMenu.popup();
+  equals('Localized.Text', locMenu.$('.sc-menu-item .value').text(), 'Menu item titles should not be localized if localize is NO');
+
+  SC.run(function () {
+    locMenu.remove();
+  });
+
+  SC.run(function () {
+    locMenu = SC.MenuPane.create({
+      items: items,
+      localize: YES
+    });
+
+    locMenu.popup();
+  });
   equals('LOCALIZED TEXT', locMenu.$('.sc-menu-item .value').text(), 'Menu item titles should be localized if localize is YES');
-  locMenu.remove();
+  SC.run(function () {
+    locMenu.remove();
+  });
 });
 
 test('Automatic Closing', function () {
-  menu.popup();
+
+  SC.run(function () {
+    menu.popup();
+  });
   ok(menu.get('isVisibleInWindow'), 'precond - window should be visible');
-  menu.windowSizeDidChange();
+  SC.run(function () {
+    menu.windowSizeDidChange();
+  });
   ok(!menu.get('isVisibleInWindow'), 'menu should close if window resizes');
 
-  menu.popup();
+  SC.run(function () {
+    menu.popup();
+  });
   clickOn(menu);
   ok(!menu.get('isVisibleInWindow'), 'menu should close if anywhere other than a menu item is clicked');
 });
@@ -278,10 +341,10 @@ test('keyEquivalents', function () {
   // keyEquivalents work
   menu.items.forEach(function (item) {
     var keyEq = item.keyEquivalent, idx, len;
-    if(!keyEq) return;
+    if (!keyEq) return;
 
-    if(SC.typeOf(keyEq)===SC.T_ARRAY) {
-      for(idx=0,len=keyEq.length;idx<len;idx++) {
+    if (SC.typeOf(keyEq) === SC.T_ARRAY) {
+      for (idx = 0, len = keyEq.length; idx < len; idx++) {
         ok(keyEquivalents[keyEq[idx]], "keyEquivalent should map to " + keyEq[idx]);
       }
     }
@@ -294,7 +357,9 @@ test('keyEquivalents', function () {
 test('scrolling', function () {
   var currentMenuItem;
 
-  menu.popup();
+  SC.run(function () {
+    menu.popup();
+  });
   menu.set('currentMenuItem', menu.get('menuItemViews')[0]);
   currentMenuItem = menu.get('currentMenuItem');
   equals(currentMenuItem.get('title'), 'Menu Item', 'menu should begin at first item');
@@ -325,12 +390,17 @@ test('scrolling', function () {
 });
 
 test('aria-role attribute', function () {
-  var menuPane = SC.MenuPane.create({
-    layout: { width: 200 },
-    items: items,
-    itemCheckboxKey: 'isChecked'
-  }), menuItems,normalItem, itemWithCheckBox, separatorItem;
-  menuPane.popup();
+  var menuPane, menuItems, normalItem, itemWithCheckBox, separatorItem;
+
+  SC.run(function () {
+    menuPane = SC.MenuPane.create({
+      layout: { width: 200 },
+      items: items,
+      itemCheckboxKey: 'isChecked'
+    });
+
+    menuPane.popup();
+  });
 
   equals(menuPane.$().attr('role'), 'menu', "menu pane should have role set");
 
@@ -346,12 +416,18 @@ test('aria-role attribute', function () {
 });
 
 test('aria-checked attribute', function () {
-  var menuPane = SC.MenuPane.create({
-    layout: { width: 200 },
-    items: items,
-    itemCheckboxKey: 'isChecked'
-  }),itemWithCheckBox;
-  menuPane.popup();
+  var menuPane,
+    itemWithCheckBox;
+
+  SC.run(function () {
+    menuPane = SC.MenuPane.create({
+      layout: { width: 200 },
+      items: items,
+      itemCheckboxKey: 'isChecked'
+    });
+
+    menuPane.popup();
+  });
 
   itemWithCheckBox = menuPane.get('menuItemViews')[1];
 

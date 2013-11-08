@@ -2783,15 +2783,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     Implements the SC.DropTarget protocol.  Hides any visible insertion
     point and clears some cached values.
   */
-  dragExited: function () {
-    this.hideInsertionPoint();
-    this._lastInsertionIndex = this._lastDropOperation = null;
-  },
-
-  /**
-    Implements the SC.DropTarget protocol.  Hides any visible insertion
-    point and clears some cached values.
-  */
   dragEnded: function () {
     this.hideInsertionPoint();
     this._lastInsertionIndex = this._lastDropOperation = null;
@@ -2963,8 +2954,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     // in-scroll clipping frame when it does).
     // TODO: perform a raw update that doesn't require the run loop.
     SC.run(function () {
-      this.notifyPropertyChange('nowShowing');
-      this.invokeOnce('_cv_nowShowingDidChange');
+    this.notifyPropertyChange('nowShowing');
+    this.invokeOnce('_cv_nowShowingDidChange');
     }, this);
 
     // Track the last time we updated.

@@ -406,32 +406,60 @@ SC.Drag = SC.Object.extend(
   /** @private
     Cancel the drag operation.
 
-    This notifies the data source that the drag ended and removes the
-    ghost view, but does not notify the drop target of a drop.
-
     This is called by RootResponder's keyup method when the user presses
     escape and a drag is in progress.
+
+    @param {Event} evt the key event
+    @see SC.Drag.endDrag
   */
-  cancelDrag: function () {
+  cancelDrag: function (evt) {
     var target = this._lastTarget,
         loc = this.get('location');
 
     if (target && target.dragExited) target.dragExited(this, this._lastMouseDraggedEvent);
 
+    this.endDrag(evt, SC.DRAG_NONE);
+  },
+
+  /** @private
+    End the drag operation.
+
+    This notifies the data source that the drag ended and removes the
+    ghost view, but does not notify the drop target of a drop.
+
+    @param {Event} evt
+    @param {DragOp} op The drag operation that was performed. One of
+      SC.DRAG_COPY, SC.DRAG_MOVE, SC.DRAG_LINK, or SC.DRAG_NONE.
+  */
+  endDrag: function (evt, op) {
+    var loc = this.get('location');
+
+    // notify all drop targets that the drag ended
+    var ary = this._dropTargets();
+    for (var idx = 0, len = ary.length; idx < len; idx++) {
+      try {
+        ary[idx].tryToPerform('dragEnded', this, evt);
+      } catch (ex2) {
+        SC.Logger.error('Exception in SC.Drag.mouseUp(dragEnded on %@): %@'.fmt(ary[idx], ex2));
+      }
+    }
+
     if (this.get('sourceIsDraggable')) {
+      // destroy the ghost view
       this._destroyGhostView();
 
       if (this.get('ghost')) {
+        // Show the dragView if it was hidden.
         if (this._dragViewWasVisible) this._getDragView().set('isVisible', YES);
         this._dragViewWasVisible = null;
       }
     }
 
+    // notify the source that everything has completed
     var source = this.source;
-    if (source && source.dragDidEnd) source.dragDidEnd(this, loc, SC.DRAG_NONE);
-
-    this._lastTarget = null;
-    this._dragInProgress = NO;
+    if (source && source.dragDidEnd) source.dragDidEnd(this, loc, op);
+    
+    this._cleanUpDrag();
   },
 
   // ..........................................
@@ -536,33 +564,7 @@ SC.Drag = SC.Object.extend(
       SC.Logger.error('Exception in SC.Drag.mouseUp(acceptDragOperation|performDragOperation): %@'.fmt(e));
     }
 
-    // notify all drop targets that the drag ended
-    var ary = this._dropTargets();
-    for (var idx = 0, len = ary.length; idx < len; idx++) {
-      try {
-        ary[idx].tryToPerform('dragEnded', this, evt);
-      } catch (ex2) {
-        SC.Logger.error('Exception in SC.Drag.mouseUp(dragEnded on %@): %@'.fmt(ary[idx], ex2));
-      }
-    }
-
-    if (this.get('sourceIsDraggable')) {
-      // destroy the ghost view
-      this._destroyGhostView();
-
-      if (this.get('ghost')) {
-        // Show the dragView if it was hidden.
-        if (this._dragViewWasVisible) this._getDragView().set('isVisible', YES);
-        this._dragViewWasVisible = null;
-      }
-    }
-
-    // notify the source that everything has completed
-    var source = this.source;
-    if (source && source.dragDidEnd) source.dragDidEnd(this, loc, op);
-
-    this._lastTarget = null;
-    this._dragInProgress = NO; // required by autoscroll (invoked by a timer)
+    this.endDrag(evt, op);
   },
 
   /** @private */
@@ -674,6 +676,13 @@ SC.Drag = SC.Object.extend(
     }
   },
 
+  /** @private */
+  _cleanUpDrag: function() {
+    this._lastTarget = null;
+    this._dragInProgress = NO;
+    this._cachedDropTargets = null;
+  },
+  
   /** @private
     Return an array of drop targets, sorted with any nested drop targets
     at the top of the array.  The first time this method is called during

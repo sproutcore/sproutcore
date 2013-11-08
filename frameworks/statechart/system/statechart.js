@@ -174,13 +174,13 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */
 
   /** @private @property */
-  allowStatechartTracing: function() {
+  allowStatechartTracing: function () {
     var key = this.get('statechartTraceKey');
     return this.get(key);
   }.property().cacheable(),
 
   /** @private */
-  _statechartTraceDidChange: function() {
+  _statechartTraceDidChange: function () {
     this.notifyPropertyChange('allowStatechartTracing');
   },
 
@@ -201,13 +201,13 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
     @returns {Hash}
   */
-  details: function() {
+  details: function () {
     var details = {
       'initialized': this.get('statechartIsInitialized')
     };
 
     if (this.get('name')) {
-      details['name'] = this.get('name');
+      details.name = this.get('name');
     }
 
     if (!this.get('statechartIsInitialized')) {
@@ -215,7 +215,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     }
 
     details['current-states'] = [];
-    this.get('currentStates').forEach(function(state) {
+    this.get('currentStates').forEach(function (state) {
       details['current-states'].push(state.get('fullPath'));
     });
 
@@ -227,12 +227,12 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     if (this._gotoStateActions) {
       stateTransition['transition-sequence'] = [];
       var actions = this._gotoStateActions,
-          actionToStr = function(action) {
+          actionToStr = function (action) {
             var actionName = action.action === SC.ENTER_STATE ? "enter" : "exit";
             return "%@ %@".fmt(actionName, action.state.get('fullPath'));
           };
 
-      actions.forEach(function(action) {
+      actions.forEach(function (action) {
         stateTransition['transition-sequence'].push(actionToStr(action));
       });
 
@@ -265,7 +265,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
     @see #details
   */
-  toStringWithDetails: function() {
+  toStringWithDetails: function () {
     var str = "",
         header = this.toString(),
         details = this.get('details');
@@ -277,7 +277,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   },
 
   /** @private */
-  _hashToString: function(hash, indent) {
+  _hashToString: function (hash, indent) {
     var str = "";
 
     for (var key in hash) {
@@ -298,14 +298,14 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   },
 
   /** @private */
-  _arrayToString: function(key, array, indent) {
+  _arrayToString: function (key, array, indent) {
     if (array.length === 0) {
       return "%@%@: []".fmt(' '.mult(indent), key);
     }
 
     var str = "%@%@: [\n".fmt(' '.mult(indent), key);
 
-    array.forEach(function(item, idx) {
+    array.forEach(function (item, idx) {
       str += "%@%@\n".fmt(' '.mult(indent + 2), item);
     }, this);
 
@@ -362,7 +362,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
     NOTE: This is only available in debug mode!
   */
-  statechartLogTrace: function(msg) {
+  statechartLogTrace: function (msg) {
     SC.Logger.info("%@: %@".fmt(this.get('statechartLogPrefix'), msg));
   },
 
@@ -498,18 +498,18 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     @see SC.StatechartDelegate
     @see #delegate
   */
-  statechartDelegate: function() {
+  statechartDelegate: function () {
     var del = this.get('delegate');
     return this.delegateFor('isStatechartDelegate', del);
   }.property('delegate'),
 
-  initMixin: function() {
+  initMixin: function () {
     if (this.get('autoInitStatechart')) {
       this.initStatechart();
     }
   },
 
-  destroyMixin: function() {
+  destroyMixin: function () {
     var root = this.get('rootState');
 
     //@if(debug)
@@ -527,7 +527,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     Initializes the statechart. By initializing the statechart, it will create all the states and register
     them with the statechart. Once complete, the statechart can be used to go to states and send events to.
   */
-  initStatechart: function() {
+  initStatechart: function () {
     if (this.get('statechartIsInitialized')) return;
 
     this._gotoStateLocked = NO;
@@ -599,7 +599,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   /**
     Will create a root state for the statechart
   */
-  createRootState: function(state, attrs) {
+  createRootState: function (state, attrs) {
     if (!attrs) attrs = {};
     state = state.create(attrs);
     return state;
@@ -610,7 +610,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
     @returns {Array} the current states
   */
-  currentStates: function() {
+  currentStates: function () {
     return this.getPath('rootState.currentSubstates');
   }.property().cacheable(),
 
@@ -619,7 +619,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
     @return {SC.State}
   */
-  firstCurrentState: function() {
+  firstCurrentState: function () {
     var cs = this.get('currentStates');
     return cs ? cs.objectAt(0) : null;
   }.property('currentStates').cacheable(),
@@ -629,7 +629,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
     @returns {Number} the count
   */
-  currentStateCount: function() {
+  currentStateCount: function () {
     return this.getPath('currentStates.length');
   }.property('currentStates').cacheable(),
 
@@ -639,7 +639,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     @param state {State|String} the state to check
     @returns {Boolean} true if the state is a current state, otherwise fals is returned
   */
-  stateIsCurrentState: function(state) {
+  stateIsCurrentState: function (state) {
     return this.get('rootState').stateIsCurrentSubstate(state);
   },
 
@@ -649,7 +649,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
     @returns {Array} the currently entered states
   */
-  enteredStates: function() {
+  enteredStates: function () {
     return this.getPath('rootState.enteredSubstates');
   }.property().cacheable(),
 
@@ -659,7 +659,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     @param state {State|String} the state to check
     @returns {Boolean} true if the state is a currently entered state, otherwise false is returned
   */
-  stateIsEntered: function(state) {
+  stateIsEntered: function (state) {
     return this.get('rootState').stateIsEnteredSubstate(state);
   },
 
@@ -669,7 +669,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     @param value {State|String} either a state object or the name of a state
     @returns {Boolean} true if the state does belong ot the statechart, otherwise false is returned
   */
-  doesContainState: function(value) {
+  doesContainState: function (value) {
     return !SC.none(this.getState(value));
   },
 
@@ -679,7 +679,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     @param value {State|String} either a state object of the name of a state
     @returns {State} if a match then the matching state is returned, otherwise null is returned
   */
-  getState: function(state) {
+  getState: function (state) {
     var root = this.get('rootState');
     return root === state ? root : root.getSubstate(state);
   },
@@ -727,7 +727,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     @param useHistory {Boolean} Optional. Indicates whether to include using history states in the transition process
     @param context {Hash} Optional. A context object that will be passed to all exited and entered states
   */
-  gotoState: function(state, fromCurrentState, useHistory, context) {
+  gotoState: function (state, fromCurrentState, useHistory, context) {
     if (!this.get('statechartIsInitialized')) {
       this.statechartLogError("can not go to state %@. statechart has not yet been initialized".fmt(state));
       return;
@@ -853,7 +853,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   /**
     Indicates if the statechart is in an active goto state process
   */
-  gotoStateActive: function() {
+  gotoStateActive: function () {
     return this._gotoStateLocked;
   }.property(),
 
@@ -861,14 +861,14 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     Indicates if the statechart is in an active goto state process
     that has been suspended
   */
-  gotoStateSuspended: function() {
+  gotoStateSuspended: function () {
     return this._gotoStateLocked && !!this._gotoStateSuspendedPoint;
   }.property(),
 
   /**
     Resumes an active goto state transition process that has been suspended.
   */
-  resumeGotoState: function() {
+  resumeGotoState: function () {
     if (!this.get('gotoStateSuspended')) {
       this.statechartLogError("Can not resume goto state since it has not been suspended");
       return;
@@ -879,7 +879,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   },
 
   /** @private */
-  _executeGotoStateActions: function(gotoState, actions, marker, context) {
+  _executeGotoStateActions: function (gotoState, actions, marker, context) {
     var action = null,
         len = actions.length,
         actionResult = null;
@@ -889,13 +889,13 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     for (; marker < len; marker += 1) {
       this._currentGotoStateAction = action = actions[marker];
       switch (action.action) {
-        case SC.EXIT_STATE:
-          actionResult = this._exitState(action.state, context);
-          break;
+      case SC.EXIT_STATE:
+        actionResult = this._exitState(action.state, context);
+        break;
 
-        case SC.ENTER_STATE:
-          actionResult = this._enterState(action.state, action.currentState, context);
-          break;
+      case SC.ENTER_STATE:
+        actionResult = this._enterState(action.state, action.currentState, context);
+        break;
       }
 
       //
@@ -935,16 +935,18 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   },
 
   /** @private */
-  _cleanupStateTransition: function() {
+  _cleanupStateTransition: function () {
     this._currentGotoStateAction = null;
     this._gotoStateSuspendedPoint = null;
     this._gotoStateActions = null;
     this._gotoStateLocked = NO;
     this._flushPendingStateTransition();
+    // Check the flags so we only flush if the events will actually get sent.
+    if (!this._sendEventLocked && !this._gotoStateLocked) { this._flushPendingSentEvents(); }
   },
 
   /** @private */
-  _exitState: function(state, context) {
+  _exitState: function (state, context) {
     var parentState;
 
     if (state.get('currentSubstates').indexOf(state) >= 0) {
@@ -991,12 +993,12 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     @param state {SC.State} the state whose enterState method is to be invoked
     @param context {Hash} a context hash object to provide the enterState method
   */
-  exitState: function(state, context) {
+  exitState: function (state, context) {
     return state.exitState(context);
   },
 
   /** @private */
-  _enterState: function(state, current, context) {
+  _enterState: function (state, current, context) {
     var parentState = state.get('parentState');
     if (parentState && !state.get('isConcurrentState')) parentState.set('historyState', state);
 
@@ -1044,7 +1046,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     @param state {SC.State} the state whose enterState method is to be invoked
     @param context {Hash} a context hash object to provide the enterState method
   */
-  enterState: function(state, context) {
+  enterState: function (state, context) {
     if (state.enterStateByRoute && SC.kindOf(context, SC.StateRouteHandlerContext)) {
       return state.enterStateByRoute(context);
     } else {
@@ -1089,7 +1091,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     @param fromCurrentState {SC.State|String} Optional. the current state to start the state transition process from
     @param recursive {Boolean} Optional. whether to follow history states recursively.
   */
-  gotoHistoryState: function(state, fromCurrentState, recursive, context) {
+  gotoHistoryState: function (state, fromCurrentState, recursive, context) {
     if (!this.get('statechartIsInitialized')) {
       this.statechartLogError("can not go to state %@'s history state. Statechart has not yet been initialized".fmt(state));
       return;
@@ -1140,7 +1142,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     @see #stateWillTryToHandleEvent
     @see #stateDidTryToHandleEvent
   */
-  sendEvent: function(event, arg1, arg2) {
+  sendEvent: function (event, arg1, arg2) {
 
     if (this.get('isDestroyed')) {
       this.statechartLogError("can not send event %@. statechart is destroyed".fmt(event));
@@ -1148,6 +1150,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     }
 
     var statechartHandledEvent = NO,
+        result = this,
         eventHandled = NO,
         currentStates = this.get('currentStates').slice(),
         checkedStates = {},
@@ -1155,7 +1158,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
         i = 0,
         state = null;
 
-    if (this._sendEventLocked || this._goStateLocked) {
+    if (this._sendEventLocked || this._gotoStateLocked) {
       // Want to prevent any actions from being processed by the states until
       // they have had a chance to handle the most immediate action or completed
       // a state transition
@@ -1184,8 +1187,8 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
       if (!state.get('isCurrentState')) continue;
       while (!eventHandled && state) {
         if (!checkedStates[state.get('fullPath')]) {
-         eventHandled = state.tryToHandleEvent(event, arg1, arg2);
-         checkedStates[state.get('fullPath')] = YES;
+          eventHandled = state.tryToHandleEvent(event, arg1, arg2);
+          checkedStates[state.get('fullPath')] = YES;
         }
         if (!eventHandled) state = state.get('parentState');
         else statechartHandledEvent = YES;
@@ -1203,7 +1206,13 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     }
     //@endif
 
-    var result = this._flushPendingSentEvents();
+    // Check if the flags are unlocked. These means any pending events
+    // will successfully send, so go ahead and flush. Otherwise, events
+    // would become out of order since the first event would get shifted,
+    // then pushed.
+    if (!this._sendEventLocked && !this._gotoStateLocked) {
+      result = this._flushPendingSentEvents();
+    }
 
     return statechartHandledEvent ? this : (result ? this : null);
   },
@@ -1216,7 +1225,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     @param {String} event the event the state will try to handle
     @param {String} handler the name of the method on the state that will try to handle the event
   */
-  stateWillTryToHandleEvent: function(state, event, handler) {
+  stateWillTryToHandleEvent: function (state, event, handler) {
     this._stateHandleEventInfo = {
       state: state,
       event: event,
@@ -1233,7 +1242,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     @param {String} handler the name of the method on the state that did try to handle the event
     @param {Boolean} handled indicates if the handler was able to handle the event
   */
-  stateDidTryToHandleEvent: function(state, event, handler, handled) {
+  stateDidTryToHandleEvent: function (state, event, handler, handled) {
     this._stateHandleEventInfo = null;
   },
 
@@ -1242,7 +1251,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     Creates a chain of states from the given state to the greatest ancestor state (the root state). Used
     when perform state transitions.
   */
-  _createStateChain: function(state) {
+  _createStateChain: function (state) {
     var chain = [];
 
     while (state) {
@@ -1259,10 +1268,10 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     go from being exited to states being entered during the state transition process. The value
     returned is the fist matching state between the two given state chains.
   */
-  _findPivotState: function(stateChain1, stateChain2) {
+  _findPivotState: function (stateChain1, stateChain2) {
     if (stateChain1.length === 0 || stateChain2.length === 0) return null;
 
-    var pivot = stateChain1.find(function(state, index) {
+    var pivot = stateChain1.find(function (state, index) {
       if (stateChain2.indexOf(state) >= 0) return YES;
     });
 
@@ -1279,7 +1288,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     @param exitStatePath {Array} an array representing a path of states that are to be exited
     @param stopState {State} an explicit state in which to stop the exiting process
   */
-  _traverseStatesToExit: function(state, exitStatePath, stopState, gotoStateActions) {
+  _traverseStatesToExit: function (state, exitStatePath, stopState, gotoStateActions) {
     if (!state || state === stopState) return;
 
     // This state has concurrent substates. Therefore we have to make sure we
@@ -1316,7 +1325,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     @param pivotState {State} The state pivoting when to go from exiting states to entering states
     @param useHistory {Boolean} indicates whether to recursively follow history states
   */
-  _traverseStatesToEnter: function(state, enterStatePath, pivotState, useHistory, gotoStateActions) {
+  _traverseStatesToEnter: function (state, enterStatePath, pivotState, useHistory, gotoStateActions) {
     if (!state) return;
 
     // We do not want to enter states in the enter path until the pivot state has been reached. After
@@ -1387,7 +1396,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     @param event {String} the property name to check
     @returns {Boolean}
   */
-  respondsTo: function(event) {
+  respondsTo: function (event) {
     // Fast path!
     if (this.get('isDestroyed')) {
       this.statechartLogError("can not respond to event %@. statechart is destroyed".fmt(event));
@@ -1421,7 +1430,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     @param arg2 {Object} Optional
     @returns {Boolean} YES if handled, NO if not handled
   */
-  tryToPerform: function(event, arg1, arg2) {
+  tryToPerform: function (event, arg1, arg2) {
     if (!this.respondsTo(event)) return NO;
 
     if (SC.typeOf(this[event]) === SC.T_FUNCTION) {
@@ -1461,7 +1470,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     we want to call a calculate method on the current states where the method
     will return a value when invoked. We can handle the returned values like so:
 
-        invokeStateMethod('calculate', value, function(state, result) {
+        invokeStateMethod('calculate', value, function (state, result) {
           // .. handle the result returned from calculate that was invoked
           //    on the given state
         })
@@ -1483,7 +1492,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
              is returned. The value is the result of the method that got invoked
              on a state.
   */
-  invokeStateMethod: function(methodName, args, func) {
+  invokeStateMethod: function (methodName, args, func) {
     if (methodName === 'unknownEvent') {
       this.statechartLogError("can not invoke method unkownEvent");
       return;
@@ -1496,8 +1505,10 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
         arg = len > 0 ? args[len - 1] : null,
         callback = SC.typeOf(arg) === SC.T_FUNCTION ? args.pop() : null,
         currentStates = this.get('currentStates'),
-        i = 0, state = null, checkedStates = {},
-        method, result = undefined, calledStates = 0;
+        i = 0, state = null,
+        checkedStates = {},
+        method, result,
+        calledStates = 0;
 
     len = currentStates.get('length');
 
@@ -1524,7 +1535,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
     Iterate over all the given concurrent states and enter them
   */
-  _traverseConcurrentStatesToEnter: function(states, exclude, useHistory, gotoStateActions) {
+  _traverseConcurrentStatesToEnter: function (states, exclude, useHistory, gotoStateActions) {
     var i = 0,
         len = states.length,
         state = null;
@@ -1540,7 +1551,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     Called by gotoState to flush a pending state transition at the front of the
     pending queue.
   */
-  _flushPendingStateTransition: function() {
+  _flushPendingStateTransition: function () {
     if (!this._pendingStateTransitions) {
       this.statechartLogError("Unable to flush pending state transition. _pendingStateTransitions is invalid");
       return;
@@ -1555,7 +1566,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
      Called by sendEvent to flush a pending actions at the front of the pending
      queue
    */
-  _flushPendingSentEvents: function() {
+  _flushPendingSentEvents: function () {
     var pending = this._pendingSentEvents.shift();
     if (!pending) return null;
     return this.sendEvent(pending.event, pending.arg1, pending.arg2);
@@ -1563,7 +1574,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
   /** @private */
   //@if(debug)
-  _monitorIsActiveDidChange: function() {
+  _monitorIsActiveDidChange: function () {
     if (this.get('monitorIsActive') && SC.none(this.get('monitor'))) {
       this.set('monitor', SC.StatechartMonitor.create());
     }
@@ -1576,19 +1587,19 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     TODO: Come back to this and refactor the code. It works, but it
           could certainly be improved
   */
-  _processGotoStateArgs: function(args) {
+  _processGotoStateArgs: function (args) {
     var processedArgs = {
-          state: null,
-          fromCurrentState: null,
-          useHistory: false,
-          context: null
-        },
-        len = null,
-        value = null;
+        state: null,
+        fromCurrentState: null,
+        useHistory: false,
+        context: null
+      },
+      len = null,
+      value = null;
 
     args = SC.$A(args);
-    args = args.filter(function(item) {
-      return !(item === undefined);
+    args = args.filter(function (item) {
+      return item !== undefined;
     });
     len = args.length;
 
@@ -1647,7 +1658,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
      - There must be one or more states that can be added to the root state
 
   */
-  _constructRootStateClass: function() {
+  _constructRootStateClass: function () {
     var rsExampleKey = 'rootStateExample',
         rsExample = this.get(rsExampleKey),
         initialState = this.get('initialState'),
@@ -1700,27 +1711,27 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   },
 
   /** @private */
-  _logStatechartCreationError: function(msg) {
+  _logStatechartCreationError: function (msg) {
     SC.Logger.error("Unable to create statechart for %@: %@.".fmt(this, msg));
   },
 
   /**
     Used to log a statechart error message
   */
-  statechartLogError: function(msg) {
+  statechartLogError: function (msg) {
     SC.Logger.error("ERROR %@: %@".fmt(this.get('statechartLogPrefix'), msg));
   },
 
   /**
     Used to log a statechart warning message
   */
-  statechartLogWarning: function(msg) {
+  statechartLogWarning: function (msg) {
     if (this.get('suppressStatechartWarnings')) return;
     SC.Logger.warn("WARN %@: %@".fmt(this.get('statechartLogPrefix'), msg));
   },
 
   /** @property */
-  statechartLogPrefix: function() {
+  statechartLogPrefix: function () {
     var className = SC._object_className(this.constructor),
         name = this.get('name'), prefix;
 

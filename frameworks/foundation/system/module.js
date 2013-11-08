@@ -5,7 +5,8 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/*jslint evil:true */
+/*globals jQuery */
+
 sc_require('tasks/task');
 SC.LOG_MODULE_LOADING = YES;
 
@@ -30,9 +31,9 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
     @param {String} moduleName the name of the module to check
     @returns {Boolean}
   */
-  isModuleReady: function(moduleName) {
-    var moduleInfo = SC.MODULE_INFO[moduleName] ;
-    return moduleInfo ? !!moduleInfo.isReady : NO ;
+  isModuleReady: function (moduleName) {
+    var moduleInfo = SC.MODULE_INFO[moduleName];
+    return moduleInfo ? !!moduleInfo.isReady : NO;
   },
 
   /**
@@ -49,7 +50,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
     @param method {Function}
     @returns {Boolean} YES if already loaded, NO otherwise
   */
-  loadModule: function(moduleName, target, method) {
+  loadModule: function (moduleName, target, method) {
     var module = SC.MODULE_INFO[moduleName], callbacks, targets,
         args   = SC.A(arguments).slice(3),
         log    = SC.LOG_MODULE_LOADING,
@@ -100,7 +101,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
         // This is because the module may set up bindings.
         this._addCallbackForModule(moduleName, target, method, args);
 
-        this.invokeLast(function() {
+        this.invokeLast(function () {
           module.isReady = YES;
           this._moduleDidBecomeReady(moduleName);
         });
@@ -113,7 +114,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
           SC.Module._invokeCallback(moduleName, target, method, args);
         } else {
           // Queue callback for when SC has finished loading.
-          SC.ready(SC.Module, function() {
+          SC.ready(SC.Module, function () {
             SC.Module._invokeCallback(moduleName, target, method, args);
           });
         }
@@ -149,14 +150,14 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
     }
   },
 
-  _addCallbackForModule: function(moduleName, target, method, args) {
+  _addCallbackForModule: function (moduleName, target, method, args) {
     var module = SC.MODULE_INFO[moduleName];
 
     // Retrieve array of callbacks from MODULE_INFO hash.
-    var callbacks = module.callbacks || [] ;
+    var callbacks = module.callbacks || [];
 
     if (method) {
-      callbacks.push(function() {
+      callbacks.push(function () {
         SC.Module._invokeCallback(moduleName, target, method, args);
       });
     }
@@ -177,7 +178,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
 
     @param {String} moduleName the name of the module to prefetch
   */
-  prefetchModule: function(moduleName) {
+  prefetchModule: function (moduleName) {
     var module = SC.MODULE_INFO[moduleName];
 
     if (module.isLoading || module.isLoaded) return;
@@ -198,7 +199,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
     If a module is marked for lazy instantiation, this method will execute the closure and call
     any registered callbacks.
   */
-  _executeLazilyInstantiatedModule: function(moduleName, targetName, methodName){
+  _executeLazilyInstantiatedModule: function (moduleName, targetName, methodName) {
     var lazyInfo =  SC.LAZY_INSTANTIATION[moduleName];
     var target;
     var method;
@@ -213,7 +214,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
       // Iterate through each function associated with this module, and attempt to execute it.
       try {
         lazyInfo[idx]();
-      } catch(e) {
+      } catch (e) {
         SC.Logger.error("SC.Module: Failed to lazily instatiate entry for  '%@'".fmt(moduleName));
       }
     }
@@ -236,7 +237,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
 
     @param {Hash} module the module to evaluate
   */
-  _evaluateStringLoadedModule: function(module) {
+  _evaluateStringLoadedModule: function (module) {
     var moduleSource = module.source;
 
     // so, force a run loop.
@@ -267,8 +268,8 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
 
     @param {String} moduleName the name of the module whose CSS should be loaded
   */
-  _loadCSSForModule: function(moduleName) {
-    var head = document.getElementsByTagName('head')[0] ;
+  _loadCSSForModule: function (moduleName) {
+    var head = document.getElementsByTagName('head')[0];
     var module = SC.MODULE_INFO[moduleName];
     var styles = module.styles || [];
     var len = styles.length;
@@ -276,32 +277,32 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
     var el;
     var idx;
 
-    if (!head) head = document.documentElement ; // fix for Opera
+    if (!head) head = document.documentElement; // fix for Opera
     len = styles.length;
 
     for (idx = 0; idx < len; idx++) {
-      url = styles[idx] ;
+      url = styles[idx];
 
       if (url.length > 0) {
         if (SC.LOG_MODULE_LOADING) SC.debug("SC.Module: Loading CSS file in '%@' -> '%@'", moduleName, url);
 
         // if we are on a retina device lets load the retina style sheet instead
         if (window.devicePixelRatio > 1 || window.location.search.indexOf("2x") > -1) {
-            url = url.replace('.css', '@2x.css')
+          url = url.replace('.css', '@2x.css');
         }
 
-        el = document.createElement('link') ;
-        el.setAttribute('href', url) ;
-        el.setAttribute('rel', "stylesheet") ;
-        el.setAttribute('type', "text/css") ;
-        head.appendChild(el) ;
+        el = document.createElement('link');
+        el.setAttribute('href', url);
+        el.setAttribute('rel', "stylesheet");
+        el.setAttribute('type', "text/css");
+        head.appendChild(el);
       }
     }
 
     el = null;
   },
 
-  _loadJavaScriptForModule: function(moduleName) {
+  _loadJavaScriptForModule: function (moduleName) {
     var module = SC.MODULE_INFO[moduleName];
     var el;
     var url;
@@ -332,27 +333,27 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
     if (url.length > 0) {
       if (SC.LOG_MODULE_LOADING) SC.debug("SC.Module: Loading JavaScript file in '%@' -> '%@'", moduleName, url);
 
-      el = document.createElement('script') ;
-      el.setAttribute('type', "text/javascript") ;
-      el.setAttribute('src', url) ;
+      el = document.createElement('script');
+      el.setAttribute('type', "text/javascript");
+      el.setAttribute('src', url);
 
-      if (SC.browser.isIE) {
-        el.onreadystatechange = function() {
-          if (this.readyState == 'complete' || this.readyState == 'loaded') {
-            SC.run(function() {
+      if (el.addEventListener) {
+        el.addEventListener('load', function () {
+          SC.run(function () {
+            SC.Module._moduleDidLoad(moduleName);
+          });
+        }, false);
+      } else if (el.readyState) {
+        el.onreadystatechange = function () {
+          if (this.readyState === 'complete' || this.readyState === 'loaded') {
+            SC.run(function () {
               SC.Module._moduleDidLoad(moduleName);
             });
           }
         };
-      } else {
-        el.onload = function() {
-          SC.run(function(){
-            SC.Module._moduleDidLoad(moduleName);
-          });
-        };
       }
 
-      document.body.appendChild(el) ;
+      document.body.appendChild(el);
     }
   },
 
@@ -364,7 +365,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
     @param {String} moduleName the name of the module being checked
     @returns {Boolean} whether the dependencies are loaded
   */
-  _dependenciesMetForModule: function(moduleName) {
+  _dependenciesMetForModule: function (moduleName) {
     var dependencies = SC.MODULE_INFO[moduleName].dependencies || [];
     var idx, len = dependencies.length;
     var dependencyName;
@@ -388,171 +389,171 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
     Loads all unloaded dependencies for a module, then creates the <script> and <link> tags to
     load the JavaScript and CSS for the module.
   */
-  _loadDependenciesForModule: function(moduleName) {
-      // Load module's dependencies first.
-      var moduleInfo      = SC.MODULE_INFO[moduleName];
-      var log             = SC.LOG_MODULE_LOADING;
-      var dependencies    = moduleInfo.dependencies || [];
-      var dependenciesMet = YES;
-      var len             = dependencies.length;
-      var idx;
-      var requiredModuleName;
-      var requiredModule;
-      var dependents;
+  _loadDependenciesForModule: function (moduleName) {
+    // Load module's dependencies first.
+    var moduleInfo      = SC.MODULE_INFO[moduleName];
+    var log             = SC.LOG_MODULE_LOADING;
+    var dependencies    = moduleInfo.dependencies || [];
+    var dependenciesMet = YES;
+    var len             = dependencies.length;
+    var idx;
+    var requiredModuleName;
+    var requiredModule;
+    var dependents;
 
-      for (idx = 0; idx < len; idx++) {
-        requiredModuleName = dependencies[idx];
-        requiredModule = SC.MODULE_INFO[requiredModuleName];
+    for (idx = 0; idx < len; idx++) {
+      requiredModuleName = dependencies[idx];
+      requiredModule = SC.MODULE_INFO[requiredModuleName];
 
-        // Try to find dependent module in MODULE_INFO
-        if (!requiredModule) {
-          throw new Error("SC.Module: could not find required module '%@' for module '%@'".fmt(requiredModuleName, moduleName));
-        } else {
-
-          // Required module has been requested but hasn't loaded yet.
-          if (requiredModule.isLoading) {
-            dependenciesMet = NO ;
-
-            dependents = requiredModule.dependents;
-            if (!dependents) requiredModule.dependents = dependents = [];
-            dependents.push(moduleName);
-          }
-
-          // Required module has already been loaded and evaluated, no need to worry about it.
-          else if (requiredModule.isReady) {
-            continue ;
-          }
-          // Required module has not been loaded nor requested yet.
-          else {
-            dependenciesMet = NO ;
-
-            // Register this as a dependent module (used by SC._moduleDidLoad()...)
-            dependents = requiredModule.dependents;
-            if (!dependents) requiredModule.dependents = dependents = [];
-
-            dependents.push(moduleName) ;
-
-            if (log) SC.debug("SC.Module: '%@' depends on '%@', loading dependency…", moduleName, requiredModuleName);
-
-            // Load dependencies
-            SC.Module.loadModule(requiredModuleName) ;
-          }
-        }
-      }
-    },
-
-    /**
-      @private
-
-      Calls an action on a target to notify the target that a module has loaded.
-    */
-    _invokeCallback: function(moduleName, targetName, methodName, args) {
-      var method;
-      var target;
-
-      target = this._targetForTargetName(targetName);
-      method = this._methodForMethodNameInTarget(methodName, target);
-
-      // If we weren't able to find the callback, this module may be lazily instantiated and
-      // the callback won't exist until we execute the closure that it is wrapped in.
-      if (!method) {
-        if (SC.LAZY_INSTANTIATION[moduleName]) {
-          this._executeLazilyInstantiatedModule(moduleName, targetName, methodName);
-
-          target = this._targetForTargetName(targetName);
-          method = this._methodForMethodNameInTarget(methodName, target);
-        } else {
-          throw new Error("SC.Module: could not find callback for '%@'".fmt(moduleName));
-        }
-      }
-
-      if (!args) {
-        args = [];
-      }
-
-      // The first parameter passed to the callback is the name of the module.
-      args.unshift(moduleName);
-
-      // Invoke the callback. Wrap it in a run loop if we are not in a runloop already.
-      var needsRunLoop = !!SC.RunLoop.currentRunLoop;
-      if (needsRunLoop) {
-        SC.run(function() {
-          method.apply(target, args);
-        });
+      // Try to find dependent module in MODULE_INFO
+      if (!requiredModule) {
+        throw new Error("SC.Module: could not find required module '%@' for module '%@'".fmt(requiredModuleName, moduleName));
       } else {
+
+        // Required module has been requested but hasn't loaded yet.
+        if (requiredModule.isLoading) {
+          dependenciesMet = NO;
+
+          dependents = requiredModule.dependents;
+          if (!dependents) requiredModule.dependents = dependents = [];
+          dependents.push(moduleName);
+        }
+
+        // Required module has already been loaded and evaluated, no need to worry about it.
+        else if (requiredModule.isReady) {
+          continue;
+        }
+        // Required module has not been loaded nor requested yet.
+        else {
+          dependenciesMet = NO;
+
+          // Register this as a dependent module (used by SC._moduleDidLoad()...)
+          dependents = requiredModule.dependents;
+          if (!dependents) requiredModule.dependents = dependents = [];
+
+          dependents.push(moduleName);
+
+          if (log) SC.debug("SC.Module: '%@' depends on '%@', loading dependency…", moduleName, requiredModuleName);
+
+          // Load dependencies
+          SC.Module.loadModule(requiredModuleName);
+        }
+      }
+    }
+  },
+
+  /**
+    @private
+
+    Calls an action on a target to notify the target that a module has loaded.
+  */
+  _invokeCallback: function (moduleName, targetName, methodName, args) {
+    var method;
+    var target;
+
+    target = this._targetForTargetName(targetName);
+    method = this._methodForMethodNameInTarget(methodName, target);
+
+    // If we weren't able to find the callback, this module may be lazily instantiated and
+    // the callback won't exist until we execute the closure that it is wrapped in.
+    if (!method) {
+      if (SC.LAZY_INSTANTIATION[moduleName]) {
+        this._executeLazilyInstantiatedModule(moduleName, targetName, methodName);
+
+        target = this._targetForTargetName(targetName);
+        method = this._methodForMethodNameInTarget(methodName, target);
+      } else {
+        throw new Error("SC.Module: could not find callback for '%@'".fmt(moduleName));
+      }
+    }
+
+    if (!args) {
+      args = [];
+    }
+
+    // The first parameter passed to the callback is the name of the module.
+    args.unshift(moduleName);
+
+    // Invoke the callback. Wrap it in a run loop if we are not in a runloop already.
+    var needsRunLoop = !!SC.RunLoop.currentRunLoop;
+    if (needsRunLoop) {
+      SC.run(function () {
         method.apply(target, args);
-      }
-    },
-
-    /** @private
-      Given a module name, iterates through all registered callbacks and calls them.
-    */
-    _invokeCallbacksForModule: function(moduleName) {
-      var moduleInfo = SC.MODULE_INFO[moduleName], callbacks ;
-      if (!moduleInfo) return ; // shouldn't happen, but recover anyway
-
-      if (SC.LOG_MODULE_LOADING) SC.debug("SC.Module: Module '%@' has completed loading, invoking callbacks.", moduleName);
-
-      callbacks = moduleInfo.callbacks || [] ;
-
-      for (var idx=0, len=callbacks.length; idx<len; ++idx) {
-        callbacks[idx]() ;
-      }
-    },
-
-    _evaluateAndInvokeCallbacks: function(moduleName) {
-      var moduleInfo = SC.MODULE_INFO;
-      var module = moduleInfo[moduleName];
-      var log = SC.LOG_MODULE_LOADING;
-
-      if (log) SC.debug("SC.Module: Evaluating and invoking callbacks for '%@'.", moduleName);
-
-      if (module.source) {
-        this._evaluateStringLoadedModule(module);
-      }
-
-      // this is ugly, but a module evaluated late like this won't be done instantiating
-      // until the end of a run loop. Also, the code here is not structured in a way that makes
-      // it easy to "add a step" before saying a module is ready. And finally, invokeLater doesn't
-      // accept arguments; hence, the closure.
-      module.isWaitingForRunLoop = YES;
-      this.invokeLast(function() {
-        module.isReady = YES;
-        this._moduleDidBecomeReady(moduleName);
       });
-    },
+    } else {
+      method.apply(target, args);
+    }
+  },
 
-    _moduleDidBecomeReady: function(moduleName) {
-      var moduleInfo = SC.MODULE_INFO;
-      var module = moduleInfo[moduleName];
-      var log = SC.LOG_MODULE_LOADING;
+  /** @private
+    Given a module name, iterates through all registered callbacks and calls them.
+  */
+  _invokeCallbacksForModule: function (moduleName) {
+    var moduleInfo = SC.MODULE_INFO[moduleName], callbacks;
+    if (!moduleInfo) return; // shouldn't happen, but recover anyway
 
-      module.isWaitingForRunLoop = NO;
+    if (SC.LOG_MODULE_LOADING) SC.debug("SC.Module: Module '%@' has completed loading, invoking callbacks.", moduleName);
 
-      if (SC.isReady) {
-        SC.Module._invokeCallbacksForModule(moduleName) ;
+    callbacks = moduleInfo.callbacks || [];
+
+    for (var idx = 0, len = callbacks.length; idx < len; ++idx) {
+      callbacks[idx]();
+    }
+  },
+
+  _evaluateAndInvokeCallbacks: function (moduleName) {
+    var moduleInfo = SC.MODULE_INFO;
+    var module = moduleInfo[moduleName];
+    var log = SC.LOG_MODULE_LOADING;
+
+    if (log) SC.debug("SC.Module: Evaluating and invoking callbacks for '%@'.", moduleName);
+
+    if (module.source) {
+      this._evaluateStringLoadedModule(module);
+    }
+
+    // this is ugly, but a module evaluated late like this won't be done instantiating
+    // until the end of a run loop. Also, the code here is not structured in a way that makes
+    // it easy to "add a step" before saying a module is ready. And finally, invokeLater doesn't
+    // accept arguments; hence, the closure.
+    module.isWaitingForRunLoop = YES;
+    this.invokeLast(function () {
+      module.isReady = YES;
+      this._moduleDidBecomeReady(moduleName);
+    });
+  },
+
+  _moduleDidBecomeReady: function (moduleName) {
+    var moduleInfo = SC.MODULE_INFO;
+    var module = moduleInfo[moduleName];
+    var log = SC.LOG_MODULE_LOADING;
+
+    module.isWaitingForRunLoop = NO;
+
+    if (SC.isReady) {
+      SC.Module._invokeCallbacksForModule(moduleName);
+      delete module.callbacks;
+    } else {
+      SC.ready(SC, function () {
+        SC.Module._invokeCallbacksForModule(moduleName);
         delete module.callbacks;
-      } else {
-        SC.ready(SC, function() {
-          SC.Module._invokeCallbacksForModule(moduleName) ;
-          delete module.callbacks;
-        });
+      });
+    }
+
+    // for each dependent module, try and load them again...
+    var dependents = module.dependents || [];
+    var dependentName, dependent;
+
+    for (var idx = 0, len = dependents.length; idx < len; idx++) {
+      dependentName = dependents[idx];
+      dependent = moduleInfo[dependentName];
+      if (dependent.isLoaded && this._dependenciesMetForModule(dependentName)) {
+        if (log) SC.debug("SC.Module: Now that %@ has loaded, all dependencies for a dependent %@ are met.", moduleName, dependentName);
+        this._evaluateAndInvokeCallbacks(dependentName);
       }
+    }
 
-      // for each dependent module, try and load them again...
-      var dependents = module.dependents || [] ;
-      var dependentName, dependent;
-
-      for (var idx = 0, len = dependents.length; idx < len; idx++) {
-        dependentName = dependents[idx];
-        dependent = moduleInfo[dependentName];
-        if (dependent.isLoaded && this._dependenciesMetForModule(dependentName)) {
-          if (log) SC.debug("SC.Module: Now that %@ has loaded, all dependencies for a dependent %@ are met.", moduleName, dependentName);
-          this._evaluateAndInvokeCallbacks(dependentName);
-        }
-      }
-
-    },
+  },
 
   /** @private
     Called when the JavaScript for a module finishes loading.
@@ -562,8 +563,8 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
     can continue loading.
 
     @param moduleName {String} the name of the module that just loaded
-*/
-  _moduleDidLoad: function(moduleName) {
+  */
+  _moduleDidLoad: function (moduleName) {
     var module = SC.MODULE_INFO[moduleName];
     var log    = SC.LOG_MODULE_LOADING;
     var dependenciesMet;
@@ -573,18 +574,18 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
 
     if (!module) {
       if (log) SC.debug("SC._moduleDidLoad() called for unknown module '@'.", moduleName);
-      module = SC.MODULE_INFO[moduleName] = { isLoaded: YES, isReady: YES } ;
+      module = SC.MODULE_INFO[moduleName] = { isLoaded: YES, isReady: YES };
       return;
     }
 
     if (module.isLoaded) {
       if (log) SC.debug("SC._moduleDidLoad() called more than once for module '%@'. Skipping.", moduleName);
-      return ;
+      return;
     }
 
     // Remember that we're loaded.
-    delete module.isLoading ;
-    module.isLoaded = YES ;
+    delete module.isLoading;
+    module.isLoaded = YES;
 
     if (!module.isPrefetching) {
       dependenciesMet = this._dependenciesMetForModule(moduleName);
@@ -607,7 +608,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
     @param {String|Object} targetName the string or object representing the target
     @returns Object
   */
-  _targetForTargetName: function(targetName){
+  _targetForTargetName: function (targetName) {
     if (SC.typeOf(targetName) === SC.T_STRING) {
       return SC.objectForPropertyPath(targetName);
     }
@@ -624,7 +625,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
     @param {Object} target the target from which to retrieve the method
     @returns Object
   */
-  _methodForMethodNameInTarget: function(methodName, target){
+  _methodForMethodNameInTarget: function (methodName, target) {
     if (SC.typeOf(methodName) === SC.T_STRING) {
       return SC.objectForPropertyPath(methodName, target);
     }
@@ -640,13 +641,13 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
   /**
     Call this in order to prevent expensive tasks from occurring at inopportune times.
   */
-  suspend: function() {
+  suspend: function () {
 
     //Increment the suspension count, to support nested suspend()/resume() pairs.
     //We only do anything if the suspend count ends up at 1, as that implies it's
     //the first suspend() call.
-    this._suspendCount = (this._suspendCount||0)+1;
-    if(this._suspendCount!==1) return;
+    this._suspendCount = (this._suspendCount || 0) + 1;
+    if (this._suspendCount !== 1) return;
 
     //Yummy variables.
     var methods = this.get('methodsForSuspend'),
@@ -654,12 +655,12 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
 
     //Now we go through the list of methods to suspend, and overwrite them with
     //versions that will buffer their calls in a _bufferedCalls array.
-    for(i=0; key=methods[i]; i++) {
-
+    for (i = 0; (key = methods[i]); i++) {
+      //jshint loopfunc: true
       //Ensure the replacement function exists at a key where it'll be cached.
-      if(!this[replaceKey="__replacement_"+key+"__"]) {
-        (this[replaceKey] = function() {
-          (this._bufferedCalls||(this._bufferedCalls=[])).push({
+      if (!this[replaceKey = "__replacement_" + key + "__"]) {
+        (this[replaceKey] = function () {
+          (this._bufferedCalls || (this._bufferedCalls = [])).push({
             method: arguments.callee.methodName,
             arguments: arguments
           });
@@ -667,7 +668,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
       }
 
       //Ensure the original function exists at a key where it'll be cached.
-      if(!this[saveKey="__saved_"+key+"__"]) this[saveKey] = this[key];
+      if (!this[saveKey = "__saved_" + key + "__"]) this[saveKey] = this[key];
 
       //Ensure that the replacement function exists where the rest of the
       //code expects the original.
@@ -680,19 +681,19 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
     finally perform any calls that may have occurred during suspension. Calls
     will run in the order they were received.
   */
-  resume: function() {
+  resume: function () {
 
     //First, we need to decrement the suspension count, and warn if the suspension
     //count implied that we weren't already suspended. Furthermore, if the suspend
     //count is not zero, then we haven't tackled the last suspend() call with a resume(),
     //and should therefore not resume.
-    this._suspendCount = (this._suspendCount||0)-1;
-    if(this._suspendCount<0) {
+    this._suspendCount = (this._suspendCount || 0) - 1;
+    if (this._suspendCount < 0) {
       SC.warn("SC.Module.resume() was called without SC.Module having been in a suspended state. Call aborted.");
       this._suspendCount = 0;
       return;
     }
-    if(this._suspendCount>0) return;
+    if (this._suspendCount > 0) return;
 
     //Yummy variables.
     var methods = this.get('methodsForSuspend'),
@@ -700,13 +701,13 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
         key, i, method, call;
 
     //Restore the original methods to where they belong for normal functionality.
-    for(i=0; (key=methods[i]); i++) this[key] = this["__saved_"+key+"__"];
+    for (i = 0; (key = methods[i]); i++) this[key] = this["__saved_" + key + "__"];
 
     //Perform any buffered calls that built up during the suspended period.
-    for(i=0; call=calls&&calls[i]; i++) this[call.method].apply(this,call.arguments);
+    for (i = 0; (call = calls) && calls[i]; i++) this[call.method].apply(this, call.arguments);
 
     //Clear the list of calls, so subsequent resume() calls won't flush them again.
-    if(calls) calls.length = 0;
+    if (calls) calls.length = 0;
   }
 });
 
@@ -714,7 +715,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
 Inspect the list of modules and, for every prefetched module, create a
 background task to load the module when the user remains idle.
 */
-SC.ready(function() {
+SC.ready(function () {
   var moduleInfo = SC.MODULE_INFO;
   var moduleName;
   var module;
@@ -736,7 +737,7 @@ SC.ready(function() {
 
 SC.Module.PrefetchModuleTask = SC.Task.extend({
   prefetchedModuleName: null,
-  run: function() {
+  run: function () {
     SC.Module.prefetchModule(this.prefetchedModuleName);
   }
 });

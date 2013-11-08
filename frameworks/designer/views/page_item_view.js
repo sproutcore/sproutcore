@@ -12,8 +12,7 @@
 
 */
 
-SC.pageItemView = SC.ListItemView.extend(
-/** @scope SC.ListItemView.prototype */ {
+SC.pageItemView = SC.ListItemView.extend({
   isDropTarget: YES,
 
   dragEntered: function(drag, evt) {

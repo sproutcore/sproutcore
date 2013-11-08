@@ -44,7 +44,12 @@ var pane = SC.ControlTestPane.design()
       contentValueKey: "title",
       contentCheckboxKey: "isDone",
       contentUnreadCountKey: "unread",
-      rowHeight: 20
+      rowHeight: 20,
+      _didCallDragEnded: false,
+      dragEnded: function() {
+        sc_super();
+        this._didCallDragEnded = true;
+      }
     })
   }));
 
@@ -225,6 +230,7 @@ test("insertion point when cancel drag on list view", function() {
     SC.Event.trigger(layer, 'keydown', [ev]);
 
     equals(listView._insertionPointView, null, "The insertion point should have been destroyed");
+    equals(listView._didCallDragEnded, true, "dragEnded should have been call");
 
     window.start();
   };

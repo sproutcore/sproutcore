@@ -10,8 +10,7 @@
 
   @extends SC.ContainerView
 */
-SC.DesignerDropTarget = SC.ContainerView.extend(
-  /** @scope SC.DesignerDropTarget.prototype */ {
+SC.DesignerDropTarget = SC.ContainerView.extend({
 
   inGlobalOffset: YES,
 

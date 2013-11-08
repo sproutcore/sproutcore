@@ -1,7 +1,30 @@
 CHANGE LOG
 ==========
 
-1.10.0.0
+1.10.1
+-----------
+
+### BUG FIXES
+
+* Clean ups for http://docs.sproutcore.com.
+* Fixes memory leak in SC.ContentValueSupport.
+* Fixes layout bug with inline label view editor when used with child view layout plugins.
+* Fixes SC.Module loading on IE11+.
+* Fixes SC.Drag to fire `dragEnded` when cancelling a drag and drop operation
+using the escape key.
+* Fixes missing non-retina image for SC.MenuPane.
+* CollectionView: fix the selection on touchEnd. Previously when an item was touched two times, after the second touch it was no longer marked as selected even if it was (correctly) part of the collection's selection, its isSelected property was NO when it was supposed to be YES.
+* Fixes the code to show an insertion point for SC.GridView using @nicolasbadia's code. Adds a default style for SC.GridView's default insertion point that matches SC.ListView's default. Also improves the positioning of SC.ListView's insertion point so that the insertion view can specify a different height/right/width layout if wanted.
+* Fixes misplaced scroll view content when changing the content using touch scrolling. Reapplies the CSS transforms when touch scroll view's content frame changes. Because the CSS transforms are applied directly to the content view, if the content view's layout style changes, the transforms will be erased.
+* Fixes warnings when smoothly decelerating scrolling (includes performance improvement). Removes the necessity to trigger run loops while the scroll decelerates and only triggers the run loop when actually doing an update. This also removes an invoke warning if the first time the deceleration code runs (not within run loop) and doesn't have any velocity and so updates immediately.
+* Changes the theme class for SC.EmptyTheme from 'sc-empty' to 'sc-empty-theme'. This fixes the conflict with 'sc-empty' used by SC.ProgressViews that causes all progress views in apps using the empty theme to not have an inner border. This is a potentially conflicting change, but less dangerous than changing the class used by SC.ProgressView, because SC.EmptyTheme doesn't have any styles.
+* Fix issue with sending statechart events while state transitioning. `sendEvent` had a typo which allowed events to be sent while in the middle of a state transition. Fixing that revealed that now events sent during state transitions would be queued but never sent (at least not until another event was sent).
+* Resolved Handlebars escaping issue with ampersands.
+* Fix caching issue with SC.routes.informLocation. Since location and informLocation really just represent a single property, they both need to update the cached value for the opposite property.
+* Fixes regression with OS sniffing of Linux and Android in SC.browser.
+
+
+1.10.0
 -----------
 
 ### CHANGES & FEATURES
