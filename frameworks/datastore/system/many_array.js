@@ -261,11 +261,14 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
       if (SC.none(id)) {
         //@if(debug)
-        // throw new Error("Developer Error: Attempted to add a record without a primary key to a many relationship. Relationships require that the id be specified. You should either assign a temporary id that you will manage accordingly or save the record and then add it to the relationship afterward.");
+        // Add some information about what we're doing.
         SC.info("Developer Info: Added a record, \"%@\", without a primary key to the '%@' to-many relationship. Relationships require that the id always be specified, so a placeholder id will be used and the record will be observed in order to update the relationship when it has a primary key set.".fmt(rec, pname));
         //@endif
         ids[i] = '_sc_id_placeholder_' + rec.get('storeKey');
 
+        // There is an unhandled edge case that if the record is removed again from this relationship before its id is set,
+        // the observer will remain. This is an unlikely case and is accounted for in _recordsIdDidChange, so we won't bother
+        // inspecting the removed indexes for transient records.
         rec.addObserver('id', this, this._recordsIdDidChange);
       } else {
         // If the record inserted doesn't have an id yet, use a unique placeholder based on the storeKey.
@@ -484,13 +487,15 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
     // Update the storeIds array with the new record id.
     idx = storeIds.indexOf('_sc_id_placeholder_' + rec.get('storeKey'));
-    storeIds.replace(idx, 1, [rec.get('id')]);
+    if (idx >= 0) {
+      storeIds.replace(idx, 1, [rec.get('id')]);
 
-    // Mark the record dirty if there is no inverse or we are master.
-    // Note: when the temporary relationship was created we avoided marking this
-    // record dirty unnecessarily at that time in an effort to ensure consistency.
-    if (record && (!inverse || isMaster)) {
-      record.recordDidChange(pname);
+      // Mark the record dirty if there is no inverse or we are master.
+      // Note: when the temporary relationship was created we avoided marking this
+      // record dirty unnecessarily at that time in an effort to ensure consistency.
+      if (record && (!inverse || isMaster)) {
+        record.recordDidChange(pname);
+      }
     }
 
     // Clean up the observer.
