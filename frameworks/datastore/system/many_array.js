@@ -23,6 +23,20 @@
 SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
   /** @scope SC.ManyArray.prototype */ {
 
+  //@if(debug)
+  /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */
+
+  /* @private */
+  toString: function () {
+    var readOnlyStoreIds = this.get('readOnlyStoreIds'),
+      length = this.get('length');
+
+    return "%@({\n  ids: [%@],\n  length: %@,\n  … })".fmt(this.constructor.toString(), readOnlyStoreIds, length);
+  },
+
+  /* END DEBUG ONLY PROPERTIES AND METHODS */
+  //@endif
+
   /**
     `recordType` will tell what type to transform the record to when
     materializing the record.
@@ -240,7 +254,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     // if we have an inverse - collect the list of records we are about to
     // remove
     inverse = this.get('inverse');
-    if (inverse && amt>0) {
+    if (inverse && amt > 0) {
       toRemove = SC.ManyArray._toRemove;
       if (toRemove) SC.ManyArray._toRemove = null; // reuse if possible
       else toRemove = [];
@@ -456,4 +470,4 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     this.recordPropertyDidChange();
   }
 
-}) ;
+});

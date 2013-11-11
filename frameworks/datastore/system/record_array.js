@@ -63,9 +63,10 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   toString: function () {
     var statusString = this.statusString(),
       storeKeys = this.get('storeKeys'),
-      query = this.get('query');
+      query = this.get('query'),
+      length = this.get('length');
 
-    return "%@({\n    query: %@,\n    storeKeys: [%@],\n  … }) %@".fmt(this.constructor.toString(), query, storeKeys, statusString);
+    return "%@({\n    query: %@,\n    storeKeys: [%@],\n  length: %@,\n  … }) %@".fmt(this.constructor.toString(), query, storeKeys, length, statusString);
   },
 
   /** @private */
