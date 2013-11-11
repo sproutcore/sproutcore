@@ -911,11 +911,19 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     @returns {SC.CollectionView} receiver
   */
   reload: function (indexes) {
-    var invalid = this._invalidIndexes;
+    var invalid = this._invalidIndexes,
+      length;
+
     if (indexes && invalid !== YES) {
       if (invalid) invalid.add(indexes);
       else invalid = this._invalidIndexes = indexes.clone();
 
+      // If the last item in the list changes, we need to reload the previous last
+      // item also so that the isLast attribute updates appropriately.
+      length = this.get('length');
+      if (length > 1 && invalid.max == length) {
+        invalid.add(length - 2);
+      }
     }
     else {
       this._invalidIndexes = YES; // force a total reload
@@ -3155,6 +3163,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     attrs.owner = attrs.displayDelegate = this;
     attrs.page = this.page;
     attrs.outlineLevel = outlineLevel;
+    attrs.isLast = idx === items.get('length') - 1;
 
     if (isGroupView) attrs.classNames = this._GROUP_COLLECTION_CLASS_NAMES;
     else attrs.classNames = this._COLLECTION_CLASS_NAMES;
@@ -3284,6 +3293,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     itemView.set('layout', attrs.layout);
     itemView.set('outlineLevel', attrs.outlineLevel);
     itemView.set('disclosureState', attrs.disclosureState);
+    itemView.set('isLast', attrs.isLast);
     itemView.endPropertyChanges();
   },
 
