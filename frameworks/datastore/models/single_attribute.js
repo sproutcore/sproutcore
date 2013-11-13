@@ -59,9 +59,15 @@ SC.SingleAttribute = SC.RecordAttribute.extend(
     if (newRec !== undefined && this.get('isEditable')) {
 
       // can only take other records or null
+      //@if(debug)
       if (newRec && !SC.kindOf(newRec, SC.Record)) {
-        throw new Error("%@ is not an instance of SC.Record".fmt(newRec));
+        throw new Error("Developer Error: %@ is not an instance of SC.Record.".fmt(newRec));
       }
+
+      if (newRec && SC.none(newRec.get('id'))) {
+        throw new Error("Developer Error: Attempted to add a record without a primary key to a to-one relationship. Relationships require that the id always be specified. The record, \"%@\", must be assigned an id (i.e. be saved) before it can be used in the '%@' relationship.".fmt(newRec, attrKey));
+      }
+      //@endif
 
       inverseKey = this.get('inverse');
       if (inverseKey) oldRec = this._scsa_call(record, key);
