@@ -485,15 +485,19 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
       idx;
 
     // Update the storeIds array with the new record id.
-    idx = storeIds.indexOf('_sc_id_placeholder_' + rec.get('storeKey'));
-    if (idx >= 0) {
-      storeIds.replace(idx, 1, [rec.get('id')]);
+    if (rec.get('id')) {
+      idx = storeIds.indexOf('_sc_id_placeholder_' + rec.get('storeKey'));
 
-      // Mark the record dirty if there is no inverse or we are master.
-      // Note: when the temporary relationship was created we avoided marking this
-      // record dirty unnecessarily at that time in an effort to ensure consistency.
-      if (record && (!inverse || isMaster)) {
-        record.recordDidChange(pname);
+      // Beware of records that are no longer a part of storeIds.
+      if (idx >= 0) {
+        storeIds.replace(idx, 1, [rec.get('id')]);
+
+        // Mark the record dirty if there is no inverse or we are master.
+        // Note: when the temporary relationship was created we avoided marking this
+        // record dirty unnecessarily at that time in an effort to ensure consistency.
+        if (record && (!inverse || isMaster)) {
+          record.recordDidChange(pname);
+        }
       }
     }
 
