@@ -31,7 +31,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     var readOnlyStoreIds = this.get('readOnlyStoreIds'),
       length = this.get('length');
 
-    return "%@({\n  ids: [%@],\n  length: %@,\n  … })".fmt(this.constructor.toString(), readOnlyStoreIds, length);
+    return "%@({\n    ids: [%@],\n    length: %@,\n    … })".fmt(this.constructor.toString(), readOnlyStoreIds, length);
   },
 
   /* END DEBUG ONLY PROPERTIES AND METHODS */
@@ -236,10 +236,11 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     records, which can be converted to `storeId`s.
   */
   replace: function(idx, amt, recs) {
-
+    //@if(debug)
     if (!this.get('isEditable')) {
-      throw new Error("%@.%@[] is not editable".fmt(this.get('record'), this.get('propertyName')));
+      throw new Error("Developer Error: %@.%@[] is not editable.".fmt(this.get('record'), this.get('propertyName')));
     }
+    //@endif
 
     var storeIds = this.get('editableStoreIds'),
         len      = recs ? (recs.get ? recs.get('length') : recs.length) : 0,
@@ -249,7 +250,15 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
     // map to store keys
     ids = [] ;
-    for(i=0;i<len;i++) ids[i] = recs.objectAt(i).get('id');
+    for(i=0;i<len;i++) {
+      //@if(debug)
+      if (SC.none(recs.objectAt(i).get('id'))) {
+        throw new Error("Developer Error: Attempted to add a record without a primary key to a to-many relationship. Relationships require that the id always be specified. The record, \"%@\", must be assigned an id (i.e. be saved) before it can be used in the '%@' relationship.".fmt(recs.objectAt(i), pname));
+      }
+      //@endif
+
+      ids[i] = recs.objectAt(i).get('id');
+    }
 
     // if we have an inverse - collect the list of records we are about to
     // remove
