@@ -353,7 +353,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate, {
     if (!this.get('autoReconnect')) return;
 
     var that = this;
-    setTimeout(function() { that.connect(); }, this.get('reconnectTimeout'));
+    setTimeout(function() { that.connect(); }, this.get('reconnectInterval'));
   },
 
   /**
