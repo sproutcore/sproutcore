@@ -245,7 +245,8 @@ SC.ContainerView = SC.View.extend(
 
   /** @private */
   destroy: function () {
-    var contentStatecharts = this._contentStatecharts;
+    var contentView = this.get('contentView'),
+      contentStatecharts = this._contentStatecharts;
 
     // Exit all the statecharts immediately. This mutates the array!
     if (contentStatecharts) {
@@ -263,6 +264,8 @@ SC.ContainerView = SC.View.extend(
       }); 
       this._cachedViews = null;
     }
+
+    if (contentView) contentView.destroy();
 
     return sc_super();
   },

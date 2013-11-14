@@ -173,6 +173,14 @@
     contentView = view.get('contentView');
     SC.run(function() { view.set('nowShowing', null); });
     equals(contentView.isDestroyed, YES, "should have destroyed the previous view it instantiated (from class)");
+
+    SC.run(function() { view.set('nowShowing', SC.View.create()); });
+    contentView = view.get('contentView');
+    equals(contentView.isDestroyed, NO, "The content view should not be destroyed");
+
+    view.destroy();
+    equals(contentView.isDestroyed, YES, "should have destroyed the content view");
+
   });
 
   test("Cleans up instantiated views without cache limit", function() {
