@@ -634,22 +634,6 @@ SC.RootResponder = SC.Object.extend(
     if (SC.browser.isIE8OrLower) this.listenFor(['focusin', 'focusout'], document);
     else this.listenFor(['focus', 'blur'], window);
 
-    // CSS Transitions (tested asynchronously)
-    if (SC.platform.supportsCSSTransitions) {
-      // Ensure that the callback name used maps to our implemented function name.
-      this[SC.platform.transitionendEventName] = this.transitionend;
-      this.listenFor([SC.platform.transitionendEventName], document);
-    }
-
-    // CSS Animations (tested asynchronously)
-    if (SC.platform.supportsCSSAnimations) {
-      // Ensure that the callback name used maps to our implemented function name.
-      this[SC.platform.animationstartEventName] = this.animationstart;
-      this[SC.platform.animationendEventName] = this.animationend;
-      this[SC.platform.animationiterationEventName] = this.animationiteration;
-      this.listenFor([SC.platform.animationstartEventName, SC.platform.animationendEventName, SC.platform.animationiterationEventName], document);
-    }
-
     // handle special case for keypress- you can't use normal listener to block
     // the backspace key on Mozilla
     if (this.keypress) {
@@ -775,6 +759,40 @@ SC.RootResponder = SC.Object.extend(
         }
       };
       SC.RunLoop.prototype.endRunLoop = patch;
+    }
+  },
+
+  /**
+    Sets up the transition end event listener.
+
+    NOTE: requires that SC.platform.transitionendEventName has been determined.
+
+    @returns {void}
+  */
+  setupTransitionListener: function () {
+    // CSS Transitions (tested asynchronously)
+    if (SC.platform.supportsCSSTransitions) {
+      // Ensure that the callback name used maps to our implemented function name.
+      this[SC.platform.transitionendEventName] = this.transitionend;
+      this.listenFor([SC.platform.transitionendEventName], document);
+    }
+  },
+
+  /**
+    Sets up the animation event listeners.
+
+    NOTE: requires that SC.platform.animationstartEventName, SC.platform.animationendEventName & SC.platform.animationiterationEventName has been determined.
+
+    @returns {void}
+  */
+  setupAnimationListeners: function () {
+    // CSS Animations (tested asynchronously)
+    if (SC.platform.supportsCSSAnimations) {
+      // Ensure that the callback name used maps to our implemented function name.
+      this[SC.platform.animationstartEventName] = this.animationstart;
+      this[SC.platform.animationendEventName] = this.animationend;
+      this[SC.platform.animationiterationEventName] = this.animationiteration;
+      this.listenFor([SC.platform.animationstartEventName, SC.platform.animationendEventName, SC.platform.animationiterationEventName], document);
     }
   },
 
