@@ -193,7 +193,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     var loc = this.get('length') || 0;
     while (--loc >= 0) {
       var curObject = this.objectAt(loc);
-      if (curObject == obj) this.removeAt(loc);
+      if (curObject === obj) this.removeAt(loc);
     }
     return this;
   },
