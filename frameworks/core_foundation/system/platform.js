@@ -440,14 +440,16 @@ SC.platform = SC.Object.create({
 
 });
 
-
 /** @private
   Test the transition and animation event names of this platform.  We could hard
   code event names into the framework, but at some point things would change and
   we would get it wrong.  Instead we perform actual tests to find out the proper
   names and only add the proper listeners.
+
+  Once the tests are completed the RootResponder is notified in order to add
+  transition and animation event listeners for the appropriate event names.
 */
-(function () {
+SC.ready(function () {
   // This will add 4 different variations of the named event listener and clean
   // them up again.
   // Note: we pass in capitalizedEventName, because we can't just capitalize
@@ -481,7 +483,6 @@ SC.platform = SC.Object.create({
 
         // Call the clean up function, pass in success state.
         if (cleanUpFunc) { cleanUpFunc(!!evt); }
-        jQuery.holdReady(NO);
       };
 
     // Set the initial value as unsupported.
@@ -493,9 +494,6 @@ SC.platform = SC.Object.create({
     el.addEventListener(lowerDomPrefix + standardEventName, callback, NO);
     el.addEventListener(lowerDomPrefix + capitalizedEventName, callback, NO);
     el.addEventListener(domPrefix + capitalizedEventName, callback, NO);
-
-    // Delay the ready event for the tests to complete.
-    jQuery.holdReady(YES);
   };
 
   // Set up and execute the transition event test.
@@ -508,12 +506,16 @@ SC.platform = SC.Object.create({
     // Test transition events.
     executeTest(transitionEl, 'transitionend', 'TransitionEnd', function (success) {
       // If an end event never fired, we can't really support CSS transitions in SproutCore.
-      if (!success) {
+      if (success) {
+        // Set up the SC transition event listener.
+        SC.RootResponder.responder.setupTransitionListener();
+      } else {
         SC.platform.supportsCSSTransitions = NO;
       }
 
       transitionEl.parentNode.removeChild(transitionEl);
       transitionEl = null;
+
     });
 
     // Append the test element.
@@ -568,7 +570,7 @@ SC.platform = SC.Object.create({
     executeTest(animationEl, 'animationend', 'AnimationEnd', function (success) {
       // If an end event never fired, we can't really support CSS animations in SproutCore.
       if (success) {
-        // Infer the start and iteration event names.
+        // Infer the start and iteration event names based on the success of the end event.
         var domPrefix = SC.browser.domPrefix,
           lowerDomPrefix = domPrefix.toLowerCase(),
           endEventName = SC.platform.animationendEventName;
@@ -591,6 +593,8 @@ SC.platform = SC.Object.create({
           SC.platform.animationiterationEventName = 'animationiteration';
         }
 
+        // Set up the SC animation event listeners.
+        SC.RootResponder.responder.setupAnimationListeners();
       } else {
         SC.platform.supportsCSSAnimations = NO;
       }
@@ -603,4 +607,4 @@ SC.platform = SC.Object.create({
     // Break execution to allow the browser to update the DOM before altering the style.
     document.documentElement.appendChild(animationEl);
   }
-})();
+});
