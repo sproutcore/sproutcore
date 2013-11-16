@@ -210,8 +210,7 @@ SC.mixin(SC.View,
           column = gridProperties.column || 0,
           row = gridProperties.row || 0,
           columnSpan = gridProperties.columnSpan || 1,
-          rowSpan = gridProperties.rowSpan || 1
-
+          rowSpan = gridProperties.rowSpan || 1,
           columnData = columnSizes[column],
           rowData = rowSizes[row];
 
