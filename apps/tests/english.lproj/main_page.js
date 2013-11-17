@@ -205,8 +205,18 @@ TestRunner.mainPage = SC.Page.design({
 
       locationLabel: SC.LabelView.design({
         classNames: ['location-label'],
+        escapeHTML: false,
         layout: { right: 10, centerY: 0, height: 16, left: 100 },
-        valueBinding: SC.Binding.oneWay("TestRunner.testController.displayName")
+        contentBinding: SC.Binding.oneWay("TestRunner.testController.content"),
+        value: function () {
+          var content = this.get('content');
+
+          if (content) {
+            return '<a href="%@" target="_blank">%@</a>'.fmt(content.get('url'), content.get('displayName'));
+          } else {
+            return '';
+          }
+        }.property('content')
       })
 
     }),
