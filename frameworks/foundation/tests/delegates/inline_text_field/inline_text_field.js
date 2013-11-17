@@ -68,6 +68,7 @@ test("basic acquire and release", function() {
 
   SC.InlineTextFieldDelegate.releaseEditor(editor);
 
+  ok(editor.isDestroyed, "editor should be destroyed");
   same(editor.get('pane'), null, "editor removed from pane after release");
   same(editor.get('parentView'), null, "editor removed from parent view after release");
 });

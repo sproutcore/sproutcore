@@ -405,6 +405,11 @@ SC.PickerPane = SC.PalettePane.extend(
   */
   windowPadding: null,
 
+  /* @private Observe the frame for changes so that we can reposition if necessary. */
+  borderFrameDidChange: function () {
+    this.positionPane(true);
+  },
+
   /**
     Displays a new picker pane.
 
@@ -430,6 +435,10 @@ SC.PickerPane = SC.PalettePane.extend(
     this.endPropertyChanges();
     this.positionPane();
     this._hideOverflow();
+
+    // Start observing the frame for changes.
+    this.addObserver('borderFrame', this.borderFrameDidChange);
+
     return this.append();
   },
 
@@ -443,11 +452,11 @@ SC.PickerPane = SC.PalettePane.extend(
     useAnchorCached = useAnchorCached && this.get('anchorCached');
 
     var anchor       = useAnchorCached ? this.get('anchorCached') : this.get('anchorElement'),
-        frame        = this.get('borderFrame'),
-        preferType   = this.get('preferType'),
-        preferMatrix = this.get('preferMatrix'),
-        layout       = this.get('layout'),
-        origin;
+      frame        = this.get('borderFrame'),
+      preferType   = this.get('preferType'),
+      preferMatrix = this.get('preferMatrix'),
+      layout       = this.get('layout'),
+      origin;
 
     // usually an anchorElement will be passed.  The ideal position is just
     // below the anchor + default or custom offset according to preferType.
@@ -492,7 +501,6 @@ SC.PickerPane = SC.PalettePane.extend(
       frame.halfHeight = parseInt(frame.height * 0.5, 0);
 
       origin = this.fitPositionToScreen(origin, frame, anchor);
-
       this.adjust({
         width: origin.width,
         height: origin.height,
@@ -1083,6 +1091,10 @@ SC.PickerPane = SC.PalettePane.extend(
       this._withdrawOverflowRequest();
     }
     this._removeScrollObservers();
+
+    // Stop observing the frame for changes.
+    this.removeObserver('borderFrame', this.borderFrameDidChange);
+
     return sc_super();
   },
 

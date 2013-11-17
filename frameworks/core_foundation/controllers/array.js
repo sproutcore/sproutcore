@@ -30,6 +30,20 @@ sc_require('mixins/selection_support');
 SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
 /** @scope SC.ArrayController.prototype */ {
 
+  //@if(debug)
+  /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */
+
+  /* @private */
+  toString: function () {
+    var content = this.get('content'),
+      ret = sc_super();
+
+    return content ? "%@:\n  ↳ %@".fmt(ret, content) : ret;
+  },
+
+  /* END DEBUG ONLY PROPERTIES AND METHODS */
+  //@endif
+
   // ..........................................................
   // PROPERTIES
   //

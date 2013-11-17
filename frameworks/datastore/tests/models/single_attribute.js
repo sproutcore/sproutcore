@@ -297,6 +297,18 @@ test("adding toOne pointing to non existing class should throw error", function(
   same(message, 'Attempted to create toOne attribute with undefined recordType. Did you forget to sc_require a dependency?');
 });
 
+test("Adding an unsaved record should throw an Error", function() {
+  var bar1 = MyApp.store.find(MyApp.Bar, 'bar1'),
+    foo = MyApp.store.createRecord(MyApp.Foo, {});
+
+  try {
+    bar1.set('foo', foo);
+    ok(false, "Attempting to assign an unsaved record resulted in an error.");
+  } catch (x) {
+    ok(true, "Attempting to assign an unsaved record resulted in an error.");
+  }
+});
+
 test("adding toMany pointing to non existing class should throw error", function() {
   var message;
   try {

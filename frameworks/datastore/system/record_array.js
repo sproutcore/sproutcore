@@ -56,6 +56,35 @@ sc_require('models/record');
 SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   /** @scope SC.RecordArray.prototype */ {
 
+  //@if(debug)
+  /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */
+
+  /* @private */
+  toString: function () {
+    var statusString = this.statusString(),
+      storeKeys = this.get('storeKeys'),
+      query = this.get('query'),
+      length = this.get('length');
+
+    return "%@({\n    query: %@,\n    storeKeys: [%@],\n    length: %@,\n    … }) %@".fmt(this.constructor.toString(), query, storeKeys, length, statusString);
+  },
+
+  /** @private */
+  statusString: function() {
+    var ret = [], status = this.get('status');
+
+    for (var prop in SC.Record) {
+      if (prop.match(/[A-Z_]$/) && SC.Record[prop] === status) {
+        ret.push(prop);
+      }
+    }
+
+    return ret.join(" ");
+  },
+
+  /* END DEBUG ONLY PROPERTIES AND METHODS */
+  //@endif
+
   /**
     The store that owns this record array.  All record arrays must have a
     store to function properly.
@@ -676,9 +705,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   _storeKeysDidChange: function() {
     var storeKeys = this.get('storeKeys');
 
-    var prev = this._prevStoreKeys, oldLen, newLen,
-        f    = this._storeKeysContentDidChange,
-        fs   = this._storeKeysStateDidChange;
+    var prev = this._prevStoreKeys, oldLen, newLen;
 
     if (storeKeys === prev) { return; } // nothing to do
 

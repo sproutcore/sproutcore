@@ -680,7 +680,7 @@ SC.mixin(/** @scope window.SC.prototype */ {
       if (SC.typeOf(v) === SC.T_FUNCTION) v = "function () { ... }";
       ret.push(key + ": " + v);
     }
-    return "{" + ret.join(" , ") + "}";
+    return "{ " + ret.join(", ") + " }";
   },
 
   /**

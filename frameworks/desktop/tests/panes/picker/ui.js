@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/*global module test htmlbody ok equals same stop start */
+/*global module, test, clearHtmlbody, htmlbody, ok, equals, same, stop, start */
 
 
 function evaluatePicker(pane) {
@@ -24,74 +24,112 @@ function evaluatePicker(pane) {
 
 var anchor = SC.ControlTestPane.design()
   .add("anchor", SC.ButtonView, {
-     title: "Anchor Button"
+    title: "Anchor Button"
   });
 
 module("SC.PickerPane UI", {
-  setup: function(){
+  setup: function () {
     htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
     anchor.standardSetup().setup();
   },
-  teardown: function(){
+  teardown: function () {
     anchor.standardSetup().teardown();
     clearHtmlbody();
   }
 });
 
 
-var paneDefault ;
-var paneMenu ;
-var paneFixed ;
-var panePointer ;
+var paneDefault;
+var paneMenu;
+var paneFixed;
+var panePointer;
 
-test("verify default picker pane content container is visible at correct location with right size", function() {
+test("verify default picker pane content container is visible at correct location with right size", function () {
   paneDefault = SC.PickerPane.create({
     layout: { width: 300, height: 200 },
     contentView: SC.View.extend({
       layout: { top: 0, left: 0, bottom: 0, right: 0 }
     })
   });
-  paneDefault.popup(anchor.view('anchor'), SC.PICKER);
+  SC.run(function () {
+    paneDefault.popup(anchor.view('anchor'), SC.PICKER);
+  });
   evaluatePicker(paneDefault);
   paneDefault.remove();
   paneDefault.destroy();
-}) ;
+});
 
-test("verify menu picker pane content container is visible at correct location with right size", function() {
+test("verify default picker pane content container is visible at correct location with right size (live resize)", function () {
+  var lowAnchor = SC.Pane.create({
+    layout: { bottom: 0, height: 10, centerX: 0, width: 10 }
+  });
+
+  paneDefault = SC.PickerPane.create({
+    layout: { width: 300, height: 200 },
+    contentView: SC.View.extend({
+      layout: { top: 0, left: 0, bottom: 0, right: 0 }
+    })
+  });
+  SC.run(function () {
+    lowAnchor.append();
+    paneDefault.popup(lowAnchor.get('layer'), SC.PICKER);
+  });
+  evaluatePicker(paneDefault);
+
+  var firstLayout = paneDefault.get('layout');
+  SC.run(function () {
+    paneDefault.adjust('height', 300);
+  });
+  var newLayout = paneDefault.get('layout');
+  equals(newLayout.height, 300, "The new height should be");
+  equals(newLayout.top, firstLayout.top - 100, "The new top should be");
+
+  paneDefault.remove();
+  paneDefault.destroy();
+});
+
+test("verify menu picker pane content container is visible at correct location with right size", function () {
   paneMenu = SC.PickerPane.create({
     layout: { width: 300, height: 200 },
     contentView: SC.View.extend({
       layout: { top: 0, left: 0, bottom: 0, right: 0 }
     })
   });
-  paneMenu.popup(anchor.view('anchor'), SC.PICKER_MENU);
+  SC.run(function () {
+    paneMenu.popup(anchor.view('anchor'), SC.PICKER_MENU);
+  });
   evaluatePicker(paneMenu);
   paneMenu.remove();
   paneMenu.destroy();
-}) ;
+});
 
-test("verify fixed picker pane content container is visible at correct location with right size", function() {
+test("verify fixed picker pane content container is visible at correct location with right size", function () {
   paneFixed = SC.PickerPane.create({
     layout: { width: 300, height: 200 },
     contentView: SC.View.extend({
       layout: { top: 0, left: 0, bottom: 0, right: 0 }
     })
   });
-  paneFixed.popup(anchor.view('anchor'), SC.PICKER_FIXED);
+
+  SC.run(function () {
+    paneFixed.popup(anchor.view('anchor'), SC.PICKER_FIXED);
+  });
   evaluatePicker(paneFixed);
   paneFixed.remove();
   paneFixed.destroy();
-}) ;
+});
 
-test("verify pointer picker pane content container is visible at correct location with right size", function() {
+test("verify pointer picker pane content container is visible at correct location with right size", function () {
   panePointer = SC.PickerPane.create({
     layout: { width: 300, height: 200 },
     contentView: SC.View.extend({
       layout: { top: 0, left: 0, bottom: 0, right: 0 }
     })
   });
-  panePointer.popup(anchor.view('anchor'), SC.PICKER_POINTER, [3,0,1,2,2]);
+  SC.run(function () {
+    panePointer.popup(anchor.view('anchor'), SC.PICKER_POINTER, [3, 0, 1, 2, 2]);
+  });
   evaluatePicker(panePointer);
   panePointer.remove();
   panePointer.destroy();
-}) ;
+});

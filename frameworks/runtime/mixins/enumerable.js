@@ -557,7 +557,7 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
 
     @param {Function} callback the callback to execute
     @param {Object} target the target object to use
-    @returns {Array} A filtered array.
+    @returns {Boolean} YES
   */
   some: function (callback, target) {
     if (typeof callback !== "function") throw new TypeError();

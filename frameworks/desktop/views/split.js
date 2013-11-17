@@ -33,6 +33,10 @@ SC.RESIZE_AUTOMATIC = 'sc-automatic-resize';
   SC.SplitView arranges multiple views side-by-side or on top of each
   other.
 
+  By default, SC.SplitView sets `size` and `position` properties on the
+  child views, leaving it up to the child view to adjust itself. For good
+  default behavior, mix SC.SplitChild into your child views.
+
   SplitView can resize its children to fit (the default behavior),
   or resize itself to fit its children--allowing you to build column-
   based file browsers and the like. As one child (a divider, most likely)

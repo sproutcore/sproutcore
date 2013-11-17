@@ -383,10 +383,13 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
       // verify that there are still events registered on this element.  If
       // there aren't, cleanup the element completely to avoid memory leaks.
       key = null ;
-      for(key in events) break;
-      if(!key) {
+      for (key in events) break;
+      if (!key) {
         SC.removeData(elem, "sc_events") ;
         delete this._elements[SC.guidFor(elem)]; // important to avoid leaks
+
+        // Clean up the cached listener to prevent a memory leak.
+        SC.removeData(elem, 'listener');
       }
 
     }
@@ -705,6 +708,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
       var guid = SC.guidFor(elem) ;
       this._elements[guid] = elem;
 
+      // Either retrieve the previously cached listener or cache a new one.
       listener = SC.data(elem, "listener") || SC.data(elem, "listener",
        function() {
          return SC.Event.handle.apply(SC.Event._elements[guid], arguments);
@@ -743,6 +747,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
   _removeEventListener: function(elem, eventType) {
     var listener, special = SC.Event.special[eventType] ;
     if (!special || (special.teardown.call(elem)===NO)) {
+      // Retrieve the cached listener.
       listener = SC.data(elem, "listener") ;
       if (listener) {
         if (elem.removeEventListener) {

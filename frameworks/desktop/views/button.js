@@ -854,7 +854,7 @@ SC.ButtonView = SC.View.extend(SC.Control,
   /** @private */
   didAppendToDocument: function() {
     if(SC.browser.isIE &&
-        SC.browser.compare(SC.browser.engineVersion, '7') === 0 &&
+        SC.browser.compare(SC.browser.version, '7') === 0 &&
         this.get('useStaticLayout')){
       var layout = this.get('layout'),
           elem = this.$(), w=0;

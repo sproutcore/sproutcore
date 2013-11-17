@@ -72,15 +72,15 @@ SC.InlineTextFieldDelegate = /** @scope SC.InlineTextFieldDelegate */{
   },
 
   /**
-    Cleans up the given editor by simply removing it from the view hierarchy. The
-    client view should null any references to the editor so it may be garbage
-    collected.
+    Cleans up the given editor by simply destroying it, which removes it from
+    the view hierarchy. The client view should null any references to the editor
+    so it may be garbage collected.
 
     @params {SC.InlineEditor} editor the editor that should be cleaned up
     @returns {Boolean} whether the cleanup succeeded
   */
   releaseEditor: function (editor) {
-    editor.removeFromParent();
+    editor.destroy();
 
     this.editor = null;
 
