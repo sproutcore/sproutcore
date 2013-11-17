@@ -107,6 +107,29 @@ test("creating basic item view", function() {
   shouldMatchFixture(itemView, view.fixture);
 });
 
+test("isLast property", function () {
+  view.isVisibleInWindow = true;
+
+  var itemView = view.itemViewForContentIndex(1);
+  equals(itemView.get('isLast'), false, 'itemView.isLast should be false');
+
+  itemView = view.itemViewForContentIndex(2);
+  equals(itemView.get('isLast'), true, 'itemView.isLast should be true');
+
+  SC.run(function () {
+    view.beginPropertyChanges();
+    view.get('content').pushObject(SC.Object.create({ title: 'd' }));
+    view.set('fixtureNowShowing', SC.IndexSet.create(0, 4));
+    view.endPropertyChanges();
+  });
+
+  itemView = view.itemViewForContentIndex(3);
+  equals(itemView.get('isLast'), true, 'itemView.isLast should be true');
+
+  itemView = view.itemViewForContentIndex(2);
+  equals(itemView.get('isLast'), false, 'itemView.isLast for previous last item should be false');
+});
+
 test("returning item from cache", function() {
 
   var itemView1 = view.itemViewForContentIndex(1);
