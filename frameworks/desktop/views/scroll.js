@@ -2007,7 +2007,7 @@ SC.ScrollView = SC.View.extend({
       }
 
       // Notify the child that its frame is changing.
-      content.notifyPropertyChange('frame');
+      if (content._viewFrameDidChange) { content._viewFrameDidChange(); }
     }
 
     if (container && !SC.platform.touch) {
