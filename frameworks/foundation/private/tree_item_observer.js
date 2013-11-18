@@ -28,6 +28,20 @@ sc_require('mixins/collection_content');
 */
 SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
 
+  //@if(debug)
+  /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */
+
+  /* @private */
+  toString: function () {
+    var item = this.get('item'),
+      ret = sc_super();
+
+    return item ? "%@:\n  ↳ %@".fmt(ret, item) : ret;
+  },
+
+  /* END DEBUG ONLY PROPERTIES AND METHODS */
+  //@endif
+
   /**
     The node in the tree this observer will manage.  Set when creating the
     object.  If you are creating an observer manually, you must set this to
@@ -44,6 +58,26 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     value.
   */
   delegate: null,
+
+  /**
+    The key used to retrieve children from the observed item. If a
+    delegate exists, the key will be the value of the `treeItemChildrenKey`
+    property of the delegate. Otherwise, the key will be `treeItemChildren`.
+
+    @type String
+    @default 'treeItemChildren'
+  */
+  treeItemChildrenKey: 'treeItemChildren',
+
+  /**
+    The key used to identify the expanded state of the observed item.
+    If a delegate exists, the key will be the value of the `treeItemIsExpandedKey`
+    property of the delegate. Otherwise, the key will be `treeItemIsExpanded`.
+
+    @type String
+    @default 'treeItemIsExpanded'
+  */
+  treeItemIsExpandedKey: 'treeItemIsExpanded',
 
   // ..........................................................
   // FOR NESTED OBSERVERS
@@ -322,7 +356,6 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     this.invalidateBranchObserversAt(start);
     this._objectAtCache = this._outlineLevelCache = null;
     this._disclosureStateCache = null;
-    this._contentGroupIndexes = NO;
     this.notifyPropertyChange('branchIndexes');
 
     var oldlen = this.get('length'),
@@ -330,7 +363,9 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
         parent = this.get('parentObserver'), set;
 
     // update length if needed
-    if (oldlen !== newlen) this.set('length', newlen);
+    if (oldlen !== newlen) {
+      this.set('length', newlen);
+    }
 
     // if we have a parent, notify that parent that we have changed.
     if (!this._notifyParent) return this; // nothing more to do
@@ -384,18 +419,15 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
   // SC.COLLECTION CONTENT SUPPORT
   //
 
-  _contentGroupIndexes: NO,
-
-  /**
+  /** SC.CollectionContent
     Called by the collection view to return any group indexes.  The default
     implementation will compute the indexes one time based on the delegate
     treeItemIsGrouped
   */
   contentGroupIndexes: function(view, content) {
-    if (content !== this) return null; // only care about receiver
+    var ret;
 
-    var ret = this._contentGroupIndexes;
-    if (ret !== NO) return ret ;
+    if (content !== this) return null; // only care about receiver
 
     // If this is not the root item, never do grouping
     if (this.get('parentObserver')) return null;
@@ -430,10 +462,10 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
       ret = null;
     }
 
-    this._contentGroupIndexes = ret ;
     return ret;
   },
 
+  /** SC.CollectionContent */
   contentIndexIsGroup: function(view, content, idx) {
     var indexes = this.contentGroupIndexes(view, content);
     return indexes ? indexes.contains(idx) : NO ;
@@ -458,8 +490,12 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     if (index >= len) return -1;
 
     if (this.get('isHeaderVisible')) {
-      if (index === 0) return cache[0] = this.get('outlineLevel')-1;
-      else cur--;
+      if (index === 0) {
+        cache[0] = this.get('outlineLevel') - 1;
+        return cache[0];
+      } else {
+        cur--;
+      }
     }
 
     // loop through branch indexes, reducing the offset until it matches
@@ -682,20 +718,41 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
   // INTERNAL METHODS
   //
 
+  /** @private */
+  _cleanUpCachedDelegate: function () {
+    var cachedDelegate = this._cachedDelegate;
+
+    if (cachedDelegate) {
+      cachedDelegate.removeObserver('treeItemIsExpandedKey', this, this.treeItemIsExpandedKeyDidChange);
+      cachedDelegate.removeObserver('treeItemChildrenKey', this, this.treeItemChildrenKeyDidChange);
+      cachedDelegate.removeObserver('treeItemIsGrouped', this, this.treeItemIsGroupedDidChange);
+    }
+  },
+
+  /** @private */
+  _cleanUpCachedItem: function () {
+    var cachedItem = this._cachedItem,
+      treeItemIsExpandedKey = this.get('treeItemIsExpandedKey'),
+      treeItemChildrenKey = this.get('treeItemChildrenKey');
+
+    if (cachedItem) {
+      cachedItem.removeObserver(treeItemIsExpandedKey, this, this._itemIsExpandedDidChange);
+      cachedItem.removeObserver(treeItemChildrenKey, this, this._itemChildrenDidChange);
+    }
+  },
+
+  /** SC.Object.prototype.init */
   init: function() {
     sc_super();
 
-    // begin all properties on item if there is one.  This will allow us to
-    // track important property changes.
-    var item = this.get('item');
-    if (!item) throw new Error("SC.TreeItemObserver.item cannot be null");
+    // Initialize the item and the delegate.
+    this._itemDidChange();
+    this._delegateDidChange();
 
-    item.addObserver('*', this, this._itemPropertyDidChange);
-    this._itemPropertyDidChange(item, '*');
     this._notifyParent = YES ; // avoid infinite loops
   },
 
-  /**
+  /** SC.Object.prototype.destroy
     Called just before a branch observer is removed.  Should stop any
     observing and invalidate any child observers.
   */
@@ -704,9 +761,9 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     this._objectAtCache = null ;
     this._notifyParent = NO ; // parent doesn't care anymore
 
-    // cleanup observing
-    var item = this.get('item');
-    if (item) item.removeObserver('*', this, this._itemPropertyDidChange);
+    // Cleanup the observed item and delegate.
+    this._cleanUpCachedItem();
+    this._cleanUpCachedDelegate();
 
     var children = this._children,
         ro = this._childrenRangeObserver;
@@ -717,26 +774,59 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     sc_super();
   },
 
-  /**
-    Called whenever a property changes on the item.  Determines if either the
-    children array or the disclosure state has changed and then notifies as
-    necessary..
-  */
-  _itemPropertyDidChange: function(target, key) {
-    var children = this.get('children'),
-        state    = this.get('disclosureState'),
-        item     = this.get('item'),
-        next ;
+  /** @private */
+  _itemDidChange: function () {
+    var item = this.get('item'),
+      treeItemIsExpandedKey;
 
+    treeItemIsExpandedKey = this.get('treeItemIsExpandedKey');
+    treeItemChildrenKey = this.get('treeItemChildrenKey');
+
+    // Cleanup the previous observed item.
+    this._cleanUpCachedItem();
+
+    //@if(debug)
+    // Add some developer support to prevent broken behavior.
+    if (!item) { throw new Error("Developer Error: SC.TreeItemObserver: Item cannot be null and must be set on create."); }
+
+    if (item.hasObserverFor(treeItemIsExpandedKey)) {
+      SC.warn("Developer Warning: SC.TreeItemObserver: Item '%@' appears to already be assigned to a tree item observer. This will cause strange behavior working with the item.".fmt(item));
+    }
+    //@endif
+
+    item.addObserver(treeItemIsExpandedKey, this, this._itemIsExpandedDidChange);
+    item.addObserver(treeItemChildrenKey, this, this._itemChildrenDidChange);
+
+    // Fire the observer functions once to initialize.
     this.beginPropertyChanges();
+    this._itemIsExpandedDidChange();
+    this._itemChildrenDidChange();
+    this.endPropertyChanges();
+
+    // Track the item so that when it changes we can clean-up.
+    this._cachedItem = item;
+  }.observes('item'),
+
+  /** @private */
+  _itemIsExpandedDidChange: function () {
+    var children = this.get('children'),
+        state = this.get('disclosureState'),
+        item = this.get('item'),
+        next;
 
     next = this._computeDisclosureState(item);
-    if (state !== next) this.set('disclosureState', next);
+    if (state !== next) { this.set('disclosureState', next); }
+  },
+
+  /** @private */
+  _itemChildrenDidChange: function() {
+    var children = this.get('children'),
+        state = this.get('disclosureState'),
+        item = this.get('item'),
+        next;
 
     next = this._computeChildren(item);
-    if (children !== next) this.set('children', next);
-
-    this.endPropertyChanges();
+    if (children !== next) { this.set('children', next); }
   },
 
   /**
@@ -783,7 +873,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     will be used.
   */
   _computeDisclosureState: function(item, pitem, index) {
-    var key, del;
+    var key;
 
     // no item - assume leaf node
     if (!item || !this._computeChildren(item)) return SC.LEAF_NODE;
@@ -796,12 +886,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
 
     // otherwise get treeItemDisclosureStateKey from delegate
     } else {
-      key = this._treeItemIsExpandedKey ;
-      if (!key) {
-        del = this.get('delegate');
-        key = del ? del.get('treeItemIsExpandedKey') : 'treeItemIsExpanded';
-        this._treeItemIsExpandedKey = key ;
-      }
+      key = this.get('treeItemIsExpandedKey');
       return item.get(key) ? SC.BRANCH_OPEN : SC.BRANCH_CLOSED;
     }
   },
@@ -811,7 +896,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     modify the property on the item or call the treeItemCollapse() method.
   */
   _collapse: function(item, pitem, index) {
-    var key, del;
+    var key;
 
     // no item - assume leaf node
     if (!item || !this._computeChildren(item)) return this;
@@ -824,24 +909,41 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
 
     // otherwise get treeItemDisclosureStateKey from delegate
     } else {
-      key = this._treeItemIsExpandedKey ;
-      if (!key) {
-        del = this.get('delegate');
-        key = del ? del.get('treeItemIsExpandedKey') : 'treeItemIsExpanded';
-        this._treeItemIsExpandedKey = key ;
-      }
+      key = this.get('treeItemIsExpandedKey');
       item.setIfChanged(key, NO);
     }
 
     return this ;
   },
 
+  /** @private Each time the delegate changes, observe it for changes to its keys. */
+  _delegateDidChange: function () {
+    var delegate = this.get('delegate');
+
+    // Clean up the previous observed delegate.
+    this._cleanUpCachedDelegate();
+
+    if (delegate) {
+      delegate.addObserver('treeItemChildrenKey', this, this.treeItemChildrenKeyDidChange);
+      delegate.addObserver('treeItemIsExpandedKey', this, this.treeItemIsExpandedKeyDidChange);
+      delegate.addObserver('treeItemIsGrouped', this, this.treeItemIsGroupedDidChange);
+    }
+
+    // Fire the observer functions once to initialize.
+    this.treeItemChildrenKeyDidChange();
+    this.treeItemIsExpandedKeyDidChange();
+    this.treeItemIsGroupedDidChange();
+
+    // Cache the previous delegate so we can clean up.
+    this._cachedDelegate = delegate;
+  }.observes('delegate'),
+
   /**
     Expand the item at the specified index.  This will either directly
     modify the property on the item or call the treeItemExpand() method.
   */
   _expand: function(item, pitem, index) {
-    var key, del;
+    var key;
 
     // no item - assume leaf node
     if (!item || !this._computeChildren(item)) return this;
@@ -854,12 +956,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
 
     // otherwise get treeItemDisclosureStateKey from delegate
     } else {
-      key = this._treeItemIsExpandedKey ;
-      if (!key) {
-        del = this.get('delegate');
-        key = del ? del.get('treeItemIsExpandedKey') : 'treeItemIsExpanded';
-        this._treeItemIsExpandedKey = key ;
-      }
+      key = this.get('treeItemIsExpandedKey');
       item.setIfChanged(key, YES);
     }
 
@@ -870,7 +967,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     Computes the children for the passed item.
   */
   _computeChildren: function(item) {
-    var del, key;
+    var key;
 
     // no item - no children
     if (!item) return null;
@@ -880,12 +977,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
 
     // otherwise get treeItemChildrenKey from delegate
     else {
-      key = this._treeItemChildrenKey ;
-      if (!key) {
-        del = this.get('delegate');
-        key = del ? del.get('treeItemChildrenKey') : 'treeItemChildren';
-        this._treeItemChildrenKey = key ;
-      }
+      key = this.get('treeItemChildrenKey');
       return item.get(key);
     }
   },
@@ -910,6 +1002,27 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
       }
     }
     return ret ;
+  },
+
+  /** @private */
+  treeItemChildrenKeyDidChange: function () {
+    var del = this.get('delegate');
+
+    key = del ? del.get('treeItemChildrenKey') : 'treeItemChildren';
+    this.set('treeItemChildrenKey', key);
+  },
+
+  /** @private */
+  treeItemIsExpandedKeyDidChange: function () {
+    var del = this.get('delegate');
+
+    key = del ? del.get('treeItemIsExpandedKey') : 'treeItemIsExpanded';
+    this.set('treeItemIsExpandedKey', key);
+  },
+
+  /** @private */
+  treeItemIsGroupedDidChange: function () {
+    this.notifyPropertyChange('branchIndexes');
   }
 
 });
