@@ -26,9 +26,11 @@ SC._detect_base = function _detect_base(func, parent, name) {
   return function invoke_superclass_method() {
     var base = parent[name], args;
 
+    //@if(debug)
     if (!base) {
-      throw new Error("No '" + name + "' method was found on the superclass");
+      throw new Error("Developer Error: No '" + name + "' method was found on the superclass");
     }
+    //@endif
 
     // NOTE: It is possible to cache the base, so that the first
     // call to sc_super will avoid doing the lookup again. However,
@@ -65,7 +67,9 @@ SC._detect_base = function _detect_base(func, parent, name) {
   @returns {Hash} base hash
 */
 SC._object_extend = function _object_extend(base, ext, proto) {
-  if (!ext) { throw new Error("SC.Object.extend expects a non-null value.  Did you forget to 'sc_require' something?  Or were you passing a Protocol to extend() as if it were a mixin?"); }
+  //@if(debug)
+  if (!ext) { throw new Error("Developer Error: SC.Object.extend expects a non-null value.  Did you forget to 'sc_require' something?  Or were you passing a Protocol to extend() as if it were a mixin?"); }
+  //@endif
   // set _kvo_cloned for later use
   base._kvo_cloned = null;
 
@@ -519,7 +523,7 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
   design: function () {
     if (this.isDesign) {
       // @if (debug)
-      SC.Logger.warn("SC.Object#design called twice for %@.".fmt(this));
+      SC.Logger.warn("Developer Warning: SC.Object.prototype.design called twice for %@.".fmt(this));
       // @endif
       return this;
     }
@@ -732,7 +736,11 @@ SC.Object.prototype = {
   */
   superclass: function () {
     var caller = arguments.callee.caller;
-    if (!caller) throw new Error("superclass cannot determine the caller method");
+
+    //@if(debug)
+    if (!caller) { throw new Error("Developer Error: superclass cannot determine the caller method: %@".fmt(this)); }
+    //@endif
+
     return caller.superclass ? caller.superclass.apply(this, arguments) : null;
   },
 
