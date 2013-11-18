@@ -311,7 +311,9 @@ SC.ObjectController = SC.Controller.extend(
     // notify!
     if ((last && last.isEnumerable) || (cur && cur.isEnumerable)) {
       this._scoc_enumerableContentDidChange();
-    } else this.contentPropertyDidChange(cur, '*');
+    } else {
+      this.contentPropertyDidChange(cur, '*');
+    }
 
   }.observes("observableContent"),
 
