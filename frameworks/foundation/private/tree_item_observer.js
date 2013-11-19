@@ -155,7 +155,8 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
       pitem = item; // save parent
 
       for (idx = 0; idx < len; idx++) {
-        if (item != children.objectAt(idx)) continue;
+        item = children.objectAt(idx);
+        if (!item) continue;
         if (!this._computeChildren(item, pitem, idx)) continue; // no children
         if (this._computeDisclosureState(item, pitem, idx) !== SC.LEAF_NODE) {
           ret.add(idx);
@@ -292,7 +293,9 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     if (indexes) {
       indexes.forEach(function (i) {
         if (observer || (i >= cur)) return; // nothing to do
-        if (!(observer = this.branchObserverAt(i))) return; // nothing to do
+        observer = this.branchObserverAt(i);
+        if (!observer) return; // nothing to do
+
         len = observer.get('length');
 
         // if this branch range is before the start loc, just remove it and
@@ -769,9 +772,10 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
   init: function () {
     sc_super();
 
-    // Initialize the item and the delegate.
-    this._itemDidChange();
+    // Initialize the item and the delegate. Be sure to set up the delegate first,
+    // because it determines the keys to observe on the item.
     this._delegateDidChange();
+    this._itemDidChange();
 
     this._notifyParent = YES; // avoid infinite loops
   },
@@ -835,8 +839,8 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
   /** @private */
   _itemIsExpandedDidChange: function () {
     var state = this.get('disclosureState'),
-        item = this.get('item'),
-        next;
+      item = this.get('item'),
+      next;
 
     next = this._computeDisclosureState(item);
     if (state !== next) { this.set('disclosureState', next); }
@@ -845,8 +849,8 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
   /** @private */
   _itemChildrenDidChange: function () {
     var children = this.get('children'),
-        item = this.get('item'),
-        next;
+      item = this.get('item'),
+      next;
 
     next = this._computeChildren(item);
     if (children !== next) { this.set('children', next); }
@@ -858,19 +862,20 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
   */
   _childrenDidChange: function () {
     var state = this.get('disclosureState'),
-        cur   = state === SC.BRANCH_OPEN ? this.get('children') : null,
-        last  = this._children,
-        ro    = this._childrenRangeObserver;
+      cur   = state === SC.BRANCH_OPEN ? this.get('children') : null,
+      last  = this._children,
+      ro    = this._childrenRangeObserver;
 
     if (last === cur) return this; //nothing to do
     if (ro) last.removeRangeObserver(ro);
     if (cur) {
       this._childrenRangeObserver = cur.addRangeObserver(null, this, this._childrenRangeDidChange);
-    } else this._childrenRangeObserver = null;
+    } else {
+      this._childrenRangeObserver = null;
+    }
 
     this._children = cur;
     this._childrenRangeDidChange(cur, null, '[]', null);
-
   }.observes("children", "disclosureState"),
 
   /**
@@ -880,10 +885,10 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
   */
   _childrenRangeDidChange: function (array, objects, key, indexes) {
     var children = this.get('children'),
-        len = children ? children.get('length') : 0,
-        min = indexes ? indexes.get('min') : 0,
-        max = indexes ? indexes.get('max') : len,
-        old = this._childrenLen || 0;
+      len = children ? children.get('length') : 0,
+      min = indexes ? indexes.get('min') : 0,
+      max = indexes ? indexes.get('max') : len,
+      old = this._childrenLen || 0;
 
     this._childrenLen = len; // save for future calls
     this.observerContentDidChange(min, max - min, len - old);
@@ -991,14 +996,11 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
   _computeChildren: function (item) {
     var key;
 
-    // no item - no children
-    if (!item) return null;
-
-    // item implement TreeItemContent - call directly
-    else if (item.isTreeItemContent) return item.get('treeItemChildren');
-
-    // otherwise get treeItemChildrenKey from delegate
-    else {
+    if (!item) { // no item - no children
+      return null;
+    } else if (item.isTreeItemContent) {  // item implements TreeItemContent - call directly
+      return item.get('treeItemChildren');
+    } else { // otherwise get treeItemChildrenKey from delegate
       key = this.get('treeItemChildrenKey');
       return item.get(key);
     }
