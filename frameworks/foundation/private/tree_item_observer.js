@@ -42,6 +42,12 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
   /* END DEBUG ONLY PROPERTIES AND METHODS */
   //@endif
 
+  /** @private */
+  _cachedItem: null,
+
+  /** @private */
+  _cachedDelegate: null,
+
   /**
     The node in the tree this observer will manage.  Set when creating the
     object.  If you are creating an observer manually, you must set this to
@@ -594,7 +600,6 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     it.
   */
   contentIndexExpand: function (view, content, idx) {
-
     var indexes, cur = idx, children, item;
 
     if (content !== this) return; // only care about us
@@ -643,7 +648,6 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     @returns {void}
   */
   contentIndexCollapse: function (view, content, idx) {
-
     var indexes, children, item, cur = idx;
 
     if (content !== this) return; // only care about us
@@ -753,6 +757,12 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
       cachedDelegate.removeObserver('treeItemIsExpandedKey', this, this.treeItemIsExpandedKeyDidChange);
       cachedDelegate.removeObserver('treeItemChildrenKey', this, this.treeItemChildrenKeyDidChange);
       cachedDelegate.removeObserver('treeItemIsGrouped', this, this.treeItemIsGroupedDidChange);
+
+      // Remove the delegate specific key observers from the cached item.
+      this._cleanUpCachedItem();
+
+      // Remove the cache.
+      this._cachedDelegate = null;
     }
   },
 
@@ -765,6 +775,9 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     if (cachedItem) {
       cachedItem.removeObserver(treeItemIsExpandedKey, this, this._itemIsExpandedDidChange);
       cachedItem.removeObserver(treeItemChildrenKey, this, this._itemChildrenDidChange);
+
+      // Remove the cache.
+      this._cachedItem = null;
     }
   },
 
@@ -856,7 +869,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     if (children !== next) { this.set('children', next); }
   },
 
-  /**
+  /** @private
     Called whenever the children or disclosure state changes.  Begins or ends
     observing on the children array so that changes can propogate outward.
   */
@@ -867,7 +880,9 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
       ro    = this._childrenRangeObserver;
 
     if (last === cur) return this; //nothing to do
+
     if (ro) last.removeRangeObserver(ro);
+
     if (cur) {
       this._childrenRangeObserver = cur.addRangeObserver(null, this, this._childrenRangeDidChange);
     } else {
@@ -878,7 +893,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     this._childrenRangeDidChange(cur, null, '[]', null);
   }.observes("children", "disclosureState"),
 
-  /**
+  /** @private
     Called anytime the actual content of the children has changed.  If this
     changes the length property, then notifies the parent that the content
     might have changed.
@@ -894,7 +909,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     this.observerContentDidChange(min, max - min, len - old);
   },
 
-  /**
+  /** @private
     Computes the current disclosure state of the item by asking the item or
     the delegate.  If no pitem or index is passed, the parentItem and index
     will be used.
@@ -918,7 +933,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     }
   },
 
-  /**
+  /** @private
     Collapse the item at the specified index.  This will either directly
     modify the property on the item or call the treeItemCollapse() method.
   */
@@ -961,11 +976,14 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     this.treeItemIsExpandedKeyDidChange();
     this.treeItemIsGroupedDidChange();
 
+    // Re-initialize the item to match the new delegate.
+    this._itemDidChange();
+
     // Cache the previous delegate so we can clean up.
     this._cachedDelegate = delegate;
   }.observes('delegate'),
 
-  /**
+  /** @private
     Expand the item at the specified index.  This will either directly
     modify the property on the item or call the treeItemExpand() method.
   */
@@ -990,7 +1008,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     return this;
   },
 
-  /**
+  /** @private
     Computes the children for the passed item.
   */
   _computeChildren: function (item) {
@@ -1006,7 +1024,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     }
   },
 
-  /**
+  /** @private
     Computes the length of the array by looking at children.
   */
   _computeLength: function () {
