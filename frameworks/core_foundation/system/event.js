@@ -846,7 +846,7 @@ SC.Event.prototype = {
     var evt = this.originalEvent ;
     if (evt) {
       if (evt.preventDefault) evt.preventDefault() ;
-      evt.returnValue = NO ; // IE
+      else evt.returnValue = NO ; // IE8
     }
     this.hasCustomEventHandling = YES ;
     return this ;
