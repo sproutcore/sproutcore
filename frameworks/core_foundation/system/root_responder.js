@@ -164,10 +164,11 @@ SC.RootResponder = SC.Object.extend(
   */
   keyPane: null,
 
-  /** @property
-    A stack of the previous key panes.
+  /** @private
+    A stack of previous key panes. Used to allow panes to resign key pane
+    status without having to know who had it before them.
 
-    *IMPORTANT: Property is not observable*
+    NOTE: This property is not observable.
   */
   previousKeyPanes: [],
 
@@ -181,6 +182,13 @@ SC.RootResponder = SC.Object.extend(
     @returns {SC.RootResponder} receiver
   */
   makeKeyPane: function (pane) {
+    // Quick note about previousKeyPanes: if a pane is destroyed while in the
+    // previous panes stack, it will retain a reference to it here, causing a
+    // brief leak. The reference will be removed as soon as the panes above it
+    // in the stack resign, so it's rarely an issue, and fixing it would require
+    // a dedicated method and some extra coordination that's probably not worth
+    // it.
+
     // Was a pane specified?
     var newKeyPane, previousKeyPane, previousKeyPanes;
 
