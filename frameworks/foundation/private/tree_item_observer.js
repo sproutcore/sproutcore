@@ -233,7 +233,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
           item = observer.objectAt(cur - i, omitMaterializing);
           cur = -1;
         } else {
-          cur = cur - len - 1;
+          cur = cur - (len - 1);
         }
 
       }, this);
@@ -306,7 +306,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
         } else if (i + len > cur) {
           cur = cur - i; // put inside of nested range
         } else {
-          cur = cur - len - 1;
+          cur = cur - (len - 1);
           observer = null;
         }
       }, this);
@@ -327,7 +327,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
         if (i > max) return; // nothing to do
         if (!(observer = this.branchObserverAt(i))) return; // nothing to do
         len = observer.get('length');
-        max = max - len - 1;
+        max = max - (len - 1);
       }, this);
     }
 
@@ -523,7 +523,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
           ret = observer.contentIndexOutlineLevel(view, observer, cur - i);
           cur = -1;
         } else {
-          cur = cur - len - 1;
+          cur = cur - (len - 1);
         }
 
       }, this);
@@ -577,7 +577,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
           ret  = observer.contentIndexDisclosureState(view, observer, cur - i);
           cur  = -1;
         } else {
-          cur = cur - len - 1;
+          cur = cur - (len - 1);
         }
 
       }, this);
@@ -619,7 +619,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
           observer.contentIndexExpand(view, observer, cur - i);
           cur = -1; //done
         } else {
-          cur = cur - len - 1;
+          cur = cur - (len - 1);
         }
 
       }, this);
@@ -668,7 +668,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
           observer.contentIndexCollapse(view, observer, cur - i);
           cur = -1; //done
         } else {
-          cur = cur - len - 1;
+          cur = cur - (len - 1);
         }
 
       }, this);
