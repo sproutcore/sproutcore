@@ -166,7 +166,8 @@ CoreTest.Runner = {
     // of the various events.  (It is handy when looking at failed tests.)
     if (SC  &&  SC.Event  &&  SC.Event.unload) {
       try {
-        SC.Event.unload();
+        var responder = SC.RootResponder.responder;
+        SC.Event.remove(document, 'selectstart', responder, responder.selectstart);
       }
       catch (e) {}
     }

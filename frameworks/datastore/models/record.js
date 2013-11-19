@@ -594,7 +594,9 @@ SC.Record = SC.Object.extend(
         this.notifyPropertyChange('status');
         this.endPropertyChanges();
 
-      } else this.allPropertiesDidChange();
+      } else {
+        this.allPropertiesDidChange();
+      }
 
       // also notify manyArrays
       var manyArrays = this.relationships,

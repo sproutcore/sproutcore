@@ -69,56 +69,57 @@ SC.TreeController = SC.ObjectController.extend(SC.SelectionSupport,
 
     @type SC.Array
   */
-  arrangedObjects: function () {
-    var content = this.get('content'),
-      ret;
-
-    if (content) {
-      ret = SC.TreeItemObserver.create({ item: content, delegate: this });
-      ret.bind('allowsSelection', this, 'allowsSelection');
-      ret.bind('allowsMultipleSelection', this, 'allowsMultipleSelection');
-      ret.bind('allowsEmptySelection', this, 'allowsEmptySelection');
-
-      ret.addObserver('[]', this, this._sctc_arrangedObjectsContentDidChange);
-    } else {
-      ret = null; // empty!
-    }
-
-    // Cache the current tree item observer, so we have it when it changes.
-    this._sctc_arrangedObjects = ret;
-
-    return ret;
-  }.property().cacheable(),
+  arrangedObjects: null,
 
   // ..........................................................
   // PRIVATE
   //
 
-  /**
-    @private
+  /** @private - setup observer on init if needed. */
+  init: function() {
+    sc_super();
 
-    Manually invalidate the arrangedObjects cache so that we can teardown
-    any existing value.  We do it via an observer so that this will fire
-    immediately instead of waiting on some other component to get
-    arrangedObjects again.
-  */
-  _sctc_invalidateArrangedObjects: function () {
-    this.propertyWillChange('arrangedObjects');
+    // Initialize arrangedObjects.
+    this._contentDidChange();
+  },
 
-    // Clean up!  Destroy the previous tree item observer.
-    var ret = this._sctc_arrangedObjects;
-    if (ret) { ret.destroy(); }
-    this._sctc_arrangedObjects = null;
+  /** @private */
+  _contentDidChange: function () {
+    var arrangedObjects = this.get('arrangedObjects'),
+      content = this.get('content');
 
-    this.propertyDidChange('arrangedObjects');
+    if (content) {
+      if (arrangedObjects) {
+        arrangedObjects.set('item', content);
+      } else {
+        arrangedObjects = SC.TreeItemObserver.create({ item: content, delegate: this });
 
-    // Fix up the selection with the new arrangedObjects.
-    this.updateSelectionAfterContentChange();
-  }.observes('content', 'treeItemIsExpandedKey', 'treeItemChildrenKey', 'treeItemIsGrouped'),
+        // Bind selection properties across to the observer.
+        arrangedObjects.bind('allowsSelection', this, 'allowsSelection');
+        arrangedObjects.bind('allowsMultipleSelection', this, 'allowsMultipleSelection');
+        arrangedObjects.bind('allowsEmptySelection', this, 'allowsEmptySelection');
 
+        // Observe the enumerable property in order to update the selection when it changes.
+        arrangedObjects.addObserver('[]', this, this._sctc_arrangedObjectsContentDidChange);
+
+        this.set('arrangedObjects', arrangedObjects);
+      }
+    } else {
+      // Since there is no content. Destroy the previous tree item observer and indicate that arrangedObjects has changed.
+      if (arrangedObjects) {
+        arrangedObjects.destroy();
+        this.set('arrangedObjects', null);
+
+        // Update the selection if it exists.
+        this._sctc_arrangedObjectsContentDidChange();
+      }
+    }
+  }.observes('content'),
+
+  /** @private */
   _sctc_arrangedObjectsContentDidChange: function () {
     this.updateSelectionAfterContentChange();
-  },
+  }.observes(),
 
   canSelectGroups: NO,
 
