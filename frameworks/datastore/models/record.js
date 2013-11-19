@@ -636,6 +636,7 @@ SC.Record = SC.Object.extend(
 
     var dataHash = store.readEditableDataHash(storeKey) || {};
     dataHash[primaryKey] = recordId;
+    keysToKeep[primaryKey] = YES;
     recHash = store.readDataHash(storeKey);
 
     for (key in this) {
@@ -658,7 +659,7 @@ SC.Record = SC.Object.extend(
             if(attrValue!==undefined && (attrValue!==null || includeNull)) {
               attr = this[key];
               // if record attribute, make sure we transform with the fromType
-              if(SC.instanceOf(attr, SC.RecordAttribute)) {
+              if(SC.kindOf(attr, SC.RecordAttribute)) {
                 attrValue = attr.fromType(this, key, attrValue);
               }
               dataHash[keyForDataHash] = attrValue;
