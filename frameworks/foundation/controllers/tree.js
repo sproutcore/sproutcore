@@ -75,6 +75,14 @@ SC.TreeController = SC.ObjectController.extend(SC.SelectionSupport,
   // PRIVATE
   //
 
+  /** @private - setup observer on init if needed. */
+  init: function() {
+    sc_super();
+
+    // Initialize arrangedObjects.
+    this._contentDidChange();
+  },
+
   /** @private */
   _contentDidChange: function () {
     var arrangedObjects = this.get('arrangedObjects'),
@@ -82,7 +90,7 @@ SC.TreeController = SC.ObjectController.extend(SC.SelectionSupport,
 
     if (content) {
       if (arrangedObjects) {
-        arrangedObjects.set('item', this.get('content'));
+        arrangedObjects.set('item', content);
       } else {
         arrangedObjects = SC.TreeItemObserver.create({ item: content, delegate: this });
 
