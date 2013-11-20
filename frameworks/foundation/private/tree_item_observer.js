@@ -1022,12 +1022,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
 
     // otherwise get treeItemChildrenKey from delegate
     else {
-      key = this._treeItemChildrenKey;
-      if (!key) {
-        del = this.get('delegate');
-        key = del ? del.get('treeItemChildrenKey') : 'treeItemChildren';
-        this._treeItemChildrenKey = key;
-      }
+      key = this.get('treeItemChildrenKey');
       ret = item.get(key);
     }
 
