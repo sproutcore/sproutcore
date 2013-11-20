@@ -291,8 +291,10 @@ SC.View.reopen(
 
     // In the case of zero duration, just adjust and call the callback.
     if (options.duration === 0) {
-      this.adjust(hash);
-      this.runAnimationCallback(options, null, NO);
+      this.invokeNext(function() {
+        this.adjust(hash);
+        this.runAnimationCallback(options, null, NO);
+      });
       return this;
     }
 
