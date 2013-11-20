@@ -347,7 +347,9 @@ SC.RootResponder = SC.Object.extend(
       this.set('currentDesignMode', newDesignMode);
 
       if (this.panes) {
-        this.panes.invoke('updateDesignMode', oldDesignMode, newDesignMode);
+        SC.run(function() {
+          this.panes.invoke('updateDesignMode', oldDesignMode, newDesignMode);
+        }, this);
       }
 
       //@if(debug)
