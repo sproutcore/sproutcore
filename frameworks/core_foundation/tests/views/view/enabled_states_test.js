@@ -4,8 +4,7 @@
 //            ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-
-/*global module test equals ok */
+/*global module, test,  equals,  ok */
 
 var parent, view, child;
 
@@ -39,6 +38,25 @@ test("Test initial states.", function () {
   ok(view.get('isEnabledInPane'), "isEnabledInPane should be true");
   ok(child.get('isEnabled'), "isEnabled should be true");
   ok(child.get('isEnabledInPane'), "isEnabledInPane should be true");
+});
+
+test("Test initial disabled states.", function () {
+  var newChild = SC.View.create({}),
+    newView = SC.View.create({ isEnabled: false, childViews: [newChild] }),
+    newParent;
+
+  equals(newView.enabledState, SC.CoreView.DISABLED, "A disabled on creation view should be in the state");
+  equals(newChild.enabledState, SC.CoreView.DISABLED_BY_PARENT, "A regular child view of disabled on creation parent should be in the state");
+
+  newParent = SC.View.create({ isEnabled: false, childViews: [newView] });
+
+  equals(newParent.enabledState, SC.CoreView.DISABLED, "A disabled on creation parent view should be in the state");
+  equals(newView.enabledState, SC.CoreView.DISABLED_AND_BY_PARENT, "A disabled on creation view of disabled on creation parent should be in the state");
+  equals(newChild.enabledState, SC.CoreView.DISABLED_BY_PARENT, "A regular child view of disabled on creation parent should be in the state");
+
+  newParent.destroy();
+  newView.destroy();
+  newChild.destroy();
 });
 
 /**
@@ -328,7 +346,7 @@ test("Test optimized display update.", function () {
   parent.destroyLayer();
 });
 
-test("initializing with isEnabled: false, should still add the proper class on append", function() {
+test("initializing with isEnabled: false, should still add the proper class on append", function () {
   var newView = SC.View.create({
     isEnabled: false
   });

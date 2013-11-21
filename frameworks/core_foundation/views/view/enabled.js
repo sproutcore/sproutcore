@@ -165,6 +165,14 @@ SC.View.reopen(
   // Methods
   //
 
+  /** @private */
+  init: function () {
+    sc_super();
+
+    // If the view is pre-configured as disabled, then go to the proper initial state.
+    if (!this.get('isEnabled')) { this._doDisable(); }
+  },
+
   /** @private
     Observes the isEnabled property and resigns first responder if set to NO.
     This will avoid cases where, for example, a disabled text field retains
