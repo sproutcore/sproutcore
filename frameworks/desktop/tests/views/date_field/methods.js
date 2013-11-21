@@ -73,7 +73,7 @@ test("isEnabled=NO isEditable=NO should add disabled attribute", function() {
   view0.set('isEditable', NO);
   SC.RunLoop.end();
   ok(view0.$input().attr('disabled'), 'should have disabled attribute');
-  ok(!view0.$input().attr('readOnly'), 'should not have readOnly attribute');
+  ok(view0.$input().attr('readOnly'), 'should have readOnly attribute');
 });
 
 test("isEnabled=NO isEditable=YES should add disabled attribute", function() {
