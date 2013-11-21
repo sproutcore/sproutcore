@@ -831,9 +831,12 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   // HANDLE NATIVE CONTROL EVENTS
   //
 
-  /** SC.FieldView
+  /**
+    Override of SC.FieldView.prototype.didCreateLayer.
+  */
   didCreateLayer: function () {
     sc_super();
+
     if (!SC.platform.input.placeholder) this.invokeLast(this._setInitialPlaceHolderIE);
     // For some strange reason if we add focus/blur events to textarea
     // inmediately they won't work. However if I add them at the end of the
@@ -857,7 +860,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   },
 
   /**
-    Override of SC.FieldView.prototype.didAppendToDocument.
+    SC.View view state callback.
+
+    Once the view is appended, fix up the text layout to sc-hints and inputs.
   */
   didAppendToDocument: function () {
     this._fixupTextLayout();
