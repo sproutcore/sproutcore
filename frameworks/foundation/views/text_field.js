@@ -1179,7 +1179,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   /** @private */
   insertTab: function(evt) {
     // Don't handle if default tabbing hasn't been enabled.
-    if (!this.get('defaultTabbingEnabled')) return NO;
+    if (!this.get('defaultTabbingEnabled')) {
+      evt.preventDefault();
+      return false;
+    }
+
     // Otherwise, handle.
     var view = this.get('nextValidKeyView');
     if (view) view.becomeFirstResponder();
@@ -1190,7 +1194,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   /** @private */
   insertBacktab: function(evt) {
     // Don't handle if default tabbing hasn't been enabled.
-    if (!this.get('defaultTabbingEnabled')) return NO;
+    if (!this.get('defaultTabbingEnabled')) {
+      evt.preventDefault();
+      return false;
+    }
+
     // Otherwise, handle.
     var view = this.get('previousValidKeyView');
     if (view) view.becomeFirstResponder();
