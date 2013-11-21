@@ -611,18 +611,19 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     //        here, but currently SC.RenderContext will render sibling
     //        contexts as parent/child.
     var hint = this.get('formattedHint'),
-        hintOnFocus = this.get('hintOnFocus'),
-        hintString = '',
-        maxLength = this.get('maxLength'),
-        isTextArea = this.get('isTextArea'),
-        isEditable = this.get('isEditable'),
-        autoCorrect = this.get('autoCorrect'),
-        autoCapitalize = this.get('autoCapitalize'),
-        isBrowserFocusable = this.get('isBrowserFocusable'),
-        spellCheckString = '', autocapitalizeString = '', autocorrectString = '',
-        activeStateString = '', browserFocusableString = '',
-        name, adjustmentStyle, type, paddingElementStyle,
-        fieldClassNames, isOldSafari;
+      hintOnFocus = this.get('hintOnFocus'),
+      hintString = '',
+      maxLength = this.get('maxLength'),
+      isTextArea = this.get('isTextArea'),
+      isEnabledInPane = this.get('isEnabledInPane'),
+      isEditable = this.get('isEditable'),
+      autoCorrect = this.get('autoCorrect'),
+      autoCapitalize = this.get('autoCapitalize'),
+      isBrowserFocusable = this.get('isBrowserFocusable'),
+      spellCheckString = '', autocapitalizeString = '', autocorrectString = '',
+      activeStateString = '', browserFocusableString = '',
+      name, adjustmentStyle, type, paddingElementStyle,
+      fieldClassNames, isOldSafari;
 
     context.setClass('text-area', isTextArea);
 
@@ -635,7 +636,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
 
     if (firstTime || this._forceRenderFirstTime) {
       this._forceRenderFirstTime = NO;
-      activeStateString = isEditable ? '' : ' readonly="readonly"';
+      activeStateString = isEnabledInPane ? (isEditable ? '' : ' readonly="readonly"') : ' disabled="disabled"';
       name = this.get('layerId');
 
       spellCheckString = this.get('spellCheckEnabled') ? ' spellcheck="true"' : ' spellcheck="false"';
