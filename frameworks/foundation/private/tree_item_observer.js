@@ -16,7 +16,13 @@ sc_require('mixins/collection_content');
   when trying to display the item in a hierarchy.
 
   When displaying a tree of objects, a tree item object will be nested to
-  cover every object that might have child views.
+  cover every object that might have child views, ignoring those that will
+  definitely not. (Any node which has children or may have children should
+  advertise this by exposing an array at its treeItemChildrenKey property;
+  any node which does not do so is assumed to be permanently childless, so
+  we optimize by not observing it. In CS terms, nodes can implicitly
+  advertise whether they are *leaves-or-branches* and should be observed,
+  or are *permanently leaves*, and may remain unobserved.)
 
   TreeNode stores an array which contains either a number pointing to the
   next place in the array there is a child item or it contains a child item.
