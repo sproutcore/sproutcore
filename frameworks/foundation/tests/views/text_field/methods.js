@@ -75,7 +75,7 @@ test("isEnabled=NO isEditable=NO should add disabled attribute", function() {
   view.set('isEditable', NO);
   SC.RunLoop.end();
   ok(view.$input().attr('disabled'), 'should have disabled attribute');
-  ok(!view.$input().attr('readOnly'), 'should not have readOnly attribute');
+  ok(view.$input().attr('readOnly'), 'should have readOnly attribute');
 });
 
 test("isEnabled=NO isEditable=YES should add disabled attribute", function() {
@@ -121,7 +121,6 @@ test("autoCapitalize=SC.AUTOCAPITALIZE_NONE should add autocapitalize='none'", f
   view.set('autoCapitalize', SC.AUTOCAPITALIZE_NONE);
   view.displayDidChange();
   SC.RunLoop.end();
-  console.log(view.$input().attr('autocapitalize'))
   ok(view.$input().attr('autocapitalize') === "none", 'should have an autocapitalize attribute set to "none"');
 });
 
