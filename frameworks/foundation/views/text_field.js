@@ -845,8 +845,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     // runLoop it works fine.
     if (this.get('isTextArea')) {
       this.invokeLast(this._addTextAreaEvents);
-    }
-    else {
+    } else {
       this._addTextAreaEvents();
 
       // In Firefox, for input fields only (that is, not textarea elements),
@@ -860,13 +859,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
         SC.Event.add(input, 'keypress', this, this._firefox_dispatch_keypress);
       }
     }
-
-    if (this.get('hintOnFocus') ||
-        (SC.browser.name === SC.BROWSER.ie && SC.browser.version <= 8 && !this.get('isTextArea'))) {
-      this.invokeLast(this._fixupTextLayout);
-    }
   },
 
+  /** SC.View state callback. */
   didAppendToDocument: function() {
     this._fixupTextLayout();
   },
@@ -955,7 +950,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     SC.run(function () {
       this.set('focused', NO);
       // passing the original event here instead that was potentially set from
-      // loosing the responder on the inline text editor so that we can
+      // losing the responder on the inline text editor so that we can
       // use it for the delegate to end editing
       this.fieldDidBlur(this._origEvent || evt);
       var val = this.get('value');
