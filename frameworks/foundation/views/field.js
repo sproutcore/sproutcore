@@ -168,14 +168,22 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     this.setFieldValue(this.get('fieldValue'));
   }.observes('fieldValue'),
 
-  /** @private
-    after the layer is created, set the field value and observe events
+  /**
+    SC.View state callback.
+
+    After the layer is created, set the field value and begin observing
+    change events on the input field.
   */
   didCreateLayer: function() {
     this.setFieldValue(this.get('fieldValue'));
     this._addChangeEvent();
   },
 
+  /**
+    SC.View state callback.
+
+    Removes the change event from the input field.
+  */
   willDestroyLayer: function() {
     SC.Event.remove(this.$input(), 'change', this, this._field_fieldValueDidChange);
   },
@@ -200,6 +208,8 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   // Override these primitives in your subclass as required.
 
   /**
+    SC.RootResponder event handler.
+
     Allow the browser to do its normal event handling for the mouse down
     event.  But first, set isActive to YES.
   */
@@ -209,7 +219,9 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     return YES;
   },
 
-  /** @private
+  /**
+    SC.RootResponder event handler.
+
     Remove the active class on mouseExited if mouse is down.
   */
   mouseExited: function(evt) {
@@ -218,7 +230,9 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     return YES;
   },
 
-  /** @private
+  /**
+    SC.RootResponder event handler.
+
     If mouse was down and we renter the button area, set the active state again.
   */
   mouseEntered: function(evt) {
@@ -227,8 +241,10 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     return YES;
   },
 
-  /** @private
-    on mouse up, remove the isActive class and then allow the browser to do
+  /**
+    SC.RootResponder event handler.
+
+    On mouse up, remove the isActive class and then allow the browser to do
     its normal thing.
   */
   mouseUp: function(evt) {
@@ -239,7 +255,9 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     return YES ;
   },
 
-  /** @private
+  /**
+    SC.RootResponder event handler.
+
     Simply allow keyDown & keyUp to pass through to the default web browser
     implementation.
   */
@@ -264,16 +282,22 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     return YES;
   },
 
-  /** tied to the isEnabledInPane state */
+  /**
+    Override of SC.Responder.prototype.acceptsFirstResponder.
+
+    Tied to the `isEnabledInPane` state.
+  */
   acceptsFirstResponder: function() {
     if (SC.FOCUS_ALL_CONTROLS) { return this.get('isEnabledInPane'); }
     return NO;
   }.property('isEnabledInPane'),
 
+  /** @private */
   _addChangeEvent: function() {
     SC.Event.add(this.$input(), 'change', this, this._field_fieldValueDidChange);
   },
 
+  /** @private */
   // these methods use the validator to convert the raw field value returned
   // by your subclass into an object and visa versa.
   _field_setFieldValue: function(newValue) {
@@ -286,6 +310,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     return ret ;
   },
 
+  /** @private */
   _field_getFieldValue: function() {
     var ret = this.getFieldValue() ;
     if (this.objectForFieldValue) ret = this.objectForFieldValue(ret);
