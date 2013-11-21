@@ -266,24 +266,3 @@ test("SC.TreeItemObserver.prototype._itemDidChange()", function () {
   ok(newItem.hasObserverFor('children'), "The item is observed for changes to otherChildren.");
   ok(newItem.hasObserverFor('isExpanded'), "The item is observed for changes to otherIsExpanded.");
 });
-
-
-// test("SC.TreeItemObserver.prototype.observerContentDidChange()", function () {
-//   var tio,
-//     oldLength,
-//     newLength;
-
-//   SC.run(function () {
-//     tio = SC.TreeItemObserver.create({
-//       delegate: SC.Object.create({
-//         treeItemChildrenKey: "children",
-//         treeItemIsExpandedKey: "isExpanded"
-//       }),
-//       item: root
-//     });
-//   });
-
-//   tio.updateLength();
-
-// });
-
