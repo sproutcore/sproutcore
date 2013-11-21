@@ -471,7 +471,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     // Mark it destroyed.
     this.isDestroyed = YES;
 
-    // Destroy the logic gate, if any.
+    // Destroy the logic gate, if any. (See and & or methods.)
     if (this._logicGate) this._logicGate.destroy();
 
     // Disconnect the binding.
@@ -773,7 +773,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
       if (tuple) {
         this._toTarget = tuple[0];
         this._toPropertyKey = tuple[1];
-        // Hook up _logicGate if needed (see and, or, not methods).
+        // Hook up _logicGate if needed (see and & or methods).
         if (this._logicGate) {
           this._logicGate.set('localObject', this._toTarget);
         }
