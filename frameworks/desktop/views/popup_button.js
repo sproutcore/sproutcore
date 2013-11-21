@@ -294,6 +294,16 @@ SC.PopupButtonView = SC.ButtonView.extend(
     var menu = this.get('instantiatedMenu') ;
 
     return (!!menu && menu.performKeyEquivalent(charCode, evt, YES)) ;
+  },
+
+  /** @private */
+  touchStart: function(evt) {
+    return this.mouseDown(evt);
+  },
+
+  /** @private */
+  touchEnd: function(evt) {
+    return this.mouseUp(evt);
   }
 
 });
