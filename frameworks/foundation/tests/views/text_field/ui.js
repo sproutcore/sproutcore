@@ -154,7 +154,7 @@ pane.verifyReadOnly = function verifyReadonly(view, isReadOnly) {
 // TEST INITIAL STATES
 //
 
-module('SC.TextFieldView ui', pane.standardSetup());
+module('SC.TextFieldView: Initial States', pane.standardSetup());
 
 test("empty", function() {
    var view = pane.view('empty');
@@ -225,6 +225,8 @@ test("textarea - disabled - with value", function() {
 // ..........................................................
 // TEST CHANGING VIEWS
 //
+
+module('SC.TextFieldView: Changing Values', pane.standardSetup());
 
 test("changing value from empty -> value", function() {
   var view = pane.view('empty');
@@ -300,7 +302,9 @@ test("changing value from not a textarea to a textarea", function() {
   $textarea.val("My New Value");
   SC.Event.trigger($textarea, 'keyup');
   SC.Event.trigger($textarea, 'change');
-  view.fieldValueDidChange();
+  SC.run(function () {
+    view.fieldValueDidChange();
+  });
 
   // wait a little bit to let text field propogate changes
   stop();
@@ -312,6 +316,23 @@ test("changing value from not a textarea to a textarea", function() {
 
   SC.RunLoop.begin();
   SC.RunLoop.end();
+});
+
+/**
+  There was a bug that when a text field view has a value before it is appended,
+  the hint line-height gets set to 0px. So if the value is removed, the hint is
+  in the wrong spot.
+  */
+test("When a manual hint is visible, the line-height of the hint should be correct", function () {
+  var view1 = pane.view('empty'),
+    view2 = pane.view('with value'),
+    hint = view1.$('.hint');
+
+  equals(hint.css('line-height'), "14px", "The line-height of the hint of an empty text field should be");
+
+  view2.set('value', null);
+  hint = view2.$('.hint')
+  equals(hint.css('line-height'), "14px", "The line-height of the hint of a non-empty text field should be");
 });
 
 
@@ -332,6 +353,9 @@ if (!SC.browser.isIE && !SC.platform.input.placeholder) {
 // ..........................................................
 // TEST SELECTION SUPPORT
 //
+
+
+module('SC.TextFieldView: Selection Support', pane.standardSetup());
 
 test("Setting the selection to a null value should fail", function() {
   var view = pane.view('with value');
@@ -382,9 +406,13 @@ test("Setting and then getting back the selection", function() {
   ok(fetchedSelection.get('length') === 3, 'the selection should have length 3');
 });
 
+
+
 // ..........................................................
 // TEST ACCESSORY VIEWS
 //
+
+module('SC.TextFieldView: Accessory Views', pane.standardSetup());
 
 test("Adding left accessory view", function() {
   var view = pane.view('with value');
@@ -629,6 +657,8 @@ test("Accessory views should only be instantiated once", function() {
 // TEST EVENTS
 //
 
+module('SC.TextFieldView: Events', pane.standardSetup());
+
 test("focus and blurring text field", function() {
   var view = pane.view('empty');
   var input = view.$('input');
@@ -680,7 +710,7 @@ test("focus and blur an empty text field", function() {
   pane.verifyEmpty(view, 'Full Name');
 });
 
-test("loosing first responder should blur", function() {
+test("losing first responder should blur", function() {
   var view = pane.view('empty');
   var input = view.$('input');
   var testResponder = SC.Responder.create(SC.ResponderContext, {});
