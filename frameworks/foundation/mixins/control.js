@@ -23,7 +23,7 @@ SC.AUTO_CONTROL_SIZE = '__AUTO__';
   @type String
   @constant
 */
-SC.JUMBO_CONTROL_SIZE = 'sc-jumbo-size' ;
+SC.JUMBO_CONTROL_SIZE = 'sc-jumbo-size';
 
 /**
   Option for HUGE control size.
@@ -31,7 +31,7 @@ SC.JUMBO_CONTROL_SIZE = 'sc-jumbo-size' ;
   @type String
   @constant
 */
-SC.HUGE_CONTROL_SIZE = 'sc-huge-size' ;
+SC.HUGE_CONTROL_SIZE = 'sc-huge-size';
 
 /**
   Option for large control size.
@@ -39,7 +39,7 @@ SC.HUGE_CONTROL_SIZE = 'sc-huge-size' ;
   @type String
   @constant
 */
-SC.LARGE_CONTROL_SIZE = 'sc-large-size' ;
+SC.LARGE_CONTROL_SIZE = 'sc-large-size';
 
 /**
   Option for standard control size.
@@ -47,7 +47,7 @@ SC.LARGE_CONTROL_SIZE = 'sc-large-size' ;
   @type String
   @constant
 */
-SC.REGULAR_CONTROL_SIZE = 'sc-regular-size' ;
+SC.REGULAR_CONTROL_SIZE = 'sc-regular-size';
 
 /**
   Option for small control size.
@@ -55,7 +55,7 @@ SC.REGULAR_CONTROL_SIZE = 'sc-regular-size' ;
   @type String
   @constant
 */
-SC.SMALL_CONTROL_SIZE = 'sc-small-size' ;
+SC.SMALL_CONTROL_SIZE = 'sc-small-size';
 
 /**
   Option for tiny control size
@@ -63,7 +63,7 @@ SC.SMALL_CONTROL_SIZE = 'sc-small-size' ;
   @type String
   @constant
 */
-SC.TINY_CONTROL_SIZE = 'sc-tiny-size' ;
+SC.TINY_CONTROL_SIZE = 'sc-tiny-size';
 
 /**
   @namespace
@@ -203,16 +203,18 @@ SC.Control = SC.mixin(SC.clone(SC.ContentValueSupport),
     @observes 'fieldLabel'
     @observes 'fieldKey'
   */
-  errorLabel: function() {
-    var ret, fk, def, locFK;
-    if (ret = this.get('fieldLabel')) return ret;
+  errorLabel: function () {
+    var ret = this.get('fieldLabel'), fk, def, locFK;
+
+    // Fast path!
+    if (ret) return ret;
 
     // if field label is not provided, compute something...
     fk = this.get('fieldKey') || this.constructor.toString();
     def = fk ? SC.String.capitalize(SC.String.humanize(fk)) : '';
     locFK = SC.String.locWithDefault("FieldKey." + fk, def);
     return SC.String.locWithDefault("ErrorLabel." + fk, locFK);
-  }.property('fieldLabel','fieldKey').cacheable(),
+  }.property('fieldLabel', 'fieldKey').cacheable(),
 
   /**
     The control size.  This will set a CSS style on the element that can be
@@ -239,14 +241,16 @@ SC.Control = SC.mixin(SC.clone(SC.ContentValueSupport),
     Invoke this method in your updateDisplay() method to update any basic
     control CSS classes.
   */
-  renderMixin: function(context, firstTime) {
-    var sel = this.get('isSelected'), disabled = !this.get('isEnabled'),
-    // update the CSS classes for the control.  note we reuse the same hash
-    // to avoid consuming more memory
-    names = this._CONTROL_TMP_CLASSNAMES ; // temporary object
+  renderMixin: function (context, firstTime) {
+    var sel = this.get('isSelected'),
+      disabled = !this.get('isEnabledInPane'),
+      // update the CSS classes for the control.  note we reuse the same hash
+      // to avoid consuming more memory
+      names = this._CONTROL_TMP_CLASSNAMES; // temporary object
+
     names.mixed = sel === SC.MIXED_STATE;
-    names.sel = sel && (sel !== SC.MIXED_STATE) ;
-    names.active = this.get('isActive') ;
+    names.sel = sel && (sel !== SC.MIXED_STATE);
+    names.active = this.get('isActive');
 
     var controlSize = this.get("controlSize");
     if (!controlSize) {
@@ -272,7 +276,8 @@ SC.Control = SC.mixin(SC.clone(SC.ContentValueSupport),
     // tags
     if (!firstTime && this.$input) {
       var inps = this.$input();
-      if(inps.attr('type')!=="radio"){
+
+      if (inps.attr('type') !== "radio") {
         this.$input().attr('disabled', disabled);
       }
     }
