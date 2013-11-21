@@ -376,7 +376,11 @@ module("AND binding", {
 
     toObject = SC.Object.create({
       value: null,
-      valueBinding: SC.Binding.and('SC.testControllerA.value', 'SC.testControllerB.value')
+      valueBinding: SC.Binding.and('SC.testControllerA.value', 'SC.testControllerB.value'),
+      localValue1: NO,
+      localValue2: NO,
+      boundLocalValue: NO,
+      boundLocalValueBinding: SC.Binding.and('.localValue1', '.localValue2')
     });
   },
 
@@ -387,14 +391,22 @@ module("AND binding", {
 
 });
 
-test("toObject.value should be YES if both sources are YES", function () {
+test("bound value should be YES if both sources are YES", function () {
   SC.RunLoop.begin();
   SC.testControllerA.set('value', YES);
   SC.testControllerB.set('value', YES);
   SC.RunLoop.end();
 
   SC.Binding.flushPendingChanges();
-  equals(toObject.get('value'), YES);
+  equals(toObject.get('value'), YES, 'Bound value');
+
+  SC.RunLoop.begin();
+  toObject.set('localValue1', YES);
+  toObject.set('localValue2', YES);
+  SC.RunLoop.end();
+
+  SC.Binding.flushPendingChanges();
+  equals(toObject.get('boundLocalValue'), YES, 'Local bound value');
 });
 
 test("toObject.value should be NO if either source is NO", function () {
@@ -404,7 +416,7 @@ test("toObject.value should be NO if either source is NO", function () {
   SC.RunLoop.end();
 
   SC.Binding.flushPendingChanges();
-  equals(toObject.get('value'), NO);
+  equals(toObject.get('value'), NO, 'Bound value on YES/NO');
 
   SC.RunLoop.begin();
   SC.testControllerA.set('value', YES);
@@ -412,7 +424,7 @@ test("toObject.value should be NO if either source is NO", function () {
   SC.RunLoop.end();
 
   SC.Binding.flushPendingChanges();
-  equals(toObject.get('value'), YES);
+  equals(toObject.get('value'), YES, 'Bound value on YES/YES');
 
   SC.RunLoop.begin();
   SC.testControllerA.set('value', NO);
@@ -420,8 +432,33 @@ test("toObject.value should be NO if either source is NO", function () {
   SC.RunLoop.end();
 
   SC.Binding.flushPendingChanges();
-  equals(toObject.get('value'), NO);
+  equals(toObject.get('value'), NO, 'Bound value on NO/YES');
+
+  SC.RunLoop.begin();
+  toObject.set('localValue1', YES);
+  toObject.set('localValue2', NO);
+  SC.RunLoop.end();
+
+  SC.Binding.flushPendingChanges();
+  equals(toObject.get('boundLocalValue'), NO, 'Local bound value on YES/NO');
+
+  SC.RunLoop.begin();
+  toObject.set('localValue1', YES);
+  toObject.set('localValue2', YES);
+  SC.RunLoop.end();
+
+  SC.Binding.flushPendingChanges();
+  equals(toObject.get('boundLocalValue'), YES, 'Local bound value on YES/YES');
+
+  SC.RunLoop.begin();
+  toObject.set('localValue1', NO);
+  toObject.set('localValue2', YES);
+  SC.RunLoop.end();
+
+  SC.Binding.flushPendingChanges();
+  equals(toObject.get('boundLocalValue'), NO, 'Local bound value on NO/YES');
 });
+
 
 module("OR binding", {
 
@@ -433,7 +470,11 @@ module("OR binding", {
 
     toObject = SC.Object.create({
       value: null,
-      valueBinding: SC.Binding.or('SC.testControllerA.value', 'SC.testControllerB.value')
+      valueBinding: SC.Binding.or('SC.testControllerA.value', 'SC.testControllerB.value'),
+      localValue1: NO,
+      localValue2: NO,
+      boundLocalValue: NO,
+      boundLocalValueBinding: SC.Binding.or('.localValue1', '.localValue2')
     });
   },
 
@@ -451,7 +492,16 @@ test("toObject.value should be first value if first value is truthy", function (
   SC.RunLoop.end();
 
   SC.Binding.flushPendingChanges();
-  equals(toObject.get('value'), 'first value');
+  equals(toObject.get('value'), 'first value', 'Bound value on truthy first value');
+
+  SC.RunLoop.begin();
+  toObject.set('localValue1', 'first value');
+  toObject.set('localValue2', 'second value');
+  SC.RunLoop.end();
+
+  SC.Binding.flushPendingChanges();
+  equals(toObject.get('boundLocalValue'), 'first value', 'Locally bound value on truthy first value');
+
 });
 
 test("toObject.value should be second value if first is falsy", function () {
@@ -461,7 +511,16 @@ test("toObject.value should be second value if first is falsy", function () {
   SC.RunLoop.end();
 
   SC.Binding.flushPendingChanges();
-  equals(toObject.get('value'), 'second value');
+  equals(toObject.get('value'), 'second value', 'Bound value on falsy first value');
+
+  SC.RunLoop.begin();
+  toObject.set('localValue1', NO);
+  toObject.set('localValue2', 'second value');
+  SC.RunLoop.end();
+
+  SC.Binding.flushPendingChanges();
+  equals(toObject.get('boundLocalValue'), 'second value', 'Locally bound value on falsy first value');
+
 });
 
 module("Binding with '[]'", {

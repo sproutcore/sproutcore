@@ -471,6 +471,9 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     // Mark it destroyed.
     this.isDestroyed = YES;
 
+    // Destroy the logic gate, if any.
+    if (this._logicGate) this._logicGate.destroy();
+
     // Disconnect the binding.
     this.disconnect();
 
@@ -770,6 +773,10 @@ SC.Binding = /** @scope SC.Binding.prototype */{
       if (tuple) {
         this._toTarget = tuple[0];
         this._toPropertyKey = tuple[1];
+        // Hook up _logicGate if needed (see and, or, not methods).
+        if (this._logicGate) {
+          this._logicGate.set('localObject', this._toTarget);
+        }
       }
     }
   },
@@ -989,10 +996,20 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   */
   and: function (pathA, pathB) {
 
+    // If either path is local, append the localObject path to it.
+    if (pathA.indexOf('*') === 0 || pathA.indexOf('.') === 0) {
+      pathA = '*localObject.' + pathA.slice(1);
+    }
+    if (pathB.indexOf('*') === 0 || pathB.indexOf('.') === 0) {
+      pathB = '*localObject.' + pathB.slice(1);
+    }
+
     // create an object to do the logical computation
     var gate = SC.Object.create({
-      valueABinding: pathA,
-      valueBBinding: pathB,
+      localObject: null,
+
+      valueABinding: SC.Binding.oneWay(pathA),
+      valueBBinding: SC.Binding.oneWay(pathB),
 
       and: function () {
         return (this.get('valueA') && this.get('valueB'));
@@ -1000,7 +1017,9 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     });
 
     // add a transform that depends on the result of that computation.
-    return this.from('and', gate).oneWay();
+    var ret = this.from('and', gate).oneWay();
+    ret._logicGate = gate;
+    return ret;
   },
 
   /**
@@ -1014,9 +1033,18 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @param {String} pathB The second part of the conditional
   */
   or: function (pathA, pathB) {
+    // If either path is local, append the localObject path to it.
+    if (pathA.indexOf('*') === 0 || pathA.indexOf('.') === 0) {
+      pathA = '*localObject.' + pathA.slice(1);
+    }
+    if (pathB.indexOf('*') === 0 || pathB.indexOf('.') === 0) {
+      pathB = '*localObject.' + pathB.slice(1);
+    }
 
     // create an object to the logical computation
     var gate = SC.Object.create({
+      localObject: null,
+      
       valueABinding: pathA,
       valueBBinding: pathB,
 
@@ -1025,7 +1053,9 @@ SC.Binding = /** @scope SC.Binding.prototype */{
       }.property('valueA', 'valueB').cacheable()
     });
 
-    return this.from('or', gate).oneWay();
+    var ret = this.from('or', gate).oneWay();
+    ret._logicGate = gate;
+    return ret;
   },
 
   /**
