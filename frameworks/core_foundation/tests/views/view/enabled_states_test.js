@@ -92,7 +92,7 @@ test("Test toggling isEnabled on view.", function () {
   SC.run(function () {
     equals(parent.enabledState, SC.CoreView.ENABLED, "A regular parent view should be in the state");
     equals(view.enabledState, SC.CoreView.DISABLED, "A disabled view should be in the state");
-    equals(child.enabledState, SC.CoreView.DISABLED, "A disabled child view with disabled ancestor should be in the state");
+    equals(child.enabledState, SC.CoreView.DISABLED_AND_BY_PARENT, "A disabled child view with disabled ancestor should be in the state");
     ok(parent.get('isEnabled'), "isEnabled should be true");
     ok(parent.get('isEnabledInPane'), "isEnabledInPane should be true");
     ok(!view.get('isEnabled'), "isEnabled should be false");
@@ -148,7 +148,7 @@ test("Test toggling isEnabled on parent.", function () {
   SC.run(function () {
     equals(parent.enabledState, SC.CoreView.DISABLED, "A disabled parent view should be in the state");
     equals(view.enabledState, SC.CoreView.DISABLED_BY_PARENT, "A regular view with disabled parent should be in the state");
-    equals(child.enabledState, SC.CoreView.DISABLED, "A disabled child view with disabled ancestor should be in the state");
+    equals(child.enabledState, SC.CoreView.DISABLED_AND_BY_PARENT, "A disabled child view with disabled ancestor should be in the state");
     ok(!parent.get('isEnabled'), "isEnabled should be false");
     ok(!parent.get('isEnabledInPane'), "isEnabledInPane should be false");
     ok(view.get('isEnabled'), "view isEnabled should be true");
@@ -204,7 +204,7 @@ test("Test toggling isEnabled on view.", function () {
   SC.run(function () {
     equals(parent.enabledState, SC.CoreView.ENABLED, "A regular parent view should be in the state");
     equals(view.enabledState, SC.CoreView.DISABLED, "A disabled view should be in the state");
-    equals(child.enabledState, SC.CoreView.DISABLED, "A disabled child view with disabled ancestor should be in the state");
+    equals(child.enabledState, SC.CoreView.DISABLED_AND_BY_PARENT, "A disabled child view with disabled ancestor should be in the state");
     ok(parent.get('isEnabled'), "isEnabled should be true");
     ok(parent.get('isEnabledInPane'), "isEnabledInPane should be true");
     ok(!view.get('isEnabled'), "isEnabled should be false");

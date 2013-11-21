@@ -29,12 +29,21 @@ SC.CoreView.mixin(
 
   /**
     The view is enabled itself, but is effectively disabled in the pane due to
-    a disabled parent view.
+    a disabled ancestor.
 
     @static
     @constant
   */
-  DISABLED_BY_PARENT: 0x12 // 18
+  DISABLED_BY_PARENT: 0x12, // 18
+
+  /**
+    The view is disabled itself and is also disabled in the pane due to
+    a disabled ancestor.
+
+    @static
+    @constant
+  */
+  DISABLED_AND_BY_PARENT: 0x13 // 19
 
 });
 
@@ -112,11 +121,16 @@ SC.View.reopen(
 
   /** @private */
   _doEnable: function () {
-    var handled = true;
+    var handled = true,
+      enabledState = this.get('enabledState');
 
-    if (this.get('enabledState') & SC.CoreView.IS_DISABLED) {
+    if (enabledState === SC.CoreView.DISABLED) {
+      // If the view itself is disabled, then we can enable it.
       this._callOnChildViews('_parentDidEnableInPane');
       this._gotoEnabledState();
+    } else if (enabledState === SC.CoreView.DISABLED_AND_BY_PARENT) {
+      // The view is no longer disabled itself, but still disabled by an ancestor.
+      this._gotoDisabledByParentState();
     } else {
       handled = false;
     }
@@ -126,15 +140,20 @@ SC.View.reopen(
 
   /** @private */
   _doDisable: function () {
-    var handled = true;
+    var handled = true,
+      enabledState = this.get('enabledState');
 
-    if (this.get('enabledState') !== SC.CoreView.DISABLED) {
+    // If the view is not itself disabled, then we can disable it.
+    if (enabledState === SC.CoreView.ENABLED) {
       if (this.get('isFirstResponder')) {
         this.resignFirstResponder();
       }
 
       this._callOnChildViews('_parentDidDisableInPane');
       this._gotoDisabledState();
+    } else if (enabledState === SC.CoreView.DISABLED_BY_PARENT) {
+      // The view is now disabled itself and disabled by an ancestor.
+      this._gotoDisabledAndByParentState();
     } else {
       handled = false;
     }
@@ -206,10 +225,18 @@ SC.View.reopen(
 
   /** @private */
   _parentDidEnableInPane: function () {
-    var isEnabled = this.get('isEnabled');
+    var enabledState = this.get('enabledState');
 
-    if (isEnabled) {
-      this._gotoEnabledState();
+    if (this.get('shouldInheritEnabled')) {
+
+      if (enabledState === SC.CoreView.DISABLED_BY_PARENT) { // Was enabled before.
+        this._gotoEnabledState();
+      } else if (enabledState === SC.CoreView.DISABLED_AND_BY_PARENT) { // Was disabled before.
+        this._gotoDisabledState();
+
+        // There's no need to continue to further child views.
+        return false;
+      }
     } else {
       // There's no need to continue to further child views.
       return false;
@@ -218,10 +245,19 @@ SC.View.reopen(
 
   /** @private */
   _parentDidDisableInPane: function () {
-    var isEnabled = this.get('isEnabled');
+    var enabledState = this.get('enabledState');
 
-    if (isEnabled && this.get('shouldInheritEnabled')) {
-      this._gotoDisableByParentState();
+    if (this.get('shouldInheritEnabled')) {
+
+      if (enabledState === SC.CoreView.ENABLED) { // Was enabled.
+        this._gotoDisabledByParentState();
+      } else if (enabledState === SC.CoreView.DISABLED) { // Was disabled.
+        this._gotoDisabledAndByParentState();
+      } else { // Was already disabled by ancestor.
+
+        // There's no need to continue to further child views.
+        return false;
+      }
     } else {
       // There's no need to continue to further child views.
       return false;
@@ -249,7 +285,13 @@ SC.View.reopen(
   },
 
   /** @private */
-  _gotoDisableByParentState: function () {
+  _gotoDisabledAndByParentState: function () {
+    // Update the state.
+    this.set('enabledState', SC.CoreView.DISABLED_AND_BY_PARENT);
+  },
+
+  /** @private */
+  _gotoDisabledByParentState: function () {
     // Update the state.
     this.set('enabledState', SC.CoreView.DISABLED_BY_PARENT);
   }
