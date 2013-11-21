@@ -767,6 +767,10 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
       // Remove the delegate specific key observers from the cached item.
       this._cleanUpCachedItem();
 
+      // Reset the delegate specific keys.
+      this.set('treeItemChildrenKey', 'treeItemChildren');
+      this.set('treeItemIsExpandedKey', 'treeItemIsExpanded');
+
       // Remove the cache.
       this._cachedDelegate = null;
     }
@@ -975,12 +979,12 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
       delegate.addObserver('treeItemChildrenKey', this, this.treeItemChildrenKeyDidChange);
       delegate.addObserver('treeItemIsExpandedKey', this, this.treeItemIsExpandedKeyDidChange);
       delegate.addObserver('treeItemIsGrouped', this, this.treeItemIsGroupedDidChange);
-    }
 
-    // Fire the observer functions once to initialize.
-    this.treeItemChildrenKeyDidChange();
-    this.treeItemIsExpandedKeyDidChange();
-    this.treeItemIsGroupedDidChange();
+      // Fire the observer functions once to initialize.
+      this.treeItemChildrenKeyDidChange();
+      this.treeItemIsExpandedKeyDidChange();
+      this.treeItemIsGroupedDidChange();
+    }
 
     // Re-initialize the item to match the new delegate.
     this._itemDidChange();
@@ -1060,7 +1064,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
       key;
 
     key = del ? del.get('treeItemChildrenKey') : 'treeItemChildren';
-    this.set('treeItemChildrenKey', key);
+    this.set('treeItemChildrenKey', key ? key : 'treeItemChildren');
   },
 
   /** @private */
@@ -1069,7 +1073,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
       key;
 
     key = del ? del.get('treeItemIsExpandedKey') : 'treeItemIsExpanded';
-    this.set('treeItemIsExpandedKey', key);
+    this.set('treeItemIsExpandedKey', key ? key : 'treeItemIsExpanded');
   },
 
   /** @private */

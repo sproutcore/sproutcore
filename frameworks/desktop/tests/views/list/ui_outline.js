@@ -51,3 +51,5 @@ var pane = SC.ControlTestPane.design()
   }));
 
 module("SC.ListView - outline list", pane.standardSetup());
+
+test("What should be tested here?");
