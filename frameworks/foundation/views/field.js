@@ -169,7 +169,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   }.observes('fieldValue'),
 
   /**
-    SC.View state callback.
+    SC.View view state callback.
 
     After the layer is created, set the field value and begin observing
     change events on the input field.
