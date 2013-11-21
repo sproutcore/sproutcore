@@ -5,9 +5,9 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('views/field') ;
-sc_require('system/text_selection') ;
-sc_require('mixins/static_layout') ;
+sc_require('views/field');
+sc_require('system/text_selection');
+sc_require('mixins/static_layout');
 sc_require('mixins/editable');
 
 SC.AUTOCAPITALIZE_NONE = 'none';
@@ -350,7 +350,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
 
   init: function () {
     var val = this.get('value');
-    this._hintON = ((!val || val && val.length===0) && !this.get('hintOnFocus')) ? YES : NO;
+    this._hintON = ((!val || val && val.length === 0) && !this.get('hintOnFocus')) ? YES : NO;
 
     var continuouslyUpdatesValue = this.get('continouslyUpdatesValue');
     if (continuouslyUpdatesValue !== null && continuouslyUpdatesValue !== undefined) {
@@ -398,55 +398,55 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
         end = null;
 
         if (!element.value) {
-          start = end = 0 ;
+          start = end = 0;
         } else {
           // In IE8, input elements don't have hasOwnProperty() defined.
           try {
             if ('selectionStart' in element) {
-              start = element.selectionStart ;
+              start = element.selectionStart;
             }
             if ('selectionEnd' in element) {
-              end = element.selectionEnd ;
+              end = element.selectionEnd;
             }
           }
           // In Firefox when you ask the selectionStart or End of a hidden
           // input, sometimes it throws a weird error.
           // Adding this to just ignore it.
-          catch (e){
+          catch (e) {
             return null;
           }
 
           // Support Internet Explorer.
-          if (start === null  ||  end === null ) {
-            var selection = document.selection ;
+          if (start === null  ||  end === null) {
+            var selection = document.selection;
             if (selection) {
-              var type = selection.type ;
+              var type = selection.type;
               if (type  &&  (type === 'None'  ||  type === 'Text')) {
-                range = selection.createRange() ;
+                range = selection.createRange();
 
                 if (!this.get('isTextArea')) {
                   // Input tag support.  Figure out the starting position by
                   // moving the range's start position as far left as possible
                   // and seeing how many characters it actually moved over.
-                  var length = range.text.length ;
-                  start = Math.abs(range.moveStart('character', 0 - (element.value.length + 1))) ;
-                  end = start + length ;
+                  var length = range.text.length;
+                  start = Math.abs(range.moveStart('character', 0 - (element.value.length + 1)));
+                  end = start + length;
                 } else {
                   // Textarea support.  Unfortunately, this case is a bit more
                   // complicated than the input tag case.  We need to create a
                   // "dummy" range to help in the calculations.
-                  var dummyRange = range.duplicate() ;
-                  dummyRange.moveToElementText(element) ;
-                  dummyRange.setEndPoint('EndToStart', range) ;
-                  start = dummyRange.text.length ;
-                  end = start + range.text.length ;
+                  var dummyRange = range.duplicate();
+                  dummyRange.moveToElementText(element);
+                  dummyRange.setEndPoint('EndToStart', range);
+                  start = dummyRange.text.length;
+                  end = start + range.text.length;
                 }
               }
             }
           }
         }
 
-        return SC.TextSelection.create({ start:start, end:end }) ;
+        return SC.TextSelection.create({ start: start, end: end });
       } else {
         return null;
       }
@@ -459,14 +459,14 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
 
       if (element) {
         if (element.setSelectionRange) {
-          element.setSelectionRange(value.get('start'), value.get('end')) ;
+          element.setSelectionRange(value.get('start'), value.get('end'));
         } else {
           // Support Internet Explorer.
-          range = element.createTextRange() ;
-          start = value.get('start') ;
-          range.move('character', start) ;
-          range.moveEnd('character', value.get('end') - start) ;
-          range.select() ;
+          range = element.createTextRange();
+          start = value.get('start');
+          range.move('character', start);
+          range.moveEnd('character', value.get('end') - start);
+          range.select();
         }
       }
 
@@ -499,35 +499,35 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   accessoryViewObserver: function () {
     var classNames,
         viewProperties = ['leftAccessoryView', 'rightAccessoryView'],
-        len = viewProperties.length , i, viewProperty, previousView,
+        len = viewProperties.length, i, viewProperty, previousView,
         accessoryView;
 
-    for (i=0; i<len; i++) {
-      viewProperty = viewProperties[i] ;
+    for (i = 0; i < len; i++) {
+      viewProperty = viewProperties[i];
 
       // Is there an accessory view specified?
-      previousView = this['_'+viewProperty] ;
-      accessoryView = this.get(viewProperty) ;
+      previousView = this['_' + viewProperty];
+      accessoryView = this.get(viewProperty);
 
       // If the view is the same, there's nothing to do.  Otherwise, remove
       // the old one (if any) and add the new one.
       if (! (previousView &&
              accessoryView &&
-             (previousView === accessoryView) ) ) {
+             (previousView === accessoryView))) {
 
         // If there was a previous previous accessory view, remove it now.
         if (previousView) {
           // Remove the "sc-text-field-accessory-view" class name that we had
           // added earlier.
-          classNames = previousView.get('classNames') ;
-          classNames = classNames.without('sc-text-field-accessory-view') ;
-          previousView.set('classNames', classNames) ;
+          classNames = previousView.get('classNames');
+          classNames = classNames.without('sc-text-field-accessory-view');
+          previousView.set('classNames', classNames);
 
           if (previousView.createdByParent) {
             this.removeChildAndDestroy(previousView);
           } else {
-          this.removeChild(previousView) ;
-        }
+            this.removeChild(previousView);
+          }
 
           // Tidy up.
           previousView = this['_' + viewProperty] = this['_created' + viewProperty] = null;
@@ -548,24 +548,24 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
 
           // Add in the "sc-text-field-accessory-view" class name so that the
           // z-index gets set correctly.
-          classNames = accessoryView.get('classNames') ;
-          var className = 'sc-text-field-accessory-view' ;
+          classNames = accessoryView.get('classNames');
+          var className = 'sc-text-field-accessory-view';
           if (classNames.indexOf(className) < 0) {
             classNames = SC.clone(classNames);
-            classNames.push(className) ;
+            classNames.push(className);
             accessoryView.set('classNames', classNames);
           }
 
           // Actually add the view to our hierarchy and cache a reference.
-          this.appendChild(accessoryView) ;
-          this['_'+viewProperty] = accessoryView ;
+          this.appendChild(accessoryView);
+          this['_' + viewProperty] = accessoryView;
         }
       }
     }
   }.observes('leftAccessoryView', 'rightAccessoryView'),
 
   render: function (context, firstTime) {
-    sc_super() ;
+    sc_super();
     var v, accessoryViewWidths, leftAdjustment, rightAdjustment;
 
     // always have at least an empty string
@@ -581,12 +581,12 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     // if we could add in the original padding, too, but there's no efficient
     // way to do that without first rendering the element somewhere on/off-
     // screen, and we don't want to take the performance hit.)
-    accessoryViewWidths = this._getAccessoryViewWidths() ;
+    accessoryViewWidths = this._getAccessoryViewWidths();
     leftAdjustment  = accessoryViewWidths.left;
     rightAdjustment = accessoryViewWidths.right;
 
-    if (leftAdjustment)  leftAdjustment  += 'px' ;
-    if (rightAdjustment) rightAdjustment += 'px' ;
+    if (leftAdjustment)  leftAdjustment  += 'px';
+    if (rightAdjustment) rightAdjustment += 'px';
 
     this._renderField(context, firstTime, v, leftAdjustment, rightAdjustment);
   },
@@ -599,7 +599,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   _forceRenderFirstTime: NO,
 
   /** @private */
-  _renderFieldLikeFirstTime: function (){
+  _renderFieldLikeFirstTime: function () {
     this.set('_forceRenderFirstTime', YES);
   }.observes('isTextArea'),
 
@@ -619,7 +619,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
         autoCorrect = this.get('autoCorrect'),
         autoCapitalize = this.get('autoCapitalize'),
         isBrowserFocusable = this.get('isBrowserFocusable'),
-        spellCheckString='', autocapitalizeString='', autocorrectString='',
+        spellCheckString = '', autocapitalizeString = '', autocorrectString = '',
         activeStateString = '', browserFocusableString = '',
         name, adjustmentStyle, type, element, paddingElementStyle,
         fieldClassNames, isOldSafari;
@@ -628,8 +628,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
 
     //Adding this to differentiate between older and newer versions of safari
     //since the internal default field padding changed
-    isOldSafari= SC.browser.isWebkit &&
-        SC.browser.compare(SC.browser.engineVersion, '532')<0;
+    isOldSafari = SC.browser.isWebkit &&
+        SC.browser.compare(SC.browser.engineVersion, '532') < 0;
     context.setClass('oldWebKitFieldPadding', isOldSafari);
 
 
@@ -649,7 +649,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
           autocapitalizeString = ' autocapitalize=' + (!autoCapitalize ? '"none"' : '"sentences"');
         } else {
           autocapitalizeString = ' autocapitalize=' + autoCapitalize;
-      }
+        }
       }
 
       if (!isBrowserFocusable) {
@@ -665,24 +665,24 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
 
       // Render the padding element, with any necessary positioning
       // adjustments to accommodate accessory views.
-      adjustmentStyle = '' ;
+      adjustmentStyle = '';
       if (leftAdjustment || rightAdjustment) {
-        adjustmentStyle = 'style="' ;
-        if (leftAdjustment)  adjustmentStyle += 'left:'  + leftAdjustment  + ';' ;
-        if (rightAdjustment) adjustmentStyle += 'right:' + rightAdjustment + ';' ;
-        adjustmentStyle += '"' ;
+        adjustmentStyle = 'style="';
+        if (leftAdjustment)  adjustmentStyle += 'left:'  + leftAdjustment  + ';';
+        if (rightAdjustment) adjustmentStyle += 'right:' + rightAdjustment + ';';
+        adjustmentStyle += '"';
       }
-      context.push('<div class="padding" '+adjustmentStyle+'>');
+      context.push('<div class="padding" ' + adjustmentStyle + '>');
 
       value = this.get('escapeHTML') ? SC.RenderContext.escapeHTML(value) : value;
-      if (this._hintON && !SC.platform.input.placeholder && (!value || (value && value.length===0))) {
+      if (this._hintON && !SC.platform.input.placeholder && (!value || (value && value.length === 0))) {
         value = hint;
         context.setClass('sc-hint', YES);
       }
 
       if (hintOnFocus) {
-        var hintStr = '<div aria-hidden="true" class="hint '+
-                      (isTextArea ? '':'ellipsis')+'%@">'+ hint + '</div>';
+        var hintStr = '<div aria-hidden="true" class="hint ' +
+                      (isTextArea ? '':'ellipsis') + '%@">' + hint + '</div>';
         context.push(hintStr.fmt(value ? ' sc-hidden': ''));
       }
 
@@ -708,16 +708,16 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
           type = 'password';
         }
 
-        context.push('<input aria-label="' + hint + '" class="'+fieldClassNames+'" type="'+ type+
+        context.push('<input aria-label="' + hint + '" class="' + fieldClassNames + '" type="' + type +
                       '" name="' + name + '"' + activeStateString + hintString +
                       spellCheckString + autocorrectString + autocapitalizeString +
                       browserFocusableString + ' maxlength="' + maxLength +
                       '" value="' + value + '"' + '/></div>');
       }
     } else {
-      var input= this.$input(),
-          elem = input[0],
-          val = this.get('value');
+      var input = this.$input(),
+        elem = input[0],
+        val = this.get('value');
 
       if (hintOnFocus) this.$('.hint')[0].innerHTML = hint;
       else if (!hintOnFocus) elem.placeholder = hint;
@@ -733,13 +733,13 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
 
         if (!SC.platform.input.placeholder && this._hintON) {
           if (!this.get('isFirstResponder')) {
-          // Internet Explorer doesn't allow you to modify the type afterwards
-          // jQuery throws an exception as well, so set attribute directly
-          context.setClass('sc-hint', YES);
-          input.val(hint);
+            // Internet Explorer doesn't allow you to modify the type afterwards
+            // jQuery throws an exception as well, so set attribute directly
+            context.setClass('sc-hint', YES);
+            input.val(hint);
           } else {
-          // Internet Explorer doesn't allow you to modify the type afterwards
-          // jQuery throws an exception as well, so set attribute directly
+            // Internet Explorer doesn't allow you to modify the type afterwards
+            // jQuery throws an exception as well, so set attribute directly
             context.setClass('sc-hint', NO);
             input.val('');
           }
@@ -755,9 +755,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       if (!SC.none(autoCapitalize)) {
         if (SC.typeOf(autoCapitalize) == 'boolean') {
           input.attr('autocapitalize', !autoCapitalize ? 'none' : 'sentences');
-      } else {
+        } else {
           input.attr('autocapitalize', autoCapitalize);
-      }
+        }
       } else {
         input.attr('autocapitalize', null);
       }
@@ -773,34 +773,34 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       element = input[0];
       if (element) {
         if (!isEnabled) {
-          element.disabled = 'true' ;
-          element.readOnly = null ;
+          element.disabled = 'true';
+          element.readOnly = null;
         } else if (!isEditable) {
-          element.disabled = null ;
-          element.readOnly = 'true' ;
+          element.disabled = null;
+          element.readOnly = 'true';
         } else {
-          element.disabled = null ;
-          element.readOnly = null ;
+          element.disabled = null;
+          element.readOnly = null;
         }
 
         // Adjust the padding element to accommodate any accessory views.
         paddingElementStyle = element.parentNode.style;
         if (leftAdjustment) {
           if (paddingElementStyle.left !== leftAdjustment) {
-            paddingElementStyle.left = leftAdjustment ;
+            paddingElementStyle.left = leftAdjustment;
           }
         }
         else {
-          paddingElementStyle.left = null ;
+          paddingElementStyle.left = null;
         }
 
         if (rightAdjustment) {
           if (paddingElementStyle.right !== rightAdjustment) {
-            paddingElementStyle.right = rightAdjustment ;
+            paddingElementStyle.right = rightAdjustment;
           }
         }
         else {
-          paddingElementStyle.right = null ;
+          paddingElementStyle.right = null;
         }
       }
     }
@@ -862,7 +862,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   },
 
   /** SC.View state callback. */
-  didAppendToDocument: function() {
+  didAppendToDocument: function () {
     this._fixupTextLayout();
   },
 
@@ -889,7 +889,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     if (!SC.platform.input.placeholder && this._hintON) {
       var input = this.$input(),
           currentValue = input.val();
-      if (!currentValue || (currentValue && currentValue.length===0)) {
+      if (!currentValue || (currentValue && currentValue.length === 0)) {
         input.val(this.get('formattedHint'));
       }
     }
@@ -934,10 +934,10 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   */
   _textField_fieldDidFocus: function (evt) {
     SC.run(function () {
-      this.set('focused',YES);
+      this.set('focused', YES);
       this.fieldDidFocus(evt);
       var val = this.get('value');
-      if (!SC.platform.input.placeholder && ((!val) || (val && val.length===0))) {
+      if (!SC.platform.input.placeholder && ((!val) || (val && val.length === 0))) {
         this._hintON = NO;
       }
     }, this);
@@ -948,13 +948,13 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
    */
   _textField_fieldDidBlur: function (evt) {
     SC.run(function () {
-      this.set('focused',NO);
+      this.set('focused', NO);
       // passing the original event here instead that was potentially set from
       // losing the responder on the inline text editor so that we can
       // use it for the delegate to end editing
       this.fieldDidBlur(this._origEvent || evt);
       var val = this.get('value');
-      if (!SC.platform.input.placeholder && !this.get('hintOnFocus') && ((!val) || (val && val.length===0))) {
+      if (!SC.platform.input.placeholder && !this.get('hintOnFocus') && ((!val) || (val && val.length === 0))) {
         this._hintON = YES;
       }
     }, this);
@@ -984,7 +984,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   },
 
   fieldDidBlur: function (evt) {
-    this.resignFirstResponder(evt) ;
+    this.resignFirstResponder(evt);
 
     if (this.get('commitOnBlur')) this.commitEditing(evt);
 
@@ -998,7 +998,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
 
   /** @private */
   _field_fieldValueDidChange: function (evt) {
-    if (this.get('focused')){
+    if (this.get('focused')) {
       SC.run(function () {
         this.fieldValueDidChange(NO);
       }, this);
@@ -1013,9 +1013,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     I welcome someone else to find a better solution to this problem. However, please make sure that it
     works with pasting via shortcut, context menu and the application menu on *All Browsers*.
    */
-  _textField_inputDidChange: function() {
+  _textField_inputDidChange: function () {
     var timerNotPending = SC.empty(this._fieldValueDidChangeTimer) || !this._fieldValueDidChangeTimer.get('isValid');
-    if(this.get('applyImmediately') && timerNotPending) {
+    if (this.get('applyImmediately') && timerNotPending) {
       this.invokeLater(this.fieldValueDidChange, 10);
     }
   },
@@ -1055,9 +1055,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
         valueLen  = value ? value.length : 0,
         responder;
 
-    if (!selection  ||  ((selection.get('length') === 0  &&  (selection.get('start') === 0)  ||  selection.get('end') === valueLen))) {
+    if (!selection || ((selection.get('length') === 0 && (selection.get('start') === 0) || selection.get('end') === valueLen))) {
       responder = SC.RootResponder.responder;
-      if(evt.keyCode===9) return;
+      if (evt.keyCode === 9) return;
       responder.keypress.call(responder, evt);
       evt.stopPropagation();
     }
@@ -1083,10 +1083,10 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       var inp = this.$input()[0];
       try {
         if (inp) inp.focus();
-      } catch(e){}
+      } catch (e) {}
 
       if (!this._txtFieldMouseDown) {
-        this.invokeLast(this._selectRootElement) ;
+        this.invokeLast(this._selectRootElement);
       }
     }
   },
@@ -1106,8 +1106,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
           SC.browser.compare(SC.browser.osVersion, '10.7') === 0;
 
       if (!(SC.browser.name === SC.BROWSER.safari &&
-            isLion && SC.buildLocale==='ko-kr')) {
-        inputElem.select() ;
+            isLion && SC.buildLocale === 'ko-kr')) {
+        inputElem.select();
       }
     }
     else this._textField_selectionDidChange();
@@ -1142,7 +1142,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   },
 
   /** @private */
-  insertText: function(chr, evt) {
+  insertText: function (chr, evt) {
     var which = evt.which,
         keyCode = evt.keyCode,
         maxLengthReached = false;
@@ -1152,8 +1152,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       var val = this.get('value');
 
       // This code is nasty. It's thanks gecko .keycode table that has charters like & with the same keycode as up arrow key
-      if (val && ((!SC.browser.isMozilla && which>47) ||
-                  (SC.browser.isMozilla && ((which>32 && which<43) || which>47) && !(keyCode>36 && keyCode<41))) &&
+      if (val && ((!SC.browser.isMozilla && which > 47) ||
+                  (SC.browser.isMozilla && ((which > 32 && which < 43) || which > 47) && !(keyCode > 36 && keyCode < 41))) &&
           (val.length >= this.get('maxLength'))) {
         maxLengthReached = true;
       }
@@ -1177,7 +1177,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   },
 
   /** @private */
-  insertTab: function(evt) {
+  insertTab: function (evt) {
     // Don't handle if default tabbing hasn't been enabled.
     if (!this.get('defaultTabbingEnabled')) {
       evt.preventDefault();
@@ -1188,11 +1188,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     var view = this.get('nextValidKeyView');
     if (view) view.becomeFirstResponder();
     else evt.allowDefault();
-    return YES ; // handled
+    return YES; // handled
   },
 
   /** @private */
-  insertBacktab: function(evt) {
+  insertBacktab: function (evt) {
     // Don't handle if default tabbing hasn't been enabled.
     if (!this.get('defaultTabbingEnabled')) {
       evt.preventDefault();
@@ -1293,7 +1293,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   },
 
   mouseUp: function (evt) {
-    this._txtFieldMouseDown=NO;
+    this._txtFieldMouseDown = NO;
     // The caret/selection could have moved.  In some browsers, though, the
     // element's values won't be updated until after this event is finished
     // processing.
