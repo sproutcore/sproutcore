@@ -484,8 +484,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   // INTERNAL SUPPORT
   //
 
-  // Note: isEnabled is required here because it is used in the render function.
-  displayProperties: ['isBrowserFocusable', 'formattedHint', 'fieldValue', 'isEditing', 'isEditable', 'isEnabled', 'leftAccessoryView', 'rightAccessoryView', 'isTextArea'],
+  // Note: isEnabledInPane is required here because it is used in the renderMixin function of
+  // SC.Control. It is not a display property directly in SC.Control, because the use of it in
+  // SC.Control is only applied to input fields, which very few consumers of SC.Control have.
+  // TODO: Pull the disabled attribute updating out of SC.Control.
+  displayProperties: ['isBrowserFocusable', 'formattedHint', 'fieldValue', 'isEditing', 'isEditable', 'isEnabledInPane', 'leftAccessoryView', 'rightAccessoryView', 'isTextArea'],
 
   createChildViews: function () {
     sc_super();
@@ -565,7 +568,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   }.observes('leftAccessoryView', 'rightAccessoryView'),
 
   render: function (context, firstTime) {
-    sc_super();
     var v, accessoryViewWidths, leftAdjustment, rightAdjustment;
 
     // always have at least an empty string
@@ -608,20 +610,18 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     // TODO:  The cleanest thing might be to create a sub- rendering context
     //        here, but currently SC.RenderContext will render sibling
     //        contexts as parent/child.
-
     var hint = this.get('formattedHint'),
         hintOnFocus = this.get('hintOnFocus'),
         hintString = '',
         maxLength = this.get('maxLength'),
         isTextArea = this.get('isTextArea'),
-        isEnabled = this.get('isEnabled'),
         isEditable = this.get('isEditable'),
         autoCorrect = this.get('autoCorrect'),
         autoCapitalize = this.get('autoCapitalize'),
         isBrowserFocusable = this.get('isBrowserFocusable'),
         spellCheckString = '', autocapitalizeString = '', autocorrectString = '',
         activeStateString = '', browserFocusableString = '',
-        name, adjustmentStyle, type, element, paddingElementStyle,
+        name, adjustmentStyle, type, paddingElementStyle,
         fieldClassNames, isOldSafari;
 
     context.setClass('text-area', isTextArea);
@@ -635,7 +635,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
 
     if (firstTime || this._forceRenderFirstTime) {
       this._forceRenderFirstTime = NO;
-      activeStateString = isEnabled ? (isEditable ? '' : ' readonly="readonly"') : ' disabled="disabled"';
+      activeStateString = isEditable ? '' : ' readonly="readonly"';
       name = this.get('layerId');
 
       spellCheckString = this.get('spellCheckEnabled') ? ' spellcheck="true"' : ' spellcheck="false"';
@@ -715,12 +715,12 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
                       '" value="' + value + '"' + '/></div>');
       }
     } else {
-      var input = this.$input(),
-        elem = input[0],
+      var input = context.$('input'),
+        element = input[0],
         val = this.get('value');
 
-      if (hintOnFocus) this.$('.hint')[0].innerHTML = hint;
-      else if (!hintOnFocus) elem.placeholder = hint;
+      if (hintOnFocus) context.$('.hint')[0].innerHTML = hint;
+      else if (!hintOnFocus) element.placeholder = hint;
 
       // IE8 has problems aligning the input text in the center
       // This is a workaround for centering it.
@@ -729,7 +729,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       }
 
       if (!val || (val && val.length === 0)) {
-        if (this.get('isPassword')) { elem.type = 'password'; }
+        if (this.get('isPassword')) { element.type = 'password'; }
 
         if (!SC.platform.input.placeholder && this._hintON) {
           if (!this.get('isFirstResponder')) {
@@ -769,28 +769,22 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       } else {
         input.attr('tabindex', '-1');
       }
-      // Enable/disable the actual input/textarea as appropriate.
-      element = input[0];
-      if (element) {
-        if (!isEnabled) {
-          element.disabled = 'true';
-          element.readOnly = null;
-        } else if (!isEditable) {
-          element.disabled = null;
-          element.readOnly = 'true';
-        } else {
-          element.disabled = null;
-          element.readOnly = null;
-        }
 
+      // Enable/disable the actual input/textarea as appropriate.
+      if (!isEditable) {
+        input.attr('readOnly', true);
+      } else {
+        input.attr('readOnly', null);
+      }
+
+      if (element) {
         // Adjust the padding element to accommodate any accessory views.
         paddingElementStyle = element.parentNode.style;
         if (leftAdjustment) {
           if (paddingElementStyle.left !== leftAdjustment) {
             paddingElementStyle.left = leftAdjustment;
           }
-        }
-        else {
+        } else {
           paddingElementStyle.left = null;
         }
 
@@ -798,8 +792,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
           if (paddingElementStyle.right !== rightAdjustment) {
             paddingElementStyle.right = rightAdjustment;
           }
-        }
-        else {
+        } else {
           paddingElementStyle.right = null;
         }
       }
@@ -837,6 +830,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   // HANDLE NATIVE CONTROL EVENTS
   //
 
+  /** SC.FieldView
   didCreateLayer: function () {
     sc_super();
     if (!SC.platform.input.placeholder) this.invokeLast(this._setInitialPlaceHolderIE);
@@ -861,7 +855,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     }
   },
 
-  /** SC.View state callback. */
+  /**
+    Override of SC.FieldView.prototype.didAppendToDocument.
+  */
   didAppendToDocument: function () {
     this._fixupTextLayout();
   },
@@ -878,7 +874,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     }
 
     if (this.get('hintOnFocus') && !this.get('isTextArea')) {
-      this.$('.hint').css('line-height', this.$('.hint').outerHeight() + 'px');
+      var hintJQ = this.$('.hint');
+
+      hintJQ.css('line-height', hintJQ.outerHeight() + 'px');
     }
   },
 
@@ -1282,27 +1280,29 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   },
 
   mouseDown: function (evt) {
-    this._txtFieldMouseDown=YES;
-    this.becomeFirstResponder();
     if (!this.get('isEnabledInPane')) {
       evt.stop();
       return YES;
     } else {
+      this._txtFieldMouseDown = YES;
+      this.becomeFirstResponder();
+
       return sc_super();
     }
   },
 
   mouseUp: function (evt) {
     this._txtFieldMouseDown = NO;
-    // The caret/selection could have moved.  In some browsers, though, the
-    // element's values won't be updated until after this event is finished
-    // processing.
-    this.notifyPropertyChange('selection');
 
     if (!this.get('isEnabledInPane')) {
       evt.stop();
       return YES;
     }
+
+    // The caret/selection could have moved.  In some browsers, though, the
+    // element's values won't be updated until after this event is finished
+    // processing.
+    this.notifyPropertyChange('selection');
     return sc_super();
   },
 
