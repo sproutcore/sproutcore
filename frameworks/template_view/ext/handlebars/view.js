@@ -29,6 +29,7 @@ SC.Handlebars.ViewHelper = SC.Object.create({
     }
 
     if (hash.id) { hash.layerId = hash.id; }
+    else if (path.id) { hash.id = hash.layerId = path.id; }
 
     var contextOptions = {
       'id': hash.id,
