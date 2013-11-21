@@ -1177,31 +1177,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   },
 
   /** @private */
-  deleteBackward: function(evt) {
-    return this.insertText(null, evt);
-  },
-
-  /** @private */
-  deleteForward: function(evt) {
-    return this.insertText(null, evt);
-  },
-
-  /**
-    @private
-
-    Invoked when the user presses return.  If this is a multi-line field,
-    then allow the newine to proceed.  Otherwise, try to commit the
-    edit.
-  */
-  insertNewline: function(evt) {
-    if (this.get('isTextArea') || evt.isIMEInput) {
-      return this.insertText(null, evt);
-    } else {
-      return NO ;
-    }
-  },
-
-  /** @private */
   insertTab: function(evt) {
     // Don't handle if default tabbing hasn't been enabled.
     if (!this.get('defaultTabbingEnabled')) return NO;
@@ -1223,10 +1198,15 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     return YES; // handled
   },
 
-  // If this is a multi-line field, then allow the new line to proceed.
-  /** @private */
+  /**
+    @private
+
+    Invoked when the user presses return.  If this is a multi-line field,
+    then allow the newline to proceed.  Otherwise, try to commit the
+    edit.
+  */
   insertNewline: function (evt) {
-    if (this.get('isTextArea')) {
+    if (this.get('isTextArea') || evt.isIMEInput) {
       evt.allowDefault();
       return YES; // handled
     }
