@@ -6,11 +6,11 @@
 // ==========================================================================
 
 /**
-  @namespace 
+  @namespace
 
   Use this mixin to automatically mix in a a collection of mixins into all
   child views created _by the view_ (that are created at view initialization).
-  
+
   @since SproutCore 1.0
 */
 SC.AutoMixin = {
@@ -20,22 +20,37 @@ SC.AutoMixin = {
     @property
   */
   autoMixins: [],
-  
+
   /**
     @private
     Override createChildViews to mix in the mixins defined in autoMixins.
   */
-  createChildView: function(v, attrs) {
-    if (!attrs) attrs = {};
+  createChildView: function(view, attrs) {
+    if (!view.isClass) {
+      attrs = view;
+    } else {
+      // attrs should always exist...
+      if (!attrs) { attrs = {}; }
+      // clone the hash that was given so we do not pollute it if it's being reused
+      else { attrs = SC.clone(attrs); }
+    }
+
     attrs.owner = attrs.parentView = this;
-    attrs.isVisibleInWindow = this.get('isVisibleInWindow');
     if (!attrs.page) attrs.page = this.page;
-    
-    var applyMixins = this.get("autoMixins");
-    applyMixins.push(attrs);
-    
-    v = v.create.apply(v, applyMixins);
-    return v;
+
+    if (view.isClass) {
+      // Track that we created this view.
+      attrs.createdByParent = true;
+
+      var applyMixins = this.get("autoMixins");
+
+      applyMixins = SC.clone(applyMixins);
+      applyMixins.push(attrs);
+
+      view = view.create.apply(view, applyMixins);
+    }
+
+    return view;
   }
 
 };
