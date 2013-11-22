@@ -226,10 +226,10 @@ SC.SelectView = SC.ButtonView.extend(
 
   /**
     @type SC.Array
-    @default ['icon', 'value','controlSize','items']
+    @default ['icon', 'value','controlSize']
     @see SC.View#displayProperties
   */
-  displayProperties: ['icon', 'value','controlSize','items', 'escapeHTML', 'emptyName'],
+  displayProperties: ['icon', 'value','controlSize', 'escapeHTML', 'emptyName'],
 
   /**
     Prefer matrix to position the select button menu such that the
@@ -391,7 +391,6 @@ SC.SelectView = SC.ButtonView.extend(
     @private
   */
   itemsDidChange: function() {
-
     var escapeHTML, items, len, nameKey, iconKey, valueKey, separatorKey, showCheckbox,
         currentSelectedVal, shouldLocalize, isSeparator, itemList, isChecked,
         idx, name, icon, value, item, itemEnabled, isEnabledKey, emptyName, isSameRecord;
