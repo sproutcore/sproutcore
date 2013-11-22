@@ -593,8 +593,8 @@ SC.View.reopen(
             if (matrix.m11 < 0) ret.scale = ret.scale * -1;
 
             // Retrieve translateX & translateY
-            if (matrix.e > 0) { ret.left = matrix.e; }
-            if (matrix.f > 0) { ret.top = matrix.f; }
+            ret.left = matrix.e;
+            ret.top = matrix.f;
           } else {
             matrix = matrix.match(/^matrix\((.*)\)$/)[1].split(/,\s*/);
             if (matrix) {
