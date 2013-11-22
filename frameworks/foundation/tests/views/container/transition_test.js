@@ -75,6 +75,30 @@ test("Test that the isTransitioning property of container view updates according
   }, 1000);
 });
 
+test("Test changing nowShowing while the container is already transitioning.", function () {
+  // Pause the test execution.
+  window.stop(2000);
+
+  SC.run(function () {
+    containerView.set('transitionSwap', SC.ContainerView.PUSH);
+    containerView.set('nowShowing', view2);
+  });
+
+  setTimeout(function () {
+    containerView.set('nowShowing', view1);
+  }, 100);
+
+  setTimeout(function () {
+    containerView.set('nowShowing', view2);
+  }, 100);
+
+  setTimeout(function () {
+    ok(!containerView.get('isTransitioning'), "Container view should not indicate that it is transitioning.");
+
+    window.start();
+  }, 1500);
+});
+
 test("Test that the container view calls the proper transition plugin methods.", function () {
   var willBuildInToViewCalled = 0,
     buildInToViewCalled = 0,
