@@ -155,4 +155,4 @@ test("The content of the popup should be recalculated correctly when the list of
   SC.RunLoop.end() ;
   equals(view4.get("_itemList")[0].title, "Moving", "The list should start with new item Moving");
   equals(view3.get("_itemList")[2].title, "Again", "The list should have on the 3rd position the title Again");
-})
+});
