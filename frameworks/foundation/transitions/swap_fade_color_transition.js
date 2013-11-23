@@ -74,6 +74,11 @@ SC.mixin(SC.ContainerView,
           }
         });
       });
+    },
+
+    /** @private */
+    buildOutFromView: function (statechart, container, content, options, exitCount) {
+      // Do nothing.
     }
 
   }

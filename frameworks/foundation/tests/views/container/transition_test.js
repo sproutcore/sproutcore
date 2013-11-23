@@ -75,7 +75,92 @@ test("Test that the isTransitioning property of container view updates according
   }, 1000);
 });
 
-test("Test changing nowShowing while the container is already transitioning.", function () {
+test("Test changing nowShowing while the container is already transitioning with pre-initialized views: DISSOLVE.", function () {
+  // Pause the test execution.
+  window.stop(2000);
+
+  SC.run(function () {
+    containerView.set('transitionSwap', SC.ContainerView.DISSOLVE);
+    containerView.set('nowShowing', view2);
+  });
+
+  setTimeout(function () {
+    SC.run(function () {
+      containerView.set('nowShowing', view1);
+    });
+  }, 100);
+
+  setTimeout(function () {
+    SC.run(function () {
+      containerView.set('nowShowing', view2);
+    });
+  }, 150);
+
+  setTimeout(function () {
+    ok(!containerView.get('isTransitioning'), "Container view should not indicate that it is transitioning.");
+
+    window.start();
+  }, 1500);
+});
+
+test("Test changing nowShowing while the container is already transitioning with pre-initialized views: MOVE_IN.", function () {
+  // Pause the test execution.
+  window.stop(2000);
+
+  SC.run(function () {
+    containerView.set('transitionSwap', SC.ContainerView.MOVE_IN);
+    containerView.set('nowShowing', view2);
+  });
+
+  setTimeout(function () {
+    SC.run(function () {
+      containerView.set('nowShowing', view1);
+    });
+  }, 100);
+
+  setTimeout(function () {
+    SC.run(function () {
+      containerView.set('nowShowing', view2);
+    });
+  }, 150);
+
+  setTimeout(function () {
+    ok(!containerView.get('isTransitioning'), "Container view should not indicate that it is transitioning.");
+
+    window.start();
+  }, 1500);
+});
+
+
+test("Test changing nowShowing while the container is already transitioning with pre-initialized views: REVEAL.", function () {
+  // Pause the test execution.
+  window.stop(2000);
+
+  SC.run(function () {
+    containerView.set('transitionSwap', SC.ContainerView.REVEAL);
+    containerView.set('nowShowing', view2);
+  });
+
+  setTimeout(function () {
+    SC.run(function () {
+      containerView.set('nowShowing', view1);
+    });
+  }, 100);
+
+  setTimeout(function () {
+    SC.run(function () {
+      containerView.set('nowShowing', view2);
+    });
+  }, 150);
+
+  setTimeout(function () {
+    ok(!containerView.get('isTransitioning'), "Container view should not indicate that it is transitioning.");
+
+    window.start();
+  }, 1500);
+});
+
+test("Test changing nowShowing while the container is already transitioning with pre-initialized views: PUSH.", function () {
   // Pause the test execution.
   window.stop(2000);
 
@@ -85,12 +170,44 @@ test("Test changing nowShowing while the container is already transitioning.", f
   });
 
   setTimeout(function () {
-    containerView.set('nowShowing', view1);
+    SC.run(function () {
+      containerView.set('nowShowing', view1);
+    });
   }, 100);
 
   setTimeout(function () {
+    SC.run(function () {
+      containerView.set('nowShowing', view2);
+    });
+  }, 150);
+
+  setTimeout(function () {
+    ok(!containerView.get('isTransitioning'), "Container view should not indicate that it is transitioning.");
+
+    window.start();
+  }, 1500);
+});
+
+test("Test changing nowShowing while the container is already transitioning with pre-initialized views: FADE_COLOR.", function () {
+  // Pause the test execution.
+  window.stop(2000);
+
+  SC.run(function () {
+    containerView.set('transitionSwap', SC.ContainerView.FADE_COLOR);
     containerView.set('nowShowing', view2);
+  });
+
+  setTimeout(function () {
+    SC.run(function () {
+      containerView.set('nowShowing', view1);
+    });
   }, 100);
+
+  setTimeout(function () {
+    SC.run(function () {
+      containerView.set('nowShowing', view2);
+    });
+  }, 150);
 
   setTimeout(function () {
     ok(!containerView.get('isTransitioning'), "Container view should not indicate that it is transitioning.");

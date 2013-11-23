@@ -98,6 +98,11 @@ SC.mixin(SC.ContainerView,
     didBuildOutFromView: function (container, content, options) {
       // Convert to a flexible layout (in case we never fully entered).
       content.adjust({ bottom: 0, right: 0, height: null, width: null });
+    },
+
+    /** @private */
+    buildOutFromView: function (statechart, container, content, options) {
+      // Do nothing.
     }
   }
 
