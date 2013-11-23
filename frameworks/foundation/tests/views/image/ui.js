@@ -22,6 +22,11 @@
       value: 'sprite-class',
       useCanvas: NO
     })
+    .add('sprite_image_canvas', SC.ImageView, {
+      layout: { width: 200, height: 300 },
+      value: 'sprite-class',
+      useCanvas: YES //default
+    })
     .add('image_canvas', SC.ImageView, {
       layout: { width: 200, height: 300 },
       useCanvas: YES,
@@ -549,6 +554,28 @@
     viewElem = view.$('img');
     ok(!viewElem.hasClass('another-sprite'), "When value removed, element has old class removed");
   });
+
+  test("CSS class is applied for ImageView using a sprite for value while using canvas", function () {
+    var view = pane.view('sprite_image_canvas'),
+        viewElem = view.$();
+
+    ok(viewElem.hasClass('sprite-class'), "element given correct class");
+
+    SC.run(function () {
+      view.set('value', 'another-sprite');
+    });
+
+    ok(!viewElem.hasClass('sprite-class'), "When value changed, element has old class removed");
+    ok(viewElem.hasClass('another-sprite'), "When value changed, element has new class added");
+
+    SC.run(function () {
+      view.set('value', null);
+    });
+
+    viewElem = view.$('img');
+    ok(!viewElem.hasClass('another-sprite'), "When value removed, element has old class removed");
+  });
+
 
   test("Changing the type of image view updates the layer appropriately (with canvas)", function () {
     var view = pane.view('canvas_not_loaded'),
