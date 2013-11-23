@@ -279,6 +279,8 @@ SC.ContainerView = SC.View.extend(
     var contentStatecharts = this._contentStatecharts;
 
     // Exit all other remaining statecharts immediately.  This mutates the array!
+    // This allows transitions where the previous content is left in place to
+    // clean up all previous content once the new content transitions in.
     for (var i = contentStatecharts.length - 2; i >= 0; i--) {
       contentStatecharts[i].doExit(true);
     }
@@ -292,6 +294,14 @@ SC.ContainerView = SC.View.extend(
 
     // Remove the statechart.
     contentStatecharts.removeObject(statechart);
+
+    // Once all the other statecharts have exited. Indicate that the current
+    // statechart is entered. This allows transitions where the new
+    // content is left in place to update state once all previous statecharts
+    // have exited.
+    if (contentStatecharts.length === 1) {
+      contentStatecharts[0].entered();
+    }
   },
 
   /** @private
@@ -318,16 +328,26 @@ SC.ContainerView = SC.View.extend(
     // Call doExit on all current content statecharts.  Any statecharts in the
     // process of exiting may accelerate their exits.
     for (var i = contentStatecharts.length - 1; i >= 0; i--) {
-      contentStatecharts[i].doExit();
+      var found = contentStatecharts[i].doExit(false, newContent);
+
+      // If the content already belongs to a content statechart reuse that statechart.
+      if (found) {
+        newStatechart = contentStatecharts[i];
+        newStatechart.set('previousStatechart', currentStatechart);
+        newStatechart.gotoEnteringState();
+      }
     }
 
     // Add the new content statechart, which will enter automatically.
-    newStatechart = SC.ContainerContentStatechart.create({
-      container: this,
-      content: newContent,
-      previousStatechart: currentStatechart
-    });
-    contentStatecharts.pushObject(newStatechart);
+    if (!newStatechart) {
+      newStatechart = SC.ContainerContentStatechart.create({
+        container: this,
+        content: newContent,
+        previousStatechart: currentStatechart
+      });
+
+      contentStatecharts.pushObject(newStatechart);
+    }
 
     // Track the current statechart.
     this._currentStatechart = newStatechart;
@@ -335,6 +355,11 @@ SC.ContainerView = SC.View.extend(
 
 });
 
+
+// When in debug mode, core developers can log the container content states.
+//@if(debug)
+SC.LOG_CONTAINER_CONTENT_STATES = false;
+//@endif
 
 /** @private
   In order to support transitioning views in and out of the container view,
@@ -385,32 +410,49 @@ SC.ContainerContentStatechart = SC.Object.extend({
   //
 
   entered: function () {
+    //@if(debug)
+    if (SC.LOG_CONTAINER_CONTENT_STATES) {
+      var container = this.get('container'),
+        content = this.get('content');
+
+      SC.Logger.log('%@ (%@)(%@, %@) — entered callback'.fmt(this, this.state, container, content));
+    }
+    //@endif
+
     if (this.state === 'entering') {
       this.gotoReadyState();
-    //@if(debug)
-    } else {
-      SC.error('Developer Error: SC.ContainerView should not receive an internal entered event while not in entering state.');
-    //@endif
     }
   },
 
-  doExit: function (immediately) {
+  doExit: function (immediately, newContent) {
     if (this.state !== 'exited') {
-      this.gotoExitingState(immediately);
+      this.gotoExitingState(immediately, newContent);
     //@if(debug)
     } else {
-      SC.error('Developer Error: SC.ContainerView should not receive an internal doExit event while in exited state.');
+      throw new Error('Developer Error: SC.ContainerView should not receive an internal doExit event while in exited state.');
     //@endif
+    }
+
+    // If the new content matches our own content, indicate this to the container.
+    if (this.get('content') === newContent) {
+      return true;
+    } else {
+      return false;
     }
   },
 
   exited: function () {
+    //@if(debug)
+    if (SC.LOG_CONTAINER_CONTENT_STATES) {
+      var container = this.get('container'),
+        content = this.get('content');
+
+      SC.Logger.log('%@ (%@)(%@, %@) — exited callback'.fmt(this, this.state, container, content));
+    }
+    //@endif
+
     if (this.state === 'exiting') {
       this.gotoExitedState();
-    //@if(debug)
-    } else {
-      SC.error('Developer Error: SC.ContainerView should not receive an internal exited event while not in exiting state.');
-    //@endif
     }
   },
 
@@ -426,20 +468,38 @@ SC.ContainerContentStatechart = SC.Object.extend({
       options = container.get('transitionSwapOptions') || {},
       transitionSwap = container.get('transitionSwap');
 
-    // Assign the state.
-    this.state = 'entering';
+    //@if(debug)
+    if (SC.LOG_CONTAINER_CONTENT_STATES) {
+      SC.Logger.log('%@ (%@)(%@, %@) — Entering (Previous: %@)'.fmt(this, this.state, container, content, previousStatechart));
+    }
+    //@endif
 
-    if (!!content) {
+    // If currently in the exiting state, reverse to entering.
+    if (this.state === 'exiting' && transitionSwap.reverseBuildOut) {
+      transitionSwap.reverseBuildOut(this, container, content, options);
+
+      // Assign the state.
+      this.set('state', 'entering');
+
+      // Fast path!!
+      return;
+    } else if (content) {
       container.appendChild(content);
     }
 
+    // Assign the state.
+    this.set('state', 'entering');
+
     // Don't transition unless there is a previous statechart.
-    if (!!previousStatechart && !!content && !!transitionSwap) {
-      if (!!transitionSwap.willBuildInToView) {
+    if (previousStatechart && content && transitionSwap) {
+      if (transitionSwap.willBuildInToView) {
         transitionSwap.willBuildInToView(container, content, previousStatechart, options);
       }
-      if (!!transitionSwap.buildInToView) {
+
+      if (transitionSwap.buildInToView) {
         transitionSwap.buildInToView(this, container, content, previousStatechart, options);
+      } else {
+        this.entered();
       }
     } else {
       this.entered();
@@ -454,31 +514,39 @@ SC.ContainerContentStatechart = SC.Object.extend({
       options = container.get('transitionSwapOptions') || {},
       transitionSwap = container.get('transitionSwap');
 
-    if (!immediately && !!content && !!transitionSwap) {
-      if (this.state === 'entering') {
-        if (!!transitionSwap.buildInDidCancel) {
-          transitionSwap.buildInDidCancel(container, content, options);
-        }
-      } else if (this.state === 'exiting') {
-        if (!!transitionSwap.buildOutDidCancel) {
-          transitionSwap.buildOutDidCancel(container, content, options);
-        }
-      }
+    //@if(debug)
+    if (SC.LOG_CONTAINER_CONTENT_STATES) {
+      if (!exitCount) { exitCount = this._exitCount = 1; }
+      SC.Logger.log('%@ (%@)(%@, %@) — Exiting (x%@)'.fmt(this, this.state, container, content, this._exitCount));
+    }
+    //@endif
+
+    // If currently in the entering state, reverse to exiting.
+    if (this.state === 'entering' && transitionSwap.reverseBuildIn) {
+      transitionSwap.reverseBuildIn(this, container, content, options);
+
+      // Assign the state.
+      this.set('state', 'exiting');
+
+      // Fast path!!
+      return;
     }
 
     // Assign the state.
-    this.state = 'exiting';
+    this.set('state', 'exiting');
 
-    if (!immediately && !!content && !!transitionSwap) {
+    if (!immediately && content && transitionSwap) {
       // Re-entering the exiting state may need to accelerate the transition, pass the count to the plugin.
       if (!exitCount) { exitCount = this._exitCount = 1; }
 
-      if (!!transitionSwap.willBuildOutFromView) {
+      if (transitionSwap.willBuildOutFromView) {
         transitionSwap.willBuildOutFromView(container, content, options, exitCount);
       }
 
-      if (!!transitionSwap.buildOutFromView) {
+      if (transitionSwap.buildOutFromView) {
         transitionSwap.buildOutFromView(this, container, content, options, exitCount);
+      } else {
+        // this.exited();
       }
 
       // Increment the exit count each time doExit is called.
@@ -495,11 +563,15 @@ SC.ContainerContentStatechart = SC.Object.extend({
       options = container.get('transitionSwapOptions') || {},
       transitionSwap = container.get('transitionSwap');
 
-    if (!!content) {
-      if (transitionSwap) {
-        if (!!transitionSwap.didBuildOutFromView) {
-          transitionSwap.didBuildOutFromView(container, content, options);
-        }
+    //@if(debug)
+    if (SC.LOG_CONTAINER_CONTENT_STATES) {
+      SC.Logger.log('%@ (%@)(%@, %@) — Exited'.fmt(this, this.state, container, content));
+    }
+    //@endif
+
+    if (content) {
+      if (transitionSwap && transitionSwap.didBuildOutFromView) {
+        transitionSwap.didBuildOutFromView(container, content, options);
       }
 
       if (content.createdByParent) {
@@ -512,8 +584,11 @@ SC.ContainerContentStatechart = SC.Object.extend({
     // Send ended event to container view statechart.
     container.statechartEnded(this);
 
+    // Reset the exiting count.
+    this._exitCount = 0;
+
     // Assign the state.
-    this.state = 'exited';
+    this.set('state', 'exited');
   },
 
   // Ready
@@ -523,17 +598,21 @@ SC.ContainerContentStatechart = SC.Object.extend({
       options = container.get('transitionSwapOptions') || {},
       transitionSwap = container.get('transitionSwap');
 
-    if (content && transitionSwap) {
-      if (!!transitionSwap.didBuildInToView) {
-        transitionSwap.didBuildInToView(container, content, options);
-      }
+    //@if(debug)
+    if (SC.LOG_CONTAINER_CONTENT_STATES) {
+      SC.Logger.log('%@ (%@)(%@, %@) — Entered'.fmt(this, this.state, container, content));
+    }
+    //@endif
+
+    if (content && transitionSwap && transitionSwap.didBuildInToView) {
+      transitionSwap.didBuildInToView(container, content, options);
     }
 
     // Send ready event to container view statechart.
     container.statechartReady();
 
     // Assign the state.
-    this.state = 'ready';
+    this.set('state', 'ready');
   }
 
 });

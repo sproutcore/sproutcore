@@ -30,6 +30,45 @@ SC.mixin(SC.ContainerView,
   REVEAL: {
 
     /** @private */
+    buildInToView: function (statechart, container, content, previousStatechart, options) {
+      // This transition is unique in that we have to wait for the previous
+      // content to finish building out entirely, before we can be considered
+      // fully entered.
+      // if (previousStatechart && previousStatechart.get('content')) {
+      //   previousStatechart.addObserver('state', this, this.previousStateDidChange, statechart);
+      // }
+    },
+
+    /** @private */
+    // reverseBuildIn: function (statechart, container, content, options) {
+    //   var nextStatechart = container._currentStatechart;
+
+    //   // We were waiting for another view to remove itself previously, now
+    //   // we are going out because someone else is coming in. If that someone
+    //   // else was also going out, then we should stay put because they are
+    //   // going to reverse.
+    //   if (nextStatechart && nextStatechart.get('content')) {
+    //     nextStatechart.addObserver('state', this, this.nextStateDidChange, statechart);
+    //   }
+    // },
+
+    /** @private */
+    // previousStateDidChange: function (previousStatechart, key, alwaysNull, statechart) {
+    //   if (previousStatechart.state === 'exited') {
+    //     statechart.entered();
+
+    //     // Clean up.
+    //     previousStatechart.removeObserver('state', this, this.previousStateDidChange);
+    //   }
+    // },
+
+    /** @private */
+    didBuildInToView: function (container, content, options) {
+      // Convert to a flexible layout.
+      content.adjust({ bottom: 0, right: 0, height: null, width: null, zIndex: null });
+    },
+
+    /** @private */
     willBuildOutFromView: function (container, content, options, exitCount) {
       var frame = container.get('frame'),
         height,
@@ -80,9 +119,37 @@ SC.mixin(SC.ContainerView,
     },
 
     /** @private */
+    // reverseBuildOut: function (statechart, container, content, options) {
+    //   var key, value;
+
+    //   // Cancel the animation in place.
+    //   content.cancelAnimation(SC.LayoutState.CURRENT);
+
+    //   switch (options.direction) {
+    //   case 'up':
+    //   case 'down':
+    //     key = 'top';
+    //     value = 0;
+    //     break;
+    //   default:
+    //     key = 'left';
+    //     value = 0;
+    //   }
+
+    //   content.animate(key, value, {
+    //     duration: options.duration || 0.2,
+    //     timing: options.timing || 'ease'
+    //   }, function (data) {
+    //     if (!data.isCancelled) {
+    //       statechart.entered();
+    //     }
+    //   });
+    // },
+
+    /** @private */
     didBuildOutFromView: function (container, content, options) {
       // Convert to a flexible layout.
-      content.adjust({ bottom: 0, right: 0, height: null, width: null, zIndex: null });
+      content.adjust({ top: 0, left: 0, bottom: 0, right: 0, height: null, width: null, zIndex: null });
     }
 
   }
