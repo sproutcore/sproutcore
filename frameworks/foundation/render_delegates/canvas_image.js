@@ -87,7 +87,7 @@ SC.BaseTheme.canvasImageRenderDelegate = SC.RenderDelegate.create({
         type = dataSource.get('type') || SC.IMAGE_TYPE_URL,
         value = dataSource.get('value');
 
-    // Support for CSS sprites (TODO: Remove this)
+    // Support for CSS sprites
     if (lastClass) jquery.removeClass(lastClass);
     if (value && type === SC.IMAGE_TYPE_CSS_CLASS) {
       jquery.addClass(value);
