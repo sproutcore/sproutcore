@@ -129,7 +129,7 @@ test("basic FLEX_GRID", function () {
     });
   });
 
-  equals(view.cellA.layout.left, 0, "lcellA eft should be 0");
+  equals(view.cellA.layout.left, 0, "cellA left should be 0");
   equals(view.cellA.layout.top, 0, "cellA top should be 0");
   equals(view.cellA.layout.width, 100, "cellA width should be 100");
   equals(view.cellA.layout.height, 24, "cellA height should be 24");
