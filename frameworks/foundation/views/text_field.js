@@ -719,7 +719,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
           elem = input[0],
           val = this.get('value');
 
-      if (hintOnFocus) this.$('.hint')[0].innerHTML = hint;
+      if (hintOnFocus) {
+        this.$('.hint')[0].innerHTML = hint;
+        // Set the right size of the hint box when text field is reused or updated with an empty value
+        this._fixupTextLayout();
+      }
       else if (!hintOnFocus) elem.placeholder = hint;
 
       // IE8 has problems aligning the input text in the center

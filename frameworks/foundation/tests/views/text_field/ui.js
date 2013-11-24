@@ -712,4 +712,19 @@ test("editing a field should not change the cursor position", function() {
   ok(selection.get('start') == 2 && selection.get('end') == 3, 'cursor position should be unchanged');
 });
 
+test("the hint of a text field should have a non 0 height when the value is set to empty", function() {
+  var empty = pane.view('empty');
+  var hintEmpty = empty.$('.hint');
+  var notEmpty = pane.view('with value');
+  var hintNotEmpty = notEmpty.$('.hint');
+  var value = notEmpty.get('value');
+
+  notEmpty.set('value', null);
+
+  //compare the calculated line-height of the hint with that of a field built with an empty value
+  ok( hintEmpty.style.lineHeight === hintNotEmpty.style.lineHeight, 'the line height of the hint should be calculated correctly when the content is removed' );
+
+  notEmpty.set('value', value);
+});
+
 })();
