@@ -134,6 +134,20 @@ SC.RecordAttribute = SC.Object.extend(
   */
   aggregate: NO,
 
+  /**
+    Can only be used for toOne or toMany relationship attributes. If YES,
+    this flag will notify any related objects when a property of this 
+    record changes.
+
+    Useful when you want a computed property observing on a toOne or toMany
+    relationship, and you want it to be recomputed when a property of
+    the relationship has changed.
+
+    @type Boolean
+    @default NO
+  */
+  aggregatePropertyChanges: NO,
+
 
   /**
     Can only be used for toOne or toMany relationship attributes. If YES,
