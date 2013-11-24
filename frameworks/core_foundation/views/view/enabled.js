@@ -166,12 +166,12 @@ SC.View.reopen(
   //
 
   /** @private */
-  init: function () {
-    sc_super();
+  init: function (original) {
+    original();
 
     // If the view is pre-configured as disabled, then go to the proper initial state.
     if (!this.get('isEnabled')) { this._doDisable(); }
-  },
+  }.enhance(),
 
   /** @private
     Observes the isEnabled property and resigns first responder if set to NO.
