@@ -716,7 +716,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
                       '" value="' + value + '"' + '/></div>');
       }
     } else {
-      var input = context.$input(),
+      var input = this.$input(),
         element = input[0],
         val = this.get('value');
 
