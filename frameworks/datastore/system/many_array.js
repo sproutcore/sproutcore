@@ -269,7 +269,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
         pname    = this.get('propertyName'),
         supportTransients = this.get('supportTransients'),
         i, ids, toRemove, inverse, attr, inverseRecord,
-        allValidRecords = len === 0; // If there are records to add, ensure they aren't transient.
+        allValidRecords = true; // If there are records to add, ensure they aren't transient.
 
     // map to store keys
     ids = [];
