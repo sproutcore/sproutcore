@@ -229,12 +229,29 @@ SC.MenuPane = SC.PickerPane.extend(
   isSubMenu: NO,
 
   /**
+    If true, title of menu items will be escaped to avoid scripting attacks.
+
+    @type Boolean
+    @default YES
+  */
+  escapeHTML: YES,
+
+  /**
     Whether the title of menu items should be localized before display.
 
     @type Boolean
     @default YES
   */
   localize: YES,
+
+  /**
+    if true, it means that no sorting will occur, items will appear
+    in the same order as in the array
+
+    @type Boolean
+    @default YES
+  */
+  disableSort: YES,
 
   /**
     Whether or not this menu pane should accept the “current menu pane”
@@ -255,6 +272,14 @@ SC.MenuPane = SC.PickerPane.extend(
   */
   isContextMenuEnabled: NO,
 
+  /**
+    Set this to non-null to place an empty option at the top of the menu.
+
+    @property
+    @type String
+    @default null
+  */
+  emptyName: null,
 
   // ..........................................................
   // METHODS
@@ -338,6 +363,17 @@ SC.MenuPane = SC.PickerPane.extend(
     @commonTask Menu Item Properties
   */
   itemIconKey: 'icon',
+
+  /**
+    If you set this to a non-null value, then the value of this key will
+    be used to sort the items.  If this is not set, then itemTitleKey will
+    be used.
+
+    @property
+    @type: {String}
+    @default null
+  */
+  itemSortKey: null,
 
   /**
     The name of the property that contains the height for each item.
@@ -468,7 +504,7 @@ SC.MenuPane = SC.PickerPane.extend(
     @isReadOnly
     @type Array
   */
-  menuItemKeys: ['itemTitleKey', 'itemValueKey', 'itemIsEnabledKey', 'itemIconKey', 'itemSeparatorKey', 'itemActionKey', 'itemCheckboxKey', 'itemShortCutKey', 'itemHeightKey', 'itemSubMenuKey', 'itemKeyEquivalentKey', 'itemTargetKey', 'itemLayerIdKey'],
+  menuItemKeys: ['itemTitleKey', 'itemValueKey', 'itemIsEnabledKey', 'itemIconKey', 'itemSortKey', 'itemSeparatorKey', 'itemActionKey', 'itemCheckboxKey', 'itemShortCutKey', 'itemHeightKey', 'itemSubMenuKey', 'itemKeyEquivalentKey', 'itemTargetKey', 'itemLayerIdKey'],
 
   // ..........................................................
   // DEFAULT PROPERTIES
@@ -649,7 +685,7 @@ SC.MenuPane = SC.PickerPane.extend(
         exampleViewKey, itemExampleView,
         height, heightKey, separatorKey, defaultHeight, separatorHeight,
         menuHeight, menuHeightPadding, keyEquivalentKey, keyEquivalent,
-        keyArray, idx, layerIdKey, propertiesHash,
+        keyArray, idx, layerIdKey, propertiesHash, escapeHTML,
         len;
 
     if (!items) return views; // return an empty array
@@ -661,6 +697,7 @@ SC.MenuPane = SC.PickerPane.extend(
     keyEquivalentKey = this.get('itemKeyEquivalentKey');
     separatorHeight = this.get('itemSeparatorHeight');
     layerIdKey = this.get('itemLayerIdKey');
+    escapeHTML = this.get('escapeHTML');
     menuHeightPadding = Math.floor(this.get('menuHeightPadding') / 2);
     menuHeight = menuHeightPadding;
 
@@ -689,7 +726,8 @@ SC.MenuPane = SC.PickerPane.extend(
         layout: { height: height, top: menuHeight },
         contentDisplayProperties: keyArray,
         content: item,
-        parentMenu: this
+        parentMenu: this,
+        escapeHTML: escapeHTML
       };
 
       if (item.get(layerIdKey)) {
@@ -735,6 +773,27 @@ SC.MenuPane = SC.PickerPane.extend(
 
     if (!menuItemViews) return undefined;
     return menuItemViews.objectAt(idx);
+  },
+
+  /**
+    override this method to implement your own sorting of the menu. By
+    default, menu items are sorted using the value shown or the sortKey
+
+    @param {SC.Array} objects the unsorted array of objects to display.
+    @returns {SC.Array} sorted array of objects
+  */
+  sortObjects: function (objects) {
+    if (!this.get('disableSort')) {
+      var nameKey = this.get('itemSortKey') || this.get('itemTitleKey');
+      objects = objects.sort(function(a, b) {
+        if (nameKey) {
+          a = a.get ? a.get(nameKey) : a[nameKey];
+          b = b.get ? b.get(nameKey) : b[nameKey];
+        }
+        return (a<b) ? -1 : ((a>b) ? 1 : 0);
+      });
+    }
+    return objects;
   },
 
   /**
@@ -806,6 +865,7 @@ SC.MenuPane = SC.PickerPane.extend(
   */
   displayItems: function () {
     var items = this.get('items'),
+      emptyName = this.get('emptyName'),
       len,
       ret = [], idx, item, itemType;
 
@@ -813,20 +873,23 @@ SC.MenuPane = SC.PickerPane.extend(
 
     len = items.get('length');
 
+    if (emptyName) {
+      ret.push(this._createItem(emptyName, null));
+
+      if (len) ret.push(this._createItem(null, null, true));
+    }
+
     // Loop through the items property and transmute as needed, then
     // copy the new objects into the ret array.
     for (idx = 0; idx < len; idx++) {
       item = items.objectAt(idx);
 
       // fast track out if we can't do anything with this item
-      if (!item) continue;
+      if (!item || (!ret.length && item[this.get('itemSeparatorKey')])) continue;
 
       itemType = SC.typeOf(item);
       if (itemType === SC.T_STRING) {
-        item = SC.Object.create({ title: item,
-                                  value: item,
-                                  isEnabled: YES
-                               });
+        item = this._createItem(item, item);
       } else if (itemType === SC.T_HASH) {
         item = SC.Object.create(item);
       }
@@ -835,8 +898,21 @@ SC.MenuPane = SC.PickerPane.extend(
       ret.push(item);
     }
 
+    ret = this.sortObjects(ret);
+
     return ret;
   }.property('items').cacheable(),
+
+  _createItem: function (title, value, isSeparator) {
+    var item = SC.Object.create();
+
+    item[this.get('itemTitleKey')] = title;
+    item[this.get('itemValueKey')] = value;
+    item[this.get('itemIsEnabledKey')] = true;
+    item[this.get('itemSeparatorKey')] = !!isSeparator;
+
+    return item;
+  },
 
   _sc_menu_itemsDidChange: function () {
     var items = this.get('items');

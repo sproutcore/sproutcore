@@ -8,14 +8,15 @@ function setValues(obj, props, toValue) {
 
 function validateValues(obj, props, value) {
   for (var idx = 0; idx < props.length; idx++) {
-    equals(obj.get(props[idx]), value);
+    equals(obj.get(props[idx]), value, props[idx]);
   }
 }
 
 test("Proxying all properties from SelectView to MenuView works.", function() {
   var proxyProperties = [
     'items',
-    'itemTitleKey', 'itemIsEnabledKey', 'itemValueKey', 'itemIconKey', 
+    'target', 'action',
+    'itemTitleKey', 'itemIsEnabledKey', 'itemValueKey', 'itemIconKey', 'itemSortKey', 
     'itemHeightKey', 'itemSubMenuKey', 'itemSeparatorKey', 'itemTargetKey',
     'itemActionKey', 'itemCheckboxKey', 'itemShortCutKey',
     'itemKeyEquivalentKey', 'itemDisableMenuFlashKey', 
