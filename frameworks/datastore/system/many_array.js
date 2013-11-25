@@ -109,6 +109,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     transient records have been saved.
 
     @type Boolean
+    @default false
     @since SproutCore 1.11.0
   */
   supportTransients: false,

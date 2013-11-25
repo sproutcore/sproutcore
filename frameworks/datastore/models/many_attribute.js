@@ -84,6 +84,7 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
     committed.
 
     @type Boolean
+    @default false
     @since SproutCore 1.11.0
   */
   supportTransients: false,
