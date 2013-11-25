@@ -809,7 +809,7 @@ SC.FlowedLayout = {
 
   /** @private */
   destroyMixin: function() {
-    this.removeObserver( 'childViews.[]', this, this._scfl_tileOnce );
+    this.removeObserver( 'childViews.[]', this, this._scfl_childViewsDidChange );
 
     var isObserving = this._scfl_isObserving;
     if (!isObserving) return;
