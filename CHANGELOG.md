@@ -1,27 +1,77 @@
 CHANGE LOG
 ==========
 
+1.11.0
+-----------
+
+### CHANGES & FEATURES
+
+* Refactors SC.SceneView to support the new SC.ContainerView HW accelerate-able transitions.
+* Add ie10 class to body element when detected (legacy).
+* Improves the performance and code structure of SC.TreeItemObserver and SC.TreeController. Previously, the tree observer process was extremely inefficient. For one, the tree controller constantly destroyed and recreated item observer instances whenever its content changed. For another, the item observer observed all properties of its items so any property change (even those not associated with tree item content) would cause the item observer to check for changes to the item’s expanded state or children.
+* Adds new SC.WebSocket class.
+
+### DEPRECATIONS & REMOVALS
+
+### BUG FIXES
+
+* Some fixes for deprecated template view framework.
+
+1.10.2
+-----------
+
+### INTERNAL CHANGES
+
+* Added a Developer Error when attempting to add records without id's to relationships.
+* Added a debug-mode only developer error to prevent double calls to materializeRecord from within materializeRecord. The result is duplicated objects that appear to be the same record instance but are in fact not, which can be very time-consuming to debug. Hopefully this saves developers a lot of grief.
+* Added several *debug-mode only* `toString` methods for easy debugging.
+* Added a tiny bit of debug mode only developer support. If manually connecting/disconnecting bindings it's possible to accidentally try to bind to a missing object. The normal stack trace this would produce is hard to follow so we present a more traceable error message with the stack.
+
+### BUG FIXES
+
+* Fixed keypress handling in IE8 and Opera.
+* Fixed the reveal swap transition plugin, SC.ContainerView.REVEAL, to properly reset the content view layout after transitioning out.
+* Fixed a problem with SC.View.prototype.cancelAnimation(SC.LayoutState.CURRENT) that failed to stop at the proper top or left positions when using transform (HW accelerated) animations and the top or left values were negative.
+* Fixed SC.ContentValueSupport to notify a change to each of the dependent content keys when the content changes entirely (i.e. the '*' property changed).
+* Fixed SC.SelectView to render correctly when its items collection is replaced or the content changes.
+* Fixed SC.AutoMixin to prevent the attributes from the former child views being applied to the latter child views.
+* Fixed locally-scoped 'and' & 'or' bindings.
+* Fixed a problem when the initial isEnabled value of a view is false that failed to update the isEnabledInPane value of that view and its child views.
+* Fixed the problem that changing the isEnabled value of a view which had disabled ancestors could change the value of isEnabledInPane for the view to an improper value.
+* Fixed SC.TextFieldView able to still be edited if it had focus while an ancestor view is disabled.
+* Fixed the `defaultTabbingEnabled` property of SC.TextFieldView to actually prevent tabbing when the property is set to false. Also added insertBacktab handler support to interpretKeyEvents in order to prevent tabbing on shift-tab in SC.TextFieldView.
+* Added missing support for touch events to SC.PopupButtonView.
+* Fixed a bug that caused SC.TextFieldView hints to have a 0 line-height at times.
+* Fixed regression in collection views so that they properly re-render when inside nested scroll views.
+* Removes a duplicate listener on ‘selectstart’ events in SC.RootResponder.
+* Removes the jQuery ready hold in SC.platform that was used to delay launching of the app until the transition and animation event names tests completed. Several browsers will not run the transition/animations in hidden tabs, which slows and possibly blocks an app from launching. Since the results of these tests are used only to optimize the event listeners set up in SC.RootResponder, the code has been changed to setup the root responder at whatever point the tests successfully finish.
+* Fixed picker panes failing to popup in the wrong place if they have some form of resizing. Added an observer to SC.PickerPane border frames so that the pane will re-position itself if it changes size.
+* Removes the appearance of an `undefined` attribute in SC.TextFieldView.
+* Fixed internal identification of IE7 to prevent a possible future version of Trident from being mistaken for IE7.
+* Fixed a minor memory leak when manually removing event listeners from an element.
+* Fixed a memory leak when using SC.InlineTextField.
+
 1.10.1
 -----------
 
 ### BUG FIXES
 
 * Clean ups for http://docs.sproutcore.com.
-* Fixes memory leak in SC.ContentValueSupport.
-* Fixes layout bug with inline label view editor when used with child view layout plugins.
-* Fixes SC.Module loading on IE11+.
-* Fixes SC.Drag to fire `dragEnded` when cancelling a drag and drop operation
+* Fixed memory leak in SC.ContentValueSupport.
+* Fixed layout bug with inline label view editor when used with child view layout plugins.
+* Fixed SC.Module loading on IE11+.
+* Fixed SC.Drag to fire `dragEnded` when cancelling a drag and drop operation
 using the escape key.
-* Fixes missing non-retina image for SC.MenuPane.
+* Fixed missing non-retina image for SC.MenuPane.
 * CollectionView: fix the selection on touchEnd. Previously when an item was touched two times, after the second touch it was no longer marked as selected even if it was (correctly) part of the collection's selection, its isSelected property was NO when it was supposed to be YES.
-* Fixes the code to show an insertion point for SC.GridView using @nicolasbadia's code. Adds a default style for SC.GridView's default insertion point that matches SC.ListView's default. Also improves the positioning of SC.ListView's insertion point so that the insertion view can specify a different height/right/width layout if wanted.
-* Fixes misplaced scroll view content when changing the content using touch scrolling. Reapplies the CSS transforms when touch scroll view's content frame changes. Because the CSS transforms are applied directly to the content view, if the content view's layout style changes, the transforms will be erased.
-* Fixes warnings when smoothly decelerating scrolling (includes performance improvement). Removes the necessity to trigger run loops while the scroll decelerates and only triggers the run loop when actually doing an update. This also removes an invoke warning if the first time the deceleration code runs (not within run loop) and doesn't have any velocity and so updates immediately.
+* Fixed the code to show an insertion point for SC.GridView using @nicolasbadia's code. Adds a default style for SC.GridView's default insertion point that matches SC.ListView's default. Also improves the positioning of SC.ListView's insertion point so that the insertion view can specify a different height/right/width layout if wanted.
+* Fixed misplaced scroll view content when changing the content using touch scrolling. Reapplies the CSS transforms when touch scroll view's content frame changes. Because the CSS transforms are applied directly to the content view, if the content view's layout style changes, the transforms will be erased.
+* Fixed warnings when smoothly decelerating scrolling (includes performance improvement). Removes the necessity to trigger run loops while the scroll decelerates and only triggers the run loop when actually doing an update. This also removes an invoke warning if the first time the deceleration code runs (not within run loop) and doesn't have any velocity and so updates immediately.
 * Changes the theme class for SC.EmptyTheme from 'sc-empty' to 'sc-empty-theme'. This fixes the conflict with 'sc-empty' used by SC.ProgressViews that causes all progress views in apps using the empty theme to not have an inner border. This is a potentially conflicting change, but less dangerous than changing the class used by SC.ProgressView, because SC.EmptyTheme doesn't have any styles.
 * Fix issue with sending statechart events while state transitioning. `sendEvent` had a typo which allowed events to be sent while in the middle of a state transition. Fixing that revealed that now events sent during state transitions would be queued but never sent (at least not until another event was sent).
 * Resolved Handlebars escaping issue with ampersands.
 * Fix caching issue with SC.routes.informLocation. Since location and informLocation really just represent a single property, they both need to update the cached value for the opposite property.
-* Fixes regression with OS sniffing of Linux and Android in SC.browser.
+* Fixed regression with OS sniffing of Linux and Android in SC.browser.
 
 
 1.10.0
@@ -32,27 +82,6 @@ using the escape key.
 * Allows adjust to be called after animate in the same run loop. Adjust can occur cleanly, which won't affect the animation or it can clash, in which case it will override the animation.
 * Improves internal code structure to support optimization by JS engines.
 * Makes the conditional that attempts to lock all textfields from receiving focus behind a modal pane, fail more quickly (this also prevents getting the pane on views that may not yet have a pane).
-
-### DEPRECATIONS & REMOVALS
-
-* Removes 26.6MB of design files from within the framework. This means that these files are no longer downloaded and duplicated in each clone of the framework nor are any of them included in the gem (although many were stripped out of the gem anyhow). These files are still available at https://github.com/sproutcore/design.
-
-### BUG FIXES
-
-* Removes the blockers that prevented all browsers that support touch events from using mouse events. Note: a browser's support of touch events is no indication of a touch capable device or even that the touch capable device will not need to send mouse events (via a plugged in mouse for example). When implementing touch support in a custom control, you should call evt.preventDefault in touchEnd to prevent additional mouse events from being sent by the browser.
-* Prevents extremely bizarre bug where an iPad will fail to detect the os in iOS, in spite of following the correct code path. The correct value is assigned to an array and then re-read from the same array a moment later. For some unknown reason, when the value is re-read from the array it would return the old value. Side effects of this are that all hacks looking for mobile safari would fail (including touch handling in text fields).
-* Fixes a regression in SC.ScrollView that threw an exception when beginning a new touch drag while a previous one was still decelerating.
-* Prevents successive clicks with two different mouse buttons from being considered a double click. 
-* Fixes a bad conditional that coerced 0 frame widths to a false value. This caused excessive reloads of SC.GridView.
-* Fixes #1093 issue where a view would fail to be hidden if its pane was removed mid-transition.
-* Fixes #1087 issue with triggering and canceling animation in same runloop.
-* Fixes bug where PanelPane's ModalPane would appear if isModal becomes true while the PanelPane is transitioning out.
-
-1.10.0.rc.1, 1.10.0.rc.2, 1.10.0.rc.3
------------
-
-### CHANGES & FEATURES
-
 * Improves and adds hundreds of lines of documentation.
 * Removes a developer warning when animating with a duration of 0, which can be valid if the duration is calculated. In any case, animating a duration of 0 has always been supported by SC.View.prototype.animate.
 * Improves the regular expression used by SC.RenderContext to escape strings so that HTML entities like &apos; or &agrave; are preserved.
@@ -89,7 +118,7 @@ This code was essentially unreadable and did not even really work. There were lo
 * Reworks the isEnabled addition in order to allow for the enabled state to actively cascade to child views. While you could previously use the `isEnabledInPane` property to determine if any ancestor view had been disabled, it was lazily computed and not bindable. With this change, `isEnabledInPane` is updated actively, which means that it can be used to update the child view's display if wanted. For example, a view gets the 'disabled' class if isEnabled is set to false, but it can also add isEnabledInPane as a displayProperty and use it to appear disabled if any ancestor becomes disabled.
 
 This cascading can be blocked by any child view by setting `shouldInheritEnabled` to false, which allows you to set isEnabled on the top pane, but keep a section of child views separately enabled.
-* [internal] Fixes from the Office for Prevention of Redundancy Office: the 'focus' and 'disabled' classes are set accordingly on all SC.View subclasses. This removes yet one more display observer from SC.CollectionView.
+* [internal] Fixed from the Office for Prevention of Redundancy Office: the 'focus' and 'disabled' classes are set accordingly on all SC.View subclasses. This removes yet one more display observer from SC.CollectionView.
 * Adds SC.View.POP transition, refactors the transition states of SC.View to handle changes in state in order to flip a transition animation smoothly and adds support for cancelling rotation or scale animations in place.
 * Removes two display observers from SC.ImageView and drops undocumented support for setting the value of an image as an array (which was parsed out into a single value for some reason.
 * [internal] Adds support for sprite images based on canvas. This fixes a bug when changing between a sprite and a URL type with the same image that created duplicate elements in the DOM.
@@ -345,6 +374,7 @@ tests that enforce the one-record-array-per-query contract.
 
 ### DEPRECATIONS & REMOVALS
 
+* Removes 26.6MB of design files from within the framework. This means that these files are no longer downloaded and duplicated in each clone of the framework nor are any of them included in the gem (although many were stripped out of the gem anyhow). These files are still available at https://github.com/sproutcore/design.
 * Removes the long deprecated SC.Border mixin. This capability was brought into SC.View several versions ago.
 * Fully deprecates SC.InlineTextField class methods, which were labeled as "should no longer be used". This should make inline text field debugging easier to do.
 * Fully deprecates the fontWeight attribute of SC.LabelView.
@@ -381,6 +411,14 @@ Also added better documentation for using dataSourceDidFetchQuery.
 
 ### BUG FIXES
 
+* Removes the blockers that prevented all browsers that support touch events from using mouse events. Note: a browser's support of touch events is no indication of a touch capable device or even that the touch capable device will not need to send mouse events (via a plugged in mouse for example). When implementing touch support in a custom control, you should call evt.preventDefault in touchEnd to prevent additional mouse events from being sent by the browser.
+* Prevents extremely bizarre bug where an iPad will fail to detect the os in iOS, in spite of following the correct code path. The correct value is assigned to an array and then re-read from the same array a moment later. For some unknown reason, when the value is re-read from the array it would return the old value. Side effects of this are that all hacks looking for mobile safari would fail (including touch handling in text fields).
+* Fixes a regression in SC.ScrollView that threw an exception when beginning a new touch drag while a previous one was still decelerating.
+* Prevents successive clicks with two different mouse buttons from being considered a double click. 
+* Fixes a bad conditional that coerced 0 frame widths to a false value. This caused excessive reloads of SC.GridView.
+* Fixes #1093 issue where a view would fail to be hidden if its pane was removed mid-transition.
+* Fixes #1087 issue with triggering and canceling animation in same runloop.
+* Fixes bug where PanelPane's ModalPane would appear if isModal becomes true while the PanelPane is transitioning out.
 * Fixes a problem which kept firstObject and lastObject referenced from an array controller from updating on replace. Also fixes a problem updating lastObject on an enumerable when replacing the last items and shrinking the collection.
 * Fixes a problem when using an SC.SplitView as a split child.
 * Fixes a bug that updating the parent record data hash failed to update the nested record hashes as well.
