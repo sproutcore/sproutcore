@@ -715,7 +715,20 @@ SC.Binding = /** @scope SC.Binding.prototype */{
       //
       // If we have a target, it is ready, but if it is invalid, that is WRONG.
       if (!target.isObservable) {
-        SC.Logger.warn("Cannot bind '%@' to property '%@' on non-observable '%@'".fmt(this._toPropertyPath, key, target));
+        //@if(debug)
+        // Provide some developer support.
+        if (target === window) {
+          var msg = "Developer Warning: You are attempting to bind \"%{to_root}\"'s '%{to_property}' property to the non-observable 'window.%{key}'. It's likely that you've specified a local binding path without prepending a period. For example, you may have `%{to_property}Binding: '%{key}'` instead of `%{to_property}Binding: '.%{key}'`."
+          msg = msg.fmt({
+            to_root: (this._toRoot || 'object').toString(),
+            to_property: this._toPropertyPath,
+            key: key
+          });
+          SC.Logger.warn(msg);
+        } else {
+          SC.Logger.warn("Developer Warning: Cannot bind \"%@\"'s '%@' property to property '%@' on non-observable '%@'".fmt((this._toRoot || 'object').toString(), this._toPropertyPath, key, target));
+        }
+        //@endif
         return this;
       }
 
