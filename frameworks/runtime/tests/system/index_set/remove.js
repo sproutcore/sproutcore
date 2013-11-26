@@ -185,5 +185,5 @@ test("removing an index range outside of target range (specific bug)", function(
 test("remove() raises exception when frozen", function() {
   should_throw(function() {
     set.freeze().remove(0,2);    
-  }, SC.FROZEN_ERROR);  
+  }, new Error(SC.FROZEN_ERROR));  
 });

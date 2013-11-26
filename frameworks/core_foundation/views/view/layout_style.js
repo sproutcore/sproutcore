@@ -147,7 +147,7 @@ SC.View.LayoutStyleCalculator = {
   _invalidAutoValue: function (view, property) {
     var error = SC.Error.desc("%@.layout() you cannot use %@:auto if staticLayout is disabled".fmt(view, property), "%@".fmt(view), -1);
     SC.Logger.error(error.toString());
-    throw error;
+    throw new Error(error);
   },
 
   /** @private */
