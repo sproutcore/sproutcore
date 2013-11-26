@@ -86,7 +86,7 @@ test("Check for different states after/before executing destroyRecord", function
   }catch(error1){
     msg=error1.message;
   }
-  equals(msg, SC.Record.NOT_FOUND_ERROR.message, "destroyRecord should throw the following error");
+  equals(msg, SC.Record.NOT_FOUND_ERROR, "destroyRecord should throw the following error");
 
   try{
     store.destroyRecord(undefined, undefined, storeKey4);
@@ -94,7 +94,7 @@ test("Check for different states after/before executing destroyRecord", function
   }catch(error2){
     msg=error2.message;
   }
-  equals(msg, SC.Record.BUSY_ERROR.message, "destroyRecord should throw the following error");
+  equals(msg, SC.Record.BUSY_ERROR, "destroyRecord should throw the following error");
 
   store.destroyRecord(undefined, undefined, storeKey5);
   status = store.readStatus(storeKey5);
