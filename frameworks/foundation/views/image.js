@@ -147,7 +147,7 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
   */
   useCanvas: function () {
     return SC.platform.supportsCanvas && !this.get('useStaticLayout');
-  }.property('useStaticLayout', 'type').cacheable(),
+  }.property('useStaticLayout').cacheable(),
 
   /**
     If YES, image view will use the SC.imageQueue to control loading.  This
