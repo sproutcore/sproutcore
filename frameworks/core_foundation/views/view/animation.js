@@ -291,7 +291,7 @@ SC.View.reopen(
 
     // In the case of zero duration, just adjust and call the callback.
     if (options.duration === 0) {
-      this.invokeNext(function() {
+      this.invokeNext(function () {
         this.adjust(hash);
         this.runAnimationCallback(options, null, NO);
       });
@@ -403,14 +403,15 @@ SC.View.reopen(
     // Check for _animateLayout.  If an invokeNext call to animate *this* occurs
     // while flushing the invokeNext queue *before* this method runs, an extra
     // call to _animate will run.  Has unit test.
-    if (this._animateLayout) {
+    var animationLayout = this._animateLayout;
+    if (animationLayout) {
       this.willRenderAnimations();
 
-      // Apply the animation layout.
-      this.set('layout', this._animateLayout);
-
-      // Clear the layout cache value.
+      // Clear the layout cache value first so that it is not present when layout changes next.
       this._animateLayout = null;
+
+      // Apply the animation layout.
+      this.set('layout', animationLayout);
     }
   },
 
