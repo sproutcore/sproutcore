@@ -24,8 +24,8 @@
     })
     .add('sprite_image_canvas', SC.ImageView, {
       layout: { width: 200, height: 300 },
-      value: 'sprite-class',
-      useCanvas: YES //default
+      value: 'sprite-class'
+      // Must use default calculated-property version of useCanvas.
     })
     .add('image_canvas', SC.ImageView, {
       layout: { width: 200, height: 300 },
@@ -572,7 +572,7 @@
       view.set('value', null);
     });
 
-    viewElem = view.$('img');
+    viewElem = view.$();
     ok(!viewElem.hasClass('another-sprite'), "When value removed, element has old class removed");
   });
 
