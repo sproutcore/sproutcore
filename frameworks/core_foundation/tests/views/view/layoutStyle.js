@@ -613,7 +613,7 @@
 
 
   test("layout {centerX, centerY, width:auto, height:auto}", function () {
-    var error = 'NONE';
+    var error = null;
     var layout = { centerX: 0.1, centerY: 0.1, width: 'auto', height: 'auto' };
 
     SC.run(function () {
@@ -626,7 +626,7 @@
       error = e;
     }
 
-    equals(SC.T_ERROR, SC.typeOf(error), 'Layout style functions should throw an ' +
+    ok(error, 'Layout style functions should throw an ' +
                                            'error if centerx/y and width/height are set at the same time ' + error);
   });
 

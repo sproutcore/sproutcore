@@ -192,7 +192,7 @@ SC.NestedStore = SC.Store.extend(
     var nRecords, nr, sk;
     // requires a pstore to reset
     var parentStore = this.get('parentStore');
-    if (!parentStore) throw SC.Store.NO_PARENT_STORE_ERROR;
+    if (!parentStore) throw new Error(SC.Store.NO_PARENT_STORE_ERROR);
 
     // inherit data store from parent store.
     this.dataHashes = SC.beget(parentStore.dataHashes);
@@ -499,7 +499,7 @@ SC.NestedStore = SC.Store.extend(
         // status hierarchy, so even though lower stores would complete the
         // retrieval, the upper layers would never inherit the new statuses.
         if (status & K.DIRTY) {
-          throw SC.Store.NESTED_STORE_RETRIEVE_DIRTY_ERROR;
+          throw new Error(SC.Store.NESTED_STORE_RETRIEVE_DIRTY_ERROR);
         }
         else {
           // Not dirty?  Then abandon any status we had set (to re-establish
@@ -541,22 +541,22 @@ SC.NestedStore = SC.Store.extend(
 
   /** @private - adapt for nested store */
   commitRecords: function(recordTypes, ids, storeKeys) {
-    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+    throw new Error(SC.Store.NESTED_STORE_UNSUPPORTED_ERROR);
   },
 
   /** @private - adapt for nested store */
   commitRecord: function(recordType, id, storeKey) {
-    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+    throw new Error(SC.Store.NESTED_STORE_UNSUPPORTED_ERROR);
   },
 
   /** @private - adapt for nested store */
   cancelRecords: function(recordTypes, ids, storeKeys) {
-    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+    throw new Error(SC.Store.NESTED_STORE_UNSUPPORTED_ERROR);
   },
 
   /** @private - adapt for nested store */
   cancelRecord: function(recordType, id, storeKey) {
-    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+    throw new Error(SC.Store.NESTED_STORE_UNSUPPORTED_ERROR);
   },
 
   // ..........................................................
@@ -566,22 +566,22 @@ SC.NestedStore = SC.Store.extend(
 
   /** @private - adapt for nested store */
   dataSourceDidCancel: function(storeKey) {
-    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+    throw new Error(SC.Store.NESTED_STORE_UNSUPPORTED_ERROR);
   },
 
   /** @private - adapt for nested store */
   dataSourceDidComplete: function(storeKey, dataHash, newId) {
-    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+    throw new Error(SC.Store.NESTED_STORE_UNSUPPORTED_ERROR);
   },
 
   /** @private - adapt for nested store */
   dataSourceDidDestroy: function(storeKey) {
-    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+    throw new Error(SC.Store.NESTED_STORE_UNSUPPORTED_ERROR);
   },
 
   /** @private - adapt for nested store */
   dataSourceDidError: function(storeKey, error) {
-    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+    throw new Error(SC.Store.NESTED_STORE_UNSUPPORTED_ERROR);
   },
 
   // ..........................................................
@@ -590,17 +590,17 @@ SC.NestedStore = SC.Store.extend(
 
   /** @private - adapt for nested store */
   pushRetrieve: function(recordType, id, dataHash, storeKey) {
-    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+    throw new Error(SC.Store.NESTED_STORE_UNSUPPORTED_ERROR);
   },
 
   /** @private - adapt for nested store */
   pushDestroy: function(recordType, id, storeKey) {
-    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+    throw new Error(SC.Store.NESTED_STORE_UNSUPPORTED_ERROR);
   },
 
   /** @private - adapt for nested store */
   pushError: function(recordType, id, error, storeKey) {
-    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+    throw new Error(SC.Store.NESTED_STORE_UNSUPPORTED_ERROR);
   }
 
 }) ;

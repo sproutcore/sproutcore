@@ -435,7 +435,7 @@ SC.IndexSet = SC.mixin({},
   */
   add: function (start, length) {
 
-    if (this.isFrozen) throw SC.FROZEN_ERROR;
+    if (this.isFrozen) throw new Error(SC.FROZEN_ERROR);
 
     var content, cur, next;
 
@@ -609,7 +609,7 @@ SC.IndexSet = SC.mixin({},
   */
   remove: function (start, length) {
 
-    if (this.isFrozen) throw SC.FROZEN_ERROR;
+    if (this.isFrozen) throw new Error(SC.FROZEN_ERROR);
 
     // normalize input
     if (length === undefined) {
@@ -786,7 +786,7 @@ SC.IndexSet = SC.mixin({},
     Clears the set
   */
   clear: function () {
-    if (this.isFrozen) throw SC.FROZEN_ERROR;
+    if (this.isFrozen) throw new Error(SC.FROZEN_ERROR);
 
     var oldlen = this.length;
     this._content.length = 1;
@@ -802,7 +802,7 @@ SC.IndexSet = SC.mixin({},
     @param {Enumerable} objects The list of ranges you want to add
   */
   addEach: function (objects) {
-    if (this.isFrozen) throw SC.FROZEN_ERROR;
+    if (this.isFrozen) throw new Error(SC.FROZEN_ERROR);
 
     this.beginPropertyChanges();
     var idx = objects.get('length');
@@ -822,7 +822,7 @@ SC.IndexSet = SC.mixin({},
     @param {Object...} objects The list of objects you want to remove
   */
   removeEach: function (objects) {
-    if (this.isFrozen) throw SC.FROZEN_ERROR;
+    if (this.isFrozen) throw new Error(SC.FROZEN_ERROR);
 
     this.beginPropertyChanges();
 

@@ -123,7 +123,7 @@ test("Test that an exception is thrown when calling adjust and setting to auto",
   }catch(e){
     error=e;
   }
-  equals(SC.T_ERROR,SC.typeOf(error),'Layout style functions should throw an '+
+  ok(error,'Layout style functions should throw an '+
   'error if width/height are set to auto but staticLayout is not enabled' + error );
       
    

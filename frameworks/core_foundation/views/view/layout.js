@@ -513,14 +513,14 @@ SC.View.reopen(
       error = SC.Error.desc(("%@.layout() cannot use width:auto if " +
         "staticLayout is disabled").fmt(this), "%@".fmt(this), -1);
       SC.Logger.error(error.toString());
-      throw error;
+      throw new Error(error);
     }
 
     if (lH === AUTO) {
       error = SC.Error.desc(("%@.layout() cannot use height:auto if " +
         "staticLayout is disabled").fmt(this), "%@".fmt(this), -1);
       SC.Logger.error(error.toString());
-      throw error;
+      throw new Error(error);
     }
 
     if (!pdim) { pdim = this.computeParentDimensions(layout); }
