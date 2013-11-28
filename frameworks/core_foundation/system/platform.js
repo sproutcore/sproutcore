@@ -515,7 +515,6 @@ SC.ready(function () {
 
       transitionEl.parentNode.removeChild(transitionEl);
       transitionEl = null;
-
     });
 
     // Append the test element.
