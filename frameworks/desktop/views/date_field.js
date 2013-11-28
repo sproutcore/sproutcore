@@ -316,7 +316,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
   /** @private */
   keyDown: function(evt) {
     var keyCodeMap = this._supportedKeys,
-        pressedKey = keyCodeMap[evt.keyCode];
+        pressedKey = keyCodeMap[evt.charCode];
     
     if (!SC.none(pressedKey)) {
       if (pressedKey === 'r') this.moveRight();
