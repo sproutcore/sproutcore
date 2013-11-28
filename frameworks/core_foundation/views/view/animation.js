@@ -530,7 +530,7 @@ SC.View.reopen(
   */
   didRenderAnimations: function () {
     // Transitions not supported or not yet tested.
-    if (!SC.platform.supportsCSSTransitions || SC.platform.transitionendEventName === SC.UNSUPPORTED) {
+    if (!SC.platform.supportsCSSTransitions) {
       var pendingAnimations = this._pendingAnimations;
 
       for (var key in pendingAnimations) {
@@ -698,7 +698,7 @@ SC.View.reopen(
    */
   willRenderAnimations: function () {
     // Only apply the style if supported by the platform and events have been tested.
-    if (SC.platform.supportsCSSTransitions && SC.platform.transitionendEventName !== SC.UNSUPPORTED) {
+    if (SC.platform.supportsCSSTransitions) {
       var pendingAnimations = this._pendingAnimations;
 
       if (pendingAnimations) {

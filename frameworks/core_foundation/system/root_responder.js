@@ -650,6 +650,57 @@ SC.RootResponder = SC.Object.extend(
       }
     }
 
+    // Add an array of transition listeners for immediate use (these will be cleaned up when actual testing completes).
+    // Because the transition test happens asynchronously and because we don't want to
+    // delay the launch of the application in order to a transition test (the app won't
+    // load if the browser tab is not visible), we start off by listening to everything
+    // and when the test is completed, we remove the extras to avoid double callbacks.
+    if (SC.platform.supportsCSSTransitions) {
+      var domPrefix = SC.browser.domPrefix,
+        lowerDomPrefix = domPrefix.toLowerCase(),
+        variation1 = lowerDomPrefix + 'transitionend',
+        variation2 = lowerDomPrefix + 'TransitionEnd',
+        variation3 = domPrefix + 'TransitionEnd';
+
+      // Ensure that the callback name used maps to our implemented function name.
+      this[variation1] = this[variation2] = this[variation3] = this.transitionend;
+
+      // ex. transitionend, webkittransitionend, webkitTransitionEnd, WebkitTransitionEnd
+      this.listenFor(['transitionend', variation1, variation2, variation3], document);
+
+      if (SC.platform.supportsCSSAnimations) {
+        variation1 = lowerDomPrefix + 'animationstart';
+        variation2 = lowerDomPrefix + 'AnimationStart';
+        variation3 = domPrefix + 'AnimationStart';
+
+        // Ensure that the callback name used maps to our implemented function name.
+        this[variation1] = this[variation2] = this[variation3] = this.animationstart;
+
+        // ex. animationstart, webkitanimationstart, webkitAnimationStart, WebkitAnimationStart
+        this.listenFor(['animationstart', variation1, variation2, variation3], document);
+
+        variation1 = lowerDomPrefix + 'animationiteration';
+        variation2 = lowerDomPrefix + 'AnimationIteration';
+        variation3 = domPrefix + 'AnimationIteration';
+
+        // Ensure that the callback name used maps to our implemented function name.
+        this[variation1] = this[variation2] = this[variation3] = this.animationiteration;
+
+        // ex. animationiteration, webkitanimationiteration, webkitAnimationIteration, WebkitAnimationIteration
+        this.listenFor(['animationiteration', variation1, variation2, variation3], document);
+
+        variation1 = lowerDomPrefix + 'animationend';
+        variation2 = lowerDomPrefix + 'AnimationEnd';
+        variation3 = domPrefix + 'AnimationEnd';
+
+        // Ensure that the callback name used maps to our implemented function name.
+        this[variation1] = this[variation2] = this[variation3] = this.animationend;
+
+        // ex. animationend, webkitanimationend, webkitAnimationEnd, WebkitAnimationEnd
+        this.listenFor(['animationend', variation1, variation2, variation3], document);
+      }
+    }
+
     // handle these two events specially in IE
     ['drag', 'selectstart'].forEach(function (keyName) {
       var method = this[keyName];
@@ -763,37 +814,79 @@ SC.RootResponder = SC.Object.extend(
   },
 
   /**
-    Sets up the transition end event listener.
+    Cleans up the additional transition event listeners.
 
-    NOTE: requires that SC.platform.transitionendEventName has been determined.
+    NOTE: requires that SC.RootResponser.responder.transitionendEventName
+    has been determined.
 
     @returns {void}
   */
-  setupTransitionListener: function () {
-    // CSS Transitions (tested asynchronously)
-    if (SC.platform.supportsCSSTransitions) {
-      // Ensure that the callback name used maps to our implemented function name.
-      this[SC.platform.transitionendEventName] = this.transitionend;
-      this.listenFor([SC.platform.transitionendEventName], document);
-    }
+  cleanUpTransitionListeners: function () {
+    var actualEventName = SC.platform.transitionendEventName,
+      domPrefix = SC.browser.domPrefix,
+      lowerDomPrefix = domPrefix.toLowerCase(),
+      variation1 = lowerDomPrefix + 'transitionend',
+      variation2 = lowerDomPrefix + 'TransitionEnd',
+      variation3 = domPrefix + 'TransitionEnd';
+
+    // Once the actual event name is determined, simply remove all the extras.
+    // This should prevent any problems with browsers that fire multiple events.
+    ['transitionend', variation1, variation2, variation3].forEach(function (keyName) {
+      if (keyName != actualEventName) {
+        SC.Event.remove(document, keyName, this, this[keyName]);
+        this[keyName] = null;
+      }
+    });
   },
 
   /**
-    Sets up the animation event listeners.
+    Cleans up the additional animation event listeners.
 
-    NOTE: requires that SC.platform.animationstartEventName, SC.platform.animationendEventName & SC.platform.animationiterationEventName has been determined.
+    NOTE: requires that SC.RootResponser.responder.animationstartEventName,
+    SC.RootResponser.responder.animationendEventName and
+    SC.RootResponser.responder.animationiterationEventName have been
+    determined.
 
     @returns {void}
   */
-  setupAnimationListeners: function () {
-    // CSS Animations (tested asynchronously)
-    if (SC.platform.supportsCSSAnimations) {
-      // Ensure that the callback name used maps to our implemented function name.
-      this[SC.platform.animationstartEventName] = this.animationstart;
-      this[SC.platform.animationendEventName] = this.animationend;
-      this[SC.platform.animationiterationEventName] = this.animationiteration;
-      this.listenFor([SC.platform.animationstartEventName, SC.platform.animationendEventName, SC.platform.animationiterationEventName], document);
-    }
+  cleanUpAnimationListeners: function () {
+    var domPrefix = SC.browser.domPrefix,
+      lowerDomPrefix = domPrefix.toLowerCase(),
+      actualEventName = SC.platform.animationendEventName,
+      variation1 = lowerDomPrefix + 'animationend',
+      variation2 = lowerDomPrefix + 'AnimationEnd',
+      variation3 = domPrefix + 'AnimationEnd';
+
+    // Once the actual event name is determined, simply remove all the extras.
+    // This should prevent any problems with browsers that fire multiple events.
+    ['animationend', variation1, variation2, variation3].forEach(function (keyName) {
+      if (keyName != actualEventName) {
+        SC.Event.remove(document, keyName, this, this[keyName]);
+        this[keyName] = null;
+      }
+    });
+
+    actualEventName = SC.platform.animationiterationEventName;
+    variation1 = lowerDomPrefix + 'animationiteration';
+    variation2 = lowerDomPrefix + 'AnimationIteration';
+    variation3 = domPrefix + 'AnimationIteration';
+    ['animationiteration', variation1, variation2, variation3].forEach(function (keyName) {
+      if (keyName != actualEventName) {
+        SC.Event.remove(document, keyName, this, this[keyName]);
+        this[keyName] = null;
+      }
+    });
+
+    actualEventName = SC.platform.animationstartEventName;
+    variation1 = lowerDomPrefix + 'animationstart';
+    variation2 = lowerDomPrefix + 'AnimationStart';
+    variation3 = domPrefix + 'AnimationStart';
+    ['animationstart', variation1, variation2, variation3].forEach(function (keyName) {
+      if (keyName != actualEventName) {
+        SC.Event.remove(document, keyName, this, this[keyName]);
+        this[keyName] = null;
+      }
+    });
   },
 
   // ...........................................................................
@@ -1615,7 +1708,7 @@ SC.RootResponder = SC.Object.extend(
     handles the event, then it will be sent as a regular keyDown event.
     This function is only valid when called with a keydown event.
   */
-  _isFunctionOrNonPrintableKey: function(evt) {
+  _isFunctionOrNonPrintableKey: function (evt) {
     return !!(evt.altKey || evt.ctrlKey || evt.metaKey || SC.FUNCTION_KEYS[evt.which]);
   },
 
@@ -1636,7 +1729,7 @@ SC.RootResponder = SC.Object.extend(
      @param {KeyboardEvent} evt keypress event
      @returns {Boolean}
    */
-  _isPrintableKey: function(evt) {
+  _isPrintableKey: function (evt) {
     return ((evt.originalEvent.which === undefined || evt.originalEvent.which > 0) &&
       !(evt.which === 8 || evt.which === 9 || evt.which === 13 || evt.which === 27));
   },
