@@ -529,8 +529,8 @@ SC.View.reopen(
     immediately and the animations removed from the queue.
   */
   didRenderAnimations: function () {
-    // Transitions not supported or not yet tested.
-    if (!SC.platform.supportsCSSTransitions) {
+    // Transitions not supported or the document is not visible.
+    if (!SC.platform.supportsCSSTransitions || document.hidden) {
       var pendingAnimations = this._pendingAnimations;
 
       for (var key in pendingAnimations) {
@@ -697,8 +697,8 @@ SC.View.reopen(
    pending and active animations.
    */
   willRenderAnimations: function () {
-    // Only apply the style if supported by the platform and events have been tested.
-    if (SC.platform.supportsCSSTransitions) {
+    // Only apply the style if supported by the platform and the document is visible.
+    if (SC.platform.supportsCSSTransitions && !document.hidden) {
       var pendingAnimations = this._pendingAnimations;
 
       if (pendingAnimations) {
