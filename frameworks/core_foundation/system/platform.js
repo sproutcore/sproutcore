@@ -446,8 +446,8 @@ SC.platform = SC.Object.create({
   we would get it wrong.  Instead we perform actual tests to find out the proper
   names and only add the proper listeners.
 
-  Once the tests are completed the RootResponder is notified in order to add
-  transition and animation event listeners for the appropriate event names.
+  Once the tests are completed the RootResponder is notified in order to clean up
+  unnecessary transition and animation event listeners.
 */
 SC.ready(function () {
   // This will add 4 different variations of the named event listener and clean
@@ -508,7 +508,7 @@ SC.ready(function () {
       // If an end event never fired, we can't really support CSS transitions in SproutCore.
       if (success) {
         // Set up the SC transition event listener.
-        SC.RootResponder.responder.setupTransitionListener();
+        SC.RootResponder.responder.cleanUpTransitionListeners();
       } else {
         SC.platform.supportsCSSTransitions = NO;
       }
@@ -524,86 +524,86 @@ SC.ready(function () {
     setTimeout(function () {
       transitionEl.style.opacity = '0';
     });
-  }
-
-  // Set up and execute the animation event test.
-  if (SC.platform.supportsCSSAnimations) {
-    var animationEl = document.createElement('div'),
-      keyframes,
-      prefixedKeyframes;
-
-    // Generate both the regular and prefixed version of the style.
-    keyframes = '@keyframes _sc_animation_test { from { opacity: 1; } to { opacity: 0; } }';
-    prefixedKeyframes = '@' + SC.browser.cssPrefix + 'keyframes _sc_prefixed_animation_test { from { opacity: 1; } to { opacity: 0; } }';
-
-    // Add test animation styles.
-    animationEl.innerHTML = '<style>' + keyframes + '\n' + prefixedKeyframes + '</style>';
 
     // Set up and execute the animation event test.
-    animationEl.style.animation = '_sc_animation_test 1ms linear';
-    animationEl.style[SC.browser.domPrefix + 'Animation'] = '_sc_prefixed_animation_test 5ms linear';
+    if (SC.platform.supportsCSSAnimations) {
+      var animationEl = document.createElement('div'),
+        keyframes,
+        prefixedKeyframes;
 
-    // NOTE: We could test start, but it's extra work and easier just to test the end
-    // and infer the start event name from it.  Keeping this code for example.
-    // executeTest(animationEl, 'animationstart', 'AnimationStart', function (success) {
-    //   // If an iteration start never fired, we can't really support CSS transitions in SproutCore.
-    //   if (!success) {
-    //     SC.platform.supportsCSSAnimations = NO;
-    //   }
-    // });
+      // Generate both the regular and prefixed version of the style.
+      keyframes = '@keyframes _sc_animation_test { from { opacity: 1; } to { opacity: 0; } }';
+      prefixedKeyframes = '@' + SC.browser.cssPrefix + 'keyframes _sc_prefixed_animation_test { from { opacity: 1; } to { opacity: 0; } }';
 
-    // NOTE: Testing iteration event support proves very problematic.  Many
-    // browsers can't iterate less than several milliseconds which means we
-    // have to wait too long to find out this event name.  Instead we test
-    // the end only and infer the iteration event name from it. Keeping this
-    // code for example, but it wont' work reliably unless the animation style
-    // is something like '_sc_animation_test 30ms linear' (i.e. ~60ms wait time)
-    // executeTest(animationEl, 'animationiteration', 'AnimationIteration', function (success) {
-    //   // If an iteration event never fired, we can't really support CSS transitions in SproutCore.
-    //   if (!success) {
-    //     SC.platform.supportsCSSAnimations = NO;
-    //   }
-    // });
+      // Add test animation styles.
+      animationEl.innerHTML = '<style>' + keyframes + '\n' + prefixedKeyframes + '</style>';
 
-    // Test animation events.
-    executeTest(animationEl, 'animationend', 'AnimationEnd', function (success) {
-      // If an end event never fired, we can't really support CSS animations in SproutCore.
-      if (success) {
-        // Infer the start and iteration event names based on the success of the end event.
-        var domPrefix = SC.browser.domPrefix,
-          lowerDomPrefix = domPrefix.toLowerCase(),
-          endEventName = SC.platform.animationendEventName;
+      // Set up and execute the animation event test.
+      animationEl.style.animation = '_sc_animation_test 1ms linear';
+      animationEl.style[SC.browser.domPrefix + 'Animation'] = '_sc_prefixed_animation_test 5ms linear';
 
-        switch (endEventName) {
-        case lowerDomPrefix + 'animationend':
-          SC.platform.animationstartEventName = lowerDomPrefix + 'animationstart';
-          SC.platform.animationiterationEventName = lowerDomPrefix + 'animationiteration';
-          break;
-        case lowerDomPrefix + 'AnimationEnd':
-          SC.platform.animationstartEventName = lowerDomPrefix + 'AnimationStart';
-          SC.platform.animationiterationEventName = lowerDomPrefix + 'AnimationIteration';
-          break;
-        case domPrefix + 'AnimationEnd':
-          SC.platform.animationstartEventName = domPrefix + 'AnimationStart';
-          SC.platform.animationiterationEventName = domPrefix + 'AnimationIteration';
-          break;
-        default:
-          SC.platform.animationstartEventName = 'animationstart';
-          SC.platform.animationiterationEventName = 'animationiteration';
+      // NOTE: We could test start, but it's extra work and easier just to test the end
+      // and infer the start event name from it.  Keeping this code for example.
+      // executeTest(animationEl, 'animationstart', 'AnimationStart', function (success) {
+      //   // If an iteration start never fired, we can't really support CSS transitions in SproutCore.
+      //   if (!success) {
+      //     SC.platform.supportsCSSAnimations = NO;
+      //   }
+      // });
+
+      // NOTE: Testing iteration event support proves very problematic.  Many
+      // browsers can't iterate less than several milliseconds which means we
+      // have to wait too long to find out this event name.  Instead we test
+      // the end only and infer the iteration event name from it. Keeping this
+      // code for example, but it wont' work reliably unless the animation style
+      // is something like '_sc_animation_test 30ms linear' (i.e. ~60ms wait time)
+      // executeTest(animationEl, 'animationiteration', 'AnimationIteration', function (success) {
+      //   // If an iteration event never fired, we can't really support CSS transitions in SproutCore.
+      //   if (!success) {
+      //     SC.platform.supportsCSSAnimations = NO;
+      //   }
+      // });
+
+      // Test animation events.
+      executeTest(animationEl, 'animationend', 'AnimationEnd', function (success) {
+        // If an end event never fired, we can't really support CSS animations in SproutCore.
+        if (success) {
+          // Infer the start and iteration event names based on the success of the end event.
+          var domPrefix = SC.browser.domPrefix,
+            lowerDomPrefix = domPrefix.toLowerCase(),
+            endEventName = SC.platform.animationendEventName;
+
+          switch (endEventName) {
+          case lowerDomPrefix + 'animationend':
+            SC.platform.animationstartEventName = lowerDomPrefix + 'animationstart';
+            SC.platform.animationiterationEventName = lowerDomPrefix + 'animationiteration';
+            break;
+          case lowerDomPrefix + 'AnimationEnd':
+            SC.platform.animationstartEventName = lowerDomPrefix + 'AnimationStart';
+            SC.platform.animationiterationEventName = lowerDomPrefix + 'AnimationIteration';
+            break;
+          case domPrefix + 'AnimationEnd':
+            SC.platform.animationstartEventName = domPrefix + 'AnimationStart';
+            SC.platform.animationiterationEventName = domPrefix + 'AnimationIteration';
+            break;
+          default:
+            SC.platform.animationstartEventName = 'animationstart';
+            SC.platform.animationiterationEventName = 'animationiteration';
+          }
+
+          // Set up the SC animation event listeners.
+          SC.RootResponder.responder.cleanUpAnimationListeners();
+        } else {
+          SC.platform.supportsCSSAnimations = NO;
         }
 
-        // Set up the SC animation event listeners.
-        SC.RootResponder.responder.setupAnimationListeners();
-      } else {
-        SC.platform.supportsCSSAnimations = NO;
-      }
+        // Clean up.
+        animationEl.parentNode.removeChild(animationEl);
+        animationEl = null;
+      });
 
-      // Clean up.
-      animationEl.parentNode.removeChild(animationEl);
-      animationEl = null;
-    });
-
-    // Break execution to allow the browser to update the DOM before altering the style.
-    document.documentElement.appendChild(animationEl);
+      // Break execution to allow the browser to update the DOM before altering the style.
+      document.documentElement.appendChild(animationEl);
+    }
   }
 });
