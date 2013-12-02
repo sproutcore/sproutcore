@@ -801,8 +801,8 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
       msg = "starting from current state: %@";
       msg = msg.fmt(fromCurrentState ? fromCurrentState : '---');
       this.statechartLogTrace(msg);
-      msg = "current states before: %@";
-      msg = msg.fmt(this.getPath('currentStates.length') > 0 ? this.get('currentStates') : '---');
+      msg = "current states before:\n%@";
+      msg = msg.fmt(this.getPath('currentStates.length') > 0 ? this.get('currentStates').getEach('fullPath').join('\n') : '---');
       this.statechartLogTrace(msg);
     }
     //@endif
@@ -926,7 +926,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
     //@if(debug)
     if (this.get('allowStatechartTracing')) {
-      this.statechartLogTrace("current states after: %@".fmt(this.get('currentStates')));
+      this.statechartLogTrace("current states after:\n%@".fmt(this.get('currentStates').getEach('fullPath').join('\n')));
       this.statechartLogTrace("END gotoState: %@".fmt(gotoState));
     }
     //@endif
