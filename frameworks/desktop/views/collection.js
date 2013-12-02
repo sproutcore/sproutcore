@@ -1029,10 +1029,16 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   /** @private */
   _TMP_ATTRS: {},
 
-  /** @private */
+  /** @private
+    The item view classes, cached here for performance. Note that if these ever change, they may
+    also need to be updated in the isGroupView code block in _reconfigureItemView below.
+  */
   _COLLECTION_CLASS_NAMES: ['sc-collection-item', 'sc-item'],
 
-  /** @private */
+  /** @private
+    The group view classes, cached here for performance. Note that if these ever change, they may
+    also need to be updated in the isGroupView code block in _reconfigureItemView below.
+  */
   _GROUP_COLLECTION_CLASS_NAMES: ['sc-collection-item', 'sc-group-item'],
 
   /**
@@ -3164,6 +3170,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     }
   },
 
+  /** @private */
   _attrsForContentIndex: function (idx) {
     var attrs = this._TMP_ATTRS,
       del = this.get('contentDelegate'),
@@ -3309,6 +3316,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   */
   _reconfigureItemView: function (itemView, attrs) {
     itemView.beginPropertyChanges();
+    // Update the view with the new properties.
     itemView.set('content', attrs.content);
     itemView.set('contentIndex', attrs.contentIndex);
     itemView.set('isEnabled', attrs.isEnabled);
@@ -3321,6 +3329,28 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     itemView.set('outlineLevel', attrs.outlineLevel);
     itemView.set('disclosureState', attrs.disclosureState);
     itemView.set('isLast', attrs.isLast);
+    // If the view's isGroupView property is changing, the associated CSS classes need to
+    // be updated.
+    var isCurrentlyGroupView = itemView.get('isGroupView'),
+        shouldBeGroupView = attrs.isGroupView;
+    if (isCurrentlyGroupView !== shouldBeGroupView) {
+      itemView.set('isGroupView', shouldBeGroupView);
+      var classNames = itemView.get('classNames'),
+          elem = itemView.$();
+      // Going from group view to item view...
+      if (isCurrentlyGroupView && !shouldBeGroupView) {
+        classNames.pushObject('sc-item');
+        classNames.removeObject('sc-group-item');
+        elem.setClass({ 'sc-item': YES, 'sc-group-item': NO });
+      }
+      // Going from item view to group view...
+      else {
+        classNames.removeObject('sc-item');
+        classNames.pushObject('sc-group-item');
+        elem.setClass({ 'sc-item': NO, 'sc-group-item': YES });
+      }
+    }
+    // Wrap up.
     itemView.endPropertyChanges();
   },
 
