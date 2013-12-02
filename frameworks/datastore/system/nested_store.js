@@ -487,7 +487,7 @@ SC.NestedStore = SC.Store.extend(
     an error if the record is dirty.  We'll otherwise avoid setting our status
     because that can disconnect us from upper and/or lower stores.
   */
-  retrieveRecords: function(recordTypes, ids, storeKeys, isRefresh) {
+  retrieveRecords: function(recordTypes, ids, storeKeys, isRefresh, callbacks) {
     var pstore = this.get('parentStore'), idx, storeKey, newStatus,
       len = (!storeKeys) ? ids.length : storeKeys.length,
       K = SC.Record, status;
@@ -541,7 +541,7 @@ SC.NestedStore = SC.Store.extend(
       }
     }
 
-    return pstore.retrieveRecords(recordTypes, ids, storeKeys, isRefresh);
+    return pstore.retrieveRecords(recordTypes, ids, storeKeys, isRefresh, callbacks);
   },
 
   /** @private - adapt for nested store */
