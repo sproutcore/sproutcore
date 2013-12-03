@@ -14,8 +14,13 @@ sc_require('system/many_array');
   ManyAttribute is a subclass of `RecordAttribute` and handles to-many
   relationships.
 
-  When setting ( `.set()` ) the value of a `toMany` attribute, make sure
-  to pass in an array of `SC.Record` objects.
+  Relationships in the client are meant to mirror the relationships that
+  the real data has in the remote data store on the server. For example,
+  if a `Parent` record on the server has an array of `Child` ids, then it is
+  appropriate for the `MyApp.Parent` model in the SproutCore app to have a `toMany`
+  relationship to the `MyApp.Child` in the app. In this way, changes to the
+  relationship in the client will best match how the data should be committed
+  to the server.
 
   There are many ways you can configure a `ManyAttribute`:
 
@@ -26,6 +31,23 @@ sc_require('system/many_array');
         isEditable: YES|NO, make editable or not,
         through: 'taggings' // set a relationship this goes through
       });
+
+  Note: When setting ( `.set()` ) the value of a `toMany` attribute, make sure
+  to pass in an array of `SC.Record` objects.
+
+  ## Using new Records in Relationships
+
+  Because relationships are based on `id`, new records created in the client
+  (that don't have an `id`) are typically not able to be assigned to a
+  relationship until after they have been committed to the server. However,
+  because it's unwieldy to manually update relationships after the real `id` is
+  known, `SC.ManyAttribute` through `SC.ManyArray`, allows new records to be added
+  that don't yet have an `id`. This works by observing each record in the
+  many array that doesn't have an `id` for changes to its `id` property.
+
+  When the `id` is set (i.e. the child record is committed to the server and now
+  has a real primary key), then the many array will be updated in place and the
+  parent record will at that point be dirtied.
 
   @extends SC.RecordAttribute
   @since SproutCore 1.0
@@ -64,30 +86,29 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
   orderBy: null,
 
   /**
-    Determines whether the transient record support of `SC.ManyArray` should be
+    Determines whether the new record support of `SC.ManyArray` should be
     enabled or not.
 
-    Normally, all records in the relationship should already have
-    been previously committed to a remote data store and have an actual `id`. However,
-    you may find you need to create a record locally that you wish to use in
-    `toMany` relationships. If you did not assign an `id` to the new record
-    and attempted to assign it to a relationship, `SC.ManyArray` would throw an exception
-    by default. If you instead created a temporary `id` for the new record, you would
-    be able to use it in relationships, but would still need to manually update the relationship
-    after the new record is committed and you run the risk of committing inverse
-    records with temporary `id`s in their data hash.
+    Normally, all records in the relationship should have previously been
+    committed to a remote data store and have an actual `id`. However,
+    you may find you need to create a record locally that you wish to use in a
+    `toMany` relationship. If you add a new record without an id to a
+    relationship, `SC.ManyArray` will observe this new record's id property
+    for changes so that once the new record is committed and has an actual
+    id, `SC.ManyArray` can update the relationship array and (depending on
+    the value of `isMaster`) dirty the inverse record at this point.
 
-    However, `SC.ManyArray` does support adding records without an `id `to the
-    relationship when you enable transient support. With this turned on, `SC.ManyArray`
-    will assign unique temporary ids to the new records and update the underlying
-    data hash with the correct ids when the transient records are successfully
-    committed.
+    If you wish to turn this off, SC.ManyArray will throw an exception if you
+    add a record without an id to the relationship. If you use temporary `id`s
+    for new record, you will need to manually update the relationship, but
+    run the risk of committing inverse records with temporary `id`s in their
+    datahashes.
 
     @type Boolean
-    @default false
+    @default true
     @since SproutCore 1.11.0
   */
-  supportTransients: false,
+  supportNewRecords: true,
 
   // ..........................................................
   // LOW-LEVEL METHODS
@@ -96,7 +117,7 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
   /**  @private - adapted for to many relationship */
   toType: function(record, key, value) {
     var type      = this.get('typeClass'),
-        supportTransients = this.get('supportTransients'),
+        supportNewRecords = this.get('supportNewRecords'),
         attrKey   = this.get('key') || key,
         arrayKey  = SC.keyFor('__manyArray__', SC.guidFor(this)),
         ret       = record[arrayKey],
@@ -110,7 +131,7 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
         record:        record,
         propertyName:  attrKey,
         manyAttribute: this,
-        supportTransients: supportTransients
+        supportNewRecords: supportNewRecords
       });
 
       record[arrayKey] = ret ; // save on record

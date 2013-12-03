@@ -260,12 +260,12 @@ test("Test transient record support.", function () {
     ok(true, "Should not be able to push a record without an id normally.");
   }
 
-  recs.set('supportTransients', true);
+  recs.set('supportNewRecords', true);
   try {
     recs.pushObject(newRec);
-    ok(true, "Should be able to push a record without an id using supportTransients.");
+    ok(true, "Should be able to push a record without an id using supportNewRecords.");
   } catch (ex) {
-    ok(false, "Should be able to push a record without an id using supportTransients.");
+    ok(false, "Should be able to push a record without an id using supportNewRecords.");
   }
 
   ok(newRec.hasObserverFor('id'), "The transient record should have an observer on its id.");

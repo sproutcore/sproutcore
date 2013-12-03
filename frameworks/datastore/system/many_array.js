@@ -96,23 +96,24 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
   }.property('record').cacheable(),
 
   /**
-    Determines whether the transient record support of should be enabled or not.
+    Determines whether the new record (i.e. unsaved) support should be enabled
+    or not.
 
     Normally, all records in the many array should already have been previously
     committed to a remote data store and have an actual `id`. However, with
-    supportTransients set to ture, adding records without an `id `to the many
-    array will assign unique temporary ids to the new records and update the underlying
-    data hash with the correct ids when the transient records are successfully
-    committed.
+    `supportNewRecords` set to true, adding records without an `id `to the many
+    array will assign unique temporary ids to the new records and update the
+    underlying data hash with the correct ids after the new records are
+    successfully committed.
 
     This means that the inverse record will not be dirtied until after all the
-    transient records have been saved.
+    new records have been saved.
 
     @type Boolean
-    @default false
+    @default true
     @since SproutCore 1.11.0
   */
-  supportTransients: false,
+  supportNewRecords: true,
 
   /**
     Returns the `storeId`s in read-only mode.  Avoids modifying the record
@@ -268,7 +269,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
         len      = recs ? (recs.get ? recs.get('length') : recs.length) : 0,
         record   = this.get('record'),
         pname    = this.get('propertyName'),
-        supportTransients = this.get('supportTransients'),
+        supportNewRecords = this.get('supportNewRecords'),
         i, ids, toRemove, inverse, attr, inverseRecord,
         allValidRecords = true; // If there are records to add, ensure they aren't transient.
 
@@ -279,7 +280,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
         id = rec.get('id');
 
       if (SC.none(id)) {
-        if (supportTransients) {
+        if (supportNewRecords) {
           ids[i] = '_sc_id_placeholder_' + rec.get('storeKey');
 
           // There is an unhandled edge case that if the record is removed again from this relationship before its id is set,
@@ -291,7 +292,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
           // want to save this record when the relationship contains records that haven't been saved yet).
           allValidRecords = false;
         } else {
-          throw new Error("Developer Error: Attempted to add a record without a primary key to a to-many relationship. Relationships require that the id always be specified. Either the record, \"%@\", must be assigned an id (i.e. be saved) before it can be used in the '%@' relationship or you should set supportTransients to true in order to have a temporary id assigned to the record and have the relationship automatically updated once the record is assigned a real id.".fmt(recs.objectAt(i), pname));
+          throw new Error("Developer Error: Attempted to add a record without a primary key to a to-many relationship. Relationships require that the id always be specified. Either the record, \"%@\", must be assigned an id (i.e. be saved) before it can be used in the '%@' relationship or you should set supportNewRecords to true in order to have a temporary id assigned to the record and have the relationship automatically updated once the record is assigned a real id.".fmt(recs.objectAt(i), pname));
         }
       } else {
         // If the record inserted doesn't have an id yet, use a unique placeholder based on the storeKey.
