@@ -267,6 +267,12 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   beget: function (fromPath) {
     var ret = SC.beget(this);
     ret.parentBinding = this;
+    // Logic gates must be recreated on beget.
+    if (ret._LogicGate) {
+      ret._logicGate = ret._LogicGate.create(ret._logicGateHash);
+      ret = ret.from('logicProperty', ret._logicGate).oneWay();
+    }
+    // Enables duplicate API calls for SC.Binding.beget and SC.Binding.from
     if (fromPath !== undefined) ret = ret.from(fromPath);
     return ret;
   },
@@ -471,8 +477,13 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     // Mark it destroyed.
     this.isDestroyed = YES;
 
-    // Destroy the logic gate, if any. (See and & or methods.)
-    if (this._logicGate) this._logicGate.destroy();
+    // Clean up the logic gate, if any. (See logic gate methods.)
+    if (this._logicGate) {
+      this._logicGate.destroy();
+      this._logicGate = null;
+      this._LogicGate = null;
+      this._logicGateHash = null;
+    }
 
     // Disconnect the binding.
     this.disconnect();
@@ -786,7 +797,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
       if (tuple) {
         this._toTarget = tuple[0];
         this._toPropertyKey = tuple[1];
-        // Hook up _logicGate if needed (see and & or methods).
+        // Hook up _logicGate if needed (see logic gate methods).
         if (this._logicGate) {
           this._logicGate.set('localObject', this._toTarget);
         }
@@ -991,87 +1002,6 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   },
 
   /**
-    Adds a transform that forwards the logical 'AND' of values at 'pathA' and
-    'pathB' whenever either source changes.  Note that the transform acts strictly
-    as a one-way binding, working only in the direction
-
-      'pathA' AND 'pathB' --> value  (value returned is the result of ('pathA' && 'pathB'))
-
-    Usage example where a delete button's 'isEnabled' value is determined by whether
-    something is selected in a list and whether the current user is allowed to delete:
-
-      deleteButton: SC.ButtonView.design({
-        isEnabledBinding: SC.Binding.and('MyApp.itemsController.hasSelection', 'MyApp.userController.canDelete')
-      })
-
-    @param {String} pathA The first part of the conditional
-    @param {String} pathB The second part of the conditional
-  */
-  and: function (pathA, pathB) {
-
-    // If either path is local, append the localObject path to it.
-    if (pathA.indexOf('*') === 0 || pathA.indexOf('.') === 0) {
-      pathA = '*localObject.' + pathA.slice(1);
-    }
-    if (pathB.indexOf('*') === 0 || pathB.indexOf('.') === 0) {
-      pathB = '*localObject.' + pathB.slice(1);
-    }
-
-    // create an object to do the logical computation
-    var gate = SC.Object.create({
-      localObject: null,
-
-      valueABinding: SC.Binding.oneWay(pathA),
-      valueBBinding: SC.Binding.oneWay(pathB),
-
-      and: function () {
-        return (this.get('valueA') && this.get('valueB'));
-      }.property('valueA', 'valueB').cacheable()
-    });
-
-    // add a transform that depends on the result of that computation.
-    var ret = this.from('and', gate).oneWay();
-    ret._logicGate = gate;
-    return ret;
-  },
-
-  /**
-    Adds a transform that forwards the 'OR' of values at 'pathA' and
-    'pathB' whenever either source changes.  Note that the transform acts strictly
-    as a one-way binding, working only in the direction
-
-      'pathA' AND 'pathB' --> value  (value returned is the result of ('pathA' || 'pathB'))
-
-    @param {String} pathA The first part of the conditional
-    @param {String} pathB The second part of the conditional
-  */
-  or: function (pathA, pathB) {
-    // If either path is local, append the localObject path to it.
-    if (pathA.indexOf('*') === 0 || pathA.indexOf('.') === 0) {
-      pathA = '*localObject.' + pathA.slice(1);
-    }
-    if (pathB.indexOf('*') === 0 || pathB.indexOf('.') === 0) {
-      pathB = '*localObject.' + pathB.slice(1);
-    }
-
-    // create an object to the logical computation
-    var gate = SC.Object.create({
-      localObject: null,
-      
-      valueABinding: pathA,
-      valueBBinding: pathB,
-
-      or: function () {
-        return (this.get('valueA') || this.get('valueB'));
-      }.property('valueA', 'valueB').cacheable()
-    });
-
-    var ret = this.from('or', gate).oneWay();
-    ret._logicGate = gate;
-    return ret;
-  },
-
-  /**
     Adds a transform to convert the value to the inverse of a bool value.  This
     uses the same transform as bool() but inverts it.
 
@@ -1097,6 +1027,92 @@ SC.Binding = /** @scope SC.Binding.prototype */{
       var t = SC.typeOf(v);
       return (t === SC.T_ERROR) ? v : SC.none(v);
     });
+  },
+
+  /* @private Used with the logic gate bindings. */
+  _LogicGateAnd: SC.Object.extend({
+    logicProperty: function() {
+      return (this.get('valueA') && this.get('valueB'));
+    }.property('valueA', 'valueB').cacheable()
+  }),
+  /* @private Used with the logic gate bindings. */
+  _LogicGateOr: SC.Object.extend({
+    logicProperty: function() {
+      return (this.get('valueA') || this.get('valueB'));
+    }.property('valueA', 'valueB').cacheable()
+  }),
+  /* @private Used by logic gate bindings. */
+  _logicGateBinding: function (gateClass, pathA, pathB) {
+    // If either path is local, remove any * chains and append the localObject path to it.
+    if (pathA.indexOf('*') === 0 || pathA.indexOf('.') === 0) {
+      pathA = pathA.slice(1).replace(/\*/g, '.');
+      pathA = '*localObject.' + pathA;
+    }
+    if (pathB.indexOf('*') === 0 || pathB.indexOf('.') === 0) {
+      pathB = pathB.slice(1).replace(/\*/g, '.');
+      pathB = '*localObject.' + pathB;
+    }
+
+    // Gets the gate class and instantiates a nice copy.
+    var gateHash = {
+          localObject: null,
+          valueABinding: SC.Binding.oneWay(pathA),
+          valueBBinding: SC.Binding.oneWay(pathB)
+        },
+        gate = gateClass.create(gateHash);
+
+    // Creates and populates the return binding.
+    var ret = this.from('logicProperty', gate).oneWay();
+    // This is all needed later on by beget, which must create a new logic gate instance
+    // or risk bad behavior.
+    ret._LogicGate = gateClass;
+    ret._logicGateHash = gateHash;
+    ret._logicGate = gate;
+
+    // On our way.
+    return ret;
+  },
+
+  /**
+    Adds a transform that forwards the logical 'AND' of values at 'pathA' and
+    'pathB' whenever either source changes.  Note that the transform acts strictly
+    as a one-way binding, working only in the direction
+
+      'pathA' AND 'pathB' --> value  (value returned is the result of ('pathA' && 'pathB'))
+
+    Usage example where a delete button's 'isEnabled' value is determined by whether
+    something is selected in a list and whether the current user is allowed to delete:
+
+      deleteButton: SC.ButtonView.design({
+        isEnabledBinding: SC.Binding.and('MyApp.itemsController.hasSelection', 'MyApp.userController.canDelete')
+      })
+
+    @param {String} pathA The first part of the conditional
+    @param {String} pathB The second part of the conditional
+  */
+  and: function (pathA, pathB) {
+    return this._logicGateBinding(this._LogicGateAnd, pathA, pathB);
+  },
+
+  /**
+    Adds a transform that forwards the 'OR' of values at 'pathA' and
+    'pathB' whenever either source changes.  Note that the transform acts strictly
+    as a one-way binding, working only in the direction
+
+      'pathA' OR 'pathB' --> value  (value returned is the result of ('pathA' || 'pathB'))
+
+    Usage example where a delete button's 'isEnabled' value is determined by if the
+    content is editable, or if the user has admin rights:
+
+      deleteButton: SC.ButtonView.design({
+        isEnabledBinding: SC.Binding.or('*content.isEditable', 'MyApp.userController.isAdmin')
+      })
+
+    @param {String} pathA The first part of the conditional
+    @param {String} pathB The second part of the conditional
+  */
+  or: function (pathA, pathB) {
+    return this._logicGateBinding(this._LogicGateOr, pathA, pathB);
   },
 
   toString: function () {
