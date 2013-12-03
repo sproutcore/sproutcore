@@ -63,6 +63,32 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
   */
   orderBy: null,
 
+  /**
+    Determines whether the transient record support of `SC.ManyArray` should be
+    enabled or not.
+
+    Normally, all records in the relationship should already have
+    been previously committed to a remote data store and have an actual `id`. However,
+    you may find you need to create a record locally that you wish to use in
+    `toMany` relationships. If you did not assign an `id` to the new record
+    and attempted to assign it to a relationship, `SC.ManyArray` would throw an exception
+    by default. If you instead created a temporary `id` for the new record, you would
+    be able to use it in relationships, but would still need to manually update the relationship
+    after the new record is committed and you run the risk of committing inverse
+    records with temporary `id`s in their data hash.
+
+    However, `SC.ManyArray` does support adding records without an `id `to the
+    relationship when you enable transient support. With this turned on, `SC.ManyArray`
+    will assign unique temporary ids to the new records and update the underlying
+    data hash with the correct ids when the transient records are successfully
+    committed.
+
+    @type Boolean
+    @default false
+    @since SproutCore 1.11.0
+  */
+  supportTransients: false,
+
   // ..........................................................
   // LOW-LEVEL METHODS
   //
@@ -70,6 +96,7 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
   /**  @private - adapted for to many relationship */
   toType: function(record, key, value) {
     var type      = this.get('typeClass'),
+        supportTransients = this.get('supportTransients'),
         attrKey   = this.get('key') || key,
         arrayKey  = SC.keyFor('__manyArray__', SC.guidFor(this)),
         ret       = record[arrayKey],
@@ -82,7 +109,8 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
         recordType:    type,
         record:        record,
         propertyName:  attrKey,
-        manyAttribute: this
+        manyAttribute: this,
+        supportTransients: supportTransients
       });
 
       record[arrayKey] = ret ; // save on record

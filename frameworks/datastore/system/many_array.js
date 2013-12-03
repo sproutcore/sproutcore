@@ -31,7 +31,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     var readOnlyStoreIds = this.get('readOnlyStoreIds'),
       length = this.get('length');
 
-    return "%@({\n    ids: [%@],\n    length: %@,\n    … })".fmt(this.constructor.toString(), readOnlyStoreIds, length);
+    return "%@({\n  ids: [%@],\n  length: %@,\n  … })".fmt(this.constructor.toString(), readOnlyStoreIds, length);
   },
 
   /* END DEBUG ONLY PROPERTIES AND METHODS */
@@ -95,6 +95,24 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return this.get('record').get('storeKey');
   }.property('record').cacheable(),
 
+  /**
+    Determines whether the transient record support of should be enabled or not.
+
+    Normally, all records in the many array should already have been previously
+    committed to a remote data store and have an actual `id`. However, with
+    supportTransients set to ture, adding records without an `id `to the many
+    array will assign unique temporary ids to the new records and update the underlying
+    data hash with the correct ids when the transient records are successfully
+    committed.
+
+    This means that the inverse record will not be dirtied until after all the
+    transient records have been saved.
+
+    @type Boolean
+    @default false
+    @since SproutCore 1.11.0
+  */
+  supportTransients: false,
 
   /**
     Returns the `storeId`s in read-only mode.  Avoids modifying the record
@@ -217,11 +235,15 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     if (!recs) this._records = recs = [] ; // create cache
     storeId = storeIds.objectAt(idx);
     if (storeId) {
+      // Handle transient records.
+      if (typeof storeId === SC.T_STRING && storeId.indexOf('_sc_id_placeholder_') == 0) {
+        storeKey = storeId.replace('_sc_id_placeholder_', '');
+      } else {
+        storeKey = store.storeKeyFor(recordType, storeId);
+      }
 
-      // if record is not loaded already, then ask the data source to
-      // retrieve it
-      storeKey = store.storeKeyFor(recordType, storeId);
-
+      // If record is not loaded already, then ask the data source to
+      // retrieve it.
       if (store.readStatus(storeKey) === SC.Record.EMPTY) {
         store.retrieveRecord(recordType, null, storeKey);
       }
@@ -246,18 +268,35 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
         len      = recs ? (recs.get ? recs.get('length') : recs.length) : 0,
         record   = this.get('record'),
         pname    = this.get('propertyName'),
-        i, ids, toRemove, inverse, attr, inverseRecord;
+        supportTransients = this.get('supportTransients'),
+        i, ids, toRemove, inverse, attr, inverseRecord,
+        allValidRecords = true; // If there are records to add, ensure they aren't transient.
 
     // map to store keys
-    ids = [] ;
-    for(i=0;i<len;i++) {
-      //@if(debug)
-      if (SC.none(recs.objectAt(i).get('id'))) {
-        throw new Error("Developer Error: Attempted to add a record without a primary key to a to-many relationship. Relationships require that the id always be specified. The record, \"%@\", must be assigned an id (i.e. be saved) before it can be used in the '%@' relationship.".fmt(recs.objectAt(i), pname));
-      }
-      //@endif
+    ids = [];
+    for (i = 0; i < len; i++) {
+      var rec = recs.objectAt(i),
+        id = rec.get('id');
 
-      ids[i] = recs.objectAt(i).get('id');
+      if (SC.none(id)) {
+        if (supportTransients) {
+          ids[i] = '_sc_id_placeholder_' + rec.get('storeKey');
+
+          // There is an unhandled edge case that if the record is removed again from this relationship before its id is set,
+          // the observer will remain. This is an unlikely case and is accounted for in _recordsIdDidChange, so we won't bother
+          // inspecting the removed indexes for transient records.
+          rec.addObserver('id', this, this._recordsIdDidChange);
+
+          // If there are some transient records, then we don't want to dirty this record yet (i.e. we don't
+          // want to save this record when the relationship contains records that haven't been saved yet).
+          allValidRecords = false;
+        } else {
+          throw new Error("Developer Error: Attempted to add a record without a primary key to a to-many relationship. Relationships require that the id always be specified. Either the record, \"%@\", must be assigned an id (i.e. be saved) before it can be used in the '%@' relationship or you should set supportTransients to true in order to have a temporary id assigned to the record and have the relationship automatically updated once the record is assigned a real id.".fmt(recs.objectAt(i), pname));
+        }
+      } else {
+        // If the record inserted doesn't have an id yet, use a unique placeholder based on the storeKey.
+        ids[i] = id;
+      }
     }
 
     // if we have an inverse - collect the list of records we are about to
@@ -303,8 +342,8 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
     }
 
-    // only mark record dirty if there is no inverse or we are master
-    if (record && (!inverse || this.get('isMaster'))) {
+    // Only mark record dirty if all the records were valid (i.e. had ids), there is no inverse or we are master.
+    if (record && allValidRecords && (!inverse || this.get('isMaster'))) {
       record.recordDidChange(pname);
     }
 
@@ -454,6 +493,36 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     this.arrayContentWillChange(0, oldLen, newLen);
     this._prevStoreIds = storeIds;
     this._storeIdsContentDidChange(0, oldLen, newLen);
+  },
+
+  /** @private Invoked when a transient record's id changes. Used to fix up the relationship accordingly. */
+  _recordsIdDidChange: function (rec) {
+    var storeIds = this.get('editableStoreIds'),
+      record = this.get('record'),
+      pname = this.get('propertyName'),
+      inverse = this.get('inverse'),
+      isMaster = this.get('isMaster'),
+      idx;
+
+    // Update the storeIds array with the new record id.
+    if (rec.get('id')) {
+      idx = storeIds.indexOf('_sc_id_placeholder_' + rec.get('storeKey'));
+
+      // Beware of records that are no longer a part of storeIds.
+      if (idx >= 0) {
+        storeIds.replace(idx, 1, [rec.get('id')]);
+
+        // Mark the record dirty if there is no inverse or we are master.
+        // Note: when the temporary relationship was created we avoided marking this
+        // record dirty unnecessarily at that time in an effort to ensure consistency.
+        if (record && (!inverse || isMaster)) {
+          record.recordDidChange(pname);
+        }
+      }
+    }
+
+    // Clean up the observer.
+    rec.removeObserver('id', this, this._recordsIdDidChange);
   },
 
   /** @private
