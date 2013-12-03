@@ -33,7 +33,9 @@ module("SC.ManyAttribute core methods", {
       }),
 
       // test toMany relationships
-      fooMany: SC.Record.toMany('MyApp.Foo'),
+      fooMany: SC.Record.toMany('MyApp.Foo', {
+        supportNewRecords: false
+      }),
 
       // test toMany relationships with different key
       fooManyKeyed: SC.Record.toMany('MyApp.Foo', {
@@ -56,7 +58,8 @@ module("SC.ManyAttribute core methods", {
 
       // test many-to-many
       fooToMany: SC.Record.toMany('MyApp.Foo', {
-        inverse: 'barToMany', isMaster: NO
+        inverse: 'barToMany', isMaster: NO,
+        supportNewRecords: false
       }),
 
       // test many-to-one
@@ -294,7 +297,7 @@ test("should be able to modify an initially empty record", function() {
 });
 
 
-test("Adding an unsaved record should throw an Error", function() {
+test("Adding an unsaved record should throw an Error is supportNewRecords is false", function() {
   var foo;
 
   SC.run(function () {

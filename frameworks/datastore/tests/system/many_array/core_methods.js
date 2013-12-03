@@ -246,26 +246,27 @@ test("Test that _findInsertionLocation returns the correct location.", function 
 });
 
 // ..........................................................
-// Transient records
+// New records
 //
 
-test("Test transient record support.", function () {
+test("Test new record support.", function () {
   var newRec = MyApp.store.createRecord(MyApp.Foo, { firstName: "Adam", lastName: "Doe", age: 15 }),
     holder = MyApp.store.find(MyApp.Foo, 50);
 
+  recs.set('supportNewRecords', false);
   try {
     recs.pushObject(newRec);
-    ok(false, "Should not be able to push a record without an id normally.");
+    ok(false, "Should not be able to push a record without an id without supportNewRecords.");
   } catch (ex) {
-    ok(true, "Should not be able to push a record without an id normally.");
+    ok(true, "Should not be able to push a record without an id without supportNewRecords.");
   }
 
   recs.set('supportNewRecords', true);
   try {
     recs.pushObject(newRec);
-    ok(true, "Should be able to push a record without an id using supportNewRecords.");
+    ok(true, "Should be able to push a record without an id normally.");
   } catch (ex) {
-    ok(false, "Should be able to push a record without an id using supportNewRecords.");
+    ok(false, "Should be able to push a record without an id normally.");
   }
 
   ok(newRec.hasObserverFor('id'), "The transient record should have an observer on its id.");
@@ -280,4 +281,5 @@ test("Test transient record support.", function () {
   ok(!newRec.hasObserverFor('id'), "The post-transient record should not have an observer on its id.");
   equals(newRec.get('id'), 200, "The post-transient record should have an id of 200.");
   equals(holder.get('status'), SC.Record.READY_DIRTY, "The record should be dirtied when the relationship is actually updated.");
+
 });
