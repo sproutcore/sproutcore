@@ -5,6 +5,19 @@
 // ==========================================================================
 sc_require("views/view");
 
+// When in debug mode, developers can log the design mode.
+//@if (debug)
+SC.LOG_DESIGN_MODE = false;
+//@endif
+
+// The class names assigned to view elements depending on the current design
+// mode.
+SC.DESIGN_MODE_CLASS_NAMES = {
+  s: 'sc-small',
+  m: 'sc-medium',
+  l: 'sc-large',
+  xl: 'sc-xlarge'
+};
 
 /** @private This adds design modes support to SC.View. */
 SC.View.reopen(
@@ -18,7 +31,7 @@ SC.View.reopen(
     The current design mode of the application and this view.
 
     If the application has designModes specified, this property will be set
-    automatically when the view is created and as the window width changes
+    automatically when the view is created and as the window size changes
     across the design mode boundaries.
 
     @property {String}
@@ -27,19 +40,16 @@ SC.View.reopen(
   designMode: null,
 
   /**
-    The dynamic adjustments to this view depending on the current design mode.
+    The dynamic adjustments to apply to this view depending on the current
+    design mode.
 
     If you specify designModes on the application, this hash will be checked
-    for a matching design mode adjustment to apply for the current design mode.
+    for a matching adjustment to apply for the current design mode.
 
-    For example, if the application has designModes 'small' and 'large', you
-    could specify matching designAdjustments 'small' and 'large' that would be
-    used depending on the current design mode.
-
-    @property {Object|null}
+    @property {Object}
     @default null
   */
-  designAdjustments: null,
+  modeAdjust: null,
 
   // ------------------------------------------------------------------------
   // Methods
@@ -80,78 +90,109 @@ SC.View.reopen(
     if (lastDesignMode === designMode) { return; }
 
     var classNames = this.get('classNames'),
-      designAdjustments,
+      modeAdjust,
       elem,
-      fallbackDesignMode,
       key,
       layer,
-      newAdjustment,
-      oldClass = this.oldClass,
-      responder = SC.RootResponder.responder,
-      prevAdjustment;
+      newProperties,
+      prevProperties,
+      size;
 
     this.set('designMode', designMode);
 
-    // If the view has designAdjustments, adjust its layout to match.
-    designAdjustments = this.get('designAdjustments');
-    if (designMode && designAdjustments) {
-      // Find new adjustments.
-      fallbackDesignMode = designMode;
-      while (fallbackDesignMode && !newAdjustment) {
-        newAdjustment = designAdjustments[fallbackDesignMode];
-        fallbackDesignMode = responder.fallbackDesignMode(fallbackDesignMode);
-      }
-
-      // Find previous adjustments.
-      fallbackDesignMode = lastDesignMode;
-      while (fallbackDesignMode && !prevAdjustment) {
-        prevAdjustment = designAdjustments[fallbackDesignMode];
-        fallbackDesignMode = responder.fallbackDesignMode(fallbackDesignMode);
-      }
-
-      // Unset previous adjustments.
+    modeAdjust = this.get('modeAdjust');
+    if (modeAdjust) {
+      // Stop observing changes for a moment.
       this.beginPropertyChanges();
-      if (prevAdjustment) {
-        for (key in prevAdjustment) {
-          if (!newAdjustment || (newAdjustment && SC.none(newAdjustment[key]))) { this.adjust(key, null); }
+
+      // Unset any previous properties.
+      prevProperties = this._originalProperties;
+      if (prevProperties) {
+        //@if(debug)
+        if (SC.LOG_DESIGN_MODE) {
+          SC.Logger.log('%@ — Removing previous design property overrides from "%@":'.fmt(this, lastDesignMode));
+        }
+        //@endif
+
+        for (key in prevProperties) {
+          //@if(debug)
+          if (SC.LOG_DESIGN_MODE) {
+            SC.Logger.log('  - Resetting %@ to %@'.fmt(key, prevProperties[key]));
+          }
+          //@endif
+          this.set(key, prevProperties[key]);
+        }
+
+        // Remove the cache.
+        this._originalProperties = null;
+      }
+
+      if (designMode) {
+        size = designMode.split('_')[0];
+
+        // Apply new properties. The orientation specific properties override the size properties.
+        if (modeAdjust[size] || modeAdjust[designMode]) {
+          newProperties = SC.merge(modeAdjust[size], modeAdjust[designMode]);
+
+          //@if(debug)
+          if (SC.LOG_DESIGN_MODE) {
+            SC.Logger.log('%@ — Applying design properties for "%@":'.fmt(this, designMode));
+          }
+          //@endif
+
+          // Cache the original properties for reset.
+          this._originalProperties = {};
+          for (key in newProperties) {
+            // Cache the original value for reset.
+            this._originalProperties[key] = this.get(key);
+
+            //@if(debug)
+            if (SC.LOG_DESIGN_MODE) {
+              SC.Logger.log('  - Setting %@: %@'.fmt(key, newProperties[key]));
+            }
+            //@endif
+
+            // Apply the override.
+            if (key === 'layout') {
+              this.adjust(newProperties[key]);
+            } else {
+              this.set(key, newProperties[key]);
+            }
+          }
         }
       }
 
-      // Apply new adjustments.
-      if (newAdjustment) {
-        this.adjust(newAdjustment);
-      } else {
-        //@if(debug)
-        // Developer support if they've implemented designAdjustments but maybe missed a layout for this mode.
-        SC.warn("Developer Warning: The view %@ has designAdjustments, but none matching the current designMode: '%@'".fmt(this, designMode));
-        //@endif
-      }
+      // Resume observing.
       this.endPropertyChanges();
     }
 
     // Apply the design mode as a class name.
     // This is done here rather than through classNameBindings, because we can
     // do it here without needing to setup a designMode observer for each view.
+    var designClass;
     layer = this.get('layer');
     if (layer) {
       elem = this.$();
 
       // If we had previously added a class to the element, remove it.
       if (lastDesignMode) {
-        elem.removeClass(lastDesignMode);
-        classNames.removeObject(lastDesignMode);
+        designClass = SC.DESIGN_MODE_CLASS_NAMES[lastDesignMode.split('_')[0]];
+        elem.removeClass(designClass);
+        classNames.removeObject(designClass);
       }
 
       // If necessary, add a new class.
       if (designMode) {
-        elem.addClass(designMode);
-        classNames.push(designMode);
+        designClass = SC.DESIGN_MODE_CLASS_NAMES[size];
+        elem.addClass(designClass);
+        classNames.push(designClass);
       }
     } else {
       if (designMode) {
+        designClass = SC.DESIGN_MODE_CLASS_NAMES[size];
         // Ensure that it gets into the classNames array
         // so it is displayed when we render.
-        classNames.push(designMode);
+        classNames.push(designClass);
       }
     }
 
