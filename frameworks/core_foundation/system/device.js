@@ -40,14 +40,13 @@ SC.NO_ORIENTATION = 'desktop'; // value 'desktop' for backwards compatibility
 SC.device = SC.Object.create({
 
   /**
-    Sets the orientation for touch devices, either SC.LANDSCAPE_ORIENTATION
-    or SC.PORTRAIT_ORIENTATION. Will be SC.NO_ORIENTATION in the case of
-    non-touch devices that are also not simulating touch events.
+    Sets the orientation for devices, either SC.LANDSCAPE_ORIENTATION
+    or SC.PORTRAIT_ORIENTATION.
 
     @type String
-    @default SC.NO_ORIENTATION
+    @default SC.PORTRAIT_ORIENTATION
   */
-  orientation: SC.NO_ORIENTATION,
+  orientation: SC.PORTRAIT_ORIENTATION,
 
   /**
     Indicates whether the device is currently online or offline. For browsers
@@ -127,30 +126,12 @@ SC.device = SC.Object.create({
   */
   windowSizeDidChange: function(newSize) {
     if (SC.platform.windowSizeDeterminesOrientation) {
-      if (!SC.browser.iOS) {
-        // in any browser other than iOS, use height vs. width test
-        SC.run(function() {
-          if (SC.platform.touch) {
-            if (newSize.height >= newSize.width) {
-              SC.device.set('orientation', SC.PORTRAIT_ORIENTATION);
-            } else {
-              SC.device.set('orientation', SC.LANDSCAPE_ORIENTATION);
-            }
-          } else {
-            SC.device.set('orientation', SC.NO_ORIENTATION);
-          }
-        });
+      if (newSize.height >= newSize.width) {
+        SC.device.set('orientation', SC.PORTRAIT_ORIENTATION);
       } else {
-        // in mobile safari, because some of its chrome can make the
-        // above match landscape falsely, we compare to screen.width
-        SC.run(function() {
-          if (newSize.width === window.screen.width) {
-            SC.device.set('orientation', SC.PORTRAIT_ORIENTATION);
-          } else {
-            SC.device.set('orientation', SC.LANDSCAPE_ORIENTATION);
-          }
-        });
+        SC.device.set('orientation', SC.LANDSCAPE_ORIENTATION);
       }
+
       return YES;
     }
     return NO;
@@ -169,20 +150,21 @@ SC.device = SC.Object.create({
     });
   },
 
-  orientationObserver: function(){
+  /** @private */
+  orientationObserver: function () {
     var body = SC.$(document.body),
         orientation = this.get('orientation');
 
     if (orientation === SC.PORTRAIT_ORIENTATION) {
-      body.addClass('portrait');
+      body.addClass('sc-portrait');
     } else {
-      body.removeClass('portrait');
+      body.removeClass('sc-portrait');
     }
 
     if (orientation === SC.LANDSCAPE_ORIENTATION) {
-      body.addClass('landscape');
+      body.addClass('sc-landscape');
     } else {
-      body.removeClass('landscape');
+      body.removeClass('sc-landscape');
     }
   }.observes('orientation'),
 
@@ -206,5 +188,5 @@ SC.device = SC.Object.create({
   an instance and sets up event listeners as needed.
 */
 SC.ready(function() {
-  SC.device.setup() ;
+  SC.device.setup();
 });
