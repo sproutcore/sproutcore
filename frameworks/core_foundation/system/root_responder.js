@@ -322,19 +322,18 @@ SC.RootResponder = SC.Object.extend(
     this.set('currentWindowSize', newSize); // update size
 
     if (!SC.rectsEqual(newSize, oldSize)) {
+      SC.run(function() {
+        //Notify orientation change. This is faster than waiting for the orientation
+        //change event.
+        SC.device.windowSizeDidChange(newSize);
 
-      //Notify orientation change. This is faster than waiting for the orientation
-      //change event.
-      SC.device.windowSizeDidChange(newSize);
-
-      // notify panes
-      if (this.panes) {
-        SC.run(function() {
-          if (oldSize !== newSize) {
-            this.panes.invoke('windowSizeDidChange', oldSize, newSize);
-          }
-        }, this);
-      }
+        // notify panes
+        if (this.panes) {
+            if (oldSize !== newSize) {
+              this.panes.invoke('windowSizeDidChange', oldSize, newSize);
+            }
+        }
+      }, this);
     }
   },
 
@@ -351,13 +350,6 @@ SC.RootResponder = SC.Object.extend(
           this.panes.invoke('updateDesignMode', oldDesignMode, newDesignMode);
         }, this);
       }
-
-      //@if(debug)
-      if (!newDesignMode) {
-        // Developer support if they've turned off designMode after previously having it on.
-        SC.warn("Developer Warning: Design modes has been disabled for the application.  The layout of panes and child views will remain whatever it was for the '%@' design mode.".fmt(oldDesignMode));
-      }
-      //@endif
     }
   },
 
@@ -451,7 +443,7 @@ SC.RootResponder = SC.Object.extend(
       // Clear previous values.
       if (this._designModeNames) {
         delete this._designModeNames;
-        delete this._designModeWidths;
+        delete this._designModeThresholds;
       }
 
       value = null;
@@ -464,22 +456,25 @@ SC.RootResponder = SC.Object.extend(
     return value;
   }.property().cacheable(),
 
-  /** @private */
+  /** @private Determine the design mode based on area and pixel density. */
   computeDesignMode: function () {
     var designMode = null,
       designModeNames = this._designModeNames,
-      designModeWidths = this._designModeWidths,
-      width;
+      designModeThresholds = this._designModeThresholds,
+      dpr = window.devicePixelRatio,
+      currentWindowSize,
+      area;
 
     // Fast path!
     if (!designModeNames) { return null; }
 
-    width = this.get('currentWindowSize').width;
-
+    currentWindowSize = this.get('currentWindowSize');
+    if (!dpr) { dpr = 1; }
+    area = (currentWindowSize.width * currentWindowSize.height) / dpr;
     var i, len;
-    for (i = 0, len = designModeWidths.get('length'); i < len; i++) {
-      var layoutWidthThreshold = designModeWidths.objectAt(i);
-      if (width < layoutWidthThreshold) {
+    for (i = 0, len = designModeThresholds.get('length'); i < len; i++) {
+      var layoutWidthThreshold = designModeThresholds.objectAt(i);
+      if (area < layoutWidthThreshold) {
         designMode = designModeNames.objectAt(i);
         break;
       }
@@ -490,7 +485,7 @@ SC.RootResponder = SC.Object.extend(
       designMode = designModeNames.objectAt(i);
     }
 
-    return designMode;
+    return SC.device.orientation === SC.PORTRAIT_ORIENTATION ? designMode + '_p' : designMode + '_l';
   },
 
   /** @private (semi-private)
@@ -515,12 +510,12 @@ SC.RootResponder = SC.Object.extend(
   /** @private Prepares ordered design modes & widths arrays when designModes changes. */
   _prepOrderedArrays: function (designModes) {
     var designModeNames,
-      designModeWidths;
+      designModeThresholds;
 
     // Order the design modes for easier access later.
     if (designModes) {
       designModeNames = this._designModeNames = [];
-      designModeWidths = this._designModeWidths = [];
+      designModeThresholds = this._designModeThresholds = [];
 
       var key;
 
@@ -531,8 +526,8 @@ SC.RootResponder = SC.Object.extend(
           // Assume that the keys will be ordered smallest to largest so run backwards.
           value = designModes[key];
           inner:
-            for (i = designModeWidths.length - 1; i >= 0; i--) {
-              if (designModeWidths[i] < value) {
+            for (i = designModeThresholds.length - 1; i >= 0; i--) {
+              if (designModeThresholds[i] < value) {
                 // Exit early!
                 break inner;
               }
@@ -540,7 +535,7 @@ SC.RootResponder = SC.Object.extend(
 
           i += 1;
           designModeNames.splice(i, 0, key);
-          designModeWidths.splice(i, 0, value);
+          designModeThresholds.splice(i, 0, value);
         }
     }
   },
