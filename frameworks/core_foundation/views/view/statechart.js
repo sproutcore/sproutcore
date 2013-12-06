@@ -718,9 +718,10 @@ SC.CoreView.reopen(
       return true;
     case SC.CoreView.ATTACHED_BUILDING_IN:
     case SC.CoreView.ATTACHED_SHOWING:
-      if (!transitionHide) {
-        this._cancelTransition();
-      }
+      // Cancel the animation and revert to hidden.
+      this.cancelAnimation();
+      this._teardownTransition();
+      this._gotoAttachedHiddenState();
       break;
     case SC.CoreView.ATTACHED_SHOWN:
       break;
@@ -877,9 +878,10 @@ SC.CoreView.reopen(
       break;
 
     case SC.CoreView.ATTACHED_HIDING:
-      if (!transitionShow) {
-        this._cancelTransition();
-      }
+      // Cancel the animation and revert to shown.
+      this.cancelAnimation();
+      this._teardownTransition();
+      this._gotoAttachedShownState();
       break;
 
     // Special case: Layer exists but is not attached. Queue an update to the visibility style.
@@ -1173,7 +1175,7 @@ SC.CoreView.reopen(
 
   /** @private Clear building in transition. */
   _cancelTransition: function () {
-    // Cancel conflicting transitions.
+    // Cancel conflicting transitions. This causes the animation callback to fire.
     this.cancelAnimation();
     // this._teardownTransition();
   },
@@ -1618,19 +1620,25 @@ SC.CoreView.reopen(
       options = this.get('transitionHideOptions') || {},
       inPlace = false;
 
-    switch (state) {
-    case SC.CoreView.ATTACHED_SHOWING:
-    case SC.CoreView.ATTACHED_BUILDING_IN:
-      this.cancelAnimation(SC.LayoutState.CURRENT);
-      inPlace = true;
-      break;
-    default:
-      this._setupTransition();
+    //@if (debug)
+    if (SC.LOG_VIEW_STATES) {
+      SC.Logger.log('%c%@ — _transitionHide()'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
+    //@endif
+
+    // switch (state) {
+    // case SC.CoreView.ATTACHED_SHOWING:
+    // case SC.CoreView.ATTACHED_BUILDING_IN:
+    //   this.cancelAnimation(SC.LayoutState.CURRENT);
+    //   inPlace = true;
+    //   break;
+    // default:
+    this._setupTransition();
+    // }
 
     // Set up the hiding transition.
     if (transitionHide.setup) {
-      transitionHide.setup(this, options, inPlace);
+      transitionHide.setup(this, options);
     }
 
     // Execute the hiding transition.
@@ -1691,12 +1699,17 @@ SC.CoreView.reopen(
       options = this.get('transitionShowOptions') || {},
       inPlace = false;
 
-    if (state === SC.CoreView.ATTACHED_HIDING) {
-      this.cancelAnimation(SC.LayoutState.CURRENT);
-      inPlace = true;
-    } else {
-      this._setupTransition();
+    //@if (debug)
+    if (SC.LOG_VIEW_STATES) {
+      SC.Logger.log('%c%@ — _transitionShow()'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
+    //@endif
+    // if (state === SC.CoreView.ATTACHED_HIDING) {
+    //   this.cancelAnimation(SC.LayoutState.CURRENT);
+    //   inPlace = true;
+    // } else {
+    this._setupTransition();
+    // }
 
     // Set up the showing transition.
     if (transitionShow.setup) {
