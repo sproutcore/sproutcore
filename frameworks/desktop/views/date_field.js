@@ -68,6 +68,15 @@ SC.DateFieldView = SC.TextFieldView.extend(
   showTime: NO,
 
   /**
+    Set this to NO to disallow the default keyboard handling, which attempts to convert
+    numeric keystrokes into valid dates.
+
+    @type Boolean
+    @default YES
+  */
+  allowNumericInput: YES,
+
+  /**
     @type String
     @default '%I:%M %p'
   */
@@ -219,6 +228,13 @@ SC.DateFieldView = SC.TextFieldView.extend(
     }
   },
 
+
+  /** @private */
+  _lastValue: null,
+
+  /** @private */
+  _lastKey: null,
+
   _selectRootElement: function() {
     // TODO: This is a solution while I don't found how we
     // receive the last key from the last input.
@@ -231,7 +247,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
   // ..........................................................
   // Key Event Support
   //
-
+  
   /** @private */
   keyDown: function(evt) {
     if (this.interpretKeyEvents(evt)) {
@@ -259,11 +275,6 @@ SC.DateFieldView = SC.TextFieldView.extend(
     var as = this.get('activeSelection');
     var ts = this.get('tabsSelections');
     this.updateValue(ts[as].get('key'), 0);
-    return YES;
-  },
-
-  /** @private */
-  insertText: function(evt) {
     return YES;
   },
 
@@ -338,6 +349,94 @@ SC.DateFieldView = SC.TextFieldView.extend(
   /** @private */
   deleteForward: function(evt) {
     return YES;
-  }
+  },
 
+  /** @private */
+  _numericCharacters: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
+  /** @private */
+  _nonnumericCharacters: [' ', '-', '/', ':'],
+  /** @private Validates and applies supported keystrokes. */
+  insertText: function(chr, evt) {
+    // If it's a nonnumeric "advance" character, advance.
+    // TODO: instead of having a list of possible delimiter characters, we should actually look
+    // at what the next separator character is and only advance on that one.
+    if (this._nonnumericCharacters.contains(chr)) this.moveRight();
+
+    // If it's a numeric character (and we're doing those), validate and apply it.
+    if (this.get('allowNumericInput') && this._numericCharacters.contains(chr)) {
+      var as = this.get('activeSelection'),
+          ts = this.get('tabsSelections'),
+          key = ts[as].get('key');
+
+      var value = this.get('value'),
+          lastValue = this._lastValue,
+          length = 2,
+          min = 0, 
+          max, key, newValue;
+
+      switch(key) {
+        case '%Y': 
+          key = 'year';
+          min = 1000;
+          max = 9999;
+          length = 4;
+        break;
+        case '%y':
+          key = 'year';
+          max = 99;
+        break;
+        case '%m':
+          key = 'month';
+          min = 1;
+          max = 12;
+        break;
+        case '%d':
+          key = 'day';
+          min = 1;
+          max = value.advance({ month: 1 }).adjust({ day: 0 }).get('day');
+        break;
+        case '%H':
+          key = 'hour';
+          max = 23;
+        break;
+        case '%I':
+          key = 'hour';
+          max = 11;
+        break;
+        case '%M':
+          key = 'minute';
+          max = 59;
+        break;
+        case '%S':
+          key = 'second';
+          max = 59;
+        break;        
+      }
+
+      if (SC.none(lastValue) || this._lastKey !== key) {
+        lastValue = value.get(key);
+        lastValue = (lastValue < 10 ? '0' : '') + lastValue;
+      }
+
+      if (lastValue.length > length) lastValue = lastValue.substr(-length);
+
+      // Removes the first character and adds the new one at the end of the string
+      lastValue = lastValue.slice(1) + chr;
+      newValue = parseInt(lastValue, 10);
+
+      // If the value is allow, updates the value
+      if (newValue <= max && newValue >= min) {
+        var hash = {};
+        hash[key] = newValue;
+
+        this.set('value', value.adjust(hash, NO));
+      }
+
+      this._lastValue = lastValue;
+      this._lastKey = key;
+    }
+
+    // Regardless, we handled the event.
+    return YES;
+  }
 });
