@@ -265,16 +265,16 @@ SC.DateFieldView = SC.TextFieldView.extend(
         break;        
       }
  
-      if (SC.none(lastValue) || this._lastkey !== key) {
+      if (SC.none(lastValue) || this._lastKey !== key) {
         lastValue = value.get(key);
-        lastValue = (lastValue<10 ? '0' : '') + lastValue;
+        lastValue = (lastValue < 10 ? '0' : '') + lastValue;
       }
 
       if (lastValue.length > length) lastValue = lastValue.substr(-length);
 
       // Removes the first character and adds the new one at the end of the string
       lastValue = lastValue.slice(1) + pressedKey;
-      newValue = parseInt(lastValue);
+      newValue = parseInt(lastValue, 10);
 
       // If the value is allow, updates the value
       if (newValue <= max && newValue >= min) {
@@ -285,9 +285,15 @@ SC.DateFieldView = SC.TextFieldView.extend(
       }
       
       this._lastValue = lastValue;
-      this._lastkey = key;
+      this._lastKey = key;
     }
   },
+
+  /** @private */
+  _lastValue: null,
+
+  /** @private */
+  _lastKey: null,
 
   _selectRootElement: function() {
     // TODO: This is a solution while I don't found how we
