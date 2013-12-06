@@ -37,8 +37,10 @@ SC.mixin(SC.View,
         { value: { scale: scale }, duration: duration * 0.4, timing: 'ease-in-out' }
       ];
 
-      var callback = function () {
-        view.didTransitionIn();
+      var callback = function (data) {
+        if (!data.isCancelled) {
+          view.didTransitionIn();
+        }
       };
 
       // Animate through the frames.
@@ -71,8 +73,10 @@ SC.mixin(SC.View,
         { value: { scale: 0 }, duration: duration * 0.6, timing: 'ease-in-out' }
       ];
 
-      var callback = function () {
-        view.didTransitionOut();
+      var callback = function (data) {
+        if (!data.isCancelled) {
+          view.didTransitionOut();
+        }
       };
 
       // Animate through the frames.

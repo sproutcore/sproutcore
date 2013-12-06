@@ -108,8 +108,10 @@ SC.mixin(SC.View,
         { value: value, duration: duration, timing: 'ease-in-out' } // Hit target.
       ];
 
-      var callback = function () {
-        view.didTransitionIn();
+      var callback = function (data) {
+        if (!data.isCancelled) {
+          view.didTransitionIn();
+        }
       };
 
       // Animate through the frames.
@@ -192,8 +194,10 @@ SC.mixin(SC.View,
         { value: finalValue, duration: duration, timing: 'ease-in' }
       ];
 
-      var callback = function () {
-        view.didTransitionOut();
+      var callback = function (data) {
+        if (!data.isCancelled) {
+          view.didTransitionOut();
+        }
       };
 
       // Animate through the frames.

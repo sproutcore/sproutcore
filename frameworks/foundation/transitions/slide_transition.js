@@ -71,7 +71,9 @@ SC.mixin(SC.View,
         duration: options.duration || 0.4,
         timing: options.timing || 'ease'
       }, function (data) {
-        this.didTransitionIn();
+        if (!data.isCancelled) {
+          this.didTransitionIn();
+        }
       });
     }
   },
@@ -132,7 +134,9 @@ SC.mixin(SC.View,
         duration: options.duration || 0.4,
         timing: options.timing || 'ease'
       }, function (data) {
-        this.didTransitionOut();
+        if (!data.isCancelled) {
+          this.didTransitionOut();
+        }
       });
     }
   }
