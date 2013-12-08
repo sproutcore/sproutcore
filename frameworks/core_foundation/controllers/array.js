@@ -441,6 +441,16 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
 
   _scac_arrayContentDidChange: function (start, removed, added) {
     this._scac_cached = NO;
+
+    // if the controller is sorted (via an orderBy) and new items are added, the ordered sequence
+    // may change so we need to trigger a notification for a full UI refresh.
+    // if only removing items (added == 0), the order of remaining elements is not changing
+    // therefore no need to perform such a full refresh
+    if ((added > 0) && this.get('orderBy')) {
+      start = 0;
+      removed = 0;
+      added = this.get('length');
+    }
     this.arrayContentDidChange(start, removed, added);
 
     // If the start & length are provided, we can also indicate if the firstObject
