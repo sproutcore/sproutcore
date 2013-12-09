@@ -31,7 +31,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     var readOnlyStoreIds = this.get('readOnlyStoreIds'),
       length = this.get('length');
 
-    return "%@({\n  ids: [%@],\n  length: %@,\n  … })".fmt(this.constructor.toString(), readOnlyStoreIds, length);
+    return "%@({\n  ids: [%@],\n  length: %@,\n  … })".fmt(sc_super(), readOnlyStoreIds, length);
   },
 
   /* END DEBUG ONLY PROPERTIES AND METHODS */
