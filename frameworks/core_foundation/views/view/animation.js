@@ -241,7 +241,8 @@ SC.View.reopen(
       hash, layout,
       optionsType,
       pendingAnimations = this._pendingAnimations,
-      timing;
+      timing,
+      viewIsVisible = this.get('isVisibleInWindow');
 
     //@if(debug)
     // Provide a little developer support if they are doing something that may not work.
@@ -289,8 +290,11 @@ SC.View.reopen(
       options.method = method;
     }
 
-    // In the case of zero duration, just adjust and call the callback.
-    if (options.duration === 0) {
+    // There are two cases where we should skip the animation and just adjust immediately: if
+    // the duration is 0 (in which case there's no point to triggering the full animation stack),
+    // and if the view isn't visible (in which case the browser will not call our callback, and
+    // completely screw up subsequent calls.)
+    if (options.duration === 0 || !viewIsVisible) {
       this.invokeNext(function () {
         this.adjust(hash);
         this.runAnimationCallback(options, null, NO);
