@@ -7,8 +7,6 @@
 
 /*globals SC */
 
-sc_require('system/state');
-
 /**
   @class
 
