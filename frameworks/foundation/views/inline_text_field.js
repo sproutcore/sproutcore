@@ -335,8 +335,11 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
   */
   // TODO: this seems to do almost the same thing as fieldDidBlur
   blurEditor: function(evt) {
-    if (!this.get('isEditing')) return YES ;
-    return this.commitOnBlur ? this.commitEditing() : this.discardEditing();
+    if (this.get('isEditing')) {
+      return this.commitOnBlur ? this.commitEditing() : this.discardEditing();
+    } else {
+      return true;
+    }
   },
 
   /**
@@ -436,7 +439,6 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
   insertTab: function(evt) {
     var target = this.target; // removed by commitEditing()
     this.resignFirstResponder();
-    this.commitEditing() ;
     if(target){
       var next = target.get('nextValidKeyView');
       if(next && next.beginEditing) next.beginEditing();
@@ -448,7 +450,6 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
   insertBacktab: function(evt) {
     var target = this.target; // removed by commitEditing()
     this.resignFirstResponder();
-    this.commitEditing() ;
     if(target){
       var prev = target.get('previousValidKeyView');
       if(prev && prev.beginEditing) prev.beginEditing();
