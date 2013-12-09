@@ -96,6 +96,25 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
   }.property('record').cacheable(),
 
   /**
+    Determines whether the new record (i.e. unsaved) support should be enabled
+    or not.
+
+    Normally, all records in the many array should already have been previously
+    committed to a remote data store and have an actual `id`. However, with
+    `supportNewRecords` set to true, adding records without an `id `to the many
+    array will assign unique temporary ids to the new records.
+
+    *Note:* You must update the many array after the new records are successfully
+    committed and have real ids. This is done by calling `updateNewRecordId()`
+    on the many array. In the future this should be automatic.
+
+    @type Boolean
+    @default true
+    @since SproutCore 1.11.0
+  */
+  supportNewRecords: true,
+
+  /**
     Returns the `storeId`s in read-only mode.  Avoids modifying the record
     unnecessarily.
 
@@ -216,7 +235,12 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     if (!recs) this._records = recs = []; // create cache
     storeId = storeIds.objectAt(idx);
     if (storeId) {
-      storeKey = store.storeKeyFor(recordType, storeId);
+      // Handle transient records.
+      if (typeof storeId === SC.T_STRING && storeId.indexOf('_sc_id_placeholder_') === 0) {
+        storeKey = storeId.replace('_sc_id_placeholder_', '');
+      } else {
+        storeKey = store.storeKeyFor(recordType, storeId);
+      }
 
       // If record is not loaded already, then ask the data source to
       // retrieve it.
@@ -244,6 +268,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
         len      = recs ? (recs.get ? recs.get('length') : recs.length) : 0,
         record   = this.get('record'),
         pname    = this.get('propertyName'),
+        supportNewRecords = this.get('supportNewRecords'),
         i, ids, toRemove, inverse, attr, inverseRecord;
 
     // map to store keys
@@ -253,7 +278,11 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
         id = rec.get('id');
 
       if (SC.none(id)) {
-        throw new Error("Developer Error: Attempted to add a record without a primary key to a to-many relationship (%@). The record must have a real id or be given a temporary id (e.g. rec.set('id', 'temp' + rec.get('storeKey'))) before it can be used.".fmt(pname));
+        if (supportNewRecords) {
+          ids[i] = '_sc_id_placeholder_' + rec.get('storeKey');
+        } else {
+          throw new Error("Developer Error: Attempted to add a record without a primary key to a to-many relationship (%@). The record must have a real id or be given a temporary id before it can be used. ".fmt(pname));
+        }
       } else {
         // If the record inserted doesn't have an id yet, use a unique placeholder based on the storeKey.
         ids[i] = id;
@@ -456,6 +485,26 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     this.arrayContentWillChange(0, oldLen, newLen);
     this._prevStoreIds = storeIds;
     this._storeIdsContentDidChange(0, oldLen, newLen);
+  },
+
+  /**
+    Call this when a new record that was added to the many array previously
+    has been committed and now has a proper `id`. This will fix up the temporary
+    id that was used to allow the new record to be a part of this many array.
+
+    @return {void}
+  */
+  updateNewRecordId: function (rec) {
+    var storeIds = this.get('editableStoreIds'),
+      idx;
+
+    // Update the storeIds array with the new record id.
+    idx = storeIds.indexOf('_sc_id_placeholder_' + rec.get('storeKey'));
+
+    // Beware of records that are no longer a part of storeIds.
+    if (idx >= 0) {
+      storeIds.replace(idx, 1, [rec.get('id')]);
+    }
   },
 
   /** @private
