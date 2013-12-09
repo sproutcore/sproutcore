@@ -35,20 +35,6 @@ sc_require('system/many_array');
   Note: When setting ( `.set()` ) the value of a `toMany` attribute, make sure
   to pass in an array of `SC.Record` objects.
 
-  ## Using new Records in Relationships
-
-  Because relationships are based on `id`, new records created in the client
-  (that don't have an `id`) are typically not able to be assigned to a
-  relationship until after they have been committed to the server. However,
-  because it's unwieldy to manually update relationships after the real `id` is
-  known, `SC.ManyAttribute` through `SC.ManyArray`, allows new records to be added
-  that don't yet have an `id`. This works by observing each record in the
-  many array that doesn't have an `id` for changes to its `id` property.
-
-  When the `id` is set (i.e. the child record is committed to the server and now
-  has a real primary key), then the many array will be updated in place and the
-  parent record will at that point be dirtied.
-
   @extends SC.RecordAttribute
   @since SproutCore 1.0
 */
@@ -85,37 +71,12 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
   */
   orderBy: null,
 
-  /**
-    Determines whether the new record support of `SC.ManyArray` should be
-    enabled or not.
-
-    Normally, all records in the relationship should have previously been
-    committed to a remote data store and have an actual `id`. However,
-    you may find you need to create a record locally that you wish to use in a
-    `toMany` relationship. If you add a new record without an id to a
-    relationship, `SC.ManyArray` will observe this new record's id property
-    for changes so that once the new record is committed and has an actual
-    id, `SC.ManyArray` can update the relationship array and (depending on
-    the value of `isMaster`) dirty the inverse record at this point.
-
-    If you wish to turn this off, SC.ManyArray will throw an exception if you
-    add a record without an id to the relationship. If you use temporary `id`s
-    for new record, you will need to manually update the relationship, but
-    run the risk of committing inverse records with temporary `id`s in their
-    datahashes.
-
-    @type Boolean
-    @default true
-    @since SproutCore 1.11.0
-  */
-  supportNewRecords: true,
-
   // ..........................................................
   // LOW-LEVEL METHODS
   //
 
   /**  @private - adapted for to many relationship */
-  toType: function(record, key, value) {
+  toType: function (record, key, value) {
     var type      = this.get('typeClass'),
         supportNewRecords = this.get('supportNewRecords'),
         attrKey   = this.get('key') || key,
@@ -130,28 +91,26 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
         recordType:    type,
         record:        record,
         propertyName:  attrKey,
-        manyAttribute: this,
-        supportNewRecords: supportNewRecords
+        manyAttribute: this
       });
 
-      record[arrayKey] = ret ; // save on record
+      record[arrayKey] = ret; // save on record
       rel = record.get('relationships');
       if (!rel) record.set('relationships', rel = []);
       rel.push(ret); // make sure we get notified of changes...
-
     }
 
     return ret;
   },
 
   /** @private - adapted for to many relationship */
-  fromType: function(record, key, value) {
+  fromType: function (record, key, value) {
     var ret = [];
 
-    if(!SC.isArray(value)) throw new Error("Expects toMany attribute to be an array");
+    if (!SC.isArray(value)) throw new Error("Expects toMany attribute to be an array");
 
     var len = value.get('length');
-    for(var i=0;i<len;i++) {
+    for (var i = 0; i < len; i++) {
       ret[i] = value.objectAt(i).get('id');
     }
 
@@ -171,7 +130,7 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
     @param {String} key key on inverse that was modified
     @returns {void}
   */
-  inverseDidRemoveRecord: function(record, key, inverseRecord, inverseKey) {
+  inverseDidRemoveRecord: function (record, key, inverseRecord, inverseKey) {
     var manyArray = record.get(key);
     if (manyArray) {
       manyArray.removeInverseRecord(inverseRecord);
@@ -191,7 +150,7 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
     @param {String} key key on inverse that was modified
     @returns {void}
   */
-  inverseDidAddRecord: function(record, key, inverseRecord, inverseKey) {
+  inverseDidAddRecord: function (record, key, inverseRecord, inverseKey) {
     var manyArray = record.get(key);
     if (manyArray) {
       manyArray.addInverseRecord(inverseRecord);

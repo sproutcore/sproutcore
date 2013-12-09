@@ -80,7 +80,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @type SC.Store
     @property
   */
-  store: function() {
+  store: function () {
     return this.get('record').get('store');
   }.property('record').cacheable(),
 
@@ -91,29 +91,9 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @type Number
     @property
   */
-  storeKey: function() {
+  storeKey: function () {
     return this.get('record').get('storeKey');
   }.property('record').cacheable(),
-
-  /**
-    Determines whether the new record (i.e. unsaved) support should be enabled
-    or not.
-
-    Normally, all records in the many array should already have been previously
-    committed to a remote data store and have an actual `id`. However, with
-    `supportNewRecords` set to true, adding records without an `id `to the many
-    array will assign unique temporary ids to the new records and update the
-    underlying data hash with the correct ids after the new records are
-    successfully committed.
-
-    This means that the inverse record will not be dirtied until after all the
-    new records have been saved.
-
-    @type Boolean
-    @default true
-    @since SproutCore 1.11.0
-  */
-  supportNewRecords: true,
 
   /**
     Returns the `storeId`s in read-only mode.  Avoids modifying the record
@@ -122,7 +102,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @type SC.Array
     @property
   */
-  readOnlyStoreIds: function() {
+  readOnlyStoreIds: function () {
     return this.get('record').readAttribute(this.get('propertyName'));
   }.property(),
 
@@ -134,7 +114,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @type {SC.Array}
     @property
   */
-  editableStoreIds: function() {
+  editableStoreIds: function () {
     var store    = this.get('store'),
         storeKey = this.get('storeKey'),
         pname    = this.get('propertyName'),
@@ -147,7 +127,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     }
 
     if (ret !== this._prevStoreIds) this.recordPropertyDidChange();
-    return ret ;
+    return ret;
   }.property(),
 
 
@@ -161,7 +141,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @type Boolean
     @property
   */
-  isEditable: function() {
+  isEditable: function () {
     // NOTE: can't use get() b/c manyAttribute looks like a computed prop
     var attr = this.manyAttribute;
     return attr ? attr.get('isEditable') : NO;
@@ -173,7 +153,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @type String
     @property
   */
-  inverse: function() {
+  inverse: function () {
     // NOTE: can't use get() b/c manyAttribute looks like a computed prop
     var attr = this.manyAttribute;
     return attr ? attr.get('inverse') : null;
@@ -185,7 +165,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @type Boolean
     @property
   */
-  isMaster: function() {
+  isMaster: function () {
     // NOTE: can't use get() b/c manyAttribute looks like a computed prop
     var attr = this.manyAttribute;
     return attr ? attr.get('isMaster') : null;
@@ -197,7 +177,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @type Array
     @property
   */
-  orderBy: function() {
+  orderBy: function () {
     // NOTE: can't use get() b/c manyAttribute looks like a computed prop
     var attr = this.manyAttribute;
     return attr ? attr.get('orderBy') : null;
@@ -213,7 +193,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @type Number
     @property
   */
-  length: function() {
+  length: function () {
     var storeIds = this.get('readOnlyStoreIds');
     return storeIds ? storeIds.get('length') : 0;
   }.property('readOnlyStoreIds'),
@@ -222,26 +202,21 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     Looks up the store id in the store ids array and materializes a
     records.
   */
-  objectAt: function(idx) {
+  objectAt: function (idx) {
     var recs      = this._records,
         storeIds  = this.get('readOnlyStoreIds'),
         store     = this.get('store'),
         recordType = this.get('recordType'),
-        storeKey, ret, storeId ;
+        storeKey, ret, storeId;
 
     if (!storeIds || !store) return undefined; // nothing to do
-    if (recs && (ret=recs[idx])) return ret ; // cached
+    if (recs && (ret = recs[idx])) return ret; // cached
 
     // not in cache, materialize
-    if (!recs) this._records = recs = [] ; // create cache
+    if (!recs) this._records = recs = []; // create cache
     storeId = storeIds.objectAt(idx);
     if (storeId) {
-      // Handle transient records.
-      if (typeof storeId === SC.T_STRING && storeId.indexOf('_sc_id_placeholder_') == 0) {
-        storeKey = storeId.replace('_sc_id_placeholder_', '');
-      } else {
-        storeKey = store.storeKeyFor(recordType, storeId);
-      }
+      storeKey = store.storeKeyFor(recordType, storeId);
 
       // If record is not loaded already, then ask the data source to
       // retrieve it.
@@ -251,14 +226,14 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
       recs[idx] = ret = store.materializeRecord(storeKey);
     }
-    return ret ;
+    return ret;
   },
 
   /** @private
     Pass through to the underlying array.  The passed in objects must be
     records, which can be converted to `storeId`s.
   */
-  replace: function(idx, amt, recs) {
+  replace: function (idx, amt, recs) {
     //@if(debug)
     if (!this.get('isEditable')) {
       throw new Error("Developer Error: %@.%@[] is not editable.".fmt(this.get('record'), this.get('propertyName')));
@@ -269,9 +244,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
         len      = recs ? (recs.get ? recs.get('length') : recs.length) : 0,
         record   = this.get('record'),
         pname    = this.get('propertyName'),
-        supportNewRecords = this.get('supportNewRecords'),
-        i, ids, toRemove, inverse, attr, inverseRecord,
-        allValidRecords = true; // If there are records to add, ensure they aren't transient.
+        i, ids, toRemove, inverse, attr, inverseRecord;
 
     // map to store keys
     ids = [];
@@ -280,20 +253,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
         id = rec.get('id');
 
       if (SC.none(id)) {
-        if (supportNewRecords) {
-          ids[i] = '_sc_id_placeholder_' + rec.get('storeKey');
-
-          // There is an unhandled edge case that if the record is removed again from this relationship before its id is set,
-          // the observer will remain. This is an unlikely case and is accounted for in _recordsIdDidChange, so we won't bother
-          // inspecting the removed indexes for transient records.
-          rec.addObserver('id', this, this._recordsIdDidChange);
-
-          // If there are some transient records, then we don't want to dirty this record yet (i.e. we don't
-          // want to save this record when the relationship contains records that haven't been saved yet).
-          allValidRecords = false;
-        } else {
-          throw new Error("Developer Error: Attempted to add a record without a primary key to a to-many relationship. Relationships require that the id always be specified. Either the record, \"%@\", must be assigned an id (i.e. be saved) before it can be used in the '%@' relationship or you should set supportNewRecords to true in order to have a temporary id assigned to the record and have the relationship automatically updated once the record is assigned a real id.".fmt(recs.objectAt(i), pname));
-        }
+        throw new Error("Developer Error: Attempted to add a record without a primary key to a to-many relationship. Relationships require that the id always be specified. The record, \"%@\", must be assigned a real id (i.e. be saved) or given a temporary id (e.g. rec.set('id', 'temp' + rec.get('storeKey'))) before it can be used in the '%@' relationship.".fmt(recs.objectAt(i), pname));
       } else {
         // If the record inserted doesn't have an id yet, use a unique placeholder based on the storeKey.
         ids[i] = id;
@@ -308,7 +268,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
       if (toRemove) SC.ManyArray._toRemove = null; // reuse if possible
       else toRemove = [];
 
-      for(i=0;i<amt;i++) toRemove[i] = this.objectAt(idx + i);
+      for (i = 0; i < amt; i++) toRemove[i] = this.objectAt(idx + i);
     }
 
     // pass along - if allowed, this should trigger the content observer
@@ -319,7 +279,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     if (inverse) {
 
       // notify removals
-      for(i=0;i<amt;i++) {
+      for (i = 0; i < amt; i++) {
         inverseRecord = toRemove[i];
         attr = inverseRecord ? inverseRecord[inverse] : null;
         if (attr && attr.inverseDidRemoveRecord) {
@@ -333,7 +293,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
       }
 
       // notify additions
-      for(i=0;i<len;i++) {
+      for (i = 0; i < len; i++) {
         inverseRecord = recs.objectAt(i);
         attr = inverseRecord ? inverseRecord[inverse] : null;
         if (attr && attr.inverseDidAddRecord) {
@@ -343,8 +303,8 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
     }
 
-    // Only mark record dirty if all the records were valid (i.e. had ids), there is no inverse or we are master.
-    if (record && allValidRecords && (!inverse || this.get('isMaster'))) {
+    // Only mark record dirty if there is no inverse or we are master.
+    if (record && (!inverse || this.get('isMaster'))) {
       record.recordDidChange(pname);
     }
 
@@ -364,9 +324,10 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @param {SC.Record} inverseRecord the record that was removed
     @returns {SC.ManyArray} receiver
   */
-  removeInverseRecord: function(inverseRecord) {
-
+  removeInverseRecord: function (inverseRecord) {
+    // Fast path!
     if (!inverseRecord) return this; // nothing to do
+
     var id = inverseRecord.get('id'),
         storeIds = this.get('editableStoreIds'),
         idx      = (storeIds && id) ? storeIds.indexOf(id) : -1,
@@ -401,7 +362,9 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     // find idx to insert at.
     if (orderBy) {
       idx = this._findInsertionLocation(inverseRecord, 0, len, orderBy);
-    } else idx = len;
+    } else {
+      idx = len;
+    }
 
     storeIds.insertAt(idx, inverseRecord.get('id'));
     if (this.get('isMaster') && (record = this.get('record'))) {
@@ -441,14 +404,14 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
         ret, idx, len;
 
     if (t === SC.T_FUNCTION) ret = orderBy(a, b);
-    else if (t === SC.T_STRING) ret = SC.compare(a,b);
+    else if (t === SC.T_STRING) ret = SC.compare(a, b);
     else {
       len = orderBy.get('length');
       ret = 0;
-      for(idx=0;(ret===0) && (idx<len);idx++) ret = SC.compare(a,b);
+      for (idx = 0; ret === 0 && idx < len; idx++) ret = SC.compare(a, b);
     }
 
-    return ret ;
+    return ret;
   },
 
   // ..........................................................
@@ -458,8 +421,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
   /** @private
     Invoked whenever the `storeIds` array changes.  Observes changes.
   */
-  recordPropertyDidChange: function(keys) {
-
+  recordPropertyDidChange: function (keys) {
     if (keys && !keys.contains(this.get('propertyName'))) return this;
 
     var storeIds = this.get('readOnlyStoreIds'), oldLen, newLen;
@@ -496,55 +458,25 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     this._storeIdsContentDidChange(0, oldLen, newLen);
   },
 
-  /** @private Invoked when a transient record's id changes. Used to fix up the relationship accordingly. */
-  _recordsIdDidChange: function (rec) {
-    var storeIds = this.get('editableStoreIds'),
-      record = this.get('record'),
-      pname = this.get('propertyName'),
-      inverse = this.get('inverse'),
-      isMaster = this.get('isMaster'),
-      idx;
-
-    // Update the storeIds array with the new record id.
-    if (rec.get('id')) {
-      idx = storeIds.indexOf('_sc_id_placeholder_' + rec.get('storeKey'));
-
-      // Beware of records that are no longer a part of storeIds.
-      if (idx >= 0) {
-        storeIds.replace(idx, 1, [rec.get('id')]);
-
-        // Mark the record dirty if there is no inverse or we are master.
-        // Note: when the temporary relationship was created we avoided marking this
-        // record dirty unnecessarily at that time in an effort to ensure consistency.
-        if (record && (!inverse || isMaster)) {
-          record.recordDidChange(pname);
-        }
-      }
-    }
-
-    // Clean up the observer.
-    rec.removeObserver('id', this, this._recordsIdDidChange);
-  },
-
   /** @private
     Invoked whenever the content of the storeIds array changes.  This will
     dump any cached record lookup and then notify that the enumerable content
     has changed.
   */
-  _storeIdsContentDidChange: function(start, removedCount, addedCount) {
-    this._records = null ; // clear cache
+  _storeIdsContentDidChange: function (start, removedCount, addedCount) {
+    this._records = null; // clear cache
     this.arrayContentDidChange(start, removedCount, addedCount);
   },
 
   /** @private */
-  unknownProperty: function(key, value) {
+  unknownProperty: function (key, value) {
     var ret;
     if (SC.typeOf(key) === SC.T_STRING) ret = this.reducedProperty(key, value);
     return ret === undefined ? sc_super() : ret;
   },
 
   /** @private */
-  init: function() {
+  init: function () {
     sc_super();
     this.recordPropertyDidChange();
   }
