@@ -1758,11 +1758,12 @@ SC.CoreView.reopen(
         // Route.
         var transitionIn = this.get('transitionIn');
         if (transitionIn) {
+          this._gotoAttachedBuildingInState();
+
           // this.invokeNext(function () {
             this._transitionIn();
           // });
 
-          this._gotoAttachedBuildingInState();
         } else {
           this._gotoAttachedShownState();
         }
