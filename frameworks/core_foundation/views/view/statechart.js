@@ -8,6 +8,7 @@ SC.LOG_VIEW_STATES_STYLE = {
   0x0300: 'color: #67b7db; font-style: italic;', // UNATTACHED
   0x0301: 'color: #67b7db; font-style: italic;', // UNATTACHED_BY_PARENT
   0x03C0: 'color: #23abf5; font-style: italic;', // ATTACHED_SHOWN
+  0x03C3: 'color: #1fe7a8; font-style: italic;', // ATTACHED_SHOWN_ANIMATING
   0x03A0: 'color: #67b7db; font-style: italic;', // ATTACHED_HIDDEN
   0x03A1: 'color: #67b7db; font-style: italic;', // ATTACHED_HIDDEN_BY_PARENT
   0x03C1: 'color: #b800db; font-style: italic;', // ATTACHED_BUILDING_IN
@@ -103,6 +104,15 @@ SC.CoreView.mixin(
     @constant
   */
   ATTACHED_SHOWN: 0x03C0, // 960
+
+  /**
+    The view has been created, rendered and attached, is visible in the
+    display and is being animated via a call to `animate()`.
+
+    @static
+    @constant
+  */
+  ATTACHED_SHOWN_ANIMATING: 0x03C3, // 963
 
   /**
     The view has been created, rendered and attached, but is not visible in the
@@ -235,6 +245,7 @@ SC.CoreView.reopen(
     * SC.CoreView.UNATTACHED_BY_PARENT
     * SC.CoreView.ATTACHED_SHOWING
     * SC.CoreView.ATTACHED_SHOWN
+    * SC.CoreView.ATTACHED_SHOWN_ANIMATING
     * SC.CoreView.ATTACHED_HIDING
     * SC.CoreView.ATTACHED_HIDDEN
     * SC.CoreView.ATTACHED_HIDDEN_BY_PARENT
@@ -493,6 +504,7 @@ SC.CoreView.reopen(
 
     // Improper states that have no effect, but should be discouraged.
     case SC.CoreView.ATTACHED_SHOWN:
+    case SC.CoreView.ATTACHED_SHOWN_ANIMATING:
       //@if(debug)
       // This should be avoided, because moving the view layer without explicitly removing it first is a dangerous practice.
       SC.warn("Developer Warning: You can not attach the view, %@, to a new node without properly detaching it first.".fmt(this));
@@ -530,6 +542,7 @@ SC.CoreView.reopen(
     case SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT:
     case SC.CoreView.ATTACHED_SHOWING:
     case SC.CoreView.ATTACHED_SHOWN:
+    case SC.CoreView.ATTACHED_SHOWN_ANIMATING:
     case SC.CoreView.UNATTACHED_BY_PARENT:
     case SC.CoreView.ATTACHED_BUILDING_OUT:
       break;
@@ -580,6 +593,11 @@ SC.CoreView.reopen(
     case SC.CoreView.ATTACHED_HIDDEN_BY_PARENT:
       // No need to transition out, since we're hidden.
       immediately = true;
+      break;
+
+    // Near normal case: Attached visible view that is in the middle of an animation.
+    case SC.CoreView.ATTACHED_SHOWN_ANIMATING:
+      this.cancelAnimation();
       break;
 
     // Near normal case: Attached showing view. We cancel the incoming animation
@@ -723,6 +741,12 @@ SC.CoreView.reopen(
       this._teardownTransition();
       this._gotoAttachedHiddenState();
       break;
+
+    // Near normal case: Attached visible view that is in the middle of an animation.
+    case SC.CoreView.ATTACHED_SHOWN_ANIMATING:
+      this.cancelAnimation();
+      break;
+
     case SC.CoreView.ATTACHED_SHOWN:
       break;
     default:
@@ -800,6 +824,7 @@ SC.CoreView.reopen(
     switch (state) {
     case SC.CoreView.ATTACHED_SHOWING: // FAST PATHS!
     case SC.CoreView.ATTACHED_SHOWN:
+    case SC.CoreView.ATTACHED_SHOWN_ANIMATING:
     case SC.CoreView.ATTACHED_HIDING:
     case SC.CoreView.ATTACHED_HIDDEN:
     case SC.CoreView.ATTACHED_HIDDEN_BY_PARENT:
@@ -894,6 +919,7 @@ SC.CoreView.reopen(
     // Invalid states that have no effect.
     case SC.CoreView.UNRENDERED: // FAST PATH!
     case SC.CoreView.ATTACHED_SHOWN: // FAST PATH!
+    case SC.CoreView.ATTACHED_SHOWN_ANIMATING:
     case SC.CoreView.ATTACHED_SHOWING: // FAST PATH!
     case SC.CoreView.ATTACHED_HIDDEN_BY_PARENT: // FAST PATH!
     case SC.CoreView.ATTACHED_BUILDING_IN: // FAST PATH!
