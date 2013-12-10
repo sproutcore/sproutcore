@@ -293,7 +293,20 @@ SC.View.reopen(
     if (options.duration === 0) {
       this.invokeNext(function () {
         this.adjust(hash);
-        this.runAnimationCallback(options, null, NO);
+        this.runAnimationCallback(options, null, false);
+      });
+      return this;
+    }
+
+    // In the case that the view is not in the standard visible state, don't animate.
+    if (!this.get('isVisibleInWindow')) {
+      //@if(debug)
+      SC.warn("Developer Warning: SC.View:animate() was called on %@ which is not visible in the window. The animation will be cancelled.".fmt(this));
+      //@endif
+
+      this.invokeNext(function () {
+        this.adjust(hash);
+        this.runAnimationCallback(options, null, true); // Cancelled
       });
       return this;
     }
@@ -380,6 +393,7 @@ SC.View.reopen(
           pendingAnimations.centerY = options;
         }
       }
+
       if (!SC.none(pendingAnimations.width) && !SC.none(layout.centerX) && SC.none(pendingAnimations.centerX)) {
         // Don't animate less than 2px difference b/c the margin-left value won't differ.
         if (Math.abs(hash.width - this.get('layout').width) >= 2) {
@@ -391,8 +405,15 @@ SC.View.reopen(
 
       // Always run the animation asynchronously so that the original layout is guaranteed to be applied to the DOM.
       this.invokeNext('_animate');
+
+      // Route.
+      if (this.get('viewState') === SC.CoreView.ATTACHED_SHOWN) {
+        this.set('viewState', SC.CoreView.ATTACHED_SHOWN_ANIMATING);
+      }
     } else if (!optionsDidChange) {
-      this.runAnimationCallback(options, null, NO);
+      this.invokeNext(function () {
+        this.runAnimationCallback(options, null, false);
+      });
     }
 
     return this;
@@ -487,6 +508,11 @@ SC.View.reopen(
       layout = this._animateLayout;
     }
 
+    // Route.
+    if (this.get('viewState') === SC.CoreView.ATTACHED_SHOWN_ANIMATING) {
+      this.set('viewState', SC.CoreView.ATTACHED_SHOWN);
+    }
+
     // Immediately remove the pending animations while calling the callbacks.
     for (key in pendingAnimations) {
       animation = pendingAnimations[key];
@@ -538,6 +564,11 @@ SC.View.reopen(
       for (var key in pendingAnimations) {
         this.removeAnimationFromLayout(key, NO);
         this.runAnimationCallback(pendingAnimations[key], null, NO);
+      }
+
+      // Route.
+      if (this.get('viewState') === SC.CoreView.ATTACHED_SHOWN_ANIMATING) {
+        this.set('viewState', SC.CoreView.ATTACHED_SHOWN);
       }
 
       // Reset the placeholder variables now that the layout style has been applied.
@@ -650,9 +681,9 @@ SC.View.reopen(
     if (method) {
       // We're using invokeNext so we don't trigger any layout changes from
       // the callback until the current layout is updated.
-      this.invokeNext(function () {
+      // this.invokeNext(function () {
         method.call(target, { event: evt, view: this, isCancelled: cancelled });
-      }, this);
+      // }, this);
 
       // Always clear the method from the hash to prevent it being called
       // multiple times for animations in the group.
@@ -681,14 +712,19 @@ SC.View.reopen(
       // Remove the animation style without triggering a layout change.
       this.removeAnimationFromLayout(propertyName, YES);
 
-      // Run the callback.
-      this.runAnimationCallback(animation, evt, NO);
-
       // Clean up the internal hash.
       this._activeAnimationsLength -= 1;
       if (this._activeAnimationsLength === 0) {
+        // Route.
+        if (this.get('viewState') === SC.CoreView.ATTACHED_SHOWN_ANIMATING) {
+          this.set('viewState', SC.CoreView.ATTACHED_SHOWN);
+        }
+
         this._activeAnimations = this._prevLayout = null;
       }
+
+      // Run the callback.
+      this.runAnimationCallback(animation, evt, NO);
     }
   },
 
