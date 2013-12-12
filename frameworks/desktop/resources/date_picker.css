@@ -1,0 +1,137 @@
+/* ==========================================================================
+*  Project: SproutCore - JavaScript Application Framework
+*  Copyright: ©2006-2011 Strobe Inc. and contributors.
+*             Portions ©2008-2011 Apple Inc. All rights reserved.
+*  License:   Licensed under MIT license (see license.js)
+*  ==========================================================================
+*/
+
+/* Calendar */
+
+/* Header */
+.sc-date-picker .header {
+  height: 31px;
+  border: 1px solid #3051A3;
+  border-bottom-color: #00065D;
+  -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6);
+  -moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6);
+  background-color: #3A77C0;
+  background: -webkit-gradient(linear, left top, left bottom, from(#2A67B0), to(#4F90E0));
+  background: -moz-linear-gradient(top, #2A67B0, #4F90E0);
+}
+.sc-date-picker.focus .header {
+  background: -webkit-gradient(linear, left top, left bottom, from(#3A77C0), to(#5FA0F0));
+  background: -moz-linear-gradient(top, #3A77C0, #5FA0F0);
+}
+
+
+.sc-date-picker .month {
+  margin: 0 29px;
+  color: #fff;
+  font-size: 14px;
+  line-height: 31px;
+  text-align: center;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, .7);
+}
+
+.sc-date-picker .button {
+  width: 9px;
+  height: 10px;
+  position: absolute;
+  top: 12px;
+  background: static_url('images/calendar.png');
+}
+
+.sc-date-picker .previous {
+  left: 10px;
+}
+
+.sc-date-picker .previous.active {
+  background-position: 0 -10px;
+}
+
+.sc-date-picker .next {
+  right: 10px;
+  background-position: -9px 0;
+}
+
+.sc-date-picker .active {
+  background-position: -9px -10px;
+}
+
+/* Body */
+.sc-date-picker .body {
+  display: inline-block;
+  padding: 10px;
+  border: 1px solid #A6A6A6;
+  border-top: 0;
+  background: #EEE;
+}
+
+.sc-date-picker .grid {
+  width: 182px;
+  overflow: hidden;
+  border-top: 1px solid #C6C2BE;
+  border-left: 1px solid #C6C2BE;
+}
+
+.sc-date-picker .day {
+  width: 25px;
+  height: 25px;
+  float: left;
+  border-bottom: 1px solid #c6c2be;
+  border-right: 1px solid #c6c2be;
+  line-height: 25px;
+  text-align: center;
+}
+
+.sc-date-picker .day.name {
+  height: 12px;
+  border-color: transparent;
+  font-size: 10px;
+  line-height: 12px;
+}
+
+.sc-date-picker .day.present {
+  color: #353535;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .7);
+  background: #FEFEFE;
+  background: -webkit-gradient(linear, left top, left bottom, from(#f8f8f7), to(#e1e0dc));
+  background: -moz-linear-gradient(top, #f8f8f7, #e1e0dc);
+}
+
+.sc-date-picker .day.past, .sc-date-picker .day.future {
+  color: #aaa;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .7);
+  background: #f6f6f6;
+}
+
+.sc-date-picker .day.today {
+  color: #fff;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, .7);
+  background: #a2a8ae;
+  -webkit-box-shadow: inset 0 1px 3px rgba(0, 0, 0, .5);
+  -moz-box-shadow: inset 0 1px 3px rgba(0, 0, 0, .5);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, .5);
+}
+
+.sc-date-picker .day.sel, .sc-date-picker .day.active {
+  color: #fff;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, .7);
+  background: #db0c10;
+  background: -webkit-gradient(linear, left top, left bottom, from(#5699DD), to(#417ADF));
+  background: -moz-linear-gradient(top, #5699DD, #417ADF);
+  &.active {
+    opacity: 0.7;
+  }
+}
+
+.sc-date-picker .date-today,
+.sc-date-picker .date-none {
+  border: 1px solid #a6a09c;
+  font-size: 11px;
+  line-height: 16px;
+  text-align: center;
+  background: #fff;
+}
