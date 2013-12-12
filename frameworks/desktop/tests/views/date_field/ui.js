@@ -415,7 +415,6 @@ test("Adding both left and right accessory views", function() {
 });
 
 
-
 // ..........................................................
 // TEST EVENTS
 //
@@ -474,4 +473,111 @@ test("editing a field should not change the cursor position", function() {
   ok(selection.get('start') == 2 && selection.get('end') == 3, 'cursor position should be unchanged');
 });
 */
+
+// ..........................................................
+// TEST DATE PICKER
+//
+test("datePicker: datePickerIsShowing", function() {
+  var view = pane.view('with value');
+  ok(view.datePicker && view.datePicker.isClass, "PRELIM: View has date picker class.");
+  SC.run(function() {
+    view.set('datePickerIsShowing', YES);
+  });
+  ok(view.datePicker.isObject, "Date picker is instantiated when needed.");
+  ok(view.datePicker.get('isVisibleInWindow'), "Date picker appears when datePickerIsShowing is set to YES.");
+  SC.run(function() {
+    view.set('datePickerIsShowing', NO);
+  });
+  ok(!view.datePicker.get('isVisibleInWindow'), "Date picker disappears when datePickerIsShowing is set to NO.");
+});
+
+test("datePicker: updateOnPickerChange", function() {
+  var view = pane.view('with value');
+  SC.run(function() {
+    view.set('updateOnPickerChange', YES);
+    view.set('datePickerIsShowing', YES);
+  });
+  ok(view.datePicker.get('isVisibleInWindow'), "PRELIM: Date picker appears when updateOnPickerChange is YES and datePickerIsShowing is YES.");
+  var newDate = view.get('value').advance({ day: 1 })
+  SC.run(function() {
+    view.datePicker.set('value', newDate);
+  });
+  ok(view.get('value') === newDate, "View's value updates when picker updates and updateOnPickerChange is YES.");
+});
+
+test("datePicker: dismissPickerOnChange", function() {
+  var view = pane.view('with value');
+  SC.run(function() {
+    view.set('dismissPickerOnChange', YES);
+    view.set('datePickerIsShowing', YES);
+  });
+  ok(view.datePicker.get('isVisibleInWindow'), "PRELIM: Date picker appears when dismissPickerOnChange is YES and datePickerIsShowing is YES.");
+  var newDate = view.get('value').advance({ day: 1 })
+  SC.run(function() {
+    view.datePicker.set('value', newDate);
+  });
+  ok(view.get('value') === newDate, "View's value updates when picker updates and dismissPickerOnChange is YES.");
+  ok(view.get('value') === newDate, "Date picker disappears when picker updates and dismissPickerOnChange is YES.");
+});
+
+test("datePicker: Arrow key proxying", function() {
+  var view = pane.view('with value');
+  SC.run(function() {
+    view.set('datePickerIsShowing', YES);
+  });
+  var datePicker = view.datePicker,
+      initialDate = datePicker.get('value');
+
+  // moveUp
+  var expectedDate = initialDate.advance({ day: -7 });
+  SC.run(function() {
+    view.moveUp({});
+  });
+  ok(datePicker.get('value') === expectedDate, "view.moveUp changes datePicker's value by -7 days.");
+
+  // moveDown
+  expectedDate = initialDate.advance({ day: 7 });
+  SC.run(function() {
+    datePicker.set('value', initialDate);
+  });
+  SC.run(function() {
+    view.moveDown({});
+  });
+  ok(datePicker.get('value') === expectedDate, "view.moveDown changes datePicker's value by 7 days.");
+
+  // moveLeft
+  expectedDate = initialDate.advance({ day: -1 });
+  SC.run(function() {
+    datePicker.set('value', initialDate);
+  });
+  SC.run(function() {
+    view.moveLeft({});
+  });
+  ok(datePicker.get('value') === expectedDate, "view.moveLeft changes datePicker's value by -1 day.");
+
+  // moveRight
+  expectedDate = initialDate.advance({ day: 1 });
+  SC.run(function() {
+    datePicker.set('value', initialDate);
+  });
+  SC.run(function() {
+    view.moveRight({});
+  });
+  ok(datePicker.get('value') === expectedDate, "view.moveRight changes datePicker's value by 1 day.");
+
+});
+
+test("datePicker: destroy", function() {
+  var view = pane.view('with value');
+  SC.run(function() {
+    view.set('datePickerIsShowing', YES);
+  });
+  var datePicker = view.datePicker;
+  SC.run(function() {
+    view.destroy();
+  });
+  ok(datePicker.isDestroyed, "Date picker is destroyed when view is destroyed.");
+  ok(!view.datePicker, "Reference to date picker is nulled out when view is destroyed.");
+});
+
 })();
