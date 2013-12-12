@@ -381,7 +381,7 @@ test("adding a record to a many-to-many; bar side", function() {
 
 
 test("adding a record to a many-to-many; foo side", function() {
-  ok(foo2.get('barToMany').indexOf(bar3) < 0, 'PRECOND - foo1.barToMany should NOT contain bar3');
+  ok(foo2.get('barToMany').indexOf(bar3) < 0, 'PRECOND - foo2.barToMany should NOT contain bar3');
   ok(bar3.get('fooToMany').indexOf(foo2) < 0, 'PRECOND - bar3.fooToMany should NOT contain foo1');
   checkAllClean(foo2, bar3);
 
@@ -389,11 +389,96 @@ test("adding a record to a many-to-many; foo side", function() {
     foo2.get('barToMany').pushObject(bar3);
   });
 
-  ok(foo2.get('barToMany').indexOf(bar3) >= 0, 'foo1.barToMany should contain bar3');
-  ok(bar3.get('fooToMany').indexOf(foo2) >= 0, 'bar1.fooToMany should contain foo3');
+  ok(foo2.get('barToMany').indexOf(bar3) >= 0, 'foo2.barToMany should contain bar3');
+  ok(bar3.get('fooToMany').indexOf(foo2) >= 0, 'bar3.fooToMany should contain foo2');
 
-  equals(foo2.get('status'), SC.Record.READY_DIRTY, 'foo1.status should be READY_DIRTY');
-  equals(bar1.get('status'), SC.Record.READY_CLEAN, 'bar3.status should be READY_CLEAN');
+  equals(foo2.get('status'), SC.Record.READY_DIRTY, 'foo2.status should be READY_DIRTY');
+  equals(bar1.get('status'), SC.Record.READY_CLEAN, 'bar1.status should be READY_CLEAN');
+});
+
+test("reset a many-to-many; bar side", function() {
+  equals(foo1.get('barToMany').get('length'), 1, 'PRECOND - foo1.barToMany.length should be 1');
+  equals(bar1.get('fooToMany').get('length'), 2, 'PRECOND - bar1.fooToMany.length should be 2');
+
+  bar1.set('fooToMany', []);
+
+  equals(foo1.get('barToMany').get('length'), 0, 'foo1.barToMany.length should be 0');
+  equals(bar1.get('fooToMany').get('length'), 0, 'bar1.fooToMany.length should be 1');
+});
+
+test("reset a many-to-many; foo side", function() {
+  equals(foo1.get('barToMany').get('length'), 1, 'PRECOND - foo1.barToMany.length should be 1');
+  equals(bar1.get('fooToMany').get('length'), 2, 'PRECOND - bar1.fooToMany.length should be 2');
+
+  foo1.set('barToMany', []);
+
+  equals(foo1.get('barToMany').get('length'), 0, 'foo1.barToMany.length should be 0');
+  equals(bar1.get('fooToMany').get('length'), 1, 'bar1.fooToMany.length should be 1');
+});
+
+test("set an array of records to a many-to-many; bar side", function() {
+  ok(foo3.get('barToMany').indexOf(bar1) < 0, 'PRECOND - foo3.barToMany should NOT contain bar1');
+  ok(bar1.get('fooToMany').indexOf(foo3) < 0, 'PRECOND - bar1.fooToMany should NOT contain foo3');
+
+  bar1.set('fooToMany', [foo2, foo3]);
+
+  ok(foo2.get('barToMany').indexOf(bar1) >= 0, 'foo2.barToMany should contain bar1');
+  ok(foo3.get('barToMany').indexOf(bar1) >= 0, 'foo3.barToMany should contain bar1');
+  ok(bar1.get('fooToMany').indexOf(foo2) >= 0, 'bar1.fooToMany should contain foo2');
+  ok(bar1.get('fooToMany').indexOf(foo3) >= 0, 'bar1.fooToMany should contain foo3');
+  ok(foo1.get('barToMany').indexOf(bar1) < 0, 'foo1.barToMany should NOT contain bar1');
+  ok(bar1.get('fooToMany').indexOf(foo1) < 0, 'bar1.fooToMany should NOT contain foo1');
+
+  equals(foo2.get('status'), SC.Record.READY_CLEAN, 'foo2.status should be READY_CLEAN');
+  equals(foo3.get('status'), SC.Record.READY_DIRTY, 'foo3.status should be READY_DIRTY');
+  equals(bar1.get('status'), SC.Record.READY_CLEAN, 'bar1.status should be READY_CLEAN');
+});
+
+test("set an array of records to a many-to-many; foo side", function() {
+  ok(bar3.get('fooToMany').indexOf(foo1) < 0, 'PRECOND - bar3.fooToMany should NOT contain foo1');
+  ok(foo1.get('barToMany').indexOf(bar3) < 0, 'PRECOND - foo1.barToMany should NOT contain bar3');
+
+  foo1.set('barToMany', [bar2, bar3]);
+
+  ok(bar2.get('fooToMany').indexOf(foo1) >= 0, 'bar2.fooToMany should contain foo1');
+  ok(bar3.get('fooToMany').indexOf(foo1) >= 0, 'foo2.fooToMany should contain foo1');
+  ok(foo1.get('barToMany').indexOf(bar2) >= 0, 'foo1.barToMany should contain bar2');
+  ok(foo1.get('barToMany').indexOf(bar3) >= 0, 'foo1.barToMany should contain bar3');
+  ok(foo1.get('barToMany').indexOf(bar1) < 0, 'foo1.fooToMany should NOT contain bar1');
+  ok(bar1.get('fooToMany').indexOf(foo1) < 0, 'bar1.barToMany should NOT contain foo1');
+
+  equals(bar2.get('status'), SC.Record.READY_CLEAN, 'bar2.status should be READY_CLEAN');
+  equals(foo1.get('status'), SC.Record.READY_DIRTY, 'foo1.status should be READY_DIRTY');
+  equals(bar3.get('status'), SC.Record.READY_CLEAN, 'bar3.status should be READY_CLEAN');
+});
+
+test("set an SC.ManyArray to a many-to-many; foo side", function() {
+  ok(bar1.get('fooToMany').indexOf(foo1) >= 0, 'PRECOND - bar1.fooToMany should contain foo1');
+  ok(bar2.get('fooToMany').indexOf(foo1) < 0, 'PRECOND - bar2.fooToMany should NOT contain foo1');
+  ok(foo1.get('barToMany').indexOf(bar2) < 0, 'PRECOND - foo1.barToMany should NOT contain bar2');
+
+  foo1.get('barToMany').pushObject(bar3);
+
+  ok(foo1.get('barToMany').indexOf(bar3) >= 0, 'foo1.barToMany should contain bar3');
+  ok(bar3.get('fooToMany').indexOf(foo1) >= 0, 'bar3.fooToMany should contain foo1');
+
+  foo1.set('barToMany', foo2.get('barToMany'));
+
+  ok(bar2.get('fooToMany').indexOf(foo1) >= 0, 'bar2.fooToMany should contain foo1');
+  ok(foo1.get('barToMany').indexOf(bar2) >= 0, 'foo1.barToMany should contain bar2');
+  ok(foo1.get('barToMany').indexOf(bar3) < 0, 'foo1.barToMany should NOT contain bar3');
+  ok(bar3.get('fooToMany').indexOf(foo1) < 0, 'bar3.fooToMany should NOT contain foo1');
+});
+
+test("set null to a many-to-many; foo side", function() {
+  foo1.set('barToMany', null);
+
+  ok(foo1.getPath('barToMany.length') === 0, 'foo1.barToMany.length should be 0');
+  ok(bar1.get('fooToMany').indexOf(foo1) < 0, 'bar1.fooToMany should NOT contain foo1');
+  ok(bar2.get('fooToMany').indexOf(foo1) < 0, 'bar2.fooToMany should NOT contain foo1');
+
+  equals(foo1.get('status'), SC.Record.READY_DIRTY, 'foo1.status should be READY_DIRTY');
+  equals(bar1.get('status'), SC.Record.READY_CLEAN, 'bar1.status should be READY_CLEAN');
 });
 
 // ..........................................................
