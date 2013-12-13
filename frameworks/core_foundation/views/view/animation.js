@@ -298,15 +298,13 @@ SC.View.reopen(
       return this;
     }
 
-    // In the case that the view is not in the standard visible state, don't animate.
+    // In the case that the view is not in the standard visible state, adjust instead of animate.
     if (!this.get('isVisibleInWindow')) {
-      //@if(debug)
-      SC.warn("Developer Warning: SC.View:animate() was called on %@ which is not visible in the window. The animation will be cancelled.".fmt(this));
-      //@endif
-
       this.invokeNext(function () {
         this.adjust(hash);
-        this.runAnimationCallback(options, null, true); // Cancelled
+        this.runAnimationCallback(options, null);
+        // Note: we may need to find a way to alert the callback that the animation was successful
+        // but instantaneous.
       });
       return this;
     }
