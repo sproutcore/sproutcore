@@ -183,7 +183,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
       target = this.tryToPerform(action, evt) ? this : null;
     }
 
-    return evt.mouseHandler || target;
+    return (evt && evt.mouseHandler) || target;
   },
 
   // .......................................................
