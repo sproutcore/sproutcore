@@ -1915,6 +1915,191 @@ SC.CoreView.unload = function () {
      before its layer is removed from the DOM. You can use this to reverse any
      setup that is performed in `didAppendToDocument`.
 
+  View Events
+  ====
+
+  One of SproutCore's optimizations is application-wide event delegation: SproutCore
+  handles and standardizes events for you before sending them through your view layer's
+  chain of responding views. You should never need to attach event listeners to elements;
+  instead, just implement methods like `click`, `doubleClick`, `mouseEnter` and
+  `dataDragHover` on your views.
+
+  Note that events generally bubble up an event's responder chain, which is made up of the
+  targeted view (i.e. the view whose DOM element received the event), and its chain of
+  parentViews up to its pane. (In certain rare cases, you may wish to manipulate the responder
+  chain to bypass certain views; you can do so by overriding a view's `nextResponder` property.)
+
+  Simple mouse click events
+  ----
+  In many situations, all you need are clicks - in which case, just implement `click` or
+  `doubleClick` on your views. Note that these events bubble up the responder chain until
+  they encounter a view which implements the event method. For example, if a view and its
+  parent both implement `click`, the parent will not be notified of the click. (If you want a
+  view to handle the event AND allow the event to keep bubbling to its parent views, no
+  problem: just be sure to return NO from the event method.)
+  - `click` -- Called on a view when the user clicks the mouse on a view. (Note that the view
+    on which the user lifts the mouse button will receive the `click` event, regardless of
+    whether the user depressed the mouse button elsewhere. If you need finer-grained control
+    than this, see "Granular mouse click events" below.)
+  - `doubleClick` -- Called on a view when a user has double-clicked it. Double-clicks are
+    triggered when two clicks of the same button happen within eight pixels and 250ms of each
+    other. (If you need finer-grained control than this, see "Granular mouse click events"
+    below.) The same view may receive both `click` and `doubleClick` events.
+
+  Note that defining application behavior directly in event handlers is usually a bad idea; you
+  should follow the target/action pattern when possible. See SC.ButtonView and SC.ActionSupport.
+  Also note that you will not need to implement event handling yourself on most built-in
+  SproutCore controls.
+
+  Note that `click` and `doubleClick` event handlers on your views will not be notified of touch
+  events; you must also implement touch handling. See "Touch events" below.
+
+  Mouse movement events
+  ----
+  SproutCore normalizes (and brings sanity to) mouse movement events by calculating when
+  the mouse has entered and exited views, and sending the correct event to each view in
+  the responder chain. For example, if a mouse moves within a parent view but crosses from
+  one child view to another, the parent view will receive a mouseMoved event while the child
+  views will receive mouseEnter and mouseExit events.
+
+  In contrast to mouse click events, mouse movement events are called on the entire responder
+  chain regardless of how you handle it along the way - a view and its parent, both implementing
+  event methods, will both be notified of the event.
+
+  - `mouseEnter` -- Called when the cursor first enters a view. Called on every view that has
+    just entered the responder chain.
+  - `mouseMoved` -- Called when the cursor moves over a view.
+  - `mouseExited` -- Called when the cursor leaves a view. Called on every view that has
+    just exited the responder chain.
+
+  Granular mouse click events
+  ----
+  If you need more granular handling of mouse click events than what is provided by `click`
+  and `doubleClick`, you can handle their atomic components `mouseDown`, `mouseDrag` and
+  `mouseUp`. Like the compound events, these events bubble up their responder chain towards
+  the pane until they find an event which implements the event handler method. (Again, to
+  handle an event but allow it to continue bubbling, just return NO.)
+
+  It bears emphasizing that `mouseDrag` and `mouseUp` events for a given mouse click sequence
+  are *only ever called* on the view which successfully responded to the mouseUp event. This
+  gives the mouseDown event control over the entire click sequence.
+
+  (Note that because of how events bubble up the responder chain, if a child view implements
+  `mouseDown` but not `mouseDrag` or `mouseUp`, those events will bubble to its parent. This
+  may cause unexpected behavior if similar events are handled at different parts of your view
+  hierarchy.)
+
+  - `mouseDown` -- Called on the target view and responder chain when the user depresses a
+    button. A view must implement mouseDown (and not return NO) in order to receive mouseUp.
+  - `mouseDrag` -- Called on the target view if it handled mouseDown. A view must implement
+    mouseDown (and not return NO) in order to receive mouseUp; only the view which handled a
+    given click sequence's mouseDown will receive `mouseDrag` events (and will continue to
+    receive them even if the user drags the mouse off of it).
+  - `mouseUp` -- Called on the target view when the user lifts a mouse button. A view must
+    implement mouseDown (and not return NO) in order to receive mouseUp.
+
+  SproutCore implements a higher-level API for handling in-application dragging and dropping.
+  See `SC.Drag`, `SC.DragSource`, `SC.DragDataSource`, and `SC.DropTarget` for more.
+
+  Data-drag events
+  ----
+  Browsers implement a parallel system of events for drags which bring something with them: for
+  example, dragging text, an image, a URL or (in modern browsers) a file. They behave differently,
+  and require different responses from the developer, so SproutCore implements them as a separate
+  set of "data drag" events. These behave much like mouse events; the data-drag movement events
+  bubble indiscriminately, and the data-drag drop event bubbles until it finds a view which handles
+  it (and doesn't return NO).
+
+  By default, SproutCore cancels the default behavior of any data drag event which carries URLs
+  or files, as by default these would quit the app and open the dragged item in the browser. If
+  you wish to implement data drag-and-drop support in your application, you should set the event's
+  dataTransfer.dropEffect property to 'copy' in a `dataDragHovered` event handler (or in the
+  equivalent statechart event; see below).
+
+  - `dataDragEntered` -- Triggered when a data drag enters a view. You can use this handler to
+    update the view to visually signal that a drop is possible.
+  - `dataDragHovered` -- Triggered when the browser sends a dragover event to a view. If you want
+    to support dropping data on your view, you must set the event's `dataTransfer.dropEffect`
+    property to 'copy' (or related). Note that `dataDragHovered` is given access to dragenter
+    events as well, so you do not need to worry about this in your `dataDragEntered` methods.
+  - `dataDragDropped` -- If the last hover event's dropEffect was set correctly, this event will
+    give the view access to the data that was dropped. This event bubbles up the responder chain
+    until it finds a view which handles it (and doesn't return NO).
+  - `dataDragExited` -- Triggered when a data drag leaves a view. You can use this handler to
+    update the view to remove the visual drop signal. This event is fired regardless of whether
+    a drop occurred.
+
+  Since these events can be more global than other events, they are accompanied by versions
+  triggered on your app's default responder (e.g. a statechart). These include:
+
+  - `dataDragDidEnter` -- Triggered when a data-drag enters the application window. You can use
+    this event to highlight drop zones appropriate to the dragging data type (found via the
+    event's `dataTransfer.types` array).
+  - `dataDragDidHover` -- Triggered when a data-drag hovers or moves over the application window.
+    This gives the statechart a chance to tell the browser how to handle the drag operation. Note
+    that `dataDragDidHover` is triggered immediately after `dataDragDidEnter`, so you don't need
+    to worry about that in the enter event.
+  - `dataDragDidDrop` -- If the last hover event's dropEffect was set correctly, this event will
+    give access to the data that was dropped.
+  - `dataDragDidExit` -- Triggered when the data drag leaves the application window. You can use
+    this event to hide drop zone highlights. This event is fired regardless of whether a drop
+    occurred.
+
+
+  Touch events
+  ----
+  Touch events can be much more complicated than mouse events: multiple touches may be in flight
+  at once, and views may wish to handle average touches rather than individual touches.
+
+  Basic support for touch events is required to make your application touch-aware. (You will not
+  need to implement touch support for built-in SproutCore controls, which are touch-aware out of
+  the box.) The basic touch event handlers are `touchStart` and `touchEnd`; if all you need is
+  basic support then you can simply proxy these events to their mouse counterparts.
+
+  TODO: Comprehensively document touch events.
+
+  Keyboard events
+  ----
+  The basic key events are `keyDown` and `keyUp`. In order to be notified of keyboard events,
+  a view must set `acceptsFirstResponder` to `YES`, and be on an active pane with
+  `acceptsKeyPane` set to YES. (You may also need to call `becomeFirstResponder` on your view
+  on a `mouseDown`, for example, to focus it. You can verify whether your view has successfully
+  received first responder status by checking `isFirstResponder`.)
+
+  Note that key events bubble similarly to mouse click events: they will stop bubbling if they
+
+
+  SproutCore implements a set of very convenient, higher-level keyboard events for action keys
+  such as *tab*, *enter,* and the arrow keys. These are not triggered automatically, but you
+  can gain access to them by proxying the keyboard event of your choice to `interpretKeyEvent`.
+  For example:
+
+  ```
+  keyDown: function(evt) {
+    return this.interpretKeyEvents(evt);
+  },
+  cancel: function() {
+    console.log('The escape key was pressed.'');
+  }
+  ```
+
+  This will analyze the key press and fire an appropriate event. These events include, but are
+  not limited to:
+
+  - `moveUp`, `moveDown`, `moveLeft`, `moveRight` -- The arrow keys
+  - `insertNewline` -- The enter key (note the lower-case 'line')
+  - `cancel` -- The escape key
+  - `insertTab` -- The tab key
+  - `insertBacktab` -- Shift + the tab key
+  - `moveToBeginningOfDocument` -- The *home* key
+  - `moveToEndOfDocument` -- The *end* key
+  - `pageUp` and `pageDown`
+  - `moveLeftAndModifySelection` -- Shift + the left arrow
+  - `selectAll` -- Ctrl + A / Cmd + A
+
+  For a full list of available methods, see the key values on SC.BASE_KEY_BINDINGS and
+  SC.MODIFIED_KEY_BINDINGS.
+
   @extends SC.Responder
   @extends SC.DelegateSupport
   @since SproutCore 1.0

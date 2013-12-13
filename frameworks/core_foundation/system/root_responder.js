@@ -636,7 +636,7 @@ SC.RootResponder = SC.Object.extend(
   */
   setup: function () {
     // handle basic events
-    this.listenFor(['touchstart', 'touchmove', 'touchend', 'touchcancel', 'keydown', 'keyup', 'beforedeactivate', 'mousedown', 'mouseup', 'click', 'dblclick', 'mousemove', 'contextmenu'], document)
+    this.listenFor(['touchstart', 'touchmove', 'touchend', 'touchcancel', 'keydown', 'keyup', 'beforedeactivate', 'mousedown', 'mouseup', 'dragenter', 'dragover', 'dragleave', 'drop', 'click', 'dblclick', 'mousemove', 'contextmenu'], document)
         .listenFor(['resize'], window);
 
     if (SC.browser.isIE8OrLower) this.listenFor(['focusin', 'focusout'], document);
@@ -2130,6 +2130,177 @@ SC.RootResponder = SC.Object.extend(
       }
     }, this);
   },
+
+  // These event handlers prevent default file handling, and enable the dataDrag API.
+  /** @private The dragenter event comes from the browser when a data-ful drag enters any element. */
+  dragenter: function(evt) {
+    SC.run(function() { this._dragenter(evt); }, this);
+  },
+  /** @private */
+  _dragenter: function(evt) {
+    // If this is our first dragenter throw a global event.
+    if (!this._dragCounter) {
+      this.sendAction('dataDragDidEnter', null, evt);
+      this._dragCounter = 1;
+    }
+    else this._dragCounter++;
+    return this._dragover(evt);
+  },
+  /** @private The dragleave event comes from the browser when a data-ful drag leaves any element. */
+  dragleave: function(evt) {
+    SC.run(function() { this._dragleave(evt); }, this);
+  },
+  /** @private */
+  _dragleave: function(evt) {
+    this._dragCounter--;
+    var ret = this._dragover(evt);
+    // If we're back to zero, it's our app-exit event and we should wrap it up.
+    if (this._dragCounter === 0) {
+      this.sendAction('dataDragDidExit', null, evt);
+    }
+    return ret;
+  },
+  /** @private
+    Dragleave doesn't fire reliably in all browsers, so this method forces it (scheduled below). Note
+    that, being scheduled via SC.Timer, this method is already in a run loop.
+  */
+  _forceDragLeave: function() {
+    // Give it another runloop to ensure that we're not in the middle of a drag.
+    this.invokeLast(function() {
+      if (this._dragCounter === 0) return;
+      this._dragCounter = 0;
+      var evt = this._lastDraggedEvt;
+      this._dragover(evt);
+      this.sendAction('dataDragDidExit', null, evt);
+    });
+  },
+  /** @private This event fires continuously while the dataful drag is over the document. */
+  dragover: function(evt) {
+    SC.run(function() { this._dragover(evt); }, this);
+  },
+  /** @private */
+  _dragover: function(evt) {
+    // If it's a file being dragged, prevent the default (leaving the app and opening the file).
+    if (evt.dataTransfer.types && evt.dataTransfer.types.contains('Files')) {
+      evt.preventDefault();
+      evt.stopPropagation();
+      // Set the default drag effect to 'none'. Views may reverse this if they wish.
+      evt.dataTransfer.dropEffect = 'none';
+    }
+
+    // Alert the default responder.
+    this.sendAction('dataDragDidHover', null, evt);
+
+    // Walk the responder chain, alerting anyone that would like to know.
+    var ld = this._lastDraggedOver || [], nd = [], loc, len,
+        view = this.targetViewForEvent(evt);
+
+    // Build the responder chain, starting with the view's target and (presumably) moving
+    // up through parentViews to the pane.
+    while (view && (view !== this)) {
+      nd.push(view);
+      view = view.get('nextResponder');
+    }
+
+    // Invalidate the force-drag-leave timer, if we have one set up.
+    if (this._dragLeaveTimer) this._dragLeaveTimer.invalidate();
+
+    // If this is our final drag event then we've left the document and everybody gets a
+    // dataDragExited.
+    if (this._dragCounter === 0) {
+      for (loc = 0, len = nd.length; loc < len; loc++) {
+        view = nd[loc];
+        view.tryToPerform('dataDragExited', evt);
+      }
+      this._lastDraggedOver = this._lastDraggedEvt = this._dragLeaveTimer = null;
+    }
+    // Otherwise, we process the responder chain normally, ignoring dragleaves.
+    // (We skip dragleave events because they are sent after the adjacent dragenter event; checking
+    // through both stacks would result in views being exited, re-entered and re-exited each time.
+    // As a consequence, views are left ignorant of a very small number of dragleave events; those
+    // shouldn't end up being the crucial just-before-drop events, though, so they should be of no
+    // consequence.)
+    else if (evt.type !== 'dragleave') {
+      // First, exit views that are no longer part of the responder chain, child to parent.
+      for (loc = 0, len = ld.length; loc < len; loc++) {
+        view = ld[loc];
+        if (nd.indexOf(view) === -1) {
+          view.tryToPerform('dataDragExited', evt);
+        }
+      }
+      // Next, enter views that have just joined the responder chain, parent to child.
+      for (loc = nd.length - 1; loc >= 0; loc--) {
+        view = nd[loc];
+        if (ld.indexOf(view) === -1) {
+          view.tryToPerform('dataDragEntered', evt);
+        }        
+      }
+      // Finally, send hover events to everybody.
+      for (loc = 0, len = nd.length; loc < len; loc++) {
+        view = nd[loc];
+        view.tryToPerform('dataDragHovered', evt);
+      }
+      this._lastDraggedOver = nd;
+      this._lastDraggedEvt = evt;
+      // For browsers that don't reliably call a dragleave for every dragenter, we have a timer fallback.
+      this._dragLeaveTimer = SC.Timer.schedule({ target: this, action: '_forceDragLeave', interval: 300 });
+    }
+  },
+
+  /** @private This event is called if the most recent dragover event was  */
+  drop: function(evt) {
+    SC.run(function() { this._drop(evt); }, this);
+  },
+  /** @private */
+  _drop: function(evt) {
+    // If it's a file being dragged, prevent the default (leaving the app and opening the file).
+    if (evt.dataTransfer.types.contains('Files')) {
+      evt.preventDefault();
+      evt.stopPropagation();
+      // Set the default drag effect to 'none'. Views may reverse this if they wish.
+      evt.dataTransfer.dropEffect = 'none';
+    }
+
+    // Bubble up the responder chain until we have a successful responder.
+    var ld = this._lastDraggedOver || [], nd = [], loc, len,
+        view = this.targetViewForEvent(evt);
+
+    // First collect all the responding view starting with the target view from the given drag event.
+    while (view && (view !== this)) {
+      nd.push(view);
+      view = view.get('nextResponder');
+    }
+    // Next, exit views that are no longer part of the responding chain. (This avoids the pixel-wide
+    // edge case where a drop event fires on a new view without a final dragover event.)
+    for (loc = 0, len = ld.length; loc < len; loc++) {
+      view = ld[loc];
+      if (nd.indexOf(view) === -1) {
+        view.tryToPerform('dataDragExited', evt);
+      }
+    }
+    // Next, bubble the drop event itself until we find someone that successfully responds.
+    for (loc = 0, len = nd.length; loc < len; loc++) {
+      view = nd[loc];
+      if (view.tryToPerform('dataDragDropped', evt)) break;
+    }
+    // Finally, notify all interested views that the drag is dead and gone.
+    for (loc = 0, len = nd.length; loc < len; loc++) {
+      view = nd[loc];
+      view.tryToPerform('dataDragExited', evt);
+    }
+
+    // Reset caches and counters.
+    this._lastDraggedOver = null;
+    this._lastDraggedAt = null;
+    this._dragCounter = 0;
+    if (this._dragLeaveTimer) this._dragLeaveTimer.invalidate();
+    this._dragLeaveTimer = null;
+
+    // Fire the final actions.
+    this.sendAction('dataDragDidDrop', null, evt);
+    this.sendAction('dataDragDidExit', null, evt);
+  },
+
 
   // these methods are used to prevent unnecessary text-selection in IE,
   // there could be some more work to improve this behavior and make it
