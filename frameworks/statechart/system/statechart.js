@@ -362,8 +362,12 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
     NOTE: This is only available in debug mode!
   */
-  statechartLogTrace: function (msg) {
-    SC.Logger.info("%@: %@".fmt(this.get('statechartLogPrefix'), msg));
+  statechartLogTrace: function (msg, style) {
+    if (style) {
+      SC.Logger.log("%c%@: %@".fmt(this.get('statechartLogPrefix'), msg), style);
+    } else {
+      SC.Logger.info("%@: %@".fmt(this.get('statechartLogPrefix'), msg));
+    }
   },
 
   /* END DEBUG ONLY PROPERTIES AND METHODS */
@@ -548,7 +552,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     this.addObserver(traceKey, this, '_statechartTraceDidChange');
     this._statechartTraceDidChange();
 
-    if (trace) this.statechartLogTrace("BEGIN initialize statechart");
+    if (trace) this.statechartLogTrace("BEGIN initialize statechart", SC.TRACE_STATECHART_STYLE.init);
     //@endif
 
     var rootState = this.get('rootState'),
@@ -592,7 +596,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     this.gotoState(rootState);
 
     //@if(debug)
-    if (trace) this.statechartLogTrace("END initialize statechart");
+    if (trace) this.statechartLogTrace("END initialize statechart", SC.TRACE_STATECHART_STYLE.init);
     //@endif
   },
 
@@ -797,13 +801,13 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     //@if(debug)
     var trace = this.get('allowStatechartTracing');
     if (trace) {
-      this.statechartLogTrace("BEGIN gotoState: %@".fmt(state));
-      msg = "starting from current state: %@";
-      msg = msg.fmt(fromCurrentState ? fromCurrentState : '---');
-      this.statechartLogTrace(msg);
-      msg = "current states before:\n%@";
-      msg = msg.fmt(this.getPath('currentStates.length') > 0 ? this.get('currentStates').getEach('fullPath').join('\n') : '---');
-      this.statechartLogTrace(msg);
+      this.statechartLogTrace("BEGIN gotoState: %@".fmt(state), SC.TRACE_STATECHART_STYLE.gotoState);
+      msg = "  starting from current state: %@";
+      msg = msg.fmt(fromCurrentState ? fromCurrentState : '-- none --');
+      this.statechartLogTrace(msg, SC.TRACE_STATECHART_STYLE.gotoStateInfo);
+      msg = "  current states before: %@";
+      msg = msg.fmt(this.getPath('currentStates.length') > 0 ? this.get('currentStates').getEach('fullPath').join(', ') : '-- none --');
+      this.statechartLogTrace(msg, SC.TRACE_STATECHART_STYLE.gotoStateInfo);
     }
     //@endif
 
@@ -821,7 +825,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
     if (pivotState) {
       //@if(debug)
-      if (trace) this.statechartLogTrace("pivot state = %@".fmt(pivotState));
+      if (trace) this.statechartLogTrace("  pivot state = %@".fmt(pivotState), SC.TRACE_STATECHART_STYLE.gotoStateInfo);
       //@endif
       if (pivotState.get('substatesAreConcurrent') && pivotState !== state) {
         this.statechartLogError("Can not go to state %@ from %@. Pivot state %@ has concurrent substates.".fmt(state, fromCurrentState, pivotState));
@@ -926,8 +930,8 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
     //@if(debug)
     if (this.get('allowStatechartTracing')) {
-      this.statechartLogTrace("current states after:\n%@".fmt(this.get('currentStates').getEach('fullPath').join('\n')));
-      this.statechartLogTrace("END gotoState: %@".fmt(gotoState));
+      this.statechartLogTrace("  current states after: %@".fmt(this.get('currentStates').getEach('fullPath').join(', ')), SC.TRACE_STATECHART_STYLE.gotoStateInfo);
+      this.statechartLogTrace("END gotoState: %@".fmt(gotoState), SC.TRACE_STATECHART_STYLE.gotoState);
     }
     //@endif
 
@@ -965,7 +969,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
     //@if(debug)
     if (this.get('allowStatechartTracing')) {
-      this.statechartLogTrace("<-- exiting state: %@".fmt(state));
+      this.statechartLogTrace("<-- exiting state: %@".fmt(state), SC.TRACE_STATECHART_STYLE.exit);
     }
     //@endif
 
@@ -1017,7 +1021,13 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     }
 
     //@if(debug)
-    if (this.get('allowStatechartTracing')) this.statechartLogTrace("--> entering state: %@".fmt(state));
+    if (this.get('allowStatechartTracing')) {
+      if (state.enterStateByRoute && SC.kindOf(context, SC.StateRouteHandlerContext)) {
+        this.statechartLogTrace("--> entering state (by route): %@".fmt(state), SC.TRACE_STATECHART_STYLE.enter);
+      } else {
+        this.statechartLogTrace("--> entering state: %@".fmt(state), SC.TRACE_STATECHART_STYLE.enter);
+      }
+    }
     //@endif
 
     state.stateWillBecomeEntered(context);
@@ -1176,7 +1186,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     //@if(debug)
     var trace = this.get('allowStatechartTracing');
     if (trace) {
-      this.statechartLogTrace("BEGIN sendEvent: '%@'".fmt(event));
+      this.statechartLogTrace("BEGIN sendEvent: '%@'".fmt(event), SC.TRACE_STATECHART_STYLE.action);
     }
     //@endif
 
@@ -1201,8 +1211,8 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
     //@if(debug)
     if (trace) {
-      if (!statechartHandledEvent) this.statechartLogTrace("No state was able handle event %@".fmt(event));
-      this.statechartLogTrace("END sendEvent: '%@'".fmt(event));
+      if (!statechartHandledEvent) this.statechartLogTrace("No state was able handle event %@".fmt(event), SC.TRACE_STATECHART_STYLE.action);
+      this.statechartLogTrace("END sendEvent: '%@'".fmt(event), SC.TRACE_STATECHART_STYLE.action);
     }
     //@endif
 

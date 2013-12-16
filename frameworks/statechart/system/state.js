@@ -7,6 +7,19 @@
 
 /*globals SC */
 
+//@if(debug)
+SC.TRACE_STATECHART_STYLE = {
+  init: 'font-style: italic; font-weight: bold;', // Initialization
+  action: 'color: #5922ab; font-style: italic; font-weight: bold;', // Actions and events
+  actionInfo: 'color: #5922ab; font-style: italic;', // Actions and events
+  route: 'color: #a67000; font-style: italic;', // Routing
+  gotoState: 'color: #479a48; font-style: italic; font-weight: bold;', // Goto state
+  gotoStateInfo: 'color: #479a48; font-style: italic;', // Goto state
+  enter: 'color: #479a48; font-style: italic; font-weight: bold;', // Entering
+  exit: 'color: #479a48; font-style: italic; font-weight: bold;' // Exiting
+};
+//@endif
+
 /**
   @class
 
@@ -50,9 +63,9 @@ SC.State = SC.Object.extend(
   /**
     Used to log a state trace message
   */
-  stateLogTrace: function(msg) {
+  stateLogTrace: function(msg, style) {
     var sc = this.get('statechart');
-    sc.statechartLogTrace("%@: %@".fmt(this, msg));
+    sc.statechartLogTrace("  %@: %@".fmt(this, msg), style);
   },
 
   /* END DEBUG ONLY PROPERTIES AND METHODS */
@@ -454,7 +467,7 @@ SC.State = SC.Object.extend(
     if (del.statechartShouldStateHandleTriggeredRoute(sc, this, context)) {
       //@if(debug)
       if (this.get('trace') && loc) {
-        this.stateLogTrace("will handle route '%@'".fmt(loc));
+        this.stateLogTrace("will handle route '%@'".fmt(loc), SC.TRACE_STATECHART_STYLE.route);
       }
       //@endif
       this.handleTriggeredRoute(context);
@@ -1114,7 +1127,7 @@ SC.State = SC.Object.extend(
     // Now begin by trying a basic method on the state to respond to the event
     if (SC.typeOf(this[event]) === SC.T_FUNCTION) {
       //@if(debug)
-      if (trace) this.stateLogTrace("will handle event '%@'".fmt(event));
+      if (trace) this.stateLogTrace("will handle event '%@'".fmt(event), SC.TRACE_STATECHART_STYLE.actionInfo);
       //@endif
       sc.stateWillTryToHandleEvent(this, event, event);
       ret = (this[event](arg1, arg2) !== NO);
@@ -1126,7 +1139,7 @@ SC.State = SC.Object.extend(
     var handler = this._registeredStringEventHandlers[event];
     if (handler) {
       //@if(debug)
-      if (trace) this.stateLogTrace("%@ will handle event '%@'".fmt(handler.name, event));
+      if (trace) this.stateLogTrace("%@ will handle event '%@'".fmt(handler.name, event), SC.TRACE_STATECHART_STYLE.actionInfo);
       //@endif
       sc.stateWillTryToHandleEvent(this, event, handler.name);
       ret = (handler.handler.call(this, event, arg1, arg2) !== NO);
@@ -1143,7 +1156,7 @@ SC.State = SC.Object.extend(
       handler = this._registeredRegExpEventHandlers[i];
       if (event.match(handler.regexp)) {
         //@if(debug)
-        if (trace) this.stateLogTrace("%@ will handle event '%@'".fmt(handler.name, event));
+        if (trace) this.stateLogTrace("%@ will handle event '%@'".fmt(handler.name, event), SC.TRACE_STATECHART_STYLE.actionInfo);
         //@endif
         sc.stateWillTryToHandleEvent(this, event, handler.name);
         ret = (handler.handler.call(this, event, arg1, arg2) !== NO);
@@ -1156,7 +1169,7 @@ SC.State = SC.Object.extend(
     // handle the event
     if (SC.typeOf(this['unknownEvent']) === SC.T_FUNCTION) {
       //@if(debug)
-      if (trace) this.stateLogTrace("unknownEvent will handle event '%@'".fmt(event));
+      if (trace) this.stateLogTrace("unknownEvent will handle event '%@'".fmt(event), SC.TRACE_STATECHART_STYLE.actionInfo);
       //@endif
       sc.stateWillTryToHandleEvent(this, event, 'unknownEvent');
       ret = (this.unknownEvent(event, arg1, arg2) !== NO);
