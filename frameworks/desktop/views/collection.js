@@ -2995,8 +2995,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     // in-scroll clipping frame when it does).
     // TODO: perform a raw update that doesn't require the run loop.
     SC.run(function () {
-    this.notifyPropertyChange('nowShowing');
-    this.invokeOnce('_cv_nowShowingDidChange');
+      this.notifyPropertyChange('nowShowing');
+      this.invokeOnce('_cv_nowShowingDidChange');
     }, this);
 
     // Track the last time we updated.
