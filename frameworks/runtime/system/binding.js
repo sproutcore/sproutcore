@@ -488,6 +488,9 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     // Disconnect the binding.
     this.disconnect();
 
+    // Destroy child objects.
+    this.destroyChildren();
+
     // Aggressively null out internal properties.
     this._bindingSource = null;
     this._toRoot = this._toTarget = null;
@@ -1154,6 +1157,9 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     return "SC.Binding%@(%@ -> %@)%@".fmt(SC.guidFor(this), from, to, oneWay);
   }
 };
+
+// Mixin support for children to SC.Binding.
+SC.mixin(SC.Binding, SC.Children);
 
 /**
   Shorthand method to define a binding.  This is the same as calling:

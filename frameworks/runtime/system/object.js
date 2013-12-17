@@ -628,6 +628,7 @@ SC.Object.prototype = {
   */
   init: function () {
     this.initObservable();
+    this.initChildren();
     return this;
   },
 
@@ -653,6 +654,9 @@ SC.Object.prototype = {
   destroy: function () {
     if (this.get('isDestroyed')) return this; // nothing to do
     this.set('isDestroyed', YES);
+
+    // destroy child objects
+    this.destroyChildren();
 
     // destroy any mixins
     var idx, inits = this.destroyMixin, len = (inits) ? inits.length : 0;
@@ -939,15 +943,17 @@ SC.Object.prototype = {
 
     @type Array
   */
-  concatenatedProperties: ['concatenatedProperties', 'initMixin', 'destroyMixin']
+  concatenatedProperties: ['concatenatedProperties', 'childProperties', 'initMixin', 'destroyMixin']
 
 };
 
 // bootstrap the constructor for SC.Object.
 SC.Object.prototype.constructor = SC.Object;
 
-// Add observable to mixin
+// Mixin support for KVO to SC.Object.
 SC.mixin(SC.Object.prototype, SC.Observable);
+// Mixin support for children to SC.Object.
+SC.mixin(SC.Object.prototype, SC.Children);
 
 // ..........................................................
 // CLASS NAME SUPPORT
