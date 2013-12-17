@@ -505,6 +505,20 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   fromPropertyDidChange: function (target, key) {
     var v = target ? target.get(key) : null;
 
+    // In rare circumstances, getting a property can result in observers firing,
+    // which may in turn run code that disconnects the binding. The cause of
+    // this pattern has been difficult to determine and so until a concrete test
+    // scenario and a lower level fix can be found, show a warning and ignore
+    // the update.
+    if (!this.isConnected) {
+      //@if(debug)
+      SC.Logger.warn("Developer Warning: A binding attempted to update after it was disconnected. The update will be ignored for binding: %@".fmt(this._fromPropertyPath, this._fromTarget, this));
+      //@endif
+
+      // Break early.
+      return;
+    }
+
     // if the new value is different from the current binding value, then
     // schedule to register an update.
     if (v !== this._bindingValue || key === '[]') {
@@ -533,6 +547,20 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     if (this._oneWay) return; // nothing to do
 
     var v = target.get(key);
+
+    // In rare circumstances, getting a property can result in observers firing,
+    // which may in turn run code that disconnects the binding. The cause of
+    // this pattern has been difficult to determine and so until a concrete test
+    // scenario and a lower level fix can be found, show a warning and ignore
+    // the update.
+    if (!this.isConnected) {
+      //@if(debug)
+      SC.Logger.warn("Developer Warning: A binding attempted to update after it was disconnected. The update will be ignored for binding: %@".fmt(this));
+      //@endif
+
+      // Break early.
+      return;
+    }
 
     // if the new value is different from the current binding value, then
     // schedule to register an update.
