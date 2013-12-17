@@ -805,8 +805,22 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
       msg = "  starting from current state: %@";
       msg = msg.fmt(fromCurrentState ? fromCurrentState : '-- none --');
       this.statechartLogTrace(msg, SC.TRACE_STATECHART_STYLE.gotoStateInfo);
-      msg = "  current states before: %@";
-      msg = msg.fmt(this.getPath('currentStates.length') > 0 ? this.get('currentStates').getEach('fullPath').join(', ') : '-- none --');
+
+      var len = this.getPath('currentStates.length');
+      // For many states, we list each on its own line.
+      if (len > 2) {
+        msg = "current states before:\n%@";
+        msg = msg.fmt(this.get('currentStates').getEach('fullPath').join('\n'));        
+      }
+      // For a few states, all on one line.
+      else if (len > 0) {
+        msg = "  current states before: %@";
+        msg = msg.fmt(this.get('currentStates').getEach('fullPath').join(', '));
+      }
+      // For no states, no states.
+      else {
+        msg = "  current states before: --none--";
+      }
       this.statechartLogTrace(msg, SC.TRACE_STATECHART_STYLE.gotoStateInfo);
     }
     //@endif
@@ -930,7 +944,11 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
     //@if(debug)
     if (this.get('allowStatechartTracing')) {
-      this.statechartLogTrace("  current states after: %@".fmt(this.get('currentStates').getEach('fullPath').join(', ')), SC.TRACE_STATECHART_STYLE.gotoStateInfo);
+      if (this.getPath('currentStates.length') > 2) {
+        this.statechartLogTrace("  current states after:\n%@".fmt(this.get('currentStates').getEach('fullPath').join('  \n')), SC.TRACE_STATECHART_STYLE.gotoStateInfo);
+      } else {
+        this.statechartLogTrace("  current states after: %@".fmt(this.get('currentStates').getEach('fullPath').join(', ')), SC.TRACE_STATECHART_STYLE.gotoStateInfo);
+      }
       this.statechartLogTrace("END gotoState: %@".fmt(gotoState), SC.TRACE_STATECHART_STYLE.gotoState);
     }
     //@endif
