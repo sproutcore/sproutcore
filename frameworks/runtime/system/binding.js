@@ -729,7 +729,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
         //@if(debug)
         // Provide some developer support.
         if (target === window) {
-          var msg = "Developer Warning: You are attempting to bind \"%{to_root}\"'s '%{to_property}' property to the non-observable 'window.%{key}'. It's likely that you've specified a local binding path without prepending a period. For example, you may have `%{to_property}Binding: '%{key}'` instead of `%{to_property}Binding: '.%{key}'`."
+          var msg = "Developer Warning: You are attempting to bind \"%{to_root}\"'s '%{to_property}' property to the non-observable 'window.%{key}'. It's likely that you've specified a local binding path without prepending a period. For example, you may have `%{to_property}Binding: '%{key}'` instead of `%{to_property}Binding: '.%{key}'`.";
           msg = msg.fmt({
             to_root: (this._toRoot || 'object').toString(),
             to_property: this._toPropertyPath,
@@ -1031,16 +1031,18 @@ SC.Binding = /** @scope SC.Binding.prototype */{
 
   /* @private Used with the logic gate bindings. */
   _LogicGateAnd: SC.Object.extend({
-    logicProperty: function() {
+    logicProperty: function () {
       return (this.get('valueA') && this.get('valueB'));
     }.property('valueA', 'valueB').cacheable()
   }),
+
   /* @private Used with the logic gate bindings. */
   _LogicGateOr: SC.Object.extend({
-    logicProperty: function() {
+    logicProperty: function () {
       return (this.get('valueA') || this.get('valueB'));
     }.property('valueA', 'valueB').cacheable()
   }),
+
   /* @private Used by logic gate bindings. */
   _logicGateBinding: function (gateClass, pathA, pathB) {
     // If either path is local, remove any * chains and append the localObject path to it.
@@ -1055,11 +1057,11 @@ SC.Binding = /** @scope SC.Binding.prototype */{
 
     // Gets the gate class and instantiates a nice copy.
     var gateHash = {
-          localObject: null,
-          valueABinding: SC.Binding.oneWay(pathA),
-          valueBBinding: SC.Binding.oneWay(pathB)
-        },
-        gate = gateClass.create(gateHash);
+        localObject: null,
+        valueABinding: SC.Binding.oneWay(pathA),
+        valueBBinding: SC.Binding.oneWay(pathB)
+      },
+      gate = gateClass.create(gateHash);
 
     // Creates and populates the return binding.
     var ret = this.from('logicProperty', gate).oneWay();
