@@ -390,6 +390,10 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     } else {
       if (this[key] !== value) {
         if (notify) this.propertyWillChange(key);
+        // If this object mixes in SC.Children, attempt to destroy the child.
+        if (this.destroyChild) {
+          this.destroyChild(key);
+        }
         ret = this[key] = value;
         if (notify) this.propertyDidChange(key, ret);
       }
