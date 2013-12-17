@@ -11,8 +11,6 @@ sc_require('private/observer_queue');
 sc_require('mixins/array');
 sc_require('system/set');
 
-/*global*/
-
 SC.BENCHMARK_OBJECTS = NO;
 
 // ..........................................................
@@ -473,7 +471,7 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
   subclassOf: function (scClass) {
     if (this === scClass) return NO;
     var t = this;
-    while (t = t.superclass) if (t === scClass) return YES;
+    while ((t = t.superclass)) if (t === scClass) return YES;
     return NO;
   },
 
@@ -838,7 +836,9 @@ SC.Object.prototype = {
       originatingMethod = originatingStack[0];
     }
     SC.RunLoop.currentRunLoop.invokeOnce(this, method, originatingTarget, originatingMethod, originatingStack);
+    /*jshint -W027 */
     return this;
+    /*jshint +W027 */
     //@endif
     SC.RunLoop.currentRunLoop.invokeOnce(this, method);
     return this;
@@ -886,7 +886,9 @@ SC.Object.prototype = {
       originatingMethod = originatingStack[0];
     }
     SC.RunLoop.currentRunLoop.invokeLast(this, method, originatingTarget, originatingMethod, originatingStack);
+    /*jshint -W027 */
     return this;
+    /*jshint +W027 */
     //@endif
     SC.RunLoop.currentRunLoop.invokeLast(this, method);
     return this;
@@ -918,7 +920,9 @@ SC.Object.prototype = {
       originatingMethod = originatingStack[0];
     }
     SC.RunLoop.currentRunLoop.invokeNext(this, method, originatingTarget, originatingMethod, originatingStack);
+    /*jshint -W027 */
     return this;
+    /*jshint +W027 */
     //@endif
     SC.RunLoop.currentRunLoop.invokeNext(this, method);
     return this;
@@ -1021,7 +1025,7 @@ SC.findClassNames = function () {
   //
   window.__SC__ = SC;
   searchObject(null, window, 2);
-}
+};
 
 /**
   Same as the instance method, but lets you check instanceOf without
