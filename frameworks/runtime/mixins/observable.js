@@ -1179,7 +1179,7 @@ SC.Observable = /** @scope SC.Observable.prototype */{
           // observer during that round of notification.  Similarly, if you're
           // added as an observer during the notification round by another
           // observer, you will not be notified until the next time.)
-          members = SC.clone(observers.getMembers());
+          members = observers.getMembers();
           membersLength = members.length;
           for (memberLoc = 0; memberLoc < membersLength; memberLoc++) {
             member = members[memberLoc];
@@ -1224,7 +1224,7 @@ SC.Observable = /** @scope SC.Observable.prototype */{
         if (starObservers && key !== '*') {
           // We clone the structure per the justification, above, for regular
           // observers.
-          members = SC.clone(starObservers.getMembers());
+          members = starObservers.getMembers();
           membersLength = members.length;
           for (memberLoc = 0; memberLoc < membersLength; memberLoc++) {
             member = members[memberLoc];
