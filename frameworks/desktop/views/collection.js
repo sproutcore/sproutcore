@@ -1803,9 +1803,11 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     Handle select all keyboard event.
   */
   selectAll: function (evt) {
-    var content = this.get('content'),
-        sel = content ? SC.IndexSet.create(0, content.get('length')) : null;
-    this.select(sel, NO);
+    var content = this.get('content');
+    if (content.get('allowsMultipleSelection')) {
+      var sel = content ? SC.IndexSet.create(0, content.get('length')) : null;
+      this.select(sel, NO);
+    }
     return YES;
   },
 
