@@ -913,3 +913,5 @@ SC.CoreState = SC.Object.extend(
   }
 
 });
+
+SC.CoreState.design = SC.CoreState.extend;

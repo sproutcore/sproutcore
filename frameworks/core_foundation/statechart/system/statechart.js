@@ -1,5 +1,5 @@
 // ==========================================================================
-// Project:   SC.Statechart - A Statechart Framework for SproutCore
+// Project:   SC.CoreStatechart - A Statechart Framework for SproutCore
 // Copyright: ©2010, 2011 Michael Cohen, and contributors.
 //            Portions @2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
@@ -27,15 +27,15 @@ sc_require('statechart/system/state');
 
   The following example shows how states are nested within a statechart:
 
-      MyApp.Statechart = SC.Object.extend(SC.StatechartManager, {
-        rootState: SC.State.design({
+      MyApp.Statechart = SC.Object.extend(SC.CoreStatechartManager, {
+        rootState: SC.CoreState.extend({
           initialSubstate: 'stateA',
 
-          stateA: SC.State.design({
+          stateA: SC.CoreState.extend({
             // ... can continue to nest further states
           }),
 
-          stateB: SC.State.design({
+          stateB: SC.CoreState.extend({
             // ... can continue to nest further states
           })
         })
@@ -48,36 +48,36 @@ sc_require('statechart/system/state');
   on your object that represents states. Upon initialization, a root state will be constructed automatically
   by the mixin and make the states on the object substates of the root state. As an example:
 
-      MyApp.Statechart = SC.Object.extend(SC.StatechartManager, {
+      MyApp.Statechart = SC.Object.extend(SC.CoreStatechartManager, {
         initialState: 'stateA',
 
-        stateA: SC.State.design({
+        stateA: SC.CoreState.design({
           // ... can continue to nest further states
         }),
 
-        stateB: SC.State.design({
+        stateB: SC.CoreState.design({
           // ... can continue to nest further states
         })
       });
 
   If you liked to specify a class that should be used as the root state but using the above method to defined
-  states, you can set the rootStateExample property with a class that extends from SC.State. If the
-  rootStateExample property is not explicitly assigned the then default class used will be SC.State.
+  states, you can set the rootStateExample property with a class that extends from SC.CoreState. If the
+  rootStateExample property is not explicitly assigned the then default class used will be SC.CoreState.
 
   To provide your statechart with orthogonality, you use concurrent states. If you use concurrent states,
   then your statechart will have multiple current states. That is because each concurrent state represents an
   independent state structure from other concurrent states. The following example shows how to provide your
   statechart with concurrent states:
 
-      MyApp.Statechart = SC.Object.extend(SC.StatechartManager, {
-        rootState: SC.State.design({
+      MyApp.Statechart = SC.Object.extend(SC.CoreStatechartManager, {
+        rootState: SC.CoreState.design({
           substatesAreConcurrent: YES,
 
-          stateA: SC.State.design({
+          stateA: SC.CoreState.design({
             // ... can continue to nest further states
           }),
 
-          stateB: SC.State.design({
+          stateB: SC.CoreState.design({
             // ... can continue to nest further states
           })
         })
@@ -90,14 +90,14 @@ sc_require('statechart/system/state');
   To define concurrent states directly on the object without explicitly defining a root, you can do the
   following:
 
-      MyApp.Statechart = SC.Object.extend(SC.StatechartManager, {
+      MyApp.Statechart = SC.Object.extend(SC.CoreStatechartManager, {
         statesAreConcurrent: YES,
 
-        stateA: SC.State.design({
+        stateA: SC.CoreState.design({
           // ... can continue to nest further states
         }),
 
-        stateB: SC.State.design({
+        stateB: SC.CoreState.design({
           // ... can continue to nest further states
         })
       });
@@ -105,23 +105,23 @@ sc_require('statechart/system/state');
   Remember that a startchart can have a mixture of nested and concurrent states in order for you to
   create as complex of statecharts that suite your needs. Here is an example of a mixed state structure:
 
-      MyApp.Statechart = SC.Object.extend(SC.StatechartManager, {
-        rootState: SC.State.design({
+      MyApp.Statechart = SC.Object.extend(SC.CoreStatechartManager, {
+        rootState: SC.CoreState.design({
           initialSubstate: 'stateA',
 
-          stateA: SC.State.design({
+          stateA: SC.CoreState.design({
             substatesAreConcurrent: YES,
 
-            stateM: SC.State.design({ ... })
-            stateN: SC.State.design({ ... })
-            stateO: SC.State.design({ ... })
+            stateM: SC.CoreState.design({ ... })
+            stateN: SC.CoreState.design({ ... })
+            stateO: SC.CoreState.design({ ... })
           }),
 
-          stateB: SC.State.design({
+          stateB: SC.CoreState.design({
             initialSubstate: 'stateX',
 
-            stateX: SC.State.design({ ... })
-            stateY: SC.State.design({ ... })
+            stateX: SC.CoreState.design({ ... })
+            stateY: SC.CoreState.design({ ... })
           })
         })
       });
@@ -133,31 +133,31 @@ sc_require('statechart/system/state');
 
       // state_a.js
 
-      MyApp.StateA = SC.State.extend({
+      MyApp.StateA = SC.CoreState.extend({
         substatesAreConcurrent: YES,
 
-        stateM: SC.State.design({ ... })
-        stateN: SC.State.design({ ... })
-        stateO: SC.State.design({ ... })
+        stateM: SC.CoreState.design({ ... })
+        stateN: SC.CoreState.design({ ... })
+        stateO: SC.CoreState.design({ ... })
       });
 
       // state_b.js
 
-      MyApp.StateB = SC.State.extend({
+      MyApp.StateB = SC.CoreState.extend({
         substatesAreConcurrent: YES,
 
-        stateM: SC.State.design({ ... })
-        stateN: SC.State.design({ ... })
-        stateO: SC.State.design({ ... })
+        stateM: SC.CoreState.design({ ... })
+        stateN: SC.CoreState.design({ ... })
+        stateO: SC.CoreState.design({ ... })
       });
 
       // statechart.js
 
       MyApp.Statechart = SC.Object.extend(SC.CoreStatechartManager, {
-        rootState: SC.State.design({
+        rootState: SC.CoreState.design({
           initialSubstate: 'stateA',
-          stateA: SC.State.plugin('MyApp.StateA'),
-          stateB: SC.State.plugin('MyApp.StateB')
+          stateA: SC.CoreState.plugin('MyApp.StateA'),
+          stateB: SC.CoreState.plugin('MyApp.StateB')
         })
       });
 
@@ -410,13 +410,13 @@ SC.CoreStatechartManager = /** @scope SC.CoreStatechartManager.prototype */{
     @see #initialState
     @see #statesAreConcurrent
 
-    @property {SC.State}
+    @property {SC.CoreState}
   */
   rootState: null,
 
   /**
     Represents the class used to construct a class that will be the root state for
-    this statechart. The class assigned must derive from SC.State.
+    this statechart. The class assigned must derive from SC.CoreState.
 
     This property will only be used if the rootState property is not assigned.
 
@@ -551,7 +551,7 @@ SC.CoreStatechartManager = /** @scope SC.CoreStatechartManager.prototype */{
       rootState = rootState.apply(this);
     }
 
-    if (!(SC.kindOf(rootState, SC.State) && rootState.isClass)) {
+    if (!(SC.kindOf(rootState, SC.CoreState) && rootState.isClass)) {
       msg = "Unable to initialize statechart. Root state must be a state class";
       this.statechartLogError(msg);
       throw msg;
@@ -605,7 +605,7 @@ SC.CoreStatechartManager = /** @scope SC.CoreStatechartManager.prototype */{
   /**
     Returns the first current state for this statechart.
 
-    @return {SC.State}
+    @return {SC.CoreState}
   */
   firstCurrentState: function () {
     var cs = this.get('currentStates');
@@ -659,10 +659,10 @@ SC.CoreStatechartManager = /** @scope SC.CoreStatechartManager.prototype */{
         // With four argument.
         gotoState(<state>, <state>, <boolean>, <hash>)
 
-    where <state> is either a SC.State object or a string and <hash> is a regular JS hash object.
+    where <state> is either a SC.CoreState object or a string and <hash> is a regular JS hash object.
 
-    @param state {SC.State|String} the state to go to (may not be the final state in the transition process)
-    @param fromCurrentState {SC.State|String} Optional. The current state to start the transition process from.
+    @param state {SC.CoreState|String} the state to go to (may not be the final state in the transition process)
+    @param fromCurrentState {SC.CoreState|String} Optional. The current state to start the transition process from.
     @param useHistory {Boolean} Optional. Indicates whether to include using history states in the transition process
     @param context {Hash} Optional. A context object that will be passed to all exited and entered states
   */
@@ -893,7 +893,7 @@ SC.CoreStatechartManager = /** @scope SC.CoreStatechartManager.prototype */{
     Called during the state transition process whenever the gotoState method is
     invoked.
 
-    @param state {SC.State} the state whose enterState method is to be invoked
+    @param state {SC.CoreState} the state whose enterState method is to be invoked
     @param context {Hash} a context hash object to provide the enterState method
   */
   exitState: function (state, context) {
@@ -952,7 +952,7 @@ SC.CoreStatechartManager = /** @scope SC.CoreStatechartManager.prototype */{
     will be invoked by default. The state route context object will be supplied to
     both enter methods in either case.
 
-    @param state {SC.State} the state whose enterState method is to be invoked
+    @param state {SC.CoreState} the state whose enterState method is to be invoked
     @param context {Hash} a context hash object to provide the enterState method
   */
   enterState: function (state, context) {
@@ -990,10 +990,10 @@ SC.CoreStatechartManager = /** @scope SC.CoreStatechartManager.prototype */{
         // With four argumetns
         gotoHistoryState(<state>, <state>, <boolean>, <hash>)
 
-    where <state> is either a SC.State object or a string and <hash> is a regular JS hash object.
+    where <state> is either a SC.CoreState object or a string and <hash> is a regular JS hash object.
 
-    @param state {SC.State|String} the state to go to and follow it's history state
-    @param fromCurrentState {SC.State|String} Optional. the current state to start the state transition process from
+    @param state {SC.CoreState|String} the state to go to and follow it's history state
+    @param fromCurrentState {SC.CoreState|String} Optional. the current state to start the state transition process from
     @param recursive {Boolean} Optional. whether to follow history states recursively.
   */
   gotoHistoryState: function (state, fromCurrentState, recursive, context) {
@@ -1126,7 +1126,7 @@ SC.CoreStatechartManager = /** @scope SC.CoreStatechartManager.prototype */{
     Used to notify the statechart that a state will try to handle event that has been passed
     to it.
 
-    @param {SC.State} state the state that will try to handle the event
+    @param {SC.CoreState} state the state that will try to handle the event
     @param {String} event the event the state will try to handle
     @param {String} handler the name of the method on the state that will try to handle the event
   */
@@ -1142,7 +1142,7 @@ SC.CoreStatechartManager = /** @scope SC.CoreStatechartManager.prototype */{
     Used to notify the statechart that a state did try to handle event that has been passed
     to it.
 
-    @param {SC.State} state the state that did try to handle the event
+    @param {SC.CoreState} state the state that did try to handle the event
     @param {String} event the event the state did try to handle
     @param {String} handler the name of the method on the state that did try to handle the event
     @param {Boolean} handled indicates if the handler was able to handle the event
@@ -1511,7 +1511,7 @@ SC.CoreStatechartManager = /** @scope SC.CoreStatechartManager.prototype */{
         break;
       case SC.T_HASH:
       case SC.T_OBJECT:
-        if (!SC.kindOf(value, SC.State)) {
+        if (!SC.kindOf(value, SC.CoreState)) {
           processedArgs.context = value;
         }
         break;
@@ -1546,10 +1546,10 @@ SC.CoreStatechartManager = /** @scope SC.CoreStatechartManager.prototype */{
   /** @private
 
     Will return a newly constructed root state class. The root state will have substates added to
-    it based on properties found on this state that derive from a SC.State class. For the
+    it based on properties found on this state that derive from a SC.CoreState class. For the
     root state to be successfully built, the following much be met:
 
-     - The rootStateExample property must be defined with a class that derives from SC.State
+     - The rootStateExample property must be defined with a class that derives from SC.CoreState
      - Either the initialState or statesAreConcurrent property must be set, but not both
      - There must be one or more states that can be added to the root state
 
@@ -1566,7 +1566,7 @@ SC.CoreStatechartManager = /** @scope SC.CoreStatechartManager.prototype */{
       rsExample = rsExample.apply(this);
     }
 
-    if (!(SC.kindOf(rsExample, SC.State) && rsExample.isClass)) {
+    if (!(SC.kindOf(rsExample, SC.CoreState) && rsExample.isClass)) {
       this._logStatechartCreationError("Invalid root state example");
       return null;
     }
@@ -1592,7 +1592,7 @@ SC.CoreStatechartManager = /** @scope SC.CoreStatechartManager.prototype */{
         value = value.apply(this);
       }
 
-      if (SC.kindOf(value, SC.State) && value.isClass && this[key] !== this.constructor) {
+      if (SC.kindOf(value, SC.CoreState) && value.isClass && this[key] !== this.constructor) {
         attrs[key] = value;
         stateCount += 1;
       }
