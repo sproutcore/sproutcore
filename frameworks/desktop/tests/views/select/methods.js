@@ -19,10 +19,10 @@ module("SC.SelectView",{
     //pane
     pane = SC.MainPane.create({
       objs : ["Around","The","World"],
-      objs2 : [{ title: "Around", pos: 3},
-        { title: "The", pos: 1},
-        { title: "World", pos: 2 },
-        { title: "Again", pos: 4}],
+      objs2 : [{ title: "Around", icon: 'around-icon', pos: 3},
+        { title: "The", icon: 'the-icon', pos: 1},
+        { title: "World", icon: 'world-icon', pos: 2 },
+        { title: "Again", icon: 'again-icon', pos: 4}],
       selectedValue: "World",
       isDue: YES,
       childViews: [
@@ -51,6 +51,7 @@ module("SC.SelectView",{
           valueBinding: '*owner.selectedValue',
           itemValueKey: 'title',
           itemTitleKey: 'title',
+          itemIconKey: 'icon',
           itemSortKey: 'pos'
         }),
 
@@ -81,7 +82,7 @@ module("SC.SelectView",{
 
   //teardown
   teardown: function() {
-    pane.remove() ;
+    pane.destroy() ;
     pane = view = null ;
   }
 });
@@ -155,4 +156,16 @@ test("The content of the popup should be recalculated correctly when the list of
   SC.RunLoop.end() ;
   equals(view4.get("_itemList")[0].title, "Moving", "The list should start with new item Moving");
   equals(view3.get("_itemList")[2].title, "Again", "The list should have on the 3rd position the title Again");
+});
+
+test("Setting the value of the view should change the title & icon properties", function () {
+  equals(view4.get('value'), "World", "The view gets a default value by sort");
+  equals(view4.get('title'), "World", "The view's title should originally be");
+  equals(view4.get('icon'), "world-icon", "The view's icon should originally be");
+  SC.run(function () {
+    view4.set('value', 'Around');
+  });
+
+  equals(view4.get('title'), "Around", "The view's title should now be");
+  equals(view4.get('icon'), "around-icon", "The view's icon should now be");
 });
