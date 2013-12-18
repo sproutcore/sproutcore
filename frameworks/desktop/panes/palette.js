@@ -10,15 +10,23 @@ sc_require('panes/panel');
 /** @class
   Displays a non-modal, default positioned, drag&drop-able palette pane.
 
-  The default way to use the palette pane is to simply add it to your page like this:
+  The simplest way to use the palette pane is to define it in an SC.Page like this:
 
-      SC.PalettePane.create({
+      ```
+      myPalettePane: SC.PalettePane.create({
         layout: { width: 400, height: 200, right: 0, top: 0 },
         contentView: SC.View.extend({
         })
-      }).append();
+      })
+      ```
 
-  This will cause your palette pane to display.
+  Then get it from your page and append like this:
+
+      ```
+      MyApp.myPage.get('myPalettePane').append();
+      ```
+
+  This will cause your palette pane to instantiate lazily and display.
 
   Palette pane is a simple way to provide non-modal messaging that won't
   blocks the user's interaction with your application.  Palette panes are
@@ -26,10 +34,10 @@ sc_require('panes/panel');
   They provide a better user experience than modal panel.
 
   @extends SC.PanelPane
-  @extends SC.Draggable
+  @extends SC.DraggablePaneSupport
   @since SproutCore 1.0
 */
-SC.PalettePane = SC.PanelPane.extend(SC.Draggable,
+SC.PalettePane = SC.PanelPane.extend(SC.DraggablePaneSupport,
 /** @scope SC.PalettePane.prototype */ {
 
   /**

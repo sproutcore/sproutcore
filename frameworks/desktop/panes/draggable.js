@@ -8,17 +8,19 @@
 /**
   @namespace
 
-  Provides drag functionality to a top level pane. If you need to disable dragging at certain times set the
+  Provides drag functionality to a pane. If you need to disable dragging at certain times set the
   property isAnchored to YES and the pane will no longer move.
+
+  See SC.PalettePane, a simple panel pane with SC.DraggablePaneSupport mixed in.
 */
-SC.Draggable = /** @scope SC.Draggable.prototype */{
+SC.DraggablePaneSupport = /** @scope SC.DraggablePaneSupport.prototype */{
 
   /**
     Walk like a duck.
 
     @type Boolean
   */
-  isDraggable: YES,
+  isDraggablePane: YES,
 
   /**
    @type Boolean
@@ -118,6 +120,7 @@ SC.Draggable = /** @scope SC.Draggable.prototype */{
     var xOffset = this._drag_cachedMouseX - evt.pageX,
         yOffset = this._drag_cachedMouseY - evt.pageY,
         frame = this.get('frame'),
+        // NOTE: wFrame will be incorrect if this pane is not attached to document.body (e.g. via appendTo).
         wFrame = SC.RootResponder.responder.computeWindowSize(),
         oldLayout = SC.clone(this.get('layout')),
         layout = {},
@@ -135,8 +138,8 @@ SC.Draggable = /** @scope SC.Draggable.prototype */{
 
     // If a layout property is in the layout no matter what other layout properties are used we need to modify it the
     // same way. For the 4 offsets we check if they've been specified as percentages and if so convert them to regular
-    // offsets based on our current frame and the current window. Since this mixin is intended for top level panes it is
-    // assumed that the frame coordinates are in the browser window's coordinate system.
+    // offsets based on our current frame and the current window. For simplicity's sake, it is assumed that the frame
+    // frame coordinates are in the browser window's coordinates (see above note on wFrame).
 
     if (oldLayout.hasOwnProperty('left')) {
       if (isPercent(oldLayout.left)) {
