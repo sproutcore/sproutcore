@@ -321,7 +321,7 @@ test('Data dragging', function() {
 
   // Check the views.
   equals(view1a.dataDragDropped.callCount, 1, "The targeted view received a dataDragDropped event");
-  equals(view1.dataDragDropped.callCount, 1, "The targeted view's parent received a dataDragDropped event");
+  equals(view1.dataDragDropped.callCount, 0, "The targeted view's parent did not receive a dataDragDropped event");
 
 
   // Clean up our default responder sitch.
