@@ -1631,20 +1631,23 @@ SC.CoreView.reopen(
 
   /** @private */
   _teardownTransition: function () {
-    // Reset the layout to its original value.
-    this.set('layout', this._preTransitionLayout);
+    // Some transition plugins will send a didTransitionIn/Out event even
+    // if the transition was cancelled. In either case, the transition can't
+    // be cleaned up multiple times.
+    if (this._preTransitionLayout) {
+      // Reset the layout to its original value.
+      this.set('layout', this._preTransitionLayout);
 
-    // Clean up.
-    this._preTransitionLayout = null;
-    this._preTransitionFrame = null;
+      // Clean up.
+      this._preTransitionLayout = null;
+      this._preTransitionFrame = null;
+    }
   },
 
   /** @private Attempts to run a transition hide, ensuring any incoming transitions are stopped in place. */
   _transitionHide: function () {
-    var state = this.get('viewState'),
-      transitionHide = this.get('transitionHide'),
-      options = this.get('transitionHideOptions') || {},
-      inPlace = false;
+    var transitionHide = this.get('transitionHide'),
+      options = this.get('transitionHideOptions') || {};
 
     //@if (debug)
     if (SC.LOG_VIEW_STATES) {
@@ -1720,8 +1723,7 @@ SC.CoreView.reopen(
 
   /** @private Attempts to run a transition show, ensuring any hiding transitions are stopped in place. */
   _transitionShow: function () {
-    var state = this.get('viewState'),
-      transitionShow = this.get('transitionShow'),
+    var transitionShow = this.get('transitionShow'),
       options = this.get('transitionShowOptions') || {},
       inPlace = false;
 
