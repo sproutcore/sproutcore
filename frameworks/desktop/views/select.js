@@ -392,8 +392,8 @@ SC.SelectView = SC.ButtonView.extend(
   */
   itemsDidChange: function() {
     var escapeHTML, items, len, nameKey, iconKey, valueKey, separatorKey, showCheckbox,
-        currentSelectedVal, shouldLocalize, isSeparator, itemList, isChecked,
-        idx, name, icon, value, item, itemEnabled, isEnabledKey, emptyName, isSameRecord;
+      currentSelectedVal, shouldLocalize, isSeparator, itemList, isChecked,
+      idx, name, icon, value, item, itemEnabled, isEnabledKey, emptyName, isSameRecord;
 
     items = this.get('items') || [];
     items = this.sortObjects(items);
@@ -468,7 +468,12 @@ SC.SelectView = SC.ButtonView.extend(
         // get the separator
         isSeparator = separatorKey ? (object.get ? object.get(separatorKey) : object[separatorKey]) : NO;
 
-          if (!isSeparator) {
+        if (isSeparator) {
+          item = SC.Object.create({
+            isSeparator: true,
+            value: '_sc_separator_item'
+          });
+        } else {
           //Get the name value. If value key is not specified convert obj
           //to string
           name = nameKey ? (object.get ?
@@ -514,8 +519,7 @@ SC.SelectView = SC.ButtonView.extend(
             //set the _itemIdx - To change the prefMatrix accordingly.
             this.set('_itemIdx', idx);
             isChecked = !showCheckbox ? NO : YES;
-          }
-          else {
+          } else {
             isChecked = NO;
           }
 
@@ -530,18 +534,17 @@ SC.SelectView = SC.ButtonView.extend(
             this._defaultTitle = name;
             this._defaultIcon = icon;
           }
-        }
 
-        item = SC.Object.create({
-          isSeparator: isSeparator,
-          title: name,
-          icon: icon,
-          value: value,
-          isEnabled: itemEnabled,
-          checkbox: isChecked,
-          target: this,
-          action: 'displaySelectedItem'
-        });
+          item = SC.Object.create({
+            action: 'displaySelectedItem',
+            title: name,
+            icon: icon,
+            value: value,
+            isEnabled: itemEnabled,
+            checkbox: isChecked,
+            target: this
+          });
+        }
 
         //Set the items in the itemList array
         itemList.push(item);
@@ -718,9 +721,30 @@ SC.SelectView = SC.ButtonView.extend(
     var currentItem = menuView.get("selectedItem");
 
     this.set("value", currentItem.get("value"));
-    this.set("title", currentItem.get("title"));
-    this.set("_itemIdx", currentItem.get("contentIndex"));
   },
+
+  /** @private Each time the value changes, update each item's checkbox property and update our display properties. */
+  valueDidChange: function () {
+    var itemList = this._itemList,
+      showCheckbox = this.get('showCheckbox'),
+      value = this.get('value');
+
+    // Find the newly selected item (if any).
+    for (var i = 0, len = itemList.length; i < len; i++) {
+      var item = itemList[i],
+        isChecked = false;
+
+      if (value === item.get('value')) {
+        isChecked = showCheckbox;
+        this.set("title", item.get("title"));
+        this.set("icon", item.get("icon"));
+        this.set("_itemIdx", item.get("contentIndex"));
+      }
+
+      item.set('checkbox', isChecked);
+    }
+
+  }.observes('value'),
 
   /** @private
      Set the "top" attribute in the prefer matrix property which will
