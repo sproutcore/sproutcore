@@ -78,10 +78,10 @@ test("writing a DateTime should successfully format the value into a string", fu
 
 test("reading or writing null values should work", function() {
   sprocket.set('createdAt', null);
-  equals(sprocket.readAttribute('createdAt'), null);
+  equals(sprocket.readAttribute('createdAt'), null, 'Setting a date attribute to null should work');
 
-  equals(nullSprocket.get('createdAt'), null);
-  equals(nullUnixTime.get('unixTimeCreatedAt'), null, 'reading a DateTime store in unix time should default to null when a null value is provided');
+  equals(nullSprocket.get('createdAt'), null, 'Reading a null date attribute should work');
+  equals(nullUnixTime.get('unixTimeCreatedAt'), null, 'Reading a null date attribute with useUnixTime: YES should work');
 });
 
 test("reading and writing a DateTime should successfully convert to/from unix time", function() {
