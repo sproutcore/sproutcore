@@ -592,13 +592,13 @@ if (SC.DateTime && !SC.RecordAttribute.transforms[SC.guidFor(SC.DateTime)]) {
       Convert a String to a DateTime
     */
     to: function(str, attr) {
+      if (SC.none(str) || SC.instanceOf(str, SC.DateTime)) return str;
       if(attr.get('useUnixTime')) {
         if(SC.typeOf(str) === SC.T_STRING) { str = parseInt(str); }
         if(isNaN(str) || SC.typeOf(str) !== SC.T_NUMBER) { str = 0; }
         return SC.DateTime.create({ milliseconds: str*1000, timezone: 0 });
       }
-      if (SC.none(str) || SC.instanceOf(str, SC.DateTime)) return str;
-      if (SC.none(str) || SC.instanceOf(str, Date)) return SC.DateTime.create(str.getTime());
+      if (SC.instanceOf(str, Date)) return SC.DateTime.create(str.getTime());
       var format = attr.get('format');
       return SC.DateTime.parse(str, format ? format : SC.DateTime.recordFormat);
     },
