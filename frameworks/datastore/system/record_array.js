@@ -274,7 +274,10 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   */
   indexOf: function(record, startAt) {
     if (!SC.kindOf(record, SC.Record)) {
-      SC.Logger.warn("Using indexOf on %@ with an object that is not an SC.Record".fmt(record));
+      //@if(debug)
+      SC.Logger.warn("Developer Warning: Used SC.RecordArray's `indexOf` on %@, which is not an SC.Record. SC.RecordArray only works with records.".fmt(record));
+      SC.Logger.trace();
+      //@endif
       return -1; // only takes records
     }
 
@@ -295,7 +298,10 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   */
   lastIndexOf: function(record, startAt) {
     if (!SC.kindOf(record, SC.Record)) {
-      SC.Logger.warn("Using lastIndexOf on %@ with an object that is not an SC.Record".fmt(record));
+      //@if(debug)
+      SC.Logger.warn("Developer Warning: Using SC.RecordArray's `lastIndexOf` on %@, which is not an SC.Record. SC.RecordArray only works with records.".fmt(record));
+      SC.Logger.trace();
+      //@endif
       return -1; // only takes records
     }
 
