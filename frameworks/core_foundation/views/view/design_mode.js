@@ -100,6 +100,11 @@ SC.View.reopen(
 
     this.set('designMode', designMode);
 
+    // Get the size name portion of the mode.
+    if (designMode) {
+      size = designMode.split('_')[0];
+    }
+
     modeAdjust = this.get('modeAdjust');
     if (modeAdjust) {
       // Stop observing changes for a moment.
@@ -128,8 +133,6 @@ SC.View.reopen(
       }
 
       if (designMode) {
-        size = designMode.split('_')[0];
-
         // Apply new properties. The orientation specific properties override the size properties.
         if (modeAdjust[size] || modeAdjust[designMode]) {
           newProperties = SC.merge(modeAdjust[size], modeAdjust[designMode]);
