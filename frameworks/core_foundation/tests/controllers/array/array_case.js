@@ -197,6 +197,10 @@ test("The computed properties firstObject, firstSelectableObject & lastObject sh
   equals(controller.get('lastObject'), newObject, 'lastObject should be the new last object in content');
 });
 
+// ..........................................................
+// orderBy
+//
+
 test("array orderBy using String", function(){
   var testController = SC.ArrayController.create({
     content: content,
@@ -257,10 +261,6 @@ test("array orderBy using function", function(){
   same(testController.get('arrangedObjects').toArray(), expected, 'arrangedObjects should be sortable by a custom function');
 });
 
-// ..........................................................
-// ADD SPECIAL CASES HERE
-//
-
 test("verify length is correct in arrayObserver didChange method when orderBy is set", function () {
   content = [];
   controller = SC.ArrayController.create({
@@ -281,6 +281,22 @@ test("verify length is correct in arrayObserver didChange method when orderBy is
 
   content.pushObject(":{");
 });
+
+test("verify range observers fire correctly when object added at different sorted index than absolute index", function() {
+  content = [ TestObject.create({ value: 1 }), TestObject.create({ value: 2 }) ];
+  controller = SC.ArrayController.create({
+    content: content,
+    orderBy: 'value ASC'
+  });
+  var callCount = 0;
+  controller.addRangeObserver(SC.IndexSet.create(0, 2), null, function() { callCount++; });
+  controller.content.pushObject(TestObject.create({ value: 0 }));
+  ok(callCount === 1, "Range observer should have fired based on inclusion in the sorted range rather than the raw content range.");
+});
+
+// ..........................................................
+// ADD SPECIAL CASES HERE
+//
 
 test("verify rangeObserver fires when content is deleted", function() {
 
