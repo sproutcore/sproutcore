@@ -14,6 +14,10 @@ SC.mixin(SC.View,
     @since Version 1.10
   */
   POP_IN: {
+
+    /* @private */
+    layoutProperties: ['scale'],
+
     /** @private */
     setup: function (view, options, inPlace) {
       view.adjust({ scale: inPlace ? view.get('layout').scale || 0 : 0 });
@@ -54,6 +58,9 @@ SC.mixin(SC.View,
     @since Version 1.10
   */
   POP_OUT: {
+
+    /* @private */
+    layoutProperties: ['scale'],
 
     /** @private */
     run: function (view, options) {

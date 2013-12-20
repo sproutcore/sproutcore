@@ -230,6 +230,9 @@ SC.CoreView.reopen(
   /* @private Internal variable used to store the original frame before running an automatic transition. */
   _preTransitionFrame: null,
 
+  /* @private Internal variable used to cache layout properties which must be reset after the transition. */
+  _transitionLayoutCache: null,
+
   /**
     The current state of the view as managed by its internal statechart.
 
@@ -1626,10 +1629,27 @@ SC.CoreView.reopen(
   },
 
   /** @private */
-  _setupTransition: function () {
+  _setupTransition: function (transition) {
+    // Get a copy of the layout.
+    var layout = SC.clone(this.get('layout'));
     // Prepare for a transition.
-    this._preTransitionLayout = SC.clone(this.get('layout'));
+    this._preTransitionLayout = layout;
     this._preTransitionFrame = this.get('borderFrame');
+    // Cache appropriate layout values.
+    var layoutProperties = SC.get(transition, 'layoutProperties');
+    // If the transition doesn't specify layoutProperties, cache all of them.
+    if (!layoutProperties) {
+      this._transitionLayoutCache = layout;
+    }
+    // Otherwise, cache just the specified ones.
+    else {
+      this._transitionLayoutCache = {};
+      var i, prop, len = layoutProperties.length;
+      for (i = 0; i < len; i++) {
+        prop = layoutProperties[i];
+        this._transitionLayoutCache[prop] = layout[prop];
+      }
+    }
   },
 
   /** @private */
@@ -1637,13 +1657,14 @@ SC.CoreView.reopen(
     // Some transition plugins will send a didTransitionIn/Out event even
     // if the transition was cancelled. In either case, the transition can't
     // be cleaned up multiple times.
-    if (this._preTransitionLayout) {
-      // Reset the layout to its original value.
-      this.set('layout', this._preTransitionLayout);
+    if (this._transitionLayoutCache) {
+      // Reset the layout with its cached values.
+      this.adjust(this._transitionLayoutCache);
 
       // Clean up.
       this._preTransitionLayout = null;
       this._preTransitionFrame = null;
+      this._transitionLayoutCache = null;
     }
   },
 
@@ -1665,7 +1686,7 @@ SC.CoreView.reopen(
     //   inPlace = true;
     //   break;
     // default:
-    this._setupTransition();
+    this._setupTransition(transitionHide);
     // }
 
     // Set up the hiding transition.
@@ -1691,7 +1712,7 @@ SC.CoreView.reopen(
       inPlace = true;
       break;
     default:
-      this._setupTransition();
+      this._setupTransition(transitionIn);
     }
 
     // Set up the incoming transition.
@@ -1709,7 +1730,7 @@ SC.CoreView.reopen(
       options = this.get('transitionOutOptions') || {};
 
     if (!inPlace) {
-      this._setupTransition();
+      this._setupTransition(transitionOut);
     }
 
     // Increment the shared building out count.
@@ -1739,7 +1760,7 @@ SC.CoreView.reopen(
     //   this.cancelAnimation(SC.LayoutState.CURRENT);
     //   inPlace = true;
     // } else {
-    this._setupTransition();
+    this._setupTransition(transitionShow);
     // }
 
     // Set up the showing transition.

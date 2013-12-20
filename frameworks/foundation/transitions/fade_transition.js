@@ -16,6 +16,9 @@ SC.mixin(SC.View,
   */
   FADE_IN: {
 
+    /* @private Empty because we don't even need to reset opacity at the end: it ends up at 1. */
+    layoutProperties: [],
+
     /** @private */
     setup: function (view, options, inPlace) {
       view.adjust({ opacity: inPlace ? view.get('layout').opacity || 0 : 0 });
@@ -42,6 +45,9 @@ SC.mixin(SC.View,
     @since Version 1.10
   */
   FADE_OUT: {
+
+    /* @private */
+    layoutProperties: ['opacity'],
 
     /** @private */
     run: function (view, options) {

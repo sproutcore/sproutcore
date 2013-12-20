@@ -43,6 +43,23 @@ SC.ViewTransitionProtocol = {
     @param {Object} finalLayout The final layout of the view, which may be different than the starting layout of the view if a previous transition was cancelled in place.
     @param {Object} finalFrame The final frame of the view, which may be different than the starting frame of the view if a previous transition was cancelled in place.
   */
-  run: function (view, options, finalLayout, finalFrame) {}
+  run: function (view, options, finalLayout, finalFrame) {},
+
+
+  /**
+    This optional property exposes a list of layout properties involved in the
+    transition. This allows the view to more intelligently reset its layout when
+    the transition is complete.
+
+    If unspecified, the transition will cache and reset the entire layout hash. This
+    can cause problems when spearately adjusting or animating those properties during
+    a transition. (Note that you should not adjust or animate the layout properties
+    that are involved in a transition while the transition is under way.)
+
+    @field
+    @type Array
+    @default All layout properties
+  */
+  layoutProperties: []
 
 };

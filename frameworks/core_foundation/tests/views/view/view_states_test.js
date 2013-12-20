@@ -454,6 +454,35 @@ test("Test hiding with transitionHide", function () {
   view.destroy();
 });
 
+test("Adjusting unrelated layout property (not specified in transition's layoutProperties) during transition.", function() {
+  var transition = {
+    layoutProperties: ['opacity'],
+    run: function (view) {
+      view.adjust('opacity', 0);
+      view.invokeNext(view.didTransitionIn);
+    }
+  }
+  var view = SC.View.create({
+    transitionIn: transition,
+    layout: { height: 40 },
+    didTransitionIn: function() {
+      sc_super();
+      equals(this.getPath('layout.height'), 30, "height adjusted during an opacity transition is retained after the transition is complete");
+      start();
+    }
+  });
+
+  SC.run(function() {
+    view._doRender();
+    view._doAttach(document.body);
+    equals(view.getPath('layout.height'), 40, 'PRELIM: View height starts at 40');
+    equals(view.get('viewState'), SC.View.ATTACHED_BUILDING_IN, "PRELIM: View is building in");
+    view.adjust('height', 30);
+    stop(250);
+  });
+
+});
+
 /** isVisible */
 var child, view;
 module("SC.View isVisible integration with shown and hidden state", {
