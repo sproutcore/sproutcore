@@ -2310,7 +2310,7 @@ SC.RootResponder = SC.Object.extend(
   /** @private */
   _dragover: function(evt) {
     // If it's a file being dragged, prevent the default (leaving the app and opening the file).
-    if (evt.dataTransfer.types && evt.dataTransfer.types.contains('Files')) {
+    if (evt.dataTransfer.types && (evt.dataTransfer.types.contains('Files') || evt.dataTransfer.types.contains('text/uri-list'))) {
       evt.preventDefault();
       evt.stopPropagation();
       // Set the default drag effect to 'none'. Views may reverse this if they wish.
@@ -2376,14 +2376,14 @@ SC.RootResponder = SC.Object.extend(
     }
   },
 
-  /** @private This event is called if the most recent dragover event was  */
+  /** @private This event is called if the most recent dragover event returned with a non-"none" dropEffect. */
   drop: function(evt) {
     SC.run(function() { this._drop(evt); }, this);
   },
   /** @private */
   _drop: function(evt) {
     // If it's a file being dragged, prevent the default (leaving the app and opening the file).
-    if (evt.dataTransfer.types.contains('Files')) {
+    if (evt.dataTransfer.types && (evt.dataTransfer.types.contains('Files') || evt.dataTransfer.types.contains('text/uri-list'))) {
       evt.preventDefault();
       evt.stopPropagation();
       // Set the default drag effect to 'none'. Views may reverse this if they wish.

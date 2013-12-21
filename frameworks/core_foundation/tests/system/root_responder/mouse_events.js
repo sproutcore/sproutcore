@@ -72,15 +72,15 @@ module("Mouse event handling", {
     // Create the events.
     evt1a = {
       target: pane.getPath('view1.view1a.layer'),
-      dataTransfer: { types: ['Files'] },
-      preventDefault: function() {},
-      stopPropagation: function() {}
+      dataTransfer: { types: [] },
+      preventDefault: CoreTest.stub(),
+      stopPropagation: CoreTest.stub()
     };
     evt2 = {
       target: pane.getPath('view2.layer'),
-      dataTransfer: { types: ['Files'] },
-      preventDefault: function() {},
-      stopPropagation: function() {}
+      dataTransfer: { types: [] },
+      preventDefault: CoreTest.stub(),
+      stopPropagation: CoreTest.stub()
     };
   },
   teardown: function() {
@@ -165,7 +165,6 @@ test('Mouse movement', function() {
   equals(view1b.mouseExited.callCount, 0, "The targeted view's sibling has NOT received mouseExited");
   equals(view2.mouseExited.callCount, 0, "The targeted view's parent's sibling (the new target) has NOT received mouseExited");
   equals(view2.mouseEntered.callCount, 1, "The new target has received mouseEntered; circle of life");
-
 });
 
 /*
@@ -213,10 +212,6 @@ test('Data dragging', function() {
   // Drag the mouse over view1a to trigger mouseEntered.
   evt1a.type = 'dragenter';
   SC.RootResponder.responder.dragenter(evt1a);
-
-  // Test the event. (Events with 'Files' in dataTransfer.types should return with dataTransfer.dropEffect set to 'none'.)
-  // (TODO: Test this with different dataTransfer types: 'text/uri-list' (yes canceled) and 'text/csv' (no canceled).)
-  equals(evt1a.dataTransfer.dropEffect, 'none', "The drop effect was canceled for a 'Files' drag (cancels default browser behavior)");
 
   // Test default responder.
   equals(defaultResponder.dataDragDidEnter.callCount, 1, "The default responder was notified that a drag began over the app");
@@ -327,9 +322,31 @@ test('Data dragging', function() {
   // Clean up our default responder sitch.
   SC.RootResponder.responder.defaultResponder.destroy();
   SC.RootResponder.responder.defaultResponder = previousDefaultResponder;
-
 });
 
-/*
-  TODO: Test dragging with different types; make sure preventDefault is being called correctly
-*/
+test('Data dragging content types', function() {
+  // Drag the event over view 1a with type 'Files' (should cancel).
+  evt1a.dataTransfer.types = ['Files'];
+  evt1a.dataTransfer.dropEffect = 'copy';
+  SC.RootResponder.responder.dragover(evt1a);
+
+  equals(evt1a.preventDefault.callCount, 1, "The default behavior was prevented for a 'Files' drag");
+  equals(evt1a.dataTransfer.dropEffect, 'none', "The drop effect was set to 'none' for a 'Files' drag");
+
+  // Drag the event over view 1a with type 'text/uri-list' (should cancel).
+  evt1a.dataTransfer.types = ['text/uri-list'];
+  evt1a.dataTransfer.dropEffect = 'copy';
+  SC.RootResponder.responder.dragover(evt1a);
+
+  equals(evt1a.preventDefault.callCount, 2, "The default behavior was prevented for a 'text/uri-list' drag");
+  equals(evt1a.dataTransfer.dropEffect, 'none', "The drop effect was set to 'none' for a 'text/uri-list' drag");
+
+  // Drag the event over view 1a with type 'text/plain' (should not cancel).
+  evt1a.dataTransfer.types = ['text/plain'];
+  evt1a.dataTransfer.dropEffect = 'copy';
+  SC.RootResponder.responder.dragover(evt1a);
+
+  equals(evt1a.preventDefault.callCount, 2, "The default behavior was NOT prevented for a 'text/plain' drag");
+  equals(evt1a.dataTransfer.dropEffect, 'copy', "The drop effect was NOT changed for a 'text/plain' drag");
+
+});
