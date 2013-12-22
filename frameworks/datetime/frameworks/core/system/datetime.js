@@ -331,6 +331,7 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
       - `%j` -- Day of the year (001..366)
       - `%m` -- Month of the year (01..12)
       - `%M` -- Minute of the hour (00..59)
+      - `%o` -- The day's ordinal abbreviation ('st', 'nd', 'rd', etc.)
       - `%p` -- Meridian indicator ("AM" or "PM")
       - `%S` -- Second of the minute (00..60)
       - `%s` -- Milliseconds of the second (000..999)
