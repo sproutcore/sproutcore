@@ -1647,7 +1647,7 @@ SC.CoreView.reopen(
       var i, prop, len = layoutProperties.length;
       for (i = 0; i < len; i++) {
         prop = layoutProperties[i];
-        this._transitionLayoutCache[prop] = layout[prop];
+        this._transitionLayoutCache[prop] = layout[prop] || null;
       }
     }
   },
