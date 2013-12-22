@@ -1824,8 +1824,11 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   */
   selectAll: function(evt) {
     var content = this.get('content'),
-        sel = content ? SC.IndexSet.create(0, content.get('length')) : null;
-    this.select(sel, NO) ;
+        del = this.delegateFor('allowsMultipleSelection', this.get('delegate'), content);
+    if (del && del.get('allowsMultipleSelection')) {
+      var sel = content ? SC.IndexSet.create(0, content.get('length')) : null;
+      this.select(sel, NO) ;
+    }
     return YES ;
   },
 
@@ -1834,8 +1837,11 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   */
   deselectAll: function() {
     var content = this.get('content'),
-        sel = content ? SC.IndexSet.create(0, content.get('length')) : null;
-    this.deselect(sel, NO) ;
+        del = this.delegateFor('allowsEmptySelection', this.get('delegate'), content);
+    if (del && del.get('allowsEmptySelection')) {
+      var sel = content ? SC.IndexSet.create(0, content.get('length')) : null;
+      this.deselect(sel, NO);
+    }
     return YES ;
   },
 
