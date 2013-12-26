@@ -523,7 +523,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       visibleDim = isHorizontal ? this.$().width() : this.$().height();
 
     // Only overflow if we've gone below the minimum dimension required to fit all the segments
-    if (this.get('shouldHandleOverflow') && (this.isOverflowing || visibleDim <= this.cachedMinimumDim)) {
+    if (this.get('shouldHandleOverflow') && (this.get('isOverflowing') || visibleDim <= this.cachedMinimumDim)) {
       this.invokeLast(this.remeasure);
     }
   },
@@ -577,10 +577,11 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         visibleDim = isHorizontal ? this.$().width() : this.$().height(),  // The inner width/height of the div
         curElementsDim = 0,
         dimToFit,
-        length, i;
+        length, i,
+        isOverflowing = NO;
 
     // This variable is useful to optimize when we are overflowing
-    this.isOverflowing = NO;
+    isOverflowing = NO;
     overflowView.set('isSelected', NO);
 
     // Clear out the overflow items (these are the items not currently visible)
@@ -591,15 +592,17 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       childView = childViews.objectAt(i);
       curElementsDim += this.cachedDims[i];
 
-      // check for an overflow (leave room for the overflow segment except for with the last segment)
-      dimToFit = (i === length - 1) ? curElementsDim : curElementsDim + this.cachedOverflowDim;
+      // Check and see if this item kicks us over into overflow.
+      if (!isOverflowing) {
+        // (don't leave room for the overflow segment on the last item)
+        dimToFit = (i === length - 1) ? curElementsDim : curElementsDim + this.cachedOverflowDim;
+        if (dimToFit > visibleDim) isOverflowing = YES;
+      }
 
-      if (dimToFit > visibleDim) {
+      // Update the view depending on overflow state.
+      if (isOverflowing) {
         // Add the localItem to the overflowItems
         this.overflowItems.pushObject(childView.get('localItem'));
-
-        // Record that we're now overflowing
-        this.isOverflowing = YES;
 
         childView.set('isVisible', NO);
 
@@ -618,9 +621,11 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       }
     }
 
-    // Show/hide the overflow view if we have overflowed
-    if (this.isOverflowing) overflowView.set('isVisible', YES);
-    else overflowView.set('isVisible', NO);
+    // Show/hide the overflow view as needed.
+    overflowView.set('isVisible', isOverflowing);
+
+    // Set the overflowing property.
+    this.setIfChanged('isOverflowing', isOverflowing);
 
     // Store the minimum dimension (height/width) before overflow
     this.cachedMinimumDim = curElementsDim + this.cachedOverflowDim;
