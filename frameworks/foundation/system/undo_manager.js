@@ -135,6 +135,18 @@ SC.UndoManager = SC.Object.extend(
   }.property('undoStack').cacheable(),
 
   /** 
+    Exposes the timestamp of the most recent undo action.
+
+    @field
+    @readonly
+    @type SC.DateTime
+    @default null
+  */
+  undoActionTimestamp: function() {
+    return this.undoStack ? this.undoStack.timeStamp : null;
+  }.property('undoStack').cacheable(),
+
+  /** 
     If name arguments are passed into `registerUndo` or related methods, then this property
     will expose the last redo action's name. You can use this to show the user what type of
     action will be redone (for example "Redo typing" or "Redo delete").
@@ -146,6 +158,18 @@ SC.UndoManager = SC.Object.extend(
   */
   redoActionName: function () { 
     return this.redoStack ? this.redoStack.name : null;
+  }.property('redoStack').cacheable(),
+
+  /** 
+    Exposes the timestamp of the most recent redo action.
+
+    @field
+    @readonly
+    @type SC.DateTime
+    @default null
+  */
+  redoActionTimestamp: function() {
+    return this.redoStack ? this.redoStack.timeStamp : null;
   }.property('redoStack').cacheable(),
 
   /** 
@@ -267,7 +291,7 @@ SC.UndoManager = SC.Object.extend(
     }
     else {
       this._activeGroup.actions.push(func);
-      this._activeGroup.timeStamp = Date.now();
+      this._activeGroup.timeStamp = SC.DateTime.create();
     }
 
     // If we're not mid-undo or -redo, then we're registering a new undo, and should
@@ -300,7 +324,7 @@ SC.UndoManager = SC.Object.extend(
     }
 
     var stack = this.isUndoing ? 'redoStack' : 'undoStack';
-    this._activeGroup = { name: name, actions: [], prev: this.get(stack), timeStamp: Date.now() };
+    this._activeGroup = { name: name, actions: [], prev: this.get(stack), timeStamp: SC.DateTime.create() };
     this.set(stack, this._activeGroup);
   },
  
