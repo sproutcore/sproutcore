@@ -113,7 +113,7 @@ SC.UndoManager = SC.Object.extend(
     @type Number
     @default 0
   */
-  levelsOfUndo: 0,
+  maxStackLength: 0,
   
   /**
     @type Boolean
@@ -205,7 +205,7 @@ SC.UndoManager = SC.Object.extend(
     @see beginUndoGroup()
   */
   endUndoGroup: function (name) {
-    var levelsOfUndo = this.get('levelsOfUndo'),
+    var maxStackLength = this.get('maxStackLength'),
       stackName = this.isUndoing ? 'redoStack' : 'undoStack';
 
     if (!this._activeGroup) {
@@ -217,12 +217,12 @@ SC.UndoManager = SC.Object.extend(
     this._activeGroup = null;
     this.propertyDidChange(stackName);
 
-    if (levelsOfUndo > 0) {
+    if (maxStackLength > 0) {
       var stack = this[stackName],
         i = 1;
       while(stack = stack.prev) {
         i++;
-        if (i >= levelsOfUndo) {
+        if (i >= maxStackLength) {
           stack.prev = null;
         }
       }
