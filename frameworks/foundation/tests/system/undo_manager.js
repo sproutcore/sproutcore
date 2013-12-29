@@ -14,11 +14,15 @@ test("simple undo case", function () {
 
       actionName: 0,
 
+      _undoAction: function(value) {
+        this.set('value', value);
+      },
+
       valDidChange: function() {
         var that = this,
           value = this._value;
 
-        undoManager.registerUndo(function () { that.set('value', value); }, this.actionName);
+        undoManager.registerUndoAction(this, this._undoAction, value, this.actionName);
 
         this._value = this.get('value');
       }.observes('value')
@@ -97,16 +101,19 @@ test("grouped undo case", function () {
 
       actionName: 0,
 
+      _undoAction: function(value) {
+        this.set('value', value)
+      },
+
       valDidChange: function() {
-        var that = this,
-          value = this._value,
-          actionName = this.actionName;
+        var value = this._value,
+            actionName = this.actionName;
 
         if (actionName === this._actionName) {
-          undoManager.registerGroupedUndo(function () { that.set('value', value); });
+          undoManager.registerGroupedUndoAction(this, this._undoAction, value);
         }
         else {
-          undoManager.registerUndo(function () { that.set('value', value); }, actionName);
+          undoManager.registerUndoAction(this, this._undoAction, value, actionName);
         }
 
         this._value = this.get('value');
@@ -163,7 +170,7 @@ test("set action name", function () {
   var undoManager = SC.UndoManager.create();
 
   undoManager.setActionName('group1');
-  undoManager.registerUndo();
+  undoManager.registerUndoAction();
 
   equals(undoManager.get('undoActionName'), null, "The name of the undo stack should be null");
 
@@ -179,10 +186,12 @@ test("restrict number of groups", function () {
     obj = SC.Object.create({
       undoManager: undoManager,
       value: 0,
+      _undoAction: function(value) {
+        this.set('value', value);
+      },
       valDidChange: function() {
-        var that = this,
-          value = this.get('value')-1;
-        undoManager.registerUndo(function () { that.set('value', value); });
+        var value = this.get('value') - 1;
+        undoManager.registerUndoAction(this, this._undoAction, value);
       }.observes('value')
     }),
     computeStackLength = function(stack) {
