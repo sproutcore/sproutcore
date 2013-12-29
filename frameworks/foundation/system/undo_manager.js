@@ -8,10 +8,10 @@
 /**
   @class
 
-  This is a simple undo manager. It manages groups of functions which return
+  This is a simple undo manager. It manages groups of actions which return
   something to an earlier state. It's your responsibility to make sure that
-  these functions successfully undo the action, and register an undo of their
-  own (allowing redo).
+  these functions successfully undo the action, and register an undo action
+  of their own (allowing redo).
 
   ## Using SC.UndoManager
 
@@ -20,18 +20,13 @@
   you have two fields that should each have their own undo stack, you should
   create two separate managers.
 
-  Register undo functions via `SC.UndoManager#registerUndo(func)`. Your undo
-  function should simply retain a copy of the previously-set value, usually
-  via a closure, and set the value back to it. For example:
+  Register undo functions via the `registerUndoAction`, which takes a target,
+  action, context and optional human-readable action name. Trigger actions by
+  calling the `undo` and `redo` methods. Actions will be called with `context`
+  as their only argument.
 
-  ```
-  var value = this._previousValue,
-      that = this;
-  this.undoManager.registerUndo(function() {
-    that.set('value', value);
-  });
-  this._previousValue = value;
-  ```
+  Optionally, you can group undo actions; groups of actions are triggered
+  together.
 
   ### Simple Example: A single value
 
@@ -47,6 +42,14 @@
 
     // Undo manager.
     valueUndoManager: SC.UndoManager.create(),
+
+    // Undo action.
+    _valueUndoAction(val) {
+      // This call will trigger the controller's `value` observer, triggering the registration
+      // of another undo; the UndoManager will automatically and correctly interpret this as
+      // the registration of a redo method.
+      this.set('value', val);
+    },
 
     // Value observer; tracks `value` and registers undos.
     valueDidChange: function() {
@@ -67,12 +70,7 @@
       if (SC.none(previousValue)) return;
 
       // Otherwise, register an undo function. (previousValue is accessed via the closure.)
-      this.undoManager.registerUndo(function() {
-        // This call will trigger the controller's `value` observer, triggering the registration
-        // of another undo; the UndoManager will automatically and correctly interpret this as
-        // the registration of a redo method.
-        that.set('value', previousValue);
-      });
+      this.undoManager.registerUndoAction(this, this._valueUndoAction, previousValue);
     }.observes('value')
   });
 
@@ -103,12 +101,13 @@
 
   ### Advanced: Grouping undos
 
-  Undo events registered by `registerUndo` will undo or redo one at a time. If you wish, you can
-  group undo events into groups (for example, if you wish to group all undos which happen within
-  a short duration of each other). Groups are fired all at once when `undo` or `redo` is called.
+  Undo events registered by `registerUndoAction` will undo or redo one at a time. If you wish,
+  you can group undo events into groups (for example, if you wish to group all undos which happen
+  within a short duration of each other). Groups are fired all at once when `undo` or `redo` is
+  called.
 
   To start a new undo group, call `beginUndoGroup`; to register undo functions to the currently-
-  open group, call `registerGroupedUndo`; finally, to mark the end of a grouped set of undo
+  open group, call `registerGroupedUndoAction`; finally, to mark the end of a grouped set of undo
   functions, call `endUndoGroup`.
 
   If `undo` is called while an undo group is open, UndoManager will simply close the group for
@@ -121,9 +120,9 @@ SC.UndoManager = SC.Object.extend(
 /** @scope SC.UndoManager.prototype */ {
 
   /** 
-    If name arguments are passed into `registerUndo` or related methods, then this property
-    will expose the last undo action's name. You can use this to show the user what type of
-    action will be undone (for example "Undo typing" or "Undo delete").
+    If name arguments are passed into `registerUndoAction` or related methods, then this property
+    will expose the last undo action's name. You can use this to show the user what type of action
+    will be undone (for example "typing" or "delete").
 
     @field
     @readonly
@@ -147,7 +146,7 @@ SC.UndoManager = SC.Object.extend(
   }.property('undoStack').cacheable(),
 
   /** 
-    If name arguments are passed into `registerUndo` or related methods, then this property
+    If name arguments are passed into `registerUndoAction` or related methods, then this property
     will expose the last redo action's name. You can use this to show the user what type of
     action will be redone (for example "Redo typing" or "Redo delete").
 
@@ -173,9 +172,8 @@ SC.UndoManager = SC.Object.extend(
   }.property('redoStack').cacheable(),
 
   /** 
-    True if there is an undo action on the stack.
-    
-    Use to validate your menu item.
+    True if there is an undo action on the stack. Use to validate your menu item or enable
+    your button.
     
     @field
     @readonly
@@ -183,21 +181,20 @@ SC.UndoManager = SC.Object.extend(
     @default NO
   */
   canUndo: function () { 
-    // instead of this.undoStack !== null && this.undoStack !== undefined
-    return this.undoStack != null;
+    return !SC.none(this.undoStack);
   }.property('undoStack').cacheable(),
   
   /** 
-    True if there is an redo action on the stack. Use to validate your menu item.
+    True if there is an redo action on the stack. Use to validate your menu item or enable
+    your button.
     
     @field
     @readonly
     @type Boolean
     @default NO
   */
-  canRedo: function () { 
-    // instead of this.redoStack !== null && this.redoStack !== undefined
-    return this.redoStack != null; 
+  canRedo: function () {
+    return !SC.none(this.redoStack);
   }.property('redoStack').cacheable(),
   
   /**
@@ -249,22 +246,21 @@ SC.UndoManager = SC.Object.extend(
   isRedoing: NO, 
   
   // --------------------------------
-  // SIMPLE REGISTRATION
+  // UNDO ACTION REGISTRATION
   //
-  // These are the core method to register undo/redo events.
-  
+
   /**
-    This is how you save new undo events. These functions will register as redo events
-    if you call this method while an undo is in progress (i.e. from your undo method,
-    or from observers which it triggers).
+    Registers an undo action. If called while an undo is in progress (i.e. from your
+    undo method, or from observers which it triggers), registers a redo action instead.
     
-    @param {Function} func A prebound function to be invoked when the undo executes.
-    @param {String} [name] An optional name for the undo.  If you are using 
-      groups, this is not necessary.
+    @param {String|Object} target The action's target (`this`).
+    @param {String|Function} action The method on `target` to be called.
+    @param {Object} context The context passed to the action when called.
+    @param {String} name An optional human-readable name for the undo action.
   */
-  registerUndo: function (func, name) {
-    // Calls to registerUndo close any open undo groups, open a new one and register to
-    // it. This means that a series of calls to registerUndo will simply open and close
+  registerUndoAction: function(target, action, context, name) {
+    // Calls to registerUndoAction close any open undo groups, open a new one and register
+    // to it. This means that a series of calls to registerUndo will simply open and close
     // a series of single-function groups, as intended.
 
     if (!this.isUndoing && !this.isRedoing) {
@@ -274,30 +270,38 @@ SC.UndoManager = SC.Object.extend(
       this.beginUndoGroup(name);
     }
     
-    this.registerGroupedUndo(func);
+    this.registerGroupedUndoAction(target, action, context);
   },
 
   /**
-    Registers an undo function to the current group. If no group is open, opens a new
+    Registers an undo action to the current group. If no group is open, opens a new
     one.
 
-    @param {Function} func A prebound function to be invoked when the undo executes.
-    @param {String} name An optional name for the undo.  If a group is already 
-      created, this is not necessary.
+    @param {String|Object} target The action's target (`this`).
+    @param {String|Function} action The method on `target` to be called.
+    @param {Object} context The context passed to the action when called.
+    @param {String} name An optional human-readable name for the undo action. Sets or
+      changes the current group's name.
   */
-  registerGroupedUndo: function (func, name) {
+  registerGroupedUndoAction: function(target, action, context, name) {
+    // If we don't have an active group, route the call through registerUndoAction, which will
+    // handle creating a new group for us before returning here. (Slight hack.)
     if (!this._activeGroup) {
-      this.registerUndo(func, name);
+      this.registerUndoAction(target, action, context, name);
     }
+    // Otherwise, register the action.
     else {
-      this._activeGroup.actions.push(func);
+      if (name) this._activeGroup.name = name;
+      this._activeGroup.targets.push(target);
+      this._activeGroup.actions.push(action);
+      this._activeGroup.contexts.push(context);
       this._activeGroup.timeStamp = SC.DateTime.create();
-    }
 
-    // If we're not mid-undo or -redo, then we're registering a new undo, and should
-    // clear out any redoStack.
-    if (!this.isUndoing && !this.isRedoing) {
-      this.set('redoStack', null);
+      // If we're not mid-undo or -redo, then we're registering a new undo, and should
+      // clear out any redoStack.
+      if (!this.isUndoing && !this.isRedoing) {
+        this.set('redoStack', null);
+      }
     }
   },
 
@@ -324,7 +328,20 @@ SC.UndoManager = SC.Object.extend(
     }
 
     var stack = this.isUndoing ? 'redoStack' : 'undoStack';
-    this._activeGroup = { name: name, actions: [], prev: this.get(stack), timeStamp: SC.DateTime.create() };
+
+    this._activeGroup = {
+      // The action's name (see undoActionName). Optional.
+      name: name,
+      // Ordered lists of targets, actions and contexts. (Nth items in each list go together.)
+      targets: [],
+      actions: [],
+      contexts: [],
+      // The previous undo action. When this group is triggered, prev will become the new stack.
+      prev: this.get(stack),
+      // When the action was registered. Useful for grouping undo actions by time.
+      timeStamp: SC.DateTime.create()
+    };
+
     this.set(stack, this._activeGroup);
   },
  
@@ -332,22 +349,24 @@ SC.UndoManager = SC.Object.extend(
     Ends a group of undo functions. All functions in an undo group will be undone or redone
     together when `undo` or `redo` is called.
 
-    @param {String} name
     @see beginUndoGroup()
   */
-  endUndoGroup: function (name) {
+  endUndoGroup: function () {
     var maxStackLength = this.get('maxStackLength'),
       stackName = this.isUndoing ? 'redoStack' : 'undoStack';
 
     if (!this._activeGroup) {
       //@if(debug)
-      SC.warn("endUndoGroup() called outside group.");
+      SC.warn("SC.UndoManager#endUndoGroup() called outside group.");
       //@endif
+      return;
     }
 
     this._activeGroup = null;
-    this.propertyDidChange(stackName);
+    this.notifyPropertyChange(stackName);
 
+    // If we have a maxStackLength, trace back through stack.prev that many times and
+    // null out anything older.
     if (maxStackLength > 0) {
       var stack = this[stackName],
         i = 1;
@@ -362,8 +381,6 @@ SC.UndoManager = SC.Object.extend(
 
   /**
     Change the name of the current undo group.
-
-    Normally you don't want to do this as it will effect the whole group.
     
     @param {String} name
   */
@@ -392,22 +409,73 @@ SC.UndoManager = SC.Object.extend(
   
   /** @private */
   _undoOrRedo: function (stack, state) {
+    // Close out any open undo groups.
     if (this._activeGroup) this.endUndoGroup();
 
+    // Flag the state.
     this.set(state, true);
-    var group = this.get(stack),
-      action;
 
+    // Run the group of actions!
+    var group = this.get(stack);
     if (group) {
+      // Roll back the stack to the previous item.
       this.set(stack, group.prev);
-
+      // Open a new group of the opposite persuasion with the same name. This makes sure a redo
+      // action will have the same name as its corresponding undo action.
       this.beginUndoGroup(group.name);
-      while(action = group.actions.pop()) { 
-        action();
+
+      // Run the actions backwards.
+      var len = group.actions.length,
+          target, action, context, i;
+      for (i = len - 1; i >= 0; i--) {
+        target = group.targets[i];
+        action = group.actions[i];
+        context = group.contexts[i];
+
+        // Normalize (for convenience and backward-compatibility).
+        // If target is a function, it's the action.
+        if (SC.typeOf(target) === SC.T_FUNCTION) {
+          action = target;
+          target = null;
+        }
+        // If target is a string, see if it points to an object.
+        if (SC.typeOf(target) === SC.T_STRING) target = SC.objectForPropertyPath(target);
+        // If action is a string, see if it's the name of a method on target.
+        if (target && SC.typeOf(action) === SC.T_STRING && SC.typeOf(target[action]) === SC.T_FUNCTION) action = target[action];
+
+        // Call!
+        if (SC.typeOf(action) === SC.T_FUNCTION) action.call(target, context);
       }
+
+      // Close the opposite-persuasion group opened above.
       this.endUndoGroup();
     }
     this.set(state, false);
-  }
+  },
+
+  /** @private */
+  destroy: function() {
+    this._activeGroup = null;
+    this.set('undoStack') = null;
+    this.set('redoStack') = null;
+    return sc_super();
+  },
+
+  /** @private Deprecated as of 1.11. Use registerUndoAction instead. */
+  registerUndo: function (func, name) {
+    //@if(debug)
+    SC.warn('SC.UndoManager#registerUndo is deprecated and will be removed in a future version. Use registerUndoAction.');
+    //@endif
+    this.registerUndoAction(null, func, null, name);
+  },
+
+  /** @private Deprecated as of 1.11. Use registerGroupedUndoAction instead. */
+  registerGroupedUndo: function (func, name) {
+    //@if(debug)
+    SC.warn('SC.UndoManager#registerGroupedUndo is deprecated and will be removed in a future version. Use registerGroupedUndoAction.');
+    //@endif
+    this.registerGroupedUndoAction(null, func, null, name);
+  },
+
   
 });
