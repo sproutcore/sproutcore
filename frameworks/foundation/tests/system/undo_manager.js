@@ -174,7 +174,7 @@ test("set action name", function () {
 
 test("restrict number of groups", function () {
   var undoManager = SC.UndoManager.create({
-      levelsOfUndo: 2
+      maxStackLength: 2
     }),
     obj = SC.Object.create({
       undoManager: undoManager,
