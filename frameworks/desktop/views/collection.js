@@ -2591,17 +2591,35 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
     indexes.forEach(function(i) {
       var itemView = this.itemViewForContentIndex(i),
-          isSelected, layer;
+          isSelected, itemViewLayer, layer;
 
-      // render item view without isSelected state.
       if (itemView) {
+        // render item view without isSelected state.
         isSelected = itemView.get('isSelected');
         itemView.set('isSelected', NO);
-
         itemView.updateLayerIfNeeded();
-        layer = itemView.get('layer');
-        if (layer) layer = layer.cloneNode(true);
+        itemViewLayer = itemView.get('layer');
 
+        if (itemViewLayer) {
+          layer = itemViewLayer.cloneNode(true);
+
+          // photocopy any canvas elements
+          var itemViewCanvasses = itemView.$().find('canvas');
+          if (itemViewCanvasses) {
+            var layerCanvasses = $(layer).find('canvas'),
+                len = itemViewCanvasses.length,
+                itemViewCanvas, layerCanvas, i;
+            for (i = 0; i < len; i++) {
+              itemViewCanvas = itemViewCanvasses[i];
+              layerCanvas = layerCanvasses[i];
+              layerCanvas.height = itemViewCanvas.height;
+              layerCanvas.width = itemViewCanvas.width;
+              layerCanvas.getContext('2d').drawImage(itemViewCanvas, 0, 0);
+            }
+          }
+        }
+
+        // reset item view
         itemView.set('isSelected', isSelected);
         itemView.updateLayerIfNeeded();
       }
@@ -2613,11 +2631,12 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
           height = layout.height+layout.top;
         }
       }
-      layer = null;
 
+      layer = null;
     }, this);
-    // we don't want to show the scrollbars, resize the dragview'
-    view.set('layout', {height:height});
+
+    // we don't want to show the scrollbars, resize the dragview
+    view.set('layout', { height: height });
 
     dragLayer = null;
     return view ;

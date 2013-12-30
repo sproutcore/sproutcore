@@ -604,15 +604,32 @@ SC.Drag = SC.Object.extend(
 
       didCreateLayer: function () {
         if (dragView) {
-          var layer = dragView.get('layer');
-          if (layer) {
-            layer = layer.cloneNode(true);
+          var dragLayer = dragView.get('layer');
+          if (dragLayer) {
+            var layer = dragLayer.cloneNode(true);
+
+            // Canvas elements need manual copying.
+            var dragCanvasses = dragView.$().find('canvas');
+            if (dragCanvasses.length) {
+              var ghostCanvasses = $(layer).find('canvas'),
+                  len = dragCanvasses.length,
+                  i, dragCanvas, ghostCanvas;
+              for (i = 0; i < len; i++) {
+                dragCanvas = dragCanvasses[i];
+                ghostCanvas = ghostCanvasses[i];
+                ghostCanvas.width = dragCanvas.width;
+                ghostCanvas.height = dragCanvas.height;
+                ghostCanvas.getContext('2d').drawImage(dragCanvas, 0, 0);
+              }
+            }
 
             // Make sure the layer we put in the ghostView wrapper is not displaced.
             layer.style.top = "0px";
             layer.style.left = "0px";
             layer.style.bottom = "0px";
             layer.style.right = "0px";
+
+            // Attach the cloned layer.
             this.get('layer').appendChild(layer);
           }
         }
