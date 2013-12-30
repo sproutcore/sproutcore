@@ -2067,7 +2067,7 @@ SC.CoreView.unload = function () {
   received first responder status by checking `isFirstResponder`.)
 
   Note that key events bubble similarly to mouse click events: they will stop bubbling if they
-
+  encounter a view which handles the event and does not return NO.
 
   SproutCore implements a set of very convenient, higher-level keyboard events for action keys
   such as *tab*, *enter,* and the arrow keys. These are not triggered automatically, but you
@@ -2075,10 +2075,12 @@ SC.CoreView.unload = function () {
   For example:
 
   ```
+  // Proxy the keyboard event to SC's built-in interpreter.
   keyDown: function(evt) {
     return this.interpretKeyEvents(evt);
   },
-  cancel: function() {
+  // The interpreter will trigger the view's `cancel` event if the escape key was pressed.
+  cancel: function(evt) {
     console.log('The escape key was pressed.'');
   }
   ```
