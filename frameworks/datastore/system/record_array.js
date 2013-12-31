@@ -10,42 +10,53 @@ sc_require('models/record');
 /**
   @class
 
-  A `RecordArray` wraps an array of `storeKeys` and, optionally, a `Query`
-  object. When you access the items of a `RecordArray`, it will automatically
-  convert the `storeKeys` into actual `SC.Record` objects that the rest of
-  your application can work with.
+  A `RecordArray` is a managed list of records (instances of your `SC.Record`
+  model classes).
 
-  Normally you do not create `RecordArray`s yourself.  Instead, a
-  `RecordArray` is returned when you call `SC.Store.find()`, already
-  properly configured. You can usually just work with the `RecordArray`
-  instance just like any other array.
+  Using RecordArrays
+  ---
 
-  The information below about `RecordArray` internals is only intended for
-  those who need to override this class for some reason to do something
-  special.
+  Most often, RecordArrays contain the results of a `SC.Query`. You will generally not
+  create or modify record arrays yourselves, instead using the ones returned from calls
+  to `SC.Store#find` with either a record type or a query.
+
+  The membership of these query-backed record arrays is managed by the store, which
+  searches already-loaded records for local queries, and defers to your data source
+  for remote ones (see `SC.Query` documentation for more details). Since membership
+  in these record arrays is managed by the store, you will not generally add, remove
+  or rearrange them here (see `isEditable` below).
+
+  Query-backed record arrays have a status property which reflects the store's progress
+  in fulfilling the query. See notes on `status` below.
+
+  (Note that instances of `SC.Query` are dumb descriptor objects which do not have a
+  status or results of their own. References to a query's status or results should be
+  understood to refer to those of its record array.)
 
   Internal Notes
   ---
 
-  Normally the `RecordArray` behavior is very simple.  Any array-like
-  operations will be translated into similar calls onto the underlying array
-  of `storeKeys`.  The underlying array can be a real array or it may be a
-  `SparseArray`, which is how you implement incremental loading.
+  This section is about `RecordArray` internals, and is only intended for those
+  who need to extend this class to do something special.
 
-  If the `RecordArray` is created with an `SC.Query` object as well (and it
-  almost always will have a `Query` object), then the `RecordArray` will also
-  consult the query for various delegate operations such as determining if
-  the record array should update automatically whenever records in the store
-  changes. It will also ask the `Query` to refresh the `storeKeys` whenever
-  records change in the store.
+  A `RecordArray` wraps an array of store keys, listed on its `storeKeys`
+  property. If you request a record from the array, e.g. via `objectAt`,
+  the `RecordArray` will convert the requested store key to a record
+  suitable for public use.
 
-  If the `SC.Query` object has complex matching rules, it might be
-  computationally heavy to match a large dataset to a query. To avoid the
-  browser from ever showing a slow script timer in this scenario, the query
-  matching is by default paced at 100ms. If query matching takes longer than
-  100ms, it will chunk the work with invokeNext to avoid too much computation
-  to happen in one runloop.
+  The list of store keys is usually managed by the store. If you are using
+  your `RecordArray` with a query, you should manage the results via the
+  store, and not try to directly manipulate the results via the array. If you
+  are managing the array's store keys yourself, then any array-like operation
+  will be translated into similar calls on the underlying `storeKeys` array.
+  This underlying array can be a real array, or, if you wish to implement
+  incremental loading, it may be a `SparseArray`.
 
+  If the record array is created with an `SC.Query` object (as is almost always the
+  case), then the record array will also consult the query for various delegate
+  operations such as determining if the record array should update automatically
+  whenever records in the store changes. It will also ask the query to refresh the
+  `storeKeys` list whenever records change in the store.
 
   @extends SC.Object
   @extends SC.Enumerable
@@ -97,7 +108,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   store: null,
 
   /**
-    The `Query` object this record array is based upon.  All record arrays
+    The `SC.Query` object this record array is based upon.  All record arrays
     **MUST** have an associated query in order to function correctly.  You
     cannot change this property once it has been set.
 
@@ -116,16 +127,31 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   storeKeys: null,
 
   /**
-    The current status for the record array.  Read from the underlying
-    store.
+    Reflects the store's current status in fulfilling the record array's query. Note
+    that this status is not directly related to the status of the array's records:
+
+    - The store returns local queries immediately, regardless of any first-time loading
+      they may trigger. (Note that by default, local queries are limited to 100ms
+      processing time per run loop, so very complex queries may take several run loops
+      to return to `READY` status. You can edit `SC.RecordArray.QUERY_MATCHING_THRESHOLD`
+      to change this duration.)
+    - The store fulfills remote queries by passing them to your data source's `fetch`
+      method. While fetching, it sets your array's status to `BUSY_LOADING` or
+      `BUSY_REFRESHING`. Once your data source has finished fetching (successfully or
+      otherwise), it will call the appropriate store methods (e.g. `dataSourceDidFetchQuery`
+      or `dataSourceDidErrorQuery`), which will update the query's array's status.
+
+    Thus, a record array may have a `READY` status while records are still loading (if
+    a local query triggers a call to `SC.DataSource#fetch`), and will not reflect the
+    `DIRTY` status of any of its records.
 
     @type Number
   */
   status: SC.Record.EMPTY,
 
   /**
-    The current editable state based on the query. If this record array is not
-    backed by an SC.Query, it is assumed to be editable.
+    The current editable state of the query. If this record array is not backed by a
+    query, it is assumed to be editable.
 
     @property
     @type Boolean
@@ -255,7 +281,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   },
 
   /**
-    Returns YES if the passed can be found in the record array.  This is
+    Returns YES if the passed record can be found in the record array.  This is
     provided for compatibility with SC.Set.
 
     @param {SC.Record} record
@@ -369,11 +395,12 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   },
 
   /**
-    Will recompute the results based on the `SC.Query` attached to the record
-    array. Useful if your query is based on computed properties that might
-    have changed. Use `refresh()` instead of you want to trigger a fetch on
-    your data source since this will purely look at records already loaded
-    into the store.
+    Will recompute the results of the attached `SC.Query`. Useful if your query
+    is based on computed properties that might have changed.
+
+    This method is for local use only, operating only on records that have already
+    been loaded into your store. If you wish to re-fetch a remote query via your
+    data source, use `refresh()` instead.
 
     @returns {SC.RecordArray} receiver
   */
