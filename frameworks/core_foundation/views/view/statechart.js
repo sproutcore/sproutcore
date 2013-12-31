@@ -512,8 +512,10 @@ SC.CoreView.reopen(
     case SC.CoreView.ATTACHED_SHOWN:
     case SC.CoreView.ATTACHED_SHOWN_ANIMATING:
       //@if(debug)
-      // This should be avoided, because moving the view layer without explicitly removing it first is a dangerous practice.
-      SC.warn("Developer Warning: You can not attach the view, %@, to a new node without properly detaching it first.".fmt(this));
+      if (parentNode !== this.getPath('parentView.layer')) {
+        // This should be avoided, because moving the view layer without explicitly removing it first is a dangerous practice.
+        SC.warn("Developer Warning: You can not attach the view, %@, to a new node without properly detaching it first.".fmt(this));
+      }
       //@endif
       break;
     case SC.CoreView.UNATTACHED_BY_PARENT:
