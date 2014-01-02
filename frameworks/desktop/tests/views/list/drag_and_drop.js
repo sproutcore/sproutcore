@@ -51,6 +51,22 @@ var pane = SC.ControlTestPane.design()
         this._didCallDragEnded = true;
       }
     })
+  }))
+  .add("empty", SC.ScrollView.design({
+    borderStyle: SC.BORDER_NONE,
+    layout: { left: 0, right: 0, top: 0, height: 300 },
+    hasHorizontalScroller: NO,
+    contentView: SC.ListView.design({
+      contentValueKey: "title",
+      contentCheckboxKey: "isDone",
+      contentUnreadCountKey: "unread",
+      rowHeight: 20,
+      _didCallDragEnded: false,
+      dragEnded: function() {
+        sc_super();
+        this._didCallDragEnded = true;
+      }
+    })
   }));
 
 
@@ -239,6 +255,17 @@ test("insertion point when cancel drag on list view", function() {
   setTimeout(f, 200);
 });
 
+test("insertion point on empty list", function() {
+  var listView = pane.view('empty').get('contentView'),
+      didError = NO;
 
+  try {
+    SC.run(function() {
+      listView.showInsertionPoint(null, SC.DRAG_MOVE);
+    });
+  } catch (e) {
+    didError = YES;
+  }
 
-
+  ok(!didError, "An insertion point was added onto no item view without incident.");
+});
