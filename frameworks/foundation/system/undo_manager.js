@@ -467,15 +467,6 @@ SC.UndoManager = SC.Object.extend(
     SC.warn('SC.UndoManager#registerUndo is deprecated and will be removed in a future version. Use registerUndoAction.');
     //@endif
     this.registerUndoAction(null, func, null, name);
-  },
+  }
 
-  /** @private Deprecated as of 1.11. Use registerGroupedUndoAction instead. */
-  registerGroupedUndo: function (func, name) {
-    //@if(debug)
-    SC.warn('SC.UndoManager#registerGroupedUndo is deprecated and will be removed in a future version. Use registerGroupedUndoAction.');
-    //@endif
-    this.registerGroupedUndoAction(null, func, null, name);
-  },
-
-  
 });
