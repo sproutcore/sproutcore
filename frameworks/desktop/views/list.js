@@ -463,7 +463,9 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     @see SC.CollectionView#showInsertionPoint
   */
   showInsertionPoint: function (itemView, dropOperation) {
-    // FAST PATH: If we're dropping on the item view itself...
+    // FAST PATH: If we're dropping on the item view itself... (Note: support for this
+    // should be built into CollectionView's calling method and not the unrelated method
+    // for showing an insertion point.)
     if (dropOperation & SC.DROP_ON) {
       if (itemView && itemView !== this._lastDropOnView) {
         this.hideInsertionPoint();
@@ -479,7 +481,13 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
       return;
     }
 
-    // Otherwise, we're inserting.
+    // Otherwise, we're actually inserting.
+
+    // TODO: CollectionView's notes on showInsertionPoint specify that if no itemView
+    // is passed, this should try to get the last itemView. (Note that ListView's
+    // itemViewForContentIndex creates a new view on demand, so make sure that we
+    // have content items before getting the last view.) This is a change in established
+    // behavior however, so proceed carefully.
 
     // If there was an item that was the target of the drop previously, be
     // sure to clear it.
