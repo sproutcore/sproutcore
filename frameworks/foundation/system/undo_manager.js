@@ -108,7 +108,12 @@
 
   To start a new undo group, call `beginUndoGroup`; to register undo functions to the currently-
   open group, call `registerGroupedUndoAction`; finally, to mark the end of a grouped set of undo
-  functions, call `endUndoGroup`.
+  functions, call `endUndoGroup`. In most cases, you will not need to call `beginUndoGroup` and
+  `endUndoGroup`: if you call `registerUndoAction`, any open group will be closed, and a new group
+  will be created and left open; calling `registerGroupedUndoAction` will simply add to the
+  currently-open group, creating a new one if necessary. This means that in practice, you can call
+  `registerUndoAction` to close previous groups and begin a new one, and `registerGroupedUndoAction`
+  to add to an existing group.
 
   If `undo` is called while an undo group is open, UndoManager will simply close the group for
   you before executing it. This allows you to safely leave groups open pending possible additional
