@@ -463,26 +463,9 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     @see SC.CollectionView#showInsertionPoint
   */
   showInsertionPoint: function (itemView, dropOperation) {
-    var index  = itemView.get('contentIndex'),
-      len = this.get('length'),
-      level  = itemView.get('outlineLevel'),
-      indent = itemView.get('outlineIndent') || 0;
-
-    // show item indented if we are inserting at the end and the last item
-    // is a group item.  This is a special case that should really be
-    // converted into a more general protocol.
-    if ((index >= len) && index>0) {
-      var group = this.itemViewForContentIndex(len - 1);
-      if (group.get('isGroupView')) {
-        level = 1;
-        indent = group.get('outlineIndent');
-      }
-    }
-
-    if (SC.none(level)) level = -1;
-
+    // FAST PATH: If we're dropping on the item view itself...
     if (dropOperation & SC.DROP_ON) {
-      if (itemView !== this._lastDropOnView) {
+      if (itemView && itemView !== this._lastDropOnView) {
         this.hideInsertionPoint();
 
         // If the drag is supposed to drop onto an item, notify the item that it
@@ -493,30 +476,59 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
         // versus having to clear it from all items.
         this._lastDropOnView = itemView;
       }
-    } else {
-      if (this._lastDropOnView) {
-        // If there was an item that was the target of the drop previously, be
-        // sure to clear it.
-        this._lastDropOnView.set('isDropTarget', NO);
-        this._lastDropOnView = null;
-      }
-
-      var insertionPoint = this._insertionPointView,
-        layout = itemView.get('layout'),
-        top, left;
-
-      if (!insertionPoint) {
-        insertionPoint = this._insertionPointView = this.get('insertionPointView').create();
-      }
-
-      // Adjust the position of the insertion point.
-      top = layout.top;
-      if (dropOperation & SC.DROP_AFTER) top += layout.height;
-      left = ((level + 1) * indent) + 12;
-
-      insertionPoint.adjust({ top: top, left: left });
-      this.appendChild(insertionPoint);
+      return;
     }
+
+    // Otherwise, we're inserting.
+
+    // If there was an item that was the target of the drop previously, be
+    // sure to clear it.
+    if (this._lastDropOnView) {
+      this._lastDropOnView.set('isDropTarget', NO);
+      this._lastDropOnView = null;
+    }
+
+    var len = this.get('length'),
+        index, level, indent;
+
+    // Get values from itemView, if present.
+    if (itemView) {
+      index = itemView.get('contentIndex');
+      level = itemView.get('outlineLevel');
+      indent = itemView.get('outlineIndent');
+    }
+    // Set defaults.
+    index = index || 0;
+    if (SC.none(level)) level = -1;
+    indent = indent || 0;
+
+    // Show item indented if we are inserting at the end and the last item
+    // is a group item.  This is a special case that should really be
+    // converted into a more general protocol.
+    if ((index >= len) && index > 0) {
+      var previousItem = this.itemViewForContentIndex(len - 1);
+      if (previousItem.get('isGroupView')) {
+        level = 1;
+        indent = previousItem.get('outlineIndent');
+      }
+    }
+
+    // Get insertion point.
+    var insertionPoint = this._insertionPointView;
+    if (!insertionPoint) {
+      insertionPoint = this._insertionPointView = this.get('insertionPointView').create();
+    }
+
+    // Calculate where it should go.
+    var itemViewLayout = itemView ? itemView.get('layout') : { top: 0, left: 0 },
+        top, left;
+    top = itemViewLayout.top;
+    if (dropOperation & SC.DROP_AFTER) top += itemViewLayout.height;
+    left = ((level + 1) * indent) + 12;
+
+    // Put it there.
+    insertionPoint.adjust({ top: top, left: left });
+    this.appendChild(insertionPoint);
   },
 
   /** @see SC.CollectionView#hideInsertionPoint */
