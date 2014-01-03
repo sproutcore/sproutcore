@@ -368,7 +368,7 @@ test("Test Multiple listeners per single status response", function() {
   var response;
 
   expect(8);
-  
+
   // sanity check
   equals(SC.Request.manager.inflight.length,0,"there should be no inflight requests");
 
@@ -381,7 +381,7 @@ test("Test Multiple listeners per single status response", function() {
     numResponses++;
     ok(true, "Received a response on second listener");
   });
-  
+
   setTimeout(function() {
     equals(SC.Request.manager.inflight.length,0,"there should be no inflight requests after the timeout");
     equals(numResponses, 2, "got two notifications");
@@ -405,7 +405,7 @@ test("Test Multiple listeners per single status response", function() {
 */
 test("Multiple arguments passed to notify()", function() {
   var response;
-  
+
   // sanity check
   equals(SC.Request.manager.inflight.length,0,"there should be no inflight requests");
 
@@ -459,7 +459,7 @@ test("Test event listeners on successful request.", function() {
   request.notify(200, this, function(response) {
     status = response.status;
 
-    if (window.XMLHttpRequestProgressEvent) {
+    if (window.ProgressEvent) {
       ok(loadstart, "Received a loadstart event.");
       ok(progress, "Received a progress event.");
       ok(load, "Received a load event.");
@@ -478,7 +478,7 @@ test("Test event listeners on successful request.", function() {
   response = request.send();
 });
 
-if (window.XMLHttpRequestProgressEvent) {
+if (window.ProgressEvent) {
   test("Test event listeners on aborted request.", function() {
     var abort = false,
       error = false,
@@ -560,7 +560,7 @@ test("Test upload event listeners on successful request.", function() {
   request.notify(200, this, function(response) {
     status = response.status;
 
-    if (window.XMLHttpRequestProgressEvent) {
+    if (window.ProgressEvent) {
       ok(loadstart, "Received a loadstart event.");
       ok(progress, "Received a progress event.");
       ok(load, "Received a load event.");
@@ -575,8 +575,9 @@ test("Test upload event listeners on successful request.", function() {
   });
 
   // Make a significant body object.
+  // It looks that Firefox is not sending the progress event if the request is too small
   var i;
-  for (i = 2000; i >= 0; i--) {
+  for (i = 200000; i >= 0; i--) {
     body['k' + i] = 'v' + i;
   }
 
@@ -590,29 +591,29 @@ test("Test manager.cancelAll.", function() {
   var manager = SC.Request.manager, max = manager.get('maxRequests');
   // Make sure we're clear.
   SC.Request.manager.cancelAll();
-  
+
   // Get a copy of the previous arrays, since they're overwritten on clear.
   var inflight = manager.get('inflight');
   var pending = manager.get('pending');
-  
+
   // Generate > 6 requests
   for( var i = 0; i < max * 2; i++) {
     SC.Request.getUrl('/').send();
   }
-  
+
   equals(inflight.get('length'), max, "There must be %@ inflight requests".fmt(max));
   equals(pending.get('length'), max, "There must be %@ pending requests".fmt(max));
-  
+
   SC.Request.manager.cancelAll();
 
   // Demonstrates memory pointer matches
   equals(inflight, manager.getPath('inflight'), "Arrays must be identical");
   equals(pending, manager.getPath('pending'), "Arrays must be identical");
-  
+
   // Demonstrates that all previous requests have been cleared.
   equals(inflight.get('length'), 0, "There must be 0 inflight requests in the old array".fmt(max));
   equals(pending.get('length'), 0, "There must be 0 pending requests in the old array".fmt(max));
-  
+
   // Demonstrates that the manager doesn't know about any requests.
   equals(manager.getPath('inflight.length'), 0, "There must be 0 inflight requests".fmt(max));
   equals(manager.getPath('pending.length'), 0, "There must be 0 pending requests".fmt(max));
