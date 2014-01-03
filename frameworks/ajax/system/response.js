@@ -517,7 +517,7 @@ SC.XHRResponse = SC.Response.extend(
     async = !!request.get('isAsynchronous');
 
     if (async) {
-      if (window.XMLHttpRequestProgressEvent) {
+      if (window.ProgressEvent) {
         // XMLHttpRequest Level 2
 
         // Add progress event listeners that were specified on the request.
@@ -653,7 +653,7 @@ SC.XHRResponse = SC.Response.extend(
       }, this);
 
       // Avoid memory leaks
-      if (window.XMLHttpRequestProgressEvent) {
+      if (window.ProgressEvent) {
         // XMLHttpRequest Level 2
 
         SC.Event.remove(rawRequest, 'loadend', this, this.finishRequest);
