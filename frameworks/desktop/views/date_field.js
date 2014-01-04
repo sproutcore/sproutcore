@@ -68,6 +68,12 @@ SC.DateFieldView = SC.TextFieldView.extend(
   showTime: NO,
 
   /**
+    @type Boolean
+    @default NO
+  */
+  allowNumericInput: YES,
+
+  /**
     @type String
     @default '%I:%M %p'
   */
@@ -319,18 +325,20 @@ SC.DateFieldView = SC.TextFieldView.extend(
   
   /** @private */
   keyDown: function(evt) {
-    var keyCodeMap = this._supportedKeys,
+    if (this.get('allowNumericInput')) {
+      var keyCodeMap = this._supportedKeys,
         pressedKey = keyCodeMap[evt.charCode];
-    
-    if (!SC.none(pressedKey)) {
-      if (pressedKey === 'r') this.moveRight();
-      else {
-        var as = this.get('activeSelection');
-        var ts = this.get('tabsSelections');
-        this.updateValue(ts[as].get('key'), pressedKey);
-      }
       
-      return YES;
+      if (!SC.none(pressedKey)) {
+        if (pressedKey === 'r') this.moveRight();
+        else {
+          var as = this.get('activeSelection');
+          var ts = this.get('tabsSelections');
+          this.updateValue(ts[as].get('key'), pressedKey);
+        }
+        
+        return YES;
+      }
     }
     
     if (this.interpretKeyEvents(evt)) {
