@@ -204,96 +204,27 @@ SC.DateFieldView = SC.TextFieldView.extend(
   /** @private
     Updates the value according the key.
   */
-  updateValue: function(key, pressedKey) {
-    var value = this.get('value');
-    
-    if (pressedKey === "down" || pressedKey === "up") {
-      var newValue = (pressedKey === 'down') ? -1 : 1;
-      
-      switch(key) {
-        case '%a': case '%d': case '%j': this.set('value', value.advance({ day: newValue })); break;
-        case '%b': case '%m': this.set('value', value.advance({ month: newValue })); break;
-        case '%H': case '%I': this.set('value', value.advance({ hour: newValue })); break;
-        case '%M': this.set('value', value.advance({ minute: newValue })); break;
-        case '%p': {
-          var hour = value.get('hour') >= 12 ? -12 : 12;
-          this.set('value', value.advance({ hour: hour }));
-          break;
-        }
-        case '%S': this.set('value', value.advance({ second: newValue })); break;
-        case '%U': this.set('value', value.advance({ week1: newValue })); break;
-        case '%W': this.set('value', value.advance({ week0: newValue })); break;
-        case '%y': case '%Y': this.set('value', value.advance({ year: newValue })); break;
+  updateValue: function(key, upOrDown) {
+    // 0 is DOWN - 1 is UP
+    var newValue = (upOrDown === 0) ? -1 : 1;
+    var value = this.get('value'), hour;
+    switch(key) {
+      case '%a': case '%d': case '%j': this.set('value', value.advance({ day: newValue })); break;
+      case '%b': case '%m': this.set('value', value.advance({ month: newValue })); break;
+      case '%H': case '%I': this.set('value', value.advance({ hour: newValue })); break;
+      case '%M': this.set('value', value.advance({ minute: newValue })); break;
+      case '%p': {
+        hour = value.get('hour') >= 12 ? -12 : 12;
+        this.set('value', value.advance({ hour: hour }));
+        break;
       }
-    }
-    else {
-      var lastValue = this._lastValue,
-          length = 2,
-          min = 0, 
-          max, key, newValue;
-      
-      switch(key) {
-        case '%Y': 
-          key = 'year';
-          min = 1000;
-          max = 9999;
-          length = 4;
-        break;
-        case '%y':
-          key = 'year';
-          max = 99;
-        break;
-        case '%m':
-          key = 'month';
-          min = 1;
-          max = 12;
-        break;
-        case '%d':
-          key = 'day';
-          min = 1;
-          max = value.advance({ month: 1 }).adjust({ day: 0 }).get('day');
-        break;
-        case '%H':
-          key = 'hour';
-          max = 23;
-        break;
-        case '%I':
-          key = 'hour';
-          max = 11;
-        break;
-        case '%M':
-          key = 'minute';
-          max = 59;
-        break;
-        case '%S':
-          key = 'second';
-          max = 59;
-        break;        
-      }
- 
-      if (SC.none(lastValue) || this._lastKey !== key) {
-        lastValue = value.get(key);
-        lastValue = (lastValue < 10 ? '0' : '') + lastValue;
-      }
-
-      if (lastValue.length > length) lastValue = lastValue.substr(-length);
-
-      // Removes the first character and adds the new one at the end of the string
-      lastValue = lastValue.slice(1) + pressedKey;
-      newValue = parseInt(lastValue, 10);
-
-      // If the value is allow, updates the value
-      if (newValue <= max && newValue >= min) {
-        var hash = {};
-        hash[key] = newValue;
-
-        this.set('value', value.adjust(hash, NO));
-      }
-      
-      this._lastValue = lastValue;
-      this._lastKey = key;
+      case '%S': this.set('value', value.advance({ second: newValue })); break;
+      case '%U': this.set('value', value.advance({ week1: newValue })); break;
+      case '%W': this.set('value', value.advance({ week0: newValue })); break;
+      case '%y': case '%Y': this.set('value', value.advance({ year: newValue })); break;
     }
   },
+
 
   /** @private */
   _lastValue: null,
@@ -313,34 +244,9 @@ SC.DateFieldView = SC.TextFieldView.extend(
   // ..........................................................
   // Key Event Support
   //
-
-  // Key codes which should be handle by the view
-  _supportedKeys: { 
-    32: 'r', // space
-    45: 'r', // dash
-    47: 'r', // slash
-    58: 'r', // colon
-    48: 0, 49: 1, 50: 2, 51: 3, 52: 4, 53: 5, 54: 6, 55: 7, 56: 8, 57: 9 
-  },
   
   /** @private */
   keyDown: function(evt) {
-    if (this.get('allowNumericInput')) {
-      var keyCodeMap = this._supportedKeys,
-        pressedKey = keyCodeMap[evt.charCode];
-      
-      if (!SC.none(pressedKey)) {
-        if (pressedKey === 'r') this.moveRight();
-        else {
-          var as = this.get('activeSelection');
-          var ts = this.get('tabsSelections');
-          this.updateValue(ts[as].get('key'), pressedKey);
-        }
-        
-        return YES;
-      }
-    }
-    
     if (this.interpretKeyEvents(evt)) {
       evt.stop();
       return YES;
@@ -357,7 +263,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
   moveUp: function(evt) {
     var as = this.get('activeSelection');
     var ts = this.get('tabsSelections');
-    this.updateValue(ts[as].get('key'), 'up');
+    this.updateValue(ts[as].get('key'), 1);
     return YES;
   },
 
@@ -365,12 +271,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
   moveDown: function(evt) {
     var as = this.get('activeSelection');
     var ts = this.get('tabsSelections');
-    this.updateValue(ts[as].get('key'), 'down');
-    return YES;
-  },
-
-  /** @private */
-  insertText: function(evt) {
+    this.updateValue(ts[as].get('key'), 0);
     return YES;
   },
 
@@ -445,6 +346,108 @@ SC.DateFieldView = SC.TextFieldView.extend(
   /** @private */
   deleteForward: function(evt) {
     return YES;
-  }
+  },
 
+
+  /** @private Key codes which should be handle by the view */
+  _supportedKeysAll: { 
+    32: 'r', // space
+    45: 'r', // dash
+    47: 'r', // slash
+    58: 'r', // colon
+    48: 0, 49: 1, 50: 2, 51: 3, 52: 4, 53: 5, 54: 6, 55: 7, 56: 8, 57: 9 
+  },
+  /** @private Key codes which should be handle by the view when allowNumericInput is NO. */
+  _supportedKeysNonNumeric: { 
+    32: 'r', // space
+    45: 'r', // dash
+    47: 'r', // slash
+    58: 'r' // colon
+  },
+  /** @private Validates and applies supported keystrokes. */
+  insertText: function(chr, evt) {
+    // Map the pressed key to a supported keystroke.
+    var keyCodeMap = this.get('allowNumericInput') ? this._supportedKeysAll : this._supportedKeysNonNumeric,
+        pressedKey = keyCodeMap[evt.charCode];
+
+    // If we've found one, handle it.
+    if (!SC.none(pressedKey)) {
+      if (pressedKey === 'r') this.moveRight();
+      else {
+        var as = this.get('activeSelection');
+        var ts = this.get('tabsSelections');
+        var key = ts[as].get('key');
+
+        var value = this.get('value'),
+            lastValue = this._lastValue,
+            length = 2,
+            min = 0, 
+            max, key, newValue;
+
+        switch(key) {
+          case '%Y': 
+            key = 'year';
+            min = 1000;
+            max = 9999;
+            length = 4;
+          break;
+          case '%y':
+            key = 'year';
+            max = 99;
+          break;
+          case '%m':
+            key = 'month';
+            min = 1;
+            max = 12;
+          break;
+          case '%d':
+            key = 'day';
+            min = 1;
+            max = value.advance({ month: 1 }).adjust({ day: 0 }).get('day');
+          break;
+          case '%H':
+            key = 'hour';
+            max = 23;
+          break;
+          case '%I':
+            key = 'hour';
+            max = 11;
+          break;
+          case '%M':
+            key = 'minute';
+            max = 59;
+          break;
+          case '%S':
+            key = 'second';
+            max = 59;
+          break;        
+        }
+
+        if (SC.none(lastValue) || this._lastKey !== key) {
+          lastValue = value.get(key);
+          lastValue = (lastValue < 10 ? '0' : '') + lastValue;
+        }
+
+        if (lastValue.length > length) lastValue = lastValue.substr(-length);
+
+        // Removes the first character and adds the new one at the end of the string
+        lastValue = lastValue.slice(1) + pressedKey;
+        newValue = parseInt(lastValue, 10);
+
+        // If the value is allow, updates the value
+        if (newValue <= max && newValue >= min) {
+          var hash = {};
+          hash[key] = newValue;
+
+          this.set('value', value.adjust(hash, NO));
+        }
+
+        this._lastValue = lastValue;
+        this._lastKey = key;
+      }
+    }
+
+    // Regardless, we handled the event.
+    return YES;
+  }
 });
