@@ -111,41 +111,47 @@ test("isEnabled=YES isEditable=YES should not add disable or readOnly attribute"
 
 
 test("test updateValue method", function() {
+  view1.set('value', view1.get('value').adjust({ month: 2 }));
+  equals(view1.get('fieldValue'), '01/02/2010 11:20 AM', 'Field value should be equal');
+  view1.updateValue('%d', 3);
+  view1.updateValue('%d', 1);
+  equals(view1.get('fieldValue'), '13/02/2010 11:20 AM', 'Field value should be equal');
+
   view1.updateValue('%d', 2);
-  equals(view1.get('fieldValue'), '12/01/2010 11:20 AM', 'Field value should be equal');
+  equals(view1.get('fieldValue'), '12/02/2010 11:20 AM', 'Field value should be equal');
   view1.updateValue('%d', 0);
   view1.updateValue('%d', 2);
-  equals(view1.get('fieldValue'), '02/01/2010 11:20 AM', 'Field value should be equal');
+  equals(view1.get('fieldValue'), '02/02/2010 11:20 AM', 'Field value should be equal');
   view1.updateValue('%d', 5);
   view1.updateValue('%d', 2);
-  equals(view1.get('fieldValue'), '25/01/2010 11:20 AM', 'Field value should be equal');
+  equals(view1.get('fieldValue'), '25/02/2010 11:20 AM', 'Field value should be equal');
   view1.updateValue('%m', 2);
-  equals(view1.get('fieldValue'), '25/12/2010 11:20 AM', 'Field value should be equal');
+  equals(view1.get('fieldValue'), '25/02/2010 11:20 AM', 'Field value should be equal');
   view1.updateValue('%m', 0);
-  view1.updateValue('%m', 2);
-  equals(view1.get('fieldValue'), '25/02/2010 11:20 AM', 'Field value should be equal');
+  view1.updateValue('%m', 3);
+  equals(view1.get('fieldValue'), '25/03/2010 11:20 AM', 'Field value should be equal');
   view1.updateValue('%m', 9);
-  equals(view1.get('fieldValue'), '25/02/2010 11:20 AM', 'Field value should be equal');
+  equals(view1.get('fieldValue'), '25/03/2010 11:20 AM', 'Field value should be equal');
   view1.updateValue('%Y', 0);
-  equals(view1.get('fieldValue'), '25/02/2010 11:20 AM', 'Field value should be equal');
+  equals(view1.get('fieldValue'), '25/03/2010 11:20 AM', 'Field value should be equal');
   view1.updateValue('%Y', 0);
-  equals(view1.get('fieldValue'), '25/02/1000 11:20 AM', 'Field value should be equal');
+  equals(view1.get('fieldValue'), '25/03/1000 11:20 AM', 'Field value should be equal');
   view1.updateValue('%Y', 2);
   view1.updateValue('%Y', 0);
   view1.updateValue('%Y', 1);
   view1.updateValue('%Y', 2);
-  equals(view1.get('fieldValue'), '25/02/2012 11:20 AM', 'Field value should be equal');
+  equals(view1.get('fieldValue'), '25/03/2012 11:20 AM', 'Field value should be equal');
   view1.updateValue('%I', 0);
-  equals(view1.get('fieldValue'), '25/02/2012 10:20 AM', 'Field value should be equal');
+  equals(view1.get('fieldValue'), '25/03/2012 10:20 AM', 'Field value should be equal');
   view1.updateValue('%I', 9);
-  equals(view1.get('fieldValue'), '25/02/2012 09:20 AM', 'Field value should be equal');
+  equals(view1.get('fieldValue'), '25/03/2012 09:20 AM', 'Field value should be equal');
   view1.updateValue('%I', 9);
   view1.updateValue('%I', 9);
-  equals(view1.get('fieldValue'), '25/02/2012 09:20 AM', 'Field value should be equal');
+  equals(view1.get('fieldValue'), '25/03/2012 09:20 AM', 'Field value should be equal');
   view1.updateValue('%M', 9);
-  equals(view1.get('fieldValue'), '25/02/2012 09:09 AM', 'Field value should be equal');
+  equals(view1.get('fieldValue'), '25/03/2012 09:09 AM', 'Field value should be equal');
   view1.updateValue('%M', 9);
-  equals(view1.get('fieldValue'), '25/02/2012 09:09 AM', 'Field value should be equal');
+  equals(view1.get('fieldValue'), '25/03/2012 09:09 AM', 'Field value should be equal');
 
   view3.updateValue('%S', 9);
   equals(view3.get('fieldValue'), '10-01-01 11:20:09', 'Field value should be equal');

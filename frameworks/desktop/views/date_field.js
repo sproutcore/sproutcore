@@ -251,7 +251,13 @@ SC.DateFieldView = SC.TextFieldView.extend(
         case '%d':
           key = 'day';
           min = 1;
-          max = 31;
+          var year = value.get('year'),
+            month = value.get('month'),
+            daysInMonth = [31,28,31,30,31,30,31,31,30,31,30,31];
+          if ((!(year % 4) && year % 100) || !(year % 400)) {
+            daysInMonth[1] = 29;
+          }
+          max = daysInMonth[month-1];
         break;
         case '%H':
           key = 'hour';
