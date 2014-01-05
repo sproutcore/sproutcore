@@ -111,8 +111,9 @@ test("isEnabled=YES isEditable=YES should not add disable or readOnly attribute"
 
 
 test("test updateValue method", function() {
+  // view1: dd/mm/yyyy
   view1.set('value', view1.get('value').adjust({ month: 2 }));
-  equals(view1.get('fieldValue'), '01/02/2010 11:20 AM', 'Field value should be equal');
+  equals(view1.get('fieldValue'), '01/02/2010 11:20 AM', 'PRELIM: Field value should be equal');
   view1.updateValue('%d', 3);
   view1.updateValue('%d', 1);
   equals(view1.get('fieldValue'), '13/02/2010 11:20 AM', 'Field value should be equal');
@@ -125,6 +126,7 @@ test("test updateValue method", function() {
   view1.updateValue('%d', 5);
   view1.updateValue('%d', 2);
   equals(view1.get('fieldValue'), '25/02/2010 11:20 AM', 'Field value should be equal');
+
   view1.updateValue('%m', 2);
   equals(view1.get('fieldValue'), '25/02/2010 11:20 AM', 'Field value should be equal');
   view1.updateValue('%m', 0);
@@ -153,6 +155,7 @@ test("test updateValue method", function() {
   view1.updateValue('%M', 9);
   equals(view1.get('fieldValue'), '25/03/2012 09:09 AM', 'Field value should be equal');
 
+  // view3 %y-%m-%d %I:%M:%S
   view3.updateValue('%S', 9);
   equals(view3.get('fieldValue'), '10-01-01 11:20:09', 'Field value should be equal');
   view3.updateValue('%S', 8);
