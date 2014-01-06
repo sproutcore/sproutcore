@@ -265,37 +265,42 @@ SC.PickerPane = SC.PalettePane.extend(
   pointerPosY: 0,
 
   /** @private
-    This property will be set to the element (or view.get('layer')) that
-    triggered your picker to show.  You can use this to properly position your
-    picker.
+    When calling `popup`, you pass a view or element to anchor the pane. This
+    property returns the anchor element. (If you've anchored to a view, this
+    is its layer.) You can use this to properly position your view.
 
     @type HTMLElement
     @default null
   */
   anchorElement: function (key, value) {
-    var anchorView;
-
+    // Getter
     if (value === undefined) {
-      // Getting the value.
-      anchorView = this._anchorView;
-      return anchorView ? anchorView.get('layer') : this._anchorHTMLElement;
-    } else {
-      // Setting the value.
+      if (this._anchorView) return this._anchorView.get('layer');
+      else return this._anchorHTMLElement;
+    }
+    // Setter
+    else {
       if (!value) {
         throw "You must set 'anchorElement' to either a view or a DOM element";
       }
-      else if (value.isView) {
+      // Clean up any previous anchor elements.
+      this._removeScrollObservers();
+
+      if (value.isView) {
+        this._setupScrollObservers(value);
         this._anchorView        = value;
         this._anchorHTMLElement = null;
+        return value.get('layer');
       }
       else {
+        // TODO: We could setupScrollObservers on passed elements too, but it would
+        // be a bit more complicated.
         this._anchorView        = null;
         this._anchorHTMLElement = value;
+        return value;
       }
-
-      return value;
     }
-  }.property('layer').cacheable(),
+  }.property().cacheable(),
 
   /** @private
     anchor rect calculated by computeAnchorRect from init popup
@@ -420,15 +425,8 @@ SC.PickerPane = SC.PalettePane.extend(
     @returns {SC.PickerPane} receiver
   */
   popup: function (anchorViewOrElement, preferType, preferMatrix, pointerOffset) {
-    if (anchorViewOrElement) {
-      if (anchorViewOrElement.isView) {
-        this._anchorView = anchorViewOrElement;
-        this._setupScrollObservers(anchorViewOrElement);
-      } else {
-        this._anchorHTMLElement = anchorViewOrElement;
-      }
-    }
     this.beginPropertyChanges();
+    this.setIfChanged('anchorElement', anchorViewOrElement);
     if (preferType) { this.set('preferType', preferType); }
     if (preferMatrix) { this.set('preferMatrix', preferMatrix); }
     if (pointerOffset) { this.set('pointerOffset', pointerOffset); }
@@ -1166,6 +1164,14 @@ SC.PickerPane = SC.PalettePane.extend(
   */
   _scrollOffsetDidChange: function () {
     this.positionPane();
+  },
+
+  /** @private Cleanup. */
+  destroy: function() {
+    this._scrollView = null;
+    this._anchorView = null;
+    this._anchorHTMLElement = null;
+    return sc_super();
   }
 });
 
