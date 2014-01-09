@@ -35,4 +35,4 @@ SC.hashesForLocale('es', 'inflectionConstants', {
 
   /** @private */
   UNCOUNTABLE: []
-};
+});
