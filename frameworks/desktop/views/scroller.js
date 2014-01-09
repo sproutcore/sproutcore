@@ -518,6 +518,25 @@ SC.ScrollerView = SC.View.extend(
     return this.get('proportion') >= 1;
   }.property('proportion').cacheable(),
 
+  // ..........................................................
+  // FADE SUPPORT
+  // Controls how the scroller fades in and out. Override these methods to implement
+  // different fading.
+  //
+
+  /*
+    Implement to support ScrollView's overlay fade procedure.
+
+    @param {Number} duration
+  */
+  fadeIn: null,
+
+  /*
+    Implement to support ScrollView's overlay fade procedure.
+
+    @param {Number} duration
+  */
+  fadeOut: null,
 
   // ..........................................................
   // MOUSE EVENTS
@@ -851,14 +870,39 @@ SC.ScrollerView = SC.View.extend(
   }
 });
 
-// TODO: Use render delegates to handle rendering.
-
 /**
   @class
   @extends SC.ScrollerView
 */
 SC.TouchScrollerView = SC.ScrollerView.extend(
 /** @scope SC.TouchScrollerView.prototype */{
+
+  // ..........................................................
+  // FADE SUPPORT
+  // Controls how the scroller fades in and out. Override these methods to implement
+  // different fading.
+  //
+
+  /*
+    Supports ScrollView's overlay fade procedure.
+
+    @param {Number} duration
+  */
+  fadeIn: function(duration) {
+    var currentOpacity = this.getPath('layout.opacity');
+    if (!SC.none(currentOpacity) && currentOpacity !== 1) {
+      this.animate('opacity', 1, duration);
+    }
+  },
+
+  /*
+    Supports ScrollView's overlay fade procedure.
+
+    @param {Number} duration
+  */
+  fadeOut: function(duration) {
+    this.animate('opacity', 0, duration);
+  },
 
   /**
     @type Array

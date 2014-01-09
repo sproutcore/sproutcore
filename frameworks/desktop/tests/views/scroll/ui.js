@@ -40,7 +40,20 @@
     })
     .add("aria-attributes", SC.ScrollView, {
       contentView: iv
+    })
+
+    .add("overlaidScrollers", SC.ScrollView, {
+      verticalOverlay: YES,
+      horizontalOverlay: YES
+    })
+
+    .add("overlaid touch scrollers", SC.ScrollView, {
+      verticalOverlay: YES,
+      verticalScrollerView: SC.TouchScrollerView,
+      horizontalOverlay: YES,
+      horizontalScrollerView: SC.TouchScrollerView
     });
+
 
   // ..........................................................
   // TEST VIEWS
@@ -166,5 +179,60 @@
     equals(verticalScrollerView.$().attr('aria-valuenow'), view.get('horizontalScrollOffset'), "verticalScroller has aria-valuenow set");
 
   });
+
+  test('Scroller fading', function() {
+    var view = pane.view('overlaid touch scrollers'),
+        verticalScroller = view.get('verticalScrollerView'),
+        opac;
+
+    stop(2000);
+    expect(2);
+    SC.RunLoop.begin();
+    verticalScroller.fadeOut(0.1);
+    SC.RunLoop.end();
+    setTimeout(function() {
+      opac = verticalScroller.getPath('layout.opacity');
+      equals(opac, 0, 'after fadeout, scroller opacity should equal zero');
+      SC.RunLoop.begin();
+      verticalScroller.fadeIn(0.1);
+      SC.RunLoop.end();
+      setTimeout(function() {
+        opac = verticalScroller.getPath('layout.opacity');
+        equals(opac, 1, 'after fadein, scroller opacity should equal 1');
+        start();
+      }, 200)
+
+    }, 200);
+
+  });
+
+  test('ScrollView-directed scroller fading', function() {
+    var view = pane.view('overlaid touch scrollers'),
+        verticalScroller = view.get('verticalScrollerView'),
+        opac;
+
+    stop(2000);
+    expect(2);
+    SC.RunLoop.begin();
+    view._scsv_verticalScrollerShouldFadeOut();
+    SC.RunLoop.end();
+    setTimeout(function() {
+      opac = verticalScroller.getPath('layout.opacity');
+      equals(opac, 0, 'after fadeout, scroller opacity should equal zero');
+      SC.RunLoop.begin();
+      view._scsv_verticalScrollerShouldFadeIn();
+      SC.RunLoop.end();
+      setTimeout(function() {
+        opac = verticalScroller.getPath('layout.opacity');
+        equals(opac, 1, 'after fadein, scroller opacity should equal 1');
+        start();
+      }, 200)
+
+    }, 200);
+
+
+  });
+
+
 
 })();
