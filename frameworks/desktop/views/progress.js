@@ -83,14 +83,15 @@ SC.ProgressView = SC.View.extend(SC.Control,
     var minimum = this.get('minimum') || 0.0,
         maximum = this.get('maximum') || 1.0,
         value = this.get('value') || 0.0;
-    value = (value - minimum) / (maximum - minimum);
-    if (value > 1.0) value = 1.0;
 
-    if(isNaN(value)) value = 0.0;
+    // Percent value.
+    value = (value - minimum) / (maximum - minimum);
+
+    if (isNaN(value)) value = 0.0;
     // cannot be smaller then minimum
-    if(value<minimum) value = 0.0;
+    if (value < 0.0) value = 0.0;
     // cannot be larger then maximum
-    if(value>maximum) value = 1.0;
+    if (value > 1.0) value = 1.0;
 
     return value;
   }.property('value', 'maximum', 'minimum').cacheable(),

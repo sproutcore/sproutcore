@@ -40,6 +40,12 @@ var pane = SC.ControlTestPane.design()
     minimum: 0,
     maximum: 50
   })
+  .add("progress basic min max", SC.ProgressView, {
+    layout: {top:0, bottom:0, left:0, width: 250},
+    value: 75,
+    minimum: 50,
+    maximum: 100
+  })
   .add("progress aria-role", SC.ProgressView, {
     layout: {top:0, bottom:0, left:0, width: 250},
     value: 10,
@@ -167,6 +173,15 @@ test("basic max 50", function() {
   equals(view.$('.content').width(), 125, 'pixel width ');
 
 });
+
+test("basic min max", function () {
+  var view = pane.view('progress basic min max');
+
+  ok(!view.$().hasClass('disabled'), 'should NOT have disabled class');
+  ok(view.$('.content').length > 0, 'should have content class');
+  equals(view.$('.content')[0].style.width, "50%", 'width should be 50%');
+  equals(view.$('.content').width(), 125, 'pixel width ');
+})
 
 // ..........................................................
 // TEST CHANGING PROGRESS BARS
