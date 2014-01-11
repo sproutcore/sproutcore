@@ -2425,6 +2425,52 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
 
   /**
+    Call by the data source whenever you want to patch a record into the store
+    using a partial (containing only a subset of attributes) or complete data hash.
+
+    The attributes received are replacing the corresponding ones form the existing hash
+    by selectively merging the current data hash into the new one. In the end, the result
+    is loaded into the store using pushRetrieve.
+
+    If the record is not yet loaded into the store, or is not READY_CLEAN,
+    it behaves like a pure pushRetrieve, therefore in most of the cases it is safe
+    to replace into the data sources the calls to pushRetrieve by pushRetrievePatch.
+
+    @param {Class} recordType the SC.Record subclass
+    @param {Object} id the record id or null
+    @param {Hash} dataHash data hash used to patch the current data loaded into the store
+    @param {Number} storeKey optional store key.
+    @returns {Number|Boolean} storeKey if push was allowed, NO if not
+  */
+  pushRetrievePatch: function(recordType, id, dataHash, storeKey) {
+    var status, existingDataHash, key;
+
+    if(dataHash) {
+      if(storeKey === undefined) storeKey = recordType.storeKeyFor(id);
+      status = this.readStatus( storeKey );
+
+      // if the current record status is not READY_CLEAN, let pushRetrieve handle the new data
+      // for all other statuses handled by pushRetrieve (EMPTY, ERROR, DESTROYED_CLEAN)
+      // the new hash will just replace the existing one
+      if(status == SC.Record.READY_CLEAN) {
+        existingDataHash = this.readDataHash(storeKey);
+
+        if(existingDataHash)
+        {
+          for(key in existingDataHash) {
+            // merge only the keys that are not defined into the data hash sent by the data source
+            if(!(key in dataHash)) {
+              dataHash[key] = existingDataHash[key];
+            }
+          }
+        }
+      }
+    }
+
+    return this.pushRetrieve(recordType, id, dataHash, storeKey);
+  },
+
+  /**
     Call by the data source whenever you want to push a deletion into the
     store.
 
