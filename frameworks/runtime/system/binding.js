@@ -1056,6 +1056,35 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     });
   },
 
+  /**
+    Adds a transform that will return YES if the value is equal to equalValue, NO otherwise
+
+    Usage examples:
+      ...
+      isVisibleBinding: SC.Binding.equalTo( "myController.someValue", A_CONSTANT )
+      ...
+
+      The transform can also be invoked using a single parameter, the value to compare with
+      ...
+      isVisibleBinding: SC.Binding.oneWay( "myController.someValue" ).equalTo( A_CONSTANT )
+      ...
+
+    @param {String} fromPath from path or null
+    @param {Object} equalValue the value to compare with
+    @returns {SC.Binding} this
+  */
+  equalTo: function(fromPath, equalValue) {
+    // if the equalValue parameter is not provided, than compare the value with the 1st parameter
+    if (equalValue === undefined) {
+      equalValue = fromPath;
+      fromPath = null;
+    }
+
+    return this.from(fromPath).transform(function(value, binding) {
+       return value === equalValue;
+     });
+  },
+
   toString: function () {
     var from = this._fromRoot ? "<%@>:%@".fmt(this._fromRoot, this._fromPropertyPath) : this._fromPropertyPath;
 
