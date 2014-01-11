@@ -22,15 +22,36 @@ SC.NORMAL_SCROLL_DECELERATION = 0.95;
 SC.FAST_SCROLL_DECELERATION = 0.85;
 
 /** @class
-  Implements a complete scroll view.  This class uses a manual implementation
-  of scrollers in order to properly support clipping frames.
+  Implements a complete scroll view. SproutCore implements its own JS-based scrolling in order
+  to unify scrolling behavior across platforms, and to enable progressive rendering (via the
+  clipping frame) during scroll on all devices.
 
-  Important Events:
+  Important Events
+  -----
 
     - contentView frame size changes (to autoshow/hide scrollbar - adjust scrollbar size)
     - horizontalScrollOffset change
     - verticalScrollOffsetChanges
     - scroll wheel events
+
+  Gutter vs. Overlaid Scrollers
+  -----
+
+  Scroll views use swappable scroll-bar views with various behavior (see `verticalScrollerView`
+  and `horizontalScrollerView`). `SC.ScrollerView` is a gutter-based scroller which persists and
+  takes up fourteen pixels. (By default, no scroller is shown for content that is too small to
+  scroll; see `autohidesHorizontalScroller` and `autohidesVerticalScroller`.) `SC.OverlayScrollerView`
+  is a gutterless view which fades when not scrolling. By default, SC.ScrollView uses the gutter
+  scroller on mouse-based systems and the fading scroller on touch-base systems. If you would
+  like your view to always have OS X-style fading overlaid scrollers, you can use the following:
+
+  ```
+    SC.ScrollView.extend({
+      verticalOverlay: YES,
+      verticalScrollerView: SC.OverlayScrollerView
+      // repeat for horizontal scrollers
+    });
+  ```
 
   @extends SC.View
   @since SproutCore 1.0
