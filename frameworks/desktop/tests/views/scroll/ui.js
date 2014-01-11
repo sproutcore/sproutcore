@@ -49,9 +49,9 @@
 
     .add("overlaid touch scrollers", SC.ScrollView, {
       verticalOverlay: YES,
-      verticalScrollerView: SC.TouchScrollerView,
+      verticalScrollerView: SC.OverlayScrollerView,
       horizontalOverlay: YES,
-      horizontalScrollerView: SC.TouchScrollerView
+      horizontalScrollerView: SC.OverlayScrollerView
     });
 
 

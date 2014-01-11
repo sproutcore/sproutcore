@@ -68,15 +68,15 @@ SC.TouchScrollView = SC.CoreScrollView.extend(
 
   /**
     @type SC.CoreScrollerView
-    @default SC.TouchScrollerView
+    @default SC.OverlayScrollerView
    */
-  horizontalScrollerView: SC.TouchScrollerView,
+  horizontalScrollerView: SC.OverlayScrollerView,
 
   /**
     @type SC.CoreScrollerView
-    @default SC.TouchScrollerView
+    @default SC.OverlayScrollerView
    */
-  verticalScrollerView: SC.TouchScrollerView,
+  verticalScrollerView: SC.OverlayScrollerView,
 
   // ..........................................................
   // TOUCH SUPPORT

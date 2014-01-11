@@ -14,8 +14,8 @@ sc_require('views/core_scroller');
 
   @extends SC.CoreScrollerView
  */
-SC.TouchScrollerView = SC.CoreScrollerView.extend(
-  /** @scope SC.TouchScrollerView.prototype */{
+SC.OverlayScrollerView = SC.CoreScrollerView.extend(
+  /** @scope SC.OverlayScrollerView.prototype */{
 
   /**
     @type Array
@@ -130,4 +130,14 @@ SC.TouchScrollerView = SC.CoreScrollerView.extend(
     this.setIfChanged('displayThumbLength', Math.round(length - 1044));
   }.observes('thumbPosition', 'thumbLength', 'scrollerLength', 'capLength', 'minimum')
 
+});
+
+/* @private Old innacurate name retained for backward compatibility */
+SC.TouchScrollerView = SC.OverlayScrollerView.extend({
+  //@if(debug)
+  init: function() {
+    SC.warn('Developer Warning: SC.TouchScrollerView has been renamed SC.OverlayScrollerView. SC.TouchScrollerView will be removed entirely in a future version.');
+    return sc_super();
+  }
+  //@endif
 });
