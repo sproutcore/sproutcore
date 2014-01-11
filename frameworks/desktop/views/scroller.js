@@ -17,7 +17,7 @@
   You can either create a subclass of ScrollerView with the new values, or
   provide your own in your theme:
 
-      SC.mixin(SC.ScrollerView.prototype, {
+      SC.ScrollerView = SC.ScrollerView.extend({
         scrollbarThickness: 14,
         capLength: 18,
         capOverlap: 14,
@@ -26,7 +26,10 @@
       });
 
   You can change whether scroll buttons are displayed by setting the
-  hasButtons property.
+  `hasButtons` property.
+
+  By default, `SC.ScrollerView` has a persistent gutter. If you would like a
+  gutterless scroller that supports fading, see `SC.OverlayScrollerView`.
 
   @extends SC.View
   @since SproutCore 1.0
@@ -871,11 +874,15 @@ SC.ScrollerView = SC.View.extend(
 });
 
 /**
+  A fading, transparent-backed scroll bar. Suitable for use as an overlaid scroller. (Note
+  that to achieve the overlay effect, you must still set `verticalOverlay` and
+  `horizontalOverlay` on your `ScrollView`.)
+
   @class
   @extends SC.ScrollerView
 */
-SC.TouchScrollerView = SC.ScrollerView.extend(
-/** @scope SC.TouchScrollerView.prototype */{
+SC.OverlayScrollerView = SC.ScrollerView.extend(
+/** @scope SC.OverlayScrollerView.prototype */{
 
   // ..........................................................
   // FADE SUPPORT
@@ -1037,4 +1044,14 @@ SC.TouchScrollerView = SC.ScrollerView.extend(
                  '<div class="thumb-bottom"></div></div></div></div>');
 
   }
+});
+
+/* @private Old inaccurate name retained for backward compatibility. */
+SC.TouchScrollerView = SC.OverlayScrollerView.extend({
+  //@if(debug)
+  init: function() {
+    SC.warn('Developer Warning: SC.TouchScrollerView has been renamed SC.OverlayScrollerView. SC.TouchScrollerView will be removed entirely in a future version.');
+    return sc_super();
+  }
+  //@endif
 });

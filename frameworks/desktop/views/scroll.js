@@ -407,9 +407,9 @@ SC.ScrollView = SC.View.extend({
     hasHorizontalScroller is NO.
 
     @type SC.View
-    @default SC.TouchScrollerView
+    @default SC.OverlayScrollerView
   */
-  horizontalTouchScrollerView: SC.TouchScrollerView,
+  horizontalTouchScrollerView: SC.OverlayScrollerView,
 
   /**
     YES if the horizontal scroller should be visible.  You can change this
@@ -470,9 +470,9 @@ SC.ScrollView = SC.View.extend({
     instance when the ScrollView is created.
 
     @type SC.View
-    @default SC.TouchScrollerView
+    @default SC.OverlayScrollerView
   */
-  verticalTouchScrollerView: SC.TouchScrollerView,
+  verticalTouchScrollerView: SC.OverlayScrollerView,
 
   /**
     YES if the vertical scroller should be visible.  You can change this
