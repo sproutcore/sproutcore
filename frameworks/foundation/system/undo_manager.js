@@ -34,70 +34,68 @@
   function each time the value of `value` changes. It also exposes methods to
   trigger undos and redos, triggered via buttons in the included stub view class.
 
-  ```
-  // Controller:
-  MyApp.myController = SC.ObjectController.create({
-    // Content, with `value`.
-    content: SC.Object.create({ value: 'Hello, World.' }),
+        // Controller:
+        MyApp.myController = SC.ObjectController.create({
+          // Content, with `value`.
+          content: SC.Object.create({ value: 'Hello, World.' }),
 
-    // Undo manager.
-    valueUndoManager: SC.UndoManager.create(),
+          // Undo manager.
+          valueUndoManager: SC.UndoManager.create(),
 
-    // Undo action.
-    _valueUndoAction(val) {
-      // This call will trigger the controller's `value` observer, triggering the registration
-      // of another undo; the UndoManager will automatically and correctly interpret this as
-      // the registration of a redo method.
-      this.set('value', val);
-    },
+          // Undo action.
+          _valueUndoAction(val) {
+            // This call will trigger the controller's `value` observer, triggering the registration
+            // of another undo; the UndoManager will automatically and correctly interpret this as
+            // the registration of a redo method.
+            this.set('value', val);
+          },
 
-    // Value observer; tracks `value` and registers undos.
-    valueDidChange: function() {
-      // Get the values.
-      var value = this.get('value'),
-          previousValue = this._previousValue,
-          that = this;
+          // Value observer; tracks `value` and registers undos.
+          valueDidChange: function() {
+            // Get the values.
+            var value = this.get('value'),
+                previousValue = this._previousValue,
+                that = this;
 
-      // Update previous value.
-      this._previousValue = value;
+            // Update previous value.
+            this._previousValue = value;
 
-      // GATEKEEP: If the current value is the same as the previous value, there's nothing to do.
-      if (previousValue === value) return;
+            // GATEKEEP: If the current value is the same as the previous value, there's nothing to do.
+            if (previousValue === value) return;
 
-      // GATEKEEP: If there is no previous value, it's probably our initial spinup. We don't want
-      // to register an undo-back-to-undefined method, so we should return. (Your situation may be
-      // different.)
-      if (SC.none(previousValue)) return;
+            // GATEKEEP: If there is no previous value, it's probably our initial spinup. We don't want
+            // to register an undo-back-to-undefined method, so we should return. (Your situation may be
+            // different.)
+            if (SC.none(previousValue)) return;
 
-      // Otherwise, register an undo function. (previousValue is accessed via the closure.)
-      this.undoManager.registerUndoAction(this, this._valueUndoAction, previousValue);
-    }.observes('value')
-  });
+            // Otherwise, register an undo function. (previousValue is accessed via the closure.)
+            this.undoManager.registerUndoAction(this, this._valueUndoAction, previousValue);
+          }.observes('value')
+        });
 
-  // Stub view:
-  MyApp.UndoableValueView = SC.View.extend({
-    childViews: ['labelView', 'undoButtonView', 'redoButtonView'],
-    labelView: SC.LabelView.extend({
-      layout: { height: 24 },
-      isEdiable: YES,
-      valueBinding: 'MyApp.myController.value'
-    }),
-    undoButtonView: SC.ButtonView.extend({
-      layout: { height: 24, width: 60, bottom: 0 },
-      title: 'Undo',
-      isEnabledBinding: SC.Binding.oneWay('MyApp.myController.valueUndoManager.canUndo'),
-      target: 'MyApp.myController.valueUndoManager',
-      action: 'undo'
-    }),
-    redoButtonView: SC.ButtonView.extend({
-      layout: { height: 24, width: 60, bottom: 0, right: 0 },
-      title: 'Redo',
-      isEnabledBinding: SC.Binding.oneWay('MyApp.myController.valueUndoManager.canRedo'),
-      target: 'MyApp.myController.valueUndoManager',
-      action: 'redo'
-    })
-  });
-  ```
+        // Stub view:
+        MyApp.UndoableValueView = SC.View.extend({
+          childViews: ['labelView', 'undoButtonView', 'redoButtonView'],
+          labelView: SC.LabelView.extend({
+            layout: { height: 24 },
+            isEdiable: YES,
+            valueBinding: 'MyApp.myController.value'
+          }),
+          undoButtonView: SC.ButtonView.extend({
+            layout: { height: 24, width: 60, bottom: 0 },
+            title: 'Undo',
+            isEnabledBinding: SC.Binding.oneWay('MyApp.myController.valueUndoManager.canUndo'),
+            target: 'MyApp.myController.valueUndoManager',
+            action: 'undo'
+          }),
+          redoButtonView: SC.ButtonView.extend({
+            layout: { height: 24, width: 60, bottom: 0, right: 0 },
+            title: 'Redo',
+            isEnabledBinding: SC.Binding.oneWay('MyApp.myController.valueUndoManager.canRedo'),
+            target: 'MyApp.myController.valueUndoManager',
+            action: 'redo'
+          })
+        });
 
   ### Advanced: Grouping undos
 

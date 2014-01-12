@@ -45,13 +45,11 @@ SC.FAST_SCROLL_DECELERATION = 0.85;
   scroller on mouse-based systems and the fading scroller on touch-base systems. If you would
   like your view to always have OS X-style fading overlaid scrollers, you can use the following:
 
-  ```
-    SC.ScrollView.extend({
-      verticalOverlay: YES,
-      verticalScrollerView: SC.OverlayScrollerView
-      // repeat for horizontal scrollers
-    });
-  ```
+        SC.ScrollView.extend({
+          verticalOverlay: YES,
+          verticalScrollerView: SC.OverlayScrollerView
+          // repeat for horizontal scrollers
+        });
 
   @extends SC.View
   @since SproutCore 1.0

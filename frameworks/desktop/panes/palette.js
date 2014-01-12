@@ -12,19 +12,15 @@ sc_require('panes/panel');
 
   The simplest way to use the palette pane is to define it in an SC.Page like this:
 
-      ```
-      myPalettePane: SC.PalettePane.create({
-        layout: { width: 400, height: 200, right: 0, top: 0 },
-        contentView: SC.View.extend({
+        myPalettePane: SC.PalettePane.create({
+          layout: { width: 400, height: 200, right: 0, top: 0 },
+          contentView: SC.View.extend({
+          })
         })
-      })
-      ```
 
   Then get it from your page and append like this:
 
-      ```
-      MyApp.myPage.get('myPalettePane').append();
-      ```
+        MyApp.myPage.get('myPalettePane').append();
 
   This will cause your palette pane to instantiate lazily and display.
 

@@ -2074,16 +2074,14 @@ SC.CoreView.unload = function () {
   can gain access to them by proxying the keyboard event of your choice to `interpretKeyEvent`.
   For example:
 
-  ```
-  // Proxy the keyboard event to SC's built-in interpreter.
-  keyDown: function(evt) {
-    return this.interpretKeyEvents(evt);
-  },
-  // The interpreter will trigger the view's `cancel` event if the escape key was pressed.
-  cancel: function(evt) {
-    console.log('The escape key was pressed.'');
-  }
-  ```
+        // Proxy the keyboard event to SC's built-in interpreter.
+        keyDown: function(evt) {
+          return this.interpretKeyEvents(evt);
+        },
+        // The interpreter will trigger the view's `cancel` event if the escape key was pressed.
+        cancel: function(evt) {
+          console.log('The escape key was pressed.'');
+        }
 
   This will analyze the key press and fire an appropriate event. These events include, but are
   not limited to:
