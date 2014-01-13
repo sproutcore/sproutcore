@@ -399,6 +399,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
    */
   selection: function (key, value) {
     var element = this.$input()[0],
+        direction = 'none',
         range, start, end;
 
     // Are we being asked to set the value, or return the current value?
@@ -413,11 +414,14 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
         } else {
           // In IE8, input elements don't have hasOwnProperty() defined.
           try {
-            if ('selectionStart' in element) {
+            if (SC.platform.input.selectionStart) {
               start = element.selectionStart;
             }
-            if ('selectionEnd' in element) {
+            if (SC.platform.input.selectionEnd) {
               end = element.selectionEnd;
+            }
+            if (SC.platform.input.selectionDirection) {
+              direction = element.selectionDirection;
             }
           }
           // In Firefox when you ask the selectionStart or End of a hidden
@@ -457,7 +461,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
           }
         }
 
-        return SC.TextSelection.create({ start: start, end: end });
+        return SC.TextSelection.create({ start: start, end: end, direction: direction });
       } else {
         return null;
       }
@@ -470,7 +474,18 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
 
       if (element) {
         if (element.setSelectionRange) {
-          element.setSelectionRange(value.get('start'), value.get('end'));
+          try {
+            element.setSelectionRange(value.get('start'), value.get('end'), value.get('direction'));
+          } catch (e) {
+            // In Firefox & IE when you call setSelectionRange on a hidden input it will throw weird
+            // errors. Adding this to just ignore it.
+            return null;
+          }
+
+          if (!SC.platform.input.selectionDirection) {
+            // Browser doesn't support selectionDirection, set it to 'none' so the wrong value is not cached.
+            value.set('direction', 'none');
+          }
         } else {
           // Support Internet Explorer.
           range = element.createTextRange();

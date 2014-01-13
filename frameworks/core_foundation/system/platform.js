@@ -117,7 +117,8 @@ SC.platform = SC.Object.create({
 
     return ret;
   }(['autocomplete', 'readonly', 'list', 'size', 'required', 'multiple', 'maxlength',
-      'pattern', 'min', 'max', 'step', 'placeholder']),
+        'pattern', 'min', 'max', 'step', 'placeholder',
+        'selectionStart', 'selectionEnd', 'selectionDirection']),
 
   /**
     YES if the application is currently running as a standalone application.
