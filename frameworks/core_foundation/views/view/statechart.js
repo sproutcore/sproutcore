@@ -1639,35 +1639,35 @@ SC.CoreView.reopen(
     this._preTransitionFrame = this.get('borderFrame');
     // Cache appropriate layout values.
     var layoutProperties = SC.get(transition, 'layoutProperties');
-    // If the transition doesn't specify layoutProperties, cache all of them.
-    if (!layoutProperties) {
-      this._transitionLayoutCache = layout;
-    }
-    // Otherwise, cache just the specified ones.
-    else {
+    // If the transition specifies any layouts, cache them.
+    if (layoutProperties && layoutProperties.length) {
       this._transitionLayoutCache = {};
       var i, prop, len = layoutProperties.length;
       for (i = 0; i < len; i++) {
         prop = layoutProperties[i];
-        this._transitionLayoutCache[prop] = layout[prop] || null;
+        this._transitionLayoutCache[prop] = layout[prop] === undefined ? null : layout[prop];
       }
     }
   },
 
   /** @private */
   _teardownTransition: function () {
-    // Some transition plugins will send a didTransitionIn/Out event even
-    // if the transition was cancelled. In either case, the transition can't
-    // be cleaned up multiple times.
-    if (this._transitionLayoutCache) {
-      // Reset the layout with its cached values.
-      this.adjust(this._transitionLayoutCache);
+    // Make sure this isn't being called twice for the same transition. For example,
+    // some transition plugins will send a didTransitionIn/Out event even if the
+    // transition was cancelled.
 
-      // Clean up.
-      this._preTransitionLayout = null;
-      this._preTransitionFrame = null;
-      this._transitionLayoutCache = null;
+    // If we have a hash of cached layout properties, adjust back to it.
+    if (this._transitionLayoutCache) {
+      this.adjust(this._transitionLayoutCache);
     }
+    // Otherwise, just set the layout back to what it was.
+    else if (this._preTransitionLayout) {
+      this.set('layout', this._preTransitionLayout);
+    }
+    // Clean up.
+    this._preTransitionLayout = null;
+    this._preTransitionFrame = null;
+    this._transitionLayoutCache = null;
   },
 
   /** @private Attempts to run a transition hide, ensuring any incoming transitions are stopped in place. */
