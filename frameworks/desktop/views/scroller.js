@@ -950,6 +950,7 @@ SC.OverlayScrollerView = SC.ScrollerView.extend(
 
   /** @private */
   adjustThumb: function(thumb, position, length) {
+    var transformCSS = SC.browser.experimentalCSSNameFor('transform');
     var thumbInner = this.$('.thumb-inner');
     var max = this.get("scrollerLength") - this.capLength, min = this.get("minimum") + this.capLength;
 
@@ -965,15 +966,15 @@ SC.OverlayScrollerView = SC.ScrollerView.extend(
 
     switch (this.get('layoutDirection')) {
       case SC.LAYOUT_VERTICAL:
-        if (this._thumbPosition !== position) thumb.css('-webkit-transform', 'translate3d(0px,' + position + 'px,0px)');
+        if (this._thumbPosition !== position) thumb.css(transformCSS, 'translate3d(0px,' + position + 'px,0px)');
         if (this._thumbSize !== length) {
-          thumbInner.css('-webkit-transform', 'translate3d(0px,' + Math.round(length - 1044) + 'px,0px)');
+          thumbInner.css(transformCSS, 'translate3d(0px,' + Math.round(length - 1044) + 'px,0px)');
         }
         break;
       case SC.LAYOUT_HORIZONTAL:
-        if (this._thumbPosition !== position) thumb.css('-webkit-transform', 'translate3d(' + position + 'px,0px,0px)');
+        if (this._thumbPosition !== position) thumb.css(transformCSS, 'translate3d(' + position + 'px,0px,0px)');
         if (this._thumbSize !== length) {
-          thumbInner.css('-webkit-transform', 'translate3d(' + Math.round(length - 1044) + 'px,0px,0px)');
+          thumbInner.css(transformCSS, 'translate3d(' + Math.round(length - 1044) + 'px,0px,0px)');
         }
         break;
     }
@@ -1032,6 +1033,8 @@ SC.OverlayScrollerView = SC.ScrollerView.extend(
   },
 
   renderThumb: function(context, layoutDirection, thumbLength) {
+    var transformCSS = SC.browser.experimentalCSSNameFor('transform');
+
     // where is this magic number from?
     thumbLength -= 1044;
     layoutDirection = (layoutDirection === SC.LAYOUT_HORIZONTAL ? 'X' : 'Y');
@@ -1039,7 +1042,7 @@ SC.OverlayScrollerView = SC.ScrollerView.extend(
     context.push('<div class="thumb">'+
                  '<div class="thumb-top"></div>'+
                  '<div class="thumb-clip">'+
-                 '<div class="thumb-inner" style="-webkit-transform: translate%@(%@px);">'.fmt(layoutDirection, thumbLength)+
+                 '<div class="thumb-inner" style="%@: translate%@(%@px);">'.fmt(layoutDirection, transformCSS, thumbLength)+
                  '<div class="thumb-center"></div>'+
                  '<div class="thumb-bottom"></div></div></div></div>');
 
