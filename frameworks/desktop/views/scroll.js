@@ -374,28 +374,12 @@ SC.ScrollView = SC.View.extend({
   horizontalFade: YES,
 
   /**
-    Determines how quickly (in seconds) scrollbars fade in. In general, this should be very fast.
-
-    @property Number
-    @default 0.1
-   */
-  fadeInDuration: 0.05,
-
-  /**
     Determines how long (in seconds) scrollbars wait before fading out.
 
     @property Number
-    @default 0.25
+    @default 0.4
    */
-  fadeDelay: 0.20,
-
-  /**
-    Determines how quickly (in seconds) scrollbars fade out.
-
-    @property Number
-    @default 0.25
-   */
-  fadeOutDuration: 0.25,
+  fadeOutDelay: 0.4,
 
   // ..........................................................
   // SCROLLERS
@@ -1043,129 +1027,101 @@ SC.ScrollView = SC.View.extend({
   // Fade Support
   //
 
+  /** @private The minimum delay before applying a fade transition. */
+  _sc_minimumFadeOutDelay: function () {
+    // The fade out delay is never less than 100ms (so that the current run loop can complete) and is never less than the fade in duration (so that it can fade fully in).
+    return Math.max(Math.max(this.get('fadeOutDelay') || 0, 0.1), this.get('fadeInDuration') || 0) * 1000;
+  }.property('fadeOutDelay').cacheable(),
+
   /** @private
-    Triggers fade-out as soon as we're appended.
+    Trigger fade-in/fade-out as soon as we re-appear.
   */
-  didAppendToDocument: function() {
-    this.invokeNext(this._scsv_setupHorizontalScrollerFadeout);
-    this.invokeNext(this._scsv_setupVerticalScrollerFadeout);
+  didShowInDocument: function () {
+    this.invokeLast(this._sc_fadeInScrollers);
   },
 
   /** @private
-    Fade horizontal scroller in.
+    Trigger fade-in/fade-out as soon as we are appended.
   */
-  _scsv_horizontalScrollerShouldFadeIn: function() {
-    // Gatekeep.
-    if (!this.get('horizontalOverlay') || !this.get('horizontalFade')) return;
-    var scroller = this.get('horizontalScrollerView');
-    if (!scroller || !scroller.get('isVisible')) return;
-    
-    // Tell the scroller to fade in, if supported.
-    var duration = this.get('fadeInDuration');
-    if (scroller.fadeIn) {
-      scroller.fadeIn(duration);
+  didAppendToDocument: function () {
+    this.invokeLast(this._sc_fadeInScrollers);
+  },
+
+  /** @private */
+  _sc_fadeOutScrollers: function () {
+    this._sc_fadeOutVerticalScroller();
+    this._sc_fadeOutHorizontalScroller();
+  },
+
+  _sc_fadeOutVerticalScroller: function () {
+    var verticalScroller = this.get('verticalScrollerView');
+
+    if (verticalScroller && verticalScroller.get('fadeOut')) {
+      // Fade out.
+      verticalScroller.fadeOut();
     }
-    
-    // Cancel fade-out timer.
-    if (this._horizontalFadeTimer) {
-      this._horizontalFadeTimer.invalidate();
-      this._horizontalFadeTimer = null;
+
+    this._sc_verticalFadeOutTimer = null;
+  },
+
+  _sc_fadeOutHorizontalScroller: function () {
+    var horizontalScroller = this.get('horizontalScrollerView');
+
+    if (horizontalScroller && horizontalScroller.get('fadeOut')) {
+      // Fade out.
+      horizontalScroller.fadeOut();
+    }
+
+    this._sc_horizontalFadeOutTimer = null;
+  },
+
+  /** @private */
+  _sc_fadeInScrollers: function () {
+    this._sc_fadeInVerticalScroller();
+    this._sc_fadeInHorizontalScroller();
+  },
+
+  /** @private Fade in the vertical scroller. Each scroller fades in/out independently. */
+  _sc_fadeInVerticalScroller: function () {
+    var canScrollVertical = this.get('canScrollVertical'),
+      verticalScroller = this.get('verticalScrollerView'),
+      delay;
+
+    if (canScrollVertical && verticalScroller.get('fadeIn')) {
+      if (this._sc_verticalFadeOutTimer) {
+        // Reschedule the current timer (avoid creating a new instance).
+        this._sc_verticalFadeOutTimer.startTime = null;
+        this._sc_verticalFadeOutTimer.schedule();
+      } else {
+        // Fade in.
+        verticalScroller.fadeIn();
+
+        // Wait the minimum time before fading out again.
+        delay = this.get('_sc_minimumFadeOutDelay');
+        this._sc_verticalFadeOutTimer = this.invokeLater(this._sc_fadeOutVerticalScroller, delay);
+      }
     }
   },
 
-  /** @private
-    Setup fade-out timer. This is used with mouse scrolling.
-  */
-  _scsv_setupHorizontalScrollerFadeout: function() {
-    // Cancel fade-out timer.
-    if (this._horizontalFadeTimer) { this._horizontalFadeTimer.invalidate(); }
-    // Set new one.
-    var interval = (this.get('fadeDelay') || 0) * 1000;
-    this._horizontalFadeTimer = SC.Timer.schedule({
-      target: this,
-      action: '_scsv_horizontalScrollerShouldFadeOut',
-      interval: interval
-    });
-  },
+  /** @private Fade in the horizontal scroller. Each scroller fades in/out independently. */
+  _sc_fadeInHorizontalScroller: function () {
+    var canScrollHorizontal = this.get('canScrollHorizontal'),
+      horizontalScroller = this.get('horizontalScrollerView'),
+      delay;
 
-  /** @private
-    Fade the horizontal scroller out.
-  */
-  _scsv_horizontalScrollerShouldFadeOut: function() {
-    // Gatekeep.
-    if (!this.get('horizontalOverlay') || !this.get('horizontalFade')) return;
-    var scroller = this.get('horizontalScrollerView');
-    if (!scroller || !scroller.get('isVisible')) { return; }
+    if (canScrollHorizontal && horizontalScroller.get('fadeIn')) {
+      if (this._sc_horizontalFadeOutTimer) {
+        // Reschedule the current timer (avoid creating a new instance).
+        this._sc_horizontalFadeOutTimer.startTime = null;
+        this._sc_horizontalFadeOutTimer.schedule();
+      } else {
+        // Fade in.
+        horizontalScroller.fadeIn();
 
-    // Tell the scroller to fade itself out, or fade with animate as a fallback
-    var duration = this.get('fadeOutDuration') || 0;
-    if (scroller.fadeOut) {
-      scroller.fadeOut(duration);
-    }
-
-    // Invalidate timer.
-    if (this._horizontalFadeTimer) {
-      this._horizontalFadeTimer.invalidate();
-      this._horizontalFadeTimer = null;
-    }
-  },
-
-  /** @private
-    Fade the vertical scroller in.
-  */
-  _scsv_verticalScrollerShouldFadeIn: function() {
-    // Gatekeep.
-    if (!this.get('verticalOverlay') || !this.get('verticalFade')) return;
-    var scroller = this.get('verticalScrollerView');
-    if (!scroller || !scroller.get('isVisible')) { return; }
-    
-    // Tell the scroller to fade in, if supported.
-    var duration = this.get('fadeInDuration');
-    if (scroller.fadeIn) {
-      scroller.fadeIn(duration);
-    }
-
-    // Cancel fade-out timer.
-    if (this._verticalFadeTimer) {
-      this._verticalFadeTimer.invalidate();
-      this._verticalFadeTimer = null;
-    }
-  },
-
-  /** @private
-    Setup the fade-out timer.  This is used with mouse scrolling.
-  */
-  _scsv_setupVerticalScrollerFadeout: function() {
-    // Cancel fade-out timer.
-    if (this._verticalFadeTimer) this._verticalFadeTimer.invalidate();
-    // Set new one.
-    var interval = (this.get('fadeDelay') || 0) * 1000;
-    this._verticalFadeTimer = SC.Timer.schedule({
-      target: this,
-      action: '_scsv_verticalScrollerShouldFadeOut',
-      interval: interval
-    });
-  },
-
-  /** @private
-    Fade the vertical scroller out.
-  */
-  _scsv_verticalScrollerShouldFadeOut: function() {
-    // Gatekeep.
-    if (!this.get('verticalOverlay') || !this.get('verticalFade')) return;
-    var scroller = this.get('verticalScrollerView');
-    if (!scroller) { return; }
-
-    // Tell scroller to fade itself out, if supported.
-    var duration = this.get('fadeOutDuration') || 0;
-    if (scroller.fadeOut) {
-      scroller.fadeOut(duration);
-    }
-    
-    // Invalidate timer.
-    if (this._verticalFadeTimer) {
-      this._verticalFadeTimer.invalidate();
-      this._verticalFadeTimer = null;
+        // Wait the minimum time before fading out again.
+        delay = this.get('_sc_minimumFadeOutDelay');
+        this._sc_horizontalFadeOutTimer = this.invokeLater(this._sc_fadeOutHorizontalScroller, delay);
+      }
     }
   },
 
@@ -1228,14 +1184,14 @@ SC.ScrollView = SC.View.extend({
     // tell scrollers
     if (this.verticalScrollerView && this.verticalScrollerView.touchScrollDidChange) {
       this.verticalScrollerView.touchScrollDidChange(this._scroll_verticalScrollOffset);
-      this._scsv_verticalScrollerShouldFadeIn();
     }
 
     if (this.horizontalScrollerView && this.horizontalScrollerView.touchScrollDidChange) {
       this.horizontalScrollerView.touchScrollDidChange(this._scroll_horizontalScrollOffset);
-      this._scsv_horizontalScrollerShouldFadeIn()
     }
 
+    // this._sc_fadeInScrollers();
+    this.invokeLast(this._sc_fadeInScrollers);
   },
 
   /** @private */
@@ -1267,11 +1223,6 @@ SC.ScrollView = SC.View.extend({
     if (this.horizontalScrollerView && this.horizontalScrollerView.touchScrollDidEnd) {
       this.horizontalScrollerView.touchScrollDidEnd(this._touch_horizontalScrollOffset);
     }
-
-    // Trigger fadeouts if necessary.
-    this._scsv_horizontalScrollerShouldFadeOut();
-    this._scsv_verticalScrollerShouldFadeOut();
-
   },
 
   /** @private */
@@ -2172,8 +2123,7 @@ SC.ScrollView = SC.View.extend({
   */
   _scroll_horizontalScrollOffsetDidChange: function () {
     this.invokeLast(this.adjustElementScroll);
-    this.invokeOnce(this._scsv_horizontalScrollerShouldFadeIn);
-    this.invokeOnce(this._scsv_setupHorizontalScrollerFadeout);
+    this.invokeLast(this._sc_fadeInScrollers);
   }.observes('horizontalScrollOffset'),
 
   /** @private
@@ -2182,8 +2132,7 @@ SC.ScrollView = SC.View.extend({
   */
   _scroll_verticalScrollOffsetDidChange: function () {
     this.invokeLast(this.adjustElementScroll);
-    this.invokeOnce(this._scsv_verticalScrollerShouldFadeIn);
-    this.invokeOnce(this._scsv_setupVerticalScrollerFadeout);
+    this.invokeLast(this._sc_fadeInScrollers);
   }.observes('verticalScrollOffset'),
 
   /** @private

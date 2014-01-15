@@ -886,23 +886,18 @@ SC.OverlayScrollerView = SC.ScrollerView.extend(
 
   /*
     Supports ScrollView's overlay fade procedure.
-
-    @param {Number} duration
   */
-  fadeIn: function(duration) {
-    var currentOpacity = this.getPath('layout.opacity');
-    if (!SC.none(currentOpacity) && currentOpacity !== 1) {
-      this.animate('opacity', 1, duration);
-    }
+  fadeIn: function () {
+    this.$().toggleClass('fade-in', true);
+    this.$().toggleClass('fade-out', false);
   },
 
   /*
     Supports ScrollView's overlay fade procedure.
-
-    @param {Number} duration
   */
-  fadeOut: function(duration) {
-    this.animate('opacity', 0, duration);
+  fadeOut: function () {
+    this.$().toggleClass('fade-in', false);
+    this.$().toggleClass('fade-out', true);
   },
 
   /**
