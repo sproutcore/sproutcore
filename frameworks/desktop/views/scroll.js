@@ -862,6 +862,8 @@ SC.ScrollView = SC.View.extend({
         height: ht
       };
       hscroll.set('layout', layout);
+
+      // Check for overlay.
       ho = this.get('horizontalOverlay');
       clipLayout.bottom = ho ? 0 : (layout.bottom + ht);
     } else {
@@ -879,6 +881,8 @@ SC.ScrollView = SC.View.extend({
         width: vt
       };
       vscroll.set('layout', layout);
+
+      // Check for overlay.
       vo = this.get('verticalOverlay');
       clipLayout.right = vo ? 0 : (layout.right + vt);
     } else {
@@ -1943,7 +1947,7 @@ SC.ScrollView = SC.View.extend({
       contentView.addObserver('layer', this, 'contentViewLayerDidChange');
     }
 
-    if (this.get('isVisibleInWindow')) this._scsv_registerAutoscroll();
+    if (this.get('isVisibleInWindow')) this._sc_registerAutoscroll();
 
     // Initialize cache values.
     this._scroll_contentWidth = this._scroll_contentHeight = null;
@@ -1952,7 +1956,7 @@ SC.ScrollView = SC.View.extend({
   /** @private
     Registers/deregisters view with SC.Drag for autoscrolling
   */
-  _scsv_registerAutoscroll: function () {
+  _sc_registerAutoscroll: function () {
     if (this.get('isVisibleInWindow')) SC.Drag.addScrollableView(this);
     else SC.Drag.removeScrollableView(this);
   }.observes('isVisibleInWindow'),

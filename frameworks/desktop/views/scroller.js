@@ -46,7 +46,7 @@ SC.ScrollerView = SC.View.extend(
 
   /**
     @type Array
-    @default 'thumbPosition thumbLength controlsHidden'.w()
+    @default ['thumbPosition', 'thumbLength', 'controlsHidden']
     @see SC.View#displayProperties
   */
   displayProperties: ['thumbPosition', 'thumbLength', 'controlsHidden'],
@@ -446,6 +446,7 @@ SC.ScrollerView = SC.View.extend(
 
     // Subtract the size of the top/left cap
     scrollerLength -= this.capLength - this.capOverlap;
+
     // Subtract the size of the scroll buttons, or the end cap if they are
     // not shown.
     scrollerLength -= this.buttonLength - this.buttonOverlap;
@@ -902,10 +903,10 @@ SC.OverlayScrollerView = SC.ScrollerView.extend(
 
   /**
     @type Array
-    @default ['sc-touch-scroller-view']
+    @default ['sc-touch-scroller-view', 'sc-overlay-scroller-view]
     @see SC.View#classNames
   */
-  classNames: ['sc-touch-scroller-view'],
+  classNames: ['sc-touch-scroller-view', 'sc-overlay-scroller-view'],
 
   /**
     @type Number
@@ -917,7 +918,7 @@ SC.OverlayScrollerView = SC.ScrollerView.extend(
     @type Number
     @default 5
   */
-  capLength: 5,
+  capLength: 3,
 
   /**
     @type Number
@@ -926,50 +927,46 @@ SC.OverlayScrollerView = SC.ScrollerView.extend(
   capOverlap: 0,
 
   /**
+    @type Number
+    @default 3
+  */
+  buttonLength: 3,
+
+  /**
+    @type Number
+    @default 0
+  */
+  buttonOverlap: 0,
+
+  /**
     @type Boolean
     @default NO
   */
   hasButtons: NO,
 
-  /**
-    @type Number
-    @default 36
-  */
-  buttonOverlap: 36,
-
   /** @private */
-  adjustThumb: function (thumb, position, length) {
+  adjustThumb: function (thumb, thumbPosition, thumbLength) {
     var transformCSS = SC.browser.experimentalCSSNameFor('transform');
     var thumbInner = this.$('.thumb-inner');
-    var max = this.get("scrollerLength") - this.capLength, min = this.get("minimum") + this.capLength;
-
-    if (position + length > max) {
-      position = Math.min(max - 20, position);
-      length = max - position;
-    }
-
-    if (position < min) {
-      length -= min - position;
-      position = min;
-    }
 
     switch (this.get('layoutDirection')) {
     case SC.LAYOUT_VERTICAL:
-      if (this._thumbPosition !== position) thumb.css(transformCSS, 'translate3d(0px,' + position + 'px,0px)');
-      if (this._thumbSize !== length) {
-        thumbInner.css(transformCSS, 'translate3d(0px,' + Math.round(length - 1044) + 'px,0px)');
+      if (this._thumbPosition !== thumbPosition) thumb.css(transformCSS, 'translate3d(0px,' + thumbPosition + 'px,0px)');
+      if (this._thumbSize !== thumbLength) {
+        thumbInner.css(transformCSS, 'translate3d(0px,' + Math.round(thumbLength - 1044) + 'px,0px)');
       }
       break;
     case SC.LAYOUT_HORIZONTAL:
-      if (this._thumbPosition !== position) thumb.css(transformCSS, 'translate3d(' + position + 'px,0px,0px)');
-      if (this._thumbSize !== length) {
-        thumbInner.css(transformCSS, 'translate3d(' + Math.round(length - 1044) + 'px,0px,0px)');
+      if (this._thumbPosition !== thumbPosition) thumb.css(transformCSS, 'translate3d(' + thumbPosition + 'px,0px,0px)');
+      if (this._thumbSize !== thumbLength) {
+        thumbInner.css(transformCSS, 'translate3d(' + Math.round(thumbLength - 1044) + 'px,0px,0px)');
       }
       break;
     }
 
-    this._thumbPosition = position;
-    this._thumbSize = length;
+    // Cache these values to check for changes.
+    this._thumbPosition = thumbPosition;
+    this._thumbSize = thumbLength;
   },
 
   /** @private */
@@ -1004,7 +1001,7 @@ SC.OverlayScrollerView = SC.ScrollerView.extend(
       context.push('<div class="track"></div>' +
                     '<div class="cap"></div>');
       this.renderButtons(context, this.get('hasButtons'));
-      this.renderThumb(context, this.get('layoutDirection'), thumbLength);
+      this.renderThumb(context, thumbPosition, thumbLength);
     }
 
     else {
@@ -1020,22 +1017,36 @@ SC.OverlayScrollerView = SC.ScrollerView.extend(
     }
   },
 
-  renderThumb: function (context, layoutDirection, thumbLength) {
-    var transformCSS = SC.browser.experimentalCSSNameFor('transform');
+  /** @private */
+  renderThumb: function (context, thumbPosition, thumbLength) {
+    var transformCSS = SC.browser.experimentalCSSNameFor('transform'),
+      thumbPositionStyle, thumbSizeStyle;
 
-    // where is this magic number from?
-    thumbLength -= 1044;
-    layoutDirection = (layoutDirection === SC.LAYOUT_HORIZONTAL ? 'X' : 'Y');
+    switch (this.get('layoutDirection')) {
+    case SC.LAYOUT_VERTICAL:
+      thumbPositionStyle = transformCSS + ': translate3d(0px,' + thumbPosition + 'px,0px)';
+      // where is this magic number from?
+      thumbSizeStyle = transformCSS + ': translateY(' + (thumbLength - 1044) + 'px)'.fmt();
+      break;
+    case SC.LAYOUT_HORIZONTAL:
+      thumbPositionStyle = transformCSS + ': translate3d(' + thumbPosition + 'px,0px,0px)';
+      thumbSizeStyle = transformCSS + ': translateX(' + (thumbLength - 1044) + 'px)'.fmt();
+      break;
+    }
 
-    context.push('<div class="thumb">' +
+    context.push('<div class="thumb" style="%@;">'.fmt(thumbPositionStyle) +
                  '<div class="thumb-top"></div>' +
                  '<div class="thumb-clip">' +
-                 '<div class="thumb-inner" style="%@: translate%@(%@px);">'.fmt(layoutDirection, transformCSS, thumbLength) +
+                 '<div class="thumb-inner" style="%@;">'.fmt(thumbSizeStyle) +
                  '<div class="thumb-center"></div>' +
                  '<div class="thumb-bottom"></div></div></div></div>');
 
+    // Cache these values to check for changes.
+    this._thumbPosition = thumbPosition;
+    this._thumbSize = thumbLength;
   }
 });
+
 
 /* @private Old inaccurate name retained for backward compatibility. */
 SC.TouchScrollerView = SC.OverlayScrollerView.extend({
