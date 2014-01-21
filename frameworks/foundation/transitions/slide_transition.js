@@ -16,7 +16,7 @@ SC.mixin(SC.View,
   */
   SLIDE_IN: {
 
-    layoutProperties: ['top', 'bottom', 'left', 'right', 'height', 'width'],
+    layoutProperties: ['top', 'bottom', 'left', 'right', 'height', 'width', 'centerX', 'centerY'],
 
     /** @private Starts from outside of parent unless inPlace is true. */
     setup: function (view, options, inPlace) {
@@ -88,7 +88,7 @@ SC.mixin(SC.View,
   */
   SLIDE_OUT: {
 
-    layoutProperties: ['top', 'bottom', 'left', 'right', 'height', 'width'],
+    layoutProperties: ['top', 'bottom', 'left', 'right', 'height', 'width', 'centerX', 'centerY'],
 
     /** @private Starts from current position. */
     setup: function (view, options) {
