@@ -461,7 +461,6 @@ SC.RootResponder = SC.Object.extend(
     var designMode = null,
       designModeNames = this._designModeNames,
       designModeThresholds = this._designModeThresholds,
-      dpr = window.devicePixelRatio,
       currentWindowSize,
       area;
 
@@ -469,8 +468,7 @@ SC.RootResponder = SC.Object.extend(
     if (!designModeNames) { return null; }
 
     currentWindowSize = this.get('currentWindowSize');
-    if (!dpr) { dpr = 1; }
-    area = (currentWindowSize.width * currentWindowSize.height) / dpr;
+    area = (currentWindowSize.width * currentWindowSize.height);
     var i, len;
     for (i = 0, len = designModeThresholds.get('length'); i < len; i++) {
       var layoutWidthThreshold = designModeThresholds.objectAt(i);
