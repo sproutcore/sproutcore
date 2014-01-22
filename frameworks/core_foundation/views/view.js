@@ -1638,8 +1638,18 @@ SC.CoreView.reopen(
     @default null
     @since Version 1.10
   */
-  transitionHideOptions: null
+  transitionHideOptions: null,
 
+  // ............................................
+  // Patches
+  //
+
+  /** @private
+    Override this method to apply design modes to this view and
+    its children.
+    @see SC.View
+  */
+  updateDesignMode: function (lastDesignMode, designMode) {}
 });
 
 SC.CoreView.mixin(
