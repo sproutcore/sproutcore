@@ -127,6 +127,15 @@ SC.SelectView = SC.PopupButtonView.extend({
   localize: YES,
 
   /**
+    if true, it means that no sorting will occur, items will appear
+    in the same order as in the array
+
+    @type Boolean
+    @default YES
+  */
+  disableSort: YES,
+
+  /**
    The menu that will pop up when this button is clicked.
 
    The default menu has its properties bound to the SC.SelectView,
@@ -321,6 +330,8 @@ SC.SelectView = SC.PopupButtonView.extend({
       ret.push(item);
     }
 
+    ret = this.sortObjects(ret);
+
     if (emptyName) {
       if (len) ret.unshift(this._addDisplayItem(null, null, true));
       ret.unshift(this._addDisplayItem(emptyName, null));
@@ -339,6 +350,28 @@ SC.SelectView = SC.PopupButtonView.extend({
     item[this.get('itemSeparatorKey')] = !!isSeparator;
 
     return item;
+  },
+
+  /**
+
+    override this method to implement your own sorting of the menu. By
+    default, menu items are sorted using the value shown or the sortKey
+
+    @param {SC.Array} objects the unsorted array of objects to display.
+    @returns {SC.Array} sorted array of objects
+  */
+  sortObjects: function (objects) {
+    if (!this.get('disableSort')) {
+      var nameKey = this.get('itemSortKey') || this.get('itemTitleKey');
+      objects = objects.sort(function(a, b) {
+        if (nameKey) {
+          a = a.get ? a.get(nameKey) : a[nameKey];
+          b = b.get ? b.get(nameKey) : b[nameKey];
+        }
+        return (a<b) ? -1 : ((a>b) ? 1 : 0);
+      });
+    }
+    return objects;
   },
 
   /**
