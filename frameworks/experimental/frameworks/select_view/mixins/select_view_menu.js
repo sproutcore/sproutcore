@@ -95,11 +95,13 @@ SC.SelectViewMenu = {
       return;
     }
 
-    var props = this._svm_bindToProperties, idx, len = props.length, key;
+    var props = this._svm_bindToProperties, idx, len = props.length, key, toKey;
 
     for (idx = 0; idx < len; idx++) {
       key = props[idx];
-      this[key + 'Binding'] = this.bind(key, bindTo, key);
+      toKey = key;
+      if (key === 'items') toKey = 'displayItems';
+      this[key + 'Binding'] = this.bind(key, bindTo, toKey);
     }
 
     this._svm_isBoundTo = bindTo;

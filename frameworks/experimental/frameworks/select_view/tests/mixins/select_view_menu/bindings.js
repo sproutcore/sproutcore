@@ -2,7 +2,9 @@ module("SelectViewMenu -- Bindings");
 
 function setValues(obj, props, toValue) {
   for (var idx = 0; idx < props.length; idx++) {
-    obj.set(props[idx], toValue);
+    var prop = props[idx];
+    if (prop === 'items') prop = 'displayItems';
+    obj.set(prop, toValue);
   }
 }
 
