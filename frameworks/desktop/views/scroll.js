@@ -869,7 +869,10 @@ SC.ScrollView = SC.View.extend({
     } else {
       clipLayout.bottom = 0;
     }
-    if (hscroll) hscroll.set('isVisible', hasHorizontal);
+    if (hscroll) {
+      hscroll.set('isVisible', hasHorizontal);
+      this._sc_fadeOutHorizontalScroller();
+    }
 
     if (hasVertical) {
       ht     = ht + this.get('verticalScrollerBottom');
@@ -888,7 +891,10 @@ SC.ScrollView = SC.View.extend({
     } else {
       clipLayout.right = 0;
     }
-    if (vscroll) vscroll.set('isVisible', hasVertical);
+    if (vscroll) {
+      vscroll.set('isVisible', hasVertical);
+      this._sc_fadeOutVerticalScroller();
+    }
 
     clip.adjust(clipLayout);
   },
