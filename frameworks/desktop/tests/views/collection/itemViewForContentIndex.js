@@ -161,6 +161,8 @@ test("set designMode on item views", function() {
 
   // Changes to designMode after creating the item view.
   view.set('designMode', 'large');
+  // Note: we have to call this manually as the view is unrendered and not updating its design modes. TODO: Test this naturally.
+  view.adjustChildDesignModes('small', 'large');
   equals(itemView.get('designMode'), 'large', "itemView.designMode should be set to match the current value of the collection");
 });
 
