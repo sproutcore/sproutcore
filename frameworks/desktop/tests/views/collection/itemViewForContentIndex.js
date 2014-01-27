@@ -399,3 +399,17 @@ test("canReorderContent sets isReorderable on the item views so they can visuall
   itemView = view.itemViewForContentIndex(1);
   equals(itemView.get('isReorderable'), false, 'itemView has isReorderable');
 });
+
+test("itemViewForContentObject", function() {
+  equals(view.itemViewForContentObject(content[0]).getPath('content.title'), 'a', "itemViewForContentObject returns 0th itemView for the 0th content object");
+
+  equals(view.itemViewForContentObject(SC.Object.create()), null, "itemViewForContentObject returns null for a object that is not in in its content");
+
+  var emptyContentCollection;
+  SC.run(function() {
+    emptyContentCollection = SC.CollectionView.create();
+  });
+
+  equals(emptyContentCollection.itemViewForContentObject(content[0]), null, "itemViewForContentObject returns null (without erroring) when it has no content.");
+
+});

@@ -1127,12 +1127,16 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   },
 
   /**
-    Helper method for getting the item view of a specific content object
+    Convenience method for getting the item view of a content object.
 
     @param {Object} object
   */
   itemViewForContentObject: function(object) {
-    return this.itemViewForContentIndex(this.get('content').indexOf(object));
+    var content = this.get('content');
+    if (!content) return null;
+    var contentIndex = content.indexOf(object);
+    if (contentIndex === -1) return null;
+    return this.itemViewForContentIndex(contentIndex);
   },
 
   /** @private */
