@@ -459,8 +459,8 @@ SC.UndoManager = SC.Object.extend(
   /** @private */
   destroy: function() {
     this._activeGroup = null;
-    this.set('undoStack') = null;
-    this.set('redoStack') = null;
+    this.set('undoStack', null);
+    this.set('redoStack', null);
     return sc_super();
   },
 
