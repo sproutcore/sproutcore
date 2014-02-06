@@ -1055,7 +1055,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
 
   /** @private */
-  _TMP_REC_ATTRS: {},
+  _CACHED_REC_ATTRS: {},
+
+  /** @private */
+  _CACHED_REC_INIT: function() {},
 
   /**
     Given a `storeKey`, return a materialized record.  You will not usually
@@ -1072,9 +1075,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   materializeRecord: function (storeKey) {
     var records = this.records,
-      //@if(debug)
-      updatingRecords = this.updatingRecords,
-      //@endif
       ret, recordType, attrs;
 
     // look up in cached records
@@ -1086,28 +1086,26 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     recordType = SC.Store.recordTypeFor(storeKey);
     if (!recordType) return null; // not recordType registered, nothing to do
 
-    attrs = this._TMP_REC_ATTRS ;
+    // Populate the attributes.
+    attrs = this._CACHED_REC_ATTRS ;
     attrs.storeKey = storeKey ;
     attrs.store    = this ;
 
-    //@if(debug)
-    // Add some developer support to prevent a tough to diagnose bug that if
-    // materializeRecord is called during the creation of a record, the store
-    // will inadvertently create a duplicate record instance not because the
-    // actual instance won't have been cached to this.records yet.
-    if (!this.updatingRecords) { updatingRecords = this.updatingRecords = {}; }
-    if (updatingRecords[storeKey]) {
-      throw new Error("Developer Error: The record of type, %@, with storeKey, %@, was materialized a second time before the first call had finished. This will result in two separate instances of the same object being created and should be fixed. A likely cause is using `.observes` code in the record class, which can cause the record to be retrieved somehow while it is still being created.".fmt(recordType, storeKey));
-    }
+    // We do a little gymnastics here to prevent record initialization before we've
+    // received and cached a copy of the object. This is because if initialization
+    // triggers downstream effects which call materializeRecord for the same record,
+    // we won't have a copy of it cached yet, causing another copy to be created
+    // and resulting in a stack overflow at best and a really hard-to-diagnose bug
+    // involving two instances of the same record floating around at worst.
 
-    updatingRecords[storeKey] = storeKey;
-    //@endif
-
-    ret = records[storeKey] = recordType.create(attrs);
-
-    //@if(debug)
-    updatingRecords[storeKey] = null;
-    //@endif
+    // Override _object_init to prevent premature initialization.
+    var _object_init = recordType.prototype._object_init;
+    recordType.prototype._object_init = this._CACHED_REC_INIT;
+    // Create the record (but don't init it).
+    ret = records[storeKey] = recordType.create();
+    // Repopulate the _object_init method and run initialization.
+    recordType.prototype._object_init = ret._object_init = _object_init;
+    ret._object_init([attrs]);
 
     return ret ;
   },
