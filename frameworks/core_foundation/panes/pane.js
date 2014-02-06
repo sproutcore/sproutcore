@@ -269,7 +269,6 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
       isKeyPane = this.get('isKeyPane');
 
     if (current === view) return this ; // nothing to do
-    if (SC.platform.touch && view && view.kindOf(SC.TextFieldView) && !view.get('focused')) return this;
 
     // if we are currently key pane, then notify key views of change also
     if (isKeyPane) {
