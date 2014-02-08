@@ -26,7 +26,7 @@ var Rec = SC.Record.extend({
 
 // ..........................................................
 // SC.Store#chain - init
-// 
+//
 module("SC.Store#chain - init");
 
 test("initial setup for chained store", function() {
@@ -87,9 +87,9 @@ test("allow for custom subclasses of SC.NestedStore", function() {
 
 
 // ..........................................................
-// SPECIAL CASES
+// SC.Store#chain - use & propagation
 // 
-
+module("SC.Store#chain - use & propagation");
 test("chained store changes should propagate reliably", function() {
   var parent = SC.Store.create(), rec, store, rec2;
 
@@ -153,7 +153,7 @@ test("chained store changes should propagate reliably", function() {
   equals(rec.fired, YES, 'original rec.title should have notified');  
   
 
-  // trial 1
+  // trial 3
   SC.RunLoop.begin();
   store = parent.chain();
   rec2  = store.find(Rec, 1);
@@ -176,5 +176,31 @@ test("chained store changes should propagate reliably", function() {
 
   equals(rec.get('title'), 'FOO2', 'original rec.title should change');
   equals(rec.fired, YES, 'original rec.title should have notified');  
-  
+});
+
+test("record retrievals triggered from a chained store and returned to the parent store should be reflected in the chained store", function() {
+  var parent = SC.Store.create().from(SC.DataSource.create({
+    retrieveRecords: function(store, storeKeys, ids) {
+      this.invokeLast(function() {
+        storeKeys.forEach(function(key, i) {
+          store.dataSourceDidComplete(key, { title: 'Stupendous! AB-solutely corking.' });
+        });
+      })
+      return YES;
+    }
+  }));
+
+  var chained = parent.chain(),
+      chainedRec, storeKey;
+
+  SC.run(function() {
+    chainedRec = chained.find(Rec, 1);
+    storeKey = chainedRec.get('storeKey');
+    equals(chained.peekStatus(storeKey), SC.Record.BUSY_LOADING, "While retrieving, the record's status should be BUSY_LOADING");
+  });
+
+  // This immediate status update is sensitive to the data source's use of invokeNext to load the record.
+  equals(chained.peekStatus(storeKey), SC.Record.READY_CLEAN, "After retrieving, the record's status should be READY_CLEAN");
+
+
 });
