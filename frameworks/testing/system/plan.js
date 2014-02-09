@@ -618,6 +618,19 @@ CoreTest.Plan = {
     },
 
     /**
+      Logs a warning. Useful for clearly marking assertions that will need to be revisited
+      after future development. Warnings are highlighted prominently in the test runner, but
+      do not mark the test suite as failed.
+
+      @param {String} msg the warning message
+      @returns {CoreTest.Plan} receiver
+    */
+    warn: function(msg) {
+      if (msg === undefined) msg = null;
+      return this.warn(msg);
+    },
+
+    /**
       Stops the current tests from running.  An optional timeout will
       automatically fail the test if it does not restart within the specified
       period of time.
