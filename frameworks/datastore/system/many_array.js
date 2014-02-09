@@ -109,10 +109,10 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     on the many array. In the future this should be automatic.
 
     @type Boolean
-    @default true
+    @default false
     @since SproutCore 1.11.0
   */
-  supportNewRecords: true,
+  supportNewRecords: NO,
 
   /**
     Returns the `storeId`s in read-only mode.  Avoids modifying the record
