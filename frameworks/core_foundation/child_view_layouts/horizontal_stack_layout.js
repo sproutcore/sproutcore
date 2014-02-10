@@ -233,7 +233,7 @@ SC.mixin(SC.View,
 
       for (i = 0, len = childViews.get('length'); i < len; i++) {
         var childView = childViews.objectAt(i),
-          layout,
+          layout, width,
           marginBefore;
 
         // Ignore child views with useAbsoluteLayout true, useStaticLayout true or that are not visible.
@@ -244,9 +244,12 @@ SC.mixin(SC.View,
         }
 
         layout = childView.get('layout');
+        width = layout.width;
+        if (SC.none(width)) { width = layout.minWidth; }
+
         //@if(debug)
         // Add some developer support.
-        if (SC.none(layout.width) && (i < len - 1 || resizeToFit)) {
+        if (SC.none(width) && (i < len - 1 || resizeToFit)) {
           SC.warn('Developer Warning: The SC.View.HORIZONTAL_STACK plugin requires that each childView layout contains at least a width and optionally also top and bottom, top and height, bottom and height or centerY and height.  The childView %@ has an invalid layout: %@'.fmt(childView, SC.stringFromLayout(layout)));
           return;
         }
@@ -260,7 +263,7 @@ SC.mixin(SC.View,
           childView.adjust('left', position);
 
           // Allow the last child view to stretch.
-          if (!resizeToFit && !layout.width && !layout.right) {
+          if (!resizeToFit && !width && !layout.right) {
             childView.adjust('right', paddingAfter);
           }
         }
@@ -273,8 +276,10 @@ SC.mixin(SC.View,
 
       // Adjust our frame to fit as well, this ensures that scrolling works.
       // If the current size is 0 (all children are hidden), it doesn't make sense to add the padding
-      if (position !== 0)
+      if (position !== 0) {
         position += Math.max(lastMargin, paddingAfter);
+      }
+
       if (resizeToFit && view.getPath('layout.width') !== position) {
         view.adjust('width', position);
       }
