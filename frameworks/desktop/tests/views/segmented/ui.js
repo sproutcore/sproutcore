@@ -521,4 +521,19 @@ var pane;
     ok(view3.$().hasClass('sel'), 'The third segment should have a sel class on mouseUp');
   });
 
+  test("passes on mouse events that don't map to a segment", function() {
+    var segmentedView, view1, layer1, point, ev;
+
+    segmentedView = pane.view('3_items,2_sel,1_disabled');
+    view1 = segmentedView.get('childViews').objectAt(0); // $('.sc-segment-view')[0];
+    layer1 = view1.get('layer');
+    point = SC.offset(layer1);
+
+    ev = SC.Event.simulateEvent(layer1, 'mousedown', { clientX: point.x, clientY: point.y });
+    ok(segmentedView.mouseDown(ev), "mouseDown event handler accepts event which maps to a segment.");
+
+    ev = SC.Event.simulateEvent(layer1, 'mousedown', { clientX: point.x - 1, clientY: point.y });
+    ok(!segmentedView.mouseDown(ev), "mouseDown event handler passes on event which doesn't map to a segment.");
+  })
+
 })();

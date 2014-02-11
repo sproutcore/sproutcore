@@ -812,7 +812,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         overflowIndex = childViews.get('length') - 1,
         index;
 
-    if (!this.get('isEnabledInPane')) return YES; // nothing to do
+    if (!this.get('isEnabledInPane')) return YES; // nothing to do // TODO: return NO?
 
     index = this.displayItemIndexForEvent(evt);
     if (index >= 0) {
@@ -823,9 +823,13 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       // if mouse was pressed on the overflow segment, popup the menu
       if (index === overflowIndex) this.showOverflowMenu();
       else this._isMouseDown = YES;
-    }
 
-    return YES;
+      return YES;
+    }
+    // If this event originated outside of a segment, pass the event along up.
+    else {
+      return NO;
+    }
   },
 
   /** @private */
