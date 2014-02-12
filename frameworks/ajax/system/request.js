@@ -639,7 +639,7 @@ SC.Request.manager = SC.Object.create(
     Cancels a specific request. If the request is pending it will simply
     be removed. Otherwise it will actually be cancelled.
 
-    @param {Object} response a response object
+    @param {SC.Response} response a response object
     @returns {Boolean} YES if cancelled
   */
   cancel: function(response) {
@@ -717,8 +717,29 @@ SC.Request.manager = SC.Object.create(
     the transport from the queue and kicks off the next one.
   */
   transportDidClose: function(response) {
+    this.get('pending').removeObject(response);
     this.get('inflight').removeObject(response);
     this.fireRequestIfNeeded();
+  },
+
+  /**
+    Checks if the response is in the pending queue.
+
+    @param {SC.Response} response a response object
+    @return {Boolean} is response in pending queue
+  */
+  isPending: function(response) {
+    return this.get('pending').contains(response);
+  },
+
+  /**
+    Checks if the response is in the inflight queue.
+
+    @param {SC.Response} response a response object
+    @return {Boolean} is response in inflight queue
+  */
+  isInFlight: function(response) {
+    return this.get('inflight').contains(response);
   }
 
 });

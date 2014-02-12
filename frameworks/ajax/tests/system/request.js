@@ -618,3 +618,81 @@ test("Test manager.cancelAll.", function() {
   equals(manager.getPath('inflight.length'), 0, "There must be 0 inflight requests".fmt(max));
   equals(manager.getPath('pending.length'), 0, "There must be 0 pending requests".fmt(max));
 });
+
+test("Test responses moving between pending and inflight states", function() {
+  var prevMaxRequests = SC.Request.manager.get('maxRequests'),
+      request2 = SC.Request.getUrl(url),
+      response,
+      response2;
+
+  SC.Request.manager.set('maxRequests', 1);
+
+  request.notify('loadstart', function (evt) {
+    ok(!SC.Request.manager.isPending(response), 'First request is no longer pending.');
+    ok(SC.Request.manager.isInFlight(response), 'First request is now inflight.');
+    ok(SC.Request.manager.isPending(response2), 'Second request is still pending.');
+    ok(!SC.Request.manager.isInFlight(response2), 'Second request is not inflight.');
+  });
+
+  request.notify('progress', this, function(evt) {
+    ok(!SC.Request.manager.isPending(response), 'First request is not pending.');
+    ok(SC.Request.manager.isInFlight(response), 'First request is still inflight.');
+    ok(SC.Request.manager.isPending(response2), 'Second request is still pending.');
+    ok(!SC.Request.manager.isInFlight(response2), 'Second request is not inflight.');
+  });
+
+  request.notify('loadend', this, function (evt) {
+    ok(!SC.Request.manager.isPending(response), 'First request is not pending.');
+    ok(SC.Request.manager.isInFlight(response), 'First request is still inflight.');
+    ok(SC.Request.manager.isPending(response2), 'Second request is still pending.');
+    ok(!SC.Request.manager.isInFlight(response2), 'Second request is not inflight.');
+  });
+
+  request.notify(this, function (evt) {
+    ok(!SC.Request.manager.isPending(response), 'First request is not pending.');
+    ok(SC.Request.manager.isInFlight(response), 'First request is still inflight.');
+    ok(SC.Request.manager.isPending(response2), 'Second request is still pending.');
+    ok(!SC.Request.manager.isInFlight(response2), 'Second request is not inflight.');
+  });
+
+  request2.notify('loadstart', this, function(evt) {
+    ok(!SC.Request.manager.isPending(response), 'First request is not pending.');
+    ok(!SC.Request.manager.isInFlight(response), 'First request is no longer inflight.');
+    ok(!SC.Request.manager.isPending(response2), 'Second request is no longer pending.');
+    ok(SC.Request.manager.isInFlight(response2), 'Second request is now inflight.');
+  });
+
+  request2.notify('progress', this, function(evt) {
+    ok(!SC.Request.manager.isPending(response), 'First request is not pending.');
+    ok(!SC.Request.manager.isInFlight(response), 'First request is not inflight.');
+    ok(!SC.Request.manager.isPending(response2), 'Second request is not pending.');
+    ok(SC.Request.manager.isInFlight(response2), 'Second request is still inflight.');
+  });
+
+  request2.notify('loadend', this, function(evt) {
+    ok(!SC.Request.manager.isPending(response), 'First request is not pending.');
+    ok(!SC.Request.manager.isInFlight(response), 'First request is not inflight.');
+    ok(!SC.Request.manager.isPending(response2), 'Second request is not pending.');
+    ok(SC.Request.manager.isInFlight(response2), 'Second request is still inflight.');
+  });
+
+  request2.notify(this, function (evt) {
+    ok(!SC.Request.manager.isPending(response), 'First request is not pending.');
+    ok(!SC.Request.manager.isInFlight(response), 'First request is not inflight.');
+    ok(!SC.Request.manager.isPending(response2), 'Second request is not pending.');
+    ok(SC.Request.manager.isInFlight(response2), 'Second request is still inflight.');
+
+    SC.Request.manager.set('maxRequests', prevMaxRequests);
+    window.start();
+  });
+
+  response = request.send();
+  response2 = request2.send();
+
+  ok(SC.Request.manager.isPending(response), 'First request is pending.');
+  ok(!SC.Request.manager.isInFlight(response), 'First request is not inflight.');
+  ok(SC.Request.manager.isPending(response2), 'Second request is pending.');
+  ok(!SC.Request.manager.isInFlight(response2), 'Second request is not inflight.');
+
+  stop();
+});
