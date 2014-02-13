@@ -16,13 +16,3 @@ test("Static layout", function() {
 
   ok(view.$().is('.sc-static-layout'), "views with useStaticLayout get the sc-static-layout class");
 });
-
-test("Background color", function() {
-  var view = SC.View.create({
-    backgroundColor: "red"
-  });
-
-  view.createLayer();
-
-  equals(view.get('layer').style.backgroundColor, "red", "backgroundColor sets the CSS background-color class");
-});

@@ -37,17 +37,21 @@ SC.View.reopen(
   /** @scope SC.View.prototype */ {
 
   /**
-    Set to YES to indicate the view has layout support added.
+    Walks like a duck. Is YES to indicate that a view has layout support.
   */
   hasLayout: YES,
 
   /**
-    Optional background color.  Will be applied to the view's element if
-    set.  This property is intended for one-off views that need a background
-    element.  If you plan to create many view instances it is probably better
-    to use CSS.
+    The view's background color. Only recommended for use during prototyping and in views
+    where the background color may change arbitrarily, for example in connection with an
+    instance of `SC.Color`. Otherwise you should use CSS and `classNames` or
+    `classNameBindings`.
+
+    If set at create time, will be added to the view's layer. For dynamic background colors,
+    you must add `backgroundColor` to the view's `displayProperties`.
 
     @type String
+    @default null
   */
   backgroundColor: null,
 
@@ -55,10 +59,10 @@ SC.View.reopen(
   _previousLayout: null,
 
   /**
-    Activates use of brower's static layout. To activate, set this
-    property to YES.
+    Activates use of brower's static layout. To activate, set this property to YES.
 
     @type Boolean
+    @default NO
   */
   useStaticLayout: NO,
 
@@ -1109,9 +1113,13 @@ SC.View.reopen(
 
     if (this.get('useStaticLayout')) { context.addClass('sc-static-layout'); }
 
+    // Background color defaults to null; for performance reasons we should ignore it
+    // unless it's ever been non-null.
     var backgroundColor = this.get('backgroundColor');
-    if (backgroundColor) {
-      context.setStyle('backgroundColor', backgroundColor);
+    if (!SC.none(backgroundColor) || this._scv_hasBackgroundColor) {
+      this._scv_hasBackgroundColor = YES;
+      if (backgroundColor) context.setStyle('backgroundColor', backgroundColor);
+      else context.removeStyle('backgroundColor');
     }
   }.enhance(),
 
