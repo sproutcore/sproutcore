@@ -337,6 +337,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
       record.recordDidChange(pname);
     }
 
+    // Update the enumerable, [], property (including firstObject and lastObject)
     this.enumerableContentDidChange(idx, amt, len - amt);
 
     return this;

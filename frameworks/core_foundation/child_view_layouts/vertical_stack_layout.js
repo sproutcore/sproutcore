@@ -275,12 +275,12 @@ SC.mixin(SC.View,
         marginAfter = lastMargin || spacing;
       }
 
-      // Adjust our frame to fit as well, this ensures that scrolling works.
       // If the current size is 0 (all children are hidden), it doesn't make sense to add the padding
       if (position !== 0) {
         position += Math.max(lastMargin, paddingAfter);
       }
 
+      // Adjust our frame to fit as well, this ensures that scrolling works.
       if (resizeToFit && view.getPath('layout.height') !== position) {
         view.adjust('height', position);
       }

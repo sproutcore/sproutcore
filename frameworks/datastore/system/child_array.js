@@ -165,17 +165,20 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     var children = this.get('editableChildren'),
         len      = recs ? (recs.get ? recs.get('length') : recs.length) : 0,
         record   = this.get('record'), newRecs,
-
         pname    = this.get('propertyName'),
         cr, recordType;
-    
+
     newRecs = this._processRecordsToHashes(recs);
+
     // notify that the record did change...
     if (newRecs !== this._prevChildren){
       this._performRecordPropertyChange(null, false);
-    } 
+    }
     children.replace(idx, amt, newRecs);
     record.recordDidChange(pname);
+
+    // Update the enumerable, [], property (including firstObject and lastObject)
+    this.enumerableContentDidChange(idx, amt, len - amt);
 
     return this;
   },
@@ -224,12 +227,12 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     this._performRecordPropertyChange(keys, true);
     return this;
   },
-  
+
   /** @private
     Invoked when the object is changed from the parent or an outside source
-    
+
     will cause the entire array to reset
-    
+
     @param {SC.Array} keys optional
     @param {Boolean} doReset optional
     @returns {SC.ChildArray} itself.
@@ -263,10 +266,10 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
       newLen = children.get('length');
     }
     this._prevChildren = children;
-    
+
     if (doReset){
       this.arrayContentWillChange(0, oldLen, newLen);
-      this._childrenContentDidChange(0, oldLen, newLen);      
+      this._childrenContentDidChange(0, oldLen, newLen);
     }
 
     return this;
