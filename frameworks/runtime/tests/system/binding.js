@@ -366,7 +366,48 @@ test("two bindings to the same value should sync in the order they are initializ
 
 });
 
-module("AND binding", {
+module("Binding transforms", {
+  setup: function () {
+    BindableObject = SC.Object.extend({
+      booleanValue: NO,
+      numericValue: 42,
+      stringValue: 'forty-two',
+      arrayValue: [4, 2]
+    });
+    // temporarily set up two source objects in the SC namespace so we can
+    // use property paths to access them
+    SC.testControllerA = BindableObject.create();
+    SC.testControllerB = BindableObject.create();
+  },
+
+  teardown: function () {
+    SC.testControllerA.destroy();
+    delete SC.testControllerA;
+    SC.testControllerB.destroy();
+    delete SC.testControllerB;
+  }
+});
+
+test("ALL THE OTHER BINDING TRANSFORMS.");
+
+test("equalTo", function() {
+  SC.RunLoop.begin();
+  var toObject = SC.Object.create({
+    isFortyTwo: null,
+    isFortyTwoBinding: SC.Binding.oneWay('SC.testControllerA.numericValue').equalTo(42)
+  });
+  SC.RunLoop.end();
+
+  equals(toObject.get('isFortyTwo'), true, "Value is equal to 42, so bound value should should be");
+
+  SC.RunLoop.begin();
+  SC.testControllerA.set('numericValue', 45);
+  SC.RunLoop.end();
+
+  equals(toObject.get('isFortyTwo'), false, "Value is no longer 42, so bound value should be");
+});
+
+module("Binding transform: `and`", {
 
   setup: function () {
     // temporarily set up two source objects in the SC namespace so we can
@@ -386,9 +427,10 @@ module("AND binding", {
 
   teardown: function () {
     SC.testControllerA.destroy();
+    delete SC.testControllerA;
     SC.testControllerB.destroy();
+    delete SC.testControllerB;
   }
-
 });
 
 test("bound value should be YES if both sources are YES", function () {
