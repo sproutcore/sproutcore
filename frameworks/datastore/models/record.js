@@ -626,8 +626,7 @@ SC.Record = SC.Object.extend(
   */
 
   normalize: function(includeNull) {
-    var primaryKey = this.primaryKey,
-        recordId   = this.get('id'),
+    var recordId   = this.get('id'),
         store      = this.get('store'),
         storeKey   = this.get('storeKey'),
         keysToKeep = {},
@@ -635,7 +634,6 @@ SC.Record = SC.Object.extend(
         isChild, defaultVal, keyForDataHash, attr;
 
     var dataHash = store.readEditableDataHash(storeKey) || {};
-    dataHash[primaryKey] = recordId;
     recHash = store.readDataHash(storeKey);
 
     for (key in this) {
@@ -658,7 +656,7 @@ SC.Record = SC.Object.extend(
             if(attrValue!==undefined && (attrValue!==null || includeNull)) {
               attr = this[key];
               // if record attribute, make sure we transform with the fromType
-              if(SC.instanceOf(attr, SC.RecordAttribute)) {
+              if(SC.kindOf(attr, SC.RecordAttribute)) {
                 attrValue = attr.fromType(this, key, attrValue);
               }
               dataHash[keyForDataHash] = attrValue;
