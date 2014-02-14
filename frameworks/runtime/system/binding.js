@@ -71,7 +71,26 @@ SC.EMPTY_PLACEHOLDER = '@@EMPTY@@';
   property of your object instance automatically.  Now the two values will be
   kept in sync.
 
-  Customizing Your Bindings
+  One-Way Bindings
+  ===
+
+  By default, bindings are set up as two-way. In cases where you only need the
+  binding to function in one direction, for example if a value from a controller
+  is bound into a read-only LabelView, then for performance reasons you should
+  use a one-way binding. To do this, call the very useful `oneWay` helper:
+
+      valueBinding: SC.Binding.oneWay('MyApp.someController.title')
+
+  or:
+
+      valueBinding: SC.Binding.from('MyApp.someController.title').oneWay()
+
+  This way if the value of MyApp.someController.title changes, your object's
+  `value` will also update. Since `value` will never update on its own, this will
+  avoid the setup time required to plumb the binding in the other direction,
+  nearly doubling performance for this binding.
+
+  Transforms
   ===
 
   In addition to synchronizing values, bindings can also perform some basic
@@ -80,7 +99,7 @@ SC.EMPTY_PLACEHOLDER = '@@EMPTY@@';
   what the other object outputs.
 
   To customize a binding, you can use one of the many helper methods defined
-  on SC.Binding like so:
+  on SC.Binding. For example:
 
         valueBinding: SC.Binding.single("MyApp.someController.title")
 
@@ -98,29 +117,9 @@ SC.EMPTY_PLACEHOLDER = '@@EMPTY@@';
   or an empty string).  If it is empty, the value will be set to the string
   "(EMPTY)".
 
-  One Way Bindings
-  ===
-
-  One especially useful binding customization you can use is the oneWay()
-  helper.  This helper tells SproutCore that you are only interested in
-  receiving changes on the object you are binding from.  For example, if you
-  are binding to a preference and you want to be notified if the preference
-  has changed, but your object will not be changing the preference itself, you
-  could do:
-
-        bigTitlesBinding: SC.Binding.oneWay("MyApp.preferencesController.bigTitles")
-
-  This way if the value of MyApp.preferencesController.bigTitles changes the
-  "bigTitles" property of your object will change also.  However, if you
-  change the value of your "bigTitles" property, it will not update the
-  preferencesController.
-
-  One way bindings are almost twice as fast to setup and twice as fast to
-  execute because the binding only has to worry about changes to one side.
-
-  You should consider using one way bindings anytime you have an object that
-  may be created frequently and you do not intend to change a property; only
-  to monitor it for changes. (such as in the example above).
+  The following transform helper methods are included: `noError`, `single`, `notEmpty`,
+  `notNull`, `multiple`, `bool`, `not`, `isNull`, `and` (two values only), `or` (two
+  values only), and `equalTo`. See each method's documentation for a full description.
 
   Adding Custom Transforms
   ===
@@ -196,7 +195,10 @@ SC.EMPTY_PLACEHOLDER = '@@EMPTY@@';
   the result of these customizations will be a binding template, not a fully
   active binding.  The binding will actually become active only when you
   instantiate the object the binding belongs to.  It is useful however, to
-  understand what actually happens when the binding is activated.
+  understand what actually happens when the binding is activated. (Of course
+  you should always use the highest-level APIs available, even if you understand
+  how it works underneath; unless you have specific needs, you should rely on
+  the convenience `fooBinding` format.)
 
   For a binding to function it must have at least a "from" property and a "to"
   property.  The from property path points to the object/key that you want to
@@ -246,14 +248,14 @@ SC.EMPTY_PLACEHOLDER = '@@EMPTY@@';
         });
 
   SproutCore's built in binding creation method make it easy to automatically
-  create bindings for you.  You should always use the highest-level APIs
-  available, even if you understand how to it works underneath.
+  create bindings for you. If you need further documentation on SC.Binding's inner
+  workings, see the private method documentation in the source code.
 
   @since SproutCore 1.0
 */
 SC.Binding = /** @scope SC.Binding.prototype */{
 
-  /**
+  /** @private
     This is the core method you use to create a new binding instance.  The
     binding instance will have the receiver instance as its parent which means
     any configuration you have there will be inherited.
@@ -277,7 +279,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     return ret;
   },
 
-  /**
+  /** @private
     Returns a builder function for compatibility.
   */
   builder: function () {
@@ -318,9 +320,13 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   },
 
   /**
-   This will set the "to" property path to the specified value.  It will not
-   attempt to reoslve this property path to an actual object/property tuple
-   until you connect the binding.
+    This will set the "to" property path to the specified value.  It will not
+    attempt to reoslve this property path to an actual object/property tuple
+    until you connect the binding.
+
+    If you are using the convenience format `fooBinding`, for example
+    `isVisibleBinding`, you do not need to call this method, as the `to` property
+    path will be generated for you when its object is created.
 
     @param {String|Tuple} propertyPath A property path or tuple
     @param {Object} [root] root object to use when resolving the path.
@@ -427,7 +433,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     }
   },
 
-  /**
+  /** 
     Disconnects the binding instance.  Changes will no longer be relayed.  You
     will not usually need to call this method.
 
@@ -456,7 +462,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     return this;
   },
 
-  /**
+  /** @private
     Indicates when the binding has been destroyed.
 
     @type Boolean
@@ -464,7 +470,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   */
   isDestroyed: NO,
 
-  /**
+  /** @private
     Disconnects the binding and removes all properties and external references. Called by
     either binding target object when destroyed.
 
@@ -495,7 +501,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     this._toObserverData = this._fromObserverData = null;
   },
 
-  /**
+  /** @private
     Invoked whenever the value of the "from" property changes.  This will mark
     the binding as dirty if the value has changed.
 
@@ -530,7 +536,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     }
   },
 
-  /**
+  /** @private
     Invoked whenever the value of the "to" property changes.  This will mark the
     binding as dirty only if:
 
@@ -572,6 +578,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     }
   },
 
+  /** @private */
   _scheduleSync: function () {
     if (SC.RunLoop.isRunLoopInProgress() || SC.Binding._syncScheduled) { return; }
     SC.Binding._syncScheduled = YES;
@@ -621,8 +628,8 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   _changeQueue: SC.CoreSet.create(),
   _alternateChangeQueue: SC.CoreSet.create(),
 
-  /**
-    Call this method on SC.Binding to flush all bindings with changed pending.
+  /** @private
+    Call this method on SC.Binding to flush all bindings with changes pending.
 
     @returns {Boolean} YES if changes were flushed.
   */
@@ -676,7 +683,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     return didFlush;
   },
 
-  /**
+  /** @private
     This method is called at the end of the Run Loop to relay the changed
     binding value from one side to the other.
   */
@@ -731,7 +738,8 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     just changed.
 
     This method is useful when you are dynamically connecting bindings to a
-    network of objects that may have already been initialized.
+    network of objects that may have already been initialized. Otherwise you
+    should not need to call this method.
   */
   sync: function () {
 
@@ -785,9 +793,12 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     return this;
   },
 
-  // set if you call sync() when the binding connection is still pending.
+  /** @private
+    set if you call sync() when the binding connection is still pending.
+   */
   _syncOnConnect: NO,
 
+  /** @private */
   _computeBindingTargets: function () {
     var path, root, tuple;
 
@@ -833,11 +844,15 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     }
   },
 
+  // -------------------------------
+  // Helper Methods
+  //
+
   /**
     Configures the binding as one way.  A one-way binding will relay changes
     on the "from" side to the "to" side, but not the other way around.  This
-    means that if you change the "to" side directly, the "from" side may have
-    a different value.
+    means that if you change the "to" side directly, the "from" side will not
+    be updated, and may have a different value.
 
     @param {String} [fromPath] from path to connect.
     @param {Boolean} [aFlag] Pass NO to set the binding back to two-way
@@ -866,10 +881,14 @@ SC.Binding = /** @scope SC.Binding.prototype */{
 
           function (value) {};
 
+    or:
+
+          function (value, binding) {};
+
     It must return either the transformed value or an error object.
 
     Transform functions are chained, so they are called in order.  If you are
-    extending a binding and want to reset the transforms, you can call
+    extending a binding and want to reset its transforms, you can call
     resetTransform() first.
 
     @param {Function} transformFunc the transform function.
@@ -1146,24 +1165,20 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   },
 
   /**
-    Adds a transform that will return YES if the value is equal to equalValue, NO otherwise
+    Adds a transform that will return YES if the value is equal to equalValue, NO otherwise.
 
-    Usage examples:
-      ...
-      isVisibleBinding: SC.Binding.equalTo( "myController.someValue", A_CONSTANT )
-      ...
+      isVisibleBinding: SC.Binding.oneWay("MyApp.someController.title").equalTo(comparisonValue)
 
-      The transform can also be invoked using a single parameter, the value to compare with
-      ...
-      isVisibleBinding: SC.Binding.oneWay( "myController.someValue" ).equalTo( A_CONSTANT )
-      ...
+    Or:
+
+      isVisibleBinding: SC.Binding.equalTo("MyApp.someController.title", comparisonValue)
 
     @param {String} fromPath from path or null
     @param {Object} equalValue the value to compare with
     @returns {SC.Binding} this
   */
   equalTo: function(fromPath, equalValue) {
-    // if the equalValue parameter is not provided, than compare the value with the 1st parameter
+    // Normalize arguments.
     if (equalValue === undefined) {
       equalValue = fromPath;
       fromPath = null;
@@ -1174,6 +1189,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
      });
   },
 
+  /** @private */
   toString: function () {
     var from = this._fromRoot ? "<%@>:%@".fmt(this._fromRoot, this._fromPropertyPath) : this._fromPropertyPath;
 
