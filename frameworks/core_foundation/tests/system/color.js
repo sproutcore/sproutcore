@@ -10,12 +10,12 @@
 //
 
 function matches(c, r, g, b, a, msg) {
-  var isEqual = c.r === r &&
-                c.g === g &&
-                c.b === b &&
-                c.a === a;
-  ok(isEqual, msg + " [rgba(%@, %@, %@) === rgba(%@, %@, %@, %@)]".fmt(r, g, b, a,
-                                                                     c.r, c.g, c.b, c.a));
+  var isEqual = c.get('r') === r &&
+                c.get('g') === g &&
+                c.get('b') === b &&
+                c.get('a') === a;
+  ok(isEqual, msg + " [rgba(%@, %@, %@, %@) === rgba(%@, %@, %@, %@)]".fmt(r, g, b, a,
+                                                                     c.get('r'), c.get('g'), c.get('b'), c.get('a')));
 };
 
 test("SC.Color.from(rgb)", function () {
@@ -54,24 +54,24 @@ test("SC.Color.from(rgba)", function () {
                              255, 255, 255, .5,
                         "rgba percents should be clamped to the device gamut");
 
-  ok(!SC.Color.from("rgba(255, 255, 255, -.2)"),
-     "Invalid alpha should make the SC.Color.from return 'NO'");
+  ok(!SC.ok(SC.Color.from("rgba(255, 255, 255, -.2)")),
+     "Invalid alpha should create an SC.Color in error state");
 
   ok(SC.Color.from("rgba(1,2,3,1)"), "Whitespace shouldn't matter");
   ok(SC.Color.from("rgba(1   ,           2   ,   3 , 1 )"), "Whitespace shouldn't matter");
 });
 
 test("SC.Color.from() with invalid rgb colors", function () {
-  ok(!SC.Color.from("rgb(0, 0, 0, 0)"), "Too many arguments");
+  ok(!SC.ok(SC.Color.from("rgb(0, 0, 0, 0)")), "Too many arguments");
 
-  ok(!SC.Color.from("rgba(0, 0, 0)"), "Too few arguments");
-  ok(!SC.Color.from("rgb(0, 0)"), "Too few arguments");
+  ok(!SC.ok(SC.Color.from("rgba(0, 0, 0)")), "Too few arguments");
+  ok(!SC.ok(SC.Color.from("rgb(0, 0)")), "Too few arguments");
 
-  ok(!SC.Color.from("rgb(0.0, 0.0, 0.0)"), "Floats are not allowed");
+  ok(!SC.ok(SC.Color.from("rgb(0.0, 0.0, 0.0)")), "Floats are not allowed");
 
-  ok(!SC.Color.from("rgb(0, 0, 0"), "Missing parenthesis");
+  ok(!SC.ok(SC.Color.from("rgb(0, 0, 0")), "Missing parenthesis");
 
-  ok(!SC.Color.from("rgb(260, -10, 5)"), "Negative numbers");
+  ok(!SC.ok(SC.Color.from("rgb(260, -10, 5)")), "Negative numbers");
 });
 
 test("SC.Color.from(#rgb)", function () {
@@ -105,12 +105,28 @@ test("SC.Color.from(#aarrggbb)", function () {
 });
 
 test("SC.Color.from() with invalid hex colors", function () {
-  ok(!SC.Color.from("#GAB"), "Invalid character");
+  ok(!SC.ok(SC.Color.from("#GAB")), "Invalid character");
 
-  ok(!SC.Color.from("#0000"), "Invalid length");
-  ok(!SC.Color.from("#00000"), "Invalid length");
-  ok(!SC.Color.from("#0000000"), "Invalid length");
+  ok(!SC.ok(SC.Color.from("#0000")), "Invalid length");
+  ok(!SC.ok(SC.Color.from("#00000")), "Invalid length");
+  ok(!SC.ok(SC.Color.from("#0000000")), "Invalid length");
 });
+
+test("SC.Color error state", function() {
+  var color = SC.Color.create(); // black
+  color.set('r', 255); // red
+  matches(color, 255, 0, 0, 1, "PRELIM: Color is as expected");
+  color.set('cssText', 'nonsense'); //error (transparent)
+  ok(color.get('isError'), "Setting cssText to nonsense puts the color in an error state.");
+  equals(color.get('errorValue'), 'nonsense', "Errored color's errorValue property should be");
+  equals(color.get('cssText'), 'nonsense', "Errored color's cssText should be");
+  equals(color.get('validCssText'), 'transparent', "Errored color's validCssText should be");
+  color.set('g', 255); // shouldn't work
+  equals(color.get('g'), 0, "Color values become read-only while in error state");
+  color.reset(); // back to red
+  ok(!color.get('isError'), "Resetting an errored color should remove the error flag.");
+  matches(color, 255, 0, 0, 1, "Resetting an errored color should reset its values to last-good values");
+})
 
 test("SC.Color.from(hsl)", function () {
   matches(SC.Color.from("hsl(330, 60%, 54%)"),

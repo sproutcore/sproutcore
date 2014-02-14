@@ -6,19 +6,137 @@
 // ==========================================================================
 
 /** @class
-  Provides colorspace conversions between rgb and hsl.
+  Represents a color, and provides methods for manipulating it. Maintains underlying
+  rgba values, and includes support for colorspace conversions between rgb and hsl.
 
-  This object can be instantiated by using `create`
-  if it's a simple RGB color, or through `SC.Color.from`,
-  which will turn any valid CSS color into it's
-  appropriate SC.Color.
+  For instructions on using SC.Color to color a view, see "SC.Color and SC.View"
+  below.
 
-  To get the CSS value of the color, call `toCSS`,
-  which will provide the best CSS color to use
-  according to browser support. This means that
-  in IE, colors with an alpha channel will fall
-  back to use ARGB, which requires the following
-  hack to use:
+  ### Basic Use
+
+  You can create a color from red, green, blue and alpha values, with:
+
+      SC.Color.create({
+        r: 255,
+        g: 255,
+        b: 255,
+        a: 0.5
+      });
+
+  All values are optional; the default is black. You can also create a color from any
+  valid CSS string, with:
+
+      SC.Color.from('rgba(255, 255, 255, 0.5)');
+
+  The best CSS value for the given color in the current browser is available at the
+  bindable property `cssText`. (This will provide deprecated ARGB values for older
+  versions of IE; see "Edge Case: Supporting Alpha in IE" below.) (Calling
+  `SC.Color.from` with an undefined or null value is equivalent to calling it with
+  `'transparent'`.)
+
+  Once created, you can manipulate a color by settings its a, r, g or b values,
+  or setting its cssText value (though be careful of invalid values; see "Error
+  State" below).
+
+  ### Math
+
+  `SC.Color` provides three methods for performing basic math: `sub` for subtraction,
+  `add` for addition, and `mult` for scaling a number via multiplication.
+
+  Note that these methods do not perform any validation to ensure that the underlying
+  rgba values stay within the device's gamut (0 to 255 on a normal screen, and 0 to 1
+  for alpha). For example, adding white to white will result in r, g and b values of
+  510, a nonsensical value. (The `cssText` property will, however, correctly clamp the
+  component values, and the color will output `#FFFFFF`.) This behavior is required
+  for operations such as interpolating between colors (see "SC.Color and SC.View"
+  below); it also gives SC.Color more predictable math, where A + B - B = A, even if
+  the intermediate (A + B) operation results in underlying values outside of the normal
+  gamut.
+
+  (The class method `SC.Color.clampToDeviceGamut` is used to clamp r, g and b values to the
+  standard 0 - 255 range. If your application is displaying on a screen with non-standard
+  ranges, you may need to override this method.)
+
+  ### SC.Color and SC.View
+
+  Hooking up an instance of SC.Color to SC.View#backgroundColor is simple, but like all
+  uses of backgroundColor, it comes with moderate performance implications, and should
+  be avoided in cases where regular CSS is sufficient, or where bindings are unduly
+  expensive, such as in rapidly-scrolling ListViews.
+
+  Use the following code to tie a view's background color to an instance of SC.Color. Note
+  that you must add backgroundColor to displayProperties in order for your view to update
+  when the it changes; for performance reasons it is not included by default.
+
+      SC.View.extend({
+        color: SC.Color.from({'burlywood'}),
+        backgroundColorBinding: SC.Binding.oneWay('*color.cssText'),
+        displayProperties: ['backgroundColor']
+      })
+
+  You can use this to implement a simple cross-fade between two colors. Here's a basic
+  example (again, note that when possible, pure CSS transitions will be substantially
+  more performant):
+
+      SC.View.extend({
+        displayProperties: ['backgroundColor'],
+        backgroundColor: 'cadetblue',
+        fromColor: SC.Color.from('cadetblue'),
+        toColor: SC.Color.from('springgreen'),
+        click: function() {
+          // Cancel previous timer.
+          if (this._timer) this._timer.invalidate();
+          // Figure out whether we're coming or going.
+          this._forward = !this._forward;
+          // Calculate the difference between the two colors.
+          var fromColor = this._forward ? this.fromColor : this.toColor,
+              toColor = this._forward ? this.toColor : this.fromColor;
+          this._deltaColor = toColor.sub(fromColor);
+          // Set the timer.
+          this._timer = SC.Timer.schedule({
+            target: this,
+            action: '_tick',
+            interval: 15,
+            repeats: YES,
+            until: Date.now() + 500
+          });
+        },
+        _tick: function() {
+          // Calculate percent of time elapsed.
+          var started = this._timer.startTime,
+              now = Date.now(),
+              until = this._timer.until,
+              pct = (now - started) / (until - started);
+          // Constrain pct.
+          pct = Math.min(pct, 1);
+          // Calculate color.
+          var fromColor = this._forward ? this.fromColor : this.toColor,
+              toColor = this._forward ? this.toColor : this.fromColor,
+              deltaColor = this._deltaColor,
+              currentColor = fromColor.add(deltaColor.mult(pct));
+          // Set.
+          this.set('backgroundColor', currentColor.get('cssText'));
+        }
+      })
+
+  ### Error State
+
+  If you call `SC.Color.from` with an invalid value, or set `cssText` to an invalid
+  value, the color object will go into error mode, with `isError` set to YES and
+  `errorValue` containing the invalid value that triggered it. A color in error mode
+  will become transparent, and you will be unable to modify its r, g, b or a values.
+
+  To reset a color to its last-good values (or, if none, to black), call its `reset`
+  method. Setting `cssText` to a valid value will also recover the color object to a
+  non-error state.
+
+  ### Edge Case: Supporting Alpha in IE
+
+  Supporting the alpha channel in older versions of IE requires a little extra work.
+  The bindable `cssText` property will return valid ARGB (e.g. `#99FFFFFF`) when it
+  detects that it's in an older version of IE which requires it, but unfortunately you
+  can't simply plug that value into `background-color`. The following code will detect
+  this case and provide the correct CSS snippet:
 
       // This hack disables ClearType on IE!
       var color = SC.Color.from('rgba(0, 0, 0, .5)').get('cssText'),
@@ -32,36 +150,18 @@
         css = "background-color:" + color;
       }
 
-  You may want to use the `sub`, `add`, and `mult`
-  functions to tween colors between a start and
-  end color.
-
-  For instance, if we wanted to tween between
-  the color "blue" and "teal", we would to the following:
-
-     var blue = SC.Color.from("blue"),
-         teal = SC.Color.from("teal"),
-         delta = blue.sub(teal);
-
-     // Tick is called using a percent
-     // between 0 and 1
-     function tick (t) {
-       return blue.add(delta.mult(t)).get('cssText');
-     }
-
   @extends SC.Object
   @extends SC.Copyable
+  @extends SC.Error
  */
 SC.Color = SC.Object.extend(
   SC.Copyable,
   /** @scope SC.Color.prototype */{
 
   /**
-    The original color string that
-    this object was created from.
+    The original color string from which this object was created.
 
-    For example, if you color was
-    created via `SC.Color.from("burlywood")`,
+    For example, if your color was created via `SC.Color.from("burlywood")`,
     then this would be set to `"burlywood"`.
 
     @type String
@@ -70,13 +170,47 @@ SC.Color = SC.Object.extend(
   original: null,
 
   /**
+    Whether the color is valid. Attempting to set `cssText` or call `from` with invalid input
+    will put the color into an error state until updated with a valid string or reset.
+
+    @type Boolean
+    @default NO
+    @see SC.Error
+  */
+  isError: NO,
+
+  /**
+    In the case of an invalid color, this contains the invalid string that was used to create or
+    update it.
+
+    @type String
+    @default null
+    @see SC.Error
+  */
+  errorValue: null,
+
+  /**
     The alpha channel (opacity).
-    `a` is a percent between 0 and 1.
+    `a` is a decimal value between 0 and 1.
 
     @type Number
     @default 1
    */
-  a: 1,
+  a: function (key, value) {
+    // Getter.
+    if (value === undefined) {
+      return this._a;
+    }
+    // Setter.
+    else {
+      if (this.get('isError')) value = this._a;
+      this._a = value;
+      return value;
+    }
+  }.property().cacheable(),
+
+  /** @private */
+  _a: 1,
 
   /**
     The red value.
@@ -85,7 +219,21 @@ SC.Color = SC.Object.extend(
     @type Number
     @default 0
    */
-  r: 0,
+  r: function (key, value) {
+    // Getter.
+    if (value === undefined) {
+      return this._r;
+    }
+    // Setter.
+    else {
+      if (this.get('isError')) value = this._r;
+      this._r = value;
+      return value;
+    }
+  }.property().cacheable(),
+
+  /** @private */
+  _r: 0,
 
   /**
     The green value.
@@ -94,7 +242,21 @@ SC.Color = SC.Object.extend(
     @type Number
     @default 0
    */
-  g: 0,
+  g: function (key, value) {
+    // Getter.
+    if (value === undefined) {
+      return this._g;
+    }
+    // Setter.
+    else {
+      if (this.get('isError')) value = this._g;
+      this._g = value;
+      return value;
+    }
+  }.property().cacheable(),
+
+  /** @private */
+  _g: 0,
 
   /**
     The blue value.
@@ -103,7 +265,21 @@ SC.Color = SC.Object.extend(
     @type Number
     @default 0
    */
-  b: 0,
+  b: function (key, value) {
+    // Getter.
+    if (value === undefined) {
+      return this._b;
+    }
+    // Setter.
+    else {
+      if (this.get('isError')) value = this._b;
+      this._b = value;
+      return value;
+    }
+  }.property().cacheable(),
+
+  /** @private */
+  _b: 0,
 
   /**
     The current hue of this color.
@@ -304,15 +480,85 @@ SC.Color = SC.Object.extend(
     @field
     @type String
    */
-  cssText: function () {
-    var supportsAlphaChannel = SC.Color.supportsRgba ||
-                               SC.Color.supportsArgb;
-    return (this.a === 1 || !supportsAlphaChannel)
-           ? this.toHex()
-           : SC.Color.supportsRgba
-           ? this.toRgba()
-           : this.toArgb();
+  cssText: function (key, value) {
+    // Getter.
+    if (value === undefined) { 
+      // FAST PATH: Error.
+      if (this.get('isError')) return this.get('errorValue');
+
+      // FAST PATH: transparent.
+      if (this.get('a') === 0) return 'transparent';
+
+      var supportsAlphaChannel = SC.Color.supportsRgba ||
+                                 SC.Color.supportsArgb;
+      return (this.get('a') === 1 || !supportsAlphaChannel)
+             ? this.toHex()
+             : SC.Color.supportsRgba
+             ? this.toRgba()
+             : this.toArgb();
+    }
+    // Setter.
+    else {
+      var hash = SC.Color._parse(value);
+      this.beginPropertyChanges();
+      // Error state
+      if (!hash) {
+        // Cache current value for recovery.
+        this._lastValidHash = { r: this._r, g: this._g, b: this._b, a: this._a };
+        this.set('r', 0);
+        this.set('g', 0);
+        this.set('b', 0);
+        this.set('a', 0);
+        this.set('errorValue', value);
+        this.set('isError', YES);
+      }
+      // Happy state
+      else {
+        this.setIfChanged('isError', NO);
+        this.setIfChanged('errorValue', null);
+        this.set('r', hash.r);
+        this.set('g', hash.g);
+        this.set('b', hash.b);
+        this.set('a', hash.a);
+      }
+      this.endPropertyChanges();
+      return value;
+    }
   }.property('r', 'g', 'b', 'a').cacheable(),
+
+  /**
+    A read-only property which always returns a valid CSS property. If the color is in
+    an error state, it returns 'transparent'.
+
+    @field
+    @type String
+   */
+  validCssText: function() {
+    if (this.get('isError')) return 'transparent';
+    else return this.get('cssText');
+  }.property('cssText', 'isError').cacheable(),
+
+  /**
+    Resets an errored color to its last valid color. If the color has never been valid,
+    it resets to black.
+
+    @returns {SC.Color} receiver
+   */
+  reset: function() {
+    // Gatekeep: not in error mode.
+    if (!this.get('isError')) return this;
+    // Reset the value to the last valid hash, or default black.
+    var lastValidHash = this._lastValidHash || { r: 0, g: 0, b: 0, a: 1 };
+    this.beginPropertyChanges();
+    this.set('isError', NO);
+    this.set('errorValue', null);
+    this.set('r', lastValidHash.r);
+    this.set('g', lastValidHash.g);
+    this.set('b', lastValidHash.b);
+    this.set('a', lastValidHash.a);
+    this.endPropertyChanges();
+    return this;
+  },
 
   /**
     Returns a clone of this color.
@@ -326,7 +572,9 @@ SC.Color = SC.Object.extend(
       r: this.get('r'),
       g: this.get('g'),
       b: this.get('b'),
-      a: this.get('a')
+      a: this.get('a'),
+      isError: this.get('isError'),
+      errorValue: this.get('errorValue')
     });
   },
 
@@ -343,14 +591,16 @@ SC.Color = SC.Object.extend(
       r: this.get('r') - color.get('r'),
       g: this.get('g') - color.get('g'),
       b: this.get('b') - color.get('b'),
-      a: this.get('a') - color.get('a')
+      a: this.get('a') - color.get('a'),
+      isError: this.get('isError') || color.get('isError')
     });
   },
 
   /**
-    Returns a color that's the addition of two colors.
+    Returns a new color that's the addition of two colors.
 
-    Note that the result might not be a valid CSS color.
+    Note that the resulting a, r, g and b values are not clamped to within valid
+    ranges.
 
     @param {SC.Color} color The color to add to this one.
     @returns {SC.Color} The addition of the two colors.
@@ -360,7 +610,8 @@ SC.Color = SC.Object.extend(
       r: this.get('r') + color.get('r'),
       g: this.get('g') + color.get('g'),
       b: this.get('b') + color.get('b'),
-      a: this.get('a') + color.get('a')
+      a: this.get('a') + color.get('a'),
+      isError: this.get('isError')
     });
   },
 
@@ -379,13 +630,46 @@ SC.Color = SC.Object.extend(
       r: round(this.get('r') * multiplier),
       g: round(this.get('g') * multiplier),
       b: round(this.get('b') * multiplier),
-      a: this.get('a') * multiplier
+      a: this.get('a') * multiplier,
+      isError: this.get('isError')
     });
   }
 });
 
 SC.Color.mixin(
   /** @scope SC.Color */{
+
+  /** @private Overrides create to support creation with {a, r, g, b} hash. */
+  create: function() {
+    var args = SC.A(arguments),
+        len = args.length,
+        vals = {},
+        hasVals = NO,
+        keys = ['a', 'r', 'g', 'b'],
+        hash, i, k, key;
+    // Loop through all arguments. If any of them contain numeric a, r, g or b arguments,
+    // clone the hash and move the value from (e.g.) a to _a.
+    for (i = 0; i < len; i++) {
+      hash = args[i];
+      if (SC.typeOf(hash.a) === SC.T_NUMBER
+        || SC.typeOf(hash.r) === SC.T_NUMBER
+        || SC.typeOf(hash.g) === SC.T_NUMBER
+        || SC.typeOf(hash.b) === SC.T_NUMBER
+      ) {
+        hasVals = YES;
+        hash = args[i] = SC.clone(hash);
+        for (k = 0; k < 4; k++) {
+          key = keys[k];
+          if (SC.typeOf(hash[key]) === SC.T_NUMBER) {
+            vals['_' + key] = hash[key];
+            delete hash[key];
+          }
+        }
+      }
+    }
+    if (hasVals) args.push(vals);
+    return SC.Object.create.apply(this, args);
+  },
 
   /**
     Whether this browser supports the rgba color model.
@@ -668,13 +952,48 @@ SC.Color.mixin(
   KEYWORDS: {"aliceblue":"#F0F8FF","antiquewhite":"#FAEBD7","aqua":"#00FFFF","aquamarine":"#7FFFD4","azure":"#F0FFFF","beige":"#F5F5DC","bisque":"#FFE4C4","black":"#000000","blanchedalmond":"#FFEBCD","blue":"#0000FF","blueviolet":"#8A2BE2","brown":"#A52A2A","burlywood":"#DEB887","cadetblue":"#5F9EA0","chartreuse":"#7FFF00","chocolate":"#D2691E","coral":"#FF7F50","cornflowerblue":"#6495ED","cornsilk":"#FFF8DC","crimson":"#DC143C","cyan":"#00FFFF","darkblue":"#00008B","darkcyan":"#008B8B","darkgoldenrod":"#B8860B","darkgray":"#A9A9A9","darkgreen":"#006400","darkgrey":"#A9A9A9","darkkhaki":"#BDB76B","darkmagenta":"#8B008B","darkolivegreen":"#556B2F","darkorange":"#FF8C00","darkorchid":"#9932CC","darkred":"#8B0000","darksalmon":"#E9967A","darkseagreen":"#8FBC8F","darkslateblue":"#483D8B","darkslategray":"#2F4F4F","darkslategrey":"#2F4F4F","darkturquoise":"#00CED1","darkviolet":"#9400D3","deeppink":"#FF1493","deepskyblue":"#00BFFF","dimgray":"#696969","dimgrey":"#696969","dodgerblue":"#1E90FF","firebrick":"#B22222","floralwhite":"#FFFAF0","forestgreen":"#228B22","fuchsia":"#FF00FF","gainsboro":"#DCDCDC","ghostwhite":"#F8F8FF","gold":"#FFD700","goldenrod":"#DAA520","gray":"#808080","green":"#008000","greenyellow":"#ADFF2F","grey":"#808080","honeydew":"#F0FFF0","hotpink":"#FF69B4","indianred":"#CD5C5C","indigo":"#4B0082","ivory":"#FFFFF0","khaki":"#F0E68C","lavender":"#E6E6FA","lavenderblush":"#FFF0F5","lawngreen":"#7CFC00","lemonchiffon":"#FFFACD","lightblue":"#ADD8E6","lightcoral":"#F08080","lightcyan":"#E0FFFF","lightgoldenrodyellow":"#FAFAD2","lightgray":"#D3D3D3","lightgreen":"#90EE90","lightgrey":"#D3D3D3","lightpink":"#FFB6C1","lightsalmon":"#FFA07A","lightseagreen":"#20B2AA","lightskyblue":"#87CEFA","lightslategray":"#778899","lightslategrey":"#778899","lightsteelblue":"#B0C4DE","lightyellow":"#FFFFE0","lime":"#00FF00","limegreen":"#32CD32","linen":"#FAF0E6","magenta":"#FF00FF","maroon":"#800000","mediumaquamarine":"#66CDAA","mediumblue":"#0000CD","mediumorchid":"#BA55D3","mediumpurple":"#9370DB","mediumseagreen":"#3CB371","mediumslateblue":"#7B68EE","mediumspringgreen":"#00FA9A","mediumturquoise":"#48D1CC","mediumvioletred":"#C71585","midnightblue":"#191970","mintcream":"#F5FFFA","mistyrose":"#FFE4E1","moccasin":"#FFE4B5","navajowhite":"#FFDEAD","navy":"#000080","oldlace":"#FDF5E6","olive":"#808000","olivedrab":"#6B8E23","orange":"#FFA500","orangered":"#FF4500","orchid":"#DA70D6","palegoldenrod":"#EEE8AA","palegreen":"#98FB98","paleturquoise":"#AFEEEE","palevioletred":"#DB7093","papayawhip":"#FFEFD5","peachpuff":"#FFDAB9","peru":"#CD853F","pink":"#FFC0CB","plum":"#DDA0DD","powderblue":"#B0E0E6","purple":"#800080","red":"#FF0000","rosybrown":"#BC8F8F","royalblue":"#4169E1","saddlebrown":"#8B4513","salmon":"#FA8072","sandybrown":"#F4A460","seagreen":"#2E8B57","seashell":"#FFF5EE","sienna":"#A0522D","silver":"#C0C0C0","skyblue":"#87CEEB","slateblue":"#6A5ACD","slategray":"#708090","slategrey":"#708090","snow":"#FFFAFA","springgreen":"#00FF7F","steelblue":"#4682B4","tan":"#D2B48C","teal":"#008080","thistle":"#D8BFD8","tomato":"#FF6347","turquoise":"#40E0D0","violet":"#EE82EE","wheat":"#F5DEB3","white":"#FFFFFF","whitesmoke":"#F5F5F5","yellow":"#FFFF00","yellowgreen":"#9ACD32"},
 
   /**
-    Parses a CSS color into a `SC.Color` object.
-    Any valid CSS color should work here.
+    Parses any valid CSS color into a `SC.Color` object. Given invalid input, will return a
+    `SC.Color` object in an error state (with isError: YES).
 
-    @param {String} color The color to parse into a `SC.Color` object.
+    @param {String} color The CSS color value to parse.
     @returns {SC.Color} The color object representing the color passed in.
    */
   from: function (color) {
+    // Fast path: clone another color.
+    if (SC.kindOf(color, SC.Color)) {
+      return color.copy();
+    }
+
+    // Slow path: string
+    var hash = SC.Color._parse(color),
+        C = SC.Color;
+
+    // Gatekeep: bad input.
+    if (!hash) {
+      return SC.Color.create({
+        original: color,
+        isError: YES
+      });
+    }
+
+    return C.create({
+      original: color,
+      r: C.clampInt(hash.r, 0, 255),
+      g: C.clampInt(hash.g, 0, 255),
+      b: C.clampInt(hash.b, 0, 255),
+      a: C.clamp(hash.a, 0, 1)
+    });
+  },
+
+  /** @private
+    Parses any valid CSS color into r, g, b and a values. Returns null for invalid inputs.
+
+    For internal use only. External code should call `SC.Color.from` or `SC.Color#cssText`.
+
+    @param {String} color The CSS color value to parse.
+    @returns {Hash || null} A hash of r, g, b, and a values.
+   */
+  _parse: function (color) {
     var C = SC.Color,
         oColor = color,
         r, g, b, a = 1,
@@ -687,6 +1006,8 @@ SC.Color.mixin(
 
     if (C.KEYWORDS.hasOwnProperty(color)) {
       color = C.KEYWORDS[color];
+    } else if (SC.none(color) || color === '') {
+      color = 'transparent';
     }
 
     if (C.PARSE_RGB.test(color)) {
@@ -755,15 +1076,14 @@ SC.Color.mixin(
       a = 0;
 
     } else {
-      return NO;
+      return null;
     }
 
-    return SC.Color.create({
-      original: oColor,
-      r: C.clampInt(r, 0, 255),
-      g: C.clampInt(g, 0, 255),
-      b: C.clampInt(b, 0, 255),
-      a: C.clamp(a, 0, 1)
-    });
+    return {
+      r: r,
+      g: g,
+      b: b,
+      a: a
+    };
   }
 });
