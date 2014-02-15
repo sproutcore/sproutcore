@@ -191,7 +191,20 @@ var pane;
       ],
       itemTitleKey: "title",
       layout: { height: 25 }
+    })
+    .add("3_items,1_sel,shouldAutoResize", SC.SegmentedView, {
+      items: "Item1 Item2 Item3".w(),
+      value: "Item2",
+      layout: { height: 25, width: 0 },
+      shouldAutoResize: YES
+    })
+    .add("3_items,1_sel,shouldAutoResize,flexible_layout", SC.SegmentedView, {
+      items: "Item1 Item2 Item3".w(),
+      value: "Item2",
+      layout: { height: 25, left: 0, right: 0 },
+      shouldAutoResize: YES
     });
+
 
   // ..........................................................
   // TEST VIEWS
@@ -529,11 +542,28 @@ var pane;
     layer1 = view1.get('layer');
     point = SC.offset(layer1);
 
+    SC.RunLoop.begin();
     ev = SC.Event.simulateEvent(layer1, 'mousedown', { clientX: point.x, clientY: point.y });
     ok(segmentedView.mouseDown(ev), "mouseDown event handler accepts event which maps to a segment.");
+    SC.RunLoop.end();
 
+    SC.RunLoop.begin();
     ev = SC.Event.simulateEvent(layer1, 'mousedown', { clientX: point.x - 1, clientY: point.y });
     ok(!segmentedView.mouseDown(ev), "mouseDown event handler passes on event which doesn't map to a segment.");
-  })
+    SC.RunLoop.end();
+  });
+
+  test("shouldAutoResize", function() {
+    var segmentedView;
+
+    segmentedView = pane.view('3_items,1_sel,shouldAutoResize');
+
+    ok(segmentedView.getPath('layout.width') !== 0, "View auto-resized to fit the present items.");
+
+    segmentedView = pane.view('3_items,1_sel,shouldAutoResize,flexible_layout');
+
+    ok(SC.none(segmentedView.getPath('layout.width')), "Having flexible layout prevents view from auto-resizing.")
+  });
+
 
 })();

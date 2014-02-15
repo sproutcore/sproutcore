@@ -46,7 +46,7 @@ sc_require('views/segment');
 SC.SegmentedView = SC.View.extend(SC.Control,
 /** @scope SC.SegmentedView.prototype */ {
 
-  /**
+  /** @private
     @ field
     @type Boolean
     @default YES
@@ -56,7 +56,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     return NO;
   }.property('isEnabledInPane').cacheable(),
 
-  /**
+  /** @private
     @type String
     @default 'tablist'
     @readOnly
@@ -64,7 +64,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   //ariaRole: 'tablist',
   ariaRole: 'group', // workaround for <rdar://problem/10444670>; switch back to 'tablist' later with <rdar://problem/10463928> (also see segment.js)
 
-  /**
+  /** @private
     @type Array
     @default ['sc-segmented-view']
     @see SC.View#classNames
@@ -296,6 +296,20 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   */
   segmentViewClass: SC.SegmentView,
 
+  /**
+    Set to YES if you would like your SegmentedView to size itself based on its
+    visible segments. Useful if you're using SegmentedView in a flowed context
+    (for example if its parent view has `childViewLayout: SC.View.HORIZONTAL_STACK`).
+
+    The view will not auto-resize unless you define an initial value for the layout
+    property which will be auto-resized (i.e. `width` when in the default horizontal
+    orientation). This is to prevent the view from inappropriately adding width to a
+    flexible (`{ left: 0, right: 0 }`) layout.
+
+    @type Boolean
+    @default NO
+   */
+  shouldAutoResize: NO,
 
   /** @private
     The following properties are used to map items to child views. Item keys
@@ -574,11 +588,14 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         value = this.get('value'),
         overflowView = childViews.lastObject(),
         isHorizontal = this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL,
+        layoutProperty = isHorizontal ? 'width' : 'height',
         visibleDim = isHorizontal ? this.$().width() : this.$().height(),  // The inner width/height of the div
         curElementsDim = 0,
-        dimToFit,
-        length, i,
-        isOverflowing = NO;
+        dimToFit, length, i,
+        isOverflowing = NO,
+        wantsAutoResize = this.get('shouldAutoResize'),
+        canAutoResize = !SC.none(this.getPath('layout.%@'.fmt(layoutProperty))),
+        willAutoResize = wantsAutoResize && canAutoResize;
 
     // This variable is useful to optimize when we are overflowing
     isOverflowing = NO;
@@ -593,7 +610,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       curElementsDim += this.cachedDims[i];
 
       // Check and see if this item kicks us over into overflow.
-      if (!isOverflowing) {
+      if (!isOverflowing && !willAutoResize) {
         // (don't leave room for the overflow segment on the last item)
         dimToFit = (i === length - 1) ? curElementsDim : curElementsDim + this.cachedOverflowDim;
         if (dimToFit > visibleDim) isOverflowing = YES;
@@ -626,6 +643,11 @@ SC.SegmentedView = SC.View.extend(SC.Control,
 
     // Set the overflowing property.
     this.setIfChanged('isOverflowing', isOverflowing);
+
+    // Autosize if needed.
+    if (willAutoResize) {
+      this.adjust(layoutProperty, this.isOverflowing ? this.cachedMinimumDim : curElementsDim);
+    }
 
     // Store the minimum dimension (height/width) before overflow
     this.cachedMinimumDim = curElementsDim + this.cachedOverflowDim;
