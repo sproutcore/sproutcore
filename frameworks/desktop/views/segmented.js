@@ -306,6 +306,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     orientation). This is to prevent the view from inappropriately adding width to a
     flexible (`{ left: 0, right: 0 }`) layout.
 
+    Has no effect if `shouldHandleOverflow` is NO.
+
     @type Boolean
     @default NO
    */
