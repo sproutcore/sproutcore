@@ -95,7 +95,7 @@ SC.EMPTY_PLACEHOLDER = '@@EMPTY@@';
 
   In addition to synchronizing values, bindings can also perform some basic
   transforms on values.  These transforms can help to make sure the data fed
-  into one object always meets the expectations of that object regardless of
+  into one object always meets the expectations of that object, regardless of
   what the other object outputs.
 
   To customize a binding, you can use one of the many helper methods defined
@@ -120,6 +120,11 @@ SC.EMPTY_PLACEHOLDER = '@@EMPTY@@';
   The following transform helper methods are included: `noError`, `single`, `notEmpty`,
   `notNull`, `multiple`, `bool`, `not`, `isNull`, `and` (two values only), `or` (two
   values only), and `equalTo`. See each method's documentation for a full description.
+
+  (Note that transforms are only applied in the forward direction (the 'to' side); values
+  are applied untransformed to the 'from' side. If the 'from' object has validation
+  needs, it should own and apply them itself, for example via a read/write calculated
+  property.)
 
   Adding Custom Transforms
   ===
