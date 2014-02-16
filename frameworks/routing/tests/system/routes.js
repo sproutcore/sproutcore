@@ -441,3 +441,29 @@ test('deparam outputs object from string', function() {
     { query: 'test', numItems: 5, size: 'small' },
     'deparam works with params only string');
 });
+
+
+// For this module, we're going to replace the route's inner plumbing with a test
+// version. Fragile. Apologies.
+var _extractLocation = SC.routes._extractLocation;
+module("Browser events", {
+  teardown: function() {
+    // Reset the innards.
+    SC.routes._extractLocation = _extractLocation;
+  }
+});
+
+test("Internal flag is properly set for browser events.", function() {
+  var runCount = 0;
+  SC.routes._extractLocation = function() {
+    runCount++;
+    ok(this._exogenous, "Internal flag reflects that location is being updated by the browser.");
+  }
+  
+  SC.routes.hashChange();
+  if (runCount === 0) ok(false, "Internal plumbing method '_extractLocation' failed to fire as expected.");
+  
+  runCount = 0;
+  SC.routes.popState();
+  if (runCount === 0) ok(false, "Internal plumbing method '_extractLocation' failed to fire as expected.");
+});

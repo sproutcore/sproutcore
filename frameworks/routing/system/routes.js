@@ -246,19 +246,24 @@ SC.routes = SC.Object.create(
         value = crumbs.route + crumbs.params;
       }
 
-      if (!SC.empty(value) || (this._location && this._location !== value)) {
-        encodedValue = encodeURI(value);
+      // Only update the browser if this event triggered from within the app, rather
+      // than from the browser back or forward buttons.
+      if (!this._exogenous) {
+        if (!SC.empty(value) || (this._location && this._location !== value)) {
+          encodedValue = encodeURI(value);
 
-        if (this.usesHistory) {
-          if (encodedValue.length > 0) {
-            encodedValue = '/' + encodedValue;
+          if (this.usesHistory) {
+            if (encodedValue.length > 0) {
+              encodedValue = '/' + encodedValue;
+            }
+            window.history.pushState(null, null, this.get('baseURI') + encodedValue);
+          } else {
+            window.location.hash = encodedValue;
           }
-          window.history.pushState(null, null, this.get('baseURI') + encodedValue);
-        } else {
-          window.location.hash = encodedValue;
         }
       }
 
+      // Cache locally.
       this._location = value;
     }
 
@@ -310,6 +315,10 @@ SC.routes = SC.Object.create(
     if it supports the hashchange event, or by our timer if not.
   */
   hashChange: function(event) {
+    // Mark this location change as coming from the browser, which therefore doesn't
+    // need to be updated.
+    this._exogenous = YES;
+
     var loc = window.location.hash;
 
     // Remove the '#' prefix
@@ -325,10 +334,16 @@ SC.routes = SC.Object.create(
         this.set('location', loc);
       }, this);
     }
-    this._skipRoute = false;
+
+    this._skipRoute = NO;
+    this._exogenous = NO;
   },
 
   popState: function(event) {
+    // Mark this location change as coming from the browser, which therefore doesn't
+    // need to be updated.
+    this._exogenous = YES;
+
     var base = this.get('baseURI'),
         loc = document.location.href;
 
@@ -343,7 +358,9 @@ SC.routes = SC.Object.create(
         }, this);
       }
     }
-    this._skipRoute = false;
+
+    this._skipRoute = NO;
+    this._exogenous = NO;
   },
 
   /**
