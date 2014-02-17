@@ -548,7 +548,7 @@ SC.XHRResponse = SC.Response.extend(
           }
         }
 
-        if(typeof rawRequest.onloadend === 'function') {
+        if(SC.typeOf(rawRequest.onloadend) === SC.T_FUNCTION) {
             SC.Event.add(rawRequest, 'loadend', this, this.finishRequest);
         } else {
             SC.Event.add(rawRequest, 'readystatechange', this, this.finishRequest);
