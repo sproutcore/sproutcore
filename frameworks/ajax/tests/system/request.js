@@ -9,7 +9,7 @@
 // ========================================================================
 /*globals module, test, ok, isObj, equals, expects */
 
-var url, request, contents, test_timeout=2500;
+var url, request, contents, test_timeout=2500, supportsOnLoadendEvent=true, supportsOnLoadEvent=true;
 if(window._phantom) {
     test_timeout=5000;
 }
@@ -143,6 +143,14 @@ test("Test Asynchronous GET Request", function() {
   response = request.send();
   ok(response !== null, 'request.send() should return a response object');
   ok(response.get('status')<0, 'response should still not have a return code since this should be async');
+  
+  // sniff browser supprot for ProgressEvent onloadend callback.
+  // will use it later.
+  supportsOnLoadendEvent=( SC.typeOf(response.rawRequest.onloadend) === SC.T_FUNCTION );
+  supportsOnLoadEvent=( SC.typeOf(response.rawRequest.onload) === SC.T_FUNCTION );
+  
+  console.log("loadend support: "+SC.typeOf(response.rawRequest.onloadend));
+  console.log("load support: "+SC.typeOf(response.rawRequest.onload));
 });
 
 test("Test Synchronous GET Request", function() {
@@ -250,7 +258,7 @@ test("Test Multiple Asynchronous GET Request - two immediate, and two in serial"
     equals(requestCount, 6, "requestCount should be 6");
     equals(responseCount, 6, "responseCount should be 6");
     window.start(); // starts the test runner
-  }, 2000);
+  }, test_timeout-500);
 });
 
 
@@ -448,13 +456,17 @@ test("Test event listeners on successful request.", function() {
     progress = true;
   });
 
-  request.notify("load", this, function(evt) {
-    load = true;
-  });
+  if(supportsOnLoadEvent) {
+      request.notify("load", this, function(evt) {
+        load = true;
+      });
+  }
 
-  request.notify("loadend", this, function(evt) {
-    loadend = true;
-  });
+  if(supportsOnLoadendEvent) {
+      request.notify("loadend", this, function(evt) {
+        loadend = true;
+      });
+  }
 
   request.notify(200, this, function(response) {
     status = response.status;
@@ -462,8 +474,12 @@ test("Test event listeners on successful request.", function() {
     if (window.ProgressEvent) {
       ok(loadstart, "Received a loadstart event.");
       ok(progress, "Received a progress event.");
-      ok(load, "Received a load event.");
-      ok(loadend, "Received a loadend event.");
+      if(supportsOnLoadEvent) {
+        ok(load, "Received a load event.");
+      }
+      if(supportsOnLoadendEvent) {
+        ok(loadend, "Received a loadend event.");
+      }
     }
     ok(!abort, "Did not receive an abort event.");
     ok(!error, "Did not receive an error event.");
@@ -490,41 +506,49 @@ if (window.ProgressEvent) {
       status,
       timeout = false;
 
-    request.notify("loadstart", this, function(evt) {
-      loadstart = true;
-    });
-
-    request.notify("abort", this, function(evt) {
-      abort = true;
-    });
-
-    request.notify("progress", this, function(evt) {
-      progress = true;
-
-      // Cancel it before it completes.
-      response.cancel();
-    });
-
-    request.notify("loadend", this, function(evt) {
-      loadend = true;
-
-      ok(loadstart, "Received a loadstart event.");
-      ok(progress, "Received a progress event.");
-      ok(abort, "Received an abort event.");
-      ok(!load, "Did not receive a load event.");
-      ok(loadend, "Received a loadend event.");
-      ok(!error, "Did not receive an error event.");
-      ok(!timeout, "Did not receive a timeout event.");
-      equals(status, undefined, "Did not receive a status notification.");
-
-      window.start();
-    });
-
-    stop(test_timeout); // stops the test runner - wait for response
-
-    response = request.send();
+    // do not run this test unless the browser fully supports the specs
+    if(supportsOnLoadEvent && supportsOnLoadendEvent) {
+        request.notify("loadstart", this, function(evt) {
+          loadstart = true;
+        });
+    
+        request.notify("abort", this, function(evt) {
+          abort = true;
+        });
+    
+        request.notify("progress", this, function(evt) {
+          progress = true;
+    
+          // Cancel it before it completes.
+          response.cancel();
+        });
+    
+        request.notify("loadend", this, function(evt) {
+          loadend = true;
+    
+          ok(loadstart, "Received a loadstart event.");
+          ok(progress, "Received a progress event.");
+          ok(abort, "Received an abort event.");
+          if(supportsOnLoadEvent) {
+            ok(!load, "Did not receive a load event.");
+          }
+          if(supportsOnLoadendEvent) {
+            ok(loadend, "Received a loadend event.");
+          }
+          ok(!error, "Did not receive an error event.");
+          ok(!timeout, "Did not receive a timeout event.");
+          equals(status, undefined, "Did not receive a status notification.");
+    
+          window.start();
+        });
+    
+        stop(test_timeout); // stops the test runner - wait for response
+    
+        response = request.send();
+    } else {
+        ok(true,"progressevent not fully implemented")
+    }
   });
-}
 
 test("Test upload event listeners on successful request.", function() {
   var abort = false,
@@ -538,54 +562,59 @@ test("Test upload event listeners on successful request.", function() {
     status,
     timeout = false;
 
-  // Use a POST request
-  request = SC.Request.postUrl('/');
-
-  request.notify("upload.loadstart", this, function(evt) {
-    loadstart = true;
-  });
-
-  request.notify("upload.progress", this, function(evt) {
-    progress = true;
-  });
-
-  request.notify("upload.load", this, function(evt) {
-    load = true;
-  });
-
-  request.notify("upload.loadend", this, function(evt) {
-    loadend = true;
-  });
-
-  request.notify(200, this, function(response) {
-    status = response.status;
-
-    if (window.ProgressEvent) {
-      ok(loadstart, "Received a loadstart event.");
-      ok(progress, "Received a progress event.");
-      ok(load, "Received a load event.");
-      ok(loadend, "Received a loadend event.");
-    }
-    ok(!abort, "Did not receive an abort event.");
-    ok(!error, "Did not receive an error event.");
-    ok(!timeout, "Did not receive a timeout event.");
-    equals(status, 200, "Received a response with status 200.");
-
-    window.start();
-  });
-
-  // Make a significant body object.
-  // It looks that Firefox is not sending the progress event if the request is too small
-  var i;
-  for (i = 200000; i >= 0; i--) {
-    body['k' + i] = 'v' + i;
+  // do not run this test unless the browser fully supports the specs
+  if(supportsOnLoadEvent && supportsOnLoadendEvent) {
+      // Use a POST request
+      request = SC.Request.postUrl('/');
+    
+      request.notify("upload.loadstart", this, function(evt) {
+        loadstart = true;
+      });
+    
+      request.notify("upload.progress", this, function(evt) {
+        progress = true;
+      });
+    
+      request.notify("upload.load", this, function(evt) {
+        load = true;
+      });
+    
+      request.notify("upload.loadend", this, function(evt) {
+        loadend = true;
+      });
+    
+      request.notify(200, this, function(response) {
+        status = response.status;
+    
+        if (window.ProgressEvent) {
+          ok(loadstart, "Received a loadstart event.");
+          ok(progress, "Received a progress event.");
+          ok(load, "Received a load event.");
+          ok(loadend, "Received a loadend event.");
+        }
+        ok(!abort, "Did not receive an abort event.");
+        ok(!error, "Did not receive an error event.");
+        ok(!timeout, "Did not receive a timeout event.");
+        equals(status, 200, "Received a response with status 200.");
+    
+        window.start();
+      });
+    
+      // Make a significant body object.
+      // It looks that Firefox is not sending the progress event if the request is too small
+      var i;
+      for (i = 200000; i >= 0; i--) {
+        body['k' + i] = 'v' + i;
+      }
+    
+      stop(test_timeout); // stops the test runner - wait for response
+    
+      response = request.send(JSON.stringify(body));
+  } else {
+    ok(true,"progressevent not fully implemented")
   }
-
-  stop(test_timeout); // stops the test runner - wait for response
-
-  response = request.send(JSON.stringify(body));
 });
-
+}
 
 test("Test manager.cancelAll.", function() {
   var manager = SC.Request.manager, max = manager.get('maxRequests');
