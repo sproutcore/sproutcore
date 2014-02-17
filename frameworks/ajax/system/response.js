@@ -548,7 +548,11 @@ SC.XHRResponse = SC.Response.extend(
           }
         }
 
-        SC.Event.add(rawRequest, 'loadend', this, this.finishRequest);
+        if(SC.typeOf(rawRequest.onloadend) === SC.T_FUNCTION) {
+            SC.Event.add(rawRequest, 'loadend', this, this.finishRequest);
+        } else {
+            SC.Event.add(rawRequest, 'readystatechange', this, this.finishRequest);
+        }
       } else if (window.XMLHttpRequest && rawRequest.addEventListener) {
         // XMLHttpRequest Level 1 + support for addEventListener (IE prior to version 9.0 lacks support for addEventListener)
         SC.Event.add(rawRequest, 'readystatechange', this, this.finishRequest);
@@ -619,7 +623,7 @@ SC.XHRResponse = SC.Response.extend(
   finishRequest: function(evt) {
     var listener, listeners, listenersForKey,
       rawRequest = this.get('rawRequest'),
-      readyState = rawRequest.readyState,
+      readyState = ( rawRequest != null ? rawRequest.readyState : null ),
       request,
       error, status, msg;
 
