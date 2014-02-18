@@ -625,7 +625,8 @@ test("Test responses moving between pending and inflight states", function() {
       response,
       response2;
 
-  SC.Request.manager.set('maxRequests', 1);
+  // This gives us precise control over when our requests fire.
+  SC.Request.manager.set('maxRequests', 0);
 
   request.notify('loadstart', function (evt) {
     ok(!SC.Request.manager.isPending(response), 'First request is no longer pending.');
@@ -693,6 +694,15 @@ test("Test responses moving between pending and inflight states", function() {
   ok(!SC.Request.manager.isInFlight(response), 'First request is not inflight.');
   ok(SC.Request.manager.isPending(response2), 'Second request is pending.');
   ok(!SC.Request.manager.isInFlight(response2), 'Second request is not inflight.');
+
+  SC.Request.manager.set('maxRequests', 1);
+  SC.Request.manager.fireRequestIfNeeded();
+
+  ok(!SC.Request.manager.isPending(response), 'First request is no longer pending.');
+  ok(SC.Request.manager.isInFlight(response), 'First request is inflight.');
+  ok(SC.Request.manager.isPending(response2), 'Second request is still pending.');
+  ok(!SC.Request.manager.isInFlight(response2), 'Second request is not inflight.');
+
 
   stop();
 });
