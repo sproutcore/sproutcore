@@ -548,7 +548,12 @@ SC.XHRResponse = SC.Response.extend(
           }
         }
 
-        SC.Event.add(rawRequest, 'loadend', this, this.finishRequest);
+        // Some older webkit browsers with ProgressEvent don't support loadend.
+        if (rawRequest.onloadend || rawRequest.onloadend === null) {
+          SC.Event.add(rawRequest, 'loadend', this, this.finishRequest);
+        } else {
+          SC.Event.add(rawRequest, 'readystatechange', this, this.finishRequest);
+        }
       } else if (window.XMLHttpRequest && rawRequest.addEventListener) {
         // XMLHttpRequest Level 1 + support for addEventListener (IE prior to version 9.0 lacks support for addEventListener)
         SC.Event.add(rawRequest, 'readystatechange', this, this.finishRequest);
