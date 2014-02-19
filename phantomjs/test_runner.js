@@ -1,16 +1,37 @@
  /**
   PhantomJS Unit Test Runner
+  ==========================
 
-  This script can be used to run the SproutCore unit tests using PhantomJS.
-  It requires that sc-server is running and uses the special /sc/targets.json
-  url provided by abbot to get the list of unit tests to run.
-  Because of this, it can also be used to run unit tests for any SproutCore app
-  as well.
+  This script can be used to run the SproutCore unit tests in PhantomJS. It is used
+  with SproutCore's Travis-CI integration to automatically run unit tests on every
+  push.
 
-  Run like:
+  This script can also be used to run tests locally, either for developing SproutCore
+  or for all of your own app's unit tests.
+  - Download or otherwise arrive at the phantomjs binary for your platform of choice
+    (see http://phantomjs.org/download.html).
+  - Run sc-server. (If you run it on a custom port, note the port number and see below.)
+  - Run this script to run the unit tests provided by sc-server.
+
+  Run all tests:
+
     phantomjs test_runner.js
 
-  Use -h to get help.
+  Run all tests with sc-super running on a custom port:
+
+    phantomjs test_runner.js --port 4021
+
+  Run only runtime and desktop unit tests:
+
+    phantomjs test_runner.js --include-targets "/sproutcore/runtime,/sproutcore/desktop"
+
+  Run everything but greenhouse tests (a good idea):
+
+    phantomjs test_runner.js --exclude-targets "/sproutcore/greenhouse"
+
+  Get help:
+
+    phantomjs test_runner.js -h
 */
 
 /*globals require, phantom, console */
