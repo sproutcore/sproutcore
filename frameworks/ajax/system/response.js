@@ -517,7 +517,7 @@ SC.XHRResponse = SC.Response.extend(
     async = !!request.get('isAsynchronous');
 
     if (async) {
-      if (window.ProgressEvent) {
+      if (SC.platform.get('supportsXHR2ProgressEvent')) {
         // XMLHttpRequest Level 2
 
         // Add progress event listeners that were specified on the request.
@@ -548,8 +548,7 @@ SC.XHRResponse = SC.Response.extend(
           }
         }
 
-        // Some older webkit browsers with ProgressEvent don't support loadend.
-        if (rawRequest.onloadend || rawRequest.onloadend === null) {
+        if (SC.platform.get('supportsXHR2LoadEndEvent')) {
           SC.Event.add(rawRequest, 'loadend', this, this.finishRequest);
         } else {
           SC.Event.add(rawRequest, 'load', this, this.finishRequest);
@@ -660,11 +659,10 @@ SC.XHRResponse = SC.Response.extend(
       }, this);
 
       // Avoid memory leaks
-      if (window.ProgressEvent) {
+      if (SC.platform.get('supportsXHR2ProgressEvent')) {
         // XMLHttpRequest Level 2
 
-        // Some older webkit browsers with ProgressEvent don't support loadend.
-        if (rawRequest.onloadend || rawRequest.onloadend === null) {
+        if (SC.platform.get('supportsXHR2LoadEndEvent')) {
           SC.Event.remove(rawRequest, 'loadend', this, this.finishRequest);
         } else {
           SC.Event.remove(rawRequest, 'load', this, this.finishRequest);

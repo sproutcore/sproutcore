@@ -28,6 +28,28 @@ module("SC.Request", {
 
 });
 
+test("PRELIM: Verify basic functionality in testing environment.", function() {
+  if (SC.platform.get('supportsXHR2ProgressEvent')) {
+    var xhr = new XMLHttpRequest;
+    xhr.addEventListener('load', function() {
+      ok(true, 'Success: xhr.addEventListener for load event.');
+      nextTest();
+    });
+    xhr.open("get", url);
+    xhr.send();
+
+    window.stop(test_timeout);
+
+    function nextTest() {
+      request.notify('load', this, function() {
+        ok(true, 'Success: SC.Request#notify for load event.');
+        window.start();
+      });
+      request.send();
+    }
+  }
+});
+
 test("Basic Requirements", function() {
   ok(SC.Request, "SC.Request is defined");
   ok("" !== url, "url variable is not empty");
@@ -459,12 +481,13 @@ test("Test event listeners on successful request.", function() {
   request.notify(200, this, function(response) {
     status = response.status;
 
-    if (window.ProgressEvent) {
+    if (SC.platform.get('supportsXHR2ProgressEvent')) {
       ok(loadstart, "Received a loadstart event.");
       ok(progress, "Received a progress event.");
       ok(load, "Received a load event.");
-      ok(loadend, "Received a loadend event.");
+      if (SC.platform.get('supportsXHR2LoadEndEvent')) ok(loadend, "Received a loadend event.");
     }
+
     ok(!abort, "Did not receive an abort event.");
     ok(!error, "Did not receive an error event.");
     ok(!timeout, "Did not receive a timeout event.");
@@ -478,14 +501,13 @@ test("Test event listeners on successful request.", function() {
   response = request.send();
 });
 
-if (window.ProgressEvent) {
+if (SC.platform.get('supportsXHR2ProgressEvent')) {
   test("Test event listeners on aborted request.", function() {
     var abort = false,
       error = false,
       load = false,
-      loadend = false,
       loadstart = false,
-      progress = false,
+      loadend = false,
       response,
       status,
       timeout = false;
@@ -505,14 +527,18 @@ if (window.ProgressEvent) {
       response.cancel();
     });
 
-    request.notify("loadend", this, function(evt) {
+    request.notify(SC.platform.get('supportsXHR2LoadEndEvent') ? 'loadend' : 'abort', this, function(evt) {
       loadend = true;
 
       ok(loadstart, "Received a loadstart event.");
       ok(progress, "Received a progress event.");
       ok(abort, "Received an abort event.");
       ok(!load, "Did not receive a load event.");
-      ok(loadend, "Received a loadend event.");
+      if (SC.platform.get('supportsXHR2LoadEndEvent')) {
+        ok(loadend, "Received a loadend event.");
+      } else {
+        ok(loadend, "loadend event not supported. Received terminal abort event.");
+      }
       ok(!error, "Did not receive an error event.");
       ok(!timeout, "Did not receive a timeout event.");
       equals(status, undefined, "Did not receive a status notification.");
@@ -560,11 +586,11 @@ test("Test upload event listeners on successful request.", function() {
   request.notify(200, this, function(response) {
     status = response.status;
 
-    if (window.ProgressEvent) {
+    if (SC.platform.get('supportsXHR2ProgressEvent')) {
       ok(loadstart, "Received a loadstart event.");
       ok(progress, "Received a progress event.");
       ok(load, "Received a load event.");
-      ok(loadend, "Received a loadend event.");
+      if (SC.platform.get('supportsXHR2LoadEndEvent')) ok(loadend, "Received a loadend event.");
     }
     ok(!abort, "Did not receive an abort event.");
     ok(!error, "Did not receive an error event.");
