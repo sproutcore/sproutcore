@@ -552,7 +552,9 @@ SC.XHRResponse = SC.Response.extend(
         if (rawRequest.onloadend || rawRequest.onloadend === null) {
           SC.Event.add(rawRequest, 'loadend', this, this.finishRequest);
         } else {
-          SC.Event.add(rawRequest, 'readystatechange', this, this.finishRequest);
+          SC.Event.add(rawRequest, 'load', this, this.finishRequest);
+          SC.Event.add(rawRequest, 'error', this, this.finishRequest);
+          SC.Event.add(rawRequest, 'abort', this, this.finishRequest);
         }
       } else if (window.XMLHttpRequest && rawRequest.addEventListener) {
         // XMLHttpRequest Level 1 + support for addEventListener (IE prior to version 9.0 lacks support for addEventListener)
@@ -661,7 +663,14 @@ SC.XHRResponse = SC.Response.extend(
       if (window.ProgressEvent) {
         // XMLHttpRequest Level 2
 
-        SC.Event.remove(rawRequest, 'loadend', this, this.finishRequest);
+        // Some older webkit browsers with ProgressEvent don't support loadend.
+        if (rawRequest.onloadend || rawRequest.onloadend === null) {
+          SC.Event.remove(rawRequest, 'loadend', this, this.finishRequest);
+        } else {
+          SC.Event.remove(rawRequest, 'load', this, this.finishRequest);
+          SC.Event.remove(rawRequest, 'error', this, this.finishRequest);
+          SC.Event.remove(rawRequest, 'abort', this, this.finishRequest);
+        }
 
         request = this.get('request');
         listeners = request.get("listeners");
