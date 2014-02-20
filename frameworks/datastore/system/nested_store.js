@@ -287,7 +287,6 @@ SC.NestedStore = SC.Store.extend(
     editables = this.editables;
     if (editables) editables[storeKey] = 0;
 
-
     // if the data hash in the parent store is editable, then clone the hash
     // for our own use.  Otherwise, just copy a reference to the data hash
     // in the parent store. -- find first non-inherited state
@@ -332,14 +331,20 @@ SC.NestedStore = SC.Store.extend(
 
   /** @private - adds chaining support */
   readDataHash: function(storeKey) {
-    if (this.get('lockOnRead')) this._lock(storeKey);
+    // If we lockOnRead, and the status isn't EMPTY or BUSY_LOADING we lock.
+    if (this.get('lockOnRead')) {
+      var status = this.peekStatus(storeKey);
+      if (status !== SC.Record.EMPTY && status !== SC.Record.BUSY_LOADING) {
+        this._lock(storeKey);
+      }
+    }
     return this.dataHashes[storeKey];
   },
 
   /** @private - adds chaining support */
   readEditableDataHash: function(storeKey) {
 
-    // lock the data hash if needed
+    // Lock the data hash.
     this._lock(storeKey);
 
     return sc_super();
@@ -473,8 +478,64 @@ SC.NestedStore = SC.Store.extend(
   // ..........................................................
   // CORE RECORDS API
   //
-  // The methods in this section can be used to manipulate records without
-  // actually creating record instances.
+  // The methods in this section can be used to manipulate data hashes without
+  // actually creating SC.Record instances.
+
+  /** @private
+    Discards all changes for the specified storeKey. Notifies the record
+    if any changes are actually made. Throws an error if attempting to
+    roll back a locked record. To roll back a locked record, call
+    `rollBackLocked` instead.
+
+    @param {Number} storeKey
+    @throws {Error} If asked to roll back a locked record.
+   */
+  rollBackEditable: function(storeKey, _unlock) {
+    var dataHashes = this.dataHashes,
+        revisions  = this.revisions,
+        statuses   = this.statuses,
+        editables  = this.editables,
+        locks      = this.locks;
+
+    // If we're not allowing an unlock, check the lock status.
+    if (!_unlock) {
+      if (this.storeKeyEditState(storeKey) === this.LOCKED) {
+        throw new Error('Cannot roll back a locked record. To force, call rollBackLocked instead.');
+      }
+    }
+
+    var changed    = NO;
+    var statusOnly = NO;
+
+    if (dataHashes  &&  dataHashes.hasOwnProperty(storeKey)) {
+      delete dataHashes[storeKey];
+      changed = YES;
+    }
+    if (revisions   &&  revisions.hasOwnProperty(storeKey)) {
+      delete revisions[storeKey];
+      changed = YES;
+    }
+    if (editables) delete editables[storeKey];
+    if (locks) delete locks[storeKey];
+
+    if (statuses  &&  statuses.hasOwnProperty(storeKey)) {
+      delete statuses[storeKey];
+      if (!changed) statusOnly = YES;
+      changed = YES;
+    }
+
+    if (changed) this._notifyRecordPropertyChange(storeKey, statusOnly);
+  },
+
+  /** @private
+    Discards all changes for the specified storeKey, even if the record
+    is locked. Notifies the record if any changes are actually made.
+
+    @param {Number} storeKey
+   */
+  rollBackLocked: function(storeKey) {
+    return this.rollBackEditable(storeKey, YES);
+  },
 
   /** @private - adapt for nested store
 
@@ -505,33 +566,7 @@ SC.NestedStore = SC.Store.extend(
           // Not dirty?  Then abandon any status we had set (to re-establish
           // any prototype linkage breakage) before asking our parent store to
           // perform the retrieve.
-          var dataHashes = this.dataHashes,
-              revisions  = this.revisions,
-              statuses   = this.statuses,
-              editables  = this.editables,
-              locks      = this.locks;
-
-          var changed    = NO;
-          var statusOnly = NO;
-
-          if (dataHashes  &&  dataHashes.hasOwnProperty(storeKey)) {
-            delete dataHashes[storeKey];
-            changed = YES;
-          }
-          if (revisions   &&  revisions.hasOwnProperty(storeKey)) {
-            delete revisions[storeKey];
-            changed = YES;
-          }
-          if (editables) delete editables[storeKey];
-          if (locks) delete locks[storeKey];
-
-          if (statuses  &&  statuses.hasOwnProperty(storeKey)) {
-            delete statuses[storeKey];
-            if (!changed) statusOnly = YES;
-            changed = YES;
-          }
-
-          if (changed) this._notifyRecordPropertyChange(storeKey, statusOnly);
+          this.rollBackEditable(storeKey);
         }
       }
     }

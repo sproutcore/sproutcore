@@ -494,6 +494,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     and execute `flush()` once at the end of the runloop.
   */
   _notifyRecordPropertyChange: function (storeKey, statusOnly, key) {
+    // Do this first so that it gets in line ahead of any of its chained stores.
+    this.invokeOnce(this.flush);
 
     var records      = this.records,
         nestedStores = this.get('nestedStores'),
@@ -504,18 +506,22 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     len = nestedStores ? nestedStores.length : 0 ;
     for(idx=0;idx<len;idx++) {
       store = nestedStores[idx];
-      status = store.peekStatus(storeKey); // important: peek avoids read-lock
       editState = store.storeKeyEditState(storeKey);
 
-      // when store needs to propagate out changes in the parent store
-      // to nested stores
+      // If the chained-store record is reflecting its parent store, simply
+      // notify it that it's changed.
       if (editState === K.INHERITED) {
         store._notifyRecordPropertyChange(storeKey, statusOnly, key);
-
-      } else if (status & SC.Record.BUSY) {
-        // make sure nested store does not have any changes before resetting
-        if(store.get('hasChanges')) throw K.CHAIN_CONFLICT_ERROR;
-        store.reset();
+      }
+      // If the chained-store record is editable but not locked, roll it back
+      // to accept updates from the parent store. (This will trigger a call
+      // to store._notifyRecordPropertyChange.)
+      else if (editState === K.EDITABLE) {
+        store.rollBackEditable(storeKey);
+      }
+      // Otherwise, the chained record is locked and we are unable to proceed.
+      else {
+        throw K.CHAIN_CONFLICT_ERROR;
       }
     }
 
@@ -562,7 +568,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       }
     }
 
-    this.invokeOnce(this.flush);
     return this;
   },
 
