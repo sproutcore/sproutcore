@@ -340,27 +340,30 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return this;
   },
 
-  /** Invoked whenever the children array changes from the store
-
+  /**
+    Invoked whenever the children array changes from the store
+  
+    @param {Array} keys Optional list of keys that have changed.
   */
 
-  notifyChildren: function (prop) {
+  notifyChildren: function (keys) {
     var d = function (obj) {
       if (obj) {
-        if (!prop && obj.allPropertiesDidChange) obj.allPropertiesDidChange();
-        else {
-          if (obj.notifyPropertyChange) {
-            obj.notifyPropertyChange(prop);
+        if (!keys && obj.allPropertiesDidChange) obj.allPropertiesDidChange();
+        else if (keys && obj.notifyPropertyChange) {
+          var len = keys.length, i;
+          for (i = 0; i < len; i++) {
+            obj.notifyPropertyChange(keys[i]);
           }
         }
         if (obj.notifyChildren) {
-          obj.notifyChildren(prop);
+          obj.notifyChildren(keys);
         }
       }
     };
 
     this.forEach(d);
-    this.recordPropertyDidChange(prop);
+    this.recordPropertyDidChange(keys);
   },
 
   /** @private

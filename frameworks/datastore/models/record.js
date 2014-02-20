@@ -527,7 +527,7 @@ SC.Record = SC.Object.extend(
       this.notifyPropertyChange('status');
       this.notifyPropertyChange('isDestroyed');
     }
-    if (isParent) this.notifyChildren('status');
+    if (isParent) this.notifyChildren(['status']);
 
     return this;
   },
@@ -547,25 +547,25 @@ SC.Record = SC.Object.extend(
   },
 
   /**
-     notify the children of this record of a property change on the underlying hash
-     @param  {String} prop
-     @return {null}
+     Notifies the children of this record of a property change on the underlying hash.
+
+     @param  {Array} keys
    */
-  notifyChildren: function (prop) {
+  notifyChildren: function (keys) {
     var i, item, obj;
     for (i in this) {
       item = this[i];
       if (item && (SC.instanceOf(item, SC.ChildAttribute) || SC.instanceOf(item, SC.ChildrenAttribute))) {
         obj = this.get(i);
         if (obj) {
-          if (!prop && obj.allPropertiesDidChange) obj.allPropertiesDidChange();
+          if (!keys && obj.allPropertiesDidChange) obj.allPropertiesDidChange();
           else {
             if (obj.notifyPropertyChange) {
-              obj.notifyPropertyChange(prop);
+              obj.notifyPropertyChange(keys);
             }
           }
           if (obj.notifyChildren) {
-            obj.notifyChildren(prop);
+            obj.notifyChildren(keys);
           }
         }
       }
@@ -939,7 +939,7 @@ SC.Record = SC.Object.extend(
     var isParent = this.get('isParentRecord');
     if (statusOnly) {
       this.notifyPropertyChange('status');
-      if (isParent) this.notifyChildren('status');
+      if (isParent) this.notifyChildren(['status']);
     }
     else {
       if (keys) {
