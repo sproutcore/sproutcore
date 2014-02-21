@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/sproutcore/sproutcore.png)](https://travis-ci.org/sproutcore/sproutcore)
+[![Build Status](https://travis-ci.org/sproutcore/sproutcore.png?branch=master)](https://travis-ci.org/sproutcore/sproutcore)
 
 SproutCore HTML5 Application Framework
 ======================================
