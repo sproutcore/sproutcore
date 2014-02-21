@@ -20,7 +20,8 @@ module("SC.AlertPane UI", {
 var pane ;
 
 function evaluatePane(pane, message, description, caption, button1Title, button2Title, button3Title, iconClass, themeName,
-    button1ToolTip, button2ToolTip, button3ToolTip, button1LayerId, button2LayerId, button3LayerId, defaultButton, cancelButton) {
+    button1ToolTip, button2ToolTip, button3ToolTip, button1LayerId, button2LayerId, button3LayerId, defaultButton, cancelButton,
+    localizeButton1, localizeButton2, localizeButton3) {
   // wrapper
   ok(pane.get('isVisibleInWindow'), 'pane.isVisibleInWindow should be YES');
   ok(pane.$().hasClass('sc-alert'), 'pane should have sc-alert class');
@@ -76,6 +77,16 @@ function evaluatePane(pane, message, description, caption, button1Title, button2
     ok(button3.$().hasClass('sc-hidden'), 'pane.div button3 should be hidden');
   }
 
+  if (localizeButton1) {
+    ok(button1.get('localize'), "button1 is set to localize.");
+  }
+  if (localizeButton2) {
+    ok(button2.get('localize'), "button2 is set to localize.");
+  }
+  if (localizeButton3) {
+    ok(button3.get('localize'), "button3 is set to localize.");
+  }
+
   if (button1ToolTip) {
     equals(button1.$('label').prop('title'), button1ToolTip, 'pane.div.div button1 should have custom toolTip %@'.fmt(button1ToolTip));
   } else {
@@ -126,21 +137,21 @@ function evaluatePane(pane, message, description, caption, button1Title, button2
   }
 
   if (cancelButton == null) cancelButton = 2;
-    if (cancelButton === 1) {
-      ok(button1.$().hasClass('cancel'), 'pane.div.div button1 should be cancel');
-    } else {
-      ok(!button1.$().hasClass('cancel'), 'pane.div.div button1 should not be cancel');
-    }
-    if (cancelButton === 2) {
-      ok(button2.$().hasClass('cancel'), 'pane.div.div button2 should be cancel');
-    } else {
-      ok(!button2.$().hasClass('cancel'), 'pane.div.div button2 should not be cancel');
-    }
-    if (cancelButton === 3) {
-      ok(button3.$().hasClass('cancel'), 'pane.div.div button3 should be cancel');
-    } else {
-      ok(!button3.$().hasClass('cancel'), 'pane.div.div button3 should not be cancel');
-    }
+  if (cancelButton === 1) {
+    ok(button1.$().hasClass('cancel'), 'pane.div.div button1 should be cancel');
+  } else {
+    ok(!button1.$().hasClass('cancel'), 'pane.div.div button1 should not be cancel');
+  }
+  if (cancelButton === 2) {
+    ok(button2.$().hasClass('cancel'), 'pane.div.div button2 should be cancel');
+  } else {
+    ok(!button2.$().hasClass('cancel'), 'pane.div.div button2 should not be cancel');
+  }
+  if (cancelButton === 3) {
+    ok(button3.$().hasClass('cancel'), 'pane.div.div button3 should be cancel');
+  } else {
+    ok(!button3.$().hasClass('cancel'), 'pane.div.div button3 should not be cancel');
+  }
 
   if (!themeName) themeName = 'capsule';
   ok(button1.$().hasClass(themeName), 'pane.div.div button1 should have class ' + themeName);
@@ -149,6 +160,7 @@ function evaluatePane(pane, message, description, caption, button1Title, button2
 }
 
 test("AlertPane.show with icon, message, description, caption and 3 buttons", function() {
+  SC.RunLoop.begin();
   pane = SC.AlertPane.show({
     message: 'AlertPane.message',
     description: 'AlertPane.description',
@@ -161,12 +173,14 @@ test("AlertPane.show with icon, message, description, caption and 3 buttons", fu
       { title: 'extraButtonTitle' }
     ]
   });
+  SC.RunLoop.end();
   evaluatePane(pane, "AlertPane.message", 'AlertPane.description', 'AlertPane.caption', "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', 'sc-icon-tools-24');
   pane.dismiss();
   pane.destroy();
 });
 
-test("AlertPane.show with 3 buttons with isDefault, isCancel, toolTip, and layerId", function () {
+test("AlertPane.show with 3 buttons with isDefault, isCancel, toolTip, layerId and localize", function () {
+  SC.RunLoop.begin();
   pane = SC.AlertPane.show({
     message: 'AlertPane.message',
     description: 'AlertPane.description',
@@ -174,28 +188,32 @@ test("AlertPane.show with 3 buttons with isDefault, isCancel, toolTip, and layer
     icon: 'sc-icon-tools-24',
     delegate: this,
     buttons: [
-      { title: 'okButtonTitle', toolTip: 'okButtonToolTip', layerId: 'okButtonLayerId', isCancel: true },
-      { title: 'cancelButtonTitle', toolTip: 'cancelButtonToolTip', layerId: 'cancelButtonLayerId' },
-      { title: 'extraButtonTitle', toolTip: 'extraButtonToolTip', layerId: 'extraButtonLayerId', isDefault: true }
+      { title: 'okButtonTitle', toolTip: 'okButtonToolTip', layerId: 'okButtonLayerId', isCancel: true, localize: true },
+      { title: 'cancelButtonTitle', toolTip: 'cancelButtonToolTip', layerId: 'cancelButtonLayerId', localize: true },
+      { title: 'extraButtonTitle', toolTip: 'extraButtonToolTip', layerId: 'extraButtonLayerId', isDefault: true, localize: true }
     ]
   });
+  SC.RunLoop.end();
   evaluatePane(pane, "AlertPane.message", 'AlertPane.description', 'AlertPane.caption',
     "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', 'sc-icon-tools-24', null,
     'okButtonToolTip', 'cancelButtonToolTip', 'extraButtonToolTip',
     'okButtonLayerId', 'cancelButtonLayerId', 'extraButtonLayerId',
-    3, 1);
+    3, 1, true, true, true);
   pane.dismiss();
   pane.destroy();
 });
 
 test("AlertPane.show with icon, message, description, caption and 3 buttons - old style", function() {
+  SC.RunLoop.begin();
   pane = SC.AlertPane.show("AlertPane.message", 'AlertPane.description', 'AlertPane.caption', "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', 'sc-icon-tools-24', this);
+  SC.RunLoop.end();
   evaluatePane(pane, "AlertPane.message", 'AlertPane.description', 'AlertPane.caption', "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', 'sc-icon-tools-24');
   pane.dismiss();
   pane.destroy();
 });
 
 test("AlertPane.warn with icon, message, description, caption and 3 buttons", function() {
+  SC.RunLoop.begin();
   pane = SC.AlertPane.warn({
     message: "AlertPane.message",
     description: 'AlertPane.description',
@@ -207,12 +225,14 @@ test("AlertPane.warn with icon, message, description, caption and 3 buttons", fu
     ],
     delegate: this
   });
+  SC.RunLoop.end();
   evaluatePane(pane, "AlertPane.message", 'AlertPane.description', 'AlertPane.caption', "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', 'sc-icon-alert-48');
   pane.dismiss();
   pane.destroy();
 });
 
 test("AlertPane.error with icon, message, description, caption and 3 buttons", function() {
+  SC.RunLoop.begin();
   pane = SC.AlertPane.error({
     message: "AlertPane.message",
     description: 'AlertPane.description',
@@ -224,12 +244,14 @@ test("AlertPane.error with icon, message, description, caption and 3 buttons", f
     ],
     delegate: this
   });
+  SC.RunLoop.end();
   evaluatePane(pane, "AlertPane.message", 'AlertPane.description', 'AlertPane.caption', "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', 'sc-icon-error-48');
   pane.dismiss();
   pane.destroy();
 });
 
 test("AlertPane.plain with message, description, caption and 3 buttons", function() {
+  SC.RunLoop.begin();
   pane = SC.AlertPane.plain({
     message: "AlertPane.message",
     description: 'AlertPane.description',
@@ -241,12 +263,14 @@ test("AlertPane.plain with message, description, caption and 3 buttons", functio
     ],
     delegate: this
   });
+  SC.RunLoop.end();
   evaluatePane(pane, "AlertPane.message", 'AlertPane.description', 'AlertPane.caption', "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', 'blank');
   pane.dismiss();
   pane.destroy();
 });
 
 test("AlertPane.info with icon, message, description, caption and 3 buttons", function() {
+  SC.RunLoop.begin();
   pane = SC.AlertPane.info({
     message: "AlertPane.message",
     description: 'AlertPane.description',
@@ -258,27 +282,34 @@ test("AlertPane.info with icon, message, description, caption and 3 buttons", fu
     ],
     delegate: this
   });
+  SC.RunLoop.end();
   evaluatePane(pane, "AlertPane.message", 'AlertPane.description', 'AlertPane.caption', "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', 'sc-icon-info-48');
   pane.dismiss();
   pane.destroy();
 });
 
 test("AlertPane.info with icon, message and 1 default button (omit all optional parameters) - old style", function() {
+  SC.RunLoop.begin();
   pane = SC.AlertPane.info("AlertPane.message");
+  SC.RunLoop.end();
   evaluatePane(pane, "AlertPane.message", null, null, null, null, null, 'sc-icon-info-48');
   pane.dismiss();
   pane.destroy();
 });
 
 test("AlertPane.info with icon, message and 3 buttons (passing null to optional description and caption) - old style", function() {
+  SC.RunLoop.begin();
   pane = SC.AlertPane.info("AlertPane.message", null, null, "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', this);
+  SC.RunLoop.end();
   evaluatePane(pane, "AlertPane.message", null, null, "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', 'sc-icon-info-48');
   pane.dismiss();
   pane.destroy();
 });
 
 test("AlertPane.info with icon, message, description, caption and 1 button (passing null to 3 buttons) - old style", function() {
+  SC.RunLoop.begin();
   pane = SC.AlertPane.info("AlertPane.message", 'AlertPane.description', 'AlertPane.caption', null, null, null, this);
+  SC.RunLoop.end();
   evaluatePane(pane, "AlertPane.message", 'AlertPane.description', 'AlertPane.caption', null, null, null, 'sc-icon-info-48');
   pane.dismiss();
   pane.destroy();
@@ -317,16 +348,25 @@ test("AlertPane.info with individual actions and targets for three buttons", fun
     SC.Event.trigger(elem, 'mouseup');
   }
 
+  SC.RunLoop.begin();
   showPane();
   clickButton(pane.get('button1'));
+  SC.RunLoop.end();
+
   equals(clickValue, 'OK', 'Action for the OK button was clicked');
 
+  SC.RunLoop.begin();
   showPane();
   clickButton(pane.get('button2'));
+  SC.RunLoop.end();
+
   equals(clickValue, 'Cancel', 'Action for the Cancel button was clicked');
 
+  SC.RunLoop.begin();
   showPane();
   clickButton(pane.get('button3'));
+  SC.RunLoop.end();
+
   equals(clickValue, 'Extra', 'Action for the Extra button was clicked');
 
   pane.destroy();
@@ -452,6 +492,7 @@ test("users interaction with mutiple alert panes with 1-3 buttons - old style", 
 
 
 test("AlertPane.show with custom themeName", function() {
+  SC.RunLoop.begin();
   pane = SC.AlertPane.show({
     themeName: 'AlertPane.themeName',
     message: 'AlertPane.message',
@@ -465,7 +506,36 @@ test("AlertPane.show with custom themeName", function() {
       { title: 'extraButtonTitle' }
     ]
   });
+  SC.RunLoop.end();
   evaluatePane(pane, "AlertPane.message", 'AlertPane.description', 'AlertPane.caption', "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', 'sc-icon-tools-24', 'AlertPane.themeName');
   pane.dismiss();
   pane.destroy();
 });
+
+test("AlertPane.show with more than three buttons specified", function() {
+  var didError = NO;
+
+  SC.RunLoop.begin();
+  try {
+    pane = SC.AlertPane.show({
+      themeName: 'AlertPane.themeName',
+      message: 'AlertPane.message',
+      description: 'AlertPane.description',
+      caption: 'AlertPane.caption',
+      icon: 'sc-icon-tools-24',
+      delegate: this,
+      buttons: [
+        { title: 'okButtonTitle' },
+        { title: 'cancelButtonTitle' },
+        { title: 'extraButtonTitle' },
+        { title: 'extraExtraButtonTitle' }
+      ]
+    });
+  } catch (e) {
+    didError = YES;
+  }
+  SC.RunLoop.end();
+
+  ok(!didError, "Specifying more than three buttons doesn't trigger an unhandled error.");
+  pane.destroy();
+})

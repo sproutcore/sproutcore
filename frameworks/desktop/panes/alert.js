@@ -41,7 +41,8 @@ SC.BUTTON3_STATUS = 'button3';
   Alert panes are a simple way to provide modal messaging that otherwise
   blocks the user's interaction with your application.  Alert panes are
   useful for showing important error messages and confirmation dialogs. They
-  provide a better user experience than using the OS-level alert dialogs.
+  provide a substantially better user experience than using the OS-level alert
+  dialogs.
 
   ## Displaying an Alert Pane
 
@@ -51,29 +52,76 @@ SC.BUTTON3_STATUS = 'button3';
 
   There are four variations of this method can you can invoke:
 
-   - `warn()` -- displays an alert pane with a warning icon to the left.
-   - `error()` -- displays an alert with an error icon to the left
-   - `info()` -- displays an alert with an info icon to the left
-   - `plain()` -- displays an alert w/o any icon
-   - `show()` -- displays an alert with a customizable icon to the left
+   - `warn({})` -- displays an alert pane with a warning icon to the left.
+   - `error()` -- displays an alert with an error icon.
+   - `info()` -- displays an alert with an info icon.
+   - `plain()` -- displays an alert with no icon.
+   - `show()` -- displays an alert with the icon class you specify.
 
-  In addition to passing a message, description and caption, you can also customize
-  the title of the button 1 (OK) and add an optional button 2 and 3 (Cancel or Extra).
-  Additionally, you can provide a toolTip and layerId for each button, as well as specify
-  which button should be the default button and the cancel button.
+  Each method takes a single argument: a hash of options. These options include:
 
-   - button1 -- 1st button from the right. default:OK
-   - button2 -- 2nd button from the right. Optional. Could be Cancel or 2nd action.
-   - button3 -- 1st button from the left. Optional. Could be Cancel or alternative option.
+  - `message` -- The alert's title message.
+  - `description` -- A longer description of the alert, displayed below the title
+    in a smaller font.
+  - `caption` -- A third layer of alert text, displayed below the description in
+    an even-smaller font.
+  - `icon` -- This is set for you automatically unless you call `show`. You may
+    specify any icon class you wish. The icon is displayed at the alert pane's
+    left.
+  - `themeName` -- A button theme that is applied to each button. The default is
+    `capsule`.
+  - `delegate` -- A delegate to be notified when the user reacts to your pane. See
+    "Responding to User Actions" below.
+  - `buttons` -- An array of up to three hashes used to customize the alert's buttons.
+    See "Customizing Buttons" below.
 
-  Additionally, you can define a delegate object.  This delegate's
-  `alertPaneDidDismiss()` method will be called when the pane
-  is dismissed, passing the pane instance and a key indicating which
-  button was pressed.
+  ## Responding to User Actions
+
+  Often, you may wish to be notified when the user has dismissed to your alert. You
+  have two options: you may specify a delegate in the options hash, or you may
+  customize each button with a target & action.
+
+  If you specify a delegate, it must implement a method with the following signature:
+  `alertPaneDidDismiss(pane, buttonKey)`. When the user dismisses your alert, this
+  method will be called with the pane instance and a key indicating which button was
+  pressed (one of either `SC.BUTTON1_STATUS`, `SC.BUTTON2_STATUS` or `SC.BUTTON3_STATUS`).
+
+  If you specify a target/action for a button (see "Customizing Buttons" below) and the
+  user dismisses the alert with that button, that action will be triggered. If you specify
+  a delegate but no target, the delegate will be used as the target. The action will
+  be called with the alert pane itself as the sender (first argument).
+
+  ## Customizing Buttons
+
+  SC.AlertPane allows you to specify up to three buttons, arranged from right to left (as
+  on Mac OS X). You can customize them by passing an array of up to three options hashes
+  on the `buttons` property. By default, the first, rightmost button is the default (i.e.
+  it is triggered when the user hits the enter key), and the second button is the "cancel"
+  button (triggered by the escape key).
+
+  If you don't specify any buttons, a single default "OK" button will appear.
+
+  You may customize the following button options:
+
+  - `title` -- The button text. Highly recommended unless you like empty buttons.
+  - `localize` -- Whether to localize the title.
+  - `toolTip` -- An extra hint to show when the user hovers the mouse over the button.
+    Make sure that the user can get along fine without this, as tooltips are hard to
+    discover and unavailable on touch devices!
+  - `isDefault` -- You may specify a different button than the first, rightmost button
+    to be the default (triggered by the enter key, and visually distinct in the default
+    Ace theme).
+  - `isCancel` -- You may specify a different button than the second, middle button
+    to be the cancel button (triggered by the escape key).
+  - `target` & `action` -- Supports the target/action pattern (see "Responding to User
+    Actions" above).
+
+  (You may also specify a layerId for the button if needed. As always, using custom
+  layerIds is dangerous and should be avoided unless you know what you're doing.)
 
   ## Examples
 
-  Show a simple AlertPane with an OK button:
+  Show a simple AlertPane with a warning (!) icon and an OK button:
 
       SC.AlertPane.warn({
         message: "Could not load calendar",
@@ -81,8 +129,7 @@ SC.BUTTON3_STATUS = 'button3';
         caption: "Try again in a few minutes."
       });
 
-  Show an AlertPane with a customized OK title (title will be 'Try Again') and
-  custom action:
+  Show an AlertPane with a customized OK button title (title will be 'Try Again'):
 
       SC.AlertPane.warn({
         message: "Could not load calendar",
@@ -100,15 +147,13 @@ SC.BUTTON3_STATUS = 'button3';
         description: "Your internet connection may be unavailable or our servers may be down.",
         caption: "Try again in a few minutes.",
         buttons: [
-          { title: "Try Again", toolTip: "Retry the connection", layerId: "try-again-button", isDefault: true },
-          { title: "Cancel", toolTip: "Cancel the action", layerId: "cancel-button", isCancel: true },
-          { title: "More Info...", toolTip: "Get more info", layerId: "more-info-button" }
+          { title: "Try Again", toolTip: "Retry the connection", isDefault: true },
+          { title: "More Info...", toolTip: "Get more info" },
+          { title: "Cancel", toolTip: "Cancel the action", isCancel: true }
         ]
       });
 
-  Show an AlertPane with a custom OK, a Cancel button and an Extra button,
-  each with custom titles.  Also, pass a delegate that will be invoked when
-  the user's dismisses the dialog.
+  Show an alert pane, using the delegate pattern to respond to how the user dismisses it.
 
       MyApp.calendarController = SC.Object.create({
         alertPaneDidDismiss: function(pane, status) {
@@ -116,11 +161,9 @@ SC.BUTTON3_STATUS = 'button3';
             case SC.BUTTON1_STATUS:
               this.tryAgain();
               break;
-
             case SC.BUTTON2_STATUS:
               // do nothing
               break;
-
             case SC.BUTTON3_STATUS:
               this.showMoreInfo();
               break;
@@ -128,7 +171,6 @@ SC.BUTTON3_STATUS = 'button3';
         },
         ...
       });
-
 
       SC.AlertPane.warn({
         message: "Could not load calendar",
@@ -142,8 +184,8 @@ SC.BUTTON3_STATUS = 'button3';
         ]
       });
 
-  Instead of using the delegate pattern above, you can also specify a target
-  and an action, similar to SC.ButtonView.
+  Show an alert pane using the target/action pattern on each button to respond to how the user
+  dismisses it.
 
       SC.AlertPane.warn({
         message: "Could not load calendar",
@@ -151,17 +193,22 @@ SC.BUTTON3_STATUS = 'button3';
         caption: "Try again in a few minutes.",
         buttons: [
           {
-            title: "OK",
-            action: "didClickOK",
+            title: "Try Again",
+            action: "doTryAgain",
+            target: MyApp.calendarController
+          },
+          {
+            title: "Cancel",
+            action: "doCancel",
+            target: MyApp.calendarController
+          },
+          {
+            title: "More Info…",
+            action: "doGiveMoreInfo",
             target: MyApp.calendarController
           }
         ]
       });
-
-  Also note that in addition to passing the action as a string of the method
-  name that will be invoked, you can also give a function reference as the
-  action.
-
 
   @extends SC.PanelPane
   @since SproutCore 1.0
@@ -450,23 +497,33 @@ SC.AlertPane.mixin(
     args = SC.AlertPane._argumentsCall.apply(this, arguments);
 
     var pane = this.create(args),
-        idx = 0,
+        idx,
         buttons = args.buttons,
-        buttonView, layerId, title, toolTip, action, target, themeName,
+        button, buttonView, layerId, title, toolTip, action, target, themeName,
         isDefault, isCancel, hasDefault, hasCancel;
 
     if (buttons) {
-      // Determine if any button specifies isDefault/isCancel.
+      //@if(debug)
+      // Provide some developer support for more than three button hashes.
+      if (buttons.length > 3) {
+        SC.warn("Tried to show SC.AlertPane with %@ buttons. SC.AlertPane only supports up to three buttons.".fmt(buttons.length));
+      }
+      //@endif
+
+      // Determine if any button hash specifies isDefault/isCancel. If so, we need
+      // to override the button views' default settings.
       hasDefault = !!buttons.findProperty('isDefault');
       hasCancel = !!buttons.findProperty('isCancel');
 
-      buttons.forEach(function (button) {
-        idx++;
-        if (!button) return;
-        buttonView = pane.get('button%@'.fmt(idx));
+      for (idx = 0; idx < 3; idx++) {
+        button = buttons[idx];
+        if (!button) continue;
+
+        buttonView = pane.get('button%@'.fmt(idx + 1));
 
         layerId = button.layerId;
         title = button.title;
+        localize = button.localize;
         toolTip = button.toolTip;
         action = button.action;
         target = button.target;
@@ -480,6 +537,7 @@ SC.AlertPane.mixin(
         isCancel = hasCancel ? !!button.isCancel : undefined;
 
         buttonView.set('title', title);
+        if (localize === YES) buttonView.set('localize', YES);
         if (toolTip) buttonView.set('toolTip', toolTip);
         if (action) buttonView.set('customAction', action);
         if (target) buttonView.set('customTarget', target);
@@ -488,7 +546,7 @@ SC.AlertPane.mixin(
         if (isCancel !== undefined) { buttonView.set('isCancel', isCancel); }
         buttonView.set('isVisible', !!title);
         buttonView.set('themeName', themeName);
-      });
+      }
     } else {
       // if there are no buttons defined, just add the standard OK button
       buttonView = pane.get('button1');
