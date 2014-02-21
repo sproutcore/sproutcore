@@ -178,20 +178,39 @@ test("chained store changes should propagate reliably", function() {
   equals(rec.fired, YES, 'original rec.title should have notified');  
 });
 
-test("record retrievals triggered from a chained store and returned to the parent store should be reflected in the chained store", function() {
-  var parent = SC.Store.create().from(SC.DataSource.create({
-    retrieveRecords: function(store, storeKeys, ids) {
-      this.invokeLast(function() {
-        storeKeys.forEach(function(key, i) {
-          store.dataSourceDidComplete(key, { title: 'Stupendous! AB-solutely corking.' });
-        });
-      })
-      return YES;
-    }
-  }));
 
-  var chained = parent.chain(),
-      chainedRec, storeKey;
+
+var title = 'A Heartbreaking Work of Staggering Genius',
+    parent, chained;
+module("SC.NestedStore#retrieveRecords", {
+  setup: function() {
+    parent = SC.Store.create().from(SC.DataSource.create({
+      retrieveRecords: function(store, storeKeys, ids) {
+        this.invokeLast(function() {
+          storeKeys.forEach(function(key, i) {
+            var didError;
+            try {
+              store.dataSourceDidComplete(key, { title: title });
+            } catch (e) {
+              didError = YES;
+            }
+            ok(!didError, "Record %@ loaded error-free.".fmt(store.idFor(key)));
+          });
+        })
+        return YES;
+      }
+    }));
+    chained = parent.chain();
+  },
+
+  teardown: function() {
+    chained.destroy();
+    parent.destroy();
+  }
+})
+
+test("Retrieving a record from the nested store should succeed, and be reflected in the nested store.", function() {
+  var chainedRec, storeKey;
 
   SC.run(function() {
     chainedRec = chained.find(Rec, 1);
@@ -201,6 +220,46 @@ test("record retrievals triggered from a chained store and returned to the paren
 
   // This immediate status update is sensitive to the data source's use of invokeNext to load the record.
   equals(chained.peekStatus(storeKey), SC.Record.READY_CLEAN, "After retrieving, the record's status should be READY_CLEAN");
+});
 
+test("Retrieving a record from the nested store should succeed & be reflected in the nested store if an attribute is read during load.", function() {
+  var chainedRec, storeKey;
 
+  SC.run(function() {
+    chainedRec = chained.find(Rec, 1);
+    storeKey = chainedRec.get('storeKey');
+    // Verify that the record is loading.
+    equals(chained.peekStatus(storeKey), SC.Record.BUSY_LOADING, "While retrieving, the record's status should be BUSY_LOADING");
+    // Get a value to trigger any potential locks.
+    chainedRec.get('title');
+  });
+
+  // This immediate status update is sensitive to the data source's use of invokeNext to load the record.
+  equals(chained.peekStatus(storeKey), SC.Record.READY_CLEAN, "After retrieving and getting a value while loading, the record's status should be READY_CLEAN");
+  equals(chainedRec.get('title'), title, "The record's value updates correctly after being prematurely retrieved while loading");
+});
+
+test("Retrieving a record from the nested store should succeed & be reflected in the nested store if an attribute is read during load and an unrelated nested-store record is dirtied.", function() {
+  var chainedRec, chainedRec2, storeKey;
+
+  SC.run(function() {
+    chainedRec = chained.find(Rec, 1);
+    storeKey = chainedRec.get('storeKey');
+  });
+
+  equals(chained.peekStatus(storeKey), SC.Record.READY_CLEAN, "PRELIM: Unrelated record loads successfully");
+
+  SC.run(function() {
+    chainedRec2 = chained.find(Rec, 2);
+    storeKey = chainedRec2.get('storeKey');
+    // Verify that the record is loading.
+    equals(chained.peekStatus(storeKey), SC.Record.BUSY_LOADING, "While retrieving, the record's status should be BUSY_LOADING");
+    // Get a value on the loading record to trigger any potential locks.
+    chainedRec2.get('title');
+    // Update the other record to set hasChanges.
+    chainedRec.set('title', 'A fairly emotional work of mediocre if any genius');
+  });
+
+  ok(chained.get('hasChanges'), "The chained store has registered a change.");
+  equals(chainedRec2.get('title'), title, "The record's value is available after loaded into a chained store with unrelated changes");
 });
