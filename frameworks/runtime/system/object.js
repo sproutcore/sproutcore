@@ -127,26 +127,18 @@ SC._object_extend = function _object_extend(base, ext, proto) {
     // Possibly add to bindings.
     if (key.length > 7 && key.slice(-7) === "Binding") {
       if (!clonedBindings) {
-        bindings = (bindings || SC.EMPTY_ARRAY).slice();
+        bindings = SC.CoreSet.create(bindings);
         clonedBindings = YES;
       }
 
-      if (bindings === null) bindings = (base._bindings || SC.EMPTY_ARRAY).slice();
       //@if(debug)
-      // Add some developer support.
-
-      // If a property binding is set on a Class and that Class is extended and
-      // the same property binding is set in the extend, two instances of the
-      // same Binding will exist on the object leading to strange behavior.
-      for (var i = bindings.length - 1; i >= 0; i--) {
-        if (bindings[i] === key) {
-          // There is already a binding for this key!
-          SC.warn("Developer Warning: '%@' was defined twice on the same class, likely because it was defined on both the parent and its subclass.  See the initial line of the following trace:".fmt(key));
-          SC.Logger.trace();
-        }
+      if (SC.LOG_DUPLICATE_BINDINGS && bindings.contains(key)) {
+        SC.warn("Developer Warning: '%@' was defined twice on the same class, likely because it was defined on both the parent and its subclass.  See the initial line of the following trace:".fmt(key));
+        SC.Logger.trace();
       }
       //@endif
-      bindings[bindings.length] = key;
+
+      bindings.add(key);
 
     // Also add observers, outlets, and properties for functions...
     } else if (value && (value instanceof Function)) {
@@ -223,7 +215,7 @@ SC._object_extend = function _object_extend(base, ext, proto) {
 
 
   // copy bindings, observers, and properties
-  base._bindings = bindings || [];
+  base._bindings = bindings || SC.CoreSet.create();
   base._observers = observers || [];
   base._properties = properties || [];
   base.outlets = outlets || [];
