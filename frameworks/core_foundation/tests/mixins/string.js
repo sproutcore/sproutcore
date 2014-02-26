@@ -138,3 +138,8 @@ test("Multiply string", function() {
   equals('xyz'.mult(1), 'xyz');
   equals('xyz'.mult(2), 'xyzxyz');
 });
+
+test('CSS escaping a string', function () {
+  equals('AnHtmlId...WithSome:Problematic::Characters'.escapeForCSS(), 'AnHtmlId\\.\\.\\.WithSome\\:Problematic\\:\\:Characters', 'should be escaped');
+  equals('AnHtmlIdWithNormalCharacters'.escapeForCSS(), 'AnHtmlIdWithNormalCharacters', 'should be escaped, with no effect');
+});
