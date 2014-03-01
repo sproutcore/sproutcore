@@ -1171,7 +1171,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   */
   layerIdFor: function(idx) {
     var ret = this._TMP_LAYERID;
-    ret[0] = SC.guidFor(this);
+    ret[0] = this.get('layerId');
     ret[1] = idx;
     return ret.join('-');
   },
@@ -1185,8 +1185,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   contentIndexForLayerId: function(id) {
     if (!id || !(id = id.toString())) return null ; // nothing to do
 
-    var base = this._baseLayerId;
-    if (!base) base = this._baseLayerId = SC.guidFor(this)+"-";
+    var base = this.get('layerId') + '-';
 
     // no match
     if ((id.length <= base.length) || (id.indexOf(base) !== 0)) return null ;
