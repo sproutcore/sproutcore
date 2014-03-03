@@ -509,6 +509,16 @@ SC.PickerPane = SC.PalettePane.extend(
   */
   windowPadding: null,
 
+  //@if(debug)
+  /** @private SC.Pane */
+  append: function () {
+    // Provide some developer support.
+    SC.warn("Developer Warning: You should not use .append() with SC.PickerPane. Instead use .popup() and pass in an anchor view or element.");
+
+    sc_super();
+  },
+  //@endif
+
   /* @private Observe the frame for changes so that we can reposition if necessary. */
   borderFrameDidChange: function () {
     this.positionPane(true);
