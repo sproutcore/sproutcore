@@ -52,14 +52,6 @@ SC.PICKER_POINTER = 'pointer';
 SC.PICKER_MENU_POINTER = 'menu-pointer';
 
 /**
-  Pointer layout for perfect right/left/top/bottom.
-
-  @constant
-  @static
-*/
-SC.POINTER_LAYOUT = ["perfectRight", "perfectLeft", "perfectTop", "perfectBottom"];
-
-/**
   @class
 
   Display a non-modal pane that automatically repositions around a view so as
@@ -257,6 +249,12 @@ SC.PickerPane = SC.PalettePane.extend(
     @default YES
   */
   isModal: YES,
+
+  /**
+    @private
+    TODO: Remove SC.POINTER_LAYOUT backward compatibility.
+  */
+  _sc_pointerLayout: SC.POINTER_LAYOUT || ['perfectRight', 'perfectLeft', 'perfectTop', 'perfectBottom'],
 
   /** @private
     @type String
@@ -570,26 +568,23 @@ SC.PickerPane = SC.PalettePane.extend(
 
       origin = SC.cloneRect(anchor);
 
-      if (preferType) {
-        switch (preferType) {
-        case SC.PICKER_MENU:
-        case SC.PICKER_FIXED:
-          if (!preferMatrix || preferMatrix.length !== 3) {
-            // default below the anchor with fine-tuned visual alignment
-            // for Menu to appear just below the anchorElement.
-            this.set('preferMatrix', [1, 4, 3]);
-          }
-
-          // fine-tuned visual alignment from preferMatrix
-          origin.x += ((this.preferMatrix[2] === 0) ? origin.width : 0) + this.preferMatrix[0];
-          origin.y += ((this.preferMatrix[2] === 3) ? origin.height : 0) + this.preferMatrix[1];
-          break;
-        default:
-          origin.y += origin.height;
-          break;
+      // Adjust the origin for offset based positioning.
+      switch (preferType) {
+      case SC.PICKER_MENU:
+      case SC.PICKER_FIXED:
+        if (!preferMatrix || preferMatrix.length !== 3) {
+          // default below the anchor with fine-tuned visual alignment
+          // for Menu to appear just below the anchorElement.
+          this.set('preferMatrix', [1, 4, 3]);
         }
-      } else {
+
+        // fine-tuned visual alignment from preferMatrix
+        origin.x += ((this.preferMatrix[2] === 0) ? origin.width : 0) + this.preferMatrix[0];
+        origin.y += ((this.preferMatrix[2] === 3) ? origin.height : 0) + this.preferMatrix[1];
+        break;
+      default:
         origin.y += origin.height;
+        break;
       }
 
       // Since we repeatedly need to know the half-width and half-height of the
@@ -878,7 +873,7 @@ SC.PickerPane = SC.PalettePane.extend(
 
     // Loop through the preferred matrix, hopefully finding one that will fit
     // perfectly.
-    for (var i = 0, pointerLen = SC.POINTER_LAYOUT.length; i < pointerLen; i++) {
+    for (var i = 0, pointerLen = this._sc_pointerLayout.length; i < pointerLen; i++) {
       // The current preferred side.
       curType = matrix[i];
 
@@ -914,7 +909,7 @@ SC.PickerPane = SC.PalettePane.extend(
 
         this.set('pointerPosX', 0);
         this.set('pointerPosY', 0);
-        this.set('pointerPos', SC.POINTER_LAYOUT[curType]);
+        this.set('pointerPos', this._sc_pointerLayout[curType]);
 
         break;
 
@@ -935,7 +930,7 @@ SC.PickerPane = SC.PalettePane.extend(
         // shifting (minus half the height of the pointer).
         this.set('pointerPosX', 0);
         this.set('pointerPosY', deltas.top);
-        this.set('pointerPos', SC.POINTER_LAYOUT[curType]);
+        this.set('pointerPos', this._sc_pointerLayout[curType]);
         break;
 
       // If we prefer right or left and can fit right or left respectively, but
@@ -955,7 +950,7 @@ SC.PickerPane = SC.PalettePane.extend(
         // shifting (minus half the height of the pointer).
         this.set('pointerPosX', 0);
         this.set('pointerPosY', Math.abs(deltas.bottom));
-        this.set('pointerPos', SC.POINTER_LAYOUT[curType]);
+        this.set('pointerPos', this._sc_pointerLayout[curType]);
         break;
 
       // If we prefer top or bottom and can fit top or bottom respectively, but
@@ -976,7 +971,7 @@ SC.PickerPane = SC.PalettePane.extend(
         // shifting (minus half the width of the pointer).
         this.set('pointerPosX', Math.abs(deltas.right));
         this.set('pointerPosY', 0);
-        this.set('pointerPos', SC.POINTER_LAYOUT[curType]);
+        this.set('pointerPos', this._sc_pointerLayout[curType]);
         break;
 
       // If we prefer top or bottom and can fit top or bottom respectively, but
@@ -997,7 +992,7 @@ SC.PickerPane = SC.PalettePane.extend(
         // shifting (minus half the width of the pointer).
         this.set('pointerPosX', deltas.left);
         this.set('pointerPosY', 0);
-        this.set('pointerPos', SC.POINTER_LAYOUT[curType]);
+        this.set('pointerPos', this._sc_pointerLayout[curType]);
         break;
       }
 
@@ -1011,13 +1006,13 @@ SC.PickerPane = SC.PalettePane.extend(
         f.x = a.x + a.halfWidth;
         f.y = a.y + a.halfHeight - f.halfHeight;
 
-        this.set('pointerPos', SC.POINTER_LAYOUT[0] + ' fallback');
+        this.set('pointerPos', this._sc_pointerLayout[0] + ' fallback');
         this.set('pointerPosY', f.halfHeight - 40);
       } else {
         f.x = topLefts[matrix[4]][0];
         f.y = topLefts[matrix[4]][1];
 
-        this.set('pointerPos', SC.POINTER_LAYOUT[matrix[4]]);
+        this.set('pointerPos', this._sc_pointerLayout[matrix[4]]);
         this.set('pointerPosY', 0);
       }
 
@@ -1058,11 +1053,11 @@ SC.PickerPane = SC.PalettePane.extend(
   */
   setupPointer: function (a) {
     var pointerOffset = this.pointerOffset,
-        K             = SC.PickerPane;
+        K = SC.PickerPane;
 
-    // set up pointerOffset according to type and size if not provided explicitly
+    // Set windowPadding and pointerOffset (SC.PICKER_MENU_POINTER only).
     if (!pointerOffset || pointerOffset.length !== 4) {
-      if (this.get('preferType') == SC.PICKER_MENU_POINTER) {
+      if (this.get('preferType') == SC.PICKER_MENU || this.get('preferType') == SC.PICKER_MENU_POINTER) {
         switch (this.get('controlSize')) {
         case SC.TINY_CONTROL_SIZE:
           this.set('pointerOffset', K.TINY_PICKER_MENU_POINTER_OFFSET);
@@ -1276,84 +1271,78 @@ SC.PickerPane = SC.PalettePane.extend(
   }
 });
 
-/**
-  Default metrics for the different control sizes.
-*/
 
-/** @static */
-SC.PickerPane.WINDOW_PADDING = 20;
+/** Class methods. */
+SC.PickerPane.mixin( /** @scope SC.PickerPane */ {
 
-/** @static */
-SC.PickerPane.TINY_MENU_WINDOW_PADDING = 12;
+  //---------------------------------------------------------------------------
+  // Constants
+  //
 
-/** @static */
-SC.PickerPane.SMALL_MENU_WINDOW_PADDING = 11;
+  /** @static */
+  WINDOW_PADDING: 20,
 
-/** @static */
-SC.PickerPane.REGULAR_MENU_WINDOW_PADDING = 12;
+  /** @static */
+  TINY_MENU_WINDOW_PADDING: 12,
 
-/** @static */
-SC.PickerPane.LARGE_MENU_WINDOW_PADDING = 17;
+  /** @static */
+  SMALL_MENU_WINDOW_PADDING: 11,
 
-/** @static */
-SC.PickerPane.HUGE_MENU_WINDOW_PADDING = 12;
+  /** @static */
+  REGULAR_MENU_WINDOW_PADDING: 12,
 
-/** @deprecated Version 1.10.  Use SC.PickerPane.WINDOW_PADDING.
-  @static
-*/
-SC.PickerPane.PICKER_EXTRA_RIGHT_OFFSET = 20;
+  /** @static */
+  LARGE_MENU_WINDOW_PADDING: 17,
 
-/** @deprecated Version 1.10.  Use SC.PickerPane.TINY_MENU_WINDOW_PADDING.
-  @static
-*/
-SC.PickerPane.TINY_PICKER_MENU_EXTRA_RIGHT_OFFSET = 12;
+  /** @static */
+  HUGE_MENU_WINDOW_PADDING: 12,
 
-/** @deprecated Version 1.10.  Use SC.PickerPane.SMALL_MENU_WINDOW_PADDING.
-  @static
-*/
-SC.PickerPane.SMALL_PICKER_MENU_EXTRA_RIGHT_OFFSET = 11;
+  /** @static */
+  PICKER_POINTER_OFFSET: [9, -9, -18, 18],
 
-/** @deprecated Version 1.10.  Use SC.PickerPane.REGULAR_MENU_WINDOW_PADDING.
-  @static
-*/
-SC.PickerPane.REGULAR_PICKER_MENU_EXTRA_RIGHT_OFFSET = 12;
+  /** @static */
+  TINY_PICKER_MENU_POINTER_OFFSET: [9, -9, -18, 18],
 
-/** @deprecated Version 1.10.  Use SC.PickerPane.LARGE_MENU_WINDOW_PADDING.
-  @static
-*/
-SC.PickerPane.LARGE_PICKER_MENU_EXTRA_RIGHT_OFFSET = 17;
+  /** @static */
+  SMALL_PICKER_MENU_POINTER_OFFSET: [9, -9, -8, 8],
 
-/** @deprecated Version 1.10.  Use SC.PickerPane.HUGE_MENU_WINDOW_PADDING.
-  @static
-*/
-SC.PickerPane.HUGE_PICKER_MENU_EXTRA_RIGHT_OFFSET = 12;
+  /** @static */
+  REGULAR_PICKER_MENU_POINTER_OFFSET: [9, -9, -12, 12],
 
-/**
-  @static
-*/
-SC.PickerPane.PICKER_POINTER_OFFSET = [9, -9, -18, 18];
+  /** @static */
+  LARGE_PICKER_MENU_POINTER_OFFSET: [9, -9, -16, 16],
 
-/**
-  @static
-*/
-SC.PickerPane.TINY_PICKER_MENU_POINTER_OFFSET = [9, -9, -18, 18];
+  /** @static */
+  HUGE_PICKER_MENU_POINTER_OFFSET: [9, -9, -18, 18],
 
-/**
-  @static
-*/
-SC.PickerPane.SMALL_PICKER_MENU_POINTER_OFFSET = [9, -9, -8, 8];
+  /** @deprecated Version 1.10.  Use SC.PickerPane.WINDOW_PADDING.
+    @static
+  */
+  PICKER_EXTRA_RIGHT_OFFSET: 20,
 
-/**
-  @static
-*/
-SC.PickerPane.REGULAR_PICKER_MENU_POINTER_OFFSET = [9, -9, -12, 12];
+  /** @deprecated Version 1.10.  Use SC.PickerPane.TINY_MENU_WINDOW_PADDING.
+    @static
+  */
+  TINY_PICKER_MENU_EXTRA_RIGHT_OFFSET: 12,
 
-/**
-  @static
-*/
-SC.PickerPane.LARGE_PICKER_MENU_POINTER_OFFSET = [9, -9, -16, 16];
+  /** @deprecated Version 1.10.  Use SC.PickerPane.SMALL_MENU_WINDOW_PADDING.
+    @static
+  */
+  SMALL_PICKER_MENU_EXTRA_RIGHT_OFFSET: 11,
 
-/**
-  @static
-*/
-SC.PickerPane.HUGE_PICKER_MENU_POINTER_OFFSET = [9, -9, -18, 18];
+  /** @deprecated Version 1.10.  Use SC.PickerPane.REGULAR_MENU_WINDOW_PADDING.
+    @static
+  */
+  REGULAR_PICKER_MENU_EXTRA_RIGHT_OFFSET: 12,
+
+  /** @deprecated Version 1.10.  Use SC.PickerPane.LARGE_MENU_WINDOW_PADDING.
+    @static
+  */
+  LARGE_PICKER_MENU_EXTRA_RIGHT_OFFSET: 17,
+
+  /** @deprecated Version 1.10.  Use SC.PickerPane.HUGE_MENU_WINDOW_PADDING.
+    @static
+  */
+  HUGE_PICKER_MENU_EXTRA_RIGHT_OFFSET: 12
+
+});
