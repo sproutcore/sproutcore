@@ -1097,15 +1097,6 @@ SC.PickerPane = SC.PalettePane.extend(
                       offsetKey[3] + overlapTuningY];
 
         this.set('pointerOffset', offset);
-        // TODO: What to do about this?
-        if (SC.none(this.get('windowPadding'))) {
-          this.set('windowPadding', K.WINDOW_PADDING);
-        }
-      }
-    } else {
-      // TODO: What to do about this?
-      if (SC.none(this.get('windowPadding'))) {
-        this.set('windowPadding', K.WINDOW_PADDING);
       }
     }
 
@@ -1262,8 +1253,16 @@ SC.PickerPane = SC.PalettePane.extend(
     this.positionPane();
   },
 
-  /** @private Cleanup. */
-  destroy: function() {
+  /** @private SC.Object */
+  init: function () {
+    sc_super();
+
+    // Set defaults that can only be configured on initialization.
+    if (!this.windowPadding) { this.windowPadding = SC.PickerPane.WINDOW_PADDING; }
+  },
+
+  /** @private SC.Object */
+  destroy: function () {
     this._scrollView = null;
     this._anchorView = null;
     this._anchorHTMLElement = null;
