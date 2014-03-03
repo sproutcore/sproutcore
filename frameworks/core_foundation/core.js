@@ -88,6 +88,26 @@ SC.ALIGN_BOTTOM_LEFT = 'bottom-left';
 */
 SC.ALIGN_BOTTOM_RIGHT = 'bottom-right';
 
+/**
+  Indicates that the content should be positioned to the right.
+*/
+SC.POSITION_RIGHT = 0;
+
+/**
+  Indicates that the content should be positioned to the left.
+*/
+SC.POSITION_LEFT = 1;
+
+/**
+  Indicates that the content should be positioned above.
+*/
+SC.POSITION_TOP = 2;
+
+/**
+  Indicates that the content should be positioned below.
+*/
+SC.POSITION_BOTTOM = 3;
+
 
 SC.mixin(/** @lends SC */ {
 
