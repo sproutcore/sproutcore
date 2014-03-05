@@ -1991,16 +1991,19 @@ SC.CoreView.unload = function () {
   handle an event but allow it to continue bubbling, just return NO.)
 
   It bears emphasizing that `mouseDrag` and `mouseUp` events for a given mouse click sequence
-  are *only ever called* on the view which successfully responded to the mouseUp event. This
-  gives the mouseDown event control over the entire click sequence.
+  are *only ever called* on the view which successfully responded to the `mouseDown` event. This
+  gives `mouseDown` control over which view responder-chain is allowed to handle the entire
+  click sequence.
 
   (Note that because of how events bubble up the responder chain, if a child view implements
   `mouseDown` but not `mouseDrag` or `mouseUp`, those events will bubble to its parent. This
   may cause unexpected behavior if similar events are handled at different parts of your view
-  hierarchy.)
+  hierarchy, for example if you handle `mouseDown` in a child and a parent, and only handle
+  `mouseUp` in the parent.)
 
   - `mouseDown` -- Called on the target view and responder chain when the user depresses a
-    button. A view must implement mouseDown (and not return NO) in order to receive mouseUp.
+    button. A view must implement `mouseDown` (and not return NO) in order to be notified
+    of the subsequent drag and up events.
   - `mouseDrag` -- Called on the target view if it handled mouseDown. A view must implement
     mouseDown (and not return NO) in order to receive mouseUp; only the view which handled a
     given click sequence's mouseDown will receive `mouseDrag` events (and will continue to
