@@ -260,6 +260,11 @@ SC.EMPTY_PLACEHOLDER = '@@EMPTY@@';
 */
 SC.Binding = /** @scope SC.Binding.prototype */{
 
+  /**
+    Quack.
+  */
+  isBinding: YES,
+
   /** @private
     This is the core method you use to create a new binding instance.  The
     binding instance will have the receiver instance as its parent which means
