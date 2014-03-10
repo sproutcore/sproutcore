@@ -102,7 +102,8 @@ SC._object_extend = function _object_extend(base, ext, proto) {
   var bindings = base._bindings, clonedBindings = NO,
       observers = base._observers, clonedObservers = NO,
       properties = base._properties, clonedProperties = NO,
-      paths, pathLoc, local, value;
+      paths, pathLoc, local, value,
+      len, i, found;
 
   // outlets are treated a little differently because you can manually
   // name outlets in the passed in hash. If this is the case, then clone
@@ -124,32 +125,25 @@ SC._object_extend = function _object_extend(base, ext, proto) {
     // get the value.  use concats if defined
     value = (concats.hasOwnProperty(key) ? concats[key] : null) || ext[key];
 
-    // Possibly add to bindings.
+    // Support fooBinding syntax...
     if (key.length > 7 && key.slice(-7) === "Binding") {
       if (!clonedBindings) {
         bindings = (bindings || SC.EMPTY_ARRAY).slice();
         clonedBindings = YES;
       }
 
-      if (bindings === null) bindings = (base._bindings || SC.EMPTY_ARRAY).slice();
-      //@if(debug)
-      // Add some developer support.
-
-      // If a property binding is set on a Class and that Class is extended and
-      // the same property binding is set in the extend, two instances of the
-      // same Binding will exist on the object leading to strange behavior.
-      for (var i = bindings.length - 1; i >= 0; i--) {
-        if (bindings[i] === key) {
-          // There is already a binding for this key!
-          SC.warn("Developer Warning: '%@' was defined twice on the same class, likely because it was defined on both the parent and its subclass.  See the initial line of the following trace:".fmt(key));
-          SC.Logger.trace();
-        }
+      if (bindings === null) {
+        bindings = (base._bindings || SC.EMPTY_ARRAY).slice();
       }
-      //@endif
-      bindings[bindings.length] = key;
 
-    // Also add observers, outlets, and properties for functions...
-    } else if (value && (value instanceof Function)) {
+      // If the binding key is new (not found on base), add it to the list of binding keys.
+      if (base[key] == null) { // (SC.none is inlined here for performance.)
+        bindings[bindings.length] = key;
+      }
+    }
+
+    // Add observers, outlets, properties and extensions for functions...
+    else if (value && (value instanceof Function)) {
 
       // add super to funcs.  Be sure not to set the base of a func to
       // itself to avoid infinite loops.
@@ -367,39 +361,44 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
 
   // Tested in ../tests/system/object/enhance.js
   reopen: function (props) {
-    var ret;
-    ret = SC._object_extend(this.prototype, props, this.__sc_super__);
-
+    // Reopen subclasses.
     if (this.subclasses) {
-      this.subclasses.forEach(function (subclass, idx) {
-        //@if(debug)
-        // Turned Off, SC.View.reopen() makes this too obnoxious. SC.warn("Developer Warning: %@ was re-opened after subclasses were defined.  We're still registering the additions to all subclasses of %@, but it would be safer to reopen() %@ before subclassing it.".fmt(this, this, this));
-        //@endif
-        var key, value;
+      var subclass, key, value, theseProps,
+          len = this.subclasses.length, i;
+      for (i = 0; i < len; i++) {
+        theseProps = null;
+        subclass = this.subclasses[i];
         for (key in props) {
-
           // avoid copying builtin methods
           if (!props.hasOwnProperty(key)) continue;
 
-          value = props[key];
-
           // Remove properties that have already been overridden by the subclass.
           if (subclass.prototype.hasOwnProperty(key)) {
-            delete props[key];
+            if (!theseProps) {
+              theseProps = SC.clone(props);
+            }
+            delete theseProps[key];
+            continue;
           }
 
           // Remove enhancements that are only intended for the superclass's
           // function.
+          value = props[key];
           if (value && (value instanceof Function) && (value.isEnhancement)) {
-            delete props[key];
+            if (!theseProps) {
+              theseProps = SC.clone(props);
+            }
+            delete theseProps[key];
+            continue;
           }
         }
 
-        subclass.reopen(props);
-      }, this);
+        subclass.reopen(theseProps || props);
+      }
     }
 
-    return ret;
+    // Reopen this.
+    return SC._object_extend(this.prototype, props, this.__sc_super__)
   },
 
   /**

@@ -9,7 +9,7 @@
 // ========================================================================
 /*globals module, test, ok, isObj, equals, expects */
 
-var fromObject, midObject, toObject, binding, Bon1, bon2, first, second, third, binding1, binding2;
+var FromObject, fromObject, midObject, toObject, binding, Bon1, bon2, first, second, third, binding1, binding2;
 
 module("basic object binding", {
 
@@ -782,4 +782,44 @@ test("works with local path", function () {
   SC.RunLoop.end();
 
   equals(TestNamespace.toObject.get('relative'), "newerValue");
+});
+
+module("Overriding binding in subclass", {
+  setup: function() {
+    FromObject = SC.Object.extend({
+      localValue1: 'hello',
+      localValue2: 'world',
+      value: null,
+      valueBinding: SC.Binding.oneWay('.localValue1')
+    });
+  },
+  teardown: function() {
+    FromObject = null;
+  }
+});
+
+test("Bindings override in subclasses.", function() {
+  SC.LOG_DUPLICATE_BINDINGS = NO; // clean consoles
+
+  SC.RunLoop.begin();
+  fromObject = FromObject.create();
+  SC.RunLoop.end();
+
+  equals(fromObject.get('value'), 'hello', "PRELIM: Superclass binding gives value of");
+
+  fromObject.destroy();
+
+  SC.RunLoop.begin();
+  fromObject = FromObject.create({
+    valueBinding: SC.Binding.oneWay('.localValue2')
+  });
+  SC.RunLoop.end();
+
+  ok(fromObject._bindings.length === 1, "Duplicate bindings are not created.")
+
+  equals(fromObject.get('value'), 'world', "Superclass binding should have been overridden in the subclass, giving value a value of");
+
+  fromObject.destroy();
+
+  SC.LOG_DUPLICATE_BINDINGS = YES;
 });
