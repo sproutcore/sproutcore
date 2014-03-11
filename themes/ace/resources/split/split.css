@@ -10,8 +10,7 @@ $theme.split-divider {
     position: absolute;
   }
 
-
-  .sc-layout-horizontal & {
+  &.sc-layout-horizontal {
     .line {
       left: 5px;
       width: 1px;
@@ -20,7 +19,7 @@ $theme.split-divider {
     }
   }
 
-  .sc-layout-vertical & {
+  &.sc-layout-vertical {
     .line {
       top: 5px;
       height: 1px;

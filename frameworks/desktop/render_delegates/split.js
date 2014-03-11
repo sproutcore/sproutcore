@@ -8,11 +8,21 @@
 SC.BaseTheme.splitRenderDelegate = SC.RenderDelegate.create({
   className: 'split',
 
+  // Returns { SC.LAYOUT_VERTICAL: true/false, SC.LAYOUT_HORIZONTAL: true/false }
+  // for use in setClass.
+  _classesForDataSource: function(dataSource) {
+    var classes = {},
+      layoutDirection = dataSource.get('layoutDirection');
+    classes[SC.LAYOUT_VERTICAL] = layoutDirection === SC.LAYOUT_VERTICAL;
+    classes[SC.LAYOUT_HORIZONTAL] = layoutDirection === SC.LAYOUT_HORIZONTAL;
+    return classes;
+  },
+
   render: function(dataSource, context) {
-    context.addClass(dataSource.get('layoutDirection'));
+    context.setClass(this._classesForDataSource(dataSource));
   },
 
   update: function(dataSource, jquery) {
-    jquery.addClass(dataSource.get('layoutDirection'));
+    jquery.setClass(this._classesForDataSource(dataSource));
   }
 });

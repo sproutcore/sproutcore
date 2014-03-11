@@ -61,14 +61,14 @@ SC.RESIZE_AUTOMATIC = 'sc-automatic-resize';
       })
 
   Dividers
-  ------------------------------------------
+  =======================================
   Dividers are automatically added between every child view.
 
   You can specify what dividers to create in two ways:
 
   - Set splitDividerView to change the default divider view class to use.
 
-  - Override splitDividerViewBetween(splitView, view1, view2), either in
+  - Override splitViewDividerBetween(splitView, view1, view2), either in
     your subclass of SC.SplitView or in a delegate, and return the divider
     view instance that should go between the two views.
 
@@ -87,19 +87,21 @@ SC.RESIZE_AUTOMATIC = 'sc-automatic-resize';
 SC.SplitView = SC.View.extend({
   /**@scope SC.SplitView.prototype*/
 
+  /** @private */
   classNames: ['sc-split-view'],
 
+  /** @private */
   childViews: ['topLeftView', 'bottomRightView'],
 
-  // used by the splitView computed property to find the nearest SplitView.
+  // Used by the splitView computed property to find the nearest SplitView.
   isSplitView: YES,
 
   /**
-   * The type of view to create for the divider views. SC.SplitDividerView by default.
-   *
-   * Should be a class, not an instance.
-   *
-   * @type {SC.View}
+   The class of view to create for the divider views. Override this to use a subclass of SC.SplitDividerView,
+   or to implment your own.
+   
+   @type {SC.View}
+   @default SC.SplitDividerView
   */
   splitDividerView: SC.SplitDividerView,
 
@@ -136,8 +138,7 @@ SC.SplitView = SC.View.extend({
   */
   splitChildCursorStyle: null,
 
-  /**
-    @private
+  /** @private
     Only occurs during drag, which only happens after render, so we
     update directly.
   */
@@ -145,15 +146,14 @@ SC.SplitView = SC.View.extend({
     this.get('cursor').set('cursorStyle', this.get('splitChildCursorStyle'));
   }.observes('splitChildCursorStyle'),
 
-
-  // set up the SC.Cursor instance that this view and all the subviews
-  // will share.
+  /** @private */
   init: function() {
+    // set up the SC.Cursor instance that this view and all the subviews
+    // will share.
     this.cursor = SC.Cursor.create();
     sc_super();
   },
 
-  //
   // RENDERING
   // Things like layoutDirection must be rendered as class names.
   // We delegate to a render delegate.
@@ -182,14 +182,26 @@ SC.SplitView = SC.View.extend({
     }
   }.property('frame', 'layoutDirection').cacheable(),
 
+  /** @private */
   viewDidResize: function () {
     this.scheduleTiling();
 
     sc_super();
   },
 
+  /** @private */
   layoutDirectionDidChange: function() {
+    // Schedule tiling.
     this.scheduleTiling();
+    // Propagate to dividers.
+    var layoutDirection = this.get('layoutDirection'),
+        childViews = this.get('childViews'),
+        len = childViews ? childViews.get('length') : 0,
+        i, view;
+    for (i = 0; i < len; i++) {
+      view = childViews[i];
+      if (view.get('isSplitDivider')) view.setIfChanged('layoutDirection', layoutDirection);
+    }
   }.observes('layoutDirection'),
 
   //
@@ -286,6 +298,7 @@ SC.SplitView = SC.View.extend({
   */
   _scsv_setupChildViews: function() {
     var del = this.get('delegate'),
+        layoutDirection = this.get('layoutDirection'),
 
         children = this.get('childViews').copy(), len = children.length, idx,
         child, lastChild, lastNonDividerChild,
@@ -335,7 +348,9 @@ SC.SplitView = SC.View.extend({
         }
 
         if (divider) {
-          divider.isSplitDivider = YES;
+          divider.setIfChanged('isSplitDivider', YES);
+          divider.setIfChanged('layoutDirection', layoutDirection);
+
           newDividers[dividerId] = divider;
 
           if (oldDividers[dividerId]) {

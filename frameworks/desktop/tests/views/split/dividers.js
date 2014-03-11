@@ -213,7 +213,7 @@ test("Adding and removing before a divider doesn't screw things majorly", functi
 
 });
 
-test("Adding and removing several views doesn't screw things", function() {
+test("Adding and removing several views doesn't screw things up", function() {
   var view = createSplitView({
     childViews: 'left middle right'.w(),
     middle: SC.View.design(SC.SplitChild, { name: 'middle' })
@@ -240,4 +240,23 @@ test("Adding and removing several views doesn't screw things", function() {
   SC.RunLoop.end();
   
   checkDividers(view, 5);
+});
+
+test("SplitView#layoutDirection is correctly propagated to its dividers.", function() {
+  var view = createSplitView(),
+      layoutDirection = view.get('layoutDirection'),
+      nextLayoutDirection = layoutDirection === SC.LAYOUT_VERTICAL ? SC.LAYOUT_HORIZONTAL : SC.LAYOUT_VERTICAL; // hey just in case the default changes
+
+  var divider = view.childViews[1];
+  ok(divider.isSplitDivider, "PRELIM: We found the divider.");
+
+  equals(divider.get('layoutDirection'), layoutDirection, "The divider's layoutDirection should match that of the SplitView.");
+
+  SC.RunLoop.begin();
+  view.set('layoutDirection', nextLayoutDirection);
+  SC.RunLoop.end();
+
+  equals(divider.get('layoutDirection'), nextLayoutDirection, "The divider's layoutDirection should update when the SplitView's does.");
+
+  view.destroy();
 });

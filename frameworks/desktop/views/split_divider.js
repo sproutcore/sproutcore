@@ -20,18 +20,44 @@ sc_require('mixins/split_thumb');
   @author Alex Iskander
 */
 SC.SplitDividerView = SC.View.extend(SC.SplitChild, SC.SplitThumb,
-{
-  /** @scope SC.SplitDividerView.prototype */
+/** @scope SC.SplitDividerView.prototype */ {
+
+  /** @private */
   classNames: ['sc-split-divider-view'],
+
+  /** @private */
+  classNameBindings: ['layoutDirection'],
   
-  // set to prevent SC.SplitView from automatically creating dividers
-  // to sit between this divider and another view.
+  /**
+    Walks like a duck. Used and maintained by SC.SplitView to keep track
+    of which of its childViews are dividers.
+
+    @type Boolean
+  */
   isSplitDivider: YES,
 
-  // NOTE: 'sc-fixed-size' is only hard-coded because SC.SplitView requires
-  // this file, and SC.FIXED_SIZE is defined inside SC.SplitView.
+  /**
+    The layout direction of the parent SplitView. May be SC.LAYOUT_VERTICAL
+    or SC.LAYOUT_HORIZONTAL. This property is also added as a class on this
+    view.
+    
+    You generally will not set this property yourself; it is managed by the
+    parent SplitView.
+
+    @type String
+    @default SC.LAYOUT_HORIZONTAL
+   */
+  layoutDirection: SC.LAYOUT_HORIZONTAL,
+
+  /** @private
+    This indicates that the view should not resize while being dragged; this
+    is generally the desired behavior.
+
+    (NOTE: SC.FIXED_SIZE is hard-coded here. It is defined on SC.SplitView,
+    which requires this file.)
+   */
   autoResizeStyle: 'sc-fixed-size',
-  
+
   movesSibling: SC.MOVES_CHILD,
   
   size: SC.propertyFromRenderDelegate('dividerSize', 10),
