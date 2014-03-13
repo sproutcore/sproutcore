@@ -257,10 +257,6 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     If YES, overflowing items are placed into a menu and an overflow segment is
     added to popup that menu.
 
-    If NO, the SegmentedView will resize itself to fit its items. (Note that this
-    behavior will be prevented if you specify a flexible layout, e.g. `{ left: 0,
-    right: 0 }`, for your view.
-
     @type Boolean
     @default YES
   */
@@ -299,6 +295,23 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     @default SC.SegmentView
   */
   segmentViewClass: SC.SegmentView,
+
+  /**
+    Set to YES if you would like your SegmentedView to size itself based on its
+    visible segments. Useful if you're using SegmentedView in a flowed context
+    (for example if its parent view has `childViewLayout: SC.View.HORIZONTAL_STACK`).
+
+    The view will not auto-resize unless you define an initial value for the layout
+    property which will be auto-resized (i.e. `width` when in the default horizontal
+    orientation). This is to prevent the view from inappropriately adding width to a
+    flexible (`{ left: 0, right: 0 }`) layout.
+
+    Has no effect if `shouldHandleOverflow` is NO.
+
+    @type Boolean
+    @default NO
+   */
+  shouldAutoResize: NO,
 
   /** @private
     The following properties are used to map items to child views. Item keys
@@ -492,7 +505,9 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     }
 
     // Force a segment remeasure to check overflow
-    this.invokeLast(this.remeasure);
+    if (this.get('shouldHandleOverflow')) {
+      this.invokeLast(this.remeasure);
+    }
   }.observes('*items.[]'),
 
   /** @private
@@ -510,7 +525,9 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       childView.updateItem(this, item);
 
       // Reset our measurements (which depend on width/height or title) and adjust visible views
-      this.invokeLast(this.remeasure);
+      if (this.get('shouldHandleOverflow')) {
+        this.invokeLast(this.remeasure);
+      }
     }
   },
 
@@ -522,7 +539,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       visibleDim = isHorizontal ? this.$().width() : this.$().height();
 
     // Only overflow if we've gone below the minimum dimension required to fit all the segments
-    if (this.get('isOverflowing') || visibleDim <= this.cachedMinimumDim) {
+    if (this.get('shouldHandleOverflow') && (this.get('isOverflowing') || visibleDim <= this.cachedMinimumDim)) {
       this.invokeLast(this.remeasure);
     }
   },
@@ -531,7 +548,9 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     Whenever visibility changes, we need to check to see if we're overflowing.
   */
   isVisibleInWindowDidChange: function () {
-    this.invokeLast(this.remeasure);
+    if (this.get('shouldHandleOverflow')) {
+      this.invokeLast(this.remeasure);
+    }
   }.observes('isVisibleInWindow'),
 
   /** @private
@@ -539,6 +558,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     segments for overflow if necessary.
   */
   remeasure: function () {
+    if (!this.get('shouldHandleOverflow')) { return; }
+
     var childViews = this.get('childViews'),
         overflowView;
 
@@ -562,6 +583,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     This method is called to adjust the segment views to see if we need to handle for overflow.
    */
   adjustOverflow: function () {
+    if (!this.get('shouldHandleOverflow')) { return; }
+
     var childViews = this.get('childViews'),
         childView,
         value = this.get('value'),
@@ -572,7 +595,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         curElementsDim = 0,
         dimToFit, length, i,
         isOverflowing = NO,
-        wantsAutoResize = !this.get('shouldHandleOverflow'),
+        wantsAutoResize = this.get('shouldAutoResize'),
         canAutoResize = !SC.none(this.getPath('layout.%@'.fmt(layoutProperty))),
         willAutoResize = wantsAutoResize && canAutoResize;
 

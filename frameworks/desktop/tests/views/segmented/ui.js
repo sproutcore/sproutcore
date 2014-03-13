@@ -192,17 +192,17 @@ var pane;
       itemTitleKey: "title",
       layout: { height: 25 }
     })
-    .add("3_items,1_sel,shouldHandleOverflow", SC.SegmentedView, {
+    .add("3_items,1_sel,shouldAutoResize", SC.SegmentedView, {
       items: "Item1 Item2 Item3".w(),
       value: "Item2",
       layout: { height: 25, width: 0 },
-      shouldHandleOverflow: NO
+      shouldAutoResize: YES
     })
-    .add("3_items,1_sel,shouldHandleOverflow,flexible_layout", SC.SegmentedView, {
+    .add("3_items,1_sel,shouldAutoResize,flexible_layout", SC.SegmentedView, {
       items: "Item1 Item2 Item3".w(),
       value: "Item2",
       layout: { height: 25, left: 0, right: 0 },
-      shouldHandleOverflow: NO
+      shouldAutoResize: YES
     });
 
 
@@ -553,14 +553,14 @@ var pane;
     SC.RunLoop.end();
   });
 
-  test("shouldHandleOverflow", function() {
+  test("shouldAutoResize", function() {
     var segmentedView;
 
-    segmentedView = pane.view('3_items,1_sel,shouldHandleOverflow');
+    segmentedView = pane.view('3_items,1_sel,shouldAutoResize');
 
     ok(segmentedView.getPath('layout.width') !== 0, "View auto-resized to fit the present items.");
 
-    segmentedView = pane.view('3_items,1_sel,shouldHandleOverflow,flexible_layout');
+    segmentedView = pane.view('3_items,1_sel,shouldAutoResize,flexible_layout');
 
     ok(SC.none(segmentedView.getPath('layout.width')), "Having flexible layout prevents view from auto-resizing.")
   });
