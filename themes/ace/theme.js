@@ -1,4 +1,3 @@
-
 /**
  * @class
  * SproutCore's Ace theme.
@@ -25,6 +24,8 @@ SC.AceTheme.Capsule = SC.AceTheme.subtheme("capsule", "capsule");
  */
 SC.AceTheme.Dark = SC.AceTheme.subtheme("dark");
 
-// for backwards-compatibility with apps that do not set their
-// own default theme:
+/**
+ * For backwards-compatibility with apps that do not set their
+ * own default theme:
+ */
 SC.defaultTheme = 'ace';
