@@ -3251,8 +3251,12 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     if (isGroupView) attrs.classNames = this._GROUP_COLLECTION_CLASS_NAMES;
     else attrs.classNames = this._COLLECTION_CLASS_NAMES;
 
-    attrs.layout = this.layoutForContentIndex(idx);
-    if (!attrs.layout) { attrs.layout = SC.View.prototype.layout; }
+    // Layout may be calculated by the collection view beforehand. If so,
+    // assign it to the attributes. If the collection view doesn't calculate
+    // layout or defers calculating layout, then we shouldn't force a layout
+    // on the child view.
+    var layout = this.layoutForContentIndex(idx);
+    if (layout) { attrs.layout = layout; }
 
     return attrs;
   },
@@ -3376,10 +3380,13 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     itemView.set('isDeletable', attrs.isDeletable);
     itemView.set('isSelected', attrs.isSelected);
     itemView.set('layerId', attrs.layerId);
-    itemView.set('layout', attrs.layout);
     itemView.set('outlineLevel', attrs.outlineLevel);
     itemView.set('disclosureState', attrs.disclosureState);
     itemView.set('isLast', attrs.isLast);
+
+    // Don't assign null/undefined layouts.
+    if (attrs.layout) { itemView.set('layout', attrs.layout); }
+
     // If the view's isGroupView property is changing, the associated CSS classes need to
     // be updated.
     var isCurrentlyGroupView = itemView.get('isGroupView'),
