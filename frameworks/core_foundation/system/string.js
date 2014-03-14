@@ -16,6 +16,7 @@ SC.STRING_DASHERIZE_REGEXP = (/[ _]/g);
 SC.STRING_DASHERIZE_CACHE = {};
 SC.STRING_TRIM_LEFT_REGEXP = (/^\s+/g);
 SC.STRING_TRIM_RIGHT_REGEXP = (/\s+$/g);
+SC.STRING_CSS_ESCAPED_REGEXP = (/(:|\.|\[|\])/g);
 
 /**
   @namespace
@@ -113,6 +114,19 @@ SC.mixin(SC.String, {
     }
 
     return ret;
+  },
+
+  /**
+    Escapes the given string to make it safe to use as a jQuery selector.
+    jQuery will interpret '.' and ':' as class and pseudo-class indicators.
+
+    @see http://learn.jquery.com/using-jquery-core/faq/how-do-i-select-an-element-by-an-id-that-has-characters-used-in-css-notation/
+
+    @param {String} str the string to escape
+    @returns {String} the escaped string
+  */
+  escapeForCSS: function (str) {
+    return str.replace(SC.STRING_CSS_ESCAPED_REGEXP, '\\$1');
   },
 
   /**

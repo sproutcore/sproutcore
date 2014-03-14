@@ -39,6 +39,13 @@ SC.supplement(String.prototype,
   },
 
   /**
+    @see SC.String.escapeForCSS
+  */
+  escapeForCSS: function () {
+    return SC.String.escapeForCSS(this);
+  },
+
+  /**
     @see SC.String.loc
   */
   loc: function() {
