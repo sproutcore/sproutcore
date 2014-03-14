@@ -8,14 +8,18 @@ in the web browser using only native HTML5 features. With SproutCore, you can
 build rich, interactive applications in the web in less code than most simple
 web pages require today.
 
+## Getting Started
+
 The easiest way to get started with SproutCore is using the build tools
 included with the SproutCore package when you install it from the Ruby gem.
 Please see the Getting Started documentation on the
 [SproutCore website](http://www.sproutcore.com/) for more information.
 
+## Mailing list
+
 For additional SproutCore user support, join the sproutcore@googlegroups.com
 mailing list and for those interested in working on the framework itself, please
-join sproutcore-dev@googlegroups.com.
+join the sproutcore-dev@googlegroups.com mailing list.
 
 
 ## Contributors
