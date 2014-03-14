@@ -3347,15 +3347,13 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     var layout = this.layoutForContentIndex(contentIndex);
 
     if (layout && layout.height) {
+      // Handle both top aligned and bottom aligned layouts.
       if (layout.top) { layout.top = -layout.height; }
       else { layout.bottom = -layout.height; }
     } else if (layout && layout.width) {
+      // Handle both left aligned and right aligned layouts.
       if (layout.left) { layout.left = -layout.width; }
       else { layout.right = -layout.width; }
-    } else {
-      // There is not really a valid layout for a collection.  Just shape it and
-      // place it out of view.
-      layout = { left: -100, width: 100, top: -100, height: 100 };
     }
 
     return layout;
@@ -3418,7 +3416,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   _removeItemView: function (itemView, idx) {
     var exampleView,
       items = this.get('content'),
-      layout,
+      canPoolView, canPoolLayer,
+      poolLayout,
       pool,
       prototype,
       wasPooled = false;
@@ -3429,7 +3428,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     if (items && itemView.get('content') === items.objectAt(idx)) {
 
       exampleView = this._exampleViewForContentIndex(idx);
-      if (SC.none(exampleView.prototype.isReusable) || exampleView.prototype.isReusable) {
+      prototype = exampleView.prototype;
+      canPoolView = SC.none(prototype.isReusable) || prototype.isReusable;
+      if (canPoolView) {
         // If the exampleView is reusable, send the view to its pool.
         pool = this._poolForExampleView(exampleView);
 
@@ -3447,13 +3448,14 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         pool.push(itemView);
 
         // If the exampleView's layer isn't reusable, destroy it.
-        prototype = exampleView.prototype;
-        if (!SC.none(prototype.isLayerReusable) && !prototype.isLayerReusable) {
-          itemView.destroyLayer();
-        } else {
+        poolLayout = this._poolLayoutForContentIndex(idx);
+        canPoolLayer = poolLayout && (SC.none(prototype.isLayerReusable) || prototype.isLayerReusable);
+        if (canPoolLayer) {
           // If the layer is sticking around, be sure to move it out of view.
-          layout = this._poolLayoutForContentIndex(idx);
-          itemView.set('layout', layout);
+          itemView.set('layout', poolLayout);
+        } else {
+          // We can't pool layers that are prohibited or that cannot be moved out of view (i.e. no poolLayout)
+          itemView.destroyLayer();
         }
 
         // Ensure that the id of views in the pool don't clash with ids that
