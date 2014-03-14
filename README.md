@@ -3,20 +3,27 @@
 SproutCore HTML5 Application Framework
 ======================================
 
-SproutCore is a framework for building blazing-fast, desktop-like applications
+SproutCore is a framework for building blazing-fast, native-caliber applications
 in the web browser using only native HTML5 features. With SproutCore, you can
 build rich, interactive applications in the web in less code than most simple
 web pages require today.
 
-The easiest way to get started with SproutCore is using the build tools
-included with the SproutCore package when you install it from the Ruby gem.
-Please see the Getting Started documentation on the
-[SproutCore website](http://www.sproutcore.com/) for more information.
+## Getting Started
+
+The easiest way to get started with SproutCore is to install the Ruby gem.
+You can find instructions [here](http://sproutcore.com/install/). Once you've
+got SproutCore installed, checkout the [Getting Started](http://guides.sproutcore.com/getting_started.html)
+tutorial. 
+
+## Support
+
+Resources for SproutCore developers include [the docs](http://docs.sproutcore.com/)
+for API documentation, and [the Guides](http://guides.sproutcore.com/) for a
+series of topical walk-throughs.
 
 For additional SproutCore user support, join the sproutcore@googlegroups.com
-mailing list and for those interested in working on the framework itself, please
-join sproutcore-dev@googlegroups.com.
-
+mailing list, or stop by #sproutcore on Freenode IRC. For those interested in
+contributing to the framework itself, please join sproutcore-dev@googlegroups.com.
 
 ## Contributors
 
@@ -46,6 +53,7 @@ code and ideas:
 - Colin Campbell
 - Corey Burrows
 - Cortland Klein
+- Dave Porter
 - Devin Torres
 - Devon Govett
 - Emrys Ingersoll
