@@ -125,7 +125,7 @@ SC.mixin(SC.String, {
     @param {String} str the string to escape
     @returns {String} the escaped string
   */
-  escapeForCSS: function (str) {
+  escapeCssIdForSelector: function (str) {
     return str.replace(SC.STRING_CSS_ESCAPED_REGEXP, '\\$1');
   },
 

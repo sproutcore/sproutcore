@@ -39,10 +39,10 @@ SC.supplement(String.prototype,
   },
 
   /**
-    @see SC.String.escapeForCSS
+    @see SC.String.escapeCssIdForSelector
   */
-  escapeForCSS: function () {
-    return SC.String.escapeForCSS(this);
+  escapeCssIdForSelector: function () {
+    return SC.String.escapeCssIdForSelector(this);
   },
 
   /**

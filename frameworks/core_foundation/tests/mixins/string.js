@@ -140,6 +140,6 @@ test("Multiply string", function() {
 });
 
 test('CSS escaping a string', function () {
-  equals('AnHtmlId...WithSome:Problematic::Characters'.escapeForCSS(), 'AnHtmlId\\.\\.\\.WithSome\\:Problematic\\:\\:Characters', 'should be escaped');
-  equals('AnHtmlIdWithNormalCharacters'.escapeForCSS(), 'AnHtmlIdWithNormalCharacters', 'should be escaped, with no effect');
+  equals('AnHtmlId...WithSome:Problematic::Characters'.escapeCssIdForSelector(), 'AnHtmlId\\.\\.\\.WithSome\\:Problematic\\:\\:Characters', 'should be escaped');
+  equals('AnHtmlIdWithNormalCharacters'.escapeCssIdForSelector(), 'AnHtmlIdWithNormalCharacters', 'should be escaped, with no effect');
 });
