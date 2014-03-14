@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('mixins/collection_view_delegate') ;
+sc_require('mixins/collection_view_delegate');
 sc_require('views/list_item');
 
 /**
@@ -1113,14 +1113,14 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         if (!ret.get('_isRendered')) {
           ret.invokeOnce(ret._doRender);
         }
-        }
       }
+    }
 
     // If we weren't able to re-use a view, then create a new one.
     if (!ret) {
       ret = this.createItemView(exampleView, idx, attrs);
       containerView.insertBefore(ret, null);   // Equivalent to 'append()', but avoids one more function call
-      }
+    }
 
     views[idx] = ret;
     return ret ;
@@ -3365,6 +3365,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   */
   _reconfigureItemView: function (itemView, attrs) {
     itemView.beginPropertyChanges();
+
     // Update the view with the new properties.
     itemView.set('content', attrs.content);
     itemView.set('contentIndex', attrs.contentIndex);
