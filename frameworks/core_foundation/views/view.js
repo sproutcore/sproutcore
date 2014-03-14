@@ -1739,12 +1739,12 @@ SC.CoreView.mixin(
     var p = this.prototype, s = this.superclass.prototype;
     var bindings = p._bindings;
     if (!bindings || bindings === s._bindings) {
-      bindings = p._bindings = (bindings || []).slice();
+      bindings = p._bindings = SC.CoreSet.create(bindings);
     }
 
     keyName = keyName + "Binding";
     p[keyName] = path;
-    bindings.push(keyName);
+    bindings.add(keyName);
 
     return this;
   },
