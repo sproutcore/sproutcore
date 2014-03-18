@@ -83,7 +83,7 @@ test("Proper Initialization", function () {
   var first, second;
   equals(storeKeys.get('length'), 2, "number of primary store keys should be 2");
 
- 
+
   // First
   SC.run(function() { first = store.materializeRecord(storeKeys[0]); });
   ok(SC.kindOf(first, SC.Record), "first record is a kind of a SC.Record Object");
@@ -93,6 +93,29 @@ test("Proper Initialization", function () {
   SC.run(function() { second = store.materializeRecord(storeKeys[1]); });
   ok(SC.kindOf(second, SC.Record), "second record is a kind of a SC.Record Object");
   ok(SC.instanceOf(second, NestedRecord.File), "second record is a instance of a NestedRecord.File Object");
+});
+
+test("Test that reset() clears out the store for re-use", function () {
+  var isEmptyObject = function ( obj ) {
+    var name;
+
+    for (name in obj) {
+      return false;
+    }
+    return true;
+  };
+
+  var parent, child;
+  SC.run(function() { parent = store.materializeRecord(storeKeys[0]); });
+  SC.run(function() { child = parent.get('contents').firstObject(); });
+
+  ok(!isEmptyObject(store.parentRecords), "We expect there to be values in store.parentRecords");
+  ok(!isEmptyObject(store.childRecords), "We expect there to be values in store.childRecords");
+
+  store.reset();
+
+  ok(isEmptyObject(store.parentRecords), "We expect there to no longer be any values in store.parentRecords");
+  ok(isEmptyObject(store.childRecords), "We expect there to no longer be any values in store.childRecords");
 });
 
 test("Proper Status", function () {
@@ -120,15 +143,15 @@ test("Can Push onto child array", function () {
     ok(SC.instanceOf(f, NestedRecord.File), "should be a NestedRecord.File");
     ok(f.get('name'), "should have a name property");
     });
-    
+
     contents.pushObject({type: 'File', name: 'File 4', id: 12});
-    
+
     equals(contents.get('length'), 3, "should have three items");
     contents.forEach(function (f) {
     ok(SC.instanceOf(f, NestedRecord.File), "should be a NestedRecord.File");
     ok(f.get('name'), "should have a name property");
     equals(f.get('status'), SC.Record.READY_DIRTY, 'second record has a READY_CLEAN State');
-    
+
     });
   });
 
@@ -396,7 +419,7 @@ test("Store#pushRetrieve for parent updates the child records, on paths nested m
         }
       ]
     };
-  
+
   ok(nr, "(deep walk) Got nested record");
   equals(nr.get('name'), 'File 1', "(deep walk) File id:3 has correct name");
 
