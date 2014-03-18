@@ -512,8 +512,12 @@ SC.PickerPane = SC.PalettePane.extend(
   //@if(debug)
   /** @private SC.Pane */
   append: function () {
-    // Provide some developer support.
-    SC.warn("Developer Warning: You should not use .append() with SC.PickerPane. Instead use .popup() and pass in an anchor view or element.");
+    // Provide some developer support. People have occasionally been misled by calling append
+    // on PickerPanes, which fails to position the pane properly. Hopefully, we can give
+    // them a clue to speed up finding the problem.
+    if (SC.none(this.get('anchorElement'))) {
+      SC.warn("Developer Warning: You should not use .append() with SC.PickerPane. Instead use .popup() and pass in an anchor view or element.");
+    }
 
     sc_super();
   },
