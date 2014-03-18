@@ -417,14 +417,14 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
             if(childPath.length > 1 && ! processedPaths[hash[childPath[0]]]) {
                 // save it so that we don't processed it over and over
                 processedPaths[hash[childPath[0]]]=true;
-                
+
                 // force fetching of all children records by invoking the children_attribute wrapper code
                 // and then interating the list in an empty loop
                 // Ugly, but there's basically no other way to do it at the moment, other than
                 // leaving this broken as it was before
-                var that=this;
+                var that = this;
                 this.invokeLast(function(){
-                    that.records[storeKey].get(childPath[0]).forEach(function(it){});    
+                  that.records[storeKey].get(childPath[0]).forEach(function(it){});
                 });
             }
           } else {
@@ -687,9 +687,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   reset: function () {
 
     // create a new empty data store
-    this.dataHashes = {} ;
-    this.revisions  = {} ;
-    this.statuses   = {} ;
+    this.dataHashes = {};
+    this.revisions = {};
+    this.statuses = {};
+    this.childRecords = {};
+    this.parentRecords = {};
 
     // also reset temporary objects and errors
     this.chainedChanges = this.locks = this.editables = null;
