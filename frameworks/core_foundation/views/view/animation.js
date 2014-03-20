@@ -3,7 +3,6 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 sc_require("views/view");
-sc_require("views/view/layout_style");
 
 /** @private
   Properties that can be animated
