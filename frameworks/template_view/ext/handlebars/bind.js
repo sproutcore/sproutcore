@@ -134,7 +134,7 @@ Handlebars.registerHelper('bindAttr', function(options) {
   // Generate a unique id for this element. This will be added as a
   // data attribute to the element so it can be looked up when
   // the bound property changes.
-  var dataId = jQuery.uuid++;
+  var dataId = SC._uuid++;
 
   // Handle classes differently, as we can bind multiple classes
   var classBindings = attrs['class'];

@@ -4,7 +4,7 @@
 //            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-/*global jQuery, require, console */
+/*global require, console */
 
 // These commands are used by the build tools to control load order.  On the
 // client side these are a no-op.
@@ -48,14 +48,11 @@ window.SproutCore = window.SproutCore || SC;
 
   You can also use the shorthand "SC" instead of "SproutCore".
 
-  SproutCore-Base is a framework that provides core functions for SproutCore
+  SproutCore-runtime is a framework that provides core functions for SproutCore
   including cross-platform functions, support for property observing and
   objects.  It's focus is on small size and performance.  You can use this
   in place of or along-side other cross-platform libraries such as jQuery or
   Prototype.
-
-  The core Base framework is based on the jQuery API with a number of
-  performance optimizations.
 */
 SC = window.SC; // This is dumb but necessary for jsdoc to get it right
 
@@ -200,11 +197,9 @@ SC.mixin(/** @scope window.SC.prototype */ {
             SC.T_ERROR: A SproutCore SC.Error object <br>
   */
   typeOf: function (item) {
-    if (item === undefined) return SC.T_UNDEFINED;
-    if (item === null) return SC.T_NULL;
+    var nativeType = SC._nativeTypeOf(item);
 
-    var nativeType = jQuery.type(item);
-
+    // Translate it into an SC type.
     if (nativeType === "function") {
       return item.isClass ? SC.T_CLASS : SC.T_FUNCTION;
     } else if (nativeType === "object") {
@@ -224,6 +219,33 @@ SC.mixin(/** @scope window.SC.prototype */ {
 
     return nativeType;
   },
+  // Inlined from jQuery.type to avoid dependency.
+  _nativeTypeOf: function(item) {
+    if (item === undefined) return SC.T_UNDEFINED;
+    if (item === null) return SC.T_NULL;
+
+    var nativeType = typeof item,
+        toString;
+    if (nativeType === "object" || nativeType === "function") {
+      toString = SC._nativeToString.call(item);
+      return SC._nativeTypeHash[toString] || "object";
+    } else {
+      return nativeType;
+    }
+  } ,
+  // Inlined from jQuery's class2type to avoid dependency.
+  _nativeTypeHash: {
+    "[object Boolean]": "boolean",
+    "[object Number]": "number",
+    "[object String]": "string",
+    "[object Function]": "function",
+    "[object Array]": "array",
+    "[object Date]": "date",
+    "[object RegExp]": "regexp",
+    "[object Object]": "object"
+  },
+  // Inlined from jQuery to avoid dependency.
+  _nativeToString: Object.prototype.toString,
 
   /**
     Returns YES if the passed value is null or undefined.  This avoids errors
@@ -268,7 +290,7 @@ SC.mixin(/** @scope window.SC.prototype */ {
     if (!obj || obj.setInterval) { return false; }
     if (Array.isArray && Array.isArray(obj)) { return true; }
     if (obj.objectAt) { return true; }
-    if (obj.length !== undefined && jQuery.type(obj) === "object") { return true; }
+    if (obj.length !== undefined && SC._nativeTypeOf(obj) === "object") { return true; }
 
     return false;
   },
@@ -329,6 +351,7 @@ SC.mixin(/** @scope window.SC.prototype */ {
   _numberGuids: [],
   _stringGuids: {},
   _keyCache: {},
+  _uuid: 0,
 
   /**"
     Returns a unique GUID for the object.  If the object does not yet have
@@ -353,7 +376,7 @@ SC.mixin(/** @scope window.SC.prototype */ {
       cache = this._guidCaches[type];
       ret   = cache[obj];
       if (!ret) {
-        ret        = "st" + (jQuery.uuid++);
+        ret        = "st" + (SC._uuid++);
         cache[obj] = ret;
       }
       return ret;
@@ -399,7 +422,7 @@ SC.mixin(/** @scope window.SC.prototype */ {
     @returns {String} the guid
   */
   generateGuid: function (obj, prefix) {
-    var ret = (prefix + (jQuery.uuid++));
+    var ret = (prefix + (SC._uuid++));
     if (obj) obj[this.guidKey] = ret;
     return ret;
   },
@@ -621,7 +644,7 @@ SC.mixin(/** @scope window.SC.prototype */ {
       if (object.clone)      return object.clone();
     }
 
-    switch (jQuery.type(object)) {
+    switch (SC._nativeTypeOf(object)) {
     case "array":
       ret = object.slice();
 
