@@ -18,6 +18,20 @@
 SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
   /** @scope SC.ChildArray.prototype */ {
 
+  //@if(debug)
+  /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */
+
+  /* @private */
+  toString: function () {
+    var propertyName = this.get('propertyName'),
+      length = this.get('length');
+
+    return "%@({  propertyName: '%@',  length: %@,  … })".fmt(sc_super(), propertyName, length);
+  },
+
+  /* END DEBUG ONLY PROPERTIES AND METHODS */
+  //@endif
+
   /**
     If set, it is the default record `recordType`
 
