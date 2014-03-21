@@ -103,12 +103,14 @@ module("Basic SC.Record w/ a Parent > Array of Children", {
   },
 
   teardown: function() {
-    delete NestedRecord.ParentRecordTest;
-    delete NestedRecord.ChildRecordTest1;
-    delete NestedRecord.ChildRecordTest2;
-    testParent.destroy();
-    testParent2.destroy();
-    store.destroy();
+    SC.run(function () {
+      delete NestedRecord.ParentRecordTest;
+      delete NestedRecord.ChildRecordTest1;
+      delete NestedRecord.ChildRecordTest2;
+      testParent.destroy();
+      testParent2.destroy();
+      store.destroy();
+    });
 
     testParent = testParent2 = store = NestedRecord = null;
   }
@@ -416,22 +418,22 @@ test("Basic Array Functionality: shiftObject", function() {
 });
 
 test("Basic Array Functionality: replace", function() {
-  var elements, cr, cr2;
+  var elements, cr1, cr2;
   // Add something to the array
   elements = testParent.get('elements');
   SC.run(function () {
-    cr = elements.objectAt(0);
-    cr2 = elements.objectAt(1);
+    cr1 = elements.objectAt(1);
+    cr2 = elements.objectAt(2);
   });
-  equals(cr.get('name'), 'Child 1', "The first record should have the name");
-  equals(cr2.get('name'), 'Child 2', "The second record should have the name");
+  equals(cr1.get('name'), 'Child 2', "The first record should have the name");
+  equals(cr2.get('name'), 'Child 3', "The second record should have the name");
 
   SC.run(function () {
-    elements.replace(0, 2, [cr2, cr]);
-    equals(cr.get('name'), 'Child 1', "The first record should still have the name");
-    equals(cr2.get('name'), 'Child 2', "The second record should still have the name");
-    equals(elements.objectAt(1).get('name'), 'Child 1', "The new second record should have the name");
-    equals(elements.objectAt(0).get('name'), 'Child 2', "The new first record should still have the name");
+    elements.replace(1, 2, [cr2, cr1]);
+    equals(elements.objectAt(2).get('name'), 'Child 2', "The new second record should have the name");
+    equals(elements.objectAt(1).get('name'), 'Child 3', "The new first record should still have the name");
+    equals(cr1.get('name'), 'Child 2', "The first record should still have the name");
+    equals(cr2.get('name'), 'Child 3', "The second record should still have the name");
   });
 
   ok(testParent.get('status') & SC.Record.DIRTY, 'check that the parent record is dirty');
