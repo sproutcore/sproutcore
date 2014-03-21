@@ -36,8 +36,8 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
   record: null,
 
   /**
-    If set will be used by the many array to get an editable version of the
-    `storeId`s from the owner.
+    The name of the attribute in the parent record's datahash that represents
+    this child array's data.
 
     @default null
     @type String
@@ -45,57 +45,50 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
   propertyName: null,
 
   /**
-    Actual references to the hashes
-
-    @default null
-    @type {SC.Array}
-  */
-  children: null,
-
-  /**
-    The store that owns this record array.  All record arrays must have a
-    store to function properly.
+    The store that owns this child array's parent record.
 
     @type SC.Store
-    @property
+    @readonly
   */
-  store: function() {
+  store: function () {
     return this.getPath('record.store');
   }.property('record').cacheable(),
 
   /**
-    The storeKey for the parent record of this many array.  Editing this
-    array will place the parent record into a `READY_DIRTY state.
+    The storeKey for the parent record of this child array.
 
     @type Number
-    @property
+    @readonly
   */
-  storeKey: function() {
+  storeKey: function () {
     return this.getPath('record.storeKey');
   }.property('record').cacheable(),
 
   /**
-    Returns the storeIds in read only mode.  Avoids modifying the record
-    unnecessarily.
+    Returns the original child array of JavaScript Objects.
+
+    Note: Avoid modifying this array directly, because changes will not be
+    reflected by this SC.ChildArray.
 
     @type SC.Array
     @property
   */
-  readOnlyChildren: function() {
+  readOnlyChildren: function () {
     return this.get('record').readAttribute(this.get('propertyName'));
   }.property(),
 
   /**
-    Returns an editable array of child hashes.  Marks the owner records as
-    modified.
+    Returns an editable child array of JavaScript Objects.
+
+    Any changes to this array will not affect the parent record's datahash.
 
     @type {SC.Array}
     @property
   */
-  editableChildren: function() {
-    var store    = this.get('store'),
+  editableChildren: function () {
+    var store = this.get('store'),
         storeKey = this.get('storeKey'),
-        pname    = this.get('propertyName'),
+        pname = this.get('propertyName'),
         ret, hash;
 
     ret = store.readEditableProperty(storeKey, pname);
@@ -104,7 +97,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
       ret = hash[pname] = [];
     }
 
-    return ret ;
+    return ret;
   }.property(),
 
   // ..........................................................
@@ -117,7 +110,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @type Number
     @property
   */
-  length: function() {
+  length: function () {
     var children = this.get('readOnlyChildren');
     return children ? children.length : 0;
   }.property('readOnlyChildren'),
@@ -127,18 +120,18 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     records.
 
     @param {Number} idx index of the object to retrieve.
-    @returns {SC.Record} The record if found or undefined.
+    @returns {SC.Record} The nested record if found or undefined if not.
   */
-  objectAt: function(idx) {
-    var recs      = this._records,
-        children = this.get('readOnlyChildren'),
-        hash, ret, pname = this.get('propertyName'),
-        parent = this.get('record');
-    var len = children ? children.length : 0;
+  objectAt: function (idx) {
+    var recs = this._records,
+      children = this.get('readOnlyChildren'),
+      hash, ret,
+      pname = this.get('propertyName'),
+      parent = this.get('record'),
+      len = children ? children.length : 0;
 
     if (!children) return undefined; // nothing to do
-    if (recs && (ret=recs[idx])) return ret ; // cached
-    if (!recs) this._records = recs = [] ; // create cache
+    if (recs && (ret = recs[idx])) return ret; // cached
 
     // If not a good index return undefined
     if (idx >= len) return undefined;
@@ -146,70 +139,115 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     if (!hash) return undefined;
 
     // not in cache, materialize
-    recs[idx] = ret = parent.registerNestedRecord(hash, pname, pname+'.'+idx);
+    if (!recs) this._records = recs = []; // create cache
+    recs[idx] = ret = parent.registerNestedRecord(hash, pname, pname + '.' + idx);
 
     return ret;
   },
 
   /**
-    Pass through to the underlying array.  The passed in objects must be
-    records, which can be converted to `storeId`s.
+    Pass through to the underlying array.  The passed in objects should be
+    nested SC.Records, which can be converted to JavaScript objects or
+    JavaScript objects themselves.
 
     @param {Number} idx index of the object to replace.
-    @param {Number} amt number of records to replace starting at idx.
-    @param {Number} recs array with records to replace.
-    @returns {SC.Record} The record if found or undefined.
-
+    @param {Number} amt number of objects to replace starting at idx.
+    @param {Number} recs array with records to replace. These may be JavaScript objects or nested SC.Record objects.
+    @returns {SC.ChildArray}
   */
-  replace: function(idx, amt, recs) {
+  replace: function (idx, amt, recs) {
     var children = this.get('editableChildren'),
-        len      = recs ? (recs.get ? recs.get('length') : recs.length) : 0,
-        record   = this.get('record'), newRecs,
-        pname    = this.get('propertyName'),
-        cr, recordType;
+      recsLen = recs ? (recs.get ? recs.get('length') : recs.length) : 0,
+      parent = this.get('record'),
+      pname = this.get('propertyName'),
+      store = this.get('store'),
+      removeCount, addCount,
+      defaultRecordType, storeKeysById,
+      newObjects, rec,
+      i, len;
 
-    newRecs = this._processRecordsToHashes(recs);
+    // Create the proxy cache, we will need it.
+    if (!this._records) this._records = [];
 
-    // notify that the record did change...
-    if (newRecs !== this._prevChildren){
-      this._performRecordPropertyChange(null, false);
+    // Convert any SC.Record objects into JavaScript objects.
+    newObjects = this._processRecordsToHashes(recs);
+
+    // Ensure that all removed objects are pre-registered in case any instances are outstanding.
+    // These objects will improperly reflect being registered to this parent, but
+    // at least they won't conflict with the actual associated records once we
+    // disassociate them from the record type.
+    defaultRecordType = this.get('defaultRecordType');
+    storeKeysById = defaultRecordType.storeKeysById();
+
+    for (i = idx, len = idx + amt; i < len; i++) {
+      rec = this._records[i];
+
+      if (!rec) {
+        rec = parent.registerNestedRecord(children[i], pname, pname + '.' + i);
+      } else {
+        // Remove the cached record.
+        this._records[i] = null;
+      }
+
+      // Now throw away the connection, so that the parent won't retrieve this
+      // same instance. This is a work-around due to the fact that nested records
+      // are proxied through their parent records.
+      storeKeysById[rec.get('id')] = null;
     }
-    children.replace(idx, amt, newRecs);
-    record.recordDidChange(pname);
+
+    // All materialized nested records after idx + amt to end need to be removed
+    // because the paths will no longer be valid.
+    for (i = idx + amt, len = this._records.length; i < len; i++) {
+      rec = this._records[i];
+
+      if (rec) {
+        store.unregisterChildFromParent(rec.get('storeKey'));
+
+        this._records[i] = null;
+      }
+    }
+
+    // All objects from idx to the end must be removed to do an insert.
+    removeCount = children.length - idx;
+    addCount = children.length - idx - amt + recsLen;
+
+    this.arrayContentWillChange(idx, removeCount, addCount);
+
+    // Perform a raw array replace without any KVO checks.
+    if (newObjects.length === 0) {
+      children.splice(idx, amt);
+    } else {
+      var args = [idx, amt].concat(newObjects);
+      children.splice.apply(children, args);
+    }
+
+    // All current SC.Record instances must be updated to their new backing object.
+    // For example, when passing an SC.Record object in, that instance should
+    // update to reflect its new nested object path.
+    for (i = idx, len = children.length; i < len; i++) {
+      this._records[i] = parent.registerNestedRecord(children[i], pname, pname + '.' + i);
+    }
 
     // Update the enumerable, [], property (including firstObject and lastObject)
-    this.enumerableContentDidChange(idx, amt, len - amt);
+    this.enumerableContentDidChange(idx, addCount);
+    this.arrayContentDidChange(idx, removeCount, addCount);
+
+    // Update our cache! So when the record property change comes back down we can ignore it.
+    this._sc_prevChildren = children;
+
+    // We must indicate to the parent that we have been modified, so they can
+    // update their status.
+    parent.recordDidChange(pname);
 
     return this;
-  },
-
-  /** @private
-
-    Converts a records array into an array of hashes.
-
-    @param {SC.Array} recs records to be converted to hashes.
-    @returns {SC.Array} array of hashes.
-  */
-  _processRecordsToHashes: function(recs){
-    var store, sk;
-    recs = recs || [];
-    recs.forEach( function(me, idx){
-      if (me.isNestedRecord){
-        store = me.get('store');
-        sk = me.storeKey;
-        recs[idx] = store.readDataHash(sk);
-      }
-    });
-
-    return recs;
   },
 
   /**
     Calls normalize on each object in the array
   */
-  normalize: function(){
-    this.forEach(function(child,id){
-      if(child.normalize) child.normalize();
+  normalize: function () {
+    this.forEach(function (rec) {
+      if (rec.normalize) rec.normalize();
     });
   },
 
@@ -217,83 +255,72 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
   // INTERNAL SUPPORT
   //
 
+  /** @private Converts any SC.Records in the array into an array of hashes.
+
+    @param {SC.Array} recs records to be converted to hashes.
+    @returns {SC.Array} array of hashes.
+  */
+  _processRecordsToHashes: function (recs) {
+    var store, sk,
+      ret = [];
+
+    recs.forEach(function (rec, idx) {
+      if (rec.isNestedRecord) {
+        store = rec.get('store');
+        sk = rec.storeKey;
+        ret[idx] = store.readDataHash(sk);
+      } else {
+        ret[idx] = rec;
+      }
+    });
+
+    return ret;
+  },
+
   /**
-    Invoked whenever the children array changes.  Observes changes.
-
-    @param {SC.Array} keys optional
-    @returns {SC.ChildArray} itself.
+    This is called by the parent record whenever its properties change. It is
+    also called by the ChildrenAttribute transform when the attribute is set
+    to a new array.
   */
-  recordPropertyDidChange: function(keys) {
-    this._performRecordPropertyChange(keys, true);
-    return this;
-  },
+  recordPropertyDidChange: function (keys) {
+    var oldLength = this.get('length'),
+      children = this.get('readOnlyChildren'),
+      newLength = children ? children.length : 0,
+      store = this.get('store'),
+      prevChildren = this._sc_prevChildren;
 
-  /** @private
-    Invoked when the object is changed from the parent or an outside source
+    // Fast Path! No actual change to our backing array attribute so we should
+    // not notify any changes.
+    if (prevChildren === children) { return; }
 
-    will cause the entire array to reset
+    // TODO: We can not use this, because removed instances will lose their
+    // connection to their data hashes in the store. There is an ugly hack in
+    // SC.Store#writeDataHash which can't handle this.
+    // All materialized nested records need to be removed. They are no longer valid!
+    // if (this._records) {
+    //   for (var i = 0, len = this._records.length; i < len; i++) {
+    //     var rec = this._records[i];
 
-    @param {SC.Array} keys optional
-    @param {Boolean} doReset optional
-    @returns {SC.ChildArray} itself.
-  */
-  _performRecordPropertyChange: function(keys, doReset){
-    if (keys && !keys.contains(this.get('propertyName'))) return this;
+    //     // Unregister the nested record.
+    //     if (rec) {
+    //       store.unregisterChildFromParent(rec.get('storeKey'));
+    //     }
+    //   }
 
-    var children = this.get('readOnlyChildren'), oldLen = 0, newLen = 0;
-    var prev = this._prevChildren, f = this._childrenContentDidChange;
-    doReset = SC.none(doReset) ? true : doReset;
+    //   // Throw away our cache.
+    //   this._records.length = 0;
+    // }
 
-    if (children === prev) return this; // nothing to do
+    // Throw away our cache.
+    this._records = null;
 
-    if (prev) {
-      prev.removeArrayObservers({
-        target: this,
-        willChange: this.arrayContentWillChange,
-        didChange: f
-      });
+    // this.arrayContentWillChange(0, oldLength, newLength);
+    this.arrayContentDidChange(0, oldLength, newLength);
+    this.enumerableContentDidChange(0, newLength);
 
-      oldLen = prev.get('length');
-    }
-
-    if (children) {
-      children.addArrayObservers({
-        target: this,
-        willChange: this.arrayContentWillChange,
-        didChange: f
-      });
-
-      newLen = children.get('length');
-    }
-    this._prevChildren = children;
-
-    if (doReset){
-      this.arrayContentWillChange(0, oldLen, newLen);
-      this._childrenContentDidChange(0, oldLen, newLen);
-    }
-
-    return this;
-  },
-
-  /** @private
-    Invoked whenever the content of the children array changes.  This will
-    dump any cached record lookup and then notify that the enumerable content
-    has changed.
-
-    @param {Number} target
-    @param {Number} key
-    @param {Number} value
-    @param {Number} rev
-  */
-  _childrenContentDidChange: function(start, removedCount, addedCount) {
-    this._records = null ; // clear cache
-    this.arrayContentDidChange(start, removedCount, addedCount);
-  },
-
-  /** @private */
-  init: function() {
-    sc_super();
-    this.recordPropertyDidChange();
+    // Cache our backing array so we can avoid updates when we haven't actually
+    // changed. See fast path above.
+    this._sc_prevChildren = children;
   }
 
-}) ;
+});
