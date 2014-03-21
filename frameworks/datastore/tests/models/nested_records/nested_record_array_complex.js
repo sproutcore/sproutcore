@@ -413,22 +413,48 @@ test("Basic Array Functionality: popObject", function() {
   same(pplAttr[1], pLast.get('attributes'), "verify that parent attributes are the same as the last individual child attributes");
 });
 
-test("Basic Array Functionality: shiftObject", function() {
-  var ppl, p, removed;
+test("Basic Array Functionality: shiftObject access first", function() {
+  var ppl, p, removed, first, second;
   // Add something to the array
   ppl = testParent.get('people');
-  // PushObject Tests
+
   SC.run(function () {
+    first = ppl.objectAt(0);
+    second = ppl.objectAt(1);
+    equals(first.get('name'), 'Barack Obama', "The first instance has the name");
+    equals(second.get('name'), 'John Doe', "The second instance has the name");
     removed = ppl.shiftObject();
+    equals(ppl.get('length'), 2, "after shiftObject() on parent, check that the length of the array of child records is 2");
   });
 
-  // ppl = testParent.get('people');
-  equals(ppl.get('length'), 2, "after shiftObject() on parent, check that the length of the array of child records is 2");
   SC.run(function () {
-    p = ppl.objectAt('0');
+    p = ppl.objectAt(0);
+    equals(removed.get('name'), 'Barack Obama', "The removed object should have name");
+    equals(p.get('name'), 'John Doe', "The new first instance should have name");
+    equals(first.get('name'), 'Barack Obama', "The previous instance should still have the name");
+    equals(second.get('name'), 'John Doe', "The previous instance should still have the name");
+    ok(testParent.get('status') & SC.Record.DIRTY, 'check that the parent record is dirty');
   });
-  equals(p.get('name'), 'John Doe', "after a shiftObject on parent, check to see if it has all the right values for the attributes");
-  ok(testParent.get('status') & SC.Record.DIRTY, 'check that the parent record is dirty');
+});
+
+test("Basic Array Functionality: shiftObject access after", function() {
+  var ppl, p, removed, first, second;
+  // Add something to the array
+  ppl = testParent.get('people');
+
+  SC.run(function () {
+    removed = ppl.shiftObject();
+    equals(ppl.get('length'), 2, "after shiftObject() on parent, check that the length of the array of child records is 2");
+  });
+
+  SC.run(function () {
+    first = ppl.objectAt(0);
+    second = ppl.objectAt(1);
+    equals(removed.get('name'), 'Barack Obama', "The removed object should have name");
+    equals(first.get('name'), 'John Doe', "The new first instance should have name");
+    equals(second.get('name'), 'Jane Doe', "The new second instance should have name");
+    ok(testParent.get('status') & SC.Record.DIRTY, 'check that the parent record is dirty');
+  });
 });
 
 test("Basic Array Functionality: unshiftObject", function() {
