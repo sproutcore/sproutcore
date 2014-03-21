@@ -128,6 +128,22 @@ test("Proper Status", function () {
   // Second
   SC.run(function() { second = store.materializeRecord(storeKeys[1]); });
   equals(second.get('status'), SC.Record.READY_CLEAN, 'second record has a READY_CLEAN State');
+
+  // Shallow property update.
+  SC.run(function() { first.get('contents').objectAt(0).set('name', 'Dir 2 - Updated') });
+  equals(first.get('status'), SC.Record.READY_DIRTY, 'first record has a READY_DIRTY State');
+});
+
+test("Deep property update", function () {
+  var first, second;
+
+  // First
+  SC.run(function() { first = store.materializeRecord(storeKeys[0]); });
+  equals(first.get('status'), SC.Record.READY_CLEAN, 'first record has a READY_CLEAN State');
+
+  // Deep property update.
+  SC.run(function() { first.get('contents').objectAt(0).get('contents').objectAt(0).set('name', 'Dir 2 - Updated') });
+  equals(first.get('status'), SC.Record.READY_DIRTY, 'first record has a READY_DIRTY State');
 });
 
 test("Can Push onto child array", function () {

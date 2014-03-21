@@ -353,9 +353,37 @@ test("Basic Array Functionality: shiftObject", function() {
   // Add something to the array
   elements = testParent.get('elements');
   // PushObject Tests
-  elements.shiftObject();
+  SC.run(function () {
+    cr = elements.shiftObject();
+    cr2 = elements.objectAt(0);
+  });
+  equals(cr.get('name'), 'Child 1', "The shifted record should have the name");
+  equals(cr2.get('name'), 'Child 2', "The first record should have the name");
   elements = testParent.get('elements');
   equals(elements.get('length'), 3, "after shiftObject() on parent, check that the length of the array of child records is 3");
+  ok(testParent.get('status') & SC.Record.DIRTY, 'check that the parent record is dirty');
+});
+
+test("Basic Array Functionality: replace", function() {
+  var elements, cr;
+  // Add something to the array
+  elements = testParent.get('elements');
+  // PushObject Tests
+  SC.run(function () {
+    cr = elements.objectAt(0);
+    cr2 = elements.objectAt(1);
+  });
+  equals(cr.get('name'), 'Child 1', "The first record should have the name");
+  equals(cr2.get('name'), 'Child 2', "The second record should have the name");
+
+  SC.run(function () {
+    elements.replace(0, 2, [cr2, cr]);
+    equals(cr.get('name'), 'Child 1', "The first record should still have the name");
+    equals(cr2.get('name'), 'Child 2', "The second record should still have the name");
+    equals(elements.objectAt(1).get('name'), 'Child 1', "The new second record should have the name");
+    equals(elements.objectAt(0).get('name'), 'Child 2', "The new first record should still have the name");
+  });
+
   ok(testParent.get('status') & SC.Record.DIRTY, 'check that the parent record is dirty');
 });
 
