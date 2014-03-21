@@ -127,6 +127,11 @@ module("SC.RecordAttribute core methods", {
     bar = MyApp.store.find(MyApp.Bar, 'bar1');
     equals(rec.storeKey, storeKeys[0], 'should find record');
 
+  },
+
+  teardown: function () {
+    MyApp.store.destroy();
+    window.MyApp = storeKeys = rec = rec2 = rec3 = bar = null;
   }
 });
 
@@ -247,8 +252,10 @@ test("writing an attribute should make many relationship aggregate dirty" ,funct
   equals(bar.get('status'), SC.Record.READY_CLEAN, "precond - bar should be READY_CLEAN");
   equals(rec2.get('status'), SC.Record.READY_CLEAN, "precond - rec2 should be READY_CLEAN");
 
-  bar.set('city', 'Oslo');
-  bar.get('store').flush();
+  SC.run(function () {
+    bar.set('city', 'Oslo');
+    bar.get('store').flush();
+  });
 
   equals(rec.get('status'), SC.Record.READY_DIRTY, "foo1 should be READY_DIRTY");
   equals(rec2.get('status'), SC.Record.READY_DIRTY, "foo2 should be READY_DIRTY");

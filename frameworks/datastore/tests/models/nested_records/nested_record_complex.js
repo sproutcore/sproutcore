@@ -288,14 +288,17 @@ function() {
 
 test("Basic normalize()", function() {
   var pAttrs;
-  testParent.set('person', {
-    type: 'Person',
-    name: 'Al Gore',
-    address: {
-      type: 'Address',
-      street: '123 Crazy St',
-      city: 'Khacki Pants'
-    }
+
+  SC.run(function () {
+    testParent.set('person', {
+      type: 'Person',
+      name: 'Al Gore',
+      address: {
+        type: 'Address',
+        street: '123 Crazy St',
+        city: 'Khacki Pants'
+      }
+    });
   });
   testParent.normalize();
   pAttrs = testParent.get('attributes');

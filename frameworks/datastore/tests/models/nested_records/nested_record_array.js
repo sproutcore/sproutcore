@@ -1,3 +1,4 @@
+/*global same, equals, test, module, ok */
 /**
  * Nested Record Array of SC.Records Unit Test
  *
@@ -9,7 +10,7 @@
 //
 var NestedRecord, store, testParent, testParent2;
 
-var initModels = function(){
+var initModels = function() {
 
   NestedRecord.ChildRecordTest1 = SC.Record.extend({
     name: SC.Record.attr(String),
@@ -103,11 +104,13 @@ module("Basic SC.Record w/ a Parent > Array of Children", {
 
   teardown: function() {
     delete NestedRecord.ParentRecordTest;
-    delete NestedRecord.ChildRecordTest;
-    testParent = null;
-    testParent2 = null;
-    store = null;
-    NestedRecord = null;
+    delete NestedRecord.ChildRecordTest1;
+    delete NestedRecord.ChildRecordTest2;
+    testParent.destroy();
+    testParent2.destroy();
+    store.destroy();
+
+    testParent = testParent2 = store = NestedRecord = null;
   }
 });
 
@@ -133,25 +136,28 @@ test("Function: readAttribute()", function() {
 
 test("Function: writeAttribute()", function() {
 
-  testParent.writeAttribute('elements',
-    [
-      {
-        type: 'ChildRecordTest1',
-        name: 'Tom',
-        value: 'Jones'
-      },
-      {
-        type: 'ChildRecordTest1',
-        name: 'Dick',
-        value: 'Smothers'
-      },
-      {
-        type: 'ChildRecordTest1',
-        name: 'Harry',
-        value: 'Balls'
-      }
-    ]
-  );
+  SC.run(function () {
+    testParent.writeAttribute('elements',
+      [
+        {
+          type: 'ChildRecordTest1',
+          name: 'Tom',
+          value: 'Jones'
+        },
+        {
+          type: 'ChildRecordTest1',
+          name: 'Dick',
+          value: 'Smothers'
+        },
+        {
+          type: 'ChildRecordTest1',
+          name: 'Harry',
+          value: 'Balls'
+        }
+      ]
+    );
+  });
+
   var elemsAry = testParent.readAttribute('elements');
   ok(elemsAry, "after writeAttribute(), check to see that the child records array exists");
   equals(elemsAry.length, 3, "after writeAttribute(), checking to see that the length of the elements array is 3");
@@ -181,9 +187,13 @@ test("Basic Read", function() {
   var arrayOfCRs = testParent.get('elements');
   // Check Model Class information
 
+  var cr, dr, dpr;
   ok(SC.instanceOf(arrayOfCRs, SC.ChildArray), "check that get() creates an actual instance of a SC.ChildArray");
   equals(arrayOfCRs.get('length'), 4, "check that the length of the array of child records is 4");
-  var cr = arrayOfCRs.objectAt(0);
+  SC.run(function () {
+    cr = arrayOfCRs.objectAt(0);
+  });
+
   ok(SC.kindOf(cr, SC.Record), "check that first ChildRecord from the get() creates an actual instance that is a kind of a SC.Record Object");
   ok(SC.instanceOf(cr, NestedRecord.ChildRecordTest1), "check that first ChildRecord from the get() creates an actual instance of a ChildRecordTest1 Object");
 
@@ -191,7 +201,9 @@ test("Basic Read", function() {
   var arrayOfDRs = testParent.get('defaultElements');
   ok(SC.instanceOf(arrayOfDRs, SC.ChildArray), "check that get() creates an actual instance of a SC.ChildArray");
   equals(arrayOfDRs.get('length'), 1, "check that the length of the array of default records is 1");
-  var dr = arrayOfDRs.objectAt(0);
+  SC.run(function () {
+    dr = arrayOfDRs.objectAt(0);
+  });
   ok(SC.kindOf(dr, SC.Record), "check that first default ChildRecord from the get() creates an actual instance that is a kind of a SC.Record Object");
   ok(SC.instanceOf(dr, NestedRecord.ChildRecordTest1), "check that first default ChildRecord from the get() creates an actual instance of a ChildRecordTest1 Object");
 
@@ -199,7 +211,9 @@ test("Basic Read", function() {
   var arrayOfDPRs = testParent.get('defaultPolymorphicElements');
   ok(SC.instanceOf(arrayOfDPRs, SC.ChildArray), "check that get() creates an actual instance of a SC.ChildArray");
   equals(arrayOfDPRs.get('length'), 1, "check that the length of the array of default records is 1");
-  var dpr = arrayOfDPRs.objectAt(0);
+  SC.run(function () {
+    dpr = arrayOfDPRs.objectAt(0);
+  });
   ok(SC.kindOf(dpr, SC.Record), "check that first default polymorphic ChildRecord from the get() creates an actual instance that is a kind of a SC.Record Object");
   ok(SC.instanceOf(dpr, NestedRecord.ChildRecordTest1), "check that first default polymorphic ChildRecord from the get() creates an actual instance of a ChildRecordTest1 Object");
 
@@ -229,9 +243,14 @@ test("Basic Read", function() {
 test("Basic Write", function() {
 
   // Test general gets
-  testParent.set('name', 'New Parent Name');
+  SC.run(function () {
+    testParent.set('name', 'New Parent Name');
+  });
   equals(testParent.get('name'), 'New Parent Name', "set() should change name attribute");
-  testParent.set('nothing', 'nothing');
+
+  SC.run(function () {
+    testParent.set('nothing', 'nothing');
+  });
   equals(testParent.get('nothing'), 'nothing', "set should change non-existent property to a new property");
 
   // Test Child Record creation
@@ -242,11 +261,17 @@ test("Basic Write", function() {
    { type: 'ChildRecordTest1', name: 'Harry', value: 'Balls'}
   ];
 
-  testParent.set('elements', newChildren);
+  SC.run(function () {
+    testParent.set('elements', newChildren);
+  });
   var newArray = testParent.get('elements');
   ok(SC.instanceOf(newArray, SC.ChildArray), "check that get() creates an actual instance of a SC.ChildArray");
   equals(newArray.get('length'), 3, "after set() on parent, check that the length of the array of child records is 3");
-  var cr = newArray.objectAt(0);
+
+  var cr;
+  SC.run(function () {
+    cr = newArray.objectAt(0);
+  });
 
   ok(SC.kindOf(cr, SC.Record), "check that first ChildRecord from the get() creates an actual instance that is a kind of a SC.Record Object");
   ok(SC.instanceOf(cr, NestedRecord.ChildRecordTest1), "check that first ChildRecord from the get() creates an actual instance of a ChildRecordTest1 Object");
@@ -256,7 +281,9 @@ test("Basic Write: reference tests", function() {
    var elems, cr, key, storeRef, newElems;
 
    elems = testParent.get('elements');
-   cr = elems.objectAt(0);
+   SC.run(function () {
+     cr = elems.objectAt(0);
+   });
    // TODO: [EG] Add test to make sure the number of ChildRecords in store
 
    // Check reference information
@@ -266,12 +293,18 @@ test("Basic Write: reference tests", function() {
    equals(cr, storeRef, "after a set with an object, checking the parent reference is the same as the direct store reference");
 
    // Check for changes on the child bubble to the parent.
-   cr.set('name', 'Child Name Change');
+   SC.run(function () {
+     cr.set('name', 'Child Name Change');
+   });
    equals(cr.get('name'), 'Child Name Change', "after a set('name', <new>) on child, checking that the value is updated");
    ok(cr.get('status') & SC.Record.DIRTY, 'check that the child record is dirty');
    ok(testParent.get('status') & SC.Record.DIRTY, 'check that the parent record is dirty');
    newElems = testParent.get('elements');
-   var newCR = newElems.objectAt(0);
+   var newCR;
+
+   SC.run(function () {
+     newCR = newElems.objectAt(0);
+   });
    same(newCR, cr, "after a set('name', <new>) on child, checking to see that the parent has received the changes from the child record");
    var readAttrsArray = testParent.readAttribute('elements');
    ok(readAttrsArray, "checks to make sure the readAttibute works with a change to the name in the first child.");
@@ -287,7 +320,9 @@ test("Basic Array Functionality: pushObject w/ HASH", function() {
   elements.pushObject({ type: 'ChildRecordTest1', name: 'Testikles', value: 'God Of Fertility'});
   elements = testParent.get('elements');
   equals(elements.get('length'), 5, "after pushObject() on parent, check that the length of the array of child records is 5");
-  cr = elements.objectAt(4);
+  SC.run(function () {
+    cr = elements.objectAt(4);
+  });
   ok(SC.kindOf(cr, SC.Record), "check that newly added ChildRecord creates an actual instance that is a kind of a SC.Record Object");
   ok(SC.instanceOf(cr, NestedRecord.ChildRecordTest1), "check that newly added ChildRecord creates an actual instance of a ChildRecordTest1 Object");
   equals(cr.get('name'), 'Testikles', "after a pushObject on parent, check to see if it has all the right values for the attributes");
@@ -297,8 +332,11 @@ test("Basic Array Functionality: pushObject w/ HASH", function() {
   // Verify the Attrs
   elementsAttrs = testParent.readAttribute('elements');
   equals(elementsAttrs.length, 5, "after pushObject() on parent, check that the length of the attribute array of child records is 5");
-  crFirst = elements.objectAt(0).get('attributes');
-  crLast = elements.objectAt(4).get('attributes');
+
+  SC.run(function () {
+    crFirst = elements.objectAt(0).get('attributes');
+    crLast = elements.objectAt(4).get('attributes');
+  });
   same(elementsAttrs[0], crFirst, "verify that parent attributes are the same as the first individual child attributes");
   same(elementsAttrs[4], crLast, "verify that parent attributes are the same as the last individual child attributes");
 });
@@ -308,11 +346,16 @@ test("Basic Array Functionality: pushObject w/ ChildRecord", function() {
   // Add something to the array
   elements = testParent.get('elements');
   // PushObject Tests
-  cr = store.createRecord(NestedRecord.ChildRecordTest1, { type: 'ChildRecordTest1', name: 'Testikles', value: 'God Of Fertility'});
+  SC.run(function () {
+    cr = store.createRecord(NestedRecord.ChildRecordTest1, { type: 'ChildRecordTest1', name: 'Testikles', value: 'God Of Fertility'});
+  });
   elements.pushObject(cr);
   elements = testParent.get('elements');
   equals(elements.get('length'), 5, "after pushObject() on parent, check that the length of the array of child records is 5");
-  cr = elements.objectAt(4);
+
+  SC.run(function () {
+    cr = elements.objectAt(4);
+  });
   ok(SC.kindOf(cr, SC.Record), "check that newly added ChildRecord creates an actual instance that is a kind of a SC.Record Object");
   ok(SC.instanceOf(cr, NestedRecord.ChildRecordTest1), "check that newly added ChildRecord creates an actual instance of a ChildRecordTest1 Object");
   equals(cr.get('name'), 'Testikles', "after a pushObject on parent, check to see if it has all the right values for the attributes");
@@ -322,8 +365,10 @@ test("Basic Array Functionality: pushObject w/ ChildRecord", function() {
   // Verify the Attrs
   elementsAttrs = testParent.readAttribute('elements');
   equals(elementsAttrs.length, 5, "after pushObject() on parent, check that the length of the attribute array of child records is 5");
-  crFirst = elements.objectAt(0).get('attributes');
-  crLast = elements.objectAt(4).get('attributes');
+  SC.run(function () {
+    crFirst = elements.objectAt(0).get('attributes');
+    crLast = elements.objectAt(4).get('attributes');
+  });
   same(elementsAttrs[0], crFirst, "verify that parent attributes are the same as the first individual child attributes");
   same(elementsAttrs[4], crLast, "verify that parent attributes are the same as the last individual child attributes");
 });
@@ -334,7 +379,9 @@ test("Basic Array Functionality: popObject", function() {
   // Add something to the array
   elements = testParent.get('elements');
   // PushObject Tests
-  elements.popObject();
+  SC.run(function () {
+    elements.popObject();
+  });
   elements = testParent.get('elements');
   equals(elements.get('length'), 3, "after popObject() on parent, check that the length of the array of child records is 3");
   ok(testParent.get('status') & SC.Record.DIRTY, 'check that the parent record is dirty');
@@ -342,14 +389,18 @@ test("Basic Array Functionality: popObject", function() {
   // Verify the Attrs
   elementsAttrs = testParent.readAttribute('elements');
   equals(elementsAttrs.length, 3, "after pushObject() on parent, check that the length of the attribute array of child records is 3");
-  crFirst = elements.objectAt(0).get('attributes');
-  crLast = elements.objectAt(2).get('attributes');
+
+  SC.run(function () {
+    crFirst = elements.objectAt(0).get('attributes');
+    crLast = elements.objectAt(2).get('attributes');
+  });
   same(elementsAttrs[0], crFirst, "verify that parent attributes are the same as the first individual child attributes");
   same(elementsAttrs[2], crLast, "verify that parent attributes are the same as the last individual child attributes");
 });
 
 test("Basic Array Functionality: shiftObject", function() {
-  var elements, cr;
+  var elements, cr, cr2;
+
   // Add something to the array
   elements = testParent.get('elements');
   // PushObject Tests
@@ -365,10 +416,9 @@ test("Basic Array Functionality: shiftObject", function() {
 });
 
 test("Basic Array Functionality: replace", function() {
-  var elements, cr;
+  var elements, cr, cr2;
   // Add something to the array
   elements = testParent.get('elements');
-  // PushObject Tests
   SC.run(function () {
     cr = elements.objectAt(0);
     cr2 = elements.objectAt(1);
@@ -395,7 +445,9 @@ test("Basic Array Functionality: unshiftObject", function() {
   elements.unshiftObject({ type: 'ChildRecordTest1', name: 'Testikles', value: 'God Of Fertility'});
   elements = testParent.get('elements');
   equals(elements.get('length'), 5, "after pushObject() on parent, check that the length of the array of child records is 5");
-  cr = elements.objectAt(0);
+  SC.run(function () {
+    cr = elements.objectAt(0);
+  });
   ok(SC.kindOf(cr, SC.Record), "check that newly added ChildRecord creates an actual instance that is a kind of a SC.Record Object");
   ok(SC.instanceOf(cr, NestedRecord.ChildRecordTest1), "check that newly added ChildRecord creates an actual instance of a ChildRecordTest1 Object");
   equals(cr.get('name'), 'Testikles', "after a pushObject on parent, check to see if it has all the right values for the attributes");
@@ -405,8 +457,10 @@ test("Basic Array Functionality: unshiftObject", function() {
   // Verify the Attrs
   elementsAttrs = testParent.readAttribute('elements');
   equals(elementsAttrs.length, 5, "after pushObject() on parent, check that the length of the attribute array of child records is 5");
-  crFirst = elements.objectAt(0).get('attributes');
-  crLast = elements.objectAt(4).get('attributes');
+  SC.run(function () {
+    crFirst = elements.objectAt(0).get('attributes');
+    crLast = elements.objectAt(4).get('attributes');
+  });
   same(elementsAttrs[0], crFirst, "verify that parent attributes are the same as the first individual child attributes");
   same(elementsAttrs[4], crLast, "verify that parent attributes are the same as the last individual child attributes");
 });
@@ -441,7 +495,14 @@ test("pushObject should trigger an arrayContentDidChange with only 1 added item"
     willChange: 'willChange',
     didChange: 'didChange'
   });
-  testParent.get('elements').pushObject({});
+
+  SC.run(function () {
+    testParent.get('elements').pushObject({
+      type: 'ChildRecordTest1',
+      name: 'Child 5',
+      value: 'x'
+    });
+  });
 
   equals(didChangeCalls.length, 1, 'didChange should only be called once');
   equals(didChangeCalls[0][0], 4, 'didChange should be called with a start index of 4');
@@ -464,7 +525,13 @@ test("replace should trigger an arrayContentDidChange with only 1 added item", f
     willChange: 'willChange',
     didChange: 'didChange'
   });
-  testParent.get('elements').replace(3, 1, [{}]);
+  SC.run(function () {
+    testParent.get('elements').replace(3, 1, [{
+      type: 'ChildRecordTest1',
+      name: 'Child 5',
+      value: 'x'
+    }]);
+  });
 
   equals(didChangeCalls.length, 1, 'didChange should only be called once');
   equals(didChangeCalls[0][0], 3, 'didChange should be called with a start index of 3');

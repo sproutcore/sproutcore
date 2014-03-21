@@ -154,20 +154,22 @@ test("Can Push onto child array", function () {
     first = store.materializeRecord(storeKeys[0]);
     first = first.get('contents').objectAt(0);
     contents = first.get('contents');
+
     equals(contents.get('length'), 2, "should have two items");
+
     contents.forEach(function (f) {
-    ok(SC.instanceOf(f, NestedRecord.File), "should be a NestedRecord.File");
-    ok(f.get('name'), "should have a name property");
+      ok(SC.instanceOf(f, NestedRecord.File), "should be a NestedRecord.File");
+      ok(f.get('name'), "should have a name property");
     });
 
     contents.pushObject({type: 'File', name: 'File 4', id: 12});
 
     equals(contents.get('length'), 3, "should have three items");
-    contents.forEach(function (f) {
-    ok(SC.instanceOf(f, NestedRecord.File), "should be a NestedRecord.File");
-    ok(f.get('name'), "should have a name property");
-    equals(f.get('status'), SC.Record.READY_DIRTY, 'second record has a READY_CLEAN State');
 
+    contents.forEach(function (f) {
+      ok(SC.instanceOf(f, NestedRecord.File), "should be a NestedRecord.File");
+      ok(f.get('name'), "should have a name property");
+      equals(f.get('status'), SC.Record.READY_DIRTY, 'second record has a READY_DIRTY State');
     });
   });
 
@@ -257,7 +259,7 @@ test("Store#pushRetrieve for parent updates the child records", function () {
     };
 
   parent = store.materializeRecord(storeKeys[0]);
-  nr = parent.get('contents').firstObject();
+  nr = parent.get('contents').get('firstObject');
 
   ok(nr, "Got nested record");
   equals(nr.get('name'), 'Dir 2', "Dir id:2 has correct name");

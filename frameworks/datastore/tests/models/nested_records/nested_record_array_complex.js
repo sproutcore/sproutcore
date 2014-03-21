@@ -3,6 +3,7 @@
  *
  * @author Evin Grano
  */
+/*global same, equals, ok, test, module*/
 
 // ..........................................................
 // Basic Set up needs to move to the setup and teardown
@@ -301,7 +302,7 @@ test("Basic Write: Testing the Second Child Array", function() {
   ppl = testParent.get('people');
   p = ppl.objectAt(0);
   addrs = p.get('addresses');
-  a = addrs.objectAt('0');
+  a = addrs.objectAt(0);
 
   // New do the test on the address
   a.set('street', '123 New Street');
@@ -413,14 +414,19 @@ test("Basic Array Functionality: popObject", function() {
 });
 
 test("Basic Array Functionality: shiftObject", function() {
-  var ppl, p;
+  var ppl, p, removed;
   // Add something to the array
   ppl = testParent.get('people');
   // PushObject Tests
-  ppl.shiftObject();
-  ppl = testParent.get('people');
+  SC.run(function () {
+    removed = ppl.shiftObject();
+  });
+
+  // ppl = testParent.get('people');
   equals(ppl.get('length'), 2, "after shiftObject() on parent, check that the length of the array of child records is 2");
-  p = ppl.objectAt('0');
+  SC.run(function () {
+    p = ppl.objectAt('0');
+  });
   equals(p.get('name'), 'John Doe', "after a shiftObject on parent, check to see if it has all the right values for the attributes");
   ok(testParent.get('status') & SC.Record.DIRTY, 'check that the parent record is dirty');
 });
@@ -430,10 +436,15 @@ test("Basic Array Functionality: unshiftObject", function() {
   // Add something to the array
   ppl = testParent.get('people');
   // PushObject Tests
-  ppl.unshiftObject(personData1);
+  SC.run(function () {
+    ppl.unshiftObject(personData1);
+  });
+
   ppl = testParent.get('people');
   equals(ppl.get('length'), 4, "after unshiftObject() on parent, check that the length of the array of child records is 4");
-  p = ppl.objectAt(0);
+  SC.run(function () {
+    p = ppl.objectAt(0);
+  });
   ok(SC.kindOf(p, SC.Record), "check that newly added ChildRecord creates an actual instance that is a kind of a SC.Record Object");
   ok(SC.instanceOf(p, NestedRecord.Person), "check that newly added ChildRecord creates an actual instance of a Person Object");
   equals(p.get('name'), 'Testikles, God Of Fertility', "after a pushObject on parent, check to see if it has all the right values for the attributes");
@@ -443,8 +454,10 @@ test("Basic Array Functionality: unshiftObject", function() {
   // Verify the Attrs
   pplAttr = testParent.readAttribute('people');
   equals(pplAttr.length, 4, "after unshiftObject() on parent, check that the length of the attribute array of child records is 4");
-  pFirst = ppl.objectAt(0);
-  pLast = ppl.objectAt(3);
+  SC.run(function () {
+    pFirst = ppl.objectAt(0);
+    pLast = ppl.objectAt(3);
+  });
   same(pplAttr[0], pFirst.get('attributes'), "verify that parent attributes are the same as the first individual child attributes");
   same(pplAttr[3], pLast.get('attributes'), "verify that parent attributes are the same as the last individual child attributes");
 });
@@ -453,11 +466,12 @@ test("Test: normalization on complex nested records", function() {
   var ppl, addresses, pAttrs;
   // Add something to the array
   ppl = testParent.get('people');
-  addresses = ppl.objectAt(0).get('addresses');
 
-  // PushObject Tests
-  addresses.pushObject({ type: 'Address', street: '2 Main Street', city: 'Awesome'});
-  testParent.normalize();
+  SC.run(function () {
+    addresses = ppl.objectAt(0).get('addresses');
+    addresses.pushObject({ type: 'Address', street: '2 Main Street', city: 'Awesome'});
+    testParent.normalize();
+  });
   pAttrs = testParent.get('attributes');
   equals(pAttrs.people[0].addresses[2].state, 'VA', "test normalization is the default value of VA");
 });
