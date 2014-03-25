@@ -158,6 +158,14 @@ test("The content of the popup should be recalculated correctly when the list of
   equals(view3.get("_itemList")[2].title, "Again", "The list should have on the 3rd position the title Again");
 });
 
+test("The content of the popup should be recalculated correctly when the list of items is empty", function() {
+  equals(view3.get("_itemList").length, 3, "The list should have 3 items.");
+  SC.RunLoop.begin() ;
+  view3.set('items', [] );
+  SC.RunLoop.end() ;
+  equals(view3.get("_itemList").length, 0, "The list should have 0 items.");
+});
+
 test("Setting the value of the view should change the title & icon properties", function () {
   equals(view4.get('value'), "World", "The view gets a default value by sort");
   equals(view4.get('title'), "World", "The view's title should originally be");

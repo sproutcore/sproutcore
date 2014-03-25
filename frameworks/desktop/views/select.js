@@ -553,8 +553,9 @@ SC.SelectView = SC.ButtonView.extend(
 
       idx += 1;
 
-      this.set('_itemList', itemList);
     }, this );
+
+    this.set('_itemList', itemList);
 
     var value = this.get('value');
     if (SC.none(value)) {
