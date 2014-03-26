@@ -139,7 +139,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
     if (st === YES && sd === YES) return this.get('formatDateTime');
     if (st === YES) return this.get('formatTime');
     return this.get('formatDate');
-  }.property('showTime', 'showDate').cacheable(),
+  }.property('showTime', 'showDate', 'formatDateTime', 'formatDate', 'formatTime').cacheable(),
 
   /**
     The current validator to format the Date to the input field and vice versa.
@@ -247,7 +247,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
   // ..........................................................
   // Key Event Support
   //
-  
+
   /** @private */
   keyDown: function(evt) {
     if (this.interpretKeyEvents(evt)) {
@@ -371,11 +371,11 @@ SC.DateFieldView = SC.TextFieldView.extend(
       var value = this.get('value'),
           lastValue = this._lastValue,
           length = 2,
-          min = 0, 
+          min = 0,
           max, key, newValue;
 
       switch(key) {
-        case '%Y': 
+        case '%Y':
           key = 'year';
           min = 1000;
           max = 9999;
@@ -410,7 +410,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
         case '%S':
           key = 'second';
           max = 59;
-        break;        
+        break;
       }
 
       if (SC.none(lastValue) || this._lastKey !== key) {

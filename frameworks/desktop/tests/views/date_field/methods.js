@@ -109,6 +109,26 @@ test("isEnabled=YES isEditable=YES should not add disable or readOnly attribute"
   ok(!view0.$input().attr('readOnly'), 'should not have readOnly attribute');
 });
 
+test("Verify the format property", function () {
+  SC.run(function () {
+    view0.set('showDate', true);
+    view0.set('showTime', true);
+    equals(view0.get('format'), view0.get('formatDateTime'), "The format should match");
+    view0.set('formatDateTime', '%d-%m-%Y @ %I:%M %p');
+    equals(view0.get('format'), '%d-%m-%Y @ %I:%M %p', "The format should match");
+
+    view0.set('showTime', false);
+    equals(view0.get('format'), view0.get('formatDate'), "The format should match");
+    view0.set('formatDate', '%d-%m-%Y');
+    equals(view0.get('format'), '%d-%m-%Y', "The format should match");
+
+    view0.set('showDate', false);
+    view0.set('showTime', true);
+    equals(view0.get('format'), view0.get('formatTime'), "The format should match");
+    view0.set('formatTime', '@ %I:%M %p');
+    equals(view0.get('format'), '@ %I:%M %p', "The format should match");
+  });
+});
 
 test("test insertText method", function() {
   // view1: dd/mm/yyyy
