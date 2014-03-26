@@ -102,8 +102,7 @@ SC._object_extend = function _object_extend(base, ext, proto) {
   var bindings = base._bindings, clonedBindings = NO,
       observers = base._observers, clonedObservers = NO,
       properties = base._properties, clonedProperties = NO,
-      paths, pathLoc, local, value,
-      len, i, found;
+      paths, pathLoc, local, value;
 
   // outlets are treated a little differently because you can manually
   // name outlets in the passed in hash. If this is the case, then clone
@@ -131,12 +130,9 @@ SC._object_extend = function _object_extend(base, ext, proto) {
         bindings = (bindings || SC.EMPTY_ARRAY).slice();
         clonedBindings = YES;
       }
-
-      if (bindings === null) {
-        bindings = (base._bindings || SC.EMPTY_ARRAY).slice();
-      }
-
-      // If the binding key is new (not found on base), add it to the list of binding keys.
+      // If the binding key is new (not found on base), add it to the list of binding keys. (If it's on
+      // base, we assume that it's already in there. We don't check for performance reasons. If that's
+      // failing, fix the failure not the check.)
       if (base[key] == null) { // (SC.none is inlined here for performance.)
         bindings[bindings.length] = key;
       }
