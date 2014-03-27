@@ -1067,6 +1067,19 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     var ret,
       views;
 
+    // Gatekeep! Since this method is often called directly by loops that may
+    // suffer from bounds issues, we should validate the idx and return nothing
+    // rather than returning an invalid item view.
+    if (SC.none(idx) || idx < 0 || idx >= this.get('length')) {
+      //@if(debug)
+      // Developer support
+      SC.warn("Developer Warning: %@ - itemViewForContentIndex(%@): The index, %@, is not within the range of the content.".fmt(this, idx, idx));
+      //@endif
+
+      return null; // FAST PATH!!
+    }
+
+
     // Initialize internal views cache.
     views = this._sc_itemViews;
     if (!views) { views = this._sc_itemViews = []; }

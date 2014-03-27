@@ -309,6 +309,24 @@ test("prefers delegate over content if both implement mixin", function() {
 // SPECIAL CASES
 //
 
+
+test("attempt to retrieve invalid indexes returns null", function () {
+  var itemView;
+
+  itemView = view.itemViewForContentIndex(null);
+  equals(itemView, null, 'Using index null should not return an item view');
+
+  itemView = view.itemViewForContentIndex(undefined);
+  equals(itemView, null, 'Using index undefined should not return an item view');
+
+  itemView = view.itemViewForContentIndex(-1);
+  equals(itemView, null, 'Using index -1 should not return an item view');
+
+  itemView = view.itemViewForContentIndex(view.get('length'));
+  equals(itemView, null, 'Using index %@ (length of content is %@) should not return an item view'.fmt(view.get('length'), view.get('length')));
+});
+
+
 test("after making an item visible then invisible again", function() {
 
   view.isVisibleInWindow = YES ;
