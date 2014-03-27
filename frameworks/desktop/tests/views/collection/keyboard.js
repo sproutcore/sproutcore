@@ -63,4 +63,23 @@ test("deselectAll", function() {
 	equals(view.getPath('selection.length'), 10, "deselectAll has no effect when allowsEmptySelection is NO")
 });
 
+// There was a specific bug in which insertNewLine when no selection was set, but
+// isEditable & canEditContent were true, that it would throw an exception.
+test("insertNewline doesn't throw exception when no selection", function() {
+	var collection = pane.view('default');
+
+	// Prep.
+	collection.set('isEditable', true);
+	collection.set('canEditContent', true);
+
+	SC.run(function() {
+		try {
+			collection.insertNewline();
+			ok(true, "Calling insertNewline without a selection should not throw an exception.");
+		} catch (ex) {
+			ok(false, "Calling insertNewline without a selection should not throw an exception. %@".fmt(ex));
+		}
+	});
+});
+
 // TODO: yeah all the other keyboard stuff.

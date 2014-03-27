@@ -2024,30 +2024,28 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     otherwise, invoke action.
   */
   insertNewline: function (sender, evt) {
-    var canEdit = this.get('isEditable') && this.get('canEditContent'),
-        sel, content, set, idx, itemView;
+    var wantsEdit = this.get('isEditable') && this.get('canEditContent'),
+      canEdit = true, //false,
+      sel, content, set, idx, itemView;
 
-    // first make sure we have a single item selected; get idx
-    if (canEdit) {
+    // Make sure we have a single item selected and the item view supports beginEditing
+    if (wantsEdit) {
       sel     = this.get('selection');
       content = this.get('content');
+
       if (sel && sel.get('length') === 1) {
         set = sel.indexSetForSource(content);
         idx = set ? set.get('min') : -1;
-        canEdit = idx >= 0;
-      }
-    }
 
-    // next find itemView and ensure it supports editing
-    if (canEdit) {
-      itemView = this.itemViewForContentIndex(idx);
-      canEdit = itemView && SC.typeOf(itemView.beginEditing) === SC.T_FUNCTION;
+        // next find itemView and ensure it supports editing
+        itemView = this.itemViewForContentIndex(idx);
+        canEdit = itemView && SC.typeOf(itemView.beginEditing) === SC.T_FUNCTION;
+      }
     }
 
     // ok, we can edit..
     if (canEdit) {
       this.scrollToContentIndex(idx);
-      itemView = this.itemViewForContentIndex(idx); // just in case
       itemView.beginEditing();
 
     // invoke action
