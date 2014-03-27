@@ -2025,7 +2025,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   */
   insertNewline: function (sender, evt) {
     var wantsEdit = this.get('isEditable') && this.get('canEditContent'),
-      canEdit = true, //false,
+      canEdit = false,
       sel, content, set, idx, itemView;
 
     // Make sure we have a single item selected and the item view supports beginEditing
