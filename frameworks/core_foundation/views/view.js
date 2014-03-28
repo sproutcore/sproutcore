@@ -1884,9 +1884,9 @@ SC.CoreView.unload = function () {
 
   Base class for managing a view.  Views provide two functions:
 
-   1. They translate state and events into drawing instructions for the
-     web browser and
-   2. They act as first responders for incoming keyboard, mouse, and
+   1. They display – translating your application's state into drawing
+     instructions for the web browser, and
+   2. They react – acting as first responders for incoming keyboard, mouse, and
      touch events.
 
   View Initialization
@@ -2069,7 +2069,29 @@ SC.CoreView.unload = function () {
   the box.) The basic touch event handlers are `touchStart` and `touchEnd`; if all you need is
   basic support then you can simply proxy these events to their mouse counterparts.
 
-  TODO: Comprehensively document touch events.
+  The counterpart to `mouseDragged` is `touchesDragged`, which is passed two arguments: a special
+  multitouch event object which includes methods for accessing information about all currently
+  in-flight touches, and a list of touches active on the current view. If you need to check the
+  status of touches currently being handled by other views, the special multitouch event object
+  exposes the `touchesForView` method. It also exposes the convenient `averagedTouchesForView`
+  method, which gives you easy access to an average touch center and distance. Unlike `mouseDragged`,
+  `touchesDragged` does not bubble, being only called on views whic handled `touchStart` for touches
+  which have moved.
+
+  To facilitate intuitive behavior in situations like scroll views with touch handlers inside them,
+  you may capture a touch from part way up its responder chain before it has a chance to bubble
+  up from the target. To capture a touch, expose a method on your view called `captureTouch` which
+  accepts the touch as its only argument, and which returns YES if you would like to capture that
+  touch. A captured touch will not bubble as normal, instead bubbling up from the capture point. Any
+  child views will not have the opportunity to handle the captured event unless you implement custom
+  responder swapping yourself.
+
+  Touch events bubble differently than mouse and keyboard events. The initial reverse `captureTouch`
+  bubbling is followed by regular `touchStart` bubbling; however, once this process has found a view
+  that's willing to respond to the touch, further events are applied only to that view. If a view
+  wishes to assign respondership for a touch to a different view, it can call one of several methods
+  on the touch object. For a fuller discussion of touch events, touch responder behavior, and the touch
+  object itself, see the documentation for SC.Touch.
 
   Keyboard events
   ----

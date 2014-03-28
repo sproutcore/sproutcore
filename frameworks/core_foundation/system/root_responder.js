@@ -7,6 +7,7 @@
 
 sc_require('system/ready');
 sc_require('system/platform');
+sc_require('system/touch');
 
 /** Set to NO to leave the backspace key under the control of the browser.*/
 SC.CAPTURE_BACKSPACE_KEY = NO ;
@@ -1027,12 +1028,6 @@ SC.RootResponder = SC.Object.extend(
   // ...........................................................................
   // TOUCH SUPPORT
   //
-  /*
-    There are three events: touchStart, touchEnd and touchesDragged.
-
-    The touchStart and touchEnd events are called individually for each touch.
-    The touchesDragged events are sent to whichever view owns the touch event.
-  */
 
   /**
     @private
@@ -1055,6 +1050,8 @@ SC.RootResponder = SC.Object.extend(
 
     When views receive a touch event, they have the option to subscribe to it.
     They are then mapped to touch events and vice-versa. This returns touches mapped to the view.
+
+    This method is also available on SC.Touch objects, and you will usually call it from there.
   */
   touchesForView: function(view) {
     if (this._touchedViews[SC.guidFor(view)]) {
@@ -1064,9 +1061,10 @@ SC.RootResponder = SC.Object.extend(
 
   /**
     Computes a hash with x, y, and d (distance) properties, containing the average position
-    of all touches, and the average distance of all touches from that average.
+    of all touches, and the average distance of all touches from that average. This is useful
+    for implementing scaling.
 
-    This is useful for implementing scaling.
+    This method is also available on SC.Touch objects, and you will usually call it from there.
   */
   averagedTouchesForView: function(view, added) {
     var len,
@@ -1197,48 +1195,25 @@ SC.RootResponder = SC.Object.extend(
   },
 
   /**
-    The touch responder for any given touch is the view which will receive touch events
-    for that touch. Quite simple.
+    This method attempts to change the responder for a particular touch. The touch's responder is the
+    view which will receive touch events for that touch.
 
-    makeTouchResponder takes a potential responder as an argument, and, by calling touchStart on each
-    nextResponder, finds the actual responder. As a side-effect of how it does this, touchStart is called
-    on the new responder before touchCancelled is called on the old one (touchStart has to accept the touch
-    before it can be considered cancelled).
+    You will usually not call this method directly, instead calling one of the convenience methods on
+    the touch itself. See documentation for SC.Touch for more.
 
-    You usually don't have to think about this at all. However, if you don't want your view to,
-    for instance, prevent scrolling in a ScrollView, you need to make sure to transfer control
-    back to the previous responder:
+    Possible gotchas:
 
-        if (Math.abs(touch.pageY - touch.startY) > this.MAX_SWIPE)
-          touch.restoreLastTouchResponder();
+    - Because this method must search for a view which implements touchStart (without returning NO),
+      touchStart is called on the new responder before touchCancelled is called on the old one.
+    - While a touch exposes its current responder at `touchResponder` and any previous stacked one at
+      `nextTouchResponder`, their relationship is ad hoc and arbitrary, and so are not chained by
+      `nextResponder` like in a standard responder chain. To query the touch's current responder stack
+      (or, though it's not recommended, change it), check touch.touchResponders.
 
-    You don't call makeTouchResponder on RootResponder directly. Instead, it gets called for you
-    when you return YES to captureTouch or touchStart.
-
-    You do, however, use a form of makeTouchResponder to return to a previous touch responder. Consider
-    a button view inside a ScrollView: if the touch moves too much, the button should give control back
-    to the scroll view.
-
-        if (Math.abs(touch.pageX - touch.startX) > 4) {
-          if (touch.nextTouchResponder)
-            touch.makeTouchResponder(touch.nextTouchResponder);
-        }
-
-    This will give control back to the containing view. Maybe you only want to do it if it is a ScrollView?
-
-        if (
-          Math.abs(touch.pageX - touch.startX) > 4 &&
-          touch.nextTouchResponder &&
-          touch.nextTouchResponder.isScrollable
-        )
-          touch.makeTouchResponder(touch.nextTouchResponder);
-
-    Possible gotcha: while you can do touch.nextTouchResponder, the responders are not chained in a linked list like
-    normal responders, because each touch has its own responder stack. To navigate through the stack (or, though
-    it is not recommended, change it), use touch.touchResponders (the raw stack array).
-
-    makeTouchResponder is called with an event object. However, it usually triggers custom touchStart/touchCancelled
-    events on the views. The event object is passed so that functions such as stopPropagation may be called.
+    @param {SC.Touch} touch
+    @param {SC.Responder} responder The view to assign to the touch. (Must implement touchStart.)
+    @param {Boolean} shouldStack Whether the new responder should replace the old one, or stack with it. Stacked responders are easy to revert.
+    @param {Boolean} upViewChain Whether the attempt to find a responder which implements touchStart should bubble up the responder chain.
   */
   makeTouchResponder: function(touch, responder, shouldStack, upViewChain) {
 
@@ -1249,7 +1224,6 @@ SC.RootResponder = SC.Object.extend(
       return;
     }
     this._isMakingTouchResponder = YES;
-
 
     var stack = touch.touchResponders, touchesForView;
 
@@ -1282,11 +1256,16 @@ SC.RootResponder = SC.Object.extend(
           responder = null;
         }
       } else {
-
+        // If the responder doesn't currently have a touch, or it does but it accepts multitouch, test it. Otherwise it's cool.
         if (responder && ((responder.get ? responder.get("acceptsMultitouch") : responder.acceptsMultitouch) || !responder.hasTouch)) {
-          if (!responder.touchStart(touch)) responder = null;
-        } else {
-          // do nothing; the responder is the responder, and may stay the responder, and all will be fine
+          // If it doesn't respond to touchStart, it's no good.
+          if (!responder.respondsTo("touchStart")) {
+            responder = null;
+          }
+          // If it returns NO from touchStart, it's no good. Otherwise it's cool.
+          else if (responder.touchStart(touch) === NO) {
+            responder = null;
+          }
         }
       }
     }
@@ -1648,15 +1627,20 @@ SC.RootResponder = SC.Object.extend(
         // the first VIEW touch should be the touch info sent
         viewTouches = this.touchesForView(view);
         firstTouch = viewTouches.firstObject();
+
+        // Load the event up with data from the first touch. THIS IS FOR CONVENIENCE ONLY in cases where the developer
+        // only cares about one touch.
         evt.pageX = firstTouch.pageX;
         evt.pageY = firstTouch.pageY;
         evt.clientX = firstTouch.clientX;
         evt.clientY = firstTouch.clientY;
         evt.screenX = firstTouch.screenX;
         evt.screenY = firstTouch.screenY;
-        evt.touchContext = this; // so it can call touchesForView
+        evt.startX = firstTouch.startX;
+        evt.startY = firstTouch.startY;
+        evt.touchContext = this; // Injects the root responder so it can call e.g. `touchesForView`.
 
-        // and go
+        // Give the view a chance to handle touchesDragged. (Don't bubble; viewTouches is view-specific.)
         view.tryToPerform("touchesDragged", evt, viewTouches);
       }
 
@@ -2498,141 +2482,6 @@ SC.RootResponder = SC.Object.extend(
     return view ? evt.hasCustomEventHandling : YES;
   }
 
-});
-
-/**
-  @class SC.Touch
-  Represents a touch.
-
-  Views receive touchStart and touchEnd.
-*/
-SC.Touch = function(touch, touchContext) {
-  // get the raw target view (we'll refine later)
-  this.touchContext = touchContext;
-  this.identifier = touch.identifier; // for now, our internal id is WebKit's id.
-
-  var target = touch.target, targetView;
-  if (target && SC.$(target).hasClass("touch-intercept")) {
-    touch.target.style.webkitTransform = "translate3d(0px,-5000px,0px)";
-    target = document.elementFromPoint(touch.pageX, touch.pageY);
-    if (target) targetView = SC.$(target).view()[0];
-
-    this.hidesTouchIntercept = NO;
-    if (target.tagName === "INPUT") {
-      this.hidesTouchIntercept = touch.target;
-    } else {
-      touch.target.style.webkitTransform = "translate3d(0px,0px,0px)";
-    }
-  } else {
-    targetView = touch.target ? SC.$(touch.target).view()[0] : null;
-  }
-  this.targetView = targetView;
-  this.target = target;
-  this.hasEnded = NO;
-  this.type = touch.type;
-  this.clickCount = 1;
-
-  this.view = undefined;
-  this.touchResponder = this.nextTouchResponder = undefined;
-  this.touchResponders = [];
-
-  this.startX = this.pageX = touch.pageX;
-  this.startY = this.pageY = touch.pageY;
-  this.clientX = touch.clientX;
-  this.clientY = touch.clientY;
-  this.screenX = touch.screenX;
-  this.screenY = touch.screenY;
-};
-
-SC.Touch.prototype = {
-  /**@scope SC.Touch.prototype*/
-
-  unhideTouchIntercept: function() {
-    var intercept = this.hidesTouchIntercept;
-    if (intercept) {
-      setTimeout(function() { intercept.style.webkitTransform = "translate3d(0px,0px,0px)"; }, 500);
-    }
-  },
-
-  /**
-    Indicates that you want to allow the normal default behavior.  Sets
-    the hasCustomEventHandling property to YES but does not cancel the event.
-  */
-  allowDefault: function() {
-    if (this.event) this.event.hasCustomEventHandling = YES ;
-  },
-
-  /**
-    If the touch is associated with an event, prevents default action on the event.
-  */
-  preventDefault: function() {
-    if (this.event) this.event.preventDefault();
-  },
-
-  stopPropagation: function() {
-    if (this.event) this.event.stopPropagation();
-  },
-
-  stop: function() {
-    if (this.event) this.event.stop();
-  },
-
-  /**
-    Removes from and calls touchEnd on the touch responder.
-  */
-  end: function() {
-    this.touchContext.endTouch(this);
-  },
-
-  /**
-    Changes the touch responder for the touch. If shouldStack === YES,
-    the current responder will be saved so that the next responder may
-    return to it.
-  */
-  makeTouchResponder: function(responder, shouldStack, upViewChain) {
-    this.touchContext.makeTouchResponder(this, responder, shouldStack, upViewChain);
-  },
-
-
-  /**
-    Captures, or recaptures, the touch. This works from the touch's raw target view
-    up to the startingPoint, and finds either a view that returns YES to captureTouch() or
-    touchStart().
-  */
-  captureTouch: function(startingPoint, shouldStack) {
-    this.touchContext.captureTouch(this, startingPoint, shouldStack);
-  },
-
-  /**
-    Returns all touches for a specified view. Put as a convenience on the touch itself; this method
-    is also available on the event.
-  */
-  touchesForView: function(view) {
-    return this.touchContext.touchesForView(view);
-  },
-
-  /**
-    Same as touchesForView, but sounds better for responders.
-  */
-  touchesForResponder: function(responder) {
-    return this.touchContext.touchesForView(responder);
-  },
-
-  /**
-    Returns average data--x, y, and d (distance)--for the touches owned by the supplied view.
-
-    addSelf adds this touch to the set being considered. This is useful from touchStart. If
-    you use it from anywhere else, it will make this touch be used twice--so use caution.
-  */
-  averagedTouchesForView: function(view, addSelf) {
-    return this.touchContext.averagedTouchesForView(view, (addSelf ? this : null));
-  }
-};
-
-SC.mixin(SC.Touch, {
-  create: function(touch, touchContext) {
-    return new SC.Touch(touch, touchContext);
-  }
 });
 
 /*
