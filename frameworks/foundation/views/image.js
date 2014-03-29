@@ -176,6 +176,7 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
     @type String
   */
   value: null,
+  valueBindingDefault: SC.Binding.oneWay(),
 
   /**
     Recalculate our innerFrame if the outer frame has changed.
