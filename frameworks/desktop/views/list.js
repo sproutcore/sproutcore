@@ -345,7 +345,7 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
         cache = [];
         content = this.get('content');
         indexes.forEach(function (idx) {
-          cache[idx] = del.contentIndexRowHeight(this, content, idx);
+          cache[idx] = del.contentIndexRowSize(this, content, idx);
         }, this);
 
         // moved down so that the cache is not marked as initialized until it actually is.

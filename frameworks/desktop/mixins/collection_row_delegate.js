@@ -150,7 +150,7 @@ SC.CollectionRowDelegate = {
     return ret;
   }.property('customRowHeightIndexes').cacheable(),
 
-  /**
+  /** @deprecated Version 1.11. Please use the `contentIndexRowSize()` function instead.
     Called for each index in the `customRowSizeIndexes` set to get the
     actual row height for the index.  This method should return the default
     rowSize if you don't want the row to have a custom height.
@@ -164,6 +164,23 @@ SC.CollectionRowDelegate = {
   */
   contentIndexRowHeight: function (view, content, contentIndex) {
     return this.get('rowSizePlusPadding');
+  },
+
+  /**
+    Called for each index in the `customRowSizeIndexes` set to get the
+    actual row size for the index.  This method should return the default
+    rowSize if you don't want the row to have a custom size.
+
+    The default implementation just returns the default rowSize plus rowPadding.
+
+    @param {SC.CollectionView} view the calling view
+    @param {Object} content the content array
+    @param {Number} contentIndex the index
+    @returns {Number} row size
+  */
+  contentIndexRowSize: function (view, content, contentIndex) {
+    // Backwards compatibility in case the contentIndexRowHeight function is overridden.
+    return this.contentIndexRowHeight(view, content, contentIndex);
   }
 
 };
