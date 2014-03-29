@@ -195,13 +195,13 @@ test("insertion point when drag on list view", function() {
     ev = SC.Event.simulateEvent(layer, 'mousemove', { pageX: point.x + 1, pageY: point.y + 1 });
     SC.Event.trigger(layer, 'mousemove', [ev]);
 
-    ok(listView._insertionPointView, "An insertion point should have been added");
+    ok(listView._sc_insertionPointView, "An insertion point should have been added");
 
     // Clean up
     ev = SC.Event.simulateEvent(layer, 'mouseup');
     SC.Event.trigger(layer, 'mouseup', [ev]);
 
-    equals(listView._insertionPointView, null, "The insertion point should have been destroyed");
+    equals(listView._sc_insertionPointView, null, "The insertion point should have been destroyed");
 
     window.start();
   };
@@ -239,13 +239,13 @@ test("insertion point when cancel drag on list view", function() {
     ev = SC.Event.simulateEvent(layer, 'mousemove', { pageX: point.x + 1, pageY: point.y + 1 });
     SC.Event.trigger(layer, 'mousemove', [ev]);
 
-    ok(listView._insertionPointView, "An insertion point should have been added");
+    ok(listView._sc_insertionPointView, "An insertion point should have been added");
 
     // cancel drag
     ev = SC.Event.simulateEvent(layer, 'keydown', { keyCode: 27 });
     SC.Event.trigger(layer, 'keydown', [ev]);
 
-    equals(listView._insertionPointView, null, "The insertion point should have been destroyed");
+    equals(listView._sc_insertionPointView, null, "The insertion point should have been destroyed");
     equals(listView._didCallDragEnded, true, "dragEnded should have been call");
 
     window.start();

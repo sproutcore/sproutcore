@@ -6,92 +6,181 @@
 // ==========================================================================
 
 
-/** 
+/**
   @namespace
-  
-  `CollectionRowDelegate`s are consulted by `SC.ListView` and `SC.TableView` to
-  control the height of rows, including specifying custom heights for
-  specific rows.
-  
-  You can implement a custom row height in one of two ways.
+
+  `CollectionRowDelegate`s are consulted by collection views, such as `SC.ListView`
+  that lay out items in vertical or horizontal rows, in order to determine the
+  height or width of each row.
 */
 SC.CollectionRowDelegate = {
 
   /**
     Walk like a duck.
-  
+
     @type Boolean
-    @default YES
+    @default true
   */
-  isCollectionRowDelegate: YES,
-  
-  /**
+  isCollectionRowDelegate: true,
+
+  /** @deprecated Version 1.11. Please use the `rowSize` property instead.
     Size of an item without spacing or padding.
-    Unless you implement some custom row height
-    support, this row height will be used for all items.
-    
+    Unless you implement custom row height or widths upport, this row height will be used for all items.
+
     @type Number
-    @default 18
+    @default 24
   */
-  itemHeight: 24,
-  
+  itemHeight: null,
+
   /**
-    This inserts empty space between rows that you can use for borders.
-    
+    The height or width of a row before padding depending on whether the
+    collection is laid out vertically or horizontally.
+
+    Unless you implement custom row size support, this value will be used for
+    all rows.
+
+    @type Number
+    @default 24
+  */
+  // This is a computed property in order to provide backwards compatibility for itemHeight.
+  // When itemHeight is removed completely, this can become a simple `24` value.
+  rowSize: function (key, value) {
+    var itemHeight = this.get('itemHeight'),
+      ret = 24;
+
+    // Backwards compatibility support
+    if (!SC.none(itemHeight)) {
+      //@if(debug)
+      SC.warn('Developer Warning: The itemHeight property of SC.CollectionRowDelegate has been renamed to rowSize.');
+      //@endif
+
+      return itemHeight;
+    }
+
+    if (!SC.none(value)) { ret = value; }
+
+    return ret;
+  }.property('itemHeight').cacheable(),
+
+  /**
+    The amount of space to leave between each row.
+
+    This is useful when you need to leave space for borders.
+
     @type Number
     @default 0
   */
   rowSpacing: 0,
-  
+
   /**
+    Padding space added to the top and bottom of each row when laid out vertically,
+    or to the left and right when laid out horizontally.
+
     This is useful if you are using a custom item view that needs to be padded.
-    This value is added to the top and bottom of the `itemHeight`.
-    
+
     @type Number
     @default 0
   */
   rowPadding: 0,
-  
-  /**
-    Total row height used for calculation. Equal to `itemHeight + (2 * rowPadding)`.
-    
+
+  /** @deprecated Version 1.11. Please use a combination of rowSize and rowPadding to specify the total height or width of each row.
+    Total row height used for calculation. Equal to `rowSize + (2 * rowPadding)`.
+
     @type Number
   */
-  rowHeight: function(key, value) {
-    var rowPadding = this.get('rowPadding');
-    var itemHeight = this.get('itemHeight');
+  rowHeight: function (key, value) {
+    var rowPadding = this.get('rowPadding'),
+      rowSize = this.get('rowSize');
 
     if (value !== undefined) {
-      this.set('itemHeight', value-rowPadding*2);
+      this.set('rowSize', value - rowPadding * 2);
       return value;
     }
 
-    return itemHeight + rowPadding * 2;
-  }.property('itemHeight', 'rowPadding'),
+    return rowSize + rowPadding * 2;
+  }.property('rowSize', 'rowPadding'),
+
+  /**
+    Returns the total row size based on rowSize and rowPadding.
+
+    @type Number
+    @default 24
+    @readonly
+  */
+  rowSizePlusPadding: function () {
+    // Backwards compatibility in case the rowHeight property is set directly.
+    var rowHeight = this.get('rowHeight');
+
+    return rowHeight;
+  }.property('rowHeight').cacheable(),
+
+  /** @deprecated Version 1.11. Please use the `customRowSizeIndexes` property instead.
+    Index set of rows that should have a custom row height. If you need
+    certain rows to have a custom row height, then set this property to a
+    non-null value.  Otherwise leave it blank to disable custom row heights.
+
+    @type SC.IndexSet
+  */
+  customRowHeightIndexes: null,
 
   /**
     Index set of rows that should have a custom row height. If you need
     certain rows to have a custom row height, then set this property to a
     non-null value.  Otherwise leave it blank to disable custom row heights.
-    
+
     @type SC.IndexSet
   */
-  customRowHeightIndexes: null,
-  
-  /**
-    Called for each index in the `customRowHeightIndexes` set to get the
+  // This is a computed property in order to provide backwards compatibility for customRowHeightIndexes.
+  // When customRowHeightIndexes is removed completely, this can become a simple `null` value.
+  customRowSizeIndexes: function (key, value) {
+    var customRowHeightIndexes = this.get('customRowHeightIndexes'),
+      ret = null;
+
+    // Backwards compatibility support.
+    if (!SC.none(customRowHeightIndexes)) {
+      //@if(debug)
+      SC.warn('Developer Warning: The customRowHeightIndexes property of SC.CollectionRowDelegate has been renamed to customRowSizeIndexes.');
+      //@endif
+
+      return customRowHeightIndexes;
+    }
+
+    if (!SC.none(value)) { ret = value; }
+
+    return ret;
+  }.property('customRowHeightIndexes').cacheable(),
+
+  /** @deprecated Version 1.11. Please use the `contentIndexRowSize()` function instead.
+    Called for each index in the `customRowSizeIndexes` set to get the
     actual row height for the index.  This method should return the default
-    rowHeight if you don't want the row to have a custom height.
-    
-    The default implementation just returns the default rowHeight.
-    
+    rowSize if you don't want the row to have a custom height.
+
+    The default implementation just returns the default rowSize.
+
     @param {SC.CollectionView} view the calling view
     @param {Object} content the content array
-    @param {Number} contentIndex the index 
+    @param {Number} contentIndex the index
     @returns {Number} row height
   */
-  contentIndexRowHeight: function(view, content, contentIndex) {
-    return this.get('rowHeight');
+  contentIndexRowHeight: function (view, content, contentIndex) {
+    return this.get('rowSizePlusPadding');
+  },
+
+  /**
+    Called for each index in the `customRowSizeIndexes` set to get the
+    actual row size for the index.  This method should return the default
+    rowSize if you don't want the row to have a custom size.
+
+    The default implementation just returns the default rowSize plus rowPadding.
+
+    @param {SC.CollectionView} view the calling view
+    @param {Object} content the content array
+    @param {Number} contentIndex the index
+    @returns {Number} row size
+  */
+  contentIndexRowSize: function (view, content, contentIndex) {
+    // Backwards compatibility in case the contentIndexRowHeight function is overridden.
+    return this.contentIndexRowHeight(view, content, contentIndex);
   }
 
 };

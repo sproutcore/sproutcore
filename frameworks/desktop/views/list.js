@@ -10,47 +10,48 @@ sc_require('mixins/collection_row_delegate');
 
 /** @class
 
-  A list view renders vertical lists of items.  It is a specialized form of
-  collection view that is simpler than the table view, but more refined than
+  A list view renders vertical or horizontal lists of items.  It is a specialized
+  form of collection view that is simpler than a table view, but more refined than
   a generic collection.
 
-  You can use a list view just like a collection view, except that often you
-  also should provide a default rowHeight.  Setting this value will allow
-  the ListView to optimize its rendering.
+  You can use a list view just like any collection view, except that often you
+  provide the rowSize, which will be either the height of each row when laying
+  out rows vertically (the default) or the widht of each row when laying out
+  the rows horizontally.
 
   ## Variable Row Heights
 
-  Normally you set the row height through the rowHeight property.  You can
-  also support custom row heights by implementing the
-  contentCustomRowHeightIndexes property to return an index set.
+  Normally you set the row height or width through the rowSize property, but
+  you can also support custom row sizes by assigning the `customRowSizeIndexes`
+  property to an index set of all custom sized rows.
 
   ## Using ListView with Very Large Data Sets
 
   ListView implements incremental rendering, which means it will only render
-  HTML for the items that are current visible on the screen.  You can use it
-  to efficiently render lists with 100K+ items very efficiently.
+  HTML for the items that are currently visible on the screen.  This means you
+  can use it to efficiently render lists with 100K+ items or more very efficiently.
 
-  If you need to work with very large lists of items, however, be aware that
-  calculate variable rows heights can become very expensive since the list
+  If you need to work with very large lists of items however, be aware that
+  calculating variable row sizes can become very expensive since the list
   view will essentially have to iterate over every item in the collection to
-  collect its row height.
+  determine each the total height or width.
 
-  To work with very large lists, you should consider making your row heights
-  uniform.  This will allow the list view to efficiently render content
-  without worrying about the overall performance.
+  Therefore, to work with very large lists, you should consider using a design
+  that allows your row sizes to remain uniform.  This will allow the list view
+  to much more efficiently render content.
 
-  Alternatively, you may want to consider overriding the
-  offsetForRowAtContentIndex() and heightForRowAtContentIndex() methods to
-  perform some faster calculations that do not require inspecting every
-  item in the collection.
+  Alternatively, to support differently sized and incrementally rendered item
+  views, you may want to consider overriding the `offsetForRowAtContentIndex()`
+  and `rowSizeForContentIndex()` methods to perform some specialized faster
+  calculations that do not require inspecting every item in the collection.
 
-  Note that row heights and offsets are cached so once they are calculated
+  Note: row sizes and offsets are cached so once they are calculated
   the list view will be able to display very quickly.
 
-  ## Dropping on an Item
+  ## Dragging and Dropping
 
-  When the list view is configured to accept drags and drops onto its items, it
-  will set the isDropTarget property on the target item accordingly.  This
+  When the list view is configured to accept drops onto its items, it
+  will set the `isDropTarget` property on the target item accordingly.  This
   allows you to modify the appearance of the drop target list item accordingly
   (@see SC.ListItemView#isDropTarget).
 
@@ -63,6 +64,27 @@ sc_require('mixins/collection_row_delegate');
 SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
 /** @scope SC.ListView.prototype */ {
 
+  /** @private */
+  _sc_customRowSizeIndexes: null,
+
+  /** @private */
+  _sc_insertionPointView: null,
+
+  /** @private */
+  _sc_lastDropOnView: null,
+
+  /** @private */
+  _sc_layout: null,
+
+  /** @private */
+  _sc_sizeCache: null,
+
+  /** @private */
+  _sc_offsetCache: null,
+
+  /** @private */
+  _sc_rowSize: null,
+
   /**
     @type Array
     @default ['sc-list-view']
@@ -72,34 +94,50 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
 
   /**
     @type Boolean
-    @default YES
+    @default true
   */
-  acceptsFirstResponder: YES,
+  acceptsFirstResponder: true,
 
   /** @private SC.CollectionView.prototype */
   exampleView: SC.ListItemView,
 
   /**
-    If set to YES, the default theme will show alternating rows
+    Determines the layout direction of the rows of items, either vertically or
+    horizontally. Possible values:
+
+      - SC.LAYOUT_HORIZONTAL
+      - SC.LAYOUT_VERTICAL
+
+    @type String
+    @default SC.LAYOUT_VERTICAL
+  */
+  layoutDirection: SC.LAYOUT_VERTICAL,
+
+  /**
+    If set to true, the default theme will show alternating rows
     for the views this ListView created through exampleView property.
 
     @type Boolean
-    @default NO
+    @default false
   */
-  showAlternatingRows: NO,
-
+  showAlternatingRows: false,
 
   // ..........................................................
   // METHODS
   //
 
   /** @private */
-  render: function(context, firstTime) {
+  init: function () {
+    sc_super();
+    this._sc_rowDelegateDidChange();
+  },
+
+  /** @private */
+  render: function (context, firstTime) {
     context.setClass('alternating', this.get('showAlternatingRows'));
 
     return sc_super();
   },
-
 
   // ..........................................................
   // COLLECTION ROW DELEGATE SUPPORT
@@ -111,103 +149,107 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     @observes 'delegate'
     @observes 'content'
   */
-  rowDelegate: function() {
+  rowDelegate: function () {
     var del = this.delegate,
-        content = this.get('content');
+      content = this.get('content');
 
     return this.delegateFor('isCollectionRowDelegate', del, content);
   }.property('delegate', 'content').cacheable(),
 
-  /** @private
-    Whenever the rowDelegate changes, begin observing important properties
-  */
-  _sclv_rowDelegateDidChange: function() {
-    var last = this._sclv_rowDelegate,
-        del  = this.get('rowDelegate'),
-        func = this._sclv_rowHeightDidChange,
-        func2 = this._sclv_customRowHeightIndexesDidChange;
+  /** @private - Whenever the rowDelegate changes, begin observing important properties */
+  _sc_rowDelegateDidChange: function () {
+    var last = this._sc_rowDelegate,
+      del  = this.get('rowDelegate'),
+      func = this._sc_rowSizeDidChange,
+      func2 = this._sc_customRowSizeIndexesDidChange;
 
     if (last === del) return this; // nothing to do
-    this._sclv_rowDelegate = del;
+    this._sc_rowDelegate = del;
 
     // last may be null on a new object
     if (last) {
-      last.removeObserver('rowHeight', this, func);
-      last.removeObserver('customRowHeightIndexes', this, func2);
+      last.removeObserver('rowSizePlusPadding', this, func);
+      last.removeObserver('customRowSizeIndexes', this, func2);
     }
 
+    //@if(debug)
     if (!del) {
-      throw new Error("Internal Inconsistancy: ListView must always have CollectionRowDelegate");
+      throw new Error("%@ - Developer Error: SC.ListView must always have a rowDelegate.".fmt(this));
     }
+    //@endif
 
-    del.addObserver('rowHeight', this, func);
-    del.addObserver('customRowHeightIndexes', this, func2);
-    this._sclv_rowHeightDidChange()._sclv_customRowHeightIndexesDidChange();
-    return this ;
+    // Add the new observers.
+    del.addObserver('rowSizePlusPadding', this, func);
+    del.addObserver('customRowSizeIndexes', this, func2);
+
+    // Trigger once to initialize.
+    this._sc_rowSizeDidChange()._sc_customRowSizeIndexesDidChange();
+
+    return this;
   }.observes('rowDelegate'),
 
-  /** @private
-    called whenever the rowHeight changes.  If the property actually changed
-    then invalidate all row heights.
-  */
-  _sclv_rowHeightDidChange: function() {
+  /** @private - Called whenever the rowSizePlusPadding changes. If the property actually changed then invalidate all row sizes. */
+  _sc_rowSizeDidChange: function () {
     var del = this.get('rowDelegate'),
-        height = del.get('rowHeight'),
-        indexes;
+      rowSizePlusPadding = del.get('rowSizePlusPadding'),
+      indexes;
 
-    if (height === this._sclv_rowHeight) return this; // nothing to do
-    this._sclv_rowHeight = height;
+    if (rowSizePlusPadding === this._sc_rowSize) return this; // nothing to do
+    this._sc_rowSize = rowSizePlusPadding;
 
     indexes = SC.IndexSet.create(0, this.get('length'));
-    this.rowHeightDidChangeForIndexes(indexes);
-    return this ;
+    this.rowSizeDidChangeForIndexes(indexes);
+
+    return this;
   },
 
-  /** @private
-    called whenever the customRowHeightIndexes changes.  If the property
-    actually changed then invalidate affected row heights.
-  */
-  _sclv_customRowHeightIndexesDidChange: function() {
-    var del     = this.get('rowDelegate'),
-        indexes = del.get('customRowHeightIndexes'),
-        last    = this._sclv_customRowHeightIndexes,
-        func    = this._sclv_customRowHeightIndexesContentDidChange;
+  /** @private - Called whenever the customRowSizeIndexes changes. If the property actually changed then invalidate affected row sizes. */
+  _sc_customRowSizeIndexesDidChange: function () {
+    var del   = this.get('rowDelegate'),
+      indexes = del.get('customRowSizeIndexes'),
+      last    = this._sc_customRowSizeIndexes,
+      func    = this._sc_customRowSizeIndexesContentDidChange;
 
     // nothing to do
-    if ((indexes===last) || (last && last.isEqual(indexes))) return this;
+    if ((indexes === last) || (last && last.isEqual(indexes))) return this;
 
     // if we were observing the last index set, then remove observer
-    if (last && this._sclv_isObservingCustomRowHeightIndexes) {
+    if (last && this._sc_isObservingCustomRowSizeIndexes) {
       last.removeObserver('[]', this, func);
     }
 
     // only observe new index set if it exists and it is not frozen.
-    if (this._sclv_isObservingCustomRowHeightIndexes = indexes && !indexes.get('isFrozen')) {
+    this._sc_isObservingCustomRowSizeIndexes = indexes;
+    if (indexes && !indexes.get('isFrozen')) {
       indexes.addObserver('[]', this, func);
     }
 
-    this._sclv_customRowHeightIndexesContentDidChange();
-    return this ;
+    // Trigger once to initialize.
+    this._sc_customRowSizeIndexesContentDidChange();
+
+    return this;
   },
 
-  /** @private
-    Called whenever the customRowHeightIndexes set is modified.
-  */
-  _sclv_customRowHeightIndexesContentDidChange: function() {
+  /** @private - Called whenever the customRowSizeIndexes set is modified. */
+  _sc_customRowSizeIndexesContentDidChange: function () {
     var del     = this.get('rowDelegate'),
-        indexes = del.get('customRowHeightIndexes'),
-        last    = this._sclv_customRowHeightIndexes,
-        changed;
+      indexes = del.get('customRowSizeIndexes'),
+      last    = this._sc_customRowSizeIndexes,
+      changed;
 
     // compute the set to invalidate.  the union of cur and last set
     if (indexes && last) {
       changed = indexes.copy().add(last);
-    } else changed = indexes || last ;
-    this._sclv_customRowHeightIndexes = indexes ? indexes.frozenCopy() : null;
+    } else {
+      changed = indexes || last;
+    }
+
+    this._sc_customRowSizeIndexes = indexes ? indexes.frozenCopy() : null;
 
     // invalidate
-    this.rowHeightDidChangeForIndexes(changed);
-    return this ;
+    this.rowSizeDidChangeForIndexes(changed);
+
+    return this;
   },
 
 
@@ -216,115 +258,153 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
   //
 
   /**
-    Returns the top offset for the specified content index.  This will take
-    into account any custom row heights and group views.
+    Returns the top or left offset for the specified content index.  This will take
+    into account any custom row sizes and group views.
 
     @param {Number} idx the content index
     @returns {Number} the row offset
   */
-  rowOffsetForContentIndex: function(idx) {
-    if (idx === 0) return 0 ; // fastpath
+  rowOffsetForContentIndex: function (idx) {
+    if (idx === 0) return 0; // Fast path!
 
-    var del       = this.get('rowDelegate'),
-        rowHeight = del.get('rowHeight'),
-        rowSpacing, ret, custom, cache, delta, max, content ;
+    var del = this.get('rowDelegate'),
+      rowSizePlusPadding = del.get('rowSizePlusPadding'),
+      rowSpacing = del.get('rowSpacing'),
+      ret, custom, cache, delta, max;
 
-    ret = idx * rowHeight;
+    ret = idx * rowSizePlusPadding;
 
-    rowSpacing = this.get('rowSpacing');
-		if(rowSpacing){
+		if (rowSpacing) {
       ret += idx * rowSpacing;
     }
 
-    if (del.customRowHeightIndexes && (custom=del.get('customRowHeightIndexes'))) {
+    if (del.customRowSizeIndexes && (custom = del.get('customRowSizeIndexes'))) {
 
       // prefill the cache with custom rows.
-      cache = this._sclv_offsetCache;
+      cache = this._sc_offsetCache;
       if (!cache) {
         cache = [];
-        delta = max = 0 ;
-        custom.forEach(function(idx) {
-          delta += this.rowHeightForContentIndex(idx)-rowHeight;
-          cache[idx+1] = delta;
-          max = idx ;
+        delta = max = 0;
+        custom.forEach(function (idx) {
+          delta += this.rowSizeForContentIndex(idx) - rowSizePlusPadding;
+          cache[idx + 1] = delta;
+          max = idx;
         }, this);
-        this._sclv_max = max+1;
+        this._sc_max = max + 1;
+
         // moved down so that the cache is not marked as initialized until it actually is
-        this._sclv_offsetCache = cache;
+        this._sc_offsetCache = cache;
       }
 
       // now just get the delta for the last custom row before the current
       // idx.
       delta = cache[idx];
       if (delta === undefined) {
-        delta = cache[idx] = cache[idx-1];
+        delta = cache[idx] = cache[idx - 1];
         if (delta === undefined) {
-          max = this._sclv_max;
-          if (idx < max) max = custom.indexBefore(idx)+1;
+          max = this._sc_max;
+          if (idx < max) max = custom.indexBefore(idx) + 1;
           delta = cache[idx] = cache[max] || 0;
         }
       }
 
-      ret += delta ;
+      ret += delta;
     }
 
-    return ret ;
+    return ret;
   },
 
-  /**
+  /** @deprecated Version 1.11. Please use the `rowSizeForContentIndex()` function instead.
     Returns the row height for the specified content index.  This will take
     into account custom row heights and group rows.
 
     @param {Number} idx content index
     @returns {Number} the row height
   */
-  rowHeightForContentIndex: function(idx) {
-    var del = this.get('rowDelegate'),
-        ret, cache, content, indexes;
+  rowHeightForContentIndex: function (idx) {
+    //@if(debug)
+    SC.warn('Developer Warning: The rowHeightForContentIndex() function of SC.ListView has been renamed to rowSizeForContentIndex().');
+    //@endif
 
-    if (del.customRowHeightIndexes && (indexes=del.get('customRowHeightIndexes'))) {
-      cache = this._sclv_heightCache ;
-      if (!cache) {
-        cache = [];
-        content = this.get('content');
-        indexes.forEach(function(idx) {
-          cache[idx] = del.contentIndexRowHeight(this, content, idx);
-        }, this);
-        // moved down so that the cache is not marked as initialized until it actually is
-        this._sclv_heightCache = cache;
-      }
-
-      ret = cache[idx];
-      if (ret === undefined) ret = del.get('rowHeight');
-    } else ret = del.get('rowHeight');
-
-    return ret ;
+    return this.rowSizeForContentIndex(idx);
   },
 
   /**
+    Returns the row size for the specified content index.  This will take
+    into account custom row sizes and group rows.
+
+    @param {Number} idx content index
+    @returns {Number} the row height
+  */
+  rowSizeForContentIndex: function (idx) {
+    var del = this.get('rowDelegate'),
+        ret, cache, content, indexes;
+
+    if (del.customRowSizeIndexes && (indexes = del.get('customRowSizeIndexes'))) {
+      cache = this._sc_sizeCache;
+      if (!cache) {
+        cache = [];
+        content = this.get('content');
+        indexes.forEach(function (idx) {
+          cache[idx] = del.contentIndexRowSize(this, content, idx);
+        }, this);
+
+        // moved down so that the cache is not marked as initialized until it actually is.
+        this._sc_sizeCache = cache;
+      }
+
+      ret = cache[idx];
+      if (ret === undefined) ret = del.get('rowSizePlusPadding');
+    } else {
+      ret = del.get('rowSizePlusPadding');
+    }
+
+    return ret;
+  },
+
+  /** @deprecated Version 1.11. Please use the `rowSizeDidChangeForIndexes()` function instead.
     Call this method whenever a row height has changed in one or more indexes.
     This will invalidate the row height cache and reload the content indexes.
     Pass either an index set or a single index number.
 
-    This method is called automatically whenever you change the rowHeight
-    or customRowHeightIndexes properties on the collectionRowDelegate.
+    This method is called automatically whenever you change the rowSizePlusPadding
+    or customRowSizeIndexes properties on the collectionRowDelegate.
 
     @param {SC.IndexSet|Number} indexes
     @returns {SC.ListView} receiver
   */
-  rowHeightDidChangeForIndexes: function(indexes) {
+  rowHeightDidChangeForIndexes: function (indexes) {
+    //@if(debug)
+    SC.warn('Developer Warning: The rowHeightDidChangeForIndexes() function of SC.ListView has been renamed to rowSizeDidChangeForIndexes().');
+    //@endif
+    return this.rowSizeDidChangeForIndexes(indexes);
+  },
+
+  /**
+    Call this method whenever a row size has changed in one or more indexes.
+    This will invalidate the row size cache and reload the content indexes.
+    Pass either an index set or a single index number.
+
+    This method is called automatically whenever you change the rowSizePlusPadding
+    or customRowSizeIndexes properties on the collectionRowDelegate.
+
+    @param {SC.IndexSet|Number} indexes
+    @returns {SC.ListView} receiver
+  */
+  rowSizeDidChangeForIndexes: function (indexes) {
     var len = this.get('length');
 
     // clear any cached offsets
-    this._sclv_heightCache = this._sclv_offsetCache = null;
+    this._sc_sizeCache = this._sc_offsetCache = null;
 
     // find the smallest index changed; invalidate everything past it
     if (indexes && indexes.isIndexSet) indexes = indexes.get('min');
-    this.reload(SC.IndexSet.create(indexes, len-indexes));
+    this.reload(SC.IndexSet.create(indexes, len - indexes));
 
     // If the row height changes, our entire layout needs to change.
     this.invokeOnce('adjustLayout');
-    return this ;
+
+    return this;
   },
 
   // ..........................................................
@@ -335,13 +415,23 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     The layout for a ListView is computed from the total number of rows
     along with any custom row heights.
   */
-  computeLayout: function() {
+  computeLayout: function () {
     // default layout
-    var ret = this._sclv_layout;
-    if (!ret) ret = this._sclv_layout = {};
-    ret.minHeight = this.rowOffsetForContentIndex(this.get('length'));
-    this.set('calculatedHeight', ret.minHeight);
-    return ret ;
+    var ret = this._sc_layout,
+      layoutDirection = this.get('layoutDirection');
+
+    // Initialize lazily.
+    if (!ret) ret = this._sc_layout = {};
+
+    // Support both vertical and horizontal lists.
+    if (layoutDirection === SC.LAYOUT_HORIZONTAL) {
+      ret.minWidth = this.rowOffsetForContentIndex(this.get('length'));
+      this.set('calculatedWidth', ret.minWidth);
+    } else {
+      ret.minHeight = this.rowOffsetForContentIndex(this.get('length'));
+      this.set('calculatedHeight', ret.minHeight);
+    }
+    return ret;
   },
 
   /**
@@ -351,15 +441,30 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     @param {Number} contentIndex
     @returns {Hash} layout hash for the index provided
   */
-  layoutForContentIndex: function(contentIndex) {
-    var del = this.get('rowDelegate');
+  layoutForContentIndex: function (contentIndex) {
+    var del = this.get('rowDelegate'),
+      layoutDirection = this.get('layoutDirection'),
+      offset, size;
 
-    return {
-      top: this.rowOffsetForContentIndex(contentIndex),
-      height: this.rowHeightForContentIndex(contentIndex) - del.get('rowPadding') * 2,
-      left: 0,
-      right: 0
-    };
+    offset = this.rowOffsetForContentIndex(contentIndex);
+    size = this.rowSizeForContentIndex(contentIndex) - del.get('rowPadding') * 2;
+
+    // Support both vertical and horizontal lists.
+    if (layoutDirection === SC.LAYOUT_HORIZONTAL) {
+      return {
+        left: offset,
+        width: size,
+        top: 0,
+        bottom: 0
+      };
+    } else {
+      return {
+        top: offset,
+        height: size,
+        left: 0,
+        right: 0
+      };
+    }
   },
 
   /**
@@ -375,61 +480,72 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     @param {Rect} rect the visible rect or a point
     @returns {SC.IndexSet} now showing indexes
   */
-  contentIndexesInRect: function(rect) {
-    var rowHeight = this.get('rowDelegate').get('rowHeight'),
-        top       = SC.minY(rect),
-        bottom    = SC.maxY(rect),
-        height    = rect.height || 0,
-        len       = this.get('length'),
-        offset, start, end;
+  contentIndexesInRect: function (rect) {
+    var rowSizePlusPadding = this.get('rowDelegate').get('rowSizePlusPadding'),
+      layoutDirection = this.get('layoutDirection'),
+      len = this.get('length'),
+      offset, start, end,
+      firstEdge, lastEdge,
+      size;
+
+    // Support both vertical and horizontal lists.
+    if (layoutDirection === SC.LAYOUT_HORIZONTAL) {
+      firstEdge = SC.minX(rect);
+      lastEdge = SC.maxX(rect);
+      size = rect.width || 0;
+    } else {
+      firstEdge = SC.minY(rect);
+      lastEdge = SC.maxY(rect);
+      size = rect.height || 0;
+    }
 
     // estimate the starting row and then get actual offsets until we are
     // right.
-    start = (top - (top % rowHeight)) / rowHeight;
+    start = (firstEdge - (firstEdge % rowSizePlusPadding)) / rowSizePlusPadding;
     offset = this.rowOffsetForContentIndex(start);
 
-    // go backwards until top of row is before top edge
-    while(start>0 && offset>top) {
+    // go backwards until offset of row is before first edge
+    while (start > 0 && offset > firstEdge) {
       start--;
-      offset -= this.rowHeightForContentIndex(start);
+      offset -= this.rowSizeForContentIndex(start);
     }
 
-    // go forwards until bottom of row is after top edge
-    offset += this.rowHeightForContentIndex(start);
-    while(start<len && offset<=top) {
+    // go forwards until offset plus size of row is after first edge
+    offset += this.rowSizeForContentIndex(start);
+    while (start < len && offset <= firstEdge) {
       start++;
-      offset += this.rowHeightForContentIndex(start);
+      offset += this.rowSizeForContentIndex(start);
     }
-    if (start<0) start = 0;
-    if (start>=len) start=len;
+    if (start < 0) start = 0;
+    if (start >= len) start = len;
 
 
     // estimate the final row and then get the actual offsets until we are
     // right. - look at the offset of the _following_ row
-    end = start + ((height - (height % rowHeight)) / rowHeight) ;
+    end = start + ((size - (size % rowSizePlusPadding)) / rowSizePlusPadding);
     if (end > len) end = len;
     offset = this.rowOffsetForContentIndex(end);
 
-    // walk backwards until top of row is before or at bottom edge
-    while(end>=start && offset>=bottom) {
+    // walk backwards until offset of row is before or at last edge
+    while (end >= start && offset >= lastEdge) {
       end--;
-      offset -= this.rowHeightForContentIndex(end);
+      offset -= this.rowSizeForContentIndex(end);
     }
 
-    // go forwards until bottom of row is after bottom edge
-    offset += this.rowHeightForContentIndex(end);
-    while(end<len && offset<bottom) {
+    // go forwards until offset plus size of row is after last edge
+    offset += this.rowSizeForContentIndex(end);
+    while (end < len && offset < lastEdge) {
       end++;
-      offset += this.rowHeightForContentIndex(end);
+      offset += this.rowSizeForContentIndex(end);
     }
 
     end++; // end should be after start
 
-    if (end<start) end = start;
-    if (end>len) end = len ;
+    if (end < start) end = start;
+    if (end > len) end = len;
 
     // convert to IndexSet and return
-    return SC.IndexSet.create(start, end-start);
+    return SC.IndexSet.create(start, end - start);
   },
 
 
@@ -450,10 +566,27 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
   insertionPointView: SC.View.extend({
     classNames: 'sc-list-insertion-point',
 
-    layout: { height: 2 },
+    layout: function () {
+      var layoutDirection = this.get('layoutDirection'),
+        ret;
+
+      if (layoutDirection === SC.LAYOUT_HORIZONTAL) {
+        ret = { width: 2 };
+      } else {
+        ret = { height: 2 };
+      }
+
+      return ret;
+    }.property('layoutDirection').cacheable(),
+
+    /**
+      The direction of layout of the SC.ListView.
+      This property will be set by the list view when this view is created.
+      */
+    layoutDirection: SC.LAYOUT_VERTICAL,
 
     /** @private */
-    render: function(context, firstTime) {
+    render: function (context, firstTime) {
       if (firstTime) context.push('<div class="anchor"></div>');
     }
   }),
@@ -467,7 +600,7 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     // should be built into CollectionView's calling method and not the unrelated method
     // for showing an insertion point.)
     if (dropOperation & SC.DROP_ON) {
-      if (itemView && itemView !== this._lastDropOnView) {
+      if (itemView && itemView !== this._sc_lastDropOnView) {
         this.hideInsertionPoint();
 
         // If the drag is supposed to drop onto an item, notify the item that it
@@ -476,7 +609,7 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
 
         // Track the item so that we can clear isDropTarget when the drag changes;
         // versus having to clear it from all items.
-        this._lastDropOnView = itemView;
+        this._sc_lastDropOnView = itemView;
       }
       return;
     }
@@ -491,13 +624,13 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
 
     // If there was an item that was the target of the drop previously, be
     // sure to clear it.
-    if (this._lastDropOnView) {
-      this._lastDropOnView.set('isDropTarget', NO);
-      this._lastDropOnView = null;
+    if (this._sc_lastDropOnView) {
+      this._sc_lastDropOnView.set('isDropTarget', NO);
+      this._sc_lastDropOnView = null;
     }
 
     var len = this.get('length'),
-        index, level, indent;
+      index, level, indent;
 
     // Get values from itemView, if present.
     if (itemView) {
@@ -505,6 +638,7 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
       level = itemView.get('outlineLevel');
       indent = itemView.get('outlineIndent');
     }
+
     // Set defaults.
     index = index || 0;
     if (SC.none(level)) level = -1;
@@ -522,35 +656,48 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     }
 
     // Get insertion point.
-    var insertionPoint = this._insertionPointView;
+    var insertionPoint = this._sc_insertionPointView,
+      layoutDirection = this.get('layoutDirection');
+
     if (!insertionPoint) {
-      insertionPoint = this._insertionPointView = this.get('insertionPointView').create();
+      insertionPoint = this._sc_insertionPointView = this.get('insertionPointView').create({
+        layoutDirection: layoutDirection
+      });
     }
 
     // Calculate where it should go.
     var itemViewLayout = itemView ? itemView.get('layout') : { top: 0, left: 0 },
-        top, left;
-    top = itemViewLayout.top;
-    if (dropOperation & SC.DROP_AFTER) top += itemViewLayout.height;
-    left = ((level + 1) * indent) + 12;
+      top, left;
+
+    // Support both vertical and horizontal lists.
+    if (layoutDirection === SC.LAYOUT_HORIZONTAL) {
+      left = itemViewLayout.left;
+      if (dropOperation & SC.DROP_AFTER) { left += itemViewLayout.width; }
+      top = ((level + 1) * indent) + 12;
+    } else {
+      top = itemViewLayout.top;
+      if (dropOperation & SC.DROP_AFTER) { top += itemViewLayout.height; }
+      left = ((level + 1) * indent) + 12;
+    }
 
     // Put it there.
     insertionPoint.adjust({ top: top, left: left });
+
     this.appendChild(insertionPoint);
   },
 
   /** @see SC.CollectionView#hideInsertionPoint */
-  hideInsertionPoint: function() {
+  hideInsertionPoint: function () {
     // If there was an item that was the target of the drop previously, be
     // sure to clear it.
-    if (this._lastDropOnView) {
-      this._lastDropOnView.set('isDropTarget', NO);
-      this._lastDropOnView = null;
+    if (this._sc_lastDropOnView) {
+      this._sc_lastDropOnView.set('isDropTarget', NO);
+      this._sc_lastDropOnView = null;
     }
 
-    var view = this._insertionPointView;
+    var view = this._sc_insertionPointView;
     if (view) view.removeFromParent().destroy();
-    this._insertionPointView = null;
+    this._sc_insertionPointView = null;
   },
 
   /**
@@ -568,12 +715,12 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
 
     @see SC.CollectionView.insertionIndexForLocation
   */
-  insertionIndexForLocation: function(loc, dropOperation) {
-    var locRect = {x:loc.x, y:loc.y, width:1, height:1},
-        indexes = this.contentIndexesInRect(locRect),
-        index   = indexes.get('min'),
-        len     = this.get('length'),
-        min, max, diff, clevel, cindent, plevel, pindent, itemView, pgroup;
+  insertionIndexForLocation: function (loc, dropOperation) {
+    var locRect = { x: loc.x, y: loc.y, width: 1, height: 1 },
+      indexes = this.contentIndexesInRect(locRect),
+      index   = indexes.get('min'),
+      len     = this.get('length'),
+      min, max, diff, clevel, cindent, plevel, pindent, itemView;
 
     // if there are no indexes in the rect, then we need to either insert
     // before the top item or after the last item.  Figure that out by
@@ -585,7 +732,7 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
 
     // figure the range of the row the location must be within.
     min = this.rowOffsetForContentIndex(index);
-    max = min + this.rowHeightForContentIndex(index);
+    max = min + this.rowSizeForContentIndex(index);
 
     // now we know which index we are in.  if dropOperation is DROP_ON, figure
     // if we can drop on or not.
@@ -602,13 +749,13 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
 
     // finally, let's decide if we want to actually insert before/after.  Only
     // matters if we are using outlining.
-    if (index>0) {
+    if (index > 0) {
 
-      itemView = this.itemViewForContentIndex(index-1);
+      itemView = this.itemViewForContentIndex(index - 1);
       pindent  = (itemView ? itemView.get('outlineIndent') : 0) || 0;
       plevel   = itemView ? itemView.get('outlineLevel') : 0;
 
-      if (index<len) {
+      if (index < len) {
         itemView = this.itemViewForContentIndex(index);
         clevel   = itemView ? itemView.get('outlineLevel') : 0;
         cindent  = (itemView ? itemView.get('outlineIndent') : 0) || 0;
@@ -618,7 +765,7 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
         cindent = pindent * clevel;
       }
 
-      pindent  *= plevel;
+      pindent *= plevel;
 
       // if indent levels are different, then try to figure out which level
       // it should be on.
@@ -639,37 +786,27 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     // and dropping at length, last item must not be a group
     //
     if (dropOperation === SC.DROP_BEFORE) {
-      itemView = (index<len) ? this.itemViewForContentIndex(index) : null;
+      itemView = (index < len) ? this.itemViewForContentIndex(index) : null;
       if (!itemView || itemView.get('isGroupView')) {
-        if (index>0) {
-          itemView = this.itemViewForContentIndex(index-1);
+        if (index > 0) {
+          itemView = this.itemViewForContentIndex(index - 1);
 
           // don't allow a drop if the previous item is a group view and we're
           // insert before the end.  For the end, allow the drop if the
           // previous item is a group view but OPEN.
           if (!itemView.get('isGroupView') || (itemView.get('disclosureState') === SC.BRANCH_OPEN)) {
-            index = index-1;
+            index = index - 1;
             dropOperation = SC.DROP_AFTER;
           } else index = -1;
 
         } else index = -1;
       }
 
-      if (index<0) dropOperation = SC.DRAG_NONE ;
+      if (index < 0) dropOperation = SC.DRAG_NONE;
     }
 
     // return whatever we came up with
     return [index, dropOperation];
-  },
-
-  // ..........................................................
-  // INTERNAL SUPPORT
-  //
-
-  /** @private */
-  init: function() {
-    sc_super();
-    this._sclv_rowDelegateDidChange();
   }
 
 });
