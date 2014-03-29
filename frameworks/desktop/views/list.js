@@ -10,47 +10,48 @@ sc_require('mixins/collection_row_delegate');
 
 /** @class
 
-  A list view renders vertical lists of items.  It is a specialized form of
-  collection view that is simpler than the table view, but more refined than
+  A list view renders vertical or horizontal lists of items.  It is a specialized
+  form of collection view that is simpler than a table view, but more refined than
   a generic collection.
 
-  You can use a list view just like a collection view, except that often you
-  also should provide a default rowSizePlusPadding.  Setting this value will allow
-  the ListView to optimize its rendering.
+  You can use a list view just like any collection view, except that often you
+  provide the rowSize, which will be either the height of each row when laying
+  out rows vertically (the default) or the widht of each row when laying out
+  the rows horizontally.
 
   ## Variable Row Heights
 
-  Normally you set the row height through the rowSizePlusPadding property.  You can
-  also support custom row heights by implementing the
-  contentCustomRowHeightIndexes property to return an index set.
+  Normally you set the row height or width through the rowSize property, but
+  you can also support custom row sizes by assigning the `customRowSizeIndexes`
+  property to an index set of all custom sized rows.
 
   ## Using ListView with Very Large Data Sets
 
   ListView implements incremental rendering, which means it will only render
-  HTML for the items that are current visible on the screen.  You can use it
-  to efficiently render lists with 100K+ items very efficiently.
+  HTML for the items that are currently visible on the screen.  This means you
+  can use it to efficiently render lists with 100K+ items or more very efficiently.
 
-  If you need to work with very large lists of items, however, be aware that
-  calculate variable rows heights can become very expensive since the list
+  If you need to work with very large lists of items however, be aware that
+  calculating variable row sizes can become very expensive since the list
   view will essentially have to iterate over every item in the collection to
-  collect its row height.
+  determine each the total height or width.
 
-  To work with very large lists, you should consider making your row heights
-  uniform.  This will allow the list view to efficiently render content
-  without worrying about the overall performance.
+  Therefore, to work with very large lists, you should consider using a design
+  that allows your row sizes to remain uniform.  This will allow the list view
+  to much more efficiently render content.
 
-  Alternatively, you may want to consider overriding the
-  offsetForRowAtContentIndex() and heightForRowAtContentIndex() methods to
-  perform some faster calculations that do not require inspecting every
-  item in the collection.
+  Alternatively, to support differently sized and incrementally rendered item
+  views, you may want to consider overriding the `offsetForRowAtContentIndex()`
+  and `rowSizeForContentIndex()` methods to perform some specialized faster
+  calculations that do not require inspecting every item in the collection.
 
-  Note that row heights and offsets are cached so once they are calculated
+  Note: row sizes and offsets are cached so once they are calculated
   the list view will be able to display very quickly.
 
-  ## Dropping on an Item
+  ## Dragging and Dropping
 
-  When the list view is configured to accept drags and drops onto its items, it
-  will set the isDropTarget property on the target item accordingly.  This
+  When the list view is configured to accept drops onto its items, it
+  will set the `isDropTarget` property on the target item accordingly.  This
   allows you to modify the appearance of the drop target list item accordingly
   (@see SC.ListItemView#isDropTarget).
 
