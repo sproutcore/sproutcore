@@ -5,8 +5,6 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-
-
 /** @class SC.Touch
   Represents a touch. Single touch objects are passed to `touchStart`, `touchEnd` and `touchCancelled` event handlers;
   a specialized multitouch event object is sent to `touchesDragged`, which include access to all in-flight touches
@@ -50,13 +48,13 @@
 
   The touchesDragged Multitouch Event Object
   -----
-  The specialized multitouch event object sent to `touchesDragged` includes access to all touches currently in flight.
-  You can access the touches for a specific view from the `touchesForView` method, or get an average position of the
-  touches on a view from the convenient `averagedTouchesForView` method. For your convenience when dealing with the
-  common single-touch view, the `touchesDragged` event object also exposes the positional page, client, screen and
-  start X/Y values from the *first touch*. If you are interested inhandling more than one touch, or in handling an
-  average of in-flight touches, you should ignore these values. (Note that this event object exposes an array of touch
-  events at `touches`. These are the browser's raw touch events, and should be avoided or used with care.)
+  The specialized event object sent to `touchesDragged` includes access to all touches currently in flight. You can
+  access the touches for a specific view from the `touchesForView` method, or get an average position of the touches
+  on a view from the convenient `averagedTouchesForView` method. For your convenience when dealing with the common
+  single-touch view, the `touchesDragged` event object also exposes the positional page, client, screen and start X/Y
+  values from the *first touch*. If you are interested inhandling more than one touch, or in handling an average of
+  in-flight touches, you should ignore these values. (Note that this event object exposes an array of touch events at
+  `touches`. These are the browser's raw touch events, and should be avoided or used with care.)
 
   Touch Responders: Passing Touches Around
   -----
@@ -90,6 +88,10 @@
   Note that the previous responder will not receive `touchCancelled` immediately, since the touch may return to it before
   the end; instead, it will only receive `touchCancelled` when the touch is ended.
 
+  (If you would like to add a view as a fallback responder without triggering automatic calls to its `touchStart` and
+  `touchCancelled`, for example as an alternative to returning YES from `captureTouch`, you can call
+  `stackCandidateTouchResponder` instead.)
+
   When the child view decides that the touch has moved enough to be a scroll, it should pass touch respondership back
   to the scroll view with:
 
@@ -99,16 +101,6 @@
 
   This will trigger `touchCancelled` on the second responder, and the first one will begin receiving `touchDragged` events
   again.
-
-  If you want to check the properties of the previous touch responder, it's available on `touch.nextTouchResponder`.
-  For example, to only return the touch to its previous responder if it's a scroll view, use:
-
-    if (Math.abs(touch.pageX - touch.startX) > 4) {
-      if (touch.nextTouchResponder && touch.nextTouchResponder.isScrollable) {
-        touch.restoreLastTouchResponder();
-      }
-    }
-
 */
 SC.Touch = function(touch, touchContext) {
   // get the raw target view (we'll refine later)
@@ -139,6 +131,7 @@ SC.Touch = function(touch, touchContext) {
   this.view = undefined;
   this.touchResponder = this.nextTouchResponder = undefined;
   this.touchResponders = [];
+  this.candidateTouchResponders = null;
 
   this.startX = this.pageX = touch.pageX;
   this.startY = this.pageY = touch.pageY;
@@ -245,8 +238,17 @@ SC.Touch.prototype = {
         }
   */
   restoreLastTouchResponder: function() {
+    // If we have a previous touch responder, go back to it.
     if (this.nextTouchResponder) {
       this.makeTouchResponder(this.nextTouchResponder);
+    }
+    // Otherwise, check if we have a candidate responder queued up.
+    else {
+      var candidates = this.candidateTouchResponders,
+          candidate = candidates ? candidates.pop() : null;
+      if (candidate) {
+        this.makeTouchResponder(candidate);
+      }
     }
   },
 
@@ -270,6 +272,25 @@ SC.Touch.prototype = {
   */
   makeTouchResponder: function(responder, shouldStack, upViewChain) {
     this.touchContext.makeTouchResponder(this, responder, shouldStack, upViewChain);
+  },
+
+  /**
+    You may want your view to insert itself into the responder chain as a fallback, but without
+    having touchStart etc. called if it doesn't end up coming into play. For example, SC.ScrollView
+    adds itself as a candidate responder (when delaysTouchResponder is NO) so that views can easily
+    give it control, but without receiving unnecessary events if not.
+  */
+  stackCandidateTouchResponder: function(responder) {
+    // Fast path: if we're the first one it's easy.
+    if (!this.candidateTouchResponders) {
+      this.candidateTouchResponders = [responder];
+    }
+    // Just make sure it's not at the top of the stack. There may be a weird case where a
+    // view wants to be in a couple of spots in the stack, but it shouldn't want to be twice
+    // in a row.
+    else if (responder !== this.candidateTouchResponders[this.candidateTouchResponders.length - 1]) {
+      this.candidateTouchResponders.push(responder);
+    }
   },
 
   /**
