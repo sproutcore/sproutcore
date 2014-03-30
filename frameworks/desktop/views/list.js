@@ -168,7 +168,7 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
 
     // last may be null on a new object
     if (last) {
-      last.removeObserver('rowSizePlusPadding', this, func);
+      last.removeObserver('_sc_totalRowSize', this, func);
       last.removeObserver('customRowSizeIndexes', this, func2);
     }
 
@@ -179,7 +179,7 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     //@endif
 
     // Add the new observers.
-    del.addObserver('rowSizePlusPadding', this, func);
+    del.addObserver('_sc_totalRowSize', this, func);
     del.addObserver('customRowSizeIndexes', this, func2);
 
     // Trigger once to initialize.
@@ -188,14 +188,14 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     return this;
   }.observes('rowDelegate'),
 
-  /** @private - Called whenever the rowSizePlusPadding changes. If the property actually changed then invalidate all row sizes. */
+  /** @private - Called whenever the _sc_totalRowSize changes. If the property actually changed then invalidate all row sizes. */
   _sc_rowSizeDidChange: function () {
     var del = this.get('rowDelegate'),
-      rowSizePlusPadding = del.get('rowSizePlusPadding'),
+      totalRowSize = del.get('_sc_totalRowSize'),
       indexes;
 
-    if (rowSizePlusPadding === this._sc_rowSize) return this; // nothing to do
-    this._sc_rowSize = rowSizePlusPadding;
+    if (totalRowSize === this._sc_rowSize) return this; // nothing to do
+    this._sc_rowSize = totalRowSize;
 
     indexes = SC.IndexSet.create(0, this.get('length'));
     this.rowSizeDidChangeForIndexes(indexes);
@@ -268,11 +268,11 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     if (idx === 0) return 0; // Fast path!
 
     var del = this.get('rowDelegate'),
-      rowSizePlusPadding = del.get('rowSizePlusPadding'),
+      totalRowSize = del.get('_sc_totalRowSize'),
       rowSpacing = del.get('rowSpacing'),
       ret, custom, cache, delta, max;
 
-    ret = idx * rowSizePlusPadding;
+    ret = idx * totalRowSize;
 
 		if (rowSpacing) {
       ret += idx * rowSpacing;
@@ -286,7 +286,7 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
         cache = [];
         delta = max = 0;
         custom.forEach(function (idx) {
-          delta += this.rowSizeForContentIndex(idx) - rowSizePlusPadding;
+          delta += this.rowSizeForContentIndex(idx) - totalRowSize;
           cache[idx + 1] = delta;
           max = idx;
         }, this);
@@ -354,9 +354,9 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
       }
 
       ret = cache[idx];
-      if (ret === undefined) ret = del.get('rowSizePlusPadding');
+      if (ret === undefined) ret = del.get('_sc_totalRowSize');
     } else {
-      ret = del.get('rowSizePlusPadding');
+      ret = del.get('_sc_totalRowSize');
     }
 
     return ret;
@@ -367,7 +367,7 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     This will invalidate the row height cache and reload the content indexes.
     Pass either an index set or a single index number.
 
-    This method is called automatically whenever you change the rowSizePlusPadding
+    This method is called automatically whenever you change the rowSize, rowPadding
     or customRowSizeIndexes properties on the collectionRowDelegate.
 
     @param {SC.IndexSet|Number} indexes
@@ -385,7 +385,7 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     This will invalidate the row size cache and reload the content indexes.
     Pass either an index set or a single index number.
 
-    This method is called automatically whenever you change the rowSizePlusPadding
+    This method is called automatically whenever you change the rowSize, rowPadding
     or customRowSizeIndexes properties on the collectionRowDelegate.
 
     @param {SC.IndexSet|Number} indexes
@@ -481,7 +481,7 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     @returns {SC.IndexSet} now showing indexes
   */
   contentIndexesInRect: function (rect) {
-    var rowSizePlusPadding = this.get('rowDelegate').get('rowSizePlusPadding'),
+    var totalRowSize = this.get('rowDelegate').get('_sc_totalRowSize'),
       layoutDirection = this.get('layoutDirection'),
       len = this.get('length'),
       offset, start, end,
@@ -501,7 +501,7 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
 
     // estimate the starting row and then get actual offsets until we are
     // right.
-    start = (firstEdge - (firstEdge % rowSizePlusPadding)) / rowSizePlusPadding;
+    start = (firstEdge - (firstEdge % totalRowSize)) / totalRowSize;
     offset = this.rowOffsetForContentIndex(start);
 
     // go backwards until offset of row is before first edge
@@ -522,7 +522,7 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
 
     // estimate the final row and then get the actual offsets until we are
     // right. - look at the offset of the _following_ row
-    end = start + ((size - (size % rowSizePlusPadding)) / rowSizePlusPadding);
+    end = start + ((size - (size % totalRowSize)) / totalRowSize);
     if (end > len) end = len;
     offset = this.rowOffsetForContentIndex(end);
 

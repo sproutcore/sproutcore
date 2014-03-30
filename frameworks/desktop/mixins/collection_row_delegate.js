@@ -84,7 +84,7 @@ SC.CollectionRowDelegate = {
   rowPadding: 0,
 
   /** @deprecated Version 1.11. Please use a combination of rowSize and rowPadding to specify the total height or width of each row.
-    Total row height used for calculation. Equal to `rowSize + (2 * rowPadding)`.
+    Total row size used for calculation. Equal to `rowSize + (2 * rowPadding)`.
 
     @type Number
   */
@@ -100,19 +100,11 @@ SC.CollectionRowDelegate = {
     return rowSize + rowPadding * 2;
   }.property('rowSize', 'rowPadding'),
 
-  /**
-    Returns the total row size based on rowSize and rowPadding.
-
-    @type Number
-    @default 24
-    @readonly
-  */
-  rowSizePlusPadding: function () {
+  /** @private - Returns the total row size based on rowSize and rowPadding for convenience. */
+  _sc_totalRowSize: function () {
     // Backwards compatibility in case the rowHeight property is set directly.
-    var rowHeight = this.get('rowHeight');
-
-    return rowHeight;
-  }.property('rowHeight').cacheable(),
+    return this.get('rowHeight');
+  }.property('rowHeight'),
 
   /** @deprecated Version 1.11. Please use the `customRowSizeIndexes` property instead.
     Index set of rows that should have a custom row height. If you need
@@ -163,7 +155,7 @@ SC.CollectionRowDelegate = {
     @returns {Number} row height
   */
   contentIndexRowHeight: function (view, content, contentIndex) {
-    return this.get('rowSizePlusPadding');
+    return this.get('_sc_totalRowSize');
   },
 
   /**
