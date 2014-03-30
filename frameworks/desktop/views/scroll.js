@@ -1177,16 +1177,20 @@ SC.ScrollView = SC.View.extend({
   alwaysBounceVertical: YES,
 
   /**
-    Whether to delay touches from passing through to the content.
+    Whether to delay touches from passing through to the content. By default, if the touch moves enough to
+    trigger a scroll within 150ms, this view will retain control of the touch, and content views will not
+    have a chance to handle it. This is generally the behavior you want.
+
+    If you set this to NO, the touch will not trigger a scroll until you pass control back to this view via
+    `touch.restoreLastTouchResponder`, for example when the touch has dragged by a certain amount. You should
+    use this option only if you know what you're doing.
 
     @type Boolean
     @default YES
   */
   delaysContentTouches: YES,
 
-  /** @private
-    If the view supports it, this
-  */
+  /** @private */
   _touchScrollDidChange: function () {
     if (this.get("contentView").touchScrollDidChange) {
       this.get("contentView").touchScrollDidChange(
@@ -1195,7 +1199,6 @@ SC.ScrollView = SC.View.extend({
       );
     }
 
-    // tell scrollers
     if (this.verticalScrollerView && this.verticalScrollerView.touchScrollDidChange) {
       this.verticalScrollerView.touchScrollDidChange(this._scroll_verticalScrollOffset);
     }
@@ -1204,7 +1207,6 @@ SC.ScrollView = SC.View.extend({
       this.horizontalScrollerView.touchScrollDidChange(this._scroll_horizontalScrollOffset);
     }
 
-    // this._sc_fadeInScrollers();
     this.invokeLast(this._sc_fadeInScrollers);
   },
 
@@ -1257,8 +1259,16 @@ SC.ScrollView = SC.View.extend({
   },
 
   /** @private */
-  captureTouch: function () {
-    return YES;
+  captureTouch: function (touch) {
+    // If we're in hand-holding mode, we capture the touch and run our own downstream event propagating.
+    if (this.get('delaysContentTouches')) {
+      return YES;
+    }
+    // Otherwise, suggest ourselves as a reasonable fallback responder.
+    else {
+      touch.stackCandidateTouchResponder(this);
+      return NO;
+    }
   },
 
   /** @private */
@@ -1266,20 +1276,25 @@ SC.ScrollView = SC.View.extend({
 
   /** @private */
   touchStart: function (touch) {
-    var generation = ++this.touchGeneration;
-    if (!this.tracking && this.get("delaysContentTouches")) {
-      this.invokeLater(this.beginTouchesInContent, 150, generation);
-    } else if (!this.tracking) {
-      // NOTE: We still have to delay because we don't want to call touchStart
-      // while touchStart is itself being called...
-      this.invokeLater(this.beginTouchesInContent, 1, generation);
+    var generation = ++this.touchGeneration,
+        alreadyTracking = this.tracking;
+    // If we're already tracking a touch, make sure it's not literally the same touch coming back around.
+    if (!this.touch || this.touch.touch !== touch) this.beginTouchTracking(touch, YES);
+    // If necessary, call beginTouchesInContent, which gives child views a chance to capture or handle the event.
+    if (!alreadyTracking) {
+      if (this.get('delaysContentTouches')) {
+        this.invokeLater(this.beginTouchesInContent, 150, generation);
+      }
     }
-    this.beginTouchTracking(touch, YES);
     return YES;
   },
 
-  /** @private */
+  /** @private
+    This method gives our descendent views a chance to capture the touch via captureTouch, and subsequently to handle the
+    touch, via touchStart. If no view elects to do so, control is returned to the scroll view for standard scrolling.
+  */
   beginTouchesInContent: function (gen) {
+    // If this was invokedLater and is now out of date, we should quit.
     if (gen !== this.touchGeneration) return;
 
     var touch = this.touch;
@@ -1290,18 +1305,18 @@ SC.ScrollView = SC.View.extend({
     // then the timer expires and starts a new Run Loop to call beginTouchesInContent(), that this.touch will STILL exist
     // here.  There's no explanation for it, and it's not 100% reproducible, but what happens is that if we try to capture
     // the touch that has already ended, assignTouch() in RootResponder will check touch.hasEnded and throw an exception.
-
-    // Therefore, don't capture a touch if the touch still exists and hasEnded
-    if (touch && this.tracking && !this.dragging && !touch.touch.scrollHasEnded && !touch.touch.hasEnded) {
-      // try to capture the touch
+    // Therefore, don't capture a touch if the touch still exists and touch.touch.hasEnded
+    if (touch && this.tracking && !this.dragging && !touch.touch.scrollHasEnded && !touch.touch.hasEnded) { // see note above for touch.touch.hasEnded
+      // See if any of our descendent views want to handle the touch.
       touch.touch.captureTouch(this, YES);
 
+      // If nobody captured the touch, we need to take responsibility for it ourselves.
       if (!touch.touch.touchResponder) {
-        // if it DIDN'T WORK!!!!!
-        // then we need to take possession again.
         touch.touch.makeTouchResponder(this);
-      } else {
-        // Otherwise, it did work, and if we had a pending scroll end, we must do it now
+      }
+      // If respondership ended up with a child view, and we have a pending scroll, we need to
+      // execute it now.
+      else if (touch.touch.touchResponder !== this) {
         if (touch.needsScrollEnd) {
           this._touchScrollDidEnd();
         }
@@ -1315,7 +1330,8 @@ SC.ScrollView = SC.View.extend({
     We keep information about the initial location of the touch so we can
     disambiguate between a tap and a drag.
 
-    @param {Event} evt
+    @param {Event} touch
+    @param {Event} starting 
   */
   beginTouchTracking: function (touch, starting) {
     var avg = touch.averagedTouchesForView(this, starting);
@@ -1612,10 +1628,12 @@ SC.ScrollView = SC.View.extend({
 
         this.startDecelerationAnimation();
       } else {
-        // well. The scrolling stopped. Let us tell everyone if there was a pending one that this non-drag op interrupted.
+        // End the scroll if there's one that's needed even if we're not dragging.
         if (touchStatus.needsScrollEnd) this._touchScrollDidEnd();
 
-        // this part looks weird, but it is actually quite simple.
+        // Now, if the touch ended without dragging, that means it was a tap, and we should give our
+        // child views a chance to handle it.
+
         // First, we send the touch off for capture+starting again, but telling it to return to us
         // if nothing is found or if it is released.
         touch.captureTouch(this, YES);
@@ -1625,7 +1643,7 @@ SC.ScrollView = SC.View.extend({
           touch.end();
         } else if (!touch.touchResponder || touch.touchResponder === this) {
           // if it was released to us or stayed with us the whole time, or is for some
-          // wacky reason empty (in which case it is ours still). If so, and there is a next responder,
+          // wacky reason empty (in which case it is ours still), and there is a next responder,
           // relay to that.
 
           if (touch.nextTouchResponder) touch.makeTouchResponder(touch.nextTouchResponder);
