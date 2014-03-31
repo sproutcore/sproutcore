@@ -270,10 +270,14 @@ SC.ObjectDesigner.mixin({
     needed.
   */
   didCreateObject: function(object, attrs) {
+    // GATEKEEP: If this isn't a design, bail.
+    if (!object.constructor.isDesign) return;
+
     // add designer if page is in design mode
-    var page = object.get('page'), design = object.constructor;
-    
-    if (design.isDesign && page && page.get('needsDesigner')) {
+    var page = object.get('page'),
+        design = object.constructor;
+
+    if (page && page.get('needsDesigner')) {
       
       // find the designer class
       var cur = design, origDesign = design;
