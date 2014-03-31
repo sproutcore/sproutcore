@@ -97,7 +97,8 @@ SC.ENGINE = {
   opera: 'opera',
   presto: 'presto',
   trident: 'trident',
-  webkit: 'webkit'
+  webkit: 'webkit',
+  node: 'node'
 };
 
 /**

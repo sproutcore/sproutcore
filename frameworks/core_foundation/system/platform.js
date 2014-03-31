@@ -6,6 +6,8 @@
 // ==========================================================================
 /*global jQuery*/
 
+sc_require("system/browser");
+
 /**
   A constant indicating an unsupported method, property or other.
 
