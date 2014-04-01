@@ -296,7 +296,9 @@ SC.RecordAttribute = SC.Object.extend(
     @returns {Object} property value
   */
   call: function(record, key, value) {
-    var attrKey = this.get('key') || key, nvalue;
+    var attrKey = this.get('key') || key, nvalue,
+      defaultValue,
+      sparseAttributes;
 
     if ((value !== undefined) && this.get('isEditable')) {
       // careful: don't overwrite value here.  we want the return value to
@@ -306,9 +308,18 @@ SC.RecordAttribute = SC.Object.extend(
     }
 
     value = record.readAttribute(attrKey);
-    if (SC.none(value) && (value = this.get('defaultValue'))) {
-       if (typeof value === SC.T_FUNCTION) {
-        value = value(record, key, this);
+
+    // If this is a sparse attribute, refresh the record.
+    if (value == undefined) {
+      sparseAttributes = record.get('sparseAttributes');
+      if (sparseAttributes && sparseAttributes.contains(key)) {
+        record.refresh();
+      }
+    }
+
+    if (SC.none(value) && (defaultValue = this.get('defaultValue'))) {
+       if (typeof defaultValue === SC.T_FUNCTION) {
+        value = defaultValue(record, key, this);
       }
     }
 

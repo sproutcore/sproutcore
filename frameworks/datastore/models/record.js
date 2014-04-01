@@ -125,6 +125,75 @@ SC.Record = SC.Object.extend(
   }.property('storeKey').cacheable(),
 
   /**
+    A list of any attributes that are expected to be empty when the record
+    is initially loaded.
+
+    This property is very useful for working with partially loaded records in
+    order to efficiently bring in the full data only when necessary.
+
+    # What is a partially loaded record?
+
+    Backend developers will often combine data in order to reduce the number
+    of requests that an application has to make.  Remember that we should think
+    of the backend as returning resources, not records.  And so a resource
+    response may include data for several other related records.
+
+    For example, say we want to show a details page for a Super Hero record
+    including a list of their arch-enemies.  If each model was its own resource,
+    we would have to get the entire hero record (ex. /heros/1) and then retrieve
+    each of the entire arch-enemy records (ex. /villians/2, /villians/3, ...)
+    just to show their names.  But if we only want the names of the villians
+    right now, we could optimize the '/heros/:id' resource to also include some
+    information of the related villians in order to only make one request for
+    the page.
+
+    When we retrieve the hero, we would load several MyApp.Villian records with
+    the partial information we have so far.
+
+    # Bringing in the missing data
+
+    The problem becomes knowing when to bring in the full details for the
+    partially loaded record.  We shouldn't just call refresh every time that
+    the record will be displayed, because it may have already been fully
+    loaded elsewhere and this would be wasteful.  Likewise, we don't want to
+    use flags in our data handling code, because this is error-prone and it's
+    easy to accidentally mark a record as dirty when trying to set flags on
+    it.
+
+    Instead, you can simply indicate the names of any attributes using
+    sparseAttributes that, when requested, should retrieve the full details of
+    the record.
+
+    For example,
+
+        MyApp.Villian = SC.Record.extend({
+
+          aliases: SC.Record.attr(Array),
+
+          birthdate: SC.Record.attr(SC.DateTime),
+
+          henchmen: SC.Record.toMany('MyApp.Henchman'),
+
+          name: SC.Record.attr(String),
+
+          plotDevice: SC.Record.attr(String),
+
+          // Getting any of these attributes will refresh the record if they
+          // have not yet been loaded.
+          sparseAttributes: ['birthdate', 'plotDevice', 'henchmen']
+
+        });
+
+    Note, you don't have to list every attribute that may not be loaded upfront,
+    just so long as at least one of the attributes is undefined initially and
+    the record has never been retrieved.
+
+    @type Array
+    @default null
+  */
+  sparseAttributes: null,
+
+  /**
     All records generally have a life cycle as they are created or loaded into
     memory, modified, committed and finally destroyed.  This life cycle is
     managed by the status property on your record.
@@ -1126,6 +1195,20 @@ SC.Record.mixin( /** @scope SC.Record */ {
     @default 0x0203
   */
   READY_NEW:        0x0203, // 515
+
+
+  /**
+    State for records that are partially loaded and ready for use with no local
+    changes.
+
+    Use a logical AND (single `&`) to test record status
+
+    @static
+    @constant
+    @type Number
+    @default 0x0204
+  */
+  READY_PARTIAL:        0x0204, // 516
 
 
   /**
