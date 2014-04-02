@@ -52,7 +52,9 @@ SC.mixin(SC.ContainerView,
           duration: options.duration || 0.4,
           timing: options.timing || 'ease'
         }, function (data) {
-          statechart.exited();
+          if (!data.isCancelled) {
+            statechart.exited();
+          }
         });
       }
     },
