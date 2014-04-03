@@ -606,26 +606,36 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   _computeBindingValue: function () {
     var source = this._bindingSource,
         key    = this._bindingKey,
-        v, idx;
+        v;
 
     this._bindingValue = v = (source ? source.getPath(key) : null);
+    this._transformedBindingValue = this._computeTransformedValue(v);
+  },
 
-    // apply any transforms to get the to property value also
-    var transforms = this._transforms;
+  /** @private
+    Applies transforms to the value and returns the transfomed value.
+    @param {*} value Binding value to transform
+    @returns {*} Transformed value
+  */
+  _computeTransformedValue: function (value) {
+    var transforms = this._transforms,
+        idx,
+        len,
+        transform;
+
     if (transforms) {
-      var len = transforms.length,
-          transform;
+      len = transforms.length;
       for (idx = 0; idx < len; idx++) {
         transform = transforms[idx];
-        v = transform(v, this);
+        value = transform(value, this);
       }
     }
 
     // if error objects are not allowed, and the value is an error, then
     // change it to null.
-    if (this._noError && SC.typeOf(v) === SC.T_ERROR) v = null;
+    if (this._noError && SC.typeOf(value) === SC.T_ERROR) { value = null; }
 
-    this._transformedBindingValue = v;
+    return value;
   },
 
   _connectQueue: SC.CoreSet.create(),
@@ -747,6 +757,10 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     should not need to call this method.
   */
   sync: function () {
+    var target,
+        key,
+        v,
+        tv;
 
     // do nothing if not connected
     if (!this.isConnected) return this;
@@ -758,8 +772,8 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     // we are connected, go ahead and sync
     } else {
       this._computeBindingTargets();
-      var target = this._fromTarget,
-          key = this._fromPropertyKey;
+      target = this._fromTarget;
+      key = this._fromPropertyKey;
       if (!target || !key) return this; // nothing to do
 
       // Let's check for whether target is a valid observable with getPath.
@@ -785,11 +799,12 @@ SC.Binding = /** @scope SC.Binding.prototype */{
       }
 
       // get the new value
-      var v = target.getPath(key);
+      v = target.getPath(key);
+      tv = this._computeTransformedValue(v);
 
       // if the new value is different from the current binding value, then
       // schedule to register an update.
-      if (v !== this._bindingValue || key === '[]') {
+      if (v !== this._bindingValue || tv !== this._transformedBindingValue || key === '[]') {
         this._setBindingValue(target, key);
         SC.Binding._changeQueue.add(this); // save for later.
       }
