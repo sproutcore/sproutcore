@@ -1903,7 +1903,63 @@ SC.ScrollView = SC.View.extend({
 
     childViews.push(this.containerView = this.createChildView(view, {
       contentView: this.contentView,
-      isScrollContainer: YES
+      isScrollContainer: YES,
+
+      /**
+        Add scroll event handler in order to maintain our scroll position
+        when native browser scroll events occur.
+      */
+      didCreateLayer: function () {
+        var layer = this.get('layer');
+        if (layer) {
+          SC.Event.add(layer, 'scroll', this, this._maintainScroll);
+        }
+      },
+
+      /**
+        Remove scroll event handler.
+      */
+      willDestroyLayer: function () {
+        var layer = this.get('layer');
+        if (layer) {
+          SC.Event.remove(layer, 'scroll', this, this._maintainScroll);
+        }
+      },
+
+      /**
+        Scroll event handler. When we receive a native browser
+        scroll event, update our horizontalScrollOffset and
+        verticalScrollOffset to stay in sync, if the event was
+        not caused by the scroll view.
+
+        @param {UIEvent} evt scroll event
+        @private
+      */
+      _maintainScroll: function (evt) {
+        var jq = this.$(),
+            pv = this.get('parentView'),
+            scrollTop = jq.scrollTop() || 0,
+            scrollLeft = jq.scrollLeft() || 0,
+            horizontalScrollOffset,
+            verticalScrollOffset;
+
+        if (pv) {
+          horizontalScrollOffset = pv.get('horizontalScrollOffset');
+          verticalScrollOffset = pv.get('verticalScrollOffset');
+
+          if (scrollLeft !== horizontalScrollOffset) {
+            // Scroll event was not caused by changing horizontalScrollOffset,
+            // update to match.
+            pv.set('horizontalScrollOffset', scrollLeft);
+          }
+
+          if (scrollTop !== verticalScrollOffset) {
+            // Scroll event was not caused by changing verticalScrollOffset,
+            // update to match.
+            pv.set('verticalScrollOffset', scrollTop);
+          }
+        }
+      }
     }));
 
     // and replace our own contentView...

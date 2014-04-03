@@ -161,6 +161,22 @@
      equals(container.get('layer').scrollTop, 10, 'scrollTop should be readjust to 10');
    });
 
+  test('ScrollView should adjust horizontalScrollOffset/verticalScrollOffset if browser scrolls', function () {
+    var view = pane.view('basic2'),
+        elem = view.getPath('containerView.layer');
+
+    elem.scrollLeft = 50;
+    elem.scrollTop = 50;
+
+    window.stop();
+
+    SC.Timer.schedule({ target: this, action: function () {
+      equals(view.get('horizontalScrollOffset'), 50, 'horizontalScrollOffset should be adjusted to 50');
+      equals(view.get('verticalScrollOffset'), 50, 'verticalScrollOffset should be adjusted to 50');
+      window.start();
+    }, interval: 200 });
+  });
+
   test('Scroller views of scroll view should have aria attributes set', function() {
     var view = pane.view("aria-attributes"),
         horizontalScrollerView = view.get('horizontalScrollerView'),
