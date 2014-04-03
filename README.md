@@ -1,19 +1,31 @@
 [![Build Status](https://travis-ci.org/sproutcore/sproutcore.png?branch=master)](https://travis-ci.org/sproutcore/sproutcore)
 
-SproutCore HTML5 Application Framework
-======================================
+SproutCore: For Native-Caliber Web Apps
+=======
 
-SproutCore is a framework for building blazing-fast, native-caliber applications
-in the web browser using only native HTML5 features. With SproutCore, you can
-build rich, interactive applications in the web in less code than most simple
-web pages require today.
+SproutCore is a JS-MVC framework for building blazing-fast, native-caliber web
+applications. SproutCore's full-stack approach to single-page application
+development gives you the tools you need to build rich, powerful applications...
+which happen to run in the browser.
 
 ## Getting Started
 
 The easiest way to get started with SproutCore is to install the Ruby gem.
 You can find instructions [here](http://sproutcore.com/install/). Once you've
-got SproutCore installed, checkout the [Getting Started](http://guides.sproutcore.com/getting_started.html)
-tutorial. 
+got SproutCore installed, checkout the
+[Getting Started](http://guides.sproutcore.com/getting_started.html) tutorial.
+
+## Next Steps
+
+Once you're through the Getting Started tutorial:
+
+- Check out the [Showcase](http://showcase.sproutcore.com/) for demos of a number
+  of views and concepts.
+- Check out lead developer Tyler Keating's book,
+  [SproutCore Web Application Development](http://blog.sproutcore.com/sproutcore-book-available/).
+- Check out Juniper, the [web app](http://juniper.dcporter.net/) +
+  [annotated source code](https://github.com/dcporter/juniper) combo, for a deep
+  dive into SproutCore features and best practices in action.
 
 ## Support
 
@@ -21,143 +33,10 @@ Resources for SproutCore developers include [the docs](http://docs.sproutcore.co
 for API documentation, and [the Guides](http://guides.sproutcore.com/) for a
 series of topical walk-throughs.
 
-For additional SproutCore user support, join the sproutcore@googlegroups.com
-mailing list, or stop by #sproutcore on Freenode IRC. For those interested in
+For additional SproutCore user support, join the
+[mailing list](https://groups.google.com/group/sproutcore), or stop by the #sproutcore
+[IRC channel](http://sproutcore.com/community/#tab=irc). For those interested in
 contributing to the framework itself, please join sproutcore-dev@googlegroups.com.
-
-## Contributors
-
-SproutCore has been built thanks to the tireless efforts of many talented
-developers. Special thanks to the following developers who contributed lots of
-code and ideas:
-
-- Alex Iskander
-- Alex Johnson
-- Andreas Cederström
-- Andrew Dupont
-- Asko Soukka
-- Benedikt Böhm
-- Brandon Blatnick
-- Brandon Dimcheff
-- Brian Cully
-- Brian Mitchell
-- Brian Moore
-- Bruz Marzolf
-- Charles Jolley
-- Charlie Lai
-- Cherif Yaya
-- Chris Hyle
-- Christopher M Pieper
-- Christopher Swasey
-- Chuck Edwall
-- Colin Campbell
-- Corey Burrows
-- Cortland Klein
-- Dave Porter
-- Devin Torres
-- Devon Govett
-- Emrys Ingersoll
-- Eric Kidd
-- Erich Ocean
-- Evin Grano
-- Ganesh J
-- Gareth Townsend
-- Geoffrey Donaldson
-- Gopal Sharma
-- Gregory Moeck
-- Hemanth Kumar
-- James A. Rosen
-- James Austin
-- James Craig
-- James F. Herdman
-- James Ribar
-- Jason Dooley
-- Jason Ketterman
-- Jeff Pittman
-- Jim Benton
-- Jiří Zajpt
-- Joe Gaudet
-- John Rogelstad
-- Jonathan Lewis
-- Joshua Dickens
-- Joshua Holt
-- Joubert Nel
-- Juan Pinzon
-- Julian Viereck
-- Konstantin Bender
-- Lauri Fjallstrom
-- Lawrence Pit
-- Levi McCallum
-- Luke Burton
-- Luke Melia
-- Mahesh Mukundan
-- Majd Taby
-- Martin Häcker
-- Martin Ottenwaelter
-- Matt Smith
-- Matthew Grantham
-- Matthias Loitsch
-- Maurits Lamers
-- Michael Cohen
-- Michael Gillogly
-- Michael Harris
-- Michael Krotscheck
-- Michael Rykov
-- Michal Kurgan
-- Mike Ball
-- Mike Subelsky
-- Mitch Oliver
-- Mitchell Rivera
-- Mohammed Ashik
-- Mohammed Taher
-- Nathan Baxter
-- Nicolas Badia
-- Nirumal Thomas
-- Nitin Gupta
-- Onar Vikingstad
-- Patrick Walton
-- Paul Chavard
-- Paul Lambert
-- Peter Bergström
-- Peter Wagenet
-- Piotr Sarnacki
-- Piotr Steininger
-- Rajesh Segu
-- Ray Bodenhorn
-- Rich Harrison
-- Richard Klancer
-- Rick Russell
-- Rob Linton
-- Robert Buchholz
-- Rodrigo Basa
-- Ryan Mudryk
-- Ryan Nielsen
-- Santhakumar Murugaiyan
-- Sean Eidemiller
-- Sergey Ukustov
-- Steven Tate
-- Sudarshan Bhat
-- Sunny Ripert
-- Suvajit Gupta
-- Tanner Donovan
-- Teresa Tsui
-- Thomas Balthazar
-- Thomas Bartelmess
-- Thomas Bradford
-- Thomas Lang
-- Tim Evans
-- Tom Dale
-- Tomasz Mazur
-- Topher Fangio
-- Trek Glowacki
-- Tyler Keating
-- Umberto Nicoletti
-- Vibul Imtarnasa
-- Vincent Fiano
-- Wesley Workman
-- William Kakes
-- Yehuda Katz
-- Yogesh Kumar
 
 ## Acknowledgements
 
