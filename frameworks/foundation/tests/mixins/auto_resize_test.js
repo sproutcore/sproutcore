@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/*global module, test, equals,ok */
+/*global module, test, equals, ok, start, stop */
 
 var view;
 
@@ -25,6 +25,40 @@ module("SC.AutoResize", {
   }
 
 });
+
+/**
+  When resizing only the height, we should restrict the width to that of the given
+  element. This way, the height will grow appropriately to fit the target as
+  text wraps within the maximum width.
+  */
+test("Resize height only.", function () {
+  stop(700);
+
+  var pane = SC.Pane.create({
+    layout: { top: 200, left: 0, width: 200, height: 200 }
+  });
+
+  // Set the view up for height only resizing.
+  // i.e. It should grow to fit the text wrapped within the width of the view.
+  view.set('shouldResizeWidth', false);
+  view.set('shouldResizeHeight', true);
+
+  SC.run(function () {
+    pane.appendChild(view);
+    pane.append();
+  });
+
+  setTimeout(function () {
+    ok(view.get('frame').width == 200, 'frame width is 200');
+    ok(view.get('layout').height > 200, 'height > 200');
+
+    pane.destroy();
+    pane.remove();
+
+    start();
+  }, 500);
+});
+
 
 test("Resize with transition plugin - no conflict", function () {
   stop(700);

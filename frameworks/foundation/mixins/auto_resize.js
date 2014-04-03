@@ -313,6 +313,13 @@ SC.AutoResize = {
     if (this.get('shouldAutoFitText') && this.get('calculatedFontSize') !== maxFontSize) {
       layer.style.fontSize = maxFontSize + "px";
     }
+
+    // When resizing only the height, we should restrict the width to that of the given
+    // layer. This way, the height will grow appropriately to fit the target as
+    // text *wraps* within the current width.
+    if (!this.get('shouldResizeWidth')) {
+      layer.style.maxWidth = layer.clientWidth + 'px';
+    }
   },
 
   /**
