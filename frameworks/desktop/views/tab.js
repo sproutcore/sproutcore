@@ -41,14 +41,14 @@ SC.BOTTOM_LOCATION = 'bottom';
 SC.TabView = SC.View.extend(
 /** @scope SC.TabView.prototype */ {
 
-  /**
+  /** @private
     @type Array
     @default ['sc-tab-view']
     @see SC.View#classNames
   */
   classNames: ['sc-tab-view'],
 
-  /**
+  /** @private
     @type Array
     @default ['nowShowing']
     @see SC.View#displayProperties
@@ -60,7 +60,9 @@ SC.TabView = SC.View.extend(
   //
 
  /**
-    Set nowShowing with the page you want to display.
+    Set nowShowing with the view you want to display. (You may specify globally-accessible views
+    like `MyApp.tabsPage.myTabView`, local views defined on the TabView itself like `myLocalTabView`,
+    or deep local views like `.myLocalPage.myTabView`.)
 
     @type String
     @default null
@@ -68,6 +70,16 @@ SC.TabView = SC.View.extend(
   nowShowing: null,
 
   /**
+    The list of items for the SegmentedView, and specifying the associated view to display. For example:
+
+        items: [
+          { title: "Tab 1", value: "MyApp.tabsPage.view1" },
+          { title: "Tab 2", value: "MyApp.tabsPage.view2" }
+        ]
+
+    (Note that if needed you can specify the item keys by specifying `itemTitleKey`, `itemValueKey`, et
+    cetera, on your TabView.)
+
     @type Array
     @default []
   */
@@ -142,13 +154,22 @@ SC.TabView = SC.View.extend(
   // FORWARDING PROPERTIES
   //
 
-  // forward important changes on to child views
-  /** @private */
+  /** @private Sync important changes with the child views. */
   _tab_nowShowingDidChange: function() {
     var v = this.get('nowShowing');
-    this.get('containerView').set('nowShowing',v);
+    // Sync the segmented view.
     this.get('segmentedView').set('value',v);
-    return this ;
+    // Normalize any local views specified by local property strings or strings beginning with '.'
+    var dotspot = v ? v.indexOf('.') : null;
+    if (dotspot === -1) {
+      v = this.get(v);
+    }
+    else if (dotspot === 0) {
+      v = this.getPath(v.slice(1));
+    }
+    // Sync the container view.
+    this.get('containerView').set('nowShowing',v);
+    return this;
   }.observes('nowShowing'),
 
   /** @private */
@@ -184,7 +205,6 @@ SC.TabView = SC.View.extend(
       var nowShowing = SC.userDefaults.get(defaultKey);
       if (!SC.none(nowShowing)) this.set('nowShowing', nowShowing);
     }
-
   },
 
   /** @private */
@@ -243,7 +263,7 @@ SC.TabView = SC.View.extend(
       }
     });
 
-    this.segmentedView = this.createChildView(this.segmentedView) ;
+    this.segmentedView = this.createChildView(this.segmentedView);
 
     childViews.push(this.containerView);
     childViews.push(this.segmentedView);

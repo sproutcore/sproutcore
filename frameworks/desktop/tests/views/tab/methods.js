@@ -7,38 +7,107 @@
 
 /*global module test htmlbody ok equals same stop start */
 
-var iconURL= "http://www.freeiconsweb.com/Icons/16x16_people_icons/People_046.gif";
-var pane, view;
 module("SC.TabView", {
   setup: function() {
-    SC.RunLoop.begin();
-    pane = SC.MainPane.create({
-      childViews: [
-        SC.TabView.extend({
-          nowShowing: 'tab2',
+    SC.run(function() {
+      window.globalPage = SC.Page.create({
+        view1: SC.View.create(),
+        view2: SC.View.create()
+      });
+    })
+  },
 
-          items: [
-            { title: "tab1", value: "tab1" , icon: iconURL},
-            { title: "tab2", value: "tab2" , icon: iconURL},
-            { title: "tab3", value: "tab3" , icon: iconURL}
-          ],
-
-          itemTitleKey: 'title',
-          itemValueKey: 'value',
-          itemIconKey: 'icon',
-          layout: { left:12, height: 200, right:12, top:12 }
-          
-        })]
-    });
-    pane.append(); // make sure there is a layer...
-    SC.RunLoop.end();
-    
-    view = pane.childViews[0];
-  }, 
-  
   teardown: function() {
-    pane.remove();
-    pane = view = null ;
+    window.globalPage.destroy()
+    delete window.globalPage;
   }
 });
 
+test("Tabs referencing global views.", function() {
+  var pane, view;
+  SC.run(function() {
+    pane = SC.MainPane.create({
+      childViews: ['tabView'],
+      tabView: SC.TabView.extend({
+        nowShowing: 'globalPage.view1',
+
+        items: [
+          { title: "tab1", value: "globalPage.view1" },
+          { title: "tab2", value: "globalPage.view2" }
+        ]
+      })
+    }).append();
+    view = pane.tabView;
+  });
+
+  ok(view.getPath('containerView.contentView') === window.globalPage.get('view1'), "The tab view should now be showing globalPage.view1.")
+
+  SC.run(function() {
+    view.set('nowShowing', 'globalPage.view2');
+  });
+
+  ok(view.getPath('containerView.contentView') === window.globalPage.get('view2'), "The tab view should now be showing globalPage.view2.")
+
+  view = null;
+  pane.destroy();
+  pane = null;
+});
+
+test("Tabs referencing local views.", function() {
+  var pane, view;
+  SC.run(function() {
+    pane = SC.MainPane.create({
+      childViews: ['tabView'],
+      tabView: SC.TabView.extend({
+        nowShowing: 'view1',
+
+        items: [
+          { title: "tab1", value: "view1" },
+          { title: "tab2", value: "view2" }
+        ],
+
+        view1: SC.View.create(),
+        view2: SC.View.create()
+      })
+    }).append();
+    view = pane.tabView;
+  });
+
+  ok(view.getPath('containerView.contentView') === view.get('view1'), "The tab view's local view1 should now be showing.");
+
+  SC.run(function() {
+    view.set('nowShowing', 'view2');
+  });
+
+  ok(view.getPath('containerView.contentView') === view.get('view2'), "The tab view's local view2 should now be showing.");
+});
+
+test("Tabs referencing deep local views.", function() {
+  var pane, view;
+  SC.run(function() {
+    pane = SC.MainPane.create({
+      childViews: ['tabView'],
+      tabView: SC.TabView.extend({
+        nowShowing: '.localPage.view1',
+
+        items: [
+          { title: "tab1", value: ".localPage.view1" },
+          { title: "tab2", value: ".localPage.view2" }
+        ],
+        localPage: SC.Page.create({
+          view1: SC.View.create(),
+          view2: SC.View.create()
+        })
+      })
+    }).append();
+    view = pane.tabView;
+  });
+
+  ok(view.getPath('containerView.contentView') === view.getPath('localPage.view1'), "The tab view's local view1 should now be showing.");
+
+  SC.run(function() {
+    view.set('nowShowing', '.localPage.view2');
+  });
+
+  ok(view.getPath('containerView.contentView') === view.getPath('localPage.view2'), "The tab view's local view2 should now be showing.");
+});
