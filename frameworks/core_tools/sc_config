@@ -1,0 +1,12 @@
+BT.addFramework(BT.Framework.extend({
+  ref: "sproutcore:core_tools",
+  path: __dirname,
+  dependencies: [
+    "sproutcore:desktop",
+    "sproutcore:datastore",
+    "sproutcore:animation",
+    "sproutcore:experimental:forms",
+    "sproutcore:ace", // not sure about this one
+    "sproutcore:experimental:select_view",
+    "sproutcore:experimental:split_view"]
+}));
