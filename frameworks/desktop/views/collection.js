@@ -229,8 +229,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     If you also accept drops, this will allow the user to drop items into
     specific points in the list.  Otherwise items will be added to the end.
 
-    When canReorderContent is true, item views will have the `isReorderable`
-    property set to true (if the `isEditable` is true on the collection).
+    If both canReorderContent and isEditable are true, item views will have
+    an `isReorderable` property set to true. You can use this to provide
+    visual cues to the user if you wish.
 
     @type Boolean
     @default NO
@@ -241,7 +242,26 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   canReorderContentBindingDefault: SC.Binding.bool(),
 
   /**
-    Allow the user to delete items using the delete key
+    Allows the user to drag items off the collection, for example to drag to
+    another list. You will need to implement the `SC.DropTarget` protocol on
+    the view you wish to receive the drop. You may also wish to modify this
+    view's `dragDataType` to alert drop targets what particular kind of
+    information it contains.
+
+    If `canDragContent` is YES, item views will have an `isDraggable` property
+    set to true. You can use this to provide visual cues to the user if you
+    wish.
+
+    @type Boolean
+    @default NO
+  */
+  canDragContent: NO,
+
+  /** @private */
+  canDragContentBindingDefault: SC.Binding.bool(),
+
+  /**
+    Allow the user to delete items using the delete key.
 
     If true the user will be allowed to delete selected items using the delete
     key.  Otherwise deletes will not be permitted.
@@ -2454,10 +2474,27 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   //
 
   /**
-    When reordering its content, the collection view will store its reorder
-    data using this special data type.  The data type is unique to each
-    collection view instance.  You can use this data type to detect reorders
-    if necessary.
+    Used during a non-reordering drag and drop to communicate to a drop target
+    what particular kind of information it contains. If your app has multiple
+    drop targets responding to different drag types, you should customize this
+    here and check it on the drop target.
+
+    Exposed during a drag via the `dragDataTypes` property.
+    
+    @type Boolean
+    @default NO
+  */
+  dragDataType: 'SC.CollectionView.Drag',
+
+  /**
+    Used during a reorder drag/drop. Usually, SC.Drag#dataTypes will expose
+    a standard data type to communicate to potential drop targets what sort
+    of information it brings. Since a reorder drag should only be handled
+    by the collection view that originated it, it uses a unique data type
+    which should be rejected by other drop targets, including other
+    rearrangeable lists.
+
+    Exposed during a drag via the `dragDataTypes` property.
 
     @field
     @type String
@@ -2524,7 +2561,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     if ((Date.now() - info.at) < 123) return YES;
 
     // OK, they must be serious, decide if a drag will be allowed.
-    if (this.get('isEditable') && del.collectionViewShouldBeginDrag(this)) {
+    if (del.collectionViewShouldBeginDrag(this)) {
 
       // First, get the selection to drag.  Drag an array of selected
       // items appearing in this collection, in the order of the
@@ -2536,7 +2573,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
       // mouse down content.
       if (!this.get("selectOnMouseDown")) {
         dragContent = SC.IndexSet.create(info.contentIndex);
-      } else dragContent = sel ? sel.indexSetForSource(content) : null;
+      } else {
+        dragContent = sel ? sel.indexSetForSource(content) : null;
+      }
 
       // remove any group indexes.  groups cannot be dragged.
       if (dragContent && groupIndexes && groupIndexes.get('length') > 0) {
@@ -2577,12 +2616,14 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
         // get called.
         this._cleanupMouseDown();
         this._lastInsertionIndex = null;
-
+      }
       // Drag was not allowed by the delegate, so bail.
-      } else this.set('dragContent', null);
-
-      return YES;
+      else {
+        this.set('dragContent', null);
+      }
     }
+
+    return YES;
   },
 
   /** @private
@@ -2658,22 +2699,33 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
 
   /**
-    Implements the drag data source protocol for the collection view.  This
+    Implements the drag data source protocol for the collection view. This
     property will consult the collection view delegate if one is provided. It
-    will also do the right thing if you have set canReorderContent to YES.
+    will also add the correct drag data types if `canReorderContent` or
+    `canDragContent` are true.
 
     @field
     @type Array
   */
   dragDataTypes: function () {
-    // consult delegate.
+    // Consult the delegate.
     var del = this.get('selectionDelegate'),
-        ret = del.collectionViewDragDataTypes(this),
+        ret = del.collectionViewDragDataTypes(this);
+
+    // Add types mediated by local properties.
+    var canDrag = this.get('canDragContent'),
+        canReorder = this.get('canReorderContent'),
         key;
 
+    if (canDrag || canReorder) ret = ret ? ret.copy() : [];    
+
     if (this.get('canReorderContent')) {
-      ret = ret ? ret.copy() : [];
       key = this.get('reorderDataType');
+      if (ret.indexOf(key) < 0) ret.push(key);
+    }
+
+    if (this.get('canDragContent')) {
+      key = this.get('dragDataType');
       if (ret.indexOf(key) < 0) ret.push(key);
     }
 
@@ -2686,15 +2738,17 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     provided.  It also respects the canReorderContent method.
   */
   dragDataForType: function (drag, dataType) {
-
-    // if this is a reorder, then return drag content.
-    if (this.get('canReorderContent')) {
-      if (dataType === this.get('reorderDataType')) {
-        return this.get('dragContent');
-      }
+    // If this is a reorder, then return drag content.
+    if (dataType === this.get('reorderDataType')) {
+      return this.get('dragContent');
     }
 
-    // otherwise, just pass along to the delegate
+    // Ditto if it's a standard drag.
+    if (dataType === this.get('dragDataType')) {
+      return this.get('dragContent');
+    }
+
+    // Otherwise, just pass along to the delegate.
     var del = this.get('selectionDelegate');
     return del.collectionViewDragDataForType(this, drag, dataType);
   },
@@ -2971,13 +3025,13 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   },
 
   /**
-    Default delegate method implementation, returns YES if canReorderContent
-    is also true.
+    Default delegate method implementation. Returns YES if canDragContent
+    is true, or if both canReorderContent and isEditable are true.
 
     @param {SC.View} view
   */
   collectionViewShouldBeginDrag: function (view) {
-    return this.get('canReorderContent');
+    return (this.get('isEditable') && this.get('canReorderContent')) || this.get('canDragContent');
   },
 
 
@@ -3236,6 +3290,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
       items = this.get('content'),
       isGroupView = this._contentIndexIsGroup(idx),
       isEditable = this.get('isEditable') && this.get('canEditContent'),
+      isDraggable = this.get('canDragContent'),
       isReorderable = this.get('isEditable') && this.get('canReorderContent'),
       isDeletable = this.get('isEditable') && this.get('canDeleteContent'),
       isEnabled = del.contentIndexIsEnabled(this, items, idx),
