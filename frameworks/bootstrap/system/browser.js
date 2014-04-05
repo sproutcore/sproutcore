@@ -98,7 +98,7 @@ SC.ENGINE = {
   presto: 'presto',
   trident: 'trident',
   webkit: 'webkit',
-  node: 'node'
+  nodejs: 'nodejs'
 };
 
 /**
@@ -199,7 +199,7 @@ SC.detectBrowser = function (userAgent, language) {
   engineAndVersion =
     // Match the specific engines first, avoiding commonly spoofed browsers.
     userAgent.match(new RegExp('(presto)' + conExp + numExp)) ||
-    userAgent.match(new RegExp('(opera|trident|webkit|gecko)' + conExp + numExp)) ||
+    userAgent.match(new RegExp('(opera|trident|webkit|gecko|nodejs)' + conExp + numExp)) ||
     ['', SC.BROWSER.unknown, '0'];
 
   // If the browser is SC.BROWSER.ie, use SC.ENGINE.trident.
