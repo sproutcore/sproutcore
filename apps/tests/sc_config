@@ -1,0 +1,6 @@
+BT.addApp(BT.AppBuilder.create({
+  name: "tests",
+  path: BT.curDir,
+  theme: "ace",
+  frameworks: ["sproutcore","sproutcore:datastore","sproutcore:core_tools"]
+}));
