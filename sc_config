@@ -1,0 +1,40 @@
+// var sr = SC.AppBuilder.extend({
+//   path: 'apps/statechart_routing'
+// });
+
+
+
+BT.addFramework(BT.Framework.extend({
+  ref: "sproutcore",
+  //path: BT.curDir,
+  path: __dirname,
+  isWrapperFramework: true,
+  all: {
+    debug: {
+      combinedScripts: true,
+      combinedStylesheets: true,
+    },
+    production: {
+      combinedScripts: true,
+      combinedStylesheets: true,
+    }
+  },
+  dependencies: ["sproutcore:desktop","sproutcore:datastore","sproutcore:statechart"]
+}));
+
+BT.addTheme(BT.Theme.extend({
+  ref: "sproutcore:empty_theme",
+  path: __dirname + "/themes/empty_theme"
+}));
+
+BT.addTheme(BT.Theme.extend({
+  ref: "sproutcore:ace",
+  path: __dirname + "/themes/ace",
+  dependencies: ["sproutcore:empty_theme"]
+}));
+
+
+// sc_require('apps/statechart_routing');
+// sc_require('apps/test_controls');
+// sc_require('apps/tests');
+// sc_require("apps/welcome");

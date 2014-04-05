@@ -1,0 +1,5 @@
+BT.addFramework(BT.Framework.extend({
+  ref: "sproutcore:experimental:menu",
+  path: __dirname,
+  dependencies: ["sproutcore:experimental:scroll_view"]
+}));
