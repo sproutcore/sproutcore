@@ -150,7 +150,7 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditable,
   autoResizeText: function() { return this.get('displayTitle'); }
   .property('displayTitle').cacheable(),
 
-  autoResizePadding: SC.propertyFromRenderDelegate('autoResizePadding', 10),
+  autoResizePadding: SC.propertyFromRenderDelegate('autoResizePadding', { height: 0, width: 10 }),
 
   /**
     The name of the theme's SC.LabelView render delegate.
