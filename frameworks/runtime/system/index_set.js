@@ -67,27 +67,53 @@ SC.IndexSet = SC.mixin({},
     return ret;
   },
 
+  //@if(debug)
+  /** @private Validates the standard IndexSet method arguments. */
+  _sc_validateIndexSetArguments: function (start, length) {
+    // Validate arguments. Potential bad usages include trying to call SC.IndexSet.create() with SproutCore's standard property-hash
+    // idiom, and passing in the results of bad math (NaN in particular causes problems).
+    var startIsValid = NO,
+        lengthIsValid = NO;
+    // Unpack hash.
+    if (SC.typeOf(start) === SC.T_HASH && !start.isIndexSet && SC.none(length)) {
+      length = start.length;
+      start = start.start;
+    }
+    // Validate start.
+    if (SC.none(start)) startIsValid = YES;
+    else if (SC.typeOf(start) === SC.T_NUMBER && !isNaN(start)) startIsValid = YES;
+    else if (start.isIndexSet && SC.none(length)) startIsValid = YES;
+    // Validate length.
+    if (SC.none(start) && !SC.none(length)) lengthIsValid = NO; // stay invalid.
+    else if (SC.none(length)) lengthIsValid = YES;
+    else if (SC.typeOf(length) === SC.T_NUMBER && !isNaN(length)) lengthIsValid = YES;
+    // Check validitty and throw if needed.
+    if (!startIsValid || !lengthIsValid) {
+      var argsString = SC.A(arguments).join(', ');
+      throw new Error("SC.IndexSet created with invalid parameters (%@). You must call SC.IndexSet with zero, one or two valid numeric arguments.".fmt(argsString));
+    }
+  },
+  //@endif
+
   /**
-    To create a set, pass either a start and index or another IndexSet.
+    To create an empty IndexSet, call `create` with no arguments. To create a set with one index, call `create` with one
+    argument: the index to add. To create a fuller set, call create with two arguments: the start index and the length to
+    add.
+
+    To create a more complicated set of indices, create an index set and populate individual ranges using `.add()`.
 
     @param {Number|SC.IndexSet} start The start of the range or an index set.
     @param {Number} [length] The length of the range (by default set to 1 if start is a Number)
     @returns {SC.IndexSet}
   */
   create: function (start, length) {
+    //@if (debug)
+    this._sc_validateIndexSetArguments.apply(this, arguments);
+    //@endif
+
     var ret = SC.beget(this);
     ret.initObservable();
     ret.registerDependentKey('min', '[]');
-
-    // @if (debug)
-    // Validate the input to ensure that the parameters
-    // match the function definition.
-    // This is here because `create` doesn't follow the
-    // idiomatic SC convention of passing in an object literal to `create`.
-    if (start && !(SC.typeOf(start) === SC.T_NUMBER || start.isIndexSet)) {
-      throw new Error("SC.IndexSet does not accept `%@` as a parameter to `create`. Take a look at the function signature for proper usage.".fmt(start));
-    }
-    // @endif
 
     // optimized method to clone an index set.
     if (start && start.isIndexSet) {
@@ -288,6 +314,10 @@ SC.IndexSet = SC.mixin({},
     @returns {Boolean}
   */
   contains: function (start, length) {
+    //@if (debug)
+    this._sc_validateIndexSetArguments.apply(this, arguments);
+    //@endif
+
     var content, cur, next, rstart, rnext;
 
     // normalize input
@@ -336,6 +366,10 @@ SC.IndexSet = SC.mixin({},
     @returns {Boolean}
   */
   intersects: function (start, length) {
+    //@if (debug)
+    this._sc_validateIndexSetArguments.apply(this, arguments);
+    //@endif
+
     var content, cur, next, lim;
 
     // normalize input
@@ -398,6 +432,9 @@ SC.IndexSet = SC.mixin({},
     @returns {SC.IndexSet} receiver
   */
   replace: function (start, length) {
+    //@if (debug)
+    this._sc_validateIndexSetArguments.apply(this, arguments);
+    //@endif
 
     if (length === undefined) {
       if (typeof start === SC.T_NUMBER) {
@@ -434,6 +471,9 @@ SC.IndexSet = SC.mixin({},
     @returns {SC.IndexSet} receiver
   */
   add: function (start, length) {
+    //@if (debug)
+    this._sc_validateIndexSetArguments.apply(this, arguments);
+    //@endif
 
     if (this.isFrozen) throw SC.FROZEN_ERROR;
 
@@ -608,6 +648,9 @@ SC.IndexSet = SC.mixin({},
     @returns {SC.IndexSet} receiver
   */
   remove: function (start, length) {
+    //@if (debug)
+    this._sc_validateIndexSetArguments.apply(this, arguments);
+    //@endif
 
     if (this.isFrozen) throw SC.FROZEN_ERROR;
 
@@ -938,6 +981,9 @@ SC.IndexSet = SC.mixin({},
     @returns {Number} count of indexes
   */
   lengthIn: function (start, length) {
+    //@if (debug)
+    this._sc_validateIndexSetArguments.apply(this, arguments);
+    //@endif
 
     var ret = 0;
 
