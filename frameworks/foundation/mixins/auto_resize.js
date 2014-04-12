@@ -318,7 +318,7 @@ SC.AutoResize = {
     // layer. This way, the height will grow appropriately to fit the target as
     // text *wraps* within the current width.
     if (!this.get('shouldResizeWidth')) {
-      layer.style.maxWidth = layer.clientWidth + 'px';
+      layer.style.maxWidth = $(layer).width() + 'px';
     }
   },
 
