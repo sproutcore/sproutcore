@@ -1455,9 +1455,14 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     else sel = SC.SelectionSet.create();
 
     if (indexes && indexes.get('length') > 0) {
-      // Select the index range. Don't select by content in case the same item
-      // appears multiple times in the content.
-      sel.add(content, indexes);
+
+      // when selecting only one item, always select by content
+      if (indexes.get('length') === 1 && !this.get('allowDuplicateItems')) {
+        sel.addObject(content.objectAt(indexes.get('firstObject')));
+
+      // otherwise select an index range
+      } else sel.add(content, indexes);
+
     }
 
     // give delegate one last chance
@@ -2223,7 +2228,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
       // determine if item is selected. If so, then go on.
       sel = this.get('selection');
-      isSelected = sel && sel.containsObject(view.get('content'));
+      // isSelected = sel && sel.containsObject(view.get('content'));
+      isSelected = sel && sel.contains(content, contentIndex, 1);
 
       if (isSelected) {
         this.deselect(contentIndex);
@@ -2376,7 +2382,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
             fail when using touch events.
     */
     // var itemView = this.itemViewForEvent(touch),
-    var itemView = this._touchSelectedView,
+    var content = this.get('content'),
+        itemView = this._touchSelectedView,
         contentIndex = itemView ? itemView.get('contentIndex') : -1,
         isSelected = NO, sel, shouldSelect;
 
@@ -2385,7 +2392,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     if (contentIndex > -1) {
       if (this.get('useToggleSelection')) {
         sel = this.get('selection');
-        isSelected = sel && sel.containsObject(itemView.get('content'));
+        // isSelected = sel && sel.containsObject(itemView.get('content'));
+        isSelected = sel && sel.contains(content, contentIndex, 1);
         shouldSelect = !isSelected;
       }
       else
