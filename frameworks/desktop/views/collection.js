@@ -1455,14 +1455,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     else sel = SC.SelectionSet.create();
 
     if (indexes && indexes.get('length') > 0) {
-
-      // when selecting only one item, always select by content
-      if (indexes.get('length') === 1) {
-        sel.addObject(content.objectAt(indexes.get('firstObject')));
-
-      // otherwise select an index range
-      } else sel.add(content, indexes);
-
+      // Select the index range. Don't select by content in case the same item
+      // appears multiple times in the content.
+      sel.add(content, indexes);
     }
 
     // give delegate one last chance
@@ -2120,7 +2115,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
         // determine if item is selected. If so, then go on.
         sel = this.get('selection');
-        isSelected = sel && sel.containsObject(itemView.get('content'));
+        // isSelected = sel && sel.containsObject(itemView.get('content'));
+        isSelected = sel && sel.contains(content, contentIndex, 1);
 
         if (isSelected) {
           this.deselect(contentIndex);
