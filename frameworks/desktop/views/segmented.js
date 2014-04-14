@@ -254,13 +254,13 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   itemKeyEquivalentKey: null,
 
   /**
-    If YES, overflowing items are placed into a menu and an overflow segment is
+    If true, overflowing items are placed into a menu and an overflow segment is
     added to popup that menu.
 
     @type Boolean
-    @default YES
+    @default false
   */
-  shouldHandleOverflow: YES,
+  shouldHandleOverflow: false,
 
   /**
     The title to use for the overflow segment if it appears.
@@ -297,7 +297,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   segmentViewClass: SC.SegmentView,
 
   /**
-    Set to YES if you would like your SegmentedView to size itself based on its
+    Set to YES if you would like your SegmentedView to size *itself* based on its
     visible segments. Useful if you're using SegmentedView in a flowed context
     (for example if its parent view has `childViewLayout: SC.View.HORIZONTAL_STACK`).
 
@@ -513,6 +513,9 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     if (this.get('shouldHandleOverflow')) {
       this.invokeLast(this.remeasure);
     }
+
+    // Re-render to update the length classname.
+    this.displayDidChange();
   }.observes('*items.[]'),
 
   /** @private

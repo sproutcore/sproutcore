@@ -16,15 +16,42 @@ SC.BaseTheme.segmentedRenderDelegate = SC.RenderDelegate.create({
     delegate to render its contents.
 
     */
-  render: function(dataSource, context) {
+  render: function (dataSource, context) {
+    var items = dataSource.get('items'),
+      length = 0;
+
     // Use text-align to align the segments
     this.addSizeClassName(dataSource, context);
     context.addStyle('text-align', dataSource.get('align'));
+
+    if (items) {
+      length = items.get('length');
+      context.addClass('sc-length-' + length);
+    }
+
+    // Cache the last length so that we can remove this class name.
+    dataSource.renderState._sc_last_length = length;
   },
 
-  update: function(dataSource, jquery) {
+  update: function (dataSource, jquery) {
+    var items = dataSource.get('items'),
+      lastLength = dataSource.renderState._sc_last_length,
+      length;
+
     this.updateSizeClassName(dataSource, jquery);
     jquery.css('text-align', dataSource.get('align'));
+
+    if (length !== lastLength) {
+      jquery.removeClass('sc-length-' + lastLength);
+
+      if (items) {
+        length = items.get('length');
+        jquery.addClass('sc-length-' + length);
+      }
+
+      // Cache the last length so that we can remove this class name.
+      dataSource.renderState._sc_last_length = length;
+    }
   }
 
 });
