@@ -26,7 +26,7 @@ var Delegate = SC.Object.extend(SC.CollectionRowDelegate, {
   }
 });
 
-module("SC.ListView.rowHeightForContentIndex", {
+module("SC.ListView.rowSizeForContentIndex", {
   setup: function() {
     content = "1 2 3 4 5 6 7 8 9 0".w().map(function(x) {
       return SC.Object.create({ value: x });
@@ -43,16 +43,16 @@ function verifyRowHeights(view, rowHeight, expected) {
     rowSpacing = view.get('rowSpacing') || 0;
 
   ok(loc>0, 'content should have some length');
-  equals(view.rowHeightForContentIndex(loc+1), rowHeight, 'content.rowHeightForContentIndex(length+1) should be rowHeight');
+  equals(view.rowSizeForContentIndex(loc+1), rowHeight, 'content.rowSizeForContentIndex(length+1) should be rowHeight');
 
   while(--loc>=0) {
-    actual = view.rowHeightForContentIndex(loc);
+    actual = view.rowSizeForContentIndex(loc);
     if (expected) {
       totalExpected += expected[loc];
-      equals(actual, expected[loc], "content.rowHeightForContentIndex(%@) should be custom row height".fmt(loc));
+      equals(actual, expected[loc], "content.rowSizeForContentIndex(%@) should be custom row height".fmt(loc));
     } else {
       totalExpected += rowHeight;
-      equals(actual, rowHeight, 'content.rowHeightForContentIndex(%@) should be rowHeight'.fmt(loc));
+      equals(actual, rowHeight, 'content.rowSizeForContentIndex(%@) should be rowHeight'.fmt(loc));
     }
 
     totalExpected += rowSpacing;
