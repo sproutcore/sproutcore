@@ -315,19 +315,13 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
   },
 
   /** @deprecated Version 1.11. Please use the `rowSizeForContentIndex()` function instead.
-    Returns the row height for the specified content index.  This will take
-    into account custom row heights and group rows.
+    Not implemented by default.
 
+    @field
     @param {Number} idx content index
     @returns {Number} the row height
   */
-  rowHeightForContentIndex: function (idx) {
-    //@if(debug)
-    SC.warn('Developer Warning: The rowHeightForContentIndex() function of SC.ListView has been renamed to rowSizeForContentIndex().');
-    //@endif
-
-    return this.rowSizeForContentIndex(idx);
-  },
+  rowHeightForContentIndex: null,
 
   /**
     Returns the row size for the specified content index.  This will take
@@ -339,6 +333,13 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
   rowSizeForContentIndex: function (idx) {
     var del = this.get('rowDelegate'),
         ret, cache, content, indexes;
+
+    if (this.rowHeightForContentIndex) {
+      //@if(debug)
+      SC.warn('Developer Warning: The rowHeightForContentIndex() method of SC.ListView has been renamed rowSizeForContentIndex().');
+      //@endif
+      return this.rowHeightForContentIndex(idx);
+    }
 
     if (del.customRowSizeIndexes && (indexes = del.get('customRowSizeIndexes'))) {
       cache = this._sc_sizeCache;
