@@ -483,6 +483,8 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
   */
   contentIndexesInRect: function (rect) {
     var totalRowSize = this.get('rowDelegate').get('_sc_totalRowSize'),
+      rowSpacing = this.get('rowSpacing'),
+      totalRowSizeWithSpacing = totalRowSize + rowSpacing,
       layoutDirection = this.get('layoutDirection'),
       len = this.get('length'),
       offset, start, end,
@@ -502,20 +504,20 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
 
     // estimate the starting row and then get actual offsets until we are
     // right.
-    start = (firstEdge - (firstEdge % totalRowSize)) / totalRowSize;
+    start = (firstEdge - (firstEdge % totalRowSizeWithSpacing)) / totalRowSizeWithSpacing;
     offset = this.rowOffsetForContentIndex(start);
 
     // go backwards until offset of row is before first edge
     while (start > 0 && offset > firstEdge) {
       start--;
-      offset -= this.rowSizeForContentIndex(start);
+      offset -= (this.rowSizeForContentIndex(start) + rowSpacing);
     }
 
     // go forwards until offset plus size of row is after first edge
     offset += this.rowSizeForContentIndex(start);
     while (start < len && offset <= firstEdge) {
       start++;
-      offset += this.rowSizeForContentIndex(start);
+      offset += this.rowSizeForContentIndex(start) + rowSpacing;
     }
     if (start < 0) start = 0;
     if (start >= len) start = len;
@@ -523,21 +525,21 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
 
     // estimate the final row and then get the actual offsets until we are
     // right. - look at the offset of the _following_ row
-    end = start + ((size - (size % totalRowSize)) / totalRowSize);
+    end = start + ((size - (size % totalRowSizeWithSpacing)) / totalRowSizeWithSpacing);
     if (end > len) end = len;
     offset = this.rowOffsetForContentIndex(end);
 
     // walk backwards until offset of row is before or at last edge
     while (end >= start && offset >= lastEdge) {
       end--;
-      offset -= this.rowSizeForContentIndex(end);
+      offset -= (this.rowSizeForContentIndex(end) + rowSpacing);
     }
 
     // go forwards until offset plus size of row is after last edge
-    offset += this.rowSizeForContentIndex(end);
+    offset += this.rowSizeForContentIndex(end) + rowSpacing;
     while (end < len && offset < lastEdge) {
       end++;
-      offset += this.rowSizeForContentIndex(end);
+      offset += this.rowSizeForContentIndex(end) + rowSpacing;
     }
 
     end++; // end should be after start
