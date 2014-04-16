@@ -1025,7 +1025,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     return this;
   },
 
-  /** @private */
+  /** @private Use a shared object so that we are not creating objects for every item view configuration. */
   _TMP_ATTRS: {},
 
   /** @private
@@ -3231,7 +3231,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
   /** @private */
   _attrsForContentIndex: function (idx) {
-    var attrs = this._TMP_ATTRS,
+    var attrs = this._TMP_ATTRS, // NOTE: This is a shared object so every property of it must be set for each use.
       del = this.get('contentDelegate'),
       items = this.get('content'),
       isGroupView = this._contentIndexIsGroup(idx),
@@ -3268,6 +3268,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     // on the child view.
     var layout = this.layoutForContentIndex(idx);
     if (layout) { attrs.layout = layout; }
+    else { delete attrs.layout; }
 
     return attrs;
   },
