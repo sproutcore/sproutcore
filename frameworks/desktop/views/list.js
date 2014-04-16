@@ -569,17 +569,19 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
   insertionPointView: SC.View.extend({
     classNames: 'sc-list-insertion-point',
 
-    layout: function () {
+    layout: function (key, value) {
       var layoutDirection = this.get('layoutDirection'),
-        ret;
+        key = layoutDirection === SC.LAYOUT_HORIZONTAL ? 'width' : 'height';
 
-      if (layoutDirection === SC.LAYOUT_HORIZONTAL) {
-        ret = { width: 2 };
-      } else {
-        ret = { height: 2 };
+      // Getter – create layout hash.
+      if (value === undefined) {
+        value = {};
       }
 
-      return ret;
+      // Either way, add the narrow dimension to the layout if needed.
+      if (SC.none(value[key])) value[key] = 2;
+
+      return value;
     }.property('layoutDirection').cacheable(),
 
     /**

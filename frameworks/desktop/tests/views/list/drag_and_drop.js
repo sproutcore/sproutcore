@@ -197,6 +197,8 @@ test("insertion point when drag on list view", function() {
 
     ok(listView._sc_insertionPointView, "An insertion point should have been added");
 
+    equals(listView._sc_insertionPointView.get('layout').top, 20, "The drag having been over item 2, the insertion point should be located at the top of item 2");
+
     // Clean up
     ev = SC.Event.simulateEvent(layer, 'mouseup');
     SC.Event.trigger(layer, 'mouseup', [ev]);
