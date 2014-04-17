@@ -91,6 +91,32 @@ test("Check if valueBinding works", function() {
   equals('World',view4.get('value'),'Value should be') ;
 });
 
+//test3
+test("Check if title of the menu is correctly displayed if no itemTitleKey", function() {
+  SC.run(function() { view2.showMenu(); });
+  equals(view2.getPath("menu.displayItems")[0].title, "Drop", "The first item should be Drop.");
+  SC.run(function() { view2.set('value', 'Down'); });
+  equals(view2.getPath("menu.value"), "Down", "The menu value should be Down.");
+  SC.run(function() { view2.hideMenu(); });
+});
+
+//test4
+test("Check if select items are bind to menu items", function() {
+  SC.run(function() { view4.showMenu(); });
+  equals(view4.getPath("items.length"), 4, "select items length should 4.");
+  equals(view4.getPath("displayItems.length"), 4, "select displayItems length should 4.");
+  equals(view4.getPath("menu.displayItems.length"), 4, "menu displayItems length should 4.");
+  SC.run(function() { view4.get('items').pushObject({ title: "More", pos: 5}); });
+  equals(view4.getPath("items.length"), 5, "select items length should have changed.");
+  equals(view4.getPath("displayItems.length"), 5, "select displayItems length have changed.");
+  equals(view4.getPath("menu.displayItems.length"), 5, "menu displayItems length have changed.");
+  SC.run(function() { view4.set('items', ['a','b']); });
+  equals(view4.getPath("items.length"), 2, "select items length should have changed.");
+  equals(view4.getPath("displayItems.length"), 2, "select displayItems length have changed.");
+  equals(view4.getPath("menu.displayItems.length"), 2, "menu displayItems length have changed.");
+  SC.run(function() { view4.hideMenu(); });
+});
+
 //test5
 test("sortObjects() sorts the items of the Drop Down component", function() {
   var obj = view1.get("items");
