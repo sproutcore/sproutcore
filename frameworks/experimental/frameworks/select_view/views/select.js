@@ -338,7 +338,7 @@ SC.SelectView = SC.PopupButtonView.extend({
     }
 
     return ret;
-  }.property('items').cacheable(),
+  }.property('items.length').cacheable(),
 
   /** @private */
   _addDisplayItem: function (title, value, isSeparator) {
