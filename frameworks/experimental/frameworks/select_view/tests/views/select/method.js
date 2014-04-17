@@ -91,6 +91,15 @@ test("Check if valueBinding works", function() {
   equals('World',view4.get('value'),'Value should be') ;
 });
 
+//test3
+test("Check if title of the menu is correctly displayed if no itemTitleKey", function() {
+  SC.run(function() { view2.showMenu(); });
+  equals(view2.getPath("menu.displayItems")[0].title, "Drop", "The first item should be Drop.");
+  SC.run(function() { view2.set('value', 'Down'); });
+  equals(view2.getPath("menu.value"), "Down", "The menu value should be Down.");
+  SC.run(function() { view2.hideMenu(); });
+});
+
 //test4
 test("Check if select items are bind to menu items", function() {
   SC.run(function() { view4.showMenu(); });

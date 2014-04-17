@@ -106,6 +106,21 @@ test("changing value changes the selected item", function() {
   equals(view.get('title'), "Yo", "Title has changed");
 });
 
+test("changing value changes the selected item when itemValueKey is null", function() {
+  SC.RunLoop.begin();
+  var view = createView({ defaultTitle: "Bonjour", itemValueKey: null });
+  SC.RunLoop.end();
+
+  equals(view.get('selectedItem'), null, "Selected item starts at null");
+
+  SC.RunLoop.begin();
+  view.set('value', obj);
+  SC.RunLoop.end();
+
+  ok(view.get('selectedItem') !== null, "Selected item is no longer null");
+  equals(view.get('title'), "Lost", "Title has changed");
+});
+
 test("changing value to a value not in the list deselects", function() {
   SC.RunLoop.begin();
   var view = createView({ defaultTitle: "Bonjour" });

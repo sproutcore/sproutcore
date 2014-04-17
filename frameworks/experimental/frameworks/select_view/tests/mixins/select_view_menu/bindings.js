@@ -3,7 +3,7 @@ module("SelectViewMenu -- Bindings");
 function setValues(obj, props, toValue) {
   for (var idx = 0; idx < props.length; idx++) {
     var prop = props[idx];
-    if (prop === 'items') prop = 'displayItems';
+    if (SC.typeOf(prop) === SC.T_HASH) prop = prop.from;
     obj.set(prop, toValue);
   }
 }
@@ -27,7 +27,7 @@ test("Proxying all properties from SelectView to MenuView works.", function() {
   ];
 
   var obj = SC.Object.create({});
-  setValues(obj, proxyProperties, 'initial');
+  setValues(obj, SC.SelectViewMenu._svm_bindToProperties, 'initial');
 
   // Bindings won't evaluate until the end of the run loop, so make a run loop
   SC.RunLoop.begin();
@@ -39,7 +39,7 @@ test("Proxying all properties from SelectView to MenuView works.", function() {
 
   // now, test updates
   SC.RunLoop.begin();
-  setValues(obj, proxyProperties, 'modified');
+  setValues(obj, SC.SelectViewMenu._svm_bindToProperties, 'modified');
   SC.RunLoop.end();
 
   validateValues(menu, proxyProperties, 'modified');
