@@ -47,9 +47,9 @@ SC.SelectView = SC.PopupButtonView.extend({
 
     @property
     @type {String}
-    @default 'title'
+    @default null
   */
-  itemTitleKey: 'title',
+  itemTitleKey: null,
 
   /**
     If you set this to a non-null value, then the value of this key will
@@ -68,9 +68,9 @@ SC.SelectView = SC.PopupButtonView.extend({
 
      @property
      @type {String}
-     @default 'value'
+     @default null
   */
-  itemValueKey: 'value',
+  itemValueKey: null,
 
   /**
      Key used to extract icons from the items array.
