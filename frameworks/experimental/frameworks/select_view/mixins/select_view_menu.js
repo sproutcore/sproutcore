@@ -78,13 +78,14 @@ SC.SelectViewMenu = {
   
   /** @private */
   _svm_bindToProperties: [
-    'items',
-    'target', 'action',
-    'itemTitleKey', 'itemIsEnabledKey', 'itemValueKey', 'itemIconKey', 
-    'itemHeightKey', 'itemSubMenuKey', 'itemSeparatorKey', 'itemTargetKey',
-    'itemActionKey', 'itemCheckboxKey', 'itemShortCutKey',
+    { from: 'displayItems', to: 'items' },
+    { from: '_itemTitleKey', to: 'itemTitleKey' },
+    { from: '_itemIsEnabledKey', to: 'itemIsEnabledKey' },
+    { from: '_itemValueKey', to: 'itemValueKey' },
+    'itemIconKey', 'itemHeightKey', 'itemSubMenuKey', 'itemSeparatorKey', 
+    'itemTargetKey', 'itemActionKey', 'itemCheckboxKey', 'itemShortCutKey',
     'itemKeyEquivalentKey', 'itemDisableMenuFlashKey', 'minimumMenuWidth',
-    
+    'target', 'action',
     'preferType', 'preferMatrix'
   ],
 
@@ -95,13 +96,16 @@ SC.SelectViewMenu = {
       return;
     }
 
-    var props = this._svm_bindToProperties, idx, len = props.length, key, toKey;
+    var props = this._svm_bindToProperties, idx, len = props.length, from, to;
 
     for (idx = 0; idx < len; idx++) {
-      key = props[idx];
-      toKey = key;
-      if (key === 'items') toKey = 'displayItems';
-      this[key + 'Binding'] = this.bind(key, bindTo, toKey);
+      from = to = props[idx];
+
+      if (SC.typeOf(from) === SC.T_HASH) {
+        from = from.from;
+        to = to.to;
+      }
+      this[to + 'Binding'] = this.bind(to, bindTo, from);
     }
 
     this._svm_isBoundTo = bindTo;
@@ -118,6 +122,10 @@ SC.SelectViewMenu = {
 
     for (idx = 0; idx < len; idx++) {
       key = props[idx];
+
+      if (SC.typeOf(from) === SC.T_HASH) {
+        key = key.to;
+      }
       this[key + 'Binding'].disconnect();
     }
   },
