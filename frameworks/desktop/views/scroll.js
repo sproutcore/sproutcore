@@ -2073,14 +2073,19 @@ SC.ScrollView = SC.View.extend({
     this._scroll_contentWidth  = width;
     this._scroll_contentHeight = height;
 
-    dim       = this.getPath('containerView.frame');
-    dimWidth  = dim.width;
+    dim = this.getPath('containerView.frame');
+    dimWidth = dim.width;
     dimHeight = dim.height;
 
     if (this.get('hasHorizontalScroller') && (view = this.get('horizontalScrollerView'))) {
       // decide if it should be visible or not
       if (this.get('autohidesHorizontalScroller')) {
         this.set('isHorizontalScrollerVisible', width > dimWidth);
+
+        // re-check dimensions since a scrollbar visibility change could change them
+        dim = this.getPath('containerView.frame');
+        dimWidth = dim.width;
+        dimHeight = dim.height;
       }
       view.setIfChanged('maximum', width - dimWidth);
       view.setIfChanged('proportion', dimWidth / width);
