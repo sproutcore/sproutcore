@@ -416,7 +416,7 @@ SC.SelectView = SC.PopupButtonView.extend({
     var a = this.get('value'),
       b = this._scsv_getValueForMenuItem(item);
 
-    return a === b;
+    return a === b || (SC.kindOf(a, SC.Record) && SC.kindOf(b, SC.Record) && a.storeKey === b.storeKey);
   },
 
   /**
