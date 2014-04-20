@@ -579,6 +579,9 @@ SC.ScrollerView = SC.View.extend(
     @param evt {SC.Event} the mousedown event
   */
   mouseDown: function (evt) {
+    // Fast path, reject secondary clicks.
+    if (evt.which !== 1) return false;
+
     if (!this.get('isEnabledInPane')) return NO;
 
     // keep note of altIsDown for later.

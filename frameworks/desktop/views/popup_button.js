@@ -181,6 +181,9 @@ SC.PopupButtonView = SC.ButtonView.extend(
     @returns {Boolean}
   */
   mouseDown: function(evt) {
+    // Fast path, reject secondary clicks.
+    if (evt.which !== 1) return false;
+
     // If disabled, handle mouse down but ignore it.
     if (!this.get('isEnabledInPane')) return YES ;
 

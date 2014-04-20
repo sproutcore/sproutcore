@@ -2086,6 +2086,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     @returns {Boolean} Usually YES.
   */
   mouseDown: function (ev) {
+    // Fast path, reject secondary clicks.
+    if (ev.which !== 1) return false;
+
     var content = this.get('content');
 
     // Fast path!

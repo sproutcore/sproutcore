@@ -149,6 +149,9 @@ SC.SliderView = SC.View.extend(SC.Control,
 
   /* @private */
   mouseDown: function(evt) {
+    // Fast path, reject secondary clicks.
+    if (evt.which !== 1) return false;
+
     if (!this.get('isEnabledInPane')) return YES; // nothing to do...
     this.set('isActive', YES);
     this._isMouseDown = YES ;

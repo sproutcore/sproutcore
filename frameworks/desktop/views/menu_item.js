@@ -454,7 +454,8 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
 
   /** @private*/
   mouseDown: function (evt) {
-    return YES;
+    // Reject secondary clicks.
+    return evt.which !== 1;
   },
 
   /** @private */

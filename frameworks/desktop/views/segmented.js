@@ -831,6 +831,9 @@ SC.SegmentedView = SC.View.extend(SC.Control,
 
   /** @private */
   mouseDown: function (evt) {
+    // Fast path, reject secondary clicks.
+    if (evt.which !== 1) return false;
+
     var childViews = this.get('childViews'),
         childView,
         overflowIndex = childViews.get('length') - 1,
