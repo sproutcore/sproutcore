@@ -335,10 +335,10 @@ SC.View.reopen(
     // Handle old style rotation.
     if (!SC.none(hash.rotate)) {
       //@if(debug)
-      SC.Logger.warn('Developer Warning: Please animate rotateX instead of rotate.');
+      SC.Logger.warn('Developer Warning: Please animate rotateZ instead of rotate.');
       //@endif
-      if (SC.none(hash.rotateX)) {
-        hash.rotateX = hash.rotate;
+      if (SC.none(hash.rotateZ)) {
+        hash.rotateZ = hash.rotate;
       }
       delete hash.rotate;
     }

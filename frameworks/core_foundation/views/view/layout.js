@@ -918,10 +918,10 @@ SC.View.reopen(
     // Handle old style rotation.
     if (!SC.none(currentLayout.rotate)) {
       //@if (debug)
-      SC.Logger.warn('Developer Warning: Please set rotateX instead of rotate.');
+      SC.Logger.warn('Developer Warning: Please set rotateZ instead of rotate.');
       //@endif
-      if (SC.none(currentLayout.rotateX)) {
-        currentLayout.rotateX = currentLayout.rotate;
+      if (SC.none(currentLayout.rotateZ)) {
+        currentLayout.rotateZ = currentLayout.rotate;
       }
       delete currentLayout.rotate;
     }
