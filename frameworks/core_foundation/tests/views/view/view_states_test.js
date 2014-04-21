@@ -424,6 +424,27 @@ test("Test showing and hiding parentView updates child views.", function () {
   view.destroy();
 });
 
+test("Test showing parentView with transitionShow", function () {
+  var parentView = SC.View.create({
+    isVisible: NO,
+    transitionShow: { run: function() {} }
+  });
+  var childView = SC.View.create();
+  childView._doAdopt(parentView);
+  parentView._doRender();
+  parentView._doAttach(document.body);
+
+  SC.run(function() { parentView.set('isVisible', YES) });
+
+  equals(parentView.viewState, SC.View.ATTACHED_SHOWING, "Upon being made visible, a view with a transition is in state");
+  equals(childView.viewState, SC.View.ATTACHED_SHOWN, "A visible view whose parent is ATTACHED_SHOWING is in state.");
+
+  parentView.destroy();
+  parentView = null;
+  childView.destroy();
+  childView = null;
+});
+
 test("Test hiding with transitionHide", function () {
   var child = SC.View.create(),
     transitionHide = { run: function () {} },
@@ -627,10 +648,10 @@ test("Test hiding and showing a showing view in same run loop should not update 
   // Hide the view using isVisible.
   SC.run(function () {
     equals(view.viewState, SC.CoreView.ATTACHED_SHOWING, "The view should be in the state");
-    equals(child.viewState, SC.CoreView.ATTACHED_HIDDEN_BY_PARENT, "The child view should be in the state");
+    equals(child.viewState, SC.CoreView.ATTACHED_SHOWN, "The child view should be in the state");
 
     ok(view.get('isVisibleInWindow'), "isVisibleInWindow should be true");
-    ok(!child.get('isVisibleInWindow'), "isVisibleInWindow of child should be false");
+    ok(child.get('isVisibleInWindow'), "isVisibleInWindow of child should be true");
 
     view.set('isVisible', false);
     equals(view.viewState, SC.CoreView.ATTACHED_HIDDEN, "The view should be in the state");
