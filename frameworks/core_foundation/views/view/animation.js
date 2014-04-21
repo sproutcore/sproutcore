@@ -461,7 +461,7 @@ SC.View.reopen(
         this._animateFrames(frames, callback, 0, count);
       } else {
         // Done.
-        callback(data);
+        if (callback) callback(data);
       }
     });
 
