@@ -690,7 +690,7 @@
       child.adjust('rotate', 45).updateLayout(true);
     });
 
-    equals(transformFor(child), 'rotateX(45deg)', 'transform attribute should be "rotateX(45deg)"');
+    equals(transformFor(child), 'rotateZ(45deg)', 'transform attribute should be "rotateZ(45deg)"');
   });
 
   test("layout {rotateX} with units", function () {
