@@ -226,44 +226,71 @@ SC.View.reopen(
   },
 
   /** @private */
-  didTransitionAdjust: function () {
-  },
+  didTransitionAdjust: function () {},
 
   /**
-    The layout describes how you want your view to be positioned on the
-    screen.  You can define the following properties:
+    Set the layout to a hash of layout properties to describe in detail how your view
+    should be positioned on screen. Like most application development environments,
+    your views are laid out absolutely, relative to their parent view.
 
-     - left: the left edge
-     - top: the top edge
-     - right: the right edge
-     - bottom: the bottom edge
-     - height: the height
-     - width: the width
-     - centerX: an offset from center X
-     - centerY: an offset from center Y
-     - minWidth: a minimum width
-     - minHeight: a minimum height
-     - maxWidth: a maximum width
-     - maxHeight: a maximum height
-     - border: border on all sides
-     - borderTop: top border
-     - borderRight: right border
-     - borderBottom: bottom border
-     - borderLeft: bottom left
+    You can define your layout using combinations of the following positional properties:
+
+     - left
+     - top
+     - right
+     - bottom
+     - height
+     - width
+     - centerX: offset from center, horizontally
+     - centerY: offset from center, vertically
+     - minWidth
+     - minHeight
+     - maxWidth
+     - maxHeight
+     - scale: once positioned, scales the view in place.
+     - transformOriginX, transformOriginY: defines the point (as a decimal percentage) around which
+       your view will scale. (Also impacts rotation; see below.)
+
+    They are processed by SproutCore's layout engine and used to position the view's element onscreen. They are
+    also reliably and speedily processed into a scaled rectangle (with x, y, height, width, scale and origin
+    values) available on the frame property. See documentation on it and the clippingFrame property for more.
+
+    Most of these properties take integer numbers of pixels, for example { left: 10 }, or fractional
+    percentages like { left 0.25 }. Exceptions include scale, which takes a scale factor (e.g. { scale:
+    2 } doubles the view's size), and transformOriginX/Y which take a decimal percent, and default to 0.5
+    (the center of the view).
+
+    It's possible to define very sophisticated layouts with these properties alone. For example, you
+    can define a view which takes up the full screen until it reaches a certain width, and aligns to
+    the left thereafter, with { left: 0, right: 0, maxWidth: 400 }. (If you need the flexibility to
+    assign entirely different layouts at different screen or window sizes, see the Design Modes
+    documentation under SC.Application.)
+
+    Certain layout combinations are nonsensical and of course should be avoided. For example, you
+    can use left + right or left + width, but not left + right + width.
+
+    If your view has a CSS border, it's important that you specify its thickness in the layout hash,
+    using one or more of the following border properties, as well as in your CSS. This is an unfortunate
+    bit of repetition, but it's necessary to allow SproutCore to adjust the layout to compensate. (HTML
+    positions borders outside of the body of an element; SproutCore positions them inside their rectangles.)
+
+     - border: border thickness on all sides
+     - borderTop: top border thickness
+     - borderRight: right border thickness
+     - borderBottom: bottom border thickness
+     - borderLeft: bottom left thickness
+
+    You can also use the following layout properties, which don't impact your view's frame.
+
      - opacity: the opacity of the view
-     - zIndex: position above or below other views
+     - rotate: once positioned, rotates the view in place.
+     - zIndex: position above or below other views (Not recommended. Control sibling view
+       overlay with childView order (later views draw above earlier views) where possible.)
 
-    Note that you can only use certain combinations to set layout.  For
-    example, you may set left/right or left/width, but not left/width/right,
-    since that combination doesn't make sense.
+    To change a layout property, you should use the adjust method, which handles some particulars for you.
 
-    Likewise, you may set a minWidth/minHeight, or maxWidth/maxHeight, but
-    if you also set the width/height explicitly, then those constraints won't
-    matter as much.
-
-    Layout is designed to maximize reliance on the browser's rendering
-    engine to keep your app up to date.
-
+    @type {Hash}
+    @default { top: 0, left: 0, bottom: 0, right: 0 }
     @test in layoutStyle
   */
   layout: { top: 0, left: 0, bottom: 0, right: 0 },
@@ -474,6 +501,32 @@ SC.View.reopen(
     return frame;
   },
 
+  /** @private */
+  _adjustForScale: function(frame, layout) {
+    // GATEKEEP: Scale not supported.
+    if (!SC.platform.supportsCSSTransforms) {
+      frame.scale = 1;
+      frame.transformOriginX = frame.transformOriginY = 0.5;
+      return frame;
+    }
+    // Get the scale and transform origins.
+    var scale = layout.scale,
+      oX = layout.transformOriginX,
+      oY = layout.transformOriginY;
+    if (scale == null) scale = 1;
+    if (oX == null) oX = 0.5;
+    if (oY == null) oY = 0.5;
+    // If the scale isn't 1, do some calculations.
+    if (scale !== 1) {
+      frame = SC.scaleRect(frame, scale, oX, oY);
+    }
+    // Regardless, attach the scale numbers for reference.
+    frame.scale = scale;
+    frame.transformOriginX = oX;
+    frame.transformOriginY = oY;
+    return frame;
+  },
+
   /**
     Computes what the frame of this view would be if the parent were resized
     to the passed dimensions.  You can use this method to project the size of
@@ -486,7 +539,7 @@ SC.View.reopen(
     parent dimensions.  This is the same method used to calculate the current
     frame when it changes.
 
-    @param {Rect} pdim the projected parent dimensions
+    @param {Rect} pdim the projected parent dimensions (optional)
     @returns {Rect} the computed frame
   */
   computeFrameWithParentFrame: function (original, pdim) {
@@ -496,11 +549,13 @@ SC.View.reopen(
     // current frame (see original computeFrameWithParentFrame in views/view.js)
     if (this.get('useStaticLayout')) {
       f = original();
-      return f ? this._adjustForBorder(f, layout) : null;
-    } else {
-      f = {};
+      f = f ? this._adjustForBorder(f, layout) : null;
+      f = f ? this._adjustForScale(f, layout) : null;
+      return f;
     }
-
+    
+    f = {};
+    
     var error, layer, AUTO = SC.LAYOUT_AUTO,
         pv = this.get('parentView'),
         dH, dW, //shortHand for parentDimensions
@@ -640,9 +695,10 @@ SC.View.reopen(
       if (f.width === AUTO) f.width = layer ? layer.clientWidth : 0;
     }
 
+    // First, adjust for border.
     f = this._adjustForBorder(f, layout);
 
-    // Account for special cases inside ScrollView, where we adjust the
+    // HACK: Account for special cases inside ScrollView, where we adjust the
     // element's scrollTop/scrollLeft property for performance reasons.
     if (pv && pv.isScrollContainer) {
       pv = pv.get('parentView');
@@ -666,6 +722,9 @@ SC.View.reopen(
     if (!SC.none(layout.minWidth) && (f.width < layout.minWidth)) {
       f.width = layout.minWidth;
     }
+
+    // Finally, adjust for scale.
+    f = this._adjustForScale(f, layout);
 
     // make sure width/height are never < 0
     if (f.height < 0) f.height = 0;

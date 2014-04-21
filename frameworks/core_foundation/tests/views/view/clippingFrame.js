@@ -32,70 +32,100 @@ module("SC.View#clippingFrame", {
   }
 });
 
-test("clippingFrame === frame w/ 0 offset if not partially hidden", function() {
+test("clippingFrame === frame if view not occluded or scaled.", function() {
   var result = pane.get('clippingFrame'), expected = pane.get('frame');
   expected.x = expected.y = 0 ;
-  same(result, expected, 'pane');
+  ok(SC.rectsEqual(result, expected), 'pane');
 
   result = a.get('clippingFrame'); expected = a.get('frame');
   expected.x = expected.y = 0 ;
-  same(result, expected, 'child');
+  ok(SC.rectsEqual(result, expected), 'child');
 
   result = aa.get('clippingFrame'); expected = aa.get('frame');
   expected.x = expected.y = 0 ;
-  same(result, expected, 'nested child');
+  ok(SC.rectsEqual(result, expected), 'nested child');
 });
 
-test("cuts off top of frame", function() {
+test("clippingFrame clips off top of frame when moved above top of parent.", function() {
   var result, expected;
 
   a.adjust('top', -50);
   result = a.get('clippingFrame'); expected = a.get('frame');
   expected.x = 0 ; expected.y = 50 ; expected.height = 50 ;
-  same(result, expected, 'child');
+  ok(SC.rectsEqual(result, expected), 'child');
 
   result = aa.get('clippingFrame'); expected = aa.get('frame');
   expected.x = 0 ; expected.y = 30 ; expected.height = 10 ;
-  same(result, expected, 'nested child');
+  ok(SC.rectsEqual(result, expected), 'nested child');
 });
 
-test("cuts off bottom of frame", function() {
+test("clippingFrame clips off bottom of frame when moved below bottom of parent.", function() {
   var result, expected;
 
   a.adjust('top', 150);
   result = a.get('clippingFrame'); expected = a.get('frame');
   expected.x = 0 ; expected.y = 0 ; expected.height = 50 ;
-  same(result, expected, 'child');
+  ok(SC.rectsEqual(result, expected), 'child');
 
   result = aa.get('clippingFrame'); expected = aa.get('frame');
   expected.x = 0 ; expected.y = 0 ; expected.height = 30 ;
-  same(result, expected, 'nested child');
+  ok(SC.rectsEqual(result, expected), 'nested child');
 });
 
-test("cuts off left of frame", function() {
+test("clippingFrame clips off left of frame when moved left of parent's left.", function() {
   var result, expected;
 
   a.adjust('left', -50);
   result = a.get('clippingFrame'); expected = a.get('frame');
   expected.y = 0 ; expected.x = 50 ; expected.width = 50 ;
-  same(result, expected, 'child');
+  ok(SC.rectsEqual(result, expected), 'child');
 
   result = aa.get('clippingFrame'); expected = aa.get('frame');
   expected.y = 0 ; expected.x = 30 ; expected.width = 10 ;
-  same(result, expected, 'nested child');
+  ok(SC.rectsEqual(result, expected), 'nested child');
 });
 
-test("cuts off right of frame", function() {
+test("clippingFrame clips off right of frame when moved right of parent's right.", function() {
   var result, expected;
 
   a.adjust('left', 150);
   result = a.get('clippingFrame'); expected = a.get('frame');
   expected.y = 0 ; expected.x = 0 ; expected.width = 50 ;
-  same(result, expected, 'child');
+  ok(SC.rectsEqual(result, expected), 'child');
 
   result = aa.get('clippingFrame'); expected = aa.get('frame');
   expected.y = 0 ; expected.x = 0 ; expected.width = 30 ;
-  same(result, expected, 'nested child');
+  ok(SC.rectsEqual(result, expected), 'nested child');
+});
+
+test("clippingFrame accounts for scale when not occluded.", function() {
+  var frame, clippingFrame, expectedFrame, expectedClippingFrame;
+
+  a.adjust('scale', 2);
+
+  frame = a.get('frame');
+  clippingFrame = a.get('clippingFrame');
+  expectedFrame = { x: 0, y: 0, height: 200, width: 200 };
+  expectedClippingFrame = { x: 0, y: 0, height: 100, width: 100 };
+
+  ok(SC.rectsEqual(frame, expectedFrame), "PRELIM: childView's frame is scaled to the parentView's scale.");
+
+  ok(SC.rectsEqual(clippingFrame, expectedClippingFrame), "childView's clippingFrame is scaled correctly into its own scale.");
+});
+
+test("clippingFrame correctly scales clipped portion when scaled and occluded.", function() {
+  var frame, clippingFrame, expectedFrame, expectedClippingFrame;
+
+  a.adjust({ scale: 2, top: -50 });
+
+  frame = a.get('frame');
+  clippingFrame = a.get('clippingFrame');
+  expectedFrame = { x: 0, y: -100, height: 200, width: 200 };
+  expectedClippingFrame = { x: 0, y: 50, height: 50, width: 100 };
+
+  ok(SC.rectsEqual(frame, expectedFrame), "PRELIM: childView's frame is scaled to the parentView's scale.");
+
+  ok(SC.rectsEqual(clippingFrame, expectedClippingFrame), "childView's clippingFrame is scaled correctly into its own scale and correctly reflects the occluded portion in that scale.");
 });
 
 test("notifies receiver and each child if parent clipping frame changes", function() {

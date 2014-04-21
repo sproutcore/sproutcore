@@ -75,7 +75,62 @@ SC.mixin( /** @scope SC */ {
     return ret ;
   },
 
-  /** Duplicates the passed rect.
+  /**
+    Returns a copy of the passed rect, scaled by the specified scale, centered on the specified origin.
+
+    @param {Rect} rect The rectangle to scale.
+    @param {Number|Array|Hash} scale The scale (or [scaleX, scaleY], or { x: scaleX, y: scaleY}) to apply. Defaults to 1.
+    @param {Number} originX The horizontal scale origin. Defaults to 0.5 (center).
+    @param {Number} originY The vertical scale origin. Defaults to 0.5 (center).
+    @returns {Rect} The scaled rect.
+  */
+  scaleRect: function(rect, scale, originX, originY) {
+    // Defaults
+    if (scale == null) scale = 1;
+    if (originX == null) originX = 0.5;
+    if (originY == null) originY = 0.5;
+
+    // Gatekeep: Identity scale.
+    if (scale === 1) return SC.cloneRect(rect);
+
+    // Unpack scale.
+    var scaleX, scaleY;
+    switch (SC.typeOf(scale)) {
+      case SC.T_ARRAY:
+        scaleX = scale[0];
+        scaleY = scale[1];
+        break;
+      case SC.T_HASH:
+        scaleX = scale.x;
+        scaleY = scale.y;
+        break;
+      default:
+        scaleX = scale;
+        scaleY = scale;
+        break;
+    }
+
+    var scaledHeight = rect.height * scaleY,
+      scaledWidth = rect.width * scaleX,
+      dHeight = scaledHeight - rect.height,
+      dWidth = scaledWidth - rect.width;
+    
+    // X and Y positions change depending on the origin of the scale. For example, if the
+    // width scales down ten pixels and the origin is 50%, x will move five pixesl (10 * 0.5)
+    // to the right.
+    var scaledX = rect.x - (dWidth * originX),
+      scaledY = rect.y - (dHeight * originY);
+
+    return {
+      height: scaledHeight,
+      width: scaledWidth,
+      x: scaledX,
+      y: scaledY
+    };
+  },
+
+  /**
+    Duplicates the passed rect.
 
     This is faster than Object.clone().
 
