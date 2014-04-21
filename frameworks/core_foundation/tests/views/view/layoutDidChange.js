@@ -193,27 +193,29 @@ test("is invoked on parentView if no layoutView whenever layout property changes
   view.destroy();
 });
 
-test("sets rotateX when rotate is set", function () {
+test("sets rotateZ when rotate is set", function () {
   var view = SC.View.create({});
 
   SC.run(function () {
     view.set('layout', { rotate: 45 });
   });
 
-  equals(view.get('layout').rotateX, 45, "should set rotateX");
+  equals(view.get('layout').rotateZ, 45, "should set rotateZ");
 
   // Clean up.
   view.destroy();
 });
 
-test("rotateX overrides rotate", function () {
+test("rotateZ overrides rotate", function () {
   var view = SC.View.create({});
 
   SC.run(function () {
-    view.set('layout', { rotate: 45, rotateX: 90 });
+    view.set('layout', { rotate: 45, rotateZ: 90 });
   });
 
   equals(view.get('layout').rotate, undefined, "should clear rotate for rotateX");
+
+  equals(view.get('layout').rotateZ, 90, "rotateZ value should hold firm in the face of a rotate value");
 
   // Clean up.
   view.destroy();
