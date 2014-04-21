@@ -3039,8 +3039,13 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   /* @private Internal property used to track the rate of touch scroll change events. */
   _lastTouchScrollTime: null,
 
-  /** @private SC.ScrollView */
-  touchScrollDidChange: function (left, top) {
+  /** @private
+    Called by SC.ScrollView when a touch scroll/scale is in flight. (Touch scrolling is done outside of
+    the run-loop to eke out maximum performance.)
+
+    TODO: This custom-calculated clipping frame doesn't take scale into account.
+  */
+  touchScrollDidChange: function (left, top, scale) {
     // Fast path!  Don't try to update too soon.
     if (Date.now() - this._lastTouchScrollTime < 30) { return; }
 

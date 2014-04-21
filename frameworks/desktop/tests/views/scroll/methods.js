@@ -15,12 +15,15 @@ module("SC.ScrollView", {
     SC.run(function () {
       pane = SC.MainPane.create({
         childViews: [
+          // ScrollView with 4000x4000 contentView. "view" below.
           SC.ScrollView.extend({
             contentView: SC.ImageView.design({ value: appleURL, layout: { height: 4000, width: 4000 }})
           }),
+          // ScrollView with 2000x2000 contentView. "view2" below.
           SC.ScrollView.extend({
             contentView: SC.ImageView.design({ value: appleURL, layout: { height: 2000, width: 2000 }})
           }),
+          // ScrollView (view3 below) with nested ScrollView (view4 below).
           SC.ScrollView.extend({
             layout: { height: 400, width: 400 },
             contentView: SC.View.design({
@@ -92,6 +95,9 @@ module("SC.ScrollView", {
 });
 
 
+// ------------------------------------
+// scrollTo, scrollBy
+//
 
 test("Scrolling to a certain co-ordinate of the container view", function () {
   equals(view.get('horizontalScrollOffset'), 0, "Initial horizontal offset must be zero");
@@ -133,6 +139,10 @@ test("Scrolling relative to the current possition of the container view", functi
   });
 });
 
+// ------------------------------------
+// scrollToRect, scrollDownLine
+//
+
 test("Scrolling to a rectangle", function () {
   equals(view.get('horizontalScrollOffset'), 0, "Initial horizontal offset must be zero");
   equals(view.get('verticalScrollOffset'), 0, "Initial vertical offset must be zero");
@@ -157,6 +167,10 @@ test("Scrolling through line by line", function () {
     view.scrollUpLine(line);
   });
 });
+
+// ------------------------------------
+// maximum[Horizontal|Vertical]ScrollOffset
+//
 
 test("maximumHorizontalScrollOffset() returns the maximum horizontal scroll dimension", function () {
   var old_horizontalScrollOffset = 2;
@@ -199,6 +213,9 @@ test("maximumVerticalScrollOffset() returns the maximum vertical scroll dimensio
 
 });
 
+// ------------------------------------
+// mouseWheel events
+//
 
 test("Mouse wheel events should only be captured if the scroll can scroll in the direction (both TOP-LEFT).", function () {
   // FIRST GROUP: everything scrolled all the way to the top left
@@ -428,4 +445,57 @@ test("Mouse wheel events capturable by the inner scroll should not bubble to the
     window.start();
   }, interval: 200 });
   SC.RunLoop.end();
+});
+
+// ------------------------------------
+// scale
+//
+
+test("Setting scale on ScrollView", function() {
+  // canScale: NO
+  SC.run(function() {
+    view.set('scale', 0.8);
+  });
+  equals(view.get('scale'), 1, "Setting scale on a ScrollView with canScale: NO doesn't change scale.");
+
+  // canScale: YES
+  SC.run(function() {
+    view.set('canScale', YES);
+    view.set('scale', 0.8);
+  });
+  equals(view.getPath('contentView.layout.scale'), 0.8, "Setting scale on ScrollView with canScale: YES adjusts scale on contentView");
+  equals(view.getPath('contentView.layout.transformOriginX'), 0, "Setting scale on ScrollView with canScale: YES adjusts contentOriginX on contentView");
+  equals(view.getPath('contentView.layout.transformOriginY'), 0, "Setting scale on ScrollView with canScale: YES adjusts contentOriginY on contentView");
+
+  // Exceeding min and max
+  SC.run(function() {
+    view.set('scale', -100);
+  });
+  equals(view.get('scale'), view.get('minimumScale'), "Scale is constrained by minimumScale");
+
+  // Exceeding min and max
+  SC.run(function() {
+    view.set('scale', 100);
+  });
+  equals(view.get('scale'), view.get('maximumScale'), "Scale is constrained by maximumScale");
+
+});
+
+test("Setting scale on ScrollView with SC.Scalable contentView", function() {
+  var contentView = view.get('contentView'),
+      didCall, withScale;
+
+  // Patch in SC.Scalable support.
+  contentView.isScalable = YES;
+  contentView.applyScale = function(scale) {
+    didCall = YES;
+    withScale = scale;
+  };
+
+  SC.run(function() {
+    view.set('canScale', YES);
+    view.set('scale', 0.8);
+  });
+  ok(didCall, "Setting scale on ScrollView with SC.Scalable contentView calls contentView.applyScale.");
+  equals(withScale, 0.8, "Setting scale on ScrollView with SC.Scalable contentView passes the correct scale to contentView.applyScale");
 });
