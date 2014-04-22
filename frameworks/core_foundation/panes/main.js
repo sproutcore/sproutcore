@@ -10,6 +10,7 @@ sc_require('panes/keyboard');
 sc_require('panes/layout');
 sc_require('panes/manipulation');
 sc_require('panes/visibility');
+sc_require('panes/pane_statechart');
 
 /** @class
 
