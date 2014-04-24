@@ -1404,33 +1404,37 @@ SC.CoreView.reopen(
     @test in createChildViews
   */
   createChildView: function (view, attrs) {
-    if (!view.isClass) {
-      attrs = view;
-    } else {
+    // Create the view if it is a class.
+    if (view.isClass) {
       // attrs should always exist...
       if (!attrs) { attrs = {}; }
+
       // clone the hash that was given so we do not pollute it if it's being reused
       else { attrs = SC.clone(attrs); }
-    }
 
-    attrs.owner = attrs.parentView = this;
-    if (!attrs.page) { attrs.page = this.page; }
+      // Assign the owner, parentView & page to ourself.
+      attrs.owner = attrs.parentView = this;
+      if (!attrs.page) { attrs.page = this.page; }
 
-    // Now add this to the attributes and create.
-    if (view.isClass) {
       // Track that we created this view.
       attrs.createdByParent = true;
 
       // Insert the autoMixins if defined
       var applyMixins = this.autoMixins;
-
       if (!!applyMixins) {
         applyMixins = SC.clone(applyMixins);
         applyMixins.push(attrs);
         view = view.create.apply(view, applyMixins);
-      }
-      else
+      } else {
         view = view.create(attrs);
+      }
+    // Assign the parentView & owner if the view is an instance.
+    // TODO: This should not be accepting view instances, for the purpose of lazy code elsewhere in the framework.
+    //       We should ensure users of `createChildViews` are using appendChild and other manipulation methods.
+    } else {
+      view.set('parentView', this);
+      view.set('owner', this);
+      if (!view.get('page')) { view.set('page', this.page); }
     }
 
     return view;
