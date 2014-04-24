@@ -1,4 +1,4 @@
 BT.addFramework(BT.Framework.extend({
   ref: "sproutcore:experimental:select_view",
-  path: __dirname
+  path: dirname()
 }));

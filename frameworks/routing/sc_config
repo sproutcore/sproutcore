@@ -1,5 +1,5 @@
 BT.addFramework(BT.Framework.extend({
   ref: "sproutcore:routing",
-  path: __dirname,
+  path: dirname(),
   dependencies: ["sproutcore:core_foundation"]
 }));

@@ -1,5 +1,5 @@
 BT.addFramework(BT.Framework.extend({
   ref: "sproutcore:experimental:forms",
-  path: __dirname,
+  path: dirname(),
   dependencies: ["sproutcore:desktop"]
 }));

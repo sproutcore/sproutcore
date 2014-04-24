@@ -1,5 +1,5 @@
 BT.addFramework(BT.Framework.extend({
   ref: "sproutcore:core_foundation",
-  path: __dirname,
+  path: dirname(),
   dependencies: ["sproutcore:runtime","sproutcore:yuireset"]
 }));

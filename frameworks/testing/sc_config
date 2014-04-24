@@ -1,5 +1,5 @@
 BT.addFramework(BT.Framework.extend({
   ref: "sproutcore:testing",
-  path: __dirname,
+  path: dirname(),
   dependencies: ["sproutcore:jquery"]
 }));
