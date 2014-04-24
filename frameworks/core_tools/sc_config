@@ -1,6 +1,6 @@
 BT.addFramework(BT.Framework.extend({
   ref: "sproutcore:core_tools",
-  path: __dirname,
+  path: dirname(),
   dependencies: [
     "sproutcore:desktop",
     "sproutcore:datastore",

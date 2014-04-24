@@ -1,5 +1,5 @@
 BT.addFramework(BT.Framework.extend({
   ref: "sproutcore:ajax",
-  path: __dirname,
+  path: dirname(),
   dependencies: ["sproutcore:runtime","sproutcore:core_foundation"]
 }));

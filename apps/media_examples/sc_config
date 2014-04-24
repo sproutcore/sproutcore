@@ -1,5 +1,5 @@
 BT.addApp(BT.AppBuilder.create({
   name: "media_examples",
-  path: __dirname,
+  path: dirname(),
   frameworks: ["sproutcore","sproutcore:experimental:media"]
 }));
