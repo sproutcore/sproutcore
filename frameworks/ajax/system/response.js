@@ -637,6 +637,8 @@ SC.XHRResponse = SC.Response.extend(
         status = -1;
         try {
           status = rawRequest.status || 0;
+          // IE mangles 204 to 1223. See http://bugs.jquery.com/ticket/1450 and many others
+          status = status === 1223 ? 204 : status;
         } catch (e) {}
 
         // if there was an error - setup error and save it
