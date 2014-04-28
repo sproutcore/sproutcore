@@ -431,22 +431,15 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     }
   },
 
-  // This is used by _scac_arrayContent[Will|Did]Change below. If orderBy is set, we can't be sure how any
-  // content change will translate into an arrangedObjects change without recalculating the order (a complex,
-  // potentially expensive operation), so we simply invalidate everything. (It may be worth investigating making
-  // this change in the future.)
-  _scac_arrayContentChangeArgumentsWithOrderBy: function(start, removed, added) {
-    var len = this.get('length');
-    return { start: 0, removed: len, added: len + added - removed };
-  },
-
   _scac_arrayContentWillChange: function (start, removed, added) {
-    // Repoint arguments if orderBy is present.
+    // Repoint arguments if orderBy is present. (If orderBy is present, we can't be sure how any content change
+    // translates into an arrangedObject change without calculating the order, which is a complex, potentially
+    // expensive operation, so we simply invalidate everything.)
     if (this.get('orderBy')) {
-      var args = this._scac_arrayContentChangeArgumentsWithOrderBy(start, removed, added);
-      start = args.start;
-      removed = args.removed;
-      added = args.added;
+      var len = this.get('length');
+      start = 0;
+      added = len + added - removed;
+      removed = len;
     }
 
     // Continue.
@@ -460,12 +453,14 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   _scac_arrayContentDidChange: function (start, removed, added) {
     this._scac_cached = NO;
 
-    // Repoint arguments if orderBy is present.
+    // Repoint arguments if orderBy is present. (If orderBy is present, we can't be sure how any content change
+    // translates into an arrangedObject change without calculating the order, which is a complex, potentially
+    // expensive operation, so we simply invalidate everything.)
     if (this.get('orderBy')) {
-      var args = this._scac_arrayContentChangeArgumentsWithOrderBy(start, removed, added);
-      start = args.start;
-      removed = args.removed;
-      added = args.added;
+      var len = this.get('length');
+      start = 0;
+      added = len + added - removed;
+      removed = len;
     }
 
     // Notify range and '[]' observers.
