@@ -431,7 +431,25 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     }
   },
 
+  // This is used by _scac_arrayContent[Will|Did]Change below. If orderBy is set, we can't be sure how any
+  // content change will translate into an arrangedObjects change without recalculating the order (a complex,
+  // potentially expensive operation), so we simply invalidate everything. (It may be worth investigating making
+  // this change in the future.)
+  _scac_arrayContentChangeArgumentsWithOrderBy: function(start, removed, added) {
+    var len = this.get('length');
+    return { start: 0, removed: len, added: len + added - removed };
+  },
+
   _scac_arrayContentWillChange: function (start, removed, added) {
+    // Repoint arguments if orderBy is present.
+    if (this.get('orderBy')) {
+      var args = this._scac_arrayContentChangeArgumentsWithOrderBy(start, removed, added);
+      start = args.start;
+      removed = args.removed;
+      added = args.added;
+    }
+
+    // Continue.
     this.arrayContentWillChange(start, removed, added);
     if (this._kvo_enumerable_property_chains) {
       var removedObjects = this.slice(start, start + removed);
@@ -442,17 +460,12 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   _scac_arrayContentDidChange: function (start, removed, added) {
     this._scac_cached = NO;
 
-    // If the controller is sorted (via an orderBy) and new items are added, we need
-    // to be sure to notify range observers based on the sorted order, not the raw
-    // order. (This simply notifies a change for sorted arrays' full ranges; it *may* be
-    // worth it to calculate the actual change in sorted order and only notify the
-    // affected range, but this calculation may be expensive.)
-    // Note that removing items (added === 0) will not affect the order of the remaining
-    // elements.
-    if ((added > 0) && this.get('orderBy')) {
-      start = 0;
-      removed = 0;
-      added = this.get('length');
+    // Repoint arguments if orderBy is present.
+    if (this.get('orderBy')) {
+      var args = this._scac_arrayContentChangeArgumentsWithOrderBy(start, removed, added);
+      start = args.start;
+      removed = args.removed;
+      added = args.added;
     }
 
     // Notify range and '[]' observers.
