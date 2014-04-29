@@ -37,15 +37,12 @@ SC.BaseTheme.sliderRenderDelegate = SC.RenderDelegate.create({
 
     context = context.begin('span').addClass('track');
     this.includeSlices(dataSource, context, SC.THREE_SLICE);
-    context.push(
-      '<img src="' + blankImage +
-      '" class="sc-handle" style="left: '+ dataSource.get('value') + '%" />'+
-      '</span>'
-    );
-
+    context.begin('img')
+      .setAttr('src', blankImage)
+      .addClass('sc-handle')
+      .setStyle('left', '%@%'.fmt(dataSource.get('value')))
+      .end()
     context = context.end();
-
-
 
     dataSource.get('renderState')._cachedHandle = null;
   },
