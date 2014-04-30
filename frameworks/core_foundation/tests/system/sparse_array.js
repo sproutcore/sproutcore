@@ -307,9 +307,9 @@ test("test updating SparseArray length via delegate", function() {
 
     var arr = SC.SparseArray.create({delegate: delegate});
     delegate.arrlen = 5;
-    equals(arr.get('length'), 5)
-    arr.provideLength(null);
+    equals(arr.get('length'), 5);
     delegate.arrlen = 50;
+    arr.provideLength(null);
     equals(arr.get('length'), 50)
 });
 
