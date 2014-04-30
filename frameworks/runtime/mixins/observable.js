@@ -1314,21 +1314,53 @@ SC.Observable = /** @scope SC.Observable.prototype */{
   },
 
   /**
-    didChangeFor allows you to determine if a property has changed since the
-    last time the method was called. You must pass a unique context as the
-    first parameter (so didChangeFor can identify which method is calling it),
-    followed by a list of keys that should be checked for changes.
+    didChangeFor is a very important method which allows you to tell whether
+    a property or properties have changed.
 
-    For example, in your render method you might pass the following context:
-    if (this.didChangeFor('render','height','width')) {
-       // Only render if changed
-    }
+    The key to using didChangeFor is to pass a unique string as the first argument,
+    which signals, "Has anything changed since the last time this was called with
+    this unique key?" The string can be anything you want, as long as it's unique
+    and stays the same from call to call.
 
-    In your view's update method, you might instead pass 'update':
+    After the key argument, you can pass as many property arguments as you like;
+    didChangeFor will only return `true` if any of those properties have changed
+    since the last call.
 
-    if (this.didChangeFor('update', 'height', 'width')) {
-      // Only update height and width properties
-    }
+    For example, in your view's update method, you might want to gate DOM changes
+    (generally a slow operation) on whether the root values have changed. You might
+    ask the following:
+
+        if (this.didChangeFor('updateOnDisplayValue', 'displayValue')) {
+          // Update the DOM.
+        }
+
+    In another method on the same view, you might send an event if that same value
+    has changed:
+
+        if (this.didChangeFor('otherMethodDisplayValue', 'displayValue')) {
+          // Send a statechart action.
+        }
+
+    Each call will correctly return whether the property has changed since the last
+    time displayDidChange was called *with that key*. The following sequence of calls
+    will return the following values:
+
+      - this.set('displayValue', 'value1');
+      - this.didChangeFor('updateOnDisplayValue', 'displayValue');
+      > true;
+      - this.didChangeFor('updateOnDisplayValue', 'displayValue');
+      > false;
+      - this.didChangeFor('otherMethodDisplayValue', 'displayValue');
+      > true;
+      - this.set('displayValue', 'value2');
+      - this.didChangeFor('updateOnDisplayValue', 'displayValue');
+      > true;
+      - this.didChangeFor('updateOnDisplayValue', 'displayValue');
+      > false;
+      - this.didChangeFor('updateOnDisplayValue', 'displayValue');
+      > false;
+      - this.didChangeFor('otherMethodDisplayValue', 'displayValue');
+      > false;
 
     This method works by comparing property revision counts. Every time a
     property changes, an internal counter is incremented. When didChangeFor is
