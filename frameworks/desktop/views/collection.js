@@ -3147,13 +3147,12 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   init: function () {
     sc_super();
 
+    //@if (debug)
     if (this.useFastPath) {
-      //@if (debug)
       // Deprecation warning for those that were using SC.CollectionFastPath.
       SC.warn("Developer Warning: SC.CollectionView `useFastPath` has been deprecated.  The performance improvements have been integrated directly into SC.CollectionView as the default behavior.  Please disable the useFastPath property and refer to the SC.CollectionView documentation for more information.");
-      //@endif
-      this.mixin(SC.CollectionFastPath);
     }
+    //@endif
 
     //@if (debug)
     if (this.willReload || this.didReload) {
