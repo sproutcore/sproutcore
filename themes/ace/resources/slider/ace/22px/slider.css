@@ -11,6 +11,11 @@
       @include slices("track.png", $left: 3, $right: 3);
     }
 
+    .sc-slider-step-mark {
+      height: 5px;
+      margin-top: -3px;
+    }
+
     .sc-handle {
       display: block; position: absolute;
       width: 22px; height: 24px; top: 50%; margin-top: -11px;

@@ -1,6 +1,18 @@
 $theme.slider {
   &.disabled { opacity: .5; }
 
+  /* TODO: These could use some slightly Ace-ier styles. */
+  .sc-slider-step-mark {
+    position: absolute;
+    width: 1px;
+    background-color: #CACACA;
+    border-right: 1px solid #DDD;
+    top: 50%;
+    &.sc-slider-step-mark-first, &.sc-slider-step-mark-last {
+      display: none;
+    }
+  }
+
   .sc-handle {
     -webkit-transform: translate3d(0,0,0);
     background: transparent;
