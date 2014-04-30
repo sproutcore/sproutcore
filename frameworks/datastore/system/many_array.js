@@ -286,13 +286,13 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
         id = rec.get('id');
 
       if (SC.none(id)) {
+        // If the record inserted doesn't have an id yet, use a unique placeholder based on the storeKey.
         if (supportNewRecords) {
           ids[i] = '_sc_id_placeholder_' + rec.get('storeKey');
         } else {
           throw new Error("Developer Error: Attempted to add a record without a primary key to a to-many relationship (%@). The record must have a real id or be given a temporary id before it can be used. ".fmt(pname));
         }
       } else {
-        // If the record inserted doesn't have an id yet, use a unique placeholder based on the storeKey.
         ids[i] = id;
       }
     }
