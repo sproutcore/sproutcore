@@ -85,12 +85,21 @@ SC.SliderView = SC.View.extend(SC.Control,
   */
   step: 0.1,
 
+  /*
+    When set to true, this draws and positions an element for each step, giving
+    your theme the opportunity to show a mark at each step.
+
+    @type {Boolean}
+    @default {false}
+  */
+  markSteps: false,
+
   // ..........................................................
   // INTERNAL
   //
 
   /* @private */
-  displayProperties: ['displayValue', 'ariaValue', 'minimum', 'maximum', 'step', 'frame'],
+  displayProperties: ['displayValue', 'ariaValue', 'minimum', 'maximum', 'step', 'markSteps'],
 
   /** @private
    @property
@@ -106,11 +115,20 @@ SC.SliderView = SC.View.extend(SC.Control,
   */
   renderDelegateName: 'sliderRenderDelegate',
 
-  /* @private */
+  /*
+    The value, converted to a percent between maximum and minimum.
+
+    @property
+    @readonly
+  */
   displayValue: function() {
+    return this._displayValueForValue(this.get('value'));
+  }.property('value', 'minimum', 'maximum', 'step').cacheable(),
+
+  // Given a particular value, returns the percentage value.
+  _displayValueForValue: function(value) {
     var min = this.get('minimum'),
         max = this.get('maximum'),
-        value = this.get('value'),
         step = this.get('step');
 
     // determine the constrained value.  Must fit within min & max
@@ -122,10 +140,10 @@ SC.SliderView = SC.View.extend(SC.Control,
     }
 
     // determine the percent across
-    if(value!==0) value = Math.floor((value - min) / (max - min) * 100);
+    if (value !== 0) value = Math.floor((value - min) / (max - min) * 100);
 
     return value;
-  }.property('value', 'minimum', 'maximum', 'step').cacheable(),
+  },
 
   _isMouseDown: NO,
 

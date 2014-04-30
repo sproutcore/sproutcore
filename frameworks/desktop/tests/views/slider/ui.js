@@ -70,6 +70,14 @@ var pane = SC.ControlTestPane.design()
     value: 50,
     minimum: 0,
     maximum: 100
+  })
+  .add("slider markSteps", SC.SliderView, {
+    layout: { top:0, bottom:0, left:0, width: 250 },
+    value: 20,
+    minimum: 0,
+    maximum: 100,
+    step: 20,
+    markSteps: true
   });
 
 // ..........................................................
@@ -138,4 +146,23 @@ test("Check if attribute aria-orientation is set correctly", function() {
   var viewElem = pane.view('slider aria-orientation').$();
   equals(viewElem.attr('aria-orientation'), "horizontal", 'aria-orientation should be horizontal');
 });
+
+// markSteps
+
+test("Turning markSteps on creates the correct number of marks.", function() {
+  var view = pane.view('slider markSteps'),
+      marks, expectedCount;
+
+  // Initial.
+  marks = view.$().find('.sc-slider-step-mark');
+  expectedCount = Math.floor((view.get('maximum') - view.get('minimum')) / view.get('step')) + 1; // yeah yeah math.floor + 1 is math.ciel
+  equals(marks.length, expectedCount, "A view with markSteps set to true contains the correct number of marks");
+
+  // Change.
+  SC.run(function() { view.set('maximum', 200); });
+  marks = view.$().find('.sc-slider-step-mark');
+  expectedCount = Math.floor((view.get('maximum') - view.get('minimum')) / view.get('step')) + 1; // yeah yeah math.floor + 1 is math.ciel
+  equals(marks.length, expectedCount, "Changing maximum correctly updates the number of marks");
+});
+
 })();
