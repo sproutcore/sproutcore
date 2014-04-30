@@ -70,6 +70,12 @@
     position: absolute;
   }
 
+  &.fade-out {
+    // When the overlay scroller isn't visible, pass events through. This isn't
+    // supported in IE < 11 (http://caniuse.com/#feat=pointer-events).
+    pointer-events: none;
+  }
+
   &.sc-vertical {
 
     /* Thumb */
