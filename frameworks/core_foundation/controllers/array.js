@@ -555,7 +555,6 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     this._scac_contentStatusDidChange();
 
     this.arrayContentDidChange(0, 0, newlen);
-    this.enumerableContentDidChange(0, newlen - 1);
     this.updateSelectionAfterContentChange();
   }.observes('content'),
 
@@ -572,15 +571,12 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
         oldlen  = this._scac_length;
 
     this._scac_length = newlen;
-    this.beginPropertyChanges();
     this._scac_cached = NO; // invalidate
     // If this is an unordered enumerable, we have no way
     // of knowing which indices changed. Instead, we just
     // invalidate the whole array.
     this.arrayContentWillChange(0, oldlen, newlen);
     this.arrayContentDidChange(0, oldlen, newlen);
-    this.enumerableContentDidChange(0, oldlen - 1);
-    this.endPropertyChanges();
     this.updateSelectionAfterContentChange();
   }.observes('orderBy'),
 

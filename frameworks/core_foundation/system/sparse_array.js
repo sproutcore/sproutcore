@@ -371,13 +371,7 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
       this.propertyDidChange('length');
     }
 
-    // Both arrayContentDidChange and enumerableContentDidChange will invoke
-    // "this.notifyPropertyChange('[]')". To prevent multiple notifications
-    // these calls are made as grouped property changes.
-    this.beginPropertyChanges();
-    this.arrayContentDidChange(idx, amt, len) ;
-    this.enumerableContentDidChange(idx, amt, delta) ;
-    this.endPropertyChanges();
+    this.arrayContentDidChange(idx, amt, len);
 
     return this ;
   },
