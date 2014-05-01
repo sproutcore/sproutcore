@@ -44,6 +44,7 @@ config :media,           :required => [:desktop]
 config :statechart,      :required => [:core_foundation], :test_required => [:core_foundation, :desktop, :routing]
 config :ajax,            :required => [:core_foundation]
 config :designer,        :required => [:desktop, :template_view]
+config :task,            :required => [:core_foundation]
 
 config :"experimental/select_view", :test_required => [:desktop]
 config :"experimental/split_view", :test_required => [:desktop]
