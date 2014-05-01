@@ -463,16 +463,8 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
       removed = len;
     }
 
-    // Notify range and '[]' observers.
+    // Notify range, firstObject, lastObject and '[]' observers.
     this.arrayContentDidChange(start, removed, added);
-
-    // If the start & length are provided, we can also indicate if the firstObject
-    // or lastObject properties changed, thus making them independently observable.
-    if (!SC.none(start)) {
-      if (start === 0) this.notifyPropertyChange('firstObject');
-      var length = added + removed;
-      if (!SC.none(length) && start + length >= this.get('length') - 1) this.notifyPropertyChange('lastObject');
-    }
 
     if (this._kvo_enumerable_property_chains) {
       var addedObjects = this.slice(start, start + added);
