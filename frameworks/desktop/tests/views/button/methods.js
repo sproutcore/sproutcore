@@ -14,29 +14,31 @@ module("SC.ButtonView#actions", {
 test("Emulate mouse click to verify if the button activates", function() {
   b.triggerActionAfterDelay();
   equals(b.get('isActive'), YES, "the should be active for 200ms");
-  
+
 });
 
 
 test("Test different moused states", function() {
   b.set('isEnabled', YES);
-  b.mouseDown();
+
+  var evt = SC.Event.simulateEvent(b.get('layer'), 'mousedown', { which: 1 });
+  b.mouseDown(evt);
   equals(b.get('isActive'), YES, "the button should be active after a mouseDown event");
   b.mouseExited();
   equals(b.get('isActive'), NO, "the button should be active after a mouseDown event");
   b.mouseEntered();
-  equals(b.get('isActive'), b._isMouseDown, "the button should be active after a mouseDown event");  
+  equals(b.get('isActive'), b._isMouseDown, "the button should be active after a mouseDown event");
 //  b.mouseUp();
 //  equals(b.get('isActive'), NO, "the button should be inactive after a mouseUP event");
 
   b.set('buttonBehavior', SC.TOGGLE_BEHAVIOR);
   b._action();
   equals(b.get('value'), b.get('toggleOnValue'), "the value should be the same as the toggle value");
- 
+
   b.set('buttonBehavior', SC.TOGGLE_ON_BEHAVIOR);
   b._action();
   equals(b.get('value'), b.get('toggleOnValue'), "the value should be the same as the toggle value");
-  
+
   b.set('buttonBehavior', SC.TOGGLE_OFF_BEHAVIOR);
   b._action();
   equals(b.get('value'), b.get('toggleOffValue'), "the value should be the same as the toggle value");
@@ -44,7 +46,7 @@ test("Test different moused states", function() {
 
 test("Actions should be sent up the responder chain", function() {
   var timeout = NO;
-  
+
   // create a pane to test with. It has a child view, and under that, a button.
   // the button sends an action up to its parent. We hope. :)
   var pane = SC.Pane.create({
@@ -55,7 +57,7 @@ test("Actions should be sent up the responder chain", function() {
         setTimeout(function() {
           clearTimeout(timeout);
           start();
-          
+
           pane.remove();
           ok(YES, "method on parent should have been called");
         }, 1);
@@ -65,23 +67,23 @@ test("Actions should be sent up the responder chain", function() {
         action: "methodOnParent"
       })
     }),
-    
+
     rootResponder: SC.RootResponder.responder
   });
-  
+
   // the pane has to be in DOM for this to work, apparently.
   pane.append();
-  
+
   // use async API
   stop();
-  
+
   timeout = setTimeout(function() {
     start();
     ok(false, "Timeout.");
     pane.remove();
   }, 1000);
-  
-  pane.v.b._action();  
+
+  pane.v.b._action();
 
 });
 
@@ -140,7 +142,8 @@ test("Test action repeats while active", function(){
 });
 
 test("Test action happens on mouseDown", function(){
-  b.mouseDown();
+  var evt = SC.Event.simulateEvent(b.get('layer'), 'mousedown', { which: 1 });
+  b.mouseDown(evt);
   equals(counter.get('value'), 1, "should have run once");
   b.set('isActive', NO); // Stops triggering
 });

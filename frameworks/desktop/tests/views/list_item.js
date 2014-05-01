@@ -211,7 +211,7 @@ var pane = SC.ControlTestPane.design({ height: 32 })
     contentValueKey: "title",
     contentUnreadCountKey:  "count",
     outlineLevel: 2
-  })) 
+  }))
 
   .add("right icon", SC.ListItemView.design(SC.ActionSupport,{
     content: SC.Object.create({
@@ -523,7 +523,7 @@ test("right icon action dom", function() {
   // basic does not have right icon and action
   var view = pane.view('basic');
   rightIcon(view, false);
-  
+
   // has right icon and action
   view = pane.view('right icon');
   rightIcon(view, true);
@@ -543,7 +543,7 @@ test("right icon action event", function() {
   var expectedAction = view.get("rightIconAction");
   var expectedTarget = view.get("rightIconTarget");
   var target = view.$('.right-icon').get(0);
-  var evt = { target: target };
+  var evt = { target: target, which: 1 };
   view.mouseDown(evt);
   view.mouseUp(evt);
 
