@@ -48,6 +48,15 @@
 SC.LinkView = SC.View.extend({
 
   /**
+    The WAI-ARIA role for link views.
+
+    @type String
+    @default 'link'
+    @readOnly
+  */
+  ariaRole: 'link',
+
+  /**
     The content of the anchor, such as text or an image.
 
     Note that this will be escaped by default, so any HTML tags will appear
@@ -147,8 +156,9 @@ SC.LinkView = SC.View.extend({
     Note: There are no restrictions on allowed values, but authors are cautioned
     that most file systems have limitations with regard to what punctuation is
     supported in file names, and user agents are likely to adjust file names
-    accordingly.
+    accordingly. Also, support for this attribute varies widely between browsers.
 
+    @see http://caniuse.com/#feat=download
     @see http://www.whatwg.org/specs/web-apps/current-work/multipage/links.html#attr-hyperlink-download
    */
   fileName: null,

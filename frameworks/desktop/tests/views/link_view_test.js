@@ -40,15 +40,14 @@ test("The view renders as expected: Default values", function () {
   // rel: null
   // target: '_blank'
   // type: null
-  // Use SC.empty because different environments return different values ("" vs. undefined)
-  ok(SC.empty(layer.innerText), "The innerText of the layer is empty");
-  ok(SC.empty(layer.download), "The download attribute of the layer is empty");
+  equals(layer.innerText, "", "The innerText of the layer is");
+  if (SC.platform.a.download) { equals(layer.download, "", "The download attribute of the layer is"); }
   equals(layer.href, document.URL + "#", "The href attribute of the layer is");
   equals(layer.hreflang, SC.Locale.currentLocale.language, "The hreflang attribute of the layer is");
-  ok(SC.empty(layer.ping), "The ping attribute of the layer is empty");
-  ok(SC.empty(layer.rel), "The rel attribute of the layer is empty");
+  equals(layer.ping, "", "The ping attribute of the layer is");
+  equals(layer.rel, "", "The rel attribute of the layer is");
   equals(layer.target, "_blank", "The target attribute of the layer is");
-  ok(SC.empty(layer.type), "The type attribute of the layer is empty.");
+  equals(layer.type, "", "The type attribute of the layer is");
 });
 
 test("The view renders as expected: Custom values", function () {
@@ -67,10 +66,10 @@ test("The view renders as expected: Custom values", function () {
   var layer = linkView.get('layer');
 
   equals(layer.innerText, "<div>ABC</div>", "The innerText of the layer is");
-  equals(layer.download, "ABC.txt", "The download attribute of the layer is");
+  if (SC.platform.a.download) { equals(layer.download, "ABC.txt", "The download attribute of the layer is"); }
   equals(layer.href, "http://bogus-site.com/files/abc.txt", "The href attribute of the layer is");
   equals(layer.hreflang, 'fr', "The hreflang attribute of the layer is");
-  equals(layer.ping, "http://logback.com/?clicked=file", "The ping attribute of the layer is");
+  if (SC.platform.a.ping) { equals(layer.ping, "http://logback.com/?clicked=file", "The ping attribute of the layer is"); }
   equals(layer.rel, "author", "The rel attribute of the layer is");
   equals(layer.target, "_self", "The target attribute of the layer is");
   equals(layer.type, "text/plain", "The type attribute of the layer is");
@@ -105,10 +104,10 @@ test("The view updates as expected: Custom values", function () {
   var layer = linkView.get('layer');
 
   equals(layer.innerText, "<div>ABC</div>", "The innerText of the layer is");
-  equals(layer.download, "ABC.txt", "The download attribute of the layer is");
+  if (SC.platform.a.download) { equals(layer.download, "ABC.txt", "The download attribute of the layer is"); }
   equals(layer.href, "http://bogus-site.com/files/abc.txt", "The href attribute of the layer is");
   equals(layer.hreflang, 'fr', "The hreflang attribute of the layer is");
-  equals(layer.ping, "http://logback.com/?clicked=file", "The ping attribute of the layer is");
+  if (SC.platform.a.ping) { equals(layer.ping, "http://logback.com/?clicked=file", "The ping attribute of the layer is"); }
   equals(layer.rel, "author", "The rel attribute of the layer is");
   equals(layer.target, "_self", "The target attribute of the layer is");
   equals(layer.type, "text/plain", "The type attribute of the layer is");
@@ -125,12 +124,12 @@ test("The view updates as expected: Custom values", function () {
   });
 
   equals(layer.innerText, "<div>DEF</div>", "The innerText of the layer is now");
-  equals(layer.download, "DEF.js", "The download attribute of the layer is now");
+  if (SC.platform.a.download) { equals(layer.download, "DEF.js", "The download attribute of the layer is now"); }
   equals(layer.href, "http://bogus-site.com/files/def.js", "The href attribute of the layer is now");
   equals(layer.hreflang, 'es', "The hreflang attribute of the layer is now");
 
   // Some properties don't result in re-rendering and aren't updated for performance reasons.
-  equals(layer.ping, "http://logback.com/?clicked=file", "The ping attribute of the layer is still");
+  if (SC.platform.a.ping) { equals(layer.ping, "http://logback.com/?clicked=file", "The ping attribute of the layer is still"); }
   equals(layer.rel, "author", "The rel attribute of the layer is still");
   equals(layer.target, "_self", "The target attribute of the layer is still");
   equals(layer.type, "text/plain", "The type attribute of the layer is still");
