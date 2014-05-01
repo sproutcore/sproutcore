@@ -340,6 +340,19 @@
     equals(hint.css('line-height'), "14px", "The line-height of the hint of a non-empty text field should be");
   });
 
+  test("Changing maxLength", function () {
+    var view = pane.view('with value'),
+        input = view.$input();
+
+    equals(input.attr('maxLength'), 5096, 'Max length should begin at')
+
+    SC.run(function () {
+      view.set('maxLength', 1234);
+    });
+
+    equals(input.attr('maxLength'), 1234, 'Max length should now be');
+  });
+
 
   if (!SC.browser.isIE && !SC.platform.input.placeholder) {
     test("Changing value to null -- password field", function () {
