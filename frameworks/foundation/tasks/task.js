@@ -31,4 +31,5 @@ SC.Task = SC.Object.extend({
     // version and still have everything work the same.
     this.startTask(queue);
   }
+
 });
