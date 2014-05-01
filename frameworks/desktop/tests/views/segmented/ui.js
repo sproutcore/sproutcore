@@ -500,7 +500,7 @@ var pane;
     layer1 = view1.get('layer');
     point = SC.offset(layer1);
 
-    ev = SC.Event.simulateEvent(layer1, 'mousedown', { clientX: point.x, clientY: point.y });
+    ev = SC.Event.simulateEvent(layer1, 'mousedown', { clientX: point.x, clientY: point.y, which: 1 });
     SC.Event.trigger(layer1, 'mousedown', [ev]);
 
     ok(view1.$().hasClass('active'), 'The first segment should have an active class on mousedown');
@@ -543,12 +543,12 @@ var pane;
     point = SC.offset(layer1);
 
     SC.RunLoop.begin();
-    ev = SC.Event.simulateEvent(layer1, 'mousedown', { clientX: point.x, clientY: point.y });
+    ev = SC.Event.simulateEvent(layer1, 'mousedown', { clientX: point.x, clientY: point.y, which: 1 });
     ok(segmentedView.mouseDown(ev), "mouseDown event handler accepts event which maps to a segment.");
     SC.RunLoop.end();
 
     SC.RunLoop.begin();
-    ev = SC.Event.simulateEvent(layer1, 'mousedown', { clientX: point.x - 1, clientY: point.y });
+    ev = SC.Event.simulateEvent(layer1, 'mousedown', { clientX: point.x - 1, clientY: point.y, which: 1 });
     ok(!segmentedView.mouseDown(ev), "mouseDown event handler passes on event which doesn't map to a segment.");
     SC.RunLoop.end();
   });

@@ -35,7 +35,7 @@
       SC.RunLoop.end();
 
       view = pane.childViews[0];
-    }, 
+    },
 
     teardown: function() {
       pane.remove();
@@ -89,7 +89,7 @@
     ok(view.get('isSelected'), 'isSelected should match value');
     ok(view.$().hasClass('sel'), 'should have sel class');
 
-    // update value -- make sure isSelected changes.  
+    // update value -- make sure isSelected changes.
     SC.RunLoop.begin();
     view.set('value', 0); // make falsy. (but not NO exactly)
     SC.RunLoop.end();
@@ -109,11 +109,13 @@
   });
 
   test("mouseDown and then mouseUp anywhere in the checkbox should toggle the selection", function() {
-    var elem = view.get('layer');
+    var elem = view.get('layer'),
+      evt;
 
     ok(!triggered, 'precond - action should not have been triggered yet');
 
-    SC.Event.trigger(elem, 'mousedown');
+    evt = SC.Event.simulateEvent(elem, 'mousedown', { which: 1 });
+    SC.Event.trigger(elem, 'mousedown', [evt]);
     ok(view.get('isActive'), 'view should be active');
     ok(view.get('value'), 'value should not change yet');
     equals(view.$().attr('aria-checked'), 'true', 'aria-checked should be true');
@@ -136,9 +138,10 @@
     SC.RunLoop.end();
 
     ok(view.get('value'), 'precond - value should be true');
-    view.mouseDown();
+    var evt = SC.Event.simulateEvent(view.get('layer'), 'mousedown', { which: 1 });
+    view.mouseDown(evt);
     view.mouseUp();
     ok(view.get('value'), 'value should not change when clicked');
   });
-  
+
 })();

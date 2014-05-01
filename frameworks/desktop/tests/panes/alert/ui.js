@@ -344,7 +344,8 @@ test("AlertPane.info with individual actions and targets for three buttons", fun
 
   function clickButton(button) {
     var elem = button.$();
-    SC.Event.trigger(elem, 'mousedown');
+    var evt = SC.Event.simulateEvent(elem, 'mousedown', { which: 1 });
+    SC.Event.trigger(elem, 'mousedown', [evt]);
     SC.Event.trigger(elem, 'mouseup');
   }
 
