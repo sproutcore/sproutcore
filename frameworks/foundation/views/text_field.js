@@ -511,7 +511,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   // SC.Control. It is not a display property directly in SC.Control, because the use of it in
   // SC.Control is only applied to input fields, which very few consumers of SC.Control have.
   // TODO: Pull the disabled attribute updating out of SC.Control.
-  displayProperties: ['isBrowserFocusable', 'formattedHint', 'fieldValue', 'isEditing', 'isEditable', 'isEnabledInPane', 'leftAccessoryView', 'rightAccessoryView', 'isTextArea'],
+  displayProperties: ['isBrowserFocusable', 'formattedHint', 'fieldValue', 'isEditing', 'isEditable', 'isEnabledInPane',
+                      'leftAccessoryView', 'rightAccessoryView', 'isTextArea', 'maxLength'],
 
   createChildViews: function () {
     sc_super();
@@ -737,6 +738,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       } else {
         input.attr('placeholder', hint);
       }
+
+      input.attr('maxLength', maxLength);
 
       // IE8 has problems aligning the input text in the center
       // This is a workaround for centering it.
