@@ -65,8 +65,8 @@
     // test
     layoutKeys.forEach(function (key) {
       var testKey;
-      if (key === 'transform') testKey = SC.browser.domPrefix + 'Transform';
-      else if (key === 'transformOrigin') testKey = SC.browser.domPrefix + 'TransformOrigin';
+      if (key === 'transform') testKey = SC.browser.experimentalStyleNameFor('transform');
+      else if (key === 'transformOrigin') testKey = SC.browser.experimentalStyleNameFor('transformOrigin');
       else testKey = key;
       equals(layoutStyle[testKey], no_s[key], "STYLE NO PARENT %@".fmt(key));
     });
@@ -93,8 +93,8 @@
     // test again
     layoutKeys.forEach(function (key) {
       var testKey;
-      if (key === 'transform') testKey = SC.browser.domPrefix + 'Transform';
-      else if (key === 'transformOrigin') testKey = SC.browser.domPrefix + 'TransformOrigin';
+      if (key === 'transform') testKey = SC.browser.experimentalStyleNameFor('transform');
+      else if (key === 'transformOrigin') testKey = SC.browser.experimentalStyleNameFor('transformOrigin');
       else testKey = key;
       equals(layoutStyle[testKey], with_s[key], "STYLE W/ PARENT %@".fmt(key));
     });
