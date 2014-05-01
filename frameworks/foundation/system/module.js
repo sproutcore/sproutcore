@@ -737,7 +737,7 @@ SC.ready(function () {
 
 SC.Module.PrefetchModuleTask = SC.Task.extend({
   prefetchedModuleName: null,
-  run: function () {
+  startTask: function () {
     SC.Module.prefetchModule(this.prefetchedModuleName);
   }
 });

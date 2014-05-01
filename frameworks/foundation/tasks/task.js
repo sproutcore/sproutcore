@@ -11,7 +11,24 @@
   might not finish.
 */
 SC.Task = SC.Object.extend({
-  run: function(queue) {
-    // if needed, you could put the task back on the queue for later finishing.
+
+  /**
+    This method should be implemented by subclasses of SC.Task to perform the
+    actual task.
+  */
+  startTask: function (queue) {
+    if (this.run) {
+      //@if(debug)
+      SC.warn("Developer Warning: The `run()` method of SC.Task has been renamed to `startTask()`. Please update your SC.Task subclasses appropriately.");
+      //@endif
+      this.run(queue);
+    }
+  },
+
+  /** @private Used by SC.TaskQueue to run the task. */
+  start: function (queue) {
+    // We simply call `startTask()`. This allows us to bring in the task framework, which replaces SC.Task with the more advanced
+    // version and still have everything work the same.
+    this.startTask(queue);
   }
 });

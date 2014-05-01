@@ -8,7 +8,7 @@ sc_require("tasks/task");
 
 /** @private */
 SC.AppCacheTask = SC.Task.extend({
-  run: function () {
+  startTask: function () {
     window.applicationCache.update();
     SC.appCache._appCacheStatusDidChange();
   }

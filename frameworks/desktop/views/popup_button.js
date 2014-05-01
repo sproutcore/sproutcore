@@ -317,7 +317,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
 */
 SC.PopupButtonMenuLoader = SC.Task.extend({
   popupButton: null,
-  run: function() {
+  startTask: function() {
     if (this.popupButton) this.popupButton._instantiateMenu();
   }
 });
