@@ -138,6 +138,8 @@ SC.FlowedLayout = {
   /** @private */
   initMixin: function() {
     this._scfl_tileOnce();
+    // register observer to detect the childViews changes
+    this.addObserver( 'childViews.[]', this, this._scfl_childViewsDidChange );
   },
 
   /** @private
@@ -145,7 +147,7 @@ SC.FlowedLayout = {
   */
   _scfl_childViewsDidChange: function(c) {
     this._scfl_tileOnce();
-  }.observes('childViews'),
+  },
 
   /** @private */
   _scfl_layoutPropertyDidChange: function(childView) {
@@ -807,6 +809,8 @@ SC.FlowedLayout = {
 
   /** @private */
   destroyMixin: function() {
+    this.removeObserver( 'childViews.[]', this, this._scfl_childViewsDidChange );
+
     var isObserving = this._scfl_isObserving;
     if (!isObserving) return;
 
