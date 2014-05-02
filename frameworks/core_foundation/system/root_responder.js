@@ -2228,7 +2228,7 @@ SC.RootResponder = SC.Object.extend(
         // responding chain
         for (loc = 0, len = lh.length; loc < len; loc++) {
           view = lh[loc];
-          if (nh.indexOf(view) === -1) {
+          if (nh.indexOf(view) === -1 && !view.isDestroyed) {
             view.tryToPerform('mouseExited', evt);
           }
         }
