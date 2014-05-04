@@ -838,7 +838,7 @@
     view.get('pane').makeFirstResponder(testResponder);
 
     // verify it no longer has focus
-    ok(!view.get('focused'), 'view should no longer have focus');
+    ok(!view.get('focused'), 'view should no longer have focus (Warning: this test will fail if the browser window doesn\'t have focus)');
   });
 
   test("editing a field should not change the cursor position", function () {
