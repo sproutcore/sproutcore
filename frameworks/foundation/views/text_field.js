@@ -165,8 +165,18 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   }.property('hint', 'localize').cacheable(),
 
   /**
-    Whether to show the hint while the field has focus.
-    If `YES`, it will disappear as soon as any character is in the field.
+    Whether to show the hint while the field still has focus.
+
+    While newer versions of Safari, Firefox and Chrome will act this way using the
+    placeholder attribute, other browsers will not. By setting this property
+    to true, we can ensure that the hint will always appear even when the
+    field has focus.
+
+    Note: If `hintOnFocus` is false, this doesn't necessarily mean that the
+    hint will disappear on focus, because some browsers will still not remove
+    the placeholder on focus when empty.
+
+    *Important:* You can not modify this property once the view has been rendered.
 
     @type Boolean
     @default true
@@ -332,18 +342,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
    */
   autoResizePadding: SC.propertyFromRenderDelegate('autoResizePadding', 20),
 
-  /** @private
-    Whether to show hint or not.
-   */
-  _hintON: YES,
-
-  init: function () {
-    var val = this.get('value');
-    this._hintON = ((!val || val && val.length === 0) && !this.get('hintOnFocus')) ? YES : NO;
-
-    return sc_super();
-  },
-
   /**
     This property indicates if the value in the text field can be changed.
     If set to `false`, a `readOnly` attribute will be added to the DOM Element.
@@ -474,6 +472,29 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     // from a menu).  So that's why we need to update our 'selection' property
     // whenever the field's value changes.
   }.property('fieldValue').cacheable(),
+
+  /**
+    Whether or not the text field view will use an overlaid label for the hint.
+
+    There are two conditions that will result in the text field adding an
+    overlaid label for the hint. The first is when the `hintOnFocus` property is
+    true. This allows the user to focus the text field and still see the hint
+    text while there is no value in the field. Since some browsers clear the
+    placeholder when the field has text, this is a way to ensure the same
+    behavior across all browsers.
+
+    The second is when the browser doesn't support the placeholder attribute
+    (i.e. < IE 10). By using an overlaid label rather than inserting the hint
+    into the input, we are able to show clear text hints over password fields.
+
+    @field
+    @type Boolean
+    @default true
+    @readonly
+  */
+  useHintOverlay: function () {
+    return this.get('hintOnFocus') || !SC.platform.input.placeholder;
+  }.property().cacheable(),
 
   // ..........................................................
   // INTERNAL SUPPORT
@@ -606,8 +627,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     //        here, but currently SC.RenderContext will render sibling
     //        contexts as parent/child.
     var hint = this.get('formattedHint'),
-      hintOnFocus = this.get('hintOnFocus'),
-      hintString = '',
+      hintAttr = '',
       maxLength = this.get('maxLength'),
       isTextArea = this.get('isTextArea'),
       isEnabledInPane = this.get('isEnabledInPane'),
@@ -657,11 +677,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
         browserFocusableString = ' tabindex="-1"';
       }
 
-        // if hint is on and we don't want it to show on focus, create one
-      if (SC.platform.input.placeholder && !hintOnFocus) {
-        hintString = ' placeholder="' + hint + '"';
-      }
-
       if (this.get('shouldRenderBorder')) context.push('<div class="border"></div>');
 
       // Render the padding element, with any necessary positioning
@@ -676,15 +691,16 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       context.push('<div class="padding" ' + adjustmentStyle + '>');
 
       value = this.get('escapeHTML') ? SC.RenderContext.escapeHTML(value) : value;
-      if (this._hintON && !SC.platform.input.placeholder && (!value || (value && value.length === 0))) {
-        value = hint;
-        context.setClass('sc-hint', YES);
-      }
 
-      if (hintOnFocus) {
-        var hintStr = '<div aria-hidden="true" class="hint ' +
+      // When hintOnFocus is true or the field doesn't support placeholders, ensure that a hint appears by adding an overlay hint element.
+      if (this.get('useHintOverlay')) {
+        var hintOverlay = '<div aria-hidden="true" class="hint ' +
                       (isTextArea ? '':'ellipsis') + '%@">' + hint + '</div>';
-        context.push(hintStr.fmt(value ? ' sc-hidden': ''));
+        context.push(hintOverlay.fmt(value ? ' sc-hidden': ''));
+
+      // Use the input placeholder attribute for the hint.
+      } else {
+        hintAttr = ' placeholder="' + hint + '"';
       }
 
       fieldClassNames = "field";
@@ -692,47 +708,33 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       // Render the input/textarea field itself, and close off the padding.
       if (isTextArea) {
         context.push('<textarea aria-label="' + hint + '" class="' + fieldClassNames + '" aria-multiline="true"' +
-                      '" name="' + name + '"' + activeStateString + hintString +
+                      '" name="' + name + '"' + activeStateString + hintAttr +
                       spellCheckString + autocorrectString + autocapitalizeString +
                       browserFocusableString + ' maxlength="' + maxLength +
                       '">' + value + '</textarea></div>');
       } else {
         type = this.get('type');
         context.push('<input aria-label="' + hint + '" class="' + fieldClassNames + '" type="' + type +
-                      '" name="' + name + '"' + activeStateString + hintString +
+                      '" name="' + name + '"' + activeStateString + hintAttr +
                       spellCheckString + autocorrectString + autocapitalizeString +
                       autocompleteString + browserFocusableString + ' maxlength="' + maxLength +
                       '" value="' + value + '"' + '/></div>');
       }
     } else {
       var input = this.$input(),
-        element = input[0],
-        val = this.get('value');
+        element = input[0];
 
-      if (hintOnFocus) context.$('.hint')[0].innerHTML = hint;
-      else if (!hintOnFocus) element.placeholder = hint;
+      // Update the hint. If the overlay hint was used, update it.
+      if (this.get('useHintOverlay')) {
+        context.$('.hint')[0].innerHTML = hint;
+      } else {
+        input.attr('placeholder', hint);
+      }
 
       // IE8 has problems aligning the input text in the center
       // This is a workaround for centering it.
       if (SC.browser.name === SC.BROWSER.ie && SC.browser.version <= 8 && !isTextArea) {
         input.css('line-height', this.get('frame').height + 'px');
-      }
-
-      if (!val || (val && val.length === 0)) {
-
-        if (!SC.platform.input.placeholder && this._hintON) {
-          if (!this.get('isFirstResponder')) {
-            // Internet Explorer doesn't allow you to modify the type afterwards
-            // jQuery throws an exception as well, so set attribute directly
-            context.setClass('sc-hint', YES);
-            input.val(hint);
-          } else {
-            // Internet Explorer doesn't allow you to modify the type afterwards
-            // jQuery throws an exception as well, so set attribute directly
-            context.setClass('sc-hint', NO);
-            input.val('');
-          }
-        }
       }
 
       if (!SC.none(autoCorrect)) {
@@ -756,8 +758,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       } else {
         input.attr('autoComplete', null);
       }
-
-      if (!hintOnFocus && SC.platform.input.placeholder) input.attr('placeholder', hint);
 
       if (isBrowserFocusable) {
         input.removeAttr('tabindex');
@@ -831,7 +831,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   didCreateLayer: function () {
     sc_super();
 
-    if (!SC.platform.input.placeholder) this.invokeLast(this._setInitialPlaceHolderIE);
     // For some strange reason if we add focus/blur events to textarea
     // inmediately they won't work. However if I add them at the end of the
     // runLoop it works fine.
@@ -856,14 +855,14 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   /**
     SC.View view state callback.
 
-    Once the view is appended, fix up the text layout to sc-hints and inputs.
+    Once the view is appended, fix up the text layout to hint and input.
   */
   didAppendToDocument: function () {
     this._fixupTextLayout();
   },
 
   /** @private
-    Apply proper text layout to sc-hints and inputs.
+    Apply proper text layout to hint and input.
    */
   _fixupTextLayout: function () {
     var height = this.get('frame').height;
@@ -873,23 +872,10 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       this.$input().css('line-height', height + 'px');
     }
 
-    if (this.get('hintOnFocus') && !this.get('isTextArea')) {
+    if (this.get('useHintOverlay') && !this.get('isTextArea')) {
       var hintJQ = this.$('.hint');
 
       hintJQ.css('line-height', hintJQ.outerHeight() + 'px');
-    }
-  },
-
-  /** @private
-    Set initial placeholder for IE
-   */
-  _setInitialPlaceHolderIE: function () {
-    if (!SC.platform.input.placeholder && this._hintON) {
-      var input = this.$input(),
-          currentValue = input.val();
-      if (!currentValue || (currentValue && currentValue.length === 0)) {
-        input.val(this.get('formattedHint'));
-      }
     }
   },
 
@@ -934,10 +920,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     SC.run(function () {
       this.set('focused', true);
       this.fieldDidFocus(evt);
-      var val = this.get('value');
-      if (!SC.platform.input.placeholder && ((!val) || (val && val.length === 0))) {
-        this._hintON = NO;
-      }
     }, this);
   },
 
@@ -951,10 +933,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       // losing the responder on the inline text editor so that we can
       // use it for the delegate to end editing
       this.fieldDidBlur(this._origEvent || evt);
-      var val = this.get('value');
-      if (!SC.platform.input.placeholder && !this.get('hintOnFocus') && ((!val) || (val && val.length === 0))) {
-        this._hintON = YES;
-      }
     }, this);
   },
 
@@ -1023,10 +1001,10 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     Make sure to update visibility of hint if it changes
    */
   updateHintOnFocus: function () {
-    // if there is a value in the field, hide the hint
-    var hintOnFocus = this.get('hintOnFocus');
-    if (!hintOnFocus) return;
+    // Fast path. If we aren't using the hind overlay, do nothing.
+    if (!this.get('useHintOverlay')) return;
 
+    // If there is a value in the field, hide the hint.
     if (this.getFieldValue()) {
       this.$('.hint').addClass('sc-hidden');
     } else {
@@ -1351,15 +1329,13 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
    */
   _valueObserver: function () {
     var val = this.get('value'), max;
-    if (val && val.length > 0) {
-      this._hintON = NO;
 
+    if (val && val.length > 0) {
       max = this.get('maxLength');
+
       if (!SC.platform.input.maxlength && val.length > max) {
         this.set('value', val.substr(0, max));
       }
-    } else if (!this.get('hintOnFocus')) {
-      this._hintON = YES;
     }
   }.observes('value')
 
