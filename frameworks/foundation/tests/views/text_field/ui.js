@@ -461,8 +461,8 @@
     fieldElement.setSelectionRange(2, 5, 'none');
 
     var fetchedSelection = view.get('selection');
-    ok(!SC.platform.input.selectionDirection || fetchedSelection.get('direction') === 'forward',
-        'the selection direction should default to forward');
+    ok(!SC.platform.input.selectionDirection || fetchedSelection.get('direction') === 'none',
+        'the selection direction should be none');
   });
 
   test("Getting forward selection direction", function () {
