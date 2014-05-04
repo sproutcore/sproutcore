@@ -13,6 +13,12 @@
     value: ''
   })
 
+  .add("empty - no hint on focus", SC.TextFieldView, {
+    hint: "Full Name",
+    hintOnFocus: false,
+    value: ''
+  })
+
   .add("with value", SC.TextFieldView, {
     hint: "Full Name",
     value: 'John Doe'
@@ -93,9 +99,9 @@
     var layer = view.$();
 
     ok(!layer.hasClass('not-empty'), 'layer should not have not-empty class');
-    if (SC.browser.isWebkit || (SC.browser.isMozilla &&
-        SC.browser.compare(SC.browser.engineVersion, '2.0') >= 0)) equals(input.val(), '', 'input should have empty value');
-    else equals(input.val(), expectedHint, 'input should have expected hint as value');
+
+    equals(input.val(), '', 'input should have empty value');
+
     if (expectedHint) {
       var hint = view.$('.hint');
       if (hint.length === 1) {
@@ -160,6 +166,13 @@
 
   test("empty", function () {
     var view = pane.view('empty');
+    pane.verifyEmpty(view, 'Full Name');
+    pane.verifyDisabled(view, NO);
+  });
+
+  test("empty - no hint on focus", function () {
+    var view = pane.view('empty - no hint on focus');
+
     pane.verifyEmpty(view, 'Full Name');
     pane.verifyDisabled(view, NO);
   });
