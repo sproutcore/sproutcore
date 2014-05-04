@@ -34,10 +34,10 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     Walk like a duck.
 
     @type Boolean
-    @default YES
+    @default true
     @readOnly
    */
-  isTextField: YES,
+  isTextField: true,
 
   // ..........................................................
   // PROPERTIES
@@ -48,45 +48,36 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     of the underlying object. Turning it off will only set the value on blur.
 
     @type String
-    @default YES
+    @default true
    */
-  applyImmediately: YES,
+  applyImmediately: true,
 
   /**
     Flag indicating whether the editor should automatically commit if you click
     outside it.
 
     @type Boolean
-    @default YES
+    @default true
    */
-  commitOnBlur: YES,
-
-  /** @deprecated
-    If `YES`, the field will hide its text from display.
-    This value is deprecated. Please use `type` instead to `"password"`.
-
-    @type Boolean
-    @default NO
-   */
-  isPassword: NO,
+  commitOnBlur: true,
 
   /**
-    If `YES` then allow multi-line input.  This will also change the default
+    If `true` then allow multi-line input.  This will also change the default
     tag type from "input" to "textarea".  Otherwise, pressing return will
     trigger the default insertion handler.
 
     @type Boolean
-    @default NO
+    @default false
    */
-  isTextArea: NO,
+  isTextArea: false,
 
   /**
     Whether the text field is currently focused.
 
     @type Boolean
-    @default NO
+    @default false
    */
-  focused: NO,
+  focused: false,
 
   /**
     The hint to display while the field is not active.
@@ -105,18 +96,18 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   type: 'text',
 
   /**
-    This property will set a tabindex="-1" on your view if set to NO.
+    This property will set a tabindex="-1" on your view if set to false.
 
     This gives us control over the native tabbing behavior. When nextValidKeyView
     reaches the end of the views in the pane views tree, it won't go to a textfield
     that can accept the default tabbing behavior in any other pane. This was a
     problem when you had an alert on top of a mainPane with textfields.
 
-    Modal panes set this to NO on all textfields that don't belong to itself.
+    Modal panes set this to false on all textfields that don't belong to itself.
     @type Boolean
-    @default YES
+    @default true
    */
-  isBrowserFocusable: YES,
+  isBrowserFocusable: true,
 
   /**
     Whether the browser should automatically correct the input.
@@ -125,9 +116,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     the system defaults.
 
     @type Boolean
-    @default YES
+    @default true
    */
-  autoCorrect: YES,
+  autoCorrect: true,
 
   /**
     Specifies the autocapitalization behavior.
@@ -140,8 +131,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
      - `SC.AUTOCAPITALIZE_WORDS` -- Autocapitalize the first letter of each word.
      - `SC.AUTOCAPITALIZE_CHARACTERS` -- Autocapitalize all characters.
 
-    Boolean values are also supported, with YES interpreted as
-    `SC.AUTOCAPITALIZE_NONE` and NO as `SC.AUTOCAPITALIZE_SENTENCES`.
+    Boolean values are also supported, with `true` interpreted as
+    `SC.AUTOCAPITALIZE_NONE` and `false` as `SC.AUTOCAPITALIZE_SENTENCES`.
 
     When `autoCapitalize` is set to `null`, the browser will use
     the system defaults.
@@ -178,55 +169,42 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     If `YES`, it will disappear as soon as any character is in the field.
 
     @type Boolean
-    @default YES
+    @default true
    */
-  hintOnFocus: YES,
+  hintOnFocus: true,
 
   /**
     Whether the hint should be localized or not.
 
     @type Boolean
-    @default YES
+    @default true
    */
-  localize: YES,
+  localize: true,
 
   /**
-    If `YES` then the text field is currently editing.
+    If `true` then the text field is currently editing.
 
     @type Boolean
-    @default NO
+    @default false
    */
-  isEditing: NO,
+  isEditing: false,
 
   /**
     If you set this property to false the tab key won't trigger its default
     behavior (tabbing to the next field).
 
     @type Boolean
-    @default YES
+    @default true
    */
-  defaultTabbingEnabled: YES,
+  defaultTabbingEnabled: true,
 
   /**
     Enabled context menu for textfields.
 
     @type Boolean
-    @default YES
+    @default true
    */
-  isContextMenuEnabled: YES,
-
-  /**
-    @deprecated Use #applyImmediately instead.
-
-    If true, every change to the text in the text field updates `value`.
-    If false, `value` is only updated when commitEditing() is called (this
-    is called automatically when the text field loses focus), or whenever
-    the return key is pressed while editing the field.
-
-    @type Boolean
-    @default null
-   */
-  continuouslyUpdatesValue: null,
+  isContextMenuEnabled: true,
 
   /**
     If no, will not allow transform or validation errors (SC.Error objects)
@@ -234,9 +212,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     to its previous value.
 
     @type Boolean
-    @default YES
+    @default true
    */
-  allowsErrorAsValue: YES,
+  allowsErrorAsValue: true,
 
   /**
     An optional view instance, or view class reference, which will be visible
@@ -294,9 +272,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     browser. As of today Safari 4+, Chrome 3+ and Firefox 3+ support it.
 
     @type Boolean
-    @default YES
+    @default true
    */
-  spellCheckEnabled: YES,
+  spellCheckEnabled: true,
 
   /**
     Maximum amount of characters this field will allow.
@@ -310,9 +288,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     Whether to render a border or not.
 
     @type Boolean
-    @default YES
+    @default true
    */
-  shouldRenderBorder: YES,
+  shouldRenderBorder: true,
 
   // ..........................................................
   // SUPPORT FOR AUTOMATIC RESIZING
@@ -321,10 +299,10 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   /**
     Text fields support auto resizing.
     @type Boolean
-    @default YES
+    @default true
     @see SC.AutoResize#supportsAutoResize
    */
-  supportsAutoResize: YES,
+  supportsAutoResize: true,
 
   /**
     The layer to automatically resize.
@@ -363,28 +341,19 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     var val = this.get('value');
     this._hintON = ((!val || val && val.length === 0) && !this.get('hintOnFocus')) ? YES : NO;
 
-    var continuouslyUpdatesValue = this.get('continouslyUpdatesValue');
-    if (continuouslyUpdatesValue !== null && continuouslyUpdatesValue !== undefined) {
-      this.set('applyImmediately',  continuouslyUpdatesValue);
-
-      // @if (debug)
-      SC.Logger.warn("SC.TextFieldView#continuouslyUpdatesValue is deprecated. Please use #applyImmediately instead.");
-      // @endif
-    }
-
     return sc_super();
   },
 
   /**
     This property indicates if the value in the text field can be changed.
-    If set to `NO`, a `readOnly` attribute will be added to the DOM Element.
+    If set to `false`, a `readOnly` attribute will be added to the DOM Element.
 
-    Note if `isEnabledInPane` is `NO` this property will have no effect.
+    Note if `isEnabledInPane` is `false` this property will have no effect.
 
     @type Boolean
-    @default YES
+    @default true
    */
-  isEditable: YES,
+  isEditable: true,
 
   /**
     The current selection of the text field, returned as an SC.TextSelection
@@ -624,11 +593,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     force the field render to render like the firsttime to avoid writing extra
     code. This can be useful also
    */
-  _forceRenderFirstTime: NO,
+  _forceRenderFirstTime: false,
 
   /** @private */
   _renderFieldLikeFirstTime: function () {
-    this.set('_forceRenderFirstTime', YES);
+    this.set('_forceRenderFirstTime', true);
   }.observes('isTextArea'),
 
   /** @private */
@@ -662,7 +631,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
 
 
     if (firstTime || this._forceRenderFirstTime) {
-      this._forceRenderFirstTime = NO;
+      this._forceRenderFirstTime = false;
       activeStateString = isEnabledInPane ? (isEditable ? '' : ' readonly="readonly"') : ' disabled="disabled"';
       name = this.get('layerId');
 
@@ -729,17 +698,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
                       '">' + value + '</textarea></div>');
       } else {
         type = this.get('type');
-
-        // Internet Explorer won't let us change the type attribute later
-        // so we force it to password if needed now, or if the value is not the hint
-        if (this.get('isPassword')) {
-          // @if (debug)
-          SC.Logger.warn("SC.TextFieldView#isPassword is deprecated. Please set SC.TextFieldView#type to password instead.");
-          // @endif
-
-          type = 'password';
-        }
-
         context.push('<input aria-label="' + hint + '" class="' + fieldClassNames + '" type="' + type +
                       '" name="' + name + '"' + activeStateString + hintString +
                       spellCheckString + autocorrectString + autocapitalizeString +
@@ -761,7 +719,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       }
 
       if (!val || (val && val.length === 0)) {
-        if (this.get('isPassword')) { element.type = 'password'; }
 
         if (!SC.platform.input.placeholder && this._hintON) {
           if (!this.get('isFirstResponder')) {
@@ -975,7 +932,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   */
   _textField_fieldDidFocus: function (evt) {
     SC.run(function () {
-      this.set('focused', YES);
+      this.set('focused', true);
       this.fieldDidFocus(evt);
       var val = this.get('value');
       if (!SC.platform.input.placeholder && ((!val) || (val && val.length === 0))) {
@@ -989,7 +946,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
    */
   _textField_fieldDidBlur: function (evt) {
     SC.run(function () {
-      this.set('focused', NO);
+      this.set('focused', false);
       // passing the original event here instead that was potentially set from
       // losing the responder on the inline text editor so that we can
       // use it for the delegate to end editing
@@ -1041,9 +998,10 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   _field_fieldValueDidChange: function (evt) {
     if (this.get('focused')) {
       SC.run(function () {
-        this.fieldValueDidChange(NO);
+        this.fieldValueDidChange(false);
       }, this);
     }
+
     this.updateHintOnFocus();
   },
 
@@ -1179,7 +1137,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
 
   /** @private */
   keyDown: function (evt) {
-    return this.interpretKeyEvents(evt) || NO;
+    return this.interpretKeyEvents(evt) || false;
   },
 
   /** @private */
@@ -1214,7 +1172,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       this._fieldValueDidChangeTimer = this.invokeLater(this.fieldValueDidChange, 10);
     }
 
-    return YES;
+    return true;
   },
 
   /** @private */
@@ -1229,7 +1187,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     var view = this.get('nextValidKeyView');
     if (view) view.becomeFirstResponder();
     else evt.allowDefault();
-    return YES; // handled
+    return true; // handled
   },
 
   /** @private */
@@ -1244,7 +1202,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     var view = this.get('previousValidKeyView');
     if (view) view.becomeFirstResponder();
     else evt.allowDefault();
-    return YES; // handled
+    return true; // handled
   },
 
   /**
@@ -1257,57 +1215,57 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   insertNewline: function (evt) {
     if (this.get('isTextArea') || evt.isIMEInput) {
       evt.allowDefault();
-      return YES; // handled
+      return true; // handled
     }
-    return NO;
+    return false;
   },
 
   /** @private */
   deleteForward: function (evt) {
     evt.allowDefault();
-    return YES;
+    return true;
   },
 
   /** @private */
   deleteBackward: function (evt) {
     evt.allowDefault();
-    return YES;
+    return true;
   },
 
   /** @private */
   moveLeft: function (evt) {
     evt.allowDefault();
-    return YES;
+    return true;
   },
 
   /** @private */
   moveRight: function (evt) {
     evt.allowDefault();
-    return YES;
+    return true;
   },
 
   /** @private */
   selectAll: function (evt) {
     evt.allowDefault();
-    return YES;
+    return true;
   },
 
   /** @private */
   moveUp: function (evt) {
     if (this.get('isTextArea')) {
       evt.allowDefault();
-      return YES;
+      return true;
     }
-    return NO;
+    return false;
   },
 
   /** @private */
   moveDown: function (evt) {
     if (this.get('isTextArea')) {
       evt.allowDefault();
-      return YES;
+      return true;
     }
-    return NO;
+    return false;
   },
 
   keyUp: function (evt) {
@@ -1319,15 +1277,15 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     // processing.
     this.notifyPropertyChange('selection');
     evt.allowDefault();
-    return YES;
+    return true;
   },
 
   mouseDown: function (evt) {
     if (!this.get('isEnabledInPane')) {
       evt.stop();
-      return YES;
+      return true;
     } else {
-      this._txtFieldMouseDown = YES;
+      this._txtFieldMouseDown = true;
       this.becomeFirstResponder();
 
       return sc_super();
@@ -1335,11 +1293,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   },
 
   mouseUp: function (evt) {
-    this._txtFieldMouseDown = NO;
+    this._txtFieldMouseDown = false;
 
     if (!this.get('isEnabledInPane')) {
       evt.stop();
-      return YES;
+      return true;
     }
 
     // The caret/selection could have moved.  In some browsers, though, the
@@ -1363,8 +1321,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   mouseWheel: function (evt) {
     if (this.get('isTextArea')) {
       evt.allowDefault();
-      return YES;
-    } else return NO;
+      return true;
+    } else return false;
   },
 
   /**
@@ -1372,7 +1330,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     block text selection in all other views.
    */
   selectStart: function (evt) {
-    return YES;
+    return true;
   },
 
   /** @private
