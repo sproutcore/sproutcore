@@ -47,7 +47,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     When `applyImmediately` is turned on, every keystroke will set the value
     of the underlying object. Turning it off will only set the value on blur.
 
-    @type String
+    @type Boolean
     @default true
    */
   applyImmediately: true,
@@ -154,14 +154,21 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   autoComplete: null,
 
   /**
-    Localizes the hint if necessary.
+    Localizes and escapes the hint if necessary.
 
     @field
     @type String
    */
   formattedHint: function () {
     var hint = this.get('hint');
-    return typeof(hint) === 'string' && this.get('localize') ? SC.String.loc(hint) : hint;
+    hint = typeof(hint) === 'string' && this.get('localize') ? SC.String.loc(hint) : hint;
+
+    // If the hint is appended via an overlay, ensure that the text is escaped in order to avoid XSS attacks.
+    if (this.get('useHintOverlay')) {
+      hint = this.get('escapeHTML') ? SC.RenderContext.escapeHTML(hint) : hint;
+    }
+
+    return hint;
   }.property('hint', 'localize').cacheable(),
 
   /**
