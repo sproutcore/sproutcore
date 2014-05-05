@@ -415,11 +415,28 @@ SC.RootResponder = SC.Object.extend(
     Handle window focus.  Change hasFocus and add sc-focus CSS class (removing
     sc-blur).  Also notify panes.
   */
-  blur: function(evt) {
+  blur: function (evt) {
     if (this.get('hasFocus')) {
       SC.$('body').addClass('sc-blur').removeClass('sc-focus');
 
       SC.run(function() {
+        // Clean up any drag or mouse down views.
+        var dragView = this._drag,
+          view = this._mouseDownView;
+
+        // Indicate that the drag has released.
+        if (dragView) {
+          dragView.tryToPerform('mouseUp', evt);
+
+        // Indicate that the mouse has exited and then released.
+        } else if (view) {
+          view.tryToPerform('mouseExited', evt);
+          view.tryToPerform('mouseUp', evt);
+        }
+
+        // Clean up regardless.
+        this._mouseDownView = this._drag = null;
+
         this.set('hasFocus', NO);
       }, this);
     }
@@ -427,7 +444,7 @@ SC.RootResponder = SC.Object.extend(
   },
 
   dragDidStart: function(drag) {
-    this._mouseDownView = drag ;
+    this._mouseDownView = drag;
     this._drag = drag ;
   },
 
@@ -2344,7 +2361,7 @@ SC.RootResponder = SC.Object.extend(
         view = nd[loc];
         if (ld.indexOf(view) === -1) {
           view.tryToPerform('dataDragEntered', evt);
-        }        
+        }
       }
       // Finally, send hover events to everybody.
       for (loc = 0, len = nd.length; loc < len; loc++) {
