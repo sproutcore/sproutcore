@@ -116,6 +116,25 @@ SC.View.reopen(
     whenever 'layout' is set.
   */
   propertyDidChange: function (key, value, _keepCache) {
+    //@if(debug)
+    // Debug mode only property validation.
+    switch (key) {
+    case 'layout':
+      // If a layout value is accidentally set to NaN, this can result in infinite loops. Help the developer out by failing
+      // early so that they can follow the stack trace to the problem.
+      var layout = this.get('layout');
+      for (var property in layout) {
+        if (!layout.hasOwnProperty(property)) { continue; }
+
+        var layoutValue = layout[property];
+        if (isNaN(layoutValue)) {
+          throw new Error("SC.View layout property set to invalid value, %@: %@. Only Number values may be assigned to the layout!".fmt(property, layoutValue));
+        }
+      }
+      break;
+    }
+    //@endif
+
     // If the key is 'layout', we need to call layoutDidChange() immediately
     // so that if the frame has changed any cached values (for both this view
     // and any child views) can be appropriately invalidated.
@@ -128,7 +147,11 @@ SC.View.reopen(
       var dependents = this._kvo_dependents[key];
       if (dependents && dependents.indexOf('layout') != -1) { layoutChange = true; }
     }
-    if (key === 'layout' || layoutChange) { this.layoutDidChange(); }
+
+    if (key === 'layout' || layoutChange) {
+      this.layoutDidChange();
+    }
+
     // Resume notification as usual.
     sc_super();
   },
@@ -502,7 +525,7 @@ SC.View.reopen(
   },
 
   /** @private */
-  _adjustForScale: function(frame, layout) {
+  _adjustForScale: function (frame, layout) {
     // GATEKEEP: Scale not supported.
     if (!SC.platform.supportsCSSTransforms) {
       frame.scale = 1;
@@ -553,9 +576,9 @@ SC.View.reopen(
       f = f ? this._adjustForScale(f, layout) : null;
       return f;
     }
-    
+
     f = {};
-    
+
     var error, layer, AUTO = SC.LAYOUT_AUTO,
         pv = this.get('parentView'),
         dH, dW, //shortHand for parentDimensions
