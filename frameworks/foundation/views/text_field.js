@@ -1135,16 +1135,16 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     if (!SC.platform.input.maxlength && this.get('isTextArea')) {
       var val = this.get('value');
 
-      // This code is nasty. It's thanks gecko .keycode table that has charters like & with the same keycode as up arrow key
+      // This code is nasty. It's thanks to Gecko .keycode table that has characters like '&' with the same keycode as up arrow key
       if (val && ((!SC.browser.isMozilla && which > 47) ||
                   (SC.browser.isMozilla && ((which > 32 && which < 43) || which > 47) && !(keyCode > 36 && keyCode < 41))) &&
           (val.length >= this.get('maxLength'))) {
         maxLengthReached = true;
       }
     }
-    // validate keyDown...
-    // do not validate on touch, as it prevents return.
-    if ((this.performValidateKeyDown(evt) || SC.platform.touch) && !maxLengthReached) {
+
+    // Validate keyDown...
+    if (this.performValidateKeyDown(evt) && !maxLengthReached) {
       evt.allowDefault();
     } else {
       evt.stop();
