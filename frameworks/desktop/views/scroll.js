@@ -2307,7 +2307,7 @@ SC.ScrollView = SC.View.extend({
 
   /** @private
     If we redraw after the initial render, we need to make sure that we reset
-    the scrollTop/scrollLeft properties on the content view.  This ensures
+    the marginTop/marginLeft properties on the content view.  This ensures
     that, for example, the scroll views displays correctly when switching
     views out in a ContainerView.
   */
@@ -2433,7 +2433,7 @@ SC.ScrollView = SC.View.extend({
 
   /** @private
     If the layer of the content view changes, we need to readjust the
-    scrollTop and scrollLeft properties on the new DOM element.
+    marginTop and marginLeft properties on the new DOM element.
   */
   contentViewLayerDidChange: function () {
     // Invalidate these cached values, as they're no longer valid
@@ -2461,8 +2461,8 @@ SC.ScrollView = SC.View.extend({
   }.observes('verticalScrollOffset'),
 
   /** @private
-    Called at the end of the run loop to actually adjust the scrollTop
-    and scrollLeft properties of the container view.
+    Called at the end of the run loop to actually adjust the marginTop
+    and marginLeft properties of the container view.
   */
   adjustElementScroll: function () {
     var container = this.get('containerView'),
@@ -2471,7 +2471,7 @@ SC.ScrollView = SC.View.extend({
         horizontalScrollOffset = this.get('horizontalScrollOffset');
 
     // We notify the content view that its frame property has changed
-    // before we actually update the scrollTop/scrollLeft properties.
+    // before we actually update the marginTop/marginLeft properties.
     // This gives views that use incremental rendering a chance to render
     // newly-appearing elements before they come into view.
     if (content) {
@@ -2484,12 +2484,12 @@ SC.ScrollView = SC.View.extend({
 
       if (container) {
         if (verticalScrollOffset !== this._verticalScrollOffset) {
-          container.scrollTop = verticalScrollOffset;
+          container.style.marginTop = -verticalScrollOffset + "px";
           this._verticalScrollOffset = verticalScrollOffset;
         }
 
         if (horizontalScrollOffset !== this._horizontalScrollOffset) {
-          container.scrollLeft = horizontalScrollOffset;
+          container.style.marginLeft = -horizontalScrollOffset + "px";
           this._horizontalScrollOffset = horizontalScrollOffset;
         }
       }
