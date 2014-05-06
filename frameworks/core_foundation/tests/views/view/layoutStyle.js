@@ -15,7 +15,7 @@
 (function () {
   var parent, child, frameKeys, layoutKeys;
 
-  frameKeys = ['x', 'y', 'width', 'height', 'scale', 'transformOriginX', 'transformOriginY'];
+  frameKeys = ['x', 'y', 'width', 'height', 'scale', 'transformOriginX', 'transformOriginY', 'originalWidth', 'originalHeight'];
   layoutKeys = ['width', 'height', 'top', 'bottom', 'marginLeft', 'marginTop', 'left', 'right',
     'minWidth', 'maxWidth', 'minHeight', 'maxHeight', 'borderTopWidth', 'borderBottomWidth',
     'borderLeftWidth', 'borderRightWidth'];
@@ -164,8 +164,8 @@
 
     var layout = { top: 10, left: 10, width: 50, height: 50 };
     var s = { top: 10, left: 10, width: 50, height: 50 };
-    var no_f = { x: 10, y: 10, width: 50, height: 50, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
-    var with_f = { x: 10, y: 10, width: 50, height: 50, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var no_f = { x: 10, y: 10, width: 50, height: 50, scale: 1, originalWidth: 50, originalHeight: 50, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var with_f = { x: 10, y: 10, width: 50, height: 50, scale: 1, originalWidth: 50, originalHeight: 50, transformOriginX: 0.5, transformOriginY: 0.5 };
 
     performLayoutTest(layout, no_f, s, with_f, s, YES);
   });
@@ -173,8 +173,8 @@
   test("layout {top, left, bottom, right}", function () {
 
     var layout = { top: 10, left: 10, bottom: 10, right: 10 };
-    var no_f = { x: 10, y: 10, width: 0, height: 0, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
-    var with_f = { x: 10, y: 10, width: 180, height: 180, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var no_f = { x: 10, y: 10, width: 0, height: 0, scale: 1, originalWidth: 0, originalHeight: 0, originalWidth: 0, originalHeight: 0, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var with_f = { x: 10, y: 10, width: 180, height: 180, scale: 1, originalWidth: 180, originalHeight: 180, transformOriginX: 0.5, transformOriginY: 0.5 };
     var s = { top: 10, left: 10, bottom: 10, right: 10 };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
@@ -183,8 +183,8 @@
   test("layout {bottom, right, width, height}", function () {
 
     var layout = { bottom: 10, right: 10, width: 50, height: 50 };
-    var no_f = { x: 0, y: 0, width: 50, height: 50, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
-    var with_f = { x: 140, y: 140, width: 50, height: 50, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var no_f = { x: 0, y: 0, width: 50, height: 50, scale: 1, originalWidth: 50, originalHeight: 50, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var with_f = { x: 140, y: 140, width: 50, height: 50, scale: 1, originalWidth: 50, originalHeight: 50, transformOriginX: 0.5, transformOriginY: 0.5 };
     var s = { bottom: 10, right: 10, width: 50, height: 50 };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
@@ -193,8 +193,8 @@
   test("layout {centerX, centerY, width, height}", function () {
 
     var layout = { centerX: 10, centerY: 10, width: 60, height: 60 };
-    var no_f = { x: 10, y: 10, width: 60, height: 60, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
-    var with_f = { x: 80, y: 80, width: 60, height: 60, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var no_f = { x: 10, y: 10, width: 60, height: 60, scale: 1, originalWidth: 60, originalHeight: 60, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var with_f = { x: 80, y: 80, width: 60, height: 60, scale: 1, originalWidth: 60, originalHeight: 60, transformOriginX: 0.5, transformOriginY: 0.5 };
     var s = { marginLeft: -20, marginTop: -20, width: 60, height: 60, top: "50%", left: "50%" };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
@@ -246,8 +246,8 @@
 
     var layout = { top: 0.1, left: 0.1, width: 0.5, height: 0.5 };
     var s = { top: '10%', left: '10%', width: '50%', height: '50%' };
-    var no_f = { x: 0, y: 0, width: 0, height: 0, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
-    var with_f = { x: 20, y: 20, width: 100, height: 100, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var no_f = { x: 0, y: 0, width: 0, height: 0, scale: 1, originalWidth: 0, originalHeight: 0, originalWidth: 0, originalHeight: 0, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var with_f = { x: 20, y: 20, width: 100, height: 100, scale: 1, originalWidth: 50, originalHeight: 50, originalWidth: 100, originalHeight: 100, transformOriginX: 0.5, transformOriginY: 0.5 };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
   });
@@ -255,8 +255,8 @@
   test("layout {top, left, bottom, right}", function () {
 
     var layout = { top: 0.1, left: 0.1, bottom: 0.1, right: 0.1 };
-    var no_f = { x: 0, y: 0, width: 0, height: 0, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
-    var with_f =  { x: 20, y: 20, width: 160, height: 160, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var no_f = { x: 0, y: 0, width: 0, height: 0, scale: 1, originalWidth: 0, originalHeight: 0, originalWidth: 0, originalHeight: 0, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var with_f =  { x: 20, y: 20, width: 160, height: 160, scale: 1, originalWidth: 160, originalHeight: 160, transformOriginX: 0.5, transformOriginY: 0.5 };
     var s = { top: '10%', left: '10%', bottom: '10%', right: '10%' };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
@@ -265,8 +265,8 @@
   test("layout {bottom, right, width, height}", function () {
 
     var layout = { bottom: 0.1, right: 0.1, width: 0.5, height: 0.5 };
-    var no_f = { x: 0, y: 0, width: 0, height: 0, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
-    var with_f = { x: 80, y: 80, width: 100, height: 100, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var no_f = { x: 0, y: 0, width: 0, height: 0, scale: 1, originalWidth: 0, originalHeight: 0, originalWidth: 0, originalHeight: 0, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var with_f = { x: 80, y: 80, width: 100, height: 100, scale: 1, originalWidth: 50, originalHeight: 50, originalWidth: 100, originalHeight: 100, transformOriginX: 0.5, transformOriginY: 0.5 };
     var s = { bottom: '10%', right: '10%', width: '50%', height: '50%' };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
@@ -275,8 +275,8 @@
   test("layout {centerX, centerY, width, height}", function () {
 
     var layout = { centerX: 0.1, centerY: 0.1, width: 0.6, height: 0.6 };
-    var no_f = { x: 0, y: 0, width: 0, height: 0, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
-    var with_f = { x: 60, y: 60, width: 120, height: 120, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var no_f = { x: 0, y: 0, width: 0, height: 0, scale: 1, originalWidth: 0, originalHeight: 0, originalWidth: 0, originalHeight: 0, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var with_f = { x: 60, y: 60, width: 120, height: 120, scale: 1, originalWidth: 60, originalHeight: 60, originalWidth: 120, originalHeight: 120, transformOriginX: 0.5, transformOriginY: 0.5 };
     var s = { marginLeft: '-20%', marginTop: '-20%', width: '60%', height: '60%', top: "50%", left: "50%" };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
@@ -287,11 +287,11 @@
   // test shows that.
   test("layout {centerX 0, centerY 0, width %, height %}", function () {
     var layout = { centerX: 0, centerY: 0, width: 0.6, height: 0.6 };
-    var no_f = { x: 0, y: 0, width: 0, height: 0, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var no_f = { x: 0, y: 0, width: 0, height: 0, scale: 1, originalWidth: 0, originalHeight: 0, originalWidth: 0, originalHeight: 0, transformOriginX: 0.5, transformOriginY: 0.5 };
 
     // The parent frame is 200 x 200.
     var size = 200 * 0.6;
-    var with_f = { x: (200 - size) * 0.5, y: (200 - size) * 0.5, width: size, height: size, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var with_f = { x: (200 - size) * 0.5, y: (200 - size) * 0.5, width: size, height: size, scale: 1, originalWidth: size, originalHeight: size, transformOriginX: 0.5, transformOriginY: 0.5 };
     var s = { marginLeft: '-30%', marginTop: '-30%', width: '60%', height: '60%', top: "50%", left: "50%" };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
@@ -300,11 +300,11 @@
   // Edge case: although rare, centered views should be able to have metrics of zero.
   test("layout {centerX 0, centerY 0, width 0, height 0}", function () {
     var layout = { centerX: 0, centerY: 0, width: 0, height: 0 };
-    var no_f = { x: 0, y: 0, width: 0, height: 0, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var no_f = { x: 0, y: 0, width: 0, height: 0, scale: 1, originalWidth: 0, originalHeight: 0, originalWidth: 0, originalHeight: 0, transformOriginX: 0.5, transformOriginY: 0.5 };
 
     // The parent frame is 200 x 200.
     var size = 0;
-    var with_f = { x: (200 - size) * 0.5, y: (200 - size) * 0.5, width: size, height: size, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var with_f = { x: (200 - size) * 0.5, y: (200 - size) * 0.5, width: size, height: size, scale: 1, originalWidth: size, originalHeight: size, transformOriginX: 0.5, transformOriginY: 0.5 };
     var s = { marginLeft: '0px', marginTop: '0px', width: '0px', height: '0px', top: '50%', left: '50%' };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
@@ -360,8 +360,8 @@
 
     var layout = { top: 10, left: 10, width: 50, height: 50, scale: 2 };
     var s = { top: 10, left: 10, width: 50, height: 50, transform: "scale(2)" };
-    var no_f = { x: -15, y: -15, width: 100, height: 100, scale: 2, transformOriginX: 0.5, transformOriginY: 0.5 };
-    var with_f = { x: -15, y: -15, width: 100, height: 100, scale: 2, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var no_f = { x: -15, y: -15, width: 100, height: 100, scale: 2, originalWidth: 50, originalHeight: 50, originalWidth: 50, originalHeight: 50, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var with_f = { x: -15, y: -15, width: 100, height: 100, scale: 2, originalWidth: 50, originalHeight: 50, originalWidth: 50, originalHeight: 50, transformOriginX: 0.5, transformOriginY: 0.5 };
 
     performLayoutTest(layout, no_f, s, with_f, s, YES);
   });
@@ -370,8 +370,8 @@
 
     var layout = { top: 10, left: 10, width: 50, height: 50, scale: 0.6 };
     var s = { top: 10, left: 10, width: 50, height: 50, transform: "scale(0.6)" };
-    var no_f = { x: 20, y: 20, width: 30, height: 30, scale: 0.6, transformOriginX: 0.5, transformOriginY: 0.5 };
-    var with_f = { x: 20, y: 20, width: 30, height: 30, scale: 0.6, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var no_f = { x: 20, y: 20, width: 30, height: 30, scale: 0.6, originalWidth: 50, originalHeight: 50, originalWidth: 50, originalHeight: 50, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var with_f = { x: 20, y: 20, width: 30, height: 30, scale: 0.6, originalWidth: 50, originalHeight: 50, originalWidth: 50, originalHeight: 50, transformOriginX: 0.5, transformOriginY: 0.5 };
 
     performLayoutTest(layout, no_f, s, with_f, s, YES);
   });
@@ -380,8 +380,8 @@
 
     var layout = { top: 10, left: 10, width: 50, height: 50, scale: 2, transformOriginX: 0, transformOriginY: 0 };
     var s = { top: 10, left: 10, width: 50, height: 50, transform: "scale(2)", transformOrigin: "0% 0%" };
-    var no_f = { x: 10, y: 10, width: 100, height: 100, scale: 2, transformOriginX: 0, transformOriginY: 0 };
-    var with_f = { x: 10, y: 10, width: 100, height: 100, scale: 2, transformOriginX: 0, transformOriginY: 0 };
+    var no_f = { x: 10, y: 10, width: 100, height: 100, scale: 2, originalWidth: 50, originalHeight: 50, originalWidth: 50, originalHeight: 50, transformOriginX: 0, transformOriginY: 0 };
+    var with_f = { x: 10, y: 10, width: 100, height: 100, scale: 2, originalWidth: 50, originalHeight: 50, originalWidth: 50, originalHeight: 50, transformOriginX: 0, transformOriginY: 0 };
 
     performLayoutTest(layout, no_f, s, with_f, s, YES);
   });
@@ -390,8 +390,8 @@
 
     var layout = { top: 10, left: 10, width: 50, height: 50, scale: 0.6, transformOriginX: 0, transformOriginY: 0 };
     var s = { top: 10, left: 10, width: 50, height: 50, transform: "scale(0.6)", transformOrigin: "0% 0%" };
-    var no_f = { x: 10, y: 10, width: 30, height: 30, scale: 0.6, transformOriginX: 0, transformOriginY: 0 };
-    var with_f = { x: 10, y: 10, width: 30, height: 30, scale: 0.6, transformOriginX: 0, transformOriginY: 0 };
+    var no_f = { x: 10, y: 10, width: 30, height: 30, scale: 0.6, originalWidth: 50, originalHeight: 50, originalWidth: 50, originalHeight: 50, transformOriginX: 0, transformOriginY: 0 };
+    var with_f = { x: 10, y: 10, width: 30, height: 30, scale: 0.6, originalWidth: 50, originalHeight: 50, originalWidth: 50, originalHeight: 50, transformOriginX: 0, transformOriginY: 0 };
 
     performLayoutTest(layout, no_f, s, with_f, s, YES);
   });
@@ -400,8 +400,8 @@
 
     var layout = { top: 10, left: 10, width: 50, height: 50, scale: 2, transformOriginX: 1, transformOriginY: 1 };
     var s = { top: 10, left: 10, width: 50, height: 50, transform: "scale(2)", transformOrigin: "100% 100%" };
-    var no_f = { x: -40, y: -40, width: 100, height: 100, scale: 2, transformOriginX: 1, transformOriginY: 1 };
-    var with_f = { x: -40, y: -40, width: 100, height: 100, scale: 2, transformOriginX: 1, transformOriginY: 1 };
+    var no_f = { x: -40, y: -40, width: 100, height: 100, scale: 2, originalWidth: 50, originalHeight: 50, originalWidth: 50, originalHeight: 50, transformOriginX: 1, transformOriginY: 1 };
+    var with_f = { x: -40, y: -40, width: 100, height: 100, scale: 2, originalWidth: 50, originalHeight: 50, originalWidth: 50, originalHeight: 50, transformOriginX: 1, transformOriginY: 1 };
 
     performLayoutTest(layout, no_f, s, with_f, s, YES);
   });
@@ -410,8 +410,8 @@
 
     var layout = { top: 10, left: 10, width: 50, height: 50, scale: 0.6, transformOriginX: 1, transformOriginY: 1 };
     var s = { top: 10, left: 10, width: 50, height: 50, transform: "scale(0.6)", transformOrigin: "100% 100%" };
-    var no_f = { x: 30, y: 30, width: 30, height: 30, scale: 0.6, transformOriginX: 1, transformOriginY: 1 };
-    var with_f = { x: 30, y: 30, width: 30, height: 30, scale: 0.6, transformOriginX: 1, transformOriginY: 1 };
+    var no_f = { x: 30, y: 30, width: 30, height: 30, scale: 0.6, originalWidth: 50, originalHeight: 50, originalWidth: 50, originalHeight: 50, transformOriginX: 1, transformOriginY: 1 };
+    var with_f = { x: 30, y: 30, width: 30, height: 30, scale: 0.6, originalWidth: 50, originalHeight: 50, originalWidth: 50, originalHeight: 50, transformOriginX: 1, transformOriginY: 1 };
 
     performLayoutTest(layout, no_f, s, with_f, s, YES);
   });
@@ -422,8 +422,8 @@
   test("layout {top, left, bottom, right, scale up}", function () {
 
     var layout = { top: 10, left: 10, bottom: 10, right: 10, scale: 2 };
-    var no_f = { x: 10, y: 10, width: 0, height: 0, scale: 2, transformOriginX: 0.5, transformOriginY: 0.5 };
-    var with_f = { x: -80, y: -80, width: 360, height: 360, scale: 2, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var no_f = { x: 10, y: 10, width: 0, height: 0, scale: 2, originalWidth: 0, originalHeight: 0, originalWidth: 0, originalHeight: 0, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var with_f = { x: -80, y: -80, width: 360, height: 360, scale: 2, originalWidth: 180, originalHeight: 180, transformOriginX: 0.5, transformOriginY: 0.5 };
     var s = { top: 10, left: 10, bottom: 10, right: 10, transform: "scale(2)" };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
@@ -432,8 +432,8 @@
   test("layout {top, left, bottom, right, scale down}", function () {
 
     var layout = { top: 10, left: 10, bottom: 10, right: 10, scale: 0.5 };
-    var no_f = { x: 10, y: 10, width: 0, height: 0, scale: 0.5, transformOriginX: 0.5, transformOriginY: 0.5 };
-    var with_f = { x: 55, y: 55, width: 90, height: 90, scale: 0.5, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var no_f = { x: 10, y: 10, width: 0, height: 0, scale: 0.5, originalWidth: 0, originalHeight: 0, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var with_f = { x: 55, y: 55, width: 90, height: 90, scale: 0.5, originalWidth: 180, originalHeight: 180, originalWidth: 180, originalHeight: 180, transformOriginX: 0.5, transformOriginY: 0.5 };
     var s = { top: 10, left: 10, bottom: 10, right: 10, transform: "scale(0.5)" };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
@@ -442,8 +442,8 @@
   test("layout {top, left, bottom, right, scale up, origin top left}", function () {
 
     var layout = { top: 10, left: 10, bottom: 10, right: 10, scale: 2, transformOriginX: 0, transformOriginY: 0 };
-    var no_f = { x: 10, y: 10, width: 0, height: 0, scale: 2, transformOriginX: 0, transformOriginY: 0 };
-    var with_f = { x: 10, y: 10, width: 360, height: 360, scale: 2, transformOriginX: 0, transformOriginY: 0 };
+    var no_f = { x: 10, y: 10, width: 0, height: 0, scale: 2, originalWidth: 0, originalHeight: 0, transformOriginX: 0, transformOriginY: 0 };
+    var with_f = { x: 10, y: 10, width: 360, height: 360, scale: 2, originalWidth: 180, originalHeight: 180, originalWidth: 180, originalHeight: 180, transformOriginX: 0, transformOriginY: 0 };
     var s = { top: 10, left: 10, bottom: 10, right: 10, transform: "scale(2)", transformOrigin: "0% 0%" };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
@@ -452,8 +452,8 @@
   test("layout {top, left, bottom, right, scale down, origin top left}", function () {
 
     var layout = { top: 10, left: 10, bottom: 10, right: 10, scale: 0.5, transformOriginX: 0, transformOriginY: 0 };
-    var no_f = { x: 10, y: 10, width: 0, height: 0, scale: 0.5, transformOriginX: 0, transformOriginY: 0 };
-    var with_f = { x: 10, y: 10, width: 90, height: 90, scale: 0.5, transformOriginX: 0, transformOriginY: 0 };
+    var no_f = { x: 10, y: 10, width: 0, height: 0, scale: 0.5, originalWidth: 0, originalHeight: 0, transformOriginX: 0, transformOriginY: 0 };
+    var with_f = { x: 10, y: 10, width: 90, height: 90, scale: 0.5, originalWidth: 180, originalHeight: 180, transformOriginX: 0, transformOriginY: 0 };
     var s = { top: 10, left: 10, bottom: 10, right: 10, transform: "scale(0.5)", transformOrigin: "0% 0%" };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
@@ -462,8 +462,8 @@
   test("layout {top, left, bottom, right, scale up, origin bottom right}", function () {
 
     var layout = { top: 10, left: 10, bottom: 10, right: 10, scale: 2, transformOriginX: 1, transformOriginY: 1 };
-    var no_f = { x: 10, y: 10, width: 0, height: 0, scale: 2, transformOriginX: 1, transformOriginY: 1 };
-    var with_f = { x: -170, y: -170, width: 360, height: 360, scale: 2, transformOriginX: 1, transformOriginY: 1 };
+    var no_f = { x: 10, y: 10, width: 0, height: 0, scale: 2, originalWidth: 0, originalHeight: 0, transformOriginX: 1, transformOriginY: 1 };
+    var with_f = { x: -170, y: -170, width: 360, height: 360, scale: 2, originalWidth: 180, originalHeight: 180, transformOriginX: 1, transformOriginY: 1 };
     var s = { top: 10, left: 10, bottom: 10, right: 10, transform: "scale(2)", transformOrigin: "100% 100%" };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
@@ -472,8 +472,8 @@
   test("layout {top, left, bottom, right, scale down, origin bottom right}", function () {
 
     var layout = { top: 10, left: 10, bottom: 10, right: 10, scale: 0.5, transformOriginX: 1, transformOriginY: 1 };
-    var no_f = { x: 10, y: 10, width: 0, height: 0, scale: 0.5, transformOriginX: 1, transformOriginY: 1 };
-    var with_f = { x: 100, y: 100, width: 90, height: 90, scale: 0.5, transformOriginX: 1, transformOriginY: 1 };
+    var no_f = { x: 10, y: 10, width: 0, height: 0, scale: 0.5, originalWidth: 0, originalHeight: 0, transformOriginX: 1, transformOriginY: 1 };
+    var with_f = { x: 100, y: 100, width: 90, height: 90, scale: 0.5, originalWidth: 180, originalHeight: 180, originalWidth: 180, originalHeight: 180, transformOriginX: 1, transformOriginY: 1 };
     var s = { top: 10, left: 10, bottom: 10, right: 10, transform: "scale(0.5)", transformOrigin: "100% 100%" };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
@@ -485,8 +485,8 @@
   test("layout {bottom, right, width, height, scaled up}", function () {
 
     var layout = { bottom: 10, right: 10, width: 50, height: 50, scale: 2 };
-    var no_f = { x: -25, y: -25, width: 100, height: 100, scale: 2, transformOriginX: 0.5, transformOriginY: 0.5 };
-    var with_f = { x: 115, y: 115, width: 100, height: 100, scale: 2, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var no_f = { x: -25, y: -25, width: 100, height: 100, scale: 2, originalWidth: 50, originalHeight: 50, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var with_f = { x: 115, y: 115, width: 100, height: 100, scale: 2, originalWidth: 50, originalHeight: 50, transformOriginX: 0.5, transformOriginY: 0.5 };
     var s = { bottom: 10, right: 10, width: 50, height: 50, transform: "scale(2)" };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
@@ -495,8 +495,8 @@
   test("layout {bottom, right, width, height, scaled down}", function () {
 
     var layout = { bottom: 10, right: 10, width: 50, height: 50, scale: 0.6 };
-    var no_f = { x: 10, y: 10, width: 30, height: 30, scale: 0.6, transformOriginX: 0.5, transformOriginY: 0.5 };
-    var with_f = { x: 150, y: 150, width: 30, height: 30, scale: 0.6, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var no_f = { x: 10, y: 10, width: 30, height: 30, scale: 0.6, originalWidth: 50, originalHeight: 50, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var with_f = { x: 150, y: 150, width: 30, height: 30, scale: 0.6, originalWidth: 50, originalHeight: 50, transformOriginX: 0.5, transformOriginY: 0.5 };
     var s = { bottom: 10, right: 10, width: 50, height: 50, transform: "scale(0.6)" };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
@@ -505,8 +505,8 @@
   test("layout {bottom, right, width, height, scaled up, origin top left}", function () {
 
     var layout = { bottom: 10, right: 10, width: 50, height: 50, scale: 2, transformOriginX: 0, transformOriginY: 0 };
-    var no_f = { x: 0, y: 0, width: 100, height: 100, scale: 2, transformOriginX: 0, transformOriginY: 0 };
-    var with_f = { x: 140, y: 140, width: 100, height: 100, scale: 2, transformOriginX: 0, transformOriginY: 0 };
+    var no_f = { x: 0, y: 0, width: 100, height: 100, scale: 2, originalWidth: 50, originalHeight: 50, transformOriginX: 0, transformOriginY: 0 };
+    var with_f = { x: 140, y: 140, width: 100, height: 100, scale: 2, originalWidth: 50, originalHeight: 50, transformOriginX: 0, transformOriginY: 0 };
     var s = { bottom: 10, right: 10, width: 50, height: 50, transform: "scale(2)", transformOrigin: "0% 0%" };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
@@ -515,8 +515,8 @@
   test("layout {bottom, right, width, height, scaled down, origin top left}", function () {
 
     var layout = { bottom: 10, right: 10, width: 50, height: 50, scale: 0.6, transformOriginX: 0, transformOriginY: 0 };
-    var no_f = { x: 0, y: 0, width: 30, height: 30, scale: 0.6, transformOriginX: 0, transformOriginY: 0 };
-    var with_f = { x: 140, y: 140, width: 30, height: 30, scale: 0.6, transformOriginX: 0, transformOriginY: 0 };
+    var no_f = { x: 0, y: 0, width: 30, height: 30, scale: 0.6, originalWidth: 50, originalHeight: 50, transformOriginX: 0, transformOriginY: 0 };
+    var with_f = { x: 140, y: 140, width: 30, height: 30, scale: 0.6, originalWidth: 50, originalHeight: 50, transformOriginX: 0, transformOriginY: 0 };
     var s = { bottom: 10, right: 10, width: 50, height: 50, transform: "scale(0.6)", transformOrigin: "0% 0%" };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
@@ -525,8 +525,8 @@
   test("layout {bottom, right, width, height, scaled up, origin bottom right}", function () {
 
     var layout = { bottom: 10, right: 10, width: 50, height: 50, scale: 2, transformOriginX: 1, transformOriginY: 1 };
-    var no_f = { x: -50, y: -50, width: 100, height: 100, scale: 2, transformOriginX: 1, transformOriginY: 1 };
-    var with_f = { x: 90, y: 90, width: 100, height: 100, scale: 2, transformOriginX: 1, transformOriginY: 1 };
+    var no_f = { x: -50, y: -50, width: 100, height: 100, scale: 2, originalWidth: 50, originalHeight: 50, transformOriginX: 1, transformOriginY: 1 };
+    var with_f = { x: 90, y: 90, width: 100, height: 100, scale: 2, originalWidth: 50, originalHeight: 50, transformOriginX: 1, transformOriginY: 1 };
     var s = { bottom: 10, right: 10, width: 50, height: 50, transform: "scale(2)", transformOrigin: "100% 100%" };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
@@ -535,8 +535,8 @@
   test("layout {bottom, right, width, height, scaled down, origin bottom right}", function () {
 
     var layout = { bottom: 10, right: 10, width: 50, height: 50, scale: 0.6, transformOriginX: 1, transformOriginY: 1 };
-    var no_f = { x: 20, y: 20, width: 30, height: 30, scale: 0.6, transformOriginX: 1, transformOriginY: 1 };
-    var with_f = { x: 160, y: 160, width: 30, height: 30, scale: 0.6, transformOriginX: 1, transformOriginY: 1 };
+    var no_f = { x: 20, y: 20, width: 30, height: 30, scale: 0.6, originalWidth: 50, originalHeight: 50, transformOriginX: 1, transformOriginY: 1 };
+    var with_f = { x: 160, y: 160, width: 30, height: 30, scale: 0.6, originalWidth: 50, originalHeight: 50, transformOriginX: 1, transformOriginY: 1 };
     var s = { bottom: 10, right: 10, width: 50, height: 50, transform: "scale(0.6)", transformOrigin: "100% 100%" };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
@@ -548,8 +548,8 @@
   test("layout {centerX, centerY, width, height, scale up}", function () {
 
     var layout = { centerX: 10, centerY: 10, width: 60, height: 60, scale: 2 };
-    var no_f = { x: -20, y: -20, width: 120, height: 120, scale: 2, transformOriginX: 0.5, transformOriginY: 0.5 };
-    var with_f = { x: 50, y: 50, width: 120, height: 120, scale: 2, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var no_f = { x: -20, y: -20, width: 120, height: 120, scale: 2, originalWidth: 60, originalHeight: 60, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var with_f = { x: 50, y: 50, width: 120, height: 120, scale: 2, originalWidth: 60, originalHeight: 60, transformOriginX: 0.5, transformOriginY: 0.5 };
     var s = { marginLeft: -20, marginTop: -20, width: 60, height: 60, top: "50%", left: "50%", transform: "scale(2)" };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
@@ -558,8 +558,8 @@
   test("layout {centerX, centerY, width, height, scale down}", function () {
 
     var layout = { centerX: 10, centerY: 10, width: 60, height: 60, scale: 0.6 };
-    var no_f = { x: 22, y: 22, width: 36, height: 36, scale: 0.6, transformOriginX: 0.5, transformOriginY: 0.5 };
-    var with_f = { x: 92, y: 92, width: 36, height: 36, scale: 0.6, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var no_f = { x: 22, y: 22, width: 36, height: 36, scale: 0.6, originalWidth: 60, originalHeight: 60, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var with_f = { x: 92, y: 92, width: 36, height: 36, scale: 0.6, originalWidth: 60, originalHeight: 60, transformOriginX: 0.5, transformOriginY: 0.5 };
     var s = { marginLeft: -20, marginTop: -20, width: 60, height: 60, top: "50%", left: "50%", transform: "scale(0.6)" };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
@@ -568,8 +568,8 @@
   test("layout {centerX, centerY, width, height, scale up, origin top left}", function () {
 
     var layout = { centerX: 10, centerY: 10, width: 60, height: 60, scale: 2, transformOriginX: 0, transformOriginY: 0 };
-    var no_f = { x: 10, y: 10, width: 120, height: 120, scale: 2, transformOriginX: 0, transformOriginY: 0 };
-    var with_f = { x: 80, y: 80, width: 120, height: 120, scale: 2, transformOriginX: 0, transformOriginY: 0 };
+    var no_f = { x: 10, y: 10, width: 120, height: 120, scale: 2, originalWidth: 60, originalHeight: 60, transformOriginX: 0, transformOriginY: 0 };
+    var with_f = { x: 80, y: 80, width: 120, height: 120, scale: 2, originalWidth: 60, originalHeight: 60, transformOriginX: 0, transformOriginY: 0 };
     var s = { marginLeft: -20, marginTop: -20, width: 60, height: 60, top: "50%", left: "50%", transform: "scale(2)", transformOrigin: "0% 0%" };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
@@ -578,8 +578,8 @@
   test("layout {centerX, centerY, width, height, scale down, origin top left}", function () {
 
     var layout = { centerX: 10, centerY: 10, width: 60, height: 60, scale: 0.6, transformOriginX: 0, transformOriginY: 0 };
-    var no_f = { x: 10, y: 10, width: 36, height: 36, scale: 0.6, transformOriginX: 0, transformOriginY: 0 };
-    var with_f = { x: 80, y: 80, width: 36, height: 36, scale: 0.6, transformOriginX: 0, transformOriginY: 0 };
+    var no_f = { x: 10, y: 10, width: 36, height: 36, scale: 0.6, originalWidth: 60, originalHeight: 60, transformOriginX: 0, transformOriginY: 0 };
+    var with_f = { x: 80, y: 80, width: 36, height: 36, scale: 0.6, originalWidth: 60, originalHeight: 60, transformOriginX: 0, transformOriginY: 0 };
     var s = { marginLeft: -20, marginTop: -20, width: 60, height: 60, top: "50%", left: "50%", transform: "scale(0.6)", transformOrigin: "0% 0%" };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
@@ -588,8 +588,8 @@
   test("layout {centerX, centerY, width, height, scale up, origin bottom right}", function () {
 
     var layout = { centerX: 10, centerY: 10, width: 60, height: 60, scale: 2, transformOriginX: 1, transformOriginY: 1 };
-    var no_f = { x: -50, y: -50, width: 120, height: 120, scale: 2, transformOriginX: 1, transformOriginY: 1 };
-    var with_f = { x: 20, y: 20, width: 120, height: 120, scale: 2, transformOriginX: 1, transformOriginY: 1 };
+    var no_f = { x: -50, y: -50, width: 120, height: 120, scale: 2, originalWidth: 60, originalHeight: 60, transformOriginX: 1, transformOriginY: 1 };
+    var with_f = { x: 20, y: 20, width: 120, height: 120, scale: 2, originalWidth: 60, originalHeight: 60, transformOriginX: 1, transformOriginY: 1 };
     var s = { marginLeft: -20, marginTop: -20, width: 60, height: 60, top: "50%", left: "50%", transform: "scale(2)", transformOrigin: "100% 100%" };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
@@ -598,8 +598,8 @@
   test("layout {centerX, centerY, width, height, scale down, origin bottom right}", function () {
 
     var layout = { centerX: 10, centerY: 10, width: 60, height: 60, scale: 0.6, transformOriginX: 1, transformOriginY: 1 };
-    var no_f = { x: 34, y: 34, width: 36, height: 36, scale: 0.6, transformOriginX: 1, transformOriginY: 1 };
-    var with_f = { x: 104, y: 104, width: 36, height: 36, scale: 0.6, transformOriginX: 1, transformOriginY: 1 };
+    var no_f = { x: 34, y: 34, width: 36, height: 36, scale: 0.6, originalWidth: 60, originalHeight: 60, transformOriginX: 1, transformOriginY: 1 };
+    var with_f = { x: 104, y: 104, width: 36, height: 36, scale: 0.6, originalWidth: 60, originalHeight: 60, transformOriginX: 1, transformOriginY: 1 };
     var s = { marginLeft: -20, marginTop: -20, width: 60, height: 60, top: "50%", left: "50%", transform: "scale(0.6)", transformOrigin: "100% 100%" };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
@@ -759,8 +759,8 @@
       var expectedTransform = 'translateX(10px) translateY(10px)';
       if (SC.platform.supportsCSS3DTransforms) expectedTransform += ' translateZ(0px)';
       var s = { top: 0, left: 0, width: 50, height: 50, transform: expectedTransform };
-      var no_f = { x: 10, y: 10, width: 50, height: 50, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
-      var with_f = { x: 10, y: 10, width: 50, height: 50, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
+      var no_f = { x: 10, y: 10, width: 50, height: 50, scale: 1, originalWidth: 50, originalHeight: 50, transformOriginX: 0.5, transformOriginY: 0.5 };
+      var with_f = { x: 10, y: 10, width: 50, height: 50, scale: 1, originalWidth: 50, originalHeight: 50, transformOriginX: 0.5, transformOriginY: 0.5 };
 
       performLayoutTest(layout, no_f, s, with_f, s, YES);
     });
@@ -768,8 +768,8 @@
     test("layout {top, left, bottom, right}", function () {
 
       var layout = { top: 10, left: 10, bottom: 10, right: 10 };
-      var no_f = { x: 10, y: 10, width: 0, height: 0, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
-      var with_f = { x: 10, y: 10, width: 180, height: 180, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
+      var no_f = { x: 10, y: 10, width: 0, height: 0, scale: 1, originalWidth: 0, originalHeight: 0, originalWidth: 0, originalHeight: 0, transformOriginX: 0.5, transformOriginY: 0.5 };
+      var with_f = { x: 10, y: 10, width: 180, height: 180, scale: 1, originalWidth: 180, originalHeight: 180, transformOriginX: 0.5, transformOriginY: 0.5 };
       var s = { top: 10, left: 10, bottom: 10, right: 10, transform: null };
 
       performLayoutTest(layout, no_f, s, with_f, s, NO);
@@ -813,8 +813,8 @@
 
       var layout = { top: 0.1, left: 0.1, width: 0.5, height: 0.5 };
       var s = { top: '10%', left: '10%', width: '50%', height: '50%', transform: null };
-      var no_f = { x: 0, y: 0, width: 0, height: 0, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
-      var with_f = { x: 20, y: 20, width: 100, height: 100, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
+      var no_f = { x: 0, y: 0, width: 0, height: 0, scale: 1, originalWidth: 0, originalHeight: 0, originalWidth: 0, originalHeight: 0, transformOriginX: 0.5, transformOriginY: 0.5 };
+      var with_f = { x: 20, y: 20, width: 100, height: 100, scale: 1, originalWidth: 50, originalHeight: 50, originalWidth: 100, originalHeight: 100, transformOriginX: 0.5, transformOriginY: 0.5 };
 
       performLayoutTest(layout, no_f, s, with_f, s, NO);
     });
@@ -834,8 +834,8 @@
   test("layout {top, left} - assume right/bottom=0", function () {
 
     var layout = { top: 0.1, left: 0.1 };
-    var no_f = { x: 0, y: 0, width: 0, height: 0, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
-    var with_f = { x: 20, y: 20, width: 180, height: 180, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var no_f = { x: 0, y: 0, width: 0, height: 0, scale: 1, originalWidth: 0, originalHeight: 0, originalWidth: 0, originalHeight: 0, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var with_f = { x: 20, y: 20, width: 180, height: 180, scale: 1, originalWidth: 180, originalHeight: 180, transformOriginX: 0.5, transformOriginY: 0.5 };
     var s = { bottom: 0, right: 0, top: '10%', left: '10%' };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
@@ -844,8 +844,8 @@
   test("layout {height, width} - assume top/left=0", function () {
 
     var layout = { height: 0.6, width: 0.6 };
-    var no_f = { x: 0, y: 0, width: 0, height: 0, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
-    var with_f = { x: 0, y: 0, width: 120, height: 120, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var no_f = { x: 0, y: 0, width: 0, height: 0, scale: 1, originalWidth: 0, originalHeight: 0, originalWidth: 0, originalHeight: 0, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var with_f = { x: 0, y: 0, width: 120, height: 120, scale: 1, originalWidth: 60, originalHeight: 60, originalWidth: 120, originalHeight: 120, transformOriginX: 0.5, transformOriginY: 0.5 };
     var s = { width: '60%', height: '60%', top: 0, left: 0 };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
@@ -855,8 +855,8 @@
   test("layout {right, bottom} - assume top/left=0", function () {
 
     var layout = { right: 0.1, bottom: 0.1 };
-    var no_f = { x: 0, y: 0, width: 0, height: 0, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
-    var with_f = { x: 0, y: 0, width: 180, height: 180, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var no_f = { x: 0, y: 0, width: 0, height: 0, scale: 1, originalWidth: 0, originalHeight: 0, originalWidth: 0, originalHeight: 0, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var with_f = { x: 0, y: 0, width: 180, height: 180, scale: 1, originalWidth: 180, originalHeight: 180, transformOriginX: 0.5, transformOriginY: 0.5 };
     var s = { bottom: '10%', right: '10%', top: 0, left: 0 };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
@@ -866,8 +866,8 @@
   test("layout {right, bottom, maxWidth, maxHeight} - assume top/left=null", function () {
 
     var layout = { right: 0.1, bottom: 0.1, maxWidth: 10, maxHeight: 10 };
-    var no_f = { x: 0, y: 0, width: 0, height: 0, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
-    var with_f = { x: 0, y: 0, width: 10, height: 10, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var no_f = { x: 0, y: 0, width: 0, height: 0, scale: 1, originalWidth: 0, originalHeight: 0, originalWidth: 0, originalHeight: 0, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var with_f = { x: 0, y: 0, width: 10, height: 10, scale: 1, originalWidth: 10, originalHeight: 10, transformOriginX: 0.5, transformOriginY: 0.5 };
     var s = { bottom: '10%', right: '10%', top: null, left: null, maxWidth: 10, maxHeight: 10 };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
@@ -877,8 +877,8 @@
   test("layout {centerX, centerY} - assume width/height=0", function () {
 
     var layout = { centerX: 0.1, centerY: 0.1 };
-    var no_f = { x: 0, y: 0, width: 0, height: 0, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
-    var with_f = { x: 120, y: 120, width: 0, height: 0, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var no_f = { x: 0, y: 0, width: 0, height: 0, scale: 1, originalWidth: 0, originalHeight: 0, originalWidth: 0, originalHeight: 0, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var with_f = { x: 120, y: 120, width: 0, height: 0, scale: 1, originalWidth: 0, originalHeight: 0, originalWidth: 0, originalHeight: 0, transformOriginX: 0.5, transformOriginY: 0.5 };
     var s = { width: 0, height: 0, top: "50%", left: "50%", marginTop: "50%", marginLeft: "50%" };
     performLayoutTest(layout, no_f, s, with_f, s, NO);
 
@@ -887,8 +887,8 @@
   test("layout {top, left, centerX, centerY, height, width} - top/left take presidence", function () {
 
     var layout = { top: 0.1, left: 0.1, centerX: 0.1, centerY: 0.1, height: 0.6, width: 0.6 };
-    var no_f = { x: 0, y: 0, width: 0, height: 0, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
-    var with_f = { x: 20, y: 20, width: 120, height: 120, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var no_f = { x: 0, y: 0, width: 0, height: 0, scale: 1, originalWidth: 0, originalHeight: 0, originalWidth: 0, originalHeight: 0, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var with_f = { x: 20, y: 20, width: 120, height: 120, scale: 1, originalWidth: 60, originalHeight: 60, originalWidth: 120, originalHeight: 120, transformOriginX: 0.5, transformOriginY: 0.5 };
     var s = { width: '60%', height: '60%', top: '10%', left: '10%' };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
@@ -898,8 +898,8 @@
   test("layout {bottom, right, centerX, centerY, height, width} - bottom/right take presidence", function () {
 
     var layout = { bottom: 0.1, right: 0.1, centerX: 0.1, centerY: 0.1, height: 0.6, width: 0.6 };
-    var no_f = { x: 0, y: 0, width: 0, height: 0, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
-    var with_f = { x: 60, y: 60, width: 120, height: 120, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var no_f = { x: 0, y: 0, width: 0, height: 0, scale: 1, originalWidth: 0, originalHeight: 0, originalWidth: 0, originalHeight: 0, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var with_f = { x: 60, y: 60, width: 120, height: 120, scale: 1, originalWidth: 60, originalHeight: 60, originalWidth: 120, originalHeight: 120, transformOriginX: 0.5, transformOriginY: 0.5 };
     var s = { width: '60%', height: '60%', bottom: '10%', right: '10%' };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
@@ -909,8 +909,8 @@
   test("layout {top, left, bottom, right, centerX, centerY, height, width} - top/left take presidence", function () {
 
     var layout = { top: 0.1, left: 0.1, bottom: 0.1, right: 0.1, centerX: 0.1, centerY: 0.1, height: 0.6, width: 0.6 };
-    var no_f = { x: 0, y: 0, width: 0, height: 0, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
-    var with_f = { x: 20, y: 20, width: 120, height: 120, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var no_f = { x: 0, y: 0, width: 0, height: 0, scale: 1, originalWidth: 0, originalHeight: 0, originalWidth: 0, originalHeight: 0, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var with_f = { x: 20, y: 20, width: 120, height: 120, scale: 1, originalWidth: 60, originalHeight: 60, originalWidth: 120, originalHeight: 120, transformOriginX: 0.5, transformOriginY: 0.5 };
     var s = { width: '60%', height: '60%', top: '10%', left: '10%' };
 
     performLayoutTest(layout, no_f, s, with_f, s, NO);
@@ -947,16 +947,16 @@
     var layout = { top: 10, left: 10, width: 50, height: 50, border: 2 };
     var s = { top: 10, left: 10, width: 46, height: 46,
               borderTopWidth: 2, borderRightWidth: 2, borderBottomWidth: 2, borderLeftWidth: 2 };
-    var no_f = { x: 12, y: 12, width: 46, height: 46, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
-    var with_f = { x: 12, y: 12, width: 46, height: 46, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var no_f = { x: 12, y: 12, width: 46, height: 46, scale: 1, originalWidth: 46, originalHeight: 46, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var with_f = { x: 12, y: 12, width: 46, height: 46, scale: 1, originalWidth: 46, originalHeight: 46, transformOriginX: 0.5, transformOriginY: 0.5 };
 
     performLayoutTest(layout, no_f, s, with_f, s, YES);
   });
 
   test("layout {top, left, bottom, right, border}", function () {
     var layout = { top: 10, left: 10, bottom: 10, right: 10, border: 2 };
-    var no_f = { x: 12, y: 12, width: 0, height: 0, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
-    var with_f = { x: 12, y: 12, width: 176, height: 176, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var no_f = { x: 12, y: 12, width: 0, height: 0, scale: 1, originalWidth: 0, originalHeight: 0, originalWidth: 0, originalHeight: 0, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var with_f = { x: 12, y: 12, width: 176, height: 176, scale: 1, originalWidth: 176, originalHeight: 176, transformOriginX: 0.5, transformOriginY: 0.5 };
     var s = { top: 10, left: 10, bottom: 10, right: 10,
                borderTopWidth: 2, borderRightWidth: 2, borderBottomWidth: 2, borderLeftWidth: 2 };
 
@@ -965,8 +965,8 @@
 
   test("layout {top, left, bottom, right, borderTop, borderLeft, borderRight, borderBottom}", function () {
     var layout = { top: 10, left: 10, bottom: 10, right: 10, borderTop: 1, borderRight: 2, borderBottom: 3, borderLeft: 4 };
-    var no_f = { x: 14, y: 11, width: 0, height: 0, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
-    var with_f = { x: 14, y: 11, width: 174, height: 176, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var no_f = { x: 14, y: 11, width: 0, height: 0, scale: 1, originalWidth: 0, originalHeight: 0, originalWidth: 0, originalHeight: 0, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var with_f = { x: 14, y: 11, width: 174, height: 176, scale: 1, originalWidth: 174, originalHeight: 176, transformOriginX: 0.5, transformOriginY: 0.5 };
     var s = { top: 10, left: 10, bottom: 10, right: 10,
                borderTopWidth: 1, borderRightWidth: 2, borderBottomWidth: 3, borderLeftWidth: 4 };
 
@@ -975,8 +975,8 @@
 
   test("layout {top, left, bottom, right, border, borderTop, borderLeft}", function () {
     var layout = { top: 10, left: 10, bottom: 10, right: 10, border: 5, borderTop: 1, borderRight: 2 };
-    var no_f = { x: 15, y: 11, width: 0, height: 0, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
-    var with_f = { x: 15, y: 11, width: 173, height: 174, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var no_f = { x: 15, y: 11, width: 0, height: 0, scale: 1, originalWidth: 0, originalHeight: 0, originalWidth: 0, originalHeight: 0, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var with_f = { x: 15, y: 11, width: 173, height: 174, scale: 1, originalWidth: 173, originalHeight: 174, transformOriginX: 0.5, transformOriginY: 0.5 };
     var s = { top: 10, left: 10, bottom: 10, right: 10,
                borderTopWidth: 1, borderRightWidth: 2, borderBottomWidth: 5, borderLeftWidth: 5 };
 
@@ -986,8 +986,8 @@
   test("layout {bottom, right, width, height, border}", function () {
 
     var layout = { bottom: 10, right: 10, width: 50, height: 50, border: 2 };
-    var no_f = { x: 2, y: 2, width: 46, height: 46, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
-    var with_f = { x: 142, y: 142, width: 46, height: 46, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var no_f = { x: 2, y: 2, width: 46, height: 46, scale: 1, originalWidth: 46, originalHeight: 46, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var with_f = { x: 142, y: 142, width: 46, height: 46, scale: 1, originalWidth: 46, originalHeight: 46, transformOriginX: 0.5, transformOriginY: 0.5 };
     var s = { bottom: 10, right: 10, width: 46, height: 46,
               borderTopWidth: 2, borderRightWidth: 2, borderBottomWidth: 2, borderLeftWidth: 2 };
 
@@ -997,8 +997,8 @@
   test("layout {centerX, centerY, width, height, border}", function () {
 
     var layout = { centerX: 10, centerY: 10, width: 60, height: 60, border: 2 };
-    var no_f = { x: 12, y: 12, width: 56, height: 56, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
-    var with_f = { x: 82, y: 82, width: 56, height: 56, scale: 1, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var no_f = { x: 12, y: 12, width: 56, height: 56, scale: 1, originalWidth: 56, originalHeight: 56, transformOriginX: 0.5, transformOriginY: 0.5 };
+    var with_f = { x: 82, y: 82, width: 56, height: 56, scale: 1, originalWidth: 56, originalHeight: 56, transformOriginX: 0.5, transformOriginY: 0.5 };
     var s = { marginLeft: -20, marginTop: -20, width: 56, height: 56, top: "50%", left: "50%",
               borderTopWidth: 2, borderRightWidth: 2, borderBottomWidth: 2, borderLeftWidth: 2 };
 
