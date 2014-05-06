@@ -559,10 +559,22 @@ SC.View.reopen(
 
   /** @private */
   _adjustForScale: function (frame, layout) {
+    // Add the original, unscaled height and width.
+    var originalWidth = frame.width;
+    var originalHeight = frame.height;
+
+    // make sure width/height are never < 0
+    if (originalHeight < 0) originalHeight = 0;
+    if (originalWidth < 0) originalWidth = 0;
+
     // GATEKEEP: Scale not supported.
     if (!SC.platform.supportsCSSTransforms) {
       frame.scale = 1;
       frame.transformOriginX = frame.transformOriginY = 0.5;
+
+      // Add the original, unscaled height and width.
+      frame.originalWidth = originalWidth;
+      frame.originalHeight = originalHeight;
       return frame;
     }
     // Get the scale and transform origins.
@@ -580,6 +592,15 @@ SC.View.reopen(
     frame.scale = scale;
     frame.transformOriginX = oX;
     frame.transformOriginY = oY;
+
+    // Add the original, unscaled height and width.
+    frame.originalWidth = originalWidth;
+    frame.originalHeight = originalHeight;
+
+    // make sure width/height are never < 0
+    if (frame.height < 0) frame.height = 0;
+    if (frame.width < 0) frame.width = 0;
+
     return frame;
   },
 
@@ -781,10 +802,6 @@ SC.View.reopen(
 
     // Finally, adjust for scale.
     f = this._adjustForScale(f, layout);
-
-    // make sure width/height are never < 0
-    if (f.height < 0) f.height = 0;
-    if (f.width < 0) f.width = 0;
 
     return f;
   }.enhance(),
