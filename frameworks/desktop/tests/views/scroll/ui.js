@@ -7,9 +7,9 @@
 
 /*global module test ok equals same stop start */
 
-(function() {
+(function () {
     var appleURL="http://photos4.meetupstatic.com/photos/event/4/6/9/9/600_4518073.jpeg";
-    var iv=SC.ImageView.design({value: appleURL, layout: {height:400, width:400}});
+    var iv = SC.ImageView.design({value: appleURL, layout: { height:400, width:400 }});
     var pane = SC.ControlTestPane.design({ height: 100 })
     .add("basic", SC.ScrollView, {
 
@@ -91,12 +91,12 @@
     view.scrollTo(0,100);
     SC.RunLoop.begin().end();
     var elem = view.get('containerView').$()[0];
-    equals(elem.scrollTop, 100, 'vertical scrolling should adjust scrollTop of container view');
+    equals(elem.style.marginTop, "-100px", 'vertical scrolling should adjust marginTop of container view');
 
     view.scrollTo(50,0);
     SC.RunLoop.begin().end();
     elem = view.get('containerView').$()[0];
-    equals(elem.scrollLeft, 50, 'horizontal scrolling should adjust scrollLeft of container view');
+    equals(elem.style.marginLeft, "-50px", 'horizontal scrolling should adjust marginLeft of container view');
   });
 
   test("basic3", function() {
@@ -136,16 +136,16 @@
       equals(scroller.$()[0].style.bottom,'16px', 'should have style.bottom of scroller as ');
     });
 
-   test('ScrollView should readjust scrollTop/scrollLeft if layer changes', function() {
+   test('ScrollView should readjust marginTop/marginLeft if layer changes', function() {
      var view = pane.view('basic2'), cv = view.get('contentView'), container = view.get('containerView') ;
      view.scrollTo(10, 10);
      SC.RunLoop.begin().end();
-     equals(container.get('layer').scrollLeft, 10, 'precond - scrollLeft is set to 10');
-     equals(container.get('layer').scrollTop, 10, 'precond- scrollTop is set to 10');
+     equals(container.get('layer').style.marginLeft, "-10px", 'precond - marginLeft is set to -10px');
+     equals(container.get('layer').style.marginTop, "-10px", 'precond- marginTop is set to -10px');
      cv.replaceLayer();
      SC.RunLoop.begin().end();
-     equals(container.get('layer').scrollLeft, 10, 'scrollLeft should be readjusted to 10');
-     equals(container.get('layer').scrollTop, 10, 'scrollTop should be readjust to 10');
+     equals(container.get('layer').style.marginLeft, "-10px", 'marginLeft should be readjusted to -10px');
+     equals(container.get('layer').style.marginTop, "-10px", 'marginTop should be readjust to -10px');
    });
 
   test('Scroller views of scroll view should have aria attributes set', function() {
