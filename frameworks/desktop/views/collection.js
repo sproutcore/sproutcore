@@ -1985,15 +1985,25 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
   /** @private */
   moveDownAndModifySelection: function (sender, evt) {
-    this.selectNextItem(true, this.get('itemsPerRow') || 1);
-    this._cv_performSelectAction(null, evt, this.ACTION_DELAY);
+    var content = this.get('content'),
+        del = this.delegateFor('allowsMultipleSelection', this.get('delegate'), content);
+
+    if (del && del.get('allowsMultipleSelection')) {
+      this.selectNextItem(true, this.get('itemsPerRow') || 1);
+      this._cv_performSelectAction(null, evt, this.ACTION_DELAY);
+    }
     return true;
   },
 
   /** @private */
   moveUpAndModifySelection: function (sender, evt) {
-    this.selectPreviousItem(true, this.get('itemsPerRow') || 1);
-    this._cv_performSelectAction(null, evt, this.ACTION_DELAY);
+    var content = this.get('content'),
+        del = this.delegateFor('allowsMultipleSelection', this.get('delegate'), content);
+
+    if (del && del.get('allowsMultipleSelection')) {
+      this.selectPreviousItem(true, this.get('itemsPerRow') || 1);
+      this._cv_performSelectAction(null, evt, this.ACTION_DELAY);
+    }
     return true;
   },
 
