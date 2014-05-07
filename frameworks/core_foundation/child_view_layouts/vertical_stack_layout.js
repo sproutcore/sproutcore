@@ -11,11 +11,15 @@ SC.mixin(SC.View,
 
   /**
     This child layout plugin automatically positions the view's child views in a
-    vertical stack and optionally adjusts the parent view's height to fit.  It
-    does this by checking the height of each child view and positioning the
-    following child view accordingly.  By default any time that a child view's
-    height changes, the view will use this plugin to re-adjust all other child
-    views and its own height appropriately.
+    vertical stack and optionally adjusts the view's height to fit.  It does this
+    by checking the height of each child view and positioning the following child
+    view accordingly.  Afterwards, by default, any time that a child view's
+    height or visibility changes, the view will use this plugin to re-adjust all
+    following child views' positions and potentially its own height appropriately.
+
+    This allows you to stack absolutely positioned views that dynamically change
+    their height and/or visibility without having to resort to using browser
+    flow layout.
 
     A typical usage scenario is a long "form" made of multiple subsection
     views.  If we want to adjust the height of a subsection, to make space for
@@ -34,27 +38,38 @@ SC.mixin(SC.View,
           // The order of child views is important!
           childViews: ['sectionA', 'sectionB', 'sectionC'],
 
-          // Actual layout will become { left: 10, right: 10, top: 20, height: 270 }
-          layout: { left: 10, right: 10, top: 20 }, // Don't need to specify layout.height, this is automatic.
+          // The view will resize itself to fit its children.
+          // i.e. We don't need to specify layout.height, this is automatic.
+          // The actual layout will become { left: 10, right: 10, top: 20, height: 270 } initially.
+          layout: { left: 10, right: 10, top: 20 },
 
           sectionA: SC.View.design({
-            // Actual layout will become { left: 0, right: 0, top: 0, height: 100 }
-            layout: { height: 100 } // Don't need to specify layout.top, this is automatic.
+
+            // We don't need to specify layout.top, this is automatic.
+            // The actual layout will become { left: 0, right: 0, top: 0, height: 100 } initially.
+            layout: { height: 100 }
+
           }),
 
           sectionB: SC.View.design({
-            // Actual layout will become { border: 1, left: 0, right: 0, top: 100, height: 50 }
-            layout: { border: 1, height: 50 } // Don't need to specify layout.top, this is automatic.
+
+            // We don't need to specify layout.top, this is automatic.
+            // The actual layout will become { border: 1, left: 0, right: 0, top: 100, height: 50 } initially.
+            layout: { border: 1, height: 50 }
+
           }),
 
           sectionC: SC.View.design({
-            // Actual layout will become { left: 10, right: 10, top: 150, height: 120 }
-            layout: { left: 10, right: 10, height: 120 } // Don't need to specify layout.top, this is automatic.
+
+            // We don't need to specify layout.top, this is automatic.
+            // The actual layout will become { left: 10, right: 10, top: 150, height: 120 } initially.
+            layout: { left: 10, right: 10, height: 120 }
+
           })
 
         });
 
-    ## Modify all child view layouts with `childViewLayoutOptions`
+    ## Modify the default behavior with `childViewLayoutOptions`
 
     To modify the plugin behavior for all child view layouts, you can set the
     following child view layout options in `childViewLayoutOptions` on the view:
@@ -81,22 +96,31 @@ SC.mixin(SC.View,
           // The order of child views is important!
           childViews: ['sectionA', 'sectionB', 'sectionC'],
 
-          // Actual layout will become { left: 10, right: 10, top: 20, height: 310 }
+          // The actual layout will become { left: 10, right: 10, top: 20, height: 310 } initially.
           layout: { left: 10, right: 10, top: 20 }, // Don't need to specify layout.height, this is automatic.
 
           sectionA: SC.View.design({
-            // Actual layout will become { left: 0, right: 0, top: 10, height: 100 }
-            layout: { height: 100 } // Don't need to specify layout.top, this is automatic.
+
+            // We don't need to specify layout.top, this is automatic.
+            // The actual layout will become { left: 0, right: 0, top: 10, height: 100 } initially.
+            layout: { height: 100 }
+
           }),
 
           sectionB: SC.View.design({
-            // Actual layout will become { border: 1, left: 0, right: 0, top: 115, height: 50 }
-            layout: { border: 1, height: 50 } // Don't need to specify layout.top, this is automatic.
+
+            // We don't need to specify layout.top, this is automatic.
+            // The actual layout will become { border: 1, left: 0, right: 0, top: 115, height: 50 } initially.
+            layout: { border: 1, height: 50 }
+
           }),
 
           sectionC: SC.View.design({
-            // Actual layout will become { left: 10, right: 10, top: 170, height: 120 }
-            layout: { left: 10, right: 10, height: 120 } // Don't need to specify layout.top, this is automatic.
+
+            // We don't need to specify layout.top, this is automatic.
+            // The actual layout will become { left: 10, right: 10, top: 170, height: 120 } initially.
+            layout: { left: 10, right: 10, height: 120 }
+
           })
 
         });
@@ -134,23 +158,37 @@ SC.mixin(SC.View,
           layout: { left: 10, right: 10, top: 20, height: 500 }, // Need to specify layout.height.
 
           sectionA: SC.View.design({
-            // Actual layout will become { left: 0, right: 0, top: 10, height: 100 }
-            layout: { height: 100 } // Don't need to specify layout.top, this is automatic.
+
+            // We don't need to specify layout.top, this is automatic. This child will not stretch, its height is set.
+            // The actual layout will become { left: 0, right: 0, top: 10, height: 100 } initially.
+            layout: { height: 100 }
+
           }),
 
           sectionB: SC.View.design({
-            // The unclaimed space == 500 - 10 - 100 - 5 - 5 - 20 == 360, will be shared between the two last sections.
-            // This section will take 1/3 * 360 = 120
+
+            // The unclaimed space so far is 500 - 10 - 100 - 5 - 5 - 20, or 360px. This space will be shared between
+            // the two last sections, because we won't specity a height on them.
+            // This view will get 1/3 of the available space, because the other flexibile view has a ratio of 2.
+            fillAvailableSpaceRatio: 1,
+
+            // This section will take 1/3 * 360px = 120px.
             // Actual layout will become { border: 1, left: 0, right: 0, top: 115, bottom: 265 }, in other words, height == 120
-            layout: { border: 1 }, // Don't need to specify layout.left, layout.right or layout.width, this is automatic.
-            fillAvailableSpaceRatio: 1
+            // We don't need to specify layout.top, layout.bottom or layout.height, this is automatic.
+            layout: { border: 1 }
+
           }),
 
           sectionC: SC.View.design({
-            // This section will take 2/3 * 360 = 240
+
+            // This view will get 2/3 of the available space, because the other flexibile view has a ratio of 1.
+            fillAvailableSpaceRatio: 2,
+
+            // This section will take 2/3 * 360px = 240px.
             // Actual layout will become { left: 10, right: 10, top: 240, bottom: 20 }, in other words, height == 240
-            layout: { left: 10, right: 10 } // Don't need to specify layout.top, layout.bottom or layout.height, this is automatic.
-            fillAvailableSpaceRatio: 2
+            // We don't need to specify layout.top, layout.bottom or layout.height, this is automatic.
+            layout: { left: 10, right: 10 }
+
           })
 
         });
@@ -239,28 +277,32 @@ SC.mixin(SC.View,
         lastMargin = 0, // Used to avoid adding spacing to the final margin.
         marginAfter = options.paddingBefore || 0,
         paddingAfter = options.paddingAfter || 0,
-        position = 0,
+        topPosition = 0,
         provisionedSpace = 0,
         autoFillAvailableSpace = 0,
         totalAvailableSpace = 0,
         totalFillAvailableSpaceRatio = 0,
         spacing = options.spacing || 0,
+        additionalRatio = 0,
+        childView,
+        fillAvailableSpaceRatio,
+        layout,
+        marginBefore,
         i, len;
 
       // if the view is not configured to resize to fit content, then we give a chance to the children to fill the available space
       // we make a 1st pass to check the conditions, to evaluate the available space and the proportions between children
-      if (!resizeToFit)
-      {
+      if (!resizeToFit) {
+
         totalAvailableSpace = view.get('frame').height;
+
         // if the view is not configured to resize and it doesn't have yet a height, it doesn't make sense to layout children
-        if( !totalAvailableSpace )
+        if (!totalAvailableSpace) {
           return;
+        }
 
         for (i = 0, len = childViews.get('length'); i < len; i++) {
-          var childView = childViews.objectAt(i),
-            layout,
-            fillAvailableSpaceRatio,
-            marginBefore;
+          childView = childViews.objectAt(i);
 
           // Ignore child views with useAbsoluteLayout true, useStaticLayout true or that are not visible.
           if (!childView.get('isVisible') ||
@@ -279,17 +321,16 @@ SC.mixin(SC.View,
           if (SC.none(layout.height)) {
             fillAvailableSpaceRatio = childView.get('fillAvailableSpaceRatio');
 
-            if (!SC.none(fillAvailableSpaceRatio))
+            if (!SC.none(fillAvailableSpaceRatio)) {
               totalFillAvailableSpaceRatio += fillAvailableSpaceRatio;
-            else
-            {
+            } else {
               // if none of the child views has fillAvailableSpaceRatio defined, allow the last one to stretch and fill the available space.
-              if (i == len - 1 && totalFillAvailableSpaceRatio === 0)
+              if (i == len - 1 && totalFillAvailableSpaceRatio === 0) {
                 totalFillAvailableSpaceRatio = 1;
+              }
               //@if(debug)
               // Add some developer support.
-              else
-              {
+              else {
                 // even if we don't have a height set, as last instance we accept the presence of minHeight
                 if (SC.none(layout.minHeight))
                 {
@@ -299,9 +340,9 @@ SC.mixin(SC.View,
               }
               //@endif
             }
-          }
-          else
+          } else {
             provisionedSpace += childView.getPath('borderFrame.height');
+          }
 
           // Determine the right margin.
           lastMargin = childView.get('marginAfter') || 0;
@@ -309,10 +350,11 @@ SC.mixin(SC.View,
         }
 
         // consider the end padding when calculating the provisionedSpace
-        if (provisionedSpace !== 0 || totalFillAvailableSpaceRatio !==0 )
+        if (provisionedSpace !== 0 || totalFillAvailableSpaceRatio !== 0) {
           provisionedSpace += Math.max(lastMargin, paddingAfter);
+        }
 
-        autoFillAvailableSpace = Math.max( 0, totalAvailableSpace - provisionedSpace );
+        autoFillAvailableSpace = Math.max(0, totalAvailableSpace - provisionedSpace);
       }
 
       // reset the references for the effective layout
@@ -321,11 +363,11 @@ SC.mixin(SC.View,
       paddingAfter = options.paddingAfter || 0;
 
       for (i = 0, len = childViews.get('length'); i < len; i++) {
-        var childView = childViews.objectAt(i),
-          layout, height,
+        var height,
           adjustTop,
-          adjustBottom,
-          marginBefore;
+          adjustBottom;
+
+        childView = childViews.objectAt(i);
 
         // Ignore child views with useAbsoluteLayout true, useStaticLayout true or that are not visible.
         if (!childView.get('isVisible') ||
@@ -346,41 +388,60 @@ SC.mixin(SC.View,
 
         // Determine the top margin.
         marginBefore = childView.get('marginBefore') || 0;
-        position += Math.max(marginAfter, marginBefore);
+        topPosition += Math.max(marginAfter, marginBefore);
 
         // Try to avoid useless adjustments top or bottom or top then bottom.
         // The required adjustments will be merged into a single call
-        adjustTop = layout.top !== position;
+        adjustTop = layout.top !== topPosition;
 
+        childView.beginPropertyChanges();
         if (!resizeToFit && !layout.height) {
+          var bottomPosition;
+
           fillAvailableSpaceRatio = childView.get('fillAvailableSpaceRatio');
 
           // if the last child doesn't define fillAvailableSpaceRatio, default it to 1 as above during the 1st pass
-          if (i == len - 1 && SC.none(fillAvailableSpaceRatio))
+          if (i == len - 1 && SC.none(fillAvailableSpaceRatio)) {
             fillAvailableSpaceRatio = 1;
+          }
 
           // we should get here only in two cases: 1. child defines fillAvailableSpaceRatio, 2. child defines a minHeight
           // if both defined, we prefer to handle fillAvailableSpaceRatio, the other case being handled below by the normal adjustment to top
-          if (!SC.none(fillAvailableSpaceRatio))
-          {
+          if (!SC.none(fillAvailableSpaceRatio)) {
+            var currentAvailableSpaceRatio = (fillAvailableSpaceRatio / totalFillAvailableSpaceRatio) + additionalRatio;
+
             // calculate the height according to fillAvailableSpaceRatio and totalFillAvailableSpaceRatio
             // but set the "bottom" position so any subsequent layout is not considering the height as fixed
-            height = autoFillAvailableSpace * fillAvailableSpaceRatio / totalFillAvailableSpaceRatio;
-            adjustBottom = layout.bottom !== totalAvailableSpace - position - height;
+            height = Math.ceil(autoFillAvailableSpace * currentAvailableSpaceRatio);
 
-            if (adjustTop && adjustBottom)
-              childView.adjust({'top': position, 'bottom': totalAvailableSpace - position - height});
-            else if (adjustBottom)
-              childView.adjust('bottom', totalAvailableSpace - position - height);
-            // avoid an extra adjust below
-            adjustTop = false;
+            // Constrain the height to the maximum height allowed.
+            var maxHeight = layout.maxHeight;
+            if (!SC.none(maxHeight)) {
+              // Constrain the height according to maxHeight. Which frees up additional available space for further child views.
+              if (height > maxHeight) {
+                // This is a bit tricky. Because this view didn't use up its entire allotment, we need to bump up what is available
+                // for the remaining views to use.
+                additionalRatio = currentAvailableSpaceRatio - (maxHeight / autoFillAvailableSpace);
+                height = maxHeight;
+              }
+            }
+
+            // Determine the bottom position. If the position overflows (i.e. goes negative) because of rounding up, stop at 0.
+            bottomPosition = Math.max(0, totalAvailableSpace - topPosition - width);
+            adjustBottom = layout.bottom !== bottomPosition;
+
+            if (adjustBottom) {
+              childView.adjust('bottom', bottomPosition);
+            }
           }
         }
 
-        if( adjustTop )
-          childView.adjust('top', position);
+        if (adjustTop) {
+          childView.adjust('top', topPosition);
+        }
+        childView.endPropertyChanges();
 
-        position += childView.getPath('borderFrame.height');
+        topPosition += childView.getPath('borderFrame.height');
 
         // Determine the right margin.
         lastMargin = childView.get('marginAfter') || 0;
@@ -388,13 +449,13 @@ SC.mixin(SC.View,
       }
 
       // If the current size is 0 (all children are hidden), it doesn't make sense to add the padding
-      if (position !== 0) {
-        position += Math.max(lastMargin, paddingAfter);
+      if (topPosition !== 0) {
+        topPosition += Math.max(lastMargin, paddingAfter);
       }
 
       // Adjust our frame to fit as well, this ensures that scrolling works.
-      if (resizeToFit && view.getPath('layout.height') !== position) {
-        view.adjust('height', position);
+      if (resizeToFit && view.getPath('layout.height') !== topPosition) {
+        view.adjust('height', topPosition);
       }
     }
 
