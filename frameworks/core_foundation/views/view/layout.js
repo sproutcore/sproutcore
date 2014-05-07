@@ -94,6 +94,11 @@ SC.View.reopen(
 
         // Initialize the child views.
         this._cvl_setupChildViewsLiveLayout();
+
+        // Initialize our own frame observer.
+        if (!this.get('isFixedSize') && childViewLayout.layoutDependsOnSize && childViewLayout.layoutDependsOnSize(this)) {
+          this.addObserver('frame', this, this._cvl_childViewLayoutDidChange);
+        }
       }
     }
 
@@ -316,7 +321,7 @@ SC.View.reopen(
 
     To change a layout property, you should use the adjust method, which handles some particulars for you.
 
-    @type {Hash}
+    @type Object
     @default { top: 0, left: 0, bottom: 0, right: 0 }
     @test in layoutStyle
   */
