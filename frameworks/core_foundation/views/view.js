@@ -2110,22 +2110,6 @@ SC.CoreView.unload = function () {
     update the view to remove the visual drop signal. This event is fired regardless of whether
     a drop occurred.
 
-  Since these events can be more global than other events, they are accompanied by versions
-  triggered on your app's default responder (e.g. a statechart). These include:
-
-  - `dataDragDidEnter` -- Triggered when a data-drag enters the application window. You can use
-    this event to highlight drop zones appropriate to the dragging data type (found via the
-    event's `dataTransfer.types` array).
-  - `dataDragDidHover` -- Triggered when a data-drag hovers or moves over the application window.
-    This gives the statechart a chance to tell the browser how to handle the drag operation. Note
-    that `dataDragDidHover` is triggered immediately after `dataDragDidEnter`, so you don't need
-    to worry about that in the enter event.
-  - `dataDragDidDrop` -- If the last hover event's dropEffect was set correctly, this event will
-    give access to the data that was dropped.
-  - `dataDragDidExit` -- Triggered when the data drag leaves the application window. You can use
-    this event to hide drop zone highlights. This event is fired regardless of whether a drop
-    occurred.
-
 
   Touch events
   ----

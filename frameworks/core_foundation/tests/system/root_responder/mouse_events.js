@@ -176,15 +176,6 @@ TODO: Touch.
 */
 
 test('Data dragging', function() {
-  // For this test, we also want to test the default responder actions.
-  var previousDefaultResponder = SC.RootResponder.responder.defaultResponder;
-  var defaultResponder = SC.RootResponder.responder.defaultResponder = SC.Object.create({
-    dataDragDidEnter: CoreTest.stub(),
-    dataDragDidHover: CoreTest.stub(),
-    dataDragDidExit: CoreTest.stub(),
-    dataDragDidDrop: CoreTest.stub()
-  });
-
   // Make sure we're all at zero.
   // dataDragEntered
   var isGood = YES &&
@@ -213,11 +204,6 @@ test('Data dragging', function() {
   evt1a.type = 'dragenter';
   SC.RootResponder.responder.dragenter(evt1a);
 
-  // Test default responder.
-  equals(defaultResponder.dataDragDidEnter.callCount, 1, "The default responder was notified that a drag began over the app");
-  equals(defaultResponder.dataDragDidHover.callCount, 1, "The default responder received dataDragDidHover immediately after dataDragDidEnter");
-  equals(defaultResponder.dataDragDidExit.callCount, 0, "The default responder has NOT received dataDragDidExit");
-
   // Test the views.
   equals(view1a.dataDragEntered.callCount, 1, "The targeted view has received dataDragEntered");
   equals(view1a.dataDragHovered.callCount, 1, "The targeted view has received initial dataDragHovered");
@@ -237,11 +223,6 @@ test('Data dragging', function() {
   // Hover the drag and make sure only dataDragHovered is called.
   evt1a.type = 'dragover';
   SC.RootResponder.responder.dragover(evt1a);
-
-  // Test the default responder.
-  equals(defaultResponder.dataDragDidEnter.callCount, 1, "The default responder did NOT receive additional dataDragDidEnter on hover");
-  equals(defaultResponder.dataDragDidHover.callCount, 2, "The default responder received additional dataDragDidHover on hover");
-  equals(defaultResponder.dataDragDidExit.callCount, 0, "The default responder has NOT received dataDragDidExit on hover");
 
   // Test the views.
   equals(view1a.dataDragHovered.callCount, 2, "The targeted view has received another dataDragHovered");
@@ -272,11 +253,6 @@ test('Data dragging', function() {
   SC.RootResponder.responder.dragenter(evt2);
   SC.RootResponder.responder.dragleave(evt1a);
 
-  // Check the default responder.
-  equals(defaultResponder.dataDragDidEnter.callCount, 1, "The default responder did NOT receive additional dataDragDidEnter on internal events");
-  equals(defaultResponder.dataDragDidHover.callCount, 4, "The default responder has received dataDragDidHover for each subsequent drag event");
-  equals(defaultResponder.dataDragDidExit.callCount, 0, "The default responder has NOT received dataDragDidExit on internal events");
-
   // Check the views.
   equals(view1a.dataDragExited.callCount, 1, "The targeted view has received dataDragExited");
   equals(view1.dataDragExited.callCount, 1, "The targeted view's parent has received dataDragExited");
@@ -288,11 +264,6 @@ test('Data dragging', function() {
   // Leave view2 to test document leaving.
   evt2.type = 'dragleave';
   SC.RootResponder.responder.dragleave(evt2);
-
-  // Check the default responder.
-  equals(defaultResponder.dataDragDidEnter.callCount, 1, "The default responder did NOT receive additional dataDragDidEnter on document exit");
-  equals(defaultResponder.dataDragDidHover.callCount, 5, "The default responder received an additional dataDragDidHover event on document exit");
-  equals(defaultResponder.dataDragDidExit.callCount, 1, "The default responder received dataDragDidExit on document exit");
 
   // Check the views.
   equals(view1a.dataDragExited.callCount, 1, "The previously-targeted view has NOT received additional dataDragExited on document exit");
@@ -311,17 +282,10 @@ test('Data dragging', function() {
   evt1a.type = 'dragdrop';
   SC.RootResponder.responder.drop(evt1a);
 
-  // Check the default responder.
-  equals(defaultResponder.dataDragDidDrop.callCount, 1, "The default responder received a dataDragDidDrop event on drop");
-
   // Check the views.
   equals(view1a.dataDragDropped.callCount, 1, "The targeted view received a dataDragDropped event");
   equals(view1.dataDragDropped.callCount, 0, "The targeted view's parent did not receive a dataDragDropped event");
 
-
-  // Clean up our default responder sitch.
-  SC.RootResponder.responder.defaultResponder.destroy();
-  SC.RootResponder.responder.defaultResponder = previousDefaultResponder;
 });
 
 test('Data dragging content types', function() {
