@@ -1150,10 +1150,6 @@ SC.ScrollView = SC.View.extend({
       if (viewportWidth >= oldContentViewWidth) {
         horizontalScrollOffset = 'mid';
       }
-      // special case - if the offset was manually set to the middle, then just let that stick
-      else if (this._scroll_horizontalScrollOffsetAtMid) {
-        horizontalScrollOffset = 'mid';
-      }
       // special case - if the offset was manually set to the minimum, then just let that stick
       else if (this._scroll_horizontalScrollOffsetAtMin) {
         horizontalScrollOffset = 'min';
@@ -1161,6 +1157,10 @@ SC.ScrollView = SC.View.extend({
       // special case - if the offset was manually set to the minimum, then just let that stick
       else if (this._scroll_horizontalScrollOffsetAtMax) {
         horizontalScrollOffset = 'max';
+      }
+      // special case - if the offset was manually set to the middle, then just let that stick
+      else if (this._scroll_horizontalScrollOffsetAtMid) {
+        horizontalScrollOffset = 'mid';
       }
       else {
         // if the horizontal scrolling offset hasn't been set, then compute it based on the midpoint percentage
@@ -1230,10 +1230,6 @@ SC.ScrollView = SC.View.extend({
       if (viewportHeight >= oldContentViewHeight) {
         verticalScrollOffset = 'mid';
       }
-      // special case - if the offset was manually set to the middle, then just let that stick
-      else if (this._scroll_verticalScrollOffsetAtMid) {
-        verticalScrollOffset = 'mid';
-      }
       // special case - if the offset was manually set to the minimum, then just let that stick
       else if (this._scroll_verticalScrollOffsetAtMin) {
         verticalScrollOffset = 'min';
@@ -1241,6 +1237,10 @@ SC.ScrollView = SC.View.extend({
       // special case - if the offset was manually set to the minimum, then just let that stick
       else if (this._scroll_verticalScrollOffsetAtMax) {
         verticalScrollOffset = 'max';
+      }
+      // special case - if the offset was manually set to the middle, then just let that stick
+      else if (this._scroll_verticalScrollOffsetAtMid) {
+        verticalScrollOffset = 'mid';
       }
       else {
         // if the vertical scrolling offset hasn't been set, then compute it based on the midpoint percentage
