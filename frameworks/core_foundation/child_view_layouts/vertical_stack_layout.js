@@ -131,8 +131,8 @@ SC.mixin(SC.View,
     the child views to automatically extend or shrink in order to fill the empty, unclaimed space.
     This available space is shared between the children not specifying a fixed height
     and their final dimension is calculated proportionally to the value of the
-    property `fillAvailableSpaceRatio`.
-    For simplicity, when none of the children specifies `fillAvailableSpaceRatio`,
+    property `fillRatio`.
+    For simplicity, when none of the children specifies `fillRatio`,
     you can ignore the last child view's layout height if you want the last child view
     to stretch to fill the parent view.
 
@@ -170,7 +170,7 @@ SC.mixin(SC.View,
             // The unclaimed space so far is 500 - 10 - 100 - 5 - 5 - 20, or 360px. This space will be shared between
             // the two last sections, because we won't specity a height on them.
             // This view will get 1/3 of the available space, because the other flexibile view has a ratio of 2.
-            fillAvailableSpaceRatio: 1,
+            fillRatio: 1,
 
             // This section will take 1/3 * 360px = 120px.
             // Actual layout will become { border: 1, left: 0, right: 0, top: 115, bottom: 265 }, in other words, height == 120
@@ -182,7 +182,7 @@ SC.mixin(SC.View,
           sectionC: SC.View.design({
 
             // This view will get 2/3 of the available space, because the other flexibile view has a ratio of 1.
-            fillAvailableSpaceRatio: 2,
+            fillRatio: 2,
 
             // This section will take 2/3 * 360px = 240px.
             // Actual layout will become { left: 10, right: 10, top: 240, bottom: 20 }, in other words, height == 240
@@ -203,7 +203,7 @@ SC.mixin(SC.View,
       - useAbsoluteLayout - Don't include this child view in automatic layout, use absolute positioning based on the child view's `layout` property.
       - useStaticLayout - Don't include this child view in automatic layout.  This child view uses relative positioning and is not eligible for automatic layout.
       - isVisible - Non-visible child views are not included in the stack.
-      - fillAvailableSpaceRatio - When the parent view is configured with a fixed dimension, children not specifying a height but specifying fillAvailableSpaceRatio will be resized to fill the unclaimed space proportionally to this ratio.
+      - fillRatio - When the parent view is configured with a fixed dimension, children not specifying a height but specifying fillRatio will be resized to fill the unclaimed space proportionally to this ratio.
 
     For example,
 
@@ -295,7 +295,7 @@ SC.mixin(SC.View,
         totalFillAvailableSpaceRatio = 0,
         spacing = options.spacing || 0,
         childView,
-        fillAvailableSpaceRatio,
+        fillRatio,
         layout,
         marginBefore,
         i, len;
@@ -329,12 +329,12 @@ SC.mixin(SC.View,
 
           // if the height is not set, let's check if is possible to resize the view
           if (SC.none(layout.height)) {
-            fillAvailableSpaceRatio = childView.get('fillAvailableSpaceRatio');
+            fillRatio = childView.get('fillRatio');
 
-            if (!SC.none(fillAvailableSpaceRatio)) {
-              totalFillAvailableSpaceRatio += fillAvailableSpaceRatio;
+            if (!SC.none(fillRatio)) {
+              totalFillAvailableSpaceRatio += fillRatio;
             } else {
-              // if none of the child views has fillAvailableSpaceRatio defined, allow the last one to stretch and fill the available space.
+              // if none of the child views has fillRatio defined, allow the last one to stretch and fill the available space.
               if (i == len - 1 && totalFillAvailableSpaceRatio === 0) {
                 totalFillAvailableSpaceRatio = 1;
               }
@@ -344,7 +344,7 @@ SC.mixin(SC.View,
                 // even if we don't have a height set, as last instance we accept the presence of minHeight
                 if (SC.none(layout.minHeight))
                 {
-                  SC.warn('Developer Warning: The SC.View.VERTICAL_STACK plugin requires that each childView layout contains at least a height or has a configured fillAvailableSpaceRatio. The layout may also optionally contain left and right, left and width, right and width or centerX and width. The childView %@ has an invalid layout/fillAvailableSpaceRatio: %@'.fmt(childView, SC.stringFromLayout(layout)));
+                  SC.warn('Developer Warning: The SC.View.VERTICAL_STACK plugin requires that each childView layout contains at least a height or has a configured fillRatio. The layout may also optionally contain left and right, left and width, right and width or centerX and width. The childView %@ has an invalid layout/fillRatio: %@'.fmt(childView, SC.stringFromLayout(layout)));
                   return;
                 }
               }
@@ -408,19 +408,19 @@ SC.mixin(SC.View,
         if (!resizeToFit && !layout.height) {
           var bottomPosition;
 
-          fillAvailableSpaceRatio = childView.get('fillAvailableSpaceRatio');
+          fillRatio = childView.get('fillRatio');
 
-          // if the last child doesn't define fillAvailableSpaceRatio, default it to 1 as above during the 1st pass
-          if (i == len - 1 && SC.none(fillAvailableSpaceRatio)) {
-            fillAvailableSpaceRatio = 1;
+          // if the last child doesn't define fillRatio, default it to 1 as above during the 1st pass
+          if (i == len - 1 && SC.none(fillRatio)) {
+            fillRatio = 1;
           }
 
-          // we should get here only in two cases: 1. child defines fillAvailableSpaceRatio, 2. child defines a minHeight
-          // if both defined, we prefer to handle fillAvailableSpaceRatio, the other case being handled below by the normal adjustment to top
-          if (!SC.none(fillAvailableSpaceRatio)) {
-            var currentAvailableSpaceRatio = (fillAvailableSpaceRatio / totalFillAvailableSpaceRatio);
+          // we should get here only in two cases: 1. child defines fillRatio, 2. child defines a minHeight
+          // if both defined, we prefer to handle fillRatio, the other case being handled below by the normal adjustment to top
+          if (!SC.none(fillRatio)) {
+            var currentAvailableSpaceRatio = (fillRatio / totalFillAvailableSpaceRatio);
 
-            // calculate the height according to fillAvailableSpaceRatio and totalFillAvailableSpaceRatio
+            // calculate the height according to fillRatio and totalFillAvailableSpaceRatio
             // but set the "bottom" position so any subsequent layout is not considering the height as fixed
             height = Math.ceil(autoFillAvailableSpace * currentAvailableSpaceRatio);
 

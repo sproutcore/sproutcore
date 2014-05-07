@@ -90,7 +90,7 @@ test("basic HORIZONTAL_STACK", function () {
 
 });
 
-test("HORIZONTAL_STACK - with fillAvailableSpaceRatio", function () {
+test("HORIZONTAL_STACK - with fillRatio", function () {
   var view = null;
   SC.run(function() {
     view = SC.View.create({
@@ -109,14 +109,14 @@ test("HORIZONTAL_STACK - with fillAvailableSpaceRatio", function () {
       }),
       c2: SC.View.create({
         layout: { height: 10 },
-        fillAvailableSpaceRatio: 1
+        fillRatio: 1
       }),
       c3: SC.View.create({
         layout: { height: 10, width: 10 },
       }),
       c4: SC.View.create({
         layout: { height: 10 },
-        fillAvailableSpaceRatio: 2
+        fillRatio: 2
       }),
       c5: SC.View.create({
         layout: { height: 10 },
@@ -146,7 +146,7 @@ test("HORIZONTAL_STACK - with fillAvailableSpaceRatio", function () {
 });
 
 
-test("VERTICAL_STACK - with fillAvailableSpaceRatio", function () {
+test("VERTICAL_STACK - with fillRatio", function () {
   var view = null;
   SC.run(function() {
     view = SC.View.create({
@@ -165,14 +165,14 @@ test("VERTICAL_STACK - with fillAvailableSpaceRatio", function () {
       }),
       c2: SC.View.create({
         layout: { width: 10 },
-        fillAvailableSpaceRatio: 1
+        fillRatio: 1
       }),
       c3: SC.View.create({
         layout: { width: 10, height: 10 },
       }),
       c4: SC.View.create({
         layout: { width: 10 },
-        fillAvailableSpaceRatio: 2
+        fillRatio: 2
       }),
       c5: SC.View.create({
         layout: { width: 10 },

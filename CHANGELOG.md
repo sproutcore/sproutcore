@@ -6,6 +6,7 @@ CHANGE LOG
 
 ### FEATURES
 
+* `SC.View.VERTICAL_STACK` & `SC.View.HORIZONTAL_STACK` have been improved to allow child views in the stack to resize to fill available space. Previously, every child view needed to have a height or width specified with the exception of the last child view which could be resized to fit the remaining space of the parent view. This option was enabled by setting `resizeToFit` to `false` in the `childViewLayoutOptions` hash. In 1.11, we can now set `resizeToFit` to `false` and have all child views without an explicit width or height respectively, resize to fill the available space. By default the available space will be shared evenly by all of these child views, but a more specific per child view weighting can be applied by specifing a `fillRatio` on the child views. For instance, to split the available space between two flexible child views as 1/3 and 2/3, the first view would have a `fillRatio` of 1 and the second view would have a `fillRatio` of 2.
 * Updates SC.SceneView to support the new SC.ContainerView hardware-accelerable transitions.
 * Adds new SC.WebSocket wrapper class with proper run loop behavior.
 * The last item view in a CollectionView now gets an isLast property.
