@@ -71,7 +71,7 @@ module('SC.MenuPane UI', {
 */
 function clickOn(view, shiftKey, ctrlKey) {
   var layer    = view.get('layer'),
-      opts     = { shiftKey: !!shiftKey, ctrlKey: !!ctrlKey },
+      opts     = { shiftKey: !!shiftKey, ctrlKey: !!ctrlKey, which: 1 },
       ev;
 
   ok(layer, 'clickOn() precond - view %@ should have layer'.fmt(view.toString()));

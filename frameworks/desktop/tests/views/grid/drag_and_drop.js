@@ -65,7 +65,7 @@ test("drag on default grid view", function() {
   itemView = gridView.itemViewForContentIndex(0);
   frame = itemView.get('frame');
   layer = itemView.get('layer');
-  ev = SC.Event.simulateEvent(layer, 'mousedown', { clientX: frame.x, clientY: frame.y });
+  ev = SC.Event.simulateEvent(layer, 'mousedown', { pageX: frame.x, pageY: frame.y });
   SC.Event.trigger(layer, 'mousedown', [ev]);
 
   ev = SC.Event.simulateEvent(layer, 'mousemove');
@@ -99,7 +99,7 @@ test("drag on grid view with SC.DROP_ON support", function() {
   frame = itemView.get('frame');
   layer = itemView.get('layer');
 
-  ev = SC.Event.simulateEvent(layer, 'mousedown', { clientX: frame.x, clientY: frame.y });
+  ev = SC.Event.simulateEvent(layer, 'mousedown', { pageX: frame.x, pageY: frame.y });
   SC.Event.trigger(layer, 'mousedown', [ev]);
 
   var f = function() {
@@ -164,7 +164,7 @@ test("insertion point when drag on grid view", function() {
   frame = itemView.get('frame');
   layer = itemView.get('layer');
 
-  ev = SC.Event.simulateEvent(layer, 'mousedown', { clientX: frame.x, clientY: frame.y });
+  ev = SC.Event.simulateEvent(layer, 'mousedown', { pageX: frame.x, pageY: frame.y });
   SC.Event.trigger(layer, 'mousedown', [ev]);
 
   var f = function() {
@@ -211,7 +211,7 @@ test("insertion point when cancel drag on grid view", function() {
   frame = itemView.get('frame');
   layer = itemView.get('layer');
 
-  ev = SC.Event.simulateEvent(layer, 'mousedown', { clientX: frame.x, clientY: frame.y });
+  ev = SC.Event.simulateEvent(layer, 'mousedown', { pageX: frame.x, pageY: frame.y });
   SC.Event.trigger(layer, 'mousedown', [ev]);
 
   var f = function() {

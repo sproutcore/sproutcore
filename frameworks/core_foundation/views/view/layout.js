@@ -32,6 +32,9 @@ SC.ANCHOR_CENTER = { centerX: 0, centerY: 0 };
 
 SC.LAYOUT_AUTO = 'auto';
 
+// Regexes representating valid values for rotation and scale layout properties
+SC._ROTATION_VALUE_REGEX = /^\-?\d+(\.\d*)?(rad|deg)$/;
+SC._SCALE_VALUE_REGEX = /^\d+(,\d+){0,2}$/;
 
 SC.View.reopen(
   /** @scope SC.View.prototype */ {
@@ -127,8 +130,9 @@ SC.View.reopen(
         if (!layout.hasOwnProperty(property)) { continue; }
 
         var layoutValue = layout[property];
-        if (isNaN(layoutValue)) {
-          throw new Error("SC.View layout property set to invalid value, %@: %@. Only Number values may be assigned to the layout!".fmt(property, layoutValue));
+        if (isNaN(layoutValue) && (layoutValue !== SC.LAYOUT_AUTO) &&
+            !SC._ROTATION_VALUE_REGEX.exec(layoutValue) && !SC._SCALE_VALUE_REGEX.exec(layoutValue)) {
+          throw new Error("SC.View layout property set to invalid value, %@: %@.".fmt(property, layoutValue));
         }
       }
       break;
