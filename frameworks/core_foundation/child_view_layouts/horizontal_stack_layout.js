@@ -231,6 +231,17 @@ SC.mixin(SC.View,
     /** @private Properties to observe on child views that affect the overall child view layout. */
     childLayoutProperties: ['marginBefore', 'marginAfter', 'isVisible'],
 
+    /** @private When resizeToFit is false, then we need to know when the view's frame changes. */
+    layoutDependsOnSize: function (view) {
+      var options = view.get('childViewLayoutOptions');
+
+      if (options) {
+        return SC.none(options.resizeToFit) ? false : !options.resizeToFit;
+      } else {
+        return false;
+      }
+    },
+
     /** @private */
     layoutChildViews: function (view) {
       var childViews = view.get('childViews'),

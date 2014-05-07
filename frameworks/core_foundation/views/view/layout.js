@@ -87,6 +87,11 @@ SC.View.reopen(
 
         // Initialize the child views.
         this._cvl_setupChildViewsLiveLayout();
+
+        // Initialize our own frame observer.
+        if (!this.get('isFixedSize') && childViewLayout.layoutDependsOnSize && childViewLayout.layoutDependsOnSize(this)) {
+          this.addObserver('frame', this, this._cvl_childViewLayoutDidChange);
+        }
       }
     }
 
