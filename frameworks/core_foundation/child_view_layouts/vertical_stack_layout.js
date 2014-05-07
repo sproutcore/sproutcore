@@ -435,7 +435,7 @@ SC.mixin(SC.View,
             // }
 
             // Determine the bottom position. If the position overflows (i.e. goes negative) because of rounding up, stop at 0.
-            bottomPosition = Math.max(0, totalAvailableSpace - topPosition - width);
+            bottomPosition = Math.max(0, totalAvailableSpace - topPosition - height);
             adjustBottom = layout.bottom !== bottomPosition;
 
             if (adjustBottom) {
