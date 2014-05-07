@@ -276,7 +276,6 @@ SC.mixin(SC.View,
         totalAvailableSpace = 0,
         totalFillAvailableSpaceRatio = 0,
         spacing = options.spacing || 0,
-        additionalRatio = 0,
         childView,
         fillAvailableSpaceRatio,
         layout,
@@ -401,23 +400,21 @@ SC.mixin(SC.View,
           // we should get here only in two cases: 1. child defines fillAvailableSpaceRatio, 2. child defines a minWidth
           // if both defined, we prefer to handle fillAvailableSpaceRatio, the other case being handled below by the normal adjustment to left
           if (!SC.none(fillAvailableSpaceRatio)) {
-            var currentAvailableSpaceRatio = (fillAvailableSpaceRatio / totalFillAvailableSpaceRatio) + additionalRatio;
+            var currentAvailableSpaceRatio = (fillAvailableSpaceRatio / totalFillAvailableSpaceRatio);
 
             // calculate the width according to fillAvailableSpaceRatio and totalFillAvailableSpaceRatio
             // but set the "right" position so any subsequent layout is not considering the width as fixed
             width = Math.ceil(autoFillAvailableSpace * currentAvailableSpaceRatio);
 
+            // INCOMPLETE: We need to flag this view as constrained and re-compute all the auto-fill amounts
             // Constrain the width to the maximum width allowed.
-            var maxWidth = layout.maxWidth;
-            if (!SC.none(maxWidth)) {
-              // Constrain the width according to maxWidth. Which frees up additional available space for further child views.
-              if (width > maxWidth) {
-                // This is a bit tricky. Because this view didn't use up its entire allotment, we need to bump up what is available
-                // for the remaining views to use.
-                additionalRatio = currentAvailableSpaceRatio - (maxWidth / autoFillAvailableSpace);
-                width = maxWidth;
-              }
-            }
+            // var maxWidth = layout.maxWidth;
+            // if (!SC.none(maxWidth)) {
+            //   // Constrain the width according to maxWidth. Which frees up additional available space for further child views.
+            //   if (width > maxWidth) {
+            //     width = maxWidth;
+            //   }
+            // }
 
             // Determine the right position. If the position overflows (i.e. goes negative) because of rounding up, stop at 0.
             rightPosition = Math.max(0, totalAvailableSpace - leftPosition - width);

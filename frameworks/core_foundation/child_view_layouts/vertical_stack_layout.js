@@ -283,7 +283,6 @@ SC.mixin(SC.View,
         totalAvailableSpace = 0,
         totalFillAvailableSpaceRatio = 0,
         spacing = options.spacing || 0,
-        additionalRatio = 0,
         childView,
         fillAvailableSpaceRatio,
         layout,
@@ -408,23 +407,21 @@ SC.mixin(SC.View,
           // we should get here only in two cases: 1. child defines fillAvailableSpaceRatio, 2. child defines a minHeight
           // if both defined, we prefer to handle fillAvailableSpaceRatio, the other case being handled below by the normal adjustment to top
           if (!SC.none(fillAvailableSpaceRatio)) {
-            var currentAvailableSpaceRatio = (fillAvailableSpaceRatio / totalFillAvailableSpaceRatio) + additionalRatio;
+            var currentAvailableSpaceRatio = (fillAvailableSpaceRatio / totalFillAvailableSpaceRatio);
 
             // calculate the height according to fillAvailableSpaceRatio and totalFillAvailableSpaceRatio
             // but set the "bottom" position so any subsequent layout is not considering the height as fixed
             height = Math.ceil(autoFillAvailableSpace * currentAvailableSpaceRatio);
 
+            // INCOMPLETE: We need to flag this view as constrained and re-compute all the auto-fill amounts
             // Constrain the height to the maximum height allowed.
-            var maxHeight = layout.maxHeight;
-            if (!SC.none(maxHeight)) {
-              // Constrain the height according to maxHeight. Which frees up additional available space for further child views.
-              if (height > maxHeight) {
-                // This is a bit tricky. Because this view didn't use up its entire allotment, we need to bump up what is available
-                // for the remaining views to use.
-                additionalRatio = currentAvailableSpaceRatio - (maxHeight / autoFillAvailableSpace);
-                height = maxHeight;
-              }
-            }
+            // var maxHeight = layout.maxHeight;
+            // if (!SC.none(maxHeight)) {
+            //   // Constrain the height according to maxHeight. Which frees up additional available space for further child views.
+            //   if (height > maxHeight) {
+            //     height = maxHeight;
+            //   }
+            // }
 
             // Determine the bottom position. If the position overflows (i.e. goes negative) because of rounding up, stop at 0.
             bottomPosition = Math.max(0, totalAvailableSpace - topPosition - width);
