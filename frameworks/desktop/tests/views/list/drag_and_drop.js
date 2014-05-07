@@ -75,21 +75,23 @@ module("SC.ListView - drag and drop", pane.standardSetup());
 test("drag on default list view", function() {
   var ev,
     itemView,
+    frame,
     layer,
     listView = pane.view("basic").get('contentView');
 
   itemView = listView.itemViewForContentIndex(0);
+  frame = itemView.get('frame');
   layer = itemView.get('layer');
-  ev = SC.Event.simulateEvent(layer, 'mousedown');
+  ev = SC.Event.simulateEvent(layer, 'mousedown', { pageX: frame.x, pageY: frame.y });
   SC.Event.trigger(layer, 'mousedown', [ev]);
 
-  ev = SC.Event.simulateEvent(layer, 'mousemove');
+  ev = SC.Event.simulateEvent(layer, 'mousemove', { pageX: frame.x, pageY: frame.y });
   SC.Event.trigger(layer, 'mousemove', [ev]);
 
   equals(listView.get('dragContent'), null, 'dragContent should not be set, because the default implementation should prevent dragging');
 
   // Clean up
-  ev = SC.Event.simulateEvent(layer, 'mouseup');
+  ev = SC.Event.simulateEvent(layer, 'mouseup', { pageX: frame.x, pageY: frame.y });
   SC.Event.trigger(layer, 'mouseup', [ev]);
 });
 
@@ -97,6 +99,7 @@ test("drag on default list view", function() {
 test("drag on list view with SC.DROP_ON support", function() {
   var ev,
     itemView,
+    frame,
     layer,
     listView = pane.view("basic").get('contentView');
 
@@ -111,7 +114,8 @@ test("drag on list view with SC.DROP_ON support", function() {
 
   itemView = listView.itemViewForContentIndex(0);
   layer = itemView.get('layer');
-  ev = SC.Event.simulateEvent(layer, 'mousedown');
+  frame = itemView.get('frame');
+  ev = SC.Event.simulateEvent(layer, 'mousedown', { pageX: frame.x, pageY: frame.y });
   SC.Event.trigger(layer, 'mousedown', [ev]);
 
   var f = function() {
@@ -119,7 +123,7 @@ test("drag on list view with SC.DROP_ON support", function() {
       point;
 
     SC.RunLoop.begin();
-    ev = SC.Event.simulateEvent(layer, 'mousemove');
+    ev = SC.Event.simulateEvent(layer, 'mousemove', { pageX: frame.x, pageY: frame.y });
     SC.Event.trigger(layer, 'mousemove', [ev]);
 
     equals(listView.get('dragContent').content, listView.get('content'), "dragContent.content should be equal to the ListView's content");
@@ -156,7 +160,7 @@ test("drag on list view with SC.DROP_ON support", function() {
     ok(!itemView2.$().hasClass('drop-target'), "second list item should not add drop-target class");
 
     // Clean up
-    ev = SC.Event.simulateEvent(layer, 'mouseup');
+    ev = SC.Event.simulateEvent(layer, 'mouseup', { pageX: point.x + 1, pageY: point.y + 1 });
     SC.Event.trigger(layer, 'mouseup', [ev]);
 
     window.start();
@@ -170,13 +174,15 @@ test("insertion point when drag on list view", function() {
   var ev,
     itemView,
     layer,
+    frame,
     listView = pane.view("basic").get('contentView');
 
   listView.set('canReorderContent', YES);
 
   itemView = listView.itemViewForContentIndex(0);
+  frame = itemView.get('frame');
   layer = itemView.get('layer');
-  ev = SC.Event.simulateEvent(layer, 'mousedown');
+  ev = SC.Event.simulateEvent(layer, 'mousedown', { pageX: frame.x, pageY: frame.y });
   SC.Event.trigger(layer, 'mousedown', [ev]);
 
   var f = function() {
@@ -184,7 +190,7 @@ test("insertion point when drag on list view", function() {
       point;
 
     SC.RunLoop.begin();
-    ev = SC.Event.simulateEvent(layer, 'mousemove');
+    ev = SC.Event.simulateEvent(layer, 'mousemove', { pageX: frame.x, pageY: frame.y });
     SC.Event.trigger(layer, 'mousemove', [ev]);
 
     // Drag over 2nd item
@@ -200,7 +206,7 @@ test("insertion point when drag on list view", function() {
     equals(listView._sc_insertionPointView.get('layout').top, 20, "The drag having been over item 2, the insertion point should be located at the top of item 2");
 
     // Clean up
-    ev = SC.Event.simulateEvent(layer, 'mouseup');
+    ev = SC.Event.simulateEvent(layer, 'mouseup', { pageX: point.x + 1, pageY: point.y + 1 });
     SC.Event.trigger(layer, 'mouseup', [ev]);
 
     equals(listView._sc_insertionPointView, null, "The insertion point should have been destroyed");
@@ -215,14 +221,16 @@ test("insertion point when drag on list view", function() {
 test("insertion point when cancel drag on list view", function() {
   var ev,
     itemView,
+    frame,
     layer,
     listView = pane.view("basic").get('contentView');
 
   listView.set('canReorderContent', YES);
 
   itemView = listView.itemViewForContentIndex(0);
+  frame = itemView.get('frame');
   layer = itemView.get('layer');
-  ev = SC.Event.simulateEvent(layer, 'mousedown');
+  ev = SC.Event.simulateEvent(layer, 'mousedown', { pageX: frame.x, pageY: frame.y });
   SC.Event.trigger(layer, 'mousedown', [ev]);
 
   var f = function() {
@@ -230,7 +238,7 @@ test("insertion point when cancel drag on list view", function() {
       point;
 
     SC.RunLoop.begin();
-    ev = SC.Event.simulateEvent(layer, 'mousemove');
+    ev = SC.Event.simulateEvent(layer, 'mousemove', { pageX: frame.x, pageY: frame.y });
     SC.Event.trigger(layer, 'mousemove', [ev]);
 
     // Drag over 2nd item
