@@ -86,7 +86,8 @@ SC.ScrollView = SC.View.extend({
   contentView: null,
 
   /**
-    The horizontal alignment for non-filling content inside of the ScrollView. Possible values:
+    The horizontal alignment for non-filling content inside of the ScrollView. (Currently, you must specify a fixed width
+    on your content for this property to have an effect.) Possible values:
 
       - SC.ALIGN_LEFT
       - SC.ALIGN_RIGHT
@@ -98,7 +99,8 @@ SC.ScrollView = SC.View.extend({
   horizontalAlign: SC.ALIGN_LEFT,
 
   /**
-    The vertical alignment for non-filling content inside of the ScrollView. Possible values:
+    The vertical alignment for non-filling content inside of the ScrollView. (Currently, you must specify a fixed height
+    on your content for this property to have an effect.) Possible values:
 
       - SC.ALIGN_TOP
       - SC.ALIGN_BOTTOM
@@ -1060,7 +1062,6 @@ SC.ScrollView = SC.View.extend({
       return;
     }
 
-
     /*
       Behavior for updating the scale.
 
@@ -1068,51 +1069,38 @@ SC.ScrollView = SC.View.extend({
       dimension (e.g., horizontal). The same thing can be applied to the other
       dimension.
 
-      This is modeled after the OS X Preview app.
+      This is modeled after the zoom behavior of the OS X Preview app.
 
-      The desired behavior here is that if the content view is fully visible
-      in that dimension, then we will center it in the container view.
-
-      If the content view is not fully visible, then we're dealing with a more
-      "general" scaling case, which basically consistents of changing the "zoom"
-      (scale property) and adjusting the "pan" (scroll offset properties).
+      Scaling takes place around an origin point. The desired behavior is for
+      this origin point to center in the middle of the visible area – unless
+      the visible area is at an extreme (e.g. scrolled all the way to the top),
+      in which case the zoom's origin point should be at that edge.
 
       We always position the contentView at the top left of the containerView,
       and the transform origin is always the top left. This way, the scaled frame
       always expands predicably to the right and to the bottom. We then adjust the
       scroll offset values in order to give the impression that the anchor was anchored
-      around the center of the viewable area.
+      around the center of the viewable area. This avoids a number of mathematical
+      jitters that were being found with more straightforward approaches.
     */
 
-    var newScale = this.get('scale');
-
-    var containerView = this.get('containerView');
-
-    // the container view's frame in the the coordinate of the container view's parent view
-    var containerViewFrame = containerView.get('frame');
-
-    // The container view's frame in the the coordinate of the content view's parent view.
-    // This is handy for the scroll offset calculation later.
-    var containerViewFrameInContentView = contentView.convertFrameFromView(containerViewFrame, containerView.get('parentView'));
-
-
-    // 1. determine the amount of margin that should be available.
+    var newScale = this.get('scale'),
+      containerView = this.get('containerView'),
+      // the container view's frame in the the coordinate of the container view's parent view
+      containerViewFrame = containerView.get('frame'),
+      // The container view's frame in the the coordinate of the content view's parent view.
+      // This is handy for the scroll offset calculation later.
+      containerViewFrameInContentView = contentView.convertFrameFromView(containerViewFrame, containerView.get('parentView'));
 
     // Horizontal
-
-    var leftOffset;
-    var horizontalScrollOffset;
-
-    var viewportWidth = containerViewFrame.width;
-
-    var newContentViewWidth = contentViewFrame.originalWidth * newScale;
-
+    var viewportWidth = containerViewFrame.width,
+      newContentViewWidth = contentViewFrame.originalWidth * newScale,
+      leftOffset, horizontalScrollOffset;
 
     // If the contentView is able to be fully displayed in the viewport...
     if (viewportWidth >= newContentViewWidth) {
 
-      // where the content view is placed is determined by the horizontal align property
-
+      // where the content view is placed is determined by the horizontal align property.
       var horizontalAlign = this.get('horizontalAlign');
 
       if (horizontalAlign === SC.ALIGN_LEFT) {
@@ -1177,22 +1165,19 @@ SC.ScrollView = SC.View.extend({
       }
     }
 
-
     // Vertical
 
     var topOffset;
     var verticalScrollOffset;
 
-    var viewportHeight = containerViewFrame.height;
-
-    var newContentViewHeight = contentViewFrame.originalHeight * newScale;
-
+    var viewportHeight = containerViewFrame.height,
+      newContentViewHeight = contentViewFrame.originalHeight * newScale,
+      topOffset, verticalScrollOffset;
 
     // If the contentView is able to be fully displayed in the viewport...
     if (viewportHeight >= newContentViewHeight) {
 
       // where the content view is placed is determined by the vertical align property
-
       var verticalAlign = this.get('verticalAlign');
 
       if (verticalAlign === SC.ALIGN_TOP) {
@@ -1257,15 +1242,19 @@ SC.ScrollView = SC.View.extend({
       }
     }
 
-    // set the scale
-
-    contentView.adjust({
-      left: leftOffset,
-      top: topOffset,
+    // Adjust the content.
+    var adjustHash = {
       scale: newScale,
       transformOriginX: 0,
       transformOriginY: 0
-    });
+    };
+
+    // For now, we disable aligning for flexible layouts; our only tools for aligning
+    // conflict with them.
+    if (contentView.get('isFixedWidth')) adjustHash.left = leftOffset;
+    if (contentView.get('isFixedHeight')) adjustHash.top = topOffset;
+
+    contentView.adjust(adjustHash);
 
     // update the scroll offsets
 
