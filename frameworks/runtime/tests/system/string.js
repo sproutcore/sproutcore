@@ -32,7 +32,7 @@ test("Passing named arguments with a SC.Object instance", function() {
     prop: 'Hello',
     computedProp: function () {
       return 'World';
-    },
+    }.property().cacheable(),
     unknownProperty: function (key, value) {
       if (key === "unknownProp") return "!";
     }
