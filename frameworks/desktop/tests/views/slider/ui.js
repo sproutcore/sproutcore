@@ -149,7 +149,7 @@ test("Check if attribute aria-orientation is set correctly", function() {
 
 // markSteps
 
-test("Turning markSteps on creates the correct number of marks.", function() {
+test("markStep", function() {
   var view = pane.view('slider markSteps'),
       marks, expectedCount;
 
@@ -163,6 +163,15 @@ test("Turning markSteps on creates the correct number of marks.", function() {
   marks = view.$().find('.sc-slider-step-mark');
   expectedCount = Math.floor((view.get('maximum') - view.get('minimum')) / view.get('step')) + 1; // yeah yeah math.floor + 1 is math.ciel
   equals(marks.length, expectedCount, "Changing maximum correctly updates the number of marks");
+
+  // Test mark at value = 0. (See https://github.com/sproutcore/sproutcore/issues/1229)
+  SC.run(function() {
+    view.set('minimum', -1).set('maximum', 4).set('step', 1);
+  });
+  
+  marks = view.$('.sc-slider-step-mark');
+  equals(marks[1].style.left, "20%", "The mark representing value zero is positioned correctly when minimum is less than zero");
+
 });
 
 })();
