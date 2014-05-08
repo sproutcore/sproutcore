@@ -7,17 +7,17 @@
 
 /**
   @class
-  
+
   Implements support methods useful when working with strings in SproutCore
   applications.
 */
 SC.String = /** @scope SC.String.prototype */ {
-  
+
   /**
     This finds the value for a key in a formatting string.
-    
+
     Keys take the form:
-    
+
         key[:argument to formatter]
   */
   _scs_valueForKey: function(key, data, /* for debugging purposes: */ string) {
@@ -26,16 +26,16 @@ SC.String = /** @scope SC.String.prototype */ {
       arg = key.substr(argsplit + 1);
       key = key.substr(0, argsplit);
     }
-    
-    value = data[key];
+
+    value = data.get ? data.get(key): data[key];
     formatter = data[key + 'Formatter'];
-    
+
     // formatters are optional
     if (formatter) value = formatter(value, arg);
     else if (arg) {
       throw new Error("String.fmt was given a formatting string, but key `" + key + "` has no formatter! String: " + string);
     }
-    
+
     return value;
   },
 
@@ -46,15 +46,15 @@ SC.String = /** @scope SC.String.prototype */ {
     Indexed Parameters
     --------------------
     Indexed parameters are just arguments you pass into format. For example:
-    
+
         "%@1 %@3 %@2".fmt(1, 2, 3)
-        
+
         // -> "1 3 2"
-    
+
     If you don't supply a number, it will use them in the order you supplied. For example:
-    
+
         "%@, %@".fmt("Iskander", "Alex")
-        
+
         // -> "Iskander, Alex"
 
     Named Paramters
@@ -62,34 +62,34 @@ SC.String = /** @scope SC.String.prototype */ {
     You can use named parameters like this:
 
         "Value: %{key_name}".fmt({ key_name: "A Value" })
-        
+
         // -> "Value: A Value"
-    
+
     You can supply formatters for each field. A formatter is a method to get applied
     to the parameter:
-    
+
         Currency = function(v) { return "$" + v; };
         "Value: %{val}".fmt({ val: 12.00, valFormatter: Currency })
-        
+
         // -> $12.00
-    
+
     Formatters can also use arguments:
-    
+
         Currency = function(v, sign) { return sign + v; };
         "Value: %{val:£}".fmt({ val: 12.00, valFormatter: Currency })
-        
+
         // -> £12.00
 
     You can supply a different formatter for each named parameter. Formatters can ONLY be
     used with named parameters (not indexed parameters).
-        
+
   */
   fmt: function(string, args) {
     var i = 0, data = undefined, hasHadNamedArguments;
     if (args) {
       data = args[0];
     }
-    
+
     return string.replace(/%\{(.*?)\}/g, function(match, propertyPath) {
       hasHadNamedArguments = YES;
       if (!data) {
@@ -110,7 +110,7 @@ SC.String = /** @scope SC.String.prototype */ {
       else return "";
     });
   },
-  
+
   /**
     Splits the string into words, separated by spaces. Empty strings are
     removed from the results.
