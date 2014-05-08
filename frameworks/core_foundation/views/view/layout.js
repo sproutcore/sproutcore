@@ -841,17 +841,19 @@ SC.View.reopen(
     // Figure out if our size may have changed.
     var isStatic = this.get('useStaticLayout'),
         // Figure out whether our height may have changed.
-        parentHeightDidChange = parentFrame.height !== this._scv_parentHeight,
+        parentHeight = parentFrame ? parentFrame.height : 0,
+        parentHeightDidChange = parentHeight !== this._scv_parentHeight,
         isFixedHeight = this.get('isFixedHeight'),
         heightMayHaveChanged = isStatic || (parentHeightDidChange && !isFixedHeight),
         // Figure out whether our width may have changed.
-        parentWidthDidChange = parentFrame.width !== this._scv_parentWidth,
+        parentWidth = parentFrame ? parentFrame.width : 0,
+        parentWidthDidChange = parentWidth !== this._scv_parentWidth,
         isFixedWidth = this.get('isFixedWidth'),
         widthMayHaveChanged = isStatic || (parentWidthDidChange && !isFixedWidth);
 
     // Update the cached parent frame.
-    this._scv_parentHeight = parentFrame.height;
-    this._scv_parentWidth = parentFrame.width;
+    this._scv_parentHeight = parentHeight;
+    this._scv_parentWidth = parentWidth;
 
     // If our height or width changed, our resulting frame change may impact our child views.
     if (heightMayHaveChanged || widthMayHaveChanged) {

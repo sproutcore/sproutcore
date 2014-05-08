@@ -922,11 +922,10 @@
     var error = 'NONE';
     var layout = { centerX: 0.1, centerY: 0.1, width: 'auto', height: 'auto' };
 
-    SC.run(function () {
-      child.set('layout', layout);
-    });
-
     try {
+      SC.run(function () {
+        child.set('layout', layout);
+      });
       child.layoutStyle();
     } catch (e) {
       error = e;
