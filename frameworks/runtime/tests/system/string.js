@@ -27,6 +27,19 @@ test("Passing named arguments", function() {
   ]), "Hello, World!");
 });
 
+test("Passing named arguments with a SC.Object instance", function() {
+  var t = SC.Object.create({
+    prop: 'Hello',
+    computedProp: function () {
+      return 'World';
+    },
+    unknownProperty: function (key, value) {
+      if (key === "unknownProp") return "!";
+    }
+  });
+  equals(SC.String.fmt("%{prop}, %{computedProp}%{unknownProp}", [t]), "Hello, World!");
+});
+
 test("Passing incomplete named arguments", function() {
   equals( SC.String.fmt("%{first}, %{last}%{punctuation}", [{first: 'Hello', punctuation: '!'}]), "Hello, %{last}!", "Formatting a string with an incomplete set of named arguments should leave unspecified named arguments in place." );
 })
@@ -35,7 +48,7 @@ test("Passing arguments with formatters", function() {
   var F = function(value) {
     return "$" + value;
   };
-  
+
   equals(SC.String.fmt("%{number}", [{ number: 12, numberFormatter: F }]), "$12", "Formatter was applied");
 });
 
@@ -43,6 +56,6 @@ test("Passing formatting strings with formatters", function() {
   var F = function(value, arg) {
     return "$" + value + ";" + arg;
   };
-  
+
   equals(SC.String.fmt("%{number:blah}", [{ number: 12, numberFormatter: F }]), "$12;blah", "Formatter was applied with argument");
 });
