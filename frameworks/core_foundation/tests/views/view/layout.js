@@ -25,16 +25,22 @@ module("SC.View.prototype.isFixedLayout", {
 
 });
 
-test("Test isFixedSize for various layouts.", function () {
+test("Test isFixedHeight, isFixedWidth and isFixedSize for various layouts.", function () {
   ok(!view.get('isFixedSize'), "The default layout doesn't correspond to a fixed size.");
 
   SC.run(function () { view.set('layout', { width: 100 }); });
+  ok(view.get('isFixedWidth'), "A width alone gives a fixed width.");
+  ok(!view.get('isFixedWidth'), "A width alone doesn't give a fixed height.");
   ok(!view.get('isFixedSize'), "A width alone doesn't correspond to a fixed size.");
 
   SC.run(function () { view.set('layout', { height: 100 }); });
+  ok(!view.get('isFixedWidth'), "A width alone doesn't give a fixed width.");
+  ok(view.get('isFixedHeight'), "A height alone gives a fixed height.");
   ok(!view.get('isFixedSize'), "A height alone doesn't correspond to a fixed size.");
 
   SC.run(function () { view.set('layout', { width: 100, height: 100 }); });
+  ok(view.get('isFixedWidth'), "A width alone doesn't give a fixed width.");
+  ok(view.get('isFixedHeight'), "A height alone gives a fixed height.");
   ok(view.get('isFixedSize'), "A width & height corresponds to a fixed size.");
 });
 

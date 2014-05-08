@@ -344,6 +344,7 @@ SC.View.reopen(
     fixed left & top position within its parent's frame.  Fixed positions are
     therefore unaffected by changes to their parent view's size.
 
+    @field
     @returns {Boolean} YES if fixed, NO otherwise
     @test in layoutStyle
   */
@@ -381,25 +382,48 @@ SC.View.reopen(
     width and height.  Fixed sizes are therefore unaffected by changes to their
     parent view's size.
 
+    @field
     @returns {Boolean} YES if fixed, NO otherwise
-    @test in layoutStyle
+    @test in layout
   */
   isFixedSize: function () {
-    var layout = this.get('layout'),
-        ret;
+    return this.get('isFixedHeight') && this.get('isFixedWidth');
+  }.property('isFixedWidth', 'isFixedHeight').cacheable(),
 
-    // Size is fixed if it has width + height !== SC.LAYOUT_AUTO
-    ret = (
-      ((layout.width !== undefined) && (layout.height !== undefined)) &&
-      ((layout.width !== SC.LAYOUT_AUTO) && (layout.height !== SC.LAYOUT_AUTO))
-    );
+  /**
+    Returns whether the height is 'fixed' or not. A fixed height is defined on the layout
+    as an integer number of pixels.  Fixed widths are therefore unaffected by changes
+    to their parent view's height.
 
-    // The size may appear fixed, but only if none of the values are percentages.
-    if (ret) {
-      ret = (!SC.isPercentage(layout.width) && !SC.isPercentage(layout.height));
-    }
+    @field
+    @returns {Boolean} YES if fixed, NO otherwise
+    @test in layout
+  */
+  isFixedHeight: function() {
+    var layout = this.get('layout');
 
-    return ret;
+    // Width is fixed if it has a height and it isn't SC.LAYOUT_AUTO or a percent.
+    return (layout.height !== undefined) &&
+      (layout.height !== SC.LAYOUT_AUTO) &&
+      !SC.isPercentage(layout.height);
+  }.property('layout').cacheable(),
+
+  /**
+    Returns whether the width is 'fixed' or not. A fixed width is defined on the layout
+    as an integer number of pixels.  Fixed widths are therefore unaffected by changes
+    to their parent view's width.
+
+    @field
+    @returns {Boolean} YES if fixed, NO otherwise
+    @test in layout
+  */
+  isFixedWidth: function() {
+    var layout = this.get('layout');
+
+    // Width is fixed if it has a width and it isn't SC.LAYOUT_AUTO or a percent.
+    return (layout.width !== undefined) &&
+      (layout.width !== SC.LAYOUT_AUTO) &&
+      !SC.isPercentage(layout.width);
   }.property('layout').cacheable(),
 
   /**
@@ -806,24 +830,36 @@ SC.View.reopen(
     viewDidResize() if its size may have changed.  You will not usually override
     this method, but you may override the viewDidResize() method.
 
+    @param {Frame} parentFrame the parent view's current frame.
     @returns {void}
     @test in viewDidResize
   */
-  parentViewDidResize: function () {
-    var positionMayHaveChanged,
-      sizeMayHaveChanged;
+  parentViewDidResize: function (parentFrame) {
+    // Determine if our position may have changed.
+    var positionMayHaveChanged = !this.get('isFixedPosition');
 
-    // If this view uses static layout, our "do we think the frame changed?"
-    // result of isFixedLayout is not applicable and we simply have to assume
-    // that the frame may have changed.
-    sizeMayHaveChanged = this.get('useStaticLayout') || !this.get('isFixedSize');
-    positionMayHaveChanged = !this.get('isFixedPosition');
+    // Figure out if our size may have changed.
+    var isStatic = this.get('useStaticLayout'),
+        // Figure out whether our height may have changed.
+        parentHeightDidChange = parentFrame.height !== this._scv_parentHeight,
+        isFixedHeight = this.get('isFixedHeight'),
+        heightMayHaveChanged = isStatic || (parentHeightDidChange && !isFixedHeight),
+        // Figure out whether our width may have changed.
+        parentWidthDidChange = parentFrame.width !== this._scv_parentWidth,
+        isFixedWidth = this.get('isFixedWidth'),
+        widthMayHaveChanged = isStatic || (parentWidthDidChange && !isFixedWidth);
 
-    if (sizeMayHaveChanged) {
-      // If our size isn't fixed, our frame may have changed and it will effect our child views.
+    // Update the cached parent frame.
+    this._scv_parentHeight = parentFrame.height;
+    this._scv_parentWidth = parentFrame.width;
+
+    // If our height or width changed, our resulting frame change may impact our child views.
+    if (heightMayHaveChanged || widthMayHaveChanged) {
       this.viewDidResize();
-    } else if (positionMayHaveChanged) {
-      // If our size is fixed but our position isn't, our frame may have changed, but it won't effect our child views.
+    }
+    // If our size didn't change but our position did, our frame will change, but it won't impact our child
+    // views' frames. (Note that the _viewFrameDidChange call is made by viewDidResize above.)
+    else if (positionMayHaveChanged) {
       this._viewFrameDidChange();
     }
   },
@@ -844,10 +880,12 @@ SC.View.reopen(
     this._viewFrameDidChange();
 
     // Also notify our children.
-    var cv = this.childViews, len, idx, view;
+    var cv = this.childViews,
+        frame = this.get('frame'),
+        len, idx, view;
     for (idx = 0; idx < (len = cv.length); ++idx) {
       view = cv[idx];
-      view.tryToPerform('parentViewDidResize');
+      view.tryToPerform('parentViewDidResize', frame);
     }
   },
 
@@ -855,7 +893,7 @@ SC.View.reopen(
     Invoked by other views to notify this view that its frame has changed.
 
     This notifies the view that its frame property has changed,
-    then propagates those changes to its child views.
+    then notifies its child views that their clipping frames may have changed.
   */
   _viewFrameDidChange: function () {
     this.notifyPropertyChange('frame');

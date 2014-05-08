@@ -86,7 +86,7 @@ CHANGE LOG
 * Fixes a layout bug when adding new child views to a view with SC.FlowedLayout.
 * Transforms were being hard-coded to include their experimental browser prefixes. These now use SC.browser.experimentalFooNameFor to correctly detect when browser prefixes aren't needed (or supported).
 * A great deal of dev-mode-only validation of layout properties has been added.
-
+* Separates SC.View#isFixedSize property into isFixedWidth and isFixedHeight, allowing for an even finer-grained optimization of child view resize notifications.
 
 ### DEPRECATIONS & REMOVALS
 
