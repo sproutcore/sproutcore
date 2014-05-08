@@ -166,12 +166,14 @@ CoreTest = {
     }
     
     if (!ret.expect) {
-      ret.expect = function(callCount) {
+      ret.expect = function(callCount, msg) {
         if (callCount === YES) {
-          ok(this.callCount > 0, CoreTest.fmt("%@ should be called at least once", this.stubName));
+          if (!msg) msg = CoreTest.fmt("%@ should be called at least once", this.stubName);
+          ok(this.callCount > 0, msg);
         } else {
           if (callCount === NO) callCount = 0;
-          equals(this.callCount, callCount, CoreTest.fmt("%@ should be called X times", this.stubName));
+          if (!msg) msg = CoreTest.fmt("%@ should be called X times", this.stubName);
+          equals(this.callCount, callCount, msg);
         }
       };
     }
