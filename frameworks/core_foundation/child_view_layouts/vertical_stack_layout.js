@@ -369,11 +369,13 @@ SC.mixin(SC.View,
             adjustBottom = layout.bottom !== totalAvailableSpace - position - height;
 
             if (adjustTop && adjustBottom)
+            {
               childView.adjust({'top': position, 'bottom': totalAvailableSpace - position - height});
+              // avoid an extra adjust below
+              adjustTop = false;
+            }
             else if (adjustBottom)
               childView.adjust('bottom', totalAvailableSpace - position - height);
-            // avoid an extra adjust below
-            adjustTop = false;
           }
         }
 

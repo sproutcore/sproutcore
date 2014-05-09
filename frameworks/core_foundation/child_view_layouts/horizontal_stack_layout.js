@@ -369,11 +369,13 @@ SC.mixin(SC.View,
             adjustRight = layout.right !== totalAvailableSpace - position - width;
 
             if (adjustLeft && adjustRight)
+            {
               childView.adjust({'left': position, 'right': totalAvailableSpace - position - width});
+              // avoid an extra adjust below
+              adjustLeft = false;
+            }
             else if (adjustRight)
               childView.adjust('right', totalAvailableSpace - position - width);
-            // avoid an extra adjust below
-            adjustLeft = false;
           }
         }
 
