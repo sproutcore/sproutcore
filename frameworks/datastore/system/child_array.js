@@ -41,13 +41,13 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
   defaultRecordType: null,
 
   /**
-    If set, the parent record will be notified whenever the array changes so that
-    it can change its own state
+    If this array changes, the parentObject will be notified in order to change its own state.
+    Always set.
 
     @default null
     @type {SC.Record}
   */
-  record: null,
+  parentObject: null,
 
   /**
     The name of the attribute in the parent record's datahash that represents
@@ -56,7 +56,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @default null
     @type String
   */
-  propertyName: null,
+  parentAttribute: null,
 
   /**
     The store that owns this child array's parent record.
@@ -288,6 +288,32 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     });
 
     return ret;
+  },
+
+  /**
+    Invoked whenever the children array changes from the store
+  
+    @param {Array} keys Optional list of keys that have changed.
+  */
+
+  notifyChildren: function (keys) {
+    var d = function (obj) {
+      if (obj) {
+        if (!keys && obj.allPropertiesDidChange) obj.allPropertiesDidChange();
+        else if (keys && obj.notifyPropertyChange) {
+          var len = keys.length, i;
+          for (i = 0; i < len; i++) {
+            obj.notifyPropertyChange(keys[i]);
+          }
+        }
+        if (obj.notifyChildren) {
+          obj.notifyChildren(keys);
+        }
+      }
+    };
+
+    this.forEach(d);
+    this.recordPropertyDidChange(keys);
   },
 
   /** @private
