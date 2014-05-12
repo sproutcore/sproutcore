@@ -4,7 +4,7 @@
 //            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-/*global jQuery*/
+
 
 /**
   A constant indicating an unsupported method, property or other.
@@ -96,10 +96,29 @@ SC.platform = SC.Object.create({
 
   /**
     A hash that contains properties that indicate support for new HTML5
+    a attributes.
+
+    For example, to test to see if the `download` attribute is supported,
+    you would verify that `SC.platform.a.download` is true.
+
+    @type Array
+  */
+  a: function () {
+    var elem = document.createElement('a');
+
+    return {
+      download: !!('download' in elem),
+      media: !!('media' in elem),
+      ping: !!('ping' in elem),
+    };
+  }(),
+
+  /**
+    A hash that contains properties that indicate support for new HTML5
     input attributes.
 
-    For example, to test to see if the placeholder attribute is supported,
-    you would verify that SC.platform.input.placeholder is YES.
+    For example, to test to see if the `placeholder` attribute is supported,
+    you would verify that `SC.platform.input.placeholder` is true.
 
     @type Array
   */
@@ -421,9 +440,9 @@ SC.platform = SC.Object.create({
 
     @type Boolean
    */
-  supportsXHR2LoadEndEvent: function() {
+  supportsXHR2LoadEndEvent: function () {
     return (new XMLHttpRequest).onloadend === null;
-  }(),
+  } (),
 
   /**
     Whether the browser supports the orientationchange event.
