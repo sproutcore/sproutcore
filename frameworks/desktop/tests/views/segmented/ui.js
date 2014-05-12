@@ -10,7 +10,7 @@
 
 var pane;
 (function () {
-  var iconURL = sc_static("sproutcore-32.png");
+  var iconURL = sc_static("foundation:sproutcore-32.png");
 
   pane = SC.ControlTestPane.design()
 
