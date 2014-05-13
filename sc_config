@@ -4,7 +4,6 @@
 
 BT.addFramework(BT.Framework.extend({
   ref: "sproutcore",
-  //path: BT.curDir,
   path: dirname(),
   isWrapperFramework: true,
   all: {
@@ -27,6 +26,7 @@ BT.addTheme(BT.Theme.extend({
 
 BT.addTheme(BT.Theme.extend({
   ref: "sproutcore:ace",
+  cssName: "ace",
   path: dirname() + "/themes/ace",
   dependencies: ["sproutcore:empty_theme"]
 }));
@@ -34,5 +34,5 @@ BT.addTheme(BT.Theme.extend({
 
 // sc_require('apps/statechart_routing');
 // sc_require('apps/test_controls');
-// sc_require('apps/tests');
+sc_require('apps/tests/sc_config');
 // sc_require("apps/welcome");
