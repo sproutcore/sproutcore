@@ -7,7 +7,7 @@
 
 /*global SC */
 
-sc_require('statechart/system/state');
+sc_require('statechart/state');
 
 /**
   @class

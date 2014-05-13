@@ -7,7 +7,7 @@
 
 /*globals SC */
 
-sc_require('statechart/system/state');
+sc_require('statechart/state');
 
 /**
   The default name given to an empty state
