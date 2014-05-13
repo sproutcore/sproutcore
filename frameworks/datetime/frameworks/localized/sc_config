@@ -1,5 +1,5 @@
 BT.addFramework(BT.Framework.extend({
   ref: "sproutcore:datetime:localized",
   path: dirname(),
-  dependencies: ["sproutcore:core_foundation"]
+  dependencies: ["sproutcore:datetime:core", "sproutcore:core_foundation"]
 }));
