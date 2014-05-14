@@ -22,6 +22,13 @@ var pane = SC.ControlTestPane.design()
     maximum: 100,
     isEnabled: NO
   })
+  .add("slider no-scroll", SC.SliderView, {
+    layout: {top:0, bottom:0, left:0, width: 250},
+    value: 50,
+    minimum: 0,
+    maximum: 100,
+    updateOnScroll: false
+  })
   .add("slider value 100", SC.SliderView, {
     layout: {top:0, bottom:0, left:0, width: 250},
     value: 100,
@@ -102,6 +109,12 @@ test("disabled", function() {
   ok(view.$('.track').length > 0, 'should have track classed element');
   ok(view.$('.sc-handle').length > 0, 'should have sc-handle classed element');
   equals(view.$('.sc-handle')[0].style.left, '50%', 'left of sc-handle should be 50%');
+});
+
+test("no scroll", function() {
+  var view = pane.view('slider no-scroll');
+
+  ok(!view.mouseWheel({}), "A slider view with updateOnScroll set to false should return NO from the mouseWheel event handler.");
 });
 
 test("basic value 100", function() {

@@ -94,6 +94,16 @@ SC.SliderView = SC.View.extend(SC.Control,
   */
   markSteps: false,
 
+  /*
+    When set to true, this view handles mouse-wheel scroll events by changing the
+    value. Set to false to prevent a slider in a scroll view from hijacking scroll
+    events mid-scroll, for example.
+
+    @type {Boolean}
+    @default {true}
+  */
+  updateOnScroll: true,
+
   // ..........................................................
   // INTERNAL
   //
@@ -173,7 +183,8 @@ SC.SliderView = SC.View.extend(SC.Control,
 
   /* @private */
   mouseWheel: function(evt) {
-    if (!this.get('isEnabledInPane')) return YES;
+    if (!this.get('isEnabledInPane')) return NO;
+    if (!this.get('updateOnScroll')) return NO;
     var min = this.get('minimum'),
         max = this.get('maximum'),
         step = this.get('step'),
@@ -252,7 +263,7 @@ SC.SliderView = SC.View.extend(SC.Control,
     return NO;
   }.property('isEnabledInPane'),
 
-  /* @private */
+  /* @private TODO: Update to use interpretKeyEvents. */
   keyDown: function(evt) {
      // handle tab key
      if (evt.which === 9 || evt.keyCode === 9) {

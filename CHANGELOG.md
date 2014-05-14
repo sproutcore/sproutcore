@@ -41,7 +41,7 @@ CHANGE LOG
 * SC.ScrollView#scale now works as advertised!
 * Scale is now a first-class layout function, correctly impacting frame and clippingFrame. As a result, scaled content within a CollectionView will now correctly calculate which item views should be currently visible.
 * Adds official SC.Scalable protocol.
-* SC.SliderView has a new markSteps property, which draws a mark element for each step.
+* SC.SliderView has a new markSteps property, which draws a mark element for each step. It also gains an updateOnScroll property, which allows you to prevent it from handling mouseWheel events (in a scroll view for example).
 * The improved documentation for SC.Object's stupendously useful didChangeFor method will hopefully encourage its use.
 * Use SC.ScrollView's horizontalAlign and verticalAlign properties to align fixed-width or -height content.
 
