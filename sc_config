@@ -34,5 +34,5 @@ BT.addTheme(BT.Theme.extend({
 
 // sc_require('apps/statechart_routing');
 // sc_require('apps/test_controls');
-sc_require('apps/tests/sc_config');
+// sc_require('apps/tests/sc_config');
 // sc_require("apps/welcome");
