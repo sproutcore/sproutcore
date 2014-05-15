@@ -170,6 +170,7 @@ test("markStep", function() {
   marks = view.$().find('.sc-slider-step-mark');
   expectedCount = Math.floor((view.get('maximum') - view.get('minimum')) / view.get('step')) + 1; // yeah yeah math.floor + 1 is math.ciel
   equals(marks.length, expectedCount, "A view with markSteps set to true contains the correct number of marks");
+  ok(marks.eq(2).hasClass('sc-slider-step-mark-2'), "The nth mark has sc-slider-step-mark-n class.");
 
   // Change.
   SC.run(function() { view.set('maximum', 200); });
