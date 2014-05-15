@@ -8,6 +8,7 @@ $theme.slider {
     background-color: #CACACA;
     border-right: 1px solid #DDD;
     top: 50%;
+    margin-left: -1px;
     &.sc-slider-step-mark-first, &.sc-slider-step-mark-last {
       display: none;
     }

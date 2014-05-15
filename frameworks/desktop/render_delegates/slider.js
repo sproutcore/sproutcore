@@ -43,22 +43,25 @@ SC.BaseTheme.sliderRenderDelegate = SC.RenderDelegate.create({
     // If desired, draw the step choinks.
     if (dataSource.get('markSteps')) {
       var step = dataSource.get('step'),
+        i = 0,
         choinkVal = valueMin,
         choinkDisplayVal;
       // Draw each choink.
       while ((choinkDisplayVal = this._displayValueForValue(dataSource, choinkVal)) < 100) {
-        context.begin().setStyle('left', '%@%'.fmt(choinkDisplayVal)).setClass({
-          'sc-slider-step-mark': true,
-          'sc-slider-step-mark-first': choinkVal === valueMin
-        }).end();
+        context.begin()
+          .setStyle('left', '%@%'.fmt(choinkDisplayVal))
+          .addClass(['sc-slider-step-mark', 'sc-slider-step-mark-%@'.fmt(i)])
+          .setClass({ 'sc-slider-step-mark-first': i === 0 })
+          .end();
         // Increment.
         choinkVal += step;
+        i++;
       }
       // Draw final choink.
-      context.begin().setStyle('left', '100%').setClass({
-        'sc-slider-step-mark': true,
-        'sc-slider-step-mark-last': true
-      }).end();
+      context.begin()
+        .setStyle('left', '100%')
+        .addClass(['sc-slider-step-mark', 'sc-slider-step-mark-%@'.fmt(i), 'sc-slider-step-mark-last'])
+        .end();
     }
 
     // Draw the handle.
@@ -107,18 +110,20 @@ SC.BaseTheme.sliderRenderDelegate = SC.RenderDelegate.create({
       // Create new choinks.
       var step = dataSource.get('step'),
         choinkVal = valueMin,
+        i = 0,
         choinkDisplayVal,
-        choinkTemplate = '<div style="left:%@%" class="sc-slider-step-mark %@"></div>',
+        choinkTemplate = '<div style="left:%@%" class="sc-slider-step-mark sc-slider-step-mark-%@ %@"></div>',
         choinkMarkup;
       // Draw each choink.
       while ((choinkDisplayVal = this._displayValueForValue(dataSource, choinkVal)) < 100) {
-        choinkMarkup = choinkTemplate.fmt(choinkDisplayVal, (choinkVal === valueMin ? 'sc-slider-step-mark-first' : ''));
+        choinkMarkup = choinkTemplate.fmt(choinkDisplayVal, i, (choinkVal === valueMin ? 'sc-slider-step-mark-first' : ''));
         handle.before(choinkMarkup);
         // Increment.
         choinkVal += step;
+        i++;
       }
       // Draw final choink.
-      choinkMarkup = choinkTemplate.fmt('100', 'sc-slider-step-mark-last');
+      choinkMarkup = choinkTemplate.fmt('100', i, 'sc-slider-step-mark-last');
       handle.before(choinkMarkup);
     }
 
