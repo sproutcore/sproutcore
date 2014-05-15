@@ -822,21 +822,31 @@ SC.View.reopen(
   },
 
   /**
-    The frame of the view including the borders
+    The frame of the view including the borders and scale
   */
   borderFrame: function () {
     var layout = this.get('layout'),
         frame = this.get('frame'),
+        scale = (frame && !SC.none(frame.scale)) ? frame.scale : 1,
         borderTop = this._effectiveBorderFor('borderTop', layout),
+        scaledBorderTop = borderTop * scale,
         borderRight = this._effectiveBorderFor('borderRight', layout),
+        scaledBorderRight = borderRight * scale,
         borderBottom = this._effectiveBorderFor('borderBottom', layout),
-        borderLeft = this._effectiveBorderFor('borderLeft', layout);
+        scaledBorderBottom = borderBottom * scale,
+        borderLeft = this._effectiveBorderFor('borderLeft', layout),
+        scaledBorderLeft = borderLeft * scale;
 
     return frame ? {
-      x: frame.x - borderLeft,
-      y: frame.y - borderTop,
-      width: frame.width + borderLeft + borderRight,
-      height: frame.height + borderTop + borderBottom
+      x: frame.x - scaledBorderLeft,
+      y: frame.y - scaledBorderTop,
+      width: frame.width + scaledBorderLeft + scaledBorderRight,
+      height: frame.height + scaledBorderTop + scaledBorderBottom,
+      scale: scale,
+      originalWidth: frame.originalWidth + borderLeft + borderRight,
+      originalHeight: frame.originalHeight + borderTop + borderBottom,
+      transformOriginX: frame.transformOriginX,
+      transformOriginY: frame.transformOriginY
     } : null;
   }.property('frame').cacheable(),
 

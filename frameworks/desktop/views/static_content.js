@@ -99,9 +99,29 @@ SC.StaticContentView = SC.View.extend(
     if (layer.getBoundingClientRect && !SC.browser.isIE8OrLower) {
       rect = layer.getBoundingClientRect();
 
-      return { x: 0, y: 0, width: rect.width, height: rect.height };
+      return {
+        x: 0,
+        y: 0,
+        width: rect.width,
+        originalWidth: rect.width,
+        height: rect.height,
+        originalHeight: rect.height,
+        scale: 1,
+        transformOriginX: 0.5,
+        transformOriginY: 0.5
+      };
     } else {
-      return { x: 0, y: 0, width: layer.clientWidth, height: layer.clientHeight };
+      return {
+        x: 0,
+        y: 0,
+        width: layer.clientWidth,
+        originalWidth: rect.width,
+        height: layer.clientHeight,
+        originalHeight: rect.height,
+        scale: 1,
+        transformOriginX: 0.5,
+        transformOriginY: 0.5
+      };
     }
   }.property('content').cacheable(),
 

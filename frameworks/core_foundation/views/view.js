@@ -1006,9 +1006,12 @@ SC.CoreView.reopen(
       /*
         TODO Can probably have some better width/height values - CC
         FIXME This will probably not work right with borders - PW
+        FIXME This assumes and reports a scale of 1 - DCP
       */
-      f.width = layer.offsetWidth;
-      f.height = layer.offsetHeight;
+      f.width = f.originalWidth = layer.offsetWidth;
+      f.height = f.originalHeight = layer.offsetHeight;
+      f.scale = 1;
+      f.transformOriginX = f.transformOriginY = 0.5;
       return f;
     }
 

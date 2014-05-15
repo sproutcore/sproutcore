@@ -172,3 +172,30 @@ test("The borderFrame property of the view should be correct for view with useSt
 
   pane.destroy();
 });
+
+test("borderFrame on a view with a scale.", function() {
+  var borderFrame,
+    frame,
+    pane;
+
+    SC.run(function() {
+      view.adjust({ border: 2 });
+    });
+
+    frame = view.get('frame');
+    borderFrame = view.get('borderFrame');
+
+    ok(SC.rectsEqual(frame, { x: 2, y: 2, height: 96, width: 96 }), "PRELIM: The unscaled frame with border: 2 is correct.");
+    ok(SC.rectsEqual(borderFrame, { x: 0, y: 0, height: 100, width: 100 }), "PRELIM: The unscaled borderFrame with border: 2 is correct.");
+
+    SC.run(function() {
+      view.adjust({ scale: 0.5 });
+    });
+
+    frame = view.get('frame');
+    borderFrame = view.get('borderFrame');
+
+    ok(SC.rectsEqual(frame, { x: 26, y: 26, height: 48, width: 48 }), "The scaled frame with border: 2 is correct.");
+    ok(SC.rectsEqual(borderFrame, { x: 25, y: 25, height: 50, width: 50 }), "The scaled borderFrame with border: 2 is correct.");
+
+});

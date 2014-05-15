@@ -423,13 +423,13 @@ SC.PickerPane = SC.PalettePane.extend(
         pointerOffset: [15, -15, -30, 20]
 
     @type Array
-    @default preferType == SC.PICKER_POINTER ? SC.PICKER_POINTER_OFFSET (i.e. [9, -9, -18, 18])
-    @default preferType == SC.PICKER_MENU_POINTER && controlSize == SC.TINY_CONTROL_SIZE ? SC.TINY_PICKER_MENU_POINTER_OFFSET (i.e [9, -9, -18, 18])
-    @default preferType == SC.PICKER_MENU_POINTER && controlSize == SC.SMALL_CONTROL_SIZE ? SC.SMALL_PICKER_MENU_POINTER_OFFSET (i.e [9, -9, -8, 8])
-    @default preferType == SC.PICKER_MENU_POINTER && controlSize == SC.REGULAR_CONTROL_SIZE ? SC.REGULAR_PICKER_MENU_POINTER_OFFSET (i.e [9, -9, -12, 12])
-    @default preferType == SC.PICKER_MENU_POINTER && controlSize == SC.LARGE_CONTROL_SIZE ? SC.LARGE_PICKER_MENU_POINTER_OFFSET (i.e [9, -9, -16, 16])
-    @default preferType == SC.PICKER_MENU_POINTER && controlSize == SC.HUGE_CONTROL_SIZE ? SC.HUGE_PICKER_MENU_POINTER_OFFSET (i.e [9, -9, -18, 18])
-    @default preferType == SC.PICKER_MENU_POINTER ? SC.REGULAR_PICKER_MENU_POINTER_OFFSET (i.e [9, -9, -12, 12])
+    @default preferType == SC.PICKER_POINTER ? SC.PickerPane.PICKER_POINTER_OFFSET (i.e. [9, -9, -18, 18])
+    @default preferType == SC.PICKER_MENU_POINTER && controlSize == SC.TINY_CONTROL_SIZE ? SC.PickerPane.TINY_PICKER_MENU_POINTER_OFFSET (i.e [9, -9, -18, 18])
+    @default preferType == SC.PICKER_MENU_POINTER && controlSize == SC.SMALL_CONTROL_SIZE ? SC.PickerPane.SMALL_PICKER_MENU_POINTER_OFFSET (i.e [9, -9, -8, 8])
+    @default preferType == SC.PICKER_MENU_POINTER && controlSize == SC.REGULAR_CONTROL_SIZE ? SC.PickerPane.REGULAR_PICKER_MENU_POINTER_OFFSET (i.e [9, -9, -12, 12])
+    @default preferType == SC.PICKER_MENU_POINTER && controlSize == SC.LARGE_CONTROL_SIZE ? SC.PickerPane.LARGE_PICKER_MENU_POINTER_OFFSET (i.e [9, -9, -16, 16])
+    @default preferType == SC.PICKER_MENU_POINTER && controlSize == SC.HUGE_CONTROL_SIZE ? SC.PickerPane.HUGE_PICKER_MENU_POINTER_OFFSET (i.e [9, -9, -18, 18])
+    @default preferType == SC.PICKER_MENU_POINTER ? SC.PickerPane.REGULAR_PICKER_MENU_POINTER_OFFSET (i.e [9, -9, -12, 12])
   */
   pointerOffset: null,
 
@@ -566,8 +566,7 @@ SC.PickerPane = SC.PalettePane.extend(
       frame        = this.get('borderFrame'),
       preferType   = this.get('preferType'),
       preferMatrix = this.get('preferMatrix'),
-      layout       = this.get('layout'),
-      origin;
+      origin, adjustHash;
 
     // usually an anchorElement will be passed.  The ideal position is just
     // below the anchor + default or custom offset according to preferType.
@@ -605,16 +604,19 @@ SC.PickerPane = SC.PalettePane.extend(
       // frames, add those properties.
       anchor.halfWidth = parseInt(anchor.width * 0.5, 0);
       anchor.halfHeight = parseInt(anchor.height * 0.5, 0);
-      frame.halfWidth = parseInt(frame.width * 0.5, 0);
-      frame.halfHeight = parseInt(frame.height * 0.5, 0);
+      frame.halfWidth = parseInt(frame.originalWidth * 0.5, 0);
+      frame.halfHeight = parseInt(frame.originalHeight * 0.5, 0);
 
       origin = this.fitPositionToScreen(origin, frame, anchor);
-      this.adjust({
+      adjustHash = {
         left: origin.x,
         top: origin.y
-      });
+      };
+      // Adjust.
+      this.adjust(adjustHash);
+    }
     // if no anchor view has been set for some reason, just center.
-    } else {
+    else {
       this.adjust({
         centerX: 0,
         centerY: 0
@@ -856,10 +858,10 @@ SC.PickerPane = SC.PalettePane.extend(
       [a.x + a.width + offset[0], a.y + a.halfHeight - f.halfHeight],
 
       // Top left [x, y] if positioned evenly to the left of the anchor
-      [a.x - f.width + offset[1], a.y + a.halfHeight - f.halfHeight],
+      [a.x - f.originalWidth + offset[1], a.y + a.halfHeight - f.halfHeight],
 
       // Top left [x, y] if positioned evenly above the anchor
-      [a.x + a.halfWidth - f.halfWidth, a.y - f.height + offset[2]],
+      [a.x + a.halfWidth - f.halfWidth, a.y - f.originalHeight + offset[2]],
 
       // Top left [x, y] if positioned evenly below the anchor
       [a.x + a.halfWidth - f.halfWidth, a.y + a.height + offset[3]]
