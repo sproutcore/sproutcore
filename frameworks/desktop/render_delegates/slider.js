@@ -69,7 +69,7 @@ SC.BaseTheme.sliderRenderDelegate = SC.RenderDelegate.create({
       .setAttr('src', SC.BLANK_IMAGE_URL)
       .addClass('sc-handle')
       .setStyle('left', '%@%'.fmt(dataSource.get('value')))
-      .end()
+      .end();
 
     // End the track element.
     context = context.end();
@@ -97,34 +97,31 @@ SC.BaseTheme.sliderRenderDelegate = SC.RenderDelegate.create({
     if(valueMin !== 0 || valueMax !== 100) jquery.attr('aria-valuetext', valueNow);
     jquery.attr('aria-orientation', 'horizontal');
 
-    // If we've turned markSteps off, hide any choinks.
-    if (!dataSource.get('markSteps') && dataSource.didChangeFor('sliderRenderDelegateMarkSteps', 'markSteps')) {
-      // jquery.find('.sc-slider-step-mark').addClass('sc-hidden');
-      jquery.find('.sc-slider-step-mark').remove();
-    }
-    // Otherwise, if either the minimum, maximum or step have changed, repoint the choinks.
-    else if (dataSource.didChangeFor('sliderRenderDelegateMinimumMaximumStepMarkSteps', 'minimum', 'maximum', 'step', 'markSteps')) {
+    if (dataSource.didChangeFor('sliderRenderDelegateMinimumMaximumStepMarkSteps', 'minimum', 'maximum', 'step', 'markSteps')) {
       // Okay for now we're going to cheat and remove & recreate all choinks. TODO: optimize this to at least the 5th grade level.
       // Remove any previous choinks.
       jquery.find('.sc-slider-step-mark').remove();
+
       // Create new choinks.
-      var step = dataSource.get('step'),
-        choinkVal = valueMin,
-        i = 0,
-        choinkDisplayVal,
-        choinkTemplate = '<div style="left:%@%" class="sc-slider-step-mark sc-slider-step-mark-%@ %@"></div>',
-        choinkMarkup;
-      // Draw each choink.
-      while ((choinkDisplayVal = this._displayValueForValue(dataSource, choinkVal)) < 100) {
-        choinkMarkup = choinkTemplate.fmt(choinkDisplayVal, i, (choinkVal === valueMin ? 'sc-slider-step-mark-first' : ''));
+      if (dataSource.get('markSteps')) {
+        var step = dataSource.get('step'),
+          choinkVal = valueMin,
+          i = 0,
+          choinkDisplayVal,
+          choinkTemplate = '<div style="left:%@%" class="sc-slider-step-mark sc-slider-step-mark-%@ %@"></div>',
+          choinkMarkup;
+        // Draw each choink.
+        while ((choinkDisplayVal = this._displayValueForValue(dataSource, choinkVal)) < 100) {
+          choinkMarkup = choinkTemplate.fmt(choinkDisplayVal, i, (choinkVal === valueMin ? 'sc-slider-step-mark-first' : ''));
+          handle.before(choinkMarkup);
+          // Increment.
+          choinkVal += step;
+          i++;
+        }
+        // Draw final choink.
+        choinkMarkup = choinkTemplate.fmt('100', i, 'sc-slider-step-mark-last');
         handle.before(choinkMarkup);
-        // Increment.
-        choinkVal += step;
-        i++;
       }
-      // Draw final choink.
-      choinkMarkup = choinkTemplate.fmt('100', i, 'sc-slider-step-mark-last');
-      handle.before(choinkMarkup);
     }
 
     // Update the value, if needed.
