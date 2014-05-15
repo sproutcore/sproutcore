@@ -63,9 +63,12 @@ SC.SelectViewMenu = {
   */
   exampleView: SC.AutoResizingMenuItemView.extend({
     isChecked: function() {
+      var selectView = this.getPath('parentMenu.selectView');
+
       // _lastIsChecked is used by the SelectViewMenu mixin above to determine whether
       // the isChecked property needs to be invalidated.
-      this._lastIsChecked = this.getContentProperty('itemValueKey') === this.getPath('parentMenu.rootMenu.value');
+      this._lastIsChecked = selectView.isValueEqualTo(this.get('content'));
+      
       return this._lastIsChecked;
     }.property(),
 

@@ -201,20 +201,15 @@ SC.SelectView = SC.PopupButtonView.extend({
   /**
     @private
 
-    This gets the value for a specific menu item. This function allows a few different
-    forms of input:
-
-    - A string: returns the string.
-    - A hash: returns hash[itemValueKey], using 'value' for the key if necessary.
-    - An SC.Object: returns object.get(itemValueKey), using 'value' for the key if needed.
-
+    This gets the value for a specific menu item. 
+    
     This method therefore accepts both the menu items as created for the menupane's displayItems
     AND the raw items provided by the developer in `items`.
   */
   _scsv_getValueForMenuItem: function(item) {
-    var valueKey = this.get('itemValueKey');
+    var valueKey = this.get('_itemValueKey');
 
-    if (!valueKey || SC.typeOf(item) === SC.T_STRING) {
+    if (!item.isDisplayItem && !this.get('itemValueKey')) {
       return item;
     } else if (item.get) {
       return item.get(valueKey);
@@ -233,7 +228,7 @@ SC.SelectView = SC.PopupButtonView.extend({
 
     // selected item could be a menu item from SC.MenuPane's displayItems, or it could
     // be a raw item. So, we have to use _scsv_getValueForMenuItem to resolve it.
-    if(sel) {
+    if (sel) {
       this.setIfChanged('value', this._scsv_getValueForMenuItem(sel));
     }
 
@@ -265,7 +260,7 @@ SC.SelectView = SC.PopupButtonView.extend({
     if (!sel) {
       return this.get('defaultTitle');
     } else {
-      var itemTitleKey = this.get('itemTitleKey');
+      var itemTitleKey = this.get('_itemTitleKey');
       if (itemTitleKey) {
         if (sel.get) return sel.get(itemTitleKey);
         else if (SC.typeOf(sel) == SC.T_HASH) return sel[itemTitleKey];
@@ -344,11 +339,18 @@ SC.SelectView = SC.PopupButtonView.extend({
     }
 
     return ret;
-  }.property('items.length').cacheable(),
+  }.property().cacheable(),
+
+  /** @private */
+  _scsv_itemsDidChange: function () {
+    this.notifyPropertyChange('displayItems');
+  }.observes('*items.[]'),
 
   /** @private */
   _addDisplayItem: function (title, value, isSeparator) {
-    var item = SC.Object.create();
+    var item = SC.Object.create({
+      isDisplayItem: true
+    });
 
     item[this.get('_itemTitleKey')] = title;
     item[this.get('_itemValueKey')] = value;
@@ -388,14 +390,13 @@ SC.SelectView = SC.PopupButtonView.extend({
     var displayItems = this.get('displayItems');
     if (!displayItems) return;
 
-    var value = this.get('value'),
-      len = displayItems.get('length'), 
-      idx;
+    var len = displayItems.get ? displayItems.get('length') : displayItems.length, 
+      idx, item;
 
     for (idx = 0; idx < len; idx++) {
-      var item = displayItems.objectAt(idx);
+      item = displayItems.objectAt(idx);
       
-      if (this._scsv_getValueForMenuItem(item) === value) {
+      if (this.isValueEqualTo(item)) {
         this.setIfChanged('selectedItem', item);
         return;
       }
@@ -404,6 +405,19 @@ SC.SelectView = SC.PopupButtonView.extend({
     // if we got here, this means no item is selected
     this.setIfChanged('selectedItem', null);
   }.observes('value', 'displayItems'),
+
+  /**
+    Check is the passed item is equal to the current value.
+
+    @param {Object} object to check
+    @returns {Boolean}
+  */
+  isValueEqualTo: function(item) {
+    var a = this.get('value'),
+      b = this._scsv_getValueForMenuItem(item);
+
+    return a === b || (SC.kindOf(a, SC.Record) && SC.kindOf(b, SC.Record) && a.storeKey === b.storeKey);
+  },
 
   /**
     SelectView must set the selectView property on the menu so that the menu's
@@ -508,12 +522,14 @@ SC.SelectView = SC.PopupButtonView.extend({
 
     // We have to find the selected item, and then get its 'top' position so we
     // can position the menu correctly.
-    var itemViews = menu.get('menuItemViews'), idx, len = itemViews.length, view;
+    var itemViews = menu.get('menuItemViews'), 
+      len = itemViews.length,
+      idx, view;
+
     for (idx = 0; idx < len; idx++) {
       view = itemViews[idx];
 
-      // we have to compare via value
-      if (this._scsv_getValueForMenuItem(view.get('content')) === this.get('value')) break;
+      if (this.isValueEqualTo(view.get('content'))) break;
     }
 
     if (idx < len) {
