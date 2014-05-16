@@ -103,8 +103,6 @@ SC.BaseTheme.sliderRenderDelegate = SC.RenderDelegate.create({
       else {
         var choinkVal,
           i, len = stepPositions.length,
-          firstClass = 'sc-slider-step-mark-first',
-          lastClass = 'sc-slider-step-mark-last',
           firstLastClass,
           choinkTemplate = '<div style="left:%@%" class="sc-slider-step-mark sc-slider-step-mark-%@ %@"></div>',
           choinkMarkup;
@@ -112,12 +110,12 @@ SC.BaseTheme.sliderRenderDelegate = SC.RenderDelegate.create({
         for (i = 0; i < len; i++) {
           if (marks[i]) {
             marks.eq(i).css('left', '%@%'.fmt(stepPositions[i] * 100)).setClass({
-              firstClass: i === 0,
-              lastClass: i === len - 1
+              'sc-slider-step-mark-first': i === 0,
+              'sc-slider-step-mark-last': i === len - 1
             });
           }
           else {
-            if (i === 0) firstLastClass = firstClass;
+            if (i === 0) firstLastClass = 'sc-slider-step-mark-first';
             else if (i === len - 1) firstLastClass = 'sc-slider-step-mark-last';
             else firstLastClass = '';
             choinkMarkup = choinkTemplate.fmt(stepPositions[i] * 100, i, firstLastClass);

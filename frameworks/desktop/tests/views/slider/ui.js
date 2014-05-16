@@ -171,12 +171,16 @@ test("markStep", function() {
   expectedCount = Math.floor((view.get('maximum') - view.get('minimum')) / view.get('step')) + 1; // yeah yeah math.floor + 1 is math.ciel
   equals(marks.length, expectedCount, "A view with markSteps set to true contains the correct number of marks");
   ok(marks.eq(2).hasClass('sc-slider-step-mark-2'), "The nth mark has sc-slider-step-mark-n class.");
+  ok(view.$().find('.sc-slider-step-mark-first').length === 1, "Only one mark is labeled as the first.");
+  ok(view.$().find('.sc-slider-step-mark-last').length === 1, "Only one mark is labeled as the last.");
 
   // Change.
   SC.run(function() { view.set('maximum', 200); });
   marks = view.$().find('.sc-slider-step-mark');
   expectedCount = Math.floor((view.get('maximum') - view.get('minimum')) / view.get('step')) + 1; // yeah yeah math.floor + 1 is math.ciel
   equals(marks.length, expectedCount, "Changing maximum correctly updates the number of marks");
+  ok(view.$().find('.sc-slider-step-mark-first').length === 1, "Only one mark is labeled as the first.");
+  ok(view.$().find('.sc-slider-step-mark-last').length === 1, "Only one mark is labeled as the last.");
 
   // Test mark at value = 0. (See https://github.com/sproutcore/sproutcore/issues/1229)
   SC.run(function() {
