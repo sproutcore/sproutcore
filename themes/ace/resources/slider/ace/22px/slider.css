@@ -18,7 +18,7 @@
 
     .sc-handle {
       display: block; position: absolute;
-      width: 22px; height: 24px; top: 50%; margin-top: -11px;
+      width: 22px; height: 24px; top: 50%; margin-top: -11px; margin-left: -11px;
 
       @include slice("knob.png");
     }
