@@ -37,31 +37,24 @@ SC.BaseTheme.sliderRenderDelegate = SC.RenderDelegate.create({
     // Begin the track element.
     context = context.begin('span').addClass('track');
 
-    // Draw the track ("beginning", "middle" and "end" elements).
+    // Draw the track's visual elements ("beginning", "middle" and "end").
     this.includeSlices(dataSource, context, SC.THREE_SLICE);
 
     // If desired, draw the step choinks.
     if (dataSource.get('markSteps')) {
-      var step = dataSource.get('step'),
-        i = 0,
-        choinkVal = valueMin,
-        choinkDisplayVal;
-      // Draw each choink.
-      while ((choinkDisplayVal = this._displayValueForValue(dataSource, choinkVal)) < 100) {
-        context.begin()
-          .setStyle('left', '%@%'.fmt(choinkDisplayVal))
-          .addClass(['sc-slider-step-mark', 'sc-slider-step-mark-%@'.fmt(i)])
-          .setClass({ 'sc-slider-step-mark-first': i === 0 })
-          .end();
-        // Increment.
-        choinkVal += step;
-        i++;
+      var stepPositions = dataSource.get('stepPositions');
+      if (stepPositions) {
+        var i, len = stepPositions.length;
+        for (i = 0; i < len; i++) {
+          context.begin()
+            .setStyle('left', '%@%'.fmt(stepPositions[i] * 100))
+            .addClass(['sc-slider-step-mark', 'sc-slider-step-mark-%@'.fmt(i)])
+            .setClass({
+              'sc-slider-step-mark-first': i === 0,
+              'sc-slider-step-mark-last': i === len - 1
+            }).end();
+        }
       }
-      // Draw final choink.
-      context.begin()
-        .setStyle('left', '100%')
-        .addClass(['sc-slider-step-mark', 'sc-slider-step-mark-%@'.fmt(i), 'sc-slider-step-mark-last'])
-        .end();
     }
 
     // Draw the handle.
@@ -97,30 +90,42 @@ SC.BaseTheme.sliderRenderDelegate = SC.RenderDelegate.create({
     if(valueMin !== 0 || valueMax !== 100) jquery.attr('aria-valuetext', valueNow);
     jquery.attr('aria-orientation', 'horizontal');
 
+    // If the minimum, maximum, step, or markSteps have changed, repoint the choinks.
     if (dataSource.didChangeFor('sliderRenderDelegateMinimumMaximumStepMarkSteps', 'minimum', 'maximum', 'step', 'markSteps')) {
-      // Okay for now we're going to cheat and remove & recreate all choinks. TODO: optimize this to at least the 5th grade level.
-      // Remove any previous choinks.
-      jquery.find('.sc-slider-step-mark').remove();
-
-      // Create new choinks.
-      if (dataSource.get('markSteps')) {
-        var step = dataSource.get('step'),
-          choinkVal = valueMin,
-          i = 0,
-          choinkDisplayVal,
+      var marks = jquery.find('.sc-slider-step-mark'),
+        markSteps = dataSource.get('markSteps'),
+        stepPositions;
+      // Ten years ago we had no marks, no steps and
+      if (!markSteps || !(stepPositions = dataSource.get('stepPositions'))) {
+        marks.remove();
+      }
+      // Otherwise, reposition them, adding new ones as needed.
+      else {
+        var choinkVal,
+          i, len = stepPositions.length,
+          firstClass = 'sc-slider-step-mark-first',
+          lastClass = 'sc-slider-step-mark-last',
+          firstLastClass,
           choinkTemplate = '<div style="left:%@%" class="sc-slider-step-mark sc-slider-step-mark-%@ %@"></div>',
           choinkMarkup;
-        // Draw each choink.
-        while ((choinkDisplayVal = this._displayValueForValue(dataSource, choinkVal)) < 100) {
-          choinkMarkup = choinkTemplate.fmt(choinkDisplayVal, i, (choinkVal === valueMin ? 'sc-slider-step-mark-first' : ''));
-          handle.before(choinkMarkup);
-          // Increment.
-          choinkVal += step;
-          i++;
+
+        for (i = 0; i < len; i++) {
+          if (marks[i]) {
+            marks.eq(i).css('left', '%@%'.fmt(stepPositions[i] * 100)).setClass({
+              firstClass: i === 0,
+              lastClass: i === len - 1
+            });
+          }
+          else {
+            if (i === 0) firstLastClass = firstClass;
+            else if (i === len - 1) firstLastClass = 'sc-slider-step-mark-last';
+            else firstLastClass = '';
+            choinkMarkup = choinkTemplate.fmt(stepPositions[i] * 100, i, firstLastClass);
+            handle.before(choinkMarkup);
+          }
         }
-        // Draw final choink.
-        choinkMarkup = choinkTemplate.fmt('100', i, 'sc-slider-step-mark-last');
-        handle.before(choinkMarkup);
+        // Remove any remaining.
+        marks.slice(i).remove();
       }
     }
 
@@ -129,12 +134,5 @@ SC.BaseTheme.sliderRenderDelegate = SC.RenderDelegate.create({
       var value = dataSource.get('value');
       handle.css('left', value + "%");
     }
-  },
-
-  // The justification for this tremendous hack is that render delegates are going away, so reaching directly into the
-  // view from here won't be a profound treason against separation of concerns for long.
-  _displayValueForValue: function (dataSource, value) {
-    return dataSource._view._displayValueForValue(value);
   }
-
 });

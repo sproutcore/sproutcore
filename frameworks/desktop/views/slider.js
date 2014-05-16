@@ -108,8 +108,8 @@ SC.SliderView = SC.View.extend(SC.Control,
   // INTERNAL
   //
 
-  /* @private */
-  displayProperties: ['displayValue', 'ariaValue', 'minimum', 'maximum', 'step', 'markSteps'],
+  /* @private The full list includes min, max, and stepPositions, but those are redundant with displayValue. */
+  displayProperties: ['displayValue', 'ariaValue', 'markSteps'],
 
   /** @private
    @property
@@ -126,7 +126,7 @@ SC.SliderView = SC.View.extend(SC.Control,
   renderDelegateName: 'sliderRenderDelegate',
 
   /*
-    The value, converted to a percent between maximum and minimum.
+    The value, converted to a percent out of 100 between maximum and minimum.
 
     @property
     @readonly
@@ -134,6 +134,54 @@ SC.SliderView = SC.View.extend(SC.Control,
   displayValue: function() {
     return this._displayValueForValue(this.get('value'));
   }.property('value', 'minimum', 'maximum', 'step').cacheable(),
+
+  /*
+    If a nonzero step is specified, this property contains an array of each step's value between
+    min and max (inclusive).
+
+    @property
+    @readonly
+    @type {Array|null}
+  */
+  steps: function() {
+    var step = this.get('step');
+    // FAST PATH: No step.
+    if (!step) return null;
+    var min = this.get('minimum'),
+      max = this.get('maximum'),
+      cur = min,
+      ret = [];
+    while (cur < max) {
+      ret.push(cur);
+      cur += step;
+      cur = Math.round(cur / step) * step;
+    }
+    ret.push(max);
+    return ret;
+  }.property('minimum', 'maximum', 'step').cacheable(),
+
+  /*
+    If a nonzero step is specified, this property contains an array of each step's position,
+    expressed as a fraction between 0 and 1 (inclusive). You can use these values to generate
+    and position labels for each step, for example.
+
+    @property
+    @readonly
+    @type {Array|null}
+  */
+  stepPositions: function() {
+    var steps = this.get('steps');
+    // FAST PATH: No steps.
+    if (!steps) return null;
+    var min = steps[0],
+      max = steps[steps.length - 1],
+      ret = [],
+      len = steps.length, i;
+    for (i = 0; i < len; i++) {
+      ret[i] = Math.round((steps[i] - min) / (max - min) * 1000) / 1000;
+    }
+    return ret;
+  }.property('steps').cacheable(),
 
   // Given a particular value, returns the percentage value.
   _displayValueForValue: function(value) {
@@ -150,7 +198,7 @@ SC.SliderView = SC.View.extend(SC.Control,
     }
 
     // determine the percent across
-    value = Math.floor((value - min) / (max - min) * 100);
+    value = Math.round((value - min) / (max - min) * 100);
 
     return value;
   },
@@ -187,9 +235,9 @@ SC.SliderView = SC.View.extend(SC.Control,
     if (!this.get('updateOnScroll')) return NO;
     var min = this.get('minimum'),
         max = this.get('maximum'),
-        step = this.get('step'),
-        newVal = this.get('value')+((evt.wheelDeltaX+evt.wheelDeltaY)*step),
-        value = Math.round(newVal / step) * step ;
+        step = this.get('step') || ((max - min) / 20),
+        newVal = this.get('value') + ((evt.wheelDeltaX+evt.wheelDeltaY)*step),
+        value = Math.round(newVal / step) * step;
     if (newVal< min) this.setIfChanged('value', min);
     else if (newVal> max) this.setIfChanged('value', max);
     else this.setIfChanged('value', newVal);
