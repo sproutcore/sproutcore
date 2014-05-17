@@ -399,7 +399,11 @@ SC.Drag = SC.Object.extend(
     var ary = this._dropTargets();
 
     for (var idx = 0, len = ary.length; idx < len; idx++) {
-      ary[idx].tryToPerform('dragStarted', this, evt);
+      var target = ary[idx];
+      // If the target is not visible, it is not valid.
+      if (!target.get('isVisibleInWindow')) continue;
+
+      target.tryToPerform('dragStarted', this, evt);
     }
   },
 
@@ -413,8 +417,7 @@ SC.Drag = SC.Object.extend(
     @see SC.Drag.endDrag
   */
   cancelDrag: function (evt) {
-    var target = this._lastTarget,
-        loc = this.get('location');
+    var target = this._lastTarget;
 
     if (target && target.dragExited) target.dragExited(this, this._lastMouseDraggedEvent);
 
@@ -582,10 +585,8 @@ SC.Drag = SC.Object.extend(
     This will create the ghostView and add it to the document.
   */
   _createGhostView: function () {
-    var that  = this,
-        dragView = this._getDragView(),
+    var dragView = this._getDragView(),
         frame = dragView.get('borderFrame'),
-        layout = dragView.get('layout'),
         ghostLayout, view;
 
     // Create a fixed layout for the ghost view.
@@ -680,7 +681,7 @@ SC.Drag = SC.Object.extend(
   },
 
   /** @private Called instead of _destroyGhostView if slideBack is YES. */
-  _slideGhostViewBack: function() {
+  _slideGhostViewBack: function () {
     if (this.ghostView) {
       var dragView = this._getDragView(),
           frame = dragView.get('borderFrame'),
@@ -692,7 +693,9 @@ SC.Drag = SC.Object.extend(
       slidebackLayout = { top: globalOrigin.y, left: globalOrigin.x };
 
       // Animate the ghost view back to its original position; destroy after.
-      this.ghostView.animate(slidebackLayout, 0.5, this, function() { this.invokeNext(this._endDrag) });
+      this.ghostView.animate(slidebackLayout, 0.5, this, function () {
+        this.invokeNext(this._endDrag);
+      });
 
     }
     else {
@@ -710,7 +713,7 @@ SC.Drag = SC.Object.extend(
   },
 
   /** @private */
-  _endDrag: function() {
+  _endDrag: function () {
     if (this.get('sourceIsDraggable')) {
       this._destroyGhostView();
       if (this.get('ghost')) {
@@ -724,12 +727,12 @@ SC.Drag = SC.Object.extend(
   },
 
   /** @private */
-  _cleanUpDrag: function() {
+  _cleanUpDrag: function () {
     this._lastTarget = null;
     this._dragInProgress = NO;
     this._cachedDropTargets = null;
   },
-  
+
   /** @private
     Return an array of drop targets, sorted with any nested drop targets
     at the top of the array.  The first time this method is called during
@@ -760,7 +763,7 @@ SC.Drag = SC.Object.extend(
       var ret = depth[guid];
       if (!ret) {
         ret = 1;
-        while (x = x.get('parentView')) {
+        while ((x = x.get('parentView'))) {
           if (dropTargets[SC.guidFor(x)] !== undefined) ret = ret + 1;
           if (x.isPane && x.isMainPane) ret = ret + 10000; // Arbitrary value always have the main pain on top
         }
@@ -812,7 +815,7 @@ SC.Drag = SC.Object.extend(
   */
   _findNextDropTarget: function (target) {
     var dropTargets = SC.Drag._dropTargets;
-    while (target = target.get('parentView')) {
+    while ((target = target.get('parentView'))) {
       if (dropTargets[SC.guidFor(target)]) return target;
     }
     return null;
@@ -845,7 +848,7 @@ SC.Drag = SC.Object.extend(
     var loc  = evt ? { x: evt.pageX, y: evt.pageY } : this.get('location'),
         view = this._findScrollableView(loc),
         scrollableView = null, // become final view when found
-        vscroll, hscroll, min, max, edge, container, f;
+        vscroll, hscroll, min, max, container, f;
 
     // hscroll and vscroll will become either 1 or -1 to indicate scroll
     // direction or 0 for no scroll.
@@ -962,7 +965,7 @@ SC.Drag = SC.Object.extend(
     // at the start of the list.
     ret = ret.sort(function (a, b) {
       var view = a;
-      while (view = view.get('parentView')) {
+      while ((view = view.get('parentView'))) {
         if (b === view) return -1;
       }
       return 1;
@@ -1001,7 +1004,7 @@ SC.Drag = SC.Object.extend(
   */
   _findNextScrollableView: function (view) {
     var scrollableViews = SC.Drag._scrollableViews;
-    while (view = view.get('parentView')) {
+    while ((view = view.get('parentView'))) {
       if (scrollableViews[SC.guidFor(view)]) return view;
     }
     return null;
