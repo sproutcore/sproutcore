@@ -797,22 +797,24 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // get local reference to values.
     var len = changes.length, i, storeKey, myDataHashes, myStatuses,
       myEditables, myRevisions, myParentRecords, myChildRecords,
-      chDataHashes, chStatuses, chRevisions, chParentRecords, chChildRecords;
+      chDataHashes, chStatuses, chRevisions, chParentRecords, chChildRecords,
+      chEditables, chLocks;
 
-    myRevisions     = this.revisions ;
+    myRevisions     = this.revisions;
     myDataHashes    = this.dataHashes;
     myStatuses      = this.statuses;
-    myEditables     = this.editables ;
+    myEditables     = this.editables;
+    if (!myEditables) myEditables = this.editables = [] ;
     myParentRecords = this.parentRecords ? this.parentRecords : this.parentRecords ={} ;
     myChildRecords  = this.childRecords ? this.childRecords : this.childRecords = {} ;
 
-    // setup some arrays if needed
-    if (!myEditables) myEditables = this.editables = [] ;
     chDataHashes    = nestedStore.dataHashes;
-    chRevisions     = nestedStore.revisions ;
+    chRevisions     = nestedStore.revisions;
     chStatuses      = nestedStore.statuses;
     chParentRecords = nestedStore.parentRecords || {};
     chChildRecords  = nestedStore.childRecords || {};
+    chEditables = nestedStore.editables;
+    chLocks = nestedStore.locks;
 
     for(i=0;i<len;i++) {
       storeKey = changes[i];
@@ -823,6 +825,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       myRevisions[storeKey]     = chRevisions[storeKey];
       myParentRecords[storeKey] = chParentRecords[storeKey];
       myChildRecords[storeKey]  = chChildRecords[storeKey];
+
+      // Update chained store's lock status.
+      if (chEditables) delete chEditables[storeKey];
+      if (chLocks) delete chLocks[storeKey];
 
       myEditables[storeKey] = 0 ; // always make dataHash no longer editable
 
