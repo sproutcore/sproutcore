@@ -1396,6 +1396,12 @@ SC.Record.mixin( /** @scope SC.Record */ {
     this._throwUnlessRecordTypeDefined(recordType, 'toMany');
 
     if(isNested){
+      //@if(debug)
+      // Let's provide a little developer help for a common misunderstanding.
+      if (!SC.none(opts.inverse)) {
+        SC.error("Developer Error: Nested attributes (toMany and toOne with isNested: YES) may not have an inverse property. Nested attributes shouldn't exist as separate records with IDs and relationships; if they do, it's likely that they should be separate records.\n\nNote that if your API nests separate records for convenient requesting and transport, you should separate them in your data source rather than improperly modeling them with nested attributes.");
+      }
+      //@endif
       attr = SC.ChildrenAttribute.attr(recordType, opts);
     }
     else {
@@ -1425,6 +1431,12 @@ SC.Record.mixin( /** @scope SC.Record */ {
     this._throwUnlessRecordTypeDefined(recordType, 'toOne');
 
     if(isNested){
+      //@if(debug)
+      // Let's provide a little developer help for a common misunderstanding.
+      if (!SC.none(opts.inverse)) {
+        SC.error("Developer Error: Nested attributes (toMany and toOne with isNested: YES) may not have an inverse property. Nested attributes shouldn't exist as separate records with IDs and relationships; if they do, it's likely that they should be separate records.\n\nNote that if your API nests separate records for convenient requesting and transport, you should separate them in your data source rather than improperly modeling them with nested attributes.");
+      }
+      //@endif
       attr = SC.ChildAttribute.attr(recordType, opts);
     }
     else {
