@@ -1,5 +1,5 @@
 {
-  "name": "SproutNode",
+  "name": "sproutnode",
   "version": "1.10.3",
   "description": "A SproutCore runtime environment for NodeJS",
   "main": "lib/index.js",
