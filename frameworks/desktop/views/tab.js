@@ -194,11 +194,7 @@ SC.TabView = SC.View.extend(
   init: function() {
     sc_super();
     this._tab_nowShowingDidChange()._tab_itemsDidChange();
-  },
-
-  /** @private */
-  awake: function() {
-    sc_super();
+    // Wake up the userDefaults support, if in use.
     var defaultKey = this.get('userDefaultKey');
     if (defaultKey) {
       defaultKey = [defaultKey,'nowShowing'].join(':');
