@@ -102,6 +102,7 @@ CHANGE LOG
 * Removes deprecated (experimental) SC.CollectionViewFastPath. Fast-path behavior became standard issue in v1.10.0.
 * Removes long-deprecated SC.Scrollable mixin.
 * Removes long-deprecated SC.TextFieldView's isPassword and continuouslyUpdatesValue properties.
+* SC.Object's `superclass` instance method has been deprecated. Use `sc_super()` or arguments.callee.base.apply(this, arguments) instead.
 
 ### BUG FIXES
 
