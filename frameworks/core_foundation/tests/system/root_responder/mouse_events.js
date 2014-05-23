@@ -47,22 +47,21 @@ function viewClassFactory() {
   });  
 }
 
-var Pane = SC.MainPane.extend({
-  childViews: ['view1', 'view2'],
-  view1: viewClassFactory().extend({
-    childViews: ['view1a', 'view1b'],
-    view1a: viewClassFactory(),
-    view1b: viewClassFactory()
-  }),
-  view2: viewClassFactory()
-});
-
 var pane, view1, view1a, view1b, view2, evt1a, evt2;
 
 module("Mouse event handling", {
   setup: function() {
     SC.run(function() {
-      pane = Pane.create().append();
+      pane = SC.MainPane.create({
+        childViews: ['view1', 'view2'],
+        view1: viewClassFactory().extend({
+          childViews: ['view1a', 'view1b'],
+          view1a: viewClassFactory(),
+          view1b: viewClassFactory()
+        }),
+        view2: viewClassFactory()
+      });
+      pane.append();
     });
     // Populate the variables for easy access.
     view1 = pane.get('view1');
@@ -165,6 +164,29 @@ test('Mouse movement', function() {
   equals(view1b.mouseExited.callCount, 0, "The targeted view's sibling has NOT received mouseExited");
   equals(view2.mouseExited.callCount, 0, "The targeted view's parent's sibling (the new target) has NOT received mouseExited");
   equals(view2.mouseEntered.callCount, 1, "The new target has received mouseEntered; circle of life");
+});
+
+test('mousemoved leaves a destroyed view without error', function() {
+
+  equals(view1a.mouseEntered.callCount, 0, "PRELIM: mouseEntered has not been called yet");
+  equals(view1a.mouseExited.callCount, 0, "PRELIM: mouseExited has not been called yet");
+
+  SC.run(function() {
+    SC.RootResponder.responder.mousemove(evt1a);
+  });
+
+  equals(view1a.mouseEntered.callCount, 1, "The targeted view has received mouseEntered");
+
+  SC.run(function() {
+    view1a.destroy();
+  });
+
+  SC.run(function() {
+    SC.RootResponder.responder.mousemove(evt2);
+  });
+
+  equals(view1a.mouseExited.callCount, 0, "The destroyed view should not receive mouseExited");
+
 });
 
 /*

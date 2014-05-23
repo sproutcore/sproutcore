@@ -2209,7 +2209,7 @@ SC.RootResponder = SC.Object.extend(
          // responding chain
          for (loc=0, len=lh.length; loc < len; loc++) {
            view = lh[loc] ;
-          if (nh.indexOf(view) === -1) {
+          if (nh.indexOf(view) === -1 && !view.isDestroyed) { // Usually we don't want to have to manually check isDestroyed, but in this case we're explicitly checking an out-of-date cache.
              view.tryToPerform('mouseExited', evt);
            }
          }
