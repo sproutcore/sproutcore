@@ -167,7 +167,7 @@ CHANGE LOG
 * Adds sanity check to SC.GridView layout computation.
 * A number of SC.CollectionView actions now correctly honor allowsMultipleSelection.
 * Fixes a bug where the legacy iPhone theme would hide popup pane workspace toolbars.
-* Fixes a bug with specifying layerIds for SC.SegmentedView's overflow menu items.
+* Fixes a bug with specifying layerIds for SC.SegmentedView's overflow menu items. Fixes a crashing bug with SC.SegmentedView and out-of-sync cached elements.
 * Fixes a bug where the root responder would throw an error trying to call mouseExited on a view that was destroyed with the mouse over it.
 
 1.10.2
