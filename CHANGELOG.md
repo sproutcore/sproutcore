@@ -44,6 +44,7 @@ CHANGE LOG
 * SC.SliderView has a new markSteps property, which draws a mark element for each step. It also gains an updateOnScroll property, which allows you to prevent it from handling mouseWheel events (in a scroll view for example).
 * The improved documentation for SC.Object's stupendously useful didChangeFor method will hopefully encourage its use.
 * Use SC.ScrollView's horizontalAlign and verticalAlign properties to align fixed-width or -height content.
+* Adds support for calculated properties to String.fmt.
 
 ### CHANGES
 
@@ -166,6 +167,7 @@ CHANGE LOG
 * Adds sanity check to SC.GridView layout computation.
 * A number of SC.CollectionView actions now correctly honor allowsMultipleSelection.
 * Fixes a bug where the legacy iPhone theme would hide popup pane workspace toolbars.
+* Fixes a bug with specifying layerIds for SC.SegmentedView's overflow menu items.
 
 1.10.2
 -----------
