@@ -45,6 +45,7 @@ CHANGE LOG
 * The improved documentation for SC.Object's stupendously useful didChangeFor method will hopefully encourage its use.
 * Use SC.ScrollView's horizontalAlign and verticalAlign properties to align fixed-width or -height content.
 * Adds support for calculated properties to String.fmt.
+* Adds toolTip to SC.MenuItemView, and the corresponding itemToolTipKey to SC.MenuView.
 
 ### CHANGES
 
