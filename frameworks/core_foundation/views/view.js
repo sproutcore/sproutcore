@@ -919,6 +919,11 @@ SC.CoreView.reopen(
   //
 
   /** @private
+    Caches the layerId to detect when it changes.
+    */
+  _lastLayerId: null,
+
+  /** @private
     Setup a view, but do not finish waking it up.
 
      - configure childViews
@@ -928,18 +933,20 @@ SC.CoreView.reopen(
        dispatch
   */
   init: function () {
-    var childViews;
+    var childViews, layerId;
 
     sc_super();
+
+    layerId = this._lastLayerId = this.get('layerId');
 
     // Register the view for event handling. This hash is used by
     // SC.RootResponder to dispatch incoming events.
     //@if (debug)
-    if (SC.View.views[this.get('layerId')]) {
+    if (SC.View.views[layerId]) {
       throw new Error("Developer Error: A view with layerId, '%@', already exists.  Each view must have a unique layerId.".fmt(this.get('layerId')));
     }
     //@endif
-    SC.View.views[this.get('layerId')] = this;
+    SC.View.views[layerId] = this;
 
     // setup classNames
     this.classNames = this.get('classNames').slice();

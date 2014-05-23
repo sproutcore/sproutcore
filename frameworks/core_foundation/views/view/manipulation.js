@@ -4,19 +4,6 @@ SC.View.reopen(
   /** @scope SC.View.prototype */{
 
   /**
-    This code exists to make it possible to pool SC.Views.
-    */
-  _lastLayerId: null,
-
-  /** @private */
-  init: function (original) {
-    original();
-
-    // Set up the cached layerId if it has been set on create.
-    this._lastLayerId = this.get('layerId');
-  }.enhance(),
-
-  /**
     Handles changes in the layer id.
   */
   layerIdDidChange: function() {
