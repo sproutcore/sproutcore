@@ -624,12 +624,16 @@ SC.Object.prototype = {
     value is ignored.
   */
   init: function () {
+    //@if(debug)
+    // Provide some developer support for the deprecation of `awake`.
+    if (this.awake !== SC.Object.prototype.awake) SC.warn("Developer Warning: `awake` has been deprecated and will not be called. Override `init` and call sc_super(); instead.");
+    //@endif
     this.initObservable();
     return this;
   },
 
   /**
-    Set to YES once this object has been destroyed.
+    This is set to YES once this object has been destroyed.
 
     @type Boolean
   */
@@ -799,22 +803,12 @@ SC.Object.prototype = {
     return this._object_toString;
   },
 
-  /**
-    Activates any outlet connections in object and syncs any bindings.  This
-    method is called automatically for view classes but may be used for any
-    object.
-
-
-  */
+  /** @deprecated v1.11 - use init instead. */
+  //@if(debug)
   awake: function () {
-    var outlets = this.outlets,
-        i, len, outlet;
-    for (i = 0, len = outlets.length;  i < len;  ++i) {
-      outlet = outlets[i];
-      this.get(outlet);
-    }
-    this.bindings.invoke('sync');
+    SC.warn('Developer Warning: The `awake` method has been deprecated. Use `init` instead. (Be sure to call sc_super().)');
   },
+  //@endif
 
   /**
     Invokes the passed method or method name one time during the runloop.  You

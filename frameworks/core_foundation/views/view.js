@@ -950,27 +950,6 @@ SC.CoreView.reopen(
   },
 
   /**
-    Wakes up the view. The default implementation immediately syncs any
-    bindings, which may cause the view to need its display updated. You
-    can override this method to perform any additional setup. Be sure to
-    call sc_super to setup bindings and to call awake on childViews.
-
-    It is best to awake a view before you add it to the DOM.  This way when
-    the DOM is generated, it will have the correct initial values and will
-    not require any additional setup.
-
-    @returns {void}
-  */
-  awake: function () {
-    sc_super();
-    var childViews = this.get('childViews'), len = childViews.length, idx;
-    for (idx = 0; idx < len; ++idx) {
-      if (!childViews[idx]) { continue; }
-      childViews[idx].awake();
-    }
-  },
-
-  /**
     Frame describes this view's current bounding rect, relative to its parent view. You
     can use this, for example, to reliably access a width for a view whose layout is
     defined with left and right. (Note that width and height values are calculated in
