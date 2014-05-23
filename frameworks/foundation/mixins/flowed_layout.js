@@ -774,7 +774,7 @@ SC.FlowedLayout = {
     // second, observe all children, and stop observing any children we no longer
     // should be observing.
     var previouslyObserving = this._scfl_isObserving || SC.CoreSet.create(),
-        nowObserving = SC.CoreSet.create();
+        nowObserving = this._scfl_isObserving = SC.CoreSet.create();
 
     var children = this.get('childViews'), len = children.length, idx, child;
     for (idx = 0; idx < len; idx++) {
