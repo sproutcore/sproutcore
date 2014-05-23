@@ -408,6 +408,15 @@ SC.Record = SC.Object.extend(
   // ATTRIBUTES
   //
 
+  /*
+    Returns a hash of the record's class's record attributes.
+
+    @returns {Hash} record attributes
+  */
+  recordAttributes: function() {
+    return this.constructor.recordAttributes();
+  }.property(),
+
   /** @private
     Current edit level.  Used to defer editing changes.
   */
@@ -1517,10 +1526,72 @@ SC.Record.mixin( /** @scope SC.Record */ {
     return store.find(this, id);
   },
 
-  /** @private - enhance extend to notify SC.Query as well. */
+  /*
+    Returns a hash listing the model class's record attributes by name.
+
+    @returns {Hash} class's record attributes
+  */
+  recordAttributes: function() {
+    // Generate if needed, then return.
+    if (!this._screc_recordAttributes) this._screc_generateRecordAttributes();
+    return SC.clone(this._screc_recordAttributes);
+  },
+
+  /*
+    Returns an array of the class's record attribute names. Use instead of looping
+    through SC.Record.recordAttribute's properties.
+
+    @returns {Array} class's record attribute names
+  */
+  recordAttributeNames: function() {
+    if (!this._screc_recordAttributeNames) this._screc_generateRecordAttributes();
+    return SC.clone(this._screc_recordAttributeNames);
+  },
+
+  /* @private - Cache of record attributes. */
+  _screc_recordAttributes: null,
+
+  /* @private - Cache of record attributes. */
+  _screc_recordAttributeNames: null,
+
+  /* @private - exposes attributes at the class level for introspection. */
+  _screc_generateRecordAttributes: function() {
+    this._screc_recordAttributes = {};
+    this._screc_recordAttributeNames = [];
+
+    var key, value;
+    for (key in this.prototype) {
+      value = this.prototype[key];
+      // If the property is an attribute, add it to recordAttributes.
+      if (value && value.isRecordAttribute) {
+        this._screc_recordAttributeNames.push(key);
+        this._screc_recordAttributes[key] = value;
+      }
+    }
+  },
+  /* @private - Invalidates record attribute cache here and on all subclasses. */
+  _screc_invalidateRecordAttributes: function() {
+    // Invalidate this class.
+    this._screc_recordAttributes = null;
+    this._screc_recordAttributeNames = null;
+    // Invalidate on all subclasses.
+    var i, len = this.subclasses.length;
+    for (i = 0; i < len; i++) {
+      this.subclasses[i]._screc_invalidateRecordAttributes();
+    }
+  },
+
+  /* @private - Extended to clear record attribute cache and notify SC.Query if necessary. */
   extend: function() {
-    var ret = SC.Object.extend.apply(this, arguments);
+    var ret = SC.Object.extend.apply(this, Array.prototype.slice.apply(arguments));
+    ret._screc_invalidateRecordAttributes();
     if(SC.Query) SC.Query._scq_didDefineRecordType(ret);
-    return ret ;
-  }
+    return ret;
+  },
+  /* @private - Extended to clear record attribute cache. */
+  reopen: function() {
+    var ret = SC.Object.reopen.apply(this, Array.prototype.slice.apply(arguments));
+    this._screc_invalidateRecordAttributes();
+    return ret;
+  },
 });
