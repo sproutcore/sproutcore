@@ -11,8 +11,9 @@ sc_require('views/view/animation');
 SC.CSS_TRANSFORM_NAMES = ['rotateX', 'rotateY', 'rotateZ', 'scale'];
 
 SC.CSS_TRANSFORM_MAP = {
-  rotate: function () {
-    return null;
+  rotate: function (val) {
+    if (SC.typeOf(val) === SC.T_NUMBER) { val += 'deg'; }
+    return 'rotate(' + val + ')';
   },
 
   rotateX: function (val) {
