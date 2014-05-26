@@ -126,6 +126,7 @@ test("Default properties are correct for different types of requests.", function
   req3 = SC.Request.putUrl(url, xmlBody).xml()._prep();
   req4 = SC.Request.patchUrl(url, jsonBody).json()._prep();
   req5 = SC.Request.deleteUrl(url)._prep();
+  req6 = SC.Request.putUrl(url, JSON.stringify(jsonBody)).json()._prep();
 
   ok(req1.get('isJSON'), 'req1 should have isJSON true');
   ok(!req1.get('isXML'), 'req1 should have isXML false');
@@ -142,6 +143,8 @@ test("Default properties are correct for different types of requests.", function
   ok(!req5.get('isJSON'), 'req5 should have isJSON false');
   ok(!req5.get('isXML'), 'req5 should have isXML false');
   equals(req5.header('Content-Type'), undefined, 'req5 should have Content-Type header as');
+  ok(req6.get('isJSON'), 'req6 should have isJSON true');
+  equals(req6.get('encodedBody'), JSON.stringify(jsonBody), 'req6 should not try to re-encode a string');
 });
 
 test("Test Asynchronous GET Request", function() {

@@ -157,7 +157,9 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
   encodedBody: function() {
     // TODO: support XML
     var ret = this.get('body');
-    if (ret && this.get('isJSON')) { ret = SC.json.encode(ret); }
+    if (ret && this.get('isJSON') && SC.typeOf(ret) !== SC.T_STRING) { 
+      ret = SC.json.encode(ret); 
+    }
     return ret;
   }.property('isJSON', 'isXML', 'body').cacheable(),
 
