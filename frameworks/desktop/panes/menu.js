@@ -321,6 +321,15 @@ SC.MenuPane = SC.PickerPane.extend(
   itemTitleKey: 'title',
 
   /**
+    The name of the property that contains the value for each item.
+
+    @type String
+    @default "value"
+    @commonTask Menu Item Properties
+  */
+  itemValueKey: 'value',
+
+  /**
     The name of the property that contains the tooltip for each item.
 
     @type String
@@ -476,7 +485,7 @@ SC.MenuPane = SC.PickerPane.extend(
     @isReadOnly
     @type Array
   */
-  menuItemKeys: ['itemTitleKey', 'itemToolTipKey', 'itemIsEnabledKey', 'itemIconKey', 'itemSeparatorKey', 'itemActionKey', 'itemCheckboxKey', 'itemShortCutKey', 'itemHeightKey', 'itemSubMenuKey', 'itemKeyEquivalentKey', 'itemTargetKey', 'itemLayerIdKey'],
+  menuItemKeys: ['itemTitleKey', 'itemValueKey', 'itemToolTipKey', 'itemIsEnabledKey', 'itemIconKey', 'itemSeparatorKey', 'itemActionKey', 'itemCheckboxKey', 'itemShortCutKey', 'itemHeightKey', 'itemSubMenuKey', 'itemKeyEquivalentKey', 'itemTargetKey', 'itemLayerIdKey'],
 
   // ..........................................................
   // DEFAULT PROPERTIES

@@ -96,6 +96,15 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
   }.property().cacheable(),
 
   /**
+    The value from the content property.
+
+    @type String
+  */
+  value: function () {
+    return this.getContentProperty('itemValueKey');
+  }.property().cacheable(),
+
+  /**
     The tooltip from the content property.
 
     @type String
@@ -759,6 +768,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
 */
 SC.MenuItemView._contentPropertyToMenuItemPropertyMapping = {
   itemTitleKey: 'title',
+  itemValueKey: 'value',
   itemToolTipKey: 'toolTip',
   itemIsEnabledKey: 'isEnabled',
   itemIconKey: 'icon',
