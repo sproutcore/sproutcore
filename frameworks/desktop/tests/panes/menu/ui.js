@@ -448,6 +448,7 @@ test('Menu item keys', function () {
   items = [
     {
       TheTitle: 'Menu item',
+      TheValue: 1,
       TheToolTip: 'Menu tooltip',
       AmIEnabled: false,
       MyIcon: 'folder',
@@ -462,6 +463,7 @@ test('Menu item keys', function () {
       layout: { width: 200 },
       items: items,
       itemTitleKey: 'TheTitle',
+      itemValueKey: 'TheValue',
       itemToolTipKey: 'TheToolTip',
       itemIsEnabledKey: 'AmIEnabled',
       itemIconKey: 'MyIcon',
@@ -475,9 +477,11 @@ test('Menu item keys', function () {
   menuItem = menuPane.get('menuItemViews')[0];
 
   equals(menuItem.get('title'), 'Menu item');
+  equals(menuItem.get('value'), 1);
   equals(menuItem.get('toolTip'), 'Menu tooltip');
   equals(menuItem.get('isEnabled'), false);
   equals(menuItem.get('icon'), 'folder');
   ok(SC.kindOf(menuItem.get('subMenu'), SC.MenuPane));
   equals(menuItem.get('isSeparator'), false);
+  clickOn(menuPane);
 });
