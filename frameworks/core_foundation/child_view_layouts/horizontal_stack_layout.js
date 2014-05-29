@@ -240,6 +240,7 @@ SC.mixin(SC.View,
         marginAfter = options.paddingBefore || 0,
         paddingAfter = options.paddingAfter || 0,
         position = 0,
+        rightPosition = 0,
         provisionedSpace = 0,
         autoFillAvailableSpace = 0,
         totalAvailableSpace = 0,
@@ -365,17 +366,19 @@ SC.mixin(SC.View,
           {
             // calculate the width according to fillRatio and totalFillAvailableSpaceRatio
             // but set the "right" position so any subsequent layout is not considering the width as fixed
-            width = autoFillAvailableSpace * fillRatio / totalFillAvailableSpaceRatio;
-            adjustRight = layout.right !== totalAvailableSpace - position - width;
+            width = Math.ceil( autoFillAvailableSpace * fillRatio / totalFillAvailableSpaceRatio );
+            // Determine the right position. If the position overflows (i.e. goes negative) because of rounding up, stop at 0.
+            rightPosition = Math.max( 0, totalAvailableSpace - position - width );
+            adjustRight = layout.right !== rightPosition;
 
             if (adjustLeft && adjustRight)
             {
-              childView.adjust({'left': position, 'right': totalAvailableSpace - position - width});
+              childView.adjust({'left': position, 'right': rightPosition});
               // avoid an extra adjust below
               adjustLeft = false;
             }
             else if (adjustRight)
-              childView.adjust('right', totalAvailableSpace - position - width);
+              childView.adjust('right', rightPosition);
           }
         }
 

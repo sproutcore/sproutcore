@@ -240,6 +240,7 @@ SC.mixin(SC.View,
         marginAfter = options.paddingBefore || 0,
         paddingAfter = options.paddingAfter || 0,
         position = 0,
+        bottomPosition = 0,
         provisionedSpace = 0,
         autoFillAvailableSpace = 0,
         totalAvailableSpace = 0,
@@ -365,17 +366,19 @@ SC.mixin(SC.View,
           {
             // calculate the height according to fillRatio and totalFillAvailableSpaceRatio
             // but set the "bottom" position so any subsequent layout is not considering the height as fixed
-            height = autoFillAvailableSpace * fillRatio / totalFillAvailableSpaceRatio;
-            adjustBottom = layout.bottom !== totalAvailableSpace - position - height;
+            height = Math.ceil( autoFillAvailableSpace * fillRatio / totalFillAvailableSpaceRatio );
+            // Determine the bottom position. If the position overflows (i.e. goes negative) because of rounding up, stop at 0.
+            bottomPosition = Math.max( 0, totalAvailableSpace - position - height );
+            adjustBottom = layout.bottom !== bottomPosition;
 
             if (adjustTop && adjustBottom)
             {
-              childView.adjust({'top': position, 'bottom': totalAvailableSpace - position - height});
+              childView.adjust({'top': position, 'bottom': bottomPosition});
               // avoid an extra adjust below
               adjustTop = false;
             }
             else if (adjustBottom)
-              childView.adjust('bottom', totalAvailableSpace - position - height);
+              childView.adjust('bottom', bottomPosition);
           }
         }
 
