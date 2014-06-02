@@ -1985,15 +1985,25 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
   /** @private */
   moveDownAndModifySelection: function (sender, evt) {
-    this.selectNextItem(true, this.get('itemsPerRow') || 1);
-    this._cv_performSelectAction(null, evt, this.ACTION_DELAY);
+    var content = this.get('content'),
+        del = this.delegateFor('allowsMultipleSelection', this.get('delegate'), content);
+
+    if (del && del.get('allowsMultipleSelection')) {
+      this.selectNextItem(true, this.get('itemsPerRow') || 1);
+      this._cv_performSelectAction(null, evt, this.ACTION_DELAY);
+    }
     return true;
   },
 
   /** @private */
   moveUpAndModifySelection: function (sender, evt) {
-    this.selectPreviousItem(true, this.get('itemsPerRow') || 1);
-    this._cv_performSelectAction(null, evt, this.ACTION_DELAY);
+    var content = this.get('content'),
+        del = this.delegateFor('allowsMultipleSelection', this.get('delegate'), content);
+
+    if (del && del.get('allowsMultipleSelection')) {
+      this.selectPreviousItem(true, this.get('itemsPerRow') || 1);
+      this._cv_performSelectAction(null, evt, this.ACTION_DELAY);
+    }
     return true;
   },
 
@@ -3039,8 +3049,13 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   /* @private Internal property used to track the rate of touch scroll change events. */
   _lastTouchScrollTime: null,
 
-  /** @private SC.ScrollView */
-  touchScrollDidChange: function (left, top) {
+  /** @private
+    Called by SC.ScrollView when a touch scroll/scale is in flight. (Touch scrolling is done outside of
+    the run-loop to eke out maximum performance.)
+
+    TODO: This custom-calculated clipping frame doesn't take scale into account.
+  */
+  touchScrollDidChange: function (left, top, scale) {
     // Fast path!  Don't try to update too soon.
     if (Date.now() - this._lastTouchScrollTime < 30) { return; }
 
@@ -3142,13 +3157,12 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   init: function () {
     sc_super();
 
+    //@if (debug)
     if (this.useFastPath) {
-      //@if (debug)
       // Deprecation warning for those that were using SC.CollectionFastPath.
       SC.warn("Developer Warning: SC.CollectionView `useFastPath` has been deprecated.  The performance improvements have been integrated directly into SC.CollectionView as the default behavior.  Please disable the useFastPath property and refer to the SC.CollectionView documentation for more information.");
-      //@endif
-      this.mixin(SC.CollectionFastPath);
     }
+    //@endif
 
     //@if (debug)
     if (this.willReload || this.didReload) {

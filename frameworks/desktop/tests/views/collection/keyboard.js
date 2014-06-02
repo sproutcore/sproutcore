@@ -17,6 +17,42 @@ pane.add('default', SC.CollectionView, {
 	content: controller.get('arrangedObjects')
 });
 
+/**
+  Simulates a key press on the specified view.
+
+  @param {SC.View} view the view
+  @param {Number} keyCode key to simulate
+  @param {Boolean} [isKeyPress] simulate key press event
+  @param {Boolean} [shiftKey] simulate shift key pressed
+  @param {Boolean} [ctrlKey] simulate ctrlKey pressed
+*/
+function keyPressOn(view, keyCode, isKeyPress, shiftKey, ctrlKey) {
+  var layer = view.get('layer'),
+    opts = {
+      shiftKey: !!shiftKey,
+      ctrlKey: !!ctrlKey,
+      keyCode: keyCode,
+      charCode: isKeyPress ? keyCode : 0,
+      which: keyCode
+    },
+    ev;
+
+  ok(layer, 'keyPressOn() precond - view %@ should have layer'.fmt(view.toString()));
+
+  ev = SC.Event.simulateEvent(layer, 'keydown', opts);
+  SC.Event.trigger(layer, 'keydown', [ev]);
+
+  if (isKeyPress) {
+    ev = SC.Event.simulateEvent(layer, 'keypress', opts);
+    SC.Event.trigger(layer, 'keypress', [ev]);
+  }
+
+  ev = SC.Event.simulateEvent(layer, 'keyup', opts);
+  SC.Event.trigger(layer, 'keyup', [ev]);
+  SC.RunLoop.begin().end();
+  layer = null;
+}
+
 module("SC.CollectionView Keyboard events and handlers", {
 	setup: function() {
     pane.standardSetup().setup();
@@ -80,6 +116,62 @@ test("insertNewline doesn't throw exception when no selection", function() {
 			ok(false, "Calling insertNewline without a selection should not throw an exception. %@".fmt(ex));
 		}
 	});
+});
+
+test("moveDownAndModifySelection", function () {
+  var view = pane.view('default');
+
+  SC.run(function () {
+    pane.becomeKeyPane();
+    view.set('acceptsFirstResponder', true);
+    view.becomeFirstResponder();
+    view.select(1);
+  });
+  equals(view.getPath('selection.length'), 1, 'Should have a single selected row');
+  SC.run(function () {
+    keyPressOn(view, SC.Event.KEY_DOWN, false, true, false);
+  });
+  equals(view.getPath('selection.length'), 2, 'Should have an additional selected row');
+  SC.run(function () {
+    view.select(1);
+    controller.set('allowsMultipleSelection', false);
+  });
+  equals(view.getPath('selection.length'), 1, 'Should have a single selected row');
+  SC.run(function () {
+    keyPressOn(view, SC.Event.KEY_DOWN, false, true, false);
+  });
+  equals(view.getPath('selection.length'), 1, 'Should still have a single selected row');
+
+  // Cleanup
+  controller.set('allowsMultipleSelection', true);
+});
+
+test("moveUpAndModifySelection", function () {
+  var view = pane.view('default');
+
+  SC.run(function () {
+    pane.becomeKeyPane();
+    view.set('acceptsFirstResponder', true);
+    view.becomeFirstResponder();
+    view.select(1);
+  });
+  equals(view.getPath('selection.length'), 1, 'Should have a single selected row');
+  SC.run(function () {
+    keyPressOn(view, SC.Event.KEY_UP, false, true, false);
+  });
+  equals(view.getPath('selection.length'), 2, 'Should have an additional selected row');
+  SC.run(function () {
+    view.select(1);
+    controller.set('allowsMultipleSelection', false);
+  });
+  equals(view.getPath('selection.length'), 1, 'Should have a single selected row');
+  SC.run(function () {
+    keyPressOn(view, SC.Event.KEY_UP, false, true, false);
+  });
+  equals(view.getPath('selection.length'), 1, 'Should still have a single selected row');
+
+  // Cleanup
+  controller.set('allowsMultipleSelection', true);
 });
 
 // TODO: yeah all the other keyboard stuff.

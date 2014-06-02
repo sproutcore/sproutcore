@@ -432,6 +432,17 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   },
 
   _scac_arrayContentWillChange: function (start, removed, added) {
+    // Repoint arguments if orderBy is present. (If orderBy is present, we can't be sure how any content change
+    // translates into an arrangedObject change without calculating the order, which is a complex, potentially
+    // expensive operation, so we simply invalidate everything.)
+    if (this.get('orderBy')) {
+      var len = this.get('length');
+      start = 0;
+      added = len + added - removed;
+      removed = len;
+    }
+
+    // Continue.
     this.arrayContentWillChange(start, removed, added);
     if (this._kvo_enumerable_property_chains) {
       var removedObjects = this.slice(start, start + removed);
@@ -442,29 +453,18 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   _scac_arrayContentDidChange: function (start, removed, added) {
     this._scac_cached = NO;
 
-    // If the controller is sorted (via an orderBy) and new items are added, we need
-    // to be sure to notify range observers based on the sorted order, not the raw
-    // order. (This simply notifies a change for sorted arrays' full ranges; it *may* be
-    // worth it to calculate the actual change in sorted order and only notify the
-    // affected range, but this calculation may be expensive.)
-    // Note that removing items (added === 0) will not affect the order of the remaining
-    // elements.
-    if ((added > 0) && this.get('orderBy')) {
+    // Repoint arguments if orderBy is present. (If orderBy is present, we can't be sure how any content change
+    // translates into an arrangedObject change without calculating the order, which is a complex, potentially
+    // expensive operation, so we simply invalidate everything.)
+    if (this.get('orderBy')) {
+      var len = this.get('length');
       start = 0;
-      removed = 0;
-      added = this.get('length');
+      added = len + added - removed;
+      removed = len;
     }
 
-    // Notify range and '[]' observers.
+    // Notify range, firstObject, lastObject and '[]' observers.
     this.arrayContentDidChange(start, removed, added);
-
-    // If the start & length are provided, we can also indicate if the firstObject
-    // or lastObject properties changed, thus making them independently observable.
-    if (!SC.none(start)) {
-      if (start === 0) this.notifyPropertyChange('firstObject');
-      var length = added + removed;
-      if (!SC.none(length) && start + length >= this.get('length') - 1) this.notifyPropertyChange('lastObject');
-    }
 
     if (this._kvo_enumerable_property_chains) {
       var addedObjects = this.slice(start, start + added);
@@ -547,7 +547,6 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     this._scac_contentStatusDidChange();
 
     this.arrayContentDidChange(0, 0, newlen);
-    this.enumerableContentDidChange(0, newlen - 1);
     this.updateSelectionAfterContentChange();
   }.observes('content'),
 
@@ -564,15 +563,12 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
         oldlen  = this._scac_length;
 
     this._scac_length = newlen;
-    this.beginPropertyChanges();
     this._scac_cached = NO; // invalidate
     // If this is an unordered enumerable, we have no way
     // of knowing which indices changed. Instead, we just
     // invalidate the whole array.
     this.arrayContentWillChange(0, oldlen, newlen);
     this.arrayContentDidChange(0, oldlen, newlen);
-    this.enumerableContentDidChange(0, oldlen - 1);
-    this.endPropertyChanges();
     this.updateSelectionAfterContentChange();
   }.observes('orderBy'),
 

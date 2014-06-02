@@ -919,6 +919,11 @@ SC.CoreView.reopen(
   //
 
   /** @private
+    Caches the layerId to detect when it changes.
+    */
+  _lastLayerId: null,
+
+  /** @private
     Setup a view, but do not finish waking it up.
 
      - configure childViews
@@ -928,18 +933,20 @@ SC.CoreView.reopen(
        dispatch
   */
   init: function () {
-    var childViews;
+    var childViews, layerId;
 
     sc_super();
+
+    layerId = this._lastLayerId = this.get('layerId');
 
     // Register the view for event handling. This hash is used by
     // SC.RootResponder to dispatch incoming events.
     //@if (debug)
-    if (SC.View.views[this.get('layerId')]) {
+    if (SC.View.views[layerId]) {
       throw new Error("Developer Error: A view with layerId, '%@', already exists.  Each view must have a unique layerId.".fmt(this.get('layerId')));
     }
     //@endif
-    SC.View.views[this.get('layerId')] = this;
+    SC.View.views[layerId] = this;
 
     // setup classNames
     this.classNames = this.get('classNames').slice();
@@ -971,8 +978,11 @@ SC.CoreView.reopen(
   },
 
   /**
-    Frame describes the current bounding rect for your view.  This is always
-    measured from the top-left corner of the parent view.
+    Frame describes this view's current bounding rect, relative to its parent view. You
+    can use this, for example, to reliably access a width for a view whose layout is
+    defined with left and right. (Note that width and height values are calculated in
+    the parent view's frame of reference as well, which has consequences for scaled
+    views.)
 
     @type Rect
     @test in layoutStyle
@@ -1003,9 +1013,12 @@ SC.CoreView.reopen(
       /*
         TODO Can probably have some better width/height values - CC
         FIXME This will probably not work right with borders - PW
+        FIXME This assumes and reports a scale of 1 - DCP
       */
-      f.width = layer.offsetWidth;
-      f.height = layer.offsetHeight;
+      f.width = f.originalWidth = layer.offsetWidth;
+      f.height = f.originalHeight = layer.offsetHeight;
+      f.scale = 1;
+      f.transformOriginX = f.transformOriginY = 0.5;
       return f;
     }
 
@@ -1046,9 +1059,9 @@ SC.CoreView.reopen(
 
   /**
     The clipping frame returns the visible portion of the view, taking into
-    account the clippingFrame of the parent view.  Keep in mind that
-    the clippingFrame is in the context of the view itself, not it's parent
-    view.
+    account the clippingFrame of the parent view.  (Note that, in contrast
+    to `frame`, `clippingFrame` is in the context of the view itself, not
+    its parent view.)
 
     Normally this will be calculated based on the intersection of your own
     clippingFrame and your parentView's clippingFrame.
@@ -1056,19 +1069,47 @@ SC.CoreView.reopen(
     @type Rect
   */
   clippingFrame: function () {
-    var f = this.get('frame'),
-        ret = f,
-        pv, cf;
+    var f = this.get('frame');
 
+    // FAST PATH: No frame, no clipping frame.
     if (!f) return null;
-    pv = this.get('parentView');
-    if (pv) {
-      cf = pv.get('clippingFrame');
-      if (!cf) return { x: 0, y: 0, width: f.width, height: f.height};
-      ret = SC.intersectRects(cf, f);
-    }
+
+    var scale = (f.scale == null) ? 1 : f.scale,
+        scaleIsArray = NO,
+        pv = this.get('parentView'),
+        pcf = pv ? pv.get('clippingFrame') : null,
+        sf, spcf, originX, originY, deltaH, deltaW,
+        ret;
+
+    // FAST PATH: No parent clipping frame, no change. (The origin and scale are reset from parent view's
+    // context to our own.)
+    if (!pcf) return { x: 0, y: 0, width: f.width / scale, height: f.height / scale};
+
+    // Get the intersection.
+    ret = SC.intersectRects(pcf, f);
+
+    // Reorient the top-left from the parent's origin to ours.
     ret.x -= f.x;
     ret.y -= f.y;
+
+    // If we're scaled, we have to scale the intersected rectangle from our parent's frame of reference
+    // to our own.
+    if (scale !== 1) {
+      var scaleX, scaleY;
+      // We're scaling from parent space into our space, so the scale is reversed. (Layout scale may be an array.)
+      if (SC.typeOf(scale) === SC.T_ARRAY) {
+        scaleX = 1 / scale[0];
+        scaleY = 1 / scale[1];
+      } else {
+        scaleX = scaleY = 1 / scale;
+      }
+
+      // Convert the entire rectangle into our scale.
+      ret.x *= scaleX;
+      ret.width *= scaleX;
+      ret.y *= scaleY;
+      ret.height *= scaleY;
+    }
 
     return ret;
   }.property('parentView', 'frame').cacheable(),
@@ -1373,33 +1414,37 @@ SC.CoreView.reopen(
     @test in createChildViews
   */
   createChildView: function (view, attrs) {
-    if (!view.isClass) {
-      attrs = view;
-    } else {
+    // Create the view if it is a class.
+    if (view.isClass) {
       // attrs should always exist...
       if (!attrs) { attrs = {}; }
+
       // clone the hash that was given so we do not pollute it if it's being reused
       else { attrs = SC.clone(attrs); }
-    }
 
-    attrs.owner = attrs.parentView = this;
-    if (!attrs.page) { attrs.page = this.page; }
+      // Assign the owner, parentView & page to ourself.
+      attrs.owner = attrs.parentView = this;
+      if (!attrs.page) { attrs.page = this.page; }
 
-    // Now add this to the attributes and create.
-    if (view.isClass) {
       // Track that we created this view.
       attrs.createdByParent = true;
 
       // Insert the autoMixins if defined
       var applyMixins = this.autoMixins;
-
       if (!!applyMixins) {
         applyMixins = SC.clone(applyMixins);
         applyMixins.push(attrs);
         view = view.create.apply(view, applyMixins);
-      }
-      else
+      } else {
         view = view.create(attrs);
+      }
+    // Assign the parentView & owner if the view is an instance.
+    // TODO: This should not be accepting view instances, for the purpose of lazy code elsewhere in the framework.
+    //       We should ensure users of `createChildViews` are using appendChild and other manipulation methods.
+    } else {
+      view.set('parentView', this);
+      view.set('owner', this);
+      if (!view.get('page')) { view.set('page', this.page); }
     }
 
     return view;
@@ -1889,6 +1934,39 @@ SC.CoreView.unload = function () {
    2. They react – acting as first responders for incoming keyboard, mouse, and
      touch events.
 
+  View Basics
+  ====
+
+  SproutCore's view layer is made up of a tree of SC.View instances, nested
+  using the `childViews` list – usually an array of local property names. You
+  position each view by specifying a set of layout keys, like 'left', 'right',
+  'width', or 'centerX', in a hash on the layout property. (See the 'layout'
+  documentation for more.)
+
+  Other than positioning, SproutCore relies on CSS for all your styling needs.
+  Set an array of CSS classes on the classNames property, then style them with
+  standard CSS. (SproutCore comes with Sass support built in, too.) If you have
+  a class that you want automatically added and removed as another property
+  changes, take a look at classNameBindings.
+
+  Different view classes do different things. The so-called "Big Five" view
+  classes are SC.LabelView, for displaying (optionally editable, optionally
+  localizable) text; SC.ButtonView, for the user to poke; SC.CollectionView
+  (most often its subclass SC.ListView) for displaying an array of content;
+  SC.ContainerView, for easily swapping child views in and out; and SC.ScrollView,
+  for containing larger views and allowing them to be scrolled.
+
+  All views live in panes (subclasses of SC.Pane, like SC.MainPane and SC.PanelPane),
+  which are views that know how to append themselves directly to the document. Panes
+  also serve as routers for events, like mouse, touch and keyboard events, that are
+  bound for their views. (See "View Events" below for more.)
+
+  For best performance, you should define your view and pane classes inside an
+  SC.Page instance, getting them as needed with `get`. As its name suggests,
+  SC.Page's one job is to instantiate views once on demand, deferring the expensive
+  view creation process until each view is needed. Correctly using SC.Page is considered
+  an important best practice for high-performance applications.
+
   View Initialization
   ====
 
@@ -2041,22 +2119,6 @@ SC.CoreView.unload = function () {
   - `dataDragExited` -- Triggered when a data drag leaves a view. You can use this handler to
     update the view to remove the visual drop signal. This event is fired regardless of whether
     a drop occurred.
-
-  Since these events can be more global than other events, they are accompanied by versions
-  triggered on your app's default responder (e.g. a statechart). These include:
-
-  - `dataDragDidEnter` -- Triggered when a data-drag enters the application window. You can use
-    this event to highlight drop zones appropriate to the dragging data type (found via the
-    event's `dataTransfer.types` array).
-  - `dataDragDidHover` -- Triggered when a data-drag hovers or moves over the application window.
-    This gives the statechart a chance to tell the browser how to handle the drag operation. Note
-    that `dataDragDidHover` is triggered immediately after `dataDragDidEnter`, so you don't need
-    to worry about that in the enter event.
-  - `dataDragDidDrop` -- If the last hover event's dropEffect was set correctly, this event will
-    give access to the data that was dropped.
-  - `dataDragDidExit` -- Triggered when the data drag leaves the application window. You can use
-    this event to hide drop zone highlights. This event is fired regardless of whether a drop
-    occurred.
 
 
   Touch events

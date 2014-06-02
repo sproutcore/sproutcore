@@ -956,3 +956,44 @@ test("undefined and null can be passed for both defaultFlowSpacing and child's f
   view.destroy();
 });
 
+test("Observed childViews", function() {
+  var view;
+
+  SC.run(function() {
+    view = SC.View.create(SC.FlowedLayout, {
+      childViews: 'a b c'.w(),
+
+      a: SC.View.create({
+        layout: { width: 100, height: 100 }
+      }),
+
+      b: SC.View.create({
+        layout: { width: 300, height: 100 }
+      }),
+
+      c: SC.View.create({
+        layout: { width: 200, height: 100 }
+      })
+    });
+    view._doRender();
+    view._doAttach(document.body);
+  });
+
+  // TODO: Redo this without poking private implementations.
+  ok(view._scfl_isObserving.contains(view.a), "FlowedLayout view should observe all three childViews (a).");
+  ok(view._scfl_isObserving.contains(view.b), "FlowedLayout view should observe all three childViews (b).");
+  ok(view._scfl_isObserving.contains(view.c), "FlowedLayout view should observe all three childViews (c).");
+
+  // Remove a child view.
+  SC.run(function() {
+    view.removeChild(view.b);
+  });
+
+  ok(!view._scfl_isObserving.contains(view.b), "FlowedLayout view should no longer observe the layout of a removed child view (b).");
+  ok(view._scfl_isObserving.contains(view.a), "FlowedLayout view should still be observing all three childViews (a).");
+  ok(view._scfl_isObserving.contains(view.c), "FlowedLayout view should still be observing all three childViews (c).");
+
+  // Cleanup
+  view.destroy();
+
+});

@@ -98,7 +98,7 @@ SC.RelationshipSupport = {
   _srs_inverseDidRelinquishRelationships: function (recordType, ids, attr, inverseId) {
     ids.forEach(function (id) {
       this._srs_inverseDidRelinquishRelationship(recordType, id, attr, inverseId);
-    },this);
+    }, this);
   },
 
   /** @private
@@ -115,9 +115,18 @@ SC.RelationshipSupport = {
 
     if (SC.instanceOf(proto[key], SC.SingleAttribute)) {
       delete dataHash[key];
-    } else if (SC.instanceOf(proto[key], SC.ManyAttribute)
-               && SC.typeOf(dataHash[key]) === SC.T_ARRAY) {
+    } else if (SC.instanceOf(proto[key], SC.ManyAttribute) &&
+        SC.typeOf(dataHash[key]) === SC.T_ARRAY) {
+
       dataHash[key].removeObject(relativeID);
+
+      // If there is a materialized record with a ManyArray we have to clear the
+      // internal cache of the ManyArray. Otherwise calling `objectAt` on the
+      // Many Array will retrieve the cached record.
+      var record = this.records[storeKey];
+      if (record) {
+        record.get(key)._records = null;
+      }
     }
 
     this.pushRetrieve(recordType, id, dataHash, undefined, true);
@@ -132,7 +141,7 @@ SC.RelationshipSupport = {
   _srs_inverseDidAddRelationships: function (recordType, ids, attr, inverseId) {
     ids.forEach(function (id) {
       this._srs_inverseDidAddRelationship(recordType, id, attr, inverseId);
-    },this);
+    }, this);
   },
 
 
@@ -246,7 +255,7 @@ SC.RelationshipSupport = {
         // update old relationships
         existingIDs = [currentHash[keyValue] || null].flatten().compact().uniq();
         this._srs_inverseDidRelinquishRelationships(inverseType, existingIDs, toAttr, id);
-    });
+      });
 
     return original(recordType, id, storeKey);
   }.enhance(),
@@ -275,22 +284,25 @@ SC.RelationshipSupport = {
           @param {String} keyValue - the property name in the datahash that defines this foreign key relationship
          */
         function (inverseType, currentHash, toAttr, keyValue) {
-          // update old relationships
-          existingIDs = [currentHash[keyValue] || null].flatten().compact().uniq();
 
-          // update new relationships
+          // Find the new relations.
           inverseIDs = [dataHash[keyValue] || null].flatten().compact().uniq();
 
-          this._srs_inverseDidRelinquishRelationships(inverseType, existingIDs.filter(
+          // Find the old relations.
+          existingIDs = [currentHash[keyValue] || null].flatten().compact().uniq();
+          existingIDs = existingIDs.filter(
             function (el) {
               return inverseIDs.indexOf(el) === -1;
-            }), toAttr, id);
+            });
 
+          // Update the relationships.
+          this._srs_inverseDidRelinquishRelationships(inverseType, existingIDs, toAttr, id);
           this._srs_inverseDidAddRelationships(inverseType, inverseIDs, toAttr, id);
         });
     }
 
     storeKey = storeKey || recordType.storeKeyFor(id);
+
     return original(recordType, id, dataHash, storeKey);
   }.enhance()
 };

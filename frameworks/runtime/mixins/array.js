@@ -37,7 +37,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
 
     Before mutating the underlying data structure, you must call
     this.arrayContentWillChange(). After the mutation is complete, you must
-    call arrayContentDidChange() and enumerableContentDidChange().
+    call arrayContentDidChange().
 
     NOTE: JavaScript arrays already implement SC.Array and automatically call
     the correct callbacks.
@@ -604,7 +604,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
       }
     }
 
-    this.notifyPropertyChange('[]');
+    this.enumerableContentDidChange(start, addedCount, addedCount - removedCount);
     this.endPropertyChanges();
 
     return this;

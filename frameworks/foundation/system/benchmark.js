@@ -6,8 +6,6 @@
 // ==========================================================================
 /*globals $A */
 
-sc_require('core') ;
-
 /** @namespace
 
   This bit of meta-programming magic can install a benchmark handler on any

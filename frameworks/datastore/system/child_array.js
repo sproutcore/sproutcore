@@ -243,7 +243,6 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     }
 
     // Update the enumerable, [], property (including firstObject and lastObject)
-    this.enumerableContentDidChange(idx, addCount);
     this.arrayContentDidChange(idx, removeCount, addCount);
 
     // Update our cache! So when the record property change comes back down we can ignore it.
@@ -291,7 +290,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return ret;
   },
 
-  /**
+  /** @private
     This is called by the parent record whenever its properties change. It is
     also called by the ChildrenAttribute transform when the attribute is set
     to a new array.
@@ -330,7 +329,6 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
     // this.arrayContentWillChange(0, oldLength, newLength);
     this.arrayContentDidChange(0, oldLength, newLength);
-    this.enumerableContentDidChange(0, newLength);
 
     // Cache our backing array so we can avoid updates when we haven't actually
     // changed. See fast path above.

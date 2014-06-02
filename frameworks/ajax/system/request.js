@@ -480,6 +480,12 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
   notify: function(statusOrEvent, target, action) {
     var args;
 
+    //@if (debug)
+    if (statusOrEvent === 'loadend' && SC.Request.WARN_ON_LOADEND) {
+      SC.warn("Developer Warning: You have called SC.Request#notify for the 'loadend' event. Note that on certain platforms, like older iPads, loadend is not supported and this notification will fail silently. You can protect against this by checking SC.platform.get('supportsXHR2LoadEndEvent'), and attaching listeners for load, error and abort instead. (This is not done automatically because your code may need to handle event type and fire order considerations.) To suppress this warning, set SC.Request.WARN_ON_LOADEND to NO.");
+    }
+    //@endif
+
     // Normalize arguments
     if (SC.typeOf(statusOrEvent) !== SC.T_NUMBER && SC.typeOf(statusOrEvent) !== SC.T_STRING) {
       // Accept multiple additional arguments (Do so before shifting the arguments!)
@@ -570,6 +576,9 @@ SC.Request.mixin(
   }
 
 });
+
+/* @private Gates loadend warning. */
+SC.Request.WARN_ON_LOADEND = YES;
 
 /**
   @class

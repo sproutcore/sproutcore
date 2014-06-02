@@ -347,6 +347,9 @@ SC.RadioView = SC.View.extend(SC.Control,
     mouseUp.
   */
   mouseDown: function(evt) {
+    // Fast path, reject secondary clicks.
+    if (evt.which !== 1) return false;
+
     if (!this.get('isEnabledInPane')) return YES;
 
     var delegate = this.get('renderDelegate'), proxy = this.get('renderDelegateProxy'),

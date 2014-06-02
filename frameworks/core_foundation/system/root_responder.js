@@ -2209,7 +2209,7 @@ SC.RootResponder = SC.Object.extend(
          // responding chain
          for (loc=0, len=lh.length; loc < len; loc++) {
            view = lh[loc] ;
-          if (nh.indexOf(view) === -1) {
+          if (nh.indexOf(view) === -1 && !view.isDestroyed) { // Usually we don't want to have to manually check isDestroyed, but in this case we're explicitly checking an out-of-date cache.
              view.tryToPerform('mouseExited', evt);
            }
          }
@@ -2249,9 +2249,7 @@ SC.RootResponder = SC.Object.extend(
   },
   /** @private */
   _dragenter: function(evt) {
-    // If this is our first dragenter throw a global event.
     if (!this._dragCounter) {
-      this.sendAction('dataDragDidEnter', null, evt);
       this._dragCounter = 1;
     }
     else this._dragCounter++;
@@ -2265,10 +2263,6 @@ SC.RootResponder = SC.Object.extend(
   _dragleave: function(evt) {
     this._dragCounter--;
     var ret = this._dragover(evt);
-    // If we're back to zero, it's our app-exit event and we should wrap it up.
-    if (this._dragCounter === 0) {
-      this.sendAction('dataDragDidExit', null, evt);
-    }
     return ret;
   },
   /** @private
@@ -2282,7 +2276,6 @@ SC.RootResponder = SC.Object.extend(
       this._dragCounter = 0;
       var evt = this._lastDraggedEvt;
       this._dragover(evt);
-      this.sendAction('dataDragDidExit', null, evt);
     });
   },
   /** @private This event fires continuously while the dataful drag is over the document. */
@@ -2298,9 +2291,6 @@ SC.RootResponder = SC.Object.extend(
       // Set the default drag effect to 'none'. Views may reverse this if they wish.
       evt.dataTransfer.dropEffect = 'none';
     }
-
-    // Alert the default responder.
-    this.sendAction('dataDragDidHover', null, evt);
 
     // Walk the responder chain, alerting anyone that would like to know.
     var ld = this._lastDraggedOver || [], nd = [], loc, len,
@@ -2406,10 +2396,6 @@ SC.RootResponder = SC.Object.extend(
     this._dragCounter = 0;
     if (this._dragLeaveTimer) this._dragLeaveTimer.invalidate();
     this._dragLeaveTimer = null;
-
-    // Fire the final actions.
-    this.sendAction('dataDragDidDrop', null, evt);
-    this.sendAction('dataDragDidExit', null, evt);
   },
 
 

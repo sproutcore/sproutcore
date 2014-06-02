@@ -17,7 +17,7 @@
 
     phantomjs test_runner.js
 
-  Run all tests with sc-super running on a custom port:
+  Run all tests with sc-server running on a custom port:
 
     phantomjs test_runner.js --port 4021
 

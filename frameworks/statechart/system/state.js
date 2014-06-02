@@ -734,7 +734,7 @@ SC.State = SC.Object.extend(
     a substate of this state, otherwise null is returned.
 
     If the given value is a string, then the string is assumed to be a path expression
-    to a substate. The value is then parsed to find the closes match. For path expression
+    to a substate. The value is then parsed to find the closest match. For path expression
     syntax, refer to the {@link SC.StatePathMatcher} class.
 
     If there is no match then null is returned. If there is more than one match then null

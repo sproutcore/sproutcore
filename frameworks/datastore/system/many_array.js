@@ -145,7 +145,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
       ret = hash[pname] = [];
     }
 
-    if (ret !== this._prevStoreIds) this.recordPropertyDidChange();
+    // if (ret !== this._sc_prevStoreIds) this.recordPropertyDidChange();
     return ret;
   }.property(),
 
@@ -222,34 +222,38 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     records.
   */
   objectAt: function (idx) {
-    var recs      = this._records,
-        storeIds  = this.get('readOnlyStoreIds'),
-        store     = this.get('store'),
-        recordType = this.get('recordType'),
-        storeKey, ret, storeId;
+    var recs = this._records,
+      storeIds  = this.get('readOnlyStoreIds'),
+      store = this.get('store'),
+      recordType = this.get('recordType'),
+      len = storeIds ? storeIds.length : 0,
+      storeKey, ret, storeId;
 
     if (!storeIds || !store) return undefined; // nothing to do
     if (recs && (ret = recs[idx])) return ret; // cached
 
+    // If not a good index return undefined
+    if (idx >= len) return undefined;
+    storeId = storeIds.objectAt(idx);
+    if (!storeId) return undefined;
+
     // not in cache, materialize
     if (!recs) this._records = recs = []; // create cache
-    storeId = storeIds.objectAt(idx);
-    if (storeId) {
-      // Handle transient records.
-      if (typeof storeId === SC.T_STRING && storeId.indexOf('_sc_id_placeholder_') === 0) {
-        storeKey = storeId.replace('_sc_id_placeholder_', '');
-      } else {
-        storeKey = store.storeKeyFor(recordType, storeId);
-      }
 
-      // If record is not loaded already, then ask the data source to
-      // retrieve it.
-      if (store.readStatus(storeKey) === SC.Record.EMPTY) {
-        store.retrieveRecord(recordType, null, storeKey);
-      }
-
-      recs[idx] = ret = store.materializeRecord(storeKey);
+    // Handle transient records.
+    if (typeof storeId === SC.T_STRING && storeId.indexOf('_sc_id_placeholder_') === 0) {
+      storeKey = storeId.replace('_sc_id_placeholder_', '');
+    } else {
+      storeKey = store.storeKeyFor(recordType, storeId);
     }
+
+    // If record is not loaded already, then ask the data source to retrieve it.
+    if (store.readStatus(storeKey) === SC.Record.EMPTY) {
+      store.retrieveRecord(recordType, null, storeKey);
+    }
+
+    recs[idx] = ret = store.materializeRecord(storeKey);
+
     return ret;
   },
 
@@ -265,26 +269,30 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     //@endif
 
     var storeIds = this.get('editableStoreIds'),
-        len      = recs ? (recs.get ? recs.get('length') : recs.length) : 0,
-        record   = this.get('record'),
-        pname    = this.get('propertyName'),
-        supportNewRecords = this.get('supportNewRecords'),
-        i, ids, toRemove, inverse, attr, inverseRecord;
+      recsLen = recs ? (recs.get ? recs.get('length') : recs.length) : 0,
+      parent   = this.get('record'),
+      pname    = this.get('propertyName'),
+      supportNewRecords = this.get('supportNewRecords'),
+      ids, toRemove, inverse, attr, inverseRecord,
+      i;
+
+    // Create the cache, we will need it.
+    if (!this._records) this._records = [];
 
     // map to store keys
     ids = [];
-    for (i = 0; i < len; i++) {
+    for (i = 0; i < recsLen; i++) {
       var rec = recs.objectAt(i),
         id = rec.get('id');
 
       if (SC.none(id)) {
+        // If the record inserted doesn't have an id yet, use a unique placeholder based on the storeKey.
         if (supportNewRecords) {
           ids[i] = '_sc_id_placeholder_' + rec.get('storeKey');
         } else {
           throw new Error("Developer Error: Attempted to add a record without a primary key to a to-many relationship (%@). The record must have a real id or be given a temporary id before it can be used. ".fmt(pname));
         }
       } else {
-        // If the record inserted doesn't have an id yet, use a unique placeholder based on the storeKey.
         ids[i] = id;
       }
     }
@@ -293,15 +301,30 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     // remove
     inverse = this.get('inverse');
     if (inverse && amt > 0) {
+      // Use a shared array to save on processing.
       toRemove = SC.ManyArray._toRemove;
       if (toRemove) SC.ManyArray._toRemove = null; // reuse if possible
       else toRemove = [];
 
-      for (i = 0; i < amt; i++) toRemove[i] = this.objectAt(idx + i);
+      for (i = 0; i < amt; i++) {
+        toRemove[i] = this.objectAt(idx + i);
+      }
     }
 
-    // pass along - if allowed, this should trigger the content observer
-    storeIds.replace(idx, amt, ids);
+    // Notify that the content will change.
+    this.arrayContentWillChange(idx, amt, recsLen);
+
+    // Perform a raw array replace without any KVO checks.
+    // NOTE: the cache must be updated to mirror changes to the storeIds
+    if (ids.length === 0) {
+      storeIds.splice(idx, amt);
+      this._records.splice(idx, amt);
+    } else {
+      var args = [idx, amt].concat(ids);
+      storeIds.splice.apply(storeIds, args);
+      args = [idx, amt].concat(new Array(ids.length)); // Insert empty items into the cache
+      this._records.splice.apply(this._records, args);
+    }
 
     // ok, notify records that were removed then added; this way reordered
     // objects are added and removed
@@ -312,7 +335,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
         inverseRecord = toRemove[i];
         attr = inverseRecord ? inverseRecord[inverse] : null;
         if (attr && attr.inverseDidRemoveRecord) {
-          attr.inverseDidRemoveRecord(inverseRecord, inverse, record, pname);
+          attr.inverseDidRemoveRecord(inverseRecord, inverse, parent, pname);
         }
       }
 
@@ -322,23 +345,29 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
       }
 
       // notify additions
-      for (i = 0; i < len; i++) {
+      for (i = 0; i < recsLen; i++) {
         inverseRecord = recs.objectAt(i);
         attr = inverseRecord ? inverseRecord[inverse] : null;
         if (attr && attr.inverseDidAddRecord) {
-          attr.inverseDidAddRecord(inverseRecord, inverse, record, pname);
+          attr.inverseDidAddRecord(inverseRecord, inverse, parent, pname);
         }
       }
 
     }
 
-    // Only mark record dirty if there is no inverse or we are master.
-    if (record && (!inverse || this.get('isMaster'))) {
-      record.recordDidChange(pname);
-    }
+    // Notify that the content did change.
+    this.arrayContentDidChange(idx, amt, recsLen);
 
-    // Update the enumerable, [], property (including firstObject and lastObject)
-    this.enumerableContentDidChange(idx, amt, len - amt);
+    // Update our cache! So when the record property change comes back down we can ignore it.
+    this._sc_prevStoreIds = storeIds;
+
+    // Only mark record dirty if there is no inverse or we are master.
+    if (parent && (!inverse || this.get('isMaster'))) {
+
+      // We must indicate to the parent that we have been modified, so they can
+      // update their status.
+      parent.recordDidChange(pname);
+    }
 
     return this;
   },
@@ -359,12 +388,26 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     if (!inverseRecord) return this; // nothing to do
 
     var id = inverseRecord.get('id'),
-        storeIds = this.get('editableStoreIds'),
-        idx      = (storeIds && id) ? storeIds.indexOf(id) : -1,
-        record;
+      storeIds = this.get('editableStoreIds'),
+      idx = (storeIds && id) ? storeIds.indexOf(id) : -1,
+      record;
 
     if (idx >= 0) {
-      storeIds.removeAt(idx);
+
+      // Notify that the content will change.
+      this.arrayContentWillChange(idx, 1, 0);
+
+      // Perform a raw array replace without any KVO checks.
+      // NOTE: the cache must be updated to mirror changes to the storeIds
+      storeIds.splice(idx, 1);
+      if (this._records) { this._records.splice(idx, 1); }
+
+      // Notify that the content did change.
+      this.arrayContentDidChange(idx, 1, 0);
+
+      // Update our cache! So when the record property change comes back down we can ignore it.
+      this._sc_prevStoreIds = storeIds;
+
       if (this.get('isMaster') && (record = this.get('record'))) {
         record.recordDidChange(this.get('propertyName'));
       }
@@ -385,18 +428,39 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     if (!inverseRecord) return this;
 
     var storeIds = this.get('editableStoreIds'),
-        orderBy  = this.get('orderBy'),
-        len      = storeIds.get('length'),
-        idx, record;
+      orderBy  = this.get('orderBy'),
+      len = storeIds.get('length'),
+      idx, record,
+      removeCount, addCount;
 
     // find idx to insert at.
     if (orderBy) {
       idx = this._findInsertionLocation(inverseRecord, 0, len, orderBy);
+
+      // All objects from idx to the end must be removed to do an ordered insert.
+      removeCount = storeIds.length - idx;
+      addCount = storeIds.length - idx + 1;
     } else {
       idx = len;
+
+      removeCount = 0;
+      addCount = 1;
     }
 
-    storeIds.insertAt(idx, inverseRecord.get('id'));
+    // Notify that the content will change.
+    this.arrayContentWillChange(idx, removeCount, addCount);
+
+    // Perform a raw array replace without any KVO checks.
+    // NOTE: the cache must be updated to mirror changes to the storeIds
+    storeIds.splice(idx, 0, inverseRecord.get('id'));
+    if (this._records) { this._records.splice(idx, 0, null); }
+
+    // Notify that the content did change.
+    this.arrayContentDidChange(idx, removeCount, addCount);
+
+    // Update our cache! So when the record property change comes back down we can ignore it.
+    this._sc_prevStoreIds = storeIds;
+
     if (this.get('isMaster') && (record = this.get('record'))) {
       record.recordDidChange(this.get('propertyName'));
     }
@@ -444,50 +508,6 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return ret;
   },
 
-  // ..........................................................
-  // INTERNAL SUPPORT
-  //
-
-  /** @private
-    Invoked whenever the `storeIds` array changes.  Observes changes.
-  */
-  recordPropertyDidChange: function (keys) {
-    if (keys && !keys.contains(this.get('propertyName'))) return this;
-
-    var storeIds = this.get('readOnlyStoreIds'), oldLen, newLen;
-    var prev = this._prevStoreIds, f = this._storeIdsContentDidChange;
-
-    if (storeIds === prev) return this; // nothing to do
-
-    if (prev) {
-      prev.removeArrayObservers({
-        target: this,
-        willChange: this.arrayContentWillChange,
-        didChange: f
-      });
-
-      oldLen = prev.get('length');
-    } else {
-      oldLen = 0;
-    }
-
-    if (storeIds) {
-      storeIds.addArrayObservers({
-        target: this,
-        willChange: this.arrayContentWillChange,
-        didChange: f
-      });
-
-      newLen = storeIds.get('length');
-    } else {
-      newLen = 0;
-    }
-
-    this.arrayContentWillChange(0, oldLen, newLen);
-    this._prevStoreIds = storeIds;
-    this._storeIdsContentDidChange(0, oldLen, newLen);
-  },
-
   /**
     Call this when a new record that was added to the many array previously
     has been committed and now has a proper `id`. This will fix up the temporary
@@ -508,15 +528,9 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     }
   },
 
-  /** @private
-    Invoked whenever the content of the storeIds array changes.  This will
-    dump any cached record lookup and then notify that the enumerable content
-    has changed.
-  */
-  _storeIdsContentDidChange: function (start, removedCount, addedCount) {
-    this._records = null; // clear cache
-    this.arrayContentDidChange(start, removedCount, addedCount);
-  },
+  // ..........................................................
+  // INTERNAL SUPPORT
+  //
 
   /** @private */
   unknownProperty: function (key, value) {
@@ -528,7 +542,37 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
   /** @private */
   init: function () {
     sc_super();
+
+    // Initialize.
     this.recordPropertyDidChange();
+  },
+
+  /** @private
+    This is called by the parent record whenever its properties change. It is
+    also called by the ChildrenAttribute transform when the attribute is set
+    to a new array.
+  */
+  recordPropertyDidChange: function (keys) {
+    if (keys && !keys.contains(this.get('propertyName'))) return this;
+
+    var oldLength = this.get('length'),
+      storeIds = this.get('readOnlyStoreIds'),
+      newLength = storeIds ? storeIds.length : 0,
+      prev = this._sc_prevStoreIds;
+
+    // Fast Path! No actual change to our backing array attribute so we should
+    // not notify any changes.
+    if (storeIds === prev) { return; }
+
+    // Throw away our cache.
+    this._records = null;
+
+    // Notify that the content did change.
+    this.arrayContentDidChange(0, oldLength, newLength);
+
+    // Cache our backing array so we can avoid updates when we haven't actually
+    // changed. See fast path above.
+    this._sc_prevStoreIds = storeIds;
   }
 
 });

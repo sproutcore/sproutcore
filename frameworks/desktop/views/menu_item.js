@@ -31,8 +31,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     @default ['title', 'isEnabled', 'isSeparator', 'isChecked']
     @see SC.View#displayProperties
   */
-  displayProperties: ['title', 'isEnabled', 'isSeparator', 'isChecked'],
-
+  displayProperties: ['title', 'toolTip', 'isEnabled', 'icon', 'isSeparator', 'shortcut', 'isChecked'],
 
   /**
     The WAI-ARIA role for menu items.
@@ -83,50 +82,88 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
   content: null,
 
   /**
-    YES if this menu item represents a separator, NO otherwise.
+    The title from the content property.
 
-    @field
-    @type Boolean
-    @observes content
+    @type String
   */
-  isSeparator: function () {
-    return this.getContentProperty('itemSeparatorKey') === YES;
-  }.property('content').cacheable(),
+  title: function () {
+    var ret = this.getContentProperty('itemTitleKey'),
+        localize = this.getPath('parentMenu.localize');
+
+    if (localize && ret) ret = SC.String.loc(ret);
+
+    return ret || '';
+  }.property().cacheable(),
 
   /**
-    @field
+    The tooltip from the content property.
+
+    @type String
+  */
+  toolTip: function () {
+    var ret = this.getContentProperty('itemToolTipKey'),
+        localize = this.getPath('parentMenu.localize');
+
+    if (localize && ret) ret = SC.String.loc(ret);
+
+    return ret || '';
+  }.property().cacheable(),
+
+  /**
+    Whether the item is enabled or not.
+
     @type Boolean
-    @observes content.isEnabled
   */
   isEnabled: function () {
     return this.getContentProperty('itemIsEnabledKey') !== NO &&
            this.getContentProperty('itemSeparatorKey') !== YES;
-  }.property('content.isEnabled').cacheable(),
+  }.property().cacheable(),
+
+  /**
+    The icon from the content property.
+
+    @type String
+  */
+  icon: function () {
+    return this.getContentProperty('itemIconKey');
+  }.property().cacheable(),
+
+  /**
+    YES if this menu item represents a separator, NO otherwise.
+
+    @type Boolean
+  */
+  isSeparator: function () {
+    return this.getContentProperty('itemSeparatorKey') === YES;
+  }.property().cacheable(),
+
+  /**
+    The shortcut from the content property.
+
+    @type String
+  */
+  shortcut: function () {
+    return this.getContentProperty('itemShortCutKey');
+  }.property().cacheable(),
 
   /**
     YES if the menu item should include a check next to it.
 
     @type Boolean
-    @property
   */
   isChecked: function () {
     return this.getContentProperty('itemCheckboxKey');
-  }.property(),
+  }.property().cacheable(),
 
   /**
     This menu item's submenu, if it exists.
 
-    @field
-    @type SC.MenuView
-    @observes content
+    @type SC.MenuPane
   */
   subMenu: function () {
-    var content = this.get('content'), menuItems, parentMenu;
+    var parentMenu = this.get('parentMenu'),
+        menuItems = this.getContentProperty('itemSubMenuKey');
 
-    if (!content) return null;
-
-    parentMenu = this.get('parentMenu');
-    menuItems = content.get(parentMenu.itemSubMenuKey);
     if (menuItems) {
       if (SC.kindOf(menuItems, SC.MenuPane)) {
         menuItems.set('isModal', NO);
@@ -147,16 +184,25 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     }
 
     return null;
-  }.property('content').cacheable(),
+  }.property().cacheable(),
 
   /**
     @type Boolean
     @default NO
-    @observes subMenu
   */
   hasSubMenu: function () {
     return !!this.get('subMenu');
   }.property('subMenu').cacheable(),
+
+  /** @private */
+  getContentProperty: function (property) {
+    var content = this.get('content'),
+        menu = this.get('parentMenu');
+
+    if (content && menu) {
+      return content.get(menu.get(property));
+    }
+  },
 
   /** @private */
   init: function () {
@@ -182,7 +228,8 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
         val,
         menu = this.get('parentMenu'),
         itemWidth = this.get('itemWidth') || menu.layout.width,
-        itemHeight = this.get('itemHeight') || SC.DEFAULT_MENU_ITEM_HEIGHT;
+        itemHeight = this.get('itemHeight') || SC.DEFAULT_MENU_ITEM_HEIGHT,
+        escapeHTML = this.get('escapeHTML');
 
     this.set('itemWidth', itemWidth);
     this.set('itemHeight', itemHeight);
@@ -203,7 +250,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
       context.push('<span class="separator"></span>');
       context.addClass('disabled');
     } else {
-      val = content.get(menu.itemIconKey);
+      val = this.get('icon');
       if (val) {
         this.renderImage(context, val);
         context.addClass('has-icon');
@@ -213,6 +260,13 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
       if (SC.typeOf(val) !== SC.T_STRING) val = val.toString();
       this.renderLabel(context, val);
 
+      val = this.get('toolTip');
+      if (SC.typeOf(val) !== SC.T_STRING) val = val.toString();
+      if (escapeHTML) {
+        val = SC.RenderContext.escapeHTML(val);
+      }
+      context.setAttr('title', val);
+
       if (this.get('isChecked')) {
         context.push('<div class="checkbox"></div>');
       }
@@ -221,7 +275,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
         this.renderBranch(context);
       }
 
-      val = this.getContentProperty('itemShortCutKey');
+      val = this.get('shortcut');
       if (val) {
         this.renderShortcut(context, val);
       }
@@ -305,33 +359,6 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
 
     this._subMenuTimer = null;
   },
-
-  /**
-    The title from the content property.
-
-    @field
-    @type String
-    @observes content.title
-  */
-  title: function () {
-    var ret = this.getContentProperty('itemTitleKey'),
-        localize = this.getPath('parentMenu.localize');
-
-    if (localize && ret) ret = SC.String.loc(ret);
-
-    return ret || '';
-  }.property('content.title').cacheable(),
-
-  /** @private */
-  getContentProperty: function (property) {
-    var content = this.get('content'),
-        menu = this.get('parentMenu');
-
-    if (content) {
-      return content.get(menu.get(property));
-    }
-  },
-
 
   //..........................................
   // Mouse Events Handling
@@ -454,7 +481,8 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
 
   /** @private*/
   mouseDown: function (evt) {
-    return YES;
+    // Accept primary clicks only.
+    return evt.which === 1;
   },
 
   /** @private */
@@ -730,8 +758,12 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
                      this mapping.
 */
 SC.MenuItemView._contentPropertyToMenuItemPropertyMapping = {
-  itemTitleKey:     'title',
+  itemTitleKey: 'title',
+  itemToolTipKey: 'toolTip',
   itemIsEnabledKey: 'isEnabled',
+  itemIconKey: 'icon',
   itemSeparatorKey: 'isSeparator',
-  itemSubMenuKey:   'subMenu'
+  itemShortCutKey: 'shortcut',
+  itemCheckboxKey: 'isChecked',
+  itemSubMenuKey: 'subMenu'
 };

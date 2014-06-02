@@ -636,6 +636,9 @@ SC.ButtonView = SC.View.extend(SC.Control,
     On mouse down, set active only if enabled.
   */
   mouseDown: function(evt) {
+    // Fast path, reject secondary clicks.
+    if (evt.which !== 1) return false;
+
     var buttonBehavior = this.get('buttonBehavior');
 
     if (!this.get('isEnabledInPane')) return YES ; // handled event, but do nothing

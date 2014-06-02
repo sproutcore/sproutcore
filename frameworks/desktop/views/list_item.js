@@ -356,6 +356,9 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     button.
   */
   mouseDown: function (evt) {
+    // Fast path, reject secondary clicks.
+    if (evt.which !== 1) return false;
+
     // if content is not editable, then always let collection view handle the
     // event.
     if (!this.get('contentIsEditable')) return NO;

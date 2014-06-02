@@ -32,6 +32,9 @@ SC.ANCHOR_CENTER = { centerX: 0, centerY: 0 };
 
 SC.LAYOUT_AUTO = 'auto';
 
+// Regexes representating valid values for rotation and scale layout properties
+SC._ROTATION_VALUE_REGEX = /^\-?\d+(\.\d*)?(rad|deg)$/;
+SC._SCALE_VALUE_REGEX = /^\d+(,\d+){0,2}$/;
 
 SC.View.reopen(
   /** @scope SC.View.prototype */ {
@@ -91,6 +94,11 @@ SC.View.reopen(
 
         // Initialize the child views.
         this._cvl_setupChildViewsLiveLayout();
+
+        // Initialize our own frame observer.
+        if (!this.get('isFixedSize') && childViewLayout.layoutDependsOnSize && childViewLayout.layoutDependsOnSize(this)) {
+          this.addObserver('frame', this, this._cvl_childViewLayoutDidChange);
+        }
       }
     }
 
@@ -116,6 +124,26 @@ SC.View.reopen(
     whenever 'layout' is set.
   */
   propertyDidChange: function (key, value, _keepCache) {
+    //@if(debug)
+    // Debug mode only property validation.
+    switch (key) {
+    case 'layout':
+      // If a layout value is accidentally set to NaN, this can result in infinite loops. Help the developer out by failing
+      // early so that they can follow the stack trace to the problem.
+      var layout = this.get('layout');
+      for (var property in layout) {
+        if (!layout.hasOwnProperty(property)) { continue; }
+
+        var layoutValue = layout[property];
+        if (isNaN(layoutValue) && (layoutValue !== SC.LAYOUT_AUTO) &&
+            !SC._ROTATION_VALUE_REGEX.exec(layoutValue) && !SC._SCALE_VALUE_REGEX.exec(layoutValue)) {
+          throw new Error("SC.View layout property set to invalid value, %@: %@.".fmt(property, layoutValue));
+        }
+      }
+      break;
+    }
+    //@endif
+
     // If the key is 'layout', we need to call layoutDidChange() immediately
     // so that if the frame has changed any cached values (for both this view
     // and any child views) can be appropriately invalidated.
@@ -128,7 +156,11 @@ SC.View.reopen(
       var dependents = this._kvo_dependents[key];
       if (dependents && dependents.indexOf('layout') != -1) { layoutChange = true; }
     }
-    if (key === 'layout' || layoutChange) { this.layoutDidChange(); }
+
+    if (key === 'layout' || layoutChange) {
+      this.layoutDidChange();
+    }
+
     // Resume notification as usual.
     sc_super();
   },
@@ -226,44 +258,71 @@ SC.View.reopen(
   },
 
   /** @private */
-  didTransitionAdjust: function () {
-  },
+  didTransitionAdjust: function () {},
 
   /**
-    The layout describes how you want your view to be positioned on the
-    screen.  You can define the following properties:
+    Set the layout to a hash of layout properties to describe in detail how your view
+    should be positioned on screen. Like most application development environments,
+    your views are laid out absolutely, relative to their parent view.
 
-     - left: the left edge
-     - top: the top edge
-     - right: the right edge
-     - bottom: the bottom edge
-     - height: the height
-     - width: the width
-     - centerX: an offset from center X
-     - centerY: an offset from center Y
-     - minWidth: a minimum width
-     - minHeight: a minimum height
-     - maxWidth: a maximum width
-     - maxHeight: a maximum height
-     - border: border on all sides
-     - borderTop: top border
-     - borderRight: right border
-     - borderBottom: bottom border
-     - borderLeft: bottom left
+    You can define your layout using combinations of the following positional properties:
+
+     - left
+     - top
+     - right
+     - bottom
+     - height
+     - width
+     - centerX: offset from center, horizontally
+     - centerY: offset from center, vertically
+     - minWidth
+     - minHeight
+     - maxWidth
+     - maxHeight
+     - scale: once positioned, scales the view in place.
+     - transformOriginX, transformOriginY: defines the point (as a decimal percentage) around which
+       your view will scale. (Also impacts rotation; see below.)
+
+    They are processed by SproutCore's layout engine and used to position the view's element onscreen. They are
+    also reliably and speedily processed into a scaled rectangle (with x, y, height, width, scale and origin
+    values) available on the frame property. See documentation on it and the clippingFrame property for more.
+
+    Most of these properties take integer numbers of pixels, for example { left: 10 }, or fractional
+    percentages like { left 0.25 }. Exceptions include scale, which takes a scale factor (e.g. { scale:
+    2 } doubles the view's size), and transformOriginX/Y which take a decimal percent, and default to 0.5
+    (the center of the view).
+
+    It's possible to define very sophisticated layouts with these properties alone. For example, you
+    can define a view which takes up the full screen until it reaches a certain width, and aligns to
+    the left thereafter, with { left: 0, right: 0, maxWidth: 400 }. (If you need the flexibility to
+    assign entirely different layouts at different screen or window sizes, see the Design Modes
+    documentation under SC.Application.)
+
+    Certain layout combinations are nonsensical and of course should be avoided. For example, you
+    can use left + right or left + width, but not left + right + width.
+
+    If your view has a CSS border, it's important that you specify its thickness in the layout hash,
+    using one or more of the following border properties, as well as in your CSS. This is an unfortunate
+    bit of repetition, but it's necessary to allow SproutCore to adjust the layout to compensate. (HTML
+    positions borders outside of the body of an element; SproutCore positions them inside their rectangles.)
+
+     - border: border thickness on all sides
+     - borderTop: top border thickness
+     - borderRight: right border thickness
+     - borderBottom: bottom border thickness
+     - borderLeft: bottom left thickness
+
+    You can also use the following layout properties, which don't impact your view's frame.
+
      - opacity: the opacity of the view
-     - zIndex: position above or below other views
+     - rotate: once positioned, rotates the view in place.
+     - zIndex: position above or below other views (Not recommended. Control sibling view
+       overlay with childView order (later views draw above earlier views) where possible.)
 
-    Note that you can only use certain combinations to set layout.  For
-    example, you may set left/right or left/width, but not left/width/right,
-    since that combination doesn't make sense.
+    To change a layout property, you should use the adjust method, which handles some particulars for you.
 
-    Likewise, you may set a minWidth/minHeight, or maxWidth/maxHeight, but
-    if you also set the width/height explicitly, then those constraints won't
-    matter as much.
-
-    Layout is designed to maximize reliance on the browser's rendering
-    engine to keep your app up to date.
-
+    @type Object
+    @default { top: 0, left: 0, bottom: 0, right: 0 }
     @test in layoutStyle
   */
   layout: { top: 0, left: 0, bottom: 0, right: 0 },
@@ -285,6 +344,7 @@ SC.View.reopen(
     fixed left & top position within its parent's frame.  Fixed positions are
     therefore unaffected by changes to their parent view's size.
 
+    @field
     @returns {Boolean} YES if fixed, NO otherwise
     @test in layoutStyle
   */
@@ -322,25 +382,48 @@ SC.View.reopen(
     width and height.  Fixed sizes are therefore unaffected by changes to their
     parent view's size.
 
+    @field
     @returns {Boolean} YES if fixed, NO otherwise
-    @test in layoutStyle
+    @test in layout
   */
   isFixedSize: function () {
-    var layout = this.get('layout'),
-        ret;
+    return this.get('isFixedHeight') && this.get('isFixedWidth');
+  }.property('isFixedWidth', 'isFixedHeight').cacheable(),
 
-    // Size is fixed if it has width + height !== SC.LAYOUT_AUTO
-    ret = (
-      ((layout.width !== undefined) && (layout.height !== undefined)) &&
-      ((layout.width !== SC.LAYOUT_AUTO) && (layout.height !== SC.LAYOUT_AUTO))
-    );
+  /**
+    Returns whether the height is 'fixed' or not. A fixed height is defined on the layout
+    as an integer number of pixels.  Fixed widths are therefore unaffected by changes
+    to their parent view's height.
 
-    // The size may appear fixed, but only if none of the values are percentages.
-    if (ret) {
-      ret = (!SC.isPercentage(layout.width) && !SC.isPercentage(layout.height));
-    }
+    @field
+    @returns {Boolean} YES if fixed, NO otherwise
+    @test in layout
+  */
+  isFixedHeight: function() {
+    var layout = this.get('layout');
 
-    return ret;
+    // Width is fixed if it has a height and it isn't SC.LAYOUT_AUTO or a percent.
+    return (layout.height !== undefined) &&
+      (layout.height !== SC.LAYOUT_AUTO) &&
+      !SC.isPercentage(layout.height);
+  }.property('layout').cacheable(),
+
+  /**
+    Returns whether the width is 'fixed' or not. A fixed width is defined on the layout
+    as an integer number of pixels.  Fixed widths are therefore unaffected by changes
+    to their parent view's width.
+
+    @field
+    @returns {Boolean} YES if fixed, NO otherwise
+    @test in layout
+  */
+  isFixedWidth: function() {
+    var layout = this.get('layout');
+
+    // Width is fixed if it has a width and it isn't SC.LAYOUT_AUTO or a percent.
+    return (layout.width !== undefined) &&
+      (layout.width !== SC.LAYOUT_AUTO) &&
+      !SC.isPercentage(layout.width);
   }.property('layout').cacheable(),
 
   /**
@@ -474,6 +557,53 @@ SC.View.reopen(
     return frame;
   },
 
+  /** @private */
+  _adjustForScale: function (frame, layout) {
+    // Add the original, unscaled height and width.
+    var originalWidth = frame.width;
+    var originalHeight = frame.height;
+
+    // make sure width/height are never < 0
+    if (originalHeight < 0) originalHeight = 0;
+    if (originalWidth < 0) originalWidth = 0;
+
+    // GATEKEEP: Scale not supported.
+    if (!SC.platform.supportsCSSTransforms) {
+      frame.scale = 1;
+      frame.transformOriginX = frame.transformOriginY = 0.5;
+
+      // Add the original, unscaled height and width.
+      frame.originalWidth = originalWidth;
+      frame.originalHeight = originalHeight;
+      return frame;
+    }
+    // Get the scale and transform origins.
+    var scale = layout.scale,
+      oX = layout.transformOriginX,
+      oY = layout.transformOriginY;
+    if (scale == null) scale = 1;
+    if (oX == null) oX = 0.5;
+    if (oY == null) oY = 0.5;
+    // If the scale isn't 1, do some calculations.
+    if (scale !== 1) {
+      frame = SC.scaleRect(frame, scale, oX, oY);
+    }
+    // Regardless, attach the scale numbers for reference.
+    frame.scale = scale;
+    frame.transformOriginX = oX;
+    frame.transformOriginY = oY;
+
+    // Add the original, unscaled height and width.
+    frame.originalWidth = originalWidth;
+    frame.originalHeight = originalHeight;
+
+    // make sure width/height are never < 0
+    if (frame.height < 0) frame.height = 0;
+    if (frame.width < 0) frame.width = 0;
+
+    return frame;
+  },
+
   /**
     Computes what the frame of this view would be if the parent were resized
     to the passed dimensions.  You can use this method to project the size of
@@ -486,7 +616,7 @@ SC.View.reopen(
     parent dimensions.  This is the same method used to calculate the current
     frame when it changes.
 
-    @param {Rect} pdim the projected parent dimensions
+    @param {Rect} pdim the projected parent dimensions (optional)
     @returns {Rect} the computed frame
   */
   computeFrameWithParentFrame: function (original, pdim) {
@@ -496,10 +626,12 @@ SC.View.reopen(
     // current frame (see original computeFrameWithParentFrame in views/view.js)
     if (this.get('useStaticLayout')) {
       f = original();
-      return f ? this._adjustForBorder(f, layout) : null;
-    } else {
-      f = {};
+      f = f ? this._adjustForBorder(f, layout) : null;
+      f = f ? this._adjustForScale(f, layout) : null;
+      return f;
     }
+
+    f = {};
 
     var error, layer, AUTO = SC.LAYOUT_AUTO,
         pv = this.get('parentView'),
@@ -640,9 +772,10 @@ SC.View.reopen(
       if (f.width === AUTO) f.width = layer ? layer.clientWidth : 0;
     }
 
+    // First, adjust for border.
     f = this._adjustForBorder(f, layout);
 
-    // Account for special cases inside ScrollView, where we adjust the
+    // HACK: Account for special cases inside ScrollView, where we adjust the
     // element's scrollTop/scrollLeft property for performance reasons.
     if (pv && pv.isScrollContainer) {
       pv = pv.get('parentView');
@@ -667,9 +800,8 @@ SC.View.reopen(
       f.width = layout.minWidth;
     }
 
-    // make sure width/height are never < 0
-    if (f.height < 0) f.height = 0;
-    if (f.width < 0) f.width = 0;
+    // Finally, adjust for scale.
+    f = this._adjustForScale(f, layout);
 
     return f;
   }.enhance(),
@@ -690,21 +822,31 @@ SC.View.reopen(
   },
 
   /**
-    The frame of the view including the borders
+    The frame of the view including the borders and scale
   */
   borderFrame: function () {
     var layout = this.get('layout'),
         frame = this.get('frame'),
+        scale = (frame && !SC.none(frame.scale)) ? frame.scale : 1,
         borderTop = this._effectiveBorderFor('borderTop', layout),
+        scaledBorderTop = borderTop * scale,
         borderRight = this._effectiveBorderFor('borderRight', layout),
+        scaledBorderRight = borderRight * scale,
         borderBottom = this._effectiveBorderFor('borderBottom', layout),
-        borderLeft = this._effectiveBorderFor('borderLeft', layout);
+        scaledBorderBottom = borderBottom * scale,
+        borderLeft = this._effectiveBorderFor('borderLeft', layout),
+        scaledBorderLeft = borderLeft * scale;
 
     return frame ? {
-      x: frame.x - borderLeft,
-      y: frame.y - borderTop,
-      width: frame.width + borderLeft + borderRight,
-      height: frame.height + borderTop + borderBottom
+      x: frame.x - scaledBorderLeft,
+      y: frame.y - scaledBorderTop,
+      width: frame.width + scaledBorderLeft + scaledBorderRight,
+      height: frame.height + scaledBorderTop + scaledBorderBottom,
+      scale: scale,
+      originalWidth: frame.originalWidth + borderLeft + borderRight,
+      originalHeight: frame.originalHeight + borderTop + borderBottom,
+      transformOriginX: frame.transformOriginX,
+      transformOriginY: frame.transformOriginY
     } : null;
   }.property('frame').cacheable(),
 
@@ -715,24 +857,38 @@ SC.View.reopen(
     viewDidResize() if its size may have changed.  You will not usually override
     this method, but you may override the viewDidResize() method.
 
+    @param {Frame} parentFrame the parent view's current frame.
     @returns {void}
     @test in viewDidResize
   */
-  parentViewDidResize: function () {
-    var positionMayHaveChanged,
-      sizeMayHaveChanged;
+  parentViewDidResize: function (parentFrame) {
+    // Determine if our position may have changed.
+    var positionMayHaveChanged = !this.get('isFixedPosition');
 
-    // If this view uses static layout, our "do we think the frame changed?"
-    // result of isFixedLayout is not applicable and we simply have to assume
-    // that the frame may have changed.
-    sizeMayHaveChanged = this.get('useStaticLayout') || !this.get('isFixedSize');
-    positionMayHaveChanged = !this.get('isFixedPosition');
+    // Figure out if our size may have changed.
+    var isStatic = this.get('useStaticLayout'),
+        // Figure out whether our height may have changed.
+        parentHeight = parentFrame ? parentFrame.height : 0,
+        parentHeightDidChange = parentHeight !== this._scv_parentHeight,
+        isFixedHeight = this.get('isFixedHeight'),
+        heightMayHaveChanged = isStatic || (parentHeightDidChange && !isFixedHeight),
+        // Figure out whether our width may have changed.
+        parentWidth = parentFrame ? parentFrame.width : 0,
+        parentWidthDidChange = parentWidth !== this._scv_parentWidth,
+        isFixedWidth = this.get('isFixedWidth'),
+        widthMayHaveChanged = isStatic || (parentWidthDidChange && !isFixedWidth);
 
-    if (sizeMayHaveChanged) {
-      // If our size isn't fixed, our frame may have changed and it will effect our child views.
+    // Update the cached parent frame.
+    this._scv_parentHeight = parentHeight;
+    this._scv_parentWidth = parentWidth;
+
+    // If our height or width changed, our resulting frame change may impact our child views.
+    if (heightMayHaveChanged || widthMayHaveChanged) {
       this.viewDidResize();
-    } else if (positionMayHaveChanged) {
-      // If our size is fixed but our position isn't, our frame may have changed, but it won't effect our child views.
+    }
+    // If our size didn't change but our position did, our frame will change, but it won't impact our child
+    // views' frames. (Note that the _viewFrameDidChange call is made by viewDidResize above.)
+    else if (positionMayHaveChanged) {
       this._viewFrameDidChange();
     }
   },
@@ -753,10 +909,12 @@ SC.View.reopen(
     this._viewFrameDidChange();
 
     // Also notify our children.
-    var cv = this.childViews, len, idx, view;
+    var cv = this.childViews,
+        frame = this.get('frame'),
+        len, idx, view;
     for (idx = 0; idx < (len = cv.length); ++idx) {
       view = cv[idx];
-      view.tryToPerform('parentViewDidResize');
+      view.tryToPerform('parentViewDidResize', frame);
     }
   },
 
@@ -764,7 +922,7 @@ SC.View.reopen(
     Invoked by other views to notify this view that its frame has changed.
 
     This notifies the view that its frame property has changed,
-    then propagates those changes to its child views.
+    then notifies its child views that their clipping frames may have changed.
   */
   _viewFrameDidChange: function () {
     this.notifyPropertyChange('frame');
@@ -859,10 +1017,10 @@ SC.View.reopen(
     // Handle old style rotation.
     if (!SC.none(currentLayout.rotate)) {
       //@if (debug)
-      SC.Logger.warn('Developer Warning: Please set rotateX instead of rotate.');
+      SC.Logger.warn('Developer Warning: Please set rotateZ instead of rotate.');
       //@endif
-      if (SC.none(currentLayout.rotateX)) {
-        currentLayout.rotateX = currentLayout.rotate;
+      if (SC.none(currentLayout.rotateZ)) {
+        currentLayout.rotateZ = currentLayout.rotate;
       }
       delete currentLayout.rotate;
     }

@@ -75,7 +75,7 @@ test("Check that childView is updated if the pane has a static layout and view d
   pane.set('useStaticLayout', YES);
 
   childFrame = view.get('frame');
-  same(childFrame, wrongFrame, 'getting frame before layer exists on non-fixed layout childView should return an empty frame');
+  ok(SC.rectsEqual(childFrame, wrongFrame), 'getting frame before layer exists on non-fixed layout childView should return an empty frame');
 
   SC.run(function () {
     pane.append(); // make sure there is a layer...
@@ -83,7 +83,7 @@ test("Check that childView is updated if the pane has a static layout and view d
   childFrame = view.get('frame');
   correctFrame = pane.get('frame');
 
-  same(childFrame, correctFrame, 'getting frame after layer exists on non-fixed layout childView should return actual frame');
+  ok(SC.rectsEqual(childFrame, correctFrame), 'getting frame after layer exists on non-fixed layout childView should return actual frame');
 });
 
 

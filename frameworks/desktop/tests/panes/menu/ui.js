@@ -71,7 +71,7 @@ module('SC.MenuPane UI', {
 */
 function clickOn(view, shiftKey, ctrlKey) {
   var layer    = view.get('layer'),
-      opts     = { shiftKey: !!shiftKey, ctrlKey: !!ctrlKey },
+      opts     = { shiftKey: !!shiftKey, ctrlKey: !!ctrlKey, which: 1 },
       ev;
 
   ok(layer, 'clickOn() precond - view %@ should have layer'.fmt(view.toString()));
@@ -435,3 +435,49 @@ test('aria-checked attribute', function () {
   clickOn(menuPane);
 });
 
+test('Menu item keys', function () {
+  var menuPane,
+    items,
+    submenu,
+    menuItem;
+
+  submenu = [
+    { title: 'Submenu item' }
+  ];
+
+  items = [
+    {
+      TheTitle: 'Menu item',
+      TheToolTip: 'Menu tooltip',
+      AmIEnabled: false,
+      MyIcon: 'folder',
+      MyHeight: 50,
+      MySubmenu: submenu,
+      AmIASeparator: false
+    }
+  ];
+
+  SC.run(function () {
+    menuPane = SC.MenuPane.create({
+      layout: { width: 200 },
+      items: items,
+      itemTitleKey: 'TheTitle',
+      itemToolTipKey: 'TheToolTip',
+      itemIsEnabledKey: 'AmIEnabled',
+      itemIconKey: 'MyIcon',
+      itemSubMenuKey: 'MySubmenu',
+      itemSeparatorKey: 'AmIASeparator'
+    });
+
+    menuPane.popup();
+  });
+
+  menuItem = menuPane.get('menuItemViews')[0];
+
+  equals(menuItem.get('title'), 'Menu item');
+  equals(menuItem.get('toolTip'), 'Menu tooltip');
+  equals(menuItem.get('isEnabled'), false);
+  equals(menuItem.get('icon'), 'folder');
+  ok(SC.kindOf(menuItem.get('subMenu'), SC.MenuPane));
+  equals(menuItem.get('isSeparator'), false);
+});

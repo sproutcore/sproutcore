@@ -696,6 +696,8 @@ SC.Object.prototype = {
   },
 
   /**
+    @deprecated v1.11 - use sc_super() (with build tools) or arguments.callee.base.apply(this, arguments) instead.
+
     EXPERIMENTAL:  You can use this to invoke a superclass implementation in
     any method.  This does not work in Safari 2 or earlier.  If you need to
     target these methods, you should use one of the alternatives below:
@@ -730,6 +732,10 @@ SC.Object.prototype = {
     @returns {Object} return value from super
   */
   superclass: function () {
+    //@if(debug)
+    SC.warn("Developer Warning: SC.Object's 'superclass' instance method is deprecated and will be removed in a future version. Use `sc_super();` instead.\n\n(Note that the unrelated `superclass` class property, which contains a class's superclass, is alive and well.)");
+    //@endif
+
     var caller = arguments.callee.caller;
 
     //@if(debug)

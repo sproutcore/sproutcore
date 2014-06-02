@@ -799,6 +799,9 @@ SC.SelectView = SC.ButtonView.extend(
     Holding down the button should display the menu pane.
   */
   mouseDown: function (evt) {
+    // Fast path, reject secondary clicks.
+    if (evt.which !== 1) return false;
+
     if (!this.get('isEnabledInPane')) return YES; // handled event, but do nothing
     this.set('isActive', YES);
     this._isMouseDown = YES;

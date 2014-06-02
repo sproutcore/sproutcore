@@ -199,3 +199,15 @@ SC.ControlTestPane.show = function() {
     SC.RunLoop.end();
   });
 };
+
+/**
+  Makes the test pane the key pane, so that key handling methods can be properly tested.
+*/
+SC.ControlTestPane.becomeKeyPane = function () {
+  var pane = this._pane || this._showPane;
+  if (pane) {
+    SC.run(function () {
+      pane.becomeKeyPane();
+    });
+  }
+};

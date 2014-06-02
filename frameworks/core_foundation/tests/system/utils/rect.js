@@ -103,3 +103,44 @@ test("rectsEqual() tests equality with delta of 0", function() {
   equals(SC.rectsEqual(frame, { x: 50, y: 50, width: 99, height: 100 }, 0), NO, "Frame.width not equal");
   equals(SC.rectsEqual(frame, { x: 50, y: 50, width: 100, height: 102 }, 0), NO, "Frame.height not equal");
 });
+
+test("scaleRect scales rects.", function() {
+  var rect = { x: 0, y: 0, width: 100, height: 100 },
+      scaledRect, expectedRect;
+
+  // Identity
+  scaledRect = SC.scaleRect(rect, 1);
+  ok(SC.rectsEqual(rect, scaledRect), "Identity: scaling by a factor of 1 changes nothing (got %@, expected %@).".fmt(SC.inspect(scaledRect), SC.inspect(rect)));
+
+  // Scaled by 0.5, top-left
+  scaledRect = SC.scaleRect(rect, 0.5, 0, 0);
+  expectedRect = { x: 0, y: 0, width: 50, height: 50 };
+  ok(SC.rectsEqual(scaledRect, expectedRect), "Scaling by a factor of 0.5, top left (got %@, expected %@).".fmt(SC.inspect(scaledRect), SC.inspect(expectedRect)));
+
+  // Scale by 0.5, centered
+  scaledRect = SC.scaleRect(rect, 0.5);
+  expectedRect = { x: 25, y: 25, width: 50, height: 50 };
+  ok(SC.rectsEqual(scaledRect, expectedRect), "Scaling by a factor of 0.5, centered (got %@, expected %@).".fmt(SC.inspect(scaledRect), SC.inspect(expectedRect)));
+
+  // Scaled by 0.5, bottom-right
+  scaledRect = SC.scaleRect(rect, 0.5, 1, 1);
+  expectedRect = { x: 50, y: 50, width: 50, height: 50 };
+  ok(SC.rectsEqual(scaledRect, expectedRect), "Scaling by a factor of 0.5, bottom right (got %@, expected %@).".fmt(SC.inspect(scaledRect), SC.inspect(expectedRect)));
+
+  // Scale by 2, top-left
+  scaledRect = SC.scaleRect(rect, 2, 0, 0);
+  expectedRect = { x: 0, y: 0, width: 200, height: 200 };
+  ok(SC.rectsEqual(scaledRect, expectedRect), "Scaling by a factor of 2 top-left (got %@, expected %@).".fmt(SC.inspect(scaledRect), SC.inspect(expectedRect)));
+
+  // Scale by 2, centered
+  scaledRect = SC.scaleRect(rect, 2);
+  expectedRect = { x: -50, y: -50, width: 200, height: 200 };
+  ok(SC.rectsEqual(scaledRect, expectedRect), "Scaling by a factor of 2 centered (got %@, expected %@).".fmt(SC.inspect(scaledRect), SC.inspect(expectedRect)));
+
+  // Scale by 2, bottom-right
+  scaledRect = SC.scaleRect(rect, 2, 1, 1);
+  expectedRect = { x: -100, y: -100, width: 200, height: 200 };
+  ok(SC.rectsEqual(scaledRect, expectedRect), "Scaling by a factor of 2 bottom-right (got %@, expected %@).".fmt(SC.inspect(scaledRect), SC.inspect(expectedRect)));
+
+
+});

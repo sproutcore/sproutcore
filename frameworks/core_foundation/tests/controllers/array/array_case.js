@@ -282,6 +282,8 @@ test("verify length is correct in arrayObserver didChange method when orderBy is
   content.pushObject(":{");
 });
 
+// orderBy impacts arrayContentDidChange calls.
+
 test("verify range observers fire correctly when object added at different sorted index than absolute index", function() {
   content = [ TestObject.create({ value: 1 }), TestObject.create({ value: 2 }) ];
   controller = SC.ArrayController.create({
@@ -292,6 +294,83 @@ test("verify range observers fire correctly when object added at different sorte
   controller.addRangeObserver(SC.IndexSet.create(0, 2), null, function() { callCount++; });
   controller.content.pushObject(TestObject.create({ value: 0 }));
   ok(callCount === 1, "Range observer should have fired based on inclusion in the sorted range rather than the raw content range.");
+});
+
+// Tests bug introduced in e33416fdd28363479b598bdbab081d5abd9737f7 (see https://github.com/sproutcore/sproutcore/issues/1214). Verified
+// more generally in test below.
+test("verify enumerable propety chains invalidate without error on ArrayController with orderBy.", function() {
+  controller = SC.ArrayController.create({
+    content: [],
+    orderBy: 'value ASC',
+    // Though nonsensical (could be '[]' without error), this property path is our canary.
+    rangeProperty: function() {}.property('*content.[]')
+  });
+
+  var didError = NO;
+  try {
+    controller.content.pushObject(TestObject.create({ value: 0 }));
+  } catch (e) {
+    didError = YES;
+  }
+  
+  ok(!didError, "Adding an object to an empty array controller with orderBy and an enumerable property chain proceeds without error.");
+
+});
+
+test("verify arrayContentWillChange and arrayContentDidChange are called with correct values when orderBy is present.", function() {
+  // Set up test values.
+  var expectedStart = 0,
+      expectedRemoved = 0,
+      expectedAdded = 0,
+      testMessage = "PRELIM %@: Creating array controller, '%@' should be";
+  // Create controller.
+  controller = SC.ArrayController.create({
+    content: [],
+    orderBy: 'value ASC',
+    arrayContentWillChange: function(start, removed, added) {
+      equals(start, expectedStart, testMessage.fmt('arrayContentWillChange', 'start'));
+      equals(removed, expectedRemoved, testMessage.fmt('arrayContentWillChange', 'removed'));
+      equals(added, expectedAdded, testMessage.fmt('arrayContentWillChange', 'added'));
+      return sc_super();
+    },
+    arrayContentDidChange: function(start, removed, added) {
+      equals(start, expectedStart, testMessage.fmt('arrayContentDidChange', 'start'));
+      equals(removed, expectedRemoved, testMessage.fmt('arrayContentDidChange', 'removed'));
+      equals(added, expectedAdded, testMessage.fmt('arrayContentDidChange', 'added'));
+      return sc_super();
+    }
+  });
+
+  // NOTE THAT THE FOLLOWING TESTS DEPEND ON THE CONTENT AS SET BY THE PREVIOUS TEST. (SORRY.)
+
+  // Adding one item to empty array.
+  expectedStart = 0;
+  expectedRemoved = 0;
+  expectedAdded = 1;
+  testMessage = "%@: adding a single item to an empty array, '%@' should be";
+  controller.content.pushObject(TestObject.create({ value: 0 }));
+
+  // Adding one item to an array with one item.
+  expectedStart = 0;
+  expectedRemoved = 1;
+  expectedAdded = 2;
+  testMessage = "%@: adding a single item to an array with one item, '%@' should be";
+  controller.content.pushObject(TestObject.create({ value: 0 }));
+
+  // Removing the first item from a two-item array
+  expectedStart = 0;
+  expectedRemoved = 2;
+  expectedAdded = 1;
+  testMessage = "%@: adding a single item to an array with one item, '%@' should be";
+  controller.content.removeAt(0);
+
+  // Replacing the first item in a one-item array with two items.
+  expectedStart = 0;
+  expectedRemoved = 1;
+  expectedAdded = 2
+  testMessage = "%@: adding a single item to an array with one item, '%@' should be";
+  controller.content.pushObject(0, 1, [TestObject.create({ value: 1 }), TestObject.create({ value: 0 })]);
+
 });
 
 // ..........................................................

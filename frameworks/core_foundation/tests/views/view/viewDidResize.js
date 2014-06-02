@@ -144,27 +144,49 @@ test("When parentViewDidResize is called on a view, it should only notify on fra
   view.set('layout', { top: 10, left: 10, height: 10, width: 10 });
   view.viewDidResize.reset(); view.frameCallCount = 0;
   parentView.adjust({ width: 90, height: 90 });
-  view.viewDidResize.expect(0);
-  equals(view.frameCallCount, 0, 'should not notify frame changed when isFixedPosition: %@ and isFixedSize: %@'.fmt(view.get('isFixedPosition'), view.get('isFixedSize')));
+  view.viewDidResize.expect(0, "Should not notify view resize with fixed position and fixed size");
+  equals(view.frameCallCount, 0, 'Should not notify frame changed with fixed position and fixed size.');
 
-  // try with flexible height
+  // Try with flexible height
   view.set('layout', { top: 10, left: 10, bottom: 10, width: 10 });
+  // Adjust height.
   view.viewDidResize.reset(); view.frameCallCount = 0;
-  parentView.adjust({ width: 80, height: 80 });
-  view.viewDidResize.expect(1);
-  equals(view.frameCallCount, 1, 'should notify frame changed when isFixedPosition: %@ and isFixedSize: %@'.fmt(view.get('isFixedPosition'), view.get('isFixedSize')));
+  parentView.adjust({ height: 80 });
+  view.viewDidResize.expect(1, "View with fixed width and flexible height SHOULD resize when parent's height is adjusted");
+  equals(view.frameCallCount, 1, "Adjusting parent's height SHOULD notify frame with fixed position, fixed width and flexible height");
+  // Adjust width.
+  view.viewDidResize.reset(); view.frameCallCount = 0;
+  parentView.adjust({ width: 80 });
+  view.viewDidResize.expect(0, "View with fixed width and flexible height should NOT resize when parent's width is adjusted");
+  equals(view.frameCallCount, 0, "Adjusting parent's width should NOT notify frame with fixed position, fixed width and flexible height");
+  // Adjust both.
+  view.viewDidResize.reset(); view.frameCallCount = 0;
+  parentView.adjust({ width: 90, height: 90 });
+  view.viewDidResize.expect(1, "View with fixed width and flexible height SHOULD resize when parent's height and width are adjusted");
+  equals(view.frameCallCount, 1, "Adjusting parent's height and width SHOULD notify frame with fixed position, fixed width and flexible height");
 
   // try with flexible width
   view.set('layout', { top: 10, left: 10, height: 10, right: 10 });
+  // Adjust height.
   view.viewDidResize.reset(); view.frameCallCount = 0;
-  parentView.adjust({ width: 70, height: 70 });
-  view.viewDidResize.expect(1);
-  equals(view.frameCallCount, 1, 'should notify frame changed when isFixedPosition: %@ and isFixedSize: %@'.fmt(view.get('isFixedPosition'), view.get('isFixedSize')));
+  parentView.adjust({ height: 80 });
+  view.viewDidResize.expect(0, "View with flexible width and fixed height should NOT resize when parent's height is adjusted");
+  equals(view.frameCallCount, 0, "Adjusting parent's height should NOT notify frame with fixed position, flexible width and fixed height");
+  // Adjust width.
+  view.viewDidResize.reset(); view.frameCallCount = 0;
+  parentView.adjust({ width: 80 });
+  view.viewDidResize.expect(1, "View with flexible width and fixed height SHOULD resize when parent's width is adjusted");
+  equals(view.frameCallCount, 1, "Adjusting parent's width SHOULD notify frame with fixed position, flexible width and fixed height");
+  // Adjust both.
+  view.viewDidResize.reset(); view.frameCallCount = 0;
+  parentView.adjust({ width: 90, height: 90 });
+  view.viewDidResize.expect(1, "View with flexible width and fixed height SHOULD resize when parent's height and width are adjusted");
+  equals(view.frameCallCount, 1, "Adjusting parent's height and width SHOULD notify frame with fixed position, flexible width and fixed height");
 
   // try with right align
   view.set('layout', { top: 10, right: 10, height: 10, width: 10 });
   view.viewDidResize.reset(); view.frameCallCount = 0;
-  parentView.adjust({ width: 60, height: 60 });
+  SC.run(function() { parentView.adjust({ width: 60, height: 60 }); });
   view.viewDidResize.expect(0);
   equals(view.frameCallCount, 1, 'right align: should notify frame changed when isFixedPosition: %@ and isFixedSize: %@'.fmt(view.get('isFixedPosition'), view.get('isFixedSize')));
 

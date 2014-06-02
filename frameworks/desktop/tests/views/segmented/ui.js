@@ -10,10 +10,9 @@
 
 var pane;
 (function () {
-  var iconURL = sc_static("sproutcore-32.png");
+  var iconURL = sc_static("foundation:sproutcore-32.png");
 
   pane = SC.ControlTestPane.design()
-
     .add("3_empty", SC.SegmentedView, {
       items: ['', '', ''],
       layout: { height: 25 }
@@ -171,6 +170,21 @@ var pane;
       itemTitleKey: 'value',
       itemValueKey: 'value',
       itemWidthKey: 'width',
+      value: "E",
+      layout: { height: 25 }
+    })
+    .add("5_items,layerIds,overflow", SC.SegmentedView, {
+      items: [
+        { value: "A", width: 70, layerId: 'segment-a' },
+        { value: "B", width: 70, layerId: 'segment-b' },
+        { value: "C", width: 70, layerId: 'segment-c' },
+        { value: "D", width: 70, layerId: 'segment-d' },
+        { value: "E", width: 70, layerId: 'segment-e' }
+      ],
+      itemTitleKey: 'value',
+      itemValueKey: 'value',
+      itemWidthKey: 'width',
+      itemLayerIdKey: 'layerId',
       value: "E",
       layout: { height: 25 }
     })
@@ -465,6 +479,37 @@ var pane;
     ok($(overflowEl).hasClass('sel'), 'overflow segment should have .sel class');
   });
 
+  test("Check that the overflow menu does not consume hidden buttons when the menu pane shows because of matching layer ids", function () {
+    var sv = pane.view("5_items,layerIds,overflow");
+    var segments = sv.$('.sc-segment-view');
+
+    // Check that we have six segments, five items and one overflow
+    var numberOfSegments = segments.size();
+    equals(numberOfSegments, 6, 'We should start with 6 segment child divs in the segment view');
+
+    sv.showOverflowMenu();
+
+    // the overflow menu should be showing
+    var menu = SC.$('.sc-menu').view();
+    if (menu.length) {
+      menu = menu[0];
+    } else {
+      menu = null;
+    }
+    ok(menu && menu.get('isVisible'), 'overflow menu should be visible');
+
+    // We need the run loop to end so that we go through cleaning up views at the end of the run loop,
+    // this is where the bug I was seeing occurs. (one of my buttons gets destroyed by the menu pane)
+    SC.run(function () {
+      menu.remove();
+    });
+
+    // check that no elements have been consumed
+    segments = sv.$('.sc-segment-view');
+    numberOfSegments = segments.size();
+    equals(numberOfSegments, 6, 'We should end with 6 segment child divs in the segment view');
+  });
+
   test("Check that the segmented view and segments have aria roles set", function () {
     var sv = pane.view("aria-role_tab,tablist"),
         viewElem  = sv.$(),
@@ -500,7 +545,7 @@ var pane;
     layer1 = view1.get('layer');
     point = SC.offset(layer1);
 
-    ev = SC.Event.simulateEvent(layer1, 'mousedown', { clientX: point.x, clientY: point.y });
+    ev = SC.Event.simulateEvent(layer1, 'mousedown', { clientX: point.x, clientY: point.y, which: 1 });
     SC.Event.trigger(layer1, 'mousedown', [ev]);
 
     ok(view1.$().hasClass('active'), 'The first segment should have an active class on mousedown');
@@ -534,7 +579,7 @@ var pane;
     ok(view3.$().hasClass('sel'), 'The third segment should have a sel class on mouseUp');
   });
 
-  test("passes on mouse events that don't map to a segment", function() {
+  test("passes on mouse events that don't map to a segment", function () {
     var segmentedView, view1, layer1, point, ev;
 
     segmentedView = pane.view('3_items,2_sel,1_disabled');
@@ -543,17 +588,17 @@ var pane;
     point = SC.offset(layer1);
 
     SC.RunLoop.begin();
-    ev = SC.Event.simulateEvent(layer1, 'mousedown', { clientX: point.x, clientY: point.y });
+    ev = SC.Event.simulateEvent(layer1, 'mousedown', { clientX: point.x, clientY: point.y, which: 1 });
     ok(segmentedView.mouseDown(ev), "mouseDown event handler accepts event which maps to a segment.");
     SC.RunLoop.end();
 
     SC.RunLoop.begin();
-    ev = SC.Event.simulateEvent(layer1, 'mousedown', { clientX: point.x - 1, clientY: point.y });
+    ev = SC.Event.simulateEvent(layer1, 'mousedown', { clientX: point.x - 1, clientY: point.y, which: 1 });
     ok(!segmentedView.mouseDown(ev), "mouseDown event handler passes on event which doesn't map to a segment.");
     SC.RunLoop.end();
   });
 
-  test("shouldAutoResize", function() {
+  test("shouldAutoResize", function () {
     var segmentedView;
 
     segmentedView = pane.view('3_items,1_sel,shouldAutoResize');
@@ -562,7 +607,7 @@ var pane;
 
     segmentedView = pane.view('3_items,1_sel,shouldAutoResize,flexible_layout');
 
-    ok(SC.none(segmentedView.getPath('layout.width')), "Having flexible layout prevents view from auto-resizing.")
+    ok(SC.none(segmentedView.getPath('layout.width')), "Having flexible layout prevents view from auto-resizing.");
   });
 
 

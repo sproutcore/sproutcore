@@ -13,6 +13,12 @@
     value: ''
   })
 
+  .add("empty - no hint on focus", SC.TextFieldView, {
+    hint: "Full Name",
+    hintOnFocus: false,
+    value: ''
+  })
+
   .add("with value", SC.TextFieldView, {
     hint: "Full Name",
     value: 'John Doe'
@@ -93,9 +99,9 @@
     var layer = view.$();
 
     ok(!layer.hasClass('not-empty'), 'layer should not have not-empty class');
-    if (SC.browser.isWebkit || (SC.browser.isMozilla &&
-        SC.browser.compare(SC.browser.engineVersion, '2.0') >= 0)) equals(input.val(), '', 'input should have empty value');
-    else equals(input.val(), expectedHint, 'input should have expected hint as value');
+
+    equals(input.val(), '', 'input should have empty value');
+
     if (expectedHint) {
       var hint = view.$('.hint');
       if (hint.length === 1) {
@@ -160,6 +166,13 @@
 
   test("empty", function () {
     var view = pane.view('empty');
+    pane.verifyEmpty(view, 'Full Name');
+    pane.verifyDisabled(view, NO);
+  });
+
+  test("empty - no hint on focus", function () {
+    var view = pane.view('empty - no hint on focus');
+
     pane.verifyEmpty(view, 'Full Name');
     pane.verifyDisabled(view, NO);
   });
@@ -340,6 +353,19 @@
     equals(hint.css('line-height'), "14px", "The line-height of the hint of a non-empty text field should be");
   });
 
+  test("Changing maxLength", function () {
+    var view = pane.view('with value'),
+        input = view.$input();
+
+    equals(input.attr('maxLength'), 5096, 'Max length should begin at')
+
+    SC.run(function () {
+      view.set('maxLength', 1234);
+    });
+
+    equals(input.attr('maxLength'), 1234, 'Max length should now be');
+  });
+
 
   if (!SC.browser.isIE && !SC.platform.input.placeholder) {
     test("Changing value to null -- password field", function () {
@@ -461,8 +487,8 @@
     fieldElement.setSelectionRange(2, 5, 'none');
 
     var fetchedSelection = view.get('selection');
-    ok(!SC.platform.input.selectionDirection || fetchedSelection.get('direction') === 'forward',
-        'the selection direction should default to forward');
+    ok(!SC.platform.input.selectionDirection || fetchedSelection.get('direction') === 'none',
+        'the selection direction should be none');
   });
 
   test("Getting forward selection direction", function () {
@@ -838,7 +864,7 @@
     view.get('pane').makeFirstResponder(testResponder);
 
     // verify it no longer has focus
-    ok(!view.get('focused'), 'view should no longer have focus');
+    ok(!view.get('focused'), 'view should no longer have focus (Warning: this test will fail if the browser window doesn\'t have focus)');
   });
 
   test("editing a field should not change the cursor position", function () {

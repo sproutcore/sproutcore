@@ -94,7 +94,9 @@ test("isEnabled should alter group classname and sync with isEnabled property", 
 test("clicking on a radio button will change toggle the value", function() {
   equals(view.get('value'), 'Red', 'precond - value should be Red');
   var r = view.$('.sc-radio-button');
-  SC.Event.trigger(r[1], 'mousedown');
+
+  var evt = SC.Event.simulateEvent(r[1], 'mousedown', { which: 1 });
+  SC.Event.trigger(r[1], 'mousedown', [evt]);
   SC.Event.trigger(r[1], 'mouseup');
   equals(view.get('value'), 'Green', 'value should have changed');
 });
@@ -103,7 +105,8 @@ test("pressing mouseDown and then mouseUp anywhere in a radio button should togg
   var elem = view.get('layer'),
       r = view.$('.sc-radio-button');
 
-  SC.Event.trigger(r[0], 'mousedown');
+  var evt = SC.Event.simulateEvent(r[0], 'mousedown', { which: 1 });
+  SC.Event.trigger(r[0], 'mousedown', [evt]);
   equals(view.get('value'), 'Red', 'value should not change yet');
   ok(r.first().hasClass('active'), 'radio button should be active');
 
@@ -111,7 +114,8 @@ test("pressing mouseDown and then mouseUp anywhere in a radio button should togg
   SC.Event.trigger(r[0],'mouseup');
   //input.attr('checked', NO);
   // loose focus of the element since it was changed
-  SC.Event.trigger(r[1],'mousedown');
+  evt = SC.Event.simulateEvent(r[1], 'mousedown', { which: 1 });
+  SC.Event.trigger(r[1], 'mousedown', [evt]);
   SC.Event.trigger(r[1],'mouseup');
 
   ok(!r.first().hasClass('active'), 'radio button should no longer be active');
@@ -128,7 +132,8 @@ test("isEnabled=NO should add disabled attr to input", function() {
   ok(view.$().hasClass('disabled'), 'should have disabled attr');
 
   ok(view.get('value'), 'precond - value should be true');
-  view.mouseDown();
+  var evt = SC.Event.simulateEvent(view.get('layer'), 'mousedown', { which: 1 });
+  view.mouseDown(evt);
   view.mouseUp();
   ok(view.get('value'), 'value should not change when clicked');
 });
@@ -139,7 +144,8 @@ test("disabled radio buttons do not become selected on click", function () {
   var elem = view.get('layer'),
       r = view.$('.sc-radio-button');
 
-  SC.Event.trigger(r[0], 'mousedown');
+  var evt = SC.Event.simulateEvent(r[0], 'mousedown', { which: 1 });
+  SC.Event.trigger(r[0], 'mousedown', [evt]);
   ok(!r.first().hasClass('active'), 'radio button should not be active');
 
   // simulate mouseUp and browser-native change to control
@@ -149,13 +155,15 @@ test("disabled radio buttons do not become selected on click", function () {
   equals(view.get('value'), undefined, "value should be undefined (nothing is checked)");
 
   // lose focus of the element since it was changed
-  SC.Event.trigger(r[1],'mousedown');
+  evt = SC.Event.simulateEvent(r[1], 'mousedown', { which: 1 });
+  SC.Event.trigger(r[1], 'mousedown', [evt]);
   SC.Event.trigger(r[1],'mouseup');
 
   equals(view.get('value'), undefined, "value should be undefined (nothing is checked)");
 
   // last one is selectable
-  SC.Event.trigger(r[2],'mousedown');
+  evt = SC.Event.simulateEvent(r[2], 'mousedown', { which: 1 });
+  SC.Event.trigger(r[2], 'mousedown', [evt]);
   SC.Event.trigger(r[2],'mouseup');
 
   equals(view.get('value'), view.items[2], "value should be 'Salgar'");

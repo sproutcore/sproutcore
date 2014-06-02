@@ -84,19 +84,30 @@ test("reading past end of array length should return undefined", function() {
   equals(recs.objectAt(2000), undefined, 'recs.objectAt(2000) should be undefined');
 });
 
-test("modifying the underlying storeId should change the returned materialized record", function() {
+/** Changed in Version 1.11
+  Previously, you could modify the datahash's storeIds array directly because it was observed,
+  however the act of observing the array adds the observable properties to it, which
+  in effect alters the array. This is now prohibited and all access must be done through the
+  proper KVO channels on the ManyArray.
+  */
+test("modifying the underlying storeId should *not* change the returned materialized record", function() {
+
   // read record once to make it materialized
+  var rec2 = recs.objectAt(1);
+
   equals(recs.objectAt(0), rec, 'recs.objectAt(0) should materialize record');
 
   // create a new record.
-  var rec2 = MyApp.store.createRecord(MyApp.Foo, { guid: 5, firstName: "Fred" });
-  var storeId2 = rec2.get('id');
+  var newRec = MyApp.store.createRecord(MyApp.Foo, { guid: 5, firstName: "Fred" });
+  var storeId2 = newRec.get('id');
 
   // add to beginning of storeKey array
   storeIds.unshiftObject(storeId2);
+  recs.recordPropertyDidChange();
+
   equals(recs.get('length'), 5, 'should now have length of 5');
-  equals(recs.objectAt(0), rec2, 'objectAt(0) should return new record');
-  equals(recs.objectAt(1), rec, 'objectAt(1) should return old record');
+  equals(recs.objectAt(0), rec, 'objectAt(0) should return the old record still');
+  equals(recs.objectAt(1), rec2, 'objectAt(1) should return the old second record still');
 });
 
 test("reading a record not loaded in store should trigger retrieveRecord", function() {
@@ -145,7 +156,13 @@ test("adding a record to the ManyArray should pass through storeIds", function()
 // Property Observing
 //
 
-test("changing the underlying storeIds should notify observers of records", function() {
+/** Changed in Version 1.11
+  Previously, you could modify the datahash's storeIds array directly because it was observed,
+  however the act of observing the array adds the observable properties to it, which
+  in effect alters the array. This is now prohibited and all access must be done through the
+  proper KVO channels on the ManyArray.
+  */
+test("changing the underlying storeIds should *not* notify observers of records", function() {
 
   // setup observer
   var obj = SC.Object.create({
@@ -156,9 +173,15 @@ test("changing the underlying storeIds should notify observers of records", func
 
   // now modify storeKeys
   storeIds.pushObject(5);
-  equals(obj.cnt, 1, 'observer should have fired after changing storeKeys');
+  equals(obj.cnt, 0, 'observer should not have fired after changing storeKeys directly');
 });
 
+/** Changed in Version 1.11
+  Previously, you could modify the datahash's storeIds array directly because it was observed,
+  however the act of observing the array adds the observable properties to it, which
+  in effect alters the array. This is now prohibited and all access must be done through the
+  proper KVO channels on the ManyArray.
+  */
 test("swapping storeIds array should change ManyArray and observers", function() {
 
   // setup alternate storeKeys
@@ -169,7 +192,9 @@ test("swapping storeIds array should change ManyArray and observers", function()
   // setup observer
   var obj = SC.Object.create({
     cnt: 0,
-    observer: function() { this.cnt++; }
+    observer: function() {
+      this.cnt++;
+    }
   });
   recs.addObserver('[]', obj, obj.observer);
 
@@ -180,19 +205,20 @@ test("swapping storeIds array should change ManyArray and observers", function()
   obj.cnt = 0 ;
   arrayRec.writeAttribute('fooMany', storeIds2);
 
-  SC.RunLoop.end();
   SC.RunLoop.begin();
+  SC.RunLoop.end();
 
   // verify observer fired and record changed
   equals(obj.cnt, 1, 'observer should have fired after swap');
+  equals(recs.get('length'), 1, 'should reflect new length');
   equals(recs.objectAt(0), rec2, 'recs.objectAt(0) should return new rec');
 
   // modify storeKey2, make sure observer fires and content changes
   obj.cnt = 0;
   storeIds2.unshiftObject(storeId);
-  equals(obj.cnt, 1, 'observer should have fired after edit');
-  equals(recs.get('length'), 2, 'should reflect new length');
-  equals(recs.objectAt(0), rec, 'recs.objectAt(0) should return pushed rec');
+  equals(obj.cnt, 0, 'observer should not have fired after direct edit');
+  equals(recs.get('length'), 2, 'should reflect new length still: DANGER!');
+  equals(recs.objectAt(0), rec2, 'recs.objectAt(0) should return old rec still');
 
 });
 
@@ -214,7 +240,8 @@ test("Test that _findInsertionLocation returns the correct location.", function 
 
   // Order the many array manually by firstName.
   arrayRec.set('fooMany', [3,2,1,4]);
-  recs._storeIdsContentDidChange(0, 4, 4);
+  recs._records = null;
+  recs.arrayContentDidChange(0, 4, 4);
 
   // Check the insertion location of a record that should appear first.
   newRec = SC.Object.create({ guid: 5, firstName: "Adam", lastName: "Doe", age: 15 });

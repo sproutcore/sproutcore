@@ -117,16 +117,13 @@ test("Test that an exception is thrown when calling adjust and setting to auto",
   function(){
   var error=null;
   console.log('NOTE: The following error concerning width:auto is expected.');
-  parent.adjust('width', 'auto').adjust('height', 'auto');
   try{
+    parent.adjust('width', 'auto').adjust('height', 'auto');
     parent.get('layoutStyle');
   }catch(e){
     error=e;
   }
-  equals(SC.T_ERROR,SC.typeOf(error),'Layout style functions should throw an '+
-  'error if width/height are set to auto but staticLayout is not enabled' + error );
-      
-   
+  equals(SC.T_ERROR,SC.typeOf(error),'Layout style functions should throw an error if width/height are set to auto but staticLayout is not enabled' + error );
 });
 
 test("Test SC.StaticLayout frame support", function() {

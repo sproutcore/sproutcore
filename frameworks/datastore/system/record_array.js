@@ -126,6 +126,9 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   */
   storeKeys: null,
 
+  /** @private The cache of previous store keys so that we can avoid unnecessary updates. */
+  _prevStoreKeys: null,
+
   /**
     Reflects the store's current status in fulfilling the record array's query. Note
     that this status is not directly related to the status of the array's records:
@@ -649,6 +652,11 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     // clear set of changed store keys
     if (changed) changed.clear();
 
+    // Clear the flushing flag.
+    // NOTE: Do this now, because any observers of storeKeys could trigger a call
+    // to flush (ex. by calling get('length') on the RecordArray).
+    this._insideFlush = NO;
+
     // only resort and update if we did change
     if (didChange) {
 
@@ -663,7 +671,6 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
       }
     }
 
-    this._insideFlush = NO;
     return this;
   },
 

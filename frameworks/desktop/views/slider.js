@@ -7,13 +7,11 @@
 
 /** @class
 
-  A SliderView shows a horizontal slider control that you can use to set
-  variable values.
+  SliderView displays a horizontal slider control that you can use to choose
+  from a spectrum (or a sequence) of values.
 
-  You can use a slider view much like you would any other control.  Simply
-  set the value or content/contentValueKey to whatever value you want to
-  display.  You can also set the maximumValue and minValue properties to
-  determine the mapping of the control to its children.
+  The property `value` holds the slider's current value. You can set the
+  `minimum`, `maximum` and `step` properties as well.
 
   @extends SC.View
   @extends SC.Control
@@ -43,6 +41,9 @@ SC.SliderView = SC.View.extend(SC.Control,
 
   /**
     The minimum value of the progress.
+
+    @type {Number}
+    @default 0
   */
   minimum: 0,
   minimumBindingDefault: SC.Binding.single().notEmpty(),
@@ -58,8 +59,11 @@ SC.SliderView = SC.View.extend(SC.Control,
 
   /**
     The maximum value of the progress bar.
+
+    @type {Number}
+    @default 1
   */
-  maximum: 1.0,
+  maximum: 1,
   maximumBindingDefault: SC.Binding.single().notEmpty(),
 
   /**
@@ -75,16 +79,39 @@ SC.SliderView = SC.View.extend(SC.Control,
     Optionally set to the minimum step size allowed.
 
     All values will be rounded to this step size when displayed.
+
+    @type {Number}
+    @default 0.1
   */
   step: 0.1,
 
+  /*
+    When set to true, this draws and positions an element for each step, giving
+    your theme the opportunity to show a mark at each step.
+
+    @type {Boolean}
+    @default {false}
+  */
+  markSteps: false,
+
+  /*
+    When set to true, this view handles mouse-wheel scroll events by changing the
+    value. Set to false to prevent a slider in a scroll view from hijacking scroll
+    events mid-scroll, for example.
+
+    @type {Boolean}
+    @default {true}
+  */
+  updateOnScroll: true,
+
   // ..........................................................
-  // INTERNAL PROPERTIES
+  // INTERNAL
   //
 
-  displayProperties: ['displayValue', 'ariaValue', 'minimum', 'maximum', 'step', 'frame'],
+  /* @private The full list includes min, max, and stepPositions, but those are redundant with displayValue. */
+  displayProperties: ['displayValue', 'ariaValue', 'markSteps'],
 
-  /**
+  /** @private
    @property
    The raw, unchanged value to be provided to screen readers and the like.
   */
@@ -92,14 +119,74 @@ SC.SliderView = SC.View.extend(SC.Control,
     return this.get('value');
   }.property('value').cacheable(),
 
-  // The name of the render delegate which is creating and maintaining
-  // the DOM associated with instances of this view
+  /* @private
+    The name of the render delegate which is creating and maintaining
+    the DOM associated with instances of this view.
+  */
   renderDelegateName: 'sliderRenderDelegate',
 
+  /*
+    The value, converted to a percent out of 100 between maximum and minimum.
+
+    @property
+    @readonly
+  */
   displayValue: function() {
+    return this._displayValueForValue(this.get('value'));
+  }.property('value', 'minimum', 'maximum', 'step').cacheable(),
+
+  /*
+    If a nonzero step is specified, this property contains an array of each step's value between
+    min and max (inclusive).
+
+    @property
+    @readonly
+    @type {Array|null}
+  */
+  steps: function() {
+    var step = this.get('step');
+    // FAST PATH: No step.
+    if (!step) return null;
+    var min = this.get('minimum'),
+      max = this.get('maximum'),
+      cur = min,
+      ret = [];
+    while (cur < max) {
+      ret.push(cur);
+      cur += step;
+      cur = Math.round(cur / step) * step;
+    }
+    ret.push(max);
+    return ret;
+  }.property('minimum', 'maximum', 'step').cacheable(),
+
+  /*
+    If a nonzero step is specified, this property contains an array of each step's position,
+    expressed as a fraction between 0 and 1 (inclusive). You can use these values to generate
+    and position labels for each step, for example.
+
+    @property
+    @readonly
+    @type {Array|null}
+  */
+  stepPositions: function() {
+    var steps = this.get('steps');
+    // FAST PATH: No steps.
+    if (!steps) return null;
+    var min = steps[0],
+      max = steps[steps.length - 1],
+      ret = [],
+      len = steps.length, i;
+    for (i = 0; i < len; i++) {
+      ret[i] = Math.round((steps[i] - min) / (max - min) * 1000) / 1000;
+    }
+    return ret;
+  }.property('steps').cacheable(),
+
+  // Given a particular value, returns the percentage value.
+  _displayValueForValue: function(value) {
     var min = this.get('minimum'),
         max = this.get('maximum'),
-        value = this.get('value'),
         step = this.get('step');
 
     // determine the constrained value.  Must fit within min & max
@@ -111,26 +198,30 @@ SC.SliderView = SC.View.extend(SC.Control,
     }
 
     // determine the percent across
-    if(value!==0) value = Math.floor((value - min) / (max - min) * 100);
+    value = Math.round((value - min) / (max - min) * 100);
 
     return value;
-  }.property('value', 'minimum', 'maximum', 'step').cacheable(),
+  },
 
   _isMouseDown: NO,
 
+  /* @private */
   mouseDown: function(evt) {
+    // Fast path, reject secondary clicks.
+    if (evt.which !== 1) return false;
+
     if (!this.get('isEnabledInPane')) return YES; // nothing to do...
     this.set('isActive', YES);
     this._isMouseDown = YES ;
     return this._triggerHandle(evt, YES);
   },
 
-  // mouseDragged uses same technique as mouseDown.
+  /* @private mouseDragged uses same technique as mouseDown. */
   mouseDragged: function(evt) {
     return this._isMouseDown ? this._triggerHandle(evt) : YES;
   },
 
-  // remove active class
+  /* @private remove active class */
   mouseUp: function(evt) {
     if (this._isMouseDown) this.set('isActive', NO);
     var ret = this._isMouseDown ? this._triggerHandle(evt) : YES ;
@@ -138,27 +229,32 @@ SC.SliderView = SC.View.extend(SC.Control,
     return ret ;
   },
 
+  /* @private */
   mouseWheel: function(evt) {
-    if (!this.get('isEnabledInPane')) return YES;
+    if (!this.get('isEnabledInPane')) return NO;
+    if (!this.get('updateOnScroll')) return NO;
     var min = this.get('minimum'),
         max = this.get('maximum'),
-        step = this.get('step'),
-        newVal = this.get('value')+((evt.wheelDeltaX+evt.wheelDeltaY)*step),
-        value = Math.round(newVal / step) * step ;
+        step = this.get('step') || ((max - min) / 20),
+        newVal = this.get('value') + ((evt.wheelDeltaX+evt.wheelDeltaY)*step),
+        value = Math.round(newVal / step) * step;
     if (newVal< min) this.setIfChanged('value', min);
     else if (newVal> max) this.setIfChanged('value', max);
     else this.setIfChanged('value', newVal);
     return YES ;
   },
 
+  /* @private */
   touchStart: function(evt){
     return this.mouseDown(evt);
   },
 
+  /* @private */
   touchEnd: function(evt){
     return this.mouseUp(evt);
   },
 
+  /* @private */
   touchesDragged: function(evt){
     return this.mouseDragged(evt);
   },
@@ -199,7 +295,7 @@ SC.SliderView = SC.View.extend(SC.Control,
 
     // convert to value using minimum/maximum then constrain to steps
     loc = min + ((max-min)*loc);
-    if (step !== 0) loc = Math.round(loc / step) * step ;
+    if (!SC.none(step) && step !== 0) loc = Math.round(loc / step) * step ;
 
     // if changes by more than a rounding amount, set v.
     if (Math.abs(v-loc)>=0.01) {
@@ -209,12 +305,13 @@ SC.SliderView = SC.View.extend(SC.Control,
     return YES ;
   },
 
-  /** tied to the isEnabledInPane state */
+  /** @private tied to the isEnabledInPane state */
   acceptsFirstResponder: function() {
     if (SC.FOCUS_ALL_CONTROLS) { return this.get('isEnabledInPane'); }
     return NO;
   }.property('isEnabledInPane'),
 
+  /* @private TODO: Update to use interpretKeyEvents. */
   keyDown: function(evt) {
      // handle tab key
      if (evt.which === 9 || evt.keyCode === 9) {
@@ -229,7 +326,7 @@ SC.SliderView = SC.View.extend(SC.Control,
           size = max-min, val=0, calculateStep, current=this.get('value');
 
        if (evt.which === 37 || evt.which === 38 || evt.which === 34 ){
-         if(step === 0){
+         if (SC.none(step) || step === 0) {
            if(size<100){
              val = current-1;
            }else{
@@ -242,7 +339,7 @@ SC.SliderView = SC.View.extend(SC.Control,
          }
        }
        if (evt.which === 39 || evt.which === 40 || evt.which === 33 ){
-           if(step === 0){
+           if (SC.none(step) || step === 0) {
               if(size<100){
                 val = current + 2;
               }else{
@@ -268,6 +365,7 @@ SC.SliderView = SC.View.extend(SC.Control,
      return YES;
    },
 
+  /* @private */
    contentKeys: {
      'contentValueKey': 'value',
      'contentMinimumKey': 'minimum',

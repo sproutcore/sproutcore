@@ -103,6 +103,18 @@ SC.View.LayoutStyleCalculator = {
       }
 
       style[transformAttribute] = transforms.length > 0 ? transforms.join(' ') : null;
+
+      // Transform origin.
+      var transformOriginAttribute = SC.browser.experimentalStyleNameFor('transformOrigin'),
+        originX = layout.transformOriginX,
+        originY = layout.transformOriginY;
+      if (originX == null && originY == null) {
+        style[transformOriginAttribute] = null;
+      } else {
+        if (originX == null) originX = 0.5;
+        if (originY == null) originY = 0.5;
+        style[transformOriginAttribute] = (originX * 100) + '% ' + (originY * 100) + '%';
+      }
     }
 
     // Reset any transitions.

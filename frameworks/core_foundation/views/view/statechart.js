@@ -1015,9 +1015,9 @@ SC.CoreView.reopen(
 
       // Notify *did* (bottom-up from children to parent).
       if (this.didShowInDocument) { this.didShowInDocument(); }
-      if (state === SC.CoreView.ATTACHED_SHOWING) {
-        this._callOnChildViews('_parentDidShowInDocument');
-      }
+      // if (state === SC.CoreView.ATTACHED_SHOWING) {
+      //   this._callOnChildViews('_parentDidShowInDocument');
+      // }
     }
   },
 
@@ -1772,6 +1772,9 @@ SC.CoreView.reopen(
 
     // Execute the showing transition.
     transitionShow.run(this, options, this._preTransitionLayout, this._preTransitionFrame);
+
+    // This view's state is going to be transitioning, but all child views are now considered shown.
+    this._callOnChildViews('_parentDidShowInDocument');
   },
 
   /** @private */

@@ -64,15 +64,29 @@ SC.View.reopen(
     @returns {Object} object that handled event, if any
   */
   interpretKeyEvents: function(event) {
-    var codes = event.commandCodes(), cmd = codes[0], chr = codes[1], ret;
+    var codes = event.commandCodes(),
+        cmd = codes[0],
+        chr = codes[1],
+        ret,
+        match,
+        methodName,
+        target,
+        pane,
+        handler;
 
     if (!cmd && !chr) { return null ; } //nothing to do.
 
     // if this is a command key, try to do something about it.
     if (cmd) {
-      var methodName = SC.MODIFIED_KEY_BINDINGS[cmd] || SC.BASE_KEY_BINDINGS[cmd.match(/[^_]+$/)[0]];
+      match = cmd.match(/[^_]+$/);
+      methodName = SC.MODIFIED_KEY_BINDINGS[cmd];
+      if (!methodName && match && match.length > 0) {
+        methodName = SC.BASE_KEY_BINDINGS[match[0]];
+      }
       if (methodName) {
-        var target = this, pane = this.get('pane'), handler = null;
+        target = this;
+        pane = this.get('pane');
+        handler = null;
         while(target && !(handler = target.tryToPerform(methodName, event))){
           target = (target===pane)? null: target.get('nextResponder') ;
         }

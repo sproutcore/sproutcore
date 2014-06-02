@@ -239,9 +239,9 @@ SC.ScrollerView = SC.View.extend(
     the end cap.
 
     @type Number
-    @default 11
+    @default 9
   */
-  buttonOverlap: 11,
+  buttonOverlap: 9,
 
   /**
     The minimium length that the thumb will be, regardless of how much content
@@ -445,7 +445,7 @@ SC.ScrollerView = SC.View.extend(
     var scrollerLength = this.get('scrollerLength');
 
     // Subtract the size of the top/left cap
-    scrollerLength -= this.capLength - this.capOverlap;
+    scrollerLength -= this.get('capLength') - this.get('capOverlap');
 
     // Subtract the size of the scroll buttons, or the end cap if they are
     // not shown.
@@ -579,6 +579,9 @@ SC.ScrollerView = SC.View.extend(
     @param evt {SC.Event} the mousedown event
   */
   mouseDown: function (evt) {
+    // Fast path, reject secondary clicks.
+    if (evt.which !== 1) return false;
+
     if (!this.get('isEnabledInPane')) return NO;
 
     // keep note of altIsDown for later.
@@ -916,7 +919,7 @@ SC.OverlayScrollerView = SC.ScrollerView.extend(
 
   /**
     @type Number
-    @default 5
+    @default 3
   */
   capLength: 3,
 

@@ -215,7 +215,8 @@ test("mouseDown and then mouseUp anywhere in the button should toggle the aria-p
   var b = pane.view('aria-pressed');
   var elem = b.get('layer');
 
-  SC.Event.trigger(elem, 'mousedown');
+  var evt = SC.Event.simulateEvent(elem, 'mousedown', { which: 1 });
+  SC.Event.trigger(elem, 'mousedown', [evt]);
   equals(b.$().attr('aria-pressed'), 'true', 'aria-pressed should be true when mousedown');
 
   SC.Event.trigger(elem,'mouseup');
