@@ -1522,10 +1522,27 @@ SC.ScrollView = SC.View.extend({
 
     transform += scaleCSS;
 
-    // Apply to the layer's CSS.
     var style = layer.style;
-    style[SC.browser.experimentalStyleNameFor('Transform')] = transform;
-    style[SC.browser.experimentalStyleNameFor('TransformOrigin')] = "top left";
+
+    // Cache transform origin. (This prevents a potential off-center blink when we remove these
+    // custom transforms.)
+    if (SC.none(this._scsv_preTouchTransformOrigin)) {
+      this._scsv_preTouchTransformOrigin = style[SC.browser.experimentalStyleNameFor('transformOrigin')] || '';
+    }
+
+    // Apply to the layer's CSS.
+    style[SC.browser.experimentalStyleNameFor('transform')] = transform;
+    style[SC.browser.experimentalStyleNameFor('transformOrigin')] = "top left";
+  },
+
+  _clearMidTouchTransforms: function(layer) {
+    if (!layer) return;
+    // Clear our touch styles, returning the transform origin to its original value.
+    var style = layer.style;
+    style[SC.browser.experimentalStyleNameFor('transform')] = null;
+    style[SC.browser.experimentalStyleNameFor('transformOrigin')] = this._scsv_preTouchTransformOrigin || null;
+    // Clear the transform-origin cache.
+    this._scsv_preTouchTransformOrigin = null;
   },
 
   /** @private */
@@ -2159,10 +2176,11 @@ SC.ScrollView = SC.View.extend({
       // set the scale, vertical, and horizontal offsets to what they technically already are,
       // but don't know they are yet. This will finally update things like, say, the clipping frame.
       SC.run(function () {
+        this._clearMidTouchTransforms(this.getPath('contentView.layer'));
         this.beginPropertyChanges();
-        this.set("scale", this._scale);
         this.set("verticalScrollOffset", this._scroll_verticalScrollOffset);
         this.set("horizontalScrollOffset", this._scroll_horizontalScrollOffset);
+        this.set("scale", this._scale);
         this.endPropertyChanges();
       }, this);
 
