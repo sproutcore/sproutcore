@@ -92,6 +92,7 @@ CHANGE LOG
 * Separates SC.View#isFixedSize property into isFixedWidth and isFixedHeight, allowing for an even finer-grained optimization of child view resize notifications.
 * Adds a Developer Error when setting up a nested record attribute with an inverse property (via toOne or toMany).
 * SC.TextFieldView's maxLength property can now be updated live.
+* SC.ContainerView can now take local property paths (e.g. '.localPage.view') as nowShowing.
 
 ### DEPRECATIONS & REMOVALS
 

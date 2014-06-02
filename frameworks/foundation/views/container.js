@@ -255,11 +255,19 @@ SC.ContainerView = SC.View.extend(
 
     // If it's a string, try to turn it into the object it references...
     if (SC.typeOf(content) === SC.T_STRING && content.length > 0) {
-      if (content.indexOf('.') > 0) {
-        content = SC.objectForPropertyPath(content);
-      } else {
-        var tempContent = this.getPath(content);
+      var dotspot = content.indexOf('.');
+      // No dot means a local property, either to this view or this view's page.
+      if (dotspot === -1) {
+        var tempContent = this.get(content);
         content = SC.kindOf(tempContent, SC.CoreView) ? tempContent : SC.objectForPropertyPath(content, this.get('page'));
+      }
+      // Dot at beginning means local property path.
+      else if (dotspot === 0) {
+        content = this.getPath(content.slice(1));
+      }
+      // Dot after the beginning
+      else {
+        content = SC.objectForPropertyPath(content);
       }
     }
 

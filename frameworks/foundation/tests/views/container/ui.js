@@ -29,6 +29,14 @@
 
   });
 
+  pane.add("deepNowShowing", SC.ContainerView, {
+    viewPage: SC.Page.extend({
+      view1: SC.View,
+      view2: SC.View
+    }),
+    init: function() { sc_super(); this.viewPage = this.viewPage.create(); } // have to create page
+  });
+
   pane.add("cleans-up-views", SC.ContainerView, {
     nowShowing: 'uninstantiatedView',
 
@@ -144,6 +152,14 @@
     ok(contentView, "should have contentView");
     equals(contentView.get('value'), 'Start', 'contentView value should be "Start"');
 
+  });
+
+  test("nowShowing as local property path", function() {
+    var view = pane.view('deepNowShowing');
+
+    view.set("nowShowing", '.viewPage.view1');
+
+    ok(view.get('contentView') === view.getPath('viewPage.view1'), "Setting nowShowing to a local property path correctly updates the contentView.");
   });
 
   test("Cleans up instantiated views", function() {
