@@ -279,8 +279,8 @@ test('When zooming out, the center of the contentView should be displayed', func
   // first, set to the scale to be pretty low, so that all of the content view is visible
   SC.run(function() {
     scrollView.set('scale', 10);
-    scrollView.set('horizontalScrollOffset', 2100);
-    scrollView.set('verticalScrollOffset', 2100);
+    scrollView.set('horizontalScrollOffset', 500);
+    scrollView.set('verticalScrollOffset', 500);
   });
 
   // Figure out the "middle" of the currently visible part of the contentView.
