@@ -1029,8 +1029,13 @@ SC.ScrollView = SC.View.extend({
   */
   maximumScale: 2.0,
 
-  /** @private Updates scale. */
+  /** @private Schedules updates for the scale. */
   _scsv_scaleDidChange: function() {
+    this.invokeLast(this._scsv_applyScale);
+  }.observes('scale'),
+
+  /** @private Updates scale. */
+  _scsv_applyScale: function() {
     var contentView = this.get('contentView');
     if (contentView) {
       // If the content view implements its own scalability, use that instead.
@@ -1042,7 +1047,8 @@ SC.ScrollView = SC.View.extend({
         this._scsv_adjustForScale();
       }
     }
-  }.observes('scale'),
+  },
+
 
   /** @private Updates the scale and scroll offsets as needed. */
   _scsv_adjustForScale: function() {
@@ -2178,9 +2184,9 @@ SC.ScrollView = SC.View.extend({
       SC.run(function () {
         this._clearMidTouchTransforms(this.getPath('contentView.layer'));
         this.beginPropertyChanges();
+        this.set("scale", this._scale);
         this.set("verticalScrollOffset", this._scroll_verticalScrollOffset);
         this.set("horizontalScrollOffset", this._scroll_horizontalScrollOffset);
-        this.set("scale", this._scale);
         this.endPropertyChanges();
       }, this);
 
