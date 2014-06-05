@@ -133,15 +133,16 @@ SC.GridView = SC.ListView.extend(
       count = (content) ? content.get('length') : 0,
       rowHeight = this.get('rowHeight') || 48,
       itemsPerRow = this.get('itemsPerRow'),
-      rows = Math.ceil(count / itemsPerRow);
+      // Check that itemsPerRow isn't 0 to prevent Infinite rows.
+      rows = itemsPerRow ? Math.ceil(count / itemsPerRow) : 0;
 
     // use this cached layout hash to avoid allocing memory...
     var ret = this._cachedLayoutHash;
     if (!ret) ret = this._cachedLayoutHash = {};
 
-    // set minHeight
     ret.minHeight = rows * rowHeight;
     this.set('calculatedHeight', ret.minHeight);
+
     return ret;
   },
 
