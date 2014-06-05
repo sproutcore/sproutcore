@@ -139,9 +139,12 @@ SC.GridView = SC.ListView.extend(
     var ret = this._cachedLayoutHash;
     if (!ret) ret = this._cachedLayoutHash = {};
 
-    // set minHeight
-    ret.minHeight = rows * rowHeight;
-    this.set('calculatedHeight', ret.minHeight);
+    // set minHeight, but only if there are items,
+    // as rows equals Infinity when itemsPerRow is 0
+    if (itemsPerRow > 0) {
+      ret.minHeight = rows * rowHeight;
+      this.set('calculatedHeight', ret.minHeight);
+    }
     return ret;
   },
 

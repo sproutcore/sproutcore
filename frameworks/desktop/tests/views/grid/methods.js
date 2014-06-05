@@ -4,7 +4,7 @@
 //            portions copyright @2011 Apple Inc.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-/*global module, test, same, CoreTest */
+/*global module, test, same, ok, CoreTest */
 
 
 var scrollView, view;
@@ -166,4 +166,14 @@ test("Adjusts layout when the itemsPerRow changes.", function () {
   SC.RunLoop.end();
 
   view.adjustLayout.expect(2);
+});
+
+test("computeLayout gives back sane values when itemsPerRow is 0", function () {
+  SC.RunLoop.begin();
+  view.adjust('width', 0);
+  SC.RunLoop.end();
+
+  var layout = view.computeLayout();
+  var minHeightIsInfinity = layout.minHeight === Infinity;
+  ok(!minHeightIsInfinity, "SC.GridView#computeLayout should not have Infinity as value for layout.minHeight");
 });
