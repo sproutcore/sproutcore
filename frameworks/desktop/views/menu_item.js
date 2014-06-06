@@ -4,16 +4,15 @@
 //            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-
-sc_require('views/button');
 sc_require('views/separator');
+
 
 /**
   @class
 
   An SC.MenuItemView is created for every item in a menu.
 
-  @extends SC.ButtonView
+  @extends SC.View
   @since SproutCore 1.0
 */
 SC.MenuItemView = SC.View.extend(SC.ContentDisplay,

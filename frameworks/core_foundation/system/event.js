@@ -917,7 +917,7 @@ SC.Event.prototype = {
 
   /**
     Returns character codes for the event.  The first value is the normalized
-    code string, with any shift or ctrl characters added to the begining.
+    code string, with any shift or ctrl characters added to the beginning.
     The second value is the char string by itself.
 
     @returns {Array}
