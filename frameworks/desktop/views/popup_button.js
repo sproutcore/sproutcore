@@ -3,6 +3,8 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
+sc_require('views/button');
+
 /**
  * @class
  * @extends SC.ButtonView
