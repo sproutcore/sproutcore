@@ -1,0 +1,28 @@
+@import "variables.css";
+
+
+@theme(sc-small-size) {
+
+$theme.sc-scroller-view.sc-vertical {
+  .track {
+    top: 6px;
+    bottom: 6px;
+  	width: 6px;
+    border-radius: 10px;
+    border: 1px solid $scroller-track-border-color;
+
+    &:hover {
+      border: 1px solid $hover-scroller-track-border-color;
+    }
+
+    &:active {
+      border: 1px solid $active-scroller-track-border-color;
+    }
+  } 
+
+  .thumb {
+    width: 6px;
+    border-radius: 10px;
+  }
+}
+}

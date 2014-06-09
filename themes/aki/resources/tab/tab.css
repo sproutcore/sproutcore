@@ -1,0 +1,5 @@
+@import "variables.css";
+
+$theme.sc-tab-view {
+  overflow: visible;
+}

@@ -1,0 +1,13 @@
+body {
+  overflow: hidden;
+}
+
+.sc-main {
+  height: 100%;
+  background: #fff;
+  font-family: Helvetica, sans-serif;
+}
+
+.sc-view {
+  font-family: Helvetica, sans-serif;
+}

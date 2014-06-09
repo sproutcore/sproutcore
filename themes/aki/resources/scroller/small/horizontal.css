@@ -1,0 +1,27 @@
+@import "variables.css";
+
+@theme(sc-small-size) {
+
+$theme.sc-scroller-view.sc-horizontal {
+  .track {
+    left: 6px;
+    right: 6px;
+    height: 6px;
+    border-radius: 10px;
+    border: 1px solid $scroller-track-border-color;
+
+    &:hover {
+      border: 1px solid $hover-scroller-track-border-color;
+    }
+
+    &:active {
+      border: 1px solid $active-scroller-track-border-color;
+    }
+  } 
+
+  .thumb {
+    height: 6px;
+    border-radius: 10px;
+  }
+}
+}

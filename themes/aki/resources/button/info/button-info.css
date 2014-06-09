@@ -1,0 +1,19 @@
+@import "variables.css";
+
+@theme(info) {
+
+  $theme.button {
+      
+    &.sel, &.def {
+      background-color: $sel-button-info-bg;
+    }
+    
+    &.sel:hover, &.def:hover {
+      background-color: $sel-hover-button-info-bg;
+    }
+
+    &.sel.active, &.def.active {
+      background-color: $sel-active-button-info-bg;
+    }
+  }
+}
