@@ -1,0 +1,33 @@
+@import "variables.css";
+
+$theme.sc-popup-view {
+
+  &:after {
+    position: absolute;
+    font-family: FontAwesome;
+    top: 3px;
+    right: 8px;
+    font-size: 13px;
+    line-height: 18px;
+    color: $button-text-color;
+    content: "\f0d7";
+  }
+
+  &.no-caret:after {
+    content: none;
+  }
+
+  .sc-button-label {
+    margin-left: 0px;
+    text-align: left;
+    margin-right: 25px;
+    vertical-align: top;
+  }
+
+  &.sc-static-layout .sc-button-label {
+    display: inline-block;
+    margin-left: 5px;
+    margin-right: 25px;
+  }
+  
+}

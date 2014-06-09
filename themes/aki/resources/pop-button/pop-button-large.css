@@ -1,0 +1,11 @@
+@import "variables.css";
+
+@theme(sc-huge-size) {
+
+  $theme.sc-popup-view {
+    &.sc-static-layout .sc-button-label {
+      margin-left: 5px;
+      margin-right: 25px;
+    }
+  }
+}

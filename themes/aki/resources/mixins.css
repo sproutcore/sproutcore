@@ -1,0 +1,16 @@
+
+
+
+@mixin box-sizing($value:border-box) { 
+  box-sizing: $value;
+  -webkit-box-sizing: $value;
+  -moz-box-sizing: $value;
+}
+
+@mixin appearance($value:none) { 
+  appearance: $value;
+  -webkit-appearance: $value;
+  -moz-appearance: $value;
+}
+
+

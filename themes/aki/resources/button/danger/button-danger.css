@@ -1,0 +1,19 @@
+@import "variables.css";
+
+@theme(danger) {
+
+  $theme.button {
+      
+    &.sel, &.def {
+      background-color: $sel-button-danger-bg;
+    }
+    
+    &.sel:hover, &.def:hover {
+      background-color: $sel-hover-button-danger-bg;
+    }
+
+    &.sel.active, &.def.active {
+      background-color: $sel-active-button-danger-bg;
+    }
+  }
+}

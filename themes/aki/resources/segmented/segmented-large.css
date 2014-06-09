@@ -1,0 +1,32 @@
+@import "variables.css";
+
+@theme(sc-large-size) {
+
+$theme.sc-segment-view {
+  font-size: 15px;
+  padding: 4px 9px;
+
+  .sc-button-label .icon { top: 0px; }
+
+  &.sc-first-segment { 
+    border-top-left-radius: $segment-border-radius-large; 
+    border-bottom-left-radius: $segment-border-radius-large; 
+
+    &.vertical {
+      border-radius: 0;
+      border-top-left-radius: $segment-border-radius-large; 
+      border-top-right-radius: $segment-border-radius-large; 
+    }
+  }
+  &.sc-last-segment {
+    border-top-right-radius: $segment-border-radius-large; 
+    border-bottom-right-radius: $segment-border-radius-large; 
+
+    &.vertical {
+      border-radius: 0;
+      border-bottom-left-radius: $segment-border-radius-large; 
+      border-bottom-right-radius: $segment-border-radius-large; 
+    }
+  }
+
+}
