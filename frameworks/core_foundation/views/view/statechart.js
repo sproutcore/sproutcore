@@ -1512,6 +1512,10 @@ SC.CoreView.reopen(
     this._notifyWillDetach();
   },
 
+  _ancestorDidChangeParent: function () {
+    this.notifyPropertyChange('pane');
+  },
+
   /** @private Routes according to parent did detach. */
   _parentDidRemoveFromDocument: function () {
     var state = this.get('viewState');

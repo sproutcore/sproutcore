@@ -1444,6 +1444,8 @@ SC.CoreView.reopen(
     } else {
       view.set('parentView', this);
       view.set('owner', this);
+      view._adopted();
+
       if (!view.get('page')) { view.set('page', this.page); }
     }
 

@@ -1425,6 +1425,7 @@ SC.View.reopen(
   _adopted: function (beforeView) {
     // Our frame may change once we've been adopted to a parent.
     this._checkForResize();
+    this._callOnChildViews('_ancestorDidChangeParent');
   },
 
   /** @private Extension: The 'orphaned' event. */
