@@ -102,3 +102,30 @@ test("check action on pane#mouseDown with removeAction and removeTarget set", fu
 
   pane.destroy();
 }) ;
+
+test("Verify setting anchorElement.", function() {
+  var anchorView = anchor.view('anchor'),
+      anchorElement = anchorView.get('layer'),
+      $anchorElement = $(anchorElement);
+
+  pane = SC.PickerPane.create({
+    layout: { width: 300, height: 200 },
+    contentView: SC.View.extend({
+      layout: { top: 0, left: 0, bottom: 0, right: 0 }
+    })
+  });
+
+  pane.set('anchorElement', anchorView);
+
+  ok(pane.get('anchorElement') === anchorElement, 'Setting anchorElement to a view successfully translates it to its element.');
+
+  pane.set('anchorElement', anchorElement);
+
+  ok(pane.get('anchorElement') === anchorElement, 'Setting anchorElement to an element succeeds.');
+
+  pane.set('anchorElement', $anchorElement);
+
+  ok(pane.get('anchorElement') === anchorElement, 'Setting anchorElement to a jQuery object succeeds.');
+
+  pane.destroy();
+}) ;

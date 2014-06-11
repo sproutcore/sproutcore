@@ -290,9 +290,15 @@ SC.PickerPane = SC.PalettePane.extend(
     }
     // Setter
     else {
+      // Strip jQuery objects. (We do this first in case an empty one is passed in.)
+      if (value && value.isCoreQuery) value = value[0];
+
+      // Throw an error if a null or empty value is set. You're not allowed to go anchorless.
+      // (TODO: why can't we go anchorless? positionPane happily centers an unmoored pane.)
       if (!value) {
         throw "You must set 'anchorElement' to either a view or a DOM element";
       }
+
       // Clean up any previous anchor elements.
       this._removeScrollObservers();
 
