@@ -2104,8 +2104,7 @@ SC.CoreView.unload = function () {
   By default, SproutCore cancels the default behavior of any data drag event which carries URLs
   or files, as by default these would quit the app and open the dragged item in the browser. If
   you wish to implement data drag-and-drop support in your application, you should set the event's
-  dataTransfer.dropEffect property to 'copy' in a `dataDragHovered` event handler (or in the
-  equivalent statechart event; see below).
+  dataTransfer.dropEffect property to 'copy' in a `dataDragHovered` event handler.
 
   - `dataDragEntered` -- Triggered when a data drag enters a view. You can use this handler to
     update the view to visually signal that a drop is possible.
