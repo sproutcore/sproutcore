@@ -443,32 +443,8 @@ SC.View.reopen(
     @returns {Rect} converted frame
     @test in convertFrames
   */
-  convertFrameToView: function (frame, targetView) {
-    var myX = 0, myY = 0, targetX = 0, targetY = 0, view = this, f;
-
-    // walk up this side
-    while (view) {
-      f = view.get('frame');
-      myX += f.x;
-      myY += f.y;
-      view = view.get('layoutView');
-    }
-
-    // walk up other size
-    if (targetView) {
-      view = targetView;
-      while (view) {
-        f = view.get('frame');
-        targetX += f.x;
-        targetY += f.y;
-        view = view.get('layoutView');
-      }
-    }
-
-    // now we can figure how to translate the origin.
-    myX = frame.x + myX - targetX;
-    myY = frame.y + myY - targetY;
-    return { x: myX, y: myY, width: frame.width, height: frame.height };
+  convertFrameToView: function (frame, targetView, ignoreScale) {
+    return this._convertFrameFromViewHelper(frame, this, targetView, ignoreScale);
   },
 
   /**
@@ -487,32 +463,66 @@ SC.View.reopen(
     @returns {Rect} converted frame
     @test in converFrames
   */
-  convertFrameFromView: function (frame, targetView) {
-    var myX = 0, myY = 0, targetX = 0, targetY = 0, view = this, f;
+  convertFrameFromView: function (frame, targetView, ignoreScale) {
+    return this._convertFrameFromViewHelper(frame, targetView, this, ignoreScale);
+  },
 
-    // walk up this side
-    //Note: Intentional assignment of variable f
-    while (view && (f = view.get('frame'))) {
-      myX += f.x;
-      myY += f.y;
-      view = view.get('parentView');
-    }
+  /** @private */
+  _convertFrameFromViewHelper: function(frame, fromView, targetView, ignoreScale) {
+    var myX = frame.x, myY = frame.y, myWidth = frame.width, myHeight = frame.height, view, f;
 
-    // walk up other size
-    if (targetView) {
-      view = targetView;
-      while (view) {
-        f = view.get('frame');
-        targetX += f.x;
-        targetY += f.y;
-        view = view.get('parentView');
+    // first, walk up from the view of the frame, up to the top level
+    if (fromView) {
+      view = fromView;
+      //Note: Intentional assignment of variable f
+      while (view && (f = view.get('frame'))) {
+
+        // if scale != 1, then multiple by the scale (going from view to parent)
+        if (!ignoreScale && f.scale && f.scale != 1) {
+          myX *= f.scale;
+          myY *= f.scale;
+          myWidth *= f.scale;
+          myHeight *= f.scale;
+        }
+
+        myX += f.x;
+        myY += f.y;
+
+        view = view.get('layoutView');
       }
     }
 
-    // now we can figure how to translate the origin.
-    myX = frame.x - myX + targetX;
-    myY = frame.y - myY + targetY;
-    return { x: myX, y: myY, width: frame.width, height: frame.height };
+    // now, we'll walk down from the top level to the target view
+
+    // construct an array of view ancestry, from
+    // the top level view down to the target view
+    if (targetView) {
+      var viewAncestors = [];
+      view = targetView;
+
+      while (view && view.get('frame')) {
+        viewAncestors.unshift(view);
+        view = view.get('layoutView');
+      }
+
+      // now walk the frame from
+      for (var i = 0; i < viewAncestors.length; i++ ) {
+        view = viewAncestors[i];
+        f = view.get('frame');
+
+        myX -= f.x;
+        myY -= f.y;
+
+        if (!ignoreScale && f.scale && f.scale != 1) {
+          myX /= f.scale;
+          myY /= f.scale;
+          myWidth /= f.scale;
+          myHeight /= f.scale;
+        }
+      }
+    }
+
+    return { x: myX, y: myY, width: myWidth, height: myHeight };
   },
 
   /**
