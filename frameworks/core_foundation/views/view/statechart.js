@@ -1510,7 +1510,7 @@ SC.CoreView.reopen(
   _isFirstResponderDidChange: function () {
     var isFirstResponder = this.get('isFirstResponder');
 
-    this.$().toggleClass('focus', isFirstResponder);
+    this.$().toggleClass('sc-focus', isFirstResponder);
   },
 
   /** @private Attempts to call `didAppendToDocument` on the view. */
