@@ -101,15 +101,24 @@
     var maxVScroll = view.maximumVerticalScrollOffset();
     ok((maxVScroll > 0), 'Max vertical scroll should be greater than zero');
 
-    view.scrollTo(0,100);
-    SC.RunLoop.begin().end();
-    var elem = view.get('containerView').$()[0];
-    equals(elem.scrollTop, 100, 'vertical scrolling should adjust scrollTop of container view');
-
-    view.scrollTo(50,0);
-    SC.RunLoop.begin().end();
-    elem = view.get('containerView').$()[0];
-    equals(elem.scrollLeft, 50, 'horizontal scrolling should adjust scrollLeft of container view');
+    SC.run(function() { view.scrollTo(0,100); });
+    equals(view.get('verticalScrollOffset'), 100, 'Vertical scrolling should adjust verticalScrollOffset');
+    var elem = view.getPath('contentView.layer');
+    if (SC.platform.get('supportsCSSTransforms')) {
+      equals(elem.style[SC.browser.experimentalStyleNameFor('transform')],
+        'translateX(0px) translateY(-100px) translateZ(0px) scale(1)',
+        'Vertical scrolling should adjust transform on the contentView layer.');
+    }
+    // TODO: Simulate unsupported browser and test fallback (containerView's marginTop)
+    
+    SC.run(function() { view.scrollTo(50,0); });
+    equals(view.get('horizontalScrollOffset'), 50, 'horizontal scrolling should adjust horizontalScrollOffset');
+    if (SC.platform.get('supportsCSSTransforms')) {
+      equals(elem.style[SC.browser.experimentalStyleNameFor('transform')],
+        'translateX(-50px) translateY(0px) translateZ(0px) scale(1)',
+        'Horizontal scrolling should adjust transform on the contentView layer.');
+    }
+    // TODO: Simulate unsupported browser and test fallback (containerView's marginLeft)
   });
 
   test("basic3", function() {
@@ -131,7 +140,7 @@
     ok(verticalScrollerView, 'default scroll view has a vertical scroller');
     ok(verticalScrollerView.$().hasClass('sc-vertical'), 'should have sc-vertical class');
     var maxVScroll = view.maximumVerticalScrollOffset();
-    equals(maxVScroll ,0, 'Max vertical scroll should be equal to zero');
+    equals(maxVScroll, 0, 'Max vertical scroll should be equal to zero');
   });
 
   test("disabled", function() {
@@ -144,21 +153,25 @@
       var view = pane.view('verticalScrollerBottom');
       equals(view.get('verticalScrollerBottom'),16, "should have verticalScrollerBottom as ");
       var scroller = view.get('verticalScrollerView') ;
-      ok(scroller, 'should have vertical scroller view ');
+      ok(scroller, 'should have vertical scroller view');
       equals(scroller.get('layout').bottom,16, 'should have layout.bottom of scroller as ');
       equals(scroller.$()[0].style.bottom,'16px', 'should have style.bottom of scroller as ');
     });
 
-   test('ScrollView should readjust scrollTop/scrollLeft if layer changes', function() {
-     var view = pane.view('basic2'), cv = view.get('contentView'), container = view.get('containerView') ;
-     view.scrollTo(10, 10);
-     SC.RunLoop.begin().end();
-     equals(container.get('layer').scrollLeft, 10, 'precond - scrollLeft is set to 10');
-     equals(container.get('layer').scrollTop, 10, 'precond- scrollTop is set to 10');
-     cv.replaceLayer();
-     SC.RunLoop.begin().end();
-     equals(container.get('layer').scrollLeft, 10, 'scrollLeft should be readjusted to 10');
-     equals(container.get('layer').scrollTop, 10, 'scrollTop should be readjust to 10');
+   test('ScrollView should readjust scroll transform if layer changes', function() {
+     var view = pane.view('basic2'), cv = view.get('contentView'), container = view.get('containerView'),
+      prevTransform;
+     
+    // Get the previous style transform.
+    SC.run(function() { view.scrollTo(10, 10); });
+    prevTransform = cv.get('layer').style[SC.browser.experimentalStyleNameFor('transform')];
+
+    SC.run(function() { cv.replaceLayer(); });
+
+    equals(prevTransform, cv.get('layer').style[SC.browser.experimentalStyleNameFor('transform')],
+      'The new layer has had the scroll transform style applied');
+
+    // TODO: Simulate transform-not-supported environment and test fallback (marginTop/Left)
    });
 
   test('Scroller views of scroll view should have aria attributes set', function() {
@@ -169,14 +182,25 @@
 
     equals(horizontalScrollerView.$().attr('aria-controls'), contentView.get('layerId'), "horizontalScroller has aria-controls set");
     equals(verticalScrollerView.$().attr('aria-controls'), contentView.get('layerId'), "verticalScroller has aria-controls set");
+    
     equals(horizontalScrollerView.$().attr('aria-orientation'), 'horizontal', "horizontalScroller has aria-orientation set");
     equals(verticalScrollerView.$().attr('aria-orientation'), 'vertical', "verticalScroller has aria-orientation set");
+    
     equals(horizontalScrollerView.$().attr('aria-valuemin'), 0, "horizontalScroller has aria-valuemin set");
     equals(verticalScrollerView.$().attr('aria-valuemin'), 0, "verticalScroller has aria-valuemin set");
-    equals(horizontalScrollerView.$().attr('aria-valuemax'), view.get('maximumHorizontalScrollOffset') - horizontalScrollerView.get('scrollbarThickness'), "horizontalScroller has aria-valuemax set");
-    equals(verticalScrollerView.$().attr('aria-valuemax'), view.get('maximumVerticalScrollOffset') - verticalScrollerView.get('scrollbarThickness'), "verticalScroller has aria-valuemax set");
+    
+    equals(horizontalScrollerView.$().attr('aria-valuemax'), view.get('maximumHorizontalScrollOffset'), "horizontalScroller has aria-valuemax set");
+    equals(verticalScrollerView.$().attr('aria-valuemax'), view.get('maximumVerticalScrollOffset'), "verticalScroller has aria-valuemax set");
+    
     equals(horizontalScrollerView.$().attr('aria-valuenow'), view.get('horizontalScrollOffset'), "horizontalScroller has aria-valuenow set");
     equals(verticalScrollerView.$().attr('aria-valuenow'), view.get('horizontalScrollOffset'), "verticalScroller has aria-valuenow set");
+
+    // Aria max-value should change when the content's size is adjusted.
+    var previousHeight = contentView.getPath('layout.height');
+    SC.run(function() {
+      contentView.adjust('height', previousHeight + 50);
+    });
+    equals(verticalScrollerView.$().attr('aria-valuemax'), view.get('maximumVerticalScrollOffset'), 'Changing the maximum scroll offset changes the aria-maxvalue');
 
   });
 
@@ -203,7 +227,6 @@
       }, 200)
 
     }, 1000);
-
   });
 
   test('ScrollView-directed scroller fading', function() {
@@ -229,10 +252,36 @@
       }, 200)
 
     }, 1000);
-
-
   });
 
+  test('Replacing contentView', function() {
+    var view = pane.view('basic2'),
+      newContent;
 
+    // Replacing the content view.
+    SC.run(function() {
+      newContent = SC.View.create({ backgroundColor: 'blue' });
+    });
+    equals(newContent.get('viewState'), SC.View.UNRENDERED, 'PRELIM: New view is unrendered');
+
+    SC.run(function() {
+      view.set('contentView', newContent);
+    });
+    ok(view.getPath('containerView.contentView') === newContent, 'New content has been successfully loaded into the container view.');
+    equals(newContent.get('viewState'), SC.View.ATTACHED_SHOWN, 'New content has been rendered and attached.');
+
+    // Replacing the content view on an unrendered view.
+    SC.run(function() {
+      view = SC.ScrollView.create();
+      newContent = SC.View.create({ backgroundColor: 'pink' });
+      view.set('contentView', newContent);
+    });
+    ok(view.getPath('containerView.contentView') === newContent, "New content has been successfully loaded into the unrendered view's container view.");
+
+    SC.run(function() {
+      view._doRender();
+    });
+    equals(newContent.get('viewState'), SC.View.UNATTACHED_BY_PARENT, 'New content renders along with the rest of the view');
+  });
 
 })();

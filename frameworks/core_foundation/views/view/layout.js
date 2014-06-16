@@ -443,8 +443,8 @@ SC.View.reopen(
     @returns {Rect} converted frame
     @test in convertFrames
   */
-  convertFrameToView: function (frame, targetView, ignoreScale) {
-    return this._convertFrameFromViewHelper(frame, this, targetView, ignoreScale);
+  convertFrameToView: function (frame, targetView) {
+    return this._convertFrameFromViewHelper(frame, this, targetView);
   },
 
   /**
@@ -463,12 +463,12 @@ SC.View.reopen(
     @returns {Rect} converted frame
     @test in converFrames
   */
-  convertFrameFromView: function (frame, targetView, ignoreScale) {
-    return this._convertFrameFromViewHelper(frame, targetView, this, ignoreScale);
+  convertFrameFromView: function (frame, targetView) {
+    return this._convertFrameFromViewHelper(frame, targetView, this);
   },
 
   /** @private */
-  _convertFrameFromViewHelper: function(frame, fromView, targetView, ignoreScale) {
+  _convertFrameFromViewHelper: function(frame, fromView, targetView) {
     var myX = frame.x, myY = frame.y, myWidth = frame.width, myHeight = frame.height, view, f;
 
     // first, walk up from the view of the frame, up to the top level
@@ -478,7 +478,7 @@ SC.View.reopen(
       while (view && (f = view.get('frame'))) {
 
         // if scale != 1, then multiple by the scale (going from view to parent)
-        if (!ignoreScale && f.scale && f.scale != 1) {
+        if (f.scale && f.scale != 1) {
           myX *= f.scale;
           myY *= f.scale;
           myWidth *= f.scale;
@@ -513,7 +513,7 @@ SC.View.reopen(
         myX -= f.x;
         myY -= f.y;
 
-        if (!ignoreScale && f.scale && f.scale != 1) {
+        if (f.scale && f.scale != 1) {
           myX /= f.scale;
           myY /= f.scale;
           myWidth /= f.scale;
@@ -568,7 +568,7 @@ SC.View.reopen(
   },
 
   /** @private */
-  _adjustForScale: function (frame, layout) {
+  _adjustForScale: function (frame, layout, scale, oX, oY) {
     // Add the original, unscaled height and width.
     var originalWidth = frame.width;
     var originalHeight = frame.height;
@@ -587,10 +587,11 @@ SC.View.reopen(
       frame.originalHeight = originalHeight;
       return frame;
     }
-    // Get the scale and transform origins.
-    var scale = layout.scale,
-      oX = layout.transformOriginX,
-      oY = layout.transformOriginY;
+    // Get the scale and transform origins, if not provided. (Note inlining of SC.none for performance)
+    scale = scale == null ? layout.scale : scale;
+    oX = oX == null ? layout.transformOriginX : oX;
+    oY = oY == null ? layout.transformOriginY : oY;
+    // Get defaults.
     if (scale == null) scale = 1;
     if (oX == null) oX = 0.5;
     if (oY == null) oY = 0.5;
@@ -607,7 +608,7 @@ SC.View.reopen(
     frame.originalWidth = originalWidth;
     frame.originalHeight = originalHeight;
 
-    // make sure width/height are never < 0
+    // Make sure width/height are never < 0.
     if (frame.height < 0) frame.height = 0;
     if (frame.width < 0) frame.width = 0;
 
@@ -645,6 +646,7 @@ SC.View.reopen(
 
     var error, layer, AUTO = SC.LAYOUT_AUTO,
         pv = this.get('parentView'),
+        scale, oX, oY, // Used with the special case ScrollView handling below.
         dH, dW, //shortHand for parentDimensions
         lR = layout.right,
         lL = layout.left,
@@ -782,36 +784,29 @@ SC.View.reopen(
       if (f.width === AUTO) f.width = layer ? layer.clientWidth : 0;
     }
 
+    // Okay we have all our numbers. Let's adjust them for things.
+
     // First, adjust for border.
     f = this._adjustForBorder(f, layout);
 
-    // HACK: Account for special cases inside ScrollView, where we adjust the
-    // element's scrollTop/scrollLeft property for performance reasons.
+    // Make sure the width/height fix their min/max (note the inlining of SC.none for performance)...
+    if ((layout.maxHeight != null) && (f.height > layout.maxHeight)) f.height = layout.maxHeight;
+    if ((layout.minHeight != null) && (f.height < layout.minHeight)) f.height = layout.minHeight;
+    if ((layout.maxWidth != null) && (f.width > layout.maxWidth)) f.width = layout.maxWidth;
+    if ((layout.minWidth != null) && (f.width < layout.minWidth)) f.width = layout.minWidth;
+
+    // SPECIAL CASE: Account for being inside ScrollView, where we use CSS
+    // transforms to scroll for performance and platform-compatibility reasons.
     if (pv && pv.isScrollContainer) {
       pv = pv.get('parentView');
       f.x -= pv.get('horizontalScrollOffset');
       f.y -= pv.get('verticalScrollOffset');
+      scale = pv.get('scale');
+      oX = oY = 0;
     }
 
-    // make sure the width/height fix min/max...
-    if (!SC.none(layout.maxHeight) && (f.height > layout.maxHeight)) {
-      f.height = layout.maxHeight;
-    }
-
-    if (!SC.none(layout.minHeight) && (f.height < layout.minHeight)) {
-      f.height = layout.minHeight;
-    }
-
-    if (!SC.none(layout.maxWidth) && (f.width > layout.maxWidth)) {
-      f.width = layout.maxWidth;
-    }
-
-    if (!SC.none(layout.minWidth) && (f.width < layout.minWidth)) {
-      f.width = layout.minWidth;
-    }
-
-    // Finally, adjust for scale.
-    f = this._adjustForScale(f, layout);
+    // Finally, adjust for scale. (Scale is only defined here if we're doing special-case ScrollView stuff.)
+    f = this._adjustForScale(f, layout, scale, oX, oY);
 
     return f;
   }.enhance(),

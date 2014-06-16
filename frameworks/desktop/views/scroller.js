@@ -93,11 +93,11 @@ SC.ScrollerView = SC.View.extend(
     @observes minimum
   */
   value: function (key, val) {
-    var minimum = this.get('minimum');
     if (val !== undefined) {
       this._scs_value = val;
     }
 
+    var minimum = this.get('minimum');
     val = this._scs_value || minimum; // default value is at top/left
     return Math.max(Math.min(val, this.get('maximum')), minimum);
   }.property('maximum', 'minimum').cacheable(),
@@ -326,6 +326,8 @@ SC.ScrollerView = SC.View.extend(
 
       //addressing accessibility
       context.setAttr('aria-valuenow', this.get('value'));
+      if (this.didChangeFor('render-min', 'minimum')) context.setAttr('aria-valuemin', this.get('minimum'));
+      if (this.didChangeFor('render-max', 'maximum')) context.setAttr('aria-valuemax', this.get('maximum'));
     }
   },
 

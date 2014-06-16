@@ -21,27 +21,29 @@ test("Frame Recalculation", function() {
           callCount += 1;
         }.observes('frame')
       });
-   pane.setPath('contentView.contentView', view);
-   pane.append();
-   baseCount = callCount;
-   ok(callCount > 0, 'precond - frame should be called at least once when displayed');
-   callCount = 0;
+  SC.run(function() {
+    pane.setPath('contentView.contentView', view);
+    pane.append();
+  });
+  baseCount = callCount;
+  ok(callCount > 0, 'precond - frame should be called at least once when displayed');
 
-   SC.run(function() { pane.adjust('width', 499); });
-   ok(callCount > 1, 'frame should recompute after parent resizes');
-   callCount = 0;
+  callCount = 0;
+  SC.run(function() { pane.adjust('width', 499); });
+  ok(callCount > 0, 'frame should recompute after parent resizes');
 
-   content = 'For today, we celebrate the first glorious anniversary of the Information Purification Directives. We have created, for the first time in all history, a garden of pure ideology. Where each worker may bloom secure from the pests of contradictory and confusing truths.Our Unification of Thought is more powerful a weapon than any fleet or army on earth. We are one people. With one will. One resolve. One cause. Our enemies shall talk themselves to death. And we will bury them with their own confusion. We shall prevail!';
-   view.set('content', content);
-   ok(callCount > 0, 'frame should recompute after content changes');
-   callCount = 0;
+  callCount = 0;
+  content = 'For today, we celebrate the first glorious anniversary of the Information Purification Directives. We have created, for the first time in all history, a garden of pure ideology. Where each worker may bloom secure from the pests of contradictory and confusing truths.Our Unification of Thought is more powerful a weapon than any fleet or army on earth. We are one people. With one will. One resolve. One cause. Our enemies shall talk themselves to death. And we will bury them with their own confusion. We shall prevail!';
+  view.set('content', content);
+  ok(callCount > 0, 'frame should recompute after content changes');
+  callCount = 0;
 
-   SC.RunLoop.begin().end();
-   var layer = view.get('layer');
+  SC.RunLoop.begin().end();
+  var layer = view.get('layer');
 
-   ok(layer.innerHTML.indexOf(content) > -1, 'view should rerender when content changes');
-   view.contentLayoutDidChange();
-   ok(callCount > 0, 'frame should recompute after calling contentLayoutDidChange()');
+  ok(layer.innerHTML.indexOf(content) > -1, 'view should rerender when content changes');
+  view.contentLayoutDidChange();
+  ok(callCount > 0, 'frame should recompute after calling contentLayoutDidChange()');
 
-   pane.remove();
+  pane.remove();
 });
