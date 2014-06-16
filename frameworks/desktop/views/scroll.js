@@ -1987,9 +1987,15 @@ SC.ScrollView = SC.View.extend({
   /** @private */
   startDecelerationAnimation: function (evt) {
     var touch = this.touch, self = this;
-    touch.decelerationVelocity = {
-      x: touch.scrollVelocity.x * 10,
-      y: touch.scrollVelocity.y * 10
+
+    touch.decelerationInfo = {
+      velocityX: touch.scrollVelocity.x * 10,
+      velocityY: touch.scrollVelocity.y * 10,
+
+      // under a few circumstances, we may want to force a valid X/Y position.
+      // For instance, if bouncing is disabled.
+      forceValidXPosition: !touch.enableBouncing,
+      forceValidYPosition: !touch.enableBouncing
     };
 
     touch.animationID = window.requestAnimationFrame(function () {
@@ -2042,33 +2048,18 @@ SC.ScrollView = SC.View.extend({
         touchContainerDim = touch.containerSize,
         hAlign = this.get("horizontalAlign"),
         vAlign = this.get("verticalAlign"),
-        minOffsetX = this.minimumScrollOffset(touchDim.width * this._scale, touchContainerDim.width, hAlign),
-        minOffsetY = this.minimumScrollOffset(touchDim.height * this._scale, touchContainerDim.height, vAlign),
-        maxOffsetX = this.maximumScrollOffset(touchDim.width * this._scale, touchContainerDim.width, hAlign),
-        maxOffsetY = this.maximumScrollOffset(touchDim.height * this._scale, touchContainerDim.height, vAlign),
-
+        minOffsetX, minOffsetY, maxOffsetX, maxOffsetY,
+        decelerationInfo = touch.decelerationInfo,
+        forceValidXPosition = decelerationInfo.forceValidXPosition,
+        forceValidYPosition = decelerationInfo.forceValidYPosition,
+        moveLeft = touch.touch.startX < touch.touch.pageX,
+        moveUp = touch.touch.startY < touch.touch.pageY,
         now = Date.now(),
         t = Math.max(now - touch.lastEventTime, 1),
-
-        newX = this._scroll_horizontalScrollOffset + touch.decelerationVelocity.x * (t / 10),
-        newY = this._scroll_verticalScrollOffset + touch.decelerationVelocity.y * (t / 10);
+        newX = this._scroll_horizontalScrollOffset + decelerationInfo.velocityX * (t / 10),
+        newY = this._scroll_verticalScrollOffset + decelerationInfo.velocityY * (t / 10);
 
     var de = touch.decelerationFromEdge, ac = touch.accelerationToEdge;
-
-    // under a few circumstances, we may want to force a valid X/Y position.
-    // For instance, if bouncing is disabled, or if position was okay before
-    // adjusting scale.
-    var forceValidXPosition = !touch.enableBouncing, forceValidYPosition = !touch.enableBouncing;
-
-    // determine if position was okay before adjusting scale (which we do, in
-    // a lovely, animated way, for the scaled out/in too far bounce-back).
-    // if the position was okay, then we are going to make sure that we keep the
-    // position okay when adjusting the scale.
-    //
-    // Position OKness, here, referring to if the position is valid (within
-    // minimum and maximum scroll offsets)
-    if (newX >= minOffsetX && newX <= maxOffsetX) forceValidXPosition = YES;
-    if (newY >= minOffsetY && newY <= maxOffsetY) forceValidYPosition = YES;
 
     // We are going to change scale in a moment, but the position should stay the
     // same, if possible (unless it would be more jarring, as described above, in
@@ -2115,24 +2106,33 @@ SC.ScrollView = SC.View.extend({
     maxOffsetX = this.maximumScrollOffset(touchDim.width * this._scale, touchContainerDim.width, hAlign);
     maxOffsetY = this.maximumScrollOffset(touchDim.height * this._scale, touchContainerDim.height, vAlign);
 
+    // determine if position is okay after adjusting scale (which we do, in
+    // a lovely, animated way, for the scaled out/in too far bounce-back).
+    // if the position is okay, then we are going to make sure that we keep the
+    // position okay when adjusting the scale.
+    //
+    // Position OKness, here, referring to if the position is valid (within
+    // minimum and maximum scroll offsets)
+    decelerationInfo.forceValidXPosition = newX < minOffsetX || newX > maxOffsetX;
+    decelerationInfo.forceValidYPosition = newY < minOffsetY || newY > maxOffsetY;
+//console.log(forceValidXPosition, moveLeft, newX, minOffsetX, forceValidYPosition, moveUp, newY, minOffsetY);
     // see if scaling messed up the X position (but ignore if 'tweren't right to begin with).
-    if (forceValidXPosition && (newX < minOffsetX || newX > maxOffsetX)) {
+    if (forceValidXPosition && ((moveLeft && newX > minOffsetX) || (!moveLeft && newX < maxOffsetX))) {
       // Correct the position
       newX = Math.max(minOffsetX, Math.min(newX, maxOffsetX));
 
       // also, make the velocity be ZERO; it is obviously not needed...
-      touch.decelerationVelocity.x = 0;
+      decelerationInfo.velocityX = 0;
     }
 
     // now the y
-    if (forceValidYPosition && (newY < minOffsetY || newY > maxOffsetY)) {
+    if (forceValidYPosition && ((moveUp && newY > minOffsetY) || (!moveUp && newY < maxOffsetY))) {
       // again, correct it...
       newY = Math.max(minOffsetY, Math.min(newY, maxOffsetY));
 
       // also, make the velocity be ZERO; it is obviously not needed...
-      touch.decelerationVelocity.y = 0;
+      decelerationInfo.velocityY = 0;
     }
-
 
     // now that we are done modifying the position, we may update the actual scroll
     this._scroll_horizontalScrollOffset = newX;
@@ -2152,8 +2152,8 @@ SC.ScrollView = SC.View.extend({
     // and as it seems to work great as-is, I'm just leaving it.
     var decay = touch.decelerationRate,
         decayXtime = Math.pow(decay, (t / 10));
-    touch.decelerationVelocity.y *= decayXtime;
-    touch.decelerationVelocity.x *= decayXtime;
+    decelerationInfo.velocityX *= decayXtime;
+    decelerationInfo.velocityY *= decayXtime;
 
     // We have a bouncyBounce method that adjusts the velocity for bounce. That is, if it is
     // out of range and still going, it will slow it down. This step is decelerationFromEdge.
@@ -2162,15 +2162,15 @@ SC.ScrollView = SC.View.extend({
     // we supply de and ac as these properties.
     // The .3 artificially increases the acceleration by .3; this is actually to make the final
     // stop a bit more abrupt.
-    touch.decelerationVelocity.x = this.bouncyBounce(touch.decelerationVelocity.x, newX, minOffsetX, maxOffsetX, de, ac, 0.3);
-    touch.decelerationVelocity.y = this.bouncyBounce(touch.decelerationVelocity.y, newY, minOffsetY, maxOffsetY, de, ac, 0.3);
+    decelerationInfo.velocityX = this.bouncyBounce(decelerationInfo.velocityX, newX, minOffsetX, maxOffsetX, de, ac, 0.3);
+    decelerationInfo.velocityY = this.bouncyBounce(decelerationInfo.velocityY, newY, minOffsetY, maxOffsetY, de, ac, 0.3);
 
     // if we ain't got no velocity... then we must be finished, as there is no where else to go.
     // to determine our velocity, we take the absolue value, and use that; if it is less than .01, we
     // must be done. Note that we check scale's most recent velocity, calculated above using bouncyBounce,
     // as well.
-    var absXVelocity = Math.abs(touch.decelerationVelocity.x),
-        absYVelocity = Math.abs(touch.decelerationVelocity.y);
+    var absXVelocity = Math.abs(decelerationInfo.velocityX),
+        absYVelocity = Math.abs(decelerationInfo.velocityY);
     if (absYVelocity < 0.05 && absXVelocity < 0.05 && Math.abs(sv) < 0.05) {
       // We can reset the animation id, as it will no longer be required, and we don't want to accidentally try to cancel it later.
       touch.animationID = null;
