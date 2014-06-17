@@ -189,11 +189,18 @@
     equals(horizontalScrollerView.$().attr('aria-valuemin'), 0, "horizontalScroller has aria-valuemin set");
     equals(verticalScrollerView.$().attr('aria-valuemin'), 0, "verticalScroller has aria-valuemin set");
     
-    equals(horizontalScrollerView.$().attr('aria-valuemax'), view.get('maximumHorizontalScrollOffset') - horizontalScrollerView.get('scrollbarThickness'), "horizontalScroller has aria-valuemax set");
-    equals(verticalScrollerView.$().attr('aria-valuemax'), view.get('maximumVerticalScrollOffset') - verticalScrollerView.get('scrollbarThickness'), "verticalScroller has aria-valuemax set");
+    equals(horizontalScrollerView.$().attr('aria-valuemax'), view.get('maximumHorizontalScrollOffset'), "horizontalScroller has aria-valuemax set");
+    equals(verticalScrollerView.$().attr('aria-valuemax'), view.get('maximumVerticalScrollOffset'), "verticalScroller has aria-valuemax set");
     
     equals(horizontalScrollerView.$().attr('aria-valuenow'), view.get('horizontalScrollOffset'), "horizontalScroller has aria-valuenow set");
     equals(verticalScrollerView.$().attr('aria-valuenow'), view.get('horizontalScrollOffset'), "verticalScroller has aria-valuenow set");
+
+    // Aria max-value should change when the content's size is adjusted.
+    var previousHeight = contentView.getPath('layout.height');
+    SC.run(function() {
+      contentView.adjust('height', previousHeight + 50);
+    });
+    equals(verticalScrollerView.$().attr('aria-valuemax'), view.get('maximumVerticalScrollOffset'), 'Changing the maximum scroll offset changes the aria-maxvalue');
 
   });
 

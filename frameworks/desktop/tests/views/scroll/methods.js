@@ -463,17 +463,15 @@ test("Setting scale on ScrollView", function() {
     view.set('canScale', YES);
     view.set('scale', 0.8);
   });
-  equals(view.getPath('contentView.layout.scale'), 0.8, "Setting scale on ScrollView with canScale: YES adjusts scale on contentView");
-  equals(view.getPath('contentView.layout.transformOriginX'), 0, "Setting scale on ScrollView with canScale: YES adjusts contentOriginX on contentView");
-  equals(view.getPath('contentView.layout.transformOriginY'), 0, "Setting scale on ScrollView with canScale: YES adjusts contentOriginY on contentView");
+  equals(view.get('scale'), 0.8, "Setting scale on a ScrollView with canScale: YES changes scale");
 
-  // Exceeding min and max
+  // Exceeding min
   SC.run(function() {
     view.set('scale', -100);
   });
   equals(view.get('scale'), view.get('minimumScale'), "Scale is constrained by minimumScale");
 
-  // Exceeding min and max
+  // Exceeding max
   SC.run(function() {
     view.set('scale', 100);
   });
