@@ -2068,7 +2068,7 @@ SC.ScrollView = SC.View.extend({
 
   /** @private
     If we redraw after the initial render, we need to make sure that we reset
-    the scrollTop/scrollLeft properties on the content view.  This ensures
+    the scroll transform properties on the content view.  This ensures
     that, for example, the scroll views displays correctly when switching
     views out in a ContainerView.
   */
@@ -2225,8 +2225,7 @@ SC.ScrollView = SC.View.extend({
   }.observes('verticalScrollOffset'),
 
   /** @private
-    Called at the end of the run loop to actually adjust the scrollTop
-    and scrollLeft properties of the container view.
+    Called at the end of the run loop to actually adjust the element's scroll positioning.
   */
   adjustElementScroll: function () {
     var contentView = this.get('contentView'),
@@ -2234,10 +2233,13 @@ SC.ScrollView = SC.View.extend({
       horizontalScrollOffset = this.get('horizontalScrollOffset'),
       scale = this.get('scale');
 
+    // Nothing to do.
+    if (!contentView) return;
+
     // We notify the content view that its frame property has changed before we actually update the position.
     // This gives views that use incremental rendering a chance to render newly-appearing elements before
     // they come into view.
-    if (contentView && contentView._viewFrameDidChange) {
+    if (contentView._viewFrameDidChange) {
       contentView._viewFrameDidChange()
     }
 
@@ -2258,7 +2260,7 @@ SC.ScrollView = SC.View.extend({
     }
     // Otherwise, we proceed with proper modern transforms!
     else {
-      var transformStyle = 'translateX(-' + horizontalScrollOffset + 'px) translateY(-' + verticalScrollOffset + 'px)';
+      var transformStyle = 'translateX(' + (-horizontalScrollOffset) + 'px) translateY(' + (-verticalScrollOffset) + 'px)';
 
       // If the platform supports 3D transforms, let's add the z translation (tricks some browsers into moving it onto
       // the graphics card).
@@ -2273,8 +2275,10 @@ SC.ScrollView = SC.View.extend({
 
       // Assign the style to the content.
       var contentViewLayer = contentView.get('layer');
-      contentViewLayer.style[transformAttribute] = transformStyle;
-      contentViewLayer.style[SC.browser.experimentalStyleNameFor('transformOrigin')] = 'top left';
+      if (contentViewLayer) {
+        contentViewLayer.style[transformAttribute] = transformStyle;
+        contentViewLayer.style[SC.browser.experimentalStyleNameFor('transformOrigin')] = 'top left';
+      }
     }
   },
 
