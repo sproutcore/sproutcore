@@ -134,6 +134,9 @@ SC.ScrollView = SC.View.extend({
       } else {
         this._scroll_horizontalScaleOrigin = SC.ALIGN_CENTER;
       }
+      // Calculating this when scroll offset changes allows us to retain it when only scale changes. (Note that this calculation
+      // doesn't take minimum offset into account; in every case I can think of where this value will be used, the minimum is 0.)
+      this._scroll_horizontalScaleOriginPct = (value + (this._scroll_containerWidth / 2)) / (maxOffset + this._scroll_containerWidth)
     }
 
     return this._scroll_horizontalScrollOffset || 0;
@@ -162,6 +165,9 @@ SC.ScrollView = SC.View.extend({
       } else {
         this._scroll_verticalScaleOrigin = SC.ALIGN_CENTER;
       }
+      // Calculating this when scroll offset changes allows us to retain it when only scale changes. (Note that this calculation
+      // doesn't take minimum offset into account; in every case I can think of where this value will be used, the minimum is 0.)
+      this._scroll_verticalScaleOriginPct = (value + (this._scroll_containerHeight / 2)) / (maxOffset + this._scroll_containerHeight)
     }
 
     return this._scroll_verticalScrollOffset || 0;
@@ -2216,14 +2222,6 @@ SC.ScrollView = SC.View.extend({
       this.set('verticalScrollOffset', this.get('verticalScrollOffset'));
     }
 
-    // First, we take some measurements to figure out what point we scale around. For example, if we can scroll
-    // in both directions and we're scrolled all the way to the bottom-right, we should scale out from the bottom
-    // right corner. (Play around with scaling on Mac Preview to get a feel for the desired behavior here.)
-    // RULES:
-    // If min and max are both 0, scale origin depends on the alignment (this is our inflection point).
-    // If we're at 0, scale from the left/top.
-    // If we're at max, scale from the right/bottom.
-    // Otherwise scale around the center.
     var horizontalOrigin = this._scroll_horizontalScaleOrigin,
       verticalOrigin = this._scroll_verticalScaleOrigin,
       hCenterPct, vCenterPct;
@@ -2234,10 +2232,10 @@ SC.ScrollView = SC.View.extend({
 
     // If we're going centered, we need to know what %age of the way across the center is, so we can reposition it after.
     if (horizontalOrigin !== SC.ALIGN_LEFT && horizontalOrigin !== SC.ALIGN_RIGHT) {
-      hCenterPct = (this._scroll_horizontalScrollOffset + (this._scroll_containerWidth / 2)) / (this._scroll_maximumHorizontalScrollOffset + this._scroll_containerWidth);
+      hCenterPct = this._scroll_horizontalScaleOriginPct;
     }
     if (verticalOrigin !== SC.ALIGN_TOP && verticalOrigin !== SC.ALIGN_BOTTOM) {
-      vCenterPct = (this._scroll_verticalScrollOffset + (this._scroll_containerHeight / 2)) / (this._scroll_maximumVerticalScrollOffset + this._scroll_containerHeight);
+      vCenterPct = this._scroll_verticalScaleOriginPct;
     }
 
     // Let the content view know that its frame has changed. (This will trigger all the correct recalculations
@@ -2279,8 +2277,10 @@ SC.ScrollView = SC.View.extend({
     // value feedback coming from the ScrollerView two-way bindings. ScrollerView retains out-of-bounds
     // values and they can resurface once the bounds change (a generally desirable behavior but may be
     // causing problems here).)
-    this._scroll_verticalScaleOrigin = verticalOrigin;
     this._scroll_horizontalScaleOrigin = horizontalOrigin;
+    this._scroll_horizontalScaleOriginPct = hCenterPct;
+    this._scroll_verticalScaleOrigin = verticalOrigin;
+    this._scroll_verticalScaleOriginPct = vCenterPct;
   }.observes('scale'),
 
   /** @private
