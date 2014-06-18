@@ -89,6 +89,11 @@ SC.ALIGN_BOTTOM_LEFT = 'bottom-left';
 SC.ALIGN_BOTTOM_RIGHT = 'bottom-right';
 
 /**
+  Indicates that the content does not specify its own alignment.
+*/
+SC.ALIGN_DEFAULT = 'default';
+
+/**
   Indicates that the content should be positioned to the right.
 */
 SC.POSITION_RIGHT = 0;

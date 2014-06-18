@@ -122,10 +122,18 @@ SC.ScrollView = SC.View.extend({
     if (value !== undefined) {
       var minOffset = this.get('minimumHorizontalScrollOffset'),
           maxOffset = this.get('maximumHorizontalScrollOffset');
-      this._scroll_horizontalScrollOffset = Math.max(minOffset, Math.min(maxOffset, value));
+      value = this._scroll_horizontalScrollOffset = Math.max(minOffset, Math.min(maxOffset, value));
 
-      this._scroll_horizontalScrollOffsetAtMin = (this._scroll_horizontalScrollOffset === minOffset);
-      this._scroll_horizontalScrollOffsetAtMax = (this._scroll_horizontalScrollOffset === maxOffset);
+      // Cache our vertical scale origin.
+      if (value === minOffset && value === maxOffset) {
+        this._scroll_horizontalScaleOrigin = SC.ALIGN_DEFAULT;
+      } else if (value === minOffset) {
+        this._scroll_horizontalScaleOrigin = SC.ALIGN_LEFT;
+      } else if (value === maxOffset) {
+        this._scroll_horizontalScaleOrigin = SC.ALIGN_RIGHT;
+      } else {
+        this._scroll_horizontalScaleOrigin = SC.ALIGN_CENTER;
+      }
     }
 
     return this._scroll_horizontalScrollOffset || 0;
@@ -142,10 +150,18 @@ SC.ScrollView = SC.View.extend({
     if (value !== undefined) {
       var minOffset = this.get('minimumVerticalScrollOffset'),
           maxOffset = this.get('maximumVerticalScrollOffset');
-      this._scroll_verticalScrollOffset = Math.max(minOffset, Math.min(maxOffset, value));
+      value = this._scroll_verticalScrollOffset = Math.max(minOffset, Math.min(maxOffset, value));
 
-      this._scroll_verticalScrollOffsetAtMin = (this._scroll_verticalScrollOffset === minOffset);
-      this._scroll_verticalScrollOffsetAtMax = (this._scroll_verticalScrollOffset === maxOffset);
+      // Cache our vertical scale origin.
+      if (value === minOffset && value === maxOffset) {
+        this._scroll_verticalScaleOrigin = SC.ALIGN_DEFAULT;
+      } else if (value === minOffset) {
+        this._scroll_verticalScaleOrigin = SC.ALIGN_TOP;
+      } else if (value === maxOffset) {
+        this._scroll_verticalScaleOrigin = SC.ALIGN_BOTTOM;
+      } else {
+        this._scroll_verticalScaleOrigin = SC.ALIGN_CENTER;
+      }
     }
 
     return this._scroll_verticalScrollOffset || 0;
@@ -2190,11 +2206,13 @@ SC.ScrollView = SC.View.extend({
     cetera.
   */
   _scsv_scaleDidChange: function() {
-    // If we don't have a bead yet on the horizontal or vertical offsets, tweak them.
-    if (SC.none(this._scroll_horizontalScrollOffsetAtMin) || SC.none(this._scroll_horizontalScrollOffsetAtMax)) {
+    // If we don't have a bead yet on the horizontal or vertical origins, tweak them. (We could
+    // remove the need for this by calculating scale origins on get as well as set, but that will
+    // likely take more CPU cycles than poking them once if scale happens before scroll.)
+    if (SC.none(this._scroll_horizontalScaleOrigin)) {
       this.set('horizontalScrollOffset', this.get('horizontalScrollOffset'));
     }
-    if (SC.none(this._scroll_verticalScrollOffsetAtMin) || SC.none(this._scroll_verticalScrollOffsetAtMax)) {
+    if (SC.none(this._scroll_verticalScaleOrigin)) {
       this.set('verticalScrollOffset', this.get('verticalScrollOffset'));
     }
 
@@ -2206,34 +2224,19 @@ SC.ScrollView = SC.View.extend({
     // If we're at 0, scale from the left/top.
     // If we're at max, scale from the right/bottom.
     // Otherwise scale around the center.
-    var horizontalOrigin, verticalOrigin, hCenterPct, vCenterPct;
+    var horizontalOrigin = this._scroll_horizontalScaleOrigin,
+      verticalOrigin = this._scroll_verticalScaleOrigin,
+      hCenterPct, vCenterPct;
 
-    // Horizontal
-    if (this._scroll_minimumHorizontalScrollOffset === 0 && this._scroll_maximumHorizontalScrollOffset === 0) {
-      horizontalOrigin = this.get('horizontalAlign');
-    } else if (this._scroll_horizontalScrollOffsetAtMin) {
-      horizontalOrigin = SC.ALIGN_LEFT;
-    } else if (this._scroll_horizontalScrollOffsetAtMax) {
-      horizontalOrigin = SC.ALIGN_RIGHT;
-    } else {
-      horizontalOrigin = SC.ALIGN_CENTER;
-    }
+    // Translate from DEFAULT to bespoke.
+    if (horizontalOrigin === SC.ALIGN_DEFAULT) horizontalOrigin = this.get('horizontalAlign');
+    if (verticalOrigin === SC.ALIGN_DEFAULT) verticalOrigin = this.get('verticalAlign');
+
     // If we're going centered, we need to know what %age of the way across the center is, so we can reposition it after.
-    if (horizontalOrigin !== SC.ALIGN_LEFT && horizontalOrigin !== SC.ALGIN_RIGHT) {
+    if (horizontalOrigin !== SC.ALIGN_LEFT && horizontalOrigin !== SC.ALIGN_RIGHT) {
       hCenterPct = (this._scroll_horizontalScrollOffset + (this._scroll_containerWidth / 2)) / (this._scroll_maximumHorizontalScrollOffset + this._scroll_containerWidth);
     }
-    // Vertical
-    if (this._scroll_minimumVerticalScrollOffset === 0 && this._scroll_maximumVerticalScrollOffset === 0) {
-      verticalOrigin = this.get('verticalAlign');
-    } else if (this._scroll_verticalScrollOffsetAtMin) {
-      verticalOrigin = SC.ALIGN_TOP;
-    } else if (this._scroll_verticalScrollOffsetAtMax) {
-      verticalOrigin = SC.ALIGN_BOTTOM;
-    } else {
-      verticalOrigin = SC.ALIGN_CENTER;
-    }
-    // If we're going centered, we need to know what %age of the way down the center is, so we can reposition it after.
-    if (verticalOrigin !== SC.ALIGN_TOP && verticalOrigin !== SC.ALGIN_BOTTOM) {
+    if (verticalOrigin !== SC.ALIGN_TOP && verticalOrigin !== SC.ALIGN_BOTTOM) {
       vCenterPct = (this._scroll_verticalScrollOffset + (this._scroll_containerHeight / 2)) / (this._scroll_maximumVerticalScrollOffset + this._scroll_containerHeight);
     }
 
@@ -2271,6 +2274,13 @@ SC.ScrollView = SC.View.extend({
         var newVOffset = ((this.get('maximumVerticalScrollOffset') + this._scroll_containerHeight) * vCenterPct) - (this._scroll_containerHeight / 2);
         this.set('verticalScrollOffset', newVOffset);
     }
+    // Reset the scale origins – these shouldn't change based on our actions here, only based on the user's
+    // scrolling actions. (Note that this reset doesn't seem to always work - I think there's some scroll
+    // value feedback coming from the ScrollerView two-way bindings. ScrollerView retains out-of-bounds
+    // values and they can resurface once the bounds change (a generally desirable behavior but may be
+    // causing problems here).)
+    this._scroll_verticalScaleOrigin = verticalOrigin;
+    this._scroll_horizontalScaleOrigin = horizontalOrigin;
   }.observes('scale'),
 
   /** @private
