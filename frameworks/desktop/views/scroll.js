@@ -2154,10 +2154,6 @@ SC.ScrollView = SC.View.extend({
     frame to be notified whenever it's size changes.
   */
   contentViewDidChange: function () {
-    if (this.viewState === SC.View.UNRENDERED) {
-      return;
-    }
-
     var newView = this.get('contentView'),
         oldView = this._scroll_contentView;
 

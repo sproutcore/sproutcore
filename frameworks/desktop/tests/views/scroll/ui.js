@@ -227,7 +227,6 @@
       }, 200)
 
     }, 1000);
-
   });
 
   test('ScrollView-directed scroller fading', function() {
@@ -253,10 +252,36 @@
       }, 200)
 
     }, 1000);
-
-
   });
 
+  test('Replacing contentView', function() {
+    var view = pane.view('basic2'),
+      newContent;
 
+    // Replacing the content view.
+    SC.run(function() {
+      newContent = SC.View.create({ backgroundColor: 'blue' });
+    });
+    equals(newContent.get('viewState'), SC.View.UNRENDERED, 'PRELIM: New view is unrendered');
+
+    SC.run(function() {
+      view.set('contentView', newContent);
+    });
+    ok(view.getPath('containerView.contentView') === newContent, 'New content has been successfully loaded into the container view.');
+    equals(newContent.get('viewState'), SC.View.ATTACHED_SHOWN, 'New content has been rendered and attached.');
+
+    // Replacing the content view on an unrendered view.
+    SC.run(function() {
+      view = SC.ScrollView.create();
+      newContent = SC.View.create({ backgroundColor: 'pink' });
+      view.set('contentView', newContent);
+    });
+    ok(view.getPath('containerView.contentView') === newContent, "New content has been successfully loaded into the unrendered view's container view.");
+
+    SC.run(function() {
+      view._doRender();
+    });
+    equals(newContent.get('viewState'), SC.View.UNATTACHED_BY_PARENT, 'New content renders along with the rest of the view');
+  });
 
 })();
