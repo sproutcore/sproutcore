@@ -459,9 +459,9 @@ SC.Drag = SC.Object.extend(
     var source = this.get('source');
     if (source) {
       // notify the source that the drag succeeded
-      if (source.dragDidSucceed && op !== SC.DRAG_NONE) source.dragDidSucceed(this, loc);
+      if (source.dragDidSucceed && op !== SC.DRAG_NONE) source.dragDidSucceed(this, loc, op);
       // notify the source that the drag was cancelled
-      else if (source.dragDidCancel && op === SC.DRAG_NONE) source.dragDidCancel(this, loc);
+      else if (source.dragDidCancel && op === SC.DRAG_NONE) source.dragDidCancel(this, loc, op);
 
       // always notify the source that everything has completed
       if (source.dragDidEnd) source.dragDidEnd(this, loc, op);
