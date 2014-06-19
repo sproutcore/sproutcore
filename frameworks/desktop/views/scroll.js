@@ -86,8 +86,7 @@ SC.ScrollView = SC.View.extend({
   contentView: null,
 
   /**
-    The horizontal alignment for non-filling content inside of the ScrollView. (Currently, you must specify a fixed width
-    on your content for this property to have an effect.) Possible values:
+    The horizontal alignment for non-filling content inside of the ScrollView. Possible values:
 
       - SC.ALIGN_LEFT
       - SC.ALIGN_RIGHT
@@ -99,8 +98,7 @@ SC.ScrollView = SC.View.extend({
   horizontalAlign: SC.ALIGN_LEFT,
 
   /**
-    The vertical alignment for non-filling content inside of the ScrollView. (Currently, you must specify a fixed height
-    on your content for this property to have an effect.) Possible values:
+    The vertical alignment for non-filling content inside of the ScrollView. Possible values:
 
       - SC.ALIGN_TOP
       - SC.ALIGN_BOTTOM
@@ -110,6 +108,31 @@ SC.ScrollView = SC.View.extend({
     @default SC.ALIGN_TOP
   */
   verticalAlign: SC.ALIGN_TOP,
+
+  /**
+    Your content view's initial horizontal alignment, if wider than the container. If not specified,
+    defaults to your horizontalAlign. May be:
+
+      - SC.ALIGN_LEFT
+      - SC.ALIGN_RIGHT
+      - SC.ALIGN_CENTER
+
+    @type String
+  */
+  initialHorizontalAlign: SC.outlet('horizontalAlign'),
+  // Maybe in the future these could optionally be a %/pixel value?
+
+  /**
+    Your content view's initial horizontal alignment, if taller than the container. If not specified,
+    defaults to your horizontalAlign. May be:
+
+      - SC.ALIGN_TOP
+      - SC.ALIGN_BOTTOM
+      - SC.ALIGN_MIDDLE
+
+    @type String
+  */
+  initialVerticalAlign: SC.outlet('verticalAlign'),
 
   /**
     The current horizontal scroll offset. Changing this value will update both the contentView and the horizontal scroller, if there is one.
@@ -124,23 +147,28 @@ SC.ScrollView = SC.View.extend({
           maxOffset = this.get('maximumHorizontalScrollOffset');
       value = this._scroll_horizontalScrollOffset = Math.max(minOffset, Math.min(maxOffset, value));
 
-      // Cache our vertical scale origin.
-      if (value === minOffset && value === maxOffset) {
-        this._scroll_horizontalScaleOrigin = SC.ALIGN_DEFAULT;
-      } else if (value === minOffset) {
-        this._scroll_horizontalScaleOrigin = SC.ALIGN_LEFT;
-      } else if (value === maxOffset) {
-        this._scroll_horizontalScaleOrigin = SC.ALIGN_RIGHT;
-      } else {
-        this._scroll_horizontalScaleOrigin = SC.ALIGN_CENTER;
+      // If we're flagged as a user-generated change, cache our vertical scale origin.
+      if (this._scroll_isExogenous) {
+        // Cache our vertical scale origin.
+        if (value === minOffset && value === maxOffset) {
+          this._scroll_horizontalScaleOrigin = SC.ALIGN_DEFAULT;
+        } else if (value === minOffset) {
+          this._scroll_horizontalScaleOrigin = SC.ALIGN_LEFT;
+        } else if (value === maxOffset) {
+          this._scroll_horizontalScaleOrigin = SC.ALIGN_RIGHT;
+        } else {
+          this._scroll_horizontalScaleOrigin = SC.ALIGN_CENTER;
+        }
+        // Calculating this when scroll offset changes allows us to retain it when only scale changes. (Note that this calculation
+        // doesn't take minimum offset into account; in every case I can think of where this value will be used, the minimum is 0.)
+        this._scroll_horizontalScaleOriginPct = (value + (this._scroll_containerWidth / 2)) / (maxOffset + this._scroll_containerWidth)
       }
-      // Calculating this when scroll offset changes allows us to retain it when only scale changes. (Note that this calculation
-      // doesn't take minimum offset into account; in every case I can think of where this value will be used, the minimum is 0.)
-      this._scroll_horizontalScaleOriginPct = (value + (this._scroll_containerWidth / 2)) / (maxOffset + this._scroll_containerWidth)
     }
 
     return this._scroll_horizontalScrollOffset || 0;
-  }.property().cacheable(),
+  }.property('minimumHorizontalScrollOffset', 'maximumHorizontalScrollOffset').cacheable(),
+  // Note that the properties above don't trigger a recalculation, as calculation is only done during setting. Instead,
+  // it renders invalidates the last-set value so that setting it again will actually succeed.
 
   /**
     The current vertical scroll offset.  Changing this value will update both the contentView and the vertical scroller, if there is one.
@@ -155,23 +183,27 @@ SC.ScrollView = SC.View.extend({
           maxOffset = this.get('maximumVerticalScrollOffset');
       value = this._scroll_verticalScrollOffset = Math.max(minOffset, Math.min(maxOffset, value));
 
-      // Cache our vertical scale origin.
-      if (value === minOffset && value === maxOffset) {
-        this._scroll_verticalScaleOrigin = SC.ALIGN_DEFAULT;
-      } else if (value === minOffset) {
-        this._scroll_verticalScaleOrigin = SC.ALIGN_TOP;
-      } else if (value === maxOffset) {
-        this._scroll_verticalScaleOrigin = SC.ALIGN_BOTTOM;
-      } else {
-        this._scroll_verticalScaleOrigin = SC.ALIGN_CENTER;
+      // If we're flagged as a user-generated change, cache our vertical scale origin.
+      if (this._scroll_isExogenous) {
+        if (value === minOffset && value === maxOffset) {
+          this._scroll_verticalScaleOrigin = SC.ALIGN_DEFAULT;
+        } else if (value === minOffset) {
+          this._scroll_verticalScaleOrigin = SC.ALIGN_TOP;
+        } else if (value === maxOffset) {
+          this._scroll_verticalScaleOrigin = SC.ALIGN_BOTTOM;
+        } else {
+          this._scroll_verticalScaleOrigin = SC.ALIGN_CENTER;
+        }
+        // Calculating this when scroll offset changes allows us to retain it when only scale changes. (Note that this calculation
+        // doesn't take minimum offset into account; in every case I can think of where this value will be used, the minimum is 0.)
+        this._scroll_verticalScaleOriginPct = (value + (this._scroll_containerHeight / 2)) / (maxOffset + this._scroll_containerHeight)
       }
-      // Calculating this when scroll offset changes allows us to retain it when only scale changes. (Note that this calculation
-      // doesn't take minimum offset into account; in every case I can think of where this value will be used, the minimum is 0.)
-      this._scroll_verticalScaleOriginPct = (value + (this._scroll_containerHeight / 2)) / (maxOffset + this._scroll_containerHeight)
     }
 
     return this._scroll_verticalScrollOffset || 0;
-  }.property().cacheable(),
+  }.property('minimumVerticalScrollOffset', 'maximumVerticalScrollOffset').cacheable(),
+  // Note that the properties above don't trigger a recalculation, as calculation is only done during setting. Instead,
+  // it renders invalidates the last-set value so that setting it again will actually succeed.
 
   /** @private
     Calculates the maximum offset given content and container sizes, and the
@@ -277,7 +309,6 @@ SC.ScrollView = SC.View.extend({
     if (!this.get('canScrollVertical')) contentHeight = Math.min(contentHeight, containerHeight);
     return this._scroll_maximumVerticalScrollOffset = this.maximumScrollOffset(contentHeight, containerHeight, this.get("verticalAlign"));
   }.property(),
-
 
   /**
     The minimum horizontal scroll offset allowed given the current contentView
@@ -651,6 +682,12 @@ SC.ScrollView = SC.View.extend({
     @returns {SC.ScrollView} receiver
   */
   scrollTo: function (x, y) {
+    // Core Developer note: Don't call scrollTo (or any of the upstream methods) from within
+    // ScrollView or a subclass; instead you should manipulate the ScrollOffset properties
+    // directly. scrollTo is reserved for exogenous interactions, presumably triggered by the
+    // user, which should cause scale and alignment origins to recalculate.
+    this._scroll_isExogenous = YES;
+
     // normalize params
     if (y === undefined && SC.typeOf(x) === SC.T_HASH) {
       y = x.y;
@@ -664,6 +701,8 @@ SC.ScrollView = SC.View.extend({
     if (!SC.none(y)) {
       this.set('verticalScrollOffset', y);
     }
+
+    this._scroll_isExogenous = NO;
 
     return this;
   },
@@ -869,6 +908,10 @@ SC.ScrollView = SC.View.extend({
     additional controls you have added to the view.
   */
   tile: function () {
+    if (this.viewState === SC.View.UNRENDERED) {
+      return;
+    }
+
     // get horizontal scroller/determine if we should have a scroller
     var hscroll = this.get('hasHorizontalScroller') ? this.get('horizontalScrollerView') : null;
     var hasHorizontal = hscroll && this.get('isHorizontalScrollerVisible');
@@ -932,9 +975,10 @@ SC.ScrollView = SC.View.extend({
   },
 
   /** @private
-    Called whenever a scroller visibility changes.  Calls the tile() method.
+    Whenever a scroller's visibility changes, we have to re-tile the views.
   */
   scrollerVisibilityDidChange: function () {
+    // this.invokeOnce(this.tile);
     this.tile();
   }.observes('isVerticalScrollerVisible', 'isHorizontalScrollerVisible'),
 
@@ -1968,6 +2012,44 @@ SC.ScrollView = SC.View.extend({
   // INTERNAL SUPPORT
   //
 
+  /** @private */
+  init: function () {
+    sc_super();
+
+    // start observing initial content view.  The content view's frame has
+    // already been setup in prepareDisplay so we don't need to call
+    // viewFrameDidChange...
+    this._scroll_contentView = this.get('contentView');
+    var contentView = this._scroll_contentView;
+
+    if (contentView) {
+      contentView.addObserver('frame', this, 'contentViewFrameDidChange');
+      contentView.addObserver('calculatedWidth', this, 'contentViewFrameDidChange');
+      contentView.addObserver('calculatedHeight', this, 'contentViewFrameDidChange');
+      contentView.addObserver('layer', this, 'contentViewLayerDidChange');
+    }
+
+    if (this.get('isVisibleInWindow')) this._sc_registerAutoscroll();
+
+    // Initialize cache values.
+    this._scroll_contentWidth = this._scroll_contentHeight = null;
+  },
+
+  /** @private
+    If we redraw after the initial render, we need to make sure that we reset
+    the scroll transform properties on the content view.  This ensures
+    that, for example, the scroll views displays correctly when switching
+    views out in a ContainerView.
+  */
+  render: function (context, firstTime) {
+    this.invokeLast(this.adjustElementScroll);
+
+    if (firstTime) {
+      context.push('<div class="corner"></div>');
+    }
+    return sc_super();
+  },
+
   /** @private
     Instantiate scrollers & container views as needed.  Replace their classes
     in the regular properties.
@@ -1993,7 +2075,21 @@ SC.ScrollView = SC.View.extend({
       if (this.get('hasHorizontalScroller')) {
         view = this.horizontalScrollerView = this.createChildView(view, {
           layoutDirection: SC.LAYOUT_HORIZONTAL,
-          valueBinding: '*owner.horizontalScrollOffset'
+          valueBinding: '*owner.horizontalScrollOffset',
+          // Make sure to pipe user events through to us correctly, so that we can recalculate scale origins.
+          mouseDown: function() {
+            this.get('owner')._scroll_isExogenous = YES;
+            if (sc_super()) {
+              return YES;
+            } else {
+              this.get('owner')._scroll_isExogenous = NO;
+              return NO;
+            }
+          },
+          mouseUp: function() {
+            var ret = sc_super();
+            this.get('owner')._scroll_isExogenous = NO;
+          }
         });
         childViews.push(view);
       } else this.horizontalScrollerView = null;
@@ -2005,7 +2101,21 @@ SC.ScrollView = SC.View.extend({
       if (this.get('hasVerticalScroller')) {
         view = this.verticalScrollerView = this.createChildView(view, {
           layoutDirection: SC.LAYOUT_VERTICAL,
-          valueBinding: '*owner.verticalScrollOffset'
+          valueBinding: '*owner.verticalScrollOffset',
+          // Make sure to pipe user events through to us correctly, so that we can recalculate scale origins.
+          mouseDown: function() {
+            this.get('owner')._scroll_isExogenous = YES;
+            if (sc_super()) {
+              return YES;
+            } else {
+              this.get('owner')._scroll_isExogenous = NO;
+              return NO;
+            }
+          },
+          mouseUp: function() {
+            var ret = sc_super();
+            this.get('owner')._scroll_isExogenous = NO;
+          }
         });
         childViews.push(view);
       } else this.verticalScrollerView = null;
@@ -2013,32 +2123,22 @@ SC.ScrollView = SC.View.extend({
 
     // set childViews array.
     this.childViews = childViews;
-
-    this.contentViewDidChange(); // setup initial display...
-    this.tile(); // set up initial tiling
   },
 
-  /** @private */
-  init: function () {
-    sc_super();
+  didCreateLayer: function() {
+    // We have to invoke-last this because at this precise moment, we're in "rendered" state but our
+    // children are not. (See GitHub Issue #1269.)
+    this.invokeLast(this._scsv_didCreateLayer);
+  },
+  _scsv_didCreateLayer: function() {
+    // Set initial scale and alignment values.
+    this._scroll_horizontalScaleOrigin = this.get('initialHorizontalAlign');
+    this._scroll_horizontalScaleOriginPct = 0.5;
+    this._scroll_verticalScaleOrigin = this.get('initialVerticalAlign');
+    this._scroll_verticalScaleOriginPct = 0.5;
 
-    // start observing initial content view.  The content view's frame has
-    // already been setup in prepareDisplay so we don't need to call
-    // viewFrameDidChange...
-    this._scroll_contentView = this.get('contentView');
-    var contentView = this._scroll_contentView;
-
-    if (contentView) {
-      contentView.addObserver('frame', this, 'contentViewFrameDidChange');
-      contentView.addObserver('calculatedWidth', this, 'contentViewFrameDidChange');
-      contentView.addObserver('calculatedHeight', this, 'contentViewFrameDidChange');
-      contentView.addObserver('layer', this, 'contentViewLayerDidChange');
-    }
-
-    if (this.get('isVisibleInWindow')) this._sc_registerAutoscroll();
-
-    // Initialize cache values.
-    this._scroll_contentWidth = this._scroll_contentHeight = null;
+    this._scsv_scaleDidChange(); // set up initial scale and alignment
+    this.tile(); // set up initial tiling
   },
 
   /** @private
@@ -2054,6 +2154,10 @@ SC.ScrollView = SC.View.extend({
     frame to be notified whenever it's size changes.
   */
   contentViewDidChange: function () {
+    if (this.viewState === SC.View.UNRENDERED) {
+      return;
+    }
+
     var newView = this.get('contentView'),
         oldView = this._scroll_contentView;
 
@@ -2076,33 +2180,12 @@ SC.ScrollView = SC.View.extend({
         newView.addObserver('layer', this, 'contentViewLayerDidChange');
       }
 
-      // replace container
+      // replace in container
       this.containerView.set('contentView', newView);
 
-      this.contentViewFrameDidChange();
+      this._scsv_scaleDidChange();
     }
   }.observes('contentView'),
-
-  /** @private
-    If we redraw after the initial render, we need to make sure that we reset
-    the scroll transform properties on the content view.  This ensures
-    that, for example, the scroll views displays correctly when switching
-    views out in a ContainerView.
-  */
-  render: function (context, firstTime) {
-    this.invokeLast(this.adjustElementScroll);
-
-    if (firstTime) {
-      context.push('<div class="corner"></div>');
-    }
-    return sc_super();
-  },
-
-  /** @private */
-  oldMaxHOffset: 0,
-
-  /** @private */
-  oldMaxVOffset: 0,
 
   /** @private
     Invoked whenever the contentView's frame changes.  This will update the
@@ -2110,9 +2193,13 @@ SC.ScrollView = SC.View.extend({
     size of the contentView changes.
   */
   contentViewFrameDidChange: function () {
+    if (this.viewState === SC.View.UNRENDERED) {
+      return;
+    }
+
     var view   = this.get('contentView'),
         f      = (view) ? view.get('frame') : null,
-        scale  = this._scale,
+        scale  = this.get('scale'),
         width  = 0,
         height = 0,
         dim, dimWidth, dimHeight;
@@ -2148,7 +2235,7 @@ SC.ScrollView = SC.View.extend({
       // decide if it should be visible or not. (We bend over backwards to only change if needed
       // because if it changes we will need to recalculate size for the vertical scroller.)
       if (this.get('autohidesHorizontalScroller')) {
-        this.set('isHorizontalScrollerVisible', width > dimWidth);
+        this.setIfChanged('isHorizontalScrollerVisible', width > dimWidth);
       }
       view.setIfChanged('maximum', width - dimWidth);
       view.setIfChanged('proportion', dimWidth / width);
@@ -2157,23 +2244,18 @@ SC.ScrollView = SC.View.extend({
     if (this.get('hasVerticalScroller') && (view = this.get('verticalScrollerView'))) {
       // decide if it should be visible or not
       if (this.get('autohidesVerticalScroller')) {
-        this.set('isVerticalScrollerVisible', height > dimHeight);
+        this.setIfChanged('isVerticalScrollerVisible', height > dimHeight);
       }
       view.setIfChanged('maximum', height - dimHeight);
       view.setIfChanged('proportion', dimHeight / height);
     }
 
-    // If there is no vertical scroller and auto hiding is on, make
-    // sure we are at the top if not already there
-    if (!this.get('isVerticalScrollerVisible') && (this.get('verticalScrollOffset') !== 0) &&
-       this.get('autohidesVerticalScroller')) {
-      this.set('verticalScrollOffset', 0);
+    // If there is no scroller and auto-hiding is on, scroll to the minimum offset.
+    if (!this.get('isVerticalScrollerVisible') && this.get('autohidesVerticalScroller')) {
+      this.set('verticalScrollOffset', this.get('minimumVerticalScrollOffset'));
     }
-
-    // Same thing for horizontal scrolling.
-    if (!this.get('isHorizontalScrollerVisible') && (this.get('horizontalScrollOffset') !== 0) &&
-       this.get('autohidesHorizontalScroller')) {
-      this.set('horizontalScrollOffset', 0);
+    if (!this.get('isHorizontalScrollerVisible') && this.get('autohidesHorizontalScroller')) {
+      this.set('horizontalScrollOffset', this.get('minimumHorizontalScrollOffset'));
     }
 
     // This forces to recalculate the height of the frame when is at the bottom
@@ -2212,75 +2294,65 @@ SC.ScrollView = SC.View.extend({
     cetera.
   */
   _scsv_scaleDidChange: function() {
-    // If we don't have a bead yet on the horizontal or vertical origins, tweak them. (We could
-    // remove the need for this by calculating scale origins on get as well as set, but that will
-    // likely take more CPU cycles than poking them once if scale happens before scroll.)
-    if (SC.none(this._scroll_horizontalScaleOrigin)) {
-      this.set('horizontalScrollOffset', this.get('horizontalScrollOffset'));
-    }
-    if (SC.none(this._scroll_verticalScaleOrigin)) {
-      this.set('verticalScrollOffset', this.get('verticalScrollOffset'));
+    if (this.viewState === SC.View.UNRENDERED) {
+      return;
     }
 
-    var horizontalOrigin = this._scroll_horizontalScaleOrigin,
-      verticalOrigin = this._scroll_verticalScaleOrigin,
-      hCenterPct, vCenterPct;
+    // No content, nothing to do.
+    if (!this.get('contentView')) return;
 
-    // Translate from DEFAULT to bespoke.
-    if (horizontalOrigin === SC.ALIGN_DEFAULT) horizontalOrigin = this.get('horizontalAlign');
-    if (verticalOrigin === SC.ALIGN_DEFAULT) verticalOrigin = this.get('verticalAlign');
+    // We should only execute our scale-origin adjustments if we're not in the middle of a user event ourselves.
+    if (!this._scroll_isExogenous) {
+      // Get our alignments.
+      var horizontalOrigin = this._scroll_horizontalScaleOrigin,
+        verticalOrigin = this._scroll_verticalScaleOrigin,
+        // Only need the center sometimes, but grab it now anyways.
+        hCenterPct = this._scroll_horizontalScaleOriginPct,
+        vCenterPct = this._scroll_verticalScaleOriginPct;
+      
+      // Translate from DEFAULT to bespoke alignments.
+      if (horizontalOrigin === SC.ALIGN_DEFAULT) horizontalOrigin = this.get('horizontalAlign');
+      if (verticalOrigin === SC.ALIGN_DEFAULT) verticalOrigin = this.get('verticalAlign');
+    }
 
-    // If we're going centered, we need to know what %age of the way across the center is, so we can reposition it after.
-    if (horizontalOrigin !== SC.ALIGN_LEFT && horizontalOrigin !== SC.ALIGN_RIGHT) {
-      hCenterPct = this._scroll_horizontalScaleOriginPct;
-    }
-    if (verticalOrigin !== SC.ALIGN_TOP && verticalOrigin !== SC.ALIGN_BOTTOM) {
-      vCenterPct = this._scroll_verticalScaleOriginPct;
-    }
+    // Let the content view know that its frame has changed. (This will trigger all the downstream recalculations
+    // on this view as well, via contentViewFrameDidChange.)
+    this.get('contentView').notifyPropertyChange('frame');
+    this.tile(); // have to tile immediately
 
-    // Let the content view know that its frame has changed. (This will trigger all the correct recalculations
-    // on this view as well.)
-    this.contentView.notifyPropertyChange('frame');
-
-    // That triggered a recalculation of our offset bounds, so we can now tweak the offsets to the
-    // new bounds to achieve the scale origin effect we're looking for.
-    // Horizontal
-    switch (horizontalOrigin) {
-      case SC.ALIGN_LEFT:
-        this.set('horizontalScrollOffset', this.get('minimumHorizontalScrollOffset'));
-        break;
-      case SC.ALIGN_RIGHT:
-        this.set('horizontalScrollOffset', this.get('maximumHorizontalScrollOffset'));
-        break;
-      default:
-        // We know what %age of the way across that we want to position the new center, so we reverse the
-        // earlier calculation with the new maximum.
-        var newHOffset = ((this.get('maximumHorizontalScrollOffset') + this._scroll_containerWidth) * hCenterPct) - (this._scroll_containerWidth / 2);
-        this.set('horizontalScrollOffset', newHOffset);
+    // Continue our scale-origin adjustments, if needed.
+    if (!this._scroll_isExogenous) {
+      // That triggered a recalculation of our offset bounds, so we can now tweak the offsets to the
+      // new bounds to achieve the scale origin effect we're looking for.
+      // Horizontal
+      switch (horizontalOrigin) {
+        case SC.ALIGN_LEFT:
+          this.set('horizontalScrollOffset', this.get('minimumHorizontalScrollOffset'));
+          break;
+        case SC.ALIGN_RIGHT:
+          this.set('horizontalScrollOffset', this.get('maximumHorizontalScrollOffset'));
+          break;
+        default:
+          // We know what %age of the way across that we want to position the new center, so we reverse the
+          // earlier calculation with the new maximum.
+          var newHOffset = ((this.get('maximumHorizontalScrollOffset') + this._scroll_containerWidth) * hCenterPct) - (this._scroll_containerWidth / 2);
+          this.set('horizontalScrollOffset', newHOffset);
+      }
+      // Vertical
+      switch (verticalOrigin) {
+        case SC.ALIGN_TOP:
+          this.set('verticalScrollOffset', this.get('minimumVerticalScrollOffset'));
+          break;
+        case SC.ALIGN_BOTTOM:
+          this.set('verticalScrollOffset', this.get('maximumVerticalScrollOffset'));
+          break;
+        default:
+          // We know what %age of the way down that we want to position the new center, so we reverse the
+          // earlier calculation with the new maximum.
+          var newVOffset = ((this.get('maximumVerticalScrollOffset') + this._scroll_containerHeight) * vCenterPct) - (this._scroll_containerHeight / 2);
+          this.set('verticalScrollOffset', newVOffset);
+      }
     }
-    // Vertical
-    switch (verticalOrigin) {
-      case SC.ALIGN_TOP:
-        this.set('verticalScrollOffset', this.get('minimumVerticalScrollOffset'));
-        break;
-      case SC.ALIGN_BOTTOM:
-        this.set('verticalScrollOffset', this.get('maximumVerticalScrollOffset'));
-        break;
-      default:
-        // We know what %age of the way down that we want to position the new center, so we reverse the
-        // earlier calculation with the new maximum.
-        var newVOffset = ((this.get('maximumVerticalScrollOffset') + this._scroll_containerHeight) * vCenterPct) - (this._scroll_containerHeight / 2);
-        this.set('verticalScrollOffset', newVOffset);
-    }
-    // Reset the scale origins – these shouldn't change based on our actions here, only based on the user's
-    // scrolling actions. (Note that this reset doesn't seem to always work - I think there's some scroll
-    // value feedback coming from the ScrollerView two-way bindings. ScrollerView retains out-of-bounds
-    // values and they can resurface once the bounds change (a generally desirable behavior but may be
-    // causing problems here).)
-    this._scroll_horizontalScaleOrigin = horizontalOrigin;
-    this._scroll_horizontalScaleOriginPct = hCenterPct;
-    this._scroll_verticalScaleOrigin = verticalOrigin;
-    this._scroll_verticalScaleOriginPct = vCenterPct;
   }.observes('scale'),
 
   /** @private
@@ -2292,22 +2364,31 @@ SC.ScrollView = SC.View.extend({
   },
 
   /** @private
-    Whenever the horizontal scroll offset changes, update the scrollers and
-    adjust the location of the contentView.
+    Whenever the alignment changes, we need to poke the offset so that it recalculates
+    within the new bounds.
   */
-  _scroll_horizontalScrollOffsetDidChange: function () {
-    this.invokeLast(this.adjustElementScroll);
-    this.invokeLast(this._sc_fadeInScrollers);
-  }.observes('horizontalScrollOffset'),
+  _scroll_horizontalAlignmentDidChange: function () {
+    this.notifyPropertyChange('horizontalScrollOffset');
+    this.set('horizontalScrollOffset', this.get('horizontalScrollOffset'));
+  }.observes('horizontalAlign'),
 
   /** @private
-    Whenever the vertical scroll offset changes, update the scrollers and
-    adjust the location of the contentView.
+    Whenever the alignment changes, we need to poke the offset so that it recalculates
+    within the new bounds.
   */
-  _scroll_verticalScrollOffsetDidChange: function () {
+  _scroll_verticalAlignmentDidChange: function () {
+    this.notifyPropertyChange('verticalScrollOffset');
+    this.set('verticalScrollOffset', this.get('verticalScrollOffset'));
+  }.observes('verticalAlign'),
+
+  /** @private
+    Whenever the scroll offsets change, update the scrollers and adjust the location
+    of the content view.
+  */
+  _scroll_scrollOffsetsDidChange: function () {
     this.invokeLast(this.adjustElementScroll);
     this.invokeLast(this._sc_fadeInScrollers);
-  }.observes('verticalScrollOffset'),
+  }.observes('horizontalScrollOffset', 'verticalScrollOffset'),
 
   /** @private
     Called at the end of the run loop to actually adjust the element's scroll positioning.
@@ -2371,23 +2452,64 @@ SC.ScrollView = SC.View.extend({
   forceDimensionsRecalculation: function (forceWidth, forceHeight, vOffSet, hOffSet) {
     var oldScrollHOffset = hOffSet;
     var oldScrollVOffset = vOffSet;
-    this.scrollTo(0, 0);
 
+    this.beginPropertyChanges();
+    this.set('verticalScrollOffset', 0);
+    this.set('horizontalScrollOffset', 0);
+    this.endPropertyChanges();
+
+    this.beginPropertyChanges();
     if (forceWidth && forceHeight) {
-      this.scrollTo(this.get('maximumHorizontalScrollOffset'), this.get('maximumVerticalScrollOffset'));
+      this.set('verticalScrollOffset', this.get('maximumVerticalScrollOffset'));
+      this.set('horizontalScrollOffset', this.get('maximumHorizontalScrollOffset'));
     }
-    if (forceWidth && !forceHeight) {
-      this.scrollTo(this.get('maximumHorizontalScrollOffset'), oldScrollVOffset);
+    else if (forceWidth && !forceHeight) {
+      this.set('verticalScrollOffset', oldScrollVOffset);
+      this.set('horizontalScrollOffset', this.get('maximumHorizontalScrollOffset'));
     }
-    if (!forceWidth && forceHeight) {
-      this.scrollTo(oldScrollHOffset, this.get('maximumVerticalScrollOffset'));
+    else if (!forceWidth && forceHeight) {
+      this.set('horizontalScrollOffset', this.get('maximumVerticalScrollOffset'));
+      this.set('verticalScrollOffset', oldScrollHOffset);
     }
+    this.endPropertyChanges();
   },
 
-  /** @private */
+  // ..........................................................
+  // PRIVATE VARIABLES
+  //
+  // Defined for performance, documented for clarity™
+
+  /** @private The cached vertical offset value. */
   _scroll_verticalScrollOffset: 0,
 
-  /** @private */
-  _scroll_horizontalScrollOffset: 0
+  /** @private The cached horizontal offset value. */
+  _scroll_horizontalScrollOffset: 0,
+
+  /** @private The cached minimum vertical offset value. */
+  _scroll_minimumVerticalScrollOffset: 0,
+
+  /** @private The cached maximum vertical offset value. */
+  _scroll_maximumVerticalScrollOffset: 0,
+
+  /** @private The cached minimum horizontal offset value. */
+  _scroll_minimumHorizontalScrollOffset: 0,
+
+  /** @private The cached maximum horizontal offset value. */
+  _scroll_maximumHorizontalScrollOffset: 0,
+
+  /** @private The cached vertical scale origin, i.e. whether the user most recently scrolled to an extreme. Used for scaling and alignment. */
+  _scroll_verticalScaleOrigin: SC.ALIGN_TOP,
+
+  /** @private If the user did not scroll to an extreme, this is their most recent %age scroll offset.  Used for scaling and alignment. */
+  _scroll_verticalScaleOriginPct: 0.5,
+
+  /** @private The cached horizontal scale origin, i.e. whether the user most recently scrolled to an extreme. Used for scaling and alignment. */
+  _scroll_horizontalScaleOrigin: SC.ALIGN_LEFT,
+
+  /** @private If the user did not scroll to an extreme, this is their most recent %age scroll offset.  Used for scaling and alignment. */
+  _scroll_horizontalScaleOriginPct: 0.5,
+
+  /** @private Used to signal that a scroll offset change is coming from outside the view. Endogenous scrolls should not change the scale origins. */
+  _scroll_isExogenous: NO
 
 });
