@@ -455,9 +455,17 @@ SC.Drag = SC.Object.extend(
     else {
       this._endDrag();
     }
-    // notify the source that everything has completed
-    var source = this.source;
-    if (source && source.dragDidEnd) source.dragDidEnd(this, loc, op);
+
+    var source = this.get('source');
+    if (source) {
+      // notify the source that the drag succeeded
+      if (source.dragDidSucceed && op !== SC.DRAG_NONE) source.dragDidSucceed(this, loc);
+      // notify the source that the drag was cancelled
+      else if (source.dragDidCancel && op === SC.DRAG_NONE) source.dragDidCancel(this, loc);
+
+      // always notify the source that everything has completed
+      if (source.dragDidEnd) source.dragDidEnd(this, loc, op);
+    }
   },
 
   // ..........................................
@@ -694,7 +702,13 @@ SC.Drag = SC.Object.extend(
 
       // Animate the ghost view back to its original position; destroy after.
       this.ghostView.animate(slidebackLayout, 0.5, this, function () {
-        this.invokeNext(this._endDrag);
+        this.invokeNext(function() {
+          // notify the source that slideback has completed
+          var source = this.get('source');
+          if (this.get('slideBack') && source && source.dragSlideBackDidEnd) source.dragSlideBackDidEnd(this);
+
+          this._endDrag();
+        });
       });
 
     }
