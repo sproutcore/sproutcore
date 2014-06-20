@@ -139,8 +139,8 @@ test("Scrolling relative to the current possition of the container view", functi
   });
 });
 
-// ------------------------------------
-// scrollToRect, scrollDownLine
+// ----------------------------------------------
+// scrollToRect, scrollToVisible, scrollDownLine
 //
 
 test("Scrolling to a rectangle", function () {
@@ -152,6 +152,55 @@ test("Scrolling to a rectangle", function () {
     equals(view.get('horizontalScrollOffset'), 100, "After scrolling to rect, horizontal offset must be 100");
     equals(view.get('verticalScrollOffset'), 100, "After scrolling to rect, vertical offset must be 100");
   });
+});
+
+test("Scrolling to a view", function() {
+  var pane = SC.MainPane.create({
+    childViews: ['scrollView'],
+    scrollView: SC.ScrollView.create({
+      layout: { height: 100, width: 100 },
+      canScale: YES,
+      contentView: SC.View.create({
+        layout: { height: 500, width: 500 },
+        childViews: ['innerView'],
+        innerView: SC.View.create({
+          layout: { height: 100, width: 100, top: 150, left: 150 }
+        })
+      })
+    })
+  });
+
+  var scrollView = pane.scrollView,
+    innerView = scrollView.contentView.innerView;
+
+  SC.run(function() { pane.append(); }); // make sure we have a layer...
+
+  // Test scrolling to view.
+  SC.run(function() {
+    scrollView.scrollToVisible(innerView);
+  });
+
+  equals(scrollView.get('verticalScrollOffset'), 150, "Scrolling to an inner view at top: 150 should offset the vertical scroll correctly");
+  equals(scrollView.get('horizontalScrollOffset'), 150, "Scrolling to an inner view at left: 150 should offset the horizontal scroll correctly");
+
+  // Test scrolling to view with scale.
+
+  SC.run(function() {
+    scrollView.scrollTo(0, 0);
+    scrollView.set('scale', 2);
+  });
+
+  ok(!scrollView.get('horizontalScrollOffset') && !scrollView.get('verticalScrollOffset'), "PRELIM: Offsets have returned to zero.");
+
+  SC.run(function() {
+    scrollView.scrollToVisible(innerView);
+  });
+
+  equals(scrollView.get('verticalScrollOffset'), 300, "Scrolling to an inner view at top: 150 with a content scale of 2 should offset the vertical scroll correctly");
+  equals(scrollView.get('horizontalScrollOffset'), 300, "Scrolling to an inner view at left: 150 with a content scale of 2 should offset the horizontal scroll correctly");
+
+  // Cleanup.
+  pane.destroy();
 });
 
 test("Scrolling through line by line", function () {
@@ -497,3 +546,5 @@ test("Setting scale on ScrollView with SC.Scalable contentView", function() {
   ok(didCall, "Setting scale on ScrollView with SC.Scalable contentView calls contentView.applyScale.");
   equals(withScale, 0.8, "Setting scale on ScrollView with SC.Scalable contentView passes the correct scale to contentView.applyScale");
 });
+
+

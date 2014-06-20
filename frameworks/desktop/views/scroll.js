@@ -756,7 +756,7 @@ SC.ScrollView = SC.View.extend({
 
     // convert view's frame to an offset from the contentView origin.  This
     // will become the new scroll offset after some adjustment.
-    vf = contentView.convertFrameFromView(vf, view.get('parentView'));
+    vf = this.convertFrameFromView(vf, view.get('parentView'));
 
     return this.scrollToRect(vf);
   },
