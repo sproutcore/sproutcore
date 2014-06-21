@@ -756,26 +756,41 @@ SC.ScrollView = SC.View.extend({
 
     // convert view's frame to an offset from the contentView origin.  This
     // will become the new scroll offset after some adjustment.
-    vf = this.convertFrameFromView(vf, view.get('parentView'));
+    vf = contentView.convertFrameFromView(vf, view.get('parentView'));
 
     return this.scrollToRect(vf);
   },
 
   /**
     Scroll to the supplied rectangle.
+
     If the rectangle is bigger than the viewport, the top-left
     will be preferred.
-    @param {Rect} rect Rectangle to scroll to.
+
+    (Note that if your content is scaled, the rectangle must be
+    relative to the contentView's scale, not the ScrollView's.)
+
+    @param {Rect} rect Rectangle to which to scroll.
     @returns {Boolean} YES if scroll position was changed.
   */
   scrollToRect: function (rect) {
     // find current visible frame.
     var vo = SC.cloneRect(this.get('containerView').get('frame')),
         origX = this.get('horizontalScrollOffset'),
-        origY = this.get('verticalScrollOffset');
+        origY = this.get('verticalScrollOffset'),
+        scale = this.get('scale');
 
     vo.x = origX;
     vo.y = origY;
+
+    // Scale rect.
+    if (scale !== 1) {
+      rect = SC.cloneRect(rect);
+      rect.x *= scale;
+      rect.y *= scale;
+      rect.height *= scale;
+      rect.width *= scale;
+    }
 
     // if bottom edge is not visible, shift origin
     vo.y += Math.max(0, SC.maxY(rect) - SC.maxY(vo));
