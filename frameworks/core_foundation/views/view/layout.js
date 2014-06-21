@@ -443,8 +443,8 @@ SC.View.reopen(
     @returns {Rect} converted frame
     @test in convertFrames
   */
-  convertFrameToView: function (frame, targetView, ignoreScale) {
-    return this._convertFrameFromViewHelper(frame, this, targetView, ignoreScale);
+  convertFrameToView: function (frame, targetView) {
+    return this._convertFrameFromViewHelper(frame, this, targetView);
   },
 
   /**
@@ -463,12 +463,12 @@ SC.View.reopen(
     @returns {Rect} converted frame
     @test in converFrames
   */
-  convertFrameFromView: function (frame, targetView, ignoreScale) {
-    return this._convertFrameFromViewHelper(frame, targetView, this, ignoreScale);
+  convertFrameFromView: function (frame, targetView) {
+    return this._convertFrameFromViewHelper(frame, targetView, this);
   },
 
   /** @private */
-  _convertFrameFromViewHelper: function(frame, fromView, targetView, ignoreScale) {
+  _convertFrameFromViewHelper: function(frame, fromView, targetView) {
     var myX = frame.x, myY = frame.y, myWidth = frame.width, myHeight = frame.height, view, f;
 
     // first, walk up from the view of the frame, up to the top level
@@ -478,7 +478,7 @@ SC.View.reopen(
       while (view && (f = view.get('frame'))) {
 
         // if scale != 1, then multiple by the scale (going from view to parent)
-        if (!ignoreScale && f.scale && f.scale != 1) {
+        if (f.scale && f.scale != 1) {
           myX *= f.scale;
           myY *= f.scale;
           myWidth *= f.scale;
@@ -513,7 +513,7 @@ SC.View.reopen(
         myX -= f.x;
         myY -= f.y;
 
-        if (!ignoreScale && f.scale && f.scale != 1) {
+        if (f.scale && f.scale != 1) {
           myX /= f.scale;
           myY /= f.scale;
           myWidth /= f.scale;
