@@ -50,6 +50,8 @@ var pane = SC.ControlTestPane.design()
         { title: "High", icon: 'select-button-icon' }],
       itemTitleKey: 'title',
       itemIconKey: 'icon',
+      itemValueKey: 'title',
+      value: 'None',
       showCheckbox: YES
     })
 
@@ -183,7 +185,9 @@ test("SortedObjects", function() {
    ok(!view.$().hasClass('icon'), 'hasClass(icon) should be NO') ;
    ok(!view.$().hasClass('disabled'), 'hasClass(disabled) should be NO') ;
    ok(!view.$().hasClass('def'), 'hasClass(def) should be NO') ;
-   equals(view.get("_itemList")[0].title, "High", "The first item, when sorted, should be High.");
+   SC.run(function() { view.showMenu(); });
+   equals(view.getPath("menu.displayItems")[0].title, "High", "The first item, when sorted, should be High.");
+   SC.run(function() { view.hideMenu(); });
 }) ;
 
 //test6
@@ -211,7 +215,7 @@ test("redraw", function() {
   ok(!view.$().hasClass('disabled'), 'hasClass(disabled) should be NO') ;
   ok(!view.$().hasClass('def'), 'hasClass(def) should be NO');
 
-  ok(view.get('items').length === 0, "Items should be empty");
+  ok(view.get('items') === null, "Items should be empty");
   SC.RunLoop.begin();
   view.set('items', ['Calendar', 'Work', 'Home']);
   SC.RunLoop.end();
@@ -235,7 +239,12 @@ test("SelectButtonWithIcon", function() {
 //test9
 test("Check if the objects are sorted based on sortKey", function() {
   var view=pane.view('SortKey');
-  equals('None',view.get('items')[2].title, 'Third object should be "None" ') ;
+
+
+   SC.run(function() { view.showMenu(); });
+
+  equals('None',view.getPath("menu.displayItems")[2].title, 'Third object should be "None" ') ;
+   SC.run(function() { view.hideMenu(); });
 }) ;
 
 //test10
@@ -261,18 +270,20 @@ test("SelectButtonWithEmptyName", function() {
 
 /**
   This is just a simple test that shows that when the first item provided to
-  SC.SelectView is a separator or is not enabled, it ignores it as the default
+  SC.SelectView is a separator, it ignores it as the default
   in favor of the first item with a value that is selectable.
 */
 test("SelectWithSeparator", function() {
-  var view=pane.view('SelectWithSeparator').$(),
-      label = pane.view('SelectWithSeparator').$('label');
-  ok(!view.hasClass('icon'), 'hasClass(Icon) should be NO') ;
-  ok(view.hasClass('sc-view'), 'hasClass(sc-view) should be YES') ;
-  ok(view.hasClass('sc-button-view'), 'hasClass(sc-button-view) should be YES') ;
-  ok(view.hasClass('sc-regular-size'), 'hasClass(sc-regular-size) should be YES') ;
-  ok(!view.hasClass('sel'), 'hasClass(sel) should be NO') ;
-  ok(!view.hasClass('disabled'), 'hasClass(disabled) should be NO') ;
-  ok(!view.hasClass('def'), 'hasClass(def) should be NO') ;
-  equals(label[0].innerHTML, 'High', 'The label should be "High"');
+  var view=pane.view('SelectWithSeparator');
+  ok(!view.$().hasClass('icon'), 'hasClass(Icon) should be NO') ;
+  ok(view.$().hasClass('sc-view'), 'hasClass(sc-view) should be YES') ;
+  ok(view.$().hasClass('sc-button-view'), 'hasClass(sc-button-view) should be YES') ;
+  ok(view.$().hasClass('sc-regular-size'), 'hasClass(sc-regular-size) should be YES') ;
+  ok(!view.$().hasClass('sel'), 'hasClass(sel) should be NO') ;
+  ok(!view.$().hasClass('disabled'), 'hasClass(disabled) should be NO') ;
+  ok(!view.$().hasClass('def'), 'hasClass(def) should be NO') ;
+  
+  SC.run(function() { view.showMenu(); });
+  equals(view.getPath("menu.displayItems")[0].title, 'Low', 'The label should be "Low"');
+  SC.run(function() { view.hideMenu(); });
 });

@@ -5,6 +5,8 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
+sc_require("views/menu_item");
+
 /**
   @class
   Extends SC.MenuItemView to support auto resize.
