@@ -16,14 +16,14 @@
   @extends SC.View
   @extends SC.Control
   @since SproutCore 1.0
-  @test in progress
 */
 SC.SliderView = SC.View.extend(SC.Control,
 /** @scope SC.SliderView.prototype */ {
 
+  /** @private */
   classNames: 'sc-slider-view',
 
-  /**
+  /** @private
     The WAI-ARIA role for slider view. This property's value should not be
     changed.
 
@@ -32,15 +32,13 @@ SC.SliderView = SC.View.extend(SC.Control,
   ariaRole: 'slider',
 
   /**
-    Bind this to the current value of the progress bar.  Note that by default
-    an empty value will disable the progress bar and a multiple value too make
-    it indeterminate.
+    The current value of the slider.
   */
   value: 0.50,
   valueBindingDefault: SC.Binding.single().notEmpty(),
 
   /**
-    The minimum value of the progress.
+    The minimum value of the slider.
 
     @type {Number}
     @default 0
@@ -49,7 +47,7 @@ SC.SliderView = SC.View.extend(SC.Control,
   minimumBindingDefault: SC.Binding.single().notEmpty(),
 
   /**
-    Optionally specify the key used to extract the minimum progress value
+    Optionally specify the key used to extract the minimum slider value
     from the content object.  If this is set to null then the minimum value
     will not be derived from the content object.
 
@@ -58,7 +56,7 @@ SC.SliderView = SC.View.extend(SC.Control,
   contentMinimumKey: null,
 
   /**
-    The maximum value of the progress bar.
+    The maximum value of the slider bar.
 
     @type {Number}
     @default 1
@@ -67,7 +65,7 @@ SC.SliderView = SC.View.extend(SC.Control,
   maximumBindingDefault: SC.Binding.single().notEmpty(),
 
   /**
-    Optionally specify the key used to extract the maximum progress value
+    Optionally specify the key used to extract the maximum slider value
     from the content object.  If this is set to null then the maximum value
     will not be derived from the content object.
 
@@ -109,7 +107,7 @@ SC.SliderView = SC.View.extend(SC.Control,
   //
 
   /* @private The full list includes min, max, and stepPositions, but those are redundant with displayValue. */
-  displayProperties: ['displayValue', 'ariaValue', 'markSteps'],
+  displayProperties: ['displayValue', 'markSteps'],
 
   /** @private
    @property
