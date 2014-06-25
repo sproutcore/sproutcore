@@ -3,17 +3,31 @@
   $theme.slider {
     overflow: visible;
 
-    .track {
-      position: absolute;
-      top: 50%; height: 5px; left: 0; right: 0;
-      margin-top: -2px;
+    &.horizontal {
+      > .track {
+        top: 50%; height: 5px; left: 0; right: 0;
+        margin-top: -2px;
 
-      @include slices("../track.png", $left: 3, $right: 3);
+        @include slices("../track.png", $left: 3, $right: 3);
+
+        > .sc-slider-step-mark {
+          height: 5px;
+          margin-top: -2px;
+        }
+      }
     }
+    &.vertical {
+      > .track {
+        left: 50%; width: 5px; top: 0; bottom: 0;
+        margin-left: -2px;
 
-    .sc-slider-step-mark {
-      height: 5px;
-      margin-top: -2px;
+        @include slices("../track_vertical.png", $top: 3, $bottom: 3);
+
+        > .sc-slider-step-mark {
+          width: 5px;
+          margin-left: -2px;
+        }
+      }
     }
 
     .sc-handle {
@@ -23,9 +37,7 @@
       @include slice("knob.png");
     }
 
-    &.active {
-      .sc-handle { @include slice("knob_active.png"); }
-    }
+    &.active .sc-handle { @include slice("knob_active.png"); }
 
   }
 
