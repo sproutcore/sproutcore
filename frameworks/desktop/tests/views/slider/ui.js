@@ -15,6 +15,13 @@ var pane = SC.ControlTestPane.design()
     minimum: 0,
     maximum: 100
   })
+  .add("slider basic vertical", SC.SliderView, {
+    layout: {top:0, bottom:0, left:0, width: 250},
+    orientation: SC.VERTICAL_ORIENTATION,
+    value: 50,
+    minimum: 0,
+    maximum: 100
+  })
   .add("slider disabled", SC.SliderView, {
     layout: {top:0, bottom:0, left:0, width: 250},
     value: 50,
@@ -100,6 +107,13 @@ test("basic", function() {
   ok(view.$('.track').length > 0, 'should have track classed element');
   ok(view.$('.sc-handle').length > 0, 'should have sc-handle classed element');
   equals(view.$('.sc-handle')[0].style.left, '50%', 'left of sc-handle should be 50%');
+});
+
+test("basic vertical", function() {
+  var view = pane.view('slider basic vertical');
+
+  equals(view.$('.sc-handle')[0].style.top, '50%', 'top of vertical sc-handle should be');
+  equals(view.$().attr('aria-orientation'), 'vertical', "Aria orientation value should be");
 });
 
 test("disabled", function() {

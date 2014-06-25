@@ -32,6 +32,15 @@ SC.SliderView = SC.View.extend(SC.Control,
   ariaRole: 'slider',
 
   /**
+    Whether the slider displays vertically or horizontally. May be either
+    SC.HORIZONTAL_ORIENTATION or SC.VERTICAL_ORIENTATION.
+
+    @type String
+    @default SC.HORIZONTAL_ORIENTATION
+  */
+  orientation: SC.HORIZONTAL_ORIENTATION,
+
+  /**
     The current value of the slider.
   */
   value: 0.50,
@@ -262,19 +271,29 @@ SC.SliderView = SC.View.extend(SC.Control,
     event.
   */
   _triggerHandle: function(evt, firstEvent) {
-    var width = this.get('frame').width,
-        min = this.get('minimum'), max=this.get('maximum'),
-        step = this.get('step'), v=this.get('value'), loc;
+    var orientation = this.get('orientation'),
+        isHorizontal = orientation !== SC.VERTICAL_ORIENTATION,
+        frame = this.get('frame'),
+        size = isHorizontal ? frame.width : frame.height,
+        min = this.get('minimum'),
+        max = this.get('maximum'),
+        step = this.get('step'),
+        v = this.get('value'),
+        evtLoc = isHorizontal ? evt.pageX : evt.pageY,
+        loc;
 
-    if(firstEvent){
-      loc = this.convertFrameFromView({ x: evt.pageX }).x;
-      this._evtDiff = evt.pageX - loc;
-    }else{
-      loc = evt.pageX-this._evtDiff;
+    if (firstEvent) {
+      loc = this.convertFrameFromView({ x: evt.pageX, y: evt.pageY })[ isHorizontal ? 'x' : 'y'];
+      this._evtDiff = evtLoc - loc;
+    } else {
+      loc = evtLoc - this._evtDiff;
     }
 
     // convert to percentage
-    loc = Math.max(0, Math.min(loc / width, 1));
+    loc = Math.max(0, Math.min(loc / size, 1));
+
+    // compensate for high pageYs meaning low values
+    if (!isHorizontal) loc = 1 - loc;
 
     // if the location is NOT in the general vicinity of the slider, we assume
     // that the mouse pointer or touch is in the center of where the knob should be.
@@ -284,7 +303,7 @@ SC.SliderView = SC.View.extend(SC.Control,
       value = (value - min) / (max - min);
 
       // if the value and the loc are within 16px
-      if (Math.abs(value * width - loc * width) < 16) this._offset = value - loc;
+      if (Math.abs(value * size - loc * size) < 16) this._offset = value - loc;
       else this._offset = 0;
     }
 
