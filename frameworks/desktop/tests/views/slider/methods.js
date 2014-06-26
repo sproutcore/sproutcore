@@ -34,7 +34,7 @@ module("SC.SliderView Methods", {
 
 test("changing value of the slider will change its left position", function() {
   equals(view.get('value'), 50, 'precond - value should be 50');
-  equals(parseFloat(view.$('.sc-handle').css('left')), 250, 'left of sc-handle should be 50%');
+  equals(view.$('.sc-handle')[0].style.left, '50%', 'left of sc-handle should be 50%');
 
   var elem = view.get('layer');
 
@@ -43,7 +43,7 @@ test("changing value of the slider will change its left position", function() {
   SC.RunLoop.end();
 
   equals(view.get('value'), 100, 'value should now be 100');
-  equals(parseFloat(view.$('.sc-handle').css('left')), 500, 'left of sc-handle should be 100%');
+  equals(view.$('.sc-handle')[0].style.left, "100%", 'left of sc-handle should be 100%');
 
 });
 
@@ -60,7 +60,7 @@ test("going over maximum slider limit", function() {
   // Yes I think so: the value (e.g. from a record) should not be constrained by the view layer just because its value was
   // bound to an unused slider. - DCP
   equals(view.get('value'), 150, 'value should now be 150');
-  equals(parseFloat(view.$('.sc-handle').css('left')), 500, 'left of sc-handle should be 100%');
+  equals(view.$('.sc-handle')[0].style.left, "100%", 'left of sc-handle should be 100%');
 });
 
 test("going below minimum slider limit", function() {
