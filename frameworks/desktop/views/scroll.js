@@ -2406,8 +2406,8 @@ SC.ScrollView = SC.View.extend({
   */
   adjustElementScroll: function () {
     var contentView = this.get('contentView'),
-      verticalScrollOffset = this.get('verticalScrollOffset'),
-      horizontalScrollOffset = this.get('horizontalScrollOffset'),
+      verticalScrollOffset = parseInt(this.get('verticalScrollOffset')),
+      horizontalScrollOffset = parseInt(this.get('horizontalScrollOffset')),
       scale = this.get('scale');
 
     // Nothing to do.
