@@ -228,6 +228,17 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     this.contentDidChange();
   },
 
+  /** @private */
+  destroy: function () {
+    sc_super();
+
+    var subMenu = this._subMenu;
+    if (subMenu) {
+      subMenu.destroy();
+      this._subMenu = null;
+    }
+  },
+
   /** SC.MenuItemView is not able to update itself in place at this time. */
   // TODO: add update: support.
   isReusable: false,

@@ -281,6 +281,11 @@ test('Basic Submenus', function () {
     menuItem.get('content').set('subMenu', [{ title: 'Submenu item 3' }]);
     subMenu = menuItem.get('subMenu');
     equals(subMenu.getPath('items.length'), 1, 'submenus should have 1 item');
+
+    smallMenu.destroy();
+    ok(smallMenu.get('isDestroyed'), 'smallMenu should be destroyed');
+    ok(menuItem.get('isDestroyed'), 'menuItem should be destroyed');
+    ok(subMenu.get('isDestroyed'), 'submenus should be destroyed');
     start();
   }, 150);
 });
