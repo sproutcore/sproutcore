@@ -179,7 +179,16 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
         menuItems.set('parentMenu', parentMenu);
         return menuItems;
       } else {
-        return SC.MenuPane.create({
+        var subMenu = this._subMenu;
+        if (subMenu) {
+          if (subMenu.get('isAttached')) {
+            this.invokeLast('showSubMenu');
+          }
+          subMenu.remove();
+          subMenu.destroy();
+        }
+
+        subMenu = this._subMenu = SC.MenuPane.create({
           layout: { width: 200 },
           items: menuItems,
           isModal: NO,
@@ -188,6 +197,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
           controlSize: parentMenu.get('controlSize'),
           exampleView: parentMenu.get('exampleView')
         });
+        return subMenu;
       }
     }
 
