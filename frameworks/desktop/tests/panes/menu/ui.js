@@ -276,6 +276,11 @@ test('Basic Submenus', function () {
       smallMenu.remove();
     });
     ok(!subMenu.get('isVisibleInWindow'), 'submenus should close if their parent menu is closed');
+    equals(subMenu.getPath('items.length'), 2, 'submenus should have 2 items');
+
+    menuItem.get('content').set('subMenu', [{ title: 'Submenu item 3' }]);
+    subMenu = menuItem.get('subMenu');
+    equals(subMenu.getPath('items.length'), 1, 'submenus should have 1 item');
     start();
   }, 150);
 });
