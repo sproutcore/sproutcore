@@ -1927,7 +1927,7 @@ SC.ScrollView = SC.View.extend({
         // reset last event time
         touchStatus.lastEventTime = touch.timeStamp;
 
-        this.startDecelerationAnimation();
+        this.startDecelerationAnimation(touch);
       } else {
         // End the scroll if there's one that's needed even if we're not dragging.
         if (touchStatus.needsScrollEnd) this._touchScrollDidEnd();
