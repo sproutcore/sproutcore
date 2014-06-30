@@ -1931,8 +1931,8 @@ SC.CoreView.unload = function () {
 
    1. They display – translating your application's state into drawing
      instructions for the web browser, and
-   2. They react – acting as first responders for incoming keyboard, mouse, and
-     touch events.
+   2. They react – acting as responders for incoming keyboard, mouse, and touch
+     events.
 
   View Basics
   ====
@@ -1944,28 +1944,28 @@ SC.CoreView.unload = function () {
   documentation for more.)
 
   Other than positioning, SproutCore relies on CSS for all your styling needs.
-  Set an array of CSS classes on the classNames property, then style them with
-  standard CSS. (SproutCore comes with Sass support built in, too.) If you have
-  a class that you want automatically added and removed as another property
-  changes, take a look at classNameBindings.
+  Set an array of CSS classes on the `classNames` property, then style them with
+  standard CSS. (SproutCore's build tools come with Sass support built in, too.)
+  If you have a class that you want automatically added and removed as another
+  property changes, take a look at `classNameBindings`.
 
   Different view classes do different things. The so-called "Big Five" view
   classes are SC.LabelView, for displaying (optionally editable, optionally
   localizable) text; SC.ButtonView, for the user to poke; SC.CollectionView
-  (most often its subclass SC.ListView) for displaying an array of content;
+  (most often as its subclass SC.ListView) for displaying an array of content;
   SC.ContainerView, for easily swapping child views in and out; and SC.ScrollView,
   for containing larger views and allowing them to be scrolled.
 
   All views live in panes (subclasses of SC.Pane, like SC.MainPane and SC.PanelPane),
-  which are views that know how to append themselves directly to the document. Panes
-  also serve as routers for events, like mouse, touch and keyboard events, that are
+  which are parentless views that know how to append themselves directly to the document.
+  Panes also serve as routers for events, like mouse, touch and keyboard events, that are
   bound for their views. (See "View Events" below for more.)
 
-  For best performance, you should define your view and pane classes inside an
-  SC.Page instance, getting them as needed with `get`. As its name suggests,
-  SC.Page's one job is to instantiate views once on demand, deferring the expensive
-  view creation process until each view is needed. Correctly using SC.Page is considered
-  an important best practice for high-performance applications.
+  For best performance, you should define your view and pane instances with `extend()`
+  inside an SC.Page instance, getting them as needed with `get`. As its name suggests,
+  SC.Page's only job is to instantiate views once when first requested, deferring the
+  expensive view creation process until each view is needed. Correctly using SC.Page is
+  considered an important best practice for high-performance applications.
 
   View Initialization
   ====
@@ -2009,7 +2009,7 @@ SC.CoreView.unload = function () {
   One of SproutCore's optimizations is application-wide event delegation: SproutCore
   handles and standardizes events for you before sending them through your view layer's
   chain of responding views. You should never need to attach event listeners to elements;
-  instead, just implement methods like `click`, `doubleClick`, `mouseEnter` and
+  instead, just implement methods like `click`, `doubleClick`, `mouseEntered` and
   `dataDragHover` on your views.
 
   Note that events generally bubble up an event's responder chain, which is made up of the
@@ -2048,13 +2048,13 @@ SC.CoreView.unload = function () {
   the mouse has entered and exited views, and sending the correct event to each view in
   the responder chain. For example, if a mouse moves within a parent view but crosses from
   one child view to another, the parent view will receive a mouseMoved event while the child
-  views will receive mouseEnter and mouseExit events.
+  views will receive mouseEntered and mouseExit events.
 
   In contrast to mouse click events, mouse movement events are called on the entire responder
   chain regardless of how you handle it along the way - a view and its parent, both implementing
   event methods, will both be notified of the event.
 
-  - `mouseEnter` -- Called when the cursor first enters a view. Called on every view that has
+  - `mouseEntered` -- Called when the cursor first enters a view. Called on every view that has
     just entered the responder chain.
   - `mouseMoved` -- Called when the cursor moves over a view.
   - `mouseExited` -- Called when the cursor leaves a view. Called on every view that has
@@ -2083,7 +2083,7 @@ SC.CoreView.unload = function () {
     button. A view must implement `mouseDown` (and not return NO) in order to be notified
     of the subsequent drag and up events.
   - `mouseDrag` -- Called on the target view if it handled mouseDown. A view must implement
-    mouseDown (and not return NO) in order to receive mouseUp; only the view which handled a
+    mouseDown (and not return NO) in order to receive mouseDrag; only the view which handled a
     given click sequence's mouseDown will receive `mouseDrag` events (and will continue to
     receive them even if the user drags the mouse off of it).
   - `mouseUp` -- Called on the target view when the user lifts a mouse button. A view must
@@ -2166,7 +2166,7 @@ SC.CoreView.unload = function () {
   encounter a view which handles the event and does not return NO.
 
   SproutCore implements a set of very convenient, higher-level keyboard events for action keys
-  such as *tab*, *enter,* and the arrow keys. These are not triggered automatically, but you
+  such as *tab*, *enter*, and the arrow keys. These are not triggered automatically, but you
   can gain access to them by proxying the keyboard event of your choice to `interpretKeyEvent`.
   For example:
 
