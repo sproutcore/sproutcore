@@ -2420,6 +2420,7 @@ SC.ScrollView = SC.View.extend({
       contentView._viewFrameDidChange()
     }
 
+    // Apply the transform.
     var transformAttribute = SC.browser.experimentalStyleNameFor('transform');
 
     // If transform is not supported (basically IE8), we fall back on margin.
@@ -2437,6 +2438,12 @@ SC.ScrollView = SC.View.extend({
     }
     // Otherwise, we proceed with proper modern transforms!
     else {
+      // Constrain the offsets to full (actual) pixels to prevent blurry text et cetera. Note that this assumes
+      // that the scroll view itself is living at a scale of 1, and may give blurry subpixel results if scaled.
+      var pixelRatio = 1 / (window.devicePixelRatio || 1);
+      verticalScrollOffset = Math.round(verticalScrollOffset/pixelRatio) * pixelRatio;
+      horizontalScrollOffset = Math.round(horizontalScrollOffset/pixelRatio) * pixelRatio;
+
       var transformStyle = 'translateX(' + (-horizontalScrollOffset) + 'px) translateY(' + (-verticalScrollOffset) + 'px)';
 
       // If the platform supports 3D transforms, let's add the z translation (tricks some browsers into moving it onto
