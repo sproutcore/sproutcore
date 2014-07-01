@@ -537,6 +537,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   /**
     The Z-Index of the pane. Currently, you have to match this in CSS.
     TODO: ALLOW THIS TO AUTOMATICALLY SET THE Z-INDEX OF THE PANE (as an option).
+    ACTUAL TODO: Remove this because z-index is evil.
   */
   zIndex: 0,
 
@@ -555,7 +556,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
       divStyle.top = "0px";
       divStyle.right = "0px";
       divStyle.bottom = "0px";
-      divStyle.webkitTransform = "translateZ(0px)";
+      divStyle[SC.browser.experimentalStyleNameFor('transform')] = "translateZ(0px)";
       divStyle.zIndex = this.get("zIndex") + this.get("touchZ");
       div.className = "touch-intercept";
       div.id = "touch-intercept-" + SC.guidFor(this);

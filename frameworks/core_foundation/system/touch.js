@@ -107,11 +107,13 @@
 SC.Touch = function(touch, touchContext) {
   // get the raw target view (we'll refine later)
   this.touchContext = touchContext;
-  this.identifier = touch.identifier; // for now, our internal id is WebKit's id.
+  // Get the touch's unique ID.
+  this.identifier = touch.identifier;
 
   var target = touch.target, targetView;
+  // Special-case handling for TextFieldView's touch intercept overlays.
   if (target && SC.$(target).hasClass("touch-intercept")) {
-    touch.target.style.webkitTransform = "translate3d(0px,-5000px,0px)";
+    touch.target.style[SC.browser.experimentalStyleNameFor('transform')] = "translate3d(0px,-5000px,0px)";
     target = document.elementFromPoint(touch.pageX, touch.pageY);
     if (target) targetView = SC.$(target).view()[0];
 
@@ -119,7 +121,7 @@ SC.Touch = function(touch, touchContext) {
     if (target.tagName === "INPUT") {
       this.hidesTouchIntercept = touch.target;
     } else {
-      touch.target.style.webkitTransform = "translate3d(0px,0px,0px)";
+      touch.target.style[SC.browser.experimentalStyleNameFor('transform')] = "translate3d(0px,0px,0px)";
     }
   } else {
     targetView = touch.target ? SC.$(touch.target).view()[0] : null;
@@ -150,7 +152,7 @@ SC.Touch.prototype = {
   unhideTouchIntercept: function() {
     var intercept = this.hidesTouchIntercept;
     if (intercept) {
-      setTimeout(function() { intercept.style.webkitTransform = "translate3d(0px,0px,0px)"; }, 500);
+      setTimeout(function() { intercept.style[SC.browser.experimentalStyleNameFor('transform')] = "translate3d(0px,0px,0px)"; }, 500);
     }
   },
 
