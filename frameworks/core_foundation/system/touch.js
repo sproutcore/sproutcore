@@ -30,7 +30,9 @@
     children if not. (See SC.ScrollView#delaysContentTouches for more.) In order to support this use case, `captureTouch`
     bubbles the opposite way as usual: beginning with the target's pane and bubbling *down* towards the target itself.
     `captureTouch` is passed a single instance of `SC.Touch`, and must return YES if it wishes to capture the touch and
-    become its responder.
+    become its responder. (If your view doesn't want to immediately capture the touch, but instead wants to suggest itself
+    as a fallback handler in case the child view resigns respondership, it can do so by passing itself to the touch's
+    `stackCandidateTouchResponder` method.)
   - `touchStart` -- When a touch begins, or when a new view responder is first given access to it (see "Touch Responders"
     below), the touch is passed to this method.
   - `touchesDragged` -- Whenever any touches move, the `touchesDragged` method is called on the current view responder
@@ -52,7 +54,7 @@
   access the touches for a specific view from the `touchesForView` method, or get an average position of the touches
   on a view from the convenient `averagedTouchesForView` method. For your convenience when dealing with the common
   single-touch view, the `touchesDragged` event object also exposes the positional page, client, screen and start X/Y
-  values from the *first touch*. If you are interested inhandling more than one touch, or in handling an average of
+  values from the *first touch*. If you are interested in handling more than one touch, or in handling an average of
   in-flight touches, you should ignore these values. (Note that this event object exposes an array of touch events at
   `touches`. These are the browser's raw touch events, and should be avoided or used with care.)
 
@@ -64,7 +66,7 @@
   A view becomes a touch responder by implementing touchStart (and not returning NO). (Out-of-order views can capture
   touch responder status by implementing captureTouch and returning YES.) Once a view is a touch responder, only that
   view will receive subsequent `touchesDragged` and `touchEnd` events; these events do not bubble like mouse events, and
-  they do not automatically switch to other views if the touch moves outside of its initial responder.
+  they do *not* automatically switch to other views if the touch moves outside of its initial responder.
 
   In some situations, you will want to pass control on to another view during the course of a touch, for example if
   it goes over another view. To permanently pass respondership to another view:
@@ -88,8 +90,8 @@
   Note that the previous responder will not receive `touchCancelled` immediately, since the touch may return to it before
   the end; instead, it will only receive `touchCancelled` when the touch is ended.
 
-  (If you would like to add a view as a fallback responder without triggering automatic calls to its `touchStart` and
-  `touchCancelled`, for example as an alternative to returning YES from `captureTouch`, you can call
+  (If you would like to add a view as a fallback responder without triggering unnecessary calls to its `touchStart` and
+  `touchCancelled` events, for example as an alternative to returning YES from `captureTouch`, you can call
   `stackCandidateTouchResponder` instead.)
 
   When the child view decides that the touch has moved enough to be a scroll, it should pass touch respondership back
