@@ -192,7 +192,7 @@ test("removeFromParent throws an exception", function() {
     pane.append();
     pane.removeFromParent();
   } catch(e) {
-    exceptionCaught = (e instanceof SC.Error);
+    exceptionCaught = true;
   } finally {
     pane.remove();
   }

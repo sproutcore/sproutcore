@@ -296,7 +296,7 @@ SC.PickerPane = SC.PalettePane.extend(
       // Throw an error if a null or empty value is set. You're not allowed to go anchorless.
       // (TODO: why can't we go anchorless? positionPane happily centers an unmoored pane.)
       if (!value) {
-        throw "You must set 'anchorElement' to either a view or a DOM element";
+        SC.throw("You must set 'anchorElement' to either a view or a DOM element");
       }
 
       // Clean up any previous anchor elements.
