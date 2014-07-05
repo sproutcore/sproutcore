@@ -619,7 +619,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
       } else if (status & SC.Record.BUSY) {
         // make sure nested store does not have any changes before resetting
-        if(store.get('hasChanges')) throw K.CHAIN_CONFLICT_ERROR;
+        if(store.get('hasChanges')) K.CHAIN_CONFLICT_ERROR.throw();
         store.reset();
       }
     }
@@ -859,7 +859,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         // if the save revision for the item does not match the current rev
         // the someone has changed the data hash in this store and we have
         // a conflict.
-        if (lock < rev) throw SC.Store.CHAIN_CONFLICT_ERROR;
+        if (lock < rev) SC.Store.CHAIN_CONFLICT_ERROR.throw();
       }
     }
     return this ;
@@ -1229,11 +1229,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     if ((status & K.BUSY)  ||
         (status & K.READY) ||
         (status === K.DESTROYED_DIRTY)) {
-      throw id ? K.RECORD_EXISTS_ERROR : K.BAD_STATE_ERROR;
+      (id ? K.RECORD_EXISTS_ERROR : K.BAD_STATE_ERROR).throw();
 
     // allow error or destroyed state only with id
     } else if (!id && (status===SC.DESTROYED_CLEAN || status===SC.ERROR)) {
-      throw K.BAD_STATE_ERROR;
+      K.BAD_STATE_ERROR.throw();
     }
 
     // Store the dataHash and setup initial status.
@@ -1342,7 +1342,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     // error out if empty
     } else if (status & K.BUSY) {
-      throw K.BUSY_ERROR ;
+      K.BUSY_ERROR.throw();
 
     // otherwise, destroy in dirty state
     } else status = newStatus ;
@@ -1433,11 +1433,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     // error out if empty
     } else if (status === K.EMPTY) {
-      throw K.NOT_FOUND_ERROR ;
+      K.NOT_FOUND_ERROR.throw();
 
     // error out if busy
     } else if (status & K.BUSY) {
-      throw K.BUSY_ERROR ;
+      K.BUSY_ERROR.throw();
 
     // if new status, destroy in clean state
     } else if (status === K.READY_NEW) {
@@ -1626,12 +1626,12 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // BUSY_LOADING, BUSY_CREATING, BUSY_COMMITTING, BUSY_REFRESH_CLEAN
     // BUSY_REFRESH_DIRTY, BUSY_DESTROYING
     if (status & K.BUSY) {
-      throw K.BUSY_ERROR ;
+      K.BUSY_ERROR.throw();
 
     // if record is not in ready state, then it is not found.
     // ERROR, EMPTY, DESTROYED_CLEAN, DESTROYED_DIRTY
     } else if (!(status & K.READY)) {
-      throw K.NOT_FOUND_ERROR ;
+      K.NOT_FOUND_ERROR.throw();
 
     // otherwise, make new status READY_DIRTY unless new.
     // K.READY_CLEAN, K.READY_DIRTY, ignore K.READY_NEW
@@ -1761,11 +1761,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
           this._setCallbackForStoreKey(storeKey, callback, hasCallbackArray, storeKeys);
         // K.BUSY_DESTROYING, K.BUSY_COMMITTING, K.BUSY_CREATING
         } else if ((status == K.BUSY_DESTROYING) || (status == K.BUSY_CREATING) || (status == K.BUSY_COMMITTING)) {
-          throw K.BUSY_ERROR ;
+          K.BUSY_ERROR.throw();
 
         // K.DESTROY_DIRTY, bad state...
         } else if (status == K.DESTROYED_DIRTY) {
-          throw K.BAD_STATE_ERROR ;
+          K.BAD_STATE_ERROR.throw();
 
         // ignore K.BUSY_LOADING, K.BUSY_REFRESH_CLEAN, K.BUSY_REFRESH_DIRTY
         }
@@ -1977,7 +1977,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       status = this.readStatus(storeKey);
 
       if (status == K.ERROR) {
-        throw K.NOT_FOUND_ERROR ;
+        K.NOT_FOUND_ERROR.throw();
       }
       else {
         if(status==K.READY_NEW) {
@@ -2087,7 +2087,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         status = this.readStatus(storeKey);
 
         if ((status == K.EMPTY) || (status == K.ERROR)) {
-          throw K.NOT_FOUND_ERROR ;
+          K.NOT_FOUND_ERROR.throw();
         }
         ret.push(storeKey);
         this._cancelCallback(storeKey);
@@ -2270,7 +2270,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // EMPTY, ERROR, READY_CLEAN, READY_NEW, READY_DIRTY, DESTROYED_CLEAN,
     // DESTROYED_DIRTY
     if (!(status & K.BUSY)) {
-      throw K.BAD_STATE_ERROR; // should never be called in this state
+      K.BAD_STATE_ERROR.throw(); // should never be called in this state
     }
 
     // otherwise, determine proper state transition
@@ -2300,7 +2300,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         break;
 
       default:
-        throw K.BAD_STATE_ERROR ;
+        K.BAD_STATE_ERROR.throw() ;
     }
     this.writeStatus(storeKey, status) ;
     this.dataHashDidChange(storeKey, null, YES);
@@ -2325,12 +2325,12 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // EMPTY, ERROR, READY_CLEAN, READY_NEW, READY_DIRTY, DESTROYED_CLEAN,
     // DESTROYED_DIRTY
     if (!(status & K.BUSY)) {
-      throw K.BAD_STATE_ERROR; // should never be called in this state
+      K.BAD_STATE_ERROR.throw(); // should never be called in this state
     }
 
     // otherwise, determine proper state transition
     if(status===K.BUSY_DESTROYING) {
-      throw K.BAD_STATE_ERROR ;
+      K.BAD_STATE_ERROR.throw() ;
     } else status = K.READY_CLEAN ;
 
     this.writeStatus(storeKey, status) ;
@@ -2364,7 +2364,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // EMPTY, ERROR, READY_CLEAN, READY_NEW, READY_DIRTY, DESTROYED_CLEAN,
     // DESTROYED_DIRTY
     if (!(status & K.BUSY)) {
-      throw K.BAD_STATE_ERROR; // should never be called in this state
+      K.BAD_STATE_ERROR.throw(); // should never be called in this state
     }
     // otherwise, determine proper state transition
     else{
@@ -2396,7 +2396,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     // EMPTY, ERROR, READY_CLEAN, READY_NEW, READY_DIRTY, DESTROYED_CLEAN,
     // DESTROYED_DIRTY
-    if (!(status & K.BUSY)) { throw K.BAD_STATE_ERROR; }
+    if (!(status & K.BUSY)) { K.BAD_STATE_ERROR.throw(); }
 
     // otherwise, determine proper state transition
     else status = K.ERROR ;
@@ -2816,7 +2816,7 @@ SC.Store.mixin(/** @scope SC.Store.prototype */{
 
     @type Error
   */
-  CHAIN_CONFLICT_ERROR: new Error("Nested Store Conflict"),
+  CHAIN_CONFLICT_ERROR: SC.$error("Nested Store Conflict"),
 
   /**
     Standard error if you try to perform an operation on a nested store
@@ -2824,7 +2824,7 @@ SC.Store.mixin(/** @scope SC.Store.prototype */{
 
     @type Error
   */
-  NO_PARENT_STORE_ERROR: new Error("Parent Store Required"),
+  NO_PARENT_STORE_ERROR: SC.$error("Parent Store Required"),
 
   /**
     Standard error if you try to perform an operation on a nested store that
@@ -2832,7 +2832,7 @@ SC.Store.mixin(/** @scope SC.Store.prototype */{
 
     @type Error
   */
-  NESTED_STORE_UNSUPPORTED_ERROR: new Error("Unsupported In Nested Store"),
+  NESTED_STORE_UNSUPPORTED_ERROR: SC.$error("Unsupported In Nested Store"),
 
   /**
     Standard error if you try to retrieve a record in a nested store that is
@@ -2840,7 +2840,7 @@ SC.Store.mixin(/** @scope SC.Store.prototype */{
 
     @type Error
   */
-  NESTED_STORE_RETRIEVE_DIRTY_ERROR: new Error("Cannot Retrieve Dirty Record in Nested Store"),
+  NESTED_STORE_RETRIEVE_DIRTY_ERROR: SC.$error("Cannot Retrieve Dirty Record in Nested Store"),
 
   /**
     Data hash state indicates the data hash is currently editable

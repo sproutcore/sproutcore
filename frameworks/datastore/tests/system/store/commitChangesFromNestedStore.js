@@ -118,7 +118,7 @@ function createConflict(force) {
   try {
     child.commitChanges(force);
   } catch(e) {
-    equals(e, SC.Store.CHAIN_CONFLICT_ERROR, 'should throw CHAIN_CONFLICT_ERROR');
+    equals(e.message, SC.Store.CHAIN_CONFLICT_ERROR.toString(), 'should throw CHAIN_CONFLICT_ERROR');
     errorCount++;
   }
 
