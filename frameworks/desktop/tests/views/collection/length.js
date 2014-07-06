@@ -9,19 +9,19 @@ var view, content1, content2 ;
 
 module("SC.CollectionView.length", {
   setup: function() {
-    
+
     // stub in collection view to verify that proper method are called
     view = SC.CollectionView.create({
-      
+
       observer: CoreTest.stub('observer(length)').observes('length'),
-      computeLayout: CoreTest.stub('computeLayout'),
-      
+      computeLayout: CoreTest.stub('computeLayout', SC.CollectionView.prototype.computeLayout),
+
       reset: function(){
         this.observer.reset();
         this.computeLayout.reset();
-      }    
+      }
     });
-    
+
     content1 = "a b c".w();
     content2 = "d e f g h".w();
   }
@@ -47,9 +47,9 @@ test("changing the content should update length & notify", function() {
   view.set('content', content1);
   view.reset(); // don't care.
   ok(content1.get('length') !== content2.get('length'), 'precond - content1.length should not equal content2.length');
-  
+
   view.set('content', content2);
-  
+
   equals(view.get('length'), content2.get('length'), 'view.length should equal new length');
   view.observer.expect(1);
 });
@@ -57,7 +57,7 @@ test("changing the content should update length & notify", function() {
 test("modifying content to make it shorter should update view length and notify",function() {
   view.set('content', content1);
   view.reset(); // don't care.
-  
+
   var len = content1.get('length');
   content1.removeAt(1);
 
