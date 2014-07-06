@@ -73,6 +73,18 @@ SC.GridView = SC.ListView.extend(
   exampleView: SC.LabelView,
 
   /**
+    Determines the layout direction of the rows of items, either vertically or
+    horizontally. Possible values:
+
+      - SC.LAYOUT_HORIZONTAL
+      - SC.LAYOUT_VERTICAL
+
+    @type String
+    @default SC.LAYOUT_VERTICAL
+  */
+  layoutDirection: SC.LAYOUT_VERTICAL,
+
+  /**
     Possible values:
 
       - SC.HORIZONTAL_ORIENTATION
@@ -85,11 +97,55 @@ SC.GridView = SC.ListView.extend(
 
   /** @private */
   itemsPerRow: function () {
-    var frameWidth = this.get('frame').width,
-      columnWidth = this.get('columnWidth') || 0;
+    var frameWidth = this.get('clippingFrame').width,
+      columnWidth = this.get('columnWidth') || 48,
+      itemsPerRow = Math.floor(frameWidth / columnWidth);
 
-    return (columnWidth < 1) ? 1 : Math.floor(frameWidth / columnWidth);
+    return itemsPerRow ? itemsPerRow : 1;
   }.property('columnWidth', '_frameWidth').cacheable(),
+
+  /** @private */
+  rowCount: function () {
+    var length = this.get('length'),
+      itemsPerRow = this.get('itemsPerRow') ;
+
+    return Math.ceil(length / itemsPerRow);
+  }.property('itemsPerRow', 'length').cacheable(),
+
+  /** @private */
+  itemsPerColumn: function() {
+    var frameHeight = this.get('clippingFrame').height,
+      rowHeight = this.get('rowHeight') || 64,
+      itemsPerColumn = Math.floor(frameHeight / rowHeight);
+
+    return itemsPerColumn ? itemsPerColumn : 1;
+  }.property('rowHeight', '_frameHeight').cacheable(),
+
+  /** @private */
+  columnCount: function () {
+    var length = this.get('length') || 0,
+      itemsPerColumn = this.get('itemsPerColumn');
+
+    return Math.ceil(length / itemsPerColumn);
+  }.property('itemsPerColumn', 'length').cacheable(),
+
+  /** @private */
+  stretchedColumnWidth: function() {
+    var frame = this.get('clippingFrame'),
+      frameWidth = frame.width,
+      itemsPerRow = this.get('itemsPerRow');
+
+    return (frameWidth / itemsPerRow) || 64;
+  }.property('_frameWidth', 'itemsPerRow').cacheable(),
+
+  /** @private */
+  stretchedRowHeight: function() {
+    var frame = this.get('clippingFrame'),
+      frameHeight = frame.height,
+      itemsPerColumn = this.get('itemsPerColumn');
+
+    return (frameHeight / itemsPerColumn) || 48;
+  }.property('_frameHeight', 'itemsPerColumn').cacheable(),
 
   /** @private
     Find the contentIndexes to display in the passed rect. Note that we
@@ -97,26 +153,50 @@ SC.GridView = SC.ListView.extend(
     contiguous range.
   */
   contentIndexesInRect: function (rect) {
-    var rowHeight = this.get('rowHeight') || 48,
-        itemsPerRow = this.get('itemsPerRow'),
-        min = Math.floor(SC.minY(rect) / rowHeight) * itemsPerRow,
-        max = Math.ceil(SC.maxY(rect) / rowHeight) * itemsPerRow;
+    var layoutDirection = this.get('layoutDirection'),
+      itemsPerRow = this.get('itemsPerRow'),
+      itemsPerColumn = this.get('itemsPerColumn'),
+      rowHeight, columnWidth,
+      min, max;
+
+    if (layoutDirection === SC.LAYOUT_HORIZONTAL) {
+      columnWidth = this.get('columnWidth') || 64;
+      min = Math.floor(SC.minX(rect) / columnWidth) * itemsPerColumn;
+      max = Math.ceil(SC.maxX(rect) / columnWidth) * itemsPerColumn;
+    }
+    else {
+      rowHeight = this.get('rowHeight') || 48;
+      min = Math.floor(SC.minY(rect) / rowHeight) * itemsPerRow;
+      max = Math.ceil(SC.maxY(rect) / rowHeight) * itemsPerRow;
+    }
+
     return SC.IndexSet.create(min, max - min);
   },
 
   /** @private */
   layoutForContentIndex: function (contentIndex) {
-    var rowHeight = this.get('rowHeight') || 48,
-        frameWidth = this.get('frame').width,
-        itemsPerRow = this.get('itemsPerRow'),
-        columnWidth = Math.floor(frameWidth / itemsPerRow),
-        row = Math.floor(contentIndex / itemsPerRow),
-        col = contentIndex - (itemsPerRow * row);
+    var layoutDirection = this.get('layoutDirection'),
+      itemsPerRow = this.get('itemsPerRow'),
+      itemsPerColumn = this.get('itemsPerColumn'),
+      rowHeight = this.get('rowHeight') || 48,
+      columnWidth = this.get('columnWidth') || 64,
+      row, col;
 
     // If the frame is not ready, then just return an empty layout.
     // Otherwise, NaN will be entered into layout values.
-    if (frameWidth === 0 || itemsPerRow === 0) {
+    if (this.get('clippingFrame').width === 0) {
       return {};
+    }
+
+    if (layoutDirection === SC.LAYOUT_HORIZONTAL) {
+      rowHeight = this.get('stretchedRowHeight');
+      col = Math.floor(contentIndex / itemsPerColumn);
+      row = contentIndex - (itemsPerColumn * col);
+    }
+    else {
+      columnWidth = this.get('stretchedColumnWidth');
+      row = Math.floor(contentIndex / itemsPerRow);
+      col = contentIndex - (itemsPerRow * row);
     }
 
     return {
@@ -132,19 +212,26 @@ SC.GridView = SC.ListView.extend(
     of the list view.
   */
   computeLayout: function () {
-    var content = this.get('content'),
-      count = (content) ? content.get('length') : 0,
-      rowHeight = this.get('rowHeight') || 48,
-      itemsPerRow = this.get('itemsPerRow'),
-      // Check that itemsPerRow isn't 0 to prevent Infinite rows.
-      rows = itemsPerRow ? Math.ceil(count / itemsPerRow) : 0;
+    var layoutDirection = this.get('layoutDirection');
 
     // use this cached layout hash to avoid allocing memory...
     var ret = this._cachedLayoutHash;
     if (!ret) ret = this._cachedLayoutHash = {};
 
-    ret.height = rows * rowHeight;
+    // Support both vertical and horizontal grids.
+    if (layoutDirection === SC.LAYOUT_HORIZONTAL) {
+      var columnWidth = this.get('columnWidth') || 64,
+        columnCount = this.get('columnCount');
 
+      ret.width = columnCount * columnWidth;
+      this.set('calculatedWidth', ret.width);
+    } else {
+      var rowHeight = this.get('rowHeight') || 48,
+        rowCount = this.get('rowCount');
+
+      ret.height = rowCount * rowHeight;
+      this.set('calculatedHeight', ret.height);
+    }
     return ret;
   },
 
@@ -264,42 +351,52 @@ SC.GridView = SC.ListView.extend(
 
     Update all of their layouts if necessary.
   */
-  _gv_frameDidChange: function () {
-    var frame = this.get('frame'),
+  viewDidResize: function () {
+    var frame = this.get('clippingFrame'),
       lastFrameWidth = this._lastFrameWidth,
-      width = frame.width;
+      width = frame.width,
+      lastFrameHeight = this._lastFrameHeight,
+      height = frame.height,
+      frameDidChange = true;
 
     // A change to the width of the frame is the only variable that
     // alters the layout of item views and our computed layout.
     if (!SC.none(lastFrameWidth) && width !== lastFrameWidth) {
-      var itemView,
-        nowShowing = this.get('nowShowing');
-
       // Internal property used to indicate a possible itemsPerRow change.  This
       // is better than having itemsPerRow dependent on frame which changes frequently.
       this.set('_frameWidth', width);
-
-      // Only loop through the now showing indexes, if the content was sparsely
-      // loaded we would inadvertently load all the content.
-      nowShowing.forEach(function (idx) {
-        itemView = this.itemViewForContentIndex(idx);
-        itemView.adjust(this.layoutForContentIndex(idx));
-      }, this);
+      frameDidChange = true;
     }
-
     this._lastFrameWidth = width;
-  }.observes('frame'),
 
-  /** @private Recompute our layout if itemsPerRow actually changes. */
-  _gv_itemsPerRowDidChange: function () {
-    var itemsPerRow = this.get('itemsPerRow'),
-      lastItemsPerRow = this._lastItemsPerRow || 0;
+    // A change to the height of the frame is the only variable that
+    // alters the layout of item views and our computed layout.
+    if (!SC.none(lastFrameHeight) && height !== lastFrameHeight) {
+      // Internal property used to indicate a possible itemsPerColumn change.  This
+      // is better than having itemsPerColumn dependent on frame which changes frequently.
+      this.set('_frameHeight', height);
+      frameDidChange = true;
+    }
+    this._lastFrameHeight = height;
 
-    if (itemsPerRow !== lastItemsPerRow) {
+    if (frameDidChange) {
+      this.adjustChildLayouts();
       this.invokeOnce('adjustLayout');
     }
 
-    this._lastItemsPerRow = itemsPerRow;
-  }.observes('itemsPerRow')
+    sc_super();
+  },
+
+  /** @private */
+  adjustChildLayouts: function () {
+    var nowShowing = this.get('nowShowing');
+
+    // Only loop through the now showing indexes, if the content is sparsely
+    // loaded we could inadvertently trigger reloading unneeded content.
+    nowShowing.forEach(function(idx) {
+      var itemView = this.itemViewForContentIndex(idx);
+      itemView.adjust(this.layoutForContentIndex(idx));
+    }, this);
+  },
 
 });
