@@ -2228,7 +2228,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
       // determine if item is selected. If so, then go on.
       sel = this.get('selection');
-      // isSelected = sel && sel.containsObject(view.get('content'));
       isSelected = sel && sel.contains(content, contentIndex, 1);
 
       if (isSelected) {
@@ -2392,7 +2391,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     if (contentIndex > -1) {
       if (this.get('useToggleSelection')) {
         sel = this.get('selection');
-        // isSelected = sel && sel.containsObject(itemView.get('content'));
         isSelected = sel && sel.contains(content, contentIndex, 1);
         shouldSelect = !isSelected;
       }
