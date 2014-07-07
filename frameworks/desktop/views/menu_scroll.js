@@ -663,25 +663,5 @@ SC.MenuScrollView = SC.ScrollView.extend(
       view.setIfChanged('maximum', height);
       view2.setIfChanged('maximum', height);
     }
-  },
-
-  /** @private
-    Whenever the horizontal scroll offset changes, update the scrollers and
-    edit the location of the contentView.
-  */
-  _scroll_horizontalScrollOffsetDidChange: function () {},
-
-  /** @private
-    Whenever the vertical scroll offset changes, update the scrollers and
-    edit the location of the contentView.
-  */
-  _scroll_verticalScrollOffsetDidChange: function () {
-    var offset = this.get('verticalScrollOffset');
-
-    // update the offset for the contentView...
-    var contentView = this.get('contentView');
-    if (contentView) contentView.$().css('top', (0 - offset) + "px");
-
-  }.observes('verticalScrollOffset')
-
+  }
 });
