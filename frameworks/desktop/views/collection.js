@@ -181,7 +181,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   */
   nowShowing: function() {
     // If there is an in-scroll clipping frame, use it.
-    var clippingFrame = this._inScrollClippingFrame || this.get('clippingFrame');
+    var clippingFrame = this.get('clippingFrame');
 
     return this.computeNowShowing(clippingFrame);
   }.property('length', 'clippingFrame').cacheable(),
@@ -3034,60 +3034,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   */
   insertionIndexForLocation: function(loc, dropOperation) {
     return -1;
-  },
-
-  // ..........................................................
-  // SCROLLING
-  //
-
-  /** @private SC.ScrollView */
-  touchScrollDidStart: function () {
-    var clippingFrame = this.get('clippingFrame');
-
-    // Create the in-scroll clipping frame that will be used while touch scrolling.
-    this._inScrollClippingFrame = {
-      x: clippingFrame.x,
-      y: clippingFrame.y,
-      width: clippingFrame.width,
-      height: clippingFrame.height
-    };
-  },
-
-  /* @private Internal property used to track the rate of touch scroll change events. */
-  _lastTouchScrollTime: null,
-
-  /** @private
-    Called by SC.ScrollView when a touch scroll/scale is in flight. (Touch scrolling is done outside of
-    the run-loop to eke out maximum performance.)
-
-    TODO: This custom-calculated clipping frame doesn't take scale into account.
-  */
-  touchScrollDidChange: function (left, top, scale) {
-    // Fast path!  Don't try to update too soon.
-    if (Date.now() - this._lastTouchScrollTime < 30) { return; }
-
-    var inScrollClippingFrame = this._inScrollClippingFrame;
-
-    // Update the in-scroll clipping frame with the new values.
-    inScrollClippingFrame.x = left;
-    inScrollClippingFrame.y = top;
-
-    // Indicate that nowShowing should be re-computed (this will use the
-    // in-scroll clipping frame when it does).
-    // TODO: perform a raw update that doesn't require the run loop.
-    SC.run(function () {
-      this.notifyPropertyChange('nowShowing');
-      this.invokeOnce('_cv_nowShowingDidChange');
-    }, this);
-
-    // Track the last time we updated.
-    this._lastTouchScrollTime = Date.now();
-  },
-
-  /** @private SC.ScrollView */
-  touchScrollDidEnd: function () {
-    // Clean up so that the regular clippingFrame is used again.
-    this._inScrollClippingFrame = null;
   },
 
   // ..........................................................

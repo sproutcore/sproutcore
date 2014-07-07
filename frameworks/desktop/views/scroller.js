@@ -37,21 +37,21 @@
 SC.ScrollerView = SC.View.extend(
 /** @scope SC.ScrollerView.prototype */ {
 
-  /**
+  /** @private
     @type Array
     @default ['sc-scroller-view']
     @see SC.View#classNames
   */
   classNames: ['sc-scroller-view'],
 
-  /**
+  /** @private
     @type Array
     @default ['thumbPosition', 'thumbLength', 'controlsHidden']
     @see SC.View#displayProperties
   */
   displayProperties: ['thumbPosition', 'thumbLength', 'controlsHidden'],
 
-  /**
+  /** @private
     The WAI-ARIA role for scroller view.
 
     @type String
@@ -76,11 +76,14 @@ SC.ScrollerView = SC.View.extend(
   */
   shouldScrollToClick: NO,
 
+  /**
+    Whether values outside of the min and max should be allowed. Set this to YES to support
+    e.g. bounce scrolling.
 
-  /** @private
-    The in-touch-scroll value.
+    @type Boolean
+    @default NO
   */
-  _touchScrollValue: NO,
+  allowOutlyingValues: NO,
 
   /**
     The value of the scroller.
@@ -99,7 +102,9 @@ SC.ScrollerView = SC.View.extend(
 
     var minimum = this.get('minimum');
     val = this._scs_value || minimum; // default value is at top/left
-    return Math.max(Math.min(val, this.get('maximum')), minimum);
+
+    if (this.get('allowOutlyingValues')) return val;
+    else return Math.max(Math.min(val, this.get('maximum')), minimum);
   }.property('maximum', 'minimum').cacheable(),
 
   /**
@@ -107,11 +112,8 @@ SC.ScrollerView = SC.View.extend(
     @observes value
   */
   displayValue: function () {
-    var ret;
-    if (this.get("_touchScrollValue")) ret = this.get("_touchScrollValue");
-    else ret = this.get("value");
-    return ret;
-  }.property("value", "_touchScrollValue").cacheable(),
+    return this.get("value");
+  }.property("value").cacheable(),
 
   /**
     The portion of the track that the thumb should fill. Usually the
@@ -349,35 +351,6 @@ SC.ScrollerView = SC.View.extend(
     } else {
       context.push('<div class="endcap"></div>');
     }
-  },
-
-  /** @private */
-  touchScrollDidStart: function (value) {
-    this.set("_touchScrollValue", value);
-  },
-
-  /** @private */
-  touchScrollDidEnd: function (value) {
-    SC.run(function () {
-      this.set("_touchScrollValue", NO);
-    }, this);
-  },
-
-  /* @private Internal property used to track the rate of touch scroll change events. */
-  _lastTouchScrollTime: null,
-
-  /** @private */
-  touchScrollDidChange: function (value) {
-    // Fast path!  Don't try to update too soon.
-    if (Date.now() - this._lastTouchScrollTime < 30) { return; }
-
-    // TODO: perform a raw update that doesn't require the run loop.
-    SC.run(function () {
-      this.set("_touchScrollValue", value);
-    }, this);
-
-    // Track the last time we updated.
-    this._lastTouchScrollTime = Date.now();
   },
 
   // ..........................................................
@@ -645,7 +618,7 @@ SC.ScrollerView = SC.View.extend(
       }
 
       if (scrollToClick) {
-        this.set('value', this.valueForPosition(mousePosition - (thumbLength / 2)));
+        this.set('value', Math.min(this.get('maximum'), Math.max(this.get('minimum'), this.valueForPosition(mousePosition - (thumbLength / 2)))));
 
         // and start a normal mouse down
         thumbPosition = this.get('thumbPosition');
@@ -747,11 +720,11 @@ SC.ScrollerView = SC.View.extend(
         // Too bad.
         if (evt.shiftKey) delta = -delta;
 
-        this.set('value', Math.round(this._valueAtDragStart + delta * 2));
+        this.set('value', Math.min(this.get('maximum'), Math.max(this.get('minimum'), Math.round(this._valueAtDragStart + delta * 2))));
       } else {
         thumbPosition = thumbPositionAtDragStart + delta;
         length = this.get('trackLength') - this.get('thumbLength');
-        this.set('value', Math.round((thumbPosition / length) * this.get('maximum')));
+        this.set('value', Math.min(this.get('maximum'), Math.max(this.get('minimum'), Math.round((thumbPosition / length) * this.get('maximum')))));
       }
 
     } else if (isScrollingUp || isScrollingDown) {
