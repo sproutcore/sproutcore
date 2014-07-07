@@ -1425,6 +1425,8 @@ SC.View.reopen(
   _adopted: function (beforeView) {
     // Our frame may change once we've been adopted to a parent.
     this._checkForResize();
+
+    // Notify all of our descendents that our parent has changed. They will update their `pane` value for one.
     this._callOnChildViews('_ancestorDidChangeParent');
   },
 
@@ -1432,8 +1434,13 @@ SC.View.reopen(
   _orphaned: function (oldParentView) {
     sc_super();
 
-    // Our frame may change once we've been removed from a parent.
-    if (!this.isDestroyed) { this._checkForResize(); }
+    if (!this.isDestroyed) {
+      // Our frame may change once we've been removed from a parent.
+      this._checkForResize();
+
+      // Notify all of our descendents that our parent has changed. They will update their `pane` value for one.
+      this._callOnChildViews('_ancestorDidChangeParent');
+    }
   },
 
   /** @private Extension: The 'updatedContent' event. */
