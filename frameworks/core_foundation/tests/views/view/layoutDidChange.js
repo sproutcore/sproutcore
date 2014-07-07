@@ -230,7 +230,7 @@ test("Calling viewDidResize on a view notifies its child views", function () {
   var view = SC.View.create({
     childViews: ['regular', 'core'],
 
-    regular: SC.View.create({
+    regular: SC.View.extend({
       viewDidResize: function () {
         regularViewCounter++;
         // Make sure we call the default implementation to
@@ -239,7 +239,7 @@ test("Calling viewDidResize on a view notifies its child views", function () {
       }
     }),
 
-    core: SC.CoreView.create({
+    core: SC.CoreView.extend({
       viewDidResize: function () {
         coreViewCounter++;
         sc_super();
