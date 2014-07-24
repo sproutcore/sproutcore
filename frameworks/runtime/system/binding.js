@@ -279,10 +279,10 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   beget: function (fromPath) {
     var ret = SC.beget(this);
     ret.parentBinding = this;
-    // Logic gates must be recreated on beget.
-    if (ret._LogicGate) {
-      ret._logicGate = ret._LogicGate.create(ret._logicGateHash);
-      ret = ret.from('logicProperty', ret._logicGate).oneWay();
+    // Mix adapters must be recreated on beget.
+    if (ret._MixAdapter) {
+      ret._mixAdapter = ret._MixAdapter.create(ret._mixAdapterHash);
+      ret = ret.from('aggregateProperty', ret._mixAdapter).oneWay();
     }
     // Enables duplicate API calls for SC.Binding.beget and SC.Binding.from
     if (fromPath !== undefined) ret = ret.from(fromPath);
@@ -443,7 +443,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     }
   },
 
-  /** 
+  /**
     Disconnects the binding instance.  Changes will no longer be relayed.  You
     will not usually need to call this method.
 
@@ -493,12 +493,12 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     // Mark it destroyed.
     this.isDestroyed = YES;
 
-    // Clean up the logic gate, if any. (See logic gate methods.)
-    if (this._logicGate) {
-      this._logicGate.destroy();
-      this._logicGate = null;
-      this._LogicGate = null;
-      this._logicGateHash = null;
+    // Clean up the mix adapter, if any. (See adapter methods.)
+    if (this._mixAdapter) {
+      this._mixAdapter.destroy();
+      this._mixAdapter = null;
+      this._MixAdapter = null;
+      this._mixAdapterHash = null;
     }
 
     // Disconnect the binding.
@@ -861,9 +861,9 @@ SC.Binding = /** @scope SC.Binding.prototype */{
       if (tuple) {
         this._toTarget = tuple[0];
         this._toPropertyKey = tuple[1];
-        // Hook up _logicGate if needed (see logic gate methods).
-        if (this._logicGate) {
-          this._logicGate.set('localObject', this._toTarget);
+        // Hook up _mixAdapter if needed (see adapter methods).
+        if (this._mixAdapter) {
+          this._mixAdapter.set('localObject', this._toTarget);
         }
       }
     }
@@ -1103,45 +1103,60 @@ SC.Binding = /** @scope SC.Binding.prototype */{
 
   /* @private Used with the logic gate bindings. */
   _LogicGateAnd: SC.Object.extend({
-    logicProperty: function () {
-      return (this.get('valueA') && this.get('valueB'));
-    }.property('valueA', 'valueB').cacheable()
+    aggregateProperty: function () {
+      return (this.get('value0') && this.get('value1'));
+    }.property('value0', 'value1').cacheable()
   }),
 
   /* @private Used with the logic gate bindings. */
   _LogicGateOr: SC.Object.extend({
-    logicProperty: function () {
-      return (this.get('valueA') || this.get('valueB'));
-    }.property('valueA', 'valueB').cacheable()
+    aggregateProperty: function () {
+      return (this.get('value0') || this.get('value1'));
+    }.property('value0', 'value1').cacheable()
   }),
 
-  /* @private Used by logic gate bindings. */
-  _logicGateBinding: function (gateClass, pathA, pathB) {
+  /* @private Used by mix adapter bindings. */
+  _mixAdapterBinding: function (adapterClass) {
+    var paths = [];
+
+    //@if(debug)
+      if( arguments.length < 3 )
+        SC.Logger.warn('Developer Warning: Invalid mix binding, it should have at least two target paths');
+    //@endif
+
     // If either path is local, remove any * chains and append the localObject path to it.
-    if (pathA.indexOf('*') === 0 || pathA.indexOf('.') === 0) {
-      pathA = pathA.slice(1).replace(/\*/g, '.');
-      pathA = '*localObject.' + pathA;
-    }
-    if (pathB.indexOf('*') === 0 || pathB.indexOf('.') === 0) {
-      pathB = pathB.slice(1).replace(/\*/g, '.');
-      pathB = '*localObject.' + pathB;
+    for (var i = 1; i < arguments.length; ++i) {
+      var path = arguments[ i ];
+
+      if (path.indexOf('*') === 0 || path.indexOf('.') === 0) {
+        path = path.slice(1).replace(/\*/g, '.');
+        path = '*localObject.' + path;
+      }
+      paths.push( path );
     }
 
-    // Gets the gate class and instantiates a nice copy.
-    var gateHash = {
+    // Gets the adapter class and instantiates a nice copy.
+    var adapterHash = {
         localObject: null,
-        valueABinding: SC.Binding.oneWay(pathA),
-        valueBBinding: SC.Binding.oneWay(pathB)
-      },
-      gate = gateClass.create(gateHash);
+    };
+
+    // create the oneWay bindings pointing to the real data sources.
+    // for naming use a hardcoded convention 'value' + index of the property/path.
+    // of course, these properties are internal so we are not concerned by the naming convention
+    for (var i=0; i<paths.length; ++i) {
+      var key = 'value' + i;
+      adapterHash[key + 'Binding'] = SC.Binding.oneWay(paths[i]);
+    }
+
+    var adapter = adapterClass.create(adapterHash);
 
     // Creates and populates the return binding.
-    var ret = this.from('logicProperty', gate).oneWay();
-    // This is all needed later on by beget, which must create a new logic gate instance
+    var ret = this.from('aggregateProperty', adapter).oneWay();
+    // This is all needed later on by beget, which must create a new adapter instance
     // or risk bad behavior.
-    ret._LogicGate = gateClass;
-    ret._logicGateHash = gateHash;
-    ret._logicGate = gate;
+    ret._MixAdapter = adapterClass;
+    ret._mixAdapterHash = adapterHash;
+    ret._mixAdapter = adapter;
 
     // On our way.
     return ret;
@@ -1165,7 +1180,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @param {String} pathB The second part of the conditional
   */
   and: function (pathA, pathB) {
-    return this._logicGateBinding(this._LogicGateAnd, pathA, pathB);
+    return this._mixAdapterBinding(this._LogicGateAnd, pathA, pathB);
   },
 
   /**
@@ -1186,7 +1201,59 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     @param {String} pathB The second part of the conditional
   */
   or: function (pathA, pathB) {
-    return this._logicGateBinding(this._LogicGateOr, pathA, pathB);
+    return this._mixAdapterBinding(this._LogicGateOr, pathA, pathB);
+  },
+
+  /**
+    Adds a transform that aggregates through a function the values at given paths. The function is called
+    whenever the values corresponding to the paths are updated.
+
+    For example if we want to calculate the sum of two properties provided by two different controllers:
+
+    label: SC.LabelView.extend({
+      valueBinding: SC.Binding.mix(function(v1, v2)
+      {
+        return v1 + v2;
+      }, 'MyApp.controller1.value', 'MyApp.controller2.value' )
+    })
+
+    @param {Function} mixFunction the function that aggregates the values
+    @param {String...} the paths of source values that will be provided to the aggregate function.
+
+    Notes:
+      - the number of parameters of mixFunction should match the number of paths provided
+      - the binding is not created if at least two paths are not provided
+      - this transform is oneWay as the provided function can't be bijective.
+  */
+  mix: function(mixFunction) {
+    // extract the paths that will bind to
+    var paths = Array.prototype.slice.call(arguments, 1);
+    var len = paths.length;
+    var properties = [];
+
+    // Create the adapter class that eventually will contain bindings pointing to all values that will be processed
+    // by mixFunction. The effective aggregation is done by another property that depends on all these local properties
+    // and is invalidated whenever they change.
+    // First of all, create the list of the property names that the aggregate property depends on.
+    // The names of these dynamically created properties are matching the pattern
+    // mentioned above (into _mixAdapterBinding): 'value' + index of the property/path
+    for (var i=0; i<len; ++i) {
+      properties.push('value' + i);
+    }
+
+    var adapter = SC.Object.extend({
+      // use SC.Function.property to be able to pass an array as arguments to .property
+      aggregateProperty: SC.Function.property(function() {
+        // create a list values that will be sent as arguments to the mix function
+        var values = properties.map(function(name)
+                                    {
+                                      return this.get(name);
+                                    }, this);
+        // call the mixFunction providing an array containing all source properties
+        return mixFunction.apply(null, values);
+      },properties).cacheable()
+    });
+    return this._mixAdapterBinding.apply(this, [adapter].concat(paths));
   },
 
   /**
@@ -1231,4 +1298,3 @@ SC.Binding = /** @scope SC.Binding.prototype */{
         SC.binding(path) = SC.Binding.from(path)
 */
 SC.binding = function (path, root) { return SC.Binding.from(path, root); };
-

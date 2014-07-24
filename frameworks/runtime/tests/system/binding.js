@@ -718,6 +718,60 @@ test("local paths work when binding is defined on a class", function() {
 
 });
 
+module("Binding transform: `mix`", {
+
+  setup: function () {
+    // temporarily set up two source objects in the SC namespace so we can
+    // use property paths to access them
+    SC.testControllerA = SC.Object.create({ value: 0 });
+    SC.testControllerB = SC.Object.create({ value: 1 });
+    SC.testControllerC = SC.Object.create({ value: 2 });
+
+    toObject = SC.Object.create({
+      value: null,
+      valueBinding: SC.Binding.mix(function(v1,v2,v3) {
+        return v1+'-'+v2+'-'+v3;
+      }, 'SC.testControllerA.value', 'SC.testControllerB.value', 'SC.testControllerC.value'),
+      localValue1: 1,
+      localValue2: 2,
+      localValue3: 3,
+      boundLocalValue: NO,
+      boundLocalValueBinding: SC.Binding.mix(function(v1,v2,v3) {
+        return v1+'+'+v2+'+'+v3;
+      }, '.localValue1', '.localValue2', '.localValue3')
+    });
+  },
+
+  teardown: function () {
+    SC.testControllerA.destroy();
+    delete SC.testControllerA;
+    SC.testControllerB.destroy();
+    delete SC.testControllerB;
+    SC.testControllerC.destroy();
+    delete SC.testControllerC;
+  }
+});
+
+test("bound value should be calculated correctly", function () {
+  SC.RunLoop.begin();
+  SC.testControllerA.set('value', 0);
+  SC.testControllerB.set('value', 10);
+  SC.testControllerC.set('value', 20);
+  SC.RunLoop.end();
+
+  SC.Binding.flushPendingChanges();
+  equals(toObject.get('value'), '0-10-20', 'Bound value');
+
+  SC.RunLoop.begin();
+  toObject.set('localValue1', 0);
+  toObject.set('localValue2', 10);
+  toObject.set('localValue3', 20);
+  SC.RunLoop.end();
+
+  SC.Binding.flushPendingChanges();
+  equals(toObject.get('boundLocalValue'), '0+10+20', 'Local bound value');
+});
+
 module("Binding with '[]'", {
   setup: function () {
     fromObject = SC.Object.create({ value: [] });
