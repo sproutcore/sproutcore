@@ -9,7 +9,7 @@
 // ========================================================================
 /*globals module, test, ok, isObj, equals, expects */
 
-var fromObject, midObject, toObject, binding, Bon1, bon2, first, second, third, binding1, binding2;
+var FromObject, fromObject, midObject, toObject, binding, Bon1, bon2, first, second, third, binding1, binding2;
 
 module("basic object binding", {
 
@@ -366,7 +366,67 @@ test("two bindings to the same value should sync in the order they are initializ
 
 });
 
-module("AND binding", {
+module("Binding transforms", {
+  setup: function () {
+    BindableObject = SC.Object.extend({
+      booleanValue: NO,
+      numericValue: 42,
+      stringValue: 'forty-two',
+      arrayValue: [4, 2],
+      undefinedValue: undefined
+    });
+    // temporarily set up two source objects in the SC namespace so we can
+    // use property paths to access them
+    SC.testControllerA = BindableObject.create();
+    SC.testControllerB = BindableObject.create();
+  },
+
+  teardown: function () {
+    SC.testControllerA.destroy();
+    delete SC.testControllerA;
+    SC.testControllerB.destroy();
+    delete SC.testControllerB;
+  }
+});
+
+test('Binding sync when only transformed value has changed', function () {
+  var toObject;
+  SC.run(function () {
+    toObject = SC.Object.create({
+      transformedValue: null,
+      transformedValueBinding: SC.Binding.oneWay('SC.testControllerA.undefinedValue').transform(function (value, binding) {
+        if (value === undefined) {
+          return 'VALUE IS UNDEFINED';
+        } else {
+          return value;
+        }
+      })
+    });
+  });
+
+  equals(toObject.get('transformedValue'), 'VALUE IS UNDEFINED', 'value is undefined, so bound value should be');
+});
+
+test("ALL THE OTHER BINDING TRANSFORMS.");
+
+test("equalTo", function() {
+  SC.RunLoop.begin();
+  var toObject = SC.Object.create({
+    isFortyTwo: null,
+    isFortyTwoBinding: SC.Binding.oneWay('SC.testControllerA.numericValue').equalTo(42)
+  });
+  SC.RunLoop.end();
+
+  equals(toObject.get('isFortyTwo'), true, "Value is equal to 42, so bound value should should be");
+
+  SC.RunLoop.begin();
+  SC.testControllerA.set('numericValue', 45);
+  SC.RunLoop.end();
+
+  equals(toObject.get('isFortyTwo'), false, "Value is no longer 42, so bound value should be");
+});
+
+module("Binding transform: `and`", {
 
   setup: function () {
     // temporarily set up two source objects in the SC namespace so we can
@@ -376,25 +436,38 @@ module("AND binding", {
 
     toObject = SC.Object.create({
       value: null,
-      valueBinding: SC.Binding.and('SC.testControllerA.value', 'SC.testControllerB.value')
+      valueBinding: SC.Binding.and('SC.testControllerA.value', 'SC.testControllerB.value'),
+      localValue1: NO,
+      localValue2: NO,
+      boundLocalValue: NO,
+      boundLocalValueBinding: SC.Binding.and('.localValue1', '.localValue2')
     });
   },
 
   teardown: function () {
     SC.testControllerA.destroy();
+    delete SC.testControllerA;
     SC.testControllerB.destroy();
+    delete SC.testControllerB;
   }
-
 });
 
-test("toObject.value should be YES if both sources are YES", function () {
+test("bound value should be YES if both sources are YES", function () {
   SC.RunLoop.begin();
   SC.testControllerA.set('value', YES);
   SC.testControllerB.set('value', YES);
   SC.RunLoop.end();
 
   SC.Binding.flushPendingChanges();
-  equals(toObject.get('value'), YES);
+  equals(toObject.get('value'), YES, 'Bound value');
+
+  SC.RunLoop.begin();
+  toObject.set('localValue1', YES);
+  toObject.set('localValue2', YES);
+  SC.RunLoop.end();
+
+  SC.Binding.flushPendingChanges();
+  equals(toObject.get('boundLocalValue'), YES, 'Local bound value');
 });
 
 test("toObject.value should be NO if either source is NO", function () {
@@ -404,7 +477,7 @@ test("toObject.value should be NO if either source is NO", function () {
   SC.RunLoop.end();
 
   SC.Binding.flushPendingChanges();
-  equals(toObject.get('value'), NO);
+  equals(toObject.get('value'), NO, 'Bound value on YES/NO');
 
   SC.RunLoop.begin();
   SC.testControllerA.set('value', YES);
@@ -412,7 +485,7 @@ test("toObject.value should be NO if either source is NO", function () {
   SC.RunLoop.end();
 
   SC.Binding.flushPendingChanges();
-  equals(toObject.get('value'), YES);
+  equals(toObject.get('value'), YES, 'Bound value on YES/YES');
 
   SC.RunLoop.begin();
   SC.testControllerA.set('value', NO);
@@ -420,7 +493,99 @@ test("toObject.value should be NO if either source is NO", function () {
   SC.RunLoop.end();
 
   SC.Binding.flushPendingChanges();
-  equals(toObject.get('value'), NO);
+  equals(toObject.get('value'), NO, 'Bound value on NO/YES');
+
+  SC.RunLoop.begin();
+  toObject.set('localValue1', YES);
+  toObject.set('localValue2', NO);
+  SC.RunLoop.end();
+
+  SC.Binding.flushPendingChanges();
+  equals(toObject.get('boundLocalValue'), NO, 'Local bound value on YES/NO');
+
+  SC.RunLoop.begin();
+  toObject.set('localValue1', YES);
+  toObject.set('localValue2', YES);
+  SC.RunLoop.end();
+
+  SC.Binding.flushPendingChanges();
+  equals(toObject.get('boundLocalValue'), YES, 'Local bound value on YES/YES');
+
+  SC.RunLoop.begin();
+  toObject.set('localValue1', NO);
+  toObject.set('localValue2', YES);
+  SC.RunLoop.end();
+
+  SC.Binding.flushPendingChanges();
+  equals(toObject.get('boundLocalValue'), NO, 'Local bound value on NO/YES');
+});
+
+test("remote paths work when binding is defined on a class", function() {
+  // This tests the solution to a bug which was hooking all instances of a class's `and` binding
+  // up through the same internal object, which would be destroyed the first time any instance
+  // was destroyed.
+
+  var ToObject = SC.Object.extend({
+    value: null,
+    valueBinding: SC.Binding.and('SC.testControllerA.value', 'SC.testControllerB.value')
+  });
+
+  var toObject1, toObject2;
+  SC.run(function() {
+    toObject1 = ToObject.create();
+    toObject2 = ToObject.create();
+  });
+
+  ok(!toObject1.get('value') && !toObject2.get('value'), "PRELIM: instances' initial values are correct.");
+
+  SC.run(function() {
+    SC.testControllerA.set('value', YES);
+    SC.testControllerB.set('value', YES);
+  });
+
+  ok(toObject1.get('value') && toObject2.get('value'), "PRELIM: instances' values update correctly.");
+
+  SC.run(function() {
+    toObject1.destroy();
+    SC.testControllerB.set('value', NO);
+  });
+
+  ok(!toObject2.get('value'), "Second instance updates correctly after first instance is destroyed.");
+
+  // Cleanup.
+  toObject2.destroy();
+
+});
+
+test("local paths work when binding is defined on a class", function() {
+  // This tests the solution to a bug which was hooking all instances of a class's `and` binding
+  // up through the same internal object, which would cause multiple instances to cross-polinate.
+
+  var ToObject = SC.Object.extend({
+    localValue1: NO,
+    localValue2: NO,
+    value: NO,
+    valueBinding: SC.Binding.and('.localValue1', '.localValue2')
+  });
+  var toObject1, toObject2;
+  SC.run(function() {
+    toObject1 = ToObject.create();
+    toObject2 = ToObject.create();
+  });
+
+  ok(!toObject1.get('value') && !toObject2.get('value'), "PRELIM: instances' initial values are correct.");
+
+  SC.run(function() {
+    toObject1.set('localValue1', YES).set('localValue2', YES);
+  });
+
+  ok(toObject1.get('value'), "First instance updates correctly when its own values are changed.");
+  ok(!toObject2.get('value'), "Second instance does not update when first instance's values are changed.");
+
+  // Cleanup.
+  toObject1.destroy();
+  toObject2.destroy();
+
 });
 
 module("OR binding", {
@@ -433,7 +598,11 @@ module("OR binding", {
 
     toObject = SC.Object.create({
       value: null,
-      valueBinding: SC.Binding.or('SC.testControllerA.value', 'SC.testControllerB.value')
+      valueBinding: SC.Binding.or('SC.testControllerA.value', 'SC.testControllerB.value'),
+      localValue1: NO,
+      localValue2: NO,
+      boundLocalValue: NO,
+      boundLocalValueBinding: SC.Binding.or('.localValue1', '.localValue2')
     });
   },
 
@@ -451,7 +620,16 @@ test("toObject.value should be first value if first value is truthy", function (
   SC.RunLoop.end();
 
   SC.Binding.flushPendingChanges();
-  equals(toObject.get('value'), 'first value');
+  equals(toObject.get('value'), 'first value', 'Bound value on truthy first value');
+
+  SC.RunLoop.begin();
+  toObject.set('localValue1', 'first value');
+  toObject.set('localValue2', 'second value');
+  SC.RunLoop.end();
+
+  SC.Binding.flushPendingChanges();
+  equals(toObject.get('boundLocalValue'), 'first value', 'Locally bound value on truthy first value');
+
 });
 
 test("toObject.value should be second value if first is falsy", function () {
@@ -461,7 +639,137 @@ test("toObject.value should be second value if first is falsy", function () {
   SC.RunLoop.end();
 
   SC.Binding.flushPendingChanges();
-  equals(toObject.get('value'), 'second value');
+  equals(toObject.get('value'), 'second value', 'Bound value on falsy first value');
+
+  SC.RunLoop.begin();
+  toObject.set('localValue1', NO);
+  toObject.set('localValue2', 'second value');
+  SC.RunLoop.end();
+
+  SC.Binding.flushPendingChanges();
+  equals(toObject.get('boundLocalValue'), 'second value', 'Locally bound value on falsy first value');
+
+});
+
+test("remote paths work when binding is defined on a class", function() {
+  // This tests the solution to a bug which was hooking all instances of a class's `or` binding
+  // up through the same internal object, which would be destroyed the first time any instance
+  // was destroyed.
+
+  var ToObject = SC.Object.extend({
+    value: null,
+    valueBinding: SC.Binding.or('SC.testControllerA.value', 'SC.testControllerB.value')
+  });
+
+  var toObject1, toObject2;
+  SC.run(function() {
+    toObject1 = ToObject.create();
+    toObject2 = ToObject.create();
+  });
+
+  ok(!toObject1.get('value') && !toObject2.get('value'), "PRELIM: instances' initial values are correct.");
+
+  SC.run(function() {
+    SC.testControllerB.set('value', YES);
+  });
+
+  ok(toObject1.get('value') && toObject2.get('value'), "PRELIM: instances' values update correctly.");
+
+  SC.run(function() {
+    toObject1.destroy();
+    SC.testControllerB.set('value', NO);
+  });
+
+  ok(!toObject2.get('value'), "Second instance updates correctly after first instance is destroyed.");
+
+  // Cleanup.
+  toObject2.destroy();
+
+});
+
+test("local paths work when binding is defined on a class", function() {
+  // This tests the solution to a bug which was hooking all instances of a class's `or` binding
+  // up through the same internal object, which would cause multiple instances to cross-polinate.
+
+  var ToObject = SC.Object.extend({
+    localValue1: NO,
+    localValue2: NO,
+    value: NO,
+    valueBinding: SC.Binding.or('.localValue1', '.localValue2')
+  });
+  var toObject1, toObject2;
+  SC.run(function() {
+    toObject1 = ToObject.create();
+    toObject2 = ToObject.create();
+  });
+
+  ok(!toObject1.get('value') && !toObject2.get('value'), "PRELIM: instances' initial values are correct.");
+
+  SC.run(function() {
+    toObject1.set('localValue1', YES);
+  });
+
+  ok(toObject1.get('value'), "First instance updates correctly when its own values are changed.");
+  ok(!toObject2.get('value'), "Second instance does not update when first instance's values are changed.");
+
+  // Cleanup.
+  toObject1.destroy();
+  toObject2.destroy();
+
+});
+
+module("Binding transform: `mix`", {
+
+  setup: function () {
+    // temporarily set up two source objects in the SC namespace so we can
+    // use property paths to access them
+    SC.testControllerA = SC.Object.create({ value: 0 });
+    SC.testControllerB = SC.Object.create({ value: 1 });
+    SC.testControllerC = SC.Object.create({ value: 2 });
+
+    toObject = SC.Object.create({
+      value: null,
+      valueBinding: SC.Binding.mix(function(v1,v2,v3) {
+        return v1+'-'+v2+'-'+v3;
+      }, 'SC.testControllerA.value', 'SC.testControllerB.value', 'SC.testControllerC.value'),
+      localValue1: 1,
+      localValue2: 2,
+      localValue3: 3,
+      boundLocalValue: NO,
+      boundLocalValueBinding: SC.Binding.mix(function(v1,v2,v3) {
+        return v1+'+'+v2+'+'+v3;
+      }, '.localValue1', '.localValue2', '.localValue3')
+    });
+  },
+
+  teardown: function () {
+    SC.testControllerA.destroy();
+    delete SC.testControllerA;
+    SC.testControllerB.destroy();
+    delete SC.testControllerB;
+    SC.testControllerC.destroy();
+    delete SC.testControllerC;
+  }
+});
+
+test("bound value should be calculated correctly", function () {
+  SC.RunLoop.begin();
+  SC.testControllerA.set('value', 0);
+  SC.testControllerB.set('value', 10);
+  SC.testControllerC.set('value', 20);
+  SC.RunLoop.end();
+
+  SC.Binding.flushPendingChanges();
+  equals(toObject.get('value'), '0-10-20', 'Bound value');
+
+  SC.RunLoop.begin();
+  toObject.set('localValue1', 0);
+  toObject.set('localValue2', 10);
+  toObject.set('localValue3', 20);
+  SC.RunLoop.end();
+
+  SC.Binding.flushPendingChanges();
+  equals(toObject.get('boundLocalValue'), '0+10+20', 'Local bound value');
 });
 
 module("Binding with '[]'", {
@@ -528,4 +836,44 @@ test("works with local path", function () {
   SC.RunLoop.end();
 
   equals(TestNamespace.toObject.get('relative'), "newerValue");
+});
+
+module("Overriding binding in subclass", {
+  setup: function() {
+    FromObject = SC.Object.extend({
+      localValue1: 'hello',
+      localValue2: 'world',
+      value: null,
+      valueBinding: SC.Binding.oneWay('.localValue1')
+    });
+  },
+  teardown: function() {
+    FromObject = null;
+  }
+});
+
+test("Bindings override in subclasses.", function() {
+  SC.LOG_DUPLICATE_BINDINGS = NO; // clean consoles
+
+  SC.RunLoop.begin();
+  fromObject = FromObject.create();
+  SC.RunLoop.end();
+
+  equals(fromObject.get('value'), 'hello', "PRELIM: Superclass binding gives value of");
+
+  fromObject.destroy();
+
+  SC.RunLoop.begin();
+  fromObject = FromObject.create({
+    valueBinding: SC.Binding.oneWay('.localValue2')
+  });
+  SC.RunLoop.end();
+
+  ok(fromObject._bindings.length === 1, "Duplicate bindings are not created.")
+
+  equals(fromObject.get('value'), 'world', "Superclass binding should have been overridden in the subclass, giving value a value of");
+
+  fromObject.destroy();
+
+  SC.LOG_DUPLICATE_BINDINGS = YES;
 });
