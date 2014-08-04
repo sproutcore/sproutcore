@@ -178,3 +178,131 @@ test("Resize with child view layout", function () {
     start();
   }, 500);
 });
+
+/**
+  For a TextFieldView where we set it to only resize its height every time its value changes 
+  we get the textareas width and set its max-width to this if no autoResizeLayer has been set.
+
+  This test checks that every-time the value changes the max-width we set doesn't change the 
+  textarea width (i.e. takes padding into account when measuring).
+ */
+test("Resize height only for textarea where textarea has padding.", function () {
+  stop(700);
+
+  var pane = SC.Pane.create({
+    layout: { top: 200, left: 0, width: 200, height: 200 }
+  });
+
+  // use a textarea for this test rather than label view
+  var view = SC.TextFieldView.create(SC.AutoResize, {
+    supportsAutoResize: YES,
+    shouldAutoResize: YES,
+    shouldResizeHeight: YES,
+    shouldResizeWidth: NO,
+    isTextArea: YES,
+    autoResizePadding: 10,
+
+    layout: {minHeight: 60, height: 60},
+
+    value: "Some text"
+  });
+
+  SC.run(function () {
+    pane.appendChild(view);
+    pane.append();
+  });
+
+  // add some padding to the element (generally done via css stylesheet)
+  // and also set the box-sizing to border-box so the textarea has 100%
+  // width including the padding.
+  SC.run(function () {
+    view.$('textarea').css({
+      'padding': '10px',
+      '-webkit-box-sizing': 'border-box', 
+      '-moz-box-sizing': 'border-box',
+      'box-sizing': 'border-box' 
+    })
+  });
+
+  // now the css is applied measure the textareas width
+  var origWidth = view.$('textarea').outerWidth();
+
+  // now we update the value and check the width of the textarea
+  // remains correct
+  SC.run(function () {
+    view.set('value', view.get('value') + "!");
+  });
+
+  setTimeout(function () {
+    // check the frame and textarea have the expected dimensions
+    ok(view.get('frame').width == 200, 'frame width is 200');
+    equals(origWidth, view.$('textarea').outerWidth(), 'textarea width has not changed since update of value')
+
+    pane.destroy();
+    pane.remove();
+
+    start();
+  }, 500);
+});
+
+/*
+  Test a TextFiledView with padding auto resizes text
+ */
+test("Resize text only for input where input has padding.", function () {
+  stop(700);
+
+  var pane = SC.Pane.create({
+    layout: {top: 200, left: 0, width: 200, height: 200 }
+  });
+
+  // use a text input for this test rather than a label view
+  var view = SC.TextFieldView.create(SC.AutoResize, {
+    supportsAutoResize: YES,
+    shouldAutoResize: YES,
+    shouldResizeHeight: NO,
+    shouldResizeWidth: NO,
+    isTextArea: NO,
+    autoResizePadding: 10,
+
+    layout: {minHeight: 60, height: 60},
+
+    value: "Some text"
+  });
+
+  SC.run(function () {
+    pane.appendChild(view);
+    pane.append();
+  });
+
+  // add some padding to the element (generally done via css stylesheet)
+  // and also set the box-sizing to border-box so the input element has 100%
+  // width including the padding.
+  SC.run(function () {
+    view.$('input').css({
+      'padding': '10px',
+      '-webkit-box-sizing': 'border-box', 
+      '-moz-box-sizing': 'border-box',
+      'box-sizing': 'border-box' 
+    })
+  });
+
+  // now the css is applied measure the input fields width
+  var origWidth = view.$('input').outerWidth();
+
+  // now we update the value and check the width of the input field
+  // remains correct
+  SC.run(function () {
+    view.set('value', view.get('value') + "!");
+  });
+
+  setTimeout(function () {
+    // check the frame and input field have the expected dimensions
+    ok(view.get('frame').width == 200, 'frame width is 200');
+    equals(origWidth, view.$('input').outerWidth(), 'input field width has not changed since update of value')
+
+    pane.destroy();
+    pane.remove();
+
+    start();
+  }, 500);
+})
