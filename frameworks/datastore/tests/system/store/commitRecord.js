@@ -156,7 +156,7 @@ test("Confirm that all the states are switched as expected after running commitR
     throwError=true;
     msg=error.message;
   }
-  equals(msg, SC.Record.NOT_FOUND_ERROR.message, "commitRecord should throw the following error");
+  equals(msg, SC.Record.NOT_FOUND_ERROR.toString(), "commitRecord should throw the following error");
 
   store.commitRecord(undefined, undefined, storeKey7);
   status = store.readStatus( storeKey7);

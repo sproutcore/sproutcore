@@ -644,7 +644,7 @@ SC.View.reopen(
 
     f = {};
 
-    var error, layer, AUTO = SC.LAYOUT_AUTO,
+    var layer, AUTO = SC.LAYOUT_AUTO,
         pv = this.get('parentView'),
         scale, oX, oY, // Used with the special case ScrollView handling below.
         dH, dW, //shortHand for parentDimensions
@@ -658,17 +658,13 @@ SC.View.reopen(
         lcY = layout.centerY;
 
     if (lW === AUTO) {
-      error = SC.Error.desc(("%@.layout() cannot use width:auto if " +
+      SC.throw(("%@.layout() cannot use width:auto if " +
         "staticLayout is disabled").fmt(this), "%@".fmt(this), -1);
-      SC.Logger.error(error.toString());
-      throw error;
     }
 
     if (lH === AUTO) {
-      error = SC.Error.desc(("%@.layout() cannot use height:auto if " +
+      SC.throw(("%@.layout() cannot use height:auto if " +
         "staticLayout is disabled").fmt(this), "%@".fmt(this), -1);
-      SC.Logger.error(error.toString());
-      throw error;
     }
 
     if (!pdim) { pdim = this.computeParentDimensions(layout); }
