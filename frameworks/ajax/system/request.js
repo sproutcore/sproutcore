@@ -31,6 +31,18 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
   //
 
   /**
+    Whether to allow credentials, such as Cookies, in the request. While this has no effect on
+    requests to the same domain, cross-domain requests require that the transport be configured to
+    allow the inclusion of credentials such as Cookies.
+
+    You can change this property using the chainable `credentials()` helper method (or set it directly).
+
+    @type Boolean
+    @default YES
+  */
+  allowCredentials: YES,
+
+  /**
     Sends the request asynchronously instead of blocking the browser. You
     should almost always make requests asynchronous. You can change this
     options with the async() helper option (or simply set it directly).
@@ -87,6 +99,29 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
     if (!ret) { ret = this._headers = {}; }
     return ret;
   }.property().cacheable(),
+
+  /**
+    Whether the request is within the same domain or not. The response class may use this property
+    to determine specific cross domain configurations.
+
+    @field
+    @type Boolean
+  */
+  isSameDomain: function () {
+    var address = this.get('address'),
+      urlRegex = /^([\w\+\.\-]+:)(?:\/\/([^\/?#:]*)(?::(\d+)|)|)/,
+      location = window.location,
+      parts, originParts;
+
+      // This pattern matching strategy was taken from jQuery.
+      parts = urlRegex.exec( address.toLowerCase()  );
+      originParts = urlRegex.exec( window.location.origin.toLowerCase() );
+
+      return SC.none(parts) ||
+        (parts[1] === originParts[1] &&  // protocol
+         parts[2] === originParts[2] &&  // domain
+         (parts[3] || (parts[1] === "http:" ? 80 : 443 ) ) === (originParts[3] || (originParts[1] === "http:" ? 80 : 443))); // port
+  }.property('address').cacheable(),
 
   /**
     Underlying response class to actually handle this request. Currently the
@@ -222,7 +257,7 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
   concatenatedProperties: 'COPY_KEYS',
 
   /** @private */
-  COPY_KEYS: ['attachIdentifyingHeaders', 'isAsynchronous', 'isJSON', 'isXML', 'address', 'type', 'timeout', 'body', 'responseClass', 'willSend', 'didSend', 'willReceive', 'didReceive'],
+  COPY_KEYS: ['attachIdentifyingHeaders', 'allowCredentials', 'isAsynchronous', 'isJSON', 'isXML', 'address', 'type', 'timeout', 'body', 'responseClass', 'willSend', 'didSend', 'willReceive', 'didReceive'],
 
   /**
     Returns a copy of the current request. This will only copy certain
@@ -316,6 +351,17 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
   async: function(flag) {
     if (flag === undefined) { flag = YES; }
     return this.set('isAsynchronous', flag);
+  },
+
+  /**
+    Converts the current request to request allowing credentials or not.
+
+    @param {Boolean} flag YES to request allowing credentials, NO to disallow credentials. Default YES.
+    @returns {SC.Request} receiver
+  */
+  credentials: function(flag) {
+    if (flag === undefined) { flag = YES; }
+    return this.set('allowCredentials', flag);
   },
 
   /**
@@ -691,13 +737,13 @@ SC.Request.manager = SC.Object.create(
         var r = inflight.objectAt(i);
         r.cancel();
       }
-      
+
       // Manually scrub the arrays without screwing up memory pointers.
       pending.replace(0, pendingLen);
       inflight.replace(0, inflightLen);
-      
+
       return YES;
-      
+
     }
     return NO;
   },

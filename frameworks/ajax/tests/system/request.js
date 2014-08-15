@@ -10,8 +10,10 @@
 /*globals module, test, ok, isObj, equals, expects */
 
 var url, request, contents, test_timeout=2500;
-if(window._phantom) {
-    test_timeout=5000;
+
+// When running Travis-CI tests through PhantomJS, wait extra long.
+if (window._phantom) {
+  test_timeout=5000;
 }
 
 module("SC.Request", {
@@ -122,22 +124,28 @@ test("Default properties are correct for different types of requests.", function
   jsonBody = { a: 1, b: 2 };
   formBody = "fname=Henry&lname=Ford";
   req1 = SC.Request.getUrl(url).json()._prep();
-  req2 = SC.Request.postUrl(url, formBody).header('Content-Type', 'application/x-www-form-urlencoded')._prep();
-  req3 = SC.Request.putUrl(url, xmlBody).xml()._prep();
-  req4 = SC.Request.patchUrl(url, jsonBody).json()._prep();
+  req2 = SC.Request.postUrl(window.location.origin + url, formBody).header('Content-Type', 'application/x-www-form-urlencoded')._prep().credentials(false);
+  req3 = SC.Request.putUrl('https://localhost:4020/' + url, xmlBody).xml()._prep();
+  req4 = SC.Request.patchUrl('http://localhost/' + url, jsonBody).json()._prep();
   req5 = SC.Request.deleteUrl(url)._prep();
 
   ok(req1.get('isJSON'), 'req1 should have isJSON true');
   ok(!req1.get('isXML'), 'req1 should have isXML false');
+  ok(req1.get('allowCredentials'), 'req1 should have allowCredentials true');
+  ok(req1.get('isSameDomain'), 'req1 should have isSameDomain true');
   equals(req1.header('Content-Type'), undefined, 'req1 should have Content-Type header as');
   ok(!req2.get('isJSON'), 'req2 should have isJSON false');
   ok(!req2.get('isXML'), 'req2 should have isXML false');
+  ok(!req2.get('allowCredentials'), 'req2 should have allowCredentials false');
+  ok(req2.get('isSameDomain'), 'req1 should have isSameDomain true');
   equals(req2.header('Content-Type'), 'application/x-www-form-urlencoded', 'req2 should have Content-Type header as');
   ok(!req3.get('isJSON'), 'req3 should have isJSON false');
   ok(req3.get('isXML'), 'req3 should have isXML true');
+  ok(!req3.get('isSameDomain'), 'req1 should have isSameDomain false');
   equals(req3.header('Content-Type'), 'text/xml', 'req3 should have Content-Type header as');
   ok(req4.get('isJSON'), 'req4 should have isJSON true');
   ok(!req4.get('isXML'), 'req4 should have isXML false');
+  ok(!req4.get('isSameDomain'), 'req1 should have isSameDomain false');
   equals(req4.header('Content-Type'), 'application/json', 'req4 should have Content-Type header as');
   ok(!req5.get('isJSON'), 'req5 should have isJSON false');
   ok(!req5.get('isXML'), 'req5 should have isXML false');
@@ -178,7 +186,6 @@ test("Test Synchronous GET Request", function() {
 
 test("Test Asynchronous GET Request, auto-deserializing JSON", function() {
   request.set("isJSON", YES);
-
 
   var timer;
 
