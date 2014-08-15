@@ -3,7 +3,6 @@
   "indent": 2,
   "latedef": true,
   "eqeqeq": true,
-  "maxcomplexity": 3,
   "maxerr": 100,
   "predef": ["SC", "YES", "NO", "sc_require", "sc_super", "sc_static"],
   "undef": true,
