@@ -579,6 +579,11 @@ SC.XHRResponse = SC.Response.extend(
       rawRequest.setRequestHeader(headerKey, headers[headerKey]);
     }
 
+    // Do we need to allow Cookies for x-domain requests?
+    if (!this.getPath('request.isSameDomain') && this.getPath('request.allowCredentials')) {
+      rawRequest.withCredentials = true;
+    }
+
     // now send the actual request body - for sync requests browser will
     // block here
     rawRequest.send(this.getPath('request.encodedBody'));
