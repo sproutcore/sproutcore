@@ -345,10 +345,10 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
     // if no type is provided, remove all types for this element.
     if (eventType === undefined) {
-      for(eventType in events) this.remove(elem, eventType) ;
+      for (var anEventType in events) this.remove(elem, anEventType) ;
 
     // otherwise, remove the handler for this specific eventType if found
-    } else if (handlers = events[eventType]) {
+    } else if ((handlers = events[eventType])) {
 
       var cleanupHandlers = NO ;
 
@@ -530,7 +530,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     if ((typeof SC === "undefined") || SC.Event.triggered) return YES ;
 
     // returned undefined or NO
-    var val, ret, namespace, all, handlers, args, key, handler, method, target;
+    var val, ret, handlers, args, key, handler, method, target;
 
     // normalize event across browsers.  The new event will actually wrap the
     // real event with a normalized API.
@@ -903,7 +903,7 @@ SC.Event.prototype = {
     if(SC.browser.name === SC.BROWSER.ie &&
         SC.browser.compare(SC.browser.version, '9.0') < 0) {
       // Return an empty String for backspace, tab, left, right, up or down.
-      if(this.keyCode == 8 || this.keyCode == 9 ||
+      if(this.keyCode === 8 || this.keyCode === 9 ||
           (this.keyCode >= 37 && this.keyCode<=40)) {
         return String.fromCharCode(0);
       } else {
@@ -943,7 +943,8 @@ SC.Event.prototype = {
     // otherwise just go get the right key.
     if (!ret) {
       code = this.which ;
-      key = ret = String.fromCharCode(code) ;
+      // key = ret = String.fromCharCode(code) ;
+      key = ret = this.getCharString();
       lowercase = ret.toLowerCase() ;
       if (this.metaKey) {
         modifiers = 'meta_' ;
