@@ -904,7 +904,7 @@ SC.Event.prototype = {
         SC.browser.compare(SC.browser.version, '9.0') < 0) {
       // Return an empty String for backspace, tab, left, right, up or down.
       if(this.keyCode === 8 || this.keyCode === 9 ||
-          (this.keyCode >= 37 && this.keyCode<=40)) {
+          (this.keyCode >= 37 && this.keyCode <= 40)) {
         return String.fromCharCode(0);
       } else {
         // This will only be accurate if the event is a keypress event.
@@ -916,48 +916,70 @@ SC.Event.prototype = {
   },
 
   /**
-    Returns character codes for the event.  The first value is the normalized
-    code string, with any shift or ctrl characters added to the beginning.
-    The second value is the char string by itself.
+    Returns characters with command codes for the event.
+
+    The first value is a normalized command code identifying the modifier keys that are pressed in
+    combination with a character key. Command codes can be used to map key combinations to an action
+    in the application. A basic example of a normalized command code would be `ctrl_x`, which
+    corresponds to the combination of the `command` key with the `x` key being pressed on OS X or
+    the `ctrl` key with the `x` key in Windows.
+
+    The second value is the character string by itself. So for `ctrl_x`, this would be simply `x`. However,
+    for `alt_x` it would be `≈` and for `alt_shift_x`, it would be `˛`.
+
+    ## Considerations for Different OS's
+
+    At this time, the meta (command) key is mapped to the `ctrl_` command code. This means that
+    on OS X, command + s, and on Windows, ctrl + s, both become the same command code, `ctrl_s`.
 
     @returns {Array}
   */
-  commandCodes: function() {
-    var code=this.keyCode, ret=null, key=null, modifiers='', lowercase ;
+  commandCodes: function () {
+    var charCode = this.charCode,
+      keyCode = this.keyCode,
+      charString = null,
+      commandCode = null;
 
-    // handle function keys.
-    // WebKit browsers have equal values for keyCode and charCode on keypress event
-    if (code && code !== this.charCode) {
-      ret = SC.FUNCTION_KEYS[code] ;
-      if (!ret && (this.altKey || this.ctrlKey || this.metaKey)) {
-        ret = SC.PRINTABLE_KEYS[code];
-      }
-
-      if (ret) {
-        if (this.altKey) modifiers += 'alt_' ;
-        if (this.ctrlKey || this.metaKey) modifiers += 'ctrl_' ;
-        if (this.shiftKey) modifiers += 'shift_' ;
-      }
+    // WebKit browsers have equal values for `keyCode` and `charCode` on the keypress event. For example,
+    // the letter `r` and the function `f3` both have a `keyCode` of 114. But the `r` also has a `charCode`
+    // of 114.
+    // If there is a keyCode and no matching charCode it is a function key.
+    if (keyCode && keyCode !== charCode) {
+      commandCode = SC.FUNCTION_KEYS[keyCode];
     }
 
-    // otherwise just go get the right key.
-    if (!ret) {
-      code = this.which ;
-      // key = ret = String.fromCharCode(code) ;
-      key = ret = this.getCharString();
-      lowercase = ret.toLowerCase() ;
-      if (this.metaKey) {
-        modifiers = 'meta_' ;
-        ret = lowercase;
+    // If this wasn't a function key, look for a modifier + key combination.
+    if (!commandCode) {
+      var printableCharString;
 
-      } else ret = null ;
+      // Find the base character of the key (i.e. `alt` + `a` becomes `å`, but we really want the key name, `a`).
+      printableCharString = SC.PRINTABLE_KEYS[keyCode];
+
+      // If a modifier key is pressed, check if it is pressed along with a printable character.
+      if (!SC.none(printableCharString) && (this.altKey || this.ctrlKey || this.metaKey)) {
+        var modifiers = '';
+
+        // Append the pressed modifier keys into a name used to identify command codes.
+        // For example, holding the keys: shift, command & x, will map to the name "ctrl_shift_x".
+        if (this.ctrlKey || this.metaKey) modifiers += 'ctrl_';
+        // UNUSED.
+        // if (this.ctrlKey) modifiers += 'ctrl_';
+        // In OS X at least, when the ctrl key is pressed, both ctrlKey & metaKey are true. This makes it impossible to identify
+        // ctrl + meta vs. just ctrl. We can identify just meta though.
+        // else if (this.metaKey) modifiers += 'meta_';
+
+        if (this.altKey) modifiers += 'alt_';
+        if (this.shiftKey) modifiers += 'shift_';
+        commandCode = modifiers + printableCharString;
+      }
+
+      charString = this.getCharString();  // A character string or null.
     }
 
-    if (ret) ret = modifiers + ret ;
-    return [ret, key] ;
+    return [commandCode, charString];
   }
 
-} ;
+};
 
 // Also provide a Prototype-like API so that people can use either one.
 
