@@ -929,8 +929,17 @@ SC.Event.prototype = {
 
     ## Considerations for Different OS's
 
-    At this time, the meta (command) key is mapped to the `ctrl_` command code. This means that
-    on OS X, command + s, and on Windows, ctrl + s, both become the same command code, `ctrl_s`.
+    At this time, the meta (command) key in OS X is mapped to the `ctrl_` command code prefix. This
+    means that on OS X, command + s, and on Windows, ctrl + s, both become the same command code, `ctrl_s`.
+
+    Note that the order of command code prefixes is important and goes in the order: `ctrl_`, `alt_`,
+    `shift_`. The following are examples of command codes:
+
+    * ctrl_x
+    * alt_x
+    * ctrl_shift_x
+    * ctrl_alt_shift_x
+    * alt_shift_x
 
     @returns {Array}
   */
@@ -938,7 +947,8 @@ SC.Event.prototype = {
     var charCode = this.charCode,
       keyCode = this.keyCode,
       charString = null,
-      commandCode = null;
+      commandCode = null,
+      baseKeyName;
 
     // WebKit browsers have equal values for `keyCode` and `charCode` on the keypress event. For example,
     // the letter `r` and the function `f3` both have a `keyCode` of 114. But the `r` also has a `charCode`
@@ -948,33 +958,35 @@ SC.Event.prototype = {
       commandCode = SC.FUNCTION_KEYS[keyCode];
     }
 
-    // If this wasn't a function key, look for a modifier + key combination.
-    if (!commandCode) {
-      var printableCharString;
+    // Use the function name as the key name in the command code (ex. `down` could become `shift_down`).
+    if (commandCode) {
+      baseKeyName = commandCode;
 
-      // Find the base character of the key (i.e. `alt` + `a` becomes `å`, but we really want the key name, `a`).
-      printableCharString = SC.PRINTABLE_KEYS[keyCode];
-
-      // If a modifier key is pressed, check if it is pressed along with a printable character.
-      if (!SC.none(printableCharString) && (this.altKey || this.ctrlKey || this.metaKey)) {
-        var modifiers = '';
-
-        // Append the pressed modifier keys into a name used to identify command codes.
-        // For example, holding the keys: shift, command & x, will map to the name "ctrl_shift_x".
-        if (this.ctrlKey || this.metaKey) modifiers += 'ctrl_';
-        // UNUSED.
-        // if (this.ctrlKey) modifiers += 'ctrl_';
-        // In OS X at least, when the ctrl key is pressed, both ctrlKey & metaKey are true. This makes it impossible to identify
-        // ctrl + meta vs. just ctrl. We can identify just meta though.
-        // else if (this.metaKey) modifiers += 'meta_';
-
-        if (this.altKey) modifiers += 'alt_';
-        if (this.shiftKey) modifiers += 'shift_';
-        commandCode = modifiers + printableCharString;
-      }
-
-      charString = this.getCharString();  // A character string or null.
+    // Find the base character for the key (i.e. `alt` + `a` becomes `å`, but we really want the key name, `a`).
+    } else {
+      baseKeyName = SC.PRINTABLE_KEYS[keyCode];
     }
+
+    // If there is a base key name, append any modifiers to generate the command code.
+    if (baseKeyName) {
+      var modifiers = '';
+
+      // Append the pressed modifier keys into a name used to identify command codes.
+      // For example, holding the keys: shift, command & x, will map to the name "ctrl_shift_x".
+      if (this.ctrlKey || this.metaKey) modifiers += 'ctrl_';
+      // UNUSED. In a future version we should scrap ctrl vs. meta for the proper intent depending on the current OS.
+      // if (this.ctrlKey) modifiers += 'ctrl_';
+      // In OS X at least, when the ctrl key is pressed, both ctrlKey & metaKey are true. This makes it impossible to identify
+      // ctrl + meta vs. just ctrl. We can identify just meta though.
+      // else if (this.metaKey) modifiers += 'meta_';
+
+      if (this.altKey) modifiers += 'alt_';
+      if (this.shiftKey) modifiers += 'shift_';
+
+      commandCode = modifiers + baseKeyName;
+    }
+
+    charString = this.getCharString();  // A character string or null.
 
     return [commandCode, charString];
   }
