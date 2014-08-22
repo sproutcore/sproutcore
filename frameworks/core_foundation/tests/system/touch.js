@@ -6,6 +6,7 @@
 // ==========================================================================
 
 var pane,
+    // TODO: This custom event counting could/should be replaced with CoreTest.stub.
     outerCapture = 0,
     outerStart = 0,
     outerDragged = 0,

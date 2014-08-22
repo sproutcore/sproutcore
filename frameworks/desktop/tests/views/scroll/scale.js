@@ -134,12 +134,14 @@ test('When contentView is fully visible, it is positioned according to horizonta
 
   SC.run(function() {
     scrollView.set('horizontalAlign', SC.ALIGN_LEFT);
+    scrollView._scsv_adjustElementScroll(); // This method is PRIVATE. (Called here to cheat, synchronously testing an asynchronous operation.)
   });
 
   equals(contentView.getPath('frame.x'), 0, "Content view's x offset is 0 when horizontalAlign is set to SC.ALIGN_LEFT");
 
   SC.run(function() {
     scrollView.set('horizontalAlign', SC.ALIGN_CENTER);
+    scrollView._scsv_adjustElementScroll(); // This method is PRIVATE. (Called here to cheat, synchronously testing an asynchronous operation.)
   });
 
   var expectedContentViewOffsetX = (containerView.getPath('frame.width') - contentView.getPath('frame.width')) / 2;
@@ -149,6 +151,7 @@ test('When contentView is fully visible, it is positioned according to horizonta
 
   SC.run(function() {
     scrollView.set('horizontalAlign', SC.ALIGN_RIGHT);
+    scrollView._scsv_adjustElementScroll(); // This method is PRIVATE. (Called here to cheat, synchronously testing an asynchronous operation.)
   });
 
   expectedContentViewOffsetX = containerView.getPath('frame.width') - contentView.getPath('frame.width');
@@ -168,12 +171,14 @@ test('When contentView is fully visible, it is positioned according to verticalA
 
   SC.run(function() {
     scrollView.set('verticalAlign', SC.ALIGN_TOP);
+    scrollView._scsv_adjustElementScroll(); // This method is PRIVATE. (Called here to cheat, synchronously testing an asynchronous operation.)
   });
 
   equals(contentView.getPath('frame.y'), 0, "Content view's y offset is 0 when verticalAlign is set to SC.ALIGN_TOP");
 
   SC.run(function() {
     scrollView.set('verticalAlign', SC.ALIGN_MIDDLE);
+    scrollView._scsv_adjustElementScroll(); // This method is PRIVATE. (Called here to cheat, synchronously testing an asynchronous operation.)
   });
 
   var expectedContentViewOffsetX = (containerView.getPath('frame.height') - contentView.getPath('frame.height')) / 2;
@@ -183,6 +188,7 @@ test('When contentView is fully visible, it is positioned according to verticalA
 
   SC.run(function() {
     scrollView.set('verticalAlign', SC.ALIGN_BOTTOM);
+    scrollView._scsv_adjustElementScroll(); // This method is PRIVATE. (Called here to cheat, synchronously testing an asynchronous operation.)
   });
 
   expectedContentViewOffsetX = containerView.getPath('frame.height') - contentView.getPath('frame.height');

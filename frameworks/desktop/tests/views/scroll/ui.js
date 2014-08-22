@@ -101,17 +101,23 @@
     var maxVScroll = view.maximumVerticalScrollOffset();
     ok((maxVScroll > 0), 'Max vertical scroll should be greater than zero');
 
-    SC.run(function() { view.scrollTo(0,100); });
+    SC.run(function() {
+      view.scrollTo(0,100);
+      view._scsv_adjustElementScroll(); // This method is PRIVATE. (Called here to cheat, synchronously testing an asynchronous operation.)
+    });
     equals(view.get('verticalScrollOffset'), 100, 'Vertical scrolling should adjust verticalScrollOffset');
     var elem = view.getPath('contentView.layer');
     if (SC.platform.get('supportsCSSTransforms')) {
       equals(elem.style[SC.browser.experimentalStyleNameFor('transform')],
         'translateX(0px) translateY(-100px) translateZ(0px) scale(1)',
-        'Vertical scrolling should adjust transform on the contentView layer.');
+        'Vertical scrolling should adjust transform on the contentView layer');
     }
     // TODO: Simulate unsupported browser and test fallback (containerView's marginTop)
-    
-    SC.run(function() { view.scrollTo(50,0); });
+
+    SC.run(function() {
+      view.scrollTo(50,0);
+      view._scsv_adjustElementScroll(); // This method is PRIVATE. (Called here to cheat, synchronously testing an asynchronous operation.)
+    });
     equals(view.get('horizontalScrollOffset'), 50, 'horizontal scrolling should adjust horizontalScrollOffset');
     if (SC.platform.get('supportsCSSTransforms')) {
       equals(elem.style[SC.browser.experimentalStyleNameFor('transform')],
@@ -161,18 +167,22 @@
    test('ScrollView should readjust scroll transform if layer changes', function() {
      var view = pane.view('basic2'), cv = view.get('contentView'), container = view.get('containerView'),
       prevTransform;
-     
+
     // Get the previous style transform.
-    SC.run(function() { view.scrollTo(10, 10); });
+    SC.run(function() {
+      view.scrollTo(10, 10);
+      view._scsv_adjustElementScroll(); // This method is PRIVATE. (Called here to cheat, synchronously testing an asynchronous operation.)
+    });
     prevTransform = cv.get('layer').style[SC.browser.experimentalStyleNameFor('transform')];
 
-    SC.run(function() { cv.replaceLayer(); });
+    SC.run(cv.replaceLayer, cv);
 
-    equals(prevTransform, cv.get('layer').style[SC.browser.experimentalStyleNameFor('transform')],
+    equals(cv.get('layer').style[SC.browser.experimentalStyleNameFor('transform')],
+      prevTransform,
       'The new layer has had the scroll transform style applied');
 
     // TODO: Simulate transform-not-supported environment and test fallback (marginTop/Left)
-   });
+  });
 
   test('Scroller views of scroll view should have aria attributes set', function() {
     var view = pane.view("aria-attributes"),
@@ -219,10 +229,11 @@
       equals(opac, '0', 'after fadeout, scroller thumb opacity should equal zero');
       SC.RunLoop.begin();
       verticalScroller.fadeIn(0.1);
+      view._scsv_adjustElementScroll(); // This method is PRIVATE. (Called here to cheat, synchronously testing an asynchronous operation.)
       SC.RunLoop.end();
       setTimeout(function() {
         opac = verticalScroller.$('.thumb').css('opacity');
-        equals(opac, '0.5', 'after fadeout, scroller thumb opacity should equal 0.5');
+        equals(opac, '0.5', 'after fadein, scroller thumb opacity should equal 0.5');
         start();
       }, 200)
 

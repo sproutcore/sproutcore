@@ -19,18 +19,20 @@ module("SC.Pane#sendEvent", {
     pane = SC.Pane.create({
       defaultResponder: defaultResponder,
       paneEvent: handler,
-      childViews: [SC.View.extend({
+      childViews: ['fooView'],
+      fooView: SC.View.extend({
         fooEvent: handler,
-        childViews: [SC.View.extend({
+        childViews: ['barView'],
+        barView: SC.View.extend({
           barEvent: handler
-        })]
-      })]
+        })
+      })
     });
-    fooView = pane.childViews[0];
-    ok(fooView.fooEvent, 'has fooEvent handler');
+    fooView = pane.fooView;
+    ok(fooView.fooEvent, 'fooView has fooEvent handler');
 
-    barView = fooView.childViews[0];
-    ok(barView.barEvent, 'has barEvent handler');
+    barView = fooView.barView;
+    ok(barView.barEvent, 'barView has barEvent handler');
 
     evt = SC.Object.create(); // mock
   },
@@ -42,7 +44,7 @@ module("SC.Pane#sendEvent", {
 });
 
 test("when invoked with target = nested view", function() {
-  var handler ;
+  var handler;
 
   // test event handler on target
   callCount = 0;
@@ -134,6 +136,31 @@ test("when invoked with target = pane", function() {
 
 
 
+test("when invoked with target = deepest descendent view and cutoff view = middle view to cut off the responder chain", function() {
+  var handler;
+
+  // Test arrested event handling where a handler exists on responder chain but above the cutoff view.
+  callCount = 0;
+  handler = pane.sendEvent('fooEvent', evt, barView, fooView);
+  equals(callCount, 0, 'should not invoke handler found on responder chain but above the cutoff view');
+  equals(handler, null, 'should return no responder');
+
+  // Test arrested event handling a handler exists within the truncated responder chain.
+  callCount = 0;
+  handler = pane.sendEvent('barEvent', evt, barView, fooView);
+  equals(callCount, 1, 'should invoke handler found within truncated responder chain');
+  equals(handler, barView, 'should return barView as having handled barEvent');
+
+  // Test that defaultResponder is NOT given an opportunity to handle an arrested event
+  callCount = 0;
+  handler = pane.sendEvent('defaultEvent', evt, barView, fooView);
+  equals(callCount, 0, 'should not invoke default handler if the responder chain is truncated');
+  equals(handler, null, 'should return no responder');
+
+});
+
+
+
 test("when invoked with target = null", function() {
   var handler ;
 
@@ -204,4 +231,3 @@ test("when invoked with target = null, no default or first responder", function(
   equals(handler, pane, 'should return pane as responder that handled event');
 
 });
-
