@@ -1233,17 +1233,23 @@ SC.RootResponder = SC.Object.extend(
       (or, though it's not recommended, change it), check touch.touchResponders.
 
     @param {SC.Touch} touch
-    @param {SC.Responder} responder The view to assign to the touch. (Must implement touchStart.)
-    @param {Boolean} shouldStack Whether the new responder should replace the old one, or stack with it. Stacked responders are easy to revert.
-    @param {Boolean} bubbles Whether the attempt to find a responder which implements touchStart should bubble up the responder chain.
+    @param {SC.Responder} responder The view to assign to the touch. (It, or if bubbling then an ancestor,
+      must implement touchStart.)
+    @param {Boolean} shouldStack Whether the new responder should replace the old one, or stack with it.
+      Stacked responders are easy to revert via `SC.Touch#restoreLastTouchResponder`.
+    @param {Boolean|SC.Responder} bubblesTo If YES, will attempt to find a `touchStart` responder up the
+      responder chain. If NO or undefined, will only check the passed responder. If you pass a responder
+      for this argument, the attempt will bubble until it reaches the passed responder, allowing you to
+      restrict the bubbling to a portion of the responder chain. ((Note that this responder will not be
+      given an opportunity to respond to the event.)
+    @returns {Boolean} Whether a valid touch responder was found and assigned.
   */
-  makeTouchResponder: function(touch, responder, shouldStack, bubbles) {
-
+  makeTouchResponder: function(touch, responder, shouldStack, bubblesTo) {
     // In certain cases (SC.Gesture being one), we have to call makeTouchResponder
     // from inside makeTouchResponder so we queue it up here.
     if (this._isMakingTouchResponder) {
-      this._queuedTouchResponder = [touch, responder, shouldStack, bubbles];
-      return;
+      this._queuedTouchResponder = [touch, responder, shouldStack, bubblesTo];
+      return YES; // um?
     }
     this._isMakingTouchResponder = YES;
 
@@ -1256,7 +1262,7 @@ SC.RootResponder = SC.Object.extend(
     if (touch.touchResponder === responder) {
       this._isMakingTouchResponder = NO;
       this._flushQueuedTouchResponder();
-      return;
+      return YES; // more um
     }
 
     // send touchStart
@@ -1266,13 +1272,13 @@ SC.RootResponder = SC.Object.extend(
     else pane = this.get('keyPane') || this.get('mainPane') ;
 
     // if the responder is not already in the stack...
-
     if (stack.indexOf(responder) < 0) {
-      // if we need to go up the view chain, do so
-      if (bubbles) {
+
+      // if we need to go up the view chain, do so via SC.Pane#sendEvent.
+      if (bubblesTo) {
         // if we found a valid pane, send the event to it
         try {
-          responder = (pane) ? pane.sendEvent("touchStart", touch, responder) : null ;
+          responder = pane ? pane.sendEvent("touchStart", touch, responder, bubblesTo) : null ;
         } catch (e) {
           SC.Logger.error("Error in touchStart: " + e);
           responder = null;
@@ -1340,31 +1346,36 @@ SC.RootResponder = SC.Object.extend(
       }
     }
 
-
+    // Unflag that this method is running, and flush the queue if any.
     this._isMakingTouchResponder = NO;
-    this._flushQueuedTouchResponder();
+    this._flushQueuedTouchResponder(); // this may need to be &&'ed with the responder to give the correct return value...
 
+    return !!responder;
   },
 
   /**
-    captureTouch is used to find the view to handle a touch. It starts at the starting point and works down
-    to the touch's target, looking for a view which captures the touch.
+    Before the touchStart event is sent up the usual responder chain, the views along that same responder chain
+    are given the opportunity to capture the touch event, preventing child views (including the target) from
+    hearing about it. This of course proceeds in the opposite direction from a usual event bubbling, starting at
+    the target's first ancestor and proceeding towards the target. This method implements the capture phase.
 
-    Then, it triggers a touchStart event starting at whatever the found view was; this propagates up the view chain
-    until a view responds YES. This view becomes the touch's owner.
+    If no view captures the touch, this method will return NO, and makeTouchResponder is then called for the
+    target, proceeding with standard target-to-pane event bubbling for `touchStart`.
 
-    You usually do not call captureTouch, and if you do call it, you'd call it on the touch itself:
-    touch.captureTouch(startingPoint, shouldStack)
+    For an example of captureTouch in action, see SC.ScrollView's touch handling, which by default captures the
+    touch and holds it for 150ms to allow it to determine whether the user is tapping or scrolling.
 
-    If shouldStack is YES, the previous responder will be kept so that it may be returned to later.
+    You will usually not call this method yourself, and if you do, you should call the corresponding convenience
+    method on the touch itself.
 
     @param {SC.Touch} touch The touch to offer up for capture.
-    @param {?SC.Responder} startingPoint The view whose children should be given an opportunity
-      to capture the event. (The starting point itself is not asked.)
-    @param {Boolean} shouldStack Whether any capturing responder should stack with (YES) or replace
-      (NO) existing responders.
+    @param {?SC.Responder} startingPoint The view whose children should be given an opportunity to capture
+      the event. (The starting point itself is not asked.)
+    @param {Boolean} shouldStack Whether any capturing responder should stack with existing responders.
+      Stacked responders are easy to revert via `SC.Touch#restoreLastTouchResponder`.
 
-    @returns {Boolean} Whether or not the touch was captured.
+    @returns {Boolean} Whether or not the touch was captured. If it was not, you should pass it to
+      `makeTouchResponder` for standard event bubbling.
   */
   captureTouch: function(touch, startingPoint, shouldStack) {
     if (!startingPoint) startingPoint = this;
@@ -1398,7 +1409,7 @@ SC.RootResponder = SC.Object.extend(
         //@endif
 
         // if so, make it the touch's responder
-        this.makeTouchResponder(touch, view, shouldStack, YES); // triggers touchStart/Cancel/etc. event.
+        this.makeTouchResponder(touch, view, shouldStack, startingPoint); // (touch, target, should stack, bubbles back to startingPoint, or all the way up.)
         return YES; // and that's all we need
       }
     }
@@ -1475,15 +1486,14 @@ SC.RootResponder = SC.Object.extend(
     "Finishes" a touch. That is, it eradicates it from our touch entries and removes all responder, etc. properties.
   */
   finishTouch: function(touch) {
-    var elem;
-
     // ensure the touch is indeed unassigned.
     this.unassignTouch(touch);
 
     // If we rescued this touch's initial element, we should remove it
     // from the DOM and garbage collect now. See setup() for an
     // explanation of this bug/workaround.
-    if (elem = touch._rescuedElement) {
+    var elem = touch._rescuedElement;
+    if (elem) {
       if (elem.swapNode && elem.swapNode.parentNode) {
         elem.swapNode.parentNode.replaceChild(elem, elem.swapNode);
       } else if (elem.parentNode === SC.touchHoldingPen) {
@@ -1493,7 +1503,6 @@ SC.RootResponder = SC.Object.extend(
       elem.swapNode = null;
       elem = null;
     }
-
 
     // clear responders (just to be thorough)
     touch.touchResponders = null;
@@ -1558,18 +1567,15 @@ SC.RootResponder = SC.Object.extend(
         // set the event (so default action, etc. can be stopped)
         touchEntry.event = evt; // will be unset momentarily
 
-        // send out event thing: creates a chain, goes up it, then down it,
-        // with startTouch and cancelTouch. in this case, only startTouch, as
-        // there are no existing touch responders. We send the touchEntry
-        // because it is cached (we add the helpers only once)
+        // First we allow any view in the responder chain to capture the touch, before triggering the standard touchStart
+        // handler chain.
         var captured = this.captureTouch(touchEntry, this);
-        if (!captured) this.makeTouchResponder(touchEntry, touchEntry.targetView, NO, YES); // touch, target, shouldStack, bubbles
+        if (!captured) this.makeTouchResponder(touchEntry, touchEntry.targetView, NO, YES); // (touch, target, shouldn't stack, bubbles all the way)
 
         // Unset the reference to the original event so we can garbage collect.
         touchEntry.event = null;
       }
     }, this);
-
 
     // hack for text fields
     if (hidingTouchIntercept) {

@@ -123,19 +123,45 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   rootResponder: null,
 
   /**
-    Attempts to send the event down the responder chain for this pane.  If you
-    pass a target, this method will begin with the target and work up the
-    responder chain.  Otherwise, it will begin with the current rr
-    and walk up the chain looking for any responder that implements a handler
-    for the passed method and returns YES when executed.
+    Attempts to send the specified event up the responder chain for this pane. This
+    method is used by the RootResponder to correctly delegate mouse, touch and keyboard
+    events. You can also use it to send your own events to the pane's responders, though
+    you will usually not do this.
 
-    @param {String} action
-    @param {SC.Event} evt
-    @param {Object} target
+    A responder chain is a linked list of responders - mostly views - which are each
+    sequentially given an opportunity to handle the event. The responder chain begins with
+    the event's `target` view, and proceeds up the chain of parentViews (via the customizable
+    nextResponder property) until it reaches the pane and its defaultResponder. You can
+    specify the `target` responder; by default, it is the pane's current `firstResponder`
+    (see SC.View keyboard event documentation for more on the first responder).
+
+    Beginning with the target, each responder is given the chance to handle the named event.
+    In order to handle an event, a responder must implement a method with the name of the
+    event. For example, to handle the mouseDown event, expose a `mouseDown` method. If a
+    responder handles a method, then the event will stop bubbling up the responder chain.
+    (If your responder exposes a handler method but you do not always want to handle that
+    method, you can signal that the method should continue bubbling up the responder chain by
+    returning NO from your handler.)
+
+    In some rare cases, you may want to only alert part of the responder chain. For example,
+    SC.ScrollView uses this to capture a touch to give the user a moment to begin scrolling
+    on otherwise-tappable controls. To accomplish this, pass a view (or responder) as the
+    `untilResponder` argument. If the responder chain includes this view, it will break the
+    chain there and not proceed. (Note that the `untilResponder` object will not be given a
+    chance to respond to the event.)
+
+    @param {String} action The name of the event (i.e. method name) to invoke.
+    @param {SC.Event} evt The optional event object.
+    @param {SC.Responder} target The responder chain's first member. If not specified, will
+      use the pane's current firstResponder instead.
+    @param {SC.Responder} untilResponder If specified, the responder chain will break when
+      this object is reached, preventing it and subsequent responders from receiving
+      the event.
     @returns {Object} object that handled the event
   */
-  sendEvent: function(action, evt, target) {
-    var handler;
+  sendEvent: function(action, evt, target, untilResponder) {
+    // Until there's time for a refactor of this method, note the early return for untilResponder, marked
+    // below with "FAST PATH".
 
     // walk up the responder chain looking for a method to handle the event
     if (!target) target = this.get('firstResponder') ;
@@ -162,9 +188,13 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
         if (target.tryToPerform(action, evt)) break;
       }
 
-      // even if someone tries to fill in the nextResponder on the pane, stop
-      // searching when we hit the pane.
-      target = (target === this) ? null : target.get('nextResponder') ;
+      // If we've reached the pane, we're at the end of the chain.
+      target = (target === this) ? null : target.get('nextResponder');
+      // FAST PATH: If we've reached untilResponder, break the chain. (TODO: refactor out this early return. The
+      // point is to avoid pinging defaultResponder if we ran into the untilResponder.)
+      if (target === untilResponder) {
+        return (evt && evt.mouseHandler) || null;
+      }
     }
 
     // if no handler was found in the responder chain, try the default

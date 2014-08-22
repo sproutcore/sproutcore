@@ -118,7 +118,8 @@ SC.ScrollView = SC.View.extend({
   verticalAlign: SC.ALIGN_TOP,
 
   /**
-    Your content view's initial horizontal alignment, if wider than the container. If not specified,
+    Your content view's initial horizontal alignment, if wider than the container. This allows you to e.g.
+    center the content view when zoomed out, but begin with it zoomed in and left-aligned. If not specified,
     defaults to your horizontalAlign. May be:
 
       - SC.ALIGN_LEFT
@@ -131,8 +132,9 @@ SC.ScrollView = SC.View.extend({
   // Maybe in the future these could optionally be a %/pixel value?
 
   /**
-    Your content view's initial horizontal alignment, if taller than the container. If not specified,
-    defaults to your horizontalAlign. May be:
+    Your content view's initial vertical alignment, if taller than the container. This allows you to e.g.
+    center the content view when zoomed out, but begin with it zoomed in and top-aligned. If not specified,
+    defaults to your verticalAlign. May be:
 
       - SC.ALIGN_TOP
       - SC.ALIGN_BOTTOM
@@ -974,89 +976,6 @@ SC.ScrollView = SC.View.extend({
     return this.scrollBy(0 - (this.get('horizontalPageScroll') * pages), null);
   },
 
-  /** @private
-    Adjusts the layout for the various internal views.  This method is called
-    once when the scroll view is first configured and then anytime a scroller
-    is shown or hidden.  You can call this method yourself as well to retile.
-
-    You may also want to override this method to handle layout for any
-    additional controls you have added to the view.
-  */
-  tile: function () {
-    if (this.viewState === SC.View.UNRENDERED) {
-      return;
-    }
-
-    // get horizontal scroller/determine if we should have a scroller
-    var hscroll = this.get('hasHorizontalScroller') ? this.get('horizontalScrollerView') : null;
-    var hasHorizontal = hscroll && this.get('isHorizontalScrollerVisible');
-
-    // get vertical scroller/determine if we should have a scroller
-    var vscroll = this.get('hasVerticalScroller') ? this.get('verticalScrollerView') : null;
-    var hasVertical = vscroll && this.get('isVerticalScrollerVisible');
-
-    // get the containerView
-    var clip = this.get('containerView');
-    var clipLayout = { left: 0, top: 0 };
-    var layout, vo, ho, vl, hl;
-
-    var ht = ((hasHorizontal) ? hscroll.get('scrollbarThickness') : 0);
-    var vt = (hasVertical) ?   vscroll.get('scrollbarThickness') : 0;
-
-    if (hasHorizontal) {
-      hl = this.get('horizontalScrollerLayout');
-      layout = {
-        left: (hl ? hl.left : 0),
-        bottom: (hl ? hl.bottom : 0),
-        right: (hl ? hl.right + vt - 1 : vt - 1),
-        height: ht
-      };
-      hscroll.set('layout', layout);
-
-      // Check for overlay.
-      ho = this.get('horizontalOverlay');
-      clipLayout.bottom = ho ? 0 : (layout.bottom + ht);
-    } else {
-      clipLayout.bottom = 0;
-    }
-    if (hscroll) {
-      hscroll.set('isVisible', hasHorizontal);
-      this._sc_fadeOutHorizontalScroller();
-    }
-
-    if (hasVertical) {
-      ht     = ht + this.get('verticalScrollerBottom');
-      vl     = this.get('verticalScrollerLayout');
-      layout = {
-        top: (vl ? vl.top : 0),
-        bottom: (vl ? vl.bottom + ht : ht),
-        right: (vl ? vl.right : 0),
-        width: vt
-      };
-      vscroll.set('layout', layout);
-
-      // Check for overlay.
-      vo = this.get('verticalOverlay');
-      clipLayout.right = vo ? 0 : (layout.right + vt);
-    } else {
-      clipLayout.right = 0;
-    }
-    if (vscroll) {
-      vscroll.set('isVisible', hasVertical);
-      this._sc_fadeOutVerticalScroller();
-    }
-
-    clip.adjust(clipLayout);
-  },
-
-  /** @private
-    Whenever a scroller's visibility changes, we have to re-tile the views.
-  */
-  scrollerVisibilityDidChange: function () {
-    // this.invokeOnce(this.tile);
-    this.tile();
-  }.observes('isVerticalScrollerVisible', 'isHorizontalScrollerVisible'),
-
   // ..........................................................
   // SCROLL WHEEL SUPPORT
   //
@@ -1451,7 +1370,7 @@ SC.ScrollView = SC.View.extend({
 
     // PROCEED.
     // See if any of our descendent views want to handle the touch. If not, we keep our existing respondership and all is well.
-    touch.captureTouch(this, YES);
+    if (!touch.captureTouch(this, YES)) { touch.makeTouchResponder(touch.targetView, YES, this); }
     // Either way, note that content has already been given a chance to handle this gesture.
     this._scroll_touchContentHadItsChance = YES;
   },
@@ -1687,7 +1606,11 @@ SC.ScrollView = SC.View.extend({
       // If the content hasn't been given a swing at the event yet (either it's been fewer than 150 ms, or
       // we're not in hand-holding mode), give it a swing.
       if (!this._scroll_touchContentHadItsChance) {
+        // Run through the captureTouch pass, then failing that go the usual makeTouchResponder (touchStart) pass.
         var captured = touch.captureTouch(this, YES);
+        if (!captured) {
+          captured = touch.makeTouchResponder(touch.targetView, YES, this);
+        }
         // If the content has captured the touch, then immediately end it. (TODO: See if there are problems with
         // beginning and ending a touch on a child view in the same run loop.)
         if (captured) {
@@ -1746,7 +1669,7 @@ SC.ScrollView = SC.View.extend({
       // Algebra:
       // (scale1Val - toScaleBottom) / (toScaleTop - toScaleBottom) = (fromScaleVal - fromScaleBottom) / (fromScaleTop - fromScaleBottom)
       // scale1Val - toScaleBottom = (toScaleTop - toScaleBottom) * (fromScaleVal - fromScaleBottom) /  (fromScaleTop - fromScaleBottom)
-      var scale1Val = toScaleBottom + (toScaleTop - toScaleBottom) * (fromScaleVal - fromScaleBottom) /  (fromScaleTop - fromScaleBottom)
+      var scale1Val = toScaleBottom + (toScaleTop - toScaleBottom) * (fromScaleVal - fromScaleBottom) /  (fromScaleTop - fromScaleBottom);
       return scale1Val;
     };
     function convertCappedScales(toScaleBottom, toScaleTop, fromScaleBottom, fromScaleVal, fromScaleTop) {
@@ -2285,7 +2208,7 @@ SC.ScrollView = SC.View.extend({
     this._scroll_verticalScaleOriginPct = 0.5;
 
     this._scsv_scaleDidChange(); // set up initial scale and alignment
-    this.tile(); // set up initial tiling
+    this.tile(); // set up initial tiling (scaleDidChange doesn't call tile 100% of time)
   },
 
   /** @private
@@ -2345,7 +2268,7 @@ SC.ScrollView = SC.View.extend({
     }
 
     // FAST PATH: Mid-scale. Running this code during a touch scale (i.e. at every frame) results in a pretty
-    // big performance hit, and a number of unsquashed bugs. Ultimately, the best approach would be to fix the
+    // big performance hit, and a number of unsquashed bugs. Ultimately, the best approach will be to fix the
     // bugs and improve the performance across the board.
     if (this._scroll_isTouchScaling) {
       return;
@@ -2445,6 +2368,97 @@ SC.ScrollView = SC.View.extend({
   }.observes('frame'),
 
   /** @private
+    Adjusts the layout for the various internal views.  This method is called
+    once when the scroll view is first configured and then anytime a scroller
+    is shown or hidden.  You can call this method yourself as well to retile.
+
+    You may also want to override this method to handle layout for any
+    additional controls you have added to the view.
+  */
+  tile: function () {
+    if (this.viewState === SC.View.UNRENDERED) {
+      return;
+    }
+
+    // Get scroller views and determine if we should have a scroller on each axis.
+    var hscroll = this.get('hasHorizontalScroller') ? this.get('horizontalScrollerView') : null,
+      hasHorizontal = hscroll && this.get('isHorizontalScrollerVisible'),
+      vscroll = this.get('hasVerticalScroller') ? this.get('verticalScrollerView') : null,
+      hasVertical = vscroll && this.get('isVerticalScrollerVisible'),
+      // Initialize the layouts.
+      containerLayout = { left: 0, top: 0, right: 0, bottom: 0 },
+      scrollerLayout, vl, hl,
+      hThickness = hasHorizontal ? hscroll.get('scrollbarThickness') : 0,
+      vThickness = hasVertical ? vscroll.get('scrollbarThickness') : 0,
+      // We need to know if any guttered scrollers appear or disappear.
+      hasHorizontalGutter = NO,
+      hasVerticalGutter = NO;
+
+    // Horizontal.
+    if (hasHorizontal) {
+      hl = this.get('horizontalScrollerLayout');
+      scrollerLayout = {
+        left: (hl ? hl.left : 0),
+        bottom: (hl ? hl.bottom : 0),
+        right: (hl ? hl.right + vThickness - 1 : vThickness - 1),
+        height: hThickness
+      };
+      hscroll.set('layout', scrollerLayout);
+
+      // If the scroller is guttered instead of overlaid, adjust the container's layout.
+      if (!this.get('horizontalOverlay')) {
+        containerLayout.bottom = scrollerLayout.bottom + hThickness;
+        hasHorizontalGutter = YES;
+      }
+    }
+    if (hscroll) {
+      hscroll.set('isVisible', hasHorizontal);
+      this._sc_fadeOutHorizontalScroller();
+    }
+
+    // Vertical.
+    if (hasVertical) {
+      hThickness = hThickness + this.get('verticalScrollerBottom');
+      vl = this.get('verticalScrollerLayout');
+      scrollerLayout = {
+        top: (vl ? vl.top : 0),
+        bottom: (vl ? vl.bottom + hThickness : hThickness),
+        right: (vl ? vl.right : 0),
+        width: vThickness
+      };
+      vscroll.set('layout', scrollerLayout);
+
+      // If the scroller is guttered instead of overlaid, adjust the container's layout.
+      if (!this.get('verticalOverlay')) {
+        containerLayout.right = scrollerLayout.right + vThickness;
+        hasVerticalGutter = YES;
+      }
+    }
+    if (vscroll) {
+      vscroll.set('isVisible', hasVertical);
+      this._sc_fadeOutVerticalScroller();
+    }
+
+    // Adjust our container view.
+    this.get('containerView').adjust(containerLayout);
+
+    // If either of our scrollers live in gutters and have appeared or disappeared, we need to ping the layout people.
+    if (hasHorizontalGutter !== this._scroll_hasHorizontalGutter || hasVerticalGutter !== this._scroll_hasVerticalGutter) {
+      this.frameDidChange();
+      this._scroll_hasHorizontalGutter = hasHorizontalGutter;
+      this._scroll_hasVerticalGutter = hasVerticalGutter;
+    }
+
+  },
+
+  /** @private
+    Whenever a scroller's visibility changes, we have to re-tile the views.
+  */
+  scrollerVisibilityDidChange: function () {
+    this.invokeOnce(this.tile);
+  }.observes('isVerticalScrollerVisible', 'isHorizontalScrollerVisible'),
+
+  /** @private
     Whenever the scale changes, we need to reposition our offsets around the
     current scale origin, and recalculate the visibility of our scrollers et
     cetera.
@@ -2524,7 +2538,8 @@ SC.ScrollView = SC.View.extend({
     transforms on the new DOM element.
   */
   contentViewLayerDidChange: function () {
-    this.invokeLast(this.adjustElementScroll);
+    this._scroll_contentLayerChangedSinceLastUpdate = YES;
+    this.invokeLast(this._scsv_adjustElementScroll);
   },
 
   /** @private
@@ -2564,6 +2579,9 @@ SC.ScrollView = SC.View.extend({
     }
   },
 
+  /** @private
+    This method actually does the scroll element adjusting.
+  */
   _scsv_adjustElementScroll: function() {
     // Bookkeep.
     this._scroll_animationID = null;
@@ -2579,13 +2597,21 @@ SC.ScrollView = SC.View.extend({
 
     // FAST PATH: Nothing changed since our last render, and no animations queued.
     if (
+      // If no changes to scale and offsets...
       verticalScrollOffset === this._scroll_lastRenderedVerticalScrollOffset &&
       horizontalScrollOffset === this._scroll_lastRenderedHorizontalScrollOffset &&
       scale === this._scroll_lastRenderedScale &&
-      !this._scroll_queuedAnimations.length
+      // And no running animations...
+      !this._scroll_queuedAnimations.length &&
+      // And it's the same layer...
+      !this._scroll_contentLayerChangedSinceLastUpdate
     ) {
+      // ...then there's no need for an update.
       return;
     }
+
+    // (If we're handling a content layer change, we need to unflag the need for it.)
+    this._scroll_contentLayerChangedSinceLastUpdate = NO;
 
     // We notify the content view that its frame property has changed before we actually update the position.
     // This gives views that use incremental rendering a chance to render newly-appearing elements before
@@ -2829,6 +2855,14 @@ SC.ScrollView = SC.View.extend({
 
   /** @private The cached maximum horizontal offset value. */
   _scroll_maximumHorizontalScrollOffset: 0,
+
+  // tile
+
+  /** @private If the tile method detects the appearance or disappearance of gutters, it triggers a re-layout. */
+  _scroll_hasHorizontalGutter: NO,
+
+  /** @private If the tile method detects the appearance or disappearance of gutters, it triggers a re-layout. */
+  _scroll_hasVerticalGutter: NO,
 
   // Scale
 

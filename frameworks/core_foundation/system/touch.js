@@ -434,12 +434,19 @@ SC.Touch.prototype = {
     When returning control of a touch to a previous handler, you should call
     `restoreLastTouchResponder` instead.
 
-    @param {SC.Responder} responder The view which should become responder.
-    @param {Boolean} shouldStack Whether the previous touch responder should be retained for possible use later in the touch's lifecycle.
-    @param {Boolean} upChain Whether or not a fallback responder should be sought up the responder chain if responder doesn't capture or handle the touch.
+    @param {SC.Responder} responder The view to assign to the touch. (It, or if bubbling then an ancestor,
+      must implement touchStart.)
+    @param {Boolean} shouldStack Whether the new responder should replace the old one, or stack with it.
+      Stacked responders are easy to revert via `SC.Touch#restoreLastTouchResponder`.
+    @param {Boolean|SC.Responder} bubblesTo If YES, will attempt to find a `touchStart` responder up the
+      responder chain. If NO or undefined, will only check the passed responder. If you pass a responder
+      for this argument, the attempt will bubble until it reaches the passed responder, allowing you to
+      restrict the bubbling to a portion of the responder chain. (Note that this responder will not be
+      given an opportunity to respond to the event.)
+    @returns {Boolean} Whether a valid touch responder was found and assigned.
   */
-  makeTouchResponder: function(responder, shouldStack, upViewChain) {
-    this.touchContext.makeTouchResponder(this, responder, shouldStack, upViewChain);
+  makeTouchResponder: function(responder, shouldStack, bubblesTo) {
+    return this.touchContext.makeTouchResponder(this, responder, shouldStack, bubblesTo);
   },
 
   /**
@@ -462,9 +469,12 @@ SC.Touch.prototype = {
   },
 
   /**
-    Captures, or recaptures, the touch. This works from the touch's raw target view
-    up to the startingPoint, and finds either a view that returns YES to captureTouch() or
-    touchStart().
+    Captures, or recaptures, this touch. This works from the startingPoint's first child up to the
+    touch's target view to find a view which implements `captureTouch` and returns YES. If the touch
+    is captured, then this method will perform a standard `touchStart` event bubbling beginning with
+    the view which captured the touch. If no view captures the touch, then this method returns NO,
+    and you should call the `makeTouchResponder` method to trigger a standard `touchStart` bubbling
+    from the initial target on down.
 
     You will generally not call this method yourself, instead exposing on
     your view either a `touchStart` event handler method, or a `captureTouch`
@@ -474,11 +484,14 @@ SC.Touch.prototype = {
 
     @param {?SC.Responder} startingPoint The view whose children should be given an opportunity
       to capture the event. (The starting point itself is not asked.)
-    @param {Boolean} shouldStack Whether any capturing responder should stack with (YES) or replace
-      (NO) existing responders.
+    @param {Boolean} shouldStack Whether any capturing responder should stack with existing responders.
+      Stacked responders are easy to revert via `SC.Touch#restoreLastTouchResponder`.
+
+    @returns {Boolean} Whether the touch was captured. If it was not, you should pass it to
+      `makeTouchResponder` for standard event bubbling.
   */
   captureTouch: function(startingPoint, shouldStack) {
-    this.touchContext.captureTouch(this, startingPoint, shouldStack);
+    return this.touchContext.captureTouch(this, startingPoint, shouldStack);
   },
 
   /**
