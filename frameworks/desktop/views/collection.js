@@ -6,7 +6,6 @@
 // ==========================================================================
 
 sc_require('mixins/collection_view_delegate');
-sc_require('views/list_item');
 
 /**
   Special drag operation passed to delegate if the collection view proposes
