@@ -18,7 +18,9 @@
   ## Example
 
       MyApp.MyViewClass = SC.View.extend(SC.ContentDisplay, {
-        contentDisplayProperties: 'title isEnabled hasChildren'.w(),
+
+        contentDisplayProperties: ['title', 'isEnabled', 'hasChildren'],
+
         ...
       });
 
@@ -28,9 +30,6 @@ SC.ContentDisplay = {
 
   /** @private */
   concatenatedProperties: 'contentDisplayProperties',
-
-  /** @private */
-  displayProperties: ['content'],
 
   /**
     Add an array with the names of any property on the content object that
