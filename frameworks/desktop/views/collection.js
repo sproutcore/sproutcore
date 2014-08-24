@@ -1789,25 +1789,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   },
 
   // ..........................................................
-  // DESIGN MODE SUPPORT
-  //
-
-  /** @private Set the designMode on each item view. */
-  adjustChildDesignModes: function (lastDesignMode, designMode) {
-    sc_super();
-
-    var itemView,
-      nowShowing = this.get('nowShowing');
-
-    // Only loop through the now showing indexes, if the content is sparsely
-    // loaded we could inadvertently trigger reloading unneeded content.
-    nowShowing.forEach(function (idx) {
-      itemView = this.itemViewForContentIndex(idx);
-      itemView.updateDesignMode(lastDesignMode, designMode);
-    }, this);
-  },
-
-  // ..........................................................
   // KEYBOARD EVENTS
   //
 
@@ -3261,7 +3242,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
     attrs.contentIndex = idx;
     attrs.content = items.objectAt(idx);
-    attrs.designMode = this.get('designMode');
     attrs.disclosureState = disclosureState;
     attrs.isEnabled = isEnabled;
     attrs.isEditable = isEditable;
@@ -3399,7 +3379,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     // Update the view with the new properties.
     itemView.set('content', attrs.content);
     itemView.set('contentIndex', attrs.contentIndex);
-    itemView.set('designMode', attrs.designMode);
     itemView.set('isEnabled', attrs.isEnabled);
     itemView.set('isEditable', attrs.isEditable);
     itemView.set('isReorderable', attrs.isReorderable);
