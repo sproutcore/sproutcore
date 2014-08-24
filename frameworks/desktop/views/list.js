@@ -570,8 +570,9 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     classNames: 'sc-list-insertion-point',
 
     layout: function (key, value) {
-      var layoutDirection = this.get('layoutDirection'),
-        key = layoutDirection === SC.LAYOUT_HORIZONTAL ? 'width' : 'height';
+      var layoutDirection = this.get('layoutDirection');
+
+      key = layoutDirection === SC.LAYOUT_HORIZONTAL ? 'width' : 'height';
 
       // Getter – create layout hash.
       if (value === undefined) {
@@ -741,7 +742,7 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
 
     // now we know which index we are in.  if dropOperation is DROP_ON, figure
     // if we can drop on or not.
-    if (dropOperation == SC.DROP_ON) {
+    if (dropOperation === SC.DROP_ON) {
       // editable size - reduce height by a bit to handle dropping
       if (this.get('isEditable')) diff = Math.min(Math.floor((max - min) * 0.2), 5);
       else diff = 0;
