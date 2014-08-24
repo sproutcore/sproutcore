@@ -1009,7 +1009,7 @@ SC.RenderContext = SC.Builder.create(
           attr = elAttrs.item(i);
           name = attr.nodeName;
           if (name.match(/^(?!class|style).*$/i)) {
-            attrs[name] = attr.nodeValue;
+            attrs[name] = attr.value;
           }
         }
 
