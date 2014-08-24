@@ -1158,7 +1158,7 @@ SC.ScrollView = SC.View.extend({
       verticalScroller = this.get('verticalScrollerView'),
       delay;
 
-    if (canScrollVertical && verticalScroller.get('fadeIn')) {
+    if (canScrollVertical && verticalScroller && verticalScroller.get('fadeIn')) {
       if (this._sc_verticalFadeOutTimer) {
         // Reschedule the current timer (avoid creating a new instance).
         this._sc_verticalFadeOutTimer.startTime = null;
@@ -1180,7 +1180,7 @@ SC.ScrollView = SC.View.extend({
       horizontalScroller = this.get('horizontalScrollerView'),
       delay;
 
-    if (canScrollHorizontal && horizontalScroller.get('fadeIn')) {
+    if (canScrollHorizontal && horizontalScroller && horizontalScroller.get('fadeIn')) {
       if (this._sc_horizontalFadeOutTimer) {
         // Reschedule the current timer (avoid creating a new instance).
         this._sc_horizontalFadeOutTimer.startTime = null;
