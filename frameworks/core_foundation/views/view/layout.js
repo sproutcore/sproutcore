@@ -7,9 +7,6 @@ SC.LAYOUT_HORIZONTAL = 'sc-layout-horizontal';
 /** Select a vertical layout for various views.*/
 SC.LAYOUT_VERTICAL = 'sc-layout-vertical';
 
-/** @private */
-SC._VIEW_DEFAULT_DIMS = ['marginTop', 'marginLeft'];
-
 /**
   Layout properties to take up the full width of a parent view.
 */
