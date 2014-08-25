@@ -2103,6 +2103,12 @@ SC.ScrollView = SC.View.extend({
     if (this.get('isVisibleInWindow')) this._sc_registerAutoscroll();
   },
 
+  /** @private */
+  destroy: function() {
+    sc_super();
+    if (this._scroll_animationID) cancelAnimationFrame(this._scroll_animationID);
+  },
+
   /** @private
     If we redraw after the initial render, we need to make sure that we reset
     the scroll transform properties on the content view.  This ensures
