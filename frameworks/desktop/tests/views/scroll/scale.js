@@ -10,15 +10,15 @@
 var pane;
 var imageUrl = sc_static('images/sproutcore-512.png'); // 'http://photos4.meetupstatic.com/photos/event/4/6/9/9/600_4518073.jpeg';
 
-var scrollViewOriginalHeight = 1000;
-var scrollViewOriginalWidth = 2000;
+var scrollViewOriginalHeight = 100;
+var scrollViewOriginalWidth = 200;
 
-var contentViewOriginalHeight = 4000;
-var contentViewOriginalWidth = 4000;
+var contentViewOriginalHeight = 400;
+var contentViewOriginalWidth = 400;
 
 var pane = SC.ControlTestPane.design()
   .add("scrollView with content view of fixed height", SC.ScrollView.design({
-    // ScrollView with 4000x4000 contentView
+    // ScrollView with overflowing contentView
     layout: { top: 0, left: 0, height: scrollViewOriginalHeight, width: scrollViewOriginalWidth },
     contentView: SC.ImageView.design({ value: imageUrl, layout: { height: contentViewOriginalHeight, width: contentViewOriginalWidth }}),
 
@@ -27,7 +27,7 @@ var pane = SC.ControlTestPane.design()
     maximumScale: 100
   }))
   .add("scrollview with content view attached to top and bottom", SC.ScrollView.design({
-    // ScrollView with 4000x4000 contentView
+    // ScrollView with overflowing contentView
     layout: { top: 0, left: 0, height: scrollViewOriginalHeight, width: scrollViewOriginalWidth },
     contentView: SC.ImageView.design({ value: imageUrl, layout: { top: 0, bottom: 0, width: contentViewOriginalWidth }}),
 
@@ -36,7 +36,7 @@ var pane = SC.ControlTestPane.design()
     maximumScale: 100
   }))
   .add("scrollView with content view of fixed height center-center-aligned", SC.ScrollView.design({
-    // ScrollView with 4000x4000 contentView
+    // ScrollView with overflowing contentView
     layout: { top: 0, left: 0, height: scrollViewOriginalHeight, width: scrollViewOriginalWidth },
     contentView: SC.ImageView.design({ value: imageUrl, layout: { height: contentViewOriginalHeight, width: contentViewOriginalWidth }}),
 
@@ -48,7 +48,7 @@ var pane = SC.ControlTestPane.design()
     verticalAlign: SC.ALIGN_MIDDLE
   }))
   .add("scrollView with content view of fixed height bottom-right-aligned", SC.ScrollView.design({
-    // ScrollView with 4000x4000 contentView
+    // ScrollView with overflowing contentView
     layout: { top: 0, left: 0, height: scrollViewOriginalHeight, width: scrollViewOriginalWidth },
     contentView: SC.ImageView.design({ value: imageUrl, layout: { height: contentViewOriginalHeight, width: contentViewOriginalWidth }}),
 
@@ -60,7 +60,7 @@ var pane = SC.ControlTestPane.design()
     verticalAlign: SC.ALIGN_BOTTOM
   }))
   .add("scrollView with content view of fixed height and bottom-right initial alignment", SC.ScrollView.design({
-    // ScrollView with 4000x4000 contentView
+    // ScrollView with overflowing contentView
     layout: { top: 0, left: 0, height: scrollViewOriginalHeight, width: scrollViewOriginalWidth },
     contentView: SC.ImageView.design({ value: imageUrl, layout: { height: contentViewOriginalHeight, width: contentViewOriginalWidth }}),
 
