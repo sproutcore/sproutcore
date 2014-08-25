@@ -3,11 +3,6 @@ sc_require("views/view");
 SC.View.reopen(
   /** @scope SC.View.prototype */ {
 
-  init: function(original) {
-    original();
-    this._lastTheme = this.get('theme');
-  }.enhance(),
-
   // ..........................................................
   // THEME SUPPORT
   //
@@ -224,30 +219,6 @@ SC.View.reopen(
       }
     }
   },
-
-  applyAttributesToContext: function(original, context) {
-    var theme = this.get('theme');
-    var themeClassNames = theme.classNames, idx, len = themeClassNames.length;
-
-    for (idx = 0; idx < len; idx++) {
-      context.addClass(themeClassNames[idx]);
-    }
-
-    original(context);
-
-    var renderDelegate = this.get('renderDelegate');
-    if (renderDelegate && renderDelegate.className) {
-      context.addClass(renderDelegate.className);
-    }
-
-    // @if(debug)
-    if (renderDelegate && renderDelegate.name) {
-      SC.Logger.error("Render delegates now use 'className' instead of 'name'.");
-      SC.Logger.error("Name '%@' will be ignored.", renderDelegate.name);
-    }
-    // @endif
-  }.enhance(),
-
 
   /**
     Invokes a method on the render delegate, if one is present and it implements

@@ -70,22 +70,6 @@ SC.View.reopen(
     return this ;
   },
 
-  removeChild: function(original, view) {
-    if (!view) { return this; } // nothing to do
-    if (view.parentView !== this) {
-      throw new Error("%@.removeChild(%@) must belong to parent".fmt(this, view));
-    }
-
-    // notify views
-    // TODO: Deprecate these notifications.
-    if (view.willRemoveFromParent) { view.willRemoveFromParent() ; }
-    if (this.willRemoveChild) { this.willRemoveChild(view) ; }
-
-    original(view);
-
-    return this;
-  }.enhance(),
-
   /**
     Replace the oldView with the specified view in the receivers childNodes
     array. This will also replace the DOM node of the oldView with the DOM

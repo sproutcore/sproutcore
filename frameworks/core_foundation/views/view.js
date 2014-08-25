@@ -2206,7 +2206,336 @@ SC.CoreView.unload = function () {
 SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
   classNames: ['sc-view'],
 
-  displayProperties: []
+  displayProperties: [],
+
+  /** @private Enhance. */
+  _executeQueuedUpdates: function () {
+    sc_super();
+
+    // Enabled
+    // Update the layout style of the layer if necessary.
+    if (this._enabledStyleNeedsUpdate) {
+      this._doUpdateEnabledStyle();
+    }
+
+    // Layout
+    // Update the layout style of the layer if necessary.
+    if (this._layoutStyleNeedsUpdate) {
+      this._doUpdateLayoutStyle();
+    }
+  },
+
+  /** Apply the attributes to the context. */
+  applyAttributesToContext: function (context) {
+    // Cursor
+    var cursor = this.get('cursor');
+    if (cursor) { context.addClass(cursor.get('className')); }
+
+    // Enabled
+    if (!this.get('isEnabled')) {
+      context.addClass('disabled');
+      context.setAttr('aria-disabled', 'true');
+    }
+
+    // Layout
+    // Have to pass 'true' for second argument for legacy.
+    this.renderLayout(context, true);
+
+    if (this.get('useStaticLayout')) { context.addClass('sc-static-layout'); }
+
+    // Background color defaults to null; for performance reasons we should ignore it
+    // unless it's ever been non-null.
+    var backgroundColor = this.get('backgroundColor');
+    if (!SC.none(backgroundColor) || this._scv_hasBackgroundColor) {
+      this._scv_hasBackgroundColor = YES;
+      if (backgroundColor) context.setStyle('backgroundColor', backgroundColor);
+      else context.removeStyle('backgroundColor');
+    }
+
+    // Theming
+    var theme = this.get('theme');
+    var themeClassNames = theme.classNames, idx, len = themeClassNames.length;
+
+    for (idx = 0; idx < len; idx++) {
+      context.addClass(themeClassNames[idx]);
+    }
+
+    sc_super();
+
+    var renderDelegate = this.get('renderDelegate');
+    if (renderDelegate && renderDelegate.className) {
+      context.addClass(renderDelegate.className);
+    }
+
+    // @if(debug)
+    if (renderDelegate && renderDelegate.name) {
+      SC.Logger.error("Render delegates now use 'className' instead of 'name'.");
+      SC.Logger.error("Name '%@' will be ignored.", renderDelegate.name);
+    }
+    // @endif
+  },
+
+  /**
+    Computes what the frame of this view would be if the parent were resized
+    to the passed dimensions.  You can use this method to project the size of
+    a frame based on the resize behavior of the parent.
+
+    This method is used especially by the scroll view to automatically
+    calculate when scrollviews should be visible.
+
+    Passing null for the parent dimensions will use the actual current
+    parent dimensions.  This is the same method used to calculate the current
+    frame when it changes.
+
+    @param {Rect} pdim the projected parent dimensions (optional)
+    @returns {Rect} the computed frame
+  */
+  computeFrameWithParentFrame: function (pdim) {
+    // Layout.
+    var f, layout = this.get('layout');
+
+    // We can't predict the frame for static layout, so just return the view's
+    // current frame (see original computeFrameWithParentFrame in views/view.js)
+    if (this.get('useStaticLayout')) {
+      f = sc_super();
+      f = f ? this._adjustForBorder(f, layout) : null;
+      f = f ? this._adjustForScale(f, layout) : null;
+      return f;
+    }
+
+    f = {};
+
+    var error, layer, AUTO = SC.LAYOUT_AUTO,
+        pv = this.get('parentView'),
+        scale, oX, oY, // Used with the special case ScrollView handling below.
+        dH, dW, //shortHand for parentDimensions
+        lR = layout.right,
+        lL = layout.left,
+        lT = layout.top,
+        lB = layout.bottom,
+        lW = layout.width,
+        lH = layout.height,
+        lcX = layout.centerX,
+        lcY = layout.centerY;
+
+    if (lW === AUTO) {
+      error = SC.Error.desc(("%@.layout() cannot use width:auto if " +
+        "staticLayout is disabled").fmt(this), "%@".fmt(this), -1);
+      SC.Logger.error(error.toString());
+      throw error;
+    }
+
+    if (lH === AUTO) {
+      error = SC.Error.desc(("%@.layout() cannot use height:auto if " +
+        "staticLayout is disabled").fmt(this), "%@".fmt(this), -1);
+      SC.Logger.error(error.toString());
+      throw error;
+    }
+
+    if (!pdim) { pdim = this.computeParentDimensions(layout); }
+    dH = pdim.height;
+    dW = pdim.width;
+
+    // handle left aligned and left/right
+    if (!SC.none(lL)) {
+      if (SC.isPercentage(lL)) {
+        f.x = dW * lL;
+      } else {
+        f.x = lL;
+      }
+      if (lW !== undefined) {
+        if (lW === AUTO) { f.width = AUTO; }
+        else if (SC.isPercentage(lW)) { f.width = dW * lW; }
+        else { f.width = lW; }
+      } else { // better have lR!
+        f.width = dW - f.x;
+        if (lR && SC.isPercentage(lR)) { f.width = f.width - (lR * dW); }
+        else { f.width = f.width - (lR || 0); }
+      }
+    // handle right aligned
+    } else if (!SC.none(lR)) {
+      if (SC.none(lW)) {
+        if (SC.isPercentage(lR)) {
+          f.width = dW - (dW * lR);
+        }
+        else f.width = dW - lR;
+        f.x = 0;
+      } else {
+        if (lW === AUTO) f.width = AUTO;
+        else if (SC.isPercentage(lW)) f.width = dW * lW;
+        else f.width = (lW || 0);
+        if (SC.isPercentage(lW)) f.x = dW - (lR * dW) - f.width;
+        else f.x = dW - lR - f.width;
+      }
+
+    // handle centered
+    } else if (!SC.none(lcX)) {
+      if (lW === AUTO) f.width = AUTO;
+      else if (SC.isPercentage(lW)) f.width = lW * dW;
+      else f.width = (lW || 0);
+      if (SC.isPercentage(lcX)) f.x = (dW - f.width) / 2 + (lcX * dW);
+      else f.x = (dW - f.width) / 2 + lcX;
+    } else {
+      f.x = 0; // fallback
+      if (SC.none(lW)) {
+        f.width = dW;
+      } else {
+        if (lW === AUTO) f.width = AUTO;
+        if (SC.isPercentage(lW)) f.width = lW * dW;
+        else f.width = (lW || 0);
+      }
+    }
+
+    // handle top aligned and top/bottom
+    if (!SC.none(lT)) {
+      if (SC.isPercentage(lT)) f.y = lT * dH;
+      else f.y = lT;
+      if (lH !== undefined) {
+        if (lH === AUTO) f.height = AUTO;
+        else if (SC.isPercentage(lH)) f.height = lH * dH;
+        else f.height = lH;
+      } else { // better have lB!
+        if (lB && SC.isPercentage(lB)) f.height = dH - f.y - (lB * dH);
+        else f.height = dH - f.y - (lB || 0);
+      }
+
+    // handle bottom aligned
+    } else if (!SC.none(lB)) {
+      if (SC.none(lH)) {
+        if (SC.isPercentage(lB)) f.height = dH - (lB * dH);
+        else f.height = dH - lB;
+        f.y = 0;
+      } else {
+        if (lH === AUTO) f.height = AUTO;
+        if (lH && SC.isPercentage(lH)) f.height = lH * dH;
+        else f.height = (lH || 0);
+        if (SC.isPercentage(lB)) f.y = dH - (lB * dH) - f.height;
+        else f.y = dH - lB - f.height;
+      }
+
+    // handle centered
+    } else if (!SC.none(lcY)) {
+      if (lH === AUTO) f.height = AUTO;
+      if (lH && SC.isPercentage(lH)) f.height = lH * dH;
+      else f.height = (lH || 0);
+      if (SC.isPercentage(lcY)) f.y = (dH - f.height) / 2 + (lcY * dH);
+      else f.y = (dH - f.height) / 2 + lcY;
+
+    // fallback
+    } else {
+      f.y = 0; // fallback
+      if (SC.none(lH)) {
+        f.height = dH;
+      } else {
+        if (lH === AUTO) f.height = AUTO;
+        if (SC.isPercentage(lH)) f.height = lH * dH;
+        else f.height = lH || 0;
+      }
+    }
+
+    f.x = Math.floor(f.x);
+    f.y = Math.floor(f.y);
+    if (f.height !== AUTO) f.height = Math.floor(f.height);
+    if (f.width !== AUTO) f.width = Math.floor(f.width);
+
+    // if width or height were set to auto and we have a layer, try lookup
+    if (f.height === AUTO || f.width === AUTO) {
+      layer = this.get('layer');
+      if (f.height === AUTO) f.height = layer ? layer.clientHeight : 0;
+      if (f.width === AUTO) f.width = layer ? layer.clientWidth : 0;
+    }
+
+    // Okay we have all our numbers. Let's adjust them for things.
+
+    // First, adjust for border.
+    f = this._adjustForBorder(f, layout);
+
+    // Make sure the width/height fix their min/max (note the inlining of SC.none for performance)...
+    if ((layout.maxHeight != null) && (f.height > layout.maxHeight)) f.height = layout.maxHeight;
+    if ((layout.minHeight != null) && (f.height < layout.minHeight)) f.height = layout.minHeight;
+    if ((layout.maxWidth != null) && (f.width > layout.maxWidth)) f.width = layout.maxWidth;
+    if ((layout.minWidth != null) && (f.width < layout.minWidth)) f.width = layout.minWidth;
+
+    // SPECIAL CASE: Account for being inside ScrollView, where we use CSS
+    // transforms to scroll for performance and platform-compatibility reasons.
+    if (pv && pv.isScrollContainer) {
+      pv = pv.get('parentView');
+      f.x -= pv.get('horizontalScrollOffset');
+      f.y -= pv.get('verticalScrollOffset');
+      scale = pv.get('scale');
+      oX = oY = 0;
+    }
+
+    // Finally, adjust for scale. (Scale is only defined here if we're doing special-case ScrollView stuff.)
+    f = this._adjustForScale(f, layout, scale, oX, oY);
+
+    return f;
+  },
+
+  init: function () {
+    sc_super();
+
+    // Enabled.
+    // If the view is pre-configured as disabled, then go to the proper initial state.
+    if (!this.get('isEnabled')) { this._doDisable(); }
+
+    // Layout
+    this._previousLayout = this.get('layout');
+
+    // Apply the automatic child view layout if it is defined.
+    var childViewLayout = this.childViewLayout;
+    if (childViewLayout) {
+      // Layout the child views once.
+      this.set('childViewsNeedLayout', true);
+      this.layoutChildViewsIfNeeded();
+
+      // If the child view layout is live, start observing affecting properties.
+      if (this.get('isChildViewLayoutLive')) {
+        this.addObserver('childViews.[]', this, this._cvl_childViewsDidChange);
+        // DISABLED. this.addObserver('childViewLayout', this, this._cvl_childViewLayoutDidChange);
+        this.addObserver('childViewLayoutOptions', this, this._cvl_childViewLayoutDidChange);
+
+        // Initialize the child views.
+        this._cvl_setupChildViewsLiveLayout();
+
+        // Initialize our own frame observer.
+        if (!this.get('isFixedSize') && childViewLayout.layoutDependsOnSize && childViewLayout.layoutDependsOnSize(this)) {
+          this.addObserver('frame', this, this._cvl_childViewLayoutDidChange);
+        }
+      }
+    }
+
+    // Theming
+    this._lastTheme = this.get('theme');
+
+  },
+
+  /** @private */
+  destroy: function () {
+    // Clean up.
+    this._previousLayout = null;
+
+    return sc_super();
+  },
+
+  /** SC.CoreView.prototype. */
+  removeChild: function(view) {
+    // Manipulation
+    if (!view) { return this; } // nothing to do
+    if (view.parentView !== this) {
+      throw new Error("%@.removeChild(%@) must belong to parent".fmt(this, view));
+    }
+
+    // notify views
+    // TODO: Deprecate these notifications.
+    if (view.willRemoveFromParent) { view.willRemoveFromParent() ; }
+    if (this.willRemoveChild) { this.willRemoveChild(view) ; }
+
+    sc_super();
+
+    return this;
+  }
+
 });
 
 //unload views for IE, trying to collect memory.

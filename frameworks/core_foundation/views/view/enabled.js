@@ -165,14 +165,6 @@ SC.View.reopen(
   // Methods
   //
 
-  /** @private */
-  init: function (original) {
-    original();
-
-    // If the view is pre-configured as disabled, then go to the proper initial state.
-    if (!this.get('isEnabled')) { this._doDisable(); }
-  }.enhance(),
-
   /** @private
     Observes the isEnabled property and resigns first responder if set to NO.
     This will avoid cases where, for example, a disabled text field retains
@@ -209,16 +201,6 @@ SC.View.reopen(
       this._enabledStyleNeedsUpdate = true;
     }
   },
-
-  /** @private Enhance. */
-  _executeQueuedUpdates: function (original) {
-    original();
-
-    // Update the layout style of the layer if necessary.
-    if (this._enabledStyleNeedsUpdate) {
-      this._doUpdateEnabledStyle();
-    }
-  }.enhance(),
 
   /** @private */
   _doUpdateEnabledStyle: function () {
@@ -271,16 +253,6 @@ SC.View.reopen(
       return false;
     }
   },
-
-  applyAttributesToContext: function (original, context) {
-    original(context);
-
-    if (!this.get('isEnabled')) {
-      context.addClass('disabled');
-      context.setAttr('aria-disabled', 'true');
-    }
-
-  }.enhance(),
 
   /** @private */
   _gotoEnabledState: function () {
