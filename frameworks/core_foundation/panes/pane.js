@@ -261,7 +261,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @param {Event} evt that cause this to become first responder
     @returns {SC.Pane} receiver
   */
-  makeFirstResponder: function(view, evt) {
+  makeFirstResponder: function(original, view, evt) {
     // firstResponder should never be null
     if(!view) view = this;
 
@@ -288,7 +288,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
       view.set('isKeyResponder', isKeyPane);
     }
 
-    sc_super();
+    original(view, evt);
 
     if(current) current.endPropertyChanges();
     if(view) view.endPropertyChanges();
@@ -304,7 +304,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     }
 
     return this ;
-  },
+  }.enhance(),
 
   /**
     Called just before the pane loses it's keyPane status.  This will notify
