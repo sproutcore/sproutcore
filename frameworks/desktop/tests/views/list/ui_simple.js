@@ -4,12 +4,12 @@
 //            portions copyright @2011 Apple Inc.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
+/*globals module, test, ok, same, equals */
 
 /*
-  This test evaluates a plain list with no custom row heights, outlines,
-  group views or any other non-standard behavior.
+  This test evaluates progressive rendering to the clippingFrame in a plain list with no
+  custom row heights, outlines, group views or other non-standard behavior.
 */
-
 
 // create a fake content array.  Generates a list with whatever length you
 // want of objects with a title based on the index.  Cannot mutate.
@@ -36,20 +36,21 @@ var ContentArray = SC.Object.extend(SC.Array, {
   }
 });
 
-var pane = SC.ControlTestPane.design()
-  .add("basic", SC.ScrollView.design({
-    borderStyle: SC.BORDER_NONE,
-    layout: { left: 0, right: 0, top: 0, height: 300 },
-    hasHorizontalScroller: NO,
-    contentView: SC.ListView.design({
-      content: ContentArray.create({ length: 20001 }),
-      contentValueKey: "title",
-      contentCheckboxKey: "isDone",
-      contentUnreadCountKey: "unread",
-      rowHeight: 20
+var pane = SC.ControlTestPane.design();
+pane.add("basic", SC.ListView.design({
+  // To avoid turning this into a SC.ScrollView integration test, our strategy is to override clippingFrame to allow
+  // us to control it directly, focusing our tests on the "progressive rendering within a given clipping frame" unit.
+  clippingFrame: function(key, value) {
+    return value || { x: 0, y: 0, width: 100, height: 300 };
+  }.property('frame', 'parentView').cacheable(),
 
-    })
-  }));
+  content: ContentArray.create({ length: 20001 }),
+  contentValueKey: "title",
+  contentCheckboxKey: "isDone",
+  contentUnreadCountKey: "unread",
+  rowHeight: 20
+
+}));
 
 function verifyChildViewsMatch(views, set) {
   var indexes = set.clone();
@@ -77,14 +78,13 @@ module("SC.ListView - simple list", pane.standardSetup());
 //
 
 test("rendering only incremental portion", function() {
-  var listView = pane.view("basic").contentView;
+  var listView = pane.view("basic");
   ok(listView.getPath("nowShowing.length") < listView.get('length'), 'nowShowing should be a subset of content items');
   equals(listView.get('childViews').length, listView.get('nowShowing').get('length'), 'should have same number of childViews as nowShowing length');
 });
 
 test("scrolling by small amount should update incremental rendering", function() {
-  var scrollView = pane.view('basic'),
-      listView   = scrollView.contentView,
+  var listView = pane.view('basic'),
       exp;
 
   ok(listView.getPath('nowShowing.length') < listView.get('length'), 'precond - nowShowing has incremental range');
@@ -92,35 +92,34 @@ test("scrolling by small amount should update incremental rendering", function()
   exp = SC.IndexSet.create(0, 15);
   same(listView.get('nowShowing'), exp, 'nowShowing should start at just the first 20 items');
 
-  // SCROLL DOWN ONE LINE
+  // CLIP DOWN ONE LINE
   SC.run(function() {
-    scrollView.scrollTo(0,20);
+    listView.set('clippingFrame', { x: 0, y: 20, width: 100, height: 300 });
   });
 
-  // top line should have scrolled out of view
+  // top line should be clipped out of view
   exp = SC.IndexSet.create(1,15);
   same(listView.get('nowShowing'), exp, 'nowShowing should change to reflect new clippingFrame');
 
   verifyChildViewsMatch(listView.childViews, exp);
 
-  // SCROLL DOWN ANOTHER LINE
+  // CLIP DOWN ANOTHER LINE
   SC.run(function() {
-    scrollView.scrollTo(0,42);
+    listView.set('clippingFrame', { x: 0, y: 42, width: 100, height: 300 });
   });
 
-  // top line should have scrolled out of view
+  // top line should be clipped out of view
   exp = SC.IndexSet.create(2,16);
   same(listView.get('nowShowing'), exp, 'nowShowing should change to reflect new clippingFrame');
 
   verifyChildViewsMatch(listView.childViews, exp);
 
-
-  // SCROLL UP ONE LINE
+  // CLIP BACK UP ONE LINE
   SC.run(function() {
-    scrollView.scrollTo(0,21);
+    listView.set('clippingFrame', { x: 0, y: 21, width: 100, height: 300 });
   });
 
-  // top line should have scrolled out of view
+  // top line should be clipped out of view
   exp = SC.IndexSet.create(1,16);
   same(listView.get('nowShowing'), exp, 'nowShowing should change to reflect new clippingFrame');
 
