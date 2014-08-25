@@ -191,7 +191,7 @@ SC.ScrollView = SC.View.extend({
         }
         // Calculating this when scroll offset changes allows us to retain it when only scale changes. (Note that this calculation
         // doesn't take minimum offset into account; in every case I can think of where this value will be used, the minimum is 0.)
-        this._scroll_horizontalScaleOriginPct = (value + (this._scroll_containerWidth / 2)) / (maxOffset + this._scroll_containerWidth)
+        this._scroll_horizontalScaleOriginPct = (value + (this._scroll_containerWidth / 2)) / (maxOffset + this._scroll_containerWidth);
       }
     }
 
@@ -246,7 +246,7 @@ SC.ScrollView = SC.View.extend({
         }
         // Calculating this when scroll offset changes allows us to retain it when only scale changes. (Note that this calculation
         // doesn't take minimum offset into account; in every case I can think of where this value will be used, the minimum is 0.)
-        this._scroll_verticalScaleOriginPct = (value + (this._scroll_containerHeight / 2)) / (maxOffset + this._scroll_containerHeight)
+        this._scroll_verticalScaleOriginPct = (value + (this._scroll_containerHeight / 2)) / (maxOffset + this._scroll_containerHeight);
       }
     }
 
@@ -328,7 +328,8 @@ SC.ScrollView = SC.View.extend({
     // we still must go through minimumScrollOffset even if we can't scroll
     // because we need to adjust for alignment. So, just make sure it won't allow scrolling.
     if (!this.get('canScrollHorizontal')) contentWidth = Math.min(contentWidth, containerWidth);
-    return this._scroll_maximumHorizontalScrollOffset = this.maximumScrollOffset(contentWidth, containerWidth, this.get("horizontalAlign"));
+    this._scroll_maximumHorizontalScrollOffset = this.maximumScrollOffset(contentWidth, containerWidth, this.get("horizontalAlign"));
+    return this._scroll_maximumHorizontalScrollOffset;
   }.property(),
 
   /**
@@ -357,7 +358,8 @@ SC.ScrollView = SC.View.extend({
     // we still must go through minimumScrollOffset even if we can't scroll
     // because we need to adjust for alignment. So, just make sure it won't allow scrolling.
     if (!this.get('canScrollVertical')) contentHeight = Math.min(contentHeight, containerHeight);
-    return this._scroll_maximumVerticalScrollOffset = this.maximumScrollOffset(contentHeight, containerHeight, this.get("verticalAlign"));
+    this._scroll_maximumVerticalScrollOffset = this.maximumScrollOffset(contentHeight, containerHeight, this.get("verticalAlign"));
+    return this._scroll_maximumVerticalScrollOffset;
   }.property(),
 
   /**
@@ -384,7 +386,8 @@ SC.ScrollView = SC.View.extend({
     // we still must go through minimumScrollOffset even if we can't scroll
     // because we need to adjust for alignment. So, just make sure it won't allow scrolling.
     if (!this.get('canScrollHorizontal')) contentWidth = Math.min(contentWidth, containerWidth);
-    return this._scroll_minimumHorizontalScrollOffset = this.minimumScrollOffset(contentWidth, containerWidth, this.get("horizontalAlign"));
+    this._scroll_minimumHorizontalScrollOffset = this.minimumScrollOffset(contentWidth, containerWidth, this.get("horizontalAlign"));
+    return this._scroll_minimumHorizontalScrollOffset;
   }.property(),
 
   /**
@@ -412,7 +415,8 @@ SC.ScrollView = SC.View.extend({
     // we still must go through minimumScrollOffset even if we can't scroll
     // because we need to adjust for alignment. So, just make sure it won't allow scrolling.
     if (!this.get('canScrollVertical')) contentHeight = Math.min(contentHeight, containerHeight);
-    return this._scroll_minimumVerticalScrollOffset = this.minimumScrollOffset(contentHeight, containerHeight, this.get("verticalAlign"));
+    this._scroll_minimumVerticalScrollOffset = this.minimumScrollOffset(contentHeight, containerHeight, this.get("verticalAlign"));
+    return this._scroll_minimumVerticalScrollOffset;
   }.property(),
 
 
@@ -1593,7 +1597,7 @@ SC.ScrollView = SC.View.extend({
 
   /** @private Update the scroll if still ongoing, otherwise wrap up. */
   touchEnd: function (touch) {
-    var touches = touch.touchesForView(this)
+    var touches = touch.touchesForView(this);
 
     // FAST PATH: If this isn't the last touch, we're still gesture-handling.
     if (touches && touches.length) {
@@ -1671,14 +1675,14 @@ SC.ScrollView = SC.View.extend({
       // scale1Val - toScaleBottom = (toScaleTop - toScaleBottom) * (fromScaleVal - fromScaleBottom) /  (fromScaleTop - fromScaleBottom)
       var scale1Val = toScaleBottom + (toScaleTop - toScaleBottom) * (fromScaleVal - fromScaleBottom) /  (fromScaleTop - fromScaleBottom);
       return scale1Val;
-    };
+    }
     function convertCappedScales(toScaleBottom, toScaleTop, fromScaleBottom, fromScaleVal, fromScaleTop) {
       return Math.max(toScaleBottom, Math.min(toScaleTop, convertScales(toScaleBottom, toScaleTop, fromScaleBottom, fromScaleVal, fromScaleTop)));
-    };
+    }
 
     // A few disposable variables used to define the animations. (`diff` is a utility player.)
-    var distanceX, distanceY, distance, fromX, diffX, toX, remainderX, fromY, diffY, toY, remainderY, fromScale, toScale, diff,
-      positionFraction, candidatePositionFraction, timeFraction, candidateTimeFraction,
+    var distanceX, distanceY, distance, fromX, toX, fromY, toY, fromScale, toScale, diff,
+      positionFraction, candidatePositionFraction, timeFraction,
       duration, fullDuration, candidateDuration;
 
     // IF WE ARE OUT OF BOUNDS ON SCALE, simply animate back in bounds. This preempts all other deceleration/bounces.
@@ -2164,6 +2168,7 @@ SC.ScrollView = SC.View.extend({
           mouseUp: function() {
             var ret = sc_super();
             this.get('owner')._scroll_isExogenous = NO;
+            return ret;
           }
         });
         childViews.push(view);
@@ -2191,6 +2196,7 @@ SC.ScrollView = SC.View.extend({
           mouseUp: function() {
             var ret = sc_super();
             this.get('owner')._scroll_isExogenous = NO;
+            return ret;
           }
         });
         childViews.push(view);
@@ -2292,8 +2298,10 @@ SC.ScrollView = SC.View.extend({
 
     // Note that calculatedWidth is in the view's internal (unscaled) space, while its frame is in our
     // external (scale-already-applied) space.
-    width = (view.get('calculatedWidth') * scale) || f.width || 0;
-    height = (view.get('calculatedHeight') * scale) || f.height || 0;
+    calculatedWidth = view.get('calculatedWidth') * scale;
+    width = calculatedWidth || f.width || 0;
+    calculatedHeight = view.get('calculatedHeight') * scale;
+    height = calculatedHeight || f.height || 0;
 
     dim       = this.getPath('containerView.frame');
     dimWidth  = dim.width;
@@ -2585,6 +2593,7 @@ SC.ScrollView = SC.View.extend({
     }
   },
 
+  /* jshint eqnull:true */
   /** @private
     This method actually does the scroll element adjusting.
   */
@@ -2623,7 +2632,7 @@ SC.ScrollView = SC.View.extend({
     // This gives views that use incremental rendering a chance to render newly-appearing elements before
     // they come into view.
     if (contentView._viewFrameDidChange) {
-      contentView._viewFrameDidChange()
+      contentView._viewFrameDidChange();
     }
 
     var transformAttribute = SC.browser.experimentalStyleNameFor('transform');
@@ -2663,8 +2672,7 @@ SC.ScrollView = SC.View.extend({
       }
 
       // Assign style to the content.
-      var contentViewLayer = contentView.get('layer'),
-        transformOriginAttribute;
+      var contentViewLayer = contentView.get('layer');
       if (contentViewLayer) {
         // (We don't optimize by applying transform origin only when needed, because browsers translate 'top left'
         // into other values inconsistently; e.g. "0% 0%" for webkit and "left top 0%" in gecko.)
@@ -2763,9 +2771,7 @@ SC.ScrollView = SC.View.extend({
         offsetFraction = offsetFraction / (animation.endFractionPosition - animation.startFractionPosition);
 
         // Calculate where we're currently at along each animating dimension.
-        var deltaHorizontalOffset, newHorizontalOffset, horizontalDidChange,
-          deltaVerticalOffset, newVerticalOffset, verticalDidChange,
-          deltaScale, newScale, scaleDidChange;
+        var deltaHorizontalOffset, deltaVerticalOffset, deltaScale;
         // Horizontal
         if (animation.toHorizontalScrollOffset != null) {
           deltaHorizontalOffset = (animation.toHorizontalScrollOffset - animation.fromHorizontalScrollOffset) * offsetFraction;
