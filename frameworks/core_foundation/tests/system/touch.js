@@ -4,6 +4,7 @@
 //            portions copyright @2011 Apple Inc.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
+/*global module, test, ok, equals */
 
 var pane,
     // TODO: This custom event counting could/should be replaced with CoreTest.stub.
@@ -130,6 +131,6 @@ test("Touch event handling and juggling.", function() {
   if (innerCancel !== 1) ok(false, "innerView.touchCancelled should only have been called once!");
   equals(outerCancel, 0, "Having never been removed from the touch's responder stack, outerView.touchCancelled should never have been called.");
   equals(innerEnd, 0, "Having previously given up control of the touch, innerView.touchEnd should never have been called:");
-  equals(outerEnd, 1, "outerView.touchEnd should have been called:")
+  equals(outerEnd, 1, "outerView.touchEnd should have been called:");
 
 });

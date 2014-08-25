@@ -7,7 +7,7 @@
 
 /*global module, test, ok, equals */
 
-var pane, scroll, inner, event,
+var pane, scrollView, inner, targetLayer, evt,
     scrollStart, innerStart, scrollDragged, innerDragged, scrollEnd, innerEnd, scrollCancel, innerCancel;
 
 // Sets up and tears down our pane and event.
@@ -50,7 +50,7 @@ module("SC.ScrollView touch", {
             innerDragged++;
             // If we've scrolled more than 15 pixels, pass back to the scroller.
             if (Math.abs(evt.startY - evt.pageY) > 15) {
-              touchesForView.invoke('restoreLastTouchResponder')
+              touchesForView.invoke('restoreLastTouchResponder');
             }
           },
           touchEnd: function() {
@@ -62,27 +62,25 @@ module("SC.ScrollView touch", {
         })
       })
     });
+    // (Actually create it, in a run loop.)
     SC.run(function() {
-      // (Actually create it, in a run loop.)
       pane = pane.create().append();
     });
 
     // Set up our pertinent reused variables.
-    scroll = pane.contentView;
-    inner = scroll.contentView;
+    scrollView = pane.contentView;
+    inner = scrollView.contentView;
     targetLayer = inner.get('layer');
 
-    event = SC.Event.simulateEvent(targetLayer, 'touchstart');
-    event.touches = [event];
-    event.identifier = 4;
-    event.pageX = 50;
-    event.pageY = 50;
-    event.changedTouches = [event];
+    evt = SC.Event.simulateEvent(targetLayer, 'touchstart');
+    evt.touches = [evt];
+    evt.identifier = 4;
+    evt.pageX = 50;
+    evt.pageY = 50;
+    evt.changedTouches = [evt];
   },
   teardown: function() {
-    pane.destroy();
-    pane = null;
-    event = null;
+    SC.run(pane.destroy, pane);
   }
 });
 
@@ -92,7 +90,7 @@ module("SC.ScrollView touch", {
 test("Tapping with delaysContentTouches: YES", function() {
   // Trigger touchstart
   SC.run(function() {
-    SC.Event.trigger(targetLayer, 'touchstart', [event]);
+    SC.Event.trigger(targetLayer, 'touchstart', [evt]);
   });
 
   equals(scrollStart, 1, "After touchstart, the scroll view's touchStart should have been called once");
@@ -100,7 +98,7 @@ test("Tapping with delaysContentTouches: YES", function() {
 
   // Trigger touchmove:
   SC.run(function() {
-    SC.Event.trigger(targetLayer, 'touchmove', [event]);
+    SC.Event.trigger(targetLayer, 'touchmove', [evt]);
   });
 
   equals(scrollDragged, 1, "After touchmove, the scroll view's touchesDragged should have been called once");
@@ -108,7 +106,7 @@ test("Tapping with delaysContentTouches: YES", function() {
 
   // Trigger touchend:
   SC.run(function() {
-    SC.Event.trigger(targetLayer, 'touchend', [event]);
+    SC.Event.trigger(targetLayer, 'touchend', [evt]);
   });
 
   equals(scrollEnd, 1, "After touchend, the scroll view's touchEnd should have been called once");
@@ -123,17 +121,17 @@ test("Tapping with delaysContentTouches: YES", function() {
 test("Dragging with delaysContentTouches: YES", function() {
   // Trigger touchstart
   SC.run(function() {
-    SC.Event.trigger(targetLayer, 'touchstart', [event]);
+    SC.Event.trigger(targetLayer, 'touchstart', [evt]);
   });
 
   equals(scrollStart, 1, "After touchstart, the scroll view's touchStart should have been called once");
   equals(innerStart, 0, "After touchstart, the inner view's touchStart should not have been called, as the touch was captured by the scroll view");
 
   // Give the event some vertical delta:
-  event.pageY += 16;
+  evt.pageY += 16;
   // Trigger touchmove:
   SC.run(function() {
-    SC.Event.trigger(targetLayer, 'touchmove', [event]);
+    SC.Event.trigger(targetLayer, 'touchmove', [evt]);
   });
 
   equals(scrollDragged, 1, "After touchmove, the scroll view's touchesDragged should have been called once");
@@ -141,7 +139,7 @@ test("Dragging with delaysContentTouches: YES", function() {
 
   // Trigger touchend:
   SC.run(function() {
-    SC.Event.trigger(targetLayer, 'touchend', [event]);
+    SC.Event.trigger(targetLayer, 'touchend', [evt]);
   });
 
   equals(scrollEnd, 1, "After touchend, the scroll view's touchEnd should have been called once");
@@ -153,11 +151,11 @@ test("Dragging with delaysContentTouches: YES", function() {
 
 // Test a touch lifecycle with no vertical movement and delaysContentTouches: NO - the scroll view should not partake in this touch at all.
 test("Tapping with delaysContentTouches: NO", function() {
-  scroll.set('delaysContentTouches', NO);
+  scrollView.set('delaysContentTouches', NO);
 
   // Trigger touchstart
   SC.run(function() {
-    SC.Event.trigger(targetLayer, 'touchstart', [event]);
+    SC.Event.trigger(targetLayer, 'touchstart', [evt]);
   });
 
   equals(scrollStart, 0, "We're not capturing touches, so scroll view's touchStart will not have fired after touchstart");
@@ -165,7 +163,7 @@ test("Tapping with delaysContentTouches: NO", function() {
 
   // Trigger touchmove:
   SC.run(function() {
-    SC.Event.trigger(targetLayer, 'touchmove', [event]);
+    SC.Event.trigger(targetLayer, 'touchmove', [evt]);
   });
 
   equals(scrollDragged, 0, "Scroll view's touchesDragged will not have fired, as it is not the touch responder");
@@ -173,7 +171,7 @@ test("Tapping with delaysContentTouches: NO", function() {
 
   // Trigger touchend:
   SC.run(function() {
-    SC.Event.trigger(targetLayer, 'touchend', [event]);
+    SC.Event.trigger(targetLayer, 'touchend', [evt]);
   });
 
   equals(scrollEnd, 0, "Again, the scroll view is completely uninvolved in this touch, so its touchEnd doesn't get called");
@@ -185,32 +183,139 @@ test("Tapping with delaysContentTouches: NO", function() {
 // but upon it becoming a drag will voluntarily relinquish it back to the scroll view. (See innerView.touchesDragged in the
 // current module.setup method.)
 test("Dragging with delaysContentTouches: NO", function() {
-  scroll.set('delaysContentTouches', NO);
+  scrollView.set('delaysContentTouches', NO);
 
   // Trigger touchstart
   SC.run(function() {
-    SC.Event.trigger(targetLayer, 'touchstart', [event]);
+    SC.Event.trigger(targetLayer, 'touchstart', [evt]);
   });
 
   equals(scrollStart, 0, "Since the scroll view isn't capturing touches, it gets no touchStart love");
   equals(innerStart, 1, "After touchstart, the inner view's touchStart should have been straightforwardly called");
 
   // Give the event some vertical delta:
-  event.pageY += 16;
+  evt.pageY += 16;
   // Trigger touchmove:
   SC.run(function() {
-    SC.Event.trigger(targetLayer, 'touchmove', [event]);
+    SC.Event.trigger(targetLayer, 'touchmove', [evt]);
   });
 
   equals(scrollDragged, 0, "The scroll view's touchDragged should not have been called, since at the time of the event it was not the touch's responder");
   equals(innerDragged, 1, "The inner view's touchesDragged should have straightforwardly handled the event");
   equals(scrollStart, 1, "Having been passed the touch by inner view's touchesDragged, the scroll view's touchStart will now have fired");
-  equals(innerCancel, 1, "Having passed the touch back to the scroll view, the inner view's touchCancelled should have run")
+  equals(innerCancel, 1, "Having passed the touch back to the scroll view, the inner view's touchCancelled should have run");
 
   // Trigger touchend:
   SC.run(function() {
-    SC.Event.trigger(targetLayer, 'touchend', [event]);
+    SC.Event.trigger(targetLayer, 'touchend', [evt]);
   });
 
   equals(scrollEnd, 1, "After touchend, the scroll view's touchEnd should have been called once");
+});
+
+var initialPageX = 100,
+  initialPageY = 100;
+
+module("SC.ScrollView touch thresholds and locks", {
+  setup: function() {
+    // Set up our pane (then create it in a run loop).
+    pane = SC.MainPane.extend({
+      layout: { height: 100, width: 100 },
+      childViews: ['contentView'],
+      contentView: SC.ScrollView.extend({
+        touchScrollThreshold: 10,
+        touchSecondaryScrollThreshold: 20,
+        touchSecondaryScrollLock: 30,
+        contentView: SC.View.extend({
+          layout: { height: 200, width: 200 }
+        })
+      })
+    });
+    SC.run(function() { pane = pane.create().append(); });
+
+    // Set up our pertinent reused variables.
+    scrollView = pane.contentView;
+    inner = scrollView.contentView;
+    targetLayer = inner.get('layer');
+
+    evt = SC.Event.simulateEvent(targetLayer, 'touchstart');
+    evt.touches = [evt];
+    evt.identifier = 4;
+    evt.pageX = initialPageX;
+    evt.pageY = initialPageY;
+    evt.changedTouches = [evt];
+  },
+  teardown: function() {
+    SC.run(pane.destroy, pane);
+  }
+});
+
+test("Touch scroll thresholds", function() {
+  equals(scrollView.get('verticalScrollOffset'), 0, "PRELIM: Vertical offset starts at");
+  equals(scrollView.get('horizontalScrollOffset'), 0, "PRELIM: Horizontal offset starts at");
+
+  // Start touch
+  SC.run(function() {
+    SC.Event.trigger(targetLayer, 'touchstart', [evt]);
+  });
+
+  // Move touch up less than touchScrollThreshold.
+  evt.pageY = initialPageY - 9;
+  SC.run(function() {
+    SC.Event.trigger(targetLayer, 'touchmove', [evt]);
+  });
+  equals(scrollView.get('verticalScrollOffset'), 0, "Scrolling less than touchScrollThreshold results in no scrolling");
+  if (scrollView.get('horizontalScrollOffset') !== 0) ok(false, "A touch with no horizontal change shouldn't trigger a horizontal scroll!");
+
+  // Move touch up more than touchScrollThreshold.
+  evt.pageY = initialPageY - 11;
+  SC.run(function() {
+    SC.Event.trigger(targetLayer, 'touchmove', [evt]);
+  });
+  equals(scrollView.get('verticalScrollOffset'), 11, "Scrolling more than touchScrollThreshold results in scrolling");
+  if (scrollView.get('horizontalScrollOffset') !== 0) ok(false, "A touch with no horizontal change shouldn't trigger a horizontal scroll!");
+
+  // Move touch sideways less than touchSecondaryScrollThreshold.
+  evt.pageX = initialPageX - 19;
+  SC.run(function() {
+    SC.Event.trigger(targetLayer, 'touchmove', [evt]);
+  });
+  if (scrollView.get('verticalScrollOffset') !== 11) ok(false, "A touch with no vertical change shouldn't trigger a vertical scroll!");
+  equals(scrollView.get('horizontalScrollOffset'), 0, "With a vertical scroll in motion, scrolling horizontally less than touchSecondaryScrollThreshold results in no scrolling");
+
+  // Move touch sideways more than touchSecondaryScrollThreshold.
+  evt.pageX = initialPageX - 21;
+  SC.run(function() {
+    SC.Event.trigger(targetLayer, 'touchmove', [evt]);
+  });
+  if (scrollView.get('verticalScrollOffset') !== 11) ok(false, "A touch with no vertical change shouldn't trigger a vertical scroll!");
+  equals(scrollView.get('horizontalScrollOffset'), 21, "With a vertical scroll in motion, scrolling horizontally by more than touchSecondaryScrollThreshold results in scrolling");
+
+});
+
+test("Touch scroll lock", function() {
+  equals(scrollView.get('verticalScrollOffset'), 0, "PRELIM: Vertical offset starts at");
+  equals(scrollView.get('horizontalScrollOffset'), 0, "PRELIM: Horizontal offset starts at");
+
+  // Start touch
+  SC.run(function() {
+    SC.Event.trigger(targetLayer, 'touchstart', [evt]);
+  });
+
+  // Move touch up more than touchSecondaryScrollLock.
+  evt.pageY = initialPageY - 35;
+  SC.run(function() {
+    SC.Event.trigger(targetLayer, 'touchmove', [evt]);
+  });
+  equals(scrollView.get('verticalScrollOffset'), 35, "PRELIM: Scrolling more than touchScrollThreshold results in scrolling");
+  if (scrollView.get('horizontalScrollOffset') !== 0) ok(false, "A touch with no horizontal change shouldn't trigger a horizontal scroll!");
+
+  // Move touch sideways.
+  evt.pageX = initialPageX - 50;
+  SC.run(function() {
+    SC.Event.trigger(targetLayer, 'touchmove', [evt]);
+  });
+  if (scrollView.get('verticalScrollOffset') !== 35) ok(false, "A touch with no vertical change shouldn't trigger a vertical scroll!");
+  equals(scrollView.get('horizontalScrollOffset'), 0, "Having scrolled vertically past the touchSecondaryScrollLock, horizontal touch movements are ignored");
+
 });
