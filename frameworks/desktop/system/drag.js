@@ -41,31 +41,31 @@ SC.DRAG_DATA = 0x0008; // includes SC.DRAG_REORDER
 */
 SC.DRAG_AUTOSCROLL_ZONE_THICKNESS = 20;
 
-SC.View.reopen(
-  /** @scope SC.View.prototype */ {
+// SC.View.reopen(
+//   /** @scope SC.View.prototype */ {
 
-  /** @private */
-  init: function (original) {
-    original();
+//   /** @private */
+//   init: function (original) {
+//     original();
 
-    // register for drags
-    if (this.get('isDropTarget')) { SC.Drag.addDropTarget(this); }
+//     // register for drags
+//     if (this.get('isDropTarget')) { SC.Drag.addDropTarget(this); }
 
-    // register scroll views for autoscroll during drags
-    if (this.get('isScrollable')) { SC.Drag.addScrollableView(this); }
-  }.enhance(),
+//     // register scroll views for autoscroll during drags
+//     if (this.get('isScrollable')) { SC.Drag.addScrollableView(this); }
+//   }.enhance(),
 
-  /** @private */
-  destroy: function (original) {
-    // unregister for drags
-    if (this.get('isDropTarget')) { SC.Drag.removeDropTarget(this); }
+//   /** @private */
+//   destroy: function (original) {
+//     // unregister for drags
+//     if (this.get('isDropTarget')) { SC.Drag.removeDropTarget(this); }
 
-    // unregister for autoscroll during drags
-    if (this.get('isScrollable')) { SC.Drag.removeScrollableView(this); }
+//     // unregister for autoscroll during drags
+//     if (this.get('isScrollable')) { SC.Drag.removeScrollableView(this); }
 
-    return original();
-  }.enhance()
-});
+//     return original();
+//   }.enhance()
+// });
 
 /**
   @class
