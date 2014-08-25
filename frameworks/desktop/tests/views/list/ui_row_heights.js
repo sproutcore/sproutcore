@@ -7,8 +7,8 @@
 /*globals module, test, ok, same, equals */
 
 /*
-  This test evaluates a list with custom row heights, outlines,
-  group views or any other non-standard behavior.
+  These tests evaluate progressive rendering within the clippingFrame on a list with
+  custom row heights, outlines, group views or any other non-standard behavior.
 */
 
 // create a fake content array.  Generates a list with whatever length you
@@ -36,56 +36,57 @@ var ContentArray = SC.Object.extend(SC.Array, {
   }
 });
 
-var pane = SC.ControlTestPane.design()
-  .add("Custom Row Heights", SC.ScrollView.design({
-    layout: { left: 0, right: 0, top: 0, height: 200 },
-    hasHorizontalScroller: NO,
-    contentView: SC.ListView.design({
-      content: ContentArray.create({ length: 100001 }),
-      customRowHeightIndexes: SC.IndexSet.create(2,5).add(10000,100),
+var pane = SC.ControlTestPane.design();
+pane.add("Custom Row Heights", SC.ListView.design({
+  // To avoid turning this into a SC.ScrollView integration test, our strategy is to override clippingFrame to allow
+  // us to control it directly, focusing our tests on the "progressive rendering within a given clipping frame" unit.
+  clippingFrame: function(key, value) {
+    return value || { x: 0, y: 0, width: 100, height: 200 };
+  }.property('frame', 'parentView').cacheable(),
 
-      // used for testing
-      adjustableRows: SC.IndexSet.create(0,5),
-      altRowHeight: 10,
+  content: ContentArray.create({ length: 100001 }),
+  customRowSizeIndexes: SC.IndexSet.create(2,5).add(10000,100),
 
-      contentIndexRowHeight: function(view, content, index) {
-        var ret =this.get('rowHeight');
-        if (!this.customRowHeightIndexes.contains(index)) return ret;
-        return this.adjustableRows.contains(index) ? this.get('altRowHeight') : ret*2;
-      },
+  // used for testing
+  adjustableRows: SC.IndexSet.create(0,5),
+  altRowHeight: 10,
 
-      contentValueKey: "title",
-      contentCheckboxKey: "isDone",
-      contentUnreadCountKey: "unread",
-      rowHeight: 20
+  contentIndexRowHeight: function(view, content, index) {
+    var ret = this.get('rowHeight');
+    if (!this.customRowSizeIndexes.contains(index)) return ret;
+    else return this.adjustableRows.contains(index) ? this.get('altRowHeight') : ret * 2;
+  },
 
-    })
-  }));
+  contentValueKey: "title",
+  contentCheckboxKey: "isDone",
+  contentUnreadCountKey: "unread",
+  rowHeight: 20
+}));
+pane.add("Custom Row Heights 2", SC.ListView.design({
+  // To avoid turning this into a SC.ScrollView integration test, our strategy is to override clippingFrame to allow
+  // us to control it directly, focusing our tests on the "progressive rendering within a given clipping frame" unit.
+  clippingFrame: function(key, value) {
+    return value || { x: 0, y: 0, width: 100, height: 200 };
+  }.property('frame', 'parentView').cacheable(),
 
-var pane2 = SC.ControlTestPane.design()
-  .add("Custom Row Heights 2", SC.ScrollView.design({
-    layout: { left: 0, right: 0, top: 0, height: 200 },
-    hasHorizontalScroller: NO,
-    contentView: SC.ListView.design({
-      content: ContentArray.create({ length: 100 }),
-      customRowHeightIndexes: SC.IndexSet.create(0,1000),
+  content: ContentArray.create({ length: 100 }),
+  customRowSizeIndexes: SC.IndexSet.create(0,1000),
 
-      contentIndexRowHeight: function(view, content, index) {
-        if (index % 2 === 0) {
-          return 17;
-        }
-        else {
-          return 48;
-        }
-      },
+  contentIndexRowHeight: function(view, content, index) {
+    if (index % 2 === 0) {
+      return 17;
+    }
+    else {
+      return 48;
+    }
+  },
 
-      contentValueKey: "title",
-      contentCheckboxKey: "isDone",
-      contentUnreadCountKey: "unread",
-      rowHeight: 48
+  contentValueKey: "title",
+  contentCheckboxKey: "isDone",
+  contentUnreadCountKey: "unread",
+  rowHeight: 48
 
-    })
-  }));
+}));
 
 function verifyChildViewsMatch(views, set) {
   var indexes = set.clone();
@@ -109,12 +110,10 @@ function verifyChildViewsMatch(views, set) {
 module("SC.ListView - ui_row_heights", {
   setup: function () {
     pane.standardSetup().setup();
-    pane2.standardSetup().setup();
   },
 
   teardown: function () {
     pane.standardSetup().teardown();
-    pane2.standardSetup().teardown();
   }
 });
 
@@ -123,35 +122,34 @@ module("SC.ListView - ui_row_heights", {
 //
 
 test("rendering only incremental portion", function() {
-  var listView = pane.view("Custom Row Heights").contentView;
+  var listView = pane.view("Custom Row Heights");
   same(listView.get("nowShowing"), SC.IndexSet.create(0, 10), 'nowShowing should be smaller IndexSet');
   equals(listView.get('childViews').length, listView.get('nowShowing').get('length'), 'should have same number of childViews as nowShowing length');
 });
 
-test("scrolling by small amount should update incremental rendering", function() {
-  var scrollView = pane.view('Custom Row Heights'),
-      listView   = scrollView.contentView,
+test("changing clippingFrame should update incremental rendering", function() {
+  var listView = pane.view('Custom Row Heights'),
       exp;
 
   same(listView.get('nowShowing'), SC.IndexSet.create(0,10), 'precond - nowShowing has incremental range');
 
-  // SCROLL DOWN ONE LINE
+  // MOVE CLIPPING FRAME DOWN ONE LINE
   SC.run(function() {
-    scrollView.scrollTo(0,61);
+    listView.set('clippingFrame', { x: 0, y: 61, width: 100, height: 200 });
   });
 
-  // top line should have scrolled out of view
+  // top line should now be clipped out of view
   exp = SC.IndexSet.create(4,9);
   same(listView.get('nowShowing'), exp, 'nowShowing should change to reflect new clippingFrame');
 
   verifyChildViewsMatch(listView.childViews, exp);
 
-  // SCROLL DOWN ANOTHER LINE
+  // MOVE CLIPPING FRAME DOWN ANOTHER LINE
   SC.run(function() {
-    scrollView.scrollTo(0,83);
+    listView.set('clippingFrame', { x: 0, y: 83, width: 100, height: 200 });
   });
 
-  // top line should have scrolled out of view
+  // next line should be clipped out of view
   exp = SC.IndexSet.create(5,9);
   same(listView.get('nowShowing'), exp, 'nowShowing should change to reflect new clippingFrame');
 
@@ -160,10 +158,10 @@ test("scrolling by small amount should update incremental rendering", function()
 
   // SCROLL UP ONE LINE
   SC.run(function() {
-    scrollView.scrollTo(0,66);
+    listView.set('clippingFrame', { x: 0, y: 66, width: 100, height: 200 });
   });
 
-  // top line should have scrolled out of view
+  // top line should no longer be clipped
   exp = SC.IndexSet.create(4,9);
   same(listView.get('nowShowing'), exp, 'nowShowing should change to reflect new clippingFrame');
 
@@ -172,14 +170,13 @@ test("scrolling by small amount should update incremental rendering", function()
 });
 
 test("the 'nowShowing' property should be correct when scrolling", function() {
-  var scrollView = pane2.view('Custom Row Heights 2'),
-      listView   = scrollView.contentView,
+  var listView = pane.view('Custom Row Heights 2'),
       correctSet = SC.IndexSet.create(1, 7);
 
-  // Scroll to point 36, which demonstrates a problem with the older list view
+  // Clip down to point 36 to demonstrate a problem with the older list view
   // contentIndexesInRect code.
   SC.run(function() {
-    scrollView.scrollTo(0,36);
+    listView.set('clippingFrame', { x: 0, y: 36, width: 100, height: 200 });
   });
   same(listView.get("nowShowing"), correctSet, 'nowShowing should %@'.fmt(correctSet));
 });
@@ -188,17 +185,15 @@ test("the 'nowShowing' property should be correct when scrolling", function() {
 // CHANGING ROW HEIGHTS
 //
 
-test("manually calling rowHeightDidChangeForIndexes()", function() {
-  var scrollView = pane.view('Custom Row Heights'),
-      listView   = scrollView.contentView,
-      exp;
+test("manually calling rowSizeDidChangeForIndexes()", function() {
+  var listView = pane.view('Custom Row Heights');
 
   same(listView.get('nowShowing'), SC.IndexSet.create(0,10), 'precond - nowShowing has incremental range');
 
   // adjust row height and then invalidate a portion range
   SC.run(function() {
     listView.set('altRowHeight', 80);
-    listView.rowHeightDidChangeForIndexes(listView.adjustableRows);
+    listView.rowSizeDidChangeForIndexes(listView.adjustableRows);
   });
 
   // nowShowing should adjust
