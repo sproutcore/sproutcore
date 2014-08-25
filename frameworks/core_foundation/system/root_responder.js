@@ -971,7 +971,7 @@ SC.RootResponder = SC.Object.extend(
     // Once the actual event name is determined, simply remove all the extras.
     // This should prevent any problems with browsers that fire multiple events.
     ['transitionend', variation1, variation2, variation3].forEach(function (keyName) {
-      if (keyName != actualEventName) {
+      if (keyName !== actualEventName) {
         SC.Event.remove(document, keyName, this, this[keyName]);
         this[keyName] = null;
     }
@@ -999,7 +999,7 @@ SC.RootResponder = SC.Object.extend(
     // Once the actual event name is determined, simply remove all the extras.
     // This should prevent any problems with browsers that fire multiple events.
     ['animationend', variation1, variation2, variation3].forEach(function (keyName) {
-      if (keyName != actualEventName) {
+      if (keyName !== actualEventName) {
         SC.Event.remove(document, keyName, this, this[keyName]);
         this[keyName] = null;
     }
@@ -1010,7 +1010,7 @@ SC.RootResponder = SC.Object.extend(
     variation2 = lowerDomPrefix + 'AnimationIteration';
     variation3 = domPrefix + 'AnimationIteration';
     ['animationiteration', variation1, variation2, variation3].forEach(function (keyName) {
-      if (keyName != actualEventName) {
+      if (keyName !== actualEventName) {
         SC.Event.remove(document, keyName, this, this[keyName]);
         this[keyName] = null;
       }
@@ -1021,7 +1021,7 @@ SC.RootResponder = SC.Object.extend(
     variation2 = lowerDomPrefix + 'AnimationStart';
     variation3 = domPrefix + 'AnimationStart';
     ['animationstart', variation1, variation2, variation3].forEach(function (keyName) {
-      if (keyName != actualEventName) {
+      if (keyName !== actualEventName) {
         SC.Event.remove(document, keyName, this, this[keyName]);
         this[keyName] = null;
       }
@@ -1937,8 +1937,8 @@ SC.RootResponder = SC.Object.extend(
   keydown: function(evt) {
     if (SC.none(evt)) return YES;
     var keyCode = evt.keyCode;
-    if(SC.browser.isMozilla && evt.keyCode===9){
-      this.keydownCounter=1;
+    if (SC.browser.isMozilla && evt.keyCode===9) {
+      this.keydownCounter = 1;
     }
     // Fix for IME input (japanese, mandarin).
     // If the KeyCode is 229 wait for the keyup and
@@ -2010,9 +2010,9 @@ SC.RootResponder = SC.Object.extend(
         keyCode   = evt.keyCode,
         isFirefox = SC.browser.isMozilla;
 
-    if(isFirefox && evt.keyCode===9){
+    if (isFirefox && evt.keyCode===9) {
       this.keydownCounter++;
-      if(this.keydownCounter==2) return YES;
+      if (this.keydownCounter === 2) return YES;
     }
 
     // delete is handled in keydown() for most browsers
