@@ -261,7 +261,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @param {Event} evt that cause this to become first responder
     @returns {SC.Pane} receiver
   */
-  makeFirstResponder: function(original, view, evt) {
+  makeFirstResponder: function(view, evt) {
     // firstResponder should never be null
     if(!view) view = this;
 
@@ -288,7 +288,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
       view.set('isKeyResponder', isKeyPane);
     }
 
-    original(view, evt);
+    sc_super();
 
     if(current) current.endPropertyChanges();
     if(view) view.endPropertyChanges();
@@ -304,7 +304,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     }
 
     return this ;
-  }.enhance(),
+  },
 
   /**
     Called just before the pane loses it's keyPane status.  This will notify
@@ -511,7 +511,10 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     method to recompute properties that depend on the pane's existence
     in the document but must be run prior to child view notification.
    */
-  recomputeDependentProperties: function() {},
+  recomputeDependentProperties: function () {
+    // @see panes/layout.js
+    this.set('currentWindowSize', this.rootResponder.computeWindowSize());
+  },
 
   /**
     YES when the pane is currently attached to a document DOM.  Read only.
@@ -594,16 +597,18 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   /** @private */
   init: function() {
     // Backwards compatibility
+    //@if(debug)
     // TODO: REMOVE THIS
     if (this.hasTouchIntercept === YES) {
-      SC.Logger.warn("Do not set hasTouchIntercept directly. Use wantsTouchIntercept instead.");
-      this.hasTouchIntercept = SC.platform.touch;
+      SC.error("Developer Error: Do not set `hasTouchIntercept` on a pane directly. Please use `wantsTouchIntercept` instead.");
     }
+    //@endif
 
-    // if a layer was set manually then we will just attach to existing
-    // HTML.
-    var hasLayer = !!this.get('layer') ;
-    sc_super() ;
+    // if a layer was set manually then we will just attach to existing HTML.
+    var hasLayer = !!this.get('layer');
+
+    sc_super();
+
     if (hasLayer) {
       this._attached();
     }

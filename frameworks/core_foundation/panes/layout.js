@@ -127,10 +127,6 @@ SC.Pane.reopen(
   */
   unsetBodyOverflowIfNeeded: function () {
     SC.bodyOverflowArbitrator.withdrawRequest(this);
-  },
+  }
 
-  recomputeDependentProperties: function (original) {
-    this.set('currentWindowSize', this.rootResponder.computeWindowSize());
-    original();
-  }.enhance()
 });
