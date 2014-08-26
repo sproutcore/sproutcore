@@ -2110,7 +2110,7 @@ SC.ScrollView = SC.View.extend({
   /** @private */
   destroy: function() {
     sc_super();
-    if (this._scroll_animationID) cancelAnimationFrame(this._scroll_animationID);
+    if (this._scroll_animationFrameID) cancelAnimationFrame(this._scroll_animationFrameID);
   },
 
   /** @private
@@ -2587,7 +2587,7 @@ SC.ScrollView = SC.View.extend({
     Called at the end of the run loop to actually adjust the element's scroll positioning.
   */
   adjustElementScroll: function () {
-    if (!this._scroll_animationID) {
+    if (!this._scroll_animationFrameID) {
       // Run, since we're already in a run loop. This will also kick off subsequent frames.
       this._scsv_adjustElementScroll();
     }
@@ -2599,7 +2599,7 @@ SC.ScrollView = SC.View.extend({
   */
   _scsv_adjustElementScroll: function() {
     // Bookkeep.
-    this._scroll_animationID = null;
+    this._scroll_animationFrameID = null;
 
     var contentView = this.get('contentView');
 
@@ -2679,6 +2679,10 @@ SC.ScrollView = SC.View.extend({
         contentViewLayer.style[SC.browser.experimentalStyleNameFor('transformOrigin')] = 'top left';
         contentViewLayer.style[transformAttribute] = transformStyle;
       }
+      // HACK: This is used to prevent a bug where the SC layout engine wipes out the scroll transforms when adjusted.
+      // See SC.View.LayoutStyleCalculator.calculate "HACK".
+      contentView._sc_scrollTransformStyle = transformStyle;
+      // END HACK
     }
 
     // Update the last-rendered numbers.
@@ -2688,12 +2692,12 @@ SC.ScrollView = SC.View.extend({
 
     // Schedule next frame.
     var self = this;
-    this._scroll_animationID = window.requestAnimationFrame(function(timestamp) {
+    this._scroll_animationFrameID = window.requestAnimationFrame(function(timestamp) {
       // (Note: The timestamp was giving us trouble, so we're not using it. TODO: Figure that out.)
       SC.run(self._scsv_adjustElementScroll, self);
     });
 
-    // If we have any animations pending, queue up the new values for the next frame.
+    // ENORMOUS ANIMATION BLOCK FROM HERE DOWN. If we have any animations pending, queue up the new values for the next frame.
     if (this._scroll_queuedAnimations.length) {
       var animations = this._scroll_queuedAnimations,
         animation = animations[0],
@@ -2792,7 +2796,8 @@ SC.ScrollView = SC.View.extend({
         }
       }
 
-      // If anything has actually changed, change anything that's actually changed.
+      // If anything has actually changed, change anything that's actually changed. This will be rendered in the
+      // next animation frame.
       if (horizontalDidChange || verticalDidChange || scaleDidChange) {
         this._scroll_isExogenous = YES;
         this.beginPropertyChanges();

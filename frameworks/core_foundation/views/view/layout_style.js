@@ -331,6 +331,27 @@ SC.View.LayoutStyleCalculator = {
 
     this._calculateAnimations(style, animations, view.get('hasAcceleratedLayer'));
 
+    // HACK: This is prevents a bug where the SC layout engine wipes out the scroll transforms when adjusted.
+    // See SC.ScrollView#_scsv_adjustElementScroll "HACK".
+    // Ultimately, the scroll view shouldn't be overriding style transforms directly, instead integrating with some future
+    // high-performance transform-based layout engine (presumably opt-in per view and integrated with the standard engine
+    // here).
+    if (view._sc_scrollTransformStyle) {
+      var transformAttribute = SC.browser.experimentalStyleNameFor('transform'),
+        transformOriginAttribute = SC.browser.experimentalStyleNameFor('transformOrigin');
+      //@if(debug)
+      // Provide some developer support for conflicting transforms.
+      if (style[transformAttribute]) {
+        var msg = "Developer Warning: Transform layout properties (e.g. rotate) were found on a ScrollView's contentView, conflicting with the scrolling transforms. " +
+          "The transform layout properties are being ignored. You should consider refactoring the transform layout properties into a child view of the contentView.";
+        SC.Logger.warn(msg);
+      }
+      //@endif
+      style[transformAttribute] = view._sc_scrollTransformStyle;
+      style[transformOriginAttribute] = 'top left';
+    }
+    // END HACK
+
     // convert any numbers into a number + "px".
     for (var key in style) {
       var value = style[key];
