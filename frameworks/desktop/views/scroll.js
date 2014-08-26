@@ -178,7 +178,7 @@ SC.ScrollView = SC.View.extend({
       this._scroll_horizontalScrollOffset = value;
 
       // If we're flagged as a user-generated change, cache our vertical scale origin.
-      if (this._scroll_isExogenous) {
+      if (this._scroll_userIsInteractingDirectly) {
         // Cache our vertical scale origin.
         if (value === minOffset && value === maxOffset) {
           this._scroll_horizontalScaleOrigin = SC.ALIGN_DEFAULT;
@@ -234,7 +234,7 @@ SC.ScrollView = SC.View.extend({
       this._scroll_verticalScrollOffset = value;
 
       // If we're flagged as a user-generated change, cache our vertical scale origin.
-      if (this._scroll_isExogenous) {
+      if (this._scroll_userIsInteractingDirectly) {
         if (value === minOffset && value === maxOffset) {
           this._scroll_verticalScaleOrigin = SC.ALIGN_DEFAULT;
         } else if (value === minOffset) {
@@ -740,7 +740,7 @@ SC.ScrollView = SC.View.extend({
     // ScrollView or a subclass; instead you should manipulate the ScrollOffset properties
     // directly. scrollTo is reserved for exogenous interactions, presumably triggered by the
     // user, which should cause scale and alignment origins to recalculate.
-    this._scroll_isExogenous = YES;
+    this._scroll_userIsInteractingDirectly = YES;
 
     // normalize params
     if (y === undefined && SC.typeOf(x) === SC.T_HASH) {
@@ -756,7 +756,7 @@ SC.ScrollView = SC.View.extend({
       this.set('verticalScrollOffset', y);
     }
 
-    this._scroll_isExogenous = NO;
+    this._scroll_userIsInteractingDirectly = NO;
 
     return this;
   },
@@ -1574,7 +1574,7 @@ SC.ScrollView = SC.View.extend({
 
     // APPLY GOALS, if any.
     if (goalXDidChange || goalYDidChange || goalScaleDidChange) {
-      this._scroll_isExogenous = YES;
+      this._scroll_userIsInteractingDirectly = YES;
       this.beginPropertyChanges();
       // Horizontal offset.
       if (goalXDidChange) this.set('horizontalScrollOffset', goalX);
@@ -1587,7 +1587,7 @@ SC.ScrollView = SC.View.extend({
         this.notifyPropertyChange('minimumVerticalScrollOffset').notifyPropertyChange('maximumVerticalScrollOffset');
       }
       this.endPropertyChanges();
-      this._scroll_isExogenous = NO;
+      this._scroll_userIsInteractingDirectly = NO;
     }
 
     // Update the priors to the currents. (Used when adjusting anchors with an additional touch.)
@@ -1954,6 +1954,10 @@ SC.ScrollView = SC.View.extend({
     return YES;
   },
 
+  /** @private
+    Resets the copious private state variables used to handle touch scrolling. Porting all this to a lightweight
+    statechart would be a really wonderful move.
+  */
   _scsv_clearTouchCache: function() {
     this._scroll_touchContentHadItsChance = NO;
     this._scroll_touchGestureIsInitialized = NO;
@@ -1975,27 +1979,6 @@ SC.ScrollView = SC.View.extend({
     this._scroll_gestureAnchorContentWidth = null;
     this._scroll_gestureAnchorContentHeight = null;
   },
-
-  // (Once these are locked in, I'll move them down to the bottom with the rest.)
-  _scroll_touchContentHadItsChance: NO,
-  _scroll_touchGestureIsInitialized: NO,
-  _scroll_touchGestureNeedsReinitializing: NO,
-  _scroll_isTouchScrolling: NO,
-  _scroll_isTouchScrollingX: NO,
-  _scroll_isTouchScrollingY: NO,
-  _scroll_isTouchScaling: NO,
-  _scroll_latestTouchID: 0,
-  _scroll_globalContainerFrame: null,
-  _scroll_gestureAnchorX: null,
-  _scroll_gestureAnchorY: null,
-  _scroll_gestureAnchorD: null,
-  _scroll_gesturePriorX: null,
-  _scroll_gesturePriorY: null,
-  _scroll_gestureAnchorVerticalOffset: null,
-  _scroll_gestureAnchorHorizontalOffset: null,
-  _scroll_gestureAnchorScale: null,
-  _scroll_gestureAnchorContentWidth: null,
-  _scroll_gestureAnchorContentHeight: null,
 
   // ..........................................................
   // Internal Animation Support
@@ -2157,17 +2140,17 @@ SC.ScrollView = SC.View.extend({
           valueBinding: '*owner.horizontalScrollOffset',
           // Make sure to pipe user events through to us correctly, so that we can recalculate scale origins.
           mouseDown: function() {
-            this.get('owner')._scroll_isExogenous = YES;
+            this.get('owner')._scroll_userIsInteractingDirectly = YES;
             if (sc_super()) {
               return YES;
             } else {
-              this.get('owner')._scroll_isExogenous = NO;
+              this.get('owner')._scroll_userIsInteractingDirectly = NO;
               return NO;
             }
           },
           mouseUp: function() {
             var ret = sc_super();
-            this.get('owner')._scroll_isExogenous = NO;
+            this.get('owner')._scroll_userIsInteractingDirectly = NO;
             return ret;
           }
         });
@@ -2185,17 +2168,17 @@ SC.ScrollView = SC.View.extend({
           valueBinding: '*owner.verticalScrollOffset',
           // Make sure to pipe user events through to us correctly, so that we can recalculate scale origins.
           mouseDown: function() {
-            this.get('owner')._scroll_isExogenous = YES;
+            this.get('owner')._scroll_userIsInteractingDirectly = YES;
             if (sc_super()) {
               return YES;
             } else {
-              this.get('owner')._scroll_isExogenous = NO;
+              this.get('owner')._scroll_userIsInteractingDirectly = NO;
               return NO;
             }
           },
           mouseUp: function() {
             var ret = sc_super();
-            this.get('owner')._scroll_isExogenous = NO;
+            this.get('owner')._scroll_userIsInteractingDirectly = NO;
             return ret;
           }
         });
@@ -2361,7 +2344,7 @@ SC.ScrollView = SC.View.extend({
         forceWidth  = mxHOffSet < hOffSet;
     if (forceHeight || forceWidth) {
       // Update the position of the content view to fit.
-      this.forceDimensionsRecalculation(forceWidth, forceHeight, vOffSet, hOffSet);
+      this._scsv_forceDimensionsRecalculation(forceWidth, forceHeight, vOffSet, hOffSet);
     } else {
       // Reapply the position.
       this.invokeLast(this.adjustElementScroll);
@@ -2370,6 +2353,32 @@ SC.ScrollView = SC.View.extend({
     // send change notifications since they don't invalidate automatically
     this.notifyPropertyChange('maximumVerticalScrollOffset');
     this.notifyPropertyChange('maximumHorizontalScrollOffset');
+  },
+
+  /** @private */
+  _scsv_forceDimensionsRecalculation: function (forceWidth, forceHeight, vOffSet, hOffSet) {
+    var oldScrollHOffset = hOffSet;
+    var oldScrollVOffset = vOffSet;
+
+    this.beginPropertyChanges();
+    this.set('verticalScrollOffset', 0);
+    this.set('horizontalScrollOffset', 0);
+    this.endPropertyChanges();
+
+    this.beginPropertyChanges();
+    if (forceWidth && forceHeight) {
+      this.set('verticalScrollOffset', this.get('maximumVerticalScrollOffset'));
+      this.set('horizontalScrollOffset', this.get('maximumHorizontalScrollOffset'));
+    }
+    else if (forceWidth && !forceHeight) {
+      this.set('verticalScrollOffset', oldScrollVOffset);
+      this.set('horizontalScrollOffset', this.get('maximumHorizontalScrollOffset'));
+    }
+    else if (!forceWidth && forceHeight) {
+      this.set('horizontalScrollOffset', this.get('maximumVerticalScrollOffset'));
+      this.set('verticalScrollOffset', oldScrollHOffset);
+    }
+    this.endPropertyChanges();
   },
 
   /** @private
@@ -2492,7 +2501,7 @@ SC.ScrollView = SC.View.extend({
     }
 
     // FAST PATH: If we're in the middle of a user event, just pass this along to adjustElementScroll.
-    if (this._scroll_isExogenous) {
+    if (this._scroll_userIsInteractingDirectly) {
       this.invokeLast(this.adjustElementScroll);
       return;
     }
@@ -2799,41 +2808,15 @@ SC.ScrollView = SC.View.extend({
       // If anything has actually changed, change anything that's actually changed. This will be rendered in the
       // next animation frame.
       if (horizontalDidChange || verticalDidChange || scaleDidChange) {
-        this._scroll_isExogenous = YES;
+        this._scroll_userIsInteractingDirectly = YES;
         this.beginPropertyChanges();
         if (horizontalDidChange) this.set('horizontalScrollOffset', newHorizontalOffset);
         if (verticalDidChange) this.set('verticalScrollOffset', newVerticalOffset);
         if (scaleDidChange) this.set('scale', newScale);
         this.endPropertyChanges();
-        this._scroll_isExogenous = NO;
+        this._scroll_userIsInteractingDirectly = NO;
       }
     }
-  },
-
-  /** @private */
-  forceDimensionsRecalculation: function (forceWidth, forceHeight, vOffSet, hOffSet) {
-    var oldScrollHOffset = hOffSet;
-    var oldScrollVOffset = vOffSet;
-
-    this.beginPropertyChanges();
-    this.set('verticalScrollOffset', 0);
-    this.set('horizontalScrollOffset', 0);
-    this.endPropertyChanges();
-
-    this.beginPropertyChanges();
-    if (forceWidth && forceHeight) {
-      this.set('verticalScrollOffset', this.get('maximumVerticalScrollOffset'));
-      this.set('horizontalScrollOffset', this.get('maximumHorizontalScrollOffset'));
-    }
-    else if (forceWidth && !forceHeight) {
-      this.set('verticalScrollOffset', oldScrollVOffset);
-      this.set('horizontalScrollOffset', this.get('maximumHorizontalScrollOffset'));
-    }
-    else if (!forceWidth && forceHeight) {
-      this.set('horizontalScrollOffset', this.get('maximumVerticalScrollOffset'));
-      this.set('verticalScrollOffset', oldScrollHOffset);
-    }
-    this.endPropertyChanges();
   },
 
   // ..........................................................
@@ -2841,39 +2824,22 @@ SC.ScrollView = SC.View.extend({
   //
   // Defined for performance, documented for clarity™
 
-  // Views and dimensions
-
+  // ..... Views and dimensions .....
   _scroll_contentView: null,
-
   _scroll_contentWidth: null,
-
   _scroll_contentHeight: null,
-
   _scroll_containerHeight: null,
-
   _scroll_containerWidth: null,
 
-  // Offsets
-
-  /** @private The cached vertical offset value. */
+  // ..... Offsets .....
   _scroll_verticalScrollOffset: 0,
-
-  /** @private The cached horizontal offset value. */
   _scroll_horizontalScrollOffset: 0,
-
-  /** @private The cached minimum vertical offset value. */
   _scroll_minimumVerticalScrollOffset: 0,
-
-  /** @private The cached maximum vertical offset value. */
   _scroll_maximumVerticalScrollOffset: 0,
-
-  /** @private The cached minimum horizontal offset value. */
   _scroll_minimumHorizontalScrollOffset: 0,
-
-  /** @private The cached maximum horizontal offset value. */
   _scroll_maximumHorizontalScrollOffset: 0,
 
-  // tile
+  // ..... Tiling child views (`tile`) .....
 
   /** @private If the tile method detects the appearance or disappearance of gutters, it triggers a re-layout. */
   _scroll_hasHorizontalGutter: NO,
@@ -2881,7 +2847,7 @@ SC.ScrollView = SC.View.extend({
   /** @private If the tile method detects the appearance or disappearance of gutters, it triggers a re-layout. */
   _scroll_hasVerticalGutter: NO,
 
-  // Scale
+  // ..... Scale .....
 
   /** @private The cached scale. */
   _scroll_scale: 1,
@@ -2899,20 +2865,36 @@ SC.ScrollView = SC.View.extend({
   _scroll_horizontalScaleOriginPct: 0.5,
 
   /** @private
-    Used to signal that a scroll offset change is coming from direct user interaction with the scroll view. Exogenous scrolls should
+    Used to signal that a scroll offset change is coming from direct user interaction with this scroll view. Direct scrolls should
     change the scale origins; changes from other locations (e.g. a scale slider) should not.
   */
-  _scroll_isExogenous: NO,
+  _scroll_userIsInteractingDirectly: NO,
 
-  // Rendered output
+  // ..... Touch .....
+  // (TODO: port to a lightweight internal statechart!)
+  _scroll_touchContentHadItsChance: NO,
+  _scroll_touchGestureIsInitialized: NO,
+  _scroll_touchGestureNeedsReinitializing: NO,
+  _scroll_isTouchScrolling: NO,
+  _scroll_isTouchScrollingX: NO,
+  _scroll_isTouchScrollingY: NO,
+  _scroll_isTouchScaling: NO,
+  _scroll_latestTouchID: 0,
+  _scroll_globalContainerFrame: null,
+  _scroll_gestureAnchorX: null,
+  _scroll_gestureAnchorY: null,
+  _scroll_gestureAnchorD: null,
+  _scroll_gesturePriorX: null,
+  _scroll_gesturePriorY: null,
+  _scroll_gestureAnchorVerticalOffset: null,
+  _scroll_gestureAnchorHorizontalOffset: null,
+  _scroll_gestureAnchorScale: null,
+  _scroll_gestureAnchorContentWidth: null,
+  _scroll_gestureAnchorContentHeight: null,
 
-  /** @private The last horizontal offset value that's been applied. */
+  // ..... Rendered output .....
   _scroll_lastRenderedHorizontalScrollOffset: null,
-
-  /** @private The last vertical offset value that's been applied. */
   _scroll_lastRenderedVerticalScrollOffset: null,
-
-  /** @private The last scale that's been applied. */
   _scroll_lastRenderedScale: null
 
 });
