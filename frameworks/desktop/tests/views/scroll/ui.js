@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/*global module, test, ok, equals, same, stop, start */
+/*global module, test, ok, equals, expect, stop, start */
 
 (function () {
     var appleURL="http://photos4.meetupstatic.com/photos/event/4/6/9/9/600_4518073.jpeg";
@@ -16,7 +16,10 @@
     })
 
     .add("basic2", SC.ScrollView, {
-        contentView: iv
+        contentView: SC.View.extend({
+          layout: { height: 400, width: 400 },
+          backgroundColor: 'lightblue'
+        })
     })
 
     .add("basic3", SC.ScrollView, {
@@ -60,7 +63,7 @@
   //
   module('SC.ScrollView UI', pane.standardSetup());
 
-  test("basic", function() {
+  test("Basic presence of child views.", function() {
     var view = pane.view('basic');
     ok(!view.$().hasClass('disabled'), 'should not have disabled class');
     ok(!view.$().hasClass('sel'), 'should not have sel class');
@@ -83,10 +86,17 @@
     ok(verticalScrollerView, 'default scroll view has a vertical scroller');
   });
 
-  test("basic2", function() {
-    var view = pane.view('basic2');
+  test("Basic class names, offsets and CSS transforms", function() {
+    var view = pane.view('basic2'),
+      contentView = view.get('contentView'),
+      elem = contentView.getPath('layer'),
+      transformAttr = SC.browser.experimentalStyleNameFor('transform'),
+      transformTemplate = 'translateX(%@px) translateY(%@px) translateZ(%@px) scale(%@)';
+
+    // CLASS
     ok(view.$().hasClass('sc-scroll-view'), 'should have sc-scroll-view class');
 
+    // HORIZONTAL SCROLLER
     var horizontalScrollerView = view.get('horizontalScrollerView');
     ok(view.get('hasHorizontalScroller'), 'default scroll view wants a horizontal scroller');
     ok(horizontalScrollerView, 'default scroll view has a horizontal scroller');
@@ -94,6 +104,7 @@
     var maxHScroll = view.maximumHorizontalScrollOffset();
     ok((maxHScroll > 0), 'Max horizontal scroll should be greater than zero');
 
+    // VERTICAL SCROLLER
     var verticalScrollerView = view.get('verticalScrollerView');
     ok(view.get('hasVerticalScroller'), 'default scroll view wants a vertical scroller');
     ok(verticalScrollerView, 'default scroll view has a vertical scroller');
@@ -101,33 +112,40 @@
     var maxVScroll = view.maximumVerticalScrollOffset();
     ok((maxVScroll > 0), 'Max vertical scroll should be greater than zero');
 
+    // SCROLLING VERTICALLY
     SC.run(function() {
       view.scrollTo(0,100);
       view._scsv_adjustElementScroll(); // This method is PRIVATE. (Called here to cheat, synchronously testing an asynchronous operation.)
     });
     equals(view.get('verticalScrollOffset'), 100, 'Vertical scrolling should adjust verticalScrollOffset');
-    var elem = view.getPath('contentView.layer');
     if (SC.platform.get('supportsCSSTransforms')) {
-      equals(elem.style[SC.browser.experimentalStyleNameFor('transform')],
-        'translateX(0px) translateY(-100px) translateZ(0px) scale(1)',
-        'Vertical scrolling should adjust transform on the contentView layer');
+      equals(elem.style[transformAttr], transformTemplate.fmt(0, -100, 0, 1), 'Vertical scrolling should adjust transform on the contentView layer');
     }
     // TODO: Simulate unsupported browser and test fallback (containerView's marginTop)
 
+    // SCROLLING HORIZONTALLY
     SC.run(function() {
       view.scrollTo(50,0);
       view._scsv_adjustElementScroll(); // This method is PRIVATE. (Called here to cheat, synchronously testing an asynchronous operation.)
     });
     equals(view.get('horizontalScrollOffset'), 50, 'horizontal scrolling should adjust horizontalScrollOffset');
     if (SC.platform.get('supportsCSSTransforms')) {
-      equals(elem.style[SC.browser.experimentalStyleNameFor('transform')],
-        'translateX(-50px) translateY(0px) translateZ(0px) scale(1)',
-        'Horizontal scrolling should adjust transform on the contentView layer.');
+      equals(elem.style[transformAttr], transformTemplate.fmt(-50, 0, 0, 1), 'Horizontal scrolling should adjust transform on the contentView layer.');
+    }
+    // TODO: Simulate unsupported browser and test fallback (containerView's marginLeft)
+
+    // ADJUSTING CONTENT LAYOUT WHILE SCROLLED
+    // Reproducing this bug requires that there be no adjustment already scheduled.
+    SC.run(function() {
+      contentView.adjust('height', 450);
+    });
+    if (SC.platform.get('supportsCSSTransforms')) {
+      equals(elem.style[transformAttr], transformTemplate.fmt(-50, 0, 0, 1), 'Adjusting content size should not affect scroll transform positioning');
     }
     // TODO: Simulate unsupported browser and test fallback (containerView's marginLeft)
   });
 
-  test("basic3", function() {
+  test("Basic scroller visibility", function() {
     var view = pane.view('basic3');
     view.set('isHorizontalScrollerVisible',NO);
     ok(!view.get('canScrollHorizontal'),'cannot scroll in horizontal direction');
@@ -139,7 +157,7 @@
     var maxHScroll = view.maximumHorizontalScrollOffset();
     equals(maxHScroll , 0, 'Max horizontal scroll should be equal to zero');
 
-    view.set('isVerticalScrollerVisible',NO);
+    SC.run(function() { view.set('isVerticalScrollerVisible', NO); });
     ok(!view.get('canScrollVertical'),'cannot scroll in vertical direction');
     var verticalScrollerView = view.get('verticalScrollerView');
     ok(view.get('hasVerticalScroller'), 'default scroll view wants a vertical scroller');
@@ -165,7 +183,7 @@
     });
 
    test('ScrollView should readjust scroll transform if layer changes', function() {
-     var view = pane.view('basic2'), cv = view.get('contentView'), container = view.get('containerView'),
+     var view = pane.view('basic2'), cv = view.get('contentView'),
       prevTransform;
 
     // Get the previous style transform.
@@ -235,7 +253,7 @@
         opac = verticalScroller.$('.thumb').css('opacity');
         equals(opac, '0.5', 'after fadein, scroller thumb opacity should equal 0.5');
         start();
-      }, 200)
+      }, 200);
 
     }, 1000);
   });
@@ -260,7 +278,7 @@
         opac = verticalScroller.$('.thumb').css('opacity');
         equals(opac, '0.5', 'after fadeout, scroller thumb opacity should equal 0.5');
         start();
-      }, 200)
+      }, 200);
 
     }, 1000);
   });
