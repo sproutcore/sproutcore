@@ -1186,10 +1186,20 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     if (l.length == 1) l = l[0];
     else error.push('string did not resolve to a single tree');
 
-    // error?
-    if (error.length > 0) return {error: error.join(',\n'), tree: l};
-    // everything fine - token list is now a tree and can be returned
-    else return l;
+    // If we have errors, return an error object.
+    if (error.length > 0) {
+      return {
+        error: error.join(',\n'),
+        tree: l,
+        // Conform to SC.Error.
+        isError: YES,
+        errorVal: function() { return this.error }
+      };
+    }
+    // Otherwise the token list is now a tree and can be returned.
+    else {
+      return l;
+    }
 
   },
 
