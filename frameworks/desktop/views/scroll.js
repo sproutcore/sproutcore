@@ -255,53 +255,6 @@ SC.ScrollView = SC.View.extend({
   // Note that the properties above don't trigger a recalculation, as calculation is only done during setting. Instead,
   // it invalidates the last-set value so that setting it again will actually do something.
 
-  /** @private
-    Calculates the maximum offset given content and container sizes, and the
-    alignment.
-  */
-  maximumScrollOffset: function (contentSize, containerSize, align) {
-    // if our content size is larger than or the same size as the container, it's quite
-    // simple to calculate the answer. Otherwise, we need to do some fancy-pants
-    // alignment logic (read: simple math)
-    if (contentSize >= containerSize) return contentSize - containerSize;
-
-    // alignment, yeah
-    if (align === SC.ALIGN_LEFT || align === SC.ALIGN_TOP) {
-      // if we left-align something, and it is smaller than the view, does that not mean
-      // that it's maximum (and minimum) offset is 0, because it should be positioned at 0?
-      return 0;
-    } else if (align === SC.ALIGN_MIDDLE || align === SC.ALIGN_CENTER) {
-      // middle align means the difference divided by two, because we want equal parts on each side.
-      return 0 - Math.round((containerSize - contentSize) / 2);
-    } else {
-      // right align means the entire difference, because we want all that space on the left
-      return 0 - (containerSize - contentSize);
-    }
-  },
-
-  /** @private
-    Calculates the minimum offset given content and container sizes, and the
-    alignment.
-  */
-  minimumScrollOffset: function (contentSize, containerSize, align) {
-    // if the content is larger than the container, we have no need to change the minimum
-    // away from the natural 0 position.
-    if (contentSize > containerSize) return 0;
-
-    // alignment, yeah
-    if (align === SC.ALIGN_LEFT || align === SC.ALIGN_TOP) {
-      // if we left-align something, and it is smaller than the view, does that not mean
-      // that it's maximum (and minimum) offset is 0, because it should be positioned at 0?
-      return 0;
-    } else if (align === SC.ALIGN_MIDDLE || align === SC.ALIGN_CENTER) {
-      // middle align means the difference divided by two, because we want equal parts on each side.
-      return 0 - Math.round((containerSize - contentSize) / 2);
-    } else {
-      // right align means the entire difference, because we want all that space on the left
-      return 0 - (containerSize - contentSize);
-    }
-  },
-
   /**
     The maximum horizontal scroll offset allowed given the current contentView
     size and the size of the scroll view.  If horizontal scrolling is
@@ -312,25 +265,8 @@ SC.ScrollView = SC.View.extend({
     @default 0
   */
   maximumHorizontalScrollOffset: function () {
-    var view = this.get('contentView');
-    var contentWidth = view ? view.get('frame').width : 0,
-        calculatedWidth = view ? view.get('calculatedWidth') : 0;
-
-    // The following code checks if there is a calculatedWidth (collections)
-    // to avoid looking at the incorrect value calculated by frame.
-    if (calculatedWidth) {
-      // Note that calculatedWidth is in the view's (unscaled) space.
-      contentWidth = calculatedWidth * this.get('scale');
-    }
-
-    var containerWidth = this.get('containerView').get('frame').width;
-
-    // we still must go through minimumScrollOffset even if we can't scroll
-    // because we need to adjust for alignment. So, just make sure it won't allow scrolling.
-    if (!this.get('canScrollHorizontal')) contentWidth = Math.min(contentWidth, containerWidth);
-    this._scroll_maximumHorizontalScrollOffset = this.maximumScrollOffset(contentWidth, containerWidth, this.get("horizontalAlign"));
     return this._scroll_maximumHorizontalScrollOffset;
-  }.property(),
+  }.property().cacheable(),
 
   /**
     The maximum vertical scroll offset allowed given the current contentView
@@ -342,25 +278,8 @@ SC.ScrollView = SC.View.extend({
     @default 0
   */
   maximumVerticalScrollOffset: function () {
-    var view = this.get('contentView'),
-        contentHeight = (view && view.get('frame')) ? view.get('frame').height : 0,
-        calculatedHeight = view ? view.get('calculatedHeight') : 0;
-
-    // The following code checks if there is a calculatedWidth (collections)
-    // to avoid looking at the incorrect value calculated by frame.
-    if (calculatedHeight) {
-      // Note that calculatedWidth is in the view's (unscaled) space.
-      contentHeight = calculatedHeight * this.get('scale');
-    }
-
-    var containerHeight = this.get('containerView').get('frame').height;
-
-    // we still must go through minimumScrollOffset even if we can't scroll
-    // because we need to adjust for alignment. So, just make sure it won't allow scrolling.
-    if (!this.get('canScrollVertical')) contentHeight = Math.min(contentHeight, containerHeight);
-    this._scroll_maximumVerticalScrollOffset = this.maximumScrollOffset(contentHeight, containerHeight, this.get("verticalAlign"));
     return this._scroll_maximumVerticalScrollOffset;
-  }.property(),
+  }.property().cacheable(),
 
   /**
     The minimum horizontal scroll offset allowed given the current contentView
@@ -372,21 +291,6 @@ SC.ScrollView = SC.View.extend({
     @default 0
   */
   minimumHorizontalScrollOffset: function () {
-    var view = this.get('contentView');
-    var contentWidth = view ? view.get('frame').width : 0,
-        calculatedWidth = view ? view.get('calculatedWidth') : 0;
-    // The following code checks if there is a calculatedWidth (collections)
-    // to avoid looking at the incorrect value calculated by frame.
-    if (calculatedWidth) {
-      contentWidth = calculatedWidth * this.get('scale');
-    }
-
-    var containerWidth = this.get('containerView').get('frame').width;
-
-    // we still must go through minimumScrollOffset even if we can't scroll
-    // because we need to adjust for alignment. So, just make sure it won't allow scrolling.
-    if (!this.get('canScrollHorizontal')) contentWidth = Math.min(contentWidth, containerWidth);
-    this._scroll_minimumHorizontalScrollOffset = this.minimumScrollOffset(contentWidth, containerWidth, this.get("horizontalAlign"));
     return this._scroll_minimumHorizontalScrollOffset;
   }.property(),
 
@@ -400,22 +304,6 @@ SC.ScrollView = SC.View.extend({
     @default 0
   */
   minimumVerticalScrollOffset: function () {
-    var view = this.get('contentView');
-    var contentHeight = (view && view.get('frame')) ? view.get('frame').height : 0,
-        calculatedHeight = view ? view.get('calculatedHeight') : 0;
-
-    // The following code checks if there is a calculatedWidth (collections)
-    // to avoid looking at the incorrect value calculated by frame.
-    if (calculatedHeight) {
-      contentHeight = calculatedHeight * this.get('scale');
-    }
-
-    var containerHeight = this.get('containerView').get('frame').height;
-
-    // we still must go through minimumScrollOffset even if we can't scroll
-    // because we need to adjust for alignment. So, just make sure it won't allow scrolling.
-    if (!this.get('canScrollVertical')) contentHeight = Math.min(contentHeight, containerHeight);
-    this._scroll_minimumVerticalScrollOffset = this.minimumScrollOffset(contentHeight, containerHeight, this.get("verticalAlign"));
     return this._scroll_minimumVerticalScrollOffset;
   }.property(),
 
@@ -1383,20 +1271,20 @@ SC.ScrollView = SC.View.extend({
   _scsv_initializeScrollGesture: function(averagedTouch) {
     // Reset the distance.
     this._scroll_gestureAnchorD = averagedTouch.d;
-    this._scroll_gestureAnchorVerticalOffset = this._scroll_verticalScrollOffset;
-    this._scroll_gestureAnchorHorizontalOffset = this._scroll_horizontalScrollOffset;
-    this._scroll_gestureAnchorScale = this._scroll_scale;
-    this._scroll_gestureAnchorContentHeight = this._scroll_contentHeight;
-    this._scroll_gestureAnchorContentWidth = this._scroll_contentWidth;
 
     // If this is our first touch initialization of the gesture, mark down our initial anchor values.
     if (!this._scroll_touchGestureIsInitialized) {
       this._scroll_gestureAnchorX = this._scroll_gesturePriorX = averagedTouch.x;
       this._scroll_gestureAnchorY = this._scroll_gesturePriorY = averagedTouch.y;
       this._scroll_globalContainerFrame = null;
+      this._scroll_gestureAnchorScale = this._scroll_scale;
+      this._scroll_gestureAnchorVerticalOffset = this._scroll_verticalScrollOffset;
+      this._scroll_gestureAnchorHorizontalOffset = this._scroll_horizontalScrollOffset;
+      this._scroll_gestureAnchorContentHeight = this._scroll_contentHeight;
+      this._scroll_gestureAnchorContentWidth = this._scroll_contentWidth;
     }
-    // If we're mid-scroll, we need to adjust locations rather than overwrite them. (This prevents jumps when
-    // adding or removing touches in edge-resistant situations.)
+    // If we're mid-scroll, we need to adjust locations rather. (This prevents jumps when
+    // adding or removing touches.)
     else {
       this._scroll_gestureAnchorX += averagedTouch.x - this._scroll_gesturePriorX;
       this._scroll_gestureAnchorY += averagedTouch.y - this._scroll_gesturePriorY;
@@ -1431,9 +1319,7 @@ SC.ScrollView = SC.View.extend({
       absDeltaD = Math.abs(deltaD),
       // If our scale changes, then our vertical/horizontal offsets need to move by an additional factor.
       xInContainer, yInContainer, xOnContent, yOnContent,
-      contentNewHeight, contentNewWidth, contentDeltaHeight, contentDeltaWidth,
-      scaleAdditionalOffsetX = 0,
-      scaleAdditionalOffsetY = 0,
+      contentDeltaHeight, contentDeltaWidth,
       // We will calculate our target values below.
       goalX, goalY, goalScale,
       goalXDidChange, goalYDidChange, goalScaleDidChange,
@@ -1510,16 +1396,21 @@ SC.ScrollView = SC.View.extend({
       // If our scale has changed, we need to tweak our offsets too, to maintain the illusion that
       // we're scaling around the center of our pinch gesture.
       if (goalScaleDidChange) {
-        // Update size values quick so that we can bypass some expensive calculations later on (cf. contentViewFrameDidChange).
-        this._scroll_contentWidth = this._scroll_contentWidth / this._scroll_scale * goalScale;
-        this._scroll_contentHeight = this._scroll_contentHeight / this._scroll_scale * goalScale;
+        // Update content size values now. This gives us truer values below, and don't cost nothin. (TODO: this is effectively
+        // contentViewFrameDidChange without the scroller updates, which means the scroller mins/maxes don't get updated as
+        // often as they should. We should look into that here.)
+        // Algebra for 'contentNew[Size]' step:
+        // new width / new scale = anchor width / anchor scale
+        // new width = (anchor width * new scale) / anchor scale
+        this._scroll_contentWidth = this._scroll_gestureAnchorContentWidth / this._scroll_gestureAnchorScale * goalScale;
+        this._scroll_contentHeight = this._scroll_gestureAnchorContentHeight / this._scroll_gestureAnchorScale * goalScale;
         // New size values means new bounds.
         vAlign = this.get('verticalAlign');
         hAlign = this.get('horizontalAlign');
-        minX = this._scroll_minimumHorizontalScrollOffset = this.minimumScrollOffset(this._scroll_contentWidth, this._scroll_containerWidth, hAlign);
-        maxX = this._scroll_maximumHorizontalScrollOffset = this.maximumScrollOffset(this._scroll_contentWidth, this._scroll_containerWidth, hAlign);
-        minY = this._scroll_minimumVerticalScrollOffset = this.minimumScrollOffset(this._scroll_contentHeight, this._scroll_containerHeight, vAlign);
-        maxY = this._scroll_maximumVerticalScrollOffset = this.maximumScrollOffset(this._scroll_contentHeight, this._scroll_containerHeight, vAlign);
+        minX = this._scroll_minimumHorizontalScrollOffset = this._scsv_minimumScrollOffset(this._scroll_contentWidth, this._scroll_containerWidth, hAlign);
+        maxX = this._scroll_maximumHorizontalScrollOffset = this._scsv_maximumScrollOffset(this._scroll_contentWidth, this._scroll_containerWidth, hAlign);
+        minY = this._scroll_minimumVerticalScrollOffset = this._scsv_minimumScrollOffset(this._scroll_contentHeight, this._scroll_containerHeight, vAlign);
+        maxY = this._scroll_maximumVerticalScrollOffset = this._scsv_maximumScrollOffset(this._scroll_contentHeight, this._scroll_containerHeight, vAlign);
 
         // First, calculate the %-across-the-content values.
         if (!this._scroll_globalContainerFrame) {
@@ -1530,29 +1421,25 @@ SC.ScrollView = SC.View.extend({
         yInContainer = avg.y - this._scroll_globalContainerFrame.y;
         yOnContent = (yInContainer + this._scroll_verticalScrollOffset) / this._scroll_contentHeight;
 
-        // Next, calculate the total change in size that the content is about to undergo. Algebra for 'contentNew[Size]' step:
-        // new width / new scale = anchor width / anchor scale
-        // new width = (anchor width * new scale) / anchor scale
-        contentNewWidth = (this._scroll_gestureAnchorContentWidth * goalScale) / this._scroll_gestureAnchorScale;
-        contentDeltaWidth = contentNewWidth - this._scroll_gestureAnchorContentWidth;
-        contentNewHeight = (this._scroll_gestureAnchorContentHeight * goalScale) / this._scroll_gestureAnchorScale;
-        contentDeltaHeight = contentNewHeight - this._scroll_gestureAnchorContentHeight;
+        // Next, calculate the total change in size that the content is about to undergo.
+        contentDeltaWidth = this._scroll_contentWidth - this._scroll_gestureAnchorContentWidth;
+        contentDeltaHeight = this._scroll_contentHeight - this._scroll_gestureAnchorContentHeight;
 
         // Combine the values to determine how much of the total size change comes off the top/left edges.
-        scaleAdditionalOffsetX = contentDeltaWidth * xOnContent;
-        scaleAdditionalOffsetY = contentDeltaHeight * yOnContent;
+        this._scroll_gestureScaleAdditionalOffsetX = contentDeltaWidth * xOnContent;
+        this._scroll_gestureScaleAdditionalOffsetY = contentDeltaHeight * yOnContent;
       }
     }
 
     // CALCULATE OFFSET GOALS.
     // Vertical (the original offset plus change since then, plus any offset from the scaling)
     if (this._scroll_isTouchScrollingY) {
-      goalY = this._scroll_gestureAnchorVerticalOffset + deltaY + scaleAdditionalOffsetY;
+      goalY = this._scroll_gestureAnchorVerticalOffset + deltaY + this._scroll_gestureScaleAdditionalOffsetY;
       // If our goal is out of bounds, we have to back it off a bit (the "bounce").
       if (goalY > maxY || goalY < minY) {
         if (goalY < minY) diff = minY - goalY;
         else diff = goalY - maxY;
-        bounce = (1 - (1 / ((diff * this.get('bounceCoefficient') / this._scroll_contentHeight) + 1))) * this._scroll_contentHeight;
+        bounce = (1 - (1 / ((diff * this.get('bounceCoefficient') / this._scroll_containerHeight) + 1))) * this._scroll_containerHeight;
         if (goalY < minY) goalY = minY - bounce;
         else goalY = maxY + bounce;
       }
@@ -1560,12 +1447,12 @@ SC.ScrollView = SC.View.extend({
     }
     // Horizontal (the original offset plus change since then, plus any offset from the scaling)
     if (this._scroll_isTouchScrollingX) {
-      goalX = this._scroll_gestureAnchorHorizontalOffset + deltaX + scaleAdditionalOffsetX;
+      goalX = this._scroll_gestureAnchorHorizontalOffset + deltaX + this._scroll_gestureScaleAdditionalOffsetX;
       // If our goal is out of bounds, we have to back it off a bit (the "bounce").
       if (goalX > maxX || goalX < minX) {
         if (goalX < minX) diff = minX - goalX;
         else diff = goalX - maxX;
-        bounce = (1 - (1 / ((diff * this.get('bounceCoefficient') / this._scroll_contentWidth) + 1))) * this._scroll_contentWidth;
+        bounce = (1 - (1 / ((diff * this.get('bounceCoefficient') / this._scroll_containerWidth) + 1))) * this._scroll_containerWidth;
         if (goalX < minX) goalX = minX - bounce;
         else goalX = maxX + bounce;
       }
@@ -1976,6 +1863,8 @@ SC.ScrollView = SC.View.extend({
     this._scroll_gestureAnchorVerticalOffset = null;
     this._scroll_gestureAnchorHorizontalOffset = null;
     this._scroll_gestureAnchorScale = null;
+    this._scroll_gestureScaleAdditionalOffsetX = 0;
+    this._scroll_gestureScaleAdditionalOffsetY = 0;
     this._scroll_gestureAnchorContentWidth = null;
     this._scroll_gestureAnchorContentHeight = null;
   },
@@ -2262,19 +2151,12 @@ SC.ScrollView = SC.View.extend({
       return;
     }
 
-    // FAST PATH: Mid-scale. Running this code during a touch scale (i.e. at every frame) results in a pretty
-    // big performance hit, and a number of unsquashed bugs. Ultimately, the best approach will be to fix the
-    // bugs and improve the performance across the board.
-    if (this._scroll_isTouchScaling) {
-      return;
-    }
-
     var view   = this.get('contentView'),
-        f      = (view) ? view.get('frame') : null,
+        f      = view ? view.get('frame') : null,
         scale  = this.get('scale'),
         width, height,
         calculatedWidth, calculatedHeight,
-        dim, dimWidth, dimHeight;
+        containerF, containerWidth, containerHeight;
 
     // FAST PATH: No view, or view with no frame.
     if (!view || !f) { return; }
@@ -2286,44 +2168,55 @@ SC.ScrollView = SC.View.extend({
     calculatedHeight = view.get('calculatedHeight') * scale;
     height = calculatedHeight || f.height || 0;
 
-    dim       = this.getPath('containerView.frame');
-    dimWidth  = dim.width;
-    dimHeight = dim.height;
+    containerF = this.getPath('containerView.frame');
+    containerWidth  = containerF.width;
+    containerHeight = containerF.height;
 
-    // FAST PATH: container and content view sizes haven't changed.
+    // FAST PATH: container and content view sizes, et al, haven't changed
     if (
       width === this._scroll_contentWidth &&
       height === this._scroll_contentHeight &&
-      dimWidth === this._scroll_containerWidth &&
-      dimHeight === this._scroll_containerHeight
+      containerWidth === this._scroll_containerWidth &&
+      containerHeight === this._scroll_containerHeight &&
+      !this.didChangeFor('stuffForContentViewFrameDidChange', 'horizontalAlign', 'verticalAlign', 'canScrollHorizontal', 'canScrollVertical')
     ) {
       return;
     }
     // Update our scroll value caches...
     this._scroll_contentWidth = width;
     this._scroll_contentHeight = height;
-    this._scroll_containerWidth = dimWidth;
-    this._scroll_containerHeight = dimHeight;
+    this._scroll_containerWidth = containerWidth;
+    this._scroll_containerHeight = containerHeight;
 
-    // Scroller visibility and values
+    // Update our min and max values...
+    var vAlign = this.get('verticalAlign'),
+        hAlign = this.get('horizontalAlign'),
+        canScrollHorizontal = this.get('canScrollHorizontal'),
+        canScrollVertical = this.get('canScrollVertical');
+    this._scroll_minimumHorizontalScrollOffset = this._scsv_minimumScrollOffset(width, containerWidth, hAlign, canScrollHorizontal);
+    this._scroll_maximumHorizontalScrollOffset = this._scsv_maximumScrollOffset(width, containerWidth, hAlign, canScrollHorizontal);
+    this._scroll_minimumVerticalScrollOffset = this._scsv_minimumScrollOffset(height, containerHeight, vAlign, canScrollVertical);
+    this._scroll_maximumVerticalScrollOffset = this._scsv_maximumScrollOffset(height, containerHeight, vAlign, canScrollVertical);
+
+    // Scroller visibility and values...
     // Horizontal
     if (this.get('hasHorizontalScroller') && (view = this.get('horizontalScrollerView'))) {
       // decide if it should be visible or not. (We bend over backwards to only change if needed
       // because if it changes we will need to recalculate size for the vertical scroller.)
       if (this.get('autohidesHorizontalScroller')) {
-        this.setIfChanged('isHorizontalScrollerVisible', width > dimWidth);
+        this.setIfChanged('isHorizontalScrollerVisible', width > containerWidth);
       }
-      view.setIfChanged('maximum', width - dimWidth);
-      view.setIfChanged('proportion', dimWidth / width);
+      view.setIfChanged('maximum', width - containerWidth);
+      view.setIfChanged('proportion', containerWidth / width);
     }
     // Vertical
     if (this.get('hasVerticalScroller') && (view = this.get('verticalScrollerView'))) {
       // decide if it should be visible or not
       if (this.get('autohidesVerticalScroller')) {
-        this.setIfChanged('isVerticalScrollerVisible', height > dimHeight);
+        this.setIfChanged('isVerticalScrollerVisible', height > containerHeight);
       }
-      view.setIfChanged('maximum', height - dimHeight);
-      view.setIfChanged('proportion', dimHeight / height);
+      view.setIfChanged('maximum', height - containerHeight);
+      view.setIfChanged('proportion', containerHeight / height);
     }
 
     // If there is no scroller and auto-hiding is on, scroll to the minimum offset.
@@ -2336,23 +2229,78 @@ SC.ScrollView = SC.View.extend({
 
     // This forces to recalculate the height of the frame when is at the bottom
     // of the scroll and the content dimension are smaller that the previous one
-    var mxVOffSet   = this.get('maximumVerticalScrollOffset'),
-        vOffSet     = this.get('verticalScrollOffset'),
-        mxHOffSet   = this.get('maximumHorizontalScrollOffset'),
-        hOffSet     = this.get('horizontalScrollOffset'),
-        forceHeight = mxVOffSet < vOffSet,
-        forceWidth  = mxHOffSet < hOffSet;
-    if (forceHeight || forceWidth) {
-      // Update the position of the content view to fit.
-      this._scsv_forceDimensionsRecalculation(forceWidth, forceHeight, vOffSet, hOffSet);
-    } else {
-      // Reapply the position.
-      this.invokeLast(this.adjustElementScroll);
+    if (!this._scroll_isTouchScaling) {
+      var mxVOffSet   = this.get('maximumVerticalScrollOffset'),
+          vOffSet     = this.get('verticalScrollOffset'),
+          mxHOffSet   = this.get('maximumHorizontalScrollOffset'),
+          hOffSet     = this.get('horizontalScrollOffset'),
+          forceHeight = mxVOffSet < vOffSet,
+          forceWidth  = mxHOffSet < hOffSet;
+      if (forceHeight || forceWidth) {
+        // Update the position of the content view to fit.
+        this._scsv_forceDimensionsRecalculation(forceWidth, forceHeight, vOffSet, hOffSet);
+      }
     }
 
+    // Reapply the position.
+    this.invokeLast(this.adjustElementScroll);
+    
     // send change notifications since they don't invalidate automatically
     this.notifyPropertyChange('maximumVerticalScrollOffset');
     this.notifyPropertyChange('maximumHorizontalScrollOffset');
+  },
+
+  /** @private
+    Calculates the maximum offset given content and container sizes, and the
+    alignment.
+  */
+  _scsv_maximumScrollOffset: function (contentSize, containerSize, align, canScroll) {
+    // If we can't scroll, we pretend our content size is no larger than the container.
+    if (!canScroll) contentSize = Math.min(contentSize, containerSize);
+
+    // if our content size is larger than or the same size as the container, it's quite
+    // simple to calculate the answer. Otherwise, we need to do some fancy-pants
+    // alignment logic (read: simple math)
+    if (contentSize >= containerSize) return contentSize - containerSize;
+
+    // alignment, yeah
+    if (align === SC.ALIGN_LEFT || align === SC.ALIGN_TOP) {
+      // if we left-align something, and it is smaller than the view, does that not mean
+      // that it's maximum (and minimum) offset is 0, because it should be positioned at 0?
+      return 0;
+    } else if (align === SC.ALIGN_MIDDLE || align === SC.ALIGN_CENTER) {
+      // middle align means the difference divided by two, because we want equal parts on each side.
+      return 0 - Math.round((containerSize - contentSize) / 2);
+    } else {
+      // right align means the entire difference, because we want all that space on the left
+      return 0 - (containerSize - contentSize);
+    }
+  },
+
+  /** @private
+    Calculates the minimum offset given content and container sizes, and the
+    alignment.
+  */
+  _scsv_minimumScrollOffset: function (contentSize, containerSize, align, canScroll) {
+    // If we can't scroll, we pretend our content size is no larger than the container.
+    if (!canScroll) contentSize = Math.min(contentSize, containerSize);
+
+    // if the content is larger than the container, we have no need to change the minimum
+    // away from the natural 0 position.
+    if (contentSize > containerSize) return 0;
+
+    // alignment, yeah
+    if (align === SC.ALIGN_LEFT || align === SC.ALIGN_TOP) {
+      // if we left-align something, and it is smaller than the view, does that not mean
+      // that it's maximum (and minimum) offset is 0, because it should be positioned at 0?
+      return 0;
+    } else if (align === SC.ALIGN_MIDDLE || align === SC.ALIGN_CENTER) {
+      // middle align means the difference divided by two, because we want equal parts on each side.
+      return 0 - Math.round((containerSize - contentSize) / 2);
+    } else {
+      // right align means the entire difference, because we want all that space on the left
+      return 0 - (containerSize - contentSize);
+    }
   },
 
   /** @private */
@@ -2471,7 +2419,6 @@ SC.ScrollView = SC.View.extend({
       this._scroll_hasHorizontalGutter = hasHorizontalGutter;
       this._scroll_hasVerticalGutter = hasVerticalGutter;
     }
-
   },
 
   /** @private
@@ -2566,11 +2513,11 @@ SC.ScrollView = SC.View.extend({
   },
 
   /** @private
-    Whenever the alignment changes, we need to poke the offset so that it recalculates
+    Whenever the alignment changes, we need to poke things so that it recalculates
     within the new bounds.
   */
   _scsv_horizontalAlignmentDidChange: function () {
-    this.notifyPropertyChange('horizontalScrollOffset');
+    this.contentViewFrameDidChange();
     this.set('horizontalScrollOffset', this.get('horizontalScrollOffset'));
   }.observes('horizontalAlign'),
 
@@ -2579,7 +2526,7 @@ SC.ScrollView = SC.View.extend({
     within the new bounds.
   */
   _scroll_verticalAlignmentDidChange: function () {
-    this.notifyPropertyChange('verticalScrollOffset');
+    this.contentViewFrameDidChange();
     this.set('verticalScrollOffset', this.get('verticalScrollOffset'));
   }.observes('verticalAlign'),
 
@@ -2889,6 +2836,8 @@ SC.ScrollView = SC.View.extend({
   _scroll_gestureAnchorVerticalOffset: null,
   _scroll_gestureAnchorHorizontalOffset: null,
   _scroll_gestureAnchorScale: null,
+  _scroll_gestureScaleAdditionalOffsetX: 0,
+  _scroll_gestureScaleAdditionalOffsetY: 0,
   _scroll_gestureAnchorContentWidth: null,
   _scroll_gestureAnchorContentHeight: null,
 

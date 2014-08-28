@@ -147,14 +147,14 @@
 
   test("Basic scroller visibility", function() {
     var view = pane.view('basic3');
-    view.set('isHorizontalScrollerVisible',NO);
-    ok(!view.get('canScrollHorizontal'),'cannot scroll in horizontal direction');
-    ok(view.$().hasClass('sc-scroll-view'), 'should have sc-scroll-view class');
+
+    SC.run(function() { view.set('isHorizontalScrollerVisible', NO) });
+    ok(!view.get('canScrollHorizontal'), 'cannot scroll in horizontal direction');
     var horizontalScrollerView = view.get('horizontalScrollerView');
     ok(view.get('hasHorizontalScroller'), 'default scroll view wants a horizontal scroller');
     ok(horizontalScrollerView, 'default scroll view has a horizontal scroller');
     ok(horizontalScrollerView.$().hasClass('sc-horizontal'), 'should have sc-horizontal class');
-    var maxHScroll = view.maximumHorizontalScrollOffset();
+    var maxHScroll = view.get('maximumHorizontalScrollOffset');
     equals(maxHScroll , 0, 'Max horizontal scroll should be equal to zero');
 
     SC.run(function() { view.set('isVerticalScrollerVisible', NO); });
@@ -163,7 +163,7 @@
     ok(view.get('hasVerticalScroller'), 'default scroll view wants a vertical scroller');
     ok(verticalScrollerView, 'default scroll view has a vertical scroller');
     ok(verticalScrollerView.$().hasClass('sc-vertical'), 'should have sc-vertical class');
-    var maxVScroll = view.maximumVerticalScrollOffset();
+    var maxVScroll = view.get('maximumVerticalScrollOffset');
     equals(maxVScroll, 0, 'Max vertical scroll should be equal to zero');
   });
 
