@@ -14,6 +14,7 @@ module("SC.ScrollView", {
   setup: function () {
     SC.run(function () {
       pane = SC.MainPane.create({
+        layout: { height: 114, width: 114 }, // Gives us 100x100 container views without worrying about scrollers (or resorting to horrible, counterproductive hacks)
         childViews: [
           // ScrollView with 4000x4000 contentView. "view" below.
           SC.ScrollView.extend({
@@ -75,12 +76,8 @@ module("SC.ScrollView", {
     });
 
     view = pane.childViews[0];
-    view.get('containerView').get('frame').height = 100;
-    view.get('containerView').get('frame').width = 100;
 
     view2 = pane.childViews[1];
-    view2.get('containerView').get('frame').height = 100;
-    view2.get('containerView').get('frame').width = 100;
 
     view3 = pane.childViews[2];
     view4 = view3.get('contentView').get('childViews')[0];
@@ -250,7 +247,7 @@ test("maximumHorizontalScrollOffset() returns the maximum horizontal scroll dime
     view2.set('horizontalScrollOffset', old_horizontalScrollOffset);
     view2.set('verticalScrollOffset', old_verticalScrollOffset);
     view2.scrollBy(5000, 0);
-    equals(view2.get('horizontalScrollOffset'), 1900, 'maximum y coordinate should be 1900');
+    equals(view2.get('horizontalScrollOffset'), 1900, 'maximum x coordinate should be 1900');
   });
 
 
@@ -258,7 +255,7 @@ test("maximumHorizontalScrollOffset() returns the maximum horizontal scroll dime
     view2.set('horizontalScrollOffset', old_horizontalScrollOffset);
     view2.set('verticalScrollOffset', old_verticalScrollOffset);
     view2.scrollBy(-5000, 0);
-    equals(view2.get('horizontalScrollOffset'), 0, 'minimum y coordinate should be 0');
+    equals(view2.get('horizontalScrollOffset'), 0, 'minimum x coordinate should be 0');
   });
 
 });
@@ -271,7 +268,7 @@ test("maximumVerticalScrollOffset() returns the maximum vertical scroll dimensio
     view2.set('horizontalScrollOffset', old_horizontalScrollOffset);
     view2.set('verticalScrollOffset', old_verticalScrollOffset);
     view2.scrollBy(0, 5000);
-    equals(view2.get('verticalScrollOffset'), 1900, 'maximum coordinate should be 1900');
+    equals(view2.get('verticalScrollOffset'), 1900, 'maximum y coordinate should be 1900');
   });
 
   SC.run(function () {
