@@ -59,6 +59,30 @@ SC.DRAG_REORDER = 0x0010;
 SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionContent,
 /** @scope SC.CollectionView.prototype */ {
 
+  /** @private */
+  _content: null,
+
+  /** @private */
+  _cv_actionTimer: null,
+
+  /** @private */
+  _cv_contentRangeObserver: null,
+
+  /** @private */
+  _cv_selection: null,
+
+  /** @private */
+  _pools: null,
+
+  /** @private */
+  _sc_itemViews: null,
+
+  /** @private */
+  _TMP_DIFF1: SC.IndexSet.create(),
+
+  /** @private */
+  _TMP_DIFF2: SC.IndexSet.create(),
+
   /**
     @type Array
     @default ['sc-collection-view']
@@ -886,7 +910,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
       for (var key in this._pools) {
         this._pools[key].invoke('destroy');
       }
-      delete this._pools;
+
+      this._pools = null;
     }
 
     // cache
@@ -947,7 +972,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
       // If the last item in the list changes, we need to reload the previous last
       // item also so that the isLast attribute updates appropriately.
       length = this.get('length');
-      if (length > 1 && invalid.max == length) {
+      if (length > 1 && invalid.max === length) {
         invalid.add(length - 2);
       }
     } else {
@@ -3093,12 +3118,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     return this.get('isSelectable');
   },
 
-  /** @private */
-  _TMP_DIFF1: SC.IndexSet.create(),
-
-  /** @private */
-  _TMP_DIFF2: SC.IndexSet.create(),
-
   /** @private
 
     Whenever the nowShowing range changes, update the range observer on the
@@ -3160,6 +3179,33 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     if (this.selection) this._cv_selectionDidChange();
   },
 
+  /** @private SC.View.prototype.destroy. */
+  destroy: function () {
+    sc_super();
+
+    // All manipulations made to objects we use must be reversed!
+    var content = this._content;
+    if (content) {
+      content.removeObserver('length', this, this.contentLengthDidChange);
+
+      this._content = null;
+    }
+
+    var sel = this._cv_selection;
+    if (sel) {
+      sel.removeObserver('[]', this, this._cv_selectionContentDidChange);
+
+      this._cv_selection = null;
+    }
+
+    var contentRangeObserver = this._cv_contentRangeObserver;
+    if (contentRangeObserver) {
+      if (content) content.removeRangeObserver(contentRangeObserver);
+
+      this._cv_contentRangeObserver = null;
+    }
+  },
+
   /** @private
     Become a drop target whenever reordering content is enabled.
   */
@@ -3216,11 +3262,11 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
     // if the target view has its own internal action handler,
     // trigger that.
-    } else if (SC.typeOf(view._action) == SC.T_FUNCTION) {
+    } else if (SC.typeOf(view._action) === SC.T_FUNCTION) {
       return view._action(evt);
 
     // otherwise call the action method to support older styles.
-    } else if (SC.typeOf(view.action) == SC.T_FUNCTION) {
+    } else if (SC.typeOf(view.action) === SC.T_FUNCTION) {
       return view.action(evt);
     }
   },

@@ -2320,7 +2320,7 @@ SC.ScrollView = SC.View.extend({
         // Only need the center sometimes, but grab it now anyways.
         hCenterPct = this._scroll_horizontalScaleOriginPct,
         vCenterPct = this._scroll_verticalScaleOriginPct;
-      
+
       // Translate from DEFAULT to bespoke alignments.
       if (horizontalOrigin === SC.ALIGN_DEFAULT) horizontalOrigin = this.get('horizontalAlign');
       if (verticalOrigin === SC.ALIGN_DEFAULT) verticalOrigin = this.get('verticalAlign');

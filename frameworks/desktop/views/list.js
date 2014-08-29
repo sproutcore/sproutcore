@@ -84,6 +84,9 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
   _sc_offsetCache: null,
 
   /** @private */
+  _sc_rowDelegate: null,
+
+  /** @private */
   _sc_rowSize: null,
 
   /**
@@ -130,7 +133,29 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
   /** @private */
   init: function () {
     sc_super();
+
     this._sc_rowDelegateDidChange();
+  },
+
+  /** @private SC.CollectionView.prototype.destroy. */
+  destroy: function () {
+    sc_super();
+
+    // All manipulations made to objects we use must be reversed!
+    var del = this._sc_rowDelegate;
+    if (del) {
+      del.removeObserver('_sc_totalRowSize', this, this._sc_rowSizeDidChange);
+      del.removeObserver('customRowSizeIndexes', this, this._sc_customRowSizeIndexesDidChange);
+
+      this._sc_rowDelegate = null;
+    }
+
+    var customRowSizeIndexes = this._sc_customRowSizeIndexes;
+    if (customRowSizeIndexes) {
+      customRowSizeIndexes.removeObserver('[]', this, this._sc_customRowSizeIndexesContentDidChange);
+
+      this._sc_customRowSizeIndexes = null;
+    }
   },
 
   /** @private */
