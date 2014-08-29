@@ -1271,17 +1271,19 @@ SC.ScrollView = SC.View.extend({
   _scsv_initializeScrollGesture: function(averagedTouch) {
     // Reset the distance.
     this._scroll_gestureAnchorD = averagedTouch.d;
+    this._scroll_gestureAnchorScale = this._scroll_scale;
+    this._scroll_gestureAnchorContentHeight = this._scroll_contentHeight;
+    this._scroll_gestureAnchorContentWidth = this._scroll_contentWidth;
 
     // If this is our first touch initialization of the gesture, mark down our initial anchor values.
     if (!this._scroll_touchGestureIsInitialized) {
       this._scroll_gestureAnchorX = this._scroll_gesturePriorX = averagedTouch.x;
       this._scroll_gestureAnchorY = this._scroll_gesturePriorY = averagedTouch.y;
-      this._scroll_globalContainerFrame = null;
-      this._scroll_gestureAnchorScale = this._scroll_scale;
+
       this._scroll_gestureAnchorVerticalOffset = this._scroll_verticalScrollOffset;
       this._scroll_gestureAnchorHorizontalOffset = this._scroll_horizontalScrollOffset;
-      this._scroll_gestureAnchorContentHeight = this._scroll_contentHeight;
-      this._scroll_gestureAnchorContentWidth = this._scroll_contentWidth;
+      // this._scroll_gestureAnchorContentHeight = this._scroll_contentHeight;
+      // this._scroll_gestureAnchorContentWidth = this._scroll_contentWidth;
     }
     // If we're mid-scroll, we need to adjust locations rather. (This prevents jumps when
     // adding or removing touches.)
@@ -1318,7 +1320,7 @@ SC.ScrollView = SC.View.extend({
       absDeltaY = Math.abs(deltaY),
       absDeltaD = Math.abs(deltaD),
       // If our scale changes, then our vertical/horizontal offsets need to move by an additional factor.
-      xInContainer, yInContainer, xOnContent, yOnContent,
+      xInContainer, yInContainer,
       contentDeltaHeight, contentDeltaWidth,
       // We will calculate our target values below.
       goalX, goalY, goalScale,
@@ -1398,8 +1400,8 @@ SC.ScrollView = SC.View.extend({
       if (goalScaleDidChange) {
         // Update content size values now. This gives us truer values below, and don't cost nothin. (TODO: this is effectively
         // contentViewFrameDidChange without the scroller updates, which means the scroller mins/maxes don't get updated as
-        // often as they should. We should look into that here.)
-        // Algebra for 'contentNew[Size]' step:
+        // often as they should. We should look into that.)
+        // Algebra:
         // new width / new scale = anchor width / anchor scale
         // new width = (anchor width * new scale) / anchor scale
         this._scroll_contentWidth = this._scroll_gestureAnchorContentWidth / this._scroll_gestureAnchorScale * goalScale;
@@ -1407,27 +1409,27 @@ SC.ScrollView = SC.View.extend({
         // New size values means new bounds.
         vAlign = this.get('verticalAlign');
         hAlign = this.get('horizontalAlign');
-        minX = this._scroll_minimumHorizontalScrollOffset = this._scsv_minimumScrollOffset(this._scroll_contentWidth, this._scroll_containerWidth, hAlign);
-        maxX = this._scroll_maximumHorizontalScrollOffset = this._scsv_maximumScrollOffset(this._scroll_contentWidth, this._scroll_containerWidth, hAlign);
-        minY = this._scroll_minimumVerticalScrollOffset = this._scsv_minimumScrollOffset(this._scroll_contentHeight, this._scroll_containerHeight, vAlign);
-        maxY = this._scroll_maximumVerticalScrollOffset = this._scsv_maximumScrollOffset(this._scroll_contentHeight, this._scroll_containerHeight, vAlign);
+        minX = this._scroll_minimumHorizontalScrollOffset = this._scsv_minimumScrollOffset(this._scroll_contentWidth, this._scroll_containerWidth, hAlign, YES);
+        maxX = this._scroll_maximumHorizontalScrollOffset = this._scsv_maximumScrollOffset(this._scroll_contentWidth, this._scroll_containerWidth, hAlign, YES);
+        minY = this._scroll_minimumVerticalScrollOffset = this._scsv_minimumScrollOffset(this._scroll_contentHeight, this._scroll_containerHeight, vAlign, YES);
+        maxY = this._scroll_maximumVerticalScrollOffset = this._scsv_maximumScrollOffset(this._scroll_contentHeight, this._scroll_containerHeight, vAlign, YES);
 
-        // First, calculate the %-across-the-content values.
+        // First, calculate the new %-across-the-content values.
         if (!this._scroll_globalContainerFrame) {
           this._scroll_globalContainerFrame = this.containerView.convertFrameToView(this.containerView.get('frame'));
+          xInContainer = avg.x - this._scroll_globalContainerFrame.x;
+          this._scroll_gestureXAcrossContent = (xInContainer + this._scroll_horizontalScrollOffset) / this._scroll_contentWidth;
+          yInContainer = avg.y - this._scroll_globalContainerFrame.y;
+          this._scroll_gestureYAcrossContent = (yInContainer + this._scroll_verticalScrollOffset) / this._scroll_contentHeight;
         }
-        xInContainer = avg.x - this._scroll_globalContainerFrame.x;
-        xOnContent = (xInContainer + this._scroll_horizontalScrollOffset) / this._scroll_contentWidth;
-        yInContainer = avg.y - this._scroll_globalContainerFrame.y;
-        yOnContent = (yInContainer + this._scroll_verticalScrollOffset) / this._scroll_contentHeight;
 
         // Next, calculate the total change in size that the content is about to undergo.
         contentDeltaWidth = this._scroll_contentWidth - this._scroll_gestureAnchorContentWidth;
         contentDeltaHeight = this._scroll_contentHeight - this._scroll_gestureAnchorContentHeight;
 
         // Combine the values to determine how much of the total size change comes off the top/left edges.
-        this._scroll_gestureScaleAdditionalOffsetX = contentDeltaWidth * xOnContent;
-        this._scroll_gestureScaleAdditionalOffsetY = contentDeltaHeight * yOnContent;
+        this._scroll_gestureScaleAdditionalOffsetX = contentDeltaWidth * this._scroll_gestureXAcrossContent;
+        this._scroll_gestureScaleAdditionalOffsetY = contentDeltaHeight * this._scroll_gestureYAcrossContent;
       }
     }
 
@@ -1492,28 +1494,23 @@ SC.ScrollView = SC.View.extend({
       return YES;
     }
 
-    // FAST PATH: We never started scrolling.
-    if (!this._scroll_isTouchScrolling) {
-      // If the content hasn't been given a swing at the event yet (either it's been fewer than 150 ms, or
-      // we're not in hand-holding mode), give it a swing.
-      if (!this._scroll_touchContentHadItsChance) {
-        // Run through the captureTouch pass, then failing that go the usual makeTouchResponder (touchStart) pass.
-        var captured = touch.captureTouch(this, YES);
-        if (!captured) {
-          captured = touch.makeTouchResponder(touch.targetView, YES, this);
-        }
-        // If the content has captured the touch, then immediately end it. (TODO: See if there are problems with
-        // beginning and ending a touch on a child view in the same run loop.)
-        if (captured) {
-          touch.end();
-        }
-        // Old touchEnd code returned respondership to any previous responders if the touch was not captured. This
-        // seems wrong, because any previous responders should receive standard notice via touchCanceled that the
-        // touch ended without being returned to them. If returning respondership during touchEnd (so that in this
-        // one weird case they receive a touchEnd instead of a touchCancelled) turns out to be desired behavior,
-        // implement it here and DOCUMENT WHY.
+    // If we never started scrolling, this may be a tap. If the content hasn't been given a swing at the event yet
+    // (either it's been fewer than 150 ms, or we're not in hand-holding mode), give it a swing.
+    if (!this._scroll_isTouchScrolling && !this._scroll_touchContentHadItsChance) {
+      // Run through the captureTouch pass, then failing that go the usual makeTouchResponder (touchStart) pass.
+      var captured = touch.captureTouch(this, YES);
+      if (!captured) {
+        captured = touch.makeTouchResponder(touch.targetView, YES, this);
       }
-      return YES;
+      // If the content has captured the touch, then immediately end it.
+      if (captured) {
+        touch.end();
+      }
+      // Old touchEnd code returned respondership to any previous responders if the touch was not captured. This
+      // seems wrong, because any previous responders should receive standard notice via touchCanceled that the
+      // touch ended without being returned to them. If returning respondership during touchEnd (so that in this
+      // one weird case they receive a touchEnd instead of a touchCancelled) turns out to be desired behavior,
+      // implement it here and DOCUMENT WHY.
     }
 
     // Get our positions, velocities and bounds.
@@ -1543,6 +1540,13 @@ SC.ScrollView = SC.View.extend({
       avg = touch.averagedTouchesForView(this, YES),
       velocityX = this._scroll_isTouchScrollingX ? avg.velocityX : 0,
       velocityY = this._scroll_isTouchScrollingY ? avg.velocityY : 0;
+
+    // If we're not the responder (most likely because we're handling a proxied touchCancelled event), then
+    // the responder should have taken care of any velocity and we should ignore it.
+    if (touch.touchResponder !== this) {
+      velocityX = 0;
+      velocityY = 0;
+    }
 
     // FAST PATH: In bounds with no velocity. Just clean up and go home.
     if (!scaleIsOutOfBounds && !verticalIsOutOfBounds && !horizontalIsOutOfBounds && Math.abs(velocityX) < 0.01 && Math.abs(velocityY) < 0.01) {
@@ -1592,8 +1596,8 @@ SC.ScrollView = SC.View.extend({
       // Vertical.
       if (verticalIsOutOfBounds) {
         fromY = verticalScrollOffset;
-        if (verticalIsAboveMax) toY = this._scroll_maximumVerticalScrollOffset;
-        else toY = this._scroll_minimumVerticalScrollOffset;
+        if (verticalIsAboveMax) toY = verticalMax;
+        else toY = verticalMin;
         diff = Math.abs(fromY - toY) / this._scroll_containerHeight;
         candidateDuration = convertCappedScales(100, 350, 0, diff, 0.5);
         if (candidateDuration > duration) duration = candidateDuration;
@@ -1601,8 +1605,8 @@ SC.ScrollView = SC.View.extend({
       // Horizontal.
       if (horizontalIsOutOfBounds) {
         fromX = horizontalScrollOffset;
-        if (horizontalIsAboveMax) toX = this._scroll_maximumHorizontalScrollOffset;
-        else toX = this._scroll_minimumHorizontalScrollOffset;
+        if (horizontalIsAboveMax) toX = horizontalMax;
+        else toX = horizontalMin;
         diff = Math.abs(fromX - toX) / this._scroll_containerWidth;
         candidateDuration = convertCappedScales(100, 350, 0, diff, 0.5);
         if (candidateDuration > duration) duration = candidateDuration;
@@ -1830,15 +1834,11 @@ SC.ScrollView = SC.View.extend({
 
   /** @private
     If we're in hand-holding mode and our content claims the touch, we will receive a touchCancelled
-    event at its completion. All we need to do is clean up if we're the last ones out.
+    event at its completion. We proxy this directly to touchEnd, which handles any required bounce-
+    backs (e.g. from a previous gesture).
   */
-  touchCancelled: function (touch) {
-    var touches = touch.touchesForView(this);
-    // If this is the last touch, clear the cached values.
-    if (!touches || !touches.length) {
-      this._scsv_clearTouchCache();
-    }
-    return YES;
+  touchCancelled: function () {
+    return this.touchEnd.apply(this, arguments);
   },
 
   /** @private
@@ -1863,6 +1863,8 @@ SC.ScrollView = SC.View.extend({
     this._scroll_gestureAnchorVerticalOffset = null;
     this._scroll_gestureAnchorHorizontalOffset = null;
     this._scroll_gestureAnchorScale = null;
+    this._scroll_gestureXAcrossContent = null;
+    this._scroll_gestureYAcrossContent = null;
     this._scroll_gestureScaleAdditionalOffsetX = 0;
     this._scroll_gestureScaleAdditionalOffsetY = 0;
     this._scroll_gestureAnchorContentWidth = null;
@@ -2788,11 +2790,8 @@ SC.ScrollView = SC.View.extend({
   _scroll_maximumHorizontalScrollOffset: 0,
 
   // ..... Tiling child views (`tile`) .....
-
-  /** @private If the tile method detects the appearance or disappearance of gutters, it triggers a re-layout. */
+  //If the tile method detects the appearance or disappearance of gutters, it triggers a re-layout.
   _scroll_hasHorizontalGutter: NO,
-
-  /** @private If the tile method detects the appearance or disappearance of gutters, it triggers a re-layout. */
   _scroll_hasVerticalGutter: NO,
 
   // ..... Scale .....
@@ -2827,7 +2826,9 @@ SC.ScrollView = SC.View.extend({
   _scroll_isTouchScrollingX: NO,
   _scroll_isTouchScrollingY: NO,
   _scroll_isTouchScaling: NO,
+  // Used to track (occasionally) asynchronous touch initialization.
   _scroll_latestTouchID: 0,
+  // Used when repositioning the scaled content to keep it under the pinch gesture.
   _scroll_globalContainerFrame: null,
   _scroll_gestureAnchorX: null,
   _scroll_gestureAnchorY: null,
@@ -2837,6 +2838,8 @@ SC.ScrollView = SC.View.extend({
   _scroll_gestureAnchorVerticalOffset: null,
   _scroll_gestureAnchorHorizontalOffset: null,
   _scroll_gestureAnchorScale: null,
+  _scroll_gestureXAcrossContent: null,
+  _scroll_gestureYAcrossContent: null,
   _scroll_gestureScaleAdditionalOffsetX: 0,
   _scroll_gestureScaleAdditionalOffsetY: 0,
   _scroll_gestureAnchorContentWidth: null,
