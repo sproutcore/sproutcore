@@ -101,6 +101,21 @@ SC.ContainerView = SC.View.extend(
   isTransitioning: NO,
 
   /**
+    If the view to display is not instantiated, SC.ContainerView will instanciate
+    it for you when the view is entered, and destroy it when the view is exited.
+    
+    This property determine the number of views that will be put in cache for later
+    reuse. If the cache limit is reach, the last displayed view will be destroyed.
+    If you set this property to -1 the cached views will never be destroy.
+
+    All the cached views will be destroy if the container itself is destroy.
+
+    @type Number
+    @default 0
+  */
+  cachedViewLimit: 0,
+
+  /**
     Optional path name for the content view.  Set this to a property path
     pointing to the view you want to display.  This will automatically change
     the content view for you. If you pass a relative property path or a single
@@ -229,7 +244,8 @@ SC.ContainerView = SC.View.extend(
 
   /** @private */
   destroy: function () {
-    var contentStatecharts = this._contentStatecharts;
+    var contentView = this.get('contentView'),
+      contentStatecharts = this._contentStatecharts;
 
     // Exit all the statecharts immediately. This mutates the array!
     if (contentStatecharts) {
@@ -241,6 +257,15 @@ SC.ContainerView = SC.View.extend(
     // Remove our internal reference to the statecharts.
     this._contentStatecharts = this._currentStatechart = null;
 
+    if (this._cachedViews) {
+      this._cachedViews.forEach(function(cachedView) {
+        cachedView.instance.destroy();
+      }); 
+      this._cachedViews = null;
+    }
+
+    if (contentView) contentView.destroy();
+
     return sc_super();
   },
 
@@ -251,7 +276,9 @@ SC.ContainerView = SC.View.extend(
   */
   nowShowingDidChange: function () {
     // This code turns this.nowShowing into a view object by any means necessary.
-    var content = this.get('nowShowing');
+    var content = nowShowing = this.get('nowShowing'),
+      cachedViewLimit = this.get('cachedViewLimit'),
+      cachedViews = this._cachedViews;
 
     // If it's a string, try to turn it into the object it references...
     if (SC.typeOf(content) === SC.T_STRING && content.length > 0) {
@@ -272,14 +299,40 @@ SC.ContainerView = SC.View.extend(
     }
 
     // If it's an uninstantiated view, then attempt to instantiate it.
-    if (content && content.kindOf(SC.CoreView)) {
-      content = this.createChildView(content);
-    } else {
-      content = null;
+    // (Uninstantiated views have a create() method; instantiated ones do not.)
+    if (SC.typeOf(content) === SC.T_CLASS) {
+      if (cachedViews) {
+        var obj = cachedViews.findProperty('nowShowing', nowShowing);
+        if (obj) {
+          cachedViews.removeObject(obj).push(obj);
+          content = obj.instance;
+        }
+      }
+
+      if (content.kindOf(SC.CoreView)) {
+        content = this.createChildView(content);
+        
+        if (cachedViewLimit !== 0) {
+          if (!cachedViews) cachedViews = this._cachedViews = [];
+          cachedViews.push({ nowShowing: nowShowing, instance: content });
+        }
+      } else {
+        content = null;
+      }
     }
 
     // Sets the content.
     this.set('contentView', content);
+    
+    // Cleanup the cached views
+    if (cachedViewLimit !== -1 && cachedViews && cachedViews.length > cachedViewLimit) {
+      SC.A(cachedViews).reverse().forEach(function(cachedView, index) { 
+        if (index > cachedViewLimit) {
+          cachedView.instance.destroy();
+          cachedViews.removeObject(cachedView);
+        }
+      });
+    }
   }.observes('nowShowing'),
 
   /** @private Called by new content statechart to indicate that it is ready. */
@@ -582,7 +635,7 @@ SC.ContainerContentStatechart = SC.Object.extend({
         transitionSwap.didBuildOutFromView(container, content, options);
       }
 
-      if (content.createdByParent) {
+      if (content.createdByParent && !container.get('cachedViewLimit')) {
         container.removeChildAndDestroy(content);
       } else {
         container.removeChild(content);

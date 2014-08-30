@@ -39,7 +39,19 @@
 
   pane.add("cleans-up-views", SC.ContainerView, {
     nowShowing: 'uninstantiatedView',
+    cachedViewLimit: 0,
+    uninstantiatedView: SC.View
+  });
 
+  pane.add("cleans-up-views-without-cache-limit", SC.ContainerView, {
+    nowShowing: 'uninstantiatedView',
+    cachedViewLimit: -1,
+    uninstantiatedView: SC.View
+  });
+
+  pane.add("cleans-up-views-with-cache-limit", SC.ContainerView, {
+    nowShowing: 'uninstantiatedView',
+    cachedViewLimit: 1,
     uninstantiatedView: SC.View
   });
 
@@ -177,6 +189,65 @@
     contentView = view.get('contentView');
     SC.run(function() { view.set('nowShowing', null); });
     equals(contentView.isDestroyed, YES, "should have destroyed the previous view it instantiated (from class)");
+
+    SC.run(function() { view.set('nowShowing', SC.View.create()); });
+    contentView = view.get('contentView');
+    equals(contentView.isDestroyed, NO, "The content view should not be destroyed");
+
+    view.destroy();
+    equals(contentView.isDestroyed, YES, "should have destroyed the content view");
+
+  });
+
+  test("Cleans up instantiated views without cache limit", function() {
+    var view = pane.view("cleans-up-views-without-cache-limit");
+    view.awake();
+
+    var contentViewFromPath = view.get('contentView');
+    SC.run(function() { view.set('nowShowing', SC.View.create()); });
+    equals(contentViewFromPath.isDestroyed, NO, "should not have destroyed the previous view it instantiated (from path)");
+
+    var contentView = view.get('contentView');
+    SC.run(function() { view.set('nowShowing', SC.View.extend()); });
+    equals(contentView.isDestroyed, NO, "should not have destroyed the previous view because it was already instantiated");
+
+    var contentViewFromClass = view.get('contentView');
+    SC.run(function() { view.set('nowShowing', null); });
+    equals(contentViewFromClass.isDestroyed, NO, "should not have destroyed the previous view it instantiated (from class)");
+
+    view.destroy();
+    equals(view.isDestroyed, YES, "should have destroyed the container");
+    equals(contentViewFromPath.isDestroyed, YES, "should have destroyed the view it instantiated (from path)");
+    equals(contentView.isDestroyed, NO, "should not have destroyed the view that was already instantiated");
+    equals(contentViewFromClass.isDestroyed, YES, "should have destroyed the view it instantiated (from class)");
+  });
+
+  test("Cleans up instantiated views with cache limit", function() {
+    var view = pane.view("cleans-up-views-with-cache-limit");
+    view.awake();
+
+    var contentViewFromPath = view.get('contentView');
+    SC.run(function() { view.set('nowShowing', SC.View.extend()); });
+    equals(contentViewFromPath.isDestroyed, NO, "should not have destroyed the previous view it instantiated (from path)");
+
+    var contentViewFromClass = view.get('contentView');
+    SC.run(function() { view.set('nowShowing', SC.View.create()); });
+    equals(contentViewFromPath.isDestroyed, NO, "should have destroyed the previous view it instantiated (from path)");
+    equals(contentViewFromClass.isDestroyed, NO, "should not have destroyed the previous view it instantiated (from class)");
+
+    var contentView = view.get('contentView');
+    SC.run(function() { view.set('nowShowing', SC.View.extend()); });
+    equals(contentViewFromPath.isDestroyed, YES, "should have destroyed the previous view it instantiated (from path)");
+    equals(contentViewFromClass.isDestroyed, NO, "should not have destroyed the previous view it instantiated (from class)");
+
+    SC.run(function() { view.set('nowShowing', SC.View.extend()); });
+    equals(contentViewFromPath.isDestroyed, YES, "should have destroyed the previous view it instantiated (from path)");
+    equals(contentViewFromClass.isDestroyed, YES, "should not have destroyed the previous view it instantiated (from class)");
+
+    view.destroy();
+    equals(contentViewFromPath.isDestroyed, YES, "should have destroyed the view it instantiated (from path)");
+    equals(contentViewFromClass.isDestroyed, YES, "should have destroyed the view it instantiated (from class)");
+    equals(contentView.isDestroyed, NO, "should not have destroyed the view that was already instantiated");
   });
 
 })();
