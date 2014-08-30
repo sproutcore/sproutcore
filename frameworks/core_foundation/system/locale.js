@@ -72,16 +72,22 @@ SC.Locale = SC.Object.extend({
   */
   metrics: {},
 
-  toString: function() {
-    if (!this.language) SC.Locale._assignLocales() ;
-    return "SC.Locale["+this.language+"]"+SC.guidFor(this) ;
+  /**
+    The inflection constants for this locale.
+  */
+  inflectionConstants: {},
+
+  /**
+    The method used to compute the ordinal of a number for this locale.
+  */
+  ordinalForNumber: function(number) { 
+    return '';
   },
 
 
-  ordinalForNumber: function(number){
-    var englishFunction = SC.Locale._numberOrdinalFunctions.en,
-      currentFunction = SC.Locale._numberOrdinalFunctions[this.language] || englishFunction;
-    return currentFunction(number);
+  toString: function() {
+    if (!this.language) SC.Locale._assignLocales() ;
+    return "SC.Locale["+this.language+"]"+SC.guidFor(this) ;
   },
 
   /**
@@ -308,6 +314,45 @@ SC.Locale.mixin(/** @scope SC.Locale */ {
   options: function() { return this.prototype; },
 
   /**
+    Adds the passed hash to the locale's given property name.  Note that
+    if the receiver locale inherits its hashes from its parent, then the
+    property table will be cloned first.
+
+    @param {String} name
+    @param {Hash} hash
+    @returns {Object} receiver
+  */
+  addHashes: function(name, hash) {
+    // make sure the target hash exists and belongs to the locale
+    var currentHash = this.prototype[name];
+    if (currentHash) {
+      if (!this.prototype.hasOwnProperty(currentHash)) {
+        currentHash = this.prototype[name] = SC.clone(currentHash);
+      }
+    }
+    else {
+      currentHash = this.prototype[name] = {};
+    }
+
+    // add hash
+    if (hash) this.prototype[name] = SC.mixin(currentHash, hash);
+
+    return this;
+  },
+
+  /**
+    Adds the passed method to the locale's given property name. 
+
+    @param {String} name
+    @param {Function} method
+    @returns {Object} receiver
+  */
+  addMethod: function(name, method) {
+    this.prototype[name] = method;
+    return this;
+  },
+
+  /**
     Adds the passed hash of strings to the locale's strings table.  Note that
     if the receiver locale inherits its strings from its parent, then the
     strings table will be cloned first.
@@ -315,18 +360,14 @@ SC.Locale.mixin(/** @scope SC.Locale */ {
     @returns {Object} receiver
   */
   addStrings: function(stringsHash) {
-    // make sure the target strings hash exists and belongs to the locale
-    var strings = this.prototype.strings ;
-    if (strings) {
-      if (!this.prototype.hasOwnProperty('strings')) {
-        strings = this.prototype.strings = SC.clone(strings) ;
-      }
-    } else strings = this.prototype.strings = {} ;
+    var ret = this.addHashes('strings', stringsHash);
 
-    // add strings hash
-    if (stringsHash)  this.prototype.strings = SC.mixin(strings, stringsHash) ;
-    this.prototype.hasStrings = YES ;
-    return this;
+    // Note:  We don't need the equivalent of this.hasStrings here, because we
+    //        are not burdened by an older API to look for like the strings
+    //        support is.
+    this.prototype.hasStrings = YES;
+
+    return ret;
   },
 
   /**
@@ -338,25 +379,7 @@ SC.Locale.mixin(/** @scope SC.Locale */ {
     @returns {Object} receiver
   */
   addMetrics: function(metricsHash) {
-    // make sure the target metrics hash exists and belongs to the locale
-    var metrics = this.prototype.metrics;
-    if (metrics) {
-      if (!this.prototype.hasOwnProperty(metrics)) {
-        metrics = this.prototype.metrics = SC.clone(metrics) ;
-      }
-    }
-    else {
-      metrics = this.prototype.metrics = {} ;
-    }
-
-    // add metrics hash
-    if (metricsHash) this.prototype.metrics = SC.mixin(metrics, metricsHash);
-
-    // Note:  We don't need the equivalent of this.hasStrings here, because we
-    //        are not burdened by an older API to look for like the strings
-    //        support is.
-
-    return this;
+    return this.addHashes('metrics', metricsHash);
   },
 
   _map: { english: 'en', french: 'fr', german: 'de', japanese: 'ja', jp: 'ja', spanish: 'es' },
@@ -394,24 +417,6 @@ SC.Locale.mixin(/** @scope SC.Locale */ {
     ret.options = SC.Locale.options ;
     ret.toString = SC.Locale.toString ;
     return ret ;
-  },
-
-  /**
-   * Contains the ordinal functions for each language, these functions are
-   * expected to take a number as the type and return a string
-   *
-   *
-   */
-  _numberOrdinalFunctions: {
-
-    en: function(number) {
-      var d = number % 10;
-      return (~~ (number % 100 / 10) === 1) ? 'th' :
-             (d === 1) ? 'st' :
-             (d === 2) ? 'nd' :
-             (d === 3) ? 'rd' : 'th';
-    }
-
   }
 
 }) ;
@@ -431,6 +436,34 @@ SC.Locale.locales = {
   es: SC.Locale.extend({ _deprecatedLanguageCodes: ['Spanish'] })
 };
 
+/**
+  This special helper will store the propertyName / hashes pair you pass 
+  in the locale matching the language code.  If a locale is not defined 
+  from the language code you specify, then one will be created for you 
+  with the english locale as the parent.
+
+  @param {String} languageCode
+  @param {String} propertyName
+  @param {Hash} hashes
+  @returns {void}
+*/
+SC.hashesForLocale = function(languageCode, propertyName, hashes) {
+  var locale = SC.Locale.localeClassFor(languageCode);
+  locale.addHashes(propertyName, hashes);
+};
+
+/**
+  Just like SC.hashesForLocale, but for methods.
+
+  @param {String} languageCode
+  @param {String} propertyName
+  @param {Function} method
+  @returns {void}
+*/
+SC.methodForLocale = function(languageCode, propertyName, method) {
+  var locale = SC.Locale.localeClassFor(languageCode);
+  locale.addMethod(propertyName, method);
+};
 
 /**
   This special helper will store the strings you pass in the locale matching
@@ -445,9 +478,9 @@ SC.Locale.locales = {
 SC.stringsFor = function(languageCode, strings) {
   // get the locale, creating one if needed.
   var locale = SC.Locale.localeClassFor(languageCode);
-  locale.addStrings(strings) ;
+  locale.addStrings(strings);
   return this ;
-} ;
+};
 
 /**
   Just like SC.stringsFor, but for metrics.
