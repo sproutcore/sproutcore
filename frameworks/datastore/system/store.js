@@ -1355,17 +1355,22 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // otherwise, destroy in dirty state
     } else status = newStatus ;
 
-    // remove the data hash, set new status
+    // remove the data hash, set the new status and remove the cached record.
     this.removeDataHash(storeKey, status);
     this.dataHashDidChange(storeKey);
+    delete this.records[storeKey];
 
-    // Handle all the child Records
+    // If this record is a parent record, unregister all of its child records.
     var that = this;
-    this._propagateToChildren(storeKey, function(storeKey){
-      that.unloadRecord(null, null, storeKey, newStatus);
+    this._propagateToChildren(storeKey, function (storeKey) {
+      that.unregisterChildFromParent(storeKey);
     });
 
-    this.unregisterChildFromParent(storeKey);
+    // If this record is a parent record, its child records have been cleared so also clear the
+    // cached reference as well.
+    if (this.parentRecords) {
+      delete this.parentRecords[storeKey];
+    }
 
     return this ;
   },
@@ -1566,25 +1571,26 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // Check the child to see if it has a parent
     childRecords = this.childRecords;
 
-      // Remove the parent's connection to the child.  This doesn't remove the
-      // parent store key from the cache of parent store keys if the parent
-      // no longer has any other registered children, because the amount of effort
-      // to determine that would not be worth the miniscule memory savings.
-    oldPk = childRecords[childStoreKey];
-        if (oldPk) {
-          delete this.parentRecords[oldPk][childStoreKey];
-      }
-
     // Remove the child.
     // 1. from the cache of data hashes
     // 2. from the cache of record objects
     // 3. from the cache of child record store keys
     this.removeDataHash(childStoreKey);
-        if (this.records) {
-          delete this.records[childStoreKey];
+    if (this.records) {
+      delete this.records[childStoreKey];
     }
-        delete childRecords[childStoreKey];
+
+    if (childRecords) {
+      // Remove the parent's connection to the child.  This doesn't remove the
+      // parent store key from the cache of parent store keys if the parent
+      // no longer has any other registered children, because the amount of effort
+      // to determine that would not be worth the miniscule memory savings.
+      oldPk = childRecords[childStoreKey];
+      if (oldPk) {
+        delete this.parentRecords[oldPk][childStoreKey];
       }
+
+      delete childRecords[childStoreKey];
     }
 
     // 4. from the cache of ids
