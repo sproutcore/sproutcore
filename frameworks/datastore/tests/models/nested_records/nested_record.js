@@ -3,6 +3,7 @@
  *
  * @author Evin Grano
  */
+/* globals module, test, equals, same, ok */
 
 // ..........................................................
 // Basic Set up needs to move to the setup and teardown
@@ -179,7 +180,6 @@ test("Function: writeAttribute()", function() {
 });
 
 test("Basic Read", function() {
-  var id;
   // Test general gets
   equals(testParent.get('name'), 'Parent Name', "get should be correct for name attribute");
   equals(testParent.get('nothing'), null, "get should be correct for invalid key");
@@ -209,7 +209,6 @@ test("Basic Read", function() {
 });
 
 test("Basic Read when Child Record has no primary key", function() {
-  var id;
   // Test general gets
   equals(testParent3.get('name'), 'Parent Name 3', "get should be correct for name attribute");
   equals(testParent3.get('nothing'), null, "get should be correct for invalid key");
@@ -240,41 +239,43 @@ test("Basic Read when Child Record has no primary key", function() {
 test("Basic Write As a Hash", function() {
 
   // Test general gets
-  testParent.set('name', 'New Parent Name');
-  equals(testParent.get('name'), 'New Parent Name', "set() should change name attribute");
-  testParent.set('nothing', 'nothing');
-  equals(testParent.get('nothing'), 'nothing', "set should change non-existent property to a new property");
+  SC.run(function () {
+    testParent.set('name', 'New Parent Name');
+    equals(testParent.get('name'), 'New Parent Name', "set() should change name attribute");
+    testParent.set('nothing', 'nothing');
+    equals(testParent.get('nothing'), 'nothing', "set should change non-existent property to a new property");
 
-  // Test Child Record creation
-  var oldCR = testParent.get('info');
-  testParent.set('info', {
-    type: 'ChildRecordTest',
-    name: 'New Child Name',
-    value: 'Red Goo',
-    guid: '6001'
+    // Test Child Record creation
+    var oldCR = testParent.get('info');
+    testParent.set('info', {
+      type: 'ChildRecordTest',
+      name: 'New Child Name',
+      value: 'Red Goo',
+      guid: '6001'
+    });
+    var cr = testParent.get('info');
+    // Check Model Class information
+    ok(SC.kindOf(cr, SC.Record), "set() with an object creates an actual instance that is a kind of a SC.Record Object");
+    ok(SC.instanceOf(cr, NestedRecord.ChildRecordTest), "set() with an object creates an actual instance of a ChildRecordTest Object");
+
+    // Check reference information
+    var pm = cr.get('primaryKey');
+    var key = cr.get(pm);
+    var storeRef = store.find(NestedRecord.ChildRecordTest, key);
+    ok(storeRef, 'after a set() with an object, checking that the store has the instance of the child record with proper primary key');
+    equals(cr, storeRef, "after a set with an object, checking the parent reference is the same as the direct store reference");
+    var oldKey = oldCR.get(pm);
+    ok(oldKey !== key, 'check to see that the old child record has a different key from the new child record');
+
+    // Check for changes on the child bubble to the parent.
+    cr.set('name', 'Child Name Change');
+    equals(cr.get('name'), 'Child Name Change', "after a set('name', <new>) on child, checking that the value is updated");
+    ok(cr.get('status') & SC.Record.DIRTY, 'check that the child record is dirty');
+    ok(testParent.get('status') & SC.Record.DIRTY, 'check that the parent record is dirty');
+    var newCR = testParent.get('info');
+    same(newCR, cr, "after a set('name', <new>) on child, checking to see that the parent has received the changes from the child record");
+    same(testParent.readAttribute('info'), cr.get('attributes'), "after a set('name', <new>) on child, readAttribute on the parent should be correct for info child attributes");
   });
-  var cr = testParent.get('info');
-  // Check Model Class information
-  ok(SC.kindOf(cr, SC.Record), "set() with an object creates an actual instance that is a kind of a SC.Record Object");
-  ok(SC.instanceOf(cr, NestedRecord.ChildRecordTest), "set() with an object creates an actual instance of a ChildRecordTest Object");
-
-  // Check reference information
-  var pm = cr.get('primaryKey');
-  var key = cr.get(pm);
-  var storeRef = store.find(NestedRecord.ChildRecordTest, key);
-  ok(storeRef, 'after a set() with an object, checking that the store has the instance of the child record with proper primary key');
-  equals(cr, storeRef, "after a set with an object, checking the parent reference is the same as the direct store reference");
-  var oldKey = oldCR.get(pm);
-  ok(!(oldKey === key), 'check to see that the old child record has a different key from the new child record');
-
-  // Check for changes on the child bubble to the parent.
-  cr.set('name', 'Child Name Change');
-  equals(cr.get('name'), 'Child Name Change', "after a set('name', <new>) on child, checking that the value is updated");
-  ok(cr.get('status') & SC.Record.DIRTY, 'check that the child record is dirty');
-  ok(testParent.get('status') & SC.Record.DIRTY, 'check that the parent record is dirty');
-  var newCR = testParent.get('info');
-  same(newCR, cr, "after a set('name', <new>) on child, checking to see that the parent has received the changes from the child record");
-  same(testParent.readAttribute('info'), cr.get('attributes'), "after a set('name', <new>) on child, readAttribute on the parent should be correct for info child attributes");
 });
 
 test("Basic Write As a Hash when Child Record has no primary key", function() {
@@ -398,7 +399,7 @@ test("Basic Write As a Child Record when Child Record has no primary key", funct
 
 test("Writing over a child record should remove caches in the store.", function() {
   // Test Child Record creation
-  var cr, key, store = testParent.get('store'), cacheLength, idx, storeKeys = [], ids = [], sks;
+  var cr, key, store = testParent.get('store'), cacheLength, storeKeys = [], ids = [];
 
   // Get the child record once before setting it in order to test that this child
   // doesn't become abandoned in the store.
@@ -577,7 +578,7 @@ test("Unloading the parent record also unloads the child record.", function() {
   duplicates of the child record.
 */
 test("Reloading the parent record uses same child record.", function() {
-  var parentId, child, childId, parentStoreKey, childStoreKey, newChildStoreKey;
+  var parentId, child, childId, parentStoreKey, childStoreKey;
   var key, cacheLength;
 
   parentId = testParent3.get('id');
@@ -590,7 +591,7 @@ test("Reloading the parent record uses same child record.", function() {
   // Verify the cache lengths to prove that there are no leaked objects.
   cacheLength = 0;
   for (key in store.parentRecords) { cacheLength += 1; }
-  equals(cacheLength, 1, 'there should only be one parent record registered in the store');
+  equals(cacheLength, 1, 'there should only be one parent record registered in the store initially');
 
   cacheLength = 0;
   for (key in store.childRecords) { cacheLength += 1; }
@@ -613,7 +614,7 @@ test("Reloading the parent record uses same child record.", function() {
   // Verify the cache lengths to prove that there are no leaked objects.
   cacheLength = 0;
   for (key in store.parentRecords) { cacheLength += 1; }
-  equals(cacheLength, 1, 'there should only be one parent record registered in the store');
+  equals(cacheLength, 0, 'there should be no parent record registered in the store');
 
   cacheLength = 0;
   for (key in store.childRecords) { cacheLength += 1; }
@@ -648,7 +649,7 @@ test("Reloading the parent record uses same child record.", function() {
   // Verify the cache lengths to prove that there are no leaked objects.
   cacheLength = 0;
   for (key in store.parentRecords) { cacheLength += 1; }
-  equals(cacheLength, 1, 'there should only be one parent record registered in the store');
+  equals(cacheLength, 1, 'there should only be one parent record registered in the store after reload');
 
   cacheLength = 0;
   for (key in store.childRecords) { cacheLength += 1; }

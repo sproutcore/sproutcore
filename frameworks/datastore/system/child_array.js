@@ -173,7 +173,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     var children = this.get('editableChildren'),
       recsLen = recs ? (recs.get ? recs.get('length') : recs.length) : 0,
       parent = this.get('record'),
-        pname    = this.get('propertyName'),
+      pname    = this.get('propertyName'),
       store = this.get('store'),
       removeCount, addCount,
       defaultRecordType, storeKeysById,
@@ -186,10 +186,10 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     // Convert any SC.Record objects into JavaScript objects.
     newObjects = this._processRecordsToHashes(recs);
 
-	// Unregister the records being replaced.
+    // Unregister the records being replaced.
     // for (i = idx, len = children.length; i < len; ++i) {
     //  this.unregisterNestedRecord(i);
-    // } 
+    // }
 
     // Ensure that all removed objects are pre-registered in case any instances are outstanding.
     // These objects will improperly reflect being registered to this parent, but
@@ -206,7 +206,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
       } else {
         // Remove the cached record.
         this._records[i] = null;
-    }
+      }
 
       // Now throw away the connection, so that the parent won't retrieve this
       // same instance. This is a work-around due to the fact that nested records
@@ -223,7 +223,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
         store.unregisterChildFromParent(rec.get('storeKey'));
 
         this._records[i] = null;
-    } 
+      }
     }
 
     // All objects from idx to the end must be removed to do an insert.
@@ -245,7 +245,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     // update to reflect its new nested object path.
     for (i = idx, len = children.length; i < len; i++) {
       this._records[i] = parent.registerNestedRecord(children[i], pname, pname + '.' + i);
-      }
+    }
 
     // Update the enumerable, [], property (including firstObject and lastObject)
     this.arrayContentDidChange(idx, removeCount, addCount);
@@ -279,7 +279,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
   //   var childArray, childRecord, csk, store,
   //       record   = this.get('record'),
   //       pname    = this.get('propertyName');
-  // 
+  //
   //   store = record.get('store');
   //   childArray = record.getPath(pname);
   //   childRecord = childArray.objectAt(idx);
@@ -321,7 +321,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
     return ret;
   },
-  
+
   /** @private
     This is called by the parent record whenever its properties change. It is
     also called by the ChildrenAttribute transform when the attribute is set
@@ -331,7 +331,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     var oldLength = this.get('length'),
       children = this.get('readOnlyChildren'),
       newLength = children ? children.length : 0,
-      store = this.get('store'),
+      // store = this.get('store'),
       prevChildren = this._sc_prevChildren;
 
     // Fast Path! No actual change to our backing array attribute so we should
@@ -361,10 +361,10 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
     // this.arrayContentWillChange(0, oldLength, newLength);
     this.arrayContentDidChange(0, oldLength, newLength);
-    
+
     // Cache our backing array so we can avoid updates when we haven't actually
     // changed. See fast path above.
     this._sc_prevChildren = children;
-    }
+  }
 
 }) ;

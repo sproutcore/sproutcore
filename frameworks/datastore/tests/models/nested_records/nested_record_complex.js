@@ -3,6 +3,7 @@
  *
  * @author Evin Grano
  */
+ /* globals module, test, equals, same, ok */
 
 // ..........................................................
 // Basic Set up needs to move to the setup and teardown

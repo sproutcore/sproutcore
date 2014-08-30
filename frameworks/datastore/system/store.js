@@ -56,7 +56,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   /**
     This type of store is not nested.
 
-		@default NO
+    @default NO
     @type Boolean
   */
   isNested: NO,
@@ -64,7 +64,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   /**
     This type of store is not nested.
 
-		@default NO
+    @default NO
     @type Boolean
   */
   commitRecordsAutomatically: NO,
@@ -332,14 +332,14 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   // to use these methods.
 
   /**
-    Returns the current edit status of a storekey.  May be one of
+    Returns the current edit status of a store key.  May be one of
     `EDITABLE` or `LOCKED`.  Used mostly for unit testing.
 
     @param {Number} storeKey the store key
     @returns {Number} edit status
   */
   storeKeyEditState: function(storeKey) {
-    var editables = this.editables, locks = this.locks;
+    var editables = this.editables;
     return (editables && editables[storeKey]) ? SC.Store.EDITABLE : SC.Store.LOCKED ;
   },
 
@@ -455,22 +455,23 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
               childHash = hash[childPath[0]];
             }
 
-            if(!processedPaths[hash[childPath[0]]]){
+            if (!processedPaths[hash[childPath[0]]]){
                 // update data hash: required to push changes beyond the first nesting level
                 this.writeDataHash(key, childHash, status);
             }
-            if(childPath.length > 1 && ! processedPaths[hash[childPath[0]]]) {
-                // save it so that we don't processed it over and over
-                processedPaths[hash[childPath[0]]]=true;
 
-                // force fetching of all children records by invoking the children_attribute wrapper code
-                // and then interating the list in an empty loop
-                // Ugly, but there's basically no other way to do it at the moment, other than
-                // leaving this broken as it was before
-    var that = this;
-                this.invokeLast(function(){
-                  that.records[storeKey].get(childPath[0]).forEach(function(it){});
-    });
+            if (childPath.length > 1 && ! processedPaths[hash[childPath[0]]]) {
+              // save it so that we don't processed it over and over
+              processedPaths[hash[childPath[0]]]=true;
+
+              // force fetching of all children records by invoking the children_attribute wrapper code
+              // and then interating the list in an empty loop
+              // Ugly, but there's basically no other way to do it at the moment, other than
+              // leaving this broken as it was before
+              var that = this;
+              this.invokeLast(function() {
+                that.records[storeKey].get(childPath[0]).forEach(function (it) {});
+              });
             }
           } else {
             this.writeDataHash(key, null, status);
@@ -694,7 +695,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         records              = changes.records,
         propertyForStoreKeys = changes.propertyForStoreKeys,
         recordTypes = SC.CoreSet.create(),
-        rec, recordType, statusOnly, idx, len, storeKey, keys;
+        rec, recordType, statusOnly, keys;
 
     storeKeys.forEach(function(storeKey) {
       if (records.contains(storeKey)) {
@@ -765,7 +766,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // Also reset all pre-created recordArrays.
     var ra, raList = this.get('recordArrays');
     if (raList) {
-      while (ra = raList.pop()) {
+      while ((ra = raList.pop())) {
         ra.destroy();
       }
       raList.clear();
@@ -1464,7 +1465,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     changelog = this.changelog;
     if (!changelog) changelog = this.changelog = SC.Set.create();
 
-    ((status & K.DIRTY) ? changelog.add(storeKey) : changelog.remove(storeKey));
+    if (status & K.DIRTY) { changelog.add(storeKey); }
+    else { changelog.remove(storeKey); }
     this.changelog=changelog;
 
     // if commit records is enabled
@@ -1612,7 +1614,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   /**
     function for retrieving a parent record key
 
-		@param {Number} storeKey The store key of the parent
+    @param {Number} storeKey The store key of the parent
   */
   parentStoreKeyExists: function(storeKey){
     if (SC.none(storeKey)) return ;
@@ -1664,7 +1666,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // otherwise, make new status READY_DIRTY unless new.
     // K.READY_CLEAN, K.READY_DIRTY, ignore K.READY_NEW
     } else {
-      if (status != K.READY_NEW) this.writeStatus(storeKey, K.READY_DIRTY);
+      if (status !== K.READY_NEW) this.writeStatus(storeKey, K.READY_DIRTY);
     }
 
     // record data hash change
@@ -1774,7 +1776,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       status = this.readStatus(storeKey);
 
       // K.EMPTY, K.ERROR, K.DESTROYED_CLEAN - initial retrieval
-      if ((status == K.EMPTY) || (status == K.ERROR) || (status == K.DESTROYED_CLEAN)) {
+      if ((status === K.EMPTY) || (status === K.ERROR) || (status === K.DESTROYED_CLEAN)) {
         this.writeStatus(storeKey, K.BUSY_LOADING);
         this.dataHashDidChange(storeKey, rev, YES);
         ret.push(storeKey);
@@ -1788,11 +1790,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
           ret.push(storeKey);
           this._setCallbackForStoreKey(storeKey, callback, hasCallbackArray, storeKeys);
         // K.BUSY_DESTROYING, K.BUSY_COMMITTING, K.BUSY_CREATING
-        } else if ((status == K.BUSY_DESTROYING) || (status == K.BUSY_CREATING) || (status == K.BUSY_COMMITTING)) {
+        } else if ((status === K.BUSY_DESTROYING) || (status === K.BUSY_CREATING) || (status === K.BUSY_COMMITTING)) {
           throw K.BUSY_ERROR ;
 
         // K.DESTROY_DIRTY, bad state...
-        } else if (status == K.DESTROYED_DIRTY) {
+        } else if (status === K.DESTROYED_DIRTY) {
           throw K.BAD_STATE_ERROR ;
 
         // ignore K.BUSY_LOADING, K.BUSY_REFRESH_CLEAN, K.BUSY_REFRESH_DIRTY
@@ -1800,7 +1802,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       }
     }
 
-    // now retrieve storekeys from dataSource.  if there is no dataSource,
+    // now retrieve storeKeys from dataSource.  if there is no dataSource,
     // then act as if we couldn't retrieve.
     ok = NO;
     if (source) ok = source.retrieveRecords.call(source, this, ret, ids);
@@ -1841,12 +1843,13 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     if(hasCallbackArray) queue[storeKey] = {callback: callback, otherKeys: storeKeys};
     else queue[storeKey] = callback;
   },
+
   /**
     @private
-    retreives and calls callback for `storkey` if exists
-    also handles if a single callback is need for one key
+    Retrieves and calls callback for `storeKey` if exists, also handles if a single callback is
+    needed for one key..
   **/
-  _retreiveCallbackForStoreKey: function(storeKey){
+  _retrieveCallbackForStoreKey: function(storeKey){
     var queue = this._callback_queue,
         callback = queue[storeKey],
         allFinished, keys;
@@ -1855,7 +1858,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         callback.call(); //args?
         delete queue[storeKey]; //cleanup
       }
-      else if(SC.typeOf(callback) == SC.T_HASH){
+      else if(SC.typeOf(callback) === SC.T_HASH){
         callback.completed = YES;
         keys = callback.storeKeys;
         keys.forEach(function(key){
@@ -1976,7 +1979,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         retCreate= [], retUpdate= [], retDestroy = [],
         rev       = SC.Store.generateStoreKey(),
         K         = SC.Record,
-        recordType, idx, storeKey, status, key, ret, len, callback;
+        recordType, idx, storeKey, status, ret, len, callback;
 
     // If no params are passed, look up storeKeys in the changelog property.
     // Remove any committed records from changelog property.
@@ -2004,26 +2007,26 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       // collect status and process
       status = this.readStatus(storeKey);
 
-      if (status == K.ERROR) {
+      if (status === K.ERROR) {
         throw K.NOT_FOUND_ERROR ;
       }
       else {
-        if(status==K.READY_NEW) {
+        if(status === K.READY_NEW) {
           this.writeStatus(storeKey, K.BUSY_CREATING);
           this.dataHashDidChange(storeKey, rev, YES);
           retCreate.push(storeKey);
           this._setCallbackForStoreKey(storeKey, callback, hasCallbackArray, storeKeys);
-        } else if (status==K.READY_DIRTY) {
+        } else if (status === K.READY_DIRTY) {
           this.writeStatus(storeKey, K.BUSY_COMMITTING);
           this.dataHashDidChange(storeKey, rev, YES);
           retUpdate.push(storeKey);
           this._setCallbackForStoreKey(storeKey, callback, hasCallbackArray, storeKeys);
-        } else if (status==K.DESTROYED_DIRTY) {
+        } else if (status === K.DESTROYED_DIRTY) {
           this.writeStatus(storeKey, K.BUSY_DESTROYING);
           this.dataHashDidChange(storeKey, rev, YES);
           retDestroy.push(storeKey);
           this._setCallbackForStoreKey(storeKey, callback, hasCallbackArray, storeKeys);
-        } else if (status==K.DESTROYED_CLEAN) {
+        } else if (status === K.DESTROYED_CLEAN) {
           this.dataHashDidChange(storeKey, rev, YES);
         }
         // ignore K.EMPTY, K.READY_CLEAN, K.BUSY_LOADING, K.BUSY_CREATING, K.BUSY_COMMITTING,
@@ -2031,7 +2034,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       }
     }
 
-    // now commit storekeys to dataSource
+    // now commit storeKeys to dataSource
     if (source && (len>0 || params)) {
       ret = source.commitRecords.call(source, this, retCreate, retUpdate, retDestroy, params);
     }
@@ -2114,7 +2117,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       if(storeKey) {
         status = this.readStatus(storeKey);
 
-        if ((status == K.EMPTY) || (status == K.ERROR)) {
+        if ((status === K.EMPTY) || (status === K.ERROR)) {
           throw K.NOT_FOUND_ERROR ;
         }
         ret.push(storeKey);
@@ -2230,8 +2233,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     var isArray = SC.typeOf(recordTypes) === SC.T_ARRAY,
         len     = dataHashes.get('length'),
         ret     = [],
-        K       = SC.Record,
-        recordType, id, primaryKey, idx, dataHash, storeKey;
+        recordType, id, primaryKey, idx, dataHash;
 
     // save lookup info
     if (!isArray) {
@@ -2357,7 +2359,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     }
 
     // otherwise, determine proper state transition
-    if(status===K.BUSY_DESTROYING) {
+    if(status === K.BUSY_DESTROYING) {
       throw K.BAD_STATE_ERROR ;
     } else status = K.READY_CLEAN ;
 
@@ -2370,11 +2372,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     // Force record to refresh its cached properties based on store key
     var record = this.materializeRecord(storeKey);
-    if (record != null) {
+    if (record !== null) {
       record.notifyPropertyChange('status');
     }
     //update callbacks
-    this._retreiveCallbackForStoreKey(storeKey);
+    this._retrieveCallbackForStoreKey(storeKey);
 
     return this ;
   },
@@ -2403,11 +2405,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     // Force record to refresh its cached properties based on store key
     var record = this.materializeRecord(storeKey);
-    if (record != null) {
+    if (record !== null) {
       record.notifyPropertyChange('status');
     }
 
-    this._retreiveCallbackForStoreKey(storeKey);
+    this._retrieveCallbackForStoreKey(storeKey);
 
     return this ;
   },
@@ -2440,11 +2442,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     // Force record to refresh its cached properties based on store key
     var record = this.materializeRecord(storeKey);
-    if (record != null) {
+    if (record) {
       record.notifyPropertyChange('status');
     }
 
-    this._retreiveCallbackForStoreKey(storeKey);
+    this._retrieveCallbackForStoreKey(storeKey);
     return this ;
   },
 
@@ -2467,10 +2469,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     if(storeKey===undefined) storeKey = recordType.storeKeyFor(id);
     status = this.readStatus(storeKey);
-    if(status==K.EMPTY || status==K.ERROR || status==K.READY_CLEAN || status==K.DESTROYED_CLEAN) {
+    if(status === K.EMPTY || status === K.ERROR || status === K.READY_CLEAN || status === K.DESTROYED_CLEAN) {
 
       status = K.READY_CLEAN;
-      if(dataHash===undefined) this.writeStatus(storeKey, status) ;
+      if(dataHash === undefined) this.writeStatus(storeKey, status) ;
       else this.writeDataHash(storeKey, dataHash, status) ;
 
       if (id && this.idFor(storeKey) !== id) SC.Store.replaceIdFor(storeKey, id);
@@ -2498,7 +2500,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       storeKey = recordType.storeKeyFor(id);
     }
     status = this.readStatus(storeKey);
-    if(status==K.EMPTY || status==K.ERROR || status==K.READY_CLEAN || status==K.DESTROYED_CLEAN){
+    if(status === K.EMPTY || status === K.ERROR || status === K.READY_CLEAN || status === K.DESTROYED_CLEAN){
       status = K.DESTROYED_CLEAN;
       this.removeDataHash(storeKey, status) ;
       this.dataHashDidChange(storeKey);
@@ -2524,7 +2526,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     if(storeKey===undefined) storeKey = recordType.storeKeyFor(id);
     status = this.readStatus(storeKey);
 
-    if(status==K.EMPTY || status==K.ERROR || status==K.READY_CLEAN || status==K.DESTROYED_CLEAN){
+    if(status === K.EMPTY || status === K.ERROR || status === K.READY_CLEAN || status === K.DESTROYED_CLEAN){
       status = K.ERROR;
 
       // Add the error to the array of record errors (for lookup later on if necessary).
@@ -2815,7 +2817,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     for(storeKey in this.statuses) {
       // if status is not empty
-      if(this.statuses[storeKey] != SC.Record.EMPTY) {
+      if(this.statuses[storeKey] !== SC.Record.EMPTY) {
         ret.push(parseInt(storeKey, 10));
       }
     }
