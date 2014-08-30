@@ -115,7 +115,7 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
 
       // This pattern matching strategy was taken from jQuery.
       parts = urlRegex.exec( address.toLowerCase()  );
-      originParts = urlRegex.exec( window.location.origin.toLowerCase() );
+      originParts = urlRegex.exec( window.location.href.toLowerCase() );
 
       return SC.none(parts) ||
         (parts[1] === originParts[1] &&  // protocol
