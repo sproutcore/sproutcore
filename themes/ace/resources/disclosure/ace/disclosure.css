@@ -12,6 +12,7 @@ $theme.disclosure {
   img.disclosure.button {
     width: 14px;
     height: 14px;
+
     &.open    { @include slice("disclosure_open.png"); }
     &.closed  { @include slice("disclosure_closed.png"); }
 
