@@ -32,7 +32,7 @@
     checkboxView.$('input').attr('checked', false);
 
     checkboxView.set('value', true);
-    ok(checkboxView.$('input').attr("checked"), "sets value of DOM to value property");
+    ok(checkboxView.$('input').is(":checked"), "sets value of DOM to value property");
   });
 
   module("SC.Checkbox", {
@@ -58,7 +58,7 @@
     checkboxView.$('input').attr('checked', false);
 
     checkboxView.set('value', true);
-    ok(checkboxView.$('input').attr("checked"), "sets value of DOM to value property");
+    ok(checkboxView.$('input').is(":checked"), "sets value of DOM to value property");
   });
 })();
 
