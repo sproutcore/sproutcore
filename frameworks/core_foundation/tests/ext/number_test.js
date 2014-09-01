@@ -58,10 +58,9 @@ test("Do not compute the ordinal in a language if no method is defined", functio
     nd = 2,
     rd = 3,
     th = 4;
-  
+
   equals(st.ordinal(), '');
   equals(nd.ordinal(), '');
   equals(rd.ordinal(), '');
   equals(th.ordinal(), '');
-
 });

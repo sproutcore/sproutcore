@@ -21,7 +21,7 @@ module('SC.Object', {
       }
     });
     this.currentLocale = LocaleObject;
-    
+
     SC.stringsFor('English', {
       'Test': '%@',
       'Test.Multiple': '%@ %@'

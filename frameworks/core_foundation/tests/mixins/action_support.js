@@ -42,7 +42,7 @@
 
   // ..........................................................
   // No Parameters
-  // 
+  //
 
   test("no paramaters - only action set", function() {
     var expectedAction = 'someAction';
@@ -66,7 +66,7 @@
 
   // ..........................................................
   // Actions Parameter
-  // 
+  //
 
   test("action parameter - only action set", function() {
     var expectedAction = 'someAction';
@@ -90,7 +90,7 @@
 
   // ..........................................................
   // Action Context
-  // 
+  //
 
   test("context", function() {
     var expectedAction = 'someAction';

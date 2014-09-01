@@ -19,7 +19,7 @@ module("ResponderContext", {
         this.hasFirst = NO;
       }
     });
-    
+
     A = TestResponder.create();
     a = TestResponder.create({nextResponder: A});
     B = TestResponder.create();
@@ -30,7 +30,7 @@ test("Can enter and exit states.", function() {
   Manager.makeFirstResponder(A);
   ok(A.didBecome, "A did become first responder.");
   ok(A.hasFirst, "A has first responder.");
-  
+
   Manager.makeFirstResponder(B);
   ok(A.didLose, "A did lose first responder.");
   ok(!A.hasFirst, "A does not have first responder.");
@@ -40,13 +40,13 @@ test("Can enter and exit chained states.", function() {
   Manager.makeFirstResponder(A);
   ok(A.didBecome, "A did become first responder.");
   ok(A.hasFirst, "A has first responder.");
-  
+
   Manager.makeFirstResponder(a);
   ok(!A.didLose, "A did not lose first responder.");
   ok(A.hasFirst, "A has first responder.");
   ok(A.didBecome, "a did become first responder.");
   ok(A.hasFirst, "a has first responder.");
-  
+
   Manager.makeFirstResponder(B);
   ok(a.didLose, "a did lose first responder.");
   ok(!a.hasFirst, "a does not have first responder.");
