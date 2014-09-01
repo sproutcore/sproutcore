@@ -47,23 +47,15 @@ SC.mixin(SC.$.fn,
     it finds an element managed by a view.
 
     @returns {Array} array of views or null.
+    @deprecated Version 1.10
   */
   view: function () {
-    return this.map(function () {
-      var ret = null,
-        dom = this,
-        value;
+    //@if(debug)
+    // Deprecation warning.
+    SC.warn("Developer Warning: SC.$.view() has been deprecated and will be removed in the future. Please use SC.viewFor(element) instead.");
+    //@endif
 
-      while (!ret && dom && (dom !== document)) {
-        if (dom.nodeType === 1 && (value = dom.getAttribute('id'))) {
-          ret = SC.View.views[value];
-        }
-        dom = dom.parentNode;
-      }
-      dom = null;
-
-      return ret;
-    });
+    return SC.viewFor(this[0]);
   },
 
   /**

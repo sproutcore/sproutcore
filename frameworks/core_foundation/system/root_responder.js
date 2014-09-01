@@ -693,8 +693,11 @@ SC.RootResponder = SC.Object.extend(
     @param {SC.Event} evt
     @returns {SC.View} view instance or null
   */
-  targetViewForEvent: function(evt) {
-    return evt.target ? SC.$(evt.target).view()[0] : null ;
+  targetViewForEvent: function (evt) {
+    var ret = null;
+    if (evt.target) { ret = SC.viewFor(evt.target); }
+
+    return ret;
   },
 
   /**
@@ -2001,7 +2004,7 @@ SC.RootResponder = SC.Object.extend(
   beforedeactivate: function(evt) {
     var toElement = evt.toElement;
     if (toElement && toElement.tagName && toElement.tagName!=="IFRAME") {
-      var view = SC.$(toElement).view()[0];
+      var view = SC.viewFor(toElement);
       //The following line is necessary to allow/block text selection for IE,
       // in combination with the selectstart event.
       if (view && view.get('blocksIEDeactivate')) return NO;
@@ -2334,7 +2337,7 @@ SC.RootResponder = SC.Object.extend(
         view = nd[loc];
         if (ld.indexOf(view) === -1) {
           view.tryToPerform('dataDragEntered', evt);
-        }        
+        }
       }
       // Finally, send hover events to everybody.
       for (loc = 0, len = nd.length; loc < len; loc++) {

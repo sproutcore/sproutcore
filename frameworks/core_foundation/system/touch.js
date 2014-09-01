@@ -43,7 +43,7 @@
     the touch object which is ending.
   - `touchCancelled` -- This method is generally only called if you have changed the touch's responder. See "Touch
     Responders" below; in brief, if you pass the touch to another responder via `makeTouchResponder`, fully resigning
-    your touch respondership, you will receive a `touchCancelled` call for the next event; if you pass the touch to another 
+    your touch respondership, you will receive a `touchCancelled` call for the next event; if you pass the touch to another
     responder via `stackNextTouchResponder`, and never receive it back, you will receive a `touchCancelled` call when the
     event finishes. (Note that because RootResponder must call touchStart to determine if a view will accept respondership,
     touchStart is called on a new responder before touchCancelled is called on the outgoing one.)
@@ -74,7 +74,7 @@
       if (shouldPassTouch) {
         touch.makeTouchResponder(nextView);
       }
-  
+
   This will trigger `touchStart` on the new responder, and `touchCancel` on the outgoing one. The new responder will begin
   receiving `touchesDragged` events in place of the outgoing one.
 
@@ -115,7 +115,7 @@ SC.Touch = function(touch, touchContext) {
   if (target && SC.$(target).hasClass("touch-intercept")) {
     touch.target.style[SC.browser.experimentalStyleNameFor('transform')] = "translate3d(0px,-5000px,0px)";
     target = document.elementFromPoint(touch.pageX, touch.pageY);
-    if (target) targetView = SC.$(target).view()[0];
+    if (target) targetView = SC.viewFor(target);
 
     this.hidesTouchIntercept = NO;
     if (target.tagName === "INPUT") {
@@ -124,7 +124,7 @@ SC.Touch = function(touch, touchContext) {
       touch.target.style[SC.browser.experimentalStyleNameFor('transform')] = "translate3d(0px,0px,0px)";
     }
   } else {
-    targetView = touch.target ? SC.$(touch.target).view()[0] : null;
+    targetView = touch.target ? SC.viewFor(touch.target) : null;
   }
   this.targetView = targetView;
   this.target = target;

@@ -490,12 +490,7 @@ var pane;
     sv.showOverflowMenu();
 
     // the overflow menu should be showing
-    var menu = SC.$('.sc-menu').view();
-    if (menu.length) {
-      menu = menu[0];
-    } else {
-      menu = null;
-    }
+    var menu = SC.viewFor(SC.$('.sc-menu')[0]);
     ok(menu && menu.get('isVisible'), 'overflow menu should be visible');
 
     // We need the run loop to end so that we go through cleaning up views at the end of the run loop,

@@ -169,6 +169,61 @@ SC.mixin(/** @lends SC */ {
   stringsFor: function(lang, strings) {
     SC.mixin(SC.STRINGS, strings);
     return this ;
+  },
+
+  /**
+    Returns the SC.View instance managing the given element.
+
+    If no instance is found, returns `null`.
+
+    @param {DOMElement} element The element to check.
+    @returns {SC.View} The view managing the element or null if none found.
+  */
+  viewFor: function (element) {
+    //@if(debug)
+    // Debug mode only arrgument validation.
+    // Ensure that every argument is correct and that the proper number of arguments is given.
+    if (!(element instanceof Element)) {
+      SC.error("Developer Error: Attempt to retrieve the SC.View instance for a non-element in SC.viewFor(): %@".fmt(element));
+    }
+
+    if (arguments.length > 1) {
+      SC.warn("Developer Warning: SC.viewFor() is meant to be used with only one argument: element");
+    }
+    //@endif
+
+    // Search for the view for the given element.
+    var viewCache = SC.View.views,
+      view = viewCache[element.getAttribute('id')];
+
+    // If the element itself is not managed by an SC.View, walk up its element chain searching for an
+    // element that is.
+    if (!view) {
+      var parentNode;
+
+      while (!view && (parentNode = element.parentNode) && (parentNode !== document)) {
+        var id;
+
+        // Ensure that the parent node is an Element and not some other type of Node.
+        // Note: while `instanceOf Element` is the most accurate determiner, performance tests show
+        // that it's much quicker to check for the existence of either the `nodeType` property or
+        // the `querySelector` method.
+        // See http://jsperf.com/nodetype-1-vs-instanceof-htmlelement/4
+        // if (parentNode.querySelector && (id = parentNode.getAttribute('id'))) {
+        if ((id = parentNode.getAttribute('id'))) {
+          view = viewCache[id];
+        }
+
+        // Check the parent node.
+        element = parentNode;
+      }
+
+      // Avoid memory leaks (i.e. IE).
+      element = parentNode = null;
+    }
+
+    // If view isn't found, return null rather than undefined.
+    return view || null;
   }
 
-}) ;
+});
