@@ -1484,8 +1484,27 @@ SC.ScrollView = SC.View.extend({
     this._scroll_gesturePriorY = avg.y;
   },
 
-  /** @private Update the scroll if still ongoing, otherwise wrap up. */
-  touchEnd: function (touch) {
+  /** @private
+    If we are the touch's responder at its completion, we'll get a touchEnd event. If this is the
+    gesture's last touch, we wrap up in spectacular fashion.
+  */
+  touchEnd: function(touch) {
+    this._scsv_touchEnded(touch);
+  },
+
+  /** @private
+    If we're in hand-holding mode and our content claims the touch, we will receive a touchCancelled
+    event at its completion. We still need to do most of our touch-ending wrapup, for example to finish
+    bouncing back from a previous gesture.
+  */
+  touchCancelled: function(touch) {
+    this._scsv_touchEnded(touch, YES)
+  },
+
+  /** @private
+    This method handles both touchEnd and touchCancelled events, with minor forking.
+  */
+  _scsv_touchEnded: function (touch, isTouchCancel) {
     var touches = touch.touchesForView(this);
 
     // FAST PATH: If this isn't the last touch, we're still gesture-handling.
@@ -1496,7 +1515,7 @@ SC.ScrollView = SC.View.extend({
 
     // If we never started scrolling, this may be a tap. If the content hasn't been given a swing at the event yet
     // (either it's been fewer than 150 ms, or we're not in hand-holding mode), give it a swing.
-    if (!this._scroll_isTouchScrolling && !this._scroll_touchContentHadItsChance) {
+    if (!this._scroll_isTouchScrolling && !this._scroll_touchContentHadItsChance && !isTouchCancel) {
       // Run through the captureTouch pass, then failing that go the usual makeTouchResponder (touchStart) pass.
       var captured = touch.captureTouch(this, YES);
       if (!captured) {
@@ -1541,9 +1560,9 @@ SC.ScrollView = SC.View.extend({
       velocityX = this._scroll_isTouchScrollingX ? avg.velocityX : 0,
       velocityY = this._scroll_isTouchScrollingY ? avg.velocityY : 0;
 
-    // If we're not the responder (most likely because we're handling a proxied touchCancelled event), then
-    // the responder should have taken care of any velocity and we should ignore it.
-    if (touch.touchResponder !== this) {
+    // If we're just cleaning up after the content view, we should assume that the content view handled
+    // all of the velocity.
+    if (isTouchCancel) {
       velocityX = 0;
       velocityY = 0;
     }
@@ -1830,15 +1849,6 @@ SC.ScrollView = SC.View.extend({
     this._scsv_clearTouchCache();
 
     return YES;
-  },
-
-  /** @private
-    If we're in hand-holding mode and our content claims the touch, we will receive a touchCancelled
-    event at its completion. We proxy this directly to touchEnd, which handles any required bounce-
-    backs (e.g. from a previous gesture).
-  */
-  touchCancelled: function () {
-    return this.touchEnd.apply(this, arguments);
   },
 
   /** @private
