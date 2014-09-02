@@ -2493,10 +2493,13 @@ SC.ScrollView = SC.View.extend({
       case SC.ALIGN_RIGHT:
         this.set('horizontalScrollOffset', this.get('maximumHorizontalScrollOffset'));
         break;
-      default:
+      default: // SC.ALIGN_CENTER
         // We know what %age of the way across that we want to position the new center, so we reverse the
         // earlier calculation with the new maximum.
         var newHOffset = ((this.get('maximumHorizontalScrollOffset') + this._scroll_containerWidth) * hCenterPct) - (this._scroll_containerWidth / 2);
+        // Constrain.
+        if (newHOffset < this._scroll_minimumHorizontalScrollOffset) newHOffset = this._scroll_minimumHorizontalScrollOffset;
+        else if (newHOffset > this._scroll_maximumHorizontalScrollOffset) newHOffset = this._scroll_maximumHorizontalScrollOffset;
         this.set('horizontalScrollOffset', newHOffset);
     }
     // Vertical
@@ -2507,10 +2510,13 @@ SC.ScrollView = SC.View.extend({
       case SC.ALIGN_BOTTOM:
         this.set('verticalScrollOffset', this.get('maximumVerticalScrollOffset'));
         break;
-      default:
+      default: // SC.ALIGN_MIDDLE
         // We know what %age of the way down that we want to position the new center, so we reverse the
         // earlier calculation with the new maximum.
         var newVOffset = ((this.get('maximumVerticalScrollOffset') + this._scroll_containerHeight) * vCenterPct) - (this._scroll_containerHeight / 2);
+        // Constrain.
+        if (newVOffset < this._scroll_minimumVerticalScrollOffset) newVOffset = this._scroll_minimumVerticalScrollOffset;
+        else if (newVOffset > this._scroll_maximumVerticalScrollOffset) newVOffset = this._scroll_maximumVerticalScrollOffset;
         this.set('verticalScrollOffset', newVOffset);
     }
   }.observes('scale'),
