@@ -1395,8 +1395,17 @@ SC.ScrollView = SC.View.extend({
       // If our scale has changed, we need to tweak our offsets too, to maintain the illusion that
       // we're scaling around the center of our pinch gesture.
       if (goalScaleDidChange) {
+        // Calculate the %-across-the-content values if needed.
+        if (!this._scroll_globalContainerFrame) {
+          this._scroll_globalContainerFrame = this.containerView.convertFrameToView(this.containerView.get('frame'));
+          xInContainer = avg.x - this._scroll_globalContainerFrame.x;
+          this._scroll_gestureXAcrossContent = (xInContainer + this._scroll_horizontalScrollOffset) / this._scroll_contentWidth;
+          yInContainer = avg.y - this._scroll_globalContainerFrame.y;
+          this._scroll_gestureYAcrossContent = (yInContainer + this._scroll_verticalScrollOffset) / this._scroll_contentHeight;
+        }
+
         // Update content size values now. This gives us truer values below, and don't cost nothin. (This is basically a
-        // custom run of contentViewFrameDidChange.)
+        // custom run of contentViewFrameDidChange that calculates the changes before they're made.)
         // Algebra:
         // new width / new scale = anchor width / anchor scale
         // new width = (anchor width * new scale) / anchor scale
@@ -1414,20 +1423,12 @@ SC.ScrollView = SC.View.extend({
         // adjustElementScroll instead, where it'll be moderated by requestAnimationFrame.)
         this._scsv_updateScrollers();
 
-        // First, calculate the new %-across-the-content values (if needed).
-        if (!this._scroll_globalContainerFrame) {
-          this._scroll_globalContainerFrame = this.containerView.convertFrameToView(this.containerView.get('frame'));
-          xInContainer = avg.x - this._scroll_globalContainerFrame.x;
-          this._scroll_gestureXAcrossContent = (xInContainer + this._scroll_horizontalScrollOffset) / this._scroll_contentWidth;
-          yInContainer = avg.y - this._scroll_globalContainerFrame.y;
-          this._scroll_gestureYAcrossContent = (yInContainer + this._scroll_verticalScrollOffset) / this._scroll_contentHeight;
-        }
-
-        // Next, calculate the total change in size that the content is about to undergo.
+        // Calculate the total change in size that the content is about to undergo.
         contentDeltaWidth = this._scroll_contentWidth - this._scroll_gestureAnchorContentWidth;
         contentDeltaHeight = this._scroll_contentHeight - this._scroll_gestureAnchorContentHeight;
 
-        // Combine the values to determine how much of the total size change comes off the top/left edges.
+        // Combine the %-across and change-in-size to determine how much of the total size change comes off the
+        // top/left edges.
         this._scroll_gestureScaleAdditionalOffsetX = contentDeltaWidth * this._scroll_gestureXAcrossContent;
         this._scroll_gestureScaleAdditionalOffsetY = contentDeltaHeight * this._scroll_gestureYAcrossContent;
       }
@@ -1658,7 +1659,7 @@ SC.ScrollView = SC.View.extend({
       // Get some Pythagorean action - a^2 + b^2 = c^2
       distance =  Math.pow(Math.pow(Math.abs(distanceX), 2) + Math.pow(Math.abs(distanceY), 2), 0.5);
       // Duration increases as a factor of distance.
-      fullDuration = duration = distance * 8; // NEEDS FINE-TUNING
+      fullDuration = duration = distance * 6; // NEEDS FINE-TUNING
 
       // If either axis's initial position is out of bounds, skip animation 1 and prep for animation 2.
       if (verticalIsOutOfBounds || horizontalIsOutOfBounds) {
@@ -1870,7 +1871,7 @@ SC.ScrollView = SC.View.extend({
     this._scroll_isTouchScrollingX = NO;
     this._scroll_isTouchScrollingY = NO;
     this._scroll_isTouchScaling = NO;
-    this._scroll_latestTouchID = 0;
+    this._scroll_latestTouchID = null;
     this._scroll_globalContainerFrame = null;
     this._scroll_gestureAnchorX = null;
     this._scroll_gestureAnchorY = null;
@@ -2202,17 +2203,21 @@ SC.ScrollView = SC.View.extend({
       height === this._scroll_contentHeight &&
       containerWidth === this._scroll_containerWidth &&
       containerHeight === this._scroll_containerHeight &&
-      !this.didChangeFor('stuffForContentViewFrameDidChange', 'horizontalAlign', 'verticalAlign', 'canScrollHorizontal', 'canScrollVertical')
+      !this.didChangeFor('anything else for contentViewFrameDidChange?', 'horizontalAlign', 'verticalAlign', 'canScrollHorizontal', 'canScrollVertical')
     ) {
       return;
     }
-    // Update our scroll value caches...
+
+    // Update our content & container values...
     this._scroll_contentWidth = width;
     this._scroll_contentHeight = height;
     this._scroll_containerWidth = containerWidth;
     this._scroll_containerHeight = containerHeight;
 
-    // Update our min and max values...
+    // Update the scroller numbers...
+    this._scsv_updateScrollers();
+
+    // With our scroller visibility updated, update our min and max values...
     var vAlign = this.get('verticalAlign'),
         hAlign = this.get('horizontalAlign'),
         canScrollHorizontal = this.get('canScrollHorizontal'),
@@ -2221,9 +2226,6 @@ SC.ScrollView = SC.View.extend({
     this._scroll_maximumHorizontalScrollOffset = this._scsv_maximumScrollOffset(width, containerWidth, hAlign, canScrollHorizontal);
     this._scroll_minimumVerticalScrollOffset = this._scsv_minimumScrollOffset(height, containerHeight, vAlign, canScrollVertical);
     this._scroll_maximumVerticalScrollOffset = this._scsv_maximumScrollOffset(height, containerHeight, vAlign, canScrollVertical);
-
-    // Update the scroller numbers...
-    this._scsv_updateScrollers();
 
     // If there is no scroller and auto-hiding is on (and we're not mid-scroll), scroll to the minimum offset.
     if (!this._scroll_isTouchScrolling) {
@@ -2291,7 +2293,7 @@ SC.ScrollView = SC.View.extend({
   */
   _scsv_maximumScrollOffset: function (contentSize, containerSize, align, canScroll) {
     // If we can't scroll, we pretend our content size is no larger than the container.
-    if (!canScroll) contentSize = Math.min(contentSize, containerSize);
+    if (canScroll === NO) contentSize = Math.min(contentSize, containerSize);
 
     // if our content size is larger than or the same size as the container, it's quite
     // simple to calculate the answer. Otherwise, we need to do some fancy-pants
@@ -2318,7 +2320,7 @@ SC.ScrollView = SC.View.extend({
   */
   _scsv_minimumScrollOffset: function (contentSize, containerSize, align, canScroll) {
     // If we can't scroll, we pretend our content size is no larger than the container.
-    if (!canScroll) contentSize = Math.min(contentSize, containerSize);
+    if (canScroll === NO) contentSize = Math.min(contentSize, containerSize);
 
     // if the content is larger than the container, we have no need to change the minimum
     // away from the natural 0 position.
@@ -2867,7 +2869,7 @@ SC.ScrollView = SC.View.extend({
   _scroll_isTouchScrollingY: NO,
   _scroll_isTouchScaling: NO,
   // Used to track (occasionally) asynchronous touch initialization.
-  _scroll_latestTouchID: 0,
+  _scroll_latestTouchID: null,
   // Used when repositioning the scaled content to keep it under the pinch gesture.
   _scroll_globalContainerFrame: null,
   _scroll_gestureAnchorX: null,

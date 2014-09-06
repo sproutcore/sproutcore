@@ -7,7 +7,7 @@
 
 /*global module, test, ok, equals */
 
-var pane, scrollView, inner, targetLayer, evt,
+var pane, scrollView, inner, targetLayer, evt, evt2, evt3,
     scrollStart, innerStart, scrollDragged, innerDragged, scrollEnd, innerEnd, scrollCancel, innerCancel;
 
 // Sets up and tears down our pane and event.
@@ -318,4 +318,146 @@ test("Touch scroll lock", function() {
   if (scrollView.get('verticalScrollOffset') !== 35) ok(false, "A touch with no vertical change shouldn't trigger a vertical scroll!");
   equals(scrollView.get('horizontalScrollOffset'), 0, "Having scrolled vertically past the touchSecondaryScrollLock, horizontal touch movements are ignored");
 
+});
+
+module("SC.ScrollView touch scale", {
+  setup: function() {
+    // Create our pane.
+    pane = SC.MainPane.extend({
+      childViews: ['contentView'],
+      contentView: SC.ScrollView.extend({
+        layout: { height: 1000, width: 1000 },
+        canScale: YES,
+        horizontalOverlay: YES,
+        verticalOverlay: YES,
+        contentView: SC.View.extend({
+          layout: { height: 1000, width: 1000 }
+        })
+      })
+    });
+    // (Actually create it, in a run loop.)
+    SC.run(function() {
+      pane = pane.create().append();
+    });
+
+    // Set up our pertinent reused variables.
+    scrollView = pane.contentView;
+    inner = scrollView.contentView;
+    targetLayer = inner.get('layer');
+
+    evt = SC.Event.simulateEvent(targetLayer, 'touchstart');
+    evt.touches = [evt];
+    evt.identifier = 4;
+    evt.pageX = 400;
+    evt.pageY = 400;
+
+    evt2 = SC.Event.simulateEvent(targetLayer, 'touchstart');
+    evt2.touches = [evt2];
+    evt2.identifier = 5;
+    evt2.pageX = 600;
+    evt2.pageY = 600;
+
+    evt3 = SC.Event.simulateEvent(targetLayer, 'touchstart');
+    evt3.touches = [evt3];
+    evt3.identifier = 6;
+    evt3.pageX = 400;
+    evt3.pageY = 600;
+
+    evt.changedTouches = evt2.changedTouches = evt3.changedTouches = [evt, evt2];
+  },
+  teardown: function() {
+    SC.run(pane.destroy, pane);
+  }
+});
+
+test("Basic touch scale", function() {
+  equals(scrollView.get('verticalScrollOffset'), 0, "PRELIM: Vertical offset starts at");
+  equals(scrollView.get('horizontalScrollOffset'), 0, "PRELIM: Horizontal offset starts at");
+  equals(scrollView.get('scale'), 1, "PRELIM: Horizontal offset starts at");
+
+  // Start touches.
+  SC.run(function() {
+    SC.Event.trigger(targetLayer, 'touchstart', [evt, evt2]);
+  });
+
+  // Pinch out to 2x.
+  evt.pageX = evt.pageY -= 100;
+  evt2.pageX = evt2.pageY += 100;
+  SC.run(function() {
+    SC.Event.trigger(targetLayer, 'touchmove', [evt, evt2]);
+  });
+
+  // SC.ScrollView's touch-pinching depends heavily on SC.RootResponder#averagedTouchesForView. If these tests
+  // are misbehaving, first verify that SC.RootResponder's touch tests are passing.
+  equals(scrollView.get('scale'), 2, "A 2x pinch gesture should double the scroll's scale");
+  equals(scrollView.get('horizontalScrollOffset'), 500, "A centered pinch gesture should move the horizontal offset by half the content view's change in width");
+  equals(scrollView.get('verticalScrollOffset'), 500, "A centered pinch gesture should move the vertical offset by half the content view's change in height");
+
+  // Move the gesture.
+  evt.pageX = evt.pageY += 100;
+  evt2.pageX = evt2.pageY += 100;
+  SC.run(function() {
+    SC.Event.trigger(targetLayer, 'touchmove', [evt, evt2]);
+  });
+
+  equals(scrollView.get('scale'), 2, "A gesture change in distance with no change in distance should not change scale");
+  equals(scrollView.get('horizontalScrollOffset'), 400, "Gesture change in position by 100 should move offsets by 100");
+  equals(scrollView.get('verticalScrollOffset'), 400, "Gesture change in position by 100 should move offsets by 100");
+
+  // Move and pinch (back to 1x) in the same gesture.
+  evt.pageX = evt.pageY = 400;
+  evt2.pageX = evt2.pageY = 600;
+  SC.run(function() {
+    SC.Event.trigger(targetLayer, 'touchmove', [evt, evt2]);
+  });
+
+  equals(scrollView.get('scale'), 1, "A pinch + move gesture should change the scale");
+  equals(scrollView.get('horizontalScrollOffset'), 0, "A pinch + move gesture should update the horizontal offset correctly");
+  equals(scrollView.get('verticalScrollOffset'), 0, "A pinch + move gesture should update the vertical offset correctly");
+});
+
+test("Adding and removing touches (no scaling).", function() {
+  // For this test we need room to scroll.
+  SC.run(function() { inner.adjust('height', 2000); });
+
+  equals(scrollView.get('verticalScrollOffset'), 0, "PRELIM: Vertical offset starts at");
+  equals(scrollView.get('maximumVerticalScrollOffset'), 1000, "PRELIM: Vertical offset has room to grow");
+  equals(scrollView.get('horizontalScrollOffset'), 0, "PRELIM: Horizontal offset starts at");
+  equals(scrollView.get('scale'), 1, "PRELIM: Horizontal offset starts at");
+
+  // Start touches.
+  SC.run(function() {
+    SC.Event.trigger(targetLayer, 'touchstart', [evt, evt2]);
+  });
+  equals(SC.RootResponder.responder.touchesForView(scrollView).length, 2, "Two touches should result in two touches");
+
+  // Move touches up in tandem.
+  evt.pageY -= 100;
+  evt2.pageY -= 100;
+  SC.run(function() {
+    SC.Event.trigger(targetLayer, 'touchmove', [evt, evt2]);
+  });
+  equals(scrollView.get('scale'), 1, "A two-touch gesture with no pinching should result in no scaling");
+  equals(scrollView.get('horizontalScrollOffset'), 0, "A two-touch vertical scroll gesture should not scroll horizontally");
+  equals(scrollView.get('verticalScrollOffset'), 100, "A two-touch vertical scroll gesture should successfully scroll vertically");
+
+  // Add a third touch.
+  SC.run(function() {
+    SC.Event.trigger(targetLayer, 'touchstart', [evt3]);
+  });
+  equals(SC.RootResponder.responder.touchesForView(scrollView).length, 2, "Adding a third touch should result in three touches");
+  equals(scrollView.get('scale'), 1, "Adding a third touch should not impact scaling");
+  equals(scrollView.get('horizontalScrollOffset'), 0, "Adding a third touch should not impact horizontal offset");
+  equals(scrollView.get('verticalScrollOffset'), 100, "Adding a third touch should not impact vertical offset");
+
+  // Move all three touches up in tandem.
+  evt.pageY -= 100;
+  evt2.pageY -= 100;
+  evt3.pageY -= 100;
+  SC.run(function() {
+    SC.Event.trigger(targetLayer, 'touchmove', [evt, evt2, evt3]);
+  });
+  equals(scrollView.get('scale'), 1, "A three-touch gesture with no pinching should result in no scaling");
+  equals(scrollView.get('horizontalScrollOffset'), 0, "A now-three-touch vertical scroll gesture should not scroll horizontally");
+  equals(scrollView.get('verticalScrollOffset'), 200, "A now-three-touch vertical scroll gesture should successfully scroll vertically");
 });

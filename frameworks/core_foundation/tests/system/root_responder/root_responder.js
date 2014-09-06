@@ -10,32 +10,26 @@
 // ========================================================================
 /*global module, test, ok, equals */
 
-var newPane, oldPane, lightPane, darkPane, myPane, responder;
-
+var responder;
 
 module("SC.RootResponder", {
 	setup: function() {
-		newPane = SC.Pane.create({ owner: this});
-		oldPane = SC.Pane.create({ owner: this});
-		lightPane = SC.Pane.create({ owner: this});
-		darkPane = SC.Pane.create({ owner: this});
-		myPane = SC.Pane.create();
 		responder = SC.RootResponder.create();
 	},
 	
 	teardown: function() {
-    newPane.destroy();
-    oldPane.destroy();
-    lightPane.destroy();
-    darkPane.destroy();
-    myPane.destroy();
     responder.destroy();
   }
 });
 
 test("Basic requirements", function() {
   ok(SC.RootResponder, "SC.RootResponder");
-  ok(SC.RootResponder.responder, "SC.RootResponder.responder");
+  ok(SC.RootResponder.responder && SC.RootResponder.responder, "SC.RootResponder.responder");
+  equals(
+    SC.RootResponder.responder ? SC.RootResponder.responder.constructor : "no responder!",
+    SC.RootResponder,
+    "SC.RootResponder.responder is an instance of"
+  );
 });
 
 test("root_responder.ignoreTouchHandle() : Should ignore TEXTAREA, INPUT, A, and SELECT elements", function () {
@@ -60,39 +54,3 @@ test("root_responder.ignoreTouchHandle() : Should ignore TEXTAREA, INPUT, A, and
 
  SC.browser.isMobileSafari = wasMobileSafari;
 });
-
-// With v1.11, SC.Touch now provides its own velocity along each axis.
-test("SC.Touch#velocity[X|Y]", function() {
-  // Get a layer
-  SC.run(newPane.append, newPane);
-  var layer = newPane.get('layer'),
-    attrs = { touches: [], identifier: 4, changedTouches: [], pageX: 0, pageY: 0 },
-    evt = SC.Event.simulateEvent(layer, 'touchstart', attrs),
-    touch;
-
-  evt.changedTouches.push(evt);
-
-  // Trigger touchstart
-  SC.run(function() {
-    SC.Event.trigger(layer, 'touchstart', [evt]);
-  });
-
-  touch = SC.RootResponder.responder._touches[evt.identifier];
-
-  equals(touch.velocityX, 0, "Horizontal velocity begin at zero");
-  equals(touch.velocityY, 0, "Vertical velocity begin at zero");
-
-  evt.type = 'touchmove';
-  evt.timeStamp += 100;
-  evt.pageX += 100;
-  evt.pageY += 100;
-  
-  SC.run(function() {
-    SC.Event.trigger(layer, 'touchmove', [evt]);
-  });
-
-  equals(touch.velocityX, 1, 'VelocityX for 100 pixels in 100 ms is 1.');
-  equals(touch.velocityY, 1, 'VelocityY for 100 pixels in 100 ms is 1.');
-
-});
-

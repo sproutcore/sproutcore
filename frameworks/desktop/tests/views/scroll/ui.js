@@ -29,6 +29,15 @@
       autohidesVerticalScroller: NO
     })
 
+    .add("basic same size content", SC.ScrollView, {
+      horizontalOverlay: YES,
+      verticalOverlay: YES,
+      contentView: SC.View.extend({
+        layout: { height: 100 },
+        backgroundColor: 'lightblue'
+      })
+    })
+
     .add("disabled", SC.ScrollView, {
       isEnabled: NO
     })
@@ -281,6 +290,18 @@
       }, 200);
 
     }, 1000);
+  });
+
+  test('Adjusting contentView', function() {
+    var view = pane.view('basic same size content');
+
+    ok(!view.get('canScrollVertical'), "PRELIM: Can't scroll vertical.");
+
+    SC.run(function() {
+      view.contentView.adjust('height', 200);
+    });
+
+    ok(view.get('canScrollVertical'), "Can now scroll vertical.");
   });
 
   test('Replacing contentView', function() {
