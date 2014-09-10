@@ -810,7 +810,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
       // For many states, we list each on its own line.
       if (len > 2) {
         msg = "current states before:\n%@";
-        msg = msg.fmt(this.get('currentStates').getEach('fullPath').join('\n'));        
+        msg = msg.fmt(this.get('currentStates').getEach('fullPath').join('\n'));
       }
       // For a few states, all on one line.
       else if (len > 0) {
@@ -1229,7 +1229,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
     //@if(debug)
     if (trace) {
-      if (!statechartHandledEvent) this.statechartLogTrace("No state was able handle event %@".fmt(event), SC.TRACE_STATECHART_STYLE.action);
+      if (!statechartHandledEvent) this.statechartLogTrace("No state was able to handle event %@".fmt(event), SC.TRACE_STATECHART_STYLE.action);
       this.statechartLogTrace("END sendEvent: '%@'".fmt(event), SC.TRACE_STATECHART_STYLE.action);
     }
     //@endif
