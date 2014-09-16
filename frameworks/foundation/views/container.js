@@ -191,6 +191,18 @@ SC.ContainerView = SC.View.extend(
     }
   },
 
+  /** @private Cancels the active transition. */
+  _sc_cancelTransitions: function () {
+    var contentStatecharts = this._contentStatecharts;
+
+    // Exit all the statecharts immediately. This mutates the array!
+    if (contentStatecharts) {
+      for (var i = contentStatecharts.length - 1; i >= 0; i--) {
+        contentStatecharts[i].doExit(true);
+      }
+    }
+  },
+
   /** @private
     Overridden to prevent clipping of child views while animating.
 
@@ -229,14 +241,7 @@ SC.ContainerView = SC.View.extend(
 
   /** @private */
   destroy: function () {
-    var contentStatecharts = this._contentStatecharts;
-
-    // Exit all the statecharts immediately. This mutates the array!
-    if (contentStatecharts) {
-      for (var i = contentStatecharts.length - 1; i >= 0; i--) {
-        contentStatecharts[i].doExit(true);
-      }
-    }
+    this._sc_cancelTransitions();
 
     // Remove our internal reference to the statecharts.
     this._contentStatecharts = this._currentStatechart = null;
@@ -359,6 +364,22 @@ SC.ContainerView = SC.View.extend(
 
     // Track the current statechart.
     this._currentStatechart = newStatechart;
+  },
+
+  /** @private SC.Observable.prototype */
+  set: function (key, value) {
+
+    // Changing the transitionSwap in the middle of a transition must cancel the transitions.
+    if (key === 'transitionSwap' && this.get('isTransitioning')) {
+      //@if(debug)
+      SC.warn("Developer Warning: You should not change the value of transitionSwap on %@ while the container view is transitioning. The transition was cancelled.".fmt(this));
+      //@endif
+
+      // Cancel the active transitions.
+      this._sc_cancelTransitions();
+    }
+
+    sc_super();
   }
 
 });
