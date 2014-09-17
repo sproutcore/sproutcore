@@ -525,7 +525,7 @@ SC.PickerPane = SC.PalettePane.extend(
       SC.warn("Developer Warning: You should not use .append() with SC.PickerPane. Instead use .popup() and pass in an anchor view or element.");
     }
 
-    sc_super();
+    return sc_super();
   },
   //@endif
 

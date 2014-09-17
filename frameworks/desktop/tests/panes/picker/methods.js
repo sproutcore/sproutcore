@@ -128,4 +128,14 @@ test("Verify setting anchorElement.", function() {
   ok(pane.get('anchorElement') === anchorElement, 'Setting anchorElement to a jQuery object succeeds.');
 
   pane.destroy();
-}) ;
+});
+
+test("SC.PickerPane#append correctly returns the receiver.", function() {
+  var pane = SC.PickerPane.create(),
+    ret = pane.append();
+
+  equals(pane, ret, 'SC.Pane#append returns the receiver');
+
+  // Clean up.
+  pane.destroy();
+});

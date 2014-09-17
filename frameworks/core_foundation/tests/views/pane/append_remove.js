@@ -150,6 +150,17 @@ test("adding a pane twice should have no effect", function() {
   pane.destroy();
 });
 
+test("SC.Pane#append correctly returns the receiver.", function() {
+  var pane = SC.Pane.create(),
+    ret = pane.append();
+
+  equals(pane, ret, 'SC.Pane#append returns the receiver');
+
+  // Clean up.
+  pane.destroy();
+});
+
+
 test("adding/remove/adding pane", function() {
   var pane = SC.Pane.create();
   var elem1 = Q$('body').get(0), elem2 = Q$('#appendtest').get(0);
