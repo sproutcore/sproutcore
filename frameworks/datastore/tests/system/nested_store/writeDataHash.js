@@ -182,6 +182,9 @@ test("writeDataHash on parent records should be propagated to nested children an
   // start an "editing" session into the nested store store
   var rec12 = store.find( rec1 );
 
+  equals( rec12.get( "c" ).objectAt( 0 ).get( "v" ), "c1-1", "the data loaded into the 1st child record should be correct" );
+  equals( rec12.get( "c" ).objectAt( 1 ).get( "v" ), "c2-1", "the data loaded into the 2nd child record should be correct" );
+
   // replace the content and notify the changes
   store.writeDataHash( storeKey1, json12, SC.Record.READY_CLEAN );
   store.dataHashDidChange( storeKey1 );
