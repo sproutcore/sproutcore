@@ -438,6 +438,19 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     if (!editables) editables = this.editables = [];
     editables[storeKey] = 1 ; // use number for dense array support
 
+    // propagate the data to the child records
+    this._updateChildRecordHashes(storeKey, hash);
+
+    return this ;
+  },
+
+  /** @private
+
+    Called by writeDataHash to update the child record hashes starting from the new (parent) data hash.
+
+    @returns {SC.Store} receiver
+  */
+  _updateChildRecordHashes: function(storeKey, hash) {
     var processedPaths={};
     // Update the child record hashes in place.
     if (!SC.none(this.parentRecords) ) {
@@ -479,8 +492,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         }
       }
     }
-
-    return this ;
   },
 
   /**
