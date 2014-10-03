@@ -9,11 +9,11 @@ sc_require('ext/function');
 sc_require('private/observer_set');
 
 
+//@if(debug)
 // When in debug mode, users can log deferred calls (such as .invokeOnce()) by
 // setting SC.LOG_DEFERRED_CALLS.  We'll declare the variable explicitly to make
 // life easier for people who want to enter it inside consoles that auto-
 // complete.
-//@if (debug)
 if (!SC.LOG_DEFERRED_CALLS) SC.LOG_DEFERRED_CALLS = false;
 //@endif
 
@@ -60,9 +60,13 @@ SC.RunLoop = SC.Object.extend(
   */
   beginRunLoop: function () {
     this._start = new Date().getTime(); // can't use Date.now() in runtime
-    if (SC.LOG_BINDINGS || SC.LOG_OBSERVERS) {
+
+    //@if(debug)
+    if (SC.LOG_OBSERVERS) {
       SC.Logger.log("-- SC.RunLoop.beginRunLoop at %@".fmt(this._start));
     }
+    //@endif
+
     this._runLoopInProgress = YES;
     this._flushinvokeNextQueue();
     return this;
@@ -93,17 +97,21 @@ SC.RunLoop = SC.Object.extend(
     // step through all of them again.  This way any changes get flushed
     // out completely.
 
-    if (SC.LOG_BINDINGS || SC.LOG_OBSERVERS) {
+    //@if(debug)
+    if (SC.LOG_OBSERVERS) {
       SC.Logger.log("-- SC.RunLoop.endRunLoop ~ flushing application queues");
     }
+    //@endif
 
     this.flushAllPending();
 
     this._start = null;
 
-    if (SC.LOG_BINDINGS || SC.LOG_OBSERVERS) {
+    //@if(debug)
+    if (SC.LOG_OBSERVERS) {
       SC.Logger.log("-- SC.RunLoop.endRunLoop ~ End");
     }
+    //@endif
 
     SC.RunLoop.lastRunLoopEnd = Date.now();
     this._runLoopInProgress = NO;
@@ -166,7 +174,7 @@ SC.RunLoop = SC.Object.extend(
 
     var deferredCallLoggingInfo;      // Used only in debug mode
 
-    //@if (debug)
+    //@if(debug)
     // When in debug mode, SC.Object#invokeOnce() will pass in the originating
     // method, target, and stack.  That way, we'll record the interesting parts
     // rather than having most of these calls seemingly coming from
@@ -239,7 +247,7 @@ SC.RunLoop = SC.Object.extend(
 
     var deferredCallLoggingInfo;      // Used only in debug mode
 
-    //@if (debug)
+    //@if(debug)
     // When in debug mode, SC.Object#invokeOnce() will pass in the originating
     // method, target, and stack.  That way, we'll record the interesting parts
     // rather than having most of these calls seemingly coming from
