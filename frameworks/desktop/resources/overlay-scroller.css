@@ -88,7 +88,7 @@
       @include border-top-radius(4px);
       width: 7px;
       top: 0px;
-      left: 5px;
+      left: 3px;
       height: 10px;
     }
 
@@ -96,7 +96,7 @@
       height: 1034px;
       width: 7px;
       top: 10px;
-      left: 5px;
+      left: 3px;
     }
 
     .thumb-inner {
