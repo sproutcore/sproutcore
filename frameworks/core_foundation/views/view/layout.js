@@ -839,6 +839,11 @@ SC.View.reopen(
       }
     }
 
+    // Cache the last layout to fine-tune notifications when the layout changes.
+    // NOTE: Do this before calling viewDidResize, so that any further adjustments that occur (say to the position after a resize),
+    // don't result in _checkForResize running against the old _previousLayout.
+    this._previousLayout = currentLayout;
+
     if (didResize) {
       this.viewDidResize();
     } else {
@@ -846,9 +851,6 @@ SC.View.reopen(
       // TODO: consider checking for position changes by testing the resulting frame against the cached frame.  This is difficult to do.
       this._viewFrameDidChange();
     }
-
-    // Cache the last layout to fine-tune notifications when the layout changes.
-    this._previousLayout = currentLayout;
   },
 
   /**

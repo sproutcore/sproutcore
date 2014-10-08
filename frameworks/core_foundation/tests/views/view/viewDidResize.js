@@ -49,6 +49,29 @@ test("parentViewDidResize should only be called when the parent's layout propert
   equals(callCount, 2, 'parentViewDidResize should invoke twice');
 });
 
+/**
+  When a view's layout changes, _checkForResize determines whether the size has changed using a comparison of the previously
+  cached layout and the new (current) layout. If it seems that the view has resized, it calls `viewDidResize`. Previously
+  it would call viewDidResize and then update the _previousLayout cache afterward. This meant that any adjustments that
+  were triggered by viewDidResize (which would in turn call _checkForResize) would compare the new layout against the
+  previous previous layout, instead of just the previous layout.
+
+  Long story short, to ensure that _checkForResize is checking the current layout against the *last* layout, it's important
+  that the last layout, _previousLayout, is updated *before* continuing on.
+*/
+test("SC.View.prototype._checkForResize() updates the _previousLayout cache before calling viewDidResize", function () {
+  var view1 = SC.View.create({
+      layout: { width: 200, height: 200 },
+      viewDidResize: function () {
+        ok(this._previousLayout !== originalPreviousLayout, "The previous layout should not be the same anymore.");
+      }
+    }),
+    originalPreviousLayout;
+
+  originalPreviousLayout = view1.get('layout');
+  SC.run(function () { view1.adjust({ width: 100 }) });
+});
+
 test("The view's frame should only notify changes when its layout changes if the effective size or position actually change.", function () {
   var view2 = SC.View.create({
       frameCallCount: 0,
