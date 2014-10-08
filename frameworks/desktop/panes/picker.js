@@ -566,25 +566,26 @@ SC.PickerPane = SC.PalettePane.extend(
     fallback to center.
   */
   positionPane: function (useAnchorCached) {
-    useAnchorCached = useAnchorCached && this.get('anchorCached');
-
-    var anchor       = useAnchorCached ? this.get('anchorCached') : this.get('anchorElement'),
-      frame        = this.get('borderFrame'),
+    var frame = this.get('borderFrame'),
       preferType   = this.get('preferType'),
       preferMatrix = this.get('preferMatrix'),
-      origin, adjustHash;
+      origin, adjustHash,
+      anchor, anchorCached, anchorElement;
 
     // usually an anchorElement will be passed.  The ideal position is just
     // below the anchor + default or custom offset according to preferType.
     // If that is not possible, fitPositionToScreen will take care of that for
     // other alternative and fallback position.
+    anchorCached = this.get('anchorCached');
+    anchorElement = this.get('anchorElement');
+    if (useAnchorCached && anchorCached) {
+      anchor = anchorCached;
+    } else if (anchorElement) {
+      anchor = this.computeAnchorRect(anchorElement);
+        this.set('anchorCached', anchor);
+    } // else no anchor to use
 
     if (anchor) {
-      if (!useAnchorCached) {
-        anchor = this.computeAnchorRect(anchor);
-        this.set('anchorCached', anchor);
-      }
-
       origin = SC.cloneRect(anchor);
 
       // Adjust the origin for offset based positioning.
@@ -595,11 +596,12 @@ SC.PickerPane = SC.PalettePane.extend(
           // default below the anchor with fine-tuned visual alignment
           // for Menu to appear just below the anchorElement.
           this.set('preferMatrix', [1, 4, 3]);
+          preferMatrix = this.get('preferMatrix');
         }
 
         // fine-tuned visual alignment from preferMatrix
-        origin.x += ((this.preferMatrix[2] === 0) ? origin.width : 0) + this.preferMatrix[0];
-        origin.y += ((this.preferMatrix[2] === 3) ? origin.height : 0) + this.preferMatrix[1];
+        origin.x += ((preferMatrix[2] === 0) ? origin.width : 0) + preferMatrix[0];
+        origin.y += ((preferMatrix[2] === 3) ? origin.height : 0) + preferMatrix[1];
         break;
       default:
         origin.y += origin.height;
@@ -628,7 +630,6 @@ SC.PickerPane = SC.PalettePane.extend(
         centerY: 0
       });
     }
-    this.updateLayout();
 
     return this;
   },
@@ -706,8 +707,9 @@ SC.PickerPane = SC.PalettePane.extend(
     picker.x = preferredPosition.x;
     picker.y = preferredPosition.y;
 
-    if (this.preferType) {
-      switch (this.preferType) {
+    var preferType = this.get('preferType');
+    if (preferType) {
+      switch (preferType) {
       case SC.PICKER_MENU:
         // apply menu re-position rule
         picker = this.fitPositionToScreenMenu(wret, picker, this.get('isSubMenu'));
@@ -731,7 +733,7 @@ SC.PickerPane = SC.PalettePane.extend(
       // apply default re-position rule
       picker = this.fitPositionToScreenDefault(wret, picker, anchor);
     }
-    // this.displayDidChange();
+
     return picker;
   },
 
@@ -852,8 +854,8 @@ SC.PickerPane = SC.PalettePane.extend(
   fitPositionToScreenPointer: function (w, f, a) {
     var curType,
         deltas,
-        matrix = this.preferMatrix,
-        offset = this.pointerOffset,
+        matrix = this.get('preferMatrix'),
+        offset = this.get('pointerOffset'),
         topLefts, botRights,
         windowPadding = this.get('windowPadding');
 
@@ -1070,12 +1072,12 @@ SC.PickerPane = SC.PalettePane.extend(
     and size if not provided explicitly.
   */
   setupPointer: function (a) {
-    var pointerOffset = this.pointerOffset,
+    var pointerOffset = this.get('pointerOffset'),
         K = SC.PickerPane;
 
     // Set windowPadding and pointerOffset (SC.PICKER_MENU_POINTER only).
     if (!pointerOffset || pointerOffset.length !== 4) {
-      if (this.get('preferType') == SC.PICKER_MENU || this.get('preferType') == SC.PICKER_MENU_POINTER) {
+      if (this.get('preferType') === SC.PICKER_MENU || this.get('preferType') === SC.PICKER_MENU_POINTER) {
         switch (this.get('controlSize')) {
         case SC.TINY_CONTROL_SIZE:
           this.set('pointerOffset', K.TINY_PICKER_MENU_POINTER_OFFSET);
@@ -1121,7 +1123,8 @@ SC.PickerPane = SC.PalettePane.extend(
     // set up preferMatrix according to type if not provided explicitly:
     // take default [0, 1, 2, 3, 2] for picker, [3, 0, 1, 2, 3] for menu picker if
     // custom matrix not provided explicitly
-    if (!this.preferMatrix || this.preferMatrix.length !== 5) {
+    var preferMatrix = this.get('preferMatrix');
+    if (!preferMatrix || preferMatrix.length !== 5) {
       // menu-picker default re-position rule :
       // perfect bottom (3) > perfect right (0) > perfect left (1) > perfect top (2)
       // fallback to perfect bottom (3)
