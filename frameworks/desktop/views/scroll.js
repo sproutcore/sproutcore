@@ -486,7 +486,7 @@ SC.ScrollView = SC.View.extend({
   isHorizontalScrollerVisible: YES,
 
   /**
-    Returns YES if the view both has a horizontal scroller, the scroller is
+    Returns YES if the view has a both a horizontal scroller and the scroller is
     visible.
 
     @field
@@ -549,7 +549,7 @@ SC.ScrollView = SC.View.extend({
   isVerticalScrollerVisible: YES,
 
   /**
-    Returns YES if the view both has a horizontal scroller, the scroller is
+    Returns YES if the view has a both a vertical scroller and the scroller is
     visible.
 
     @field
