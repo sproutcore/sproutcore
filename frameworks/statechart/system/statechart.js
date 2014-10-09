@@ -975,6 +975,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
       parentState = state.get('parentState');
       while (parentState) {
         parentState.get('currentSubstates').removeObject(state);
+        parentState.notifyPropertyChange('currentSubstates');
         parentState = parentState.get('parentState');
       }
     }
@@ -982,6 +983,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     parentState = state;
     while (parentState) {
       parentState.get('enteredSubstates').removeObject(state);
+      parentState.notifyPropertyChange('enteredSubstates');
       parentState = parentState.get('parentState');
     }
 
@@ -992,6 +994,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     //@endif
 
     state.set('currentSubstates', []);
+    state.notifyPropertyChange('currentSubstates');
 
     state.stateWillBecomeExited(context);
     var result = this.exitState(state, context);
@@ -1028,6 +1031,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
       parentState = state;
       while (parentState) {
         parentState.get('currentSubstates').pushObject(state);
+        parentState.notifyPropertyChange('currentSubstates');
         parentState = parentState.get('parentState');
       }
     }
@@ -1035,6 +1039,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     parentState = state;
     while (parentState) {
       parentState.get('enteredSubstates').pushObject(state);
+      parentState.notifyPropertyChange('enteredSubstates');
       parentState = parentState.get('parentState');
     }
 

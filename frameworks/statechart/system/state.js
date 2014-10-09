@@ -1417,16 +1417,6 @@ SC.State = SC.Object.extend(
   },
 
   /** @private */
-  _enteredSubstatesDidChange: function() {
-    this.notifyPropertyChange('enteredSubstates');
-  }.observes('*enteredSubstates.[]'),
-
-  /** @private */
-  _currentSubstatesDidChange: function() {
-    this.notifyPropertyChange('currentSubstates');
-  }.observes('*currentSubstates.[]'),
-
-  /** @private */
   _statechartOwnerDidChange: function() {
     this.notifyPropertyChange('owner');
   },
