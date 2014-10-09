@@ -2090,7 +2090,8 @@ SC.ScrollView = SC.View.extend({
       if (this.get('hasHorizontalScroller')) {
         view = this.horizontalScrollerView = this.createChildView(view, {
           layoutDirection: SC.LAYOUT_HORIZONTAL,
-          valueBinding: '*owner.horizontalScrollOffset',
+          valueBinding: '.owner.horizontalScrollOffset',
+
           // Make sure to pipe user events through to us correctly, so that we can recalculate scale origins.
           mouseDown: function() {
             this.get('owner')._scroll_isExogenous = YES;
@@ -2116,7 +2117,8 @@ SC.ScrollView = SC.View.extend({
       if (this.get('hasVerticalScroller')) {
         view = this.verticalScrollerView = this.createChildView(view, {
           layoutDirection: SC.LAYOUT_VERTICAL,
-          valueBinding: '*owner.verticalScrollOffset',
+          valueBinding: '.owner.verticalScrollOffset',
+
           // Make sure to pipe user events through to us correctly, so that we can recalculate scale origins.
           mouseDown: function() {
             this.get('owner')._scroll_isExogenous = YES;
