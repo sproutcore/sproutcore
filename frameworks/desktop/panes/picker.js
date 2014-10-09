@@ -567,7 +567,7 @@ SC.PickerPane = SC.PalettePane.extend(
   */
   positionPane: function (useAnchorCached) {
     var frame = this.get('borderFrame'),
-      preferType   = this.get('preferType'),
+      preferType = this.get('preferType'),
       preferMatrix = this.get('preferMatrix'),
       origin, adjustHash,
       anchor, anchorCached, anchorElement;
@@ -582,7 +582,7 @@ SC.PickerPane = SC.PalettePane.extend(
       anchor = anchorCached;
     } else if (anchorElement) {
       anchor = this.computeAnchorRect(anchorElement);
-        this.set('anchorCached', anchor);
+      this.set('anchorCached', anchor);
     } // else no anchor to use
 
     if (anchor) {
@@ -1189,7 +1189,11 @@ SC.PickerPane = SC.PalettePane.extend(
   windowSizeDidChange: function (oldSize, newSize) {
     sc_super();
 
-    if (this.repositionOnWindowResize) { this.positionPane(); }
+    if (this.repositionOnWindowResize) {
+      // Do this in the next run loop. This ensures that positionPane is only called once even if scroll view
+      // offsets are changing at the same time as the window is resizing (see _scrollOffsetDidChange below).
+      this.invokeNext(this.positionPane);
+    }
   },
 
   remove: function () {
@@ -1247,28 +1251,53 @@ SC.PickerPane = SC.PalettePane.extend(
   _setupScrollObservers: function (anchorView) {
     var scrollView = this._getScrollViewOfView(anchorView);
     if (scrollView) {
-      scrollView.addObserver('horizontalScrollOffset', this, this._scrollOffsetDidChange);
-      scrollView.addObserver('verticalScrollOffset', this, this._scrollOffsetDidChange);
+      scrollView.addObserver('canScrollHorizontal', this, this._scrollCanScrollHorizontalDidChange);
+      scrollView.addObserver('canScrollVertical', this, this._scrollCanScrollVerticalDidChange);
+
+      // Fire the observers once to initialize them.
+      this._scrollCanScrollHorizontalDidChange(scrollView);
+      this._scrollCanScrollVerticalDidChange(scrollView);
+
       this._scrollView = scrollView;
     }
   },
 
-  /** @private
-    Teardown observers setup in _setupScrollObservers.
-  */
+  /** @private Modify horizontalScrollOffset observer. */
+  _scrollCanScrollHorizontalDidChange: function (scrollView) {
+    if (scrollView.get('canScrollHorizontal')) {
+      scrollView.addObserver('horizontalScrollOffset', this, this._scrollOffsetDidChange);
+    } else {
+      scrollView.removeObserver('horizontalScrollOffset', this, this._scrollOffsetDidChange);
+    }
+  },
+
+  /** @private Modify verticalScrollOffset observer. */
+  _scrollCanScrollVerticalDidChange: function (scrollView) {
+    if (scrollView.get('canScrollVertical')) {
+      scrollView.addObserver('verticalScrollOffset', this, this._scrollOffsetDidChange);
+    } else {
+      scrollView.removeObserver('verticalScrollOffset', this, this._scrollOffsetDidChange);
+    }
+  },
+
+  /** @private Teardown observers setup in _setupScrollObservers. */
   _removeScrollObservers: function () {
     var scrollView = this._scrollView;
     if (scrollView) {
+      scrollView.removeObserver('canScrollHorizontal', this, this._scrollCanScrollHorizontalDidChange);
+      scrollView.removeObserver('canScrollVertical', this, this._scrollCanScrollVerticalDidChange);
       scrollView.removeObserver('horizontalScrollOffset', this, this._scrollOffsetDidChange);
       scrollView.removeObserver('verticalScrollOffset', this, this._scrollOffsetDidChange);
     }
   },
 
-  /** @private
-    Reposition pane whenever scroll offsets change.
-  */
+  /** @private Reposition pane whenever scroll offsets change. */
   _scrollOffsetDidChange: function () {
-    this.positionPane();
+    // Filter the observer firing. We don't want to reposition multiple times if both horizontal and vertical
+    // scroll offsets are updating.
+    // Note: do this *after* the current run loop finishes. This allows the scroll view to scroll to
+    // actually move so that the anchor's position is correct before we reposition.
+    this.invokeNext(this.positionPane);
   },
 
   /** @private SC.Object */
