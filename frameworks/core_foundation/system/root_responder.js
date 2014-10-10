@@ -1938,7 +1938,7 @@ SC.RootResponder = SC.Object.extend(
     have been processed to reflect that actual text you might want to insert.
 
     Normally ignore any function or non-printable key events.  Otherwise, just
-    trigger a keyDown.
+    trigger a keyPress.
   */
   keypress: function(evt) {
     var ret,
@@ -1954,7 +1954,7 @@ SC.RootResponder = SC.Object.extend(
     if (isFirefox && (evt.which === 8)) {
       //get the keycode and set it for which.
       evt.which = keyCode;
-      ret = this.sendEvent('keyDown', evt);
+      ret = this.sendEvent('keyPress', evt);
       return ret ? (SC.allowsBackspaceToPreviousPage || evt.hasCustomEventHandling) : YES ;
 
     // normal processing.  send keyDown for printable keys...
@@ -1968,7 +1968,7 @@ SC.RootResponder = SC.Object.extend(
       // we only want to rethrow if this is a printable key so that we don't
       // duplicate the event sent in keydown when a modifier key is pressed.
       if (isFirefoxArrowKeys || this._isPrintableKey(evt)) {
-        return this.sendEvent('keyDown', evt) ? evt.hasCustomEventHandling : YES;
+        return this.sendEvent('keyPress', evt) ? evt.hasCustomEventHandling : YES;
     }
     }
   },
