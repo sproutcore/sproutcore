@@ -41,35 +41,23 @@
     //
 
     /**
-      Like the original SC.Record.storeKeyFor,
-      but when a storeKey is generated, it will
-      propagate it to superclasses.
+      Like the original SC.Record.storeKeysById, but all store keys are kept on the top-most polymorphic
+      superclass. This ensures that store key by id requests at any level return only the one unique
+      store key and uses less memory than having store key to id mappings on each polymorphic sub-class.
 
-      @see SC.Record.storeKeyFor
+      @see SC.Record.storeKeysById
     */
-    storeKeyFor: function (id) {
-      var storeKeys = this.storeKeysById(),
-          ret = storeKeys[id],
-          superclass = this.superclass;
+    storeKeysById: function() {
+      var superclass = this.superclass,
+        key = SC.keyFor('storeKey', SC.guidFor(this)),
+        ret = this[key];
 
       if (!ret) {
-        // If this is a polymorphic record, send the key generation recursively up to its polymorphic
-        // superclasses.  This allows the key, which may exist or may be generated, to then propagate
-        // back down so that it exists at each level.
         if (this.isPolymorphic && superclass.isPolymorphic && superclass !== SC.Record) {
-          ret = superclass.storeKeyFor(id);
+          ret = this[key] = superclass.storeKeysById();
         } else {
-          ret = SC.Store.generateStoreKey();
-          SC.Store.idsByStoreKey[ret] = id;
+          ret = this[key] = {};
         }
-
-        // Update the RecordType for the key on each recursion return, so that it ends as the lowest class
-        SC.Store.recordTypesByStoreKey[ret] = this;
-
-        // Each Record must keep track of its own storeKeys so that a find at any level on the same ID
-        // doesn't generate new storeKeys.  Plus it will be faster than always running back up to the
-        // superclass method to retrieve the key.
-        storeKeys[id] = ret;
       }
 
       return ret;
