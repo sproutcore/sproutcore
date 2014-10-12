@@ -6,10 +6,10 @@
 /*globals module ok equals same test MyApp */
 
 (function() {
-  
+
   var store, Employee, Company, Engineer, Executive, Accountant, Other,
       strobe, colin, charles, matt, yehuda, erin, digits;
-  
+
   module("Polymorphic SC.Record - toMany tests", {
     setup: function() {
       SC.RunLoop.begin();

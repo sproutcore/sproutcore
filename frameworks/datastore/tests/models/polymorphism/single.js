@@ -6,9 +6,9 @@
 /*globals module ok equals same test MyApp */
 
 (function() {
-  
+
   var store, Person, Place, Male, Female, home, colin, maggie;
-  
+
   module("Polymorphic SC.Record - toOne tests", {
     setup: function() {
       SC.RunLoop.begin();
@@ -62,6 +62,16 @@
   test("setting toOne relationship works", function() {
     home.set('person', maggie);
     ok(SC.kindOf(home.get('person'), Female), "Changing toOne to record of different type works");
+  });
+
+  test("Requesting a specific subclass returns only that type.", function() {
+    var males = store.find(Male),
+      females = store.find(Female),
+      people = store.find(Person);
+
+    equals(males.get('length'), 1, "Only a single male record should be returned.");
+    equals(females.get('length'), 1, "Only a single female record should be returned.");
+    equals(people.get('length'), 2, "Two person records should be returned.");
   });
 
 })();
