@@ -47,12 +47,12 @@ sc_require('system/query');
     // This is the "root" class. All subclasses of MyApp.Person will be unique from MyApp.Person.
     MyApp.Person = SC.Record.extend({});
 
-    // As a subclass, MyApp.Female inherits from a MyApp.Person, but is not "equal" to it nor to MyApp.Male.
+    // As a subclass, MyApp.Female inherits from a MyApp.Person, but is not "equal" to it.
     MyApp.Female = MyApp.Person.extend({
       isFemale: true
     });
 
-    // As a subclass, MyApp.Male inherits from a MyApp.Person, but is not "equal".
+    // As a subclass, MyApp.Male inherits from a MyApp.Person, but is not "equal" to it.
     MyApp.Male = MyApp.Person.extend({
       isMale: true
     });
@@ -71,12 +71,12 @@ sc_require('system/query');
 
   Next, let's make MyApp.Person a polymorphic class,
 
-    // This is the "root" polymorphic class. All subclasses of MyApp.Person will be able to stand-in as an MyApp.Person.
+    // This is the "root" polymorphic class. All subclasses of MyApp.Person will be able to stand-in as a MyApp.Person.
     MyApp.Person = SC.Record.extend({
       isPolymorphic: true
     });
 
-    // As a polymorphic subclass, MyApp.Female is "equal" to a MyApp.Person and MyApp.Male.
+    // As a polymorphic subclass, MyApp.Female is "equal" to a MyApp.Person.
     MyApp.Female = MyApp.Person.extend({
       isFemale: true
     });
