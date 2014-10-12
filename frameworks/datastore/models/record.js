@@ -33,6 +33,72 @@ sc_require('system/query');
   You can bulk update attributes from the server using the
   `updateAttributes()` method.
 
+  # Polymorphic Records
+
+  SC.Record also supports polymorphism, which allows subclasses of a record type to share a common
+  identity. Polymorphism is similar to inheritance (i.e. a polymorphic subclass inherits its parents
+  properties), but differs in that polymorphic subclasses can be considered to be "equal" to each
+  other and their superclass. This means that any memmber of the polymorphic class group should be
+  able to stand in for any other member.
+
+  These examples may help identify the difference. First, let's look at the classic inheritance
+  model,
+
+    // This is the "root" class. All subclasses of MyApp.Person will be unique from MyApp.Person.
+    MyApp.Person = SC.Record.extend({});
+
+    // As a subclass, MyApp.Female inherits from a MyApp.Person, but is not "equal" to it nor to MyApp.Male.
+    MyApp.Female = MyApp.Person.extend({
+      isFemale: true
+    });
+
+    // As a subclass, MyApp.Male inherits from a MyApp.Person, but is not "equal".
+    MyApp.Male = MyApp.Person.extend({
+      isMale: true
+    });
+
+    // Load two unique records into the store.
+    MyApp.store.createRecord(MyApp.Female, { guid: '1' });
+    MyApp.store.createRecord(MyApp.Male, { guid: '2' });
+
+    // Now we can see that these records are isolated from each other.
+    var female = MyApp.store.find(MyApp.Person, '1'); // Returns an SC.Record.EMPTY record.
+    var male = MyApp.store.find(MyApp.Person, '2'); // Returns an SC.Record.EMPTY record.
+
+    // These records are MyApp.Person only.
+    SC.kindOf(female, MyApp.Female); // false
+    SC.kindOf(male, MyApp.Male); // false
+
+  Next, let's make MyApp.Person a polymorphic class,
+
+    // This is the "root" polymorphic class. All subclasses of MyApp.Person will be able to stand-in as an MyApp.Person.
+    MyApp.Person = SC.Record.extend({
+      isPolymorphic: true
+    });
+
+    // As a polymorphic subclass, MyApp.Female is "equal" to a MyApp.Person and MyApp.Male.
+    MyApp.Female = MyApp.Person.extend({
+      isFemale: true
+    });
+
+    // As a polymorphic subclass, MyApp.Male is "equal" to a MyApp.Person.
+    MyApp.Male = MyApp.Person.extend({
+      isMale: true
+    });
+
+    // Load two unique records into the store.
+    MyApp.store.createRecord(MyApp.Female, { guid: '1' });
+    MyApp.store.createRecord(MyApp.Male, { guid: '2' });
+
+    // Now we can see that these records are in fact "equal" to each other. Which means that if we
+    // search for "people", we will get "males" & "females".
+    var female = MyApp.store.find(MyApp.Person, '1'); // Returns record.
+    var male = MyApp.store.find(MyApp.Person, '2'); // Returns record.
+
+    // These records are MyApp.Person as well as their unique subclass.
+    SC.kindOf(female, MyApp.Female); // true
+    SC.kindOf(male, MyApp.Male); // true
+
   @extends SC.Object
   @see SC.RecordAttribute
   @since SproutCore 1.0
@@ -1321,6 +1387,23 @@ SC.Record.mixin( /** @scope SC.Record */ {
   GENERIC_ERROR:       SC.$error("Generic Error"),
 
   /**
+    If true, then searches for records of this type will return subclass instances. For example:
+
+        Person = SC.Record.extend();
+        Person.isPolymorphic = true;
+
+        Male = Person.extend();
+        Female = Person.extend();
+
+    Using SC.Store#find, or a toOne or toMany relationship on Person will then return records of
+    type Male and Female. Polymorphic record types must have unique GUIDs across all subclasses.
+
+    @type Boolean
+    @default NO
+  */
+  isPolymorphic: NO,
+
+  /**
     @private
     The next child key to allocate.  A nextChildKey must always be greater than 0.
   */
@@ -1453,16 +1536,28 @@ SC.Record.mixin( /** @scope SC.Record */ {
   },
 
   /**
-    Returns all storeKeys mapped by Id for this record type.  This method is
-    used mostly by the `SC.Store` and the Record to coordinate.  You will rarely
-    need to call this method yourself.
+    Returns all storeKeys mapped by Id for this record type.  This method is used mostly by the
+    `SC.Store` and the Record to coordinate.  You will rarely need to call this method yourself.
 
-    @returns {Hash}
+    Note that for polymorpic record classes, all store keys are kept on the top-most polymorphic
+    superclass. This ensures that store key by id requests at any level return only the one unique
+    store key.
+
+    @see SC.Record.storeKeysById
   */
   storeKeysById: function() {
-    var key = SC.keyFor('storeKey', SC.guidFor(this)),
+    var superclass = this.superclass,
+      key = SC.keyFor('storeKey', SC.guidFor(this)),
         ret = this[key];
-    if (!ret) ret = this[key] = {};
+
+    if (!ret) {
+      if (this.isPolymorphic && superclass.isPolymorphic && superclass !== SC.Record) {
+        ret = this[key] = superclass.storeKeysById();
+      } else {
+        ret = this[key] = {};
+      }
+    }
+
     return ret;
   },
 
@@ -1517,10 +1612,19 @@ SC.Record.mixin( /** @scope SC.Record */ {
     return store.find(this, id);
   },
 
-  /** @private - enhance extend to notify SC.Query as well. */
+  /** @private - enhance extend to notify SC.Query and ensure polymorphic subclasses are marked as polymorphic as well. */
   extend: function() {
     var ret = SC.Object.extend.apply(this, arguments);
-    if(SC.Query) SC.Query._scq_didDefineRecordType(ret);
-    return ret ;
+
+    if (SC.Query) SC.Query._scq_didDefineRecordType(ret);
+
+    // All subclasses of a polymorphic class, must also be polymorphic.
+    if (ret.prototype.hasOwnProperty('isPolymorphic')) {
+      ret.isPolymorphic = ret.prototype.isPolymorphic;
+      delete ret.prototype.isPolymorphic;
+    }
+
+    return ret;
   }
+
 });
