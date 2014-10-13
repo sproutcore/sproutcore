@@ -171,7 +171,7 @@ SC.View.reopen(
           animateLayout[key] = value;
         }
 
-        if (this._pendingAnimations[key]) {
+        if (this._pendingAnimations && this._pendingAnimations[key]) {
           // Adjusting a value that was previously about to be animated cancels the animation.
           delete this._pendingAnimations[key];
         }
