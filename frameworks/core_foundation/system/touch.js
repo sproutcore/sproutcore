@@ -296,7 +296,7 @@ SC.Touch.prototype = {
 
     @type {Number}
   */
-  velocityY: 0,  
+  velocityY: 0,
 
   /** @private */
   unhideTouchIntercept: function() {
@@ -363,7 +363,7 @@ SC.Touch.prototype = {
     A lazily-created array of candidate touch responders. Use `stackCandidateTouchResponder` to add candidates;
     candidates are used as a fallback if the touch is out of previous touch responders.
 
-    @type {?Array}
+    @type {Array}
   */
   candidateTouchResponders: null,
 
