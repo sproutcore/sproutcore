@@ -231,6 +231,7 @@ SC.SliderView = SC.View.extend(SC.Control,
   mouseWheel: function(evt) {
     if (!this.get('isEnabledInPane')) return NO;
     if (!this.get('updateOnScroll')) return NO;
+    if (this._isMouseDown) return NO;
     var min = this.get('minimum'),
         max = this.get('maximum'),
         step = this.get('step') || ((max - min) / 20),
