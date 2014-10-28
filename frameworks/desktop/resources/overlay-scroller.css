@@ -46,7 +46,7 @@
   }
 
   .thumb-top {
-    background: black;
+    background-color: black;
     position: absolute;
   }
 
@@ -61,12 +61,12 @@
   }
 
   .thumb-center {
-    background: black;
+    background-color: black;
     position: absolute;
   }
 
   .thumb-bottom {
-    background: black;
+    background-color: black;
     position: absolute;
   }
 
@@ -133,7 +133,7 @@
     .thumb-top {
       @include border-left-radius(4px);
       width: 10px;
-      top: 5px;
+      top: 3px;
       left: 0px;
       height: 7px;
     }
@@ -142,7 +142,7 @@
       width: 1034px;
       height: 7px;
       left: 10px;
-      top: 5px;
+      top: 3px;
     }
 
     .thumb-inner {
