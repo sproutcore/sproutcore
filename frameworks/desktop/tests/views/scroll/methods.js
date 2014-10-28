@@ -199,7 +199,7 @@ test("Scrolling to a view", function() {
   SC.run(function() {
     scrollView.set('scale', 2);
   });
-  
+
   SC.run(function() {
     scrollView.scrollToVisible(innerView1);
   });
@@ -289,7 +289,6 @@ test("Mouse wheel events should only be captured if the scroll can scroll in the
   SC.run(function () {
     view3.scrollTo(0, 0);
     view4.scrollTo(0, 0);
-  });
 
   // Scrolling further left is not captured by either scroll view
   ok(!view3.mouseWheel({ wheelDeltaX: -10, wheelDeltaY: 0 }), 'The inner scroll view should not capture the mousewheel event since it cannot scroll further.');
@@ -306,13 +305,13 @@ test("Mouse wheel events should only be captured if the scroll can scroll in the
   // Scrolling right is captured by the target scroll view
   ok(view3.mouseWheel({ wheelDeltaX: 0, wheelDeltaY: 10 }), 'The inner scroll view should capture the mousewheel event since it can scroll further.');
   ok(view4.mouseWheel({ wheelDeltaX: 0, wheelDeltaY: 10 }), 'The outer scroll view should capture the mousewheel event since it can scroll further.');
+  });
 });
 
 test("Mouse wheel events should only be captured if the scroll can scroll in the direction (both BOTTOM-RIGHT).", function () {
   SC.run(function () {
     view3.scrollTo(114, 114);
     view4.scrollTo(114, 114);
-  });
 
     // Scrolling further right is not captured by either scroll view
   ok(!view3.mouseWheel({ wheelDeltaX: 10, wheelDeltaY: 0 }), 'The inner scroll view should not capture the mousewheel event since it cannot scroll further.');
@@ -329,6 +328,7 @@ test("Mouse wheel events should only be captured if the scroll can scroll in the
   // Scrolling left is captured by the target scroll view
   ok(view3.mouseWheel({ wheelDeltaX: 0, wheelDeltaY: -10 }), 'The inner scroll view should capture the mousewheel event since it can scroll further.');
   ok(view4.mouseWheel({ wheelDeltaX: 0, wheelDeltaY: -10 }), 'The outer scroll view should capture the mousewheel event since it can scroll further.');
+  });
 });
 
 test("Mouse wheel events not capturable by the inner scroll should bubble to the outer scroll (scroll right).", function () {
