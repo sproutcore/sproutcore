@@ -189,6 +189,10 @@ SC.ContainerView = SC.View.extend(
         this.set('nowShowing', view);
       }
     }
+
+    // Observe for changes to the content view and initialize once.
+    this.addObserver('contentView', this, this._sc_contentViewDidChange);
+    this._sc_contentViewDidChange();
   },
 
   /** @private Cancels the active transition. */
@@ -235,12 +239,23 @@ SC.ContainerView = SC.View.extend(
     call replaceContent.  Override replaceContent to change how the view is
     swapped out.
   */
-  contentViewDidChange: function () {
-    this.replaceContent(this.get('contentView'));
-  }.observes('contentView'),
+  _sc_contentViewDidChange: function () {
+    var contentView = this.get('contentView');
+
+    // If it's an uninstantiated view, then attempt to instantiate it.
+    if (contentView && contentView.kindOf(SC.CoreView)) {
+      contentView = this.createChildView(contentView);
+    }
+
+    this.replaceContent(contentView);
+  },
 
   /** @private */
   destroy: function () {
+    // Clean up observers.
+    this.removeObserver('contentView', this, this._sc_contentViewDidChange);
+
+    // Cancel any active transitions.
     this._sc_cancelTransitions();
 
     // Remove our internal reference to the statecharts.
@@ -279,8 +294,6 @@ SC.ContainerView = SC.View.extend(
     // If it's an uninstantiated view, then attempt to instantiate it.
     if (content && content.kindOf(SC.CoreView)) {
       content = this.createChildView(content);
-    } else {
-      content = null;
     }
 
     // Sets the content.
