@@ -1162,8 +1162,10 @@ SC.RootResponder = SC.Object.extend(
     // sanity-check
     if (touch.hasEnded) throw new Error("Attempt to assign a touch that is already finished.");
 
-    // unassign from old view if necessary
+    // Fast path, the touch is already assigned to the view.
     if (touch.view === view) return;
+
+    // unassign from old view if necessary
     if (touch.view) {
       this.unassignTouch(touch);
     }
@@ -1188,8 +1190,10 @@ SC.RootResponder = SC.Object.extend(
     // find view entry
     var view, viewEntry;
 
-    // get view
+    // Fast path, the touch is not assigned to a view.
     if (!touch.view) return; // touch.view should===touch.touchResponder eventually :)
+
+    // get view
     view = touch.view;
 
     // get view entry
@@ -1421,6 +1425,7 @@ SC.RootResponder = SC.Object.extend(
     return NO;
   },
 
+  //@if(debug)
   /** @private
     Artificially calls endTouch for any touch which is no longer present. This is necessary because
     _sometimes_, WebKit ends up not sending endtouch.
@@ -1440,13 +1445,18 @@ SC.RootResponder = SC.Object.extend(
     }
 
     // end said touches
+    if (end.length) {
+      console.warn('Ending missing touches: ' + end.toString());
+    }
     for (idx = 0, len = end.length; idx < len; idx++) {
       this.endTouch(end[idx]);
       this.finishTouch(end[idx]);
     }
   },
+  //@endif
 
   _touchCount: 0,
+
   /** @private
     Ends a specific touch (for a bit, at least). This does not "finish" a touch; it merely calls
     touchEnd, touchCancelled, etc. A re-dispatch (through recapture or makeTouchResponder) will terminate
@@ -1533,8 +1543,10 @@ SC.RootResponder = SC.Object.extend(
     var hidingTouchIntercept = NO;
 
     SC.run(function() {
-      // End missing touches (for example if code froze during a debug session).
+      //@if(debug)
+      // When using breakpoints on touch start, we will lose the end touch event.
       this.endMissingTouches(evt.touches);
+      //@endif
 
       // loop through changed touches, calling touchStart, etc.
       var idx, touches = evt.changedTouches, len = touches.length,

@@ -442,23 +442,23 @@ SC.View.reopen(
     @returns {SC.View} receiver
   */
   // TODO: Do this using CSS animations instead.
-  _animateFrames: function (frames, callback, initialDelay, count) {
-    // Normalize the private argument `count`.
-    if (SC.none(count)) { count = 0; }
+  _animateFrames: function (frames, callback, initialDelay, _sc_frameCount) {
+    // Normalize the private argument `_sc_frameCount`.
+    if (SC.none(_sc_frameCount)) { _sc_frameCount = 0; }
 
-    var frame = frames[count];
+    var frame = frames[_sc_frameCount];
 
     this.animate(frame.value, {
       delay: initialDelay,
       duration: frame.duration,
       timing: frame.timing
     }, function (data) {
-      count += 1;
+      _sc_frameCount += 1;
 
       // Keep iterating while frames exist and the animations weren't cancelled.
-      if (!data.isCancelled && count < frames.length) {
+      if (!data.isCancelled && _sc_frameCount < frames.length) {
         // Only delay on the first animation.  Increase count to the next frame.
-        this._animateFrames(frames, callback, 0, count);
+        this._animateFrames(frames, callback, 0, _sc_frameCount);
       } else {
         // Done.
         if (callback) callback(data);
