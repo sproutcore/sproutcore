@@ -3182,6 +3182,10 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
      if (this.content) this._cv_contentDidChange();
      if (this.selection) this._cv_selectionDidChange();
+
+     // Set our initial layout. It's important that our computed layout exist on instantiation so that containing views
+     // understand in which way the collection will grow (e.g. if we compute height, then the container won't adjust height).
+     this.adjustLayout();
   },
 
   /** @private SC.View.prototype.destroy. */
