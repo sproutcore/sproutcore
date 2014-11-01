@@ -882,28 +882,33 @@ SC.RenderContext = SC.Builder.create(
     // Add the updated styles to the internal styles object.
     if (SC.typeOf(nameOrStyles) === SC.T_HASH) {
       for (var key in nameOrStyles) {
-        if (!nameOrStyles.hasOwnProperty(key)) continue;
-
-        value = nameOrStyles[key];
-
-        didChange = this._deleteComboStyles(styles, key) || didChange;
-        didChange = this._setOnHash(styles, key, value) || didChange;
+        // Call a separate function so that it may be optimized.
+        didChange = this._sc_setStyleFromObject(didChange, key, nameOrStyles, styles);
       }
     } else {
       didChange = this._deleteComboStyles(styles, nameOrStyles);
       didChange = this._setOnHash(styles, nameOrStyles, value) || didChange;
     }
 
-    if (didChange) {
-
-      // Set the styles on the element if we have one already.
-      if (this._elem) {
-        // Note: jQuery .css doesn't remove old styles
-        this.$().css(styles);
-      }
+    // Set the styles on the element if we have one already.
+    if (didChange && this._elem) {
+      // Note: jQuery .css doesn't remove old styles
+      this.$().css(styles);
     }
 
     return this;
+  },
+
+  /** @private Sets the style by key from the styles object. This allows for optimization outside of the for..in loop. */
+  _sc_setStyleFromObject: function (didChange, key, stylesObject, styles) {
+    if (!stylesObject.hasOwnProperty(key)) return false;
+
+    var value = stylesObject[key];
+
+    didChange = this._deleteComboStyles(styles, key) || didChange;
+    didChange = this._setOnHash(styles, key, value) || didChange;
+
+    return didChange;
   },
 
   /** @private */
