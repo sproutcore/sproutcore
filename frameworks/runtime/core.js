@@ -719,6 +719,7 @@ SC.mixin(/** @scope window.SC.prototype */ {
     @returns {Array} array with [object, property] if found or null
   */
   tupleForPropertyPath: function (path, root) {
+    /* jshint eqnull:true */
     // if passed nothing, return nothing.
     if (path == null) return null;
 

@@ -133,6 +133,8 @@ SC._object_extend = function _object_extend(base, ext, proto) {
       // If the binding key is new (not found on base), add it to the list of binding keys. (If it's on
       // base, we assume that it's already in there. We don't check for performance reasons. If that's
       // failing, fix the failure not the check.)
+
+      /* jshint eqnull:true */
       if (base[key] == null) { // (SC.none is inlined here for performance.)
         bindings[bindings.length] = key;
       }
@@ -394,7 +396,7 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
     }
 
     // Reopen this.
-    return SC._object_extend(this.prototype, props, this.__sc_super__)
+    return SC._object_extend(this.prototype, props, this.__sc_super__);
   },
 
   /**
@@ -468,7 +470,7 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
   subclassOf: function (scClass) {
     if (this === scClass) return NO;
     var t = this;
-    while (t = t.superclass) if (t === scClass) return YES;
+    while ((t = t.superclass)) if (t === scClass) return YES;
     return NO;
   },
 
@@ -971,11 +973,11 @@ SC.findClassNames = function () {
     seen.push(object);
 
     for (var key in object) {
-      if (key == '__scope__') continue;
-      if (key == 'superclass') continue;
-      if (key == '__SC__') key = 'SC';
+      if (key === '__scope__') continue;
+      if (key === 'superclass') continue;
+      if (key === '__SC__') key = 'SC';
       if (!key.match(/^[A-Z0-9]/)) continue;
-      if (key == 'SC') {
+      if (key === 'SC') {
         if (detectedSC) continue;
         detectedSC = true;
       }
@@ -1022,7 +1024,7 @@ SC.findClassNames = function () {
   //
   window.__SC__ = SC;
   searchObject(null, window, 2);
-}
+};
 
 /**
   Same as the instance method, but lets you check instanceOf without
