@@ -22,7 +22,9 @@ SC.BENCHMARK_OBJECTS = NO;
 // definition because SC.Object is copied frequently and we want to keep the
 // number of class methods to a minimum.
 
+/** @private */
 SC._detect_base = function _detect_base(func, parent, name) {
+
   return function invoke_superclass_method() {
     var base = parent[name], args;
 
@@ -43,7 +45,10 @@ SC._detect_base = function _detect_base(func, parent, name) {
     //else { func.base = base; }
 
     if (func.isEnhancement) {
-      args = Array.prototype.slice.call(arguments, 1);
+      // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
+      // TODO: Add macro to build tools for this.
+      args = new Array(arguments.length - 1); // Array.prototype.slice.call(arguments, 1)
+      for (var i = 0, len = args.length; i < len; i++) { args[i] = arguments[i + 1]; }
     } else {
       args = arguments;
     }
@@ -223,13 +228,16 @@ SC._object_extend = function _object_extend(base, ext, proto) {
   return base;
 };
 
-
+/** @private */
 SC._enhance = function (originalFunction, enhancement) {
   return function () {
-    var args = Array.prototype.slice.call(arguments, 0),
-        self = this;
+    // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
+    // TODO: Add macro to build tools for this.
+    var args = new Array(arguments.length + 1); // Array.prototype.slice.call(arguments)
+    for (var i = 1, len = args.length; i < len; i++) { args[i] = arguments[i - 1]; }
 
-    args.unshift(function () { return originalFunction.apply(self, arguments); });
+    var self = this;
+    args[0] = function () { return originalFunction.apply(self, arguments); }; // args.unshift(function ...
     return enhancement.apply(this, args);
   };
 };

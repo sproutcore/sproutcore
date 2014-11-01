@@ -74,10 +74,9 @@ SC.VERSION = 'Edge';
   @returns {Object} the target object.
   @static
 */
-SC._baseMixin = function (override) {
-  var args = Array.prototype.slice.call(arguments, 1),
-  // copy reference to target object
-      target = args[0] || {},
+SC._baseMixin = function (override, args) {
+  // Copy reference to target object
+  var target = args[0] || {},
       idx = 1,
       length = args.length,
       options, copy, key;
@@ -116,9 +115,12 @@ SC._baseMixin = function (override) {
   @static
 */
 SC.mixin = function () {
-  var args = Array.prototype.slice.call(arguments);
-  args.unshift(true);
-  return SC._baseMixin.apply(this, args);
+  // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
+  // TODO: Add macro to build tools for this.
+  var args = new Array(arguments.length); // Array.prototype.slice.call(arguments)
+  for (var i = 0, len = args.length; i < len; i++) { args[i] = arguments[i]; }
+
+  return SC._baseMixin(true, args);
 };
 
 /**
@@ -134,9 +136,12 @@ SC.mixin = function () {
   @static
 */
 SC.supplement = function () {
-  var args = Array.prototype.slice.call(arguments);
-  args.unshift(false);
-  return SC._baseMixin.apply(this, args);
+  // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object which is costly.
+  // TODO: Add macro to build tools for this.
+  var args = new Array(arguments.length); // Array.prototype.slice.call(arguments)
+  for (var i = 0, len = args.length; i < len; i++) { args[i] = arguments[i]; }
+
+  return SC._baseMixin(false, args);
 };
 
 /**
