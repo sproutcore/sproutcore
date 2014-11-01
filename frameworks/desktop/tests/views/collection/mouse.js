@@ -253,6 +253,24 @@ test("clicking on an unselected item should select it and clear the previous sel
   clickOn(view, 3, NO, NO, selectionFromIndex(3));
 });
 
+test("clicking on an unselected item should fire action when actOnSelect is true", function() {
+  view.set('actOnSelect', YES);
+
+  equals(actionCalled, 0, "precond - action hasn't been called");
+  clickOn(view, 1, NO, NO);
+  equals(actionCalled, 1, "Action called when item is selected");
+});
+
+test("clicking on an unselected item should fire action when actOnSelect is true", function() {
+  view.set('actOnSelect', YES);
+  view.set('useToggleSelection', YES);
+  view.set('selectOnMouseDown', YES);
+
+  equals(actionCalled, 0, "precond - action hasn't been called");
+  clickOn(view, 1, NO, NO);
+  equals(actionCalled, 1, "Action called when item is selected");
+});
+
 test("clicking on an unselected item should fire action when useToggleSelection is true and actOnSelect is true", function() {
   view.set('useToggleSelection', YES);
   view.set('actOnSelect', YES);
