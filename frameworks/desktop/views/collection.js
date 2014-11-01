@@ -74,8 +74,18 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   /** @private */
   _pools: null,
 
+  /** @private Timer used to track time immediately after a mouse up event. */
+  _sc_clearMouseJustDownTimer: null,
+
+  /** @private Flag used to track when the mouse is pressed. */
+  _sc_isMouseDown: false,
+
+  /** @private Flag used to track when mouse was just down so that mousewheel events firing as the finger is lifted don't shoot the slider over. */
+  _sc_isMouseJustDown: false,
+
   /** @private */
   _sc_itemViews: null,
+
 
   /** @private */
   _TMP_DIFF1: SC.IndexSet.create(),
@@ -2101,200 +2111,236 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     @returns {Boolean} Usually YES.
   */
   mouseDown: function(ev) {
-    var content = this.get('content');
+    var isEnabledInPane = this.get('isEnabledInPane'),
+        isSelectable = this.get('isSelectable'),
+        handled = false;
 
-    // Fast path!
-    if (!content) return this.get('isSelectable');
+    // If enabled and selectable, handle the event.
+    if (isEnabledInPane && isSelectable) {
+      var content = this.get('content');
 
-    var itemView      = this.itemViewForEvent(ev),
-        contentIndex  = itemView ? itemView.get('contentIndex') : -1,
-        info, anchor, sel, isSelected, modifierKeyPressed, didSelect = NO,
-        allowsMultipleSel = content.get('allowsMultipleSelection');
+      handled = true;
 
-    if (!this.get('isEnabledInPane')) return contentIndex > -1;
+      if (content) {
+        var itemView = this.itemViewForEvent(ev),
+            allowsMultipleSel = content.get('allowsMultipleSelection'),
+            didSelect = false,
+            sel, isSelected,
+            contentIndex;
 
-    if(!this.get('isSelectable')) return NO;
+        // Ensure that the view is first responder if possible.
+        this.becomeFirstResponder();
 
-    // become first responder if possible.
-    this.becomeFirstResponder() ;
+        // Determine the content index of the item view.
+        contentIndex = itemView ? itemView.get('contentIndex') : -1;
 
-    // Toggle the selection if selectOnMouseDown is true
-    if (this.get('useToggleSelection')) {
-      if (this.get('selectOnMouseDown')) {
-        if (!itemView) return ; // do nothing when clicked outside of elements
+        // Toggle the selection if useToggleSelection is true.
+        if (this.get('useToggleSelection')) {
 
-        // determine if item is selected. If so, then go on.
-        sel = this.get('selection') ;
-        // isSelected = sel && sel.containsObject(itemView.get('content'));
-        isSelected = sel && sel.contains(content, contentIndex, 1);
+          if (this.get('selectOnMouseDown') && itemView) {
+            // Determine if item is selected. If so, then go on.
+            sel = this.get('selection');
 
-        if (isSelected) {
-          this.deselect(contentIndex);
-        } else if (!allowsMultipleSel) {
-          this.select(contentIndex, NO);
-          didSelect = YES;
+            isSelected = sel && sel.contains(content, contentIndex, 1);
+            if (isSelected) {
+              this.deselect(contentIndex);
+            } else if (!allowsMultipleSel) {
+              this.select(contentIndex, false);
+              didSelect = true;
+            } else {
+              this.select(contentIndex, true);
+              didSelect = true;
+            }
+          }
+
+        // Normal selection behavior.
         } else {
-          this.select(contentIndex, YES);
-          didSelect = YES;
+          var info, anchor, modifierKeyPressed;
+
+          // Received a mouseDown on the view, but not on one of the item views.
+          if (!itemView) {
+            // Deselect all.
+            if (this.get('allowDeselectAll')) this.select(null, false);
+
+          } else {
+            // Collect some basic setup info.
+            sel = this.get('selection');
+            if (sel) sel = sel.indexSetForSource(content);
+
+            info = this.mouseDownInfo = {
+              event:        ev,
+              itemView:     itemView,
+              contentIndex: contentIndex,
+              at:           Date.now()
+            };
+
+            isSelected = sel ? sel.contains(contentIndex) : NO;
+            info.modifierKeyPressed = modifierKeyPressed = ev.ctrlKey || ev.metaKey;
+
+
+            // holding down a modifier key while clicking a selected item should
+            // deselect that item...deselect and bail.
+            if (modifierKeyPressed && isSelected) {
+              info.shouldDeselect = contentIndex >= 0;
+
+            // if the shiftKey was pressed, then we want to extend the selection
+            // from the last selected item
+            } else if (ev.shiftKey && sel && sel.get('length') > 0 && allowsMultipleSel) {
+              sel = this._findSelectionExtendedByShift(sel, contentIndex);
+              anchor = this._selectionAnchor;
+              this.select(sel) ;
+              didSelect = true;
+              this._selectionAnchor = anchor; //save the anchor
+
+            // If no modifier key was pressed, then clicking on the selected item
+            // should clear the selection and reselect only the clicked on item.
+            } else if (!modifierKeyPressed && isSelected) {
+              info.shouldReselect = contentIndex >= 0;
+
+            // Otherwise, if selecting on mouse down,  simply select the clicked on
+            // item, adding it to the current selection if a modifier key was pressed.
+            } else {
+
+              if ((ev.shiftKey || modifierKeyPressed) && !allowsMultipleSel) {
+                this.select(null, false);
+                didSelect = true;
+              }
+
+              if (this.get("selectOnMouseDown")) {
+                this.select(contentIndex, modifierKeyPressed);
+                didSelect = true;
+              } else {
+                info.shouldSelect = contentIndex >= 0;
+              }
+            }
+
+            // saved for extend by shift ops.
+            info.previousContentIndex = contentIndex;
+          }
         }
 
+        // Trigger select action if select occurred.
         if (didSelect && this.get('actOnSelect')) {
-          // handle actions on editing
           this._cv_performSelectAction(itemView, ev);
         }
       }
-
-      return YES;
     }
 
-    // received a mouseDown on the collection element, but not on one of the
-    // childItems... unless we do not allow empty selections, set it to empty.
-    if (!itemView) {
-      if (this.get('allowDeselectAll')) this.select(null, false);
-      return YES ;
+    if (handled) {
+      // Track that mouse is down.
+      this._sc_isMouseDown = true;
     }
 
-    // collection some basic setup info
-    sel = this.get('selection');
-    if (sel) sel = sel.indexSetForSource(content);
-
-    info = this.mouseDownInfo = {
-      event:        ev,
-      itemView:     itemView,
-      contentIndex: contentIndex,
-      at:           Date.now()
-    };
-
-    isSelected = sel ? sel.contains(contentIndex) : NO;
-    info.modifierKeyPressed = modifierKeyPressed = ev.ctrlKey || ev.metaKey ;
-
-
-    // holding down a modifier key while clicking a selected item should
-    // deselect that item...deselect and bail.
-    if (modifierKeyPressed && isSelected) {
-      info.shouldDeselect = contentIndex >= 0;
-
-    // if the shiftKey was pressed, then we want to extend the selection
-    // from the last selected item
-    } else if (ev.shiftKey && sel && sel.get('length') > 0 && allowsMultipleSel) {
-      sel = this._findSelectionExtendedByShift(sel, contentIndex);
-      anchor = this._selectionAnchor ;
-      this.select(sel) ;
-      this._selectionAnchor = anchor; //save the anchor
-
-    // If no modifier key was pressed, then clicking on the selected item
-    // should clear the selection and reselect only the clicked on item.
-    } else if (!modifierKeyPressed && isSelected) {
-      info.shouldReselect = contentIndex >= 0;
-
-    // Otherwise, if selecting on mouse down,  simply select the clicked on
-    // item, adding it to the current selection if a modifier key was pressed.
-    } else {
-
-      if((ev.shiftKey || modifierKeyPressed) && !allowsMultipleSel){
-        this.select(null, false);
-      }
-
-      if (this.get("selectOnMouseDown")) {
-        this.select(contentIndex, modifierKeyPressed);
-      } else {
-        info.shouldSelect = contentIndex >= 0 ;
-      }
-    }
-
-    // saved for extend by shift ops.
-    info.previousContentIndex = contentIndex;
-
-    return YES;
+    return handled;
   },
 
   /** @private */
   mouseUp: function(ev) {
-    var view = this.itemViewForEvent(ev),
-        info = this.mouseDownInfo,
-        content = this.get('content');
+    var isEnabledInPane = this.get('isEnabledInPane'),
+        isSelectable = this.get('isSelectable');
 
-    // Fast path!
-    if (!content) {
-      this._cleanupMouseDown();
-      return true;
-    }
+    // If enabled and selectable, handle the event.
+    if (isEnabledInPane && isSelectable) {
+      var content = this.get('content');
 
-    var contentIndex = view ? view.get('contentIndex') : -1,
-        sel, isSelected, canEdit, itemView, idx,
-        allowsMultipleSel = content.get('allowsMultipleSelection');
+      if (content) {
+        var itemView = this.itemViewForEvent(ev),
+            info = this.mouseDownInfo,
+            didSelect = false,
+            sel, isSelected,
+            contentIndex;
 
-    if (!this.get('isEnabledInPane')) return contentIndex > -1;
-    if(!this.get('isSelectable')) return NO;
+        // Determine the content index of the item view.
+        contentIndex = itemView ? itemView.get('contentIndex') : -1;
 
-    if (this.get('useToggleSelection')) {
-      // Return if clicked outside of elements or if toggle was handled by mouseDown
-      if (!view || this.get('selectOnMouseDown')) return NO;
+        // Toggle the selection if useToggleSelection is true.
+        if (this.get('useToggleSelection')) {
+          // If the toggle wasn't done on mouse down, handle it now.
+          if (!this.get('selectOnMouseDown') && itemView) {
+            var allowsMultipleSel = content.get('allowsMultipleSelection');
 
-      // determine if item is selected. If so, then go on.
-      sel = this.get('selection') ;
-      isSelected = sel && sel.contains(content, contentIndex, 1);
+            // determine if item is selected. If so, then go on.
+            sel = this.get('selection') ;
+            isSelected = sel && sel.contains(content, contentIndex, 1);
 
-      if (isSelected) {
-        this.deselect(contentIndex) ;
-      } else if (!allowsMultipleSel) {
-        this.select(contentIndex, NO) ;
-      } else {
-        this.select(contentIndex, YES) ;
+            if (isSelected) {
+              this.deselect(contentIndex) ;
+            } else if (!allowsMultipleSel) {
+              this.select(contentIndex, false);
+              didSelect = true;
+            } else {
+              this.select(contentIndex, true);
+              didSelect = true;
+            }
+          }
+
+        } else if (info) {
+          var idx = info.contentIndex;
+
+          // this will be set if the user simply clicked on an unselected item and
+          // selectOnMouseDown was NO.
+          if (info.shouldSelect) {
+            this.select(idx, info.modifierKeyPressed);
+            didSelect = true;
+          }
+
+          // This is true if the user clicked on a selected item with a modifier
+          // key pressed.
+          if (info.shouldDeselect) this.deselect(idx);
+
+          // This is true if the user clicked on a selected item without a
+          // modifier-key pressed.  When this happens we try to begin editing
+          // on the content.  If that is not allowed, then simply clear the
+          // selection and reselect the clicked on item.
+          if (info.shouldReselect) {
+
+            // - contentValueIsEditable is true
+            var canEdit = this.get('isEditable') && this.get('canEditContent') ;
+
+            // - the user clicked on an item that was already selected
+            //   ^ this is the only way shouldReset is set to YES
+
+            // - is the only item selected
+            if (canEdit) {
+              sel = this.get('selection') ;
+              canEdit = sel && (sel.get('length') === 1);
+            }
+
+            // - the item view responds to contentHitTest() and returns YES.
+            // - the item view responds to beginEditing and returns YES.
+            if (canEdit) {
+              itemView = this.itemViewForContentIndex(idx) ;
+              canEdit = itemView && (!itemView.contentHitTest || itemView.contentHitTest(ev)) ;
+              canEdit = (canEdit && itemView.beginEditing) ? itemView.beginEditing() : NO ;
+            }
+
+            // if cannot edit, schedule a reselect (but give doubleClick a chance)
+            if (!canEdit) {
+              if (this._cv_reselectTimer) this._cv_reselectTimer.invalidate() ;
+              this._cv_reselectTimer = this.invokeLater(this.select, 300, idx, false) ;
+            }
+          }
+
+          // Clean up.
+          this._cleanupMouseDown();
+        }
+
+        // Trigger select action if select occurred.
+        if (didSelect && this.get('actOnSelect')) {
+          this._cv_performSelectAction(itemView, ev);
+        }
       }
 
-    } else if(info) {
-      idx = info.contentIndex;
-      contentIndex = (view) ? view.get('contentIndex') : -1 ;
-
-      // this will be set if the user simply clicked on an unselected item and
-      // selectOnMouseDown was NO.
-      if (info.shouldSelect) this.select(idx, info.modifierKeyPressed);
-
-      // This is true if the user clicked on a selected item with a modifier
-      // key pressed.
-      if (info.shouldDeselect) this.deselect(idx);
-
-      // This is true if the user clicked on a selected item without a
-      // modifier-key pressed.  When this happens we try to begin editing
-      // on the content.  If that is not allowed, then simply clear the
-      // selection and reselect the clicked on item.
-      if (info.shouldReselect) {
-
-        // - contentValueIsEditable is true
-        canEdit = this.get('isEditable') && this.get('canEditContent') ;
-
-        // - the user clicked on an item that was already selected
-        //   ^ this is the only way shouldReset is set to YES
-
-        // - is the only item selected
-        if (canEdit) {
-          sel = this.get('selection') ;
-          canEdit = sel && (sel.get('length') === 1);
-        }
-
-        // - the item view responds to contentHitTest() and returns YES.
-        // - the item view responds to beginEditing and returns YES.
-        if (canEdit) {
-          itemView = this.itemViewForContentIndex(idx) ;
-          canEdit = itemView && (!itemView.contentHitTest || itemView.contentHitTest(ev)) ;
-          canEdit = (canEdit && itemView.beginEditing) ? itemView.beginEditing() : NO ;
-        }
-
-        // if cannot edit, schedule a reselect (but give doubleClick a chance)
-        if (!canEdit) {
-          if (this._cv_reselectTimer) this._cv_reselectTimer.invalidate() ;
-          this._cv_reselectTimer = this.invokeLater(this.select, 300, idx, false) ;
-        }
-      }
-
-      this._cleanupMouseDown() ;
+      // To avoid annoying jitter from Magic Mouse (which sends mousewheel events while trying
+      // to lift your finger after a drag), capture mousewheel events for a small period of time.
+      this._sc_isMouseJustDown = true;
+      this._sc_clearMouseJustDownTimer = this.invokeLater(this._sc_clearMouseJustDown, 150);
     }
 
-    // handle actions on editing
-    this._cv_performSelectAction(view, ev, 0, ev.clickCount);
+    // Track that mouse is up no matter what (e.g. mouse went down and then view was disabled before mouse up).
+    this._sc_isMouseDown = false;
 
-    return NO;  // bubble event to allow didDoubleClick to be called...
+    return false;  // Bubble event to allow didDoubleClick to be called...
   },
 
   /** @private */
@@ -2303,7 +2349,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     // delete items explicitly to avoid leaks on IE
     var info = this.mouseDownInfo, key;
     if (info) {
-      for(key in info) {
+      for (key in info) {
         if (!info.hasOwnProperty(key)) continue;
         delete info[key];
       }
@@ -2333,6 +2379,14 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     this._lastHoveredItem = null ;
     if (view && view.mouseExited) view.mouseExited(ev) ;
     return YES ;
+  },
+
+  /** @private We capture mouseWheel events while the mouse is pressed, this is to prevent jitter from slight mouse wheels while pressing
+    and lifting the finger (especially a problem with the Magic Mouse) */
+  mouseWheel: function (evt) {
+    // Capture mouse wheel events when mouse is pressed or immediately after a mouse up (to avoid
+    // excessive Magic Mouse wheel events while the person lifts their finger).
+    return this._sc_isMouseDown || this._sc_isMouseJustDown;
   },
 
   // ..........................................................
@@ -3039,6 +3093,11 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   // ..........................................................
   // INTERNAL SUPPORT
   //
+
+  /** @private Clears the mouse just down flag. */
+  _sc_clearMouseJustDown: function () {
+    this._sc_isMouseJustDown = false;
+  },
 
   /** @private - when we are about to become visible, reload if needed. */
   willShowInDocument: function () {
