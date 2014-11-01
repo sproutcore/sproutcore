@@ -201,7 +201,19 @@ SC.SliderView = SC.View.extend(SC.Control,
     return value;
   },
 
+  /** @private Clears the mouse just down flag. */
+  _sc_clearMouseJustDown: function () {
+    this._sc_isMouseJustDown = NO;
+  },
+
+  /** @private Flag used to track when the mouse is pressed. */
   _isMouseDown: NO,
+
+  /** @private Flag used to track when mouse was just down so that mousewheel events firing as the finger is lifted don't shoot the slider over. */
+  _sc_isMouseJustDown: NO,
+
+  /** @private Timer used to track time immediately after a mouse up event. */
+  _sc_clearMouseJustDownTimer: null,
 
   /* @private */
   mouseDown: function(evt) {
@@ -211,6 +223,15 @@ SC.SliderView = SC.View.extend(SC.Control,
     if (!this.get('isEnabledInPane')) return YES; // nothing to do...
     this.set('isActive', YES);
     this._isMouseDown = YES ;
+
+    // Clear existing mouse just down timer.
+    if (this._sc_clearMouseJustDownTimer) {
+      this._sc_clearMouseJustDownTimer.invalidate();
+      this._sc_clearMouseJustDownTimer = null;
+    }
+
+    this._sc_isMouseJustDown = NO;
+
     return this._triggerHandle(evt, YES);
   },
 
@@ -224,6 +245,12 @@ SC.SliderView = SC.View.extend(SC.Control,
     if (this._isMouseDown) this.set('isActive', NO);
     var ret = this._isMouseDown ? this._triggerHandle(evt) : YES ;
     this._isMouseDown = NO;
+
+    // To avoid annoying jitter from Magic Mouse (which sends mousewheel events while trying
+    // to lift your finger after a drag), ignore mousewheel events for a small period of time.
+    this._sc_isMouseJustDown = YES;
+    this._sc_clearMouseJustDownTimer = this.invokeLater(this._sc_clearMouseJustDown, 250);
+
     return ret ;
   },
 
@@ -231,7 +258,11 @@ SC.SliderView = SC.View.extend(SC.Control,
   mouseWheel: function(evt) {
     if (!this.get('isEnabledInPane')) return NO;
     if (!this.get('updateOnScroll')) return NO;
-    if (this._isMouseDown) return NO;
+
+    // If the Magic Mouse is pressed, it still sends mousewheel events rapidly, we don't want errant wheel
+    // events to move the slider.
+    if (this._isMouseDown || this._sc_isMouseJustDown) return NO;
+
     var min = this.get('minimum'),
         max = this.get('maximum'),
         step = this.get('step') || ((max - min) / 20),
