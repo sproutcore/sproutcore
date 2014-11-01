@@ -926,10 +926,10 @@ SC.RenderContext = SC.Builder.create(
 
   /** @private Sets or unsets the key:value on the hash and returns whether a change occurred. */
   _setOnHash: function (hash, key, value) {
-    /*jshint eqnull:true*/
     var cur = hash[key],
       didChange = true;
 
+    /*jshint eqnull:true */
     if (cur == null && value != null) {
       hash[key] = value;
     } else if (cur != null && value == null) {
