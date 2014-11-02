@@ -3,8 +3,8 @@
 @theme(sc-small-size) {
 
 $theme.sc-segment-view {
-  font-size: 10px;
-  padding: 1px 5px;
+  font-size: 11px;
+  padding: 0px 5px 1px;
 
   &.sc-first-segment { 
     border-top-left-radius: $segment-border-radius-small; 

@@ -17,6 +17,7 @@ $theme.sc-segment-view {
   border-left-width: 1px;
   border-right-width: 0;
   box-shadow: $segment-box-shadow;
+  vertical-align: top;
   
   .sc-button-label {
     vertical-align: top;

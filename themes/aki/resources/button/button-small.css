@@ -3,14 +3,14 @@
 @theme(sc-small-size) {
 
   $theme.button {
-    height: 16px;
+    height: 18px;
     font-size: 11px;
     border-radius: $button-border-radius-small;
 
     .sc-button-label {
       margin-top:-4px;
-      height: 16px;
-      padding-top:2px;
+      height: 18px;
+      padding-top: 1px;
     }
 
     &.sc-static-layout .sc-button-label {

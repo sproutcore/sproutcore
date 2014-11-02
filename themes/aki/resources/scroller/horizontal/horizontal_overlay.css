@@ -1,56 +1,33 @@
+@import "variables.css";
 
 /* Overrides of the themed horizontal scroller to take it back to a basic black transparent OS X style overlay. */
 $theme.sc-overlay-scroller-view.sc-horizontal {
 
   /* Track */
-  .track {
-    background: none;
-  }
-
-  .cap, .endcap {
-    background: none;
-  }
-
-  /* Buttons */
-  .button-top {
-    background: none;
-  }
-
-  .button-bottom {
-    background: none;
-  }
-
+  .track,
+  .cap, 
+  .endcap,
+  .button-top, 
+  .button-bottom, 
+  .button-top:hover, 
   .button-top:active {
     background: none;
   }
 
-  .button-bottom:active {
-    background: none;
-  }
-
   /* Thumb */
-  .thumb {
+  .thumb, 
+  .thumb:hover, 
+  .thumb:active {
+    background: none;
+    border: none;
+    box-shadow: none;
+    height: 12px;
   }
 
-  .thumb-top {
-    background: black;
-    height: 5px;
-  }
-
-  .thumb-clip {
-  }
-
-  .thumb-inner {
-  }
-
-  .thumb-center {
-    background: black;
-    width: initial;
-    height: 5px;
-  }
-
+  .thumb-top, 
+  .thumb-center, 
   .thumb-bottom {
-    background: black;
+    background-color: $scroller-thumb-bg;
     height: 5px;
   }
 

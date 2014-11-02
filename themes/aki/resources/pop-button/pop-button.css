@@ -13,21 +13,17 @@ $theme.sc-popup-view {
     content: "\f0d7";
   }
 
-  &.no-caret:after {
-    content: none;
-  }
-
   .sc-button-label {
-    margin-left: 0px;
+    margin-left: 2px;
     text-align: left;
-    margin-right: 25px;
+    margin-right: 15px;
     vertical-align: top;
   }
 
   &.sc-static-layout .sc-button-label {
     display: inline-block;
-    margin-left: 5px;
-    margin-right: 25px;
+    margin-left: 0px;
+    margin-right: 20px;
   }
   
 }
