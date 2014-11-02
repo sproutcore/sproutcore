@@ -4,8 +4,8 @@
 
   $theme.sc-popup-view {
     &.sc-static-layout .sc-button-label {
-      margin-left: 3px;
-      margin-right: 22px;
+      margin-left: 2px;
+      margin-right: 20px;
     }
   }
 }

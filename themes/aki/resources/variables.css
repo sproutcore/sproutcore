@@ -50,10 +50,10 @@ $sel-active-default-text-shadow: $black-text-shadow;
 $disable-default-text-color: #A0A0A0;
 
 
-$border-radius-small: 2px;
-$border-radius-regular: 3px;
-$border-radius-large: 4px;
-$border-radius-jumbo: 4px;
+$border-radius-small: 3px;
+$border-radius-regular: 4px;
+$border-radius-large: 5px;
+$border-radius-jumbo: 6px;
 
 
 
@@ -94,27 +94,10 @@ $sel-active-button-border-color: $sel-active-default-border-color;
 $sel-active-button-text-color: $sel-active-default-text-color;
 $sel-active-button-text-shadow: $sel-active-default-text-shadow;
 
-$button-border-radius-small: 3px;
-$button-border-radius-regular: 4px;
-$button-border-radius-large: 5px;
-$button-border-radius-jumbo: 6px;
-
-
-$sel-button-info-bg: hsl(180, 85%, 65%);
-$sel-hover-button-info-bg: hsl(180, 70%, 60%);
-$sel-active-button-info-bg: hsl(180, 55%, 55%);
-
-$sel-button-success-bg: hsl(125, 85%, 65%);
-$sel-hover-button-success-bg: hsl(125, 70%, 60%);
-$sel-active-button-success-bg: hsl(125, 55%, 55%);
-
-$sel-button-warning-bg: hsl(20, 85%, 65%);
-$sel-hover-button-warning-bg: hsl(20, 70%, 60%);
-$sel-active-button-warning-bg: hsl(20, 55%, 55%);
-
-$sel-button-danger-bg: hsl(0, 85%, 65%);
-$sel-hover-button-danger-bg: hsl(0, 70%, 60%);
-$sel-active-button-danger-bg: hsl(0, 55%, 55%);
+$button-border-radius-small: $border-radius-small;
+$button-border-radius-regular: $border-radius-regular;
+$button-border-radius-large: $border-radius-large;
+$button-border-radius-jumbo: $border-radius-jumbo;
 
 
 // ..........................................................
@@ -257,19 +240,19 @@ $collection-bg: #FAFAFA;
 
 $collection-item-bg: transparent;
 $collection-item-text-color: $default-text-color;
-$collection-item-text-shadow: $default-text-shadow;
+$collection-item-text-shadow: none;
 
 $collection-item-even-bg: #eef3f6;
 $collection-item-even-text-color: $default-text-color;
-$collection-item-even-text-shadow: $default-text-shadow;
+$collection-item-even-text-shadow: none;
 
 $sel-collection-item-bg: $sel-collection-bg;
 $sel-collection-item-text-color: $sel-default-text-color;
-$sel-collection-item-text-shadow: $sel-default-text-shadow;
+$sel-collection-item-text-shadow: none;
 
 $collection-item-drop-target-bg: #bcd7ec;
 $collection-item-drop-target-text-color: $sel-default-text-color;
-$collection-item-drop-target-text-shadow: $sel-default-text-shadow;
+$collection-item-drop-target-text-shadow: none;
 
 
 // ..........................................................
@@ -280,19 +263,19 @@ $list-bg: white;
 
 $list-item-bg: white;
 $list-item-text-color: #000;
-$list-item-text-shadow: $default-text-shadow;
+$list-item-text-shadow: none;
 
 $list-item-even-bg: $collection-item-even-bg;
 $list-item-even-text-color: $collection-item-even-text-color;
-$list-item-even-text-shadow: $collection-item-even-text-shadow;
+$list-item-even-text-shadow: none;
 
 $sel-list-item-bg: $sel-collection-item-bg;
 $sel-list-item-text-color: $sel-collection-item-text-color;
-$sel-list-item-text-shadow: $sel-collection-item-text-shadow;
+$sel-list-item-text-shadow: none;
 
 $list-item-drop-target-bg: $collection-item-drop-target-bg;
 $list-item-drop-target-text-color: $collection-item-drop-target-text-color;
-$list-item-drop-target-text-shadow: $collection-item-drop-target-text-shadow;
+$list-item-drop-target-text-shadow: none;
 
 $list-insertion-point-bg: #9ABAC9;
 
@@ -371,8 +354,7 @@ $active-disclosure-text-color: #494949;
 //
 
 $progress-bg: $default-bg;
-$progress-border-color: $default-border-color;
-$progress-box-shadow: $default-box-shadow;
+$progress-box-shadow: $default-box-shadow, 0 0 0 1px $default-border-color;
 $progress-border-radius: 1px;
 $sel-progress-bg: $sel-default-bg;
 $sel-progress-border-color: $sel-default-border-color;

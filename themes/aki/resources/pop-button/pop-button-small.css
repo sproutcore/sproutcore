@@ -1,11 +1,15 @@
 @import "variables.css";
 
-@theme(sc-regular-size) {
+@theme(sc-small-size) {
 
   $theme.sc-popup-view {
+    &:after {
+      top: 0;
+    }
+
     &.sc-static-layout .sc-button-label {
-      margin-left: 1px;
-      margin-right: 20px;
+      margin-left: 0px;
+      margin-right: 18px;
     }
   }
 }
