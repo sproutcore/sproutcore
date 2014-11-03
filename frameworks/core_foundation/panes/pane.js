@@ -542,8 +542,8 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     in the document but must be run prior to child view notification.
    */
   recomputeDependentProperties: function () {
-    // @see panes/layout.js
-    this.set('currentWindowSize', this.rootResponder.computeWindowSize());
+    // Does nothing.  Left here so that subclasses that implement the method
+    // and call sc_super() won't fail.
   },
 
   /**

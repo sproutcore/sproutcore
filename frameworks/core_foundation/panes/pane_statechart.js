@@ -17,13 +17,15 @@ SC.Pane.reopen({
     var responder = (this.rootResponder = SC.RootResponder.responder);
     responder.panes.add(this);
 
+    // Update the currentWindowSize cache.
+    this.set('currentWindowSize', responder.currentWindowSize);
+
     // Legacy.
     this.set('isPaneAttached', YES);
     this.paneDidAttach();
 
     // Legacy?
     this.recomputeDependentProperties();
-    this.set('currentWindowSize', responder.currentWindowSize);
 
     // Set the initial design mode.  The responder will update this if it changes.
     this.updateDesignMode(this.get('designMode'), responder.get('currentDesignMode'));
