@@ -880,7 +880,7 @@ SC.RootResponder = SC.Object.extend(
     }
     SC.Event.add(document, mousewheel, this, this.mousewheel);
 
-    // do some initial set
+    // Do some initial set up.
     this.set('currentWindowSize', this.computeWindowSize()) ;
 
     // TODO: Is this workaround still valid?
