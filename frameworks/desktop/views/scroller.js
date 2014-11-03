@@ -136,9 +136,9 @@ SC.ScrollerView = SC.View.extend(
     When set less than the height of the scroller, the scroller is disabled.
 
     @type Number
-    @default 100
+    @default 0
   */
-  maximum: 100,
+  maximum: 0,
 
   /**
     The minimum offset value for the scroller.  This will be used to calculate
