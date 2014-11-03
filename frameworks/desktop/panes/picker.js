@@ -631,6 +631,8 @@ SC.PickerPane = SC.PalettePane.extend(
       adjustHash = {
         left: frame.x,
         top: frame.y,
+        width: frame.width,
+        height: frame.height
       };
 
       // Adjust.
@@ -802,44 +804,48 @@ SC.PickerPane = SC.PalettePane.extend(
     If the menu is a submenu, we also want to reposition the pane to the left
     of the parent menu if it would otherwise exceed the width of the viewport.
   */
-  fitPositionToScreenMenu: function (windowFrame, paneFrame, subMenu) {
+  fitPositionToScreenMenu: function (windowFrame, frame, subMenu) {
+    var windowPadding = this.get('windowPadding');
+
     // Set up init location for submenu
     if (subMenu) {
-      paneFrame.x -= this.get('submenuOffsetX');
-      paneFrame.y -= Math.floor(this.get('menuHeightPadding') / 2);
+      frame.x -= this.get('submenuOffsetX');
+      frame.y -= Math.floor(this.get('menuHeightPadding') / 2);
     }
 
-    // If the right edge of the pane is within 20 pixels of the right edge
+    // Make sure we are at least the window padding from the left edge of the screen to start.
+    if (frame.x < windowPadding) {
+      frame.x = windowPadding;
+    }
+
+    // If the right edge of the pane is within the window padding of the right edge
     // of the window, we need to reposition it.
-    if ((paneFrame.x + paneFrame.width) > (windowFrame.width - 20)) {
+    if ((frame.x + frame.width + windowPadding) > windowFrame.width) {
       if (subMenu) {
         // Submenus should be re-anchored to the left of the parent menu
-        paneFrame.x = paneFrame.x - (paneFrame.width * 2);
+        frame.x = frame.x - (frame.width * 2);
       } else {
-        // Otherwise, just position the pane 20 pixels from the right edge
-        paneFrame.x = windowFrame.width - paneFrame.width - 20;
+        // Otherwise, just shift the pane windowPadding pixels from the right edge
+        frame.x = windowFrame.width - frame.width - windowPadding;
       }
     }
 
-    // Make sure we are at least 7 pixels from the left edge of the screen.
-    if (paneFrame.x < 7) { paneFrame.x = 7; }
-
-    if (paneFrame.y < 7) {
-      paneFrame.height += paneFrame.y;
-      paneFrame.y = 7;
+    // Make sure we are at least the window padding from the top edge of the screen to start.
+    if (frame.y < windowPadding) {
+      frame.y = windowPadding;
     }
 
-    // If the height of the menu is bigger than the window height, resize it.
-    if (paneFrame.height + paneFrame.y + 35 >= windowFrame.height) {
-      if (paneFrame.height + 50 >= windowFrame.height) {
-        paneFrame.y = SC.MenuPane.VERTICAL_OFFSET;
-        paneFrame.height = windowFrame.height - (SC.MenuPane.VERTICAL_OFFSET * 2);
-      } else {
-        paneFrame.y += (windowFrame.height - (paneFrame.height + paneFrame.y + 35));
-      }
+    // If the height of the menu is bigger than the window height, shift it upward.
+    if (frame.y + frame.height + windowPadding > windowFrame.height) {
+      frame.y = Math.max(windowPadding, windowFrame.height - frame.height - windowPadding);
     }
 
-    return paneFrame;
+    // If the height of the menu is still bigger than the window height, resize it.
+    if (frame.y + frame.height + windowPadding > windowFrame.height) {
+      frame.height = windowFrame.height - (2 * windowPadding);
+    }
+
+    return frame;
   },
 
   /** @private
