@@ -22,370 +22,236 @@ sc_require('views/scroll_view');
 SC.MenuScrollView = SC.ScrollView.extend(
 /** @scope SC.MenuScrollView.prototype */{
 
+  // ---------------------------------------------------------------------------------------------
+  // Properties
+  //
+
   /**
+    The bottom scroller view class. This will be replaced with a view instance when the
+    MenuScrollView is created unless hasVerticalScroller is false.
+
+    @type SC.View
+    @default SC.MenuScrollerView
+  */
+  bottomScrollerView: SC.MenuScrollerView,
+
+  /**
+    Returns true if the view has both a vertical scroller and the scroller is visible.
+
+    @field
+    @type Boolean
+    @readonly
+    @see SC.ScrollView
+  */
+  canScrollVertical: function () {
+    return !!(this.get('hasVerticalScroller') && // This property isn't bindable.
+      this.get('bottomScrollerView') && // This property isn't bindable.
+      this.get('topScrollerView') && // This property isn't bindable.
+      this.get('isVerticalScrollerVisible'));
+  }.property('isVerticalScrollerVisible').cacheable(),
+
+  /** SC.View.prototype
     @type Array
     @default ['sc-menu-scroll-view']
     @see SC.View#classNames
   */
   classNames: ['sc-menu-scroll-view'],
 
-
-  // ..........................................................
-  // PROPERTIES
-  //
-
-
-  /**
-    The maximum horizontal scroll offset allowed given the current contentView
-    size and the size of the scroll view.  If horizontal scrolling is
-    disabled, this will always return 0.
-
-    @type Number
-    @default 0
-  */
-  maximumHorizontalScrollOffset: 0,
-
-
-  // ..........................................................
-  // SCROLLERS
-  //
-
-  /**
-    YES if the view should maintain a horizontal scroller.   This property
-    must be set when the view is created.
-
-    @type Boolean
-    @default NO
-  */
-  hasHorizontalScroller: NO,
-
-  /**
-    The horizontal scroller view class. This will be replaced with a view
-    instance when the ScrollView is created unless hasHorizontalScroller is
-    NO.
-
-    @type SC.View
-    @default SC.MenuScrollerView
-  */
-  horizontalScrollerView: SC.MenuScrollerView,
-
-  /**
-    YES if the horizontal scroller should be visible.  You can change this
-    property value anytime to show or hide the horizontal scroller.  If you
-    do not want to use a horizontal scroller at all, you should instead set
-    hasHorizontalScroller to NO to avoid creating a scroller view in the
-    first place.
-
-    @type Boolean
-    @default NO
-  */
-  isHorizontalScrollerVisible: NO,
-
-  /**
-    Returns YES if the view both has a horizontal scroller, the scroller is
-    visible.
-
-    @type Boolean
-    @default NO
-  */
-  canScrollHorizontal: NO,
-
-  /**
-    If YES, the horizontal scroller will autohide if the contentView is
-    smaller than the visible area.  You must set hasHorizontalScroller to YES
-    for this property to have any effect.
-
-    @type Boolean
-    @default NO
-  */
-  autohidesHorizontalScroller: NO,
-
-  /**
-    YES if the view should maintain a vertical scroller.   This property must
-    be set when the view is created.
-
-    @type Boolean
-    @default YES
-  */
-  hasVerticalScroller: YES,
-
-  /**
-    The vertical scroller view class. This will be replaced with a view
-    instance when the ScrollView is created unless hasVerticalScroller is NO.
-
-    @type SC.View
-    @default SC.MenuScrollerView
-  */
-  verticalScrollerView: SC.MenuScrollerView,
-  verticalScrollerView2: SC.MenuScrollerView,
-
-  /**
-    YES if the vertical scroller should be visible.  For SC.MenuScroll the
-    vertical scroller is always there we just hide the arrows to scroll.
-
-    @type Boolean
-    @default YES
-  */
-  isVerticalScrollerVisible: YES,
-
-  /**
-    @type Boolean
-    @default YES
-  */
-  canScrollVertical: YES,
-
-  /**
-    If YES, the vertical scroller will autohide if the contentView is
-    smaller than the visible area.  You must set hasVerticalScroller to YES
-    for this property to have any effect.
-
-    @type Boolean
-    @default YES
-  */
-  autohidesVerticalScroller: YES,
-
-  /**
-    Use this property to set the 'bottom' offset of your vertical scroller,
-    to make room for a thumb view or other accessory view. Default is 0.
-
-    @type Number
-    @default 0
-  */
-  verticalScrollerBottom: 0,
-
-
-  // ..........................................................
-  // CUSTOM VIEWS
-  //
-
   /**
     Control Size for Menu content: change verticalLineScroll
 
     @type String
     @default SC.REGULAR_CONTROL_SIZE
+    @see SC.Control
   */
   controlSize: SC.REGULAR_CONTROL_SIZE,
 
   /**
-    The container view that will contain your main content view.  You can
-    replace this property with your own custom subclass if you prefer.
+    YES if the view should maintain a horizontal scroller. This property must be set when the view
+    is created.
 
-    @type SC.ContainerView
-    @default SC.ContainerView
+    @type Boolean
+    @default false
+    @see SC.ScrollView
   */
-  containerView: SC.ContainerView,
-
-  // ..........................................................
-  // METHODS
-  //
+  hasHorizontalScroller: false,
 
   /**
-    @param {SC.View} view
+    The top scroller view class. This will be replaced with a view instance when the MenuScrollView
+    is created unless hasVerticalScroller is false.
+
+    @type SC.View
+    @default SC.MenuScrollerView
   */
-  scrollToVisible: function (view) {
-    // if no view is passed, do default
-    if (arguments.length === 0) return sc_super();
+  topScrollerView: SC.MenuScrollerView,
 
-    var contentView = this.get('contentView');
-    if (!contentView) return NO; // nothing to do if no contentView.
+  // ---------------------------------------------------------------------------------------------
+  // Methods
+  //
 
-    // get the frame for the view - should work even for views with static
-    // layout, assuming it has been added to the screen.
-    var vf = view.get('frame');
-    if (!vf) return NO; // nothing to do
+  /** @private @see SC.ScrollView. Check frame changes for size changes. */
+  _sc_contentViewFrameDidChange: function () {
+    sc_super();
 
-    // convert view's frame to an offset from the contentView origin.  This
-    // will become the new scroll offset after some adjustment.
-    vf = contentView.convertFrameFromView(vf, view.get('parentView'));
-
-    var vscroll2 = this.get('verticalScrollerView2');
-    if (vscroll2 && vscroll2.get('isVisible')) {
-      vf.height += vscroll2.get('frame').height;
-    }
-
-    var vscroll = this.get('verticalScrollerView');
-    if (vscroll && vscroll.get('isVisible')) {
-      vf.top -= vscroll.get('frame').height;
-    }
-
-    return this.scrollToRect(vf);
+    // Unlike a normal SC.ScrollView, the visibility of the top & bottom scrollers changes as the
+    // scrolling commences. For example, once the user scrolls a tiny bit, we need to show the
+    // top scroller.
+    this._sc_repositionScrollers();
   },
 
-  /** @private
-    Adjusts the layout for the various internal views.  This method is called
-    once when the scroll view is first configured and then anytime a scroller
-    is shown or hidden.  You can call this method yourself as well to retile.
+  /** @private @see SC.ScrollView. When the content view's size changes, we need to update our scroll offset properties. */
+  _sc_contentViewSizeDidChangeUnfiltered: function () {
+    var hasVerticalScroller = this.get('hasVerticalScroller'),
+        // minimumVerticalScrollOffset = this.get('minimumVerticalScrollOffset'),
+        maximumVerticalScrollOffset = this.get('maximumVerticalScrollOffset');
 
-    You may also want to override this method to handle layout for any
-    additional controls you have added to the view.
-  */
-  tile: function () {
-    // get vertical scroller/determine if we should have a scroller
-    var hasScroller, vscroll, vscroll2, hasVertical, clip, clipLayout, viewportHeight;
-    hasScroller = this.get('hasVerticalScroller');
-    vscroll = hasScroller ? this.get('verticalScrollerView') : null;
-    vscroll2 = hasScroller ? this.get('verticalScrollerView2') : null;
-    hasVertical = vscroll && this.get('isVerticalScrollerVisible');
+    if (hasVerticalScroller) {
+      var bottomScrollerView = this.get('bottomScrollerView'),
+          topScrollerView = this.get('topScrollerView');
 
-    // get the containerView
-    clip = this.get('containerView');
-    clipLayout = { left: 0, top: 0 };
+      topScrollerView.set('maximum', maximumVerticalScrollOffset);
+      bottomScrollerView.set('maximum', maximumVerticalScrollOffset);
 
-    if (hasVertical) {
-      viewportHeight = 0;
-      var scrollerThickness = vscroll.get('scrollerThickness') || vscroll2.get('scrollerThickness');
-      var view   = this.get('contentView'),
-            f      = (view) ? view.get('frame') : null,
-            height = (f) ? f.height : 0,
-            elem = this.containerView.$()[0],
-            verticalOffset = this.get('verticalScrollOffset'),
-            topArrowInvisible = { height: 0, top: 0, right: 0, left: 0 },
-            topArrowVisible = { height: scrollerThickness, top: 0, right: 0, left: 0 },
-            bottomArrowVisible = { height: scrollerThickness, bottom: 0, right: 0, left: 0 },
-            bottomArrowInvisible = { height: 0, bottom: 0, right: 0, left: 0 };
+      // Update if the visibility of the scrollers has changed now.
+      var containerHeight = this._sc_containerHeight,
+          contentHeight = this._sc_contentHeight;
+      this.setIfChanged('isVerticalScrollerVisible', contentHeight > containerHeight);
+    }
+  },
 
-      if (elem) viewportHeight = elem.offsetHeight;
+  /** @private @see SC.ScrollView. Re-position the scrollers and content depending on the need to scroll or not. */
+  _sc_repositionScrollersUnfiltered: function () {
+    var hasScroller = this.get('hasVerticalScroller'),
+        containerView = this.get('containerView');
 
-      if (verticalOffset === 0) {
-        clipLayout.top = 0;
-        clipLayout.bottom = scrollerThickness;
-        vscroll.set('layout', topArrowInvisible);
-        vscroll2.set('layout', bottomArrowVisible);
-      } else if (verticalOffset >= (height - viewportHeight - scrollerThickness)) {
-        clipLayout.top = scrollerThickness;
-        clipLayout.bottom = 0;
-        vscroll.set('layout', topArrowVisible);
-        vscroll2.set('layout', bottomArrowInvisible);
-      } else {
-        clipLayout.top = scrollerThickness;
-        clipLayout.bottom = scrollerThickness;
-        vscroll.set('layout', topArrowVisible);
-        vscroll2.set('layout', bottomArrowVisible);
+
+    if (hasScroller) {
+      var bottomScrollerView = this.get('bottomScrollerView'),
+          bottomScrollerThickness = bottomScrollerView.get('scrollerThickness'),
+          maximumVerticalScrollOffset = this.get('maximumVerticalScrollOffset'),
+          topScrollerView = this.get('topScrollerView'),
+          topScrollerThickness = topScrollerView.get('scrollerThickness'),
+          verticalOffset = this.get('verticalScrollOffset'),
+          isBottomScrollerVisible = bottomScrollerView.get('isVisible'),
+          isTopScrollerVisible = topScrollerView.get('isVisible');
+
+      // This asymetric update moves the container view out of the way of the scrollers (essentially
+      // so that the scroller views can be transparent). What's important is that as the container
+      // view is adjusted, the vertical scroll offset is adjusted properly so that the content view
+      // position doesn't jump around.
+      if (isTopScrollerVisible) {
+        if (verticalOffset <= topScrollerThickness) {
+          topScrollerView.set('isVisible', false);
+          containerView.adjust('top', 0);
+          this.decrementProperty('verticalScrollOffset', topScrollerThickness);
+        }
+      } else if (verticalOffset > 0) {
+        topScrollerView.set('isVisible', true);
+        containerView.adjust('top', topScrollerThickness);
+        this.incrementProperty('verticalScrollOffset', topScrollerThickness);
+      }
+
+      if (isBottomScrollerVisible) {
+        if (verticalOffset >= maximumVerticalScrollOffset - bottomScrollerThickness) {
+          bottomScrollerView.set('isVisible', false);
+          containerView.adjust('bottom', 0);
+          this.incrementProperty('verticalScrollOffset', bottomScrollerThickness);
+        }
+      } else if (verticalOffset < maximumVerticalScrollOffset) {
+        bottomScrollerView.set('isVisible', true);
+        containerView.adjust('bottom', bottomScrollerThickness);
+        this.decrementProperty('verticalScrollOffset', bottomScrollerThickness);
       }
     }
-
-    if (vscroll) {
-      vscroll.set('isVisible', hasVertical);
-      vscroll2.set('isVisible', hasVertical);
-    }
-
-    clip.set('layout', clipLayout);
   },
-
-  /** @private
-    Called whenever a scroller visibility changes.  Calls the tile() method.
-  */
-  scrollerVisibilityDidChange: function () {
-    this.tile();
-  }.observes('isVerticalScrollerVisible', 'isHorizontalScrollerVisible', 'verticalScrollOffset'),
-
-
-  // ..........................................................
-  // INTERNAL SUPPORT
-  //
 
   /** @private
     Instantiate scrollers & container views as needed.  Replace their classes
     in the regular properties.
   */
   createChildViews: function () {
-    var childViews = [], view, view2, controlSize = this.get('controlSize');
+    var childViews = [];
 
-    // create the containerView.  We must always have a container view.
-    // also, setup the contentView as the child of the containerView...
-    if (SC.none(view = this.containerView)) view = SC.ContainerView;
+    // Set up the container view.
+    var containerView = this.get('containerView');
 
-    childViews.push(this.containerView = this.createChildView(view, {
-      contentView: this.contentView
-    }));
+    //@if(debug)
+    // Provide some debug-mode only developer support to prevent problems.
+    if (!containerView) {
+      throw new Error("Developer Error: SC.ScrollView must have a containerView class set before it is instantiated.");
+    }
+    //@endif
 
-    // and replace our own contentView...
-    this.contentView = this.containerView.get('contentView');
+    containerView = this.containerView = this.createChildView(containerView, {
+      contentView: this.contentView // Initialize the view with the currently set container view.
+    });
+    this.contentView = containerView.get('contentView'); // Replace our content view with the instantiated version.
+    childViews.push(containerView);
 
-    // create a vertical scroller
-    if ((view = this.verticalScrollerView) && (view2 = this.verticalScrollerView2)) {
-      if (this.get('hasVerticalScroller')) {
-        view = this.verticalScrollerView = this.createChildView(view, {
-          layout: {top: 0, left: 0, right: 0},
-          controlSize: controlSize,
-          valueBinding: '*owner.verticalScrollOffset'
-        });
-        childViews.push(view);
-        view2 = this.verticalScrollerView2 = this.createChildView(view2, {
-          scrollDown: YES,
-          layout: { bottom: 0, left: 0, right: 0 },
-          controlSize: controlSize,
-          valueBinding: '*owner.verticalScrollOffset'
-        });
-        childViews.push(view2);
-      } else {
-        this.verticalScrollerView = null;
-        this.verticalScrollerView2 = null;
+    // Set up the scrollers.
+    if (!this.get('hasVerticalScroller')) {
+      // Remove the class entirely.
+      this.topScrollerView = null;
+      this.bottomScrollerView = null;
+    } else {
+      var controlSize = this.get('controlSize'),
+          topScrollerView = this.get('topScrollerView');
+
+      // Use a default scroller view.
+      /* jshint eqnull:true */
+      if (topScrollerView == null) {
+        topScrollerView = SC.MenuScrollerView;
       }
+
+      // Replace the class property with an instance.
+      topScrollerView = this.topScrollerView = this.createChildView(topScrollerView, {
+        controlSize: controlSize,
+        scrollDown: false,
+        isVisible: false,
+
+        value: this.get('verticalScrollOffset'),
+        valueBinding: '.owner.verticalScrollOffset', // Bind the value of the scroller to our vertical offset.
+        minimum: this.get('minimumVerticalScrollOffset'),
+        maximum: this.get('maximumVerticalScrollOffset')
+      });
+
+      var topScrollerThickness = topScrollerView.get('scrollerThickness');
+      topScrollerView.adjust('height', topScrollerThickness);
+
+      // Add the scroller view to the child views array.
+      childViews.push(topScrollerView);
+
+
+      var bottomScrollerView = this.get('bottomScrollerView');
+
+      // Use a default scroller view.
+      /* jshint eqnull:true */
+      if (bottomScrollerView == null) {
+        bottomScrollerView = SC.MenuScrollerView;
+      }
+
+      // Replace the class property with an instance.
+      bottomScrollerView = this.bottomScrollerView = this.createChildView(bottomScrollerView, {
+        controlSize: controlSize,
+        scrollDown: true,
+        isVisible: false,
+        layout: { bottom: 0 },
+
+        value: this.get('verticalScrollOffset'),
+        valueBinding: '.owner.verticalScrollOffset', // Bind the value of the scroller to our vertical offset.
+        minimum: this.get('minimumVerticalScrollOffset'),
+        maximum: this.get('maximumVerticalScrollOffset')
+      });
+
+      var bottomScrollerThickness = bottomScrollerView.get('scrollerThickness');
+      bottomScrollerView.adjust('height', bottomScrollerThickness);
+
+      // Add the scroller view to the child views array.
+      childViews.push(bottomScrollerView);
     }
 
-    // set childViews array.
+    // Set the childViews array.
     this.childViews = childViews;
-
-    this.contentViewFrameDidChange(); // setup initial display...
-    this.tile(); // set up initial tiling
-  },
-
-  /** @private */
-  init: function () {
-    sc_super();
-
-    // start observing initial content view.  The content view's frame has
-    // already been setup in prepareDisplay so we don't need to call
-    // viewFrameDidChange...
-    this._scroll_contentView = this.get('contentView');
-    var contentView = this._scroll_contentView;
-
-    if (contentView) {
-      contentView.addObserver('frame', this, this.contentViewFrameDidChange);
-    }
-
-    if (this.get('isVisibleInWindow')) this._scsv_registerAutoscroll();
-  },
-
-  /** @private Registers/deregisters view with SC.Drag for autoscrolling */
-  _scsv_registerAutoscroll: function () {
-    if (this.get('isVisibleInWindow')) SC.Drag.addScrollableView(this);
-    else SC.Drag.removeScrollableView(this);
-  }.observes('isVisibleInWindow'),
-
-  /** @private
-    Invoked whenever the contentView's frame changes.  This will update the
-    scroller maximum and optionally update the scroller visibility if the
-    size of the contentView changes.  We don't care about the origin since
-    that is tracked separately from the offset values.
-  */
-  contentViewFrameDidChange: function () {
-    var view   = this.get('contentView'), view2,
-        f      = (view) ? view.get('frame') : null,
-        width  = (f) ? f.width : 0,
-        height = (f) ? f.height : 0,
-        dim    = this.get('frame'),
-        viewportHeight, elem;
-
-    // cache out scroll settings...
-    //if ((width === this._scroll_contentWidth) && (height === this._scroll_contentHeight)) return;
-    this._scroll_contentWidth = width;
-    this._scroll_contentHeight = height;
-
-    if (this.get('hasVerticalScroller') && (view = this.get('verticalScrollerView')) && (view2 = this.get('verticalScrollerView2'))) {
-      height -= 1; // accurately account for our layout
-      // decide if it should be visible or not
-      if (this.get('autohidesVerticalScroller')) {
-        this.set('isVerticalScrollerVisible', height > dim.height);
-      }
-      height -= this.get('verticalScrollerBottom');
-      viewportHeight = 0;
-      elem = this.containerView.$()[0];
-      if (elem) viewportHeight = elem.offsetHeight;
-      height = height - viewportHeight;
-      view.setIfChanged('maximum', height);
-      view2.setIfChanged('maximum', height);
-    }
   }
+
 });
