@@ -851,21 +851,21 @@ SC.PickerPane = SC.PalettePane.extend(
 
     @returns {Rect}
   */
-  fitPositionToScreenMenuPointer: function (w, f, a) {
-    f = this.fitPositionToScreenPointer(w, f, a);
+  fitPositionToScreenMenuPointer: function (windowFrame, frame, anchorFrame) {
+    frame = this.fitPositionToScreenPointer(windowFrame, frame, anchorFrame);
 
     // If the height of the menu is bigger than the window height, resize it.
-    if (f.height + f.y + 35 >= w.height) {
-      f.height = w.height - f.y - (SC.MenuPane.VERTICAL_OFFSET * 2);
+    if (frame.height + frame.y + 35 >= windowFrame.height) {
+      frame.height = windowFrame.height - frame.y - (SC.MenuPane.VERTICAL_OFFSET * 2);
     }
 
-    return f;
+    return frame;
   },
 
   /** @private
     re-position rule for triangle pointer picker.
   */
-  fitPositionToScreenPointer: function (w, f, a) {
+  fitPositionToScreenPointer: function (windowFrame, frame, anchorFrame) {
     var curType,
         deltas,
         matrix = this.get('preferMatrix'),
@@ -877,32 +877,32 @@ SC.PickerPane = SC.PalettePane.extend(
     // frames, while taking the pointer offset into account.
     topLefts = [
       // Top left [x, y] if positioned evenly to the right of the anchor
-      [a.x + a.width + offset[0], a.y + a.halfHeight - f.halfHeight],
+      [anchorFrame.x + anchorFrame.width + offset[0], anchorFrame.y + anchorFrame.halfHeight - frame.halfHeight],
 
       // Top left [x, y] if positioned evenly to the left of the anchor
-      [a.x - f.originalWidth + offset[1], a.y + a.halfHeight - f.halfHeight],
+      [anchorFrame.x - frame.originalWidth + offset[1], anchorFrame.y + anchorFrame.halfHeight - frame.halfHeight],
 
       // Top left [x, y] if positioned evenly above the anchor
-      [a.x + a.halfWidth - f.halfWidth, a.y - f.originalHeight + offset[2]],
+      [anchorFrame.x + anchorFrame.halfWidth - frame.halfWidth, anchorFrame.y - frame.originalHeight + offset[2]],
 
       // Top left [x, y] if positioned evenly below the anchor
-      [a.x + a.halfWidth - f.halfWidth, a.y + a.height + offset[3]]
+      [anchorFrame.x + anchorFrame.halfWidth - frame.halfWidth, anchorFrame.y + anchorFrame.height + offset[3]]
     ];
 
     // Determine the bottom-right corner of each of the 4 perfectly positioned
     // frames, while taking the pointer offset into account.
     botRights = [
       // Bottom right [x, y] if positioned evenly to the right of the anchor
-      [a.x + a.width + f.width + offset[0], a.y + a.halfHeight + f.halfHeight],
+      [anchorFrame.x + anchorFrame.width + frame.width + offset[0], anchorFrame.y + anchorFrame.halfHeight + frame.halfHeight],
 
       // Bottom right [x, y] if positioned evenly to the left of the anchor
-      [a.x + offset[1], a.y + a.halfHeight + f.halfHeight],
+      [anchorFrame.x + offset[1], anchorFrame.y + anchorFrame.halfHeight + frame.halfHeight],
 
       // Bottom right [x, y] if positioned evenly above the anchor
-      [a.x + a.halfWidth + f.halfWidth, a.y + offset[2]],
+      [anchorFrame.x + anchorFrame.halfWidth + frame.halfWidth, anchorFrame.y + offset[2]],
 
       // Bottom right [x, y] if positioned evenly below the anchor
-      [a.x + a.halfWidth + f.halfWidth, a.y + a.height + f.height + offset[3]]
+      [anchorFrame.x + anchorFrame.halfWidth + frame.halfWidth, anchorFrame.y + anchorFrame.height + frame.height + offset[3]]
     ];
 
     // Loop through the preferred matrix, hopefully finding one that will fit
