@@ -304,6 +304,11 @@ SC.MenuPane = SC.PickerPane.extend(
     // Prevent body overflow (we don't want to overflow because of shadows).
     SC.bodyOverflowArbitrator.requestHidden(this, true);
 
+    //@if(debug)
+    // A debug-mode only flag to indicate that the popup method was called (see override of append in SC.PickerPane).
+    this._sc_didUsePopup = true;
+    //@endif
+
     this.append();
   },
 

@@ -231,6 +231,11 @@ SC.PICKER_MENU_POINTER = 'menu-pointer';
 SC.PickerPane = SC.PalettePane.extend(
 /** @scope SC.PickerPane.prototype */ {
 
+  //@if(debug)
+  /** @private Debug-mode only flag for ensuring that the pane is appended via `popup`. */
+  _sc_didUsePopup: false,
+  //@endif
+
   /**
     @type Array
     @default ['sc-picker']
@@ -516,14 +521,16 @@ SC.PickerPane = SC.PalettePane.extend(
   windowPadding: null,
 
   //@if(debug)
+  // Provide some developer support. People have occasionally been misled by calling `append`
+  // on PickerPanes, which fails to position the pane properly. Hopefully, we can give
+  // them a clue to speed up finding the problem.
   /** @private SC.Pane */
   append: function () {
-    // Provide some developer support. People have occasionally been misled by calling append
-    // on PickerPanes, which fails to position the pane properly. Hopefully, we can give
-    // them a clue to speed up finding the problem.
-    if (SC.none(this.get('anchorElement'))) {
+    if (!this._sc_didUsePopup) {
       SC.warn("Developer Warning: You should not use .append() with SC.PickerPane. Instead use .popup() and pass in an anchor view or element.");
     }
+
+    this._sc_didUsePopup = false;
 
     return sc_super();
   },
@@ -555,6 +562,11 @@ SC.PickerPane = SC.PalettePane.extend(
     this.endPropertyChanges();
     this.positionPane();
     this._hideOverflow();
+
+    //@if(debug)
+    // A debug-mode only flag to indicate that the popup method was called (see override of append).
+    this._sc_didUsePopup = true;
+    //@endif
 
     return this.append();
   },
