@@ -392,7 +392,7 @@ SC.ContainerView = SC.View.extend(
       this._sc_cancelTransitions();
     }
 
-    sc_super();
+    return sc_super();
   }
 
 });
