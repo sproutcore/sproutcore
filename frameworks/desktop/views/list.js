@@ -452,11 +452,9 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
 
     // Support both vertical and horizontal lists.
     if (layoutDirection === SC.LAYOUT_HORIZONTAL) {
-      ret.minWidth = this.rowOffsetForContentIndex(this.get('length'));
-      this.set('calculatedWidth', ret.minWidth);
+      ret.width = this.rowOffsetForContentIndex(this.get('length'));
     } else {
-      ret.minHeight = this.rowOffsetForContentIndex(this.get('length'));
-      this.set('calculatedHeight', ret.minHeight);
+      ret.height = this.rowOffsetForContentIndex(this.get('length'));
     }
     return ret;
   },
