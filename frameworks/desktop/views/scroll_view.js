@@ -62,14 +62,12 @@ SC.SCROLL = {
   and `horizontalScrollerView`). `SC.ScrollerView` is a gutter-based scroller which persists and
   takes up fourteen pixels. (By default, no scroller is shown for content that is too small to
   scroll; see `autohidesHorizontalScroller` and `autohidesVerticalScroller`.) `SC.OverlayScrollerView`
-  is a gutterless view which fades when not scrolling. By default, SC.ScrollView uses the gutter
-  scroller on mouse-based systems and the fading scroller on touch-base systems. If you would
-  like your view to always have OS X-style fading overlaid scrollers, you can use the following:
+  is a gutterless view which fades when not scrolling. If you would like your view to always have
+  OS X-style fading overlaid scrollers, you can use the following:
 
         SC.ScrollView.extend({
-          verticalOverlay: YES,
-          verticalScrollerView: SC.OverlayScrollerView
-          // repeat for horizontal scrollers
+          horizontalOverlay: true,
+          verticalOverlay: true
         });
 
   @extends SC.View
@@ -85,8 +83,11 @@ SC.ScrollView = SC.View.extend({
   /** @private Shared object used to avoid continually initializing/destroying objects. */
   _SC_CONTAINER_LAYOUT_MAP: null,
 
-  /** @private Flag used to determine whether to reverse bounce the animation (i.e. change direction fluidly) */
-  _sc_animationCurve: false,
+  /** @private Flag used to determine whether to animate the adjustment. */
+  _sc_animationDuration: null,
+
+  /** @private The animation timing to use. */
+  _sc_animationTiming: null,
 
   /** @private The cached height of the container. */
   _sc_containerHeight: 0,
@@ -1252,7 +1253,7 @@ SC.ScrollView = SC.View.extend({
 
         contentView.animate({ left: left, top: top, scale: scale }, {
           duration: this._sc_animationDuration,
-          timing: this._sc_animationCurve
+          timing: this._sc_animationTiming
         });
 
         // Run the animation immediately (don't wait for next Run Loop).
@@ -1261,7 +1262,7 @@ SC.ScrollView = SC.View.extend({
 
         // Clear out the flag that got us here.
         this._sc_animationDuration = null;
-        this._sc_animationCurve = null;
+        this._sc_animationTiming = null;
       } else {
         contentView.adjust({
           left: left,
@@ -1290,7 +1291,7 @@ SC.ScrollView = SC.View.extend({
       verticalScrollerWidth = verticalScrollerView ? verticalScrollerView.get('scrollbarThickness') : 0,
       layout; // The new layout to be applied to each scroller.
 
-    // Create the container layout map once if necessary.
+    // Create the container layout map once.
     if (!containerLayoutMap) { containerLayoutMap = SC.ScrollView._SC_CONTAINER_LAYOUT_MAP = {}; }
 
     // Adjust the horizontal scroller.
@@ -1471,13 +1472,6 @@ SC.ScrollView = SC.View.extend({
         scrollerView = this.get('horizontalOverlay') ? SC.OverlayScrollerView : SC.ScrollerView;
       }
 
-      //@if(debug)
-      // Provide some debug-mode only developer support to prevent problems.
-      if (!scrollerView) {
-        throw new Error("Developer Error: SC.ScrollView must have a `horizontalScrollerView` class set before it is instantiated or else set `hasHorizontalScroller` to false.");
-      }
-      //@endif
-
       // Replace the class property with an instance.
       scrollerView = this.horizontalScrollerView = this.createChildView(scrollerView, {
         isVisible: false,
@@ -1504,13 +1498,6 @@ SC.ScrollView = SC.View.extend({
       if (scrollerView == null) {
         scrollerView = this.get('verticalOverlay') ? SC.OverlayScrollerView : SC.ScrollerView;
       }
-
-      //@if(debug)
-      // Provide some debug-mode only developer support to prevent problems.
-      if (!scrollerView) {
-        throw new Error("Developer Error: SC.ScrollView must have a `verticalScrollerView` class set before it is instantiated or else set `hasVerticalScroller` to false.");
-      }
-      //@endif
 
       // Replace the class property with an instance.
       scrollerView = this.verticalScrollerView = this.createChildView(scrollerView, {
@@ -1920,11 +1907,11 @@ SC.ScrollView = SC.View.extend({
 
             // Moving away from maximum. Change direction.
             if (horizontalVelocity < 0.2) {
-              this._sc_animationCurve = this.get('animationCurveReverse');
+              this._sc_animationTiming = this.get('animationCurveReverse');
 
             // Stopped or moving back towards maximum. Maintain direction, snap at the end.
             } else {
-              this._sc_animationCurve = this.get('animationCurveSnap');
+              this._sc_animationTiming = this.get('animationCurveSnap');
             }
 
             // 0.8 seconds for a full screen animation (most will be 50% or less of screen)
@@ -1936,11 +1923,11 @@ SC.ScrollView = SC.View.extend({
 
             // Moving away from minimum. Change direction.
             if (horizontalVelocity > 0.2) {
-              this._sc_animationCurve = this.get('animationCurveReverse');
+              this._sc_animationTiming = this.get('animationCurveReverse');
 
             // Stopped or moving back towards minimum. Maintain direction, snap at the end.
             } else {
-              this._sc_animationCurve = this.get('animationCurveSnap');
+              this._sc_animationTiming = this.get('animationCurveSnap');
             }
 
             // 0.8 seconds for a full screen animation (most will be 50% or less of screen)
@@ -1956,7 +1943,7 @@ SC.ScrollView = SC.View.extend({
               // Generate an animation curve that bounces past the end point.
               c2x = (horizontalScrollOffset - maximumHorizontalScrollOffset) / containerWidth;
               c2y = 2 * c2x;
-              this._sc_animationCurve = 'cubic-bezier(0.0,0.5,%@,%@)'.fmt(c2x.toFixed(1), c2y.toFixed(1));
+              this._sc_animationTiming = 'cubic-bezier(0.0,0.5,%@,%@)'.fmt(c2x.toFixed(1), c2y.toFixed(1));
 
               horizontalScrollOffset = maximumHorizontalScrollOffset;
 
@@ -1964,12 +1951,12 @@ SC.ScrollView = SC.View.extend({
               // Generate an animation curve that bounces past the end point.
               c2x = (minimumHorizontalScrollOffset - horizontalScrollOffset) / containerWidth;
               c2y = 2 * c2x;
-              this._sc_animationCurve = 'cubic-bezier(0.0,0.5,%@,%@)'.fmt(c2x.toFixed(1), c2y.toFixed(1));
+              this._sc_animationTiming = 'cubic-bezier(0.0,0.5,%@,%@)'.fmt(c2x.toFixed(1), c2y.toFixed(1));
 
               horizontalScrollOffset = minimumHorizontalScrollOffset;
 
             } else {
-              this._sc_animationCurve = this.get('animationCurveDecelerate');
+              this._sc_animationTiming = this.get('animationCurveDecelerate');
             }
 
             this.set('horizontalScrollOffset', horizontalScrollOffset);
@@ -1990,11 +1977,11 @@ SC.ScrollView = SC.View.extend({
 
             // Moving away from maximum. Change direction.
             if (verticalVelocity < 0.2) {
-              this._sc_animationCurve = this.get('animationCurveReverse');
+              this._sc_animationTiming = this.get('animationCurveReverse');
 
             // Stopped or moving back towards maximum. Maintain direction, snap at the end.
             } else {
-              this._sc_animationCurve = this.get('animationCurveSnap');
+              this._sc_animationTiming = this.get('animationCurveSnap');
             }
 
             // 0.8 seconds for a full screen animation (most will be 50% or less of screen)
@@ -2006,11 +1993,11 @@ SC.ScrollView = SC.View.extend({
 
             // Moving away from minimum. Change direction.
             if (verticalVelocity > 0.2) {
-              this._sc_animationCurve = this.get('animationCurveReverse');
+              this._sc_animationTiming = this.get('animationCurveReverse');
 
             // Stopped or moving back towards minimum. Maintain direction, snap at the end.
             } else {
-              this._sc_animationCurve = this.get('animationCurveSnap');
+              this._sc_animationTiming = this.get('animationCurveSnap');
             }
 
             // 0.8 seconds for a full screen animation (most will be 50% or less of screen)
@@ -2026,7 +2013,7 @@ SC.ScrollView = SC.View.extend({
               // Generate an animation curve that bounces past the end point.
               c2x = (verticalScrollOffset - maximumVerticalScrollOffset) / containerHeight;
               c2y = 2 * c2x;
-              this._sc_animationCurve = 'cubic-bezier(0.0,0.5,%@,%@)'.fmt(c2x.toFixed(1), c2y.toFixed(1));
+              this._sc_animationTiming = 'cubic-bezier(0.0,0.5,%@,%@)'.fmt(c2x.toFixed(1), c2y.toFixed(1));
 
               verticalScrollOffset = maximumVerticalScrollOffset;
 
@@ -2034,12 +2021,12 @@ SC.ScrollView = SC.View.extend({
               // Generate an animation curve that bounces past the end point.
               c2x = (minimumVerticalScrollOffset - verticalScrollOffset) / containerHeight;
               c2y = 2 * c2x;
-              this._sc_animationCurve = 'cubic-bezier(0.0,0.5,%@,%@)'.fmt(c2x.toFixed(1), c2y.toFixed(1));
+              this._sc_animationTiming = 'cubic-bezier(0.0,0.5,%@,%@)'.fmt(c2x.toFixed(1), c2y.toFixed(1));
 
               verticalScrollOffset = minimumVerticalScrollOffset;
 
             } else {
-              this._sc_animationCurve = this.get('animationCurveDecelerate');
+              this._sc_animationTiming = this.get('animationCurveDecelerate');
             }
 
             this.set('verticalScrollOffset', verticalScrollOffset);
