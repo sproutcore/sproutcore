@@ -381,7 +381,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
   */
   showSubMenu: function () {
     var subMenu = this.get('subMenu');
-    if (subMenu) {
+    if (subMenu && !subMenu.get('isAttached')) {
       subMenu.set('mouseHasEntered', NO);
       subMenu.popup(this, [0, 0, 0]);
     }
