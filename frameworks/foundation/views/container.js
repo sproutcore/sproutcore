@@ -296,6 +296,14 @@ SC.ContainerView = SC.View.extend(
       content = this.createChildView(content);
     }
 
+    //@if(debug)
+    // Prevent developers from assigning non-view content to a container.
+    if (content && !SC.kindOf(content, SC.CoreView)) {
+      SC.error("Developer Error: You should not assign non-View content to an SC.ContainerView.");
+      content = null;
+    }
+    //@endif
+
     // Sets the content.
     this.set('contentView', content);
   }.observes('nowShowing'),
