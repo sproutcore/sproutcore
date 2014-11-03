@@ -84,7 +84,7 @@ module("SC.ScrollView", {
 
 // ------------------------------
 // BASIC
-// 
+//
 
 test('Initial values of scale and horizontal offsets are good', function () {
   var scrollView = pane.view('scrollView with content view of fixed height');
@@ -121,7 +121,7 @@ test("Content view is scaled based on scroll view's scale property", function() 
 
 // ------------------------------
 // Fully visible - static
-// 
+//
 
 test('When contentView is fully visible, it is positioned according to horizontalAlign', function() {
   var scrollView = pane.view('scrollView with content view of fixed height'),
@@ -134,24 +134,20 @@ test('When contentView is fully visible, it is positioned according to horizonta
 
   SC.run(function() {
     scrollView.set('horizontalAlign', SC.ALIGN_LEFT);
-    scrollView._scsv_adjustElementScroll(); // This method is PRIVATE. (Called here to cheat, synchronously testing an asynchronous operation.)
   });
 
   equals(contentView.getPath('frame.x'), 0, "Content view's x offset is 0 when horizontalAlign is set to SC.ALIGN_LEFT");
 
   SC.run(function() {
     scrollView.set('horizontalAlign', SC.ALIGN_CENTER);
-    scrollView._scsv_adjustElementScroll(); // This method is PRIVATE. (Called here to cheat, synchronously testing an asynchronous operation.)
   });
 
   var expectedContentViewOffsetX = (containerView.getPath('frame.width') - contentView.getPath('frame.width')) / 2;
   expectedContentViewOffsetX = Math.round(expectedContentViewOffsetX);
-
   equals(contentView.getPath('frame.x'), expectedContentViewOffsetX, "Content view is centered when horizontalAlign is set to SC.ALIGN_CENTER");
 
   SC.run(function() {
     scrollView.set('horizontalAlign', SC.ALIGN_RIGHT);
-    scrollView._scsv_adjustElementScroll(); // This method is PRIVATE. (Called here to cheat, synchronously testing an asynchronous operation.)
   });
 
   expectedContentViewOffsetX = containerView.getPath('frame.width') - contentView.getPath('frame.width');
@@ -171,14 +167,12 @@ test('When contentView is fully visible, it is positioned according to verticalA
 
   SC.run(function() {
     scrollView.set('verticalAlign', SC.ALIGN_TOP);
-    scrollView._scsv_adjustElementScroll(); // This method is PRIVATE. (Called here to cheat, synchronously testing an asynchronous operation.)
   });
 
   equals(contentView.getPath('frame.y'), 0, "Content view's y offset is 0 when verticalAlign is set to SC.ALIGN_TOP");
 
   SC.run(function() {
     scrollView.set('verticalAlign', SC.ALIGN_MIDDLE);
-    scrollView._scsv_adjustElementScroll(); // This method is PRIVATE. (Called here to cheat, synchronously testing an asynchronous operation.)
   });
 
   var expectedContentViewOffsetX = (containerView.getPath('frame.height') - contentView.getPath('frame.height')) / 2;
@@ -188,7 +182,6 @@ test('When contentView is fully visible, it is positioned according to verticalA
 
   SC.run(function() {
     scrollView.set('verticalAlign', SC.ALIGN_BOTTOM);
-    scrollView._scsv_adjustElementScroll(); // This method is PRIVATE. (Called here to cheat, synchronously testing an asynchronous operation.)
   });
 
   expectedContentViewOffsetX = containerView.getPath('frame.height') - contentView.getPath('frame.height');
@@ -199,7 +192,7 @@ test('When contentView is fully visible, it is positioned according to verticalA
 
 // ------------------------------
 // Zoomed in - static
-// 
+//
 
 test('When zoomed into the contentView, the content view should be placed at the top left', function() {
   var scrollView = pane.view('scrollView with content view of fixed height'),
@@ -215,7 +208,7 @@ test('When zoomed into the contentView, the content view should be placed at the
 
 // ------------------------------
 // Zooming in
-// 
+//
 
 test('When zoomed into the contentView, the horizontal offset should stick to minimum if it was previously set to minimum', function() {
   var scrollView = pane.view('scrollView with content view of fixed height');
@@ -307,7 +300,7 @@ test('When zoomed into the contentView, the vertical offset should stick to maxi
 
 // ---------------------------------------------------
 // Zooming in from fully-visible with fresh view
-// 
+//
 
 test("Zooming from fully-visible to clipped with different alignments", function() {
 

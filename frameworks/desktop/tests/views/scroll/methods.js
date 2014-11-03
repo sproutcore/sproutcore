@@ -546,23 +546,23 @@ test("Setting scale on ScrollView", function() {
 
 });
 
-test("Setting scale on ScrollView with SC.Scalable contentView", function() {
-  var contentView = view.get('contentView'),
-      didCall, withScale;
+// test("Setting scale on ScrollView with SC.Scalable contentView", function() {
+//   var contentView = view.get('contentView'),
+//       didCall, withScale;
 
-  // Patch in SC.Scalable support.
-  contentView.isScalable = YES;
-  contentView.applyScale = function(scale) {
-    didCall = YES;
-    withScale = scale;
-  };
+//   // Patch in SC.Scalable support.
+//   contentView.isScalable = YES;
+//   contentView.applyScale = function(scale) {
+//     didCall = YES;
+//     withScale = scale;
+//   };
 
-  SC.run(function() {
-    view.set('canScale', YES);
-    view.set('scale', 0.8);
-  });
-  ok(didCall, "Setting scale on ScrollView with SC.Scalable contentView calls contentView.applyScale.");
-  equals(withScale, 0.8, "Setting scale on ScrollView with SC.Scalable contentView passes the correct scale to contentView.applyScale");
-});
+//   SC.run(function() {
+//     view.set('canScale', YES);
+//     view.set('scale', 0.8);
+//   });
+//   ok(didCall, "Setting scale on ScrollView with SC.Scalable contentView calls contentView.applyScale.");
+//   equals(withScale, 0.8, "Setting scale on ScrollView with SC.Scalable contentView passes the correct scale to contentView.applyScale");
+// });
 
 

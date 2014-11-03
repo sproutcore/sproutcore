@@ -60,6 +60,7 @@
     })
 
     .add("overlaid touch scrollers", SC.ScrollView, {
+      contentView: iv,
       verticalOverlay: YES,
       verticalScrollerView: SC.OverlayScrollerView,
       horizontalOverlay: YES,
@@ -110,7 +111,7 @@
     ok(view.get('hasHorizontalScroller'), 'default scroll view wants a horizontal scroller');
     ok(horizontalScrollerView, 'default scroll view has a horizontal scroller');
     ok(horizontalScrollerView.$().hasClass('sc-horizontal'), 'should have sc-horizontal class');
-    var maxHScroll = view.maximumHorizontalScrollOffset();
+    var maxHScroll = view.get('maximumHorizontalScrollOffset');
     ok((maxHScroll > 0), 'Max horizontal scroll should be greater than zero');
 
     // VERTICAL SCROLLER
@@ -118,13 +119,13 @@
     ok(view.get('hasVerticalScroller'), 'default scroll view wants a vertical scroller');
     ok(verticalScrollerView, 'default scroll view has a vertical scroller');
     ok(verticalScrollerView.$().hasClass('sc-vertical'), 'should have sc-vertical class');
-    var maxVScroll = view.maximumVerticalScrollOffset();
+    var maxVScroll = view.get('maximumVerticalScrollOffset');
     ok((maxVScroll > 0), 'Max vertical scroll should be greater than zero');
 
     // SCROLLING VERTICALLY
     SC.run(function() {
       view.scrollTo(0,100);
-      view._scsv_adjustElementScroll(); // This method is PRIVATE. (Called here to cheat, synchronously testing an asynchronous operation.)
+      view._sc_repositionContentViewUnfiltered(); // This method is PRIVATE. (Called here to cheat, synchronously testing an asynchronous operation.)
     });
     equals(view.get('verticalScrollOffset'), 100, 'Vertical scrolling should adjust verticalScrollOffset');
     if (SC.platform.get('supportsCSSTransforms')) {
@@ -135,7 +136,7 @@
     // SCROLLING HORIZONTALLY
     SC.run(function() {
       view.scrollTo(50,0);
-      view._scsv_adjustElementScroll(); // This method is PRIVATE. (Called here to cheat, synchronously testing an asynchronous operation.)
+      view._sc_repositionContentViewUnfiltered(); // This method is PRIVATE. (Called here to cheat, synchronously testing an asynchronous operation.)
     });
     equals(view.get('horizontalScrollOffset'), 50, 'horizontal scrolling should adjust horizontalScrollOffset');
     if (SC.platform.get('supportsCSSTransforms')) {
@@ -198,7 +199,7 @@
     // Get the previous style transform.
     SC.run(function() {
       view.scrollTo(10, 10);
-      view._scsv_adjustElementScroll(); // This method is PRIVATE. (Called here to cheat, synchronously testing an asynchronous operation.)
+      view._sc_repositionContentViewUnfiltered(); // This method is PRIVATE. (Called here to cheat, synchronously testing an asynchronous operation.)
     });
     prevTransform = cv.get('layer').style[SC.browser.experimentalStyleNameFor('transform')];
 
@@ -219,16 +220,16 @@
 
     equals(horizontalScrollerView.$().attr('aria-controls'), contentView.get('layerId'), "horizontalScroller has aria-controls set");
     equals(verticalScrollerView.$().attr('aria-controls'), contentView.get('layerId'), "verticalScroller has aria-controls set");
-    
+
     equals(horizontalScrollerView.$().attr('aria-orientation'), 'horizontal', "horizontalScroller has aria-orientation set");
     equals(verticalScrollerView.$().attr('aria-orientation'), 'vertical', "verticalScroller has aria-orientation set");
-    
+
     equals(horizontalScrollerView.$().attr('aria-valuemin'), 0, "horizontalScroller has aria-valuemin set");
     equals(verticalScrollerView.$().attr('aria-valuemin'), 0, "verticalScroller has aria-valuemin set");
-    
+
     equals(horizontalScrollerView.$().attr('aria-valuemax'), view.get('maximumHorizontalScrollOffset'), "horizontalScroller has aria-valuemax set");
     equals(verticalScrollerView.$().attr('aria-valuemax'), view.get('maximumVerticalScrollOffset'), "verticalScroller has aria-valuemax set");
-    
+
     equals(horizontalScrollerView.$().attr('aria-valuenow'), view.get('horizontalScrollOffset'), "horizontalScroller has aria-valuenow set");
     equals(verticalScrollerView.$().attr('aria-valuenow'), view.get('horizontalScrollOffset'), "verticalScroller has aria-valuenow set");
 
@@ -256,7 +257,7 @@
       equals(opac, '0', 'after fadeout, scroller thumb opacity should equal zero');
       SC.RunLoop.begin();
       verticalScroller.fadeIn(0.1);
-      view._scsv_adjustElementScroll(); // This method is PRIVATE. (Called here to cheat, synchronously testing an asynchronous operation.)
+      view._sc_repositionContentViewUnfiltered(); // This method is PRIVATE. (Called here to cheat, synchronously testing an asynchronous operation.)
       SC.RunLoop.end();
       setTimeout(function() {
         opac = verticalScroller.$('.thumb').css('opacity');
@@ -275,13 +276,15 @@
     stop(2000);
     expect(2);
     SC.RunLoop.begin();
-    view._sc_fadeOutScrollers();
+    view._sc_fadeOutHorizontalScroller();
+    view._sc_fadeOutVerticalScroller();
     SC.RunLoop.end();
     setTimeout(function() {
       opac = verticalScroller.$('.thumb').css('opacity');
       equals(opac, '0', 'after fadeout, scroller thumb opacity should equal zero');
       SC.RunLoop.begin();
-      view._sc_fadeInScrollers();
+      view._sc_fadeInHorizontalScroller();
+      view._sc_fadeInVerticalScroller();
       SC.RunLoop.end();
       setTimeout(function() {
         opac = verticalScroller.$('.thumb').css('opacity');

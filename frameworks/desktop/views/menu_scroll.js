@@ -5,7 +5,8 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('views/scroll');
+sc_require('views/scroll_view');
+sc_require('views/scroller');
 
 /** @class
 
