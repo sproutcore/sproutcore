@@ -1387,7 +1387,6 @@ SC.ScrollView = SC.View.extend({
 
   /** @private Whenever the scale changes, update the scrollers and adjust the location of the content view. */
   _sc_scaleDidChange: function () {
-    // console.log('_sc_scaleDidChange()');
     var contentView = this.get('contentView'),
       scale = this.get('scale');
 
@@ -1817,14 +1816,14 @@ SC.ScrollView = SC.View.extend({
 
     // get the frame for the view - should work even for views with static
     // layout, assuming it has been added to the screen.
-    var vf = view.get('frame');
-    if (!vf) return NO; // nothing to do
+    var viewFrame = view.get('borderFrame');
+    if (!viewFrame) return NO; // nothing to do
 
     // convert view's frame to an offset from the contentView origin.  This
     // will become the new scroll offset after some adjustment.
-    vf = contentView.convertFrameFromView(vf, view.get('parentView'));
+    viewFrame = contentView.convertFrameFromView(viewFrame, view.get('parentView'));
 
-    return this.scrollToRect(vf);
+    return this.scrollToRect(viewFrame);
   },
 
   /** @private SC.View */
