@@ -886,35 +886,37 @@ SC.ScrollView = SC.View.extend({
       // Be wary of content views that replace their layers.
       // newView.addObserver('layer', this, layerChangeFunc);
 
-      // Ensure that scale transforms occur from the top-left corner (per our math).
-      newView.adjust({
-        transformOriginX: 0,
-        transformOriginY: 0
-      });
+      if (!newView.useStaticLayout) {
+        // Ensure that scale transforms occur from the top-left corner (per our math).
+        newView.adjust({
+          transformOriginX: 0,
+          transformOriginY: 0
+        });
 
-      // When a view wants an accelerated layer and isn't a fixed size, we convert it to a fixed
-      // size and resize it when our container resizes.
-      if (!newView.get('isFixedSize')) {
-        var contentViewLayout = newView.get('layout');
+        // When a view wants an accelerated layer and isn't a fixed size, we convert it to a fixed
+        // size and resize it when our container resizes.
+        if (!newView.get('isFixedSize')) {
+          var contentViewLayout = newView.get('layout');
 
-        // Fix the width.
-        if (contentViewLayout.width == null) {
-          this._sc_shouldResizeContentWidth = true; // Flag to indicate that when the container's width changes, we should update the content's width.
+          // Fix the width.
+          if (contentViewLayout.width == null) {
+            this._sc_shouldResizeContentWidth = true; // Flag to indicate that when the container's width changes, we should update the content's width.
 
-          newView.adjust({
-            right: null,
-            width: this._sc_containerWidth
-          });
-        }
+            newView.adjust({
+              right: null,
+              width: this._sc_containerWidth
+            });
+          }
 
-        // Fix the height.
-        if (contentViewLayout.height == null) {
-          this._sc_shouldResizeContentHeight = true; // Flag to indicate that when the container's height changes, we should update the content's height.
+          // Fix the height.
+          if (contentViewLayout.height == null) {
+            this._sc_shouldResizeContentHeight = true; // Flag to indicate that when the container's height changes, we should update the content's height.
 
-          newView.adjust({
-            bottom: null,
-            height: this._sc_containerHeight
-          });
+            newView.adjust({
+              bottom: null,
+              height: this._sc_containerHeight
+            });
+          }
         }
       }
 
