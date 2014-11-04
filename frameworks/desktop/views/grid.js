@@ -25,6 +25,9 @@ sc_require('views/list');
 SC.GridView = SC.ListView.extend(
 /** @scope SC.GridView.prototype */ {
 
+  /** @private */
+  _lastFrameWidth: null,
+
   /**
     @type Array
     @default ['sc-grid-view']
@@ -110,6 +113,12 @@ SC.GridView = SC.ListView.extend(
         row = Math.floor(contentIndex / itemsPerRow),
         col = contentIndex - (itemsPerRow * row);
 
+    // If the frame is not ready, then just return an empty layout.
+    // Otherwise, NaN will be entered into layout values.
+    if (frameWidth === 0 || itemsPerRow === 0) {
+      return {};
+    }
+
     return {
       left: col * columnWidth,
       top: row * rowHeight,
@@ -127,15 +136,15 @@ SC.GridView = SC.ListView.extend(
       count = (content) ? content.get('length') : 0,
       rowHeight = this.get('rowHeight') || 48,
       itemsPerRow = this.get('itemsPerRow'),
-      rows = Math.ceil(count / itemsPerRow);
+      // Check that itemsPerRow isn't 0 to prevent Infinite rows.
+      rows = itemsPerRow ? Math.ceil(count / itemsPerRow) : 0;
 
     // use this cached layout hash to avoid allocing memory...
     var ret = this._cachedLayoutHash;
     if (!ret) ret = this._cachedLayoutHash = {};
 
-    // set minHeight
-    ret.minHeight = rows * rowHeight;
-    this.set('calculatedHeight', ret.minHeight);
+    ret.height = rows * rowHeight;
+
     return ret;
   },
 
@@ -197,7 +206,7 @@ SC.GridView = SC.ListView.extend(
       top = layout.top;
       left = layout.left;
       if (dropOperation & SC.DROP_AFTER) left += layout.width;
-      height = layout.height;
+      var height = layout.height;
 
       // Adjust the position of the insertion point.
       insertionPoint.adjust({ top: top, left: left, height: height });
