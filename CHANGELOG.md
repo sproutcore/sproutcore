@@ -17,6 +17,35 @@ CHANGE LOG
 
 * Some fixes for deprecated template view framework.
 
+
+1.10.3
+-----------
+
+### INTERNAL CHANGES
+
+* Adds a new state to the view statechart, SC.CoreView.ATTACHED_SHOWN_ANIMATING. This state is for views that are manually animated via a call to `animate` when in the ATTACHED_SHOWN state and is used to cancel manual animations if a view is hidden or removed, which would cause the animation callbacks to fail to trigger. Also prevents animate from running on views that are not visible in the window. 
+* Removes double clone of observable members array. The `getMembers` function already does a slice of the array, so SC.clone (which just does another slice of the array) is unnecessary.
+* Prevents bindings that are disconnected at the moment of updating from continuing, which would throw an exception because the binding would try to resolve both sides of the connection and become connected to the window (which doesn’t support the KVC methods the binding uses).
+
+One scenario that this has been seen in is an observer that destroys an old binding and creates a new binding to a *store query based computed property*. As the binding is about to update, it first has to get the value of the query based computed property from the target, which results in the store flushing and indicating certain records did change which in turn triggers the original observer function where the binding is replaced. In the very next step, the old binding, which is now disconnected, tries to syncronize its value, which will fail.
+
+### BUG FIXES
+
+* Fixes problems with SC.GridView when its width goes to 0 (which would calculate infinite items per row).
+* Fixes a bug where separator items gained the value of the previous item such that the separator item would appear selected in the menu when the previous item was actually selected.
+* Fixes regression that the icon of the selected item doesn’t update the view.
+Adds ability to set the value of the view and have the view’s title and icon update.
+* Fixes regression with transitionIn due to animate rejecting non-visible states.
+* Fixes double invokeNext call when runAnimationCallback is wrapped in an invokeNext.
+* Fixes direct duplicate call to commitEditing in SC.InlineTextField when using the tab or shift-tab keys, also cleans whitespace in SC.Editable.
+* Fixes cancellation of view transitions. If the transition is cancelled, the plugin should not fire the callback. Cancels show/hide transitions when the state changes before they complete.
+* Fixes bugs where logic bindings (and & or) defined on classes were being serviced by a shared underlying object, causing issues when two instances wanted different values or to be destroyed at different times.
+* Stacked child layout views: don't add padding or margins if none of the children are visible.
+* Fixes animations failing when browser tab not visible.
+* Takes a new approach to transition and animation callbacks. Instead of waiting for the exact right event name to be determined, we listen to all the possible combinations for the browser and then remove the unnecessary listeners when the test completes. This allows code to run that uses transitions and animations in the application’s main function and doesn’t require blocking the launch of the application for the tests to complete.
+* Fixes animations failing when tab loaded and not visible. Because animation callbacks are paused when some browsers’ tabs are not visible, we can’t apply animations based on the browser support for CSS transitions alone. We also need to set up our animation event listeners and so any animations that occur while the page is loading should simply apply directly.
+* Fixes the case that a layout observer calls adjust due to an animate layout being set. The observer would fire before the _animateLayout internal property would be cleared, leading a later adjust method to fail.
+
 1.10.2
 -----------
 
@@ -26,6 +55,11 @@ CHANGE LOG
 * Added a debug-mode only developer error to prevent double calls to materializeRecord from within materializeRecord. The result is duplicated objects that appear to be the same record instance but are in fact not, which can be very time-consuming to debug. Hopefully this saves developers a lot of grief.
 * Added several *debug-mode only* `toString` methods for easy debugging.
 * Added a tiny bit of debug mode only developer support. If manually connecting/disconnecting bindings it's possible to accidentally try to bind to a missing object. The normal stack trace this would produce is hard to follow so we present a more traceable error message with the stack.
+* Fixed issue with property chain notifications.
+
+Property chains would by notified during teardownEnumerablePropertyChains, but this could result in computed properties trying to access the array before it was finished mutating. This was observed with SC.ChildArray's.
+
+Instead, wait until setupEnumerablePropertyChains to notify, and always notify with the assumption that changes were made.
 
 ### BUG FIXES
 
