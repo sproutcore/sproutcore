@@ -3090,10 +3090,10 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
 
   /** @private - when we are about to become visible, reload if needed. */
   willShowInDocument: function () {
-      if (this._invalidIndexes) this.invokeOnce(this.reloadIfNeeded);
-      if (this._invalidSelection) {
-        this.invokeOnce(this.reloadSelectionIndexesIfNeeded);
-      }
+    if (this._invalidIndexes) this.invokeOnce(this.reloadIfNeeded);
+    if (this._invalidSelection) {
+      this.invokeOnce(this.reloadSelectionIndexesIfNeeded);
+    }
   },
 
   /** @private - when we are added, reload if needed. */
