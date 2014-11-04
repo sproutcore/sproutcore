@@ -436,7 +436,7 @@ SC.NestedStore = SC.Store.extend(
     editables[storeKey] = 1 ; // use number for dense array support
 
     // propagate the data to the child records
-    this._updateChildRecordHashes(storeKey, hash);
+    this._updateChildRecordHashes(storeKey, hash, status);
 
     return this ;
   },
