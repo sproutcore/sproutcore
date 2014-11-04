@@ -1296,6 +1296,10 @@ SC.ScrollView = SC.View.extend({
     // Create the container layout map once.
     if (!containerLayoutMap) { containerLayoutMap = SC.ScrollView._SC_CONTAINER_LAYOUT_MAP = {}; }
 
+    // Set the standard.
+    containerLayoutMap.bottom = 0;
+    containerLayoutMap.right = 0;
+
     // Adjust the horizontal scroller.
     if (hasHorizontalScroller) {
       var horizontalOverlay = this.get('horizontalOverlay'),
@@ -1319,10 +1323,8 @@ SC.ScrollView = SC.View.extend({
       }
       horizontalScrollerView.set('layout', layout);
 
-      // Prepare to adjust the content view accordingly.
-      if (horizontalOverlay) {
-        containerLayoutMap.bottom = 0;
-      } else {
+      // Adjust the content view accordingly.
+      if (canScrollHorizontal && !horizontalOverlay) {
         containerLayoutMap.bottom = horizontalScrollerHeight;
       }
 
@@ -1355,9 +1357,7 @@ SC.ScrollView = SC.View.extend({
       verticalScrollerView.set('layout', layout);
 
       // Prepare to adjust the content view accordingly.
-      if (verticalOverlay) {
-        containerLayoutMap.right = 0;
-      } else {
+      if (canScrollVertical && !verticalOverlay) {
         containerLayoutMap.right = verticalScrollerWidth;
       }
 
