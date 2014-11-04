@@ -25,6 +25,9 @@ sc_require('views/list');
 SC.GridView = SC.ListView.extend(
 /** @scope SC.GridView.prototype */ {
 
+  /** @private */
+  _lastFrameWidth: null,
+
   /**
     @type Array
     @default ['sc-grid-view']
@@ -140,7 +143,7 @@ SC.GridView = SC.ListView.extend(
     var ret = this._cachedLayoutHash;
     if (!ret) ret = this._cachedLayoutHash = {};
 
-    ret.minHeight = rows * rowHeight;
+    ret.height = rows * rowHeight;
 
     return ret;
   },
