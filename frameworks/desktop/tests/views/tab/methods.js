@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/*global module test htmlbody ok equals same stop start */
+/*globals module, test, ok */
 
 module("SC.TabView", {
   setup: function() {
@@ -14,11 +14,11 @@ module("SC.TabView", {
         view1: SC.View.create(),
         view2: SC.View.create()
       });
-    })
+    });
   },
 
   teardown: function() {
-    window.globalPage.destroy()
+    window.globalPage.destroy();
     delete window.globalPage;
   }
 });
@@ -40,17 +40,18 @@ test("Tabs referencing global views.", function() {
     view = pane.tabView;
   });
 
-  ok(view.getPath('containerView.contentView') === window.globalPage.get('view1'), "The tab view should now be showing globalPage.view1.")
+  ok(view.getPath('containerView.contentView') === window.globalPage.get('view1'), "The tab view should now be showing globalPage.view1.");
 
   SC.run(function() {
     view.set('nowShowing', 'globalPage.view2');
   });
 
-  ok(view.getPath('containerView.contentView') === window.globalPage.get('view2'), "The tab view should now be showing globalPage.view2.")
+  ok(view.getPath('containerView.contentView') === window.globalPage.get('view2'), "The tab view should now be showing globalPage.view2.");
 
-  view = null;
-  pane.destroy();
-  pane = null;
+  // Clean up.
+  SC.run(function() {
+    pane.destroy();
+  });
 });
 
 test("Tabs referencing local views.", function() {
@@ -80,6 +81,11 @@ test("Tabs referencing local views.", function() {
   });
 
   ok(view.getPath('containerView.contentView') === view.get('view2'), "The tab view's local view2 should now be showing.");
+
+  // Clean up.
+  SC.run(function() {
+    pane.destroy();
+  });
 });
 
 test("Tabs referencing deep local views.", function() {
@@ -110,4 +116,9 @@ test("Tabs referencing deep local views.", function() {
   });
 
   ok(view.getPath('containerView.contentView') === view.getPath('localPage.view2'), "The tab view's local view2 should now be showing.");
+
+  // Clean up.
+  SC.run(function() {
+    pane.destroy();
+  });
 });

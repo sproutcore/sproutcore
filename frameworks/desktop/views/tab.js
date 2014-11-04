@@ -156,30 +156,39 @@ SC.TabView = SC.View.extend(
 
   /** @private Sync important changes with the child views. */
   _tab_nowShowingDidChange: function() {
-    var v = this.get('nowShowing');
-    // Sync the segmented view.
-    this.get('segmentedView').set('value',v);
-    // Normalize any local views specified by local property strings or strings beginning with '.'
-    var dotspot = v ? v.indexOf('.') : null;
-    if (dotspot === -1) {
-      v = this.get(v);
-    }
-    else if (dotspot === 0) {
-      v = this.getPath(v.slice(1));
-    }
-    // Sync the container view.
-    this.get('containerView').set('nowShowing',v);
-    return this;
-  }.observes('nowShowing'),
+    var content = this.get('nowShowing');
 
-  /** @private */
-  _tab_saveUserDefault: function() {
-    // if user default is set, save also
-    var v = this.get('nowShowing');
+    // Sync the segmented view.
+    this.get('segmentedView').set('value', content);
+
+    // If the user default is set, save it.
     var defaultKey = this.get('userDefaultKey');
     if (defaultKey) {
-      SC.userDefaults.set([defaultKey,'nowShowing'].join(':'), v);
+      SC.userDefaults.set([defaultKey,'nowShowing'].join(':'), content);
     }
+
+    // If it's a string, try to turn it into the object it references...
+    if (SC.typeOf(content) === SC.T_STRING && content.length > 0) {
+      var dotspot = content.indexOf('.');
+      // No dot means a local property, either to this view or this view's page.
+      if (dotspot === -1) {
+        var tempContent = this.get(content);
+        content = SC.kindOf(tempContent, SC.CoreView) ? tempContent : SC.objectForPropertyPath(content, this.get('page'));
+      }
+      // Dot at beginning means local property path.
+      else if (dotspot === 0) {
+        content = this.getPath(content.slice(1));
+      }
+      // Dot after the beginning
+      else {
+        content = SC.objectForPropertyPath(content);
+      }
+    }
+
+    // Sync the container view.
+    this.get('containerView').set('nowShowing', content);
+
+    return this;
   }.observes('nowShowing'),
 
   /** @private */
