@@ -553,6 +553,7 @@ SC.View.reopen(
     if (scale == null) scale = 1;
     if (oX == null) oX = 0.5;
     if (oY == null) oY = 0.5;
+
     // If the scale isn't 1, do some calculations.
     if (scale !== 1) {
       frame = SC.scaleRect(frame, scale, oX, oY);
