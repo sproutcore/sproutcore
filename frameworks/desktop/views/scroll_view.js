@@ -98,9 +98,6 @@ SC.ScrollView = SC.View.extend({
   /** @private The cached height of the content. */
   _sc_contentHeight: 0,
 
-  /** @private The current frame of the content view, used to determine if the size of the content view changes (vs. just its position). */
-  // _sc_contentViewFrame: null,
-
   /** @private The cached width of the content. */
   _sc_contentWidth: 0,
 
@@ -1293,7 +1290,7 @@ SC.ScrollView = SC.View.extend({
       verticalScrollerWidth = verticalScrollerView ? verticalScrollerView.get('scrollbarThickness') : 0,
       layout; // The new layout to be applied to each scroller.
 
-    // Create the container layout map once.
+    // Create the container layout map once. Note: This is a shared object, all properties must be overwritten each time.
     if (!containerLayoutMap) { containerLayoutMap = SC.ScrollView._SC_CONTAINER_LAYOUT_MAP = {}; }
 
     // Set the standard.
@@ -1381,7 +1378,6 @@ SC.ScrollView = SC.View.extend({
       oldView.removeObserver('frame', this, frameChangeFunc);
       // oldView.removeObserver('layer', this, layerChangeFunc);
 
-      this._sc_contentViewFrame = null;
       this._sc_shouldResizeContentWidth = false;
       this._sc_shouldResizeContentHeight = false;
     }
@@ -2058,7 +2054,7 @@ SC.ScrollView = SC.View.extend({
 
         // Determine how long the deceleration should take (we can't animate left/top separately, so use the largest duration for both).
         // This variable also acts as a flag so that when the content view is repositioned, it will be animated.
-        this._sc_animationDuration = Math.max(Math.max(durationH, durationV), durationS);
+        this._sc_animationDuration = Math.max(Math.max(durationH, durationV), durationS) + 2;
 
         // Clear up all caches from touchesDragged.
         this._sc_isTouchScrollingH = false;
