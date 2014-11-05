@@ -1285,9 +1285,9 @@ SC.ScrollView = SC.View.extend({
       canScrollVertical = this.get('canScrollVertical'),
       containerLayoutMap = SC.ScrollView._SC_CONTAINER_LAYOUT_MAP, // Shared object used to avoid continually initializing/destroying objects.
       horizontalScrollerView = this.get('horizontalScrollerView'),
-      horizontalScrollerHeight = horizontalScrollerView ? horizontalScrollerView.get('scrollbarThickness') : 0,
+      horizontalScrollerHeight = horizontalScrollerView && canScrollHorizontal ? horizontalScrollerView.get('scrollbarThickness') : 0,
       verticalScrollerView = this.get('verticalScrollerView'),
-      verticalScrollerWidth = verticalScrollerView ? verticalScrollerView.get('scrollbarThickness') : 0,
+      verticalScrollerWidth = verticalScrollerView && canScrollVertical ? verticalScrollerView.get('scrollbarThickness') : 0,
       layout; // The new layout to be applied to each scroller.
 
     // Create the container layout map once. Note: This is a shared object, all properties must be overwritten each time.
