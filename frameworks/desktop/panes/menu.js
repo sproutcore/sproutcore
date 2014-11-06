@@ -561,7 +561,9 @@ SC.MenuPane = SC.PickerPane.extend(
 
     // Create the menu items collection view.
     // TODO: Should this not be an SC.ListView?
-    menuView = this._menuView = SC.View.create();
+    menuView = this._menuView = SC.View.create({
+      layout: { height: 0 }
+    });
 
     scroll = this._menuScrollView = this.createChildView(SC.MenuScrollView, {
       controlSize: this.get('controlSize'),
@@ -1073,7 +1075,7 @@ SC.MenuPane = SC.PickerPane.extend(
         verticalOffset = 0,
         verticalPageScroll;
 
-    if (this._menuScrollView && this._menuScrollView.verticalScrollerView2) {
+    if (this._menuScrollView && this._menuScrollView.bottomScrollerView) {
 
       if (currentMenuItem) {
         idx = currentMenuItem.getPath('content.contentIndex');
@@ -1119,7 +1121,7 @@ SC.MenuPane = SC.PickerPane.extend(
         verticalOffset = 0,
         verticalPageScroll;
 
-    if (this._menuScrollView && this._menuScrollView.verticalScrollerView) {
+    if (this._menuScrollView && this._menuScrollView.topScrollerView) {
 
       if (currentMenuItem) {
         idx = currentMenuItem.getPath('content.contentIndex');
