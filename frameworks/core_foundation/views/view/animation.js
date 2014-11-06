@@ -686,7 +686,7 @@ SC.View.reopen(
             // Convert scientific E number representations to fixed numbers.
             // In WebKit at least, these throw exceptions when used to generate the matrix. To test,
             // paste the following in a browser console:
-            //  new WebKitCSSMatrix('matrix(-1, 1.22464679914735e-16, -1.22464679914735e-16, -1, 0, 0)')
+            //    new WebKitCSSMatrix('matrix(-1, 1.22464679914735e-16, -1.22464679914735e-16, -1, 0, 0)')
             value = this._sc_removeENotationFromMatrixString(value);
             matrix = new window[CSSMatrixClass](value);
 
