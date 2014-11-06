@@ -370,20 +370,89 @@ SC.ScrollerView = SC.View.extend(
 
     @param {Number} position the position of the thumb in pixels
   */
-  adjustThumbPosition: function (thumb, position) {
-    // Don't touch the DOM if the position hasn't changed
-    if (this._thumbPosition === position) return;
+  adjustThumbPosition: function (thumb, thumbPosition) {
+    var transformAttribute = SC.browser.experimentalCSSNameFor('transform'),
+        thumbEl = thumb[0];
 
-    switch (this.get('layoutDirection')) {
-    case SC.LAYOUT_VERTICAL:
-      thumb.css('top', position);
-      break;
-    case SC.LAYOUT_HORIZONTAL:
-      thumb.css('left', position);
-      break;
+    // Don't touch the DOM if the position hasn't changed.
+    if (this._thumbPosition !== thumbPosition) {
+      // Consider that the parent view may be animating its final position, then we need to also animate
+      // our final position.
+      var parentView = this.get('parentView'),
+        duration = parentView._sc_animationDuration,
+        timing = parentView._sc_animationTiming;
+
+      if (SC.platform.supportsCSSTransitions) {
+        var transitionStyle = SC.browser.experimentalStyleNameFor('transition');
+
+        if (duration) {
+
+          // Will use translation transform to position thumb.
+          if (SC.platform.supportsCSSTransforms) {
+            thumbEl.style[transitionStyle] = transformAttribute + ' ' + duration + 's ' + timing;
+
+          // Will use top/left style to position thumb.
+          } else {
+            switch (this.get('layoutDirection')) {
+            case SC.LAYOUT_VERTICAL:
+              thumbEl.style[transitionStyle] = 'top ' + duration + 's ' + timing;
+              break;
+            case SC.LAYOUT_HORIZONTAL:
+              thumbEl.style[transitionStyle] = 'left ' + duration + 's ' + timing;
+              break;
+            }
+          }
+
+        // No duration, clear any previous transition.
+        } else {
+          thumbEl.style[transitionStyle] = '';
+        }
+      }
+
+
+      // Position the thumb.
+      var transformStyle;
+      switch (this.get('layoutDirection')) {
+      case SC.LAYOUT_VERTICAL:
+
+        // Use translation transform to position thumb.
+        if (SC.platform.supportsCSSTransforms) {
+          transformStyle = 'translateX(0px) translateY(' + thumbPosition + 'px)';
+
+          // TODO: Is this a necessary check?
+          if (SC.platform.supportsCSS3DTransforms) { transformStyle += ' translateZ(0px)'; }
+
+          thumbEl.style[transformAttribute] = transformStyle;
+
+        // Use top style to position thumb.
+        } else {
+          thumbEl.style.top = thumbPosition;
+        }
+
+        break;
+
+      case SC.LAYOUT_HORIZONTAL:
+        // Use translation transform to position thumb.
+        if (SC.platform.supportsCSSTransforms) {
+
+          transformStyle = 'translateX(' + thumbPosition + 'px) translateY(0px)';
+
+          // TODO: Is this a necessary check?
+          if (SC.platform.supportsCSS3DTransforms) { transformStyle += ' translateZ(0px)'; }
+
+          thumbEl.style[transformAttribute] = transformStyle;
+
+        // Use left style to position thumb.
+        } else {
+          thumbEl.style.left = thumbPosition;
+        }
+
+        break;
+      }
     }
 
-    this._thumbPosition = position;
+    // Cache these values to check for changes.
+    this._thumbPosition = thumbPosition;
   },
 
   /** @private */
@@ -924,22 +993,131 @@ SC.OverlayScrollerView = SC.ScrollerView.extend(
 
   /** @private */
   adjustThumb: function (thumb, thumbPosition, thumbLength) {
-    var transformCSS = SC.browser.experimentalCSSNameFor('transform');
-    var thumbInner = this.$('.thumb-inner');
+    var transformAttribute = SC.browser.experimentalCSSNameFor('transform'),
+        thumbEl = thumb[0],
+        thumbInner = this.$('.thumb-inner'),
+        thumbInnerEl = thumbInner[0];
 
-    switch (this.get('layoutDirection')) {
-    case SC.LAYOUT_VERTICAL:
-      if (this._thumbPosition !== thumbPosition) thumb.css(transformCSS, 'translate3d(0px,' + thumbPosition + 'px,0px)');
-      if (this._thumbSize !== thumbLength) {
-        thumbInner.css(transformCSS, 'translate3d(0px,' + Math.round(thumbLength - 1044) + 'px,0px)');
+    // Don't touch the DOM if the position hasn't changed.
+    if (this._thumbPosition !== thumbPosition) {
+      // Consider that the parent view may be animating its final position, then we need to also animate
+      // our final position.
+      var parentView = this.get('parentView'),
+        duration = parentView._sc_animationDuration,
+        timing = parentView._sc_animationTiming;
+
+      if (SC.platform.supportsCSSTransitions) {
+        var transitionStyle = SC.browser.experimentalStyleNameFor('transition');
+
+        if (duration) {
+
+          // Will use translation transform to position thumb.
+          if (SC.platform.supportsCSSTransforms) {
+            thumbEl.style[transitionStyle] = transformAttribute + ' ' + duration + 's ' + timing;
+
+            if (this._thumbSize !== thumbLength) {
+              thumbInnerEl.style[transitionStyle] = transformAttribute + ' ' + duration + 's ' + timing;
+            }
+
+          // Will use top/left style to position thumb.
+          } else {
+            switch (this.get('layoutDirection')) {
+            case SC.LAYOUT_VERTICAL:
+              thumbEl.style[transitionStyle] = 'top ' + duration + 's ' + timing;
+
+              if (this._thumbSize !== thumbLength) {
+                thumbInnerEl.style[transitionStyle] = 'top ' + duration + 's ' + timing;
+              }
+
+              break;
+            case SC.LAYOUT_HORIZONTAL:
+              thumbEl.style[transitionStyle] = 'left ' + duration + 's ' + timing;
+
+              if (this._thumbSize !== thumbLength) {
+                thumbInnerEl.style[transitionStyle] = 'left ' + duration + 's ' + timing;
+              }
+
+              break;
+            }
+          }
+
+        // No duration, clear any previous transition.
+        } else {
+          thumbEl.style[transitionStyle] = '';
+          thumbInnerEl.style[transitionStyle] = '';
+        }
       }
-      break;
-    case SC.LAYOUT_HORIZONTAL:
-      if (this._thumbPosition !== thumbPosition) thumb.css(transformCSS, 'translate3d(' + thumbPosition + 'px,0px,0px)');
-      if (this._thumbSize !== thumbLength) {
-        thumbInner.css(transformCSS, 'translate3d(' + Math.round(thumbLength - 1044) + 'px,0px,0px)');
+
+
+      // Position the thumb.
+      var transformStyle;
+      switch (this.get('layoutDirection')) {
+      case SC.LAYOUT_VERTICAL:
+
+        // Use translation transform to position thumb.
+        if (SC.platform.supportsCSSTransforms) {
+          transformStyle = 'translateX(0px) translateY(' + thumbPosition + 'px)';
+
+          // TODO: Is this a necessary check?
+          if (SC.platform.supportsCSS3DTransforms) { transformStyle += ' translateZ(0px)'; }
+
+          thumbEl.style[transformAttribute] = transformStyle;
+          // thumb.css(transformCSS, 'translate3d(0px,' + thumbPosition + 'px,0px)');
+
+          if (this._thumbSize !== thumbLength) {
+            transformStyle = 'translateX(0px) translateY(' + Math.round(thumbLength - 1044) + 'px)';
+
+            // TODO: Is this a necessary check?
+            if (SC.platform.supportsCSS3DTransforms) { transformStyle += ' translateZ(0px)'; }
+
+            // thumbInner.css(transformCSS, 'translate3d(0px,' + Math.round(thumbLength - 1044) + 'px,0px)');
+            thumbInnerEl.style[transformAttribute] = transformStyle;
+          }
+
+        // Use top style to position thumb.
+        } else {
+          thumbEl.style.top = thumbPosition;
+
+          if (this._thumbSize !== thumbLength) {
+            thumbInnerEl.style.top = Math.round(thumbLength - 1044);
+          }
+        }
+
+        break;
+
+      case SC.LAYOUT_HORIZONTAL:
+        // Use translation transform to position thumb.
+        if (SC.platform.supportsCSSTransforms) {
+
+          transformStyle = 'translateX(' + thumbPosition + 'px) translateY(0px)';
+
+          // TODO: Is this a necessary check?
+          if (SC.platform.supportsCSS3DTransforms) { transformStyle += ' translateZ(0px)'; }
+
+          thumbEl.style[transformAttribute] = transformStyle;
+          // thumb.css(transformCSS, 'translate3d(0px,' + thumbPosition + 'px,0px)');
+
+          if (this._thumbSize !== thumbLength) {
+            transformStyle = 'translateX(' + Math.round(thumbLength - 1044) + 'px) translateY(0px)';
+
+            // TODO: Is this a necessary check?
+            if (SC.platform.supportsCSS3DTransforms) { transformStyle += ' translateZ(0px)'; }
+
+            // thumbInner.css(transformCSS, 'translate3d(0px,' + Math.round(thumbLength - 1044) + 'px,0px)');
+            thumbInnerEl.style[transformAttribute] = transformStyle;
+          }
+
+        // Use left style to position thumb.
+        } else {
+          thumbEl.style.left = thumbPosition;
+
+          if (this._thumbSize !== thumbLength) {
+            thumbInnerEl.style.left = Math.round(thumbLength - 1044);
+          }
+        }
+
+        break;
       }
-      break;
     }
 
     // Cache these values to check for changes.

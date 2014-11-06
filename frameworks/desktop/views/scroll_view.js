@@ -829,6 +829,10 @@ SC.ScrollView = SC.View.extend({
       this.set('horizontalScrollOffset', -curLayout.left);
       this.set('verticalScrollOffset', -curLayout.top);
       this.set('scale', curLayout.scale);
+
+      // Clear out the animation flags.
+      this._sc_animationDuration = null;
+      this._sc_animationTiming = null;
     }
   },
 
@@ -1286,6 +1290,9 @@ SC.ScrollView = SC.View.extend({
         top = Math.floor(top);
       }
 
+      // Cancel any active animation in place.
+      this._sc_cancelAnimation();
+
       if (this._sc_animationDuration) {
 
         contentView.animate({ left: left, top: top, scale: scale }, {
@@ -1297,9 +1304,6 @@ SC.ScrollView = SC.View.extend({
         // Note: The next run loop will be queued none-the-less, so we may want to avoid that entirely in the future.
         contentView._animate();
 
-        // Clear out the flag that got us here.
-        this._sc_animationDuration = null;
-        this._sc_animationTiming = null;
       } else {
         contentView.adjust({
           left: left,
