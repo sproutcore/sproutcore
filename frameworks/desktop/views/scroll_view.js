@@ -1473,7 +1473,7 @@ SC.ScrollView = SC.View.extend({
 
       // Replace the class property with an instance.
       scrollerView = this.horizontalScrollerView = this.createChildView(scrollerView, {
-        isVisible: false,
+        isVisible: !this.get('autohidesHorizontalScroller'),
         layoutDirection: SC.LAYOUT_HORIZONTAL,
         value: this.get('horizontalScrollOffset'),
         valueBinding: '.owner.horizontalScrollOffset', // Bind the value of the scroller to our horizontal offset.
@@ -1500,7 +1500,7 @@ SC.ScrollView = SC.View.extend({
 
       // Replace the class property with an instance.
       scrollerView = this.verticalScrollerView = this.createChildView(scrollerView, {
-        isVisible: false,
+        isVisible: !this.get('autohidesVerticalScroller'),
         layoutDirection: SC.LAYOUT_VERTICAL,
         value: this.get('verticalScrollOffset'),
         valueBinding: '.owner.verticalScrollOffset', // Bind the value of the scroller to our vertical offset.

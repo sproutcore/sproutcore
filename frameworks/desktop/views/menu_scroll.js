@@ -102,7 +102,7 @@ SC.MenuScrollView = SC.ScrollView.extend(
   /** @private @see SC.ScrollView. When the content view's size changes, we need to update our scroll offset properties. */
   _sc_contentViewSizeDidChangeUnfiltered: function () {
     var hasVerticalScroller = this.get('hasVerticalScroller'),
-        // minimumVerticalScrollOffset = this.get('minimumVerticalScrollOffset'),
+        // UNUSED. minimumVerticalScrollOffset = this.get('minimumVerticalScrollOffset'),
         maximumVerticalScrollOffset = this.get('maximumVerticalScrollOffset');
 
     if (hasVerticalScroller) {
@@ -115,7 +115,10 @@ SC.MenuScrollView = SC.ScrollView.extend(
       // Update if the visibility of the scrollers has changed now.
       var containerHeight = this._sc_containerHeight,
           contentHeight = this._sc_contentHeight;
-      this.setIfChanged('isVerticalScrollerVisible', contentHeight > containerHeight);
+
+      if (this.get('autohidesVerticalScroller')) {
+        this.setIfChanged('isVerticalScrollerVisible', contentHeight > containerHeight);
+      }
     }
   },
 
@@ -124,8 +127,7 @@ SC.MenuScrollView = SC.ScrollView.extend(
     var hasScroller = this.get('hasVerticalScroller'),
         containerView = this.get('containerView');
 
-
-    if (hasScroller) {
+    if (hasScroller && this.get('autohidesVerticalScroller')) {
       var bottomScrollerView = this.get('bottomScrollerView'),
           bottomScrollerThickness = bottomScrollerView.get('scrollerThickness'),
           maximumVerticalScrollOffset = this.get('maximumVerticalScrollOffset'),
@@ -170,7 +172,8 @@ SC.MenuScrollView = SC.ScrollView.extend(
     in the regular properties.
   */
   createChildViews: function () {
-    var childViews = [];
+    var childViews = [],
+      autohidesVerticalScroller = this.get('autohidesVerticalScroller');
 
     // Set up the container view.
     var containerView = this.get('containerView');
@@ -207,7 +210,7 @@ SC.MenuScrollView = SC.ScrollView.extend(
       topScrollerView = this.topScrollerView = this.createChildView(topScrollerView, {
         controlSize: controlSize,
         scrollDown: false,
-        isVisible: false,
+        isVisible: !autohidesVerticalScroller,
 
         value: this.get('verticalScrollOffset'),
         valueBinding: '.owner.verticalScrollOffset', // Bind the value of the scroller to our vertical offset.
@@ -234,7 +237,7 @@ SC.MenuScrollView = SC.ScrollView.extend(
       bottomScrollerView = this.bottomScrollerView = this.createChildView(bottomScrollerView, {
         controlSize: controlSize,
         scrollDown: true,
-        isVisible: false,
+        isVisible: !autohidesVerticalScroller,
         layout: { bottom: 0 },
 
         value: this.get('verticalScrollOffset'),
@@ -248,6 +251,12 @@ SC.MenuScrollView = SC.ScrollView.extend(
 
       // Add the scroller view to the child views array.
       childViews.push(bottomScrollerView);
+
+      // If the scrollers aren't initially hidden, adjust the container.
+      if (!autohidesVerticalScroller) {
+        containerView.adjust('top', topScrollerThickness);
+        containerView.adjust('bottom', bottomScrollerThickness);
+      }
     }
 
     // Set the childViews array.

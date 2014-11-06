@@ -3,7 +3,7 @@
 // Copyright: ©2006-2011 Strobe Inc. and contributors.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-/*globals SC, module, test, ok, equals, same, stop, start */
+/*globals SC, module, test, ok, equals */
 
 var view, pane;
 module("Menu Scroll View", {
@@ -48,13 +48,7 @@ module("Menu Scroll View", {
 test("menu scroll views cannot scroll horizontally", function () {
   ok(!view.get('hasHorizontalScroller'),
      "the horizontal scroller doesn't exist");
-  ok(!view.get('isHorizontalScrollerVisible'),
-     "the horizontal scroller shouldn't be visible");
-});
-
-test("vertical scroll views cannot scroll horizontally", function () {
-  ok(view.get('hasVerticalScroller'),
-     "the vertical scroller should exist");
+  ok(!view.get('canScrollHorizontal'), "The view cannot scroll horizontally.");
 });
 
 test("menu scrollers not visible when content doesn't fill the container", function () {
@@ -62,16 +56,17 @@ test("menu scrollers not visible when content doesn't fill the container", funct
   view.setPath('contentView.content', []);
   SC.RunLoop.end();
 
-  equals(view.getPath('verticalScrollerView.isVisible'), NO,
+  ok(view.get('hasVerticalScroller'), "the vertical scrollers should exist");
+  equals(view.getPath('topScrollerView.isVisible'), NO,
          "the top vertical scroller shouldn't be visible");
-  equals(view.getPath('verticalScrollerView2.isVisible'), NO,
+  equals(view.getPath('bottomScrollerView.isVisible'), NO,
          "the bottom vertical scroller shouldn't be visible");
 });
 
 test("initially, only the bottom menu scroller should be visible", function () {
-  equals(view.getPath('verticalScrollerView.isVisible'), NO,
+  equals(view.getPath('topScrollerView.isVisible'), NO,
          "the top scroller shouldn't be visible");
-  equals(view.getPath('verticalScrollerView2.isVisible'), YES,
+  equals(view.getPath('bottomScrollerView.isVisible'), YES,
          "the bottom scroller should be visible");
 });
 
@@ -81,77 +76,105 @@ test("initially, only the bottom menu scroller should be visible", function () {
 
 // Top scroller visibility
 test("when setting `verticalScrollOffset` to anywhere before the scroller thickness, the top scroller will become invisible", function () {
-  view.scrollTo(0, 50);
+  SC.run(function () {
+    view.scrollTo(0, 50);
+  });
 
-  ok(view.getPath('verticalScrollerView.isVisible'),
-     "top scroller should be visible");
+  ok(view.getPath('topScrollerView.isVisible'),
+     "top scroller should be visible 1");
 
-  view.scrollTo(0, view.getPath('verticalScrollerView.scrollerThickness'));
+  SC.run(function () {
+    view.scrollTo(0, view.getPath('topScrollerView.scrollerThickness'));
+  });
   equals(view.get('verticalScrollOffset'), 0,
          "view should be at 0px scroll offset");
-  ok(!view.getPath('verticalScrollerView.isVisible'),
+  ok(!view.getPath('topScrollerView.isVisible'),
      "top scroller should NOT be visible");
 
-  view.scrollTo(0, 50);
-  ok(view.getPath('verticalScrollerView.isVisible'),
-     "top scroller should be visible");
+  SC.run(function () {
+    view.scrollTo(0, 50);
+  });
+  ok(view.getPath('topScrollerView.isVisible'),
+     "top scroller should be visible 2");
 
-  view.scrollTo(0, view.getPath('verticalScrollerView.scrollerThickness') + 1);
-  ok(view.getPath('verticalScrollerView.isVisible'),
-     "top scroller should be visible");
+  SC.run(function () {
+    view.scrollTo(0, view.getPath('topScrollerView.scrollerThickness') + 1);
+  });
+  ok(view.getPath('topScrollerView.isVisible'),
+     "top scroller should be visible 3");
 
-  view.scrollTo(0, 50);
-  ok(view.getPath('verticalScrollerView.isVisible'),
-     "top scroller should be visible");
+  SC.run(function () {
+    view.scrollTo(0, 50);
+  });
+  ok(view.getPath('topScrollerView.isVisible'),
+     "top scroller should be visible 4");
 
-  view.scrollTo(0, view.getPath('verticalScrollerView.scrollerThickness') - 1);
-  ok(!view.getPath('verticalScrollerView.isVisible'),
+  SC.run(function () {
+    view.scrollTo(0, view.getPath('topScrollerView.scrollerThickness') - 1);
+  });
+  ok(!view.getPath('topScrollerView.isVisible'),
      "top scroller should NOT be visible");
 });
 
 // Bottom scroller visibility
 test("when setting `verticalScrollOffset` to anywhere before the scroller thickness, the bottom scroller will become invisible", function () {
   var max = view.get('maximumVerticalScrollOffset');
-  ok(view.getPath('verticalScrollerView2.isVisible'),
-     "bottom scroller should be visible");
+  ok(view.getPath('bottomScrollerView.isVisible'),
+     "bottom scroller should be visible 1");
 
   // @ bottom
-  view.scrollTo(0, max);
-  ok(!view.getPath('verticalScrollerView2.isVisible'),
+  SC.run(function () {
+    view.scrollTo(0, max);
+  });
+  ok(!view.getPath('bottomScrollerView.isVisible'),
      "bottom scroller should NOT be visible");
 
-  view.scrollTo(0, 0);
-  ok(view.getPath('verticalScrollerView2.isVisible'),
-     "bottom scroller should be visible");
+  SC.run(function () {
+    view.scrollTo(0, 0);
+  });
+  ok(view.getPath('bottomScrollerView.isVisible'),
+     "bottom scroller should be visible 2");
 
   // just enough so bottom is invisible
-  view.scrollTo(0, max - view.getPath('verticalScrollerView2.scrollerThickness') - 1);
-  ok(view.getPath('verticalScrollerView2.isVisible'),
-     "bottom scroller should be visible");
+  SC.run(function () {
+    view.scrollTo(0, max - view.getPath('bottomScrollerView.scrollerThickness') - 1);
+  });
+  ok(view.getPath('bottomScrollerView.isVisible'),
+     "bottom scroller should be visible 3");
 
-  view.scrollTo(0, 0);
-  ok(view.getPath('verticalScrollerView2.isVisible'),
-     "bottom scroller should be visible");
+  SC.run(function () {
+    view.scrollTo(0, 0);
+  });
+  ok(view.getPath('bottomScrollerView.isVisible'),
+     "bottom scroller should be visible 4");
 
   // exactly enough for bottom to be invisible
-  view.scrollTo(0, max - view.getPath('verticalScrollerView2.scrollerThickness'));
-  ok(!view.getPath('verticalScrollerView2.isVisible'),
+  SC.run(function () {
+    view.scrollTo(0, max - view.getPath('bottomScrollerView.scrollerThickness'));
+  });
+  ok(!view.getPath('bottomScrollerView.isVisible'),
      "bottom scroller should NOT be visible");
 
-  view.scrollTo(0, 0);
-  ok(view.getPath('verticalScrollerView2.isVisible'),
-     "bottom scroller should be visible");
+  SC.run(function () {
+    view.scrollTo(0, 0);
+  });
+  ok(view.getPath('bottomScrollerView.isVisible'),
+     "bottom scroller should be visible 5");
 
   // more than enough for bottom to be invisible
-  view.scrollTo(0, max - view.getPath('verticalScrollerView2.scrollerThickness') + 1);
-  ok(!view.getPath('verticalScrollerView2.isVisible'),
+  SC.run(function () {
+    view.scrollTo(0, max - view.getPath('bottomScrollerView.scrollerThickness') + 1);
+  });
+  ok(!view.getPath('bottomScrollerView.isVisible'),
      "bottom scroller should NOT be visible");
 });
 
 test("when the top scroller becomes visible, the vertical scroll offset is adjusted by the scroller thickness", function () {
-  view.scrollBy(0, 1);
+  SC.run(function () {
+    view.scrollBy(0, 1);
+  });
 
-  var thickness = view.getPath('verticalScrollerView.scrollerThickness');
+  var thickness = view.getPath('topScrollerView.scrollerThickness');
 
   // check for adjustment
   equals(view.get('verticalScrollOffset'),
@@ -159,77 +182,25 @@ test("when the top scroller becomes visible, the vertical scroll offset is adjus
          "the offset should be the scroller thickness + 1");
 
   // shouldn't adjust this time
-  view.scrollBy(0, 1);
+  SC.run(function () {
+    view.scrollBy(0, 1);
+  });
   equals(view.get('verticalScrollOffset'),
          2 + thickness,
          "the offset should be the scroller thickness + 2");
 
   // shouldn't adjust this time
-  view.scrollBy(0, -1);
+  SC.run(function () {
+    view.scrollBy(0, -1);
+  });
   equals(view.get('verticalScrollOffset'),
          1 + thickness,
          "the offset should be the scroller thickness + 1");
 
   // check for adjustment
-  view.scrollBy(0, -1);
+  SC.run(function () {
+    view.scrollBy(0, -1);
+  });
   equals(view.get('verticalScrollOffset'), 0,
          "the offset should be 0px");
-});
-
-// ..........................................................
-// autohidesVerticalScrollers => NO
-//
-
-test("when `autohidesVerticalScrollers` is NO, it will hide both when the content doesn't fill the container", function () {
-  view.set('autohidesVerticalScrollers', NO);
-  view.tile();
-
-  SC.RunLoop.begin();
-  view.setPath('contentView.content', []);
-  SC.RunLoop.end();
-
-  equals(view.getPath('verticalScrollerView.isVisible'), NO,
-         "the top vertical scroller shouldn't be visible");
-  equals(view.getPath('verticalScrollerView2.isVisible'), NO,
-         "the bottom vertical scroller shouldn't be visible");
-});
-
-test("when `autohidesVerticalScrollers` is NO, both scrollers will be shown when the content overflows", function () {
-  view.set('autohidesVerticalScrollers', NO);
-  view.tile();
-
-  equals(view.getPath('verticalScrollerView.isVisible'), YES,
-         "the top vertical scroller shouldn't be visible");
-  equals(view.getPath('verticalScrollerView2.isVisible'), YES,
-         "the bottom vertical scroller shouldn't be visible");
-});
-
-// ..........................................................
-// autohidesVerticalScroller  => NO AND
-// autohidesVerticalScrollers => NO
-//
-
-test("when `autohidesVerticalScroller` is NO, it will NOT hide both when the content doesn't fill the container", function () {
-  view.set('autohidesVerticalScroller', NO);
-  view.set('autohidesVerticalScrollers', NO);
-
-  SC.RunLoop.begin();
-  view.setPath('contentView.content', []);
-  SC.RunLoop.end();
-
-  equals(view.getPath('verticalScrollerView.isVisible'), YES,
-         "the top vertical scroller shouldn't be visible");
-  equals(view.getPath('verticalScrollerView2.isVisible'), YES,
-         "the bottom vertical scroller shouldn't be visible");
-});
-
-test("when `autohidesVerticalScroller` is NO, both scrollers will be shown when the content overflows", function () {
-  view.set('autohidesVerticalScroller', NO);
-  view.set('autohidesVerticalScrollers', NO);
-  view.tile();
-
-  equals(view.getPath('verticalScrollerView.isVisible'), YES,
-         "the top vertical scroller shouldn't be visible");
-  equals(view.getPath('verticalScrollerView2.isVisible'), YES,
-         "the bottom vertical scroller shouldn't be visible");
 });
