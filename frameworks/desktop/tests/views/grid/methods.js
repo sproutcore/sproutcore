@@ -147,25 +147,27 @@ test("Optimized re-position of item views when the frame changes.", function () 
   update to fit the new number of rows.
 */
 test("Adjusts layout when the itemsPerRow changes.", function () {
-  view.adjustLayout.expect(1);
+  // adjustLayout is called once on initialization so that the layout "style" that the view will be using
+  // is known.
+  view.adjustLayout.expect(2);
 
   SC.RunLoop.begin();
   view.notifyPropertyChange('frame');
   SC.RunLoop.end();
 
-  view.adjustLayout.expect(1);
+  view.adjustLayout.expect(2);
 
   SC.RunLoop.begin();
   view.adjust('height', 500);
   SC.RunLoop.end();
 
-  view.adjustLayout.expect(1);
+  view.adjustLayout.expect(2);
 
   SC.RunLoop.begin();
   view.adjust('width', 400);
   SC.RunLoop.end();
 
-  view.adjustLayout.expect(2);
+  view.adjustLayout.expect(3);
 });
 
 test("computeLayout gives back sane values when itemsPerRow is 0", function () {
