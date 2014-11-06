@@ -2092,7 +2092,7 @@ SC.ScrollView = SC.View.extend({
 
         // Determine how long the deceleration should take (we can't animate left/top separately, so use the largest duration for both).
         // This variable also acts as a flag so that when the content view is repositioned, it will be animated.
-        this._sc_animationDuration = Math.max(Math.max(durationH, durationV), durationS) + 2;
+        this._sc_animationDuration = Math.max(Math.max(durationH, durationV), durationS);
 
         // Clear up all caches from touchesDragged.
         this._sc_isTouchScrollingH = false;
