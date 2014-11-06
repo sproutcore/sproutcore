@@ -579,8 +579,8 @@ SC.View.reopen(
   /** @private Decompose a transformation matrix. */
   // TODO: Add skew support
   _sc_decompose3DTransformMatrix: function (matrix, expectsScale) {
-    var ret = SC.View._SC_DECOMPOSED_TRANSFORM_MAP;  // Shared object used to avoid continually initializing/destroying
-      // toDegrees = 180 / Math.PI,
+    var ret = SC.View._SC_DECOMPOSED_TRANSFORM_MAP,  // Shared object used to avoid continually initializing/destroying
+      toDegrees = 180 / Math.PI;
       // determinant;
 
     // Create the decomposition map once. Note: This is a shared object, all properties must be overwritten each time.
@@ -593,8 +593,8 @@ SC.View.reopen(
       ret.scaleY = Math.sqrt((matrix.m21 * matrix.m21) + (matrix.m22 * matrix.m22) + (matrix.m23 * matrix.m23));
       ret.scaleZ = Math.sqrt((matrix.m31 * matrix.m31) + (matrix.m32 * matrix.m32) + (matrix.m33 * matrix.m33));
 
-      // Remove scale from the matrix.
-      // matrix = matrix.scale(1 / ret.scaleX, 1 / ret.scaleY, 1 / ret.scaleZ);
+      // Decompose scale from the matrix.
+      matrix = matrix.scale(1 / ret.scaleX, 1 / ret.scaleY, 1 / ret.scaleZ);
     } else {
       ret.scaleX = 1;
       ret.scaleY = 1;
@@ -606,13 +606,13 @@ SC.View.reopen(
     // Find the 3 Euler angles.
     // ret.rotateX = Math.atan2(matrix.m32, matrix.m33) * toDegrees; // Between -180° and 180°
     // ret.rotateY = Math.atan2(-matrix.m31, Math.sqrt((matrix.m32 * matrix.m32) + (matrix.m33 * matrix.m33))) * toDegrees;  // Between -90° and 90°
-    // ret.rotateZ = -Math.atan2(matrix.m21, matrix.m11) * toDegrees; // Between -180° and 180°
+    ret.rotateZ = -Math.atan2(matrix.m21, matrix.m11) * toDegrees; // Between -180° and 180°
 
     // console.log("rotations: %@, %@, %@".fmt(ret.rotateX, ret.rotateY, ret.rotateZ));
 
     // if (ret.rotateX < 0) { ret.rotateX = 360 + ret.rotateX; } // Convert to 0° to 360°
     // if (ret.rotateY < 0) { ret.rotateY = 180 + ret.rotateY; } // Convert to 0° to 180°
-    // if (ret.rotateZ < 0) { ret.rotateZ = 360 + ret.rotateZ; } // Convert to 0° to 360°
+    if (ret.rotateZ < 0) { ret.rotateZ = 360 + ret.rotateZ; } // Convert to 0° to 360°
 
     // Pull out the translate values directly.
     ret.translateX = matrix.m41;
@@ -624,7 +624,7 @@ SC.View.reopen(
     return ret;
   },
 
-  /** @private Replace significantly small scientific E notation values with 0. */
+  /** @private Replace scientific E notation values with fixed decimal values. */
   _sc_removeENotationFromMatrixString: function (matrixString) {
     var components,
       numbers,
@@ -684,7 +684,8 @@ SC.View.reopen(
           if (CSSMatrixClass !== SC.UNSUPPORTED) {
 
             // Convert scientific E number representations to fixed numbers.
-            // In WebKit at least, these throw exceptions when used. To test, paste the following in a browser console:
+            // In WebKit at least, these throw exceptions when used to generate the matrix. To test,
+            // paste the following in a browser console:
             //  new WebKitCSSMatrix('matrix(-1, 1.22464679914735e-16, -1.22464679914735e-16, -1, 0, 0)')
             value = this._sc_removeENotationFromMatrixString(value);
             matrix = new window[CSSMatrixClass](value);
@@ -706,10 +707,10 @@ SC.View.reopen(
             //   ret.rotateY = decomposition.rotateY;
             // }
 
-            // // Set rotateZ.
-            // if (layout.rotateZ != null) {
-            //   ret.rotateZ = decomposition.rotateZ;
-            // }
+            // Set rotateZ.
+            if (layout.rotateZ != null) {
+              ret.rotateZ = decomposition.rotateZ;
+            }
 
             // Set scale.
             if (expectsScale) {
