@@ -18,7 +18,8 @@
     .add("basic2", SC.ScrollView, {
         contentView: SC.View.extend({
           layout: { height: 400, width: 400 },
-          backgroundColor: 'lightblue'
+          backgroundColor: 'lightblue',
+          wantsAcceleratedLayer: true
         })
     })
 
@@ -42,10 +43,10 @@
       isEnabled: NO
     })
 
-    .add("verticalScrollerBottom",SC.ScrollView, {
+    .add("verticalScrollerLayout",SC.ScrollView, {
       contentView: iv,
       hasHorizontalScroller : NO,
-      verticalScrollerBottom: 16,
+      verticalScrollerLayout: { right: 0, top: 0, bottom: 16 },
       isVerticalScrollerVisible: YES,
       autohidesVerticalScroller: NO
 
@@ -101,7 +102,7 @@
       contentView = view.get('contentView'),
       elem = contentView.getPath('layer'),
       transformAttr = SC.browser.experimentalStyleNameFor('transform'),
-      transformTemplate = 'translateX(%@px) translateY(%@px) translateZ(%@px) scale(%@)';
+      transformTemplate = 'scale(%@) translateX(%@px) translateY(%@px) translateZ(%@px)';
 
     // CLASS
     ok(view.$().hasClass('sc-scroll-view'), 'should have sc-scroll-view class');
@@ -125,32 +126,31 @@
     // SCROLLING VERTICALLY
     SC.run(function() {
       view.scrollTo(0,100);
-      view._sc_repositionContentViewUnfiltered(); // This method is PRIVATE. (Called here to cheat, synchronously testing an asynchronous operation.)
     });
     equals(view.get('verticalScrollOffset'), 100, 'Vertical scrolling should adjust verticalScrollOffset');
     if (SC.platform.get('supportsCSSTransforms')) {
-      equals(elem.style[transformAttr], transformTemplate.fmt(0, -100, 0, 1), 'Vertical scrolling should adjust transform on the contentView layer');
+      equals(elem.style[transformAttr], transformTemplate.fmt(1, 0, -100, 0), 'Vertical scrolling should adjust transform on the contentView layer');
     }
     // TODO: Simulate unsupported browser and test fallback (containerView's marginTop)
 
     // SCROLLING HORIZONTALLY
     SC.run(function() {
       view.scrollTo(50,0);
-      view._sc_repositionContentViewUnfiltered(); // This method is PRIVATE. (Called here to cheat, synchronously testing an asynchronous operation.)
     });
     equals(view.get('horizontalScrollOffset'), 50, 'horizontal scrolling should adjust horizontalScrollOffset');
     if (SC.platform.get('supportsCSSTransforms')) {
-      equals(elem.style[transformAttr], transformTemplate.fmt(-50, 0, 0, 1), 'Horizontal scrolling should adjust transform on the contentView layer.');
+      equals(elem.style[transformAttr], transformTemplate.fmt(1, -50, 0, 0), 'Horizontal scrolling should adjust transform on the contentView layer.');
     }
     // TODO: Simulate unsupported browser and test fallback (containerView's marginLeft)
 
-    // ADJUSTING CONTENT LAYOUT WHILE SCROLLED
+    // ADJUSTING CONTENT LAYOUT WHILE SCROLLED SHOULD STAY CENTERED
     // Reproducing this bug requires that there be no adjustment already scheduled.
     SC.run(function() {
       contentView.adjust('height', 450);
     });
+
     if (SC.platform.get('supportsCSSTransforms')) {
-      equals(elem.style[transformAttr], transformTemplate.fmt(-50, 0, 0, 1), 'Adjusting content size should not affect scroll transform positioning');
+      equals(elem.style[transformAttr], transformTemplate.fmt(1, -50, -6, 0), 'Adjusting content size should not affect scroll transform positioning');
     }
     // TODO: Simulate unsupported browser and test fallback (containerView's marginLeft)
   });
@@ -158,14 +158,14 @@
   test("Basic scroller visibility", function() {
     var view = pane.view('basic3');
 
-    SC.run(function() { view.set('isHorizontalScrollerVisible', NO) });
+    SC.run(function() { view.set('isHorizontalScrollerVisible', NO); });
     ok(!view.get('canScrollHorizontal'), 'cannot scroll in horizontal direction');
     var horizontalScrollerView = view.get('horizontalScrollerView');
     ok(view.get('hasHorizontalScroller'), 'default scroll view wants a horizontal scroller');
     ok(horizontalScrollerView, 'default scroll view has a horizontal scroller');
     ok(horizontalScrollerView.$().hasClass('sc-horizontal'), 'should have sc-horizontal class');
-    var maxHScroll = view.get('maximumHorizontalScrollOffset');
-    equals(maxHScroll , 0, 'Max horizontal scroll should be equal to zero');
+    // var maxHScroll = view.get('maximumHorizontalScrollOffset');
+    // equals(maxHScroll , 0, 'Max horizontal scroll should be equal to zero');
 
     SC.run(function() { view.set('isVerticalScrollerVisible', NO); });
     ok(!view.get('canScrollVertical'),'cannot scroll in vertical direction');
@@ -173,8 +173,8 @@
     ok(view.get('hasVerticalScroller'), 'default scroll view wants a vertical scroller');
     ok(verticalScrollerView, 'default scroll view has a vertical scroller');
     ok(verticalScrollerView.$().hasClass('sc-vertical'), 'should have sc-vertical class');
-    var maxVScroll = view.get('maximumVerticalScrollOffset');
-    equals(maxVScroll, 0, 'Max vertical scroll should be equal to zero');
+    // var maxVScroll = view.get('maximumVerticalScrollOffset');
+    // equals(maxVScroll, 0, 'Max vertical scroll should be equal to zero');
   });
 
   test("disabled", function() {
@@ -184,8 +184,7 @@
    });
 
    test("non-zero bottom in vertical scrollbar", function() {
-      var view = pane.view('verticalScrollerBottom');
-      equals(view.get('verticalScrollerBottom'),16, "should have verticalScrollerBottom as ");
+      var view = pane.view('verticalScrollerLayout');
       var scroller = view.get('verticalScrollerView') ;
       ok(scroller, 'should have vertical scroller view');
       equals(scroller.get('layout').bottom,16, 'should have layout.bottom of scroller as ');

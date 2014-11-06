@@ -374,9 +374,7 @@ SC.ScrollView = SC.View.extend({
       }
 
       // Record the relative percentage offset for maintaining position while scaling.
-      if (value) {
-        this._sc_horizontalPct = (value + (containerWidth / 2)) / (max + containerWidth);
-      }
+      this._sc_horizontalPct = (value + (containerWidth / 2)) / (max + containerWidth);
 
     // Use the cached value.
     } else {
@@ -732,9 +730,7 @@ SC.ScrollView = SC.View.extend({
       }
 
       // Record the relative percentage offset for maintaining position while scaling.
-      if (value) {
-        this._sc_verticalPct = (value + (containerHeight / 2)) / (max + containerHeight);
-      }
+      this._sc_verticalPct = (value + (containerHeight / 2)) / (max + containerHeight);
 
     // Use the cached value.
     } else {
@@ -1519,6 +1515,9 @@ SC.ScrollView = SC.View.extend({
   /** @private */
   destroy: function() {
     // Clean up.
+    this._sc_removeContentViewObservers();
+    this.removeObserver('contentView', this, this._sc_contentViewDidChange);
+
     this.removeObserver('horizontalAlign', this, this._sc_horizontalAlignDidChange);
     this.removeObserver('verticalAlign', this, this._sc_verticalAlignDidChange);
 
@@ -1527,10 +1526,6 @@ SC.ScrollView = SC.View.extend({
 
   /** @private SC.View */
   didCreateLayer: function () {
-    // Observe the content view for changes and initialize once.
-    this.addObserver('contentView', this, this._sc_contentViewDidChange);
-    this._sc_contentViewDidChange();
-
     // Observe the scroll offsets for changes and initialize once.
     this.addObserver('horizontalScrollOffset', this, this._sc_scrollOffsetHorizontalDidChange);
     this.addObserver('verticalScrollOffset', this, this._sc_scrollOffsetVerticalDidChange);
@@ -1560,6 +1555,10 @@ SC.ScrollView = SC.View.extend({
   /** SC.Object.prototype */
   init: function () {
     sc_super();
+
+    // Observe the content view for changes and initialize once.
+    this.addObserver('contentView', this, this._sc_contentViewDidChange);
+    this._sc_contentViewDidChange();
 
     // Observe the alignment properties for changes. No need to initialize, the default alignment property
     // will be used.
@@ -1829,9 +1828,6 @@ SC.ScrollView = SC.View.extend({
   /** @private SC.View */
   willDestroyLayer: function () {
     // Clean up.
-    this._sc_removeContentViewObservers();
-    this.removeObserver('contentView', this, this._sc_contentViewDidChange);
-
     this.removeObserver('horizontalScrollOffset', this, this._sc_scrollOffsetHorizontalDidChange);
     this.removeObserver('verticalScrollOffset', this, this._sc_scrollOffsetVerticalDidChange);
     this.removeObserver('isHorizontalScrollerVisible', this, this._sc_repositionScrollers);
