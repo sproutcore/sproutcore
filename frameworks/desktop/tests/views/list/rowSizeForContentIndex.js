@@ -58,7 +58,7 @@ function verifyRowHeights(view, rowHeight, expected) {
     totalExpected += rowSpacing;
   }
 
-  equals(totalExpected, view.get('layout').minHeight, "The minimum height of the list should match the total height of the rows.")
+  equals(totalExpected, view.get('layout').height, "The height of the list should match the total height of the rows.")
 }
 
 // ..........................................................
