@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/*global module, test, ok, equals */
+/*global module, test, equals */
 
 var pane;
 var imageUrl = sc_static('images/sproutcore-512.png'); // 'http://photos4.meetupstatic.com/photos/event/4/6/9/9/600_4518073.jpeg';
@@ -70,7 +70,7 @@ var pane = SC.ControlTestPane.design()
 
     initialHorizontalAlign: SC.ALIGN_RIGHT,
     initialVerticalAlign: SC.ALIGN_BOTTOM
-  }))
+  }));
 
 module("SC.ScrollView", {
   setup: function () {
@@ -314,7 +314,7 @@ test("Zooming from fully-visible to clipped with different alignments", function
     scrollView.set('scale', 10);
   });
   equals(scrollView.get('horizontalScrollOffset'), 0, "Scaling a fresh left-aligned view in from fully-visible aligns it to the left");
-  equals(scrollView.get('verticalScrollOffset'), 0, "Scaling a fresh top-aligned view in from fully-visible aligns it to the top")
+  equals(scrollView.get('verticalScrollOffset'), 0, "Scaling a fresh top-aligned view in from fully-visible aligns it to the top");
 
   // CENTER
   scrollView = pane.view('scrollView with content view of fixed height center-center-aligned');
@@ -326,7 +326,7 @@ test("Zooming from fully-visible to clipped with different alignments", function
     scrollView.set('scale', 10);
   });
   equals(scrollView.get('horizontalScrollOffset'), (scrollView.get('maximumHorizontalScrollOffset')) / 2, "Scaling a fresh horizontally-center-aligned view in from fully-visible aligns it to the center");
-  equals(scrollView.get('verticalScrollOffset'), (scrollView.get('maximumVerticalScrollOffset')) / 2, "Scaling a fresh vertically-middle-aligned view in from fully-visible aligns it to the center")
+  equals(scrollView.get('verticalScrollOffset'), (scrollView.get('maximumVerticalScrollOffset')) / 2, "Scaling a fresh vertically-middle-aligned view in from fully-visible aligns it to the center");
 
   // BOTTOM & RIGHT
   scrollView = pane.view('scrollView with content view of fixed height bottom-right-aligned');
@@ -338,7 +338,7 @@ test("Zooming from fully-visible to clipped with different alignments", function
     scrollView.set('scale', 10);
   });
   equals(scrollView.get('horizontalScrollOffset'), scrollView.get('maximumHorizontalScrollOffset'), "Scaling a fresh right-aligned view in from fully-visible aligns it to the right");
-  equals(scrollView.get('verticalScrollOffset'), scrollView.get('maximumVerticalScrollOffset'), "Scaling a fresh bottom-aligned view in from fully-visible aligns it to the bottom")
+  equals(scrollView.get('verticalScrollOffset'), scrollView.get('maximumVerticalScrollOffset'), "Scaling a fresh bottom-aligned view in from fully-visible aligns it to the bottom");
 });
 
 test("Initial alignments different than alignments", function() {
