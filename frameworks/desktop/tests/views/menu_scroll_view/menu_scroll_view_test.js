@@ -3,8 +3,8 @@
 // Copyright: ©2006-2011 Strobe Inc. and contributors.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-/*globals SC module test ok equals same stop start */
- 
+/*globals SC, module, test, ok, equals, same, stop, start */
+
 var view, pane;
 module("Menu Scroll View", {
   setup: function () {
