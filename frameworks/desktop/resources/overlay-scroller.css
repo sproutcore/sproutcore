@@ -41,7 +41,6 @@
   .thumb {
     @include transform(translateZ(0px));
     position: absolute;
-    opacity: 0.5;
     overflow: hidden;
   }
 
@@ -172,21 +171,17 @@
   &.sc-vertical, &.sc-horizontal {
 
     &.fade-in {
-      .thumb {
-        @include transition-duration(0.1s);
-        @include transition-property(opacity);
-        @include transition-timing-function(ease);
-        opacity: 0.5;
-      }
+      @include transition-duration(0.1s);
+      @include transition-property(opacity);
+      @include transition-timing-function(ease);
+      opacity: 0.5;
     }
 
     &.fade-out {
-      .thumb {
-        @include transition-duration(0.5s);
-        @include transition-property(opacity);
-        @include transition-timing-function(ease);
-        opacity: 0;
-      }
+      @include transition-duration(0.5s);
+      @include transition-property(opacity);
+      @include transition-timing-function(ease);
+      opacity: 0;
     }
   }
 }
