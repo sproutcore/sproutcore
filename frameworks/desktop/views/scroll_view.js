@@ -943,7 +943,7 @@ SC.ScrollView = SC.View.extend({
       this._sc_contentViewSizeDidChange();
     }
 
-    if (lastHeight.height !== newFrame.height) {
+    if (lastHeight !== newFrame.height) {
       this._sc_contentViewSizeDidChange();
     }
   },
@@ -953,8 +953,10 @@ SC.ScrollView = SC.View.extend({
     var newFrame = this.getPath('contentView.borderFrame');
 
     // Cache the current sizes of the view, so we can only watch for size changes.
-    this.set('_sc_contentHeight', newFrame.height);
-    this.set('_sc_contentWidth', newFrame.width);
+    if (newFrame) { // TODO: This is necessary for static content. Remove it.
+      this.set('_sc_contentHeight', newFrame.height);
+      this.set('_sc_contentWidth', newFrame.width);
+    }
 
     // Filter the observer input.
     this.invokeOnce(this._sc_contentViewSizeDidChangeUnfiltered);
