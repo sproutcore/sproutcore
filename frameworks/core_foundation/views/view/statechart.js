@@ -854,10 +854,11 @@ SC.CoreView.reopen(
 
       // Update states after *will* and before *did* notifications!
       this._gotoUnattachedState();
+      this._callOnChildViews('_gotoUnattachedByParentState');
 
-      // Notify *did* (bottom-up from children to parent).
-      this._callOnChildViews('_parentDidRender');
+      // Notify *did* (top-down from parent to children).
       this._rendered();
+      this._callOnChildViews('_rendered');
 
       // Bypass the unattached state for adopted views.
       var parentView = this.get('parentView');
@@ -1428,14 +1429,6 @@ SC.CoreView.reopen(
       // There's no need to continue to further child views.
       return false;
     }
-  },
-
-  /** @private Updates according to parent did render. */
-  _parentDidRender: function () {
-    // Update states after *will* and before *did* notifications!
-    this._gotoUnattachedByParentState();
-
-    this._rendered();
   },
 
   /** @private Starts building out view if appropriate. */
