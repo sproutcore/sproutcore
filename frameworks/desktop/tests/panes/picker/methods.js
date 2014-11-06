@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/*global module test htmlbody ok equals same stop start target */
+/*globals module, test, ok, equals, target */
 
 window.target = null;
 
@@ -43,7 +43,9 @@ test("check default action on pane#mouseDown", function() {
       layout: { top: 0, left: 0, bottom: 0, right: 0 }
     })
   });
-  pane.popup(anchor.view('anchor'), SC.PICKER);
+  SC.run(function () {
+    pane.popup(anchor.view('anchor'), SC.PICKER);
+  });
 
   ok(pane.get('isVisibleInWindow'), 'pane.isVisibleInWindow should be YES');
 
@@ -51,7 +53,9 @@ test("check default action on pane#mouseDown", function() {
 
   ok(!pane.get('isVisibleInWindow'), 'pane.isVisibleInWindow should be NO after mouseDown');
 
-  pane.destroy();
+  SC.run(function () {
+    pane.destroy();
+  });
 }) ;
 
 test("check action on pane#mouseDown with removeAction set", function() {
@@ -68,7 +72,10 @@ test("check action on pane#mouseDown with removeAction set", function() {
       this.remove();
     }
   });
-  pane.popup(anchor.view('anchor'), SC.PICKER);
+
+  SC.run(function () {
+    pane.popup(anchor.view('anchor'), SC.PICKER);
+  });
 
   ok(pane.get('isVisibleInWindow'), 'pane.isVisibleInWindow should be YES');
 
@@ -76,9 +83,10 @@ test("check action on pane#mouseDown with removeAction set", function() {
 
   ok(!pane.get('isVisibleInWindow'), 'pane.isVisibleInWindow should be NO after mouseDown');
   ok(pane.get('fooInvoked'), 'pane.fooInvoked should be YES after mouseDown');
-
-  pane.destroy();
-}) ;
+  SC.run(function () {
+    pane.destroy();
+  });
+});
 
 test("check action on pane#mouseDown with removeAction and removeTarget set", function() {
   pane = SC.PickerPane.create({
@@ -90,7 +98,9 @@ test("check action on pane#mouseDown with removeAction and removeTarget set", fu
     removeAction: 'foo',
     removeTarget: target
   });
-  pane.popup(anchor.view('anchor'), SC.PICKER);
+  SC.run(function () {
+    pane.popup(anchor.view('anchor'), SC.PICKER);
+  });
 
   ok(pane.get('isVisibleInWindow'), 'pane.isVisibleInWindow should be YES');
 
@@ -100,7 +110,9 @@ test("check action on pane#mouseDown with removeAction and removeTarget set", fu
   ok(target.get('fooInvoked'), 'target.fooInvoked should be YES');
   ok(target.get('sender'), pane, 'target.sender should be pane');
 
-  pane.destroy();
+  SC.run(function () {
+    pane.destroy();
+  });
 }) ;
 
 test("Verify setting anchorElement.", function() {
@@ -127,15 +139,23 @@ test("Verify setting anchorElement.", function() {
 
   ok(pane.get('anchorElement') === anchorElement, 'Setting anchorElement to a jQuery object succeeds.');
 
-  pane.destroy();
+  SC.run(function () {
+    pane.destroy();
+  });
 });
 
-test("SC.PickerPane#append correctly returns the receiver.", function() {
+test("SC.PickerPane#popup correctly returns the receiver.", function() {
   var pane = SC.PickerPane.create(),
-    ret = pane.append();
+    ret;
 
-  equals(pane, ret, 'SC.Pane#append returns the receiver');
+  SC.run(function () {
+    ret = pane.popup();
+  });
+
+  equals(pane, ret, 'SC.Pane#popup returns the receiver');
 
   // Clean up.
-  pane.destroy();
+  SC.run(function () {
+    pane.destroy();
+  });
 });

@@ -20,9 +20,13 @@ test("PanelPane destroy", function() {
   var pane = SC.PanelPane.create({
     isModal: YES
   });
-  pane.append();
-  pane.remove();
-  pane.destroy();
+  SC.run(function () {
+    pane.append();
+  });
+
+  SC.run(function () {
+    pane.destroy();
+  });
 
   var end = getViewCount();
   equals(start, end, "No extra views lying about after calling .destroy");

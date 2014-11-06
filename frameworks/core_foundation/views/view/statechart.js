@@ -662,6 +662,9 @@ SC.CoreView.reopen(
       if (immediately) {
         // Note: *will* detach notice already sent.
         this.cancelAnimation(); // Fires didTransitionOut callback (state changes to UNATTACHED/notifications sent).
+
+        // Detach immediately.
+        this._executeDoDetach();
       }
 
       // Don't try to notify or run transition out code again.

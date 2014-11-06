@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/*global module test htmlbody ok equals same stop start */
+/*globals module, test, ok, equals, stop, start */
 
 module("SC.SheetPane UI");
 
@@ -18,28 +18,23 @@ test("verify sheet pane slide down works", function() {
     })
   });
 
-  var layout = slidePane.get('layout');
-  var pt = layout.top;
-  var pl = layout.left;
-  var pw = layout.width;
-  var ph = layout.height;
-  var ret = slidePane.layoutStyle();
-
-  slidePane.append();
+  SC.run(function () {
+    slidePane.append();
+  });
   var f = function() {
     // make sure all fo the timers have had an opportunity to fire
-    SC.RunLoop.begin().end();
+
     equals(slidePane.get('layout').top, 0, 'pane should be displayed at default position top after animating');
     ok(slidePane.get('isVisibleInWindow'), 'pane.isVisibleInWindow should be YES');
     ok(slidePane.$().hasClass('sc-sheet'), 'pane should have sc-sheet class');
     ok(slidePane.childViews[0].get('isVisibleInWindow'), 'pane.div.isVisibleInWindow should be YES');
     ok(slidePane.childViews[0].$().hasClass('sc-view'), 'pane.div should have sc-view class');
-    SC.RunLoop.begin();
-    slidePane.remove();
-    slidePane.destroy();
-    SC.RunLoop.end();
 
-    window.start();
+    SC.run(function () {
+      slidePane.destroy();
+    });
+
+    start();
   };
 
   stop(800);
