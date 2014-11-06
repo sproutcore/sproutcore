@@ -137,6 +137,6 @@ test("Verify SC.PanelPane#isModal", function() {
   SC.run(function () {
     pane.destroy();
 
-    equals(pane.get('viewState'), SC.CoreView.UNATTACHED);
+    equals(pane.get('viewState'), SC.CoreView.UNRENDERED);
   });
 });
