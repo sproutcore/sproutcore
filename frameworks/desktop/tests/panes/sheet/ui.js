@@ -23,8 +23,7 @@ test("verify sheet pane slide down works", function() {
   });
   var f = function() {
     // make sure all fo the timers have had an opportunity to fire
-
-    equals(slidePane.get('layout').top, 0, 'pane should be displayed at default position top after animating');
+    equals(slidePane.get('frame').y, 0, 'pane should be displayed at default position top after animating');
     ok(slidePane.get('isVisibleInWindow'), 'pane.isVisibleInWindow should be YES');
     ok(slidePane.$().hasClass('sc-sheet'), 'pane should have sc-sheet class');
     ok(slidePane.childViews[0].get('isVisibleInWindow'), 'pane.div.isVisibleInWindow should be YES');
@@ -37,8 +36,8 @@ test("verify sheet pane slide down works", function() {
     start();
   };
 
-  stop(800);
+  stop(1200);
 
-  setTimeout(f, 400);
+  setTimeout(f, 800);
 
 });
