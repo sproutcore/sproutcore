@@ -116,6 +116,9 @@ SC.ScrollView = SC.View.extend({
   /** @private The actual horizontal scroll offset. */
   _sc_horizontalScrollOffset: null,
 
+  /** @private The percentage offset scrolled horizontally. Used to maintain the horizontal position when the content size changes. */
+  _sc_horizontalPct: null,
+
   /** @private Flag is true when scaling. Used in capturing touches. */
   _sc_isTouchScaling: false,
 
@@ -151,6 +154,9 @@ SC.ScrollView = SC.View.extend({
 
   /** @private The actual vertical scroll offset. */
   _sc_verticalScrollOffset: null,
+
+  /** @private The percentage offset scrolled vertically. Used to maintain the vertical position when the content size changes. */
+  _sc_verticalPct: null,
 
   /** @see SC.View.prototype.acceptsMultitouch
 
@@ -302,9 +308,9 @@ SC.ScrollView = SC.View.extend({
       - SC.ALIGN_CENTER
 
     @type String
-    @default SC.ALIGN_LEFT
+    @default SC.ALIGN_CENTER
   */
-  horizontalAlign: SC.ALIGN_LEFT,
+  horizontalAlign: SC.ALIGN_CENTER,
 
   /**
     Determines whether the horizontal scroller should fade out while in overlay mode. Has no effect
@@ -369,19 +375,21 @@ SC.ScrollView = SC.View.extend({
     if (value != null) {
       // When touch scrolling, we allow scroll to pass the limits by a small amount.
       if (!this._sc_isTouchScrollingH) {
-        // Constrain to the set limits.\
+        // Constrain to the set limits.
         value = Math.max(min, Math.min(max, value));
       }
 
       // Record the relative percentage offset for maintaining position while scaling.
-      this._sc_horizontalPct = (value + (containerWidth / 2)) / (max + containerWidth);
+      if (this._sc_contentWidth > 0) {
+        this._sc_horizontalPct = (value + (containerWidth / 2)) / (max + containerWidth);
+      }
 
     // Use the cached value.
     } else {
       value = this._sc_horizontalScrollOffset;
 
       // Default value.
-      if (value == null) { // || maxOffset === 0) {
+      if (value == null) {
         var horizontalAlign = this.get('initialHorizontalAlign');
 
         value = this._sc_alignedHorizontalOffset(horizontalAlign, containerWidth, this._sc_contentWidth);
@@ -392,9 +400,7 @@ SC.ScrollView = SC.View.extend({
     this._sc_horizontalScrollOffset = value;
 
     return value;
-  }.property().cacheable(), //'minimumHorizontalScrollOffset', 'maximumHorizontalScrollOffset', 'horizontalAlign'
-  // Note that the properties above don't trigger a recalculation, as calculation is only done during setting. Instead,
-  // it invalidates the last-set value so that setting it again will actually do something.
+  }.property().cacheable(),
 
   /**
     Use to control the positioning of the horizontal scroller. If you do not set 'horizontalOverlay' to
@@ -730,7 +736,9 @@ SC.ScrollView = SC.View.extend({
       }
 
       // Record the relative percentage offset for maintaining position while scaling.
-      this._sc_verticalPct = (value + (containerHeight / 2)) / (max + containerHeight);
+      if (this._sc_contentHeight > 0) {
+        this._sc_verticalPct = (value + (containerHeight / 2)) / (max + containerHeight);
+      }
 
     // Use the cached value.
     } else {
@@ -748,9 +756,7 @@ SC.ScrollView = SC.View.extend({
     this._sc_verticalScrollOffset = value;
 
     return value;
-  }.property().cacheable(), // 'minimumVerticalScrollOffset', 'maximumVerticalScrollOffset', 'verticalAlign'
-  // Note that the properties above don't trigger a recalculation, as calculation is only done during setting. Instead,
-  // it invalidates the last-set value so that setting it again will actually do something.
+  }.property().cacheable(),
 
   /**
     Use to control the positioning of the vertical scroller. If you do not set 'verticalOverlay' to
@@ -822,6 +828,7 @@ SC.ScrollView = SC.View.extend({
       // Update offsets to match actual placement.
       this.set('horizontalScrollOffset', -curLayout.left);
       this.set('verticalScrollOffset', -curLayout.top);
+      this.set('scale', curLayout.scale);
     }
   },
 
@@ -849,7 +856,7 @@ SC.ScrollView = SC.View.extend({
       }
 
       // Ensure that the content view size did change runs none-the-less.
-      if (!didAdjust) { this._sc_contentViewSizeDidChange(); }
+      // if (!didAdjust) { this._sc_contentViewSizeDidChange(); }
     }
 
   },
@@ -986,24 +993,57 @@ SC.ScrollView = SC.View.extend({
     }
 
     var value;
-    if (maximumHorizontalScrollOffset === 0) {
-      // Align horizontally.
-      value = this._sc_alignedHorizontalOffset(this.get('horizontalAlign'), containerWidth, contentWidth);
-      this.set('horizontalScrollOffset', value); // Note: Trigger for _sc_scrollOffsetHorizontalDidChange
+    if (contentWidth) {
+      if (maximumHorizontalScrollOffset === 0) {
+        // Align horizontally.
+        value = this._sc_alignedHorizontalOffset(this.get('horizontalAlign'), containerWidth, contentWidth);
+        this.set('horizontalScrollOffset', value); // Note: Trigger for _sc_scrollOffsetHorizontalDidChange
 
-    } else if (this._sc_horizontalPct > 0) {
-      value = this._sc_horizontalPct * (maximumHorizontalScrollOffset + containerWidth) - (containerWidth / 2);
-      this.set('horizontalScrollOffset', value); // Note: Trigger for _sc_scrollOffsetHorizontalDidChange
+      } else {
+        /* jshint eqnull:true */
+        if (this._sc_verticalPct != null) {
+          value = this._sc_horizontalPct * (maximumHorizontalScrollOffset + containerWidth) - (containerWidth / 2);
+          this.set('horizontalScrollOffset', value); // Note: Trigger for _sc_scrollOffsetHorizontalDidChange
+        } else {
+          switch (this.get('horizontalAlign')) {
+          case SC.ALIGN_RIGHT:
+            this.set('horizontalScrollOffset', maximumHorizontalScrollOffset);
+            break;
+          case SC.ALIGN_CENTER:
+            this.set('horizontalScrollOffset', maximumHorizontalScrollOffset / 2);
+            break;
+          default: // SC.ALIGN_LEFT
+            this.set('horizontalScrollOffset', minimumHorizontalScrollOffset);
+          }
+        }
+      }
     }
 
-    if (maximumVerticalScrollOffset === 0) {
-      // Align vertically.
-      value = this._sc_alignedVerticalOffset(this.get('verticalAlign'), containerHeight, contentHeight);
-      this.set('verticalScrollOffset', value); // Note: Trigger for _sc_scrollOffsetHorizontalDidChange
+    if (contentHeight) {
+      if (maximumVerticalScrollOffset === 0) {
+        // Align vertically.
+        value = this._sc_alignedVerticalOffset(this.get('verticalAlign'), containerHeight, contentHeight);
+        this.set('verticalScrollOffset', value); // Note: Trigger for _sc_scrollOffsetHorizontalDidChange
 
-    } else if (this._sc_verticalPct > 0) {
-      value = this._sc_verticalPct * (maximumVerticalScrollOffset + containerHeight) - (containerHeight / 2);
-      this.set('verticalScrollOffset', value); // Note: Trigger for _sc_scrollOffsetVerticalDidChange
+      } else {
+        /* jshint eqnull:true */
+        if (this._sc_verticalPct != null) {
+          value = this._sc_verticalPct * (maximumVerticalScrollOffset + containerHeight) - (containerHeight / 2);
+          this.set('verticalScrollOffset', value); // Note: Trigger for _sc_scrollOffsetVerticalDidChange
+        } else {
+
+          switch (this.get('verticalAlign')) {
+          case SC.ALIGN_BOTTOM:
+            this.set('verticalScrollOffset', maximumVerticalScrollOffset);
+            break;
+          case SC.ALIGN_MIDDLE:
+            this.set('verticalScrollOffset', maximumVerticalScrollOffset / 2);
+            break;
+          default: // SC.ALIGN_TOP
+            this.set('verticalScrollOffset', minimumVerticalScrollOffset);
+          }
+        }
+      }
     }
 
     // Update the minimum and maximum scrollable distance on the scrollers as well as their visibility.
@@ -1103,8 +1143,8 @@ SC.ScrollView = SC.View.extend({
   _sc_horizontalAlignDidChange: function () {
     var maximumHorizontalScrollOffset = this.get('maximumHorizontalScrollOffset');
 
-    // Align horizontally.
-    if (maximumHorizontalScrollOffset === 0) {
+    // Align horizontally (Unless content width is zero).
+    if (maximumHorizontalScrollOffset === 0 && this._sc_contentWidth) {
       var horizontalAlign = this.get('horizontalAlign'),
           value;
 
@@ -1421,8 +1461,8 @@ SC.ScrollView = SC.View.extend({
   _sc_verticalAlignDidChange: function () {
     var maximumVerticalScrollOffset = this.get('maximumVerticalScrollOffset');
 
-    // Align vertically.
-    if (maximumVerticalScrollOffset === 0) {
+    // Align vertically (Unless content height is zero).
+    if (maximumVerticalScrollOffset === 0 && this._sc_contentHeight) {
       var verticalAlign = this.get('verticalAlign'),
         value;
 
