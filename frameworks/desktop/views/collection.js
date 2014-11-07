@@ -2323,7 +2323,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
       // To avoid annoying jitter from Magic Mouse (which sends mousewheel events while trying
       // to lift your finger after a drag), capture mousewheel events for a small period of time.
       this._sc_isMouseJustDown = true;
-      this._sc_clearMouseJustDownTimer = this.invokeLater(this._sc_clearMouseJustDown, 150);
+      this._sc_clearMouseJustDownTimer = this.invokeLater(this._sc_clearMouseJustDown, 250);
     }
 
     // Track that mouse is up no matter what (e.g. mouse went down and then view was disabled before mouse up).
