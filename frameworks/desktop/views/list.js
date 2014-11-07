@@ -445,16 +445,20 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
   computeLayout: function () {
     // default layout
     var ret = this._sc_layout,
-      layoutDirection = this.get('layoutDirection');
+      layoutDirection = this.get('layoutDirection'),
+      del = this.get('rowDelegate'),
+      rowSpacing = del.get('rowSpacing');
 
     // Initialize lazily.
     if (!ret) ret = this._sc_layout = {};
 
     // Support both vertical and horizontal lists.
     if (layoutDirection === SC.LAYOUT_HORIZONTAL) {
-      ret.width = this.rowOffsetForContentIndex(this.get('length'));
+      // Don't include the row spacing after the last item in the width.
+      ret.width = Math.max(this.rowOffsetForContentIndex(this.get('length')) - rowSpacing, 0);
     } else {
-      ret.height = this.rowOffsetForContentIndex(this.get('length'));
+      // Don't include the row spacing after the last item in the height.
+      ret.height = Math.max(this.rowOffsetForContentIndex(this.get('length')) - rowSpacing, 0);
     }
     return ret;
   },
@@ -506,8 +510,9 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     @returns {SC.IndexSet} now showing indexes
   */
   contentIndexesInRect: function (rect) {
-    var totalRowSize = this.get('rowDelegate').get('_sc_totalRowSize'),
-      rowSpacing = this.get('rowSpacing'),
+    var del = this.get('rowDelegate'),
+      totalRowSize = del.get('_sc_totalRowSize'),
+      rowSpacing = del.get('rowSpacing'),
       totalRowSizeWithSpacing = totalRowSize + rowSpacing,
       layoutDirection = this.get('layoutDirection'),
       len = this.get('length'),

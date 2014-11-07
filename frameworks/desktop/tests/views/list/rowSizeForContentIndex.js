@@ -58,7 +58,8 @@ function verifyRowHeights(view, rowHeight, expected) {
     totalExpected += rowSpacing;
   }
 
-  equals(totalExpected, view.get('layout').height, "The height of the list should match the total height of the rows.")
+  // Don't include spacing after the last item.
+  equals(totalExpected - rowSpacing, view.get('layout').height, "The height of the list should match the total height of the rows including row spacing.")
 }
 
 // ..........................................................
