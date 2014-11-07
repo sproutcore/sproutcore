@@ -2119,7 +2119,6 @@ SC.RootResponder = SC.Object.extend(
         dragView.tryToPerform('mouseUp', evt);
       });
     } else {
-
       var view = this._mouseDownView,
         targetView = this.targetViewForEvent(evt);
 
@@ -2302,6 +2301,7 @@ SC.RootResponder = SC.Object.extend(
   dragenter: function(evt) {
     SC.run(function() { this._dragenter(evt); }, this);
   },
+
   /** @private */
   _dragenter: function(evt) {
     if (!this._dragCounter) {
@@ -2310,10 +2310,12 @@ SC.RootResponder = SC.Object.extend(
     else this._dragCounter++;
     return this._dragover(evt);
   },
+
   /** @private The dragleave event comes from the browser when a data-ful drag leaves any element. */
   dragleave: function(evt) {
     SC.run(function() { this._dragleave(evt); }, this);
   },
+
   /** @private */
   _dragleave: function(evt) {
     this._dragCounter--;
@@ -2333,10 +2335,12 @@ SC.RootResponder = SC.Object.extend(
       this._dragover(evt);
     });
   },
+
   /** @private This event fires continuously while the dataful drag is over the document. */
   dragover: function(evt) {
     SC.run(function() { this._dragover(evt); }, this);
   },
+
   /** @private */
   _dragover: function(evt) {
     // If it's a file being dragged, prevent the default (leaving the app and opening the file).
@@ -2407,6 +2411,7 @@ SC.RootResponder = SC.Object.extend(
   drop: function(evt) {
     SC.run(function() { this._drop(evt); }, this);
   },
+
   /** @private */
   _drop: function(evt) {
     // If it's a file being dragged, prevent the default (leaving the app and opening the file).

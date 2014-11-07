@@ -753,7 +753,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       }
 
       if (!SC.none(autoCapitalize)) {
-        if (SC.typeOf(autoCapitalize) == 'boolean') {
+        if (SC.typeOf(autoCapitalize) === 'boolean') {
           input.attr('autocapitalize', !autoCapitalize ? 'none' : 'sentences');
         } else {
           input.attr('autocapitalize', autoCapitalize);
