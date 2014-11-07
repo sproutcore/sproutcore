@@ -783,13 +783,10 @@ SC.View.reopen(
 
     // Handle old style rotation.
     if (!SC.none(currentLayout.rotate)) {
-      //@if (debug)
-      SC.Logger.warn('Developer Warning: Please set rotateZ instead of rotate.');
-      //@endif
-      if (SC.none(currentLayout.rotateZ)) {
+      if (SC.none(currentLayout.rotateZ) && SC.platform.get('supportsCSS3DTransforms')) {
         currentLayout.rotateZ = currentLayout.rotate;
+        delete currentLayout.rotate;
       }
-      delete currentLayout.rotate;
     }
 
     // Optimize notifications depending on if we resized or just moved.
