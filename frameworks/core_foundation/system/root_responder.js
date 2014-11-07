@@ -773,7 +773,7 @@ SC.RootResponder = SC.Object.extend(
   */
   setup: function() {
     // handle basic events
-    this.listenFor(['touchstart', 'touchmove', 'touchend', 'touchcancel', 'keydown', 'keyup', 'beforedeactivate', 'mousedown', 'mouseup', 'dragenter', 'dragover', 'dragleave', 'drop', 'click', 'dblclick', 'mousemove', 'contextmenu'], document)
+    this.listenFor(['touchstart', 'touchmove', 'touchend', 'touchcancel', 'keydown', 'keyup', 'beforedeactivate', 'mousedown', 'mouseup', 'dragenter', 'dragover', 'dragstart', 'dragleave', 'drop', 'click', 'dblclick', 'mousemove', 'contextmenu'], document)
         .listenFor(['resize'], window);
 
     if(SC.browser.isIE8OrLower) this.listenFor(['focusin', 'focusout'], document);
@@ -2335,6 +2335,29 @@ SC.RootResponder = SC.Object.extend(
          }
        }
     }, this);
+  },
+
+  /**
+    dragStart only gets delivered to the view that handled the mouseDown evt.
+  */
+  dragstart: function(evt) {
+    var handler = null,
+      view = this._mouseDownView,
+      targetView = this.targetViewForEvent(evt);
+
+    // We don't want a dragStart going to anyone unless they handled the mousedown.
+    if (view) {
+      handler = this.sendEvent('dragStart', evt, view) ;
+    }
+
+    // cleanup
+    this._mouseCanDrag = NO;
+    this._mouseDownView = this._drag = null;
+
+    // Determine if any views took responsibility for the event.
+    var ret = handler ? evt.hasCustomEventHandling : YES;
+
+    return ret;
   },
 
   // These event handlers prevent default file handling, and enable the dataDrag API.
