@@ -17,8 +17,7 @@ module("SC.AudioView", {
     SC.RunLoop.begin();
 
     audioView = SC.AudioView.create({
-      volume: INITIAL_VOL,
-      value: TESTFILE
+      volume: INITIAL_VOL
     });
 
     pane = SC.MainPane.create();
