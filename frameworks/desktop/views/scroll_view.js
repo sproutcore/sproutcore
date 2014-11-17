@@ -101,6 +101,12 @@ SC.ScrollView = SC.View.extend({
   /** @private The cached width of the content. */
   _sc_contentWidth: 0,
 
+  /** @private The anchor horizontal offset of the touch gesture. */
+  _sc_gestureAnchorHOffset: null,
+
+  /** @private The anchor vertical offset of the touch gesture. */
+  _sc_gestureAnchorVOffset: null,
+
   /** @private The anchor position of the touch gesture. */
   _sc_gestureAnchorX: null,
 
@@ -1900,16 +1906,15 @@ SC.ScrollView = SC.View.extend({
     // Clean up.
     this._sc_passTouchToContentTimer = null;
 
-    // If the touch has ended in the mean time, don't proceed.
-    if (touch.hasEnded) return;
-
     // If the touch is not a scroll or scale, see if any of our descendent views want to handle the touch. If not,
     // we keep our existing respondership and all is well.
-    if (!touch.captureTouch(this, true)) { touch.makeTouchResponder(touch.targetView, true, this); }
+    if (!touch.captureTouch(this, true)) {
+      touch.makeTouchResponder(touch.targetView, true, this);
+    }
   },
 
   /** @private */
-  _sc_touchEnded: function (touch) {
+  _sc_touchEnded: function (touch, wasCancelled) {
     // When the last touch ends, we stop touch scrolling.
     var hasTouch = this.get('hasTouch');
     if (hasTouch) {
@@ -2104,12 +2109,27 @@ SC.ScrollView = SC.View.extend({
         this._sc_isTouchScaling = false;
         this._sc_touchVelocityH = null;
         this._sc_touchVelocityV = null;
+
+      // Pass the initial touch on to the content view if it hasn't tried yet (i.e. a tap) and the touch wasn't cancelled.
+      } else if (this._sc_passTouchToContentTimer) {
+        // Clean up.
+        this._sc_passTouchToContentTimer.invalidate();
+        this._sc_passTouchToContentTimer = null;
+
+        if (!wasCancelled) {
+          // If the content has handled the touch, then immediately end it.
+          if (touch.makeTouchResponder(touch.targetView, true, this)) {
+            touch.end();
+          }
+        }
       }
 
       // Clean up all caches from touchStart.
       this._sc_gestureAnchorX = null;
       this._sc_gestureAnchorY = null;
       this._sc_gestureAnchorD = null;
+      this._sc_gestureAnchorHOffset = null;
+      this._sc_gestureAnchorVOffset = null;
     }
 
     // TODO: What happens when isEnabledInPane goes false while interacting? Statechart would help solve this.
@@ -2178,14 +2198,13 @@ SC.ScrollView = SC.View.extend({
 
   /** @private */
   touchesDragged: function (evt, touchesForView) {
-    var avg = evt.averagedTouchesForView(this),
+    var avgTouch = evt.averagedTouchesForView(this),
         scrollThreshold = this.get('scrollGestureThreshold'),
         scaleThreshold = this.get('scaleGestureThreshold'),
-
         // Changes in x and y since the last initialization.
-        touchDeltaX = this._sc_gestureAnchorX - avg.x,
-        touchDeltaY = this._sc_gestureAnchorY - avg.y,
-        touchDeltaD = this._sc_gestureAnchorD - avg.d;
+        touchDeltaX = this._sc_gestureAnchorX - avgTouch.x,
+        touchDeltaY = this._sc_gestureAnchorY - avgTouch.y,
+        touchDeltaD = this._sc_gestureAnchorD - avgTouch.d;
 
     // Determine if we've moved enough to switch to horizontal scrolling.
     if (!this._sc_isTouchScrollingH) {
@@ -2205,61 +2224,63 @@ SC.ScrollView = SC.View.extend({
     if (!this._sc_isTouchScaling) {
       var absDeltaD = Math.abs(touchDeltaD);
 
-      this._sc_isTouchScaling = !!avg.d && absDeltaD > scaleThreshold;
+      this._sc_isTouchScaling = !!avgTouch.d && absDeltaD > scaleThreshold;
     }
 
     // Adjust scale.
     if (this._sc_isTouchScaling) {
-      var touchPercentChange = (avg.d - (touchDeltaD * 0.5)) / avg.d, // The percentage difference in touch distance (halved b/c two touches moving in opposite directions doubles the difference).
+      // The percentage difference in touch distance (halved b/c two touches moving in opposite directions doubles the difference).
+      var touchPercentChange = (avgTouch.d - (touchDeltaD * 0.5)) / avgTouch.d,
           scale = this.get('scale');
 
       scale = scale * touchPercentChange;
-
       this.set('scale', scale);
 
       // Reset the difference each time so that we don't scale exponentially.
-      this._sc_gestureAnchorD = avg.d;
+      this._sc_gestureAnchorD = avgTouch.d;
 
     // Adjust scroll.
     } else {
-      if (this._sc_isTouchScrollingH) {
+      if (this.get('canScrollHorizontal')) {
         // Record the last velocity.
-        this._sc_touchVelocityH = avg.velocityX;
+        this._sc_touchVelocityH = avgTouch.velocityX;
 
         var maximumHorizontalScrollOffset = this.get('maximumHorizontalScrollOffset'),
-          minimumHorizontalScrollOffset = this.get('minimumHorizontalScrollOffset');
+          minimumHorizontalScrollOffset = this.get('minimumHorizontalScrollOffset'),
+          horizontalScrollOffset = this._sc_gestureAnchorHOffset + touchDeltaX;
 
         // Degrade the offset as we pass maximum.
-        if (touchDeltaX > maximumHorizontalScrollOffset) {
-          touchDeltaX = touchDeltaX - this._sc_overDragSlip * (touchDeltaX - maximumHorizontalScrollOffset);
+        if (horizontalScrollOffset > maximumHorizontalScrollOffset) {
+          horizontalScrollOffset = horizontalScrollOffset - this._sc_overDragSlip * (horizontalScrollOffset - maximumHorizontalScrollOffset);
 
         // Degrade the offset as we pass minimum.
-        } else if (touchDeltaX < minimumHorizontalScrollOffset) {
-          touchDeltaX = touchDeltaX + this._sc_overDragSlip * (minimumHorizontalScrollOffset - touchDeltaX);
+        } else if (horizontalScrollOffset < minimumHorizontalScrollOffset) {
+          horizontalScrollOffset = horizontalScrollOffset + this._sc_overDragSlip * (minimumHorizontalScrollOffset - horizontalScrollOffset);
         }
 
         // Update the scroll offset.
-        this.set('horizontalScrollOffset', touchDeltaX);
+        this.set('horizontalScrollOffset', horizontalScrollOffset);
       }
 
-      if (this._sc_isTouchScrollingV) {
+      if (this.get('canScrollVertical')) {
         // Record the last velocity.
-        this._sc_touchVelocityV = avg.velocityY;
+        this._sc_touchVelocityV = avgTouch.velocityY;
 
         var maximumVerticalScrollOffset = this.get('maximumVerticalScrollOffset'),
-          minimumVerticalScrollOffset = this.get('minimumVerticalScrollOffset');
+          minimumVerticalScrollOffset = this.get('minimumVerticalScrollOffset'),
+          verticalScrollOffset = this._sc_gestureAnchorVOffset + touchDeltaY;
 
         // Degrade the offset as we pass maximum.
-        if (touchDeltaY > maximumVerticalScrollOffset) {
-          touchDeltaY = touchDeltaY - this._sc_overDragSlip * (touchDeltaY - maximumVerticalScrollOffset);
+        if (verticalScrollOffset > maximumVerticalScrollOffset) {
+          verticalScrollOffset = verticalScrollOffset - this._sc_overDragSlip * (verticalScrollOffset - maximumVerticalScrollOffset);
 
         // Degrade the offset as we pass minimum.
-        } else if (touchDeltaY < minimumVerticalScrollOffset) {
-          touchDeltaY = touchDeltaY + this._sc_overDragSlip * (minimumVerticalScrollOffset - touchDeltaY);
+        } else if (verticalScrollOffset < minimumVerticalScrollOffset) {
+          verticalScrollOffset = verticalScrollOffset + this._sc_overDragSlip * (minimumVerticalScrollOffset - verticalScrollOffset);
         }
 
         // Update the scroll offset.
-        this.set('verticalScrollOffset', touchDeltaY);
+        this.set('verticalScrollOffset', verticalScrollOffset);
       }
     }
 
@@ -2269,6 +2290,7 @@ SC.ScrollView = SC.View.extend({
       this._sc_passTouchToContentTimer = null;
     }
 
+    // Note: If the content view has already accepted the initial touch, it will be sent a touchCancelled event.
   },
 
   /** @private
@@ -2285,7 +2307,7 @@ SC.ScrollView = SC.View.extend({
     gesture's last touch, we wrap up in spectacular fashion.
   */
   touchEnd: function (touch) {
-    return this._sc_touchEnded(touch);
+    return this._sc_touchEnded(touch, false);
   },
 
   // /** @private */
@@ -2298,12 +2320,6 @@ SC.ScrollView = SC.View.extend({
 
       // Additional touches can be used for pinching gestures.
       if (hasTouch) {
-        // Update the average distance to center of the touch, which is used to recognize pinch/zoom movement of the touch.
-        var avgTouch = touch.averagedTouchesForView(this, true);
-
-        this._sc_gestureAnchorD = avgTouch.d;
-        this._sc_gestureAnchorX = avgTouch.x;
-        this._sc_gestureAnchorY = avgTouch.y;
 
         // If a new touch has appeared, force scrolling to recalculate.
         this._sc_isTouchScrollingV = this._sc_isTouchScrollingH = false;
@@ -2311,12 +2327,8 @@ SC.ScrollView = SC.View.extend({
       // The first touch is used to set up initial state.
       } else {
         // Cancel any active animation in place.
-        this._sc_cancelAnimation();
 
-        // Get the initial touch point from which deltas will be calculated while dragging.
-        this._sc_gestureAnchorX = this.get('horizontalScrollOffset') + touch.pageX;
-        this._sc_gestureAnchorY = this.get('verticalScrollOffset') + touch.pageY;
-        this._sc_gestureAnchorD = 0;
+        this._sc_cancelAnimation();
 
         // If we have captured the touch and are not yet scrolling, we may want to delay a moment to test for
         // scrolling and if not scrolling, we will pass the touch through to the content.
@@ -2325,6 +2337,15 @@ SC.ScrollView = SC.View.extend({
           this._sc_passTouchToContentTimer = this.invokeLater(this._sc_beginTouchesInContent, 150, touch);
         } // Else do nothing.
       }
+
+      // Update the average distance to center of the touch, which is used to recognize pinch/zoom movement of the touch.
+      var avgTouch = touch.averagedTouchesForView(this, true);
+
+      this._sc_gestureAnchorX = avgTouch.x;
+      this._sc_gestureAnchorY = avgTouch.y;
+      this._sc_gestureAnchorD = avgTouch.d;
+      this._sc_gestureAnchorHOffset = this.get('horizontalScrollOffset');
+      this._sc_gestureAnchorVOffset = this.get('verticalScrollOffset');
 
       handled = true;
     }
