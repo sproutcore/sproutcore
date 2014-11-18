@@ -13,7 +13,8 @@ sc_require("views/form_row");
 /** 
   @class
   FormView lays out rows, manages their label widths, binds their
-  content properties, and sets up their contentValueKeys as needed.
+  content properties, and sets up their contentValueKeys as needed. This class is 
+  experimental and not available out of the box. 
 
   Usually, you will place rows into the FormView:
   
