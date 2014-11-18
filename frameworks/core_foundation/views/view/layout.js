@@ -187,12 +187,12 @@ SC.View.reopen(
         if (!key.hasOwnProperty(aKey)) { continue; }
 
         newLayout = this._sc_applyAdjustment(aKey, key[aKey], layout, newLayout);
-        }
+      }
 
         if (this._pendingAnimations && this._pendingAnimations[key]) {
           // Adjusting a value that was previously about to be animated cancels the animation.
           delete this._pendingAnimations[key];
-      }
+    }
 
 
     // now set adjusted layout
@@ -580,17 +580,27 @@ SC.View.reopen(
   },
 
   computeParentDimensions: function (frame) {
-    var ret, pv = this.get('parentView'), pf = (pv) ? pv.get('frame') : null;
+    var parentView = this.get('parentView'),
+        parentFrame = (parentView) ? parentView.get('frame') : null,
+        ret;
 
-    if (pf) {
-      ret = { width: pf.width, height: pf.height };
-    } else {
-      var f = frame || {};
+    if (parentFrame) {
       ret = {
-        width: (f.left || 0) + (f.width || 0) + (f.right || 0),
-        height: (f.top || 0) + (f.height || 0) + (f.bottom || 0)
+        width: parentFrame.width,
+        height: parentFrame.height
+      };
+    } else if (frame) {
+      ret = {
+        width: (frame.left || 0) + (frame.width || 0) + (frame.right || 0),
+        height: (frame.top || 0) + (frame.height || 0) + (frame.bottom || 0)
+      };
+    } else {
+      ret = {
+        width: 0,
+        height: 0
       };
     }
+
     return ret;
   },
 
@@ -829,16 +839,16 @@ SC.View.reopen(
     /*jshint eqnull:true*/
     if (previousLayout &&
         previousLayout.width != null &&
-         previousLayout.height != null &&
-         previousLayout.width === currentLayout.width &&
-         previousLayout.height === currentLayout.height &&
-         previousLayout.border === currentLayout.border &&
-         previousLayout.borderTop === currentLayout.borderTop &&
-         previousLayout.borderLeft === currentLayout.borderLeft &&
-         previousLayout.borderBottom === currentLayout.borderBottom &&
+        previousLayout.height != null &&
+        previousLayout.width === currentLayout.width &&
+        previousLayout.height === currentLayout.height &&
+        previousLayout.border === currentLayout.border &&
+        previousLayout.borderTop === currentLayout.borderTop &&
+        previousLayout.borderLeft === currentLayout.borderLeft &&
+        previousLayout.borderBottom === currentLayout.borderBottom &&
         previousLayout.borderRight === currentLayout.borderRight) {
-        didResize = false;
-      }
+      didResize = false;
+    }
 
     // Cache the last layout to fine-tune notifications when the layout changes.
     // NOTE: Do this before continuing so that any adjustments that occur in viewDidResize or from _viewFrameDidChange
