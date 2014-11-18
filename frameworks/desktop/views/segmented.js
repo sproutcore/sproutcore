@@ -708,7 +708,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         v, rect,
         point;
 
-    point = {x: x, y: y};
+    point = { x: x, y: y };
     for (i = 0, length = cv.length; i < length; i++) {
       v = cv[i];
 
@@ -754,25 +754,33 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     event occurred.
   */
   displayItemIndexForEvent: function (evt) {
-    var renderDelegate = this.get('renderDelegate');
-    var x = evt.clientX;
-    var y = evt.clientY;
+    var el = evt.target,
+        x = evt.clientX,
+        y = evt.clientY,
+        ret = -1;
 
-    // Accessibility workaround: <rdar://problem/10467360> WebKit sends all event coords as 0,0 for all AXPress-triggered events
-    if (x === 0 && y === 0) {
-      var el = evt.target;
-      if (el) {
+    if (el && el !== this.get('layer')) {
+      // Accessibility workaround: WebKit sends all event coords as 0,0 for all AXPress-triggered events.
+      // For example, triggering an element with VoiceOver in OS X.
+      // Note: by ensuring that the event target wasn't our own layer, we avoid the situation where an
+      // actual mouse clicked at 0,0 and hit only our layer.
+      if (x === 0 && y === 0) {
         var offset = SC.offset(el);
+
+        // Generate point coordinates in the middle of the target element.
         x = offset.x + Math.round(el.offsetWidth / 2);
         y = offset.y + Math.round(el.offsetHeight / 2);
       }
+
+      var renderDelegate = this.get('renderDelegate');
+      if (renderDelegate && renderDelegate.indexForClientPosition) {
+        ret = renderDelegate.indexForClientPosition(this, x, y);
+      } else {
+        ret = this.indexForClientPosition(x, y);
+      }
     }
 
-    if (renderDelegate && renderDelegate.indexForClientPosition) {
-      return renderDelegate.indexForClientPosition(this, x, y);
-    }
-
-    return this.indexForClientPosition(evt.clientX, evt.clientY);
+    return ret;
   },
 
   /** @private */
