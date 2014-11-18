@@ -35,7 +35,7 @@ SC.ArraySuite.define(function(T) {
     try {
       obj.removeAt(200);
     } catch (e) {
-      equals(e.message, SC.OUT_OF_RANGE_EXCEPTION, 'should throw SC.OUT_OF_RANGE_EXCEPTION');
+      equals(e, SC.OUT_OF_RANGE_EXCEPTION, 'should throw SC.OUT_OF_RANGE_EXCEPTION');
       didThrow = YES ;
     }
     ok(didThrow, 'should raise exception');
