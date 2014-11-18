@@ -309,7 +309,7 @@ SC.ObjectCoder = SC.Object.extend({
   begin: function(object) {
     var methodName = this.get('encodeMethodName');
     if (SC.typeOf(object[methodName]) !== SC.T_FUNCTION) {
-      SC.throw("Cannot encode %@ because it does not respond to %@()".fmt(object, methodName));
+      throw SC.$error("Cannot encode %@ because it does not respond to %@()".fmt(object, methodName)) ;
     } 
     
     // save className for later coding

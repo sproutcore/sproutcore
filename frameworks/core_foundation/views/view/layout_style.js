@@ -158,7 +158,9 @@ SC.View.LayoutStyleCalculator = {
 
   // handles the case where you do width:auto or height:auto and are not using "staticLayout"
   _invalidAutoValue: function (view, property) {
-    SC.throw("%@.layout() you cannot use %@:auto if staticLayout is disabled".fmt(view, property), "%@".fmt(view), -1);
+    var error = SC.Error.desc("%@.layout() you cannot use %@:auto if staticLayout is disabled".fmt(view, property), "%@".fmt(view), -1);
+    SC.Logger.error(error.toString());
+    throw error;
   },
 
   /** @private */

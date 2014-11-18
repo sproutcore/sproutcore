@@ -16,7 +16,7 @@ SC.mixin(Array.prototype,
 
   // primitive for array support.
   replace: function (idx, amt, objects) {
-    if (this.isFrozen) { throw new Error(SC.FROZEN_ERROR); }
+    if (this.isFrozen) { throw SC.FROZEN_ERROR; }
 
     var args;
     var len = objects ? (objects.get ? objects.get('length') : objects.length) : 0;

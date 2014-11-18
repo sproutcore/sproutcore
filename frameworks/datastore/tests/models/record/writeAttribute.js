@@ -77,7 +77,7 @@ test("raises exception if you try to write an attribute before an attribute hash
   try {
     foo.writeAttribute("foo", "bar");
   } catch(e) {
-    equals(e.message, SC.Record.BAD_STATE_ERROR.toString(), 'should throw BAD_STATE_ERROR');
+    equals(e, SC.Record.BAD_STATE_ERROR, 'should throw BAD_STATE_ERROR');
     cnt++;
   }
   equals(cnt, 1, 'should raise exception');

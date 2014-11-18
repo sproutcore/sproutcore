@@ -119,7 +119,7 @@ function testStates(canLoad) {
   }catch(error1){
     msg=error1.message;
   }
-  equals(msg, SC.Record.BUSY_ERROR.toString(), "should throw error");
+  equals(msg, SC.Record.BUSY_ERROR.message, "should throw error");
 
   try{
     store.retrieveRecord(undefined, undefined, storeKey5, YES);
@@ -127,7 +127,7 @@ function testStates(canLoad) {
   }catch(error2){
     msg=error2.message;
   }
-  equals(msg, SC.Record.BUSY_ERROR.toString(), "should throw error");
+  equals(msg, SC.Record.BUSY_ERROR.message, "should throw error");
   
   try{
     store.retrieveRecord(undefined, undefined, storeKey6, YES);
@@ -135,7 +135,7 @@ function testStates(canLoad) {
   }catch(error3){
     msg=error3.message;
   }
-  equals(msg, SC.Record.BUSY_ERROR.toString(), "should throw error");
+  equals(msg, SC.Record.BUSY_ERROR.message, "should throw error");
 
   try{
     store.retrieveRecord(undefined, undefined, storeKey7, YES);
@@ -143,7 +143,7 @@ function testStates(canLoad) {
   }catch(error4){
     msg=error4.message;
   }
-  equals(msg, SC.Record.BAD_STATE_ERROR.toString(), "should throw error");
+  equals(msg, SC.Record.BAD_STATE_ERROR.message, "should throw error");
 
 
   store.retrieveRecord(undefined, undefined, storeKey8, YES);

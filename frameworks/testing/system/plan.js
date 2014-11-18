@@ -540,7 +540,7 @@ CoreTest.Plan = {
       }
 
       if (QUNIT_BREAK_ON_TEST_FAIL & !pass) {
-        SC.throw(msg);
+        throw msg;
       }
 
       return !!pass ? this.pass(msg) : this.fail(msg);

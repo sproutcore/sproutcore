@@ -158,7 +158,7 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
   */
   add: function(source, start, length) {
 
-    if (this.isFrozen) throw new Error(SC.FROZEN_ERROR);
+    if (this.isFrozen) throw SC.FROZEN_ERROR ;
 
     var sets, len, idx, set, oldlen, newlen, setlen, objects;
 
@@ -218,7 +218,7 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
   */
   remove: function(source, start, length) {
 
-    if (this.isFrozen) throw new Error(SC.FROZEN_ERROR);
+    if (this.isFrozen) throw SC.FROZEN_ERROR ;
 
     var sets, len, idx, i, set, oldlen, newlen, setlen, objects, object;
 
@@ -536,7 +536,7 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
     @returns {SC.SelectionSet}
   */
   clear: function() {
-    if (this.isFrozen) throw new Error(SC.FROZEN_ERROR);
+    if (this.isFrozen) throw SC.FROZEN_ERROR;
     if (this._sets) this._sets.length = 0 ; // truncate
     if (this._objects) this._objects = null;
 

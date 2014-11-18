@@ -93,5 +93,5 @@ Handlebars.registerHelper('helperMissing', function(path, options) {
   var error;
 
   error = "%@ Handlebars error: Could not find property '%@' on object %@.";
-  throw new Error(error.fmt(options.data.view, path, this));
+  throw error.fmt(options.data.view, path, this);
 });

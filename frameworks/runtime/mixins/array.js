@@ -138,7 +138,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     @param {Object} object object to insert
   */
   insertAt: function (idx, object) {
-    if (idx > this.get('length')) throw new Error(SC.OUT_OF_RANGE_EXCEPTION);
+    if (idx > this.get('length')) throw SC.OUT_OF_RANGE_EXCEPTION;
     this.replace(idx, 0, [object]);
     return this;
   },
@@ -162,7 +162,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     if (typeof start === SC.T_NUMBER) {
 
       if ((start < 0) || (start >= this.get('length'))) {
-        throw new Error(SC.OUT_OF_RANGE_EXCEPTION);
+        throw SC.OUT_OF_RANGE_EXCEPTION;
       }
 
       // fast case

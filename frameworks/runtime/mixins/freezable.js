@@ -11,7 +11,7 @@
 
   @type Error
 */
-SC.FROZEN_ERROR = "Cannot modify a frozen object";
+SC.FROZEN_ERROR = new Error("Cannot modify a frozen object");
 
 /**
   @class
@@ -48,7 +48,7 @@ SC.FROZEN_ERROR = "Cannot modify a frozen object";
 
           // swaps the names
           swapNames: function() {
-            if (this.get('isFrozen')) throw new Error(SC.FROZEN_ERROR);
+            if (this.get('isFrozen')) throw SC.FROZEN_ERROR;
             var tmp = this.get('firstName');
             this.set('firstName', this.get('lastName'));
             this.set('lastName', tmp);
