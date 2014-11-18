@@ -112,7 +112,7 @@ SC.View.reopen(
     var layoutChange = false;
     if (typeof this.layout === "function" && this._kvo_dependents) {
       var dependents = this._kvo_dependents[key];
-      if (dependents && dependents.indexOf('layout') != -1) { layoutChange = true; }
+      if (dependents && dependents.indexOf('layout') !== -1) { layoutChange = true; }
     }
 
     if (key === 'layout' || layoutChange) {
@@ -436,7 +436,7 @@ SC.View.reopen(
       while (view && (f = view.get('frame'))) {
 
         // if scale != 1, then multiple by the scale (going from view to parent)
-        if (f.scale && f.scale != 1) {
+        if (f.scale && f.scale !== 1) {
           myX *= f.scale;
           myY *= f.scale;
           myWidth *= f.scale;
@@ -471,7 +471,7 @@ SC.View.reopen(
         myX -= f.x;
         myY -= f.y;
 
-        if (f.scale && f.scale != 1) {
+        if (f.scale && f.scale !== 1) {
           myX /= f.scale;
           myY /= f.scale;
           myWidth /= f.scale;
@@ -546,6 +546,7 @@ SC.View.reopen(
       return frame;
     }
     // Get the scale and transform origins, if not provided. (Note inlining of SC.none for performance)
+    /*jshint eqnull:true*/
     scale = scale == null ? layout.scale : scale;
     oX = oX == null ? layout.transformOriginX : oX;
     oY = oY == null ? layout.transformOriginY : oY;
@@ -812,7 +813,7 @@ SC.View.reopen(
 
   /** @private */
   _checkForResize: function () {
-    // Did our layout change in a way that could cause us to be resized?  If
+    // Did our layout change in a way that could cause us to have changed size?  If
     // not, then there's no need to invalidate the frames of our child views.
     var previousLayout = this._previousLayout,
         currentLayout  = this.get('layout'),
