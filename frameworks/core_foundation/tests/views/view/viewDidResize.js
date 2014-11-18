@@ -45,8 +45,14 @@ test("parentViewDidResize should only be called when the parent's layout propert
   equals(callCount, 2, 'parentViewDidResize should invoke twice');
 
   // This is tricky, if the height increases, but the same size border is added, the effective height/width is unchanged.
-  SC.run(function () { view.adjust({'height': 70, 'borderTop': 10 }); });
-  equals(callCount, 2, 'parentViewDidResize should invoke twice');
+  /*
+    Testing for this type of change on every call to adjust isn't worth the computation cost. Essentially,
+    what we lose is that parentViewDidResize will get called still if a view happens to adjust its border and
+    size at the same time, such that its frame doesn't change, which has a very small chance of occurring and
+    isn't critical if it does occur.
+    */
+  // SC.run(function () { view.adjust({'height': 70, 'borderTop': 10 }); });
+  // equals(callCount, 2, 'parentViewDidResize should invoke twice');
 });
 
 /**
@@ -69,7 +75,7 @@ test("SC.View.prototype._checkForResize() updates the _previousLayout cache befo
     originalPreviousLayout;
 
   originalPreviousLayout = view1.get('layout');
-  SC.run(function () { view1.adjust({ width: 100 }) });
+  SC.run(function () { view1.adjust({ width: 100 }); });
 });
 
 test("The view's frame should only notify changes when its layout changes if the effective size or position actually change.", function () {

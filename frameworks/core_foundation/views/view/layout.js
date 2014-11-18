@@ -123,6 +123,40 @@ SC.View.reopen(
     sc_super();
   },
 
+  /** @private Apply the adjustment to a clone of the layout (cloned unless newLayout is passed in) */
+  _sc_applyAdjustment: function (key, newValue, layout, newLayout) {
+    var animateLayout = this._animateLayout;
+
+    // If a call to animate occurs in the same run loop, the animation layout
+    // would still be applied in the next run loop, potentially overriding this
+    // adjustment. So we need to cancel the animation layout.
+    if (animateLayout) {
+      if (newValue === null) {
+        delete animateLayout[key];
+      } else {
+        animateLayout[key] = newValue;
+      }
+
+      if (this._pendingAnimations[key]) {
+        // Adjusting a value that was about to be animated cancels the animation.
+        delete this._pendingAnimations[key];
+      }
+    }
+
+    // Ignore undefined values or values equal to the current value.
+    if (newValue !== undefined && layout[key] != newValue) { // coerced so '100' == 100
+      // Only clone the layout if it is not given.
+      if (!newLayout) newLayout = SC.clone(this.get('layout'));
+
+      if (newValue === null) {
+        delete newLayout[key];
+      } else {
+        newLayout[key] = newValue;
+      }
+    }
+
+    return newLayout;
+  },
 
   /**
     This convenience method will take the current layout, apply any changes
@@ -140,66 +174,36 @@ SC.View.reopen(
     @returns {SC.View} receiver
   */
   adjust: function (key, value) {
-    if (key === undefined) { return this; } // nothing to do.
+    if (key === undefined) { return this; } // FAST PATH! Nothing to do.
 
     var layout = this.get('layout'),
-        didChange = NO,
-        animateLayout = this._animateLayout,
-        cur, hash;
+      newLayout;
 
     // Normalize arguments.
     if (SC.typeOf(key) === SC.T_STRING) {
-      hash = {};
-      hash[key] = value;
+      newLayout = this._sc_applyAdjustment(key, value, layout);
     } else {
-      hash = key;
-    }
+      for (var aKey in key) {
+        if (!key.hasOwnProperty(aKey)) { continue; }
 
-    for (key in hash) {
-      if (!hash.hasOwnProperty(key)) { continue; }
-
-      value = hash[key];
-      cur = layout[key];
-
-      // If a call to animate occurs in the same run loop, the animation layout
-      // would still be applied in the next run loop, potentially overriding this
-      // adjustment. So we need to fix up the animation layout.
-      if (animateLayout) {
-        if (value === null) {
-          delete animateLayout[key];
-        } else {
-          animateLayout[key] = value;
+        newLayout = this._sc_applyAdjustment(aKey, key[aKey], layout, newLayout);
         }
 
         if (this._pendingAnimations && this._pendingAnimations[key]) {
           // Adjusting a value that was previously about to be animated cancels the animation.
           delete this._pendingAnimations[key];
-        }
       }
 
-      if (value === undefined || cur == value) { continue; }
-
-      // only clone the layout the first time we see a change
-      if (!didChange) layout = SC.clone(layout);
-
-      if (value === null) {
-        delete layout[key];
-      } else {
-        layout[key] = value;
-      }
-
-      didChange = YES;
-    }
 
     // now set adjusted layout
-    if (didChange) {
+    if (newLayout) {
       var transitionAdjust = this.get('transitionAdjust');
 
       if (this.get('viewState') & SC.CoreView.IS_SHOWN && transitionAdjust) {
         // Run the adjust transition.
-        this._transitionAdjust(layout);
+        this._transitionAdjust(newLayout);
       } else {
-        this.set('layout', layout);
+        this.set('layout', newLayout);
       }
     }
 
@@ -787,8 +791,8 @@ SC.View.reopen(
     if (!SC.none(currentLayout.rotate)) {
       if (SC.none(currentLayout.rotateZ) && SC.platform.get('supportsCSS3DTransforms')) {
         currentLayout.rotateZ = currentLayout.rotate;
-        delete currentLayout.rotate;
-      }
+      delete currentLayout.rotate;
+    }
     }
 
     // Optimize notifications depending on if we resized or just moved.
@@ -822,25 +826,23 @@ SC.View.reopen(
     // We test the new layout to see if we believe it will affect the view's frame.
     // Since all the child view frames may depend on the parent's frame, it's
     // best only to notify a frame change when it actually happens.
-    if (previousLayout && !SC.none(previousLayout.width) && !SC.none(previousLayout.height) && previousLayout !== currentLayout) {
-      var currentTest,
-        previousTest;
-
-      // This code already exists in _adjustForBorder, so we use it to test the effective width/height.
-      // TODO: consider checking min/max sizes
-      previousTest = this._adjustForBorder({ x: 0, y: 0, width: previousLayout.width, height: previousLayout.height },
-        previousLayout);
-      currentTest = this._adjustForBorder({ x: 0, y: 0, width: currentLayout.width || 0, height: currentLayout.height || 0 },
-        currentLayout);
-
-      if (previousTest.width === currentTest.width && previousTest.height === currentTest.height) {
+    /*jshint eqnull:true*/
+    if (previousLayout &&
+        previousLayout.width != null &&
+         previousLayout.height != null &&
+         previousLayout.width === currentLayout.width &&
+         previousLayout.height === currentLayout.height &&
+         previousLayout.border === currentLayout.border &&
+         previousLayout.borderTop === currentLayout.borderTop &&
+         previousLayout.borderLeft === currentLayout.borderLeft &&
+         previousLayout.borderBottom === currentLayout.borderBottom &&
+        previousLayout.borderRight === currentLayout.borderRight) {
         didResize = false;
       }
-    }
 
     // Cache the last layout to fine-tune notifications when the layout changes.
-    // NOTE: Do this before calling viewDidResize, so that any further adjustments that occur (say to the position after a resize),
-    // don't result in _checkForResize running against the old _previousLayout.
+    // NOTE: Do this before continuing so that any adjustments that occur in viewDidResize or from _viewFrameDidChange
+    // (say to the position after a resize), don't result in _checkForResize running against the old _previousLayout.
     this._previousLayout = currentLayout;
 
     if (didResize) {
