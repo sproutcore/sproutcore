@@ -2456,16 +2456,6 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
     if ((layout.maxWidth != null) && (f.width > layout.maxWidth)) f.width = layout.maxWidth;
     if ((layout.minWidth != null) && (f.width < layout.minWidth)) f.width = layout.minWidth;
 
-    // SPECIAL CASE: Account for being inside ScrollView, where we use CSS
-    // transforms to scroll for performance and platform-compatibility reasons.
-    if (pv && pv.isScrollContainer) {
-      pv = pv.get('parentView');
-      f.x -= pv.get('horizontalScrollOffset');
-      f.y -= pv.get('verticalScrollOffset');
-      scale = pv.get('scale');
-      oX = oY = 0;
-    }
-
     // Finally, adjust for scale. (Scale is only defined here if we're doing special-case ScrollView stuff.)
     f = this._adjustForScale(f, layout, scale, oX, oY);
 
