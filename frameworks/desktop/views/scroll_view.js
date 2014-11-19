@@ -80,9 +80,6 @@ SC.ScrollView = SC.View.extend({
   // Properties
   //
 
-  /** @private Shared object used to avoid continually initializing/destroying objects. */
-  _SC_CONTAINER_LAYOUT_MAP: null,
-
   /** @private Flag used to determine whether to animate the adjustment. */
   _sc_animationDuration: null,
 
@@ -172,13 +169,13 @@ SC.ScrollView = SC.View.extend({
   acceptsMultitouch: true,
 
   /** @private Animation curves. Kept private b/c it will likely become a computed property. */
-  animationCurveDecelerate: 'cubic-bezier(.35,.34,.84,1)',  // http://cubic-bezier.com
+  animationCurveDecelerate: SC.easingCurve(0.35,0.34,0.84,1), // 'cubic-bezier(.35,.34,.84,1)',  // http://cubic-bezier.com
 
   /** @private Animation curves. Kept private b/c it will likely become a computed property. */
-  animationCurveReverse: 'cubic-bezier(0.45,-0.47,0.73,1.3)',
+  animationCurveReverse: SC.easingCurve(0.45,-0.47,0.73,1.3), // 'cubic-bezier(0.45,-0.47,0.73,1.3)',
 
   /** @private Animation curves. Kept private b/c it will likely become a computed property. */
-  animationCurveSnap: 'cubic-bezier(.28,.36,.52,1)',
+  animationCurveSnap: SC.easingCurve(0.28,0.36,0.52,1), // 'cubic-bezier(.28,.36,.52,1)',
 
   /**
     If true, the horizontal scroller will automatically hide if the contentView is smaller than the
@@ -821,25 +818,72 @@ SC.ScrollView = SC.View.extend({
     }
   },
 
+  /** @private Manually animates the content view. */
+  _sc_animateContentView: function (leftEnd, topEnd) {
+    var easingCurve = this._sc_animationTiming,
+      totalDuration = this._sc_animationDuration * 1000,
+      start = new Date(),
+      contentView = this.get('contentView'),
+      contentViewLayout = contentView.get('layout'),
+      leftStart = contentViewLayout.left,
+      leftDelta = leftEnd - leftStart,
+      topStart = contentViewLayout.top,
+      topDelta = topEnd - topStart,
+      self = this;
+
+    function animationFrame() {
+      if (self._sc_isAnimating) {
+        var duration = new Date() - start,
+            percent = Math.min(duration / totalDuration, 1); // Capped at 100%
+
+        SC.run(function () {
+          var currentLeft = leftStart + leftDelta * easingCurve.value(percent),
+              currentTop = topStart + topDelta * easingCurve.value(percent);
+
+          console.log('  animating: duration: %@ (%@%), value: %@, left (∆%@): %@ (%@), top(∆%@): %@ (%@)'.fmt(duration, percent.toFixed(1), easingCurve.value(percent), leftDelta, currentLeft, leftEnd, topDelta, currentTop, topEnd));
+
+          contentView.adjust('left', currentLeft);
+          contentView.adjust('top', currentTop);
+        });
+
+        // Keep animating as long as we haven't hit 100%.
+        if (percent < 1) {
+          window.requestAnimationFrame(animationFrame);
+        }
+      }
+    }
+
+    // Start the animation.
+    self._sc_isAnimating = true;
+    animationFrame();
+
+    // Clear out the animation flags.
+    this._sc_animationDuration = null;
+    this._sc_animationTiming = null;
+  },
+
   /* @private Cancels any content view animation if it exists. */
   _sc_cancelAnimation: function () {
+    if (this._sc_isAnimating) {
     var contentView = this.get('contentView');
 
-    if (contentView.get('viewState') === SC.CoreView.ATTACHED_SHOWN_ANIMATING) {
-      // Stop the animation in place.
-      contentView.cancelAnimation(SC.LayoutState.CURRENT);
+    // if (contentView.get('viewState') === SC.CoreView.ATTACHED_SHOWN_ANIMATING) {
+    //   // Stop the animation in place.
+    //   contentView.cancelAnimation(SC.LayoutState.CURRENT);
 
       var curLayout = contentView.get('layout');
 
       // Update offsets to match actual placement.
       this.set('horizontalScrollOffset', -curLayout.left);
       this.set('verticalScrollOffset', -curLayout.top);
-      this.set('scale', curLayout.scale);
+    //   this.set('scale', curLayout.scale);
 
-      // Clear out the animation flags.
-      this._sc_animationDuration = null;
-      this._sc_animationTiming = null;
+    //   // Clear out the animation flags.
+    //   this._sc_animationDuration = null;
+    //   this._sc_animationTiming = null;
     }
+
+    this._sc_isAnimating = false;
   },
 
   /** @private Reposition our content view if necessary according to aligment. */
@@ -1297,18 +1341,19 @@ SC.ScrollView = SC.View.extend({
       }
 
       // Cancel any active animation in place.
-      this._sc_cancelAnimation();
+      // this._sc_cancelAnimation();
 
       if (this._sc_animationDuration) {
 
-        contentView.animate({ left: left, top: top, scale: scale }, {
-          duration: this._sc_animationDuration,
-          timing: this._sc_animationTiming
-        });
+        // contentView.animate({ left: left, top: top, scale: scale }, {
+        //   duration: this._sc_animationDuration,
+        //   timing: this._sc_animationTiming
+        // });
 
-        // Run the animation immediately (don't wait for next Run Loop).
-        // Note: The next run loop will be queued none-the-less, so we may want to avoid that entirely in the future.
-        contentView._animate();
+        // // Run the animation immediately (don't wait for next Run Loop).
+        // // Note: The next run loop will be queued none-the-less, so we may want to avoid that entirely in the future.
+        // contentView._animate();
+        this._sc_animateContentView(left, top);
 
       } else {
         contentView.adjust({
@@ -1987,7 +2032,7 @@ SC.ScrollView = SC.View.extend({
               // Generate an animation curve that bounces past the end point.
               c2x = (horizontalScrollOffset - maximumHorizontalScrollOffset) / containerWidth;
               c2y = 2 * c2x;
-              this._sc_animationTiming = 'cubic-bezier(0.0,0.5,%@,%@)'.fmt(c2x.toFixed(1), c2y.toFixed(1));
+              this._sc_animationTiming = SC.easingCurve(0.0,0.5,c2x.toFixed(1),c2y.toFixed(1)); // 'cubic-bezier(0.0,0.5,%@,%@)'.fmt(c2x.toFixed(1), c2y.toFixed(1));
 
               horizontalScrollOffset = maximumHorizontalScrollOffset;
 
@@ -1995,7 +2040,7 @@ SC.ScrollView = SC.View.extend({
               // Generate an animation curve that bounces past the end point.
               c2x = (minimumHorizontalScrollOffset - horizontalScrollOffset) / containerWidth;
               c2y = 2 * c2x;
-              this._sc_animationTiming = 'cubic-bezier(0.0,0.5,%@,%@)'.fmt(c2x.toFixed(1), c2y.toFixed(1));
+              this._sc_animationTiming = SC.easingCurve(0.0,0.5,c2x.toFixed(1),c2y.toFixed(1)); // 'cubic-bezier(0.0,0.5,%@,%@)'.fmt(c2x.toFixed(1), c2y.toFixed(1));
 
               horizontalScrollOffset = minimumHorizontalScrollOffset;
 
@@ -2057,7 +2102,7 @@ SC.ScrollView = SC.View.extend({
               // Generate an animation curve that bounces past the end point.
               c2x = (verticalScrollOffset - maximumVerticalScrollOffset) / containerHeight;
               c2y = 2 * c2x;
-              this._sc_animationTiming = 'cubic-bezier(0.0,0.5,%@,%@)'.fmt(c2x.toFixed(1), c2y.toFixed(1));
+              this._sc_animationTiming = SC.easingCurve(0.0, 0.5,c2x.toFixed(1), c2y.toFixed(1)); 'cubic-bezier(0.0,0.5,%@,%@)'.fmt(c2x.toFixed(1), c2y.toFixed(1));
 
               verticalScrollOffset = maximumVerticalScrollOffset;
 
@@ -2065,7 +2110,7 @@ SC.ScrollView = SC.View.extend({
               // Generate an animation curve that bounces past the end point.
               c2x = (minimumVerticalScrollOffset - verticalScrollOffset) / containerHeight;
               c2y = 2 * c2x;
-              this._sc_animationTiming = 'cubic-bezier(0.0,0.5,%@,%@)'.fmt(c2x.toFixed(1), c2y.toFixed(1));
+              this._sc_animationTiming = SC.easingCurve(0.0, 0.5,c2x.toFixed(1), c2y.toFixed(1)); 'cubic-bezier(0.0,0.5,%@,%@)'.fmt(c2x.toFixed(1), c2y.toFixed(1));
 
               verticalScrollOffset = minimumVerticalScrollOffset;
 
@@ -2352,5 +2397,14 @@ SC.ScrollView = SC.View.extend({
 
     return handled;
   }
+
+});
+
+
+SC.ScrollView.mixin(
+/** @scope SC.ScrollView */ {
+
+  /** @private Shared object used to avoid continually initializing/destroying objects. */
+  _SC_CONTAINER_LAYOUT_MAP: null
 
 });
