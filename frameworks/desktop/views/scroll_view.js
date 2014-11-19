@@ -909,8 +909,8 @@ SC.ScrollView = SC.View.extend({
         didAdjust = true;
       }
 
-      // Ensure that the content view size did change runs none-the-less.
-      // if (!didAdjust) { this._sc_contentViewSizeDidChange(); }
+      // Ensure that the content view size did change runs none-the-less in order to update the scrollers.
+      if (!didAdjust) { this._sc_contentViewSizeDidChange(); }
     }
 
   },

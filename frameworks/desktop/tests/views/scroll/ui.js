@@ -230,7 +230,7 @@
     equals(verticalScrollerView.$().attr('aria-valuemax'), view.get('maximumVerticalScrollOffset'), "verticalScroller has aria-valuemax set");
 
     equals(horizontalScrollerView.$().attr('aria-valuenow'), view.get('horizontalScrollOffset'), "horizontalScroller has aria-valuenow set");
-    equals(verticalScrollerView.$().attr('aria-valuenow'), view.get('horizontalScrollOffset'), "verticalScroller has aria-valuenow set");
+    equals(verticalScrollerView.$().attr('aria-valuenow'), view.get('verticalScrollOffset'), "verticalScroller has aria-valuenow set");
 
     // Aria max-value should change when the content's size is adjusted.
     var previousHeight = contentView.getPath('layout.height');
@@ -252,15 +252,15 @@
     verticalScroller.fadeOut(0.1);
     SC.RunLoop.end();
     setTimeout(function() {
-      opac = verticalScroller.$('.thumb').css('opacity');
-      equals(opac, '0', 'after fadeout, scroller thumb opacity should equal zero');
+      opac = verticalScroller.$().css('opacity');
+      equals(opac, '0', 'after fadeout, scroller opacity should equal zero');
       SC.RunLoop.begin();
       verticalScroller.fadeIn(0.1);
       view._sc_repositionContentViewUnfiltered(); // This method is PRIVATE. (Called here to cheat, synchronously testing an asynchronous operation.)
       SC.RunLoop.end();
       setTimeout(function() {
-        opac = verticalScroller.$('.thumb').css('opacity');
-        equals(opac, '0.5', 'after fadein, scroller thumb opacity should equal 0.5');
+        opac = verticalScroller.$().css('opacity');
+        equals(opac, '0.5', 'after fadein, scroller opacity should equal 0.5');
         start();
       }, 200);
 
@@ -279,15 +279,15 @@
     view._sc_fadeOutVerticalScroller();
     SC.RunLoop.end();
     setTimeout(function() {
-      opac = verticalScroller.$('.thumb').css('opacity');
-      equals(opac, '0', 'after fadeout, scroller thumb opacity should equal zero');
+      opac = verticalScroller.$().css('opacity');
+      equals(opac, '0', 'after fadeout, scroller opacity should equal zero');
       SC.RunLoop.begin();
       view._sc_fadeInHorizontalScroller();
       view._sc_fadeInVerticalScroller();
       SC.RunLoop.end();
       setTimeout(function() {
-        opac = verticalScroller.$('.thumb').css('opacity');
-        equals(opac, '0.5', 'after fadeout, scroller thumb opacity should equal 0.5');
+        opac = verticalScroller.$().css('opacity');
+        equals(opac, '0.5', 'after fadeout, scroller opacity should equal 0.5');
         start();
       }, 200);
 
