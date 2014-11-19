@@ -77,6 +77,27 @@ SC.Error = SC.Object.extend(
   }.property().cacheable(),
 
   /**
+    Throw the error.
+
+    @type SC.Error
+  */
+  $throw: function() {
+    var error = this.toString()
+    SC.Logger.error(error);
+
+    throw new Error(error);
+  },
+
+  /**
+    The error stacktrace.
+
+    @type SC.Error
+  */
+  trace: function() {
+    return (new Error).trace;
+  }.property().cacheable(),
+
+  /**
     Human readable name of the item with the error.
 
     @type String
@@ -94,24 +115,41 @@ SC.Error = SC.Object.extend(
     @type Boolean
   */
   isError: YES
-}) ;
+});
 
-/**
-  Creates a new SC.Error instance with the passed description, label, and
-  code.  All parameters are optional.
+SC.Error.mixin({
 
-  @param description {String} human readable description of the error
-  @param label {String} human readable name of the item with the error
-  @param code {Number} an error code to use for testing.
-  @returns {SC.Error} new error instance.
-*/
-SC.Error.desc = function(description, label, value, code) {
-  var opts = { message: description } ;
-  if (label !== undefined) opts.label = label ;
-  if (code !== undefined) opts.code = code ;
-  if (value !== undefined) opts.errorValue = value ;
-  return this.create(opts) ;
-} ;
+  /**
+    Creates a new SC.Error instance with the passed description, label, and
+    code.  All parameters are optional.
+
+    @param description {String} human readable description of the error
+    @param label {String} human readable name of the item with the error
+    @param code {Number} an error code to use for testing.
+    @returns {SC.Error} new error instance.
+  */
+  desc: function(description, label, value, code) {
+    var opts = { message: description } ;
+    if (label !== undefined) opts.label = label ;
+    if (code !== undefined) opts.code = code ;
+    if (value !== undefined) opts.errorValue = value ;
+    return this.create(opts) ;
+  },
+
+  /**
+    Throw a new SC.Error instance with the passed description, label, and
+    code.  All parameters are optional.
+
+    @param description {String} human readable description of the error
+    @param label {String} human readable name of the item with the error
+    @param code {Number} an error code to use for testing.
+    @returns {SC.Error} new error instance.
+  */
+  $throw: function(description, label, value, code) {
+    this.desc.apply(this, arguments).$throw();
+  },
+
+});
 
 /**
   Shorthand form of the SC.Error.desc method.
@@ -121,10 +159,21 @@ SC.Error.desc = function(description, label, value, code) {
   @param code {Number} an error code to use for testing.
   @returns {SC.Error} new error instance.
 */
-
 SC.$error = function(description, label, value, c) {  
   return SC.Error.desc(description,label, value, c);
-} ;
+};
+
+/**
+  Shorthand form of the SC.Error.$throw method.
+
+  @param description {String} human readable description of the error
+  @param label {String} human readable name of the item with the error
+  @param code {Number} an error code to use for testing.
+  @returns {SC.Error} new error instance.
+*/
+SC.$throw = function(description, label, value, c) {  
+  SC.Error.$throw(description,label, value, c);
+};
 
 /**
   Returns NO if the passed value is an error object or false.

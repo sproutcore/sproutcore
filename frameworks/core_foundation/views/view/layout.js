@@ -1168,7 +1168,7 @@ SC.View.reopen(
     sc_super();
 
     if (!this.isDestroyed) {
-      // Our frame may change once we've been removed from a parent.
+    // Our frame may change once we've been removed from a parent.
       this._checkForResize();
 
       // Notify all of our descendents that our parent has changed. They will update their `pane` value for one.

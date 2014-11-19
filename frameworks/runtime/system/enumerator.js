@@ -57,7 +57,7 @@ SC.Enumerator.prototype = /** @scope SC.Enumerator.prototype */{
   */
   reset: function() {
     var e = this.enumerable ;
-    if (!e) throw SC.$error("Enumerator has been destroyed");
+    if (!e) SC.$throw("Enumerator has been destroyed");
     this._length = e.get ? e.get('length') : e.length ;
     var len = this._length;
     this._index = 0;

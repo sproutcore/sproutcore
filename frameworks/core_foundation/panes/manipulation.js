@@ -31,6 +31,6 @@ SC.Pane.reopen(
     @returns {void}
   */
   removeFromParent: function() {
-    throw SC.Error.desc("SC.Pane cannot be removed from its parent, since it's the root. Did you mean remove()?");
+    SC.$throw("SC.Pane cannot be removed from its parent, since it's the root. Did you mean remove()?");
   }
 });

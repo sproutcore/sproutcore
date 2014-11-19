@@ -455,7 +455,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     this._order = this.buildOrder(this.get('orderBy'));
 
     this._isReady = !!tree && !tree.error;
-    if (tree && tree.error) throw tree.error;
+    if (tree && tree.error) SC.$throw(tree.error);
     return this._isReady;
   },
 
