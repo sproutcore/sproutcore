@@ -62,7 +62,7 @@ test("SC.Error#throw throw an error with description,label and code", function()
   var msg='',
     error = SC.Error.desc('This is an error instance','Error Instance', "FOO", 99999);
   try{
-    error.throw();
+    error.$throw();
   }catch(e){
     msg=e.message;
   }
