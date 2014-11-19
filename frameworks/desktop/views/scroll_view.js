@@ -849,6 +849,11 @@ SC.ScrollView = SC.View.extend({
         // Keep animating as long as we haven't hit 100%.
         if (percent < 1) {
           window.requestAnimationFrame(animationFrame);
+        } else {
+          // Clear out the animation flags.
+          self._sc_isAnimating = false;
+          self._sc_animationDuration = null;
+          self._sc_animationTiming = null;
         }
       }
     }
@@ -856,10 +861,6 @@ SC.ScrollView = SC.View.extend({
     // Start the animation.
     self._sc_isAnimating = true;
     animationFrame();
-
-    // Clear out the animation flags.
-    this._sc_animationDuration = null;
-    this._sc_animationTiming = null;
   },
 
   /* @private Cancels any content view animation if it exists. */
@@ -878,12 +879,12 @@ SC.ScrollView = SC.View.extend({
       this.set('verticalScrollOffset', -curLayout.top);
     //   this.set('scale', curLayout.scale);
 
-    //   // Clear out the animation flags.
-    //   this._sc_animationDuration = null;
-    //   this._sc_animationTiming = null;
+      // Clear out the animation flags.
+      this._sc_isAnimating = false;
+      this._sc_animationDuration = null;
+      this._sc_animationTiming = null;
     }
 
-    this._sc_isAnimating = false;
   },
 
   /** @private Reposition our content view if necessary according to aligment. */

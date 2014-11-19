@@ -379,13 +379,14 @@ SC.ScrollerView = SC.View.extend(
       // Consider that the parent view may be animating its final position, then we need to also animate
       // our final position.
       var parentView = this.get('parentView'),
-        duration = parentView._sc_animationDuration,
-        timing = parentView._sc_animationTiming;
+        parentIsAnimating = parentView._sc_isAnimating;
 
       if (SC.platform.supportsCSSTransitions) {
         var transitionStyle = SC.browser.experimentalStyleNameFor('transition');
 
-        if (duration) {
+        if (parentIsAnimating) {
+          var duration = parentView._sc_animationDuration,
+            timing = parentView._sc_animationTiming.toString();
 
           // Will use translation transform to position thumb.
           if (SC.platform.supportsCSSTransforms) {
@@ -1003,13 +1004,14 @@ SC.OverlayScrollerView = SC.ScrollerView.extend(
       // Consider that the parent view may be animating its final position, then we need to also animate
       // our final position.
       var parentView = this.get('parentView'),
-        duration = parentView._sc_animationDuration,
-        timing = parentView._sc_animationTiming;
+        parentIsAnimating = parentView._sc_isAnimating;
 
       if (SC.platform.supportsCSSTransitions) {
         var transitionStyle = SC.browser.experimentalStyleNameFor('transition');
 
-        if (duration) {
+        if (parentIsAnimating) {
+          var duration = parentView._sc_animationDuration,
+            timing = parentView._sc_animationTiming.toString();
 
           // Will use translation transform to position thumb.
           if (SC.platform.supportsCSSTransforms) {
