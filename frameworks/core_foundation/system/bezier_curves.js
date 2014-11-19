@@ -5,6 +5,9 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
+/** @private Kept private until fully fleshed out.
+  A cubic bezier equation. Used by the SC.easingCurve function.
+ */
 SC.CubicBezierEquation = function (C1, C2, C3, C4) {
 
   var B1 = function (t) { return (1 - t) * (1 - t) * (1 - t); };
@@ -23,7 +26,10 @@ SC.CubicBezierEquation = function (C1, C2, C3, C4) {
 
 };
 
-/* A specialized bezier curve with fixed start at 0,0 and fixed end at 1,1. */
+/** @private Kept private until fully fleshed out (name change?).
+  A specialized bezier curve with fixed start at 0,0 and fixed end at 1,1.
+
+  */
 SC.easingCurve = function (C2x, C2y, C3x, C3y) {
 
   var C1 = { x: 0, y: 0 },
@@ -34,7 +40,12 @@ SC.easingCurve = function (C2x, C2y, C3x, C3y) {
   var equation = new SC.CubicBezierEquation(C1, C2, C3, C4);
 
   equation.value = function (percent) {
+    percent = Math.max(0, Math.min(percent, 1));
     return this.position(percent).y;
+  };
+
+  equation.toString = function () {
+    return "cubic-bezier(%@, %@, %@, %@)".fmt(C2x, C2y, C3x, C3y);
   };
 
   return equation;
