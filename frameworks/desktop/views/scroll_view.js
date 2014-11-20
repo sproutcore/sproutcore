@@ -878,7 +878,7 @@ SC.ScrollView = SC.View.extend({
   /* @private Cancels any content view animation if it exists. */
   _sc_cancelAnimation: function () {
     if (this._sc_isAnimating) {
-    var contentView = this.get('contentView');
+      var contentView = this.get('contentView');
 
     // UNUSED. Animate using SC.View.prototype.animate. Cancelling the animation in place proved problematic.
     // if (contentView.get('viewState') === SC.CoreView.ATTACHED_SHOWN_ANIMATING) {
@@ -1017,21 +1017,21 @@ SC.ScrollView = SC.View.extend({
       if (lastScale !== newFrame.scale) {
         this._sc_contentScaleDidChange = true;
         this.set('_sc_contentScale', newFrame.scale);
-    }
+      }
 
       if (lastWidth !== newFrame.width) {
         this._sc_contentWidthDidChange = true;
         this.set('_sc_contentWidth', newFrame.width);
-    }
+      }
 
       if (lastHeight !== newFrame.height) {
         this._sc_contentHeightDidChange = true;
-      this.set('_sc_contentHeight', newFrame.height);
-    }
+        this.set('_sc_contentHeight', newFrame.height);
+      }
 
       // If any of the size values changed, update.
       if (this._sc_contentScaleDidChange || this._sc_contentWidthDidChange || this._sc_contentHeightDidChange) {
-    // Filter the observer input.
+        // Filter the observer input.
         this.invokeOnce(this._sc_contentViewSizeDidChange);
       }
     }
