@@ -68,6 +68,8 @@ var pane = SC.ControlTestPane.design()
     minimumScale: 0.01,
     maximumScale: 100,
 
+    horizontalAlign: SC.ALIGN_LEFT,
+    verticalAlign: SC.ALIGN_TOP,
     initialHorizontalAlign: SC.ALIGN_RIGHT,
     initialVerticalAlign: SC.ALIGN_BOTTOM
   }));
@@ -91,7 +93,7 @@ test('Initial values of scale and horizontal offsets are good', function () {
 
   equals(scrollView.get('scale'), 1, 'Initial scale is 1');
 
-  equals(scrollView.get('horizontalScrollOffset'), 0, 'Initial horizontal offset must be zero');
+  equals(scrollView.get('horizontalScrollOffset'), 107, 'Initial horizontal offset must be half the maximumHorizontalScrollOffset');
   equals(scrollView.get('verticalScrollOffset'), 0, 'Initial vertical offset must be zero');
 });
 
@@ -194,152 +196,175 @@ test('When contentView is fully visible, it is positioned according to verticalA
 // Zoomed in - static
 //
 
-test('When zoomed into the contentView, the content view should be placed at the top left', function() {
+test('When zoomed into the contentView, the content view should remain centered around visible center', function() {
   var scrollView = pane.view('scrollView with content view of fixed height'),
-    contentView = scrollView.get('contentView');
+    containerFrame = scrollView.getPath('containerView.frame');
+
+  // The percentage offsets for horizontal: ALIGN_CENTER & vertical: ALIGN_TOP for the given content and container size.
+  var hPct = 0.5,
+      vPct = 0.125;
 
   SC.run(function() {
     scrollView.set('scale', 10);
   });
 
-  equals(contentView.getPath('frame.x'), 0, "Content view left offset is 0 when zoomed into contentView");
-  equals(contentView.getPath('frame.y'), 0, "Content view top offset is 0 when zoomed into contentView");
+  var newOffsets = {
+    h: hPct * (scrollView.get('maximumHorizontalScrollOffset') + containerFrame.width) - (containerFrame.width / 2),
+    v: vPct * (scrollView.get('maximumVerticalScrollOffset') + containerFrame.height) - (containerFrame.height / 2)
+  };
+
+  equals(scrollView.get('horizontalScrollOffset'), newOffsets.h, "Content view left offset remains centered to visible center when zoomed into contentView");
+  equals(scrollView.get('verticalScrollOffset'), newOffsets.v, "Content view top offset remains centered to visible center when zoomed into contentView");
 });
 
 // ------------------------------
 // Zooming in
 //
 
-test('When zoomed into the contentView, the horizontal offset should stick to minimum if it was previously set to minimum', function() {
-  var scrollView = pane.view('scrollView with content view of fixed height');
+/*
+  The following tests ensure that the content sticks to minimums or maximums when scaling. However, this seems like the incorrect
+  behavior. Instead zooming should respect the content's visible center (e.g. OS X Preview zooming behavior).
+  */
+// test('When zoomed into the contentView, the horizontal offset should stick to minimum if it was previously set to minimum', function() {
+//   var scrollView = pane.view('scrollView with content view of fixed height'),
+//     containerFrame = scrollView.getPath('containerView.frame');
 
-  // first, zoom in a bit and set the horizontal offset to minimum
-  SC.run(function() {
-    scrollView.set('scale', 10);
-    scrollView.set('horizontalScrollOffset', scrollView.get('minimumHorizontalScrollOffset'));
-  });
+//   // first, zoom in a bit and set the horizontal offset to minimum
+//   SC.run(function() {
+//     scrollView.set('scale', 10);
+//     scrollView.set('horizontalScrollOffset', scrollView.get('minimumHorizontalScrollOffset'));
+//   });
 
-  // verify that the horizontal offset is minimum
+//   // verify that the horizontal offset is minimum
 
-  equals(scrollView.get('horizontalScrollOffset'), scrollView.get('minimumHorizontalScrollOffset'), 'Horizontal offset is at minimum after setting it to be thus');
+//   equals(scrollView.get('horizontalScrollOffset'), scrollView.get('minimumHorizontalScrollOffset'), 'Horizontal offset is at minimum after setting it to be thus');
 
-  // now, zoom in a bit more and make sure it's still minimum
+//   // now, zoom in a bit more and make sure it's still minimum
 
-  SC.run(function() {
-    scrollView.set('scale', 11);
-  });
+//   // The percentage offsets for horizontal: 0 @ scale of 10 & vertical: ALIGN_TOP for the given content and container size.
+//   var hPct = (0 + (containerFrame.width / 2)) / (scrollView.get('maximumHorizontalScrollOffset') + containerFrame.width),
+//       vPct = 0.125;
 
-  equals(scrollView.get('horizontalScrollOffset'), scrollView.get('minimumHorizontalScrollOffset'), 'Horizontal offset is still at minimum after scaling');
-});
+//   SC.run(function() {
+//     scrollView.set('scale', 11);
+//   });
 
-test('When zoomed into the contentView, the horizontal offset should stick to maximum if it was previously set to maximum', function() {
-  var scrollView = pane.view('scrollView with content view of fixed height');
+//   var newOffsets = {
+//     h: hPct * (scrollView.get('maximumHorizontalScrollOffset') + containerFrame.width) - (containerFrame.width / 2),
+//     v: vPct * (scrollView.get('maximumVerticalScrollOffset') + containerFrame.height) - (containerFrame.height / 2)
+//   };
 
-  // first, zoom in a bit and set the horizontal offset to maximum
-  SC.run(function() {
-    scrollView.set('scale', 10);
-    scrollView.scrollTo(scrollView.get('maximumHorizontalScrollOffset'));
-  });
+//   equals(scrollView.get('horizontalScrollOffset'), newOffsets.h, 'Horizontal offset is still at minimum after scaling');
+// });
 
-  // verify that the horizontal offset is maximum
+// test('When zoomed into the contentView, the horizontal offset should stick to maximum if it was previously set to maximum', function() {
+//   var scrollView = pane.view('scrollView with content view of fixed height');
 
-  equals(scrollView.get('horizontalScrollOffset'), scrollView.get('maximumHorizontalScrollOffset'), 'Horizontal offset is at maximum after setting it to be thus');
+//   // first, zoom in a bit and set the horizontal offset to maximum
+//   SC.run(function() {
+//     scrollView.set('scale', 10);
+//     scrollView.scrollTo(scrollView.get('maximumHorizontalScrollOffset'));
+//   });
 
-  // now, zoom in a bit more and make sure it's still maximum
+//   // verify that the horizontal offset is maximum
 
-  SC.run(function() {
-    scrollView.set('scale', 11);
-  });
+//   equals(scrollView.get('horizontalScrollOffset'), scrollView.get('maximumHorizontalScrollOffset'), 'Horizontal offset is at maximum after setting it to be thus');
 
-  equals(scrollView.get('horizontalScrollOffset'), scrollView.get('maximumHorizontalScrollOffset'), 'Horizontal offset is still at maximum after scaling');
-});
+//   // now, zoom in a bit more and make sure it's still maximum
 
-test('When zoomed into the contentView, the vertical offset should stick to minimum if it was previously set to minimum', function() {
-  var scrollView = pane.view('scrollView with content view of fixed height');
+//   SC.run(function() {
+//     scrollView.set('scale', 11);
+//   });
 
-  // first, zoom in a bit and set the vertical offset to minimum
-  SC.run(function() {
-    scrollView.set('scale', 10);
-    scrollView.scrollTo(null, scrollView.get('minimumVerticalScrollOffset'));
-  });
+//   equals(scrollView.get('horizontalScrollOffset'), scrollView.get('maximumHorizontalScrollOffset'), 'Horizontal offset is still at maximum after scaling');
+// });
 
-  // verify that the vertical offset is minimum
+// test('When zoomed into the contentView, the vertical offset should stick to minimum if it was previously set to minimum', function() {
+//   var scrollView = pane.view('scrollView with content view of fixed height');
 
-  equals(scrollView.get('verticalScrollOffset'), scrollView.get('minimumVerticalScrollOffset'), 'Vertical offset is at minimum after setting it to be thus');
+//   // first, zoom in a bit and set the vertical offset to minimum
+//   SC.run(function() {
+//     scrollView.set('scale', 10);
+//     scrollView.scrollTo(null, scrollView.get('minimumVerticalScrollOffset'));
+//   });
 
-  // now, zoom in a bit more and make sure it's still minimum
+//   // verify that the vertical offset is minimum
 
-  SC.run(function() {
-    scrollView.set('scale', 11);
-  });
+//   equals(scrollView.get('verticalScrollOffset'), scrollView.get('minimumVerticalScrollOffset'), 'Vertical offset is at minimum after setting it to be thus');
 
-  equals(scrollView.get('verticalScrollOffset'), scrollView.get('minimumVerticalScrollOffset'), 'Vertical offset is still at minimum after scaling');
-});
+//   // now, zoom in a bit more and make sure it's still minimum
 
-test('When zoomed into the contentView, the vertical offset should stick to maximum if it was previously set to maximum', function() {
-  var scrollView = pane.view('scrollView with content view of fixed height');
+//   SC.run(function() {
+//     scrollView.set('scale', 11);
+//   });
 
-  // first, zoom in a bit and set the vertical offset to maximum
-  SC.run(function() {
-    scrollView.set('scale', 10);
-    scrollView.scrollTo(null, scrollView.get('maximumVerticalScrollOffset'));
-  });
+//   equals(scrollView.get('verticalScrollOffset'), scrollView.get('minimumVerticalScrollOffset'), 'Vertical offset is still at minimum after scaling');
+// });
 
-  // verify that the vertical offset is maximum
+// test('When zoomed into the contentView, the vertical offset should stick to maximum if it was previously set to maximum', function() {
+//   var scrollView = pane.view('scrollView with content view of fixed height');
 
-  equals(scrollView.get('verticalScrollOffset'), scrollView.get('maximumVerticalScrollOffset'), 'Vertical offset is at maximum after setting it to be thus');
+//   // first, zoom in a bit and set the vertical offset to maximum
+//   SC.run(function() {
+//     scrollView.set('scale', 10);
+//     scrollView.scrollTo(null, scrollView.get('maximumVerticalScrollOffset'));
+//   });
 
-  // now, zoom in a bit more and make sure it's still maximum
+//   // verify that the vertical offset is maximum
 
-  SC.run(function() {
-    scrollView.set('scale', 11);
-  });
+//   equals(scrollView.get('verticalScrollOffset'), scrollView.get('maximumVerticalScrollOffset'), 'Vertical offset is at maximum after setting it to be thus');
 
-  equals(scrollView.get('verticalScrollOffset'), scrollView.get('maximumVerticalScrollOffset'), 'Vertical offset is still at maximum after scaling');
-});
+//   // now, zoom in a bit more and make sure it's still maximum
+
+//   SC.run(function() {
+//     scrollView.set('scale', 11);
+//   });
+
+//   equals(scrollView.get('verticalScrollOffset'), scrollView.get('maximumVerticalScrollOffset'), 'Vertical offset is still at maximum after scaling');
+// });
 
 // ---------------------------------------------------
 // Zooming in from fully-visible with fresh view
 //
 
-test("Zooming from fully-visible to clipped with different alignments", function() {
+// test("Zooming from fully-visible to clipped with different alignments", function() {
 
-  // TOP & LEFT
-  var scrollView = pane.view('scrollView with content view of fixed height');
+//   // TOP & LEFT
+//   var scrollView = pane.view('scrollView with content view of fixed height');
 
-  SC.run(function() {
-    scrollView.set('scale', 0.1);
-  });
-  SC.run(function() {
-    scrollView.set('scale', 10);
-  });
-  equals(scrollView.get('horizontalScrollOffset'), 0, "Scaling a fresh left-aligned view in from fully-visible aligns it to the left");
-  equals(scrollView.get('verticalScrollOffset'), 0, "Scaling a fresh top-aligned view in from fully-visible aligns it to the top");
+//   SC.run(function() {
+//     scrollView.set('scale', 0.1);
+//   });
+//   SC.run(function() {
+//     scrollView.set('scale', 1);
+//   });
+//   equals(scrollView.get('horizontalScrollOffset'), 0, "Scaling a fresh left-aligned view in from fully-visible aligns it to the left");
+//   equals(scrollView.get('verticalScrollOffset'), 0, "Scaling a fresh top-aligned view in from fully-visible aligns it to the top");
 
-  // CENTER
-  scrollView = pane.view('scrollView with content view of fixed height center-center-aligned');
+//   // CENTER
+//   scrollView = pane.view('scrollView with content view of fixed height center-center-aligned');
 
-  SC.run(function() {
-    scrollView.set('scale', 0.1);
-  });
-  SC.run(function() {
-    scrollView.set('scale', 10);
-  });
-  equals(scrollView.get('horizontalScrollOffset'), (scrollView.get('maximumHorizontalScrollOffset')) / 2, "Scaling a fresh horizontally-center-aligned view in from fully-visible aligns it to the center");
-  equals(scrollView.get('verticalScrollOffset'), (scrollView.get('maximumVerticalScrollOffset')) / 2, "Scaling a fresh vertically-middle-aligned view in from fully-visible aligns it to the center");
+//   SC.run(function() {
+//     scrollView.set('scale', 0.1);
+//   });
+//   SC.run(function() {
+//     scrollView.set('scale', 1);
+//   });
+//   equals(scrollView.get('horizontalScrollOffset'), (scrollView.get('maximumHorizontalScrollOffset')) / 2, "Scaling a fresh horizontally-center-aligned view in from fully-visible aligns it to the center");
+//   equals(scrollView.get('verticalScrollOffset'), (scrollView.get('maximumVerticalScrollOffset')) / 2, "Scaling a fresh vertically-middle-aligned view in from fully-visible aligns it to the center");
 
-  // BOTTOM & RIGHT
-  scrollView = pane.view('scrollView with content view of fixed height bottom-right-aligned');
+//   // BOTTOM & RIGHT
+//   scrollView = pane.view('scrollView with content view of fixed height bottom-right-aligned');
 
-  SC.run(function() {
-    scrollView.set('scale', 0.1);
-  });
-  SC.run(function() {
-    scrollView.set('scale', 10);
-  });
-  equals(scrollView.get('horizontalScrollOffset'), scrollView.get('maximumHorizontalScrollOffset'), "Scaling a fresh right-aligned view in from fully-visible aligns it to the right");
-  equals(scrollView.get('verticalScrollOffset'), scrollView.get('maximumVerticalScrollOffset'), "Scaling a fresh bottom-aligned view in from fully-visible aligns it to the bottom");
-});
+//   SC.run(function() {
+//     scrollView.set('scale', 0.1);
+//   });
+//   SC.run(function() {
+//     scrollView.set('scale', 1);
+//   });
+//   equals(scrollView.get('horizontalScrollOffset'), scrollView.get('maximumHorizontalScrollOffset'), "Scaling a fresh right-aligned view in from fully-visible aligns it to the right");
+//   equals(scrollView.get('verticalScrollOffset'), scrollView.get('maximumVerticalScrollOffset'), "Scaling a fresh bottom-aligned view in from fully-visible aligns it to the bottom");
+// });
 
 test("Initial alignments different than alignments", function() {
   // This view is aligned top-left but with initial position at bottom-right. It should start at maximum offsets; when
@@ -351,7 +376,8 @@ test("Initial alignments different than alignments", function() {
   SC.run(function() {
     view.set('scale', 0.1);
   });
-  equals(view.get('horizontalScrollOffset'), view.get('minimumHorizontalScrollOffset'), "horizontalAlign correctly takes over from initialHorizontalAlign when scaled out");
-  equals(view.get('verticalScrollOffset'), view.get('minimumVerticalScrollOffset'), "verticalAlign correctly takes over from initialVerticalAlign when scaled out");
+
+  equals(view.get('horizontalScrollOffset'), 0, "horizontalAlign correctly takes over from initialHorizontalAlign when scaled out");
+  equals(view.get('verticalScrollOffset'), 0, "verticalAlign correctly takes over from initialVerticalAlign when scaled out");
 
 });
