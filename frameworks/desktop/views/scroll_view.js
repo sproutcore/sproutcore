@@ -95,8 +95,20 @@ SC.ScrollView = SC.View.extend({
   /** @private The cached height of the content. */
   _sc_contentHeight: 0,
 
+  /** @private Flag used to react accordingly when the content's height changes. */
+  _sc_contentHeightDidChange: false,
+
+  /** @private The cached scale of the content. */
+  _sc_contentScale: 1,
+
+  /** @private Flag used to react accordingly when the content's scale changes. */
+  _sc_contentScaleDidChange: false,
+
   /** @private The cached width of the content. */
   _sc_contentWidth: 0,
+
+  /** @private Flag used to react accordingly when the content's width changes. */
+  _sc_contentWidthDidChange: false,
 
   /** @private The anchor horizontal offset of the touch gesture. */
   _sc_gestureAnchorHOffset: null,
@@ -868,6 +880,7 @@ SC.ScrollView = SC.View.extend({
     if (this._sc_isAnimating) {
     var contentView = this.get('contentView');
 
+    // UNUSED. Animate using SC.View.prototype.animate. Cancelling the animation in place proved problematic.
     // if (contentView.get('viewState') === SC.CoreView.ATTACHED_SHOWN_ANIMATING) {
     //   // Stop the animation in place.
     //   contentView.cancelAnimation(SC.LayoutState.CURRENT);
@@ -910,8 +923,8 @@ SC.ScrollView = SC.View.extend({
         didAdjust = true;
       }
 
-      // Ensure that the content view size did change runs none-the-less in order to update the scrollers.
-      if (!didAdjust) { this._sc_contentViewSizeDidChange(); }
+      // Update the scrollers regardless.
+      if (!didAdjust) { this._sc_updateScrollers(); }
     }
 
   },
@@ -930,6 +943,7 @@ SC.ScrollView = SC.View.extend({
     this._sc_shouldResizeContentHeight = false;
     this._sc_contentHeight = 0;
     this._sc_contentWidth = 0;
+    this._sc_contentScale = 1;
 
     // Assign the content view to our container view. This ensures that it is instantiated.
     containerView.set('contentView', newView);
@@ -979,7 +993,7 @@ SC.ScrollView = SC.View.extend({
       newView.addObserver('frame', this, frameChangeFunc);
 
       // Initialize once.
-      this._sc_contentViewSizeDidChange();
+      this._sc_contentViewFrameDidChange();
     }
 
     // Cache the current content view so that we can properly clean up when it changes.
@@ -994,37 +1008,38 @@ SC.ScrollView = SC.View.extend({
   /** @private Check frame changes for size changes. */
   _sc_contentViewFrameDidChange: function () {
     var lastHeight = this._sc_contentHeight,
+        lastScale = this._sc_contentScale,
         lastWidth = this._sc_contentWidth,
         newFrame = this.getPath('contentView.borderFrame');
 
-    if (lastWidth !== newFrame.width) {
-      this._sc_contentViewSizeDidChange();
+    if (newFrame) {
+      // Determine whether the scale has changed.
+      if (lastScale !== newFrame.scale) {
+        this._sc_contentScaleDidChange = true;
+        this.set('_sc_contentScale', newFrame.scale);
     }
 
-    if (lastHeight !== newFrame.height) {
-      this._sc_contentViewSizeDidChange();
+      if (lastWidth !== newFrame.width) {
+        this._sc_contentWidthDidChange = true;
+        this.set('_sc_contentWidth', newFrame.width);
+    }
+
+      if (lastHeight !== newFrame.height) {
+        this._sc_contentHeightDidChange = true;
+      this.set('_sc_contentHeight', newFrame.height);
+    }
+
+      // If any of the size values changed, update.
+      if (this._sc_contentScaleDidChange || this._sc_contentWidthDidChange || this._sc_contentHeightDidChange) {
+    // Filter the observer input.
+        this.invokeOnce(this._sc_contentViewSizeDidChange);
+      }
     }
   },
 
   /** @private When the content view's size changes, we need to update our scroll offset properties. */
   _sc_contentViewSizeDidChange: function () {
-    var newFrame = this.getPath('contentView.borderFrame');
-
-    // Cache the current sizes of the view, so we can only watch for size changes.
-    if (newFrame) { // TODO: This is necessary for static content. Remove it.
-      this.set('_sc_contentHeight', newFrame.height);
-      this.set('_sc_contentWidth', newFrame.width);
-    }
-
-    // Filter the observer input.
-    this.invokeOnce(this._sc_contentViewSizeDidChangeUnfiltered);
-  },
-
-  /** @private When the content view's size changes, we need to update our scroll offset properties. */
-  _sc_contentViewSizeDidChangeUnfiltered: function () {
-    var horizontalScrollerView = this.get('horizontalScrollerView'),
-      verticalScrollerView = this.get('verticalScrollerView'),
-      minimumHorizontalScrollOffset = this.get('minimumHorizontalScrollOffset'),
+    var minimumHorizontalScrollOffset = this.get('minimumHorizontalScrollOffset'),
       minimumVerticalScrollOffset = this.get('minimumVerticalScrollOffset'),
       maximumHorizontalScrollOffset = this.get('maximumHorizontalScrollOffset'),
       maximumVerticalScrollOffset = this.get('maximumVerticalScrollOffset'),
@@ -1036,17 +1051,6 @@ SC.ScrollView = SC.View.extend({
     contentHeight = this._sc_contentHeight;
     contentWidth = this._sc_contentWidth;
 
-    // Update the scrollers manually.
-    if (this.get('hasHorizontalScroller')) {
-      horizontalScrollerView.set('minimum', minimumHorizontalScrollOffset);
-      horizontalScrollerView.set('maximum', maximumHorizontalScrollOffset);
-    }
-
-    if (this.get('hasVerticalScroller')) {
-      verticalScrollerView.set('minimum', minimumVerticalScrollOffset);
-      verticalScrollerView.set('maximum', maximumVerticalScrollOffset);
-    }
-
     var value;
     if (contentWidth) {
       if (maximumHorizontalScrollOffset === 0) {
@@ -1056,7 +1060,8 @@ SC.ScrollView = SC.View.extend({
 
       } else {
         /* jshint eqnull:true */
-        if (this._sc_verticalPct != null) {
+        // If the scale of the content view changes, we want to maintain relative position so that zooming remains centered.
+        if (this._sc_horizontalPct != null && this._sc_contentScaleDidChange) {
           value = this._sc_horizontalPct * (maximumHorizontalScrollOffset + containerWidth) - (containerWidth / 2);
           this.set('horizontalScrollOffset', value); // Note: Trigger for _sc_scrollOffsetHorizontalDidChange
         } else {
@@ -1082,7 +1087,8 @@ SC.ScrollView = SC.View.extend({
 
       } else {
         /* jshint eqnull:true */
-        if (this._sc_verticalPct != null) {
+        // If the scale of the content view changes, we want to maintain relative position so that zooming remains centered.
+        if (this._sc_verticalPct != null && this._sc_contentScaleDidChange) {
           value = this._sc_verticalPct * (maximumVerticalScrollOffset + containerHeight) - (containerHeight / 2);
           this.set('verticalScrollOffset', value); // Note: Trigger for _sc_scrollOffsetVerticalDidChange
         } else {
@@ -1101,28 +1107,12 @@ SC.ScrollView = SC.View.extend({
       }
     }
 
-    // Update the minimum and maximum scrollable distance on the scrollers as well as their visibility.
-    var proportion;
+    // Reset our flags.
+    this._sc_contentScaleDidChange = false;
+    this._sc_contentHeightDidChange = false;
+    this._sc_contentWidthDidChange = false;
 
-    if (horizontalScrollerView) {
-      if (this.get('autohidesHorizontalScroller')) {
-        this.setIfChanged('isHorizontalScrollerVisible', contentWidth > containerWidth);
-      }
-
-      // Constrain the proportion to 100%.
-      proportion = Math.min(containerWidth / contentWidth, 1.0);
-      horizontalScrollerView.setIfChanged('proportion', proportion);
-    }
-
-    if (verticalScrollerView) {
-      if (this.get('autohidesVerticalScroller')) {
-        this.setIfChanged('isVerticalScrollerVisible', contentHeight > containerHeight);
-      }
-
-      // Constrain the proportion to 100%.
-      proportion = Math.min(containerHeight / contentHeight, 1.0);
-      verticalScrollerView.setIfChanged('proportion', proportion);
-    }
+    this._sc_updateScrollers();
   },
 
   /** @private Fade in the horizontal scroller. Each scroller fades in/out independently. */
@@ -1345,7 +1335,7 @@ SC.ScrollView = SC.View.extend({
       // this._sc_cancelAnimation();
 
       if (this._sc_animationDuration) {
-
+        // UNUSED. Animate using SC.View.prototype.animate. Cancelling the animation in place proved problematic.
         // contentView.animate({ left: left, top: top, scale: scale }, {
         //   duration: this._sc_animationDuration,
         //   timing: this._sc_animationTiming
@@ -1511,6 +1501,51 @@ SC.ScrollView = SC.View.extend({
   _sc_scrollOffsetVerticalDidChange: function () {
     this._sc_repositionContentView();
     this.invokeLast(this._sc_fadeInVerticalScroller);
+  },
+
+  /** @private Update the scrollers. */
+  _sc_updateScrollers: function () {
+    var horizontalScrollerView = this.get('horizontalScrollerView'),
+      verticalScrollerView = this.get('verticalScrollerView'),
+      minimumHorizontalScrollOffset = this.get('minimumHorizontalScrollOffset'),
+      minimumVerticalScrollOffset = this.get('minimumVerticalScrollOffset'),
+      maximumHorizontalScrollOffset = this.get('maximumHorizontalScrollOffset'),
+      maximumVerticalScrollOffset = this.get('maximumVerticalScrollOffset'),
+      containerHeight, containerWidth,
+      contentHeight, contentWidth;
+
+    containerHeight = this._sc_containerHeight;
+    containerWidth = this._sc_containerWidth;
+    contentHeight = this._sc_contentHeight;
+    contentWidth = this._sc_contentWidth;
+
+    // Update the minimum and maximum scrollable distance on the scrollers as well as their visibility.
+    var proportion;
+    if (horizontalScrollerView) {
+      horizontalScrollerView.set('minimum', minimumHorizontalScrollOffset);
+      horizontalScrollerView.set('maximum', maximumHorizontalScrollOffset);
+
+      if (this.get('autohidesHorizontalScroller')) {
+        this.setIfChanged('isHorizontalScrollerVisible', contentWidth > containerWidth);
+      }
+
+      // Constrain the proportion to 100%.
+      proportion = Math.min(containerWidth / contentWidth, 1.0);
+      horizontalScrollerView.setIfChanged('proportion', proportion);
+    }
+
+    if (verticalScrollerView) {
+      verticalScrollerView.set('minimum', minimumVerticalScrollOffset);
+      verticalScrollerView.set('maximum', maximumVerticalScrollOffset);
+
+      if (this.get('autohidesVerticalScroller')) {
+        this.setIfChanged('isVerticalScrollerVisible', contentHeight > containerHeight);
+      }
+
+      // Constrain the proportion to 100%.
+      proportion = Math.min(containerHeight / contentHeight, 1.0);
+      verticalScrollerView.setIfChanged('proportion', proportion);
+    }
   },
 
   /** @private Adjust the content alignment vertically on change. */

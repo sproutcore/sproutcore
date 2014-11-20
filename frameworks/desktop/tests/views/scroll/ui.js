@@ -150,7 +150,7 @@
     });
 
     if (SC.platform.get('supportsCSSTransforms')) {
-      equals(elem.style[transformAttr], transformTemplate.fmt(1, -50, -6, 0), 'Adjusting content size should not affect scroll transform positioning');
+      equals(elem.style[transformAttr], transformTemplate.fmt(1, -50, 0, 0), 'Adjusting content size should not affect scroll transform positioning');
     }
     // TODO: Simulate unsupported browser and test fallback (containerView's marginLeft)
   });
