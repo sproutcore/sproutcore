@@ -18,21 +18,25 @@ module("SC.ScrollView", {
         childViews: [
           // ScrollView with 4000x4000 contentView. "view" below.
           SC.ScrollView.extend({
-            contentView: SC.ImageView.design({ value: appleURL, layout: { height: 4000, width: 4000 }})
+            contentView: SC.ImageView.design({ value: appleURL, layout: { height: 4000, width: 4000 }}),
+            horizontalAlign: SC.ALIGN_LEFT
           }),
           // ScrollView with 2000x2000 contentView. "view2" below.
           SC.ScrollView.extend({
-            contentView: SC.ImageView.design({ value: appleURL, layout: { height: 2000, width: 2000 }})
+            contentView: SC.ImageView.design({ value: appleURL, layout: { height: 2000, width: 2000 }}),
+            horizontalAlign: SC.ALIGN_LEFT
           }),
           // ScrollView (view3 below) with nested ScrollView (view4 below).
           SC.ScrollView.extend({
             layout: { height: 400, width: 400 },
+            horizontalAlign: SC.ALIGN_LEFT,
             contentView: SC.View.design({
               layout: { height: 500, width: 500 },
               childViews: [
                 SC.ScrollView.design({
                   layout: { height: 200, width: 200, centerX: 0, centerY: 0 },
-                  contentView: SC.ImageView.design({ value: appleURL, layout: { height: 300, width: 300 }})
+                  contentView: SC.ImageView.design({ value: appleURL, layout: { height: 300, width: 300 }}),
+                  horizontalAlign: SC.ALIGN_LEFT
                 })
               ]
             })
