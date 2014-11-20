@@ -924,7 +924,7 @@ SC.ScrollView = SC.View.extend({
       }
 
       // Update the scrollers regardless.
-      if (!didAdjust) { this._sc_updateScrollers(); }
+      if (!didAdjust) { this._sc_contentViewSizeDidChange(); }
     }
 
   },
@@ -1039,9 +1039,7 @@ SC.ScrollView = SC.View.extend({
 
   /** @private When the content view's size changes, we need to update our scroll offset properties. */
   _sc_contentViewSizeDidChange: function () {
-    var minimumHorizontalScrollOffset = this.get('minimumHorizontalScrollOffset'),
-      minimumVerticalScrollOffset = this.get('minimumVerticalScrollOffset'),
-      maximumHorizontalScrollOffset = this.get('maximumHorizontalScrollOffset'),
+    var maximumHorizontalScrollOffset = this.get('maximumHorizontalScrollOffset'),
       maximumVerticalScrollOffset = this.get('maximumVerticalScrollOffset'),
       containerHeight, containerWidth,
       contentHeight, contentWidth;
@@ -1061,20 +1059,13 @@ SC.ScrollView = SC.View.extend({
       } else {
         /* jshint eqnull:true */
         // If the scale of the content view changes, we want to maintain relative position so that zooming remains centered.
-        if (this._sc_horizontalPct != null && this._sc_contentScaleDidChange) {
+        if (this._sc_contentScaleDidChange) {
           value = this._sc_horizontalPct * (maximumHorizontalScrollOffset + containerWidth) - (containerWidth / 2);
           this.set('horizontalScrollOffset', value); // Note: Trigger for _sc_scrollOffsetHorizontalDidChange
         } else {
-          switch (this.get('horizontalAlign')) {
-          case SC.ALIGN_RIGHT:
-            this.set('horizontalScrollOffset', maximumHorizontalScrollOffset);
-            break;
-          case SC.ALIGN_CENTER:
-            this.set('horizontalScrollOffset', maximumHorizontalScrollOffset / 2);
-            break;
-          default: // SC.ALIGN_LEFT
-            this.set('horizontalScrollOffset', minimumHorizontalScrollOffset);
-          }
+          // Align horizontally according to initial alignment.
+          value = this._sc_alignedHorizontalOffset(this.get('initialHorizontalAlign'), containerWidth, contentWidth);
+          this.set('horizontalScrollOffset', value); // Note: Trigger for _sc_scrollOffsetHorizontalDidChange
         }
       }
     }
@@ -1088,21 +1079,12 @@ SC.ScrollView = SC.View.extend({
       } else {
         /* jshint eqnull:true */
         // If the scale of the content view changes, we want to maintain relative position so that zooming remains centered.
-        if (this._sc_verticalPct != null && this._sc_contentScaleDidChange) {
+        if (this._sc_contentScaleDidChange) {
           value = this._sc_verticalPct * (maximumVerticalScrollOffset + containerHeight) - (containerHeight / 2);
           this.set('verticalScrollOffset', value); // Note: Trigger for _sc_scrollOffsetVerticalDidChange
         } else {
-
-          switch (this.get('verticalAlign')) {
-          case SC.ALIGN_BOTTOM:
-            this.set('verticalScrollOffset', maximumVerticalScrollOffset);
-            break;
-          case SC.ALIGN_MIDDLE:
-            this.set('verticalScrollOffset', maximumVerticalScrollOffset / 2);
-            break;
-          default: // SC.ALIGN_TOP
-            this.set('verticalScrollOffset', minimumVerticalScrollOffset);
-          }
+          value = this._sc_alignedVerticalOffset(this.get('initialVerticalAlign'), containerHeight, contentHeight);
+          this.set('verticalScrollOffset', value); // Note: Trigger for _sc_scrollOffsetHorizontalDidChange
         }
       }
     }
