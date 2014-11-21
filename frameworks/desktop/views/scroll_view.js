@@ -1280,12 +1280,7 @@ SC.ScrollView = SC.View.extend({
         verticalAlign = this.get('verticalAlign'),
         left, top;
 
-      // When the content has an accelerated layer (the transformed position is unscaled).
-      if (contentView.get('hasAcceleratedLayer')) {
-        left = -horizontalScrollOffset / scale;
-      } else {
-        left = -horizontalScrollOffset;
-      }
+      left = -horizontalScrollOffset;
 
       // Round according to the alignment to avoid jitter at the edges. For example, we don't want 0.55 rounding up to 1 when left aligned. This also prevents implied percentage values (i.e. 0.0 > value > 1.0 == %)!
       switch (horizontalAlign) {
@@ -1299,12 +1294,7 @@ SC.ScrollView = SC.View.extend({
         left = Math.floor(left);
       }
 
-      // When the content has an accelerated layer (the transformed position is unscaled).
-      if (contentView.get('hasAcceleratedLayer')) {
-        top = -verticalScrollOffset / scale;
-      } else {
-        top = -verticalScrollOffset;
-      }
+      top = -verticalScrollOffset;
 
       switch (verticalAlign) {
       case SC.ALIGN_MIDDLE:
