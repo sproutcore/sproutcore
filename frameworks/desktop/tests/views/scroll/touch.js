@@ -226,6 +226,7 @@ module("SC.ScrollView touch thresholds and locks", {
         touchScrollThreshold: 10,
         touchSecondaryScrollThreshold: 20,
         touchSecondaryScrollLock: 30,
+        horizontalAlign: SC.ALIGN_LEFT,
         contentView: SC.View.extend({
           layout: { height: 200, width: 200 }
         })
@@ -250,48 +251,50 @@ module("SC.ScrollView touch thresholds and locks", {
   }
 });
 
-test("Touch scroll thresholds", function() {
-  equals(scrollView.get('verticalScrollOffset'), 0, "PRELIM: Vertical offset starts at");
-  equals(scrollView.get('horizontalScrollOffset'), 0, "PRELIM: Horizontal offset starts at");
+// Disabled. The scroll thresholds don't stop the content from moving, they only allow the touch event to be
+// sent to the content if not met. This allows scrolling to begin immediately, not after a small pause.
+// test("Touch scroll thresholds", function() {
+//   equals(scrollView.get('verticalScrollOffset'), 0, "PRELIM: Vertical offset starts at");
+//   equals(scrollView.get('horizontalScrollOffset'), 0, "PRELIM: Horizontal offset starts at");
 
-  // Start touch
-  SC.run(function() {
-    SC.Event.trigger(targetLayer, 'touchstart', [evt]);
-  });
+//   // Start touch
+//   SC.run(function() {
+//     SC.Event.trigger(targetLayer, 'touchstart', [evt]);
+//   });
 
-  // Move touch up less than touchScrollThreshold.
-  evt.pageY = initialPageY - 9;
-  SC.run(function() {
-    SC.Event.trigger(targetLayer, 'touchmove', [evt]);
-  });
-  equals(scrollView.get('verticalScrollOffset'), 0, "Scrolling less than touchScrollThreshold results in no scrolling");
-  if (scrollView.get('horizontalScrollOffset') !== 0) ok(false, "A touch with no horizontal change shouldn't trigger a horizontal scroll!");
+//   // Move touch up less than touchScrollThreshold.
+//   evt.pageY = initialPageY - 9;
+//   SC.run(function() {
+//     SC.Event.trigger(targetLayer, 'touchmove', [evt]);
+//   });
+//   equals(scrollView.get('verticalScrollOffset'), 0, "Scrolling less than touchScrollThreshold results in no scrolling");
+//   if (scrollView.get('horizontalScrollOffset') !== 0) ok(false, "A touch with no horizontal change shouldn't trigger a horizontal scroll!");
 
-  // Move touch up more than touchScrollThreshold.
-  evt.pageY = initialPageY - 11;
-  SC.run(function() {
-    SC.Event.trigger(targetLayer, 'touchmove', [evt]);
-  });
-  equals(scrollView.get('verticalScrollOffset'), 11, "Scrolling more than touchScrollThreshold results in scrolling");
-  if (scrollView.get('horizontalScrollOffset') !== 0) ok(false, "A touch with no horizontal change shouldn't trigger a horizontal scroll!");
+//   // Move touch up more than touchScrollThreshold.
+//   evt.pageY = initialPageY - 11;
+//   SC.run(function() {
+//     SC.Event.trigger(targetLayer, 'touchmove', [evt]);
+//   });
+//   equals(scrollView.get('verticalScrollOffset'), 11, "Scrolling more than touchScrollThreshold results in scrolling");
+//   if (scrollView.get('horizontalScrollOffset') !== 0) ok(false, "A touch with no horizontal change shouldn't trigger a horizontal scroll!");
 
-  // Move touch sideways less than touchSecondaryScrollThreshold.
-  evt.pageX = initialPageX - 19;
-  SC.run(function() {
-    SC.Event.trigger(targetLayer, 'touchmove', [evt]);
-  });
-  if (scrollView.get('verticalScrollOffset') !== 11) ok(false, "A touch with no vertical change shouldn't trigger a vertical scroll!");
-  equals(scrollView.get('horizontalScrollOffset'), 0, "With a vertical scroll in motion, scrolling horizontally less than touchSecondaryScrollThreshold results in no scrolling");
+//   // Move touch sideways less than touchSecondaryScrollThreshold.
+//   evt.pageX = initialPageX - 19;
+//   SC.run(function() {
+//     SC.Event.trigger(targetLayer, 'touchmove', [evt]);
+//   });
+//   if (scrollView.get('verticalScrollOffset') !== 11) ok(false, "A touch with no vertical change shouldn't trigger a vertical scroll!");
+//   equals(scrollView.get('horizontalScrollOffset'), 0, "With a vertical scroll in motion, scrolling horizontally less than touchSecondaryScrollThreshold results in no scrolling");
 
-  // Move touch sideways more than touchSecondaryScrollThreshold.
-  evt.pageX = initialPageX - 21;
-  SC.run(function() {
-    SC.Event.trigger(targetLayer, 'touchmove', [evt]);
-  });
-  if (scrollView.get('verticalScrollOffset') !== 11) ok(false, "A touch with no vertical change shouldn't trigger a vertical scroll!");
-  equals(scrollView.get('horizontalScrollOffset'), 21, "With a vertical scroll in motion, scrolling horizontally by more than touchSecondaryScrollThreshold results in scrolling");
+//   // Move touch sideways more than touchSecondaryScrollThreshold.
+//   evt.pageX = initialPageX - 21;
+//   SC.run(function() {
+//     SC.Event.trigger(targetLayer, 'touchmove', [evt]);
+//   });
+//   if (scrollView.get('verticalScrollOffset') !== 11) ok(false, "A touch with no vertical change shouldn't trigger a vertical scroll!");
+//   equals(scrollView.get('horizontalScrollOffset'), 21, "With a vertical scroll in motion, scrolling horizontally by more than touchSecondaryScrollThreshold results in scrolling");
 
-});
+// });
 
 test("Touch scroll lock", function() {
   equals(scrollView.get('verticalScrollOffset'), 0, "PRELIM: Vertical offset starts at");
@@ -303,20 +306,20 @@ test("Touch scroll lock", function() {
   });
 
   // Move touch up more than touchSecondaryScrollLock.
-  evt.pageY = initialPageY - 35;
+  evt.pageY = initialPageY - SC.SCROLL.SCROLL_LOCK_GESTURE_THRESHOLD;
   SC.run(function() {
     SC.Event.trigger(targetLayer, 'touchmove', [evt]);
   });
-  equals(scrollView.get('verticalScrollOffset'), 35, "PRELIM: Scrolling more than touchScrollThreshold results in scrolling");
-  if (scrollView.get('horizontalScrollOffset') !== 0) ok(false, "A touch with no horizontal change shouldn't trigger a horizontal scroll!");
+  equals(scrollView.get('verticalScrollOffset'), SC.SCROLL.SCROLL_LOCK_GESTURE_THRESHOLD, "PRELIM: Scrolling more than touchScrollThreshold results in scrolling");
+  equals(scrollView.get('horizontalScrollOffset'), 0, "A touch with no horizontal change shouldn't trigger a horizontal scroll!");
 
   // Move touch sideways.
   evt.pageX = initialPageX - 50;
   SC.run(function() {
     SC.Event.trigger(targetLayer, 'touchmove', [evt]);
   });
-  if (scrollView.get('verticalScrollOffset') !== 35) ok(false, "A touch with no vertical change shouldn't trigger a vertical scroll!");
-  equals(scrollView.get('horizontalScrollOffset'), 0, "Having scrolled vertically past the touchSecondaryScrollLock, horizontal touch movements are ignored");
+  equals(scrollView.get('verticalScrollOffset'), SC.SCROLL.SCROLL_LOCK_GESTURE_THRESHOLD, "A touch with no vertical change shouldn't trigger a vertical scroll!");
+  equals(scrollView.get('horizontalScrollOffset'), 0, "Having scrolled vertically past the scrollGestureSecondaryThreshold, horizontal touch movements are ignored");
 
 });
 

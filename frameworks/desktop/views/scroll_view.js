@@ -28,18 +28,25 @@ SC.SCROLL = {
   SCROLL_GESTURE_THRESHOLD: 5,
 
   /**
+    The number of pixels a gesture needs to move in only a single direction, before it should be
+    considered as a locked scrolling direction (i.e. no gestures in the other direction will scroll
+    in that direction).
+
+    @static
+    @type Number
+    @default 50
+  */
+  SCROLL_LOCK_GESTURE_THRESHOLD: 50,
+
+  /**
     The number of pixels a gesture needs to expand or contract before it should be considered a scale gesture.
 
     @static
     @type Number
     @default 5
   */
-  SCALE_GESTURE_THRESHOLD: 3,
+  SCALE_GESTURE_THRESHOLD: 3
 
-  TOUCH: {
-    DEFAULT_SECONDARY_SCROLL_THRESHOLD: 50,
-    DEFAULT_SECONDARY_SCROLL_LOCK: 500
-  }
 };
 
 
@@ -125,6 +132,9 @@ SC.ScrollView = SC.View.extend({
   /** @private The anchor distance from center of the touch gesture. */
   _sc_gestureAnchorD: null,
 
+  /** @private The original scale before a touch gesture. */
+  _sc_gestureAnchorScale: null,
+
   /** @private The timer used to fade out this scroller. */
   _sc_horizontalFadeOutTimer: null,
 
@@ -140,8 +150,14 @@ SC.ScrollView = SC.View.extend({
   /** @private Flag is true when scrolling horizontally. Used in capturing touches. */
   _sc_isTouchScrollingH: false,
 
+  /** @private Flag is true when scrolling is locked to horizontal. */
+  _sc_isTouchScrollingHOnly: false,
+
   /** @private Flag is true when scrolling vertically. Used in capturing touches. */
   _sc_isTouchScrollingV: false,
+
+  /** @private Flag is true when scrolling is locked to vertical. */
+  _sc_isTouchScrollingVOnly: false,
 
   /** @private The amount of slip while over dragging (drag past bounds). 1.0 or 100% would slip completely, and 0.0 or 0% would not slip at all.  */
   _sc_overDragSlip: 0.5,
@@ -651,14 +667,14 @@ SC.ScrollView = SC.View.extend({
     (e.g. a map) you should set this value to 0.
 
     You can change this value for all instances of SC.ScrollView in your application by overriding
-    `SC.SCROLL.TOUCH.DEFAULT_SECONDARY_SCROLL_LOCK` at launch time.
+    `SC.SCROLL.SCROLL_LOCK_GESTURE_THRESHOLD` at launch time.
 
     @type Number
-    @default SC.SCROLL.TOUCH.DEFAULT_SECONDARY_SCROLL_LOCK
+    @default SC.SCROLL.SCROLL_LOCK_GESTURE_THRESHOLD
   */
-  // touchSecondaryScrollLock: SC.SCROLL.TOUCH.DEFAULT_SECONDARY_SCROLL_LOCK,
+  scrollLockGestureThreshold: SC.SCROLL.SCROLL_LOCK_GESTURE_THRESHOLD,
 
-  /**
+  /** @private
     Once a vertical or horizontal scroll has been triggered, this determines how far (in pixels) the gesture
     must move on the other axis to trigger a two-axis scroll. If your scroll view's content is omnidirectional
     (e.g. a map) you should set this value to 0.
@@ -669,7 +685,7 @@ SC.ScrollView = SC.View.extend({
     @type Number
     @default SC.SCROLL.TOUCH.DEFAULT_SECONDARY_SCROLL_THRESHOLD
   */
-  // touchSecondaryScrollThreshold: SC.SCROLL.TOUCH.DEFAULT_SECONDARY_SCROLL_THRESHOLD,
+  // scrollSecondaryGestureThreshold: SC.SCROLL.TOUCH.DEFAULT_SECONDARY_SCROLL_THRESHOLD,
 
   /**
     The vertical alignment for non-filling content inside of the ScrollView. Possible values:
@@ -2172,7 +2188,9 @@ SC.ScrollView = SC.View.extend({
 
         // Clear up all caches from touchesDragged.
         this._sc_isTouchScrollingH = false;
+        this._sc_isTouchScrollingHOnly = false;
         this._sc_isTouchScrollingV = false;
+        this._sc_isTouchScrollingVOnly = false;
         this._sc_isTouchScaling = false;
         this._sc_touchVelocityH = null;
         this._sc_touchVelocityV = null;
@@ -2195,6 +2213,7 @@ SC.ScrollView = SC.View.extend({
       this._sc_gestureAnchorX = null;
       this._sc_gestureAnchorY = null;
       this._sc_gestureAnchorD = null;
+      this._sc_gestureAnchorScale = null;
       this._sc_gestureAnchorHOffset = null;
       this._sc_gestureAnchorVOffset = null;
     }
@@ -2268,23 +2287,38 @@ SC.ScrollView = SC.View.extend({
     var avgTouch = evt.averagedTouchesForView(this),
         scrollThreshold = this.get('scrollGestureThreshold'),
         scaleThreshold = this.get('scaleGestureThreshold'),
+        scrollLockThreshold = this.get('scrollLockGestureThreshold'),
+
         // Changes in x and y since the last initialization.
         touchDeltaX = this._sc_gestureAnchorX - avgTouch.x,
         touchDeltaY = this._sc_gestureAnchorY - avgTouch.y,
         touchDeltaD = this._sc_gestureAnchorD - avgTouch.d;
 
-    // Determine if we've moved enough to switch to horizontal scrolling.
-    if (!this._sc_isTouchScrollingH) {
-      var absDeltaX = Math.abs(touchDeltaX);
+    // Determine if we've moved enough to switch to horizontal or vertical scrolling.
+    if (!(this._sc_isTouchScrollingH && this._sc_isTouchScrollingV) &&
+      !this._sc_isTouchScrollingHOnly && !this._sc_isTouchScrollingVOnly) {
+      var absDeltaX = Math.abs(touchDeltaX),
+          absDeltaY = Math.abs(touchDeltaY);
 
-      this._sc_isTouchScrollingH = this.get('canScrollHorizontal') && absDeltaX >= scrollThreshold;
-    }
+      if (this.get('canScrollHorizontal')) {
+        if (!this._sc_isTouchScrollingH) {
+          this._sc_isTouchScrollingH = absDeltaX >= scrollThreshold;
 
-    // Determine if we've moved enough to switch to vertical scrolling.
-    if (!this._sc_isTouchScrollingV) {
-      var absDeltaY = Math.abs(touchDeltaY);
+        // Determine if we've moved enough to lock scrolling to only this direction.
+        } else {
+          this._sc_isTouchScrollingHOnly = absDeltaX >= scrollLockThreshold;
+        }
+      }
 
-      this._sc_isTouchScrollingV = this.get('canScrollVertical') && absDeltaY >= scrollThreshold;
+      if (this.get('canScrollVertical')) {
+        if (!this._sc_isTouchScrollingV) {
+          this._sc_isTouchScrollingV = absDeltaY >= scrollThreshold;
+
+        // Determine if we've moved enough to lock scrolling to only this direction.
+        } else {
+          this._sc_isTouchScrollingVOnly = absDeltaY >= scrollLockThreshold;
+        }
+      }
     }
 
     // Determine if we've moved enough to switch to scaling.
@@ -2296,19 +2330,14 @@ SC.ScrollView = SC.View.extend({
 
     // Adjust scale.
     if (this._sc_isTouchScaling) {
-      // The percentage difference in touch distance (halved b/c two touches moving in opposite directions doubles the difference).
-      var touchPercentChange = (avgTouch.d - (touchDeltaD * 0.5)) / avgTouch.d,
-          scale = this.get('scale');
+      // The percentage difference in touch distance.
+      var scalePercentChange = avgTouch.d / this._sc_gestureAnchorD;
 
-      scale = scale * touchPercentChange;
-      this.set('scale', scale);
-
-      // Reset the difference each time so that we don't scale exponentially.
-      this._sc_gestureAnchorD = avgTouch.d;
+      this.set('scale', this._sc_gestureAnchorScale * scalePercentChange);
 
     // Adjust scroll.
     } else {
-      if (this.get('canScrollHorizontal')) {
+      if (this.get('canScrollHorizontal') && !this._sc_isTouchScrollingVOnly) {
         // Record the last velocity.
         this._sc_touchVelocityH = avgTouch.velocityX;
 
@@ -2329,7 +2358,7 @@ SC.ScrollView = SC.View.extend({
         this.set('horizontalScrollOffset', horizontalScrollOffset);
       }
 
-      if (this.get('canScrollVertical')) {
+      if (this.get('canScrollVertical') && !this._sc_isTouchScrollingHOnly) {
         // Record the last velocity.
         this._sc_touchVelocityV = avgTouch.velocityY;
 
@@ -2390,6 +2419,7 @@ SC.ScrollView = SC.View.extend({
 
         // If a new touch has appeared, force scrolling to recalculate.
         this._sc_isTouchScrollingV = this._sc_isTouchScrollingH = false;
+        this._sc_isTouchScrollingHOnly = this._sc_isTouchScrollingHOnly = false;
 
       // The first touch is used to set up initial state.
       } else {
@@ -2411,6 +2441,7 @@ SC.ScrollView = SC.View.extend({
       this._sc_gestureAnchorX = avgTouch.x;
       this._sc_gestureAnchorY = avgTouch.y;
       this._sc_gestureAnchorD = avgTouch.d;
+      this._sc_gestureAnchorScale = this.get('scale');
       this._sc_gestureAnchorHOffset = this.get('horizontalScrollOffset');
       this._sc_gestureAnchorVOffset = this.get('verticalScrollOffset');
 
