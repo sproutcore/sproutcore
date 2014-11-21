@@ -852,10 +852,7 @@ SC.ScrollView = SC.View.extend({
           var currentLeft = leftStart + leftDelta * easingCurve.value(percent),
               currentTop = topStart + topDelta * easingCurve.value(percent);
 
-          console.log('  animating: duration: %@ (%@%), value: %@, left (∆%@): %@ (%@), top(∆%@): %@ (%@)'.fmt(duration, percent.toFixed(1), easingCurve.value(percent), leftDelta, currentLeft, leftEnd, topDelta, currentTop, topEnd));
-
-          contentView.adjust('left', currentLeft);
-          contentView.adjust('top', currentTop);
+          contentView.adjust({ 'left': currentLeft, 'top': currentTop });
         });
 
         // Keep animating as long as we haven't hit 100%.
