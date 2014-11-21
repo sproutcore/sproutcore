@@ -366,21 +366,23 @@ SC.View.LayoutStyleCalculator = {
 
       if (shouldTranslate) {
         var transformAttribute = SC.browser.experimentalStyleNameFor('transform'),
-          curValue = style[transformAttribute];
+          curValue = style[transformAttribute],
+          newValue;
 
-        // Don't overwrite previously transformed values.
-        if (curValue) {
-          curValue += ' ';
-        } else {
-          curValue = '';
-        }
-
-        style[transformAttribute] = curValue + 'translateX(' + style.left + 'px) translateY(' + style.top + 'px)';
-        style.left = 0;
-        style.top = 0;
+        newValue = 'translateX(' + style.left + 'px) translateY(' + style.top + 'px)';
 
         // double check to make sure this is needed
-        if (SC.platform.supportsCSS3DTransforms) { style[transformAttribute] += ' translateZ(0px)'; }
+        if (SC.platform.supportsCSS3DTransforms) { newValue += ' translateZ(0px)'; }
+
+        // Append any current transforms.
+        // NOTE: The order of transforms is important. If we scale before translate, our translations
+        // will be scaled and incorrect.
+        if (curValue) { newValue += ' ' + curValue; }
+        style[transformAttribute] = newValue;
+
+        // Set the absolute left & top style to 0,0 (will be translated from there).
+        style.left = 0;
+        style.top = 0;
       }
     }
 
