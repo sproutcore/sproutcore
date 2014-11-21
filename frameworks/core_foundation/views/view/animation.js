@@ -603,10 +603,10 @@ SC.View.reopen(
 
     // console.log("scales: %@, %@, %@".fmt(ret.scaleX, ret.scaleY, ret.scaleZ));
 
-    // Find the 3 Euler angles.
-    // ret.rotateX = Math.atan2(matrix.m32, matrix.m33) * toDegrees; // Between -180° and 180°
-    // ret.rotateY = Math.atan2(-matrix.m31, Math.sqrt((matrix.m32 * matrix.m32) + (matrix.m33 * matrix.m33))) * toDegrees;  // Between -90° and 90°
+    // Find the 3 Euler angles. Note the order applied using SC.CSS_TRANSFORM_NAMES in layout_style.js.
     ret.rotateZ = -Math.atan2(matrix.m21, matrix.m11) * toDegrees; // Between -180° and 180°
+    // ret.rotateY = Math.atan2(-matrix.m31, Math.sqrt((matrix.m32 * matrix.m32) + (matrix.m33 * matrix.m33))) * toDegrees;  // Between -90° and 90°
+    // ret.rotateX = Math.atan2(matrix.m32, matrix.m33) * toDegrees; // Between -180° and 180°
 
     // console.log("rotations: %@, %@, %@".fmt(ret.rotateX, ret.rotateY, ret.rotateZ));
 
