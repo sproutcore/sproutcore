@@ -894,7 +894,7 @@ SC.ScrollView = SC.View.extend({
       // Update offsets to match actual placement.
       this.set('horizontalScrollOffset', -curLayout.left);
       this.set('verticalScrollOffset', -curLayout.top);
-    //   this.set('scale', curLayout.scale);
+      this.set('scale', curLayout.scale);
 
       // Clear out the animation flags.
       this._sc_isAnimating = false;
@@ -1062,13 +1062,14 @@ SC.ScrollView = SC.View.extend({
 
       } else {
         /* jshint eqnull:true */
+        // If the horizontal position has never been set, use the initial alignment.
+        if (this._sc_horizontalPct == null) {
+          this._sc_horizontalScrollOffset = null;
+          this.notifyPropertyChange('horizontalScrollOffset');
+
         // If the scale of the content view changes, we want to maintain relative position so that zooming remains centered.
-        if (this._sc_contentScaleDidChange) {
+        } else if (this._sc_contentScaleDidChange) {
           value = this._sc_horizontalPct * (maximumHorizontalScrollOffset + containerWidth) - (containerWidth / 2);
-          this.set('horizontalScrollOffset', value); // Note: Trigger for _sc_scrollOffsetHorizontalDidChange
-        } else {
-          // Align horizontally according to initial alignment.
-          value = this._sc_alignedHorizontalOffset(this.get('initialHorizontalAlign'), containerWidth, contentWidth);
           this.set('horizontalScrollOffset', value); // Note: Trigger for _sc_scrollOffsetHorizontalDidChange
         }
       }
@@ -1082,13 +1083,15 @@ SC.ScrollView = SC.View.extend({
 
       } else {
         /* jshint eqnull:true */
+        // If the vertical position has never been set, use the initial alignment.
+        if (this._sc_verticalPct == null) {
+          this._sc_verticalScrollOffset = null;
+          this.notifyPropertyChange('verticalScrollOffset');
+
         // If the scale of the content view changes, we want to maintain relative position so that zooming remains centered.
-        if (this._sc_contentScaleDidChange) {
+        } else if (this._sc_contentScaleDidChange) {
           value = this._sc_verticalPct * (maximumVerticalScrollOffset + containerHeight) - (containerHeight / 2);
           this.set('verticalScrollOffset', value); // Note: Trigger for _sc_scrollOffsetVerticalDidChange
-        } else {
-          value = this._sc_alignedVerticalOffset(this.get('initialVerticalAlign'), containerHeight, contentHeight);
-          this.set('verticalScrollOffset', value); // Note: Trigger for _sc_scrollOffsetHorizontalDidChange
         }
       }
     }
@@ -1098,6 +1101,8 @@ SC.ScrollView = SC.View.extend({
     this._sc_contentHeightDidChange = false;
     this._sc_contentWidthDidChange = false;
 
+    // TODO: Updating scrollers may change the container size, which will cause this to run again. Can we bring
+    // this into a single call?
     this._sc_updateScrollers();
   },
 

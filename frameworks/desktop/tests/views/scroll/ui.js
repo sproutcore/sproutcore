@@ -102,7 +102,7 @@
       contentView = view.get('contentView'),
       elem = contentView.getPath('layer'),
       transformAttr = SC.browser.experimentalStyleNameFor('transform'),
-      transformTemplate = 'scale(%@) translateX(%@px) translateY(%@px) translateZ(%@px)';
+      transformTemplate = 'translateX(%@px) translateY(%@px) translateZ(%@px) scale(%@)';
 
     // CLASS
     ok(view.$().hasClass('sc-scroll-view'), 'should have sc-scroll-view class');
@@ -129,7 +129,7 @@
     });
     equals(view.get('verticalScrollOffset'), 100, 'Vertical scrolling should adjust verticalScrollOffset');
     if (SC.platform.get('supportsCSSTransforms')) {
-      equals(elem.style[transformAttr], transformTemplate.fmt(1, 0, -100, 0), 'Vertical scrolling should adjust transform on the contentView layer');
+      equals(elem.style[transformAttr], transformTemplate.fmt(0, -100, 0, 1), 'Vertical scrolling should adjust transform on the contentView layer');
     }
     // TODO: Simulate unsupported browser and test fallback (containerView's marginTop)
 
@@ -139,7 +139,7 @@
     });
     equals(view.get('horizontalScrollOffset'), 50, 'horizontal scrolling should adjust horizontalScrollOffset');
     if (SC.platform.get('supportsCSSTransforms')) {
-      equals(elem.style[transformAttr], transformTemplate.fmt(1, -50, 0, 0), 'Horizontal scrolling should adjust transform on the contentView layer.');
+      equals(elem.style[transformAttr], transformTemplate.fmt(-50, 0, 0, 1), 'Horizontal scrolling should adjust transform on the contentView layer.');
     }
     // TODO: Simulate unsupported browser and test fallback (containerView's marginLeft)
 
@@ -150,7 +150,7 @@
     });
 
     if (SC.platform.get('supportsCSSTransforms')) {
-      equals(elem.style[transformAttr], transformTemplate.fmt(1, -50, 0, 0), 'Adjusting content size should not affect scroll transform positioning');
+      equals(elem.style[transformAttr], transformTemplate.fmt(-50, 0, 0, 1), 'Adjusting content size should not affect scroll transform positioning');
     }
     // TODO: Simulate unsupported browser and test fallback (containerView's marginLeft)
   });

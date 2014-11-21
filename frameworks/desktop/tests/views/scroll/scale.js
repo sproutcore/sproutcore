@@ -202,9 +202,13 @@ test('When zoomed into the contentView, the content view should remain centered 
 
   // The percentage offsets for horizontal: ALIGN_CENTER & vertical: ALIGN_TOP for the given content and container size.
   var hPct = 0.5,
-      vPct = 0.125;
+      vPct = 0.1075;
 
   SC.run(function() {
+    // Note: Before any scrolling occurs, scale changes adhere to initial alignments.
+    scrollView.set('horizontalScrollOffset', scrollView.get('horizontalScrollOffset'));
+    scrollView.set('verticalScrollOffset', scrollView.get('verticalScrollOffset'));
+
     scrollView.set('scale', 10);
   });
 
