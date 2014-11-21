@@ -831,16 +831,18 @@ SC.ScrollView = SC.View.extend({
   },
 
   /** @private Manually animates the content view. */
-  _sc_animateContentView: function (leftEnd, topEnd) {
+  _sc_animateContentView: function (contentAdjustMap) {
     var easingCurve = this._sc_animationTiming,
       totalDuration = this._sc_animationDuration * 1000,
       start = new Date(),
       contentView = this.get('contentView'),
       contentViewLayout = contentView.get('layout'),
       leftStart = contentViewLayout.left,
-      leftDelta = leftEnd - leftStart,
+      leftDelta = contentAdjustMap.left - leftStart,
+      scaleStart = contentViewLayout.scale,
+      scaleDelta = contentAdjustMap.scale - scaleStart,
       topStart = contentViewLayout.top,
-      topDelta = topEnd - topStart,
+      topDelta = contentAdjustMap.top - topStart,
       self = this;
 
     function animationFrame() {
@@ -850,9 +852,14 @@ SC.ScrollView = SC.View.extend({
 
         SC.run(function () {
           var currentLeft = leftStart + leftDelta * easingCurve.value(percent),
+              currentScale = scaleStart + scaleDelta * easingCurve.value(percent),
               currentTop = topStart + topDelta * easingCurve.value(percent);
 
-          contentView.adjust({ 'left': currentLeft, 'top': currentTop });
+          contentAdjustMap.left = currentLeft;
+          contentAdjustMap.top = currentTop;
+          contentAdjustMap.scale = currentScale;
+
+          contentView.adjust(contentAdjustMap);
         });
 
         // Keep animating as long as we haven't hit 100%.
@@ -1280,7 +1287,7 @@ SC.ScrollView = SC.View.extend({
         left = -horizontalScrollOffset;
       }
 
-      // Round according to the alignment to avoid jitter at the edges. For example, we don't want 0.55 rounding up to 1 when left aligned. This also prevents implied percentage values (i.e. 0.0 > value > 1.0).
+      // Round according to the alignment to avoid jitter at the edges. For example, we don't want 0.55 rounding up to 1 when left aligned. This also prevents implied percentage values (i.e. 0.0 > value > 1.0 == %)!
       switch (horizontalAlign) {
       case SC.ALIGN_CENTER:
         left = Math.round(left);
@@ -1313,6 +1320,15 @@ SC.ScrollView = SC.View.extend({
       // Cancel any active animation in place.
       // this._sc_cancelAnimation();
 
+      var contentAdjustMap = SC.ScrollView._SC_CONTENT_ADJUST_MAP; // Shared object used to avoid continually initializing/destroying objects.
+
+      // Create the content adjust map once. Note: This is a shared object, all properties must be overwritten each time.
+      if (!contentAdjustMap) { contentAdjustMap = SC.ScrollView._SC_CONTENT_ADJUST_MAP = {}; }
+
+      contentAdjustMap.left = left;
+      contentAdjustMap.top = top;
+      contentAdjustMap.scale = scale;
+
       if (this._sc_animationDuration) {
         // UNUSED. Animate using SC.View.prototype.animate. Cancelling the animation in place proved problematic.
         // contentView.animate({ left: left, top: top, scale: scale }, {
@@ -1323,14 +1339,10 @@ SC.ScrollView = SC.View.extend({
         // // Run the animation immediately (don't wait for next Run Loop).
         // // Note: The next run loop will be queued none-the-less, so we may want to avoid that entirely in the future.
         // contentView._animate();
-        this._sc_animateContentView(left, top);
+        this._sc_animateContentView(contentAdjustMap);
 
       } else {
-        contentView.adjust({
-          left: left,
-          top: top,
-          scale: scale
-        });
+        contentView.adjust(contentAdjustMap);
       }
     }
   },
@@ -2420,6 +2432,9 @@ SC.ScrollView.mixin(
 /** @scope SC.ScrollView */ {
 
   /** @private Shared object used to avoid continually initializing/destroying objects. */
-  _SC_CONTAINER_LAYOUT_MAP: null
+  _SC_CONTAINER_LAYOUT_MAP: null,
+
+  /** @private Shared object used to avoid continually initializing/destroying objects. */
+  _SC_CONTENT_ADJUST_MAP: null
 
 });
