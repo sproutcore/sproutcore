@@ -77,43 +77,27 @@ SC.ScrollerView = SC.View.extend(
   shouldScrollToClick: NO,
 
   /**
-    Whether values outside of the min and max should be allowed. Set this to YES to support
-    e.g. bounce scrolling.
-
-    @type Boolean
-    @default NO
-  */
-  allowOutlyingValues: NO,
-
-  /**
     The value of the scroller.
 
     The value represents the position of the scroller's thumb.
 
     @field
     @type Number
-    @observes maximum
-    @observes minimum
+    @default null
   */
-  value: function (key, val) {
-    if (val !== undefined) {
-      this._scs_value = val;
-    }
-
-    var minimum = this.get('minimum');
-    val = this._scs_value || minimum; // default value is at top/left
-
-    if (this.get('allowOutlyingValues')) return val;
-    else return Math.max(Math.min(val, this.get('maximum')), minimum);
-  }.property('maximum', 'minimum').cacheable(),
+  value: null,
 
   /**
+    The displayed value of the scroller.
+
+    This is the value of the scroller constrained within the minimum and maximum values.
+
     @type Number
     @observes value
   */
   displayValue: function () {
-    return this.get("value");
-  }.property("value").cacheable(),
+    return Math.max(Math.min(this.get("value"), this.get('maximum')), this.get('minimum'));
+  }.property("value", 'minimum', 'maximum').cacheable(),
 
   /**
     The portion of the track that the thumb should fill. Usually the
@@ -524,13 +508,25 @@ SC.ScrollerView = SC.View.extend(
     @property
   */
   thumbLength: function () {
-    var length;
+    var value = this.get('value'),
+        maximum = this.get('maximum'),
+        minimum = this.get('minimum'),
+        proportion = this.get('proportion'),
+        length;
 
-    length = Math.floor(this.get('trackLength') * this.get('proportion'));
+    // If the value is beyond the minimum or maximums, shrink our thumb length to represent the amount
+    // of over scroll. Do this proportionally for the best effect!
+    if (value < minimum) {
+      proportion -= (minimum - value) / maximum;
+    } else if (value > maximum) {
+      proportion -= (value - maximum) / maximum;
+    }
+
+    length = Math.floor(this.get('trackLength') * proportion);
     length = isNaN(length) ? 0 : length;
 
     return Math.max(length, this.get('minimumThumbLength'));
-  }.property('trackLength', 'proportion').cacheable(),
+  }.property('value', 'minimum', 'maximum', 'trackLength', 'proportion').cacheable(),
 
   /** @private
     The position of the thumb in the track.
@@ -539,14 +535,14 @@ SC.ScrollerView = SC.View.extend(
     @isReadOnly
   */
   thumbPosition: function () {
-    var value = this.get('displayValue'),
-        max = this.get('maximum'),
+    var displayValue = this.get('displayValue'),
+        maximum = this.get('maximum'),
         trackLength = this.get('trackLength'),
         thumbLength = this.get('thumbLength'),
         capLength = this.get('capLength'),
         capOverlap = this.get('capOverlap'), position;
 
-    position = (value / max) * (trackLength - thumbLength);
+    position = (displayValue / maximum) * (trackLength - thumbLength);
     position += capLength - capOverlap; // account for the top/left cap
 
     return Math.floor(isNaN(position) ? 0 : position);
@@ -1160,11 +1156,10 @@ SC.OverlayScrollerView = SC.ScrollerView.extend(
                     '<div class="cap"></div>');
       this.renderButtons(context, this.get('hasButtons'));
       this.renderThumb(context, thumbPosition, thumbLength);
-    }
 
-    else {
-      // The HTML has already been generated, so all we have to do is
-      // reposition and resize the thumb
+    // The HTML has already been generated, so all we have to do is
+    // reposition and resize the thumb
+    } else {
 
       // If we aren't displaying controls don't bother
       if (this.get('controlsHidden')) return;
