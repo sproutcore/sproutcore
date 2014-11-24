@@ -96,6 +96,9 @@ SC.ScrollView = SC.View.extend({
   /** @private The cached height of the container. */
   _sc_containerHeight: 0,
 
+  /** @private The cached offset of the container. */
+  _sc_containerOffset: null,
+
   /** @private The cached width of the container. */
   _sc_containerWidth: 0,
 
@@ -168,6 +171,12 @@ SC.ScrollView = SC.View.extend({
   /** @private Flag is true when scrolling is locked to vertical. */
   _sc_isTouchScrollingVOnly: false,
 
+  /** @private The minimum delay before applying a fade transition. */
+  _sc_minimumFadeOutDelay: function () {
+    // The fade out delay is never less than 100ms (so that the current run loop can complete) and is never less than the fade in duration (so that it can fade fully in).
+    return Math.max(Math.max(this.get('fadeOutDelay') || 0, 0.1), this.get('fadeInDuration') || 0) * 1000;
+  }.property('fadeOutDelay').cacheable(),
+
   /** @private The amount of slip while over dragging (drag past bounds). 1.0 or 100% would slip completely, and 0.0 or 0% would not slip at all.  */
   _sc_overDragSlip: 0.5,
 
@@ -183,11 +192,11 @@ SC.ScrollView = SC.View.extend({
   /** @private Flag used to indicate when we should resize the content height manually. */
   _sc_shouldResizeContentHeight: false,
 
-  /** @private The minimum delay before applying a fade transition. */
-  _sc_minimumFadeOutDelay: function () {
-    // The fade out delay is never less than 100ms (so that the current run loop can complete) and is never less than the fade in duration (so that it can fade fully in).
-    return Math.max(Math.max(this.get('fadeOutDelay') || 0, 0.1), this.get('fadeInDuration') || 0) * 1000;
-  }.property('fadeOutDelay').cacheable(),
+  /** @private The offset center x of a multi-touch gesture. */
+  _sc_touchCenterX: null,
+
+  /** @private The offset center y of a multi-touch gesture. */
+  _sc_touchCenterY: null,
 
   /** @private The timer used to fade out this scroller. */
   _sc_verticalFadeOutTimer: null,
@@ -408,6 +417,7 @@ SC.ScrollView = SC.View.extend({
   */
   horizontalScrollOffset: function (key, value) {
     var containerWidth = this._sc_containerWidth,
+        contentWidth = this._sc_contentWidth,
         min = this.get('minimumHorizontalScrollOffset'),
         max = this.get('maximumHorizontalScrollOffset');
 
@@ -420,8 +430,8 @@ SC.ScrollView = SC.View.extend({
       }
 
       // Record the relative percentage offset for maintaining position while scaling.
-      if (this._sc_contentWidth > 0) {
-        this._sc_horizontalPct = (value + (containerWidth / 2)) / (max + containerWidth);
+      if (contentWidth > 0) {
+        this._sc_horizontalPct = (value + (containerWidth / 2)) / contentWidth;
       }
 
     // Use the cached value.
@@ -432,7 +442,7 @@ SC.ScrollView = SC.View.extend({
       if (value == null) {
         var horizontalAlign = this.get('initialHorizontalAlign');
 
-        value = this._sc_alignedHorizontalOffset(horizontalAlign, containerWidth, this._sc_contentWidth);
+        value = this._sc_alignedHorizontalOffset(horizontalAlign, containerWidth, contentWidth);
       }
     }
 
@@ -763,6 +773,7 @@ SC.ScrollView = SC.View.extend({
   */
   verticalScrollOffset: function (key, value) {
     var containerHeight = this._sc_containerHeight,
+      contentHeight = this._sc_contentHeight,
       min = this.get('minimumVerticalScrollOffset'),
       max = this.get('maximumVerticalScrollOffset');
 
@@ -776,8 +787,8 @@ SC.ScrollView = SC.View.extend({
       }
 
       // Record the relative percentage offset for maintaining position while scaling.
-      if (this._sc_contentHeight > 0) {
-        this._sc_verticalPct = (value + (containerHeight / 2)) / (max + containerHeight);
+      if (contentHeight > 0) {
+        this._sc_verticalPct = (value + (containerHeight / 2)) / contentHeight;
       }
 
     // Use the cached value.
@@ -788,7 +799,7 @@ SC.ScrollView = SC.View.extend({
       if (value == null) {
         var verticalAlign = this.get('initialVerticalAlign');
 
-        value = this._sc_alignedVerticalOffset(verticalAlign, containerHeight, this._sc_contentHeight);
+        value = this._sc_alignedVerticalOffset(verticalAlign, containerHeight, contentHeight);
       }
     }
 
@@ -1094,11 +1105,15 @@ SC.ScrollView = SC.View.extend({
 
         // If the scale of the content view changes, we want to maintain relative position so that zooming remains centered.
         } else if (this._sc_contentScaleDidChange) {
-          value = this._sc_horizontalPct * (maximumHorizontalScrollOffset + containerWidth) - (containerWidth / 2);
+          if (this._sc_touchCenterX != null) {
+            value = (this._sc_horizontalPct * contentWidth) - this._sc_touchCenterX;
+          } else {
+            value = (this._sc_horizontalPct * contentWidth) - (containerWidth / 2);
+          }
           this.set('horizontalScrollOffset', value); // Note: Trigger for _sc_scrollOffsetHorizontalDidChange
 
           // Live scale gesture. Update the anchor so that the scroll deltas are calculated correctly.
-          if (this._sc_gestureAnchorHOffset) {
+          if (this._sc_gestureAnchorHOffset != null) {
             this._sc_gestureAnchorHOffset = value;
           }
         }
@@ -1120,11 +1135,15 @@ SC.ScrollView = SC.View.extend({
 
         // If the scale of the content view changes, we want to maintain relative position so that zooming remains centered.
         } else if (this._sc_contentScaleDidChange) {
-          value = this._sc_verticalPct * (maximumVerticalScrollOffset + containerHeight) - (containerHeight / 2);
+          if (this._sc_touchCenterY != null) {
+            value = (this._sc_verticalPct * contentHeight) - this._sc_touchCenterY;
+          } else {
+            value = (this._sc_verticalPct * contentHeight) - (containerHeight / 2);
+          }
           this.set('verticalScrollOffset', value); // Note: Trigger for _sc_scrollOffsetVerticalDidChange
 
           // Live scale gesture. Update the anchor so that the scroll deltas are calculated correctly.
-          if (this._sc_gestureAnchorVOffset) {
+          if (this._sc_gestureAnchorVOffset != null) {
             this._sc_gestureAnchorVOffset = value;
           }
         }
@@ -2027,7 +2046,13 @@ SC.ScrollView = SC.View.extend({
       this._sc_gestureAnchorX = this._sc_gestureAnchorTotalX = avgTouch.x;
       this._sc_gestureAnchorY = this._sc_gestureAnchorTotalY = avgTouch.y;
 
+      if (this._sc_containerOffset) {
+        this._sc_touchCenterX = avgTouch.x - this._sc_containerOffset.x;
+        this._sc_touchCenterY = avgTouch.y - this._sc_containerOffset.y;
+      }
+
     } else {
+
       // If we were scrolling, continue scrolling at present velocity with deceleration.
       if (this._sc_isTouchScrollingV || this._sc_isTouchScrollingH || this._sc_isTouchScaling) {
         var decelerationRate = this.get('decelerationRate'),
@@ -2219,12 +2244,15 @@ SC.ScrollView = SC.View.extend({
         }
       }
 
-      // Clean up all caches from touchStart.
+      // Clean up all caches from touchStart & touchesDragged
       this._sc_gestureAnchorX = this._sc_gestureAnchorY = this._sc_gestureAnchorD = null;
       this._sc_gestureAnchorTotalX = this._sc_gestureAnchorTotalY = this._sc_gestureAnchorTotalD = null;
       this._sc_gestureAnchorScale = null;
       this._sc_gestureAnchorHOffset = null;
       this._sc_gestureAnchorVOffset = null;
+      this._sc_containerOffset = null;
+      this._sc_touchCenterX = null;
+      this._sc_touchCenterY = null;
     }
 
     // Force recalculation of scrolling and scaling.
@@ -2281,10 +2309,6 @@ SC.ScrollView = SC.View.extend({
 
       // Only attempt to scroll if we are allowed to scroll in the direction and have room to scroll
       // in the direction. Otherwise, ignore the event so that an outer ScrollView may capture it.
-      // handled = ((wheelDeltaX < 0 && horizontalScrollOffset > minimumHorizontalScrollOffset) ||
-      //     (wheelDeltaX > 0 && horizontalScrollOffset < maximumHorizontalScrollOffset)) ||
-      //     ((wheelDeltaY < 0 && verticalScrollOffset > minimumVerticalScrollOffset) ||
-      //     (wheelDeltaY > 0 && verticalScrollOffset < maximumVerticalScrollOffset));
       handled = ((wheelDeltaX < 0 && horizontalScrollOffset > minimumHorizontalScrollOffset) ||
                  (wheelDeltaX > 0 && horizontalScrollOffset < maximumHorizontalScrollOffset)) ||
                 ((wheelDeltaY < 0 && verticalScrollOffset > minimumVerticalScrollOffset) ||
@@ -2306,7 +2330,9 @@ SC.ScrollView = SC.View.extend({
         canScrollVertical = this.get('canScrollVertical'),
         scrollThreshold = this.get('scrollGestureThreshold'),
         scaleThreshold = this.get('scaleGestureThreshold'),
-        scrollLockThreshold = this.get('scrollLockGestureThreshold');
+        scrollLockThreshold = this.get('scrollLockGestureThreshold'),
+        horizontalScrollOffset,
+        verticalScrollOffset;
 
 
     // Determine if we've moved enough to claim horizontal or vertical scrolling.
@@ -2338,41 +2364,18 @@ SC.ScrollView = SC.View.extend({
       }
     }
 
-    // Adjust scale.
-    if (canScale) {
-
-      // Determine if we've moved enough to claim scaling.
-      if (!this._sc_isTouchScaling) {
-        var totalAbsDeltaD = Math.abs(this._sc_gestureAnchorTotalD - avgTouch.d);
-        this._sc_isTouchScaling = !!avgTouch.d && totalAbsDeltaD > scaleThreshold;
-      }
-
-      var touchDeltaD = this._sc_gestureAnchorD - avgTouch.d,
-          absDeltaD = Math.abs(touchDeltaD);
-      if (absDeltaD > 1) {
-        // The percentage difference in touch distance.
-        var scalePercentChange = avgTouch.d / this._sc_gestureAnchorD,
-            scale = this._sc_gestureAnchorScale * scalePercentChange;
-
-        this.set('scale', scale);
-
-        // Reset the anchor.
-        this._sc_gestureAnchorD = avgTouch.d;
-        this._sc_gestureAnchorScale = scale;
-      }
-    }
-
     var touchDeltaX = this._sc_gestureAnchorX - avgTouch.x,
         absDeltaX = Math.abs(touchDeltaX);
 
     // Adjust scroll.
-    if (canScrollHorizontal && absDeltaX > 1 && !this._sc_isTouchScrollingVOnly) {
+    if (canScrollHorizontal && absDeltaX >= 1 && !this._sc_isTouchScrollingVOnly) {
       // Record the last velocity.
       this._sc_touchVelocityH = avgTouch.velocityX;
 
-      var maximumHorizontalScrollOffset = this.get('maximumHorizontalScrollOffset'),
-        minimumHorizontalScrollOffset = this.get('minimumHorizontalScrollOffset'),
-        horizontalScrollOffset = this._sc_gestureAnchorHOffset + touchDeltaX;
+      var minimumHorizontalScrollOffset = this.get('minimumHorizontalScrollOffset'),
+        maximumHorizontalScrollOffset = this.get('maximumHorizontalScrollOffset');
+
+      horizontalScrollOffset = this._sc_gestureAnchorHOffset + touchDeltaX;
 
       // Reset the anchor. Note: Do this before degrading the offset.
       this._sc_gestureAnchorX = avgTouch.x;
@@ -2394,13 +2397,14 @@ SC.ScrollView = SC.View.extend({
     var touchDeltaY = this._sc_gestureAnchorY - avgTouch.y,
         absDeltaY = Math.abs(touchDeltaY);
 
-    if (canScrollVertical && absDeltaY > 1 && !this._sc_isTouchScrollingHOnly) {
+    if (canScrollVertical && absDeltaY > 0 && !this._sc_isTouchScrollingHOnly) {
       // Record the last velocity.
       this._sc_touchVelocityV = avgTouch.velocityY;
 
-      var maximumVerticalScrollOffset = this.get('maximumVerticalScrollOffset'),
-        minimumVerticalScrollOffset = this.get('minimumVerticalScrollOffset'),
-        verticalScrollOffset = this._sc_gestureAnchorVOffset + touchDeltaY;
+      var minimumVerticalScrollOffset = this.get('minimumVerticalScrollOffset'),
+          maximumVerticalScrollOffset = this.get('maximumVerticalScrollOffset');
+
+      verticalScrollOffset = this._sc_gestureAnchorVOffset + touchDeltaY;
 
       // Reset the anchor. Note: Do this before degrading the offset.
       this._sc_gestureAnchorY = avgTouch.y;
@@ -2419,6 +2423,46 @@ SC.ScrollView = SC.View.extend({
       this.set('verticalScrollOffset', verticalScrollOffset);
     }
 
+    // Adjust scale.
+    if (canScale) {
+
+      // Determine if we've moved enough to claim scaling.
+      if (!this._sc_isTouchScaling) {
+        var totalAbsDeltaD = Math.abs(this._sc_gestureAnchorTotalD - avgTouch.d);
+        this._sc_isTouchScaling = !!avgTouch.d && totalAbsDeltaD > scaleThreshold;
+      }
+
+      var touchDeltaD = this._sc_gestureAnchorD - avgTouch.d,
+          absDeltaD = Math.abs(touchDeltaD);
+      if (absDeltaD > 0) {
+        // The percentage difference in touch distance.
+        var scalePercentChange = avgTouch.d / this._sc_gestureAnchorD,
+            scale = this._sc_gestureAnchorScale * scalePercentChange;
+
+        // Adjust the center of the zoom to the center of the gesture.
+        horizontalScrollOffset = this._sc_horizontalScrollOffset;
+        verticalScrollOffset = this._sc_verticalScrollOffset;
+
+        // Cache the current offset of the container view in the document. Calculated each time touch scaling begins.
+        if (!this._sc_containerOffset) {
+          var el = this.getPath('containerView.layer');
+
+          this._sc_containerOffset = SC.offset(el);
+          this._sc_touchCenterX = avgTouch.x - this._sc_containerOffset.x;
+          this._sc_touchCenterY = avgTouch.y - this._sc_containerOffset.y;
+        }
+
+        // Compute the relative center of the scale gesture.
+        this._sc_horizontalPct = (horizontalScrollOffset + this._sc_touchCenterX) / this._sc_contentWidth;
+        this._sc_verticalPct = (verticalScrollOffset + this._sc_touchCenterY) / this._sc_contentHeight;
+
+        this.set('scale', scale);
+
+        // Reset the anchor.
+        this._sc_gestureAnchorD = avgTouch.d;
+        this._sc_gestureAnchorScale = scale;
+      }
+    }
 
     // No longer pass the initial touch on to the content view if it was still about to.
     if (this._sc_passTouchToContentTimer && (this._sc_isTouchScrollingV || this._sc_isTouchScrollingH || this._sc_isTouchScaling)) {
