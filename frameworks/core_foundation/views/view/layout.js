@@ -137,10 +137,11 @@ SC.View.reopen(
         animateLayout[key] = newValue;
       }
 
-      if (this._pendingAnimations[key]) {
+      if (this._pendingAnimations && this._pendingAnimations[key]) {
         // Adjusting a value that was about to be animated cancels the animation.
         delete this._pendingAnimations[key];
       }
+
     }
 
     // Ignore undefined values or values equal to the current value.
@@ -188,12 +189,7 @@ SC.View.reopen(
 
         newLayout = this._sc_applyAdjustment(aKey, key[aKey], layout, newLayout);
       }
-
-        if (this._pendingAnimations && this._pendingAnimations[key]) {
-          // Adjusting a value that was previously about to be animated cancels the animation.
-          delete this._pendingAnimations[key];
     }
-
 
     // now set adjusted layout
     if (newLayout) {
