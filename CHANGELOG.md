@@ -42,13 +42,14 @@ These new properties can be used by an `SC.Response` subclass to include allowin
 
 * Scale is now a first-class layout function, correctly impacting frame and clippingFrame. As a result, scaled content within a CollectionView will now correctly calculate which item views should be currently visible.
 * SC.ScrollView complete refactor:
+  * If `horizontalOverlay` or `verticalOverlay` is true, it will use `SC.OverlayScrollerView` by default. It's no longer necessary to also set `horizontalScrollerView: SC.OverlayScrollerView` in order to get overlaid scrollers.
   * Use SC.ScrollView's horizontalAlign and verticalAlign properties to align fixed-width or -height content.
   * SC.ScrollView#scale now works as advertised!
   * iOS-style Overlaid scroller bars now fade out when not in use.
   * Ensures that scaling the view maintains the visual center.
   * Improves touch support significantly. Including centered zooming for pinch gestures, smoother bounce-back overdrag past the boundaries.
   * Improves gesture animation performance and feel with requestAnimationFrame.
-  * Supports flexible sized GPU accelerated content. When the content of the view has an undefined width or height, SC.ScrollView will fix the size of the content to fit the container so that it may be positioned using translateX & translateY.
+  * Supports flexible sized GPU accelerated content. When the content of the view has an undefined width or height in its layout and has `wantsAcceleratedLayer` set to `true`, `SC.ScrollView` will fix the undefined size (width or height) of the content to *fit* the container so that the content may be scrolled using `translateX` & `translateY`.
   * Uses shared objects for adjusting the content & container views of SC.ScrollView. This prevents repeated memory allocs while scrolling, which must eventually be garbage collected (a painful occurrence in JavaScript).
 * Improves SC.Touch documentation.
 * The improved documentation for SC.Object's didChangeFor method will hopefully encourage its use.

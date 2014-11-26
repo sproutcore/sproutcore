@@ -1004,7 +1004,7 @@ SC.ScrollView = SC.View.extend({
 
         // When a view wants an accelerated layer and isn't a fixed size, we convert it to a fixed
         // size and resize it when our container resizes.
-        if (!newView.get('isFixedSize')) {
+        if (newView.get('wantsAcceleratedLayer') && !newView.get('isFixedSize')) {
           var contentViewLayout = newView.get('layout');
 
           // Fix the width.
