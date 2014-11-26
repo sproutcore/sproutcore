@@ -59,38 +59,33 @@ These new properties can be used by an `SC.Response` subclass to include allowin
 * Improves the SC.View cancel animation method to work with centerX/centerY animations. Disabled the rotation decompositions on X & Y axes, since they don't work in all cases.
 * Changed SC.GridView to provide its own height rather than minHeight. Note: We use height, because this allows the list view to be positioned with translateX, translateY.
 * Refactored SC.MenuScrollView.
-
-** Reduced code by removing duplicate properties from its superclass SC.ScrollView.
-** Renamed verticalScrollerView & verticalScrollerView2 to topScrollerView & bottomScrollerView respectively to make it clearer which they are and to avoid confusion with the verticalScrollerView property of SC.ScrollView.
-** Removed four (!) extra observers (one which was totally useless on the non-existant horizontal scroller visibility).
-** Tidied up the createChildViews code to be more readable and not make excess calls to reposition the scrollers.
-** Improved the appearance/disappearance of the scrollers. It now shifts the content view at the same time that the container view adjusts to show/hide scrollers so that the content view never appears to jump, which also ensures that there is no extra space at the bottom of the container view.
-
+  * Reduced code by removing duplicate properties from its superclass SC.ScrollView.
+  * Renamed verticalScrollerView & verticalScrollerView2 to topScrollerView & bottomScrollerView respectively to make it clearer which they are and to avoid confusion with the verticalScrollerView property of SC.ScrollView.
+  * Removed four (!) extra observers (one which was totally useless on the non-existant horizontal scroller visibility).
+  * Tidied up the createChildViews code to be more readable and not make excess calls to reposition the scrollers.
+  * Improved the appearance/disappearance of the scrollers. It now shifts the content view at the same time that the container view adjusts to show/hide scrollers so that the content view never appears to jump, which also ensures that there is no extra space at the bottom of the container view.
 * Pulled SC.MenuScrollerView into its own file and refactors it slightly.
-
-** Reduced the amount of code by removing duplicate properties from its superclass SC.ScrollerView.
-** Removed unused code (ownerScrollValueKey computed property & _sc_scroller_valueDidChange observer(!)).
-** Improved the readability of the _scrollMenu method.
-
+  * Reduced the amount of code by removing duplicate properties from its superclass SC.ScrollerView.
+  * Removed unused code (ownerScrollValueKey computed property & _sc_scroller_valueDidChange observer(!)).
+  * Improved the readability of the _scrollMenu method.
 * Refactored SC.MenuPane slightly:
-
-** Fixed a problem where the items array was not observed for content changes when it was set on create (includes unit test).
-** Removed an unnecessary layout change in createChildViews, which also meant that creating a menu pane as a singleton (i.e. with no run loop) would throw warnings.
-** Slightly simplified the code by removing duplicated properties from the superclass SC.PickerPane and reusing the items observer code for initialization.
+  * Fixed a problem where the items array was not observed for content changes when it was set on create (includes unit test).
+  * Removed an unnecessary layout change in createChildViews, which also meant that creating a menu pane as a singleton (i.e. with no run loop) would throw warnings.
+  * Slightly simplified the code by removing duplicated properties from the superclass SC.PickerPane and reusing the items observer code for initialization.
 * Changed the default maximum of SC.ScrollerView to be 0. It was 100 previously, which is arbitrary and incorrect.
 * Removed an extra call to SC.RootResponder's computeWindowSize() each time that a pane is appended. This is unnecessary, since the root responder recomputes its window size property whenever the window actually resizes.
 * Changed SC.MenuItemView's handling of submenus. Previously if the item's submenu was visible and the mouse exited back onto the menu item view, it tried to re-append the same submenu. Instead, it now checks to see if its submenu is already attached before attempting to enter it again.
 * Allows for optimization of SC.RenderContext's setStyle method (Removes V8 "ForIn is not fast case" warning, see http://commondatastorage.googleapis.com/io-2013/presentations/223.pdf).
 * Many developer warnings and errors that would previously appear in production have been restricted to dev-mode only.
-* Improved performance of core SC methods: SC.mixin, SC.supplement as well as SC.Function.enhance. SC.mixin and SC.supplement iterated the arguments object to insert a boolean flag to pass to a private function that then iterated its arguments in order to ignore the flag argument, which is totally unnecessary. Instead, SC.mixin and SC.supplement iterate the arguments once and pass the new Array to the private function as a second argument, removing the need for a second iteration.
-
-As well, these three areas all accessed the arguments object to copy it, which requires the browser to instantiate it, which is costly. Instead, we now do a fast copy (similar to this: http://jsperf.com/closure-with-arguments) without instantiating the arguments object.
-
-Finally, by doing a fast copy of arguments these functions are now optimizable by V8, whereas they weren't previously.
-
-Benchmark: SC.mixin & SC.supplement ~ 58% faster
-* Calls adjustLayout on initialization of SC.CollectionView.
-
+* Improved performance of core SC methods: SC.mixin, SC.supplement as well as SC.Function.enhance. SC.mixin and SC.supplement iterated the arguments object to insert a boolean flag to pass to a private function that then iterated its arguments in order to ignore the flag argument, which is totally unnecessary. Instead, SC.mixin and SC.supplement iterate the arguments once and pass the new Array to the private function as a second argument, removing the need for a second iteration.  
+  
+As well, these three areas all accessed the arguments object to copy it, which requires the browser to instantiate it, which is costly. Instead, we now do a fast copy (similar to this: http://jsperf.com/closure-with-arguments) without instantiating the arguments object.  
+  
+Finally, by doing a fast copy of arguments these functions are now optimizable by V8, whereas they weren't previously.  
+  
+Benchmark: `SC.mixin` & `SC.supplement` ~ 58% faster
+* Calls adjustLayout on initialization of SC.CollectionView.  
+  
 Certain containing views, transitions and specialized layout engines need to know what type of layout their child views will have in order to make the proper adjustments. SC.CollectionView subclasses typically set a width or a height themselves, but when this happens late, the actual layout style of the collection is misunderstood at initialization to be something different.
 * Improved the management of the content view for SC.ContainerView.
 * Improved the default styling of overlay scroller views. Making them look more like natural overlay scrollers in OS X/iOS and making them visible on dark backgrounds.
