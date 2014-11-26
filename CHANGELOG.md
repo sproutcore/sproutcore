@@ -6,6 +6,7 @@ CHANGE LOG
 
 ### NEW FEATURES
 
+* There are two new binding transforms, `string` and `integer`, that ensure the value is *always* a `String` or an integer `Number`. Examples include returning an empty `String` for `null` or `undefined` values when using the `string` transform and returning a 0 for these same values when using the `integer` transform. Furthermore, if the `integer` transform is given a String, it will be parsed to an integer `Number` according to the extra argument `radix` (which is 10 by default).
 * There is a new binding transform, `mix`, that allows for the aggregation of multiple bound properties into a single property through a given function. It is often the case that a single property depends on two or more bound properties in a complex manner that isn't handled by the current `and` and `or` transforms. To handle this situation previously, the developer would need to write the code to bind in the external property values and then make a local computed property dependent on each of these. The `mix` transform does exactly the same thing, but with less typing on the developer's part.  
 
 For example, to create a mix binding that concatenates two external properties in a non-trivial way, we can now do the following,  

@@ -952,6 +952,112 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   },
 
   /**
+    Adds a transform to convert the value to a bool value.  If the value is
+    an array it will return YES if array is not empty.  If the value is a string
+    it will return YES if the string is not empty.
+
+    @param {String} [fromPath]
+    @returns {SC.Binding} this
+  */
+  bool: function (fromPath) {
+    return this.from(fromPath).transform(function (v) {
+      var t = SC.typeOf(v);
+      if (t === SC.T_ERROR) return v;
+      return (t == SC.T_ARRAY) ? (v.length > 0) : (v === '') ? NO : !!v;
+    });
+  },
+
+  /**
+    Adds a transform that will return YES if the value is equal to equalValue, NO otherwise.
+
+      isVisibleBinding: SC.Binding.oneWay("MyApp.someController.title").equalTo(comparisonValue)
+
+    Or:
+
+      isVisibleBinding: SC.Binding.equalTo("MyApp.someController.title", comparisonValue)
+
+    @param {String} fromPath from path or null
+    @param {Object} equalValue the value to compare with
+    @returns {SC.Binding} this
+  */
+  equalTo: function(fromPath, equalValue) {
+    // Normalize arguments.
+    if (equalValue === undefined) {
+      equalValue = fromPath;
+      fromPath = null;
+    }
+
+    return this.from(fromPath).transform(function(value, binding) {
+       return value === equalValue;
+     });
+  },
+
+  /**
+    Adds a transform that will *always* return an integer Number value. Null and undefined values will
+    return 0 while String values will be transformed using the parseInt method (according to the
+    radix) and Boolean values will be 1 or 0 if true or false accordingly. Other edge cases like NaN
+    or other non-Numbers will also return 0.
+
+    Example results:
+
+      * null => 0
+      * undefined => 0
+      * '123' => 123
+      * true => 1
+      * {} => 0
+
+    @param {String} fromPathOrRadix from path or the radix for the parsing or null for 10
+    @param {String} radix the radix for the parsing or null for 10
+    @returns {SC.Binding} this
+  */
+  integer: function (fromPathOrRadix, radix) {
+    // Normalize arguments.
+    if (radix === undefined) {
+      radix = fromPathOrRadix;
+      fromPathOrRadix = null;
+    }
+
+    // Use base 10 by default.
+    if (radix === undefined) radix = 10;
+
+    return this.from(fromPathOrRadix).transform(function (value) {
+
+      // Null or undefined will be converted to 0.
+      if (SC.none(value)) {
+        value = 0;
+
+      // String values will be converted to integer Numbers using parseInt with the given radix.
+      } else if (typeof value === SC.T_STRING) {
+        value = window.parseInt(value, radix);
+
+      // Boolean values will be converted to 0 or 1 accordingly.
+      } else if (typeof value === SC.T_BOOL) {
+        value = value ? 1 : 0;
+      }
+
+      // All other non-Number values will be converted to 0 (this includes bad String parses above).
+      if (typeof value !== SC.T_NUMBER || isNaN(value)) {
+        value = 0;
+      }
+
+      return value;
+    });
+  },
+
+  /**
+    Adds a transform that will return YES if the value is null or undefined, NO otherwise.
+
+    @param {String} [fromPath]
+    @returns {SC.Binding} this
+  */
+  isNull: function (fromPath) {
+    return this.from(fromPath).transform(function (v) {
+      var t = SC.typeOf(v);
+      return (t === SC.T_ERROR) ? v : SC.none(v);
+    });
+  },
+
+  /**
     Specifies that the binding should not return error objects.  If the value
     of a binding is an Error object, it will be transformed to a null value
     instead.
@@ -979,33 +1085,31 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   },
 
   /**
-    Adds a transform to the chain that will allow only single values to pass.
-    This will allow single values, nulls, and error values to pass through.  If
-    you pass an array, it will be mapped as so:
+    Adds a transform to convert the value to the inverse of a bool value.  This
+    uses the same transform as bool() but inverts it.
 
-          [] => null
-          [a] => a
-          [a,b,c] => Multiple Placeholder
-
-    You can pass in an optional multiple placeholder or it will use the
-    default.
-
-    Note that this transform will only happen on forwarded valued.  Reverse
-    values are send unchanged.
-
-    @param {String} fromPath from path or null
-    @param {Object} [placeholder] placeholder value.
+    @param {String} [fromPath]
     @returns {SC.Binding} this
   */
-  single: function (fromPath, placeholder) {
-    if (placeholder === undefined) {
-      placeholder = SC.MULTIPLE_PLACEHOLDER;
-    }
-    return this.from(fromPath).transform(function (value, isForward) {
-      if (value && value.isEnumerable) {
-        var len = value.get('length');
-        value = (len > 1) ? placeholder : (len <= 0) ? null : value.firstObject();
-      }
+  not: function (fromPath) {
+    return this.from(fromPath).transform(function (v) {
+      var t = SC.typeOf(v);
+      if (t === SC.T_ERROR) return v;
+      return !((t == SC.T_ARRAY) ? (v.length > 0) : (v === '') ? NO : !!v);
+    });
+  },
+
+  /**
+    Adds a transform that will convert the passed value to an array.  If
+    the value is null or undefined, it will be converted to an empty array.
+
+    @param {String} [fromPath]
+    @returns {SC.Binding} this
+  */
+  multiple: function (fromPath) {
+    return this.from(fromPath).transform(function (value) {
+      /*jshint eqnull:true*/
+      if (!SC.isArray(value)) value = (value == null) ? [] : [value];
       return value;
     });
   },
@@ -1045,61 +1149,65 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   },
 
   /**
-    Adds a transform that will convert the passed value to an array.  If
-    the value is null or undefined, it will be converted to an empty array.
+    Adds a transform to the chain that will allow only single values to pass.
+    This will allow single values, nulls, and error values to pass through.  If
+    you pass an array, it will be mapped as so:
 
-    @param {String} [fromPath]
+          [] => null
+          [a] => a
+          [a,b,c] => Multiple Placeholder
+
+    You can pass in an optional multiple placeholder or it will use the
+    default.
+
+    Note that this transform will only happen on forwarded valued.  Reverse
+    values are send unchanged.
+
+    @param {String} fromPath from path or null
+    @param {Object} [placeholder] placeholder value.
     @returns {SC.Binding} this
   */
-  multiple: function (fromPath) {
-    return this.from(fromPath).transform(function (value) {
-      /*jshint eqnull:true*/
-      if (!SC.isArray(value)) value = (value == null) ? [] : [value];
+  single: function (fromPath, placeholder) {
+    if (placeholder === undefined) {
+      placeholder = SC.MULTIPLE_PLACEHOLDER;
+    }
+    return this.from(fromPath).transform(function (value, isForward) {
+      if (value && value.isEnumerable) {
+        var len = value.get('length');
+        value = (len > 1) ? placeholder : (len <= 0) ? null : value.firstObject();
+      }
       return value;
     });
   },
 
   /**
-    Adds a transform to convert the value to a bool value.  If the value is
-    an array it will return YES if array is not empty.  If the value is a string
-    it will return YES if the string is not empty.
+    Adds a transform that will *always* return a String value. Null and undefined values will return
+    an empty string while all other non-String values will be transformed using the toString method.
 
-    @param {String} [fromPath]
+    Example results:
+
+      * null => ''
+      * undefined => ''
+      * 123 => '123'
+      * true => 'true'
+      * {} => '[object Object]' (i.e. x = {}; return x.toString())
+
+    @param {String} fromPath from path or null
     @returns {SC.Binding} this
   */
-  bool: function (fromPath) {
-    return this.from(fromPath).transform(function (v) {
-      var t = SC.typeOf(v);
-      if (t === SC.T_ERROR) return v;
-      return (t === SC.T_ARRAY) ? (v.length > 0) : (v === '') ? NO : !!v;
-    });
-  },
+  string: function (fromPath) {
+    return this.from(fromPath).transform(function (value) {
 
-  /**
-    Adds a transform to convert the value to the inverse of a bool value.  This
-    uses the same transform as bool() but inverts it.
+      // Null or undefined will be converted to an empty string.
+      if (SC.none(value)) {
+        value = '';
 
-    @param {String} [fromPath]
-    @returns {SC.Binding} this
-  */
-  not: function (fromPath) {
-    return this.from(fromPath).transform(function (v) {
-      var t = SC.typeOf(v);
-      if (t === SC.T_ERROR) return v;
-      return !((t === SC.T_ARRAY) ? (v.length > 0) : (v === '') ? NO : !!v);
-    });
-  },
+      // Non-string values will be converted to strings using `toString`.
+      } else if (typeof value !== SC.T_STRING && value.toString) {
+        value = value.toString();
+      }
 
-  /**
-    Adds a transform that will return YES if the value is null or undefined, NO otherwise.
-
-    @param {String} [fromPath]
-    @returns {SC.Binding} this
-  */
-  isNull: function (fromPath) {
-    return this.from(fromPath).transform(function (v) {
-      var t = SC.typeOf(v);
-      return (t === SC.T_ERROR) ? v : SC.none(v);
+      return value;
     });
   },
 

@@ -7,7 +7,7 @@
 // ========================================================================
 // SC.Binding Tests
 // ========================================================================
-/*globals module, test, ok, isObj, equals, expects */
+/*globals module, test, ok, equals */
 
 var FromObject, fromObject, midObject, toObject, binding, Bon1, bon2, first, second, third, binding1, binding2;
 
@@ -366,6 +366,7 @@ test("two bindings to the same value should sync in the order they are initializ
 
 });
 
+var BindableObject;
 module("Binding transforms", {
   setup: function () {
     BindableObject = SC.Object.extend({
@@ -373,7 +374,8 @@ module("Binding transforms", {
       numericValue: 42,
       stringValue: 'forty-two',
       arrayValue: [4, 2],
-      undefinedValue: undefined
+      undefinedValue: undefined,
+      nullValue: null
     });
     // temporarily set up two source objects in the SC namespace so we can
     // use property paths to access them
@@ -407,9 +409,112 @@ test('Binding sync when only transformed value has changed', function () {
   equals(toObject.get('transformedValue'), 'VALUE IS UNDEFINED', 'value is undefined, so bound value should be');
 });
 
-test("ALL THE OTHER BINDING TRANSFORMS.");
+test("the integer transform", function() {
+  var toObject;
 
-test("equalTo", function() {
+  SC.run(function () {
+    toObject = SC.Object.create({
+      aNumber: null,
+      aNumberBinding: SC.Binding.oneWay('SC.testControllerA.nullValue').integer(10)
+    });
+  });
+
+  equals(toObject.get('aNumber'), 0, "Value is null, so bound value should should be");
+
+  SC.run(function () {
+    SC.testControllerA.set('nullValue', '123abc');
+  });
+
+  equals(toObject.get('aNumber'), window.parseInt('123abc', 10), "Value is String, so bound value should be");
+
+  SC.run(function () {
+    SC.testControllerA.set('nullValue', 'abc123');
+  });
+
+  equals(toObject.get('aNumber'), 0, "Value is non-parseable String, so bound value should be");
+
+  SC.run(function () {
+    SC.testControllerA.set('nullValue', NaN);
+  });
+
+  equals(toObject.get('aNumber'), 0, "Value is NaN, so bound value should be");
+
+  SC.run(function () {
+    SC.testControllerA.set('nullValue', Infinity);
+  });
+
+  equals(toObject.get('aNumber'), Infinity, "Value is Infinity, so bound value should be");
+
+  SC.run(function () {
+    SC.testControllerA.set('nullValue', true);
+  });
+
+  equals(toObject.get('aNumber'), 1, "Value is Boolean true, so bound value should be");
+
+  SC.run(function () {
+    SC.testControllerA.set('nullValue', false);
+  });
+
+  equals(toObject.get('aNumber'), 0, "Value is Boolean false, so bound value should be");
+
+  SC.run(function () {
+    SC.testControllerA.set('nullValue', {});
+  });
+
+  equals(toObject.get('aNumber'), 0, "Value is Object, so bound value should be");
+
+  SC.run(function () {
+    SC.testControllerA.set('nullValue', SC.Object.create({}));
+  });
+
+  equals(toObject.get('aNumber'), 0, "Value is SC.Object instance, so bound value should be");
+});
+
+
+test("the string transform", function() {
+  var toObject;
+
+  SC.run(function () {
+    toObject = SC.Object.create({
+      aString: null,
+      aStringBinding: SC.Binding.oneWay('SC.testControllerA.nullValue').string()
+    });
+  });
+
+  equals(toObject.get('aString'), '', "Value is null, so bound value should should be");
+
+  SC.run(function () {
+    SC.testControllerA.set('nullValue', 1);
+  });
+
+  equals(toObject.get('aString'), '1', "Value is Number, so bound value should be");
+
+  SC.run(function () {
+    SC.testControllerA.set('nullValue', true);
+  });
+
+  equals(toObject.get('aString'), 'true', "Value is Boolean true, so bound value should be");
+
+  SC.run(function () {
+    SC.testControllerA.set('nullValue', false);
+  });
+
+  equals(toObject.get('aString'), 'false', "Value is Boolean false, so bound value should be");
+
+  SC.run(function () {
+    SC.testControllerA.set('nullValue', {});
+  });
+
+  equals(toObject.get('aString'), {}.toString(), "Value is Object, so bound value should be");
+
+  SC.run(function () {
+    SC.testControllerA.set('nullValue', SC.Object.create({ toString: function () { return 'An SC.Object'; }}));
+  });
+
+  equals(toObject.get('aString'), 'An SC.Object', "Value is SC.Object instance, so bound value should be");
+});
+
+test("the equalTo transform", function() {
   SC.RunLoop.begin();
   var toObject = SC.Object.create({
     isFortyTwo: null,
@@ -819,8 +924,7 @@ module("propertyNameBinding with longhand", {
   teardown: function () {
     TestNamespace.fromObject.destroy();
     TestNamespace.toObject.destroy();
-    delete TestNamespace.fromObject;
-    delete TestNamespace.toObject;
+    TestNamespace = null;
   }
 });
 
@@ -883,7 +987,7 @@ test("Bindings override in subclasses.", function() {
   });
   SC.RunLoop.end();
 
-  ok(fromObject._bindings.length === 1, "Duplicate bindings are not created.")
+  ok(fromObject._bindings.length === 1, "Duplicate bindings are not created.");
 
   equals(fromObject.get('value'), 'world', "Superclass binding should have been overridden in the subclass, giving value a value of");
 
