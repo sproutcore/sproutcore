@@ -7,8 +7,7 @@ CHANGE LOG
 ### NEW FEATURES
 
 * Added polymorphic record support to `SC.Record`. This experimental framework has been in use in a few projects and has recently been vastly improved to fix bugs and improve its performance. Includes unit tests and examples
-* Added new properties to `SC.Request` instances: `allowCredentials` (default true, which will indicate that credentials be included for cross-domain requests (e.g. xhr.withCredentials = true) and `isSameDomain` (readonly computed property, true if the protocol, domain and port match exactly).
-
+* Added new properties to `SC.Request` instances: `allowCredentials` (default true, which will indicate that credentials be included for cross-domain requests (e.g. xhr.withCredentials = true) and `isSameDomain` (readonly computed property, true if the protocol, domain and port match exactly).  
 These new properties can be used by an `SC.Response` subclass to include allowing credentials for cross domain requests.
 * Added `dragDidSucceed`, `dragDidCancel`, `source.dragSlideBackDidEnd` callbacks to `SC.Drag`.
 * `SC.View.VERTICAL_STACK` & `SC.View.HORIZONTAL_STACK` have been improved to allow child views in the stack to resize to fill available space. Previously, every child view needed to have a height or width specified with the exception of the last child view which could be resized to fit the remaining space of the parent view. This option was enabled by setting `resizeToFit` to `false` in the `childViewLayoutOptions` hash. In 1.11, we can now set `resizeToFit` to `false` and have all child views without an explicit width or height respectively, resize to fill the available space. By default the available space will be shared evenly by all of these child views, but a more specific per child view weighting can be applied by specifing a `fillRatio` on the child views. For instance, to split the available space between two flexible child views as 1/3 and 2/3, the first view would have a `fillRatio` of 1 and the second view would have a `fillRatio` of 2.
@@ -32,27 +31,25 @@ These new properties can be used by an `SC.Response` subclass to include allowin
 * Adds boolean shouldAutoResize property to SC.SegmentedView.
 * Now includes "minimal-ui" viewport meta tag for Mobile Safari apps.
 * Adds stackNextTouchResponder and stackCandidateTouchResponder methods to SC.Touch to make it easier to pass touch respondership between views.
-* Adds horizontal layout for SC.ListView using layoutDirection property.
-* Adds new opt-in API (SC.Store#chainAutonomousStore) for nested stores which can interact with the data source. This allows you to commit nested store changes to the server before committing successful updates to the parent store with SC.NestedStore#commitSuccessfulChanges.
-* Setting SC.ScrollView#delaysContentTouches will now give your content views full control over touch events in question. As a side effect, native touch handling is now possible inside scroll views.
-* SC.SliderView has a new markSteps property, which draws a mark element for each step. It also gains an updateOnScroll property, which allows you to prevent it from handling mouseWheel events (in a scroll view for example).
-* Adds support for calculated properties to String.fmt.
-* Adds toolTip to SC.MenuItemView, and the corresponding itemToolTipKey to SC.MenuView.
+* Adds horizontal layout for `SC.ListView` using `layoutDirection` property.
+* Adds new opt-in API (`SC.Store.prototype.chainAutonomousStore`) for nested stores which can interact with the data source. This allows you to commit nested store changes to the server before committing successful updates to the parent store with `SC.NestedStore.prototype.commitSuccessfulChanges`.
+* Setting `SC.ScrollView.prototype.delaysContentTouches` will now give your content views full control over touch events in question. As a side effect, native touch handling is now possible inside scroll views.
+* `SC.SliderView` has a new `markSteps` property, which draws a mark element for each step. It also gains an `updateOnScroll` property, which allows you to prevent it from handling `mouseWheel` events (in a scroll view for example).
+* Adds support for calculated properties to `String.fmt`.
+* Adds `toolTip` property to `SC.MenuItemView`, and the corresponding `itemToolTipKey` to `SC.MenuView`.
 
 ### CHANGES & IMPROVEMENTS
 
 * Scale is now a first-class layout function, correctly impacting frame and clippingFrame. As a result, scaled content within a CollectionView will now correctly calculate which item views should be currently visible.
 * SC.ScrollView complete refactor:
-
-** Use SC.ScrollView's horizontalAlign and verticalAlign properties to align fixed-width or -height content.
-** SC.ScrollView#scale now works as advertised!
-** iOS-style Overlaid scroller bars now fade out when not in use.
-** Ensures that scaling the view maintains the visual center.
-** Improves touch support significantly. Including centered zooming for pinch gestures, smoother bounce-back overdrag past the boundaries.
-** Improves gesture animation performance and feel with requestAnimationFrame.
-** Supports flexible sized GPU accelerated content. When the content of the view has an undefined width or height, SC.ScrollView will fix the size of the content to fit the container so that it may be positioned using translateX & translateY.
-** Uses shared objects for adjusting the content & container views of SC.ScrollView. This prevents repeated memory allocs while scrolling, which must eventually be garbage collected (a painful occurrence in JavaScript).
-
+  * Use SC.ScrollView's horizontalAlign and verticalAlign properties to align fixed-width or -height content.
+  * SC.ScrollView#scale now works as advertised!
+  * iOS-style Overlaid scroller bars now fade out when not in use.
+  * Ensures that scaling the view maintains the visual center.
+  * Improves touch support significantly. Including centered zooming for pinch gestures, smoother bounce-back overdrag past the boundaries.
+  * Improves gesture animation performance and feel with requestAnimationFrame.
+  * Supports flexible sized GPU accelerated content. When the content of the view has an undefined width or height, SC.ScrollView will fix the size of the content to fit the container so that it may be positioned using translateX & translateY.
+  * Uses shared objects for adjusting the content & container views of SC.ScrollView. This prevents repeated memory allocs while scrolling, which must eventually be garbage collected (a painful occurrence in JavaScript).
 * Improves SC.Touch documentation.
 * The improved documentation for SC.Object's didChangeFor method will hopefully encourage its use.
 * The last item view in a CollectionView now gets an isLast property.
@@ -145,13 +142,13 @@ cross-platform compatible.
 * Fixes up some bad overrides of interpretKeyEvents. Make sure to use, rather than override, this method in your own code.
 * SC.TextFieldView now supports selection direction when the browser allows.
 * Many webkit-specific properties under the hood – for example, transform CSS – have been replaced with correctly browser-detected versions.
-* VERTICAL_STACK and HORIZONTAL_STACK child layout plugins now support the use of minHeight and minWidth.
+* `SC.View.VERTICAL_STACK` and `SC.View.HORIZONTAL_STACK` child layout plugins now support the use of `minHeight` and `minWidth`.
 * CoreTest, our QUnit like testing suite, now includes a "warn" method to explicitly create a warning.
 * SC.MenuPane will ignore the first item if it is a separator.
 * A number of improvements and backwards-compatibility fixes have been made to the SC.SelectView replacement class found in the experimental frameworks.
 * You can now customize your SC.AlertPane's buttons' isDefault, isCancel, tooltips, layerId and localize properties.
-* Adds developer warning when calling SC.PickerPane#append. You should use SC.PickerPane#popup instead.
-* Adds a layout orientation class to SC.SplitDividerView.
+* Adds developer warning when calling `SC.PickerPane.prototype.append`. A developer should always use `SC.PickerPane.prototype.popup` to display a picker pane.
+* Adds a layout orientation class to `SC.SplitDividerView`.
 * Adds SC.String#escapeCssIdForSelector method to handle '.' and ':' characters, which are valid in CSS IDs but which must be escaped for use in jQuery selectors.
 * In development mode, SC.ChildArray (nested toMany attribute) now has a helpfully verbose toString method.
 * runtime framework no longer requires jQuery. jQuery requirement moved to core_foundation.
