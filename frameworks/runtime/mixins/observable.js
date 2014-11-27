@@ -5,6 +5,8 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
+/*globals console */
+
 sc_require('ext/function');
 sc_require('private/observer_set');
 sc_require('private/chain_observer');
@@ -389,6 +391,10 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     } else {
       if (this[key] !== value) {
         if (notify) this.propertyWillChange(key);
+        // If this object mixes in SC.Children, attempt to destroy the child.
+        if (this.destroyChild) {
+          this.destroyChild(key);
+        }
         ret = this[key] = value;
         if (notify) this.propertyDidChange(key, ret);
       }
@@ -714,7 +720,10 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
 
     // if there are no dependent keys, then just set and return null to avoid
     // this mess again.
-    if (!keys || keys.length === 0) return cached[key] = null;
+    if (!keys || keys.length === 0) {
+      cached[key] = null;
+      return cached[key];
+    }
 
     // there are dependent keys, so we need to do the work to find out if
     // any of them or their dependent keys are cached.
@@ -874,7 +883,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
 
       // try to find matching chains
       kvoKey = SC.keyFor('_kvo_chains', key);
-      if (chains = this[kvoKey]) {
+      if ((chains = this[kvoKey])) {
 
         // if chains have not been cloned yet, do so now.
         chains = this._kvo_for(kvoKey);
@@ -893,7 +902,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     } else {
       if (target === this) target = null; // use null for observers only.
       kvoKey = SC.keyFor('_kvo_observers', key);
-      if (observers = this[kvoKey]) {
+      if ((observers = this[kvoKey])) {
         // if observers have not been cloned yet, do so now
         observers = this._kvo_for(kvoKey);
         observers.remove(target, method);
@@ -959,7 +968,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
         len, ploc, path, propertyKey, keysLen;
 
     // Loop through observer functions and register them
-    if (keys = this._observers) {
+    if ((keys = this._observers)) {
       len = keys.length;
       for (loc = 0; loc < len; loc++) {
         key = keys[loc];
@@ -975,7 +984,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
 
     // Add Bindings
     this.bindings = []; // will be filled in by the bind() method.
-    if (keys = this._bindings) {
+    if ((keys = this._bindings)) {
       for (loc = 0, keysLen = keys.length; loc < keysLen; loc++) {
         // get propertyKey
         key = keys[loc];
@@ -988,10 +997,10 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     }
 
     // Add Properties
-    if (keys = this._properties) {
+    if ((keys = this._properties)) {
       for (loc = 0, keysLen = keys.length; loc < keysLen; loc++) {
         key = keys[loc];
-        if (value = this[key]) {
+        if ((value = this[key])) {
 
           // activate cacheable only if needed for perf reasons
           if (value.isCacheable) this._kvo_cacheable = YES;
@@ -1029,7 +1038,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     delete this.bindings;
 
     // Loop through observer functions and remove them
-    if (keys = this._observers) {
+    if ((keys = this._observers)) {
       len = keys.length;
       for (var loc = 0; loc < len; loc++) {
         key = keys[loc];
@@ -1207,7 +1216,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
       } else if (key) changes.add(key);
 
       // Now go through the set and add all dependent keys...
-      if (dependents = this._kvo_dependents) {
+      if ((dependents = this._kvo_dependents)) {
 
         // NOTE: each time we loop, we check the changes length, this
         // way any dependent keys added to the set will also be evaluated...
@@ -1227,7 +1236,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
             if (!cache) cache = this._kvo_cache = {};
             while (--loc >= 0) {
               changes.add(key = keys[loc]);
-              if (func = this[key]) {
+              if ((func = this[key])) {
                 this[func.cacheKey] = undefined;
                 cache[func.cacheKey] = cache[func.lastSetValueKey] = undefined;
               } // if (func=)
