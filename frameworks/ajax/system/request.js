@@ -115,7 +115,7 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
 
       // This pattern matching strategy was taken from jQuery.
       parts = urlRegex.exec( address.toLowerCase()  );
-      originParts = urlRegex.exec( window.location.href.toLowerCase() );
+      originParts = urlRegex.exec( location.href.toLowerCase() );
 
       return SC.none(parts) ||
         (parts[1] === originParts[1] &&  // protocol
@@ -174,7 +174,7 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
   timeout: null,
 
   /**
-    The body of the request.  May be an object is isJSON or isXML is set,
+    The body of the request.  May be an object if isJSON or isXML is set,
     otherwise should be a string.
 
     @type Object|String
@@ -270,7 +270,7 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
     var ret = {},
         keys = this.COPY_KEYS,
         loc = keys.length,
-        key, listeners, headers;
+        key;
 
     while(--loc >= 0) {
       key = keys[loc];
@@ -699,8 +699,7 @@ SC.Request.manager = SC.Object.create(
   */
   cancel: function(response) {
     var pending = this.get('pending'),
-        inflight = this.get('inflight'),
-        idx;
+        inflight = this.get('inflight');
 
     if (pending.indexOf(response) >= 0) {
       this.propertyWillChange('pending');
