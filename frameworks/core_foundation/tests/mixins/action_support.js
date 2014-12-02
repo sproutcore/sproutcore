@@ -92,7 +92,7 @@
   // Action Context
   //
 
-  test("context", function() {
+  test("no context parameter - context set", function() {
     var expectedAction = 'someAction';
     var context = {zomg: "context"};
 
@@ -101,6 +101,18 @@
     view.fireAction();
 
     ok(sendActionSpy.wasCalledWith(expectedAction, null, view, pane, context, view), 'triggers the action');
+  });
+
+  test("context parameter - context set", function() {
+    var expectedAction = 'someAction';
+    var context = {zomg: "context"};
+    var contextParamter = {foobar: "context"};
+
+    view.set('action', expectedAction);
+    view.set('actionContext', context)
+    view.fireAction(expectedAction, contextParamter);
+
+    ok(sendActionSpy.wasCalledWith(expectedAction, null, view, pane, contextParamter, view), 'triggers the action');
   });
 
 })();

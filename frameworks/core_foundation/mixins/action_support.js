@@ -47,7 +47,9 @@ SC.ActionSupport =
   action: null,
 
   /**
-    Will be sent along with the action to provide the context of the action.
+    Will be sent along with the action to provide the context of the action,
+    if no context is provided when fireAction() is called.
+
     This is an easy way to include information along with the action.
 
     @type Object
@@ -57,21 +59,26 @@ SC.ActionSupport =
 
    /**
      Perform the action. If an action parameter is not provided, then
-     the action defaults to the `action` property.
+     the action defaults to the `action` property. If a context parameter
+     is not provided, then the context defaults to the `actionContext`
+     property.
 
      @param {String} [action] The action to fire.
+     @param {Object} [context] The context to send along with the action.
 
      @returns {Boolean} true if successful
      @returns {Boolean} false otherwise
   */
-  fireAction: function(action) {
+  fireAction: function(action, context) {
     var target = this.get('target') || null,
         rootResponder = this.getPath('pane.rootResponder');
 
     if (action === undefined) { action = this.get('action'); }
 
+    if (context === undefined) { context = this.get('actionContext'); }
+
     if (action && rootResponder) {
-      return rootResponder.sendAction(action, target, this, this.get('pane'), this.get('actionContext'), this);
+      return rootResponder.sendAction(action, target, this, this.get('pane'), context, this);
     }
 
     return false;
