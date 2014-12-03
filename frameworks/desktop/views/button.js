@@ -57,7 +57,7 @@ SC.HOLD_BEHAVIOR = 'hold';
   @extends SC.Control
   @since SproutCore 1.0
 */
-SC.ButtonView = SC.View.extend(SC.Control,
+SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
 /** @scope SC.ButtonView.prototype */ {
 
   /**
@@ -70,6 +70,32 @@ SC.ButtonView = SC.View.extend(SC.Control,
     if (SC.FOCUS_ALL_CONTROLS) { return this.get('isEnabledInPane'); }
     return NO;
   }.property('isEnabledInPane'),
+
+  /**
+    The name of the method to call when the button is pressed.
+
+    This property is used in conjunction with the `target` property to execute a method when a
+    regular button is pressed. If you do not set a target, then pressing the button will cause a
+    search of the responder chain for a view that implements the action named. If you do set a
+    target, then the button will only try to call the method on that target.
+
+    The action method of the target should implement the following signature:
+
+        action: function (sender) {
+          // Return value is ignored by SC.ButtonView.
+        }
+
+    Therefore, if a target needs to know which button called its action, it should look to the
+    `sender` argument.
+
+    *NOTE:* This property is not relevant when the button is used in toggle mode. Toggle mode only
+    modifies the `value` of the button without triggering actions.
+
+    @type String
+    @default null
+    @see SC.ActionSupport
+  */
+  action: null,
 
   /**
     @type Array
@@ -92,6 +118,31 @@ SC.ButtonView = SC.View.extend(SC.Control,
     @default true
    */
   escapeHTML: true,
+
+  /**
+    The target to invoke the action on when the button is pressed.
+
+    If you set this target, the action will be called on the target object directly when the button
+    is clicked.  If you leave this property set to `null`, then the responder chain will be
+    searched for a view that implements the action when the button is pressed.
+
+    The action method of the target should implement the following signature:
+
+        action: function (sender) {
+          // Return value is ignored by SC.ButtonView.
+        }
+
+    Therefore, if a target needs to know which button called its action, it should look to the
+    `sender` argument.
+
+    *NOTE:* This property is not relevant when the button is used in toggle mode. Toggle mode only
+    modifies the `value` of the button without triggering actions.
+
+    @type Object
+    @default null
+    @see SC.ActionSupport
+  */
+  target: null,
 
   /**
     The theme to apply to the button. By default, a subtheme with the name of
@@ -298,41 +349,6 @@ SC.ButtonView = SC.View.extend(SC.Control,
   */
   isCancel: NO,
   isCancelBindingDefault: SC.Binding.oneWay().bool(),
-
-  /**
-    The name of the action you want triggered when the button is pressed.
-
-    This property is used in conjunction with the target property to execute
-    a method when a regular button is pressed.  These properties are not
-    relevant when the button is used in toggle mode.
-
-    If you do not set a target, then pressing a button will cause the
-    responder chain to search for a view that implements the action you name
-    here.  If you set a target, then the button will try to call the method
-    on the target itself.
-
-    For legacy support, you can also set the action property to a function.
-    Doing so will cause the function itself to be called when the button is
-    clicked.  It is generally better to use the target/action approach and
-    to implement your code in a controller of some type.
-
-    @type String
-    @default null
-  */
-  action: null,
-
-  /**
-    The target object to invoke the action on when the button is pressed.
-
-    If you set this target, the action will be called on the target object
-    directly when the button is clicked.  If you leave this property set to
-    null, then the button will search the responder chain for a view that
-    implements the action when the button is pressed instead.
-
-    @type Object
-    @default null
-  */
-  target: null,
 
   /*
     TODO When is this property ever changed? Is this redundant with
@@ -804,20 +820,16 @@ SC.ButtonView = SC.View.extend(SC.Control,
 
   /** @private */
   _runAction: function(evt) {
-    var action = this.get('action'),
-        target = this.get('target') || null,
-        rootResponder;
+    var action = this.get('action');
 
     if (action) {
+      // Legacy support for action functions.
       if (action && (SC.typeOf(action) === SC.T_FUNCTION)) {
         this.action(evt);
-        return;
+
+      // Use SC.ActionSupport.
       } else {
-        rootResponder = this.getPath('pane.rootResponder');
-        if (rootResponder) {
-          // newer action method + optional target syntax...
-          rootResponder.sendAction(action, target, this, this.get('pane'), null, this);
-        }
+        this.fireAction();
       }
     }
   },

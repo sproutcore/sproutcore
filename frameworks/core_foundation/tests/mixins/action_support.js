@@ -24,13 +24,7 @@
       });
 
       view = SC.View.create(SC.ActionSupport, {
-        action: null,
-        zomgAction: null,
-        pane: pane,
-
-        someEvent: function() {
-          return this.fireAction(this.get('zomgAction'));
-        }
+        pane: pane
       });
     },
 
@@ -41,10 +35,10 @@
 
 
   // ..........................................................
-  // No Parameters
+  // No Arguments
   //
 
-  test("no paramaters - only action set", function() {
+  test("no arguments - only action set", function() {
     var expectedAction = 'someAction';
 
     view.set('action', expectedAction);
@@ -53,11 +47,11 @@
     ok(sendActionSpy.wasCalledWith(expectedAction, null, view, pane, null, view), 'triggers the action');
   });
 
-  test("no paramaters - action and target set", function() {
+  test("no arguments - action and target set", function() {
     var expectedAction = 'someAction';
 
-    view.set('target', target);
     view.set('action', expectedAction);
+    view.set('target', target);
     view.fireAction();
 
     ok(sendActionSpy.wasCalledWith(expectedAction, target, view, pane, null, view), 'triggers the action');
@@ -65,40 +59,50 @@
 
 
   // ..........................................................
-  // Actions Parameter
+  // Arguments
   //
 
-  test("action parameter - only action set", function() {
+  test("context argument", function() {
     var expectedAction = 'someAction';
+    var context = { zomg: "context" };
 
-    view.set('zomgAction', expectedAction);
-    view.someEvent();
+    view.set('action', expectedAction);
+    view.fireAction(context);
+
+    ok(sendActionSpy.wasCalledWith(expectedAction, null, view, pane, context, view), 'triggers the action');
+  });
+
+
+  // ..........................................................
+  // Backwards-compatibility
+  //
+
+  test("backwards-compatibility actionContext property", function() {
+    var expectedAction = 'someAction';
+    var context = { zomg: "context" };
+
+    view.set('action', expectedAction);
+    view.set('actionContext', context);
+    view.fireAction();
+
+    ok(sendActionSpy.wasCalledWith(expectedAction, null, view, pane, context, view), 'triggers the action');
+  });
+
+  test("backwards-compatibility action argument", function() {
+    var expectedAction = 'someAction';
+    var context = { zomg: "context" };
+
+    view.fireAction(expectedAction);
 
     ok(sendActionSpy.wasCalledWith(expectedAction, null, view, pane, null, view), 'triggers the action');
   });
 
-  test("action parameter - action and target set", function() {
+  test("backwards-compatibility String context argument", function() {
     var expectedAction = 'someAction';
-
-    view.set('target', target);
-    view.set('zomgAction', expectedAction);
-    view.someEvent();
-
-    ok(sendActionSpy.wasCalledWith(expectedAction, target, view, pane, null, view), 'triggers the action');
-  });
-
-
-  // ..........................................................
-  // Action Context
-  //
-
-  test("context", function() {
-    var expectedAction = 'someAction';
-    var context = {zomg: "context"};
+    var context = "context";
 
     view.set('action', expectedAction);
-    view.set('actionContext', context)
-    view.fireAction();
+    view.fireAction(context);
 
     ok(sendActionSpy.wasCalledWith(expectedAction, null, view, pane, context, view), 'triggers the action');
   });

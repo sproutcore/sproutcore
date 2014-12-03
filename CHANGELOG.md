@@ -6,6 +6,12 @@ CHANGE LOG
 
 ### CHANGES & IMPROVEMENTS
 
+* The argument for the SC.ActionSupport mixin's main method `fireAction` has been changed from `action` to `context`. This allows calling-time specific information to be passed to the action + target on each call. To specify the `action` for `fireAction` to use, the existing `action` property should still be set. As part of this change, the documentation for SC.ActionSupport has been greatly extended and includes tips on supporting multiple actions or targets and for implementing actions on targets.
+  
+Along with this change, the `actionContext` property has also now been deprecated and will be removed in a future version of SproutCore.
+
+Note: this is a backwards-compatible change. If a String is passed to `fireAction` *and* no `action` property exists, the argument will be used as the `action` (i.e. no context will be sent). When this occurs, a Developer Warning will appear in the console. Likewise, a Developer Warning will appear if `actionContext` is set prior to a view being initialized.
+* SC.ButtonView and SC.CollectionView have both been altered slightly to use SC.ActionSupport. This has no affect on the use of action & target in these views.
 * Moved tracing code of SC.ResponderContext to debug-only. This prevents the debugging code from being included in production builds, thus reducing the overall deployed file size slightly.
 
 1.11.0.rc1

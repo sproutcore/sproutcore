@@ -56,7 +56,7 @@ SC.DRAG_REORDER = 0x0010;
   @extends SC.CollectionContent
   @since SproutCore 0.9
 */
-SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionContent,
+SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, SC.CollectionContent,
 /** @scope SC.CollectionView.prototype */ {
 
   /** @private */
@@ -472,13 +472,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     If you do not specify an action, then the collection view will also try to
     invoke the action named on the target item view.
 
-    Older versions of SproutCore expected the action property to contain an
-    actual function that would be run.  This format is still supported but is
-    deprecated for future use.  You should generally use the responder chain
-    to handle your action for you.
-
     @type String
     @default null
+    @see SC.ActionSupport
   */
   action: null,
 
@@ -489,9 +485,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
     optionally specify the target object you want the action to be sent to.
     This can be either an actual object or a property path that will resolve
     to an object at the time that the action is invoked.
-
-    This property is ignored if you use the deprecated approach of making the
-    action property a function.
 
     @type String|Object
     @default null
@@ -3240,17 +3233,17 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate, SC.CollectionConte
   */
   _cv_action: function(view, evt, context) {
     var action = this.get('action');
-    var target = this.get('target') || null;
 
     this._cv_actionTimer = null;
     if (action) {
-      // if the action is a function, just call it
-      if (SC.typeOf(action) === SC.T_FUNCTION) return this.action(view, evt) ;
 
-      // otherwise, use the new sendAction style
-      var pane = this.get('pane') ;
-      if (pane) {
-        pane.rootResponder.sendAction(action, target, this, pane, context);
+      // Legacy support for action functions.
+      if (action && (SC.typeOf(action) === SC.T_FUNCTION)) {
+        return this.action(view, evt);
+
+      // Use SC.ActionSupport.
+      } else {
+        return this.fireAction(context);
       }
 
     // if no action is specified, then trigger the support action,
