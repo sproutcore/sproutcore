@@ -14,6 +14,10 @@ Note: this is a backwards-compatible change. If a String is passed to `fireActio
 * SC.ButtonView and SC.CollectionView have both been altered slightly to use SC.ActionSupport. This has no affect on the use of action & target in these views.
 * Moved tracing code of SC.ResponderContext to debug-only. This prevents the debugging code from being included in production builds, thus reducing the overall deployed file size slightly.
 
+### BUG FIXES
+
+* Fixes a deficiency in SC.RootResponder.prototype.sendAction. It failed to pass the given context argument along to the target unless the target was a ResponderContext object (i.e. SC.Pane or SC.Application).
+
 1.11.0.rc1
 -----------
 

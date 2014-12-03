@@ -7,14 +7,18 @@
 /*global module test equals context ok same Q$ htmlbody Dummy */
 
 var r, r2, sender, pane, pane2, barView, fooView, defaultResponder;
-var keyPane, mainPane, globalResponder, globalResponderContext, actionSender ;
+var keyPane, mainPane, globalResponder, globalResponderContext, actionSender, actionContext;
 
 var CommonSetup = {
-  setup: function() { 
-    
-    actionSender = null ; // use for sendAction tests
-    var action = function(sender) { actionSender = sender; } ;
-    
+  setup: function() {
+
+    actionSender = null; // use for sendAction tests
+    actionContext = null;
+    var action = function (sender, context) {
+      actionSender = sender;
+      actionContext = context;
+    };
+
     sender = SC.Object.create();
     
     // default responder for each pane
@@ -257,6 +261,19 @@ test("no target, no explicit pane", function() {
 // sendAction()
 // 
 module("SC.RootResponder#sendAction", CommonSetup) ;
+
+test("if context given, passes context to action + target", function() {
+  var context = {};
+
+  // pane.firstResponder = defaultResponder;
+  r.sendAction('defaultAction', defaultResponder, sender, pane, context);
+  equals(actionSender, sender, 'action did invoke');
+  equals(actionContext, context, 'context was passed');
+
+  actionSender = null;
+  r.sendAction('imaginaryAction', null, sender, pane);
+  equals(actionSender, null, 'action did not invoke');
+});
 
 test("if pane passed, invokes action on pane if found", function() {
   pane.firstResponder = pane;
