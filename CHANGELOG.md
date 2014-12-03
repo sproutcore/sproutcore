@@ -1,7 +1,14 @@
 CHANGE LOG
 ==========
 
-1.11.0
+1.11.0.rc2
+-----------
+
+### CHANGES & IMPROVEMENTS
+
+* Moved tracing code of SC.ResponderContext to debug-only. This prevents the debugging code from being included in production builds, thus reducing the overall deployed file size slightly.
+
+1.11.0.rc1
 -----------
 
 ### NEW FEATURES

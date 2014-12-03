@@ -575,10 +575,14 @@ SC.RootResponder = SC.Object.extend(
   sendAction: function( action, target, sender, pane, context, firstResponder) {
     target = this.targetForAction(action, target, sender, pane, firstResponder) ;
 
-    // HACK: If the target is a ResponderContext, forward the action.
-    if (target && target.isResponderContext) {
-      return !!target.sendAction(action, sender, context, firstResponder);
-    } else return target && target.tryToPerform(action, sender);
+    if (target) {
+      // HACK: If the target is a ResponderContext, forward the action.
+      if (target.isResponderContext) {
+        return !!target.sendAction(action, sender, context, firstResponder);
+      } else {
+        return target.tryToPerform(action, sender, context);
+      }
+    }
   },
 
   _responderFor: function(target, methodName, firstResponder) {
@@ -634,11 +638,13 @@ SC.RootResponder = SC.Object.extend(
 
     // 2. an explicit target was passed...
     if (target) {
+      // Normalize String targets to Objects
       if (SC.typeOf(target) === SC.T_STRING) {
-        target =  SC.objectForPropertyPath(target) ||
-                  SC.objectForPropertyPath(target, sender);
+        target = SC.objectForPropertyPath(target) ||
+                 SC.objectForPropertyPath(target, sender);
       }
 
+      // Ensure that the target responds to the method.
       if (target && !target.isResponderContext) {
         if (target.respondsTo && !target.respondsTo(methodName)) {
           target = null ;
