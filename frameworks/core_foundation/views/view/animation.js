@@ -189,7 +189,7 @@ SC.View.reopen(
         );
 
     The animate functions are intelligent in how they apply animations and
-    calling animate in a manner that would effect an ongoing animation (i.e.
+    calling animate in a manner that would affect an ongoing animation (i.e.
     animating left again while it is still in transition) will result in
     the ongoing animation callback firing immediately with isCancelled set to
     true and adjusting the transition to accomodate the new settings.
