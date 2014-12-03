@@ -43,9 +43,6 @@ SC.CSS_TRANSFORM_MAP = {
 SC.View.LayoutStyleCalculator = {
 
   /** @private Shared object used to avoid continually initializing/destroying objects. */
-  _SC_STYLE_MAP: null,
-
-  /** @private Shared object used to avoid continually initializing/destroying objects. */
   _SC_STATE_MAP: null,
 
   /** @private Shared object used to avoid continually initializing/destroying objects. */
@@ -60,15 +57,15 @@ SC.View.LayoutStyleCalculator = {
   },
 
   /** @private */
-  _prepareStyle: function (layout) {
+  _prepareStyle: function (style, layout) {
     /*jshint eqnull:true */
     // It's important to provide null defaults to reset any previous style when
     // this is applied.
-    var commonBorder = this._valueOrNull(layout.border),
-      style = this._SC_STYLE_MAP; // Shared object used to avoid continually initializing/destroying objects.
+    var commonBorder = this._valueOrNull(layout.border);
 
-    // Create the object once. Note: This is a shared object; all properties must be overwritten each time.
-    if (!style) { style = this._SC_STYLE_MAP = {}; }
+    // Reset properties that might not be set from style to style.
+    style.marginLeft = null;
+    style.marginTop = null;
 
     // Position and size.
     style.bottom = layout.bottom;
@@ -79,8 +76,6 @@ SC.View.LayoutStyleCalculator = {
     style.centerY = layout.centerY;
     style.height = layout.height;
     style.width = layout.width;
-    style.marginLeft = null;
-    style.marginTop = null;
 
     // Borders.
     style.borderTopWidth = layout.borderTop !== undefined ? layout.borderTop : commonBorder;
@@ -144,17 +139,10 @@ SC.View.LayoutStyleCalculator = {
 
     // Reset shared object!
     this._SC_TRANSFORMS_ARRAY.length = 0;
-
-    return style;
   },
 
   /** @private */
-  _prepareState: function (style) {
-    var state = this._SC_STATE_MAP; // Shared object used to avoid continually initializing/destroying objects.
-
-    // Create the object once. Note: This is a shared object; all properties must be overwritten each time.
-    if (!state) { state = this._SC_STATE_MAP = {}; }
-
+  _prepareState: function (state, style) {
     /*jshint eqnull:true */
     state.hasBottom = (style.bottom != null);
     state.hasRight = (style.right != null);
@@ -166,8 +154,6 @@ SC.View.LayoutStyleCalculator = {
     state.hasWidth = (style.width != null);
     state.hasMaxWidth = (style.maxWidth != null);
     state.hasMaxHeight = (style.maxHeight != null);
-
-    return state;
   },
 
 
@@ -308,12 +294,11 @@ SC.View.LayoutStyleCalculator = {
 
     @return {Object} Layout style hash.
   */
-  calculate: function (view) {
+  calculate: function (view, style) {
     var layout = view.get('layout'),
       animations = view._activeAnimations,
-      state,
-      useStaticLayout = view.get('useStaticLayout'),
-      style;
+      state = this._SC_STATE_MAP, // Shared object used to avoid continually initializing/destroying objects.
+      useStaticLayout = view.get('useStaticLayout');
 
     // Fast path!
     // If the developer sets useStaticLayout and doesn't provide a unique `layout` property, we
@@ -322,8 +307,14 @@ SC.View.LayoutStyleCalculator = {
     // use it.
     if (useStaticLayout && layout === SC.View.prototype.layout) { return {}; }
 
-    style = this._prepareStyle(layout);
-    state = this._prepareState(style);
+    // Reset and prep the style object.
+    this._prepareStyle(style, layout);
+
+    // Create the object once. Note: This is a shared object; all properties must be overwritten each time.
+    if (!state) { state = this._SC_STATE_MAP = {}; }
+
+    // Reset and prep the state object.
+    this._prepareState(state, style);
 
     // handle invalid use of auto in absolute layouts
     if (!useStaticLayout) {
@@ -470,6 +461,9 @@ SC.View.LayoutStyleCalculator = {
 SC.View.reopen(
   /** @scope SC.View.prototype */ {
 
+  /** @private Shared object used to avoid continually initializing/destroying objects. */
+  _SC_STYLE_MAP: null,
+
   /**
     layoutStyle describes the current styles to be written to your element
     based on the layout you defined.  Both layoutStyle and frame reset when
@@ -481,7 +475,12 @@ SC.View.reopen(
     @readOnly
   */
   layoutStyle: function () {
-    return SC.View.LayoutStyleCalculator.calculate(this);
+    var style = this._SC_STYLE_MAP; // Shared object used to avoid continually initializing/destroying objects.
+
+    // Create the object once. Note: This is a shared object; all properties must be overwritten each time.
+    if (!style) { style = this._SC_STYLE_MAP = {}; }
+
+    return SC.View.LayoutStyleCalculator.calculate(this, style);
 
   // 'hasAcceleratedLayer' is dependent on 'layout' so we don't need 'layout' to be a dependency here
   }.property('hasAcceleratedLayer', 'useStaticLayout').cacheable()
