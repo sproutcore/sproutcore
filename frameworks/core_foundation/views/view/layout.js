@@ -543,13 +543,16 @@ SC.View.reopen(
       // Add the original, unscaled height and width.
       frame.originalWidth = originalWidth;
       frame.originalHeight = originalHeight;
+
       return frame;
     }
+
     // Get the scale and transform origins, if not provided. (Note inlining of SC.none for performance)
     /*jshint eqnull:true*/
     scale = scale == null ? layout.scale : scale;
     oX = oX == null ? layout.transformOriginX : oX;
     oY = oY == null ? layout.transformOriginY : oY;
+
     // Get defaults.
     if (scale == null) scale = 1;
     if (oX == null) oX = 0.5;
@@ -559,6 +562,7 @@ SC.View.reopen(
     if (scale !== 1) {
       frame = SC.scaleRect(frame, scale, oX, oY);
     }
+
     // Regardless, attach the scale numbers for reference.
     frame.scale = scale;
     frame.transformOriginX = oX;
@@ -797,8 +801,8 @@ SC.View.reopen(
     if (!SC.none(currentLayout.rotate)) {
       if (SC.none(currentLayout.rotateZ) && SC.platform.get('supportsCSS3DTransforms')) {
         currentLayout.rotateZ = currentLayout.rotate;
-      delete currentLayout.rotate;
-    }
+        delete currentLayout.rotate;
+      }
     }
 
     // Optimize notifications depending on if we resized or just moved.

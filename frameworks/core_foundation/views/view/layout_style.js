@@ -11,6 +11,7 @@ sc_require('views/view/animation');
 SC.CSS_TRANSFORM_NAMES = ['rotateX', 'rotateY', 'rotateZ', 'scale'];
 
 SC.CSS_TRANSFORM_MAP = {
+
   rotate: function (val) {
     if (SC.typeOf(val) === SC.T_NUMBER) { val += 'deg'; }
     return 'rotate(' + val + ')';
@@ -41,6 +42,18 @@ SC.CSS_TRANSFORM_MAP = {
 /** @private */
 SC.View.LayoutStyleCalculator = {
 
+  /** @private Shared object used to avoid continually initializing/destroying objects. */
+  _SC_STYLE_MAP: null,
+
+  /** @private Shared object used to avoid continually initializing/destroying objects. */
+  _SC_STATE_MAP: null,
+
+  /** @private Shared object used to avoid continually initializing/destroying objects. */
+  _SC_TRANSFORMS_ARRAY: null,
+
+  /** @private Shared object used to avoid continually initializing/destroying objects. */
+  _SC_TRANSITIONS_ARRAY: null,
+
   /** @private If the value is undefined, make it null. */
   _valueOrNull: function (value) {
     return value === undefined ? null : value;
@@ -52,10 +65,10 @@ SC.View.LayoutStyleCalculator = {
     // It's important to provide null defaults to reset any previous style when
     // this is applied.
     var commonBorder = this._valueOrNull(layout.border),
-      style = {
-        marginLeft: null,
-        marginTop: null
-      };
+      style = this._SC_STYLE_MAP; // Shared object used to avoid continually initializing/destroying objects.
+
+    // Create the object once. Note: This is a shared object; all properties must be overwritten each time.
+    if (!style) { style = this._SC_STYLE_MAP = {}; }
 
     // Position and size.
     style.bottom = layout.bottom;
@@ -66,6 +79,8 @@ SC.View.LayoutStyleCalculator = {
     style.centerY = layout.centerY;
     style.height = layout.height;
     style.width = layout.width;
+    style.marginLeft = null;
+    style.marginTop = null;
 
     // Borders.
     style.borderTopWidth = layout.borderTop !== undefined ? layout.borderTop : commonBorder;
@@ -88,8 +103,11 @@ SC.View.LayoutStyleCalculator = {
     // Handle transforms (including reset).
     if (SC.platform.supportsCSSTransforms) {
       var transformAttribute = SC.browser.experimentalStyleNameFor('transform'),
-        transforms = [],
+        transforms = this._SC_TRANSFORMS_ARRAY, // Shared object used to avoid continually initializing/destroying objects.
         transformMap = SC.CSS_TRANSFORM_MAP;
+
+      // Create the array once. Note: This is a shared array; it must be set to 0 length each time.
+      if (!transforms) { transforms = this._SC_TRANSFORMS_ARRAY = []; }
 
       // The order of the transforms is important so that we can decompose them
       // from the transformation matrix later if necessary.
@@ -103,6 +121,7 @@ SC.View.LayoutStyleCalculator = {
         }
       }
 
+      // Set or reset the transform style.
       style[transformAttribute] = transforms.length > 0 ? transforms.join(' ') : null;
 
       // Transform origin.
@@ -123,24 +142,20 @@ SC.View.LayoutStyleCalculator = {
       style[SC.browser.experimentalStyleNameFor('transition')] = null;
     }
 
-    // for ie, we will NOT use alpha. It is just a source of pain.
-    // a) it will not affect absolutely positioned child elements, and is therefore
-    //    useless for most SC purposes.
-    //
-    // b) It completely breaks semitransparent background images (PNGs with opacity)
-    //
-    // If users want to use alpha, they should do it on their own.
-
-    // if(!SC.none(layout.opacity)) style.filter = "alpha(opacity=%@)".fmt(layout.opacity * 100);
+    // Reset shared object!
+    this._SC_TRANSFORMS_ARRAY.length = 0;
 
     return style;
   },
 
   /** @private */
   _prepareState: function (style) {
-    /*jshint eqnull:true */
-    var state = {};
+    var state = this._SC_STATE_MAP; // Shared object used to avoid continually initializing/destroying objects.
 
+    // Create the object once. Note: This is a shared object; all properties must be overwritten each time.
+    if (!state) { state = this._SC_STATE_MAP = {}; }
+
+    /*jshint eqnull:true */
     state.hasBottom = (style.bottom != null);
     state.hasRight = (style.right != null);
     state.hasLeft = (style.left != null);
@@ -277,7 +292,7 @@ SC.View.LayoutStyleCalculator = {
   },
 
   /** @private */
-  // return "auto" for "auto", null for null, converts 0.XY into "XY%".
+  // return "auto" for "auto", null for null, converts 0.X into "X%".
   // otherwise returns the original number, rounded down
   _cssNumber: function (val) {
     /*jshint eqnull:true*/
@@ -389,7 +404,10 @@ SC.View.LayoutStyleCalculator = {
     // Handle animations
     if (animations) {
       if (SC.platform.supportsCSSTransitions) {
-        var transitions = [];
+        var transitions = this._SC_TRANSITIONS_ARRAY; // Shared object used to avoid continually initializing/destroying objects.
+
+        // Create the array once. Note: This is a shared array; it must be set to 0 length each time.
+        if (!transitions) { transitions = this._SC_TRANSITIONS_ARRAY = []; }
 
         for (key in animations) {
           var animation = animations[key],
@@ -436,6 +454,9 @@ SC.View.LayoutStyleCalculator = {
         }
 
         style[SC.browser.experimentalStyleNameFor('transition')] = transitions.join(", ");
+
+        // Reset shared object!
+        this._SC_TRANSITIONS_ARRAY.length = 0;
       } else {
         // TODO: Do it the JS way
       }
@@ -461,6 +482,8 @@ SC.View.reopen(
   */
   layoutStyle: function () {
     return SC.View.LayoutStyleCalculator.calculate(this);
-    // 'hasAcceleratedLayer' is dependent on 'layout' so we don't need 'layout' to be a dependency here
+
+  // 'hasAcceleratedLayer' is dependent on 'layout' so we don't need 'layout' to be a dependency here
   }.property('hasAcceleratedLayer', 'useStaticLayout').cacheable()
+
 });

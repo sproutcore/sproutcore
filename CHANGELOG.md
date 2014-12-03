@@ -6,6 +6,7 @@ CHANGE LOG
 
 ### CHANGES & IMPROVEMENTS
 
+* The core methods used in SC.View layout have been slightly optimized to avoid memory re-allocation. Since SC.View layout code may run repeatedly in short order (e.g. re-positioning during scrolling), we need to ensure that no new objects are created each time. The reason for this is so that we're not quickly adding hundreds of small objects to the garbage heap that will need to be collected. Since we have no control over when garbage collection occurs, the best we can do is try to avoid it and to ensure that it completes as quickly as possible.
 * The argument for the SC.ActionSupport mixin's main method `fireAction` has been changed from `action` to `context`. This allows calling-time specific information to be passed to the action + target on each call. To specify the `action` for `fireAction` to use, the existing `action` property should still be set. As part of this change, the documentation for SC.ActionSupport has been greatly extended and includes tips on supporting multiple actions or targets and for implementing actions on targets.
   
 Along with this change, the `actionContext` property has also now been deprecated and will be removed in a future version of SproutCore.
