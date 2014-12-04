@@ -443,10 +443,10 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     Note that like other parts of this library, the handle function does not
     support namespaces.
 
-    @param event {Event} the event to handle
+    @param event {DOMEvent} the event to handle
     @returns {Boolean}
   */
-  handle: function(event) {
+  handle: function (event) {
 
     // ignore events triggered after window is unloaded or if double-called
     // from within a trigger.
@@ -652,13 +652,9 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
         // there is currently a hack in request , but it needs to fixed here.
         elem.attachEvent("on" + eventType, listener);
       }
-      //
-      // else {
-      //         elem.onreadystatechange = listener;
-      //       }
     }
 
-    elem = special = listener = null ; // avoid memory leak
+    elem = special = listener = null; // avoid memory leak
   },
 
   /** @private
@@ -698,7 +694,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
   // implement preventDefault() in a cross platform way
 
   /** @private Take an incoming event and convert it to a normalized event. */
-  normalizeEvent: function(event) {
+  normalizeEvent: function (event) {
     var ret;
 
     // Create the cache the first time.
@@ -732,7 +728,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
   // TODO: Remove this needless copy.
   _props: ['altKey', 'attrChange', 'attrName', 'bubbles', 'button', 'cancelable', 'charCode', 'clientX', 'clientY', 'ctrlKey', 'currentTarget', 'data', 'detail', 'fromElement', 'handler', 'keyCode', 'metaKey', 'newValue', 'originalTarget', 'pageX', 'pageY', 'prevValue', 'relatedNode', 'relatedTarget', 'screenX', 'screenY', 'shiftKey', 'srcElement', 'target', 'timeStamp', 'toElement', 'type', 'view', 'which', 'touches', 'targetTouches', 'changedTouches', 'animationName', 'elapsedTime', 'dataTransfer']
 
-}) ;
+});
 
 SC.Event.prototype = {
 
@@ -831,32 +827,75 @@ SC.Event.prototype = {
       this.which = ((this.button & 1) ? 1 : ((this.button & 2) ? 3 : ( (this.button & 4) ? 2 : 0 ) ));
     }
 
-    // Normalize wheel delta values for mousewheel events
+    // Normalize wheel delta values for mousewheel events.
+    /*
+      Taken from https://developer.mozilla.org/en-US/docs/Web/Events/mousewheel
+      IE and Opera (Presto) only support wheelDelta attribute and do not support horizontal scroll.
+
+      The wheelDeltaX attribute value indicates the wheelDelta attribute value along the horizontal axis. When a user operates the device for scrolling to right, the value is negative. Otherwise, i.e., if it's to left, the value is positive.
+
+      The wheelDeltaY attribute value indicates the wheelDelta attribute value along the vertical axis. The sign of the value is the same as the wheelDelta attribute value.
+
+      IE
+
+      The value is the same as the delta value of WM_MOUSEWHEEL or WM_MOUSEHWHEEL. It means that if the mouse wheel doesn't support high resolution scroll, the value is 120 per notch. The value isn't changed even if the scroll amount of system settings is page scroll.
+
+      ## Chrome
+
+      On Windows, the value is the same as the delta value of WM_MOUSEWHEEL or WM_MOUSEHWHEEL. And also, the value isn't changed even if the scroll amount of system settings is page scroll, i.e., the value is the same as IE on Windows.
+
+      On Linux, the value is 120 or -120 per native wheel event. This makes the same behavior as IE and Chrome for Windows.
+
+      On Mac, the value is complicated. The value is changed if the device that causes the native wheel event supports continuous scroll.
+
+      If the device supports continuous scroll (e.g., trackpad of MacBook or mouse wheel which can be turned smoothly), the value is computed from accelerated scroll amount. In this case, the value is the same as Safari.
+
+      If the device does not support continuous scroll (typically, old mouse wheel which cannot be turned smoothly), the value is computed from non-accelerated scroll amount (120 per notch). In this case, the value is different from Safari.
+
+      This difference makes a serious issue for web application developers. That is, web developers cannot know if mousewheel event is caused by which device.
+
+      See WebInputEventFactory::mouseWheelEvent of the Chromium's source code for the detail.
+
+      ## Safari
+
+      The value is always computed from accelerated scroll amount. This is really different from other browsers except Chrome with continuous scroll supported device.
+
+      Note: tested with the Windows package, the earliest available version was Safari 3.0 from 2007. It could be that earlier versions (on Mac) support the properties too.
+
+      ## Opera (Presto)
+
+      The value is always the detail attribute value ✕ 40.
+
+      On Windows, since the detail attribute value is computed from actual scroll amount, the value is different from other browsers except the scroll amount per notch is 3 lines in system settings or a page.
+
+      On Linux, the value is 80 or -80 per native wheel event. This is different from other browsers.
+
+      On Mac, the detail attribute value is computed from accelerated scroll amout of native event. The value is usually much bigger than Safari's or Chrome's value.
+    */
     if (this.type === 'mousewheel' || this.type === 'DOMMouseScroll' || this.type === 'MozMousePixelScroll') {
       var deltaMultiplier = SC.Event.MOUSE_WHEEL_MULTIPLIER;
 
       // normalize wheelDelta, wheelDeltaX, & wheelDeltaY for Safari
       if (SC.browser.isWebkit && originalEvent.wheelDelta !== undefined) {
-        this.wheelDelta = 0-(originalEvent.wheelDeltaY || originalEvent.wheelDeltaX);
-        this.wheelDeltaY = 0-(originalEvent.wheelDeltaY||0);
-        this.wheelDeltaX = 0-(originalEvent.wheelDeltaX||0);
+        this.wheelDelta = 0 - (originalEvent.wheelDeltaY || originalEvent.wheelDeltaX);
+        this.wheelDeltaY = 0 - (originalEvent.wheelDeltaY || 0);
+        this.wheelDeltaX = 0 - (originalEvent.wheelDeltaX || 0);
 
       // normalize wheelDelta for Firefox (all Mozilla browsers)
-      // note that we multiple the delta on FF to make it's acceleration more
-      // natural.
+      // note that we multiple the delta on FF to make it's acceleration more natural.
       } else if (!SC.none(originalEvent.detail) && SC.browser.isMozilla) {
         if (originalEvent.axis && (originalEvent.axis === originalEvent.HORIZONTAL_AXIS)) {
           this.wheelDeltaX = originalEvent.detail;
-          this.wheelDeltaY = this.wheelDelta = 0;
+          this.wheelDelta = this.wheelDeltaY = 0;
         } else {
-          this.wheelDeltaY = this.wheelDelta = originalEvent.detail ;
-          this.wheelDeltaX = 0 ;
+          this.wheelDelta = this.wheelDeltaY = originalEvent.detail;
+          this.wheelDeltaX = 0;
         }
 
       // handle all other legacy browser
       } else {
-        this.wheelDelta = this.wheelDeltaY = SC.browser.isIE || SC.browser.isOpera ? 0-originalEvent.wheelDelta : originalEvent.wheelDelta ;
-        this.wheelDeltaX = 0 ;
+        this.wheelDelta = this.wheelDeltaY = SC.browser.isIE || SC.browser.isOpera ? 0 - originalEvent.wheelDelta : originalEvent.wheelDelta;
+        this.wheelDeltaX = 0;
       }
 
       this.wheelDelta *= deltaMultiplier;
