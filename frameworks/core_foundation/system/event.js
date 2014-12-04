@@ -446,7 +446,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     @param event {Event} the event to handle
     @returns {Boolean}
   */
-  handle: function(event, args) {
+  handle: function(event) {
 
     // ignore events triggered after window is unloaded or if double-called
     // from within a trigger.
@@ -466,13 +466,6 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
       // normalize event across browsers.  The new event will actually wrap the real event with a normalized API.
       event = SC.Event.normalizeEvent(event || window.event);
 
-      // Send the event to the handler as the first argument (include any other given arguments).
-      if (args) {
-        args.unshift(event);
-      } else {
-        args = [event];
-      }
-
       // invoke all handlers
       for (var key in handlers) {
         var handler = handlers[key];
@@ -484,7 +477,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
         event.data = event.context = handler[2];
 
         target = handler[0] || this;
-        ret = method.apply( target, args );
+        ret = method.call(target, event);
 
         if (val !== false) val = ret;
 
@@ -647,14 +640,8 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
       // Either retrieve the previously cached listener or cache a new one.
       listener = SC.data(elem, "listener") || SC.data(elem, "listener",
-        function handle_event() {
-          // Fast copy.
-          var args = new Array(arguments.length);
-          for (var i = 0, len = args.length; i < len; i++) {
-            args[i] = arguments[i];
-          }
-
-          return SC.Event.handle.apply(SC.Event._elements[guid], args);
+        function handle_event (event) {
+          return SC.Event.handle.call(SC.Event._elements[guid], event);
         });
 
       // Bind the global event handler to the element
