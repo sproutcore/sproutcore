@@ -19,6 +19,7 @@ Note: this is a backwards-compatible change. If a String is passed to `fireActio
 * Optimized use of the `arguments` object in several locations in order to avoid its instantiation. There were several occurrences of code copying the `arguments` object into an Array using `slice`; this is very costly for performance as it causes the browser to instantiate the `arguments` object in order to do the slice. Instead, these occurrences were converted to either access the arguments by index without a copy or to do a fast copy without instantiation. See http://jsperf.com/closure-with-arguments for an example of the performance difference this can make. Using slice is anywhere from ~50% to ~90% slower depending on the browser.  
   
 Affected: SC.Request, SC.WebSocket, SC.DelegateSupport, SC.Color, SC.Event, SC.Store, SC.Module, SC.Object, SC.Function, SC.State, SC.Statechart
+* Named two anonymous functions: send_event & handle_event in order to aid in debugging and profiling of the core framework.
 
 ### BUG FIXES
 

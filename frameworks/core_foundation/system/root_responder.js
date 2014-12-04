@@ -723,7 +723,7 @@ SC.RootResponder = SC.Object.extend(
   sendEvent: function(action, evt, target) {
     var pane, ret ;
 
-    SC.run(function() {
+    SC.run(function send_event() {
       // get the target pane
       if (target) pane = target.get('pane') ;
       else pane = this.get('menuPane') || this.get('keyPane') || this.get('mainPane') ;
@@ -854,7 +854,6 @@ SC.RootResponder = SC.Object.extend(
           var responder = this ;
 
           document.body['on' + keyName] = function(e) {
-            // return method.call(responder, SC.Event.normalizeEvent(e));
             return method.call(responder, SC.Event.normalizeEvent(event || window.event)); // this is IE :(
           };
 
