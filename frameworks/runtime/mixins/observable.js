@@ -1471,7 +1471,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     seenValues = valueCache[context] || {};
     seenRevisions = revisionCache[context] || {};
 
-    // prepare too loop!
+    // prepare to loop!
     ret = false;
     currentRevision = this._kvo_revision;
     idx = arguments.length;

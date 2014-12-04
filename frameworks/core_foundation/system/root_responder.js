@@ -1554,7 +1554,9 @@ SC.RootResponder = SC.Object.extend(
       //@endif
 
       // loop through changed touches, calling touchStart, etc.
-      var idx, touches = evt.changedTouches, len = touches.length,
+      var changedTouches = evt.changedTouches,
+          len = changedTouches.length,
+          idx,
           touch, touchEntry;
 
       // prepare event for touch mapping.
@@ -1562,7 +1564,7 @@ SC.RootResponder = SC.Object.extend(
 
       // Loop through each touch we received in this event
       for (idx = 0; idx < len; idx++) {
-        touch = touches[idx];
+        touch = changedTouches[idx];
 
         // Create an SC.Touch instance for every touch.
         touchEntry = SC.Touch.create(touch, this);
