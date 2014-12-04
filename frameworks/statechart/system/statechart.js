@@ -570,7 +570,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     if (!(SC.kindOf(rootState, SC.State) && rootState.isClass)) {
       msg = "Unable to initialize statechart. Root state must be a state class";
       this.statechartLogError(msg);
-      throw msg;
+      SC.$throw(msg);
     }
 
     rootState = this.createRootState(rootState, {
@@ -584,7 +584,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     if (SC.kindOf(rootState.get('initialSubstate'), SC.EmptyState)) {
       msg = "Unable to initialize statechart. Root state must have an initial substate explicitly defined";
       this.statechartLogError(msg);
-      throw msg;
+      SC.$throw(msg);
     }
 
     if (!SC.empty(this.get('initialState'))) {

@@ -121,9 +121,9 @@ test("Test that an exception is thrown when calling adjust and setting to auto",
     parent.adjust('width', 'auto').adjust('height', 'auto');
     parent.get('layoutStyle');
   }catch(e){
-    error=e;
+    error=true;
   }
-  equals(SC.T_ERROR,SC.typeOf(error),'Layout style functions should throw an error if width/height are set to auto but staticLayout is not enabled' + error );
+  ok(error,'Layout style functions should throw an error if width/height are set to auto but staticLayout is not enabled' + error );
 });
 
 test("Test SC.StaticLayout frame support", function() {

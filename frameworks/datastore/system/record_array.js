@@ -272,7 +272,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
     if (!storeKeys) throw new Error("Unable to edit an SC.RecordArray that does not have its storeKeys property set.");
 
-    if (!this.get('isEditable')) throw SC.RecordArray.NOT_EDITABLE;
+    if (!this.get('isEditable')) SC.RecordArray.NOT_EDITABLE.$throw();
 
     // map to store keys
     keys = [] ;
@@ -814,7 +814,7 @@ SC.RecordArray.mixin(/** @scope SC.RecordArray.prototype */{
 
     @type SC.Error
   */
-  NOT_EDITABLE: SC.Error.desc("SC.RecordArray is not editable"),
+  NOT_EDITABLE: SC.$error("SC.RecordArray is not editable"),
 
   /**
     Number of milliseconds to allow a query matching to run for. If this number
