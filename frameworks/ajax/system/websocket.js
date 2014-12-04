@@ -209,10 +209,14 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate, {
       target = event;
       event = 'onmessage';
     } else {
-      // Fast arguments access.
-      // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
-      args = new Array(arguments.length - 3); //  SC.A(arguments).slice(3)
-      for (var i = 0, len = args.length; i < len; i++) { args[i] = arguments[i + 3]; }
+      if (arguments.length > 3) {
+        // Fast arguments access.
+        // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
+        args = new Array(arguments.length - 3); //  SC.A(arguments).slice(3)
+        for (var i = 0, len = args.length; i < len; i++) { args[i] = arguments[i + 3]; }
+      } else {
+        args = [];
+      }
     }
 
     var listeners = this.get('listeners');
