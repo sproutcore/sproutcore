@@ -490,7 +490,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
       }
 
       // Clean up the cached normalized SC.Event so that it's not holding onto extra memory.
-      if (!event.originalEvent.simulated) { event._sc_clearNormalizedEvent(); }
+      if (event.originalEvent && !event.originalEvent.simulated) { event._sc_clearNormalizedEvent(); }
     }
 
     return val;
