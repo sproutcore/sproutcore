@@ -338,9 +338,9 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     if (value === undefined && SC.typeOf(key) === SC.T_HASH) {
       var hash = key;
 
-      for (key in hash) {
-        if (!hash.hasOwnProperty(key)) continue;
-        this.set(key, hash[key]);
+      for (var hashKey in hash) {
+        if (!hash.hasOwnProperty(hashKey)) continue;
+        this.set(hashKey, hash[hashKey]);
       }
 
       return this;
@@ -1205,10 +1205,13 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
         changes.add('*');
         changes.addEach(this._kvo_for('_kvo_observed_keys', SC.CoreSet));
 
-      } else if (key) changes.add(key);
+      } else if (key) {
+        changes.add(key);
+      }
 
       // Now go through the set and add all dependent keys...
-      if (dependents = this._kvo_dependents) {
+      dependents = this._kvo_dependents;
+      if (dependents) {
 
         // NOTE: each time we loop, we check the changes length, this
         // way any dependent keys added to the set will also be evaluated...
