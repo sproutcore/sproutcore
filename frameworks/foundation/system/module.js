@@ -574,7 +574,6 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
     var module = SC.MODULE_INFO[moduleName];
     var log    = SC.LOG_MODULE_LOADING;
     var dependenciesMet;
-    var callbacks, targets;
 
     if (log) SC.debug("SC.Module: Module '%@' finished loading.", moduleName);
 
@@ -704,7 +703,7 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
     //Yummy variables.
     var methods = this.get('methodsForSuspend'),
         calls = this._bufferedCalls,
-        key, i, method, call;
+        key, i, call;
 
     //Restore the original methods to where they belong for normal functionality.
     for (i = 0; (key = methods[i]); i++) this[key] = this["__saved_" + key + "__"];

@@ -323,9 +323,6 @@ SC.State = SC.Object.extend(
         matchedInitialSubstate = NO,
         initialSubstate = this.get('initialSubstate'),
         substatesAreConcurrent = this.get('substatesAreConcurrent'),
-        statechart = this.get('statechart'),
-        i = 0,
-        len = 0,
         valueIsFunc = NO,
         historyState = null;
 
@@ -1324,7 +1321,7 @@ SC.State = SC.Object.extend(
     statechart framework use.
   */
   _configureAllStateObserveHandlers: function(action) {
-    var key, values, value, dotIndex, path, observer, i, root;
+    var key, values, dotIndex, path, observer, i, root;
 
     for (key in this._registeredStateObserveHandlers) {
       values = this._registeredStateObserveHandlers[key];
