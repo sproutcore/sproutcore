@@ -239,15 +239,23 @@ SC._enhance = function (originalFunction, enhancement) {
   return function () {
     // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
     // TODO: Add macro to build tools for this.
-    var originalArgs = new Array(arguments.length);
     var enhancedArgs = new Array(arguments.length + 1); // Array.prototype.slice.call(arguments)
-    for (var i = 0, len = originalArgs.length; i < len; i++) {
-      originalArgs[i] = enhancedArgs[i + 1] = arguments[i];
+    for (var i = 1, len = enhancedArgs.length; i < len; i++) {
+      enhancedArgs[i] = arguments[i - 1];
     }
 
     // Add the original function as the first argument passed to the enhancement.
     var self = this;
-    enhancedArgs[0] = function () { return originalFunction.apply(self, originalArgs); }; // args.unshift(function ...
+    enhancedArgs[0] = function () {
+      // Fast copy.
+      var originalArgs = new Array(arguments.length);
+      for (var i = 0, len = originalArgs.length; i < len; i++) {
+        originalArgs[i] = arguments[i];
+      }
+
+      return originalFunction.apply(self, originalArgs);
+    }; // args.unshift(function ...
+
     return enhancement.apply(this, enhancedArgs);
   };
 
