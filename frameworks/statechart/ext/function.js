@@ -117,6 +117,11 @@ Function.prototype.handleEvents = function() {
 */
 Function.prototype.stateObserves = function() {
   this.isStateObserveHandler = YES;
-  this.args = SC.A(arguments);
+
+  // Fast arguments access.
+  // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
+  this.args = new Array(arguments.length); // SC.A(arguments)
+  for (var i = 0, len = this.args.length; i < len; i++) { this.args[i] = arguments[i]; }
+
   return this;
 };

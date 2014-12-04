@@ -641,16 +641,22 @@ SC.Color.mixin(
 
   /** @private Overrides create to support creation with {a, r, g, b} hash. */
   create: function() {
-    var args = SC.A(arguments),
-        len = args.length,
-        vals = {},
+    var vals = {},
         hasVals = NO,
         keys = ['a', 'r', 'g', 'b'],
+        args, len,
         hash, i, k, key;
+
+
+    // Fast arguments access.
+    // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
+    args = new Array(arguments.length); // SC.A(arguments)
+    len = args.length;
+
     // Loop through all arguments. If any of them contain numeric a, r, g or b arguments,
     // clone the hash and move the value from (e.g.) a to _a.
     for (i = 0; i < len; i++) {
-      hash = args[i];
+      hash = arguments[i];
       if (SC.typeOf(hash.a) === SC.T_NUMBER
         || SC.typeOf(hash.r) === SC.T_NUMBER
         || SC.typeOf(hash.g) === SC.T_NUMBER

@@ -1577,11 +1577,10 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     @returns {Array} Values of property keys.
   */
   getEach: function () {
-    var keys = SC.A(arguments),
-      ret = [], idx, idxLen;
+    var ret = [], idx, idxLen;
 
-    for (idx = 0, idxLen = keys.length; idx < idxLen; idx++) {
-      ret[ret.length] = this.getPath(keys[idx]);
+    for (idx = 0, idxLen = arguments.length; idx < idxLen; idx++) {
+      ret[ret.length] = this.getPath(arguments[idx]);
     }
     return ret;
   },

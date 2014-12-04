@@ -534,7 +534,12 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
     // normalize event across browsers.  The new event will actually wrap the
     // real event with a normalized API.
-    args = SC.A(arguments);
+
+    // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
+    // TODO: Add macro to build tools for this.
+    args = new Array(arguments.length + 1); // SC.A(arguments);
+    for (var i = 1, len = args.length; i < len; i++) { args[i] = arguments[i - 1]; }
+
     args[0] = event = SC.Event.normalizeEvent(event || window.event);
 
     // get the handlers for this event type

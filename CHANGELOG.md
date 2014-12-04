@@ -14,6 +14,9 @@ Along with this change, the `actionContext` property has also now been deprecate
 Note: this is a backwards-compatible change. If a String is passed to `fireAction` *and* no `action` property exists, the argument will be used as the `action` (i.e. no context will be sent). When this occurs, a Developer Warning will appear in the console. Likewise, a Developer Warning will appear if `actionContext` is set prior to a view being initialized.
 * SC.ButtonView and SC.CollectionView have both been altered slightly to use SC.ActionSupport. This has no affect on the use of action & target in these views.
 * Moved tracing code of SC.ResponderContext to debug-only. This prevents the debugging code from being included in production builds, thus reducing the overall deployed file size slightly.
+* Optimized use of the `arguments` object in several locations in order to avoid its instantiation. There were several occurrences of code copying the `arguments` object into an Array using `slice`; this is very costly for performance as it causes the browser to instantiate the `arguments` object in order to do the slice. Instead, these occurrences were converted to either access the arguments by index without a copy or to do a fast copy without instantiation. See http://jsperf.com/closure-with-arguments for an example of the performance difference this can make. Using slice is anywhere from ~50% to ~90% slower depending on the browser.  
+  
+Affected: SC.Request, SC.WebSocket, SC.DelegateSupport, SC.Color, SC.Event, SC.Store, SC.Module, SC.Object, SC.Function, SC.State, SC.Statechart
 
 ### BUG FIXES
 

@@ -742,7 +742,12 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
       return;
     }
 
-    var args = this._processGotoStateArgs(arguments);
+    // Fast arguments access.
+    // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
+    var args = new Array(arguments.length); //  SC.$A(arguments)
+    for (var i = 0, len = args.length; i < len; i++) { args[i] = arguments[i]; }
+
+    args = this._processGotoStateArgs(args);
 
     state = args.state;
     fromCurrentState = args.fromCurrentState;
@@ -1130,7 +1135,12 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
       return;
     }
 
-    var args = this._processGotoStateArgs(arguments);
+    // Fast arguments access.
+    // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
+    var args = new Array(arguments.length); //  SC.$A(arguments)
+    for (var i = 0, len = args.length; i < len; i++) { args[i] = arguments[i]; }
+
+    args = this._processGotoStateArgs(args);
 
     state = args.state;
     fromCurrentState = args.fromCurrentState;
@@ -1630,7 +1640,6 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
       len = null,
       value = null;
 
-    args = SC.$A(args);
     args = args.filter(function (item) {
       return item !== undefined;
     });

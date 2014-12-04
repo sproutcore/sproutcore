@@ -109,7 +109,13 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Store} receiver
   */
   cascade: function(dataSource) {
-    var dataSources = SC.A(arguments) ;
+    var dataSources;
+
+    // Fast arguments access.
+    // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
+    dataSources = new Array(arguments.length); //  SC.A(arguments)
+    for (var i = 0, len = dataSources.length; i < len; i++) { dataSources[i] = arguments[i]; }
+
     dataSource = SC.CascadeDataSource.create({
       dataSources: dataSources
     });

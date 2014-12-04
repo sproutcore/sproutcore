@@ -1465,7 +1465,13 @@ SC.State = SC.Object.extend(
   @param args {Hash,...} Optional. Hash objects to be added to the created state
 */
 SC.State.plugin = function(value) {
-  var args = SC.A(arguments); args.shift();
+  var args;
+
+  // Fast arguments access.
+  // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
+  args = new Array(arguments.length - 1); // SC.A(arguments).shift()
+  for (var i = 0, len = args.length; i < len; i++) { args[i] = arguments[i + 1]; }
+
   var func = function() {
     var klass = SC.objectForPropertyPath(value);
     if (!klass) {
