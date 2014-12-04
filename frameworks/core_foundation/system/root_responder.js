@@ -1593,6 +1593,8 @@ SC.RootResponder = SC.Object.extend(
         // Unset the reference to the original event so we can garbage collect.
         touchEntry.event = null;
       }
+
+      evt.touchContext = null;
     }, this);
 
     // hack for text fields
@@ -1722,6 +1724,8 @@ SC.RootResponder = SC.Object.extend(
         touchEntry = this._touches[touch.identifier];
         if (touchEntry) touchEntry.event = null;
       }
+      evt.touchContext = null;
+      evt.viewChangedTouches = null;
     }, this);
 
     return evt.hasCustomEventHandling;

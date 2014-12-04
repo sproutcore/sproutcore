@@ -28,90 +28,10 @@ sc_require('system/core_query') ;
   @since SproutCore 1.0
 */
 SC.Event = function(originalEvent) {
-  var idx, len;
-  // copy properties from original event, if passed in.
-  if (originalEvent) {
-    this.originalEvent = originalEvent ;
-    var props = SC.Event._props, key;
-    len = props.length;
-    idx = len;
-    while(--idx >= 0) {
-      key = props[idx] ;
-      this[key] = originalEvent[key] ;
-    }
-  }
-
-  // Fix timeStamp
-  this.timeStamp = this.timeStamp || Date.now();
-
-  // Fix target property, if necessary
-  // Fixes #1925 where srcElement might not be defined either
-  if (!this.target) this.target = this.srcElement || document;
-
-  // check if target is a textnode (safari)
-  if (this.target.nodeType === 3 ) this.target = this.target.parentNode;
-
-  // Add relatedTarget, if necessary
-  if (!this.relatedTarget && this.fromElement) {
-    this.relatedTarget = (this.fromElement === this.target) ? this.toElement : this.fromElement;
-  }
-
-  // Calculate pageX/Y if missing and clientX/Y available
-  if (SC.none(this.pageX) && !SC.none(this.clientX)) {
-    var doc = document.documentElement, body = document.body;
-    this.pageX = this.clientX + (doc && doc.scrollLeft || body && body.scrollLeft || 0) - (doc.clientLeft || 0);
-    this.pageY = this.clientY + (doc && doc.scrollTop || body && body.scrollTop || 0) - (doc.clientTop || 0);
-  }
-
-  // Add which for key events
-  if (!this.which && ((this.charCode || originalEvent.charCode === 0) ? this.charCode : this.keyCode)) {
-    this.which = this.charCode || this.keyCode;
-  }
-
-  // Add metaKey to non-Mac browsers (use ctrl for PC's and Meta for Macs)
-  if (!this.metaKey && this.ctrlKey) this.metaKey = this.ctrlKey;
-
-  // Add which for click: 1 == left; 2 == middle; 3 == right
-  // Note: button is not normalized, so don't use it
-  if (!this.which && this.button) {
-    this.which = ((this.button & 1) ? 1 : ((this.button & 2) ? 3 : ( (this.button & 4) ? 2 : 0 ) ));
-  }
-
-  // Normalize wheel delta values for mousewheel events
-  if (this.type === 'mousewheel' || this.type === 'DOMMouseScroll' || this.type === 'MozMousePixelScroll') {
-    var deltaMultiplier = SC.Event.MOUSE_WHEEL_MULTIPLIER;
-
-    // normalize wheelDelta, wheelDeltaX, & wheelDeltaY for Safari
-    if (SC.browser.isWebkit && originalEvent.wheelDelta !== undefined) {
-      this.wheelDelta = 0-(originalEvent.wheelDeltaY || originalEvent.wheelDeltaX);
-      this.wheelDeltaY = 0-(originalEvent.wheelDeltaY||0);
-      this.wheelDeltaX = 0-(originalEvent.wheelDeltaX||0);
-
-    // normalize wheelDelta for Firefox (all Mozilla browsers)
-    // note that we multiple the delta on FF to make it's acceleration more
-    // natural.
-    } else if (!SC.none(originalEvent.detail) && SC.browser.isMozilla) {
-      if (originalEvent.axis && (originalEvent.axis === originalEvent.HORIZONTAL_AXIS)) {
-        this.wheelDeltaX = originalEvent.detail;
-        this.wheelDeltaY = this.wheelDelta = 0;
-      } else {
-        this.wheelDeltaY = this.wheelDelta = originalEvent.detail ;
-        this.wheelDeltaX = 0 ;
-      }
-
-    // handle all other legacy browser
-    } else {
-      this.wheelDelta = this.wheelDeltaY = SC.browser.isIE || SC.browser.isOpera ? 0-originalEvent.wheelDelta : originalEvent.wheelDelta ;
-      this.wheelDeltaX = 0 ;
-    }
-
-    this.wheelDelta *= deltaMultiplier;
-    this.wheelDeltaX *= deltaMultiplier;
-    this.wheelDeltaY *= deltaMultiplier;
-  }
+  this._sc_updateNormalizedEvent(originalEvent);
 
   return this;
-} ;
+};
 
 SC.mixin(SC.Event, /** @scope SC.Event */ {
 
@@ -523,52 +443,59 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     @param event {Event} the event to handle
     @returns {Boolean}
   */
-  handle: function(event) {
+  handle: function(event, args) {
 
     // ignore events triggered after window is unloaded or if double-called
     // from within a trigger.
-    if ((typeof SC === "undefined") || SC.Event.triggered) return YES ;
+    if ((typeof SC === "undefined") || SC.Event.triggered) return true;
 
-    // returned undefined or NO
-    var val, ret, handlers, args, key, handler, method, target;
-
-    // normalize event across browsers.  The new event will actually wrap the
-    // real event with a normalized API.
-
-    // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
-    // TODO: Add macro to build tools for this.
-    args = new Array(arguments.length + 1); // SC.A(arguments);
-    for (var i = 1, len = args.length; i < len; i++) { args[i] = arguments[i - 1]; }
-
-    args[0] = event = SC.Event.normalizeEvent(event || window.event);
+    // returned undefined or false
+    var val, ret, handlers, method, target;
 
     // get the handlers for this event type
     handlers = (SC.data(this, "sc_events") || {})[event.type];
-    if (!handlers) return NO ; // nothing to do
 
-    // invoke all handlers
-    for (key in handlers ) {
-      handler = handlers[key];
-      // handler = [target, method, context]
-      method = handler[1];
+    // no handlers for the event
+    if (!handlers) {
+      val = false; // nothing to do
 
-      // Pass in a reference to the handler function itself
-      // So that we can later remove it
-      event.handler = method;
-      event.data = event.context = handler[2];
+    } else {
+      // normalize event across browsers.  The new event will actually wrap the real event with a normalized API.
+      event = SC.Event.normalizeEvent(event || window.event);
 
-      target = handler[0] || this;
-      ret = method.apply( target, args );
-
-      if (val !== NO) val = ret;
-
-      // if method returned NO, do not continue.  Stop propagation and
-      // return default.  Note that we test explicitly for NO since
-      // if the handler returns no specific value, we do not want to stop.
-      if ( ret === NO ) {
-        event.preventDefault();
-        event.stopPropagation();
+      // Send the event to the handler as the first argument (include any other given arguments).
+      if (args) {
+        args.unshift(event);
+      } else {
+        args = [event];
       }
+
+      // invoke all handlers
+      for (var key in handlers) {
+        var handler = handlers[key];
+
+        method = handler[1];
+
+        // Pass in a reference to the handler function itself so that we can remove it later.
+        event.handler = method;
+        event.data = event.context = handler[2];
+
+        target = handler[0] || this;
+        ret = method.apply( target, args );
+
+        if (val !== false) val = ret;
+
+        // if method returned NO, do not continue.  Stop propagation and
+        // return default.  Note that we test explicitly for NO since
+        // if the handler returns no specific value, we do not want to stop.
+        if ( ret === false ) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      }
+
+      // Clean up the cached normalized SC.Event so that it's not holding onto extra memory.
+      event._sc_clearNormalizedEvent();
     }
 
     return val;
@@ -716,9 +643,15 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
       // Either retrieve the previously cached listener or cache a new one.
       listener = SC.data(elem, "listener") || SC.data(elem, "listener",
-       function() {
-         return SC.Event.handle.apply(SC.Event._elements[guid], arguments);
-      }) ;
+        function handle_event() {
+          // Fast copy.
+          var args = new Array(arguments.length);
+          for (var i = 0, len = args.length; i < len; i++) {
+            args[i] = arguments[i];
+          }
+
+          return SC.Event.handle.apply(SC.Event._elements[guid], args);
+        });
 
       // Bind the global event handler to the element
       if (elem.addEventListener) {
@@ -769,22 +702,44 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
   _elements: {},
 
+  _sc_normalizedEvents: null,
+
   // implement preventDefault() in a cross platform way
 
   /** @private Take an incoming event and convert it to a normalized event. */
   normalizeEvent: function(event) {
-    if (event === window.event) {
-      // IE can't do event.normalized on an Event object
-      return SC.Event.create(event) ;
+    var ret;
+
+    // Create the cache the first time.
+    if (!this._sc_normalizedEvents) { this._sc_normalizedEvents = {}; }
+    ret = this._sc_normalizedEvents[event.type];
+
+    // Create a new normalized SC.Event.
+    if (!ret) {
+      if (event === window.event) {
+        // IE can't do event.normalized on an Event object
+        ret = SC.Event.create(event) ;
+      } else {
+        ret = event.normalized ? event : SC.Event.create(event) ;
+      }
+
+    // Update the cached normalized SC.Event with the new DOM event.
     } else {
-      return event.normalized ? event : SC.Event.create(event) ;
+      ret._sc_updateNormalizedEvent(event);
     }
+
+    // Cache the normalized event object for this type of event. This allows us to avoid recreating
+    // SC.Event objects constantly for noisy events such as 'mousemove' or 'mousewheel'.
+    this._sc_normalizedEvents[event.type] = ret;
+
+    return ret;
   },
 
   _global: {},
 
   /** @private properties to copy from native event onto the event */
-  _props: "altKey attrChange attrName bubbles button cancelable charCode clientX clientY ctrlKey currentTarget data detail eventPhase fromElement handler keyCode metaKey newValue originalTarget pageX pageY prevValue relatedNode relatedTarget screenX screenY shiftKey srcElement target timeStamp toElement type view which touches targetTouches changedTouches animationName elapsedTime dataTransfer".split(" ")
+  // TODO: Remove this needless copy.
+  _props: ['altKey', 'attrChange', 'attrName', 'bubbles', 'button', 'cancelable', 'charCode', 'clientX', 'clientY', 'ctrlKey', 'currentTarget', 'data', 'detail', 'fromElement', 'handler', 'keyCode', 'metaKey', 'newValue', 'originalTarget', 'pageX', 'pageY', 'prevValue', 'relatedNode', 'relatedTarget', 'screenX', 'screenY', 'shiftKey', 'srcElement', 'target', 'timeStamp', 'toElement', 'type', 'view', 'which', 'touches', 'targetTouches', 'changedTouches', 'animationName', 'elapsedTime', 'dataTransfer']
 
 }) ;
 
@@ -797,7 +752,127 @@ SC.Event.prototype = {
 
     @type Boolean
   */
-  hasCustomEventHandling: NO,
+  hasCustomEventHandling: false,
+
+  /** @private Clear out the originalEvent from the SC.Event instance. */
+  _sc_clearNormalizedEvent: function () {
+    // Remove the original event.
+    this.originalEvent = null;
+
+    // Reset the custom event handling flag.
+    this.hasCustomEventHandling = false;
+
+    // Remove non-primitive properties copied over from the original event. While these will
+    // be overwritten, it's best to quickly null them out to avoid any issues.
+    var props = SC.Event._props,
+      idx;
+
+    idx = props.length;
+    while(--idx >= 0) {
+      var key = props[idx];
+      this[key] = null;
+    }
+
+    // Remove the custom properties associated with the previous original event. While these will
+    // be overwritten, it's best to quickly null them out to avoid any issues.
+    this.timeStamp = null;
+    this.target = null;
+    this.relatedTarget = null;
+    this.pageX = null;
+    this.pageY = null;
+    this.which = null;
+    this.metaKey = null;
+    this.wheelDelta = null;
+    this.wheelDeltaY = null;
+    this.wheelDeltaX = null;
+  },
+
+  /** @private Update the SC.Event instance with the new originalEvent. */
+  _sc_updateNormalizedEvent: function (originalEvent) {
+    var idx, len;
+    // copy properties from original event, if passed in.
+    if (originalEvent) {
+      this.originalEvent = originalEvent ;
+      var props = SC.Event._props,
+        key;
+
+      len = props.length;
+      idx = len;
+      while(--idx >= 0) {
+        key = props[idx] ;
+        this[key] = originalEvent[key] ;
+      }
+    }
+
+    // Fix timeStamp
+    this.timeStamp = this.timeStamp || Date.now();
+
+    // Fix target property, if necessary
+    // Fixes #1925 where srcElement might not be defined either
+    if (!this.target) this.target = this.srcElement || document;
+
+    // check if target is a textnode (safari)
+    if (this.target.nodeType === 3 ) this.target = this.target.parentNode;
+
+    // Add relatedTarget, if necessary
+    if (!this.relatedTarget && this.fromElement) {
+      this.relatedTarget = (this.fromElement === this.target) ? this.toElement : this.fromElement;
+    }
+
+    // Calculate pageX/Y if missing and clientX/Y available
+    if (SC.none(this.pageX) && !SC.none(this.clientX)) {
+      var doc = document.documentElement, body = document.body;
+      this.pageX = this.clientX + (doc && doc.scrollLeft || body && body.scrollLeft || 0) - (doc.clientLeft || 0);
+      this.pageY = this.clientY + (doc && doc.scrollTop || body && body.scrollTop || 0) - (doc.clientTop || 0);
+    }
+
+    // Add which for key events
+    if (!this.which && ((this.charCode || originalEvent.charCode === 0) ? this.charCode : this.keyCode)) {
+      this.which = this.charCode || this.keyCode;
+    }
+
+    // Add metaKey to non-Mac browsers (use ctrl for PC's and Meta for Macs)
+    if (!this.metaKey && this.ctrlKey) this.metaKey = this.ctrlKey;
+
+    // Add which for click: 1 == left; 2 == middle; 3 == right
+    // Note: button is not normalized, so don't use it
+    if (!this.which && this.button) {
+      this.which = ((this.button & 1) ? 1 : ((this.button & 2) ? 3 : ( (this.button & 4) ? 2 : 0 ) ));
+    }
+
+    // Normalize wheel delta values for mousewheel events
+    if (this.type === 'mousewheel' || this.type === 'DOMMouseScroll' || this.type === 'MozMousePixelScroll') {
+      var deltaMultiplier = SC.Event.MOUSE_WHEEL_MULTIPLIER;
+
+      // normalize wheelDelta, wheelDeltaX, & wheelDeltaY for Safari
+      if (SC.browser.isWebkit && originalEvent.wheelDelta !== undefined) {
+        this.wheelDelta = 0-(originalEvent.wheelDeltaY || originalEvent.wheelDeltaX);
+        this.wheelDeltaY = 0-(originalEvent.wheelDeltaY||0);
+        this.wheelDeltaX = 0-(originalEvent.wheelDeltaX||0);
+
+      // normalize wheelDelta for Firefox (all Mozilla browsers)
+      // note that we multiple the delta on FF to make it's acceleration more
+      // natural.
+      } else if (!SC.none(originalEvent.detail) && SC.browser.isMozilla) {
+        if (originalEvent.axis && (originalEvent.axis === originalEvent.HORIZONTAL_AXIS)) {
+          this.wheelDeltaX = originalEvent.detail;
+          this.wheelDeltaY = this.wheelDelta = 0;
+        } else {
+          this.wheelDeltaY = this.wheelDelta = originalEvent.detail ;
+          this.wheelDeltaX = 0 ;
+        }
+
+      // handle all other legacy browser
+      } else {
+        this.wheelDelta = this.wheelDeltaY = SC.browser.isIE || SC.browser.isOpera ? 0-originalEvent.wheelDelta : originalEvent.wheelDelta ;
+        this.wheelDeltaX = 0 ;
+      }
+
+      this.wheelDelta *= deltaMultiplier;
+      this.wheelDeltaX *= deltaMultiplier;
+      this.wheelDeltaY *= deltaMultiplier;
+    }
+  },
 
   /**
     Returns the touches owned by the supplied view.
