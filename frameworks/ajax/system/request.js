@@ -538,8 +538,8 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
 
       // Fast arguments access.
       // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
-      this.args = new Array(arguments.length - 2); //  SC.A(arguments).slice(2)
-      for (var i = 0, len = this.args.length; i < len; i++) { this.args[i] = arguments[i + 2]; }
+      args = new Array(arguments.length - 2); //  SC.A(arguments).slice(2)
+      for (var i = 0, len = args.length; i < len; i++) { args[i] = arguments[i + 2]; }
 
       // Shift the arguments
       action = target;
@@ -548,10 +548,14 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
     } else {
       // Accept multiple additional arguments.
 
-      // Fast arguments access.
-      // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
-      this.args = new Array(arguments.length - 3); //  SC.A(arguments).slice(3)
-      for (var i = 0, len = this.args.length; i < len; i++) { this.args[i] = arguments[i + 3]; }
+      if (arguments.length > 3) {
+        // Fast arguments access.
+        // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
+        args = new Array(arguments.length - 3); //  SC.A(arguments).slice(3)
+        for (var i = 0, len = args.length; i < len; i++) { args[i] = arguments[i + 3]; }
+      } else {
+        args = [];
+      }
     }
 
     // Prepare listeners for this object and notification target.
