@@ -671,6 +671,8 @@ SC.Color.mixin(
             delete hash[key];
           }
         }
+      } else {
+        args[i] = hash;
       }
     }
 
