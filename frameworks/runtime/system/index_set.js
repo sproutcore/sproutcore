@@ -87,7 +87,8 @@ SC.IndexSet = SC.mixin({},
     if (SC.none(start) && !SC.none(length)) lengthIsValid = NO; // stay invalid.
     else if (SC.none(length)) lengthIsValid = YES;
     else if (SC.typeOf(length) === SC.T_NUMBER && !isNaN(length)) lengthIsValid = YES;
-    // Check validitty and throw if needed.
+
+    // Check validity and throw if needed.
     if (!startIsValid || !lengthIsValid) {
       var argsString = SC.A(arguments).join(', ');
       throw new Error("SC.IndexSet created with invalid parameters (%@). You must call SC.IndexSet with zero, one or two valid numeric arguments.".fmt(argsString));

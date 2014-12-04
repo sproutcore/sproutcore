@@ -187,7 +187,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     named element.  You can optionally pass an additional context object which
     will be included on the event in the event.data property.
 
-    When your handler function is called the, the function's "this" property
+    When your handler function is called, the function's "this" property
     will point to the element the event occurred on.
 
     The click handler for this method must have a method signature like:
