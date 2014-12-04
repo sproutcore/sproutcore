@@ -187,10 +187,10 @@ SC.ScrollView = SC.View.extend({
   _sc_scale: null,
 
   /** @private Flag used to indicate when we should resize the content width manually. */
-  _sc_shouldResizeContentWidth: false,
+  // _sc_shouldResizeContentWidth: false,
 
   /** @private Flag used to indicate when we should resize the content height manually. */
-  _sc_shouldResizeContentHeight: false,
+  // _sc_shouldResizeContentHeight: false,
 
   /** @private The offset center x of a multi-touch gesture. */
   _sc_touchCenterX: null,
@@ -951,20 +951,22 @@ SC.ScrollView = SC.View.extend({
     this.set('_sc_containerWidth', containerFrame.width);
 
     if (contentView) {
-      var didAdjust = false;
+      // var didAdjust = false;
 
-      if (this._sc_shouldResizeContentHeight) {
-        contentView.adjust('height', containerFrame.height);
-        didAdjust = true;
-      }
+      // if (this._sc_shouldResizeContentHeight) {
+      //   contentView.adjust('height', containerFrame.height);
+      //   didAdjust = true;
+      // }
 
-      if (this._sc_shouldResizeContentWidth) {
-        contentView.adjust('width', containerFrame.width);
-        didAdjust = true;
-      }
+      // if (this._sc_shouldResizeContentWidth) {
+      //   contentView.adjust('width', containerFrame.width);
+      //   didAdjust = true;
+      // }
 
       // Update the scrollers regardless.
-      if (!didAdjust) { this._sc_contentViewSizeDidChange(); }
+      // if (!didAdjust) {
+      this._sc_contentViewSizeDidChange();
+      // }
     }
 
   },
@@ -979,8 +981,8 @@ SC.ScrollView = SC.View.extend({
     this._sc_removeContentViewObservers();
 
     // Reset caches.
-    this._sc_shouldResizeContentWidth = false;
-    this._sc_shouldResizeContentHeight = false;
+    // this._sc_shouldResizeContentWidth = false;
+    // this._sc_shouldResizeContentHeight = false;
     this._sc_contentHeight = 0;
     this._sc_contentWidth = 0;
     this._sc_contentScale = 1;
@@ -1004,29 +1006,29 @@ SC.ScrollView = SC.View.extend({
 
         // When a view wants an accelerated layer and isn't a fixed size, we convert it to a fixed
         // size and resize it when our container resizes.
-        if (newView.get('wantsAcceleratedLayer') && !newView.get('isFixedSize')) {
-          var contentViewLayout = newView.get('layout');
+        // if (newView.get('wantsAcceleratedLayer') && !newView.get('isFixedSize')) {
+        //   var contentViewLayout = newView.get('layout');
 
-          // Fix the width.
-          if (contentViewLayout.width == null) {
-            this._sc_shouldResizeContentWidth = true; // Flag to indicate that when the container's width changes, we should update the content's width.
+        //   // Fix the width.
+        //   if (contentViewLayout.width == null) {
+        //     this._sc_shouldResizeContentWidth = true; // Flag to indicate that when the container's width changes, we should update the content's width.
 
-            newView.adjust({
-              right: null,
-              width: this._sc_containerWidth
-            });
-          }
+        //     newView.adjust({
+        //       right: null,
+        //       width: this._sc_containerWidth
+        //     });
+        //   }
 
-          // Fix the height.
-          if (contentViewLayout.height == null) {
-            this._sc_shouldResizeContentHeight = true; // Flag to indicate that when the container's height changes, we should update the content's height.
+        //   // Fix the height.
+        //   if (contentViewLayout.height == null) {
+        //     this._sc_shouldResizeContentHeight = true; // Flag to indicate that when the container's height changes, we should update the content's height.
 
-            newView.adjust({
-              bottom: null,
-              height: this._sc_containerHeight
-            });
-          }
-        }
+        //     newView.adjust({
+        //       bottom: null,
+        //       height: this._sc_containerHeight
+        //     });
+        //   }
+        // }
       }
 
       // TODO: Can we remove this if a calculated property exists?
@@ -1502,8 +1504,8 @@ SC.ScrollView = SC.View.extend({
       oldView.removeObserver('frame', this, frameChangeFunc);
       // oldView.removeObserver('layer', this, layerChangeFunc);
 
-      this._sc_shouldResizeContentWidth = false;
-      this._sc_shouldResizeContentHeight = false;
+      // this._sc_shouldResizeContentWidth = false;
+      // this._sc_shouldResizeContentHeight = false;
     }
   },
 
