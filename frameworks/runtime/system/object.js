@@ -26,7 +26,9 @@ SC.BENCHMARK_OBJECTS = NO;
 SC._detect_base = function _detect_base(func, parent, name) {
 
   return function invoke_superclass_method() {
-    var base = parent[name], args;
+    var base = parent[name],
+      args,
+      i, len;
 
     //@if(debug)
     if (!base) {
@@ -44,13 +46,16 @@ SC._detect_base = function _detect_base(func, parent, name) {
     //if(base && func === base) { func.base = function () {}; }
     //else { func.base = base; }
 
+    // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
+    // TODO: Add macro to build tools for this.
     if (func.isEnhancement) {
-      // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
-      // TODO: Add macro to build tools for this.
+      // Fast copy.
       args = new Array(arguments.length - 1); // Array.prototype.slice.call(arguments, 1)
-      for (var i = 0, len = args.length; i < len; i++) { args[i] = arguments[i + 1]; }
+      for (i = 0, len = args.length; i < len; i++) { args[i] = arguments[i + 1]; }
     } else {
-      args = arguments;
+      // Fast copy.
+      args = new Array(arguments.length);
+      for (i = 0, len = args.length; i < len; i++) { args[i] = arguments[i]; }
     }
 
     return base.apply(this, args);
@@ -230,16 +235,22 @@ SC._object_extend = function _object_extend(base, ext, proto) {
 
 /** @private */
 SC._enhance = function (originalFunction, enhancement) {
+
   return function () {
     // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
     // TODO: Add macro to build tools for this.
-    var args = new Array(arguments.length + 1); // Array.prototype.slice.call(arguments)
-    for (var i = 1, len = args.length; i < len; i++) { args[i] = arguments[i - 1]; }
+    var originalArgs = new Array(arguments.length);
+    var enhancedArgs = new Array(arguments.length + 1); // Array.prototype.slice.call(arguments)
+    for (var i = 0, len = originalArgs.length; i < len; i++) {
+      originalArgs[i] = enhancedArgs[i + 1] = arguments[i];
+    }
 
+    // Add the original function as the first argument passed to the enhancement.
     var self = this;
-    args[0] = function () { return originalFunction.apply(self, arguments); }; // args.unshift(function ...
-    return enhancement.apply(this, args);
+    enhancedArgs[0] = function () { return originalFunction.apply(self, originalArgs); }; // args.unshift(function ...
+    return enhancement.apply(this, enhancedArgs);
   };
+
 };
 
 /** @class
