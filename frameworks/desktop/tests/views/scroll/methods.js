@@ -91,7 +91,7 @@ module("SC.ScrollView", {
     SC.run(function () {
       pane.destroy();
     });
-    pane = view = null;
+    pane = view = view2 = view3 = view4 = null;
   }
 });
 
@@ -156,22 +156,26 @@ test("Scrolling to a rectangle", function () {
 });
 
 test("Scrolling to a view", function() {
-  var pane = SC.MainPane.create({
-    childViews: ['scrollView'],
-    scrollView: SC.ScrollView.create({
-      layout: { height: 100, width: 100 },
-      canScale: YES,
-      contentView: SC.View.create({
-        layout: { height: 500, width: 500 },
-        childViews: ['innerView1', 'innerView2'],
-        innerView1: SC.View.create({
-          layout: { height: 100, width: 100, top: 150, left: 150 }
-        }),
-        innerView2: SC.View.create({
-          layout: { height: 100, width: 100, top: 200, left: 200 }
+  var pane;
+
+  SC.run(function () {
+    pane = SC.MainPane.create({
+      childViews: ['scrollView'],
+      scrollView: SC.ScrollView.create({
+        layout: { height: 100, width: 100 },
+        canScale: YES,
+        contentView: SC.View.create({
+          layout: { height: 500, width: 500 },
+          childViews: ['innerView1', 'innerView2'],
+          innerView1: SC.View.create({
+            layout: { height: 100, width: 100, top: 150, left: 150 }
+          }),
+          innerView2: SC.View.create({
+            layout: { height: 100, width: 100, top: 200, left: 200 }
+          })
         })
       })
-    })
+    });
   });
 
   var scrollView = pane.scrollView,
@@ -286,7 +290,7 @@ test("maximumVerticalScrollOffset() returns the maximum vertical scroll dimensio
 
 // ------------------------------------
 // mouseWheel events
-//
+
 
 test("Mouse wheel events should only be captured if the scroll can scroll in the direction (both TOP-LEFT).", function () {
   // FIRST GROUP: everything scrolled all the way to the top left
@@ -344,18 +348,13 @@ test("Mouse wheel events not capturable by the inner scroll should bubble to the
     view4.scrollTo(114, 114);
   });
 
-  window.stop();
-
   event = SC.Event.simulateEvent(elem, 'mousewheel', { wheelDeltaX: 10, wheelDeltaY: 0 });
   SC.Event.trigger(elem, 'mousewheel', event);
 
-  SC.RunLoop.begin();
-  SC.Timer.schedule({ target: this, action: function () {
+  SC.run(function () {
     equals(view4.get('horizontalScrollOffset'), 114, 'The inner scroll view should still have horizontalScrollOffset');
     equals(view3.get('horizontalScrollOffset'), 10, 'The outer scroll view should now have horizontalScrollOffset');
-    window.start();
-  }, interval: 200});
-  SC.RunLoop.end();
+  });
 });
 
 test("Mouse wheel events not capturable by the inner scroll should bubble to the outer scroll (scroll down).", function () {
@@ -367,18 +366,13 @@ test("Mouse wheel events not capturable by the inner scroll should bubble to the
     view4.scrollTo(114, 114);
   });
 
-  window.stop();
-
   event = SC.Event.simulateEvent(elem, 'mousewheel', { wheelDeltaX: 0, wheelDeltaY: 10 });
   SC.Event.trigger(elem, 'mousewheel', event);
 
-  SC.RunLoop.begin();
-  SC.Timer.schedule({ target: this, action: function () {
+  SC.run(function () {
     equals(view4.get('verticalScrollOffset'), 114, 'The inner scroll view should still have verticalScrollOffset');
     equals(view3.get('verticalScrollOffset'), 10, 'The outer scroll view should now have verticalScrollOffset');
-    window.start();
-  }, interval: 200});
-  SC.RunLoop.end();
+  });
 });
 
 test("Mouse wheel events not capturable by the inner scroll should bubble to the outer scroll (scroll left).", function () {
@@ -388,19 +382,16 @@ test("Mouse wheel events not capturable by the inner scroll should bubble to the
   SC.run(function () {
     view3.scrollTo(114, 114);
     view4.scrollTo(0, 0);
-
-    SC.Timer.schedule({ target: this, action: function () {
-      equals(view4.get('horizontalScrollOffset'), 0, 'The inner scroll view should still have horizontalScrollOffset');
-      equals(view3.get('horizontalScrollOffset'), 104, 'The outer scroll view should now have horizontalScrollOffset');
-      window.start();
-    }, interval: 200});
   });
-
-  window.stop();
 
   event = SC.Event.simulateEvent(elem, 'mousewheel', { wheelDeltaX: -10, wheelDeltaY: 0 });
   SC.Event.trigger(elem, 'mousewheel', event);
 
+  SC.run(function () {
+      equals(view4.get('horizontalScrollOffset'), 0, 'The inner scroll view should still have horizontalScrollOffset');
+      equals(view3.get('horizontalScrollOffset'), 104, 'The outer scroll view should now have horizontalScrollOffset');
+
+  });
 });
 
 test("Mouse wheel events not capturable by the inner scroll should bubble to the outer scroll (scroll up).", function () {
@@ -412,18 +403,13 @@ test("Mouse wheel events not capturable by the inner scroll should bubble to the
     view4.scrollTo(0, 0);
   });
 
-  window.stop();
-
   event = SC.Event.simulateEvent(elem, 'mousewheel', { wheelDeltaX: 0, wheelDeltaY: -10 });
   SC.Event.trigger(elem, 'mousewheel', event);
 
-  SC.RunLoop.begin();
-  SC.Timer.schedule({ target: this, action: function () {
+  SC.run(function () {
     equals(view4.get('verticalScrollOffset'), 0, 'The inner scroll view should still have verticalScrollOffset');
     equals(view3.get('verticalScrollOffset'), 104, 'The outer scroll view should now have verticalScrollOffset');
-    window.start();
-  }, interval: 200 });
-  SC.RunLoop.end();
+  });
 });
 
 test("Mouse wheel events capturable by the inner scroll should not bubble to the outer scroll (scroll right).", function () {
@@ -435,18 +421,13 @@ test("Mouse wheel events capturable by the inner scroll should not bubble to the
     view4.scrollTo(0, 0);
   });
 
-  window.stop();
-
   event = SC.Event.simulateEvent(elem, 'mousewheel', { wheelDeltaX: 10, wheelDeltaY: 0 });
   SC.Event.trigger(elem, 'mousewheel', event);
 
-  SC.RunLoop.begin();
-  SC.Timer.schedule({ target: this, action: function () {
+  SC.run(function () {
     equals(view4.get('horizontalScrollOffset'), 10, 'The inner scroll view should now have horizontalScrollOffset');
     equals(view3.get('horizontalScrollOffset'), 0, 'The outer scroll view should still have horizontalScrollOffset');
-    window.start();
-  }, interval: 200 });
-  SC.RunLoop.end();
+  });
 });
 
 test("Mouse wheel events capturable by the inner scroll should not bubble to the outer scroll (scroll up).", function () {
@@ -458,18 +439,13 @@ test("Mouse wheel events capturable by the inner scroll should not bubble to the
     view4.scrollTo(114, 114);
   });
 
-  window.stop();
-
   event = SC.Event.simulateEvent(elem, 'mousewheel', { wheelDeltaX: 0, wheelDeltaY: -10 });
   SC.Event.trigger(elem, 'mousewheel', event);
 
-  SC.RunLoop.begin();
-  SC.Timer.schedule({ target: this, action: function () {
+  SC.run(function () {
     equals(view4.get('verticalScrollOffset'), 104, 'The inner scroll view should now have verticalScrollOffset');
     equals(view3.get('verticalScrollOffset'), 114, 'The outer scroll view should still have verticalScrollOffset');
-    window.start();
-  }, interval: 200 });
-  SC.RunLoop.end();
+  });
 });
 
 test("Mouse wheel events capturable by the inner scroll should not bubble to the outer scroll (scroll left).", function () {
@@ -481,18 +457,13 @@ test("Mouse wheel events capturable by the inner scroll should not bubble to the
     view4.scrollTo(114,  114);
   });
 
-  window.stop();
-
   event = SC.Event.simulateEvent(elem, 'mousewheel', { wheelDeltaX: -10, wheelDeltaY: 0 });
   SC.Event.trigger(elem, 'mousewheel', event);
 
-  SC.RunLoop.begin();
-  SC.Timer.schedule({ target: this, action: function () {
+  SC.run(function () {
     equals(view4.get('horizontalScrollOffset'), 104, 'The inner scroll view should now have horizontalScrollOffset');
     equals(view3.get('horizontalScrollOffset'), 114, 'The outer scroll view should still have horizontalScrollOffset');
-    window.start();
-  }, interval: 200 });
-  SC.RunLoop.end();
+  });
 });
 
 test("Mouse wheel events capturable by the inner scroll should not bubble to the outer scroll (scroll down).", function () {
@@ -504,18 +475,15 @@ test("Mouse wheel events capturable by the inner scroll should not bubble to the
     view4.scrollTo(0, 0);
   });
 
-  window.stop();
+  // window.stop();
 
   event = SC.Event.simulateEvent(elem, 'mousewheel', { wheelDeltaX: 0, wheelDeltaY: 10 });
   SC.Event.trigger(elem, 'mousewheel', event);
 
-  SC.RunLoop.begin();
-  SC.Timer.schedule({ target: this, action: function () {
+  SC.run(function () {
     equals(view4.get('verticalScrollOffset'), 10, 'The inner scroll view should now have verticalScrollOffset');
     equals(view3.get('verticalScrollOffset'), 0, 'The outer scroll view should still have verticalScrollOffset');
-    window.start();
-  }, interval: 200 });
-  SC.RunLoop.end();
+  });
 });
 
 // ------------------------------------

@@ -65,7 +65,8 @@ test("Touch event handling and juggling.", function() {
   var outer = pane.outerView,
       inner = outer.innerView,
       layer = inner.get('layer'),
-      event = SC.Event.simulateEvent(layer, 'touchstart');
+      event = SC.Event.simulateEvent(layer, 'touchstart'),
+      touch;
 
   event.touches = [];
   event.identifier = 4;
@@ -87,7 +88,12 @@ test("Touch event handling and juggling.", function() {
   if (outerEnd) ok(false, "outerView.touchEnd should not have been called yet!");
 
   // Trigger touchmoved: outerView.touchesDragged > [passes touch to innerView] > innerView.touchStart
-  event.type = 'touchmove';
+
+  // Copy the last DOM touch as the basis of an updated DOM touch.
+  touch = SC.RootResponder.responder._touches[event.identifier];
+  touch = SC.copy(touch);
+
+  event = SC.Event.simulateEvent(layer, 'touchmove', { touches: [touch], identifier: 4, changedTouches: [touch] });
   SC.run(function() {
     SC.Event.trigger(layer, 'touchmove', [event]);
   });
@@ -103,6 +109,11 @@ test("Touch event handling and juggling.", function() {
   if (outerEnd) ok(false, "outerView.touchEnd should not have been called yet!");
 
   // Trigger touchmoved x2: innerView.touchesDragged > [passes touch back to outerView] > outerView.touchStart > innerView.touchCancelled
+  // Copy the last DOM touch as the basis of an updated DOM touch.
+  touch = SC.RootResponder.responder._touches[event.identifier];
+  touch = SC.copy(touch);
+
+  event = SC.Event.simulateEvent(layer, 'touchmove', { touches: [touch], identifier: 4, changedTouches: [touch] });
   SC.run(function() {
     SC.Event.trigger(layer, 'touchmove', [event]);
   });
@@ -118,7 +129,12 @@ test("Touch event handling and juggling.", function() {
   if (outerEnd) ok(false, "outerView.touchEnd should not have been called yet!");
 
   // Trigger touchend: outerView.touchEnd
-  event.type = 'touchend';
+
+  // Copy the last DOM touch as the basis of an updated DOM touch.
+  touch = SC.RootResponder.responder._touches[event.identifier];
+  touch = SC.copy(touch);
+
+  event = SC.Event.simulateEvent(layer, 'touchend', { touches: [touch], identifier: 4, changedTouches: [touch] });
   SC.run(function() {
     SC.Event.trigger(layer, 'touchend', [event]);
   });

@@ -40,16 +40,20 @@ module("SC.RootResponder", {
     evt2.changedTouches.push(evt);
     evt2.changedTouches.push(evt2);
   },
-  
+
   teardown: function() {
     pane.destroy();
+    evt = evt2 = layer = view = pane = null;
   }
 });
 
 // With v1.11, SC.Touch now provides its own velocity along each axis.
 test("SC.Touch velocity", function() {
   // Get a layer
-  var touch;
+  var touch,
+    lastTimestamp;
+
+  lastTimestamp = evt.timeStamp;
 
   // Trigger touchstart
   SC.run(function() {
@@ -61,14 +65,19 @@ test("SC.Touch velocity", function() {
   equals(touch.velocityX, 0, "Horizontal velocity begin at zero");
   equals(touch.velocityY, 0, "Vertical velocity begin at zero");
 
-  evt.type = 'touchmove';
-  evt.timeStamp += 100;
-  evt.pageX += 100;
-  evt.pageY += 100;
-  
+  // Copy the last DOM touch as the basis of an updated DOM touch.
+  touch = SC.copy(touch);
+  touch.pageX += 100;
+  touch.pageY += 100;
+
+  evt = SC.Event.simulateEvent(layer, 'touchmove', { touches: [touch], identifier: 4, changedTouches: [touch] });
+  evt.timeStamp = lastTimestamp + 100;
+
   SC.run(function() {
     SC.Event.trigger(layer, 'touchmove', [evt]);
   });
+
+  touch = SC.RootResponder.responder._touches[evt.identifier];
 
   equals(touch.velocityX, 1, 'VelocityX for 100 pixels in 100 ms is 1.');
   equals(touch.velocityY, 1, 'VelocityY for 100 pixels in 100 ms is 1.');

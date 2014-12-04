@@ -710,6 +710,11 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
         ret = event.normalized ? event : SC.Event.create(event) ;
       }
 
+    // When passed an SC.Event, don't re-normalize it.
+    // TODO: This is hacky nonsense left over from a whole pile of bad decisions in SC.Event—
+    } else if (event.normalized) {
+      ret = event;
+
     // Update the cached normalized SC.Event with the new DOM event.
     } else {
       ret._sc_updateNormalizedEvent(event);
@@ -746,8 +751,9 @@ SC.Event.prototype = {
     // Remove the original event.
     this.originalEvent = null;
 
-    // Reset the custom event handling flag.
+    // Reset the custom event handling and normalized flag.
     this.hasCustomEventHandling = false;
+    this.normalized = false;
 
     // Remove non-primitive properties copied over from the original event. While these will
     // be overwritten, it's best to quickly null them out to avoid any issues.
@@ -777,6 +783,10 @@ SC.Event.prototype = {
   /** @private Update the SC.Event instance with the new originalEvent. */
   _sc_updateNormalizedEvent: function (originalEvent) {
     var idx, len;
+
+    // Flag.
+    this.normalized = true;
+
     // copy properties from original event, if passed in.
     if (originalEvent) {
       this.originalEvent = originalEvent ;
