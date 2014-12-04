@@ -10,15 +10,15 @@ sc_require('mixins/websocket_delegate');
   @class
 
   Implements support for WebSocket.
-  
+
   Example Usage:
 
     var ws = SC.WebSocket.create({
       server: 'ws://server',
     }).connect();
-    
+
     ws.notify(this, 'wsReceivedMessage');
-    
+
     ws.send('message');
 
   @since SproutCore 1.11
@@ -27,7 +27,7 @@ sc_require('mixins/websocket_delegate');
   @author Nicolas BADIA
 */
 SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate, {
-  
+
   /**
     URL of the WebSocket server.
 
@@ -54,9 +54,9 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate, {
   isConnected: false,
 
   /**
-    In order to handle authentification, set `isAuth` to NO in the 
-    `webSocketDidOpen` delegate method just after sending a request to 
-    authentificate the connection. This way, any futher message will be put in 
+    In order to handle authentification, set `isAuth` to NO in the
+    `webSocketDidOpen` delegate method just after sending a request to
+    authentificate the connection. This way, any futher message will be put in
     queue until the server tels you the connection is authentified. Once it
     did, you should set `isAuth` to YES to resume the queue.
 
@@ -64,7 +64,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate, {
 
     @type Boolean
     @default null
-  */  
+  */
   isAuth: null,
 
   /**
@@ -77,7 +77,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate, {
 
   /**
     A WebSocket delegate.
-    
+
     @see SC.WebSocketDelegate
     @type {SC.WebSocketDelegate}
     @default null
@@ -109,7 +109,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate, {
   /**
     Call this method to open a connection.
 
-    @returns {SC.WebSocket} 
+    @returns {SC.WebSocket}
   */
   connect: function() {
     var that = this;
@@ -119,30 +119,30 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate, {
     if (!this.isSupported || this.socket) return this;
 
     try {
-      var socket = this.socket = new WebSocket(this.get('server')); 
+      var socket = this.socket = new WebSocket(this.get('server'));
 
       socket.onopen = function() {
-        SC.RunLoop.begin(); 
-        that.onOpen.apply(that, arguments); 
-        SC.RunLoop.end(); 
+        SC.RunLoop.begin();
+        that.onOpen.apply(that, arguments);
+        SC.RunLoop.end();
       };
 
       socket.onmessage = function() {
-        SC.RunLoop.begin(); 
-        that.onMessage.apply(that, arguments); 
-        SC.RunLoop.end(); 
+        SC.RunLoop.begin();
+        that.onMessage.apply(that, arguments);
+        SC.RunLoop.end();
       };
 
       socket.onclose = function() {
-        SC.RunLoop.begin(); 
-        that.onClose.apply(that, arguments); 
-        SC.RunLoop.end(); 
+        SC.RunLoop.begin();
+        that.onClose.apply(that, arguments);
+        SC.RunLoop.end();
       };
 
       socket.onerror = function() {
-        SC.RunLoop.begin(); 
-        that.onError.apply(that, arguments); 
-        SC.RunLoop.end(); 
+        SC.RunLoop.begin();
+        that.onError.apply(that, arguments);
+        SC.RunLoop.end();
       };
     } catch(e) {
       SC.error('An error has occurred while connnecting to the websocket server: '+e);
@@ -153,10 +153,10 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate, {
 
   /**
     Call this method to close a connection.
-    
+
     @param code {Number} A numeric value indicating the status code explaining why the connection is being closed. If this parameter is not specified, a default value of 1000 (indicating a normal "transaction complete" closure) is assumed.
     @param reason {String} A human-readable string explaining why the connection is closing. This string must be no longer than 123 bytes of UTF-8 text (not characters).
-    @returns {SC.WebSocket} 
+    @returns {SC.WebSocket}
   */
   close: function(code, reason) {
     var socket = this.socket;
@@ -169,14 +169,14 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate, {
   },
 
   /**
-    Configures a callback to execute when an event happen. You must pass 
+    Configures a callback to execute when an event happen. You must pass
     at least a target and action/method to this and optionally an event name.
 
     You may also pass additional arguments which will then be passed along to
     your callback.
 
     Example:
-        
+
         var websocket = SC.WebSocket.create({ server: 'ws://server' }).connect();
 
         webSocket.notify('onopen', this, 'wsWasOpen');
@@ -189,7 +189,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate, {
     Your notification callback should expect to receive the WebSocket object as
     the first parameter and the event or message; plus any additional parameters that you pass. If your callback handles the notification and to prevent further handling, it
     should return YES.
-    
+
     @param target {String} String Event name.
     @param target {Object} The target object for the callback action.
     @param action {String|Function} The method name or function to call on the target.
@@ -237,9 +237,9 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate, {
   /**
     Send the passed message. If the connection is not yet open or anthentified,
     the message will be put in the queue.
-    
+
     @param message {String|Object} The message to send.
-    @returns {SC.WebSocket} 
+    @returns {SC.WebSocket}
   */
   send: function(message) {
     if (this.isConnected === true && this.isAuth !== false) {
@@ -305,7 +305,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate, {
     this.socket = null;
 
     var ret = del.webSocketDidClose(this, closeEvent);
-    
+
     if (ret !== true) {
       this._notifyListeners('onclose', closeEvent);
       this.tryReconnect();
@@ -316,7 +316,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate, {
      @private
   */
   onError: function(event) {
-    var del = this.get('objectDelegate'), 
+    var del = this.get('objectDelegate'),
       ret = del.webSocketDidError(this, event);
 
     if (ret !== true) this._notifyListeners('onerror', event);
@@ -410,7 +410,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate, {
     @default null
   */
   socket: null,
-  
+
   /**
     @private
 
@@ -418,7 +418,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate, {
     @default null
   */
   listeners: null,
-  
+
   /**
     @private
 

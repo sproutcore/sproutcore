@@ -144,7 +144,7 @@
       if (SC.Color.supportsARGB) {
         var gradient = "progid:DXImageTransform.Microsoft.gradient";
         css = ("-ms-filter:" + gradient + "(startColorstr=%@1,endColorstr=%@1);" +
-               "filter:" + gradient + "(startColorstr=%@1,endColorstr=%@1)" + 
+               "filter:" + gradient + "(startColorstr=%@1,endColorstr=%@1)" +
                "zoom: 1").fmt(color);
       } else {
         css = "background-color:" + color;
@@ -482,7 +482,7 @@ SC.Color = SC.Object.extend(
    */
   cssText: function (key, value) {
     // Getter.
-    if (value === undefined) { 
+    if (value === undefined) {
       // FAST PATH: Error.
       if (this.get('isError')) return this.get('errorValue');
 
@@ -673,6 +673,7 @@ SC.Color.mixin(
         }
       }
     }
+
     if (hasVals) args.push(vals);
     return SC.Object.create.apply(this, args);
   },
@@ -927,7 +928,7 @@ SC.Color.mixin(
 
   // ..........................................................
   // Regular expressions for accepted color types
-  // 
+  //
   PARSE_RGBA: /^rgba\(\s*([\d]+%?)\s*,\s*([\d]+%?)\s*,\s*([\d]+%?)\s*,\s*([.\d]+)\s*\)$/,
   PARSE_RGB : /^rgb\(\s*([\d]+%?)\s*,\s*([\d]+%?)\s*,\s*([\d]+%?)\s*\)$/,
   PARSE_HSLA: /^hsla\(\s*(-?[\d]+)\s*\s*,\s*([\d]+)%\s*,\s*([\d]+)%\s*,\s*([.\d]+)\s*\)$/,
