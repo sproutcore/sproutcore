@@ -60,10 +60,14 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
         //@endif
         args;
 
-    // Fast arguments access.
-    // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
-    args = new Array(arguments.length - 3); //  SC.A(arguments).slice(3)
-    for (var i = 0, len = args.length; i < len; i++) { args[i] = arguments[i + 3]; }
+    if (arguments.length > 3) {
+      // Fast arguments access.
+      // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
+      args = new Array(arguments.length - 3); //  SC.A(arguments).slice(3)
+      for (var i = 0, len = args.length; i < len; i++) { args[i] = arguments[i + 3]; }
+    } else {
+      args = [];
+    }
 
     // Treat the first parameter as the callback if the target is a function and there is
     // no method supplied.
