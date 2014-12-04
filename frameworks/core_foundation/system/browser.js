@@ -138,19 +138,6 @@ SC.mixin(SC.browser,
     @returns {string} The name of the property or method on the target or SC.UNSUPPORTED if no method found.
   */
   experimentalNameFor: function (target, standardName, testValue) {
-    var cachedNames = this._cachedNames,
-      targetGuid = SC.guidFor(target);
-
-    // Fast path & cache initialization.
-    if (!cachedNames) {
-      cachedNames = this._cachedNames = {};
-      cachedNames[targetGuid] = {};
-    } else if (!cachedNames[targetGuid]) {
-      cachedNames[targetGuid] = {};
-    } else if (cachedNames[targetGuid][standardName]) {
-      return cachedNames[targetGuid][standardName];
-    }
-
     // Test the property name.
     var ret = standardName;
 
@@ -177,9 +164,6 @@ SC.mixin(SC.browser,
         }
       }
     }
-
-    // Cache the experimental property name (even SC.UNSUPPORTED) for quick repeat access.
-    cachedNames[targetGuid][standardName] = ret;
 
     return ret;
   },
@@ -220,13 +204,28 @@ SC.mixin(SC.browser,
     @returns {string} Future-proof style name for use in the current browser or SC.UNSUPPORTED if no style support found.
   */
   experimentalStyleNameFor: function (standardStyleName, testValue) {
-    // Test the style name.
-    var el = this._testEl;
+    var cachedNames = this._sc_experimentalStyleNames,
+        ret;
 
-    // Create a test element and cache it for repeated use.
-    if (!el) { el = this._testEl = document.createElement("div"); }
+    // Fast path & cache initialization.
+    if (!cachedNames) {
+      cachedNames = this._sc_experimentalStyleNames = {};
+    }
 
-    return this.experimentalNameFor(el.style, standardStyleName, testValue);
+    if (cachedNames[standardStyleName]) {
+      ret = cachedNames[standardStyleName];
+    } else {
+      // Test the style name.
+      var el = this._testEl;
+
+      // Create a test element and cache it for repeated use.
+      if (!el) { el = this._testEl = document.createElement("div"); }
+
+      // Cache the experimental style name (even SC.UNSUPPORTED) for quick repeat access.
+      ret = cachedNames[standardStyleName] = this.experimentalNameFor(el.style, standardStyleName, testValue);
+    }
+
+    return ret;
   },
 
   /**
