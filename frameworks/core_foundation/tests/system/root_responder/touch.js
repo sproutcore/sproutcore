@@ -56,9 +56,7 @@ test("SC.Touch velocity", function() {
   lastTimestamp = evt.timeStamp;
 
   // Trigger touchstart
-  SC.run(function() {
-    SC.Event.trigger(layer, 'touchstart', [evt]);
-  });
+  SC.Event.trigger(layer, 'touchstart', [evt]);
 
   touch = SC.RootResponder.responder._touches[evt.identifier];
 
@@ -73,9 +71,7 @@ test("SC.Touch velocity", function() {
   evt = SC.Event.simulateEvent(layer, 'touchmove', { touches: [touch], identifier: 4, changedTouches: [touch] });
   evt.timeStamp = lastTimestamp + 100;
 
-  SC.run(function() {
-    SC.Event.trigger(layer, 'touchmove', [evt]);
-  });
+  SC.Event.trigger(layer, 'touchmove', [evt]);
 
   touch = SC.RootResponder.responder._touches[evt.identifier];
 
@@ -86,13 +82,15 @@ test("SC.Touch velocity", function() {
 
 test("averagedTouchesForView", function() {
   // Start touch.
-  SC.run(function() {
-    SC.Event.trigger(layer, 'touchstart', [evt, evt2]);
-  });
+  SC.Event.trigger(layer, 'touchstart', evt);
+
+  // Copy the last DOM touch as the basis of an updated DOM touch.
+  var touch1 = SC.RootResponder.responder._touches[evt.identifier];
+  var touch2 = SC.RootResponder.responder._touches[evt2.identifier];
 
   // Get our starting average.
-  var expectedAverageX = (evt.pageX + evt2.pageX) / 2,
-    expectedAverageY = (evt.pageY + evt2.pageY) / 2,
+  var expectedAverageX = (touch1.pageX + touch2.pageX) / 2,
+    expectedAverageY = (touch1.pageY + touch2.pageY) / 2,
     startAverage = SC.clone(SC.RootResponder.responder.averagedTouchesForView(view));
 
   equals(startAverage.x, expectedAverageX, "averagedTouchesForView correctly returns touch location averages (x)");
@@ -100,13 +98,14 @@ test("averagedTouchesForView", function() {
   ok(startAverage.d, "averagedTouchesForView's distance measurement should ... be a nonzero number. (Pythagoras doesn't play nice with integers.)");
 
   // Pinch out by 50 pixels in every direction.
-  evt.pageX = 50;
-  evt.pageY = 50;
-  evt2.pageX = 250;
-  evt2.pageY = 250;
-  SC.run(function() {
-    SC.Event.trigger(layer, 'touchmove', [evt, evt2]);
-  });
+  touch1.pageX = 50;
+  touch1.pageY = 50;
+  touch2.pageX = 250;
+  touch2.pageY = 250;
+
+  var moveEvt = SC.Event.simulateEvent(layer, 'touchmove', { touches: [touch1, touch2], identifier: 6, changedTouches: [touch1, touch2] });
+  SC.Event.trigger(layer, 'touchmove', moveEvt);
+
   // Get our post-pinch average.
   var endAverage = SC.RootResponder.responder.averagedTouchesForView(view);
 

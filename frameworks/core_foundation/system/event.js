@@ -343,7 +343,8 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
       timeStamp: Date.now(),
       bubbles: (this.NO_BUBBLE.indexOf(eventType)<0),
       cancelled: NO,
-      normalized: YES
+      normalized: YES,
+      simulated: true
     });
     if (attrs) SC.mixin(ret, attrs) ;
     return ret ;
@@ -368,18 +369,18 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
     @param elem {Element} the target element
     @param eventType {String} the event type
-    @param args {Array} optional argument or arguments to pass to handler.
+    @param event {SC.Event} [event] pre-normalized event to pass to handler
     @param donative ??
     @returns {Boolean} Return value of trigger or undefined if not fired
   */
-  trigger: function(elem, eventType, args, donative) {
+  trigger: function(elem, eventType, event, donative) {
 
     // if a CQ object is passed in, either call add on each item in the
     // matched set, or simply get the first element and use that.
     if (elem && elem.isCoreQuery) {
       if (elem.length > 0) {
         elem.forEach(function(e) {
-          this.trigger(e, eventType, args, donative);
+          this.trigger(e, eventType, event, donative);
         }, this);
         return this;
       } else elem = elem[0];
@@ -389,25 +390,23 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     // don't do events on text and comment nodes
     if ( elem.nodeType === 3 || elem.nodeType === 8 ) return undefined;
 
-    // Normalize to an array
-    args = SC.A(args) ;
+    // Backwards-compatibility. Normalize from an Array.
+    if (SC.typeOf(event) === SC.T_ARRAY) { event = event[0]; }
 
     var ret, fn = SC.typeOf(elem[eventType] || null) === SC.T_FUNCTION ,
-        event, current, onfoo, isClick;
+        current, onfoo, isClick;
 
     // Get the event to pass, creating a fake one if necessary
-    event = args[0];
     if (!event || !event.preventDefault) {
-      event = this.simulateEvent(elem, eventType) ;
-      args.unshift(event) ;
+      event = this.simulateEvent(elem, eventType);
     }
 
-    event.type = eventType ;
+    event.type = eventType;
 
     // Trigger the event - bubble if enabled
     current = elem;
     do {
-      ret = SC.Event.handle.apply(current, args);
+      ret = SC.Event.handle.call(current, event);
       current = (current===document) ? null : (current.parentNode || document);
     } while(!ret && event.bubbles && current);
     current = null ;
@@ -415,7 +414,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     // Handle triggering native .onfoo handlers
     onfoo = elem["on" + eventType] ;
     isClick = SC.$.nodeName(elem, 'a') && eventType === 'click';
-    if ((!fn || isClick) && onfoo && onfoo.apply(elem, args) === NO) ret = NO;
+    if ((!fn || isClick) && onfoo && onfoo.call(elem, event) === NO) ret = NO;
 
     // Trigger the native events (except for clicks on links)
     if (fn && donative !== NO && ret !== NO && !isClick) {
@@ -491,7 +490,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
       }
 
       // Clean up the cached normalized SC.Event so that it's not holding onto extra memory.
-      event._sc_clearNormalizedEvent();
+      if (!event.originalEvent.simulated) { event._sc_clearNormalizedEvent(); }
     }
 
     return val;
@@ -547,12 +546,13 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
         return YES;
       },
 
-      handler: function(event) {
+      handler: function (event) {
         // If we actually just moused on to a sub-element, ignore it
         if ( SC.Event._withinElement(event, this) ) return YES;
         // Execute the right handlers by setting the event type to mouseenter
         event.type = "mouseenter";
-        return SC.Event.handle.apply(this, arguments);
+
+        return SC.Event.handle.call(this, event);
       }
     },
 
@@ -571,12 +571,12 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
         return YES;
       },
 
-      handler: function(event) {
+      handler: function (event) {
         // If we actually just moused on to a sub-element, ignore it
         if ( SC.Event._withinElement(event, this) ) return YES;
         // Execute the right handlers by setting the event type to mouseleave
         event.type = "mouseleave";
-        return SC.Event.handle.apply(this, arguments);
+        return SC.Event.handle.call(this, event);
       }
     }
   },

@@ -73,9 +73,7 @@ test("Touch event handling and juggling.", function() {
   event.changedTouches = [event];
 
   // Trigger touchstart: outerView.captureTouch > outerView.touchStart
-  SC.run(function() {
-    SC.Event.trigger(layer, 'touchstart', [event]);
-  });
+  SC.Event.trigger(layer, 'touchstart', [event]);
 
   equals(outerCapture, 1, "To capture the initial touch, outerView.captureTouch should have run:");
   equals(outerStart, 1, "Having captured the initial touch, outerView.touchStart should have run:");
@@ -94,9 +92,7 @@ test("Touch event handling and juggling.", function() {
   touch = SC.copy(touch);
 
   event = SC.Event.simulateEvent(layer, 'touchmove', { touches: [touch], identifier: 4, changedTouches: [touch] });
-  SC.run(function() {
-    SC.Event.trigger(layer, 'touchmove', [event]);
-  });
+  SC.Event.trigger(layer, 'touchmove', [event]);
 
   if (outerCapture !== 1) ok(false, "outerView.captureTouch should only have been called once!");
   if (outerStart !== 1) ok(false, "outerView.touchStart should only have been called once!");
@@ -114,9 +110,7 @@ test("Touch event handling and juggling.", function() {
   touch = SC.copy(touch);
 
   event = SC.Event.simulateEvent(layer, 'touchmove', { touches: [touch], identifier: 4, changedTouches: [touch] });
-  SC.run(function() {
-    SC.Event.trigger(layer, 'touchmove', [event]);
-  });
+  SC.Event.trigger(layer, 'touchmove', [event]);
 
   if (outerCapture !== 1) ok(false, "outerView.captureTouch should only have been called once!");
   equals(outerDragged, 1, "Having passed ownership to innerView, outerView.touchesDragged should not have been called again:");
@@ -135,9 +129,7 @@ test("Touch event handling and juggling.", function() {
   touch = SC.copy(touch);
 
   event = SC.Event.simulateEvent(layer, 'touchend', { touches: [touch], identifier: 4, changedTouches: [touch] });
-  SC.run(function() {
-    SC.Event.trigger(layer, 'touchend', [event]);
-  });
+  SC.Event.trigger(layer, 'touchend', [event]);
 
   if (outerCapture !== 1) ok(false, "outerView.captureTouch should only have been called once!");
   if (outerStart !== 1) ok(false, "outerView.touchStart should only have been called once!");
