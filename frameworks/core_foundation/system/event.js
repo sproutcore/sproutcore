@@ -180,21 +180,24 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
     // if target is a function, treat it as the method, with optional context
     if (SC.typeOf(target) === SC.T_FUNCTION) {
-      context = method; method = target; target = null;
+      context = method;
+      method = target;
+      target = null;
 
     // handle case where passed method is a key on the target.
     } else if (target && SC.typeOf(method) === SC.T_STRING) {
-      method = target[method] ;
+      method = target[method];
     }
 
     // Get the handlers queue for this element/eventType.  If the queue does
     // not exist yet, create it and also setup the shared listener for this
     // eventType.
-    var events = SC.data(elem, "sc_events") || SC.data(elem, "sc_events", {}) ,
+    var events = SC.data(elem, "sc_events") || SC.data(elem, "sc_events", {}),
         handlers = events[eventType];
+
     if (!handlers) {
-      handlers = events[eventType] = {} ;
-      this._addEventListener(elem, eventType, useCapture) ;
+      handlers = events[eventType] = {};
+      this._addEventListener(elem, eventType, useCapture);
     }
 
     // Build the handler array and add to queue
@@ -625,16 +628,17 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     @param eventType {String} the event type
   */
   _addEventListener: function(elem, eventType, useCapture) {
-    var listener, special = this.special[eventType] ;
+    var listener,
+        special = this.special[eventType] ;
 
 		if (!useCapture) {
-			useCapture = NO;
+			useCapture = false;
 		}
 
     // Check for a special event handler
     // Only use addEventListener/attachEvent if the special
-    // events handler returns NO
-    if ( !special || special.setup.call(elem)===NO) {
+    // events handler returns false
+    if ( !special || special.setup.call(elem) === false) {
 
       // Save element in cache.  This must be removed later to avoid
       // memory leaks.
