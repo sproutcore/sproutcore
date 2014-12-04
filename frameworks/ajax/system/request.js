@@ -524,7 +524,8 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
     @returns {SC.Request} The SC.Request object.
   */
   notify: function(statusOrEvent, target, action) {
-    var args;
+    var args,
+      i, len;
 
     //@if (debug)
     if (statusOrEvent === 'loadend' && SC.Request.WARN_ON_LOADEND) {
@@ -539,7 +540,7 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
       // Fast arguments access.
       // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
       args = new Array(arguments.length - 2); //  SC.A(arguments).slice(2)
-      for (var i = 0, len = args.length; i < len; i++) { args[i] = arguments[i + 2]; }
+      for (i = 0, len = args.length; i < len; i++) { args[i] = arguments[i + 2]; }
 
       // Shift the arguments
       action = target;
@@ -552,7 +553,7 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
         // Fast arguments access.
         // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
         args = new Array(arguments.length - 3); //  SC.A(arguments).slice(3)
-        for (var i = 0, len = args.length; i < len; i++) { args[i] = arguments[i + 3]; }
+        for (i = 0, len = args.length; i < len; i++) { args[i] = arguments[i + 3]; }
       } else {
         args = [];
       }

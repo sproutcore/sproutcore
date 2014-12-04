@@ -21,7 +21,8 @@ Affected: SC.Request, SC.WebSocket, SC.DelegateSupport, SC.Color, SC.Event, SC.S
 
 ### BUG FIXES
 
-* Fixes a deficiency in SC.RootResponder.prototype.sendAction. It failed to pass the given context argument along to the target unless the target was a ResponderContext object (i.e. SC.Pane or SC.Application).
+* Fixed a deficiency in SC.RootResponder.prototype.sendAction. It failed to pass the given context argument along to the target unless the target was a ResponderContext object (i.e. SC.Pane or SC.Application).
+* Fixed a memory leak in SC.WebSocket due to a set on an undeclared (i.e. global) variable.
 
 1.11.0.rc1
 -----------

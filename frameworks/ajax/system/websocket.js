@@ -196,13 +196,14 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate, {
     @returns {SC.WebSocket} The SC.WebSocket object.
   */
   notify: function(event, target, action) {
-    var args;
+    var args,
+      i, len;
 
     if (SC.typeOf(event) !== SC.T_STRING) {
       // Fast arguments access.
       // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
       args = new Array(arguments.length - 2); //  SC.A(arguments).slice(2)
-      for (var i = 0, len = args.length; i < len; i++) { args[i] = arguments[i + 2]; }
+      for (i = 0, len = args.length; i < len; i++) { args[i] = arguments[i + 2]; }
 
       // Shift the arguments
       action = target;
@@ -213,7 +214,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate, {
         // Fast arguments access.
         // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
         args = new Array(arguments.length - 3); //  SC.A(arguments).slice(3)
-        for (var i = 0, len = args.length; i < len; i++) { args[i] = arguments[i + 3]; }
+        for (i = 0, len = args.length; i < len; i++) { args[i] = arguments[i + 3]; }
       } else {
         args = [];
       }
@@ -224,12 +225,12 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate, {
     if(!listeners[event]) { listeners[event] = []; }
 
     //@if(debug)
-    for (var i = listeners[event].length - 1; i >= 0; i--) {
+    for (i = listeners[event].length - 1; i >= 0; i--) {
       var listener = listeners[event][i];
       if (listener.event === event && listener.target === target && listener.action === action) {
         SC.warn("Developer Warning: This listener is already defined.");
       }
-    };
+    }
     //@endif
 
     // Add another listener for the given event name.
@@ -248,7 +249,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate, {
   send: function(message) {
     if (this.isConnected === true && this.isAuth !== false) {
       if (this.isJSON) {
-        var message = JSON.stringify(message);
+        message = JSON.stringify(message);
       }
 
       this.socket.send(message);
@@ -282,9 +283,13 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate, {
   */
   onMessage: function(messageEvent) {
     if (messageEvent) {
-      var message = data = messageEvent.data,
-        del = this.get('objectDelegate'),
-        ret = del.webSocketDidReceiveMessage(this, data);
+      var del = this.get('objectDelegate'),
+        message,
+        data,
+        ret;
+
+      message = data = messageEvent.data;
+      ret = del.webSocketDidReceiveMessage(this, data);
 
       if (ret !== true) {
         if (this.isJSON) {
