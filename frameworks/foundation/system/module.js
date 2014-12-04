@@ -8,7 +8,10 @@
 /*globals jQuery */
 
 sc_require('tasks/task');
+
+//@if(debug)
 SC.LOG_MODULE_LOADING = YES;
+//@endif
 
 /**
   SC.Module is responsible for dynamically loading in JavaScript and other
@@ -69,7 +72,9 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
       target = null;
     }
 
+    //@if(debug)
     if (log) SC.debug("SC.Module: Attempting to load '%@'", moduleName);
+    //@endif
 
     // If we couldn't find anything in the SC.MODULE_INFO hash, we don't have any record of the
     // requested module.
@@ -84,7 +89,9 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
     // If the module is already loaded, execute the callback immediately if SproutCore is loaded,
     // or else as soon as SC has finished loading.
     if (module.isLoaded && !module.isWaitingForRunLoop) {
+      //@if(debug)
       if (log) SC.debug("SC.Module: Module '%@' already loaded.", moduleName);
+      //@endif
 
       // we can't just eval it if its dependencies have not been met...
       if (!this._dependenciesMetForModule(moduleName)) {
@@ -100,7 +107,9 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
       // If the module has finished loading and we have the string
       // representation, try to evaluate it now.
       if (module.source) {
+        //@if(debug)
         if (log) SC.debug("SC.Module: Evaluating JavaScript for module '%@'.", moduleName);
+        //@endif
         this._evaluateStringLoadedModule(module);
 
         // we can't let it return normally here, because we need the module to wait until the end of the run loop.
@@ -137,7 +146,10 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
     // The module is not yet loaded, so register the callback and, if necessary, begin loading
     // the code.
     else {
+
+      //@if(debug)
       if (log) SC.debug("SC.Module: Module '%@' is not loaded, loading now.", moduleName);
+      //@endif
 
       // If this method is called more than once for the same module before it is finished
       // loading, we might have multiple callbacks that need to be executed once it loads.
@@ -398,7 +410,10 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
   _loadDependenciesForModule: function (moduleName) {
     // Load module's dependencies first.
     var moduleInfo      = SC.MODULE_INFO[moduleName];
+
+    //@if(debug)
     var log             = SC.LOG_MODULE_LOADING;
+    //@endif
     var dependencies    = moduleInfo.dependencies || [];
     var dependenciesMet = YES;
     var len             = dependencies.length;
@@ -439,7 +454,9 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
 
           dependents.push(moduleName);
 
+          //@if(debug)
           if (log) SC.debug("SC.Module: '%@' depends on '%@', loading dependency…", moduleName, requiredModuleName);
+          //@endif
 
           // Load dependencies
           SC.Module.loadModule(requiredModuleName);
@@ -498,7 +515,9 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
     var moduleInfo = SC.MODULE_INFO[moduleName], callbacks;
     if (!moduleInfo) return; // shouldn't happen, but recover anyway
 
+    //@if(debug)
     if (SC.LOG_MODULE_LOADING) SC.debug("SC.Module: Module '%@' has completed loading, invoking callbacks.", moduleName);
+    //@endif
 
     callbacks = moduleInfo.callbacks || [];
 
@@ -510,9 +529,11 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
   _evaluateAndInvokeCallbacks: function (moduleName) {
     var moduleInfo = SC.MODULE_INFO;
     var module = moduleInfo[moduleName];
+    //@if(debug)
     var log = SC.LOG_MODULE_LOADING;
 
     if (log) SC.debug("SC.Module: Evaluating and invoking callbacks for '%@'.", moduleName);
+    //@endif
 
     if (module.source) {
       this._evaluateStringLoadedModule(module);
@@ -532,7 +553,9 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
   _moduleDidBecomeReady: function (moduleName) {
     var moduleInfo = SC.MODULE_INFO;
     var module = moduleInfo[moduleName];
+    //@if(debug)
     var log = SC.LOG_MODULE_LOADING;
+    //@endif
 
     module.isWaitingForRunLoop = NO;
 
@@ -554,7 +577,9 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
       dependentName = dependents[idx];
       dependent = moduleInfo[dependentName];
       if (dependent.isLoaded && this._dependenciesMetForModule(dependentName)) {
+        //@if(debug)
         if (log) SC.debug("SC.Module: Now that %@ has loaded, all dependencies for a dependent %@ are met.", moduleName, dependentName);
+        //@endif
         this._evaluateAndInvokeCallbacks(dependentName);
       }
     }
@@ -572,19 +597,27 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
   */
   _moduleDidLoad: function (moduleName) {
     var module = SC.MODULE_INFO[moduleName];
+    //@if(debug)
     var log    = SC.LOG_MODULE_LOADING;
+    //@endif
     var dependenciesMet;
 
+    //@if(debug)
     if (log) SC.debug("SC.Module: Module '%@' finished loading.", moduleName);
+    //@endif
 
     if (!module) {
+      //@if(debug)
       if (log) SC.debug("SC._moduleDidLoad() called for unknown module '@'.", moduleName);
+      //@endif
       module = SC.MODULE_INFO[moduleName] = { isLoaded: YES, isReady: YES };
       return;
     }
 
     if (module.isLoaded) {
+      //@if(debug)
       if (log) SC.debug("SC._moduleDidLoad() called more than once for module '%@'. Skipping.", moduleName);
+      //@endif
       return;
     }
 
@@ -597,11 +630,15 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
       if (dependenciesMet) {
         this._evaluateAndInvokeCallbacks(moduleName);
       } else {
+        //@if(debug)
         if (log) SC.debug("SC.Module: Dependencies for '%@' not met yet, waiting to evaluate.", moduleName);
+        //@endif
       }
     } else {
       delete module.isPrefetching;
+      //@if(debug)
       if (log) SC.debug("SC.Module: Module '%@' was prefetched, not evaluating until needed.", moduleName);
+      //@endif
     }
   },
 
