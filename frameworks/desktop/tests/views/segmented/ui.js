@@ -605,5 +605,20 @@ var pane;
     ok(SC.none(segmentedView.getPath('layout.width')), "Having flexible layout prevents view from auto-resizing.");
   });
 
+  test("Check adjusting a segment views layout updates its frame", function() {
+    var segmentedView;
+
+    segmentedView = pane.view('3_empty');
+
+    equals(segmentedView.get('layout').height, 25, '3_empty.layout should have a height of 25');
+    equals(segmentedView.get('frame').height, 25, '3_empty.layout should have a height of 25');
+
+    // adjust the views height
+    segmentedView.adjust('height', 30);
+
+    equals(segmentedView.get('layout').height, 30, '3_empty.layout should have a height of 30');
+    equals(segmentedView.get('frame').height, 30, '3_empty.layout should have a height of 30');
+  })
+
 
 })();
