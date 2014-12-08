@@ -952,7 +952,7 @@ SC.RenderContext = SC.Builder.create(
   /**
     Removes all styles from the context.
 
-    Be aware that setStyle() only effects the styles specified.  If there
+    Be aware that setStyle() only affects the styles specified.  If there
     are existing styles that are not modified by a call to setStyle(), they
     will remain on the context.  For example, if you call addStyle('margin-left', 10)
     and addStyle('margin-right', 10) followed by setClass({ 'margin-right': null }),
