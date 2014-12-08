@@ -277,16 +277,18 @@ SC.Set = SC.mixin({},
   add: function(obj) {
     if (this.isFrozen) throw SC.FROZEN_ERROR;
 
-    // cannot add null to a set.
-    if (SC.none(obj)) return this;
-
-    // Implementation note:  SC.hashFor() is inlined because sets are
+    // Implementation note:  SC.none() and SC.hashFor() is inlined because sets are
     // fundamental in SproutCore, and the inlined code is ~ 25% faster than
     // calling SC.hashFor() in IE8.
+
+    // Cannot add null to a set.
+    if (obj === null || obj === undefined) return this;
+
     var hashFunc,
         guid = ((hashFunc = obj.hash) && (typeof hashFunc === "function")) ? hashFunc.call(obj) : SC.guidFor(obj),
         idx  = this[guid],
         len  = this.length;
+
     if ((idx >= len) || (this[idx] !== obj)) {
       this[len] = obj;
       this[guid] = len;
@@ -296,7 +298,7 @@ SC.Set = SC.mixin({},
 
     if (this.isObservable) this.enumerableContentDidChange();
 
-    return this ;
+    return this;
   },
 
   /**
