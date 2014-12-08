@@ -145,6 +145,7 @@ SC.View.reopen(
     }
 
     // Ignore undefined values or values equal to the current value.
+    /*jshint eqeqeq:false*/
     if (newValue !== undefined && layout[key] != newValue) { // coerced so '100' == 100
       // Only clone the layout if it is not given.
       if (!newLayout) newLayout = SC.clone(this.get('layout'));
@@ -1143,11 +1144,12 @@ SC.View.reopen(
 
   /** @private */
   _doUpdateLayoutStyle: function () {
-    var context;
+    var layer = this.get('layer'),
+      layoutStyle = this.get('layoutStyle');
 
-    context = this.renderContext(this.get('layer'));
-    context.setStyle(this.get('layoutStyle'));
-    context.update();
+    for (var styleName in layoutStyle) {
+      layer.style[styleName] = layoutStyle[styleName];
+    }
 
     // Reset that an update is required.
     this._layoutStyleNeedsUpdate = false;
