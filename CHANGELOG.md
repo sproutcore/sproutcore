@@ -34,6 +34,7 @@ Affected: SC.Request, SC.WebSocket, SC.DelegateSupport, SC.Color, SC.Event, SC.S
 * Fixed a very slow memory leak in SC.browser. Caching of the experimental style names for the current browser would fail intermittently since the cache key was being kept on the CSSStyleDeclaration which the browser (seen in Chrome) would occasionally drop. Caching is now done per experimental style name, which is more correct and has the added benefit of being marginally faster than using SC.guidFor.
 * Fixed a deficiency in SC.RootResponder.prototype.sendAction. It failed to pass the given context argument along to the target unless the target was a ResponderContext object (i.e. SC.Pane or SC.Application).
 * Fixed a memory leak in SC.WebSocket due to a set on an undeclared (i.e. global) variable.
+* Fixed an issue with SC.SegmentedView that meant its frame property failed to update when its layout was changed.
 
 1.11.0.rc1
 -----------
