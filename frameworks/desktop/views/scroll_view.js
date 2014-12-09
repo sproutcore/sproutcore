@@ -1126,7 +1126,7 @@ SC.ScrollView = SC.View.extend({
           if (this._sc_gestureAnchorHOffset != null) {
             this._sc_gestureAnchorHOffset = value;
           }
-        } else {
+        } else if (this.get('canScrollHorizontal')) {
           // Take alignment into account.
           var horizontalAlign = this.get('horizontalAlign'),
               horizontalScrollOffset = this._sc_horizontalScrollOffset,
@@ -1185,7 +1185,7 @@ SC.ScrollView = SC.View.extend({
           if (this._sc_gestureAnchorVOffset != null) {
             this._sc_gestureAnchorVOffset = value;
           }
-        } else {
+        } else if (this.get('canScrollVertical')) {
           var verticalAlign = this.get('verticalAlign'),
               verticalScrollOffset = this._sc_verticalScrollOffset,
               minimumVerticalScrollOffset = this.get('minimumVerticalScrollOffset');
