@@ -944,9 +944,14 @@ SC.ScrollView = SC.View.extend({
   _sc_containerViewFrameDidChange: function () {
     // Run the content view size change code (updates min & max offsets, sets content alignment if necessary, shows scrollers if necessary)
     var containerFrame = this.getPath('containerView.frame'),
-      contentView = this.get('contentView');
+      contentView = this.get('contentView'),
+      lastMaximumHorizontalScrollOffset = this.get('maximumHorizontalScrollOffset'),
+      lastMaximumVerticalScrollOffset = this.get('maximumVerticalScrollOffset'),
+      lastMinimumHorizontalScrollOffset = this.get('minimumHorizontalScrollOffset'),
+      lastMinimumVerticalScrollOffset = this.get('minimumVerticalScrollOffset');
 
     // Cache the current height and width of the container view, so we can only watch for size changes.
+    // This will update the maximum scroll offsets when they are requested.
     this.set('_sc_containerHeight', containerFrame.height);
     this.set('_sc_containerWidth', containerFrame.width);
 
@@ -965,7 +970,7 @@ SC.ScrollView = SC.View.extend({
 
       // Update the scrollers regardless.
       // if (!didAdjust) {
-      this._sc_contentViewSizeDidChange();
+      this._sc_contentViewSizeDidChange(lastMinimumHorizontalScrollOffset, lastMaximumHorizontalScrollOffset, lastMinimumVerticalScrollOffset, lastMaximumVerticalScrollOffset);
       // }
     }
 
@@ -1052,7 +1057,11 @@ SC.ScrollView = SC.View.extend({
     var lastHeight = this._sc_contentHeight,
         lastScale = this._sc_contentScale,
         lastWidth = this._sc_contentWidth,
-        newFrame = this.getPath('contentView.borderFrame');
+        newFrame = this.getPath('contentView.borderFrame'),
+        lastMaximumHorizontalScrollOffset = this.get('maximumHorizontalScrollOffset'),
+        lastMaximumVerticalScrollOffset = this.get('maximumVerticalScrollOffset'),
+        lastMinimumHorizontalScrollOffset = this.get('minimumHorizontalScrollOffset'),
+        lastMinimumVerticalScrollOffset = this.get('minimumVerticalScrollOffset');
 
     if (newFrame) {
       // Determine whether the scale has changed.
@@ -1073,14 +1082,13 @@ SC.ScrollView = SC.View.extend({
 
       // If any of the size values changed, update.
       if (this._sc_contentScaleDidChange || this._sc_contentWidthDidChange || this._sc_contentHeightDidChange) {
-        // Filter the observer input.
-        this.invokeOnce(this._sc_contentViewSizeDidChange);
+        this._sc_contentViewSizeDidChange(lastMinimumHorizontalScrollOffset, lastMaximumHorizontalScrollOffset, lastMinimumVerticalScrollOffset, lastMaximumVerticalScrollOffset);
       }
     }
   },
 
   /** @private When the content view's size changes, we need to update our scroll offset properties. */
-  _sc_contentViewSizeDidChange: function () {
+  _sc_contentViewSizeDidChange: function (lastMinimumHorizontalScrollOffset, lastMaximumHorizontalScrollOffset, lastMinimumVerticalScrollOffset, lastMaximumVerticalScrollOffset) {
     var maximumHorizontalScrollOffset = this.get('maximumHorizontalScrollOffset'),
       maximumVerticalScrollOffset = this.get('maximumVerticalScrollOffset'),
       containerHeight, containerWidth,
@@ -1118,6 +1126,35 @@ SC.ScrollView = SC.View.extend({
           if (this._sc_gestureAnchorHOffset != null) {
             this._sc_gestureAnchorHOffset = value;
           }
+        } else {
+          // Take alignment into account.
+          var horizontalAlign = this.get('horizontalAlign'),
+              horizontalScrollOffset = this._sc_horizontalScrollOffset,
+              minimumHorizontalScrollOffset = this.get('minimumHorizontalScrollOffset');
+
+          switch (horizontalAlign) {
+          case SC.ALIGN_CENTER:
+            // Switched to scrolling horizontally, stick to center OR was scrolled at center and size changed.
+            if ((lastMinimumHorizontalScrollOffset < 0 && minimumHorizontalScrollOffset === 0) ||
+              (horizontalScrollOffset === lastMaximumHorizontalScrollOffset / 2)) {
+              this.set('horizontalScrollOffset', maximumHorizontalScrollOffset / 2);
+            }
+
+            break;
+          case SC.ALIGN_RIGHT:
+            // Switched to scrolling horizontally, stick to right side OR was scrolled to right and size changed.
+            if ((lastMinimumHorizontalScrollOffset < 0 && minimumHorizontalScrollOffset === 0) ||
+              (horizontalScrollOffset === lastMaximumHorizontalScrollOffset)) {
+              this.set('horizontalScrollOffset', maximumHorizontalScrollOffset);
+            }
+
+            break;
+          }
+
+          // Was at right side and size shrunk.
+          if (horizontalScrollOffset > maximumHorizontalScrollOffset) {
+            this.set('horizontalScrollOffset', maximumHorizontalScrollOffset);
+          }
         }
       }
     }
@@ -1147,6 +1184,34 @@ SC.ScrollView = SC.View.extend({
           // Live scale gesture. Update the anchor so that the scroll deltas are calculated correctly.
           if (this._sc_gestureAnchorVOffset != null) {
             this._sc_gestureAnchorVOffset = value;
+          }
+        } else {
+          var verticalAlign = this.get('verticalAlign'),
+              verticalScrollOffset = this._sc_verticalScrollOffset,
+              minimumVerticalScrollOffset = this.get('minimumVerticalScrollOffset');
+
+          switch (verticalAlign) {
+          case SC.ALIGN_MIDDLE:
+            // Switched to scrolling vertically, stick to middle OR was scrolled at middle and size changed.
+            if ((lastMinimumVerticalScrollOffset < 0 && minimumVerticalScrollOffset === 0) ||
+              (verticalScrollOffset === lastMaximumVerticalScrollOffset / 2)) {
+              this.set('verticalScrollOffset', maximumVerticalScrollOffset / 2);
+            }
+
+            break;
+          case SC.ALIGN_BOTTOM:
+            // Switched to scrolling vertically, stick to bottom side OR was scrolled to bottom and size changed.
+            if ((lastMinimumVerticalScrollOffset < 0 && minimumVerticalScrollOffset === 0) ||
+              (verticalScrollOffset === lastMaximumVerticalScrollOffset)) {
+              this.set('verticalScrollOffset', maximumVerticalScrollOffset);
+            }
+
+            break;
+          }
+
+          // Was at bottom side and size shrunk.
+          if (verticalScrollOffset > maximumVerticalScrollOffset) {
+            this.set('verticalScrollOffset', maximumVerticalScrollOffset);
           }
         }
       }

@@ -117,6 +117,194 @@ test("Scrolling to a certain co-ordinate of the container view", function () {
   });
 });
 
+
+test("Scroll offsets are correct when scroll view's frame changes", function () {
+
+  // Scenario: left & top aligned, at maximums, scroll view shrinks: don't move content
+  SC.run(function () {
+    view.scrollBy(3900, 3900);
+    pane.adjust({ width: 64, height: 64 });
+    equals(view.get('horizontalScrollOffset'), 3900, "After resizing the pane with adjust height of 64, horizontal offset must not change");
+    equals(view.get('verticalScrollOffset'), 3900, "After resizing the pane with adjust width of 64, vertical offset must not change");
+  });
+
+  // Reset the parent view.
+  SC.run(function () {
+    view.scrollTo(0, 0);
+    pane.adjust({ width: 114, height: 114 });
+  });
+
+  // Scenario: left & top aligned, at maximums, scroll view grows: hug the right & bottom sides.
+  SC.run(function () {
+    view.scrollBy(3900, 3900);
+    pane.adjust({ width: 1014, height: 1014 });
+    equals(view.get('horizontalScrollOffset'), view.get('maximumHorizontalScrollOffset'), "After resizing the pane with adjust height of 1014, horizontal offset must be maximum");
+    equals(view.get('verticalScrollOffset'), view.get('maximumVerticalScrollOffset'), "After resizing the pane with adjust width of 1014, vertical offset must be maximum");
+  });
+
+  // Reset the parent view.
+  SC.run(function () {
+    view.scrollTo(0, 0);
+    pane.adjust({ width: 114, height: 114 });
+  });
+
+  // Set alignments to hug right and bottom edges.
+  SC.run(function() {
+    view.set('horizontalAlign', SC.ALIGN_RIGHT);
+    view.set('verticalAlign', SC.ALIGN_BOTTOM);
+  });
+
+  // Scenario: right & bottom aligned, at maximums, scroll view shrinks: hug the right & bottom sides.
+  SC.run(function () {
+    view.scrollBy(3900, 3900);
+    pane.adjust({ width: 64, height: 64 });
+    equals(view.get('horizontalScrollOffset'), view.get('maximumHorizontalScrollOffset'), "After resizing the pane with adjust height of 64, horizontal offset must be maximum");
+    equals(view.get('verticalScrollOffset'), view.get('maximumVerticalScrollOffset'), "After resizing the pane with adjust width of 64, vertical offset must be maximum");
+  });
+
+  // Reset the parent view.
+  SC.run(function () {
+    view.scrollTo(0, 0);
+    pane.adjust({ width: 114, height: 114 });
+  });
+
+  // Scenario: right & bottom aligned, at maximums, scroll view grows: hug the right & bottom sides.
+  SC.run(function () {
+    view.scrollBy(3900, 3900);
+    pane.adjust({ width: 1014, height: 1014 });
+    equals(view.get('horizontalScrollOffset'), view.get('maximumHorizontalScrollOffset'), "After resizing the pane with adjust height of 1014, horizontal offset must be maximum");
+    equals(view.get('verticalScrollOffset'), view.get('maximumVerticalScrollOffset'), "After resizing the pane with adjust width of 1014, vertical offset must be maximum");
+  });
+
+  // Reset the parent view.
+  SC.run(function () {
+    view.scrollTo(0, 0);
+    pane.adjust({ width: 114, height: 114 });
+  });
+
+  // Set alignments to be center and middle.
+  SC.run(function() {
+    view.set('horizontalAlign', SC.ALIGN_CENTER);
+    view.set('verticalAlign', SC.ALIGN_MIDDLE);
+  });
+
+  // Scenario: center & middle aligned, at center & middle, scroll view shrinks: stick to center & middle
+  SC.run(function () {
+    view.scrollBy(1950, 1950);
+    pane.adjust({ width: 64, height: 64 });
+    equals(view.get('horizontalScrollOffset'), view.get('maximumHorizontalScrollOffset') / 2, "After resizing the pane with adjust height of 64, horizontal offset should stay centered");
+    equals(view.get('verticalScrollOffset'), view.get('maximumVerticalScrollOffset') / 2, "After resizing the pane with adjust width of 64, vertical offset should stay centered");
+  });
+
+  // Reset the parent view.
+  SC.run(function () {
+    view.scrollTo(0, 0);
+    pane.adjust({ width: 114, height: 114 });
+  });
+
+  // Scenario: center & middle aligned, at center & middle, scroll view grows: stick to center & middle
+  SC.run(function () {
+    view.scrollBy(1950, 1950);
+    pane.adjust({ width: 1014, height: 1014 });
+    equals(view.get('horizontalScrollOffset'), view.get('maximumHorizontalScrollOffset') / 2, "After resizing the pane with adjust height of 1014, horizontal offset should stay centered");
+    equals(view.get('verticalScrollOffset'), view.get('maximumVerticalScrollOffset') / 2, "After resizing the pane with adjust width of 1014, vertical offset should stay centered");
+  });
+});
+
+test("Scroll offsets are correct when scroll view's content frame changes", function () {
+  var contentView = view.get('contentView');
+
+  // Scenario: left & top aligned, at maximums, content view shrinks: hug the right & bottom sides
+  SC.run(function () {
+    view.scrollBy(3900, 3900);
+    contentView.adjust({ width: 3900, height: 3900 });
+    equals(view.get('horizontalScrollOffset'), view.get('maximumHorizontalScrollOffset'), "After resizing the content with adjust width of 3900, horizontal offset must be at maximum");
+    equals(view.get('verticalScrollOffset'), view.get('maximumVerticalScrollOffset'), "After resizing the content with adjust height of 3900 vertical offset must be at maximum");
+  });
+
+  // Reset the view.
+  SC.run(function () {
+    view.scrollTo(0, 0);
+    contentView.adjust({ width: 4000, height: 4000 });
+  });
+
+  // Scenario: left & top aligned, at maximums, content view grows: don't move
+  SC.run(function () {
+    view.scrollBy(3900, 3900);
+    contentView.adjust({ width: 4100, height: 4100 });
+    equals(view.get('horizontalScrollOffset'), 3900, "After resizing the content with adjust width of 4100, horizontal offset must not change");
+    equals(view.get('verticalScrollOffset'), 3900, "After resizing the content with adjust height of 4100, vertical offset must not change");
+  });
+
+  // Reset the view.
+  SC.run(function () {
+    view.scrollTo(0, 0);
+    contentView.adjust({ width: 4000, height: 4000 });
+  });
+
+  // Set alignments to hug right and bottom edges.
+  SC.run(function() {
+    view.set('horizontalAlign', SC.ALIGN_RIGHT);
+    view.set('verticalAlign', SC.ALIGN_BOTTOM);
+  });
+
+  // Scenario: right & bottom aligned, at maximums, content view shrinks: hug the right & bottom sides.
+  SC.run(function () {
+    view.scrollBy(3900, 3900);
+    contentView.adjust({ width: 3900, height: 3900 });
+    equals(view.get('horizontalScrollOffset'), view.get('maximumHorizontalScrollOffset'), "After resizing the content with adjust width of 3900, horizontal offset must be at maximum");
+    equals(view.get('verticalScrollOffset'), view.get('maximumVerticalScrollOffset'), "After resizing the content with adjust height of 3900 vertical offset must be at maximum");
+  });
+
+  // Reset the view.
+  SC.run(function () {
+    view.scrollTo(0, 0);
+    contentView.adjust({ width: 4000, height: 4000 });
+  });
+
+  // Scenario: right & bottom aligned, at maximums, content view grows: hug the right & bottom sides.
+  SC.run(function () {
+    view.scrollBy(3900, 3900);
+    contentView.adjust({ width: 4100, height: 4100 });
+    equals(view.get('horizontalScrollOffset'), view.get('maximumHorizontalScrollOffset'), "After resizing the content with adjust width of 4100, horizontal offset must be at maximum");
+    equals(view.get('verticalScrollOffset'), view.get('maximumVerticalScrollOffset'), "After resizing the content with adjust height of 4100 vertical offset must be at maximum");
+  });
+
+  // Reset the view.
+  SC.run(function () {
+    view.scrollTo(0, 0);
+    contentView.adjust({ width: 4000, height: 4000 });
+  });
+
+  // Set alignments to be center and middle.
+  SC.run(function() {
+    view.set('horizontalAlign', SC.ALIGN_CENTER);
+    view.set('verticalAlign', SC.ALIGN_MIDDLE);
+  });
+
+  // Scenario: center & middle aligned, at center & middle, content view shrinks: stick to center & middle
+  SC.run(function () {
+    view.scrollBy(1950, 1950);
+    contentView.adjust({ width: 3900, height: 3900 });
+    equals(view.get('horizontalScrollOffset'), view.get('maximumHorizontalScrollOffset') / 2, "After resizing the content with adjust width of 3900, horizontal offset should stay centered");
+    equals(view.get('verticalScrollOffset'), view.get('maximumVerticalScrollOffset') / 2, "After resizing the content with adjust height of 3900 vertical offset should stay centered");
+  });
+
+  // Reset the view.
+  SC.run(function () {
+    view.scrollTo(0, 0);
+    contentView.adjust({ width: 4000, height: 4000 });
+  });
+
+  // Scenario: center & middle aligned, at center & middle, scroll view grows: stick to center & middle
+  SC.run(function () {
+    view.scrollBy(1950, 1950);
+    contentView.adjust({ width: 4100, height: 4100 });
+    equals(view.get('horizontalScrollOffset'), view.get('maximumHorizontalScrollOffset') / 2, "After resizing the content with adjust width of 4100, horizontal offset should stay centered");
+    equals(view.get('verticalScrollOffset'), view.get('maximumVerticalScrollOffset') / 2, "After resizing the content with adjust height of 4100 vertical offset should stay centered");
+  });
+});
+
 test("Scrolling relative to the current possition of the container view", function () {
   equals(view.get('horizontalScrollOffset'), 0, "Initial horizontal offset must be zero");
   equals(view.get('verticalScrollOffset'), 0, "Initial vertical offset must be zero");

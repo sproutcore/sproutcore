@@ -6,6 +6,14 @@ CHANGE LOG
 
 ### CHANGES & IMPROVEMENTS
 
+* SC.ScrollView alignment handling has been improved for container (i.e. the scroll view) or content size changes. This change partially addresses a regression that allowed the content to appear offset incorrectly when it or the scroll view's size changed. But after some investigation, the behavior has also been improved to support the following scenarios:  
+
+1. The scroll view is left (or top) aligned, scrolled to the maximum right (or bottom) edge and container or content changes size: the content should stick to the right (or bottom) side
+2. The scroll view is left (or top) aligned, scrolled to the minimum left (or top) edge and container or content changes size: the content should stick to the left (or top) side
+3. The scroll view is right (or bottom) aligned, scrolled to the maximum right (or bottom) edge and container or content changes size: the content should stick to the right (or bottom) side
+4. The scroll view is right (or bottom) aligned, scrolled to the minimum left (or top) edge and container or content changes size: the content should stick to the left (or top) side
+5. The scroll view is center (or middle) aligned, scrolled to the center (or middle) and container or content changes size: the content should stick to the center (or middle)
+
 * Refactored SC.Event slightly. Most importantly, SC.Event instances are now cached per event type in order to avoid constant memory re-allocation. Previously, every DOM event was normalized into a new SC.Event object, which was later freed. In order to reduce the amount of memory churn, one SC.Event instance is cached per type of event and updated with the new DOM event as it comes in.
 * Removed long deprecated method, `SC.browser.compareVersion`. This method was deprecated in version 1.7 and is not used anywhere within the framework. As the deprecation warning noted, developers should use the `SC.browser.compare` method for doing a proper comparison between version strings.
 * The core methods used in SC.View layout have been slightly optimized to avoid memory re-allocation. Since SC.View layout code may run repeatedly in short order (e.g. re-positioning during scrolling), we need to ensure that no new objects are created each time. The reason for this is so that we're not quickly adding hundreds of small objects to the garbage heap that will need to be collected. Since we have no control over when garbage collection occurs, the best we can do is try to avoid it and to ensure that it completes as quickly as possible.
