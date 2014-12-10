@@ -37,30 +37,8 @@ SC.Page = SC.Object.extend(
     var value = this[key] ;
     if (value && value.isClass) {
       this[key] = value = value.create({ page: this }) ;
-      if (!this.get('inDesignMode')) value.awake() ;
       return value ;
     } else return sc_super();
-  },
-  
-  /**
-    Finds all views defined on this page instances and builds them.  This is 
-    a quick, brute force way to wake up all of the views in a page object.  It
-    is not generally recommended. Instead, you should use get() or getPath() 
-    to retrieve views and rely on the lazy creation process to set them up.
-    
-    @return {SC.Page} receiver
-  */
-  awake: function() {
-    // step through all views and build them
-    var value, key;
-    for(key in this) {
-      if (!this.hasOwnProperty(key)) continue ;
-      value = this[key] ;
-      if (value && value.isViewClass) {
-        this[key] = value = value.create({ page: this }) ;
-      }
-    }
-    return this;
   },
 
   /**

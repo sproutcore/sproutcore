@@ -144,7 +144,6 @@
 
   test("default nowShowing", function(){
     var view = pane.view("nowShowingDefault");
-    view.awake();
 
     var contentView = view.get('contentView');
 
@@ -164,7 +163,6 @@
 
   test("Cleans up instantiated views", function() {
     var view = pane.view("cleans-up-views");
-    view.awake();
 
     var contentView = view.get('contentView');
     SC.run(function() { view.set('nowShowing', SC.View.create()); });

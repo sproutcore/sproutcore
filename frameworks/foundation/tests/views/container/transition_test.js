@@ -30,10 +30,6 @@ module("SC.ContainerView Transitions", {
         childViews: [containerView]
       }).append();
     });
-
-    SC.run(function () {
-      containerView.awake();
-    });
   },
 
   teardown: function () {

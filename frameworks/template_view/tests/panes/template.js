@@ -18,20 +18,3 @@ test("Template panes append a main pane to the document body", function() {
   pane.remove();
   pane.destroy();
 });
-
-test("Template panes should be awoken", function(){
-  var didAwake = false;
-
-  var originalAwake = SC.MainPane.prototype.awake; // null for now, but just in case
-  SC.MainPane.prototype.awake = function(){ didAwake = true; }
-
-  var pane = SC.TemplatePane.append({
-    layerId: 'template-panes-are-so-cool',
-    template: SC.Handlebars.compile('<h1>foo bar baz</h1>')
-  });
-
-  SC.MainPane.prototype.awake = originalAwake;
-
-  ok(didAwake, "should have awoken the pane");
-  pane.destroy();
-});
