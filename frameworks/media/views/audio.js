@@ -298,6 +298,7 @@ SC.AudioView = SC.View.extend(
   addAudioDOMEvents: function() {
     var audioElem, view=this;
     audioElem = this.$('audio')[0];
+    audioElem.volume = this.get('volume');
     this.set('audioObject', audioElem);
     SC.Event.add(audioElem, 'durationchange', this, function () {
       SC.run(function() {
