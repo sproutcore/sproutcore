@@ -4,13 +4,14 @@
 //            portions copyright @2011 Apple Inc.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
+/* globals module, test, equals, ok */
+var content, delegate;
 
-var content, delegate ;
 var Delegate = SC.Object.extend(SC.CollectionRowDelegate, {
-  rowHeight: 40,
-  customRowHeightIndexes: SC.IndexSet.create(3).add(5,2),
-  contentIndexRowHeight: function(view, content, index) {
-    return this.get('customRowHeightIndexes').contains(index) ? view.get('customRowHeight') : this.get('rowHeight');
+  rowSize: 40,
+  customRowSizeIndexes: SC.IndexSet.create(3).add(5,2),
+  contentIndexRowSize: function(view, content, index) {
+    return this.get('customRowSizeIndexes').contains(index) ? view.get('customRowSize') : this.get('rowSize');
   },
 
   expected: function(view) {
@@ -19,7 +20,7 @@ var Delegate = SC.Object.extend(SC.CollectionRowDelegate, {
         loc = view.get('length');
 
     while(--loc>=0) {
-      ret[loc] = this.contentIndexRowHeight(view,content,loc);
+      ret[loc] = this.contentIndexRowSize(view,content,loc);
     }
 
     return ret ;
@@ -28,7 +29,7 @@ var Delegate = SC.Object.extend(SC.CollectionRowDelegate, {
 
 module("SC.ListView.rowSizeForContentIndex", {
   setup: function() {
-    content = "1 2 3 4 5 6 7 8 9 0".w().map(function(x) {
+    content = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'].map(function(x) {
       return SC.Object.create({ value: x });
     }, this);
 
@@ -38,12 +39,12 @@ module("SC.ListView.rowSizeForContentIndex", {
   }
 });
 
-function verifyRowHeights(view, rowHeight, expected) {
+function verifyRowHeights(view, rowSize, expected) {
   var loc = view.get('length'), actual, totalExpected = 0,
     rowSpacing = view.get('rowSpacing') || 0;
 
   ok(loc>0, 'content should have some length');
-  equals(view.rowSizeForContentIndex(loc+1), rowHeight, 'content.rowSizeForContentIndex(length+1) should be rowHeight');
+  equals(view.rowSizeForContentIndex(loc+1), rowSize, 'content.rowSizeForContentIndex(length+1) should be rowSize');
 
   while(--loc>=0) {
     actual = view.rowSizeForContentIndex(loc);
@@ -51,15 +52,15 @@ function verifyRowHeights(view, rowHeight, expected) {
       totalExpected += expected[loc];
       equals(actual, expected[loc], "content.rowSizeForContentIndex(%@) should be custom row height".fmt(loc));
     } else {
-      totalExpected += rowHeight;
-      equals(actual, rowHeight, 'content.rowSizeForContentIndex(%@) should be rowHeight'.fmt(loc));
+      totalExpected += rowSize;
+      equals(actual, rowSize, 'content.rowSizeForContentIndex(%@) should be rowSize'.fmt(loc));
     }
 
     totalExpected += rowSpacing;
   }
 
   // Don't include spacing after the last item.
-  equals(totalExpected - rowSpacing, view.get('layout').height, "The height of the list should match the total height of the rows including row spacing.")
+  equals(totalExpected - rowSpacing, view.get('layout').height, "The height of the list should match the total height of the rows including row spacing.");
 }
 
 // ..........................................................
@@ -69,7 +70,7 @@ function verifyRowHeights(view, rowHeight, expected) {
 test("constant row heights", function() {
   var view;
   SC.run(function() {
-    view = SC.ListView.create({ content: content, rowHeight: 40, customRowHeightIndexes: null });
+    view = SC.ListView.create({ content: content, rowSize: 40, customRowSizeIndexes: null });
   });
   verifyRowHeights(view, 40);
 });
@@ -77,7 +78,7 @@ test("constant row heights", function() {
 test("constant row heights with rowSpacing", function() {
   var view;
   SC.run(function() {
-    view = SC.ListView.create({ content: content, rowHeight: 40, rowSpacing: 2, customRowHeightIndexes: null });
+    view = SC.ListView.create({ content: content, rowSize: 40, rowSpacing: 2, customRowSizeIndexes: null });
   });
   verifyRowHeights(view, 40);
 });
@@ -87,7 +88,7 @@ test("custom row heights", function() {
   SC.run(function() {
     view = SC.ListView.create({
       content: content,
-      customRowHeight: 50,
+      customRowSize: 50,
       delegate: delegate
     });
   });
@@ -100,8 +101,8 @@ test("adding delegate should update calculation", function() {
   SC.run(function() {
     view = SC.ListView.create({
       content: content,
-      rowHeight: 30,
-      customRowHeight: 50
+      rowSize: 30,
+      customRowSize: 50
     });
   });
 
@@ -118,15 +119,15 @@ test("changing delegate from custom to not custom should update", function() {
   SC.run(function() {
     view = SC.ListView.create({
       content: content,
-      rowHeight: 30,
-      customRowHeight: 50,
+      rowSize: 30,
+      customRowSize: 50,
       delegate: delegate
     });
   });
   verifyRowHeights(view, 40, delegate.expected(view));
 
   SC.run(function() {
-    delegate.set('customRowHeightIndexes', null);
+    delegate.set('customRowSizeIndexes', null);
   });
   verifyRowHeights(view, 40);
 });
@@ -135,13 +136,13 @@ test("changing delegate from custom to not custom should update", function() {
 // SPECIAL CASES
 //
 
-test("computed custom row height indexes", function() {
+test("computed custom row size indexes", function() {
 
   delegate = Delegate.create({
-    indexes: Delegate.prototype.customRowHeightIndexes,
+    indexes: Delegate.prototype.customRowSizeIndexes,
     useIndexes: NO,
 
-    customRowHeightIndexes: function() {
+    customRowSizeIndexes: function() {
       return this.get('useIndexes') ? this.get('indexes') : null;
     }.property('useIndexes').cacheable()
   });
@@ -150,8 +151,8 @@ test("computed custom row height indexes", function() {
   SC.run(function() {
     view = SC.ListView.create({
       content: content,
-      rowHeight: 15,
-      customRowHeight: 50,
+      rowSize: 15,
+      customRowSize: 50,
       delegate: delegate
     });
   });
