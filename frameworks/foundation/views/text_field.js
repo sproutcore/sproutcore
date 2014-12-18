@@ -1259,10 +1259,12 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     if (SC.browser.isMozilla &&
         evt.keyCode === SC.Event.KEY_RETURN) { this.fieldValueDidChange(); }
 
-    // The caret/selection could have moved.  In some browsers, though, the
-    // element's values won't be updated until after this event is finished
-    // processing.
-    this.notifyPropertyChange('selection');
+    // The caret/selection may have changed.
+    // This cannot notify immediately, because in some browsers (tested Chrome 39.0 on OS X), the
+    // value of `selectionStart` and `selectionEnd` won't have updated yet. Thus if we notified
+    // immediately, observers of this view's `selection` property would get the old value.
+    this.invokeNext(this._textField_selectionDidChange);
+
     evt.allowDefault();
     return true;
   },
@@ -1287,9 +1289,10 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       return true;
     }
 
-    // The caret/selection could have moved.  In some browsers, though, the
-    // element's values won't be updated until after this event is finished
-    // processing.
+    // The caret/selection may have changed.
+    // This cannot notify immediately, because in some browsers (tested Chrome 39.0 on OS X), the
+    // value of `selectionStart` and `selectionEnd` won't have updated yet. Thus if we notified
+    // immediately, observers of this view's `selection` property would get the old value.
     this.invokeNext(this._textField_selectionDidChange);
 
     return sc_super();

@@ -6,6 +6,7 @@ CHANGE LOG
 
 ### BUG FIXES
 
+* Fixed an issue with observing the `selection` property of `SC.TextFieldView`. Since the `input` element doesn't update its `selectionStart` and `selectionEnd` values until after the event execution completes, the mouse and keypress event handlers that affect the selection must wait until after the run loop before notifying that the selection property has changed.
 * `SC.RootResponder` mistook two successive mousedown events at the same point as a double click even if the target of the second mousedown was different. The result was that if a view moved suddenly on a first click, a second immediate click at the same point would try to call `doubleClick` on the new target view instead of just `mouseUp`.
 * Fixed a regression in SC.CollectionView that prevented double clicks from triggering the action. Closes #1304 & #1305.
 
