@@ -1,6 +1,13 @@
 CHANGE LOG
 ==========
 
+1.11.0.rc3
+-----------
+
+### BUG FIXES
+
+* `SC.RootResponder` mistook two successive mousedown events at the same point as a double click even if the target of the second mousedown was different. The result was that if a view moved suddenly on a first click, a second immediate click at the same point would try to call `doubleClick` on the new target view instead of just `mouseUp`.
+
 1.11.0.rc2
 -----------
 

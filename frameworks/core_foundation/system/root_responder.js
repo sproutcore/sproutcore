@@ -2109,7 +2109,7 @@ SC.RootResponder = SC.Object.extend(
     // event occurs more than 250 ms later than the mouse up event or more
     // than 8 pixels away from the mouse down event or if the button used is different.
     this._clickCount += 1 ;
-    if (!this._lastMouseUpAt || this._lastClickWhich !== evt.which || ((Date.now() - this._lastMouseUpAt) > 250)) {
+    if (!this._lastMouseUpAt || this._lastClickTarget !== evt.target || ((Date.now() - this._lastMouseUpAt) > 250)) {
       this._clickCount = 1 ;
     } else {
       var deltaX = this._lastMouseDownX - evt.clientX,
@@ -2120,7 +2120,7 @@ SC.RootResponder = SC.Object.extend(
     }
     evt.clickCount = this._clickCount ;
 
-    this._lastClickWhich = evt.which;
+    this._lastClickTarget = evt.target;
     this._lastMouseDownX = evt.clientX ;
     this._lastMouseDownY = evt.clientY ;
 
@@ -2159,40 +2159,40 @@ SC.RootResponder = SC.Object.extend(
       var view = this._mouseDownView,
         targetView = this.targetViewForEvent(evt);
 
-    // record click count.
-    evt.clickCount = this._clickCount ;
+      // record click count.
+      evt.clickCount = this._clickCount ;
 
-    // attempt the mouseup call only if there's a target.
-    // don't want a mouseup going to anyone unless they handled the mousedown...
-    if (view) {
-      handler = this.sendEvent('mouseUp', evt, view) ;
+      // attempt the mouseup call only if there's a target.
+      // don't want a mouseup going to anyone unless they handled the mousedown...
+      if (view) {
+        handler = this.sendEvent('mouseUp', evt, view) ;
 
-      // try doubleClick
-      if (!handler && (this._clickCount === 2)) {
-        handler = this.sendEvent('doubleClick', evt, view) ;
-        clickOrDoubleClickDidTrigger = YES;
+        // try doubleClick
+        if (!handler && this._clickCount === 2) {
+          handler = this.sendEvent('doubleClick', evt, view) ;
+          clickOrDoubleClickDidTrigger = YES;
+        }
+
+        // try single click
+        if (!handler) {
+          handler = this.sendEvent('click', evt, view) ;
+          clickOrDoubleClickDidTrigger = YES;
+        }
       }
 
-      // try single click
-      if (!handler) {
-        handler = this.sendEvent('click', evt, view) ;
-        clickOrDoubleClickDidTrigger = YES;
-      }
-    }
+      // try whoever's under the mouse if we haven't handle the mouse up yet
+      if (!handler && !clickOrDoubleClickDidTrigger) {
 
-    // try whoever's under the mouse if we haven't handle the mouse up yet
-    if (!handler && !clickOrDoubleClickDidTrigger) {
+        // try doubleClick
+        if (this._clickCount === 2) {
+          handler = this.sendEvent('doubleClick', evt, targetView);
+        }
 
-      // try doubleClick
-      if (this._clickCount === 2) {
-        handler = this.sendEvent('doubleClick', evt, targetView);
+        // try singleClick
+        if (!handler) {
+          handler = this.sendEvent('click', evt, targetView) ;
+        }
       }
-
-      // try singleClick
-      if (!handler) {
-        handler = this.sendEvent('click', evt, targetView) ;
-      }
-    }
     }
 
     // cleanup
