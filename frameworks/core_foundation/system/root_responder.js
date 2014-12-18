@@ -2108,32 +2108,36 @@ SC.RootResponder = SC.Object.extend(
     // First, save the click count. The click count resets if the mouse down
     // event occurs more than 250 ms later than the mouse up event or more
     // than 8 pixels away from the mouse down event or if the button used is different.
-    this._clickCount += 1 ;
-    if (!this._lastMouseUpAt || this._lastClickTarget !== evt.target || ((Date.now() - this._lastMouseUpAt) > 250)) {
-      this._clickCount = 1 ;
-    } else {
-      var deltaX = this._lastMouseDownX - evt.clientX,
-          deltaY = this._lastMouseDownY - evt.clientY,
-          distance = Math.sqrt(deltaX*deltaX + deltaY*deltaY) ;
-
-      if (distance > 8.0) this._clickCount = 1 ;
-    }
-    evt.clickCount = this._clickCount ;
-
-    this._lastClickTarget = evt.target;
-    this._lastMouseDownX = evt.clientX ;
-    this._lastMouseDownY = evt.clientY ;
+    this._clickCount += 1;
 
     var view = this.targetViewForEvent(evt);
 
     view = this._mouseDownView = this.sendEvent('mouseDown', evt, view) ;
     if (view && view.respondsTo('mouseDragged')) this._mouseCanDrag = YES ;
 
-    // Determine if any views took responsibility for the
-    // event. If so, save that information so we can prevent
-    // the next click event we receive from propagating to the browser.
+    // Determine if any views took responsibility for the event. If so, save that information so we
+    // can prevent the next click event we receive from propagating to the browser.
     var ret = view ? evt.hasCustomEventHandling : YES;
     this._lastMouseDownCustomHandling = ret;
+
+    // If it has been too long since the last click, the handler has changed or the mouse has moved
+    // too far, reset the click count.
+    if (!this._lastMouseUpAt || this._lastMouseDownView !== this._mouseDownView || ((Date.now() - this._lastMouseUpAt) > 250)) {
+      this._clickCount = 1;
+    } else {
+      var deltaX = this._lastMouseDownX - evt.clientX,
+          deltaY = this._lastMouseDownY - evt.clientY,
+          distance = Math.sqrt(deltaX*deltaX + deltaY*deltaY) ;
+
+      if (distance > 8.0) this._clickCount = 1;
+    }
+    evt.clickCount = this._clickCount;
+
+    // Cache the handler and point of the last mouse down in order to determine whether a successive mouse down should
+    // still increment the click count.
+    this._lastMouseDownView = this._mouseDownView;
+    this._lastMouseDownX = evt.clientX;
+    this._lastMouseDownY = evt.clientY;
 
     return ret;
   },
