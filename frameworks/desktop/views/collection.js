@@ -2081,6 +2081,24 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
   // MOUSE EVENTS
   //
 
+  doubleClick: function (ev) {
+    var isEnabledInPane = this.get('isEnabledInPane'),
+        handled = false;
+
+    if (isEnabledInPane) {
+      var action = this.get('action');
+
+      if (action) {
+        var itemView = this.itemViewForEvent(ev);
+
+        this._cv_performSelectAction(itemView, ev, 0, ev.clickCount);
+        handled = true;
+      }
+    }
+
+    return handled;
+  },
+
   /** @private
     Handles mouse down events on the collection view or on any of its
     children.

@@ -7,6 +7,7 @@ CHANGE LOG
 ### BUG FIXES
 
 * `SC.RootResponder` mistook two successive mousedown events at the same point as a double click even if the target of the second mousedown was different. The result was that if a view moved suddenly on a first click, a second immediate click at the same point would try to call `doubleClick` on the new target view instead of just `mouseUp`.
+* Fixed a regression in SC.CollectionView that prevented double clicks from triggering the action. Closes #1304 & #1305.
 
 1.11.0.rc2
 -----------

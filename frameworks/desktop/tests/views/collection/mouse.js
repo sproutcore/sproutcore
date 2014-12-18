@@ -246,6 +246,19 @@ test("click on an item when isEnabled is false doesn't do anything", function() 
   });
   clickOn(view, 1, NO, NO, null);
 });
+
+// ..........................................................
+// double click
+//
+
+test("double-clicking on an unselected item should fire action when actOnSelect is false", function() {
+  equals(actionCalled, 0, "precond - action hasn't been called");
+  clickOn(view, 1, NO, NO);
+  equals(actionCalled, 0, "No action is called on first click");
+  clickOn(view, 1, NO, NO);
+  equals(actionCalled, 1, "Action called when item receives second click");
+});
+
 // ..........................................................
 // ctrl-click mouse down
 //
@@ -278,7 +291,9 @@ test("shift-clicking on an item above should extend the selection", function() {
 });
 
 test("shift-clicking inside selection first time should reduce selection from top", function() {
-  view.select(SC.IndexSet.create(3,4));
+  SC.run(function () {
+    view.select(SC.IndexSet.create(3,4));
+  });
   clickOn(view,4, YES, NO, selectionFromIndexSet(SC.IndexSet.create(3,2)));
 });
 
