@@ -2259,21 +2259,18 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
         } else if (info) {
           var idx = info.contentIndex;
 
-          // this will be set if the user simply clicked on an unselected item and
-          // selectOnMouseDown was NO.
+          // This will be set if the user simply clicked on an unselected item and selectOnMouseDown was NO.
           if (info.shouldSelect) {
             this.select(idx, info.modifierKeyPressed);
             didSelect = true;
           }
 
-          // This is true if the user clicked on a selected item with a modifier
-          // key pressed.
+          // This is true if the user clicked on a selected item with a modifier key pressed.
           if (info.shouldDeselect) this.deselect(idx);
 
-          // This is true if the user clicked on a selected item without a
-          // modifier-key pressed.  When this happens we try to begin editing
-          // on the content.  If that is not allowed, then simply clear the
-          // selection and reselect the clicked on item.
+          // This is true if the user clicked on a selected item without a modifier-key pressed.
+          // When this happens we try to begin editing on the content.  If that is not allowed, then
+          // simply clear the selection and reselect the clicked on item.
           if (info.shouldReselect) {
 
             // - contentValueIsEditable is true
@@ -2322,7 +2319,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     // Track that mouse is up no matter what (e.g. mouse went down and then view was disabled before mouse up).
     this._sc_isMouseDown = false;
 
-    return false;  // Bubble event to allow didDoubleClick to be called...
+    return false;  // Bubble event to allow doubleClick to be called.
   },
 
   /** @private */
