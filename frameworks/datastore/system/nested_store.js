@@ -435,6 +435,9 @@ SC.NestedStore = SC.Store.extend(
     if (!editables) editables = this.editables = [];
     editables[storeKey] = 1 ; // use number for dense array support
 
+    // propagate the data to the child records
+    this._updateChildRecordHashes(storeKey, hash, status);
+
     return this ;
   },
 
@@ -468,12 +471,19 @@ SC.NestedStore = SC.Store.extend(
     var changes = this.chainedChanges;
     if (!changes) changes = this.chainedChanges = SC.Set.create();
 
+    var that = this;
+
     for(idx=0;idx<len;idx++) {
       if (isArray) storeKey = storeKeys[idx];
       this._lock(storeKey);
       this.revisions[storeKey] = rev;
       changes.add(storeKey);
       this._notifyRecordPropertyChange(storeKey, statusOnly, key);
+
+      // notify also the child records
+      this._propagateToChildren(storeKey, function(storeKey){
+        that.dataHashDidChange(storeKey, null, statusOnly, key);
+      });
     }
 
     this.setIfChanged('hasChanges', YES);
