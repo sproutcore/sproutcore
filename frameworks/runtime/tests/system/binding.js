@@ -433,14 +433,16 @@ module("Binding transform: `and`", {
     // use property paths to access them
     SC.testControllerA = SC.Object.create({ value: NO });
     SC.testControllerB = SC.Object.create({ value: NO });
+    SC.testControllerC = SC.Object.create({ value: NO });
 
     toObject = SC.Object.create({
       value: null,
-      valueBinding: SC.Binding.and('SC.testControllerA.value', 'SC.testControllerB.value'),
+      valueBinding: SC.Binding.and('SC.testControllerA.value', 'SC.testControllerB.value', 'SC.testControllerC.value'),
       localValue1: NO,
       localValue2: NO,
+      localValue3: NO,
       boundLocalValue: NO,
-      boundLocalValueBinding: SC.Binding.and('.localValue1', '.localValue2')
+      boundLocalValueBinding: SC.Binding.and('.localValue1', '.localValue2', '.localValue3')
     });
   },
 
@@ -449,13 +451,16 @@ module("Binding transform: `and`", {
     delete SC.testControllerA;
     SC.testControllerB.destroy();
     delete SC.testControllerB;
+    SC.testControllerC.destroy();
+    delete SC.testControllerC;
   }
 });
 
-test("bound value should be YES if both sources are YES", function () {
+test("bound value should be YES if all sources are YES", function () {
   SC.RunLoop.begin();
   SC.testControllerA.set('value', YES);
   SC.testControllerB.set('value', YES);
+  SC.testControllerC.set('value', YES);
   SC.RunLoop.end();
 
   SC.Binding.flushPendingChanges();
@@ -464,6 +469,7 @@ test("bound value should be YES if both sources are YES", function () {
   SC.RunLoop.begin();
   toObject.set('localValue1', YES);
   toObject.set('localValue2', YES);
+  toObject.set('localValue3', YES);
   SC.RunLoop.end();
 
   SC.Binding.flushPendingChanges();
@@ -474,50 +480,56 @@ test("toObject.value should be NO if either source is NO", function () {
   SC.RunLoop.begin();
   SC.testControllerA.set('value', YES);
   SC.testControllerB.set('value', NO);
+  SC.testControllerC.set('value', YES);
   SC.RunLoop.end();
 
   SC.Binding.flushPendingChanges();
-  equals(toObject.get('value'), NO, 'Bound value on YES/NO');
+  equals(toObject.get('value'), NO, 'Bound value on YES/NO/YES');
 
   SC.RunLoop.begin();
   SC.testControllerA.set('value', YES);
   SC.testControllerB.set('value', YES);
+  SC.testControllerC.set('value', YES);
   SC.RunLoop.end();
 
   SC.Binding.flushPendingChanges();
-  equals(toObject.get('value'), YES, 'Bound value on YES/YES');
+  equals(toObject.get('value'), YES, 'Bound value on YES/YES/YES');
 
   SC.RunLoop.begin();
   SC.testControllerA.set('value', NO);
   SC.testControllerB.set('value', YES);
+  SC.testControllerC.set('value', NO);
   SC.RunLoop.end();
 
   SC.Binding.flushPendingChanges();
-  equals(toObject.get('value'), NO, 'Bound value on NO/YES');
+  equals(toObject.get('value'), NO, 'Bound value on NO/YES/NO');
 
   SC.RunLoop.begin();
   toObject.set('localValue1', YES);
   toObject.set('localValue2', NO);
+  toObject.set('localValue3', YES);
   SC.RunLoop.end();
 
   SC.Binding.flushPendingChanges();
-  equals(toObject.get('boundLocalValue'), NO, 'Local bound value on YES/NO');
+  equals(toObject.get('boundLocalValue'), NO, 'Local bound value on YES/NO/YES');
 
   SC.RunLoop.begin();
   toObject.set('localValue1', YES);
   toObject.set('localValue2', YES);
+  toObject.set('localValue3', YES);
   SC.RunLoop.end();
 
   SC.Binding.flushPendingChanges();
-  equals(toObject.get('boundLocalValue'), YES, 'Local bound value on YES/YES');
+  equals(toObject.get('boundLocalValue'), YES, 'Local bound value on YES/YES/YES');
 
   SC.RunLoop.begin();
   toObject.set('localValue1', NO);
   toObject.set('localValue2', YES);
+  toObject.set('localValue2', NO);
   SC.RunLoop.end();
 
   SC.Binding.flushPendingChanges();
-  equals(toObject.get('boundLocalValue'), NO, 'Local bound value on NO/YES');
+  equals(toObject.get('boundLocalValue'), NO, 'Local bound value on NO/YES/NO');
 });
 
 test("remote paths work when binding is defined on a class", function() {
@@ -731,7 +743,7 @@ module("Binding transform: `mix`", {
       value: null,
       valueBinding: SC.Binding.mix('SC.testControllerA.value', 'SC.testControllerB.value', 'SC.testControllerC.value',
                                    function(v1,v2,v3) {
-        return v1+'-'+v2+'-'+v3;
+                                     return v1+'-'+v2+'-'+v3;
                                    } ),
       localValue1: 1,
       localValue2: 2,
@@ -739,7 +751,7 @@ module("Binding transform: `mix`", {
       boundLocalValue: NO,
       boundLocalValueBinding: SC.Binding.mix('.localValue1', '.localValue2', '.localValue3',
                                              function(v1,v2,v3) {
-        return v1+'+'+v2+'+'+v3;
+                                               return v1+'+'+v2+'+'+v3;
                                              } )
     });
   },

@@ -1101,20 +1101,6 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     });
   },
 
-  /* @private Used with the logic gate bindings. */
-  _LogicGateAnd: SC.Object.extend({
-    aggregateProperty: function () {
-      return (this.get('value0') && this.get('value1'));
-    }.property('value0', 'value1').cacheable()
-  }),
-
-  /* @private Used with the logic gate bindings. */
-  _LogicGateOr: SC.Object.extend({
-    aggregateProperty: function () {
-      return (this.get('value0') || this.get('value1'));
-    }.property('value0', 'value1').cacheable()
-  }),
-
   /* @private Used by mix adapter bindings. */
   _mixAdapterBinding: function (adapterClass) {
     var paths = [];
@@ -1163,11 +1149,11 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   },
 
   /**
-    Adds a transform that forwards the logical 'AND' of values at 'pathA' and
-    'pathB' whenever either source changes.  Note that the transform acts strictly
+    Adds a transform that forwards the logical 'AND' of values at provided paths
+    whenever any source changes.  Note that the transform acts strictly
     as a one-way binding, working only in the direction
 
-      'pathA' AND 'pathB' --> value  (value returned is the result of ('pathA' && 'pathB'))
+      'pathA' AND 'pathB' AND 'pathC' --> value  (value returned is the result of ('pathA' && 'pathB' && 'pathC'))
 
     Usage example where a delete button's 'isEnabled' value is determined by whether
     something is selected in a list and whether the current user is allowed to delete:
@@ -1176,19 +1162,25 @@ SC.Binding = /** @scope SC.Binding.prototype */{
         isEnabledBinding: SC.Binding.and('MyApp.itemsController.hasSelection', 'MyApp.userController.canDelete')
       })
 
-    @param {String} pathA The first part of the conditional
-    @param {String} pathB The second part of the conditional
+    @param {String...} the paths of source values that will be provided to the AND sequence.
   */
-  and: function (pathA, pathB) {
-    return this._mixAdapterBinding(this._LogicGateAnd, pathA, pathB);
+  and: function () {
+    var paths = new Array(arguments.length);
+
+    for (i = 0, len = paths.length; i < len; i++) { paths[ i ] = arguments[i]; }
+    return this._mixImpl( paths, function() {
+      for(i = 0, result=YES; result && (i< arguments.length); ++i)
+        result = result && arguments[ i ];
+      return result;
+    });
   },
 
   /**
-    Adds a transform that forwards the 'OR' of values at 'pathA' and
-    'pathB' whenever either source changes.  Note that the transform acts strictly
+    Adds a transform that forwards the 'OR' of values at provided paths
+    whenever any source changes.  Note that the transform acts strictly
     as a one-way binding, working only in the direction
 
-      'pathA' OR 'pathB' --> value  (value returned is the result of ('pathA' || 'pathB'))
+      'pathA' OR 'pathB' OR 'pathC' --> value  (value returned is the result of ('pathA' || 'pathB' || 'pathC'))
 
     Usage example where a delete button's 'isEnabled' value is determined by if the
     content is editable, or if the user has admin rights:
@@ -1197,11 +1189,17 @@ SC.Binding = /** @scope SC.Binding.prototype */{
         isEnabledBinding: SC.Binding.or('*content.isEditable', 'MyApp.userController.isAdmin')
       })
 
-    @param {String} pathA The first part of the conditional
-    @param {String} pathB The second part of the conditional
+    @param {String...} the paths of source values that will be provided to the OR sequence.
   */
-  or: function (pathA, pathB) {
-    return this._mixAdapterBinding(this._LogicGateOr, pathA, pathB);
+  or: function () {
+    var paths = new Array(arguments.length);
+
+    for (i = 0, len = paths.length; i < len; i++) { paths[ i ] = arguments[i]; }
+    return this._mixImpl( paths, function() {
+      for(i = 0, result=NO; !result && (i< arguments.length); ++i)
+        result = result || arguments[ i ];
+      return result;
+    });
   },
 
   /**
@@ -1213,8 +1211,8 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     label: SC.LabelView.extend({
       valueBinding: SC.Binding.mix('MyApp.controller1.value', 'MyApp.controller2.value',
                                    function(v1, v2)
-      {
-        return v1 + v2;
+                                   {
+                                     return v1 + v2;
                                    } )
     })
 
