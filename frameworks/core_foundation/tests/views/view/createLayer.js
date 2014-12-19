@@ -38,20 +38,25 @@ test("calls renderToContext() and sets layer to resulting element", function() {
 });
 
 test("invokes didCreateLayer() on receiver and all child views", function() {
-  var callCount = 0, mixinCount = 0;
+  var callCount = 0, mixinCount = 0,
+      callees = [];
   var v = SC.View.create({
 
-    didCreateLayer: function() { callCount++; },
+    didCreateLayer: function() { callees.push(this); callCount++; },
     didCreateLayerMixin: function() { mixinCount++; },
 
     childViews: [SC.View.extend({
-      didCreateLayer: function() { callCount++; },
+      didCreateLayer: function() { callees.push(this); callCount++; },
       childViews: [SC.View.extend({
-        didCreateLayer: function() { callCount++; },
+        didCreateLayer: function() { callees.push(this); callCount++; },
         didCreateLayerMixin: function() { mixinCount++; }
       }), SC.View.extend({ /* no didCreateLayer */ })]
     })]
   });
+
+  // Grab the child and grandchild view for easy reference.
+  var childView = v.get('childViews').objectAt(0),
+      grandChildView = childView.get('childViews').objectAt(0);
 
   // verify setup...
   ok(v.didCreateLayer, 'precondition - has root');
@@ -62,6 +67,7 @@ test("invokes didCreateLayer() on receiver and all child views", function() {
   v.createLayer();
   equals(callCount, 3, 'did invoke all methods');
   equals(mixinCount, 2, 'did invoke all mixin methods');
+  same(callees, [grandChildView, childView, v], "The didCreateLayer function should be called bottom-up so that parent's that alter children, do so while the child is in the proper state.");
   v.destroy();
 });
 

@@ -710,6 +710,9 @@ SC.View.reopen(
   */
   _viewFrameDidChange: function () {
     this.notifyPropertyChange('frame');
+
+    // Notify the children that their clipping frame may have changed. Top-down, because a child's
+    // clippingFrame is dependent on its parent's frame.
     this._callOnChildViews('_sc_view_clippingFrameDidChange');
   },
 
@@ -1170,25 +1173,21 @@ SC.View.reopen(
     if (this.didAppendToDocument) { this.didAppendToDocument(); }
   },
 
-  /** @private Override: The 'adopted' event (uses _checkForResize so our childViews are notified if our frame changes). */
-  _adopted: function (beforeView) {
+  /** @private Extension: The 'adopted' event (uses _checkForResize so our childViews are notified if our frame changes). */
+  _adopted: function () {
     // Our frame may change once we've been adopted to a parent.
     this._checkForResize();
 
-    // Notify all of our descendents that our parent has changed. They will update their `pane` value for one.
-    this._callOnChildViews('_ancestorDidChangeParent');
+    sc_super();
   },
 
   /** @private Extension: The 'orphaned' event. */
-  _orphaned: function (oldParentView) {
+  _orphaned: function () {
     sc_super();
 
     if (!this.isDestroyed) {
       // Our frame may change once we've been removed from a parent.
       this._checkForResize();
-
-      // Notify all of our descendents that our parent has changed. They will update their `pane` value for one.
-      this._callOnChildViews('_ancestorDidChangeParent');
     }
   },
 
