@@ -279,11 +279,13 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   beget: function (fromPath) {
     var ret = SC.beget(this);
     ret.parentBinding = this;
+
     // Mix adapters must be recreated on beget.
     if (ret._MixAdapter) {
       ret._mixAdapter = ret._MixAdapter.create(ret._mixAdapterHash);
       ret = ret.from('aggregateProperty', ret._mixAdapter).oneWay();
     }
+
     // Enables duplicate API calls for SC.Binding.beget and SC.Binding.from
     if (fromPath !== undefined) ret = ret.from(fromPath);
     return ret;
@@ -1069,7 +1071,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     return this.from(fromPath).transform(function (v) {
       var t = SC.typeOf(v);
       if (t === SC.T_ERROR) return v;
-      return (t == SC.T_ARRAY) ? (v.length > 0) : (v === '') ? NO : !!v;
+      return (t === SC.T_ARRAY) ? (v.length > 0) : (v === '') ? NO : !!v;
     });
   },
 
@@ -1084,7 +1086,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     return this.from(fromPath).transform(function (v) {
       var t = SC.typeOf(v);
       if (t === SC.T_ERROR) return v;
-      return !((t == SC.T_ARRAY) ? (v.length > 0) : (v === '') ? NO : !!v);
+      return !((t === SC.T_ARRAY) ? (v.length > 0) : (v === '') ? NO : !!v);
     });
   },
 
@@ -1102,17 +1104,19 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   },
 
   /* @private Used by mix adapter bindings. */
-  _mixAdapterBinding: function (adapterClass) {
+  _sc_mixAdapterBinding: function (adapterClass) {
     var paths = [];
 
     //@if(debug)
-      if( arguments.length < 3 )
-        SC.Logger.warn('Developer Warning: Invalid mix binding, it should have at least two target paths');
+    // Add some developer support to prevent improper use.
+    if (arguments.length < 3 ) {
+      SC.Logger.warn('Developer Warning: Invalid mix binding, it should have at least two target paths');
+    }
     //@endif
 
     // If either path is local, remove any * chains and append the localObject path to it.
-    for (var i = 1; i < arguments.length; ++i) {
-      var path = arguments[ i ];
+    for (var i = 1; i < arguments.length; i++) {
+      var path = arguments[i];
 
       if (path.indexOf('*') === 0 || path.indexOf('.') === 0) {
         path = path.slice(1).replace(/\*/g, '.');
@@ -1123,13 +1127,13 @@ SC.Binding = /** @scope SC.Binding.prototype */{
 
     // Gets the adapter class and instantiates a nice copy.
     var adapterHash = {
-        localObject: null,
+      localObject: null,
     };
 
     // create the oneWay bindings pointing to the real data sources.
     // for naming use a hardcoded convention 'value' + index of the property/path.
     // of course, these properties are internal so we are not concerned by the naming convention
-    for (var i=0; i<paths.length; ++i) {
+    for (i = 0; i < paths.length; ++i) {
       var key = 'value' + i;
       adapterHash[key + 'Binding'] = SC.Binding.oneWay(paths[i]);
     }
@@ -1138,6 +1142,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
 
     // Creates and populates the return binding.
     var ret = this.from('aggregateProperty', adapter).oneWay();
+
     // This is all needed later on by beget, which must create a new adapter instance
     // or risk bad behavior.
     ret._MixAdapter = adapterClass;
@@ -1148,120 +1153,243 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     return ret;
   },
 
-  /**
-    Adds a transform that forwards the logical 'AND' of values at provided paths
-    whenever any source changes.  Note that the transform acts strictly
-    as a one-way binding, working only in the direction
+  /** @private */
+  _sc_mixImpl: function(paths, mixFunction) {
+    var len = paths.length,
+        properties = [];
 
-      'pathA' AND 'pathB' AND 'pathC' --> value  (value returned is the result of ('pathA' && 'pathB' && 'pathC'))
-
-    Usage example where a delete button's 'isEnabled' value is determined by whether
-    something is selected in a list and whether the current user is allowed to delete:
-
-      deleteButton: SC.ButtonView.design({
-        isEnabledBinding: SC.Binding.and('MyApp.itemsController.hasSelection', 'MyApp.userController.canDelete')
-      })
-
-    @param {String...} the paths of source values that will be provided to the AND sequence.
-  */
-  and: function () {
-    var paths = new Array(arguments.length);
-
-    for (i = 0, len = paths.length; i < len; i++) { paths[ i ] = arguments[i]; }
-    return this._mixImpl( paths, function() {
-      for(i = 0, result=YES; result && (i< arguments.length); ++i)
-        result = result && arguments[ i ];
-      return result;
-    });
-  },
-
-  /**
-    Adds a transform that forwards the 'OR' of values at provided paths
-    whenever any source changes.  Note that the transform acts strictly
-    as a one-way binding, working only in the direction
-
-      'pathA' OR 'pathB' OR 'pathC' --> value  (value returned is the result of ('pathA' || 'pathB' || 'pathC'))
-
-    Usage example where a delete button's 'isEnabled' value is determined by if the
-    content is editable, or if the user has admin rights:
-
-      deleteButton: SC.ButtonView.design({
-        isEnabledBinding: SC.Binding.or('*content.isEditable', 'MyApp.userController.isAdmin')
-      })
-
-    @param {String...} the paths of source values that will be provided to the OR sequence.
-  */
-  or: function () {
-    var paths = new Array(arguments.length);
-
-    for (i = 0, len = paths.length; i < len; i++) { paths[ i ] = arguments[i]; }
-    return this._mixImpl( paths, function() {
-      for(i = 0, result=NO; !result && (i< arguments.length); ++i)
-        result = result || arguments[ i ];
-      return result;
-    });
-  },
-
-  /**
-    Adds a transform that aggregates through a function the values at given paths. The function is called
-    whenever the values corresponding to the paths are updated.
-
-    For example if we want to calculate the sum of two properties provided by two different controllers:
-
-    label: SC.LabelView.extend({
-      valueBinding: SC.Binding.mix('MyApp.controller1.value', 'MyApp.controller2.value',
-                                   function(v1, v2)
-                                   {
-                                     return v1 + v2;
-                                   } )
-    })
-
-    @param {String...} the paths of source values that will be provided to the aggregate function.
-    @param {Function} mixFunction the function that aggregates the values
-
-    Notes:
-      - the number of parameters of mixFunction should match the number of paths provided
-      - the binding is not created if at least two paths are not provided
-      - this transform is oneWay as the provided function can't be bijective.
-  */
-  mix: function() {
-    var len = arguments.length - 1;
-    var paths = new Array(len);
-    var mixFunction = arguments[len]
-
-    // extract the paths that will bind to
-    for (i = 0, len = paths.length; i < len; i++) { paths[i] = arguments[i]; }
-
-    return this._mixImpl(paths, mixFunction);
-  },
-
-  _mixImpl: function(paths, mixFunction) {
-    var len = paths.length;
-    var properties = [];
+    //@if(debug)
+    // Add some developer support to prevent improper use.
+    if (SC.none(mixFunction) || SC.typeOf(mixFunction) !== SC.T_FUNCTION ) {
+      SC.Logger.error('Developer Error: Invalid mix binding, the last argument must be a function.');
+    }
+    //@endif
 
     // Create the adapter class that eventually will contain bindings pointing to all values that will be processed
     // by mixFunction. The effective aggregation is done by another property that depends on all these local properties
     // and is invalidated whenever they change.
     // First of all, create the list of the property names that the aggregate property depends on.
     // The names of these dynamically created properties are matching the pattern
-    // mentioned above (into _mixAdapterBinding): 'value' + index of the property/path
-    for (var i=0; i<len; ++i) {
+    // mentioned above (into _sc_mixAdapterBinding): 'value' + index of the property/path
+    for (var i = 0; i < len; ++i) {
       properties.push('value' + i);
     }
 
+    // Create a proxy SC.Object which will be bound to the each of the paths and contain a computed
+    // property that will be dependent on all of the bound properties. The computed property will
+    // return the result of the mix function.
     var adapter = SC.Object.extend({
-      // use SC.Function.property to be able to pass an array as arguments to .property
+      // Use SC.Function.property to be able to pass an array as arguments to .property
       aggregateProperty: SC.Function.property(function() {
-        // create a list values that will be sent as arguments to the mix function
-        var values = properties.map(function(name)
-                                    {
+        // Get an array of current values that will be passed to the mix function.
+        var values = properties.map(function (name) {
                                       return this.get(name);
                                     }, this);
-        // call the mixFunction providing an array containing all source properties
+
+        // Call the mixFunction providing an array containing all current source property values.
         return mixFunction.apply(null, values);
-      },properties).cacheable()
+      }, properties).cacheable()
     });
-    return this._mixAdapterBinding.apply(this, [adapter].concat(paths));
+
+    return this._sc_mixAdapterBinding.apply(this, [adapter].concat(paths));
+  },
+
+  /**
+    Adds a transform that returns the logical 'AND' of all the values at the provided paths. This is
+    a quick and useful way to bind a `Boolean` property to two or more other `Boolean` properties.
+
+    For example, imagine that we wanted to only enable a deletion button when an item in a list
+    is selected *and* the current user is allowed to delete items. If these two values are set
+    on controllers respectively at `MyApp.itemsController.hasSelection` and
+    `MyApp.userController.canDelete`. We could do the following,
+
+        deleteButton: SC.ButtonView.design({
+
+          // Action & target for the button.
+          action: 'deleteSelectedItem',
+          target: MyApp.statechart,
+
+          // Whether the list has a selection or not.
+          listHasSelectionBinding: SC.Binding.oneWay('MyApp.itemsController.hasSelection'),
+
+          // Whether the user can delete items or not.
+          userCanDeleteBinding: SC.Binding.oneWay('MyApp.userController.canDelete'),
+
+          // Note: Only enable when the list has a selection and the user is allowed!
+          isEnabled: function () {
+            return this.get('listHasSelection') && this.get('userCanDelete');
+          }.property('listHasSelection', 'userCanDelete').cacheable()
+
+        })
+
+    However, this would be much simpler to write by using the `and` binding transform like so,
+
+        deleteButton: SC.ButtonView.design({
+
+          // Action & target for the button.
+          action: 'deleteSelectedItem',
+          target: MyApp.statechart,
+
+          // Note: Only enable when the list has a selection and the user is allowed!
+          isEnabledBinding: SC.Binding.and('MyApp.itemsController.hasSelection', 'MyApp.userController.canDelete')
+
+        })
+
+    *Note:* the transform acts strictly as a one-way binding, working only in the one direction.
+
+    @param {String...} the property paths of source values that will be provided to the AND transform.
+  */
+  and: function () {
+    // Fast copy.
+    var len = arguments.length,
+        paths = new Array(len);
+    for (var i = 0; i < len; i++) { paths[i] = arguments[i]; }
+
+    // Create a new mix implementation for the AND function.
+    return this._sc_mixImpl(paths, function() {
+      var result = true;
+
+      for (i = 0; result && (i < arguments.length); i++) { // Bails early if any value is false.
+        result = result && arguments[i];
+      }
+
+      return result;
+    });
+  },
+
+  /**
+    Adds a transform that returns the logical 'OR' of all the values at the provided paths. This is
+    a quick and useful way to bind a `Boolean` property to two or more other `Boolean` properties.
+
+    For example, imagine that we wanted to show a button when one or both of two values are present.
+    If these two values are set on controllers respectively at `MyApp.profileController.hasDisplayName` and
+    `MyApp.profileController.hasFullName`. We could do the following,
+
+        saveButton: SC.ButtonView.design({
+
+          // Action & target for the button.
+          action: 'saveProfile',
+          target: MyApp.statechart,
+
+          // Whether the profile has a displayName or not.
+          profileHasDisplayNameBinding: SC.Binding.oneWay('MyApp.profileController.hasDisplayName'),
+
+          // Whether the profile has a fullName or not.
+          profileHasFullNameBinding: SC.Binding.oneWay('MyApp.profileController.hasFullName'),
+
+          // Note: Only show when the profile has a displayName or a fullName or both!
+          isVisible: function () {
+            return this.get('profileHasDisplayName') || this.get('profileHasFullName');
+          }.property('profileHasDisplayName', 'profileHasFullName').cacheable()
+
+        })
+
+    However, this would be much simpler to write by using the `or` binding transform like so,
+
+        saveButton: SC.ButtonView.design({
+
+          // Action & target for the button.
+          action: 'saveProfile',
+          target: MyApp.statechart,
+
+          // Note: Only show when the profile has a displayName or a fullName or both!
+          isVisibleBinding: SC.Binding.or('MyApp.profileController.hasDisplayName', 'MyApp.profileController.hasFullName')
+
+        })
+
+    *Note:* the transform acts strictly as a one-way binding, working only in the one direction.
+
+    @param {String...} the paths of source values that will be provided to the OR sequence.
+  */
+  or: function () {
+    // Fast copy.
+    var len = arguments.length,
+        paths = new Array(len);
+    for (var i = 0; i < len; i++) { paths[i] = arguments[i]; }
+
+    // Create a new mix implementation for the OR function.
+    return this._sc_mixImpl( paths, function() {
+      var result = false;
+      for (i = 0; !result && (i < arguments.length); i++) { // Bails early if any value is true.
+        result = result || arguments[i];
+      }
+
+      return result;
+    });
+  },
+
+  /**
+    Adds a transform that aggregates through a given function the values at the provided paths. The
+    given function is called whenever any of the values are updated. This is a quick way to
+    aggregate multiple properties into a single property value.
+
+    For example, to concatenate two properties 'MyApp.groupController.name' and
+    'MyApp.userController.fullName', we could do the following,
+
+        currentGroupUserLabel: SC.LabelView.extend({
+
+          // The group name (may be null).
+          groupNameBinding: SC.Binding.oneWay('MyApp.groupController.name'),
+
+          // The user full name (may be null).
+          userFullNameBinding: SC.Binding.oneWay('MyApp.userController.fullName'),
+
+          // Ex. Returns one of "", "Selected Group", or "Selected Group: Selected User"
+          value: function () {
+            var groupName = this.get('groupName'),
+                userFullName = this.get('userFullName');
+
+            if (SC.none(userFullName)) {
+              if (SC.none(groupName)) {
+                return ''; // No group and no user.
+              } else {
+                return groupName; // Just a group.
+              }
+            } else {
+              return '%@: %@'.fmt(groupName, userFullName); // Group and user.
+            }
+          }.property('groupName', 'userFullName').cacheable()
+
+        })
+
+    However, this is simpler (ex. 86 fewer characters) to write by using the `mix` binding transform like so,
+
+        currentGroupUserLabel: SC.LabelView.extend({
+
+          // Ex. Returns one of "", "Selected Group", or "Selected Group: Selected User"
+          valueBinding: SC.Binding.mix(
+            'MyApp.groupController.name', // The group name (may be null).
+            'MyApp.userController.fullName', // The user full name (may be null).
+
+            // Aggregate function. The arguments match the bound property values above.
+            function (groupName, userFullName) {
+              if (SC.none(userFullName)) {
+                if (SC.none(groupName)) {
+                  return ''; // No group and no user.
+                } else {
+                  return groupName; // Just a group.
+                }
+              } else {
+                return '%@: %@'.fmt(groupName, userFullName); // Group and user.
+              }
+            })
+
+        })
+
+    *Note:* the number of parameters of `mixFunction` should match the number of paths provided.
+    *Note:* the transform acts strictly as a one-way binding, working only in the one direction.
+
+    @param {String...} the paths of source values that will be provided to the aggregate function.
+    @param {Function} mixFunction the function that aggregates the values
+  */
+  mix: function() {
+    var len = arguments.length - 1,
+        paths = new Array(len);
+
+    // Fast copy. The function is the last argument.
+    for (var i = 0; i < len; i++) { paths[i] = arguments[i]; }
+
+    return this._sc_mixImpl(paths, arguments[len]);
   },
 
   /**

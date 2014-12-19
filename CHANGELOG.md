@@ -4,6 +4,43 @@ CHANGE LOG
 1.11.0.rc3
 -----------
 
+### NEW FEATURES
+
+* There is a new binding transform, `mix`, that allows for the aggregation of multiple bound properties into a single property through a given function. It is often the case that a single property depends on two or more bound properties in a complex manner that isn't handled by the current `and` and `or` transforms. To handle this situation previously, the developer would need to write the code to bind in the external property values and then make a local computed property dependent on each of these. The `mix` transform does exactly the same thing, but with less typing on the developer's part.  
+
+For example, to create a mix binding that concatenates two external properties in a non-trivial way, we can now do the following,  
+
+    currentGroupUserLabel: SC.LabelView.extend({
+
+      // Ex. Returns one of "", "Selected Group", or "Selected Group: Selected User"
+      valueBinding: SC.Binding.mix(
+        'MyApp.groupController.name', // The group name (may be null).
+        'MyApp.userController.fullName', // The user full name (may be null).
+
+        // Aggregate function. The arguments match the bound property values above.
+        function (groupName, userFullName) {
+          if (SC.none(userFullName)) {
+            if (SC.none(groupName)) {
+              return ''; // No group and no user. Ex. ""
+            } else {
+              return groupName; // Just a group. Ex. "Selected Group"
+            }
+          } else {
+            return '%@: %@'.fmt(groupName, userFullName); // Group and user. Ex. "Selected Group: Selected User"
+          }
+        })
+
+    })
+
+### CHANGES & IMPROVEMENTS
+
+* The SC.Binding transforms `and` and `or` have been refactored to use the new `mix` code. This means that you can now pass more than two property paths to these transforms.  
+
+For example,  
+
+    isEnabledBinding: SC.Binding.and('.hasValue', '.valueIsValid', '.userIsAllowed')
+
+
 ### BUG FIXES
 
 * Fixed an issue with observing the `selection` property of `SC.TextFieldView`. Since the `input` element doesn't update its `selectionStart` and `selectionEnd` values until after the event execution completes, the mouse and keypress event handlers that affect the selection must wait until after the run loop before notifying that the selection property has changed.
