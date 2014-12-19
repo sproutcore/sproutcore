@@ -1211,23 +1211,33 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     For example if we want to calculate the sum of two properties provided by two different controllers:
 
     label: SC.LabelView.extend({
-      valueBinding: SC.Binding.mix(function(v1, v2)
+      valueBinding: SC.Binding.mix('MyApp.controller1.value', 'MyApp.controller2.value',
+                                   function(v1, v2)
       {
         return v1 + v2;
-      }, 'MyApp.controller1.value', 'MyApp.controller2.value' )
+                                   } )
     })
 
-    @param {Function} mixFunction the function that aggregates the values
     @param {String...} the paths of source values that will be provided to the aggregate function.
+    @param {Function} mixFunction the function that aggregates the values
 
     Notes:
       - the number of parameters of mixFunction should match the number of paths provided
       - the binding is not created if at least two paths are not provided
       - this transform is oneWay as the provided function can't be bijective.
   */
-  mix: function(mixFunction) {
+  mix: function() {
+    var len = arguments.length - 1;
+    var paths = new Array(len);
+    var mixFunction = arguments[len]
+
     // extract the paths that will bind to
-    var paths = Array.prototype.slice.call(arguments, 1);
+    for (i = 0, len = paths.length; i < len; i++) { paths[i] = arguments[i]; }
+
+    return this._mixImpl(paths, mixFunction);
+  },
+
+  _mixImpl: function(paths, mixFunction) {
     var len = paths.length;
     var properties = [];
 

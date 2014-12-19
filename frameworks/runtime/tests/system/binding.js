@@ -729,16 +729,18 @@ module("Binding transform: `mix`", {
 
     toObject = SC.Object.create({
       value: null,
-      valueBinding: SC.Binding.mix(function(v1,v2,v3) {
+      valueBinding: SC.Binding.mix('SC.testControllerA.value', 'SC.testControllerB.value', 'SC.testControllerC.value',
+                                   function(v1,v2,v3) {
         return v1+'-'+v2+'-'+v3;
-      }, 'SC.testControllerA.value', 'SC.testControllerB.value', 'SC.testControllerC.value'),
+                                   } ),
       localValue1: 1,
       localValue2: 2,
       localValue3: 3,
       boundLocalValue: NO,
-      boundLocalValueBinding: SC.Binding.mix(function(v1,v2,v3) {
+      boundLocalValueBinding: SC.Binding.mix('.localValue1', '.localValue2', '.localValue3',
+                                             function(v1,v2,v3) {
         return v1+'+'+v2+'+'+v3;
-      }, '.localValue1', '.localValue2', '.localValue3')
+                                             } )
     });
   },
 
