@@ -1010,14 +1010,12 @@ SC.CoreView.reopen(
   },
 
   /** @private Call the method recursively on all child views. */
-  _callOnChildViews: function (methodName, context) {
+  _callOnChildViews: function (methodName, isTopDown, context) {
     var childView,
       childViews = this.get('childViews'),
       method,
       shouldContinue;
 
-    // Could have support for arguments, but accessing Arguments and using apply is slower than using call, so avoid it.
-    // args = SC.$A(arguments).slice(1);
     for (var i = childViews.length - 1; i >= 0; i--) {
       childView = childViews[i];
 
@@ -1026,12 +1024,20 @@ SC.CoreView.reopen(
 
       // Look up the method on the child.
       method = childView[methodName];
-      // method.apply(childView, args);  This is slower.
-      shouldContinue = method.call(childView, context);
+
+      // Call the method on this view *before* its children.
+      if (isTopDown === undefined || isTopDown) {
+        shouldContinue = method.call(childView, context);
+      }
 
       // Recurse.
       if (shouldContinue === undefined || shouldContinue) {
-        childView._callOnChildViews(methodName, context);
+        childView._callOnChildViews(methodName, isTopDown, context);
+      }
+
+      // Call the method on this view *after* its children.
+      if (isTopDown === false) {
+        method.call(childView, context);
       }
     }
   },
