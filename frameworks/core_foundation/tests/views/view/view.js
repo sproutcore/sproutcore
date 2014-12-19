@@ -94,10 +94,10 @@ test("_callOnChildViews", function () {
       }),
       grandChildView;
 
-  // Add the child view (and grand child view).
+  // Add the child view (and grandchild view).
   view.appendChild(childView);
 
-  // Grab the grand child view for easy reference.
+  // Grab the grandchild view for easy reference.
   grandChildView = childView.get('childViews').objectAt(0);
 
   // Call the function by default (top-down).

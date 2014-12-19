@@ -365,8 +365,8 @@ test("Test showing and hiding parentView updates child views.", function () {
   parentView._doAttach(document.body);
   view._doAdopt(parentView);
   equals(parentView.viewState, SC.CoreView.ATTACHED_SHOWN, "A newly created parentView that is attached should be in the state");
-  equals(view.viewState, SC.CoreView.ATTACHED_SHOWN, "A newly created child view of unattached parentView should be in the state");
-  equals(child.viewState, SC.CoreView.ATTACHED_SHOWN, "A newly created child view of unattached parentView's child view should be in the state");
+  equals(view.viewState, SC.CoreView.ATTACHED_SHOWN, "A newly created child view of attached parentView should be in the state");
+  equals(child.viewState, SC.CoreView.ATTACHED_SHOWN, "A newly created child view of attached parentView's child view should be in the state");
   ok(view.get('isVisibleInWindow'), "isVisibleInWindow should be true");
 
   // Hide the parentView.
@@ -434,7 +434,7 @@ test("Test showing parentView with transitionShow", function () {
   parentView._doRender();
   parentView._doAttach(document.body);
 
-  SC.run(function() { parentView.set('isVisible', YES) });
+  SC.run(function() { parentView.set('isVisible', YES); });
 
   equals(parentView.viewState, SC.View.ATTACHED_SHOWING, "Upon being made visible, a view with a transition is in state");
   equals(childView.viewState, SC.View.ATTACHED_SHOWN, "A visible view whose parent is ATTACHED_SHOWING is in state.");
@@ -482,7 +482,8 @@ test("Adjusting unrelated layout property (not specified in transition's layoutP
       view.adjust('opacity', 0);
       view.invokeNext(view.didTransitionIn);
     }
-  }
+  };
+
   var view = SC.View.create({
     transitionIn: transition,
     layout: { height: 40 },
