@@ -1046,8 +1046,6 @@ SC.CoreView.reopen(
       state === SC.CoreView.ATTACHED_BUILDING_IN) {
       this._teardownTransition();
 
-      // Show the view.
-      // this._executeDoShow();
       // Set the proper state.
       this._gotoAttachedShownState();
     }
