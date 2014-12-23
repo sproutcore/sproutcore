@@ -2396,6 +2396,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // Force record to refresh its cached properties based on store key
     var record = this.materializeRecord(storeKey);
     if (record !== null) {
+      // If the record's id property has been computed, ensure that it re-computes.
+      if (newId) { record.propertyDidChange('id'); }
       record.notifyPropertyChange('status');
     }
     //update callbacks
@@ -2498,7 +2500,13 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       if(dataHash === undefined) this.writeStatus(storeKey, status) ;
       else this.writeDataHash(storeKey, dataHash, status) ;
 
-      if (id && this.idFor(storeKey) !== id) SC.Store.replaceIdFor(storeKey, id);
+      if (id && this.idFor(storeKey) !== id) {
+        SC.Store.replaceIdFor(storeKey, id);
+
+        // If the record's id property has been computed, ensure that it re-computes.
+        var record = this.materializeRecord(storeKey);
+        record.propertyDidChange('id');
+      }
       this.dataHashDidChange(storeKey);
 
       return storeKey;

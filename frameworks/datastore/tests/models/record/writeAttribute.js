@@ -108,10 +108,11 @@ test("Writing a new guid", function(){
 });
 
 test("Writing primaryKey of 'id'", function(){
-  PrimaryKeyId = SC.Record.extend({ primaryKey: 'id' });
+  var PrimaryKeyId = SC.Record.extend({ primaryKey: 'id' });
   var foo2 = store.createRecord(PrimaryKeyId, { id: 1 });
 
   equals(foo2.get('id'), 1, 'foo2.id should be 1');
   foo2.set('id', 2);
   equals(foo2.get('id'), 2, 'foo2.id should be 2');
+  equals(store.idFor(foo2.get('storeKey')), 2, 'foo2.id should be 2 in the store');
 });

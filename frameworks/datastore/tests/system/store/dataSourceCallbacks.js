@@ -226,6 +226,30 @@ test("Confirm that dataSourceDidComplete switched the records to the right state
   
 });
 
+/**
+  There was a situation that when the id of the record was accessed it would remain cached even if
+  dataSourceDidComplete() was called with a new id.
+*/
+test("Confirm that passing a new id to dataSourceDidComplete clears the cached id on the record", function () {
+  var MyRecordType = SC.Record.extend({});
+
+  // Assign the store key to a record type so we can materialize the record.
+  SC.Store.replaceRecordTypeFor(storeKey11, MyRecordType);
+  SC.Store.idsByStoreKey[storeKey11] = 'commitGUID11';
+
+  var record = store.materializeRecord(storeKey11),
+      tempId = record.get('id'),
+      body;
+
+  equals(tempId, 'commitGUID11', "The id should originally be");
+
+  // Went to the server, came back with actual id.
+  body = SC.copy(json11);
+  body.guid = 'actualID';
+  store.dataSourceDidComplete(storeKey11, body, body.guid);
+
+  equals(record.get('id'), 'actualID', "The id should update now to be");
+});
 
 test("Confirm that dataSourceDidDestroy switched the records to the right states", function() {
   var msg='', status;
