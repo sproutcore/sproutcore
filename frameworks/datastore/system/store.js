@@ -2384,11 +2384,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // otherwise, determine proper state transition
     if(status === K.BUSY_DESTROYING) {
       throw K.BAD_STATE_ERROR ;
-    } else status = K.READY_CLEAN ;
+    } else status = K.READY_CLEAN;
 
-    this.writeStatus(storeKey, status) ;
-    if (dataHash) this.writeDataHash(storeKey, dataHash, status) ;
-    if (newId) SC.Store.replaceIdFor(storeKey, newId);
+    this.writeStatus(storeKey, status);
+    if (dataHash) this.writeDataHash(storeKey, dataHash, status);
+    if (newId) { SC.Store.replaceIdFor(storeKey, newId); }
 
     statusOnly = dataHash || newId ? NO : YES;
     this.dataHashDidChange(storeKey, null, statusOnly);

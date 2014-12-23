@@ -3,7 +3,7 @@
 // Copyright: ©2006-2011 Apple Inc. and contributors.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-/*globals module ok equals same test MyApp */
+/*globals module, ok, equals, same, test */
 
 var store, Foo, json, foo ;
 module("SC.Record#writeAttribute", {
