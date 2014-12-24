@@ -1089,6 +1089,9 @@ SC.CoreView.reopen(
     } else if (state === SC.CoreView.ATTACHED_HIDING) {
       this._teardownTransition();
 
+      // Cancel any remaining animations (i.e. a build in or build out that was left running at the same time).
+      this.cancelAnimation(SC.LayoutState.CURRENT);
+
       // Allow children to notify that they will be hidden. Bottom-up so that each child is in the
       // proper state before its parent potentially alters its state. For example, a parent could
       // modify children in `willHideInDocument`.
@@ -1308,9 +1311,6 @@ SC.CoreView.reopen(
     //   childView._notifyWillHideInDocument();
     // }
     this._notifyWillHideInDocument();
-
-    // Cancel any remaining animations (i.e. a build in or build out that was left running at the same time).
-    this.cancelAnimation(SC.LayoutState.CURRENT);
 
     // Update the visible style.
     this._doUpdateVisibleStyle();
