@@ -1173,8 +1173,8 @@ SC.View.reopen(
     if (this.didAppendToDocument) { this.didAppendToDocument(); }
   },
 
-  /** @private Extension: The 'adopted' event (uses _checkForResize so our childViews are notified if our frame changes). */
-  _adopted: function () {
+  /** @private Override: The 'adopted' event (uses _checkForResize so our childViews are notified if our frame changes). */
+  _adopted: function (beforeView) {
     // Our frame may change once we've been adopted to a parent.
     this._checkForResize();
 

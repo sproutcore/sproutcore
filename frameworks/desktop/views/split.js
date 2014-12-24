@@ -99,7 +99,7 @@ SC.SplitView = SC.View.extend({
   /**
    The class of view to create for the divider views. Override this to use a subclass of SC.SplitDividerView,
    or to implment your own.
-   
+
    @type {SC.View}
    @default SC.SplitDividerView
   */
@@ -338,12 +338,9 @@ SC.SplitView = SC.View.extend({
       if (lastNonDividerChild && !child.isSplitDivider) {
         dividerId = SC.guidFor(lastNonDividerChild) + "-" + SC.guidFor(child);
 
+        // Try to re-use an existing divider.
         divider = oldDividers[dividerId];
-
-        // if the previous view is a divider, but is not in our set of dividers,
-        // then it is manually created. If it is manually created, we should not
-        // create a new one.
-        if (!divider && !lastChild.isSplitDivider) {
+        if (!divider) {
           divider = this.invokeDelegateMethod(del, 'splitViewDividerBetween', this, lastNonDividerChild, child);
         }
 
@@ -597,7 +594,7 @@ SC.SplitView = SC.View.extend({
    * @returns {Number} The final position of the child.
   */
   splitViewAdjustPositionForChild: function(splitView, child, position) {
-    var del = this.get('delegate');
+    // var del = this.get('delegate');
     // Unlike tiling, the process of moving a child view is much more sophisticated.
     //
     // The basic sequence of events is simple:
