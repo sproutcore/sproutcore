@@ -180,10 +180,10 @@ test("Resize with child view layout", function () {
 });
 
 /**
-  For a TextFieldView where we set it to only resize its height every time its value changes 
+  For a TextFieldView where we set it to only resize its height every time its value changes
   we get the textareas width and set its max-width to this if no autoResizeLayer has been set.
 
-  This test checks that every-time the value changes the max-width we set doesn't change the 
+  This test checks that every-time the value changes the max-width we set doesn't change the
   textarea width (i.e. takes padding into account when measuring).
  */
 test("Resize height only for textarea where textarea has padding.", function () {
@@ -218,9 +218,9 @@ test("Resize height only for textarea where textarea has padding.", function () 
   SC.run(function () {
     view.$('textarea').css({
       'padding': '10px',
-      '-webkit-box-sizing': 'border-box', 
+      '-webkit-box-sizing': 'border-box',
       '-moz-box-sizing': 'border-box',
-      'box-sizing': 'border-box' 
+      'box-sizing': 'border-box'
     })
   });
 
@@ -280,9 +280,9 @@ test("Resize text only for input where input has padding.", function () {
   SC.run(function () {
     view.$('input').css({
       'padding': '10px',
-      '-webkit-box-sizing': 'border-box', 
+      '-webkit-box-sizing': 'border-box',
       '-moz-box-sizing': 'border-box',
-      'box-sizing': 'border-box' 
+      'box-sizing': 'border-box'
     })
   });
 

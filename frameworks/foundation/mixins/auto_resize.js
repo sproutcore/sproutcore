@@ -253,8 +253,8 @@ SC.AutoResize = {
     var metrics, layer = this.get('autoResizeLayer'), autoResizeText = this.get('autoResizeText'),
         ignoreEscape = !this.get('escapeHTML'),
         batchResizeId = this.get('batchResizeId'),
-        cachedMetrics = this.get('_cachedMetrics'),
-        maxFontSize = this.get('maxFontSize');
+        cachedMetrics = this.get('_cachedMetrics');
+        // maxFontSize = this.get('maxFontSize');
 
     if (!layer) return;
 
@@ -353,7 +353,8 @@ SC.AutoResize = {
         // the frame will be truncated
         width = frame.width - 1, height = frame.height - 1,
         measured = this.get('measuredSize'),
-        mWidth = measured.width, mHeight = measured.height;
+        mWidth = measured.width, mHeight = measured.height,
+        actual;
 
     // figure out and apply padding to the width/height
     if(SC.typeOf(padding) === SC.T_NUMBER) {
@@ -382,7 +383,6 @@ SC.AutoResize = {
       var xProportion = width / mWidth, yProportion = height / mHeight,
 
           guestimate = Math.floor(maxFontSize * Math.min(xProportion, yProportion)),
-          actual,
 
           classNames = this.get('classNames'),
           ignoreEscape = !this.get('escapeHTML'),
@@ -472,7 +472,7 @@ SC.AutoResize = {
 
     TODO: consider making the measurement state a formal SC.View state
   */
-  _transitionIn: function (original) {
+  _transitionIn: function (original, inPlace) {
     // In order to allow views to measure and adjust themselves on append, we
     // can't transition until after the measurement is done.
     var preTransitionOpacity = this.get('layout').opacity || 1;
@@ -480,7 +480,7 @@ SC.AutoResize = {
     this.adjust('opacity', 0);
     this.invokeNext(function () {
       this.adjust('opacity', preTransitionOpacity);
-      original();
+      original(inPlace);
     });
   }.enhance()
 

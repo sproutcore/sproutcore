@@ -766,6 +766,7 @@ SC.CoreView.reopen(
     // Scenario: The view is not even rendered.
     // Result: Nothing is required.
     case SC.CoreView.UNRENDERED:
+      shouldHandle = false;
       break;
 
     case SC.CoreView.ATTACHED_HIDDEN: // FAST PATH!
@@ -804,29 +805,7 @@ SC.CoreView.reopen(
       shouldHandle = false;
     }
 
-    // Notify *will* (top-down from parent to children).
-    // if (this.willHideInDocument) { this.willHideInDocument(); }
-
-    // if (transitionHide) {
-    //   // Update states after *will* and before *did* notifications!
-    //   this._gotoAttachedHidingState();
-
-    //   // this.invokeNext(function () {
-    //     this._transitionHide();
-    //   // });
-
-    // } else {
-    //   // TODO: notify only if in proper state top-down!
-    //   // Allow children to notify that they will be hidden. Bottom-up so that each child is in the
-    //   // proper state before its parent potentially alters its state. For example, a parent could
-    //   // modify children in `willHideInDocument`.
-    //   this._callOnChildViews('_notifyWillHideInDocument');
-
-    //   // Hide immediately.
-    //   this._executeDoHide();
-    // }
-
-    return true;
+    return shouldHandle;
   },
 
   /** @private Orphan this view action. */
@@ -998,6 +977,7 @@ SC.CoreView.reopen(
     // Scenario: The view is not even rendered.
     // Result: Nothing is required.
     case SC.CoreView.UNRENDERED:
+      shouldHandle = false;
       break;
 
     // Invalid states.
@@ -1567,6 +1547,13 @@ SC.CoreView.reopen(
 
       // Go to the proper state.
       this._gotoSomeAttachedState();
+
+      // If there is a transition in, run it. TODO: Check state here?
+      var transitionIn = this.get('transitionIn');
+      if (transitionIn) {
+        this._transitionIn(false);
+      }
+
       break;
 
     // Scenario: The child is unrendered or unattached.

@@ -229,7 +229,6 @@ test("Reversing HIDING to SHOWING: FADE_IN & FADE_OUT", function () {
     equals(view.get('isVisible'), true, "The isVisible property of the view is");
     ok(!jqEl.hasClass('sc-hidden'), "The view doesn't have sc-hidden class name.");
     equals(jqEl.css('opacity'), '1', "The view's current opacity is now");
-    // debugger;
 
     start();
   }, 1000);
