@@ -710,7 +710,8 @@ SC.CoreView.reopen(
   /** @private Hide this view action. */
   _doHide: function () {
     var state = this.get('viewState'),
-      transitionHide = this.get('transitionHide');
+      transitionHide = this.get('transitionHide'),
+      shouldHandle = true;
 
     //@if (debug)
     if (SC.LOG_VIEW_STATES) {
@@ -718,13 +719,58 @@ SC.CoreView.reopen(
     }
     //@endif
 
+    // Handle all 12 possible view states.
     switch (state) {
-    case SC.CoreView.UNRENDERED: // FAST PATH!
+
+    // Scenario: The view is shown.
+    // Result: Notify that the view will hide and then either hide or run hide transition.
+    case SC.CoreView.ATTACHED_SHOWN:
+    case SC.CoreView.ATTACHED_BUILDING_OUT:
+    case SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT:
+    case SC.ATTACHED_BUILDING_IN:
+    case SC.CoreView.ATTACHED_SHOWN_ANIMATING:
+    // ATTACHED_HIDDEN_BY_PARENT, ATTACHED_BUILDING_IN, ATTACHED_BUILDING_OUT_BY_PARENT, ATTACHED_BUILDING_OUT
+
+      if (transitionHide) {
+        // this.invokeNext(function () {
+          this._transitionHide();
+        // });
+      } else {
+        // Hide the view.
+        this._executeDoHide();
+      }
+
+      break;
+
+    // Scenario: The view was showing at the time it was told to hide.
+    // Result: Cancel the animation.
+    case SC.CoreView.ATTACHED_SHOWING:
+      this.cancelAnimation(SC.LayoutState.CURRENT);
+
+      // Set the proper state.
+      this._gotoAttachedShownState();
+
+      shouldHandle = this._doHide();
+
+      break;
+
+    // Scenario: The view is rendered but is not attached.
+    // Result: Queue an update to the visibility style.
+    case SC.CoreView.UNATTACHED:
+    case SC.CoreView.UNATTACHED_BY_PARENT:
+      // Queue the visibility update for the next time we display.
+      this._visibleStyleNeedsUpdate = true;
+
+      break;
+
+    // Scenario: The view is not even rendered.
+    // Result: Nothing is required.
+    case SC.CoreView.UNRENDERED:
+      break;
+
     case SC.CoreView.ATTACHED_HIDDEN: // FAST PATH!
     case SC.CoreView.ATTACHED_HIDING: // FAST PATH!
       return false;
-    case SC.CoreView.UNATTACHED: // FAST PATH!
-    case SC.CoreView.UNATTACHED_BY_PARENT: // FAST PATH!
     case SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT: // FAST PATH!
     case SC.CoreView.ATTACHED_BUILDING_OUT: // FAST PATH!
       // Queue the visibility update for the next time we display.
@@ -740,44 +786,45 @@ SC.CoreView.reopen(
 
       return true;
     case SC.CoreView.ATTACHED_BUILDING_IN:
-    case SC.CoreView.ATTACHED_SHOWING:
-      // Cancel the animation and revert to hidden.
-      this.cancelAnimation();
-      this._teardownTransition();
-      this._gotoAttachedHiddenState();
-      break;
 
     // Near normal case: Attached visible view that is in the middle of an animation.
     case SC.CoreView.ATTACHED_SHOWN_ANIMATING:
       this.cancelAnimation();
       break;
 
-    case SC.CoreView.ATTACHED_SHOWN:
-      break;
+    // Invalid states.
     default:
+      //@if(debug)
+      // Add some debugging only warnings for if the view statechart code is being improperly used.
+      // Telling the view to hide when it is already hidden isn't correct:
+      //
+      SC.warn("Developer Warning: Called _doShow on view in invalid state, %@.".fmt(this._viewStateString()));
+      //@endif
+
+      shouldHandle = false;
     }
 
     // Notify *will* (top-down from parent to children).
-    if (this.willHideInDocument) { this.willHideInDocument(); }
+    // if (this.willHideInDocument) { this.willHideInDocument(); }
 
-    if (transitionHide) {
-      // Update states after *will* and before *did* notifications!
-      this._gotoAttachedHidingState();
+    // if (transitionHide) {
+    //   // Update states after *will* and before *did* notifications!
+    //   this._gotoAttachedHidingState();
 
-      // this.invokeNext(function () {
-        this._transitionHide();
-      // });
+    //   // this.invokeNext(function () {
+    //     this._transitionHide();
+    //   // });
 
-    } else {
-      // TODO: notify only if in proper state top-down!
-      // Allow children to notify that they will be hidden. Bottom-up so that each child is in the
-      // proper state before its parent potentially alters its state. For example, a parent could
-      // modify children in `willHideInDocument`.
-      this._callOnChildViews('_notifyWillHideInDocument');
+    // } else {
+    //   // TODO: notify only if in proper state top-down!
+    //   // Allow children to notify that they will be hidden. Bottom-up so that each child is in the
+    //   // proper state before its parent potentially alters its state. For example, a parent could
+    //   // modify children in `willHideInDocument`.
+    //   this._callOnChildViews('_notifyWillHideInDocument');
 
-      // Hide immediately.
-      this._executeDoHide();
-    }
+    //   // Hide immediately.
+    //   this._executeDoHide();
+    // }
 
     return true;
   },
@@ -877,6 +924,8 @@ SC.CoreView.reopen(
     // Handle all 12 possible view states.
     switch (state) {
 
+    // Scenario: The view is hidden.
+    // Result: Depends on whether the parent view is shown or hidden by an ancestor.
     case SC.CoreView.ATTACHED_HIDDEN:
       var parentView = this.get('parentView'),
           // Views without a parent are not limited by a parent's current state.
@@ -896,11 +945,12 @@ SC.CoreView.reopen(
         // Notify for each child (that will change state) in reverse so that each child is in the proper
         // state before its parent potentially alters its state. For example, a parent could modify
         // children in `willShowInDocument`.
-        for (var i = notifyStack.length - 1; i >= 0; i--) {
-          var childView = notifyStack[i];
+        // UNUSED: Is it necessary for hiding/showing of a view to notify entire descendent tree?
+        // for (var i = notifyStack.length - 1; i >= 0; i--) {
+        //   var childView = notifyStack[i];
 
-          childView._notifyWillShowInDocument();
-        }
+        //   childView._notifyWillShowInDocument();
+        // }
         this._notifyWillShowInDocument();
 
         // Show the view.
@@ -921,12 +971,11 @@ SC.CoreView.reopen(
 
       break;
 
-    // Scenario: The view was hiding before it was told to show.
+    // Scenario: The view was hiding at the time it was told to show.
     // Result: Revert or reverse the hiding transition.
     case SC.CoreView.ATTACHED_HIDING:
-
       // Cancel the hiding transition (in place if we are going to switch to transitioning back in).
-      this.cancelAnimation(transitionShow ? SC.LayoutState.CURRENT : undefined);
+      this.cancelAnimation(transitionShow ? SC.LayoutState.CURRENT : SC.LayoutState.START);
 
       // Set the proper state.
       this._gotoAttachedShownState();
@@ -935,7 +984,7 @@ SC.CoreView.reopen(
         this._transitionShow(true);
       }
 
-      return true;
+      break;
 
     // Scenario: The view is rendered but is not attached.
     // Result: Queue an update to the visibility style.
@@ -946,12 +995,17 @@ SC.CoreView.reopen(
 
       break;
 
+    // Scenario: The view is not even rendered.
+    // Result: Nothing is required.
+    case SC.CoreView.UNRENDERED:
+      break;
+
     // Invalid states.
     default:
       //@if(debug)
       // Add some debugging only warnings for if the view statechart code is being improperly used.
-      // All other states should be impossible if parent was UNATTACHED:
-      // UNRENDERED, ATTACHED_SHOWN, ATTACHED_SHOWN_ANIMATING, ATTACHED_SHOWING, ATTACHED_HIDDEN_BY_PARENT, ATTACHED_BUILDING_IN, ATTACHED_BUILDING_OUT_BY_PARENT, ATTACHED_BUILDING_OUT
+      // Telling the view to show when it is already visible isn't correct:
+      // ATTACHED_SHOWN, ATTACHED_SHOWN_ANIMATING, ATTACHED_SHOWING, ATTACHED_HIDDEN_BY_PARENT, ATTACHED_BUILDING_IN, ATTACHED_BUILDING_OUT_BY_PARENT, ATTACHED_BUILDING_OUT
       SC.warn("Developer Warning: Called _doShow on view in invalid state, %@.".fmt(this._viewStateString()));
       //@endif
 
@@ -1058,7 +1112,7 @@ SC.CoreView.reopen(
       // Allow children to notify that they will be hidden. Bottom-up so that each child is in the
       // proper state before its parent potentially alters its state. For example, a parent could
       // modify children in `willHideInDocument`.
-      this._callOnChildViews('_notifyWillHideInDocument');
+      // this._callOnChildViews('_notifyWillHideInDocument');
 
       // Hide immediately.
       this._executeDoHide();
@@ -1259,7 +1313,24 @@ SC.CoreView.reopen(
 
   /** @private Hides the view. */
   _executeDoHide: function () {
-    var notifyStack = []; // Only those views that changed state get added to the stack.
+    // UNUSED: Is it necessary for hiding/showing of a view to notify entire descendent tree?
+    // var notifyStack = []; // Only those views that changed state get added to the stack.
+
+    // The children are updated top-down so that hidden or unattached children allow us to bail out early.
+    this._callOnChildViews('_parentWillHideInDocument', true); // , notifyStack
+
+    // Notify for each child (that will change state) in reverse so that each child is in the proper
+    // state before its parent potentially alters its state. For example, a parent could modify
+    // children in `willHideInDocument`.
+    // for (var i = notifyStack.length - 1; i >= 0; i--) {
+    //   var childView = notifyStack[i];
+
+    //   childView._notifyWillHideInDocument();
+    // }
+    this._notifyWillHideInDocument();
+
+    // Cancel any remaining animations (i.e. a build in or build out that was left running at the same time).
+    this.cancelAnimation(SC.LayoutState.CURRENT);
 
     // Update the visible style.
     this._doUpdateVisibleStyle();
@@ -1267,16 +1338,16 @@ SC.CoreView.reopen(
     // Update the state and children state. The children are updated top-down so that hidden or
     // unattached children allow us to bail out early.
     this._gotoAttachedHiddenState();
-    this._callOnChildViews('_parentDidHideInDocument', true, notifyStack);
+    this._callOnChildViews('_parentDidHideInDocument', true); // , notifyStack
 
     // Notify for each child (that changed state) in reverse so that each child is in the proper
     // state before its parent potentially alters its state. For example, a parent could modify
     // children in `didHideInDocument`.
-    for (var i = notifyStack.length - 1; i >= 0; i--) {
-      var childView = notifyStack[i];
+    // for (var i = notifyStack.length - 1; i >= 0; i--) {
+    //   var childView = notifyStack[i];
 
-      childView._notifyDidHideInDocument();
-    }
+    //   childView._notifyDidHideInDocument();
+    // }
     this._notifyDidHideInDocument();
   },
 
@@ -1310,7 +1381,7 @@ SC.CoreView.reopen(
 
   /** @private Shows the view. */
   _executeDoShow: function () {
-    var notifyStack = []; // Only those views that changed state get added to the stack.
+    // var notifyStack = []; // Only those views that changed state get added to the stack.
 
     // Update the visible style.
     this._doUpdateVisibleStyle();
@@ -1319,16 +1390,16 @@ SC.CoreView.reopen(
     // unattached children allow us to bail out early. This view's state is going to be transitioning,
     // but all child views are now considered shown.
     this._gotoAttachedShownState();
-    this._callOnChildViews('_parentDidShowInDocument', true, notifyStack);
+    this._callOnChildViews('_parentDidShowInDocument', true); // , notifyStack
 
     // Notify for each child (that changed state) in reverse so that each child is in the proper
     // state before its parent potentially alters its state. For example, a parent could modify
     // children in `didShowInDocument`.
-    for (var i = notifyStack.length - 1; i >= 0; i--) {
-      var childView = notifyStack[i];
+    // for (var i = notifyStack.length - 1; i >= 0; i--) {
+    //   var childView = notifyStack[i];
 
-      childView._notifyDidShowInDocument();
-    }
+    //   childView._notifyDidShowInDocument();
+    // }
     this._notifyDidShowInDocument();
   },
 
@@ -1556,75 +1627,43 @@ SC.CoreView.reopen(
   },
 
   /** @private Update child view states when the parent hides. Top-down! */
-  _parentDidHideInDocument: function (notifyStack) {
+  _parentDidHideInDocument: function () { // notifyStack
     var state = this.get('viewState'),
-        shouldContinue = true;
+        shouldContinue = false;
 
+    // Handle all 12 possible view states.
     switch (state) {
-    //@if(debug)
-    // Add some debugging only warnings for if the view statechart is breaking assumptions.
-    case SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT: // If the parent was ATTACHED_BUILDING_OUT, it would have been handled below first (top-down).
-    case SC.CoreView.UNATTACHED_BY_PARENT: // If the parent was UNATTACHED, it would have been handled below first (top-down).
-    case SC.CoreView.ATTACHED_HIDDEN_BY_PARENT: // If the parent was ATTACHED_HIDDEN, it would have been handled below first (top-down).
-      SC.warn("Core Developer Warning: Found invalid state %@ for _parentDidHideInDocument".fmt(this._viewStateString()));
-      // There's no need to continue to further child views.
-      shouldContinue = false;
-      break;
-    //@endif
 
-    // Fast path for child view states that don't care if the parent's hidden state changes.
+    // Scenario: The child view was shown.
+    // Result: Go to hidden by parent state.
+    case SC.CoreView.ATTACHED_SHOWN:
+      // Go to the proper state.
+      this._gotoAttachedHiddenByParentState();
+
+      shouldContinue = true;
+      break;
+
+    // Scenario: The child view was hidden or forced to unrendered or unattached state.
+    // Result: Do nothing.
     case SC.CoreView.UNRENDERED:
     case SC.CoreView.UNATTACHED:
     case SC.CoreView.ATTACHED_HIDDEN:
-      // There's no need to continue to further child views.
-      shouldContinue = false;
       break;
 
-    // Scenario: The child view was in the process of building out before the parent hid.
-    // Result: The child view needs to become fully built-out immediately. It then would be in
-    //         the UNATTACHED state which is ignored (see above).
-    case SC.CoreView.ATTACHED_BUILDING_OUT:
-      this._cancelTransition();
-
-      // Detach immediately.
-      this._executeDoDetach();
-
-      // There's no need to continue to further child views.
-      shouldContinue = false;
-      break;
-
-    // Scenario: The child view was in the process of hiding before the parent hid.
-    // Result: The child view has to become hidden immediately. Note: further children have already
-    //         been notified that they will hide and don't need to re-notify.
-    case SC.CoreView.ATTACHED_HIDING:
-      this._cancelTransition();
-
-      // Hide immediately.
-      this._executeDoHide();
-
-      // There's no need to continue to further child views.
-      shouldContinue = false;
-      break;
-
-    // Scenario: The child view was in the process of building in or showing before the parent hid.
-    // Result: The child view has to become fully built-in/visible immediately and then put into
-    //         unattached by parent state.
-    case SC.CoreView.ATTACHED_BUILDING_IN:
-    case SC.CoreView.ATTACHED_SHOWING:
-      this._cancelTransition();
-
-      // Go to the proper state.
-      this._gotoAttachedHiddenByParentState();
-      break;
-    default: // SC.CoreView.ATTACHED_SHOWN
-      // Go to the proper state.
-      this._gotoAttachedHiddenByParentState();
+    // Invalid states.
+    default:
+      //@if(debug)
+      // Add some debugging only warnings for if the view statechart is breaking assumptions.
+      // All animating states should have been canceled when parent will hide is called.
+      // ATTACHED_HIDING, ATTACHED_BUILDING_IN, ATTACHED_SHOWING, ATTACHED_BUILDING_OUT, ATTACHED_BUILDING_OUT_BY_PARENT, UNATTACHED_BY_PARENT, ATTACHED_HIDDEN_BY_PARENT, ATTACHED_SHOWN_ANIMATING
+      SC.warn("Core Developer Warning: Found invalid state %@ for _parentDidHideInDocument".fmt(this._viewStateString()));
+      //@endif
     }
 
-    if (shouldContinue) {
-      // Allow children that have changed state to notify that they have been hidden.
-      notifyStack.push(this);
-    }
+    // if (shouldContinue) {
+    //   // Allow children that have changed state to notify that they have been hidden.
+    //   notifyStack.push(this);
+    // }
 
     return shouldContinue;
   },
@@ -1681,7 +1720,7 @@ SC.CoreView.reopen(
   },
 
   /** @private Update child view states when the parent shows. Top-down! */
-  _parentDidShowInDocument: function (notifyStack) {
+  _parentDidShowInDocument: function () { // notifyStack
     var state = this.get('viewState'),
         shouldContinue = true;
 
@@ -1718,10 +1757,10 @@ SC.CoreView.reopen(
       shouldContinue = false;
     }
 
-    if (shouldContinue) {
-      // Allow children that have changed state to notify that they have been made visible.
-      notifyStack.push(this);
-    }
+    // if (shouldContinue) {
+    //   // Allow children that have changed state to notify that they have been made visible.
+    //   notifyStack.push(this);
+    // }
 
     return shouldContinue;
   },
@@ -1764,6 +1803,59 @@ SC.CoreView.reopen(
       return true;
     default:
     }
+  },
+
+  /** @private Prepares according to parent will hide. This is called before the parent view hides
+    completely, which may be after a hide transition completes. */
+  _parentWillHideInDocument: function () { // notifyStack
+    var state = this.get('viewState'),
+        shouldContinue = true;
+
+    // Handle all 12 possible view states.
+    switch (state) {
+
+    // Scenario: The child view is visible.
+    // Result: Do nothing and continue.
+    case SC.CoreView.ATTACHED_SHOWN:
+      break;
+
+    // Scenario: The child view is animating.
+    // Result: Complete its animation immediately and continue.
+    case SC.CoreView.ATTACHED_SHOWN_ANIMATING:
+    case SC.CoreView.ATTACHED_SHOWING:
+    case SC.CoreView.ATTACHED_BUILDING_IN:
+    case SC.CoreView.ATTACHED_BUILDING_OUT:
+    case SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT:
+    case SC.CoreView.ATTACHED_HIDING:
+      this.cancelAnimation();
+      break;
+
+    // Scenario: The child view is hidden or has been forced to an unrendered or unattached state.
+    // Result: Do nothing and don't notify.
+    case SC.CoreView.UNRENDERED:
+    case SC.CoreView.UNATTACHED:
+    case SC.CoreView.ATTACHED_HIDDEN:
+      // There's no need to continue to further child views.
+      break;
+
+    // Invalid states.
+    default:
+      //@if(debug)
+      // Add some debugging only warnings for if the view statechart is breaking assumptions.
+      // This state should be impossible if its parent was UNATTACHED or HIDDEN/HIDING (it should have been trimmed above):
+      // UNATTACHED_BY_PARENT, ATTACHED_HIDDEN_BY_PARENT
+      SC.warn("Core Developer Warning: Found invalid state %@ for _parentWillHideInDocument".fmt(this._viewStateString()));
+      //@endif
+      // There's no need to continue to further child views.
+      shouldContinue = false;
+    }
+
+    // if (shouldContinue) {
+    //   // Allow children that have changed state to notify that they will be shown.
+    //   notifyStack.push(this);
+    // }
+
+    return shouldContinue;
   },
 
   /** @private Clean up before parent is detached. */
@@ -1889,7 +1981,7 @@ SC.CoreView.reopen(
   },
 
   /** @private Attempts to run a transition hide, ensuring any incoming transitions are stopped in place. */
-  _transitionHide: function () {
+  _transitionHide: function (inPlace) {
     var transitionHide = this.get('transitionHide'),
       options = this.get('transitionHideOptions') || {};
 
@@ -1906,16 +1998,21 @@ SC.CoreView.reopen(
     //   inPlace = true;
     //   break;
     // default:
-    this._setupTransition(transitionHide);
+    if (!inPlace) {
+      this._setupTransition(transitionHide);
+    }
     // }
 
     // Set up the hiding transition.
     if (transitionHide.setup) {
-      transitionHide.setup(this, options);
+      transitionHide.setup(this, options, inPlace);
     }
 
     // Execute the hiding transition.
     transitionHide.run(this, options, this._preTransitionLayout, this._preTransitionFrame);
+
+    // Set the proper state.
+    this._gotoAttachedHidingState();
   },
 
   /** @private Attempts to run a transition in, ensuring any outgoing transitions are stopped in place. */
@@ -1928,7 +2025,10 @@ SC.CoreView.reopen(
       SC.Logger.log('%c%@ — _transitionIn()'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
     //@endif
-    this._setupTransition(transitionIn);
+
+    if (!inPlace) {
+      this._setupTransition(transitionIn);
+    }
 
     // Set up the incoming transition.
     if (transitionIn.setup) {
@@ -1973,7 +2073,10 @@ SC.CoreView.reopen(
       SC.Logger.log('%c%@ — _transitionShow()'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
     //@endif
-    this._setupTransition(transitionShow);
+
+    if (!inPlace) {
+      this._setupTransition(transitionShow);
+    }
 
     // Set up the showing transition.
     if (transitionShow.setup) {

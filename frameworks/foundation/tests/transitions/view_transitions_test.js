@@ -109,7 +109,6 @@ test("Reversing SHOWING to HIDING: FADE_IN & FADE_OUT", function () {
     equals(view.get('isVisible'), false, "The isVisible property of the view is");
     ok(!jqEl.hasClass('sc-hidden'), "The view doesn't have sc-hidden class name.");
     ok(jqEl.css('opacity') > 0, "The view's opacity is not 0 still.");
-    equals(view.$().css('opacity'), '1', "The view's opacity is");
   }, 200);
 
   setTimeout(function () {
@@ -208,8 +207,8 @@ test("Reversing HIDING to SHOWING: FADE_IN & FADE_OUT", function () {
     // Test assumption.
     equals(view.get('isVisible'), false, "The isVisible property of the view is");
     ok(!jqEl.hasClass('sc-hidden'), "The view doesn't have sc-hidden class name.");
-    ok(jqEl.css('opacity') > 0, "The view's opacity is not 0.");
-    ok(jqEl.css('opacity') < 1, "The view's opacity is not 1.");
+    ok(jqEl.css('opacity') > 0, "The view's current opacity is not 0.");
+    ok(jqEl.css('opacity') < 1, "The view's current opacity is not 1.");
 
     // Cancel fading out.
     SC.run(function () {
@@ -219,7 +218,8 @@ test("Reversing HIDING to SHOWING: FADE_IN & FADE_OUT", function () {
     jqEl = view.$();
     equals(view.get('isVisible'), true, "The isVisible property of the view is");
     ok(!jqEl.hasClass('sc-hidden'), "The view doesn't have sc-hidden class name.");
-    equals(view.$().css('opacity'), '0', "The view's opacity is");
+    ok(jqEl.css('opacity') > 0, "The view's current opacity is not 0 still.");
+    ok(jqEl.css('opacity') < 1, "The view's current opacity is not 1 still.");
   }, 200);
 
   setTimeout(function () {
@@ -228,7 +228,8 @@ test("Reversing HIDING to SHOWING: FADE_IN & FADE_OUT", function () {
     // Test assumption.
     equals(view.get('isVisible'), true, "The isVisible property of the view is");
     ok(!jqEl.hasClass('sc-hidden'), "The view doesn't have sc-hidden class name.");
-    equals(jqEl.css('opacity'), '1', "The view's opacity is now");
+    equals(jqEl.css('opacity'), '1', "The view's current opacity is now");
+    // debugger;
 
     start();
   }, 1000);

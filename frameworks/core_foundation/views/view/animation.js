@@ -542,7 +542,7 @@ SC.View.reopen(
 
     // Adjust to final position.
     if (didCancel && !!layout) {
-      this.adjust(layout);
+      this.set('layout', layout);
     }
 
     // Clean up.
@@ -633,8 +633,7 @@ SC.View.reopen(
     components = matrixString.split(/\(|\)/);
     numbers = components[1].split(',');
     for (var i = 0, len = numbers.length; i < len; i++) {
-      var number = numbers[i],
-        value;
+      var number = numbers[i];
 
       // Transform E notation into fixed decimal (20 is maximum allowed).
       if (number.indexOf('e') > 0) {
@@ -744,7 +743,7 @@ SC.View.reopen(
 
         // Determine the current style.
         } else {
-          value = window.parseInt(value, 10);
+          value = window.parseFloat(value, 10);
 
           // Account for centerX & centerY animations (margin-left & margin-top).
           if (key === 'centerX') {
