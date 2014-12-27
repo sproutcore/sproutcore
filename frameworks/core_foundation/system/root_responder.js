@@ -2533,32 +2533,32 @@ SC.RootResponder = SC.Object.extend(
 
   /* @private Handler for animationstart events. */
   animationstart: function (evt) {
-      var view = this.targetViewForEvent(evt) ;
-      this.sendEvent('animationDidStart', evt, view) ;
+    var view = this.targetViewForEvent(evt);
+    this.sendEvent('animationDidStart', evt, view);
 
     return view ? evt.hasCustomEventHandling : YES;
   },
 
   /* @private Handler for animationiteration events. */
   animationiteration: function (evt) {
-      var view = this.targetViewForEvent(evt) ;
-      this.sendEvent('animationDidIterate', evt, view) ;
+    var view = this.targetViewForEvent(evt);
+    this.sendEvent('animationDidIterate', evt, view);
 
     return view ? evt.hasCustomEventHandling : YES;
   },
 
   /* @private Handler for animationend events. */
   animationend: function (evt) {
-      var view = this.targetViewForEvent(evt) ;
-      this.sendEvent('animationDidEnd', evt, view) ;
+    var view = this.targetViewForEvent(evt);
+    this.sendEvent('animationDidEnd', evt, view);
 
     return view ? evt.hasCustomEventHandling : YES;
   },
 
   /* @private Handler for transitionend events. */
   transitionend: function (evt) {
-      var view = this.targetViewForEvent(evt) ;
-      this.sendEvent('transitionDidEnd', evt, view) ;
+    var view = this.targetViewForEvent(evt);
+    this.sendEvent('transitionDidEnd', evt, view);
 
     return view ? evt.hasCustomEventHandling : YES;
   }
@@ -2569,8 +2569,9 @@ SC.RootResponder = SC.Object.extend(
   Invoked when the document is ready, but before main is called.  Creates
   an instance and sets up event listeners as needed.
 */
-SC.ready(SC.RootResponder, SC.RootResponder.ready = function() {
+SC.ready(SC.RootResponder, SC.RootResponder.ready = function () {
   var r;
-  r = SC.RootResponder.responder = SC.RootResponder.create() ;
-  r.setup() ;
+
+  r = SC.RootResponder.responder = SC.RootResponder.create();
+  r.setup();
 });

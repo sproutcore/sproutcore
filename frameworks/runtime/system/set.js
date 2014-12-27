@@ -12,13 +12,13 @@ sc_require('mixins/copyable');
 
 // IMPORTANT NOTE:  This file actually defines two classes:
 // SC.Set is a fully observable set class documented below.
-// SC._CoreSet is just like SC.Set but is not observable.  This is required
+// SC.CoreSet is just like SC.Set but is not observable.  This is required
 // because SC.Observable is built on using sets and requires sets without
 // observability.
 //
 // We use pointer swizzling below to swap around the actual definitions so
 // that the documentation will turn out right.  (The docs should only
-// define SC.Set - not SC._CoreSet)
+// define SC.Set - not SC.CoreSet)
 
 /**
   @class
@@ -197,7 +197,8 @@ SC.Set = SC.mixin({},
   clear: function() {
     if (this.isFrozen) throw SC.FROZEN_ERROR;
     this.length = 0;
-    return this ;
+
+    return this;
   },
 
   /**
@@ -374,6 +375,7 @@ SC.Set = SC.mixin({},
 
     if (this.isObservable) this.enumerableContentDidChange();
     if (this.setObservers) this.didRemoveItem(obj);
+
     return this ;
   },
 
@@ -431,8 +433,10 @@ SC.Set = SC.mixin({},
     @returns {SC.Set} receiver
   */
   destroy: function() {
-    this.isFrozen = NO ; // unfreeze to return to pool
+    this.isFrozen = NO; // unfreeze to return to pool
+
     if (!this.isObservable) SC.Set._pool.push(this.clear());
+
     return this;
   },
 
@@ -443,15 +447,16 @@ SC.Set = SC.mixin({},
   /** @private - optimized */
   forEach: function(iterator, target) {
     var len = this.length;
-    if (!target) target = this ;
-    for(var idx=0;idx<len;idx++) iterator.call(target, this[idx], idx, this);
+
+    if (!target) target = this;
+    for (var idx = 0; idx < len; idx++) iterator.call(target, this[idx], idx, this);
     return this ;
   },
 
   /** @private */
   toString: function() {
     var len = this.length, idx, ary = [];
-    for(idx=0;idx<len;idx++) ary[idx] = this[idx];
+    for (idx = 0; idx < len; idx++) ary[idx] = this[idx];
     return "SC.Set<%@>".fmt(ary.join(',')) ;
   },
 
@@ -487,31 +492,28 @@ SC.Set = SC.mixin({},
     for (idx = 0; idx < len; idx++) o[idx].didRemoveItem(this, item);
   },
 
-  // the pool used for non-observable sets
-  _pool: [],
-
   /** @private */
   isObservable: YES
 
-}) ;
+});
 
 SC.Set.constructor = SC.Set;
 
 // Make SC.Set look a bit more like other enumerables
 
 /** @private */
-SC.Set.clone = SC.Set.copy ;
+SC.Set.clone = SC.Set.copy;
 
 /** @private */
-SC.Set.push = SC.Set.unshift = SC.Set.add ;
+SC.Set.push = SC.Set.unshift = SC.Set.add;
 
 /** @private */
-SC.Set.shift = SC.Set.pop ;
+SC.Set.shift = SC.Set.pop;
 
 // add generic add/remove enumerable support
 
 /** @private */
-SC.Set.addObject = SC.Set.add ;
+SC.Set.addObject = SC.Set.add;
 
 /** @private */
 SC.Set.removeObject = SC.Set.remove;
@@ -524,7 +526,7 @@ SC.Set._pool = [];
 
 /** @class
 
-  CoreSet is just like set but not observable.  If you want to use the set
+  CoreSet is just like Set but not observable.  If you want to use the set
   as a simple data structure with no observing, CoreSet is slightly faster
   and more memory efficient.
 
@@ -534,7 +536,7 @@ SC.Set._pool = [];
 SC.CoreSet = SC.beget(SC.Set);
 
 /** @private */
-SC.CoreSet.isObservable = NO ;
+SC.CoreSet.isObservable = NO;
 
 /** @private */
 SC.CoreSet.constructor = SC.CoreSet;

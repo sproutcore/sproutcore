@@ -561,7 +561,9 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
       }
 
     // otherwise notify property observers immediately
-    } else this._notifyPropertyObservers(key);
+    } else {
+      this._notifyPropertyObservers(key);
+    }
 
     return this;
   },
@@ -1162,9 +1164,12 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     return observers ? observers.getMembers() : [];
   },
 
-  // this private method actually notifies the observers for any keys in the
-  // observer queue.  If you pass a key it will be added to the queue.
+  /** @private
+    This private method actually notifies the observers for any keys in the observer queue.  If you
+    pass a key it will be added to the queue.
+  */
   _notifyPropertyObservers: function (key) {
+    // Ensure that this object has been initialized.
     if (!this._observableInited) this.initObservable();
 
     SC.Observers.flush(this); // hookup as many observers as possible.
@@ -1182,7 +1187,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     //@endif
 
     // Get any starObservers -- they will be notified of all changes.
-    starObservers =  this['_kvo_observers_*'];
+    starObservers = this['_kvo_observers_*'];
 
     // prevent notifications from being sent until complete
     this._kvo_changeLevel = this._kvo_changeLevel + 1;
@@ -1259,6 +1264,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
           // observer, you will not be notified until the next time.)
           members = observers.getMembers();
           membersLength = members.length;
+
           for (memberLoc = 0; memberLoc < membersLength; memberLoc++) {
             member = members[memberLoc];
 
@@ -1297,6 +1303,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
               //@if(debug)
               if (log) console.log('%@...firing local observer %@.%@ for key "%@"'.fmt(spaces, this, member, key));
               //@endif
+
               method.call(this, this, key, null, rev);
             }
           }
