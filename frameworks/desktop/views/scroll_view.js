@@ -109,7 +109,7 @@ SC.ScrollView = SC.View.extend({
   _sc_contentHeightDidChange: false,
 
   /** @private The cached scale of the content. */
-  _sc_contentScale: 1,
+  _sc_contentScale: undefined,
 
   /** @private Flag used to react accordingly when the content's scale changes. */
   _sc_contentScaleDidChange: false,
@@ -184,7 +184,7 @@ SC.ScrollView = SC.View.extend({
   _sc_passTouchToContentTimer: null,
 
   /** @private The actual scale. */
-  _sc_scale: null,
+  _sc_scale: 1,
 
   /** @private Flag used to indicate when we should resize the content width manually. */
   // _sc_shouldResizeContentWidth: false,
@@ -645,11 +645,6 @@ SC.ScrollView = SC.View.extend({
       }
     } else {
       value = this._sc_scale;
-
-      // Default value.
-      if (value == null) {
-        value = 1;
-      }
     }
 
     // Update the actual value.
@@ -875,7 +870,7 @@ SC.ScrollView = SC.View.extend({
       contentViewLayout = contentView.get('layout'),
       leftStart = contentViewLayout.left,
       leftDelta = contentAdjustMap.left - leftStart,
-      scaleStart = contentViewLayout.scale,
+      scaleStart = contentViewLayout.scale == null ? 1 : contentViewLayout.scale,
       scaleDelta = contentAdjustMap.scale - scaleStart,
       topStart = contentViewLayout.top,
       topDelta = contentAdjustMap.top - topStart,
@@ -990,7 +985,7 @@ SC.ScrollView = SC.View.extend({
     // this._sc_shouldResizeContentHeight = false;
     this._sc_contentHeight = 0;
     this._sc_contentWidth = 0;
-    this._sc_contentScale = 1;
+    this._sc_contentScale = undefined;
 
     // Assign the content view to our container view. This ensures that it is instantiated.
     containerView.set('contentView', newView);
@@ -1003,12 +998,6 @@ SC.ScrollView = SC.View.extend({
       // newView.addObserver('layer', this, layerChangeFunc);
 
       if (!newView.useStaticLayout) {
-        // Ensure that scale transforms occur from the top-left corner (per our math).
-        newView.adjust({
-          transformOriginX: 0,
-          transformOriginY: 0
-        });
-
         // When a view wants an accelerated layer and isn't a fixed size, we convert it to a fixed
         // size and resize it when our container resizes.
         // if (newView.get('wantsAcceleratedLayer') && !newView.get('isFixedSize')) {
@@ -1439,7 +1428,13 @@ SC.ScrollView = SC.View.extend({
       var contentAdjustMap = SC.ScrollView._SC_CONTENT_ADJUST_MAP; // Shared object used to avoid continually initializing/destroying objects.
 
       // Create the content adjust map once. Note: This is a shared object, all properties must be overwritten each time.
-      if (!contentAdjustMap) { contentAdjustMap = SC.ScrollView._SC_CONTENT_ADJUST_MAP = {}; }
+      if (!contentAdjustMap) {
+        contentAdjustMap = SC.ScrollView._SC_CONTENT_ADJUST_MAP = {
+          // Ensure that scale transforms occur from the top-left corner (per our math).
+          transformOriginX: 0,
+          transformOriginY: 0
+        };
+      }
 
       contentAdjustMap.left = left;
       contentAdjustMap.top = top;
