@@ -361,10 +361,10 @@ SC.View.reopen(
   isFixedHeight: function() {
     var layout = this.get('layout');
 
-    // Width is fixed if it has a height and it isn't SC.LAYOUT_AUTO or a percent.
+    // Height is fixed if it has a height and it isn't SC.LAYOUT_AUTO or a percent.
     return (layout.height !== undefined) &&
-      (layout.height !== SC.LAYOUT_AUTO) &&
-      !SC.isPercentage(layout.height);
+      !SC.isPercentage(layout.height) &&
+      (layout.height !== SC.LAYOUT_AUTO);
   }.property('layout').cacheable(),
 
   /**
@@ -381,8 +381,8 @@ SC.View.reopen(
 
     // Width is fixed if it has a width and it isn't SC.LAYOUT_AUTO or a percent.
     return (layout.width !== undefined) &&
-      (layout.width !== SC.LAYOUT_AUTO) &&
-      !SC.isPercentage(layout.width);
+      !SC.isPercentage(layout.width) &&
+      (layout.width !== SC.LAYOUT_AUTO);
   }.property('layout').cacheable(),
 
   /**
@@ -427,7 +427,7 @@ SC.View.reopen(
   },
 
   /** @private */
-  _convertFrameFromViewHelper: function(frame, fromView, targetView) {
+  _convertFrameFromViewHelper: function (frame, fromView, targetView) {
     var myX = frame.x, myY = frame.y, myWidth = frame.width, myHeight = frame.height, view, f;
 
     // first, walk up from the view of the frame, up to the top level
@@ -580,6 +580,7 @@ SC.View.reopen(
     return frame;
   },
 
+  /** */
   computeParentDimensions: function (frame) {
     var parentView = this.get('parentView'),
         parentFrame = (parentView) ? parentView.get('frame') : null,

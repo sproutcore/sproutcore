@@ -234,7 +234,7 @@ test("updates frame and clippingFrame when loading MainPane", function() {
 
   // needs a fixed layout size to make sure the sizes stay constant
   var pane = SC.MainPane.create();
-  var w = SC.RootResponder.responder.computeWindowSize().width;
+  var windowWidth = SC.RootResponder.responder.computeWindowSize().width;
 
   // add the pane to the main window.  should resize the frames
   SC.run(function() {
@@ -242,8 +242,8 @@ test("updates frame and clippingFrame when loading MainPane", function() {
   });
 
   // should equal window size
-  equals(pane.get('frame').width, w, 'frame width should have changed');
-  equals(pane.get('clippingFrame').width, w, 'clippingFrame width should have changed');
+  equals(pane.get('frame').width, windowWidth, 'frame width should have changed');
+  equals(pane.get('clippingFrame').width, windowWidth, 'clippingFrame width should have changed');
 
   // Clean up.
   pane.destroy();

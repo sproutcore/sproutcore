@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/*global module, test, equals, ok */
+/*global module, test, equals, ok, same */
 
 var view;
 

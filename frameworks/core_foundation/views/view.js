@@ -1059,6 +1059,7 @@ SC.CoreView.reopen(
     // FAST PATH: No frame, no clipping frame.
     if (!f) return null;
 
+    /*jshint eqnull:true */
     var scale = (f.scale == null) ? 1 : f.scale,
         scaleIsArray = NO,
         pv = this.get('parentView'),
@@ -2277,7 +2278,8 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
   */
   computeFrameWithParentFrame: function (pdim) {
     // Layout.
-    var f, layout = this.get('layout');
+    var layout = this.get('layout'),
+        f;
 
     // We can't predict the frame for static layout, so just return the view's
     // current frame (see original computeFrameWithParentFrame in views/view.js)
@@ -2304,15 +2306,13 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
         lcY = layout.centerY;
 
     if (lW === AUTO) {
-      error = SC.Error.desc(("%@.layout() cannot use width:auto if " +
-        "staticLayout is disabled").fmt(this), "%@".fmt(this), -1);
+      error = SC.Error.desc(("%@.layout() cannot use width:auto if staticLayout is disabled").fmt(this), "%@".fmt(this), -1);
       SC.Logger.error(error.toString());
       throw error;
     }
 
     if (lH === AUTO) {
-      error = SC.Error.desc(("%@.layout() cannot use height:auto if " +
-        "staticLayout is disabled").fmt(this), "%@".fmt(this), -1);
+      error = SC.Error.desc(("%@.layout() cannot use height:auto if staticLayout is disabled").fmt(this), "%@".fmt(this), -1);
       SC.Logger.error(error.toString());
       throw error;
     }
@@ -2328,6 +2328,7 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
       } else {
         f.x = lL;
       }
+
       if (lW !== undefined) {
         if (lW === AUTO) { f.width = AUTO; }
         else if (SC.isPercentage(lW)) { f.width = dW * lW; }
@@ -2337,6 +2338,7 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
         if (lR && SC.isPercentage(lR)) { f.width = f.width - (lR * dW); }
         else { f.width = f.width - (lR || 0); }
       }
+
     // handle right aligned
     } else if (!SC.none(lR)) {
       if (SC.none(lW)) {
@@ -2436,6 +2438,7 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
     f = this._adjustForBorder(f, layout);
 
     // Make sure the width/height fix their min/max (note the inlining of SC.none for performance)...
+    /*jshint eqnull:true */
     if ((layout.maxHeight != null) && (f.height > layout.maxHeight)) f.height = layout.maxHeight;
     if ((layout.minHeight != null) && (f.height < layout.minHeight)) f.height = layout.minHeight;
     if ((layout.maxWidth != null) && (f.width > layout.maxWidth)) f.width = layout.maxWidth;
