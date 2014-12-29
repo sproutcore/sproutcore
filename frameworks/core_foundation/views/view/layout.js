@@ -787,7 +787,6 @@ SC.View.reopen(
     @returns {void}
   */
   viewDidResize: function () {
-
     // Also notify our children.
     var cv = this.childViews,
         frame = this.get('frame'),

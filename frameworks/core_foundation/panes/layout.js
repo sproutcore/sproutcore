@@ -64,10 +64,6 @@ SC.Pane.reopen(
   },
 
   /** @private Disable caching due to an known bug in SC. */
-  frame: function () {
-    if (this.get('designer') && SC.suppressMain) { return sc_super(); }
-    return this.computeFrameWithParentFrame(null);
-  }.property(),
 
   /**
     Invoked by the root responder whenever the window resizes.  This should

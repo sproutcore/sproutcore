@@ -624,8 +624,11 @@ SC.PickerPane = SC.PalettePane.extend(
       // frames, add those properties.
       anchor.halfWidth = parseInt(anchor.width * 0.5, 0);
       anchor.halfHeight = parseInt(anchor.height * 0.5, 0);
-      frame.halfWidth = parseInt(frame.originalWidth * 0.5, 0);
-      frame.halfHeight = parseInt(frame.originalHeight * 0.5, 0);
+
+      // Don't pollute the borderFrame rect.
+      frame = SC.cloneRect(frame);
+      frame.halfWidth = parseInt(frame.width * 0.5, 0);
+      frame.halfHeight = parseInt(frame.height * 0.5, 0);
 
       frame = this.fitPositionToScreen(origin, frame, anchor);
       adjustHash = {
@@ -886,10 +889,10 @@ SC.PickerPane = SC.PalettePane.extend(
       [anchorFrame.x + anchorFrame.width + offset[0], anchorFrame.y + anchorFrame.halfHeight - frame.halfHeight],
 
       // Top left [x, y] if positioned evenly to the left of the anchor
-      [anchorFrame.x - frame.originalWidth + offset[1], anchorFrame.y + anchorFrame.halfHeight - frame.halfHeight],
+      [anchorFrame.x - frame.width + offset[1], anchorFrame.y + anchorFrame.halfHeight - frame.halfHeight],
 
       // Top left [x, y] if positioned evenly above the anchor
-      [anchorFrame.x + anchorFrame.halfWidth - frame.halfWidth, anchorFrame.y - frame.originalHeight + offset[2]],
+      [anchorFrame.x + anchorFrame.halfWidth - frame.halfWidth, anchorFrame.y - frame.height + offset[2]],
 
       // Top left [x, y] if positioned evenly below the anchor
       [anchorFrame.x + anchorFrame.halfWidth - frame.halfWidth, anchorFrame.y + anchorFrame.height + offset[3]]
