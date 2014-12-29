@@ -2,7 +2,6 @@ sc_require("views/view/base");
 
 // When in debug mode, core developers can log the view state.
 //@if (debug)
-SC.LOG_VIEW_STATES = false;
 SC.LOG_VIEW_STATES_STYLE = {
   0x0200: 'color: #67b7db; font-style: italic;', // UNRENDERED
   0x0300: 'color: #67b7db; font-style: italic;', // UNATTACHED
@@ -329,7 +328,7 @@ SC.CoreView.reopen(
       handled = true;
 
     //@if (debug)
-    if (SC.LOG_VIEW_STATES) {
+    if (this.SC_LOG_VIEW_STATE) {
       SC.Logger.log('%c%@ — _doAdopt(%@, %@)'.fmt(this, parentView, beforeView), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
     //@endif
@@ -428,7 +427,7 @@ SC.CoreView.reopen(
       isHandled = false;
 
     //@if (debug)
-    if (SC.LOG_VIEW_STATES) {
+    if (this.SC_LOG_VIEW_STATE) {
       SC.Logger.log('%c%@ — _doAttach(%@, %@)'.fmt(this, parentNode, nextNode), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
     //@endif
@@ -530,7 +529,7 @@ SC.CoreView.reopen(
       isHandled = false;
 
     //@if (debug)
-    if (SC.LOG_VIEW_STATES) {
+    if (this.SC_LOG_VIEW_STATE) {
       SC.Logger.log('%c%@ — _doDestroyLayer()'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
     //@endif
@@ -577,7 +576,7 @@ SC.CoreView.reopen(
       isHandled = true;
 
     //@if (debug)
-    if (SC.LOG_VIEW_STATES) {
+    if (this.SC_LOG_VIEW_STATE) {
       SC.Logger.log('%c%@ — _doDetach()'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
     //@endif
@@ -714,7 +713,7 @@ SC.CoreView.reopen(
       shouldHandle = true;
 
     //@if (debug)
-    if (SC.LOG_VIEW_STATES) {
+    if (this.SC_LOG_VIEW_STATE) {
       SC.Logger.log('%c%@ — _doHide()'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
     //@endif
@@ -725,15 +724,16 @@ SC.CoreView.reopen(
     // Scenario: The view is shown.
     // Result: Notify that the view will hide and then either hide or run hide transition.
     case SC.CoreView.ATTACHED_SHOWN:
+    case SC.CoreView.ATTACHED_BUILDING_IN:
     case SC.CoreView.ATTACHED_BUILDING_OUT:
     case SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT:
-    case SC.ATTACHED_BUILDING_IN:
     case SC.CoreView.ATTACHED_SHOWN_ANIMATING:
     // ATTACHED_HIDDEN_BY_PARENT, ATTACHED_BUILDING_IN, ATTACHED_BUILDING_OUT_BY_PARENT, ATTACHED_BUILDING_OUT
 
+      // TODO: How do we check for conflicts in the hide transition against other concurrent transitions/animations?
       if (transitionHide) {
         // this.invokeNext(function () {
-          this._transitionHide();
+        this._transitionHide();
         // });
       } else {
         // Hide the view.
@@ -745,12 +745,23 @@ SC.CoreView.reopen(
     // Scenario: The view was showing at the time it was told to hide.
     // Result: Cancel the animation.
     case SC.CoreView.ATTACHED_SHOWING:
-      this.cancelAnimation(SC.LayoutState.CURRENT);
+      if (transitionHide) {
+        this.cancelAnimation(SC.LayoutState.CURRENT);
+      } else {
+        this.cancelAnimation();
+      }
 
       // Set the proper state.
-      this._gotoAttachedShownState();
+      // this._gotoAttachedShownState();
 
-      shouldHandle = this._doHide();
+      if (transitionHide) {
+        // this.invokeNext(function () {
+        this._transitionHide(true);
+        // });
+      } else {
+        // Hide the view.
+        this._executeDoHide();
+      }
 
       break;
 
@@ -772,12 +783,6 @@ SC.CoreView.reopen(
     case SC.CoreView.ATTACHED_HIDDEN: // FAST PATH!
     case SC.CoreView.ATTACHED_HIDING: // FAST PATH!
       return false;
-    case SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT: // FAST PATH!
-    case SC.CoreView.ATTACHED_BUILDING_OUT: // FAST PATH!
-      // Queue the visibility update for the next time we display.
-      this._visibleStyleNeedsUpdate = true;
-
-      return true;
     case SC.CoreView.ATTACHED_HIDDEN_BY_PARENT: // FAST PATH!
       // Note that visibility update is NOT conditional for this state.
       this._doUpdateVisibleStyle();
@@ -786,12 +791,6 @@ SC.CoreView.reopen(
       this._gotoAttachedHiddenState();
 
       return true;
-    case SC.CoreView.ATTACHED_BUILDING_IN:
-
-    // Near normal case: Attached visible view that is in the middle of an animation.
-    case SC.CoreView.ATTACHED_SHOWN_ANIMATING:
-      this.cancelAnimation();
-      break;
 
     // Invalid states.
     default:
@@ -799,7 +798,7 @@ SC.CoreView.reopen(
       // Add some debugging only warnings for if the view statechart code is being improperly used.
       // Telling the view to hide when it is already hidden isn't correct:
       //
-      SC.warn("Developer Warning: Called _doShow on view in invalid state, %@.".fmt(this._viewStateString()));
+      SC.warn("Core Developer Warning: Found invalid state for view, %@, in _doHide".fmt(this));
       //@endif
 
       shouldHandle = false;
@@ -814,7 +813,7 @@ SC.CoreView.reopen(
       handled = true;
 
     //@if (debug)
-    if (SC.LOG_VIEW_STATES) {
+    if (this.SC_LOG_VIEW_STATE) {
       SC.Logger.log('%c%@ — _doOrphan()'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
     //@endif
@@ -844,7 +843,7 @@ SC.CoreView.reopen(
         shouldHandle = true;
 
     //@if (debug)
-    if (SC.LOG_VIEW_STATES) {
+    if (this.SC_LOG_VIEW_STATE) {
       SC.Logger.log('%c%@ — _doRender()'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
     //@endif
@@ -880,7 +879,7 @@ SC.CoreView.reopen(
       // Add some debugging only warnings for if the view statechart code is being improperly used.
       // All other states should be impossible if parent was UNATTACHED:
       // ATTACHED_SHOWING, ATTACHED_SHOWN, ATTACHED_SHOWN_ANIMATING, ATTACHED_HIDING, ATTACHED_HIDDEN, ATTACHED_HIDDEN_BY_PARENT, ATTACHED_BUILDING_IN, ATTACHED_BUILDING_OUT, ATTACHED_BUILDING_OUT_BY_PARENT, UNATTACHED, UNATTACHED_BY_PARENT
-      SC.warn("Developer Warning: Called _doRender on view in invalid state, %@.".fmt(this._viewStateString()));
+      SC.warn("Core Developer Warning: Found invalid state for view, %@, in _doRender".fmt(this));
       //@endif
       shouldHandle = false;
     }
@@ -895,7 +894,7 @@ SC.CoreView.reopen(
         shouldHandle = true;
 
     //@if (debug)
-    if (SC.LOG_VIEW_STATES) {
+    if (this.SC_LOG_VIEW_STATE) {
       SC.Logger.log('%c%@ — _doShow()'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
     //@endif
@@ -986,7 +985,7 @@ SC.CoreView.reopen(
       // Add some debugging only warnings for if the view statechart code is being improperly used.
       // Telling the view to show when it is already visible isn't correct:
       // ATTACHED_SHOWN, ATTACHED_SHOWN_ANIMATING, ATTACHED_SHOWING, ATTACHED_HIDDEN_BY_PARENT, ATTACHED_BUILDING_IN, ATTACHED_BUILDING_OUT_BY_PARENT, ATTACHED_BUILDING_OUT
-      SC.warn("Developer Warning: Called _doShow on view in invalid state, %@.".fmt(this._viewStateString()));
+      SC.warn("Core Developer Warning: Found invalid state for view, %@, in _doShow".fmt(this));
       //@endif
 
       shouldHandle = false;
@@ -1001,7 +1000,7 @@ SC.CoreView.reopen(
       handled = true;
 
     //@if (debug)
-    if (SC.LOG_VIEW_STATES) {
+    if (this.SC_LOG_VIEW_STATE) {
       SC.Logger.log('%c%@ — _doUpdateContent(%@)'.fmt(this, force), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
     //@endif
@@ -1037,7 +1036,7 @@ SC.CoreView.reopen(
     var state = this.get('viewState');
 
     //@if (debug)
-    if (SC.LOG_VIEW_STATES) {
+    if (this.SC_LOG_VIEW_STATE) {
       SC.Logger.log('%c%@ — didTransitionIn()'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
     //@endif
@@ -1063,7 +1062,7 @@ SC.CoreView.reopen(
     var state = this.get('viewState');
 
     //@if (debug)
-    if (SC.LOG_VIEW_STATES) {
+    if (this.SC_LOG_VIEW_STATE) {
       SC.Logger.log('%c%@ — didTransitionOut()'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
     //@endif
@@ -1309,6 +1308,17 @@ SC.CoreView.reopen(
     //   childView._notifyWillHideInDocument();
     // }
     this._notifyWillHideInDocument();
+
+    // Cancel any remaining animations (i.e. a concurrent build in or build out).
+    var viewState = this.get('viewState');
+    switch (viewState) {
+    case SC.CoreView.ATTACHED_BUILDING_IN:
+    case SC.CoreView.ATTACHED_BUILDING_OUT:
+    case SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT:
+    case SC.CoreView.ATTACHED_SHOWN_ANIMATING:
+      this.cancelAnimation(SC.LayoutState.CURRENT);
+      break;
+    }
 
     // Update the visible style.
     this._doUpdateVisibleStyle();
@@ -1569,7 +1579,7 @@ SC.CoreView.reopen(
       // Add some debugging only warnings for if the view statechart is breaking assumptions.
       // All other states should be impossible if parent was UNATTACHED:
       // ATTACHED_BUILDING_IN, ATTACHED_SHOWING, ATTACHED_SHOWN, ATTACHED_SHOWN_ANIMATING, ATTACHED_BUILDING_OUT, ATTACHED_BUILDING_OUT_BY_PARENT, ATTACHED_HIDING, ATTACHED_HIDDEN, ATTACHED_HIDDEN_BY_PARENT
-      SC.warn("Core Developer Warning: Found invalid state %@ for _parentDidAttach".fmt(this._viewStateString()));
+      SC.warn("Core Developer Warning: Found invalid state for view, %@, in _parentDidAttach".fmt(this));
       //@endif
 
       // There's no need to continue to further child views.
@@ -1641,7 +1651,7 @@ SC.CoreView.reopen(
       // Add some debugging only warnings for if the view statechart is breaking assumptions.
       // All animating states should have been canceled when parent will hide is called.
       // ATTACHED_HIDING, ATTACHED_BUILDING_IN, ATTACHED_SHOWING, ATTACHED_BUILDING_OUT, ATTACHED_BUILDING_OUT_BY_PARENT, UNATTACHED_BY_PARENT, ATTACHED_HIDDEN_BY_PARENT, ATTACHED_SHOWN_ANIMATING
-      SC.warn("Core Developer Warning: Found invalid state %@ for _parentDidHideInDocument".fmt(this._viewStateString()));
+      SC.warn("Core Developer Warning: Found invalid state for view %@ in _parentDidHideInDocument".fmt(this));
       //@endif
     }
 
@@ -1689,7 +1699,7 @@ SC.CoreView.reopen(
       // Add some debugging only warnings for if the view statechart is breaking assumptions.
       // All other states should be impossible if parent was UNRENDERED:
       // ATTACHED_BUILDING_IN, ATTACHED_SHOWING, ATTACHED_SHOWN, ATTACHED_SHOWN_ANIMATING, ATTACHED_BUILDING_OUT, ATTACHED_BUILDING_OUT_BY_PARENT, ATTACHED_HIDING, ATTACHED_HIDDEN, ATTACHED_HIDDEN_BY_PARENT, UNATTACHED_BY_PARENT, UNATTACHED
-      SC.warn("Core Developer Warning: Found invalid state %@ for _parentDidAttach".fmt(this._viewStateString()));
+      SC.warn("Core Developer Warning: Found invalid state for view %@ in _parentDidAttach".fmt(this));
       //@endif
 
       // There's no need to continue to further child views.
@@ -1736,7 +1746,7 @@ SC.CoreView.reopen(
       // ATTACHED_SHOWN, ATTACHED_SHOWN_ANIMATING, ATTACHED_SHOWING, ATTACHED_HIDING, ATTACHED_BUILDING_IN, ATTACHED_BUILDING_OUT, ATTACHED_BUILDING_OUT_BY_PARENT
       // This state should be impossible if its parent was UNATTACHED (it should have been trimmed above):
       // UNATTACHED_BY_PARENT
-      SC.warn("Core Developer Warning: Found invalid state %@ for _parentDidShowInDocument".fmt(this._viewStateString()));
+      SC.warn("Core Developer Warning: Found invalid state for view %@ in _parentDidShowInDocument".fmt(this));
       //@endif
       // There's no need to continue to further child views.
       shouldContinue = false;
@@ -1829,7 +1839,7 @@ SC.CoreView.reopen(
       // Add some debugging only warnings for if the view statechart is breaking assumptions.
       // This state should be impossible if its parent was UNATTACHED or HIDDEN/HIDING (it should have been trimmed above):
       // UNATTACHED_BY_PARENT, ATTACHED_HIDDEN_BY_PARENT
-      SC.warn("Core Developer Warning: Found invalid state %@ for _parentWillHideInDocument".fmt(this._viewStateString()));
+      SC.warn("Core Developer Warning: Found invalid state for view %@ in _parentWillHideInDocument".fmt(this));
       //@endif
       // There's no need to continue to further child views.
       shouldContinue = false;
@@ -1911,7 +1921,7 @@ SC.CoreView.reopen(
       // ATTACHED_SHOWN, ATTACHED_SHOWN_ANIMATING, ATTACHED_SHOWING, ATTACHED_HIDING, ATTACHED_BUILDING_IN, ATTACHED_BUILDING_OUT, ATTACHED_BUILDING_OUT_BY_PARENT
       // This state should be impossible if its parent was UNATTACHED (it should have been trimmed above):
       // UNATTACHED_BY_PARENT
-      SC.warn("Core Developer Warning: Found invalid state %@ for _parentWillShowInDocument".fmt(this._viewStateString()));
+      SC.warn("Core Developer Warning: Found invalid state for view %@ in _parentWillShowInDocument".fmt(this));
       //@endif
       // There's no need to continue to further child views.
       shouldContinue = false;
@@ -1971,7 +1981,7 @@ SC.CoreView.reopen(
       options = this.get('transitionHideOptions') || {};
 
     //@if (debug)
-    if (SC.LOG_VIEW_STATES) {
+    if (this.SC_LOG_VIEW_STATE) {
       SC.Logger.log('%c%@ — _transitionHide()'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
     //@endif
@@ -2006,7 +2016,7 @@ SC.CoreView.reopen(
       options = this.get('transitionInOptions') || {};
 
     //@if (debug)
-    if (SC.LOG_VIEW_STATES) {
+    if (this.SC_LOG_VIEW_STATE) {
       SC.Logger.log('%c%@ — _transitionIn()'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
     //@endif
@@ -2054,7 +2064,7 @@ SC.CoreView.reopen(
       options = this.get('transitionShowOptions') || {};
 
     //@if (debug)
-    if (SC.LOG_VIEW_STATES) {
+    if (this.SC_LOG_VIEW_STATE) {
       SC.Logger.log('%c%@ — _transitionShow()'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
     //@endif
