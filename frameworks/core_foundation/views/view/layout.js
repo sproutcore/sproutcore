@@ -81,6 +81,47 @@ SC.View.reopen(
     be invalid, we need to force layoutDidChange() to always immediately run
     whenever 'layout' is set.
   */
+  propertyDidChange: function (key, value, _keepCache) {
+    //@if(debug)
+    // Debug mode only property validation.
+    switch (key) {
+    case 'layout':
+      // If a layout value is accidentally set to NaN, this can result in infinite loops. Help the developer out by failing
+      // early so that they can follow the stack trace to the problem.
+      var layout = this.get('layout');
+      for (var property in layout) {
+        if (!layout.hasOwnProperty(property)) { continue; }
+
+        var layoutValue = layout[property];
+        if (isNaN(layoutValue) && (layoutValue !== SC.LAYOUT_AUTO) &&
+            !SC._ROTATION_VALUE_REGEX.exec(layoutValue) && !SC._SCALE_VALUE_REGEX.exec(layoutValue)) {
+          throw new Error("SC.View layout property set to invalid value, %@: %@.".fmt(property, layoutValue));
+        }
+      }
+      break;
+    }
+    //@endif
+
+    // If the key is 'layout', we need to call layoutDidChange() immediately
+    // so that if the frame has changed any cached values (for both this view
+    // and any child views) can be appropriately invalidated.
+
+    // To allow layout to be a computed property, we check if any property has
+    // changed and if layout is dependent on the property.
+    // If it is we call layoutDidChange.
+    var layoutChange = false;
+    if (typeof this.layout === "function" && this._kvo_dependents) {
+      var dependents = this._kvo_dependents[key];
+      if (dependents && dependents.indexOf('layout') !== -1) { layoutChange = true; }
+    }
+
+    if (key === 'layout' || layoutChange) {
+      this.layoutDidChange();
+    }
+
+    // Resume notification as usual.
+    sc_super();
+  },
 
   /** @private Apply the adjustment to a clone of the layout (cloned unless newLayout is passed in) */
   _sc_applyAdjustment: function (key, newValue, layout, newLayout) {
@@ -765,7 +806,6 @@ SC.View.reopen(
     // If our height or width changed, our resulting frame change may impact our child views.
     if (heightMayHaveChanged || widthMayHaveChanged) {
       this.viewDidResize();
-      this._viewFrameDidChange();
     }
     // If our size didn't change but our position did, our frame will change, but it won't impact our child
     // views' frames. (Note that the _viewFrameDidChange call is made by viewDidResize above.)
@@ -787,6 +827,8 @@ SC.View.reopen(
     @returns {void}
   */
   viewDidResize: function () {
+    this._viewFrameDidChange();
+
     // Also notify our children.
     var cv = this.childViews,
         frame = this.get('frame'),
@@ -880,10 +922,6 @@ SC.View.reopen(
     return this.get('parentView');
   }.property('parentView').cacheable(),
 
-  frame: function () {
-    return this.computeFrameWithParentFrame(null);
-  }.property('layout', 'useStaticLayout').cacheable(),
-
   /**
     This method is called whenever a property changes that invalidates the
     layout of the view.  Changing the layout will do this automatically, but
@@ -909,11 +947,8 @@ SC.View.reopen(
     }
 
     // Optimize notifications depending on if we resized or just moved.
-    var didResize = this._checkForResize();
+    this._checkForResize();
 
-    if (didResize) {
-      this.viewDidResize();
-    }
 
     // Notify layoutView/parentView, unless we are transitioning.
     var layoutView = this.get('layoutView');
@@ -929,10 +964,8 @@ SC.View.reopen(
       this.invokeOnce(this.updateLayout);
     }
 
-    this._callOnChildViews('_sc_view_clippingFrameDidChange');
-
     return this;
-  }.observes('layout'),
+  },
 
   /** @private */
   _checkForResize: function () {
@@ -964,7 +997,13 @@ SC.View.reopen(
     // (say to the position after a resize), don't result in _checkForResize running against the old _previousLayout.
     this._previousLayout = currentLayout;
 
-    return didResize;
+    if (didResize) {
+      this.viewDidResize();
+    } else {
+      // Even if we didn't resize, our frame may have changed
+      // TODO: consider checking for position changes by testing the resulting frame against the cached frame.  This is difficult to do.
+      this._viewFrameDidChange();
+    }
   },
 
   /**
@@ -1266,7 +1305,6 @@ SC.View.reopen(
     if (this.get('useStaticLayout')) {
       // We call viewDidResize so that it calls parentViewDidResize on all child views.
       this.viewDidResize();
-      this._viewFrameDidChange();
     }
 
     // Notify.
@@ -1276,15 +1314,7 @@ SC.View.reopen(
   /** @private Override: The 'adopted' event (uses _checkForResize so our childViews are notified if our frame changes). */
   _adopted: function (beforeView) {
     // Our frame may change once we've been adopted to a parent.
-    var didResize = this._checkForResize();
-
-    if (didResize) {
-      this.viewDidResize();
-    }
-
-    // Even if we didn't resize, our frame may have changed
-    // TODO: consider checking for position changes by testing the resulting frame against the cached frame.  This is difficult to do.
-    this._viewFrameDidChange();
+    this._checkForResize();
 
     sc_super();
   },
@@ -1295,15 +1325,7 @@ SC.View.reopen(
 
     if (!this.isDestroyed) {
       // Our frame may change once we've been removed from a parent.
-      var didResize = this._checkForResize();
-
-      if (didResize) {
-        this.viewDidResize();
-      }
-
-      // Even if we didn't resize, our frame may have changed
-      // TODO: consider checking for position changes by testing the resulting frame against the cached frame.  This is difficult to do.
-      this._viewFrameDidChange();
+      this._checkForResize();
     }
   },
 
@@ -1313,10 +1335,7 @@ SC.View.reopen(
 
     // If this view uses static layout, then notify that the frame (likely)
     // changed.
-    if (this.get('useStaticLayout')) {
-      this.viewDidResize();
-      this._viewFrameDidChange();
-    }
+    if (this.get('useStaticLayout')) { this.viewDidResize(); }
   },
 
   /** @private The 'updatedLayout' event. */
