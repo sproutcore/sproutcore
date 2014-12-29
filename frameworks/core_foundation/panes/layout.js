@@ -63,8 +63,6 @@ SC.Pane.reopen(
     return wDim;
   },
 
-  /** @private Disable caching due to an known bug in SC. */
-
   /**
     Invoked by the root responder whenever the window resizes.  This should
     simply begin the process of notifying children that the view size has
