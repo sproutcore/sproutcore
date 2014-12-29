@@ -538,10 +538,11 @@ SC.PickerPane = SC.PalettePane.extend(
 
   /* @private If the pane changes size, reposition as necessary. */
   viewDidResize: function () {
-    this.positionPane(true);
-
     // Don't forget to call the superclass method.
     sc_super();
+
+    // Re-position.
+    this.positionPane(true);
   },
 
   /**
