@@ -211,6 +211,7 @@ SC.MenuScrollView = SC.ScrollView.extend(
         controlSize: controlSize,
         scrollDown: false,
         isVisible: !autohidesVerticalScroller,
+        layout: { height: 0 },
 
         value: this.get('verticalScrollOffset'),
         valueBinding: '.owner.verticalScrollOffset', // Bind the value of the scroller to our vertical offset.
@@ -238,7 +239,7 @@ SC.MenuScrollView = SC.ScrollView.extend(
         controlSize: controlSize,
         scrollDown: true,
         isVisible: !autohidesVerticalScroller,
-        layout: { bottom: 0 },
+        layout: { bottom: 0, height: 0 },
 
         value: this.get('verticalScrollOffset'),
         valueBinding: '.owner.verticalScrollOffset', // Bind the value of the scroller to our vertical offset.
