@@ -327,13 +327,13 @@ SC.View.reopen(
 
     // Get the layout (may be a previous layout already animating).
     if (!this._prevLayout) {
-      this._prevLayout = SC.clone(this.get('layout'));
+      this._prevLayout = SC.clone(this.get('explicitLayout'));
     }
 
     if (!pendingAnimations) { pendingAnimations = this._pendingAnimations = {}; }
 
     // Get the layout (may be a partially adjusted one already queued up).
-    layout = this._animateLayout || SC.clone(this.get('layout'));
+    layout = this._animateLayout || SC.clone(this.get('explicitLayout'));
 
     // Handle old style rotation.
     if (!SC.none(hash.rotate)) {

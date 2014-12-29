@@ -313,6 +313,28 @@ if (SC.platform.supportsCSSTransitions) {
     });
   });
 
+  // This behavior should be up for debate.  Does the callback call immediately, or does it wait until the end of
+  // the specified animation period?  Currently we're calling it immediately.
+  test("callback should be called immediately when a property is animated to its current value (even if the value is implied).", function () {
+    stop(2000);
+
+    expect(1);
+
+    var implicitView = SC.View.create({
+        backgroundColor: '#ABC',
+        layout: { left: 0 } // implicit layout: { top: 0, right: 0, bottom: 0 }
+      });
+    pane.appendChild(implicitView);
+
+    SC.run(function () {
+      implicitView.animate('top', 0, { duration: 0.5 }, function () {
+        ok(true, 'callback called back');
+
+        start();
+      });
+    });
+  });
+
   test("callback should be called when a property is animated with a duration of zero.", function () {
     stop(2000);
 

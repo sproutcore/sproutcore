@@ -260,10 +260,7 @@ SC.View.LayoutStyleCalculator = {
 
     // Calculate the margin offset used to center the value along this axis.
     if (SC.none(sizeValue)) {
-      //@if(debug)
-      // This error message happens whenever width or height is not set.
-      SC.warn("Developer Warning: When setting '" + center + "' in the layout, you must also set '" + size + "'.");
-      //@endif
+      // Invalid!
       style[margin] = "50%";
     } else {
       value = centerValue - sizeValue / 2;

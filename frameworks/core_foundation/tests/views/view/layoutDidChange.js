@@ -21,7 +21,7 @@ test("notifies layoutStyle & frame change", function () {
     view.layoutDidChange();
   });
 
-  equals(frameCallCount, 1, 'should trigger observers for frame');
+  equals(frameCallCount, 0, 'should not trigger observer for frame because layout didn\'t actually change');
   equals(layoutStyleCallCount, 0, 'should not trigger observers for layoutStyle');
 
   // Attach to the document.
@@ -29,15 +29,15 @@ test("notifies layoutStyle & frame change", function () {
   parent.append();
   parent.appendChild(view);
 
-  equals(frameCallCount, 2, 'should trigger observers for frame when attached to the document');
+  equals(frameCallCount, 1, 'should trigger observers for frame when adopted');
   equals(layoutStyleCallCount, 0, 'should still not trigger observers for layoutStyle');
 
   SC.run(function () {
     view.adjust('top', 20);
   });
 
-  equals(frameCallCount, 3, 'should trigger observers for frame when attached to the document');
-  equals(layoutStyleCallCount, 1, 'should trigger observers for layoutStyle');
+  equals(frameCallCount, 2, 'should trigger observers for frame when adjusted');
+  equals(layoutStyleCallCount, 1, 'should trigger observers for layoutStyle when adjusted');
 
   // Clean up.
   view.destroy();

@@ -992,12 +992,10 @@ SC.CoreView.reopen(
       /*
         TODO Can probably have some better width/height values - CC
         FIXME This will probably not work right with borders - PW
-        FIXME This assumes and reports a scale of 1 - DCP
       */
-      f.width = f.originalWidth = layer.offsetWidth;
-      f.height = f.originalHeight = layer.offsetHeight;
-      f.scale = 1;
-      f.transformOriginX = f.transformOriginY = 0.5;
+      f.width = layer.offsetWidth
+      f.height = layer.offsetHeight;
+
       return f;
     }
 
@@ -1061,10 +1059,8 @@ SC.CoreView.reopen(
 
     /*jshint eqnull:true */
     var scale = (f.scale == null) ? 1 : f.scale,
-        scaleIsArray = NO,
         pv = this.get('parentView'),
         pcf = pv ? pv.get('clippingFrame') : null,
-        sf, spcf, originX, originY, deltaH, deltaW,
         ret;
 
     // FAST PATH: No parent clipping frame, no change. (The origin and scale are reset from parent view's
@@ -2293,8 +2289,6 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
     f = {};
 
     var error, layer, AUTO = SC.LAYOUT_AUTO,
-        pv = this.get('parentView'),
-        scale, oX, oY, // Used with the special case ScrollView handling below.
         dH, dW, //shortHand for parentDimensions
         lR = layout.right,
         lL = layout.left,
@@ -2444,8 +2438,8 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
     if ((layout.maxWidth != null) && (f.width > layout.maxWidth)) f.width = layout.maxWidth;
     if ((layout.minWidth != null) && (f.width < layout.minWidth)) f.width = layout.minWidth;
 
-    // Finally, adjust for scale. (Scale is only defined here if we're doing special-case ScrollView stuff.)
-    f = this._adjustForScale(f, layout, scale, oX, oY);
+    // Finally, adjust for scale.
+    f = this._adjustForScale(f, layout);
 
     return f;
   },

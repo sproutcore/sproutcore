@@ -107,3 +107,104 @@ test("Test isFixedPosition for various layouts.", function () {
   SC.run(function () { view.set('layout', { top: SC.LAYOUT_AUTO }); });
   ok(!view.get('isFixedPosition'), "A top: SC.LAYOUT_AUTO (auto top) doesn't correspond to a fixed position.");
 });
+
+test("Test explicitLayout for various valid layouts.", function () {
+  same(view.get('explicitLayout'), { top: 0, right: 0, bottom: 0, left: 0 }, "No layout is implied as");
+
+  SC.run(function () { view.set('layout', { left: 5 }); });
+  same(view.get('explicitLayout'), { top: 0, right: 0, bottom: 0, left: 5 }, "{ left: 5 } is implied as");
+
+  SC.run(function () { view.set('layout', { top: 5 }); });
+  same(view.get('explicitLayout'), { top: 5, right: 0, bottom: 0, left: 0 }, "{ top: 5 } is implied as");
+
+  SC.run(function () { view.set('layout', { bottom: 5 }); });
+  same(view.get('explicitLayout'), { top: 0, right: 0, bottom: 5, left: 0 }, "{ bottom: 5 } is implied as");
+
+  SC.run(function () { view.set('layout', { right: 5 }); });
+  same(view.get('explicitLayout'), { top: 0, right: 5, bottom: 0, left: 0 }, "{ right: 5 } is implied as");
+
+  SC.run(function () { view.set('layout', { bottom: 5, left: 5 }); });
+  same(view.get('explicitLayout'), { top: 0, right: 0, bottom: 5, left: 5 }, "{ bottom: 5, left: 5 } is implied as");
+
+  SC.run(function () { view.set('layout', { right: 5, bottom: 5, left: 5 }); });
+  same(view.get('explicitLayout'), { top: 0, right: 5, bottom: 5, left: 5 }, "{ right: 5, bottom: 5, left: 5 } is implied as");
+
+  SC.run(function () { view.set('layout', { top: 5, right: 5, bottom: 5, left: 5 }); });
+  same(view.get('explicitLayout'), { top: 5, right: 5, bottom: 5, left: 5 }, "{ top: 5, right: 5, bottom: 5, left: 5 } is implied as");
+
+  SC.run(function () { view.set('layout', { top: 5, right: 5, bottom: 5 }); });
+  same(view.get('explicitLayout'), { top: 5, right: 5, bottom: 5, left: 0 }, "{ top: 5, right: 5, bottom: 5 } is implied as");
+
+  SC.run(function () { view.set('layout', { top: 5, right: 5 }); });
+  same(view.get('explicitLayout'), { top: 5, right: 5, bottom: 0, left: 0 }, "{ top: 5, right: 5 } is implied as");
+
+  SC.run(function () { view.set('layout', { width: 100 }); });
+  same(view.get('explicitLayout'), { top: 0, width: 100, bottom: 0, left: 0 }, "{ width: 100 } is implied as");
+
+  SC.run(function () { view.set('layout', { width: 100, right: 5 }); });
+  same(view.get('explicitLayout'), { top: 0, width: 100, bottom: 0, right: 5 }, "{ width: 100, right: 5 } is implied as");
+
+  SC.run(function () { view.set('layout', { height: 100 }); });
+  same(view.get('explicitLayout'), { top: 0, height: 100, right: 0, left: 0 }, "{ height: 100 } is implied as");
+
+  SC.run(function () { view.set('layout', { height: 100, bottom: 5 }); });
+  same(view.get('explicitLayout'), { right: 0, height: 100, bottom: 5, left: 0 }, "{ height: 100, bottom: 5 } is implied as");
+
+  // MIN/MAX
+
+  SC.run(function () { view.set('layout', { minWidth: 100, maxHeight: 100 }); });
+  same(view.get('explicitLayout'), { top: 0, right: 0, bottom: 0, left: 0, minWidth: 100, maxHeight: 100 }, "{ minWidth: 100, maxHeight: 100 } is implied as");
+
+  SC.run(function () { view.set('layout', { maxWidth: 100, minHeight: 100 }); });
+  same(view.get('explicitLayout'), { top: 0, right: 0, bottom: 0, left: 0, maxWidth: 100, minHeight: 100 }, "{ maxWidth: 100, minHeight: 100 } is implied as");
+
+  // CENTERS
+
+  SC.run(function () { view.set('layout', { centerX: 0, width: 100 }); });
+  same(view.get('explicitLayout'), { top: 0, centerX: 0, width: 100, bottom: 0 }, "{ centerX: 0, width: 100 } is implied as");
+
+  SC.run(function () { view.set('layout', { centerY: 0, height: 100 }); });
+  same(view.get('explicitLayout'), { right: 0, centerY: 0, height: 100, left: 0 }, "{ centerY: 0, height: 100 } is implied as");
+
+  // OPACITY
+
+  SC.run(function () { view.set('layout', { opacity: 0.25 }); });
+  same(view.get('explicitLayout'), { top: 0, right: 0, bottom: 0, left: 0, opacity: 0.25 }, "{ opacity: 0.25 } is implied as");
+
+  // TRANSFORMS
+
+  SC.run(function () { view.set('layout', { scale: 0.25 }); });
+  same(view.get('explicitLayout'), { top: 0, right: 0, bottom: 0, left: 0, scale: 0.25 }, "{ scale: 0.25 } is implied as");
+
+  SC.run(function () { view.set('layout', { transformOriginX: 0, transformOriginY: 1 }); });
+  same(view.get('explicitLayout'), { top: 0, right: 0, bottom: 0, left: 0, transformOriginX: 0, transformOriginY: 1 }, "{ transformOriginX: 0, transformOriginY: 1 } is implied as");
+
+  // BORDERS
+
+  SC.run(function () { view.set('layout', { border: 1 }); });
+  same(view.get('explicitLayout'), { top: 0, right: 0, bottom: 0, left: 0, borderTop: 1, borderRight: 1, borderBottom: 1, borderLeft: 1 }, "{ border: 1 } is implied as");
+
+  SC.run(function () { view.set('layout', { border: 1, borderTop: 2 }); });
+  same(view.get('explicitLayout'), { top: 0, right: 0, bottom: 0, left: 0, borderTop: 2, borderRight: 1, borderBottom: 1, borderLeft: 1 }, "{ border: 1, borderTop: 2 } is implied as");
+
+  SC.run(function () { view.set('layout', { borderBottom: 1, borderTop: 2 }); });
+  same(view.get('explicitLayout'), { top: 0, right: 0, bottom: 0, left: 0, borderTop: 2, borderBottom: 1 }, "{ borderBottom: 1, borderTop: 2 } is implied as");
+});
+
+test("Test explicitLayout for various invalid layouts.", function () {
+  // Centered without a size dimension.
+  SC.run(function () { view.set('layout', { centerX: 0 }); });
+  same(view.get('explicitLayout'), { top: 0, centerX: 0, bottom: 0 }, "{ centerX: 0 } is implied as");
+
+  // Centered without a size dimension.
+  SC.run(function () { view.set('layout', { centerY: 0 }); });
+  same(view.get('explicitLayout'), { left: 0, centerY: 0, right: 0 }, "{ centerY: 0 } is implied as");
+
+  // Left, right & width
+  SC.run(function () { view.set('layout', { left: 5, width: 100, right: 5 }); });
+  same(view.get('explicitLayout'), { top: 0, left: 5, bottom: 0, width: 100 }, "{ left: 5, width: 100, right: 5 } is implied as");
+
+  // Top, bottom & height
+  SC.run(function () { view.set('layout', { top: 5, height: 100, bottom: 5 }); });
+  same(view.get('explicitLayout'), { left: 0, top: 5, right: 0, height: 100 }, "{ top: 5, height: 100, bottom: 5 } is implied as");
+});
