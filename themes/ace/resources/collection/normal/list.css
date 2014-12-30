@@ -1,5 +1,4 @@
 $theme.collection {
-  background: white;
 
   &.alternating .sc-collection-item.even {
     background: #eef3f6;

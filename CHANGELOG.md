@@ -51,7 +51,12 @@ Test Results:
       Paint x 8:         ~6.0ms
 
 *How does this affect your code?*  
-Because lists and grids have an implied layout of `{ top: 0, bottom: 0, left: 0, right: 0 }`, they used to always stretch to fill their parent containing view. This is no longer the case and so a collection with too few items to fill the containing view will only be as tall or wide as its items warrant. This will affect any background styles that were applied to the collection, which previously would have covered the whole containing view's background. Unfortunately, those background styles would need to be moved to the style of the containing view in order to prevent any styling regressions after updating to this new version.  
+Because lists and grids have an implied layout of `{ top: 0, bottom: 0, left: 0, right: 0 }`, they used to always stretch to fill their parent containing view. This is no longer the case and so a collection with too few items to fill the containing view will only be as tall or as wide as its items warrant. This will affect any background styles that were applied to the collection (such as the Ace theme did), which previously would have covered the whole containing view's background. Unfortunately, those background styles need to be moved to the style of the containing view in order to prevent any styling regressions after updating to this new version.  
+
+Therefore, to go along with this change the `background: white` style in the Ace theme that was applied to `$theme.collection` has been moved to `$theme.sc-scroll-view`. It has also been changed to `background-color: white`, which is less likely to conflict with other background styles.  
+
+*How do I check for style regressions?*  
+To ensure that any background styles applied to your collections still look correct, you should do a search through your stylesheets for `.collection` and move any custom background styles over to an `.sc-scroll-view` class.
 
 * The SC.Binding transforms `and` and `or` have been refactored to use the new `mix` code. This means that you can now pass more than two property paths to these transforms.  
 
