@@ -743,7 +743,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       evaluate:         function (r,w) {
                           var left  = this.leftSide.evaluate(r,w);
                           var right = this.rightSide.evaluate(r,w);
-                          return SC.compare(left, right) == -1; //left < right;
+                          return SC.compare(left, right) === -1; //left < right;
                         }
     },
 
@@ -757,7 +757,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       evaluate:         function (r,w) {
                           var left  = this.leftSide.evaluate(r,w);
                           var right = this.rightSide.evaluate(r,w);
-                          return SC.compare(left, right) != 1; //left <= right;
+                          return SC.compare(left, right) !== 1; //left <= right;
                         }
     },
 
@@ -771,7 +771,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       evaluate:         function (r,w) {
                           var left  = this.leftSide.evaluate(r,w);
                           var right = this.rightSide.evaluate(r,w);
-                          return SC.compare(left, right) == 1; //left > right;
+                          return SC.compare(left, right) === 1; //left > right;
                         }
     },
 
@@ -785,7 +785,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       evaluate:         function (r,w) {
                           var left  = this.leftSide.evaluate(r,w);
                           var right = this.rightSide.evaluate(r,w);
-                          return SC.compare(left, right) != -1; //left >= right;
+                          return SC.compare(left, right) !== -1; //left >= right;
                         }
     },
 
@@ -835,7 +835,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                             if (allType !== SC.T_ARRAY) all = all.toArray();
                             var found  = false;
                             var i      = 0;
-                            while ( found===false && i<all.length ) {
+                            while ( found === false && i < all.length ) {
                               if ( value == all[i] ) found = true;
                               i++;
                             }
@@ -963,14 +963,12 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
         c                   = null,
         t                   = null,
         token               = null,
-        tokenType           = null,
         currentToken        = null,
         currentTokenType    = null,
         currentTokenValue   = null,
         currentDelimiter    = null,
         endOfString         = false,
         endOfToken          = false,
-        belongsToToken      = false,
         skipThisCharacter   = false,
         rememberCount       = {};
 
@@ -990,8 +988,8 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       // reserved words
       if ( !t.delimited ) {
         for ( var anotherToken in grammar ) {
-          if ( grammar[anotherToken].reservedWord
-               && anotherToken == tokenValue ) {
+          if (grammar[anotherToken].reservedWord &&
+              anotherToken == tokenValue ) {
             tokenType = anotherToken;
           }
         }
@@ -1147,8 +1145,8 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       var p = position;
       var tl = tokenLogic(p);
       if ( !tl )            return false;
-      if (side == 'left')   return tl.leftType;
-      if (side == 'right')  return tl.rightType;
+      if (side === 'left')   return tl.leftType;
+      if (side === 'right')  return tl.rightType;
     }
 
     function evalType (position) {
@@ -1172,8 +1170,8 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     function tokenIsMissingChilds (position) {
       var p = position;
       if ( p < 0 )  return true;
-      return (expectedType('left',p) && !l[p].leftSide)
-          || (expectedType('right',p) && !l[p].rightSide);
+      return (expectedType('left',p) && !l[p].leftSide) ||
+             (expectedType('right',p) && !l[p].rightSide);
     }
 
     function typesAreMatching (parent, child) {
@@ -1223,15 +1221,15 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
 
     // step through the tokenList
 
-    for (i=0; i < l.length; i++) {
+    for (i = 0; i < l.length; i++) {
       shouldCheckAgain = false;
 
-      if ( l[i].tokenType == 'UNKNOWN' ) {
+      if ( l[i].tokenType === 'UNKNOWN' ) {
         error.push('found unknown token: '+l[i].tokenValue);
       }
 
-      if ( l[i].tokenType == 'OPEN_PAREN' ) openParenthesisStack.push(i);
-      if ( l[i].tokenType == 'CLOSE_PAREN' ) removeParenthesesPair(i);
+      if ( l[i].tokenType === 'OPEN_PAREN' ) openParenthesisStack.push(i);
+      if ( l[i].tokenType === 'CLOSE_PAREN' ) removeParenthesesPair(i);
 
       if ( preceedingTokenCanBeMadeChild(i) ) makeChild(i);
 
@@ -1245,7 +1243,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     }
 
     // error if tokenList l is not a single token now
-    if (l.length == 1) l = l[0];
+    if (l.length === 1) l = l[0];
     else error.push('string did not resolve to a single tree');
 
     // If we have errors, return an error object.
@@ -1255,7 +1253,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
         tree: l,
         // Conform to SC.Error.
         isError: YES,
-        errorVal: function() { return this.error }
+        errorVal: function() { return this.error; }
       };
     }
     // Otherwise the token list is now a tree and can be returned.
@@ -1293,7 +1291,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
         p = p.replace(/\s+/,',');
         p = p.split(',');
         o[i] = {propertyName: p[0]};
-        if (p[1] && p[1] == 'DESC') o[i].descending = true;
+        if (p[1] && p[1] === 'DESC') o[i].descending = true;
       }
 
       return o;
@@ -1367,7 +1365,7 @@ SC.Query.mixin( /** @scope SC.Query */ {
   orderStoreKeys: function(storeKeys, query, store) {
     // apply the sort if there is one
     if (storeKeys) {
-      var res = storeKeys.sort(function(a, b) {
+      storeKeys.sort(function(a, b) {
         return SC.Query.compareStoreKeys(query, store, a, b);
       });
     }
