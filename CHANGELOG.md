@@ -38,6 +38,10 @@ For example, to create a mix binding that concatenates two external properties i
 
 ### CHANGES & IMPROVEMENTS
 
+* Documentation  
+
+Added lots of documentation to `SC.Request` (examples), `SC.Query` (local vs. remote) and `SC.DateTime` (`adjust` and `advance`).
+
 * SC.PickerPane  
 
 This view has been given special behavior when used with SC.View's `transitionIn` plugin support. If the plugin defines `layoutProperties` of either `scale` or `rotate`, then the picker will adjust its transform origin X & Y position to appear to scale or rotate out of the anchor. The result is a very nice effect that picker panes appear to pop out of their anchors.  

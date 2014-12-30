@@ -27,7 +27,7 @@ module("SC.Query querying find() on a store", {
         // used by tests to verify remote queries
         if (query.get('location') === SC.Query.REMOTE) {
           if (query.get('recordType') === MyApp.Foo) {
-            store.loadQueryResults(query, this.get('storeKeys'));
+            store.dataSourceDidFetchQuery(query, this.get('storeKeys'));
           }
         }
 
@@ -252,7 +252,7 @@ test("sending a new store key array from the data source should update record ar
 
   // .replace() will call .enumerableContentDidChange()
   SC.RunLoop.begin();
-  MyApp.store.loadQueryResults(q, newStoreKeys);
+  MyApp.store.dataSourceDidFetchQuery(q, newStoreKeys);
   SC.RunLoop.end();
 
   equals(records.get('length'), 4, 'record length should be 4');

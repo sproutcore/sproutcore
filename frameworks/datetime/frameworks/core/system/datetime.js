@@ -238,20 +238,36 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
   isFrozen: YES,
 
   /**
-    Returns a new `SC.DateTime` object where one or more of the elements have been
-    changed according to the options parameter. The time options (hour,
-    minute, sec, usec) reset cascadingly, so if only the hour is passed, then
-    minute, sec, and usec is set to 0. If the hour and minute is passed, then
-    sec and usec is set to 0.
+    Returns a new `SC.DateTime` object where one or more of the elements have been adjusted
+    according to the `options` parameter. The possible options that can be adjusted are `timezone`,
+    `year`, `month`, `day`, `hour`, `minute`, `second` and `millisecond`.
 
-    If a time zone is passed in the options hash, all dates and times are assumed
-    to be local to it, and the returned `SC.DateTime` instance has that time zone. If
-    none is passed, it defaults to `SC.DateTime.timezone`.
+    This is particularly useful when we want to get to a certain date or time based on an existing
+    date or time without having to know all the elements of the existing date.
 
-    Note that passing only a time zone does not affect the actual milliseconds since
-    Jan 1, 1970, only the time zone in which it is expressed when displayed.
+    For example, say we needed a datetime for midnight on whatever day we are given. The easiest
+    way to do this is to take the datetime we are given and adjust it. For example,
 
-    @see SC.DateTime.create for the list of options you can pass
+        var midnight = someDate.adjust({ hour: 24 }); // Midnight on whatever day `someDate` is.
+
+    ### Adjusting Time
+
+    The time options, `hour`, `minute`, `second`, `millisecond`, are reset cascadingly by default.
+    So for example, if only the hour is passed, then the minute, second, and millisecond will be set
+    to 0. Or for another example, if the hour and minute are passed, then second and millisecond
+    would be set to 0. To disable this simply pass `false` as the second argument to `adjust`.
+
+    ### Adjusting Timezone
+
+    If a time zone is passed in the options hash, all dates and times are assumed to be local to it,
+    and the returned `SC.DateTime` instance has that time zone. If none is passed, it defaults to
+    the value of `SC.DateTime.timezone`.
+
+    Note that passing only a time zone does not affect the actual milliseconds since Jan 1, 1970,
+    only the time zone in which it is expressed when displayed.
+
+    @param {Object} options the amount of date/time to advance the receiver
+    @param {Boolean} [resetCascadingly] whether to reset the time elements cascadingly from hour down to millisecond. Default `true`.
     @returns {SC.DateTime} copy of receiver
   */
   adjust: function(options, resetCascadingly) {
@@ -264,11 +280,13 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
   },
 
   /**
-    Returns a new `SC.DateTime` object advanced according the the given parameters.
-    Don't use floating point values, it might give unpredictable results.
+    Returns a new `SC.DateTime` object where one or more of the elements have been advanced
+    according to the `options` parameter. The possible options that can be advanced are `year`,
+    `month`, `day`, `hour`, `minute`, `second` and `millisecond`.
 
-    @see SC.DateTime.create for the list of options you can pass
-    @param {Hash} options the amount of date/time to advance the receiver
+    Note, you should not use floating point values as it might give unpredictable results.
+
+    @param {Object} options the amount of date/time to advance the receiver
     @returns {DateTime} copy of the receiver
   */
   advance: function(options) {
@@ -668,7 +686,7 @@ SC.DateTime.mixin(SC.Comparable,
     @see SC.DateTime#unknownProperty
   */
   _get: function(key, start, timezone) {
-    var ms, tz, doy, m, y, firstDayOfWeek, dayOfWeek, dayOfYear, prefix, suffix;
+    var ms, doy, m, y, firstDayOfWeek, dayOfWeek, dayOfYear, prefix, suffix;
     var currentWeekday, targetWeekday;
     var d = this._date;
     var originalTime, v = null;
@@ -814,7 +832,6 @@ SC.DateTime.mixin(SC.Comparable,
     Sets the internal calculation state to something specified.
   */
   _adjust: function(options, start, timezone, resetCascadingly) {
-    var opts = options ? SC.clone(options) : {};
     var ms = this._toMilliseconds(options, start, timezone, resetCascadingly);
     this._setCalcState(ms, timezone);
     return this; // for chaining
@@ -876,12 +893,12 @@ SC.DateTime.mixin(SC.Comparable,
       if ( !SC.none(opts.hour) && SC.none(opts.minute)) {
         opts.minute = 0;
       }
-      if (!(SC.none(opts.hour) && SC.none(opts.minute))
-          && SC.none(opts.second)) {
+      if (!(SC.none(opts.hour) && SC.none(opts.minute)) &&
+          SC.none(opts.second)) {
         opts.second = 0;
       }
-      if (!(SC.none(opts.hour) && SC.none(opts.minute) && SC.none(opts.second))
-          && SC.none(opts.millisecond)) {
+      if (!(SC.none(opts.hour) && SC.none(opts.minute) && SC.none(opts.second)) &&
+          SC.none(opts.millisecond)) {
         opts.millisecond = 0;
       }
     }
@@ -1063,8 +1080,8 @@ SC.DateTime.mixin(SC.Comparable,
     }
 
     if (!SC.none(opts.meridian) && !SC.none(opts.hour)) {
-      if ((opts.meridian === 1 && opts.hour !== 12)
-          || (opts.meridian === 0 && opts.hour === 12)) {
+      if ((opts.meridian === 1 && opts.hour !== 12) ||
+          (opts.meridian === 0 && opts.hour === 12)) {
         opts.hour = (opts.hour + 12) % 24;
       }
       delete opts.meridian;
@@ -1145,10 +1162,10 @@ SC.DateTime.mixin(SC.Comparable,
       case 'Y': return this._get('year');
       case 'Z':
         offset = -1 * timezone;
-        return (offset >= 0 ? '+' : '-')
-               + this._pad(parseInt(Math.abs(offset)/60, 10))
-               + ':'
-               + this._pad(Math.abs(offset)%60);
+        return (offset >= 0 ? '+' : '-') +
+               this._pad(parseInt(Math.abs(offset)/60, 10)) +
+               ':' +
+               this._pad(Math.abs(offset)%60);
       case '%': return '%';
     }
   },
@@ -1159,7 +1176,6 @@ SC.DateTime.mixin(SC.Comparable,
   */
   _toFormattedString: function(format, start, timezone) {
     var that = this;
-    var tz = (timezone !== undefined) ? timezone : (this.timezone !== undefined) ? this.timezone : 0;
 
     // need to move into local time zone for these calculations
     this._setCalcState(start - (timezone * 60000), 0); // so simulate a shifted 'UTC' time
@@ -1236,15 +1252,28 @@ SC.DateTime.mixin(SC.Comparable,
         divider;
 
     switch(format) {
-      case 'd':
-      case 'D': divider = 864e5; break; // day: 1000 * 60 * 60 * 24
-      case 'h':
-      case 'H': divider = 36e5; break; // hour: 1000 * 60 * 60
-      case 'M': divider = 6e4; break; // minute: 1000 * 60
-      case 'S': divider = 1e3; break; // second: 1000
-      case 's': divider = 1; break;
-      case 'W': divider = 6048e5; break; // week: 1000 * 60 * 60 * 24 * 7
-      default: throw format+" is not supported"; break;
+    case 'd':
+    case 'D':
+      divider = 864e5;  // day: 1000 * 60 * 60 * 24
+      break;
+    case 'h':
+    case 'H':
+      divider = 36e5; // hour: 1000 * 60 * 60
+      break;
+    case 'M':
+      divider = 6e4; // minute: 1000 * 60
+      break;
+    case 'S':
+      divider = 1e3;  // second: 1000
+      break;
+    case 's':
+      divider = 1;
+      break;
+    case 'W':
+      divider = 6048e5; // week: 1000 * 60 * 60 * 24 * 7
+      break;
+    default:
+      throw format + " is not supported";
     }
 
     var ret = diff/divider;
@@ -1266,8 +1295,8 @@ SC.DateTime.mixin(SC.Comparable,
   @param {String} format format string
   @returns {SC.Binding} this
 */
-SC.Binding.dateTime = function(format) {
-  return this.transform(function(value, binding) {
+SC.Binding.dateTime = function (format) {
+  return this.transform(function (value) {
     return value ? value.toFormattedString(format) : null;
   });
 };
