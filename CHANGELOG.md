@@ -38,6 +38,11 @@ For example, to create a mix binding that concatenates two external properties i
 
 ### CHANGES & IMPROVEMENTS
 
+* SC.PickerPane  
+
+This view has been given special behavior when used with SC.View's `transitionIn` plugin support. If the plugin defines `layoutProperties` of either `scale` or `rotate`, then the picker will adjust its transform origin X & Y position to appear to scale or rotate out of the anchor. The result is a very nice effect that picker panes appear to pop out of their anchors.  
+To see it in effect, simply set the `transitionIn` property of the pane to one of `SC.View.SCALE_IN` or `SC.View.POP_IN`.
+
 * The automatically adjusted size component of the layouts of `SC.ListView` and `SC.GridView` have changed to set `height` and `width` instead of `minHeight` and `minWidth` (as it applies). The reason for this change is so that the entire list of items can be GPU accelerated by setting `wantsAcceleratedLayer: true` on the view. GPU accelerated positioning using the `translateX` and `translateY` transforms requires that the view have a fixed position (top & left) and a fixed size (height & width). These views already have a fixed position by default and now by having them adjust their `height` or `width` (depending on the direction), it is possible to accelerate these views by also fixing the other size component (i.e. if the list scrolls vertically, the list will set its height, so the developer needs to set the lists width to a fixed value and then add `wantsAcceleratedLayer: true`).  
 
 Test Results:

@@ -225,6 +225,14 @@ SC.PICKER_MENU_POINTER = 'menu-pointer';
 
   Positioning: SC.POSITION_BOTTOM (3) > SC.POSITION_RIGHT (0) > SC.POSITION_LEFT (1) > SC.POSITION_TOP (2). Fallback to SC.POSITION_BOTTOM (3).
 
+  ### Transition-In Special Handling
+
+  This view has special behavior when used with SC.View's `transitionIn` plugin support. If the
+  plugin defines `layoutProperties` of either `scale` or `rotate`, then the picker will adjust its
+  transform origin X & Y position to appear to scale or rotate out of the anchor. The result is a
+  very nice effect that picker panes appear to pop out of their anchors. To see it in effect,
+  simply set the `transitionIn` property of the pane to one of `SC.View.SCALE_IN` or `SC.View.POP_IN`.
+
   @extends SC.PalettePane
   @since SproutCore 1.0
 */
@@ -632,18 +640,72 @@ SC.PickerPane = SC.PalettePane.extend(
       frame.halfHeight = parseInt(frame.height * 0.5, 0);
 
       frame = this.fitPositionToScreen(origin, frame, anchor);
+
       adjustHash = {
         left: frame.x,
-        top: frame.y,
-        width: frame.width,
-        height: frame.height
+        top: frame.y
       };
+
+      /*
+        Special case behavior for transitions that include scale or rotate: notably SC.View.SCALE_IN and SC.View.POP_IN.
+
+        We make an assumption that the picker should always scale out of the anchor, so we set the
+        transform origin accordingly.
+      */
+      var transitionIn = this.get('transitionIn');
+      if (transitionIn && (transitionIn.layoutProperties.indexOf('scale') >= 0 || transitionIn.layoutProperties.indexOf('rotate') >= 0)) {
+        var transformOriginX, transformOriginY;
+
+        switch (preferType) {
+        // If the picker uses a pointer, set the origin to the pointer.
+        case SC.PICKER_POINTER:
+        case SC.PICKER_MENU_POINTER:
+          switch (this.get('pointerPos')) {
+          case 'perfectTop':
+            transformOriginX = (frame.halfWidth + this.get('pointerPosX')) / frame.width;
+            transformOriginY = 1;
+            break;
+          case 'perfectRight':
+            transformOriginX = 0;
+            transformOriginY = (frame.halfHeight + this.get('pointerPosY')) / frame.height;
+            break;
+          case 'perfectBottom':
+            transformOriginX = (frame.halfWidth + this.get('pointerPosX')) / frame.width;
+            transformOriginY = 0;
+            break;
+          case 'perfectLeft':
+            transformOriginX = 1;
+            transformOriginY = (frame.halfHeight + this.get('pointerPosY')) / frame.height;
+            break;
+          }
+          break;
+
+        // If the picker doesn't use a pointer, set the origin to the correct corner.
+        case SC.PICKER_MENU:
+        case SC.PICKER_FIXED:
+          if (frame.x >= anchor.x) {
+            transformOriginX = 0;
+          } else {
+            transformOriginX = 1;
+          }
+          if (frame.y >= anchor.y) {
+            transformOriginY = 0;
+          } else {
+            transformOriginY = 1;
+          }
+
+          break;
+        }
+
+        adjustHash.transformOriginX = transformOriginX;
+        adjustHash.transformOriginY = transformOriginY;
+      }
 
       // Adjust.
       this.adjust(adjustHash);
-    }
+
     // if no anchor view has been set for some reason, just center.
-    else {
+    } else {
       this.adjust({
         centerX: 0,
         centerY: 0
@@ -1042,8 +1104,7 @@ SC.PickerPane = SC.PalettePane.extend(
 
     }
 
-    // If no arrangement was found to fit, then use the fall back preferred
-    // type.
+    // If no arrangement was found to fit, then use the fall back preferred type.
     if (i === pointerLen) {
       if (matrix[4] === -1) {
         frame.x = anchorFrame.x + anchorFrame.halfWidth;
@@ -1338,6 +1399,7 @@ SC.PickerPane = SC.PalettePane.extend(
     this._anchorHTMLElement = null;
     return sc_super();
   }
+
 });
 
 
