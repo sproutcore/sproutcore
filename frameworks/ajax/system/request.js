@@ -10,13 +10,175 @@ sc_require('system/response');
 /**
   @class
 
-  Implements support for Ajax requests using XHR, XHR 2 and other protocols.
+  Implements support for AJAX requests using XHR, XHR2 and other protocols.
 
-  SC.Request is much like an inverted version of the request/response objects
-  you receive when implementing HTTP servers.
+  SC.Request is essentially a client version of the request/response objects you receive when
+  implementing HTTP servers.
 
-  To send a request, you just need to create your request object, configure
-  your options, and call send() to initiate the request.
+  To send a request, you just need to create your request object, configure your options, and call
+  `send()` to initiate the request. The request will be added to the pending request queue managed
+  by `SC.Request.manager`.
+
+  For example,
+
+      // Create a simple XHR request.
+      var request = SC.Request.create();
+      request.set('address', resourceAddress);
+      request.set('type', 'GET');
+      request.send();
+
+  The previous example will create an XHR GET request to `resourceAddress`. Because the `address`
+  and `type` of the request must be set on every request, there are helper methods on `SC.Request`
+  that you will likely use in every situation.
+
+  For example, the previous example can be written more concisely as,
+
+      // Create a simple XHR request.
+      var request = SC.Request.getUrl(resourceAddress);
+
+  There are four other helper methods to cover the other common HTTP method types: `POST`, `DELETE`,
+  `PUT` and `PATCH`, which are `postUrl`, `deleteUrl`, `putUrl` and `patchUrl` respectively. Since
+  you may also send a body with `POST`, `PUT` and `PATCH` requests, those helper methods also take a
+  second argument `body` (which is analogous to calling `request.set('body', body)`).
+
+  ## Responses
+
+  ### XHR Requests & Custom Communication Protocols
+
+  By default, the request will create an instance of `SC.XHRResponse` in order to complete the
+  request. As the name implies, the `SC.XHRResponse` class will make an XHR request to the server,
+  which is the typical method that the SproutCore client will communicate with remote endpoints.
+
+  In order to use a custom response type handler, you should extend `SC.Response` and set the
+  `responseClass` of the request to your custom response type.
+
+  For example,
+
+      var request = SC.Request.getUrl(resourceAddress).set('responseClass', MyApp.CustomProtocolResponse);
+
+
+  ### Handling Responses
+
+  `SC.Request` supports multiple response handlers based on the status code of the response. This
+  system is quite intelligent and allows for specific callbacks to handle specific status codes
+  (e.g. 404) or general status codes (e.g. 400) or combinations of both. Callbacks are registered
+  using the `notify` method, which accepts a `target` and a `method` which will be called when the
+  request completes. The most basic example of registering a general response handler would be like
+  so,
+
+      // The response handler target (typically a state or controller or some such SC.Object instance).
+      var targetObject;
+
+      targetObject = SC.Object.create({
+
+        handleResponse: function (response) {
+          // Handle the various possible status codes.
+          var status = response.get('status');
+          if (status === 200) { // 200 OK
+            // Do something.
+          } else if (status < 400) { // i.e. 3xx
+            // Do something.
+          } else ...
+        }
+
+      });
+
+
+      // Create a simple XHR request.
+      var request;
+
+      request = SC.Request.getUrl(resourceAddress)
+                          .notify(targetObject, 'handleResponse')
+                          .send();
+
+  However, this approach requires that every response handler be able to handle all of the possible
+  error codes that we may be able to handle in a more general manner. It's also more code for us
+  to write to write all of the multiple condition statements. For this reason, the `notify` method
+  accepts an optional status code argument *before* the target and method. You can use a generic
+  status code (i.e. 400) or a specific status code (i.e. 404). If you use a generic status code, all
+  statuses within that range will result in that callback being used.
+
+  For example, here is a more specific example,
+
+      // The response handler target (typically a data source or state or some such SC.Object instance).
+      var targetObject;
+
+      targetObject = SC.Object.create({
+
+        gotOK: function (response) { // 2xx Successful
+          // Do something.
+
+          return true; // Return true to ensure that any following generic handlers don't run!
+        },
+
+        gotForbidden: function (response) { // 403 Forbidden
+          // Do something.
+
+          return true; // Return true to ensure that any following generic handlers don't run!
+        },
+
+        gotUnknownError: function (response) { // 3xx, 4xx (except 403), 5xx
+          // Do something.
+        }
+
+      });
+
+
+      // Create a simple XHR request.
+      var request;
+
+      request = SC.Request.getUrl(resourceAddress)
+                          .notify(200, targetObject, 'gotOK')
+                          .notify(403, targetObject, 'gotForbidden')
+                          .notify(targetObject, 'gotUnknownError')
+                          .send();
+
+  Please note that the notifications will fall through in the order they are added if not handled.
+  This means that the generic handler `gotUnknownError` will be called for any responses not caught
+  by the other handlers. In this example, to ensure that `gotUnknownError` doesn't get called when a
+  2xx or 403 response comes in, those handlers *return `true`*.
+
+  Please also note that this design allows us to easily re-use handler methods. For example, we may
+  choose to have `gotUnknownError` be the standard last resort fallback handler for all requests.
+
+  For more examples, including handling of XHR2 progress events, please @see SC.Request.prototype.notify.
+
+  ### Response Bodies & JSON Decoding
+
+  The body of the response is the `body` property on the response object which is passed to the
+  notify target method. For example,
+
+      gotOK: function (response) { // 2xx Successful
+        var body = response.get('body');
+
+        // Do something.
+
+        return true; // Return true to ensure that any following generic handlers don't run!
+      },
+
+  The type of the body will depend on what the server returns, but since it will typically be JSON,
+  we have a built-in option to have the body be decoded into a JavaScript object automatically by
+  setting `isJSON` to true on the request.
+
+  For example,
+
+      // Create a simple XHR request.
+      var request;
+
+      request = SC.Request.getUrl(resourceAddress)
+                          .set('isJSON', true)
+                          .notify(200, targetObject, 'gotOK')
+                          .send();
+
+  There is a helper method to achieve this as well, `json()`,
+
+      // Create a simple XHR request.
+      var request;
+
+      request = SC.Request.getUrl(resourceAddress)
+                          .json() // Set `isJSON` to true.
+                          .notify(200, targetObject, 'gotOK')
+                          .send();
 
   @extends SC.Object
   @extends SC.Copyable
