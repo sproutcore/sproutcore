@@ -35,6 +35,24 @@ For example, to create a mix binding that concatenates two external properties i
 
 ### CHANGES & IMPROVEMENTS
 
+* The automatically adjusted size component of the layouts of `SC.ListView` and `SC.GridView` have changed to set `height` and `width` instead of `minHeight` and `minWidth` (as it applies). The reason for this change is so that the entire list of items can be GPU accelerated by setting `wantsAcceleratedLayer: true` on the view. GPU accelerated positioning using the `translateX` and `translateY` transforms requires that the view have a fixed position (top & left) and a fixed size (height & width). These views already have a fixed position by default and now by having them adjust their `height` or `width` (depending on the direction), it is possible to accelerate these views by also fixing the other size component (i.e. if the list scrolls vertically, the list will set its height, so the developer needs to set the lists width to a fixed value and then add `wantsAcceleratedLayer: true`).  
+
+Test Results:
+
+    With min-height (i.e. can't accelerate):       With height (and accelerated):
+
+      JS Function:       ~5.9ms                      JS Function:       ~5.9ms
+      Recalc. Style:     ~0.3ms                      Recalc. Style:     ~0.3ms
+      Layout:            ~0.3ms                      Update Layer Tree: ~0.2ms
+      Update Layer Tree: ~0.2ms                      Composite Layers:  ~0.3ms
+      Paint:             ~2.4ms
+      Composite Layers:  ~0.3ms
+      Update Layer Tree: ~0.1ms
+      Paint x 8:         ~6.0ms
+
+*How does this affect your code?*
+Because lists and grids have an implied layout of `{ top: 0, bottom: 0, left: 0, right: 0 }`, they used to always stretch to fill their parent containing view. This is no longer the case and so a collection with too few items to fill the containing view will only be as tall or wide as its items warrant. This will affect any background styles that were applied to the collection, which previously would have covered the whole containing view's background. Unfortunately, those background styles would need to be moved to the style of the containing view in order to prevent any styling regressions after updating to this new version.  
+
 * The SC.Binding transforms `and` and `or` have been refactored to use the new `mix` code. This means that you can now pass more than two property paths to these transforms.  
 
 For example,  
@@ -43,6 +61,7 @@ For example,
 
 ### BUG FIXES
 
+* Added code to prevent a possible issue that could occur when animating to an implied layout position. For instance, if a view has a layout set to `{ top: 5 }`, the implied layout is actually `{ top: 5, right: 0, bottom: 0, left: 0 }`. The issue that could arise is if the code tried to animate to an implied value (ex. `view.animate('left', 0, { duration: 1 }, callbackFunc)`), the animation wouldn't actually need to run and the callback function would fail to fire.
 * Fixed possible issues that may occur when code altered child views in any of the view state callback functions: `didCreateLayer`, `didAppendToDocument`, `didHideInDocument`, `didShowInDocument`. The issue was that the callback functions were called on the parent before the child was updated to the proper new state. For example, if a developer set the visibility of a child view to false in `didCreateLayer`, at that point the child view would have still been in an unrendered state and optimizations preventing visibility changes to unrendered views would have meant the visibility change would have been lost.
 * Fixed an issue that could occur when using temporary IDs with newly created records. Because the `id` property is a computed property, once it has been read (i.e. `myNewRecord.get('id')`), it will remain cached for any further reads. This can become an issue in situations where the ID of the record changes after being saved to the server. For instance, a new record may be given a temporary ID when it is created and the temporary id may be accessed via `get`. After that record is saved to the server, a call to `store.dataSourceDidComplete(RecordType, newBody, newBody.id)` would properly update the `id` value in the store, but would fail to clear the record instance's cache of `id`. Therefore, a successive call to `get('id')` would return the old value.
 * Fixed an issue with observing the `selection` property of `SC.TextFieldView`. Since the `input` element doesn't update its `selectionStart` and `selectionEnd` values until after the event execution completes, the mouse and keypress event handlers that affect the selection must wait until after the run loop before notifying that the selection property has changed.
