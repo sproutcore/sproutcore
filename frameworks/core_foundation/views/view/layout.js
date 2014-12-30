@@ -369,9 +369,10 @@ SC.View.reopen(
 
       //@if(debug)
       // Debug-only warning when layout isn't valid.
-      if (hasRight && hasLeft && hasWidth) {
-        SC.warn("Developer Warning: When setting `width` in the layout, you must only set `left` or `right`, but not both: %@".fmt(this));
-      }
+      // UNUSED: This is too noisy for certain views that adjust their own layouts based on top of the default layout.
+      // if (hasRight && hasLeft && hasWidth) {
+      //   SC.warn("Developer Warning: When setting `width` in the layout, you must only set `left` or `right`, but not both: %@".fmt(this));
+      // }
       //@endif
 
       if (hasTop) {
@@ -388,9 +389,10 @@ SC.View.reopen(
 
       //@if(debug)
       // Debug-only warning when layout isn't valid.
-      if (hasBottom && hasTop && hasHeight) {
-        SC.warn("Developer Warning: When setting `height` in the layout, you must only set `top` or `bottom`, but not both: %@".fmt(this));
-      }
+      // UNUSED: This is too noisy for certain views that adjust their own layouts based on top of the default layout.
+      // if (hasBottom && hasTop && hasHeight) {
+      //   SC.warn("Developer Warning: When setting `height` in the layout, you must only set `top` or `bottom`, but not both: %@".fmt(this));
+      // }
       //@endif
 
       // CENTERS
