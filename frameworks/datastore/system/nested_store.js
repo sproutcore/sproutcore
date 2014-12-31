@@ -140,6 +140,22 @@ SC.NestedStore = SC.Store.extend(
     this.reset();
     return this ;
   },
+  
+  /** 
+    An easy way to find out which records are conflicting between the 
+    parent store and this nested store.
+    
+    @returns { false } when no error
+    @returns { SC.Array } with storeKeys of conflicting records
+  */
+  
+  commitConflictsWithParent: function(){
+    if(this.get('hasChanges')){
+      var pstore = this.get('parentStore');
+      return pstore.commitConflictsFromNestedStore(this, this.chainedChanges);      
+    }
+    else return false;
+  },
 
   /**
     Propagate this store's successful changes to its parent (if exists). At the end, it clears the
