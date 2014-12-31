@@ -67,7 +67,7 @@ if (SC.platform.supportsCSSTransitions) {
   });
 
   test("animate + adjust: no conflict", function () {
-    stop(1000);
+    stop(4000);
 
     SC.run(function () {
       view.animate('left', 100, { duration: 0.1 });
@@ -99,7 +99,7 @@ if (SC.platform.supportsCSSTransitions) {
   });
 
   test("animate + adjust: conflict", function () {
-    stop(1000);
+    stop(4000);
 
     SC.run(function () {
       view.animate('left', 100, { duration: 0.1 });
@@ -647,7 +647,7 @@ if (SC.platform.supportsCSSTransitions) {
     });
 
     test("doesn't use acceleration when not appropriate", function () {
-      stop(1000);
+      stop(4000);
 
       SC.RunLoop.begin();
       view.adjust({ height: null, bottom: 0 });
@@ -662,7 +662,7 @@ if (SC.platform.supportsCSSTransitions) {
     });
 
     test("combines accelerated layer animation with compatible transform animations", function () {
-      stop(1000);
+      stop(4000);
 
       SC.RunLoop.begin();
       view.animate('top', 100, { duration: 1 }).animate('rotateX', 45, { duration: 1 });
@@ -680,7 +680,7 @@ if (SC.platform.supportsCSSTransitions) {
     });
 
     test("should not use accelerated layer if other transforms are being animated at different speeds", function () {
-      stop(1000);
+      stop(4000);
 
       SC.RunLoop.begin();
       view.animate('rotateX', 45, { duration: 2 }).animate('top', 100, { duration: 1 });
@@ -697,7 +697,7 @@ if (SC.platform.supportsCSSTransitions) {
     });
 
     test("callbacks should work properly with acceleration", function () {
-      stop(1000);
+      stop(4000);
 
       SC.run(function () {
         view.animate({ top: 100, left: 100, scale: 2 }, { duration: 0.25 }, function () {
