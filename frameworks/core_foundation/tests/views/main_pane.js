@@ -33,12 +33,12 @@
   });
 
   test("should not be attached before calling append()", function() {
-    equals(pane.get('isPaneAttached'), NO) ;
+    equals(pane.get('isAttached'), NO) ;
   });
 
   test("should attach when calling append()", function() {
     pane.append() ;
-    equals(pane.get('isPaneAttached'), YES) ;
+    equals(pane.get('isAttached'), YES) ;
   });
 
   test("appending should make pane main & key", function() {

@@ -1281,7 +1281,7 @@ SC.PickerPane = SC.PalettePane.extend(
   },
 
   remove: function () {
-    if (this.get('isVisibleInWindow') && this.get('isPaneAttached')) {
+    if (this.get('isVisibleInWindow')) {
       this._withdrawOverflowRequest();
     }
     this._removeScrollObservers();

@@ -1,6 +1,14 @@
 CHANGE LOG
 ==========
 
+Edge
+-----------
+
+### NEW FEATURES
+### CHANGES & IMPROVEMENTS
+### DEPRECATIONS & REMOVALS
+### BUG FIXES
+
 1.11.0.rc3
 -----------
 
@@ -75,6 +83,12 @@ To ensure that any background styles applied to your collections still look corr
 For example,  
 
     isEnabledBinding: SC.Binding.and('.hasValue', '.valueIsValid', '.userIsAllowed')
+
+### DEPRECATIONS & REMOVALS
+
+* The `isPaneAttached` property of SC.Pane has been deprecated. This property is identical to the existing `isAttached` property of SC.View that SC.Pane extends and so `isPaneAttached` is not needed. Please use `isAttached` instead.  
+
+Note: This deprecation will show a console warning in debug (i.e. non-production) mode.
 
 ### BUG FIXES
 

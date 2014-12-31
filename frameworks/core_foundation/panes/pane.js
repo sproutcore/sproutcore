@@ -476,7 +476,9 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @returns {SC.Pane} receiver
   */
   remove: function() {
-    this._doDetach();
+    if (this.get('isAttached')) {
+      this._doDetach();
+    }
 
     return this ;
   },
@@ -546,13 +548,15 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     // and call sc_super() won't fail.
   },
 
-  /**
-    YES when the pane is currently attached to a document DOM.  Read only.
+  /** @deprecated Version 1.11. Use `isAttached` instead. */
+  isPaneAttached: function () {
 
-    @type Boolean
-    @readOnly
-  */
-  isPaneAttached: NO,
+    //@if(debug)
+    SC.warn("Developer Warning: The `isPaneAttached` property of `SC.Pane` has been deprecated. Please use the `isAttached` property instead.");
+    //@endif
+
+    return this.get('isAttached');
+  }.property('isAttached').cacheable(),
 
   /**
     If YES, a touch intercept pane will be added above this pane when on

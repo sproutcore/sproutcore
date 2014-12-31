@@ -12,7 +12,7 @@ sc_require("panes/pane");
 SC.Pane.reopen({
 
   /** @private */
-  _notifyDidAttach: function () {
+  _executeDoAttach: function () {
     // hook into root responder
     var responder = (this.rootResponder = SC.RootResponder.responder);
     responder.panes.add(this);
@@ -20,15 +20,16 @@ SC.Pane.reopen({
     // Update the currentWindowSize cache.
     this.set('currentWindowSize', responder.currentWindowSize);
 
+    // Set the initial design mode.  The responder will update this if it changes.
+    this.updateDesignMode(this.get('designMode'), responder.get('currentDesignMode'));
+
+    sc_super();
+
     // Legacy.
-    this.set('isPaneAttached', YES);
     this.paneDidAttach();
 
     // Legacy?
     this.recomputeDependentProperties();
-
-    // Set the initial design mode.  The responder will update this if it changes.
-    this.updateDesignMode(this.get('designMode'), responder.get('currentDesignMode'));
 
     // handle intercept if needed
     this._addIntercept();
@@ -39,16 +40,11 @@ SC.Pane.reopen({
       // We call viewDidResize so that it calls parentViewDidResize on all child views.
       this.viewDidResize();
     }
-
-    sc_super();
   },
 
   /** @private */
-  _notifyWillDetach: function () {
+  _executeDoDetach: function () {
     sc_super();
-
-    // Legacy.
-    this.set('isPaneAttached', NO);
 
     // remove intercept
     this._removeIntercept();

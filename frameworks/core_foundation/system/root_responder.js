@@ -230,7 +230,7 @@ SC.RootResponder = SC.Object.extend(
       var candidate;
       while (previousKeyPanes.length > 0) {
         candidate = previousKeyPanes.pop();
-        if (candidate.get('isPaneAttached')  &&  candidate.get('acceptsKeyPane')) {
+        if (candidate.get('isVisibleInWindow') && candidate.get('acceptsKeyPane')) {
           newKeyPane = candidate ;
           break ;
         }
