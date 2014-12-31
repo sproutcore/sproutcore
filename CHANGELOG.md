@@ -14,8 +14,17 @@ Edge
 
 ### NEW FEATURES
 
-* There are two new binding transforms, `string` and `integer`, that ensure the value is *always* a `String` or an integer `Number`. Examples include returning an empty `String` for `null` or `undefined` values when using the `string` transform and returning a 0 for these same values when using the `integer` transform. Furthermore, if the `integer` transform is given a String, it will be parsed to an integer `Number` according to the extra argument `radix` (which is 10 by default).
-* There is a new binding transform, `mix`, that allows for the aggregation of multiple bound properties into a single property through a given function. It is often the case that a single property depends on two or more bound properties in a complex manner that isn't handled by the current `and` and `or` transforms. To handle this situation previously, the developer would need to write the code to bind in the external property values and then make a local computed property dependent on each of these. The `mix` transform does exactly the same thing, but with less typing on the developer's part.  
+* *SC.NestedStore*  
+
+`SC.NestedStore` has a new property, `conflictedStoreKeys`, which is an array of all store keys that currently have conflicts with the nested store's parent. A conflict in a nested store can occur when the data in the parent store changes *after* the nested store has accessed and modified it.  
+
+For instance, in a multi-user system where records can be edited by multiple people at the same time, the client may use polling or websockets to update the records in the main store asynchronously in the background. With such a scenario it would be possible for the current user to be editing a record that someone else has changed in the meantime. If the client attempted to commit the changes from the nested store it would get an exception because of the conflict. Instead, the developer can now check the value of `conflictedStoreKeys` and if it is `null`, then commit the changes and if it is an array of store keys, then they know which records have conflicts and can deal with them directly.
+
+* *SC.Binding*  
+
+There are two new binding transforms, `string` and `integer`, that ensure the value is *always* a `String` or an integer `Number`. Examples include returning an empty `String` for `null` or `undefined` values when using the `string` transform and returning a 0 for these same values when using the `integer` transform. Furthermore, if the `integer` transform is given a String, it will be parsed to an integer `Number` according to the extra argument `radix` (which is 10 by default).
+
+There is also a new binding transform, `mix`, that allows for the aggregation of multiple bound properties into a single property through a given function. It is often the case that a single property depends on two or more bound properties in a complex manner that isn't handled by the current `and` and `or` transforms. To handle this situation previously, the developer would need to write the code to bind in the external property values and then make a local computed property dependent on each of these. The `mix` transform does exactly the same thing, but with less typing on the developer's part.  
 
 For example, to create a mix binding that concatenates two external properties in a non-trivial way, we can now do the following,  
 

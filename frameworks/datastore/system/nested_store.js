@@ -133,29 +133,51 @@ SC.NestedStore = SC.Store.extend(
   commitChanges: function(force) {
     if (this.get('hasChanges')) {
       var pstore = this.get('parentStore');
-      pstore.commitChangesFromNestedStore(this, this.chainedChanges, force);
+      pstore.commitChangesFromNestedStore(this, this.get('chainedChanges'), force);
     }
 
     // clear out custom changes - even if there is nothing to commit.
     this.reset();
-    return this ;
+    return this;
   },
-  
-  /** 
-    An easy way to find out which records are conflicting between the 
-    parent store and this nested store.
-    
-    @returns { false } when no error
-    @returns { SC.Array } with storeKeys of conflicting records
+
+  /**
+    An array of store keys for all conflicting records with the parent store. If there are no
+    conflicting records, this property will be null.
+
+    @readonly
+    @field
+    @type Array
+    @default null
   */
-  
-  commitConflictsWithParent: function(){
-    if(this.get('hasChanges')){
-      var pstore = this.get('parentStore');
-      return pstore.commitConflictsFromNestedStore(this, this.chainedChanges);      
+  conflictedStoreKeys: function () {
+    var ret = null;
+
+    if (this.get('hasChanges')) {
+      var pstore = this.get('parentStore'),
+          locks = this.locks,
+          revisions = pstore.revisions;
+
+      if (locks && revisions) {
+        var changes = this.get('chainedChanges');
+
+        for (var i = 0, len = changes.length; i < len; i++) {
+          var storeKey = changes[i],
+              lock = locks[storeKey] || 1,
+              revision = revisions[storeKey] || 1;
+
+          // If the same revision for the item does not match the current revision, then someone has
+          // changed the data hash in this store and we have a conflict.
+          if (lock < revision) {
+            if (!ret) ret = [];
+            ret.push(storeKey);
+          }
+        }
+      }
     }
-    else return false;
-  },
+
+    return ret;
+  }.property('chainedChanges').cacheable(),
 
   /**
     Propagate this store's successful changes to its parent (if exists). At the end, it clears the
@@ -166,37 +188,41 @@ SC.NestedStore = SC.Store.extend(
     @returns {SC.Store} receiver
   */
   commitSuccessfulChanges: function(force) {
-    if (this.get('hasChanges') && this.chainedChanges) {
-      var chainedChanges = this.chainedChanges,
-          dataHashes = this.dataHashes,
+    var chainedChanges = this.get('chainedChanges');
+
+    if (this.get('hasChanges') && chainedChanges) {
+      var dataHashes = this.dataHashes,
           revisions  = this.revisions,
           statuses   = this.statuses,
           editables  = this.editables,
           locks      = this.locks;
+
       var successfulChanges = chainedChanges.filter( function(storeKey) {
         var state = this.readStatus(storeKey);
 
-        return state===SC.Record.READY_CLEAN || state===SC.Record.DESTROYED_CLEAN;
+        return state === SC.Record.READY_CLEAN || state === SC.Record.DESTROYED_CLEAN;
       }, this );
+
       var pstore = this.get('parentStore');
 
       pstore.commitChangesFromNestedStore(this, successfulChanges, force);
 
       // remove the local status so these records that have been successfully committed on the server
       // are no longer retrieved from this nested store but from the parent
-      successfulChanges.forEach(function(storeKey)
-      {
-        if (dataHashes && dataHashes.hasOwnProperty(storeKey))
-          delete dataHashes[storeKey];
-        if (revisions && revisions.hasOwnProperty(storeKey))
-          delete revisions[storeKey];
-        if (editables) delete editables[storeKey];
-        if (locks) delete locks[storeKey];
-        if (statuses && statuses.hasOwnProperty(storeKey))
-          delete statuses[storeKey];
-        chainedChanges.remove( storeKey );
-      }, this );
+      for (var i = 0, len = successfulChanges.get('length'); i < len; i++) {
+        var storeKey = successfulChanges.objectAt(i);
 
+        if (dataHashes && dataHashes.hasOwnProperty(storeKey)) { delete dataHashes[storeKey]; }
+        if (revisions && revisions.hasOwnProperty(storeKey)) { delete revisions[storeKey]; }
+        if (editables) { delete editables[storeKey]; }
+        if (locks) { delete locks[storeKey]; }
+        if (statuses && statuses.hasOwnProperty(storeKey)) { delete statuses[storeKey]; }
+
+        chainedChanges.remove(storeKey);
+      }
+
+      // Indicate that chainedChanges has changed.
+      if (successfulChanges.length > 0) { this.notifyPropertyChange('chainedChanges'); }
     }
 
     return this;
@@ -250,7 +276,6 @@ SC.NestedStore = SC.Store.extend(
     Resets a store's data hash contents to match its parent.
   */
   reset: function() {
-    var nRecords, nr, sk;
     // requires a pstore to reset
     var parentStore = this.get('parentStore');
     if (!parentStore) throw SC.Store.NO_PARENT_STORE_ERROR;
@@ -265,12 +290,11 @@ SC.NestedStore = SC.Store.extend(
     this.parentRecords = parentStore.parentRecords ? SC.beget(parentStore.parentRecords) : {};
 
     // also, reset private temporary objects
+    this.set('hasChanges', false);
     this.chainedChanges = this.locks = this.editables = null;
     this.changelog = null ;
 
     // TODO: Notify record instances
-
-    this.set('hasChanges', NO);
   },
 
   /** @private
@@ -484,16 +508,23 @@ SC.NestedStore = SC.Store.extend(
       storeKey = storeKeys;
     }
 
-    var changes = this.chainedChanges;
+    var changes = this.get('chainedChanges');
     if (!changes) changes = this.chainedChanges = SC.Set.create();
 
-    var that = this;
+    var that = this,
+        didAddChainedChanges = false;
 
-    for(idx=0;idx<len;idx++) {
+    for (idx = 0; idx < len; idx++) {
       if (isArray) storeKey = storeKeys[idx];
+
       this._lock(storeKey);
       this.revisions[storeKey] = rev;
-      changes.add(storeKey);
+
+      if (!changes.contains(storeKey)) {
+        changes.add(storeKey);
+        didAddChainedChanges = true;
+      }
+
       this._notifyRecordPropertyChange(storeKey, statusOnly, key);
 
       // notify also the child records
@@ -503,6 +534,10 @@ SC.NestedStore = SC.Store.extend(
     }
 
     this.setIfChanged('hasChanges', YES);
+    if (didAddChainedChanges) {
+      this.notifyPropertyChange('chainedChanges');
+    }
+
     return this ;
   },
 
@@ -518,7 +553,11 @@ SC.NestedStore = SC.Store.extend(
     // save a lock for each store key if it does not have one already
     // also add each storeKey to my own changes set.
     var pstore = this.get('parentStore'), psRevisions = pstore.revisions, i;
-    var myLocks = this.locks, myChanges = this.chainedChanges,len,storeKey;
+    var myLocks = this.locks,
+        myChanges = this.get('chainedChanges'),
+        len,
+        storeKey;
+
     if (!myLocks) myLocks = this.locks = [];
     if (!myChanges) myChanges = this.chainedChanges = SC.Set.create();
 
@@ -530,7 +569,9 @@ SC.NestedStore = SC.Store.extend(
     }
 
     // Finally, mark store as dirty if we have changes
-    this.setIfChanged('hasChanges', myChanges.get('length')>0);
+    this.setIfChanged('hasChanges', myChanges.get('length') > 0);
+    this.notifyPropertyChange('chainedChanges');
+
     this.flush();
 
     return this ;
@@ -559,7 +600,7 @@ SC.NestedStore = SC.Store.extend(
     because that can disconnect us from upper and/or lower stores.
   */
   retrieveRecords: function(recordTypes, ids, storeKeys, isRefresh, callbacks) {
-    var pstore = this.get('parentStore'), idx, storeKey, newStatus,
+    var pstore = this.get('parentStore'), idx, storeKey,
       len = (!storeKeys) ? ids.length : storeKeys.length,
       K = SC.Record, status;
 
