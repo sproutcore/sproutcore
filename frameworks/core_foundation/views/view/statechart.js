@@ -273,7 +273,7 @@ SC.CoreView.reopen(
   */
   isAttached: function () {
     var state = this.get('viewState');
-    return state & SC.CoreView.IS_ATTACHED;
+    return (state & SC.CoreView.IS_ATTACHED) > 0;
   }.property('viewState').cacheable(),
 
   /** @private
