@@ -433,7 +433,9 @@ SC.CoreView.reopen(
       this._doDetach();
     }
 
-    this._doDestroyLayer();
+    if (this.get('_isRendered')) {
+      this._doDestroyLayer();
+    }
 
     return this;
   },
@@ -1283,11 +1285,15 @@ SC.CoreView.reopen(
     } else {
       // Immediately remove the layer if attached (ignores transitionOut). This
       // will detach the layer for all child views as well.
-      this._doDetach(true);
+      if (this.get('isAttached')) {
+        this._doDetach(true);
+      }
 
       // Clear the layer if rendered.  This will clear all child views layer
       // references as well.
-      this._doDestroyLayer();
+      if (this.get('_isRendered')) {
+        this._doDestroyLayer();
+      }
 
       // Complete the destroy.
       this._destroy();

@@ -218,7 +218,7 @@ SC.CoreView.reopen(
   //
 
   /* @private Internal variable used to store the number of children building out while we wait to be detached. */
-  _buildingOutCount: null,
+  _sc_buildOutCount: null,
 
   /* @private Internal variable used to track the original view being detached that we are delaying so that we can build out. */
   _owningView: null,
@@ -469,7 +469,7 @@ SC.CoreView.reopen(
       this._callOnChildViews('_parentDidCancelBuildOut');
 
       // Remove the shared building out count if it exists.
-      this._buildingOutCount = null;
+      this._sc_buildOutCount = null;
 
       // Note: We can be in ATTACHED_BUILDING_OUT state without a transition out while we wait for child views.
       if (this.get('transitionOut')) {
@@ -572,8 +572,7 @@ SC.CoreView.reopen(
   _doDetach: function (immediately) {
     var state = this.get('viewState'),
       transitionOut = this.get('transitionOut'),
-      inPlace = false,
-      isHandled = true;
+      shouldHandle = true;
 
     //@if (debug)
     if (this.SC_LOG_VIEW_STATE) {
@@ -581,74 +580,100 @@ SC.CoreView.reopen(
     }
     //@endif
 
+    // Handle all 12 possible view states.
     switch (state) {
 
-    // Normal case: Attached visible view being detached.
+    // Scenario: The view is shown.
+    // Result: Allow the view and/or any of its child views to build out or else execute the detach.
     case SC.CoreView.ATTACHED_SHOWN:
+      this._executeDoBuildOut(immediately);
+
       break;
 
-    // Normal case: Attached non-visible view being detached.
-    case SC.CoreView.UNATTACHED_BY_PARENT:
+    // Scenario: The view isn't visible.
+    // Result: Detach the view immediately.
     case SC.CoreView.ATTACHED_HIDDEN:
     case SC.CoreView.ATTACHED_HIDDEN_BY_PARENT:
-      // No need to transition out, since we're hidden.
-      immediately = true;
+      // Detach immediately.
+      this._executeDoDetach();
+
       break;
 
-    // Near normal case: Attached visible view that is in the middle of an animation.
-    case SC.CoreView.ATTACHED_SHOWN_ANIMATING:
-      this.cancelAnimation();
-      break;
-
-    // Near normal case: Attached showing view. We cancel the incoming animation
-    // rather than swapping to a build out (difficult to get right, because we lose track of the correct final layout).
-    case SC.CoreView.ATTACHED_SHOWING:
-      this.cancelAnimation(); // Fires didTransitionIn callback (state changes to ATTACHED_SHOWN/notifications sent).
-      break;
-
-    // Near normal case: Attached hiding view. We cancel the outgoing animation
-    // rather than swapping to a build out (difficult to get right, because we lose track of the correct final layout).
+    // Scenario: The view is in the middle of a hiding transition.
+    // Result: Cancel the animation and then run as normal.
     case SC.CoreView.ATTACHED_HIDING:
-      this.cancelAnimation(); // Fires didTransitionOut callback (state changes to ATTACHED_HIDDEN/notifications sent).
+      // Cancel the animation (in the future we will be able to let it run out while building out).
+      this.cancelAnimation();
 
-      // No need to transition out, since we're hidden.
-      immediately = true;
+      // Set the proper state.
+      this._gotoAttachedHiddenState();
+
+      // Detach immediately.
+      this._executeDoDetach();
+
       break;
 
-    // Near normal case: Attached building in view. We cancel the incoming
-    // animation and build out the view in place.
+    // Scenario: The view is in the middle of an animation or showing transition.
+    // Result: Cancel the animation and then run as normal.
+    case SC.CoreView.ATTACHED_SHOWING:
+    case SC.CoreView.ATTACHED_SHOWN_ANIMATING: // TODO: We need concurrent states!
+      // Cancel the animation (in the future we will be able to let it run out while building out).
+      this.cancelAnimation();
+
+      // Set the proper state.
+      this._gotoAttachedShownState();
+
+      this._executeDoBuildOut(immediately);
+
+      break;
+
+    // Scenario: The view is building in.
+    // Result: If it has a build out transition, swap to it. Otherwise, cancel.
     case SC.CoreView.ATTACHED_BUILDING_IN:
-      if (immediately || !transitionOut) {
-        this.cancelAnimation(); // Fires didTransitionIn callback (state changes to ATTACHED_SHOWN/notifications sent).
+      // Cancel the build in transition.
+      if (transitionOut) {
+        //@if (debug)
+        if (this.SC_LOG_VIEW_STATE) {
+          SC.Logger.log('%c       — cancelling build in in place'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
+        }
+        //@endif
+
+        this.cancelAnimation(SC.LayoutState.CURRENT);
       } else {
-        // Set the state manually so the callback doesn't do clean up and notify.
-        this._gotoAttachedShownState();
+        //@if (debug)
+        if (this.SC_LOG_VIEW_STATE) {
+          SC.Logger.log('%c       — cancelling build in outright'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
+        }
+        //@endif
 
-        // Cancel the animation in place (setup properties still exist and will be cleared by transitionOut)
-        this.cancelAnimation(SC.LayoutState.CURRENT); // Fires didTransitionIn callback (no state change/no notifications).
-
-        // Transition out in place.
-        inPlace = true;
+        this.cancelAnimation();
       }
+
+      // Set the proper state.
+      this._gotoAttachedShownState();
+
+      // Build out in place.
+      this._executeDoBuildOut(immediately, true);
       break;
 
-    // Special case: Already building out, because parent is building out. Stop
-    // the transition in place so that it can continue in place on its own.
-    case SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT: // FAST PATH!
-      // Note: *will* detach notice already sent.
+    // Scenario: View is already building out because of an ancestor.
+    // Result: Stop the transition so that it can continue in place on its own.
+    case SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT:
+      // Cancel the build out transition.
       this.cancelAnimation(SC.LayoutState.CURRENT); // Fires didTransitionOut callback (necessary to clean up parent view build out wait)
 
-      // Switch state to regular state (the view should only have been able to get to ATTACHED_BUILDING_OUT_BY_PARENT from ATTACHED_SHOWN).
+      // Set the proper state. (the view should only have been able to get to ATTACHED_BUILDING_OUT_BY_PARENT from ATTACHED_SHOWN).
       this._gotoAttachedShownState();
 
       // TODO: Grab the build out count for all child views of this view. What a nightmare for an edge case!
 
-      // Transition out in place.
-      inPlace = true;
+      // Build out in place.
+      this._executeDoBuildOut(immediately, true);
 
       break;
 
-    // Special case: Already building out. Fast path!
+    // Scenario: View is already building out.
+    // Result: Stop if forced to.
     case SC.CoreView.ATTACHED_BUILDING_OUT:
       // If immediately is passed, cancel the build out prematurely.
       if (immediately) {
@@ -659,51 +684,20 @@ SC.CoreView.reopen(
         this._executeDoDetach();
       }
 
-      // Don't try to notify or run transition out code again.
-      return true;
+      break;
 
-    // Invalid states that have no effect. Fast path!
-    case SC.CoreView.UNRENDERED:
-    case SC.CoreView.UNATTACHED:
-      return false;
+    // Invalid states.
+    default:
+      //@if(debug)
+      // Add some debugging only warnings for if the view statechart code is being improperly used.
+      // Telling the view to detach when it is already detached isn't correct: UNRENDERED, UNATTACHED, UNATTACHED_BY_PARENT
+      SC.warn("Core Developer Warning: Found invalid state for view, %@, in _doDetach".fmt(this));
+      //@endif
+
+      shouldHandle = false;
     }
 
-    // Notify *will* (top-down from parent to children). The children will be
-    // notified only when they are actually about to be removed.
-    // this._notifyWillDetach();
-
-    if (immediately) {
-      // Detach immediately.
-      this._executeDoDetach();
-    } else {
-      // In order to allow the removal of a parent to be delayed by children's
-      // transitions, we track which views are building out and finish
-      // only when they're all done.
-      this._buildingOutCount = 0;
-
-      // Tell all the child views so that any with a transitionOut may run it. Top-down so that
-      // any hidden or already building out child views allow us to bail out early.
-      this._callOnChildViews('_parentWillBuildOutFromDocument', true, this);
-
-      if (transitionOut) {
-        // this.invokeNext(function () {
-          this._transitionOut(inPlace, this);
-        // });
-
-        // Update states after *will* and before *did* notifications!
-        this._gotoAttachedBuildingOutState();
-      } else if (this._buildingOutCount > 0) {
-        // Some children are building out, we will have to wait for them.
-        this._gotoAttachedBuildingOutState();
-      } else {
-        this._buildingOutCount = null;
-
-        // Detach immediately.
-        this._executeDoDetach();
-      }
-    }
-
-    return isHandled;
+    return shouldHandle;
   },
 
   /** @private Hide this view action. */
@@ -745,6 +739,7 @@ SC.CoreView.reopen(
     // Scenario: The view was showing at the time it was told to hide.
     // Result: Cancel the animation.
     case SC.CoreView.ATTACHED_SHOWING:
+      // Cancel the showing transition.
       if (transitionHide) {
         this.cancelAnimation(SC.LayoutState.CURRENT);
       } else {
@@ -752,14 +747,12 @@ SC.CoreView.reopen(
       }
 
       // Set the proper state.
-      // this._gotoAttachedShownState();
+      this._gotoAttachedShownState();
 
+      // Hide the view.
       if (transitionHide) {
-        // this.invokeNext(function () {
         this._transitionHide(true);
-        // });
       } else {
-        // Hide the view.
         this._executeDoHide();
       }
 
@@ -1075,9 +1068,9 @@ SC.CoreView.reopen(
       var owningView = this._owningView;
       // We can't clean up the transition until the parent is done.  For
       // example, a fast child build out inside of a slow parent build out.
-      owningView._buildingOutCount--;
+      owningView._sc_buildOutCount--;
 
-      if (owningView._buildingOutCount === 0) {
+      if (owningView._sc_buildOutCount === 0) {
         owningView._executeDoDetach();
 
         // Clean up.
@@ -1276,19 +1269,71 @@ SC.CoreView.reopen(
     this._notifyDidAttach();
   },
 
+  /** @private Builds out the view. */
+  _executeDoBuildOut: function (immediately, inPlace) {
+    if (immediately) {
+      // Detach immediately.
+      this._executeDoDetach();
+    } else {
+      // In order to allow the removal of a parent to be delayed by its children's transitions, we
+      // track which views are building out and finish only when they're all done.
+      this._sc_buildOutCount = 0;
+
+      // Tell all the child views so that any with a transitionOut may run it. Top-down so that
+      // any hidden or already building out child views allow us to bail out early.
+      this._callOnChildViews('_parentWillBuildOutFromDocument', true, this);
+
+      var transitionOut = this.get('transitionOut');
+      if (transitionOut) {
+        inPlace = inPlace || false;
+        this._transitionOut(inPlace, this);
+
+      } else if (this._sc_buildOutCount > 0) {
+        // Some children are building out, we will have to wait for them.
+        this._gotoAttachedBuildingOutState();
+      } else {
+        this._sc_buildOutCount = null;
+
+        // Detach immediately.
+        this._executeDoDetach();
+      }
+    }
+  },
+
   /** @private Detaches the view and updates the state. */
   _executeDoDetach: function () {
-    // Notify *will* (top-down from parent to children).
+    var notifyStack = []; // Only those views that changed state get added to the stack.
+
+    // The children are updated top-down so that hidden or unattached children allow us to bail out early.
+    this._callOnChildViews('_parentWillRemoveFromDocument', true, notifyStack);
+
+    // Notify for each child (that will change state) in reverse so that each child is in the proper
+    // state before its parent potentially alters its state. For example, a parent could modify
+    // children in `willRemoveFromDocument`.
+    for (var i = notifyStack.length - 1; i >= 0; i--) {
+      var childView = notifyStack[i];
+
+      childView._notifyWillDetach();
+    }
     this._notifyWillDetach();
-    this._callOnChildViews('_parentWillRemoveFromDocument');
 
     // Detach the layer.
     var node = this.get('layer');
     node.parentNode.removeChild(node);
 
-    // Update states after *will* and before *did* notifications!
+    // Cancel any remaining animations (e.g. a concurrent hide).
+    var viewState = this.get('viewState');
+    switch (viewState) {
+    case SC.CoreView.ATTACHED_HIDING:
+    case SC.CoreView.ATTACHED_SHOWN_ANIMATING:
+      this.cancelAnimation();
+      break;
+    }
+
+    // Update the state and children state. The children are updated top-down so that hidden or
+    // unattached children allow us to bail out early.
     this._gotoUnattachedState();
-    this._callOnChildViews('_parentDidRemoveFromDocument');
+    this._callOnChildViews('_parentDidRemoveFromDocument', true);
   },
 
   /** @private Hides the view. */
@@ -1309,14 +1354,14 @@ SC.CoreView.reopen(
     // }
     this._notifyWillHideInDocument();
 
-    // Cancel any remaining animations (i.e. a concurrent build in or build out).
+    // Cancel any remaining animations (e.g. a concurrent build in or build out).
     var viewState = this.get('viewState');
     switch (viewState) {
     case SC.CoreView.ATTACHED_BUILDING_IN:
     case SC.CoreView.ATTACHED_BUILDING_OUT:
     case SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT:
     case SC.CoreView.ATTACHED_SHOWN_ANIMATING:
-      this.cancelAnimation(SC.LayoutState.CURRENT);
+      this.cancelAnimation();
       break;
     }
 
@@ -1763,41 +1808,64 @@ SC.CoreView.reopen(
   /** @private Starts building out view if appropriate. */
   _parentWillBuildOutFromDocument: function (owningView) {
     var state = this.get('viewState'),
-      transitionOut = this.get('transitionOut');
+      transitionOut = this.get('transitionOut'),
+      shouldContinue = true;
 
     switch (state) {
     case SC.CoreView.UNRENDERED:
     case SC.CoreView.UNATTACHED:
-    case SC.CoreView.UNATTACHED_BY_PARENT:
     case SC.CoreView.ATTACHED_BUILDING_OUT:
-    case SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT:
     case SC.CoreView.ATTACHED_HIDDEN:
-    case SC.CoreView.ATTACHED_HIDDEN_BY_PARENT:
-    case SC.CoreView.ATTACHED_HIDING:
-      // Notify *will* (top-down from parent to children).
-      // this._notifyWillDetach();
-
       // There's no need to continue to further child views.
-      return false;
-    case SC.CoreView.ATTACHED_SHOWING:
+      shouldContinue = false;
+      break;
+
+    // Scenario: The child view is building in at the same time that its ancestor wants to detach.
+    // Result: If the child wants to build out, switch to building out by parent, otherwise let the build in run for as long as it can.
     case SC.CoreView.ATTACHED_BUILDING_IN:
-    case SC.CoreView.ATTACHED_SHOWN:
-      // Notify *will* (top-down from parent to children).
-      // this._notifyWillDetach();
 
+      // Cancel the build in transition.
       if (transitionOut) {
-        this._owningView = owningView;
-
-        // this.invokeNext(function () {
-          this._transitionOut(false, owningView);
-        // });
-
-        // Update states after *will* and before *did* notifications!
-        this._gotoAttachedBuildingOutByParentState();
+        this.cancelAnimation(SC.LayoutState.CURRENT);
+      } else {
+        this.cancelAnimation();
       }
-      return true;
+
+      // Set the proper state.
+      this._gotoAttachedShownState();
+
+      // Build out the view by parent.
+      if (transitionOut) {
+        this._transitionOut(true, owningView);
+      }
+
+      break;
+
+    // Scenario: The view is shown and possibly transitioning.
+    // Result: Allow any transitions to continue concurrent with build out transition (may be conflicts).
+    case SC.CoreView.ATTACHED_HIDING:
+    case SC.CoreView.ATTACHED_SHOWN_ANIMATING:
+    case SC.CoreView.ATTACHED_SHOWING:
+    case SC.CoreView.ATTACHED_SHOWN:
+
+      // Build out the view by parent.
+      if (transitionOut) {
+        this._transitionOut(false, owningView);
+      }
+      break;
+
+    // Invalid states.
     default:
+      //@if(debug)
+      // Add some debugging only warnings for if the view statechart is breaking assumptions.
+      // These states should not be reachable here: UNATTACHED_BY_PARENT, ATTACHED_HIDDEN_BY_PARENT, ATTACHED_BUILDING_OUT_BY_PARENT
+      SC.warn("Core Developer Warning: Found invalid state for view %@ in _parentWillBuildOutFromDocument".fmt(this));
+      //@endif
+      // There's no need to continue to further child views.
+      shouldContinue = false;
     }
+
+    return shouldContinue;
   },
 
   /** @private Prepares according to parent will hide. This is called before the parent view hides
@@ -1854,39 +1922,53 @@ SC.CoreView.reopen(
   },
 
   /** @private Clean up before parent is detached. */
-  _parentWillRemoveFromDocument: function () {
-    var state = this.get('viewState');
+  _parentWillRemoveFromDocument: function (notifyStack) {
+    var state = this.get('viewState'),
+        shouldContinue = true;
 
+    // Handle all 12 possible view states.
     switch (state) {
-    case SC.CoreView.UNRENDERED:
-    case SC.CoreView.UNATTACHED:
-    case SC.CoreView.UNATTACHED_BY_PARENT:
-      // There's no need to continue to further child views.
-      return false;
-    // Cancel any outstanding isVisible transitions and mark for visibility update.
-    case SC.CoreView.ATTACHED_SHOWING:
-    case SC.CoreView.ATTACHED_HIDING:
-      this._cancelTransition();
-      this._teardownTransition();
-      this._visibleStyleNeedsUpdate = true;
-      break;
-    // Cancel any other outstanding transitions.
-    case SC.CoreView.ATTACHED_BUILDING_IN:
-    case SC.CoreView.ATTACHED_BUILDING_OUT:
-    case SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT:
-      this._cancelTransition();
-      this._teardownTransition();
-      break;
-    case SC.CoreView.ATTACHED_HIDDEN:
-    case SC.CoreView.ATTACHED_HIDDEN_BY_PARENT:
+
+    // Scenario: The child view is visible.
+    // Result: Do nothing and continue.
     case SC.CoreView.ATTACHED_SHOWN:
       break;
+
+    // Scenario: The child view is animating.
+    // Result: Complete its animation immediately and continue.
+    case SC.CoreView.ATTACHED_SHOWN_ANIMATING: // TODO: We need concurrent states!
+    case SC.CoreView.ATTACHED_SHOWING:
+    case SC.CoreView.ATTACHED_BUILDING_IN: // Was building in and didn't have a build out.
+    case SC.CoreView.ATTACHED_BUILDING_OUT: // Was building out on its own at the same time.
+    case SC.CoreView.ATTACHED_HIDING:
+      this.cancelAnimation();
+      break;
+
+    // Scenario: The child view has forced to unattached or unrendered state, or it's hidden.
+    // Result: Don't continue.
+    case SC.CoreView.UNRENDERED:
+    case SC.CoreView.UNATTACHED:
+    case SC.CoreView.ATTACHED_HIDDEN:
+      shouldContinue = false;
+      break;
+
+    // Invalid states.
     default:
-      // Attached and not in a transitionary state.
+      //@if(debug)
+      // Add some debugging only warnings for if the view statechart is breaking assumptions.
+      // These states should not be reachable here: UNATTACHED_BY_PARENT, ATTACHED_HIDDEN_BY_PARENT, ATTACHED_BUILDING_OUT_BY_PARENT
+      SC.warn("Core Developer Warning: Found invalid state for view %@ in _parentWillRemoveFromDocument".fmt(this));
+      //@endif
+      // There's no need to continue to further child views.
+      shouldContinue = false;
     }
 
-    // Notify *will*.
-    this._notifyWillDetach();
+    if (shouldContinue) {
+      // Allow children that have changed state to notify that they will be shown.
+      notifyStack.push(this);
+    }
+
+    return shouldContinue;
   },
 
   /** @private Prepares according to parent will show. */
@@ -2047,7 +2129,7 @@ SC.CoreView.reopen(
     }
 
     // Increment the shared building out count.
-    owningView._buildingOutCount++;
+    owningView._sc_buildOutCount++;
 
     // Set up the outgoing transition.
     if (transitionOut.setup) {
@@ -2056,6 +2138,13 @@ SC.CoreView.reopen(
 
     // Execute the outgoing transition.
     transitionOut.run(this, options, this._preTransitionLayout, this._preTransitionFrame);
+
+    // Set the proper state.
+    if (owningView === this) {
+      this._gotoAttachedBuildingOutState();
+    } else {
+      this._gotoAttachedBuildingOutByParentState();
+    }
   },
 
   /** @private Attempts to run a transition show, ensuring any hiding transitions are stopped in place. */
