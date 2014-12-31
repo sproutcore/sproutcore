@@ -41,8 +41,9 @@ var commonSetup = {
   },
 
   teardown: function () {
-    pane.remove();
-    pane.destroy();
+    SC.run(function () {
+      pane.destroy();
+    });
     pane = view = null;
   }
 };
@@ -52,7 +53,7 @@ if (SC.platform.supportsCSSTransitions) {
   module("ANIMATION", commonSetup);
 
   test("should work", function () {
-    stop(2000);
+    stop(4000);
     SC.RunLoop.begin();
     view.animate('left', 100, { duration: 1 });
     SC.RunLoop.end();
@@ -123,7 +124,7 @@ if (SC.platform.supportsCSSTransitions) {
   });
 
   test("callbacks work in general", function () {
-    stop(2000);
+    stop(4000);
 
     SC.run(function () {
       view.animate('left', 100, { duration: 0.5 }, function () {
@@ -136,7 +137,7 @@ if (SC.platform.supportsCSSTransitions) {
   });
 
   test("callbacks work in general with target method", function () {
-    stop(2000);
+    stop(4000);
 
     var ob = SC.Object.create({
       callback: function () {
@@ -153,7 +154,7 @@ if (SC.platform.supportsCSSTransitions) {
   });
 
   test("callbacks should have appropriate data", function () {
-    stop(2000);
+    stop(4000);
 
     SC.RunLoop.begin();
     view.animate('left', 100, { duration: 0.5 }, function (data) {
@@ -168,7 +169,7 @@ if (SC.platform.supportsCSSTransitions) {
   });
 
   test("handles delay function string", function () {
-    stop(2000);
+    stop(4000);
 
     SC.RunLoop.begin();
     view.animate('left', 100, { duration: 1, delay: 1 });
@@ -182,7 +183,7 @@ if (SC.platform.supportsCSSTransitions) {
   });
 
   test("handles timing function string", function () {
-    stop(2000);
+    stop(4000);
 
     SC.RunLoop.begin();
     view.animate('left', 100, { duration: 1, timing: 'ease-in' });
@@ -196,7 +197,7 @@ if (SC.platform.supportsCSSTransitions) {
   });
 
   test("handles timing function array", function () {
-    stop(2000);
+    stop(4000);
 
     SC.RunLoop.begin();
     view.animate('left', 100, { duration: 1, timing: [0.1, 0.2, 0.3, 0.4] });
@@ -210,7 +211,7 @@ if (SC.platform.supportsCSSTransitions) {
   });
 
   test("should allow multiple keys to be set at once", function () {
-    stop(2000);
+    stop(4000);
 
     SC.RunLoop.begin();
     view.animate({ top: 100, left: 100 }, { duration: 1 });
@@ -226,7 +227,7 @@ if (SC.platform.supportsCSSTransitions) {
   });
 
   test("should not animate any keys that don't change", function () {
-    stop(2000);
+    stop(4000);
 
     SC.RunLoop.begin();
     view.animate({ top: 0, left: 100 }, { duration: 1 });
@@ -242,7 +243,7 @@ if (SC.platform.supportsCSSTransitions) {
   });
 
   test("animating height with a centerY layout should also animate margin-top", function () {
-    stop(2000);
+    stop(4000);
 
     SC.RunLoop.begin();
     view.adjust({ top: null, centerY: 0 });
@@ -259,7 +260,7 @@ if (SC.platform.supportsCSSTransitions) {
   });
 
   test("animating width with a centerX layout should also animate margin-left", function () {
-    stop(2000);
+    stop(4000);
 
     SC.RunLoop.begin();
     view.adjust({ left: null, centerX: 0 });
@@ -277,7 +278,7 @@ if (SC.platform.supportsCSSTransitions) {
 
   // Pretty sure this does the job
   test("callbacks should be called only once for a grouped animation", function () {
-    stop(2000);
+    stop(4000);
     var stopped = true;
 
     expect(1);
@@ -300,7 +301,7 @@ if (SC.platform.supportsCSSTransitions) {
   // This behavior should be up for debate.  Does the callback call immediately, or does it wait until the end of
   // the specified animation period?  Currently we're calling it immediately.
   test("callback should be called immediately when a property is animated to its current value.", function () {
-    stop(2000);
+    stop(4000);
 
     expect(1);
 
@@ -316,7 +317,7 @@ if (SC.platform.supportsCSSTransitions) {
   // This behavior should be up for debate.  Does the callback call immediately, or does it wait until the end of
   // the specified animation period?  Currently we're calling it immediately.
   test("callback should be called immediately when a property is animated to its current value (even if the value is implied).", function () {
-    stop(2000);
+    stop(4000);
 
     expect(1);
 
@@ -336,7 +337,7 @@ if (SC.platform.supportsCSSTransitions) {
   });
 
   test("callback should be called when a property is animated with a duration of zero.", function () {
-    stop(2000);
+    stop(4000);
 
     expect(1);
 
@@ -349,7 +350,7 @@ if (SC.platform.supportsCSSTransitions) {
   });
 
   test("multiple animations should be able to run simultaneously", function () {
-    stop(2000);
+    stop(4000);
 
     expect(2);
 
@@ -366,7 +367,7 @@ if (SC.platform.supportsCSSTransitions) {
   });
 
   test("altering existing animation should call callback as cancelled", function () {
-    stop(2000);
+    stop(4000);
 
     var order = 0;
     expect(6);
@@ -402,7 +403,7 @@ if (SC.platform.supportsCSSTransitions) {
 
   test("should not cancel callback when value hasn't changed", function () {
     var callbacks = 0, wasCancelled = NO, check = 0;
-    stop(2000);
+    stop(4000);
 
     SC.run(function () {
       // this triggers the initial layoutStyle code
@@ -435,7 +436,7 @@ if (SC.platform.supportsCSSTransitions) {
   // and not expecting a null value.
   test("animating different attributes at different times should not throw an error", function () {
     // Run test.
-    stop(2000);
+    stop(4000);
 
     expect(0);
 
@@ -465,7 +466,7 @@ if (SC.platform.supportsCSSTransitions) {
   });
 
   test("should handle transform attributes", function () {
-    stop(2000);
+    stop(4000);
 
     SC.run(function () {
       view.animate('rotateX', 45, { duration: 1 });
@@ -482,7 +483,7 @@ if (SC.platform.supportsCSSTransitions) {
 
   test("should handle conflicting transform animations", function () {
     /*global console*/
-    stop(2000);
+    stop(4000);
 
     var originalConsoleWarn = console.warn;
     console.warn = function (warning) {
@@ -508,7 +509,7 @@ if (SC.platform.supportsCSSTransitions) {
   });
 
   test("removes animation property when done", function () {
-    stop(2000);
+    stop(4000);
 
     SC.RunLoop.begin();
     view.animate({ top: 100, scale: 2 }, { duration: 0.5 });
@@ -523,7 +524,7 @@ if (SC.platform.supportsCSSTransitions) {
   });
 
   test("Test that cancelAnimation() removes the animation style and fires the callback with isCancelled set.", function () {
-    stop(2000);
+    stop(4000);
 
     expect(7);
 
@@ -555,7 +556,7 @@ if (SC.platform.supportsCSSTransitions) {
   });
 
   test("Test that cancelAnimation(SC.LayoutState.CURRENT) removes the animation style, stops at the current position and fires the callback with isCancelled set.", function () {
-    stop(2000);
+    stop(4000);
 
     expect(9);
 
@@ -589,7 +590,7 @@ if (SC.platform.supportsCSSTransitions) {
   });
 
   test("Test that cancelAnimation(SC.LayoutState.START) removes the animation style, returns to the start position and fires the callback with isCancelled set.", function () {
-    stop(2000);
+    stop(4000);
 
     expect(9);
 
@@ -632,7 +633,7 @@ if (SC.platform.supportsCSSTransitions) {
     });
 
     test("handles acceleration when appropriate", function () {
-      stop(2000);
+      stop(4000);
 
       SC.RunLoop.begin();
       view.animate('top', 100, { duration: 1 });
@@ -717,7 +718,7 @@ if (SC.platform.supportsCSSTransitions) {
 
       ok(callbacks === 0, "precond - callback should not have been run yet");
 
-      stop(2000);
+      stop(4000);
 
       // we need to test changing the width at a later time
       setTimeout(function () {
@@ -734,7 +735,7 @@ if (SC.platform.supportsCSSTransitions) {
     });
 
     test("Test that cancelAnimation() removes the animation style and fires the callback with isCancelled set.", function () {
-      stop(2000);
+      stop(4000);
 
       SC.run(function () {
         view.animate({ left: 100, top: 100, width: 400 }, { duration: 0.5 }, function (data) {
@@ -779,7 +780,7 @@ if (SC.platform.supportsCSSTransitions) {
     });
 
     test("Test that cancelAnimation(SC.LayoutState.CURRENT) removes the animation style, stops at the current position and fires the callback with isCancelled set.", function () {
-      stop(2000);
+      stop(4000);
 
 
       SC.run(function () {
@@ -822,7 +823,7 @@ if (SC.platform.supportsCSSTransitions) {
     });
 
     test("Test that cancelAnimation(SC.LayoutState.START) removes the animation style, goes back to the start position and fires the callback with isCancelled set.", function () {
-      stop(2000);
+      stop(4000);
 
       // expect(12);
 
@@ -886,7 +887,7 @@ module("ANIMATION WITHOUT TRANSITIONS", {
 });
 
 test("should update layout", function () {
-  stop(2000);
+  stop(4000);
   SC.RunLoop.begin();
   view.animate('left', 100, { duration: 1 });
   SC.RunLoop.end();
@@ -898,7 +899,7 @@ test("should update layout", function () {
 });
 
 test("should still run callback", function () {
-  stop(2000);
+  stop(4000);
 
   expect(1);
 
