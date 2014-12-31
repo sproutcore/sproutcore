@@ -314,13 +314,13 @@
     SC.run(function() {
       newContent = SC.View.create({ backgroundColor: 'blue' });
     });
-    equals(newContent.get('viewState'), SC.View.UNRENDERED, 'PRELIM: New view is unrendered');
+    equals(newContent.get('viewState'), SC.CoreView.UNRENDERED, 'PRELIM: New view is unrendered');
 
     SC.run(function() {
       view.set('contentView', newContent);
     });
     ok(view.getPath('containerView.contentView') === newContent, 'New content has been successfully loaded into the container view.');
-    equals(newContent.get('viewState'), SC.View.ATTACHED_SHOWN, 'New content has been rendered and attached.');
+    equals(newContent.get('viewState'), SC.CoreView.ATTACHED_SHOWN, 'New content has been rendered and attached.');
 
     // Replacing the content view on an unrendered view.
     SC.run(function() {
@@ -333,7 +333,7 @@
     SC.run(function() {
       view._doRender();
     });
-    equals(newContent.get('viewState'), SC.View.UNATTACHED_BY_PARENT, 'New content renders along with the rest of the view');
+    equals(newContent.get('viewState'), SC.CoreView.ATTACHED_PARTIAL, 'New content renders along with the rest of the view');
   });
 
 })();

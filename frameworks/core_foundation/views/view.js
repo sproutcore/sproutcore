@@ -1126,7 +1126,9 @@ SC.CoreView.reopen(
     @returns {SC.View} receiver
   */
   removeChild: function (view, immediately) {
-    view._doDetach(immediately);
+    if (view.get('isAttached')) {
+      view._doDetach(immediately);
+    }
 
     // If the view will transition out, wait for the transition to complete
     // before orphaning the view entirely.

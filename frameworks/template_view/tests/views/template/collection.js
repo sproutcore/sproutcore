@@ -33,16 +33,18 @@ test("creating a collection view works", function() {
   var selectCollectionView  = CollectionView.create({ tagName: "select" });
   var customTagCollectionView = CollectionView.create({ tagName: "p", itemView: CustomChildView });
 
-  defaultCollectionView.createLayer();
-  ulCollectionView.createLayer();
-  olCollectionView.createLayer();
-  dlCollectionView.createLayer();
-  dlCollectionView2.createLayer();
-  dlCollectionView3.createLayer();
-  dlCollectionView4.createLayer();
-  dlCollectionView5.createLayer();
-  selectCollectionView.createLayer();
-  customTagCollectionView.createLayer();
+  SC.run(function () {
+    defaultCollectionView.createLayer();
+    ulCollectionView.createLayer();
+    olCollectionView.createLayer();
+    dlCollectionView.createLayer();
+    dlCollectionView2.createLayer();
+    dlCollectionView3.createLayer();
+    dlCollectionView4.createLayer();
+    dlCollectionView5.createLayer();
+    selectCollectionView.createLayer();
+    customTagCollectionView.createLayer();
+  });
 
   ok(defaultCollectionView.$().is("ul"), "Unordered list collection view was rendered (Default)");
   equals(defaultCollectionView.$('li').length, 1, "List item was rendered (Default)");
@@ -87,7 +89,9 @@ test("not passing a block to the collection helper creates a collection", functi
     template: SC.Handlebars.compile('{{collection "TemplateTests.CollectionTestView"}}')
   });
 
-  view.createLayer();
+  SC.run(function () {
+    view.createLayer();
+  });
   equals(view.$('aside').length, 3, 'one aside element is created for each content item');
 });
 
@@ -100,7 +104,9 @@ test("passing a block to the collection helper sets it as the template for examp
     template: SC.Handlebars.compile('{{#collection "TemplateTests.CollectionTestView"}} <aside></aside> {{/collection}}')
   });
 
-  view.createLayer();
+  SC.run(function () {
+    view.createLayer();
+  });
   equals(view.$('aside').length, 3, 'one aside element is created for each content item');
 });
 
@@ -113,7 +119,9 @@ test("a block passed to a collection helper defaults to the content property of 
     template: SC.Handlebars.compile('{{#collection "TemplateTests.CollectionTestView"}} <aside>{{content}}</aside> {{/collection}}')
   });
 
-  view.createLayer();
+  SC.run(function () {
+    view.createLayer();
+  });
 
   equals(view.$('li:has(aside:contains("foo")) + li:has(aside:contains("bar")) + li:has(aside:contains("baz"))').length, 1, 'one aside element is created for each content item');
 });
@@ -127,13 +135,18 @@ test("a block passed to a collection helper defaults to the view", function() {
     template: SC.Handlebars.compile('{{#collection "TemplateTests.CollectionTestView"}} <aside>{{content}}</aside> {{/collection}}')
   });
 
-  view.createLayer();
+  SC.run(function () {
+    view.createLayer();
+  });
+
   equals(view.$('li:has(aside:contains("foo")) + li:has(aside:contains("bar")) + li:has(aside:contains("baz"))').length, 1, 'precond - one aside element is created for each content item');
 
   SC.run(function() {
     TemplateTests.CollectionTestView.set('content', []);
   });
   equals(view.$('aside').length, 0, "all list item views should be removed from DOM");
+
+  view.destroyLayer();
 });
 
 test("should include an id attribute if id is set in the options hash", function() {
@@ -141,7 +154,9 @@ test("should include an id attribute if id is set in the options hash", function
     template: SC.Handlebars.compile('{{#collection "TemplateTests.CollectionTestView" id="baz"}}foo{{/collection}}')
   });
 
-  view.createLayer();
+  SC.run(function () {
+    view.createLayer();
+  });
   equals(view.$('ul#baz').length, 1, "adds an id attribute");
 });
 
@@ -153,7 +168,9 @@ test("should give its item views the class specified by itemClass", function() {
     template: SC.Handlebars.compile('{{#collection "TemplateTests.itemClassTestCollectionView" itemClass="baz"}}foo{{/collection}}')
   });
 
-  view.createLayer();
+  SC.run(function () {
+    view.createLayer();
+  });
   equals(view.$('ul li.baz').length, 3, "adds class attribute");
 });
 
@@ -266,7 +283,7 @@ test("should re-render when the content object changes", function() {
     template: SC.Handlebars.compile('{{#collection TemplateTests.RerenderTest}}{{content}}{{/collection}}')
   });
 
-  view.createLayer();
+  SC.run(function() { view.createLayer(); });
 
   SC.run(function() {
     view.childViews[0].set('content', ['bing', 'bat', 'bang']);
@@ -290,7 +307,7 @@ test("should allow changes to content object before layer is created", function(
   view.set('content', [1, 2, 3]);
   view.set('content', [1, 2]);
 
-  view.createLayer();
+  SC.run(function() { view.createLayer(); });
   ok(view.$('li').length);
 });
 
@@ -299,10 +316,10 @@ test("should allow changing content property to be null", function() {
     content: [1, 2, 3]
   });
 
-  view.createLayer();
+  SC.run(function() { view.createLayer(); });
   equals(view.$('li').length, 3, "precond - creates three elements");
 
-  view.set('content', null);
+  SC.run(function() { view.set('content', null); });
   equals(view.$('li').length, 0, "should not create any li elements");
 });
 
@@ -326,7 +343,7 @@ test("collection view within a collection view with default content should rende
     template: SC.Handlebars.compile('{{collection "TemplateTests.OuterCollectionView"}}')
   });
 
-  view.createLayer();
+  SC.run(function() { view.createLayer(); });
 
   equals(view.$('ul ul:eq(0) li').length, 3, 'first nested collection view should have 3 list items');
   equals(view.$('ul ul:eq(1) li').length, 2, 'second nested collection view should have 2 list items');
@@ -353,7 +370,7 @@ test("collection view within a collection view should have the right childViews"
     template: SC.Handlebars.compile('{{collection "TemplateTests.OuterCollectionView"}}')
   });
 
-  view.createLayer();
+  SC.run(function() { view.createLayer(); });
 
   var outer       = view.childViews[0];
   var firstInner  = outer.childViews[0].childViews[0];
@@ -376,7 +393,7 @@ test("should render inverse template when its present and there is no content", 
     template: SC.Handlebars.compile('{{collection "TemplateTests.CollectionTestView"}}')
   });
 
-  view.createLayer();
+  SC.run(function() { view.createLayer(); });
 
   equals(view.$('h1').text(), 'inverse', 'collection view with no content and inverse template should render inverse template');
 });
@@ -397,7 +414,7 @@ test("should render inverse template name when its present and there is no conte
     template: SC.Handlebars.compile('{{collection "TemplateTests.CollectionTestView"}}')
   });
 
-  view.createLayer();
+  SC.run(function() { view.createLayer(); });
 
   equals(view.$('h1').text(), 'inverse template from file', 'collection view with no content and inverse template name should render template');
 });
@@ -425,7 +442,7 @@ test("#collection helper should raise an error when passing a first argument tha
   var errored = false;
 
   try {
-    view.createLayer();
+    SC.run(function() { view.createLayer(); });
   } catch(e) {
     errored = true;
   }
@@ -438,7 +455,7 @@ test("should still cleanup childViews after removed from DOM", function() {
     content: [1, 2, 3]
   });
 
-  view.createLayer();
+  SC.run(function() { view.createLayer(); });
   equals(view.get('childViews').length, 3, "precond - creates three child views");
 
   view.destroyLayer();
