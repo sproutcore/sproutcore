@@ -1284,6 +1284,28 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       return orderOp;
     }
     else {
+      // @if(debug)
+      // debug mode syntax checks.
+      // first check is position of ASC or DESC
+      var ASCpos = orderOp.indexOf("ASC");
+      var DESCpos = orderOp.indexOf("DESC");
+      if (ASCpos > -1 || DESCpos > -1) { // if they exist
+        if (ASCpos > -1 && (ASCpos + 3) !== orderOp.length) {
+          SC.warn("Developer Warning: You have a orderBy syntax error in a Query: ASC is not in last position.");
+        }
+        if (DESCpos > -1 && (DESCpos + 4) !== orderOp.length) {
+          SC.warn("Developer Warning: You have a orderBy syntax error in a Query: DESC is not in last position.");
+        }
+      }
+      // check for improper separation chars
+      if (orderOp.indexOf(".") > -1) {
+        SC.warn("Developer Warning: You have a orderBy syntax error in a Query: A dot was used as separation character");
+      }
+      if (orderOp.indexOf(":") > -1 || orderOp.indexOf(":") > -1) {
+        SC.warn("Developer Warning: You have a orderBy syntax error in a Query: A colon or semicolon was used as separation character");
+      }
+      // @endif
+
       var o = orderOp.split(',');
       for (var i=0; i < o.length; i++) {
         var p = o[i];
