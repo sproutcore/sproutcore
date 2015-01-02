@@ -199,13 +199,13 @@ SC.AutoResize = {
     @private
     Begins observing the auto resize field.
   */
+  // @if (debug)
   initMixin: function() {
-    // @if (debug)
     if (!this.get('supportsAutoResize')) {
       throw new Error("View `%@` does not support automatic resize. See documentation for SC.AutoResize".fmt(this));
     }
-    // @endif
   },
+  // @endif
 
   /**
     If this property is provided, all views that share the same value for this property will be resized as a batch for increased performance.
@@ -228,8 +228,10 @@ SC.AutoResize = {
     SC.AutoResizeManager.scheduleMeasurementForView(this, batchResizeId);
   }.observes('isVisibleInWindow', 'shouldMeasureSize', 'autoResizeText', 'batchResizeId'),
 
+  /** @private */
   _lastMeasuredText: null,
 
+  /** @private */
   _cachedMetrics: function(key, value) {
     if(!this.get('shouldCacheSizes')) return;
 
@@ -250,7 +252,8 @@ SC.AutoResize = {
     @param batch For internal use during batch resizing.
   */
   measureSize: function(batch) {
-    var metrics, layer = this.get('autoResizeLayer'), autoResizeText = this.get('autoResizeText'),
+    var metrics, layer = this.get('autoResizeLayer'),
+        autoResizeText = this.get('autoResizeText'),
         ignoreEscape = !this.get('escapeHTML'),
         batchResizeId = this.get('batchResizeId'),
         cachedMetrics = this.get('_cachedMetrics');
@@ -587,4 +590,5 @@ SC.AutoResizeManager = {
       }
     }
   }
+
 };

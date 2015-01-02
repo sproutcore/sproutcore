@@ -13,9 +13,11 @@ var view;
 module("SC.AutoResize", {
 
   setup: function () {
-    view = SC.LabelView.create(SC.AutoResize, {
-      layout: { left: 0, height: 40 },
-      value: "The bottom line, Williams said, is that the internet is “a giant machine designed to give people what they want.” It’s not a utopia. It’s not magical. It’s simply an engine of convenience. Those who can tune that engine well — who solve basic human problems with greater speed and simplicity than those who came before — will profit immensely. Those who lose sight of basic human needs — who want to give people the next great idea — will have problems. “We often think of the internet enables you to do new things,” Williams said. “But people just want to do the same things they’ve always done.”"
+    SC.run(function () {
+      view = SC.LabelView.create(SC.AutoResize, {
+        layout: { left: 0, height: 40 },
+        value: "The bottom line, Williams said, is that the internet is “a giant machine designed to give people what they want.” It’s not a utopia. It’s not magical. It’s simply an engine of convenience. Those who can tune that engine well — who solve basic human problems with greater speed and simplicity than those who came before — will profit immensely. Those who lose sight of basic human needs — who want to give people the next great idea — will have problems. “We often think of the internet enables you to do new things,” Williams said. “But people just want to do the same things they’ve always done.”"
+      });
     });
   },
 
@@ -40,10 +42,10 @@ test("Resize height only.", function () {
 
   // Set the view up for height only resizing.
   // i.e. It should grow to fit the text wrapped within the width of the view.
-  view.set('shouldResizeWidth', false);
-  view.set('shouldResizeHeight', true);
-
   SC.run(function () {
+    view.set('shouldResizeWidth', false);
+    view.set('shouldResizeHeight', true);
+
     pane.appendChild(view);
     pane.append();
   });
@@ -101,7 +103,7 @@ test("Resize with transition plugin - conflict", function () {
 
     // Width transition plugin.
     run: function (view, options, finalLayout, finalFrame) {
-      view.animate('width', finalFrame.width, { duration: 0.5 }, function (data) {
+      view.animate('width', finalFrame.width, { duration: 1 }, function (data) {
         this.didTransitionIn();
       });
     }
@@ -119,7 +121,7 @@ test("Resize with transition plugin - conflict", function () {
     ok(jqEl.width() > 10, 'width is > 10: %@'.fmt(jqEl.width()));
     ok(jqEl.width() < 3000, 'width is < 3000: %@'.fmt(jqEl.width()));
     ok(view.get('layout').width > 3000, 'layout.width is > 3000: %@'.fmt(view.get('layout').width));
-  }, 200);
+  }, 250);
 
   setTimeout(function () {
     var jqEl = view.$();
@@ -132,12 +134,11 @@ test("Resize with transition plugin - conflict", function () {
     });
 
     start();
-  }, 700);
+  }, 1250);
 });
 
-
 test("Resize with child view layout", function () {
-  stop(700);
+  // stop(700);
 
   var pane, view2;
 
@@ -221,7 +222,7 @@ test("Resize height only for textarea where textarea has padding.", function () 
       '-webkit-box-sizing': 'border-box',
       '-moz-box-sizing': 'border-box',
       'box-sizing': 'border-box'
-    })
+    });
   });
 
   // now the css is applied measure the textareas width
@@ -236,7 +237,7 @@ test("Resize height only for textarea where textarea has padding.", function () 
   setTimeout(function () {
     // check the frame and textarea have the expected dimensions
     ok(view.get('frame').width == 200, 'frame width is 200');
-    equals(origWidth, view.$('textarea').outerWidth(), 'textarea width has not changed since update of value')
+    equals(origWidth, view.$('textarea').outerWidth(), 'textarea width has not changed since update of value');
 
     pane.destroy();
     pane.remove();
@@ -283,7 +284,7 @@ test("Resize text only for input where input has padding.", function () {
       '-webkit-box-sizing': 'border-box',
       '-moz-box-sizing': 'border-box',
       'box-sizing': 'border-box'
-    })
+    });
   });
 
   // now the css is applied measure the input fields width
@@ -298,11 +299,11 @@ test("Resize text only for input where input has padding.", function () {
   setTimeout(function () {
     // check the frame and input field have the expected dimensions
     ok(view.get('frame').width == 200, 'frame width is 200');
-    equals(origWidth, view.$('input').outerWidth(), 'input field width has not changed since update of value')
+    equals(origWidth, view.$('input').outerWidth(), 'input field width has not changed since update of value');
 
     pane.destroy();
     pane.remove();
 
     start();
   }, 500);
-})
+});
