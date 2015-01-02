@@ -518,7 +518,7 @@ SC.AutoResizeManager = {
   scheduleMeasurementForView: function(view) {
     this.measurementQueue.add(view);
 
-    SC.RunLoop.currentRunLoop.invokeLast(this.doBatchResize);
+    SC.RunLoop.currentRunLoop.invokeOnce(this.doBatchResize);
   },
 
   /**

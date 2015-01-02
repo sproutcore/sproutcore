@@ -138,8 +138,6 @@ test("Resize with transition plugin - conflict", function () {
 });
 
 test("Resize with child view layout", function () {
-  // stop(700);
-
   var pane, view2;
 
   SC.run(function () {
@@ -148,8 +146,8 @@ test("Resize with child view layout", function () {
       layout: { top: 200, left: 0, width: 200, height: 200 },
       childViewLayout: SC.View.HORIZONTAL_STACK,
 
-      a: SC.View.extend({
-        layout: { width: 100 }
+      a: SC.LabelView.extend(SC.AutoResize, {
+        value: "XYZ"
       }),
 
       b: SC.View.extend({
@@ -168,16 +166,17 @@ test("Resize with child view layout", function () {
     pane.appendChild(view2);
   });
 
-  setTimeout(function () {
-    ok(view.get('layout').width > 2000, 'width is > 2000');
-    equals(view.get('layout').left, 150, 'left is');
-    ok(view2.get('layout').left > 2000, 'left: %@ is > 2000'.fmt(view2.get('layout').left));
+  var childViews = pane.get('childViews'),
+      viewA = childViews.objectAt(0),
+      viewB = childViews.objectAt(1);
 
-    pane.destroy();
-    pane.remove();
+  ok(view.get('layout').width > 2000, 'width is > 2000');
+  equals(viewB.get('layout').left, viewA.get('frame').width, 'second view left is');
+  equals(view.get('layout').left, viewA.get('frame').width + 50, 'third view left is');
+  ok(view2.get('layout').left > 2000, 'left: %@ is > 2000'.fmt(view2.get('layout').left));
 
-    start();
-  }, 500);
+  pane.destroy();
+  pane.remove();
 });
 
 /**
