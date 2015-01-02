@@ -246,7 +246,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
 
     @type String | Function
   */
-  orderBy:     null,
+  orderBy: null,
 
   /**
     The base record type or types for the query.  This must be specified to
@@ -1291,18 +1291,16 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       var DESCpos = orderOp.indexOf("DESC");
       if (ASCpos > -1 || DESCpos > -1) { // if they exist
         if (ASCpos > -1 && (ASCpos + 3) !== orderOp.length) {
-          SC.warn("Developer Warning: You have a orderBy syntax error in a Query: ASC is not in last position.");
+          SC.warn("Developer Warning: You have an orderBy syntax error in a Query, %@: ASC should be in the last position.".fmt(orderOp));
         }
         if (DESCpos > -1 && (DESCpos + 4) !== orderOp.length) {
-          SC.warn("Developer Warning: You have a orderBy syntax error in a Query: DESC is not in last position.");
+          SC.warn("Developer Warning: You have an orderBy syntax error in a Query, %@: DESC should be in the last position.".fmt(orderOp));
         }
       }
+      
       // check for improper separation chars
-      if (orderOp.indexOf(".") > -1) {
-        SC.warn("Developer Warning: You have a orderBy syntax error in a Query: A dot was used as separation character");
-      }
       if (orderOp.indexOf(":") > -1 || orderOp.indexOf(":") > -1) {
-        SC.warn("Developer Warning: You have a orderBy syntax error in a Query: A colon or semicolon was used as separation character");
+        SC.warn("Developer Warning: You have an orderBy syntax error in a Query, %@: Colons or semicolons should not be used as a separation character.".fmt(orderOp));
       }
       // @endif
 
