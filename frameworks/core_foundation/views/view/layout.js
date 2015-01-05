@@ -401,7 +401,7 @@ SC.View.reopen(
 
         //@if(debug)
         // Debug-only warning when layout isn't valid.
-        if (ret.width == null) {
+        if (!hasWidth) {
           SC.warn("Developer Warning: When setting `centerX` in the layout, you must also set `width`: %@".fmt(this));
         }
         //@endif
@@ -412,7 +412,7 @@ SC.View.reopen(
 
         //@if(debug)
         // Debug-only warning when layout isn't valid.
-        if (ret.height == null) {
+        if (!hasHeight) {
           SC.warn("Developer Warning: When setting `centerY` in the layout, you must also set `height`: %@".fmt(this));
         }
         //@endif
