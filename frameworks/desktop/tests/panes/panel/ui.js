@@ -128,7 +128,7 @@ test("Should changing isModal when a pane is transitioning out not append the mo
   they are transitioning views out they should take care not to change isModal until the view is
   done transitioning). We should probably do the former, but it opens a bigger question, how should
   all views respond when they are modified in transitioning out states?
-
+*/
 // , function () {
 
 //   // Tests an edge case where isModal turns YES during a transition out.
