@@ -76,8 +76,9 @@ SC.View.reopen(
     Also, because
   */
   _sc_view_themeDidChange: function() {
-    if (this._lastTheme === this.get('theme')) { return; }
-    this._lastTheme = this.get('theme');
+    var curTheme = this.get('theme');
+    if (this._lastTheme === curTheme) { return; }
+    this._lastTheme = curTheme;
 
     // invalidate child view base themes, if present
     var childViews = this.childViews, len = childViews.length, idx;
