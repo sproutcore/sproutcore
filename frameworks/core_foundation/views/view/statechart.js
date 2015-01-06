@@ -106,15 +106,6 @@ SC.CoreView.mixin(
   ATTACHED_SHOWN: 0x03C0, // 960
 
   /**
-    The view has been created, rendered and attached, is visible in the
-    display and is being animated via a call to `animate()`.
-
-    @static
-    @constant
-  */
-  ATTACHED_SHOWN_ANIMATING: 0x03C4, // 964
-
-  /**
     The view has been created, rendered and attached, but is not visible in the
     display.
 
@@ -151,7 +142,7 @@ SC.CoreView.mixin(
     @static
     @constant
   */
-  ATTACHED_BUILDING_OUT: 0x0381, // 897
+  ATTACHED_BUILDING_OUT: 0x03C4, // 964
 
   /**
     The view has been created, rendered and attached.  It is currently
@@ -162,7 +153,7 @@ SC.CoreView.mixin(
     @static
     @constant
   */
-  ATTACHED_BUILDING_OUT_BY_PARENT: 0x0382, // 898
+  ATTACHED_BUILDING_OUT_BY_PARENT: 0x03C5, // 965
 
   /**
     The view has been created, rendered and attached and is visible in the
@@ -182,7 +173,16 @@ SC.CoreView.mixin(
     @static
     @constant
   */
-  ATTACHED_HIDING: 0x03C3 // 963
+  ATTACHED_HIDING: 0x03C3, // 963
+
+  /**
+    The view has been created, rendered and attached, is visible in the
+    display and is being animated via a call to `animate()`.
+
+    @static
+    @constant
+  */
+  ATTACHED_SHOWN_ANIMATING: 0x03C6 // 966
 
 });
 
@@ -910,12 +910,11 @@ SC.CoreView.reopen(
         // Notify for each child (that will change state) in reverse so that each child is in the proper
         // state before its parent potentially alters its state. For example, a parent could modify
         // children in `willShowInDocument`.
-        // UNUSED: Is it necessary for hiding/showing of a view to notify entire descendent tree?
-        // for (var i = notifyStack.length - 1; i >= 0; i--) {
-        //   var childView = notifyStack[i];
+        for (var i = notifyStack.length - 1; i >= 0; i--) {
+          var childView = notifyStack[i];
 
-        //   childView._notifyWillShowInDocument();
-        // }
+          childView._notifyWillShowInDocument();
+        }
         this._notifyWillShowInDocument();
 
         // Show the view.
@@ -1072,14 +1071,6 @@ SC.CoreView.reopen(
       }
     } else if (state === SC.CoreView.ATTACHED_HIDING) {
       this._teardownTransition();
-
-      // Cancel any remaining animations (i.e. a build in or build out that was left running at the same time).
-      this.cancelAnimation(SC.LayoutState.CURRENT);
-
-      // Allow children to notify that they will be hidden. Bottom-up so that each child is in the
-      // proper state before its parent potentially alters its state. For example, a parent could
-      // modify children in `willHideInDocument`.
-      // this._callOnChildViews('_notifyWillHideInDocument');
 
       // Hide immediately.
       this._executeDoHide();
@@ -1311,10 +1302,6 @@ SC.CoreView.reopen(
     }
     this._notifyWillDetach();
 
-    // Detach the layer.
-    var node = this.get('layer');
-    node.parentNode.removeChild(node);
-
     // Cancel any remaining animations (e.g. a concurrent hide).
     var viewState = this.get('viewState');
     switch (viewState) {
@@ -1324,6 +1311,10 @@ SC.CoreView.reopen(
       break;
     }
 
+    // Detach the layer.
+    var node = this.get('layer');
+    node.parentNode.removeChild(node);
+
     // Update the state and children state. The children are updated top-down so that hidden or
     // unattached children allow us to bail out early.
     this._gotoUnattachedState();
@@ -1332,20 +1323,19 @@ SC.CoreView.reopen(
 
   /** @private Hides the view. */
   _executeDoHide: function () {
-    // UNUSED: Is it necessary for hiding/showing of a view to notify entire descendent tree?
-    // var notifyStack = []; // Only those views that changed state get added to the stack.
+    var notifyStack = []; // Only those views that changed state get added to the stack.
 
     // The children are updated top-down so that hidden or unattached children allow us to bail out early.
-    this._callOnChildViews('_parentWillHideInDocument', true); // , notifyStack
+    this._callOnChildViews('_parentWillHideInDocument', true, notifyStack);
 
     // Notify for each child (that will change state) in reverse so that each child is in the proper
     // state before its parent potentially alters its state. For example, a parent could modify
     // children in `willHideInDocument`.
-    // for (var i = notifyStack.length - 1; i >= 0; i--) {
-    //   var childView = notifyStack[i];
+    for (var i = notifyStack.length - 1; i >= 0; i--) {
+      var childView = notifyStack[i];
 
-    //   childView._notifyWillHideInDocument();
-    // }
+      childView._notifyWillHideInDocument();
+    }
     this._notifyWillHideInDocument();
 
     // Cancel any remaining animations (e.g. a concurrent build in or build out).
