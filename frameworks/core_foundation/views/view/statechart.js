@@ -23,6 +23,11 @@ SC.LOG_VIEW_STATES_STYLE = {
 SC.CoreView.mixin(
   /** @scope SC.CoreView */ {
 
+  // State bit masks
+
+  // Logically always present, so not necessary, but here for logical ordering.
+  // IS_CREATED: 0x0200, // 10 0000 0000, 512
+
   /**
     The view has been rendered.
 
@@ -33,7 +38,7 @@ SC.CoreView.mixin(
     @static
     @constant
   */
-  IS_RENDERED: 0x0100, // 256
+  IS_RENDERED: 0x0100, // 01 0000 0000, 256
 
   /**
     The view has been attached.
@@ -45,7 +50,7 @@ SC.CoreView.mixin(
     @static
     @constant
   */
-  IS_ATTACHED: 0x0080, // 128
+  IS_ATTACHED: 0x0080, // 00 1000 0000, 128
 
   /**
     The view is visible in the display.
@@ -57,7 +62,7 @@ SC.CoreView.mixin(
     @static
     @constant
   */
-  IS_SHOWN: 0x0040, // 64
+  IS_SHOWN: 0x0040, // 00 0100 0000, 64
 
   /**
     The view is invisible in the display.
@@ -69,7 +74,9 @@ SC.CoreView.mixin(
     @static
     @constant
   */
-  IS_HIDDEN: 0x0020, // 32
+  IS_HIDDEN: 0x0020, // 00 0010 0000, 32
+
+  // Main states
 
   /**
     The view has been created, but has not been rendered or attached.
@@ -77,7 +84,7 @@ SC.CoreView.mixin(
     @static
     @constant
   */
-  UNRENDERED: 0x0200, // 512
+  UNRENDERED: 0x0200, // 10 0000 0000, 512 (IS_CREATED)
 
   /**
     The view has been created and rendered, but has not been attached
@@ -86,24 +93,16 @@ SC.CoreView.mixin(
     @static
     @constant
   */
-  UNATTACHED: 0x0300, // 768
+  UNATTACHED: 0x0300, // 11 0000 0000, 768 (IS_CREATED + IS_RENDERED)
 
   /**
-    The view has been created and rendered, but an ancestor is not attached.
+    The view has been created and rendered and attached to a parent, but an ancestor is not
+    attached.
 
     @static
     @constant
   */
-  ATTACHED_PARTIAL: 0x0380, // 896
-
-  /**
-    The view has been created, rendered and attached and is visible in the
-    display.
-
-    @static
-    @constant
-  */
-  ATTACHED_SHOWN: 0x03C0, // 960
+  ATTACHED_PARTIAL: 0x0380, // 11 1000 0000, 896 (IS_CREATED + IS_RENDERED + IS_ATTACHED)
 
   /**
     The view has been created, rendered and attached, but is not visible in the
@@ -113,7 +112,18 @@ SC.CoreView.mixin(
     @static
     @constant
   */
-  ATTACHED_HIDDEN: 0x03A0, // 928
+  ATTACHED_HIDDEN: 0x03A0, // 11 1010 0000, 928 (IS_CREATED + IS_RENDERED + IS_ATTACHED + IS_HIDDEN)
+
+  /**
+    The view has been created, rendered and attached and is visible in the
+    display.
+
+    @static
+    @constant
+  */
+  ATTACHED_SHOWN: 0x03C0, // 11 1100 0000, 960 (IS_CREATED + IS_RENDERED + IS_ATTACHED + IS_SHOWN)
+
+  // Minor states
 
   /**
     The view has been created, rendered and attached, but is not visible in the
@@ -122,7 +132,7 @@ SC.CoreView.mixin(
     @static
     @constant
   */
-  ATTACHED_HIDDEN_BY_PARENT: 0x03A1, // 929
+  ATTACHED_HIDDEN_BY_PARENT: 0x03A1, // 929  (IS_CREATED + IS_RENDERED + IS_ATTACHED + IS_HIDDEN +)
 
   /**
     The view has been created, rendered and attached and is visible in the
@@ -132,7 +142,7 @@ SC.CoreView.mixin(
     @static
     @constant
   */
-  ATTACHED_BUILDING_IN: 0x03C1, // 961
+  ATTACHED_BUILDING_IN: 0x03C1, // 961 (IS_CREATED + IS_RENDERED + IS_ATTACHED + IS_SHOWN +)
 
   /**
     The view has been created, rendered and attached.  It is currently
@@ -142,7 +152,7 @@ SC.CoreView.mixin(
     @static
     @constant
   */
-  ATTACHED_BUILDING_OUT: 0x03C4, // 964
+  ATTACHED_BUILDING_OUT: 0x03C4, // 964 (IS_CREATED + IS_RENDERED + IS_ATTACHED + IS_SHOWN +)
 
   /**
     The view has been created, rendered and attached.  It is currently
@@ -153,7 +163,7 @@ SC.CoreView.mixin(
     @static
     @constant
   */
-  ATTACHED_BUILDING_OUT_BY_PARENT: 0x03C5, // 965
+  ATTACHED_BUILDING_OUT_BY_PARENT: 0x03C5, // 965 (IS_CREATED + IS_RENDERED + IS_ATTACHED + IS_SHOWN +)
 
   /**
     The view has been created, rendered and attached and is visible in the
@@ -163,7 +173,7 @@ SC.CoreView.mixin(
     @static
     @constant
   */
-  ATTACHED_SHOWING: 0x03C2, // 962
+  ATTACHED_SHOWING: 0x03C2, // 962 (IS_CREATED + IS_RENDERED + IS_ATTACHED + IS_SHOWN +)
 
   /**
     The view has been created, rendered and attached.  It is currently
@@ -173,7 +183,7 @@ SC.CoreView.mixin(
     @static
     @constant
   */
-  ATTACHED_HIDING: 0x03C3, // 963
+  ATTACHED_HIDING: 0x03C3, // 963 (IS_CREATED + IS_RENDERED + IS_ATTACHED + IS_SHOWN +)
 
   /**
     The view has been created, rendered and attached, is visible in the
@@ -182,7 +192,7 @@ SC.CoreView.mixin(
     @static
     @constant
   */
-  ATTACHED_SHOWN_ANIMATING: 0x03C6 // 966
+  ATTACHED_SHOWN_ANIMATING: 0x03C6 // 966 (IS_CREATED + IS_RENDERED + IS_ATTACHED + IS_SHOWN +)
 
 });
 
@@ -263,9 +273,9 @@ SC.CoreView.reopen(
   viewState: SC.CoreView.UNRENDERED,
 
   /**
-    Whether the view's layer is attached to the document or not.
+    Whether the view's layer is attached to a parent or not.
 
-    When the view's layer is attached to the document, this value will be true.
+    When the view's layer is attached to a parent view, this value will be true.
 
     @field
     @type Boolean
@@ -453,7 +463,7 @@ SC.CoreView.reopen(
       } else {
         // Attaching an unattached view to an unattached view, simply moves it to unattached by
         // parent state. Don't do any notifications.
-        this._gotoUnattachedByParentState();
+        this._gotoAttachedPartialState();
       }
 
       isHandled = true;
@@ -1154,7 +1164,7 @@ SC.CoreView.reopen(
   },
 
   /** @private */
-  _gotoUnattachedByParentState: function () {
+  _gotoAttachedPartialState: function () {
     this.set('viewState', SC.CoreView.ATTACHED_PARTIAL);
   },
 
@@ -1290,7 +1300,7 @@ SC.CoreView.reopen(
     var notifyStack = []; // Only those views that changed state get added to the stack.
 
     // The children are updated top-down so that hidden or unattached children allow us to bail out early.
-    this._callOnChildViews('_parentWillRemoveFromDocument', true, notifyStack);
+    this._callOnChildViews('_parentWillDetach', true, notifyStack);
 
     // Notify for each child (that will change state) in reverse so that each child is in the proper
     // state before its parent potentially alters its state. For example, a parent could modify
@@ -1315,10 +1325,10 @@ SC.CoreView.reopen(
     var node = this.get('layer');
     node.parentNode.removeChild(node);
 
-    // Update the state and children state. The children are updated top-down so that hidden or
-    // unattached children allow us to bail out early.
+    // Update the state and children state. The children are updated top-down so that unattached
+    // children allow us to bail out early.
     this._gotoUnattachedState();
-    this._callOnChildViews('_parentDidRemoveFromDocument', true);
+    this._callOnChildViews('_parentDidDetach', true);
   },
 
   /** @private Hides the view. */
@@ -1693,12 +1703,12 @@ SC.CoreView.reopen(
   },
 
   /** @private Routes according to parent did detach. */
-  _parentDidRemoveFromDocument: function () {
+  _parentDidDetach: function () {
     var state = this.get('viewState');
 
     if (state & SC.CoreView.IS_ATTACHED) {
       // Update states after *will* and before *did* notifications!
-      this._gotoUnattachedByParentState();
+      this._gotoAttachedPartialState();
     } else {
       // There's no need to continue to further child views.
       return false;
@@ -1719,7 +1729,7 @@ SC.CoreView.reopen(
       this._sc_addRenderedStateObservers();
 
       // Go to the proper state.
-      this._gotoUnattachedByParentState();
+      this._gotoAttachedPartialState();
       break;
 
     // Invalid states.
@@ -1906,7 +1916,7 @@ SC.CoreView.reopen(
   },
 
   /** @private Clean up before parent is detached. */
-  _parentWillRemoveFromDocument: function (notifyStack) {
+  _parentWillDetach: function (notifyStack) {
     var state = this.get('viewState'),
         shouldContinue = true;
 
@@ -1941,7 +1951,7 @@ SC.CoreView.reopen(
       //@if(debug)
       // Add some debugging only warnings for if the view statechart is breaking assumptions.
       // These states should not be reachable here: ATTACHED_PARTIAL, ATTACHED_HIDDEN_BY_PARENT, ATTACHED_BUILDING_OUT_BY_PARENT
-      SC.warn("Core Developer Warning: Found invalid state for view %@ in _parentWillRemoveFromDocument".fmt(this));
+      SC.warn("Core Developer Warning: Found invalid state for view %@ in _parentWillDetach".fmt(this));
       //@endif
       // There's no need to continue to further child views.
       shouldContinue = false;
