@@ -404,7 +404,9 @@ SC.CoreView.reopen(
     @returns {SC.View} receiver
   */
   createLayer: function () {
-    this._doRender();
+    if (!this.get('_isRendered')) {
+      this._doRender();
+    }
 
     return this;
   },
