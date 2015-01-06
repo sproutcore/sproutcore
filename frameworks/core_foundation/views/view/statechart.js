@@ -2171,18 +2171,21 @@ SC.CoreView.reopen(
   /** @private Goes to the proper attached state depending on its parents state*/
   _gotoSomeAttachedState: function () {
     var parentView = this.get('parentView'),
+      isParentHidden = parentView ? parentView.get('viewState') & SC.CoreView.IS_HIDDEN : false,
       // Views without a parent are not limited by a parent's current state.
       isParentShown = parentView ? parentView.get('viewState') & SC.CoreView.IS_SHOWN : true;
 
     // Set the proper state.
-    if (this.get('isVisible')) {
-      if (isParentShown) {
+    if (isParentShown) {
+      if (this.get('isVisible')) {
         this._gotoAttachedShownState();
       } else {
-        this._gotoAttachedHiddenByParentState();
+        this._gotoAttachedHiddenState();
       }
+    } else if (isParentHidden) {
+      this._gotoAttachedHiddenByParentState();
     } else {
-      this._gotoAttachedHiddenState();
+      this._gotoAttachedPartialState();
     }
   }
 
