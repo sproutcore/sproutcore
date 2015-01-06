@@ -389,10 +389,11 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         i, j;
 
     // Update childViews
-    if (childViews.get('length') - 1 > items.get('length')) {   // We've lost segments (ie. childViews)
+    var childViewsLength = this.get('shouldHandleOverflow') ? childViews.get('length') - 1 : childViews.get('length');
+    if (childViewsLength > items.get('length')) {   // We've lost segments (ie. childViews)
 
       // Remove unneeded segments from the end back
-      for (i = childViews.get('length') - 2; i >= items.get('length'); i--) {
+      for (i = childViewsLength - 1; i >= items.get('length'); i--) {
         childView = childViews.objectAt(i);
         localItem = childView.get('localItem');
 
@@ -421,10 +422,10 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       // Update our value which may have changed
       this.set('value', value);
 
-    } else if (childViews.get('length') - 1 < items.get('length')) {  // We've gained segments
+    } else if (childViewsLength < items.get('length')) {  // We've gained segments
 
       // Create the new segments
-      for (i = childViews.get('length') - 1; i < items.get('length'); i++) {
+      for (i = childViewsLength; i < items.get('length'); i++) {
 
         // We create a default SC.ButtonView-like object for each segment
         childView = segmentViewClass.create({
@@ -855,7 +856,6 @@ SC.SegmentedView = SC.View.extend(SC.Control,
 
     var childViews = this.get('childViews'),
         childView,
-        overflowIndex = childViews.get('length') - 1,
         index;
 
     if (!this.get('isEnabledInPane')) return YES; // nothing to do // TODO: return NO?
@@ -867,6 +867,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       this.activeChildView = childView;
 
       // if mouse was pressed on the overflow segment, popup the menu
+      var overflowIndex = this.get('shouldHandleOverflow') ? childViews.get('length') - 1 : null;
       if (index === overflowIndex) this.showOverflowMenu();
       else this._isMouseDown = YES;
 
@@ -903,7 +904,6 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   /** @private */
   mouseMoved: function (evt) {
     var childViews = this.get('childViews'),
-        overflowIndex = childViews.get('length') - 1,
         activeChildView,
         childView,
         index;
@@ -921,6 +921,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         if (childView.get('isEnabled')) childView.set('isActive', YES);
         this.activeChildView = childView;
 
+        var overflowIndex = this.get('shouldHandleOverflow') ? childViews.get('length') - 1 : null;
         if (index === overflowIndex) {
           this.showOverflowMenu();
           this._isMouseDown = NO;
@@ -934,7 +935,6 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   mouseEntered: function (evt) {
     var childViews = this.get('childViews'),
         childView,
-        overflowIndex = childViews.get('length') - 1,
         index;
 
     // if mouse was pressed down initially, start detection again
@@ -942,6 +942,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       index = this.displayItemIndexForEvent(evt);
 
       // if mouse was pressed on the overflow segment, popup the menu
+      var overflowIndex = this.get('shouldHandleOverflow') ? childViews.get('length') - 1 : null;
       if (index === overflowIndex) {
         this.showOverflowMenu();
         this._isMouseDown = NO;
@@ -974,7 +975,6 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   touchStart: function (touch) {
     var childViews = this.get('childViews'),
         childView,
-        overflowIndex = childViews.get('length') - 1,
         index;
 
     if (!this.get('isEnabledInPane')) return YES; // nothing to do
@@ -987,6 +987,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       this.activeChildView = childView;
 
       // if touch was on the overflow segment, popup the menu
+      var overflowIndex = this.get('shouldHandleOverflow') ? childViews.get('length') - 1 : null;
       if (index === overflowIndex) this.showOverflowMenu();
       else this._isTouching = YES;
     }
@@ -1019,7 +1020,6 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   touchesDragged: function (evt, touches) {
     var isTouching = this.touchIsInBoundary(evt),
         childViews = this.get('childViews'),
-        overflowIndex = childViews.get('length') - 1,
         activeChildView,
         childView,
         index;
@@ -1040,6 +1040,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
 
         this.activeChildView = childView;
 
+        var overflowIndex = this.get('shouldHandleOverflow') ? childViews.get('length') - 1 : null;
         if (index === overflowIndex) {
           this.showOverflowMenu();
           this._isMouseDown = NO;
@@ -1071,11 +1072,11 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   _touchDidEnter: function (evt) {
     var childViews = this.get('childViews'),
         childView,
-        overflowIndex = childViews.get('length') - 1,
         index;
 
     index = this.displayItemIndexForEvent(evt);
 
+    var overflowIndex = this.get('shouldHandleOverflow') ? childViews.get('length') - 1 : null;
     if (index === overflowIndex) {
       this.showOverflowMenu();
       this._isTouching = NO;
@@ -1262,6 +1263,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     var value = this.get('value'),
         overflowItemsLength,
         childViews = this.get('childViews'),
+        childViewsLength = this.get('shouldHandleOverflow') ? childViews.get('length') - 1 : childViews.get('length'),
         overflowIndex = Infinity,
         overflowView = this.get('overflowView'),
         childView;
@@ -1269,13 +1271,13 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     // The index where childViews are all overflowed
     if (this.overflowItems) {
       overflowItemsLength = this.overflowItems.get('length');
-      overflowIndex = childViews.get('length') - 1 - overflowItemsLength;
+      overflowIndex = childViewsLength - overflowItemsLength;
 
       // Clear out the selected value of the overflowView (if it's set)
       overflowView.set('isSelected', NO);
     }
 
-    for (var i = childViews.get('length') - 2; i >= 0; i--) {
+    for (var i = childViewsLength - 1; i >= 0; i--) {
       childView = childViews.objectAt(i);
       if (SC.isArray(value) ? value.indexOf(childView.get('value')) >= 0 : value === childView.get('value')) {
         childView.set('isSelected', YES);
