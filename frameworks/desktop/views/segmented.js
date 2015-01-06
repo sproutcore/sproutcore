@@ -333,36 +333,40 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   init: function () {
     sc_super();
 
-    var title = this.get('overflowTitle'),
-        toolTip = this.get('overflowToolTip'),
-        icon = this.get('overflowIcon'),
-        overflowView;
-
-    overflowView = this.get('segmentViewClass').create({
-      controlSize: this.get('controlSize'),
-      escapeHTML: false,
-      localize: this.get('localize'),
-      title: title,
-      toolTip: toolTip,
-      icon: icon,
-      isLastSegment: YES,
-      isOverflowSegment: YES,
-      layoutDirection: this.get('layoutDirection'),
-      isVisible: this.get('shouldHandleOverflow')
-    });
-    this.set('overflowView', overflowView);
-
-    this.appendChild(overflowView);
-
+    // Initialize.
+    this.shouldHandleOverflowDidChange();
     this.itemsDidChange();
   },
 
   shouldHandleOverflowDidChange: function () {
+    var overflowView = this.get('overflowView');
+
     if (this.get('shouldHandleOverflow')) {
+      var title = this.get('overflowTitle'),
+          toolTip = this.get('overflowToolTip'),
+          icon = this.get('overflowIcon');
+
+      overflowView = this.get('segmentViewClass').create({
+        controlSize: this.get('controlSize'),
+        escapeHTML: false,
+        localize: this.get('localize'),
+        title: title,
+        toolTip: toolTip,
+        icon: icon,
+        isLastSegment: YES,
+        isOverflowSegment: YES,
+        layoutDirection: this.get('layoutDirection')
+      });
+      this.appendChild(overflowView);
+      this.set('overflowView', overflowView);
+
       // remeasure should show/hide it as needed
       this.invokeLast(this.remeasure);
     } else {
-      this.get('overflowView').set('isVisible', NO);
+      if (overflowView) { // There will not be an overflow view on initialization.
+        this.removeChildAndDestroy(overflowView);
+        this.set('overflowView', null);
+      }
     }
   }.observes('shouldHandleOverflow'),
 
@@ -592,12 +596,12 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         value = this.get('value'),
         overflowView = this.get('overflowView'),
         isHorizontal = this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL,
-        layoutProperty = isHorizontal ? 'width' : 'height',
         visibleDim = isHorizontal ? this.$().width() : this.$().height(),  // The inner width/height of the div
         curElementsDim = 0,
         dimToFit, length, i,
         isOverflowing = NO,
         wantsAutoResize = this.get('shouldAutoResize'),
+        layoutProperty = isHorizontal ? 'width' : 'height',
         canAutoResize = !SC.none(this.getPath('layout.%@'.fmt(layoutProperty))),
         willAutoResize = wantsAutoResize && canAutoResize;
 

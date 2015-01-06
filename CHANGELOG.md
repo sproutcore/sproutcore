@@ -50,7 +50,6 @@ For example, to create a mix binding that concatenates two external properties i
 
     })
 
-
 * *Updated Description* Scale is now a first-class layout property, correctly impacting `frame` and `clippingFrame`. If a view is scaled, the width & height of the frame will be correct as the view appears. For example, a view with layout equal to `{ width: 100, height: 100, scale: 2 }` will report a frame of `{ x: 0, y: 0, width: 200, height: 200, scale: 2 }`. The scale also takes a scaling origin into account as well and as part of this change, there are two new layout properties: `transformOriginX` and `transformOriginY`, which define the percentage (between 0.0 and 1.0) on the respective axis about which the scale transform is applied. These properties affect all transform styles and so can be used to also change the origin of a rotate style.  
 
 ### CHANGES & IMPROVEMENTS
@@ -63,6 +62,10 @@ Added lots of documentation to `SC.Request` (examples), `SC.Query` (local vs. re
 
 This view has been given special behavior when used with SC.View's `transitionIn` plugin support. If the plugin defines `layoutProperties` of either `scale` or `rotate`, then the picker will adjust its transform origin X & Y position to appear to scale or rotate out of the anchor. The result is a very nice effect that picker panes appear to pop out of their anchors.  
 To see it in effect, simply set the `transitionIn` property of the pane to one of `SC.View.SCALE_IN` or `SC.View.POP_IN`.
+
+* SC.SegmentedView  
+
+This view was refactored slightly to remove the special overflow view if `shouldHandleOverflow` is `false` (default). Previously the overflow view was always created and appended even if it was not to be used.  
 
 * The automatically adjusted size component of the layouts of `SC.ListView` and `SC.GridView` have changed to set `height` and `width` instead of `minHeight` and `minWidth` (as it applies). The reason for this change is so that the entire list of items can be GPU accelerated by setting `wantsAcceleratedLayer: true` on the view. GPU accelerated positioning using the `translateX` and `translateY` transforms requires that the view have a fixed position (top & left) and a fixed size (height & width). These views already have a fixed position by default and now by having them adjust their `height` or `width` (depending on the direction), it is possible to accelerate these views by also fixing the other size component (i.e. if the list scrolls vertically, the list will set its height, so the developer needs to set the lists width to a fixed value and then add `wantsAcceleratedLayer: true`).  
 

@@ -157,6 +157,7 @@ var pane;
       itemTitleKey: 'value',
       itemValueKey: 'value',
       itemWidthKey: 'width',
+      shouldHandleOverflow: true,
       layout: { height: 25 }
     })
     .add("5_items,1_sel,widths,overflow", SC.SegmentedView, {
@@ -170,6 +171,7 @@ var pane;
       itemTitleKey: 'value',
       itemValueKey: 'value',
       itemWidthKey: 'width',
+      shouldHandleOverflow: true,
       value: "E",
       layout: { height: 25 }
     })
@@ -185,6 +187,7 @@ var pane;
       itemValueKey: 'value',
       itemWidthKey: 'width',
       itemLayerIdKey: 'layerId',
+      shouldHandleOverflow: true,
       value: "E",
       layout: { height: 25 }
     })
@@ -210,12 +213,14 @@ var pane;
       items: "Item1 Item2 Item3".w(),
       value: "Item2",
       layout: { height: 25, width: 0 },
+      shouldHandleOverflow: true,
       shouldAutoResize: YES
     })
     .add("3_items,1_sel,shouldAutoResize,flexible_layout", SC.SegmentedView, {
       items: "Item1 Item2 Item3".w(),
       value: "Item2",
       layout: { height: 25, left: 0, right: 0 },
+      shouldHandleOverflow: true,
       shouldAutoResize: YES
     });
 
