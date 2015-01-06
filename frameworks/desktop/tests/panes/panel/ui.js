@@ -116,27 +116,43 @@ test("Verify SC.PanelPane#isModal", function() {
   SC.run(function () {
     pane.destroy();
   });
-
-  // Tests an edge case where isModal turns YES during a transition out.
-  pane = SC.PanelPane.create({
-    contentView: SC.View,
-    modalPane: SC.ModalPane.create(),
-    isModal: NO,
-    transitionOut: SC.View.FADE_OUT,
-    transitionOutOptions: { duration: 0.1 }
-  });
-
-  SC.run(function () {
-    pane.append();
-
-    pane.remove(); // trigger transition and then willRemoveFromDocument
-  });
-  pane.set('isModal', YES);
-  equals(pane.getPath('modalPane.viewState'), SC.CoreView.UNRENDERED, "Panel pane does not add modal pane when isModal becomes YES while transitioning out");
-
-  SC.run(function () {
-    pane.destroy();
-
-    equals(pane.get('viewState'), SC.CoreView.UNRENDERED);
-  });
 });
+
+test("Should changing isModal when a pane is transitioning out not append the modal pane?");
+/*
+  Previously, if the panel pane was not shown it would simply not append the modal pane to it. Which
+  causes issues, because what if a pane is hidden and then isModal changes to true? When the view
+  becomes visible, isModal will still be true, but there won't be a modal view. This would need to
+  be more minutely handled in the pane (i.e. each time it re-shows it has to check if isModal is
+  true and if it does have a modal pane or not) or more minutely handled by the developer (i.e. when
+  they are transitioning views out they should take care not to change isModal until the view is
+  done transitioning). We should probably do the former, but it opens a bigger question, how should
+  all views respond when they are modified in transitioning out states?
+
+// , function () {
+
+//   // Tests an edge case where isModal turns YES during a transition out.
+//   pane = SC.PanelPane.create({
+//     contentView: SC.View,
+//     modalPane: SC.ModalPane.create(),
+//     isModal: NO,
+//     transitionOut: SC.View.FADE_OUT,
+//     transitionOutOptions: { duration: 0.1 }
+//   });
+
+//   SC.run(function () {
+//     pane.append();
+
+//     pane.remove(); // trigger transition and then willRemoveFromDocument
+//   });
+
+//   pane.set('isModal', YES);
+
+//   equals(pane.getPath('modalPane.viewState'), SC.CoreView.UNRENDERED, "Panel pane does not add modal pane when isModal becomes YES while transitioning out");
+
+//   SC.run(function () {
+//     pane.destroy();
+
+//     equals(pane.get('viewState'), SC.CoreView.UNRENDERED);
+//   });
+// });
