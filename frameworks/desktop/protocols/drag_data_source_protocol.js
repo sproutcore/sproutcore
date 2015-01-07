@@ -5,16 +5,22 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('system/drag') ;
+sc_require('system/drag');
 
-/**
-  @namespace
+/** @namespace
+  The `SC.DragDataSourceProtocol` protocol defines the properties and methods that you may implement
+  in your drag source objects in order to access additional functionality of SproutCore's drag
+  support.
 
-  This protocol implements a dynamic data source for a drag operation. You can
-  return a set of allowed data types and then the method will be used to 
-  actually get data in that format when requested.
+  This protocol implements a dynamic data source for a drag operation. You should use it to return a
+  set of allowed data types and then the method will be used to actually get data in that format
+  when requested.
+
+  *Note: Do not mix `SC.DragDataSourceProtocol` into your classes. As a protocol, it exists only for
+  reference sake. You only need define any of the properties or methods listed below in order to use
+  this protocol.*
 */
-SC.DragDataSource = {
+SC.DragDataSourceProtocol = {
 
   /**
     Implement this property as an array of data types you want to support
@@ -28,11 +34,11 @@ SC.DragDataSource = {
   /**
     Implement this method to return the data in the format passed.  Return
     null if the requested data type cannot be generated.
-    
+
     @param {SC.Drag} drag The Drag instance managing this drag.
-    @param {Object} dataType The proposed dataType to return.  This will 
+    @param {Object} dataType The proposed dataType to return.  This will
       always be one of the data types declared in dragDataTypes.
-    
+
     @returns The data object for the specified type
   */
   dragDataForType: function(drag, dataType) {

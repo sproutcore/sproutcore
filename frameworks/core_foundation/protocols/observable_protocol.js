@@ -5,16 +5,19 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/**
-  The SC.ObservableProtocol defines optional methods you can implement on your
-  objects.  They will be used if defined but are not required for observing to
-  work.
+/** @namespace
+  The `SC.ObservableProtocol` protocol defines the properties and methods that you may implement
+  in your `SC.Observable` (i.e. `SC.Object`) subclasses in order to access additional observer
+  functionality. They will be used if defined but are not required for observing to work.
+
+  *Note: Do not mix `SC.ObservableProtocol` into your classes. As a protocol, it exists only for
+  reference sake. You only need define any of the properties or methods listed below in order to use
+  this protocol.*
 */
 SC.ObservableProtocol = {
 
   /**
-    Generic property observer called whenever a property on the receiver
-    changes.
+    Generic property observer called whenever a property on the receiver changes.
 
     If you need to observe a large number of properties on your object, it
     is sometimes more efficient to implement this observer only and then to

@@ -2768,7 +2768,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
   },
 
   /**
-    Implements the SC.DropTarget interface.  The default implementation will
+    Implements the SC.DropTargetProtocol interface.  The default implementation will
     consult the collection view delegate, if you implement those methods.
 
     This method is called once when the drag enters the view area.  It's
@@ -2914,7 +2914,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
   },
 
   /**
-    Implements the SC.DropTarget interface.  The default implementation will
+    Implements the SC.DropTargetProtocol interface.  The default implementation will
     determine the drop location and then consult the collection view delegate
     if you implement those methods.  Otherwise it will handle reordering
     content on its own.
@@ -2948,7 +2948,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
   },
 
   /**
-    Implements the SC.DropTarget protocol.  Hides any visible insertion
+    Implements the SC.DropTargetProtocol protocol.  Hides any visible insertion
     point and clears some cached values.
   */
   dragEnded: function () {
@@ -2957,7 +2957,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
   },
 
   /**
-    Implements the SC.DropTarget protocol.
+    Implements the SC.DropTargetProtocol protocol.
 
     @returns {Boolean} YES
   */
@@ -2966,7 +2966,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
   },
 
   /**
-    Implements the SC.DropTarget protocol. Consults the collection view
+    Implements the SC.DropTargetProtocol protocol. Consults the collection view
     delegate to actually perform the operation unless the operation is
     reordering content.
 

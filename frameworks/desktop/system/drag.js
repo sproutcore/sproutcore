@@ -108,7 +108,7 @@ SC.View.reopen(
     - `dataSource` --  Optional object that will provide the data for the drag to
       be consumed by the drop target.  If you do not pass this parameter or the
       data hash, then the source object will be used if it implements the
-      SC.DragDataSource protocol.
+      SC.DragDataSourceProtocol protocol.
 
     - `anchorView` -- if you pass this optional view, then the drag will only be
       allowed to happen within this view.  The ghostView will actually be added
@@ -294,7 +294,7 @@ SC.Drag = SC.Object.extend(
     a drag dynamically.  The data source can and often is the drag source
     object itself.
 
-    Data Source objects must comply with the `SC.DragDataSource` interface.  If
+    Data Source objects must comply with the `SC.DragDataSourceProtocol` interface.  If
     you do not want to implement this interface, you can provide the data
     directly with the data property.
 
@@ -303,7 +303,7 @@ SC.Drag = SC.Object.extend(
     these properties.
 
     @readOnly
-    @type SC.DragDataSource
+    @type SC.DragDataSourceProtocol
   */
   dataSource: null,
 
@@ -1054,7 +1054,7 @@ SC.Drag.mixin(
     isDropTarget property set to `YES`.  You generally will not need to call it
     yourself.
 
-    @param {SC.View} target a view implementing the SC.DropTarget protocol
+    @param {SC.View} target a view implementing the SC.DropTargetProtocol protocol
   */
   addDropTarget: function (target) {
     this._dropTargets[SC.guidFor(target)] = target;

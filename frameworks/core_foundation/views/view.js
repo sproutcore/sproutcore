@@ -2084,7 +2084,8 @@ SC.CoreView.unload = function () {
     implement mouseDown (and not return NO) in order to receive mouseUp.
 
   SproutCore implements a higher-level API for handling in-application dragging and dropping.
-  See `SC.Drag`, `SC.DragSource`, `SC.DragDataSource`, and `SC.DropTarget` for more.
+  See `SC.Drag`, `SC.DragSourceProtocol`, `SC.DragDataSourceProtocol`, and `SC.DropTargetProtocol`
+  for more.
 
   Data-drag events
   ----

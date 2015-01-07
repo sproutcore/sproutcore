@@ -6,11 +6,16 @@
 
 
 /** @namespace
-  This protocol defines the allowable transition plugin methods.
+  The `SC.SwapTransitionProtocol` protocol defines the properties and methods that you may
+  implement in your custom swap transition plugins. All methods are optional, but a plugin is
+  expected to use at least one of the methods.
 
-  SC.ContainerView uses transition plugins to setup, execute and cleanup the
-  swapping between views and expects the given transition plugin object
-  to implement the methods in this protocol.
+  SC.ContainerView uses transition plugins to setup, execute and cleanup the swapping between views
+  and expects the given transition plugin object to implement the methods in this protocol.
+
+  *Note: Do not mix `SC.SwapTransitionProtocol` into your classes. As a protocol, it exists only
+  for reference sake. You only need define any of the properties or methods listed below in order to
+  use this protocol.*
 */
 SC.SwapTransitionProtocol = {
 

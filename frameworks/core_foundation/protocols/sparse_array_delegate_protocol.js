@@ -6,18 +6,22 @@
 // ==========================================================================
 
 /** @namespace
+  The `SC.SparseArrayDelegateProtocol` protocol defines the properties and methods that you may
+  implement in your sparse array delegate objects.
 
-  Delegate that provides data for a sparse array.  If you set the delegate for
-  a sparse array to an object that implements one or more of these methods,
-  they will be invoked by the sparse array to fetch data or to update the
-  array content as needed.
+  An object that implements this protocol may act as a delegate that provides data for a sparse
+  array.  The delegate is invoked by the sparse array to fetch data or to update the array content
+  as needed.
 
-  Your object does not need to implement all of these methods, but it should
-  at least implement the sparseArrayDidRequestIndex() method.
+  Your object does not need to implement all of these methods, but it should at least implement the `sparseArrayDidRequestIndex()` method.
+
+  *Note: Do not mix `SC.SparseArrayDelegateProtocol` into your classes. As a protocol, it exists
+  only for reference sake. You only need define any of the properties or methods listed below in
+  order to use this protocol.*
 
   @since SproutCore 1.0
 */
-SC.SparseArrayDelegate = {
+SC.SparseArrayDelegateProtocol = {
 
   /**
     Invoked when an object requests the length of the sparse array and the
