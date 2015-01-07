@@ -7,7 +7,7 @@
 
 /** @namespace
   The `SC.ObservableProtocol` protocol defines the properties and methods that you may implement
-  in your `SC.Observable` (i.e. `SC.Object`) subclasses in order to access additional observer
+  in your `SC.Observable` consumers (i.e. `SC.Object`) in order to access additional observer
   functionality. They will be used if defined but are not required for observing to work.
 
   *Note: Do not mix `SC.ObservableProtocol` into your classes. As a protocol, it exists only for
