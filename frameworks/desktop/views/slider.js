@@ -40,7 +40,7 @@ SC.SliderView = SC.View.extend(SC.Control,
   /**
     The minimum value of the slider.
 
-    @type {Number}
+    @type Number
     @default 0
   */
   minimum: 0,
@@ -58,7 +58,7 @@ SC.SliderView = SC.View.extend(SC.Control,
   /**
     The maximum value of the slider bar.
 
-    @type {Number}
+    @type Number
     @default 1
   */
   maximum: 1,
@@ -78,7 +78,7 @@ SC.SliderView = SC.View.extend(SC.Control,
 
     All values will be rounded to this step size when displayed.
 
-    @type {Number}
+    @type Number
     @default 0.1
   */
   step: 0.1,
@@ -87,8 +87,8 @@ SC.SliderView = SC.View.extend(SC.Control,
     When set to true, this draws and positions an element for each step, giving
     your theme the opportunity to show a mark at each step.
 
-    @type {Boolean}
-    @default {false}
+    @type Boolean
+    @default false
   */
   markSteps: false,
 
@@ -97,8 +97,8 @@ SC.SliderView = SC.View.extend(SC.Control,
     value. Set to false to prevent a slider in a scroll view from hijacking scroll
     events mid-scroll, for example.
 
-    @type {Boolean}
-    @default {true}
+    @type Boolean
+    @default true
   */
   updateOnScroll: true,
 
@@ -110,7 +110,7 @@ SC.SliderView = SC.View.extend(SC.Control,
   displayProperties: ['displayValue', 'markSteps'],
 
   /** @private
-   @property
+   @type Number
    The raw, unchanged value to be provided to screen readers and the like.
   */
   ariaValue: function() {
@@ -126,7 +126,7 @@ SC.SliderView = SC.View.extend(SC.Control,
   /*
     The value, converted to a percent out of 100 between maximum and minimum.
 
-    @property
+    @type Number
     @readonly
   */
   displayValue: function() {
@@ -137,9 +137,9 @@ SC.SliderView = SC.View.extend(SC.Control,
     If a nonzero step is specified, this property contains an array of each step's value between
     min and max (inclusive).
 
-    @property
+    @type Array
+    @default null
     @readonly
-    @type {Array|null}
   */
   steps: function() {
     var step = this.get('step');
@@ -163,9 +163,9 @@ SC.SliderView = SC.View.extend(SC.Control,
     expressed as a fraction between 0 and 1 (inclusive). You can use these values to generate
     and position labels for each step, for example.
 
-    @property
+    @type Array
+    @default null
     @readonly
-    @type {Array|null}
   */
   stepPositions: function() {
     var steps = this.get('steps');
@@ -181,7 +181,7 @@ SC.SliderView = SC.View.extend(SC.Control,
     return ret;
   }.property('steps').cacheable(),
 
-  // Given a particular value, returns the percentage value.
+  /** @private Given a particular value, returns the percentage value. */
   _displayValueForValue: function(value) {
     var min = this.get('minimum'),
         max = this.get('maximum'),

@@ -36,8 +36,8 @@ SC.SheetPane = SC.PanelPane.extend(
 
     /**
      @type {Array}
-     @default {['sc-sheet']}
-     @see {SC.View#classNames}
+     @default ['sc-sheet']
+     @see SC.View#classNames
      */
     classNames: ['sc-sheet'],
 
