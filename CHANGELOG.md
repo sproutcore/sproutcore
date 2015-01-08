@@ -54,12 +54,13 @@ For example, to create a mix binding that concatenates two external properties i
 
 ### CHANGES & IMPROVEMENTS
 
-* Documentation
-** Added lots of documentation to `SC.Request` (examples), `SC.Query` (local vs. remote) and `SC.DateTime` (`adjust` and `advance`).   
-** Cleaned up documentation of all protocols, including a warning not to mix in protocols and fixed some problems that prevented some protocols from being properly generated on docs.sproutcore.com.  
-** Added `SC.ObjectMixinProtocol` with documentation on using mixins with `SC.Object` as well as the methods `initMixin` and  `destroyMixin` that are supported.  
-** Added documentation on touch event handling to `SC.ResponderProtocol` (i.e. the protocol that may be implemented by `SC.Responder` subclasses like `SC.View`).  
-** Added/improved documentation on `SC.Gesturable` mixin.  
+* Documentation  
+
+- Added lots of documentation to `SC.Request` (examples), `SC.Query` (local vs. remote) and `SC.DateTime` (`adjust` and `advance`).   
+- Cleaned up documentation of all protocols, including a warning not to mix in protocols and fixed some problems that prevented some protocols from being properly generated on docs.sproutcore.com.  
+- Added `SC.ObjectMixinProtocol` with documentation on using mixins with `SC.Object` as well as the methods `initMixin` and  `destroyMixin` that are supported.  
+- Added documentation on touch event handling to `SC.ResponderProtocol` (i.e. the protocol that may be implemented by `SC.Responder` subclasses like `SC.View`).  
+- Added/improved documentation on `SC.Gesturable` mixin.  
 
 * SC.PickerPane  
 
