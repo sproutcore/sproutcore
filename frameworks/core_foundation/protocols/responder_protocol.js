@@ -75,6 +75,14 @@ SC.ResponderProtocol = {
   */
   mouseMoved: function(evt) {},
 
+  /**
+     Called when a contextmenu event is triggered. Used to disable contextmenu
+     per view.
+
+     @param evt {SC.Event} the contextmenu event
+     @returns {void}
+   */
+  contextMenu: function(evt) {},
 
   /**
     Called when a selectstart event in IE is triggered. **ONLY IE**
@@ -85,17 +93,78 @@ SC.ResponderProtocol = {
   */
   selectStart: function(evt) {},
 
-  /**
-     Called when a contextmenu event is triggered. Used to disable contextmenu
-     per view.
+  // .......................................................................
+  // Touch Event Handlers
+  //
 
-     @param evt {SC.Event} the contextmenu event
-     @returns {void}
-   */
-  contextMenu: function(evt) {},
+  /**
+    Called when a touch begins. Capturing a touch is a special case behavior that allows for the
+    nesting of touch capable views. In some situations, an outer view may want to capture a touch
+    *before* the inner view acts on it. For example, a container view may want to act on swipes or
+    pinches, while the inner view may only respond to taps. If the normal event path was followed,
+    the inner view would get the `touchStart` event and by accepting it, would inadvertently prevent
+    the outer view from being able to act on it.
+
+    For this reason, when a touch begins, each view from the top-down has a chance to capture a
+    touch first, before it is passed to the bottom-most target view. For example, SC.ScrollView
+    captures touches so that it can determine if the touch is the beginning of a swipe or pinch. If
+    the touch does become one of these gestures, SC.ScrollView can act on it. However, if the touch
+    doesn't become one of these gestures, SC.ScrollView understands that it needs to pass the touch
+    to its children.
+
+    Therefore, implementors of `captureTouch` are expected to release the touch if they won't use it
+    by calling the touch's `captureTouch` method and passing themself as the new starting point
+    (capturing will continue from the implementor onward as it would have if the implementor hadn't
+    temporarily captured it).
+
+    Note, `captureTouch` is only meaningful for container type views where their children may
+    handle touches as well. For most controls that want to handle touch, there is no reason to
+    capture a touch, because they don't have any children. For these views, simply use the
+    `touchStart`, `touchesDragged`, `touchCancelled` and `touchEnd` methods.
+
+    @param touch {SC.Touch} the touch
+    @returns {Boolean} YES to claim the touch and receive touchStart, NO otherwise
+    @see SC.Touch#captureTouch
+  */
+  captureTouch: function (touch) {},
+
+  /**
+    Called when a touch previously claimed by returning `true` from `touchStart` is cancelled.
+
+    @param touch {SC.Touch} the touch
+    @returns {void}
+  */
+  touchCancelled: function (touch) {},
+
+  /**
+    Called when an active touch moves. The touches array contains all of the touches that this view
+    has claimed by returning `true` from `touchStart`.
+
+    @param evt {SC.Event} the event
+    @param touches {Array} the touches
+    @returns {void}
+  */
+  touchesDragged: function (evt, touches) {},
+
+  /**
+    Called when a touch previously claimed by returning `true` from `touchStart` ends.
+
+    @param touch {SC.Touch} the touch
+    @returns {void}
+  */
+  touchEnd: function (touch) {},
+
+  /**
+    Called when a touch begins. You must return `YES` to receive `touchesDragged` and `touchEnd` in
+    the future.
+
+    @param touch {SC.Touch} the touch
+    @returns {Boolean} YES to receive additional touch events, NO otherwise
+  */
+  touchStart: function (touch) {},
 
   // .......................................................................
-  // Event Handlers
+  // Keyboard Event Handlers
   //
   // These methods are called by the input manager in response to keyboard
   // events.  Most of these methods are defined here for you, but not actually
