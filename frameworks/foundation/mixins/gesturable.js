@@ -86,7 +86,7 @@ SC.Gesturable = {
   */
   concatenatedProperties: ['gestures'],
 
-  /*
+  /**
     The gestures that the view will support. This property must be set on the consumer of
     `SC.Gesturable` before it is initialized.
 
@@ -94,7 +94,6 @@ SC.Gesturable = {
     pre-built gestures or create your own. If you create your own, you can use a property name
     in the list of gestures to refer to the actual gesture class, similar to how the childViews
     array works. For example,
-
 
         gestures: [SC.PinchGesture, 'mySwipeGesture'],
 
@@ -106,9 +105,9 @@ SC.Gesturable = {
         }),
 
     Note that `gestures` is a *concatenated property*, which means that it will not be overwritten
-    by subclasses. So for example, if the base class lists gestures as [SC.PinchGesture] and its
-    subclass lists gestures as [SC.TapGesture], the actual gestures supported by the subclass will
-    be [SC.PinchGesture, SC.TapGesture].
+    by subclasses. So for example, if the base class lists gestures as `[SC.PinchGesture]` and its
+    subclass lists gestures as `[SC.TapGesture]`, the actual gestures supported by the subclass will
+    be `[SC.PinchGesture, SC.TapGesture]`.
 
     @type Array
     @default null
