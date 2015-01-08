@@ -30,10 +30,10 @@ SC.TapGesture = SC.Gesture.extend(
 
   /** @private */
   _tapCount: null,
-  
+
   /** @private */
   _candidateTouch: null,
-  
+
   /** @private */
   _eventTimer: null,
 
