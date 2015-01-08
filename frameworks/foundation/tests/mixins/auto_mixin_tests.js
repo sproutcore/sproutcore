@@ -1,6 +1,5 @@
 // ==========================================================================
-// Project:   Showcase
-// Copyright: ©2013 7x7 Software, Inc.
+// Project:   SproutCore
 // License:   Licensed under MIT license
 // ==========================================================================
 /*globals module, test, ok, equals */

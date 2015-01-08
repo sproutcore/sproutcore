@@ -550,7 +550,7 @@ SC.State = SC.Object.extend(
 
     @param {String} name a unique name for the given substate.
     @param {SC.State} state a class that derives from `SC.State`
-    @param {Hash} [attr] liternal to be applied to the substate
+    @param {Object} [attr] literal to be applied to the substate
     @returns {SC.State} an instance of the given state class
   */
   addSubstate: function(name, state, attr) {
