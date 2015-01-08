@@ -79,51 +79,92 @@
 */
 SC.Gesturable = {
 
-  concatenatedProperties: ["gestures"],
-  gestures: [],
-  
   /**
-    @private
-    When SC.Gesturable initializes, any gestures on the view must be instantiated.
+    @type Array
+    @default ['gestures']
+    @see SC.Object#concatenatedProperties
+  */
+  concatenatedProperties: ['gestures'],
+
+  /*
+    The gestures that the view will support. This property must be set on the consumer of
+    `SC.Gesturable` before it is initialized.
+
+    These gestures should be objects that extend the `SC.Gesture` class. You can use SproutCore's
+    pre-built gestures or create your own. If you create your own, you can use a property name
+    in the list of gestures to refer to the actual gesture class, similar to how the childViews
+    array works. For example,
+
+
+        gestures: [SC.PinchGesture, 'mySwipeGesture'],
+
+        // Specifying the Gesture by property name allows you to configure it.
+        mySwipeGesture: SC.SwipeGesture.extend({
+          direction: SC.SWIPE_VERTICAL,
+          startDistance: 3,
+          swipeDistance: 20
+        }),
+
+    Note that `gestures` is a *concatenated property*, which means that it will not be overwritten
+    by subclasses. So for example, if the base class lists gestures as [SC.PinchGesture] and its
+    subclass lists gestures as [SC.TapGesture], the actual gestures supported by the subclass will
+    be [SC.PinchGesture, SC.TapGesture].
+
+    @type Array
+    @default null
+  */
+  gestures: null,
+
+  /**
+    When SC.Gesturable initializes, any gestures named on the view are instantiated.
+
+    @see SC.ObjectMixinProtocol#initMixin
   */
   initMixin: function() {
+    //@if(debug)
+    if (SC.none(this.gestures)) {
+      SC.error("Developer Error: When mixing in SC.Gesturable, you must define a list of gestures to use.");
+    }
+    //@endif
     this.createGestures();
   },
-  
-  /**
-    @private
-    Instantiates the gestures.
-  */
+
+  /** @private  Instantiates the gestures. */
   createGestures: function() {
-    var gestures = this.get("gestures"), idx, len = gestures.length, g, _g = [];
+    var gestures = this.get("gestures"),
+        len = gestures.length,
+        instantiatedGestures = [],
+        idx;
 
     // loop through all gestures
     for (idx = 0; idx < len; idx++) {
+      var gesture;
+
       // get the proper gesture
       if (SC.typeOf(gestures[idx]) === SC.T_STRING) {
-        g = this.get(gestures[idx]);
+        gesture = this.get(gestures[idx]);
       } else {
-        g = gestures[idx];
+        gesture = gestures[idx];
       }
 
       // if it was not found, well, that's an error.
-      if (!g) {
-        throw new Error("Could not find gesture named '" + gestures[idx] + "' on view.");
+      if (!gesture) {
+        throw new Error("Developer Error: Could not find gesture named '" + gestures[idx] + "' on view.");
       }
-      
+
       // if it is a class, instantiate (it really ought to be a class...)
-      if (g.isClass) {
-        g = g.create({
+      if (gesture.isClass) {
+        gesture = gesture.create({
           view: this
         });
       }
-      
+
       // and set the gesture instance and add it to the array.
-      if (SC.typeOf(gestures[idx]) === SC.T_STRING) this[gestures[idx]] = g;
-      _g.push(g);
+      if (SC.typeOf(gestures[idx]) === SC.T_STRING) this[gestures[idx]] = gesture;
+      instantiatedGestures.push(gesture);
     }
-    
-    this.set("gestures", _g);
+
+    this.set("gestures", instantiatedGestures);
   },
 
   /**
