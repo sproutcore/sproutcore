@@ -87,34 +87,51 @@ SC.RESIZE_AUTOMATIC = 'sc-automatic-resize';
 SC.SplitView = SC.View.extend({
   /**@scope SC.SplitView.prototype*/
 
-  /** @private */
-  classNames: ['sc-split-view'],
-
-  /** @private */
+  /**
+    @type Array
+    @default ['topLeftView', 'bottomRightView']
+    @readonly
+    @see SC.View#childViews
+  */
   childViews: ['topLeftView', 'bottomRightView'],
 
-  // Used by the splitView computed property to find the nearest SplitView.
+  /**
+    @type Array
+    @default ['sc-split-view']
+    @readonly
+    @see SC.View#classNames
+   */
+  classNames: ['sc-split-view'],
+
+  /**
+    Used by the splitView computed property to find the nearest SplitView.
+
+    @type Boolean
+    @default true
+    @readonly
+   */
   isSplitView: YES,
 
   /**
-   The class of view to create for the divider views. Override this to use a subclass of SC.SplitDividerView,
-   or to implment your own.
+   The class of view to create for the divider views. Override this to use a subclass of
+   SC.SplitDividerView, or to implment your own.
 
-   @type {SC.View}
+   @type SC.View
    @default SC.SplitDividerView
   */
   splitDividerView: SC.SplitDividerView,
 
   /**
-   * Determines whether the SplitView should lay out its children
-   * horizontally or vertically.
-   *
-   * Possible values:
-   *
-   * - SC.LAYOUT_HORIZONTAL: side-by-side
-   * - SC.LAYOUT_VERTICAL: on top of each other
-   *
-   * @type LayoutDirection
+   Determines whether the SplitView should lay out its children
+   horizontally or vertically.
+
+   Possible values:
+
+     - SC.LAYOUT_HORIZONTAL: side-by-side
+     - SC.LAYOUT_VERTICAL: on top of each other
+
+   @type LayoutDirection
+   @default SC.LAYOUT_HORIZONTAL
   */
   layoutDirection: SC.LAYOUT_HORIZONTAL,
 
@@ -125,7 +142,7 @@ SC.SplitView = SC.View.extend({
    * If NO, the SplitView will decide its own size based on its children.
    *
    * @type Boolean
-   * @default YES
+   * @default true
   */
   shouldResizeChildrenToFit: YES,
 
@@ -134,7 +151,8 @@ SC.SplitView = SC.View.extend({
    * This allows the cursor to be used even if the user drags "too far",
    * past the child's own boundaries.
    *
-   * @type {String}
+   * @type String
+   * @default null
   */
   splitChildCursorStyle: null,
 
@@ -542,7 +560,7 @@ SC.SplitView = SC.View.extend({
       var isResizable = this.invokeDelegateMethod(del, 'splitViewShouldResizeChildToFit', this, child);
       if (isResizable === useResizable) {
         // if outOfSize === -1 then we are aggressively resizing (not resizing proportionally)
-        if (outOfSize === -1) size += diff
+        if (outOfSize === -1) size += diff;
         else size += (size / outOfSize) * diff;
 
         size = Math.round(size);

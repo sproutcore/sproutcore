@@ -47,7 +47,7 @@
   rgba values stay within the device's gamut (0 to 255 on a normal screen, and 0 to 1
   for alpha). For example, adding white to white will result in r, g and b values of
   510, a nonsensical value. (The `cssText` property will, however, correctly clamp the
-  component values, and the color will output `#FFFFFF`.) This behavior is required
+  component values, and the color will output #FFFFFF.) This behavior is required
   for operations such as interpolating between colors (see "SC.Color and SC.View"
   below); it also gives SC.Color more predictable math, where A + B - B = A, even if
   the intermediate (A + B) operation results in underlying values outside of the normal
@@ -133,7 +133,7 @@
   ### Edge Case: Supporting Alpha in IE
 
   Supporting the alpha channel in older versions of IE requires a little extra work.
-  The bindable `cssText` property will return valid ARGB (e.g. `#99FFFFFF`) when it
+  The bindable `cssText` property will return valid ARGB (e.g. #99FFFFFF) when it
   detects that it's in an older version of IE which requires it, but unfortunately you
   can't simply plug that value into `background-color`. The following code will detect
   this case and provide the correct CSS snippet:
