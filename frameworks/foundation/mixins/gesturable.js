@@ -76,6 +76,7 @@
       })
 
   @extends SC.ObjectMixinProtocol
+  @extends SC.ResponderProtocol
 */
 SC.Gesturable = {
 
@@ -216,10 +217,10 @@ SC.Gesturable = {
   gestureTouchStart: function(touch) {
     touch.isInteresting = 0;
 
-    var gestures = this.get("gestures"), idx, len = gestures.length, g;
+    var gestures = this.get("gestures"), idx, len = gestures.length;
     for (idx = 0; idx < len; idx++) {
-      g = gestures[idx];
-      g.unassignedTouchDidStart(touch);
+      var gesture = gestures[idx];
+      gesture.unassignedTouchDidStart(touch);
     }
   },
 
@@ -231,10 +232,10 @@ SC.Gesturable = {
     to the gesture.
   */
   gestureTouchesDragged: function(evt, touches) {
-    var gestures = this.get("gestures"), idx, len = gestures.length, g;
+    var gestures = this.get("gestures"), idx, len = gestures.length;
     for (idx = 0; idx < len; idx++) {
-      g = gestures[idx];
-      g.unassignedTouchesDidChange(evt, touches);
+      var gesture = gestures[idx];
+      gesture.unassignedTouchesDidChange(evt, touches);
     }
   },
 
@@ -246,10 +247,10 @@ SC.Gesturable = {
     been sent directly to the gesture, bypassing this view.
   */
   gestureTouchEnd: function(touch) {
-    var gestures = this.get("gestures"), idx, len = gestures.length, g;
+    var gestures = this.get("gestures"), idx, len = gestures.length;
     for (idx = 0; idx < len; idx++) {
-      g = gestures[idx];
-      g.unassignedTouchDidEnd(touch);
+      var gesture = gestures[idx];
+      gesture.unassignedTouchDidEnd(touch);
     }
   }
 };

@@ -143,6 +143,13 @@ SC.Touch = function(touch, touchContext) {
 };
 
 SC.Touch.prototype = {
+  //@if(debug)
+  // Debug-mode only.
+  toString: function () {
+    return "SC.Touch (%@)".fmt(this.identifier);
+  },
+  //@endif
+
   /**@scope SC.Touch.prototype*/
 
   /** @private
