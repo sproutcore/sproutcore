@@ -106,6 +106,10 @@
 
 */
 SC.Gesture = SC.Object.extend({
+
+  /** @private Tracks when the gesture is active or not. */
+  _sc_isActive: false,
+
   /**
     The gesture's name. When calling events on the owning SC.View, this name will
     be prefixed to the methods. For instance, if the method to be called is
@@ -174,11 +178,16 @@ SC.Gesture = SC.Object.extend({
     event on the SC.View.
   */
   start: function() {
-    if (!this.get("isActive")) {
-      this.set("isActive", YES);
+    if (!this._sc_isActive) {
+      this._sc_isActive = true;
 
-      var args = SC.$A(arguments);
-      args.unshift(this);
+      // Fast arguments access. Don't materialize the `arguments` object, it is costly.
+      var argumentsLength = arguments.length,
+          args = new Array(argumentsLength + 1);
+
+      // Unshift this to the front of arguments.
+      args[0] = this;
+      for (var i = 0, len = argumentsLength; i < len; i++) { args[i + 1] = arguments[i]; }
 
       var act = this.name + "Start";
       if (this.view[act]) this.view[act].apply(this.view, args);
@@ -193,11 +202,16 @@ SC.Gesture = SC.Object.extend({
     instance itself, will be passed to the appropriate gesture event on the SC.View.
   */
   end: function() {
-    if (this.get("isActive")) {
-      this.set("isActive", NO);
+    if (this._sc_isActive) {
+      this._sc_isActive = false;
 
-      var args = SC.$A(arguments);
-      args.unshift(this);
+      // Fast arguments access. Don't materialize the `arguments` object, it is costly.
+      var argumentsLength = arguments.length,
+          args = new Array(argumentsLength + 1);
+
+      // Unshift this to the front of arguments.
+      args[0] = this;
+      for (var i = 0, len = argumentsLength; i < len; i++) { args[i + 1] = arguments[i]; }
 
       var act = this.name + "End";
       if (this.view[act]) this.view[act].apply(this.view, args);
@@ -212,9 +226,14 @@ SC.Gesture = SC.Object.extend({
     the appropriate method on the SC.View.
   */
   change: function() {
-    if (this.get('isActive')) {
-      var args = SC.$A(arguments);
-      args.unshift(this);
+    if (this._sc_isActive) {
+      // Fast arguments access. Don't materialize the `arguments` object, it is costly.
+      var argumentsLength = arguments.length,
+          args = new Array(argumentsLength + 1);
+
+      // Unshift this to the front of arguments.
+      args[0] = this;
+      for (var i = 0, len = argumentsLength; i < len; i++) { args[i + 1] = arguments[i]; }
 
       var act = this.name + "Changed";
       if (this.view[act]) this.view[act].apply(this.view, args);
@@ -232,11 +251,16 @@ SC.Gesture = SC.Object.extend({
     appropriate method on the SC.View.
   */
   cancel: function(){
-    if (this.get('isActive')) {
-      this.set('isActive', NO);
+    if (this._sc_isActive) {
+      this._sc_isActive = false;
 
-      var args = SC.$A(arguments);
-      args.unshift(this);
+      // Fast arguments access. Don't materialize the `arguments` object, it is costly.
+      var argumentsLength = arguments.length,
+          args = new Array(argumentsLength + 1);
+
+      // Unshift this to the front of arguments.
+      args[0] = this;
+      for (var i = 0, len = argumentsLength; i < len; i++) { args[i + 1] = arguments[i]; }
 
       var act = this.name + "Cancelled";
       if (this.view[act]) this.view[act].apply(this.view, args);
@@ -257,22 +281,33 @@ SC.Gesture = SC.Object.extend({
     automatically notified whenever any swipe has occurred.
   */
   trigger: function() {
-    var args = SC.$A(arguments);
-    args.unshift(this);
+    // Fast arguments access. Don't materialize the `arguments` object, it is costly.
+    var argumentsLength = arguments.length,
+        args = new Array(argumentsLength + 1);
+
+    // Unshift this to the front of arguments.
+    args[0] = this;
+    for (var i = 0, len = argumentsLength; i < len; i++) { args[i + 1] = arguments[i]; }
 
     var act = this.name;
     if (this.view[act]) this.view[act].apply(this.view, args);
   },
 
   /**
-    Takes possession of a touch. This does not take effect immediately; it takes effect after
-    the run loop finishes to prevent it from being called during another makeTouchResponder.
+    Takes possession of a touch.
 
     This is called automatically when you return YES from touchIsInGesture.
   */
   take: function(touch) {
-    touch.isTaken = YES; // because even changing responder won't prevent it from being used this cycle.
-    if (SC.none(touch.touchResponder) || touch.touchResponder !== this) touch.makeTouchResponder(this, YES);
+    if (!touch.isTaken) {
+      touch.isTaken = YES; // because even changing responder won't prevent it from being used this cycle.
+      if (SC.none(touch.touchResponder) || touch.touchResponder !== this) touch.makeTouchResponder(this, YES);
+    }
+    //@if(debug)
+    else {
+      SC.warn("Developer Warning: A gesture tried to take a touch that was already taken: %@".fmt(this));
+    }
+    //@endif
   },
 
   /**
@@ -283,8 +318,15 @@ SC.Gesture = SC.Object.extend({
     touchesDragged or such.
   */
   release: function(touch) {
-    touch.isTaken = NO;
-    if (touch.nextTouchResponder) touch.makeTouchResponder(touch.nextTouchResponder);
+    if (touch.isTaken) {
+      touch.isTaken = NO;
+      if (touch.nextTouchResponder) touch.makeTouchResponder(touch.nextTouchResponder);
+    }
+    //@if(debug)
+    else {
+      SC.warn("Developer Warning: A gesture tried to release a touch that was not taken: %@".fmt(this));
+    }
+    //@endif
   },
 
   /**
