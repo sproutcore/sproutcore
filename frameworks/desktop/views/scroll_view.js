@@ -43,7 +43,7 @@ SC.SCROLL = {
 
     @static
     @type Number
-    @default 5
+    @default 3
   */
   SCALE_GESTURE_THRESHOLD: 3
 
