@@ -62,6 +62,14 @@ For example, to create a mix binding that concatenates two external properties i
 - Added documentation on touch event handling to `SC.ResponderProtocol` (i.e. the protocol that may be implemented by `SC.Responder` subclasses like `SC.View`).  
 - Added/improved documentation on `SC.Gesturable` mixin.  
 
+* Legacy Framework
+
+There is now a sub-framework within SproutCore, `:'sproutcore/legacy'`, which is meant to contain all code providing support for older browsers. This includes the existing polyfill for `window.requestAnimationFrame` and a brand new polyfill for `Object.keys`. The legacy framework is included by default by requiring `:sproutcore` in a project's or an app's Buildfile. The legacy framework itself requires the `:sproutcore/desktop` framework, which allows for any legacy code in the SproutCore controls to be separated out.  
+
+Therefore, to build an app that will only work with the newest browsers (probably not a great idea —), you may change your Buildfile requirements to include only the specific SproutCore sub-frameworks you need. For example,
+
+    config :my_app, :required => [:"sproutcore/desktop", :"sproutcore/datastore"]
+
 * SC.PickerPane  
 
 This view has been given special behavior when used with SC.View's `transitionIn` plugin support. If the plugin defines `layoutProperties` of either `scale` or `rotate`, then the picker will adjust its transform origin X & Y position to appear to scale or rotate out of the anchor. The result is a very nice effect that picker panes appear to pop out of their anchors.  
