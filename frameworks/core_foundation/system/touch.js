@@ -539,7 +539,76 @@ SC.Touch.prototype = {
 };
 
 SC.mixin(SC.Touch, {
+
   create: function(touch, touchContext) {
     return new SC.Touch(touch, touchContext);
+  },
+
+  /**
+    Returns the averaged touch for an array of given touches. The averaged touch includes the
+    average position of all the touches (i.e. the center point), the averaged distance of all
+    the touches (i.e. the average of each touch's distance to the center) and the average velocity
+    of each touch.
+
+    The returned Object has a signature like,
+
+        {
+          x: ...,
+          y: ...,
+          velocityX: ...,
+          velocityY: ...,
+          d: ...
+        }
+
+    @param {Array} touches An array of touches to average.
+    @param {Object} objectRef An Object to assign the values to rather than creating a new Object. If you pass an Object to this method, that same Object will be returned with the values assigned to it. This is useful in order to only alloc memory once and hold it in order to avoid garbage collection. The trade-off is that more memory remains in use indefinitely.
+    @returns {Object} The averaged touch.
+  */
+  averagedTouch: function (touches, objectRef) {
+    var len = touches.length,
+        ax = 0, ay = 0, avx = 0, avy = 0,
+        idx, touch;
+
+    // If no holder object is given, create a new one.
+    if (objectRef === undefined) { objectRef = {}; }
+
+    // Sum the positions and velocities of each touch.
+    for (idx = 0; idx < len; idx++) {
+      touch = touches[idx];
+      ax += touch.pageX;
+      ay += touch.pageY;
+      avx += touch.velocityX;
+      avy += touch.velocityY;
+    }
+
+    // Average each value.
+    ax /= len;
+    ay /= len;
+    avx /= len;
+    avy /= len;
+
+    // Calculate average distance.
+    var ad = 0;
+    for (idx = 0; idx < len; idx++) {
+      touch = touches[idx];
+
+      // Get distance for each from average position.
+      var dx = Math.abs(touch.pageX - ax);
+      var dy = Math.abs(touch.pageY - ay);
+
+      // Pythagoras was clever...
+      ad += Math.pow(dx * dx + dy * dy, 0.5);
+    }
+
+    // Average value.
+    ad /= len;
+
+    objectRef.x = ax;
+    objectRef.y = ay;
+    objectRef.velocityX = avx;
+    objectRef.velocityY = avy;
+    objectRef.d = ad;
+
+    return objectRef;
   }
 });
