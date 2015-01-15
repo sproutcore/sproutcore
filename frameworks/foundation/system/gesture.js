@@ -111,6 +111,16 @@ SC.Gesture = SC.Object.extend({
   _sc_isActive: false,
 
   /**
+    Whether to receive touch events for each distinct touch (rather than only the first touch start
+    and last touch end).
+
+    @type Boolean
+    @default false
+    @see SC.View#acceptsMultitouch
+  */
+  acceptsMultitouch: false,
+
+  /**
     The gesture's name. When calling events on the owning SC.View, this name will
     be prefixed to the methods. For instance, if the method to be called is
     'Start', and the gesture's name is 'swipe', SC.Gesture will call 'swipeStart'.
@@ -182,12 +192,20 @@ SC.Gesture = SC.Object.extend({
       this._sc_isActive = true;
 
       // Fast arguments access. Don't materialize the `arguments` object, it is costly.
-      var argumentsLength = arguments.length,
-          args = new Array(argumentsLength + 1);
+      // var argumentsLength = arguments.length,
+      //     args = new Array(argumentsLength + 1);
 
-      // Unshift this to the front of arguments.
-      args[0] = this;
-      for (var i = 0, len = argumentsLength; i < len; i++) { args[i + 1] = arguments[i]; }
+      // // Unshift this to the front of arguments.
+      // args[0] = this;
+      // for (var i = 0, len = argumentsLength; i < len; i++) { args[i + 1] = arguments[i]; }
+
+      // var act = this.name + "Start";
+      // if (this.view[act]) this.view[act].apply(this.view, args);
+
+      var argumentsLength = arguments.length,
+          args = new Array(argumentsLength);
+
+      for (var i = 0, len = argumentsLength; i < len; i++) { args[i] = arguments[i]; }
 
       var act = this.name + "Start";
       if (this.view[act]) this.view[act].apply(this.view, args);
@@ -206,12 +224,20 @@ SC.Gesture = SC.Object.extend({
       this._sc_isActive = false;
 
       // Fast arguments access. Don't materialize the `arguments` object, it is costly.
-      var argumentsLength = arguments.length,
-          args = new Array(argumentsLength + 1);
+      // var argumentsLength = arguments.length,
+      //     args = new Array(argumentsLength + 1);
 
-      // Unshift this to the front of arguments.
-      args[0] = this;
-      for (var i = 0, len = argumentsLength; i < len; i++) { args[i + 1] = arguments[i]; }
+      // // Unshift this to the front of arguments.
+      // args[0] = this;
+      // for (var i = 0, len = argumentsLength; i < len; i++) { args[i + 1] = arguments[i]; }
+
+      // var act = this.name + "End";
+      // if (this.view[act]) this.view[act].apply(this.view, args);
+
+      var argumentsLength = arguments.length,
+          args = new Array(argumentsLength);
+
+      for (var i = 0, len = argumentsLength; i < len; i++) { args[i] = arguments[i]; }
 
       var act = this.name + "End";
       if (this.view[act]) this.view[act].apply(this.view, args);
@@ -228,12 +254,20 @@ SC.Gesture = SC.Object.extend({
   change: function() {
     if (this._sc_isActive) {
       // Fast arguments access. Don't materialize the `arguments` object, it is costly.
-      var argumentsLength = arguments.length,
-          args = new Array(argumentsLength + 1);
+      // var argumentsLength = arguments.length,
+      //     args = new Array(argumentsLength + 1);
 
-      // Unshift this to the front of arguments.
-      args[0] = this;
-      for (var i = 0, len = argumentsLength; i < len; i++) { args[i + 1] = arguments[i]; }
+      // // Unshift this to the front of arguments.
+      // args[0] = this;
+      // for (var i = 0, len = argumentsLength; i < len; i++) { args[i + 1] = arguments[i]; }
+
+      // var act = this.name + "Changed";
+      // if (this.view[act]) this.view[act].apply(this.view, args);
+
+      var argumentsLength = arguments.length,
+          args = new Array(argumentsLength);
+
+      for (var i = 0, len = argumentsLength; i < len; i++) { args[i] = arguments[i]; }
 
       var act = this.name + "Changed";
       if (this.view[act]) this.view[act].apply(this.view, args);
@@ -255,12 +289,20 @@ SC.Gesture = SC.Object.extend({
       this._sc_isActive = false;
 
       // Fast arguments access. Don't materialize the `arguments` object, it is costly.
-      var argumentsLength = arguments.length,
-          args = new Array(argumentsLength + 1);
+      // var argumentsLength = arguments.length,
+      //     args = new Array(argumentsLength + 1);
 
-      // Unshift this to the front of arguments.
-      args[0] = this;
-      for (var i = 0, len = argumentsLength; i < len; i++) { args[i + 1] = arguments[i]; }
+      // // Unshift this to the front of arguments.
+      // args[0] = this;
+      // for (var i = 0, len = argumentsLength; i < len; i++) { args[i + 1] = arguments[i]; }
+
+      // var act = this.name + "Cancelled";
+      // if (this.view[act]) this.view[act].apply(this.view, args);
+
+      var argumentsLength = arguments.length,
+          args = new Array(argumentsLength);
+
+      for (var i = 0, len = argumentsLength; i < len; i++) { args[i] = arguments[i]; }
 
       var act = this.name + "Cancelled";
       if (this.view[act]) this.view[act].apply(this.view, args);
@@ -283,11 +325,13 @@ SC.Gesture = SC.Object.extend({
   trigger: function() {
     // Fast arguments access. Don't materialize the `arguments` object, it is costly.
     var argumentsLength = arguments.length,
-        args = new Array(argumentsLength + 1);
+        // args = new Array(argumentsLength + 1);
+        args = new Array(argumentsLength);
 
-    // Unshift this to the front of arguments.
-    args[0] = this;
-    for (var i = 0, len = argumentsLength; i < len; i++) { args[i + 1] = arguments[i]; }
+    // // Unshift this to the front of arguments.
+    // args[0] = this;
+    // for (var i = 0, len = argumentsLength; i < len; i++) { args[i + 1] = arguments[i]; }
+    for (var i = 0, len = argumentsLength; i < len; i++) { args[i] = arguments[i]; }
 
     var act = this.name;
     if (this.view[act]) this.view[act].apply(this.view, args);
@@ -298,17 +342,17 @@ SC.Gesture = SC.Object.extend({
 
     This is called automatically when you return YES from touchIsInGesture.
   */
-  take: function(touch) {
-    if (!touch.isTaken) {
-      touch.isTaken = YES; // because even changing responder won't prevent it from being used this cycle.
-      if (SC.none(touch.touchResponder) || touch.touchResponder !== this) touch.makeTouchResponder(this, YES);
-    }
-    //@if(debug)
-    else {
-      SC.warn("Developer Warning: A gesture tried to take a touch that was already taken: %@".fmt(this));
-    }
-    //@endif
-  },
+  // take: function(touch) {
+  //   if (!touch.isTaken) {
+  //     touch.isTaken = YES; // because even changing responder won't prevent it from being used this cycle.
+  //     if (SC.none(touch.touchResponder) || touch.touchResponder !== this) touch.makeTouchResponder(this, YES);
+  //   }
+  //   //@if(debug)
+  //   else {
+  //     SC.warn("Developer Warning: A gesture tried to take a touch that was already taken: %@".fmt(this));
+  //   }
+  //   //@endif
+  // },
 
   /**
     Releases a touch back to its previous owner, which is usually the view. This allows
@@ -317,91 +361,103 @@ SC.Gesture = SC.Object.extend({
     This takes effect immediately, because you would usually call this from
     touchesDragged or such.
   */
-  release: function(touch) {
-    if (touch.isTaken) {
-      touch.isTaken = NO;
-      if (touch.nextTouchResponder) touch.makeTouchResponder(touch.nextTouchResponder);
-    }
-    //@if(debug)
-    else {
-      SC.warn("Developer Warning: A gesture tried to release a touch that was not taken: %@".fmt(this));
-    }
-    //@endif
-  },
+  // release: function(touch) {
+  //   if (touch.isTaken) {
+  //     touch.isTaken = NO;
+  //     if (touch.nextTouchResponder) touch.makeTouchResponder(touch.nextTouchResponder);
+  //   }
+  //   //@if(debug)
+  //   else {
+  //     SC.warn("Developer Warning: A gesture tried to release a touch that was not taken: %@".fmt(this));
+  //   }
+  //   //@endif
+  // },
 
   /**
     Discards a touch, making its responder null. This makes the touch go away and never
     come back—not to this gesture, nor to any other, nor to the view, nor to any other
     view.
   */
-  discardTouch: function(touch) {
-    touch.isTaken = YES; // because even changing responder won't prevent it from being used this cycle.
-    touch.makeTouchResponder(null);
+  // discardTouch: function(touch) {
+  //   touch.isTaken = YES; // because even changing responder won't prevent it from being used this cycle.
+  //   touch.makeTouchResponder(null);
+  // },
+
+  /**
+    Called by the view when a touch session has begun.
+
+    You should override this method in your custom SC.Gesturable subclasses to set up any touch
+    session state. For example, you may want to track the initial touch start time in order to
+    decide how to react when or if additional touches start later.
+
+    @param {SC.Touch} touch The touch that started the session.
+    @returns {void}
+    */
+  touchSessionStarted: function (touch) {
   },
 
   /**
-    Returns a status hash (which gestures may and should modify) for a given touch, for tracking
-    whether it is a potential match, etc.
-  */
-  statusForTouch: function(touch) {
-    var key = SC.guidFor(touch.view) + this.name;
-    var status = touch[key];
-    if (!status) status = touch[key] = {};
-    return status;
+    Called by the view when the touch session has ended.
+
+    This will occur because all touches in the session have finished.
+
+    You should override this method in your custom SC.Gesturable subclasses to clean up any state
+    variables used in the touch session.
+
+    @returns {void}
+   */
+  touchSessionEnded: function () {
   },
 
   /**
-    Called when an unassigned touch has started. By default, this calls touchIsInGesture, and,
-    if it returns YES, takes possesion of the touch (causing touchStart to  be called).
-  */
-  unassignedTouchDidStart: function(touch) {
-    if (touch.isTaken) return;
-    if (this.touchIsInGesture(touch, this.statusForTouch(touch))) {
-      this.take(touch);
-    }
+    Called by the view when the touch session was cancelled.
+
+    This will occur because this gesture returned `false` in any of `touchAddedToSession`,
+    `touchesMovedInSession`, `touchEndedInSession`, `touchCancelledInSession` to indicate that the
+    gesture is no longer interested in the session or because another gesture claimed the touch
+    session for itself, forcing all other gestures out (rare).
+
+    You should override this method in your custom SC.Gesturable subclasses to clean up any state
+    variables used in the touch session.
+
+    @returns {void}
+   */
+  touchSessionCancelled: function () {
   },
 
   /**
-    This is called when the unassigned touches (touches not in a gesture) change or move
-    in some way. By default, this calls touchIsInGesture(touch, status) for each touch.
-  */
-  unassignedTouchesDidChange: function(evt, touches) {
-    touches.forEach(function(touch) {
-      if (touch.isTaken) return;
-      if (this.touchIsInGesture(touch, this.statusForTouch(touch))) {
-        this.take(touch);
-      }
-    }, this);
+    @param {SC.Touch} touch The touch to be added to the session.
+    @param {Array} touchesInSession The touches already in the session.
+    @returns {Boolean} True if the gesture is still interested in the touch session; false to stop getting notified for any further touch changes in the touch session.
+    */
+  touchAddedToSession: function (touch, touchesInSession) {
+    return true; // Most gestures should theoretically be interested in a new touch session.
   },
 
   /**
-    This is called when the unassigned touches (touches not in the gesture) have ended.
-    Default does nothing. Some gestures may want to implement this even if they don't implement
-    unassignedTouchesDidChange.
-  */
-  unassignedTouchDidEnd: function(touch) {
-
+    @param {SC.Touch} touch The touch to be removed from the session.
+    @param {Array} touchesInSession The touches in the session.
+    @returns {Boolean} True if the gesture is still interested in the touch session; false to stop getting notified for any further touch changes in the touch session.
+    */
+  touchCancelledInSession: function (touch, touchesInSession) {
+    return true;
   },
 
   /**
-    Marks the touch as "interesting" to this gesture. A view could then check the 'isInteresting'
-    property of the touch to see if any gestures are interested in it, potentially delaying any
-    action of releasing the touch to another view.
-  */
-  interestedInTouch: function(touch) {
-    var status = this.statusForTouch(touch);
-    if (status.isInterested) return;
-    status.isInterested = YES;
-    touch.isInteresting++;
+    @param {SC.Touch} touch The touch to be removed from the session.
+    @param {Array} touchesInSession The touches in the session.
+    @returns {Boolean} True if the gesture is still interested in the touch session; false to stop getting notified for any further touch changes in the touch session.
+    */
+  touchEndedInSession: function (touch, touchesInSession) {
+    return true;
   },
 
   /**
-    Marks the touch as "uninteresting" to this gesture.
-  */
-  uninterestedInTouch: function(touch) {
-    var status = this.statusForTouch(touch);
-    if (!status.isInterested) return;
-    status.isInterested = NO;
-    touch.isInteresting--;
+    @param {Array} touchesInSession The touches in the session.
+    @returns {Boolean} True if the gesture is still interested in the touch session; false to stop getting notified for any further touch changes in the touch session.
+    */
+  touchesMovedInSession: function (touchesInSession) {
+    return true;
   }
+
 });

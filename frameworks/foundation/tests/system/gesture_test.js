@@ -25,8 +25,6 @@ test("Default Properties:", function () {
 
 /* Methods */
 
-// touchIsInGesture, touchStart, start, end, change, cancel, trigger, take, release, discardTouch, statusForTouch, unassignedTouchDidStart, unassignedTouchesDidChange, unassignedTouchDidEnd, interestedInTouch, uninterestedInTouch
-
 // This method returns false.
 test("Method: touchIsInGesture", function () {
   gesture = gesture.create();
