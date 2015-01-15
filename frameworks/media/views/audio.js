@@ -36,7 +36,7 @@ SC.AudioView = SC.View.extend(
     Audio view className.
     @type String
   */
-  classNames: 'sc-audio-view',
+  classNames: ['sc-audio-view'],
 
   /**
     Properties that trigger a re render of the view. If the value changes, it
@@ -44,14 +44,13 @@ SC.AudioView = SC.View.extend(
 
     @type Array
   */
-  displayProperties: ['value', 'shouldAutoResize'],
+  displayProperties: ['value'],
 
   /**
     Reference to the audio object once is created.
     @type Object
   */
-
-  audioObject:null,
+  audioObject: null,
 
   /**
     Array containing the technologies and the order to load them depending
@@ -62,26 +61,19 @@ SC.AudioView = SC.View.extend(
   degradeList: ['html5','quicktime', 'flash'],
 
   /**
-     Current time in secs
+     The current play time in seconds.
 
      @type Number
+     @default 0
    */
   currentTime : function(key, value) {
-    if (!SC.empty(value) && this._currentTime != value) {
-      this._currentTime = value;
+    /* jshint eqnull:true */
+    if (value != null) {
       this.seek(value);
     }
 
-    return this._currentTime;
-  }.property('_currentTime'),
-
-  /**
-     Current time in secs
-
-     @type Number
-     @private
-   */
-  _currentTime : 0,
+    return value == null ? 0 : value;
+  }.property().cacheable(),
 
   /**
     Duration in secs
@@ -113,7 +105,7 @@ SC.AudioView = SC.View.extend(
     @type Boolean
   */
 
-  ended: NO, //did the audio finished playing
+  ended: NO, //did the audio finish playing
 
   /**
     Indicates if the audio is ready to be played.
@@ -144,6 +136,7 @@ SC.AudioView = SC.View.extend(
   */
   render: function(context, firstTime) {
     var i, j, listLen, pluginsLen, id = SC.guidFor(this);
+
     if(firstTime){
       for(i=0, listLen = this.degradeList.length; i<listLen; i++){
         switch(this.degradeList[i]){
@@ -267,7 +260,11 @@ SC.AudioView = SC.View.extend(
     this.set('ended', NO);
     this.set('canPlay', NO);
     this.set('loadedTimeRanges', []);
-    this.replaceLayer();
+
+    // Re-render the entire layer.
+    if (this.get('_isRendered')) {
+      this.replaceLayer();
+    }
   }.observes('value'),
 
   /**
@@ -417,16 +414,14 @@ SC.AudioView = SC.View.extend(
 
     SC.Event.add(audioElem, 'qt_pause', this, function () {
       SC.run(function() {
-        view._currentTime = media.GetTime() / media.GetTimeScale();
-        view.propertyDidChange('currentTime');
+        view.set('currentTime', media.GetTime() / media.GetTimeScale());
         view.set('paused', YES);
       });
     });
 
     SC.Event.add(audioElem, 'qt_play', this, function () {
       SC.run(function() {
-        view._currentTime = media.GetTime() / media.GetTimeScale();
-        view.propertyDidChange('currentTime');
+        view.set('currentTime', media.GetTime() / media.GetTimeScale());
         view.set('paused', NO);
       });
     });
@@ -442,8 +437,7 @@ SC.AudioView = SC.View.extend(
    */
   _qtTimer:function(){
     if (this.loaded === 'quicktime' && !this.get('paused')) {
-      this.incrementProperty('_currentTime');
-      this.propertyDidChange('currentTime');
+      this.incrementProperty('currentTime');
       this.invokeLater(this._qtTimer, 1000);
     }
   }.observes('paused'),
