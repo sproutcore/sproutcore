@@ -142,3 +142,67 @@ test("Touch event handling and juggling.", function() {
   equals(outerEnd, 1, "outerView.touchEnd should have been called:");
 
 });
+
+module("SC.Touch", {
+});
+
+/* Class Methods */
+
+// This method creates a new SC.Touch.
+test("Class Method: create", function () {
+  equals(SC.Touch.create({ identifier: 'test-touch' }).constructor, SC.Touch.prototype.constructor, "The method returns instance of type");
+});
+
+// This method returns the average of all the given touches.
+test("Class Method: averagedTouch", function () {
+  var touch1 = SC.Touch.create({ identifier: 'touch-1', pageX: 0, pageY: 0, velocityX: 0, velocityY: 0 }),
+      touch2 = SC.Touch.create({ identifier: 'touch-2', pageX: 100, pageY: 100, velocityX: 0, velocityY: 0 }),
+      touch3 = SC.Touch.create({ identifier: 'touch-3', pageX: 200, pageY: 200, velocityX: 0, velocityY: 0 }),
+      avgTouch;
+
+  // Test two touches.
+  avgTouch = SC.Touch.averagedTouch([touch1, touch2]);
+  equals(avgTouch.x.toFixed(1), '50.0', "The value of x is");
+  equals(avgTouch.y.toFixed(1), '50.0', "The value of y is");
+  equals(avgTouch.velocityX.toFixed(1), '0.0', "The value of velocityX is");
+  equals(avgTouch.velocityY.toFixed(1), '0.0', "The value of velocityY is");
+  equals(avgTouch.d.toFixed(1), '70.7', "The value of d is");
+
+  // Test two touches in reverse.
+  avgTouch = SC.Touch.averagedTouch([touch2, touch1]);
+  equals(avgTouch.x.toFixed(1), '50.0', "The value of x is");
+  equals(avgTouch.y.toFixed(1), '50.0', "The value of y is");
+  equals(avgTouch.velocityX.toFixed(1), '0.0', "The value of velocityX is");
+  equals(avgTouch.velocityY.toFixed(1), '0.0', "The value of velocityY is");
+  equals(avgTouch.d.toFixed(1), '70.7', "The value of d is");
+
+  // Test three touches.
+  avgTouch = SC.Touch.averagedTouch([touch1, touch2, touch3]);
+  equals(avgTouch.x.toFixed(1), '100.0', "The value of x is");
+  equals(avgTouch.y.toFixed(1), '100.0', "The value of y is");
+  equals(avgTouch.velocityX.toFixed(1), '0.0', "The value of velocityX is");
+  equals(avgTouch.velocityY.toFixed(1), '0.0', "The value of velocityY is");
+  equals(avgTouch.d.toFixed(1), '94.3', "The value of d is");
+
+  // Test three touches in different order.
+  avgTouch = SC.Touch.averagedTouch([touch2, touch3, touch1]);
+  equals(avgTouch.x.toFixed(1), '100.0', "The value of x is");
+  equals(avgTouch.y.toFixed(1), '100.0', "The value of y is");
+  equals(avgTouch.velocityX.toFixed(1), '0.0', "The value of velocityX is");
+  equals(avgTouch.velocityY.toFixed(1), '0.0', "The value of velocityY is");
+  equals(avgTouch.d.toFixed(1), '94.3', "The value of d is");
+});
+
+/* Properties */
+
+test("Default Properties:", function () {
+  var touch = SC.Touch.create({ identifier: 'test-touch' });
+
+  equals(touch.identifier, 'test-touch', "The default value of identifier is");
+});
+
+/* Methods */
+
+// This method registers _sc_pinchAnchorScale to the value of the view's scale.
+test("Method: touchSessionStarted", function () {
+});

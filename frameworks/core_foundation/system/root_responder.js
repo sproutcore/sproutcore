@@ -1094,10 +1094,9 @@ SC.RootResponder = SC.Object.extend(
       averaged.d = 0;
       averaged.velocityX = 0;
       averaged.velocityY = 0;
-      averaged.touchCount = 0;
-    }
+
     // Otherwise, average the touches.
-    else {
+    } else {
       // Cache the array object used by this method. (Cleared at the end to prevent memory leaks.)
       var touches = this._averagedTouches_touches || (this._averagedTouches_touches = []);
 
@@ -1114,47 +1113,8 @@ SC.RootResponder = SC.Object.extend(
       // Add additionalTouch if present and not duplicated.
       if (additionalTouch && !additionalTouchIsDuplicate) touches.push(additionalTouch);
 
-      // prepare variables for looping
-      var idx, touch,
-          ax = 0, ay = 0, dx, dy, ad = 0, avx = 0, avy = 0;
-      len = touches.length;
-
-      // first, add
-      for (idx = 0; idx < len; idx++) {
-        touch = touches[idx];
-        ax += touch.pageX;
-        ay += touch.pageY;
-        avx += touch.velocityX;
-        avy += touch.velocityY;
-      }
-
-      // now, average
-      ax /= len;
-      ay /= len;
-      avx /= len;
-      avy /= len;
-
-      // distance
-      for (idx = 0; idx < len; idx++) {
-        touch = touches[idx];
-
-        // get distance from average
-        dx = Math.abs(touch.pageX - ax);
-        dy = Math.abs(touch.pageY - ay);
-
-        // Pythagoras was clever...
-        ad += Math.pow(dx * dx + dy * dy, 0.5);
-      }
-
-      // average
-      ad /= len;
-
-      averaged.x = ax;
-      averaged.y = ay;
-      averaged.velocityX = avx;
-      averaged.velocityY = avy;
-      averaged.d = ad;
-      averaged.touchCount = len;
+      // Calculate the average.
+      SC.Touch.averagedTouch(touches, averaged);
 
       // Clear the touches array to prevent touch object leaks.
       touches.length = 0;
