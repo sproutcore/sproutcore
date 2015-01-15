@@ -62,6 +62,21 @@ For example, to create a mix binding that concatenates two external properties i
 - Added documentation on touch event handling to `SC.ResponderProtocol` (i.e. the protocol that may be implemented by `SC.Responder` subclasses like `SC.View`).  
 - Added/improved documentation on `SC.Gesturable` mixin.  
 
+* SC.Gesturable & SC.Gesture (SC.TapGesture, SC.PinchGesture, SC.SwipeGesture)
+
+After some investigation, it was found that there were a number of issues with the built-in gesture support. For example, two touch taps would throw an exception, pinches would fail to register and in particular, supporting multiple gestures failed in a number of scenarios. In order to fix these problems, the gesture code has been rewritten from the top-down.
+
+It is now possible to mixin SC.Gesturable to a view and use events to react to multiple gestures concurrently. Examples of the advanced type of behavior that the gesture code allows include:
+
+* Responding to single finger, two finger or any other number of touch taps, pinches (2+ touches) or swipes individually or as a group. For example, your code may want to perform different actions when a single finger taps vs. when there is a two finger tap.
+* A touch session, the time between when the first touch begins and the last touch ends, may contain more than one gesture. For example, it's possible for the user to perform a pinch, then use a third finger to tap, then swipe the remaining fingers. For example, imagine using pinch to scale an image, tap to save the change and then swipe to move it aside all without lifting the fingers. At the least, the ability to perform gestures in a single touch session multiple times, makes the gesture recognition more robust against stray accidental touches.
+* Swipe gestures can now be configured to match against any arbitrary angles, not just left, right, up & down.
+* Swipe gestures no longer trigger by simply moving far enough in one direction. They must also move quickly (configurable) and end immediately.
+
+*How does this affect your code?*  
+
+For the most part, this should have no effect on existing implementors of SC.Gesturable. The three built-in gestures: SC.TapGesture, SC.PinchGesture, and SC.SwipeGesture are still defined and they work much better than before. However if you have defined a custom SC.Gesture subclass, it will unfortunately not work correctly with this update. Because we felt the previous version of SC.Gesture's API was too complex and incompatible with the behavior we needed to achieve, we decided it was better to rewrite it in a simpler form. We're very sorry for this backwards incompatibility, but because of the previous issues with gestures, we believe no one was able to use them anyway.
+
 * SC.PickerPane  
 
 This view has been given special behavior when used with SC.View's `transitionIn` plugin support. If the plugin defines `layoutProperties` of either `scale` or `rotate`, then the picker will adjust its transform origin X & Y position to appear to scale or rotate out of the anchor. The result is a very nice effect that picker panes appear to pop out of their anchors.  
@@ -87,6 +102,7 @@ Test Results:
       Paint x 8:         ~6.0ms
 
 *How does this affect your code?*  
+
 Because lists and grids have an implied layout of `{ top: 0, bottom: 0, left: 0, right: 0 }`, they used to always stretch to fill their parent containing view. This is no longer the case and so a collection with too few items to fill the containing view will only be as tall or as wide as its items warrant. This will affect any background styles that were applied to the collection (such as the Ace theme did), which previously would have covered the whole containing view's background. Unfortunately, those background styles need to be moved to the style of the containing view in order to prevent any styling regressions after updating to this new version.  
 
 Therefore, to go along with this change the `background: white` style in the Ace theme that was applied to `$theme.collection` has been moved to `$theme.sc-scroll-view`. It has also been changed to `background-color: white`, which is less likely to conflict with other background styles.  

@@ -8,8 +8,7 @@
 /**
   @namespace
 
-  You can mix in SC.Gesturable to your views to add some support for recognizing
-  gestures.
+  You can mix in SC.Gesturable to your views to add some support for recognizing gestures.
 
   SproutCore views have built-in touch events. However, sometimes you may want
   to recognize gestures like tap, pinch, swipe, etc. This becomes tedious if you
@@ -80,6 +79,29 @@
 */
 SC.Gesturable = {
 
+  /** @private An array of all gestures currently interested in the touch session.
+
+    @type Array
+    @default null
+  */
+  _sc_interestedGestures: null,
+
+  /** @private An array of the touches that are currently active in a touch session.
+
+    @type Array
+    @default null
+  */
+  _sc_touchesInSession: null,
+
+  /**
+    Gestures need to understand multiple touches.
+
+    @type Boolean
+    @default true
+    @see SC.View#acceptsMultitouch
+  */
+  acceptsMultitouch: true,
+
   /**
     @type Array
     @default ['gestures']
@@ -114,6 +136,60 @@ SC.Gesturable = {
     @default null
   */
   gestures: null,
+
+  /** @private Shared method for finishing a touch.
+
+    @param {SC.Touch} touch The touch that ended or cancelled.
+    @param {Boolean} wasCancelled Whether the touch was cancelled or not (i.e. ended normally).
+  */
+  _sc_gestureTouchFinish: function (touch, wasCancelled) {
+    // console.log("%@ - _sc_gestureTouchFinish".fmt(this));
+    var touchesInSession = this._sc_touchesInSession,
+        touchIndexInSession = touchesInSession.indexOf(touch);
+
+    // Decrement our list of touches that are being acted upon.
+    touchesInSession.replace(touchIndexInSession, 1);
+
+    var gestures = this._sc_interestedGestures,
+        idx,
+        gesture;
+
+    // Loop through the gestures in reverse, as the list may be mutated.
+    for (idx = gestures.length - 1; idx >= 0; idx--) {
+      var isInterested;
+
+      gesture = gestures[idx];
+
+      if (wasCancelled) {
+        isInterested = gesture.touchCancelledInSession(touch, touchesInSession);
+      } else {
+        isInterested = gesture.touchEndedInSession(touch, touchesInSession);
+      }
+
+      // If the gesture is no longer interested in *any* touches for this session, remove it.
+      if (!isInterested) {
+        // Tell the gesture that the touch session has ended for it.
+        gesture.touchSessionCancelled();
+
+        gestures.replace(idx, 1);
+      }
+    }
+
+    // Once there are no more touches in the session, reset the interested gestures.
+    if (touchesInSession.length === 0) {
+      // Notify all remaining interested gestures that the touch session has finished cleanly.
+      var len;
+
+      for (idx = 0, len = gestures.length; idx < len; idx++) {
+        gesture = gestures[idx];
+
+        gesture.touchSessionEnded();
+      }
+
+      // Clear out the current cache of interested gestures for the session.
+      this._sc_interestedGestures.length = 0;
+    }
+  },
 
   /**
     When SC.Gesturable initializes, any gestures named on the view are instantiated.
@@ -179,9 +255,13 @@ SC.Gesturable = {
     at any time. This allows you to avoid passing control until _after_ you
     have determined your own touchStart, touchesDragged, and touchEnd methods
     are not going to handle it.
+
+    @param {SC.Touch} touch The touch that started.
+    @returns {Boolean} Whether the touch should be claimed by the view or not.
+    @see SC.ResponderProtocol#touchStart
   */
   touchStart: function(touch) {
-    this.gestureTouchStart(touch);
+    return this.gestureTouchStart(touch);
   },
 
   /**
@@ -190,6 +270,8 @@ SC.Gesturable = {
     If you override touchesDragged, you will need to call gestureTouchesDragged
     (at least for any touches you called gestureTouchStart for in touchStart) to
     allow the gesture system to update.
+
+    @see SC.ResponderProtocol#touchesDragged
   */
   touchesDragged: function(evt, touches) {
     this.gestureTouchesDragged(evt, touches);
@@ -199,10 +281,45 @@ SC.Gesturable = {
     Tells the gesture recognizing code about a touch ending.
 
     If you override touchEnd, you will need to call gestureTouchEnd
-    for any touches you called touchStart for.
+    for any touches you called gestureTouchStart for in touchStart (if overridden).
+
+    @param {SC.Touch} touch The touch that ended.
+    @see SC.ResponderProtocol#touchEnd
   */
   touchEnd: function(touch) {
     this.gestureTouchEnd(touch);
+  },
+
+  /**
+    Tells the gesture recognizing code about a touch cancelling.
+
+    If you override touchCancelled, you will need to call gestureTouchCancelled
+    for any touches you called gestureTouchStart for in touchStart (if overridden).
+
+    @param {SC.Touch} touch The touch that cancelled.
+    @see SC.ResponderProtocol#touchCancelled
+  */
+  touchCancelled: function (touch) {
+    this.gestureTouchCancelled(touch);
+  },
+
+  /**
+    Called by a gesture that has lost interest in the entire touch session, likely due to too much
+    time having passed since `gestureTouchStart` or `gestureTouchesDragged` having been called.
+
+    Simply removes the gesture from the list of interested gestures and calls
+    `touchSessionCancelled` on the gesture.
+  */
+  gestureLostInterest: function (gesture) {
+    var gestures = this._sc_interestedGestures,
+        gestureIndex = gestures.indexOf(gesture);
+
+    // Remove the gesture.
+    if (gestureIndex >= 0) {
+      gesture.touchSessionCancelled();
+
+      gestures.replace(gestureIndex, 1);
+    }
   },
 
   /**
@@ -213,44 +330,110 @@ SC.Gesturable = {
 
     Once they have claimed the touch, further events will go _directly_ to them—
     this view will cease receiving the touchesDragged and will not receive a touchEnd.
-  */
-  gestureTouchStart: function(touch) {
-    touch.isInteresting = 0;
 
-    var gestures = this.get("gestures"), idx, len = gestures.length;
-    for (idx = 0; idx < len; idx++) {
-      var gesture = gestures[idx];
-      gesture.unassignedTouchDidStart(touch);
+    @param {SC.Touch} touch The touch that started.
+    @returns {Boolean} Whether any gesture is interested in the touch or not.
+  */
+  gestureTouchStart: function (touch) {
+    // touch.isInteresting = 0;
+
+    var interestedGestures = this._sc_interestedGestures,
+        touchesInSession = this._sc_touchesInSession,
+        addedTouchToSession = false,
+        idx;
+
+    // Instantiate once.
+    if (touchesInSession === null) {
+      touchesInSession = this._sc_touchesInSession = [];
+      interestedGestures = this._sc_interestedGestures = [];
+    }
+
+    // When there are no touches in the session, check all gestures.
+    if (touchesInSession.length === 0) {
+      var gestures = this.get("gestures"),
+          len;
+
+      for (idx = 0, len = gestures.length; idx < len; idx++) {
+        var gesture = gestures[idx];
+
+        gesture.touchSessionStarted(touch);
+        interestedGestures.push(gesture);
+      }
+
+    // Only check gestures that are interested.
+    } else {
+      // Loop through the gestures in reverse, as the list may be mutated.
+      for (idx = interestedGestures.length - 1; idx >= 0; idx--) {
+        var interestedGesture = interestedGestures[idx],
+            isInterested;
+
+        // Keep only the gestures still interested in the touch.
+        isInterested = interestedGesture.touchAddedToSession(touch, touchesInSession);
+
+        if (!isInterested) {
+          // Tell the gesture that the touch session has ended for it.
+          interestedGesture.touchSessionCancelled();
+
+          interestedGestures.replace(idx, 1);
+        }
+      }
+    }
+
+    // If any gesture is interested or still interested, increment our list of interesting touches
+    // that are being acted upon in this session.
+    if (interestedGestures.length > 0) {
+      touchesInSession.push(touch);
+
+      addedTouchToSession = true;
+    }
+
+    return addedTouchToSession;
+  },
+
+  /**
+    Tells the gesture recognition system that some unassigned touches have moved.
+
+    This informs all interested gestures that these touches have changed. All such touches
+    will be "unassigned" because all "assigned" touches already get sent directly to the gesture.
+  */
+  gestureTouchesDragged: function (evt, touches) {
+    var gestures = this._sc_interestedGestures,
+        touchesInSession = this._sc_touchesInSession;
+
+    // Loop through the gestures in reverse, as the list may be mutated.
+    for (var i = gestures.length - 1; i >= 0; i--) {
+      var gesture = gestures[i],
+          isInterested = gesture.touchesMovedInSession(touchesInSession);
+
+      // If the gesture is no longer interested in *any* touches for this session, remove it.
+      if (!isInterested) {
+        // Tell the gesture that the touch session has ended for it.
+        gesture.touchSessionCancelled();
+
+        gestures.replace(i, 1);
+      }
     }
   },
 
   /**
-    Tells the gesture recognition system that some touches have moved.
-
-    This informs all gestures that these touches have changed. All such touches
-    are "unassigned" because all "assigned" touches already get sent directly
-    to the gesture.
-  */
-  gestureTouchesDragged: function(evt, touches) {
-    var gestures = this.get("gestures"), idx, len = gestures.length;
-    for (idx = 0; idx < len; idx++) {
-      var gesture = gestures[idx];
-      gesture.unassignedTouchesDidChange(evt, touches);
-    }
-  },
-
-  /**
-    Tells the gesture recognition system that a touch have ended.
+    Tells the gesture recognition system that an unassigned touch has ended.
 
     This informs all of the gestures that the touch ended. The touch is
     an unassigned touch as, if it were assigned to a gesture, it would have
     been sent directly to the gesture, bypassing this view.
   */
   gestureTouchEnd: function(touch) {
-    var gestures = this.get("gestures"), idx, len = gestures.length;
-    for (idx = 0; idx < len; idx++) {
-      var gesture = gestures[idx];
-      gesture.unassignedTouchDidEnd(touch);
-    }
+    this._sc_gestureTouchFinish(touch, false);
+  },
+
+  /**
+    Tells the gesture recognition system that an unassigned touch has cancelled.
+
+    This informs all of the gestures that the touch cancelled. The touch is
+    an unassigned touch as, if it were assigned to a gesture, it would have
+    been sent directly to the gesture, bypassing this view.
+  */
+  gestureTouchCancelled: function(touch) {
+    this._sc_gestureTouchFinish(touch, true);
   }
 };
