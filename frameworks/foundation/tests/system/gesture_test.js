@@ -25,29 +25,12 @@ test("Default Properties:", function () {
 
 /* Methods */
 
-// This method returns false.
-test("Method: touchIsInGesture", function () {
-  gesture = gesture.create();
-
-  equals(gesture.touchIsInGesture(), false, "The method returns");
-});
-
-
-// This method does almost nothing, but returns true by default to simplify custom gestures slightly.
-test("Method: touchStart", function () {
-  gesture = gesture.create();
-
-  ok(gesture.touchStart !== undefined, 'defined', 'defined', "The method is");
-  equals(gesture.touchStart(), true, "The method returns");
-});
-
 // This method sets _sc_isActive to true and calls gestureName + 'Start' on the view with the gesture and any given arguments.
 test("Method: start (_sc_isActive === false)", function () {
   var view = SC.View.create({
 
-    gestureStart: function (theGesture, arg1, arg2) {
+    gestureStart: function (arg1, arg2) {
       ok(true, 'called', 'called', "The method was");
-      equals(theGesture, gesture, "The gesture itself was passed as first argument");
       equals(arg1, 'a', "The first argument passed to start is passed to gestureStart and is");
       equals(arg2, 'b', "The second argument passed to start is passed to gestureStart and is");
     }
@@ -90,9 +73,8 @@ test("Method: start (_sc_isActive === true)", function () {
 test("Method: end (_sc_isActive === true)", function () {
   var view = SC.View.create({
 
-    gestureEnd: function (theGesture, arg1, arg2) {
+    gestureEnd: function (arg1, arg2) {
       ok(true, 'called', 'called', "The method was");
-      equals(theGesture, gesture, "The gesture itself was passed as first argument");
       equals(arg1, 'a', "The first argument passed to start is passed to gestureEnd and is");
       equals(arg2, 'b', "The second argument passed to start is passed to gestureEnd and is");
     }
@@ -136,9 +118,8 @@ test("Method: end (_sc_isActive === false)", function () {
 test("Method: change (_sc_isActive === true)", function () {
   var view = SC.View.create({
 
-    gestureChanged: function (theGesture, arg1, arg2) {
+    gestureChanged: function (arg1, arg2) {
       ok(true, 'called', 'called', "The method was");
-      equals(theGesture, gesture, "The gesture itself was passed as first argument");
       equals(arg1, 'a', "The first argument passed to start is passed to gestureChanged and is");
       equals(arg2, 'b', "The second argument passed to start is passed to gestureChanged and is");
     }
@@ -180,9 +161,8 @@ test("Method: change (_sc_isActive === false)", function () {
 test("Method: cancel (_sc_isActive === true)", function () {
   var view = SC.View.create({
 
-    gestureCancelled: function (theGesture, arg1, arg2) {
+    gestureCancelled: function (arg1, arg2) {
       ok(true, 'called', 'called', "The method was");
-      equals(theGesture, gesture, "The gesture itself was passed as first argument");
       equals(arg1, 'a', "The first argument passed to start is passed to gestureCancelled and is");
       equals(arg2, 'b', "The second argument passed to start is passed to gestureCancelled and is");
     }
@@ -226,9 +206,8 @@ test("Method: cancel (_sc_isActive === false)", function () {
 test("Method: trigger (_sc_isActive === true)", function () {
   var view = SC.View.create({
 
-    gesture: function (theGesture, arg1, arg2) {
+    gesture: function (arg1, arg2) {
       ok(true, 'called', 'called', "The method was");
-      equals(theGesture, gesture, "The gesture itself was passed as first argument");
       equals(arg1, 'a', "The first argument passed to start is passed to gestureChanged and is");
       equals(arg2, 'b', "The second argument passed to start is passed to gestureChanged and is");
     }
@@ -266,93 +245,10 @@ test("Method: trigger (_sc_isActive === false)", function () {
   expect(0);
 });
 
-// This method sets isTaken to true on the touch and calls makeTouchResponder on the touch.
-test("Method: take (isTaken === false)", function () {
-  var testTouch = SC.Touch.create({
-      identifier: 'test-touch'
-    }, {
-        makeTouchResponder: function () {
-          ok(true, 'called', 'called', "The method was");
-        }
-    });
-
+// This method does nothing.
+test("Method: touchSessionStarted", function () {
   gesture = gesture.create();
 
-  gesture.take(testTouch);
-  ok(gesture.take !== undefined, 'defined', 'defined', "The method is");
-
-  equals(testTouch.isTaken, true, "The touch has isTaken set to");
-
-  // Ensure 3 tests run.
-  expect(3);
+  ok(gesture.touchSessionStarted !== undefined, 'defined', 'defined', "The method is");
+  equals(gesture.touchSessionStarted(), undefined, "The method returns");
 });
-
-// This method does nothing if isTaken is already true.
-test("Method: take (isTaken === true)", function () {
-  var testTouch = SC.Touch.create({
-      identifier: 'test-touch'
-    }, {
-        makeTouchResponder: function () {
-          ok(true, 'called', 'called', "The method was");
-        }
-    });
-
-  gesture = gesture.create();
-
-  gesture.take(testTouch);
-
-  // Ensure 0 tests run.
-  expect(0);
-});
-
-// This method sets isTaken to false on the touch and calls makeTouchResponder on the touch's nextTouchResponder.
-test("Method: release (isTaken === true)", function () {
-  var testTouch = SC.Touch.create({
-      identifier: 'test-touch'
-    }, {
-      makeTouchResponder: function () {
-        ok(true, 'called', 'called', "The method was");
-      }
-    });
-
-  testTouch.nextTouchResponder = {};
-  testTouch.isTaken = true;
-
-  gesture = gesture.create();
-
-  gesture.release(testTouch);
-  ok(gesture.release !== undefined, 'defined', 'defined', "The method is");
-
-  equals(testTouch.isTaken, false, "The touch has isTaken set to");
-
-  // Ensure 3 tests run.
-  expect(3);
-});
-
-// This method does nothing if isTaken is already false.
-test("Method: release (isTaken === false)", function () {
-  var testTouch = SC.Touch.create({
-      identifier: 'test-touch'
-    }, {
-      makeTouchResponder: function () {
-        ok(true, 'called', 'called', "The method was");
-      }
-    });
-
-  testTouch.nextTouchResponder = {};
-
-  gesture = gesture.create();
-
-  gesture.release(testTouch);
-
-  // Ensure 0 tests run.
-  expect(0);
-});
-
-test("Method: discardTouch");
-test("Method: statusForTouch");
-test("Method: unassignedTouchDidStart");
-test("Method: unassignedTouchesDidChange");
-test("Method: unassignedTouchDidEnd");
-test("Method: interestedInTouch");
-test("Method: uninterestedInTouch");
