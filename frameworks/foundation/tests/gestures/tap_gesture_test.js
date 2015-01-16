@@ -21,7 +21,7 @@ module("SC.TapGesture", {
 test("Default Properties:", function () {
   gesture = gesture.create();
   equals(gesture.name, 'tap', "The default value of name is");
-  equals(gesture.tapInUnisonDelay, 75, "The default value of tapInUnisonDelay is");
+  equals(gesture.touchUnityDelay, 75, "The default value of touchUnityDelay is");
   equals(gesture.tapLengthDelay, 250, "The default value of tapLengthDelay is");
   equals(gesture.tapStartDelay, 150, "The default value of tapStartDelay is");
   equals(gesture.tapWiggle, 10, "The default value of tapWiggle is");
