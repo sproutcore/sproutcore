@@ -232,11 +232,15 @@ SC.mixin(SC.String, {
     @returns {String} the plural form of the string
   */
   pluralize: function(str) {
+      var inflectionConstants = SC.Locale.currentLocale.inflectionConstants;
+
+      // Fast path if there is no inflection constants for a locale
+      if (!inflectionConstants) return str.toString();
+
       var idx, len,
           compare = str.split(/\s/).pop(), //check only the last word of a string
           restOfString = str.replace(compare,''),
-          isCapitalized = compare.charAt(0).match(/[A-Z]/) ? true : false,
-          inflectionConstants = SC.Locale.currentLocale.inflectionConstants;
+          isCapitalized = compare.charAt(0).match(/[A-Z]/) ? true : false;
 
       compare = compare.toLowerCase();
       for (idx=0, len=inflectionConstants.UNCOUNTABLE.length; idx < len; idx++) {
@@ -269,11 +273,15 @@ SC.mixin(SC.String, {
     @returns {String} the singular form of the string
   */
   singularize: function(str) {
+      var inflectionConstants = SC.Locale.currentLocale.inflectionConstants;
+
+      // Fast path if there is no inflection constants for a locale
+      if (!inflectionConstants) return str.toString();
+
       var idx, len,
           compare = str.split(/\s/).pop(), //check only the last word of a string
           restOfString = str.replace(compare,''),
-          isCapitalized = compare.charAt(0).match(/[A-Z]/) ? true : false,
-          inflectionConstants = SC.Locale.currentLocale.inflectionConstants;
+          isCapitalized = compare.charAt(0).match(/[A-Z]/) ? true : false;
 
       compare = compare.toLowerCase();
       for (idx=0, len=inflectionConstants.UNCOUNTABLE.length; idx < len; idx++) {
