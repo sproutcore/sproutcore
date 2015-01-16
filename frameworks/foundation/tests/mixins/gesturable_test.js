@@ -73,9 +73,9 @@ test("Method: touchStart", function () {
     gestureTouchStart: CoreTest.stub('gestureTouchStart', SC.Gesturable.gestureTouchStart)
   });
 
-  var touch = SC.Touch.create({ identifier: 'test-touch' }, this);
+  var testTouch = SC.Touch.create({ identifier: 'test-touch' }, this);
 
-  view.touchStart(touch);
+  view.touchStart(testTouch);
   view.gestureTouchStart.expect(1);
 });
 
@@ -90,9 +90,10 @@ test("Method: touchesDragged", function () {
     gestureTouchesDragged: CoreTest.stub('gestureTouchesDragged', SC.Gesturable.gestureTouchesDragged)
   });
 
-  var touch = SC.Touch.create({ identifier: 'test-touch' }, this);
+  var testTouch = SC.Touch.create({ identifier: 'test-touch' }, this);
 
-  view.touchesDragged({}, [touch]);
+  view.touchStart(testTouch);
+  view.touchesDragged({}, [testTouch]);
   view.gestureTouchesDragged.expect(1);
 });
 
@@ -107,47 +108,53 @@ test("Method: touchEnd", function () {
     gestureTouchEnd: CoreTest.stub('gestureTouchEnd', SC.Gesturable.gestureTouchEnd)
   });
 
-  var touch = SC.Touch.create({ identifier: 'test-touch' }, this);
+  var testTouch = SC.Touch.create({ identifier: 'test-touch' }, this);
 
-  view.touchEnd(touch);
+  view.touchStart(testTouch);
+  view.touchEnd(testTouch);
   view.gestureTouchEnd.expect(1);
 });
 
-// This method initializes the isInteresting property of the touch and calls unassignedTouchDidStart
+// This method initializes the _sc_interestedGestures & _sc_touchesInSession properties and calls touchSessionStarted
 // on each gesture.
 test("Method: gestureTouchStart", function () {
   var testTouch = SC.Touch.create({ identifier: 'test-touch' }, this);
+
+  testTouch._isSeen = 0;
 
   view = view.create({
     gestures: [
       SC.Gesture.extend({
         name: 'a',
 
-        unassignedTouchDidStart: function (aTouch) {
+        touchSessionStarted: function (aTouch) {
           equals(aTouch, testTouch, "The touch is passed to the gesture. The touch param is");
-          equals(aTouch.isInteresting, 0, "The value of isInteresting is set on the touch to");
+          equals(aTouch._isSeen, 0, "The value of _isSeen is set on the touch to");
 
-          // Bump up isInteresting to assert the order of the gestures is correct.
-          aTouch.isInteresting = 1;
+          // Bump up _isSeen to assert the order of the gestures is correct.
+          aTouch._isSeen = 1;
         }
       }),
       SC.Gesture.extend({
         name: 'b',
 
-        unassignedTouchDidStart: function (aTouch) {
+        touchSessionStarted: function (aTouch) {
           equals(aTouch, testTouch, "The touch is passed to the gesture. The touch param is");
-          equals(aTouch.isInteresting, 1, "The value of isInteresting is set on the touch to");
+          equals(aTouch._isSeen, 1, "The value of _isSeen is set on the touch to");
         }
       })]
   });
 
-  view.gestureTouchStart(testTouch);
+  equals(view.gestureTouchStart(testTouch), true, "The method returns");
 
-  // Ensure 4 tests run.
-  expect(4);
+  same(view._sc_interestedGestures, view.gestures, "The value of view._sc_interestedGestures is");
+  same(view._sc_touchesInSession, [testTouch], "The value of view._sc_touchesInSession is");
+
+  // Ensure 7 tests run.
+  expect(7);
 });
 
-// This method calls unassignedTouchesDidChange on each gesture.
+// This method calls touchesMovedInSession on each gesture.
 test("Method: gestureTouchesDragged", function () {
   var testTouch = SC.Touch.create({ identifier: 'test-touch' }, this);
 
@@ -156,27 +163,28 @@ test("Method: gestureTouchesDragged", function () {
       SC.Gesture.extend({
         name: 'a',
 
-        unassignedTouchesDidChange: function (evt, touches) {
+        touchesMovedInSession: function (touches) {
           same(touches, [testTouch], "The touches are passed to the gesture. The touches param is");
         }
       }),
       SC.Gesture.extend({
         name: 'b',
 
-        unassignedTouchesDidChange: function (evt, touches) {
+        touchesMovedInSession: function (touches) {
           same(touches, [testTouch], "The touches are passed to the gesture. The touches param is");
         }
       })]
   });
 
-  view.gestureTouchesDragged({}, [testTouch]);
+  view.gestureTouchStart(testTouch);
+  equals(view.gestureTouchesDragged({}, [testTouch]), undefined, "The method returns");
 
-  // Ensure 2 tests run.
-  expect(2);
+  // Ensure 3 tests run.
+  expect(3);
 });
 
 
-// This method calls unassignedTouchDidEnd on each gesture.
+// This method calls touchEndedInSession on each gesture.
 test("Method: gestureTouchEnd", function () {
   var testTouch = SC.Touch.create({ identifier: 'test-touch' }, this);
 
@@ -185,22 +193,23 @@ test("Method: gestureTouchEnd", function () {
       SC.Gesture.extend({
         name: 'a',
 
-        unassignedTouchDidEnd: function (touch) {
+        touchEndedInSession: function (touch) {
           equals(touch, testTouch, "The touch is passed to the gesture. The touch param is");
         }
       }),
       SC.Gesture.extend({
         name: 'b',
 
-        unassignedTouchDidEnd: function (touch) {
+        touchEndedInSession: function (touch) {
           equals(touch, testTouch, "The touch is passed to the gesture. The touch param is");
           console.log(touch);
         }
       })]
   });
 
-  view.gestureTouchEnd(testTouch);
+  view.gestureTouchStart(testTouch);
+  equals(view.gestureTouchEnd(testTouch), undefined, "The method returns");
 
-  // Ensure 2 tests run.
-  expect(2);
+  // Ensure 3 tests run.
+  expect(3);
 });
