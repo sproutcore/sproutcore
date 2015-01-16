@@ -405,11 +405,6 @@ SC.View.reopen(
 
       // Always run the animation asynchronously so that the original layout is guaranteed to be applied to the DOM.
       this.invokeNext('_animate');
-
-      // Route.
-      if (this.get('viewState') === SC.CoreView.ATTACHED_SHOWN) {
-        this.set('viewState', SC.CoreView.ATTACHED_SHOWN_ANIMATING);
-      }
     } else if (!optionsDidChange) {
       this.invokeNext(function () {
         this.runAnimationCallback(options, null, false);
@@ -433,6 +428,11 @@ SC.View.reopen(
 
       // Apply the animation layout.
       this.set('layout', animationLayout);
+
+      // Route.
+      if (this.get('viewState') === SC.CoreView.ATTACHED_SHOWN) {
+        this.set('viewState', SC.CoreView.ATTACHED_SHOWN_ANIMATING);
+      }
     }
   },
 

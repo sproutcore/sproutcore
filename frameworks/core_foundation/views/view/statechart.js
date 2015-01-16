@@ -332,11 +332,12 @@ SC.CoreView.reopen(
   /** @private Adopt this view action. */
   _doAdopt: function (parentView, beforeView) {
     var curParentView = this.get('parentView'),
-      handled = true;
+      handled = true,
+      state = this.get('viewState');
 
     //@if (debug)
     if (SC.LOG_VIEW_STATES || this.SC_LOG_VIEW_STATE) {
-      SC.Logger.log('%c%@ — _doAdopt(%@, %@)'.fmt(this, parentView, beforeView), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
+      SC.Logger.log('%c%@ — _doAdopt(%@, %@): curParentView: %@'.fmt(this, parentView, beforeView, curParentView), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
     }
     //@endif
 
@@ -353,11 +354,11 @@ SC.CoreView.reopen(
 
     // You can adopt childViews that have you set as their parent (i.e. created
     // with createChildView()), but have not yet been fully adopted.
-    if (!curParentView || this.get('childViews').indexOf(this) < 0) {
+    var siblings = parentView.get('childViews');
+    if (!curParentView || siblings.indexOf(this) < 0) {
       var idx,
-        childViews = parentView.get('childViews'),
         parentViewState = parentView.get('viewState'),
-        parentNode, nextNode, nextView, siblings;
+        parentNode, nextNode, nextView;
 
       // Notify that the child view will be added to the parent view.
       if (parentView.willAddChild) { parentView.willAddChild(this, beforeView); }
@@ -367,10 +368,10 @@ SC.CoreView.reopen(
       this.set('parentView', parentView);
 
       // Add to the new parent's childViews array.
-      if (childViews.needsClone) { parentView.set(childViews = []); }
-      idx = (beforeView) ? childViews.indexOf(beforeView) : childViews.length;
-      if (idx < 0) { idx = childViews.length; }
-      childViews.insertAt(idx, this);
+      if (siblings.needsClone) { parentView.set('childViews', []); }
+      idx = (beforeView) ? siblings.indexOf(beforeView) : siblings.length;
+      if (idx < 0) { idx = siblings.length; }
+      siblings.insertAt(idx, this);
 
       // Pass the current designMode to the view (and its children).
       this.updateDesignMode(this.get('designMode'), parentView.get('designMode'));
@@ -379,7 +380,7 @@ SC.CoreView.reopen(
       this._adopted(beforeView);
 
       // When a view is adopted, it should go to the same state as its new parent.
-      switch (this.get('viewState')) {
+      switch (state) {
       case SC.CoreView.UNRENDERED:
         switch (parentViewState) {
         case SC.CoreView.UNRENDERED:
@@ -397,7 +398,6 @@ SC.CoreView.reopen(
           break;
         default:
           parentNode = parentView.get('containerLayer');
-          siblings = parentView.get('childViews');
           nextView = siblings.objectAt(siblings.indexOf(this) + 1);
           nextNode = (nextView) ? nextView.get('layer') : null;
 
@@ -412,13 +412,18 @@ SC.CoreView.reopen(
           break;
         default:
           parentNode = parentView.get('containerLayer');
-          siblings = parentView.get('childViews');
           nextView = siblings.objectAt(siblings.indexOf(this) + 1);
           nextNode = (nextView) ? nextView.get('layer') : null;
 
           this._doAttach(parentNode, nextNode);
         }
       }
+
+    // Adopting a view that is building out.
+    } else if (state === SC.CoreView.ATTACHED_BUILDING_OUT) {
+      this._doAttach();
+
+    // Can't do anything.
     } else {
       handled = false;
     }
@@ -481,7 +486,14 @@ SC.CoreView.reopen(
       // Note: We can be in ATTACHED_BUILDING_OUT state without a transition out while we wait for child views.
       if (this.get('transitionOut')) {
         // Cancel the building out transition (in place if we are going to switch to transitioning back in).
-        this.cancelAnimation(transitionIn ? SC.LayoutState.CURRENT : undefined);
+        // this.cancelAnimation(transitionIn ? SC.LayoutState.CURRENT : undefined);
+        this.cancelAnimation();
+
+        //@if (debug)
+        if (SC.LOG_VIEW_STATES || this.SC_LOG_VIEW_STATE) {
+          SC.Logger.log('%c       — cancelling build out outright'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
+        }
+        //@endif
 
         // Set the proper state.
         this._gotoAttachedShownState();
@@ -635,15 +647,15 @@ SC.CoreView.reopen(
     // Result: If it has a build out transition, swap to it. Otherwise, cancel.
     case SC.CoreView.ATTACHED_BUILDING_IN:
       // Cancel the build in transition.
-      if (transitionOut) {
-        //@if (debug)
-        if (SC.LOG_VIEW_STATES || this.SC_LOG_VIEW_STATE) {
-          SC.Logger.log('%c       — cancelling build in in place'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
-        }
-        //@endif
+      // if (transitionOut) {
+      //   //@if (debug)
+      //   if (SC.LOG_VIEW_STATES || this.SC_LOG_VIEW_STATE) {
+      //     SC.Logger.log('%c       — cancelling build in in place'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
+      //   }
+      //   //@endif
 
-        this.cancelAnimation(SC.LayoutState.CURRENT);
-      } else {
+      //   this.cancelAnimation(SC.LayoutState.CURRENT);
+      // } else {
         //@if (debug)
         if (SC.LOG_VIEW_STATES || this.SC_LOG_VIEW_STATE) {
           SC.Logger.log('%c       — cancelling build in outright'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
@@ -651,7 +663,7 @@ SC.CoreView.reopen(
         //@endif
 
         this.cancelAnimation();
-      }
+      // }
 
       // Set the proper state.
       this._gotoAttachedShownState();
@@ -1390,7 +1402,11 @@ SC.CoreView.reopen(
 
     // Update the state and children state. The children are updated top-down so that invalid state
     // children allow us to bail out early.
-    this._gotoUnattachedState();
+    // if (this.get('parentView')) {
+    //   this._gotoAttachedPartialState();
+      this._gotoUnattachedState();
+    // }
+
     this._callOnChildViews('_parentDidRender', true, notifyStack);
 
     this._sc_addRenderedStateObservers();
