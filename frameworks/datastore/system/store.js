@@ -1384,8 +1384,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     unload records this way.
 
     @param {SC.Record|Array} recordTypes class or array of classes
-    @param {Array} ids (optional) ids to unload
-    @param {Array} storeKeys (optional) store keys to unload
+    @param {Array} [ids] ids to unload
+    @param {Array} [storeKeys] store keys to unload
     @returns {SC.Store} receiver
   */
   unloadRecords: function(recordTypes, ids, storeKeys, newStatus) {
@@ -2225,35 +2225,38 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     @param {SC.Record} recordTypes the record type or array of record types
     @param {Array} dataHashes array of data hashes to update
-    @param {Array} ids optional array of ids.  if not passed lookup on hashes
+    @param {Array} [ids] array of ids.  if not passed lookup on hashes
     @returns {Array} store keys assigned to these ids
   */
-  loadRecords: function(recordTypes, dataHashes, ids) {
+  // TODO: No reason for first argument to be an array. The developer can just call loadRecords multiple times with different record type each time. Would save us the need to check if recordTypes is an Array or not.
+  loadRecords: function (recordTypes, dataHashes, ids) {
     var isArray = SC.typeOf(recordTypes) === SC.T_ARRAY,
         len     = dataHashes.get('length'),
         ret     = [],
-        recordType, id, primaryKey, idx, dataHash;
+        recordType,
+        id, primaryKey, idx, dataHash;
 
     // save lookup info
     if (!isArray) {
       recordType = recordTypes || SC.Record;
-      primaryKey = recordType.prototype.primaryKey ;
+      primaryKey = recordType.prototype.primaryKey;
     }
 
     // push each record
-    for(idx=0;idx<len;idx++) {
+    for (idx = 0; idx < len; idx++) {
       dataHash = dataHashes.objectAt(idx);
       if (isArray) {
         recordType = recordTypes.objectAt(idx) || SC.Record;
         primaryKey = recordType.prototype.primaryKey ;
       }
-      id = (ids) ? ids.objectAt(idx) : dataHash[primaryKey];
-      ret[idx] = this.loadRecord(recordType, dataHash, id);
 
+      id = (ids) ? ids.objectAt(idx) : dataHash[primaryKey];
+
+      ret[idx] = this.loadRecord(recordType, dataHash, id);
     }
 
     // return storeKeys
-    return ret ;
+    return ret;
   },
 
   /**
@@ -2590,7 +2593,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     For example,
 
-        storeKeys = store.loadRecords(body.contacts);
+        storeKeys = store.loadRecords(MyApp.SomeType, body.contacts);
         store.dataSourceDidFetchQuery(query, storeKeys);
 
     # Automatic updates
