@@ -143,7 +143,6 @@ SC.Gesturable = {
     @param {Boolean} wasCancelled Whether the touch was cancelled or not (i.e. ended normally).
   */
   _sc_gestureTouchFinish: function (touch, wasCancelled) {
-    // console.log("%@ - _sc_gestureTouchFinish".fmt(this));
     var touchesInSession = this._sc_touchesInSession,
         touchIndexInSession = touchesInSession.indexOf(touch);
 
@@ -323,23 +322,22 @@ SC.Gesturable = {
   },
 
   /**
-    Tells the gesture recognizing system about a new touch.
+    Tells the gesture recognizing system about a new touch. This notifies all gestures of a new
+    touch session starting (if there were no previous touches) or notifies all interested gestures
+    that a touch has been added.
 
-    This informs all gestures that a new touch, "unassigned" to any gesture,
-    has been located. Later, each gesture has an opportunity to claim the touch.
-
-    Once they have claimed the touch, further events will go _directly_ to them—
-    this view will cease receiving the touchesDragged and will not receive a touchEnd.
+    As touches are added beyond the first touch, gestures may "lose interest" in the touch session.
+    For example, a gesture may explicitly want only a single touch and if a second touch appears,
+    the gesture may not want any further updates on this touch session (even if the second touch
+    ends again).
 
     @param {SC.Touch} touch The touch that started.
     @returns {Boolean} Whether any gesture is interested in the touch or not.
   */
   gestureTouchStart: function (touch) {
-    // touch.isInteresting = 0;
-
     var interestedGestures = this._sc_interestedGestures,
         touchesInSession = this._sc_touchesInSession,
-        addedTouchToSession = false,
+        claimedTouch = false,
         idx;
 
     // Instantiate once.
@@ -360,6 +358,9 @@ SC.Gesturable = {
         interestedGestures.push(gesture);
       }
 
+      // Keep this touch.
+      claimedTouch = true;
+
     // Only check gestures that are interested.
     } else {
       // Loop through the gestures in reverse, as the list may be mutated.
@@ -370,7 +371,10 @@ SC.Gesturable = {
         // Keep only the gestures still interested in the touch.
         isInterested = interestedGesture.touchAddedToSession(touch, touchesInSession);
 
-        if (!isInterested) {
+        if (isInterested) {
+          // Keep this touch.
+          claimedTouch = true;
+        } else {
           // Tell the gesture that the touch session has ended for it.
           interestedGesture.touchSessionCancelled();
 
@@ -379,22 +383,20 @@ SC.Gesturable = {
       }
     }
 
-    // If any gesture is interested or still interested, increment our list of interesting touches
-    // that are being acted upon in this session.
-    if (interestedGestures.length > 0) {
+    // If any gesture is interested in the new touch. Add it to the list of touches in the session.
+    if (claimedTouch) {
       touchesInSession.push(touch);
-
-      addedTouchToSession = true;
     }
 
-    return addedTouchToSession;
+    return claimedTouch;
   },
 
   /**
-    Tells the gesture recognition system that some unassigned touches have moved.
+    Tells the gesture recognition system that touches have moved.
 
-    This informs all interested gestures that these touches have changed. All such touches
-    will be "unassigned" because all "assigned" touches already get sent directly to the gesture.
+    @param {SC.Event} evt The touch event.
+    @param {Array} touches The touches previously claimed by this view.
+    @returns {void}
   */
   gestureTouchesDragged: function (evt, touches) {
     var gestures = this._sc_interestedGestures,
@@ -411,6 +413,8 @@ SC.Gesturable = {
         gesture.touchSessionCancelled();
 
         gestures.replace(i, 1);
+
+        // TODO: When there are no more interested gestures? Do what with the touches? Anything?
       }
     }
   },
