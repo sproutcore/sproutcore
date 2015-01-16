@@ -133,6 +133,11 @@ test("Method: gestureTouchStart", function () {
 
           // Bump up _isSeen to assert the order of the gestures is correct.
           aTouch._isSeen = 1;
+        },
+
+        touchAddedToSession: function (aTouch, touchesAlreadyInSession) {
+          equals(aTouch, testTouch2, "The touch is passed to the gesture. The touch param is");
+          same(touchesAlreadyInSession, [testTouch], "The touchesAlreadyInSession is passed to the gesture. The touchesAlreadyInSession param is");
         }
       }),
       SC.Gesture.extend({
@@ -141,6 +146,11 @@ test("Method: gestureTouchStart", function () {
         touchSessionStarted: function (aTouch) {
           equals(aTouch, testTouch, "The touch is passed to the gesture. The touch param is");
           equals(aTouch._isSeen, 1, "The value of _isSeen is set on the touch to");
+        },
+
+        touchAddedToSession: function (aTouch, touchesAlreadyInSession) {
+          equals(aTouch, testTouch2, "The touch is passed to the gesture. The touch param is");
+          same(touchesAlreadyInSession, [testTouch], "The touchesAlreadyInSession is passed to the gesture. The touchesAlreadyInSession param is");
         }
       })]
   });
@@ -152,6 +162,13 @@ test("Method: gestureTouchStart", function () {
 
   // Ensure 7 tests run.
   expect(7);
+
+  // Add a second touch.
+  var testTouch2 = SC.Touch.create({ identifier: 'test-touch-2' }, this);
+  view.gestureTouchStart(testTouch2);
+
+  // Ensure 11 tests run.
+  expect(11);
 });
 
 // This method calls touchesMovedInSession on each gesture.
@@ -193,16 +210,17 @@ test("Method: gestureTouchEnd", function () {
       SC.Gesture.extend({
         name: 'a',
 
-        touchEndedInSession: function (touch) {
+        touchEndedInSession: function (touch, touchesStillInSession) {
           equals(touch, testTouch, "The touch is passed to the gesture. The touch param is");
+          same(touchesStillInSession, [], "The touchesStillInSession is passed to the gesture. The touchesStillInSession param is");
         }
       }),
       SC.Gesture.extend({
         name: 'b',
 
-        touchEndedInSession: function (touch) {
+        touchEndedInSession: function (touch, touchesStillInSession) {
           equals(touch, testTouch, "The touch is passed to the gesture. The touch param is");
-          console.log(touch);
+          same(touchesStillInSession, [], "The touchesStillInSession is passed to the gesture. The touchesStillInSession param is");
         }
       })]
   });
@@ -210,6 +228,6 @@ test("Method: gestureTouchEnd", function () {
   view.gestureTouchStart(testTouch);
   equals(view.gestureTouchEnd(testTouch), undefined, "The method returns");
 
-  // Ensure 3 tests run.
-  expect(3);
+  // Ensure 5 tests run.
+  expect(5);
 });
