@@ -17,24 +17,24 @@
 
   Gestures can call the following methods on their views:
 
-  - [gestureName](gesture, args...): called when the gesture has occurred. This is
+  - [gestureName](args...): called when the gesture has occurred. This is
     useful for event-style gestures, where you aren't interested in when it starts or
     ends, but just that it has occurred. SC.SwipeGesture triggers this after the
     swipe has moved a minimum amount—40px by default.
 
-  - [gestureName]Start(gesture, args...): called when the gesture is first recognized.
+  - [gestureName]Start(args...): called when the gesture is first recognized.
     For instance, a swipe gesture may be recognized after the finger has moved a
     minimum distance in a horizontal.
 
-  - [gestureName]Changed(gesture, args...): called when some property of the gesture
+  - [gestureName]Changed(args...): called when some property of the gesture
     has changed. For instance, this may be called continuously as the user swipes as
     the swipe's distance changes.
 
-  - [gestureName]Cancelled(gesture, args...): called when a gesture, for one reason
+  - [gestureName]Cancelled(args...): called when a gesture, for one reason
     or another, is no longer recognized. For instance, a horizontal swipe gesture
     could cancel if the user moves too far in a vertical direction.
 
-  - [gestureName]End(gesture, args...): called when a gesture ends. A swipe would end
+  - [gestureName]End(args...): called when a gesture ends. A swipe would end
     when the user lifts their finger.
 
   Gesture Lifecycle
@@ -191,7 +191,6 @@ SC.Gesture = SC.Object.extend({
     if (!this._sc_isActive) {
       this._sc_isActive = true;
 
-      // Fast arguments access. Don't materialize the `arguments` object, it is costly.
       // var argumentsLength = arguments.length,
       //     args = new Array(argumentsLength + 1);
 
@@ -202,6 +201,7 @@ SC.Gesture = SC.Object.extend({
       // var act = this.name + "Start";
       // if (this.view[act]) this.view[act].apply(this.view, args);
 
+      // Fast arguments access. Don't materialize the `arguments` object, it is costly.
       var argumentsLength = arguments.length,
           args = new Array(argumentsLength);
 
@@ -223,7 +223,6 @@ SC.Gesture = SC.Object.extend({
     if (this._sc_isActive) {
       this._sc_isActive = false;
 
-      // Fast arguments access. Don't materialize the `arguments` object, it is costly.
       // var argumentsLength = arguments.length,
       //     args = new Array(argumentsLength + 1);
 
@@ -234,6 +233,7 @@ SC.Gesture = SC.Object.extend({
       // var act = this.name + "End";
       // if (this.view[act]) this.view[act].apply(this.view, args);
 
+      // Fast arguments access. Don't materialize the `arguments` object, it is costly.
       var argumentsLength = arguments.length,
           args = new Array(argumentsLength);
 
@@ -253,7 +253,6 @@ SC.Gesture = SC.Object.extend({
   */
   change: function() {
     if (this._sc_isActive) {
-      // Fast arguments access. Don't materialize the `arguments` object, it is costly.
       // var argumentsLength = arguments.length,
       //     args = new Array(argumentsLength + 1);
 
@@ -264,6 +263,7 @@ SC.Gesture = SC.Object.extend({
       // var act = this.name + "Changed";
       // if (this.view[act]) this.view[act].apply(this.view, args);
 
+      // Fast arguments access. Don't materialize the `arguments` object, it is costly.
       var argumentsLength = arguments.length,
           args = new Array(argumentsLength);
 
@@ -288,7 +288,6 @@ SC.Gesture = SC.Object.extend({
     if (this._sc_isActive) {
       this._sc_isActive = false;
 
-      // Fast arguments access. Don't materialize the `arguments` object, it is costly.
       // var argumentsLength = arguments.length,
       //     args = new Array(argumentsLength + 1);
 
@@ -299,6 +298,7 @@ SC.Gesture = SC.Object.extend({
       // var act = this.name + "Cancelled";
       // if (this.view[act]) this.view[act].apply(this.view, args);
 
+      // Fast arguments access. Don't materialize the `arguments` object, it is costly.
       var argumentsLength = arguments.length,
           args = new Array(argumentsLength);
 
@@ -331,6 +331,7 @@ SC.Gesture = SC.Object.extend({
     // // Unshift this to the front of arguments.
     // args[0] = this;
     // for (var i = 0, len = argumentsLength; i < len; i++) { args[i + 1] = arguments[i]; }
+
     for (var i = 0, len = argumentsLength; i < len; i++) { args[i] = arguments[i]; }
 
     var act = this.name;
@@ -436,7 +437,7 @@ SC.Gesture = SC.Object.extend({
 
   /**
     @param {SC.Touch} touch The touch to be removed from the session.
-    @param {Array} touchesInSession The touches in the session.
+    @param {Array} touchesInSession The touches still remaining in the session.
     @returns {Boolean} True if the gesture is still interested in the touch session; false to stop getting notified for any further touch changes in the touch session.
     */
   touchCancelledInSession: function (touch, touchesInSession) {
@@ -445,7 +446,7 @@ SC.Gesture = SC.Object.extend({
 
   /**
     @param {SC.Touch} touch The touch to be removed from the session.
-    @param {Array} touchesInSession The touches in the session.
+    @param {Array} touchesInSession The touches still remaining in the session.
     @returns {Boolean} True if the gesture is still interested in the touch session; false to stop getting notified for any further touch changes in the touch session.
     */
   touchEndedInSession: function (touch, touchesInSession) {
