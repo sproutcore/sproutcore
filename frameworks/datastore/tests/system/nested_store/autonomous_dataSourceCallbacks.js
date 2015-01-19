@@ -163,7 +163,7 @@ test("Confirm that dataSourceDidCancel switched the records to the right states"
   }catch(error){
     msg=error.message;
   }
-  equals(SC.Record.BAD_STATE_ERROR.message, msg,
+  equals(SC.Record.BAD_STATE_ERROR.toString(), msg,
     "should throw the following error ");
 
   store.dataSourceDidCancel(storeKey2);
@@ -196,7 +196,7 @@ test("Confirm that dataSourceDidCancel switched the records to the right states"
   }catch(error){
     msg=error.message;
   }
-  equals(SC.Record.BAD_STATE_ERROR.message, msg,
+  equals(SC.Record.BAD_STATE_ERROR.toString(), msg,
     "should throw the following error ");
 
 });
@@ -210,7 +210,7 @@ test("Confirm that dataSourceDidComplete switched the records to the right state
   }catch(error){
     msg=error.message;
   }
-  equals(SC.Record.BAD_STATE_ERROR.message, msg,
+  equals(SC.Record.BAD_STATE_ERROR.toString(), msg,
     "should throw the following error ");
 
   try{
@@ -219,7 +219,7 @@ test("Confirm that dataSourceDidComplete switched the records to the right state
   }catch(error){
     msg=error.message;
   }
-  equals(SC.Record.BAD_STATE_ERROR.message, msg,
+  equals(SC.Record.BAD_STATE_ERROR.toString(), msg,
     "should throw the following error ");
 
   store.dataSourceDidComplete(storeKey11);
@@ -237,7 +237,7 @@ test("Confirm that dataSourceDidDestroy switched the records to the right states
   }catch(error){
     msg=error.message;
   }
-  equals(SC.Record.BAD_STATE_ERROR.message, msg,
+  equals(SC.Record.BAD_STATE_ERROR.toString(), msg,
     "should throw the following error ");
 
   store.dataSourceDidDestroy(storeKey13);
@@ -255,7 +255,7 @@ test("Confirm that dataSourceDidError switched the records to the right states",
   }catch(error){
     msg = error.message;
   }
-  equals(SC.Record.BAD_STATE_ERROR.message, msg,
+  equals(SC.Record.BAD_STATE_ERROR.toString(), msg,
     "should throw the following error ");
 
   store.dataSourceDidError(storeKey15, SC.Record.BAD_STATE_ERROR);

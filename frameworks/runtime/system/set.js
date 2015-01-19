@@ -195,7 +195,7 @@ SC.Set = SC.mixin({},
     @returns {SC.Set}
   */
   clear: function() {
-    if (this.isFrozen) throw SC.FROZEN_ERROR;
+    if (this.isFrozen) throw new Error(SC.FROZEN_ERROR);
     this.length = 0;
 
     return this;
@@ -276,7 +276,7 @@ SC.Set = SC.mixin({},
     @returns {SC.Set} receiver
   */
   add: function(obj) {
-    if (this.isFrozen) throw SC.FROZEN_ERROR;
+    if (this.isFrozen) throw new Error(SC.FROZEN_ERROR);
 
     // Implementation note:  SC.none() and SC.hashFor() is inlined because sets are
     // fundamental in SproutCore, and the inlined code is ~ 25% faster than
@@ -309,7 +309,7 @@ SC.Set = SC.mixin({},
     @returns {SC.Set} receiver
   */
   addEach: function(objects) {
-    if (this.isFrozen) throw SC.FROZEN_ERROR;
+    if (this.isFrozen) throw new Error(SC.FROZEN_ERROR);
     if (!objects || !objects.isEnumerable) {
       throw new Error("%@.addEach must pass enumerable".fmt(this));
     }
@@ -339,7 +339,7 @@ SC.Set = SC.mixin({},
     @returns {SC.Set} receiver
   */
   remove: function(obj) {
-    if (this.isFrozen) throw SC.FROZEN_ERROR;
+    if (this.isFrozen) throw new Error(SC.FROZEN_ERROR);
 
     // Implementation note:  SC.none() and SC.hashFor() are inlined because
     // sets are fundamental in SproutCore, and the inlined code is ~ 25%
@@ -385,7 +385,7 @@ SC.Set = SC.mixin({},
     @returns {Object} an object from the set or null
   */
   pop: function() {
-    if (this.isFrozen) throw SC.FROZEN_ERROR;
+    if (this.isFrozen) throw new Error(SC.FROZEN_ERROR);
     var obj = (this.length > 0) ? this[this.length-1] : null ;
     this.remove(obj) ;
     return obj ;
@@ -398,7 +398,7 @@ SC.Set = SC.mixin({},
     @returns {SC.Set} receiver
   */
   removeEach: function(objects) {
-    if (this.isFrozen) throw SC.FROZEN_ERROR;
+    if (this.isFrozen) throw new Error(SC.FROZEN_ERROR);
     if (!objects || !objects.isEnumerable) {
       throw new Error("%@.addEach must pass enumerable".fmt(this));
     }

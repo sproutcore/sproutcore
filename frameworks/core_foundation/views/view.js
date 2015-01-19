@@ -2311,15 +2311,11 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
         lcY = layout.centerY;
 
     if (lW === AUTO) {
-      error = SC.Error.desc(("%@.layout() cannot use width:auto if staticLayout is disabled").fmt(this), "%@".fmt(this), -1);
-      SC.Logger.error(error.toString());
-      throw error;
+      SC.throw(("%@.layout() cannot use width:auto if staticLayout is disabled").fmt(this), "%@".fmt(this), -1);
     }
 
     if (lH === AUTO) {
-      error = SC.Error.desc(("%@.layout() cannot use height:auto if staticLayout is disabled").fmt(this), "%@".fmt(this), -1);
-      SC.Logger.error(error.toString());
-      throw error;
+      SC.throw(("%@.layout() cannot use height:auto if staticLayout is disabled").fmt(this), "%@".fmt(this), -1);
     }
 
     if (!pdim) { pdim = this.computeParentDimensions(layout); }

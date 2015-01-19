@@ -12,7 +12,7 @@
   @constant
   @type Error
 */
-SC.SCANNER_OUT_OF_BOUNDS_ERROR = new Error("Out of bounds.");
+SC.SCANNER_OUT_OF_BOUNDS_ERROR = SC.$error("Out of bounds.");
 
 /**
   Standard error thrown by `SC.Scanner` when  you pass a value not an integer.
@@ -21,7 +21,7 @@ SC.SCANNER_OUT_OF_BOUNDS_ERROR = new Error("Out of bounds.");
   @constant
   @type Error
 */
-SC.SCANNER_INT_ERROR = new Error("Not an int.");
+SC.SCANNER_INT_ERROR = SC.$error("Not an int.");
 
 /**
   Standard error thrown by `SC.SCanner` when it cannot find a string to skip.
@@ -30,7 +30,7 @@ SC.SCANNER_INT_ERROR = new Error("Not an int.");
   @constant
   @type Error
 */
-SC.SCANNER_SKIP_ERROR = new Error("Did not find the string to skip.");
+SC.SCANNER_SKIP_ERROR = SC.$error("Did not find the string to skip.");
 
 /**
   Standard error thrown by `SC.Scanner` when it can any kind a string in the
@@ -40,7 +40,7 @@ SC.SCANNER_SKIP_ERROR = new Error("Did not find the string to skip.");
   @constant
   @type Error
 */
-SC.SCANNER_SCAN_ARRAY_ERROR = new Error("Did not find any string of the given array to scan.");
+SC.SCANNER_SCAN_ARRAY_ERROR = SC.$error("Did not find any string of the given array to scan.");
 
 /**
   Standard error thrown when trying to compare two dates in different
@@ -50,7 +50,7 @@ SC.SCANNER_SCAN_ARRAY_ERROR = new Error("Did not find any string of the given ar
   @constant
   @type Error
 */
-SC.DATETIME_COMPAREDATE_TIMEZONE_ERROR = new Error("Can't compare the dates of two DateTimes that don't have the same timezone.");
+SC.DATETIME_COMPAREDATE_TIMEZONE_ERROR = SC.$error("Can't compare the dates of two DateTimes that don't have the same timezone.");
 
 /**
   Standard ISO8601 date format
@@ -106,7 +106,7 @@ SC.Scanner = SC.Object.extend(
     @returns {String} The characters
   */
   scan: function(len) {
-    if (this.scanLocation + len > this.length) throw SC.SCANNER_OUT_OF_BOUNDS_ERROR;
+    if (this.scanLocation + len > this.length) SC.SCANNER_OUT_OF_BOUNDS_ERROR.throw();
     var str = this.string.substr(this.scanLocation, len);
     this.scanLocation += len;
     return str;
@@ -125,7 +125,7 @@ SC.Scanner = SC.Object.extend(
     var str = this.scan(max_len);
     var re = new RegExp("^\\d{" + min_len + "," + max_len + "}");
     var match = str.match(re);
-    if (!match) throw SC.SCANNER_INT_ERROR;
+    if (!match) SC.SCANNER_INT_ERROR.throw();
     if (match[0].length < max_len) {
       this.scanLocation += match[0].length - max_len;
     }
@@ -140,7 +140,7 @@ SC.Scanner = SC.Object.extend(
     @returns {Boolean} YES if the given string was successfully scanned, NO otherwise
   */
   skipString: function(str) {
-    if (this.scan(str.length) !== str) throw SC.SCANNER_SKIP_ERROR;
+    if (this.scan(str.length) !== str) SC.SCANNER_SKIP_ERROR.throw();
     return YES;
   },
 
@@ -158,7 +158,7 @@ SC.Scanner = SC.Object.extend(
       }
       this.scanLocation -= ary[i].length;
     }
-    throw SC.SCANNER_SCAN_ARRAY_ERROR;
+    SC.SCANNER_SCAN_ARRAY_ERROR.throw();
   }
 
 });
@@ -1227,7 +1227,7 @@ SC.DateTime.mixin(SC.Comparable,
   */
   compareDate: function(a, b) {
     if (SC.none(a) || SC.none(b)) throw new Error("You must pass two valid dates to compareDate()");
-    if (a.get('timezone') !== b.get('timezone')) throw SC.DATETIME_COMPAREDATE_TIMEZONE_ERROR;
+    if (a.get('timezone') !== b.get('timezone')) SC.DATETIME_COMPAREDATE_TIMEZONE_ERROR.throw();
     var ma = a.adjust({hour: 0}).get('milliseconds');
     var mb = b.adjust({hour: 0}).get('milliseconds');
     return ma < mb ? -1 : ma === mb ? 0 : 1;
@@ -1273,7 +1273,7 @@ SC.DateTime.mixin(SC.Comparable,
       divider = 6048e5; // week: 1000 * 60 * 60 * 24 * 7
       break;
     default:
-      throw format + " is not supported";
+      throw new Error(format + " is not supported");
     }
 
     var ret = diff/divider;

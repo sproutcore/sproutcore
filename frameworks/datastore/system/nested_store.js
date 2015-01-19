@@ -278,7 +278,7 @@ SC.NestedStore = SC.Store.extend(
   reset: function() {
     // requires a pstore to reset
     var parentStore = this.get('parentStore');
-    if (!parentStore) throw SC.Store.NO_PARENT_STORE_ERROR;
+    if (!parentStore) SC.Store.NO_PARENT_STORE_ERROR.throw();
 
     // inherit data store from parent store.
     this.dataHashes = SC.beget(parentStore.dataHashes);
@@ -337,7 +337,7 @@ SC.NestedStore = SC.Store.extend(
 
   /** @private - adapt for nested store */
   chainAutonomousStore: function(attrs, newStoreClass) {
-    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+    SC.Store.NESTED_STORE_UNSUPPORTED_ERROR.throw();
   },
 
   // ..........................................................
@@ -616,7 +616,7 @@ SC.NestedStore = SC.Store.extend(
         // status hierarchy, so even though lower stores would complete the
         // retrieval, the upper layers would never inherit the new statuses.
         if (status & K.DIRTY) {
-          throw SC.Store.NESTED_STORE_RETRIEVE_DIRTY_ERROR;
+          SC.Store.NESTED_STORE_RETRIEVE_DIRTY_ERROR.throw();
         }
         else {
           // Not dirty?  Then abandon any status we had set (to re-establish
@@ -661,7 +661,7 @@ SC.NestedStore = SC.Store.extend(
     if( this.get( "dataSource" ) )
       return sc_super();
     else
-      throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+      SC.Store.NESTED_STORE_UNSUPPORTED_ERROR.throw();
   },
 
   /** @private - adapt for nested store */
@@ -669,7 +669,7 @@ SC.NestedStore = SC.Store.extend(
     if( this.get( "dataSource" ) )
       return sc_super();
     else
-      throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+      SC.Store.NESTED_STORE_UNSUPPORTED_ERROR.throw();
   },
 
   /** @private - adapt for nested store */
@@ -677,7 +677,7 @@ SC.NestedStore = SC.Store.extend(
     if( this.get( "dataSource" ) )
       return sc_super();
     else
-      throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+      SC.Store.NESTED_STORE_UNSUPPORTED_ERROR.throw();
   },
 
   /** @private - adapt for nested store */
@@ -685,7 +685,7 @@ SC.NestedStore = SC.Store.extend(
     if( this.get( "dataSource" ) )
       return sc_super();
     else
-      throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+      SC.Store.NESTED_STORE_UNSUPPORTED_ERROR.throw();
   },
 
   // ..........................................................
@@ -698,7 +698,7 @@ SC.NestedStore = SC.Store.extend(
     if( this.get( "dataSource" ) )
       return sc_super();
     else
-      throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+      SC.Store.NESTED_STORE_UNSUPPORTED_ERROR.throw();
   },
 
   /** @private - adapt for nested store */
@@ -706,7 +706,7 @@ SC.NestedStore = SC.Store.extend(
     if( this.get( "dataSource" ) )
       return sc_super();
     else
-      throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+      SC.Store.NESTED_STORE_UNSUPPORTED_ERROR.throw();
   },
 
   /** @private - adapt for nested store */
@@ -714,7 +714,7 @@ SC.NestedStore = SC.Store.extend(
     if( this.get( "dataSource" ) )
       return sc_super();
     else
-      throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+      SC.Store.NESTED_STORE_UNSUPPORTED_ERROR.throw();
   },
 
   /** @private - adapt for nested store */
@@ -722,7 +722,7 @@ SC.NestedStore = SC.Store.extend(
     if( this.get( "dataSource" ) )
       return sc_super();
     else
-      throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+      SC.Store.NESTED_STORE_UNSUPPORTED_ERROR.throw();
   },
 
   // ..........................................................
@@ -734,7 +734,7 @@ SC.NestedStore = SC.Store.extend(
     if( this.get( "dataSource" ) )
       return sc_super();
     else
-      throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+      SC.Store.NESTED_STORE_UNSUPPORTED_ERROR.throw();
   },
 
   /** @private - adapt for nested store */
@@ -742,7 +742,7 @@ SC.NestedStore = SC.Store.extend(
     if( this.get( "dataSource" ) )
       return sc_super();
     else
-      throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+      SC.Store.NESTED_STORE_UNSUPPORTED_ERROR.throw();
   },
 
   /** @private - adapt for nested store */
@@ -750,7 +750,7 @@ SC.NestedStore = SC.Store.extend(
     if( this.get( "dataSource" ) )
       return sc_super();
     else
-      throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+      SC.Store.NESTED_STORE_UNSUPPORTED_ERROR.throw();
   }
 
 }) ;

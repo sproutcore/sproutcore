@@ -542,7 +542,7 @@ SC.Record = SC.Object.extend(
         attrs;
 
     attrs = store.readEditableDataHash(storeKey);
-    if (!attrs) throw SC.Record.BAD_STATE_ERROR;
+    if (!attrs) SC.Record.BAD_STATE_ERROR.throw();
 
     // if value is the same, do not flag record as dirty
     if (value !== attrs[key]) {
@@ -1346,7 +1346,7 @@ SC.Record.mixin( /** @scope SC.Record */ {
     @constant
     @type SC.Error
   */
-  BAD_STATE_ERROR:     SC.$error("Internal Inconsistency"),
+  BAD_STATE_ERROR: SC.$error("Internal Inconsistency"),
 
   /**
     Error for when you try to create a new record that already exists.
@@ -1364,7 +1364,7 @@ SC.Record.mixin( /** @scope SC.Record */ {
     @constant
     @type SC.Error
   */
-  NOT_FOUND_ERROR:     SC.$error("Not found "),
+  NOT_FOUND_ERROR: SC.$error("Not found "),
 
   /**
     Error for when you try to modify a record that is currently busy
@@ -1373,7 +1373,7 @@ SC.Record.mixin( /** @scope SC.Record */ {
     @constant
     @type SC.Error
   */
-  BUSY_ERROR:          SC.$error("Busy"),
+  BUSY_ERROR: SC.$error("Busy"),
 
   /**
     Generic unknown record error
@@ -1382,7 +1382,7 @@ SC.Record.mixin( /** @scope SC.Record */ {
     @constant
     @type SC.Error
   */
-  GENERIC_ERROR:       SC.$error("Generic Error"),
+  GENERIC_ERROR: SC.$error("Generic Error"),
 
   /**
     If true, then searches for records of this type will return subclass instances. For example:

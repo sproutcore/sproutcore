@@ -56,13 +56,13 @@ test("recordDidChange", function() {
   try{
     store.recordDidChange(undefined, undefined, storeKey1);
   }catch(error1){
-    equals(SC.Record.BUSY_ERROR.message, error1.message, "the status shouldn't have changed.");
+    equals(SC.Record.BUSY_ERROR.toString(), error1.message, "the status shouldn't have changed.");
   }
   
   try{
     store.recordDidChange(undefined, undefined, storeKey2);
   }catch(error2){
-    equals(SC.Record.NOT_FOUND_ERROR.message, error2.message, "the status shouldn't have changed.");
+    equals(SC.Record.NOT_FOUND_ERROR.toString(), error2.message, "the status shouldn't have changed.");
   }
   
   store.recordDidChange(undefined, undefined, storeKey3);
