@@ -57,3 +57,24 @@ test("errorObject property should return the error itself", function() {
   var er = SC.$error("foo");
   equals(er.get('errorObject'), er, 'errorObject should return receiver');
 });
+
+test("SC.Error#throw throw an error with description,label and code", function() {
+  var msg='',
+    error = SC.Error.desc('This is an error instance','Error Instance', "FOO", 99999);
+  try{
+    error.throw();
+  }catch(e){
+    msg=e.message;
+  }
+  equals(error.toString(), msg, "should throw the following error ");
+});
+
+test("SC.$throw creates and throw an error instance with description,label and code", function() {
+  var msg='';
+  try{
+    SC.$throw('This is an error instance','Error Instance', "FOO", 99999)
+  }catch(error){
+    msg=error.message;
+  }
+  equals(msg.split(':')[2], 'This is an error instance (99999)', "should throw the following error ");
+});
