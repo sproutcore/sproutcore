@@ -75,7 +75,7 @@ SC.Locale = SC.Object.extend({
   /**
     The inflection constants for this locale.
   */
-  inflectionConstants: {},
+  inflectionConstants: null,
 
   /**
     The method used to compute the ordinal of a number for this locale.

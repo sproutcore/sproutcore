@@ -232,34 +232,38 @@ SC.mixin(SC.String, {
     @returns {String} the plural form of the string
   */
   pluralize: function(str) {
-      var idx, len,
-          compare = str.split(/\s/).pop(), //check only the last word of a string
-          restOfString = str.replace(compare,''),
-          isCapitalized = compare.charAt(0).match(/[A-Z]/) ? true : false,
-          inflectionConstants = SC.Locale.currentLocale.inflectionConstants;
+    var inflectionConstants = SC.Locale.currentLocale.inflectionConstants;
 
-      compare = compare.toLowerCase();
-      for (idx=0, len=inflectionConstants.UNCOUNTABLE.length; idx < len; idx++) {
-          var uncountable = inflectionConstants.UNCOUNTABLE[idx];
-          if (compare == uncountable) {
-              return str.toString();
-          }
+    // Fast path if there is no inflection constants for a locale
+    if (!inflectionConstants) return str.toString();
+
+    var idx, len,
+      compare = str.split(/\s/).pop(), //check only the last word of a string
+      restOfString = str.replace(compare,''),
+      isCapitalized = compare.charAt(0).match(/[A-Z]/) ? true : false;
+
+    compare = compare.toLowerCase();
+    for (idx=0, len=inflectionConstants.UNCOUNTABLE.length; idx < len; idx++) {
+      var uncountable = inflectionConstants.UNCOUNTABLE[idx];
+      if (compare == uncountable) {
+        return str.toString();
       }
-      for (idx=0, len=inflectionConstants.IRREGULAR.length; idx < len; idx++) {
-          var singular = inflectionConstants.IRREGULAR[idx][0],
-              plural   = inflectionConstants.IRREGULAR[idx][1];
-          if ((compare == singular) || (compare == plural)) {
-              if(isCapitalized) plural = plural.capitalize();
-              return restOfString + plural;
-          }
+    }
+    for (idx=0, len=inflectionConstants.IRREGULAR.length; idx < len; idx++) {
+      var singular = inflectionConstants.IRREGULAR[idx][0],
+          plural   = inflectionConstants.IRREGULAR[idx][1];
+      if ((compare == singular) || (compare == plural)) {
+        if(isCapitalized) plural = plural.capitalize();
+        return restOfString + plural;
       }
-      for (idx=0, len=inflectionConstants.PLURAL.length; idx < len; idx++) {
-          var regex          = inflectionConstants.PLURAL[idx][0],
-              replace_string = inflectionConstants.PLURAL[idx][1];
-          if (regex.test(compare)) {
-              return str.replace(regex, replace_string);
-          }
+    }
+    for (idx=0, len=inflectionConstants.PLURAL.length; idx < len; idx++) {
+      var regex          = inflectionConstants.PLURAL[idx][0],
+        replace_string = inflectionConstants.PLURAL[idx][1];
+      if (regex.test(compare)) {
+        return str.replace(regex, replace_string);
       }
+    }
   },
 
   /**
@@ -269,34 +273,38 @@ SC.mixin(SC.String, {
     @returns {String} the singular form of the string
   */
   singularize: function(str) {
-      var idx, len,
-          compare = str.split(/\s/).pop(), //check only the last word of a string
-          restOfString = str.replace(compare,''),
-          isCapitalized = compare.charAt(0).match(/[A-Z]/) ? true : false,
-          inflectionConstants = SC.Locale.currentLocale.inflectionConstants;
+    var inflectionConstants = SC.Locale.currentLocale.inflectionConstants;
 
-      compare = compare.toLowerCase();
-      for (idx=0, len=inflectionConstants.UNCOUNTABLE.length; idx < len; idx++) {
-          var uncountable = inflectionConstants.UNCOUNTABLE[idx];
-          if (compare == uncountable) {
-              return str.toString();
-          }
+    // Fast path if there is no inflection constants for a locale
+    if (!inflectionConstants) return str.toString();
+
+    var idx, len,
+      compare = str.split(/\s/).pop(), //check only the last word of a string
+      restOfString = str.replace(compare,''),
+      isCapitalized = compare.charAt(0).match(/[A-Z]/) ? true : false;
+
+    compare = compare.toLowerCase();
+    for (idx=0, len=inflectionConstants.UNCOUNTABLE.length; idx < len; idx++) {
+      var uncountable = inflectionConstants.UNCOUNTABLE[idx];
+      if (compare == uncountable) {
+        return str.toString();
       }
-      for (idx=0, len=inflectionConstants.IRREGULAR.length; idx < len; idx++) {
-          var singular = inflectionConstants.IRREGULAR[idx][0],
-              plural   = inflectionConstants.IRREGULAR[idx][1];
-          if ((compare == singular) || (compare == plural)) {
-              if(isCapitalized) singular = singular.capitalize();
-              return restOfString + singular;
-          }
+    }
+    for (idx=0, len=inflectionConstants.IRREGULAR.length; idx < len; idx++) {
+      var singular = inflectionConstants.IRREGULAR[idx][0],
+        plural   = inflectionConstants.IRREGULAR[idx][1];
+      if ((compare == singular) || (compare == plural)) {
+        if(isCapitalized) singular = singular.capitalize();
+        return restOfString + singular;
       }
-      for (idx=0, len=inflectionConstants.SINGULAR.length; idx < len; idx++) {
-          var regex          = inflectionConstants.SINGULAR[idx][0],
-              replace_string = inflectionConstants.SINGULAR[idx][1];
-          if (regex.test(compare)) {
-              return str.replace(regex, replace_string);
-          }
+    }
+    for (idx=0, len=inflectionConstants.SINGULAR.length; idx < len; idx++) {
+      var regex          = inflectionConstants.SINGULAR[idx][0],
+          replace_string = inflectionConstants.SINGULAR[idx][1];
+      if (regex.test(compare)) {
+        return str.replace(regex, replace_string);
       }
+    }
   }
 
 });
