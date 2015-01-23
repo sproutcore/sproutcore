@@ -139,7 +139,6 @@ SC.PinchGesture = SC.Gesture.extend(
     @see SC.Gesture#touchAddedToSession
     */
   touchAddedToSession: function (touch, touchesInSession) {
-    // console.log("%@ - touchAddedToSession".fmt(this));
     // Get the averaged touches for the the view. Because pinch is always interested in every touch
     // the touchesInSession will equal the touches for the view.
     var avgTouch = touch.averagedTouchesForView(this.view, true);
@@ -160,7 +159,6 @@ SC.PinchGesture = SC.Gesture.extend(
     @see SC.Gesture#touchCancelledInSession
     */
   touchCancelledInSession: function (touch, touchesInSession) {
-    // console.log("%@ - touchCancelledInSession".fmt(this));
     this._sc_touchFinishedInSession(touch, touchesInSession);
 
     return true;
@@ -177,7 +175,6 @@ SC.PinchGesture = SC.Gesture.extend(
     @see SC.Gesture#touchEndedInSession
     */
   touchEndedInSession: function (touch, touchesInSession) {
-    // console.log("%@ - touchEndedInSession".fmt(this));
     this._sc_touchFinishedInSession(touch, touchesInSession);
 
     return true;
@@ -202,15 +199,17 @@ SC.PinchGesture = SC.Gesture.extend(
     @see SC.Gesture#touchesMovedInSession
     */
   touchesMovedInSession: function (touchesInSession) {
+    // console.log('touchesMovedInSession: %@'.fmt(touchesInSession.length));
     // We should pay attention to the movement.
     if (touchesInSession.length > 1) {
       // Get the averaged touches for the the view. Because pinch is always interested in every touch
       // the touchesInSession will equal the touches for the view.
-      var avgTouch = touchesInSession[0].averagedTouchesForView(this.view);
+      var avgTouch = SC.Touch.averagedTouch(touchesInSession); // touchesInSession[0].averagedTouchesForView(this.view);
 
-      console.log("%@ - touchesMovedInSession: _sc_pinchAnchorD: %@, avgTouch.d: %@".fmt(this, this._sc_pinchAnchorD, avgTouch.d));
       var touchDeltaD = this._sc_pinchAnchorD - avgTouch.d,
           absDeltaD = Math.abs(touchDeltaD);
+
+      // console.log('  this._sc_pinchAnchorD, %@ - avgTouch.d, %@ = touchDeltaD, %@'.fmt(this._sc_pinchAnchorD, avgTouch.d, touchDeltaD));
       if (absDeltaD > 0) {
         // Trigger the gesture, 'pinchStart', once.
         if (!this._sc_isPinching) {
@@ -237,7 +236,7 @@ SC.PinchGesture = SC.Gesture.extend(
             scale = this._sc_pinchAnchorScale * scalePercentChange;
 
         // Trigger the gesture, 'pinch'.
-        this.trigger(scale);
+        this.trigger(scale, touchesInSession.length);
 
         // Reset the anchor.
         this._sc_pinchAnchorD = avgTouch.d;

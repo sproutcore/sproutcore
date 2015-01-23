@@ -132,10 +132,12 @@ SC.TapGesture = SC.Gesture.extend(
     @see SC.Gesture#touchAddedToSession
     */
   touchAddedToSession: function (touch, touchesInSession) {
-    var stillInterestedInSession;
+    var stillInterestedInSession,
+        delay;
 
     // If the new touch came in too late after the first touch was added.
-    stillInterestedInSession = Date.now() - this._sc_firstTouchAddedAt > this.get('touchUnityDelay');
+    delay = Date.now() - this._sc_firstTouchAddedAt;
+    stillInterestedInSession = delay < this.get('touchUnityDelay');
 
     return stillInterestedInSession;
   },
