@@ -286,52 +286,139 @@ SC.View.reopen(
   */
   layout: { top: 0, left: 0, bottom: 0, right: 0 },
 
+  /** @private Computes the explicit layout. */
+  _sc_computeExplicitLayout: function (layout) {
+    // Only use the explicit position values.
+    var ret = this._sc_computeExplicitPosition(layout);
+
+    // SIZE
+    /*jshint eqnull:true */
+    if (layout.width != null) {
+      ret.width = layout.width;
+    }
+
+    if (layout.height != null) {
+      ret.height = layout.height;
+    }
+
+    // BORDERS
+    // Apply border first, so that the more specific borderX values will override it next.
+    var border = layout.border;
+    if (border != null) {
+      ret.borderTop = border;
+      ret.borderRight = border;
+      ret.borderBottom = border;
+      ret.borderLeft = border;
+      delete ret.border;
+    }
+
+    if (layout.borderTop != null) {
+      ret.borderTop = layout.borderTop;
+    }
+    if (layout.borderRight != null) {
+      ret.borderRight = layout.borderRight;
+    }
+    if (layout.borderBottom != null) {
+      ret.borderBottom = layout.borderBottom;
+    }
+    if (layout.borderLeft != null) {
+      ret.borderLeft = layout.borderLeft;
+    }
+
+    return ret;
+  },
+
+  /** @private Computes the explicit position. */
+  _sc_computeExplicitPosition: function (layout) {
+    var ret = {};
+
+    /* jshint eqnull:true */
+    var hasBottom = (layout.bottom != null);
+    var hasRight = (layout.right != null);
+    var hasLeft = (layout.left != null);
+    var hasTop = (layout.top != null);
+    var hasCenterX = (layout.centerX != null);
+    var hasCenterY = (layout.centerY != null);
+    var hasHeight = (layout.height != null); //  || (layout.maxHeight != null)
+    var hasWidth = (layout.width != null); // || (layout.maxWidth != null)
+
+    if (hasLeft) {
+      ret.left = layout.left;
+    } else if (!hasCenterX && !(hasWidth && hasRight)) {
+      ret.left = 0;
+    }
+
+    if (hasRight && !(hasLeft && hasWidth)) {
+      ret.right = layout.right;
+    } else if (!hasCenterX && !hasWidth) {
+      ret.right = 0;
+    }
+
+    //@if(debug)
+    // Debug-only warning when layout isn't valid.
+    // UNUSED: This is too noisy for certain views that adjust their own layouts based on top of the default layout.
+    // if (hasRight && hasLeft && hasWidth) {
+    //   SC.warn("Developer Warning: When setting `width` in the layout, you must only set `left` or `right`, but not both: %@".fmt(this));
+    // }
+    //@endif
+
+    if (hasTop) {
+      ret.top = layout.top;
+    } else if (!hasCenterY && !(hasHeight && hasBottom)) {
+      ret.top = 0;
+    }
+
+    if (hasBottom && !(hasTop && hasHeight)) {
+      ret.bottom = layout.bottom;
+    } else if (!hasCenterY && !hasHeight) {
+      ret.bottom = 0;
+    }
+
+    //@if(debug)
+    // Debug-only warning when layout isn't valid.
+    // UNUSED: This is too noisy for certain views that adjust their own layouts based on top of the default layout.
+    // if (hasBottom && hasTop && hasHeight) {
+    //   SC.warn("Developer Warning: When setting `height` in the layout, you must only set `top` or `bottom`, but not both: %@".fmt(this));
+    // }
+    //@endif
+
+    // CENTERS
+    if (hasCenterX) {
+      ret.centerX = layout.centerX;
+    }
+
+    if (hasCenterY) {
+      ret.centerY = layout.centerY;
+    }
+
+    return ret;
+  },
+
   /** @private The explicit layout of the view, computed from the layout using the explicit position. */
   explicitLayout: function () {
     var layout = this.get('layout'),
-        explicitPosition = this.get('explicitPosition'),
+        // explicitPosition = this.get('explicitPosition'),
         ret;
 
     if (layout) {
-      ret = SC.clone(layout);
+      ret = this._sc_computeExplicitLayout(layout);
 
-      // Only use the explicit position values.
-      // delete ret.left;
-      delete ret.right;
-      // delete ret.top;
-      delete ret.bottom;
+      //@if(debug)
+      // Debug-only warning when layout isn't valid.
+      /* jshint eqnull:true */
+      var hasCenterX = (ret.centerX != null);
+      var hasCenterY = (ret.centerY != null);
+      var hasHeight = (ret.height != null); //  || (layout.maxHeight != null)
+      var hasWidth = (ret.width != null); // || (layout.maxWidth != null)
 
-      /*jshint eqnull:true */
-      if (explicitPosition.left != null) { ret.left = explicitPosition.left; }
-      if (explicitPosition.right != null) { ret.right = explicitPosition.right; }
-      if (explicitPosition.top != null) { ret.top = explicitPosition.top; }
-      if (explicitPosition.bottom != null) { ret.bottom = explicitPosition.bottom; }
-      if (explicitPosition.centerX != null) { ret.centerX = explicitPosition.centerX; }
-      if (explicitPosition.centerY != null) { ret.centerY = explicitPosition.centerY; }
-
-      // BORDERS
-      // Apply border first, so that the more specific borderX values will override it next.
-      var border = layout.border;
-      if (border != null) {
-        ret.borderTop = border;
-        ret.borderRight = border;
-        ret.borderBottom = border;
-        ret.borderLeft = border;
-        delete ret.border;
+      if (hasCenterX && !hasWidth) {
+        SC.warn("Developer Warning: When setting `centerX` in the layout, you must also define the `width`: %@".fmt(this));
       }
 
-      if (layout.borderTop != null) {
-        ret.borderTop = layout.borderTop;
+      if (hasCenterY && !hasHeight) {
+        SC.warn("Developer Warning: When setting `centerY` in the layout, you must also define the `height`: %@".fmt(this));
       }
-      if (layout.borderRight != null) {
-        ret.borderRight = layout.borderRight;
-      }
-      if (layout.borderBottom != null) {
-        ret.borderBottom = layout.borderBottom;
-      }
-      if (layout.borderLeft != null) {
-        ret.borderLeft = layout.borderLeft;
-      }
+      //@endif
     }
 
     return ret;
@@ -343,80 +430,7 @@ SC.View.reopen(
       ret;
 
     if (layout) {
-      ret = {};
-
-      /* jshint eqnull:true */
-      var hasBottom = (layout.bottom != null);
-      var hasRight = (layout.right != null);
-      var hasLeft = (layout.left != null);
-      var hasTop = (layout.top != null);
-      var hasCenterX = (layout.centerX != null);
-      var hasCenterY = (layout.centerY != null);
-      var hasHeight = (layout.height != null); //  || (layout.maxHeight != null)
-      var hasWidth = (layout.width != null); // || (layout.maxWidth != null)
-
-      if (hasLeft) {
-        ret.left = layout.left;
-      } else if (!hasCenterX && !(hasWidth && hasRight)) {
-        ret.left = 0;
-      }
-
-      if (hasRight && !(hasLeft && hasWidth)) {
-        ret.right = layout.right;
-      } else if (!hasCenterX && !hasWidth) {
-        ret.right = 0;
-      }
-
-      //@if(debug)
-      // Debug-only warning when layout isn't valid.
-      // UNUSED: This is too noisy for certain views that adjust their own layouts based on top of the default layout.
-      // if (hasRight && hasLeft && hasWidth) {
-      //   SC.warn("Developer Warning: When setting `width` in the layout, you must only set `left` or `right`, but not both: %@".fmt(this));
-      // }
-      //@endif
-
-      if (hasTop) {
-        ret.top = layout.top;
-      } else if (!hasCenterY && !(hasHeight && hasBottom)) {
-        ret.top = 0;
-      }
-
-      if (hasBottom && !(hasTop && hasHeight)) {
-        ret.bottom = layout.bottom;
-      } else if (!hasCenterY && !hasHeight) {
-        ret.bottom = 0;
-      }
-
-      //@if(debug)
-      // Debug-only warning when layout isn't valid.
-      // UNUSED: This is too noisy for certain views that adjust their own layouts based on top of the default layout.
-      // if (hasBottom && hasTop && hasHeight) {
-      //   SC.warn("Developer Warning: When setting `height` in the layout, you must only set `top` or `bottom`, but not both: %@".fmt(this));
-      // }
-      //@endif
-
-      // CENTERS
-      if (hasCenterX) {
-        ret.centerX = layout.centerX;
-
-        //@if(debug)
-        // Debug-only warning when layout isn't valid.
-        if (!hasWidth) {
-          SC.warn("Developer Warning: When setting `centerX` in the layout, you must also set `width`: %@".fmt(this));
-        }
-        //@endif
-      }
-
-      if (hasCenterY) {
-        ret.centerY = layout.centerY;
-
-        //@if(debug)
-        // Debug-only warning when layout isn't valid.
-        if (!hasHeight) {
-          SC.warn("Developer Warning: When setting `centerY` in the layout, you must also set `height`: %@".fmt(this));
-        }
-        //@endif
-      }
+      ret = this._sc_computeExplicitPosition(layout);
     }
 
     return ret;
@@ -727,6 +741,7 @@ SC.View.reopen(
         ret = null;
 
     if (frame) {
+      /*jshint eqnull:true */
       var layout = this.get('layout'),
         defaultValue = layout.border == null ? 0 : layout.border,
         borderTop = this._sc_explicitValueFor(layout.borderTop, defaultValue),
@@ -950,7 +965,6 @@ SC.View.reopen(
 
     // Optimize notifications depending on if we resized or just moved.
     this._checkForResize();
-
 
     // Notify layoutView/parentView, unless we are transitioning.
     var layoutView = this.get('layoutView');

@@ -8,6 +8,7 @@
 
 var pane, view1, view2, view3, view4, view5;
 
+SC.LOG_DESIGN_MODE = true;
 
 // Localized layout.
 SC.metricsFor('English', {
@@ -203,20 +204,20 @@ test("When updateDesignMode() is called on a pane, it sets designMode properly o
   view4.set.expect(1);
 
   var modeName = orientation === SC.PORTRAIT_ORIENTATION ? 'l_p' : 'l_l';
-  equals(view1.get('designMode'), modeName, "view1 designMode should be");
-  equals(view2.get('designMode'), modeName, "view2 designMode should be");
-  equals(view3.get('designMode'), modeName, "view3 designMode should be");
-  equals(view4.get('designMode'), modeName, "view4 designMode should be");
+  equals(view1.get('designMode'), modeName, "Test 1 view1 designMode should be");
+  equals(view2.get('designMode'), modeName, "Test 1 view2 designMode should be");
+  equals(view3.get('designMode'), modeName, "Test 1 view3 designMode should be");
+  equals(view4.get('designMode'), modeName, "Test 1 view4 designMode should be");
 
-  same(view1.get('layout'), largeLayout,  "layout of view1 should be");
-  same(view2.get('layout'), largeLayout,  "layout of view2 should be");
-  same(view3.get('layout'), normalLayout, "layout of view3 should be");
-  same(view4.get('layout'), largeLayout,  "layout of view4 should be");
+  same(view1.get('layout'), largeLayout,  "Test 1 layout of view1 should be");
+  same(view2.get('layout'), largeLayout,  "Test 1 layout of view2 should be");
+  same(view3.get('layout'), normalLayout, "Test 1 layout of view3 should be");
+  same(view4.get('layout'), largeLayout,  "Test 1 layout of view4 should be");
 
-  same(view1.get('classNames'), ['sc-view', 'sc-large'], "classNames of view1 should be");
-  same(view2.get('classNames'), ['sc-view', 'sc-large'], "classNames of view2 should be");
-  same(view3.get('classNames'), ['sc-view', 'sc-large'], "classNames of view3 should be");
-  same(view4.get('classNames'), ['sc-view', 'sc-large'], "classNames of view4 should be");
+  same(view1.get('classNames'), ['sc-view', 'sc-large'], "Test 1 classNames of view1 should be");
+  same(view2.get('classNames'), ['sc-view', 'sc-large'], "Test 1 classNames of view2 should be");
+  same(view3.get('classNames'), ['sc-view', 'sc-large'], "Test 1 classNames of view3 should be");
+  same(view4.get('classNames'), ['sc-view', 'sc-large'], "Test 1 classNames of view4 should be");
 
   var newModeName = orientation === SC.PORTRAIT_ORIENTATION ? 's_p' : 's_l';
 
@@ -230,20 +231,20 @@ test("When updateDesignMode() is called on a pane, it sets designMode properly o
   view3.set.expect(2);
   view4.set.expect(2);
 
-  equals(view1.get('designMode'), newModeName, "view1 designMode should be");
-  equals(view2.get('designMode'), newModeName, "view2 designMode should be");
-  equals(view3.get('designMode'), newModeName, "view3 designMode should be");
-  equals(view4.get('designMode'), newModeName, "view4 designMode should be");
+  equals(view1.get('designMode'), newModeName, "Test 2 view1 designMode should be");
+  equals(view2.get('designMode'), newModeName, "Test 2 view2 designMode should be");
+  equals(view3.get('designMode'), newModeName, "Test 2 view3 designMode should be");
+  equals(view4.get('designMode'), newModeName, "Test 2 view4 designMode should be");
 
-  same(view1.get('layout'), smallLayout, "layout of view1 should be");
-  same(view2.get('layout'), smallLayout, "layout of view2 should be");
-  same(view3.get('layout'), smallLayout, "layout of view3 should be");
-  same(view4.get('layout'), smallLayout, "layout of view4 should be");
+  same(view1.get('layout'), smallLayout, "Test 2 layout of view1 should be");
+  same(view2.get('layout'), smallLayout, "Test 2 layout of view2 should be");
+  same(view3.get('layout'), smallLayout, "Test 2 layout of view3 should be");
+  same(view4.get('layout'), smallLayout, "Test 2 layout of view4 should be");
 
-  same(view1.get('classNames'), ['sc-view', 'sc-small'], "classNames of view1 should be");
-  same(view2.get('classNames'), ['sc-view', 'sc-small'], "classNames of view2 should be");
-  same(view3.get('classNames'), ['sc-view', 'sc-small'], "classNames of view3 should be");
-  same(view4.get('classNames'), ['sc-view', 'sc-small'], "classNames of view4 should be");
+  same(view1.get('classNames'), ['sc-view', 'sc-small'], "Test 2 classNames of view1 should be");
+  same(view2.get('classNames'), ['sc-view', 'sc-small'], "Test 2 classNames of view2 should be");
+  same(view3.get('classNames'), ['sc-view', 'sc-small'], "Test 2 classNames of view3 should be");
+  same(view4.get('classNames'), ['sc-view', 'sc-small'], "Test 2 classNames of view4 should be");
 });
 
 test("When RootResponder has designModes, and you add a view to a pane, it sets designMode on the new view.", function () {
@@ -396,6 +397,42 @@ test("When you change designModes on RootResponder, it sets designMode on the pa
   same(view3.get('classNames'), ['sc-view', 'sc-medium'], "classNames for view3 should be");
   same(view4.get('classNames'), ['sc-view', 'sc-medium'], "classNames for view4 should be");
 });
+
+test("When the design mode changes, overrides are reverted.");
+// This is extremely complex to achieve. Left as a warning for now.
+//   , function () {
+//   var windowSize,
+//     responder = SC.RootResponder.responder,
+//     orientation = SC.device.orientation;
+
+//   windowSize = responder.get('currentWindowSize');
+//   responder.set('designModes', { s: ((windowSize.width - 10) * (windowSize.height - 10)) / window.devicePixelRatio, l: Infinity });
+
+//   SC.run(function () {
+//     pane = pane.create().append();
+//   });
+
+//   same(view1.get('layout'), largeLayout,  "Test 1 layout of view1 should be");
+//   same(view2.get('layout'), largeLayout,  "Test 1 layout of view2 should be");
+
+//   SC.run(function () {
+//     view1.adjust('top', 10); // Original layout goes from implied top: 0 to top: 10.
+//     view2.adjust('height', 100); // Original layout goes from implied bottom: 0 to bottom: undefined.
+//   });
+
+//   var modeName = orientation === SC.PORTRAIT_ORIENTATION ? 'l_p' : 'l_l';
+//   var newModeName = orientation === SC.PORTRAIT_ORIENTATION ? 's_p' : 's_l';
+
+//   SC.run(function () {
+//     pane.updateDesignMode(modeName, newModeName);
+//   });
+
+//   var adjustedSmallLayout1 = { top: 10, bottom: 0, left: 10, right: 10 },
+//       adjustedSmallLayout2 = { top: 0, height: 100, left: 10, right: 10 };
+
+//   same(view1.get('layout'), adjustedSmallLayout1, "Test 2 layout for view1 should be");
+//   same(view2.get('layout'), adjustedSmallLayout2, "Test 2 layout for view2 should be");
+// });
 
 test("When you unset designModes on RootResponder, it clears designMode on its panes and their childViews.", function () {
   var windowSize,
