@@ -30,6 +30,12 @@
       autohidesVerticalScroller: NO
     })
 
+    .add("basic4", SC.ScrollView, {
+      contentView: SC.View.extend({ top: 10, left: 10, height: 400, width: 400 }),
+      horizontalAlign: SC.ALIGN_LEFT,
+      verticalAlign: SC.ALIGN_TOP,
+    })
+
     .add("basic same size content", SC.ScrollView, {
       horizontalOverlay: YES,
       verticalOverlay: YES,
@@ -175,6 +181,18 @@
     ok(verticalScrollerView.$().hasClass('sc-vertical'), 'should have sc-vertical class');
     // var maxVScroll = view.get('maximumVerticalScrollOffset');
     // equals(maxVScroll, 0, 'Max vertical scroll should be equal to zero');
+  });
+
+  test("Basic contentView positioning", function() {
+    var view = pane.view('basic4'), cv = view.get('contentView');
+    equals(cv.get('frame').x, 10, 'should have frame.x as');
+    equals(cv.get('frame').y, 10, 'should have frame.y as');
+    SC.run(function() { view.scrollTo(50, 50); });
+    equals(cv.get('frame').x, -40, 'should have frame.x as');
+    equals(cv.get('frame').y, -40, 'should have frame.y as');
+    SC.run(function() { view.scrollTo(0, 0); });
+    equals(cv.get('frame').x, 10, 'should have frame.x as');
+    equals(cv.get('frame').y, 10, 'should have frame.y as');
   });
 
   test("disabled", function() {
