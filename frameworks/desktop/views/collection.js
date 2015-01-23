@@ -2168,7 +2168,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
             if (sel) sel = sel.indexSetForSource(content);
 
             info = this.mouseDownInfo = {
-              event:        ev,
+              event:        SC.copy(ev),
               itemView:     itemView,
               contentIndex: contentIndex,
               at:           Date.now()
