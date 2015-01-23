@@ -9,7 +9,7 @@ test("Regular expression escaping a string", function() {
 });
 
 test("Pluralizing a string", function() {
-  expect(8);
+  expect(11);
   same('Goat'.pluralize(), 'Goats', "standard pluralization");
   same('There are many goat'.pluralize(), 'There are many goats', "standard pluralization of a multi-word string");
   same('Bunny'.pluralize(), 'Bunnies', "non-standard pluralization");
@@ -18,10 +18,20 @@ test("Pluralizing a string", function() {
   same('I have three child'.pluralize(), 'I have three children', "irregular pluralization of a multi-word string");
   same('sheep'.pluralize(), 'sheep', "uncountable pluralization");
   same('Please hold this sheep'.pluralize(), 'Please hold this sheep', "uncountable pluralization of a multi-word string");
+
+  String.preferredLanguage = 'jp';
+  SC.Locale.currentLocale = SC.Locale.createCurrentLocale();
+  equals(SC.Locale.currentLocale.language, 'ja');
+
+  same('Goat'.pluralize(), 'Goat', "pluralization should be ignore in japanese");
+
+  String.preferredLanguage = 'en';
+  SC.Locale.currentLocale = SC.Locale.createCurrentLocale();
+  equals(SC.Locale.currentLocale.language, 'en');
 });
 
 test("Singularizing a string", function() {
-  expect(8);
+  expect(11);
   same('Vegetables'.singularize(), 'Vegetable', "standard singularization");
   same('Broccoli is a vegetables'.singularize(), 'Broccoli is a vegetable', "standard singularization of a multi-word string");
   same('Properties'.singularize(), 'Property', "non-standard singularization");
@@ -30,5 +40,15 @@ test("Singularizing a string", function() {
   same('The Village People'.singularize(), 'The Village Person', "irregular singularization of a multi-word string");
   same('money'.singularize(), 'money', "uncountable singularization");
   same('Gotta git da money'.singularize(), 'Gotta git da money', "uncountable singularization of a multi-word string");
+
+  String.preferredLanguage = 'jp';
+  SC.Locale.currentLocale = SC.Locale.createCurrentLocale();
+  equals(SC.Locale.currentLocale.language, 'ja');
+  
+  same('Vegetable'.singularize(), 'Vegetable', "singularization should be ignore in japanese");
+
+  String.preferredLanguage = 'en';
+  SC.Locale.currentLocale = SC.Locale.createCurrentLocale();
+  equals(SC.Locale.currentLocale.language, 'en');
 });
 
