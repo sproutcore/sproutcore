@@ -1296,9 +1296,7 @@ SC.IndexSet = SC.mixin({},
       str.push(length === 1 ? start : "%@..%@".fmt(start, start + length - 1));
     }, this);
     return "SC.IndexSet<%@>".fmt(str.join(','));
-  },
-
-  max: 0
+  }
 
 });
 

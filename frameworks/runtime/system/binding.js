@@ -968,31 +968,6 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   },
 
   /**
-    Adds a transform that will return YES if the value is equal to equalValue, NO otherwise.
-
-      isVisibleBinding: SC.Binding.oneWay("MyApp.someController.title").equalTo(comparisonValue)
-
-    Or:
-
-      isVisibleBinding: SC.Binding.equalTo("MyApp.someController.title", comparisonValue)
-
-    @param {String} fromPath from path or null
-    @param {Object} equalValue the value to compare with
-    @returns {SC.Binding} this
-  */
-  equalTo: function(fromPath, equalValue) {
-    // Normalize arguments.
-    if (equalValue === undefined) {
-      equalValue = fromPath;
-      fromPath = null;
-    }
-
-    return this.from(fromPath).transform(function(value, binding) {
-       return value === equalValue;
-     });
-  },
-
-  /**
     Adds a transform that will *always* return an integer Number value. Null and undefined values will
     return 0 while String values will be transformed using the parseInt method (according to the
     radix) and Boolean values will be 1 or 0 if true or false accordingly. Other edge cases like NaN
