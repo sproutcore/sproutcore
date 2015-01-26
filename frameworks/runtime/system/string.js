@@ -85,7 +85,7 @@ SC.String = /** @scope SC.String.prototype */ {
 
   */
   fmt: function(string, args) {
-    var i = 0, data = undefined, hasHadNamedArguments;
+    var i = 0, data, hasHadNamedArguments;
     if (args) {
       data = args[0];
     }

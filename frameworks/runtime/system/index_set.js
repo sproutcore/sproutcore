@@ -456,7 +456,6 @@ SC.IndexSet = SC.mixin({},
       }
     }
 
-    var oldlen = this.length;
     this._content.length=1;
     this._content[0] = 0;
     this.length = this.max = 0; // reset without notifying since add()
@@ -678,7 +677,6 @@ SC.IndexSet = SC.mixin({},
 
     // special case - appending to end of set
     var max     = this.get('max'),
-        oldmax  = max,
         content = this._content,
         cur, next, delta, value, last;
 
@@ -1115,7 +1113,6 @@ SC.IndexSet = SC.mixin({},
 
     var content = this._content,
         cur     = 0,
-        idx     = 0,
         next    = content[cur];
 
     if (target === undefined) target = null;
