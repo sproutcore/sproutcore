@@ -288,49 +288,7 @@ SC.View.reopen(
 
   /** @private Computes the explicit layout. */
   _sc_computeExplicitLayout: function (layout) {
-    // Only use the explicit position values.
-    var ret = this._sc_computeExplicitPosition(layout);
-
-    // SIZE
-    /*jshint eqnull:true */
-    if (layout.width != null) {
-      ret.width = layout.width;
-    }
-
-    if (layout.height != null) {
-      ret.height = layout.height;
-    }
-
-    // BORDERS
-    // Apply border first, so that the more specific borderX values will override it next.
-    var border = layout.border;
-    if (border != null) {
-      ret.borderTop = border;
-      ret.borderRight = border;
-      ret.borderBottom = border;
-      ret.borderLeft = border;
-      delete ret.border;
-    }
-
-    if (layout.borderTop != null) {
-      ret.borderTop = layout.borderTop;
-    }
-    if (layout.borderRight != null) {
-      ret.borderRight = layout.borderRight;
-    }
-    if (layout.borderBottom != null) {
-      ret.borderBottom = layout.borderBottom;
-    }
-    if (layout.borderLeft != null) {
-      ret.borderLeft = layout.borderLeft;
-    }
-
-    return ret;
-  },
-
-  /** @private Computes the explicit position. */
-  _sc_computeExplicitPosition: function (layout) {
-    var ret = {};
+    var ret = SC.copy(layout);
 
     /* jshint eqnull:true */
     var hasBottom = (layout.bottom != null);
@@ -341,6 +299,11 @@ SC.View.reopen(
     var hasCenterY = (layout.centerY != null);
     var hasHeight = (layout.height != null); //  || (layout.maxHeight != null)
     var hasWidth = (layout.width != null); // || (layout.maxWidth != null)
+
+    /*jshint eqnull:true */
+    // Left + Top take precedence (left & right & width becomes left & width).
+    delete ret.right; // Right will be set if needed below.
+    delete ret.bottom; // Bottom will be set if needed below.
 
     if (hasLeft) {
       ret.left = layout.left;
@@ -385,10 +348,49 @@ SC.View.reopen(
     // CENTERS
     if (hasCenterX) {
       ret.centerX = layout.centerX;
+
+      //@if(debug)
+      // Debug-only warning when layout isn't valid.
+      if (hasCenterX && !hasWidth) {
+        SC.warn("Developer Warning: When setting `centerX` in the layout, you must also define the `width`: %@".fmt(this));
+      }
+      //@endif
     }
 
     if (hasCenterY) {
       ret.centerY = layout.centerY;
+
+      //@if(debug)
+      // Debug-only warning when layout isn't valid.
+      if (hasCenterY && !hasHeight) {
+        SC.warn("Developer Warning: When setting `centerY` in the layout, you must also define the `height`: %@".fmt(this));
+      }
+      //@endif
+    }
+
+    // BORDERS
+    // Apply border first, so that the more specific borderX values will override it next.
+    var border = layout.border;
+    if (border != null) {
+      ret.borderTop = border;
+      ret.borderRight = border;
+      ret.borderBottom = border;
+      ret.borderLeft = border;
+      delete ret.border;
+    }
+
+    // Override generic border with more specific borderX.
+    if (layout.borderTop != null) {
+      ret.borderTop = layout.borderTop;
+    }
+    if (layout.borderRight != null) {
+      ret.borderRight = layout.borderRight;
+    }
+    if (layout.borderBottom != null) {
+      ret.borderBottom = layout.borderBottom;
+    }
+    if (layout.borderLeft != null) {
+      ret.borderLeft = layout.borderLeft;
     }
 
     return ret;
@@ -397,40 +399,10 @@ SC.View.reopen(
   /** @private The explicit layout of the view, computed from the layout using the explicit position. */
   explicitLayout: function () {
     var layout = this.get('layout'),
-        // explicitPosition = this.get('explicitPosition'),
-        ret;
+        ret = null;
 
     if (layout) {
       ret = this._sc_computeExplicitLayout(layout);
-
-      //@if(debug)
-      // Debug-only warning when layout isn't valid.
-      /* jshint eqnull:true */
-      var hasCenterX = (ret.centerX != null);
-      var hasCenterY = (ret.centerY != null);
-      var hasHeight = (ret.height != null); //  || (layout.maxHeight != null)
-      var hasWidth = (ret.width != null); // || (layout.maxWidth != null)
-
-      if (hasCenterX && !hasWidth) {
-        SC.warn("Developer Warning: When setting `centerX` in the layout, you must also define the `width`: %@".fmt(this));
-      }
-
-      if (hasCenterY && !hasHeight) {
-        SC.warn("Developer Warning: When setting `centerY` in the layout, you must also define the `height`: %@".fmt(this));
-      }
-      //@endif
-    }
-
-    return ret;
-  }.property('explicitPosition').cacheable(),
-
-  /** @private The explicit position of the view, computed from the layout property, which may be written in shortform. */
-  explicitPosition: function () {
-    var layout = this.get('layout'),
-      ret;
-
-    if (layout) {
-      ret = this._sc_computeExplicitPosition(layout);
     }
 
     return ret;
@@ -458,9 +430,9 @@ SC.View.reopen(
     @test in layoutStyle
   */
   isFixedPosition: function () {
-    var explicitPosition = this.get('explicitPosition'),
-      left = explicitPosition.left,
-      top = explicitPosition.top,
+    var explicitLayout = this.get('explicitLayout'),
+      left = explicitLayout.left,
+      top = explicitLayout.top,
       hasFixedLeft,
       hasFixedTop;
 
@@ -469,7 +441,7 @@ SC.View.reopen(
     hasFixedTop = top !== undefined && !SC.isPercentage(top) && top !== SC.LAYOUT_AUTO;
 
     return hasFixedLeft && hasFixedTop;
-  }.property('explicitPosition').cacheable(),
+  }.property('explicitLayout').cacheable(),
 
   /**
     Returns whether the size is 'fixed' or not.  A fixed size means a fixed
