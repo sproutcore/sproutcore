@@ -81,7 +81,10 @@ SC.Observers = {
     // it is fastest to set to null then loop over again to collapse, but for all other browsers
     // it is not. Plus, this code shouldn't get hit very often anyway (it may not ever get hit
     // for some apps).
-    idx = this.queue.length; queue = this.queue, newQueue = undefined;
+    idx = this.queue.length;
+    queue = this.queue;
+
+    var newQueue;
     while(--idx >= 0) {
       item = queue[idx];
 
