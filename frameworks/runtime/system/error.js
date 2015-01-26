@@ -32,7 +32,7 @@ sc_require('ext/function');
   set isError to YES, then calling SC.ok(obj) on your object will return NO.
   If isError is YES, then SC.val(obj) will return your errorValue property
   instead of the receiver.
-  
+
   When using SC.typeOf(obj), SC.T_ERROR will only be returned if the obj
   is an instance of SC.Error
 
@@ -81,8 +81,8 @@ SC.Error = SC.Object.extend(
 
     @type SC.Error
   */
-  throw: function() {
-    var error = this.toString()
+  'throw': function() {
+    var error = this.toString();
     SC.Logger.error(error);
 
     throw new Error(error);
@@ -94,7 +94,7 @@ SC.Error = SC.Object.extend(
     @type SC.Error
   */
   trace: function() {
-    return (new Error).trace;
+    return (new Error()).trace;
   }.property().cacheable(),
 
   /**
@@ -145,9 +145,9 @@ SC.Error.mixin({
     @param code {Number} an error code to use for testing.
     @returns {SC.Error} new error instance.
   */
-  throw: function(description, label, value, code) {
+  'throw': function(description, label, value, code) {
     this.desc.apply(this, arguments).throw();
-  },
+  }
 
 });
 
@@ -159,7 +159,7 @@ SC.Error.mixin({
   @param code {Number} an error code to use for testing.
   @returns {SC.Error} new error instance.
 */
-SC.$error = function(description, label, value, c) {  
+SC.$error = function(description, label, value, c) {
   return SC.Error.desc(description, label, value, c);
 };
 
@@ -171,7 +171,7 @@ SC.$error = function(description, label, value, c) {
   @param code {Number} an error code to use for testing.
   @returns {SC.Error} new error instance.
 */
-SC.throw = function(description, label, value, c) {  
+SC.throw = function(description, label, value, c) {
   SC.Error.throw(description, label, value, c);
 };
 
