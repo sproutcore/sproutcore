@@ -683,6 +683,9 @@ SC.PickerPane = SC.PalettePane.extend(
         // If the picker doesn't use a pointer, set the origin to the correct corner.
         case SC.PICKER_MENU:
         case SC.PICKER_FIXED:
+          adjustHash.width = frame.width;
+          adjustHash.height = frame.height;
+          
           if (frame.x >= anchor.x) {
             transformOriginX = 0;
           } else {
