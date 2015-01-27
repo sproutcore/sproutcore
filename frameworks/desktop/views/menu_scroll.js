@@ -120,6 +120,8 @@ SC.MenuScrollView = SC.ScrollView.extend(
         this.setIfChanged('isVerticalScrollerVisible', contentHeight > containerHeight);
       }
     }
+
+    sc_super();
   },
 
   /** @private @see SC.ScrollView. Re-position the scrollers and content depending on the need to scroll or not. */
