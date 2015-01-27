@@ -88,12 +88,6 @@ SC.MenuScrollerView = SC.ScrollerView.extend(
   },
 
   /** @private */
-  willDestroyLayer: function () {
-    var callback = this._sc_scroller_scrollDidChange;
-    SC.Event.remove(this.$(), 'scroll', this, callback);
-  },
-
-  /** @private */
   mouseEntered: function (evt) {
     this.set('isMouseOver', YES);
     this._invokeScrollOnMouseOver();
@@ -103,36 +97,6 @@ SC.MenuScrollerView = SC.ScrollerView.extend(
   mouseExited: function (evt) {
     this.set('isMouseOver', NO);
   },
-
-  /** @private */
-  _sc_scroller_armScrollTimer: function () {
-    if (!this._sc_scrollTimer) {
-      SC.run(function () {
-        var method = this._sc_scroller_scrollDidChange;
-        this._sc_scrollTimer = this.invokeLater(method, 50);
-      });
-    }
-  },
-
-  /** @private */
-  _sc_scroller_scrollDidChange: function () {
-    var now = Date.now(),
-        last = this._sc_lastScroll,
-        layer = this.get('layer'),
-        scroll = 0;
-
-    if (last && (now - last) < 50) return this._sc_scroller_armScrollTimer();
-    this._sc_scrollTimer = null;
-    this._sc_lastScroll = now;
-
-    SC.run(function () {
-      if (!this.get('isEnabledInPane')) return; // nothing to do.
-
-      this._sc_scrollValue = scroll = layer.scrollTop;
-      this.set('value', scroll); // will now enforce minimum and maximum
-    });
-  },
-
 
   /** @private
     Scroll the menu if it is is an up or down arrow. This is called by
