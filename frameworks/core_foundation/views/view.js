@@ -1104,7 +1104,7 @@ SC.CoreView.reopen(
     This method is invoked whenever the clippingFrame changes, notifying
     each child view that its clippingFrame has also changed.
   */
-  _sc_view_clippingFrameDidChange: function () {
+  _sc_clippingFrameDidChange: function () {
     this.notifyPropertyChange('clippingFrame');
   },
 
@@ -2292,8 +2292,8 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
     // current frame (see original computeFrameWithParentFrame in views/view.js)
     if (this.get('useStaticLayout')) {
       f = sc_super();
-      f = f ? this._adjustForBorder(f, layout) : null;
-      f = f ? this._adjustForScale(f, layout) : null;
+      f = f ? this._sc_adjustForBorder(f, layout) : null;
+      f = f ? this._sc_adjustForScale(f, layout) : null;
       return f;
     }
 
@@ -2436,7 +2436,7 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
     // Okay we have all our numbers. Let's adjust them for things.
 
     // First, adjust for border.
-    f = this._adjustForBorder(f, layout);
+    f = this._sc_adjustForBorder(f, layout);
 
     // Make sure the width/height fix their min/max (note the inlining of SC.none for performance)...
     /*jshint eqnull:true */
@@ -2446,7 +2446,7 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
     if ((layout.minWidth != null) && (f.width < layout.minWidth)) f.width = layout.minWidth;
 
     // Finally, adjust for scale.
-    f = this._adjustForScale(f, layout);
+    f = this._sc_adjustForScale(f, layout);
 
     return f;
   },

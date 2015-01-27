@@ -8,7 +8,7 @@
 // View Layout Unit Tests
 // ========================================================================
 
-/*global module test ok same equals */
+/*globals module, test, ok, same, equals */
 
 
 /* These unit tests verify:  layout(), frame(), styleLayout() and clippingFrame(). */
@@ -1220,7 +1220,7 @@
     same(view.get('layout'), { bottom: 10, right: 10, width: 200, height: 50 }, "Test the value of the computed layout.");
     layoutStyle = view.get('layoutStyle');
     expectedLayoutStyle = { bottom: "10px", right: "10px", width: "200px", height: "50px" };
-    for (var key in layoutStyle) {
+    for (key in layoutStyle) {
       equals(layoutStyle[key], expectedLayoutStyle[key], "Test the value of %@ in the layout style.".fmt(key));
     }
 

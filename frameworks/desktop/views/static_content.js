@@ -70,7 +70,7 @@ SC.StaticContentView = SC.View.extend(
     automatically.
   */
   contentLayoutDidChange: function() {
-    this._viewFrameDidChange();
+    this._sc_viewFrameDidChange();
   },
 
   // ..........................................................

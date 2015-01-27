@@ -540,7 +540,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     Whenever the view resizes, we need to check to see if we're overflowing.
   */
   viewDidResize: function () {
-    this._viewFrameDidChange();
+    this._sc_viewFrameDidChange();
 
     var isHorizontal = this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL,
       visibleDim = isHorizontal ? this.$().width() : this.$().height();
