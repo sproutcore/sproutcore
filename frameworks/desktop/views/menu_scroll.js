@@ -100,7 +100,7 @@ SC.MenuScrollView = SC.ScrollView.extend(
   },
 
   /** @private @see SC.ScrollView. When the content view's size changes, we need to update our scroll offset properties. */
-  _sc_contentViewSizeDidChangeUnfiltered: function () {
+  _sc_repositionContentViewUnfiltered: function () {
     var hasVerticalScroller = this.get('hasVerticalScroller'),
         // UNUSED. minimumVerticalScrollOffset = this.get('minimumVerticalScrollOffset'),
         maximumVerticalScrollOffset = this.get('maximumVerticalScrollOffset');
