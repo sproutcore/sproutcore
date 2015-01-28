@@ -7,9 +7,9 @@
 // ========================================================================
 // SC.Observable Tests
 // ========================================================================
-/*globals module test ok isObj equals expects Namespace */
+/*globals module, test, ok, equals, expect, Namespace */
 
-var object, ObjectC, ObjectD, objectA, objectB, objectE, objectF ;
+var object, ObjectC, ObjectD, objectA, objectB;
 
 // ..........................................................
 // GET()
@@ -332,6 +332,10 @@ module("Computed properties", {
       }.property('state')
 
     }) ;
+  },
+
+  teardown: function () {
+    window.DepObj = null;
   }
 });
 
@@ -522,13 +526,13 @@ test("nested dependent keys should propagate after they update", function() {
 
   equals(bindObj.get('price'), 5, "precond - binding propagates");
 
-  DepObj.setPath('restaurant.menu.price', 10);
+  window.DepObj.setPath('restaurant.menu.price', 10);
 
   SC.run();
 
   equals(bindObj.get('price'), 10, "binding propagates after a nested dependent keys updates");
 
-  DepObj.setPath('restaurant.menu', SC.Object.create({
+  window.DepObj.setPath('restaurant.menu', SC.Object.create({
     price: 15
   }));
 
@@ -552,30 +556,30 @@ test("cacheable nested dependent keys should clear after their dependencies upda
 
   SC.run();
 
-  equals(DepObj.get('price'), 5, "precond - computed property is correct");
+  equals(window.DepObj.get('price'), 5, "precond - computed property is correct");
 
-  DepObj.setPath('restaurant.menu.price', 10);
+  window.DepObj.setPath('restaurant.menu.price', 10);
 
-  equals(DepObj.get('price'), 10, "cacheable computed properties are invalidated even if no run loop occurred");
-  DepObj.setPath('restaurant.menu.price', 20);
+  equals(window.DepObj.get('price'), 10, "cacheable computed properties are invalidated even if no run loop occurred");
+  window.DepObj.setPath('restaurant.menu.price', 20);
 
-  equals(DepObj.get('price'), 20, "cacheable computed properties are invalidated after a second get before a run loop");
+  equals(window.DepObj.get('price'), 20, "cacheable computed properties are invalidated after a second get before a run loop");
 
   SC.run();
 
-  equals(DepObj.get('price'), 20, "precond - computed properties remain correct after a run loop");
+  equals(window.DepObj.get('price'), 20, "precond - computed properties remain correct after a run loop");
 
-  DepObj.setPath('restaurant.menu', SC.Object.create({
+  window.DepObj.setPath('restaurant.menu', SC.Object.create({
     price: 15
   }));
 
-  equals(DepObj.get('price'), 15, "cacheable computed properties are invalidated after a middle property changes");
+  equals(window.DepObj.get('price'), 15, "cacheable computed properties are invalidated after a middle property changes");
 
-  DepObj.setPath('restaurant.menu', SC.Object.create({
+  window.DepObj.setPath('restaurant.menu', SC.Object.create({
     price: 25
   }));
 
-  equals(DepObj.get('price'), 25, "cacheable computed properties are invalidated after a middle property changes again, before a run loop");
+  equals(window.DepObj.get('price'), 25, "cacheable computed properties are invalidated after a middle property changes again, before a run loop");
 });
 
 
@@ -833,12 +837,18 @@ module("object.hasObserverFor", {
   setup: function() {
     objectA = SC.Object.create({
       internalObject: SC.Object.create({
-        chainedKey: 'value'
+        chainedKey: 'value',
+        deepInternalObject: SC.Object.create({
+          deepChainedKey: 'value'
+        }),
       }),
       key: 'value',
       observingMethod: function() {
         // nothin to see here
       }.observes('key', '.objectF.chainedKey'),
+      nonObservingMethod: function () {
+        // nothin to see here
+      },
       counter: 0
     });
     objectB = SC.Object.create({
@@ -848,20 +858,69 @@ module("object.hasObserverFor", {
     });
   }
 });
+
 test('hasObserverFor correctly identifies local observers.', function() {
   objectA.addObserver('key', 'observingMethod');
   ok(objectA.hasObserverFor('key'), "Object has an observer for 'key'.");
   ok(objectA.hasObserverFor('key', 'observingMethod'), "Object's observingMethod is the observer for 'key'.");
 });
+
 test('hasObserverFor correctly identifies remote observers.', function() {
-  objectA.addObserver('key', objectB, 'observingMethod');
+  objectA.addObserver('key', objectA, 'observingMethod');
   ok(objectA.hasObserverFor('key'), "Object has an observer for 'key'.");
-  ok(objectA.hasObserverFor('key', objectB, 'observingMethod'), "Second object's observingMethod is the observer for 'key'.");
+  ok(objectA.hasObserverFor('key', objectA, 'observingMethod'), "Second object's observingMethod is the observer for 'key'.");
 });
+
 test('hasObserverFor correctly identifies chained observers.', function() {
-  objectA.addObserver('.internalObject.key', 'observingMethod');
-  ok(objectA.hasObserverFor('internalObject.key'), "Object has an observer for '.internalObject.key'.");
-  ok(objectA.hasObserverFor('internalObject.key', 'observingMethod'), "Object's observingMethod is the observer for '.internalObject.key'.");
+  objectA.addObserver('.internalObject.chainedKey', 'observingMethod');
+
+  // Test general support for chain.
+  ok(objectA.hasObserverFor('.internalObject.chainedKey'), "Object has an observer for '.internalObject.chainedKey'.");
+
+  // Ensure we're not getting false positives.
+  ok(!objectA.hasObserverFor('.internalObject.nonChainedKey'), "Object does not have an observer for '.internalObject.nonChainedKey'.");
+  ok(!objectA.hasObserverFor('*internalObject.chainedKey'), "Object does not have an observer for '*internalObject.chainedKey'.");
+
+  // Test support for chain with target/method.
+  ok(objectA.hasObserverFor('.internalObject.chainedKey', 'observingMethod'), "Object's observingMethod is the observer for '.internalObject.chainedKey'.");
+
+  // Ensure we're not getting false positives.
+  ok(!objectB.hasObserverFor('.internalObject.chainedKey', 'observingMethod'), "Wrong object's observingMethod is not the observer for '.internalObject.chainedKey'.");
+  ok(!objectA.hasObserverFor('.internalObject.chainedKey', 'nonObservingMethod'), "Object's nonObservingMethod is not the observer for '.internalObject.chainedKey'.");
+
+  objectA.addObserver('.internalObject.deepInternalObject.deepChainedKey', 'observingMethod');
+
+  // Test general support for deeper chain.
+  ok(objectA.hasObserverFor('.internalObject.deepInternalObject.deepChainedKey'), "Object has an observer for '.internalObject.deepInternalObject.deepChainedKey'.");
+
+  // Ensure we're not getting false positives.
+  ok(!objectA.hasObserverFor('.internalObject.deepInternalObject.nonDeepChainedKey'), "Object does not have an observer for '.internalObject*deepInternalObject.nonDeepChainedKey'.");
+  ok(!objectA.hasObserverFor('.internalObject*deepInternalObject.deepChainedKey'), "Object does not have an observer for '.internalObject*deepInternalObject.deepChainedKey'.");
+
+  // Test support for deeper chain with target/method.
+  ok(objectA.hasObserverFor('.internalObject.deepInternalObject.deepChainedKey', 'observingMethod'), "Object's observingMethod is the observer for '.internalObject.deepInternalObject.deepChainedKey'.");
+
+  // Ensure we're not getting false positives.
+  ok(!objectB.hasObserverFor('.internalObject.deepInternalObject.deepChainedKey', 'observingMethod'), "Wrong object's observingMethod is not the observer for '.internalObject.deepInternalObject.deepChainedKey'.");
+  ok(!objectA.hasObserverFor('.internalObject.deepInternalObject.deepChainedKey', 'nonObservingMethod'), "Object's nonObservingMethod is not the observer for '.internalObject.deepInternalObject.deepChainedKey'.");
+});
+
+test('hasObserverFor correctly identifies greedy chain observers.', function() {
+  objectA.addObserver('.internalObject*deepInternalObject.deepChainedKey', 'observingMethod');
+
+  // Test general support for chain.
+  ok(objectA.hasObserverFor('.internalObject*deepInternalObject.deepChainedKey'), "Object has an observer for '.internalObject*deepInternalObject.deepChainedKey'.");
+
+  // Ensure we're not getting false positives.
+  ok(!objectA.hasObserverFor('.internalObject*deepInternalObject.nonDeepChainedKey'), "Object does not have an observer for '.internalObject*deepInternalObject.nonDeepChainedKey'.");
+  ok(!objectA.hasObserverFor('*internalObject.deepInternalObject.deepChainedKey'), "Object does not have an observer for '*internalObject.deepInternalObject.deepChainedKey'.");
+
+  // Test support for chain with target/method.
+  ok(objectA.hasObserverFor('.internalObject*deepInternalObject.deepChainedKey', 'observingMethod'), "Object's observingMethod is the observer for '.internalObject*deepInternalObject.deepChainedKey'.");
+
+  // Ensure we're not getting false positives.
+  ok(!objectB.hasObserverFor('.internalObject*deepInternalObject.deepChainedKey', 'observingMethod'), "Wrong object's observingMethod is not the observer for '.internalObject*deepInternalObject.deepChainedKey'.");
+  ok(!objectA.hasObserverFor('.internalObject*deepInternalObject.deepChainedKey', 'nonObservingMethod'), "Object's nonObservingMethod is not the observer for '.internalObject*deepInternalObject.deepChainedKey'.");
 });
 
 
@@ -1063,8 +1122,8 @@ test("destroying an observable should remove binding objects and clear observer 
 
   targetGuid1 = SC.guidFor(object);
   targetGuid2 = SC.guidFor(object.bindings[0]);
-  observerSet1 = TestNS._kvo_observers_value1;
-  observerSet2 = TestNS._kvo_observers_value2;
+  observerSet1 = window.TestNS._kvo_observers_value1;
+  observerSet2 = window.TestNS._kvo_observers_value2;
   equals(observerSet1.members.length, 1, "The length of the members array on TestNS._kvo_observers_value1 should be");
   equals(observerSet2.members.length, 1, "The length of the members array on TestNS._kvo_observers_value2 should be");
   ok(!SC.none(observerSet1._members[targetGuid2]), "The object should be retained in TestNS._kvo_observers_value1.");

@@ -14,13 +14,13 @@ Edge
 
 ### NEW FEATURES
 
-* *SC.NestedStore*  
+#### SC.NestedStore
 
 `SC.NestedStore` has a new property, `conflictedStoreKeys`, which is an array of all store keys that currently have conflicts with the nested store's parent. A conflict in a nested store can occur when the data in the parent store changes *after* the nested store has accessed and modified it.  
 
 For instance, in a multi-user system where records can be edited by multiple people at the same time, the client may use polling or websockets to update the records in the main store asynchronously in the background. With such a scenario it would be possible for the current user to be editing a record that someone else has changed in the meantime. If the client attempted to commit the changes from the nested store it would get an exception because of the conflict. Instead, the developer can now check the value of `conflictedStoreKeys` and if it is `null`, then commit the changes and if it is an array of store keys, then they know which records have conflicts and can deal with them directly.
 
-* *SC.Binding*  
+#### SC.Binding
 
 There are two new binding transforms, `string` and `integer`, that ensure the value is *always* a `String` or an integer `Number`. Examples include returning an empty `String` for `null` or `undefined` values when using the `string` transform and returning a 0 for these same values when using the `integer` transform. Furthermore, if the `integer` transform is given a String, it will be parsed to an integer `Number` according to the extra argument `radix` (which is 10 by default).
 
@@ -50,11 +50,14 @@ For example, to create a mix binding that concatenates two external properties i
 
     })
 
+#### General
+
+* The `hasObserverFor` method of `SC.Observable` has been improved to also be able to optionally check against a specific target and method. This allows the developer to properly check for the existence of a specific handler before adding it rather than only being able to check for the existence of any handler (without knowing which handler it is).
 * *Updated Description* Scale is now a first-class layout property, correctly impacting `frame` and `clippingFrame`. If a view is scaled, the width & height of the frame will be correct as the view appears. For example, a view with layout equal to `{ width: 100, height: 100, scale: 2 }` will report a frame of `{ x: 0, y: 0, width: 200, height: 200, scale: 2 }`. The scale also takes a scaling origin into account as well and as part of this change, there are two new layout properties: `transformOriginX` and `transformOriginY`, which define the percentage (between 0.0 and 1.0) on the respective axis about which the scale transform is applied. These properties affect all transform styles and so can be used to also change the origin of a rotate style.  
 
 ### CHANGES & IMPROVEMENTS
 
-* Documentation  
+#### Documentation  
 
 - Added lots of documentation to `SC.Request` (examples), `SC.Query` (local vs. remote) and `SC.DateTime` (`adjust` and `advance`).   
 - Cleaned up documentation of all protocols, including a warning not to mix in protocols and fixed some problems that prevented some protocols from being properly generated on docs.sproutcore.com.  
@@ -62,7 +65,7 @@ For example, to create a mix binding that concatenates two external properties i
 - Added documentation on touch event handling to `SC.ResponderProtocol` (i.e. the protocol that may be implemented by `SC.Responder` subclasses like `SC.View`).  
 - Added/improved documentation on `SC.Gesturable` mixin.  
 
-* SC.Gesturable & SC.Gesture (SC.TapGesture, SC.PinchGesture, SC.SwipeGesture)
+#### SC.Gesturable & SC.Gesture (SC.TapGesture, SC.PinchGesture, SC.SwipeGesture)
 
 After some investigation, it was found that there were a number of issues with the built-in gesture support. For example, two touch taps would throw an exception, pinches would fail to register and in particular, supporting multiple gestures failed in a number of scenarios. In order to fix these problems, the gesture code has been rewritten from the top-down.
 
@@ -77,7 +80,7 @@ It is now possible to mixin SC.Gesturable to a view and use events to react to m
 
 For the most part, this should have no effect on existing implementors of SC.Gesturable. The three built-in gestures: SC.TapGesture, SC.PinchGesture, and SC.SwipeGesture are still defined and they work much better than before. However if you have defined a custom SC.Gesture subclass, it will unfortunately not work correctly with this update. Because we felt the previous version of SC.Gesture's API was too complex and incompatible with the behavior we needed to achieve, we decided it was better to rewrite it in a simpler form. We're very sorry for this backwards incompatibility, but because of the previous issues with gestures, we believe no one was able to use them anyway.
 
-* Legacy Framework
+#### Legacy Framework
 
 There is now a sub-framework within SproutCore, `:'sproutcore/legacy'`, which is meant to contain all code providing support for older browsers. This includes the existing polyfill for `window.requestAnimationFrame` and a brand new polyfill for `Object.keys`. The legacy framework is included by default by requiring `:sproutcore` in a project's or an app's Buildfile. The legacy framework itself requires the `:sproutcore/desktop` framework, which allows for any legacy code in the SproutCore controls to be separated out.  
 
@@ -85,14 +88,16 @@ Therefore, to build an app that will only work with the newest browsers (probabl
 
     config :my_app, :required => [:"sproutcore/desktop", :"sproutcore/datastore"]
 
-* SC.PickerPane  
+#### SC.PickerPane  
 
 This view has been given special behavior when used with SC.View's `transitionIn` plugin support. If the plugin defines `layoutProperties` of either `scale` or `rotate`, then the picker will adjust its transform origin X & Y position to appear to scale or rotate out of the anchor. The result is a very nice effect that picker panes appear to pop out of their anchors.  
 To see it in effect, simply set the `transitionIn` property of the pane to one of `SC.View.SCALE_IN` or `SC.View.POP_IN`.
 
-* SC.SegmentedView  
+#### SC.SegmentedView  
 
 This view was refactored slightly to remove the special overflow view if `shouldHandleOverflow` is `false` (default). Previously the overflow view was always created and appended even if it was not to be used.  
+
+#### General
 
 * The automatically adjusted size component of the layouts of `SC.ListView` and `SC.GridView` have changed to set `height` and `width` instead of `minHeight` and `minWidth` (as it applies). The reason for this change is so that the entire list of items can be GPU accelerated by setting `wantsAcceleratedLayer: true` on the view. GPU accelerated positioning using the `translateX` and `translateY` transforms requires that the view have a fixed position (top & left) and a fixed size (height & width). These views already have a fixed position by default and now by having them adjust their `height` or `width` (depending on the direction), it is possible to accelerate these views by also fixing the other size component (i.e. if the list scrolls vertically, the list will set its height, so the developer needs to set the lists width to a fixed value and then add `wantsAcceleratedLayer: true`).  
 
