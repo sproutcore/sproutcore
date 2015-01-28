@@ -641,10 +641,21 @@ SC.PickerPane = SC.PalettePane.extend(
 
       frame = this.fitPositionToScreen(origin, frame, anchor);
 
+      // Create an adjustment layout from the computed position.
       adjustHash = {
         left: frame.x,
         top: frame.y
       };
+
+      // If the computed position also constrains width or height, add it to the adjustment.
+      /*jshint eqnull:true*/
+      if (frame.width != null) {
+        adjustHash.width = frame.width;
+      }
+
+      if (frame.height != null) {
+        adjustHash.height = frame.height;
+      }
 
       /*
         Special case behavior for transitions that include scale or rotate: notably SC.View.SCALE_IN and SC.View.POP_IN.
@@ -683,9 +694,6 @@ SC.PickerPane = SC.PalettePane.extend(
         // If the picker doesn't use a pointer, set the origin to the correct corner.
         case SC.PICKER_MENU:
         case SC.PICKER_FIXED:
-          adjustHash.width = frame.width;
-          adjustHash.height = frame.height;
-          
           if (frame.x >= anchor.x) {
             transformOriginX = 0;
           } else {
