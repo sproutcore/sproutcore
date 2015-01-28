@@ -557,7 +557,7 @@ SC.MenuPane = SC.PickerPane.extend(
     @returns {SC.View} receiver
   */
   createChildViews: function () {
-    var scroll, menuView, menuItemViews;
+    var scroll, menuView;
 
     // Create the menu items collection view.
     // TODO: Should this not be an SC.ListView?
@@ -1273,3 +1273,32 @@ SC._menu_fetchItem = function (k) {
   if (!k) return null;
   return this.get ? this.get(k) : this[k];
 };
+
+
+/**
+  Default metrics for the different control sizes.
+*/
+SC.MenuPane.TINY_MENU_ITEM_HEIGHT = 10;
+// SC.MenuPane.TINY_MENU_ITEM_SEPARATOR_HEIGHT = 2;
+// SC.MenuPane.TINY_MENU_HEIGHT_PADDING = 2;
+// SC.MenuPane.TINY_SUBMENU_OFFSET_X = 0;
+
+SC.MenuPane.SMALL_MENU_ITEM_HEIGHT = 16;
+// SC.MenuPane.SMALL_MENU_ITEM_SEPARATOR_HEIGHT = 7;
+// SC.MenuPane.SMALL_MENU_HEIGHT_PADDING = 4;
+// SC.MenuPane.SMALL_SUBMENU_OFFSET_X = 2;
+
+SC.MenuPane.REGULAR_MENU_ITEM_HEIGHT = 22;
+// SC.MenuPane.REGULAR_MENU_ITEM_SEPARATOR_HEIGHT = 9;
+// SC.MenuPane.REGULAR_MENU_HEIGHT_PADDING = 6;
+// SC.MenuPane.REGULAR_SUBMENU_OFFSET_X = 2;
+
+SC.MenuPane.LARGE_MENU_ITEM_HEIGHT = 31;
+// SC.MenuPane.LARGE_MENU_ITEM_SEPARATOR_HEIGHT = 20;
+// SC.MenuPane.LARGE_MENU_HEIGHT_PADDING = 0;
+// SC.MenuPane.LARGE_SUBMENU_OFFSET_X = 4;
+
+SC.MenuPane.HUGE_MENU_ITEM_HEIGHT = 20;
+// SC.MenuPane.HUGE_MENU_ITEM_SEPARATOR_HEIGHT = 9;
+// SC.MenuPane.HUGE_MENU_HEIGHT_PADDING = 0;
+// SC.MenuPane.HUGE_SUBMENU_OFFSET_X = 0;
