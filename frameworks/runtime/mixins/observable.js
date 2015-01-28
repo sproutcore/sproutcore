@@ -1187,18 +1187,29 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     } else {
       root = null;
 
+      // Transform '.x.y' to 'x.y'.
       if (dotIndex === 0) {
         root = this;
         path = path.slice(1);
+
+      // Transform 'this.x.y' to 'x.y'.
       } else if (dotIndex === 4 && path.slice(0, 5) === 'this.') {
         root = this;
         path = path.slice(5);
+
+      // Transform '@each.x.y' to '@each.x.y' on this.
+      } else if (dotIndex === 5 && path.slice(0, 6) === '@each.') {
+        root = this;
+
+      // Transform 'this' to ''.
+      // TODO: Why?
       } else if (dotIndex < 0 && path.length === 4 && path === 'this') {
         root = this;
         path = '';
+
+      // If the first character for the given path is lower case then we assume the path is relative
+      // to this.
       } else if (dotIndex > 0 && path[0] === path.charAt(0).toLowerCase()) {
-        // if the first character for the given path is lower case
-        // then we assume the path is relative to this
         root = this;
       }
 

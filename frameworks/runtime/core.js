@@ -731,11 +731,15 @@ SC.mixin(/** @scope window.SC.prototype */ {
     // if the passed path is itself a tuple, return it
     if (typeof path === "object" && (path instanceof Array)) return path;
 
-    // find the key.  It is the last . or first *
-    var key;
+    // find the key.  It is the last ., .@each, or first *
+    var sliceLength = 1,
+        key;
     var stopAt = path.indexOf('*');
+    if (stopAt < 0) stopAt = path.indexOf('@each');
+    if (stopAt >= 0) { sliceLength = 0; } // No '.' in front.
+    if (stopAt < 0) stopAt = path.indexOf('.@each');
     if (stopAt < 0) stopAt = path.lastIndexOf('.');
-    key = (stopAt >= 0) ? path.slice(stopAt + 1) : path;
+    key = (stopAt >= 0) ? path.slice(stopAt + sliceLength) : path;
 
     // convert path to object.
     var obj = this.objectForPropertyPath(path, root, stopAt);
