@@ -9,6 +9,50 @@ Edge
 ### DEPRECATIONS & REMOVALS
 ### BUG FIXES
 
+1.11.0
+-----------
+
+### NEW FEATURES
+
+#### General
+
+* The `hasObserverFor` method of `SC.Observable` has been improved to also be able to optionally check against a specific target and method. This allows the developer to properly check for the existence of a specific handler before adding it rather than only being able to check for the existence of any handler (without knowing which handler it is).
+
+### CHANGES & IMPROVEMENTS
+
+#### SC.Gesturable & SC.Gesture (SC.TapGesture, SC.PinchGesture, SC.SwipeGesture)
+
+After some investigation, it was found that there were a number of issues with the built-in gesture support. For example, two touch taps would throw an exception, pinches would fail to register and in particular, supporting multiple gestures failed in a number of scenarios. In order to fix these problems, the gesture code has been rewritten from the top-down.
+
+It is now possible to mixin SC.Gesturable to a view and use events to react to multiple gestures concurrently. Examples of the advanced type of behavior that the gesture code allows include:
+
+* Responding to single finger, two finger or any other number of touch taps, pinches (2+ touches) or swipes individually or as a group. For example, your code may want to perform different actions when a single finger taps vs. when there is a two finger tap.
+* A touch session, the time between when the first touch begins and the last touch ends, may contain more than one gesture. For example, it's possible for the user to perform a pinch, then use a third finger to tap, then swipe the remaining fingers. For example, imagine using pinch to scale an image, tap to save the change and then swipe to move it aside all without lifting the fingers. At the least, the ability to perform gestures in a single touch session multiple times, makes the gesture recognition more robust against stray accidental touches.
+* Swipe gestures can now be configured to match against any arbitrary angles, not just left, right, up & down.
+* Swipe gestures no longer trigger by simply moving far enough in one direction. They must also move quickly (configurable) and end immediately.
+
+*How does this affect your code?*  
+
+For the most part, this should have no effect on existing implementors of SC.Gesturable. The three built-in gestures: SC.TapGesture, SC.PinchGesture, and SC.SwipeGesture are still defined and they work much better than before. However if you have defined a custom SC.Gesture subclass, it will unfortunately not work correctly with this update. Because we felt the previous version of SC.Gesture's API was too complex and incompatible with the behavior we needed to achieve, we decided it was better to rewrite it in a simpler form. We're very sorry for this backwards incompatibility, but because of the previous issues with gestures, we believe no one was able to use them anyway.
+
+#### Legacy Framework
+
+There is now a sub-framework within SproutCore, `:'sproutcore/legacy'`, which is meant to contain all code providing support for older browsers. This includes the existing polyfill for `window.requestAnimationFrame` and a brand new polyfill for `Object.keys`. The legacy framework is included by default by requiring `:sproutcore` in a project's or an app's Buildfile. The legacy framework itself requires the `:sproutcore/desktop` framework, which allows for any legacy code in the SproutCore controls to be separated out.  
+
+Therefore, to build an app that will only work with the newest browsers (probably not a great idea —), you may change your Buildfile requirements to include only the specific SproutCore sub-frameworks you need. For example,
+
+    config :my_app, :required => [:"sproutcore/desktop", :"sproutcore/datastore"]
+
+### DEPRECATIONS & REMOVALS
+
+* The `owner` property of SC.View has been deprecated for general use. This property is identical to the existing `parentView` property on all views. It existed in order for some ancestor view to claim ownership of a descendent view, so that the descendent could reference the ancestor directly as `owner` rather than using some chain like `parentView.parentView...`. However, this type of connection can still be achieved by the an ancestor simply assigning `owner`, or whichever property they want to use, none-the-less and there's no need for every single SC.View to have it assigned.
+
+Note: This deprecation will show a console warning in debug (i.e. non-production) mode.
+
+### BUG FIXES
+
+* Fixed several regressions from previous release candidates.
+
 1.11.0.rc3
 -----------
 
@@ -52,7 +96,6 @@ For example, to create a mix binding that concatenates two external properties i
 
 #### General
 
-* The `hasObserverFor` method of `SC.Observable` has been improved to also be able to optionally check against a specific target and method. This allows the developer to properly check for the existence of a specific handler before adding it rather than only being able to check for the existence of any handler (without knowing which handler it is).
 * *Updated Description* Scale is now a first-class layout property, correctly impacting `frame` and `clippingFrame`. If a view is scaled, the width & height of the frame will be correct as the view appears. For example, a view with layout equal to `{ width: 100, height: 100, scale: 2 }` will report a frame of `{ x: 0, y: 0, width: 200, height: 200, scale: 2 }`. The scale also takes a scaling origin into account as well and as part of this change, there are two new layout properties: `transformOriginX` and `transformOriginY`, which define the percentage (between 0.0 and 1.0) on the respective axis about which the scale transform is applied. These properties affect all transform styles and so can be used to also change the origin of a rotate style.  
 
 ### CHANGES & IMPROVEMENTS
@@ -64,29 +107,6 @@ For example, to create a mix binding that concatenates two external properties i
 - Added `SC.ObjectMixinProtocol` with documentation on using mixins with `SC.Object` as well as the methods `initMixin` and  `destroyMixin` that are supported.  
 - Added documentation on touch event handling to `SC.ResponderProtocol` (i.e. the protocol that may be implemented by `SC.Responder` subclasses like `SC.View`).  
 - Added/improved documentation on `SC.Gesturable` mixin.  
-
-#### SC.Gesturable & SC.Gesture (SC.TapGesture, SC.PinchGesture, SC.SwipeGesture)
-
-After some investigation, it was found that there were a number of issues with the built-in gesture support. For example, two touch taps would throw an exception, pinches would fail to register and in particular, supporting multiple gestures failed in a number of scenarios. In order to fix these problems, the gesture code has been rewritten from the top-down.
-
-It is now possible to mixin SC.Gesturable to a view and use events to react to multiple gestures concurrently. Examples of the advanced type of behavior that the gesture code allows include:
-
-* Responding to single finger, two finger or any other number of touch taps, pinches (2+ touches) or swipes individually or as a group. For example, your code may want to perform different actions when a single finger taps vs. when there is a two finger tap.
-* A touch session, the time between when the first touch begins and the last touch ends, may contain more than one gesture. For example, it's possible for the user to perform a pinch, then use a third finger to tap, then swipe the remaining fingers. For example, imagine using pinch to scale an image, tap to save the change and then swipe to move it aside all without lifting the fingers. At the least, the ability to perform gestures in a single touch session multiple times, makes the gesture recognition more robust against stray accidental touches.
-* Swipe gestures can now be configured to match against any arbitrary angles, not just left, right, up & down.
-* Swipe gestures no longer trigger by simply moving far enough in one direction. They must also move quickly (configurable) and end immediately.
-
-*How does this affect your code?*  
-
-For the most part, this should have no effect on existing implementors of SC.Gesturable. The three built-in gestures: SC.TapGesture, SC.PinchGesture, and SC.SwipeGesture are still defined and they work much better than before. However if you have defined a custom SC.Gesture subclass, it will unfortunately not work correctly with this update. Because we felt the previous version of SC.Gesture's API was too complex and incompatible with the behavior we needed to achieve, we decided it was better to rewrite it in a simpler form. We're very sorry for this backwards incompatibility, but because of the previous issues with gestures, we believe no one was able to use them anyway.
-
-#### Legacy Framework
-
-There is now a sub-framework within SproutCore, `:'sproutcore/legacy'`, which is meant to contain all code providing support for older browsers. This includes the existing polyfill for `window.requestAnimationFrame` and a brand new polyfill for `Object.keys`. The legacy framework is included by default by requiring `:sproutcore` in a project's or an app's Buildfile. The legacy framework itself requires the `:sproutcore/desktop` framework, which allows for any legacy code in the SproutCore controls to be separated out.  
-
-Therefore, to build an app that will only work with the newest browsers (probably not a great idea —), you may change your Buildfile requirements to include only the specific SproutCore sub-frameworks you need. For example,
-
-    config :my_app, :required => [:"sproutcore/desktop", :"sproutcore/datastore"]
 
 #### SC.PickerPane  
 
@@ -132,10 +152,6 @@ For example,
 ### DEPRECATIONS & REMOVALS
 
 * The `isPaneAttached` property of SC.Pane has been deprecated. This property is identical to the existing `isAttached` property of SC.View that SC.Pane extends and so `isPaneAttached` is not needed. Please use `isAttached` instead.  
-
-Note: This deprecation will show a console warning in debug (i.e. non-production) mode.
-
-* The `owner` property of SC.View has been deprecated for general use. This property is identical to the existing `parentView` property on all views. It existed in order for some ancestor view to claim ownership of a descendent view, so that the descendent could reference the ancestor directly as `owner` rather than using some chain like `parentView.parentView...`. However, this type of connection can still be achieved by the an ancestor simply assigning `owner`, or whichever property they want to use, none-the-less and there's no need for every single SC.View to have it assigned.
 
 Note: This deprecation will show a console warning in debug (i.e. non-production) mode.
 
