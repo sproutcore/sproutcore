@@ -491,6 +491,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     @returns {SC.Observable}
   */
   propertyDidChange: function (key, value, _keepCache) {
+    // console.log("%@ - propertyDidChange(%@, %@)".fmt(key, value));
     this._kvo_revision = this._kvo_revision + 1;
     var level = this._kvo_changeLevel,
         cachedep, idx, dfunc, func;
@@ -810,6 +811,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
       target = this;
     }
     if (!target) target = this;
+    console.log('%@.addObserver(%@, %@, ..., %@)'.fmt(this, key, target, context));
 
     if (typeof method === "string") method = target[method];
     if (!method) throw new Error("You must pass a method to addObserver()");
@@ -1165,6 +1167,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     @param {String} path a dot-notation property path string
   */
   _configureObservesHandler: function (action, observer, path) {
+    console.log('_configureObservesHandler(..., %@)'.fmt(path));
     var dotIndex, root;
 
     switch (action) {

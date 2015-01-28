@@ -165,6 +165,8 @@ module("SC.Observable - Convenience observing with @each", {
     child4 = SC.Object.create({ name: "Nancy", toString: function () { return this.name; } });
     child5 = SC.Object.create({ name: "Constance", toString: function () { return this.name; } });
 
+    console.warn("creating momma");
+
     DummyArray = SC.Object.extend(SC.Array, {
 
       // The SC.Array mixin sends all mutations through replace.
@@ -220,6 +222,7 @@ module("SC.Observable - Convenience observing with @each", {
       }
     });
 
+    console.warn("creating family");
     family = SC.Object.create({
       toString: function () {
         return 'family';
@@ -238,6 +241,7 @@ module("SC.Observable - Convenience observing with @each", {
   },
 
   teardown: function () {
+    console.warn("teardown");
     family.destroy();
     grandma.destroy();
     momma.destroy();
@@ -253,17 +257,21 @@ module("SC.Observable - Convenience observing with @each", {
 
 test("chained observers on enumerable properties are triggered when the observed property of any item changes", function () {
   observerFiredCount = 0;
+    console.warn("changing each");
   SC.run(function () { momma.get('children').setEach('name', 'Juan'); });
   equals(observerFiredCount, 6, "observer fired after changing child names");
 
+    console.warn("adding child");
   observerFiredCount = 0;
   SC.run(function () { momma.children.pushObject(child4); });
   equals(observerFiredCount, 2, "observer fired after adding a new item");
 
   observerFiredCount = 0;
+    console.warn("changing one");
   SC.run(function () { child4.set('name', "Herbert"); });
   equals(observerFiredCount, 2, "observer fired after changing property on new object");
 
+    console.warn("replacing all");
   var oldChildren = momma.get('children');
   momma.set('children', []);
   observerFiredCount = 0;

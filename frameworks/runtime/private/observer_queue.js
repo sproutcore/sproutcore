@@ -46,6 +46,7 @@ SC.Observers = {
     } else {
       tuple = propertyPath;
     }
+    console.log('SC.Observes.addObserver(%@, ..., %@): tuple: %@'.fmt(propertyPath, pathRoot, (tuple ? tuple[0] + ', ' + tuple[1] : null)));
 
     // if a tuple was found and is observable, add the observer immediately...
     if (tuple && tuple[0].addObserver) {

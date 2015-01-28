@@ -724,6 +724,7 @@ SC.mixin(/** @scope window.SC.prototype */ {
     @returns {Array} array with [object, property] if found or null
   */
   tupleForPropertyPath: function (path, root) {
+    console.log('tupleForPropertyPath(%@, %@)'.fmt(path, root));
     /* jshint eqnull:true */
     // if passed nothing, return nothing.
     if (path == null) return null;
@@ -756,7 +757,7 @@ SC.mixin(/** @scope window.SC.prototype */ {
     @returns {Object} the found object or undefined.
   */
   objectForPropertyPath: function (path, root, stopAt) {
-
+    console.log('objectForPropertyPath(%@, %@, %@)'.fmt(path, root, stopAt));
     var loc, nextDotAt, key, max;
 
     if (!root) root = window;

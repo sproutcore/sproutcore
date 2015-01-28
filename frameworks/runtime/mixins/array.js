@@ -621,6 +621,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     @param {Array} removedObjects the array of objects that have been removed
   */
   _setupContentObservers: function (start, addedCount) {
+    console.log("%@ - _setupContentObservers(%@, %@): %@".fmt(this, start, addedCount));
     var observedKeys = this._kvo_for('_kvo_content_observed_keys', SC.CoreSet);
     var addedObjects;
     var kvoKey;
