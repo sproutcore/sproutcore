@@ -14,11 +14,11 @@ SC.SimpleMediaControlsView = SC.View.extend(
 /** @scope SC.SimpleMediaControlsView.prototype */{
 
   target: null,
-  
+
   childViews: ['playButton', 'progressView'],
-  
+
   classNames: ['sc-media-controls'],
-  
+
   playObserver: function(){
     if(this.getPath('target.paused')){
       this.get('playButton').set('icon', 'play');
@@ -26,23 +26,23 @@ SC.SimpleMediaControlsView = SC.View.extend(
       this.get('playButton').set('icon', 'stop');
     }
   }.observes('*target.paused'),
-  
+
   playButton: SC.ButtonView.design({
     title: '',
     titleMinWidth: 35,
     icon: 'play',
     layout: { top: 0, left: 0, width: 20, height:20 },
     action: "playPause",
-    targetBinding: "*owner.target"
+    targetBinding: ".parentView.target"
   }),
-  
+
   progressView: SC.MediaSlider.design({
     layout: { top: 0, left: 25, right: 10, height:20 },
     value:0,
     minimum: 0,
     step:0.1,
-    valueBinding: "*owner.target.currentTime" ,
-    maximumBinding: "*owner.target.duration",
-    mediaViewBinding: "*owner.target"
+    valueBinding: ".parentView*target.currentTime" ,
+    maximumBinding: ".parentView*target.duration",
+    mediaViewBinding: ".parentView.target"
   })
 });

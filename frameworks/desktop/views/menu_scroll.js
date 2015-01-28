@@ -216,7 +216,7 @@ SC.MenuScrollView = SC.ScrollView.extend(
         layout: { height: 0 },
 
         value: this.get('verticalScrollOffset'),
-        valueBinding: '.owner.verticalScrollOffset', // Bind the value of the scroller to our vertical offset.
+        valueBinding: '.parentView.verticalScrollOffset', // Bind the value of the scroller to our vertical offset.
         minimum: this.get('minimumVerticalScrollOffset'),
         maximum: this.get('maximumVerticalScrollOffset')
       });
@@ -244,7 +244,7 @@ SC.MenuScrollView = SC.ScrollView.extend(
         layout: { bottom: 0, height: 0 },
 
         value: this.get('verticalScrollOffset'),
-        valueBinding: '.owner.verticalScrollOffset', // Bind the value of the scroller to our vertical offset.
+        valueBinding: '.parentView.verticalScrollOffset', // Bind the value of the scroller to our vertical offset.
         minimum: this.get('minimumVerticalScrollOffset'),
         maximum: this.get('maximumVerticalScrollOffset')
       });

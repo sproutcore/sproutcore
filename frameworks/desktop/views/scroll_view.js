@@ -1705,7 +1705,7 @@ SC.ScrollView = SC.View.extend({
         isVisible: !this.get('autohidesHorizontalScroller'),
         layoutDirection: SC.LAYOUT_HORIZONTAL,
         value: this.get('horizontalScrollOffset'),
-        valueBinding: '.owner.horizontalScrollOffset', // Bind the value of the scroller to our horizontal offset.
+        valueBinding: '.parentView.horizontalScrollOffset', // Bind the value of the scroller to our horizontal offset.
         minimum: this.get('minimumHorizontalScrollOffset'),
         maximum: this.get('maximumHorizontalScrollOffset')
       });
@@ -1732,7 +1732,7 @@ SC.ScrollView = SC.View.extend({
         isVisible: !this.get('autohidesVerticalScroller'),
         layoutDirection: SC.LAYOUT_VERTICAL,
         value: this.get('verticalScrollOffset'),
-        valueBinding: '.owner.verticalScrollOffset', // Bind the value of the scroller to our vertical offset.
+        valueBinding: '.parentView.verticalScrollOffset', // Bind the value of the scroller to our vertical offset.
         minimum: this.get('minimumVerticalScrollOffset'),
         maximum: this.get('maximumVerticalScrollOffset')
       });

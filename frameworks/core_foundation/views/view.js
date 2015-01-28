@@ -99,6 +99,14 @@ SC.CoreView.reopen(
   */
   createdByParent: false,
 
+  /** @deprecated Version 1.11.0 Please use parentView instead. */
+  owner: function () {
+    //@if(debug)
+    SC.warn("Developer Warning: The `owner` property of SC.View has been deprecated in favor of the `parentView`, which is the same value. Please use `parentView`.");
+    //@endif
+    return this.get('parentView');
+  }.property('parentView').cacheable(),
+
   /**
     The current pane.
 
@@ -1320,8 +1328,6 @@ SC.CoreView.reopen(
     // Orphan the view if adopted.
     this._doOrphan();
 
-    // TODO: Deprecate owner in this sense.
-    this.set('owner', null);
     delete this.page;
   },
 
@@ -1414,8 +1420,8 @@ SC.CoreView.reopen(
       // clone the hash that was given so we do not pollute it if it's being reused
       else { attrs = SC.clone(attrs); }
 
-      // Assign the owner, parentView & page to ourself.
-      attrs.owner = attrs.parentView = this;
+      // Assign the parentView & page to ourself.
+      attrs.parentView = this;
       if (!attrs.page) { attrs.page = this.page; }
 
       // Track that we created this view.
@@ -1430,12 +1436,11 @@ SC.CoreView.reopen(
       } else {
         view = view.create(attrs);
       }
-    // Assign the parentView & owner if the view is an instance.
+    // Assign the parentView if the view is an instance.
     // TODO: This should not be accepting view instances, for the purpose of lazy code elsewhere in the framework.
     //       We should ensure users of `createChildViews` are using appendChild and other manipulation methods.
     } else {
       view.set('parentView', this);
-      view.set('owner', this);
       view._adopted();
 
       if (!view.get('page')) { view.set('page', this.page); }

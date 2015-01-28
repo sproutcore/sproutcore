@@ -130,6 +130,10 @@ For example,
 
 Note: This deprecation will show a console warning in debug (i.e. non-production) mode.
 
+* The `owner` property of SC.View has been deprecated for general use. This property is identical to the existing `parentView` property on all views. It existed in order for some ancestor view to claim ownership of a descendent view, so that the descendent could reference the ancestor directly as `owner` rather than using some chain like `parentView.parentView...`. However, this type of connection can still be achieved by the an ancestor simply assigning `owner`, or whichever property they want to use, none-the-less and there's no need for every single SC.View to have it assigned.
+
+Note: This deprecation will show a console warning in debug (i.e. non-production) mode.
+
 ### BUG FIXES
 
 * Added code to prevent a possible issue that could occur when animating to an implied layout position. For instance, if a view has a layout set to `{ top: 5 }`, the implied layout is actually `{ top: 5, right: 0, bottom: 0, left: 0 }`. The issue that could arise is if the code tried to animate to an implied value (ex. `view.animate('left', 0, { duration: 1 }, callbackFunc)`), the animation wouldn't actually need to run and the callback function would fail to fire.

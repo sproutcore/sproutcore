@@ -34,7 +34,7 @@ SC.MiniMediaControlsView = SC.View.extend(
     noStyle: YES,
     layout: { top: 0, left: 0, width: 20, height:20},
     action: "playPause",
-    targetBinding: "*owner.target",
+    targetBinding: ".parentView.target",
     renderStyle: 'renderImage',
     theme: ''
   }),
@@ -42,7 +42,7 @@ SC.MiniMediaControlsView = SC.View.extend(
   timeView: SC.LabelView.design({
     layout: { top: 0, left: 20, width: 60, height:20},
     classNames: 'time',
-    valueBinding: '*owner.target.time'
+    valueBinding: '.parentView*target.time'
   }),
 
   minusLabelView: SC.LabelView.design({
@@ -54,7 +54,7 @@ SC.MiniMediaControlsView = SC.View.extend(
   volumeView: SC.MediaSlider.design({
     layout: { top: 0, left: 100, right: 10, height:20},
     value:0,
-    valueBinding: "*owner.target.volume" ,
+    valueBinding: ".parentView*target.volume" ,
     minimum: 0,
     maximum: 1,
     step: 0.01
