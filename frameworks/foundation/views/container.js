@@ -256,6 +256,7 @@ SC.ContainerView = SC.View.extend(
     this.removeObserver('contentView', this, this._sc_contentViewDidChange);
 
     // Cancel any active transitions.
+    // Note: this will also destroy any content view that the container created.
     this._sc_cancelTransitions();
 
     // Remove our internal reference to the statecharts.
