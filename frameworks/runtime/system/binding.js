@@ -973,13 +973,13 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     radix) and Boolean values will be 1 or 0 if true or false accordingly. Other edge cases like NaN
     or other non-Numbers will also return 0.
 
-    Example results:
+    Example results,
 
-      * null => 0
-      * undefined => 0
-      * '123' => 123
-      * true => 1
-      * {} => 0
+    - null => 0
+    - undefined => 0
+    - '123' => 123
+    - true => 1
+    - {} => 0
 
     @param {String} fromPathOrRadix from path or the radix for the parsing or null for 10
     @param {String} radix the radix for the parsing or null for 10
@@ -1159,13 +1159,13 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     Adds a transform that will *always* return a String value. Null and undefined values will return
     an empty string while all other non-String values will be transformed using the toString method.
 
-    Example results:
+    Example results,
 
-      * null => ''
-      * undefined => ''
-      * 123 => '123'
-      * true => 'true'
-      * {} => '[object Object]' (i.e. x = {}; return x.toString())
+    - null => ''
+    - undefined => ''
+    - 123 => '123'
+    - true => 'true'
+    - {} => '[object Object]' (i.e. x = {}; return x.toString())
 
     @param {String} fromPath from path or null
     @returns {SC.Binding} this

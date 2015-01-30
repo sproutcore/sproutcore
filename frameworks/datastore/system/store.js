@@ -167,39 +167,42 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
   /**
     Creates an autonomous nested store that is connected to the data source.
-    Use this kind of nested store to ensure that all records that are committed into main store are first of all committed on the server.
 
-    ns = store.chainAutonomousStore();
-    ... perform changes into the nested store
-    ns.commitRecords( ...,callback );
-    or...
-    newRecord.commitRecord( ..., callback );
+    Use this kind of nested store to ensure that all records that are committed into the main store
+    are first of all committed to the server.
 
-    into the callback method:
-      A. If using a transaction model: "all or nothing" where all rows are handled into a single transaction
+    For example,
 
-         if the transaction is successful, commit the successful changes into the main store and destroy:
-           ns.commitSuccessfulChanges();
-           ns.destroy();
+        nestedStore = store.chainAutonomousStore();
 
-        if not successful, handle the error, allow corrections if needed, etc.
+        // ... commit all changes from the nested store to the remote data store
+        nestedStore.commitRecords();
 
-      B. If using a transaction model: "independent rows" where the edited rows are independent and committed separately into the backend database
-         When only some of them have been accepted by the server, the overall transaction is only partially
-         successful therefore the nested store will contain rows with different statuses.
-         In such case, into the callback method only the accepted rows should be pushed to the main store using commitSuccessfulChanges()
+        // or commit the changes of a nested store's record to the remote data store ...
+        nestedRecord.commitRecord();
 
-           ns.commitSuccessfulChanges();
-           ...
-         if some of the rows were not accepted by the backend, allow corrections, attempt another commit, etc.:
-           ns.commitRecords( ...,callback );
-           ... the callback will be invoked again
+    ## Resolving nested store commits with the main store
 
-         Important note: In the case of such configuration, in order to preserve the consistency of the main store with
-         the backend database, it is recommended to systematically call commitSuccessfulChanges() when receiving the answer from the server.
+    When the committed changes are deemed successful (either by observing the status of the modified
+    record(s) or by using callbacks with commitRecord/commitRecords), the changes can be passed back
+    to the main store.
 
-    @param {Hash} attrs optional attributes to set on new store
-    @param {Class} newStoreClass optional the class of the newly-created nested store (defaults to SC.NestedStore)
+    In the case that the commits are all successful, simply commit to the main store using
+    `commitSuccessfulChanges`. Note, that using `commitSuccessfulChanges` rather than the standard
+    `commitChanges` ensures that only clean changes propagate back to the main store.
+
+    For example,
+
+        nestedStore.commitSuccessfulChanges();
+
+    In the case that some or all of the commits fail, you can still use `commitSuccessfulChanges` to
+    update only those commits that have succeeded in the main store or wait until all commits have
+    succeeded. Regardless, it will be up to your application to act on the failures and work with
+    the user to resolve all failures until the nested store records are all clean.
+
+
+    @param {Hash} [attrs] attributes to set on new store
+    @param {Class} [newStoreClass] the class of the newly-created nested store (defaults to SC.NestedStore)
     @returns {SC.NestedStore} new nested store chained to receiver
   */
   chainAutonomousStore: function(attrs, newStoreClass) {

@@ -34,7 +34,8 @@ sc_require('mixins/websocket_delegate');
   @extends SC.DelegateSupport
   @author Nicolas BADIA
 */
-SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate, {
+SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
+  /** @scope SC.WebSocket.prototype */ {
 
   /**
     The URL of the WebSocket server.
@@ -98,7 +99,6 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate, {
     @default null
   */
   reconnectInterval: 10000, // 10 seconds
-
 
   // ..........................................................
   // PUBLIC METHODS
