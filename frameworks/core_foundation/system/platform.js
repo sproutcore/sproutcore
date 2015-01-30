@@ -452,6 +452,13 @@ SC.platform = SC.Object.create({
   supportsOrientationChange: ('onorientationchange' in window),
 
   /**
+    Whether the browser supports WebSocket or not.
+
+    @type Boolean
+  */
+  supportsWebSocket: ("WebSocket" in window),
+
+  /**
     Whether the browser supports WebSQL.
 
     @type Boolean

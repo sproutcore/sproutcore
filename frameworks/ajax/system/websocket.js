@@ -45,15 +45,6 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate, {
   server: null,
 
   /**
-    Whether the browser supports the WebSocket protocol or not.
-
-    @type Boolean
-    @default null
-    @readOnly
-  */
-  isSupported: null,
-
-  /**
     Whether the connection is open or not.
 
     @type Boolean
@@ -106,7 +97,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate, {
     @type SC.WebSocketDelegate
     @default null
   */
-  reconnectInterval: 10000, // 10 secondes
+  reconnectInterval: 10000, // 10 seconds
 
 
   // ..........................................................
@@ -119,9 +110,8 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate, {
     @returns {SC.WebSocket} The SC.WebSocket object.
   */
   connect: function() {
-    if (this.isSupported === null) this.set('isSupported', !!window.WebSocket);
-
-    if (!this.isSupported || this.socket) return this;
+    // If not supported or already connected, return.
+    if (!SC.platform.supportsWebSocket || this.socket) return this;
 
     // Connect.
     try {
