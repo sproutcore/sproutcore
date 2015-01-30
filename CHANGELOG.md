@@ -314,8 +314,7 @@ There were a couple of issues hampering performance for SC.PickerPanes within SC
 * Refactored commandCodes function of SC.Event to be easier to read and with more descriptive inline documentation.
 * Use 24-hour clock notation for French times.
 * Now allows duplicate items to appear in a collection and still be selected independently. Previously, all collection view selection was done per object, which would mean the first instance of the object in the content was always selected. Instead, selection is done by index only so that the same object can appear many times and each be selected separately.
-* Replaced a couple of latent style.webkitTransform calls with experimentalStyleNameFor, which is forward compatible and
-cross-platform compatible.
+* Replaced a couple of latent style.webkitTransform calls with experimentalStyleNameFor, which is forward compatible and cross-platform compatible.
 * Reimplemented itemValueKey support in SC.MenuPane.
 * Improved the performance and code structure of SC.TreeItemObserver and SC.TreeController by optimizing overactive observers and object creation. Improved delegate and item handling, and documentation.
 * Added ie10 class to body element when detected (legacy).
@@ -381,6 +380,11 @@ cross-platform compatible.
 * Removed long-deprecated SC.Scrollable mixin.
 * Removed long-deprecated SC.TextFieldView's isPassword and continuouslyUpdatesValue properties.
 * SC.Object's `superclass` instance method has been deprecated. Use `sc_super()` or arguments.callee.base.apply(this, arguments) instead.
+* SC.CollectionView item views with static layouts should now behave better.
+* Nested records are now cleared from a store on SC.Store#reset.
+* Makes a number of improvements to SC.ChildArray, including removing KVO property pollution from the underlying raw array.
+* Removes KVO pollution on SC.ManyArray's underlying raw arrays.
+* SC.TextFieldView's hint implementation is now much simpler and less bug-ridden.
 
 ### BUG FIXES
 
@@ -450,9 +454,6 @@ The pane listened to changes to its borderFrame in order to know whether to repo
 * Fixes a bug where SC.CollectionViews could not have a custom layerId set.
 * Fixes a bug where SC.ScrollView's scrollToRect method preferred the bottom right of a larger-than-clippingFrame rect. The top left is now preferred, like you'd expect.
 * Fixes a number of bugs with SC.SplitView's divider view CSS.
-* SC.CollectionView item views with static layouts should now behave better.
-* Nested records are now cleared from a store on SC.Store#reset.
-* Makes a number of improvements to SC.ChildArray, including removing KVO property pollution from the underlying raw array.
 * Fixes a bug where SC.DateField's format property was failing to update when formatDate, formatTime or formatDateTime changed.
 * Fixes a bug where SC.CollectionView#itemViewForContentIndex would happily return an empty view for a bogus content index.
 * Fixes a bug where hitting enter on an empty SC.CollectionView would throw an error while trying to edit nonexistent items.
@@ -463,9 +464,7 @@ The pane listened to changes to its borderFrame in order to know whether to repo
 * Fixes a bug where children of ATTACHED_SHOWING (transitioning) views were incorrectly set to ATTACHED_HIDDEN_BY_PARENT until the transition completed.
 * Fixes a bug where rotate layout property was being incorrectly proxied to rotateX. Now correctly proxies to layoutZ.
 * Adds a workaround to age-old IE XHR bug where 204 statuses would be mangled to 1223 for no apparent reason.
-* Removes KVO pollution on SC.ManyArray's underlying raw arrays.
 * Fixes a number of bugs where setting various SC.SliderView properties to null would break everything.
-* SC.TextFieldView's hint implementation is now much simpler and less bug-ridden.
 * Fixes a bug where interpretKeyEvents would crash on the rare occasion that cmd.match returned null.
 * Fixes a rare security vulnerability when a TextFieldView's hint property was set to user-supplied data.
 * Removes an invalid condition that prevented key down validation in any browser that supported the touch event.

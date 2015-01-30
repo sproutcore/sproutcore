@@ -44,60 +44,60 @@ sc_require('system/query');
   These examples may help identify the difference. First, let's look at the classic inheritance
   model,
 
-    // This is the "root" class. All subclasses of MyApp.Person will be unique from MyApp.Person.
-    MyApp.Person = SC.Record.extend({});
+      // This is the "root" class. All subclasses of MyApp.Person will be unique from MyApp.Person.
+      MyApp.Person = SC.Record.extend({});
 
-    // As a subclass, MyApp.Female inherits from a MyApp.Person, but is not "equal" to it.
-    MyApp.Female = MyApp.Person.extend({
-      isFemale: true
-    });
+      // As a subclass, MyApp.Female inherits from a MyApp.Person, but is not "equal" to it.
+      MyApp.Female = MyApp.Person.extend({
+        isFemale: true
+      });
 
-    // As a subclass, MyApp.Male inherits from a MyApp.Person, but is not "equal" to it.
-    MyApp.Male = MyApp.Person.extend({
-      isMale: true
-    });
+      // As a subclass, MyApp.Male inherits from a MyApp.Person, but is not "equal" to it.
+      MyApp.Male = MyApp.Person.extend({
+        isMale: true
+      });
 
-    // Load two unique records into the store.
-    MyApp.store.createRecord(MyApp.Female, { guid: '1' });
-    MyApp.store.createRecord(MyApp.Male, { guid: '2' });
+      // Load two unique records into the store.
+      MyApp.store.createRecord(MyApp.Female, { guid: '1' });
+      MyApp.store.createRecord(MyApp.Male, { guid: '2' });
 
-    // Now we can see that these records are isolated from each other.
-    var female = MyApp.store.find(MyApp.Person, '1'); // Returns an SC.Record.EMPTY record.
-    var male = MyApp.store.find(MyApp.Person, '2'); // Returns an SC.Record.EMPTY record.
+      // Now we can see that these records are isolated from each other.
+      var female = MyApp.store.find(MyApp.Person, '1'); // Returns an SC.Record.EMPTY record.
+      var male = MyApp.store.find(MyApp.Person, '2'); // Returns an SC.Record.EMPTY record.
 
-    // These records are MyApp.Person only.
-    SC.kindOf(female, MyApp.Female); // false
-    SC.kindOf(male, MyApp.Male); // false
+      // These records are MyApp.Person only.
+      SC.kindOf(female, MyApp.Female); // false
+      SC.kindOf(male, MyApp.Male); // false
 
   Next, let's make MyApp.Person a polymorphic class,
 
-    // This is the "root" polymorphic class. All subclasses of MyApp.Person will be able to stand-in as a MyApp.Person.
-    MyApp.Person = SC.Record.extend({
-      isPolymorphic: true
-    });
+      // This is the "root" polymorphic class. All subclasses of MyApp.Person will be able to stand-in as a MyApp.Person.
+      MyApp.Person = SC.Record.extend({
+        isPolymorphic: true
+      });
 
-    // As a polymorphic subclass, MyApp.Female is "equal" to a MyApp.Person.
-    MyApp.Female = MyApp.Person.extend({
-      isFemale: true
-    });
+      // As a polymorphic subclass, MyApp.Female is "equal" to a MyApp.Person.
+      MyApp.Female = MyApp.Person.extend({
+        isFemale: true
+      });
 
-    // As a polymorphic subclass, MyApp.Male is "equal" to a MyApp.Person.
-    MyApp.Male = MyApp.Person.extend({
-      isMale: true
-    });
+      // As a polymorphic subclass, MyApp.Male is "equal" to a MyApp.Person.
+      MyApp.Male = MyApp.Person.extend({
+        isMale: true
+      });
 
-    // Load two unique records into the store.
-    MyApp.store.createRecord(MyApp.Female, { guid: '1' });
-    MyApp.store.createRecord(MyApp.Male, { guid: '2' });
+      // Load two unique records into the store.
+      MyApp.store.createRecord(MyApp.Female, { guid: '1' });
+      MyApp.store.createRecord(MyApp.Male, { guid: '2' });
 
-    // Now we can see that these records are in fact "equal" to each other. Which means that if we
-    // search for "people", we will get "males" & "females".
-    var female = MyApp.store.find(MyApp.Person, '1'); // Returns record.
-    var male = MyApp.store.find(MyApp.Person, '2'); // Returns record.
+      // Now we can see that these records are in fact "equal" to each other. Which means that if we
+      // search for "people", we will get "males" & "females".
+      var female = MyApp.store.find(MyApp.Person, '1'); // Returns record.
+      var male = MyApp.store.find(MyApp.Person, '2'); // Returns record.
 
-    // These records are MyApp.Person as well as their unique subclass.
-    SC.kindOf(female, MyApp.Female); // true
-    SC.kindOf(male, MyApp.Male); // true
+      // These records are MyApp.Person as well as their unique subclass.
+      SC.kindOf(female, MyApp.Female); // true
+      SC.kindOf(male, MyApp.Male); // true
 
   @extends SC.Object
   @see SC.RecordAttribute
