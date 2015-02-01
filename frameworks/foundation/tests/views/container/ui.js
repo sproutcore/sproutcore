@@ -37,6 +37,23 @@
     init: function() { sc_super(); this.viewPage = this.viewPage.create(); } // have to create page
   });
 
+  pane.add("nestedContainer", SC.ContainerView, {
+    nowShowing: 'container1',
+
+    container1: SC.ContainerView.create({
+      nowShowing: 'view1',
+
+      view1: SC.View.create(),
+      view2: SC.View.create()
+    }),
+    container2: SC.ContainerView.create({
+      nowShowing: 'view3',
+
+      view3: SC.View.create(),
+      view4: SC.View.create()
+    })
+  });
+
   pane.add("cleans-up-views", SC.ContainerView, {
     nowShowing: 'uninstantiatedView',
 
@@ -175,6 +192,89 @@
     contentView = view.get('contentView');
     SC.run(function() { view.set('nowShowing', null); });
     equals(contentView.isDestroyed, YES, "should have destroyed the previous view it instantiated (from class)");
+  });
+
+  test("Nested container view", function() {
+    var view = pane.view('nestedContainer'),
+      container1 = view.get('container1'),
+      container2 = view.get('container2');
+
+    equals(container1.get('isVisibleInWindow'), true, "nowShowing#view1: container1 visbility should be");
+    equals(container1.getPath('view1.isVisibleInWindow'), true, "nowShowing#view1: view1 visbility should be");
+    equals(container1.getPath('view2.isVisibleInWindow'), false, "nowShowing#view1: view2 visbility should be");
+    equals(container2.get('isVisibleInWindow'), false, "nowShowing#view1: container2 visbility should be");
+    equals(container2.getPath('view3.isVisibleInWindow'), false, "nowShowing#view1: view3 visbility should be");
+    equals(container2.getPath('view4.isVisibleInWindow'), false, "nowShowing#view1: view4 visbility should be");
+
+    equals(container1.getPath('frame.height'), 100, 'nowShowing#view1: container1 height should be');
+    equals(container1.getPath('view1.frame.height'), 100, 'nowShowing#view1: view1 height should be');
+
+
+    container1.set("nowShowing", 'view2');
+
+    equals(container1.get('isVisibleInWindow'), true, "nowShowing#view2: container1 visbility should be");
+    equals(container1.getPath('view1.isVisibleInWindow'), false, "nowShowing#view2: view1 visbility should be");
+    equals(container1.getPath('view2.isVisibleInWindow'), true, "nowShowing#view2: view2 visbility should be");
+    equals(container2.get('isVisibleInWindow'), false, "nowShowing#view2: container2 visbility should be");
+    equals(container2.getPath('view3.isVisibleInWindow'), false, "nowShowing#view2: view3 visbility should be");
+    equals(container2.getPath('view4.isVisibleInWindow'), false, "nowShowing#view2: view4 visbility should be");
+
+    equals(container1.getPath('view2.frame.height'), 100, 'nowShowing#view2: view2 height should be');
+
+
+    view.set("nowShowing", 'container2');
+
+    equals(container1.get('isVisibleInWindow'), false, "nowShowing#view3: container1 visbility should be");
+    equals(container1.getPath('view1.isVisibleInWindow'), false, "nowShowing#view3: view1 visbility should be");
+    equals(container1.getPath('view2.isVisibleInWindow'), false, "nowShowing#view3: view2 visbility should be");
+    equals(container2.get('isVisibleInWindow'), true, "nowShowing#view3: container2 visbility should be");
+    equals(container2.getPath('view3.isVisibleInWindow'), true, "nowShowing#view3: view3 visbility should be");
+    equals(container2.getPath('view4.isVisibleInWindow'), false, "nowShowing#view3: view4 visbility should be");
+
+    equals(container2.getPath('frame.height'), 100, 'nowShowing#view3: container2 height should be');
+    equals(container2.getPath('view3.frame.height'), 100, 'nowShowing#view3: view3 height should be');
+
+
+    container2.set("nowShowing", 'view4');
+
+    equals(container1.get('isVisibleInWindow'), false, "nowShowing#view4: container1 visbility should be");
+    equals(container1.getPath('view1.isVisibleInWindow'), false, "nowShowing#view4: view1 visbility should be");
+    equals(container1.getPath('view2.isVisibleInWindow'), false, "nowShowing#view4: view2 visbility should be");
+    equals(container2.get('isVisibleInWindow'), true, "nowShowing#view4: container2 visbility should be");
+    equals(container2.getPath('view3.isVisibleInWindow'), false, "nowShowing#view4: view3 visbility should be");
+    equals(container2.getPath('view4.isVisibleInWindow'), true, "nowShowing#view4: view4 visbility should be");
+
+    equals(container2.getPath('frame.height'), 100, 'nowShowing#view4: container2 height should be');
+    equals(container2.getPath('view4.frame.height'), 100, 'nowShowing#view4: view4 height should be');
+
+
+    container1.set("nowShowing", 'view1');
+    view.set("nowShowing", 'container1');
+
+    equals(container1.get('isVisibleInWindow'), true, "nowShowing#view1: container1 visbility should be");
+    equals(container1.getPath('view1.isVisibleInWindow'), true, "nowShowing#view1: view1 visbility should be");
+    equals(container1.getPath('view2.isVisibleInWindow'), false, "nowShowing#view1: view2 visbility should be");
+    equals(container2.get('isVisibleInWindow'), false, "nowShowing#view1: container2 visbility should be");
+    equals(container2.getPath('view3.isVisibleInWindow'), false, "nowShowing#view1: view3 visbility should be");
+    equals(container2.getPath('view4.isVisibleInWindow'), false, "nowShowing#view1: view4 visbility should be");
+
+    equals(container1.getPath('frame.height'), 100, 'nowShowing#view1: container1 height should be');
+    equals(container1.getPath('view1.frame.height'), 100, 'nowShowing#view1: view1 height should be');
+
+
+    container2.get('view4').adjust('top', 10); 
+    view.set("nowShowing", 'container2');
+
+    equals(container1.get('isVisibleInWindow'), false, "nowShowing#view4: container1 visbility should be");
+    equals(container1.getPath('view1.isVisibleInWindow'), false, "nowShowing#view4: view1 visbility should be");
+    equals(container1.getPath('view2.isVisibleInWindow'), false, "nowShowing#view4: view2 visbility should be");
+    equals(container2.get('isVisibleInWindow'), true, "nowShowing#view4: container2 visbility should be");
+    equals(container2.getPath('view3.isVisibleInWindow'), false, "nowShowing#view4: view3 visbility should be");
+    equals(container2.getPath('view4.isVisibleInWindow'), true, "nowShowing#view4: view4 visbility should be");
+
+    equals(container2.getPath('frame.height'), 100, 'nowShowing#view4: container2 height should be');
+    equals(container2.getPath('view4.frame.height'), 90, 'nowShowing#view4: view4 height should be');
+
   });
 
 })();
