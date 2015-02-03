@@ -4,8 +4,7 @@
 //            Portions @2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-
-/*globals SC */
+sc_require('system/substate');
 
 /**
   @class

@@ -4,10 +4,8 @@
 //            Portions @2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
+sc_require('system/substate');
 
-/*global SC */
-
-sc_require('statechart/substate');
 
 /**
   @class
@@ -356,13 +354,6 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   */
   trace: NO,
 
-  /** @private */
-  _monitorIsActiveDidChange: function () {
-    if (this.get('monitorIsActive') && SC.none(this.get('monitor'))) {
-      this.set('monitor', SC.StatechartMonitor.create());
-    }
-  }.observes('monitorIsActive'),
-
   /**
     Used to log a statechart trace message
 
@@ -613,6 +604,55 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   }.property('currentStates').cacheable(),
 
   /**
+    Returns the count of the current states for this statechart
+
+    @returns {Number} the count
+  */
+  currentStateCount: function () {
+    return this.getPath('currentStates.length');
+  }.property('currentStates').cacheable(),
+
+  /**
+    Checks if a given state is a current state of this statechart.
+
+    @param state {State|String} the state to check
+    @returns {Boolean} true if the state is a current state, otherwise fals is returned
+  */
+  stateIsCurrentState: function (state) {
+    return this.get('rootState').stateIsCurrentSubstate(state);
+  },
+
+  /**
+    Returns an array of all the states that are currently entered for
+    this statechart.
+
+    @returns {Array} the currently entered states
+  */
+  enteredStates: function () {
+    return this.getPath('rootState.enteredSubstates');
+  }.property().cacheable(),
+
+  /**
+    Checks if a given state is a currently entered state of this statechart.
+
+    @param state {State|String} the state to check
+    @returns {Boolean} true if the state is a currently entered state, otherwise false is returned
+  */
+  stateIsEntered: function (state) {
+    return this.get('rootState').stateIsEnteredSubstate(state);
+  },
+
+  /**
+    Checks if the given value represents a state is this statechart
+
+    @param value {State|String} either a state object or the name of a state
+    @returns {Boolean} true if the state does belong ot the statechart, otherwise false is returned
+  */
+  doesContainState: function (value) {
+    return !SC.none(this.getState(value));
+  },
+
+  /**
     Gets a state from the statechart that matches the given value
 
     @param value {State|String} either a state object of the name of a state
@@ -677,7 +717,12 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
       return;
     }
 
-    var args = this._processGotoStateArgs(arguments);
+    // Fast arguments access.
+    // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
+    var args = new Array(arguments.length); //  SC.$A(arguments)
+    for (var i = 0, len = args.length; i < len; i++) { args[i] = arguments[i]; }
+
+    args = this._processGotoStateArgs(args);
 
     state = args.state;
     fromCurrentState = args.fromCurrentState;
@@ -804,45 +849,6 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   },
 
   /**
-    Returns the count of the current states for this statechart
-
-    @returns {Number} the count
-  */
-  currentStateCount: function () {
-    return this.getPath('currentStates.length');
-  }.property('currentStates').cacheable(),
-
-  /**
-    Returns an array of all the states that are currently entered for
-    this statechart.
-
-    @returns {Array} the currently entered states
-  */
-  enteredStates: function () {
-    return this.getPath('rootSubstate.enteredSubstates');
-  }.property().cacheable(),
-
-  /**
-    Checks if a given state is a currently entered state of this statechart.
-
-    @param state {State|String} the state to check
-    @returns {Boolean} true if the state is a currently entered state, otherwise false is returned
-  */
-  stateIsEntered: function (state) {
-    return this.get('rootSubstate').stateIsEnteredSubstate(state);
-  },
-
-  /**
-    Checks if the given value represents a state is this statechart
-
-    @param value {State|String} either a state object or the name of a state
-    @returns {Boolean} true if the state does belong ot the statechart, otherwise false is returned
-  */
-  doesContainState: function (value) {
-    return !SC.none(this.getState(value));
-  },
-
-  /**
     Indicates if the statechart is in an active goto state process
   */
   gotoStateActive: function () {
@@ -858,13 +864,16 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   }.property(),
 
   /**
-    Checks if a given state is a current state of this statechart.
-
-    @param state {State|String} the state to check
-    @returns {Boolean} true if the state is a current state, otherwise fals is returned
+    Resumes an active goto state transition process that has been suspended.
   */
-  stateIsCurrentState: function (state) {
-    return this.get('rootSubstate').stateIsCurrentSubstate(state);
+  resumeGotoState: function () {
+    if (!this.get('gotoStateSuspended')) {
+      this.statechartLogError("Can not resume goto state since it has not been suspended");
+      return;
+    }
+
+    var point = this._gotoStateSuspendedPoint;
+    this._executeGotoStateActions(point.gotoState, point.actions, point.marker, point.context);
   },
 
   /** @private */
@@ -925,19 +934,6 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     //@endif
 
     this._cleanupStateTransition();
-  },
-
-  /**
-    Resumes an active goto state transition process that has been suspended.
-  */
-  resumeGotoState: function () {
-    if (!this.get('gotoStateSuspended')) {
-      this.statechartLogError("Can not resume goto state since it has not been suspended");
-      return;
-    }
-
-    var point = this._gotoStateSuspendedPoint;
-    this._executeGotoStateActions(point.gotoState, point.actions, point.marker, point.context);
   },
 
   /** @private */
@@ -1110,7 +1106,12 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
       return;
     }
 
-    var args = this._processGotoStateArgs(arguments);
+    // Fast arguments access.
+    // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
+    var args = new Array(arguments.length); //  SC.$A(arguments)
+    for (var i = 0, len = args.length; i < len; i++) { args[i] = arguments[i]; }
+
+    args = this._processGotoStateArgs(args);
 
     state = args.state;
     fromCurrentState = args.fromCurrentState;
@@ -1585,6 +1586,15 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     if (!pending) return null;
     return this.sendEvent(pending.event, pending.arg1, pending.arg2);
   },
+
+  /** @private */
+  //@if(debug)
+  _monitorIsActiveDidChange: function () {
+    if (this.get('monitorIsActive') && SC.none(this.get('monitor'))) {
+      this.set('monitor', SC.StatechartMonitor.create());
+    }
+  }.observes('monitorIsActive'),
+  //@endif
 
   /** @private
     Will process the arguments supplied to the gotoState method.

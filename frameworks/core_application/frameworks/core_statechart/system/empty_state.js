@@ -4,10 +4,7 @@
 //            Portions @2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-
-/*globals SC */
-
-sc_require('statechart/substate');
+sc_require('system/substate');
 
 /**
   The default name given to an empty state
@@ -22,7 +19,8 @@ SC.EMPTY_STATE_NAME = "__EMPTY_STATE__";
 
   @extends SC.Substate
 */
-SC.EmptyState = SC.Substate.extend(/** @scope SC.EmptyState.prototype */{
+SC.EmptyState = SC.Substate.extend(/** @scope SC.EmptyState.prototype */
+{
 
   name: SC.EMPTY_STATE_NAME
 

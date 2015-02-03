@@ -6,8 +6,8 @@
 // ==========================================================================
 
 /*global SC */
-sc_require('app_statechart/app_substate');
-sc_require('app_statechart/mixins/statechart_delegate');
+sc_require('system/app_substate');
+sc_require('mixins/statechart_delegate');
 
 
 /**

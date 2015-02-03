@@ -41,7 +41,6 @@ config :datastore,       :required => [:runtime, :datetime]
 config :formatters,      :required => [:runtime, :foundation]
 config :desktop,         :required => [:foundation]
 config :media,           :required => [:desktop]
-config :statechart,      :required => [:core_foundation, :'core_application/core_statechart'], :test_required => [:core_foundation, :desktop, :routing]
 config :ajax,            :required => [:core_foundation]
 config :designer,        :required => [:desktop, :template_view]
 

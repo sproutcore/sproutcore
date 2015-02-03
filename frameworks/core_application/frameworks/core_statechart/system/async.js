@@ -5,7 +5,6 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/*globals SC */
 
 /**
   @class

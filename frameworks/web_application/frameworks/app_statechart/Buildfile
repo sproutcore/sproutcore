@@ -4,7 +4,7 @@
 # ==========================================================================
 
 # The configuration for this framework.
-config :web_application,
+config :app_statechart,
 
   # Required other frameworks within SproutCore.
-  :required => [:desktop, :datastore]
+  :required => [:'core_application/core_statechart']

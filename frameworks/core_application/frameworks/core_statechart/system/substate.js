@@ -433,8 +433,8 @@ SC.Substate = SC.Object.extend(
 
     @param {String} name a unique name for the given substate.
     @param {SC.Substate} state a class that derives from `SC.Substate`
-    @param {Hash} [attr] liternal to be applied to the substate
     @returns {SC.Substate} an instance of the given state class
+    @param {Object} [attr] literal to be applied to the substate
   */
   addSubstate: function (name, state, attr) {
     if (SC.empty(name)) {
@@ -1348,10 +1348,15 @@ SC.Substate = SC.Object.extend(
   @param value {String} property path to a state class
   @param args {Hash,...} Optional. Hash objects to be added to the created state
 */
-SC.Substate.plugin = function (value) {
-  var args = SC.A(arguments);
-  args.shift();
-  var func = function () {
+SC.State.plugin = function(value) {
+  var args;
+
+  // Fast arguments access.
+  // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
+  args = new Array(arguments.length - 1); // SC.A(arguments).shift()
+  for (var i = 0, len = args.length; i < len; i++) { args[i] = arguments[i + 1]; }
+
+  var func = function() {
     var klass = SC.objectForPropertyPath(value);
     if (!klass) {
       console.error('SC.Substate.plugin: Unable to determine path %@'.fmt(value));
