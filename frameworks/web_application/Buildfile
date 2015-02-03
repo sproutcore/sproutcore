@@ -1,0 +1,10 @@
+# ==========================================================================
+# Project:   SproutCore - Web Application
+# License:   Licensed under MIT license (see license.js)
+# ==========================================================================
+
+# The configuration for this framework.
+config :web_application,
+
+  # Required other frameworks within SproutCore.
+  :required => [:desktop, :datastore, :statechart]

@@ -25,7 +25,7 @@ mode :debug do
 end
 
 # CORE FRAMEWORKS
-config :bootstrap,  :required => [], :use_modules => false
+config :bootstrap,  :required => [:legacy], :use_modules => false
 
 config :jquery,          :required => [], :test_required => [], :debug_required => []
 config :yuireset,        :required => [], :test_required => [], :debug_required => []
@@ -39,10 +39,9 @@ config :routing,         :required => [:core_foundation]
 config :foundation,      :required => [:routing, :core_foundation, :datetime, :'datetime/localized', :ajax]
 config :datastore,       :required => [:runtime, :datetime]
 config :formatters,      :required => [:runtime, :foundation]
-config :desktop,         :required => [:foundation], :test_required => [:legacy]
-config :legacy,          :required => [:desktop]
+config :desktop,         :required => [:foundation]
 config :media,           :required => [:desktop]
-config :statechart,      :required => [:core_foundation], :test_required => [:core_foundation, :desktop, :routing]
+config :statechart,      :required => [:core_foundation, :'core_application/core_statechart'], :test_required => [:core_foundation, :desktop, :routing]
 config :ajax,            :required => [:core_foundation]
 config :designer,        :required => [:desktop, :template_view]
 
@@ -51,7 +50,7 @@ config :"experimental/split_view", :test_required => [:desktop]
 
 # WRAPPER FRAMEWORKS
 config :sproutcore,
-  :required => [:legacy, :datastore, :statechart],
+  :required => [:web_application],
   :exclude => ['phantomjs']
 
 config :qunit, :required => []
