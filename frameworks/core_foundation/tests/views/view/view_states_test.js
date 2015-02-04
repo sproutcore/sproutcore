@@ -760,9 +760,35 @@ test("In ATTACHED_SHOWN state, _isVisibleDidChange should not call _doShow.", fu
   view._doAttach(document.body);
   equals(view.viewState, SC.CoreView.ATTACHED_SHOWN, "A newly created orphan view that is rendered and attached should be in the state");
 
+  // set up _doShow to fail, if called
   view._doShow = function() {
-    ok(false, '_doShow was called in teh ATTACHED_SHOWN state');
+    ok(false, '_doShow should not be called in the ATTACHED_SHOWN state');
   };
 
+  // call _isVisibleDidChange
+  view._isVisibleDidChange();
+});
+
+test("In ATTACHED_SHOWING state, _isVisibleDidChange should not call _doShow.", function () {
+ // Test expected state of the view.
+  view._doRender();
+  view._doAttach(document.body);
+
+  var transitionShow = { run: function () {} };
+  view.set('transitionShow', transitionShow);
+
+  SC.run(function () {
+    view.set('isVisible', false);
+    view.set('isVisible', true);
+  });
+
+  equals(view.viewState, SC.CoreView.ATTACHED_SHOWING, "The view should be in the state");
+
+  // set up _doShow to fail, if called
+  view._doShow = function() {
+    ok(false, '_doShow should not be called in the ATTACHED_SHOWING state');
+  };
+
+  // call _isVisibleDidChange
   view._isVisibleDidChange();
 });
