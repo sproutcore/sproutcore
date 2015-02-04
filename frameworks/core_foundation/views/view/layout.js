@@ -114,7 +114,7 @@ SC.View.reopen(
 
 
   /**
-    This this property to YES whenever the view needs to layout its child
+    Set this property to YES whenever the view needs to layout its child
     views.  Normally this property is set automatically whenever the layout
     property for a child view changes.
 
