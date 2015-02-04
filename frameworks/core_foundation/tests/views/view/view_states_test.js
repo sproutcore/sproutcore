@@ -751,3 +751,18 @@ test("Test adding a hidden child view to attached shown parentView.", function (
   ok(!view.get('isVisibleInWindow'), "isVisibleInWindow should be false");
   ok(!child.get('isVisibleInWindow'), "isVisibleInWindow of child should be false");
 });
+
+test("In ATTACHED_SHOWN state, _isVisibleDidChange should not call _doShow.", function () {
+  var view = SC.View.create();
+
+  // Test expected state of the view.
+  view._doRender();
+  view._doAttach(document.body);
+  equals(view.viewState, SC.CoreView.ATTACHED_SHOWN, "A newly created orphan view that is rendered and attached should be in the state");
+
+  view._doShow = function() {
+    ok(false, '_doShow was called in teh ATTACHED_SHOWN state');
+  };
+
+  view._isVisibleDidChange();
+});

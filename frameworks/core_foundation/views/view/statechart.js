@@ -1511,7 +1511,10 @@ SC.CoreView.reopen(
   */
   _isVisibleDidChange: function () {
     if (this.get('isVisible')) {
-      this._doShow();
+      // show the view if it's not being shown already
+      if (this.get('viewState') !== SC.CoreView.ATTACHED_SHOWN) {
+        this._doShow();
+      }
     } else {
       this._doHide();
     }
