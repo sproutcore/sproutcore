@@ -720,7 +720,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     // Fast arguments access.
     // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
     var args = new Array(arguments.length); //  SC.$A(arguments)
-    for (var i = 0, len = args.length; i < len; i++) { args[i] = arguments[i]; }
+    for (var i = 0, argslen = args.length; i < argslen; i++) { args[i] = arguments[i]; }
 
     args = this._processGotoStateArgs(args);
 
@@ -1025,7 +1025,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
     //@if(debug)
     if (this.get('allowStatechartTracing')) {
-      if (state.enterStateByRoute && SC.kindOf(context, SC.StateRouteHandlerContext)) {
+      if (state.enterStateByRoute && SC.kindOf(context, SC.AppSubstateRouteHandlerContext)) {
         this.statechartLogTrace("--> entering state (by route): %@".fmt(state), SC.TRACE_STATECHART_STYLE.enter);
       } else {
         this.statechartLogTrace("--> entering state: %@".fmt(state), SC.TRACE_STATECHART_STYLE.enter);
@@ -1498,48 +1498,49 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     invokeStateMethod will return a value if only one state was able to have
     the given method invoked on it, otherwise no value is returned.
 
-    @param methodName {String} methodName a method name
-    @param args {Object...} Optional. any additional arguments
-    @param func {Function} Optional. a callback function. Must be the last
-           value supplied if provided.
+    @param {String} methodName a method name
+    @param {Object...} [args] any additional arguments
+    @param {Function} [func] a callback function. Must be the last value supplied if provided.
 
     @returns a value if the number of current states is one, otherwise undefined
              is returned. The value is the result of the method that got invoked
              on a state.
   */
-  invokeStateMethod: function (methodName, args, func) {
+  invokeStateMethod: function (methodName) {
     if (methodName === 'unknownEvent') {
       this.statechartLogError("can not invoke method unkownEvent");
       return;
     }
 
-    args = SC.A(arguments);
-    args.shift();
+    // Fast arguments access.
+    // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
+    var args = new Array(arguments.length), //  SC.$A(arguments)
+        len = args.length - 1;
+    for (var i = 0; i < len; i++) { args[i] = arguments[i + 1]; } // args.shift();
 
-    var len = args.length,
-        arg = len > 0 ? args[len - 1] : null,
+    var arg = len > 0 ? args[len - 1] : null,
         callback = SC.typeOf(arg) === SC.T_FUNCTION ? args.pop() : null,
         currentStates = this.get('currentStates'),
-        i = 0, state = null,
+        substate = null,
         checkedStates = {},
         method, result,
         calledStates = 0;
 
     len = currentStates.get('length');
 
-    for (; i < len; i += 1) {
-      state = currentStates.objectAt(i);
-      while (state) {
-        if (checkedStates[state.get('fullPath')]) break;
-        checkedStates[state.get('fullPath')] = YES;
-        method = state[methodName];
+    for (i = 0; i < len; i += 1) {
+      substate = currentStates.objectAt(i);
+      while (substate) {
+        if (checkedStates[substate.get('fullPath')]) break;
+        checkedStates[substate.get('fullPath')] = YES;
+        method = substate[methodName];
         if (SC.typeOf(method) === SC.T_FUNCTION && !method.isEventHandler) {
-          result = method.apply(state, args);
-          if (callback) callback.call(this, state, result);
+          result = method.apply(substate, args);
+          if (callback) callback.call(this, substate, result);
           calledStates += 1;
           break;
         }
-        state = state.get('parentState');
+        substate = substate.get('parentState');
       }
     }
 

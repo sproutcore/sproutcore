@@ -1081,13 +1081,6 @@ SC.Substate = SC.Object.extend(
     When the enterState method is called, an optional context value may be supplied if
     one was provided to the gotoState method.
 
-    In the case that the context being supplied is a state context object
-    ({@link SC.StateRouteHandlerContext}), an optional `enterStateByRoute` method can be invoked
-    on this state if the state has implemented the method. If `enterStateByRoute` is
-    not part of this state then the `enterState` method will be invoked by default. The
-    `enterStateByRoute` is simply a convenience method that helps removes checks to
-    determine if the context provide is a state route context object.
-
     @param {Hash} [context] value if one was supplied to gotoState when invoked
 
     @see #representRoute
@@ -1348,7 +1341,7 @@ SC.Substate = SC.Object.extend(
   @param value {String} property path to a state class
   @param args {Hash,...} Optional. Hash objects to be added to the created state
 */
-SC.State.plugin = function(value) {
+SC.Substate.plugin = function(value) {
   var args;
 
   // Fast arguments access.

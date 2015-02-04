@@ -175,7 +175,7 @@ test("trigger state B's route", function() {
 
   var context = info.enterState.context;
 
-  ok(SC.kindOf(context, SC.StateRouteHandlerContext), "state B's enterState method should have been provided a state route handler context object");
+  ok(SC.kindOf(context, SC.AppSubstateRouteHandlerContext), "state B's enterState method should have been provided a state route handler context object");
   equals(context.get('state'), stateB);
   equals(context.get('location'), 'bar');
   equals(context.get('params'), params);
@@ -207,7 +207,7 @@ test("trigger state C's route", function() {
 
   var context = info.enterStateByRoute.context;
 
-  ok(SC.kindOf(context, SC.StateRouteHandlerContext), "state C's enterState method should have been provided a state route handler context object");
+  ok(SC.kindOf(context, SC.AppSubstateRouteHandlerContext), "state C's enterState method should have been provided a state route handler context object");
   equals(context.get('state'), stateC);
   equals(context.get('location'), 'mah');
   equals(context.get('params'), params);
@@ -239,7 +239,7 @@ test("trigger state D's route", function() {
 
   var context = info.enterStateByRoute.context;
 
-  ok(SC.kindOf(context, SC.StateRouteHandlerContext), "state D's enterState method should have been provided a state route handler context object");
+  ok(SC.kindOf(context, SC.AppSubstateRouteHandlerContext), "state D's enterState method should have been provided a state route handler context object");
   equals(context.get('state'), stateD);
   equals(context.get('location'), '');
   equals(context.get('params'), params);

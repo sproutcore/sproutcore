@@ -179,7 +179,7 @@ SC.AppSubstate = SC.Substate.extend(
 
     @see #handleRoute
   */
-  createStateRouteHandlerContext: function (attr) {
+  createAppSubstateRouteHandlerContext: function (attr) {
     return SC.AppSubstateRouteHandlerContext.create(attr);
   },
 
@@ -224,7 +224,7 @@ SC.AppSubstate = SC.Substate.extend(
     @see #representRoute
     @see SC.StatechartDelegate#statechartShouldStateHandleRoute
     @see SC.StatechartDelegate#statechartStateCancelledHandlingRoute
-    @see #createStateRouteHandlerContext
+    @see #createAppSubstateRouteHandlerContext
     @see #handleTriggeredRoute
   */
   routeTriggered: function (params) {
@@ -241,7 +241,7 @@ SC.AppSubstate = SC.Substate.extend(
       handler: this.routeTriggered
     };
 
-    var context = this.createStateRouteHandlerContext(attr);
+    var context = this.createAppSubstateRouteHandlerContext(attr);
 
     if (del.statechartShouldStateHandleTriggeredRoute(sc, this, context)) {
       //@if(debug)

@@ -263,11 +263,12 @@ SC.mixin(SC.AppStatechartManager,
     Called during the state transition process whenever the gotoState method is
     invoked.
 
-    If the context provided is a state route context object
-    ({@link SC.AppSubstateRouteContext}), then if the given state has a enterStateByRoute
-    method, that method will be invoked, otherwise the state's enterState method
-    will be invoked by default. The state route context object will be supplied to
-    both enter methods in either case.
+    In the case that the context being supplied is a state context object
+    ({@link SC.AppSubstateRouteHandlerContext}), an optional `enterStateByRoute` method can be invoked
+    on this state if the state has implemented the method. If `enterStateByRoute` is
+    not part of this state then the `enterState` method will be invoked by default. The
+    `enterStateByRoute` is simply a convenience method that helps removes checks to
+    determine if the context provide is a state route context object.
 
     @param state {SC.AppSubstate} the state whose enterState method is to be invoked
     @param context {Hash} a context hash object to provide the enterState method
