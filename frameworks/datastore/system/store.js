@@ -460,40 +460,66 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Store} receiver
   */
   _updateChildRecordHashes: function(storeKey, hash, status) {
-    var processedPaths={};
+    // var processedPaths={};
     // Update the child record hashes in place.
     if (!SC.none(this.parentRecords) ) {
-      var children = this.parentRecords[storeKey] || {},
+      // All previously materialized nested objects.
+      var materializedNestedObjects = this.parentRecords[storeKey] || {},
+        processedPaths = {},
         childHash;
 
-      for (var key in children) {
-        if (children.hasOwnProperty(key)) {
+      for (var key in materializedNestedObjects) {
+        if (materializedNestedObjects.hasOwnProperty(key)) {
+
+          // If there is a value for the nested object.
           if (hash) {
-            var childPath = children[key];
+            var childPath = materializedNestedObjects[key],
+                nestedIndex,
+                nestedProperty;
+
+            // Note: toMany nested objects have a path indicating their index, ex. 'children.0'
             childPath = childPath.split('.');
-            if (childPath.length > 1) {
-              childHash = hash[childPath[0]][childPath[1]];
+            nestedProperty = childPath[0];
+            nestedIndex = childPath[1];
+            /*jshint eqnull:true*/
+            if (nestedIndex != null) {
+              // The hash value for this particular object in the array of the record.
+              // ex. '{ children: [{ ... }, { ...] }'
+              childHash = hash[nestedProperty][nestedIndex];
             } else {
-              childHash = hash[childPath[0]];
+              // The hash value for this object on the record.
+              // ex. '{ child: { ... } }'
+              childHash = hash[nestedProperty];
             }
 
-            if (!processedPaths[hash[childPath[0]]]){
-                // update data hash: required to push changes beyond the first nesting level
-                this.writeDataHash(key, childHash, status);
-            }
+            // Update the data hash for the materialized nested record.
+            this.writeDataHash(key, childHash, status);
 
-            if (childPath.length > 1 && ! processedPaths[hash[childPath[0]]]) {
-              // save it so that we don't processed it over and over
-              processedPaths[hash[childPath[0]]]=true;
+            // Problem: If the materialized nested object is in an array, how do we update only that
+            // nested object when its position in the array may have changed?
+            // Ex. children: [{ n: 'A' }] => children: [{ n: 'B' }, { n: 'A' }]
+            // If { n: 'A' } was materialized, with child path 'children.0', if we updated the hash
+            // to be the latest object at index 0, that materialized record would suddenly be backed
+            // as { n: 'B' }. The only solution, short of an entire re-architect of nested objects,
+            // seems to be to force materialize all items in the array.
+            // NOTE: This is a problem because nested objects are masquerading as records. This will
+            // be fixed by fixing the concept of nested records to be nested objects.
+            // FURTHER NOTE: This also seems to be a usage/expectations problem. Is it not correct
+            // for the first materialized child object to update itself?
+            if (nestedIndex != null && processedPaths[nestedProperty] == null) {
+              // save it so that we don't process it over and over
+              processedPaths[nestedProperty] = true;
 
               // force fetching of all children records by invoking the children_attribute wrapper code
               // and then interating the list in an empty loop
               // Ugly, but there's basically no other way to do it at the moment, other than
               // leaving this broken as it was before
-              var that = this;
-              this.invokeLast(function() {
-                that.records[storeKey].get(childPath[0]).forEach(function (it) {});
-              });
+              var siblings = this.records[storeKey].get(nestedProperty);
+              for (var i = 0, len = siblings.get('length'); i < len; i++) {
+                if (i !== nestedIndex) { // Don't materialize this same one again.
+                  siblings.objectAt(i); // Get the sibling to materialize it.
+                }
+              }
             }
           } else {
             this.writeDataHash(key, null, status);
