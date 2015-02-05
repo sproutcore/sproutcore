@@ -1,5 +1,5 @@
 // ==========================================================================
-// Project:   SproutCore - JavaScript Application Framework
+// Project:   SproutCore - Web Application - Client Data Store
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 sc_require('data_sources/indexeddb_data_source');

@@ -1,13 +1,8 @@
 // ==========================================================================
-// Project:   SproutCore - JavaScript Application Framework
+// Project:   SproutCore - Web Application - Client Data Store
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 /*globals module, test, ok, equals, same */
-// ==========================================================================
-// Project:   SproutCore - JavaScript Application Framework
-// License:   Licensed under MIT license (see license.js)
-// ==========================================================================
-/*globals module, test, ok, equals, same, start, stop, expect */
 
 var dataSource,
     store,
