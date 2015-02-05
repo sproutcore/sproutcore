@@ -24,7 +24,7 @@ module("Statechart Event Queuing", {
 
     statechart = SC.Statechart.create({
 
-      rootState: TestState.extend({
+      rootSubstate: TestState.extend({
 
         initialSubstate: 'a',
 
@@ -35,7 +35,7 @@ module("Statechart Event Queuing", {
         eventB: function() {
           this._handledEvents.push('eventB');
 
-          statechart.gotoState('b');
+          statechart.gotoSubstate('b');
         },
 
         eventC: function() {
@@ -47,13 +47,13 @@ module("Statechart Event Queuing", {
         }),
 
         b: TestState.extend({
-          enterState: function() {
+          enterSubstate: function() {
             statechart.sendEvent('eventC');
           }
         }),
 
         c: TestState.extend({
-          enterState: function() {
+          enterSubstate: function() {
             statechart.sendEvent('eventA');
             stop();
             return this.performAsync('asyncFunction');
@@ -65,9 +65,9 @@ module("Statechart Event Queuing", {
               statechart.sendEvent('eventC');
             }, 100);
             setTimeout(function() {
-              var rootState = statechart.get('rootState');
+              var rootSubstate = statechart.get('rootSubstate');
               self.resumeGotoState();
-              same(rootState._handledEvents, expectedEvents, 'expected events were handled');
+              same(rootSubstate._handledEvents, expectedEvents, 'expected events were handled');
               start();
             }, 500);
           }
@@ -87,18 +87,18 @@ module("Statechart Event Queuing", {
 });
 
 test("Events are sent even when queued during state transitions", function() {
-  var rootState = statechart.get('rootState'),
+  var rootSubstate = statechart.get('rootSubstate'),
       stateA = statechart.getState('a'),
       stateB = statechart.getState('b');
 
   statechart.sendEvent('eventA');
-  equals(rootState._handledEvents.contains('eventA'), true, 'eventA was handled');
+  equals(rootSubstate._handledEvents.contains('eventA'), true, 'eventA was handled');
 
-  rootState.reset();
+  rootSubstate.reset();
   statechart.sendEvent('eventB');
-  same(rootState._handledEvents, ['eventB', 'eventC'], 'eventB and eventC were handled');
+  same(rootSubstate._handledEvents, ['eventB', 'eventC'], 'eventB and eventC were handled');
 
-  rootState.reset();
+  rootSubstate.reset();
   expectedEvents = ['eventA', 'eventC'];
-  statechart.gotoState('c');
+  statechart.gotoSubstate('c');
 });

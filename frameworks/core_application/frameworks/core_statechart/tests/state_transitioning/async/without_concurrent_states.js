@@ -7,51 +7,51 @@ var statechart = null;
 
 // ..........................................................
 // CONTENT CHANGING
-// 
+//
 
 module("SC.Statechart: No Concurrent States - Goto State Asynchronous Tests", {
   setup: function() {
-    
+
     var StateMixin = {
-      
+
       counter: 0,
-      
+
       foo: function() {
         this.set('counter', this.get('counter') + 1);
         this.resumeGotoState();
       },
-      
-      enterState: function() {
+
+      enterSubstate: function() {
         return this.performAsync('foo');
       },
-      
-      exitState: function() {
+
+      exitSubstate: function() {
         return this.performAsync(function() { this.foo(); });
       }
     };
-  
+
     statechart = SC.Statechart.create({
-      
+
       monitorIsActive: YES,
-      
-      rootState: SC.State.design({
-        
+
+      rootSubstate: SC.State.design({
+
         initialSubstate: 'a',
-        
+
         a: SC.State.design(),
-        
+
         b: SC.State.design({
-          
+
           methodInvoked: null,
-          
-          enterState: function() {
+
+          enterSubstate: function() {
             return this.performAsync('foo');
           },
-          
-          exitState: function() {
+
+          exitSubstate: function() {
             return this.performAsync('bar');
           },
-          
+
           foo: function(arg1, arg2) {
             this.set('methodInvoked', 'foo');
           },
@@ -59,30 +59,30 @@ module("SC.Statechart: No Concurrent States - Goto State Asynchronous Tests", {
           bar: function(arg1, arg2) {
             this.set('methodInvoked', 'bar');
           }
-          
+
         }),
-        
+
         c: SC.State.design(StateMixin, {
-          
+
           initialSubstate: 'd',
-          
+
           d: SC.State.design(StateMixin, {
-            
+
             initialSubstate: 'e',
-            
+
             e: SC.State.design(StateMixin)
-            
+
           })
-          
+
         })
-        
+
       })
-      
+
     });
-    
+
     statechart.initStatechart();
   },
-  
+
   teardown: function() {
     statechart.destroy();
   }
@@ -91,22 +91,22 @@ module("SC.Statechart: No Concurrent States - Goto State Asynchronous Tests", {
 test("go to state b", function() {
   var stateB = statechart.getState('b'),
       monitor = statechart.get('monitor');
-  
+
   monitor.reset();
-  
-  equals(statechart.get('gotoStateActive'), NO, "statechart should not have active gotoState");
-  equals(statechart.get('gotoStateSuspended'), NO, "statechart should not have active gotoState suspended");
-  
-  statechart.gotoState(stateB);
-  
-  equals(statechart.get('gotoStateActive'), YES, "statechart should have active gotoState");
-  equals(statechart.get('gotoStateSuspended'), YES, "statechart should have active gotoState suspended");
-  
+
+  equals(statechart.get('gotoSubstateActive'), NO, "statechart should not have active gotoSubstate");
+  equals(statechart.get('gotoSubstateSuspended'), NO, "statechart should not have active gotoSubstate suspended");
+
+  statechart.gotoSubstate(stateB);
+
+  equals(statechart.get('gotoSubstateActive'), YES, "statechart should have active gotoSubstate");
+  equals(statechart.get('gotoSubstateSuspended'), YES, "statechart should have active gotoSubstate suspended");
+
   statechart.resumeGotoState();
-  
-  equals(statechart.get('gotoStateActive'), NO, "statechart should not have active gotoState");
-  equals(statechart.get('gotoStateSuspended'), NO, "statechart should not have active gotoState suspended");
-  
+
+  equals(statechart.get('gotoSubstateActive'), NO, "statechart should not have active gotoSubstate");
+  equals(statechart.get('gotoSubstateSuspended'), NO, "statechart should not have active gotoSubstate suspended");
+
   equals(monitor.matchSequence().begin().exited('a').entered('b').end(), true, 'sequence should be exited[a], entered[b]');
   equals(statechart.get('currentStateCount'), 1, 'current state count should be 1');
   equals(statechart.stateIsCurrentState('a'), false, 'current state should not be a');
@@ -118,22 +118,22 @@ test("go to state b and then back to state a", function() {
   var stateA = statechart.getState('a'),
       stateB = statechart.getState('b'),
       monitor = statechart.get('monitor');
-  
-  statechart.gotoState(stateB);
+
+  statechart.gotoSubstate(stateB);
   statechart.resumeGotoState();
-  
+
   monitor.reset();
-  
-  statechart.gotoState(stateA);
-  
-  equals(statechart.get('gotoStateActive'), YES, "statechart should have active gotoState");
-  equals(statechart.get('gotoStateSuspended'), YES, "statechart should have active gotoState suspended");
-  
+
+  statechart.gotoSubstate(stateA);
+
+  equals(statechart.get('gotoSubstateActive'), YES, "statechart should have active gotoSubstate");
+  equals(statechart.get('gotoSubstateSuspended'), YES, "statechart should have active gotoSubstate suspended");
+
   statechart.resumeGotoState();
-  
-  equals(statechart.get('gotoStateActive'), NO, "statechart should not have active gotoState");
-  equals(statechart.get('gotoStateSuspended'), NO, "statechart should not have active gotoState suspended");
-  
+
+  equals(statechart.get('gotoSubstateActive'), NO, "statechart should not have active gotoSubstate");
+  equals(statechart.get('gotoSubstateSuspended'), NO, "statechart should not have active gotoSubstate suspended");
+
   equals(monitor.matchSequence().begin().exited('b').entered('a').end(), true, 'sequence should be exited[b], entered[a]');
   equals(statechart.get('currentStateCount'), 1, 'current state count should be 1');
   equals(statechart.stateIsCurrentState('a'), true, 'current state should be a');
@@ -146,15 +146,15 @@ test("go to state c", function() {
       stateD = statechart.getState('d'),
       stateE = statechart.getState('e'),
       monitor = statechart.get('monitor');
-  
+
   monitor.reset();
-  
-  statechart.gotoState(stateC);
-  
-  equals(statechart.get('gotoStateActive'), NO, "statechart should not have active gotoState");
-  equals(statechart.get('gotoStateSuspended'), NO, "statechart should not have active gotoState suspended");
-  
-  equals(monitor.matchSequence().begin().exited('a').entered('c', 'd', 'e').end(), true, 
+
+  statechart.gotoSubstate(stateC);
+
+  equals(statechart.get('gotoSubstateActive'), NO, "statechart should not have active gotoSubstate");
+  equals(statechart.get('gotoSubstateSuspended'), NO, "statechart should not have active gotoSubstate suspended");
+
+  equals(monitor.matchSequence().begin().exited('a').entered('c', 'd', 'e').end(), true,
         'sequence should be exited[a], entered[c, d, e]');
   equals(statechart.get('currentStateCount'), 1, 'current state count should be 1');
   equals(statechart.stateIsCurrentState('a'), false, 'current state should not be a');
@@ -170,17 +170,17 @@ test("go to state c and then back to state a", function() {
       stateD = statechart.getState('d'),
       stateE = statechart.getState('e'),
       monitor = statechart.get('monitor');
-  
-  statechart.gotoState(stateC);
-  
+
+  statechart.gotoSubstate(stateC);
+
   monitor.reset();
-  
-  statechart.gotoState(stateA);
-  
-  equals(statechart.get('gotoStateActive'), NO, "statechart should not have active gotoState");
-  equals(statechart.get('gotoStateSuspended'), NO, "statechart should not have active gotoState suspended");
-  
-  equals(monitor.matchSequence().begin().exited('e', 'd', 'c').entered('a').end(), true, 
+
+  statechart.gotoSubstate(stateA);
+
+  equals(statechart.get('gotoSubstateActive'), NO, "statechart should not have active gotoSubstate");
+  equals(statechart.get('gotoSubstateSuspended'), NO, "statechart should not have active gotoSubstate suspended");
+
+  equals(monitor.matchSequence().begin().exited('e', 'd', 'c').entered('a').end(), true,
         'sequence should be exited[e, d, c], entered[a]');
   equals(statechart.get('currentStateCount'), 1, 'current state count should be 1');
   equals(statechart.stateIsCurrentState('a'), true, 'current state should be a');

@@ -16,21 +16,21 @@ module("SC.Statechart: No Concurrent States - Pane Default Responder Tests", {
 
     window.statechart = SC.Statechart.create({
 
-      rootState: SC.State.design({
+      rootSubstate: SC.State.design({
 
         initialSubstate: 'a',
 
         a: SC.State.design({
           foo: function() {
             fooInvokedCount++;
-            this.gotoState('b');
+            this.gotoSubstate('b');
           }
         }),
 
         b: SC.State.design({
           foo: function() {
             fooInvokedCount++;
-            this.gotoState('a');
+            this.gotoSubstate('a');
           }
         })
 

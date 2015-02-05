@@ -190,7 +190,7 @@ SC.AppSubstate = SC.Substate.extend(
     By default the method invokes a state transition to this state.
   */
   handleTriggeredRoute: function (context) {
-    this.gotoState(this, context);
+    this.gotoSubstate(this, context);
   },
 
   /**

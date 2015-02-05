@@ -9,31 +9,31 @@ module("SC.Statechart: State Initial Substate Tests", {
   setup: function() {
 
     statechart = SC.Statechart.create({
-      
+
       monitorIsActive: YES,
-      
-      rootState: SC.State.design({
-        
+
+      rootSubstate: SC.State.design({
+
         initialSubstate: 'a',
-        
+
         a: SC.State.design({
           initialSubstate: 'c',
           c: SC.State.design(),
           d: SC.State.design()
         }),
-        
+
         b: SC.State.design({
           e: SC.State.design(),
           f: SC.State.design()
         })
-        
+
       })
-      
+
     });
-    
+
     statechart.initStatechart();
-    
-    root = statechart.get('rootState');
+
+    root = statechart.get('rootSubstate');
     monitor = statechart.get('monitor');
     stateA = statechart.getState('a');
     stateB = statechart.getState('b');
@@ -42,7 +42,7 @@ module("SC.Statechart: State Initial Substate Tests", {
     stateE = statechart.getState('e');
     stateF = statechart.getState('f');
   },
-  
+
   teardown: function() {
     statechart = root = stateA = stateB = stateC = stateD = stateE = stateF = null;
   }
@@ -61,7 +61,7 @@ test("check initial substates", function() {
 test("go to state b and confirm current state is an empty state", function() {
   equals(stateC.get('isCurrentState'), true);
   monitor.reset();
-  statechart.gotoState(stateB);
+  statechart.gotoSubstate(stateB);
   ok(monitor.matchSequence().begin().exited(stateC, stateA).entered(stateB, stateB.get('initialSubstate')).end());
   equals(stateB.getPath('initialSubstate.isCurrentState'), true, "state b\'s initial substate should be the current state");
 });

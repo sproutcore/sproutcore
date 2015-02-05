@@ -13,8 +13,8 @@ SC.TRACE_STATECHART_STYLE = {
   action: 'color: #5922ab; font-style: italic; font-weight: bold;', // Actions and events
   actionInfo: 'color: #5922ab; font-style: italic;', // Actions and events
   route: 'color: #a67000; font-style: italic;', // Routing
-  gotoState: 'color: #479a48; font-style: italic; font-weight: bold;', // Goto state
-  gotoStateInfo: 'color: #479a48; font-style: italic;', // Goto state
+  gotoSubstate: 'color: #479a48; font-style: italic; font-weight: bold;', // Goto state
+  gotoSubstateInfo: 'color: #479a48; font-style: italic;', // Goto state
   enter: 'color: #479a48; font-style: italic; font-weight: bold;', // Entering
   exit: 'color: #479a48; font-style: italic; font-weight: bold;' // Exiting
 };
@@ -367,7 +367,7 @@ SC.Substate = SC.Object.extend(
 
       // If the current substate is a source for the event, use it.
       if (!SC.none(transitionSubstate)) {
-        this.gotoState(transitionSubstate, context);
+        this.gotoSubstate(transitionSubstate, context);
 
         // Found a match.
         return true;
@@ -729,8 +729,7 @@ SC.Substate = SC.Object.extend(
   },
 
   /**
-    Used to go to a state in the statechart either directly from this state if it is a current state,
-    or from the first relative current state from this state.
+    Go to a descendent substate of this substate.
 
     If the value given is a string then it is considered a state path expression. The path is then
     used to find a state relative to this state based on rules of the {@link #getState} method.
@@ -740,8 +739,8 @@ SC.Substate = SC.Object.extend(
            exited and entered during the state transition process. Context can not be an instance of
            SC.Substate.
   */
-  gotoState: function (value, context) {
-    var state = this.getState(value);
+  gotoSubstate: function (value, context) {
+    var state = this.getSubstate(value);
 
     if (!state) {
       var msg = "can not go to state %@ from state %@. Invalid value.";
@@ -752,6 +751,31 @@ SC.Substate = SC.Object.extend(
     var from = this.findFirstRelativeCurrentState(state);
     this.get('statechart').gotoState(state, from, false, context);
   },
+
+  /** @private
+    Used to go to a substate in the statechart either directly from this state if it is a current
+    state, or from the first relative current state from this state.
+
+    If the value given is a string then it is considered a state path expression. The path is then
+    used to find a state relative to this state based on rules of the {@link #getState} method.
+
+    @param value {SC.Substate|String} the state to go to
+    @param [context] {Hash|Object} context object that will be supplied to all states that are
+           exited and entered during the state transition process. Context can not be an instance of
+           SC.Substate.
+  */
+  // gotoState: function (value, context) {
+  //   var state = this.getState(value);
+
+  //   if (!state) {
+  //     var msg = "can not go to state %@ from state %@. Invalid value.";
+  //     this.stateLogError(msg.fmt(value, this));
+  //     return;
+  //   }
+
+  //   var from = this.findFirstRelativeCurrentState(state);
+  //   this.get('statechart').gotoState(state, from, false, context);
+  // },
 
   /**
     Used to go to a given state's history state in the statechart either directly from this state if it
@@ -855,7 +879,7 @@ SC.Substate = SC.Object.extend(
     Indicates if this state is a currently entered state.
 
     A state is currently entered if during a state transition process the
-    state's enterState method was invoked, but only after its exitState method
+    state's enterSubstate method was invoked, but only after its exitSubstate method
     was called, if at all.
   */
   isEnteredState: function () {
@@ -934,7 +958,7 @@ SC.Substate = SC.Object.extend(
   */
   reenter: function () {
     if (this.get('isEnteredState')) {
-      this.gotoState(this);
+      this.gotoSubstate(this);
     } else {
       SC.Logger.error('Can not re-enter state %@ since it is not an entered state in the statechart'.fmt(this));
     }
@@ -1069,7 +1093,7 @@ SC.Substate = SC.Object.extend(
     as an animation or fetching remote data, then you need to return an asynchronous
     action, which is done like so:
 
-        enterState: function () {
+        enterSubstate: function () {
           return this.performAsync('foo');
         }
 
@@ -1078,36 +1102,36 @@ SC.Substate = SC.Object.extend(
     this state's resumeGotoState method or the statechart's resumeGotoState. If no asynchronous
     action is to be perform, then nothing needs to be returned.
 
-    When the enterState method is called, an optional context value may be supplied if
-    one was provided to the gotoState method.
+    When the enterSubstate method is called, an optional context value may be supplied if
+    one was provided to the gotoSubstate method.
 
-    @param {Hash} [context] value if one was supplied to gotoState when invoked
+    @param {Hash} [context] value if one was supplied to gotoSubstate when invoked
 
     @see #representRoute
   */
-  enterState: function (context) { },
+  enterSubstate: function (context) { },
 
   /**
-    Notification called just before enterState is invoked.
+    Notification called just before enterSubstate is invoked.
 
     Note: This is intended to be used by the owning statechart but it can be overridden if
     you need to do something special.
 
-    @param {Hash} [context] value if one was supplied to gotoState when invoked
-    @see #enterState
+    @param {Hash} [context] value if one was supplied to gotoSubstate when invoked
+    @see #enterSubstate
   */
   stateWillBecomeEntered: function (context) {
     this._isEnteringState = YES;
   },
 
   /**
-    Notification called just after enterState is invoked.
+    Notification called just after enterSubstate is invoked.
 
     Note: This is intended to be used by the owning statechart but it can be overridden if
     you need to do something special.
 
-    @param context {Hash} Optional value if one was supplied to gotoState when invoked
-    @see #enterState
+    @param context {Hash} Optional value if one was supplied to gotoSubstate when invoked
+    @see #enterSubstate
   */
   stateDidBecomeEntered: function (context) {
     this._setupAllStateObserveHandlers();
@@ -1122,7 +1146,7 @@ SC.Substate = SC.Object.extend(
     as an animation or fetching remote data, then you need to return an asynchronous
     action, which is done like so:
 
-        exitState: function () {
+        exitSubstate: function () {
           return this.performAsync('foo');
         }
 
@@ -1131,21 +1155,21 @@ SC.Substate = SC.Object.extend(
     this state's resumeGotoState method or the statechart's resumeGotoState. If no asynchronous
     action is to be perform, then nothing needs to be returned.
 
-    When the exitState method is called, an optional context value may be supplied if
-    one was provided to the gotoState method.
+    When the exitSubstate method is called, an optional context value may be supplied if
+    one was provided to the gotoSubstate method.
 
-    @param context {Hash} Optional value if one was supplied to gotoState when invoked
+    @param context {Hash} Optional value if one was supplied to gotoSubstate when invoked
   */
-  exitState: function (context) { },
+  exitSubstate: function (context) { },
 
   /**
-    Notification called just before exitState is invoked.
+    Notification called just before exitSubstate is invoked.
 
     Note: This is intended to be used by the owning statechart but it can be overridden
     if you need to do something special.
 
-    @param context {Hash} Optional value if one was supplied to gotoState when invoked
-    @see #exitState
+    @param context {Hash} Optional value if one was supplied to gotoSubstate when invoked
+    @see #exitSubstate
   */
   stateWillBecomeExited: function (context) {
     this._isExitingState = YES;
@@ -1153,13 +1177,13 @@ SC.Substate = SC.Object.extend(
   },
 
   /**
-    Notification called just after exitState is invoked.
+    Notification called just after exitSubstate is invoked.
 
     Note: This is intended to be used by the owning statechart but it can be overridden
     if you need to do something special.
 
-    @param context {Hash} Optional value if one was supplied to gotoState when invoked
-    @see #exitState
+    @param context {Hash} Optional value if one was supplied to gotoSubstate when invoked
+    @see #exitSubstate
   */
   stateDidBecomeExited: function (context) {
     this._isExitingState = NO;
@@ -1238,8 +1262,8 @@ SC.Substate = SC.Object.extend(
     Call when an asynchronous action need to be performed when either entering or exiting
     a state.
 
-    @see enterState
-    @see exitState
+    @see enterSubstate
+    @see exitSubstate
   */
   performAsync: function (func, arg1, arg2) {
     return SC.Async.perform(func, arg1, arg2);

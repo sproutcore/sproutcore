@@ -7,29 +7,29 @@ var statechart = null;
 
 // ..........................................................
 // CONTENT CHANGING
-// 
+//
 
 module("SC.Statechart: With Concurrent States - Send Event Tests", {
   setup: function() {
 
     statechart = SC.Statechart.create({
-      
+
       monitorIsActive: YES,
-      
-      rootState: SC.State.design({
-        
+
+      rootSubstate: SC.State.design({
+
         initialSubstate: 'x',
-        
+
         x: SC.State.design({
-          
+
           fooInvokedCount: 0,
-          
+
           foo: function() {
             this.fooInvokedCount++;
           },
-          
+
           substatesAreConcurrent: YES,
-          
+
           a: SC.State.design({
 
             initialSubstate: 'c',
@@ -39,12 +39,12 @@ module("SC.Statechart: With Concurrent States - Send Event Tests", {
             eventA: function() { this.set('eventAInvoked', YES); },
 
             c: SC.State.design({
-              eventB: function() { this.gotoState('d'); },
-              eventD: function() { this.gotoState('y'); }
+              eventB: function() { this.gotoSubstate('d'); },
+              eventD: function() { this.gotoSubstate('y'); }
             }),
 
             d: SC.State.design({
-              eventC: function() { this.gotoState('c'); }
+              eventC: function() { this.gotoSubstate('c'); }
             })
 
           }),
@@ -58,27 +58,27 @@ module("SC.Statechart: With Concurrent States - Send Event Tests", {
             eventA: function() { this.set('eventAInvoked', YES); },
 
             e: SC.State.design({
-              eventB: function() { this.gotoState('f'); },
-              eventD: function() { this.gotoState('y'); }
+              eventB: function() { this.gotoSubstate('f'); },
+              eventD: function() { this.gotoSubstate('y'); }
             }),
 
             f: SC.State.design({
-              eventC: function() { this.gotoState('e'); }
+              eventC: function() { this.gotoSubstate('e'); }
             })
 
           })
-          
+
         }),
-        
+
         y: SC.State.design()
-        
+
       })
-      
+
     });
-    
+
     statechart.initStatechart();
   },
-  
+
   teardown: function() {
     statechart.destroy();
     statechart = null;
@@ -89,14 +89,14 @@ test("send event eventA", function() {
   var monitor = statechart.get('monitor'),
       stateA = statechart.getState('a'),
       stateB = statechart.getState('b');
-      
+
   monitor.reset();
 
   equals(stateA.get('eventAInvoked'), false);
   equals(stateB.get('eventAInvoked'), false);
 
   statechart.sendEvent('eventA');
-  
+
   equals(monitor.get('length'), 0, 'state sequence should be of length 0');
   equals(statechart.stateIsCurrentState('c'), true, 'current state should be c');
   equals(statechart.stateIsCurrentState('e'), true, 'current state should be e');
@@ -106,18 +106,18 @@ test("send event eventA", function() {
 
 test("send event eventB", function() {
   var monitor = statechart.get('monitor');
-      
+
   monitor.reset();
-  
+
   equals(statechart.stateIsCurrentState('c'), true, 'current state should be c');
   equals(statechart.stateIsCurrentState('e'), true, 'current state should be e');
-  
+
   statechart.sendEvent('eventB');
-  
+
   equals(statechart.get('currentStateCount'), 2, 'current state count should be 2');
   equals(statechart.stateIsCurrentState('d'), true, 'current state should be d');
   equals(statechart.stateIsCurrentState('f'), true, 'current state should be f');
-  
+
   equals(monitor.get('length'), 4, 'state sequence should be of length 4');
   equals(monitor.matchSequence().begin()
                   .beginConcurrent()
@@ -130,7 +130,7 @@ test("send event eventB", function() {
                       .entered('f')
                     .endSequence()
                   .endConcurrent()
-                .end(), 
+                .end(),
           true, 'sequence should be exited[c], entered[d], exited[e], entered[f]');
 });
 
@@ -138,12 +138,12 @@ test("send event eventB then eventC", function() {
   var monitor = statechart.get('monitor');
 
   statechart.sendEvent('eventB');
-  
+
   equals(statechart.stateIsCurrentState('d'), true, 'current state should be d');
   equals(statechart.stateIsCurrentState('f'), true, 'current state should be f');
 
   monitor.reset();
-  
+
   statechart.sendEvent('eventC');
 
   equals(statechart.stateIsCurrentState('c'), true, 'current state should be c');
@@ -159,20 +159,20 @@ test("send event eventB then eventC", function() {
                       .exited('f').entered('e')
                     .endSequence()
                   .endConcurrent()
-                .end(), 
+                .end(),
           true, 'sequence should be exited[d], entered[c], exited[f], entered[e]');
 });
 
 test("send event eventD", function() {
   var monitor = statechart.get('monitor');
-      
+
   monitor.reset();
-  
+
   equals(statechart.stateIsCurrentState('c'), true, 'current state should be c');
   equals(statechart.stateIsCurrentState('e'), true, 'current state should be e');
-  
+
   statechart.sendEvent('eventD');
-  
+
   equals(monitor.get('length'), 6, 'state sequence should be of length 6');
   equals(monitor.matchSequence().begin()
                   .beginConcurrent()
@@ -185,9 +185,9 @@ test("send event eventD", function() {
                   .endConcurrent()
                   .exited('x')
                   .entered('y')
-                .end(), 
+                .end(),
           true, 'sequence should be exited[c, a, e, b, x], entered[y]');
-          
+
   equals(statechart.currentStateCount(), 1, 'statechart should only have 1 current state');
   equals(statechart.stateIsCurrentState('c'), false, 'current state not should be c');
   equals(statechart.stateIsCurrentState('e'), false, 'current state not should be e');
@@ -196,24 +196,24 @@ test("send event eventD", function() {
 
 test("send event eventZ", function() {
   var monitor = statechart.get('monitor');
-      
+
   monitor.reset();
-  
+
   equals(statechart.stateIsCurrentState('c'), true, 'current state should be c');
   equals(statechart.stateIsCurrentState('e'), true, 'current state should be e');
-  
+
   equals(monitor.get('length'), 0, 'state sequence should be of length 0');
-  
+
   equals(statechart.stateIsCurrentState('c'), true, 'current state should be c');
   equals(statechart.stateIsCurrentState('e'), true, 'current state should be e');
 });
 
 test("send event foo to statechart and ensure event is only handled once by state X", function() {
   var x = statechart.getState('x');
-  
+
   equals(x.fooInvokedCount, 0, "x.fooInvokedCount should be 0");
-  
+
   statechart.sendEvent('foo');
-  
+
   equals(x.fooInvokedCount, 1, "x.fooInvokedCount should be 1");
 });

@@ -14,12 +14,12 @@ TestRunner.statechart = SC.Object.create(SC.StatechartManager, {
 
   trace: false,
 
-  rootState: SC.State.extend({
+  rootSubstate: SC.State.extend({
     initialSubstate: 'loadingTargets',
 
     loadingTargets: SC.State.extend({
 
-      enterState: function () {
+      enterSubstate: function () {
         var targets = TestRunner.store.find(CoreTools.TARGETS_QUERY);
 
         TestRunner.set('currentScene', 'targetsLoading');
@@ -44,9 +44,9 @@ TestRunner.statechart = SC.Object.create(SC.StatechartManager, {
         // Give bindings a chance to flush.
         this.invokeLast(function () {
           if (target) {
-            this.gotoState('selectedTarget');
+            this.gotoSubstate('selectedTarget');
           } else {
-            this.gotoState('noSelectedTarget');
+            this.gotoSubstate('noSelectedTarget');
           }
         });
       },
@@ -55,7 +55,7 @@ TestRunner.statechart = SC.Object.create(SC.StatechartManager, {
 
         representRoute: '',
 
-        enterState: function () {
+        enterSubstate: function () {
           var hasTargets = TestRunner.targetsController.get('length') > 0;
 
           if (hasTargets) {
@@ -74,7 +74,7 @@ TestRunner.statechart = SC.Object.create(SC.StatechartManager, {
 
         initialSubstate: 'noSelectedTest',
 
-        enterState: function () {
+        enterSubstate: function () {
           var target = TestRunner.targetController.get('content'),
             tests = target.get('tests'),
             ret = true;
@@ -88,7 +88,7 @@ TestRunner.statechart = SC.Object.create(SC.StatechartManager, {
           return ret;
         },
 
-        enterStateByRoute: function (context) {
+        enterSubstateByRoute: function (context) {
           var name = context.params.target,
             target,
             tests;
@@ -125,18 +125,18 @@ TestRunner.statechart = SC.Object.create(SC.StatechartManager, {
             // Give bindings a chance to flush.
             this.invokeLast(function () {
               if (target) {
-                this.gotoState('selectedTest');
+                this.gotoSubstate('selectedTest');
               } else {
-                this.gotoState('noSelectedTest');
+                this.gotoSubstate('noSelectedTest');
               }
             });
           },
 
           // runTests: function (sender) {
-          //   this.gotoState('allSelectedTests');
+          //   this.gotoSubstate('allSelectedTests');
           // },
 
-          enterState: function () {
+          enterSubstate: function () {
             var target = TestRunner.targetController.get('content'),
               tests = target.get('tests'),
               name;
@@ -168,10 +168,10 @@ TestRunner.statechart = SC.Object.create(SC.StatechartManager, {
         //   */
         //   back: function () {
         //     TestRunner.testsController.selectObject(null);
-        //     this.gotoState('noSelectedTest');
+        //     this.gotoSubstate('noSelectedTest');
         //   },
 
-        //   enterState: function () {
+        //   enterSubstate: function () {
         //     var target = TestRunner.targetController.get('content'),
         //       test = TestRunner.testController.get('content'),
         //       name,
@@ -187,7 +187,7 @@ TestRunner.statechart = SC.Object.create(SC.StatechartManager, {
         //     this.set('location', name + '/' + filename);
         //   },
 
-        //   enterStateByRoute: function (context) {
+        //   enterSubstateByRoute: function (context) {
         //     var name = context.params.target,
         //       target,
         //       test, tests;
@@ -219,10 +219,10 @@ TestRunner.statechart = SC.Object.create(SC.StatechartManager, {
           */
           back: function () {
             TestRunner.testsController.selectObject(null);
-            this.gotoState('noSelectedTest');
+            this.gotoSubstate('noSelectedTest');
           },
 
-          enterState: function () {
+          enterSubstate: function () {
             var target = TestRunner.targetController.get('content'),
               test = TestRunner.testController.get('content'),
               name,
@@ -238,7 +238,7 @@ TestRunner.statechart = SC.Object.create(SC.StatechartManager, {
             this.set('location', name + '/' + filename);
           },
 
-          enterStateByRoute: function (context) {
+          enterSubstateByRoute: function (context) {
             var name = context.params.target,
               filename = context.params.filename,
               target,

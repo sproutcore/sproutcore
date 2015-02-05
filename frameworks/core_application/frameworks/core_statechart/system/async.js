@@ -50,18 +50,18 @@ SC.Async = SC.Object.extend(
 SC.Async.mixin(/** @scope SC.Async */{
 
   /**
-    Call in either a state's enterState or exitState method when you
+    Call in either a state's enterSubstate or exitSubstate method when you
     want a state to perform an asynchronous action, such as an animation.
 
     Examples:
 
       SC.AppSubstate.extend({
 
-        enterState: function() {
+        enterSubstate: function() {
           return SC.Async.perform('foo');
         },
 
-        exitState: function() {
+        exitSubstate: function() {
           return SC.Async.perform('bar', 100);
         }
 

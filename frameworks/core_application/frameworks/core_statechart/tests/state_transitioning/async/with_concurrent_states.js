@@ -7,56 +7,56 @@ var statechart = null;
 
 // ..........................................................
 // CONTENT CHANGING
-// 
+//
 
 module("SC.Statechart: With Concurrent States - Goto State Asynchronous Tests", {
   setup: function() {
-    
+
     var StateMixin = {
-      
+
       counter: 0,
-      
+
       foo: function() {
         this.set('counter', this.get('counter') + 1);
         this.resumeGotoState();
       },
-      
-      enterState: function() {
+
+      enterSubstate: function() {
         return this.performAsync('foo');
       },
-      
-      exitState: function() {
+
+      exitSubstate: function() {
         return this.performAsync(function() { this.foo(); });
       }
     };
-  
+
     statechart = SC.Statechart.create({
-      
+
       monitorIsActive: YES,
-      
-      rootState: SC.State.design({
-        
+
+      rootSubstate: SC.State.design({
+
         initialSubstate: 'a',
-        
+
         a: SC.State.design(),
-        
+
         b: SC.State.design({
-          
+
           substatesAreConcurrent: YES,
-          
+
           c: SC.State.design(StateMixin),
-          
+
           d: SC.State.design(StateMixin)
-          
+
         })
-        
+
       })
-      
+
     });
-    
+
     statechart.initStatechart();
   },
-  
+
   teardown: function() {
     statechart.destroy();
     statechart = null;
@@ -68,24 +68,24 @@ test("go to state b", function() {
       stateA = statechart.getState('a'),
       stateC = statechart.getState('c'),
       stateD = statechart.getState('d');
-  
+
   monitor.reset();
-  
-  equals(statechart.get('gotoStateActive'), NO, "statechart should not have active gotoState");
-  equals(statechart.get('gotoStateSuspended'), NO, "statechart should not have active gotoState suspended");
-  
-  stateA.gotoState('b');
-  
-  equals(statechart.get('gotoStateActive'), NO, "statechart should not have active gotoState");
-  equals(statechart.get('gotoStateSuspended'), NO, "statechart should not have active gotoState suspended");
-  
+
+  equals(statechart.get('gotoSubstateActive'), NO, "statechart should not have active gotoSubstate");
+  equals(statechart.get('gotoSubstateSuspended'), NO, "statechart should not have active gotoSubstate suspended");
+
+  stateA.gotoSubstate('b');
+
+  equals(statechart.get('gotoSubstateActive'), NO, "statechart should not have active gotoSubstate");
+  equals(statechart.get('gotoSubstateSuspended'), NO, "statechart should not have active gotoSubstate suspended");
+
   equals(monitor.matchSequence().begin()
                   .exited('a')
                   .entered('b')
                   .beginConcurrent()
                     .entered('c', 'd')
                   .endConcurrent()
-                .end(), 
+                .end(),
           true, 'sequence should be exited[a], entered[b, c, d]');
   equals(statechart.get('currentStateCount'), 2, 'current state count should be 2');
   equals(stateC.get('isCurrentState'), true, 'current state should be c');
@@ -100,21 +100,21 @@ test("go to state b, then back to state a", function() {
       stateB = statechart.getState('b'),
       stateC = statechart.getState('c'),
       stateD = statechart.getState('d');
-  
-  stateA.gotoState('b');
-  
+
+  stateA.gotoSubstate('b');
+
   monitor.reset();
-  
-  stateC.gotoState('a');
-  
-  equals(statechart.get('gotoStateActive'), NO, "statechart should not have active gotoState");
-  equals(statechart.get('gotoStateSuspended'), NO, "statechart should not have active gotoState suspended");
-  
+
+  stateC.gotoSubstate('a');
+
+  equals(statechart.get('gotoSubstateActive'), NO, "statechart should not have active gotoSubstate");
+  equals(statechart.get('gotoSubstateSuspended'), NO, "statechart should not have active gotoSubstate suspended");
+
   equals(monitor.matchSequence()
                 .begin()
                 .exited('c', 'd', 'b')
                 .entered('a')
-                .end(), 
+                .end(),
           true, 'sequence should be exited[c, d, b], entered[a]');
   equals(statechart.get('currentStateCount'), 1, 'current state count should be 1');
   equals(stateA.get('isCurrentState'), true, 'current state should not be a');

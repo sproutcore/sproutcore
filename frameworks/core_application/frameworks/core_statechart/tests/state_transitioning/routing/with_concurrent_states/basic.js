@@ -35,9 +35,9 @@ module("SC.Statechart: Concurrent States - Trigger Routing on States Basic Tests
 
     TestState = SC.State.extend({
 
-      enterState: function(context) {
+      enterSubstate: function(context) {
         this.info = {};
-        this.info.enterState = {
+        this.info.enterSubstate = {
           state: this,
           context: context
         };
@@ -91,9 +91,9 @@ module("SC.Statechart: Concurrent States - Trigger Routing on States Basic Tests
 
           representRoute: 'cow',
 
-          enterStateByRoute: function(context) {
+          enterSubstateByRoute: function(context) {
             this.info = {};
-            this.info.enterStateByRoute = {
+            this.info.enterSubstateByRoute = {
               context: context
             };
           }
@@ -179,11 +179,11 @@ test("trigger state B's route", function() {
 
   var info = stateB.info;
 
-  ok(info.enterState, "state B's enterState should have been invoked");
+  ok(info.enterSubstate, "state B's enterSubstate should have been invoked");
 
-  var context = info.enterState.context;
+  var context = info.enterSubstate.context;
 
-  ok(SC.kindOf(context, SC.AppSubstateRouteHandlerContext), "state B's enterState method should have been provided a state route handler context object");
+  ok(SC.kindOf(context, SC.AppSubstateRouteHandlerContext), "state B's enterSubstate method should have been provided a state route handler context object");
   equals(context.get('state'), stateB);
   equals(context.get('location'), 'cat');
   equals(context.get('params'), params);
@@ -216,11 +216,11 @@ test("trigger state C's route", function() {
 
   var info = stateC.info;
 
-  ok(info.enterState, "state C's enterState should have been invoked");
+  ok(info.enterSubstate, "state C's enterSubstate should have been invoked");
 
-  var context = info.enterState.context;
+  var context = info.enterSubstate.context;
 
-  ok(SC.kindOf(context, SC.AppSubstateRouteHandlerContext), "state C's enterState method should have been provided a state route handler context object");
+  ok(SC.kindOf(context, SC.AppSubstateRouteHandlerContext), "state C's enterSubstate method should have been provided a state route handler context object");
   equals(context.get('state'), stateC);
   equals(context.get('location'), '');
   equals(context.get('params'), params);
@@ -253,12 +253,12 @@ test("trigger state Y's route", function() {
 
   var info = stateY.info;
 
-  ok(!info.enterState, "state Y's enterState should not have been invoked");
-  ok(info.enterStateByRoute, "state Y's enterStateByRoute should have been invoked");
+  ok(!info.enterSubstate, "state Y's enterSubstate should not have been invoked");
+  ok(info.enterSubstateByRoute, "state Y's enterSubstateByRoute should have been invoked");
 
-  var context = info.enterStateByRoute.context;
+  var context = info.enterSubstateByRoute.context;
 
-  ok(SC.kindOf(context, SC.AppSubstateRouteHandlerContext), "state X's enterState method should have been provided a state route handler context object");
+  ok(SC.kindOf(context, SC.AppSubstateRouteHandlerContext), "state X's enterSubstate method should have been provided a state route handler context object");
   equals(context.get('state'), stateY);
   equals(context.get('location'), 'cow');
   equals(context.get('params'), params);

@@ -619,7 +619,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     @returns {Boolean} true if the state is a current state, otherwise fals is returned
   */
   stateIsCurrentState: function (state) {
-    return this.get('rootState').stateIsCurrentSubstate(state);
+    return this.get('rootSubstate').stateIsCurrentSubstate(state);
   },
 
   /**
@@ -629,7 +629,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     @returns {Array} the currently entered states
   */
   enteredStates: function () {
-    return this.getPath('rootState.enteredSubstates');
+    return this.getPath('rootSubstate.enteredSubstates');
   }.property().cacheable(),
 
   /**
@@ -639,7 +639,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     @returns {Boolean} true if the state is a currently entered state, otherwise false is returned
   */
   stateIsEntered: function (state) {
-    return this.get('rootState').stateIsEnteredSubstate(state);
+    return this.get('rootSubstate').stateIsEnteredSubstate(state);
   },
 
   /**
@@ -730,8 +730,8 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     context = args.context;
 
     var pivotState = null,
-        exitStates = [],
-        enterStates = [],
+        exitSubstates = [],
+        enterSubstates = [],
         paramState = state,
         paramFromCurrentState = fromCurrentState,
         msg;
@@ -808,14 +808,14 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     // If there is a current state to start the transition process from, then determine what
     // states are to be exited
     if (!SC.none(fromCurrentState)) {
-      exitStates = this._createStateChain(fromCurrentState);
+      exitSubstates = this._createStateChain(fromCurrentState);
     }
 
     // Now determine the initial states to be entered
-    enterStates = this._createStateChain(state);
+    enterSubstates = this._createStateChain(state);
 
     // Get the pivot state to indicate when to go from exiting states to entering states
-    pivotState = this._findPivotState(exitStates, enterStates);
+    pivotState = this._findPivotState(exitSubstates, enterSubstates);
 
     if (pivotState) {
       //@if(debug)
@@ -833,11 +833,11 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
 
     // Go ahead and find states that are to be exited
-    this._traverseStatesToExit(exitStates.shift(), exitStates, pivotState, gotoStateActions);
+    this._traverseStatesToExit(exitSubstates.shift(), exitSubstates, pivotState, gotoStateActions);
 
     // Now go find states that are to be entered
     if (pivotState !== state) {
-      this._traverseStatesToEnter(enterStates.pop(), enterStates, pivotState, useHistory, gotoStateActions);
+      this._traverseStatesToEnter(enterSubstates.pop(), enterSubstates, pivotState, useHistory, gotoStateActions);
     } else {
       this._traverseStatesToExit(pivotState, [], null, gotoStateActions);
       this._traverseStatesToEnter(pivotState, null, null, useHistory, gotoStateActions);
@@ -888,11 +888,11 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
       this._currentGotoStateAction = action = actions[marker];
       switch (action.action) {
       case SC.EXIT_STATE:
-        actionResult = this._exitState(action.state, context);
+        actionResult = this._exitSubstate(action.state, context);
         break;
 
       case SC.ENTER_STATE:
-        actionResult = this._enterState(action.state, action.currentState, context);
+        actionResult = this._enterSubstate(action.state, action.currentState, context);
         break;
       }
 
@@ -948,7 +948,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   },
 
   /** @private */
-  _exitState: function (state, context) {
+  _exitSubstate: function (state, context) {
     var parentState;
 
     if (state.get('currentSubstates').indexOf(state) >= 0) {
@@ -977,7 +977,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     state.notifyPropertyChange('currentSubstates');
 
     state.stateWillBecomeExited(context);
-    var result = this.exitState(state, context);
+    var result = this.exitSubstate(state, context);
     state.stateDidBecomeExited(context);
 
     //@if(debug)
@@ -990,20 +990,20 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   },
 
   /**
-    What will actually invoke a state's exitState method.
+    What will actually invoke a state's exitSubstate method.
 
     Called during the state transition process whenever the gotoState method is
     invoked.
 
-    @param state {SC.Substate} the state whose enterState method is to be invoked
-    @param context {Hash} a context hash object to provide the enterState method
+    @param state {SC.Substate} the state whose enterSubstate method is to be invoked
+    @param context {Hash} a context hash object to provide the enterSubstate method
   */
-  exitState: function (state, context) {
-    return state.exitState(context);
+  exitSubstate: function (state, context) {
+    return state.exitSubstate(context);
   },
 
   /** @private */
-  _enterState: function (state, current, context) {
+  _enterSubstate: function (state, current, context) {
     var parentState = state.get('parentState');
     if (parentState && !state.get('isConcurrentState')) parentState.set('historyState', state);
 
@@ -1025,7 +1025,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
     //@if(debug)
     if (this.get('allowStatechartTracing')) {
-      if (state.enterStateByRoute && SC.kindOf(context, SC.AppSubstateRouteHandlerContext)) {
+      if (state.enterSubstateByRoute && SC.kindOf(context, SC.AppSubstateRouteHandlerContext)) {
         this.statechartLogTrace("--> entering state (by route): %@".fmt(state), SC.TRACE_STATECHART_STYLE.enter);
       } else {
         this.statechartLogTrace("--> entering state: %@".fmt(state), SC.TRACE_STATECHART_STYLE.enter);
@@ -1034,7 +1034,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     //@endif
 
     state.stateWillBecomeEntered(context);
-    var result = this.enterState(state, context);
+    var result = this.enterSubstate(state, context);
     state.stateDidBecomeEntered(context);
 
     //@if(debug)
@@ -1045,22 +1045,22 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   },
 
   /**
-    What will actually invoke a state's enterState method.
+    What will actually invoke a state's enterSubstate method.
 
     Called during the state transition process whenever the gotoState method is
     invoked.
 
     If the context provided is a state route context object
-    ({@link SC.StateRouteContext}), then if the given state has a enterStateByRoute
-    method, that method will be invoked, otherwise the state's enterState method
+    ({@link SC.StateRouteContext}), then if the given state has a enterSubstateByRoute
+    method, that method will be invoked, otherwise the state's enterSubstate method
     will be invoked by default. The state route context object will be supplied to
     both enter methods in either case.
 
-    @param state {SC.Substate} the state whose enterState method is to be invoked
-    @param context {Hash} a context hash object to provide the enterState method
+    @param state {SC.Substate} the state whose enterSubstate method is to be invoked
+    @param context {Hash} a context hash object to provide the enterSubstate method
   */
-  enterState: function (state, context) {
-    return state.enterState(context);
+  enterSubstate: function (state, context) {
+    return state.enterSubstate(context);
   },
 
   /**
@@ -1300,10 +1300,10 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     states have been reached based on a given exit path or when a stop state has been reached.
 
     @param state {State} the state to be exited
-    @param exitStatePath {Array} an array representing a path of states that are to be exited
+    @param exitSubstatePath {Array} an array representing a path of states that are to be exited
     @param stopState {State} an explicit state in which to stop the exiting process
   */
-  _traverseStatesToExit: function (state, exitStatePath, stopState, gotoStateActions) {
+  _traverseStatesToExit: function (state, exitSubstatePath, stopState, gotoStateActions) {
     if (!state || state === stopState) return;
 
     // This state has concurrent substates. Therefore we have to make sure we
@@ -1324,7 +1324,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
     gotoStateActions.push({ action: SC.EXIT_STATE, state: state });
     if (state.get('isCurrentState')) state._traverseStatesToExit_skipState = YES;
-    this._traverseStatesToExit(exitStatePath.shift(), exitStatePath, stopState, gotoStateActions);
+    this._traverseStatesToExit(exitSubstatePath.shift(), exitSubstatePath, stopState, gotoStateActions);
   },
 
   /** @private
@@ -1336,26 +1336,26 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     followed; when none of those condition are met then the enter process is done.
 
     @param state {State} the sate to be entered
-    @param enterStatePath {Array} an array representing an initial path of states that are to be entered
+    @param enterSubstatePath {Array} an array representing an initial path of states that are to be entered
     @param pivotState {State} The state pivoting when to go from exiting states to entering states
     @param useHistory {Boolean} indicates whether to recursively follow history states
   */
-  _traverseStatesToEnter: function (state, enterStatePath, pivotState, useHistory, gotoStateActions) {
+  _traverseStatesToEnter: function (state, enterSubstatePath, pivotState, useHistory, gotoStateActions) {
     if (!state) return;
 
     // We do not want to enter states in the enter path until the pivot state has been reached. After
     // the pivot state has been reached, then we can go ahead and actually enter states.
     if (pivotState) {
       if (state !== pivotState) {
-        this._traverseStatesToEnter(enterStatePath.pop(), enterStatePath, pivotState, useHistory, gotoStateActions);
+        this._traverseStatesToEnter(enterSubstatePath.pop(), enterSubstatePath, pivotState, useHistory, gotoStateActions);
       } else {
-        this._traverseStatesToEnter(enterStatePath.pop(), enterStatePath, null, useHistory, gotoStateActions);
+        this._traverseStatesToEnter(enterSubstatePath.pop(), enterSubstatePath, null, useHistory, gotoStateActions);
       }
     }
 
     // If no more explicit enter path instructions, then default to enter states based on
     // other criteria
-    else if (!enterStatePath || enterStatePath.length === 0) {
+    else if (!enterSubstatePath || enterSubstatePath.length === 0) {
       var gotoStateAction = { action: SC.ENTER_STATE, state: state, currentState: NO };
       gotoStateActions.push(gotoStateAction);
 
@@ -1390,10 +1390,10 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     }
 
     // Still have an explicit enter path to follow, so keep moving through the path.
-    else if (enterStatePath.length > 0) {
+    else if (enterSubstatePath.length > 0) {
       gotoStateActions.push({ action: SC.ENTER_STATE, state: state });
-      var nextState = enterStatePath.pop();
-      this._traverseStatesToEnter(nextState, enterStatePath, null, useHistory, gotoStateActions);
+      var nextState = enterSubstatePath.pop();
+      this._traverseStatesToEnter(nextState, enterSubstatePath, null, useHistory, gotoStateActions);
 
       // We hit a state that has concurrent substates. Must go through each of the substates
       // and enter them

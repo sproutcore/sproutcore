@@ -80,7 +80,7 @@ SC.AppCacheTask = SC.Task.extend({
       // The loading state in our sample application.
       MyApp.LoadingState = SC.State.extend({
 
-        enterState: function () {
+        enterSubstate: function () {
           var hasNewVersion = SC.appCache.get('hasNewVersion');
 
           if (SC.none(hasNewVersion)) {

@@ -6,37 +6,37 @@
 var sc, root, stateA, stateB, stateC, stateD, stateE, stateF;
 
 module("SC.State: findFirstRelativeCurrentState method Tests (without concurrent states)", {
-  
+
   setup: function() {
-    
+
     sc = SC.Statechart.create({
       initialState: 'a',
-    
+
       a: SC.State.design({
-        
+
         initialSubstate: 'c',
-        
+
         c: SC.State.design(),
-        
+
         d: SC.State.design()
-        
+
       }),
-      
+
       b: SC.State.design({
-        
+
         initialSubstate: 'e',
-        
+
         e: SC.State.design(),
-        
+
         f: SC.State.design()
-        
+
       })
-      
+
     });
-    
+
     sc.initStatechart();
-    
-    root = sc.get('rootState');
+
+    root = sc.get('rootSubstate');
     stateA = sc.getState('a');
     stateB = sc.getState('b');
     stateC = sc.getState('c');
@@ -44,11 +44,11 @@ module("SC.State: findFirstRelativeCurrentState method Tests (without concurrent
     stateE = sc.getState('e');
     stateF = sc.getState('f');
   },
-  
+
   teardown: function() {
     sc = root = stateA = stateB = stateC = stateD = stateE = stateF = null;
   }
-  
+
 });
 
 test("check when current state is state C", function() {
@@ -62,8 +62,8 @@ test("check when current state is state C", function() {
 });
 
 test("check when current state is state F", function() {
-  sc.gotoState(stateF);
-  
+  sc.gotoSubstate(stateF);
+
   equals(root.findFirstRelativeCurrentState(), stateF, "root state should return state F");
   equals(stateA.findFirstRelativeCurrentState(), stateF, "state A should return state F");
   equals(stateB.findFirstRelativeCurrentState(), stateF, "state B should return state F");

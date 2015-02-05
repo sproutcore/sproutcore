@@ -8,24 +8,24 @@ var monitor, root, stateA, stateB, stateC, stateD, stateE, stateF, stateG, state
 
 module("SC.Statechart: With Concurrent States - Goto State Intermediate Tests", {
   setup: function() {
-    
+
     statechart = SC.Statechart.create({
-      
+
       monitorIsActive: YES,
-      
-      rootState: SC.State.design({
-        
+
+      rootSubstate: SC.State.design({
+
         initialSubstate: 'a',
 
         a: SC.State.design({
           substatesAreConcurrent: YES,
-          
+
           b: SC.State.design({
             initialSubstate: 'd',
             d: SC.State.design(),
             e: SC.State.design()
           }),
-          
+
           c: SC.State.design({
             initialSubstate: 'f',
             f: SC.State.design(),
@@ -35,13 +35,13 @@ module("SC.Statechart: With Concurrent States - Goto State Intermediate Tests", 
 
         z: SC.State.design()
       })
-      
+
     });
-    
+
     statechart.initStatechart();
-    
+
     monitor = statechart.get('monitor');
-    root = statechart.get('rootState');
+    root = statechart.get('rootSubstate');
     stateA = statechart.getState('a');
     stateB = statechart.getState('b');
     stateC = statechart.getState('c');
@@ -50,7 +50,7 @@ module("SC.Statechart: With Concurrent States - Goto State Intermediate Tests", 
     stateF = statechart.getState('f');
     stateZ = statechart.getState('z');
   },
-  
+
   teardown: function() {
     statechart.destroy();
     statechart = monitor = root = null;
@@ -58,9 +58,9 @@ module("SC.Statechart: With Concurrent States - Goto State Intermediate Tests", 
   }
 });
 
-test("check statechart initialization", function() {  
+test("check statechart initialization", function() {
   equals(monitor.get('length'), 6, 'initial state sequence should be of length 5');
-  
+
   equals(monitor.matchSequence().begin()
                                   .entered(root, 'a')
                                   .beginConcurrent()
@@ -71,9 +71,9 @@ test("check statechart initialization", function() {
                                       .entered('c', 'f')
                                     .endSequence()
                                   .endConcurrent()
-                                .end(), 
+                                .end(),
     true, 'initial sequence should be entered[ROOT, a, b, d, c, f]');
-  
+
   equals(statechart.get('currentStateCount'), 2, 'current state count should be 2');
   equals(statechart.stateIsCurrentState('d'), true, 'current state should be d');
   equals(statechart.stateIsCurrentState('f'), true, 'current state should be f');
@@ -85,14 +85,14 @@ test("check statechart initialization", function() {
   equals(stateB.stateIsCurrentSubstate('e'), false, 'state b\'s current substate should not be state e');
   equals(stateC.stateIsCurrentSubstate('f'), true, 'state c\'s current substate should be state f');
   equals(stateC.stateIsCurrentSubstate('g'), false, 'state c\'s current substate should not be state g');
-  
+
   ok(monitor.matchEnteredStates(root, 'a', 'b', 'c', 'd', 'f'), 'states root, A, B, C, D and F should all be entered');
 });
 
-test("from state d, go to state z", function() {   
+test("from state d, go to state z", function() {
   monitor.reset();
-  stateD.gotoState('z');
-  
+  stateD.gotoSubstate('z');
+
   equals(monitor.get('length'), 6, 'initial state sequence should be of length 6');
   equals(monitor.matchSequence().begin().exited('d', 'b', 'f', 'c', 'a').entered('z').end(), true, 'sequence should be exited[d, b, f, c, a], entered[z]');
   equals(statechart.get('currentStateCount'), 1, 'current state count should be 1');
@@ -102,16 +102,16 @@ test("from state d, go to state z", function() {
   equals(stateA.stateIsCurrentSubstate('f'), false, 'state a\'s current substate should not be state f');
   equals(stateA.stateIsCurrentSubstate('e'), false, 'state a\'s current substate should not be state e');
   equals(stateA.stateIsCurrentSubstate('g'), false, 'state a\'s current substate should not be state g');
-  
+
   ok(monitor.matchEnteredStates(root, 'z'), 'states root and Z should all be entered');
 });
 
-test("from state a, go to state z and then back to state a", function() { 
+test("from state a, go to state z and then back to state a", function() {
   monitor.reset();
-  stateA.gotoState('z');
+  stateA.gotoSubstate('z');
 
   equals(monitor.get('length'), 6, 'initial state sequence should be of length 6');
-  
+
   equals(monitor.matchSequence().begin()
                                   .beginConcurrent()
                                     .beginSequence()
@@ -123,17 +123,17 @@ test("from state a, go to state z and then back to state a", function() {
                                   .endConcurrent()
                                   .exited('a')
                                   .entered('z')
-                                .end(), 
+                                .end(),
     true, 'sequence should be exited[d, b, f, c, a], entered[z]');
-  
+
   equals(statechart.get('currentStateCount'), 1, 'current state count should be 1');
   equals(statechart.stateIsCurrentState('z'), true, 'current state should be z');
-  
+
   monitor.reset();
-  stateZ.gotoState('a');
-  
+  stateZ.gotoSubstate('a');
+
   equals(monitor.get('length'), 6, 'initial state sequence should be of length 6');
-  
+
   equals(monitor.matchSequence().begin()
                                   .exited('z')
                                   .entered('a')
@@ -145,9 +145,9 @@ test("from state a, go to state z and then back to state a", function() {
                                       .entered('c', 'f')
                                     .endSequence()
                                   .endConcurrent()
-                                .end(), 
+                                .end(),
     true, 'sequence should be exited[z], entered[a, b, d, c, f]');
-  
+
   equals(statechart.get('currentStateCount'), 2, 'current state count should be 1');
   equals(statechart.stateIsCurrentState('d'), true, 'current state should be d');
   equals(statechart.stateIsCurrentState('f'), true, 'current state should be f');
@@ -156,6 +156,6 @@ test("from state a, go to state z and then back to state a", function() {
   equals(stateA.stateIsCurrentSubstate('e'), false, 'state a\'s current substate should not be state e');
   equals(stateA.stateIsCurrentSubstate('f'), true, 'state a\'s current substate should be state f');
   equals(stateA.stateIsCurrentSubstate('g'), false, 'state a\'s current substate should not be state g');
-  
+
   ok(monitor.matchEnteredStates(root, 'a', 'b', 'c', 'd', 'f'), 'states root, A, B, C, D and F should all be entered');
 });

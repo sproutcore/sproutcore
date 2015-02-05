@@ -46,8 +46,8 @@ module("SC.Statechart: No Concurrent States - Trigger Routing on States Basic Te
 
         info: {},
 
-        enterState: function(context) {
-          this.info.enterState = {
+        enterSubstate: function(context) {
+          this.info.enterSubstate = {
             context: context
           };
         }
@@ -60,8 +60,8 @@ module("SC.Statechart: No Concurrent States - Trigger Routing on States Basic Te
 
         info: {},
 
-        enterState: function(context) {
-          this.info.enterState = {
+        enterSubstate: function(context) {
+          this.info.enterSubstate = {
             context: context
           };
         }
@@ -74,14 +74,14 @@ module("SC.Statechart: No Concurrent States - Trigger Routing on States Basic Te
 
         info: {},
 
-        enterStateByRoute: function(context) {
-          this.info.enterStateByRoute = {
+        enterSubstateByRoute: function(context) {
+          this.info.enterSubstateByRoute = {
             context: context
           };
         },
 
-        enterState: function(context) {
-          this.info.enterState = {
+        enterSubstate: function(context) {
+          this.info.enterSubstate = {
             context: context
           };
         }
@@ -94,14 +94,14 @@ module("SC.Statechart: No Concurrent States - Trigger Routing on States Basic Te
 
         info: {},
 
-        enterStateByRoute: function(context) {
-          this.info.enterStateByRoute = {
+        enterSubstateByRoute: function(context) {
+          this.info.enterSubstateByRoute = {
             context: context
           };
         },
 
-        enterState: function(context) {
-          this.info.enterState = {
+        enterSubstate: function(context) {
+          this.info.enterSubstate = {
             context: context
           };
         }
@@ -171,11 +171,11 @@ test("trigger state B's route", function() {
 
   var info = stateB.info;
 
-  ok(info.enterState, "state B's enterState should have been invoked");
+  ok(info.enterSubstate, "state B's enterSubstate should have been invoked");
 
-  var context = info.enterState.context;
+  var context = info.enterSubstate.context;
 
-  ok(SC.kindOf(context, SC.AppSubstateRouteHandlerContext), "state B's enterState method should have been provided a state route handler context object");
+  ok(SC.kindOf(context, SC.AppSubstateRouteHandlerContext), "state B's enterSubstate method should have been provided a state route handler context object");
   equals(context.get('state'), stateB);
   equals(context.get('location'), 'bar');
   equals(context.get('params'), params);
@@ -202,12 +202,12 @@ test("trigger state C's route", function() {
 
   var info = stateC.info;
 
-  ok(!info.enterState, "state C's enterState should not have been invoked");
-  ok(info.enterStateByRoute, "state C's enterStateByRoute should have been invoked");
+  ok(!info.enterSubstate, "state C's enterSubstate should not have been invoked");
+  ok(info.enterSubstateByRoute, "state C's enterSubstateByRoute should have been invoked");
 
-  var context = info.enterStateByRoute.context;
+  var context = info.enterSubstateByRoute.context;
 
-  ok(SC.kindOf(context, SC.AppSubstateRouteHandlerContext), "state C's enterState method should have been provided a state route handler context object");
+  ok(SC.kindOf(context, SC.AppSubstateRouteHandlerContext), "state C's enterSubstate method should have been provided a state route handler context object");
   equals(context.get('state'), stateC);
   equals(context.get('location'), 'mah');
   equals(context.get('params'), params);
@@ -234,12 +234,12 @@ test("trigger state D's route", function() {
 
   var info = stateD.info;
 
-  ok(!info.enterState, "state D's enterState should not have been invoked");
-  ok(info.enterStateByRoute, "state D's enterStateByRoute should have been invoked");
+  ok(!info.enterSubstate, "state D's enterSubstate should not have been invoked");
+  ok(info.enterSubstateByRoute, "state D's enterSubstateByRoute should have been invoked");
 
-  var context = info.enterStateByRoute.context;
+  var context = info.enterSubstateByRoute.context;
 
-  ok(SC.kindOf(context, SC.AppSubstateRouteHandlerContext), "state D's enterState method should have been provided a state route handler context object");
+  ok(SC.kindOf(context, SC.AppSubstateRouteHandlerContext), "state D's enterSubstate method should have been provided a state route handler context object");
   equals(context.get('state'), stateD);
   equals(context.get('location'), '');
   equals(context.get('params'), params);
@@ -254,7 +254,7 @@ test("Go to state C without triggering state's route", function() {
   ok(stateA.get('isCurrentState'), "state A should be a current state");
   ok(!stateC.get('isCurrentState'), "state C should not be a current state");
 
-  statechart.gotoState(stateC, context);
+  statechart.gotoSubstate(stateC, context);
 
   var seq = monitor.matchSequence().begin().exited('a').entered('c').end();
   ok(seq, 'sequence should be exited[a], entered[c]');
@@ -264,9 +264,9 @@ test("Go to state C without triggering state's route", function() {
 
   var info = stateC.info;
 
-  ok(info.enterState, "state C's enterState should have been invoked");
-  ok(!info.enterStateByRoute, "state C's enterStateByRoute should not have been invoked");
-  equals(info.enterState.context, context, "state C's enterState should have been passed a context value");
+  ok(info.enterSubstate, "state C's enterSubstate should have been invoked");
+  ok(!info.enterSubstateByRoute, "state C's enterSubstateByRoute should not have been invoked");
+  equals(info.enterSubstate.context, context, "state C's enterSubstate should have been passed a context value");
 });
 
 test("Go to state D without triggering state's route", function() {
@@ -277,7 +277,7 @@ test("Go to state D without triggering state's route", function() {
   ok(stateA.get('isCurrentState'), "state A should be a current state");
   ok(!stateD.get('isCurrentState'), "state D should not be a current state");
 
-  statechart.gotoState(stateD, context);
+  statechart.gotoSubstate(stateD, context);
 
   var seq = monitor.matchSequence().begin().exited('a').entered('d').end();
   ok(seq, 'sequence should be exited[a], entered[d]');
@@ -287,7 +287,7 @@ test("Go to state D without triggering state's route", function() {
 
   var info = stateD.info;
 
-  ok(info.enterState, "state D's enterState should have been invoked");
-  ok(!info.enterStateByRoute, "state D's enterStateByRoute should not have been invoked");
-  equals(info.enterState.context, context, "state D's enterState should have been passed a context value");
+  ok(info.enterSubstate, "state D's enterSubstate should have been invoked");
+  ok(!info.enterSubstateByRoute, "state D's enterSubstateByRoute should not have been invoked");
+  equals(info.enterSubstate.context, context, "state D's enterSubstate should have been passed a context value");
 });

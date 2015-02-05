@@ -258,26 +258,26 @@ SC.mixin(SC.AppStatechartManager,
   },
 
   /**
-    What will actually invoke a state's enterState method.
+    What will actually invoke a state's enterSubstate method.
 
-    Called during the state transition process whenever the gotoState method is
+    Called during the state transition process whenever the gotoSubstate method is
     invoked.
 
     In the case that the context being supplied is a state context object
-    ({@link SC.AppSubstateRouteHandlerContext}), an optional `enterStateByRoute` method can be invoked
-    on this state if the state has implemented the method. If `enterStateByRoute` is
-    not part of this state then the `enterState` method will be invoked by default. The
-    `enterStateByRoute` is simply a convenience method that helps removes checks to
+    ({@link SC.AppSubstateRouteHandlerContext}), an optional `enterSubstateByRoute` method can be invoked
+    on this state if the state has implemented the method. If `enterSubstateByRoute` is
+    not part of this state then the `enterSubstate` method will be invoked by default. The
+    `enterSubstateByRoute` is simply a convenience method that helps removes checks to
     determine if the context provide is a state route context object.
 
-    @param state {SC.AppSubstate} the state whose enterState method is to be invoked
-    @param context {Hash} a context hash object to provide the enterState method
+    @param state {SC.AppSubstate} the state whose enterSubstate method is to be invoked
+    @param context {Hash} a context hash object to provide the enterSubstate method
   */
-  enterState: function (state, context) {
-    if (state.enterStateByRoute && SC.kindOf(context, SC.AppSubstateRouteHandlerContext)) {
-      return state.enterStateByRoute(context);
+  enterSubstate: function (state, context) {
+    if (state.enterSubstateByRoute && SC.kindOf(context, SC.AppSubstateRouteHandlerContext)) {
+      return state.enterSubstateByRoute(context);
     } else {
-      return state.enterState(context);
+      return state.enterSubstate(context);
     }
   }
 
