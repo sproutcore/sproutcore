@@ -1,0 +1,10 @@
+# ==========================================================================
+# Project:   SproutCore - Web Application
+# License:   Licensed under MIT license (see license.js)
+# ==========================================================================
+
+# The configuration for this framework.
+config :client_data_store,
+
+  # Required other frameworks within SproutCore.
+  :required => [:'core_application/core_statechart', :datastore]
