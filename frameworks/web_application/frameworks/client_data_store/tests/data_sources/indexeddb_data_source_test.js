@@ -7,7 +7,9 @@
 var dataSource,
     store,
     RecordType = SC.Record.extend({
-      stringProp: SC.Record.attr(String)
+      stringProp: SC.Record.attr(String),
+
+      primaryKey: 'sc_client_id'
     });
 
 // Can only test in supported platforms.
@@ -55,11 +57,11 @@ if (SC.platform.supportsIndexedDB) {
     store.dataSourceDidComplete = function (storeKey, dataHash, newId) {
       ok(true, 'called', 'called', "The dataSourceDidComplete callback is");
 
-      same(dataHash, { stringProp: 'A', guid: newId }, "The data source should call dataSourceDidComplete with dataHash");
+      same(dataHash, { stringProp: 'A', sc_client_id: newId }, "The data source should call dataSourceDidComplete with dataHash");
 
       // Verify the data in the database directly.
       SC.IndexedDBAdaptor.getRow(dataSource._sc_db, 'SC.Record', newId, function (result) {
-        same(result, { stringProp: 'A', guid: newId }, "The database should contain a row equal to");
+        same(result, { stringProp: 'A', sc_client_id: newId }, "The database should contain a row equal to");
 
         expect(4);
         start();
@@ -85,7 +87,7 @@ if (SC.platform.supportsIndexedDB) {
 
         // Insert a record.
         SC.IndexedDBAdaptor.insertRow(dataSource._sc_db, 'SC.Record', { stringProp: 'A' }, function (id) {
-          var storeKey = store.loadRecord(RecordType, { stringProp: 'A', guid: id });
+          var storeKey = store.loadRecord(RecordType, { stringProp: 'A', sc_client_id: id });
           dataSource.destroyRecord(store, storeKey);
 
           store.dataSourceDidDestroy = function (storeKey) {
@@ -132,10 +134,10 @@ if (SC.platform.supportsIndexedDB) {
             store.loadRecord = function (recordType, dataHash) {
               ok(true, 'called', 'called', "The loadRecord callback is");
 
-              if (dataHash.guid === id1) {
-                same(dataHash, { stringProp: 'A', guid: id1 }, "The data source should call loadRecord with data hash");
+              if (dataHash.sc_client_id === id1) {
+                same(dataHash, { stringProp: 'A', sc_client_id: id1 }, "The data source should call loadRecord with data hash");
               } else {
-                same(dataHash, { stringProp: 'B', guid: id2 }, "The data source should call loadRecord with data hash");
+                same(dataHash, { stringProp: 'B', sc_client_id: id2 }, "The data source should call loadRecord with data hash");
               }
             };
 
@@ -176,7 +178,7 @@ if (SC.platform.supportsIndexedDB) {
           store.loadRecord = function (recordType, dataHash) {
             ok(true, 'called', 'called', "The loadRecord callback is");
 
-            same(dataHash, { stringProp: 'A', guid: id }, "The data source should call loadRecord with data hash");
+            same(dataHash, { stringProp: 'A', sc_client_id: id }, "The data source should call loadRecord with data hash");
 
             expect(3);
             start();
@@ -204,9 +206,9 @@ if (SC.platform.supportsIndexedDB) {
 
         // Insert a record.
         SC.IndexedDBAdaptor.insertRow(dataSource._sc_db, 'SC.Record', { stringProp: 'A' }, function (id) {
-          var storeKey = store.loadRecord(RecordType, { stringProp: 'A', guid: id });
+          var storeKey = store.loadRecord(RecordType, { stringProp: 'A', sc_client_id: id });
 
-          store.writeDataHash(storeKey, { stringProp: 'B', guid: id }, SC.Record.READY_DIRTY);
+          store.writeDataHash(storeKey, { stringProp: 'B', sc_client_id: id }, SC.Record.READY_DIRTY);
           dataSource.updateRecord(store, storeKey);
 
           store.dataSourceDidComplete = function (storeKey) {
@@ -214,7 +216,7 @@ if (SC.platform.supportsIndexedDB) {
 
             // Verify the data in the database directly.
             SC.IndexedDBAdaptor.getRow(dataSource._sc_db, 'SC.Record', id, function (result) {
-              same(result, { stringProp: 'B', guid: id }, "The database should contain a row equal to");
+              same(result, { stringProp: 'B', sc_client_id: id }, "The database should contain a row equal to");
 
               expect(3);
               start();
@@ -256,9 +258,9 @@ if (SC.platform.supportsIndexedDB) {
       ok(true, 'called', 'called', "The dataSourceDidComplete callback is");
 
       if (storeKey === storeKey1) {
-        same(dataHash, { stringProp: 'A', guid: newId }, "The data source should call dataSourceDidComplete with dataHash");
+        same(dataHash, { stringProp: 'A', sc_client_id: newId }, "The data source should call dataSourceDidComplete with dataHash");
       } else if (storeKey === storeKey2) {
-        same(dataHash, { stringProp: 'B', guid: newId }, "The data source should call dataSourceDidComplete with dataHash");
+        same(dataHash, { stringProp: 'B', sc_client_id: newId }, "The data source should call dataSourceDidComplete with dataHash");
       }
     };
 

@@ -14,10 +14,10 @@ SC.IndexedDBDataSource = SC.DataSource.extend(SC.StatechartManager,
   /// Properties
   ///
 
-  /** @private The open database(s). */
+  /** @private The open database. */
   _sc_db: null,
 
-  /** @private Queued actions while the database is not accessible. */
+  /** @private Queued actions while the database is not yet accessible. */
   _sc_queue: null,
 
   /** @private Useful or not?
@@ -30,6 +30,17 @@ SC.IndexedDBDataSource = SC.DataSource.extend(SC.StatechartManager,
     @default false
     */
   connectOnInit: false,
+
+  /**
+    Whether the database is connected or not. It may not be ready, due to being initialized or
+    migrated.
+
+    @type Boolean
+    @default false
+    */
+  isConnected: function () {
+    return this.stateIsEntered('Connected');
+  }.property('enteredStates').cacheable(),
 
   /**
     Whether the database is connected and ready or not.
@@ -63,7 +74,10 @@ SC.IndexedDBDataSource = SC.DataSource.extend(SC.StatechartManager,
   recordTypes: null,
 
   /**
-    The version of the data.
+    The version of the schema.
+
+    Once an IndexedDB database has been created once with a version, incrementing this property will
+    result in an upgrade of the database for the new version.
 
     @type Number
     @default 1
@@ -116,10 +130,11 @@ SC.IndexedDBDataSource = SC.DataSource.extend(SC.StatechartManager,
   init: function () {
     sc_super();
 
-    var version = this.get('version'),
-        name = this.get('name');
-
     //@if(debug)
+    var version = this.get('version'),
+        name = this.get('name'),
+        recordTypes = this.get('recordTypes');
+
     // Debug mode only developer support to prevent improper versions being set on create.
     /*jshint eqeqeq:false*/
     if (!version) {
@@ -133,33 +148,43 @@ SC.IndexedDBDataSource = SC.DataSource.extend(SC.StatechartManager,
     if (!name) {
       SC.error("Developer Error: The IndexedDB name value must be set on create.");
     }
+
+    // Debug mode only developer support to prevent missing recordTypes on create.
+    /*jshint eqeqeq:false*/
+    if (!recordTypes) {
+      SC.error("Developer Error: The IndexedDB recordTypes value must be set on create.");
+    }
     //@endif
 
   },
 
   /** @see SC.Object#destroy */
   destroy: function () {
-    var dbName = this.get('name');
+    // If this data source auto-created a database, then a call to destroy the data source should
+    // destroy the database as well.
+    if (this.get('isConnected')) {
+      var dbName = this.get('name');
 
-    // Lock the database by name. This prevents the issue where an IndexedDB database is opened
-    // with the same name as one that is being deleted.
-    var K = SC.IndexedDBDataSource,
-        databaseLocks = K._sc_databaseLocks;
-    if (databaseLocks === null) { databaseLocks = K._sc_databaseLocks = {}; }
-    databaseLocks[dbName] = true;
+      // Lock the database by name. This prevents the issue where an IndexedDB database is opened
+      // with the same name as one that is being deleted.
+      var K = SC.IndexedDBDataSource,
+          databaseLocks = K._sc_databaseLocks;
+      if (databaseLocks === null) { databaseLocks = K._sc_databaseLocks = {}; }
+      databaseLocks[dbName] = true;
 
-    SC.IndexedDBAdaptor.deleteDatabase(dbName,
+      SC.IndexedDBAdaptor.deleteDatabase(dbName,
 
-      // onSuccess
-      function () {
-        SC.IndexedDBDataSource._sc_databaseLocks[dbName] = null;
-      },
+        // onSuccess
+        function () {
+          SC.IndexedDBDataSource._sc_databaseLocks[dbName] = null;
+        },
 
-      // onError
-      function () {
-      });
+        // onError
+        function () {
+        });
 
-    this._sc_db = this._sc_queue = null;
+      this._sc_db = this._sc_queue = null;
+    }
 
     sc_super();
   },
@@ -195,7 +220,7 @@ SC.IndexedDBDataSource = SC.DataSource.extend(SC.StatechartManager,
   /// Statechart
   ///
 
-  // trace: true,
+  trace: true,
 
   /** @see SC.StatechartManager.prototype.rootSubstate */
   rootSubstate: SC.Substate.extend({
@@ -284,7 +309,7 @@ SC.IndexedDBDataSource = SC.DataSource.extend(SC.StatechartManager,
           }
 
           // Connect to the database.
-          SC.IndexedDBAdaptor.connectDatabase(dbName, dbVersion,
+          SC.IndexedDBAdaptor.connectDatabase(dbName, dbVersion, null,
 
             // onsuccess
             function (db) {
@@ -293,6 +318,11 @@ SC.IndexedDBDataSource = SC.DataSource.extend(SC.StatechartManager,
 
               // Send event to statechart.
               statechart.sendEvent('didConnect');
+            },
+
+            // onerror
+            function () {
+
             },
 
             // onupgradeneeded
@@ -410,14 +440,20 @@ SC.IndexedDBDataSource = SC.DataSource.extend(SC.StatechartManager,
 
           recordTypeName = SC._object_className(recordType);
 
-          SC.IndexedDBAdaptor.insertRow(db, recordTypeName, dataHash, function (newId) {
-            var recordType = store.recordTypeFor(storeKey),
-                primaryKeyName = recordType.prototype.primaryKey;
+          SC.IndexedDBAdaptor.insertRow(db, recordTypeName, dataHash,
+            // onSuccess
+            function (newId) {
+              var recordType = store.recordTypeFor(storeKey);
 
-            // Insert the new ID in the data hash.
-            dataHash[primaryKeyName] = newId;
-            store.dataSourceDidComplete(storeKey, dataHash, newId);
-          });
+              // Insert the new ID in the data hash.
+              dataHash.sc_client_id = newId;
+              store.dataSourceDidComplete(storeKey, dataHash, newId);
+            },
+
+            // onError
+            function (error) {
+              console.error(error);
+            });
         },
 
         destroyRecord: function (store, storeKey) {
@@ -444,12 +480,19 @@ SC.IndexedDBDataSource = SC.DataSource.extend(SC.StatechartManager,
           recordTypeName = SC._object_className(recordType);
 
           SC.IndexedDBAdaptor.getRows(db, recordTypeName,
+            // onRowSuccess
             function (result) {
               store.loadRecord(recordType, result);
             },
 
+            // onSuccess
             function () {
               store.dataSourceDidFetchQuery(query);
+            },
+
+            // onError
+            function (error) {
+              console.error(error);
             });
         },
 
@@ -509,14 +552,10 @@ SC.IndexedDBDataSource = SC.DataSource.extend(SC.StatechartManager,
 
           for (var i = 0; i < len; i++) {
             var recordType = recordTypes[i],
-                recordTypeName,
-                primaryKeyName;
+                recordTypeName;
 
             recordTypeName = SC._object_className(recordType);
-            primaryKeyName = recordType.prototype.primaryKey;
-            // if (!db.objectStoreNames.contains(recordTypeName)) {
-            SC.IndexedDBAdaptor.createTable(db, recordTypeName, primaryKeyName, waitFunc);
-            // }
+            SC.IndexedDBAdaptor.createTable(db, recordTypeName, null, waitFunc);
           }
         }
 

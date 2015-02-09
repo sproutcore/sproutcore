@@ -9,9 +9,8 @@
 */
 SC.IndexedDBAdaptor = {
 
-  connectDatabase: function (name, version, onSuccess, onUpgrade, onError) {
-    var openDBRequest = window.indexedDB.open(name, version), // IDBOpenDBRequest
-        db;
+  connectDatabase: function (name, version, options, onSuccess, onError, onUpgrade) {
+    var openDBRequest = window.indexedDB.open(name, version); // IDBOpenDBRequest
 
     // Called when an error is encountered on open. This could be the result of a user rejecting
     // access to storage.
@@ -25,7 +24,7 @@ SC.IndexedDBAdaptor = {
     openDBRequest.onsuccess = function (event) {
       SC.run(function () {
         // Store the result of opening the database in the db variable.
-        db = openDBRequest.result;
+        var db = openDBRequest.result;
 
         onSuccess(db);
       });
@@ -35,28 +34,30 @@ SC.IndexedDBAdaptor = {
     openDBRequest.onupgradeneeded = function (event) {
       SC.run(function () {
         // Store the result of opening the database in the db variable.
-        db = openDBRequest.result;
+        var db = openDBRequest.result;
 
-        // db.onversionchange = function (event) {
-        //   target.versionChanged(event);
-        // };
+        db.onversionchange = function (event) {
+          console.warn("VERSION CHANGE!");
+        };
 
         onUpgrade(db);
       });
     };
   },
 
-  createTable: function (database, tableName, keyPath, onComplete) {
-    var objectStore = database.createObjectStore(tableName, {
-      autoIncrement : true,
-      keyPath: keyPath
-    });
+  createTable: function (database, tableName, options, onSuccess, onError) {
+    if (!database.objectStoreNames.contains(tableName)) {
+      var objectStore = database.createObjectStore(tableName, {
+        autoIncrement : true,
+        keyPath: 'sc_client_id'
+      });
+    }
 
     // Use transaction oncomplete to make sure the objectStore creation is
     // finished before adding data into it.
     objectStore.transaction.oncomplete = function(event) {
       SC.run(function () {
-        onComplete();
+        onSuccess();
       });
     };
   },
@@ -80,11 +81,11 @@ SC.IndexedDBAdaptor = {
     };
   },
 
-  deleteRow: function (database, tableName, key, onSuccess, onError) {
+  deleteRow: function (database, tableName, primaryKey, onSuccess, onError) {
     // Start a new transaction on the appropriate tables.
     var transaction = database.transaction([tableName], "readwrite");
     var objectStore = transaction.objectStore(tableName);
-    var request = objectStore.delete(key);
+    var request = objectStore.delete(primaryKey);
 
     transaction.onerror = request.onerror = function (event) {
       SC.run(function () {
@@ -101,19 +102,19 @@ SC.IndexedDBAdaptor = {
     };
   },
 
-  getRow: function (database, tableName, key, onSuccess, onError) {
+  getRow: function (database, tableName, primaryKey, onSuccess, onError) {
     // Start a new transaction on the appropriate tables.
-    var transaction = database.transaction([tableName], "readonly");
-    var objectStore = transaction.objectStore(tableName);
-    var request = objectStore.get(key);
+    var transaction = database.transaction([tableName], "readonly"),
+        objectStore = transaction.objectStore(tableName),
+        request = objectStore.get(primaryKey);
 
-    request.onerror = function(event) {
+    request.onerror = function (event) {
       SC.run(function () {
         onError(event);
       });
     };
 
-    request.onsuccess = function(event) {
+    request.onsuccess = function (event) {
       SC.run(function () {
         onSuccess(request.result || null);
       });
@@ -175,7 +176,6 @@ SC.IndexedDBAdaptor = {
     var request = objectStore.put(dataHash);
 
     transaction.onerror = request.onerror = function (event) {
-      console.error(event);
       SC.run(function () {
       });
     };
