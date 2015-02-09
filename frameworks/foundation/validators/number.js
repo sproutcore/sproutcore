@@ -94,7 +94,7 @@ SC.Validator.Number = SC.Validator.extend(
       else return (text.match(/^[\-{0,1}]?[0-9,\0]*/) || [])[0]===text;
     }else {
       if(charStr.length===0) return true;
-      else return (text.match(/^[\-{0,1}]?[0-9,\0]*\.?[0-9\0]+/) || [])[0]===text;
+      else return (text.match(/^[\-{0,1}]?[0-9,\0]*\.?[0-9\0]*/) || [])[0]===text;
     }
   }
 
