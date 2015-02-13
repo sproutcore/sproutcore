@@ -83,7 +83,6 @@ SC.Error = SC.Object.extend(
   */
   'throw': function() {
     var error = this.toString();
-    SC.Logger.error(error);
 
     throw new Error(error);
   },
