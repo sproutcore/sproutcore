@@ -203,7 +203,7 @@ test("writing to a to-many relationship should update set guids when using a dif
   rec4.set('fooManyKeyed', [rec2, rec3]);
   SC.RunLoop.end();
 
-  ok(rec4.get('fooIds').isEqual([2,3]), 'should get array of guids (2, 3) for rec4.fooIds');
+  same(rec4.get('fooIds'), [2,3], 'should get array of guids (2, 3) for rec4.fooIds');
 });
 
 test("pushing an object to a to-many relationship attribute should update set guids", function() {

@@ -145,7 +145,7 @@ test("storeKeys should maintain order between repeat calls to orderStoreKeys eve
   storeKeys = records.get('storeKeys');
   storeKeysSorted1 = SC.Query.orderStoreKeys(records.get('storeKeys'), q, MyApp.store).copy();
   storeKeysSorted2 = SC.Query.orderStoreKeys(records.get('storeKeys'), q, MyApp.store).copy();
-  ok(storeKeysSorted1.isEqual(storeKeysSorted2), 'Each time you call orderStoreKeys, it should return the same order if the storeKeys haven\'t changed');
+  same(storeKeysSorted1, storeKeysSorted2, 'Each time you call orderStoreKeys, it should return the same order if the storeKeys haven\'t changed');
 });
 
 test("comparing non existent properties", function() {

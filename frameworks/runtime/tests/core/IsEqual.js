@@ -28,9 +28,18 @@ test("numericals should be equal",function(){
 	ok( !SC.isEqual(24, 21), "different numbers are inequal" );
 });
 
-test("array should be equal",function(){
+test("array should not be equal",function(){
 	// NOTE: We don't test for array contents -- that would be too expensive.
-	ok( !SC.isEqual( [1,2], [1,2] ), 'two array instances with the same values should not be equal' );
-	ok( !SC.isEqual( [1,2], [1] ),   'two array instances with different values should not be equal' );
+  var x = [1, 2],
+      y = [1, 2];
+
+	ok( !SC.isEqual( x, y ), 'two array instances with the same values should not be equal' );
+	ok( !SC.isEqual( [1,2], [1] ), 'two array instances with different values should not be equal' );
+});
+
+test("objects should not be equal",function(){
+  // NOTE: We don't test for object contents -- that would be too expensive.
+  ok( !SC.isEqual( { a: 'A', b: 1 }, { a: 'A', b: 1 } ), 'two object instances with the same values should not be equal' );
+  ok( !SC.isEqual( { a: 'A', b: 1 }, { a: 'A', b: 2 } ), 'two object instances with different values should not be equal' );
 });
 
