@@ -351,14 +351,10 @@ SC.mixin(/** @scope window.SC.prototype */ {
   guidKey: "SproutCore" + (SC.VERSION + Math.random()).replace(/\D/g, ""),
 
   // Used for guid generation...
-  _guidPrefixes: {"number": "nu", "string": "st"},
-  _guidCaches:   {"number": {},   "string": {}},
-  _numberGuids: [],
-  _stringGuids: {},
   _keyCache: {},
   _uuid: 0,
 
-  /**"
+  /**
     Returns a unique GUID for the object.  If the object does not yet have
     a guid, one will be assigned to it.  You can call this on any object,
     SC.Object-based or not, but be aware that it will add a _guid property.
@@ -378,13 +374,7 @@ SC.mixin(/** @scope window.SC.prototype */ {
 
     // Don't allow prototype changes to String etc. to change the guidFor
     if (type === SC.T_NUMBER || type === SC.T_STRING) {
-      cache = this._guidCaches[type];
-      ret   = cache[obj];
-      if (!ret) {
-        ret        = "st" + (SC._uuid++);
-        cache[obj] = ret;
-      }
-      return ret;
+      return '(' + obj + ')'; // E.g. '(Abc)' or '(123)'
     } else if (type === SC.T_BOOL) {
       return (obj) ? "(true)" : "(false)";
     }
