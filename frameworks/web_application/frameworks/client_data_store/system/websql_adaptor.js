@@ -126,11 +126,11 @@ SC.WebSQLAdaptor = {
   getRow: function (database, tableName, primaryKeyValue, onSuccess, onError) {
     var sql;
 
-    sql = 'SELECT rowid AS sc_client_id, * FROM %@ WHERE rowid = ? LIMIT 1'.fmt(tableName);
+    sql = 'SELECT rowid AS guid, * FROM %@ WHERE rowid = ? LIMIT 1'.fmt(tableName);
 
     console.log('getRow: sql: %@'.fmt(sql));
     database.transaction(function (tx) {
-      tx.executeSql(sql, [primaryKeyValue + ''],
+      tx.executeSql(sql, [primaryKeyValue],
         function (tx, results) {
           SC.run(function () {
             var result = null;
@@ -153,7 +153,7 @@ SC.WebSQLAdaptor = {
   getRows: function (database, tableName, onRowSuccess, onSuccess, onError) {
     var sql;
 
-    sql = 'SELECT rowid AS sc_client_id, * FROM %@'.fmt(tableName);
+    sql = 'SELECT rowid AS guid, * FROM %@'.fmt(tableName);
 
     console.log('getRows: sql: %@'.fmt(sql));
     database.transaction(function (tx) {
@@ -201,7 +201,7 @@ SC.WebSQLAdaptor = {
       tx.executeSql(sql, values,
         function (tx, result) {
           SC.run(function () {
-            onSuccess(result.insertId); // Return the newly created rowid.
+            onSuccess(result.insertId + ''); // Return the newly created rowid.
           });
         },
         function (tx, e) {
@@ -225,8 +225,8 @@ SC.WebSQLAdaptor = {
 
       var value = dataHash[key];
 
-      // Ignore update to `sc_client_id`, but use the value.
-      if (key === 'sc_client_id') {
+      // Ignore update to `guid`, but use the value.
+      if (key === 'guid') {
         primaryKeyValue = value;
 
         continue;

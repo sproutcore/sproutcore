@@ -61,6 +61,17 @@ SC.WebSQLDataSource = SC.DataSource.extend(SC.StatechartManager,
   }.property('enteredStates').cacheable(),
 
   /**
+    The name of the database.
+
+    This is required in order to maintain an IndexedDB database between sessions.
+
+    @type String
+    @default null
+    */
+  name: null,
+
+
+  /**
     The version of the schema.
 
     @type Number
@@ -83,9 +94,9 @@ SC.WebSQLDataSource = SC.DataSource.extend(SC.StatechartManager,
 
   /** @private */
   _sc_tableNameForRecordType: function (recordType) {
-    var className = SC._object_className(recordType);
+    var className = SC._object_className(recordType); // .prototype.constructor
 
-    return className.replace('.', '_').toLowerCase();
+    return className.split('.')[1].toLowerCase();
   },
 
   /**
@@ -129,21 +140,21 @@ SC.WebSQLDataSource = SC.DataSource.extend(SC.StatechartManager,
     // Debug mode only developer support to prevent improper versions being set on create.
     /*jshint eqeqeq:false*/
     if (!version) {
-      SC.error("Developer Error: The WebSQL version value must be set on create.");
+      SC.throw("Developer Error: The WebSQLDataSource version value must be set on create.");
     } else if (version != version.toFixed(0)) {
-      SC.error("Developer Error: The WebSQL version must be an integer Number. The given value, %@, is invalid.".fmt(version));
+      SC.throw("Developer Error: The WebSQLDataSource version must be an integer Number. The given value, %@, is invalid.".fmt(version));
     }
 
     // Debug mode only developer support to prevent missing name on create.
     /*jshint eqeqeq:false*/
     if (!name) {
-      SC.error("Developer Error: The WebSQL name value must be set on create.");
+      SC.throw("Developer Error: The WebSQLDataSource name value must be set on create.");
     }
 
     // Debug mode only developer support to prevent missing recordTypes on create.
     /*jshint eqeqeq:false*/
     if (!recordTypes) {
-      SC.error("Developer Error: The WebSQL recordTypes value must be set on create.");
+      SC.throw("Developer Error: The WebSQLDataSource recordTypes value must be set on create.");
     }
     //@endif
 
@@ -221,7 +232,7 @@ SC.WebSQLDataSource = SC.DataSource.extend(SC.StatechartManager,
   /// Statechart
   ///
 
-  trace: true,
+  // trace: true,
 
   /** @see SC.StatechartManager.prototype.rootSubstate */
   rootSubstate: SC.Substate.extend({
@@ -447,7 +458,7 @@ SC.WebSQLDataSource = SC.DataSource.extend(SC.StatechartManager,
             // onSuccess
             function (newId) {
               // Insert the new ID in the data hash.
-              dataHash.sc_client_id = newId;
+              dataHash.guid = newId;
               store.dataSourceDidComplete(storeKey, dataHash, newId);
             },
 
@@ -544,14 +555,145 @@ SC.WebSQLDataSource = SC.DataSource.extend(SC.StatechartManager,
       Migrating: SC.Substate.extend({
 
         enterSubstate: function (context) {
+          console.log("%@ - migrating()".fmt(this));
           var db = this.statechart._sc_db;
 
-          // Create object stores for each record type as necessary.
+          // Create object stores for each record type as necessary. This is a simple ORM.
           var statechart = this.statechart,
-              recordTypes = statechart.get('recordTypes'),
-              len = recordTypes.get('length'),
+              namespace = statechart.get('name'),
+              recordTypes = [],//statechart.get('recordTypes'),
+              recordType,
+              len,// = recordTypes.get('length'),
+              key,
               count = 0;
 
+          var appDomain = window[namespace];
+          for (var aKey in appDomain) {
+            if (!appDomain.hasOwnProperty(aKey)) { continue; }
+
+            if (SC.kindOf(appDomain[aKey], SC.Record)) { recordTypes.push(appDomain[aKey]); }
+          }
+
+          len = recordTypes.length;
+
+          var optionsPerType = {}, // A list of creates by record type.
+              relationMaps, // A list of toMany relationships.
+              inverses,
+              relationMap;
+
+          for (var i = 0; i < len; i++) {
+            recordType = recordTypes.objectAt(i);
+
+            console.log('Prepping %@'.fmt(recordType));
+            var prototype = recordType.prototype,
+                options = {
+                  columns: []
+                };
+
+            // Get the attributes of the record type.
+            for (key in prototype) {
+              // Don't block superclass's attributes. if (!prototype.hasOwnProperty(key)) { continue; }
+
+              if (prototype[key] && prototype[key].isRecordAttribute) {
+                var attribute = prototype[key],
+                    name = attribute.key || key,
+                    type = attribute.type;
+
+                // Map SC.RecordAttribute types to SQLite types.
+                // TODO: An option may be to store all data as JSON strings in a single column.
+                if (SC.kindOf(attribute, SC.SingleAttribute)) {
+                  // Foreign key stored on record.
+                  options.columns.push(name + ' INTEGER');
+                  // console.log("... adding foreign constraint: %@".fmt(name));
+                } else if (SC.kindOf(attribute, SC.ManyAttribute)) {
+                  // Foreign key stored on other relationship *unless* many-to-many.
+                  if (!relationMaps) { relationMaps = {}; inverses = {}; } // lazily instantiate only if necessary.
+
+                  // relationMaps.push(attribute);
+                  relationMap = [recordType, name, type, attribute.inverse]; // [From Record, attribute, To Many Record, Inverse Attribute]
+                  // if (attribute.inverse) { inverses[relatedName] = attribute; }
+                  var relationKey = SC._object_className(recordType) + ',' + name;
+                  relationMaps[relationKey] = relationMap;
+                  // console.log("... prepping to-many constraint: %@".fmt(relationKey));
+                } else {
+                  switch (type) {
+                  case Boolean:
+                    type = 'INTEGER';
+                    break;
+                  case Number:
+                    type = 'REAL';
+                    break;
+                  case String:
+                    type = 'TEXT';
+                    break;
+                  case SC.DateTime:
+                    type = 'TEXT'; // ISO8601 "YYYY-MM-DD HH:MM:SS.SSS"
+                    break;
+                  default:
+                  }
+
+                  options.columns.push(name + ' ' + type);
+                  // console.log("... adding column: %@".fmt(name));
+                }
+              }
+            }
+
+            optionsPerType[recordType] = options;
+          }
+
+          // Deal with one-to-many and many-to-many relationships.
+          for (key in relationMaps) {
+            relationMap = relationMaps[key];
+
+            console.log("Resolving to-many constraints %@.%@ => %@.%@".fmt(relationMap[0],relationMap[1],relationMap[2],relationMap[3]));
+
+            var attributeName = relationMap[1],
+                inverseAttributeName = relationMap[3];
+            if (inverseAttributeName) {
+              var inverseKey = relationMap[2] + ',' + attributeName;
+
+              // If there is an inverse toMany attribute, then create a join table.
+              if (relationMaps[inverseKey]) {
+                console.log('... Adding JOIN table');
+                var joinTableName = this.statechart._sc_tableNameForRecordType(relationMap[0]) + '_' +
+                    attributeName + '_' +
+                    relationMap[2].split('.')[1].toLowerCase() + '_' +
+                    inverseAttributeName;
+
+                // Special case A.others <=> B.others
+                if (attributeName === inverseAttributeName) {
+                  attributeName += '_a';
+                  inverseAttributeName += '_b';
+                }
+                var joinOptions = {
+                  columns: [attributeName + ' INTEGER', inverseAttributeName + ' INTEGER']
+                };
+
+                SC.WebSQLAdaptor.createTable(db, joinTableName, joinOptions,
+                  // onSuccess
+                  function () {},
+
+                  // onError
+                  function (error) {
+                    console.error(error);
+                  });
+
+                // Remove the other relation to avoid this happening again.
+                relationMaps[inverseKey] = undefined;
+
+              // It is a many-to-one, add the foreign key to the other record.
+              } else {
+                // // Use the inverse key so that we don't collide with other attributes.
+                // var column = inverseAttributeName + ' INTEGER';
+                // if (optionsPerType[relationMap[2]].columns.indexOf(column) < 0) {
+                //   optionsPerType[relationMap[2]].columns.push(column);
+                // }
+                console.error("Can't yet store toMany relationships on the record (i.e. an Array) in WebSQL.");
+              }
+            }
+          }
+
+          // Now create the tables.
           var waitFunc = function () {
               count++;
 
@@ -561,47 +703,13 @@ SC.WebSQLDataSource = SC.DataSource.extend(SC.StatechartManager,
               }
             };
 
-          for (var i = 0; i < len; i++) {
-            var recordType = recordTypes.objectAt(i),
-                prototype = recordType.prototype,
-                options = {
-                  columns: []
-                },
-                recordTypeName;
+          for (i = 0; i < len; i++) {
+            var recordTypeName;
 
+            recordType = recordTypes.objectAt(i);
             recordTypeName = this.statechart._sc_tableNameForRecordType(recordType);
 
-            // Get the attributes of the record type.
-            for (var key in prototype) {
-              if (!prototype.hasOwnProperty(key)) { continue; }
-
-              if (prototype[key] && prototype[key].isRecordAttribute) {
-                var name = prototype[key].key || key,
-                    type = prototype[key].type;
-
-                // Map SC.RecordAttribute types to SQLite types.
-                // TODO: An option may be to store all data as JSON strings in a single column.
-                switch (type) {
-                case Boolean:
-                  type = 'INTEGER';
-                  break;
-                case Number:
-                  type = 'REAL';
-                  break;
-                case String:
-                  type = 'TEXT';
-                  break;
-                case SC.DateTime:
-                  type = 'TEXT'; // ISO8601 "YYYY-MM-DD HH:MM:SS.SSS"
-                  break;
-                default: // Relationship
-                }
-
-                options.columns.push(name + ' ' + type);
-              }
-            }
-
-            SC.WebSQLAdaptor.createTable(db, recordTypeName, options,
+            SC.WebSQLAdaptor.createTable(db, recordTypeName, optionsPerType[recordType],
               // onSuccess
               waitFunc,
 

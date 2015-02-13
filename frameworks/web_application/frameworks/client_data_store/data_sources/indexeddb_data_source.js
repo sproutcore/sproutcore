@@ -71,6 +71,9 @@ SC.IndexedDBDataSource = SC.DataSource.extend(SC.StatechartManager,
     @type Array
     @default null
     */
+
+  // Note: The only time that we can create IndexedDB object stores is on first open/version
+  // change of the database. This means we need to know all object store names up front.
   recordTypes: null,
 
   /**
@@ -220,7 +223,7 @@ SC.IndexedDBDataSource = SC.DataSource.extend(SC.StatechartManager,
   /// Statechart
   ///
 
-  trace: true,
+  // trace: true,
 
   /** @see SC.StatechartManager.prototype.rootSubstate */
   rootSubstate: SC.Substate.extend({
@@ -446,7 +449,7 @@ SC.IndexedDBDataSource = SC.DataSource.extend(SC.StatechartManager,
               var recordType = store.recordTypeFor(storeKey);
 
               // Insert the new ID in the data hash.
-              dataHash.sc_client_id = newId;
+              dataHash.guid = newId;
               store.dataSourceDidComplete(storeKey, dataHash, newId);
             },
 

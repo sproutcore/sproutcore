@@ -7,8 +7,8 @@ sc_require('data_sources/websql_data_source');
 
 
 /** @class
-  A generic data source for communicating with client storage, IndexedDB or WebSQL, dependent on
-  browser support.
+  A generic data source for communicating with a client store, either IndexedDB or WebSQL, dependent
+  on browser support.
 
   Depending on which client storage option is available, the SC.ClientDataSource will automatically
   proxy requests to either an IndexedDB (SC.IndexedDBDataSource) or a WebSQL (SC.WebSQLDataSource)
@@ -30,6 +30,28 @@ SC.ClientDataSource = SC.DataSource.extend(
 
   /** @private The assigned client store data source. WebSQL is preferred if both are available. */
   _sc_assignedDataSource: null,
+
+  /**
+    The name of the database.
+
+    This is required in order to maintain the same database between sessions.
+
+    @type String
+    @default null
+    */
+  name: null,
+
+  /**
+    The record types that will be stored in the database.
+
+    This is required in order for tables to be created for each record type when the database is
+    first initialized.
+
+    @type Array
+    @default null
+    */
+  recordTypes: null,
+
 
   // ---------------------------------------------------------------------------------------------
   // Methods
@@ -74,12 +96,27 @@ SC.ClientDataSource = SC.DataSource.extend(
   init: function () {
     sc_super();
 
+    var name = this.get('name'),
+        recordTypes = this.get('recordTypes');
+
     // Attempt to assign a client store adaptor.
     if (SC.platform.supportsWebSQL) {
-      this._sc_assignedDataSource = SC.WebSQLDataSource.create();
+      this._sc_assignedDataSource = SC.WebSQLDataSource.create({
+        name: name,
+        recordTypes: recordTypes
+      });
     } else if (SC.platform.supportsIndexedDB) {
-      this._sc_assignedDataSource = SC.IndexedDBDataSource.create();
+      this._sc_assignedDataSource = SC.IndexedDBDataSource.create({
+        name: name,
+        recordTypes: recordTypes
+      });
     }
+
+    //@if(debug)
+    var dsDescription = SC.platform.supportsWebSQL ? 'SC.WebSQLDataSource' : 'SC.IndexedDBDataSource';
+    var lsDesciption = SC.platform.supportsWebSQL ? 'WebSQL' : 'IndexedDB';
+    SC.info('SC.ClientDataSource Initialized. Using %@ with %@ store.'.fmt(dsDescription, lsDesciption));
+    //@endif
   },
 
   /** @see SC.DataSource#fetch */

@@ -49,7 +49,7 @@ SC.IndexedDBAdaptor = {
     if (!database.objectStoreNames.contains(tableName)) {
       var objectStore = database.createObjectStore(tableName, {
         autoIncrement : true,
-        keyPath: 'sc_client_id'
+        keyPath: 'guid'
       });
     }
 
