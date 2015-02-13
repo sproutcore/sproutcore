@@ -460,7 +460,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Store} receiver
   */
   _updateChildRecordHashes: function(storeKey, hash, status) {
-    // var processedPaths={};
     // Update the child record hashes in place.
     if (!SC.none(this.parentRecords) ) {
       // All previously materialized nested objects.
