@@ -107,7 +107,7 @@ SC.ClientDataSource = SC.DataSource.extend(
   /** @see SC.DataSource#updateRecord */
   updateRecord: function (store, storeKey, params) {
     if (this._sc_assignedDataSource) {
-      this._sc_assignedDataSource.retrieveRecord(store, storeKey);
+      this._sc_assignedDataSource.updateRecord(store, storeKey);
 
       return true;
     } else {
