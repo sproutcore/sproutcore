@@ -54,7 +54,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
   isConnected: false,
 
   /**
-    In order to handle authentification, set `isAuth` to `false` in the
+    In order to handle authentication, set `isAuth` to `false` in the
     `webSocketDidOpen` delegate method just after sending a request to
     authenticate the connection. This way, any futher messages will be put in the
     queue until the server tells you that the connection is authenticated. Once it
@@ -115,30 +115,31 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
 
     // Connect.
     try {
-      var socket = this.socket = new WebSocket(this.get('server'));
+      var socket = this.socket = new WebSocket(this.get('server')),
+          self = this;
 
-      socket.onopen = function() {
+      socket.onopen = function (open) {
         SC.run(function () {
-          this.onOpen.apply(this, arguments);
-        }, this);
+          self.onOpen(open);
+        });
       };
 
-      socket.onmessage = function() {
+      socket.onmessage = function (message) {
         SC.run(function () {
-          this.onMessage.apply(this, arguments);
-        }, this);
+          self.onMessage(message);
+        });
       };
 
-      socket.onclose = function() {
+      socket.onclose = function (close) {
         SC.run(function () {
-          this.onClose.apply(this, arguments);
-        }, this);
+          self.onClose(close);
+        });
       };
 
-      socket.onerror = function() {
+      socket.onerror = function (error) {
         SC.run(function () {
-          this.onError.apply(this, arguments);
-        }, this);
+          self.onError(error);
+        });
       };
     } catch (e) {
       SC.error('An error has occurred while connnecting to the websocket server: ' + e);
@@ -197,7 +198,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
     if (SC.typeOf(event) !== SC.T_STRING) {
       // Fast arguments access.
       // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
-      args = new Array(arguments.length - 2); //  SC.A(arguments).slice(2)
+      args = new Array(Math.max(0, arguments.length - 2)); //  SC.A(arguments).slice(2)
       for (i = 0, len = args.length; i < len; i++) { args[i] = arguments[i + 2]; }
 
       // Shift the arguments
@@ -205,14 +206,10 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
       target = event;
       event = 'onmessage';
     } else {
-      if (arguments.length > 3) {
-        // Fast arguments access.
-        // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
-        args = new Array(arguments.length - 3); //  SC.A(arguments).slice(3)
-        for (i = 0, len = args.length; i < len; i++) { args[i] = arguments[i + 3]; }
-      } else {
-        args = [];
-      }
+      // Fast arguments access.
+      // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
+      args = new Array(Math.max(0, arguments.length - 3)); //  SC.A(arguments).slice(3)
+      for (i = 0, len = args.length; i < len; i++) { args[i] = arguments[i + 3]; }
     }
 
     var listeners = this.get('listeners');
