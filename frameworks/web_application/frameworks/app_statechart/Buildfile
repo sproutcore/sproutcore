@@ -6,5 +6,5 @@
 # The configuration for this framework.
 config :app_statechart,
 
-  # Required other frameworks within SproutCore.
+  # Required frameworks within SproutCore.
   :required => [:'core_application/core_statechart']
