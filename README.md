@@ -3,6 +3,8 @@
 SproutCore: For Native-Caliber Web Apps
 =======
 
+[![Join the chat at https://gitter.im/sproutcore/sproutcore](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/sproutcore/sproutcore?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 SproutCore is a JS-MVC framework for building blazing-fast, native-caliber web
 applications. SproutCore's full-stack approach to single-page application
 development gives you the tools you need to build rich, powerful applications...
