@@ -29,6 +29,12 @@ if (typeof console === 'undefined') {
   console.log = console.info = console.warn = console.error = function () {};
 }
 
+// prevent console.trace from blowing things up - some browsers like IE10 has
+// a console object but no console.trace
+if (!console.trace) {
+    console.trace = function() {};
+}
+
 window.SC = window.SC || {};
 window.SproutCore = window.SproutCore || SC;
 
