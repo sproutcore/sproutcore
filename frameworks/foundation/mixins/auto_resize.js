@@ -323,6 +323,10 @@ SC.AutoResize = {
     if (!this.get('shouldResizeWidth')) {
       layer.style.maxWidth = $(layer).outerWidth() + 'px';
     }
+
+    if (this.get('shouldResizeWidth') && this.get('maxWidth')) {
+      layer.style.maxWidth = this.get('maxWidth') + 'px';
+    }
   },
 
   /**

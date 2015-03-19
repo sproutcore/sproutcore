@@ -306,3 +306,35 @@ test("Resize text only for input where input has padding.", function () {
     start();
   }, 500);
 });
+
+/**
+  When resizing the height and/or width, we should restrict the max width given.
+  This way, the height and width will grow appropriately to fit the target as
+  text wraps within the maximum values.
+  */
+test("Resizing height and width will also respect max width.", function () {
+  stop(700);
+
+  var pane = SC.Pane.create({
+    layout: { top: 200, left: 0, width: 50, height: 50 }
+  });
+
+  SC.run(function () {
+    view.set('shouldResizeWidth', true);
+    view.set('shouldResizeHeight', true);
+    view.set('maxWidth', 200);
+
+    pane.appendChild(view);
+    pane.append();
+  });
+
+  setTimeout(function () {
+    equals(view.get('frame').width, 200, 'frame width is 200');
+    ok(view.get('layout').height > 200, 'height > 200');
+
+    pane.destroy();
+    pane.remove();
+
+    start();
+  }, 500);
+});
