@@ -220,13 +220,17 @@ SC.AutoResize = {
   scheduleMeasurement: function() {
     var batchResizeId = this.get('batchResizeId');
 
-    // only measure if we are visible, active, and the text or style actually changed
-    if (!this.get('shouldMeasureSize') || !this.get('isVisibleInWindow') || (this.get('autoResizeText') === this._lastMeasuredText && batchResizeId === this._lastMeasuredId)) return;
+    // only measure if we are visible, active, and the text or style or maxWidth or maxHeight actually changed
+    if (!this.get('shouldMeasureSize') ||
+        !this.get('isVisibleInWindow') ||
+        (this.get('autoResizeText') === this._lastMeasuredText && batchResizeId === this._lastMeasuredId && this.get('maxHeight') === this._lastMeasuredMaxHeight && this.get('maxWidth') === this._lastMeasuredMaxWidth)) {
+        return;
+    }
 
     // batchResizeId is allowed to be undefined; views without an id will just
     // get measured one at a time
     SC.AutoResizeManager.scheduleMeasurementForView(this, batchResizeId);
-  }.observes('isVisibleInWindow', 'shouldMeasureSize', 'autoResizeText', 'batchResizeId'),
+  }.observes('isVisibleInWindow', 'shouldMeasureSize', 'autoResizeText', 'batchResizeId', 'maxWidth', 'maxHeight'),
 
   _lastMeasuredText: null,
 
@@ -294,6 +298,8 @@ SC.AutoResize = {
     // set the measured value so we can avoid extra measurements in the future
     this._lastMeasuredText = autoResizeText;
     this._lastMeasuredId = batchResizeId;
+    this._lastMeasuredMaxWidth = this.get('maxWidth');
+    this._lastMeasuredMaxHeight = this.get('maxHeight');
 
     return metrics;
   },
