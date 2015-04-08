@@ -192,6 +192,10 @@ SC.mixin(/** @lends SC */ {
     }
     //@endif
 
+    if(element instanceof HTMLDocument) {
+      return null;
+    }
+
     // Search for the view for the given element.
     var viewCache = SC.View.views,
       view = viewCache[element.getAttribute('id')];
