@@ -13,19 +13,83 @@ sc_require('tasks/task');
 SC.LOG_MODULE_LOADING = YES;
 //@endif
 
-/**
-  SC.Module is responsible for dynamically loading in JavaScript and other
-  resources. These packages of code and resources, called bundles, can be
-  loaded by your application once it has finished loading, allowing you to
-  reduce the time taken for it to launch.
+/** @class
+  SC.Module is responsible for dynamically loading in JavaScript and other resources. These packages
+  of code and resources, called bundles, can be loaded (i.e. parsed into actual JavaScript) by your application once it has finished launching, allowing you to reduce the time taken for it to load
+  and launch.
 
-  You can explicitly load a module by calling SC.Module.loadModule(), or you
-  can mark a module as prefetched in your Buildfile. In those cases,
-  SproutCore will automatically start to load the bundle once the application
-  has loaded and the user has remained idle for more than one second.
+  To separate code into bundles, create a directory called `modules` within your application (or
+  framework). For example, a directory structure for an app with two modules and a framework with one module would be,
+
+      my_project/
+        apps/
+          my_app/
+            modules/
+              settings_pane/
+                ... all code in the settings_pane bundle
+              sign_up_pane/
+                ... all code in the sign_up_pane bundle
+        frameworks/
+          my_framework/
+            modules/
+              framework_config/
+                ... all code in the framework_config bundle
+
+  Once you've got your modules defined, you need to decide how they should be made available to your
+  application. There are three different loading styles that we can use for modules,
+  'inlined_modules', 'prefetched_modules', or 'deferred_modules', each with its own strengths and
+  weaknesses.
+
+  This is specified in the Buildfile for your application or project. For example,
+
+      config :my_app,
+        :inlined_modules => [:sign_up_pane],
+        :prefetched_modules => [:settings_pane],
+        :deferred_modules => [:'my_framework/framework_config']
+
+  Inlined modules include the module as an unparsed String within the main application code. This
+  means inlined modules are guaranteed to be available within a loaded application, making them the
+  best option for supporting offline mode. They, however, add to the initial load time of the main
+  application code and take up space (less than when parsed) in memory.
+
+  Prefetched modules store the module as an unparsed String in a separate file from the main
+  application code that is lazily loaded. This means that prefetched modules are not guaranteed to
+  be available within a freshly loaded application. Instead, SproutCore will lazily fetch these
+  modules individually when it detects that the application is idle, which means that the initial
+  load time of the main application is improved, but importing a prefetched module may take slightly
+  longer if it hasn't yet been fetched and going offline before a prefetched module is loaded will
+  cause the module load to fail. Therefore, this loading style is most suitable for online-only
+  applications that want to optimize their loading speed, but don't want noticeable delays when
+  modules are first accessed.
+
+  Deferred modules store the module as a regular JavaScript file separate from the main application
+  code. This means that deferred modules are not available within a loaded application *until*
+  manually imported. Because the deferred module may never be needed and thus never be loaded, these
+  modules are best for improving the load time and memory usage of an application. However,
+  thesemodules are absolutely not suitable for offline mode and because they will not be prefetched,
+  they take slightly longer to initially import than do prefetched modules.
+
+  To recap, the different loading styles and their benefits and costs are,
+
+  ### `:inlined_modules`:
+
+  - Pros: offline ready, improved launch time, improved memory management, always load quickly
+  - Cons: still delays initial load time, still consumes memory
+
+  ### `:prefetched_modules`:
+
+  - Pros: best possible launch time, improved memory management, almost always load quickly
+  - Cons: must be online (at least for a little while), still consumes memory
+
+  ### `deferred_modules`:
+
+  - Pros: best possible launch time, best possible memory management
+  - Cons: must be online, loads slowly
+
+  @extends SC.Object
 */
-
-SC.Module = SC.Object.create(/** @scope SC.Module */ {
+SC.Module = SC.Object.create(
+  /** @scope SC.Module.prototype */ {
 
   /**
     Returns YES if the module is ready; NO if it is not loaded or its
@@ -758,8 +822,8 @@ SC.Module = SC.Object.create(/** @scope SC.Module */ {
 });
 
 /**
-Inspect the list of modules and, for every prefetched module, create a
-background task to load the module when the user remains idle.
+  Inspect the list of modules and, for every prefetched module, create a
+  background task to load the module when the user remains idle.
 */
 SC.ready(function () {
   var moduleInfo = SC.MODULE_INFO;
