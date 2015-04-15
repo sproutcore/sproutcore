@@ -54,9 +54,9 @@ SC.BaseTheme.checkboxRenderDelegate = SC.RenderDelegate.create({
       'active': isActive
     });
 
-    context.push('<span class = "button"></span>');
+    context.push('<span class="button"></span>');
 
-    context = context.begin('span').addClass('label').id(labelId);
+    context = context.begin('span').addClass('sc-button-label').id(labelId);
     theme.labelRenderDelegate.render(dataSource, context);
     context = context.end();
   },
@@ -80,7 +80,7 @@ SC.BaseTheme.checkboxRenderDelegate = SC.RenderDelegate.create({
     // NOTE: the other properties were already set in render, and should not
     // need to be changed.
 
-    theme.labelRenderDelegate.update(dataSource, jquery.find('span.label'));
+    theme.labelRenderDelegate.update(dataSource, jquery.find('span.sc-button-label'));
 
     // add class names
     jquery.setClass({

@@ -9,9 +9,7 @@
       padding-top:2px;
     }
 
-    img {
-      top: -2px;
-    }
+    
 
     @include slices("normal_button.png", $left: 3, $right: 3);
 
