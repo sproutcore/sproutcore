@@ -1,0 +1,122 @@
+@theme(sc-jumbo-size) {
+
+  $theme.button {
+    // set these here because SC.AutoResize looks here...
+    font-size: 16px;
+    font-weight: bold;
+
+    .sc-button-label {
+      color: #777;
+      line-height: 24px;
+      margin-top: 10px;
+      top: 0;
+      height: 24px;
+    }
+
+    @include slices("normal_button_44px.png", $left: 3, $right: 3);
+
+    &.sc-static-layout .sc-button-label {
+      margin-left: 3px;
+      margin-right: 3px;
+    }
+
+    &.active {
+      @include slices("active_button_44px.png", $left: 3, $right: 3);
+    }
+
+    &.sel, &.def {
+      .sc-button-label {
+        color:white;
+        text-shadow: 0 -1px 1px black;
+      }
+
+      @include slices("selected_button_44px.png", $left: 3, $right: 3);
+
+      &.sel.active, &.def.active {
+        @include slices("selected_active_button_44px.png", $left: 3, $right: 3);
+      }
+    }
+  }
+
+  @theme(point-left) {
+    $theme.button {
+      @include slices("normal_button_pointer_44px.png", $left: 15, $right: 15, $skip: middle right);
+
+      .middle { left: 15px; }
+      .right { right:12px; width:3px }
+
+      &.active {
+        @include slices("active_button_pointer_44px.png", $left: 15, $right: 15, $skip: middle right);
+        .middle { left: 15px; }
+        .right { right:12px; width:3px }
+      }
+
+      &.sel, &.def {
+        @include slices("selected_button_pointer_44px.png", $left: 15, $right: 15, $skip: middle right);
+        .middle { left: 15px; }
+        .right { right:12px; width:3px }
+      }
+
+      &.sel.active, &.def.active {
+        @include slices("selected_active_button_pointer_44px.png", $left: 15, $right: 15, $skip: middle right);
+        .middle { left: 15px; }
+        .right { right:12px; width:3px }
+      }
+    }
+  }
+
+  @theme(point-right) {
+    $theme.button {
+      @include slices("normal_button_pointer_44px.png", $left: 15, $right: 15, $skip: middle left);
+
+      .middle { right: 15px; }
+      .left { left:12px; width:3px }
+
+      &.active {
+        @include slices("active_button_pointer_44px.png", $left: 15, $right: 15, $skip: middle left);
+        .middle { right: 15px; }
+        .left { left:12px; width:3px }
+      }
+
+      &.sel, &.def {
+        @include slices("selected_button_pointer_44px.png", $left: 15, $right: 15, $skip: middle left);
+        .middle { right: 15px; }
+        .left { left:12px; width:3px }
+      }
+
+      &.sel.active, &.def.active {
+        @include slices("selected_active_button_pointer_44px.png", $left: 15, $right: 15, $skip: middle left);
+        .middle { right: 15px; }
+        .left { left:12px; width:3px }
+      }
+    }
+  }
+
+  @theme(capsule) {
+    $theme.button {
+      @include slices("normal_button_capsule_44px.png", $left: 24, $right: 24, $skip: middle);
+
+      & > .middle { left: 24px; right: 24px; }
+
+      &.active, &.sel, &.def, &.sel.active, &.sel.active.def {
+        & > .middle { left: 24px; right: 24px; }
+      }
+
+      &.active {
+        @include slices("active_button_capsule_44px.png", $left: 24, $right: 24, $skip: middle);
+        .middle { left: 24px; right: 24px; }
+      }
+
+      &.sel, &.def {
+        @include slices("selected_button_capsule_44px.png", $left: 24, $right: 24, $skip: middle);
+        .middle { left: 24px; right: 24px; }
+      }
+
+      &.sel.active, &.def.active {
+        @include slices("selected_active_button_capsule_44px.png", $left: 24, $right: 24, $skip: middle);
+        .middle { left: 24px; right: 24px; }
+      }
+    }
+  }
+
+}
