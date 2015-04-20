@@ -14,6 +14,14 @@ Edge
 ### DEPRECATIONS & REMOVALS
 ### BUG FIXES
 
+1.11.1
+-----------
+
+### BUG FIXES
+
+* Added a retina version of the SC.ToolbarView image. This prevents the bleedthrough of adjacent sprites on retina displays (noticeable as pink in development mode).
+* Added retina versions of all SC.ButtonView images. This includes capsule and pointer images at every control size. Previously, the capsule theme was only supported at SC.REGULAR_CONTROL_SIZE and the pointer theme was only supported at SC.REGULAR_CONTROL_SIZE or SC.HUGE_CONTROL_SIZE.
+
 1.11.0
 -----------
 
