@@ -114,6 +114,13 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   classNames: ['sc-pane'],
 
   /**
+    Last known window size.
+
+    @type Rect
+  */
+  currentWindowSize: null,
+
+  /**
     The first responder.  This is the first view that should receive action
     events.  Whenever you click on a view, it will usually become
     firstResponder.
@@ -227,6 +234,64 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   },
 
   /** @private */
+  _executeDoAttach: function () {
+    // hook into root responder
+    var responder = (this.rootResponder = SC.RootResponder.responder);
+    responder.panes.add(this);
+
+    // Update the currentWindowSize cache.
+    this.set('currentWindowSize', responder.currentWindowSize);
+
+    // Set the initial design mode.  The responder will update this if it changes.
+    this.updateDesignMode(this.get('designMode'), responder.get('currentDesignMode'));
+
+    sc_super();
+
+    // Legacy.
+    this.paneDidAttach();
+
+    // Legacy?
+    this.recomputeDependentProperties();
+
+    // handle intercept if needed
+    this._addIntercept();
+
+    // If the layout is flexible (dependent on the window size), then the view
+    // will resize when appended.
+    if (!this.get('isFixedSize')) {
+      // We call viewDidResize so that it calls parentViewDidResize on all child views.
+      this.viewDidResize();
+    }
+  },
+
+  /** @private */
+  _executeDoDetach: function () {
+    sc_super();
+
+    // remove intercept
+    this._removeIntercept();
+
+    // remove the pane
+    var rootResponder = this.rootResponder;
+    rootResponder.panes.remove(this);
+    this.rootResponder = null;
+  },
+
+  /** @private method forwards status changes in a generic way. */
+  _forwardKeyChange: function(shouldForward, methodName, pane, isKey) {
+    var keyView, responder, newKeyView;
+    if (shouldForward && (responder = this.get('firstResponder'))) {
+      newKeyView = (pane) ? pane.get('firstResponder') : null ;
+      keyView = this.get('firstResponder') ;
+      if (keyView && keyView[methodName]) { keyView[methodName](newKeyView); }
+
+      if ((isKey !== undefined) && responder) {
+        responder.set('isKeyResponder', isKey);
+      }
+    }
+  },
+
+  /** @private */
   _removeIntercept: function() {
     if (this._touchIntercept) {
       document.body.removeChild(this._touchIntercept);
@@ -293,6 +358,54 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @returns {void}
   */
   blurTo: function(pane) {},
+
+  /**
+    The parent dimensions are always the last known window size.
+
+    @returns {Rect} current window size
+  */
+  computeParentDimensions: function (frame) {
+    if (this.get('designer') && SC.suppressMain) { return sc_super(); }
+
+    var wDim = {x: 0, y: 0, width: 1000, height: 1000},
+        layout = this.get('layout');
+
+    // There used to be a whole bunch of code right here to calculate
+    // based first on a stored window size, then on root responder, then
+    // from document... but a) it is incorrect because we don't care about
+    // the window size, but instead, the clientWidth/Height of the body, and
+    // b) the performance benefits are not worth complicating the code that much.
+    if (document && document.body) {
+      wDim.width = document.body.clientWidth;
+      wDim.height = document.body.clientHeight;
+
+      // IE7 is the only browser which reports clientHeight _including_ scrollbar.
+      if (SC.browser.name === SC.BROWSER.ie &&
+          SC.browser.compare(SC.browser.version, "7") === 0) {
+
+        var scrollbarSize = SC.platform.get('scrollbarSize');
+        if (document.body.scrollWidth > wDim.width) {
+          wDim.width -= scrollbarSize;
+        }
+        if (document.body.scrollHeight > wDim.height) {
+          wDim.height -= scrollbarSize;
+        }
+      }
+    }
+
+    // If there is a minWidth or minHeight set on the pane, take that
+    // into account when calculating dimensions.
+
+    if (layout.minHeight || layout.minWidth) {
+      if (layout.minHeight) {
+        wDim.height = Math.max(wDim.height, layout.minHeight);
+      }
+      if (layout.minWidth) {
+        wDim.width = Math.max(wDim.width, layout.minWidth);
+      }
+    }
+    return wDim;
+  },
 
   /**
     Called just after the keyPane focus has changed to the receiver.  Notifies
@@ -409,6 +522,36 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     return this;
   },
 
+  /** @private
+    If the user presses the tab key and the pane does not have a first
+    responder, try to give it to the next eligible responder.
+
+    If the keyDown event reaches the pane, we can assume that no responders in
+    the responder chain, nor the default responder, handled the event.
+  */
+  keyDown: function(evt) {
+    var nextValidKeyView;
+
+    // Handle tab key presses if we don't have a first responder already
+    if (evt.keyCode === 9 && !this.get('firstResponder')) {
+      // Cycle forwards by default, backwards if the shift key is held
+      if (evt.shiftKey) {
+        nextValidKeyView = this.get('previousValidKeyView');
+      } else {
+        nextValidKeyView = this.get('nextValidKeyView');
+      }
+
+      if (nextValidKeyView) {
+        this.makeFirstResponder(nextValidKeyView);
+        return YES;
+      }else if(!SC.TABBING_ONLY_INSIDE_DOCUMENT){
+        evt.allowDefault();
+      }
+    }
+
+    return NO;
+  },
+
   /**
     Makes the passed view (or any object that implements SC.Responder) into
     the new firstResponder for this pane.  This will cause the current first
@@ -475,6 +618,52 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   paneDidAttach: function() {
     // Does nothing.  Left here so that subclasses that implement the method
     // and call sc_super() won't fail.
+  },
+
+  performKeyEquivalent: function(keystring, evt) {
+    var ret = sc_super() ; // try normal view behavior first
+    if (!ret) {
+      var defaultResponder = this.get('defaultResponder') ;
+      if (defaultResponder) {
+        // try default responder's own performKeyEquivalent method,
+        // if it has one...
+        if (defaultResponder.performKeyEquivalent) {
+          ret = defaultResponder.performKeyEquivalent(keystring, evt) ;
+        }
+
+        // even if it does have one, if it doesn't handle the event, give
+        // methodName-style key equivalent handling a try
+        if (!ret && defaultResponder.tryToPerform) {
+          ret = defaultResponder.tryToPerform(keystring, evt) ;
+        }
+      }
+    }
+    return ret ;
+  },
+
+  /**
+    Inserts the pane's layer as the first child of the passed element.
+
+    @param {DOMElement|jQuery|String} elem the element to prepend the pane's layer to.
+      This is passed to `jQuery()`, so any value supported by `jQuery()` will work.
+    @returns {SC.Pane} receiver
+  */
+  prependTo: function(elem) {
+    var self = this;
+
+    return this.insert(function () {
+      var el = jQuery(elem)[0];
+      self._doAttach(el, el.firstChild);
+    });
+  },
+
+  /**
+    This method has no effect in the pane.  Instead use remove().
+
+    @returns {void}
+  */
+  removeFromParent: function() {
+    SC.throw("SC.Pane cannot be removed from its parent, since it's the root. Did you mean remove()?");
   },
 
   /**
@@ -610,9 +799,53 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     return (evt && evt.mouseHandler) || target;
   },
 
+  /**
+    Changes the body overflow according to whether minWidth or minHeight
+    are present in the layout hash. If there are no minimums, nothing
+    is done unless true is passed as the first argument. If so, then
+    overflow:hidden; will be used.
+
+    It's possible to call this manually and pass YES to remove overflow
+    if setting layout to a hash without minWidth and minHeight, but it's
+    probably not a good idea to do so unless you're doing it from the main
+    pane. There's only one body tag, after all, and if this is called from
+    multiple different panes, the panes could fight over whether it gets
+    an overflow if care isn't taken!
+
+    @param {Boolean} [force=false] force a style to be set even if there are no minimums.
+    @returns {void}
+  */
+  setBodyOverflowIfNeeded: function (force) {
+    //Code to get rid of Lion rubberbanding.
+    var layout = this.get('layout'),
+        size = this.get('currentWindowSize');
+
+    if (!layout || !size || !size.width || !size.height) return;
+
+    var minW = layout.minWidth,
+      minH = layout.minHeight;
+
+    if (force === true || minW || minH) {
+      if ((minH && size.height < minH) || (minW && size.width < minW)) {
+        SC.bodyOverflowArbitrator.requestVisible(this);
+      } else {
+        SC.bodyOverflowArbitrator.requestHidden(this);
+      }
+    }
+  },
+
   /** @private */
   showTouchIntercept: function() {
     if (this._touchIntercept) this._touchIntercept.style.display = "block";
+  },
+
+  /**
+    Stops controlling the body overflow according to the needs of this pane.
+
+    @returns {void}
+  */
+  unsetBodyOverflowIfNeeded: function () {
+    SC.bodyOverflowArbitrator.withdrawRequest(this);
   },
 
   /**
@@ -640,6 +873,23 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   willBecomeKeyPaneFrom: function(pane) {
     this._forwardKeyChange(!this.get('isKeyPane'), 'willBecomeKeyResponderFrom', pane, YES);
     return this ;
+  },
+
+  /**
+    Invoked by the root responder whenever the window resizes.  This should
+    simply begin the process of notifying children that the view size has
+    changed, if needed.
+
+    @param {Rect} oldSize the old window size
+    @param {Rect} newSize the new window size
+    @returns {SC.Pane} receiver
+  */
+  windowSizeDidChange: function (oldSize, newSize) {
+    this.set('currentWindowSize', newSize);
+    this.setBodyOverflowIfNeeded();
+    this.parentViewDidResize(newSize); // start notifications.
+    return this;
   }
+
 
 });
