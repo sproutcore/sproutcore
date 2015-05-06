@@ -173,9 +173,6 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @property {SC.Responder}
     @readOnly
   */
-  nextResponder: function() {
-    return null;
-  }.property().cacheable(),
 
   /**
     Set to the current page when the pane is instantiated from a page object.
@@ -740,70 +737,79 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     chain there and not proceed. (Note that the `untilResponder` object will not be given a
     chance to respond to the event.)
 
-    @param {String} action The name of the event (i.e. method name) to invoke.
-    @param {SC.Event} evt The optional event object.
-    @param {SC.Responder} target The responder chain's first member. If not specified, will
-      use the pane's current firstResponder instead.
-    @param {SC.Responder} untilResponder If specified, the responder chain will break when
-      this object is reached, preventing it and subsequent responders from receiving
-      the event.
-    @returns {Object} object that handled the event
+    @param {String} action The name of the event (i.e. the method name) to invoke.
+    @param {SC.Event} [evt] The event object.
+    @param {SC.Responder} [responder] The first responder in the chain to check. If not specified, then the pane's currently designated `firstResponder` will be used instead.
+    @param {SC.Responder} [untilResponder] If specified, the responder chain will break when this object is reached preventing it and subsequent responders in the chain from receiving the event.
+    @returns {SC.Responder} The responder that handled the event
   */
-  sendEvent: function(action, evt, target, untilResponder) {
-    // Until there's time for a refactor of this method, note the early return for untilResponder, marked
-    // below with "FAST PATH".
+  sendEvent: function (action, evt, responder, untilResponder) {
 
-    // walk up the responder chain looking for a method to handle the event
-    if (!target) target = this.get('firstResponder') ;
-    while(target) {
+    // Walk up our own responder chain looking for a responder to handle the event.
+    // If no target is given, use our designated first responder.
+    if (!responder) {
+      responder = this.get('firstResponder');
+    }
+
+    // Cycle through all responders in our chain.
+    while (responder) {
+
       if (action === 'touchStart') {
         // first, we must check that the target is not already touch responder
         // if it is, we don't want to have "found" it; that kind of recursion is sure to
-        // cause really severe, and even worse, really odd bugs.
-        if (evt.touchResponder === target) {
-          target = null;
+        // cause really severe and odd bugs.
+        if (evt.touchResponder === responder) {
+          responder = null;
           break;
         }
 
         // now, only pass along if the target does not already have any touches, or is
         // capable of accepting multitouch.
-        if (!target.get("hasTouch") || target.get("acceptsMultitouch")) {
-          if (target.tryToPerform("touchStart", evt)) break;
+        if (!responder.get("hasTouch") || responder.get("acceptsMultitouch")) {
+          // The responder implemented the action, we're done.
+          if (responder.tryToPerform("touchStart", evt)) break;
         }
-      } else if (action === 'touchEnd' && !target.get("acceptsMultitouch")) {
-        if (!target.get("hasTouch")) {
-          if (target.tryToPerform("touchEnd", evt)) break;
+      } else if (action === 'touchEnd' && !responder.get("acceptsMultitouch")) {
+        if (!responder.get("hasTouch")) {
+          // The responder implemented the action, we're done.
+          if (responder.tryToPerform("touchEnd", evt)) break;
         }
       } else {
-        if (target.tryToPerform(action, evt)) break;
+        // The responder implemented the action, we're done.
+        if (responder.tryToPerform(action, evt)) break;
       }
 
-      // If we've reached the pane, we're at the end of the chain.
-      target = (target === this) ? null : target.get('nextResponder');
-      // FAST PATH: If we've reached untilResponder, break the chain. (TODO: refactor out this early return. The
-      // point is to avoid pinging defaultResponder if we ran into the untilResponder.)
-      if (target === untilResponder) {
-        return (evt && evt.mouseHandler) || null;
+      // Nothing was implemented, get the next responder in the chain.
+      responder = responder.get('nextResponder');
+
+      // Unless we've reached the until responder, at which point, we have to give up.
+      if (responder === untilResponder) {
+        responder = null;
+
+      // Unless we've reached ourself, at which point we do a couple checks and stop looking.
+      } else if (responder === this) {
+        var defaultResponder = this.get('nextResponder');
+
+        // If no responder was found in the responder chain, try a default responder (if set).
+        if (defaultResponder) {
+          // Coerce String default responders to actual Objects.
+          if (typeof defaultResponder === SC.T_STRING) {
+            defaultResponder = SC.objectForPropertyPath(defaultResponder);
+          }
+
+          responder = defaultResponder.tryToPerform(action, evt) ? defaultResponder : null;
+
+        // Finally, try ourself.
+        } else {
+          responder = this.tryToPerform(action, evt) ? this : null;
+        }
+
+        // IMPORTANT! At this point, break no matter what.
+        break;
       }
     }
 
-    // if no handler was found in the responder chain, try the default
-    if (!target && (target = this.get('defaultResponder'))) {
-      if (typeof target === SC.T_STRING) {
-        target = SC.objectForPropertyPath(target);
-      }
-
-      if (!target) target = null;
-      else target = target.tryToPerform(action, evt) ? target : null ;
-    }
-
-    // if we don't have a default responder or no responders in the responder
-    // chain handled the event, see if the pane itself implements the event
-    else if (!target && !(target = this.get('defaultResponder'))) {
-      target = this.tryToPerform(action, evt) ? this : null ;
-    }
-
-    return (evt && evt.mouseHandler) || target;
+    return responder;
   },
 
   /**
