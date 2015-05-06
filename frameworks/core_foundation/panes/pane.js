@@ -113,14 +113,14 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   /** @private */
   classNames: ['sc-pane'],
 
-  /**
+  /*
     Last known window size.
 
     @type Rect
   */
   currentWindowSize: null,
 
-  /**
+  /*
     The first responder.  This is the first view that should receive action
     events.  Whenever you click on a view, it will usually become
     firstResponder.
@@ -132,7 +132,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   /**
     Returns YES if wantsTouchIntercept and this is a touch platform.
   */
-  hasTouchIntercept: function(){
+  hasTouchIntercept: function (){
     return this.get('wantsTouchIntercept') && SC.platform.touch;
   }.property('wantsTouchIntercept').cacheable(),
 
@@ -215,25 +215,6 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   //
 
   /** @private */
-  _addIntercept: function() {
-    if (this.get('hasTouchIntercept')) {
-      var div = document.createElement("div");
-      var divStyle = div.style;
-      divStyle.position = "absolute";
-      divStyle.left = "0px";
-      divStyle.top = "0px";
-      divStyle.right = "0px";
-      divStyle.bottom = "0px";
-      divStyle[SC.browser.experimentalStyleNameFor('transform')] = "translateZ(0px)";
-      divStyle.zIndex = this.get("zIndex") + this.get("touchZ");
-      div.className = "touch-intercept";
-      div.id = "touch-intercept-" + SC.guidFor(this);
-      this._touchIntercept = div;
-      document.body.appendChild(div);
-    }
-  },
-
-  /** @private */
   _executeDoAttach: function () {
     // hook into root responder
     var responder = (this.rootResponder = SC.RootResponder.responder);
@@ -254,7 +235,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     this.recomputeDependentProperties();
 
     // handle intercept if needed
-    this._addIntercept();
+    this._sc_addIntercept();
 
     // If the layout is flexible (dependent on the window size), then the view
     // will resize when appended.
@@ -269,7 +250,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     sc_super();
 
     // remove intercept
-    this._removeIntercept();
+    this._sc_removeIntercept();
 
     // remove the pane
     var rootResponder = this.rootResponder;
@@ -277,8 +258,27 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     this.rootResponder = null;
   },
 
-  /** @private method forwards status changes in a generic way. */
-  _forwardKeyChange: function(shouldForward, methodName, pane, isKey) {
+  /** @private */
+  _sc_addIntercept: function () {
+    if (this.get('hasTouchIntercept')) {
+      var div = document.createElement("div");
+      var divStyle = div.style;
+      divStyle.position = "absolute";
+      divStyle.left = "0px";
+      divStyle.top = "0px";
+      divStyle.right = "0px";
+      divStyle.bottom = "0px";
+      divStyle[SC.browser.experimentalStyleNameFor('transform')] = "translateZ(0px)";
+      divStyle.zIndex = this.get("zIndex") + this.get("touchZ");
+      div.className = "touch-intercept";
+      div.id = "touch-intercept-" + SC.guidFor(this);
+      this._touchIntercept = div;
+      document.body.appendChild(div);
+    }
+  },
+
+  /** @private Method forwards status changes in a generic way. */
+  _sc_forwardKeyChange: function (shouldForward, methodName, pane, isKey) {
     var keyView, responder, newKeyView;
     if (shouldForward && (responder = this.get('firstResponder'))) {
       newKeyView = (pane) ? pane.get('firstResponder') : null ;
@@ -292,7 +292,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   },
 
   /** @private */
-  _removeIntercept: function() {
+  _sc_removeIntercept: function () {
     if (this._touchIntercept) {
       document.body.removeChild(this._touchIntercept);
       this._touchIntercept = null;
@@ -306,7 +306,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @param {SC.RootResponder} rootResponder
     @returns {SC.Pane} receiver
   */
-  append: function() {
+  append: function () {
     return this.appendTo(document.body) ;
   },
 
@@ -317,7 +317,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
       This is passed to `jQuery()`, so any value supported by `jQuery()` will work.
     @returns {SC.Pane} receiver
   */
-  appendTo: function(elem) {
+  appendTo: function (elem) {
     var self = this;
 
     return this.insert(function () {
@@ -331,7 +331,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
 
     @returns {SC.Pane} receiver
   */
-  becomeKeyPane: function() {
+  becomeKeyPane: function () {
     if (this.get('isKeyPane')) return this ;
     if (this.rootResponder) this.rootResponder.makeKeyPane(this) ;
 
@@ -346,7 +346,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @param {SC.Pane} pane
     @returns {void}
   */
-  blurMainTo: function(pane) {
+  blurMainTo: function (pane) {
     this.set('isMainPane', NO) ;
   },
 
@@ -357,7 +357,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @param {SC.Pane} pane the pane that will receive focus next
     @returns {void}
   */
-  blurTo: function(pane) {},
+  blurTo: function (pane) {},
 
   /**
     The parent dimensions are always the last known window size.
@@ -417,14 +417,14 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @returns {SC.Pane} receiver
 
   */
-  didBecomeKeyPaneFrom: function(pane) {
+  didBecomeKeyPaneFrom: function (pane) {
     var isKeyPane = this.get('isKeyPane');
     this.set('isKeyPane', YES);
-    this._forwardKeyChange(!isKeyPane, 'didBecomeKeyResponderFrom', pane, YES);
+    this._sc_forwardKeyChange(!isKeyPane, 'didBecomeKeyResponderFrom', pane, YES);
     return this ;
   },
 
-  didBecomeKeyResponderFrom: function(responder) {},
+  didBecomeKeyResponderFrom: function (responder) {},
 
   /**
     Called just after the pane has lost its keyPane status.  Notifies the
@@ -434,10 +434,10 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @param {SC.Pane} pane
     @returns {SC.Pane} receiver
   */
-  didLoseKeyPaneTo: function(pane) {
+  didLoseKeyPaneTo: function (pane) {
     var isKeyPane = this.get('isKeyPane');
     this.set('isKeyPane', NO);
-    this._forwardKeyChange(isKeyPane, 'didLoseKeyResponderTo', pane);
+    this._sc_forwardKeyChange(isKeyPane, 'didLoseKeyResponderTo', pane);
     return this ;
   },
 
@@ -448,7 +448,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @param {SC.Pane} pane the pane that currently have focus
     @returns {void}
   */
-  focusFrom: function(pane) {},
+  focusFrom: function (pane) {},
 
   /**
     Invokes when the view is about to become the new mainPane.  The default
@@ -459,25 +459,17 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @param {SC.Pane} pane
     @returns {void}
   */
-  focusMainFrom: function(pane) {
+  focusMainFrom: function (pane) {
     this.set('isMainPane', YES);
   },
 
   /** @private */
-  hideTouchIntercept: function() {
+  hideTouchIntercept: function () {
     if (this._touchIntercept) this._touchIntercept.style.display = "none";
   },
 
   /** @private */
-  // updateLayerLocation: function () {
-  //   if(this.get('designer') && SC.suppressMain) return sc_super();
-  //   // note: the normal code here to update node location is removed
-  //   // because we don't need it for panes.
-  //   return this;
-  // },
-
-  /** @private */
-  init: function() {
+  init: function () {
     // Backwards compatibility
     //@if(debug)
     // TODO: REMOVE THIS
@@ -503,7 +495,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     is not already attached, and for calling `paneDidAttach` when done.
 
         pane = SC.Pane.create();
-        pane.insert(function(layer) {
+        pane.insert(function (layer) {
           jQuery(layer).insertBefore("#otherElement");
         });
 
@@ -511,7 +503,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
       necessary in order to insert the pane's layer into the DOM.
     @returns {SC.Pane} receiver
    */
-  insert: function(fn) {
+  insert: function (fn) {
     // Render the layer.
     this.createLayer();
 
@@ -522,19 +514,21 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     return this;
   },
 
-  /** @private
-    If the user presses the tab key and the pane does not have a first
-    responder, try to give it to the next eligible responder.
+  /*
+    If the user presses the tab key and the pane does not have a first responder, try to give it to
+    the next eligible responder.
 
-    If the keyDown event reaches the pane, we can assume that no responders in
-    the responder chain, nor the default responder, handled the event.
+    If the keyDown event reaches the pane, we can assume that no responders in the responder chain,
+    nor the default responder, handled the event.
   */
-  keyDown: function(evt) {
+  keyDown: function (evt) {
     var nextValidKeyView;
 
-    // Handle tab key presses if we don't have a first responder already
+    // When the Tab key is pressed and we don't have first responder, we assign the first responder.
+    // Note, once a first responder is set, it will be responsible to handle the Tab key, including
+    // passing it to the next/previous valid key view.
     if (evt.keyCode === 9 && !this.get('firstResponder')) {
-      // Cycle forwards by default, backwards if the shift key is held
+      // Cycle forwards by default, backwards if the shift key is held.
       if (evt.shiftKey) {
         nextValidKeyView = this.get('previousValidKeyView');
       } else {
@@ -543,8 +537,9 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
 
       if (nextValidKeyView) {
         this.makeFirstResponder(nextValidKeyView);
+
         return YES;
-      }else if(!SC.TABBING_ONLY_INSIDE_DOCUMENT){
+      } else if (!SC.TABBING_ONLY_INSIDE_DOCUMENT) {
         evt.allowDefault();
       }
     }
@@ -564,12 +559,12 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   */
   makeFirstResponder: function(original, view, evt) {
     // firstResponder should never be null
-    if(!view) view = this;
+    if (!view) view = this;
 
     var current = this.get('firstResponder'),
-      isKeyPane = this.get('isKeyPane');
+        isKeyPane = this.get('isKeyPane');
 
-    if (current === view) return this ; // nothing to do
+    if (current === view) return this; // nothing to do
 
     // if we are currently key pane, then notify key views of change also
     if (isKeyPane) {
@@ -591,8 +586,8 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
 
     original(view, evt);
 
-    if(current) current.endPropertyChanges();
-    if(view) view.endPropertyChanges();
+    if (current) current.endPropertyChanges();
+    if (view) view.endPropertyChanges();
 
     // and notify again if needed.
     if (isKeyPane) {
@@ -615,13 +610,22 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
 
     @deprecated Version 1.10
   */
-  paneDidAttach: function() {
+  paneDidAttach: function () {
     // Does nothing.  Left here so that subclasses that implement the method
     // and call sc_super() won't fail.
   },
 
-  performKeyEquivalent: function(keystring, evt) {
-    var ret = sc_super() ; // try normal view behavior first
+  /* SC.View.prototype.performKeyEquivalent
+    When the user presses a key-combination event, this will be called so you
+    can run the command.
+
+    @param charCode {String} the character code
+    @param evt {SC.Event} the keydown event
+    @returns {Boolean} YES if you handled the method; NO otherwise
+  */
+  performKeyEquivalent: function (keystring, evt) {
+    var ret = sc_super(); // try normal view behavior first
+
     if (!ret) {
       var defaultResponder = this.get('defaultResponder') ;
       if (defaultResponder) {
@@ -648,22 +652,13 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
       This is passed to `jQuery()`, so any value supported by `jQuery()` will work.
     @returns {SC.Pane} receiver
   */
-  prependTo: function(elem) {
+  prependTo: function (elem) {
     var self = this;
 
     return this.insert(function () {
       var el = jQuery(elem)[0];
       self._doAttach(el, el.firstChild);
     });
-  },
-
-  /**
-    This method has no effect in the pane.  Instead use remove().
-
-    @returns {void}
-  */
-  removeFromParent: function() {
-    SC.throw("SC.Pane cannot be removed from its parent, since it's the root. Did you mean remove()?");
   },
 
   /**
@@ -684,7 +679,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
 
     @returns {SC.Pane} receiver
   */
-  remove: function() {
+  remove: function () {
     if (this.get('isAttached')) {
       this._doDetach();
     }
@@ -693,12 +688,23 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   },
 
   /**
+    This method has no effect in the pane.  Instead use remove().
+
+    @returns {void}
+  */
+  removeFromParent: function () {
+    //@if(debug)
+    SC.throw("Developer Error: SC.Pane cannot be removed from a parent, since it has none. Did you mean `remove()`?");
+    //@endif
+  },
+
+  /**
     Remove the pane view status from the pane.  This will simply set the
     keyPane on the rootResponder to null.
 
     @returns {SC.Pane} receiver
   */
-  resignKeyPane: function() {
+  resignKeyPane: function () {
     if (!this.get('isKeyPane')) return this ;
     if (this.rootResponder) this.rootResponder.makeKeyPane(null);
 
@@ -835,7 +841,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   },
 
   /** @private */
-  showTouchIntercept: function() {
+  showTouchIntercept: function () {
     if (this._touchIntercept) this._touchIntercept.style.display = "block";
   },
 
@@ -849,19 +855,6 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   },
 
   /**
-    Called just before the pane loses it's keyPane status.  This will notify
-    the current keyView, if there is one, that it is about to lose focus,
-    giving it one last opportunity to save its state.
-
-    @param {SC.Pane} pane
-    @returns {SC.Pane} receiver
-  */
-  willLoseKeyPaneTo: function(pane) {
-    this._forwardKeyChange(this.get('isKeyPane'), 'willLoseKeyResponderTo', pane, NO);
-    return this ;
-  },
-
-  /**
     Called just before the pane becomes keyPane.  Notifies the current keyView
     that it is about to gain focus.  The keyView can use this opportunity to
     prepare itself, possibly stealing any value it might need to steal from
@@ -870,8 +863,21 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @param {SC.Pane} pane
     @returns {SC.Pane} receiver
   */
-  willBecomeKeyPaneFrom: function(pane) {
-    this._forwardKeyChange(!this.get('isKeyPane'), 'willBecomeKeyResponderFrom', pane, YES);
+  willBecomeKeyPaneFrom: function (pane) {
+    this._sc_forwardKeyChange(!this.get('isKeyPane'), 'willBecomeKeyResponderFrom', pane, YES);
+    return this ;
+  },
+
+  /**
+    Called just before the pane loses it's keyPane status.  This will notify
+    the current keyView, if there is one, that it is about to lose focus,
+    giving it one last opportunity to save its state.
+
+    @param {SC.Pane} pane
+    @returns {SC.Pane} receiver
+  */
+  willLoseKeyPaneTo: function (pane) {
+    this._sc_forwardKeyChange(this.get('isKeyPane'), 'willLoseKeyResponderTo', pane, NO);
     return this ;
   },
 
@@ -890,6 +896,5 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     this.parentViewDidResize(newSize); // start notifications.
     return this;
   }
-
 
 });
