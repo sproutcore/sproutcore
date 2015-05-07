@@ -746,47 +746,21 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   sendEvent: function (action, evt, responder, untilResponder) {
 
     // Walk up our own responder chain looking for a responder to handle the event.
-    // If no target is given, use our designated first responder.
+    // If no responder is given, use our designated first responder or fallback to ourself.
     if (!responder) {
-      responder = this.get('firstResponder');
+      responder = this.get('firstResponder') || this;
     }
 
-    // Cycle through all responders in our chain.
+    // Cycle through all responders in our chain...
     while (responder) {
 
-      if (action === 'touchStart') {
-        // first, we must check that the target is not already touch responder
-        // if it is, we don't want to have "found" it; that kind of recursion is sure to
-        // cause really severe and odd bugs.
-        if (evt.touchResponder === responder) {
-          responder = null;
-          break;
-        }
-
-        // now, only pass along if the target does not already have any touches, or is
-        // capable of accepting multitouch.
-        if (!responder.get("hasTouch") || responder.get("acceptsMultitouch")) {
-          // The responder implemented the action, we're done.
-          if (responder.tryToPerform("touchStart", evt)) break;
-        }
-      } else if (action === 'touchEnd' && !responder.get("acceptsMultitouch")) {
-        if (!responder.get("hasTouch")) {
-          // The responder implemented the action, we're done.
-          if (responder.tryToPerform("touchEnd", evt)) break;
-        }
-      } else {
-        // The responder implemented the action, we're done.
-        if (responder.tryToPerform(action, evt)) break;
-      }
-
-      // Nothing was implemented, get the next responder in the chain.
-      responder = responder.get('nextResponder');
-
-      // Unless we've reached the until responder, at which point, we have to give up.
+      // ...unless we've reached the until responder, at which point, we have to give up.
       if (responder === untilResponder) {
         responder = null;
 
-      // Unless we've reached ourself, at which point we do a couple checks and stop looking.
+        break;
+
+      // ... or unless we've reached ourself, at which point we do a couple more attempts and stop looking.
       } else if (responder === this) {
         var defaultResponder = this.get('nextResponder');
 
@@ -798,14 +772,45 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
           }
 
           responder = defaultResponder.tryToPerform(action, evt) ? defaultResponder : null;
+        }
 
         // Finally, try ourself.
-        } else {
+        if (responder === this || responder === null) {
           responder = this.tryToPerform(action, evt) ? this : null;
         }
 
-        // IMPORTANT! At this point, break no matter what.
         break;
+
+      // Try the responder.
+      } else {
+
+        if (action === 'touchStart') {
+          // first, we must check that the target is not already touch responder
+          // if it is, we don't want to have "found" it; that kind of recursion is sure to
+          // cause really severe and odd bugs.
+          if (evt.touchResponder === responder) {
+            responder = null;
+            break;
+          }
+
+          // now, only pass along if the target does not already have any touches, or is
+          // capable of accepting multitouch.
+          if (!responder.get("hasTouch") || responder.get("acceptsMultitouch")) {
+            // The responder implemented the action, we're done.
+            if (responder.tryToPerform("touchStart", evt)) break;
+          }
+        } else if (action === 'touchEnd' && !responder.get("acceptsMultitouch")) {
+          if (!responder.get("hasTouch")) {
+            // The responder implemented the action, we're done.
+            if (responder.tryToPerform("touchEnd", evt)) break;
+          }
+        } else {
+          // The responder implemented the action, we're done.
+          if (responder.tryToPerform(action, evt)) break;
+        }
+
+        // Nothing was implemented, get the next responder in the chain.
+        responder = responder.get('nextResponder');
       }
     }
 
