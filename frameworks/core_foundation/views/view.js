@@ -1169,11 +1169,13 @@ SC.CoreView.reopen(
     @returns {SC.View} receiver
   */
   removeChildAndDestroy: function (view, immediately) {
-    view._doDetach(immediately);
+    if (view.get('isAttached')) {
+      view._doDetach(immediately);
+    }
 
     // If the view will transition out, wait for the transition to complete
     // before destroying the view entirely.
-    if (view.get('transitionOut') && !immediately) {
+    if (view.get('isAttached') && view.get('transitionOut') && !immediately) {
       view.addObserver('isAttached', this, this._destroyChildView);
     } else {
       view.destroy(); // Destroys the layer and the view.
