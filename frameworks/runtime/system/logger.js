@@ -353,7 +353,7 @@ SC.Logger = SC.Object.create(
     String.fmt() call will never actually be performed.
 
     @param {String}              A message or a format string
-    @param {…}       (optional)  Other arguments to pass to String.fmt() when using a format string
+    @param {*}       (optional)  Other arguments to pass to String.fmt() when using a format string
   */
   debug: function(message, optionalFormatArgs) {
     // Implementation note:  To avoid having to put the SC.debug() shorthand
@@ -406,7 +406,7 @@ SC.Logger = SC.Object.create(
     String.fmt() call will never actually be performed.
 
     @param {String}  (optional)  A title or format string to display above the group
-    @param {…}       (optional)  Other arguments to pass to String.fmt() when using a format string as the title
+    @param {*}       (optional)  Other arguments to pass to String.fmt() when using a format string as the title
   */
   debugGroup: function(message, optionalFormatArgs) {
     // Implementation note:  To avoid having to put the SC.debugGroup()
@@ -448,7 +448,7 @@ SC.Logger = SC.Object.create(
     String.fmt() call will never actually be performed.
 
     @param {String}              A message or a format string
-    @param {…}       (optional)  Other arguments to pass to String.fmt() when using a format string
+    @param {*}       (optional)  Other arguments to pass to String.fmt() when using a format string
   */
   info: function(message, optionalFormatArgs) {
     // Implementation note:  To avoid having to put the SC.info() shorthand
@@ -501,7 +501,7 @@ SC.Logger = SC.Object.create(
     String.fmt() call will never actually be performed.
 
     @param {String}  (optional)  A title or format string to display above the group
-    @param {…}       (optional)  Other arguments to pass to String.fmt() when using a format string as the title
+    @param {*}       (optional)  Other arguments to pass to String.fmt() when using a format string as the title
   */
   infoGroup: function(message, optionalFormatArgs) {
     // Implementation note:  To avoid having to put the SC.infoGroup()
@@ -543,7 +543,7 @@ SC.Logger = SC.Object.create(
     String.fmt() call will never actually be performed.
 
     @param {String}              A message or a format string
-    @param {…}       (optional)  Other arguments to pass to String.fmt() when using a format string
+    @param {*}       (optional)  Other arguments to pass to String.fmt() when using a format string
   */
   warn: function(message, optionalFormatArgs) {
     // Implementation note:  To avoid having to put the SC.warn() shorthand
@@ -597,7 +597,7 @@ SC.Logger = SC.Object.create(
     String.fmt() call will never actually be performed.
 
     @param {String}  (optional)  A title or format string to display above the group
-    @param {…}       (optional)  Other arguments to pass to String.fmt() when using a format string as the title
+    @param {*}       (optional)  Other arguments to pass to String.fmt() when using a format string as the title
   */
   warnGroup: function(message, optionalFormatArgs) {
     // Implementation note:  To avoid having to put the SC.warnGroup()
@@ -638,7 +638,7 @@ SC.Logger = SC.Object.create(
     String.fmt() call will never actually be performed.
 
     @param {String}              A message or a format string
-    @param {…}       (optional)  Other arguments to pass to String.fmt() when using a format string
+    @param {*}       (optional)  Other arguments to pass to String.fmt() when using a format string
   */
   error: function(message, optionalFormatArgs) {
     // Implementation note:  To avoid having to put the SC.error() shorthand
@@ -691,7 +691,7 @@ SC.Logger = SC.Object.create(
     String.fmt() call will never actually be performed.
 
     @param {String}  (optional)  A title or format string to display above the group
-    @param {…}       (optional)  Other arguments to pass to String.fmt() when using a format string as the title
+    @param {*}       (optional)  Other arguments to pass to String.fmt() when using a format string as the title
   */
   errorGroup: function(message, optionalFormatArgs) {
     // Implementation note:  To avoid having to put the SC.errorGroup()
@@ -1120,7 +1120,7 @@ SC.Logger = SC.Object.create(
   },
 
 
-  /** 
+  /**
     For backwards compatibility with the older 'debugEnabled' property, set
     our log output level to SC.LOGGER_LEVEL_DEBUG if 'debugEnabled' is set to
     YES.
@@ -1134,7 +1134,7 @@ SC.Logger = SC.Object.create(
 
 
 
-  /** 
+  /**
     Outputs and/or records the specified message of the specified type if the
     respective current log levels allow for it.  Assuming
     'automaticallyFormat' is specified, then String.fmt() will be called
@@ -1214,7 +1214,7 @@ SC.Logger = SC.Object.create(
   },
 
 
-  /** 
+  /**
     Outputs and/or records a group with the (optional) specified title
     assuming the respective current log levels allow for it.  This will output
     the title (if there is one) and indent all further messages (of any type)
@@ -1278,7 +1278,7 @@ SC.Logger = SC.Object.create(
   },
 
 
-  /** 
+  /**
     Outputs and/or records a “group end” assuming the respective current log
     levels allow for it.  This will remove one level of indentation from all
     further messages (of any type).
@@ -1327,7 +1327,7 @@ SC.Logger = SC.Object.create(
   },
 
 
-  /** 
+  /**
     Returns whether a message of the specified type ('debug', etc.) should be
     output to the reporter based on the current value of 'logOutputLevel'.
 
@@ -1344,7 +1344,7 @@ SC.Logger = SC.Object.create(
   },
 
 
-  /** 
+  /**
     Returns whether a message of the specified type ('debug', etc.) should be
     recorded based on the current value of 'logRecordingLevel'.
 
@@ -1363,7 +1363,7 @@ SC.Logger = SC.Object.create(
   },
 
 
-  /** 
+  /**
     Outputs the specified message to the current reporter.  If the reporter
     does not handle the specified type of message, it will fall back to using
     log() if possible.
@@ -1455,7 +1455,7 @@ SC.Logger = SC.Object.create(
   },
 
 
-  /** 
+  /**
     Outputs the specified “begin group” directive to the current reporter.  If
     the reporter does not handle the group() method, it will fall back to
     simulating using log() if possible.
@@ -1496,7 +1496,7 @@ SC.Logger = SC.Object.create(
   },
 
 
-  /** 
+  /**
     This method will add the specified entry to the recorded log messages
     array and also prune array as necessary according to the current values of
     'recordedLogMessagesMaximumLength' and
@@ -1527,7 +1527,7 @@ SC.Logger = SC.Object.create(
 
 
 
-  /** 
+  /**
     The arguments function property doesn't support Array#unshift. This helper
     copies the elements of arguments to a blank array.
 
@@ -1548,7 +1548,7 @@ SC.Logger = SC.Object.create(
   },
 
 
-  /** 
+  /**
     Formats the arguments array of a function by creating a string with
     SC.LOGGER_LOG_DELIMITER between the elements.
     @private
@@ -1566,7 +1566,7 @@ SC.Logger = SC.Object.create(
   },
 
 
-  /** 
+  /**
     Returns a string containing the appropriate indentation for the specified
     indentation level.
 
@@ -1591,7 +1591,7 @@ SC.Logger = SC.Object.create(
 
 
 
-  /** 
+  /**
     The current “for output” indentation level.  The reporter (browser
     console) is expected to keep track of this for us for output, but we need
     to do our own bookkeeping if the browser doesn’t support console.group.
@@ -1602,7 +1602,7 @@ SC.Logger = SC.Object.create(
   _outputIndentationLevel: 0,
 
 
-  /** 
+  /**
     The current “for recording” indentation level.  This can be different than
     the “for output” indentation level if the respective log levels are set
     differently.  This is incremented by _debugGroup() and friends, and
@@ -1612,7 +1612,7 @@ SC.Logger = SC.Object.create(
   _recordingIndentationLevel: 0,
 
 
-  /** 
+  /**
     A mapping of the log level constants (SC.LOGGER_LEVEL_DEBUG, etc.) to
     their priority.  This makes it easy to determine which levels are “higher”
     than the current level.
@@ -1625,7 +1625,7 @@ SC.Logger = SC.Object.create(
   _LOG_LEVEL_MAPPING: { debug: 4, info: 3, warn: 2, error: 1, none: 0 },
 
 
-  /** 
+  /**
     If the current reporter does not support a particular type of log message
     (for example, some older browsers’ consoles support console.log but not
     console.debug), we’ll use the specified prefixes.

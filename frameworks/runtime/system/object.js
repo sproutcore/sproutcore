@@ -62,7 +62,7 @@ SC._detect_base = function _detect_base(func, parent, name) {
   };
 };
 
-/** 
+/**
   Augments a base object by copying the properties from the extended hash.
   In addition to simply copying properties, this method also performs a
   number of optimizations that can make init'ing a new object much faster
@@ -570,7 +570,7 @@ SC.Object.prototype = {
 
   _kvo_enabled: YES,
 
-  /** 
+  /**
     This is the first method invoked on a new instance.  It will first apply
     any added properties to the new instance and then calls the real init()
     method.
@@ -763,7 +763,7 @@ SC.Object.prototype = {
             }
           });
 
-    @param {*args} args any arguments you want to pass along.
+    @param {*} args any arguments you want to pass along.
     @returns {Object} return value from super
   */
   superclass: function () {
@@ -975,7 +975,7 @@ SC.mixin(SC.Object.prototype, SC.Observable);
 // CLASS NAME SUPPORT
 //
 
-/** 
+/**
   This is a way of performing brute-force introspection.  This searches
   through all the top-level properties looking for classes.  When it finds
   one, it saves the class path name.
@@ -1075,7 +1075,7 @@ SC.kindOf = function (scObject, scClass) {
   return !!(scObject && scObject.kindOf && scObject.kindOf(scClass));
 };
 
-/** 
+/**
   Returns the name of this class.  If the name is not known, triggers
   a search.  This can be expensive the first time it is called.
 

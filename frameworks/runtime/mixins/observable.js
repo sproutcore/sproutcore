@@ -622,7 +622,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     }
   },
 
-  /** 
+  /**
     Register a property chain so that dependent keys can be invalidated
     when a property on this object changes.
 
@@ -635,7 +635,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     chains.add(chain);
   },
 
-  /** 
+  /**
     Removes a property chain from the object.
 
     @param {String} property the property on this object that invalidates the chain
@@ -651,7 +651,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     }
   },
 
-  /** 
+  /**
     Returns an instance of SC.CoreSet in which to save SC._PropertyChains.
 
     @param {String} property the property associated with the SC._PropertyChain
@@ -666,7 +666,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     return chains;
   },
 
-  /** 
+  /**
 
     Helper method used by computeCachedDependents.  Just loops over the
     array of dependent keys.  If the passed function is cacheable, it will
@@ -701,7 +701,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
 
   },
 
-  /** 
+  /**
 
     Called by set() whenever it needs to determine which cached dependent
     keys to clear.  Recursively searches dependent keys to determine all
@@ -1152,7 +1152,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     return this;
   },
 
-  /** 
+  /**
 
     Used to either add or remove an observer handler on this object
     for a given property path.
@@ -1231,7 +1231,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     return observers ? observers.getMembers() : [];
   },
 
-  /** 
+  /**
     This private method actually notifies the observers for any keys in the observer queue.  If you
     pass a key it will be added to the queue.
     @private
@@ -1529,7 +1529,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     revision count from the last time this method was called.
 
     @param {(String|Object)} context a unique identifier
-    @param {String…} propertyNames one or more property names
+    @param {...String} propertyNames one or more property names
   */
   didChangeFor: function (context) {
     var valueCache, revisionCache, seenValues, seenRevisions, ret,
