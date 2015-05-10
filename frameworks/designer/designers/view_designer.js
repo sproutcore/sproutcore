@@ -127,7 +127,7 @@ SC.ViewDesigner = SC.Object.extend(
     the layout.  Direct properties are exposed a well. You will usually want
     to work with those instead.
 
-    @property
+    @member
     @type {Hash}
   */
   layout: function(key, value) {
@@ -148,7 +148,7 @@ SC.ViewDesigner = SC.Object.extend(
        WIDTH_LEFT, WIDTH_CENTER, WIDTH_RIGHT, WIDTH_HEIGHT,
        null
 
-    @property
+    @member
     @type {Number}
   */
   anchorLocation: function(key, value) {

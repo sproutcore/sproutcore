@@ -25,7 +25,7 @@ SC.COMBO_STYLES = {
 };
 
 /**
-  @namespace
+  
 
   A RenderContext is a builder that can be used to generate HTML for views or
   to update an existing element.  Rather than making changes to an element
@@ -49,6 +49,7 @@ SC.COMBO_STYLES = {
 
   context.begin() <-- begins a new tag context
   context.end() <-- ends the tag context...
+  @namespace
 */
 SC.RenderContext = SC.Builder.create(
   /** @lends SC.RenderContext */ {
@@ -67,7 +68,7 @@ SC.RenderContext = SC.Builder.create(
     A second parameter, parentContext, is used internally for chaining.  You
     should never pass a second argument.
 
-    @param {String|DOMElement} tagNameOrElement
+    @param {(String|DOMElement)} tagNameOrElement
     @returns {SC.RenderContext} receiver
   */
   init: function (tagNameOrElement, prevContext) {
@@ -573,7 +574,7 @@ SC.RenderContext = SC.Builder.create(
 
     This is a convenience method that simply calls setClass(nameOrClasses, YES).
 
-    @param {String|Array} nameOrClasses a class name or an array of class names
+    @param {(String|Array)} nameOrClasses a class name or an array of class names
     @returns {SC.RenderContext} receiver
   */
   addClass: function (nameOrClasses) {
@@ -623,7 +624,7 @@ SC.RenderContext = SC.Builder.create(
 
         });
 
-    @param {String|Hash} nameOrClasses either a single class name or a hash of class names with boolean values indicating whether to add or remove the class
+    @param {(String|Hash)} nameOrClasses either a single class name or a hash of class names with boolean values indicating whether to add or remove the class
     @param {Boolean} shouldAdd if a single class name for nameOrClasses is passed, this
     @returns {SC.RenderContext} receiver
   */
@@ -665,7 +666,7 @@ SC.RenderContext = SC.Builder.create(
     return this;
   },
 
-  /** @private */
+  /**  @private */
   _setClass: function (classes, name, shouldAdd) {
     var didChange = NO,
       idx;
@@ -744,7 +745,7 @@ SC.RenderContext = SC.Builder.create(
   // CSS Styles Support
   //
 
-  /** @private */
+  /**  @private */
   _STYLE_REGEX: /-?\s*([^:\s]+)\s*:\s*([^;]+)\s*;?/g,
 
   /**
@@ -798,8 +799,8 @@ SC.RenderContext = SC.Builder.create(
 
     This is a convenience method that simply calls setStyle(nameOrStyles, value).
 
-    @param {String|Object} nameOrStyles the name of a style or a hash of style names with values
-    @param {String|Number} value style value if a single style name for nameOrStyles is passed
+    @param {(String|Object)} nameOrStyles the name of a style or a hash of style names with values
+    @param {(String|Number)} value style value if a single style name for nameOrStyles is passed
     @returns {SC.RenderContext} receiver
   */
   addStyle: function (nameOrStyles, value) {
@@ -871,8 +872,8 @@ SC.RenderContext = SC.Builder.create(
           }
         });
 
-    @param {String|Object} nameOrStyles the name of a style or a hash of style names with values
-    @param {String|Number} [value] style value if a single style name for nameOrStyles is passed
+    @param {(String|Object)} nameOrStyles the name of a style or a hash of style names with values
+    @param {(String|Number)} [value] style value if a single style name for nameOrStyles is passed
     @returns {SC.RenderContext} receiver
   */
   setStyle: function (nameOrStyles, value) {
@@ -899,7 +900,7 @@ SC.RenderContext = SC.Builder.create(
     return this;
   },
 
-  /** @private Sets the style by key from the styles object. This allows for optimization outside of the for..in loop. */
+  /**  Sets the style by key from the styles object. This allows for optimization outside of the for..in loop. @private */
   _sc_setStyleFromObject: function (didChange, key, stylesObject, styles) {
     if (!stylesObject.hasOwnProperty(key)) return false;
 
@@ -911,7 +912,7 @@ SC.RenderContext = SC.Builder.create(
     return didChange;
   },
 
-  /** @private */
+  /**  @private */
   _deleteComboStyles: function (styles, key) {
     var comboStyles = SC.COMBO_STYLES[key],
         didChange = NO, tmp;
@@ -929,7 +930,7 @@ SC.RenderContext = SC.Builder.create(
     return didChange;
   },
 
-  /** @private Sets or unsets the key:value on the hash and returns whether a change occurred. */
+  /**  Sets or unsets the key:value on the hash and returns whether a change occurred. @private */
   _setOnHash: function (hash, key, value) {
     var cur = hash[key],
       didChange = true;
@@ -1056,8 +1057,8 @@ SC.RenderContext = SC.Builder.create(
 
     This is a convenience method that simply calls setAttr(nameOrAttrs, value).
 
-    @param {String|Object} nameOrAttrs the name of an attribute or a hash of attribute names with values
-    @param {String|Number} value attribute value if a single attribute name for nameOrAttrs is passed
+    @param {(String|Object)} nameOrAttrs the name of an attribute or a hash of attribute names with values
+    @param {(String|Number)} value attribute value if a single attribute name for nameOrAttrs is passed
     @returns {SC.RenderContext} receiver
   */
   addAttr: function (nameOrAttrs, value) {
@@ -1114,7 +1115,7 @@ SC.RenderContext = SC.Builder.create(
           }
         });
 
-    @param {String|Object} nameOrAttrs the name of an attribute or a hash of attribute names with values
+    @param {(String|Object)} nameOrAttrs the name of an attribute or a hash of attribute names with values
     @param {String} [value] attribute value if a single attribute name for nameOrAttrs is passed
     @returns {SC.RenderContext} receiver
   */
@@ -1184,7 +1185,8 @@ SC.RenderContext = SC.Builder.create(
   },
 
 
-  /** @private
+  /** 
+    @private
   */
   _camelizeStyleName: function (name) {
     // IE wants the first letter lowercase so we can allow normal behavior
@@ -1198,8 +1200,9 @@ SC.RenderContext = SC.Builder.create(
     }
   },
 
-  /** @private
+  /** 
     Converts camelCased style names to dasherized forms
+    @private
   */
   _dasherizeStyleName: function (name) {
     var dasherized = SC.String.dasherize(name);
@@ -1233,7 +1236,7 @@ SC.RenderContext = SC.Builder.create(
     this method to avoid errors.  You can also do this with the text() helper
     method on a render context.
 
-    @param {String|Number} text value to escape
+    @param {(String|Number)} text value to escape
     @returns {String} string with all HTML values properly escaped
   */
   SC.RenderContext.escapeHTML = function (text) {

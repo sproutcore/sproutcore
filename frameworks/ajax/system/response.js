@@ -193,13 +193,14 @@ SC.Response = SC.Object.extend(
   }.property('encodedBody').cacheable(),
 
   /**
-    @private
+    
     @deprecated Use body instead.
 
     Alias for body.
 
     @type Hash|String
     @see #body
+    @private
   */
   response: function() {
     return this.get('body');
@@ -378,9 +379,10 @@ SC.Response = SC.Object.extend(
   cancelTransport: function() {},
 
   /**
-    @private
+    
 
     Will notify each listener. Returns true if any of the listeners handle.
+    @private
   */
   _notifyListeners: function(listeners, status) {
     var notifiers = listeners[status], args, target, action;
@@ -636,12 +638,13 @@ SC.XHRResponse = SC.Response.extend(
   },
 
   /**
-    @private
+    
 
     Called by the XHR when it responds with some final results.
 
     @param {XMLHttpRequest} rawRequest the actual request
     @returns {Boolean} YES if completed, NO otherwise
+    @private
   */
   finishRequest: function(evt) {
     var listener, listeners, listenersForKey,

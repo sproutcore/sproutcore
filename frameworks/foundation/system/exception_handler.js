@@ -6,7 +6,7 @@
 // ==========================================================================
 
 /**
-  @namespace
+  
 
   If an exception is thrown during execution of your SproutCore app, this
   object will be given the opportunity to handle it.
@@ -21,10 +21,11 @@
   using SproutCore views.
 
   @since SproutCore 1.5
+  @namespace
 */
 SC.ExceptionHandler = {
 
-  /** @private */
+  /**  @private */
   enabled: (SC.buildMode !== 'debug'),
 
   /**
@@ -43,10 +44,11 @@ SC.ExceptionHandler = {
     return NO;
   },
 
-  /** @private
+  /** 
     Creates the error dialog and appends it to the DOM.
 
     @param {Exception} exception the exception to display
+    @private
   */
   _displayErrorDialog: function(exception) {
     var html = this._errorDialogHTMLForException(exception),
@@ -60,11 +62,12 @@ SC.ExceptionHandler = {
     this.isShowingErrorDialog = YES;
   },
 
-  /** @private
+  /** 
     Given an exception, returns the HTML for the error dialog.
 
     @param {Exception} exception the exception to display
     @returns {String}
+    @private
   */
   _errorDialogHTMLForException: function(exception) {
     var html;

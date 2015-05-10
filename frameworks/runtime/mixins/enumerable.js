@@ -670,7 +670,7 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     Prototype 1.6.
 
     @param {String} methodName the name of the method
-    @param {Object...} args optional arguments to pass as well.
+    @param {...Object} args optional arguments to pass as well.
     @returns {Array} return values from calling invoke.
   */
   invoke: function (methodName) {
@@ -709,7 +709,7 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
 
     @param {Object} targetValue the target return value
     @param {String} methodName the name of the method
-    @param {Object...} args optional arguments to pass as well.
+    @param {...Object} args optional arguments to pass as well.
     @returns {Array} return values from calling invoke.
   */
   invokeWhile: function (targetValue, methodName) {

@@ -19,21 +19,21 @@ SC.Responder = SC.Object.extend( /** @scope SC.Responder.prototype */ {
 
   isResponder: YES,
 
-  /** @property
+  /** @member
     The pane this responder belongs to.  This is used to determine where you
     belong to in the responder chain.  Normally you should leave this property
     set to null.
   */
   pane: null,
 
-  /** @property
+  /** @member
     The app this responder belongs to.  For non-user-interface responder
     chains, this is used to determine the context.  Usually this
     is the property you will want to work with.
   */
   responderContext: null,
 
-  /** @property
+  /** @member
     This is the nextResponder in the responder chain.  If the receiver does
     not implement a particular event handler, it will bubble to the next
     responder.
@@ -43,13 +43,13 @@ SC.Responder = SC.Object.extend( /** @scope SC.Responder.prototype */ {
   */
   nextResponder: null,
 
-  /** @property
+  /** @member
     YES if the view is currently first responder.  This property is always
     edited by the pane during its makeFirstResponder() method.
   */
   isFirstResponder: NO,
 
-  /** @property
+  /** @member
 
     YES the responder is somewhere in the responder chain.  This currently
     only works when used with a ResponderContext.
@@ -58,7 +58,7 @@ SC.Responder = SC.Object.extend( /** @scope SC.Responder.prototype */ {
   */
   hasFirstResponder: NO,
 
-  /** @property
+  /** @member
     Set to YES if your view is willing to accept first responder status.  This is used when calculating key responder loop.
   */
   acceptsFirstResponder: YES,

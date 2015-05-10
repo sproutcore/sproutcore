@@ -173,19 +173,19 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   //@if(debug)
   /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */
 
-  /** @private @property */
+  /**  @member @private */
   allowStatechartTracing: function () {
     var key = this.get('statechartTraceKey');
     return this.get(key);
   }.property().cacheable(),
 
-  /** @private */
+  /**  @private */
   _statechartTraceDidChange: function () {
     this.notifyPropertyChange('allowStatechartTracing');
   },
 
   /**
-    @property
+    @member
 
     Returns an object containing current detailed information about
     the statechart. This is primarily used for diagnostic/debugging
@@ -276,7 +276,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     return str;
   },
 
-  /** @private */
+  /**  @private */
   _hashToString: function (hash, indent) {
     var str = "";
 
@@ -297,7 +297,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     return str;
   },
 
-  /** @private */
+  /**  @private */
   _arrayToString: function (key, array, indent) {
     if (array.length === 0) {
       return "%@%@: []".fmt(' '.mult(indent), key);
@@ -640,7 +640,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   /**
     Checks if a given state is a current state of this statechart.
 
-    @param state {State|String} the state to check
+    @param state {(State|String)} the state to check
     @returns {Boolean} true if the state is a current state, otherwise fals is returned
   */
   stateIsCurrentState: function (state) {
@@ -660,7 +660,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   /**
     Checks if a given state is a currently entered state of this statechart.
 
-    @param state {State|String} the state to check
+    @param state {(State|String)} the state to check
     @returns {Boolean} true if the state is a currently entered state, otherwise false is returned
   */
   stateIsEntered: function (state) {
@@ -670,7 +670,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   /**
     Checks if the given value represents a state is this statechart
 
-    @param value {State|String} either a state object or the name of a state
+    @param value {(State|String)} either a state object or the name of a state
     @returns {Boolean} true if the state does belong ot the statechart, otherwise false is returned
   */
   doesContainState: function (value) {
@@ -680,7 +680,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   /**
     Gets a state from the statechart that matches the given value
 
-    @param value {State|String} either a state object of the name of a state
+    @param value {(State|String)} either a state object of the name of a state
     @returns {State} if a match then the matching state is returned, otherwise null is returned
   */
   getState: function (state) {
@@ -726,8 +726,8 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
     where <state> is either a SC.State object or a string and <hash> is a regular JS hash object.
 
-    @param state {SC.State|String} the state to go to (may not be the final state in the transition process)
-    @param fromCurrentState {SC.State|String} Optional. The current state to start the transition process from.
+    @param state {(SC.State|String)} the state to go to (may not be the final state in the transition process)
+    @param fromCurrentState {(SC.State|String)} Optional. The current state to start the transition process from.
     @param useHistory {Boolean} Optional. Indicates whether to include using history states in the transition process
     @param context {Hash} Optional. A context object that will be passed to all exited and entered states
   */
@@ -901,7 +901,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     this._executeGotoStateActions(point.gotoState, point.actions, point.marker, point.context);
   },
 
-  /** @private */
+  /**  @private */
   _executeGotoStateActions: function (gotoState, actions, marker, context) {
     var action = null,
         len = actions.length,
@@ -961,7 +961,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     this._cleanupStateTransition();
   },
 
-  /** @private */
+  /**  @private */
   _cleanupStateTransition: function () {
     this._currentGotoStateAction = null;
     this._gotoStateSuspendedPoint = null;
@@ -972,7 +972,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     if (!this._sendEventLocked && !this._gotoStateLocked) { this._flushPendingSentEvents(); }
   },
 
-  /** @private */
+  /**  @private */
   _exitState: function (state, context) {
     var parentState;
 
@@ -1027,7 +1027,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     return state.exitState(context);
   },
 
-  /** @private */
+  /**  @private */
   _enterState: function (state, current, context) {
     var parentState = state.get('parentState');
     if (parentState && !state.get('isConcurrentState')) parentState.set('historyState', state);
@@ -1125,8 +1125,8 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
     where <state> is either a SC.State object or a string and <hash> is a regular JS hash object.
 
-    @param state {SC.State|String} the state to go to and follow it's history state
-    @param fromCurrentState {SC.State|String} Optional. the current state to start the state transition process from
+    @param state {(SC.State|String)} the state to go to and follow it's history state
+    @param fromCurrentState {(SC.State|String)} Optional. the current state to start the state transition process from
     @param recursive {Boolean} Optional. whether to follow history states recursively.
   */
   gotoHistoryState: function (state, fromCurrentState, recursive, context) {
@@ -1289,10 +1289,11 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     this._stateHandleEventInfo = null;
   },
 
-  /** @private
+  /** 
 
     Creates a chain of states from the given state to the greatest ancestor state (the root state). Used
     when perform state transitions.
+    @private
   */
   _createStateChain: function (state) {
     var chain = [];
@@ -1305,11 +1306,12 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     return chain;
   },
 
-  /** @private
+  /** 
 
     Finds a pivot state from two given state chains. The pivot state is the state indicating when states
     go from being exited to states being entered during the state transition process. The value
     returned is the fist matching state between the two given state chains.
+    @private
   */
   _findPivotState: function (stateChain1, stateChain2) {
     if (stateChain1.length === 0 || stateChain2.length === 0) return null;
@@ -1321,7 +1323,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     return pivot;
   },
 
-  /** @private
+  /** 
 
     Recursively follow states that are to be exited during a state transition process. The exit
     process is to start from the given state and work its way up to when either all exit
@@ -1330,6 +1332,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     @param state {State} the state to be exited
     @param exitStatePath {Array} an array representing a path of states that are to be exited
     @param stopState {State} an explicit state in which to stop the exiting process
+    @private
   */
   _traverseStatesToExit: function (state, exitStatePath, stopState, gotoStateActions) {
     if (!state || state === stopState) return;
@@ -1355,7 +1358,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     this._traverseStatesToExit(exitStatePath.shift(), exitStatePath, stopState, gotoStateActions);
   },
 
-  /** @private
+  /** 
 
     Recursively follow states that are to be entered during the state transition process. The
     enter process is to start from the given state and work its way down a given enter path. When
@@ -1367,6 +1370,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     @param enterStatePath {Array} an array representing an initial path of states that are to be entered
     @param pivotState {State} The state pivoting when to go from exiting states to entering states
     @param useHistory {Boolean} indicates whether to recursively follow history states
+    @private
   */
   _traverseStatesToEnter: function (state, enterStatePath, pivotState, useHistory, gotoStateActions) {
     if (!state) return;
@@ -1431,13 +1435,14 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     }
   },
 
-  /** @override
+  /** 
 
     Returns YES if the named value translates into an executable function on
     any of the statechart's current states or the statechart itself.
 
     @param event {String} the property name to check
     @returns {Boolean}
+    @override
   */
   respondsTo: function (event) {
     // Fast path!
@@ -1462,7 +1467,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     return SC.typeOf(this[event]) === SC.T_FUNCTION;
   },
 
-  /** @override
+  /** 
 
     Attempts to handle a given event against any of the statechart's current states and the
     statechart itself. If any current state can handle the event or the statechart itself can
@@ -1472,6 +1477,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     @param arg1 {Object} Optional
     @param arg2 {Object} Optional
     @returns {Boolean} YES if handled, NO if not handled
+    @override
   */
   tryToPerform: function (event, arg1, arg2) {
     if (!this.respondsTo(event)) return NO;
@@ -1527,7 +1533,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     the given method invoked on it, otherwise no value is returned.
 
     @param methodName {String} methodName a method name
-    @param args {Object...} Optional. any additional arguments
+    @param args {...Object} Optional. any additional arguments
     @param func {Function} Optional. a callback function. Must be the last
            value supplied if provided.
 
@@ -1574,9 +1580,10 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     return calledStates === 1 ? result : undefined;
   },
 
-  /** @private
+  /** 
 
     Iterate over all the given concurrent states and enter them
+    @private
   */
   _traverseConcurrentStatesToEnter: function (states, exclude, useHistory, gotoStateActions) {
     var i = 0,
@@ -1589,10 +1596,11 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     }
   },
 
-  /** @private
+  /** 
 
     Called by gotoState to flush a pending state transition at the front of the
     pending queue.
+    @private
   */
   _flushPendingStateTransition: function () {
     if (!this._pendingStateTransitions) {
@@ -1604,10 +1612,11 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     this.gotoState(pending.state, pending.fromCurrentState, pending.useHistory, pending.context);
   },
 
-  /** @private
+  /** 
 
      Called by sendEvent to flush a pending actions at the front of the pending
      queue
+    @private
    */
   _flushPendingSentEvents: function () {
     var pending = this._pendingSentEvents.shift();
@@ -1615,7 +1624,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     return this.sendEvent(pending.event, pending.arg1, pending.arg2);
   },
 
-  /** @private */
+  /**  @private */
   //@if(debug)
   _monitorIsActiveDidChange: function () {
     if (this.get('monitorIsActive') && SC.none(this.get('monitor'))) {
@@ -1624,11 +1633,12 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   }.observes('monitorIsActive'),
   //@endif
 
-  /** @private
+  /** 
     Will process the arguments supplied to the gotoState method.
 
     TODO: Come back to this and refactor the code. It works, but it
           could certainly be improved
+    @private
   */
   _processGotoStateArgs: function (args) {
     var processedArgs = {
@@ -1689,7 +1699,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     return processedArgs;
   },
 
-  /** @private
+  /** 
 
     Will return a newly constructed root state class. The root state will have substates added to
     it based on properties found on this state that derive from a SC.State class. For the
@@ -1699,6 +1709,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
      - Either the initialState or statesAreConcurrent property must be set, but not both
      - There must be one or more states that can be added to the root state
 
+    @private
   */
   _constructRootStateClass: function () {
     var rsExampleKey = 'rootStateExample',
@@ -1752,7 +1763,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     return rsExample.extend(attrs);
   },
 
-  /** @private */
+  /**  @private */
   _logStatechartCreationError: function (msg) {
     SC.Logger.error("Unable to create statechart for %@: %@.".fmt(this, msg));
   },
@@ -1772,7 +1783,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     SC.Logger.warn("WARN %@: %@".fmt(this.get('statechartLogPrefix'), msg));
   },
 
-  /** @property */
+  /** @member */
   statechartLogPrefix: function () {
     var className = SC._object_className(this.constructor),
         name = this.get('name'), prefix;

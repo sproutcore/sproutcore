@@ -313,7 +313,7 @@ SC.LinkView = SC.View.extend({
   // Methods
   //
 
-  /** @private */
+  /**  @private */
   render: function (context) {
     var displayBody = this.get('displayBody'),
       displayToolTip = this.get('displayToolTip'),
@@ -352,31 +352,31 @@ SC.LinkView = SC.View.extend({
     context.push(displayBody);
   },
 
-  /** @private */
+  /**  @private */
   mouseDown: function (evt) {
     evt.allowDefault();
     return true;
   },
 
-  /** @private */
+  /**  @private */
   mouseUp: function (evt) {
     evt.allowDefault();
     return true;
   },
 
-  /** @private */
+  /**  @private */
   touchStart: function (touch) {
     touch.allowDefault();
     return true;
   },
 
-  /** @private */
+  /**  @private */
   touchEnd: function (touch) {
     touch.allowDefault();
     return true;
   },
 
-  /** @private */
+  /**  @private */
   update: function (jqEl) {
     var displayBody = this.get('displayBody'),
       displayToolTip = this.get('displayToolTip'),

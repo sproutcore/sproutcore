@@ -211,13 +211,14 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
 /** @scope SC.DateTime.prototype */ {
 
   /**
-    @private
+    
 
     Internal representation of a date: the number of milliseconds
     since January, 1st 1970 00:00:00.0 UTC.
 
-    @property
+    @member
     @type {Integer}
+    @private
   */
   _ms: 0,
 
@@ -451,7 +452,7 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
    }.property(),
 
   /**
-    @private
+    
 
     Creates a string representation of the receiver.
 
@@ -461,6 +462,7 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
     `SC.DateTime`'s methods from `toString`)
 
     @returns {String}
+    @private
   */
   toString: function() {
     return "UTC: " +
@@ -538,11 +540,12 @@ SC.DateTime.mixin(SC.Comparable,
   dayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
 
   /**
-    @private
+    
 
     The English day names used for the 'lastMonday', 'nextTuesday', etc., getters.
 
     @type Array
+    @private
   */
   _englishDayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
 
@@ -571,7 +574,7 @@ SC.DateTime.mixin(SC.Comparable,
   AMPMNames:['AM', 'PM'],
 
   /**
-    @private
+    
 
     The unique internal `Date` object used to make computations. Better
     performance is obtained by having only one Date object for the whole
@@ -586,16 +589,18 @@ SC.DateTime.mixin(SC.Comparable,
     Be sure to set it before using for internal calculations if necessary.
 
     @type Date
+    @private
   */
   _date: new Date(),
 
   /**
-    @private
+    
 
     The offset, in minutes, between UTC and the currently manipulated
     `SC.DateTime` instance.
 
     @type Integer
+    @private
   */
   _tz: 0,
 
@@ -610,38 +615,41 @@ SC.DateTime.mixin(SC.Comparable,
   timezone: new Date().getTimezoneOffset(),
 
   /**
-    @private
+    
 
     A cache of `SC.DateTime` instances. If you attempt to create a `SC.DateTime`
     instance that has already been created, then it will return the cached
     value.
 
     @type Array
+    @private
   */
   _dt_cache: {},
 
   /**
-    @private
+    
 
     The index of the latest cached value. Used with `_DT_CACHE_MAX_LENGTH` to
     limit the size of the cache.
 
     @type Integer
+    @private
   */
   _dt_cache_index: -1,
 
   /**
-    @private
+    
 
     The maximum length of `_dt_cache`. If this limit is reached, then the cache
     is overwritten, starting with the oldest element.
 
     @type Integer
+    @private
   */
   _DT_CACHE_MAX_LENGTH: 1000,
 
   /**
-    @private
+    
 
     Both args are optional, but will only overwrite `_date` and `_tz` if
     defined. This method does not affect the DateTime instance's actual time,
@@ -656,6 +664,7 @@ SC.DateTime.mixin(SC.Comparable,
 
     Returns a hash of the previous milliseconds and time zone in case they
     are wanted for later restoration.
+    @private
   */
   _setCalcState: function(ms, timezone) {
     var previous = {
@@ -670,10 +679,11 @@ SC.DateTime.mixin(SC.Comparable,
   },
 
   /**
-    @private
+    
 
     By this time, any time zone setting on 'hash' will be ignored.
     'timezone' will be used, or the last this._tz.
+    @private
   */
   _setCalcStateFromHash: function(hash, timezone) {
     var tz = (timezone !== undefined) ? timezone : this._tz; // use the last-known time zone if necessary
@@ -682,8 +692,9 @@ SC.DateTime.mixin(SC.Comparable,
   },
 
   /**
-    @private
+    
     @see SC.DateTime#unknownProperty
+    @private
   */
   _get: function(key, start, timezone) {
     var ms, doy, m, y, firstDayOfWeek, dayOfWeek, dayOfYear, prefix, suffix;
@@ -827,9 +838,10 @@ SC.DateTime.mixin(SC.Comparable,
   },
 
   /**
-    @private
+    
 
     Sets the internal calculation state to something specified.
+    @private
   */
   _adjust: function(options, start, timezone, resetCascadingly) {
     var ms = this._toMilliseconds(options, start, timezone, resetCascadingly);
@@ -838,8 +850,9 @@ SC.DateTime.mixin(SC.Comparable,
   },
 
   /**
-    @private
+    
     @see SC.DateTime#advance
+    @private
   */
   _advance: function(options, start, timezone) {
     var opts = options ? SC.clone(options) : {};
@@ -1000,11 +1013,12 @@ SC.DateTime.mixin(SC.Comparable,
   },
 
   /**
-    @private
+    
 
     Calls the `create()` method with the current internal `_date` value.
 
     @return {SC.DateTime} the SC.DateTime instance returned by create()
+    @private
   */
   _createFromCurrentState: function() {
     return this.create({
@@ -1097,7 +1111,7 @@ SC.DateTime.mixin(SC.Comparable,
   },
 
   /**
-    @private
+    
 
     Converts the x parameter into a string padded with 0s so that the string’s
     length is at least equal to the len parameter.
@@ -1105,6 +1119,7 @@ SC.DateTime.mixin(SC.Comparable,
     @param {Object} x the object to convert to a string
     @param {Integer} the minimum length of the returned string
     @returns {String} the padded string
+    @private
   */
   _pad: function(x, len) {
     var str = '' + x;
@@ -1114,8 +1129,9 @@ SC.DateTime.mixin(SC.Comparable,
   },
 
   /**
-    @private
+    
     @see SC.DateTime#_toFormattedString
+    @private
   */
   __toFormattedString: function(part, start, timezone) {
     var hour, offset;
@@ -1171,8 +1187,9 @@ SC.DateTime.mixin(SC.Comparable,
   },
 
   /**
-    @private
+    
     @see SC.DateTime#toFormattedString
+    @private
   */
   _toFormattedString: function(format, start, timezone) {
     var that = this;
@@ -1187,8 +1204,9 @@ SC.DateTime.mixin(SC.Comparable,
   },
 
   /**
-    @private
+    
     @see SC.DateTime#toFormattedString
+    @private
    */
   __getElapsedStringFormat: function(start, timezone) {
     return "";

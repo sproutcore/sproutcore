@@ -71,7 +71,7 @@ SC.FetchedAttribute = SC.RecordAttribute.extend(
   // LOW-LEVEL METHODS
   //
 
-  /**  @private - adapted for fetching. do find */
+  /**   - adapted for fetching. do find @private */
   toType: function(record, key, value) {
     var store = record.get('store');
     if (!store) return null ; // nothing to do
@@ -91,7 +91,7 @@ SC.FetchedAttribute = SC.RecordAttribute.extend(
     return store.find(queryKey, params);
   },
 
-  /** @private - fetched attributes are read only. */
+  /**  - fetched attributes are read only. @private */
   fromType: function(record, key, value) {
     return value;
   }

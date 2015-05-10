@@ -6,7 +6,7 @@
 // ==========================================================================
 
 /**
-  @namespace
+  
 
   The SC.ContentDisplay mixin makes it easy to automatically update your view
   display whenever relevant properties on a content object change.  To use
@@ -25,10 +25,11 @@
       });
 
   @since SproutCore 1.0
+  @namespace
 */
 SC.ContentDisplay = {
 
-  /** @private */
+  /**  @private */
   concatenatedProperties: 'contentDisplayProperties',
 
   /**
@@ -41,8 +42,9 @@ SC.ContentDisplay = {
   */
   contentDisplayProperties: [],
 
-  /** @private
+  /** 
     Setup observers on the content object when initializing the mixin.
+    @private
   */
   initMixin: function() {
     this._display_contentDidChange();
@@ -50,7 +52,8 @@ SC.ContentDisplay = {
 
   /**
    * Remove observer on existing content object, if present
-   * @private
+   * 
+    @private
    */
   destroyMixin: function () {
     if (!this._display_content) return;
@@ -58,7 +61,7 @@ SC.ContentDisplay = {
     this._display_content = null;
   },
 
-  /** @private */
+  /**  @private */
   _display_beginObservingContent: function(content) {
     var f = this._display_contentPropertyDidChange;
 
@@ -70,7 +73,7 @@ SC.ContentDisplay = {
     }
   },
 
-  /** @private */
+  /**  @private */
   _display_stopObservingContent: function(content) {
     var f = this._display_contentPropertyDidChange;
 
@@ -82,7 +85,7 @@ SC.ContentDisplay = {
     }
   },
 
-  /** @private */
+  /**  @private */
   _display_contentDidChange: function(target, key, value) {
     // handle changes to the content...
     if ((value = this.get('content')) === this._display_content) return;
@@ -98,7 +101,7 @@ SC.ContentDisplay = {
     this.displayDidChange();
   }.observes('content'),
 
-  /** @private Invoked when properties on the content object change. */
+  /**  Invoked when properties on the content object change. @private */
   _display_contentPropertyDidChange: function(target, key, value, propertyRevision) {
     if (key === '*') {
       this.displayDidChange() ;

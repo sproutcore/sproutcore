@@ -151,7 +151,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     If you pass a single index or a start and length that is beyond the
     length this method will throw an SC.OUT_OF_RANGE_EXCEPTION
 
-    @param {Number|SC.IndexSet} start index, start of range, or index set
+    @param {(Number|SC.IndexSet)} start index, start of range, or index set
     @param {Number} length length of passing range
     @returns {Object} receiver
   */
@@ -445,7 +445,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
 
     @param {SC.IndexSet} indexes indexes to observe
     @param {Object} target object to invoke on change
-    @param {String|Function} method the method to invoke
+    @param {(String|Function)} method the method to invoke
     @param {Object} context optional context
     @returns {SC.RangeObserver} range observer
   */
@@ -611,7 +611,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
   },
 
   /**
-    @private
+    
 
     When enumerable content has changed, remove enumerable observers from
     items that are no longer in the enumerable, and add observers to newly
@@ -619,6 +619,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
 
     @param {Array} addedObjects the array of objects that have been added
     @param {Array} removedObjects the array of objects that have been removed
+    @private
   */
   _setupContentObservers: function (start, addedCount) {
     var observedKeys = this._kvo_for('_kvo_content_observed_keys', SC.CoreSet);
@@ -786,13 +787,14 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
   },
 
   /**
-    @private
+    
 
     Clones a segment of an observer chain and applies it
     to an element of this Enumerable.
 
     @param {Object} item The element
     @param {SC._ChainObserver} chainObserver the chain segment to begin from
+    @private
   */
   _resumeChainObservingForItemWithChainObserver: function (item, chainObserver) {
     var observer = SC.clone(chainObserver.next);
@@ -815,7 +817,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
   },
 
   /**
-    @private
+    
 
     Adds a content observer. Content observers are able to
     propagate chain observers to each member item in the enumerable,
@@ -830,6 +832,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
         arrayController.addObserver('@each.isDone');
 
     @param {SC._ChainObserver} chainObserver the chain observer to propagate
+    @private
   */
   _addContentObserver: function (chainObserver) {
     var key = chainObserver.next.property;
@@ -850,12 +853,13 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
   },
 
   /**
-    @private
+    
 
     Removes a content observer. Pass the same chain observer
     that was used to add the content observer.
 
     @param {SC._ChainObserver} chainObserver the chain observer to propagate
+    @private
   */
 
   _removeContentObserver: function (chainObserver) {
@@ -882,9 +886,10 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     }
   },
 
-  /**  @private
+  /**  
     Observer fires whenever the '[]' property changes.  If there are
     range observers, will notify observers of change.
+    @private
   */
   _array_notifyRangeObservers: function () {
     var rangeob = this._array_rangeObservers,
@@ -901,7 +906,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
 };
 
 /**
-  @namespace
+  
 
   This module implements Observer-friendly Array-like behavior.  This mixin is
   picked up by the Array class as well as other controllers, etc. that want to
@@ -931,5 +936,6 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
 
   @extends SC.Enumerable
   @since SproutCore 0.9.0
+  @namespace
 */
 SC.Array = SC.mixin({}, SC.Enumerable, SC.CoreArray);

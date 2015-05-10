@@ -269,7 +269,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     Returns the complete set of `recordType`s matched by this query.  Includes
     any named `recordType`s plus their subclasses.
 
-    @property
+    @member
     @type SC.Enumerable
   */
   expandedRecordTypes: function() {
@@ -290,8 +290,9 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     return ret.freeze() ;
   }.property('recordType', 'recordTypes').cacheable(),
 
-  /** @private
+  /** 
     expands a single record type into the set. called recursively
+    @private
   */
   _scq_expandRecordType: function(recordType, set) {
     if (set.contains(recordType)) return; // nothing to do
@@ -354,7 +355,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     Returns `YES` if query location is Remote.  This is sometimes more
     convenient than checking the location.
 
-		@property
+		@member
     @type Boolean
   */
   isRemote: function() {
@@ -365,7 +366,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     Returns `YES` if query location is Local.  This is sometimes more
     convenient than checking the location.
 
-		@property
+		@member
     @type Boolean
   */
   isLocal: function() {
@@ -494,8 +495,9 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     else return SC.compare(record1.get('storeKey'), record2.get('storeKey'));
   },
 
-  /** @private
+  /** 
       Becomes YES once the query has been successfully parsed
+    @private
   */
   _isReady:     NO,
 
@@ -547,17 +549,19 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
   // PRIVATE SUPPORT
   //
 
-  /** @private
+  /** 
     Properties that need to be copied when cloning the query.
+    @private
   */
   copyKeys: ['conditions', 'orderBy', 'recordType', 'recordTypes', 'parameters', 'location', 'scope'],
 
-  /** @private */
+  /**  @private */
   concatenatedProperties: ['copyKeys'],
 
-  /** @private
+  /** 
     Implement the Copyable API to clone a query object once it has been
     created.
+    @private
   */
   copy: function() {
     var opts = {},
@@ -1273,7 +1277,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     describing this order for easier processing.
     Called by `parse()`.
 
-    @param {String | Function} orderOp the string containing the order statement, or a comparison function
+    @param {(String | Function)} orderOp the string containing the order statement, or a comparison function
     @returns {Array | Function} array of order statement, or a function if a function was specified
   */
   buildOrder: function (orderOp) {
@@ -1448,7 +1452,7 @@ SC.Query.mixin( /** @scope SC.Query */ {
         var orderedPeople = SC.Query.local(Ab.Person, { orderBy: "firstName" });
 
     @param {String} location the query location.
-    @param {SC.Record|Array} recordType the record type or types.
+    @param {(SC.Record|Array)} recordType the record type or types.
     @param {String} [conditions] The conditions string.
     @param {Object} [parameters] The parameters object.
     @returns {SC.Query}
@@ -1546,7 +1550,7 @@ SC.Query.mixin( /** @scope SC.Query */ {
           orderBy: 'value DESC'
         });
 
-    @param {SC.Record|Array} recordType the record type or types.
+    @param {(SC.Record|Array)} recordType the record type or types.
     @param {Object} [properties] Additional properties to be added to the query.
     @returns {SC.Query}
   */
@@ -1573,7 +1577,7 @@ SC.Query.mixin( /** @scope SC.Query */ {
         // `query.beginsWith`.
         query = SC.Query.remote(MyApp.Person, { beginsWith: 'T' });
 
-    @param {SC.Record|Array} recordType the record type or types.
+    @param {(SC.Record|Array)} recordType the record type or types.
     @param {Object} [properties] Additional properties to be added to the query.
     @returns {SC.Query}
   */
@@ -1592,8 +1596,9 @@ SC.Query.mixin( /** @scope SC.Query */ {
     return this.build(SC.Query.REMOTE, recordType, properties, oldParameters);
   },
 
-  /** @private
+  /** 
     called by `SC.Record.extend()`. invalidates `expandedRecordTypes`
+    @private
   */
   _scq_didDefineRecordType: function() {
     var q = SC.Query._scq_queriesWithExpandedRecordTypes;
@@ -1608,8 +1613,9 @@ SC.Query.mixin( /** @scope SC.Query */ {
 });
 
 
-/** @private
+/** 
   Hash of registered comparisons by property name.
+  @private
 */
 SC.Query.comparisons = {};
 

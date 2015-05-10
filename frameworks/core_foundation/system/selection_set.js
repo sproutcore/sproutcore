@@ -110,10 +110,11 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
   },
 
   /**
-    @private
+    
 
     Internal method gets the index set for the source, ignoring objects
     that have been added directly.
+    @private
   */
   _indexSetForSource: function(source, canCreate) {
     if (canCreate === undefined) canCreate = YES;
@@ -573,9 +574,10 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
   },
 
   /**
-    @private
+    
 
     Freezing a SelectionSet also freezes its internal sets.
+    @private
   */
   freeze: function() {
     if (this.get('isFrozen')) { return this ; }
@@ -598,7 +600,7 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
   // ITERATORS
   //
 
-  /** @private */
+  /**  @private */
   toString: function() {
     var sets = this._sets || [];
     sets = sets.map(function(set) {
@@ -608,7 +610,7 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
     return "SC.SelectionSet:%@<%@>".fmt(SC.guidFor(this), sets.join(','));
   },
 
-  /** @private */
+  /**  @private */
   firstObject: function() {
     var sets    = this._sets,
         objects = this._objects;
@@ -626,9 +628,10 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
 
   }.property(),
 
-  /** @private
+  /** 
     Implement primitive enumerable support.  Returns each object in the
     selection.
+    @private
   */
   nextObject: function(count, lastObject, context) {
     var objects, ret;
@@ -684,7 +687,7 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
 
 });
 
-/** @private */
+/**  @private */
 SC.SelectionSet.prototype.clone = SC.SelectionSet.prototype.copy;
 
 /**

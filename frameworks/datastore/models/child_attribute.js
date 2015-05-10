@@ -32,7 +32,7 @@ SC.ChildAttribute = SC.RecordAttribute.extend(
   // LOW-LEVEL METHODS
   //
 
-  /**  @private - adapted for to one relationship */
+  /**   - adapted for to one relationship @private */
   toType: function(record, key, value) {
     var ret   = null, rel,
         recordType  = this.get('typeClass');

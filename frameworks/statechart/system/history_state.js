@@ -62,17 +62,19 @@ SC.HistoryState = SC.Object.extend(
   */
   defaultState: null,
 
-  /** @private
+  /** 
     Managed by the statechart
 
     The statechart that owns this object.
+    @private
   */
   statechart: null,
 
-  /** @private
+  /** 
     Managed by the statechart
 
     The state that owns this object
+    @private
   */
   parentState: null,
 
@@ -89,7 +91,7 @@ SC.HistoryState = SC.Object.extend(
     return !!historyState ? historyState : defaultState;
   }.property().cacheable(),
 
-  /** @private */
+  /**  @private */
   parentHistoryStateDidChange: function() {
     this.notifyPropertyChange('state');
   }.observes('*parentState.historyState')

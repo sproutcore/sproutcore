@@ -69,7 +69,7 @@ SC.ProgressView = SC.View.extend(SC.Control,
   */
   value: 0.50,
 
-  /** @private */
+  /**  @private */
   valueBindingDefault: SC.Binding.single().notEmpty(),
 
   /**
@@ -110,7 +110,7 @@ SC.ProgressView = SC.View.extend(SC.Control,
     rendering code as-is, not converted into percentages, etc. It is computed
     based on the original value property.
 
-    @property
+    @member
   */
   ariaValue: function() {
     return this.get('value');
@@ -124,7 +124,7 @@ SC.ProgressView = SC.View.extend(SC.Control,
   */
   minimum: 0,
 
-  /** @private */
+  /**  @private */
   minimumBindingDefault: SC.Binding.single().notEmpty(),
 
   /**
@@ -145,7 +145,7 @@ SC.ProgressView = SC.View.extend(SC.Control,
   */
   maximum: 1.0,
 
-  /** @private */
+  /**  @private */
   maximumBindingDefault: SC.Binding.single().notEmpty(),
 
   /**
@@ -167,7 +167,7 @@ SC.ProgressView = SC.View.extend(SC.Control,
   */
   isIndeterminate: NO,
 
-  /** @private */
+  /**  @private */
   isIndeterminateBindingDefault: SC.Binding.bool(),
 
   /**
@@ -179,7 +179,7 @@ SC.ProgressView = SC.View.extend(SC.Control,
   */
   isRunning: NO,
 
-  /** @private */
+  /**  @private */
   isRunningBindingDefault: SC.Binding.bool(),
 
   /**
@@ -196,7 +196,7 @@ SC.ProgressView = SC.View.extend(SC.Control,
   // INTERNAL SUPPORT
   //
 
-  /** @private */
+  /**  @private */
   contentPropertyDidChange: function(target, key) {
     var content = this.get('content');
     this.beginPropertyChanges()
@@ -207,7 +207,7 @@ SC.ProgressView = SC.View.extend(SC.Control,
     .endPropertyChanges();
   },
 
-  /** @private */
+  /**  @private */
   didCreateLayer: function() {
     // When using the JavaScript animation, we cannot start until the layer is
     // created.  Then if we are indeterminate, running and visible in the

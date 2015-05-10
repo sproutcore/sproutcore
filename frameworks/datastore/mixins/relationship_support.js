@@ -89,11 +89,12 @@
  */
 SC.RelationshipSupport = {
 
-  /** @private
+  /** 
     Relinquish many records.
 
     This happens when a master record (`isMaster` = `YES`) removes a reference
     to related records, either through `pushRetrieve` or `pushDestroy`.
+    @private
    */
   _srs_inverseDidRelinquishRelationships: function (recordType, ids, attr, inverseId) {
     ids.forEach(function (id) {
@@ -101,9 +102,10 @@ SC.RelationshipSupport = {
     }, this);
   },
 
-  /** @private
+  /** 
     Relinquish the record, removing the reference of the record being
     destroyed on any related records.
+    @private
    */
   _srs_inverseDidRelinquishRelationship: function (recordType, id, toAttr, relativeID) {
     var storeKey = recordType.storeKeyFor(id),
@@ -132,11 +134,12 @@ SC.RelationshipSupport = {
     this.pushRetrieve(recordType, id, dataHash, undefined, true);
   },
 
-  /** @private
+  /** 
     Add a relationship to many inverse records.
 
     This happens when a master record (`isMaster` = `YES`) adds a reference
     to another record on a `pushRetrieve`.
+    @private
    */
   _srs_inverseDidAddRelationships: function (recordType, ids, attr, inverseId) {
     ids.forEach(function (id) {
@@ -145,7 +148,7 @@ SC.RelationshipSupport = {
   },
 
 
-  /** @private
+  /** 
     Add a relationship to an inverse record.
 
     If the flag lazilyInstantiate is set to YES, then the inverse record will be
@@ -157,6 +160,7 @@ SC.RelationshipSupport = {
       the relationship being created.
     @param {String} relativeID The ID of the model that needs to have it's
       relationship updated.
+    @private
    */
   _srs_inverseDidAddRelationship: function (recordType, id, toAttr, relativeID) {
     var storeKey = recordType.storeKeyFor(id),
@@ -210,7 +214,7 @@ SC.RelationshipSupport = {
   // ASYNCHRONOUS RECORD RELATIONSHIPS
   //
 
-  /** @private
+  /** 
     Iterates over keys on the recordType prototype, looking for RecordAttributes
     that have relationships (toOne or toMany).
 
@@ -218,6 +222,7 @@ SC.RelationshipSupport = {
       if it has any RecordAttributes that have relationships to other records.
     @param {String} id The id of the record being pushed in.
     @param {Number} storeKey The storeKey
+    @private
    */
   _srs_pushIterator: function (recordType, id, storeKey, lambda) {
     var proto = recordType.prototype,

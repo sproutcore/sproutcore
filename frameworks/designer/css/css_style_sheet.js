@@ -108,10 +108,11 @@ SC.CSSStyleSheet = SC.Object.extend(
   // TODO: implement a destroy method
 
   /**
-    @private
+    
 
     Invoked by the sparse array whenever it needs a particular index
     provided.  Provide the content for the index.
+    @private
   */
   sparseArrayDidRequestIndex: function(array, idx) {
     // sc_assert(this.rules === array) ;
@@ -125,7 +126,7 @@ SC.CSSStyleSheet = SC.Object.extend(
     }
   },
 
-  /** @private synchronize the browser's rules array with our own */
+  /**  synchronize the browser's rules array with our own @private */
   sparseArrayDidReplace: function(array, idx, amt, objects) {
     var cssRules = objects.collect(function(obj) { return obj.rule; }) ;
     this.styleSheet.rules.replace(idx, amt, cssRules) ;

@@ -18,24 +18,27 @@ sc_require("system/gesture");
 SC.PinchGesture = SC.Gesture.extend(
 /** @scope SC.PinchGesture.prototype */{
 
-  /** @private Whether we have started pinching or not.
+  /**  Whether we have started pinching or not.
 
     @type Boolean
     @default false
+    @private
   */
   _sc_isPinching: false,
 
-  /** @private The previous distance between touches.
+  /**  The previous distance between touches.
 
     @type Number
     @default null
+    @private
   */
   _sc_pinchAnchorD: null,
 
-  /** @private The initial scale of the view before pinching.
+  /**  The initial scale of the view before pinching.
 
     @type Number
     @default null
+    @private
   */
   _sc_pinchAnchorScale: null,
 
@@ -66,7 +69,7 @@ SC.PinchGesture = SC.Gesture.extend(
     */
   // pinchStartThreshold: 3,
 
-  /** @private Cleans up the touch session. */
+  /**  Cleans up the touch session. @private */
   _sc_cleanUpTouchSession: function () {
     // If we were pinching before, end the pinch immediately.
     if (this._sc_isPinching) {
@@ -83,7 +86,7 @@ SC.PinchGesture = SC.Gesture.extend(
     this._sc_pinchAnchorD = null;
   },
 
-  /** @private Shared function for when a touch ends or cancels. */
+  /**  Shared function for when a touch ends or cancels. @private */
   _sc_touchFinishedInSession: function (touch, touchesInSession) {
     // If there are more than two touches, keep monitoring for pinches by updating _sc_pinchAnchorD.
     if (touchesInSession.length > 1) {
@@ -99,7 +102,7 @@ SC.PinchGesture = SC.Gesture.extend(
     }
   },
 
-  /** @private Triggers pinchEnd and resets _sc_isPinching if enough time has passed. */
+  /**  Triggers pinchEnd and resets _sc_isPinching if enough time has passed. @private */
   _sc_triggerPinchEnd: function () {
     // If a pinch came in since the time the timer was registered, set up a new timer for the
     // remaining time.

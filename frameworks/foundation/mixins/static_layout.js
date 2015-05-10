@@ -6,7 +6,7 @@
 // ==========================================================================
 
 /**
-  @namespace
+  
 
   SC.StaticLayout is now built in to SC.View.  You do not need to
   apply this mixin to use static layout.  Just set useStaticLayout to YES.
@@ -60,6 +60,7 @@
 
   @deprecated Version 1.10
   @since SproutCore 1.0
+  @namespace
 */
 SC.StaticLayout = {
 

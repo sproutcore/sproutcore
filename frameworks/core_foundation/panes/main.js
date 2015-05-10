@@ -31,7 +31,7 @@ sc_require('panes/pane_statechart');
   @since SproutCore 1.0
 */
 SC.MainPane = SC.Pane.extend({
-  /** @private */
+  /**  @private */
   layout: { minHeight: 200, minWidth: 200 },
 
   /**
@@ -60,7 +60,7 @@ SC.MainPane = SC.Pane.extend({
     this.resignKeyPane();
   },
 
-  /** @private The 'updatedLayout' event. */
+  /**  The 'updatedLayout' event. @private */
   _updatedLayout: function () {
     sc_super();
 
@@ -68,9 +68,9 @@ SC.MainPane = SC.Pane.extend({
     this.setBodyOverflowIfNeeded();
   },
 
-  /** @private */
+  /**  @private */
   acceptsKeyPane: YES,
 
-  /** @private */
+  /**  @private */
   classNames: ['sc-main']
 });

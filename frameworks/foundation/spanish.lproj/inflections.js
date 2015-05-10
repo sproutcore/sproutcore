@@ -5,11 +5,12 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/** @private
+/** 
   Active Support style inflection constants
+  @private
 */
 SC.hashesForLocale('es', 'inflectionConstants', {
-  /** @private */
+  /**  @private */
   PLURAL: [
     [/([^aeéiou])$/i, '$1es'],
     [/([aeiou]s)$/i, '$1'],
@@ -22,17 +23,17 @@ SC.hashesForLocale('es', 'inflectionConstants', {
     [/$/, "s"]
   ],
 
-  /** @private */
+  /**  @private */
   SINGULAR: [
     [/es$/i, ''],
     [/s$/i, ""]
   ],
 
-  /** @private */
+  /**  @private */
   IRREGULAR: [
     ['el', 'los']
   ],
 
-  /** @private */
+  /**  @private */
   UNCOUNTABLE: []
 });

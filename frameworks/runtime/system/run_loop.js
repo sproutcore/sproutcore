@@ -75,7 +75,7 @@ SC.RunLoop = SC.Object.extend(
   /**
     YES when a run loop is in progress
 
-    @property
+    @member
     @type Boolean
   */
   isRunLoopInProgress: function () {
@@ -360,13 +360,14 @@ SC.RunLoop = SC.Object.extend(
     return hadContent;
   },
 
-  /** @private
+  /** 
     Schedules the run loop to run at the given time.  If the run loop is
     already scheduled to run earlier nothing will change, but if the run loop
     is not scheduled or it is scheduled later, then it will be rescheduled
     to the value of nextTimeoutAt.
 
     @returns timeoutID {Number} The ID of the timeout to start the next run of the run loop
+    @private
   */
   scheduleRunLoop: function (nextTimeoutAt) {
     /*jshint eqnull:true*/
@@ -384,10 +385,11 @@ SC.RunLoop = SC.Object.extend(
     return this._timeout;
   },
 
-  /** @private
+  /** 
     Invoked when a timeout actually fires.  Simply cleanup, then begin and end
     a runloop. Note that this function will be called with 'this' set to the
     global context, hence the need to lookup the current run loop.
+    @private
   */
   _timeoutDidFire: function () {
     var rl = SC.RunLoop.currentRunLoop;
@@ -395,7 +397,7 @@ SC.RunLoop = SC.Object.extend(
     SC.run();  // begin/end runloop to trigger timers.
   },
 
-  /** @private Unschedule the run loop that is scheduled for the given timeoutID */
+  /**  Unschedule the run loop that is scheduled for the given timeoutID @private */
   unscheduleRunLoop: function () {
     // Don't unschedule if the timeout is shared with an invokeNext timeout.
     if (!this._invokeNextTimeout) {

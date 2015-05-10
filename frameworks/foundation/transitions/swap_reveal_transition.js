@@ -29,7 +29,7 @@ SC.mixin(SC.ContainerView,
   */
   REVEAL: {
 
-    /** @private */
+    /**  @private */
     buildInToView: function (statechart, container, content, previousStatechart, options) {
       // This transition is unique in that we have to wait for the previous
       // content to finish building out entirely, before we can be considered
@@ -39,7 +39,7 @@ SC.mixin(SC.ContainerView,
       // }
     },
 
-    /** @private */
+    /**  @private */
     // reverseBuildIn: function (statechart, container, content, options) {
     //   var nextStatechart = container._currentStatechart;
 
@@ -52,7 +52,7 @@ SC.mixin(SC.ContainerView,
     //   }
     // },
 
-    /** @private */
+    /**  @private */
     // previousStateDidChange: function (previousStatechart, key, alwaysNull, statechart) {
     //   if (previousStatechart.state === 'exited') {
     //     statechart.entered();
@@ -62,13 +62,13 @@ SC.mixin(SC.ContainerView,
     //   }
     // },
 
-    /** @private */
+    /**  @private */
     didBuildInToView: function (container, content, options) {
       // Convert to a flexible layout.
       content.adjust({ bottom: 0, right: 0, height: null, width: null, zIndex: null });
     },
 
-    /** @private */
+    /**  @private */
     willBuildOutFromView: function (container, content, options, exitCount) {
       var frame = container.get('frame'),
         height,
@@ -81,7 +81,7 @@ SC.mixin(SC.ContainerView,
       content.adjust({ bottom: null, right: null, height: height, width: width, zIndex: exitCount });
     },
 
-    /** @private */
+    /**  @private */
     buildOutFromView: function (statechart, container, content, options, exitCount) {
       // We can call this transition repeatedly without effecting the current exit transition.
       if (exitCount === 1) {
@@ -118,7 +118,7 @@ SC.mixin(SC.ContainerView,
       }
     },
 
-    /** @private */
+    /**  @private */
     // reverseBuildOut: function (statechart, container, content, options) {
     //   var key, value;
 
@@ -146,7 +146,7 @@ SC.mixin(SC.ContainerView,
     //   });
     // },
 
-    /** @private */
+    /**  @private */
     didBuildOutFromView: function (container, content, options) {
       // Convert to a flexible layout.
       content.adjust({ top: 0, left: 0, bottom: 0, right: 0, height: null, width: null, zIndex: null });

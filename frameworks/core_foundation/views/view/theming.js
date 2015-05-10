@@ -31,8 +31,9 @@ SC.View.reopen(
 
     This property is private for the time being.
 
-    @private
+    
     @type String
+    @private
   */
   baseThemeName: null,
 
@@ -97,8 +98,9 @@ SC.View.reopen(
     it will look to see if SC.AceTheme has a child theme named 'popover',
     and _then_, if it is not found, look globally.
 
-    @private
+    
     @property {SC.Theme}
+    @private
   */
   baseTheme: function() {
     var parent;
@@ -243,7 +245,7 @@ SC.View.reopen(
 
 /**
   @class
-  @private
+  
   View Render Delegate Proxies are tool SC.Views use to:
 
   - look up 'display*' ('displayTitle' instead of 'title') to help deal with
@@ -254,6 +256,7 @@ SC.View.reopen(
   based on the view's displayProperties.
 
   This tool is not useful outside of SC.View itself, and as such, is private.
+  @private
 */
 SC.View._RenderDelegateProxy = {
 

@@ -203,12 +203,12 @@ SC.CoreView.reopen(
   //@if(debug)
   /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */
 
-  /** @private Creates string representation of view, with view state. */
+  /**  Creates string representation of view, with view state. @private */
   toString: function () {
     return "%@ (%@)".fmt(sc_super(), this._viewStateString());
   },
 
-  /** @private Creates string representation of view state.  */
+  /**  Creates string representation of view state.  @private */
   _viewStateString: function () {
     var ret = [], state = this.get('viewState');
 
@@ -286,7 +286,7 @@ SC.CoreView.reopen(
     return (this.get('viewState') & SC.CoreView.IS_ATTACHED) > 0;
   }.property('viewState').cacheable(),
 
-  /** @private
+  /** 
     Whether the view's layer exists or not.
 
     When the view's layer is created, this value will be true.  This includes
@@ -296,6 +296,7 @@ SC.CoreView.reopen(
     @type Boolean
     @default false
     @readonly
+    @private
   */
   // NOTE: This property is of little value, so it's private in case we decide to toss it.
   _isRendered: function () {
@@ -329,7 +330,7 @@ SC.CoreView.reopen(
   // Actions (Locked down to the proper state)
   //
 
-  /** @private Adopt this view action. */
+  /**  Adopt this view action. @private */
   _doAdopt: function (parentView, beforeView) {
     var curParentView = this.get('parentView'),
       handled = true,
@@ -431,7 +432,7 @@ SC.CoreView.reopen(
     return handled;
   },
 
-  /** @private Attach this view action. */
+  /**  Attach this view action. @private */
   _doAttach: function (parentNode, nextNode) {
     var state = this.get('viewState'),
       transitionIn = this.get('transitionIn'),
@@ -542,7 +543,7 @@ SC.CoreView.reopen(
     return isHandled;
   },
 
-  /** @private Destroy the layer of this view action. */
+  /**  Destroy the layer of this view action. @private */
   _doDestroyLayer: function () {
     var state = this.get('viewState'),
       isHandled = false;
@@ -583,7 +584,7 @@ SC.CoreView.reopen(
     return isHandled;
   },
 
-  /** @private Detach this view action. */
+  /**  Detach this view action. @private */
   _doDetach: function (immediately) {
     var state = this.get('viewState'),
       transitionOut = this.get('transitionOut'),
@@ -716,7 +717,7 @@ SC.CoreView.reopen(
     return shouldHandle;
   },
 
-  /** @private Hide this view action. */
+  /**  Hide this view action. @private */
   _doHide: function () {
     var state = this.get('viewState'),
       transitionHide = this.get('transitionHide'),
@@ -816,7 +817,7 @@ SC.CoreView.reopen(
     return shouldHandle;
   },
 
-  /** @private Orphan this view action. */
+  /**  Orphan this view action. @private */
   _doOrphan: function () {
     var parentView = this.get('parentView'),
       handled = true;
@@ -846,7 +847,7 @@ SC.CoreView.reopen(
     return handled;
   },
 
-  /** @private Render this view action. */
+  /**  Render this view action. @private */
   _doRender: function () {
     var state = this.get('viewState'),
         shouldHandle = true;
@@ -896,7 +897,7 @@ SC.CoreView.reopen(
     return shouldHandle;
   },
 
-  /** @private Show this view action. */
+  /**  Show this view action. @private */
   _doShow: function () {
     var state = this.get('viewState'),
         transitionShow = this.get('transitionShow'),
@@ -1002,7 +1003,7 @@ SC.CoreView.reopen(
     return shouldHandle;
   },
 
-  /** @private Update this view's contents action. */
+  /**  Update this view's contents action. @private */
   _doUpdateContent: function (force) {
     var isVisibleInWindow = this.get('isVisibleInWindow'),
       handled = true;
@@ -1099,7 +1100,7 @@ SC.CoreView.reopen(
     }
   },
 
-  /** @private The 'adopted' event. */
+  /**  The 'adopted' event. @private */
   _adopted: function (beforeView) {
     // Notify all of our descendents that our parent has changed. They will update their `pane` value
     // for one. Bottom-up in case a parent view modifies children when its pane changes for any
@@ -1112,7 +1113,7 @@ SC.CoreView.reopen(
     if (parentView.didAddChild) { parentView.didAddChild(this, beforeView); }
   },
 
-  /** @private The 'orphaned' event. */
+  /**  The 'orphaned' event. @private */
   _orphaned: function (oldParentView) {
     // It's not necessary to send notice to destroyed views.
     if (!this.isDestroyed) {
@@ -1130,57 +1131,57 @@ SC.CoreView.reopen(
   // States
   //
 
-  /** @private */
+  /**  @private */
   _gotoAttachedBuildingInState: function () {
     this.set('viewState', SC.CoreView.ATTACHED_BUILDING_IN);
   },
 
-  /** @private */
+  /**  @private */
   _gotoAttachedBuildingOutState: function () {
     this.set('viewState', SC.CoreView.ATTACHED_BUILDING_OUT);
   },
 
-  /** @private */
+  /**  @private */
   _gotoAttachedBuildingOutByParentState: function () {
     this.set('viewState', SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT);
   },
 
-  /** @private */
+  /**  @private */
   _gotoAttachedHiddenState: function () {
     this.set('viewState', SC.CoreView.ATTACHED_HIDDEN);
   },
 
-  /** @private */
+  /**  @private */
   _gotoAttachedHiddenByParentState: function () {
     this.set('viewState', SC.CoreView.ATTACHED_HIDDEN_BY_PARENT);
   },
 
-  /** @private */
+  /**  @private */
   _gotoAttachedHidingState: function () {
     this.set('viewState', SC.CoreView.ATTACHED_HIDING);
   },
 
-  /** @private */
+  /**  @private */
   _gotoAttachedShowingState: function () {
     this.set('viewState', SC.CoreView.ATTACHED_SHOWING);
   },
 
-  /** @private */
+  /**  @private */
   _gotoAttachedShownState: function () {
     this.set('viewState', SC.CoreView.ATTACHED_SHOWN);
   },
 
-  /** @private */
+  /**  @private */
   _gotoUnattachedState: function () {
     this.set('viewState', SC.CoreView.UNATTACHED);
   },
 
-  /** @private */
+  /**  @private */
   _gotoAttachedPartialState: function () {
     this.set('viewState', SC.CoreView.ATTACHED_PARTIAL);
   },
 
-  /** @private */
+  /**  @private */
   _gotoUnrenderedState: function () {
     this.set('viewState', SC.CoreView.UNRENDERED);
   },
@@ -1189,7 +1190,7 @@ SC.CoreView.reopen(
   // Methods
   //
 
-  /** @private Adds observers once a view has a layer. */
+  /**  Adds observers once a view has a layer. @private */
   _sc_addRenderedStateObservers: function () {
     var displayProperties,
       len, idx;
@@ -1205,20 +1206,20 @@ SC.CoreView.reopen(
     this.addObserver('isFirstResponder', this, this._isFirstResponderDidChange);
   },
 
-  /** @private Called when an ancestor's parent changed. */
+  /**  Called when an ancestor's parent changed. @private */
   _ancestorDidChangeParent: function () {
     // When an ancestor changes, the pane may have changed.
     this.notifyPropertyChange('pane');
   },
 
-  /** @private Clear building in transition. */
+  /**  Clear building in transition. @private */
   _cancelTransition: function () {
     // Cancel conflicting transitions. This causes the animation callback to fire.
     this.cancelAnimation();
     // this._teardownTransition();
   },
 
-  /** @private */
+  /**  @private */
   _doUpdateVisibleStyle: function () {
     var isVisible = this.get('isVisible');
 
@@ -1229,7 +1230,7 @@ SC.CoreView.reopen(
     this._visibleStyleNeedsUpdate = false;
   },
 
-  /** @private Destroys the layer and updates the state. */
+  /**  Destroys the layer and updates the state. @private */
   _teardownLayer: function () {
     this._notifyWillDestroyLayer();
 
@@ -1253,7 +1254,7 @@ SC.CoreView.reopen(
     this._gotoUnrenderedState();
   },
 
-  /** @private Attaches the view. */
+  /**  Attaches the view. @private */
   _executeDoAttach: function () {
     var notifyStack = []; // Only those views that changed state get added to the stack.
 
@@ -1276,7 +1277,7 @@ SC.CoreView.reopen(
     this._notifyDidAttach();
   },
 
-  /** @private Builds out the view. */
+  /**  Builds out the view. @private */
   _executeDoBuildOut: function (immediately, inPlace) {
     if (immediately) {
       // Detach immediately.
@@ -1307,7 +1308,7 @@ SC.CoreView.reopen(
     }
   },
 
-  /** @private Detaches the view and updates the state. */
+  /**  Detaches the view and updates the state. @private */
   _executeDoDetach: function () {
     var notifyStack = []; // Only those views that changed state get added to the stack.
 
@@ -1343,7 +1344,7 @@ SC.CoreView.reopen(
     this._callOnChildViews('_parentDidDetach', true);
   },
 
-  /** @private Hides the view. */
+  /**  Hides the view. @private */
   _executeDoHide: function () {
     var notifyStack = []; // Only those views that changed state get added to the stack.
 
@@ -1390,7 +1391,7 @@ SC.CoreView.reopen(
     this._notifyDidHideInDocument();
   },
 
-  /** @private Render the view's layer. */
+  /**  Render the view's layer. @private */
   _executeDoRender: function () {
     var notifyStack = []; // Only those views that changed state get added to the stack.
 
@@ -1422,7 +1423,7 @@ SC.CoreView.reopen(
     this._notifyDidRender();
   },
 
-  /** @private Shows the view. */
+  /**  Shows the view. @private */
   _executeDoShow: function () {
     // var notifyStack = []; // Only those views that changed state get added to the stack.
 
@@ -1446,7 +1447,7 @@ SC.CoreView.reopen(
     this._notifyDidShowInDocument();
   },
 
-  /** @private Updates the layer. */
+  /**  Updates the layer. @private */
   _executeDoUpdateContent: function () {
     var mixins = this.renderMixin,
       context = this.renderContext(this.get('layer'));
@@ -1488,7 +1489,7 @@ SC.CoreView.reopen(
     }
   },
 
-  /** @private */
+  /**  @private */
   _executeQueuedUpdates: function () {
 
     // Update visibility style if necessary.
@@ -1502,12 +1503,13 @@ SC.CoreView.reopen(
     }
   },
 
-  /** @private
+  /** 
     Marks the view as needing a visibility update if the isVisible property
     changes.
 
     This observer is connected when the view is attached and is disconnected
     when the view is detached.
+    @private
   */
   _isVisibleDidChange: function () {
     if (this.get('isVisible')) {
@@ -1522,11 +1524,12 @@ SC.CoreView.reopen(
     }
   },
 
-  /** @private
+  /** 
     Adds the 'focus' class to the view.
 
     This observer is connected when the view is attached and is disconnected
     when the view is detached.
+    @private
   */
   _isFirstResponderDidChange: function () {
     var isFirstResponder = this.get('isFirstResponder');
@@ -1534,7 +1537,7 @@ SC.CoreView.reopen(
     this.$().toggleClass('focus', isFirstResponder);
   },
 
-  /** @private Attempts to call `didAppendToDocument` on the view. */
+  /**  Attempts to call `didAppendToDocument` on the view. @private */
   _notifyDidAttach: function () {
     // If we don't have the layout module then we don't know the frame until appended to the document.
     this.notifyPropertyChange('frame');
@@ -1543,12 +1546,12 @@ SC.CoreView.reopen(
     if (this.didAppendToDocument) { this.didAppendToDocument(); }
   },
 
-  /** @private Attempts to call `didHideInDocument` on the view. */
+  /**  Attempts to call `didHideInDocument` on the view. @private */
   _notifyDidHideInDocument: function () {
     if (this.didHideInDocument) { this.didHideInDocument(); }
   },
 
-  /** @private Attempts to call `didCreateLayer` on the view. */
+  /**  Attempts to call `didCreateLayer` on the view. @private */
   _notifyDidRender: function () {
     var mixins = this.didCreateLayerMixin,
       idx, len;
@@ -1563,12 +1566,12 @@ SC.CoreView.reopen(
     }
   },
 
-  /** @private Attempts to call `didShowInDocument` on the view. */
+  /**  Attempts to call `didShowInDocument` on the view. @private */
   _notifyDidShowInDocument: function () {
     if (this.didShowInDocument) { this.didShowInDocument(); }
   },
 
-  /** @private Attempts to call `willDestroyLayer` on the view. */
+  /**  Attempts to call `willDestroyLayer` on the view. @private */
   _notifyWillDestroyLayer: function () {
     var idx, len,
       mixins;
@@ -1584,22 +1587,22 @@ SC.CoreView.reopen(
     if (this.willDestroyLayer) { this.willDestroyLayer(); }
   },
 
-  /** @private Attempts to call `willRemoveFromDocument` on the view. */
+  /**  Attempts to call `willRemoveFromDocument` on the view. @private */
   _notifyWillDetach: function () {
     if (this.willRemoveFromDocument) { this.willRemoveFromDocument(); }
   },
 
-  /** @private Attempts to call `willHideInDocument` on the view. */
+  /**  Attempts to call `willHideInDocument` on the view. @private */
   _notifyWillHideInDocument: function () {
     if (this.willHideInDocument) { this.willHideInDocument(); }
   },
 
-  /** @private Attempts to call `willShowInDocument` on the view. */
+  /**  Attempts to call `willShowInDocument` on the view. @private */
   _notifyWillShowInDocument: function () {
     if (this.willShowInDocument) { this.willShowInDocument(); }
   },
 
-  /** @private Routes according to parent did append. */
+  /**  Routes according to parent did append. @private */
   _parentDidAttach: function (notifyStack) {
     var state = this.get('viewState'),
         shouldContinue = true;
@@ -1654,7 +1657,7 @@ SC.CoreView.reopen(
     return shouldContinue;
   },
 
-  /** @private Updates according to parent did cancel build out. */
+  /**  Updates according to parent did cancel build out. @private */
   _parentDidCancelBuildOut: function () {
     var state = this.get('viewState');
 
@@ -1681,7 +1684,7 @@ SC.CoreView.reopen(
     }
   },
 
-  /** @private Update child view states when the parent hides. Top-down! */
+  /**  Update child view states when the parent hides. Top-down! @private */
   _parentDidHideInDocument: function () { // notifyStack
     var state = this.get('viewState'),
         shouldContinue = false;
@@ -1723,7 +1726,7 @@ SC.CoreView.reopen(
     return shouldContinue;
   },
 
-  /** @private Routes according to parent did detach. */
+  /**  Routes according to parent did detach. @private */
   _parentDidDetach: function () {
     var state = this.get('viewState');
 
@@ -1736,7 +1739,7 @@ SC.CoreView.reopen(
     }
   },
 
-  /** @private Configure child views when parent did render. */
+  /**  Configure child views when parent did render. @private */
   _parentDidRender: function (notifyStack) {
     var state = this.get('viewState'),
         shouldContinue = true;
@@ -1774,7 +1777,7 @@ SC.CoreView.reopen(
     return shouldContinue;
   },
 
-  /** @private Update child view states when the parent shows. Top-down! */
+  /**  Update child view states when the parent shows. Top-down! @private */
   _parentDidShowInDocument: function () { // notifyStack
     var state = this.get('viewState'),
         shouldContinue = true;
@@ -1820,7 +1823,7 @@ SC.CoreView.reopen(
     return shouldContinue;
   },
 
-  /** @private Starts building out view if appropriate. */
+  /**  Starts building out view if appropriate. @private */
   _parentWillBuildOutFromDocument: function (owningView) {
     var state = this.get('viewState'),
       transitionOut = this.get('transitionOut'),
@@ -1883,7 +1886,8 @@ SC.CoreView.reopen(
     return shouldContinue;
   },
 
-  /** @private Prepares according to parent will hide. This is called before the parent view hides
+  /**  Prepares according to parent will hide. This is called before the parent view hides
+    @private
     completely, which may be after a hide transition completes. */
   _parentWillHideInDocument: function () { // notifyStack
     var state = this.get('viewState'),
@@ -1936,7 +1940,7 @@ SC.CoreView.reopen(
     return shouldContinue;
   },
 
-  /** @private Clean up before parent is detached. */
+  /**  Clean up before parent is detached. @private */
   _parentWillDetach: function (notifyStack) {
     var state = this.get('viewState'),
         shouldContinue = true;
@@ -1986,7 +1990,7 @@ SC.CoreView.reopen(
     return shouldContinue;
   },
 
-  /** @private Prepares according to parent will show. */
+  /**  Prepares according to parent will show. @private */
   _parentWillShowInDocument: function (notifyStack) {
     var state = this.get('viewState'),
         shouldContinue = true;
@@ -2032,7 +2036,7 @@ SC.CoreView.reopen(
     return shouldContinue;
   },
 
-  /** @private */
+  /**  @private */
   _setupTransition: function (transition) {
     // Get a copy of the layout.
     var layout = SC.clone(this.get('layout'));
@@ -2052,7 +2056,7 @@ SC.CoreView.reopen(
     }
   },
 
-  /** @private */
+  /**  @private */
   _teardownTransition: function () {
     // Make sure this isn't being called twice for the same transition. For example,
     // some transition plugins will send a didTransitionIn/Out event even if the
@@ -2072,7 +2076,7 @@ SC.CoreView.reopen(
     this._transitionLayoutCache = null;
   },
 
-  /** @private Attempts to run a transition hide, ensuring any incoming transitions are stopped in place. */
+  /**  Attempts to run a transition hide, ensuring any incoming transitions are stopped in place. @private */
   _transitionHide: function (inPlace) {
     var transitionHide = this.get('transitionHide'),
       options = this.get('transitionHideOptions') || {};
@@ -2107,7 +2111,7 @@ SC.CoreView.reopen(
     this._gotoAttachedHidingState();
   },
 
-  /** @private Attempts to run a transition in, ensuring any outgoing transitions are stopped in place. */
+  /**  Attempts to run a transition in, ensuring any outgoing transitions are stopped in place. @private */
   _transitionIn: function (inPlace) {
     var transitionIn = this.get('transitionIn'),
       options = this.get('transitionInOptions') || {};
@@ -2134,7 +2138,7 @@ SC.CoreView.reopen(
     this._gotoAttachedBuildingInState();
   },
 
-  /** @private Attempts to run a transition out, ensuring any incoming transitions are stopped in place. */
+  /**  Attempts to run a transition out, ensuring any incoming transitions are stopped in place. @private */
   _transitionOut: function (inPlace, owningView) {
     var transitionOut = this.get('transitionOut'),
       options = this.get('transitionOutOptions') || {};
@@ -2162,7 +2166,7 @@ SC.CoreView.reopen(
     }
   },
 
-  /** @private Attempts to run a transition show, ensuring any hiding transitions are stopped in place. */
+  /**  Attempts to run a transition show, ensuring any hiding transitions are stopped in place. @private */
   _transitionShow: function (inPlace) {
     var transitionShow = this.get('transitionShow'),
       options = this.get('transitionShowOptions') || {};
@@ -2189,7 +2193,7 @@ SC.CoreView.reopen(
     this._gotoAttachedShowingState();
   },
 
-  /** @private Goes to the proper attached state depending on its parents state*/
+  /**  Goes to the proper attached state depending on its parents state@private */
   _gotoSomeAttachedState: function () {
     var parentView = this.get('parentView'),
       isParentHidden = parentView ? parentView.get('viewState') & SC.CoreView.IS_HIDDEN : false,

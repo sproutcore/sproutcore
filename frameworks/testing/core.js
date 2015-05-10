@@ -16,13 +16,14 @@ var sc_resource = sc_resource || function sc_resource() {};
 // map used to exist, this is here for backwards compatibility
 var Q$ = jQuery;
 
-/** @namespace
+/** 
 
   CoreTest is the unit testing library for SproutCore.  It includes a test 
   runner based on QUnit with some useful extensions for testing SproutCore-
   based applications.
   
   You can use CoreTest just like you would use QUnit in your tests directory.
+  @namespace
 */
 CoreTest = {
   
@@ -117,7 +118,7 @@ CoreTest = {
     testing.
 
     @param {String} name the name of the stub to use for logging
-    @param {Function|Hash} func the function or hash
+    @param {(Function|Hash)} func the function or hash
     @returns {Function} stub function
   */
   stub: function(name, func) {  

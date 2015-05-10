@@ -13,7 +13,7 @@ SC.SelectViewMenu = {
   /**
     The SelectView to bind to.
     
-    @property
+    @member
     @type {SC.SelectView}
     @default null
   */
@@ -26,7 +26,7 @@ SC.SelectViewMenu = {
   /**
     The current value of the SelectView.
     
-    @property
+    @member
     @default null
   */
   value: null,
@@ -34,8 +34,9 @@ SC.SelectViewMenu = {
 
 
   /** 
-    @private 
+     
     Invalidates menu items' isChecked property when the selectView's value changes.
+    @private
   */
   valueDidChange: function() {
     var items = this.get('menuItemViews'), idx, len = items.length, item;
@@ -57,7 +58,7 @@ SC.SelectViewMenu = {
     An overridden MenuItemView to create for each menu item that makes itself checked if
     it is selected.
     
-    @property
+    @member
     @type {SC.MenuItemView}
     @default SC.MenuItemView subclass
   */
@@ -79,7 +80,7 @@ SC.SelectViewMenu = {
   // CODE TO BIND TO SELECTVIEW PROPERTIES
   //
   
-  /** @private */
+  /**  @private */
   _svm_bindToProperties: [
     { from: 'displayItems', to: 'items' },
     { from: '_itemTitleKey', to: 'itemTitleKey' },
@@ -92,7 +93,7 @@ SC.SelectViewMenu = {
     'preferType', 'preferMatrix'
   ],
 
-  /** @private */
+  /**  @private */
   _svm_setupBindings: function() {
     var bindTo = this.get('selectView');
     if (!bindTo) {
@@ -114,7 +115,7 @@ SC.SelectViewMenu = {
     this._svm_isBoundTo = bindTo;
   },
 
-  /** @private */
+  /**  @private */
   _svm_clearBindings: function() {
     var boundTo = this._svm_isBoundTo;
     if (!boundTo) {
@@ -133,18 +134,18 @@ SC.SelectViewMenu = {
     }
   },
 
-  /** @private */
+  /**  @private */
   _svm_selectViewDidChange: function() {
     this._svm_clearBindings();
     this._svm_setupBindings();
   }.observes('selectView'),
 
-  /** @private */
+  /**  @private */
   initMixin: function() {
     this._svm_setupBindings();
   },
 
-  /** @private */
+  /**  @private */
   destroyMixin: function() {
     this._svm_clearBindings();
   }

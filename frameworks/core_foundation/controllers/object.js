@@ -258,7 +258,7 @@ SC.ObjectController = SC.Controller.extend(
   // INTERNAL SUPPORT
   //
 
-  /** @private - setup observer on init if needed. */
+  /**  - setup observer on init if needed. @private */
   init: function() {
     sc_super();
     if (this.get('content')) this._scoc_contentDidChange();
@@ -281,10 +281,11 @@ SC.ObjectController = SC.Controller.extend(
     }
   }.observes("content"),
 
-  /**  @private
+  /**  
 
     Called whenever the observable content property changes.  This will setup
     observers on the content if needed.
+    @private
   */
   _scoc_observableContentDidChange: function() {
     var last = this._scoc_observableContent,
@@ -317,11 +318,12 @@ SC.ObjectController = SC.Controller.extend(
 
   }.observes("observableContent"),
 
-  /** @private
+  /** 
     Called when observed enumerable content has changed.  This will teardown
     and setup observers on the enumerable content items and then calls
     contentPropertyDidChange().  This method may be called even if the new
     'cur' is not enumerable but the last content was enumerable.
+    @private
   */
   _scoc_enumerableContentDidChange: function() {
     var cur  = this.get('observableContent'),

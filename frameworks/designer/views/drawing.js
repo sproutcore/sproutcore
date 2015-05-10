@@ -209,9 +209,10 @@ SC.DrawingView = SC.View.extend({
   },
 
   /**
-    @private
+    
 
     Function for actually drawing the shapes that we have listed
+    @private
   */
   _drawShapes: function(cntx){
     var curr;

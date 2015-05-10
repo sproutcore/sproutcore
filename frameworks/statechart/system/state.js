@@ -55,7 +55,7 @@ SC.State = SC.Object.extend(
     return this.getPath('statechart.%@'.fmt(key));
   }.property().cacheable(),
 
-  /** @private */
+  /**  @private */
   _statechartTraceDidChange: function() {
     this.notifyPropertyChange('trace');
   },
@@ -394,7 +394,7 @@ SC.State = SC.Object.extend(
     this.set('stateIsInitialized', YES);
   },
 
-  /** @private
+  /**
 
     Used to bind this state with a route this state is to represent if a route has been assigned.
 
@@ -405,6 +405,7 @@ SC.State = SC.Object.extend(
 
     @see #representRoute
     @see SC.StatechartDelegate#statechartBindStateToRoute
+    @private
   */
   _setupRouteHandling: function() {
     var route = this.get('representRoute'),
@@ -495,7 +496,7 @@ SC.State = SC.Object.extend(
     this.gotoState(this, context);
   },
 
-  /** @private */
+  /**  @private */
   _addEmptyInitialSubstateIfNeeded: function() {
     var initialSubstate = this.get('initialSubstate'),
         substatesAreConcurrent = this.get('substatesAreConcurrent');
@@ -511,7 +512,7 @@ SC.State = SC.Object.extend(
     return state;
   },
 
-  /** @private */
+  /**  @private */
   _addSubstate: function(name, state, attr) {
     var substates = this.get('substates');
 
@@ -603,12 +604,13 @@ SC.State = SC.Object.extend(
     }, attr);
   },
 
-  /** @private
+  /**
 
     Registers event handlers with this state. Event handlers are special
     functions on the state that are intended to handle more than one event. This
     compared to basic functions that only respond to a single event that reflects
     the name of the method.
+    @private
   */
   _registerEventHandler: function(name, handler) {
     var events = handler.events,
@@ -642,11 +644,12 @@ SC.State = SC.Object.extend(
     }
   },
 
-  /** @private
+  /**
 
     Registers state observe handlers with this state. State observe handlers behave just like
     when you apply observes() on a method but will only be active when the state is currently
     entered, otherwise the handlers are inactive until the next time the state is entered
+    @private
   */
   _registerStateObserveHandler: function(name, handler) {
     var i = 0,
@@ -667,9 +670,10 @@ SC.State = SC.Object.extend(
     this._registeredStateObserveHandlers[name] = handler.args;
   },
 
-  /** @private
+  /**
     Will traverse up through this state's parent states to register
     this state with them.
+    @private
   */
   _registerWithParentStates: function() {
     var parent = this.get('parentState');
@@ -679,8 +683,9 @@ SC.State = SC.Object.extend(
     }
   },
 
-  /** @private
+  /**
     Will register a given state as a substate of this state
+    @private
   */
   _registerSubstate: function(state) {
     var path = state.pathRelativeTo(this);
@@ -754,7 +759,7 @@ SC.State = SC.Object.extend(
     You can also optionally provide a target that the callback is invoked on. If no
     target is provided then this state is used as the target.
 
-    @param value {State|String} used to identify a substate of this state
+    @param value {(State|String)} used to identify a substate of this state
     @param [callback] {Function} the callback
     @param [target] {Object} the target
   */
@@ -803,7 +808,7 @@ SC.State = SC.Object.extend(
     return this._notifySubstateNotFound(callback, target, value);
   },
 
-  /** @private */
+  /**  @private */
   _notifySubstateNotFound: function(callback, target, value, keys) {
     return callback ? callback.call(target || this, this, value, keys) : null;
   },
@@ -831,7 +836,7 @@ SC.State = SC.Object.extend(
     return this.getSubstate(value, this._handleSubstateNotFound);
   },
 
-  /** @private */
+  /**  @private */
   _handleSubstateNotFound: function(state, value, keys) {
     var parentState = this.get('parentState');
 
@@ -852,8 +857,8 @@ SC.State = SC.Object.extend(
     If the value given is a string then it is considered a state path expression. The path is then
     used to find a state relative to this state based on rules of the {@link #getState} method.
 
-    @param value {SC.State|String} the state to go to
-    @param [context] {Hash|Object} context object that will be supplied to all states that are
+    @param value {(SC.State|String)} the state to go to
+    @param [context] {(Hash|Object)} context object that will be supplied to all states that are
            exited and entered during the state transition process. Context can not be an instance of
            SC.State.
   */
@@ -890,10 +895,10 @@ SC.State = SC.Object.extend(
 
     Where <value> is either a string or a SC.State object and <hash> is a regular JS hash object.
 
-    @param value {SC.State|String} the state whose history state to go to
+    @param value {(SC.State|String)} the state whose history state to go to
     @param [recusive] {Boolean} indicates whether to follow history states recusively starting
            from the given state
-    @param [context] {Hash|Object} context object that will be supplied to all states that are exited
+    @param [context] {(Hash|Object)} context object that will be supplied to all states that are exited
            entered during the state transition process. Context can not be an instance of SC.State.
   */
   gotoHistoryState: function(value, recursive, context) {
@@ -920,7 +925,7 @@ SC.State = SC.Object.extend(
     Used to check if a given state is a current substate of this state. Mainly used in cases
     when this state is a concurrent state.
 
-    @param state {State|String} either a state object or the name of a state
+    @param state {(State|String)} either a state object or the name of a state
     @returns {Boolean} true is the given state is a current substate, otherwise false is returned
   */
   stateIsCurrentSubstate: function(state) {
@@ -932,7 +937,7 @@ SC.State = SC.Object.extend(
   /**
     Used to check if a given state is a substate of this state that is currently entered.
 
-    @param state {State|String} either a state object of the name of a state
+    @param state {(State|String)} either a state object of the name of a state
     @returns {Boolean} true if the given state is a entered substate, otherwise false is returned
   */
   stateIsEnteredSubstate: function(state) {
@@ -1022,7 +1027,7 @@ SC.State = SC.Object.extend(
       4. If (3) did not find a relative current state then default to returning
          this state's first current substate.
 
-    @param anchor {State|String} Optional. a substate of this state used to help direct
+    @param anchor {(State|String)} Optional. a substate of this state used to help direct
       finding a current state
     @return {SC.State} a current state
   */
@@ -1289,25 +1294,27 @@ SC.State = SC.Object.extend(
     this._isExitingState = NO;
   },
 
-  /** @private
+  /**
 
     Used to setup all the state observer handlers. Should be done when
     the state has been entered.
+    @private
   */
   _setupAllStateObserveHandlers: function() {
     this._configureAllStateObserveHandlers('addObserver');
   },
 
-  /** @private
+  /**
 
     Used to teardown all the state observer handlers. Should be done when
     the state is being exited.
+    @private
   */
   _teardownAllStateObserveHandlers: function() {
     this._configureAllStateObserveHandlers('removeObserver');
   },
 
-  /** @private
+  /**
 
     Primary method used to either add or remove this state as an observer
     based on all the state observe handlers that have been registered with
@@ -1319,6 +1326,7 @@ SC.State = SC.Object.extend(
     will have to do. In the future the code should be refactored so that
     there is one common function that both the observerable mixin and the
     statechart framework use.
+    @private
   */
   _configureAllStateObserveHandlers: function(action) {
     var key, values, dotIndex, path, observer, i, root;
@@ -1365,13 +1373,14 @@ SC.State = SC.Object.extend(
     return SC.Async.perform(func, arg1, arg2);
   },
 
-  /** @override
+  /**
 
     Returns YES if this state can respond to the given event, otherwise
     NO is returned
 
     @param event {String} the value to check
     @returns {Boolean}
+    @override
   */
   respondsToEvent: function(event) {
     if (this._registeredEventHandlers[event]) return false;
@@ -1413,7 +1422,7 @@ SC.State = SC.Object.extend(
     return this.get('fullPath');
   },
 
-  /** @private */
+  /**  @private */
   _statechartOwnerDidChange: function() {
     this.notifyPropertyChange('owner');
   },
@@ -1459,7 +1468,7 @@ SC.State = SC.Object.extend(
       stateA: SC.State.plugin('path.to.state', SomeMixin, { ... })
 
   @param value {String} property path to a state class
-  @param args {Hash,...} Optional. Hash objects to be added to the created state
+  @param args {...Hash} Optional. Hash objects to be added to the created state
 */
 SC.State.plugin = function(value) {
   var args;

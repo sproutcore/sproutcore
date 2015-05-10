@@ -86,7 +86,7 @@ SC.mixin( /** @scope SC */ {
     optionally include the border or border and margin.
 
     @param {Object} point the point as an Object (ie. Hash) in the form { x: value, y: value }.
-    @param {DOMElement|jQuery|String} elem the element to test inclusion within.
+    @param {(DOMElement|jQuery|String)} elem the element to test inclusion within.
       This is passed to `jQuery()`, so any value supported by `jQuery()` will work.
     @param {String} includeFlag flag to determine the dimensions of the element to test within.
       One of either: 'padding', 'border' or 'margin' (default: 'border').

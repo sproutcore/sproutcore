@@ -65,28 +65,28 @@ sc_require('mixins/collection_row_delegate');
 SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
 /** @scope SC.ListView.prototype */ {
 
-  /** @private */
+  /**  @private */
   _sc_customRowSizeIndexes: null,
 
-  /** @private */
+  /**  @private */
   _sc_insertionPointView: null,
 
-  /** @private */
+  /**  @private */
   _sc_lastDropOnView: null,
 
-  /** @private */
+  /**  @private */
   _sc_layout: null,
 
-  /** @private */
+  /**  @private */
   _sc_sizeCache: null,
 
-  /** @private */
+  /**  @private */
   _sc_offsetCache: null,
 
-  /** @private */
+  /**  @private */
   _sc_rowDelegate: null,
 
-  /** @private */
+  /**  @private */
   _sc_rowSize: null,
 
   /**
@@ -102,7 +102,7 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
   */
   acceptsFirstResponder: true,
 
-  /** @private SC.CollectionView.prototype */
+  /**  SC.CollectionView.prototype @private */
   exampleView: SC.ListItemView,
 
   /**
@@ -130,14 +130,14 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
   // METHODS
   //
 
-  /** @private */
+  /**  @private */
   init: function () {
     sc_super();
 
     this._sc_rowDelegateDidChange();
   },
 
-  /** @private SC.CollectionView.prototype.destroy. */
+  /**  SC.CollectionView.prototype.destroy. @private */
   destroy: function () {
     sc_super();
 
@@ -158,7 +158,7 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     }
   },
 
-  /** @private */
+  /**  @private */
   render: function (context, firstTime) {
     context.setClass('alternating', this.get('showAlternatingRows'));
 
@@ -182,7 +182,7 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     return this.delegateFor('isCollectionRowDelegate', del, content);
   }.property('delegate', 'content').cacheable(),
 
-  /** @private - Whenever the rowDelegate changes, begin observing important properties */
+  /**  - Whenever the rowDelegate changes, begin observing important properties @private */
   _sc_rowDelegateDidChange: function () {
     var last = this._sc_rowDelegate,
       del  = this.get('rowDelegate'),
@@ -214,7 +214,7 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     return this;
   }.observes('rowDelegate'),
 
-  /** @private - Called whenever the _sc_totalRowSize changes. If the property actually changed then invalidate all row sizes. */
+  /**  - Called whenever the _sc_totalRowSize changes. If the property actually changed then invalidate all row sizes. @private */
   _sc_rowSizeDidChange: function () {
     var del = this.get('rowDelegate'),
       totalRowSize = del.get('_sc_totalRowSize'),
@@ -229,7 +229,7 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     return this;
   },
 
-  /** @private - Called whenever the customRowSizeIndexes changes. If the property actually changed then invalidate affected row sizes. */
+  /**  - Called whenever the customRowSizeIndexes changes. If the property actually changed then invalidate affected row sizes. @private */
   _sc_customRowSizeIndexesDidChange: function () {
     var del   = this.get('rowDelegate'),
       indexes = del.get('customRowSizeIndexes'),
@@ -256,7 +256,7 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     return this;
   },
 
-  /** @private - Called whenever the customRowSizeIndexes set is modified. */
+  /**  - Called whenever the customRowSizeIndexes set is modified. @private */
   _sc_customRowSizeIndexesContentDidChange: function () {
     var del     = this.get('rowDelegate'),
       indexes = del.get('customRowSizeIndexes'),
@@ -397,7 +397,7 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     This method is called automatically whenever you change the rowSize, rowPadding
     or customRowSizeIndexes properties on the collectionRowDelegate.
 
-    @param {SC.IndexSet|Number} indexes
+    @param {(SC.IndexSet|Number)} indexes
     @returns {SC.ListView} receiver
   */
   rowHeightDidChangeForIndexes: function (indexes) {
@@ -415,7 +415,7 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     This method is called automatically whenever you change the rowSize, rowPadding
     or customRowSizeIndexes properties on the collectionRowDelegate.
 
-    @param {SC.IndexSet|Number} indexes
+    @param {(SC.IndexSet|Number)} indexes
     @returns {SC.ListView} receiver
   */
   rowSizeDidChangeForIndexes: function (indexes) {
@@ -620,7 +620,7 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
       */
     layoutDirection: SC.LAYOUT_VERTICAL,
 
-    /** @private */
+    /**  @private */
     render: function (context, firstTime) {
       if (firstTime) context.push('<div class="anchor"></div>');
     }

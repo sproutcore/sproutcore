@@ -18,12 +18,12 @@ SC.mixin(SC.View,
     /* @private */
     layoutProperties: ['scale'],
 
-    /** @private */
+    /**  @private */
     setup: function (view, options, inPlace) {
       view.adjust({ scale: inPlace ? view.get('layout').scale || 0 : 0 });
     },
 
-    /** @private */
+    /**  @private */
     run: function (view, options, finalLayout, finalFrame) {
       var bigScale,
         duration,
@@ -62,7 +62,7 @@ SC.mixin(SC.View,
     /* @private */
     layoutProperties: ['scale'],
 
-    /** @private */
+    /**  @private */
     run: function (view, options) {
       var bigScale,
         duration,

@@ -156,7 +156,7 @@ SC.TableView = SC.ListView.extend(SC.TableDelegate, {
     A collection of `SC.TableColumn` objects. Modify the array to adjust the
     columns.
 
-    @property
+    @member
     @type Array
   */
   columns: [],
@@ -165,7 +165,7 @@ SC.TableView = SC.ListView.extend(SC.TableDelegate, {
     Which column will alter its size so that the columns fill the available
     width of the table. If `null`, the last column will stretch.
 
-    @property
+    @member
     @type SC.TableColumn
   */
   flexibleColumn: null,
@@ -175,7 +175,7 @@ SC.TableView = SC.ListView.extend(SC.TableDelegate, {
     Doesn't say anything about sorting direction; for that, read the
     `sortState` property of the sorted column.
 
-    @property
+    @member
     @type SC.TableColumn
   */
   sortedColumn: null,
@@ -188,7 +188,7 @@ SC.TableView = SC.ListView.extend(SC.TableDelegate, {
     if YES, the table view will generate a head row at the top of the table
     view.
 
-    @property
+    @member
     @type Boolean
   */
   hasTableHead: YES,
@@ -196,7 +196,7 @@ SC.TableView = SC.ListView.extend(SC.TableDelegate, {
   /**
     The view that serves as the head view for the table (if any).
 
-    @property
+    @member
     @type SC.View
   */
   tableHeadView: SC.TableHeadView.extend({
@@ -206,7 +206,7 @@ SC.TableView = SC.ListView.extend(SC.TableDelegate, {
   /**
     The height of the table head in pixels.
 
-    @property
+    @member
     @type Number
   */
   tableHeadHeight: 18,
@@ -220,7 +220,7 @@ SC.TableView = SC.ListView.extend(SC.TableDelegate, {
     Whether all rows in the table will have the same pixel height. If so, we
     can compute offsets very cheaply.
 
-    @property
+    @member
     @type Boolean
   */
   hasUniformRowHeights: YES,
@@ -228,7 +228,7 @@ SC.TableView = SC.ListView.extend(SC.TableDelegate, {
   /**
     How high each row should be, in pixels.
 
-    @property
+    @member
     @type Number
   */
   rowHeight: 18,
@@ -236,7 +236,7 @@ SC.TableView = SC.ListView.extend(SC.TableDelegate, {
   /**
     Which view to use for a table row.
 
-    @property
+    @member
     @type SC.View
   */
   exampleView: SC.TableRowView,

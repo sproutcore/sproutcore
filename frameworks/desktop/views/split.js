@@ -156,15 +156,16 @@ SC.SplitView = SC.View.extend({
   */
   splitChildCursorStyle: null,
 
-  /** @private
+  /** 
     Only occurs during drag, which only happens after render, so we
     update directly.
+    @private
   */
   _scsv_splitChildCursorDidChange: function() {
     this.get('cursor').set('cursorStyle', this.get('splitChildCursorStyle'));
   }.observes('splitChildCursorStyle'),
 
-  /** @private */
+  /**  @private */
   init: function() {
     // set up the SC.Cursor instance that this view and all the subviews
     // will share.
@@ -183,14 +184,15 @@ SC.SplitView = SC.View.extend({
   // UTILITIES
   //
   /**
-   * @private
+   * 
    * Returns either the width or the height of the SplitView's frame,
    * depending on the value of layoutDirection. If layoutDirection is
    * SC.LAYOUT_HORIZONTAL, this will return the SplitView's width; otherwise,
    * the SplitView's height.
    *
-   * @property
+   * @member
    * @type {Number}
+    @private
   */
   _frameSize: function(){
     if (this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL) {
@@ -200,14 +202,14 @@ SC.SplitView = SC.View.extend({
     }
   }.property('frame', 'layoutDirection').cacheable(),
 
-  /** @private */
+  /**  @private */
   viewDidResize: function () {
     this.scheduleTiling();
 
     sc_super();
   },
 
-  /** @private */
+  /**  @private */
   layoutDirectionDidChange: function() {
     // Schedule tiling.
     this.scheduleTiling();
@@ -305,7 +307,7 @@ SC.SplitView = SC.View.extend({
   },
 
   /**
-   * @private
+   * 
    * During initialization and whenever the child views change, SplitView needs
    * to set some helper properties on the children and create any needed dividers.
    *
@@ -313,6 +315,7 @@ SC.SplitView = SC.View.extend({
    * this is proper, because this updates the nextView, etc. properties appropriately.
    *
    * The helper properties are: previousView, nextView, viewIndex.
+    @private
   */
   _scsv_setupChildViews: function() {
     var del = this.get('delegate'),
@@ -416,7 +419,7 @@ SC.SplitView = SC.View.extend({
   },
 
   /**
-   * @private
+   * 
    * Tiling is the simpler of two layout paths. Tiling lays out all of the
    * children according to their size, and, if shouldResizeChildrenToFit is
    * YES, attempts to resize the children to fit in the SplitView.
@@ -424,6 +427,7 @@ SC.SplitView = SC.View.extend({
    * It is called when the child views are initializing or have changed, and
    * when the SplitView is resized.
    *
+    @private
   */
   _scsv_tile: function() {
     var del = this.get('delegate');
@@ -539,11 +543,12 @@ SC.SplitView = SC.View.extend({
   },
 
   /**
-   * @private
+   * 
    * Utility method used by splitViewResizeChildrenToFit to do the proportionate
    * sizing of child views.
    *
    * @returns {Number} The new runningSize.
+    @private
   */
   _resizeChildrenForSize: function(runningSize, targetSize, useResizable, outOfSize) {
     var del = this.get('delegate');
@@ -649,7 +654,7 @@ SC.SplitView = SC.View.extend({
   },
 
   /**
-   * @private
+   * 
    * Creates a plan in which to prepare changes to the SplitView's children.
    *
    * A plan is an array with the same number of elements as the SplitView has children.
@@ -667,6 +672,7 @@ SC.SplitView = SC.View.extend({
    * than looking them up each time.
    *
    * @returns {Plan}
+    @private
   */
   _scsv_createPlan: function() {
     var del = this.get('delegate'),
@@ -691,12 +697,13 @@ SC.SplitView = SC.View.extend({
   },
 
   /**
-    * @private
+    * 
     * Resets a range of the plan to its original settings.
     *
     * @param {Plan} plan The plan.
     * @param {Number} first The first item in the range.
     * @param {Number} last The last item in the range.
+    @private
    */
    _scsv_resetPlanRange: function(plan, first, last) {
      for (var idx = first; idx <= last; idx++) {
@@ -706,10 +713,11 @@ SC.SplitView = SC.View.extend({
    },
 
   /**
-   * @private
+   * 
    * Commits the changes specified in the plan to the child views.
    *
    * @param {Plan} plan The plan with the changes.
+    @private
   */
   _scsv_commitPlan: function(plan) {
     var del = this.get('delegate'), len = plan.length, idx, item, end = 0;

@@ -107,7 +107,7 @@
 */
 SC.Gesture = SC.Object.extend({
 
-  /** @private Tracks when the gesture is active or not. */
+  /**  Tracks when the gesture is active or not. @private */
   _sc_isActive: false,
 
   /**

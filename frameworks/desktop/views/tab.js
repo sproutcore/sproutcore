@@ -41,17 +41,19 @@ SC.BOTTOM_LOCATION = 'bottom';
 SC.TabView = SC.View.extend(
 /** @scope SC.TabView.prototype */ {
 
-  /** @private
+  /** 
     @type Array
     @default ['sc-tab-view']
     @see SC.View#classNames
+    @private
   */
   classNames: ['sc-tab-view'],
 
-  /** @private
+  /** 
     @type Array
     @default ['nowShowing']
     @see SC.View#displayProperties
+    @private
   */
   displayProperties: ['nowShowing'],
 
@@ -154,7 +156,7 @@ SC.TabView = SC.View.extend(
   // FORWARDING PROPERTIES
   //
 
-  /** @private Sync important changes with the child views. */
+  /**  Sync important changes with the child views. @private */
   _tab_nowShowingDidChange: function() {
     var content = this.get('nowShowing');
 
@@ -191,14 +193,15 @@ SC.TabView = SC.View.extend(
     return this;
   }.observes('nowShowing'),
 
-  /** @private */
+  /**  @private */
   _tab_itemsDidChange: function() {
     this.get('segmentedView').set('items', this.get('items'));
     return this ;
   }.observes('items'),
 
-  /** @private
+  /** 
     Restore userDefault key if set.
+    @private
   */
   init: function() {
     sc_super();
@@ -212,7 +215,7 @@ SC.TabView = SC.View.extend(
     }
   },
 
-  /** @private */
+  /**  @private */
   createChildViews: function() {
     var childViews  = [], containerView, layout,
         tabLocation = this.get('tabLocation'),
@@ -248,15 +251,16 @@ SC.TabView = SC.View.extend(
 
       controlSize: controlSize,
 
-      /** @private
+      /** 
         When the value changes, update the parentView's value as well.
+        @private
       */
       _sc_tab_segmented_valueDidChange: function() {
         var pv = this.get('parentView');
         if (pv) pv.set('nowShowing', this.get('value'));
       }.observes('value'),
 
-      /** @private */
+      /**  @private */
       init: function() {
         // before we setup the rest of the view, copy key config properties
         // from the owner view...

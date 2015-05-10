@@ -26,7 +26,7 @@ SC.mixin(SC.ContainerView,
   */
   FADE_COLOR: {
 
-    /** @private */
+    /**  @private */
     willBuildInToView: function (container, content, previousStatechart, options) {
       var color,
         colorView;
@@ -44,7 +44,7 @@ SC.mixin(SC.ContainerView,
       container.appendChild(colorView);
     },
 
-    /** @private */
+    /**  @private */
     buildInToView: function (statechart, container, content, previousStatechart, options) {
       var childViews = container.get('childViews'),
         colorView;
@@ -76,7 +76,7 @@ SC.mixin(SC.ContainerView,
       });
     },
 
-    /** @private */
+    /**  @private */
     buildOutFromView: function (statechart, container, content, options, exitCount) {
       // Do nothing.
     }

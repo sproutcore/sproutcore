@@ -6,7 +6,7 @@
 // ==========================================================================
 /*globals $A */
 
-/** @namespace
+/** 
 
   This bit of meta-programming magic can install a benchmark handler on any
   object method.  When a benchmark is installed, the time required to execute
@@ -36,6 +36,7 @@
                      Hide this by calling hideChart()
 
   @since SproutCore 1.0
+  @namespace
 */
 SC.Benchmark = {
 
@@ -503,8 +504,9 @@ SC.Benchmark = {
     return YES;
   },
 
-  /** @private
+  /** 
     Because we show a pane to display the chart...
+    @private
   */
   tryToPerform: function(action, sender) {
     if (this[action]) return this[action](sender);
@@ -541,8 +543,9 @@ SC.Benchmark = {
   // Internal Support
   //
 
-  /** @private
+  /** 
     Loads data from both the browser's own event hash and SC's pre-load event hash.
+    @private
   */
   loadPreloadEvents: function() {
     var preloadEvents = SC.benchmarkPreloadEvents, events = [], idx, len, evt;
@@ -577,7 +580,7 @@ SC.Benchmark = {
     this._hasLoadedPreloadEvents = true;
   },
 
-  /** @private
+  /** 
     Some events represent a beginning and end. While this is not common for events
     that take place after the app loads (as they can just use SC.Benchmark.start/end),
     SC.Benchmark.start/end is not available before load—as such, code will add
@@ -585,6 +588,7 @@ SC.Benchmark = {
 
     This method iterates over the event hash and removes those items that represent
     starts and ends, calling .start/.end for them.
+    @private
   */
   _loadBenchmarksFromEvents: function() {
     if (!this._hasLoadedPreloadEvents) this.loadPreloadEvents();
@@ -604,8 +608,9 @@ SC.Benchmark = {
     }
   },
 
-  /** @private
+  /** 
     Generates, sorts, and returns the array of all the data that has been captured.
+    @private
   */
   _compileChartData: function(showSub) {
     this._loadBenchmarksFromEvents();
@@ -657,7 +662,7 @@ SC.Benchmark = {
   },
 
   // Generate the traditional report show multiple runs averaged.
-  /** @private */
+  /**  @private */
   _genReport: function(key) {
     var stat = this._statFor(key),
         avg = (stat.runs > 0) ? (Math.floor(stat.amt * 1000 / stat.runs) / 1000) : 0,
@@ -675,7 +680,7 @@ SC.Benchmark = {
   },
 
   // Generate the report in the form of at time line. This returns the parent.
-  /** @private */
+  /**  @private */
   _timelineGenReport: function(val)
   {
     if(this.globalStartTime)
@@ -689,7 +694,7 @@ SC.Benchmark = {
   },
 
   // Generate the report in the form of at time line. This returns the children.
-  /** @private */
+  /**  @private */
   _timelineGenSubReport: function(val)
   {
     if(this.globalStartTime)
@@ -704,7 +709,7 @@ SC.Benchmark = {
 
   // returns a stats hash for the named key and parent key.  If the hash does not exist yet,
   // creates it.
-  /** @private */
+  /**  @private */
   _subStatFor: function(key, parentKey) {
     var parentStat = this.stats[parentKey],
         parentTimeLen = parentStat ? parentStat._times.length : 0,
@@ -725,7 +730,7 @@ SC.Benchmark = {
 
   // returns a stats hash for the named key.  If the hash does not exist yet,
   // creates it.
-  /** @private */
+  /**  @private */
   _statFor: function(key) {
     var ret = this.stats[key];
     if (!ret) {
@@ -736,17 +741,17 @@ SC.Benchmark = {
     return ret;
   },
 
-  /** @private */
+  /**  @private */
   reset: function() { this.stats = {} ; },
 
   // This is private, but it is used in some places, so we are keeping this for
   // compatibility.
-  /** @private */
+  /**  @private */
   _bench: function(func, name) {
     SC.Benchmark.bench(func, name, 1) ;
   },
 
-  /** @private */
+  /**  @private */
   _benchCount: 1
 
 } ;

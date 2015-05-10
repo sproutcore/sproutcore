@@ -82,22 +82,22 @@ SC.SwipeGesture = SC.Gesture.extend(
   // - Properties --------------------------------------------------------------------
   //
 
-  /** @private The last approved angle. Is set as long as a swipe appears valid. */
+  /**  The last approved angle. Is set as long as a swipe appears valid. @private */
   _sc_lastAngle: null,
 
-  /** @private The last computed distance. Is set as long as a swipe appears valid. */
+  /**  The last computed distance. Is set as long as a swipe appears valid. @private */
   _sc_lastDistance: null,
 
-  /** @private The number of touches in the current swipe. */
+  /**  The number of touches in the current swipe. @private */
   _sc_numberOfTouches: 0,
 
-  /** @private The initial point where a swipe appears to begin. */
+  /**  The initial point where a swipe appears to begin. @private */
   _sc_swipeAnchorX: null,
 
-  /** @private The initial point where a swipe appears to begin. */
+  /**  The initial point where a swipe appears to begin. @private */
   _sc_swipeAnchorY: null,
 
-  /** @private The last time a movement in a swipe was recorded. */
+  /**  The last time a movement in a swipe was recorded. @private */
   _sc_swipeLastMovedAt: null,
 
   /**
@@ -207,7 +207,7 @@ SC.SwipeGesture = SC.Gesture.extend(
   // - Methods --------------------------------------------------------------------
   //
 
-  /** @private Cleans up the touch session. */
+  /**  Cleans up the touch session. @private */
   _sc_cleanUpTouchSession: function (wasCancelled) {
     // Clean up.
     this._sc_numberOfTouches = 0;
@@ -218,7 +218,7 @@ SC.SwipeGesture = SC.Gesture.extend(
     this._sc_swipeAnchorY = null;
   },
 
-  /** @private Timer used to tell if swipe was too slow. */
+  /**  Timer used to tell if swipe was too slow. @private */
   _sc_swipeTooSlow: function () {
     // The session took to long to finish from when a swipe appeared to start. Reset.
     this._sc_cleanUpTouchSession();
@@ -285,7 +285,7 @@ SC.SwipeGesture = SC.Gesture.extend(
     return true;
   },
 
-  /** @private Test the given angle against an approved angle. */
+  /**  Test the given angle against an approved angle. @private */
   _sc_testAngle: function (absoluteCurrentAngle, currentIsPositive, approvedAngle, tolerance) {
     var angleIsPositive = approvedAngle >= 0,
         absoluteAngle = !angleIsPositive ? Math.abs(approvedAngle) : approvedAngle,

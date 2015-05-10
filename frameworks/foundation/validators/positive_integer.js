@@ -22,7 +22,7 @@ SC.Validator.PositiveInteger = SC.Validator.extend(
     Default Value to be displayed. If the value in the text field is null,
     undefined or an empty string, it will be replaced by this value.
 
-    @property
+    @member
     @type Number
     @default null
   */

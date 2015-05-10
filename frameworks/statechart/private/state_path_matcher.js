@@ -90,7 +90,7 @@ SC.StatePathMatcher = SC.Object.extend(
     this._parseExpression();
   },
   
-  /** @private 
+  /**  
   
     Will parse the matcher's given expession by creating tokens and chaining them
     together.
@@ -101,6 +101,7 @@ SC.StatePathMatcher = SC.Object.extend(
     type of parser.
     
     @see #expression
+    @private
   */
   _parseExpression: function() {
     var parts = this.expression ? this.expression.split('.') : [],
@@ -175,7 +176,7 @@ SC.StatePathMatcher = SC.Object.extend(
     return this._chain.match();
   },
   
-  /** @private */
+  /**  @private */
   _pop: function() {
     this._lastPopped = this._stack.pop();
     return this._lastPopped;
@@ -183,9 +184,10 @@ SC.StatePathMatcher = SC.Object.extend(
 
 });
 
-/** @private @class
+/**  @class
 
   Base class used to represent a token the expression
+  @private
 */
 SC.StatePathMatcher._Token = SC.Object.extend({
   
@@ -212,12 +214,13 @@ SC.StatePathMatcher._Token = SC.Object.extend({
   
 });
 
-/** @private @class
+/**  @class
 
   Represents a basic name of a state in the expression. Ex 'foo'. 
   
   A match is true if the matcher's current path stack is popped and the
   result matches this token's value.
+  @private
 */
 SC.StatePathMatcher._BasicToken = SC.StatePathMatcher._Token.extend({
     
@@ -238,7 +241,7 @@ SC.StatePathMatcher._BasicToken = SC.StatePathMatcher._Token.extend({
     
 });
   
-/** @private @class
+/**  @class
 
   Represents an expanding path based on the use of the '<start>~<end>' syntax.
   <start> represents the start and <end> represents the end. 
@@ -246,6 +249,7 @@ SC.StatePathMatcher._BasicToken = SC.StatePathMatcher._Token.extend({
   A match is true if the matcher's current path stack is first popped to match 
   <end> and eventually is popped to match <start>. If neither <end> nor <start>
   are satified then false is retuend.
+  @private
 */
 SC.StatePathMatcher._ExpandToken = SC.StatePathMatcher._Token.extend({
     
@@ -278,7 +282,7 @@ SC.StatePathMatcher._ExpandToken = SC.StatePathMatcher._Token.extend({
     
 });
 
-/** @private @class
+/**  @class
   
   Represents a this token, which is used to represent the owner's
   `state` property.
@@ -286,6 +290,7 @@ SC.StatePathMatcher._ExpandToken = SC.StatePathMatcher._Token.extend({
   A match is true if the last path part popped from the owner's
   current path stack is an immediate substate of the state this
   token represents.
+  @private
 */
 SC.StatePathMatcher._ThisToken = SC.StatePathMatcher._Token.extend({
     

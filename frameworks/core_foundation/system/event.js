@@ -78,8 +78,9 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
   */
   MOUSE_WHEEL_DELTA_LIMIT: 1000,
 
-  /** @private
+  /**
     We only want to invalidate once
+    @private
   */
   _MOUSE_WHEEL_LIMIT_INVALIDATED: NO,
 
@@ -521,8 +522,10 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
     },
 
-    /** @private
-        Implement support for mouseenter on browsers other than IE */
+    /**
+        Implement support for mouseenter on browsers other than IE
+        @private
+        */
     mouseenter: {
       setup: function() {
         if ( SC.browser.name === SC.BROWSER.ie ) return NO;
@@ -546,8 +549,10 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
       }
     },
 
-    /** @private
-        Implement support for mouseleave on browsers other than IE */
+    /**
+        Implement support for mouseleave on browsers other than IE
+        @private
+        */
     mouseleave: {
       setup: function() {
         if ( SC.browser.name === SC.BROWSER.ie ) return NO;
@@ -600,7 +605,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     return parent === elem;
   },
 
-  /** @private
+  /**
     Adds the primary event listener for the named type on the element.
 
     If the event type has a special handler defined in SC.Event.special,
@@ -609,6 +614,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
     @param elem {Element} the target element
     @param eventType {String} the event type
+    @private
   */
   _addEventListener: function(elem, eventType, useCapture) {
     var listener,
@@ -647,7 +653,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     elem = special = listener = null; // avoid memory leak
   },
 
-  /** @private
+  /**
     Removes the primary event listener for the named type on the element.
 
     If the event type has a special handler defined in SC.Event.special,
@@ -659,6 +665,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
     @param elem {Element} the target element
     @param eventType {String} the event type
+    @private
   */
   _removeEventListener: function(elem, eventType) {
     var listener, special = SC.Event.special[eventType] ;
@@ -683,7 +690,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
   // implement preventDefault() in a cross platform way
 
-  /** @private Take an incoming event and convert it to a normalized event. */
+  /**  Take an incoming event and convert it to a normalized event. @private */
   normalizeEvent: function (event) {
     var ret;
 
@@ -719,7 +726,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
   _global: {},
 
-  /** @private properties to copy from native event onto the event */
+  /**  properties to copy from native event onto the event @private */
   // TODO: Remove this needless copy.
   _props: ['altKey', 'attrChange', 'attrName', 'bubbles', 'button', 'cancelable', 'charCode', 'clientX', 'clientY', 'ctrlKey', 'currentTarget', 'data', 'detail', 'fromElement', 'handler', 'keyCode', 'metaKey', 'newValue', 'originalTarget', 'pageX', 'pageY', 'prevValue', 'relatedNode', 'relatedTarget', 'screenX', 'screenY', 'shiftKey', 'srcElement', 'target', 'timeStamp', 'toElement', 'type', 'view', 'which', 'touches', 'targetTouches', 'changedTouches', 'animationName', 'elapsedTime', 'dataTransfer']
 
@@ -736,7 +743,7 @@ SC.Event.prototype = {
   */
   hasCustomEventHandling: false,
 
-  /** @private Clear out the originalEvent from the SC.Event instance. */
+  /**  Clear out the originalEvent from the SC.Event instance. @private */
   _sc_clearNormalizedEvent: function () {
     // Remove the original event.
     this.originalEvent = null;
@@ -770,7 +777,7 @@ SC.Event.prototype = {
     this.wheelDeltaX = null;
   },
 
-  /** @private Update the SC.Event instance with the new originalEvent. */
+  /**  Update the SC.Event instance with the new originalEvent. @private */
   _sc_updateNormalizedEvent: function (originalEvent) {
     var idx, len;
 

@@ -119,6 +119,7 @@ SC.OS = {
 /**
   Detects browser properties based on the given userAgent and language.
 
+  
   @private
 */
 SC.detectBrowser = function (userAgent, language) {

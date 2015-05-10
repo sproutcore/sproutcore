@@ -344,10 +344,11 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
 
   /**
     @method
-    @private
+    
 
     Called by commitEditing and discardEditing to actually end editing.
 
+    @private
   */
   _endEditing: function(original) {
     var ret = original();
@@ -367,7 +368,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
 
   // TODO: make textArea automatically resize to fit content
 
-  /** @private */
+  /**  @private */
   mouseDown: function(e) {
     arguments.callee.base.call(this, e) ;
     return this.get('isEditing');
@@ -385,13 +386,13 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
 
   // [Safari] if you don't take key focus away from an element before you
   // remove it from the DOM key events are no longer sent to the browser.
-  /** @private */
+  /**  @private */
   willRemoveFromParent: function() {
     return this._scitf_blurInput();
   },
 
   // ask owner to end editing.
-  /** @private */
+  /**  @private */
   willLoseFirstResponder: function(responder, evt) {
     if (responder !== this) return;
 
@@ -423,7 +424,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
   // Invoked when the user presses return.  If this is a multi-line field,
   // then allow the new line to proceed by calling the super class.
   // Otherwise, try to commit the edit.
-  /** @private */
+  /**  @private */
   insertNewline: function(evt) {
     if (this.get('isTextArea')) {
       return sc_super();
@@ -435,7 +436,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
 
   // Tries to find the next key view when tabbing.  If the next view is
   // editable, begins editing.
-  /** @private */
+  /**  @private */
   insertTab: function(evt) {
     var target = this.target; // removed by commitEditing()
     this.resignFirstResponder();
@@ -446,7 +447,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
     return YES ;
   },
 
-  /** @private */
+  /**  @private */
   insertBacktab: function(evt) {
     var target = this.target; // removed by commitEditing()
     this.resignFirstResponder();

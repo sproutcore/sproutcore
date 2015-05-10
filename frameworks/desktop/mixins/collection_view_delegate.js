@@ -6,7 +6,7 @@
 // ==========================================================================
 
 /**
-  @namespace
+  
 
   A Collection View Delegate is consulted by a `SC.CollectionView` to make
   policy decisions about certain behaviors such as selection control and
@@ -25,6 +25,7 @@
   delegate for the view.
   
   @since SproutCore 1.0
+  @namespace
 */
 SC.CollectionViewDelegate = {
 

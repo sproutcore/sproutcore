@@ -5,7 +5,7 @@
 // ==========================================================================
 
 /** 
-  @namespace
+  
   
   A WebSocket Delegate is consulted by `SC.WebSocket` when events are received.
   You may want to handle this events before propagate them to eventual listeners.
@@ -19,6 +19,7 @@
   
   @since SproutCore 1.11
   @author Nicolas BADIA
+  @namespace
 */
 SC.WebSocketDelegate = {
   

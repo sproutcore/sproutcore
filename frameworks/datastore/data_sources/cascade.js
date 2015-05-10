@@ -81,7 +81,7 @@ SC.CascadeDataSource = SC.DataSource.extend(
   // SC.STORE ENTRY POINTS
   //
 
-  /** @private - just cascades */
+  /**  - just cascades @private */
   fetch: function(store, query) {
     var sources = this.get('dataSources'),
         len     = sources ? sources.length : 0,
@@ -98,7 +98,7 @@ SC.CascadeDataSource = SC.DataSource.extend(
   },
 
 
-  /** @private - just cascades */
+  /**  - just cascades @private */
   retrieveRecords: function(store, storeKeys, ids) {
     var sources = this.get('dataSources'),
         len     = sources ? sources.length : 0,
@@ -114,7 +114,7 @@ SC.CascadeDataSource = SC.DataSource.extend(
     return ret ;
   },
 
-  /** @private - just cascades */
+  /**  - just cascades @private */
   commitRecords: function(store, createStoreKeys, updateStoreKeys, destroyStoreKeys, params) {
     var sources = this.get('dataSources'),
         len     = sources ? sources.length : 0,
@@ -130,7 +130,7 @@ SC.CascadeDataSource = SC.DataSource.extend(
     return ret ;
   },
 
-  /** @private - just cascades */
+  /**  - just cascades @private */
   cancel: function(store, storeKeys) {
     var sources = this.get('dataSources'),
         len     = sources ? sources.length : 0,
@@ -150,7 +150,7 @@ SC.CascadeDataSource = SC.DataSource.extend(
   // INTERNAL SUPPORT
   //
 
-  /** @private */
+  /**  @private */
   init: function() {
     sc_super();
 
@@ -166,7 +166,7 @@ SC.CascadeDataSource = SC.DataSource.extend(
 
   },
 
-  /** @private - Determine the proper return value. */
+  /**  - Determine the proper return value. @private */
   _handleResponse: function(current, response) {
     if (response === YES) return YES ;
     else if (current === NO) return (response === NO) ? NO : SC.MIXED_STATE ;

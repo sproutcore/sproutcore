@@ -41,10 +41,10 @@ SC.TO_RIGHT = "TORIGHT";
 SC.NavigationView = SC.WorkspaceView.extend(
 /** @scope SC.NavigationView.prototype */ {
   
-  /** @private */
+  /**  @private */
   _views: null,
   
-  /** @private */
+  /**  @private */
   _current: null,
   
   /**
@@ -53,13 +53,13 @@ SC.NavigationView = SC.WorkspaceView.extend(
   */
   navigationContentView: SC.View,
   
-  /** @private */
+  /**  @private */
   init: function() {
     sc_super();
     this._views = [];
   },
   
-  /** @private */
+  /**  @private */
   createChildViews: function() {
     sc_super();
     
@@ -76,7 +76,7 @@ SC.NavigationView = SC.WorkspaceView.extend(
     this.contentView.appendChild(content);
   },
   
-  /** @private */
+  /**  @private */
   changeNavigationContent: function(view) {
     var top = null, bottom = null;
     
@@ -162,7 +162,7 @@ SC.NavigationView = SC.WorkspaceView.extend(
     this.changeNavigationContent(view);
   },
   
-  /** @private */
+  /**  @private */
   topToolbarDidChange: function() {
     var active = this.activeTopToolbar, replacement = this.get("topToolbar");
     
@@ -191,7 +191,7 @@ SC.NavigationView = SC.WorkspaceView.extend(
     this.invokeOnce("childDidChange");
   }.observes("topToolbar"),
   
-  /** @private */
+  /**  @private */
   bottomToolbarDidChange: function() {
     var active = this.activeBottomToolbar, replacement = this.get("bottomToolbar");
     
@@ -216,7 +216,7 @@ SC.NavigationView = SC.WorkspaceView.extend(
     this.invokeOnce("childDidChange");
   }.observes("topToolbar"),
   
-  /** @private */
+  /**  @private */
   contentViewDidChange: function() {
     var active = this.activeNavigationContentView, replacement = this.get("navigationContentView");
     
@@ -234,7 +234,7 @@ SC.NavigationView = SC.WorkspaceView.extend(
     this.invokeOnce("childDidChange");
   }.observes("navigationContentView"),
   
-  /** @private */
+  /**  @private */
   childDidChange: function() {
     var replacement = this._pendingBuildIn, active = this._pendingBuildOut;
     if (active) {

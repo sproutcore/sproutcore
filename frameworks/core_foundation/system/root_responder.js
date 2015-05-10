@@ -165,11 +165,12 @@ SC.RootResponder = SC.Object.extend(
   */
   keyPane: null,
 
-  /** @private
+  /** 
     A stack of previous key panes. Used to allow panes to resign key pane
     status without having to know who had it before them.
 
     NOTE: This property is not observable.
+    @private
   */
   previousKeyPanes: [],
 
@@ -316,7 +317,7 @@ SC.RootResponder = SC.Object.extend(
     return YES; //always allow normal processing to continue.
   },
 
-  /** @private */
+  /**  @private */
   _resize: function() {
     // calculate new window size...
     var newSize = this.computeWindowSize(), oldSize = this.get('currentWindowSize');
@@ -338,7 +339,7 @@ SC.RootResponder = SC.Object.extend(
     }
   },
 
-  /** @private */
+  /**  @private */
   _assignDesignMode: function () {
     var newDesignMode = this.computeDesignMode(),
       oldDesignMode = this.get('currentDesignMode');
@@ -435,10 +436,10 @@ SC.RootResponder = SC.Object.extend(
   // Design Modes
   //
 
-  /** @private */
+  /**  @private */
   currentDesignMode: null,
 
-  /** @private Managed by SC.Application. */
+  /**  Managed by SC.Application. @private */
   designModes: function (key, value) {
     if (SC.none(value)) {
       // Clear previous values.
@@ -457,7 +458,7 @@ SC.RootResponder = SC.Object.extend(
     return value;
   }.property().cacheable(),
 
-  /** @private Determine the design mode based on area and pixel density. */
+  /**  Determine the design mode based on area and pixel density. @private */
   computeDesignMode: function () {
     var designMode = null,
       designModeNames = this._designModeNames,
@@ -487,11 +488,12 @@ SC.RootResponder = SC.Object.extend(
     return SC.device.orientation === SC.PORTRAIT_ORIENTATION ? designMode + '_p' : designMode + '_l';
   },
 
-  /** @private (semi-private)
+  /**  (semi-private)
     Returns the fallback design mode for the given design mode.  This is
     primarily used by SC.View for the case where an adjustment isn't found
     for the current design mode and we want to apply the next best design
     mode as a fallback.
+    @private
   */
   fallbackDesignMode: function (designMode) {
     var designModeNames = this._designModeNames,
@@ -506,7 +508,7 @@ SC.RootResponder = SC.Object.extend(
     return ret;
   },
 
-  /** @private Prepares ordered design modes & widths arrays when designModes changes. */
+  /**  Prepares ordered design modes & widths arrays when designModes changes. @private */
   _prepOrderedArrays: function (designModes) {
     var designModeNames,
       designModeThresholds;
@@ -622,7 +624,7 @@ SC.RootResponder = SC.Object.extend(
     Passing an explicit target or pane constrains the target lookup to just
     them; the defaultResponder and other panes are *not* searched.
 
-    @param {Object|String} target or null if no target is specified
+    @param {(Object|String)} target or null if no target is specified
     @param {String} method name for target
     @param {Object} sender optional sender
     @param {SC.Pane} optional pane
@@ -1038,18 +1040,20 @@ SC.RootResponder = SC.Object.extend(
   //
 
   /**
-    @private
+    
     A map from views to internal touch entries.
 
     Note: the touch entries themselves also reference the views.
+    @private
   */
   _touchedViews: {},
 
   /**
-    @private
+    
     A map from internal touch ids to the touch entries themselves.
 
     The touch entry ids currently come from the touch event's identifier.
+    @private
   */
   _touches: {},
 
@@ -1206,7 +1210,7 @@ SC.RootResponder = SC.Object.extend(
       must implement touchStart.)
     @param {Boolean} shouldStack Whether the new responder should replace the old one, or stack with it.
       Stacked responders are easy to revert via `SC.Touch#restoreLastTouchResponder`.
-    @param {Boolean|SC.Responder} bubblesTo If YES, will attempt to find a `touchStart` responder up the
+    @param {(Boolean|SC.Responder)} bubblesTo If YES, will attempt to find a `touchStart` responder up the
       responder chain. If NO or undefined, will only check the passed responder. If you pass a responder
       for this argument, the attempt will bubble until it reaches the passed responder, allowing you to
       restrict the bubbling to a portion of the responder chain. ((Note that this responder will not be
@@ -1391,9 +1395,10 @@ SC.RootResponder = SC.Object.extend(
   },
 
   //@if(debug)
-  /** @private
+  /** 
     Artificially calls endTouch for any touch which is no longer present. This is necessary because
     _sometimes_, WebKit ends up not sending endtouch.
+    @private
   */
   endMissingTouches: function(presentTouches) {
     var idx, len = presentTouches.length, map = {}, end = [];
@@ -1422,10 +1427,11 @@ SC.RootResponder = SC.Object.extend(
 
   _touchCount: 0,
 
-  /** @private
+  /** 
     Ends a specific touch (for a bit, at least). This does not "finish" a touch; it merely calls
     touchEnd, touchCancelled, etc. A re-dispatch (through recapture or makeTouchResponder) will terminate
     the process; it would have to be restarted separately, through touch.end().
+    @private
   */
   endTouch: function(touchEntry, action, evt) {
     if (!action) { action = "touchEnd"; }
@@ -1457,8 +1463,9 @@ SC.RootResponder = SC.Object.extend(
   },
 
   /**
-    @private
+    
     "Finishes" a touch. That is, it eradicates it from our touch entries and removes all responder, etc. properties.
+    @private
   */
   finishTouch: function(touch) {
     // ensure the touch is indeed unassigned.
@@ -1489,7 +1496,7 @@ SC.RootResponder = SC.Object.extend(
     if (this._touches[touch.identifier]) delete this._touches[touch.identifier];
   },
 
-  /** @private
+  /** 
     Called when the user touches their finger to the screen. This method
     dispatches the touchstart event to the appropriate view.
 
@@ -1499,6 +1506,7 @@ SC.RootResponder = SC.Object.extend(
 
     @param {Event} evt the event
     @returns {Boolean}
+    @private
   */
   touchstart: function(evt) {
     // Starting iOS5 touch events are handled by textfields.
@@ -1567,8 +1575,9 @@ SC.RootResponder = SC.Object.extend(
   },
 
   /**
-    @private
+    
     used to keep track of when a specific type of touch event was last handled, to see if it needs to be re-handled
+    @private
   */
   touchmove: function(evt) {
     // Starting iOS5 touch events are handled by textfields.
@@ -1768,18 +1777,20 @@ SC.RootResponder = SC.Object.extend(
     return evt.hasCustomEventHandling;
   },
 
-  /** @private
+  /** 
     Handle touch cancel event.  Works just like cancelling a touch for any other reason.
     touchend handles it as a special case (sending cancel instead of end if needed).
+    @private
   */
   touchcancel: function(evt) {
     evt.isCancel = YES;
     this.touchend(evt);
   },
 
-  /** @private
+  /** 
      Ignore Touch events on textfields and links. starting iOS 5 textfields
      get touch events. Textfields just need to get the default focus action.
+    @private
   */
   ignoreTouchHandle: function(evt) {
     if(SC.browser.isMobileSafari){
@@ -1842,10 +1853,11 @@ SC.RootResponder = SC.Object.extend(
 
   _lastModifiers: null,
 
-  /** @private
+  /** 
     Modifier key changes are notified with a keydown event in most browsers.
     We turn this into a flagsChanged keyboard event.  Normally this does not
     stop the normal browser behavior.
+    @private
   */
   _handleModifierChanges: function(evt) {
     // if the modifier keys have changed, then notify the first responder.
@@ -1872,39 +1884,42 @@ SC.RootResponder = SC.Object.extend(
     return (changed) ? (this.sendEvent('flagsChanged', evt) ? evt.hasCustomEventHandling : YES) : YES ;
   },
 
-  /** @private
+  /** 
     Determines if the keyDown event is a nonprintable or function key. These
     kinds of events are processed as keyboard shortcuts.  If no shortcut
     handles the event, then it will be sent as a regular keyDown event.
     This function is only valid when called with a keydown event.
+    @private
   */
   _isFunctionOrNonPrintableKey: function(evt) {
     return !!(evt.altKey || evt.ctrlKey || evt.metaKey || SC.FUNCTION_KEYS[evt.which]);
   },
 
-  /** @private
+  /** 
     Determines if the event simply reflects a modifier key change.  These
     events may generate a flagsChanged event, but are otherwise ignored.
+    @private
   */
   _isModifierKey: function(evt) {
     return !!SC.MODIFIER_KEYS[evt.charCode];
   },
 
    /**
-     @private
+     
      Determines if the key is printable (and therefore should be dispatched from keypress).
      Some browsers send backspace, tab, enter, and escape on keypress, so we want to
      explicitly ignore those here.
 
      @param {KeyboardEvent} evt keypress event
      @returns {Boolean}
+     @private
    */
   _isPrintableKey: function (evt) {
     return ((evt.originalEvent.which === undefined || evt.originalEvent.which > 0) &&
       !(evt.which === 8 || evt.which === 9 || evt.which === 13 || evt.which === 27));
   },
 
-  /** @private
+  /** 
     The keydown event occurs whenever the physically depressed key changes.
     This event is used to deliver the flagsChanged event and to with function
     keys and keyboard shortcuts.
@@ -1916,6 +1931,7 @@ SC.RootResponder = SC.Object.extend(
         http://www.quirksmode.org/js/keys.html
         https://developer.mozilla.org/en/DOM/KeyboardEvent
         http://msdn.microsoft.com/library/ff974342.aspx
+    @private
   */
   keydown: function(evt) {
     if (SC.none(evt)) return YES;
@@ -1980,13 +1996,14 @@ SC.RootResponder = SC.Object.extend(
     return forceBlock ? NO : ret ;
   },
 
-  /** @private
+  /** 
     The keypress event occurs after the user has typed something useful that
     the browser would like to insert.  Unlike keydown, the input codes here
     have been processed to reflect that actual text you might want to insert.
 
     Normally ignore any function or non-printable key events.  Otherwise, just
     trigger a keyDown.
+    @private
   */
   keypress: function(evt) {
     var ret,
@@ -2297,12 +2314,12 @@ SC.RootResponder = SC.Object.extend(
   },
 
   // These event handlers prevent default file handling, and enable the dataDrag API.
-  /** @private The dragenter event comes from the browser when a data-ful drag enters any element. */
+  /**  The dragenter event comes from the browser when a data-ful drag enters any element. @private */
   dragenter: function(evt) {
     SC.run(function() { this._dragenter(evt); }, this);
   },
 
-  /** @private */
+  /**  @private */
   _dragenter: function(evt) {
     if (!this._dragCounter) {
       this._dragCounter = 1;
@@ -2311,20 +2328,21 @@ SC.RootResponder = SC.Object.extend(
     return this._dragover(evt);
   },
 
-  /** @private The dragleave event comes from the browser when a data-ful drag leaves any element. */
+  /**  The dragleave event comes from the browser when a data-ful drag leaves any element. @private */
   dragleave: function(evt) {
     SC.run(function() { this._dragleave(evt); }, this);
   },
 
-  /** @private */
+  /**  @private */
   _dragleave: function(evt) {
     this._dragCounter--;
     var ret = this._dragover(evt);
     return ret;
   },
-  /** @private
+  /** 
     Dragleave doesn't fire reliably in all browsers, so this method forces it (scheduled below). Note
     that, being scheduled via SC.Timer, this method is already in a run loop.
+    @private
   */
   _forceDragLeave: function() {
     // Give it another runloop to ensure that we're not in the middle of a drag.
@@ -2336,12 +2354,12 @@ SC.RootResponder = SC.Object.extend(
     });
   },
 
-  /** @private This event fires continuously while the dataful drag is over the document. */
+  /**  This event fires continuously while the dataful drag is over the document. @private */
   dragover: function(evt) {
     SC.run(function() { this._dragover(evt); }, this);
   },
 
-  /** @private */
+  /**  @private */
   _dragover: function(evt) {
     // If it's a file being dragged, prevent the default (leaving the app and opening the file).
     if (evt.dataTransfer.types && (evt.dataTransfer.types.contains('Files') || evt.dataTransfer.types.contains('text/uri-list'))) {
@@ -2407,12 +2425,12 @@ SC.RootResponder = SC.Object.extend(
     }
   },
 
-  /** @private This event is called if the most recent dragover event returned with a non-"none" dropEffect. */
+  /**  This event is called if the most recent dragover event returned with a non-"none" dropEffect. @private */
   drop: function(evt) {
     SC.run(function() { this._drop(evt); }, this);
   },
 
-  /** @private */
+  /**  @private */
   _drop: function(evt) {
     // If it's a file being dragged, prevent the default (leaving the app and opening the file).
     if (evt.dataTransfer.types && (evt.dataTransfer.types.contains('Files') || evt.dataTransfer.types.contains('text/uri-list'))) {

@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/** @namespace
+/** 
   The `SC.ObservableProtocol` protocol defines the properties and methods that you may implement
   in your `SC.Observable` consumers (i.e. `SC.Object`) in order to access additional observer
   functionality. They will be used if defined but are not required for observing to work.
@@ -13,6 +13,7 @@
   *Note: Do not mix `SC.ObservableProtocol` into your classes. As a protocol, it exists only for
   reference sake. You only need define any of the properties or methods listed below in order to use
   this protocol.*
+  @namespace
 */
 SC.ObservableProtocol = {
 

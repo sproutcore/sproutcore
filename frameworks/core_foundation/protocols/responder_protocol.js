@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/** @namespace
+/** 
   The `SC.ResponderProtocol` protocol defines the properties and methods that you may implement
   in your `SC.Responder` (i.e. `SC.View`) subclasses in order to handle specific responder chain
   events.
@@ -15,6 +15,7 @@
   this protocol.*
 
   @since SproutCore 1.0
+  @namespace
 */
 SC.ResponderProtocol = {
 

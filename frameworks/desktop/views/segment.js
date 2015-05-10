@@ -176,15 +176,17 @@ SC.SegmentView = SC.View.extend(SC.Control,
   */
   localItem: null,
 
-  /** @private
+  /** 
     Whenever the width property changes, adjust our layout accordingly.
+    @private
   */
   widthDidChange: function() {
     this.adjust('width', this.get('width'));
   }.observes('width'),
 
-  /** @private
+  /** 
     Update our properties according to our matching item.
+    @private
   */
   updateItem: function(parentView, item) {
     var itemKeys = parentView.get('itemKeys'),

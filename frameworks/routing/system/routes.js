@@ -61,7 +61,7 @@ SC.routes = SC.Object.create(
     SproutCore application.
 
     @see http://dev.w3.org/html5/spec/history.html#the-history-interface
-    @property
+    @member
     @type {Boolean}
   */
   wantsHistory: NO,
@@ -71,7 +71,7 @@ SC.routes = SC.Object.create(
     on the value of wantsHistory and the browser's support for pushState.
 
     @see wantsHistory
-    @property
+    @member
     @type {Boolean}
   */
   usesHistory: null,
@@ -94,40 +94,44 @@ SC.routes = SC.Object.create(
     main() method.
 
     @see http://www.w3.org/TR/html5/semantics.html#the-base-element
-    @property
+    @member
     @type {String}
   */
   baseURI: document.baseURI,
 
-  /** @private
+  /** 
     A boolean value indicating whether or not the ping method has been called
     to setup the SC.routes.
 
-    @property
+    @member
     @type {Boolean}
+    @private
   */
   _didSetup: NO,
 
-  /** @private
+  /** 
     Internal representation of the current location hash.
 
-    @property
+    @member
     @type {String}
+    @private
   */
   _location: null,
 
-  /** @private
+  /** 
     Routes are stored in a tree structure, this is the root node.
 
-    @property
+    @member
     @type {SC.routes._Route}
+    @private
   */
   _firstRoute: null,
 
-  /** @private
+  /** 
     Internal method used to extract and merge the parameters of a URL.
 
     @returns {Hash}
+    @private
   */
   _extractParametersAndRoute: function(obj, coerce) {
     var params = {},
@@ -194,7 +198,7 @@ SC.routes = SC.Object.create(
     The 'notes/show/4&format=xml&language=fr' syntax for passing parameters,
     using a '&' instead of a '?', as used in SproutCore 1.0 is still supported.
 
-    @property
+    @member
     @type {String}
   */
   location: function(key, value) {
@@ -499,12 +503,13 @@ SC.routes = SC.Object.create(
   },
 
   /**
-    @private
+    
     @class
 
     SC.routes._Route is a class used internally by SC.routes. The routes defined by your
     application are stored in a tree structure, and this is the class for the
     nodes.
+    @private
   */
   _Route: SC.Object.extend(
   /** @scope SC.routes._Route.prototype */ {

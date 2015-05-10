@@ -109,10 +109,11 @@ SC.Record = SC.Object.extend(
   //@if(debug)
   /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */
 
-  /** @private
+  /** 
     Creates string representation of record, with status.
 
     @returns {String}
+    @private
   */
   toString: function () {
     // We won't use 'readOnlyAttributes' here because accessing them directly
@@ -121,10 +122,11 @@ SC.Record = SC.Object.extend(
     return "%@(%@) %@".fmt(this.constructor.toString(), SC.inspect(attrs), this.statusString());
   },
 
-  /** @private
+  /** 
     Creates string representation of record, with status.
 
     @returns {String}
+    @private
   */
 
   statusString: function () {
@@ -161,7 +163,7 @@ SC.Record = SC.Object.extend(
     `primaryKey` property on the underlying JSON hash.
 
     @type String
-    @property
+    @member
     @dependsOn storeKey
   */
   id: function(key, value) {
@@ -205,7 +207,7 @@ SC.Record = SC.Object.extend(
     more detail in the class mixin (below) where they are defined.
 
     @type Number
-    @property
+    @member
     @dependsOn storeKey
   */
   status: function() {
@@ -240,7 +242,7 @@ SC.Record = SC.Object.extend(
     YES when the record has been destroyed
 
     @type Boolean
-    @property
+    @member
     @dependsOn status
   */
   isDestroyed: function() {
@@ -257,7 +259,7 @@ SC.Record = SC.Object.extend(
     `SC.Record.READY`, the return value of this property may remain `NO`.
 
     @type Boolean
-    @property
+    @member
     @dependsOn status
   */
   isEditable: function(key, value) {
@@ -267,9 +269,10 @@ SC.Record = SC.Object.extend(
   }.property('status').cacheable(),
 
   /**
-    @private
+    
 
     Backing value for isEditable
+    @private
   */
   _screc_isEditable: YES, // default
 
@@ -278,7 +281,7 @@ SC.Record = SC.Object.extend(
     can use this to quickly determine if the record is ready to display.
 
     @type Boolean
-    @property
+    @member
     @dependsOn status
   */
   isLoaded: function() {
@@ -307,7 +310,7 @@ SC.Record = SC.Object.extend(
     the attributes and `endEditing()` afterwards.
 
     @type Hash
-    @property
+    @member
   **/
   attributes: function() {
     var store    = this.get('store'),
@@ -322,7 +325,7 @@ SC.Record = SC.Object.extend(
     instead.
 
     @type Hash
-    @property
+    @member
   **/
   readOnlyAttributes: function() {
     var store    = this.get('store'),
@@ -346,7 +349,7 @@ SC.Record = SC.Object.extend(
     Whether or not this is a nested Record.
 
     @type Boolean
-    @property
+    @member
   */
   isNestedRecord: function(){
     var store = this.get('store'), ret,
@@ -361,7 +364,7 @@ SC.Record = SC.Object.extend(
     The parent record if this is a nested record.
 
     @type Boolean
-    @property
+    @member
   */
   parentRecord: function(){
     var sk = this.storeKey, store = this.get('store');
@@ -474,8 +477,9 @@ SC.Record = SC.Object.extend(
   // ATTRIBUTES
   //
 
-  /** @private
+  /** 
     Current edit level.  Used to defer editing changes.
+    @private
   */
   _editLevel: 0 ,
 
@@ -600,7 +604,7 @@ SC.Record = SC.Object.extend(
         iter;
 
     /**
-      @private
+      
 
       If the child is dirty, then make sure the parent gets a dirty
       status.  (If the child is created or destroyed, there's no need,
@@ -608,6 +612,7 @@ SC.Record = SC.Object.extend(
       relationship.)
 
       @param {SC.Record} record to propagate to
+      @private
     */
     iter =  function(rec) {
       var childStatus, parentStore, parentStoreKey, parentStatus;
@@ -861,7 +866,7 @@ SC.Record = SC.Object.extend(
     to put the UI into an error state.
 
     @type Boolean
-    @property
+    @member
     @dependsOn status
   */
   isError: function() {
@@ -873,7 +878,7 @@ SC.Record = SC.Object.extend(
     otherwise.
 
     @type SC.Record
-    @property
+    @member
     @dependsOn isError
   */
   errorValue: function() {
@@ -885,7 +890,7 @@ SC.Record = SC.Object.extend(
     If no explicit error object has been set, returns SC.Record.GENERIC_ERROR.
 
     @type SC.Error
-    @property
+    @member
     @dependsOn isError
   */
   errorObject: function() {
@@ -899,7 +904,7 @@ SC.Record = SC.Object.extend(
   // PRIVATE
   //
 
-  /** @private
+  /** 
     Sets the key equal to value.
 
     This version will first check to see if the property is an
@@ -909,6 +914,7 @@ SC.Record = SC.Object.extend(
     @param key {String} the property to set
     @param value {Object} the value to set or null.
     @returns {SC.Record}
+    @private
   */
   set: function(key, value) {
     var func = this[key];
@@ -981,7 +987,7 @@ SC.Record = SC.Object.extend(
   },
 
   /**
-    @private
+    
 
      private method that retrieves the `recordType` from the hash that is
      provided.
@@ -995,6 +1001,7 @@ SC.Record = SC.Object.extend(
      @param {Hash} value The hash of attributes to apply to the child record.
      @param {String} key the name of the key on the attribute
      @param {SC.Record} the record that was materialized
+    @private
     */
   _materializeNestedRecordType: function(value, key){
     var childNS, recordType;
@@ -1402,8 +1409,9 @@ SC.Record.mixin( /** @scope SC.Record */ {
   isPolymorphic: NO,
 
   /**
-    @private
+    
     The next child key to allocate.  A nextChildKey must always be greater than 0.
+    @private
   */
   _nextChildKey: 0,
 
@@ -1442,7 +1450,7 @@ SC.Record.mixin( /** @scope SC.Record */ {
           contacts: SC.Record.fetch('MyApp.Contact')
         });
 
-    @param {SC.Record|String} recordType The type of records to load
+    @param {(SC.Record|String)} recordType The type of records to load
     @param {Hash} opts the options for the attribute
     @returns {SC.RecordAttribute} created instance
   */
@@ -1465,7 +1473,7 @@ SC.Record.mixin( /** @scope SC.Record */ {
     inverse key on the matching record will also be edited and that
     record will be marked as needing a change.
 
-    @param {SC.Record|String} recordType The type of record to create
+    @param {(SC.Record|String)} recordType The type of record to create
     @param {Hash} opts the options for the attribute
     @returns {SC.ManyAttribute|SC.ChildrenAttribute} created instance
   */
@@ -1500,7 +1508,7 @@ SC.Record.mixin( /** @scope SC.Record */ {
      2. `SC.ChildAttribute` that you can edit the contents
         of this relationship.
 
-    @param {SC.Record|String} recordType the type of the record to create
+    @param {(SC.Record|String)} recordType the type of the record to create
     @param {Hash} opts additional options
     @returns {SC.SingleAttribute|SC.ChildAttribute} created instance
   */
@@ -1610,7 +1618,7 @@ SC.Record.mixin( /** @scope SC.Record */ {
     return store.find(this, id);
   },
 
-  /** @private - enhance extend to notify SC.Query and ensure polymorphic subclasses are marked as polymorphic as well. */
+  /**  - enhance extend to notify SC.Query and ensure polymorphic subclasses are marked as polymorphic as well. @private */
   extend: function() {
     var ret = SC.Object.extend.apply(this, arguments);
 

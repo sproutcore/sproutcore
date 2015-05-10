@@ -123,7 +123,7 @@ SC.mixin(Function.prototype,
     conditionally exclude part of it. This helps to keep your code more
     compact and easier to maintain.
 
-    @param {String...} dependentKeys optional set of dependent keys
+    @param {...String} dependentKeys optional set of dependent keys
     @returns {Function} the declared function instance
   */
   property: function() {
@@ -177,7 +177,7 @@ SC.mixin(Function.prototype,
     Declare that a function should observe an object or property at the named
     path.  Note that the path is used only to construct the observation one time.
 
-    @param {String...} propertyPaths A list of strings which indicate the
+    @param {...String} propertyPaths A list of strings which indicate the
       properties being observed
 
     @returns {Function} receiver, useful for chaining calls.

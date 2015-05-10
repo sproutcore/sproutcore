@@ -84,7 +84,7 @@ SC.StackedView = SC.CollectionView.extend(
     return this;
   },
 
-  /** @private */
+  /**  @private */
   _updateHeight: function () {
 
     var childViews = this.get('childViews'),
@@ -107,9 +107,10 @@ SC.StackedView = SC.CollectionView.extend(
   // INTERNAL SUPPORT
   //
 
-  /** @private
+  /** 
     Whenever the collection view reloads some views, reset the cache on the
     frame as well so that it will recalculate.
+    @private
   */
   reloadIfNeeded: function () {
     sc_super();
@@ -117,9 +118,10 @@ SC.StackedView = SC.CollectionView.extend(
     return this.updateHeight();
   },
 
-  /** @private
+  /** 
     When layer is first created, make sure we update the height using the
     newly calculated value.
+    @private
   */
   didCreateLayer: function () { return this.updateHeight(); }
 

@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/** @namespace
+/** 
   The `SC.SparseArrayDelegateProtocol` protocol defines the properties and methods that you may
   implement in your sparse array delegate objects.
 
@@ -20,6 +20,7 @@
   order to use this protocol.*
 
   @since SproutCore 1.0
+  @namespace
 */
 SC.SparseArrayDelegateProtocol = {
 

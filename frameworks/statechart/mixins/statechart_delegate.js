@@ -33,7 +33,7 @@ SC.StatechartDelegate = /** @scope SC.StatechartDelegate.prototype */ {
     routing mechanism.
     
     @param {SC.StatechartManager} statechart the statechart
-    @param {String|Hash} location the new location 
+    @param {(String|Hash)} location the new location 
     @param {SC.State} state the state requesting the location update
   */
   statechartUpdateLocationForState: function(statechart, location, state) {
@@ -67,8 +67,8 @@ SC.StatechartDelegate = /** @scope SC.StatechartDelegate.prototype */ {
     
     @param {SC.StatechartManager} statechart the statechart
     @param {SC.State} state the state to bind the route to
-    @param {String|Hash} route the route that is to be bound to the state
-    @param {Function|String} handler the method on the state to be invoked when the route
+    @param {(String|Hash)} route the route that is to be bound to the state
+    @param {(Function|String)} handler the method on the state to be invoked when the route
       gets triggered.
       
     @see SC.State#representRoute

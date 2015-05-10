@@ -5,9 +5,10 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/** @private
+/** 
   SC.SplitChild and SC.SplitThumb both share this code, but we don't want it
   included twice if the view mixes in both SC.SplitChild and SC.SplitThumb.
+  @private
 */
 SC.NeedsSplitParent = {
 
@@ -17,7 +18,7 @@ SC.NeedsSplitParent = {
    * This is computed to be the first SplitView found in a search
    * up the view hierarchy. You can substitute your own SplitView
    *
-   * @property SC.SplitView
+   * @member SC.SplitView
   */
   splitView: function () {
     var view = this.get('parentView');
@@ -41,13 +42,14 @@ SC.NeedsSplitParent = {
 
 
 /**
-  @namespace
+  
   Child views of SplitViews should use this mixin to get their positioning
   logic and default settings.
 
   By default, SplitView merely sets the position and size properties on its
   child views. This mixin observes the position and size properties and
   calls adjust().
+  @namespace
 */
 SC.SplitChild =
   /** @scope SC.SplitChild.prototype */{
@@ -194,7 +196,7 @@ SC.SplitChild =
   */
   allowsIndirectAdjustments: YES,
 
-  /** @private Include SC.NeedsSplitParent if it hasn't already been included. */
+  /**  Include SC.NeedsSplitParent if it hasn't already been included. @private */
   initMixin: function () {
     if (!this.splitView) {
       this.mixin(SC.NeedsSplitParent);

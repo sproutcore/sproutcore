@@ -19,12 +19,12 @@ SC.mixin(SC.View,
     /* @private */
     layoutProperties: ['opacity'],
 
-    /** @private */
+    /**  @private */
     setup: function (view, options, inPlace) {
       view.adjust({ opacity: inPlace ? view.get('layout').opacity || 0 : 0 });
     },
 
-    /** @private */
+    /**  @private */
     run: function (view, options, finalLayout, finalFrame) {
       view.animate('opacity', finalLayout.opacity || 1, {
         delay: options.delay || 0,
@@ -49,7 +49,7 @@ SC.mixin(SC.View,
     /* @private */
     layoutProperties: ['opacity'],
 
-    /** @private */
+    /**  @private */
     run: function (view, options) {
       view.animate('opacity', 0, {
         delay: options.delay || 0,

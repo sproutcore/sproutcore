@@ -85,7 +85,7 @@ SC.ContainerView = SC.View.extend(
   */
   contentView: null,
 
-  /** @private */
+  /**  @private */
   contentViewBindingDefault: SC.Binding.single(),
 
   /**
@@ -114,7 +114,7 @@ SC.ContainerView = SC.View.extend(
   */
   nowShowing: null,
 
-  /** @private */
+  /**  @private */
   renderDelegateName: 'containerRenderDelegate',
 
   /**
@@ -169,7 +169,7 @@ SC.ContainerView = SC.View.extend(
   // Methods
   //
 
-  /** @private */
+  /**  @private */
   init: function () {
     var view;
 
@@ -195,7 +195,7 @@ SC.ContainerView = SC.View.extend(
     this._sc_contentViewDidChange();
   },
 
-  /** @private Cancels the active transition. */
+  /**  Cancels the active transition. @private */
   _sc_cancelTransitions: function () {
     var contentStatecharts = this._contentStatecharts;
 
@@ -207,7 +207,7 @@ SC.ContainerView = SC.View.extend(
     }
   },
 
-  /** @private
+  /** 
     Overridden to prevent clipping of child views while animating.
 
     In particular, collection views have trouble being animated in a certain
@@ -215,6 +215,7 @@ SC.ContainerView = SC.View.extend(
     the PUSH transition returns a double width/height frame with an adjusted
     left/top while the transition is in process so neither view thinks it
     is clipped.
+    @private
    */
   clippingFrame: function () {
     var contentStatecharts = this._contentStatecharts,
@@ -234,10 +235,11 @@ SC.ContainerView = SC.View.extend(
     return ret;
   }.property('parentView', 'frame').cacheable(),
 
-  /** @private
+  /** 
     Invoked whenever the content property changes.  This method will simply
     call replaceContent.  Override replaceContent to change how the view is
     swapped out.
+    @private
   */
   _sc_contentViewDidChange: function () {
     var contentView = this.get('contentView');
@@ -250,7 +252,7 @@ SC.ContainerView = SC.View.extend(
     this.replaceContent(contentView);
   },
 
-  /** @private */
+  /**  @private */
   destroy: function () {
     // Clean up observers.
     this.removeObserver('contentView', this, this._sc_contentViewDidChange);
@@ -265,10 +267,11 @@ SC.ContainerView = SC.View.extend(
     return sc_super();
   },
 
-  /** @private
+  /** 
     Invoked whenever the nowShowing property changes.  This will try to find
     the new content if possible and set it.  If you set nowShowing to an
     empty string or null, then the current content will be cleared.
+    @private
   */
   nowShowingDidChange: function () {
     // This code turns this.nowShowing into a view object by any means necessary.
@@ -309,7 +312,7 @@ SC.ContainerView = SC.View.extend(
     this.set('contentView', content);
   }.observes('nowShowing'),
 
-  /** @private Called by new content statechart to indicate that it is ready. */
+  /**  Called by new content statechart to indicate that it is ready. @private */
   statechartReady: function () {
     var contentStatecharts = this._contentStatecharts;
 
@@ -323,7 +326,7 @@ SC.ContainerView = SC.View.extend(
     this.set('isTransitioning', NO);
   },
 
-  /** @private Called by content statecharts to indicate that they have exited. */
+  /**  Called by content statecharts to indicate that they have exited. @private */
   statechartEnded: function (statechart) {
     var contentStatecharts = this._contentStatecharts;
 
@@ -339,7 +342,7 @@ SC.ContainerView = SC.View.extend(
     }
   },
 
-  /** @private
+  /** 
     Replaces any child views with the passed new content.
 
     This method is automatically called whenever your contentView property
@@ -347,6 +350,7 @@ SC.ContainerView = SC.View.extend(
     than the default.
 
     @param {SC.View} newContent the new content view or null.
+    @private
   */
   replaceContent: function (newContent) {
     var contentStatecharts,
@@ -388,7 +392,7 @@ SC.ContainerView = SC.View.extend(
     this._currentStatechart = newStatechart;
   },
 
-  /** @private SC.Observable.prototype */
+  /**  SC.Observable.prototype @private */
   set: function (key, value) {
 
     // Changing the transitionSwap in the middle of a transition must cancel the transitions.
@@ -412,12 +416,13 @@ SC.ContainerView = SC.View.extend(
 SC.LOG_CONTAINER_CONTENT_STATES = false;
 //@endif
 
-/** @private
+/** 
   In order to support transitioning views in and out of the container view,
   each content view needs its own simple statechart.  This is required, because
   while only one view will ever be transitioning in, several views may be in
   the process of transitioning out.  See the 'SC.ContainerView Statechart.graffle'
   file in the repository.
+  @private
 */
 SC.ContainerContentStatechart = SC.Object.extend({
 

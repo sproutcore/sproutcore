@@ -60,10 +60,10 @@ SC.SheetPane = SC.PanelPane.extend(
      */
     timing: 'ease-in-out',
 
-    /** @private */
+    /**  @private */
     transitionIn: SC.View.SLIDE_IN,
 
-    /** @private */
+    /**  @private */
     transitionInOptions: function () {
       return {
         direction: 'down',
@@ -73,10 +73,10 @@ SC.SheetPane = SC.PanelPane.extend(
     }.property('timing', 'duration').cacheable(),
 
 
-    /** @private */
+    /**  @private */
     transitionOut: SC.View.SLIDE_OUT,
 
-    /** @private */
+    /**  @private */
     transitionOutOptions: function () {
       return {
         direction: 'up',

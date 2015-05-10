@@ -39,24 +39,24 @@ SC.CSS_TRANSFORM_MAP = {
 };
 
 
-/** @private */
+/**  @private */
 SC.View.LayoutStyleCalculator = {
 
-  /** @private Shared object used to avoid continually initializing/destroying objects. */
+  /**  Shared object used to avoid continually initializing/destroying objects. @private */
   _SC_STATE_MAP: null,
 
-  /** @private Shared object used to avoid continually initializing/destroying objects. */
+  /**  Shared object used to avoid continually initializing/destroying objects. @private */
   _SC_TRANSFORMS_ARRAY: null,
 
-  /** @private Shared object used to avoid continually initializing/destroying objects. */
+  /**  Shared object used to avoid continually initializing/destroying objects. @private */
   _SC_TRANSITIONS_ARRAY: null,
 
-  /** @private If the value is undefined, make it null. */
+  /**  If the value is undefined, make it null. @private */
   _valueOrNull: function (value) {
     return value === undefined ? null : value;
   },
 
-  /** @private */
+  /**  @private */
   _prepareStyle: function (style, layout) {
     /*jshint eqnull:true */
     // It's important to provide null defaults to reset any previous style when
@@ -141,7 +141,7 @@ SC.View.LayoutStyleCalculator = {
     this._SC_TRANSFORMS_ARRAY.length = 0;
   },
 
-  /** @private */
+  /**  @private */
   _prepareState: function (state, style) {
     /*jshint eqnull:true */
     state.hasBottom = (style.bottom != null);
@@ -162,7 +162,7 @@ SC.View.LayoutStyleCalculator = {
     SC.throw("%@.layout() you cannot use %@:auto if staticLayout is disabled".fmt(view, property), "%@".fmt(view), -1);
   },
 
-  /** @private */
+  /**  @private */
   _calculatePosition: function (style, state, direction) {
     var start, finish, size,
       hasStart, hasFinish, hasSize, hasMaxSize,
@@ -220,7 +220,7 @@ SC.View.LayoutStyleCalculator = {
   },
 
 
-  /** @private */
+  /**  @private */
   _calculateCenter: function (style, direction) {
     var size, center, start, finish, margin,
         startBorder,
@@ -272,7 +272,7 @@ SC.View.LayoutStyleCalculator = {
     style[finish] = style[center] = null;
   },
 
-  /** @private */
+  /**  @private */
   // return "auto" for "auto", null for null, converts 0.X into "X%".
   // otherwise returns the original number, rounded down
   _cssNumber: function (val) {
@@ -283,11 +283,12 @@ SC.View.LayoutStyleCalculator = {
     else { return Math.floor(val); }
   },
 
-  /** @private
+  /** 
     Calculate the layout style for the given view, making adjustments to allow
     for flexible positioning, animation and accelerated transforms.
 
     @return {Object} Layout style hash.
+    @private
   */
   calculate: function (view, style) {
     var layout = view.get('layout'),
@@ -342,7 +343,7 @@ SC.View.LayoutStyleCalculator = {
     return style;
   },
 
-  /** @private Calculates animation styles. */
+  /**  Calculates animation styles. @private */
   _calculateAnimations: function (style, animations, hasAcceleratedLayer) {
     /*jshint eqnull:true*/
     var key,
@@ -456,7 +457,7 @@ SC.View.LayoutStyleCalculator = {
 SC.View.reopen(
   /** @scope SC.View.prototype */ {
 
-  /** @private Shared object used to avoid continually initializing/destroying objects. */
+  /**  Shared object used to avoid continually initializing/destroying objects. @private */
   _SC_STYLE_MAP: null,
 
   /**

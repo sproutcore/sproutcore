@@ -77,13 +77,14 @@ SC.WebView = SC.View.extend(SC.Control, {/** @scope SC.WebView.prototype */
     SC.Event.remove(f, 'load', this, this.iframeDidLoad);
   },
 
-  /**  @private
+  /**  
     Called when iframe onload event is fired.
     1. Resizes the view to fit the contents of the iframe using the
     scroll width and scroll height of the contents of the iframe
 
     The iframe contents can be accessed only when the src is from the same
     domain as the parent document
+    @private
   */
   iframeDidLoad: function() {
 

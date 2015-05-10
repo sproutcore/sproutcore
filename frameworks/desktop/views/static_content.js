@@ -77,19 +77,21 @@ SC.StaticContentView = SC.View.extend(
   // INTERNAL SUPPORT
   //
 
-  /** @private
+  /** 
     Disable SproutCore management of view positioning.
+    @private
   */
   useStaticLayout: YES,
 
-  /** @private
+  /** 
     Overrides SC.View's frame computed property, and returns a value from the
     DOM. This value is cached to improve performance.
 
     If the size of the content inside the view changes, you should call
     contentLayoutDidChange().
 
-    @property
+    @member
+    @private
   */
   frame: function() {
     var layer = this.get('layer'), rect;
@@ -115,25 +117,28 @@ SC.StaticContentView = SC.View.extend(
     }
   }.property('content').cacheable(),
 
-  /** @private
+  /** 
     Recalculate content frame if our parent view resizes.
+    @private
   */
   parentViewDidResize: function() {
     this.contentLayoutDidChange();
   },
 
-  /** @private
+  /** 
     If the layer changes, make sure we recalculate the frame.
+    @private
   */
   didUpdateLayer: function() {
     this.contentLayoutDidChange();
   },
 
-  /** @private
+  /** 
     Outputs the content property to the DOM.
 
     @param {SC.RenderContext} context
     @param {Boolean} firstTime
+    @private
   */
   render: function(context, firstTime) {
     var content = this.get('content');
@@ -141,13 +146,13 @@ SC.StaticContentView = SC.View.extend(
     context.push(content || '');
   },
 
-  /** @private */
+  /**  @private */
   touchStart: function(evt){
     evt.allowDefault();
     return YES;
   },
 
-  /** @private */
+  /**  @private */
   touchEnd: function(evt){
     evt.allowDefault();
     return YES;

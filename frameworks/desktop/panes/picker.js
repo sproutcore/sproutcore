@@ -240,7 +240,7 @@ SC.PickerPane = SC.PalettePane.extend(
 /** @scope SC.PickerPane.prototype */ {
 
   //@if(debug)
-  /** @private Debug-mode only flag for ensuring that the pane is appended via `popup`. */
+  /**  Debug-mode only flag for ensuring that the pane is appended via `popup`. @private */
   _sc_didUsePopup: false,
   //@endif
 
@@ -264,36 +264,41 @@ SC.PickerPane = SC.PalettePane.extend(
   isModal: YES,
 
   /**
-    @private
+    
     TODO: Remove SC.POINTER_LAYOUT backward compatibility.
+    @private
   */
   _sc_pointerLayout: SC.POINTER_LAYOUT || ['perfectRight', 'perfectLeft', 'perfectTop', 'perfectBottom'],
 
-  /** @private
+  /** 
     @type String
     @default 'perfectRight'
+    @private
   */
   pointerPos: 'perfectRight',
 
-  /** @private
+  /** 
     @type Number
     @default 0
+    @private
   */
   pointerPosX: 0,
 
-  /** @private
+  /** 
     @type Number
     @default 0
+    @private
   */
   pointerPosY: 0,
 
-  /** @private
+  /** 
     When calling `popup`, you pass a view or element to anchor the pane. This
     property returns the anchor element. (If you've anchored to a view, this
     is its layer.) You can use this to properly position your view.
 
     @type HTMLElement
     @default null
+    @private
   */
   anchorElement: function (key, value) {
     // Getter
@@ -331,11 +336,12 @@ SC.PickerPane = SC.PalettePane.extend(
     }
   }.property().cacheable(),
 
-  /** @private
+  /** 
     anchor rect calculated by computeAnchorRect from init popup
 
     @type Hash
     @default null
+    @private
   */
   anchorCached: null,
 
@@ -510,7 +516,7 @@ SC.PickerPane = SC.PalettePane.extend(
   repositionOnWindowResize: YES,
 
 
-  /** @private
+  /** 
     Default padding around the window's edge that the pane will not overlap.
 
     This value is set to the value of SC.PickerPane.WINDOW_PADDING, except when
@@ -525,6 +531,7 @@ SC.PickerPane = SC.PalettePane.extend(
 
     @type Number
     @default SC.PickerPane.WINDOW_PADDING
+    @private
   */
   windowPadding: null,
 
@@ -532,7 +539,7 @@ SC.PickerPane = SC.PalettePane.extend(
   // Provide some developer support. People have occasionally been misled by calling `append`
   // on PickerPanes, which fails to position the pane properly. Hopefully, we can give
   // them a clue to speed up finding the problem.
-  /** @private SC.Pane */
+  /**  SC.Pane @private */
   append: function () {
     if (!this._sc_didUsePopup) {
       SC.warn("Developer Warning: You should not use .append() with SC.PickerPane. Instead use .popup() and pass in an anchor view or element.");
@@ -556,7 +563,7 @@ SC.PickerPane = SC.PalettePane.extend(
   /**
     Displays a new picker pane.
 
-    @param {SC.View|HTMLElement} anchorViewOrElement view or element to anchor to
+    @param {(SC.View|HTMLElement)} anchorViewOrElement view or element to anchor to
     @param {String} [preferType] apply picker position rule
     @param {Array} [preferMatrix] apply custom offset or position pref matrix for specific preferType
     @param {Number} [pointerOffset]
@@ -580,11 +587,12 @@ SC.PickerPane = SC.PalettePane.extend(
     return this.append();
   },
 
-  /** @private
+  /** 
     The ideal position for a picker pane is just below the anchor that
     triggered it + offset of specific preferType. Find that ideal position,
     then call fitPositionToScreen to get final position. If anchor is missing,
     fallback to center.
+    @private
   */
   positionPane: function (useAnchorCached) {
     var frame = this.get('borderFrame'),
@@ -726,11 +734,12 @@ SC.PickerPane = SC.PalettePane.extend(
     return this;
   },
 
-  /** @private
+  /** 
     This method will return ret (x, y, width, height) from a rectangular element
     Notice: temp hack for calculating visible anchor height by counting height
     up to window bottom only. We do have 'clippingFrame' supported from view.
     But since our anchor can be element, we use this solution for now.
+    @private
   */
   computeAnchorRect: function (anchor) {
     var bounding, ret, cq,
@@ -774,8 +783,9 @@ SC.PickerPane = SC.PalettePane.extend(
     return ret;
   },
 
-  /** @private
+  /** 
     This method will dispatch to the correct re-position rule according to preferType
+    @private
   */
   fitPositionToScreen: function (preferredPosition, frame, anchorFrame) {
     var windowSize = SC.RootResponder.responder.computeWindowSize(),
@@ -829,9 +839,10 @@ SC.PickerPane = SC.PalettePane.extend(
     return frame;
   },
 
-  /** @private
+  /** 
     re-position rule migrated from old SC.OverlayPaneView.
     shift x, y to optimized picker visibility and make sure top-left corner is always visible.
+    @private
   */
   fitPositionToScreenDefault: function (windowFrame, frame, anchorFrame) {
     var maximum;
@@ -872,7 +883,7 @@ SC.PickerPane = SC.PalettePane.extend(
     return frame;
   },
 
-  /** @private
+  /** 
     Reposition the pane in a way that is optimized for menus.
 
     Specifically, we want to ensure that the pane is at least 7 pixels from
@@ -880,6 +891,7 @@ SC.PickerPane = SC.PalettePane.extend(
 
     If the menu is a submenu, we also want to reposition the pane to the left
     of the parent menu if it would otherwise exceed the width of the viewport.
+    @private
   */
   fitPositionToScreenMenu: function (windowFrame, frame, subMenu) {
     var windowPadding = this.get('windowPadding');
@@ -925,7 +937,7 @@ SC.PickerPane = SC.PalettePane.extend(
     return frame;
   },
 
-  /** @private
+  /** 
     Reposition the pane in a way that is optimized for menus that have a
     point element.
 
@@ -933,6 +945,7 @@ SC.PickerPane = SC.PalettePane.extend(
     does not exceed the height of the viewport.
 
     @returns {Rect}
+    @private
   */
   fitPositionToScreenMenuPointer: function (windowFrame, frame, anchorFrame) {
     frame = this.fitPositionToScreenPointer(windowFrame, frame, anchorFrame);
@@ -945,8 +958,9 @@ SC.PickerPane = SC.PalettePane.extend(
     return frame;
   },
 
-  /** @private
+  /** 
     re-position rule for triangle pointer picker.
+    @private
   */
   fitPositionToScreenPointer: function (windowFrame, frame, anchorFrame) {
     var curType,
@@ -1139,7 +1153,7 @@ SC.PickerPane = SC.PalettePane.extend(
     return frame;
   },
 
-  /** @private Measure the pointer element and adjust it by the determined offset. */
+  /**  Measure the pointer element and adjust it by the determined offset. @private */
   _adjustPointerPosition: function () {
     var pointer = this.$('.sc-pointer'),
       pointerPos = this.get('pointerPos'),
@@ -1162,9 +1176,10 @@ SC.PickerPane = SC.PalettePane.extend(
     }
   },
 
-  /** @private
+  /** 
     This method will set up pointerOffset and preferMatrix according to type
     and size if not provided explicitly.
+    @private
   */
   setupPointer: function (a) {
     var pointerOffset = this.get('pointerOffset'),
@@ -1243,7 +1258,7 @@ SC.PickerPane = SC.PalettePane.extend(
   */
   renderDelegateName: 'pickerRenderDelegate',
 
-  /** @private - click away picker. */
+  /**  - click away picker. @private */
   modalPaneDidClick: function (evt) {
     var f = this.get('frame'),
         target = this.get('removeTarget') || null,
@@ -1264,15 +1279,16 @@ SC.PickerPane = SC.PalettePane.extend(
     return NO;
   },
 
-  /** @private */
+  /**  @private */
   mouseDown: function (evt) {
     return this.modalPaneDidClick(evt);
   },
 
-  /** @private
+  /** 
     internal method to define the range for clicking inside so the picker
     won't be clicked away default is the range of contentView frame.
     Over-write for adjustments. ex: shadow
+    @private
   */
   clickInside: function (frame, evt) {
     return SC.pointInRect({ x: evt.pageX, y: evt.pageY }, frame);
@@ -1300,9 +1316,10 @@ SC.PickerPane = SC.PalettePane.extend(
     return sc_super();
   },
 
-  /** @private
+  /** 
     Internal method to hide the overflow on the body to make sure we don't
     show scrollbars when the picker has shadows, as it's really annoying.
+    @private
   */
   _hideOverflow: function () {
     var main = SC.$('.sc-main'),
@@ -1315,17 +1332,19 @@ SC.PickerPane = SC.PalettePane.extend(
     }
   },
 
-  /** @private
+  /** 
     Internal method to show the overflow on the body to make sure we don't
     show scrollbars when the picker has shadows, as it's really annoying.
+    @private
   */
   _withdrawOverflowRequest: function () {
     SC.bodyOverflowArbitrator.withdrawRequest(this);
   },
 
-  /** @private
+  /** 
     Detect if view is inside a scroll view. Do this by traversing parent view
     hierarchy until you hit a scroll view or main pane.
+    @private
   */
   _getScrollViewOfView: function (view) {
     var curLevel = view;
@@ -1340,8 +1359,9 @@ SC.PickerPane = SC.PalettePane.extend(
     return curLevel;
   },
 
-  /** @private
+  /** 
     If anchor view is in a scroll view, setup observers on scroll offsets.
+    @private
   */
   _setupScrollObservers: function (anchorView) {
     var scrollView = this._getScrollViewOfView(anchorView);
@@ -1357,7 +1377,7 @@ SC.PickerPane = SC.PalettePane.extend(
     }
   },
 
-  /** @private Modify horizontalScrollOffset observer. */
+  /**  Modify horizontalScrollOffset observer. @private */
   _scrollCanScrollHorizontalDidChange: function (scrollView) {
     if (scrollView.get('canScrollHorizontal')) {
       scrollView.addObserver('horizontalScrollOffset', this, this._scrollOffsetDidChange);
@@ -1366,7 +1386,7 @@ SC.PickerPane = SC.PalettePane.extend(
     }
   },
 
-  /** @private Modify verticalScrollOffset observer. */
+  /**  Modify verticalScrollOffset observer. @private */
   _scrollCanScrollVerticalDidChange: function (scrollView) {
     if (scrollView.get('canScrollVertical')) {
       scrollView.addObserver('verticalScrollOffset', this, this._scrollOffsetDidChange);
@@ -1375,7 +1395,7 @@ SC.PickerPane = SC.PalettePane.extend(
     }
   },
 
-  /** @private Teardown observers setup in _setupScrollObservers. */
+  /**  Teardown observers setup in _setupScrollObservers. @private */
   _removeScrollObservers: function () {
     var scrollView = this._scrollView;
     if (scrollView) {
@@ -1386,7 +1406,7 @@ SC.PickerPane = SC.PalettePane.extend(
     }
   },
 
-  /** @private Reposition pane whenever scroll offsets change. */
+  /**  Reposition pane whenever scroll offsets change. @private */
   _scrollOffsetDidChange: function () {
     // Filter the observer firing. We don't want to reposition multiple times if both horizontal and vertical
     // scroll offsets are updating.
@@ -1395,7 +1415,7 @@ SC.PickerPane = SC.PalettePane.extend(
     this.invokeNext(this.positionPane);
   },
 
-  /** @private SC.Object */
+  /**  SC.Object @private */
   init: function () {
     sc_super();
 
@@ -1403,7 +1423,7 @@ SC.PickerPane = SC.PalettePane.extend(
     if (!this.windowPadding) { this.windowPadding = SC.PickerPane.WINDOW_PADDING; }
   },
 
-  /** @private SC.Object */
+  /**  SC.Object @private */
   destroy: function () {
     this._scrollView = null;
     this._anchorView = null;

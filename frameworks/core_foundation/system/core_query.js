@@ -16,7 +16,7 @@ SC.mixin(SC.$.fn,
 
   isCoreQuery: YES, // walk like a duck
 
-  /** @private - better loggin */
+  /**  - better loggin @private */
   toString: function () {
     var values = [],
       len = this.length,
@@ -135,10 +135,11 @@ SC.mixin(SC.$.fn,
 // Add some global helper methods.
 SC.mixin(SC.$, {
 
-  /** @private helper method to determine if an element is visible.  Exposed
+  /**  helper method to determine if an element is visible.  Exposed
    for use in testing.
 
     @deprecated Version 1.10
+    @private
   */
   isVisible: function (elem) {
     //@if(debug)

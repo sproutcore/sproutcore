@@ -46,28 +46,31 @@ sc_require('views/segment');
 SC.SegmentedView = SC.View.extend(SC.Control,
 /** @scope SC.SegmentedView.prototype */ {
 
-  /** @private
+  /** 
     @ field
     @type Boolean
     @default YES
+    @private
   */
   acceptsFirstResponder: function () {
     if (SC.FOCUS_ALL_CONTROLS) { return this.get('isEnabledInPane'); }
     return NO;
   }.property('isEnabledInPane').cacheable(),
 
-  /** @private
+  /** 
     @type String
     @default 'tablist'
     @readOnly
+    @private
   */
   //ariaRole: 'tablist',
   ariaRole: 'group', // workaround for <rdar://problem/10444670>; switch back to 'tablist' later with <rdar://problem/10463928> (also see segment.js)
 
-  /** @private
+  /** 
     @type Array
     @default ['sc-segmented-view']
     @see SC.View#classNames
+    @private
   */
   classNames: ['sc-segmented-view'],
 
@@ -313,22 +316,24 @@ SC.SegmentedView = SC.View.extend(SC.Control,
    */
   shouldAutoResize: NO,
 
-  /** @private
+  /** 
     The following properties are used to map items to child views. Item keys
     are looked up on the item based on this view's value for each 'itemKey'.
     If a value in the item is found, then that value is mapped to a child
     view using the matching viewKey.
 
     @type Array
+    @private
   */
   itemKeys: ['itemTitleKey', 'itemValueKey', 'itemIsEnabledKey', 'itemIconKey', 'itemWidthKey', 'itemToolTipKey', 'itemKeyEquivalentKey', 'itemLayerIdKey'],
 
-  /** @private */
+  /**  @private */
   viewKeys: ['title', 'value', 'isEnabled', 'icon', 'width', 'toolTip', 'keyEquivalent', 'layerId'],
 
-  /** @private
+  /** 
     Call itemsDidChange once to initialize segment child views for the items that exist at
     creation time.
+    @private
   */
   init: function () {
     sc_super();
@@ -370,9 +375,10 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     }
   }.observes('shouldHandleOverflow'),
 
-  /** @private
+  /** 
     Called whenever the number of items changes.  This method populates SegmentedView's childViews, taking
     care to re-use existing childViews if possible.
+    @private
   */
   itemsDidChange: function () {
     var items = this.get('items') || [],
@@ -515,9 +521,10 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     }
   }.observes('*items.[]'),
 
-  /** @private
+  /** 
     This observer method is called whenever any of the relevant properties of an item change.  This only applies
     to SC.Object based items that may be observed.
+    @private
   */
   itemContentDidChange: function (item, key, alwaysNull, index) {
     var childViews = this.get('childViews'),
@@ -536,8 +543,9 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     }
   },
 
-  /** @private
+  /** 
     Whenever the view resizes, we need to check to see if we're overflowing.
+    @private
   */
   viewDidResize: function () {
     this._sc_viewFrameDidChange();
@@ -551,8 +559,9 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     }
   },
 
-  /** @private
+  /** 
     Whenever visibility changes, we need to check to see if we're overflowing.
+    @private
   */
   isVisibleInWindowDidChange: function () {
     if (this.get('shouldHandleOverflow')) {
@@ -560,9 +569,10 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     }
   }.observes('isVisibleInWindow'),
 
-  /** @private
+  /** 
     Calling this method forces the segments to be remeasured and will also adjust the
     segments for overflow if necessary.
+    @private
   */
   remeasure: function () {
     if (!this.get('shouldHandleOverflow')) { return; }
@@ -586,8 +596,9 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     }
   },
 
-  /** @private
+  /** 
     This method is called to adjust the segment views to see if we need to handle for overflow.
+    @private
    */
   adjustOverflow: function () {
     if (!this.get('shouldHandleOverflow')) { return; }
@@ -756,9 +767,10 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   // EVENT HANDLING
   //
 
-  /** @private
+  /** 
     Determines the index into the displayItems array where the passed mouse
     event occurred.
+    @private
   */
   displayItemIndexForEvent: function (evt) {
     var el = evt.target,
@@ -790,7 +802,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     return ret;
   },
 
-  /** @private */
+  /**  @private */
   keyDown: function (evt) {
     var childViews,
         childView,
@@ -849,7 +861,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     return NO;
   },
 
-  /** @private */
+  /**  @private */
   mouseDown: function (evt) {
     // Fast path, reject secondary clicks.
     if (evt.which !== 1) return false;
@@ -879,7 +891,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     }
   },
 
-  /** @private */
+  /**  @private */
   mouseUp: function (evt) {
     var activeChildView,
         index;
@@ -901,7 +913,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     return YES;
   },
 
-  /** @private */
+  /**  @private */
   mouseMoved: function (evt) {
     var childViews = this.get('childViews'),
         activeChildView,
@@ -931,7 +943,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     return YES;
   },
 
-  /** @private */
+  /**  @private */
   mouseEntered: function (evt) {
     var childViews = this.get('childViews'),
         childView,
@@ -956,7 +968,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     return YES;
   },
 
-  /** @private */
+  /**  @private */
   mouseExited: function (evt) {
     var activeChildView;
 
@@ -971,7 +983,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     return YES;
   },
 
-  /** @private */
+  /**  @private */
   touchStart: function (touch) {
     var childViews = this.get('childViews'),
         childView,
@@ -995,7 +1007,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     return YES;
   },
 
-  /** @private */
+  /**  @private */
   touchEnd: function (touch) {
     var activeChildView,
         index;
@@ -1016,7 +1028,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     return YES;
   },
 
-  /** @private */
+  /**  @private */
   touchesDragged: function (evt, touches) {
     var isTouching = this.touchIsInBoundary(evt),
         childViews = this.get('childViews'),
@@ -1055,7 +1067,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     return YES;
   },
 
-  /** @private */
+  /**  @private */
   _touchDidExit: function (evt) {
     var activeChildView;
 
@@ -1068,7 +1080,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     return YES;
   },
 
-  /** @private */
+  /**  @private */
   _touchDidEnter: function (evt) {
     var childViews = this.get('childViews'),
         childView,
@@ -1089,9 +1101,10 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     return YES;
   },
 
-  /** @private
+  /** 
     Simulates the user clicking on the segment at the specified index. This
     will update the value if possible and fire the action.
+    @private
   */
   triggerItemAtIndex: function (index) {
     var childViews = this.get('childViews'),
@@ -1165,8 +1178,9 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     }
   },
 
-  /** @private
+  /** 
     Invoked whenever an item is selected in the overflow menu.
+    @private
   */
   selectOverflowItem: function (menu) {
     var item = menu.get('selectedItem');
@@ -1180,8 +1194,9 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     this.activeChildView = null;
   },
 
-  /** @private
+  /** 
     Presents the popup menu containing overflowed segments.
+    @private
   */
   showOverflowMenu: function () {
     var self = this,
@@ -1256,8 +1271,9 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     menu.addObserver("selectedItem", this, 'selectOverflowItem');
   },
 
-  /** @private
+  /** 
     Whenever the value changes, update the segments accordingly.
+    @private
   */
   valueDidChange: function () {
     var value = this.get('value'),

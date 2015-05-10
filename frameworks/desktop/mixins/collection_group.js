@@ -6,12 +6,13 @@
 // ==========================================================================
 
 /**
-  @namespace
+  
 
   Any view you want to use as a group view in a collection must include this
   mixin.
   
   @since SproutCore 1.0
+  @namespace
 */
 SC.CollectionGroup = {
   

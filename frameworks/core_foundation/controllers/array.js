@@ -282,16 +282,18 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     return content ? content.get('length') : 0;
   }.property().cacheable(),
 
-  /** @private
+  /** 
     Returns the object at the specified index based on the observable content
+    @private
   */
   objectAt: function (idx) {
     var content = this._scac_observableContent();
     return content ? content.objectAt(idx) : undefined;
   },
 
-  /** @private
+  /** 
     Forwards a replace on to the content, but only if reordering is allowed.
+    @private
   */
   replace: function (start, amt, objects) {
     // check for various conditions before a replace is allowed
@@ -334,26 +336,28 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   // INTERNAL SUPPORT
   //
 
-  /** @private */
+  /**  @private */
   init: function () {
     sc_super();
     this._scac_contentDidChange();
   },
 
-  /** @private
+  /** 
     Cached observable content property.  Set to NO to indicate cache is
     invalid.
+    @private
   */
   _scac_cached: NO,
 
   /**
-    @private
+    
 
     Returns the current array this controller is actually managing.  Usually
     this should be the same as the content property, but sometimes we need to
     generate something different because the content is not a regular array.
 
     @returns {SC.Array} observable or null
+    @private
   */
   _scac_observableContent: function () {
     var ret = this._scac_cached;
@@ -471,9 +475,10 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     this.updateSelectionAfterContentChange();
   },
 
-  /** @private
+  /** 
     Whenever content changes, setup and teardown observers on the content
     as needed.
+    @private
   */
   _scac_contentDidChange: function () {
     this._scac_cached = NO; // invalidate observable content
@@ -548,12 +553,13 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     this.updateSelectionAfterContentChange();
   }.observes('content'),
 
-  /** @private
+  /** 
     Whenever enumerable content changes, need to regenerate the
     observableContent and notify that the range has changed.
 
     This is called whenever the content enumerable changes or whenever orderBy
     changes.
+    @private
   */
   _scac_enumerableDidChange: function () {
     var content = this.get('content'), // use content directly
@@ -570,8 +576,9 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     this.updateSelectionAfterContentChange();
   }.observes('orderBy'),
 
-  /** @private
+  /** 
     Whenever the content "status" property changes, relay out.
+    @private
   */
   _scac_contentStatusDidChange: function () {
     this.notifyPropertyChange('status');

@@ -43,8 +43,9 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
   */
   appDomain: null,
 
-  /** @private
+  /** 
     Defaults.  These will be used if not defined on localStorage.
+    @private
   */
   _defaults: null,
 

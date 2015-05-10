@@ -25,7 +25,7 @@ SC.TableRowView = SC.View.extend({
   /**
     A reference to the row's encompassing TableView.
 
-    @property
+    @member
     @type SC.TableView
   */
   tableView: null,
@@ -42,7 +42,7 @@ SC.TableRowView = SC.View.extend({
   /**
     A collection of `SC.TableColumn` objects.
 
-    @property
+    @member
     @type Array
   */
   columns: function() {

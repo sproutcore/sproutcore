@@ -10,14 +10,16 @@
 //
 
 /**
-  @namespace
+  
 
   This private class is used to store information about observers on a
   particular key.  Note that this object is not observable.  You create new
   instances by calling SC.beget(SC.ObserverSet) ;
 
-  @private
+  
   @since SproutCore 1.0
+  @private
+  @namespace
 */
 SC.ObserverSet = {
 

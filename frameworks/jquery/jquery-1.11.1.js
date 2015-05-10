@@ -1018,7 +1018,7 @@ function createPositionalPseudo( fn ) {
 
 /**
  * Checks a node for validity as a Sizzle context
- * @param {Element|Object=} context
+ * @param {(Element|Object=)} context
  * @returns {Element|Object|Boolean} The input node if acceptable, otherwise a falsy value
  */
 function testContext( context ) {
@@ -1030,7 +1030,7 @@ support = Sizzle.support = {};
 
 /**
  * Detects XML nodes
- * @param {Element|Object} elem An element or a document
+ * @param {(Element|Object)} elem An element or a document
  * @returns {Boolean} True iff elem is a non-HTML XML node
  */
 isXML = Sizzle.isXML = function( elem ) {
@@ -1042,7 +1042,7 @@ isXML = Sizzle.isXML = function( elem ) {
 
 /**
  * Sets document-related variables once based on the current document
- * @param {Element|Object} [doc] An element or document object to use to set the document
+ * @param {(Element|Object)} [doc] An element or document object to use to set the document
  * @returns {Object} Returns the current document
  */
 setDocument = Sizzle.setDocument = function( node ) {
@@ -1508,7 +1508,7 @@ Sizzle.uniqueSort = function( results ) {
 
 /**
  * Utility function for retrieving the text value of an array of DOM nodes
- * @param {Array|Element} elem
+ * @param {(Array|Element)} elem
  */
 getText = Sizzle.getText = function( elem ) {
 	var node,
@@ -2476,7 +2476,7 @@ compile = Sizzle.compile = function( selector, match /* Internal Use Only */ ) {
 /**
  * A low-level selection function that works with Sizzle's compiled
  *  selector functions
- * @param {String|Function} selector A selector or a pre-compiled
+ * @param {(String|Function)} selector A selector or a pre-compiled
  *  selector function built with Sizzle.compile
  * @param {Element} context
  * @param {Array} [results]

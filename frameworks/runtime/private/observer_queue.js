@@ -16,7 +16,7 @@ sc_require('system/set');
 // notification is sent.
 
 /**
-  @namespace
+  
 
   The private ObserverQueue is used to maintain a set of pending observers.
   This allows you to setup an observer on an object before the object exists.
@@ -24,18 +24,21 @@ sc_require('system/set');
   Whenever the observer fires, the queue will be flushed to connect any
   pending observers.
 
-  @private
+  
   @since SproutCore 1.0
+  @private
+  @namespace
 */
 SC.Observers = {
 
   queue: [],
 
   /**
-   @private
+   
 
    Attempt to add the named observer.  If the observer cannot be found, put
    it into a queue for later.
+    @private
   */
   addObserver: function(propertyPath, target, method, pathRoot) {
     var tuple ;
@@ -58,10 +61,11 @@ SC.Observers = {
   },
 
   /**
-    @private
+    
 
     Remove the observer.  If it is already in the queue, remove it.  Also
     if already found on the object, remove that.
+    @private
   */
   removeObserver: function(propertyPath, target, method, pathRoot) {
     var idx, queue, tuple, item;
@@ -99,10 +103,11 @@ SC.Observers = {
   },
 
   /**
-    @private
+    
 
     Range Observers register here to indicate that they may potentially
     need to start observing.
+    @private
   */
   addPendingRangeObserver: function(observer) {
     var ro = this.rangeObservers;
@@ -162,17 +167,17 @@ SC.Observers = {
 
   },
 
-  /** @private */
+  /**  @private */
   isObservingSuspended: 0,
 
   _pending: SC.CoreSet.create(),
 
-  /** @private */
+  /**  @private */
   objectHasPendingChanges: function(obj) {
     this._pending.add(obj) ; // save for later
   },
 
-  /** @private */
+  /**  @private */
   // temporarily suspends all property change notifications.
   suspendPropertyObserving: function() {
     this.isObservingSuspended++ ;
@@ -180,7 +185,7 @@ SC.Observers = {
 
   // resume change notifications.  This will call notifications to be
   // delivered for all pending objects.
-  /** @private */
+  /**  @private */
   resumePropertyObserving: function() {
     var pending ;
     if(--this.isObservingSuspended <= 0) {

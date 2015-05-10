@@ -99,14 +99,14 @@ SC.DateFieldView = SC.TextFieldView.extend(
   // NOTE: I think that %a and %b aren't useful because is more adequate to represent day
   // with 1..31 without zeros at start, but causes the length not to be fixed)
 
-  /** @private*/
+  /** @private */
   _dtConstants: ['%a', '%b', '%d', '%H', '%I', '%j', '%m', '%M', '%p', '%S', '%U', '%W', '%y', '%Y'],
   // Width constants for each representation %@.
 
-  /** @private */
+  /**  @private */
   _wtConstants: [3,3,2,2,2,3,2,2,2,2,2,2,2,4],
 
-  /** @private */
+  /**  @private */
   activeSelection: 0,
 
   /*
@@ -193,8 +193,9 @@ SC.DateFieldView = SC.TextFieldView.extend(
     return arr;
   }.property('format').cacheable(),
 
-  /** @private
+  /** 
     If the activeSelection changes or the value changes, update the "TextSelection" to show accordingly.
+    @private
   */
   updateTextSelectionObserver: function() {
     var as = this.get('activeSelection');
@@ -204,8 +205,9 @@ SC.DateFieldView = SC.TextFieldView.extend(
     }
   }.observes('activeSelection', 'value'),
 
-  /** @private
+  /** 
     Updates the value according the key.
+    @private
   */
   updateValue: function(key, upOrDown) {
     // 0 is DOWN - 1 is UP
@@ -229,10 +231,10 @@ SC.DateFieldView = SC.TextFieldView.extend(
   },
 
 
-  /** @private */
+  /**  @private */
   _lastValue: null,
 
-  /** @private */
+  /**  @private */
   _lastKey: null,
 
   _selectRootElement: function() {
@@ -248,7 +250,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
   // Key Event Support
   //
 
-  /** @private */
+  /**  @private */
   keyDown: function(evt) {
     if (this.interpretKeyEvents(evt)) {
       evt.stop();
@@ -257,12 +259,12 @@ SC.DateFieldView = SC.TextFieldView.extend(
     return sc_super();
   },
 
-  /** @private */
+  /**  @private */
   ctrl_a: function() {
     return YES;
   },
 
-  /** @private */
+  /**  @private */
   moveUp: function(evt) {
     var as = this.get('activeSelection');
     var ts = this.get('tabsSelections');
@@ -270,7 +272,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
     return YES;
   },
 
-  /** @private */
+  /**  @private */
   moveDown: function(evt) {
     var as = this.get('activeSelection');
     var ts = this.get('tabsSelections');
@@ -278,7 +280,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
     return YES;
   },
 
-  /** @private */
+  /**  @private */
   moveRight: function(evt) {
     var ts = this.get('tabsSelections');
     var ns = this.get('activeSelection') + 1;
@@ -289,7 +291,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
     return YES;
   },
 
-  /** @private */
+  /**  @private */
   moveLeft: function(evt) {
     var ts = this.get('tabsSelections');
     var ns = this.get('activeSelection') - 1;
@@ -300,7 +302,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
     return YES;
   },
 
-  /** @private */
+  /**  @private */
   insertTab: function(evt) {
     var ts = this.get('tabsSelections');
     var ns = this.get('activeSelection') + 1;
@@ -311,7 +313,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
     return NO;
   },
 
-  /** @private */
+  /**  @private */
   insertBacktab: function(evt) {
     var ns = this.get('activeSelection') - 1;
     if (ns !== -1) {
@@ -321,7 +323,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
     return NO;
   },
 
-  /** @private */
+  /**  @private */
   mouseUp: function(evt) {
     var ret = sc_super();
     var cs = this.get('selection');
@@ -341,21 +343,21 @@ SC.DateFieldView = SC.TextFieldView.extend(
     return ret;
   },
 
-  /** @private */
+  /**  @private */
   deleteBackward: function(evt) {
     return YES;
   },
 
-  /** @private */
+  /**  @private */
   deleteForward: function(evt) {
     return YES;
   },
 
-  /** @private */
+  /**  @private */
   _numericCharacters: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
-  /** @private */
+  /**  @private */
   _nonnumericCharacters: [' ', '-', '/', ':'],
-  /** @private Validates and applies supported keystrokes. */
+  /**  Validates and applies supported keystrokes. @private */
   insertText: function(chr, evt) {
     // If it's a nonnumeric "advance" character, advance.
     // TODO: instead of having a list of possible delimiter characters, we should actually look

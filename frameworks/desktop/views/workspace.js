@@ -119,7 +119,7 @@ SC.WorkspaceView = SC.View.extend(
   */
   masterIsHidden: NO,
 
-  /** @private */
+  /**  @private */
   masterIsHiddenDidChange: function() {
     var t, mih = this.get("masterIsHidden");
     if (t = this.get("topToolbar")) t.set("masterIsHidden", mih);
@@ -129,17 +129,19 @@ SC.WorkspaceView = SC.View.extend(
   /// INTERNAL CODE. HERE, THERE BE MONSTERS!
 
   /**
-    @private
+    
     Whenever something that affects the tiling changes (for now, just toolbarSize, but if
     we allow dynamic changing of toolbars in future, this could include toolbars themselves),
     we need to update the tiling.
+    @private
   */
   _scmd_tilePropertyDidChange: function() {
     this.invokeOnce("_scws_tile");
   }.observes("toolbarSize"),
 
-  /** @private
+  /** 
     Creates the child views. Specifically, instantiates master and detail views.
+    @private
   */
   createChildViews: function() {
     sc_super();
@@ -164,8 +166,9 @@ SC.WorkspaceView = SC.View.extend(
   },
 
   /**
-    @private
+    
     Tiles the views as necessary.
+    @private
   */
   _scws_tile: function() {
     var contentTop = 0, contentBottom = 0,
@@ -196,48 +199,55 @@ SC.WorkspaceView = SC.View.extend(
     });
   },
 
-  /** @private
+  /** 
     Returns YES if a top toolbar is present.
+    @private
   */
   hasTopToolbar: function() {
     if (this.get("topToolbar")) return YES;
     return NO;
   }.property("topToolbar").cacheable(),
 
-  /** @private
+  /** 
     Returns YES if a bottom toolbar is present.
+    @private
   */
   hasBottomToolbar: function() {
     if (this.get("bottomToolbar")) return YES;
     return NO;
   }.property("bottomToolbar").cacheable(),
 
-  /** @private
+  /** 
     Called by the individual toolbar/contentView observers at runloop end when the toolbars change.
+    @private
   */
   childDidChange: function() {
     this._scws_tile();
   },
 
-  /** @private
+  /** 
     For subclassing, this is the currently displaying top toolbar.
+    @private
   */
   activeTopToolbar: null,
 
-  /** @private
+  /** 
     For subclassing, this is the currently displaying bottom toolbar.
+    @private
   */
   activeBottomToolbar: null,
 
-  /** @private
+  /** 
     For subclassing, this is the currently displaying content view.
+    @private
   */
   activeContentView: null,
 
-  /** @private
+  /** 
     Called when the top toolbar changes. It appends it, removes any old ones, and calls toolbarsDidChange.
 
     You may want to override this if, for instance, you want to add transitions of some sort (should be trivial).
+    @private
   */
   topToolbarDidChange: function() {
     var active = this.activeTopToolbar, replacement = this.get("topToolbar");
@@ -257,6 +267,7 @@ SC.WorkspaceView = SC.View.extend(
   }.observes("topToolbar"),
 
   /**
+    
     @private
   */
   bottomToolbarDidChange: function() {
@@ -276,7 +287,7 @@ SC.WorkspaceView = SC.View.extend(
     this.invokeLast("childDidChange");
   }.observes("bottomToolbar"),
 
-  /** @private */
+  /**  @private */
   contentViewDidChange: function() {
     var active = this.activeContentView, replacement = this.get("contentView");
     if (active) {

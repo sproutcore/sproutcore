@@ -1,6 +1,6 @@
 sc_require('views/template');
 
-/** @private
+/** 
   @class
 
   SC._BindableSpan is a private view created by the Handlebars {{bind}} helpers
@@ -10,6 +10,7 @@ sc_require('views/template');
   SC._BindableSpan is created with the appropriate sub-template and context
   set up. When the associated property changes, just the template for this view
   will re-render.
+  @private
 */
 SC._BindableSpan = SC.TemplateView.extend(
   /** @scope SC._BindableSpan.prototype */{

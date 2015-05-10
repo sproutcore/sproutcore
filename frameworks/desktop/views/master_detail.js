@@ -144,7 +144,7 @@ SC.MasterDetailView = SC.View.extend(
   */
   orientation: SC.VERTICAL_ORIENTATION,
 
-  /** @private */
+  /**  @private */
   _scmd_frameDidChange: function() {
     var f = this.get("frame"), ret;
     if (f.width > f.height) ret = SC.HORIZONTAL_ORIENTATION;
@@ -153,7 +153,7 @@ SC.MasterDetailView = SC.View.extend(
     this.setIfChanged('orientation', ret);
   }.observes('frame'),
 
-  /** @private */
+  /**  @private */
   init: function() {
     sc_super();
     this._scmd_frameDidChange();
@@ -230,14 +230,15 @@ SC.MasterDetailView = SC.View.extend(
   // Internal Support
   //
 
-  /** @private */
+  /**  @private */
   _picker: null,
 
-  /** @private */
+  /**  @private */
   pointerDistanceFromEdge: 46,
 
-  /** @private
+  /** 
     Updates masterIsHidden in child views.
+    @private
   */
   _scmd_masterIsHiddenDidChange: function() {
     var mih = this.get("masterIsHidden");
@@ -245,23 +246,26 @@ SC.MasterDetailView = SC.View.extend(
     this.get("detailView").set("masterIsHidden", mih);
   }.observes("masterIsHidden"),
 
-  /** @private
+  /** 
     When the frame changes, we don't need to do anything. We use smart positioning.
     However, if the orientation were to change, well, then we might need to do something.
+    @private
   */
   _scmd_orientationDidChange: function() {
     this.invokeOnce("_scmd_tile");
   }.observes("orientation"),
 
-  /** @private
+  /** 
     Observes properties which require retiling.
+    @private
   */
   _scmd_retileProperties: function() {
     this.invokeOnce("_scmd_tile");
   }.observes("masterIsHidden", "masterWidth"),
 
-  /** @private
+  /** 
     Instantiates master and detail views.
+    @private
   */
   createChildViews: function() {
     var master = this.get("masterView");
@@ -274,11 +278,12 @@ SC.MasterDetailView = SC.View.extend(
     this.invokeOnce("_scmd_tile");
   },
 
-  /** @private */
+  /**  @private */
   _masterIsDrawn: NO, // whether the master is in the view
 
-  /** @private
+  /** 
     Tiles the views as necessary.
+    @private
   */
   _scmd_tile: function() {
     // first, determine what is and is not visible.

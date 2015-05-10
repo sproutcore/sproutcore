@@ -256,8 +256,8 @@ SC.UndoManager = SC.Object.extend(
     Registers an undo action. If called while an undo is in progress (i.e. from your
     undo method, or from observers which it triggers), registers a redo action instead.
     
-    @param {String|Object} target The action's target (`this`).
-    @param {String|Function} action The method on `target` to be called.
+    @param {(String|Object)} target The action's target (`this`).
+    @param {(String|Function)} action The method on `target` to be called.
     @param {Object} context The context passed to the action when called.
     @param {String} name An optional human-readable name for the undo action.
   */
@@ -280,8 +280,8 @@ SC.UndoManager = SC.Object.extend(
     Registers an undo action to the current group. If no group is open, opens a new
     one.
 
-    @param {String|Object} target The action's target (`this`).
-    @param {String|Function} action The method on `target` to be called.
+    @param {(String|Object)} target The action's target (`this`).
+    @param {(String|Function)} action The method on `target` to be called.
     @param {Object} context The context passed to the action when called.
     @param {String} name An optional human-readable name for the undo action. Sets or
       changes the current group's name.
@@ -401,16 +401,16 @@ SC.UndoManager = SC.Object.extend(
   // PRIVATE
   //
   
-  /** @private */
+  /**  @private */
   _activeGroup: null,
   
-  /** @private */
+  /**  @private */
   undoStack: null,
   
-  /** @private */
+  /**  @private */
   redoStack: null, 
   
-  /** @private */
+  /**  @private */
   _undoOrRedo: function (stack, state) {
     // Close out any open undo groups.
     if (this._activeGroup) this.endUndoGroup();
@@ -456,7 +456,7 @@ SC.UndoManager = SC.Object.extend(
     this.set(state, false);
   },
 
-  /** @private */
+  /**  @private */
   destroy: function() {
     this._activeGroup = null;
     this.set('undoStack', null);
@@ -464,7 +464,7 @@ SC.UndoManager = SC.Object.extend(
     return sc_super();
   },
 
-  /** @private Deprecated as of 1.11. Use registerUndoAction instead. */
+  /**  Deprecated as of 1.11. Use registerUndoAction instead. @private */
   registerUndo: function (func, name) {
     //@if(debug)
     SC.warn('SC.UndoManager#registerUndo is deprecated and will be removed in a future version. Use registerUndoAction.');

@@ -29,7 +29,7 @@ SC.RangeObserver = /** @scope SC.RangeObserver.prototype */{
   */
   isRangeObserver: YES,
 
-  /** @private */
+  /**  @private */
   toString: function() {
     var base = this.indexes ? this.indexes.toString() : "SC.IndexSet<..>";
     return base.replace('IndexSet', 'RangeObserver(%@)'.fmt(SC.guidFor(this)));
@@ -46,7 +46,7 @@ SC.RangeObserver = /** @scope SC.RangeObserver.prototype */{
     @param {SC.Array} source the source array
     @param {SC.IndexSet} indexSet set of indexes to observer
     @param {Object} target the target
-    @param {Function|String} method the method to invoke
+    @param {(Function|String)} method the method to invoke
     @param {Object} context optional context to include in callback
     @param {Boolean} isDeep if YES, observe property changes as well
     @returns {SC.RangeObserver} instance
@@ -140,11 +140,12 @@ SC.RangeObserver = /** @scope SC.RangeObserver.prototype */{
     return this;
   },
 
-  /** @private
+  /** 
     Called when an object that appears to need range observers has changed.
     Check to see if the range observer contains this object in its list.  If
     it does, go ahead and setup observers on all objects and remove ourself
     from the queue.
+    @private
   */
   setupPending: function(object) {
     var observing = this.observing ;

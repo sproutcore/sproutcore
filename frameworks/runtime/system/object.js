@@ -22,7 +22,7 @@ SC.BENCHMARK_OBJECTS = NO;
 // definition because SC.Object is copied frequently and we want to keep the
 // number of class methods to a minimum.
 
-/** @private */
+/**  @private */
 SC._detect_base = function _detect_base(func, parent, name) {
 
   return function invoke_superclass_method() {
@@ -62,7 +62,7 @@ SC._detect_base = function _detect_base(func, parent, name) {
   };
 };
 
-/** @private
+/** 
   Augments a base object by copying the properties from the extended hash.
   In addition to simply copying properties, this method also performs a
   number of optimizations that can make init'ing a new object much faster
@@ -75,6 +75,7 @@ SC._detect_base = function _detect_base(func, parent, name) {
   @param {Hash} base hash
   @param {Hash} extension
   @returns {Hash} base hash
+  @private
 */
 SC._object_extend = function _object_extend(base, ext, proto) {
   //@if(debug)
@@ -233,7 +234,7 @@ SC._object_extend = function _object_extend(base, ext, proto) {
   return base;
 };
 
-/** @private */
+/**  @private */
 SC._enhance = function (originalFunction, enhancement) {
 
   return function () {
@@ -471,7 +472,7 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
   */
   subclasses: SC.Set.create(),
 
-  /** @private */
+  /**  @private */
   toString: function () { return SC._object_className(this); },
 
   // ..........................................
@@ -569,13 +570,14 @@ SC.Object.prototype = {
 
   _kvo_enabled: YES,
 
-  /** @private
+  /** 
     This is the first method invoked on a new instance.  It will first apply
     any added properties to the new instance and then calls the real init()
     method.
 
     @param {Array} extensions an array-like object with hashes to apply.
     @returns {Object} receiver
+    @private
   */
   _object_init: function (extensions) {
     // apply any new properties
@@ -820,7 +822,7 @@ SC.Object.prototype = {
   */
   kindOf: function (scClass) { return this.constructor.kindOf(scClass); },
 
-  /** @private */
+  /**  @private */
   toString: function () {
     if (!this._object_toString) {
       // only cache the string if the klass name is available
@@ -848,7 +850,7 @@ SC.Object.prototype = {
     Note that in development mode only, the object and method that call this
     method will be recorded, for help in debugging scheduled code.
 
-    @param {Function|String} method method or method name
+    @param {(Function|String)} method method or method name
     @returns {SC.Object} receiver
   */
   invokeOnce: function (method) {
@@ -896,7 +898,7 @@ SC.Object.prototype = {
     Note that in development mode only, the object and method that call this
     method will be recorded, for help in debugging scheduled code.
 
-    @param {Function|String} method method or method name
+    @param {(Function|String)} method method or method name
     @returns {SC.Object} receiver
   */
   invokeLast: function (method) {
@@ -928,7 +930,7 @@ SC.Object.prototype = {
     Note that in development mode only, the object and method that call this
     method will be recorded, for help in debugging scheduled code.
 
-    @param {Function|String} method method or method name
+    @param {(Function|String)} method method or method name
     @returns {SC.Object} receiver
    */
   invokeNext: function (method) {
@@ -973,10 +975,11 @@ SC.mixin(SC.Object.prototype, SC.Observable);
 // CLASS NAME SUPPORT
 //
 
-/** @private
+/** 
   This is a way of performing brute-force introspection.  This searches
   through all the top-level properties looking for classes.  When it finds
   one, it saves the class path name.
+  @private
 */
 SC.findClassNames = function () {
   if (SC._object_foundObjectClassNames) return;
@@ -1072,11 +1075,12 @@ SC.kindOf = function (scObject, scClass) {
   return !!(scObject && scObject.kindOf && scObject.kindOf(scClass));
 };
 
-/** @private
+/** 
   Returns the name of this class.  If the name is not known, triggers
   a search.  This can be expensive the first time it is called.
 
   This method is used to allow classes to determine their own name.
+  @private
 */
 SC._object_className = function (obj) {
   if (SC.isReady === NO) return ''; // class names are not available until ready

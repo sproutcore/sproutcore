@@ -11,7 +11,7 @@ sc_require("panes/pane");
   */
 SC.Pane.reopen({
 
-  /** @private */
+  /**  @private */
   _executeDoAttach: function () {
     // hook into root responder
     var responder = (this.rootResponder = SC.RootResponder.responder);
@@ -42,7 +42,7 @@ SC.Pane.reopen({
     }
   },
 
-  /** @private */
+  /**  @private */
   _executeDoDetach: function () {
     sc_super();
 

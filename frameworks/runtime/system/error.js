@@ -104,7 +104,7 @@ SC.Error = SC.Object.extend(
   */
   label: null,
 
-  /** @private */
+  /**  @private */
   toString: function() {
     return "SC.Error:%@:%@ (%@)".fmt(SC.guidFor(this), this.get('message'), this.get('code'));
   },
@@ -175,7 +175,7 @@ SC.throw = function(description, label, value, c) {
   SC.Error.throw(description, label, value, c);
 };
 
-/** @private */
+/**  @private */
 SC.$throw = SC.throw;
 
 /**
@@ -188,7 +188,7 @@ SC.ok = function(ret) {
   return (ret !== false) && !(ret && ret.isError);
 };
 
-/** @private */
+/**  @private */
 SC.$ok = SC.ok;
 
 /**
@@ -204,7 +204,7 @@ SC.val = function(obj) {
   } else return obj ;
 };
 
-/** @private */
+/**  @private */
 SC.$val = SC.val;
 
 // STANDARD ERROR OBJECTS

@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/** @namespace
+/** 
   The `SC.ObjectMixinProtocol` protocol defines the properties and methods that you may implement
   in your mixin objects (i.e. JavaScript Objects passed to SC.Object's `extend` or `create`) in
   order to access additional functionality when used. They will be used if defined but are not
@@ -73,6 +73,7 @@
   *Note: Do not mix `SC.ObjectMixinProtocol` into your classes. As a protocol, it exists only for
   reference sake. You only need define any of the properties or methods listed below in order to use
   this protocol.*
+  @namespace
 */
 SC.ObjectMixinProtocol = {
 

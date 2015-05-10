@@ -5,15 +5,15 @@
 // ==========================================================================
 sc_require('views/view');
 
-/** @private Shared stack plugin (may be horizontal or vertical). */
+/**  Shared stack plugin (may be horizontal or vertical). @private */
 function _SC_VIEW_STACK_PLUGIN (direction) {
   this.direction = direction;
 }
 
-/** @private Properties to observe on child views that affect the overall child view layout. */
+/**  Properties to observe on child views that affect the overall child view layout. @private */
 _SC_VIEW_STACK_PLUGIN.prototype.childLayoutProperties = ['marginBefore', 'marginAfter', 'isVisible'];
 
-/** @private When resizeToFit is false, then we need to know when the view's frame changes. */
+/**  When resizeToFit is false, then we need to know when the view's frame changes. @private */
 _SC_VIEW_STACK_PLUGIN.prototype.layoutDependsOnSize = function (view) {
   var options = view.get('childViewLayoutOptions');
 
@@ -24,7 +24,7 @@ _SC_VIEW_STACK_PLUGIN.prototype.layoutDependsOnSize = function (view) {
   }
 };
 
-/** @private */
+/**  @private */
 _SC_VIEW_STACK_PLUGIN.prototype.layoutChildViews = function (view) {
   var childViews = view.get('childViews'),
     options = view.get('childViewLayoutOptions') || {},

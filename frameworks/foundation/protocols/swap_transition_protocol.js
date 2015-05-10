@@ -5,7 +5,7 @@
 // ==========================================================================
 
 
-/** @namespace
+/** 
   The `SC.SwapTransitionProtocol` protocol defines the properties and methods that you may
   implement in your custom swap transition plugins. All methods are optional, but a plugin is
   expected to use at least one of the methods.
@@ -16,6 +16,7 @@
   *Note: Do not mix `SC.SwapTransitionProtocol` into your classes. As a protocol, it exists only
   for reference sake. You only need define any of the properties or methods listed below in order to
   use this protocol.*
+  @namespace
 */
 SC.SwapTransitionProtocol = {
 

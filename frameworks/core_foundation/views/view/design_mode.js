@@ -19,7 +19,7 @@ SC.DESIGN_MODE_CLASS_NAMES = {
   xl: 'sc-xlarge'
 };
 
-/** @private This adds design modes support to SC.View. */
+/**  This adds design modes support to SC.View. @private */
 SC.View.reopen(
   /** @scope SC.View.prototype */ {
 
@@ -55,7 +55,7 @@ SC.View.reopen(
   // Methods
   //
 
-  /** @private Recursively set the designMode on each child view. */
+  /**  Recursively set the designMode on each child view. @private */
   adjustChildDesignModes: function (lastDesignMode, designMode) {
     var childViews = this.get('childViews');
 

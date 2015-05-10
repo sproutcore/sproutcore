@@ -15,7 +15,7 @@ SC.mixin(SC.browser,
   /* @private Internal property for the test element used for style testing. */
   _testEl: null,
 
-  /** @private */
+  /**  @private */
   _testSupportFor: function (target, propertyName, testValue) {
     /*jshint eqnull:true*/
     var ret = target[propertyName] != null,

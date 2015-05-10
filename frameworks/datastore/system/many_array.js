@@ -78,7 +78,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     store to function properly.
 
     @type SC.Store
-    @property
+    @member
   */
   store: function () {
     return this.get('record').get('store');
@@ -89,7 +89,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     array will place the parent record into a `READY_DIRTY` state.
 
     @type Number
-    @property
+    @member
   */
   storeKey: function () {
     return this.get('record').get('storeKey');
@@ -119,7 +119,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     unnecessarily.
 
     @type SC.Array
-    @property
+    @member
   */
   readOnlyStoreIds: function () {
     return this.get('record').readAttribute(this.get('propertyName'));
@@ -131,7 +131,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     modified.
 
     @type {SC.Array}
-    @property
+    @member
   */
   editableStoreIds: function () {
     var store    = this.get('store'),
@@ -158,7 +158,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     Computed from owner many attribute
 
     @type Boolean
-    @property
+    @member
   */
   isEditable: function () {
     // NOTE: can't use get() b/c manyAttribute looks like a computed prop
@@ -170,7 +170,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     Computed from owner many attribute
 
     @type String
-    @property
+    @member
   */
   inverse: function () {
     // NOTE: can't use get() b/c manyAttribute looks like a computed prop
@@ -182,7 +182,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     Computed from owner many attribute
 
     @type Boolean
-    @property
+    @member
   */
   isMaster: function () {
     // NOTE: can't use get() b/c manyAttribute looks like a computed prop
@@ -194,7 +194,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     Computed from owner many attribute
 
     @type Array
-    @property
+    @member
   */
   orderBy: function () {
     // NOTE: can't use get() b/c manyAttribute looks like a computed prop
@@ -206,20 +206,22 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
   // ARRAY PRIMITIVES
   //
 
-  /** @private
+  /** 
     Returned length is a pass-through to the `storeIds` array.
 
     @type Number
-    @property
+    @member
+    @private
   */
   length: function () {
     var storeIds = this.get('readOnlyStoreIds');
     return storeIds ? storeIds.get('length') : 0;
   }.property('readOnlyStoreIds'),
 
-  /** @private
+  /** 
     Looks up the store id in the store ids array and materializes a
     records.
+    @private
   */
   objectAt: function (idx) {
     var recs = this._records,
@@ -257,9 +259,10 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return ret;
   },
 
-  /** @private
+  /** 
     Pass through to the underlying array.  The passed in objects must be
     records, which can be converted to `storeId`s.
+    @private
   */
   replace: function (idx, amt, recs) {
     //@if(debug)
@@ -468,7 +471,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return this;
   },
 
-  /** @private binary search to find insertion location */
+  /**  binary search to find insertion location @private */
   _findInsertionLocation: function (rec, min, max, orderBy) {
     var idx   = min + Math.floor((max - min) / 2),
         cur   = this.objectAt(idx),
@@ -492,7 +495,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     }
   },
 
-  /** @private function to compare two objects*/
+  /**  function to compare two objects@private */
   _compare: function (a, b, orderBy) {
     var t = SC.typeOf(orderBy),
         ret, idx, len;
@@ -532,14 +535,14 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
   // INTERNAL SUPPORT
   //
 
-  /** @private */
+  /**  @private */
   unknownProperty: function (key, value) {
     var ret;
     if (SC.typeOf(key) === SC.T_STRING) ret = this.reducedProperty(key, value);
     return ret === undefined ? sc_super() : ret;
   },
 
-  /** @private */
+  /**  @private */
   init: function () {
     sc_super();
 
@@ -547,10 +550,11 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     this.recordPropertyDidChange();
   },
 
-  /** @private
+  /** 
     This is called by the parent record whenever its properties change. It is
     also called by the ChildrenAttribute transform when the attribute is set
     to a new array.
+    @private
   */
   recordPropertyDidChange: function (keys) {
     if (keys && !keys.contains(this.get('propertyName'))) return this;

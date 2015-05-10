@@ -57,9 +57,10 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     return this.$(elementTagName).andSelf().filter(elementTagName);
   },
 
-  /** @private
+  /** 
     Override to specify the HTML element type to use as the field. For
     example, "input" or "textarea".
+    @private
   */
   _inputElementTagName: function() {
     return 'input';
@@ -161,8 +162,9 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   // INTERNAL SUPPORT
   //
 
-  /** @private
+  /** 
     invoked when the value property changes.  Sets the field value...
+    @private
   */
   _field_valueDidChange: function() {
     this.setFieldValue(this.get('fieldValue'));
@@ -292,12 +294,12 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     return NO;
   }.property('isEnabledInPane'),
 
-  /** @private */
+  /**  @private */
   _addChangeEvent: function() {
     SC.Event.add(this.$input(), 'change', this, this._field_fieldValueDidChange);
   },
 
-  /** @private */
+  /**  @private */
   // these methods use the validator to convert the raw field value returned
   // by your subclass into an object and visa versa.
   _field_setFieldValue: function(newValue) {
@@ -310,7 +312,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     return ret ;
   },
 
-  /** @private */
+  /**  @private */
   _field_getFieldValue: function() {
     var ret = this.getFieldValue() ;
     if (this.objectForFieldValue) ret = this.objectForFieldValue(ret);

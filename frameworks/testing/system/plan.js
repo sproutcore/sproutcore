@@ -69,7 +69,7 @@ CoreTest.Plan = {
   // RUNNING
   //
 
-  /** @private - array of functions to execute in order. */
+  /**  - array of functions to execute in order. @private */
   queue: [],
 
   /**

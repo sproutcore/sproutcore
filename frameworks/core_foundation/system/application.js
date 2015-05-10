@@ -27,7 +27,7 @@ sc_require('system/root_responder');
 SC.Application = SC.Responder.extend(SC.ResponderContext,
 /** @scope SC.Application.prototype */ {
 
-  /** @private UNUSED
+  /**  UNUSED
     The current design mode of the application and its views.
 
     If the application has designModes specified, this property will be set
@@ -35,6 +35,7 @@ SC.Application = SC.Responder.extend(SC.ResponderContext,
 
     @property {String}
     @default null
+    @private
   */
   // designMode: null,
 
@@ -196,7 +197,7 @@ SC.Application = SC.Responder.extend(SC.ResponderContext,
     'l': Infinity // ex. retina desktop display and TV
   },
 
-  /** @private */
+  /**  @private */
   init: function () {
     sc_super();
 
@@ -204,7 +205,7 @@ SC.Application = SC.Responder.extend(SC.ResponderContext,
     SC.ready(this, '_setDesignModes');
   },
 
-  /** @private */
+  /**  @private */
   _setDesignModes: function () {
     var designModes = this.get('designModes'),
       responder = SC.RootResponder.responder;

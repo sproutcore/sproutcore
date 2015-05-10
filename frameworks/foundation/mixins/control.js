@@ -66,7 +66,7 @@ SC.SMALL_CONTROL_SIZE = 'sc-small-size';
 SC.TINY_CONTROL_SIZE = 'sc-tiny-size';
 
 /**
-  @namespace
+  
 
   A Control is a view that also implements some basic state functionality.
   Apply this mixin to any view that you want to have standard control
@@ -117,6 +117,7 @@ SC.TINY_CONTROL_SIZE = 'sc-tiny-size';
 
   @since SproutCore 1.0
   @extends SC.ContentValueSupport
+  @namespace
 */
 SC.Control = SC.mixin(SC.clone(SC.ContentValueSupport),
 /** @scope SC.Control.prototype */{
@@ -142,7 +143,7 @@ SC.Control = SC.mixin(SC.clone(SC.ContentValueSupport),
   */
   isSelected: NO,
 
-  /** @private */
+  /**  @private */
   isSelectedBindingDefault: SC.Binding.oneWay().bool(),
 
   /**
@@ -158,7 +159,7 @@ SC.Control = SC.mixin(SC.clone(SC.ContentValueSupport),
   */
   isActive: NO,
 
-  /** @private */
+  /**  @private */
   isActiveBindingDefault: SC.Binding.oneWay().bool(),
 
   /**
@@ -231,15 +232,16 @@ SC.Control = SC.mixin(SC.clone(SC.ContentValueSupport),
   */
   controlSize: SC.REGULAR_CONTROL_SIZE,
 
-  /** @private */
+  /**  @private */
   displayProperties: ['isSelected', 'isActive', 'controlSize'],
 
-  /** @private */
+  /**  @private */
   _CONTROL_TMP_CLASSNAMES: {},
 
-  /** @private
+  /** 
     Invoke this method in your updateDisplay() method to update any basic
     control CSS classes.
+    @private
   */
   renderMixin: function (context, firstTime) {
     var sel = this.get('isSelected'),

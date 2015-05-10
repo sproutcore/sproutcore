@@ -26,8 +26,9 @@ SC.Async = SC.Object.extend(
 
   arg2: null,
 
-  /** @private
+  /** 
     Called by the statechart
+    @private
   */
   tryToPerform: function(state) {
     var func = this.get('func'),
@@ -72,7 +73,7 @@ SC.Async.mixin(/** @scope SC.Async */{
 
       });
 
-    @param func {String|Function} the function to be invoked on a state
+    @param func {(String|Function)} the function to be invoked on a state
     @param arg1 Optional. An argument to pass to the given function
     @param arg2 Optional. An argument to pass to the given function
     @return {SC.Async} a new instance of a SC.Async

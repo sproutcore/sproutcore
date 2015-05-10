@@ -60,14 +60,15 @@ SC.DisclosureView = SC.ButtonView.extend(
   */
   toggleOffValue: NO,
   
-  /** @private */
+  /**  @private */
   valueBindingDefault: SC.Binding.bool(),
 
-  /** @private
+  /** 
 
     Allows toggling of the value with the right and left arrow keys.
     Extends the behavior inherited from SC.ButtonView.
     @param evt
+    @private
   */
   keyDown: function(evt) {
     if (evt.which === 37 || evt.which === 38) {

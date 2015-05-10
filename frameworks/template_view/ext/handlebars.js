@@ -46,6 +46,7 @@ SC.Handlebars.JavaScriptCompiler.prototype.nameLookup = function(parent, name, t
   mustaches in SproutCore's Handlebars will also set up an observer to keep the DOM
   up to date when the underlying property changes.
 
+  
   @private
 */
 SC.Handlebars.Compiler.prototype.mustache = function(mustache) {

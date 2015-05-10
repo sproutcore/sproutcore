@@ -512,7 +512,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   /**
     Inserts the pane into the DOM.
 
-    @param {DOMElement|jQuery|String} elem the element to append the pane's layer to.
+    @param {(DOMElement|jQuery|String)} elem the element to append the pane's layer to.
       This is passed to `jQuery()`, so any value supported by `jQuery()` will work.
     @returns {SC.Pane} receiver
   */
@@ -583,7 +583,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   */
   touchZ: 99,
 
-  /** @private */
+  /**  @private */
   _addIntercept: function() {
     if (this.get('hasTouchIntercept')) {
       var div = document.createElement("div");
@@ -602,7 +602,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     }
   },
 
-  /** @private */
+  /**  @private */
   _removeIntercept: function() {
     if (this._touchIntercept) {
       document.body.removeChild(this._touchIntercept);
@@ -610,17 +610,17 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     }
   },
 
-  /** @private */
+  /**  @private */
   hideTouchIntercept: function() {
     if (this._touchIntercept) this._touchIntercept.style.display = "none";
   },
 
-  /** @private */
+  /**  @private */
   showTouchIntercept: function() {
     if (this._touchIntercept) this._touchIntercept.style.display = "block";
   },
 
-  /** @private */
+  /**  @private */
   // updateLayerLocation: function () {
   //   if(this.get('designer') && SC.suppressMain) return sc_super();
   //   // note: the normal code here to update node location is removed
@@ -628,7 +628,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   //   return this;
   // },
 
-  /** @private */
+  /**  @private */
   init: function() {
     // Backwards compatibility
     //@if(debug)
@@ -648,7 +648,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     }
   },
 
-  /** @private */
+  /**  @private */
   classNames: ['sc-pane']
 
 }) ;

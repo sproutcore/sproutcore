@@ -6,7 +6,7 @@
 // ==========================================================================
 
 /**
-  @namespace
+  
   
   This delegate is consulted by view implementing SC.InlineEditable and
   SC.InlineEditor and controls the lifecycle of the editor as well as begin
@@ -20,6 +20,7 @@
   editable view.
   
   @since SproutCore 1.0
+  @namespace
 */
 SC.InlineEditorDelegate = {
 
@@ -161,7 +162,7 @@ SC.InlineEditorDelegate = {
   // 
 
   /**
-    @private
+    
 
     Notifies the delegate that the editor will end editing but hasn't cleaned up
     yet. This can be caused by both commit or discard. If it was a discard, the
@@ -173,11 +174,12 @@ SC.InlineEditorDelegate = {
     @params {SC.InlineEditable} the view being edited
     @params {SC.InlineEditor} the editor for the view
     @params {Object} the final value of the edit
+    @private
   */
   inlineEditorWillEndEditing: function(editor, value, editable) {},
 
   /**
-    @private
+    
 
     Notifies the delegate that the editor has cleaned up after editing. This can
     be caused by both commit or discard. If it was a discard, the value will be
@@ -189,6 +191,7 @@ SC.InlineEditorDelegate = {
     @params {SC.InlineEditable} the view being edited
     @params {SC.InlineEditor} the editor for the view
     @params {Object} the final value of the edit
+    @private
   */
   inlineEditorDidEndEditing: function(editor, value, editable) {}
 };

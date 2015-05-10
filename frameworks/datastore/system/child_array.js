@@ -85,7 +85,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     reflected by this SC.ChildArray.
 
     @type SC.Array
-    @property
+    @member
   */
   readOnlyChildren: function() {
     return this.get('record').readAttribute(this.get('propertyName'));
@@ -97,7 +97,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     Any changes to this array will not affect the parent record's datahash.
 
     @type {SC.Array}
-    @property
+    @member
   */
   editableChildren: function() {
     var store    = this.get('store'),
@@ -118,11 +118,12 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
   // ARRAY PRIMITIVES
   //
 
-  /** @private
+  /** 
     Returned length is a pass-through to the storeIds array.
 
     @type Number
-    @property
+    @member
+    @private
   */
   length: function() {
     var children = this.get('readOnlyChildren');
@@ -300,10 +301,11 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
   // INTERNAL SUPPORT
   //
 
-  /** @private Converts any SC.Records in the array into an array of hashes.
+  /**  Converts any SC.Records in the array into an array of hashes.
 
     @param {SC.Array} recs records to be converted to hashes.
     @returns {SC.Array} array of hashes.
+    @private
   */
   _processRecordsToHashes: function (recs) {
     var store, sk,
@@ -322,10 +324,11 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return ret;
   },
 
-  /** @private
+  /** 
     This is called by the parent record whenever its properties change. It is
     also called by the ChildrenAttribute transform when the attribute is set
     to a new array.
+    @private
   */
   recordPropertyDidChange: function (keys) {
     var oldLength = this.get('length'),

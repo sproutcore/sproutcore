@@ -71,7 +71,7 @@ SC.mixin(SC.Object.prototype, /** @scope SC.Object.prototype */ {
 
         // After 200 ms, alerts "a: x, b: y, c: z"
 
-    @param {Function|String} method reference or method name
+    @param {(Function|String)} method reference or method name
     @param {Number} interval
   */
   invokeOnceLater: function(method, interval) {
@@ -131,7 +131,7 @@ SC.mixin(SC.Object.prototype, /** @scope SC.Object.prototype */ {
 
     @param {String} pathName
     @param {Object} target target or method
-    @param {Function|String} method
+    @param {(Function|String)} method
     @returns {SC.Object} receiver
   */
   invokeWith: function(pathName, target, method) {

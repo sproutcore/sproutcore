@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 /**
-  @namespace
+  
 
   Implements common selection management properties for controllers.
 
@@ -26,6 +26,7 @@
   already applied to SC.ArrayController.
 
   @since SproutCore 1.0
+  @namespace
 */
 SC.SelectionSupport = {
 

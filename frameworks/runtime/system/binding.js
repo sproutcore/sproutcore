@@ -265,7 +265,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   */
   isBinding: YES,
 
-  /** @private
+  /** 
     This is the core method you use to create a new binding instance.  The
     binding instance will have the receiver instance as its parent which means
     any configuration you have there will be inherited.
@@ -275,6 +275,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
 
     @param {String} [fromPath]
     @returns {SC.Binding} new binding instance
+    @private
   */
   beget: function (fromPath) {
     var ret = SC.beget(this);
@@ -291,8 +292,9 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     return ret;
   },
 
-  /** @private
+  /** 
     Returns a builder function for compatibility.
+    @private
   */
   builder: function () {
     var binding = this,
@@ -312,7 +314,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     "*", which will use the root object of the to side be default.  This special
     behavior is used to support the high-level API provided by SC.Object.
 
-    @param {String|Tuple} propertyPath A property path or tuple
+    @param {(String|Tuple)} propertyPath A property path or tuple
     @param {Object} [root] root object to use when resolving the path.
     @returns {SC.Binding} this
   */
@@ -340,7 +342,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     `isVisibleBinding`, you do not need to call this method, as the `to` property
     path will be generated for you when its object is created.
 
-    @param {String|Tuple} propertyPath A property path or tuple
+    @param {(String|Tuple)} propertyPath A property path or tuple
     @param {Object} [root] root object to use when resolving the path.
     @returns {SC.Binding} this
   */
@@ -376,10 +378,11 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     return this;
   },
 
-  /** @private
+  /** 
     Actually connects the binding.  This is done at the end of the runloop
     to give you time to setup your entire object graph before the bindings
     try to activate.
+    @private
   */
   _connect: function () {
     if (!this._connectionPending) return; //nothing to do
@@ -474,18 +477,20 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     return this;
   },
 
-  /** @private
+  /** 
     Indicates when the binding has been destroyed.
 
     @type Boolean
     @default NO
+    @private
   */
   isDestroyed: NO,
 
-  /** @private
+  /** 
     Disconnects the binding and removes all properties and external references. Called by
     either binding target object when destroyed.
 
+    
     @private
   */
   destroy: function () {
@@ -513,12 +518,13 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     this._toObserverData = this._fromObserverData = null;
   },
 
-  /** @private
+  /** 
     Invoked whenever the value of the "from" property changes.  This will mark
     the binding as dirty if the value has changed.
 
     @param {Object} target The object that contains the key
     @param {String} key The name of the property which changed
+    @private
   */
   fromPropertyDidChange: function (target, key) {
     var v = target ? target.get(key) : null;
@@ -548,7 +554,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     }
   },
 
-  /** @private
+  /** 
     Invoked whenever the value of the "to" property changes.  This will mark the
     binding as dirty only if:
 
@@ -560,6 +566,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
 
     @param {Object} target The object that contains the key
     @param {String} key The name of the property which changed
+    @private
   */
   toPropertyDidChange: function (target, key) {
     if (this._oneWay) return; // nothing to do
@@ -590,25 +597,27 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     }
   },
 
-  /** @private */
+  /**  @private */
   _scheduleSync: function () {
     if (SC.RunLoop.isRunLoopInProgress() || SC.Binding._syncScheduled) { return; }
     SC.Binding._syncScheduled = YES;
     setTimeout(function () { SC.run(); SC.Binding._syncScheduled = NO; }, 1);
   },
 
-  /** @private
+  /** 
     Saves the source location for the binding value.  This will be used later
     to actually update the binding value.
+    @private
   */
   _setBindingValue: function (source, key) {
     this._bindingSource = source;
     this._bindingKey    = key;
   },
 
-  /** @private
+  /** 
     Updates the binding value from the current binding source if needed.  This
     should be called just before using this._bindingValue.
+    @private
   */
   _computeBindingValue: function () {
     var source = this._bindingSource,
@@ -619,10 +628,11 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     this._transformedBindingValue = this._computeTransformedValue(v);
   },
 
-  /** @private
+  /** 
     Applies transforms to the value and returns the transfomed value.
     @param {*} value Binding value to transform
     @returns {*} Transformed value
+    @private
   */
   _computeTransformedValue: function (value) {
     var transforms = this._transforms,
@@ -650,10 +660,11 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   _changeQueue: SC.CoreSet.create(),
   _alternateChangeQueue: SC.CoreSet.create(),
 
-  /** @private
+  /** 
     Call this method on SC.Binding to flush all bindings with changes pending.
 
     @returns {Boolean} YES if changes were flushed.
+    @private
   */
   flushPendingChanges: function () {
 
@@ -705,9 +716,10 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     return didFlush;
   },
 
-  /** @private
+  /** 
     This method is called at the end of the Run Loop to relay the changed
     binding value from one side to the other.
+    @private
   */
   applyBindingValue: function () {
     // compute the binding targets if needed.
@@ -820,12 +832,13 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     return this;
   },
 
-  /** @private
+  /** 
     set if you call sync() when the binding connection is still pending.
+    @private
    */
   _syncOnConnect: NO,
 
-  /** @private */
+  /**  @private */
   _computeBindingTargets: function () {
     var path, root, tuple;
 
@@ -1236,7 +1249,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     return ret;
   },
 
-  /** @private */
+  /**  @private */
   _sc_mixImpl: function(paths, mixFunction) {
     var len = paths.length,
         properties = [];
@@ -1320,7 +1333,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
 
     *Note:* the transform acts strictly as a one-way binding, working only in the one direction.
 
-    @param {String...} the property paths of source values that will be provided to the AND transform.
+    @param {...String} the property paths of source values that will be provided to the AND transform.
   */
   and: function () {
     // Fast copy.
@@ -1382,7 +1395,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
 
     *Note:* the transform acts strictly as a one-way binding, working only in the one direction.
 
-    @param {String...} the paths of source values that will be provided to the OR sequence.
+    @param {...String} the paths of source values that will be provided to the OR sequence.
   */
   or: function () {
     // Fast copy.
@@ -1462,7 +1475,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     *Note:* the number of parameters of `mixFunction` should match the number of paths provided.
     *Note:* the transform acts strictly as a one-way binding, working only in the one direction.
 
-    @param {String...} the paths of source values that will be provided to the aggregate function.
+    @param {...String} the paths of source values that will be provided to the aggregate function.
     @param {Function} mixFunction the function that aggregates the values
   */
   mix: function() {
@@ -1500,7 +1513,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
      });
   },
 
-  /** @private */
+  /**  @private */
   toString: function () {
     var from = this._fromRoot ? "<%@>:%@".fmt(this._fromRoot, this._fromPropertyPath) : this._fromPropertyPath;
 

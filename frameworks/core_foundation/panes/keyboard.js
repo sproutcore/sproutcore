@@ -30,12 +30,13 @@ SC.Pane.reopen(
     return ret ;
   },
 
-  /** @private
+  /** 
     If the user presses the tab key and the pane does not have a first
     responder, try to give it to the next eligible responder.
 
     If the keyDown event reaches the pane, we can assume that no responders in
     the responder chain, nor the default responder, handled the event.
+    @private
   */
   keyDown: function(evt) {
     var nextValidKeyView;
@@ -60,7 +61,7 @@ SC.Pane.reopen(
     return NO;
   },
 
-  /** @private method forwards status changes in a generic way. */
+  /**  method forwards status changes in a generic way. @private */
   _forwardKeyChange: function(shouldForward, methodName, pane, isKey) {
     var keyView, responder, newKeyView;
     if (shouldForward && (responder = this.get('firstResponder'))) {

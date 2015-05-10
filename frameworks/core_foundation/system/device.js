@@ -150,7 +150,7 @@ SC.device = SC.Object.create({
     });
   },
 
-  /** @private */
+  /**  @private */
   orientationObserver: function () {
     var body = SC.$(document.body),
         orientation = this.get('orientation');

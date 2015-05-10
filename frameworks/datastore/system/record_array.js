@@ -80,7 +80,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return "%@({\n    query: %@,\n    storeKeys: [%@],\n    length: %@,\n    … }) %@".fmt(sc_super(), query, storeKeys, length, statusString);
   },
 
-  /** @private */
+  /**  @private */
   statusString: function() {
     var ret = [], status = this.get('status');
 
@@ -126,7 +126,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   */
   storeKeys: null,
 
-  /** @private The cache of previous store keys so that we can avoid unnecessary updates. */
+  /**  The cache of previous store keys so that we can avoid unnecessary updates. @private */
   _prevStoreKeys: null,
 
   /**
@@ -156,7 +156,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     The current editable state of the query. If this record array is not backed by a
     query, it is assumed to be editable.
 
-    @property
+    @member
     @type Boolean
   */
   isEditable: function() {
@@ -168,9 +168,10 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   // ARRAY PRIMITIVES
   //
 
-  /** @private
+  /** 
     Returned length is a pass-through to the `storeKeys` array.
-		@property
+		@member
+    @private
   */
   length: function() {
     this.flush(); // cleanup pending changes
@@ -178,22 +179,24 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return storeKeys ? storeKeys.get('length') : 0;
   }.property('storeKeys').cacheable(),
 
-  /** @private
+  /** 
     A cache of materialized records. The first time an instance of SC.Record is
     created for a store key at a given index, it will be saved to this array.
 
     Whenever the `storeKeys` property is reset, this cache is also reset.
 
     @type Array
+    @private
   */
   _scra_records: null,
 
-  /** @private
+  /** 
     Looks up the store key in the `storeKeys array and materializes a
     records.
 
     @param {Number} idx index of the object
     @return {SC.Record} materialized record
+    @private
   */
   objectAt: function(idx) {
 
@@ -222,7 +225,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return ret ;
   },
 
-  /** @private - optimized forEach loop. */
+  /**  - optimized forEach loop. @private */
   forEach: function(callback, target) {
     this.flush();
 
@@ -247,7 +250,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return this;
   },
 
-  /** @private
+  /** 
     Replaces a range of records starting at a given index with the replacement
     records provided. The objects to be inserted must be instances of SC.Record
     and must have a store key assigned to them.
@@ -261,6 +264,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @param {SC.RecordArray} recs the records that should replace the removed records
 
     @returns {SC.RecordArray} receiver, after mutation has occurred
+    @private
   */
   replace: function(idx, amt, recs) {
 
@@ -294,12 +298,13 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return this.indexOf(record)>=0;
   },
 
-  /** @private
+  /** 
     Returns the first index where the specified record is found.
 
     @param {SC.Record} record
     @param {Number} startAt optional starting index
     @returns {Number} index
+    @private
   */
   indexOf: function(record, startAt) {
     if (!SC.kindOf(record, SC.Record)) {
@@ -318,12 +323,13 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return storeKeys ? storeKeys.indexOf(storeKey, startAt) : -1;
   },
 
-  /** @private
+  /** 
     Returns the last index where the specified record is found.
 
     @param {SC.Record} record
     @param {Number} startAt optional starting index
     @returns {Number} index
+    @private
   */
   lastIndexOf: function(record, startAt) {
     if (!SC.kindOf(record, SC.Record)) {
@@ -436,12 +442,13 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   // because eventually this particular implementation is likely to change;
   // moving some or all of this code directly into the store. -CAJ
 
-  /** @private
+  /** 
     Called whenever the store initiates a refresh of the query.  Sets the
     status of the record array to the appropriate status.
 
     @param {SC.Query} query
     @returns {SC.RecordArray} receiver
+    @private
   */
   storeWillFetchQuery: function(query) {
     var status = this.get('status'),
@@ -452,23 +459,25 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return this ;
   },
 
-  /** @private
+  /** 
     Called whenever the store has finished fetching a query.
 
     @param {SC.Query} query
     @returns {SC.RecordArray} receiver
+    @private
   */
   storeDidFetchQuery: function(query) {
     this.setIfChanged('status', SC.Record.READY_CLEAN);
     return this ;
   },
 
-  /** @private
+  /** 
     Called whenever the store has cancelled a refresh.  Sets the
     status of the record array to the appropriate status.
 
     @param {SC.Query} query
     @returns {SC.RecordArray} receiver
+    @private
   */
   storeDidCancelQuery: function(query) {
     var status = this.get('status'),
@@ -479,19 +488,20 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return this ;
   },
 
-  /** @private
+  /** 
     Called whenever the store encounters an error while fetching.  Sets the
     status of the record array to the appropriate status.
 
     @param {SC.Query} query
     @returns {SC.RecordArray} receiver
+    @private
   */
   storeDidErrorQuery: function(query) {
     this.setIfChanged('status', SC.Record.ERROR);
     return this ;
   },
 
-  /** @private
+  /** 
     Called by the store whenever it changes the state of certain store keys. If
     the receiver cares about these changes, it will mark itself as dirty and add
     the changed store keys to the _scq_changedStoreKeys index set.
@@ -503,6 +513,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @param {SC.Array} storeKeys the effected store keys
     @param {SC.Set} recordTypes the record types for the storeKeys.
     @returns {SC.RecordArray} receiver
+    @private
   */
   storeDidChangeStoreKeys: function(storeKeys, recordTypes) {
     var query =  this.get('query');
@@ -691,7 +702,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     Returns `YES` whenever the status is `SC.Record.ERROR`.  This will allow
     you to put the UI into an error state.
 
-		@property
+		@member
     @type Boolean
   */
   isError: function() {
@@ -702,7 +713,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     Returns the receiver if the record array is in an error state.  Returns
     `null` otherwise.
 
-		@property
+		@member
     @type SC.Record
   */
   errorValue: function() {
@@ -714,7 +725,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     state. If no explicit error object has been set, returns
     `SC.Record.GENERIC_ERROR.`
 
-		@property
+		@member
     @type SC.Error
   */
   errorObject: function() {
@@ -739,8 +750,9 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return sc_super();
   },
 
-  /** @private
+  /** 
     Invoked whenever the `storeKeys` array changes.  Observes changes.
+    @private
   */
   _storeKeysDidChange: function() {
     var storeKeys = this.get('storeKeys');
@@ -778,20 +790,22 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
   }.observes('storeKeys'),
 
-  /** @private
+  /** 
     If anyone adds an array observer on to the record array, make sure
     we flush so that the observers don't fire the first time length is
     calculated.
+    @private
   */
   addArrayObservers: function() {
     this.flush();
     return SC.Array.addArrayObservers.apply(this, arguments);
   },
 
-  /** @private
+  /** 
     Invoked whenever the content of the `storeKeys` array changes.  This will
     dump any cached record lookup and then notify that the enumerable content
     has changed.
+    @private
   */
   _storeKeysContentDidChange: function(start, removedCount, addedCount) {
     if (this._scra_records) this._scra_records.length=0 ; // clear cache
@@ -799,7 +813,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     this.arrayContentDidChange(start, removedCount, addedCount);
   },
 
-  /** @private */
+  /**  @private */
   init: function() {
     sc_super();
     this._storeKeysDidChange();

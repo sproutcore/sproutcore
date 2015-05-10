@@ -53,7 +53,7 @@ SC.MenuScrollerView = SC.ScrollerView.extend(
   // INTERNAL SUPPORT
   //
 
-  /** @private */
+  /**  @private */
   init: function () {
     // Set the scrollerThickness based on controlSize
     switch (this.get('controlSize')) {
@@ -77,7 +77,7 @@ SC.MenuScrollerView = SC.ScrollerView.extend(
     return sc_super();
   },
 
-  /** @private */
+  /**  @private */
   render: function (context, firstTime) {
     context.addClass('sc-vertical');
     context.addClass(this.get('controlSize'));
@@ -87,20 +87,21 @@ SC.MenuScrollerView = SC.ScrollerView.extend(
     }
   },
 
-  /** @private */
+  /**  @private */
   mouseEntered: function (evt) {
     this.set('isMouseOver', YES);
     this._invokeScrollOnMouseOver();
   },
 
-  /** @private */
+  /**  @private */
   mouseExited: function (evt) {
     this.set('isMouseOver', NO);
   },
 
-  /** @private
+  /** 
     Scroll the menu if it is is an up or down arrow. This is called by
     the function that simulates mouseOver.
+    @private
   */
   _scrollMenu: function () {
     var value = this.get('value');
@@ -118,11 +119,12 @@ SC.MenuScrollerView = SC.ScrollerView.extend(
     return YES;
   },
 
-  /** @private
+  /** 
 
     We use this function to simulate mouseOver. It checks for the flag
     isMouseOver which is turned on when mouseEntered is called and turned off
     when mouseExited is called.
+    @private
   */
   _invokeScrollOnMouseOver: function () {
     this._scrollMenu();

@@ -20,14 +20,15 @@
 SC.SliderView = SC.View.extend(SC.Control,
 /** @scope SC.SliderView.prototype */ {
 
-  /** @private */
+  /**  @private */
   classNames: 'sc-slider-view',
 
-  /** @private
+  /** 
     The WAI-ARIA role for slider view. This property's value should not be
     changed.
 
     @type String
+    @private
   */
   ariaRole: 'slider',
 
@@ -109,9 +110,10 @@ SC.SliderView = SC.View.extend(SC.Control,
   /* @private The full list includes min, max, and stepPositions, but those are redundant with displayValue. */
   displayProperties: ['displayValue', 'markSteps'],
 
-  /** @private
+  /** 
    @type Number
    The raw, unchanged value to be provided to screen readers and the like.
+    @private
   */
   ariaValue: function() {
     return this.get('value');
@@ -181,7 +183,7 @@ SC.SliderView = SC.View.extend(SC.Control,
     return ret;
   }.property('steps').cacheable(),
 
-  /** @private Given a particular value, returns the percentage value. */
+  /**  Given a particular value, returns the percentage value. @private */
   _displayValueForValue: function(value) {
     var min = this.get('minimum'),
         max = this.get('maximum'),
@@ -201,18 +203,18 @@ SC.SliderView = SC.View.extend(SC.Control,
     return value;
   },
 
-  /** @private Clears the mouse just down flag. */
+  /**  Clears the mouse just down flag. @private */
   _sc_clearMouseJustDown: function () {
     this._sc_isMouseJustDown = NO;
   },
 
-  /** @private Flag used to track when the mouse is pressed. */
+  /**  Flag used to track when the mouse is pressed. @private */
   _isMouseDown: NO,
 
-  /** @private Flag used to track when mouse was just down so that mousewheel events firing as the finger is lifted don't shoot the slider over. */
+  /**  Flag used to track when mouse was just down so that mousewheel events firing as the finger is lifted don't shoot the slider over. @private */
   _sc_isMouseJustDown: NO,
 
-  /** @private Timer used to track time immediately after a mouse up event. */
+  /**  Timer used to track time immediately after a mouse up event. @private */
   _sc_clearMouseJustDownTimer: null,
 
   /* @private */
@@ -289,9 +291,10 @@ SC.SliderView = SC.View.extend(SC.Control,
     return this.mouseDragged(evt);
   },
 
-  /** @private
+  /** 
     Updates the handle based on the mouse location of the handle in the
     event.
+    @private
   */
   _triggerHandle: function(evt, firstEvent) {
     var width = this.get('frame').width,
@@ -335,7 +338,7 @@ SC.SliderView = SC.View.extend(SC.Control,
     return YES ;
   },
 
-  /** @private tied to the isEnabledInPane state */
+  /**  tied to the isEnabledInPane state @private */
   acceptsFirstResponder: function() {
     if (SC.FOCUS_ALL_CONTROLS) { return this.get('isEnabledInPane'); }
     return NO;

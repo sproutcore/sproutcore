@@ -6,7 +6,7 @@
 // ==========================================================================
 
 /**
-  @namespace
+  
 
   This mixin is for a view that is editable but is acting as a proxy to
   edit another view. For example, a calendar picker that pops up over
@@ -25,6 +25,7 @@
 
   See SC.InlineTextFieldView for an example of an implementation of
   SC.InlineEditor.
+  @namespace
 */
 SC.InlineEditor = {
 
@@ -60,9 +61,10 @@ SC.InlineEditor = {
   inlineEditorDelegate: null,
 
   /**
-    @private
+    
     The view that this view is responsible for editing.
     @type SC.InlineEditable
+    @private
   */
   _target: null,
 
@@ -106,10 +108,11 @@ SC.InlineEditor = {
   },
 
   /**
-    @private
+    
     Notifies the delegate of the didBeginEditing event. Needs to be invoked last
     because becoming first responder doesn't happen until the end of the runLoop
     and didBegin is supposed to occur after the editor becomes first responder.
+    @private
   */
   _callDidBegin: function() {
     // don't notify if we already ended editing
@@ -191,9 +194,10 @@ SC.InlineEditor = {
   },
 
   /**
-    @private
+    
     Performs the cleanup functionality shared between discardEditing and
     commitEditing.
+    @private
   */
   _endEditing: function() {
     this.set('isEditing', NO);

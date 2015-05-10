@@ -16,8 +16,9 @@ SC.TextFieldSupport = /** @scope SC.TextFieldSupport */{
     return this.$('input');
   },
 
-  /** @private
+  /** 
     Used internally to store value because the layer may not exist
+    @private
   */
   _value: null,
 
@@ -106,12 +107,13 @@ SC.TextFieldSupport = /** @scope SC.TextFieldSupport */{
     return YES;
   },
 
-  /** @private
+  /** 
     Make sure our input value is synced with any bindings.
     In some cases, such as auto-filling, a value can get
     changed without an event firing. We could do this
     on focusOut, but blur can potentially get called
     after other events.
+    @private
   */
   willLoseFirstResponder: function() {
     this.notifyPropertyChange('value');
@@ -131,11 +133,12 @@ SC.TextFieldSupport = /** @scope SC.TextFieldSupport */{
     }
   },
 
-  /** @private
+  /** 
     RootResponder will call this function whenever a selection
     event has occurred, for instance a select all. Simply return
     true so that all selection events bubble up to the browser,
     triggering the default browser behavior.
+    @private
   */
   selectStart: function() {
     return true;

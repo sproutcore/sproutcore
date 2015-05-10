@@ -5,7 +5,7 @@
 // ==========================================================================
 
 /**
-  @namespace
+  
 
   This is the default InlineEditorDelegate for SC.LabelView. The default editor
   is an SC.InlineTextFieldView.
@@ -20,6 +20,7 @@
   itself correctly in its beginEditing method.
 
   @since SproutCore 1.0
+  @namespace
 */
 SC.InlineTextFieldDelegate = /** @scope SC.InlineTextFieldDelegate */{
 

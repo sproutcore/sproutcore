@@ -29,12 +29,13 @@ SC.MediaSlider = SC.SliderView.extend(
   renderDelegateName: 'mediaSliderRenderDelegate',
   
   /**
-   * @private
+   * 
    * 
    * Appends a loaded ranges span to the div element.
    * 
    * @param context
    * @param firstTime
+    @private
    */
   render: function(context, firstTime) {
     sc_super();

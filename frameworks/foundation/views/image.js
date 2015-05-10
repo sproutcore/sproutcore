@@ -54,12 +54,12 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
 
   displayProperties: ['align', 'scale', 'value', 'displayToolTip'],
 
-  /** @private */
+  /**  @private */
   renderDelegateName: function () {
     return (this.get('useCanvas') ? 'canvasImage' : 'image') + "RenderDelegate";
   }.property('useCanvas').cacheable(),
 
-  /** @private */
+  /**  @private */
   tagName: function () {
     return this.get('useCanvas') ? 'canvas' : 'div';
   }.property('useCanvas').cacheable(),
@@ -76,18 +76,20 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
   */
   canLoadInBackground: NO,
 
-  /** @private
+  /** 
     @type Image
     @default SC.BLANK_IMAGE
+    @private
   */
   image: SC.BLANK_IMAGE,
 
 
-  /** @private
+  /** 
     The frame for the inner img element or for the canvas to draw within, altered according to the scale
     and align properties provided by SC.InnerFrame.
 
     @type Object
+    @private
   */
   innerFrame: function () {
     var image = this.get('image'),
@@ -207,7 +209,7 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
   // Methods
   //
 
-  /** @private */
+  /**  @private */
   init: function () {
     sc_super();
 
@@ -261,9 +263,10 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
   // Value handling
   //
 
-  /** @private
+  /** 
     Whenever the value changes, update the image state and possibly schedule
     an image to load.
+    @private
   */
   _valueDidChange: function () {
     var value = this.get('value'),
@@ -283,11 +286,12 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
     }
   }.observes('value'),
 
-  /** @private
+  /** 
     Tries to load the image value using the SC.imageQueue object. If the value is not
     a URL, it won't attempt to load it using this method.
 
     @returns YES if loading using SC.imageQueue, NO otherwise
+    @private
   */
   _loadImageUsingCache: function () {
     var value = this.get('value'),
@@ -304,7 +308,7 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
     return NO;
   },
 
-  /** @private */
+  /**  @private */
   _loadImageUsingCacheDidComplete: function (url, image) {
     var value = this.get('value');
 
@@ -318,10 +322,11 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
     }
   },
 
-  /** @private
+  /** 
     Loads an image using a normal Image object, without using the SC.imageQueue.
 
     @returns YES if it will load, NO otherwise
+    @private
   */
   _loadImage: function () {
     var value = this.get('value'),
@@ -361,7 +366,7 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
     return NO;
   },
 
-  /** @private */
+  /**  @private */
   _loadImageDidComplete: function (url, image) {
     var value = this.get('value');
 

@@ -22,10 +22,10 @@ sc_require('mixins/split_thumb');
 SC.SplitDividerView = SC.View.extend(SC.SplitChild, SC.SplitThumb,
 /** @scope SC.SplitDividerView.prototype */ {
 
-  /** @private */
+  /**  @private */
   classNames: ['sc-split-divider-view'],
 
-  /** @private */
+  /**  @private */
   classNameBindings: ['layoutDirection'],
   
   /**
@@ -49,12 +49,13 @@ SC.SplitDividerView = SC.View.extend(SC.SplitChild, SC.SplitThumb,
    */
   layoutDirection: SC.LAYOUT_HORIZONTAL,
 
-  /** @private
+  /** 
     This indicates that the view should not resize while being dragged; this
     is generally the desired behavior.
 
     (NOTE: SC.FIXED_SIZE is hard-coded here. It is defined on SC.SplitView,
     which requires this file.)
+    @private
    */
   autoResizeStyle: 'sc-fixed-size',
 

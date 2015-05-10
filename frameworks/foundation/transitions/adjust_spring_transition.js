@@ -23,7 +23,7 @@ SC.mixin(SC.View,
   */
   SPRING_ADJUST: {
 
-    /** @private */
+    /**  @private */
     run: function (view, options, finalLayout) {
       var springs = options.springs || 4,
         springiness = options.springiness || 0.25,

@@ -18,7 +18,7 @@ SC.mixin(SC.View,
 
     layoutProperties: ['top', 'bottom', 'left', 'right', 'height', 'width', 'centerX', 'centerY'],
 
-    /** @private Starts from outside of parent unless inPlace is true. */
+    /**  Starts from outside of parent unless inPlace is true. @private */
     setup: function (view, options, inPlace) {
       var parentView = view.get('parentView'),
         parentFrame,
@@ -55,7 +55,7 @@ SC.mixin(SC.View,
       view.adjust({ centerX: null, centerY: null, bottom: null, left: left || viewFrame.x, right: null, top: top || viewFrame.y, height: viewFrame.height, width: viewFrame.width });
     },
 
-    /** @private */
+    /**  @private */
     run: function (view, options, finalLayout, finalFrame) {
       var key,
         value;
@@ -90,7 +90,7 @@ SC.mixin(SC.View,
 
     layoutProperties: ['top', 'bottom', 'left', 'right', 'height', 'width', 'centerX', 'centerY'],
 
-    /** @private Starts from current position. */
+    /**  Starts from current position. @private */
     setup: function (view, options) {
       var viewFrame = view.get('borderFrame'),
         left = viewFrame.x,
@@ -101,7 +101,7 @@ SC.mixin(SC.View,
       view.adjust({ centerX: null, centerY: null, bottom: null, left: left, right: null, top: top, height: height, width: width });
     },
 
-    /** @private */
+    /**  @private */
     run: function (view, options, finalLayout, finalFrame) {
       var viewFrame = view.get('borderFrame'),
         parentView = view.get('parentView'),

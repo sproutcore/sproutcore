@@ -185,8 +185,9 @@ SC.View.reopen(
   },
 
   /**
-    @private
+    
     Called by child view when build out finishes. By default removes the child view.
+    @private
   */
   buildOutDidFinishFor: function(child) {
     this.removeChild(child);
@@ -312,12 +313,13 @@ SC.View.reopen(
   },
 
   /**
-    @private (semi)
+     (semi)
     Called by building parent view's buildInChild method. This prepares
     to build in, but unlike buildInToView, this is called _before_ the child
     is appended.
 
     Mostly, this cancels any build out _before_ the view is removed through parent change.
+    @private
   */
   willBuildInToView: function(view) {
     // stop any current build outs (and if we need to, we also need to build in again)
@@ -327,8 +329,9 @@ SC.View.reopen(
   },
 
   /**
-    @private (semi)
+     (semi)
     Called by building parent view's buildInChild method.
+    @private
   */
   buildInToView: function(view) {
     // if we are already building in, do nothing.
@@ -341,10 +344,11 @@ SC.View.reopen(
   },
 
   /**
-    @private (semi)
+     (semi)
     Called by building parent view's buildOutChild method.
 
     The supplied view should always be the parent view.
+    @private
   */
   buildOutFromView: function(view) {
     // if we are already building out, do nothing.

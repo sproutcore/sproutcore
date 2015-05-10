@@ -173,7 +173,7 @@ SC.View.reopen(
   */
   childViewLayoutOptions: null,
 
-  /** @private The explicit layout of the view, computed from the layout using the explicit position. */
+  /**  The explicit layout of the view, computed from the layout using the explicit position. @private */
   explicitLayout: function () {
     var layout = this.get('layout'),
         ret = null;
@@ -432,7 +432,7 @@ SC.View.reopen(
   // Methods
   //
 
-  /** @private */
+  /**  @private */
   _sc_adjustForBorder: function (frame, layout) {
     /*jshint eqnull:true */
     var defaultValue = layout.border == null ? 0 : layout.border,
@@ -449,7 +449,7 @@ SC.View.reopen(
     return frame;
   },
 
-  /** @private */
+  /**  @private */
   _sc_adjustForScale: function (frame, layout) {
 
     // Scale not supported on this platform, ignore the layout values.
@@ -493,7 +493,7 @@ SC.View.reopen(
     return frame;
   },
 
-  /** @private Apply the adjustment to a clone of the layout (cloned unless newLayout is passed in) */
+  /**  Apply the adjustment to a clone of the layout (cloned unless newLayout is passed in) @private */
   _sc_applyAdjustment: function (key, newValue, layout, newLayout) {
     var animateLayout = this._animateLayout;
 
@@ -530,7 +530,7 @@ SC.View.reopen(
     return newLayout;
   },
 
-  /** @private */
+  /**  @private */
   _sc_checkForResize: function (previousLayout, currentLayout) {
     // Did our layout change in a way that could cause us to have changed size?  If
     // not, then there's no need to invalidate the frames of our child views.
@@ -579,7 +579,7 @@ SC.View.reopen(
     return didResize;
   },
 
-  /** @private Called when the child view layout plugin or options change. */
+  /**  Called when the child view layout plugin or options change. @private */
   _cvl_childViewLayoutDidChange: function () {
     this.set('childViewsNeedLayout', true);
 
@@ -587,7 +587,7 @@ SC.View.reopen(
     this.invokeOnce(this.layoutChildViewsIfNeeded);
   },
 
-  /** @private Called when the child views change. */
+  /**  Called when the child views change. @private */
   _cvl_childViewsDidChange: function () {
     this._cvl_teardownChildViewsLiveLayout();
     this._cvl_setupChildViewsLiveLayout();
@@ -598,7 +598,7 @@ SC.View.reopen(
     this.invokeOnce(this.layoutChildViewsIfNeeded);
   },
 
-  /** @private Add observers to the child views for automatic child view layout. */
+  /**  Add observers to the child views for automatic child view layout. @private */
   _cvl_setupChildViewsLiveLayout: function () {
     var childViewLayout = this.childViewLayout,
       childViews,
@@ -618,7 +618,7 @@ SC.View.reopen(
     }
   },
 
-  /** @private Remove observers from the child views for automatic child view layout. */
+  /**  Remove observers from the child views for automatic child view layout. @private */
   _cvl_teardownChildViewsLiveLayout: function () {
     var childViewLayout = this.childViewLayout,
       childViews = this._cvl_childViews || [],
@@ -636,7 +636,7 @@ SC.View.reopen(
     }
   },
 
-  /** @private Computes the explicit layout. */
+  /**  Computes the explicit layout. @private */
   _sc_computeExplicitLayout: function (layout) {
     var ret = SC.copy(layout);
 
@@ -746,7 +746,7 @@ SC.View.reopen(
     return ret;
   },
 
-  /** @private */
+  /**  @private */
   _sc_convertFrameFromViewHelper: function (frame, fromView, targetView) {
     var myX = frame.x, myY = frame.y, myWidth = frame.width, myHeight = frame.height, view, f;
 
@@ -804,12 +804,12 @@ SC.View.reopen(
     return { x: myX, y: myY, width: myWidth, height: myHeight };
   },
 
-  /** @private */
+  /**  @private */
   _sc_explicitValueFor: function (givenValue, impliedValue) {
     return givenValue === undefined ? impliedValue : givenValue;
   },
 
-  /** @private Attempts to run a transition adjust, ensuring any showing transitions are stopped in place. */
+  /**  Attempts to run a transition adjust, ensuring any showing transitions are stopped in place. @private */
   _sc_transitionAdjust: function (layout) {
     var transitionAdjust = this.get('transitionAdjust'),
       options = this.get('transitionAdjustOptions') || {};
@@ -818,11 +818,12 @@ SC.View.reopen(
     transitionAdjust.run(this, options, layout);
   },
 
-  /** @private
+  /** 
     Invoked by other views to notify this view that its frame has changed.
 
     This notifies the view that its frame property has changed,
     then notifies its child views that their clipping frames may have changed.
+    @private
   */
   _sc_viewFrameDidChange: function () {
     this.notifyPropertyChange('frame');
@@ -843,7 +844,7 @@ SC.View.reopen(
     This method will avoid actually setting the layout if the value you pass
     does not edit the layout.
 
-    @param {String|Hash} key
+    @param {(String|Hash)} key
     @param {Object} value
     @returns {SC.View} receiver
   */
@@ -946,7 +947,7 @@ SC.View.reopen(
     return this._sc_convertFrameFromViewHelper(frame, targetView, this);
   },
 
-  /** @private */
+  /**  @private */
   didTransitionAdjust: function () {},
 
   /**
@@ -1341,7 +1342,7 @@ SC.View.reopen(
   // Statechart
   //
 
-  /** @private Update this view's layout action. */
+  /**  Update this view's layout action. @private */
   _doUpdateLayout: function (force) {
     var isRendered = this.get('_isRendered'),
       isVisibleInWindow = this.get('isVisibleInWindow'),
@@ -1362,7 +1363,7 @@ SC.View.reopen(
     return handled;
   },
 
-  /** @private */
+  /**  @private */
   _doUpdateLayoutStyle: function () {
     var layer = this.get('layer'),
       layoutStyle = this.get('layoutStyle');
@@ -1378,7 +1379,7 @@ SC.View.reopen(
     this._updatedLayout();
   },
 
-  /** @private Override: Notify on attached (avoids notify of frame changed). */
+  /**  Override: Notify on attached (avoids notify of frame changed). @private */
   _notifyDidAttach: function () {
     // If we are using static layout then we don't know the frame until appended to the document.
     if (this.get('useStaticLayout')) {
@@ -1390,7 +1391,7 @@ SC.View.reopen(
     if (this.didAppendToDocument) { this.didAppendToDocument(); }
   },
 
-  /** @private Override: The 'adopted' event (uses isFixedSize so our childViews are notified if our frame changes). */
+  /**  Override: The 'adopted' event (uses isFixedSize so our childViews are notified if our frame changes). @private */
   _adopted: function (beforeView) {
     // If our size depends on our parent, it will have changed on adoption.
     var isFixedSize = this.get('isFixedSize');
@@ -1404,7 +1405,7 @@ SC.View.reopen(
     sc_super();
   },
 
-  /** @private Extension: The 'orphaned' event (uses isFixedSize so our childViews are notified if our frame changes). */
+  /**  Extension: The 'orphaned' event (uses isFixedSize so our childViews are notified if our frame changes). @private */
   _orphaned: function () {
     sc_super();
 
@@ -1420,7 +1421,7 @@ SC.View.reopen(
     }
   },
 
-  /** @private Extension: The 'updatedContent' event. */
+  /**  Extension: The 'updatedContent' event. @private */
   _updatedContent: function () {
     sc_super();
 
@@ -1429,7 +1430,7 @@ SC.View.reopen(
     if (this.get('useStaticLayout')) { this.viewDidResize(); }
   },
 
-  /** @private The 'updatedLayout' event. */
+  /**  The 'updatedLayout' event. @private */
   _updatedLayout: function () {
     // Notify.
     this.didRenderAnimations();

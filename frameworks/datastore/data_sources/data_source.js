@@ -440,8 +440,9 @@ SC.DataSource = SC.Object.extend( /** @scope SC.DataSource.prototype */ {
     return this._handleEach(store, storeKeys, this.destroyRecord, null, params);
   },
 
-  /** @private
+  /** 
     invokes the named action for each store key.  returns proper value
+    @private
   */
   _handleEach: function(store, storeKeys, action, ids, params) {
     var len = storeKeys.length, idx, ret, cur, idOrParams;

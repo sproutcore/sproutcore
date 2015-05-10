@@ -46,7 +46,7 @@ SC.HELP_CURSOR = 'help';
 SC.Cursor = SC.Object.extend(
 /** @scope SC.Cursor.prototype */ {
 
-  /** @private */
+  /**  @private */
   init: function () {
     sc_super();
 
@@ -84,7 +84,7 @@ SC.Cursor = SC.Object.extend(
   */
   cursorStyle: SC.DEFAULT_CURSOR,
 
-  /** @private */
+  /**  @private */
   cursorStyleDidChange: function () {
     var cursorStyle, rule, selector, ss, rules, idx, len;
     cursorStyle = this.get('cursorStyle') || SC.DEFAULT_CURSOR;
@@ -115,7 +115,7 @@ SC.Cursor = SC.Object.extend(
 });
 
 
-/** @private */
+/**  @private */
 SC.Cursor.sharedStyleSheet = function () {
   var ssEl,
     head,

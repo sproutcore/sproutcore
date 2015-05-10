@@ -215,8 +215,9 @@ SC.RadioView = SC.View.extend(SC.Control,
   */
   itemIconKey: null,
 
-  /**  @private
+  /**  
     If the items array itself changes, add/remove observer on item...
+    @private
   */
   itemsDidChange: function() {
     if (this._items) {
@@ -229,9 +230,10 @@ SC.RadioView = SC.View.extend(SC.Control,
     this.itemContentDidChange();
   }.observes('items'),
 
-  /** @private
+  /** 
     Invoked whenever the item array or an item in the array is changed.
     This method will regenerate the list of items.
+    @private
   */
   itemContentDidChange: function() {
     // Force regeneration of buttons
@@ -244,8 +246,9 @@ SC.RadioView = SC.View.extend(SC.Control,
   // PRIVATE SUPPORT
   //
 
-  /** @private
+  /** 
     Data Sources for radioRenderDelegates, as required by radioGroupRenderDelegate.
+    @private
   */
   displayItems: function() {
     var items = this.get('items'),
@@ -339,12 +342,13 @@ SC.RadioView = SC.View.extend(SC.Control,
     return ret; // done!
   }.property('isEnabled', 'value', 'items', 'itemTitleKey', 'itemWidthKey', 'itemValueKey', 'itemIsEnabledKey', 'localize', 'itemIconKey','itemAriaLabeledByKey', 'itemAriaLabelKey').cacheable(),
 
-  /** @private
+  /** 
     If the user clicks on of the items mark it as active on mouseDown unless
     is disabled.
 
     Save the element that was clicked on so we can remove the active state on
     mouseUp.
+    @private
   */
   mouseDown: function(evt) {
     // Fast path, reject secondary clicks.
@@ -372,10 +376,11 @@ SC.RadioView = SC.View.extend(SC.Control,
     return YES;
   },
 
-  /** @private
+  /** 
     If we have a radio element that was clicked on previously, make sure we
     remove the active state. Then update the value if the item clicked is
     enabled.
+    @private
   */
   mouseUp: function(evt) {
     if (!this.get('isEnabledInPane')) return YES;
@@ -442,12 +447,12 @@ SC.RadioView = SC.View.extend(SC.Control,
   },
 
 
-  /** @private */
+  /**  @private */
   touchStart: function(evt) {
     return this.mouseDown(evt);
   },
 
-  /** @private */
+  /**  @private */
   touchEnd: function(evt) {
     return this.mouseUp(evt);
   }

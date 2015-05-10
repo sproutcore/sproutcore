@@ -7,11 +7,12 @@
 
 
 /**
-  @namespace
+  
 
   `CollectionRowDelegate`s are consulted by collection views, such as `SC.ListView`
   that lay out items in vertical or horizontal rows, in order to determine the
   height or width of each row.
+  @namespace
 */
 SC.CollectionRowDelegate = {
 
@@ -100,7 +101,7 @@ SC.CollectionRowDelegate = {
     return rowSize + rowPadding * 2;
   }.property('rowSize', 'rowPadding'),
 
-  /** @private - Returns the total row size based on rowSize and rowPadding for convenience. */
+  /**  - Returns the total row size based on rowSize and rowPadding for convenience. @private */
   _sc_totalRowSize: function () {
     // Backwards compatibility in case the rowHeight property is set directly.
     return this.get('rowHeight');

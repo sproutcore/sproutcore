@@ -49,9 +49,10 @@ SC.IndexSet = SC.mixin({},
   SC.Observable, SC.Enumerable, SC.Freezable, SC.Copyable,
 /** @scope SC.IndexSet.prototype */ {
 
-  /** @private
+  /** 
     Walks a content array and copies its contents to a new array.  For large
     content arrays this is faster than using slice()
+    @private
   */
   _sc_sliceContent: function (c) {
     if (c.length < 1000) return c.slice(); // use native when faster
@@ -68,7 +69,7 @@ SC.IndexSet = SC.mixin({},
   },
 
   //@if(debug)
-  /** @private Validates the standard IndexSet method arguments. */
+  /**  Validates the standard IndexSet method arguments. @private */
   _sc_validateIndexSetArguments: function (start, length) {
     // Validate arguments. Potential bad usages include trying to call SC.IndexSet.create() with SproutCore's standard property-hash
     // idiom, and passing in the results of bad math (NaN in particular causes problems).
@@ -103,7 +104,7 @@ SC.IndexSet = SC.mixin({},
 
     To create a more complicated set of indices, create an index set and populate individual ranges using `.add()`.
 
-    @param {Number|SC.IndexSet} start The start of the range or an index set.
+    @param {(Number|SC.IndexSet)} start The start of the range or an index set.
     @param {Number} [length] The length of the range (by default set to 1 if start is a Number)
     @returns {SC.IndexSet}
   */
@@ -138,10 +139,11 @@ SC.IndexSet = SC.mixin({},
   */
   isIndexSet: YES,
 
-  /**  @private
+  /**  
     Internal setting determines the preferred skip size for hinting sets.
 
     @type Number
+    @private
   */
   HINT_SIZE: 256,
 
@@ -784,10 +786,11 @@ SC.IndexSet = SC.mixin({},
     return this;
   },
 
-  /** @private
+  /** 
     iterates through a named range, setting hints every HINT_SIZE indexes
     pointing to the nearest range start.  The passed range must start on a
     range boundary.  It can end anywhere.
+    @private
   */
   _hint: function (start, length, content) {
     if (content === undefined) content = this._content;
@@ -861,7 +864,7 @@ SC.IndexSet = SC.mixin({},
   /**
     Removes all the ranges in the passed array.
 
-    @param {Object...} objects The list of objects you want to remove
+    @param {...Object} objects The list of objects you want to remove
   */
   removeEach: function (objects) {
     if (this.isFrozen) throw new Error(SC.FROZEN_ERROR);
@@ -975,7 +978,7 @@ SC.IndexSet = SC.mixin({},
   /**
     Total number of indexes within the specified range.
 
-    @param {Number|SC.IndexSet} start index, range object or IndexSet
+    @param {(Number|SC.IndexSet)} start index, range object or IndexSet
     @param {Number} length optional range length
     @returns {Number} count of indexes
   */
@@ -1236,7 +1239,7 @@ SC.IndexSet = SC.mixin({},
   */
   LOG_OBSERVING: NO,
 
-  /** @private - optimized call to forEach() */
+  /**  - optimized call to forEach() @private */
   forEach: function (callback, target) {
     var content = this._content,
         cur     = 0,
@@ -1259,7 +1262,7 @@ SC.IndexSet = SC.mixin({},
     return this;
   },
 
-  /** @private - support iterators */
+  /**  - support iterators @private */
   nextObject: function (ignore, idx, context) {
     var content = this._content,
         next    = context.next,

@@ -5,7 +5,7 @@
 // ==========================================================================
 
 
-/** @namespace
+/** 
   The `SC.ViewTransitionProtocol` protocol defines the properties and methods that you may
   implement in your custom transition plugins. The only required method for a plugin to
   implement is `run`.
@@ -16,6 +16,7 @@
   *Note: Do not mix `SC.ViewTransitionProtocol` into your classes. As a protocol, it exists only
   for reference sake. You only need define any of the properties or methods listed below in order to
   use this protocol.*
+  @namespace
 */
 SC.ViewTransitionProtocol = {
 

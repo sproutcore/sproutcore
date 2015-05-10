@@ -196,8 +196,9 @@ SC.AutoResize = {
   }.observes('shouldAutoResize', 'measuredSize', 'autoResizePadding', 'maxWidth', 'maxHeight', 'shouldResizeWidth', 'shouldResizeHeight'),
 
   /**
-    @private
+    
     Begins observing the auto resize field.
+    @private
   */
   // @if (debug)
   initMixin: function() {
@@ -232,10 +233,10 @@ SC.AutoResize = {
     SC.AutoResizeManager.scheduleMeasurementForView(this, batchResizeId);
   }.observes('isVisibleInWindow', 'shouldMeasureSize', 'autoResizeText', 'batchResizeId', 'maxWidth', 'maxHeight'),
 
-  /** @private */
+  /**  @private */
   _lastMeasuredText: null,
 
-  /** @private */
+  /**  @private */
   _cachedMetrics: function(key, value) {
     if(!this.get('shouldCacheSizes')) return;
 
@@ -468,8 +469,9 @@ SC.AutoResize = {
   }.enhance(),
 
   /**
-    @private
+    
     When the layer is first created, measurement will need to take place.
+    @private
   */
   didCreateLayer: function(orig) {
     orig();
@@ -477,13 +479,14 @@ SC.AutoResize = {
     this.scheduleMeasurement();
   }.enhance(),
 
-  /** @private
+  /** 
     If the view has a transitionIn property, we have to delay the transition
     setup and execution until after we measure.  In order to prevent a brief
     flash of the view, we ensure it is hidden while it is being measured and
     adjusted.
 
     TODO: consider making the measurement state a formal SC.View state
+    @private
   */
   _transitionIn: function (original, inPlace) {
     // In order to allow views to measure and adjust themselves on append, we
@@ -500,12 +503,13 @@ SC.AutoResize = {
 };
 
 /**
- * @private
+ * 
  * @class
  * Manages batch auto resizing.
  *
  * This used to be part of SC.AutoResize, but we shouldn't mix these
  * methods/properties into each view.
+  @private
  */
 SC.AutoResizeManager = {
   /**

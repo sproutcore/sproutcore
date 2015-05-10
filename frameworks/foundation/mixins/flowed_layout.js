@@ -12,7 +12,7 @@
 SC.ALIGN_JUSTIFY = "justify";
 
 /**
-  @namespace
+  
 
   Normal SproutCore views are absolutely positioned--parent views have relatively
   little input on where their child views are placed.
@@ -39,6 +39,7 @@ SC.ALIGN_JUSTIFY = "justify";
   Like normal views, you simply specify child views--everything will "just work."
 
   @since SproutCore 1.0
+  @namespace
 */
 SC.FlowedLayout = {
   isFlowedLayout: YES,
@@ -119,10 +120,11 @@ SC.FlowedLayout = {
   flowPadding: { left: 0, bottom: 0, right: 0, top: 0 },
 
   /**
-    @private
+    
 
     If the flowPadding somehow misses a property (one of the sides),
     we need to make sure a default value of 0 is still there.
+    @private
    */
   _scfl_validFlowPadding: function() {
     var padding = this.get('flowPadding') || {}, ret = {};
@@ -135,28 +137,30 @@ SC.FlowedLayout = {
 
   concatenatedProperties: ['childMixins'],
 
-  /** @private */
+  /**  @private */
   initMixin: function() {
     this._scfl_tileOnce();
     // register observer to detect the childViews changes
     this.addObserver( 'childViews.[]', this, this._scfl_childViewsDidChange );
   },
 
-  /** @private
+  /** 
     Detects when the child views change.
+    @private
   */
   _scfl_childViewsDidChange: function(c) {
     this._scfl_tileOnce();
   },
 
-  /** @private */
+  /**  @private */
   _scfl_layoutPropertyDidChange: function(childView) {
     this._scfl_tileOnce();
   }.observes('layoutDirection', 'align', 'flowPadding', 'canWrap', 'defaultFlowSpacing', 'isVisibleInWindow'),
 
-  /** @private
+  /** 
     Overridden to only update if it is a view we do not manage, or the width or height has changed
     since our last record of it.
+    @private
   */
   layoutDidChangeFor: function(c) {
     // now, check if anything has changed
@@ -183,13 +187,14 @@ SC.FlowedLayout = {
     sc_super();
   },
 
-  /** @private
+  /** 
     Sets up layout observers on child view. We observe three things:
     - isVisible
     - calculatedWidth
     - calculatedHeight
 
     Actual layout changes are detected through layoutDidChangeFor.
+    @private
   */
   observeChildLayout: function(c) {
     if (c._scfl_isBeingObserved) return;
@@ -206,8 +211,9 @@ SC.FlowedLayout = {
     c.addObserver('fillHeight', this, '_scfl_tileOnce');
   },
 
-  /** @private
+  /** 
     Removes observers on child view.
+    @private
   */
   unobserveChildLayout: function(c) {
     c._scfl_isBeingObserved = NO;
@@ -316,12 +322,12 @@ SC.FlowedLayout = {
     return calc;
   },
 
-  /** @private */
+  /**  @private */
   clippingFrame: function() {
     return { left: 0, top: 0, width: this.get('calculatedWidth'), height: this.get('calculatedHeight') };
   }.property('calculatedWidth', 'calculatedHeight'),
 
-  /** @private */
+  /**  @private */
 
   // the maximum row length when all flexible items are collapsed.
   _scfl_maxCollapsedRowLength: 0,
@@ -352,7 +358,7 @@ SC.FlowedLayout = {
   }.observes('autoResize', 'shouldResizeWidth', '_scfl_maximumCollapsedRowLength', '_scfl_totalCollapsedRowSize', 'shouldResizeHeight'),
 
   /**
-    @private
+    
     Creates a plan, initializing all of the basic properties in it, but not
     doing anything further.
 
@@ -366,6 +372,7 @@ SC.FlowedLayout = {
     The plan's structure is defined inside the method.
 
     Some of these methods may eventually be made public and/or delegate methods.
+    @private
   */
   _scfl_createPlan: function() {
     var layoutDirection = this.get('layoutDirection'),
@@ -425,7 +432,7 @@ SC.FlowedLayout = {
     return plan;
   },
 
-  /** @private */
+  /**  @private */
   _scfl_distributeChildrenIntoRows: function(plan) {
     var children = this.get('childViews'), child, idx, len = children.length,
         isVertical = plan.isVertical, rows = [], lastIdx;
@@ -467,9 +474,10 @@ SC.FlowedLayout = {
   },
 
   /**
-    @private
+    
     Distributes as many children as possible into a single row, stating
     at the given index, and returning the index of the next item, if any.
+    @private
   */
   _scfl_distributeChildrenIntoRow: function(children, startingAt, row) {
     var idx, len = children.length, plan = row.plan, child, childSize, spacing,
@@ -553,7 +561,7 @@ SC.FlowedLayout = {
     return idx;
   },
 
-  /** @private */
+  /**  @private */
   _scfl_positionChildrenInRows: function(plan) {
     var rows = plan.rows, len = rows.length, idx;
 
@@ -563,12 +571,13 @@ SC.FlowedLayout = {
   },
 
   /**
-    @private
+    
     Positions items within a row. The items are already in the row, this just
     modifies the 'position' property.
 
     This also marks a tentative size of the row, and whether it should be expanded
     to fit in any available extra space. Note the term 'size' rather than 'length'...
+    @private
   */
   _scfl_positionChildrenInRow: function(row) {
     var items = row.items, len = items.length, idx, item, position, rowSize = 0,
@@ -661,7 +670,7 @@ SC.FlowedLayout = {
 
   },
 
-  /** @private */
+  /**  @private */
   _scfl_positionRows: function(plan) {
     var rows = plan.rows, len = rows.length, idx, row, position,
         fillRowCount = 0, planSize = 0, fillSpace;
@@ -691,8 +700,9 @@ SC.FlowedLayout = {
   },
 
   /**
-    @private
+    
     Positions all of the child views according to the plan.
+    @private
   */
   _scfl_applyPlan: function(plan) {
     var rows = plan.rows, rowIdx, rowsLen, row, longestRow = 0, totalSize = 0,
@@ -752,7 +762,7 @@ SC.FlowedLayout = {
     view.adjust(layout);
   },
 
-  /** @private */
+  /**  @private */
   _scfl_tileOnce: function() {
     this.invokeLast(this._scfl_tile);
   },
@@ -795,7 +805,7 @@ SC.FlowedLayout = {
     }
   },
 
-  /** @private */
+  /**  @private */
   _scfl_frameDidChange: function() {
     var frame = this.get("frame"), lf = this._scfl_lastFrameSize || {};
     this._scfl_lastFrameSize = SC.clone(frame);
@@ -807,7 +817,7 @@ SC.FlowedLayout = {
     this._scfl_tileOnce();
   }.observes('frame'),
 
-  /** @private */
+  /**  @private */
   destroyMixin: function() {
     this.removeObserver( 'childViews.[]', this, this._scfl_childViewsDidChange );
 
@@ -820,8 +830,9 @@ SC.FlowedLayout = {
     }
   },
 
-  /** @private
+  /** 
     Reorders childViews so that the passed views are at the beginning in the order they are passed. Needed because childViews are laid out in the order they appear in childViews.
+    @private
   */
   reorder: function(views) {
     if(!SC.typeOf(views) === SC.T_ARRAY) views = arguments;

@@ -75,7 +75,7 @@ SC.TreeController = SC.ObjectController.extend(SC.SelectionSupport,
   // PRIVATE
   //
 
-  /** @private - setup observer on init if needed. */
+  /**  - setup observer on init if needed. @private */
   init: function() {
     sc_super();
 
@@ -83,7 +83,7 @@ SC.TreeController = SC.ObjectController.extend(SC.SelectionSupport,
     this._contentDidChange();
   },
 
-  /** @private */
+  /**  @private */
   _contentDidChange: function () {
     var arrangedObjects = this.get('arrangedObjects'),
       content = this.get('content');
@@ -116,7 +116,7 @@ SC.TreeController = SC.ObjectController.extend(SC.SelectionSupport,
     }
   }.observes('content'),
 
-  /** @private */
+  /**  @private */
   _sctc_arrangedObjectsContentDidChange: function () {
     this.updateSelectionAfterContentChange();
   }.observes(),
@@ -124,11 +124,12 @@ SC.TreeController = SC.ObjectController.extend(SC.SelectionSupport,
   canSelectGroups: NO,
 
   /**
-    @private
+    
 
     Returns the first item in arrangedObjects that is not a group.  This uses
     a brute force approach right now; we assume you probably don't have a lot
     of groups up front.
+    @private
   */
   firstSelectableObject: function () {
     var objects = this.get('arrangedObjects'),

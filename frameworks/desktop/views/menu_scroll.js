@@ -89,7 +89,7 @@ SC.MenuScrollView = SC.ScrollView.extend(
   // Methods
   //
 
-  /** @private @see SC.ScrollView. Check frame changes for size changes. */
+  /**  @see SC.ScrollView. Check frame changes for size changes. @private */
   _sc_contentViewFrameDidChange: function () {
     sc_super();
 
@@ -99,7 +99,7 @@ SC.MenuScrollView = SC.ScrollView.extend(
     this._sc_repositionScrollers();
   },
 
-  /** @private @see SC.ScrollView. When the content view's size changes, we need to update our scroll offset properties. */
+  /**  @see SC.ScrollView. When the content view's size changes, we need to update our scroll offset properties. @private */
   _sc_repositionContentViewUnfiltered: function () {
     var hasVerticalScroller = this.get('hasVerticalScroller'),
         // UNUSED. minimumVerticalScrollOffset = this.get('minimumVerticalScrollOffset'),
@@ -124,7 +124,7 @@ SC.MenuScrollView = SC.ScrollView.extend(
     sc_super();
   },
 
-  /** @private @see SC.ScrollView. Re-position the scrollers and content depending on the need to scroll or not. */
+  /**  @see SC.ScrollView. Re-position the scrollers and content depending on the need to scroll or not. @private */
   _sc_repositionScrollersUnfiltered: function () {
     var hasScroller = this.get('hasVerticalScroller'),
         containerView = this.get('containerView');
@@ -169,9 +169,10 @@ SC.MenuScrollView = SC.ScrollView.extend(
     }
   },
 
-  /** @private
+  /** 
     Instantiate scrollers & container views as needed.  Replace their classes
     in the regular properties.
+    @private
   */
   createChildViews: function () {
     var childViews = [],

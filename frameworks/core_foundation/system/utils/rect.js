@@ -79,7 +79,7 @@ SC.mixin( /** @scope SC */ {
     Returns a copy of the passed rect, scaled by the specified scale, centered on the specified origin.
 
     @param {Rect} rect The rectangle to scale.
-    @param {Number|Array|Hash} scale The scale (or [scaleX, scaleY], or { x: scaleX, y: scaleY}) to apply. Defaults to 1.
+    @param {(Number|Array|Hash)} scale The scale (or [scaleX, scaleY], or { x: scaleX, y: scaleY}) to apply. Defaults to 1.
     @param {Number} originX The horizontal scale origin. Defaults to 0.5 (center).
     @param {Number} originY The vertical scale origin. Defaults to 0.5 (center).
     @returns {Rect} The scaled rect.

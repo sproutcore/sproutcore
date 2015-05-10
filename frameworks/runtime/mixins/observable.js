@@ -163,7 +163,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
   /**
     Logs the named properties to the console.
 
-    @param {String...} propertyNames one or more property names
+    @param {...String} propertyNames one or more property names
   */
   logProperty: function () {
     var props = SC.$A(arguments),
@@ -177,28 +177,28 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
   /* END DEBUG ONLY PROPERTIES AND METHODS */
   //@endif
 
-  /** @private Property cache. */
+  /**  Property cache. @private */
   _kvo_cache: null,
 
-  /** @private Whether properties of the object will be cacheable. Becomes true if any one computed property is .cacheable() */
+  /**  Whether properties of the object will be cacheable. Becomes true if any one computed property is .cacheable() @private */
   _kvo_cacheable: false,
 
-  /** @private Cache of dependepents for a property. */
+  /**  Cache of dependepents for a property. @private */
   _kvo_cachedep: null,
 
-  /** @private */
+  /**  @private */
   _kvo_changeLevel: 0,
 
-  /** @private */
+  /**  @private */
   _kvo_changes: null,
 
-  /** @private */
+  /**  @private */
   _kvo_cloned: null,
 
-  /** @private */
+  /**  @private */
   _kvo_revision: 0,
 
-  /** @private */
+  /**  @private */
   _observableInited: false,
 
   /**
@@ -325,7 +325,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
 
           record.set('firstName', 'Charles').set('lastName', 'Jolley');
 
-    @param {String|Hash} key the property to set
+    @param {(String|Hash)} key the property to set
     @param {Object} value the value to set or null.
     @returns {SC.Observable}
   */
@@ -585,7 +585,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     trigger a change notification for your computed properties.
 
     @param {String} key the dependent key
-    @param {Array|String} dependentKeys one or more dependent keys
+    @param {(Array|String)} dependentKeys one or more dependent keys
     @returns {Object} this
   */
   registerDependentKey: function (key, dependentKeys) {
@@ -622,23 +622,25 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     }
   },
 
-  /** @private
+  /** 
     Register a property chain so that dependent keys can be invalidated
     when a property on this object changes.
 
     @param {String} property the property on this object that invalidates the chain
     @param {SC._PropertyChain} chain the chain to notify
+    @private
   */
   registerDependentKeyWithChain: function (property, chain) {
     var chains = this._chainsFor(property);
     chains.add(chain);
   },
 
-  /** @private
+  /** 
     Removes a property chain from the object.
 
     @param {String} property the property on this object that invalidates the chain
     @param {SC._PropertyChain} chain the chain to notify
+    @private
   */
   removeDependentKeyWithChain: function (property, chain) {
     var chains = this._chainsFor(property);
@@ -649,11 +651,12 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     }
   },
 
-  /** @private
+  /** 
     Returns an instance of SC.CoreSet in which to save SC._PropertyChains.
 
     @param {String} property the property associated with the SC._PropertyChain
     @returns {SC.CoreSet}
+    @private
   */
   _chainsFor: function (property) {
     this._kvo_property_chains = this._kvo_property_chains || {};
@@ -663,7 +666,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     return chains;
   },
 
-  /** @private
+  /** 
 
     Helper method used by computeCachedDependents.  Just loops over the
     array of dependent keys.  If the passed function is cacheable, it will
@@ -675,6 +678,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     @param {Hash} dependents the _kvo_dependents cache
     @param {SC.Set} seen already seen keys
     @returns {void}
+    @private
   */
   _kvo_addCachedDependents: function (queue, keys, dependents, seen) {
     var idx = keys.length,
@@ -697,7 +701,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
 
   },
 
-  /** @private
+  /** 
 
     Called by set() whenever it needs to determine which cached dependent
     keys to clear.  Recursively searches dependent keys to determine all
@@ -707,6 +711,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
 
     @param {String} key the key to compute
     @returns {Array}
+    @private
   */
   _kvo_computeCachedDependentsFor: function (key) {
     var cached     = this._kvo_cachedep,
@@ -797,7 +802,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
 
     @param {String} key the key to observer
     @param {Object} target the target object to invoke
-    @param {String|Function} method the method to invoke.
+    @param {(String|Function)} method the method to invoke.
     @param {Object} context optional context
     @returns {SC.Object} self
   */
@@ -854,7 +859,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
 
     @param {String} key the key to observer
     @param {Object} target the target object to invoke
-    @param {String|Function} method the method to invoke.
+    @param {(String|Function)} method the method to invoke.
     @returns {SC.Observable} receiver
   */
   removeObserver: function (key, target, method) {
@@ -924,7 +929,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
 
     @param {String} key key to check
     @param {Object} [target] the target that the observer uses
-    @param {Function|String} [method]) the method on the target that the observer uses
+    @param {(Function|String)} [method]) the method on the target that the observer uses
     @returns {Boolean}
   */
   hasObserverFor: function (key, target, method) {
@@ -1147,7 +1152,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     return this;
   },
 
-  /** @private
+  /** 
 
     Used to either add or remove an observer handler on this object
     for a given property path.
@@ -1163,6 +1168,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
       notified of changes
     @param {String} path a property path string
     @param {String} path a dot-notation property path string
+    @private
   */
   _configureObservesHandler: function (action, observer, path) {
     var dotIndex, root;
@@ -1225,9 +1231,10 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     return observers ? observers.getMembers() : [];
   },
 
-  /** @private
+  /** 
     This private method actually notifies the observers for any keys in the observer queue.  If you
     pass a key it will be added to the queue.
+    @private
   */
   _notifyPropertyObservers: function (key) {
     // Ensure that this object has been initialized.
@@ -1430,7 +1437,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
 
     @param {String} toKey the key to bind to
     @param {Object} target target or property path to bind from
-    @param {String|Function} method method for target to bind from
+    @param {(String|Function)} method method for target to bind from
     @returns {SC.Binding} new binding instance
   */
   bind: function (toKey, target, method) {
@@ -1521,7 +1528,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     invoked, the current revision count of the property is compared to the
     revision count from the last time this method was called.
 
-    @param {String|Object} context a unique identifier
+    @param {(String|Object)} context a unique identifier
     @param {String…} propertyNames one or more property names
   */
   didChangeFor: function (context) {
@@ -1572,7 +1579,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     changed. However, this check can skipped by setting .property().idempotent(NO)
     setIfChanged() may be useful in this case.
 
-    @param {String|Hash} key the key to change
+    @param {(String|Hash)} key the key to change
     @param {Object} value the value to change
     @returns {SC.Observable}
   */
@@ -1740,7 +1747,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
 };
 
 //@if(debug)
-/** @private used by addProbe/removeProbe. Debug mode only. */
+/**  used by addProbe/removeProbe. Debug mode only. @private */
 SC.logChange = function logChange(target, key, value) {
   console.log("CHANGE: %@[%@] => %@".fmt(target, key, target.get(key)));
 };

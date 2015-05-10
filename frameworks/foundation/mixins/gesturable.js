@@ -6,7 +6,7 @@
 // ==========================================================================
 
 /**
-  @namespace
+  
 
   You can mix in SC.Gesturable to your views to add some support for recognizing gestures.
 
@@ -76,20 +76,23 @@
 
   @extends SC.ObjectMixinProtocol
   @extends SC.ResponderProtocol
+  @namespace
 */
 SC.Gesturable = {
 
-  /** @private An array of all gestures currently interested in the touch session.
+  /**  An array of all gestures currently interested in the touch session.
 
     @type Array
     @default null
+    @private
   */
   _sc_interestedGestures: null,
 
-  /** @private An array of the touches that are currently active in a touch session.
+  /**  An array of the touches that are currently active in a touch session.
 
     @type Array
     @default null
+    @private
   */
   _sc_touchesInSession: null,
 
@@ -137,10 +140,11 @@ SC.Gesturable = {
   */
   gestures: null,
 
-  /** @private Shared method for finishing a touch.
+  /**  Shared method for finishing a touch.
 
     @param {SC.Touch} touch The touch that ended or cancelled.
     @param {Boolean} wasCancelled Whether the touch was cancelled or not (i.e. ended normally).
+    @private
   */
   _sc_gestureTouchFinish: function (touch, wasCancelled) {
     var touchesInSession = this._sc_touchesInSession,
@@ -204,7 +208,7 @@ SC.Gesturable = {
     this.createGestures();
   },
 
-  /** @private  Instantiates the gestures. */
+  /**   Instantiates the gestures. @private */
   createGestures: function() {
     var gestures = this.get("gestures"),
         len = gestures.length,

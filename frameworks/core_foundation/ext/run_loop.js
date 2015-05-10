@@ -76,7 +76,7 @@ SC.RunLoop = SC.RunLoop.extend(
     return this ;
   },
 
-  /** @private - shared array used by fireExpiredTimers to avoid memory */
+  /**  - shared array used by fireExpiredTimers to avoid memory @private */
   TIMER_ARRAY: [],
 
   /**
@@ -113,13 +113,14 @@ SC.RunLoop = SC.RunLoop.extend(
     return didFire;
   },
 
-  /** @private
+  /** 
     Invoked at the end of a runloop, if there are pending timers, a timeout
     will be scheduled to fire when the next timer expires.  You will not
     usually call this method yourself.  It is invoked automatically at the
     end of a run loop.
 
     @returns {Boolean} YES if a timeout was scheduled
+    @private
   */
   scheduleNextTimeout: function() {
     var ret = NO,

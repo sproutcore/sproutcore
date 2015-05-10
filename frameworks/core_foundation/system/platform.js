@@ -201,10 +201,11 @@ SC.platform = SC.Object.create({
     SC.device.orientationHandlingShouldChange();
   },
 
-  /** @private
+  /** 
     Removes event listeners from the document.
 
     @param {Array} events Array of strings representing the events to remove
+    @private
   */
   removeEvents: function (events) {
     var idx, len = events.length, key;
@@ -214,22 +215,24 @@ SC.platform = SC.Object.create({
     }
   },
 
-  /** @private
+  /** 
     Replaces an event listener with another.
 
     @param {String} evt The event to replace
     @param {Function} replacement The method that should be called instead
+    @private
   */
   replaceEvent: function (evt, replacement) {
     SC.Event.remove(document, evt, SC.RootResponder.responder, SC.RootResponder.responder[evt]);
     SC.Event.add(document, evt, this, replacement);
   },
 
-  /** @private
+  /** 
     When simulating touch events, this method is called when mousemove events
     are received.
 
     If the altKey is depressed and pinch center not yet established, we will capture the mouse position.
+    @private
   */
   _simtouch_mousemove: function (evt) {
     if (!this._mousedown) {
@@ -256,9 +259,10 @@ SC.platform = SC.Object.create({
     return SC.RootResponder.responder.touchmove(manufacturedEvt);
   },
 
-  /** @private
+  /** 
     When simulating touch events, this method is called when mousedown events
     are received.
+    @private
   */
   _simtouch_mousedown: function (evt) {
     this._mousedown = YES;
@@ -267,9 +271,10 @@ SC.platform = SC.Object.create({
     return SC.RootResponder.responder.touchstart(manufacturedEvt);
   },
 
-  /** @private
+  /** 
     When simulating touch events, this method is called when mouseup events
     are received.
+    @private
   */
   _simtouch_mouseup: function (evt) {
     var manufacturedEvt = this.manufactureTouchEvent(evt, 'touchend'),
@@ -280,7 +285,7 @@ SC.platform = SC.Object.create({
     return ret;
   },
 
-  /** @private
+  /** 
     Converts a mouse-style event to a touch-style event.
 
     Note that this method edits the passed event in place, and returns
@@ -294,6 +299,7 @@ SC.platform = SC.Object.create({
     @param {Event} evt the mouse event to modify
     @param {String} type the type of event (e.g., touchstart)
     @returns {Event} the mouse event with an added changedTouches array
+    @private
   */
   manufactureTouchEvent: function (evt, type) {
     var realTouch, virtualTouch, realTouchIdentifier = this._simtouch_counter;
@@ -495,7 +501,7 @@ SC.platform = SC.Object.create({
 
 });
 
-/** @private
+/** 
   Test the transition and animation event names of this platform.  We could hard
   code event names into the framework, but at some point things would change and
   we would get it wrong.  Instead we perform actual tests to find out the proper
@@ -503,6 +509,7 @@ SC.platform = SC.Object.create({
 
   Once the tests are completed the RootResponder is notified in order to clean up
   unnecessary transition and animation event listeners.
+  @private
 */
 SC.ready(function () {
   // This will add 4 different variations of the named event listener and clean

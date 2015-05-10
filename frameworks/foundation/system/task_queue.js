@@ -107,8 +107,9 @@ SC.TaskQueue = SC.Task.extend({
   },
   
   /**
-    @private
+    
     Sets up idling if needed when the task count changes.
+    @private
   */
   _taskCountDidChange: function() {
     this._setupIdle();
@@ -124,6 +125,7 @@ SC.TaskQueue = SC.Task.extend({
   
   /**
     Sets up the scheduled idling check if needed and applicable.
+    
     @private
   */
   _setupIdle: function() {
@@ -140,6 +142,7 @@ SC.TaskQueue = SC.Task.extend({
   
   /**
     The entry point for the idle.
+    
     @private
   */
   _idleEntry: function() {

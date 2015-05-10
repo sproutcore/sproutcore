@@ -78,7 +78,7 @@ SC.ControlTestPane = SC.Pane.extend(
     return this.childViews[idx].childViews[0];
   },
 
-  /** @private */
+  /**  @private */
   init: function() {
     sc_super();
     if (!this._views) this._views = {};

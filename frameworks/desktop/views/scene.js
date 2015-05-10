@@ -79,9 +79,10 @@ SC.SceneView = SC.ContainerView.extend(
   */
   transitionForwardOptions: { duration: .25, direction: 'left' },
 
-  /** @private
+  /** 
     @param {SC.View} newContent the new content view or null.
     @see SC.ContainerView#replaceContent
+    @private
   */
   replaceContent: function(newContent) {
     var scenes = this.get('scenes'),

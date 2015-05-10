@@ -4,9 +4,10 @@
 // ==========================================================================
 sc_require("views/view");
 
-/** @private
+/** 
   Properties that can be animated
   (Hash for faster lookup)
+  @private
 */
 SC.ANIMATABLE_PROPERTIES = {
   top:     YES,
@@ -82,7 +83,7 @@ SC.LayoutState = {
 SC.View.reopen(
   /** @scope SC.View.prototype */ {
 
-  /** @private Shared object used to avoid continually initializing/destroying objects. */
+  /**  Shared object used to avoid continually initializing/destroying objects. @private */
   _SC_DECOMPOSED_TRANSFORM_MAP: null,
 
   /* @private Internal variable to store the active (i.e. applied) animations. */
@@ -229,11 +230,11 @@ SC.View.reopen(
           myView.adjust({ right: -width, bottom: 10 });
         });
 
-    @param {Object|String} properties Hash of property names with new layout values or a single property name.
+    @param {(Object|String)} properties Hash of property names with new layout values or a single property name.
     @param {Number} [value] The new layout value for a single property (only provide if the first parameter is a String).
-    @param {Number|Object} Duration or hash of transition options.
+    @param {(Number|Object)} Duration or hash of transition options.
     @param {Object} [target=this] The target for the method.
-    @param {AnimateCallback|String} [method] The method to run when the transition completes.  May be a function or a property path.
+    @param {(AnimateCallback|String)} [method] The method to run when the transition completes.  May be a function or a property path.
     @returns {SC.View} receiver
   */
   animate: function (key, value, options, target, method) {
@@ -414,7 +415,7 @@ SC.View.reopen(
     return this;
   },
 
-  /** @private */
+  /**  @private */
   _animate: function () {
     // Check for _animateLayout.  If an invokeNext call to animate *this* occurs
     // while flushing the invokeNext queue *before* this method runs, an extra
@@ -436,13 +437,14 @@ SC.View.reopen(
     }
   },
 
-  /** @private
+  /** 
     Animates through the given frames.
 
     @param {Array} frames The array of frame objects.
     @param {AnimateCallback} callback The callback function to call when the final frame is done animating.
     @param {Number} initialDelay The delay before the first frame begins animating.
     @returns {SC.View} receiver
+    @private
   */
   // TODO: Do this using CSS animations instead.
   _animateFrames: function (frames, callback, initialDelay, _sc_frameCount) {
@@ -551,10 +553,11 @@ SC.View.reopen(
     return this;
   },
 
-  /** @private
+  /** 
     This method is called after the layout style is applied to the layer.  If
     the platform didn't support CSS transitions, the callbacks will be fired
     immediately and the animations removed from the queue.
+    @private
   */
   didRenderAnimations: function () {
     // Transitions not supported or the document is not visible.
@@ -576,7 +579,7 @@ SC.View.reopen(
     }
   },
 
-  /** @private Decompose a transformation matrix. */
+  /**  Decompose a transformation matrix. @private */
   // TODO: Add skew support
   _sc_decompose3DTransformMatrix: function (matrix, expectsScale) {
     var ret = SC.View._SC_DECOMPOSED_TRANSFORM_MAP,  // Shared object used to avoid continually initializing/destroying
@@ -624,7 +627,7 @@ SC.View.reopen(
     return ret;
   },
 
-  /** @private Replace scientific E notation values with fixed decimal values. */
+  /**  Replace scientific E notation values with fixed decimal values. @private */
   _sc_removeENotationFromMatrixString: function (matrixString) {
     var components,
       numbers,
@@ -646,7 +649,7 @@ SC.View.reopen(
     return ret;
   },
 
-  /** @private
+  /** 
     Returns the live values of the properties being animated on a view while it
     is animating.  Getting the layout of the view after a call to animate will
     include the final values, some of which will not be the same as what they
@@ -664,6 +667,7 @@ SC.View.reopen(
     PRIVATE - because we may want to rename this function and change its output
 
     @returns {Object}
+    @private
   */
   liveAdjustments: function () {
     var activeAnimations = this._activeAnimations,
@@ -760,7 +764,7 @@ SC.View.reopen(
     return ret;
   }.property(),
 
-  /** @private Removes the animation CSS from the layer style. */
+  /**  Removes the animation CSS from the layer style. @private */
   removeAnimationFromLayout: function (propertyName, shouldUpdateStyle) {
     var activeAnimations = this._activeAnimations,
       layer = this.get('layer');
@@ -791,7 +795,7 @@ SC.View.reopen(
     return this.cancelAnimation();
   },
 
-  /** @private */
+  /**  @private */
   runAnimationCallback: function (animation, evt, cancelled) {
     var method = animation.method,
       target = animation.target;
@@ -810,8 +814,9 @@ SC.View.reopen(
     }
   },
 
-  /** @private
+  /** 
     Called when animation ends, should not usually be called manually
+    @private
   */
   transitionDidEnd: function (evt) {
     var propertyName = evt.originalEvent.propertyName,
@@ -846,11 +851,12 @@ SC.View.reopen(
     }
   },
 
-  /** @private
+  /** 
    This method is called before the layout style is applied to the layer.  If
    animations have been defined for the view, they will be included in
    this._pendingAnimations.  This method will clear out any conflicts between
    pending and active animations.
+    @private
    */
   willRenderAnimations: function () {
     // Only apply the style if supported by the platform and the document is visible.

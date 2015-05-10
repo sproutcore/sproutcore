@@ -32,7 +32,7 @@ SC.TABBING_ONLY_INSIDE_DOCUMENT = NO;
 */
 SC.FROM_THEME = "__FROM_THEME__"; // doesn't really matter what it is, so long as it is unique. Readability is a plus.
 
-/** @private - custom array used for child views */
+/**  - custom array used for child views @private */
 SC.EMPTY_CHILD_VIEWS_ARRAY = [];
 SC.EMPTY_CHILD_VIEWS_ARRAY.needsClone = YES;
 
@@ -178,7 +178,7 @@ SC.CoreView.reopen(
   /**
     Use this property to automatically mix in a collection of mixins into all
     child views created by the view. This collection is applied during createChildView
-    @property
+    @member
 
     @type Array
     @default null
@@ -376,7 +376,7 @@ SC.CoreView.reopen(
     return this;
   },
 
-  /** @private */
+  /**  @private */
   parentViewDidResize: function () {
     if (!this.get('hasLayout')) { this.notifyPropertyChange('frame'); }
     this.viewDidResize();
@@ -527,7 +527,7 @@ SC.CoreView.reopen(
   },
 
   /**
-    @private
+    
 
     Renders to a context.
     Rendering only happens for the initial rendering. Further updates happen in updateLayer,
@@ -537,6 +537,7 @@ SC.CoreView.reopen(
     a context.
 
     @param {SC.RenderContext} context the render context.
+    @private
   */
   renderToContext: function (context) {
     var mixins, idx, len;
@@ -587,12 +588,13 @@ SC.CoreView.reopen(
   },
 
   /**
-    @private
+    
 
     Iterates over the view's `classNameBindings` array, inserts the value
     of the specified property into the `classNames` array, then creates an
     observer to update the view's element if the bound property ever changes
     in the future.
+    @private
   */
   _applyClassNameBindings: function () {
     var classBindings = this.get('classNameBindings'),
@@ -702,13 +704,14 @@ SC.CoreView.reopen(
   },
 
   /**
-    @private
+    
 
     Given a property name, returns a dasherized version of that
     property name if the property evaluates to a non-falsy value.
 
     For example, if the view has property `isUrgent` that evaluates to true,
     passing `isUrgent` to this method will return `"is-urgent"`.
+    @private
   */
   _classStringForProperty: function (property) {
     var split = property.split(':'), className = split[1];
@@ -765,8 +768,9 @@ SC.CoreView.reopen(
     return context;
   },
 
-  /** @private -
+  /**  -
     override to add support for theming or in your view
+    @private
   */
   render: function () { },
 
@@ -912,7 +916,7 @@ SC.CoreView.reopen(
   // SC.RESPONDER SUPPORT
   //
 
-  /** @property
+  /** @member
     The nextResponder is usually the parentView.
   */
   nextResponder: function () {
@@ -920,7 +924,7 @@ SC.CoreView.reopen(
   }.property('parentView').cacheable(),
 
 
-  /** @property
+  /** @member
     Set to YES if your view is willing to accept first responder status.  This
     is used when calculating key responder loop.
   */
@@ -930,12 +934,13 @@ SC.CoreView.reopen(
   // CORE DISPLAY METHODS
   //
 
-  /** @private
+  /** 
     Caches the layerId to detect when it changes.
+    @private
     */
   _lastLayerId: null,
 
-  /** @private
+  /** 
     Setup a view, but do not finish waking it up.
 
      - configure childViews
@@ -943,6 +948,7 @@ SC.CoreView.reopen(
      - Fetch a render delegate from the theme, if necessary
      - register the view with the global views hash, which is used for event
        dispatch
+    @private
   */
   init: function () {
     var childViews, layerId;
@@ -1019,7 +1025,7 @@ SC.CoreView.reopen(
     }
   },
 
-  /** @private Call the method recursively on all child views. */
+  /**  Call the method recursively on all child views. @private */
   _callOnChildViews: function (methodName, isTopDown, context) {
     var childView,
       childViews = this.get('childViews'),
@@ -1108,9 +1114,10 @@ SC.CoreView.reopen(
     return ret;
   }.property('parentView', 'frame').cacheable(),
 
-  /** @private
+  /** 
     This method is invoked whenever the clippingFrame changes, notifying
     each child view that its clippingFrame has also changed.
+    @private
   */
   _sc_clippingFrameDidChange: function () {
     this.notifyPropertyChange('clippingFrame');
@@ -1252,7 +1259,7 @@ SC.CoreView.reopen(
     return this;
   },
 
-  /** @private Observer for child views that are being discarded after transitioning out. */
+  /**  Observer for child views that are being discarded after transitioning out. @private */
   _destroyChildView: function (view) {
     // Commence destroying of the view once it is detached.
     if (!view.get('isAttached')) {
@@ -1261,7 +1268,7 @@ SC.CoreView.reopen(
     }
   },
 
-  /** @private Observer for child views that are being orphaned after transitioning out. */
+  /**  Observer for child views that are being orphaned after transitioning out. @private */
   _orphanChildView: function (view) {
     // Commence orphaning of the view once it is detached.
     if (!view.get('isAttached')) {
@@ -1325,7 +1332,7 @@ SC.CoreView.reopen(
     return ret;
   },
 
-  /** @private */
+  /**  @private */
   _destroy: function () {
     // Orphan the view if adopted.
     this._doOrphan();
@@ -1690,10 +1697,11 @@ SC.CoreView.reopen(
   // Patches
   //
 
-  /** @private
+  /** 
     Override this method to apply design modes to this view and
     its children.
     @see SC.View
+    @private
   */
   updateDesignMode: function (lastDesignMode, designMode) {}
 });
@@ -1701,7 +1709,7 @@ SC.CoreView.reopen(
 SC.CoreView.mixin(
   /** @scope SC.CoreView */ {
 
-  /** @private walk like a duck -- used by SC.Page */
+  /**  walk like a duck -- used by SC.Page @private */
   isViewClass: YES,
 
   /**
@@ -1819,7 +1827,7 @@ SC.CoreView.mixin(
     often, but it is sometimes useful if you want to attach to already
     existing HTML.
 
-    @param {String|Element} element
+    @param {(String|Element)} element
     @param {Hash} attrs
     @returns {SC.View} instance
   */
@@ -1912,7 +1920,7 @@ SC.outlet = function (path, root) {
   }.property();
 };
 
-/** @private on unload clear cached divs. */
+/**  on unload clear cached divs. @private */
 SC.CoreView.unload = function () {
   // delete view items this way to ensure the views are cleared.  The hash
   // itself may be owned by multiple view subclasses.
@@ -2208,7 +2216,7 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
 
   displayProperties: [],
 
-  /** @private Enhance. */
+  /**  Enhance. @private */
   _executeQueuedUpdates: function () {
     sc_super();
 
@@ -2496,7 +2504,7 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
 
   },
 
-  /** @private */
+  /**  @private */
   destroy: function () {
     // Clean up.
     this._previousLayout = null;

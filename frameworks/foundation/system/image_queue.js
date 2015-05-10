@@ -102,7 +102,7 @@ SC.imageQueue = SC.Object.create(/** @scope SC.imageQueue.prototype */ {
     
     @param {String} url
     @param {Object} target
-    @param {String|Function} method
+    @param {(String|Function)} method
     @param {Boolean} isBackgroundFlag
     @returns {SC.imageQueue} receiver
   */
@@ -142,7 +142,7 @@ SC.imageQueue = SC.Object.create(/** @scope SC.imageQueue.prototype */ {
     
     @param {String} url
     @param {Object} target
-    @param {String|Function} method
+    @param {(String|Function)} method
     @returns {SC.imageQueue} receiver
   */
   releaseImage: function(url, target, method) {
@@ -231,7 +231,7 @@ SC.imageQueue = SC.Object.create(/** @scope SC.imageQueue.prototype */ {
   // SUPPORT METHODS
   // 
 
-  /** @private Find or create an entry for the URL. */
+  /**  Find or create an entry for the URL. @private */
   _imageEntryFor: function(url, createIfNeeded) {
     if (createIfNeeded === undefined) createIfNeeded = YES;
     var entry = this._images[url] ;
@@ -250,15 +250,16 @@ SC.imageQueue = SC.Object.create(/** @scope SC.imageQueue.prototype */ {
     return entry ;
   },
   
-  /** @private deletes an entry from the image queue, descheduling also */
+  /**  deletes an entry from the image queue, descheduling also @private */
   _deleteEntry: function(entry) {
     this._unscheduleImageEntry(entry) ;
     delete this._images[entry.url];    
   },
   
-  /** @private 
+  /**  
     Add a callback to the image entry.  First search the callbacks to make
     sure this is only added once.
+    @private
   */
   _addCallback: function(entry, target, method) {
     var callbacks = entry.callbacks;
@@ -274,9 +275,10 @@ SC.imageQueue = SC.Object.create(/** @scope SC.imageQueue.prototype */ {
     return this ;
   },
   
-  /** @private
+  /** 
     Removes a callback from the image entry.  Removing a callback just nulls
     out that position in the array.  It will be skipped when executing.
+    @private
   */
   _removeCallback: function(entry, target, method) {
     var callbacks = entry.callbacks ;
@@ -287,11 +289,12 @@ SC.imageQueue = SC.Object.create(/** @scope SC.imageQueue.prototype */ {
     return this ;
   },
   
-  /** @private 
+  /**  
     Adds an entry to the foreground or background queue to load.  If the 
     loader is not already running, start it as well.  If the entry is in the
     queue, but it is in the background queue, possibly move it to the
     foreground queue.
+    @private
   */
   _scheduleImageEntry: function(entry, isBackgroundFlag) {
 
@@ -323,8 +326,9 @@ SC.imageQueue = SC.Object.create(/** @scope SC.imageQueue.prototype */ {
     return this ; // done!
   },
   
-  /** @private
+  /** 
     Removes an entry from the foreground or background queue.  
+    @private
   */
   _unscheduleImageEntry: function(entry) {
     // if entry is not queued, do nothing
@@ -344,7 +348,7 @@ SC.imageQueue = SC.Object.create(/** @scope SC.imageQueue.prototype */ {
     return this ;
   },
   
-  /** @private invoked by Image().  Note that this is the image instance */
+  /**  invoked by Image().  Note that this is the image instance @private */
   _imageDidAbort: function() {
     SC.run(function() {
       SC.imageQueue.imageStatusDidChange(this.entry, SC.imageQueue.ABORTED);
@@ -363,8 +367,9 @@ SC.imageQueue = SC.Object.create(/** @scope SC.imageQueue.prototype */ {
     }, this);
   },
 
-  /** @private called whenever the image loading status changes.  Notifies
+  /**  called whenever the image loading status changes.  Notifies
     items in the queue and then cleans up the entry.
+    @private
   */
   imageStatusDidChange: function(entry, status) {
     if (!entry) return; // nothing to do...

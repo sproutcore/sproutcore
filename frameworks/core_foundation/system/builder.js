@@ -153,7 +153,7 @@ SC.Builder.fn = {
     Take an array of elements and push it onto the stack (making it the
     new matched set.)  The receiver will be saved so it can be popped later.
     
-    @param {Object|Array} content
+    @param {(Object|Array)} content
     @returns {SC.Builder} new instance
   */
   pushStack: function() {

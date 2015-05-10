@@ -6,7 +6,7 @@
 // ==========================================================================
 
 /**
-  @namespace
+  
 
   This mixin allows a view to get its value from a content object based
   on the value of its contentValueKey.
@@ -22,6 +22,7 @@
   This is useful if you have a nested record structure and want to have
   it be reflected in a nested view structure. If your data structures
   only have primitive values, consider using SC.Control instead.
+  @namespace
 */
 SC.ContentValueSupport = {
   /**
@@ -32,13 +33,13 @@ SC.ContentValueSupport = {
   */
   hasContentValueSupport: YES,
 
-  /** @private */
+  /**  @private */
   initMixin: function () {
     // setup content observing if needed.
     this._control_contentKeysDidChange();
   },
 
-  /** @private */
+  /**  @private */
   destroyMixin: function () {
     // Remove old observers on self.
     this._cleanup_old_observers();
@@ -238,21 +239,23 @@ SC.ContentValueSupport = {
     }
   },
 
-  /** @private
+  /** 
     This should be null so that if content is also null, the
     _contentDidChange won't do anything on init.
+    @private
   */
   _control_content: null,
   _old_contentValueKeys: null,
   _old_contentKeys: null,
 
-  /** @private
+  /** 
     Observes when a content object has changed and handles notifying
     changes to the value of the content object.
 
     Optimized for the default case of only observing contentValueKey. If you use
     a custom value for contentKeys it will switch to using a CoreSet to track
     observed keys.
+    @private
   */
   _control_contentDidChange: function (target, key) {
     // remove an observer from the old content if necessary
@@ -306,9 +309,10 @@ SC.ContentValueSupport = {
     this._old_contentValueKeys = oldKeys;
   }.observes('content'),
 
-  /** @private
+  /** 
     Observes changes to contentKeys and sets up observers on the local keys to
     update the observers on the content object.
+    @private
   */
   _control_contentKeysDidChange: function () {
     var key, reverse = {},
@@ -344,7 +348,7 @@ SC.ContentValueSupport = {
     this._control_contentDidChange();
   }.observes('contentKeys'),
 
-  /** @private */
+  /**  @private */
   _cleanup_old_content_observers: function () {
     var old = this._control_content,
       oldKeys = this._old_contentValueKeys,
@@ -375,7 +379,7 @@ SC.ContentValueSupport = {
     }
   },
 
-  /** @private */
+  /**  @private */
   _cleanup_old_observers: function () {
     var oldContentKeys = this._old_contentKeys,
       f = this._control_contentDidChange,

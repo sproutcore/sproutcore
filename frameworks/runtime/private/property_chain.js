@@ -2,7 +2,7 @@ sc_require('system/object');
 
 /**
   @class
-  @private
+  
 
   SC._PropertyChain is used as the bookkeeping system for notifying the KVO
   system of changes to computed properties that contains paths as dependent
@@ -28,6 +28,7 @@ sc_require('system/object');
 
   @extends SC.Object
   @since SproutCore 1.5
+  @private
 */
 
 SC._PropertyChain = SC.Object.extend(

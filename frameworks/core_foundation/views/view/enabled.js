@@ -119,7 +119,7 @@ SC.View.reopen(
   // Actions & Events
   //
 
-  /** @private */
+  /**  @private */
   _doEnable: function () {
     var handled = true,
       enabledState = this.get('enabledState');
@@ -144,7 +144,7 @@ SC.View.reopen(
     return handled;
   },
 
-  /** @private */
+  /**  @private */
   _doDisable: function () {
     var handled = true,
       enabledState = this.get('enabledState');
@@ -178,19 +178,20 @@ SC.View.reopen(
   // Methods
   //
 
-  /** @private
+  /** 
     Observes the isEnabled property and resigns first responder if set to NO.
     This will avoid cases where, for example, a disabled text field retains
     its focus rings.
 
     @observes isEnabled
+    @private
   */
   _sc_view_isEnabledDidChange: function () {
     // Filter the input channel.
     this.invokeOnce(this._doUpdateEnabled);
   }.observes('isEnabled'),
 
-  /** @private */
+  /**  @private */
   _doUpdateEnabled: function () {
     var state = this.get('viewState');
 
@@ -215,7 +216,7 @@ SC.View.reopen(
     }
   },
 
-  /** @private */
+  /**  @private */
   _doUpdateEnabledStyle: function () {
     var isEnabled = this.get('isEnabled');
 
@@ -226,7 +227,7 @@ SC.View.reopen(
     this._enabledStyleNeedsUpdate = false;
   },
 
-  /** @private */
+  /**  @private */
   _parentDidEnableInPane: function () {
     var enabledState = this.get('enabledState');
 
@@ -246,7 +247,7 @@ SC.View.reopen(
     }
   },
 
-  /** @private */
+  /**  @private */
   _parentDidDisableInPane: function () {
     var enabledState = this.get('enabledState');
 
@@ -267,22 +268,22 @@ SC.View.reopen(
     }
   },
 
-  /** @private */
+  /**  @private */
   _gotoEnabledState: function () {
     this.set('enabledState', SC.CoreView.ENABLED);
   },
 
-  /** @private */
+  /**  @private */
   _gotoDisabledState: function () {
     this.set('enabledState', SC.CoreView.DISABLED);
   },
 
-  /** @private */
+  /**  @private */
   _gotoDisabledAndByParentState: function () {
     this.set('enabledState', SC.CoreView.DISABLED_AND_BY_PARENT);
   },
 
-  /** @private */
+  /**  @private */
   _gotoDisabledByParentState: function () {
     this.set('enabledState', SC.CoreView.DISABLED_BY_PARENT);
   }

@@ -48,10 +48,10 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
   /* END DEBUG ONLY PROPERTIES AND METHODS */
   //@endif
 
-  /** @private */
+  /**  @private */
   _cachedItem: null,
 
-  /** @private */
+  /**  @private */
   _cachedDelegate: null,
 
   /**
@@ -132,7 +132,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     no parent or parent item.  IN this case the disclosure state is always
     SC.BRANCH_OPEN.
 
-    @property
+    @member
     @type Number
   */
   disclosureState: SC.BRANCH_OPEN,
@@ -142,7 +142,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     these indexes.  The default implementation will iterate over the children
     of the item but a more optimized version could avoid touching each item.
 
-    @property
+    @member
     @type SC.IndexSet
   */
   branchIndexes: function () {
@@ -755,7 +755,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
   // INTERNAL METHODS
   //
 
-  /** @private */
+  /**  @private */
   _cleanUpCachedDelegate: function () {
     var cachedDelegate = this._cachedDelegate;
 
@@ -776,7 +776,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     }
   },
 
-  /** @private */
+  /**  @private */
   _cleanUpCachedItem: function () {
     var cachedItem = this._cachedItem,
       treeItemIsExpandedKey = this.get('treeItemIsExpandedKey'),
@@ -825,7 +825,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     sc_super();
   },
 
-  /** @private */
+  /**  @private */
   _itemDidChange: function () {
     var item = this.get('item'),
       treeItemChildrenKey,
@@ -859,7 +859,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     this._cachedItem = item;
   }.observes('item'),
 
-  /** @private */
+  /**  @private */
   _itemIsExpandedDidChange: function () {
     var state = this.get('disclosureState'),
       item = this.get('item'),
@@ -869,7 +869,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     if (state !== next) { this.set('disclosureState', next); }
   },
 
-  /** @private */
+  /**  @private */
   _itemChildrenDidChange: function () {
     var children = this.get('children'),
       item = this.get('item'),
@@ -879,9 +879,10 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     if (children !== next) { this.set('children', next); }
   },
 
-  /** @private
+  /** 
     Called whenever the children or disclosure state changes.  Begins or ends
     observing on the children array so that changes can propogate outward.
+    @private
   */
   _childrenDidChange: function () {
     var state = this.get('disclosureState'),
@@ -903,10 +904,11 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     this._childrenRangeDidChange(cur, null, '[]', null);
   }.observes("children", "disclosureState"),
 
-  /** @private
+  /** 
     Called anytime the actual content of the children has changed.  If this
     changes the length property, then notifies the parent that the content
     might have changed.
+    @private
   */
   _childrenRangeDidChange: function (array, objects, key, indexes) {
     var children = this.get('children'),
@@ -919,10 +921,11 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     this.observerContentDidChange(min, max - min, len - old);
   },
 
-  /** @private
+  /** 
     Computes the current disclosure state of the item by asking the item or
     the delegate.  If no pitem or index is passed, the parentItem and index
     will be used.
+    @private
   */
   _computeDisclosureState: function (item, pitem, index) {
     var key;
@@ -943,9 +946,10 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     }
   },
 
-  /** @private
+  /** 
     Collapse the item at the specified index.  This will either directly
     modify the property on the item or call the treeItemCollapse() method.
+    @private
   */
   _collapse: function (item, pitem, index) {
     var key;
@@ -968,7 +972,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     return this;
   },
 
-  /** @private Each time the delegate changes, observe it for changes to its keys. */
+  /**  Each time the delegate changes, observe it for changes to its keys. @private */
   _delegateDidChange: function () {
     var delegate = this.get('delegate');
 
@@ -993,9 +997,10 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     this._cachedDelegate = delegate;
   }.observes('delegate'),
 
-  /** @private
+  /** 
     Expand the item at the specified index.  This will either directly
     modify the property on the item or call the treeItemExpand() method.
+    @private
   */
   _expand: function (item, pitem, index) {
     var key;
@@ -1018,8 +1023,9 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     return this;
   },
 
-  /** @private
+  /** 
     Computes the children for the passed item.
+    @private
   */
   _computeChildren: function (item) {
     var key;
@@ -1034,8 +1040,9 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     }
   },
 
-  /** @private
+  /** 
     Computes the length of the array by looking at children.
+    @private
   */
   _computeLength: function () {
     var ret = this.get('isHeaderVisible') ? 1 : 0,
@@ -1058,7 +1065,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     return ret;
   },
 
-  /** @private */
+  /**  @private */
   treeItemChildrenKeyDidChange: function () {
     var del = this.get('delegate'),
       key;
@@ -1067,7 +1074,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     this.set('treeItemChildrenKey', key ? key : 'treeItemChildren');
   },
 
-  /** @private */
+  /**  @private */
   treeItemIsExpandedKeyDidChange: function () {
     var del = this.get('delegate'),
       key;
@@ -1076,7 +1083,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     this.set('treeItemIsExpandedKey', key ? key : 'treeItemIsExpanded');
   },
 
-  /** @private */
+  /**  @private */
   treeItemIsGroupedDidChange: function () {
     this.notifyPropertyChange('branchIndexes');
   }

@@ -6,7 +6,7 @@
 // ==========================================================================
 
 /**
-  @namespace
+  
 
   The Editable mixin is a standard protocol used to activate keyboard editing
   on views that are editable such as text fields, label views and item views.
@@ -34,6 +34,7 @@
 
 
   @since SproutCore 1.0
+  @namespace
 */
 SC.Editable = {
 

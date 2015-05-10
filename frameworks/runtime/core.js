@@ -46,7 +46,7 @@ window.SproutCore = window.SproutCore || SC;
 
 /**
   @version 1.11.0
-  @namespace
+  
 
   All SproutCore methods and functions are defined
   inside of this namespace.  You generally should not add new properties to
@@ -59,13 +59,14 @@ window.SproutCore = window.SproutCore || SC;
   objects.  It's focus is on small size and performance.  You can use this
   in place of or along-side other cross-platform libraries such as jQuery or
   Prototype.
+  @namespace
 */
 SC = window.SC; // This is dumb but necessary for jsdoc to get it right
 
 SC.VERSION = '1.11.0';
 
 /**
-  @private
+  
 
   Adds properties to a target object. You must specify whether
   to overwrite a value for a property or not.
@@ -79,6 +80,7 @@ SC.VERSION = '1.11.0';
   @param {Object} properties one or more objects with properties to copy.
   @returns {Object} the target object.
   @static
+  @private
 */
 SC._baseMixin = function (override, args) {
   // Copy reference to target object
@@ -444,7 +446,7 @@ SC.mixin(/** @scope window.SC.prototype */ {
     number or a string that contains only a number. Typically hash codes
     are strings that begin with a "%".
 
-    @param {Object...} objects the object(s)
+    @param {...Object} objects the object(s)
     @returns {String} the hash code for this instance.
   */
   hashFor: function () {
@@ -666,7 +668,7 @@ SC.mixin(/** @scope window.SC.prototype */ {
   /**
     Returns a new object combining the values of all passed hashes.
 
-    @param {Object...} object one or more objects
+    @param {...Object} object one or more objects
     @returns {Object} new Object
   */
   merge: function () {
@@ -801,16 +803,16 @@ SC.mixin(/** @scope window.SC.prototype */ {
 
 }); // end mixin
 
-/** @private Alias for SC.clone() */
+/**  Alias for SC.clone() @private */
 SC.clone = SC.copy;
 
-/** @private Alias for SC.A() */
+/**  Alias for SC.A() @private */
 SC.$A = SC.A;
 
-/** @private Provided for compatibility with old HTML templates. */
+/**  Provided for compatibility with old HTML templates. @private */
 SC.didLoad = SC.K;
 
-/** @private Used by SC.compare */
+/**  Used by SC.compare @private */
 SC.ORDER_DEFINITION = [ SC.T_ERROR,
                         SC.T_UNDEFINED,
                         SC.T_NULL,

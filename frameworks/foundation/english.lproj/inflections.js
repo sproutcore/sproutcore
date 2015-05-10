@@ -5,11 +5,12 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/** @private
+/** 
   Active Support style inflection constants
+  @private
 */
 SC.hashesForLocale('en', 'inflectionConstants', {
-  /** @private */
+  /**  @private */
   PLURAL: [
     [/(quiz)$/i,               "$1zes"  ],
     [/^(ox)$/i,                "$1en"   ],
@@ -30,7 +31,7 @@ SC.hashesForLocale('en', 'inflectionConstants', {
     [/$/,                      "s"      ]
   ],
 
-  /** @private */
+  /**  @private */
   SINGULAR: [
     [/(quiz)zes$/i,                                                    "$1"     ],
     [/(matr)ices$/i,                                                   "$1ix"   ],
@@ -58,7 +59,7 @@ SC.hashesForLocale('en', 'inflectionConstants', {
     [/s$/i,                                                            ""       ]
   ],
 
-  /** @private */
+  /**  @private */
   IRREGULAR: [
     ['move',   'moves'   ],
     ['sex',    'sexes'   ],
@@ -69,7 +70,7 @@ SC.hashesForLocale('en', 'inflectionConstants', {
     ['self',   'selves'  ]
   ],
 
-  /** @private */
+  /**  @private */
   UNCOUNTABLE: [
     "sheep",
     "fish",

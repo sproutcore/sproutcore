@@ -7,12 +7,13 @@
 
 /**
   @deprecated SC.AutoMixin is deprecated. Please use the property autoMixins of SC.View instead
-  @namespace
+  
 
   Use this mixin to automatically mix in a list of mixins into all
   child views created _by the view_ (that are created at view initialization).
 
   @since SproutCore 1.0
+  @namespace
 */
 SC.AutoMixin = {
 
@@ -26,8 +27,9 @@ SC.AutoMixin = {
   autoMixins: [],
 
   /**
-    @private
+    
     Override createChildViews to mix in the mixins defined in autoMixins.
+    @private
   */
   createChildView: function (view, attrs) {
     if (!view.isClass) {

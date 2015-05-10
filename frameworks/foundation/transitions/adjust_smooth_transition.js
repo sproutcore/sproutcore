@@ -21,7 +21,7 @@ SC.mixin(SC.View,
   */
   SMOOTH_ADJUST: {
 
-    /** @private */
+    /**  @private */
     run: function (view, options, finalLayout) {
       var key,
         value;

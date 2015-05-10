@@ -6,7 +6,7 @@
 sc_require("tasks/task");
 
 
-/** @private */
+/**  @private */
 SC.AppCacheTask = SC.Task.extend({
   run: function () {
     window.applicationCache.update();
@@ -334,7 +334,7 @@ SC.appCache = SC.Object.create(
   // Methods
   //
 
-  /** @private */
+  /**  @private */
   _appCacheDidProgress: function (evt) {
     evt = evt.originalEvent;
     if (evt.lengthComputable) {
@@ -344,7 +344,7 @@ SC.appCache = SC.Object.create(
     }
   },
 
-  /** @private */
+  /**  @private */
   _appCacheStatusDidChange: function () {
     var appCache = window.applicationCache,
       status;
@@ -383,7 +383,7 @@ SC.appCache = SC.Object.create(
     this.set('status', status);
   },
 
-  /** @private Adds a task to check for application updates to the background task queue. */
+  /**  Adds a task to check for application updates to the background task queue. @private */
   _checkForUpdates: function () {
     var task = this._task;
 
@@ -396,7 +396,7 @@ SC.appCache = SC.Object.create(
     }
   },
 
-  /** @private */
+  /**  @private */
   init: function () {
     sc_super();
 

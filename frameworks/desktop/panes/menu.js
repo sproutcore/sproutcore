@@ -61,7 +61,7 @@ sc_require('views/menu_item');
 SC.MenuPane = SC.PickerPane.extend(
 /** @scope SC.MenuPane.prototype */ {
 
-  /** @private Cache of the items array, used for clean up of observers. */
+  /**  Cache of the items array, used for clean up of observers. @private */
   _sc_menu_items: null,
 
   /**
@@ -491,9 +491,10 @@ SC.MenuPane = SC.PickerPane.extend(
     The array of keys used by SC.MenuItemView when inspecting your menu items
     for display properties.
 
-    @private
+    
     @isReadOnly
     @type Array
+    @private
   */
   menuItemKeys: ['itemTitleKey', 'itemValueKey', 'itemToolTipKey', 'itemIsEnabledKey', 'itemIconKey', 'itemSeparatorKey', 'itemActionKey', 'itemCheckboxKey', 'itemShortCutKey', 'itemHeightKey', 'itemSubMenuKey', 'itemKeyEquivalentKey', 'itemTargetKey', 'itemLayerIdKey'],
 
@@ -521,14 +522,14 @@ SC.MenuPane = SC.PickerPane.extend(
   // INTERNAL PROPERTIES
   //
 
-  /** @private */
+  /**  @private */
   preferType: SC.PICKER_MENU,
 
   // ..........................................................
   // INTERNAL METHODS
   //
 
-  /** @private */
+  /**  @private */
   init: function () {
     // Initialize the items array.
     if (!this.items) { this.items = []; }
@@ -553,8 +554,9 @@ SC.MenuPane = SC.PickerPane.extend(
     view.  This new view is saved and managed by the `SC.MenuPane`,
     and contains the visible menu items.
 
-    @private
+    
     @returns {SC.View} receiver
+    @private
   */
   createChildViews: function () {
     var scroll, menuView;
@@ -752,7 +754,7 @@ SC.MenuPane = SC.PickerPane.extend(
     return this;
   }.property('isSubMenu').cacheable(),
 
-  /** @private @see SC.Object */
+  /**  @see SC.Object @private */
   destroy: function () {
     var ret = sc_super();
 
@@ -775,6 +777,7 @@ SC.MenuPane = SC.PickerPane.extend(
   /**
     Close the menu if the user resizes the window.
 
+    
     @private
   */
   windowSizeDidChange: function () {
@@ -839,7 +842,7 @@ SC.MenuPane = SC.PickerPane.extend(
     return ret;
   }.property('items').cacheable(),
 
-  /** @private */
+  /**  @private */
   _sc_menu_itemsDidChange: function () {
     var items = this.get('items');
 
@@ -862,7 +865,7 @@ SC.MenuPane = SC.PickerPane.extend(
     this._menuView.adjust('height', this.get('menuHeight'));
   }.observes('items'),
 
-  /** @private */
+  /**  @private */
   _sc_menu_itemPropertiesDidChange: function () {
     // Indicate that the displayItems changed.
     this.notifyPropertyChange('displayItems');
@@ -887,7 +890,7 @@ SC.MenuPane = SC.PickerPane.extend(
     return this._currentMenuItem;
   }.property().cacheable(),
 
-  /** @private */
+  /**  @private */
   _sc_menu_currentMenuItemDidChange: function () {
     var currentMenuItem = this.get('currentMenuItem'),
         previousMenuItem = this.get('previousMenuItem');
@@ -931,18 +934,19 @@ SC.MenuPane = SC.PickerPane.extend(
 
   //Mouse and Key Events
 
-  /** @private */
+  /**  @private */
   mouseDown: function (evt) {
     this.modalPaneDidClick(evt);
     return YES;
   },
 
-  /** @private
+  /** 
     Note when the mouse has entered, so that if this is a submenu,
     the menu item to which it belongs knows whether to maintain its highlight
     or not.
 
     @param {Event} evt
+    @private
   */
   mouseEntered: function () {
     this.set('mouseHasEntered', YES);
@@ -957,6 +961,7 @@ SC.MenuPane = SC.PickerPane.extend(
     Selects the next enabled menu item above the currently
     selected menu item when the up-arrow key is pressed.
 
+    
     @private
   */
   moveUp: function () {
@@ -988,6 +993,7 @@ SC.MenuPane = SC.PickerPane.extend(
     Selects the next enabled menu item below the currently
     selected menu item when the down-arrow key is pressed.
 
+    
     @private
   */
   moveDown: function () {
@@ -1019,6 +1025,7 @@ SC.MenuPane = SC.PickerPane.extend(
   /**
     Selects the first enabled menu item when the home key is pressed.
 
+    
     @private
    */
   moveToBeginningOfDocument: function () {
@@ -1041,6 +1048,7 @@ SC.MenuPane = SC.PickerPane.extend(
   /**
     Selects the last enabled menu item when the end key is pressed.
 
+    
     @private
   */
   moveToEndOfDocument: function () {
@@ -1064,6 +1072,7 @@ SC.MenuPane = SC.PickerPane.extend(
     Selects the next item one page down. If that is not enabled,
     continues to move down until it finds an enabled item.
 
+    
     @private
   */
   pageDown: function () {
@@ -1110,6 +1119,7 @@ SC.MenuPane = SC.PickerPane.extend(
     Selects the previous item one page up. If that is not enabled,
     continues to move up until it finds an enabled item.
 
+    
     @private
   */
   pageUp: function () {
@@ -1174,7 +1184,7 @@ SC.MenuPane = SC.PickerPane.extend(
     return YES;
   },
 
-  /** @private
+  /** 
     Called by the view hierarchy when the menu should respond to a shortcut
     key being pressed.
 
@@ -1188,6 +1198,7 @@ SC.MenuPane = SC.PickerPane.extend(
     @param fromVisibleControl Boolean if the shortcut key press was proxied
     to this menu by a visible parent control
     @returns Boolean
+    @private
   */
   performKeyEquivalent: function (keyEquivalent, evt, fromVisibleControl) {
     //If menu is not visible
@@ -1240,6 +1251,7 @@ SC.MenuPane = SC.PickerPane.extend(
 
     This is called by the timer created in the `insertText` method.
 
+    
     @private
   */
   clearKeyBuffer: function () {
@@ -1253,6 +1265,7 @@ SC.MenuPane = SC.PickerPane.extend(
     called once.
 
     @returns Boolean
+    
     @private
   */
   modalPaneDidClick: function () {
@@ -1263,12 +1276,12 @@ SC.MenuPane = SC.PickerPane.extend(
 });
 
 
-/** @private */
+/**  @private */
 SC._menu_fetchKeys = function (k) {
   return this.get(k);
 };
 
-/** @private */
+/**  @private */
 SC._menu_fetchItem = function (k) {
   if (!k) return null;
   return this.get ? this.get(k) : this[k];

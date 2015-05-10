@@ -9,7 +9,7 @@ sc_require('system/locale');
 
 // These are basic enhancements to the string class used throughout
 // SproutCore.
-/** @private */
+/**  @private */
 SC.STRING_TITLEIZE_REGEXP = (/([\s|\-|\_|\n])([^\s|\-|\_|\n]?)/g);
 SC.STRING_DECAMELIZE_REGEXP = (/([a-z])([A-Z])/g);
 SC.STRING_DASHERIZE_REGEXP = (/[ _]/g);
@@ -19,7 +19,7 @@ SC.STRING_TRIM_RIGHT_REGEXP = (/\s+$/g);
 SC.STRING_CSS_ESCAPED_REGEXP = (/(:|\.|\[|\])/g);
 
 /**
-  @namespace
+  
 
   SproutCore implements a variety of enhancements to the built-in String
   object that make it easy to perform common substitutions and conversions.
@@ -29,6 +29,7 @@ SC.STRING_CSS_ESCAPED_REGEXP = (/(:|\.|\[|\])/g);
 
   @since SproutCore 1.0
   @lends String.prototype
+  @namespace
 */
 SC.mixin(SC.String, {
 
@@ -136,7 +137,7 @@ SC.mixin(SC.String, {
     any variables.
 
     @param str {String} String to localize
-    @param args {Object...} optional arguments to interpolate also
+    @param args {...Object} optional arguments to interpolate also
     @returns {String} the localized and formatted string.
   */
   loc: function(str) {
@@ -268,7 +269,7 @@ SC.mixin(SC.String, {
 
     @param {String} str the string to localize
     @param {String} def the default to return
-    @param {Object...} args optional formatting arguments
+    @param {...Object} args optional formatting arguments
     @returns {String} localized and formatted string
   */
   locWithDefault: function(str, def) {

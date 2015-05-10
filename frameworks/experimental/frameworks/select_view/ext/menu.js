@@ -26,7 +26,7 @@ SC.AutoResizingMenuPane = SC.MenuPane.extend(
     This property must be set before instantiation; any changes after instantiation
     will not function properly.
 
-    @property
+    @member
     @type {Boolean}
     @default YES
   */
@@ -65,8 +65,9 @@ SC.AutoResizingMenuPane = SC.MenuPane.extend(
   exampleView: SC.AutoResizingMenuItemView,
 
   /**
-    @private
+    
     In addition to the normal init, we need to schedule an automatic resize.
+    @private
   */
   init: function() {
     sc_super();
@@ -81,9 +82,10 @@ SC.AutoResizingMenuPane = SC.MenuPane.extend(
 
     This computed property parses @displayItems@ and constructs an SC.MenuItemView (or whatever class you have set as the @exampleView@) for every item.
 
-    @property
+    @member
     @type Array
     @readOnly
+    
     @private
   */
   createMenuItemViews: function() {

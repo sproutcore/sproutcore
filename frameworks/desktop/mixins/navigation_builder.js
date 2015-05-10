@@ -7,12 +7,13 @@
 
 
 /**
-  @namespace
+  
   NavigationBuilder is an implementation of the Builder protocol. It implements
   `buildIn`/`Out` (though these only relay to `buildIn`/`OutNavigation, so feel free to
   override if needed; the navigation builders will still be accessible).
   
   Building in and out animates the view in and out to and from the left and right.
+  @namespace
 */
 SC.NavigationBuilder = {
 
@@ -64,16 +65,18 @@ SC.NavigationBuilder = {
     if (SC.Animatable) SC.mixin(this.transitions, navigationTransitions);
   },
   
-  /** @private
+  /** 
     Determines metrics of the view. This may be adapted to work with non-CSS transforms in future...
+    @private
   */
   metrics: function() {
     var f = this.computeFrameWithParentFrame();
     return f;
   },
   
-  /** @private
+  /** 
     Applies the supplied CSS transform.
+    @private
   */
   transform: function(pos) {
     if (SC.platform.supportsCSS3DTransforms) {

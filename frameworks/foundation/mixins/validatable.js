@@ -6,15 +6,16 @@
 // ==========================================================================
 
 /**
-  @namespace
+  
 
   Views that include the Validatable mixin can be used with validators to
   ensure their values are valid.
 
+  @namespace
 */
 SC.Validatable = {
 
-  /** @private */
+  /**  @private */
   initMixin: function() {
     this._validatable_validatorDidChange() ;
   },
@@ -170,18 +171,19 @@ SC.Validatable = {
     return this._validator ? this._validator.fieldValueForObject(object, this.get('ownerForm'), this) : object ;
   },
 
-  /** @private */
+  /**  @private */
   _validatable_displayObserver: function() {
     this.displayDidChange();
   }.observes('isValid'),
 
-  /** @private */
+  /**  @private */
   renderMixin: function(context) {
     context.setClass('invalid', !this.get('isValid'));
   },
 
-  /** @private
+  /** 
     Invoked whenever the attached validator changes.
+    @private
   */
   _validatable_validatorDidChange: function() {
     var form = this.get('ownerForm') ;

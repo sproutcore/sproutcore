@@ -152,11 +152,12 @@ SC.Touch.prototype = {
 
   /**@scope SC.Touch.prototype*/
 
-  /** @private
+  /** 
     The responder that's responsible for the creation and management of this touch. Usually this will be
     your app's root responder. You must pass this on create, and should not change it afterwards.
 
     @type {SC.RootResponder}
+    @private
   */
   touchContext: null,
 
@@ -219,9 +220,10 @@ SC.Touch.prototype = {
   */
   type: null,
 
-  /** @private
+  /** 
     A faked mouse event property used to prevent unexpected behavior when proxying touch events to mouse
     event handlers.
+    @private
   */
   clickCount: 1,
 
@@ -305,7 +307,7 @@ SC.Touch.prototype = {
   */
   velocityY: 0,
 
-  /** @private */
+  /**  @private */
   unhideTouchIntercept: function() {
     var intercept = this.hidesTouchIntercept;
     if (intercept) {
@@ -350,27 +352,30 @@ SC.Touch.prototype = {
     this.touchContext.endTouch(this);
   },
 
-  /** @private
+  /** 
     This property, contrary to its name, stores the last touch responder for possible use later in the touch's
     lifecycle. You will usually not use this property directly, instead calling `stackNextTouchResponder` to pass
     the touch to a different view, and `restoreLastTouchResponder` to pass it back to the previous one.
 
     @type {SC.Responder}
+    @private
   */
   nextTouchResponder: null,
 
-  /** @private
+  /** 
     An array of previous touch responders.
 
     @type {Array}
+    @private
   */
   touchResponders: null,
 
-  /** @private
+  /** 
     A lazily-created array of candidate touch responders. Use `stackCandidateTouchResponder` to add candidates;
     candidates are used as a fallback if the touch is out of previous touch responders.
 
     @type {Array}
+    @private
   */
   candidateTouchResponders: null,
 
@@ -445,7 +450,7 @@ SC.Touch.prototype = {
       must implement touchStart.)
     @param {Boolean} shouldStack Whether the new responder should replace the old one, or stack with it.
       Stacked responders are easy to revert via `SC.Touch#restoreLastTouchResponder`.
-    @param {Boolean|SC.Responder} bubblesTo If YES, will attempt to find a `touchStart` responder up the
+    @param {(Boolean|SC.Responder)} bubblesTo If YES, will attempt to find a `touchStart` responder up the
       responder chain. If NO or undefined, will only check the passed responder. If you pass a responder
       for this argument, the attempt will bubble until it reaches the passed responder, allowing you to
       restrict the bubbling to a portion of the responder chain. (Note that this responder will not be

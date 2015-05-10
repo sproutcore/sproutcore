@@ -444,7 +444,7 @@ SC.Set = SC.mixin({},
   // PRIVATE
   //
 
-  /** @private - optimized */
+  /**  - optimized @private */
   forEach: function(iterator, target) {
     var len = this.length;
 
@@ -453,7 +453,7 @@ SC.Set = SC.mixin({},
     return this ;
   },
 
-  /** @private */
+  /**  @private */
   toString: function() {
     var len = this.length, idx, ary = [];
     for (idx = 0; idx < len; idx++) ary[idx] = this[idx];
@@ -461,8 +461,9 @@ SC.Set = SC.mixin({},
   },
 
   /**
-    @private
+    
     Alerts set observers that an item has been added.
+    @private
   */
   didAddItem: function(item) {
     // get the set observers
@@ -477,8 +478,9 @@ SC.Set = SC.mixin({},
   },
 
   /**
-    @private
+    
     Alerts set observers that an item has been removed.
+    @private
   */
   didRemoveItem: function(item) {
     // get the set observers
@@ -492,7 +494,7 @@ SC.Set = SC.mixin({},
     for (idx = 0; idx < len; idx++) o[idx].didRemoveItem(this, item);
   },
 
-  /** @private */
+  /**  @private */
   isObservable: YES
 
 });
@@ -501,21 +503,21 @@ SC.Set.constructor = SC.Set;
 
 // Make SC.Set look a bit more like other enumerables
 
-/** @private */
+/**  @private */
 SC.Set.clone = SC.Set.copy;
 
-/** @private */
+/**  @private */
 SC.Set.push = SC.Set.unshift = SC.Set.add;
 
-/** @private */
+/**  @private */
 SC.Set.shift = SC.Set.pop;
 
 // add generic add/remove enumerable support
 
-/** @private */
+/**  @private */
 SC.Set.addObject = SC.Set.add;
 
-/** @private */
+/**  @private */
 SC.Set.removeObject = SC.Set.remove;
 
 SC.Set._pool = [];
@@ -535,8 +537,8 @@ SC.Set._pool = [];
 */
 SC.CoreSet = SC.beget(SC.Set);
 
-/** @private */
+/**  @private */
 SC.CoreSet.isObservable = NO;
 
-/** @private */
+/**  @private */
 SC.CoreSet.constructor = SC.CoreSet;

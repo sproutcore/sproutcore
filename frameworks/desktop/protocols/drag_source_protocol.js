@@ -7,7 +7,7 @@
 
 sc_require('system/drag') ;
 
-/** @namespace
+/** 
   The `SC.DragSourceProtocol` protocol defines the properties and methods that you may implement in
   your drag source objects in order to access additional functionality of SproutCore's drag support.
 
@@ -20,6 +20,7 @@ sc_require('system/drag') ;
   *Note: Do not mix `SC.DragSourceProtocol` into your classes. As a protocol, it exists only for
   reference sake. You only need define any of the properties or methods listed below in order to use
   this protocol.*
+  @namespace
 */
 SC.DragSourceProtocol = {
 

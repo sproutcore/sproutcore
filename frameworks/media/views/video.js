@@ -79,7 +79,8 @@ SC.VideoView = SC.View.extend(
      Current time in secs
 
      @type Number
-     @private
+     
+    @private
    */
   _currentTime : 0,
 

@@ -52,7 +52,7 @@ SC.FixturesDataSource = SC.DataSource.extend(
   // CANCELLING
   //
 
-  /** @private */
+  /**  @private */
   cancel: function(store, storeKeys) {
     return NO;
   },
@@ -62,7 +62,7 @@ SC.FixturesDataSource = SC.DataSource.extend(
   // FETCHING
   //
 
-  /** @private */
+  /**  @private */
   fetch: function(store, query) {
 
     // can only handle local queries out of the box
@@ -80,8 +80,9 @@ SC.FixturesDataSource = SC.DataSource.extend(
     } else this._fetch(store, query);
   },
 
-  /** @private
+  /** 
     Actually performs the fetch.
+    @private
   */
   _fetch: function(store, query) {
 
@@ -106,7 +107,7 @@ SC.FixturesDataSource = SC.DataSource.extend(
   // RETRIEVING
   //
 
-  /** @private */
+  /**  @private */
   retrieveRecords: function(store, storeKeys) {
     // first let's see if the fixture data source can handle any of the
     // storeKeys
@@ -137,7 +138,7 @@ SC.FixturesDataSource = SC.DataSource.extend(
   // UPDATE
   //
 
-  /** @private */
+  /**  @private */
   updateRecords: function(store, storeKeys, params) {
     // first let's see if the fixture data source can handle any of the
     // storeKeys
@@ -165,7 +166,7 @@ SC.FixturesDataSource = SC.DataSource.extend(
   // CREATE RECORDS
   //
 
-  /** @private */
+  /**  @private */
   createRecords: function(store, storeKeys, params) {
     // first let's see if the fixture data source can handle any of the
     // storeKeys
@@ -197,7 +198,7 @@ SC.FixturesDataSource = SC.DataSource.extend(
   // DESTROY RECORDS
   //
 
-  /** @private */
+  /**  @private */
   destroyRecords: function(store, storeKeys, params) {
     // first let's see if the fixture data source can handle any of the
     // storeKeys
@@ -377,7 +378,7 @@ SC.FixturesDataSource = SC.DataSource.extend(
     return ret ;
   },
 
-  /** @private
+  /** 
     Invalidates any internal caches based on the recordType and optional
     other parameters.  Currently this only invalidates the storeKeyCache used
     for fetch, but it could invalidate others later as well.
@@ -386,6 +387,7 @@ SC.FixturesDataSource = SC.DataSource.extend(
     @param {Number} storeKey optional store key
     @param {String} id optional record id
     @returns {SC.FixturesDataSource} receiver
+    @private
   */
   _invalidateCachesFor: function(recordType, storeKey, id) {
     var cache = this._storeKeyCache;

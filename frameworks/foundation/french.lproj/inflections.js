@@ -5,11 +5,12 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/** @private
+/** 
   Active Support style inflection constants
+  @private
 */
 SC.hashesForLocale('fr', 'inflectionConstants', {
-  /** @private */
+  /**  @private */
   PLURAL: [
     [/(bijou|caillou|chou|genou|hibou|joujou|pou|au|eu|eau)$/i, '$1x'],
     [/(bleu|émeu|landau|lieu|pneu|sarrau)$/i, '$1s'],
@@ -20,7 +21,7 @@ SC.hashesForLocale('fr', 'inflectionConstants', {
     [/$/, "s"]
   ],
 
-  /** @private */
+  /**  @private */
   SINGULAR: [
     [/(bijou|caillou|chou|genou|hibou|joujou|pou|au|eu|eau)x$/i, '$1'],
     [/(journ|chev)aux$/i, '$1al'],
@@ -29,13 +30,13 @@ SC.hashesForLocale('fr', 'inflectionConstants', {
     [/s$/i, ""]
   ],
 
-  /** @private */
+  /**  @private */
   IRREGULAR: [
     ['monsieur', 'messieurs'],
     ['madame', 'mesdames'],
     ['mademoiselle', 'mesdemoiselles']
   ],
 
-  /** @private */
+  /**  @private */
   UNCOUNTABLE: []
 });

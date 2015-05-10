@@ -36,7 +36,7 @@ SC.SelectView = SC.PopupButtonView.extend({
   /**
     Binding default for an array of items
 
-    @property
+    @member
     @default SC.Binding.multiple()
   */
   itemsBindingDefault: SC.Binding.multiple(),
@@ -45,7 +45,7 @@ SC.SelectView = SC.PopupButtonView.extend({
     They key in the items which maps to the title.
     This only applies for items that are hashes or SC.Objects.
 
-    @property
+    @member
     @type {String}
     @default null
   */
@@ -56,7 +56,7 @@ SC.SelectView = SC.PopupButtonView.extend({
     be used to sort the items.  If this is not set, then itemTitleKey will
     be used.
 
-    @property
+    @member
     @type: {String}
     @default null
   */
@@ -66,7 +66,7 @@ SC.SelectView = SC.PopupButtonView.extend({
     They key in the items which maps to the value.
     This only applies for items that are hashes or SC.Objects.
 
-     @property
+     @member
      @type {String}
      @default null
   */
@@ -75,7 +75,7 @@ SC.SelectView = SC.PopupButtonView.extend({
   /**
      Key used to extract icons from the items array.
 
-     @property
+     @member
      @type {String}
      @default null
   */
@@ -86,7 +86,7 @@ SC.SelectView = SC.PopupButtonView.extend({
 
     Items that have this property set to YES will be drawn as separators.
 
-    @property
+    @member
     @type {String}
     @default null
   */
@@ -95,7 +95,7 @@ SC.SelectView = SC.PopupButtonView.extend({
   /**
     Key used to indicate if the item is to be enabled.
 
-    @property
+    @member
     @type {String}
     @default null
   */
@@ -104,7 +104,7 @@ SC.SelectView = SC.PopupButtonView.extend({
   /**
     Set this to non-null to place an empty option at the top of the menu.
 
-    @property
+    @member
     @type String
     @default null
   */
@@ -144,7 +144,7 @@ SC.SelectView = SC.PopupButtonView.extend({
    mix in SC.SelectViewMenu, it'll get the bindings and the extended
    MenuItemView that draws its checkbox when it is the selected item.
 
-   @property
+   @member
    @type {SC.MenuPane}
    @default SC.AutoResizingMenuPane.extend(SC.SelectViewMenu)
   */
@@ -153,10 +153,11 @@ SC.SelectView = SC.PopupButtonView.extend({
   /**
     The currently selected item. If no item is selected, `null`.
 
-    @private
+    
     @type SC.Object
     @default null
     @isReadOnly
+    @private
    */
   selectedItem: null,
   selectedItemBinding: '*menu.rootMenu.selectedItem',
@@ -166,7 +167,7 @@ SC.SelectView = SC.PopupButtonView.extend({
     This is a property to enable/disable focus rings in buttons.
     For SelectView, it is a default.
 
-    @property
+    @member
     @type {Boolean}
     @default YES
   */
@@ -174,7 +175,8 @@ SC.SelectView = SC.PopupButtonView.extend({
 
 
   /**
-    * @private
+    * 
+    @private
   */
   init: function() {
     sc_super();
@@ -183,28 +185,29 @@ SC.SelectView = SC.PopupButtonView.extend({
     this._scsv_valueDidChange();
   },
 
-  /** @private */
+  /**  @private */
   _itemTitleKey: function() {
     return this.get('itemTitleKey') || 'title';
   }.property('itemTitleKey').cacheable(),
 
-  /** @private */
+  /**  @private */
   _itemValueKey: function() {
     return this.get('itemValueKey') || 'value';
   }.property('itemValueKey').cacheable(),
 
-  /** @private */
+  /**  @private */
   _itemIsEnabledKey: function() {
     return this.get('itemIsEnabledKey') || 'isEnabled';
   }.property('itemIsEnabledKey').cacheable(),
 
   /**
-    @private
+    
 
     This gets the value for a specific menu item. 
     
     This method therefore accepts both the menu items as created for the menupane's displayItems
     AND the raw items provided by the developer in `items`.
+    @private
   */
   _scsv_getValueForMenuItem: function(item) {
     var valueKey = this.get('_itemValueKey');
@@ -220,7 +223,8 @@ SC.SelectView = SC.PopupButtonView.extend({
 
   /**
     * When the selected item changes, we need to update our value.
-    * @private
+    * 
+    @private
   */
   _scsv_selectedItemDidChange: function() {
     var sel = this.get('selectedItem'),
@@ -269,7 +273,7 @@ SC.SelectView = SC.PopupButtonView.extend({
     }
   }.property('selectedItem').cacheable(),
 
-  /** @private */
+  /**  @private */
   defaultTitle: function() {
     var emptyName = this.get('emptyName');
     if (emptyName) {
@@ -341,12 +345,12 @@ SC.SelectView = SC.PopupButtonView.extend({
     return ret;
   }.property().cacheable(),
 
-  /** @private */
+  /**  @private */
   _scsv_itemsDidChange: function () {
     this.notifyPropertyChange('displayItems');
   }.observes('*items.[]'),
 
-  /** @private */
+  /**  @private */
   _addDisplayItem: function (title, value, isSeparator) {
     var item = SC.Object.create({
       isDisplayItem: true
@@ -384,7 +388,8 @@ SC.SelectView = SC.PopupButtonView.extend({
 
   /**
     * When the value changes, we need to update selectedItem.
-    * @private
+    * 
+    @private
   */
   _scsv_valueDidChange: function() {
     var displayItems = this.get('displayItems');
@@ -425,6 +430,7 @@ SC.SelectView = SC.PopupButtonView.extend({
     the SelectViewMenu mixin, which should be mixed in to any SelectView menu.
 
     In addition, the initial selected item and the initial minimum menu width are set.
+    
     @private
   */
   createMenu: function(klass) {
@@ -447,7 +453,7 @@ SC.SelectView = SC.PopupButtonView.extend({
     By default, this comes from the render delegate's menuLeftOffset property.
     If you are writing a theme, you should set the value there.
 
-    @property
+    @member
     @type Number
     @default 'menuLeftOffset' from render delegate if present, or 0.
   */
@@ -463,7 +469,7 @@ SC.SelectView = SC.PopupButtonView.extend({
     By default, this comes from the render delegate's menuTopOffset property.
     If you are writing a theme, you should set the value there.
 
-    @property
+    @member
     @type Number
     @default 'menuTopOffset' from render delegate if present, or 0.
   */
@@ -476,7 +482,7 @@ SC.SelectView = SC.PopupButtonView.extend({
     By default, this comes from the render delegate's menuMinimumWidthOffset property.
     If you are writing a theme, you should set the value there.
 
-    @property
+    @member
     @type Number
     @default 'menuWidthOffset' from render delegate if present, or 0.
   */
@@ -486,8 +492,9 @@ SC.SelectView = SC.PopupButtonView.extend({
     The prefer matrix for menu positioning. It is calculated so that the selected
     menu item is positioned directly over the SelectView.
 
-    @property
+    @member
     @type Array
+    
     @private
   */
   menuPreferMatrix: function() {
@@ -512,6 +519,7 @@ SC.SelectView = SC.PopupButtonView.extend({
   /**
     Used to calculate things like the menu's top position.
 
+    
     @private
   */
   _selectedItemIndex: function() {
@@ -550,7 +558,7 @@ SC.SelectView = SC.PopupButtonView.extend({
     property.
 
     @type Number
-    @property
+    @member
   */
   minimumMenuWidth: function() {
     return this.get('frame').width + this.get('menuMinimumWidthOffset');
@@ -560,9 +568,10 @@ SC.SelectView = SC.PopupButtonView.extend({
   // KEY HANDLING
   //
   /**
-    @private
+    
 
     Handle Key event - Down arrow key
+    @private
   */
   keyDown: function(event) {
     if ( this.interpretKeyEvents(event) ) {
@@ -574,15 +583,16 @@ SC.SelectView = SC.PopupButtonView.extend({
   },
 
   /**
-    @private
+    
     Pressing the Up or Down arrow key should display the menu pane. Pressing escape should
     resign first responder.
+    @private
   */
   moveUp: function(evt) {
     this._action();
     return YES;
   },
-  /** @private */
+  /**  @private */
   moveDown: function(evt) {
     this._action();
     return YES;
@@ -591,8 +601,9 @@ SC.SelectView = SC.PopupButtonView.extend({
     this.resignFirstResponder();
   },
 
-  /** @private
+  /** 
    Function overridden - tied to the isEnabled state
+    @private
   */
   acceptsFirstResponder: function() {
     return this.get('isEnabled');

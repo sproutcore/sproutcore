@@ -405,7 +405,7 @@ SC.Timer = SC.Object.extend(
     }
   },
 
-  /** @private - Default values to reset reused timers to. */
+  /**  - Default values to reset reused timers to. @private */
   RESET_DEFAULTS: {
     target: null, action: null,
     isPooled: NO, isPaused: NO, isScheduled: NO, isValid: YES,
@@ -443,8 +443,9 @@ SC.Timer = SC.Object.extend(
   // TIMER QUEUE SUPPORT
   //
 
-  /** @private - removes the timer from its current timerQueue if needed.
+  /**  - removes the timer from its current timerQueue if needed.
     return value is the new "root" timer.
+    @private
   */
   removeFromTimerQueue: function(timerQueueRoot) {
     var prev = this._timerQueuePrevious, next = this._timerQueueNext ;
@@ -458,7 +459,7 @@ SC.Timer = SC.Object.extend(
     return (timerQueueRoot === this) ? next : timerQueueRoot ;
   },
 
-  /** @private - schedules the timer in the queue based on the runtime. */
+  /**  - schedules the timer in the queue based on the runtime. @private */
   scheduleInTimerQueue: function(timerQueueRoot, runTime) {
     this._timerQueueRunTime = runTime ;
 
@@ -484,11 +485,12 @@ SC.Timer = SC.Object.extend(
     return (beforeNode === timerQueueRoot) ? this : timerQueueRoot ;
   },
 
-  /** @private
+  /** 
     adds the receiver to the passed array of expired timers based on the
     current time and then recursively calls the next timer.  Returns the
     first timer that is not expired.  This is faster than iterating through
     the timers because it does some faster cleanup of the nodes.
+    @private
   */
   collectExpiredTimers: function(timers, now) {
     if (this._timerQueueRunTime > now) return this ; // not expired!

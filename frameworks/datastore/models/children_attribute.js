@@ -32,7 +32,7 @@ SC.ChildrenAttribute = SC.ChildAttribute.extend(
   // LOW-LEVEL METHODS
   //
 
-  /**  @private - adapted for to many relationship */
+  /**   - adapted for to many relationship @private */
   toType: function (record, key, value) {
     var attrKey   = this.get('key') || key,
         arrayKey  = SC.keyFor('__kidsArray__', SC.guidFor(this)),

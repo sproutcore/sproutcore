@@ -30,7 +30,7 @@ SC.BRANCH_CLOSED = 0x0012;
 SC.LEAF_NODE = 0x0020;
 
 /**
-  @namespace
+  
 
   This mixin provides standard methods used by a CollectionView to provide
   additional meta-data about content in a collection view such as selection
@@ -40,6 +40,7 @@ SC.LEAF_NODE = 0x0020;
   object you set as content.
 
   @since SproutCore 1.0
+  @namespace
 */
 SC.CollectionContent = {
 

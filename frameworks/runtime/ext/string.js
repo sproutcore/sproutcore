@@ -8,8 +8,9 @@
 sc_require('system/string');
 
 /** 
-  @namespace
+  
   Extends String by adding a few helpful methods.
+  @namespace
 */
 SC.mixin(String.prototype,
 /** @scope String.prototype */ {

@@ -6,7 +6,7 @@
 // ==========================================================================
 
 /**
-  @namespace
+  
 
   Support methods for the Delegate design pattern.
 
@@ -33,6 +33,7 @@
 
   @since SproutCore 1.0
 
+  @namespace
 */
 SC.DelegateSupport = {
 
@@ -44,7 +45,7 @@ SC.DelegateSupport = {
     to marshall arguments into a delegate call.
 
     @param {String} methodName
-    @param {Object...} delegate one or more delegate arguments
+    @param {...Object} delegate one or more delegate arguments
     @returns {Object} delegate or null
   */
   delegateFor: function(methodName) {
@@ -71,7 +72,7 @@ SC.DelegateSupport = {
 
     @param {Object} delegate a delegate object.  May be null.
     @param {String} methodName a method name
-    @param {Object...} [args...] any additional arguments
+    @param {...Object} [args...] any additional arguments
 
     @returns {Object} value returned by delegate
   */

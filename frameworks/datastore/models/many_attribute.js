@@ -116,7 +116,7 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
   // LOW-LEVEL METHODS
   //
 
-  /**  @private - adapted for to many relationship */
+  /**   - adapted for to many relationship @private */
   toType: function(record, key, value) {
     var type      = this.get('typeClass'),
         supportNewRecords = this.get('supportNewRecords'),
@@ -146,7 +146,7 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
     return ret;
   },
 
-  /** @private - adapted for to many relationship */
+  /**  - adapted for to many relationship @private */
   fromType: function(record, key, value) {
     var ret = [];
 

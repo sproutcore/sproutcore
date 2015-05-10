@@ -252,7 +252,7 @@ SC.Module = SC.Object.create(
   },
 
   /**
-    @private
+    
 
     Loads a module in string form. If you prefetch a module, its source will
     be held as a string in memory until SC.Module.loadModule() is called, at
@@ -263,6 +263,7 @@ SC.Module = SC.Object.create(
     modules once your application has loaded and the user is idle.
 
     @param {String} moduleName the name of the module to prefetch
+    @private
   */
   prefetchModule: function (moduleName) {
     var module = SC.MODULE_INFO[moduleName];
@@ -281,9 +282,10 @@ SC.Module = SC.Object.create(
   // INTERNAL SUPPORT
   //
 
-  /** @private
+  /** 
     If a module is marked for lazy instantiation, this method will execute the closure and call
     any registered callbacks.
+    @private
   */
   _executeLazilyInstantiatedModule: function (moduleName, targetName, methodName) {
     var lazyInfo =  SC.LAZY_INSTANTIATION[moduleName];
@@ -348,11 +350,12 @@ SC.Module = SC.Object.create(
   },
 
   /**
-    @private
+    
 
     Creates <link> tags for every CSS resource in a module.
 
     @param {String} moduleName the name of the module whose CSS should be loaded
+    @private
   */
   _loadCSSForModule: function (moduleName) {
     var head = document.getElementsByTagName('head')[0];
@@ -444,12 +447,13 @@ SC.Module = SC.Object.create(
   },
 
   /**
-    @private
+    
 
     Returns YES if all of the dependencies for a module are ready.
 
     @param {String} moduleName the name of the module being checked
     @returns {Boolean} whether the dependencies are loaded
+    @private
   */
   _dependenciesMetForModule: function (moduleName) {
     var dependencies = SC.MODULE_INFO[moduleName].dependencies || [];
@@ -534,9 +538,10 @@ SC.Module = SC.Object.create(
   },
 
   /**
-    @private
+    
 
     Calls an action on a target to notify the target that a module has loaded.
+    @private
   */
   _invokeCallback: function (moduleName, targetName, methodName, args) {
     var method;
@@ -576,8 +581,9 @@ SC.Module = SC.Object.create(
     }
   },
 
-  /** @private
+  /** 
     Given a module name, iterates through all registered callbacks and calls them.
+    @private
   */
   _invokeCallbacksForModule: function (moduleName) {
     var moduleInfo = SC.MODULE_INFO[moduleName], callbacks;
@@ -654,7 +660,7 @@ SC.Module = SC.Object.create(
 
   },
 
-  /** @private
+  /** 
     Called when the JavaScript for a module finishes loading.
 
     Any pending callbacks are called (if SC.isReady), and any dependent
@@ -662,6 +668,7 @@ SC.Module = SC.Object.create(
     can continue loading.
 
     @param moduleName {String} the name of the module that just loaded
+    @private
   */
   _moduleDidLoad: function (moduleName) {
     var module = SC.MODULE_INFO[moduleName];
@@ -711,12 +718,13 @@ SC.Module = SC.Object.create(
   },
 
   /**
-    @private
+    
 
     If necessary, converts a property path into a target object.
 
-    @param {String|Object} targetName the string or object representing the target
+    @param {(String|Object)} targetName the string or object representing the target
     @returns Object
+    @private
   */
   _targetForTargetName: function (targetName) {
     if (SC.typeOf(targetName) === SC.T_STRING) {
@@ -727,13 +735,14 @@ SC.Module = SC.Object.create(
   },
 
   /**
-    @private
+    
 
     If necessary, converts a property path into a method object.
 
-    @param {String|Object} methodName the string or object representing the method
+    @param {(String|Object)} methodName the string or object representing the method
     @param {Object} target the target from which to retrieve the method
     @returns Object
+    @private
   */
   _methodForMethodNameInTarget: function (methodName, target) {
     if (SC.typeOf(methodName) === SC.T_STRING) {

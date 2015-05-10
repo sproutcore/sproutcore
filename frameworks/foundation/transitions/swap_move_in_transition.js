@@ -30,7 +30,7 @@ SC.mixin(SC.ContainerView,
   */
   MOVE_IN: {
 
-    /** @private */
+    /**  @private */
     willBuildInToView: function (container, content, previousStatechart, options) {
       var frame = container.get('frame'),
         left,
@@ -58,7 +58,7 @@ SC.mixin(SC.ContainerView,
       content.adjust({ bottom: null, left: left || 0, right: null, top: top || 0, height: height, width: width });
     },
 
-    /** @private */
+    /**  @private */
     buildInToView: function (statechart, container, content, previousStatechart, options) {
       var key,
         value;
@@ -88,19 +88,19 @@ SC.mixin(SC.ContainerView,
       });
     },
 
-    /** @private */
+    /**  @private */
     didBuildInToView: function (container, content, options) {
       // Convert to a flexible layout.
       content.adjust({ bottom: 0, right: 0, height: null, width: null });
     },
 
-    /** @private */
+    /**  @private */
     didBuildOutFromView: function (container, content, options) {
       // Convert to a flexible layout (in case we never fully entered).
       content.adjust({ bottom: 0, right: 0, height: null, width: null });
     },
 
-    /** @private */
+    /**  @private */
     buildOutFromView: function (statechart, container, content, options) {
       // Do nothing.
     }

@@ -360,7 +360,7 @@ SC.AlertPane = SC.PanelPane.extend(
   */
   layout: { top : 0.3, centerX: 0, width: 500 },
 
-  /** @private - internal view that is actually displayed */
+  /**  - internal view that is actually displayed @private */
   contentView: SC.View.extend({
 
     useStaticLayout: YES,
@@ -372,7 +372,7 @@ SC.AlertPane = SC.PanelPane.extend(
         classNames: ['info'],
         useStaticLayout: YES,
 
-        /** @private */
+        /**  @private */
         render: function(context, firstTime) {
           var pane = this.get('pane');
           if(pane.get('icon') == 'blank') context.addClass('plain');
@@ -462,9 +462,10 @@ SC.AlertPane = SC.PanelPane.extend(
     this.remove(); // hide alert
   },
 
-  /** @private
+  /** 
     Executes whenever one of the icon, message, description or caption is changed.
     This simply causes the UI to refresh.
+    @private
   */
   alertInfoDidChange: function() {
     var v = this.getPath('contentView.childViews.0');
@@ -620,13 +621,14 @@ SC.AlertPane.mixin(
     return this.show(args);
   },
 
-  /** @private
+  /** 
     Set properties to new structure for call that use the old arguments
     structure.
 
     Deprecated API but is preserved for now for backwards compatibility.
 
     @deprecated
+    @private
   */
   _argumentsCall: function(args) {
     var ret = args;
@@ -660,8 +662,9 @@ SC.AlertPane.mixin(
     return ret;
   },
 
-  /** @private
+  /** 
     internal method normalizes arguments for processing by helper methods.
+    @private
   */
   _normalizeArguments: function(args) {
     args = SC.A(args); // convert to real array

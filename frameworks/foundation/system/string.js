@@ -6,14 +6,15 @@
 // ==========================================================================
 
 
-/** @private */
+/**  @private */
 SC.STRING_TITLEIZE_REGEXP = (/([\s|\-|\_|\n])([^\s|\-|\_|\n]?)/g);
 SC.STRING_HUMANIZE_REGEXP = (/[\-_]/g);
 SC.STRING_REGEXP_ESCAPED_REGEXP = (/([\\\.\+\*\?\[\^\]\$\(\)\{\}\=\!\<\>\|\:])/g);
 
-/** @private
+/** 
   Since there are many strings that are commonly dasherized(), we'll maintain
   // a cache.  Moreover, we'll pre-add some common ones.
+  @private
 */
 SC.STRING_DASHERIZE_CACHE = {
   top:      'top',
@@ -27,8 +28,9 @@ SC.STRING_DASHERIZE_CACHE = {
 };
 
 /**
-  @namespace
+  
   @lends SC.String
+  @namespace
 */
 SC.mixin(SC.String, {
 
@@ -309,5 +311,5 @@ SC.mixin(SC.String, {
 
 });
 
-/** @private */
+/**  @private */
 SC.String.strip = SC.String.trim;

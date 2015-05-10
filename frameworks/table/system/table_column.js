@@ -25,7 +25,7 @@ SC.TableColumn = SC.Object.extend({
     The internal name of the column. `SC.TableRowView` objects expect their
     `content` to be an object with keys corresponding to the column's keys.
     
-    @property
+    @member
     @type String
   */
   key: null,
@@ -34,7 +34,7 @@ SC.TableColumn = SC.Object.extend({
     The display name of the column. Will appear in the table header for this
     column.
     
-    @property
+    @member
     @type String
   */
   title: null,
@@ -42,7 +42,7 @@ SC.TableColumn = SC.Object.extend({
   /**
     Width of the column.
     
-    @property
+    @member
     @type Number
   */
   width: 100,
@@ -50,7 +50,7 @@ SC.TableColumn = SC.Object.extend({
   /**
     How narrow the column will allow itself to be.
     
-    @property
+    @member
     @type Number
   */
   minWidth: 16,
@@ -58,7 +58,7 @@ SC.TableColumn = SC.Object.extend({
   /**
     How wide the column will allow itself to be.
     
-    @property
+    @member
     @type Number
   */
   maxWidth: 700,
@@ -74,7 +74,7 @@ SC.TableColumn = SC.Object.extend({
     Whether the column gets wider or narrower based on the size of the
     table. Only one column in a TableView is allowed to be flexible.
     
-    @property
+    @member
     @type Boolean
   */
   isFlexible: NO,
@@ -82,7 +82,7 @@ SC.TableColumn = SC.Object.extend({
   /**
     Whether the column can be drag-reordered.
     
-    @property
+    @member
     @type Boolean
   */
   isReorderable: YES,
@@ -90,7 +90,7 @@ SC.TableColumn = SC.Object.extend({
   /**
     Whether the column can be sorted.
     
-    @property
+    @member
     @type Boolean
   */
   isSortable: YES,
@@ -98,7 +98,7 @@ SC.TableColumn = SC.Object.extend({
   /**
     Reference to the URL for this column's icon. If `null`, there is no
     icon associated with the column.
-    @property
+    @member
   */
   icon: null,
   
@@ -111,7 +111,7 @@ SC.TableColumn = SC.Object.extend({
     in the ascending direction. If `null`, means that the table is sorted
     on another column.
     
-    @property
+    @member
   */
   sortState: null,
   

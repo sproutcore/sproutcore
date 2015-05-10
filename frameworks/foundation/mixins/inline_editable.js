@@ -6,7 +6,7 @@
 // ==========================================================================
 
 /**
-  @namespace
+  
 
   This mixin is used for views that show a seperate editor view to edit.
   For example, the default behavior of SC.LabelView if isEditable is set
@@ -48,6 +48,7 @@
   Note that the editor is a private property of the view, so the only views that
   should be able to access the methods on it are the editor itself, the view it
   is editing, and their delegates.
+  @namespace
 */
 SC.InlineEditable = {
 
@@ -96,8 +97,9 @@ SC.InlineEditable = {
   inlineEditorDelegate: SC.InlineTextFieldDelegate,
 
   /**
-    @private
+    
     The editor responsible for editing this view.
+    @private
   */
   _editor: null,
 
@@ -184,12 +186,13 @@ SC.InlineEditable = {
     this.set('isEditing', YES);
   },
 
-  /** @private
+  /** 
     Calls inlineEditorWillEndEditing for backwards compatibility.
 
     @params {SC.InlineEditable} the view being edited
     @params {SC.InlineEditor} the editor for the view
     @params {Object} the initial value of the editor
+    @private
   */
   inlineEditorWillCommitEditing: function(editor, value, editable) {
     if(this.inlineEditorWillEndEditing) this.inlineEditorWillEndEditing(editor, value);
@@ -237,8 +240,9 @@ SC.InlineEditable = {
   },
 
   /**
-    @private
+    
     Shared code used to cleanup editing after both discarding and commiting.
+    @private
   */
   _endEditing: function() {
     // _editor may be null if we were called using the

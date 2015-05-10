@@ -25,7 +25,7 @@ sc_require('views/list');
 SC.GridView = SC.ListView.extend(
 /** @scope SC.GridView.prototype */ {
 
-  /** @private */
+  /**  @private */
   _lastFrameWidth: null,
 
   /**
@@ -83,7 +83,7 @@ SC.GridView = SC.ListView.extend(
   */
   insertionOrientation: SC.HORIZONTAL_ORIENTATION,
 
-  /** @private */
+  /**  @private */
   itemsPerRow: function () {
     var frameWidth = this.get('frame').width,
       columnWidth = this.get('columnWidth') || 0;
@@ -91,10 +91,11 @@ SC.GridView = SC.ListView.extend(
     return (columnWidth < 1) ? 1 : Math.floor(frameWidth / columnWidth);
   }.property('columnWidth', '_frameWidth').cacheable(),
 
-  /** @private
+  /** 
     Find the contentIndexes to display in the passed rect. Note that we
     ignore the width of the rect passed since we need to have a single
     contiguous range.
+    @private
   */
   contentIndexesInRect: function (rect) {
     var rowHeight = this.get('rowHeight') || 48,
@@ -104,7 +105,7 @@ SC.GridView = SC.ListView.extend(
     return SC.IndexSet.create(min, max - min);
   },
 
-  /** @private */
+  /**  @private */
   layoutForContentIndex: function (contentIndex) {
     var rowHeight = this.get('rowHeight') || 48,
         frameWidth = this.get('frame').width,
@@ -127,9 +128,10 @@ SC.GridView = SC.ListView.extend(
     };
   },
 
-  /** @private
+  /** 
     Overrides default CollectionView method to compute the minimum height
     of the list view.
+    @private
   */
   computeLayout: function () {
     var content = this.get('content'),
@@ -168,7 +170,7 @@ SC.GridView = SC.ListView.extend(
     }
   }),
 
-  /** @private */
+  /**  @private */
   showInsertionPoint: function (itemView, dropOperation) {
     if (!itemView) return;
 
@@ -228,7 +230,7 @@ SC.GridView = SC.ListView.extend(
     this._insertionPointView = null;
   },
 
-  /** @private */
+  /**  @private */
   insertionIndexForLocation: function (loc, dropOperation) {
     var f = this.get('frame'),
         sf = this.get('clippingFrame'),
@@ -257,12 +259,13 @@ SC.GridView = SC.ListView.extend(
     return [ret, retOp];
   },
 
-  /** @private
+  /** 
     Since GridView lays out items evenly from left to right, if the width of the
     frame changes, all of the item views on screen are potentially in
     the wrong position.
 
     Update all of their layouts if necessary.
+    @private
   */
   _gv_frameDidChange: function () {
     var frame = this.get('frame'),
@@ -290,7 +293,7 @@ SC.GridView = SC.ListView.extend(
     this._lastFrameWidth = width;
   }.observes('frame'),
 
-  /** @private Recompute our layout if itemsPerRow actually changes. */
+  /**  Recompute our layout if itemsPerRow actually changes. @private */
   _gv_itemsPerRowDidChange: function () {
     var itemsPerRow = this.get('itemsPerRow'),
       lastItemsPerRow = this._lastItemsPerRow || 0;

@@ -83,7 +83,8 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
   }),
 
   /**
-     @private
+     
+    @private
   */
   init: function() {
     if (this.get("editsByDefault")) this.set("isEditing", YES);

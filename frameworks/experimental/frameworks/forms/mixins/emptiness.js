@@ -5,11 +5,12 @@
 // ==========================================================================
 
 /**
-  @namespace 
+   
   A view is empty if all of its children are empty. A view is automatically 
   counted as empty if it is not visible, and not empty if it is being edited.
 
   Any field that does not mix in CalculatesEmptiness will be considered empty.
+  @namespace
 */
 SC.CalculatesEmptiness = {
   

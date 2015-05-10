@@ -6,7 +6,7 @@ SC.View.reopen(
   // KEY RESPONDER
   //
 
-  /** @property
+  /** @member
     YES if the view is currently first responder and the pane the view belongs
     to is also key pane.  While this property is set, you should expect to
     receive keyboard events.
@@ -157,11 +157,12 @@ SC.View.reopen(
   firstKeyView: null,
 
   /**
-    @private
+    
 
     Actually calculates the firstKeyView as described in firstKeyView.
 
     @returns {SC.View}
+    @private
   */
   _getFirstKeyView: function() {
     // if first was given, just return it
@@ -186,11 +187,12 @@ SC.View.reopen(
   lastKeyView: null,
 
   /**
-    @private
+    
 
     Actually calculates the lastKeyView as described in lastKeyView.
 
     @returns {SC.View}
+    @private
   */
   _getLastKeyView: function() {
     // if last was given, just return it
@@ -242,12 +244,13 @@ SC.View.reopen(
   nextKeyView: undefined,
 
   /**
-    @private
+    
 
     Gets the next key view by checking if the user set it and otherwise just
     getting the next by index in childViews.
 
     @return {SC.View}
+    @private
   */
   _getNextKeyView: function() {
     var pv = this.get('parentView'),
@@ -274,7 +277,7 @@ SC.View.reopen(
     the current view is the only valid view, the current view will be returned. Will
     return null if no valid view can be found.
 
-    @property
+    @member
     @type SC.View
   */
   nextValidKeyView: function() {
@@ -334,12 +337,13 @@ SC.View.reopen(
   previousKeyView: undefined,
 
   /**
-    @private
+    
 
     Gets the previous key view by checking if the user set it and otherwise just
     getting the previous by index in childViews.
 
     @return {SC.View}
+    @private
   */
   _getPreviousKeyView: function() {
     var pv = this.get('parentView'),
@@ -367,7 +371,7 @@ SC.View.reopen(
     first child, tries the parent. Will return null if no valid view can be
     found.
 
-    @property
+    @member
     @type SC.View
   */
   // TODO: clean this up

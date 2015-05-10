@@ -9,12 +9,13 @@ SC.DateTime.mixin(
 /** @scope SC.DateTime */ {
 
   /**
-    @private
+    
 
     Called on `document.ready`.
 
     Because localizations may have been modified by an application developer,
     we need to wait for the ready event to actually evaluate the localizations.
+    @private
   */
   _setup: function() {
     SC.DateTime.dayNames = SC.String.w(SC.String.loc('_SC.DateTime.dayNames'));
@@ -25,11 +26,12 @@ SC.DateTime.mixin(
   },
   
   /**
-    @private
+    
     
     Elapsed string formatting override, as it depends on localization.
     
     @see SC.DateTime#toFormattedString
+    @private
    */
   __getElapsedStringFormat: function(start, timezone) {
     

@@ -188,7 +188,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
 
     @param {String} target String Event name.
     @param {Object} target The target object for the callback action.
-    @param {String|Function} action The method name or function to call on the target.
+    @param {(String|Function)} action The method name or function to call on the target.
     @returns {SC.WebSocket} The SC.WebSocket object.
   */
   notify: function(event, target, action) {
@@ -237,7 +237,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
 
     If `isJSON` is true (the default for SC.WebSocket), the message will be stringified JSON.
 
-    @param {String|Object} message The message to send.
+    @param {(String|Object)} message The message to send.
     @returns {SC.WebSocket}
   */
   send: function(message) {
@@ -258,7 +258,8 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
   //
 
   /**
-     @private
+     
+    @private
   */
   onOpen: function(event) {
     var del = this.get('objectDelegate');
@@ -272,7 +273,8 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
   },
 
   /**
-     @private
+     
+    @private
   */
   onMessage: function(messageEvent) {
     if (messageEvent) {
@@ -297,7 +299,8 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
   },
 
   /**
-     @private
+     
+    @private
   */
   onClose: function(closeEvent) {
     var del = this.get('objectDelegate');
@@ -315,7 +318,8 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
   },
 
   /**
-     @private
+     
+    @private
   */
   onError: function(event) {
     var del = this.get('objectDelegate'),
@@ -325,9 +329,10 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
   },
 
   /**
-     @private
+     
 
      Add the message to the queue
+    @private
   */
   addToQueue: function(message) {
     var queue = this.queue;
@@ -337,9 +342,10 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
   },
 
   /**
-     @private
+     
 
      Send the messages from the queue.
+    @private
   */
   fireQueue: function() {
     var queue = this.queue;
@@ -355,6 +361,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
   },
 
   /**
+    
     @private
   */
   tryReconnect: function() {
@@ -365,9 +372,10 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
   },
 
   /**
-    @private
+    
 
     Will notify each listener. Returns true if any of the listeners handle.
+    @private
   */
   _notifyListeners: function(event, message) {
     var listeners = (this.listeners || {})[event], notifier, target, action, args;
@@ -394,6 +402,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
   },
 
   /**
+    
     @private
   */
   objectDelegate: function () {
@@ -406,28 +415,31 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
   //
 
   /**
-    @private
+    
 
     @type WebSocket
     @default null
+    @private
   */
   socket: null,
 
   /**
-    @private
+    
 
     @type Object
     @default null
+    @private
   */
   listeners: null,
 
   /**
-    @private
+    
 
     Messages that needs to be send once the connection is open.
 
     @type Array
     @default null
+    @private
   */
   queue: null,
 

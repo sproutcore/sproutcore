@@ -6,7 +6,7 @@
 // ==========================================================================
 sc_require('system/responder');
 
-/** @namespace
+/** 
 
   The root object for a responder chain.  A responder context can dispatch
   actions directly to a first responder; walking up the responder chain until
@@ -22,13 +22,14 @@ sc_require('system/responder');
   SC.Responder or SC.Responder subclass.
 
   @since SproutCore 1.0
+  @namespace
 */
 SC.ResponderContext = {
 
   //@if(debug)
   /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */
 
-  /** @property
+  /** @member
 
     When set to YES, logs tracing information about all actions sent and
     responder changes.
@@ -44,7 +45,7 @@ SC.ResponderContext = {
 
   isResponderContext: YES,
 
-  /** @property
+  /** @member
     The default responder.  Set this to point to a responder object that can
     respond to events when no other view in the hierarchy handles them.
 
@@ -52,14 +53,14 @@ SC.ResponderContext = {
   */
   defaultResponder: null,
 
-  /** @property
+  /** @member
     The next responder for an app is always its defaultResponder.
   */
   nextResponder: function() {
     return this.get('defaultResponder');
   }.property('defaultResponder').cacheable(),
 
-  /** @property
+  /** @member
     The first responder.  This is the first responder that should receive
     actions.
   */
@@ -96,7 +97,7 @@ SC.ResponderContext = {
     return responder._scrc_name || responder.toString(); // try again
   },
 
-  /** @private */
+  /**  @private */
   _findResponderNamesFor: function(responder, level, path) {
     var key, value;
 

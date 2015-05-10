@@ -49,7 +49,8 @@ SC.SingleAttribute = SC.RecordAttribute.extend(
 
 
   /**
-    @private - implements support for handling inverse relationships.
+     - implements support for handling inverse relationships.
+    @private
   */
   call: function(record, key, newRec) {
     var attrKey = this.get('key') || key,
@@ -99,7 +100,7 @@ SC.SingleAttribute = SC.RecordAttribute.extend(
     return ret ;
   },
 
-  /** @private - save original call() impl */
+  /**  - save original call() impl @private */
   _scsa_call: SC.RecordAttribute.prototype.call,
 
   /**

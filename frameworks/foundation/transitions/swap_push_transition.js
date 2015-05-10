@@ -28,7 +28,7 @@ SC.mixin(SC.ContainerView,
   */
   PUSH: {
 
-    /** @private */
+    /**  @private */
     willBuildInToView: function (container, content, previousStatechart, options) {
       var adjustLeft = 0,
         adjustTop = 0,
@@ -67,7 +67,7 @@ SC.mixin(SC.ContainerView,
       content.adjust({ bottom: null, right: null, left: left, top: top, height: height, width: width });
     },
 
-    /** @private */
+    /**  @private */
     buildInToView: function (statechart, container, content, previousStatechart, options) {
       var key;
 
@@ -93,13 +93,13 @@ SC.mixin(SC.ContainerView,
       });
     },
 
-    /** @private */
+    /**  @private */
     didBuildInToView: function (container, content, options) {
       // Convert to a flexible layout.
       content.adjust({ bottom: 0, right: 0, height: null, width: null });
     },
 
-    /** @private */
+    /**  @private */
     willBuildOutFromView: function (container, content, options) {
       var frame = container.get('frame'),
         height,
@@ -112,7 +112,7 @@ SC.mixin(SC.ContainerView,
       content.adjust({ bottom: null, right: null, height: height, width: width });
     },
 
-    /** @private */
+    /**  @private */
     buildOutFromView: function (statechart, container, content, options, exitCount) {
       var frame = container.get('frame'),
         key,
@@ -146,13 +146,13 @@ SC.mixin(SC.ContainerView,
       });
     },
 
-    /** @private */
+    /**  @private */
     didBuildOutFromView: function (container, content, options) {
       // Convert to a flexible layout.
       content.adjust({ bottom: 0, right: 0, height: null, width: null });
     },
 
-    /** @private */
+    /**  @private */
     transitionClippingFrame: function (container, clippingFrame, options) {
       var frame = container.get('frame');
 

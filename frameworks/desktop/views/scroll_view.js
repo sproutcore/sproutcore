@@ -87,124 +87,124 @@ SC.ScrollView = SC.View.extend({
   // Properties
   //
 
-  /** @private Flag used to determine whether to animate the adjustment. */
+  /**  Flag used to determine whether to animate the adjustment. @private */
   _sc_animationDuration: null,
 
-  /** @private The animation timing to use. */
+  /**  The animation timing to use. @private */
   _sc_animationTiming: null,
 
-  /** @private The cached height of the container. */
+  /**  The cached height of the container. @private */
   _sc_containerHeight: 0,
 
-  /** @private The cached offset of the container. */
+  /**  The cached offset of the container. @private */
   _sc_containerOffset: null,
 
-  /** @private The cached width of the container. */
+  /**  The cached width of the container. @private */
   _sc_containerWidth: 0,
 
-  /** @private The cached height of the content. */
+  /**  The cached height of the content. @private */
   _sc_contentHeight: 0,
 
-  /** @private Flag used to react accordingly when the content's height changes. */
+  /**  Flag used to react accordingly when the content's height changes. @private */
   _sc_contentHeightDidChange: false,
 
-  /** @private The cached scale of the content. */
+  /**  The cached scale of the content. @private */
   _sc_contentScale: undefined,
 
-  /** @private Flag used to react accordingly when the content's scale changes. */
+  /**  Flag used to react accordingly when the content's scale changes. @private */
   _sc_contentScaleDidChange: false,
 
-  /** @private The cached width of the content. */
+  /**  The cached width of the content. @private */
   _sc_contentWidth: 0,
 
-  /** @private Flag used to react accordingly when the content's width changes. */
+  /**  Flag used to react accordingly when the content's width changes. @private */
   _sc_contentWidthDidChange: false,
 
-  /** @private The anchor horizontal offset of the touch gesture. */
+  /**  The anchor horizontal offset of the touch gesture. @private */
   _sc_gestureAnchorHOffset: null,
 
-  /** @private The anchor position of the initial touch gesture. */
+  /**  The anchor position of the initial touch gesture. @private */
   _sc_gestureAnchorTotalD: null,
 
-  /** @private The anchor position of the initial touch gesture. */
+  /**  The anchor position of the initial touch gesture. @private */
   _sc_gestureAnchorTotalX: null,
 
-  /** @private The anchor position of the initial touch gesture. */
+  /**  The anchor position of the initial touch gesture. @private */
   _sc_gestureAnchorTotalY: null,
 
-  /** @private The anchor vertical offset of the touch gesture. */
+  /**  The anchor vertical offset of the touch gesture. @private */
   _sc_gestureAnchorVOffset: null,
 
-  /** @private The anchor position of the last touch gesture. */
+  /**  The anchor position of the last touch gesture. @private */
   _sc_gestureAnchorX: null,
 
-  /** @private The anchor position of the last touch gesture. */
+  /**  The anchor position of the last touch gesture. @private */
   _sc_gestureAnchorY: null,
 
-  /** @private The anchor distance from center of the last touch gesture. */
+  /**  The anchor distance from center of the last touch gesture. @private */
   _sc_gestureAnchorD: null,
 
-  /** @private The original scale before a touch gesture. */
+  /**  The original scale before a touch gesture. @private */
   _sc_gestureAnchorScale: null,
 
-  /** @private The timer used to fade out this scroller. */
+  /**  The timer used to fade out this scroller. @private */
   _sc_horizontalFadeOutTimer: null,
 
-  /** @private The actual horizontal scroll offset. */
+  /**  The actual horizontal scroll offset. @private */
   _sc_horizontalScrollOffset: null,
 
-  /** @private The percentage offset scrolled horizontally. Used to maintain the horizontal position when the content size changes. */
+  /**  The percentage offset scrolled horizontally. Used to maintain the horizontal position when the content size changes. @private */
   _sc_horizontalPct: null,
 
-  /** @private Flag is true when scaling. Used in capturing touches. */
+  /**  Flag is true when scaling. Used in capturing touches. @private */
   _sc_isTouchScaling: false,
 
-  /** @private Flag is true when scrolling horizontally. Used in capturing touches. */
+  /**  Flag is true when scrolling horizontally. Used in capturing touches. @private */
   _sc_isTouchScrollingH: false,
 
-  /** @private Flag is true when scrolling is locked to horizontal. */
+  /**  Flag is true when scrolling is locked to horizontal. @private */
   _sc_isTouchScrollingHOnly: false,
 
-  /** @private Flag is true when scrolling vertically. Used in capturing touches. */
+  /**  Flag is true when scrolling vertically. Used in capturing touches. @private */
   _sc_isTouchScrollingV: false,
 
-  /** @private Flag is true when scrolling is locked to vertical. */
+  /**  Flag is true when scrolling is locked to vertical. @private */
   _sc_isTouchScrollingVOnly: false,
 
-  /** @private The minimum delay before applying a fade transition. */
+  /**  The minimum delay before applying a fade transition. @private */
   _sc_minimumFadeOutDelay: function () {
     // The fade out delay is never less than 100ms (so that the current run loop can complete) and is never less than the fade in duration (so that it can fade fully in).
     return Math.max(Math.max(this.get('fadeOutDelay') || 0, 0.1), this.get('fadeInDuration') || 0) * 1000;
   }.property('fadeOutDelay').cacheable(),
 
-  /** @private The amount of slip while over dragging (drag past bounds). 1.0 or 100% would slip completely, and 0.0 or 0% would not slip at all.  */
+  /**  The amount of slip while over dragging (drag past bounds). 1.0 or 100% would slip completely, and 0.0 or 0% would not slip at all.  @private */
   _sc_overDragSlip: 0.5,
 
-  /** @private Timer used to pass a touch through to its content if we don't start scrolling in that time. */
+  /**  Timer used to pass a touch through to its content if we don't start scrolling in that time. @private */
   _sc_passTouchToContentTimer: null,
 
-  /** @private The actual scale. */
+  /**  The actual scale. @private */
   _sc_scale: 1,
 
-  /** @private Flag used to indicate when we should resize the content width manually. */
+  /**  Flag used to indicate when we should resize the content width manually. @private */
   // _sc_shouldResizeContentWidth: false,
 
-  /** @private Flag used to indicate when we should resize the content height manually. */
+  /**  Flag used to indicate when we should resize the content height manually. @private */
   // _sc_shouldResizeContentHeight: false,
 
-  /** @private The offset center x of a multi-touch gesture. */
+  /**  The offset center x of a multi-touch gesture. @private */
   _sc_touchCenterX: null,
 
-  /** @private The offset center y of a multi-touch gesture. */
+  /**  The offset center y of a multi-touch gesture. @private */
   _sc_touchCenterY: null,
 
-  /** @private The timer used to fade out this scroller. */
+  /**  The timer used to fade out this scroller. @private */
   _sc_verticalFadeOutTimer: null,
 
-  /** @private The actual vertical scroll offset. */
+  /**  The actual vertical scroll offset. @private */
   _sc_verticalScrollOffset: null,
 
-  /** @private The percentage offset scrolled vertically. Used to maintain the vertical position when the content size changes. */
+  /**  The percentage offset scrolled vertically. Used to maintain the vertical position when the content size changes. @private */
   _sc_verticalPct: null,
 
   /** @see SC.View.prototype.acceptsMultitouch
@@ -214,13 +214,13 @@ SC.ScrollView = SC.View.extend({
   */
   acceptsMultitouch: true,
 
-  /** @private Animation curves. Kept private b/c it will likely become a computed property. */
+  /**  Animation curves. Kept private b/c it will likely become a computed property. @private */
   animationCurveDecelerate: SC.easingCurve(0.35,0.34,0.84,1), // 'cubic-bezier(.35,.34,.84,1)',  // http://cubic-bezier.com
 
-  /** @private Animation curves. Kept private b/c it will likely become a computed property. */
+  /**  Animation curves. Kept private b/c it will likely become a computed property. @private */
   animationCurveReverse: SC.easingCurve(0.45,-0.47,0.73,1.3), // 'cubic-bezier(0.45,-0.47,0.73,1.3)',
 
-  /** @private Animation curves. Kept private b/c it will likely become a computed property. */
+  /**  Animation curves. Kept private b/c it will likely become a computed property. @private */
   animationCurveSnap: SC.easingCurve(0.28,0.36,0.52,1), // 'cubic-bezier(.28,.36,.52,1)',
 
   /**
@@ -309,7 +309,7 @@ SC.ScrollView = SC.View.extend({
   */
   decelerationRate: SC.SCROLL.DRAG_SCROLL_DECELERATION,
 
-  /** @private
+  /** 
     Whether to delay touches from passing through to the content. By default, if the touch moves enough to
     trigger a scroll within 150ms, this view will retain control of the touch, and content views will not
     have a chance to handle it. This is generally the behavior you want.
@@ -320,13 +320,14 @@ SC.ScrollView = SC.View.extend({
 
     @type Boolean
     @default true
+    @private
   */
   delaysContentTouches: true,
 
   /**
     Determines how long (in seconds) scrollbars wait before fading out.
 
-    @property Number
+    @member Number
     @default 0.4
    */
   fadeOutDelay: 0.4,
@@ -365,7 +366,7 @@ SC.ScrollView = SC.View.extend({
     Determines whether the horizontal scroller should fade out while in overlay mode. Has no effect
     if `horizontalOverlay` is set to false.
 
-    @property Boolean
+    @member Boolean
     @default true
    */
   horizontalFade: true,
@@ -688,7 +689,7 @@ SC.ScrollView = SC.View.extend({
   */
   scrollLockGestureThreshold: SC.SCROLL.SCROLL_LOCK_GESTURE_THRESHOLD,
 
-  /** @private
+  /** 
     Once a vertical or horizontal scroll has been triggered, this determines how far (in pixels) the gesture
     must move on the other axis to trigger a two-axis scroll. If your scroll view's content is omnidirectional
     (e.g. a map) you should set this value to 0.
@@ -698,6 +699,7 @@ SC.ScrollView = SC.View.extend({
 
     @type Number
     @default SC.SCROLL.TOUCH.DEFAULT_SECONDARY_SCROLL_THRESHOLD
+    @private
   */
   // scrollSecondaryGestureThreshold: SC.SCROLL.TOUCH.DEFAULT_SECONDARY_SCROLL_THRESHOLD,
 
@@ -717,7 +719,7 @@ SC.ScrollView = SC.View.extend({
     Determines whether the vertical scroller should fade out while in overlay mode. Has no effect if
     `verticalOverlay` is set to false.
 
-    @property Boolean
+    @member Boolean
     @default true
    */
   verticalFade: true,
@@ -837,7 +839,7 @@ SC.ScrollView = SC.View.extend({
   // Methods
   //
 
-  /** @private Aligns the content horizontally. */
+  /**  Aligns the content horizontally. @private */
   _sc_alignedHorizontalOffset: function (horizontalAlign, containerWidth, contentWidth) {
     switch (horizontalAlign) {
     case SC.ALIGN_RIGHT:
@@ -849,7 +851,7 @@ SC.ScrollView = SC.View.extend({
     }
   },
 
-  /** @private Aligns the content vertically. */
+  /**  Aligns the content vertically. @private */
   _sc_alignedVerticalOffset: function (verticalAlign, containerHeight, contentHeight) {
     switch (verticalAlign) {
     case SC.ALIGN_BOTTOM:
@@ -861,7 +863,7 @@ SC.ScrollView = SC.View.extend({
     }
   },
 
-  /** @private Manually animates the content view. */
+  /**  Manually animates the content view. @private */
   _sc_animateContentView: function (contentAdjustMap) {
     var easingCurve = this._sc_animationTiming,
       totalDuration = this._sc_animationDuration * 1000,
@@ -935,7 +937,7 @@ SC.ScrollView = SC.View.extend({
 
   },
 
-  /** @private Reposition our content view if necessary according to aligment. */
+  /**  Reposition our content view if necessary according to aligment. @private */
   _sc_containerViewFrameDidChange: function () {
     // Run the content view size change code (updates min & max offsets, sets content alignment if necessary, shows scrollers if necessary)
     var containerFrame = this.getPath('containerView.frame'),
@@ -971,7 +973,7 @@ SC.ScrollView = SC.View.extend({
 
   },
 
-  /** @private Whenever the contentView of the container changes, set up new observers and clean up old observers. */
+  /**  Whenever the contentView of the container changes, set up new observers and clean up old observers. @private */
   _sc_contentViewDidChange: function () {
     var newView = this.get('contentView'), // Our content view.
       containerView = this.get('containerView'),
@@ -1036,12 +1038,12 @@ SC.ScrollView = SC.View.extend({
     this._sc_contentView = newView;
   },
 
-  /** @private */
+  /**  @private */
   // _sc_contentViewLayerDidChange: function () {
   //   ???
   // },
 
-  /** @private Check frame changes for size changes. */
+  /**  Check frame changes for size changes. @private */
   _sc_contentViewFrameDidChange: function () {
     var lastHeight = this._sc_contentHeight,
         lastScale = this._sc_contentScale,
@@ -1076,7 +1078,7 @@ SC.ScrollView = SC.View.extend({
     }
   },
 
-  /** @private When the content view's size changes, we need to update our scroll offset properties. */
+  /**  When the content view's size changes, we need to update our scroll offset properties. @private */
   _sc_contentViewSizeDidChange: function (lastMinimumHorizontalScrollOffset, lastMaximumHorizontalScrollOffset, lastMinimumVerticalScrollOffset, lastMaximumVerticalScrollOffset) {
     var maximumHorizontalScrollOffset = this.get('maximumHorizontalScrollOffset'),
       maximumVerticalScrollOffset = this.get('maximumVerticalScrollOffset'),
@@ -1216,7 +1218,7 @@ SC.ScrollView = SC.View.extend({
     this._sc_updateScrollers();
   },
 
-  /** @private Fade in the horizontal scroller. Each scroller fades in/out independently. */
+  /**  Fade in the horizontal scroller. Each scroller fades in/out independently. @private */
   _sc_fadeInHorizontalScroller: function () {
     var canScrollHorizontal = this.get('canScrollHorizontal'),
       horizontalScroller = this.get('horizontalScrollerView'),
@@ -1238,7 +1240,7 @@ SC.ScrollView = SC.View.extend({
     }
   },
 
-  /** @private Fade in the vertical scroller. Each scroller fades in/out independently. */
+  /**  Fade in the vertical scroller. Each scroller fades in/out independently. @private */
   _sc_fadeInVerticalScroller: function () {
     var canScrollVertical = this.get('canScrollVertical'),
       verticalScroller = this.get('verticalScrollerView'),
@@ -1261,7 +1263,7 @@ SC.ScrollView = SC.View.extend({
     }
   },
 
-  /** @private Fade out the horizontal scroller. */
+  /**  Fade out the horizontal scroller. @private */
   _sc_fadeOutHorizontalScroller: function () {
     var horizontalScroller = this.get('horizontalScrollerView');
 
@@ -1273,7 +1275,7 @@ SC.ScrollView = SC.View.extend({
     this._sc_horizontalFadeOutTimer = null;
   },
 
-  /** @private Fade out the vertical scroller. */
+  /**  Fade out the vertical scroller. @private */
   _sc_fadeOutVerticalScroller: function () {
     var verticalScroller = this.get('verticalScrollerView');
 
@@ -1285,7 +1287,7 @@ SC.ScrollView = SC.View.extend({
     this._sc_verticalFadeOutTimer = null;
   },
 
-  /** @private Adjust the content alignment horizontally on change. */
+  /**  Adjust the content alignment horizontally on change. @private */
   _sc_horizontalAlignDidChange: function () {
     var maximumHorizontalScrollOffset = this.get('maximumHorizontalScrollOffset');
 
@@ -1299,9 +1301,10 @@ SC.ScrollView = SC.View.extend({
     }
   },
 
-  /** @private
+  /** 
     Calculates the maximum offset given content and container sizes, and the
     alignment.
+    @private
   */
   _sc_maximumScrollOffset: function (contentSize, containerSize, align, canScroll) {
     // If we can't scroll, we pretend our content size is no larger than the container.
@@ -1326,9 +1329,10 @@ SC.ScrollView = SC.View.extend({
     }
   },
 
-  /** @private
+  /** 
     Calculates the minimum offset given content and container sizes, and the
     alignment.
+    @private
   */
   _sc_minimumScrollOffset: function (contentSize, containerSize, align, canScroll) {
     // If we can't scroll, we pretend our content size is no larger than the container.
@@ -1352,7 +1356,7 @@ SC.ScrollView = SC.View.extend({
     }
   },
 
-  /** @private Registers/deregisters view with SC.Drag for autoscrolling. */
+  /**  Registers/deregisters view with SC.Drag for autoscrolling. @private */
   _sc_registerAutoscroll: function () {
     if (this.get('isVisibleInWindow') && this.get('isEnabledInPane')) {
       SC.Drag.addScrollableView(this);
@@ -1361,7 +1365,7 @@ SC.ScrollView = SC.View.extend({
     }
   },
 
-  /** @private Reposition the content view to match the current scroll offsets and scale. */
+  /**  Reposition the content view to match the current scroll offsets and scale. @private */
   _sc_repositionContentView: function () {
     var contentView = this.get('contentView');
 
@@ -1370,7 +1374,7 @@ SC.ScrollView = SC.View.extend({
     }
   },
 
-  /** @private Reposition the content view to match the current scroll offsets and scale. */
+  /**  Reposition the content view to match the current scroll offsets and scale. @private */
   _sc_repositionContentViewUnfiltered: function () {
     var containerView = this.get('containerView'),
         contentView = this.get('contentView'),
@@ -1458,12 +1462,12 @@ SC.ScrollView = SC.View.extend({
     }
   },
 
-  /** @private Re-position the scrollers and content depending on the need to scroll or not. */
+  /**  Re-position the scrollers and content depending on the need to scroll or not. @private */
   _sc_repositionScrollers: function () {
     this.invokeOnce(this._sc_repositionScrollersUnfiltered);
   },
 
-  /** @private Re-position the scrollers and content depending on the need to scroll or not. */
+  /**  Re-position the scrollers and content depending on the need to scroll or not. @private */
   _sc_repositionScrollersUnfiltered: function () {
     var hasHorizontalScroller = this.get('hasHorizontalScroller'),
       hasVerticalScroller = this.get('hasVerticalScroller'),
@@ -1554,7 +1558,7 @@ SC.ScrollView = SC.View.extend({
     containerView.adjust(containerLayoutMap);
   },
 
-  /** @private Clean up observers on the content view. */
+  /**  Clean up observers on the content view. @private */
   _sc_removeContentViewObservers: function () {
     var oldView = this._sc_contentView,
       frameChangeFunc = this._sc_contentViewFrameDidChange;
@@ -1569,7 +1573,7 @@ SC.ScrollView = SC.View.extend({
     }
   },
 
-  /** @private Whenever the scale changes, update the scrollers and adjust the location of the content view. */
+  /**  Whenever the scale changes, update the scrollers and adjust the location of the content view. @private */
   _sc_scaleDidChange: function () {
     var contentView = this.get('contentView'),
       scale = this.get('scale');
@@ -1593,19 +1597,19 @@ SC.ScrollView = SC.View.extend({
     }
   },
 
-  /** @private Whenever the scroll offsets change, update the scrollers and adjust the location of the content view. */
+  /**  Whenever the scroll offsets change, update the scrollers and adjust the location of the content view. @private */
   _sc_scrollOffsetHorizontalDidChange: function () {
     this._sc_repositionContentView();
     this.invokeLast(this._sc_fadeInHorizontalScroller);
   },
 
-  /** @private Whenever the scroll offsets change, update the scrollers and adjust the location of the content view. */
+  /**  Whenever the scroll offsets change, update the scrollers and adjust the location of the content view. @private */
   _sc_scrollOffsetVerticalDidChange: function () {
     this._sc_repositionContentView();
     this.invokeLast(this._sc_fadeInVerticalScroller);
   },
 
-  /** @private Update the scrollers. */
+  /**  Update the scrollers. @private */
   _sc_updateScrollers: function () {
     var horizontalScrollerView = this.get('horizontalScrollerView'),
       verticalScrollerView = this.get('verticalScrollerView'),
@@ -1650,7 +1654,7 @@ SC.ScrollView = SC.View.extend({
     }
   },
 
-  /** @private Adjust the content alignment vertically on change. */
+  /**  Adjust the content alignment vertically on change. @private */
   _sc_verticalAlignDidChange: function () {
     var maximumVerticalScrollOffset = this.get('maximumVerticalScrollOffset');
 
@@ -1664,7 +1668,7 @@ SC.ScrollView = SC.View.extend({
     }
   },
 
-  /** @private Instantiate the container view and the scrollers as needed. */
+  /**  Instantiate the container view and the scrollers as needed. @private */
   createChildViews: function () {
     var childViews = [];
 
@@ -1745,7 +1749,7 @@ SC.ScrollView = SC.View.extend({
     this.childViews = childViews;
   },
 
-  /** @private */
+  /**  @private */
   destroy: function() {
     // Clean up.
     this._sc_removeContentViewObservers();
@@ -1757,7 +1761,7 @@ SC.ScrollView = SC.View.extend({
     sc_super();
   },
 
-  /** @private SC.View */
+  /**  SC.View @private */
   didCreateLayer: function () {
     // Observe the scroll offsets for changes and initialize once.
     this.addObserver('horizontalScrollOffset', this, this._sc_scrollOffsetHorizontalDidChange);
@@ -2058,7 +2062,7 @@ SC.ScrollView = SC.View.extend({
     return this.scrollToRect(viewFrame);
   },
 
-  /** @private SC.View */
+  /**  SC.View @private */
   willDestroyLayer: function () {
     // Clean up.
     this.removeObserver('horizontalScrollOffset', this, this._sc_scrollOffsetHorizontalDidChange);
@@ -2081,9 +2085,10 @@ SC.ScrollView = SC.View.extend({
   // Interaction
   //
 
-  /** @private
+  /** 
     This method gives our descendent views a chance to capture the touch via captureTouch, and subsequently to handle the
     touch, via touchStart. If no view elects to do so, control is returned to the scroll view for standard scrolling.
+    @private
   */
   _sc_beginTouchesInContent: function (touch) {
     // Clean up.
@@ -2096,7 +2101,7 @@ SC.ScrollView = SC.View.extend({
     }
   },
 
-  /** @private */
+  /**  @private */
   _sc_touchEnded: function (touch, wasCancelled) {
     // When the last touch ends, we stop touch scrolling.
     var hasTouch = this.get('hasTouch');
@@ -2328,7 +2333,7 @@ SC.ScrollView = SC.View.extend({
     return true;
   },
 
-  /** @private @see SC.RootResponder.prototype.captureTouch */
+  /**  @see SC.RootResponder.prototype.captureTouch @private */
   captureTouch: function (touch) {
     // Capture the touch and begin determination of actual scroll or not.
     if (this.get('delaysContentTouches')) {
@@ -2343,7 +2348,7 @@ SC.ScrollView = SC.View.extend({
     }
   },
 
-  /** @private */
+  /**  @private */
   mouseWheel: function (evt) {
     var handled = false,
       contentView = this.get('contentView');
@@ -2384,7 +2389,7 @@ SC.ScrollView = SC.View.extend({
     return handled;
   },
 
-  /** @private */
+  /**  @private */
   touchesDragged: function (evt, touchesForView) {
     var avgTouch = evt.averagedTouchesForView(this),
         canScale = this.get('canScale'),
@@ -2535,24 +2540,26 @@ SC.ScrollView = SC.View.extend({
     // Note: If the content view has already accepted the initial touch, it will be sent a touchCancelled event.
   },
 
-  /** @private
+  /** 
     If we're in hand-holding mode and our content claims the touch, we will receive a touchCancelled
     event at its completion. We still need to do most of our touch-ending wrap up, for example to finish
     bouncing back from a previous gesture.
+    @private
   */
   touchCancelled: function (touch) {
     return this._sc_touchEnded(touch, true);
   },
 
-  /** @private
+  /** 
     If we are the touch's responder at its completion, we'll get a touchEnd event. If this is the
     gesture's last touch, we wrap up in spectacular fashion.
+    @private
   */
   touchEnd: function (touch) {
     return this._sc_touchEnded(touch, false);
   },
 
-  // /** @private */
+  // /**  @private */
   touchStart: function (touch) {
     var handled = false,
       contentView = this.get('contentView');
@@ -2613,10 +2620,10 @@ SC.ScrollView = SC.View.extend({
 SC.ScrollView.mixin(
 /** @scope SC.ScrollView */ {
 
-  /** @private Shared object used to avoid continually initializing/destroying objects. */
+  /**  Shared object used to avoid continually initializing/destroying objects. @private */
   _SC_CONTAINER_LAYOUT_MAP: null,
 
-  /** @private Shared object used to avoid continually initializing/destroying objects. */
+  /**  Shared object used to avoid continually initializing/destroying objects. @private */
   _SC_CONTENT_ADJUST_MAP: null
 
 });

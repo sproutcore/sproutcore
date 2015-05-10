@@ -298,7 +298,7 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
   /**
     The original request for copied requests.
 
-    @property SC.Request
+    @member SC.Request
     @default null
   */
   source: null,
@@ -415,10 +415,10 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
   // HELPER METHODS
   //
 
-  /** @private */
+  /**  @private */
   concatenatedProperties: 'COPY_KEYS',
 
-  /** @private */
+  /**  @private */
   COPY_KEYS: ['attachIdentifyingHeaders', 'allowCredentials', 'isAsynchronous', 'isJSON', 'isXML', 'address', 'type', 'timeout', 'body', 'responseClass', 'willSend', 'didSend', 'willReceive', 'didReceive'],
 
   /**
@@ -459,7 +459,7 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
     pair or a hash of key/value pairs. If you pass only a header name, this
     will return the current value of the header.
 
-    @param {String|Hash} key
+    @param {(String|Hash)} key
     @param {String} value
     @returns {SC.Request|Object} receiver
   */
@@ -589,7 +589,7 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
     mode then you can pass any object that can be converted to JSON as the
     body. Otherwise you should pass a string body.
 
-    @param {String|Object} [body]
+    @param {(String|Object)} [body]
     @returns {SC.Response} New response object
   */
   send: function(body) {
@@ -680,9 +680,9 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
     your callback handles the notification and to prevent further handling, it
     should return YES.
 
-    @param [statusOrEvent] {Number|String} A Number status code or String Event name.
+    @param [statusOrEvent] {(Number|String)} A Number status code or String Event name.
     @param target {Object} The target object for the callback action.
-    @param action {String|Function} The method name or function to call on the target.
+    @param action {(String|Function)} The method name or function to call on the target.
     @returns {SC.Request} The SC.Request object.
   */
   notify: function(statusOrEvent, target, action) {

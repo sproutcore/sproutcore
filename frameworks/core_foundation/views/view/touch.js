@@ -30,8 +30,9 @@ SC.View.reopen(
   */
   touchBoundary: { left: 25, right: 25, top: 25, bottom: 25 },
 
-  /** @private
+  /** 
     A computed property based on frame.
+    @private
   */
   _touchBoundaryFrame: function () {
     var boundary = this.get("touchBoundary"),

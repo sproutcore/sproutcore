@@ -41,7 +41,7 @@ SC.Page.prototype.designController = function() {
   return this._designController ;
 }.property().cacheable();
 
-/** @private implement support for encoders */
+/**  implement support for encoders @private */
 SC.Page.prototype.encodeDesign = function(c) {
   // step through and find all views.  encode them.
   for(var key in this) {

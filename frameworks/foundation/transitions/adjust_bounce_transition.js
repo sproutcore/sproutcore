@@ -23,7 +23,7 @@ SC.mixin(SC.View,
   */
   BOUNCE_ADJUST: {
 
-    /** @private */
+    /**  @private */
     run: function (view, options, finalLayout) {
       var bounces = options.bounces || 2,
         bounciness = options.bounciness || 0.25,

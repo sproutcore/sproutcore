@@ -37,19 +37,21 @@ SC.PopupButtonView = SC.ButtonView.extend({
 
     @type Boolean
     @default NO
-    @property
+    @member
   */
   shouldLoadInBackground: NO,
 
   /**
-   * @private
+   * 
    * If YES, the menu has been instantiated; if NO, the 'menu' property
    * still has a class instead of an instance.
+    @private
   */
   _menuIsLoaded: NO,
 
-  /** @private
+  /** 
     isActive is NO, but when the menu is instantiated, it is bound to the menu's isVisibleInWindow property.
+    @private
   */
   isActive: NO,
 
@@ -57,6 +59,7 @@ SC.PopupButtonView = SC.ButtonView.extend({
   
 
   /**
+    
     @private
   */
   init: function() {
@@ -75,6 +78,7 @@ SC.PopupButtonView = SC.ButtonView.extend({
     is not already instantiated and if shouldLoadInBackground is YES.
     
     @method
+    
     @private
    */
   scheduleMenuSetupIfNeeded: function() {
@@ -85,7 +89,7 @@ SC.PopupButtonView = SC.ButtonView.extend({
     }
   },
 
-  /** @private if the menu changes, it must be set up again. */
+  /**  if the menu changes, it must be set up again. @private */
   menuDidChange: function() {
     // first, check if we are the ones who changed the property
     // by setting it to the instantiated menu
@@ -161,16 +165,17 @@ SC.PopupButtonView = SC.ButtonView.extend({
   /**
     The prefer matrix (positioning information) to use to pop up the new menu.
     
-    @property
+    @member
     @type Array
     @default [0, 0, 0]
   */
   menuPreferMatrix: [0, 0, 0],
 
   /**
-    @private
+    
     The actual showing of the menu is delayed because bindings may need
     to flush.
+    @private
   */
   _showMenu: function() {
     var menu = this.get('menu');
@@ -178,7 +183,7 @@ SC.PopupButtonView = SC.ButtonView.extend({
     menu.popup(this, this.get('menuPreferMatrix'));
   },
 
-  /** @private */
+  /**  @private */
   mouseDown: function(evt) {
     // If disabled, handle mouse down but ignore it.
     if (!this.get('isEnabled')) return YES ;
@@ -210,7 +215,7 @@ SC.PopupButtonView = SC.ButtonView.extend({
     return YES;
   },
 
-  /** @private */
+  /**  @private */
   mouseUp: function(evt) {
     var menu = this.get('menu'), targetMenuItem, success;
 
@@ -247,10 +252,11 @@ SC.PopupButtonView = SC.ButtonView.extend({
   },
 
   /**
-    @private
+    
     
     Shows the menu when the user presses Enter. Otherwise, hands it off to button
     to decide what to do.
+    @private
   */
   keyDown: function(event) {
     if (event.which == 13) {
@@ -261,12 +267,12 @@ SC.PopupButtonView = SC.ButtonView.extend({
     return sc_super();
   },
 
-  /** @private */
+  /**  @private */
   touchStart: function(evt) {
     return this.mouseDown(evt);
   },
 
-  /** @private */
+  /**  @private */
   touchEnd: function(evt) {
     return this.mouseUp(evt);
   }
@@ -284,7 +290,7 @@ SC.PopupButtonView.InstantiateMenuTask = SC.Task.extend(
   /**
     The popupButton whose menu should be instantiated.
     
-    @property
+    @member
     @type {SC.PopupButtonView}
     @default null
   */

@@ -5,8 +5,9 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/** @private Kept private until fully fleshed out.
+/**  Kept private until fully fleshed out.
   A cubic bezier equation. Used by the SC.easingCurve function.
+  @private
  */
 SC.CubicBezierEquation = function (C1, C2, C3, C4) {
 
@@ -26,9 +27,10 @@ SC.CubicBezierEquation = function (C1, C2, C3, C4) {
 
 };
 
-/** @private Kept private until fully fleshed out (name change?).
+/**  Kept private until fully fleshed out (name change?).
   A specialized bezier curve with fixed start at 0,0 and fixed end at 1,1.
 
+  @private
   */
 SC.easingCurve = function (C2x, C2y, C3x, C3y) {
 

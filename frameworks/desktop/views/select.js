@@ -49,7 +49,7 @@ SC.SelectView = SC.ButtonView.extend(
   */
   items: [],
 
-  /** @private */
+  /**  @private */
   itemsBindingDefault: SC.Binding.multiple(),
 
   /**
@@ -139,9 +139,10 @@ SC.SelectView = SC.ButtonView.extend(
   /**
     List of actual menu items, handed off to the menu view.
 
-    @property
-    @private
+    @member
+    
     @type:{Array}
+    @private
   */
   _itemList: [],
 
@@ -149,9 +150,10 @@ SC.SelectView = SC.ButtonView.extend(
     Property to set the index of the selected menu item. This in turn
     is used to calculate the preferMatrix.
 
-    @property
+    @member
     @type Number
     @default null
+    
     @private
   */
   _itemIdx: null,
@@ -185,7 +187,7 @@ SC.SelectView = SC.ButtonView.extend(
   /**
     Set this to non-null to place an empty option at the top of the menu.
 
-    @property
+    @member
     @type String
     @default null
   */
@@ -195,6 +197,7 @@ SC.SelectView = SC.ButtonView.extend(
     Default value of the select button.
      This will be the first item from the menu item list.
 
+    
     @private
   */
   _defaultVal: null,
@@ -203,6 +206,7 @@ SC.SelectView = SC.ButtonView.extend(
     Default title of the select button.
      This will be the title corresponding to the _defaultVal.
 
+    
     @private
   */
   _defaultTitle: null,
@@ -211,6 +215,7 @@ SC.SelectView = SC.ButtonView.extend(
     Default icon of the select button.
      This will be the icon corresponding to the _defaultVal.
 
+    
     @private
   */
   _defaultIcon: null,
@@ -254,6 +259,7 @@ SC.SelectView = SC.ButtonView.extend(
   /**
     Binds the button's selection state to the menu's visibility.
 
+    
     @private
   */
   isActiveBinding: '*menu.isVisibleInWindow',
@@ -271,6 +277,7 @@ SC.SelectView = SC.ButtonView.extend(
     lastMenuWidth is the width of the last menu which was created from
     the items of this select button.
 
+    
     @private
   */
   lastMenuWidth: null,
@@ -334,8 +341,9 @@ SC.SelectView = SC.ButtonView.extend(
   supportFocusRing: YES,
 
   /**
-  * @private
+  * 
   * Overwritten to calculate the content corresponding to items configured at creation
+    @private
   */
   init: function() {
     sc_super();
@@ -346,6 +354,7 @@ SC.SelectView = SC.ButtonView.extend(
   /**
     Left Alignment based on the size of the button
 
+    
     @private
   */
   leftAlign: function () {
@@ -388,6 +397,7 @@ SC.SelectView = SC.ButtonView.extend(
   /**
     Observer called whenever the items collection or an element of this collection changes
 
+    
     @private
   */
   itemsDidChange: function() {
@@ -572,8 +582,9 @@ SC.SelectView = SC.ButtonView.extend(
   }.observes( '*items.[]' ),
 
   /**
-    @private
+    
     @param {DOMMouseEvent} evt mouseup event that triggered the action
+    @private
   */
   _action: function (evt) {
     var buttonLabel, menuWidth, scrollWidth, lastMenuWidth, offsetWidth,
@@ -671,7 +682,7 @@ SC.SelectView = SC.ButtonView.extend(
       /**
         The menu items are set from the itemList property of SelectView
 
-        @property
+        @member
       */
       items: itemList,
 
@@ -686,7 +697,7 @@ SC.SelectView = SC.ButtonView.extend(
       /**
         This property enables all the items and makes them selectable.
 
-        @property
+        @member
       */
       isEnabled: YES,
 
@@ -715,8 +726,9 @@ SC.SelectView = SC.ButtonView.extend(
     return YES;
   },
 
-  /** @private
+  /** 
      Action method for the select button menu items
+    @private
   */
   displaySelectedItem: function (menuView) {
     var currentItem = menuView.get("selectedItem");
@@ -724,7 +736,7 @@ SC.SelectView = SC.ButtonView.extend(
     this.set("value", currentItem.get("value"));
   },
 
-  /** @private Each time the value changes, update each item's checkbox property and update our display properties. */
+  /**  Each time the value changes, update each item's checkbox property and update our display properties. @private */
   valueDidChange: function () {
     var itemList = this._itemList,
       showCheckbox = this.get('showCheckbox'),
@@ -747,10 +759,11 @@ SC.SelectView = SC.ButtonView.extend(
 
   }.observes('value'),
 
-  /** @private
+  /** 
      Set the "top" attribute in the prefer matrix property which will
      position menu such that the selected item in the menu will be
      place aligned to the item on the button when menu is opened.
+    @private
   */
   changeSelectPreferMatrix: function () {
     var controlSizeTuning = 0, customMenuItemHeight = 0;
@@ -795,8 +808,9 @@ SC.SelectView = SC.ButtonView.extend(
   },
 
   /**
-    @private
+    
     Holding down the button should display the menu pane.
+    @private
   */
   mouseDown: function (evt) {
     // Fast path, reject secondary clicks.
@@ -810,7 +824,7 @@ SC.SelectView = SC.ButtonView.extend(
     return YES;
   },
 
-  /** @private
+  /** 
     Because we responded YES to the mouseDown event, we have responsibility
     for handling the corresponding mouseUp event.
 
@@ -825,6 +839,7 @@ SC.SelectView = SC.ButtonView.extend(
 
     @param {SC.Event} evt
     @returns {Boolean}
+    @private
   */
   mouseUp: function (evt) {
     var menu = this.get('menu'), targetMenuItem;
@@ -854,16 +869,18 @@ SC.SelectView = SC.ButtonView.extend(
     return YES;
   },
 
-  /** @private
+  /** 
     Override mouseExited to not remove the active state on mouseexit.
+    @private
   */
   mouseExited: function () {
     return YES;
   },
 
   /**
-    @private
+    
     Handle Key event - Down arrow key
+    @private
   */
   keyDown: function (event) {
     if ( this.interpretKeyEvents(event) ) {
@@ -875,15 +892,16 @@ SC.SelectView = SC.ButtonView.extend(
   },
 
   /**
-    @private
+    
     Pressing the Up or Down arrow key should display the menu pane. Pressing escape should
     resign first responder.
+    @private
   */
   moveUp: function(evt) {
     this._action();
     return YES;
   },
-  /** @private */
+  /**  @private */
   moveDown: function(evt) {
     this._action();
     return YES;
@@ -892,9 +910,10 @@ SC.SelectView = SC.ButtonView.extend(
     this.resignFirstResponder();
   },
 
-  /** @private
+  /** 
     Override the button isSelectedDidChange function in order to not perform any action
     on selecting the select_button
+    @private
   */
   _button_isSelectedDidChange: function () {
 

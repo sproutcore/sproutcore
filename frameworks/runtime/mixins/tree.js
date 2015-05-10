@@ -5,10 +5,10 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/** @private */
+/**  @private */
 SC.Tree = /** @scope SC.Tree.prototype */ {
 
-  /** @private Call the method recursively on all child views. */
+  /**  Call the method recursively on all child views. @private */
   invoke: function (methodName, isTopDown, context) {
     var childView,
       childViews = this.get('childViews'),

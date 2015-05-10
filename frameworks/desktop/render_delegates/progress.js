@@ -123,10 +123,10 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
     }
   },
 
-  /** @private Queue of objects to animate: { id, offset, element } */
+  /**  Queue of objects to animate: { id, offset, element } @private */
   _queue: {},
 
-  /** @private Catch double calls to _animate */
+  /**  Catch double calls to _animate @private */
   _animating: false,
 
   /**

@@ -44,7 +44,7 @@ SC.bodyOverflowArbitrator = SC.Object.create(/**@scope SC.bodyOverflowArbitrator
     // console.log("Body Overflow Arbitrator now decides "+(overflow===undefined?"that overflow is unimportant.":"to use overflow:"+(overflow===true?'visible':"hidden")+";")+" Requests are:",this._requests);
   },
 
-  /** @private */
+  /**  @private */
   _makeRequest: function (from, value) {
     // Fast path!
     if (!from) return;
@@ -58,10 +58,10 @@ SC.bodyOverflowArbitrator = SC.Object.create(/**@scope SC.bodyOverflowArbitrator
     }
   },
 
-  /** @private */
+  /**  @private */
   _requests: {},
 
-  /** @private */
+  /**  @private */
   _decideOverflow: function () {
     var haveHidden, haveVisible, haveImportantHidden, haveImportantVisible,
         reqs = this._requests, req;

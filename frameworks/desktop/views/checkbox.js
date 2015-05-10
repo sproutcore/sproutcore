@@ -68,13 +68,13 @@ SC.CheckboxView = SC.ButtonView.extend(
     return NO;
   }.property('isEnabledInPane'),
 
-  /** @private */
+  /**  @private */
   _toggleValue: function(){
     var isOn = this.get('value') === this.get('toggleOnValue');
     this.set('value', isOn ? this.get('toggleOffValue') : this.get('toggleOnValue'));
   },
 
-  /** @private */
+  /**  @private */
   mouseDown: function(evt) {
     // Fast path, reject secondary clicks.
     if (evt.which && evt.which !== 1) return false;
@@ -86,7 +86,7 @@ SC.CheckboxView = SC.ButtonView.extend(
     return YES;
   },
 
-  /** @private */
+  /**  @private */
   mouseUp: function(evt) {
     if(!this.get('isEnabledInPane')) return YES;
 
@@ -105,7 +105,7 @@ SC.CheckboxView = SC.ButtonView.extend(
 
   },
 
-  /** @private */
+  /**  @private */
   keyDown: function(evt) {
     // handle tab key
     if(!this.get('isEnabledInPane')) return YES;
@@ -136,12 +136,12 @@ SC.CheckboxView = SC.ButtonView.extend(
 
 
 
-  /** @private */
+  /**  @private */
   touchStart: function(evt) {
     return this.mouseDown(evt);
   },
 
-  /** @private */
+  /**  @private */
   touchEnd: function(evt) {
     return this.mouseUp(evt);
   }

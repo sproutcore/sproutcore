@@ -53,9 +53,10 @@ sc_require('render_delegates/render_delegate');
 SC.BaseTheme.canvasImageRenderDelegate = SC.RenderDelegate.create({
   className: 'canvasImage',
 
-  /** @private
+  /** 
     We don't have an element yet, so we do the minimal necessary setup
     here.
+    @private
   */
   render: function (dataSource, context) {
     var width = dataSource.get('width') || 0,

@@ -88,7 +88,7 @@ SC.mixin( /** @scope SC */ {
     For a useful discussion on the concepts of offsets and coordinates, see:
     http://www.quirksmode.org/mobile/viewports.html.
 
-    @param {DOMElement|jQuery|String} elem the element to find the offset of.
+    @param {(DOMElement|jQuery|String)} elem the element to find the offset of.
       This is passed to `jQuery()`, so any value supported by `jQuery()` will work.
     @param {String} relativeToFlag flag to determine which relative element to determine offset by.
       One of either: 'document', 'viewport' or 'parent' (default: 'document').

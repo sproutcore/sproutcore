@@ -49,12 +49,13 @@ SC.BEST_FIT = "best-fit";
 SC.BEST_FIT_DOWN_ONLY = "best-fit-down";
 
 /**
-  @namespace
+  
 
   InnerFrame provides the innerFrameForSize function, which will return a frame for the given size adjusted
   to fit within the given outer size, according to the align and scale properties.
 
   View's that render images will find this mixin particularly useful for fitting their images.
+  @namespace
  */
 SC.InnerFrame = {
 

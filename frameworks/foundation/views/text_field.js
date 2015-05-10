@@ -616,19 +616,20 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     this._renderField(context, firstTime, v, leftAdjustment, rightAdjustment);
   },
 
-  /** @private
+  /** 
     If isTextArea is changed (this might happen in inlineeditor constantly)
     force the field render to render like the firsttime to avoid writing extra
     code. This can be useful also
+    @private
    */
   _forceRenderFirstTime: false,
 
-  /** @private */
+  /**  @private */
   _renderFieldLikeFirstTime: function () {
     this.set('_forceRenderFirstTime', true);
   }.observes('isTextArea'),
 
-  /** @private */
+  /**  @private */
   _renderField: function (context, firstTime, value, leftAdjustment, rightAdjustment) {
     // TODO:  The cleanest thing might be to create a sub- rendering context
     //        here, but currently SC.RenderContext will render sibling
@@ -870,8 +871,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     this._fixupTextLayout();
   },
 
-  /** @private
+  /** 
     Apply proper text layout to hint and input.
+    @private
    */
   _fixupTextLayout: function () {
     var height = this.get('frame').height;
@@ -888,11 +890,12 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     }
   },
 
-  /** @private
+  /** 
     Adds all the textarea events. This functions is called by didCreateLayer
     at different moments depending if it is a textarea or not. Appending
     events to text areas is not reliable unless the element is already added
     to the DOM.
+    @private
    */
   _addTextAreaEvents: function () {
     var input = this.$input();
@@ -922,8 +925,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     SC.Event.remove(input, 'input', this, this._textField_inputDidChange);
   },
 
-  /** @private
+  /** 
      This function is called by the event when the textfield gets focus
+    @private
   */
   _textField_fieldDidFocus: function (evt) {
     SC.run(function () {
@@ -932,8 +936,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     }, this);
   },
 
-  /** @private
+  /** 
     This function is called by the event when the textfield blurs
+    @private
    */
   _textField_fieldDidBlur: function (evt) {
     SC.run(function () {
@@ -981,7 +986,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     }
   },
 
-  /** @private */
+  /**  @private */
   _field_fieldValueDidChange: function (evt) {
     if (this.get('focused')) {
       SC.run(function () {
@@ -992,12 +997,13 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     this.updateHintOnFocus();
   },
 
-  /** @private
+  /** 
     Context-menu paste does not trigger fieldValueDidChange normally. To do so, we'll capture the
     input event and avoid duplicating the "fieldValueDidChange" call if it was already issued elsewhere.
 
     I welcome someone else to find a better solution to this problem. However, please make sure that it
     works with pasting via shortcut, context menu and the application menu on *All Browsers*.
+    @private
    */
   _textField_inputDidChange: function () {
     var timerNotPending = SC.empty(this._fieldValueDidChangeTimer) || !this._fieldValueDidChangeTimer.get('isValid');
@@ -1006,8 +1012,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     }
   },
 
-  /** @private
+  /** 
     Make sure to update visibility of hint if it changes
+    @private
    */
   updateHintOnFocus: function () {
     // Fast path. If we aren't using the hind overlay, do nothing.
@@ -1022,18 +1029,20 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     }
   }.observes('value'),
 
-  /** @private
+  /** 
     Move magic number out so it can be over-written later in inline editor
+    @private
    */
   _topOffsetForFirefoxCursorFix: 3,
 
-  /** @private
+  /** 
     In Firefox, as of 3.6 -- including 3.0 and 3.5 -- for input fields only
     (that is, not textarea elements), if the cursor is at the end of the
     field, the "down" key will not result in a "keypress" event for the
     document (only for the input element), although it will be bubbled up in
     other contexts.  Since SproutCore's event dispatching requires the
     document to see the event, we'll manually forward the event along.
+    @private
    */
   _firefox_dispatch_keypress: function (evt) {
     var selection = this.get('selection'),
@@ -1049,7 +1058,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     }
   },
 
-  /** @private */
+  /**  @private */
   _textField_selectionDidChange: function () {
     this.notifyPropertyChange('selection');
   },
@@ -1060,9 +1069,10 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   // When we become first responder, make sure the field gets focus and
   // the hint value is hidden if needed.
 
-  /** @private
+  /** 
     When we become first responder, focus the text field if needed and
     hide the hint text.
+    @private
    */
   didBecomeKeyResponderFrom: function (keyView) {
     if (this.get('isVisibleInWindow')) {
@@ -1077,9 +1087,10 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     }
   },
 
-  /** @private
+  /** 
     In IE, you can't modify functions on DOM elements so we need to wrap the
     call to select() like this.
+    @private
    */
   _selectRootElement: function () {
     var inputElem = this.$input()[0],
@@ -1099,9 +1110,10 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     else this._textField_selectionDidChange();
   },
 
-  /** @private
+  /** 
     When we lose first responder, blur the text field if needed and show
     the hint text if needed.
+    @private
    */
   didLoseKeyResponderTo: function (keyView) {
     var el = this.$input()[0];
@@ -1109,8 +1121,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     this.invokeLater("scrollToOriginIfNeeded", 100);
   },
 
-  /** @private
+  /** 
     Scrolls to origin if necessary (if the pane's current firstResponder is not a text field).
+    @private
    */
   scrollToOriginIfNeeded: function () {
     var pane = this.get("pane");
@@ -1122,12 +1135,12 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     }
   },
 
-  /** @private */
+  /**  @private */
   keyDown: function (evt) {
     return this.interpretKeyEvents(evt) || false;
   },
 
-  /** @private */
+  /**  @private */
   insertText: function (chr, evt) {
     var which = evt.which,
         keyCode = evt.keyCode,
@@ -1162,7 +1175,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     return true;
   },
 
-  /** @private */
+  /**  @private */
   insertTab: function (evt) {
     // Don't handle if default tabbing hasn't been enabled.
     if (!this.get('defaultTabbingEnabled')) {
@@ -1177,7 +1190,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     return true; // handled
   },
 
-  /** @private */
+  /**  @private */
   insertBacktab: function (evt) {
     // Don't handle if default tabbing hasn't been enabled.
     if (!this.get('defaultTabbingEnabled')) {
@@ -1193,11 +1206,12 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   },
 
   /**
-    @private
+    
 
     Invoked when the user presses return.  If this is a multi-line field,
     then allow the newline to proceed.  Otherwise, try to commit the
     edit.
+    @private
   */
   insertNewline: function (evt) {
     if (this.get('isTextArea') || evt.isIMEInput) {
@@ -1207,37 +1221,37 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     return false;
   },
 
-  /** @private */
+  /**  @private */
   deleteForward: function (evt) {
     evt.allowDefault();
     return true;
   },
 
-  /** @private */
+  /**  @private */
   deleteBackward: function (evt) {
     evt.allowDefault();
     return true;
   },
 
-  /** @private */
+  /**  @private */
   moveLeft: function (evt) {
     evt.allowDefault();
     return true;
   },
 
-  /** @private */
+  /**  @private */
   moveRight: function (evt) {
     evt.allowDefault();
     return true;
   },
 
-  /** @private */
+  /**  @private */
   selectAll: function (evt) {
     evt.allowDefault();
     return true;
   },
 
-  /** @private */
+  /**  @private */
   moveUp: function (evt) {
     if (this.get('isTextArea')) {
       evt.allowDefault();
@@ -1246,7 +1260,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     return false;
   },
 
-  /** @private */
+  /**  @private */
   moveDown: function (evt) {
     if (this.get('isTextArea')) {
       evt.allowDefault();
@@ -1324,9 +1338,10 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     return true;
   },
 
-  /** @private
+  /** 
     Overridden from SC.FieldView. Provides correct tag name based on the
     `isTextArea` property.
+    @private
    */
   _inputElementTagName: function () {
     if (this.get('isTextArea')) {
@@ -1336,9 +1351,10 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     }
   },
 
-  /** @private
+  /** 
     This observer makes sure to hide the hint when a value is entered, or
     show it if it becomes empty.
+    @private
    */
   _valueObserver: function () {
     var val = this.get('value'), max;

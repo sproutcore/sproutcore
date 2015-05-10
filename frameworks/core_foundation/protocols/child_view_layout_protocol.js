@@ -4,7 +4,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/** @namespace
+/** 
   The `SC.ChildViewLayoutProtocol` protocol defines the properties and methods that you may
   implement in your custom child view layout plugins. The only required method for a plugin to
   implement is `layoutChildViews`.
@@ -12,6 +12,7 @@
   *Note: Do not mix `SC.ChildViewLayoutProtocol` into your classes. As a protocol, it exists only
   for reference sake. You only need define any of the properties or methods listed below in order to
   use this protocol.*
+  @namespace
 */
 SC.ChildViewLayoutProtocol = {
 

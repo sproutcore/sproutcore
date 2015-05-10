@@ -219,7 +219,7 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
   */
   localize: NO,
 
-  /** @private */
+  /**  @private */
   localizeBindingDefault: SC.Binding.bool(),
 
   /**
@@ -371,19 +371,19 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
   // to enable automatic resizing of the button.
   //
 
-  /** @private */
+  /**  @private */
   supportsAutoResize: YES,
 
   /*
     TODO get this from the render delegate so other elements may be used.
   */
-  /** @private */
+  /**  @private */
   autoResizeLayer: function() {
     var ret = this.invokeRenderDelegateMethod('getRenderedAutoResizeLayer', this.$());
     return ret || this.get('layer');
   }.property('layer').cacheable(),
 
-  /** @private */
+  /**  @private */
   autoResizeText: function() {
     return this.get('displayTitle');
   }.property('displayTitle').cacheable(),
@@ -430,11 +430,12 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
     return YES;
   },
 
-  /** @private
+  /** 
     Called by triggerActionAfterDelay; this method actually
     performs the action and restores the button's state.
 
     @param {Event} evt
+    @private
   */
   triggerAction: function(evt) {
     this._action(evt, YES);
@@ -454,7 +455,7 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
   // INTERNAL SUPPORT
   //
 
-  /** @private - save keyEquivalent for later use */
+  /**  - save keyEquivalent for later use @private */
   init: function() {
     sc_super();
 
@@ -584,8 +585,9 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
     return state ;
   },
 
-  /** @private
+  /** 
     Whenever the button value changes, update the selected state to match.
+    @private
   */
   _button_valueDidChange: function() {
     var value = this.get('value'),
@@ -596,10 +598,11 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
     this.displayDidChange();
   }.observes('value'),
 
-  /** @private
+  /** 
     Whenever the selected state is changed, make sure the button value is
     also updated.  Note that this may be called because the value has just
     changed.  In that case this should do nothing.
+    @private
   */
   _button_isSelectedDidChange: function() {
     var newState = this.get('isSelected'),
@@ -615,7 +618,7 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
   }.observes('isSelected'),
 
 
-  /** @private
+  /** 
     Used to store the keyboard equivalent.
 
     Setting the isDefault property to YES, for example, will cause the
@@ -623,13 +626,15 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
     the `keyEquivalent` property if isDefault is set back to NO.
 
     @type String
+    @private
   */
   _defaultKeyEquivalent: null,
 
-  /** @private
+  /** 
 
     Whenever the isDefault or isCancel property changes, re-render and change
     the keyEquivalent property so that we respond to the return or escape key.
+    @private
   */
   _isDefaultOrCancelDidChange: function() {
     var isDefault = !!this.get('isDefault'),
@@ -648,8 +653,9 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
     this.displayDidChange();
   }.observes('isDefault', 'isCancel'),
 
-  /** @private
+  /** 
     On mouse down, set active only if enabled.
+    @private
   */
   mouseDown: function(evt) {
     // Fast path, reject secondary clicks.
@@ -671,8 +677,9 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
     return YES;
   },
 
-  /** @private
+  /** 
     Remove the active class on mouseExited if mouse is down.
+    @private
   */
   mouseExited: function(evt) {
     if (this._isMouseDown) {
@@ -681,8 +688,9 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
     return YES;
   },
 
-  /** @private
+  /** 
     If mouse was down and we renter the button area, set the active state again.
+    @private
   */
   mouseEntered: function(evt) {
     if (this._isMouseDown) {
@@ -691,8 +699,9 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
     return YES;
   },
 
-  /** @private
+  /** 
     ON mouse up, trigger the action only if we are enabled and the mouse was released inside of the view.
+    @private
   */
   mouseUp: function(evt) {
     if (this._isMouseDown) this.set('isActive', NO); // track independently in case isEnabledInPane has changed
@@ -706,7 +715,7 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
     return YES ;
   },
 
-  /** @private */
+  /**  @private */
   touchStart: function(touch){
     var buttonBehavior = this.get('buttonBehavior');
 
@@ -726,7 +735,7 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
     return YES;
   },
 
-  /** @private */
+  /**  @private */
   touchesDragged: function(evt, touches) {
     if (!this.touchIsInBoundary(evt)) {
       if (!this._touch_exited) this.set('isActive', NO);
@@ -740,7 +749,7 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
     return YES;
   },
 
-  /** @private */
+  /**  @private */
   touchEnd: function(touch){
     this._touch_exited = NO;
     this.set('isActive', NO); // track independently in case isEnabledInPane has changed
@@ -755,7 +764,7 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
     return YES ;
   },
 
-  /** @private */
+  /**  @private */
   keyDown: function(evt) {
     // handle tab key
      if(!this.get('isEnabledInPane')) return YES;
@@ -776,13 +785,14 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
     return NO;
   },
 
-  /** @private
+  /** 
     Perform an action based on the behavior of the button.
 
      - toggle behavior: switch to on/off state
      - on behavior: turn on.
      - off behavior: turn off.
      - otherwise: invoke target/action
+    @private
   */
   _action: function(evt, skipHoldRepeat) {
     switch(this.get('buttonBehavior')) {
@@ -818,7 +828,7 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
     }
   },
 
-  /** @private */
+  /**  @private */
   _runAction: function(evt) {
     var action = this.get('action');
 
@@ -834,7 +844,7 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
     }
   },
 
-  /** @private */
+  /**  @private */
   _runHoldAction: function(evt, skipRepeat) {
     if (this.get('isActive')) {
       this._runAction();
@@ -849,7 +859,7 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
   },
 
 
-  /** @private */
+  /**  @private */
   didBecomeKeyResponderFrom: function(keyView) {
     // focus the text field.
     if (!this._isFocused) {
@@ -861,12 +871,12 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
     }
   },
 
-  /** @private */
+  /**  @private */
   willLoseKeyResponderTo: function(responder) {
     if (this._isFocused) this._isFocused = NO ;
   },
 
-  /** @private */
+  /**  @private */
   didAppendToDocument: function() {
     if(SC.browser.isIE &&
         SC.browser.compare(SC.browser.version, '7') === 0 &&

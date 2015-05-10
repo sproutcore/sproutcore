@@ -29,10 +29,11 @@ SC._ChainObserver = function (property, root) {
   this.root = root || this;
 };
 
-/** @private
+/** 
   This is the primary entry point.  Configures the chain.
 
   @param {String} path The property path for the chain.  Ex. 'propA.propB.propC.@each.propD'
+  @private
   */
 SC._ChainObserver.createChain = function (rootObject, path, target, method, context) {
   // First we create the chain.

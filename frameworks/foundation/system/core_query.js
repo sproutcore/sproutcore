@@ -15,7 +15,7 @@
 
     This is far more efficient than using addClass/removeClass.
 
-    @param {String|Hash} className class name or hash of classNames + bools
+    @param {(String|Hash)} className class name or hash of classNames + bools
     @param {Boolean} shouldAdd for class name if a string was passed
     @returns {SC.CoreQuery} receiver
   */
@@ -47,7 +47,7 @@
     return this ;
   },
 
-  /** @private used by setClass */
+  /**  used by setClass @private */
   _fixupClass: function(classNames, name, shouldAdd) {
     var indexOf = classNames.indexOf(name);
     // if should add, add class...

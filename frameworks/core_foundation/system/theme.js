@@ -59,10 +59,11 @@ SC.Theme = {
   classNames: [],
 
   /**
-    @private
+    
     A helper to extend class names with another set of classnames. The
     other set of class names can be a hash, an array, a Set, or a space-
     delimited string.
+    @private
   */
   _extend_class_names: function(classNames) {
     // class names may be a CoreSet, array, string, or hash
@@ -103,10 +104,11 @@ SC.Theme = {
   },
 
   /**
-    @private
+    
     Helper method that extends this theme with some extra properties.
 
     Used during Theme.create();
+    @private
    */
   _extend_self: function(ext) {
     if (ext.classNames) this._extend_class_names(ext.classNames);

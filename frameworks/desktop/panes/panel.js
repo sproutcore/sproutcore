@@ -122,7 +122,7 @@ SC.PanelPane = SC.Pane.extend(
     if (newContent) this.appendChild(newContent);
   },
 
-  /** @private */
+  /**  @private */
   createChildViews: function() {
     // if contentView is defined, then create the content
     var view = this.contentView ;
@@ -167,7 +167,7 @@ SC.PanelPane = SC.Pane.extend(
     return pane ;
   },
 
-  /** @private - whenever showing on screen, deal with modal pane as well */
+  /**  - whenever showing on screen, deal with modal pane as well @private */
   appendTo: function(elem) {
     var pane ;
     if (!this.get('isVisibleInWindow') && this.get('isModal') && (pane = this._modalPane())) {
@@ -177,7 +177,7 @@ SC.PanelPane = SC.Pane.extend(
     return sc_super();
   },
 
-  /** @private - when removing from screen, deal with modal pane as well. */
+  /**  - when removing from screen, deal with modal pane as well. @private */
   remove: function() {
     var pane, ret = sc_super();
 
@@ -197,7 +197,7 @@ SC.PanelPane = SC.Pane.extend(
     sc_super();
   },
 
-  /** @private - if isModal state changes, update pane state if needed. */
+  /**  - if isModal state changes, update pane state if needed. @private */
   _isModalDidChange: function() {
     var modalPane,
         isModal = this.get('isModal');

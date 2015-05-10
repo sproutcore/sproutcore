@@ -6,7 +6,7 @@
 // ==========================================================================
 
 /**
-  @namespace
+  
 
   A tree item is a model object that acts as a node in a tree-like data
   structure such as a hierarchy of folders or outline of items.  This mixin
@@ -31,6 +31,7 @@
   null or an empty index set.
 
   @since SproutCore 1.0
+  @namespace
 */
 SC.TreeItemContent = {
 

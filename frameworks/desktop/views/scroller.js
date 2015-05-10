@@ -37,26 +37,29 @@
 SC.ScrollerView = SC.View.extend(
 /** @scope SC.ScrollerView.prototype */ {
 
-  /** @private
+  /** 
     @type Array
     @default ['sc-scroller-view']
     @see SC.View#classNames
+    @private
   */
   classNames: ['sc-scroller-view'],
 
-  /** @private
+  /** 
     @type Array
     @default ['thumbPosition', 'thumbLength', 'controlsHidden']
     @see SC.View#displayProperties
+    @private
   */
   displayProperties: ['thumbPosition', 'thumbLength', 'controlsHidden'],
 
-  /** @private
+  /** 
     The WAI-ARIA role for scroller view.
 
     @type String
     @default 'scrollbar'
     @readOnly
+    @private
   */
   ariaRole: 'scrollbar',
 
@@ -154,7 +157,7 @@ SC.ScrollerView = SC.View.extend(
     return this.get('proportion') < 1;
   }.property('proportion').cacheable(),
 
-  /** @private */
+  /**  @private */
   _scsv_isEnabled: undefined,
 
   /**
@@ -243,7 +246,7 @@ SC.ScrollerView = SC.View.extend(
   //
 
 
-  /** @private
+  /** 
     Generates the HTML that gets displayed to the user.
 
     The first time render is called, the HTML will be output to the DOM.
@@ -251,6 +254,7 @@ SC.ScrollerView = SC.View.extend(
 
     @param {SC.RenderContext} context the render context
     @param {Boolean} firstTime YES if this is creating a layer
+    
     @private
   */
   render: function (context, firstTime) {
@@ -341,18 +345,20 @@ SC.ScrollerView = SC.View.extend(
   // THUMB MANAGEMENT
   //
 
-  /** @private
+  /** 
     Adjusts the thumb (for backwards-compatibility calls adjustThumbPosition+adjustThumbSize by default)
+    @private
   */
   adjustThumb: function (thumb, position, length) {
     this.adjustThumbPosition(thumb, position);
     this.adjustThumbSize(thumb, length);
   },
 
-  /** @private
+  /** 
     Updates the position of the thumb DOM element.
 
     @param {Number} position the position of the thumb in pixels
+    @private
   */
   adjustThumbPosition: function (thumb, thumbPosition) {
     var transformAttribute = SC.browser.experimentalCSSNameFor('transform'),
@@ -440,7 +446,7 @@ SC.ScrollerView = SC.View.extend(
     this._thumbPosition = thumbPosition;
   },
 
-  /** @private */
+  /**  @private */
   adjustThumbSize: function (thumb, size) {
     // Don't touch the DOM if the size hasn't changed
     if (this._thumbSize === size) return;
@@ -461,14 +467,15 @@ SC.ScrollerView = SC.View.extend(
   // SCROLLER DIMENSION COMPUTED PROPERTIES
   //
 
-  /** @private
+  /** 
     Returns the total length of the track in which the thumb sits.
 
     The length of the track is the height or width of the scroller, less the
     cap length and the button length. This property is used to calculate the
     position of the thumb relative to the view.
 
-    @property
+    @member
+    @private
   */
   trackLength: function () {
     var scrollerLength = this.get('scrollerLength');
@@ -483,12 +490,13 @@ SC.ScrollerView = SC.View.extend(
     return scrollerLength;
   }.property('scrollerLength').cacheable(),
 
-  /** @private
+  /** 
     Returns the height of the view if this is a vertical scroller or the width
     of the view if this is a horizontal scroller. This is used when scrolling
     up and down by page, as well as in various layout calculations.
 
     @type Number
+    @private
   */
   scrollerLength: function () {
     switch (this.get('layoutDirection')) {
@@ -501,11 +509,12 @@ SC.ScrollerView = SC.View.extend(
     return 0;
   }.property('frame').cacheable(),
 
-  /** @private
+  /** 
     The total length of the thumb. The size of the thumb is the
     length of the track times the content proportion.
 
-    @property
+    @member
+    @private
   */
   thumbLength: function () {
     var value = this.get('value'),
@@ -528,11 +537,12 @@ SC.ScrollerView = SC.View.extend(
     return Math.max(length, this.get('minimumThumbLength'));
   }.property('value', 'minimum', 'maximum', 'trackLength', 'proportion').cacheable(),
 
-  /** @private
+  /** 
     The position of the thumb in the track.
 
     @type Number
     @isReadOnly
+    @private
   */
   thumbPosition: function () {
     var displayValue = this.get('displayValue'),
@@ -548,12 +558,13 @@ SC.ScrollerView = SC.View.extend(
     return Math.floor(isNaN(position) ? 0 : position);
   }.property('displayValue', 'maximum', 'trackLength', 'thumbLength').cacheable(),
 
-  /** @private
+  /** 
     YES if the maximum value exceeds the frame size of the scroller.  This
     will hide the thumb and buttons.
 
     @type Boolean
     @isReadOnly
+    @private
   */
   controlsHidden: function () {
     return this.get('proportion') >= 1;
@@ -583,8 +594,9 @@ SC.ScrollerView = SC.View.extend(
   // MOUSE EVENTS
   //
 
-  /** @private
+  /** 
     Returns the value for a position within the scroller's frame.
+    @private
   */
   valueForPosition: function (pos) {
     var max = this.get('maximum'),
@@ -599,7 +611,7 @@ SC.ScrollerView = SC.View.extend(
     return value;
   },
 
-  /** @private
+  /** 
     Handles mouse down events and adjusts the value property depending where
     the user clicked.
 
@@ -618,6 +630,7 @@ SC.ScrollerView = SC.View.extend(
     are repeated until they release the mouse button.
 
     @param evt {SC.Event} the mousedown event
+    @private
   */
   mouseDown: function (evt) {
     // Fast path, reject secondary clicks.
@@ -711,12 +724,13 @@ SC.ScrollerView = SC.View.extend(
     return YES;
   },
 
-  /** @private
+  /** 
     When the user releases the mouse button, remove any active
     state from the button controls, and cancel any outstanding
     timers.
 
     @param evt {SC.Event} the mousedown event
+    @private
   */
   mouseUp: function (evt) {
     var active = this._scs_buttonActive, ret = NO, timer;
@@ -742,7 +756,7 @@ SC.ScrollerView = SC.View.extend(
     return ret;
   },
 
-  /** @private
+  /** 
     If the user began the drag on the thumb, we calculate the difference
     between the mouse position at click and where it is now.  We then
     offset the thumb by that amount, within the bounds of the track.
@@ -751,6 +765,7 @@ SC.ScrollerView = SC.View.extend(
     what component they are currently over, changing the scroll direction.
 
     @param evt {SC.Event} the mousedragged event
+    @private
   */
   mouseDragged: function (evt) {
     if (!this.get('isEnabledInPane')) return NO;
@@ -840,13 +855,14 @@ SC.ScrollerView = SC.View.extend(
     return YES;
   },
 
-  /** @private
+  /** 
     Starts a timer that fires after 300ms.  This is called when the user
     clicks a button or inside the track to move a page at a time. If they
     continue holding the mouse button down, we want to repeat that action
     after a small delay.  This timer will be invalidated in mouseUp.
 
     Specify "immediate" as YES if it should not wait.
+    @private
   */
   startMouseDownTimer: function (action, immediate) {
     this._mouseDownTimerAction = action;
@@ -857,9 +873,10 @@ SC.ScrollerView = SC.View.extend(
     });
   },
 
-  /** @private
+  /** 
     Called by the mousedown timer.  This method determines the initial
     user action and repeats it until the timer is invalidated in mouseUp.
+    @private
   */
   mouseDownTimerDidFire: function () {
     var scrollerLength = this.get('scrollerLength'),
@@ -900,12 +917,13 @@ SC.ScrollerView = SC.View.extend(
     });
   },
 
-  /** @private
+  /** 
     Given a selector, finds the corresponding DOM element and adds
     the 'active' class name.  Also stores the returned element so that
     the 'active' class name can be removed during mouseup.
 
     @param {String} the selector to find
+    @private
   */
   makeButtonActive: function (selector) {
     this._scs_buttonActive = this.$(selector).addClass('active');
@@ -988,7 +1006,7 @@ SC.OverlayScrollerView = SC.ScrollerView.extend(
   */
   hasButtons: NO,
 
-  /** @private */
+  /**  @private */
   adjustThumb: function (thumb, thumbPosition, thumbLength) {
     var transformAttribute = SC.browser.experimentalCSSNameFor('transform'),
         thumbEl = thumb[0],
@@ -1123,7 +1141,7 @@ SC.OverlayScrollerView = SC.ScrollerView.extend(
     this._thumbSize = thumbLength;
   },
 
-  /** @private */
+  /**  @private */
   render: function (context, firstTime) {
     var classNames = [],
       thumbPosition, thumbLength, thumbElement;
@@ -1170,7 +1188,7 @@ SC.OverlayScrollerView = SC.ScrollerView.extend(
     }
   },
 
-  /** @private */
+  /**  @private */
   renderThumb: function (context, thumbPosition, thumbLength) {
     var transformCSS = SC.browser.experimentalCSSNameFor('transform'),
       thumbPositionStyle, thumbSizeStyle;

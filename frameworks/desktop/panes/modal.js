@@ -31,15 +31,16 @@ SC.ModalPane = SC.Pane.extend(
   */
   classNames: 'sc-modal',
 
-  /** @private */
+  /**  @private */
   _openPaneCount: 0,
 
-  /** @private
+  /** 
     Called by a pane just before it appends itself.   The modal pane can
     make itself visible first if needed.
 
     @param {SC.Pane} pane the pane
     @returns {SC.ModalPane} receiver
+    @private
   */
   paneWillAppend: function(pane) {
     var _tmpPane;
@@ -56,13 +57,14 @@ SC.ModalPane = SC.Pane.extend(
     return this ;
   },
 
-  /** @private
+  /** 
     Called by a pane just after it removes itself.  The modal pane can remove
     itself if needed.   Modal panes only remove themselves when an equal
     number of `paneWillAppend()` and `paneDidRemove()` calls are received.
 
     @param {SC.Pane} pane the pane
     @returns {SC.ModalPane} receiver
+    @private
   */
   paneDidRemove: function(pane) {
     var _tmpPane;
@@ -81,12 +83,13 @@ SC.ModalPane = SC.Pane.extend(
     }
   },
 
-  /** @private
+  /** 
     If `focusable` is NO all SC.TextFieldViews not belonging to the given
     pane will have isBrowserFocusable set to NO.  If `focusable` is YES, then
     all SC.TextFieldViews not belonging to the given pane will have
     isBrowserFocusable set to YES, unless they previously had it set explictly
     to NO.
+    @private
   */
   _hideShowTextfields: function(pane, focusable){
     var view;
@@ -114,13 +117,13 @@ SC.ModalPane = SC.Pane.extend(
     }
   },
 
-  /** @private */
+  /**  @private */
   mouseDown: function(evt) {
     var owner = this.get('owner');
     if (owner && owner.modalPaneDidClick) owner.modalPaneDidClick(evt);
   },
 
-  /** @private */
+  /**  @private */
   touchStart: function(evt) {
     this.mouseDown(evt);
   }

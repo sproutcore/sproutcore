@@ -22,19 +22,19 @@ sc_require("system/gesture");
 SC.TapGesture = SC.Gesture.extend(
 /** @scope SC.TapGesture.prototype */{
 
-  /** @private The time that the first touch started at. */
+  /**  The time that the first touch started at. @private */
   _sc_firstTouchAddedAt: null,
 
-  /** @private The time that the first touch ended at. */
+  /**  The time that the first touch ended at. @private */
   _sc_firstTouchEndedAt: null,
 
-  /** @private A flag used to track when the touch was long enough to register tapStart (and tapEnd). */
+  /**  A flag used to track when the touch was long enough to register tapStart (and tapEnd). @private */
   _sc_isTapping: false,
 
-  /** @private The number of touches in the current tap. */
+  /**  The number of touches in the current tap. @private */
   _sc_numberOfTouches: 0,
 
-  /** @private A timer started after the first touch starts. */
+  /**  A timer started after the first touch starts. @private */
   _sc_tapStartTimer: null,
 
   /**
@@ -85,12 +85,12 @@ SC.TapGesture = SC.Gesture.extend(
   */
   touchUnityDelay: 75,
 
-  /** @private Calculates the distance a touch has moved. */
+  /**  Calculates the distance a touch has moved. @private */
   _sc_calculateDragDistance: function (touch) {
     return Math.sqrt(Math.pow(touch.pageX - touch.startX, 2) + Math.pow(touch.pageY - touch.startY, 2));
   },
 
-  /** @private Cleans up the touch session. */
+  /**  Cleans up the touch session. @private */
   _sc_cleanUpTouchSession: function (wasCancelled) {
     if (this._sc_isTapping) {
       // Trigger the gesture, 'tapCancelled'.
@@ -111,7 +111,7 @@ SC.TapGesture = SC.Gesture.extend(
     this._sc_tapStartTimer = this._sc_firstTouchAddedAt = this._sc_firstTouchEndedAt = null;
   },
 
-  /** @private Triggers the tapStart event. Should *not* be reachable unless the tap is still valid. */
+  /**  Triggers the tapStart event. Should *not* be reachable unless the tap is still valid. @private */
   _sc_triggerTapStart: function () {
       // Trigger the gesture, 'tapStart'.
     this.start();

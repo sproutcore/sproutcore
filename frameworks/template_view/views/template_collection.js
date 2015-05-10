@@ -39,8 +39,9 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
   emptyView: null,
 
   /**
-    @private
+    
     When the view is destroyed, remove array observers on the content array.
+    @private
   */
   destroy: function() {
     var content = this.get('content');
@@ -168,11 +169,12 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
   }.property('itemView').cacheable(),
 
   /**
-    @private
+    
 
     When the content property of the collection changes, remove any existing
     child views and observers, then set up an observer on the new content, if
     needed.
+    @private
   */
   _sctcv_contentDidChange: function() {
 

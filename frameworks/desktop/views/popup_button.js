@@ -53,7 +53,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
   /**
     The prefer matrix to use when displaying the menu.
 
-    @property
+    @member
   */
   preferMatrix: null,
 
@@ -78,8 +78,9 @@ SC.PopupButtonView = SC.ButtonView.extend(
   // INTERNAL SUPPORT
   //
 
-  /** @private
+  /** 
     If necessary, adds the loading of the menu to the background task queue.
+    @private
   */
   init: function() {
     sc_super();
@@ -89,8 +90,9 @@ SC.PopupButtonView = SC.ButtonView.extend(
     }
   },
 
-  /** @private
+  /** 
     Sets up binding on the menu, removing any old ones if necessary.
+    @private
   */
   _setupMenu: function() {
     var menu = this.get('instantiatedMenu');
@@ -105,20 +107,23 @@ SC.PopupButtonView = SC.ButtonView.extend(
     }
   },
 
-  /** @private
+  /** 
     Setup the bindings for menu...
+    @private
   */
   _popup_menuDidChange: function() {
     this._setupMenu();
   }.observes('menu'),
 
-  /** @private
+  /** 
     isActive is NO, but when the menu is instantiated, it is bound to the menu's isVisibleInWindow property.
+    @private
   */
   isActive: NO,
 
-  /** @private
+  /** 
     Instantiates the menu if it is not already instantiated.
+    @private
   */
   _instantiateMenu: function() {
     // get menu
@@ -134,8 +139,9 @@ SC.PopupButtonView = SC.ButtonView.extend(
     this._setupMenu();
   },
 
-  /** @private
+  /** 
     The guaranteed-instantiated menu.
+    @private
   */
   instantiatedMenu: function() {
     // get the menu
@@ -154,10 +160,11 @@ SC.PopupButtonView = SC.ButtonView.extend(
     return menu;
   }.property('menu').cacheable(),
 
-  /** @private
+  /** 
     Displays the menu.
 
     @param {SC.Event} evt
+    @private
   */
   action: function(evt) {
     var menu = this.get('instantiatedMenu') ;
@@ -173,12 +180,13 @@ SC.PopupButtonView = SC.ButtonView.extend(
     return YES;
   },
 
-  /** @private
+  /** 
     On mouse down, we set the state of the button, save some state for further
     processing, then call the button's action method.
 
     @param {SC.Event} evt
     @returns {Boolean}
+    @private
   */
   mouseDown: function(evt) {
     // Fast path, reject secondary clicks.
@@ -219,7 +227,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
     return YES ;
   },
 
-  /** @private
+  /** 
     Because we responded YES to the mouseDown event, we have responsibility
     for handling the corresponding mouseUp event.
 
@@ -234,6 +242,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
 
     @param {SC.Event} evt
     @returns {Boolean}
+    @private
   */
   mouseUp: function(evt) {
     var timestamp = new Date().getTime(),
@@ -272,25 +281,27 @@ SC.PopupButtonView = SC.ButtonView.extend(
     return YES;
   },
 
-  /** @private
+  /** 
     Overrides ButtonView's mouseExited method to remove the behavior where the
     active state is removed on mouse exit. We want the button to remain active
     as long as the menu is visible.
 
     @param {SC.Event} evt
     @returns {Boolean}
+    @private
   */
   mouseExited: function(evt) {
     return YES;
   },
 
-  /** @private
+  /** 
     Overrides performKeyEquivalent method to pass any keyboard shortcuts to
     the menu.
 
     @param {String} charCode string corresponding to shortcut pressed (e.g.,
     alt_shift_z)
     @param {SC.Event} evt
+    @private
   */
   performKeyEquivalent: function(charCode, evt) {
     if (!this.get('isEnabledInPane')) return NO ;
@@ -299,12 +310,12 @@ SC.PopupButtonView = SC.ButtonView.extend(
     return (!!menu && menu.performKeyEquivalent(charCode, evt, YES)) ;
   },
 
-  /** @private */
+  /**  @private */
   touchStart: function(evt) {
     return this.mouseDown(evt);
   },
 
-  /** @private */
+  /**  @private */
   touchEnd: function(evt) {
     return this.mouseUp(evt);
   }
@@ -312,8 +323,9 @@ SC.PopupButtonView = SC.ButtonView.extend(
 });
 
 /**
-  @private
+  
   Handles lazy instantiation of popup button menu.
+  @private
 */
 SC.PopupButtonMenuLoader = SC.Task.extend({
   popupButton: null,

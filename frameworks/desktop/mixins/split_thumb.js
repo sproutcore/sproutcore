@@ -30,7 +30,7 @@ SC.MOVES_PREVIOUS_CHILD = 'moves-previous-child';
 SC.MOVES_NEXT_CHILD = 'moves-next-child';
 
 /**
-  @namespace
+  
   A SplitThumb may be placed inside any view in a SplitView, and can even
   be a direct child of the SplitView. It forwards its events to the SplitView
   to control the movement of a divider or another child of the SplitView.
@@ -46,6 +46,7 @@ SC.MOVES_NEXT_CHILD = 'moves-next-child';
   SC.MOVES_NEXT_CHILD or SC.MOVES_PREVIOUS_CHILD. If your ThumbView is inside
   the middle pane, for instance, this would tell it whether the ThumbView
   should move the divider to the left, or the divider to the right.
+  @namespace
 */
 SC.SplitThumb = {
 
@@ -58,7 +59,7 @@ SC.SplitThumb = {
    * and then either returning it or one of its immediate siblings, depending
    * on the value of the movesSibling property.
    *
-   * @property SC.View
+   * @member SC.View
   */
   movesChild: function () {
     var view = this, child, splitView = this.get('splitView'),
@@ -111,7 +112,7 @@ SC.SplitThumb = {
    * This is computed to be the first SplitView found in a search
    * up the view hierarchy. You can substitute your own SplitView
    *
-   * @property SC.SplitView
+   * @member SC.SplitView
   */
   // splitView: function () {
   //   var view = this;
@@ -158,7 +159,7 @@ SC.SplitThumb = {
     this.$().css('cursor', this.get('splitCursorStyle'));
   }.observes('splitCursorStyle'),
 
-  /** @private Include SC.NeedsSplitParent if it hasn't already been included. */
+  /**  Include SC.NeedsSplitParent if it hasn't already been included. @private */
   initMixin: function () {
     if (!this.splitView) {
       this.mixin(SC.NeedsSplitParent);
@@ -166,9 +167,10 @@ SC.SplitThumb = {
   },
 
   /**
-   * @private
+   * 
    * Renders the cursor for the view as defined by this view's splitCursor
    * property.
+    @private
   */
   renderMixin: function (context) {
     context.setStyle('cursor', this.get('splitCursorStyle'));

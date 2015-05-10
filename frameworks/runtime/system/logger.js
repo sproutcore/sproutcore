@@ -372,7 +372,7 @@ SC.Logger = SC.Object.create(
     a type in a manner more useful to you than you can achieve with
     String.fmt().
 
-    @param {String|Array|Function|Object}
+    @param {(String|Array|Function|Object)}
   */
   debugWithoutFmt: function() {
     this._handleMessage(SC.LOGGER_LEVEL_DEBUG, NO, null, arguments);
@@ -467,7 +467,7 @@ SC.Logger = SC.Object.create(
     a type in a manner more useful to you than you can achieve with
     String.fmt().
 
-    @param {String|Array|Function|Object}
+    @param {(String|Array|Function|Object)}
   */
   infoWithoutFmt: function() {
     this._handleMessage(SC.LOGGER_LEVEL_INFO, NO, null, arguments);
@@ -563,7 +563,7 @@ SC.Logger = SC.Object.create(
     a type in a manner more useful to you than you can achieve with
     String.fmt().
 
-    @param {String|Array|Function|Object}
+    @param {(String|Array|Function|Object)}
   */
   warnWithoutFmt: function() {
     this._handleMessage(SC.LOGGER_LEVEL_WARN, NO, null, arguments);
@@ -657,7 +657,7 @@ SC.Logger = SC.Object.create(
     a type in a manner more useful to you than you can achieve with
     String.fmt().
 
-    @param {String|Array|Function|Object}
+    @param {(String|Array|Function|Object)}
   */
   errorWithoutFmt: function() {
     this._handleMessage(SC.LOGGER_LEVEL_ERROR, NO, null, arguments);
@@ -878,7 +878,7 @@ SC.Logger = SC.Object.create(
     appropriate categorization for your message, choosing the appropriate
     method.
 
-    @param {String|Array|Function|Object}
+    @param {(String|Array|Function|Object)}
     @returns {Boolean} Whether or not anything was logged
   */
   log: function() {
@@ -1120,10 +1120,11 @@ SC.Logger = SC.Object.create(
   },
 
 
-  /** @private
+  /** 
     For backwards compatibility with the older 'debugEnabled' property, set
     our log output level to SC.LOGGER_LEVEL_DEBUG if 'debugEnabled' is set to
     YES.
+    @private
   */
   debugEnabledDidChange: function() {
     if (this.get('debugEnabled')) {
@@ -1133,7 +1134,7 @@ SC.Logger = SC.Object.create(
 
 
 
-  /** @private
+  /** 
     Outputs and/or records the specified message of the specified type if the
     respective current log levels allow for it.  Assuming
     'automaticallyFormat' is specified, then String.fmt() will be called
@@ -1144,6 +1145,7 @@ SC.Logger = SC.Object.create(
     @param {Boolean}              automaticallyFormat  Whether or not to treat 'message' as a format string if there are additional arguments
     @param {String}               message              Expected to a string format (for String.fmt()) if there are other arguments
     @param {String}   (optional)  originalArguments    All arguments passed into debug(), etc. (which includes 'message'; for efficiency, we don’t copy it)
+    @private
   */
   _handleMessage: function(type, automaticallyFormat, message, originalArguments) {
     // Are we configured to show this type?
@@ -1212,7 +1214,7 @@ SC.Logger = SC.Object.create(
   },
 
 
-  /** @private
+  /** 
     Outputs and/or records a group with the (optional) specified title
     assuming the respective current log levels allow for it.  This will output
     the title (if there is one) and indent all further messages (of any type)
@@ -1225,6 +1227,7 @@ SC.Logger = SC.Object.create(
     @param {String}              type                 Expected to be SC.LOGGER_LEVEL_DEBUG, etc.
     @param {String}  (optional)  title                Expected to a string format (for String.fmt()) if there are other arguments
     @param {String}  (optional)  originalArguments    All arguments passed into debug(), etc. (which includes 'title'; for efficiency, we don’t copy it)
+    @private
   */
   _handleGroup: function(type, title, originalArguments) {
     // Are we configured to show this type?
@@ -1275,12 +1278,13 @@ SC.Logger = SC.Object.create(
   },
 
 
-  /** @private
+  /** 
     Outputs and/or records a “group end” assuming the respective current log
     levels allow for it.  This will remove one level of indentation from all
     further messages (of any type).
 
     @param {String}              type                 Expected to be SC.LOGGER_LEVEL_DEBUG, etc.
+    @private
   */
   _handleGroupEnd: function(type) {
     // Are we configured to show this type?
@@ -1323,12 +1327,13 @@ SC.Logger = SC.Object.create(
   },
 
 
-  /** @private
+  /** 
     Returns whether a message of the specified type ('debug', etc.) should be
     output to the reporter based on the current value of 'logOutputLevel'.
 
     @param {Constant}  type
     @returns {Boolean}
+    @private
   */
   _shouldOutputType: function(type) {
     var logLevelMapping = this._LOG_LEVEL_MAPPING,
@@ -1339,12 +1344,13 @@ SC.Logger = SC.Object.create(
   },
 
 
-  /** @private
+  /** 
     Returns whether a message of the specified type ('debug', etc.) should be
     recorded based on the current value of 'logRecordingLevel'.
 
     @param {Constant}  type
     @returns {Boolean}
+    @private
   */
   _shouldRecordType: function(type) {
     // This is the same code as in _shouldOutputType(), but inlined to
@@ -1357,7 +1363,7 @@ SC.Logger = SC.Object.create(
   },
 
 
-  /** @private
+  /** 
     Outputs the specified message to the current reporter.  If the reporter
     does not handle the specified type of message, it will fall back to using
     log() if possible.
@@ -1367,6 +1373,7 @@ SC.Logger = SC.Object.create(
     @param {Number}                 indentation        The current indentation level
     @param {String}                 message
     @param {Arguments}  (optional)  originalArguments  If specified, the assumption is that the message was not automatically formatted
+    @private
   */
   _outputMessage: function(type, timestampStr, indentation, message, originalArguments) {
     if (!this.get('exists')) return;
@@ -1448,7 +1455,7 @@ SC.Logger = SC.Object.create(
   },
 
 
-  /** @private
+  /** 
     Outputs the specified “begin group” directive to the current reporter.  If
     the reporter does not handle the group() method, it will fall back to
     simulating using log() if possible.
@@ -1457,6 +1464,7 @@ SC.Logger = SC.Object.create(
     @param {String}                 timestampStr  An optional timestamp prefix for the line, or null for none
     @param {Number}                 indentation   The current indentation level, not including what the group will set it to
     @param {String}     (optional)  title
+    @private
   */
   _outputGroup: function(type, timestampStr, indentation, title) {
     if (!this.get('exists')) return;
@@ -1488,11 +1496,12 @@ SC.Logger = SC.Object.create(
   },
 
 
-  /** @private
+  /** 
     This method will add the specified entry to the recorded log messages
     array and also prune array as necessary according to the current values of
     'recordedLogMessagesMaximumLength' and
     'recordedLogMessagesPruningMinimumLength'.
+    @private
   */
   _addRecordedMessageEntry: function(entry) {
     var recordedMessages = this.get('recordedLogMessages'),
@@ -1518,12 +1527,13 @@ SC.Logger = SC.Object.create(
 
 
 
-  /** @private
+  /** 
     The arguments function property doesn't support Array#unshift. This helper
     copies the elements of arguments to a blank array.
 
     @param {Array} arguments The arguments property of a function
     @returns {Array} An array containing the elements of arguments parameter
+    @private
   */
   _argumentsToArray: function(args) {
     var ret = [],
@@ -1538,9 +1548,10 @@ SC.Logger = SC.Object.create(
   },
 
 
-  /** @private
+  /** 
     Formats the arguments array of a function by creating a string with
     SC.LOGGER_LOG_DELIMITER between the elements.
+    @private
   */
   _argumentsToString: function() {
     var ret       = "",
@@ -1555,12 +1566,13 @@ SC.Logger = SC.Object.create(
   },
 
 
-  /** @private
+  /** 
     Returns a string containing the appropriate indentation for the specified
     indentation level.
 
     @param {Number}  The indentation level
     @returns {String}
+    @private
   */
   _indentation: function(level) {
     if (!level  ||  level < 0) {
@@ -1579,26 +1591,28 @@ SC.Logger = SC.Object.create(
 
 
 
-  /** @private
+  /** 
     The current “for output” indentation level.  The reporter (browser
     console) is expected to keep track of this for us for output, but we need
     to do our own bookkeeping if the browser doesn’t support console.group.
     This is incremented by _debugGroup() and friends, and decremented by
     _debugGroupEnd() and friends.
+    @private
   */
   _outputIndentationLevel: 0,
 
 
-  /** @private
+  /** 
     The current “for recording” indentation level.  This can be different than
     the “for output” indentation level if the respective log levels are set
     differently.  This is incremented by _debugGroup() and friends, and
     decremented by _debugGroupEnd() and friends.
+    @private
   */
   _recordingIndentationLevel: 0,
 
 
-  /** @private
+  /** 
     A mapping of the log level constants (SC.LOGGER_LEVEL_DEBUG, etc.) to
     their priority.  This makes it easy to determine which levels are “higher”
     than the current level.
@@ -1606,11 +1620,12 @@ SC.Logger = SC.Object.create(
     Implementation note:  We’re hardcoding the values of the constants defined
     earlier here for a tiny bit of efficiency (we can create the hash all at
     once rather than having to push in keys).
+    @private
   */
   _LOG_LEVEL_MAPPING: { debug: 4, info: 3, warn: 2, error: 1, none: 0 },
 
 
-  /** @private
+  /** 
     If the current reporter does not support a particular type of log message
     (for example, some older browsers’ consoles support console.log but not
     console.debug), we’ll use the specified prefixes.
@@ -1618,6 +1633,7 @@ SC.Logger = SC.Object.create(
     Implementation note:  We’re hardcoding the values of the constants defined
     earlier here for a tiny bit of efficiency (we can create the hash all at
     once rather than having to push in keys).
+    @private
   */
   _LOG_FALLBACK_PREFIX_MAPPING: {
     debug:  SC.LOGGER_LOG_DEBUG,

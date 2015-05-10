@@ -209,7 +209,7 @@ SC.Color = SC.Object.extend(
     }
   }.property().cacheable(),
 
-  /** @private */
+  /**  @private */
   _a: 1,
 
   /**
@@ -232,7 +232,7 @@ SC.Color = SC.Object.extend(
     }
   }.property().cacheable(),
 
-  /** @private */
+  /**  @private */
   _r: 0,
 
   /**
@@ -255,7 +255,7 @@ SC.Color = SC.Object.extend(
     }
   }.property().cacheable(),
 
-  /** @private */
+  /**  @private */
   _g: 0,
 
   /**
@@ -278,7 +278,7 @@ SC.Color = SC.Object.extend(
     }
   }.property().cacheable(),
 
-  /** @private */
+  /**  @private */
   _b: 0,
 
   /**
@@ -639,7 +639,7 @@ SC.Color = SC.Object.extend(
 SC.Color.mixin(
   /** @scope SC.Color */{
 
-  /** @private Overrides create to support creation with {a, r, g, b} hash. */
+  /**  Overrides create to support creation with {a, r, g, b} hash. @private */
   create: function() {
     var vals = {},
         hasVals = NO,
@@ -862,8 +862,9 @@ SC.Color.mixin(
             clamp(hueToRgb(m1, m2, h - 1/3) * 255)];
   },
 
-  /** @private
+  /** 
     Returns the RGB value for a given hue.
+    @private
    */
   hueToRgb: function (m1, m2, h) {
   // HOW TO RETURN hue.to.rgb(m1, m2, h):
@@ -994,13 +995,14 @@ SC.Color.mixin(
     });
   },
 
-  /** @private
+  /** 
     Parses any valid CSS color into r, g, b and a values. Returns null for invalid inputs.
 
     For internal use only. External code should call `SC.Color.from` or `SC.Color#cssText`.
 
     @param {String} color The CSS color value to parse.
     @returns {Hash || null} A hash of r, g, b, and a values.
+    @private
    */
   _parse: function (color) {
     var C = SC.Color,

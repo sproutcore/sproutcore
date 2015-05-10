@@ -57,7 +57,7 @@
   since that statechart will not be able to fully optimize the event handling logic based
   on its use. Therefore the use of regular expression should be used sparingly.
 
-  @param {(String|RegExp)...} args
+  @param {(...(String|RegExp))} args
 */
 Function.prototype.handleEvents = function() {
   this.isEventHandler = YES;
@@ -113,7 +113,7 @@ Function.prototype.handleEvents = function() {
   state observe handlers. Therefore none of the state observe handlers will be
   invoked until the next time the state is entered.
 
-  @param {String...} args
+  @param {...String} args
 */
 Function.prototype.stateObserves = function() {
   this.isStateObserveHandler = YES;
