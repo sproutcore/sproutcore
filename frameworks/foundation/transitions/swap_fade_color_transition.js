@@ -7,7 +7,7 @@ sc_require('views/container');
 
 
 SC.mixin(SC.ContainerView,
-/** @scope SC.ContainerView */ {
+/** @lends SC.ContainerView */ {
 
  /** @class
     Provides fade through color transitions to SC.ContainerView.  The old

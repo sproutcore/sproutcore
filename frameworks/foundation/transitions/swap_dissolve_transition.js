@@ -7,7 +7,7 @@ sc_require('views/container');
 
 
 SC.mixin(SC.ContainerView,
-/** @scope SC.ContainerView */ {
+/** @lends SC.ContainerView */ {
 
   /** @class
     Provides dissolve transitions for SC.ContainerView.  The new content will

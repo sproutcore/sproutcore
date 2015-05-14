@@ -22,7 +22,7 @@
 */
 SC.TemplatePane = SC.Object.extend({});
 
-SC.TemplatePane.mixin( /** @scope SC.TemplatePane */ {
+SC.TemplatePane.mixin( /** @lends SC.TemplatePane */ {
 
   /**
     Creates a new pane with a single TemplateView.

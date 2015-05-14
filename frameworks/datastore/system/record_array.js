@@ -65,7 +65,7 @@ sc_require('models/record');
 */
 
 SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
-  /** @scope SC.RecordArray.prototype */ {
+  /** @lends SC.RecordArray.prototype */ {
 
   //@if(debug)
   /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */
@@ -168,7 +168,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   // ARRAY PRIMITIVES
   //
 
-  /** 
+  /**
     Returned length is a pass-through to the `storeKeys` array.
 		@member
     @private
@@ -179,7 +179,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return storeKeys ? storeKeys.get('length') : 0;
   }.property('storeKeys').cacheable(),
 
-  /** 
+  /**
     A cache of materialized records. The first time an instance of SC.Record is
     created for a store key at a given index, it will be saved to this array.
 
@@ -190,7 +190,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   */
   _scra_records: null,
 
-  /** 
+  /**
     Looks up the store key in the `storeKeys array and materializes a
     records.
 
@@ -250,7 +250,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return this;
   },
 
-  /** 
+  /**
     Replaces a range of records starting at a given index with the replacement
     records provided. The objects to be inserted must be instances of SC.Record
     and must have a store key assigned to them.
@@ -298,7 +298,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return this.indexOf(record)>=0;
   },
 
-  /** 
+  /**
     Returns the first index where the specified record is found.
 
     @param {SC.Record} record
@@ -323,7 +323,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return storeKeys ? storeKeys.indexOf(storeKey, startAt) : -1;
   },
 
-  /** 
+  /**
     Returns the last index where the specified record is found.
 
     @param {SC.Record} record
@@ -442,7 +442,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   // because eventually this particular implementation is likely to change;
   // moving some or all of this code directly into the store. -CAJ
 
-  /** 
+  /**
     Called whenever the store initiates a refresh of the query.  Sets the
     status of the record array to the appropriate status.
 
@@ -459,7 +459,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return this ;
   },
 
-  /** 
+  /**
     Called whenever the store has finished fetching a query.
 
     @param {SC.Query} query
@@ -471,7 +471,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return this ;
   },
 
-  /** 
+  /**
     Called whenever the store has cancelled a refresh.  Sets the
     status of the record array to the appropriate status.
 
@@ -488,7 +488,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return this ;
   },
 
-  /** 
+  /**
     Called whenever the store encounters an error while fetching.  Sets the
     status of the record array to the appropriate status.
 
@@ -501,7 +501,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return this ;
   },
 
-  /** 
+  /**
     Called by the store whenever it changes the state of certain store keys. If
     the receiver cares about these changes, it will mark itself as dirty and add
     the changed store keys to the _scq_changedStoreKeys index set.
@@ -750,7 +750,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return sc_super();
   },
 
-  /** 
+  /**
     Invoked whenever the `storeKeys` array changes.  Observes changes.
     @private
   */
@@ -790,7 +790,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
   }.observes('storeKeys'),
 
-  /** 
+  /**
     If anyone adds an array observer on to the record array, make sure
     we flush so that the observers don't fire the first time length is
     calculated.
@@ -801,7 +801,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return SC.Array.addArrayObservers.apply(this, arguments);
   },
 
-  /** 
+  /**
     Invoked whenever the content of the `storeKeys` array changes.  This will
     dump any cached record lookup and then notify that the enumerable content
     has changed.
@@ -821,7 +821,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
 });
 
-SC.RecordArray.mixin(/** @scope SC.RecordArray.prototype */{
+SC.RecordArray.mixin(/** @lends SC.RecordArray.prototype */{
 
   /**
     Standard error throw when you try to modify a record that is not editable

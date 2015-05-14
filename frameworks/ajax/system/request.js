@@ -186,7 +186,7 @@ sc_require('system/response');
   @since SproutCore 1.0
 */
 SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
-/** @scope SC.Request.prototype */ {
+/** @lends SC.Request.prototype */ {
 
   // ..........................................................
   // PROPERTIES
@@ -298,7 +298,7 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
   /**
     The original request for copied requests.
 
-    @member SC.Request
+    @type SC.Request
     @default null
   */
   source: null,
@@ -735,7 +735,7 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
 });
 
 SC.Request.mixin(
-/** @scope SC.Request */ {
+/** @lends SC.Request */ {
 
   /**
     Helper method for quickly setting up a GET request.
@@ -812,7 +812,7 @@ SC.Request.WARN_ON_LOADEND = YES;
   @since SproutCore 1.0
 */
 SC.Request.manager = SC.Object.create(
-/** @scope SC.Request.manager */{
+/** @lends SC.Request.manager */{
 
   /**
     Maximum number of concurrent requests allowed. 6 for all browsers.

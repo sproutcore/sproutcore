@@ -13,7 +13,7 @@ sc_require('ext/menu_item');
 */
 
 SC.AutoResizingMenuPane = SC.MenuPane.extend(
-/** @scope SC.AutoResizingMenuPane.prototype */ {
+/** @lends SC.AutoResizingMenuPane.prototype */ {
 
   /**
     If YES, the menu should automatically resize its width to fit its items.
@@ -65,7 +65,7 @@ SC.AutoResizingMenuPane = SC.MenuPane.extend(
   exampleView: SC.AutoResizingMenuItemView,
 
   /**
-    
+
     In addition to the normal init, we need to schedule an automatic resize.
     @private
   */
@@ -85,7 +85,7 @@ SC.AutoResizingMenuPane = SC.MenuPane.extend(
     @member
     @type Array
     @readOnly
-    
+
     @private
   */
   createMenuItemViews: function() {

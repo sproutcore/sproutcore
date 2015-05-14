@@ -139,7 +139,7 @@ SC.OBSERVES_HANDLER_REMOVE = 1;
 
   @since SproutCore 1.0
 */
-SC.Observable = /** @scope SC.Observable.prototype */ {
+SC.Observable = /** @lends SC.Observable.prototype */ {
 
   //@if(debug)
   /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */

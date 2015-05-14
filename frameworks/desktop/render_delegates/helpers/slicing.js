@@ -15,7 +15,7 @@ SC.NINE_SLICE = [
 ];
 
 SC.RenderDelegate.reopen({
-  /*@scope SC.RenderDelegate.prototype*/
+  /*@lends SC.RenderDelegate.prototype*/
 
   /**
     Use this to render slices that you can match in CSS. This matches with the

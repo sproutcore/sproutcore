@@ -27,7 +27,7 @@
   @author Tom Dale
 */
 SC.StaticContentView = SC.View.extend(
-/** @scope SC.StaticContentView.prototype */ {
+/** @lends SC.StaticContentView.prototype */ {
 
   /**
     @type Array
@@ -77,13 +77,13 @@ SC.StaticContentView = SC.View.extend(
   // INTERNAL SUPPORT
   //
 
-  /** 
+  /**
     Disable SproutCore management of view positioning.
     @private
   */
   useStaticLayout: YES,
 
-  /** 
+  /**
     Overrides SC.View's frame computed property, and returns a value from the
     DOM. This value is cached to improve performance.
 
@@ -117,7 +117,7 @@ SC.StaticContentView = SC.View.extend(
     }
   }.property('content').cacheable(),
 
-  /** 
+  /**
     Recalculate content frame if our parent view resizes.
     @private
   */
@@ -125,7 +125,7 @@ SC.StaticContentView = SC.View.extend(
     this.contentLayoutDidChange();
   },
 
-  /** 
+  /**
     If the layer changes, make sure we recalculate the frame.
     @private
   */
@@ -133,7 +133,7 @@ SC.StaticContentView = SC.View.extend(
     this.contentLayoutDidChange();
   },
 
-  /** 
+  /**
     Outputs the content property to the DOM.
 
     @param {SC.RenderContext} context

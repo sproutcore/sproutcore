@@ -156,7 +156,7 @@
  */
 SC.Color = SC.Object.extend(
   SC.Copyable,
-  /** @scope SC.Color.prototype */{
+  /** @lends SC.Color.prototype */{
 
   /**
     The original color string from which this object was created.
@@ -637,7 +637,7 @@ SC.Color = SC.Object.extend(
 });
 
 SC.Color.mixin(
-  /** @scope SC.Color */{
+  /** @lends SC.Color */{
 
   /**  Overrides create to support creation with {a, r, g, b} hash. @private */
   create: function() {

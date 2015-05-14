@@ -55,7 +55,7 @@ sc_require('system/many_array');
   @since SproutCore 1.0
 */
 SC.ManyAttribute = SC.RecordAttribute.extend(
-  /** @scope SC.ManyAttribute.prototype */ {
+  /** @lends SC.ManyAttribute.prototype */ {
 
   /**
     Set the foreign key on content objects that represent the inversion of

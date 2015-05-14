@@ -10,23 +10,23 @@ sc_require('system/utils/misc');
 
 /**
   Handles parsing and validating of numbers.
-  
+
   @extends SC.Validator
   @author Charles Jolley
   @version 1.0
   @class
 */
 SC.Validator.Number = SC.Validator.extend(
-/** @scope SC.Validator.Number.prototype */ {
+/** @lends SC.Validator.Number.prototype */ {
 
   /**
-    Number of decimal places to show.  
-    
+    Number of decimal places to show.
+
     If 0, then numbers will be treated as integers.  Otherwise, numbers will
     show with a fixed number of decimals.
   */
   places: 0,
-  
+
   fieldValueForObject: function(object, form, field) {
     switch(SC.typeOf(object)) {
       case SC.T_NUMBER:
@@ -69,18 +69,18 @@ SC.Validator.Number = SC.Validator.extend(
     }
     return value ;
   },
-  
-  validate: function(form, field) { 
+
+  validate: function(form, field) {
     var value = field.get('fieldValue') ;
-    return (value === '') || !(isNaN(value) || isNaN(parseFloat(value))) ; 
+    return (value === '') || !(isNaN(value) || isNaN(parseFloat(value))) ;
   },
-  
+
   validateError: function(form, field) {
     var label = field.get('errorLabel') || 'Field' ;
     return SC.$error(SC.String.loc("Invalid.Number(%@)", label), label) ;
   },
-  
-  /** 
+
+  /**
     Allow only numbers, dashes, period, and commas
   */
   validateKeyDown: function(form, field, charStr) {
@@ -97,5 +97,5 @@ SC.Validator.Number = SC.Validator.extend(
       else return text.match(/^[\-{0,1}]?[0-9,\0]*\.?[0-9\0]+/)===text;
     }
   }
-    
+
 }) ;

@@ -58,7 +58,7 @@ SC.HOLD_BEHAVIOR = 'hold';
   @since SproutCore 1.0
 */
 SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
-/** @scope SC.ButtonView.prototype */ {
+/** @lends SC.ButtonView.prototype */ {
 
   /**
     Tied to the isEnabledInPane state
@@ -430,7 +430,7 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
     return YES;
   },
 
-  /** 
+  /**
     Called by triggerActionAfterDelay; this method actually
     performs the action and restores the button's state.
 
@@ -585,7 +585,7 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
     return state ;
   },
 
-  /** 
+  /**
     Whenever the button value changes, update the selected state to match.
     @private
   */
@@ -598,7 +598,7 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
     this.displayDidChange();
   }.observes('value'),
 
-  /** 
+  /**
     Whenever the selected state is changed, make sure the button value is
     also updated.  Note that this may be called because the value has just
     changed.  In that case this should do nothing.
@@ -618,7 +618,7 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
   }.observes('isSelected'),
 
 
-  /** 
+  /**
     Used to store the keyboard equivalent.
 
     Setting the isDefault property to YES, for example, will cause the
@@ -630,7 +630,7 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
   */
   _defaultKeyEquivalent: null,
 
-  /** 
+  /**
 
     Whenever the isDefault or isCancel property changes, re-render and change
     the keyEquivalent property so that we respond to the return or escape key.
@@ -653,7 +653,7 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
     this.displayDidChange();
   }.observes('isDefault', 'isCancel'),
 
-  /** 
+  /**
     On mouse down, set active only if enabled.
     @private
   */
@@ -677,7 +677,7 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
     return YES;
   },
 
-  /** 
+  /**
     Remove the active class on mouseExited if mouse is down.
     @private
   */
@@ -688,7 +688,7 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
     return YES;
   },
 
-  /** 
+  /**
     If mouse was down and we renter the button area, set the active state again.
     @private
   */
@@ -699,7 +699,7 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
     return YES;
   },
 
-  /** 
+  /**
     ON mouse up, trigger the action only if we are enabled and the mouse was released inside of the view.
     @private
   */
@@ -785,7 +785,7 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
     return NO;
   },
 
-  /** 
+  /**
     Perform an action based on the behavior of the button.
 
      - toggle behavior: switch to on/off state

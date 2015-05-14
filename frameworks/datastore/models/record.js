@@ -104,12 +104,12 @@ sc_require('system/query');
   @since SproutCore 1.0
 */
 SC.Record = SC.Object.extend(
-/** @scope SC.Record.prototype */ {
+/** @lends SC.Record.prototype */ {
 
   //@if(debug)
   /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */
 
-  /** 
+  /**
     Creates string representation of record, with status.
 
     @returns {String}
@@ -122,7 +122,7 @@ SC.Record = SC.Object.extend(
     return "%@(%@) %@".fmt(this.constructor.toString(), SC.inspect(attrs), this.statusString());
   },
 
-  /** 
+  /**
     Creates string representation of record, with status.
 
     @returns {String}
@@ -269,7 +269,7 @@ SC.Record = SC.Object.extend(
   }.property('status').cacheable(),
 
   /**
-    
+
 
     Backing value for isEditable
     @private
@@ -477,7 +477,7 @@ SC.Record = SC.Object.extend(
   // ATTRIBUTES
   //
 
-  /** 
+  /**
     Current edit level.  Used to defer editing changes.
     @private
   */
@@ -604,7 +604,7 @@ SC.Record = SC.Object.extend(
         iter;
 
     /**
-      
+
 
       If the child is dirty, then make sure the parent gets a dirty
       status.  (If the child is created or destroyed, there's no need,
@@ -904,7 +904,7 @@ SC.Record = SC.Object.extend(
   // PRIVATE
   //
 
-  /** 
+  /**
     Sets the key equal to value.
 
     This version will first check to see if the property is an
@@ -987,7 +987,7 @@ SC.Record = SC.Object.extend(
   },
 
   /**
-    
+
 
      private method that retrieves the `recordType` from the hash that is
      provided.
@@ -1081,7 +1081,7 @@ SC.Record = SC.Object.extend(
 });
 
 // Class Methods
-SC.Record.mixin( /** @scope SC.Record */ {
+SC.Record.mixin( /** @lends SC.Record */ {
 
   /**
     Whether to ignore unknown properties when they are being set on the record
@@ -1409,7 +1409,7 @@ SC.Record.mixin( /** @scope SC.Record */ {
   isPolymorphic: NO,
 
   /**
-    
+
     The next child key to allocate.  A nextChildKey must always be greater than 0.
     @private
   */

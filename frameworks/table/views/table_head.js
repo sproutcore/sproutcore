@@ -10,7 +10,7 @@ sc_require('views/table_header');
 
 
 SC.TableHeadView = SC.View.extend({
-/** @scope SC.TableHeadView.prototype */
+/** @lends SC.TableHeadView.prototype */
 
   layout: { height: 18, left: 0, right: 0, top: 0 },
 

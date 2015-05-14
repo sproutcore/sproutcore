@@ -1,6 +1,6 @@
 sc_require('views/template');
 
-/** 
+/**
   @class
 
   SC._BindableSpan is a private view created by the Handlebars {{bind}} helpers
@@ -13,7 +13,7 @@ sc_require('views/template');
   @private
 */
 SC._BindableSpan = SC.TemplateView.extend(
-  /** @scope SC._BindableSpan.prototype */{
+  /** @lends SC._BindableSpan.prototype */{
   /**
    The type of HTML tag to use. To ensure compatibility with
    Internet Explorer 7, a <span> tag is used to ensure that inline elements are

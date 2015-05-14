@@ -8,7 +8,7 @@
 /**
   @class
 */
-SC.Function = /** @scope SC.Function.prototype */{
+SC.Function = /** @lends SC.Function.prototype */{
 
   /**
     @see Function.prototype.property

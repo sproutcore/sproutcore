@@ -168,7 +168,7 @@ sc_require('mixins/statechart_delegate');
   @author Michael Cohen
 */
 
-SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
+SC.StatechartManager = /** @lends SC.StatechartManager.prototype */{
 
   //@if(debug)
   /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */

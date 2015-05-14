@@ -19,7 +19,7 @@
 
   @since SproutCore 1.0
 */
-SC.Copyable = /** @scope SC.Copyable.prototype */{
+SC.Copyable = /** @lends SC.Copyable.prototype */{
 
   /**
     Walk like a duck.  Indicates that the object can be copied.

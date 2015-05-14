@@ -26,7 +26,7 @@ sc_require('models/record_attribute');
   @since SproutCore 1.0
 */
 SC.FetchedAttribute = SC.RecordAttribute.extend(
-  /** @scope SC.FetchedAttribute.prototype */ {
+  /** @lends SC.FetchedAttribute.prototype */ {
 
   /**
     Define the param key that will be passed to the `find` method on the

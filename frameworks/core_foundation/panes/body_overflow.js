@@ -15,7 +15,7 @@
   any other, but an important hidden-request will override a normal visible-request. A normal visible-request
   will in turn override a normal hidden-request.
 */
-SC.bodyOverflowArbitrator = SC.Object.create(/**@scope SC.bodyOverflowArbitrator.prototype */{
+SC.bodyOverflowArbitrator = SC.Object.create(/**@lends SC.bodyOverflowArbitrator.prototype */{
   /** Request that the body be given overflow:hidden;. Pass your object, then (optionally) true to confer importance. */
   requestHidden: function (from, important) { this._makeRequest(from, -1 - 9 * !!important); },
 

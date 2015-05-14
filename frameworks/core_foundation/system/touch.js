@@ -150,9 +150,9 @@ SC.Touch.prototype = {
   },
   //@endif
 
-  /**@scope SC.Touch.prototype*/
+  /**@lends SC.Touch.prototype*/
 
-  /** 
+  /**
     The responder that's responsible for the creation and management of this touch. Usually this will be
     your app's root responder. You must pass this on create, and should not change it afterwards.
 
@@ -220,7 +220,7 @@ SC.Touch.prototype = {
   */
   type: null,
 
-  /** 
+  /**
     A faked mouse event property used to prevent unexpected behavior when proxying touch events to mouse
     event handlers.
     @private
@@ -352,7 +352,7 @@ SC.Touch.prototype = {
     this.touchContext.endTouch(this);
   },
 
-  /** 
+  /**
     This property, contrary to its name, stores the last touch responder for possible use later in the touch's
     lifecycle. You will usually not use this property directly, instead calling `stackNextTouchResponder` to pass
     the touch to a different view, and `restoreLastTouchResponder` to pass it back to the previous one.
@@ -362,7 +362,7 @@ SC.Touch.prototype = {
   */
   nextTouchResponder: null,
 
-  /** 
+  /**
     An array of previous touch responders.
 
     @type {Array}
@@ -370,7 +370,7 @@ SC.Touch.prototype = {
   */
   touchResponders: null,
 
-  /** 
+  /**
     A lazily-created array of candidate touch responders. Use `stackCandidateTouchResponder` to add candidates;
     candidates are used as a fallback if the touch is out of previous touch responders.
 

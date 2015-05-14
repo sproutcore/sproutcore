@@ -77,7 +77,7 @@ SC.DATETIME_ISO8601 = '%Y-%m-%dT%H:%M:%S%Z';
   @author Martin Ottenwaelter
 */
 SC.Scanner = SC.Object.extend(
-/** @scope SC.Scanner.prototype */ {
+/** @lends SC.Scanner.prototype */ {
 
   /**
     The string to scan. You usually pass it to the create method:
@@ -208,10 +208,10 @@ SC.Scanner = SC.Object.extend(
   @since SproutCore 1.0
 */
 SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
-/** @scope SC.DateTime.prototype */ {
+/** @lends SC.DateTime.prototype */ {
 
   /**
-    
+
 
     Internal representation of a date: the number of milliseconds
     since January, 1st 1970 00:00:00.0 UTC.
@@ -452,7 +452,7 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
    }.property(),
 
   /**
-    
+
 
     Creates a string representation of the receiver.
 
@@ -516,7 +516,7 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
 });
 
 SC.DateTime.mixin(SC.Comparable,
-/** @scope SC.DateTime */ {
+/** @lends SC.DateTime */ {
 
   /**
     The default format (ISO 8601) in which DateTimes are stored in a record.
@@ -540,7 +540,7 @@ SC.DateTime.mixin(SC.Comparable,
   dayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
 
   /**
-    
+
 
     The English day names used for the 'lastMonday', 'nextTuesday', etc., getters.
 
@@ -574,7 +574,7 @@ SC.DateTime.mixin(SC.Comparable,
   AMPMNames:['AM', 'PM'],
 
   /**
-    
+
 
     The unique internal `Date` object used to make computations. Better
     performance is obtained by having only one Date object for the whole
@@ -594,7 +594,7 @@ SC.DateTime.mixin(SC.Comparable,
   _date: new Date(),
 
   /**
-    
+
 
     The offset, in minutes, between UTC and the currently manipulated
     `SC.DateTime` instance.
@@ -615,7 +615,7 @@ SC.DateTime.mixin(SC.Comparable,
   timezone: new Date().getTimezoneOffset(),
 
   /**
-    
+
 
     A cache of `SC.DateTime` instances. If you attempt to create a `SC.DateTime`
     instance that has already been created, then it will return the cached
@@ -627,7 +627,7 @@ SC.DateTime.mixin(SC.Comparable,
   _dt_cache: {},
 
   /**
-    
+
 
     The index of the latest cached value. Used with `_DT_CACHE_MAX_LENGTH` to
     limit the size of the cache.
@@ -638,7 +638,7 @@ SC.DateTime.mixin(SC.Comparable,
   _dt_cache_index: -1,
 
   /**
-    
+
 
     The maximum length of `_dt_cache`. If this limit is reached, then the cache
     is overwritten, starting with the oldest element.
@@ -649,7 +649,7 @@ SC.DateTime.mixin(SC.Comparable,
   _DT_CACHE_MAX_LENGTH: 1000,
 
   /**
-    
+
 
     Both args are optional, but will only overwrite `_date` and `_tz` if
     defined. This method does not affect the DateTime instance's actual time,
@@ -679,7 +679,7 @@ SC.DateTime.mixin(SC.Comparable,
   },
 
   /**
-    
+
 
     By this time, any time zone setting on 'hash' will be ignored.
     'timezone' will be used, or the last this._tz.
@@ -692,7 +692,7 @@ SC.DateTime.mixin(SC.Comparable,
   },
 
   /**
-    
+
     @see SC.DateTime#unknownProperty
     @private
   */
@@ -838,7 +838,7 @@ SC.DateTime.mixin(SC.Comparable,
   },
 
   /**
-    
+
 
     Sets the internal calculation state to something specified.
     @private
@@ -850,7 +850,7 @@ SC.DateTime.mixin(SC.Comparable,
   },
 
   /**
-    
+
     @see SC.DateTime#advance
     @private
   */
@@ -1013,7 +1013,7 @@ SC.DateTime.mixin(SC.Comparable,
   },
 
   /**
-    
+
 
     Calls the `create()` method with the current internal `_date` value.
 
@@ -1111,7 +1111,7 @@ SC.DateTime.mixin(SC.Comparable,
   },
 
   /**
-    
+
 
     Converts the x parameter into a string padded with 0s so that the string’s
     length is at least equal to the len parameter.
@@ -1129,7 +1129,7 @@ SC.DateTime.mixin(SC.Comparable,
   },
 
   /**
-    
+
     @see SC.DateTime#_toFormattedString
     @private
   */
@@ -1187,7 +1187,7 @@ SC.DateTime.mixin(SC.Comparable,
   },
 
   /**
-    
+
     @see SC.DateTime#toFormattedString
     @private
   */
@@ -1204,7 +1204,7 @@ SC.DateTime.mixin(SC.Comparable,
   },
 
   /**
-    
+
     @see SC.DateTime#toFormattedString
     @private
    */

@@ -21,7 +21,7 @@ SC.LOG_VIEW_STATES_STYLE = {
 
 
 SC.CoreView.mixin(
-  /** @scope SC.CoreView */ {
+  /** @lends SC.CoreView */ {
 
   // State bit masks
 
@@ -198,7 +198,7 @@ SC.CoreView.mixin(
 
 
 SC.CoreView.reopen(
-  /** @scope SC.CoreView.prototype */ {
+  /** @lends SC.CoreView.prototype */ {
 
   //@if(debug)
   /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */

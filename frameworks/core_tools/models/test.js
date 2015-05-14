@@ -12,7 +12,7 @@
   @version 0.1
 */
 CoreTools.Test = SC.Record.extend(
-/** @scope CoreTools.Test.prototype */ {
+/** @lends CoreTools.Test.prototype */ {
 
   primaryKey: "url",
 

@@ -39,9 +39,9 @@ SC.BOTTOM_LOCATION = 'bottom';
   @since SproutCore 1.0
 */
 SC.TabView = SC.View.extend(
-/** @scope SC.TabView.prototype */ {
+/** @lends SC.TabView.prototype */ {
 
-  /** 
+  /**
     @type Array
     @default ['sc-tab-view']
     @see SC.View#classNames
@@ -49,7 +49,7 @@ SC.TabView = SC.View.extend(
   */
   classNames: ['sc-tab-view'],
 
-  /** 
+  /**
     @type Array
     @default ['nowShowing']
     @see SC.View#displayProperties
@@ -199,7 +199,7 @@ SC.TabView = SC.View.extend(
     return this ;
   }.observes('items'),
 
-  /** 
+  /**
     Restore userDefault key if set.
     @private
   */
@@ -251,7 +251,7 @@ SC.TabView = SC.View.extend(
 
       controlSize: controlSize,
 
-      /** 
+      /**
         When the value changes, update the parentView's value as well.
         @private
       */

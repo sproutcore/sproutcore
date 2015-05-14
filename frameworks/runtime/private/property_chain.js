@@ -2,7 +2,7 @@ sc_require('system/object');
 
 /**
   @class
-  
+
 
   SC._PropertyChain is used as the bookkeeping system for notifying the KVO
   system of changes to computed properties that contains paths as dependent
@@ -32,7 +32,7 @@ sc_require('system/object');
 */
 
 SC._PropertyChain = SC.Object.extend(
-/** @scope SC.Object.prototype */ {
+/** @lends SC.Object.prototype */ {
   /**
     The object represented by this node in the chain.
 

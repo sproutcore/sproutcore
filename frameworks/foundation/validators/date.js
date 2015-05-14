@@ -9,20 +9,20 @@ sc_require('validators/validator') ;
 
 /**
   Handle parsing and display of dates.
-  
+
   @class
   @extends SC.Validator
   @author Charles Jolley
   @version 1.0
 */
 SC.Validator.Date = SC.Validator.extend(
-/** @scope SC.Validator.Date.prototype */ {
+/** @lends SC.Validator.Date.prototype */ {
 
   /**
     The standard format you want the validator to convert dates to.
   */
   format: '%b %d, %Y %i:%M:%S %p',
-  
+
   /**
     if we have a number, then convert to a date object.
   */
@@ -75,5 +75,5 @@ SC.Validator.Date = SC.Validator.extend(
     }
     return value ;
   }
-    
+
 }) ;

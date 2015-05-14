@@ -111,7 +111,7 @@
   @since version 1.0
 */
 SC.Timer = SC.Object.extend(
-/** @scope SC.Timer.prototype */ {
+/** @lends SC.Timer.prototype */ {
 
   /**
     The target object whose method will be invoked when the time fires.
@@ -503,7 +503,7 @@ SC.Timer = SC.Object.extend(
 
 }) ;
 
-/** @scope SC.Timer */
+/** @lends SC.Timer */
 
 /*
   Created a new timer with the passed properties and schedules it to

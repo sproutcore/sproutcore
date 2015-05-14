@@ -199,7 +199,7 @@ sc_require('models/record');
 */
 // TODO: Rename local vs. remote to avoid confusion.
 SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
-  /** @scope SC.Query.prototype */ {
+  /** @lends SC.Query.prototype */ {
 
   //@if(debug)
   /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */
@@ -290,7 +290,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     return ret.freeze() ;
   }.property('recordType', 'recordTypes').cacheable(),
 
-  /** 
+  /**
     expands a single record type into the set. called recursively
     @private
   */
@@ -495,7 +495,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     else return SC.compare(record1.get('storeKey'), record2.get('storeKey'));
   },
 
-  /** 
+  /**
       Becomes YES once the query has been successfully parsed
     @private
   */
@@ -549,7 +549,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
   // PRIVATE SUPPORT
   //
 
-  /** 
+  /**
     Properties that need to be copied when cloning the query.
     @private
   */
@@ -558,7 +558,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
   /**  @private */
   concatenatedProperties: ['copyKeys'],
 
-  /** 
+  /**
     Implement the Copyable API to clone a query object once it has been
     created.
     @private
@@ -1301,7 +1301,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
           SC.warn("Developer Warning: You have an orderBy syntax error in a Query, %@: DESC should be in the last position.".fmt(orderOp));
         }
       }
-      
+
       // check for improper separation chars
       if (orderOp.indexOf(":") > -1 || orderOp.indexOf(":") > -1) {
         SC.warn("Developer Warning: You have an orderBy syntax error in a Query, %@: Colons or semicolons should not be used as a separation character.".fmt(orderOp));
@@ -1327,7 +1327,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
 
 
 // Class Methods
-SC.Query.mixin( /** @scope SC.Query */ {
+SC.Query.mixin( /** @lends SC.Query */ {
 
   /**
     Constant used for `SC.Query#location`
@@ -1596,7 +1596,7 @@ SC.Query.mixin( /** @scope SC.Query */ {
     return this.build(SC.Query.REMOTE, recordType, properties, oldParameters);
   },
 
-  /** 
+  /**
     called by `SC.Record.extend()`. invalidates `expandedRecordTypes`
     @private
   */
@@ -1613,7 +1613,7 @@ SC.Query.mixin( /** @scope SC.Query */ {
 });
 
 
-/** 
+/**
   Hash of registered comparisons by property name.
   @private
 */

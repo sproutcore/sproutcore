@@ -16,7 +16,7 @@ sc_require('css/css_rule') ;
   @extends SC.Object
 */
 SC.CSSStyleSheet = SC.Object.extend(
-/** @scope SC.CSSStyleSheet.prototype */ {
+/** @lends SC.CSSStyleSheet.prototype */ {
 
   init: function() {
     sc_super() ;

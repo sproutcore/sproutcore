@@ -41,7 +41,7 @@
   @since SproutCore 1.5
 */
 SC.ImageButtonView = SC.ButtonView.extend(
-/** @scope SC.ImageButtonView.prototype */ {
+/** @lends SC.ImageButtonView.prototype */ {
 
   /**
     @type Array

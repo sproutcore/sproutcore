@@ -1,7 +1,7 @@
 sc_require("views/view");
 
 SC.View.reopen(
-  /** @scope SC.View.prototype */{
+  /** @lends SC.View.prototype */{
 
   /**
     Handles changes in the layer id.
@@ -185,7 +185,7 @@ SC.View.reopen(
   },
 
   /**
-    
+
     Called by child view when build out finishes. By default removes the child view.
     @private
   */

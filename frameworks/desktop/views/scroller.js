@@ -35,9 +35,9 @@
   @since SproutCore 1.0
 */
 SC.ScrollerView = SC.View.extend(
-/** @scope SC.ScrollerView.prototype */ {
+/** @lends SC.ScrollerView.prototype */ {
 
-  /** 
+  /**
     @type Array
     @default ['sc-scroller-view']
     @see SC.View#classNames
@@ -45,7 +45,7 @@ SC.ScrollerView = SC.View.extend(
   */
   classNames: ['sc-scroller-view'],
 
-  /** 
+  /**
     @type Array
     @default ['thumbPosition', 'thumbLength', 'controlsHidden']
     @see SC.View#displayProperties
@@ -53,7 +53,7 @@ SC.ScrollerView = SC.View.extend(
   */
   displayProperties: ['thumbPosition', 'thumbLength', 'controlsHidden'],
 
-  /** 
+  /**
     The WAI-ARIA role for scroller view.
 
     @type String
@@ -246,7 +246,7 @@ SC.ScrollerView = SC.View.extend(
   //
 
 
-  /** 
+  /**
     Generates the HTML that gets displayed to the user.
 
     The first time render is called, the HTML will be output to the DOM.
@@ -254,7 +254,7 @@ SC.ScrollerView = SC.View.extend(
 
     @param {SC.RenderContext} context the render context
     @param {Boolean} firstTime YES if this is creating a layer
-    
+
     @private
   */
   render: function (context, firstTime) {
@@ -345,7 +345,7 @@ SC.ScrollerView = SC.View.extend(
   // THUMB MANAGEMENT
   //
 
-  /** 
+  /**
     Adjusts the thumb (for backwards-compatibility calls adjustThumbPosition+adjustThumbSize by default)
     @private
   */
@@ -354,7 +354,7 @@ SC.ScrollerView = SC.View.extend(
     this.adjustThumbSize(thumb, length);
   },
 
-  /** 
+  /**
     Updates the position of the thumb DOM element.
 
     @param {Number} position the position of the thumb in pixels
@@ -467,7 +467,7 @@ SC.ScrollerView = SC.View.extend(
   // SCROLLER DIMENSION COMPUTED PROPERTIES
   //
 
-  /** 
+  /**
     Returns the total length of the track in which the thumb sits.
 
     The length of the track is the height or width of the scroller, less the
@@ -490,7 +490,7 @@ SC.ScrollerView = SC.View.extend(
     return scrollerLength;
   }.property('scrollerLength').cacheable(),
 
-  /** 
+  /**
     Returns the height of the view if this is a vertical scroller or the width
     of the view if this is a horizontal scroller. This is used when scrolling
     up and down by page, as well as in various layout calculations.
@@ -509,7 +509,7 @@ SC.ScrollerView = SC.View.extend(
     return 0;
   }.property('frame').cacheable(),
 
-  /** 
+  /**
     The total length of the thumb. The size of the thumb is the
     length of the track times the content proportion.
 
@@ -537,7 +537,7 @@ SC.ScrollerView = SC.View.extend(
     return Math.max(length, this.get('minimumThumbLength'));
   }.property('value', 'minimum', 'maximum', 'trackLength', 'proportion').cacheable(),
 
-  /** 
+  /**
     The position of the thumb in the track.
 
     @type Number
@@ -558,7 +558,7 @@ SC.ScrollerView = SC.View.extend(
     return Math.floor(isNaN(position) ? 0 : position);
   }.property('displayValue', 'maximum', 'trackLength', 'thumbLength').cacheable(),
 
-  /** 
+  /**
     YES if the maximum value exceeds the frame size of the scroller.  This
     will hide the thumb and buttons.
 
@@ -594,7 +594,7 @@ SC.ScrollerView = SC.View.extend(
   // MOUSE EVENTS
   //
 
-  /** 
+  /**
     Returns the value for a position within the scroller's frame.
     @private
   */
@@ -611,7 +611,7 @@ SC.ScrollerView = SC.View.extend(
     return value;
   },
 
-  /** 
+  /**
     Handles mouse down events and adjusts the value property depending where
     the user clicked.
 
@@ -724,7 +724,7 @@ SC.ScrollerView = SC.View.extend(
     return YES;
   },
 
-  /** 
+  /**
     When the user releases the mouse button, remove any active
     state from the button controls, and cancel any outstanding
     timers.
@@ -756,7 +756,7 @@ SC.ScrollerView = SC.View.extend(
     return ret;
   },
 
-  /** 
+  /**
     If the user began the drag on the thumb, we calculate the difference
     between the mouse position at click and where it is now.  We then
     offset the thumb by that amount, within the bounds of the track.
@@ -855,7 +855,7 @@ SC.ScrollerView = SC.View.extend(
     return YES;
   },
 
-  /** 
+  /**
     Starts a timer that fires after 300ms.  This is called when the user
     clicks a button or inside the track to move a page at a time. If they
     continue holding the mouse button down, we want to repeat that action
@@ -873,7 +873,7 @@ SC.ScrollerView = SC.View.extend(
     });
   },
 
-  /** 
+  /**
     Called by the mousedown timer.  This method determines the initial
     user action and repeats it until the timer is invalidated in mouseUp.
     @private
@@ -917,7 +917,7 @@ SC.ScrollerView = SC.View.extend(
     });
   },
 
-  /** 
+  /**
     Given a selector, finds the corresponding DOM element and adds
     the 'active' class name.  Also stores the returned element so that
     the 'active' class name can be removed during mouseup.
@@ -939,7 +939,7 @@ SC.ScrollerView = SC.View.extend(
   @extends SC.ScrollerView
 */
 SC.OverlayScrollerView = SC.ScrollerView.extend(
-/** @scope SC.OverlayScrollerView.prototype */{
+/** @lends SC.OverlayScrollerView.prototype */{
 
   // ..........................................................
   // FADE SUPPORT

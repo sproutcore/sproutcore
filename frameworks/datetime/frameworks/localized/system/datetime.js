@@ -6,10 +6,10 @@
 // ==========================================================================
 
 SC.DateTime.mixin(
-/** @scope SC.DateTime */ {
+/** @lends SC.DateTime */ {
 
   /**
-    
+
 
     Called on `document.ready`.
 
@@ -24,22 +24,22 @@ SC.DateTime.mixin(
     SC.DateTime.abbreviatedMonthNames = SC.String.w(SC.String.loc('_SC.DateTime.abbreviatedMonthNames'));
     SC.DateTime.AMPMNames = SC.String.w(SC.String.loc('_SC.DateTime.AMPMNames'));
   },
-  
+
   /**
-    
-    
+
+
     Elapsed string formatting override, as it depends on localization.
-    
+
     @see SC.DateTime#toFormattedString
     @private
    */
   __getElapsedStringFormat: function(start, timezone) {
-    
+
     var elapsed = Math.floor((+new Date() - this._date.getTime() - (timezone * 60000)) / 1000);
     var future = !!(elapsed < 0) ? "In" : "Ago";
     var interval = 0;
     var intervalType = "now";
-    
+
     if(Math.abs(elapsed) > 31536000) { // 60 * 60 * 24 * 365 - years
       interval = Math.floor(Math.abs(elapsed / 31536000));
       intervalType = 'year';
@@ -62,7 +62,7 @@ SC.DateTime.mixin(
       interval = Math.abs(elapsed);
       intervalType = 'second';
     }
-    
+
     var formatString = '_SC.DateTime.now';
     if(intervalType !== 'now') {
       formatString = "_SC.DateTime.%@%@%@".fmt(intervalType, interval > 1 ? "s" : "", future);

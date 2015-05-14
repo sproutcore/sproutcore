@@ -1,7 +1,7 @@
 sc_require("views/view");
 
 SC.View.reopen(
-  /** @scope SC.View.prototype */ {
+  /** @lends SC.View.prototype */ {
   // ..........................................................
   // KEY RESPONDER
   //
@@ -45,9 +45,9 @@ SC.View.reopen(
 
   /**
     Invoked just after the responder gains key responder status.
-    By default, it calls focus on the view root element. For accessibility 
+    By default, it calls focus on the view root element. For accessibility
     purposes.
-  
+
     @param {SC.Responder} responder
   */
   didBecomeKeyResponderFrom: function(responder) {},
@@ -157,7 +157,7 @@ SC.View.reopen(
   firstKeyView: null,
 
   /**
-    
+
 
     Actually calculates the firstKeyView as described in firstKeyView.
 
@@ -187,7 +187,7 @@ SC.View.reopen(
   lastKeyView: null,
 
   /**
-    
+
 
     Actually calculates the lastKeyView as described in lastKeyView.
 
@@ -244,7 +244,7 @@ SC.View.reopen(
   nextKeyView: undefined,
 
   /**
-    
+
 
     Gets the next key view by checking if the user set it and otherwise just
     getting the next by index in childViews.
@@ -337,7 +337,7 @@ SC.View.reopen(
   previousKeyView: undefined,
 
   /**
-    
+
 
     Gets the previous key view by checking if the user set it and otherwise just
     getting the previous by index in childViews.

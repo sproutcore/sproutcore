@@ -9,9 +9,9 @@
 sc_require('designers/view_designer');
 
 SC.TextFieldView.Designer = SC.ViewDesigner.extend(
-/** @scope SC.TabView.Designer.prototype */ {
-  
+/** @lends SC.TabView.Designer.prototype */ {
+
   encodeChildViews: NO,
-  
+
   designProperties: ['isPassword', 'isTextArea', 'hint']
 });

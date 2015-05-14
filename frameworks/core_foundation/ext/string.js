@@ -8,7 +8,7 @@
 sc_require('system/string');
 
 SC.supplement(String.prototype,
-/** @scope String.prototype */ {
+/** @lends String.prototype */ {
 
   /**
     @see SC.String.capitalize
@@ -62,7 +62,7 @@ SC.supplement(String.prototype,
     args.unshift(this);
     return SC.String.locWithDefault.apply(SC.String, args);
   },
-  
+
   /**
     @see SC.String.mult
   */

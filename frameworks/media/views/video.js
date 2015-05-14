@@ -30,7 +30,7 @@ sc_require('media_capabilities');
   @since SproutCore 1.1
 */
 SC.VideoView = SC.View.extend(
-/** @scope SC.VideoView.prototype */{
+/** @lends SC.VideoView.prototype */{
 
   /**
     Video view className.
@@ -79,7 +79,7 @@ SC.VideoView = SC.View.extend(
      Current time in secs
 
      @type Number
-     
+
     @private
    */
   _currentTime : 0,

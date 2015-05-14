@@ -8,7 +8,7 @@
 
 
 SC.TableRowView = SC.View.extend({
-/** @scope SC.TableRowView.prototype */
+/** @lends SC.TableRowView.prototype */
 
   //layout: { height: 18, left: 0, right: 0, top: 0 },
 

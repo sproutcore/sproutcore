@@ -42,7 +42,7 @@ SC.DRAG_DATA = 0x0008; // includes SC.DRAG_REORDER
 SC.DRAG_AUTOSCROLL_ZONE_THICKNESS = 20;
 
 SC.View.reopen(
-  /** @scope SC.View.prototype */ {
+  /** @lends SC.View.prototype */ {
 
   /**  @private */
   init: function (original) {
@@ -118,7 +118,7 @@ SC.View.reopen(
   @extends SC.Object
 */
 SC.Drag = SC.Object.extend(
-/** @scope SC.Drag.prototype */ {
+/** @lends SC.Drag.prototype */ {
 
   /**
     The source object used to coordinate this drag.
@@ -334,14 +334,14 @@ SC.Drag = SC.Object.extend(
   /**  required by autoscroll @private */
   _dragInProgress: YES,
 
-  /** 
+  /**
     Stores the initial visibility state of the dragView so it can be restored
     after the drag
     @private
   */
   _dragViewWasVisible: null,
 
-  /** 
+  /**
     This will actually start the drag process. Called by SC.Drag.start().
     @private
   */
@@ -409,7 +409,7 @@ SC.Drag = SC.Object.extend(
     }
   },
 
-  /** 
+  /**
     Cancel the drag operation.
 
     This is called by RootResponder's keyup method when the user presses
@@ -427,7 +427,7 @@ SC.Drag = SC.Object.extend(
     this.endDrag(evt, SC.DRAG_NONE);
   },
 
-  /** 
+  /**
     End the drag operation.
 
     This notifies the data source that the drag ended and removes the
@@ -481,7 +481,7 @@ SC.Drag = SC.Object.extend(
     return YES;
   },
 
-  /** 
+  /**
     This method is called repeatedly during a mouse drag.  It updates the
     position of the ghost image, then it looks for a current drop target and
     notifies it.
@@ -552,7 +552,7 @@ SC.Drag = SC.Object.extend(
   },
 
   /**
-    
+
 
     Called when the mouse is released.  Performs any necessary cleanup and
     executes the drop target protocol to try to complete the drag operation.
@@ -584,7 +584,7 @@ SC.Drag = SC.Object.extend(
     this.mouseUp(evt);
   },
 
-  /** 
+  /**
     Returns the dragView. If it is not set, the source is returned.
     @private
   */
@@ -596,7 +596,7 @@ SC.Drag = SC.Object.extend(
     return this.dragView;
   },
 
-  /** 
+  /**
     This will create the ghostView and add it to the document.
     @private
   */
@@ -651,7 +651,7 @@ SC.Drag = SC.Object.extend(
     view.append();  // add to window
   },
 
-  /** 
+  /**
     Positions the ghost view underneath the mouse/touch with the initial offset
     recorded by when the drag started.
     @private
@@ -669,7 +669,7 @@ SC.Drag = SC.Object.extend(
     }
   },
 
-  /** 
+  /**
     YES if the ghostView has been manually hidden.
 
     @type Boolean
@@ -757,7 +757,7 @@ SC.Drag = SC.Object.extend(
     this._cachedDropTargets = null;
   },
 
-  /** 
+  /**
     Return an array of drop targets, sorted with any nested drop targets
     at the top of the array.  The first time this method is called during
     a drag, it will reconstruct this array using the current set of
@@ -809,7 +809,7 @@ SC.Drag = SC.Object.extend(
     return ret;
   },
 
-  /** 
+  /**
     This will search through the drop targets, looking for one in the target
     area.
     @private
@@ -835,7 +835,7 @@ SC.Drag = SC.Object.extend(
     return null;
   },
 
-  /** 
+  /**
     Search the parent nodes of the target to find another view matching the
     drop target.  Returns null if no matching target is found.
     @private
@@ -852,7 +852,7 @@ SC.Drag = SC.Object.extend(
   // AUTOSCROLLING
   //
 
-  /** 
+  /**
     Performs auto-scrolling for the drag.  This will only do anything if
     the user keeps the mouse/touch within a few pixels of one location for a little
     while.
@@ -973,7 +973,7 @@ SC.Drag = SC.Object.extend(
     }
   },
 
-  /** 
+  /**
     Returns an array of scrollable views, sorted with nested scrollable views
     at the top of the array.  The first time this method is called during a
     drag, it will reconstruct this array using the current state of scrollable
@@ -1004,7 +1004,7 @@ SC.Drag = SC.Object.extend(
     return ret;
   },
 
-  /** 
+  /**
     This will search through the scrollable views, looking for one in the
     target area.
     @private
@@ -1028,7 +1028,7 @@ SC.Drag = SC.Object.extend(
     return null;
   },
 
-  /** 
+  /**
     Search the parent nodes of the target to find another scrollable view.
     return null if none is found.
     @private
@@ -1044,7 +1044,7 @@ SC.Drag = SC.Object.extend(
 });
 
 SC.Drag.mixin(
-/** @scope SC.Drag */ {
+/** @lends SC.Drag */ {
 
   /**
    This is the method you use to initiate a new drag.  See class documentation

@@ -38,7 +38,7 @@ sc_require("system/utils/string_measurement");
   SC.AutoResize into the view should not override these properties.
 */
 SC.AutoResize = {
-  /*@scope SC.AutoResize.prototype */
+  /*@lends SC.AutoResize.prototype */
 
   /**
     If YES, automatically resizes the view (default). If NO, only measures,
@@ -196,7 +196,7 @@ SC.AutoResize = {
   }.observes('shouldAutoResize', 'measuredSize', 'autoResizePadding', 'maxWidth', 'maxHeight', 'shouldResizeWidth', 'shouldResizeHeight'),
 
   /**
-    
+
     Begins observing the auto resize field.
     @private
   */
@@ -469,7 +469,7 @@ SC.AutoResize = {
   }.enhance(),
 
   /**
-    
+
     When the layer is first created, measurement will need to take place.
     @private
   */
@@ -479,7 +479,7 @@ SC.AutoResize = {
     this.scheduleMeasurement();
   }.enhance(),
 
-  /** 
+  /**
     If the view has a transitionIn property, we have to delay the transition
     setup and execution until after we measure.  In order to prevent a brief
     flash of the view, we ensure it is hidden while it is being measured and
@@ -503,7 +503,7 @@ SC.AutoResize = {
 };
 
 /**
- * 
+ *
  * @class
  * Manages batch auto resizing.
  *

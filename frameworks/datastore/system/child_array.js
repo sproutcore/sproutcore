@@ -16,7 +16,7 @@
 */
 
 SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
-  /** @scope SC.ChildArray.prototype */ {
+  /** @lends SC.ChildArray.prototype */ {
 
   //@if(debug)
   /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */
@@ -118,7 +118,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
   // ARRAY PRIMITIVES
   //
 
-  /** 
+  /**
     Returned length is a pass-through to the storeIds array.
 
     @type Number
@@ -324,7 +324,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return ret;
   },
 
-  /** 
+  /**
     This is called by the parent record whenever its properties change. It is
     also called by the ChildrenAttribute transform when the attribute is set
     to a new array.

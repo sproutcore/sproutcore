@@ -19,7 +19,7 @@ SC.STRING_TRIM_RIGHT_REGEXP = (/\s+$/g);
 SC.STRING_CSS_ESCAPED_REGEXP = (/(:|\.|\[|\])/g);
 
 /**
-  
+
 
   SproutCore implements a variety of enhancements to the built-in String
   object that make it easy to perform common substitutions and conversions.
@@ -162,7 +162,7 @@ SC.mixin(SC.String, {
     // Also, .loc() is not called SO much to begin with. So, the error handling
     // that this gives us is worth it.
     try {
-      return SC.String.fmt(localized, args);      
+      return SC.String.fmt(localized, args);
     } catch (e) {
       SC.error("Error processing string with key: " + str);
       SC.error("Localized String: " + localized);
@@ -310,33 +310,33 @@ SC.mixin(SC.String, {
   trimRight: function (str) {
     return str.replace(SC.STRING_TRIM_RIGHT_REGEXP,"");
   },
-  
+
   /**
     Mulitplies a given string. For instance if you have a string "xyz"
     and multiply it by 2 the result is "xyzxyz".
-    
+
     @param {String} str the string to multiply
     @param {Number} value the number of times to multiply the string
     @returns {String} the mulitiplied string
   */
   mult: function(str, value) {
     if (SC.typeOf(value) !== SC.T_NUMBER || value < 1) return null;
-    
+
     var ret = "";
     for (var i = 0; i < value; i += 1) {
       ret += str;
     }
-    
+
     return ret;
   }
-  
+
 });
 
 
 // IE doesn't support string trimming
 if(String.prototype.trim) {
   SC.supplement(String.prototype,
-  /** @scope String.prototype */ {
+  /** @lends String.prototype */ {
 
     trim: function() {
       return SC.String.trim(this, arguments);
@@ -354,7 +354,7 @@ if(String.prototype.trim) {
 
 // We want the version defined here, not in Runtime
 SC.mixin(String.prototype,
-/** @scope String.prototype */ {
+/** @lends String.prototype */ {
 
   loc: function() {
     return SC.String.loc(this.toString(), SC.$A(arguments));

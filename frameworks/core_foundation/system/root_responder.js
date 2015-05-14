@@ -50,7 +50,7 @@ SC.CAPTURE_BACKSPACE_KEY = NO ;
      view is found that handles it.
 */
 SC.RootResponder = SC.Object.extend(
-  /** @scope SC.RootResponder.prototype */{
+  /** @lends SC.RootResponder.prototype */{
 
   /**
     Contains a list of all panes currently visible on screen.  Every time a
@@ -165,7 +165,7 @@ SC.RootResponder = SC.Object.extend(
   */
   keyPane: null,
 
-  /** 
+  /**
     A stack of previous key panes. Used to allow panes to resign key pane
     status without having to know who had it before them.
 
@@ -1040,7 +1040,7 @@ SC.RootResponder = SC.Object.extend(
   //
 
   /**
-    
+
     A map from views to internal touch entries.
 
     Note: the touch entries themselves also reference the views.
@@ -1049,7 +1049,7 @@ SC.RootResponder = SC.Object.extend(
   _touchedViews: {},
 
   /**
-    
+
     A map from internal touch ids to the touch entries themselves.
 
     The touch entry ids currently come from the touch event's identifier.
@@ -1395,7 +1395,7 @@ SC.RootResponder = SC.Object.extend(
   },
 
   //@if(debug)
-  /** 
+  /**
     Artificially calls endTouch for any touch which is no longer present. This is necessary because
     _sometimes_, WebKit ends up not sending endtouch.
     @private
@@ -1427,7 +1427,7 @@ SC.RootResponder = SC.Object.extend(
 
   _touchCount: 0,
 
-  /** 
+  /**
     Ends a specific touch (for a bit, at least). This does not "finish" a touch; it merely calls
     touchEnd, touchCancelled, etc. A re-dispatch (through recapture or makeTouchResponder) will terminate
     the process; it would have to be restarted separately, through touch.end().
@@ -1463,7 +1463,7 @@ SC.RootResponder = SC.Object.extend(
   },
 
   /**
-    
+
     "Finishes" a touch. That is, it eradicates it from our touch entries and removes all responder, etc. properties.
     @private
   */
@@ -1496,7 +1496,7 @@ SC.RootResponder = SC.Object.extend(
     if (this._touches[touch.identifier]) delete this._touches[touch.identifier];
   },
 
-  /** 
+  /**
     Called when the user touches their finger to the screen. This method
     dispatches the touchstart event to the appropriate view.
 
@@ -1575,7 +1575,7 @@ SC.RootResponder = SC.Object.extend(
   },
 
   /**
-    
+
     used to keep track of when a specific type of touch event was last handled, to see if it needs to be re-handled
     @private
   */
@@ -1777,7 +1777,7 @@ SC.RootResponder = SC.Object.extend(
     return evt.hasCustomEventHandling;
   },
 
-  /** 
+  /**
     Handle touch cancel event.  Works just like cancelling a touch for any other reason.
     touchend handles it as a special case (sending cancel instead of end if needed).
     @private
@@ -1787,7 +1787,7 @@ SC.RootResponder = SC.Object.extend(
     this.touchend(evt);
   },
 
-  /** 
+  /**
      Ignore Touch events on textfields and links. starting iOS 5 textfields
      get touch events. Textfields just need to get the default focus action.
     @private
@@ -1853,7 +1853,7 @@ SC.RootResponder = SC.Object.extend(
 
   _lastModifiers: null,
 
-  /** 
+  /**
     Modifier key changes are notified with a keydown event in most browsers.
     We turn this into a flagsChanged keyboard event.  Normally this does not
     stop the normal browser behavior.
@@ -1884,7 +1884,7 @@ SC.RootResponder = SC.Object.extend(
     return (changed) ? (this.sendEvent('flagsChanged', evt) ? evt.hasCustomEventHandling : YES) : YES ;
   },
 
-  /** 
+  /**
     Determines if the keyDown event is a nonprintable or function key. These
     kinds of events are processed as keyboard shortcuts.  If no shortcut
     handles the event, then it will be sent as a regular keyDown event.
@@ -1895,7 +1895,7 @@ SC.RootResponder = SC.Object.extend(
     return !!(evt.altKey || evt.ctrlKey || evt.metaKey || SC.FUNCTION_KEYS[evt.which]);
   },
 
-  /** 
+  /**
     Determines if the event simply reflects a modifier key change.  These
     events may generate a flagsChanged event, but are otherwise ignored.
     @private
@@ -1905,7 +1905,7 @@ SC.RootResponder = SC.Object.extend(
   },
 
    /**
-     
+
      Determines if the key is printable (and therefore should be dispatched from keypress).
      Some browsers send backspace, tab, enter, and escape on keypress, so we want to
      explicitly ignore those here.
@@ -1919,7 +1919,7 @@ SC.RootResponder = SC.Object.extend(
       !(evt.which === 8 || evt.which === 9 || evt.which === 13 || evt.which === 27));
   },
 
-  /** 
+  /**
     The keydown event occurs whenever the physically depressed key changes.
     This event is used to deliver the flagsChanged event and to with function
     keys and keyboard shortcuts.
@@ -1996,7 +1996,7 @@ SC.RootResponder = SC.Object.extend(
     return forceBlock ? NO : ret ;
   },
 
-  /** 
+  /**
     The keypress event occurs after the user has typed something useful that
     the browser would like to insert.  Unlike keydown, the input codes here
     have been processed to reflect that actual text you might want to insert.
@@ -2339,7 +2339,7 @@ SC.RootResponder = SC.Object.extend(
     var ret = this._dragover(evt);
     return ret;
   },
-  /** 
+  /**
     Dragleave doesn't fire reliably in all browsers, so this method forces it (scheduled below). Note
     that, being scheduled via SC.Timer, this method is already in a run loop.
     @private

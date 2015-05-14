@@ -63,7 +63,7 @@ sc_require('mixins/collection_row_delegate');
 // (Can we also have an 'estimate row heights' property that will simply
 // cheat for very long data sets to make rendering more efficient?)
 SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
-/** @scope SC.ListView.prototype */ {
+/** @lends SC.ListView.prototype */ {
 
   /**  @private */
   _sc_customRowSizeIndexes: null,

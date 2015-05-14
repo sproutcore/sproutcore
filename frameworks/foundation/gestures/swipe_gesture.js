@@ -76,7 +76,7 @@ SC.SWIPE_DOWN = [90];
   @extends SC.Gesture
 */
 SC.SwipeGesture = SC.Gesture.extend(
-/** @scope SC.SwipeGesture.prototype */ {
+/** @lends SC.SwipeGesture.prototype */ {
 
   //
   // - Properties --------------------------------------------------------------------

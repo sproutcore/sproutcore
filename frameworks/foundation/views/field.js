@@ -24,7 +24,7 @@ sc_require('mixins/validatable') ;
   @since SproutCore 1.0
 */
 SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
-/** @scope SC.FieldView.prototype */ {
+/** @lends SC.FieldView.prototype */ {
 
   /**
   _field_isMouseDown: NO,
@@ -57,7 +57,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     return this.$(elementTagName).andSelf().filter(elementTagName);
   },
 
-  /** 
+  /**
     Override to specify the HTML element type to use as the field. For
     example, "input" or "textarea".
     @private
@@ -162,7 +162,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   // INTERNAL SUPPORT
   //
 
-  /** 
+  /**
     invoked when the value property changes.  Sets the field value...
     @private
   */

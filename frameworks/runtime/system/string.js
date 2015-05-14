@@ -11,7 +11,7 @@
   Implements support methods useful when working with strings in SproutCore
   applications.
 */
-SC.String = /** @scope SC.String.prototype */ {
+SC.String = /** @lends SC.String.prototype */ {
 
   /**
     This finds the value for a key in a formatting string.

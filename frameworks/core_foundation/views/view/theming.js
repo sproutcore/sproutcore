@@ -1,7 +1,7 @@
 sc_require("views/view");
 
 SC.View.reopen(
-  /** @scope SC.View.prototype */ {
+  /** @lends SC.View.prototype */ {
 
   // ..........................................................
   // THEME SUPPORT
@@ -31,7 +31,7 @@ SC.View.reopen(
 
     This property is private for the time being.
 
-    
+
     @type String
     @private
   */
@@ -98,7 +98,7 @@ SC.View.reopen(
     it will look to see if SC.AceTheme has a child theme named 'popover',
     and _then_, if it is not found, look globally.
 
-    
+
     @property {SC.Theme}
     @private
   */
@@ -245,7 +245,7 @@ SC.View.reopen(
 
 /**
   @class
-  
+
   View Render Delegate Proxies are tool SC.Views use to:
 
   - look up 'display*' ('displayTitle' instead of 'title') to help deal with

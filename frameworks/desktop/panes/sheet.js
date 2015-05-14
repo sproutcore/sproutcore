@@ -31,7 +31,7 @@ sc_require('panes/panel');
  @author Joe Gaudet
  */
 SC.SheetPane = SC.PanelPane.extend(
-  /** @scope SC.SheetPane.prototype */
+  /** @lends SC.SheetPane.prototype */
   {
 
     /**

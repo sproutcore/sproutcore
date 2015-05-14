@@ -6,7 +6,7 @@
 // ==========================================================================
 
 // Extensions to the core SC.Object class
-SC.mixin(SC.Object.prototype, /** @scope SC.Object.prototype */ {
+SC.mixin(SC.Object.prototype, /** @lends SC.Object.prototype */ {
 
   /**
     Invokes the named method after the specified period of time.  This

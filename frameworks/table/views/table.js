@@ -24,7 +24,7 @@ sc_require('views/table_head');
 */
 
 SC.TableView = SC.ListView.extend(SC.TableDelegate, {
-  /** @scope SC.TableView.prototype */
+  /** @lends SC.TableView.prototype */
 
   // ..........................................................
   // PROPERTIES

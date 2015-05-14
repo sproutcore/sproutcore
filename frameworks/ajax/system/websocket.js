@@ -35,7 +35,7 @@ sc_require('mixins/websocket_delegate');
   @author Nicolas BADIA
 */
 SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
-  /** @scope SC.WebSocket.prototype */ {
+  /** @lends SC.WebSocket.prototype */ {
 
   /**
     The URL of the WebSocket server.
@@ -258,7 +258,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
   //
 
   /**
-     
+
     @private
   */
   onOpen: function(event) {
@@ -273,7 +273,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
   },
 
   /**
-     
+
     @private
   */
   onMessage: function(messageEvent) {
@@ -299,7 +299,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
   },
 
   /**
-     
+
     @private
   */
   onClose: function(closeEvent) {
@@ -318,7 +318,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
   },
 
   /**
-     
+
     @private
   */
   onError: function(event) {
@@ -329,7 +329,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
   },
 
   /**
-     
+
 
      Add the message to the queue
     @private
@@ -342,7 +342,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
   },
 
   /**
-     
+
 
      Send the messages from the queue.
     @private
@@ -361,7 +361,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
   },
 
   /**
-    
+
     @private
   */
   tryReconnect: function() {
@@ -372,7 +372,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
   },
 
   /**
-    
+
 
     Will notify each listener. Returns true if any of the listeners handle.
     @private
@@ -402,7 +402,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
   },
 
   /**
-    
+
     @private
   */
   objectDelegate: function () {
@@ -415,7 +415,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
   //
 
   /**
-    
+
 
     @type WebSocket
     @default null
@@ -424,7 +424,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
   socket: null,
 
   /**
-    
+
 
     @type Object
     @default null
@@ -433,7 +433,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
   listeners: null,
 
   /**
-    
+
 
     Messages that needs to be send once the connection is open.
 
@@ -446,7 +446,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
 });
 
 // Class Methods
-SC.WebSocket.mixin( /** @scope SC.WebSocket */ {
+SC.WebSocket.mixin( /** @lends SC.WebSocket */ {
 
   // ..........................................................
   // CONSTANTS

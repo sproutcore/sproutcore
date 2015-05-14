@@ -41,7 +41,7 @@ SC.LIST_ITEM_ACTION_EJECT = 'sc-list-item-cancel-eject';
   @since SproutCore 1.0
 */
 SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
-/** @scope SC.ListItemView.prototype */ {
+/** @lends SC.ListItemView.prototype */ {
 
   /**
     @type Array
@@ -304,7 +304,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     return this.$('label');
   },
 
-  /** 
+  /**
     Determines if the event occurred inside an element with the specified
     classname or not.
     @private
@@ -323,7 +323,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     return ret;
   },
 
-  /** 
+  /**
     Returns YES if the list item has a checkbox and the event occurred
     inside of it.
     @private
@@ -334,7 +334,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     return checkboxKey && this._isInsideElementWithClassName('sc-checkbox-view', evt);
   },
 
-  /** 
+  /**
     Returns YES if the list item has a disclosure triangle and the event
     occurred inside of it.
     @private
@@ -344,7 +344,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     return this._isInsideElementWithClassName('sc-disclosure-view', evt);
   },
 
-  /** 
+  /**
     Returns YES if the list item has a right icon and the event
     occurred inside of it.
     @private
@@ -355,7 +355,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     return rightIconKey && this._isInsideElementWithClassName('right-icon', evt);
   },
 
-  /** 
+  /**
     mouseDown is handled only for clicks on the checkbox view or or action
     button.
     @private
@@ -576,7 +576,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
 
   },
 
-  /** 
+  /**
     Returns true if a click is on the label text itself to enable editing.
 
     Note that if you override renderLabel(), you probably need to override
@@ -693,7 +693,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     });
   },
 
-  /** 
+  /**
     Allow editing.
     @private
   */
@@ -701,7 +701,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     return YES;
   },
 
-  /** 
+  /**
    Hide the label view while the inline editor covers it.
     @private
   */
@@ -717,7 +717,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     if (this._oldLineHeight) el.css({ lineHeight: this._oldLineHeight });
   }.enhance(),
 
-  /** 
+  /**
    Update the field value and make it visible again.
     @private
   */
@@ -748,7 +748,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
   // TODO: add update: support.
   isReusable: false,
 
-  /** 
+  /**
     Fills the passed html-array with strings that can be joined to form the
     innerHTML of the receiver element.  Also populates an array of classNames
     to set on the outer element.
@@ -874,7 +874,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     context = working.end();
   },
 
-  /** 
+  /**
     Adds a disclosure triangle with the appropriate display to the content.
     This method will only be called if the disclosure state of the view is
     something other than SC.LEAF_NODE.
@@ -910,7 +910,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     this._disclosureRenderDelegate = renderer;
   },
 
-  /** 
+  /**
     Adds a checkbox with the appropriate state to the content.  This method
     will only be called if the list item view is supposed to have a
     checkbox.
@@ -949,7 +949,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     this._checkboxRenderDelegate = renderer;
   },
 
-  /** 
+  /**
     Generates an icon for the label based on the content.  This method will
     only be called if the list item view has icons enabled.  You can override
     this method to display your own type of icon if desired.
@@ -978,7 +978,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
             .end();
   },
 
-  /** 
+  /**
    Generates a label based on the content.  You can override this method to
    display your own type of icon if desired.
 
@@ -991,7 +991,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     context.push('<label>', label || '', '</label>');
   },
 
-  /** 
+  /**
     Generates a right icon for the label based on the content.  This method will
     only be called if the list item view has icons enabled.  You can override
     this method to display your own type of icon if desired.
@@ -1022,7 +1022,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     .end();
   },
 
-  /** 
+  /**
    Generates an unread or other count for the list item.  This method will
    only be called if the list item view has counts enabled.  You can
    override this method to display your own type of counts if desired.
@@ -1037,7 +1037,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
                   count.toString(), '</span></span>');
   },
 
-  /** 
+  /**
     Generates the html string used to represent the action item for your
     list item.  override this to return your own custom HTML
 
@@ -1050,7 +1050,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     context.push('<img src="', SC.BLANK_IMAGE_URL, '" class="action" />');
   },
 
-  /** 
+  /**
    Generates the string used to represent the branch arrow. override this to
    return your own custom HTML
 

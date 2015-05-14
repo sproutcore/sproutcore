@@ -9,26 +9,26 @@
 
 sc_require('system/state');
 
-/** 
+/**
   The default name given to an empty state
 */
 SC.EMPTY_STATE_NAME = "__EMPTY_STATE__";
 
 /**
   @class
-  
-  Represents an empty state that gets assigned as a state's initial substate 
+
+  Represents an empty state that gets assigned as a state's initial substate
   if the state does not have an initial substate defined.
 
   @extends SC.State
 */
-SC.EmptyState = SC.State.extend(/** @scope SC.EmptyState.prototype */{
-  
+SC.EmptyState = SC.State.extend(/** @lends SC.EmptyState.prototype */{
+
   name: SC.EMPTY_STATE_NAME,
-  
+
   enterState: function() {
     var msg = "No initial substate was defined for state %@. Entering default empty state";
     this.stateLogWarning(msg.fmt(this.get('parentState')));
   }
-  
+
 });

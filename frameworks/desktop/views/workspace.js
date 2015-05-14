@@ -18,7 +18,7 @@ sc_require("views/toolbar");
   @author Alex Iskander
 */
 SC.WorkspaceView = SC.View.extend(
-/** @scope SC.WorkspaceView.prototype */ {
+/** @lends SC.WorkspaceView.prototype */ {
 
   /**
     @type Array
@@ -129,7 +129,7 @@ SC.WorkspaceView = SC.View.extend(
   /// INTERNAL CODE. HERE, THERE BE MONSTERS!
 
   /**
-    
+
     Whenever something that affects the tiling changes (for now, just toolbarSize, but if
     we allow dynamic changing of toolbars in future, this could include toolbars themselves),
     we need to update the tiling.
@@ -139,7 +139,7 @@ SC.WorkspaceView = SC.View.extend(
     this.invokeOnce("_scws_tile");
   }.observes("toolbarSize"),
 
-  /** 
+  /**
     Creates the child views. Specifically, instantiates master and detail views.
     @private
   */
@@ -166,7 +166,7 @@ SC.WorkspaceView = SC.View.extend(
   },
 
   /**
-    
+
     Tiles the views as necessary.
     @private
   */
@@ -199,7 +199,7 @@ SC.WorkspaceView = SC.View.extend(
     });
   },
 
-  /** 
+  /**
     Returns YES if a top toolbar is present.
     @private
   */
@@ -208,7 +208,7 @@ SC.WorkspaceView = SC.View.extend(
     return NO;
   }.property("topToolbar").cacheable(),
 
-  /** 
+  /**
     Returns YES if a bottom toolbar is present.
     @private
   */
@@ -217,7 +217,7 @@ SC.WorkspaceView = SC.View.extend(
     return NO;
   }.property("bottomToolbar").cacheable(),
 
-  /** 
+  /**
     Called by the individual toolbar/contentView observers at runloop end when the toolbars change.
     @private
   */
@@ -225,25 +225,25 @@ SC.WorkspaceView = SC.View.extend(
     this._scws_tile();
   },
 
-  /** 
+  /**
     For subclassing, this is the currently displaying top toolbar.
     @private
   */
   activeTopToolbar: null,
 
-  /** 
+  /**
     For subclassing, this is the currently displaying bottom toolbar.
     @private
   */
   activeBottomToolbar: null,
 
-  /** 
+  /**
     For subclassing, this is the currently displaying content view.
     @private
   */
   activeContentView: null,
 
-  /** 
+  /**
     Called when the top toolbar changes. It appends it, removes any old ones, and calls toolbarsDidChange.
 
     You may want to override this if, for instance, you want to add transitions of some sort (should be trivial).
@@ -267,7 +267,7 @@ SC.WorkspaceView = SC.View.extend(
   }.observes("topToolbar"),
 
   /**
-    
+
     @private
   */
   bottomToolbarDidChange: function() {

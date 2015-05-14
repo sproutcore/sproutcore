@@ -25,7 +25,7 @@ SC.AUTOCAPITALIZE_CHARACTERS = 'characters';
   @author Charles Jolley
  */
 SC.TextFieldView = SC.FieldView.extend(SC.Editable,
-  /** @scope SC.TextFieldView.prototype */ {
+  /** @lends SC.TextFieldView.prototype */ {
 
   classNames: ['sc-text-field-view'],
 

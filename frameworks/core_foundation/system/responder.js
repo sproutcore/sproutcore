@@ -15,7 +15,7 @@
   @extends SC.Object
   @since SproutCore 1.0
 */
-SC.Responder = SC.Object.extend( /** @scope SC.Responder.prototype */ {
+SC.Responder = SC.Object.extend( /** @lends SC.Responder.prototype */ {
 
   isResponder: YES,
 

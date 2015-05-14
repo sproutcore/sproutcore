@@ -18,7 +18,7 @@
   @since SproutCore 1.0
 */
 SC.SliderView = SC.View.extend(SC.Control,
-/** @scope SC.SliderView.prototype */ {
+/** @lends SC.SliderView.prototype */ {
 
   /**  @private */
   classNames: 'sc-slider-view',

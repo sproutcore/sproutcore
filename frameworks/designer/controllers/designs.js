@@ -19,7 +19,7 @@
   @extends SC.Object
 */
 SC.designsController = SC.ArrayController.create(SC.CollectionViewDelegate,
-/** @scope SC.designsController.prototype */ {
+/** @lends SC.designsController.prototype */ {
 
   setDesigns: function(page, iframe){
     var designs = [];

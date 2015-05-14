@@ -26,7 +26,7 @@ sc_require('models/record_attribute');
   @since SproutCore 1.0
 */
 SC.SingleAttribute = SC.RecordAttribute.extend(
-  /** @scope SC.SingleAttribute.prototype */ {
+  /** @lends SC.SingleAttribute.prototype */ {
 
   /**
     Specifies the property on the member record that represents the inverse

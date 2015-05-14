@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/** 
+/**
   SC.SplitChild and SC.SplitThumb both share this code, but we don't want it
   included twice if the view mixes in both SC.SplitChild and SC.SplitThumb.
   @private
@@ -42,7 +42,7 @@ SC.NeedsSplitParent = {
 
 
 /**
-  
+
   Child views of SplitViews should use this mixin to get their positioning
   logic and default settings.
 
@@ -52,7 +52,7 @@ SC.NeedsSplitParent = {
   @namespace
 */
 SC.SplitChild =
-  /** @scope SC.SplitChild.prototype */{
+  /** @lends SC.SplitChild.prototype */{
   /**
    * Set to YES if your Split Child is a divider view.
    *

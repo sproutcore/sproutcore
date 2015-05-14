@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-SC.mixin( /** @scope SC */ {
+SC.mixin( /** @lends SC */ {
 
   _copy_computed_props: [
     "maxWidth", "maxHeight", "paddingLeft", "paddingRight", "paddingTop", "paddingBottom",

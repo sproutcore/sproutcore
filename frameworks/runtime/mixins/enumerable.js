@@ -50,7 +50,7 @@ sc_require('system/enumerator');
 
   @since SproutCore 1.0
 */
-SC.Enumerable = /** @scope SC.Enumerable.prototype */{
+SC.Enumerable = /** @lends SC.Enumerable.prototype */{
 
   /**
     Walk like a duck.
@@ -807,7 +807,7 @@ SC._buildReducerFor = function (reducerKey, reducerProperty) {
 };
 
 /** @class */
-SC.Reducers = /** @scope SC.Reducers.prototype */ {
+SC.Reducers = /** @lends SC.Reducers.prototype */ {
   /**
     This property will trigger anytime the enumerable's content changes.
     You can observe this property to be notified of changes to the enumerables

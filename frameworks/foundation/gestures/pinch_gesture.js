@@ -16,7 +16,7 @@ sc_require("system/gesture");
   @extends SC.Gesture
 */
 SC.PinchGesture = SC.Gesture.extend(
-/** @scope SC.PinchGesture.prototype */{
+/** @lends SC.PinchGesture.prototype */{
 
   /**  Whether we have started pinching or not.
 

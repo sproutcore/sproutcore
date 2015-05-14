@@ -38,7 +38,7 @@ sc_require('mixins/delegate_support') ;
 */
 
 SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
-  SC.DelegateSupport, /** @scope SC.SparseArray.prototype */ {
+  SC.DelegateSupport, /** @lends SC.SparseArray.prototype */ {
 
   // ..........................................................
   // LENGTH SUPPORT

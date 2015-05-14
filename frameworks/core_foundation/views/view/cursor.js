@@ -1,7 +1,7 @@
 sc_require("views/view");
 
 SC.View.reopen(
-  /** @scope SC.View.prototype */ {
+  /** @lends SC.View.prototype */ {
 
   /**
     You can set this to an SC.Cursor instance; whenever that SC.Cursor's

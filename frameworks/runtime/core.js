@@ -46,7 +46,7 @@ window.SproutCore = window.SproutCore || SC;
 
 /**
   @version 1.11.0
-  
+
 
   All SproutCore methods and functions are defined
   inside of this namespace.  You generally should not add new properties to
@@ -66,7 +66,7 @@ SC = window.SC; // This is dumb but necessary for jsdoc to get it right
 SC.VERSION = '1.11.0';
 
 /**
-  
+
 
   Adds properties to a target object. You must specify whether
   to overwrite a value for a property or not.
@@ -163,7 +163,7 @@ SC.extend = SC.mixin;
 //
 // Enough with the bootstrap code.  Let's define some core functions
 
-SC.mixin(/** @scope window.SC.prototype */ {
+SC.mixin(/** @lends window.SC.prototype */ {
 
   // ........................................
   // GLOBAL CONSTANTS

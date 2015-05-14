@@ -57,7 +57,7 @@ SC.DRAG_REORDER = 0x0010;
   @since SproutCore 0.9
 */
 SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, SC.CollectionContent,
-/** @scope SC.CollectionView.prototype */ {
+/** @lends SC.CollectionView.prototype */ {
 
   /**  @private */
   _content: null,

@@ -26,7 +26,7 @@
   @extends SC.Object
   @since SproutCore 1.0
 */
-SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
+SC.UserDefaults = SC.Object.extend(/** @lends SC.UserDefaults.prototype */ {
 
   ready: NO,
 
@@ -43,7 +43,7 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
   */
   appDomain: null,
 
-  /** 
+  /**
     Defaults.  These will be used if not defined on localStorage.
     @private
   */

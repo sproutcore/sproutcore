@@ -34,7 +34,7 @@ sc_require('panes/panel');
   @since SproutCore 1.0
 */
 SC.PalettePane = SC.PanelPane.extend(SC.DraggablePaneSupport,
-/** @scope SC.PalettePane.prototype */ {
+/** @lends SC.PalettePane.prototype */ {
 
   /**
     @type Array

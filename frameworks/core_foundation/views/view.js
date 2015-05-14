@@ -41,7 +41,7 @@ SC.EMPTY_CHILD_VIEWS_ARRAY.needsClone = YES;
 
 */
 SC.CoreView.reopen(
-/** @scope SC.View.prototype */ {
+/** @lends SC.View.prototype */ {
 
   /**
     An array of the properties of this class that will be concatenated when
@@ -1711,7 +1711,7 @@ SC.CoreView.reopen(
 });
 
 SC.CoreView.mixin(
-  /** @scope SC.CoreView */ {
+  /** @lends SC.CoreView */ {
 
   /**  walk like a duck -- used by SC.Page @private */
   isViewClass: YES,
@@ -2215,7 +2215,7 @@ SC.CoreView.unload = function () {
   @since SproutCore 1.0
 
 */
-SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
+SC.View = SC.CoreView.extend(/** @lends SC.View.prototype */{
   classNames: ['sc-view'],
 
   displayProperties: [],

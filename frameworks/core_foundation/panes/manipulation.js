@@ -7,7 +7,7 @@
 sc_require("panes/pane");
 
 SC.Pane.reopen(
-  /** @scope SC.Pane.prototype */ {
+  /** @lends SC.Pane.prototype */ {
 
   /**
     Inserts the pane's layer as the first child of the passed element.

@@ -23,7 +23,7 @@ sc_require('views/list');
   @version 1.0
 */
 SC.GridView = SC.ListView.extend(
-/** @scope SC.GridView.prototype */ {
+/** @lends SC.GridView.prototype */ {
 
   /**  @private */
   _lastFrameWidth: null,
@@ -91,7 +91,7 @@ SC.GridView = SC.ListView.extend(
     return (columnWidth < 1) ? 1 : Math.floor(frameWidth / columnWidth);
   }.property('columnWidth', '_frameWidth').cacheable(),
 
-  /** 
+  /**
     Find the contentIndexes to display in the passed rect. Note that we
     ignore the width of the rect passed since we need to have a single
     contiguous range.
@@ -128,7 +128,7 @@ SC.GridView = SC.ListView.extend(
     };
   },
 
-  /** 
+  /**
     Overrides default CollectionView method to compute the minimum height
     of the list view.
     @private
@@ -259,7 +259,7 @@ SC.GridView = SC.ListView.extend(
     return [ret, retOp];
   },
 
-  /** 
+  /**
     Since GridView lays out items evenly from left to right, if the width of the
     frame changes, all of the item views on screen are potentially in
     the wrong position.

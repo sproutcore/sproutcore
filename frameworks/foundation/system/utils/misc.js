@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-SC.mixin( /** @scope SC */ {
+SC.mixin( /** @lends SC */ {
   _downloadFrames: 0, // count of download frames inserted into document
 
   /**

@@ -9,14 +9,14 @@ sc_require('validators/validator') ;
 
 /**
   Handles parsing and validating of positive integers.
-  
+
   @extends SC.Validator
   @author Nirumal Thomas
   @version 1.0
   @class
 */
 SC.Validator.PositiveInteger = SC.Validator.extend(
-/** @scope SC.Validator.PositiveInteger.prototype */ {
+/** @lends SC.Validator.PositiveInteger.prototype */ {
 
   /**
     Default Value to be displayed. If the value in the text field is null,
@@ -65,13 +65,13 @@ SC.Validator.PositiveInteger = SC.Validator.extend(
     var value = field.get('fieldValue') ;
     return (value === '') || !isNaN(value) ;
   },
-  
+
   validateError: function(form, field) {
     var label = field.get('errorLabel') || 'Field' ;
     return SC.$error(SC.String.loc("Invalid.Number(%@)", label), label) ;
   },
-  
-  /** 
+
+  /**
     Allow only numbers
   */
   validateKeyDown: function(form, field, charStr) {
@@ -81,5 +81,5 @@ SC.Validator.PositiveInteger = SC.Validator.extend(
     if(charStr.length===0) return true ;
     else return text.match(/^[0-9\0]*/)[0]===text;
   }
-    
+
 }) ;

@@ -20,7 +20,7 @@ sc_require("system/gesture");
   @extends SC.Gesture
 */
 SC.TapGesture = SC.Gesture.extend(
-/** @scope SC.TapGesture.prototype */{
+/** @lends SC.TapGesture.prototype */{
 
   /**  The time that the first touch started at. @private */
   _sc_firstTouchAddedAt: null,

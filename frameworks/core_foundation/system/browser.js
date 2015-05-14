@@ -7,7 +7,7 @@
 
 
 SC.mixin(SC.browser,
-/** @scope SC.browser */ {
+/** @lends SC.browser */ {
 
   /* @private Internal property for the cache of pre-determined experimental names. */
   _cachedNames: null,

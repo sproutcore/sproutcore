@@ -18,7 +18,7 @@
   @author Michael Cohen
 */
 SC.Async = SC.Object.extend(
-  /** @scope SC.Async.prototype */{
+  /** @lends SC.Async.prototype */{
 
   func: null,
 
@@ -26,7 +26,7 @@ SC.Async = SC.Object.extend(
 
   arg2: null,
 
-  /** 
+  /**
     Called by the statechart
     @private
   */
@@ -49,7 +49,7 @@ SC.Async = SC.Object.extend(
 /**
   Singleton
 */
-SC.Async.mixin(/** @scope SC.Async */{
+SC.Async.mixin(/** @lends SC.Async */{
 
   /**
     Call in either a state's enterState or exitState method when you

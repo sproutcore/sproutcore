@@ -50,7 +50,7 @@ sc_require('controllers/controller') ;
   @since SproutCore 1.0
 */
 SC.ObjectController = SC.Controller.extend(
-/** @scope SC.ObjectController.prototype */ {
+/** @lends SC.ObjectController.prototype */ {
 
   //@if(debug)
   /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */
@@ -281,7 +281,7 @@ SC.ObjectController = SC.Controller.extend(
     }
   }.observes("content"),
 
-  /**  
+  /**
 
     Called whenever the observable content property changes.  This will setup
     observers on the content if needed.
@@ -318,7 +318,7 @@ SC.ObjectController = SC.Controller.extend(
 
   }.observes("observableContent"),
 
-  /** 
+  /**
     Called when observed enumerable content has changed.  This will teardown
     and setup observers on the enumerable content items and then calls
     contentPropertyDidChange().  This method may be called even if the new

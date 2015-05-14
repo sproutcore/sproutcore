@@ -85,7 +85,7 @@ SC.RESIZE_AUTOMATIC = 'sc-automatic-resize';
   @author Alex Iskander
 */
 SC.SplitView = SC.View.extend({
-  /**@scope SC.SplitView.prototype*/
+  /**@lends SC.SplitView.prototype*/
 
   /**
     @type Array
@@ -156,7 +156,7 @@ SC.SplitView = SC.View.extend({
   */
   splitChildCursorStyle: null,
 
-  /** 
+  /**
     Only occurs during drag, which only happens after render, so we
     update directly.
     @private
@@ -184,7 +184,7 @@ SC.SplitView = SC.View.extend({
   // UTILITIES
   //
   /**
-   * 
+   *
    * Returns either the width or the height of the SplitView's frame,
    * depending on the value of layoutDirection. If layoutDirection is
    * SC.LAYOUT_HORIZONTAL, this will return the SplitView's width; otherwise,
@@ -307,7 +307,7 @@ SC.SplitView = SC.View.extend({
   },
 
   /**
-   * 
+   *
    * During initialization and whenever the child views change, SplitView needs
    * to set some helper properties on the children and create any needed dividers.
    *
@@ -419,7 +419,7 @@ SC.SplitView = SC.View.extend({
   },
 
   /**
-   * 
+   *
    * Tiling is the simpler of two layout paths. Tiling lays out all of the
    * children according to their size, and, if shouldResizeChildrenToFit is
    * YES, attempts to resize the children to fit in the SplitView.
@@ -543,7 +543,7 @@ SC.SplitView = SC.View.extend({
   },
 
   /**
-   * 
+   *
    * Utility method used by splitViewResizeChildrenToFit to do the proportionate
    * sizing of child views.
    *
@@ -654,7 +654,7 @@ SC.SplitView = SC.View.extend({
   },
 
   /**
-   * 
+   *
    * Creates a plan in which to prepare changes to the SplitView's children.
    *
    * A plan is an array with the same number of elements as the SplitView has children.
@@ -697,7 +697,7 @@ SC.SplitView = SC.View.extend({
   },
 
   /**
-    * 
+    *
     * Resets a range of the plan to its original settings.
     *
     * @param {Plan} plan The plan.
@@ -713,7 +713,7 @@ SC.SplitView = SC.View.extend({
    },
 
   /**
-   * 
+   *
    * Commits the changes specified in the plan to the child views.
    *
    * @param {Plan} plan The plan with the changes.

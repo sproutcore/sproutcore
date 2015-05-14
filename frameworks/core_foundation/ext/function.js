@@ -5,16 +5,16 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-SC.mixin(Function.prototype, /** @scope Function.prototype */ {
+SC.mixin(Function.prototype, /** @lends Function.prototype */ {
 
   /**
-    Creates a timer that will execute the function after a specified 
+    Creates a timer that will execute the function after a specified
     period of time.
-    
+
     If you pass an optional set of arguments, the arguments will be passed
-    to the function as well.  Otherwise the function should have the 
+    to the function as well.  Otherwise the function should have the
     signature:
-    
+
         function functionName(timer)
 
     @param target {Object} optional target object to use as this
@@ -29,7 +29,7 @@ SC.mixin(Function.prototype, /** @scope Function.prototype */ {
       args.unshift(target);
       // f = f.bind.apply(f, args) ;
       var func = f ;
-      // Use "this" in inner func because it get its scope by 
+      // Use "this" in inner func because it get its scope by
       // outer func f (=target). Could replace "this" with target for clarity.
       f = function() { return func.apply(this, args.slice(1)); } ;
     }

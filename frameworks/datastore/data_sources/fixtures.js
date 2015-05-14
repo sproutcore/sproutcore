@@ -16,7 +16,7 @@ sc_require('models/record');
   @since SproutCore 1.0
 */
 SC.FixturesDataSource = SC.DataSource.extend(
-  /** @scope SC.FixturesDataSource.prototype */ {
+  /** @lends SC.FixturesDataSource.prototype */ {
 
   /**
     If YES then the data source will asynchronously respond to data requests
@@ -80,7 +80,7 @@ SC.FixturesDataSource = SC.DataSource.extend(
     } else this._fetch(store, query);
   },
 
-  /** 
+  /**
     Actually performs the fetch.
     @private
   */
@@ -378,7 +378,7 @@ SC.FixturesDataSource = SC.DataSource.extend(
     return ret ;
   },
 
-  /** 
+  /**
     Invalidates any internal caches based on the recordType and optional
     other parameters.  Currently this only invalidates the storeKeyCache used
     for fetch, but it could invalidate others later as well.

@@ -7,7 +7,7 @@
 sc_require("panes/pane");
 
 SC.Pane.reopen(
-  /** @scope SC.Pane.prototype */ {
+  /** @lends SC.Pane.prototype */ {
 
   performKeyEquivalent: function(keystring, evt) {
     var ret = sc_super() ; // try normal view behavior first
@@ -30,7 +30,7 @@ SC.Pane.reopen(
     return ret ;
   },
 
-  /** 
+  /**
     If the user presses the tab key and the pane does not have a first
     responder, try to give it to the next eligible responder.
 

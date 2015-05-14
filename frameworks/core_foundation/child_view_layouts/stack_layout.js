@@ -225,7 +225,7 @@ _SC_VIEW_STACK_PLUGIN.prototype.layoutChildViews = function (view) {
 
 
 SC.mixin(SC.View,
-  /** @scope SC.View */ {
+  /** @lends SC.View */ {
 
   /**
     This child layout plugin automatically positions the view's child views in a

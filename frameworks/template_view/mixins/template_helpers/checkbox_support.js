@@ -10,7 +10,7 @@ sc_require('views/template');
 /** @class */
 
 SC.Checkbox = SC.TemplateView.extend(
-  /** @scope SC.Checkbox.prototype */ {
+  /** @lends SC.Checkbox.prototype */ {
 
   title: null,
   value: null,
@@ -46,7 +46,7 @@ SC.Checkbox = SC.TemplateView.extend(
   }.property()
 });
 
-SC.CheckboxSupport = /** @scope SC.CheckboxSupport */{
+SC.CheckboxSupport = /** @lends SC.CheckboxSupport */{
   didCreateLayer: function() {
     this.$('input').change(jQuery.proxy(function() {
       SC.RunLoop.begin();

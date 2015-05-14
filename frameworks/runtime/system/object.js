@@ -295,7 +295,7 @@ SC.Object = function (props) {
   return this._object_init(props);
 };
 
-SC.mixin(SC.Object, /** @scope SC.Object */ {
+SC.mixin(SC.Object, /** @lends SC.Object */ {
 
   /**
     Adds the passed properties to the object's class definition.  You can

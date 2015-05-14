@@ -11,15 +11,15 @@
 */
 
 SC.AutoResizingMenuItemView = SC.MenuItemView.extend(SC.AutoResize,
-/** @scope SC.AutoResizingMenuItemView.prototype */ {
+/** @lends SC.AutoResizingMenuItemView.prototype */ {
 
   //
   // For automatic resizing, if enabled (to be enabled by parent menu)
   //
   /**
     The item view is capable of automatic resizing.
-    
-    
+
+
     @member
     @type {Boolean}
     @private
@@ -28,18 +28,18 @@ SC.AutoResizingMenuItemView = SC.MenuItemView.extend(SC.AutoResize,
 
   /**
     The menu item should NOT change its own width and height.
-    
-    
+
+
     @member
     @type {Boolean}
     @private
   */
   shouldAutoResize: NO,
-  
+
   /**
     If YES, the menu item will measure its width and height so that the menu
     can automatically resize itself. This is usually set by the parent menu.
-    
+
     @member
     @type {Boolean}
     @default NO
@@ -50,7 +50,7 @@ SC.AutoResizingMenuItemView = SC.MenuItemView.extend(SC.AutoResize,
   // would have to be migrated to render delegates first. MenuPane adds the
   // necessary padding for now.
   autoResizePadding: 0,
-  
+
   /**  @private */
   autoResizeText: function() {
     return this.get('title');
@@ -60,13 +60,13 @@ SC.AutoResizingMenuItemView = SC.MenuItemView.extend(SC.AutoResize,
   autoResizeLayer: function() {
     return this.$('.value')[0];
   }.property('layer').cacheable(),
-  
-  /** 
-    
+
+  /**
+
     The batch resize id is computed to be "good enough." It is unlikely that
     multiple menus of different size will need to resize at the same time, but
     we guard against this a little bit by giving it a name based on the menu's guid.
-    
+
     This won't cover cases where the menu has items of multiple sizes, but that's
     an edge case that can address the issue by overriding batchResizeId to null.
     @private
@@ -76,7 +76,7 @@ SC.AutoResizingMenuItemView = SC.MenuItemView.extend(SC.AutoResize,
   }.property().cacheable(),
 
   /**
-   * 
+   *
    * When we render, we recreate all of the DOM, including the element that gets measured.
    * This is a problem because our autoResizeLayer changes. So, we must invalidate that
    * layer whenever we re-render.
@@ -84,7 +84,7 @@ SC.AutoResizingMenuItemView = SC.MenuItemView.extend(SC.AutoResize,
    * We need to move menu item rendering into a render delegate. When this happens, there
    * are a few ways we could do it:
    *
-   * - Give render delegate method to find clientWidth and return it: 
+   * - Give render delegate method to find clientWidth and return it:
    *   getMenuItemTitleWidth(dataSource, $)
    *
    * - Make render delegate provide the autoResizeLayer:

@@ -81,7 +81,7 @@ SC.SCROLL = {
   @since SproutCore 1.0
 */
 SC.ScrollView = SC.View.extend({
-/** @scope SC.ScrollView.prototype */
+/** @lends SC.ScrollView.prototype */
 
   // ---------------------------------------------------------------------------------------------
   // Properties
@@ -309,7 +309,7 @@ SC.ScrollView = SC.View.extend({
   */
   decelerationRate: SC.SCROLL.DRAG_SCROLL_DECELERATION,
 
-  /** 
+  /**
     Whether to delay touches from passing through to the content. By default, if the touch moves enough to
     trigger a scroll within 150ms, this view will retain control of the touch, and content views will not
     have a chance to handle it. This is generally the behavior you want.
@@ -689,7 +689,7 @@ SC.ScrollView = SC.View.extend({
   */
   scrollLockGestureThreshold: SC.SCROLL.SCROLL_LOCK_GESTURE_THRESHOLD,
 
-  /** 
+  /**
     Once a vertical or horizontal scroll has been triggered, this determines how far (in pixels) the gesture
     must move on the other axis to trigger a two-axis scroll. If your scroll view's content is omnidirectional
     (e.g. a map) you should set this value to 0.
@@ -1301,7 +1301,7 @@ SC.ScrollView = SC.View.extend({
     }
   },
 
-  /** 
+  /**
     Calculates the maximum offset given content and container sizes, and the
     alignment.
     @private
@@ -1329,7 +1329,7 @@ SC.ScrollView = SC.View.extend({
     }
   },
 
-  /** 
+  /**
     Calculates the minimum offset given content and container sizes, and the
     alignment.
     @private
@@ -2085,7 +2085,7 @@ SC.ScrollView = SC.View.extend({
   // Interaction
   //
 
-  /** 
+  /**
     This method gives our descendent views a chance to capture the touch via captureTouch, and subsequently to handle the
     touch, via touchStart. If no view elects to do so, control is returned to the scroll view for standard scrolling.
     @private
@@ -2540,7 +2540,7 @@ SC.ScrollView = SC.View.extend({
     // Note: If the content view has already accepted the initial touch, it will be sent a touchCancelled event.
   },
 
-  /** 
+  /**
     If we're in hand-holding mode and our content claims the touch, we will receive a touchCancelled
     event at its completion. We still need to do most of our touch-ending wrap up, for example to finish
     bouncing back from a previous gesture.
@@ -2550,7 +2550,7 @@ SC.ScrollView = SC.View.extend({
     return this._sc_touchEnded(touch, true);
   },
 
-  /** 
+  /**
     If we are the touch's responder at its completion, we'll get a touchEnd event. If this is the
     gesture's last touch, we wrap up in spectacular fashion.
     @private
@@ -2618,7 +2618,7 @@ SC.ScrollView = SC.View.extend({
 
 
 SC.ScrollView.mixin(
-/** @scope SC.ScrollView */ {
+/** @lends SC.ScrollView */ {
 
   /**  Shared object used to avoid continually initializing/destroying objects. @private */
   _SC_CONTAINER_LAYOUT_MAP: null,

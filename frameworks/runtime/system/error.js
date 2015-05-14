@@ -40,7 +40,7 @@ sc_require('ext/function');
   @since SproutCore 1.0
 */
 SC.Error = SC.Object.extend(
-/** @scope SC.Error.prototype */ {
+/** @lends SC.Error.prototype */ {
 
   /**
     error code.  Used to designate the error type.

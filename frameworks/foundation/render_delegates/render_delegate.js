@@ -9,8 +9,8 @@
   @class
   Base class for all render delegates.
 
-  You should use SC.RenderDelegate or a subclass of it as the base for all 
-  of your render delegates. SC.RenderDelegate offers many helper methods 
+  You should use SC.RenderDelegate or a subclass of it as the base for all
+  of your render delegates. SC.RenderDelegate offers many helper methods
   and can be simpler to subclass between themes than `SC.Object`.
 
   Creating & Subclassing
@@ -34,8 +34,8 @@
 
   For render delegates, subclassing and instantiating are the same.
 
-  NOTE: Even though `.extend` and `.create` technically do the same thing, 
-  convention dictates that you use `.extend` for RenderDelegates that 
+  NOTE: Even though `.extend` and `.create` technically do the same thing,
+  convention dictates that you use `.extend` for RenderDelegates that
   will be used primarily as base classes, and `create` for RenderDelegates
   that you expect to be instances.
 
@@ -72,7 +72,7 @@
   for the padding to the left and right sides of the title.
 
   This padding will vary from theme to theme.
-  
+
   You can specify properties on the render delegate like any other property:
 
       MyRenderDelegate = SC.RenderDelegate.create({
@@ -144,7 +144,7 @@
 
   Sizing Helpers
   -------------------------
-  As discussed previously, you can create hashes of properties for each size. 
+  As discussed previously, you can create hashes of properties for each size.
   However, to support sizing, you must render the size's class name.
 
   Use the `addSizeClassName` and `updateSizeClassName` methods:
@@ -188,7 +188,7 @@
 
   Adding Custom Helpers
   ---------------------
-  You can mix your own helpers into this base class by calling 
+  You can mix your own helpers into this base class by calling
   SC.RenderDelegate.mixin; they will be available to all render delegates:
 
       SC.RenderDelegate.mixin({
@@ -206,7 +206,7 @@
       });
 
 
-  By convention, all render delegate methods should take a `dataSource` as 
+  By convention, all render delegate methods should take a `dataSource` as
   their first argument. If they do any rendering or updating, their second
   argument should be the `SC.RenderContext` or `jQuery` object to use.
 
@@ -260,15 +260,15 @@
     While render delegates are _usually_ completely stateless, there are
     cases where they may need to save some sort of state.
 */
-SC.RenderDelegate = /** @scope SC.RenderDelegate.prototype */{
-  
+SC.RenderDelegate = /** @lends SC.RenderDelegate.prototype */{
+
   // docs will look more natural if these are all considered instance
   // methods/properties.
 
   /**
     Creates a new render delegate based on this one. When you want to
     create a render delegate, you call this:
-   
+
         MyTheme.myRenderDelegate = SC.RenderDelegate.create({
           className: 'my-render-delegate',
           render: function(dataSource, context) {
@@ -289,13 +289,13 @@ SC.RenderDelegate = /** @scope SC.RenderDelegate.prototype */{
 
   /**
     Adds extra capabilities to this render delegate.
-   
+
     You can use this to add helpers to all render delegates:
-   
+
         SC.RenderDelegate.reopen({
           myHelperMethod: function(dataSource) { ... }
         });
-   
+
   */
   reopen: function(mixin) {
     var i, v;
@@ -329,7 +329,7 @@ SC.RenderDelegate = /** @scope SC.RenderDelegate.prototype */{
     it will be used to compute the value, `dataSource`
     being passed as an argument. Otherwise, it will simply
     be looked up on the render delegate.
-    
+
     NOTE: this implementation is a reference implementation. It
     is overridden in the sizing code (helpers/sizing.js) to be
     size-sensitive.
@@ -353,7 +353,7 @@ SC.RenderDelegate = /** @scope SC.RenderDelegate.prototype */{
     Writes the DOM representation of this render delegate to the
     supplied `SC.RenderContext`, using the supplied `dataSource`
     for any data needed.
-    
+
     @method
     @param {DataSource} dataSource An object from which to get
     data. See documentation on data sources above.
@@ -366,7 +366,7 @@ SC.RenderDelegate = /** @scope SC.RenderDelegate.prototype */{
   /**
     Updates the DOM representation of this render delegate using
     the supplied `jQuery` instance and `dataSource`.
-    
+
     @method
     @param {DataSource} dataSource An object from which to get
     data. See documentation on data sources above.

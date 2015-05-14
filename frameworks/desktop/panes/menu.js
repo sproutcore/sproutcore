@@ -59,7 +59,7 @@ sc_require('views/menu_item');
   @since SproutCore 1.0
 */
 SC.MenuPane = SC.PickerPane.extend(
-/** @scope SC.MenuPane.prototype */ {
+/** @lends SC.MenuPane.prototype */ {
 
   /**  Cache of the items array, used for clean up of observers. @private */
   _sc_menu_items: null,

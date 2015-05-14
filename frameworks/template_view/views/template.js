@@ -26,7 +26,7 @@ SC.TEMPLATES = SC.Object.create();
   @since SproutCore 1.5
 */
 SC.TemplateView = SC.CoreView.extend(
-/** @scope SC.TemplateView.prototype */ {
+/** @lends SC.TemplateView.prototype */ {
 
   // This makes it easier to build custom views on top of TemplateView without
   // gotchas, but may have tab navigation repercussions. The tab navigation

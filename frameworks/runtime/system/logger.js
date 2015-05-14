@@ -143,7 +143,7 @@ SC.LOGGER_LEVEL_NONE  = 'none';
   @see <a href="http://getfirebug.com/logging.html">Firebug Logging Reference</a>
 */
 SC.Logger = SC.Object.create(
-	/** @scope SC.Logger.prototype */{
+	/** @lends SC.Logger.prototype */{
 
   // ..........................................................
   // PROPERTIES

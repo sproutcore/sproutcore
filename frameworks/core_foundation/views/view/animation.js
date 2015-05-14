@@ -4,7 +4,7 @@
 // ==========================================================================
 sc_require("views/view");
 
-/** 
+/**
   Properties that can be animated
   (Hash for faster lookup)
   @private
@@ -81,7 +81,7 @@ SC.LayoutState = {
 
 
 SC.View.reopen(
-  /** @scope SC.View.prototype */ {
+  /** @lends SC.View.prototype */ {
 
   /**  Shared object used to avoid continually initializing/destroying objects. @private */
   _SC_DECOMPOSED_TRANSFORM_MAP: null,
@@ -437,7 +437,7 @@ SC.View.reopen(
     }
   },
 
-  /** 
+  /**
     Animates through the given frames.
 
     @param {Array} frames The array of frame objects.
@@ -553,7 +553,7 @@ SC.View.reopen(
     return this;
   },
 
-  /** 
+  /**
     This method is called after the layout style is applied to the layer.  If
     the platform didn't support CSS transitions, the callbacks will be fired
     immediately and the animations removed from the queue.
@@ -649,7 +649,7 @@ SC.View.reopen(
     return ret;
   },
 
-  /** 
+  /**
     Returns the live values of the properties being animated on a view while it
     is animating.  Getting the layout of the view after a call to animate will
     include the final values, some of which will not be the same as what they
@@ -814,7 +814,7 @@ SC.View.reopen(
     }
   },
 
-  /** 
+  /**
     Called when animation ends, should not usually be called manually
     @private
   */
@@ -851,7 +851,7 @@ SC.View.reopen(
     }
   },
 
-  /** 
+  /**
    This method is called before the layout style is applied to the layer.  If
    animations have been defined for the view, they will be included in
    this._pendingAnimations.  This method will clear out any conflicts between

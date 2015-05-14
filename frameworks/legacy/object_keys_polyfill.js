@@ -1,4 +1,4 @@
-/** @scope Object
+/** @lends Object
   Polyfill for Object.keys().
 
   Supports using `Object.keys()` on browsers prior to the following:

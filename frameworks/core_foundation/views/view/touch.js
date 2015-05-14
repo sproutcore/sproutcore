@@ -1,7 +1,7 @@
 sc_require("views/view");
 
 SC.View.reopen(
-  /** @scope SC.View.prototype */ {
+  /** @lends SC.View.prototype */ {
 
   // ..........................................................
   // MULTITOUCH SUPPORT
@@ -30,7 +30,7 @@ SC.View.reopen(
   */
   touchBoundary: { left: 25, right: 25, top: 25, bottom: 25 },
 
-  /** 
+  /**
     A computed property based on frame.
     @private
   */

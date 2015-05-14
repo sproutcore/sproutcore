@@ -47,7 +47,7 @@
   @author Juan Pablo Goldfinger
 */
 SC.DateFieldView = SC.TextFieldView.extend(
-/** @scope SC.DateFieldView.prototype */ {
+/** @lends SC.DateFieldView.prototype */ {
 
   /**
     @type String
@@ -193,7 +193,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
     return arr;
   }.property('format').cacheable(),
 
-  /** 
+  /**
     If the activeSelection changes or the value changes, update the "TextSelection" to show accordingly.
     @private
   */
@@ -205,7 +205,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
     }
   }.observes('activeSelection', 'value'),
 
-  /** 
+  /**
     Updates the value according the key.
     @private
   */

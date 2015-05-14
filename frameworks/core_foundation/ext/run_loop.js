@@ -8,7 +8,7 @@
 // Create anonymous subclass of SC.RunLoop to add support for processing
 // view queues and Timers.
 SC.RunLoop = SC.RunLoop.extend(
-/** @scope SC.RunLoop.prototype */ {
+/** @lends SC.RunLoop.prototype */ {
 
   /**
     The time the current run loop began executing.
@@ -113,7 +113,7 @@ SC.RunLoop = SC.RunLoop.extend(
     return didFire;
   },
 
-  /** 
+  /**
     Invoked at the end of a runloop, if there are pending timers, a timeout
     will be scheduled to fire when the next timer expires.  You will not
     usually call this method yourself.  It is invoked automatically at the

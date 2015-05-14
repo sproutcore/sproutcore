@@ -29,7 +29,7 @@
   @since SproutCore 1.0
 */
 SC.Response = SC.Object.extend(
-/** @scope SC.Response.prototype */ {
+/** @lends SC.Response.prototype */ {
 
   /**
     Walk like a duck
@@ -193,7 +193,7 @@ SC.Response = SC.Object.extend(
   }.property('encodedBody').cacheable(),
 
   /**
-    
+
     @deprecated Use body instead.
 
     Alias for body.
@@ -379,7 +379,7 @@ SC.Response = SC.Object.extend(
   cancelTransport: function() {},
 
   /**
-    
+
 
     Will notify each listener. Returns true if any of the listeners handle.
     @private
@@ -454,7 +454,7 @@ SC.Response = SC.Object.extend(
   @since SproutCore 1.0
 */
 SC.XHRResponse = SC.Response.extend(
-/** @scope SC.XHRResponse.prototype */{
+/** @lends SC.XHRResponse.prototype */{
 
   /**
     Implement transport-specific support for fetching all headers
@@ -638,7 +638,7 @@ SC.XHRResponse = SC.Response.extend(
   },
 
   /**
-    
+
 
     Called by the XHR when it responds with some final results.
 

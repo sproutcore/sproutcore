@@ -25,7 +25,7 @@ sc_require('private/tree_item_observer');
   @since SproutCore 1.0
 */
 SC.TreeController = SC.ObjectController.extend(SC.SelectionSupport,
-/** @scope SC.TreeController.prototype */ {
+/** @lends SC.TreeController.prototype */ {
 
   // ..........................................................
   // PROPERTIES
@@ -124,7 +124,7 @@ SC.TreeController = SC.ObjectController.extend(SC.SelectionSupport,
   canSelectGroups: NO,
 
   /**
-    
+
 
     Returns the first item in arrangedObjects that is not a group.  This uses
     a brute force approach right now; we assume you probably don't have a lot

@@ -66,7 +66,7 @@ SC.SMALL_CONTROL_SIZE = 'sc-small-size';
 SC.TINY_CONTROL_SIZE = 'sc-tiny-size';
 
 /**
-  
+
 
   A Control is a view that also implements some basic state functionality.
   Apply this mixin to any view that you want to have standard control
@@ -120,7 +120,7 @@ SC.TINY_CONTROL_SIZE = 'sc-tiny-size';
   @namespace
 */
 SC.Control = SC.mixin(SC.clone(SC.ContentValueSupport),
-/** @scope SC.Control.prototype */{
+/** @lends SC.Control.prototype */{
 
   /**
     Walk like a duck
@@ -238,7 +238,7 @@ SC.Control = SC.mixin(SC.clone(SC.ContentValueSupport),
   /**  @private */
   _CONTROL_TMP_CLASSNAMES: {},
 
-  /** 
+  /**
     Invoke this method in your updateDisplay() method to update any basic
     control CSS classes.
     @private

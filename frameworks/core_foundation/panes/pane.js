@@ -95,7 +95,7 @@ SC.MIXED_STATE = '__MIXED__' ;
   @since SproutCore 1.0
 */
 SC.Pane = SC.View.extend(SC.ResponderContext,
-/** @scope SC.Pane.prototype */ {
+/** @lends SC.Pane.prototype */ {
 
   /**
     Returns YES for easy detection of when you reached the pane.

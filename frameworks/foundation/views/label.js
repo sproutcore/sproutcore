@@ -25,7 +25,7 @@ sc_require('delegates/inline_text_field');
   @since SproutCore 1.0
 */
 SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditable,
-/** @scope SC.LabelView.prototype */ {
+/** @lends SC.LabelView.prototype */ {
 
   classNames: ['sc-label-view'],
 

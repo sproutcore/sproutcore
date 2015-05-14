@@ -9,14 +9,14 @@
 /**
   @class
 
-  Displays a horizontal or vertical separator line.  Simply create one of 
+  Displays a horizontal or vertical separator line.  Simply create one of
   these views and configure the layout direction and layout frame.
-  
+
   @extends SC.View
   @since SproutCore 1.0
 */
 SC.SeparatorView = SC.View.extend(
-/** @scope SC.SeparatorView.prototype */ {
+/** @lends SC.SeparatorView.prototype */ {
 
   /**
     @type Array
@@ -24,7 +24,7 @@ SC.SeparatorView = SC.View.extend(
     @see SC.View#classNames
   */
   classNames: ['sc-separator-view'],
-  
+
   /**
     @type String
     @default 'span'
@@ -32,12 +32,12 @@ SC.SeparatorView = SC.View.extend(
   */
   tagName: 'span',
 
-  /** 
+  /**
     Select the direction of the separator line. Possible values:
-    
+
       - SC.LAYOUT_VERTICAL
       - SC.LAYOUT_HORIZONTAL
-    
+
     @type String
     @default SC.LAYOUT_HORIZONTAL
   */

@@ -30,7 +30,7 @@ sc_require('views/button');
   @version 1.0
 */
 SC.PopupButtonView = SC.ButtonView.extend(
-/** @scope SC.PopupButtonView.prototype */ {
+/** @lends SC.PopupButtonView.prototype */ {
 
   /**
     @type Array
@@ -78,7 +78,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
   // INTERNAL SUPPORT
   //
 
-  /** 
+  /**
     If necessary, adds the loading of the menu to the background task queue.
     @private
   */
@@ -90,7 +90,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
     }
   },
 
-  /** 
+  /**
     Sets up binding on the menu, removing any old ones if necessary.
     @private
   */
@@ -107,7 +107,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
     }
   },
 
-  /** 
+  /**
     Setup the bindings for menu...
     @private
   */
@@ -115,13 +115,13 @@ SC.PopupButtonView = SC.ButtonView.extend(
     this._setupMenu();
   }.observes('menu'),
 
-  /** 
+  /**
     isActive is NO, but when the menu is instantiated, it is bound to the menu's isVisibleInWindow property.
     @private
   */
   isActive: NO,
 
-  /** 
+  /**
     Instantiates the menu if it is not already instantiated.
     @private
   */
@@ -139,7 +139,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
     this._setupMenu();
   },
 
-  /** 
+  /**
     The guaranteed-instantiated menu.
     @private
   */
@@ -160,7 +160,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
     return menu;
   }.property('menu').cacheable(),
 
-  /** 
+  /**
     Displays the menu.
 
     @param {SC.Event} evt
@@ -180,7 +180,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
     return YES;
   },
 
-  /** 
+  /**
     On mouse down, we set the state of the button, save some state for further
     processing, then call the button's action method.
 
@@ -227,7 +227,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
     return YES ;
   },
 
-  /** 
+  /**
     Because we responded YES to the mouseDown event, we have responsibility
     for handling the corresponding mouseUp event.
 
@@ -281,7 +281,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
     return YES;
   },
 
-  /** 
+  /**
     Overrides ButtonView's mouseExited method to remove the behavior where the
     active state is removed on mouse exit. We want the button to remain active
     as long as the menu is visible.
@@ -294,7 +294,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
     return YES;
   },
 
-  /** 
+  /**
     Overrides performKeyEquivalent method to pass any keyboard shortcuts to
     the menu.
 
@@ -323,7 +323,7 @@ SC.PopupButtonView = SC.ButtonView.extend(
 });
 
 /**
-  
+
   Handles lazy instantiation of popup button menu.
   @private
 */

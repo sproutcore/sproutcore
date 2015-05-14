@@ -6,7 +6,7 @@
 
 
 SC.mixin(SC.View,
-  /** @scope SC.View */ {
+  /** @lends SC.View */ {
 
   /** @class
 

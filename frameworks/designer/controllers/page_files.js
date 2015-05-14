@@ -16,7 +16,7 @@
   @extends SC.Object
 */
 SC.pageFilesController = SC.ArrayController.create(
-/** @scope SC.pageFilesController.prototype */ {
+/** @lends SC.pageFilesController.prototype */ {
 
 }) ;
 SC.pageFilesController.mixin({

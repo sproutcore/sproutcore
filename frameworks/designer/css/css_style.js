@@ -14,7 +14,7 @@
   @extends SC.Object
 */
 SC.CSSStyle = SC.Object.extend(
-/** @scope SC.CSSStyle.prototype */ {
+/** @lends SC.CSSStyle.prototype */ {
 
   /**
     a css string representing the style property

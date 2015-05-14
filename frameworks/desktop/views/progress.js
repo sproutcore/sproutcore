@@ -33,7 +33,7 @@
   @since SproutCore 1.0
 */
 SC.ProgressView = SC.View.extend(SC.Control,
-/** @scope SC.ProgressView.prototype */{
+/** @lends SC.ProgressView.prototype */{
 
   /**
     @type Array

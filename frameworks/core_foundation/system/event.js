@@ -33,7 +33,7 @@ SC.Event = function(originalEvent) {
   return this;
 };
 
-SC.mixin(SC.Event, /** @scope SC.Event */ {
+SC.mixin(SC.Event, /** @lends SC.Event */ {
 
   /**
     We need this because some browsers deliver different values

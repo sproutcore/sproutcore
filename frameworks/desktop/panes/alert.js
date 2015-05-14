@@ -214,7 +214,7 @@ SC.BUTTON3_STATUS = 'button3';
   @since SproutCore 1.0
 */
 SC.AlertPane = SC.PanelPane.extend(
-/** @scope SC.AlertPane.prototype */{
+/** @lends SC.AlertPane.prototype */{
 
   /**
     @type Array
@@ -462,7 +462,7 @@ SC.AlertPane = SC.PanelPane.extend(
     this.remove(); // hide alert
   },
 
-  /** 
+  /**
     Executes whenever one of the icon, message, description or caption is changed.
     This simply causes the UI to refresh.
     @private
@@ -475,7 +475,7 @@ SC.AlertPane = SC.PanelPane.extend(
 });
 
 SC.AlertPane.mixin(
-/** @scope SC.AlertPane */{
+/** @lends SC.AlertPane */{
 
   /**
     Show a dialog with a given set of hash attributes:
@@ -621,7 +621,7 @@ SC.AlertPane.mixin(
     return this.show(args);
   },
 
-  /** 
+  /**
     Set properties to new structure for call that use the old arguments
     structure.
 
@@ -662,7 +662,7 @@ SC.AlertPane.mixin(
     return ret;
   },
 
-  /** 
+  /**
     internal method normalizes arguments for processing by helper methods.
     @private
   */

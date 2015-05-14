@@ -283,7 +283,7 @@ SC.View.LayoutStyleCalculator = {
     else { return Math.floor(val); }
   },
 
-  /** 
+  /**
     Calculate the layout style for the given view, making adjustments to allow
     for flexible positioning, animation and accelerated transforms.
 
@@ -455,7 +455,7 @@ SC.View.LayoutStyleCalculator = {
 
 
 SC.View.reopen(
-  /** @scope SC.View.prototype */ {
+  /** @lends SC.View.prototype */ {
 
   /**  Shared object used to avoid continually initializing/destroying objects. @private */
   _SC_STYLE_MAP: null,

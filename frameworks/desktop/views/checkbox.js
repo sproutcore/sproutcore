@@ -22,7 +22,7 @@
   @since SproutCore 1.0
 */
 SC.CheckboxView = SC.ButtonView.extend(
-/** @scope SC.CheckboxView.prototype */ {
+/** @lends SC.CheckboxView.prototype */ {
 
   /**
     @type Array

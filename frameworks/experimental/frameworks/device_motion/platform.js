@@ -6,7 +6,7 @@
 // ==========================================================================
 
 SC.mixin(SC.platform,
-/** @scope SC.platform */ {
+/** @lends SC.platform */ {
 
   /**
     YES if the ondeviceorientation event on window is supported.

@@ -66,7 +66,7 @@
   @since SproutCore 1.7
 */
 SC.ActionSupport =
-/** @scope SC.ActionSupport.prototype */ {
+/** @lends SC.ActionSupport.prototype */ {
 
   //@if(debug)
   // Provide some debug-only developer warning support.

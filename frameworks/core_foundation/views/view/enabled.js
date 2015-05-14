@@ -1,7 +1,7 @@
 sc_require("views/view");
 
 SC.CoreView.mixin(
-  /** @scope SC.CoreView */ {
+  /** @lends SC.CoreView */ {
 
   /**
     The view is enabled.
@@ -49,7 +49,7 @@ SC.CoreView.mixin(
 
 
 SC.View.reopen(
-  /** @scope SC.View.prototype */ {
+  /** @lends SC.View.prototype */ {
 
   // ------------------------------------------------------------------------
   // Properties
@@ -178,7 +178,7 @@ SC.View.reopen(
   // Methods
   //
 
-  /** 
+  /**
     Observes the isEnabled property and resigns first responder if set to NO.
     This will avoid cases where, for example, a disabled text field retains
     its focus rings.

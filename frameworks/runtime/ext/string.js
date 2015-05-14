@@ -7,13 +7,13 @@
 
 sc_require('system/string');
 
-/** 
-  
+/**
+
   Extends String by adding a few helpful methods.
   @namespace
 */
 SC.mixin(String.prototype,
-/** @scope String.prototype */ {
+/** @lends String.prototype */ {
 
   /**
     @see SC.String.fmt

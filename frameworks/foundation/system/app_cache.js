@@ -143,7 +143,7 @@ SC.AppCacheTask = SC.Task.extend({
   @since Version 1.10
 */
 SC.appCache = SC.Object.create(
-/** @scope SC.appCache.prototype */{
+/** @lends SC.appCache.prototype */{
 
   // ------------------------------------------------------------------------
   // Properties

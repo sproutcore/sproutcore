@@ -20,7 +20,7 @@ sc_require('views/scroll_view');
   @since SproutCore 1.0
 */
 SC.MenuScrollView = SC.ScrollView.extend(
-/** @scope SC.MenuScrollView.prototype */{
+/** @lends SC.MenuScrollView.prototype */{
 
   // ---------------------------------------------------------------------------------------------
   // Properties
@@ -169,7 +169,7 @@ SC.MenuScrollView = SC.ScrollView.extend(
     }
   },
 
-  /** 
+  /**
     Instantiate scrollers & container views as needed.  Replace their classes
     in the regular properties.
     @private

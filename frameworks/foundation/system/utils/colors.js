@@ -10,7 +10,7 @@
   @deprecated
   @see SC.Color
  */
-SC.mixin ( /** @scope SC */ {
+SC.mixin ( /** @lends SC */ {
 
   /** Returns hex color from hsv value */
   convertHsvToHex: function (h, s, v) {

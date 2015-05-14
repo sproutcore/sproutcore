@@ -30,7 +30,7 @@ sc_require('views/collection');
   @since SproutCore 0.9
 */
 SC.StackedView = SC.CollectionView.extend(
-/** @scope SC.StackedView.prototype */ {
+/** @lends SC.StackedView.prototype */ {
 
   /**
     @type Array
@@ -107,7 +107,7 @@ SC.StackedView = SC.CollectionView.extend(
   // INTERNAL SUPPORT
   //
 
-  /** 
+  /**
     Whenever the collection view reloads some views, reset the cache on the
     frame as well so that it will recalculate.
     @private
@@ -118,7 +118,7 @@ SC.StackedView = SC.CollectionView.extend(
     return this.updateHeight();
   },
 
-  /** 
+  /**
     When layer is first created, make sure we update the height using the
     newly calculated value.
     @private

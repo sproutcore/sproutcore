@@ -25,7 +25,7 @@ sc_require('system/root_responder');
   @since SproutCore 1.0
 */
 SC.Application = SC.Responder.extend(SC.ResponderContext,
-/** @scope SC.Application.prototype */ {
+/** @lends SC.Application.prototype */ {
 
   /**  UNUSED
     The current design mode of the application and its views.

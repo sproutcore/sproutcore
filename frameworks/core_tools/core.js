@@ -12,7 +12,7 @@
 
   @extends SC.Object
 */
-CoreTools = SC.Object.create( /** @scope CoreTools.prototype */ {
+CoreTools = SC.Object.create( /** @lends CoreTools.prototype */ {
 
   NAMESPACE: 'CoreTools',
   VERSION: '1.0.0',

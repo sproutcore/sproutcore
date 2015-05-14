@@ -44,9 +44,9 @@ sc_require('views/segment');
   @since SproutCore 1.0
 */
 SC.SegmentedView = SC.View.extend(SC.Control,
-/** @scope SC.SegmentedView.prototype */ {
+/** @lends SC.SegmentedView.prototype */ {
 
-  /** 
+  /**
     @ field
     @type Boolean
     @default YES
@@ -57,7 +57,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     return NO;
   }.property('isEnabledInPane').cacheable(),
 
-  /** 
+  /**
     @type String
     @default 'tablist'
     @readOnly
@@ -66,7 +66,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   //ariaRole: 'tablist',
   ariaRole: 'group', // workaround for <rdar://problem/10444670>; switch back to 'tablist' later with <rdar://problem/10463928> (also see segment.js)
 
-  /** 
+  /**
     @type Array
     @default ['sc-segmented-view']
     @see SC.View#classNames
@@ -316,7 +316,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
    */
   shouldAutoResize: NO,
 
-  /** 
+  /**
     The following properties are used to map items to child views. Item keys
     are looked up on the item based on this view's value for each 'itemKey'.
     If a value in the item is found, then that value is mapped to a child
@@ -330,7 +330,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   /**  @private */
   viewKeys: ['title', 'value', 'isEnabled', 'icon', 'width', 'toolTip', 'keyEquivalent', 'layerId'],
 
-  /** 
+  /**
     Call itemsDidChange once to initialize segment child views for the items that exist at
     creation time.
     @private
@@ -375,7 +375,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     }
   }.observes('shouldHandleOverflow'),
 
-  /** 
+  /**
     Called whenever the number of items changes.  This method populates SegmentedView's childViews, taking
     care to re-use existing childViews if possible.
     @private
@@ -521,7 +521,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     }
   }.observes('*items.[]'),
 
-  /** 
+  /**
     This observer method is called whenever any of the relevant properties of an item change.  This only applies
     to SC.Object based items that may be observed.
     @private
@@ -543,7 +543,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     }
   },
 
-  /** 
+  /**
     Whenever the view resizes, we need to check to see if we're overflowing.
     @private
   */
@@ -559,7 +559,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     }
   },
 
-  /** 
+  /**
     Whenever visibility changes, we need to check to see if we're overflowing.
     @private
   */
@@ -569,7 +569,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     }
   }.observes('isVisibleInWindow'),
 
-  /** 
+  /**
     Calling this method forces the segments to be remeasured and will also adjust the
     segments for overflow if necessary.
     @private
@@ -596,7 +596,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     }
   },
 
-  /** 
+  /**
     This method is called to adjust the segment views to see if we need to handle for overflow.
     @private
    */
@@ -767,7 +767,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   // EVENT HANDLING
   //
 
-  /** 
+  /**
     Determines the index into the displayItems array where the passed mouse
     event occurred.
     @private
@@ -1101,7 +1101,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     return YES;
   },
 
-  /** 
+  /**
     Simulates the user clicking on the segment at the specified index. This
     will update the value if possible and fire the action.
     @private
@@ -1178,7 +1178,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     }
   },
 
-  /** 
+  /**
     Invoked whenever an item is selected in the overflow menu.
     @private
   */
@@ -1194,7 +1194,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     this.activeChildView = null;
   },
 
-  /** 
+  /**
     Presents the popup menu containing overflowed segments.
     @private
   */
@@ -1271,7 +1271,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     menu.addObserver("selectedItem", this, 'selectOverflowItem');
   },
 
-  /** 
+  /**
     Whenever the value changes, update the segments accordingly.
     @private
   */

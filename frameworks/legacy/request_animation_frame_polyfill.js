@@ -1,4 +1,4 @@
-/** @scope window
+/** @lends window
   Polyfill for cross-browser backwards compatible window.requestAnimationFrame support.
 
   Supports using `window.requestAnimationFrame` on browsers prior to the following:

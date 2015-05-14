@@ -30,7 +30,7 @@ sc_require("views/toolbar");
   @since SproutCore 1.2
 */
 SC.MasterDetailView = SC.View.extend(
-/** @scope SC.MasterDetailView.prototype */ {
+/** @lends SC.MasterDetailView.prototype */ {
 
   /**
     @type Array
@@ -236,7 +236,7 @@ SC.MasterDetailView = SC.View.extend(
   /**  @private */
   pointerDistanceFromEdge: 46,
 
-  /** 
+  /**
     Updates masterIsHidden in child views.
     @private
   */
@@ -246,7 +246,7 @@ SC.MasterDetailView = SC.View.extend(
     this.get("detailView").set("masterIsHidden", mih);
   }.observes("masterIsHidden"),
 
-  /** 
+  /**
     When the frame changes, we don't need to do anything. We use smart positioning.
     However, if the orientation were to change, well, then we might need to do something.
     @private
@@ -255,7 +255,7 @@ SC.MasterDetailView = SC.View.extend(
     this.invokeOnce("_scmd_tile");
   }.observes("orientation"),
 
-  /** 
+  /**
     Observes properties which require retiling.
     @private
   */
@@ -263,7 +263,7 @@ SC.MasterDetailView = SC.View.extend(
     this.invokeOnce("_scmd_tile");
   }.observes("masterIsHidden", "masterWidth"),
 
-  /** 
+  /**
     Instantiates master and detail views.
     @private
   */
@@ -281,7 +281,7 @@ SC.MasterDetailView = SC.View.extend(
   /**  @private */
   _masterIsDrawn: NO, // whether the master is in the view
 
-  /** 
+  /**
     Tiles the views as necessary.
     @private
   */

@@ -16,7 +16,7 @@ sc_require('views/separator');
   @since SproutCore 1.0
 */
 SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
-/** @scope SC.MenuItemView.prototype */ {
+/** @lends SC.MenuItemView.prototype */ {
 
   /**
     @type Array
@@ -243,7 +243,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
   // TODO: add update: support.
   isReusable: false,
 
-  /** 
+  /**
     Fills the passed html-array with strings that can be joined to form the
     innerHTML of the receiver element.  Also populates an array of classNames
     to set on the outer element.
@@ -314,7 +314,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     context = context.end();
   },
 
-  /** 
+  /**
    Generates the image used to represent the image icon. override this to
    return your own custom HTML
 
@@ -338,7 +338,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     context.begin('img').addClass('image').addClass(className).setAttr('src', url).end();
   },
 
-  /** 
+  /**
    Generates the label used to represent the menu item. override this to
    return your own custom HTML
 
@@ -355,7 +355,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     context.push("<span class='value ellipsis'>" + label + "</span>");
   },
 
-  /** 
+  /**
    Generates the string used to represent the branch arrow. override this to
    return your own custom HTML
 
@@ -367,7 +367,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     context.push('<span class="has-branch"></span>');
   },
 
-  /** 
+  /**
    Generates the string used to represent the short cut keys. override this to
    return your own custom HTML
 
@@ -411,7 +411,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     return YES;
   },
 
-  /** 
+  /**
     Called on mouse down to send the action to the target.
 
     This method will start flashing the menu item to indicate to the user that
@@ -455,7 +455,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     return YES;
   },
 
-  /** 
+  /**
     Actually sends the action of the menu item to the target.
     @private
   */
@@ -493,7 +493,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
 
   },
 
-  /** 
+  /**
     Toggles the focus class name on the menu item layer to quickly flash the
     highlight. This indicates to the user that a selection has been made.
 
@@ -547,7 +547,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     return YES;
   },
 
-  /** 
+  /**
     Set the focus based on whether the current menu item is selected or not.
     @private
   */
@@ -616,7 +616,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     }
   },
 
-  /** 
+  /**
     Call the moveUp function on the parent Menu
     @private
   */
@@ -628,7 +628,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     return YES;
   },
 
-  /** 
+  /**
     Call the moveDown function on the parent Menu
     @private
   */
@@ -640,7 +640,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     return YES;
   },
 
-  /** 
+  /**
     Call the function to create a branch
     @private
   */
@@ -649,7 +649,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     return YES;
   },
 
-  /** 
+  /**
     Proxies insertText events to the parent menu so items can be selected
     by typing their titles.
     @private
@@ -723,7 +723,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
   // CONTENT OBSERVING
   //
 
-  /** 
+  /**
     Add an observer to ensure that we invalidate our cached properties
     whenever the content object’s associated property changes.
     @private
@@ -747,7 +747,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
   }.observes('content'),
 
 
-  /** 
+  /**
     Invalidate our cached property whenever the content object’s associated
     property changes.
     @private
@@ -792,7 +792,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
 // CLASS PROPERTIES
 //
 
-/** 
+/**
   A mapping of the "content property key" keys to the properties we use to
   wrap them.  This hash is used in 'contentPropertyDidChange' to ensure that
   when the content changes a property that is locally cached inside the menu

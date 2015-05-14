@@ -17,7 +17,7 @@
   @extends SC.Object
 */
 SC.controllersController = SC.ArrayController.create(
-/** @scope SC.controllersController.prototype */ {
+/** @lends SC.controllersController.prototype */ {
 
 
 }) ;

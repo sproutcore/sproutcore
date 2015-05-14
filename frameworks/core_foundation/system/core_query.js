@@ -12,7 +12,7 @@ SC.$ = SC.CoreQuery = jQuery;
 
 // Add some plugins to SC.$. jQuery will get these also. -- test in system/core_query/additions
 SC.mixin(SC.$.fn,
-  /** @scope SC.$.prototype */ {
+  /** @lends SC.$.prototype */ {
 
   isCoreQuery: YES, // walk like a duck
 

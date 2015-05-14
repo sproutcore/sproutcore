@@ -125,7 +125,7 @@ SC.Set = SC.mixin({},
   SC.Observable,
   SC.Enumerable,
   SC.Freezable,
-/** @scope SC.Set.prototype */ {
+/** @lends SC.Set.prototype */ {
 
   /**
     Creates a new set, with the optional array of items included in the
@@ -461,7 +461,7 @@ SC.Set = SC.mixin({},
   },
 
   /**
-    
+
     Alerts set observers that an item has been added.
     @private
   */
@@ -478,7 +478,7 @@ SC.Set = SC.mixin({},
   },
 
   /**
-    
+
     Alerts set observers that an item has been removed.
     @private
   */

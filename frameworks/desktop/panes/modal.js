@@ -22,7 +22,7 @@
   @since SproutCore 1.0
 */
 SC.ModalPane = SC.Pane.extend(
-/** @scope SC.ModalPane.prototype */{
+/** @lends SC.ModalPane.prototype */{
 
   /**
     @type Array
@@ -34,7 +34,7 @@ SC.ModalPane = SC.Pane.extend(
   /**  @private */
   _openPaneCount: 0,
 
-  /** 
+  /**
     Called by a pane just before it appends itself.   The modal pane can
     make itself visible first if needed.
 
@@ -57,7 +57,7 @@ SC.ModalPane = SC.Pane.extend(
     return this ;
   },
 
-  /** 
+  /**
     Called by a pane just after it removes itself.  The modal pane can remove
     itself if needed.   Modal panes only remove themselves when an equal
     number of `paneWillAppend()` and `paneDidRemove()` calls are received.
@@ -83,7 +83,7 @@ SC.ModalPane = SC.Pane.extend(
     }
   },
 
-  /** 
+  /**
     If `focusable` is NO all SC.TextFieldViews not belonging to the given
     pane will have isBrowserFocusable set to NO.  If `focusable` is YES, then
     all SC.TextFieldViews not belonging to the given pane will have

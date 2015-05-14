@@ -11,7 +11,7 @@
   @extends SC.Record
 */
 CoreTools.Target = SC.Record.extend(
-/** @scope CoreTools.Target.prototype */ {
+/** @lends CoreTools.Target.prototype */ {
 
   primaryKey: "name",
 

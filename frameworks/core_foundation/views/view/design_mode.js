@@ -21,7 +21,7 @@ SC.DESIGN_MODE_CLASS_NAMES = {
 
 /**  This adds design modes support to SC.View. @private */
 SC.View.reopen(
-  /** @scope SC.View.prototype */ {
+  /** @lends SC.View.prototype */ {
 
   // ------------------------------------------------------------------------
   // Properties

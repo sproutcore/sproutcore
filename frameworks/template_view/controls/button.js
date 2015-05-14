@@ -13,7 +13,7 @@ sc_require('views/template');
   @extends SC.ActionSupport
 */
 SC.Button = SC.TemplateView.extend(SC.ActionSupport,
-/** @scope SC.Button.prototype */{
+/** @lends SC.Button.prototype */{
 
   classNames: ['sc-button'],
 

@@ -60,7 +60,7 @@
   @since SproutCore 1.0
 */
 SC.ContainerView = SC.View.extend(
-  /** @scope SC.ContainerView.prototype */ {
+  /** @lends SC.ContainerView.prototype */ {
 
   // ------------------------------------------------------------------------
   // Properties

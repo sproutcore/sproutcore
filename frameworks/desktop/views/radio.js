@@ -59,7 +59,7 @@
   @since SproutCore 1.0
 */
 SC.RadioView = SC.View.extend(SC.Control,
-/** @scope SC.RadioView.prototype */{
+/** @lends SC.RadioView.prototype */{
 
   /**
     @field
@@ -215,7 +215,7 @@ SC.RadioView = SC.View.extend(SC.Control,
   */
   itemIconKey: null,
 
-  /**  
+  /**
     If the items array itself changes, add/remove observer on item...
     @private
   */
@@ -230,7 +230,7 @@ SC.RadioView = SC.View.extend(SC.Control,
     this.itemContentDidChange();
   }.observes('items'),
 
-  /** 
+  /**
     Invoked whenever the item array or an item in the array is changed.
     This method will regenerate the list of items.
     @private
@@ -246,7 +246,7 @@ SC.RadioView = SC.View.extend(SC.Control,
   // PRIVATE SUPPORT
   //
 
-  /** 
+  /**
     Data Sources for radioRenderDelegates, as required by radioGroupRenderDelegate.
     @private
   */
@@ -342,7 +342,7 @@ SC.RadioView = SC.View.extend(SC.Control,
     return ret; // done!
   }.property('isEnabled', 'value', 'items', 'itemTitleKey', 'itemWidthKey', 'itemValueKey', 'itemIsEnabledKey', 'localize', 'itemIconKey','itemAriaLabeledByKey', 'itemAriaLabelKey').cacheable(),
 
-  /** 
+  /**
     If the user clicks on of the items mark it as active on mouseDown unless
     is disabled.
 
@@ -376,7 +376,7 @@ SC.RadioView = SC.View.extend(SC.Control,
     return YES;
   },
 
-  /** 
+  /**
     If we have a radio element that was clicked on previously, make sure we
     remove the active state. Then update the value if the item clicked is
     enabled.

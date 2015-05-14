@@ -26,7 +26,7 @@ sc_require('system/child_array');
   @since SproutCore 1.0
 */
 SC.ChildrenAttribute = SC.ChildAttribute.extend(
-  /** @scope SC.ChildrenAttribute.prototype */ {
+  /** @lends SC.ChildrenAttribute.prototype */ {
 
   // ..........................................................
   // LOW-LEVEL METHODS

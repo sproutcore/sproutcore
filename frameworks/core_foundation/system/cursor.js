@@ -44,7 +44,7 @@ SC.HELP_CURSOR = 'help';
   @extends SC.Object
 */
 SC.Cursor = SC.Object.extend(
-/** @scope SC.Cursor.prototype */ {
+/** @lends SC.Cursor.prototype */ {
 
   /**  @private */
   init: function () {

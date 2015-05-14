@@ -8,7 +8,7 @@ sc_require('views/template');
   @since SproutCore 1.5
 */
 SC.TemplateCollectionView = SC.TemplateView.extend(
-  /** @scope SC.TemplateCollectionView.prototype */{
+  /** @lends SC.TemplateCollectionView.prototype */{
   /**
     Name of the tag that is used for the collection
 
@@ -39,7 +39,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
   emptyView: null,
 
   /**
-    
+
     When the view is destroyed, remove array observers on the content array.
     @private
   */
@@ -169,7 +169,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
   }.property('itemView').cacheable(),
 
   /**
-    
+
 
     When the content property of the collection changes, remove any existing
     child views and observers, then set up an observer on the new content, if

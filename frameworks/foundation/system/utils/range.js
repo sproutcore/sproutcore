@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-SC.mixin( /** @scope SC */ {
+SC.mixin( /** @lends SC */ {
   /** A zero length range at zero. */
   ZERO_RANGE: { start: 0, length: 0 },
 

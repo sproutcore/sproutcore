@@ -21,7 +21,7 @@
 */
 
 SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
-  /** @scope SC.ManyArray.prototype */ {
+  /** @lends SC.ManyArray.prototype */ {
 
   //@if(debug)
   /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */
@@ -206,7 +206,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
   // ARRAY PRIMITIVES
   //
 
-  /** 
+  /**
     Returned length is a pass-through to the `storeIds` array.
 
     @type Number
@@ -218,7 +218,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return storeIds ? storeIds.get('length') : 0;
   }.property('readOnlyStoreIds'),
 
-  /** 
+  /**
     Looks up the store id in the store ids array and materializes a
     records.
     @private
@@ -259,7 +259,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return ret;
   },
 
-  /** 
+  /**
     Pass through to the underlying array.  The passed in objects must be
     records, which can be converted to `storeId`s.
     @private
@@ -550,7 +550,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     this.recordPropertyDidChange();
   },
 
-  /** 
+  /**
     This is called by the parent record whenever its properties change. It is
     also called by the ChildrenAttribute transform when the attribute is set
     to a new array.

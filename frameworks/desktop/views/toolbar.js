@@ -89,7 +89,7 @@ SC.ANCHOR_BOTTOM_RIGHT = { bottom: 0, right: 0 };
   @since SproutCore 1.0
 */
 SC.ToolbarView = SC.View.extend(
-/** @scope SC.ToolbarView.prototype */ {
+/** @lends SC.ToolbarView.prototype */ {
 
   /**
     @type Array

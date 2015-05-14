@@ -11,28 +11,28 @@
   A Page object is used to store a set of views that can be lazily configured
   as needed.  The page object works by overloading the get() method.  The
   first time you try to get the page
-  
+
   @extends SC.Object
 */
 SC.Page = SC.Object.extend(
-/** @scope SC.Page.prototype */ {
-  
+/** @lends SC.Page.prototype */ {
+
   /**
     When you create a page, you can set it's "owner" property to an
     object outside the page definition. This allows views in the page
     to use the owner object as a target, (as well as other objects
     accessible through the owner object). E.g.
-    
+
         myButton: SC.ButtonView.design({
           title: 'Click me',
           target: SC.outlet('page.owner'),
           action: 'buttonClicked'
         })
-    
+
     Usually, you'll set 'owner' to the object defined in core.js.
   */
   owner: null,
-  
+
   get: function(key) {
     var value = this[key] ;
     if (value && value.isClass) {
@@ -66,14 +66,14 @@ SC.Page = SC.Object.extend(
   }
 
   //needsDesigner: YES,
-  
+
   //inDesignMode: YES
-    
+
 }) ;
 
 // ..........................................................
 // SUPPORT FOR LOADING PAGE DESIGNS
-// 
+//
 
 /** Calling design() on a page is the same as calling create() */
 SC.Page.design = SC.Page.create ;

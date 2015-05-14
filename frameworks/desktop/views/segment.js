@@ -14,7 +14,7 @@
   @since SproutCore 1.5
 */
 SC.SegmentView = SC.View.extend(SC.Control,
-/** @scope SC.SegmentView.prototype */{
+/** @lends SC.SegmentView.prototype */{
 
   /**
     @type String
@@ -176,7 +176,7 @@ SC.SegmentView = SC.View.extend(SC.Control,
   */
   localItem: null,
 
-  /** 
+  /**
     Whenever the width property changes, adjust our layout accordingly.
     @private
   */
@@ -184,7 +184,7 @@ SC.SegmentView = SC.View.extend(SC.Control,
     this.adjust('width', this.get('width'));
   }.observes('width'),
 
-  /** 
+  /**
     Update our properties according to our matching item.
     @private
   */

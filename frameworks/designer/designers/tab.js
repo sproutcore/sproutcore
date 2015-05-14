@@ -9,12 +9,12 @@
 sc_require('designers/view_designer');
 
 SC.TabView.Designer = SC.ViewDesigner.extend(
-/** @scope SC.TabView.Designer.prototype */ {
-  
+/** @lends SC.TabView.Designer.prototype */ {
+
   encodeChildViews: NO,
-  
+
   acceptRootDesigner: YES,
-  
+
   designProperties: ['nowShowing', 'items', 'itemTitleKey', 'itemValueKey', 'itemIsEnabledKey', 'itemIconKey', 'itemWidthKey', 'tabLocation', 'userDefaultKey']
-  
+
 });

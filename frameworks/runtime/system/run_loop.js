@@ -47,7 +47,7 @@ if (!SC.LOG_DEFERRED_CALLS) SC.LOG_DEFERRED_CALLS = false;
   @since SproutCore 1.0
 */
 SC.RunLoop = SC.Object.extend(
-  /** @scope SC.RunLoop.prototype */ {
+  /** @lends SC.RunLoop.prototype */ {
 
   /**
     Call this method whenver you begin executing code.
@@ -360,7 +360,7 @@ SC.RunLoop = SC.Object.extend(
     return hadContent;
   },
 
-  /** 
+  /**
     Schedules the run loop to run at the given time.  If the run loop is
     already scheduled to run earlier nothing will change, but if the run loop
     is not scheduled or it is scheduled later, then it will be rescheduled
@@ -385,7 +385,7 @@ SC.RunLoop = SC.Object.extend(
     return this._timeout;
   },
 
-  /** 
+  /**
     Invoked when a timeout actually fires.  Simply cleanup, then begin and end
     a runloop. Note that this function will be called with 'this' set to the
     global context, hence the need to lookup the current run loop.

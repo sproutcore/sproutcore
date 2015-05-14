@@ -21,7 +21,7 @@
   @author Michael Cohen
 */
 SC.StateRouteHandlerContext = SC.Object.extend(
-  /** @scope SC.StateRouteContext.prototype */{
+  /** @lends SC.StateRouteContext.prototype */{
 
   /**
     The state that constructed this context object.

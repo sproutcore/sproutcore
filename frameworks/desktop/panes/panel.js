@@ -27,7 +27,7 @@ sc_require('panes/modal');
   @since SproutCore 1.0
 */
 SC.PanelPane = SC.Pane.extend(
-/** @scope SC.PanelPane.prototype */ {
+/** @lends SC.PanelPane.prototype */ {
 
   /**
     Walk like a duck.

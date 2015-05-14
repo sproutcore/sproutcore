@@ -1,4 +1,4 @@
-SC.mixin( /** @scope SC */ {
+SC.mixin( /** @lends SC */ {
   /**
     This function is similar to SC.metricsForString, but takes an extra argument after the string and before the exampleElement.
     That extra argument is *maxWidth*, which is the maximum allowable width in which the string can be displayed. This function

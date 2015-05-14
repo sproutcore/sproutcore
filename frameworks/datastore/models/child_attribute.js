@@ -24,7 +24,7 @@ sc_require('models/record_attribute');
   @since SproutCore 1.0
 */
 SC.ChildAttribute = SC.RecordAttribute.extend(
-  /** @scope SC.ChildAttribute.prototype */ {
+  /** @lends SC.ChildAttribute.prototype */ {
 
   isNestedRecordTransform: YES,
 

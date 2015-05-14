@@ -16,7 +16,7 @@
   @extends SC.Object
 */
 SC.designController = SC.ObjectController.create(
-/** @scope SC.designController.prototype */ {
+/** @lends SC.designController.prototype */ {
 
   contentBinding: 'SC.designsController.selection',
   contentBindingDefault: SC.Binding.single(),

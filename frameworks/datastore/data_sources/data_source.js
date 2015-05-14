@@ -206,7 +206,7 @@ SC.MIXED_STATE = '__MIXED__';
   @extend SC.Object
   @since SproutCore 1.0
 */
-SC.DataSource = SC.Object.extend( /** @scope SC.DataSource.prototype */ {
+SC.DataSource = SC.Object.extend( /** @lends SC.DataSource.prototype */ {
 
   // ..........................................................
   // SC.STORE ENTRY POINTS
@@ -440,7 +440,7 @@ SC.DataSource = SC.Object.extend( /** @scope SC.DataSource.prototype */ {
     return this._handleEach(store, storeKeys, this.destroyRecord, null, params);
   },
 
-  /** 
+  /**
     invokes the named action for each store key.  returns proper value
     @private
   */

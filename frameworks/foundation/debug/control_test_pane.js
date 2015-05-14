@@ -35,7 +35,7 @@
   @since SproutCore 1.0
 */
 SC.ControlTestPane = SC.Pane.extend(
-/** @scope SC.ControlTestPane.prototype */ {
+/** @lends SC.ControlTestPane.prototype */ {
 
   classNames: ['sc-control-test-pane'],
   layout: { right: 20, width: 350, top: 65, bottom: 5 },

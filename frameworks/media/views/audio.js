@@ -30,7 +30,7 @@ sc_require('media_capabilities');
 */
 
 SC.AudioView = SC.View.extend(
-/** @scope SC.AudioView.prototype */{
+/** @lends SC.AudioView.prototype */{
 
   /**
     Audio view className.

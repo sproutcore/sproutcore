@@ -28,7 +28,7 @@ sc_require('mixins/selection_support');
   @since SproutCore 1.0
 */
 SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
-/** @scope SC.ArrayController.prototype */ {
+/** @lends SC.ArrayController.prototype */ {
 
   //@if(debug)
   /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */
@@ -282,7 +282,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     return content ? content.get('length') : 0;
   }.property().cacheable(),
 
-  /** 
+  /**
     Returns the object at the specified index based on the observable content
     @private
   */
@@ -291,7 +291,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     return content ? content.objectAt(idx) : undefined;
   },
 
-  /** 
+  /**
     Forwards a replace on to the content, but only if reordering is allowed.
     @private
   */
@@ -342,7 +342,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     this._scac_contentDidChange();
   },
 
-  /** 
+  /**
     Cached observable content property.  Set to NO to indicate cache is
     invalid.
     @private
@@ -350,7 +350,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   _scac_cached: NO,
 
   /**
-    
+
 
     Returns the current array this controller is actually managing.  Usually
     this should be the same as the content property, but sometimes we need to
@@ -475,7 +475,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     this.updateSelectionAfterContentChange();
   },
 
-  /** 
+  /**
     Whenever content changes, setup and teardown observers on the content
     as needed.
     @private
@@ -553,7 +553,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     this.updateSelectionAfterContentChange();
   }.observes('content'),
 
-  /** 
+  /**
     Whenever enumerable content changes, need to regenerate the
     observableContent and notify that the range has changed.
 
@@ -576,7 +576,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     this.updateSelectionAfterContentChange();
   }.observes('orderBy'),
 
-  /** 
+  /**
     Whenever the content "status" property changes, relay out.
     @private
   */

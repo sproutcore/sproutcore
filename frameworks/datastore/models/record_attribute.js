@@ -46,7 +46,7 @@ sc_require('models/record');
   @since SproutCore 1.0
 */
 SC.RecordAttribute = SC.Object.extend(
-  /** @scope SC.RecordAttribute.prototype */ {
+  /** @lends SC.RecordAttribute.prototype */ {
   /**
     Walk like a duck.
 
@@ -238,7 +238,7 @@ SC.RecordAttribute = SC.Object.extend(
   },
 
   /**
-    
+
 
     Shared observer used by any attribute whose transform creates a seperate
     object that needs to write back to the datahash when it changes. For
@@ -354,7 +354,7 @@ SC.RecordAttribute = SC.Object.extend(
 //
 
 SC.RecordAttribute.mixin(
-  /** @scope SC.RecordAttribute.prototype */{
+  /** @lends SC.RecordAttribute.prototype */{
   /**
     The default method used to create a record attribute instance.  Unlike
     `create()`, takes an `attributeType` as the first parameter which will be
@@ -372,7 +372,7 @@ SC.RecordAttribute.mixin(
     return this.create(opts);
   },
 
-  /** 
+  /**
     Hash of registered transforms by class guid.
     @private
   */
@@ -592,7 +592,7 @@ if (SC.DateTime && !SC.RecordAttribute.transforms[SC.guidFor(SC.DateTime)]) {
 
   SC.RecordAttribute.registerTransform(SC.DateTime, {
 
-    /** 
+    /**
       Convert a String to a DateTime
       @private
     */
@@ -608,7 +608,7 @@ if (SC.DateTime && !SC.RecordAttribute.transforms[SC.guidFor(SC.DateTime)]) {
       return SC.DateTime.parse(str, format ? format : SC.DateTime.recordFormat);
     },
 
-    /** 
+    /**
       Convert a DateTime to a String
       @private
     */

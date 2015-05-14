@@ -34,7 +34,7 @@ SC._ROTATION_VALUE_REGEX = /^\-?\d+(\.\d*)?(rad|deg)$/;
 SC._SCALE_VALUE_REGEX = /^\d+(,\d+){0,2}$/;
 
 SC.View.reopen(
-  /** @scope SC.View.prototype */ {
+  /** @lends SC.View.prototype */ {
 
   // ------------------------------------------------------------------------
   // Properties
@@ -1440,7 +1440,7 @@ SC.View.reopen(
 });
 
 SC.View.mixin(
-  /** @scope SC.View */ {
+  /** @lends SC.View */ {
 
   /**
     Convert any layout to a Top, Left, Width, Height layout

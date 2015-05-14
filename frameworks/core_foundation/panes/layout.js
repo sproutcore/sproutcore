@@ -6,7 +6,7 @@
 // ==========================================================================
 sc_require("panes/pane");
 SC.Pane.reopen(
-  /** @scope SC.Pane.prototype */ {
+  /** @lends SC.Pane.prototype */ {
 
   /**
     Last known window size.

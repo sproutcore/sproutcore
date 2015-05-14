@@ -23,7 +23,7 @@ sc_require('validators/validator') ;
   @since SproutCore 1.0
 */
 SC.Validator.CreditCard = SC.Validator.extend(
-/** @scope SC.Validator.CreditCard.prototype */ {
+/** @lends SC.Validator.CreditCard.prototype */ {
 
   /**
     Expects a string of 16 digits.  Will split into groups of 4 for display.

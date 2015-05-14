@@ -30,7 +30,7 @@
   @since SproutCore 1.0
 */
 SC.Controller = SC.Object.extend(
-/** @scope SC.Controller.prototype */ {
+/** @lends SC.Controller.prototype */ {
 
   /**
     Makes a controller editable or not editable.  The SC.Controller class

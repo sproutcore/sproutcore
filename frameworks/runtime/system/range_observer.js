@@ -20,7 +20,7 @@
 
   @since SproutCore 1.0
 */
-SC.RangeObserver = /** @scope SC.RangeObserver.prototype */{
+SC.RangeObserver = /** @lends SC.RangeObserver.prototype */{
 
   /**
     Walk like a duck.
@@ -140,7 +140,7 @@ SC.RangeObserver = /** @scope SC.RangeObserver.prototype */{
     return this;
   },
 
-  /** 
+  /**
     Called when an object that appears to need range observers has changed.
     Check to see if the range observer contains this object in its list.  If
     it does, go ahead and setup observers on all objects and remove ourself

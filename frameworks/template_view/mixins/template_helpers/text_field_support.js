@@ -10,13 +10,13 @@ sc_require('views/template');
 /**
   @class
 */
-SC.TextFieldSupport = /** @scope SC.TextFieldSupport */{
+SC.TextFieldSupport = /** @lends SC.TextFieldSupport */{
 
   $input: function() {
     return this.$('input');
   },
 
-  /** 
+  /**
     Used internally to store value because the layer may not exist
     @private
   */
@@ -107,7 +107,7 @@ SC.TextFieldSupport = /** @scope SC.TextFieldSupport */{
     return YES;
   },
 
-  /** 
+  /**
     Make sure our input value is synced with any bindings.
     In some cases, such as auto-filling, a value can get
     changed without an event firing. We could do this
@@ -133,7 +133,7 @@ SC.TextFieldSupport = /** @scope SC.TextFieldSupport */{
     }
   },
 
-  /** 
+  /**
     RootResponder will call this function whenever a selection
     event has occurred, for instance a select all. Simply return
     true so that all selection events bubble up to the browser,
@@ -152,7 +152,7 @@ SC.TextFieldSupport = /** @scope SC.TextFieldSupport */{
   @extends SC.TextFieldSupport
 */
 SC.TextField = SC.TemplateView.extend(SC.TextFieldSupport,
-/** @scope SC.TextField.prototype */ {
+/** @lends SC.TextField.prototype */ {
 
   classNames: ['sc-text-field'],
 

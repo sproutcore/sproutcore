@@ -6,7 +6,7 @@
 // ==========================================================================
 
 /**  @private */
-SC.Tree = /** @scope SC.Tree.prototype */ {
+SC.Tree = /** @lends SC.Tree.prototype */ {
 
   /**  Call the method recursively on all child views. @private */
   invoke: function (methodName, isTopDown, context) {

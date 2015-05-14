@@ -258,14 +258,14 @@ SC.EMPTY_PLACEHOLDER = '@@EMPTY@@';
 
   @since SproutCore 1.0
 */
-SC.Binding = /** @scope SC.Binding.prototype */{
+SC.Binding = /** @lends SC.Binding.prototype */{
 
   /**
     Quack.
   */
   isBinding: YES,
 
-  /** 
+  /**
     This is the core method you use to create a new binding instance.  The
     binding instance will have the receiver instance as its parent which means
     any configuration you have there will be inherited.
@@ -292,7 +292,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     return ret;
   },
 
-  /** 
+  /**
     Returns a builder function for compatibility.
     @private
   */
@@ -378,7 +378,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     return this;
   },
 
-  /** 
+  /**
     Actually connects the binding.  This is done at the end of the runloop
     to give you time to setup your entire object graph before the bindings
     try to activate.
@@ -477,7 +477,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     return this;
   },
 
-  /** 
+  /**
     Indicates when the binding has been destroyed.
 
     @type Boolean
@@ -486,11 +486,11 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   */
   isDestroyed: NO,
 
-  /** 
+  /**
     Disconnects the binding and removes all properties and external references. Called by
     either binding target object when destroyed.
 
-    
+
     @private
   */
   destroy: function () {
@@ -518,7 +518,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     this._toObserverData = this._fromObserverData = null;
   },
 
-  /** 
+  /**
     Invoked whenever the value of the "from" property changes.  This will mark
     the binding as dirty if the value has changed.
 
@@ -554,7 +554,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     }
   },
 
-  /** 
+  /**
     Invoked whenever the value of the "to" property changes.  This will mark the
     binding as dirty only if:
 
@@ -604,7 +604,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     setTimeout(function () { SC.run(); SC.Binding._syncScheduled = NO; }, 1);
   },
 
-  /** 
+  /**
     Saves the source location for the binding value.  This will be used later
     to actually update the binding value.
     @private
@@ -614,7 +614,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     this._bindingKey    = key;
   },
 
-  /** 
+  /**
     Updates the binding value from the current binding source if needed.  This
     should be called just before using this._bindingValue.
     @private
@@ -628,7 +628,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     this._transformedBindingValue = this._computeTransformedValue(v);
   },
 
-  /** 
+  /**
     Applies transforms to the value and returns the transfomed value.
     @param {*} value Binding value to transform
     @returns {*} Transformed value
@@ -660,7 +660,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   _changeQueue: SC.CoreSet.create(),
   _alternateChangeQueue: SC.CoreSet.create(),
 
-  /** 
+  /**
     Call this method on SC.Binding to flush all bindings with changes pending.
 
     @returns {Boolean} YES if changes were flushed.
@@ -716,7 +716,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     return didFlush;
   },
 
-  /** 
+  /**
     This method is called at the end of the Run Loop to relay the changed
     binding value from one side to the other.
     @private
@@ -832,7 +832,7 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     return this;
   },
 
-  /** 
+  /**
     set if you call sync() when the binding connection is still pending.
     @private
    */

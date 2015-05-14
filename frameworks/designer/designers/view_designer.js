@@ -35,7 +35,7 @@ sc_require('views/high_light');
   @since SproutCore 1.0
 */
 SC.ViewDesigner = SC.Object.extend(
-/** @scope SC.ViewDesigner.prototype */ {
+/** @lends SC.ViewDesigner.prototype */ {
 
   /** The view managed by this designer. */
   view: null,

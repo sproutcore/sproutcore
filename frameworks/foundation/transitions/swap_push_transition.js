@@ -7,7 +7,7 @@ sc_require('views/container');
 
 
 SC.mixin(SC.ContainerView,
-/** @scope SC.ContainerView */ {
+/** @lends SC.ContainerView */ {
   /** @class
     Provides push transitions to SC.ContainerView.  The new content will push
     the old content out of the view.

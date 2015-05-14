@@ -45,7 +45,7 @@ SC.BLANK_IMAGE.width = SC.BLANK_IMAGE.height = 1;
   @since SproutCore 1.0
 */
 SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
-/** @scope SC.ImageView.prototype */ {
+/** @lends SC.ImageView.prototype */ {
 
   classNames: 'sc-image-view',
 
@@ -76,7 +76,7 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
   */
   canLoadInBackground: NO,
 
-  /** 
+  /**
     @type Image
     @default SC.BLANK_IMAGE
     @private
@@ -84,7 +84,7 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
   image: SC.BLANK_IMAGE,
 
 
-  /** 
+  /**
     The frame for the inner img element or for the canvas to draw within, altered according to the scale
     and align properties provided by SC.InnerFrame.
 
@@ -263,7 +263,7 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
   // Value handling
   //
 
-  /** 
+  /**
     Whenever the value changes, update the image state and possibly schedule
     an image to load.
     @private
@@ -286,7 +286,7 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
     }
   }.observes('value'),
 
-  /** 
+  /**
     Tries to load the image value using the SC.imageQueue object. If the value is not
     a URL, it won't attempt to load it using this method.
 
@@ -322,7 +322,7 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
     }
   },
 
-  /** 
+  /**
     Loads an image using a normal Image object, without using the SC.imageQueue.
 
     @returns YES if it will load, NO otherwise

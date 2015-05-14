@@ -10,12 +10,12 @@
  * @author Alex Iskander
  */
 SC.PopupButtonView = SC.ButtonView.extend({
-  /** @scope SC.PopupButtonView.prototype */
+  /** @lends SC.PopupButtonView.prototype */
 
 
   /**
     The render delegate to use to render and update the HTML for the PopupButton.
-    
+
     @type String
     @default 'popupButtonRenderDelegate'
   */
@@ -24,7 +24,7 @@ SC.PopupButtonView = SC.ButtonView.extend({
   /**
     The menu that will pop up when this button is clicked. This can be a class or
     an instance.
-    
+
     @type {SC.MenuPane}
     @default SC.MenuPane
   */
@@ -32,7 +32,7 @@ SC.PopupButtonView = SC.ButtonView.extend({
 
   /**
     If YES, a menu instantiation task will be placed in SproutCore's
-    `SC.backgroundTaskQueue` so the menu will be instantiated before 
+    `SC.backgroundTaskQueue` so the menu will be instantiated before
     the user taps the button, improving response time.
 
     @type Boolean
@@ -42,24 +42,24 @@ SC.PopupButtonView = SC.ButtonView.extend({
   shouldLoadInBackground: NO,
 
   /**
-   * 
+   *
    * If YES, the menu has been instantiated; if NO, the 'menu' property
    * still has a class instead of an instance.
     @private
   */
   _menuIsLoaded: NO,
 
-  /** 
+  /**
     isActive is NO, but when the menu is instantiated, it is bound to the menu's isVisibleInWindow property.
     @private
   */
   isActive: NO,
 
   acceptsFirstResponder: YES,
-  
+
 
   /**
-    
+
     @private
   */
   init: function() {
@@ -76,9 +76,9 @@ SC.PopupButtonView = SC.ButtonView.extend({
   /**
     Adds menu instantiation to the background task queue if the menu
     is not already instantiated and if shouldLoadInBackground is YES.
-    
+
     @method
-    
+
     @private
    */
   scheduleMenuSetupIfNeeded: function() {
@@ -94,7 +94,7 @@ SC.PopupButtonView = SC.ButtonView.extend({
     // first, check if we are the ones who changed the property
     // by setting it to the instantiated menu
     var menu = this.get('menu');
-    if (menu === this._currentMenu) { 
+    if (menu === this._currentMenu) {
       return;
     }
 
@@ -131,7 +131,7 @@ SC.PopupButtonView = SC.ButtonView.extend({
   /**
     Called to instantiate a menu. You can override this to set properties
     such as the menu's width or the currently selected item.
-    
+
     @param {SC.MenuPane} menu The MenuPane class to instantiate.
   */
   createMenu: function(menu) {
@@ -141,7 +141,7 @@ SC.PopupButtonView = SC.ButtonView.extend({
 
   /**
     Shows the PopupButton's menu. You can call this to show it manually.
-    
+
     NOTE: The menu will not be shown until the end of the Run Loop.
   */
   showMenu: function() {
@@ -164,7 +164,7 @@ SC.PopupButtonView = SC.ButtonView.extend({
 
   /**
     The prefer matrix (positioning information) to use to pop up the new menu.
-    
+
     @member
     @type Array
     @default [0, 0, 0]
@@ -172,7 +172,7 @@ SC.PopupButtonView = SC.ButtonView.extend({
   menuPreferMatrix: [0, 0, 0],
 
   /**
-    
+
     The actual showing of the menu is delayed because bindings may need
     to flush.
     @private
@@ -191,9 +191,9 @@ SC.PopupButtonView = SC.ButtonView.extend({
     this.set('_mouseDown', YES);
 
     this.showMenu();
-    
+
     this._mouseDownTimestamp = null;
-    
+
     // Some nutty stuff going on here. If the number of menu items is large, and
     // it takes over 400 ms to create, then invokeLater will not return control
     // to the browser, thereby causing the menu pane to dismiss itself
@@ -209,7 +209,7 @@ SC.PopupButtonView = SC.ButtonView.extend({
     setTimeout(function() {
       self._mouseDownTimestamp = Date.now();
     }, 1);
-    
+
     this.becomeFirstResponder();
 
     return YES;
@@ -252,8 +252,8 @@ SC.PopupButtonView = SC.ButtonView.extend({
   },
 
   /**
-    
-    
+
+
     Shows the menu when the user presses Enter. Otherwise, hands it off to button
     to decide what to do.
     @private
@@ -280,22 +280,22 @@ SC.PopupButtonView = SC.ButtonView.extend({
 
 /**
   @class
-  
+
   An SC.Task that handles instantiating a PopupButtonView's menu. It is used
   by SC.PopupButtonView to instantiate the menu in the backgroundTaskQueue.
 */
 SC.PopupButtonView.InstantiateMenuTask = SC.Task.extend(
-  /**@scope SC.PopupButtonView.InstantiateMenuTask.prototype */ {
-    
+  /**@lends SC.PopupButtonView.InstantiateMenuTask.prototype */ {
+
   /**
     The popupButton whose menu should be instantiated.
-    
+
     @member
     @type {SC.PopupButtonView}
     @default null
   */
   popupButton: null,
-  
+
   /** Instantiates the menu. */
   run: function(queue) {
     this.popupButton.setupMenu();

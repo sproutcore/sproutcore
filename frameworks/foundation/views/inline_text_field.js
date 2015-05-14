@@ -88,7 +88,7 @@ sc_require('mixins/inline_editor');
   @since SproutCore 1.0
 */
 SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
-/** @scope SC.InlineTextFieldView.prototype */ {
+/** @lends SC.InlineTextFieldView.prototype */ {
   classNames: ['inline-editor'],
 
   /**
@@ -344,7 +344,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
 
   /**
     @method
-    
+
 
     Called by commitEditing and discardEditing to actually end editing.
 

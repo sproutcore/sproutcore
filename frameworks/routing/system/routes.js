@@ -38,7 +38,7 @@
   in the URLs, so that all your website's URLs are consistent.
 */
 SC.routes = SC.Object.create(
-  /** @scope SC.routes.prototype */{
+  /** @lends SC.routes.prototype */{
 
   /**
     Set this property to YES if you want to use HTML5 history, if available on
@@ -99,7 +99,7 @@ SC.routes = SC.Object.create(
   */
   baseURI: document.baseURI,
 
-  /** 
+  /**
     A boolean value indicating whether or not the ping method has been called
     to setup the SC.routes.
 
@@ -109,7 +109,7 @@ SC.routes = SC.Object.create(
   */
   _didSetup: NO,
 
-  /** 
+  /**
     Internal representation of the current location hash.
 
     @member
@@ -118,7 +118,7 @@ SC.routes = SC.Object.create(
   */
   _location: null,
 
-  /** 
+  /**
     Routes are stored in a tree structure, this is the root node.
 
     @member
@@ -127,7 +127,7 @@ SC.routes = SC.Object.create(
   */
   _firstRoute: null,
 
-  /** 
+  /**
     Internal method used to extract and merge the parameters of a URL.
 
     @returns {Hash}
@@ -503,7 +503,7 @@ SC.routes = SC.Object.create(
   },
 
   /**
-    
+
     @class
 
     SC.routes._Route is a class used internally by SC.routes. The routes defined by your
@@ -512,7 +512,7 @@ SC.routes = SC.Object.create(
     @private
   */
   _Route: SC.Object.extend(
-  /** @scope SC.routes._Route.prototype */ {
+  /** @lends SC.routes._Route.prototype */ {
 
     target: null,
 

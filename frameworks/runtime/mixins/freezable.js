@@ -70,7 +70,7 @@ SC.FROZEN_ERROR = "Cannot modify a frozen object";
   a frozen object, if the object implements this method as well.
 
 */
-SC.Freezable = /** @scope SC.Freezable.prototype */ {
+SC.Freezable = /** @lends SC.Freezable.prototype */ {
 
   /**
     Walk like a duck.

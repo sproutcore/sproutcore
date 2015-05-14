@@ -47,9 +47,9 @@ sc_require('mixins/copyable');
 */
 SC.IndexSet = SC.mixin({},
   SC.Observable, SC.Enumerable, SC.Freezable, SC.Copyable,
-/** @scope SC.IndexSet.prototype */ {
+/** @lends SC.IndexSet.prototype */ {
 
-  /** 
+  /**
     Walks a content array and copies its contents to a new array.  For large
     content arrays this is faster than using slice()
     @private
@@ -139,7 +139,7 @@ SC.IndexSet = SC.mixin({},
   */
   isIndexSet: YES,
 
-  /**  
+  /**
     Internal setting determines the preferred skip size for hinting sets.
 
     @type Number
@@ -786,7 +786,7 @@ SC.IndexSet = SC.mixin({},
     return this;
   },
 
-  /** 
+  /**
     iterates through a named range, setting hints every HINT_SIZE indexes
     pointing to the nearest range start.  The passed range must start on a
     range boundary.  It can end anywhere.

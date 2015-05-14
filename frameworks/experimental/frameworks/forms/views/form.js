@@ -10,14 +10,14 @@ sc_require("mixins/emptiness");
 sc_require("mixins/edit_mode");
 sc_require("views/form_row");
 
-/** 
+/**
   @class
   FormView lays out rows, manages their label widths, binds their
-  content properties, and sets up their contentValueKeys as needed. This class is 
-  experimental and not available out of the box. 
+  content properties, and sets up their contentValueKeys as needed. This class is
+  experimental and not available out of the box.
 
   Usually, you will place rows into the FormView:
-  
+
       childViews: "fullName gender".w(),
       contentBinding: 'MyApp.personController',
 
@@ -39,7 +39,7 @@ sc_require("views/form_row");
   @implements SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEditMode
 */
 
-SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEditMode, /** @scope SC.FormView.prototype */ {
+SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEditMode, /** @lends SC.FormView.prototype */ {
   // We lay out forms vertically. Each item gets its own "row". Wrapping makes
   // no sense, as the FormView should grow with each row.
   layoutDirection: SC.LAYOUT_VERTICAL,
@@ -67,13 +67,13 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
 
   /**
     The content to bind the form to. This content object is passed to all children.
-  
+
     All child views, if added at design time via string-based childViews array, will get their
     contentValueKey set to their own key. Note that SC.RowView passes on its contentValueKey to its
     child field, and if its isNested property is YES, uses it to find its own content object.
   */
   content: null,
-  
+
   /**
     Rows in the form do not have to be full SC.FormRowView at design time. They can also be hashes
     that get loaded into rows.
@@ -83,7 +83,7 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
   }),
 
   /**
-     
+
     @private
   */
   init: function() {
@@ -166,12 +166,12 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
     return this ;
   },
 
-  
+
   /**
     Allows rows to use this to track label width.
   */
   isRowDelegate: YES,
-  
+
   /**
     Supply a label width to avoid automatically calculating the widths of the labels
     in the form. Leave null to let SproutCore automatically determine the proper width
@@ -181,21 +181,21 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
     @default null
   */
   labelWidth: null,
-  
+
   /**
     Tells the child rows whether they should measure their labels or not.
   */
   labelWidthDidChange: function() {
     var childViews = this.get('childViews'), i, len = childViews.length,
     shouldMeasure = SC.none(this.get('labelWidth'));
-    
+
     for(i = 0; i < len; i++) {
       childViews[i].set('shouldMeasureLabel', shouldMeasure);
     }
-    
+
     this.recalculateLabelWidth();
   }.observes('labelWidth'),
-  
+
   /**
     Propagates the label width to the child rows, finding the measured size if necessary.
   */
@@ -203,27 +203,27 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
     if (!this._hasCreatedRows) {
       return;
     }
-    
+
     var ret = this.get("labelWidth"), children = this.get("childViews"), idx, len = children.length, child;
-    
+
     // calculate by looping through child views and getting size (if possible and if
     // no label width is explicitly set)
     if (ret === null) {
       ret = 0;
       for (idx = 0; idx < len; idx++) {
         child = children[idx];
-      
+
         // if it has a measurable row label
         if (child.get("rowLabelMeasuredSize")) {
           ret = Math.max(child.get("rowLabelMeasuredSize"), ret);
         }
       }
     }
-    
+
     // now set for all children
     if (this._rowLabelSize !== ret) {
       this._rowLabelSize = ret;
-      
+
       // set by looping through child views
       for (idx = 0; idx < len; idx++) {
         child = children[idx];
@@ -233,10 +233,10 @@ SC.FormView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.FormsEd
           child.set("rowLabelSize", ret);
         }
       }
-      
+
     }
   },
-  
+
   /**
     Rows call this when their label width changes.
   */
@@ -255,7 +255,7 @@ SC.mixin(SC.FormView, {
   a field with the properties, and puts it in a new row;
   and `row(properties)`, which creates a new row—and it is up to you to add
   any fields you want in the row.
-  
+
   You can also supply some properties to extend the row itself with.
   */
   row: function(optionalClass, properties, rowExt)

@@ -6,7 +6,7 @@
 // ==========================================================================
 
 /**
-  
+
 
   Provides drag functionality to a pane. If you need to disable dragging at certain times set the
   property isAnchored to YES and the pane will no longer move.
@@ -14,7 +14,7 @@
   See SC.PalettePane, a simple panel pane with SC.DraggablePaneSupport mixed in.
   @namespace
 */
-SC.DraggablePaneSupport = /** @scope SC.DraggablePaneSupport.prototype */{
+SC.DraggablePaneSupport = /** @lends SC.DraggablePaneSupport.prototype */{
 
   /**
     Walk like a duck.

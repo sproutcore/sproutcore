@@ -6,7 +6,7 @@
 // ==========================================================================
 sc_require('system/responder');
 
-/** 
+/**
 
   The root object for a responder chain.  A responder context can dispatch
   actions directly to a first responder; walking up the responder chain until
@@ -29,10 +29,11 @@ SC.ResponderContext = {
   //@if(debug)
   /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */
 
-  /** @member
+  /**
 
     When set to YES, logs tracing information about all actions sent and
     responder changes.
+    @property Boolean
   */
   trace: NO,
 
@@ -45,7 +46,7 @@ SC.ResponderContext = {
 
   isResponderContext: YES,
 
-  /** @member
+  /**
     The default responder.  Set this to point to a responder object that can
     respond to events when no other view in the hierarchy handles them.
 
@@ -53,16 +54,18 @@ SC.ResponderContext = {
   */
   defaultResponder: null,
 
-  /** @member
+  /**
     The next responder for an app is always its defaultResponder.
+    @member
   */
   nextResponder: function() {
     return this.get('defaultResponder');
   }.property('defaultResponder').cacheable(),
 
-  /** @member
+  /**
     The first responder.  This is the first responder that should receive
     actions.
+    @member
   */
   firstResponder: null,
 

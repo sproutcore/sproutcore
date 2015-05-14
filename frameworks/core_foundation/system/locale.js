@@ -80,7 +80,7 @@ SC.Locale = SC.Object.extend({
   /**
     The method used to compute the ordinal of a number for this locale.
   */
-  ordinalForNumber: function(number) { 
+  ordinalForNumber: function(number) {
     return '';
   },
 
@@ -208,7 +208,7 @@ SC.Locale = SC.Object.extend({
 
 }) ;
 
-SC.Locale.mixin(/** @scope SC.Locale */ {
+SC.Locale.mixin(/** @lends SC.Locale */ {
 
   /**
     If YES, localization will favor the detected language instead of the
@@ -341,7 +341,7 @@ SC.Locale.mixin(/** @scope SC.Locale */ {
   },
 
   /**
-    Adds the passed method to the locale's given property name. 
+    Adds the passed method to the locale's given property name.
 
     @param {String} name
     @param {Function} method
@@ -437,9 +437,9 @@ SC.Locale.locales = {
 };
 
 /**
-  This special helper will store the propertyName / hashes pair you pass 
-  in the locale matching the language code.  If a locale is not defined 
-  from the language code you specify, then one will be created for you 
+  This special helper will store the propertyName / hashes pair you pass
+  in the locale matching the language code.  If a locale is not defined
+  from the language code you specify, then one will be created for you
   with the english locale as the parent.
 
   @param {String} languageCode

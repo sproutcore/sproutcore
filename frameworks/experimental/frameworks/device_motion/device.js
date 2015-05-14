@@ -15,7 +15,7 @@ sc_require('platform');
 
 */
 SC.mixin(SC.device,
-/** @scope SC.device */ {
+/** @lends SC.device */ {
 
   // ..........................................................
   // PROPERTIES
@@ -121,7 +121,7 @@ SC.mixin(SC.device,
     this.notifyPropertyChange('listenForDeviceMotion');
   },
 
-  /** 
+  /**
     Gets called after the first deviceorientation event, used to actually set
     the rotation values
     @private
@@ -140,7 +140,7 @@ SC.mixin(SC.device,
     }, this);
   },
 
-  /** 
+  /**
     Because we only want to deal with only the gyroscope, if it is firing its event,
     we wait until two devicemotion events have been fired to decide to use the
     accelerometer instead.
@@ -173,7 +173,7 @@ SC.mixin(SC.device,
               positions, the rotation values from the accelerometer no longer match those
               from the gyroscope. What about people who use their iPad in bed?!
   */
-  /** 
+  /**
     Gets called after the first devicemotion event, if the device has no gyropscope.
     @private
   */

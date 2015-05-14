@@ -25,7 +25,7 @@
 */
 
 SC.TextSelection = SC.Object.extend(SC.Copyable, SC.Freezable,
-/** @scope SC.TextSelection.prototype */ {
+/** @lends SC.TextSelection.prototype */ {
 
   /**
     The number of characters appearing to the left of the beginning of the

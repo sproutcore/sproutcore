@@ -39,7 +39,7 @@ sc_require('system/state');
   @extends SC.Object
 */
 SC.HistoryState = SC.Object.extend(
-  /** @scope SC.HistoryState.prototype */{
+  /** @lends SC.HistoryState.prototype */{
 
   /**
     Used to indicate if the statechart should recurse the
@@ -62,7 +62,7 @@ SC.HistoryState = SC.Object.extend(
   */
   defaultState: null,
 
-  /** 
+  /**
     Managed by the statechart
 
     The statechart that owns this object.
@@ -70,7 +70,7 @@ SC.HistoryState = SC.Object.extend(
   */
   statechart: null,
 
-  /** 
+  /**
     Managed by the statechart
 
     The state that owns this object

@@ -4,7 +4,7 @@
 //            ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-SC.mixin( /** @scope SC */ {
+SC.mixin( /** @lends SC */ {
   /** A Point at {0,0} */
   ZERO_POINT: { x: 0, y: 0 },
 
@@ -114,7 +114,7 @@ SC.mixin( /** @scope SC */ {
       scaledWidth = rect.width * scaleX,
       dHeight = scaledHeight - rect.height,
       dWidth = scaledWidth - rect.width;
-    
+
     // X and Y positions change depending on the origin of the scale. For example, if the
     // width scales down ten pixels and the origin is 50%, x will move five pixesl (10 * 0.5)
     // to the right.

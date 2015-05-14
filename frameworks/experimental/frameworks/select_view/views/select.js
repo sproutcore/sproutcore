@@ -14,7 +14,7 @@ sc_require('ext/menu');
  * @author Alex Iskander
  */
 SC.SelectView = SC.PopupButtonView.extend({
-  /** @scope SC.SelectView.prototype */
+  /** @lends SC.SelectView.prototype */
 
   //
   // Properties
@@ -120,7 +120,7 @@ SC.SelectView = SC.PopupButtonView.extend({
 
   /**
     If true, the empty name and the default title will be localized.
-    
+
     @type Boolean
     @default YES
   */
@@ -153,7 +153,7 @@ SC.SelectView = SC.PopupButtonView.extend({
   /**
     The currently selected item. If no item is selected, `null`.
 
-    
+
     @type SC.Object
     @default null
     @isReadOnly
@@ -175,7 +175,7 @@ SC.SelectView = SC.PopupButtonView.extend({
 
 
   /**
-    * 
+    *
     @private
   */
   init: function() {
@@ -201,10 +201,10 @@ SC.SelectView = SC.PopupButtonView.extend({
   }.property('itemIsEnabledKey').cacheable(),
 
   /**
-    
 
-    This gets the value for a specific menu item. 
-    
+
+    This gets the value for a specific menu item.
+
     This method therefore accepts both the menu items as created for the menupane's displayItems
     AND the raw items provided by the developer in `items`.
     @private
@@ -223,7 +223,7 @@ SC.SelectView = SC.PopupButtonView.extend({
 
   /**
     * When the selected item changes, we need to update our value.
-    * 
+    *
     @private
   */
   _scsv_selectedItemDidChange: function() {
@@ -294,7 +294,7 @@ SC.SelectView = SC.PopupButtonView.extend({
       if (sel.get) return sel.get(itemIconKey);
       else if (SC.typeOf(sel) == SC.T_HASH) return sel[itemIconKey];
     }
-    return null;      
+    return null;
   }.property('selectedItem').cacheable(),
 
   /**
@@ -388,19 +388,19 @@ SC.SelectView = SC.PopupButtonView.extend({
 
   /**
     * When the value changes, we need to update selectedItem.
-    * 
+    *
     @private
   */
   _scsv_valueDidChange: function() {
     var displayItems = this.get('displayItems');
     if (!displayItems) return;
 
-    var len = displayItems.get ? displayItems.get('length') : displayItems.length, 
+    var len = displayItems.get ? displayItems.get('length') : displayItems.length,
       idx, item;
 
     for (idx = 0; idx < len; idx++) {
       item = displayItems.objectAt(idx);
-      
+
       if (this.isValueEqualTo(item)) {
         this.setIfChanged('selectedItem', item);
         return;
@@ -430,7 +430,7 @@ SC.SelectView = SC.PopupButtonView.extend({
     the SelectViewMenu mixin, which should be mixed in to any SelectView menu.
 
     In addition, the initial selected item and the initial minimum menu width are set.
-    
+
     @private
   */
   createMenu: function(klass) {
@@ -494,7 +494,7 @@ SC.SelectView = SC.PopupButtonView.extend({
 
     @member
     @type Array
-    
+
     @private
   */
   menuPreferMatrix: function() {
@@ -519,7 +519,7 @@ SC.SelectView = SC.PopupButtonView.extend({
   /**
     Used to calculate things like the menu's top position.
 
-    
+
     @private
   */
   _selectedItemIndex: function() {
@@ -530,7 +530,7 @@ SC.SelectView = SC.PopupButtonView.extend({
 
     // We have to find the selected item, and then get its 'top' position so we
     // can position the menu correctly.
-    var itemViews = menu.get('menuItemViews'), 
+    var itemViews = menu.get('menuItemViews'),
       len = itemViews.length,
       idx, view;
 
@@ -568,7 +568,7 @@ SC.SelectView = SC.PopupButtonView.extend({
   // KEY HANDLING
   //
   /**
-    
+
 
     Handle Key event - Down arrow key
     @private
@@ -583,7 +583,7 @@ SC.SelectView = SC.PopupButtonView.extend({
   },
 
   /**
-    
+
     Pressing the Up or Down arrow key should display the menu pane. Pressing escape should
     resign first responder.
     @private
@@ -601,7 +601,7 @@ SC.SelectView = SC.PopupButtonView.extend({
     this.resignFirstResponder();
   },
 
-  /** 
+  /**
    Function overridden - tied to the isEnabled state
     @private
   */

@@ -15,7 +15,7 @@
   @extends SC.Control
   @since SproutCore 1.0
 */
-SC.WebView = SC.View.extend(SC.Control, {/** @scope SC.WebView.prototype */
+SC.WebView = SC.View.extend(SC.Control, {/** @lends SC.WebView.prototype */
   classNames: 'sc-web-view',
 
   /**
@@ -77,7 +77,7 @@ SC.WebView = SC.View.extend(SC.Control, {/** @scope SC.WebView.prototype */
     SC.Event.remove(f, 'load', this, this.iframeDidLoad);
   },
 
-  /**  
+  /**
     Called when iframe onload event is fired.
     1. Resizes the view to fit the contents of the iframe using the
     scroll width and scroll height of the contents of the iframe

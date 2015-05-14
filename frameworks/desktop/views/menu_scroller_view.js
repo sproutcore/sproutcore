@@ -19,7 +19,7 @@ sc_require('views/scroller');
   @since SproutCore 1.0
 */
 SC.MenuScrollerView = SC.ScrollerView.extend(
-/** @scope SC.MenuScrollerView.prototype */ {
+/** @lends SC.MenuScrollerView.prototype */ {
 
   // ---------------------------------------------------------------------------------------------
   // Properties
@@ -98,7 +98,7 @@ SC.MenuScrollerView = SC.ScrollerView.extend(
     this.set('isMouseOver', NO);
   },
 
-  /** 
+  /**
     Scroll the menu if it is is an up or down arrow. This is called by
     the function that simulates mouseOver.
     @private
@@ -119,7 +119,7 @@ SC.MenuScrollerView = SC.ScrollerView.extend(
     return YES;
   },
 
-  /** 
+  /**
 
     We use this function to simulate mouseOver. It checks for the flag
     isMouseOver which is turned on when mouseEntered is called and turned off

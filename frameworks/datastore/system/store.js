@@ -26,7 +26,7 @@ sc_require('models/record');
   @extends SC.Object
   @since SproutCore 1.0
 */
-SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
+SC.Store = SC.Object.extend( /** @lends SC.Store.prototype */ {
 
   /**
     An (optional) name of the store, which can be useful during debugging,
@@ -213,7 +213,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     return this.chain( newAttrs, newStoreClass );
   },
 
-  /** 
+  /**
 
     Called by a nested store just before it is destroyed so that the parent
     can remove the store from its list of nested stores.
@@ -244,7 +244,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   // SHARED DATA STRUCTURES
   //
 
-  /** 
+  /**
     JSON data hashes indexed by store key.
 
     *IMPORTANT: Property is not observable*
@@ -256,7 +256,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   dataHashes: null,
 
-  /** 
+  /**
     The current status of a data hash indexed by store key.
 
     *IMPORTANT: Property is not observable*
@@ -268,7 +268,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   statuses: null,
 
-  /** 
+  /**
     This array contains the revisions for the attributes indexed by the
     storeKey.
 
@@ -457,7 +457,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     return this ;
   },
 
-  /** 
+  /**
 
     Called by writeDataHash to update the child record hashes starting from the new (parent) data hash.
 
@@ -651,7 +651,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     return this ;
   },
 
-  /** 
+  /**
     Will push all changes to a the recordPropertyChanges property
     and execute `flush()` once at the end of the runloop.
     @private
@@ -827,7 +827,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     this.set('hasChanges', NO);
   },
 
-  /** 
+  /**
     Called by a nested store on a parent store to commit any changes from the
     store.  This will copy any changed dataHashes as well as any persistent
     change logs.
@@ -1085,7 +1085,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     return this ;
   },
 
-  /** 
+  /**
     Will ask all record arrays that have been returned from `find`
     with an `SC.Query` to check their arrays with the new `storeKey`s
 
@@ -1870,7 +1870,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   _callback_queue: {},
 
   /**
-    
+
     stores the callbacks for the storeKeys that are inflight
     @private
   **/
@@ -1881,7 +1881,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
 
   /**
-    
+
     Retrieves and calls callback for `storeKey` if exists, also handles if a single callback is
     needed for one key..
     @private
@@ -2886,7 +2886,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
 }) ;
 
-SC.Store.mixin(/** @scope SC.Store.prototype */{
+SC.Store.mixin(/** @lends SC.Store.prototype */{
 
   /**
     Standard error raised if you try to commit changes from a nested store
@@ -2943,7 +2943,7 @@ SC.Store.mixin(/** @scope SC.Store.prototype */{
   */
   INHERITED: 'inherited',
 
-  /** 
+  /**
     This array maps all storeKeys to primary keys.  You will not normally
     access this method directly.  Instead use the `idFor()` and
     `storeKeyFor()` methods on `SC.Record`.
@@ -2951,7 +2951,7 @@ SC.Store.mixin(/** @scope SC.Store.prototype */{
   */
   idsByStoreKey: [],
 
-  /** 
+  /**
     Maps all `storeKey`s to a `recordType`.  Once a `storeKey` is associated
     with a `primaryKey` and `recordType` that remains constant throughout the
     lifetime of the application.
@@ -2959,7 +2959,7 @@ SC.Store.mixin(/** @scope SC.Store.prototype */{
   */
   recordTypesByStoreKey: {},
 
-  /** 
+  /**
     Maps some `storeKeys` to query instance.  Once a `storeKey` is associated
     with a query instance, that remains constant through the lifetime of the
     application.  If a `Query` is destroyed, it will remove itself from this
@@ -2970,7 +2970,7 @@ SC.Store.mixin(/** @scope SC.Store.prototype */{
   */
   queriesByStoreKey: [],
 
-  /** 
+  /**
     The next store key to allocate.  A storeKey must always be greater than 0
     @private
   */

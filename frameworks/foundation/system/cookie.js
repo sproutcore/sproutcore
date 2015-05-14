@@ -22,7 +22,7 @@
 */
 
 SC.Cookie = SC.Object.extend(
-/** @scope SC.Cookie.prototype */{
+/** @lends SC.Cookie.prototype */{
 
   // ..........................................................
   // PROPERTIES
@@ -136,7 +136,7 @@ SC.Cookie = SC.Object.extend(
 });
 
 SC.Cookie.mixin(
-  /** @scope SC.Cookie */ {
+  /** @lends SC.Cookie */ {
 
   /**
     Finds a cookie that has been stored
@@ -169,7 +169,7 @@ SC.CookieMonster = {
       SC.Logger.log("YUM!");
       return cookie.destroy();
     }
-    
+
     SC.Logger.error("Y U PASS ME NO COOKIE? %@", cookie);
     return NO;
   }

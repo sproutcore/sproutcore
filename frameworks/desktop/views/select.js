@@ -21,7 +21,7 @@ sc_require('views/button');
   @author Alex Iskander, Mohammed Ashik
 */
 SC.SelectView = SC.ButtonView.extend(
-/** @scope SC.SelectView.prototype */ {
+/** @lends SC.SelectView.prototype */ {
 
   /**
     @field
@@ -140,7 +140,7 @@ SC.SelectView = SC.ButtonView.extend(
     List of actual menu items, handed off to the menu view.
 
     @member
-    
+
     @type:{Array}
     @private
   */
@@ -153,7 +153,7 @@ SC.SelectView = SC.ButtonView.extend(
     @member
     @type Number
     @default null
-    
+
     @private
   */
   _itemIdx: null,
@@ -197,7 +197,7 @@ SC.SelectView = SC.ButtonView.extend(
     Default value of the select button.
      This will be the first item from the menu item list.
 
-    
+
     @private
   */
   _defaultVal: null,
@@ -206,7 +206,7 @@ SC.SelectView = SC.ButtonView.extend(
     Default title of the select button.
      This will be the title corresponding to the _defaultVal.
 
-    
+
     @private
   */
   _defaultTitle: null,
@@ -215,7 +215,7 @@ SC.SelectView = SC.ButtonView.extend(
     Default icon of the select button.
      This will be the icon corresponding to the _defaultVal.
 
-    
+
     @private
   */
   _defaultIcon: null,
@@ -259,7 +259,7 @@ SC.SelectView = SC.ButtonView.extend(
   /**
     Binds the button's selection state to the menu's visibility.
 
-    
+
     @private
   */
   isActiveBinding: '*menu.isVisibleInWindow',
@@ -277,7 +277,7 @@ SC.SelectView = SC.ButtonView.extend(
     lastMenuWidth is the width of the last menu which was created from
     the items of this select button.
 
-    
+
     @private
   */
   lastMenuWidth: null,
@@ -341,7 +341,7 @@ SC.SelectView = SC.ButtonView.extend(
   supportFocusRing: YES,
 
   /**
-  * 
+  *
   * Overwritten to calculate the content corresponding to items configured at creation
     @private
   */
@@ -354,7 +354,7 @@ SC.SelectView = SC.ButtonView.extend(
   /**
     Left Alignment based on the size of the button
 
-    
+
     @private
   */
   leftAlign: function () {
@@ -397,7 +397,7 @@ SC.SelectView = SC.ButtonView.extend(
   /**
     Observer called whenever the items collection or an element of this collection changes
 
-    
+
     @private
   */
   itemsDidChange: function() {
@@ -582,7 +582,7 @@ SC.SelectView = SC.ButtonView.extend(
   }.observes( '*items.[]' ),
 
   /**
-    
+
     @param {DOMMouseEvent} evt mouseup event that triggered the action
     @private
   */
@@ -726,7 +726,7 @@ SC.SelectView = SC.ButtonView.extend(
     return YES;
   },
 
-  /** 
+  /**
      Action method for the select button menu items
     @private
   */
@@ -759,7 +759,7 @@ SC.SelectView = SC.ButtonView.extend(
 
   }.observes('value'),
 
-  /** 
+  /**
      Set the "top" attribute in the prefer matrix property which will
      position menu such that the selected item in the menu will be
      place aligned to the item on the button when menu is opened.
@@ -808,7 +808,7 @@ SC.SelectView = SC.ButtonView.extend(
   },
 
   /**
-    
+
     Holding down the button should display the menu pane.
     @private
   */
@@ -824,7 +824,7 @@ SC.SelectView = SC.ButtonView.extend(
     return YES;
   },
 
-  /** 
+  /**
     Because we responded YES to the mouseDown event, we have responsibility
     for handling the corresponding mouseUp event.
 
@@ -869,7 +869,7 @@ SC.SelectView = SC.ButtonView.extend(
     return YES;
   },
 
-  /** 
+  /**
     Override mouseExited to not remove the active state on mouseexit.
     @private
   */
@@ -878,7 +878,7 @@ SC.SelectView = SC.ButtonView.extend(
   },
 
   /**
-    
+
     Handle Key event - Down arrow key
     @private
   */
@@ -892,7 +892,7 @@ SC.SelectView = SC.ButtonView.extend(
   },
 
   /**
-    
+
     Pressing the Up or Down arrow key should display the menu pane. Pressing escape should
     resign first responder.
     @private
@@ -910,7 +910,7 @@ SC.SelectView = SC.ButtonView.extend(
     this.resignFirstResponder();
   },
 
-  /** 
+  /**
     Override the button isSelectedDidChange function in order to not perform any action
     on selecting the select_button
     @private

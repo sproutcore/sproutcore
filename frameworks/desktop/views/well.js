@@ -25,7 +25,7 @@ SC.WELL_CONTAINER_PADDING = 15;
   @test in progress
 */
 SC.WellView = SC.ContainerView.extend(
-/** @scope SC.WellView.prototype */ {
+/** @lends SC.WellView.prototype */ {
 
   /**
     @type Array
@@ -51,7 +51,7 @@ SC.WellView = SC.ContainerView.extend(
   */
   renderDelegateName: 'wellRenderDelegate',
 
-  /** 
+  /**
      Overrides createChildViews and replaces the layout of the contentView
      with the one in contentLayout.
     @private
@@ -63,7 +63,7 @@ SC.WellView = SC.ContainerView.extend(
     return view;
   },
 
-  /** 
+  /**
      Invoked whenever the content property changes.  This method will simply set the contentLayout
      in the new contentView.
     @private

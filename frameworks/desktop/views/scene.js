@@ -30,7 +30,7 @@
   @since Version 1.0
 */
 SC.SceneView = SC.ContainerView.extend(
-/** @scope SC.SceneView.prototype */ {
+/** @lends SC.SceneView.prototype */ {
 
   /**
     Array of scene names.  Scenes will slide on and off screen in the order

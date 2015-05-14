@@ -23,7 +23,7 @@ sc_require('system/store');
   @since SproutCore 1.0
 */
 SC.NestedStore = SC.Store.extend(
-/** @scope SC.NestedStore.prototype */ {
+/** @lends SC.NestedStore.prototype */ {
 
   /**
     This is set to YES when there are changes that have not been committed
@@ -74,7 +74,7 @@ SC.NestedStore = SC.Store.extend(
   */
   lockOnRead: YES,
 
-  /** 
+  /**
     Array contains the base revision for an attribute hash when it was first
     cloned from the parent store.  If the attribute hash is edited and
     committed, the commit will fail if the parent attributes hash has been
@@ -94,7 +94,7 @@ SC.NestedStore = SC.Store.extend(
   */
   locks: null,
 
-  /** 
+  /**
     An array that includes the store keys that have changed since the store
     was last committed.  This array is used to sync data hash changes between
     chained stores.  For a log changes that may actually be committed back to
@@ -299,7 +299,7 @@ SC.NestedStore = SC.Store.extend(
     // TODO: Notify record instances
   },
 
-  /** 
+  /**
 
     Chain to parentstore
     @private
@@ -362,7 +362,7 @@ SC.NestedStore = SC.Store.extend(
     return (editables && editables[storeKey]) ? SC.Store.EDITABLE : (locks && locks[storeKey]) ? SC.Store.LOCKED : SC.Store.INHERITED ;
   },
 
-  /**  
+  /**
     Locks the data hash so that it iterates independently from the parent
     store.
     @private

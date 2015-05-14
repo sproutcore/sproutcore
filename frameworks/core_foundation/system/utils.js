@@ -8,7 +8,7 @@
 // These are helpful utility functions for calculating range and rect values
 sc_require('system/browser');
 
-SC.mixin( /** @scope SC */ {
+SC.mixin( /** @lends SC */ {
 
   /**
     Takes a URL of any type and normalizes it into a fully qualified URL with

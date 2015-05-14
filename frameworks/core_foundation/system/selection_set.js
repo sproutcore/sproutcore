@@ -18,7 +18,7 @@
   @since SproutCore 1.0
 */
 SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
-  /** @scope SC.SelectionSet.prototype */ {
+  /** @lends SC.SelectionSet.prototype */ {
 
   /**
     Walk like a duck.
@@ -110,7 +110,7 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
   },
 
   /**
-    
+
 
     Internal method gets the index set for the source, ignoring objects
     that have been added directly.
@@ -574,7 +574,7 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
   },
 
   /**
-    
+
 
     Freezing a SelectionSet also freezes its internal sets.
     @private
@@ -628,7 +628,7 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
 
   }.property(),
 
-  /** 
+  /**
     Implement primitive enumerable support.  Returns each object in the
     selection.
     @private
