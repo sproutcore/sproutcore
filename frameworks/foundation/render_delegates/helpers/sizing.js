@@ -21,23 +21,23 @@ SC.RenderDelegate.reopen({
   /**
     Determines the correct size for the given data source, and returns the
     hash, if any, representing it.
-   
+
     The hashes to choose from are properties on the render delegate. You define
     them with the same name as you would use for styling. For example,
     SC.REGULAR_CONTROL_SIZE uses a property name 'sc-regular-size':
-   
+
         SC.RenderDelegate.create({
           'sc-regular-size': {
             // my properties here
           }
-   
+
     If no matching size is found, the hash (if any) for SC.REGULAR_CONTROL_SIZE
     will be returned.
-   
+
     @param {DataSource} dataSource The data source in which to find `controlSize`
     or `frame` and to determine the size for.
-   
-    @returns {Hash undefined}
+
+    @returns {Hash|undefined}
   */
   sizeFor: function(dataSource) {
     var controlSize = dataSource.get('controlSize'), size, idx, len;
@@ -87,7 +87,7 @@ SC.RenderDelegate.reopen({
         // if no auto-size-selection params are supplied, then we cannot
         // automatically select a size...
         (
-          size.width === undefined && size.height === undefined && 
+          size.width === undefined && size.height === undefined &&
           size.minHeight === undefined && size.minWidth === undefined &&
           size.maxHeight === undefined && size.maxWidth === undefined
         ) ||
@@ -151,7 +151,7 @@ SC.RenderDelegate.reopen({
     may be static, or may be computed specifically for this data source. This
     version fo `getPropertyFor` will check in your size hashes to see if any
     properties have been overridden.
-    
+
     @param {DataSource} dataSource The data source to get the property
     for. Some properties may differ based on the data source; for instance,
     some may have different values depending on size.

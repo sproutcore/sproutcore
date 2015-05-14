@@ -870,7 +870,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     this.invokeOnce(this.adjustLayout);
   },
 
-  /** 
+  /**
     Whenever content property changes to a new value:
 
       - remove any old observers
@@ -924,14 +924,14 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
   // ITEM VIEWS
   //
 
-  /** 
+  /**
     The indexes that need to be reloaded.  Must be one of YES, NO, or an
     SC.IndexSet.
     @private
   */
   _invalidIndexes: NO,
 
-  /** 
+  /**
     We need to reload if isEnabled, isEditable, canEditContent, canReorderContent or
     canDeleteContent change.
     @private
@@ -1047,14 +1047,14 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
   /**  Use a shared object so that we are not creating objects for every item view configuration. @private */
   _TMP_ATTRS: {},
 
-  /** 
+  /**
     The item view classes, cached here for performance. Note that if these ever change, they may
     also need to be updated in the isGroupView code block in _reconfigureItemView below.
     @private
   */
   _COLLECTION_CLASS_NAMES: ['sc-collection-item', 'sc-item'],
 
-  /** 
+  /**
     The group view classes, cached here for performance. Note that if these ever change, they may
     also need to be updated in the isGroupView code block in _reconfigureItemView below.
     @private
@@ -1320,7 +1320,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
   // SELECTION SUPPORT
   //
 
-  /** 
+  /**
     Called whenever the selection object is changed to a new value.  Begins
     observing the selection for changes.
     @private
@@ -1338,7 +1338,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     this._cv_selectionContentDidChange();
   }.observes('selection'),
 
-  /** 
+  /**
     Called whenever the selection object or its content changes.  This will
     repaint any items that changed their selection state.
     @private
@@ -1362,7 +1362,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     if (diff && diff.get('length')>0) this.reloadSelectionIndexes(diff);
   },
 
-  /** 
+  /**
     Contains the current item views that need their selection to be repainted.
     This may be either NO, YES, or an IndexSet.
     @private
@@ -1531,7 +1531,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     return this ;
   },
 
-  /** 
+  /**
    Finds the next selectable item, up to content length, by asking the
    delegate. If a non-selectable item is found, the index is skipped. If
    no item is found, selection index is returned unmodified.
@@ -1577,7 +1577,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     return bottom ;
   },
 
-  /** 
+  /**
    Finds the previous selectable item, up to the first item, by asking the
    delegate. If a non-selectable item is found, the index is skipped. If
    no item is found, selection index is returned unmodified.
@@ -1827,7 +1827,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
   /**  @private */
   keyUp: function() { return true; },
 
-  /** 
+  /**
     Handle space key event.  Do action
     @private
   */
@@ -1841,7 +1841,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     } else return NO ;
   },
 
-  /** 
+  /**
     Handle select all keyboard event.
     @private
   */
@@ -1856,7 +1856,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     return YES ;
   },
 
-  /** 
+  /**
     Remove selection of any selected items.
     @private
   */
@@ -1871,7 +1871,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     return YES ;
   },
 
-  /** 
+  /**
     Handle delete keyboard event.
     @private
   */
@@ -1879,7 +1879,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     return this.deleteSelection() ;
   },
 
-  /** 
+  /**
     Handle delete keyboard event.
     @private
   */
@@ -1887,7 +1887,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     return this.deleteSelection() ;
   },
 
-  /** 
+  /**
     Selects the same item on the next row or moves down one if itemsPerRow = 1
     @private
   */
@@ -1897,7 +1897,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     return true ;
   },
 
-  /** 
+  /**
     Selects the same item on the next row or moves up one if itemsPerRow = 1
     @private
   */
@@ -1907,7 +1907,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     return true ;
   },
 
-  /** 
+  /**
     Selects the previous item if itemsPerRow > 1.  Otherwise does nothing.
     If item is expandable, will collapse.
     @private
@@ -1977,7 +1977,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     return true ;
   },
 
-  /** 
+  /**
     Selects the next item if itemsPerRow > 1.  Otherwise does nothing.
     @private
   */
@@ -2023,7 +2023,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     return true ;
   },
 
-  /** 
+  /**
     Selects the previous item if itemsPerRow > 1.  Otherwise does nothing.
     @private
   */
@@ -2035,7 +2035,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     return true ;
   },
 
-  /** 
+  /**
     Selects the next item if itemsPerRow > 1.  Otherwise does nothing.
     @private
   */
@@ -2047,7 +2047,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     return true ;
   },
 
-  /** 
+  /**
     if content value is editable and we have one item selected, then edit.
     otherwise, invoke action.
     @private
@@ -2121,7 +2121,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     return handled;
   },
 
-  /** 
+  /**
     Handles mouse down events on the collection view or on any of its
     children.
 
@@ -2401,9 +2401,11 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     return YES ;
   },
 
-  /**  We capture mouseWheel events while the mouse is pressed, this is to prevent jitter from slight mouse wheels while pressing
+  /**
+    We capture mouseWheel events while the mouse is pressed, this is to prevent jitter from slight mouse wheels while pressing
+    and lifting the finger (especially a problem with the Magic Mouse)
     @private
-    and lifting the finger (especially a problem with the Magic Mouse) */
+    */
   mouseWheel: function (evt) {
     // Capture mouse wheel events when mouse is pressed or immediately after a mouse up (to avoid
     // excessive Magic Mouse wheel events while the person lifts their finger).
@@ -2592,7 +2594,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
   */
   proposedDropOperation: null,
 
-  /** 
+  /**
     mouseDragged event handler.  Initiates a drag if the following conditions
     are met:
 
@@ -2678,7 +2680,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     }
   },
 
-  /** 
+  /**
     Compute a default drag view by grabbing the raw layers and inserting them
     into a drag view.
     @private
@@ -2824,7 +2826,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     return op ;
   },
 
-  /** 
+  /**
     Determines the allowed drop operation insertion point, operation type,
     and the drag operation to be performed.  Used by dragUpdated() and
     performDragOperation().
@@ -3147,7 +3149,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     return this.get('isSelectable') ;
   },
 
-  /** 
+  /**
 
     Whenever the nowShowing range changes, update the range observer on the
     content item and instruct the view to reload any indexes that are not in
@@ -3240,7 +3242,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     }
   },
 
-  /** 
+  /**
     Become a drop target whenever reordering content is enabled.
     @private
   */
@@ -3251,7 +3253,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     }
   }.observes('canReorderContent'),
 
-  /** 
+  /**
     Fires an action after a selection if enabled.
 
     if actOnSelect is YES, then try to invoke the action, passing the
@@ -3272,7 +3274,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     }
   },
 
-  /** 
+  /**
     Perform the action.  Supports legacy behavior as well as newer style
     action dispatch.
     @private
@@ -3351,7 +3353,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     return attrs;
   },
 
-  /** 
+  /**
     A cache of the `contentGroupIndexes` value returned by the delegate.  This
     is frequently accessed and usually involves creating an `SC.IndexSet`
     object, so it's worthwhile to cache.
@@ -3361,7 +3363,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     return this.get('contentDelegate').contentGroupIndexes(this, this.get('content'));
   }.property('contentDelegate').cacheable(),
 
-  /** 
+  /**
     Rather than calling contentIndexIsGroup on the delegate each time, first
     check if there are even any contentGroupIndexes.
     @private
@@ -3381,7 +3383,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
   }
   },
 
-  /** 
+  /**
     Determines the example view for a content index.
     @private
   */
@@ -3406,7 +3408,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     return ExampleView;
   },
 
-  /** 
+  /**
     Returns the pool for a given example view.
 
     The pool is calculated based on the guid for the example view class.
@@ -3421,7 +3423,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     return this._pools[poolKey];
   },
 
-  /** 
+  /**
     Override to compute the hidden layout of the itemView for the content at the
     specified idnex.  This layout will be applied when it is moved to the
     pool for reuse and should be completely outside the visible portion
@@ -3454,7 +3456,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     return layout;
   },
 
-  /** 
+  /**
     Configures an existing item view with new attributes.
 
     @param {SC.View} itemView
@@ -3505,7 +3507,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     itemView.endPropertyChanges();
   },
 
-  /** 
+  /**
     Removes the item view, pooling it for re-use if possible.
     @private
   */

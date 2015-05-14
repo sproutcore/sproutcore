@@ -23,7 +23,7 @@ SC.SliderView = SC.View.extend(SC.Control,
   /**  @private */
   classNames: 'sc-slider-view',
 
-  /** 
+  /**
     The WAI-ARIA role for slider view. This property's value should not be
     changed.
 
@@ -110,9 +110,9 @@ SC.SliderView = SC.View.extend(SC.Control,
   /* @private The full list includes min, max, and stepPositions, but those are redundant with displayValue. */
   displayProperties: ['displayValue', 'markSteps'],
 
-  /** 
-   @type Number
-   The raw, unchanged value to be provided to screen readers and the like.
+  /**
+    The raw, unchanged value to be provided to screen readers and the like.
+    @type Number
     @private
   */
   ariaValue: function() {
@@ -291,7 +291,7 @@ SC.SliderView = SC.View.extend(SC.Control,
     return this.mouseDragged(evt);
   },
 
-  /** 
+  /**
     Updates the handle based on the mouse location of the handle in the
     event.
     @private

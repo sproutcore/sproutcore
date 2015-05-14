@@ -389,7 +389,8 @@ SC.View.reopen(
     NOTE: When creating custom transition adjust plugins, be aware that SC.View
     will not call the `setup` method of the plugin, only the `run` method.
 
-    @type Object (SC.ViewTransitionProtocol)
+    @type Object
+    @implements SC.ViewTransitionProtocol
     @default null
     @since Version 1.10
   */
@@ -818,7 +819,7 @@ SC.View.reopen(
     transitionAdjust.run(this, options, layout);
   },
 
-  /** 
+  /**
     Invoked by other views to notify this view that its frame has changed.
 
     This notifies the view that its frame property has changed,

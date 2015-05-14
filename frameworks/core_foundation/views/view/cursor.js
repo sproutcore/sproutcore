@@ -14,7 +14,7 @@ SC.View.reopen(
     hovering over the divider or another child of the split view, the
     proper cursor is visible.
 
-    @property {SC.Cursor String}
+    @property {SC.Cursor|String}
   */
   cursor: function(key, value) {
     var parent;

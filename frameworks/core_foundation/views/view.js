@@ -199,7 +199,7 @@ SC.CoreView.reopen(
 
     You can also set the layer by calling set on this property.
 
-    @type DOMElement the layer
+    @prop {DOMElement} the layer
   */
   layer: function (key, value) {
     if (value !== undefined) {
@@ -238,7 +238,7 @@ SC.CoreView.reopen(
     returns the layer itself.  You can override this to return a DOM element
     within the layer.
 
-    @type DOMElement the container layer
+    @prop {DOMElement} the container layer
   */
   containerLayer: function () {
     return this.get('layer');
@@ -527,7 +527,7 @@ SC.CoreView.reopen(
   },
 
   /**
-    
+
 
     Renders to a context.
     Rendering only happens for the initial rendering. Further updates happen in updateLayer,
@@ -588,7 +588,7 @@ SC.CoreView.reopen(
   },
 
   /**
-    
+
 
     Iterates over the view's `classNameBindings` array, inserts the value
     of the specified property into the `classNames` array, then creates an
@@ -704,7 +704,7 @@ SC.CoreView.reopen(
   },
 
   /**
-    
+
 
     Given a property name, returns a dasherized version of that
     property name if the property evaluates to a non-falsy value.
@@ -934,13 +934,13 @@ SC.CoreView.reopen(
   // CORE DISPLAY METHODS
   //
 
-  /** 
+  /**
     Caches the layerId to detect when it changes.
     @private
     */
   _lastLayerId: null,
 
-  /** 
+  /**
     Setup a view, but do not finish waking it up.
 
      - configure childViews
@@ -1114,7 +1114,7 @@ SC.CoreView.reopen(
     return ret;
   }.property('parentView', 'frame').cacheable(),
 
-  /** 
+  /**
     This method is invoked whenever the clippingFrame changes, notifying
     each child view that its clippingFrame has also changed.
     @private
@@ -1518,7 +1518,8 @@ SC.CoreView.reopen(
     You can even provide your own custom transition plugins.  Just create a
     transition object that conforms to the SC.ViewTransitionProtocol protocol.
 
-    @type Object (SC.ViewTransitionProtocol)
+    @type Object
+    @implements SC.ViewTransitionProtocol
     @default null
     @since Version 1.10
   */
@@ -1566,7 +1567,8 @@ SC.CoreView.reopen(
     You can even provide your own custom transition plugins.  Just create a
     transition object that conforms to the SC.ViewTransitionProtocol protocol.
 
-    @type Object (SC.ViewTransitionProtocol)
+    @type Object
+    @implements SC.ViewTransitionProtocol
     @default null
     @since Version 1.10
   */
@@ -1615,7 +1617,8 @@ SC.CoreView.reopen(
     You can even provide your own custom transition plugins.  Just create a
     transition object that conforms to the SC.ViewTransitionProtocol protocol.
 
-    @type Object (SC.ViewTransitionProtocol)
+    @type Object
+    @implements SC.ViewTransitionProtocol
     @default null
     @since Version 1.10
   */
@@ -1663,7 +1666,8 @@ SC.CoreView.reopen(
     You can even provide your own custom transition plugins.  Just create a
     transition object that conforms to the SC.ViewTransitionProtocol protocol.
 
-    @type Object (SC.ViewTransitionProtocol)
+    @type Object
+    @implements SC.ViewTransitionProtocol
     @default null
     @since Version 1.10
   */
@@ -1697,7 +1701,7 @@ SC.CoreView.reopen(
   // Patches
   //
 
-  /** 
+  /**
     Override this method to apply design modes to this view and
     its children.
     @see SC.View

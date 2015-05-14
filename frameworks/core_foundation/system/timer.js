@@ -134,7 +134,7 @@ SC.Timer = SC.Object.extend(
     called.  If you pass a function instead, then the function will be
     called in the context of the target object.
 
-    @type {String, Function}
+    @type {String | Function}
   */
   action: null,
 
@@ -196,7 +196,7 @@ SC.Timer = SC.Object.extend(
     If this property is null, then the timer will continue to repeat until you
     call invalidate().
 
-    @type {Date, Number}
+    @type {Date | Number}
   */
   until: null,
 
@@ -485,7 +485,7 @@ SC.Timer = SC.Object.extend(
     return (beforeNode === timerQueueRoot) ? this : timerQueueRoot ;
   },
 
-  /** 
+  /**
     adds the receiver to the passed array of expired timers based on the
     current time and then recursively calls the next timer.  Returns the
     first timer that is not expired.  This is faster than iterating through

@@ -105,7 +105,7 @@ SC.BaseTheme.radioGroupRenderDelegate = SC.RenderDelegate.create({
 
     @param {Object} dataSource The RenderDelegate data source.
     @param {jQuery} jquery A jQuery instance with the DOM for this radio group.
-    @param {SC.Event SC.Touch} event The event or SC.Touch object.
+    @param {SC.Event|SC.Touch} event The event or SC.Touch object.
   */
 
   indexForEvent: function(dataSource, jquery, evt) {

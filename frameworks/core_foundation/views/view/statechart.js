@@ -286,7 +286,7 @@ SC.CoreView.reopen(
     return (this.get('viewState') & SC.CoreView.IS_ATTACHED) > 0;
   }.property('viewState').cacheable(),
 
-  /** 
+  /**
     Whether the view's layer exists or not.
 
     When the view's layer is created, this value will be true.  This includes
@@ -1503,7 +1503,7 @@ SC.CoreView.reopen(
     }
   },
 
-  /** 
+  /**
     Marks the view as needing a visibility update if the isVisible property
     changes.
 
@@ -1524,7 +1524,7 @@ SC.CoreView.reopen(
     }
   },
 
-  /** 
+  /**
     Adds the 'focus' class to the view.
 
     This observer is connected when the view is attached and is disconnected
@@ -1887,8 +1887,9 @@ SC.CoreView.reopen(
   },
 
   /**  Prepares according to parent will hide. This is called before the parent view hides
+    completely, which may be after a hide transition completes.
     @private
-    completely, which may be after a hide transition completes. */
+    */
   _parentWillHideInDocument: function () { // notifyStack
     var state = this.get('viewState'),
         shouldContinue = true;

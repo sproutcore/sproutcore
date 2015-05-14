@@ -136,7 +136,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     When `autoCapitalize` is set to `null`, the browser will use
     the system defaults.
 
-    @type String SC.AUTOCAPITALIZE_NONE|SC.AUTOCAPITALIZE_SENTENCES|SC.AUTOCAPITALIZE_WORDS|SC.AUTOCAPITALIZE_CHARACTERS
+    @type {SC.AUTOCAPITALIZE_NONE|SC.AUTOCAPITALIZE_SENTENCES|SC.AUTOCAPITALIZE_WORDS|SC.AUTOCAPITALIZE_CHARACTERS}
     @default SC.CAPITALIZE_SENTENCES
    */
   autoCapitalize: SC.CAPITALIZE_SENTENCES,
@@ -616,7 +616,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     this._renderField(context, firstTime, v, leftAdjustment, rightAdjustment);
   },
 
-  /** 
+  /**
     If isTextArea is changed (this might happen in inlineeditor constantly)
     force the field render to render like the firsttime to avoid writing extra
     code. This can be useful also
@@ -871,7 +871,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     this._fixupTextLayout();
   },
 
-  /** 
+  /**
     Apply proper text layout to hint and input.
     @private
    */
@@ -890,7 +890,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     }
   },
 
-  /** 
+  /**
     Adds all the textarea events. This functions is called by didCreateLayer
     at different moments depending if it is a textarea or not. Appending
     events to text areas is not reliable unless the element is already added
@@ -925,7 +925,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     SC.Event.remove(input, 'input', this, this._textField_inputDidChange);
   },
 
-  /** 
+  /**
      This function is called by the event when the textfield gets focus
     @private
   */
@@ -936,7 +936,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     }, this);
   },
 
-  /** 
+  /**
     This function is called by the event when the textfield blurs
     @private
    */
@@ -997,7 +997,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     this.updateHintOnFocus();
   },
 
-  /** 
+  /**
     Context-menu paste does not trigger fieldValueDidChange normally. To do so, we'll capture the
     input event and avoid duplicating the "fieldValueDidChange" call if it was already issued elsewhere.
 
@@ -1012,7 +1012,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     }
   },
 
-  /** 
+  /**
     Make sure to update visibility of hint if it changes
     @private
    */
@@ -1029,13 +1029,13 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     }
   }.observes('value'),
 
-  /** 
+  /**
     Move magic number out so it can be over-written later in inline editor
     @private
    */
   _topOffsetForFirefoxCursorFix: 3,
 
-  /** 
+  /**
     In Firefox, as of 3.6 -- including 3.0 and 3.5 -- for input fields only
     (that is, not textarea elements), if the cursor is at the end of the
     field, the "down" key will not result in a "keypress" event for the
@@ -1069,7 +1069,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   // When we become first responder, make sure the field gets focus and
   // the hint value is hidden if needed.
 
-  /** 
+  /**
     When we become first responder, focus the text field if needed and
     hide the hint text.
     @private
@@ -1087,7 +1087,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     }
   },
 
-  /** 
+  /**
     In IE, you can't modify functions on DOM elements so we need to wrap the
     call to select() like this.
     @private
@@ -1110,7 +1110,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     else this._textField_selectionDidChange();
   },
 
-  /** 
+  /**
     When we lose first responder, blur the text field if needed and show
     the hint text if needed.
     @private
@@ -1121,7 +1121,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     this.invokeLater("scrollToOriginIfNeeded", 100);
   },
 
-  /** 
+  /**
     Scrolls to origin if necessary (if the pane's current firstResponder is not a text field).
     @private
    */
@@ -1206,7 +1206,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   },
 
   /**
-    
+
 
     Invoked when the user presses return.  If this is a multi-line field,
     then allow the newline to proceed.  Otherwise, try to commit the
@@ -1338,7 +1338,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     return true;
   },
 
-  /** 
+  /**
     Overridden from SC.FieldView. Provides correct tag name based on the
     `isTextArea` property.
     @private
@@ -1351,7 +1351,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     }
   },
 
-  /** 
+  /**
     This observer makes sure to hide the hint when a value is entered, or
     show it if it becomes empty.
     @private

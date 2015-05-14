@@ -135,7 +135,8 @@ SC.ContainerView = SC.View.extend(
     You can even provide your own custom transitionSwap plugins.  Just create an
     object that conforms to the SC.SwapTransitionProtocol protocol.
 
-    @type Object (SC.SwapTransitionProtocol)
+    @type Object
+    @implements SC.SwapTransitionProtocol // this use is actually not correct, but there doesn't seem to be another way to
     @default null
     @since Version 1.10
   */
@@ -207,7 +208,7 @@ SC.ContainerView = SC.View.extend(
     }
   },
 
-  /** 
+  /**
     Overridden to prevent clipping of child views while animating.
 
     In particular, collection views have trouble being animated in a certain
@@ -235,7 +236,7 @@ SC.ContainerView = SC.View.extend(
     return ret;
   }.property('parentView', 'frame').cacheable(),
 
-  /** 
+  /**
     Invoked whenever the content property changes.  This method will simply
     call replaceContent.  Override replaceContent to change how the view is
     swapped out.
@@ -267,7 +268,7 @@ SC.ContainerView = SC.View.extend(
     return sc_super();
   },
 
-  /** 
+  /**
     Invoked whenever the nowShowing property changes.  This will try to find
     the new content if possible and set it.  If you set nowShowing to an
     empty string or null, then the current content will be cleared.
@@ -342,7 +343,7 @@ SC.ContainerView = SC.View.extend(
     }
   },
 
-  /** 
+  /**
     Replaces any child views with the passed new content.
 
     This method is automatically called whenever your contentView property
@@ -416,7 +417,7 @@ SC.ContainerView = SC.View.extend(
 SC.LOG_CONTAINER_CONTENT_STATES = false;
 //@endif
 
-/** 
+/**
   In order to support transitioning views in and out of the container view,
   each content view needs its own simple statechart.  This is required, because
   while only one view will ever be transitioning in, several views may be in

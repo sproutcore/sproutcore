@@ -134,7 +134,7 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditable,
     Note: this is not an observed display property.  If you change it after
     rendering, you should call `displayDidChange` on the view to update the layer.
 
-    @type String SC.ALIGN_LEFT|SC.ALIGN_CENTER|SC.ALIGN_RIGHT
+    @type {SC.ALIGN_LEFT|SC.ALIGN_CENTER|SC.ALIGN_RIGHT}
     @default null
     @deprecated Use CSS instead.
   */

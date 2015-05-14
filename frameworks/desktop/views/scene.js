@@ -46,7 +46,8 @@ SC.SceneView = SC.ContainerView.extend(
   /**
     The transitionSwap plugin to use when animating backwards.
 
-    @type Object (SC.SwapTransitionProtocol)
+    @type Object
+    @implements SC.SwapTransitionProtocol
     @default null
     @see SC.ContainerView#transitionSwap
   */
@@ -64,7 +65,8 @@ SC.SceneView = SC.ContainerView.extend(
   /**
     The transitionSwap plugin to use when animating forwards.
 
-    @type Object (SC.SwapTransitionProtocol)
+    @type Object
+    @implements SC.SwapTransitionProtocol
     @default null
     @see SC.ContainerView#transitionSwap
   */
@@ -79,7 +81,7 @@ SC.SceneView = SC.ContainerView.extend(
   */
   transitionForwardOptions: { duration: .25, direction: 'left' },
 
-  /** 
+  /**
     @param {SC.View} newContent the new content view or null.
     @see SC.ContainerView#replaceContent
     @private

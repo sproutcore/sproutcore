@@ -862,7 +862,7 @@ SC.Color.mixin(
             clamp(hueToRgb(m1, m2, h - 1/3) * 255)];
   },
 
-  /** 
+  /**
     Returns the RGB value for a given hue.
     @private
    */
@@ -995,13 +995,13 @@ SC.Color.mixin(
     });
   },
 
-  /** 
+  /**
     Parses any valid CSS color into r, g, b and a values. Returns null for invalid inputs.
 
     For internal use only. External code should call `SC.Color.from` or `SC.Color#cssText`.
 
     @param {String} color The CSS color value to parse.
-    @returns {Hash || null} A hash of r, g, b, and a values.
+    @returns {Hash | null} A hash of r, g, b, and a values.
     @private
    */
   _parse: function (color) {

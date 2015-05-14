@@ -1289,7 +1289,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     this._stateHandleEventInfo = null;
   },
 
-  /** 
+  /**
 
     Creates a chain of states from the given state to the greatest ancestor state (the root state). Used
     when perform state transitions.
@@ -1306,7 +1306,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     return chain;
   },
 
-  /** 
+  /**
 
     Finds a pivot state from two given state chains. The pivot state is the state indicating when states
     go from being exited to states being entered during the state transition process. The value
@@ -1323,7 +1323,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     return pivot;
   },
 
-  /** 
+  /**
 
     Recursively follow states that are to be exited during a state transition process. The exit
     process is to start from the given state and work its way up to when either all exit
@@ -1358,7 +1358,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     this._traverseStatesToExit(exitStatePath.shift(), exitStatePath, stopState, gotoStateActions);
   },
 
-  /** 
+  /**
 
     Recursively follow states that are to be entered during the state transition process. The
     enter process is to start from the given state and work its way down a given enter path. When
@@ -1435,7 +1435,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     }
   },
 
-  /** 
+  /**
 
     Returns YES if the named value translates into an executable function on
     any of the statechart's current states or the statechart itself.
@@ -1467,7 +1467,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     return SC.typeOf(this[event]) === SC.T_FUNCTION;
   },
 
-  /** 
+  /**
 
     Attempts to handle a given event against any of the statechart's current states and the
     statechart itself. If any current state can handle the event or the statechart itself can
@@ -1580,7 +1580,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     return calledStates === 1 ? result : undefined;
   },
 
-  /** 
+  /**
 
     Iterate over all the given concurrent states and enter them
     @private
@@ -1596,7 +1596,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     }
   },
 
-  /** 
+  /**
 
     Called by gotoState to flush a pending state transition at the front of the
     pending queue.
@@ -1612,7 +1612,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     this.gotoState(pending.state, pending.fromCurrentState, pending.useHistory, pending.context);
   },
 
-  /** 
+  /**
 
      Called by sendEvent to flush a pending actions at the front of the pending
      queue
@@ -1633,7 +1633,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
   }.observes('monitorIsActive'),
   //@endif
 
-  /** 
+  /**
     Will process the arguments supplied to the gotoState method.
 
     TODO: Come back to this and refactor the code. It works, but it
@@ -1699,7 +1699,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     return processedArgs;
   },
 
-  /** 
+  /**
 
     Will return a newly constructed root state class. The root state will have substates added to
     it based on properties found on this state that derive from a SC.State class. For the

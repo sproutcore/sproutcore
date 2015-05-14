@@ -46,7 +46,8 @@ SC.CSSStyleSheet = SC.Object.extend(
   },
 
   /**
-    @type Boolean YES if the stylesheet is enabled.
+    YES if the stylesheet is enabled.
+    @type {Boolean}
   */
   isEnabled: function(key, val) {
     if (val !== undefined) {
@@ -61,7 +62,8 @@ SC.CSSStyleSheet = SC.Object.extend(
     object to update properties of the style sheet; otherwise, your changes
     will not be reflected.
 
-    @type CSSStyleSheet RO
+    @type CSSStyleSheet
+    @readonly
   */
   styleSheet: null,
 
@@ -86,7 +88,7 @@ SC.CSSStyleSheet = SC.Object.extend(
   }.property(),
 
   /**
-    @type SC.Array contains SC.CSSRule objects
+    @type SC.CSSRule[]
   */
   rules: null,
 
@@ -108,7 +110,7 @@ SC.CSSStyleSheet = SC.Object.extend(
   // TODO: implement a destroy method
 
   /**
-    
+
 
     Invoked by the sparse array whenever it needs a particular index
     provided.  Provide the content for the index.

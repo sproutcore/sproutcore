@@ -12,7 +12,7 @@
 SC.ALIGN_JUSTIFY = "justify";
 
 /**
-  
+
 
   Normal SproutCore views are absolutely positioned--parent views have relatively
   little input on where their child views are placed.
@@ -108,8 +108,6 @@ SC.FlowedLayout = {
   defaultFlowSpacing: { left: 0, bottom: 0, top: 0, right: 0 },
 
   /**
-    @type Hash
-
     Padding around the edges of this flow layout view. This is useful for
     situations where you don't control the layout of the FlowedLayout view;
     for instance, when the view is the contentView for a SC.ScrollView.
@@ -120,7 +118,7 @@ SC.FlowedLayout = {
   flowPadding: { left: 0, bottom: 0, right: 0, top: 0 },
 
   /**
-    
+
 
     If the flowPadding somehow misses a property (one of the sides),
     we need to make sure a default value of 0 is still there.
@@ -144,7 +142,7 @@ SC.FlowedLayout = {
     this.addObserver( 'childViews.[]', this, this._scfl_childViewsDidChange );
   },
 
-  /** 
+  /**
     Detects when the child views change.
     @private
   */
@@ -157,7 +155,7 @@ SC.FlowedLayout = {
     this._scfl_tileOnce();
   }.observes('layoutDirection', 'align', 'flowPadding', 'canWrap', 'defaultFlowSpacing', 'isVisibleInWindow'),
 
-  /** 
+  /**
     Overridden to only update if it is a view we do not manage, or the width or height has changed
     since our last record of it.
     @private
@@ -187,7 +185,7 @@ SC.FlowedLayout = {
     sc_super();
   },
 
-  /** 
+  /**
     Sets up layout observers on child view. We observe three things:
     - isVisible
     - calculatedWidth
@@ -211,7 +209,7 @@ SC.FlowedLayout = {
     c.addObserver('fillHeight', this, '_scfl_tileOnce');
   },
 
-  /** 
+  /**
     Removes observers on child view.
     @private
   */
@@ -358,7 +356,7 @@ SC.FlowedLayout = {
   }.observes('autoResize', 'shouldResizeWidth', '_scfl_maximumCollapsedRowLength', '_scfl_totalCollapsedRowSize', 'shouldResizeHeight'),
 
   /**
-    
+
     Creates a plan, initializing all of the basic properties in it, but not
     doing anything further.
 
@@ -474,7 +472,7 @@ SC.FlowedLayout = {
   },
 
   /**
-    
+
     Distributes as many children as possible into a single row, stating
     at the given index, and returning the index of the next item, if any.
     @private
@@ -571,7 +569,7 @@ SC.FlowedLayout = {
   },
 
   /**
-    
+
     Positions items within a row. The items are already in the row, this just
     modifies the 'position' property.
 
@@ -700,7 +698,7 @@ SC.FlowedLayout = {
   },
 
   /**
-    
+
     Positions all of the child views according to the plan.
     @private
   */
@@ -830,7 +828,7 @@ SC.FlowedLayout = {
     }
   },
 
-  /** 
+  /**
     Reorders childViews so that the passed views are at the beginning in the order they are passed. Needed because childViews are laid out in the order they appear in childViews.
     @private
   */

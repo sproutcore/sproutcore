@@ -74,13 +74,13 @@ SC.Cursor = SC.Object.extend(
     SC.View behavior is to add this className to a view's layer if it has
     its cursor property defined.
 
-    @readOnly
-    @type String the css class name updated by this cursor
+    @readonly
+    @prop String the css class name updated by this cursor
   */
   className: null,
 
   /**
-    @type String the cursor value, can be 'url("path/to/cursor")'
+    @prop String the cursor value, can be 'url("path/to/cursor")'
   */
   cursorStyle: SC.DEFAULT_CURSOR,
 
