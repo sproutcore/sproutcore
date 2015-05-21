@@ -173,6 +173,9 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @property {SC.Responder}
     @readOnly
   */
+  nextResponder: function() {
+    return null;
+  }.property().cacheable(),
 
   /**
     Set to the current page when the pane is instantiated from a page object.

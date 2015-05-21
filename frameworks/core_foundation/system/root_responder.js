@@ -585,7 +585,7 @@ SC.RootResponder = SC.Object.extend(
     }
   },
 
-  _responderFor: function(target, methodName, firstResponder) {
+  _responderFor: function (target, methodName, firstResponder) {
     var defaultResponder = target ? target.get('defaultResponder') : null;
 
     if (target) {
