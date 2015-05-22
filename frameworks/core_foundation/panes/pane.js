@@ -777,8 +777,8 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
           responder = defaultResponder.tryToPerform(action, evt) ? defaultResponder : null;
         }
 
-        // Finally, try ourself.
-        if (responder === this || responder === null) {
+        // Finally, if the default responder was missing or failed, try ourself.
+        if (responder === null || responder !== defaultResponder) {
           responder = this.tryToPerform(action, evt) ? this : null;
         }
 
