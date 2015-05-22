@@ -765,7 +765,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
 
       // ... or unless we've reached ourself, at which point we do a couple more attempts and stop looking.
       } else if (responder === this) {
-        var defaultResponder = this.get('nextResponder');
+        var defaultResponder = this.get('defaultResponder');
 
         // If no responder was found in the responder chain, try a default responder (if set).
         if (defaultResponder) {
