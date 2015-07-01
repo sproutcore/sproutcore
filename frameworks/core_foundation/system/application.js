@@ -25,7 +25,7 @@ sc_require('system/root_responder');
   @since SproutCore 1.0
 */
 SC.Application = SC.Responder.extend(SC.ResponderContext,
-/** SC.Application.prototype */ {
+/** @scope SC.Application.prototype */ {
 
   /** @private UNUSED
     The current design mode of the application and its views.
@@ -187,7 +187,7 @@ SC.Application = SC.Responder.extend(SC.ResponderContext,
     you can set your own thresholds easily enough by overriding this property.
 
     @readonly
-    @property {Object}
+    @type Object
     @default { s: 500000, m: 2000000, l: Infinity }
   */
   designModes: {

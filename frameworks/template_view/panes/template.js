@@ -51,9 +51,6 @@ SC.TemplatePane.mixin( /** @scope SC.TemplatePane */ {
 
     pane = pane.create().append();
 
-    // Normally the awake process is started in the Page, but we don't have a Page
-    pane.awake();
-
     return pane;
   }
 });

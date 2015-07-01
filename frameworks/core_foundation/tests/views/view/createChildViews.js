@@ -109,9 +109,8 @@ test("should create view from class with any passed attributes", function() {
   equals(v.foo, 'baz', 'view did get custom attributes');
 });
 
-test("should set newView.owner & parentView to receiver", function() {
+test("should set newView.parentView to receiver", function() {
   var v = view.createChildView(myViewClass) ;
-  equals(v.get('owner'), view, 'v.owner == view');
   equals(v.get('parentView'), view, 'v.parentView == view');
 });
 

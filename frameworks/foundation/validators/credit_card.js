@@ -8,15 +8,15 @@
 sc_require('validators/validator') ;
 
 /** @class
-  Validate a field value as a credit card number. 
-  
+  Validate a field value as a credit card number.
+
   This validator will perform a basic check to ensure the credit card number
   is mathematically valid.  It will also accept numbers with spaces, dashes
-  or other punctuation.  
-  
+  or other punctuation.
+
   Converted credit card numbers are broken into units of 4.
-  
-  Basic credit card validation courtesy David Leppek 
+
+  Basic credit card validation courtesy David Leppek
   (https://www.azcode.com/Mod10)
 
   @extends SC.Validator
@@ -41,30 +41,30 @@ SC.Validator.CreditCard = SC.Validator.extend(
   objectForFieldValue: function(value, form, field) {
     return value.replace(/[\s-\.\:]/g,'') ;
   },
-  
-  validate: function(form, field) { 
-    return this.checkNumber(field.get('fieldValue')) ; 
+
+  validate: function(form, field) {
+    return this.checkNumber(field.get('fieldValue')) ;
   },
-  
+
   validateError: function(form, field) {
     var label = field.get('errorLabel') || 'Field' ;
     return SC.$error(SC.String.loc("Invalid.CreditCard(%@)", label), label);
   },
-  
-  /** 
-    Allow only numbers, dashes, and spaces 
+
+  /**
+    Allow only numbers, dashes, and spaces
   */
   validateKeyDown: function(form, field, charStr) {
     return !!charStr.match(/[0-9\- ]/);
   },
-  
+
   checkNumber: function(ccNumb) {
-    
+
     if (!ccNumb || ccNumb.length===0) return YES; // do not validate empty
-    
+
     // remove any spaces or dashes
     ccNumb = ccNumb.replace(/[^0-9]/g,'');
-    
+
     var valid = "0123456789";  // Valid digits in a credit card number
     var len = ccNumb.length;  // The length of the submitted cc number
     var iCCN = parseInt(ccNumb,0);  // integer of ccNumb
@@ -82,11 +82,11 @@ SC.Validator.CreditCard = SC.Validator.extend(
       if (valid.indexOf(temp) == "-1"){bNum = false;}
     }
 
-    // if it is NOT a number, you can either alert to the fact, 
+    // if it is NOT a number, you can either alert to the fact,
     // or just pass a failure
     if(!bNum) bResult = false;
 
-    // Determine if it is the proper length 
+    // Determine if it is the proper length
     if((len === 0)&&(bResult)){  // nothing, field is blank AND passed above # check
       bResult = false;
     } else{  // ccNumb is a number and the proper length - let's see if it is a valid card number
@@ -108,7 +108,7 @@ SC.Validator.CreditCard = SC.Validator.extend(
             case 16: calc = 7; break;       //8*2=16 & 1+6 = 7
             case 18: calc = 9; break;       //9*2=18 & 1+8 = 9
             default: calc = calc;           //4*2= 8 &   8 = 8  -same for all lower numbers
-          }                                               
+          }
         iCCN = iCCN / 10;  // subtracts right most digit from ccNum
         iTotal += calc;  // running total of the card number as we loop
       }  // END OF LOOP
@@ -121,5 +121,5 @@ SC.Validator.CreditCard = SC.Validator.extend(
     }
     return bResult; // Return the results
   }
-    
+
 }) ;

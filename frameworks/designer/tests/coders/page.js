@@ -38,14 +38,13 @@ test('Verify basic page file encoding', function () {
 });
 
 test('Verify view in page encoding', function () {
-  baseTypes.awake();
+  baseTypes.get('mainView');
   design = SC.DesignCoder.encode(baseTypes);
   equals(design.trim(),'SC.Page.design({mainView: SC.View.design({s: "string",n: 12,b: false,a: [1,2,3],h: {"a": "b","c": "d"}})})', 'basic types encoded');  
 });
 
 test('Verify binding in page encoding', function () {
   SC.RunLoop.begin();
-  bindingPage.awake();
   bindingPage.get('mainView');
   SC.RunLoop.end();
 

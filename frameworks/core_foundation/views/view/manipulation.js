@@ -56,35 +56,8 @@ SC.View.reopen(
 
     view.endPropertyChanges();
 
-    // Make sure all notifications are delayed since the appending
-    // doesn't complete until the end of the RunLoop
-    // There may be better ways to do this than with invokeLast,
-    // but it's the best I can do for now - PDW
-    // this.invokeLast(function () {
-    //   var pane = view.get('pane');
-    //   if (pane && pane.get('isPaneAttached')) {
-    //     view._notifyDidAppendToDocument();
-    //   }
-    // });
-
     return this ;
   },
-
-  removeChild: function(original, view) {
-    if (!view) { return this; } // nothing to do
-    if (view.parentView !== this) {
-      throw new Error("%@.removeChild(%@) must belong to parent".fmt(this, view));
-    }
-
-    // notify views
-    // TODO: Deprecate these notifications.
-    if (view.willRemoveFromParent) { view.willRemoveFromParent() ; }
-    if (this.willRemoveChild) { this.willRemoveChild(view) ; }
-
-    original(view);
-
-    return this;
-  }.enhance(),
 
   /**
     Replace the oldView with the specified view in the receivers childNodes

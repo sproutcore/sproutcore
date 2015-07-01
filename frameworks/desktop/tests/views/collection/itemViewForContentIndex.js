@@ -52,9 +52,9 @@ module("SC.CollectionView.itemViewForContentIndex", {
 
       groupExampleView: SC.View.extend(), // custom for testing
 
-        exampleView: SC.View.extend({
-          isReusable: false
-        }), // custom for testing
+      exampleView: SC.View.extend({
+        isReusable: false
+      }), // custom for testing
 
       testAsGroup: NO,
 
@@ -152,16 +152,27 @@ test("returning item from cache", function() {
 // SC.View:insertBefore, it needs to pass the designMode down to its item views
 // itself.
 test("set designMode on item views", function() {
-  var itemView;
+  var itemView,
+    updateDesignModeCount = 0;
+
+  view.set('exampleView', SC.View.extend({
+    updateDesignMode: function () {
+      updateDesignModeCount++;
+
+      sc_super();
+    }
+  }));
 
   // Initial designMode before creating the item view.
   view.set('designMode', 'small');
   itemView = view.itemViewForContentIndex(1);
   equals(itemView.get('designMode'), 'small', "itemView.designMode should be set to match the current value of the collection");
+  equals(updateDesignModeCount, 1, "updateDesignMode should have been called once on the itemView");
 
   // Changes to designMode after creating the item view.
   view.updateDesignMode('small', 'large');
   equals(itemView.get('designMode'), 'large', "itemView.designMode should be set to match the current value of the collection");
+  equals(updateDesignModeCount, 2, "updateDesignMode should have been called once more on each itemView");
 });
 
 // ..........................................................

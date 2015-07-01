@@ -1,0 +1,32 @@
+@theme(sc-small-size) {
+
+  $theme.slider {
+    overflow: visible;
+
+    .track {
+      position: absolute;
+      top: 50%; height: 4px; left: 0; right: 0;
+      margin-top: -2px;
+
+      @include slices("track.png", $left: 3, $right: 3);
+    }
+
+    .sc-slider-step-mark {
+      height: 5px;
+      margin-top: -2px;
+    }
+
+    .sc-handle {
+      display: block; position: absolute;
+      width: 18px; height: 18px; top: 50%; margin-top: -8.5px; margin-left: -9px;
+
+      @include slice("knob.png");
+    }
+
+    &.active {
+      .sc-handle { @include slice("knob-active.png"); }
+    }
+
+  }
+
+}

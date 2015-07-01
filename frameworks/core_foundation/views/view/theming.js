@@ -3,11 +3,6 @@ sc_require("views/view");
 SC.View.reopen(
   /** @scope SC.View.prototype */ {
 
-  init: function(original) {
-    original();
-    this._lastTheme = this.get('theme');
-  }.enhance(),
-
   // ..........................................................
   // THEME SUPPORT
   //
@@ -81,8 +76,9 @@ SC.View.reopen(
     Also, because
   */
   _sc_view_themeDidChange: function() {
-    if (this._lastTheme === this.get('theme')) { return; }
-    this._lastTheme = this.get('theme');
+    var curTheme = this.get('theme');
+    if (this._lastTheme === curTheme) { return; }
+    this._lastTheme = curTheme;
 
     // invalidate child view base themes, if present
     var childViews = this.childViews, len = childViews.length, idx;
@@ -224,30 +220,6 @@ SC.View.reopen(
       }
     }
   },
-
-  applyAttributesToContext: function(original, context) {
-    var theme = this.get('theme');
-    var themeClassNames = theme.classNames, idx, len = themeClassNames.length;
-
-    for (idx = 0; idx < len; idx++) {
-      context.addClass(themeClassNames[idx]);
-    }
-
-    original(context);
-
-    var renderDelegate = this.get('renderDelegate');
-    if (renderDelegate && renderDelegate.className) {
-      context.addClass(renderDelegate.className);
-    }
-
-    // @if(debug)
-    if (renderDelegate && renderDelegate.name) {
-      SC.Logger.error("Render delegates now use 'className' instead of 'name'.");
-      SC.Logger.error("Name '%@' will be ignored.", renderDelegate.name);
-    }
-    // @endif
-  }.enhance(),
-
 
   /**
     Invokes a method on the render delegate, if one is present and it implements

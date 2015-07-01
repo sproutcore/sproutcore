@@ -8,7 +8,7 @@
 SC.supplement(Number.prototype, {
 
   /**
-   * Returns the oridnal associated for the current number:
+   * Returns the ordinal associated for the current number:
    *
    * eg: 1 => 'st', 2 => 'nd'
    *

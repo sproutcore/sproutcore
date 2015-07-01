@@ -42,17 +42,17 @@ module("SC.ScrollerView",{
   }
 });
 
-test('value', function() {
+test('value & displayValue', function() {
   equals(view1.get('maximum'), 100, 'precond - view has maximum of 100');
   equals(view1.get('minimum'), 10, 'precond - view has a minimum of 10');
   view1.set('value', 300);
-  equals(view1.get('value'), view1.get('maximum'), 'value is set to maximum if attempting to set higher than maximum');
+  equals(view1.get('displayValue'), view1.get('maximum'), 'displayValue is set to maximum if attempting to set value higher than maximum');
   view1.set('maximum', 50);
-  equals(view1.get('value'), view1.get('maximum'), 'value should change if maximum changes');
+  equals(view1.get('displayValue'), view1.get('maximum'), 'displayValue should change if maximum changes');
   view1.set('value', 0);
-  equals(view1.get('value'), view1.get('minimum'), 'value is set to minimum if attempt to set lower than minimum');
+  equals(view1.get('displayValue'), view1.get('minimum'), 'displayValue is set to minimum if attempt to set value lower than minimum');
   view1.set('minimum', 15);
-  equals(view1.get('value'), view1.get('minimum'), 'value should change if minimum changes');
+  equals(view1.get('displayValue'), view1.get('minimum'), 'displayValue should change if minimum changes');
 });
 
 test('isEnabled', function() {

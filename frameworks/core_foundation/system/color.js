@@ -47,7 +47,7 @@
   rgba values stay within the device's gamut (0 to 255 on a normal screen, and 0 to 1
   for alpha). For example, adding white to white will result in r, g and b values of
   510, a nonsensical value. (The `cssText` property will, however, correctly clamp the
-  component values, and the color will output `#FFFFFF`.) This behavior is required
+  component values, and the color will output #FFFFFF.) This behavior is required
   for operations such as interpolating between colors (see "SC.Color and SC.View"
   below); it also gives SC.Color more predictable math, where A + B - B = A, even if
   the intermediate (A + B) operation results in underlying values outside of the normal
@@ -133,7 +133,7 @@
   ### Edge Case: Supporting Alpha in IE
 
   Supporting the alpha channel in older versions of IE requires a little extra work.
-  The bindable `cssText` property will return valid ARGB (e.g. `#99FFFFFF`) when it
+  The bindable `cssText` property will return valid ARGB (e.g. #99FFFFFF) when it
   detects that it's in an older version of IE which requires it, but unfortunately you
   can't simply plug that value into `background-color`. The following code will detect
   this case and provide the correct CSS snippet:
@@ -144,7 +144,7 @@
       if (SC.Color.supportsARGB) {
         var gradient = "progid:DXImageTransform.Microsoft.gradient";
         css = ("-ms-filter:" + gradient + "(startColorstr=%@1,endColorstr=%@1);" +
-               "filter:" + gradient + "(startColorstr=%@1,endColorstr=%@1)" + 
+               "filter:" + gradient + "(startColorstr=%@1,endColorstr=%@1)" +
                "zoom: 1").fmt(color);
       } else {
         css = "background-color:" + color;
@@ -482,7 +482,7 @@ SC.Color = SC.Object.extend(
    */
   cssText: function (key, value) {
     // Getter.
-    if (value === undefined) { 
+    if (value === undefined) {
       // FAST PATH: Error.
       if (this.get('isError')) return this.get('errorValue');
 
@@ -641,16 +641,22 @@ SC.Color.mixin(
 
   /** @private Overrides create to support creation with {a, r, g, b} hash. */
   create: function() {
-    var args = SC.A(arguments),
-        len = args.length,
-        vals = {},
+    var vals = {},
         hasVals = NO,
         keys = ['a', 'r', 'g', 'b'],
+        args, len,
         hash, i, k, key;
+
+
+    // Fast arguments access.
+    // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
+    args = new Array(arguments.length); // SC.A(arguments)
+    len = args.length;
+
     // Loop through all arguments. If any of them contain numeric a, r, g or b arguments,
     // clone the hash and move the value from (e.g.) a to _a.
     for (i = 0; i < len; i++) {
-      hash = args[i];
+      hash = arguments[i];
       if (SC.typeOf(hash.a) === SC.T_NUMBER
         || SC.typeOf(hash.r) === SC.T_NUMBER
         || SC.typeOf(hash.g) === SC.T_NUMBER
@@ -665,8 +671,11 @@ SC.Color.mixin(
             delete hash[key];
           }
         }
+      } else {
+        args[i] = hash;
       }
     }
+
     if (hasVals) args.push(vals);
     return SC.Object.create.apply(this, args);
   },
@@ -921,7 +930,7 @@ SC.Color.mixin(
 
   // ..........................................................
   // Regular expressions for accepted color types
-  // 
+  //
   PARSE_RGBA: /^rgba\(\s*([\d]+%?)\s*,\s*([\d]+%?)\s*,\s*([\d]+%?)\s*,\s*([.\d]+)\s*\)$/,
   PARSE_RGB : /^rgb\(\s*([\d]+%?)\s*,\s*([\d]+%?)\s*,\s*([\d]+%?)\s*\)$/,
   PARSE_HSLA: /^hsla\(\s*(-?[\d]+)\s*\s*,\s*([\d]+)%\s*,\s*([\d]+)%\s*,\s*([.\d]+)\s*\)$/,

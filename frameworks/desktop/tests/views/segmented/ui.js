@@ -157,6 +157,7 @@ var pane;
       itemTitleKey: 'value',
       itemValueKey: 'value',
       itemWidthKey: 'width',
+      shouldHandleOverflow: true,
       layout: { height: 25 }
     })
     .add("5_items,1_sel,widths,overflow", SC.SegmentedView, {
@@ -170,6 +171,7 @@ var pane;
       itemTitleKey: 'value',
       itemValueKey: 'value',
       itemWidthKey: 'width',
+      shouldHandleOverflow: true,
       value: "E",
       layout: { height: 25 }
     })
@@ -185,6 +187,7 @@ var pane;
       itemValueKey: 'value',
       itemWidthKey: 'width',
       itemLayerIdKey: 'layerId',
+      shouldHandleOverflow: true,
       value: "E",
       layout: { height: 25 }
     })
@@ -210,12 +213,14 @@ var pane;
       items: "Item1 Item2 Item3".w(),
       value: "Item2",
       layout: { height: 25, width: 0 },
+      shouldHandleOverflow: true,
       shouldAutoResize: YES
     })
     .add("3_items,1_sel,shouldAutoResize,flexible_layout", SC.SegmentedView, {
       items: "Item1 Item2 Item3".w(),
       value: "Item2",
       layout: { height: 25, left: 0, right: 0 },
+      shouldHandleOverflow: true,
       shouldAutoResize: YES
     });
 
@@ -490,12 +495,7 @@ var pane;
     sv.showOverflowMenu();
 
     // the overflow menu should be showing
-    var menu = SC.$('.sc-menu').view();
-    if (menu.length) {
-      menu = menu[0];
-    } else {
-      menu = null;
-    }
+    var menu = SC.viewFor(SC.$('.sc-menu')[0]);
     ok(menu && menu.get('isVisible'), 'overflow menu should be visible');
 
     // We need the run loop to end so that we go through cleaning up views at the end of the run loop,
@@ -609,6 +609,21 @@ var pane;
 
     ok(SC.none(segmentedView.getPath('layout.width')), "Having flexible layout prevents view from auto-resizing.");
   });
+
+  test("Check adjusting a segment views layout updates its frame", function() {
+    var segmentedView;
+
+    segmentedView = pane.view('3_empty');
+
+    equals(segmentedView.get('layout').height, 25, '3_empty.layout should have a height of 25');
+    equals(segmentedView.get('frame').height, 25, '3_empty.layout should have a height of 25');
+
+    // adjust the views height
+    segmentedView.adjust('height', 30);
+
+    equals(segmentedView.get('layout').height, 30, '3_empty.layout should have a height of 30');
+    equals(segmentedView.get('frame').height, 30, '3_empty.layout should have a height of 30');
+  })
 
 
 })();

@@ -4,49 +4,49 @@
 //            portions copyright @2011 Apple Inc.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-
+/* globals equals, ok, test, module, start, stop */
 var view, content, contentController, pane, actionCalled = 0;
 
 module("SC.CollectionView Mouse Events", {
   setup: function() {
+    SC.run(function () {
+      content = "1 2 3 4 5 6 7 8 9 10".w().map(function(x) {
+        return SC.Object.create({ value: x });
+      });
 
-    SC.RunLoop.begin();
+      contentController = SC.ArrayController.create({
+        content: content,
+        allowsMultipleSelection: YES
+      });
 
-    content = "1 2 3 4 5 6 7 8 9 10".w().map(function(x) {
-      return SC.Object.create({ value: x });
+      view = SC.CollectionView.create({
+        content: contentController,
+
+        layout: { top: 0, left: 0, width: 300, height: 500 },
+
+        layoutForContentIndex: function(idx) {
+          return { left: 0, right: 0, top: idx * 50, height: 50 };
+        },
+
+        isVisibleInWindow: YES,
+        acceptsFirstResponder: YES,
+        action: function() {
+          actionCalled++;
+        }
+      });
+
+      pane = SC.MainPane.create();
+      pane.appendChild(view);
+      pane.append();
     });
-
-    contentController = SC.ArrayController.create({
-      content: content,
-      allowsMultipleSelection: YES
-    });
-
-    view = SC.CollectionView.create({
-      content: contentController,
-
-      layout: { top: 0, left: 0, width: 300, height: 500 },
-
-      layoutForContentIndex: function(idx) {
-        return { left: 0, right: 0, top: idx * 50, height: 50 };
-      },
-
-      isVisibleInWindow: YES,
-      acceptsFirstResponder: YES,
-      action: function() {
-        actionCalled++;
-      }
-    });
-
-    pane = SC.MainPane.create();
-    pane.appendChild(view);
-    pane.append();
-
-    SC.RunLoop.end();
   },
 
   teardown: function() {
-    pane.destroy();
-    actionCalled = 0;
+    SC.run(function () {
+      pane.destroy();
+      pane = view = content = contentController = null;
+      actionCalled = 0;
+    });
   }
 });
 
@@ -88,7 +88,7 @@ function clickOn(view, index, shiftKey, ctrlKey, expected, delay) {
 
       ok(expected ? expected.isEqual(sel) : expected === sel, 'should have selection: %@ after click with %@ on item[%@], actual: %@'.fmt(expected, modifiers, index, sel));
       SC.RunLoop.end();
-      if (delay) window.start() ; // starts the test runner
+      if (delay) { start(); }// starts the test runner
     };
 
     if (delay) {
@@ -136,13 +136,16 @@ test("clicking on an item should select it", function() {
 });
 
 test("clicking on a selected item should clear selection after 300ms and reselect it", function() {
-  view.select(SC.IndexSet.create(1,5));
-  SC.RootResponder.responder._lastMouseUpAt = null ; // HACK: don't want a doubleClick from previous tests
+  SC.run(function () {
+    view.select(SC.IndexSet.create(1,5));
+  });
   clickOn(view, 3, NO, NO, selectionFromIndex(3), 500);
 });
 
 test("clicking on unselected item should clear selection and select it", function() {
-  view.select(SC.IndexSet.create(1,5));
+  SC.run(function () {
+    view.select(SC.IndexSet.create(1,5));
+  });
   clickOn(view, 7, NO, NO, selectionFromIndex(7));
 });
 
@@ -153,7 +156,10 @@ test("first responder", function() {
 
 test("clicking on a collection view with null content should not throw an error", function() {
   var failed = NO;
-  view.set('content', null);
+  SC.run(function () {
+    view.set('content', null);
+  });
+
   try {
     var l = view.get('layer'),
         evt = SC.Event.simulateEvent(l, 'mousedown');
@@ -163,6 +169,95 @@ test("clicking on a collection view with null content should not throw an error"
   ok(!failed, "clicking on a collection view with null content should not throw an error");
 });
 
+test("clicking on an item should select it when useToggleSelection is true", function() {
+  view.set('useToggleSelection', YES);
+  clickOn(view, 3, NO, NO, selectionFromIndex(3));
+});
+
+test("clicking on an unselected item should select it when useToggleSelection is true", function() {
+  view.set('useToggleSelection', YES);
+  clickOn(view, 3, NO, NO, selectionFromIndex(3));
+});
+
+test("clicking on a selected item should deselect it when useToggleSelection is true", function() {
+  view.set('useToggleSelection', YES);
+  SC.run(function () {
+    view.select(SC.IndexSet.create(3,1));
+  });
+  clickOn(view, 3, NO, NO, SC.SelectionSet.create());
+});
+
+test("clicking on an unselected item should select it and add it to the selection when useToggleSelection is true", function() {
+  view.set('useToggleSelection', YES);
+  clickOn(view, 1, NO, NO, selectionFromIndex(1));
+  clickOn(view, 3, NO, NO, selectionFromIndex(1).addObject(content.objectAt(3)));
+});
+
+test("clicking on a selected item should remove it from the selection when useToggleSelection is true", function() {
+  view.set('useToggleSelection', YES);
+  SC.run(function () {
+    view.select(SC.IndexSet.create(1,5));
+  });
+  clickOn(view, 5, NO, NO, selectionFromIndexSet(SC.IndexSet.create(1,4)));
+});
+
+test("clicking on an unselected item should select it and clear the previous selection when useToggleSelection is true and allowsMultipleSelection is not", function() {
+  view.set('useToggleSelection', YES);
+  contentController.set('allowsMultipleSelection', NO);
+  clickOn(view, 1, NO, NO, selectionFromIndex(1));
+  clickOn(view, 3, NO, NO, selectionFromIndex(3));
+});
+
+test("clicking on an unselected item should fire action when actOnSelect is true", function() {
+  view.set('actOnSelect', YES);
+
+  equals(actionCalled, 0, "precond - action hasn't been called");
+  clickOn(view, 1, NO, NO);
+  equals(actionCalled, 1, "Action called when item is selected");
+});
+
+test("clicking on an unselected item should fire action when useToggleSelection is true and actOnSelect is true", function() {
+  view.set('useToggleSelection', YES);
+  view.set('actOnSelect', YES);
+
+  equals(actionCalled, 0, "precond - action hasn't been called");
+  clickOn(view, 1, NO, NO);
+  equals(actionCalled, 1, "Action called when item is selected");
+});
+
+test("clicking on an unselected item should fire action when useToggleSelection is true and selectOnMouseDown is true and actOnSelect is true", function() {
+  view.set('actOnSelect', YES);
+  view.set('useToggleSelection', YES);
+  view.set('selectOnMouseDown', YES);
+
+  equals(actionCalled, 0, "precond - action hasn't been called");
+  clickOn(view, 1, NO, NO);
+  equals(actionCalled, 1, "Action called when item is selected");
+});
+
+test("click on an item when isSelectable is false doesn't do anything", function() {
+  view.set('isSelectable', NO);
+  clickOn(view, 1, NO, NO, null);
+});
+
+test("click on an item when isEnabled is false doesn't do anything", function() {
+  SC.run(function () {
+    view.set('isEnabled', NO);
+  });
+  clickOn(view, 1, NO, NO, null);
+});
+
+// ..........................................................
+// double click
+//
+
+test("double-clicking on an unselected item should fire action when actOnSelect is false", function() {
+  equals(actionCalled, 0, "precond - action hasn't been called");
+  clickOn(view, 1, NO, NO);
+  equals(actionCalled, 0, "No action is called on first click");
+  clickOn(view, 1, NO, NO);
+  equals(actionCalled, 1, "Action called when item receives second click");
+});
 
 // ..........................................................
 // ctrl-click mouse down
@@ -196,7 +291,9 @@ test("shift-clicking on an item above should extend the selection", function() {
 });
 
 test("shift-clicking inside selection first time should reduce selection from top", function() {
-  view.select(SC.IndexSet.create(3,4));
+  SC.run(function () {
+    view.select(SC.IndexSet.create(3,4));
+  });
   clickOn(view,4, YES, NO, selectionFromIndexSet(SC.IndexSet.create(3,2)));
 });
 
@@ -216,60 +313,4 @@ test("shift-click below bottom of selection then shift click on top of selection
   clickOn(view, 3, NO, NO, selectionFromIndex(3));
   clickOn(view, 5, YES, NO, selectionFromIndexSet(SC.IndexSet.create(3,3)));
   clickOn(view,3, YES, NO, selectionFromIndex(3));
-});
-
-test("clicking on an item should select it when useToggleSelection is true", function() {
-  view.set('useToggleSelection', YES);
-  clickOn(view, 3, NO, NO, selectionFromIndex(3));
-});
-
-test("clicking on an unselected item should select it when useToggleSelection is true", function() {
-  view.set('useToggleSelection', YES);
-  clickOn(view, 3, NO, NO, selectionFromIndex(3));
-});
-
-test("clicking on a selected item should deselect it when useToggleSelection is true", function() {
-  view.set('useToggleSelection', YES);
-  view.select(SC.IndexSet.create(3,1));
-  clickOn(view, 3, NO, NO, SC.SelectionSet.create());
-});
-
-test("clicking on an unselected item should select it and add it to the selection when useToggleSelection is true", function() {
-  view.set('useToggleSelection', YES);
-  clickOn(view, 1, NO, NO, selectionFromIndex(1));
-  clickOn(view, 3, NO, NO, selectionFromIndex(1).addObject(content.objectAt(3)));
-});
-
-test("clicking on a selected item should remove it from the selection when useToggleSelection is true", function() {
-  view.set('useToggleSelection', YES);
-  view.select(SC.IndexSet.create(1,5));
-  clickOn(view, 5, NO, NO, selectionFromIndexSet(SC.IndexSet.create(1,4)));
-});
-
-test("clicking on an unselected item should select it and clear the previous selection when useToggleSelection is true and allowsMultipleSelection is not", function() {
-  view.set('useToggleSelection', YES);
-  contentController.set('allowsMultipleSelection', NO);
-  clickOn(view, 1, NO, NO, selectionFromIndex(1));
-  clickOn(view, 3, NO, NO, selectionFromIndex(3));
-});
-
-test("clicking on an unselected item should fire action when useToggleSelection is true and actOnSelect is true", function() {
-  view.set('useToggleSelection', YES);
-  view.set('actOnSelect', YES);
-
-  equals(actionCalled, 0, "precond - action hasn't been called");
-  clickOn(view, 1, NO, NO);
-  equals(actionCalled, 1, "Action called when item is selected");
-});
-
-test("click on an item when isSelectable is false doesn't do anything", function() {
-  view.set('isSelectable', NO);
-  clickOn(view, 1, NO, NO, null);
-});
-
-test("click on an item when isEnabled is false doesn't do anything", function() {
-  SC.run(function () {
-    view.set('isEnabled', NO);
-  });
-  clickOn(view, 1, NO, NO, null);
 });

@@ -28,90 +28,10 @@ sc_require('system/core_query') ;
   @since SproutCore 1.0
 */
 SC.Event = function(originalEvent) {
-  var idx, len;
-  // copy properties from original event, if passed in.
-  if (originalEvent) {
-    this.originalEvent = originalEvent ;
-    var props = SC.Event._props, key;
-    len = props.length;
-    idx = len;
-    while(--idx >= 0) {
-      key = props[idx] ;
-      this[key] = originalEvent[key] ;
-    }
-  }
-
-  // Fix timeStamp
-  this.timeStamp = this.timeStamp || Date.now();
-
-  // Fix target property, if necessary
-  // Fixes #1925 where srcElement might not be defined either
-  if (!this.target) this.target = this.srcElement || document;
-
-  // check if target is a textnode (safari)
-  if (this.target.nodeType === 3 ) this.target = this.target.parentNode;
-
-  // Add relatedTarget, if necessary
-  if (!this.relatedTarget && this.fromElement) {
-    this.relatedTarget = (this.fromElement === this.target) ? this.toElement : this.fromElement;
-  }
-
-  // Calculate pageX/Y if missing and clientX/Y available
-  if (SC.none(this.pageX) && !SC.none(this.clientX)) {
-    var doc = document.documentElement, body = document.body;
-    this.pageX = this.clientX + (doc && doc.scrollLeft || body && body.scrollLeft || 0) - (doc.clientLeft || 0);
-    this.pageY = this.clientY + (doc && doc.scrollTop || body && body.scrollTop || 0) - (doc.clientTop || 0);
-  }
-
-  // Add which for key events
-  if (!this.which && ((this.charCode || originalEvent.charCode === 0) ? this.charCode : this.keyCode)) {
-    this.which = this.charCode || this.keyCode;
-  }
-
-  // Add metaKey to non-Mac browsers (use ctrl for PC's and Meta for Macs)
-  if (!this.metaKey && this.ctrlKey) this.metaKey = this.ctrlKey;
-
-  // Add which for click: 1 == left; 2 == middle; 3 == right
-  // Note: button is not normalized, so don't use it
-  if (!this.which && this.button) {
-    this.which = ((this.button & 1) ? 1 : ((this.button & 2) ? 3 : ( (this.button & 4) ? 2 : 0 ) ));
-  }
-
-  // Normalize wheel delta values for mousewheel events
-  if (this.type === 'mousewheel' || this.type === 'DOMMouseScroll' || this.type === 'MozMousePixelScroll') {
-    var deltaMultiplier = SC.Event.MOUSE_WHEEL_MULTIPLIER;
-
-    // normalize wheelDelta, wheelDeltaX, & wheelDeltaY for Safari
-    if (SC.browser.isWebkit && originalEvent.wheelDelta !== undefined) {
-      this.wheelDelta = 0-(originalEvent.wheelDeltaY || originalEvent.wheelDeltaX);
-      this.wheelDeltaY = 0-(originalEvent.wheelDeltaY||0);
-      this.wheelDeltaX = 0-(originalEvent.wheelDeltaX||0);
-
-    // normalize wheelDelta for Firefox (all Mozilla browsers)
-    // note that we multiple the delta on FF to make it's acceleration more
-    // natural.
-    } else if (!SC.none(originalEvent.detail) && SC.browser.isMozilla) {
-      if (originalEvent.axis && (originalEvent.axis === originalEvent.HORIZONTAL_AXIS)) {
-        this.wheelDeltaX = originalEvent.detail;
-        this.wheelDeltaY = this.wheelDelta = 0;
-      } else {
-        this.wheelDeltaY = this.wheelDelta = originalEvent.detail ;
-        this.wheelDeltaX = 0 ;
-      }
-
-    // handle all other legacy browser
-    } else {
-      this.wheelDelta = this.wheelDeltaY = SC.browser.isIE || SC.browser.isOpera ? 0-originalEvent.wheelDelta : originalEvent.wheelDelta ;
-      this.wheelDeltaX = 0 ;
-    }
-
-    this.wheelDelta *= deltaMultiplier;
-    this.wheelDeltaX *= deltaMultiplier;
-    this.wheelDeltaY *= deltaMultiplier;
-  }
+  this._sc_updateNormalizedEvent(originalEvent);
 
   return this;
-} ;
+};
 
 SC.mixin(SC.Event, /** @scope SC.Event */ {
 
@@ -187,7 +107,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     named element.  You can optionally pass an additional context object which
     will be included on the event in the event.data property.
 
-    When your handler function is called the, the function's "this" property
+    When your handler function is called, the function's "this" property
     will point to the element the event occurred on.
 
     The click handler for this method must have a method signature like:
@@ -260,21 +180,24 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
     // if target is a function, treat it as the method, with optional context
     if (SC.typeOf(target) === SC.T_FUNCTION) {
-      context = method; method = target; target = null;
+      context = method;
+      method = target;
+      target = null;
 
     // handle case where passed method is a key on the target.
     } else if (target && SC.typeOf(method) === SC.T_STRING) {
-      method = target[method] ;
+      method = target[method];
     }
 
     // Get the handlers queue for this element/eventType.  If the queue does
     // not exist yet, create it and also setup the shared listener for this
     // eventType.
-    var events = SC.data(elem, "sc_events") || SC.data(elem, "sc_events", {}) ,
+    var events = SC.data(elem, "sc_events") || SC.data(elem, "sc_events", {}),
         handlers = events[eventType];
+
     if (!handlers) {
-      handlers = events[eventType] = {} ;
-      this._addEventListener(elem, eventType, useCapture) ;
+      handlers = events[eventType] = {};
+      this._addEventListener(elem, eventType, useCapture);
     }
 
     // Build the handler array and add to queue
@@ -330,25 +253,15 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     // don't do events on text and comment nodes
     if ( elem.nodeType === 3 || elem.nodeType === 8 ) return SC.Event;
 
-    /*
-      commenting out this block because
-      1. this issue is no longer reproducible in IE7, 8 or 9
-      2. this causes undesired behavior if one tries to remove an event from
-         an iframe because elem.setInterval is true there.
-    */
-    // // For whatever reason, IE has trouble passing the window object
-    // // around, causing it to be cloned in the process
-    // if (SC.browser.name === SC.BROWSER.ie && elem.setInterval) elem = window;
-
     var handlers, key, events = SC.data(elem, "sc_events") ;
     if (!events) return this ; // nothing to do if no events are registered
 
     // if no type is provided, remove all types for this element.
     if (eventType === undefined) {
-      for(eventType in events) this.remove(elem, eventType) ;
+      for (var anEventType in events) this.remove(elem, anEventType) ;
 
     // otherwise, remove the handler for this specific eventType if found
-    } else if (handlers = events[eventType]) {
+    } else if ((handlers = events[eventType])) {
 
       var cleanupHandlers = NO ;
 
@@ -420,7 +333,8 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
       timeStamp: Date.now(),
       bubbles: (this.NO_BUBBLE.indexOf(eventType)<0),
       cancelled: NO,
-      normalized: YES
+      normalized: YES,
+      simulated: true
     });
     if (attrs) SC.mixin(ret, attrs) ;
     return ret ;
@@ -445,18 +359,18 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
     @param elem {Element} the target element
     @param eventType {String} the event type
-    @param args {Array} optional argument or arguments to pass to handler.
+    @param event {SC.Event} [event] pre-normalized event to pass to handler
     @param donative ??
     @returns {Boolean} Return value of trigger or undefined if not fired
   */
-  trigger: function(elem, eventType, args, donative) {
+  trigger: function(elem, eventType, event, donative) {
 
     // if a CQ object is passed in, either call add on each item in the
     // matched set, or simply get the first element and use that.
     if (elem && elem.isCoreQuery) {
       if (elem.length > 0) {
         elem.forEach(function(e) {
-          this.trigger(e, eventType, args, donative);
+          this.trigger(e, eventType, event, donative);
         }, this);
         return this;
       } else elem = elem[0];
@@ -466,25 +380,23 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     // don't do events on text and comment nodes
     if ( elem.nodeType === 3 || elem.nodeType === 8 ) return undefined;
 
-    // Normalize to an array
-    args = SC.A(args) ;
+    // Backwards-compatibility. Normalize from an Array.
+    if (SC.typeOf(event) === SC.T_ARRAY) { event = event[0]; }
 
     var ret, fn = SC.typeOf(elem[eventType] || null) === SC.T_FUNCTION ,
-        event, current, onfoo, isClick;
+        current, onfoo, isClick;
 
     // Get the event to pass, creating a fake one if necessary
-    event = args[0];
     if (!event || !event.preventDefault) {
-      event = this.simulateEvent(elem, eventType) ;
-      args.unshift(event) ;
+      event = this.simulateEvent(elem, eventType);
     }
 
-    event.type = eventType ;
+    event.type = eventType;
 
     // Trigger the event - bubble if enabled
     current = elem;
     do {
-      ret = SC.Event.handle.apply(current, args);
+      ret = SC.Event.handle.call(current, event);
       current = (current===document) ? null : (current.parentNode || document);
     } while(!ret && event.bubbles && current);
     current = null ;
@@ -492,7 +404,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     // Handle triggering native .onfoo handlers
     onfoo = elem["on" + eventType] ;
     isClick = SC.$.nodeName(elem, 'a') && eventType === 'click';
-    if ((!fn || isClick) && onfoo && onfoo.apply(elem, args) === NO) ret = NO;
+    if ((!fn || isClick) && onfoo && onfoo.call(elem, event) === NO) ret = NO;
 
     // Trigger the native events (except for clicks on links)
     if (fn && donative !== NO && ret !== NO && !isClick) {
@@ -520,50 +432,55 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     Note that like other parts of this library, the handle function does not
     support namespaces.
 
-    @param event {Event} the event to handle
+    @param event {DOMEvent} the event to handle
     @returns {Boolean}
   */
-  handle: function(event) {
+  handle: function (event) {
 
     // ignore events triggered after window is unloaded or if double-called
     // from within a trigger.
-    if ((typeof SC === "undefined") || SC.Event.triggered) return YES ;
+    if ((typeof SC === "undefined") || SC.Event.triggered) return true;
 
-    // returned undefined or NO
-    var val, ret, namespace, all, handlers, args, key, handler, method, target;
-
-    // normalize event across browsers.  The new event will actually wrap the
-    // real event with a normalized API.
-    args = SC.A(arguments);
-    args[0] = event = SC.Event.normalizeEvent(event || window.event);
+    // returned undefined or false
+    var val, ret, handlers, method, target;
 
     // get the handlers for this event type
     handlers = (SC.data(this, "sc_events") || {})[event.type];
-    if (!handlers) return NO ; // nothing to do
 
-    // invoke all handlers
-    for (key in handlers ) {
-      handler = handlers[key];
-      // handler = [target, method, context]
-      method = handler[1];
+    // no handlers for the event
+    if (!handlers) {
+      val = false; // nothing to do
 
-      // Pass in a reference to the handler function itself
-      // So that we can later remove it
-      event.handler = method;
-      event.data = event.context = handler[2];
+    } else {
+      // normalize event across browsers.  The new event will actually wrap the real event with a normalized API.
+      event = SC.Event.normalizeEvent(event || window.event);
 
-      target = handler[0] || this;
-      ret = method.apply( target, args );
+      // invoke all handlers
+      for (var key in handlers) {
+        var handler = handlers[key];
 
-      if (val !== NO) val = ret;
+        method = handler[1];
 
-      // if method returned NO, do not continue.  Stop propagation and
-      // return default.  Note that we test explicitly for NO since
-      // if the handler returns no specific value, we do not want to stop.
-      if ( ret === NO ) {
-        event.preventDefault();
-        event.stopPropagation();
+        // Pass in a reference to the handler function itself so that we can remove it later.
+        event.handler = method;
+        event.data = event.context = handler[2];
+
+        target = handler[0] || this;
+        ret = method.call(target, event);
+
+        if (val !== false) val = ret;
+
+        // if method returned NO, do not continue.  Stop propagation and
+        // return default.  Note that we test explicitly for NO since
+        // if the handler returns no specific value, we do not want to stop.
+        if ( ret === false ) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
       }
+
+      // Clean up the cached normalized SC.Event so that it's not holding onto extra memory.
+      if (event.originalEvent && !event.originalEvent.simulated) { event._sc_clearNormalizedEvent(); }
     }
 
     return val;
@@ -619,12 +536,13 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
         return YES;
       },
 
-      handler: function(event) {
+      handler: function (event) {
         // If we actually just moused on to a sub-element, ignore it
         if ( SC.Event._withinElement(event, this) ) return YES;
         // Execute the right handlers by setting the event type to mouseenter
         event.type = "mouseenter";
-        return SC.Event.handle.apply(this, arguments);
+
+        return SC.Event.handle.call(this, event);
       }
     },
 
@@ -643,12 +561,12 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
         return YES;
       },
 
-      handler: function(event) {
+      handler: function (event) {
         // If we actually just moused on to a sub-element, ignore it
         if ( SC.Event._withinElement(event, this) ) return YES;
         // Execute the right handlers by setting the event type to mouseleave
         event.type = "mouseleave";
-        return SC.Event.handle.apply(this, arguments);
+        return SC.Event.handle.call(this, event);
       }
     }
   },
@@ -693,16 +611,17 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     @param eventType {String} the event type
   */
   _addEventListener: function(elem, eventType, useCapture) {
-    var listener, special = this.special[eventType] ;
+    var listener,
+        special = this.special[eventType] ;
 
 		if (!useCapture) {
-			useCapture = NO;
+			useCapture = false;
 		}
 
     // Check for a special event handler
     // Only use addEventListener/attachEvent if the special
-    // events handler returns NO
-    if ( !special || special.setup.call(elem)===NO) {
+    // events handler returns false
+    if ( !special || special.setup.call(elem) === false) {
 
       // Save element in cache.  This must be removed later to avoid
       // memory leaks.
@@ -711,9 +630,9 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
       // Either retrieve the previously cached listener or cache a new one.
       listener = SC.data(elem, "listener") || SC.data(elem, "listener",
-       function() {
-         return SC.Event.handle.apply(SC.Event._elements[guid], arguments);
-      }) ;
+        function handle_event (event) {
+          return SC.Event.handle.call(SC.Event._elements[guid], event);
+        });
 
       // Bind the global event handler to the element
       if (elem.addEventListener) {
@@ -723,13 +642,9 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
         // there is currently a hack in request , but it needs to fixed here.
         elem.attachEvent("on" + eventType, listener);
       }
-      //
-      // else {
-      //         elem.onreadystatechange = listener;
-      //       }
     }
 
-    elem = special = listener = null ; // avoid memory leak
+    elem = special = listener = null; // avoid memory leak
   },
 
   /** @private
@@ -764,24 +679,51 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
   _elements: {},
 
+  _sc_normalizedEvents: null,
+
   // implement preventDefault() in a cross platform way
 
   /** @private Take an incoming event and convert it to a normalized event. */
-  normalizeEvent: function(event) {
-    if (event === window.event) {
-      // IE can't do event.normalized on an Event object
-      return SC.Event.create(event) ;
+  normalizeEvent: function (event) {
+    var ret;
+
+    // Create the cache the first time.
+    if (!this._sc_normalizedEvents) { this._sc_normalizedEvents = {}; }
+    ret = this._sc_normalizedEvents[event.type];
+
+    // Create a new normalized SC.Event.
+    if (!ret) {
+      if (event === window.event) {
+        // IE can't do event.normalized on an Event object
+        ret = SC.Event.create(event) ;
+      } else {
+        ret = event.normalized ? event : SC.Event.create(event) ;
+      }
+
+    // When passed an SC.Event, don't re-normalize it.
+    // TODO: This is hacky nonsense left over from a whole pile of bad decisions in SC.Event—
+    } else if (event.normalized) {
+      ret = event;
+
+    // Update the cached normalized SC.Event with the new DOM event.
     } else {
-      return event.normalized ? event : SC.Event.create(event) ;
+      ret._sc_updateNormalizedEvent(event);
     }
+
+    // Cache the normalized event object for this type of event. This allows us to avoid recreating
+    // SC.Event objects constantly for noisy events such as 'mousemove' or 'mousewheel'.
+    this._sc_normalizedEvents[event.type] = ret;
+
+    return ret;
   },
 
   _global: {},
 
   /** @private properties to copy from native event onto the event */
-  _props: "altKey attrChange attrName bubbles button cancelable charCode clientX clientY ctrlKey currentTarget data detail eventPhase fromElement handler keyCode metaKey newValue originalTarget pageX pageY prevValue relatedNode relatedTarget screenX screenY shiftKey srcElement target timeStamp toElement type view which touches targetTouches changedTouches animationName elapsedTime dataTransfer".split(" ")
+  // TODO: Remove this needless copy.
+  _props: ['altKey', 'attrChange', 'attrName', 'bubbles', 'button', 'cancelable', 'charCode', 'clientX', 'clientY', 'ctrlKey', 'currentTarget', 'data', 'detail', 'fromElement', 'handler', 'keyCode', 'metaKey', 'newValue', 'originalTarget', 'pageX', 'pageY', 'prevValue', 'relatedNode', 'relatedTarget', 'screenX', 'screenY', 'shiftKey', 'srcElement', 'target', 'timeStamp', 'toElement', 'type', 'view', 'which', 'touches', 'targetTouches', 'changedTouches', 'animationName', 'elapsedTime', 'dataTransfer']
 
-}) ;
+});
 
 SC.Event.prototype = {
 
@@ -792,7 +734,175 @@ SC.Event.prototype = {
 
     @type Boolean
   */
-  hasCustomEventHandling: NO,
+  hasCustomEventHandling: false,
+
+  /** @private Clear out the originalEvent from the SC.Event instance. */
+  _sc_clearNormalizedEvent: function () {
+    // Remove the original event.
+    this.originalEvent = null;
+
+    // Reset the custom event handling and normalized flag.
+    this.hasCustomEventHandling = false;
+    this.normalized = false;
+
+    // Remove non-primitive properties copied over from the original event. While these will
+    // be overwritten, it's best to quickly null them out to avoid any issues.
+    var props = SC.Event._props,
+      idx;
+
+    idx = props.length;
+    while(--idx >= 0) {
+      var key = props[idx];
+      this[key] = null;
+    }
+
+    // Remove the custom properties associated with the previous original event. While these will
+    // be overwritten, it's best to quickly null them out to avoid any issues.
+    this.timeStamp = null;
+    this.target = null;
+    this.relatedTarget = null;
+    this.pageX = null;
+    this.pageY = null;
+    this.which = null;
+    this.metaKey = null;
+    this.wheelDelta = null;
+    this.wheelDeltaY = null;
+    this.wheelDeltaX = null;
+  },
+
+  /** @private Update the SC.Event instance with the new originalEvent. */
+  _sc_updateNormalizedEvent: function (originalEvent) {
+    var idx, len;
+
+    // Flag.
+    this.normalized = true;
+
+    // copy properties from original event, if passed in.
+    if (originalEvent) {
+      this.originalEvent = originalEvent ;
+      var props = SC.Event._props,
+        key;
+
+      len = props.length;
+      idx = len;
+      while(--idx >= 0) {
+        key = props[idx] ;
+        this[key] = originalEvent[key] ;
+      }
+    }
+
+    // Fix timeStamp
+    this.timeStamp = this.timeStamp || Date.now();
+
+    // Fix target property, if necessary
+    // Fixes #1925 where srcElement might not be defined either
+    if (!this.target) this.target = this.srcElement || document;
+
+    // check if target is a textnode (safari)
+    if (this.target.nodeType === 3 ) this.target = this.target.parentNode;
+
+    // Add relatedTarget, if necessary
+    if (!this.relatedTarget && this.fromElement) {
+      this.relatedTarget = (this.fromElement === this.target) ? this.toElement : this.fromElement;
+    }
+
+    // Calculate pageX/Y if missing and clientX/Y available
+    if (SC.none(this.pageX) && !SC.none(this.clientX)) {
+      var doc = document.documentElement, body = document.body;
+      this.pageX = this.clientX + (doc && doc.scrollLeft || body && body.scrollLeft || 0) - (doc.clientLeft || 0);
+      this.pageY = this.clientY + (doc && doc.scrollTop || body && body.scrollTop || 0) - (doc.clientTop || 0);
+    }
+
+    // Add which for key events
+    if (!this.which && ((this.charCode || originalEvent.charCode === 0) ? this.charCode : this.keyCode)) {
+      this.which = this.charCode || this.keyCode;
+    }
+
+    // Add metaKey to non-Mac browsers (use ctrl for PC's and Meta for Macs)
+    if (!this.metaKey && this.ctrlKey) this.metaKey = this.ctrlKey;
+
+    // Add which for click: 1 == left; 2 == middle; 3 == right
+    // Note: button is not normalized, so don't use it
+    if (!this.which && this.button) {
+      this.which = ((this.button & 1) ? 1 : ((this.button & 2) ? 3 : ( (this.button & 4) ? 2 : 0 ) ));
+    }
+
+    // Normalize wheel delta values for mousewheel events.
+    /*
+      Taken from https://developer.mozilla.org/en-US/docs/Web/Events/mousewheel
+      IE and Opera (Presto) only support wheelDelta attribute and do not support horizontal scroll.
+
+      The wheelDeltaX attribute value indicates the wheelDelta attribute value along the horizontal axis. When a user operates the device for scrolling to right, the value is negative. Otherwise, i.e., if it's to left, the value is positive.
+
+      The wheelDeltaY attribute value indicates the wheelDelta attribute value along the vertical axis. The sign of the value is the same as the wheelDelta attribute value.
+
+      IE
+
+      The value is the same as the delta value of WM_MOUSEWHEEL or WM_MOUSEHWHEEL. It means that if the mouse wheel doesn't support high resolution scroll, the value is 120 per notch. The value isn't changed even if the scroll amount of system settings is page scroll.
+
+      ## Chrome
+
+      On Windows, the value is the same as the delta value of WM_MOUSEWHEEL or WM_MOUSEHWHEEL. And also, the value isn't changed even if the scroll amount of system settings is page scroll, i.e., the value is the same as IE on Windows.
+
+      On Linux, the value is 120 or -120 per native wheel event. This makes the same behavior as IE and Chrome for Windows.
+
+      On Mac, the value is complicated. The value is changed if the device that causes the native wheel event supports continuous scroll.
+
+      If the device supports continuous scroll (e.g., trackpad of MacBook or mouse wheel which can be turned smoothly), the value is computed from accelerated scroll amount. In this case, the value is the same as Safari.
+
+      If the device does not support continuous scroll (typically, old mouse wheel which cannot be turned smoothly), the value is computed from non-accelerated scroll amount (120 per notch). In this case, the value is different from Safari.
+
+      This difference makes a serious issue for web application developers. That is, web developers cannot know if mousewheel event is caused by which device.
+
+      See WebInputEventFactory::mouseWheelEvent of the Chromium's source code for the detail.
+
+      ## Safari
+
+      The value is always computed from accelerated scroll amount. This is really different from other browsers except Chrome with continuous scroll supported device.
+
+      Note: tested with the Windows package, the earliest available version was Safari 3.0 from 2007. It could be that earlier versions (on Mac) support the properties too.
+
+      ## Opera (Presto)
+
+      The value is always the detail attribute value ✕ 40.
+
+      On Windows, since the detail attribute value is computed from actual scroll amount, the value is different from other browsers except the scroll amount per notch is 3 lines in system settings or a page.
+
+      On Linux, the value is 80 or -80 per native wheel event. This is different from other browsers.
+
+      On Mac, the detail attribute value is computed from accelerated scroll amout of native event. The value is usually much bigger than Safari's or Chrome's value.
+    */
+    if (this.type === 'mousewheel' || this.type === 'DOMMouseScroll' || this.type === 'MozMousePixelScroll') {
+      var deltaMultiplier = SC.Event.MOUSE_WHEEL_MULTIPLIER;
+
+      // normalize wheelDelta, wheelDeltaX, & wheelDeltaY for Safari
+      if (SC.browser.isWebkit && originalEvent.wheelDelta !== undefined) {
+        this.wheelDelta = 0 - (originalEvent.wheelDeltaY || originalEvent.wheelDeltaX);
+        this.wheelDeltaY = 0 - (originalEvent.wheelDeltaY || 0);
+        this.wheelDeltaX = 0 - (originalEvent.wheelDeltaX || 0);
+
+      // normalize wheelDelta for Firefox (all Mozilla browsers)
+      // note that we multiple the delta on FF to make it's acceleration more natural.
+      } else if (!SC.none(originalEvent.detail) && SC.browser.isMozilla) {
+        if (originalEvent.axis && (originalEvent.axis === originalEvent.HORIZONTAL_AXIS)) {
+          this.wheelDeltaX = originalEvent.detail;
+          this.wheelDelta = this.wheelDeltaY = 0;
+        } else {
+          this.wheelDelta = this.wheelDeltaY = originalEvent.detail;
+          this.wheelDeltaX = 0;
+        }
+
+      // handle all other legacy browser
+      } else {
+        this.wheelDelta = this.wheelDeltaY = SC.browser.isIE || SC.browser.isOpera ? 0 - originalEvent.wheelDelta : originalEvent.wheelDelta;
+        this.wheelDeltaX = 0;
+      }
+
+      this.wheelDelta *= deltaMultiplier;
+      this.wheelDeltaX *= deltaMultiplier;
+      this.wheelDeltaY *= deltaMultiplier;
+    }
+  },
 
   /**
     Returns the touches owned by the supplied view.
@@ -903,8 +1013,8 @@ SC.Event.prototype = {
     if(SC.browser.name === SC.BROWSER.ie &&
         SC.browser.compare(SC.browser.version, '9.0') < 0) {
       // Return an empty String for backspace, tab, left, right, up or down.
-      if(this.keyCode == 8 || this.keyCode == 9 ||
-          (this.keyCode >= 37 && this.keyCode<=40)) {
+      if(this.keyCode === 8 || this.keyCode === 9 ||
+          (this.keyCode >= 37 && this.keyCode <= 40)) {
         return String.fromCharCode(0);
       } else {
         // This will only be accurate if the event is a keypress event.
@@ -916,47 +1026,82 @@ SC.Event.prototype = {
   },
 
   /**
-    Returns character codes for the event.  The first value is the normalized
-    code string, with any shift or ctrl characters added to the begining.
-    The second value is the char string by itself.
+    Returns characters with command codes for the event.
+
+    The first value is a normalized command code identifying the modifier keys that are pressed in
+    combination with a character key. Command codes can be used to map key combinations to an action
+    in the application. A basic example of a normalized command code would be `ctrl_x`, which
+    corresponds to the combination of the `command` key with the `x` key being pressed on OS X or
+    the `ctrl` key with the `x` key in Windows.
+
+    The second value is the character string by itself. So for `ctrl_x`, this would be simply `x`. However,
+    for `alt_x` it would be `≈` and for `alt_shift_x`, it would be `˛`.
+
+    ## Considerations for Different OS's
+
+    At this time, the meta (command) key in OS X is mapped to the `ctrl_` command code prefix. This
+    means that on OS X, command + s, and on Windows, ctrl + s, both become the same command code, `ctrl_s`.
+
+    Note that the order of command code prefixes is important and goes in the order: `ctrl_`, `alt_`,
+    `shift_`. The following are examples of command codes:
+
+    * ctrl_x
+    * alt_x
+    * ctrl_shift_x
+    * ctrl_alt_shift_x
+    * alt_shift_x
 
     @returns {Array}
   */
-  commandCodes: function() {
-    var code=this.keyCode, ret=null, key=null, modifiers='', lowercase ;
+  commandCodes: function () {
+    var charCode = this.charCode,
+      keyCode = this.keyCode,
+      charString = null,
+      commandCode = null,
+      baseKeyName;
 
-    // handle function keys.
-    // WebKit browsers have equal values for keyCode and charCode on keypress event
-    if (code && code !== this.charCode) {
-      ret = SC.FUNCTION_KEYS[code] ;
-      if (!ret && (this.altKey || this.ctrlKey || this.metaKey)) {
-        ret = SC.PRINTABLE_KEYS[code];
-      }
-
-      if (ret) {
-        if (this.altKey) modifiers += 'alt_' ;
-        if (this.ctrlKey || this.metaKey) modifiers += 'ctrl_' ;
-        if (this.shiftKey) modifiers += 'shift_' ;
-      }
+    // WebKit browsers have equal values for `keyCode` and `charCode` on the keypress event. For example,
+    // the letter `r` and the function `f3` both have a `keyCode` of 114. But the `r` also has a `charCode`
+    // of 114.
+    // If there is a keyCode and no matching charCode it is a function key.
+    if (keyCode && keyCode !== charCode) {
+      commandCode = SC.FUNCTION_KEYS[keyCode];
     }
 
-    // otherwise just go get the right key.
-    if (!ret) {
-      code = this.which ;
-      key = ret = String.fromCharCode(code) ;
-      lowercase = ret.toLowerCase() ;
-      if (this.metaKey) {
-        modifiers = 'meta_' ;
-        ret = lowercase;
+    // Use the function name as the key name in the command code (ex. `down` could become `shift_down`).
+    if (commandCode) {
+      baseKeyName = commandCode;
 
-      } else ret = null ;
+    // Find the base character for the key (i.e. `alt` + `a` becomes `å`, but we really want the key name, `a`).
+    } else {
+      baseKeyName = SC.PRINTABLE_KEYS[keyCode];
     }
 
-    if (ret) ret = modifiers + ret ;
-    return [ret, key] ;
+    // If there is a base key name, append any modifiers to generate the command code.
+    if (baseKeyName) {
+      var modifiers = '';
+
+      // Append the pressed modifier keys into a name used to identify command codes.
+      // For example, holding the keys: shift, command & x, will map to the name "ctrl_shift_x".
+      if (this.ctrlKey || this.metaKey) modifiers += 'ctrl_';
+      // UNUSED. In a future version we should scrap ctrl vs. meta for the proper intent depending on the current OS.
+      // if (this.ctrlKey) modifiers += 'ctrl_';
+      // In OS X at least, when the ctrl key is pressed, both ctrlKey & metaKey are true. This makes it impossible to identify
+      // ctrl + meta vs. just ctrl. We can identify just meta though.
+      // else if (this.metaKey) modifiers += 'meta_';
+
+      if (this.altKey) modifiers += 'alt_';
+      if (this.shiftKey) modifiers += 'shift_';
+
+      commandCode = modifiers + baseKeyName;
+    }
+
+    charString = this.getCharString();  // A character string or null.
+
+    return [commandCode, charString];
   }
 
-} ;
+};
 
 // Also provide a Prototype-like API so that people can use either one.
 

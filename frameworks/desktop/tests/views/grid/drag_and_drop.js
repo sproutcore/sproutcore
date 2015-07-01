@@ -4,7 +4,7 @@
 //            portions copyright @2011 Apple Inc.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-
+/*globals module, test, ok, equals, start, stop */
 /*
   This test evaluates drag and drop support for SC.GridView
 */
@@ -87,13 +87,15 @@ test("drag on grid view with SC.DROP_ON support", function() {
     gridView = pane.view("basic").get('contentView');
 
   // Configure the view to accept drop on.
-  gridView.set('canReorderContent', YES);
-  gridView.set('isDropTarget', YES);
-  gridView.set('delegate', SC.Object.create(SC.CollectionViewDelegate, {
-     collectionViewValidateDragOperation: function(view, drag, op, proposedInsertionIndex, proposedDropOperation) {
-      return SC.DRAG_ANY;
-    }
-  }));
+  SC.run(function () {
+    gridView.set('canReorderContent', YES);
+    gridView.set('isDropTarget', YES);
+    gridView.set('delegate', SC.Object.create(SC.CollectionViewDelegate, {
+       collectionViewValidateDragOperation: function(view, drag, op, proposedInsertionIndex, proposedDropOperation) {
+        return SC.DRAG_ANY;
+      }
+      }));
+  });
 
   itemView = gridView.itemViewForContentIndex(0);
   frame = itemView.get('frame');
@@ -158,7 +160,9 @@ test("insertion point when drag on grid view", function() {
     gridView = pane.view("basic").get('contentView');
 
   // Configure the view to accept drop on.
-  gridView.set('canReorderContent', YES);
+  SC.run(function () {
+    gridView.set('canReorderContent', YES);
+  });
 
   itemView = gridView.itemViewForContentIndex(0);
   frame = itemView.get('frame');
@@ -168,8 +172,7 @@ test("insertion point when drag on grid view", function() {
   SC.Event.trigger(layer, 'mousedown', [ev]);
 
   var f = function() {
-    var halfWidth,
-      itemView2,
+    var itemView2,
       point;
 
     ev = SC.Event.simulateEvent(layer, 'mousemove');
@@ -205,7 +208,9 @@ test("insertion point when cancel drag on grid view", function() {
     layer,
     gridView = pane.view("basic").get('contentView');
 
-  gridView.set('canReorderContent', YES);
+  SC.run(function () {
+    gridView.set('canReorderContent', YES);
+  });
 
   itemView = gridView.itemViewForContentIndex(0);
   frame = itemView.get('frame');
@@ -215,8 +220,7 @@ test("insertion point when cancel drag on grid view", function() {
   SC.Event.trigger(layer, 'mousedown', [ev]);
 
   var f = function() {
-    var halfWidth,
-      itemView2,
+    var itemView2,
       point;
 
     ev = SC.Event.simulateEvent(layer, 'mousemove');

@@ -174,11 +174,15 @@ SC.device = SC.Object.create({
   //
 
   online: function(evt) {
-    this.set('isOffline', NO);
+    SC.run(function () {
+      this.set('isOffline', NO);
+    }, this);
   },
 
   offline: function(evt) {
-    this.set('isOffline', YES);
+    SC.run(function () {
+      this.set('isOffline', YES);
+    }, this);
   }
 
 });

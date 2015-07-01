@@ -6,7 +6,7 @@
 // ==========================================================================
 // Author: Richard Klancer <rpk@pobox.com>
 
-/*globals module test ok equals same stop start */
+/*globals module, test, ok, equals, expect */
 
 module("Problematic SC.ObserverSet.getMethods() removal", {
   setup: function () {
@@ -115,4 +115,17 @@ test("Removing all the methods on a target should clear the internal tracking of
   observerSet.remove(target, method2);
   equals(observerSet.members.length, 0, "The ObserverSet should have a members length of");
   ok(!observerSet._members[targetGuid], "The ObserverSet should not be tracking methods for the target: %@".fmt(targetGuid));
+});
+
+test("Observers should pass the context along to their method", function () {
+  var target = {},
+    method = function (passedContext) {
+      equals(passedContext, originalContext, "The observer function should receive the context");
+    },
+    observerSet,
+    originalContext = "ABCD";
+
+  observerSet = SC.ObserverSet.create();
+  observerSet.add(target, method, originalContext);
+  observerSet.invokeMethods();
 });

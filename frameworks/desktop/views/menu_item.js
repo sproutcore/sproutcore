@@ -4,16 +4,15 @@
 //            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-
-sc_require('views/button');
 sc_require('views/separator');
+
 
 /**
   @class
 
   An SC.MenuItemView is created for every item in a menu.
 
-  @extends SC.ButtonView
+  @extends SC.View
   @since SproutCore 1.0
 */
 SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
@@ -96,6 +95,15 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
   }.property().cacheable(),
 
   /**
+    The value from the content property.
+
+    @type String
+  */
+  value: function () {
+    return this.getContentProperty('itemValueKey');
+  }.property().cacheable(),
+
+  /**
     The tooltip from the content property.
 
     @type String
@@ -171,7 +179,16 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
         menuItems.set('parentMenu', parentMenu);
         return menuItems;
       } else {
-        return SC.MenuPane.create({
+        var subMenu = this._subMenu;
+        if (subMenu) {
+          if (subMenu.get('isAttached')) {
+            this.invokeLast('showSubMenu');
+          }
+          subMenu.remove();
+          subMenu.destroy();
+        }
+
+        subMenu = this._subMenu = SC.MenuPane.create({
           layout: { width: 200 },
           items: menuItems,
           isModal: NO,
@@ -180,6 +197,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
           controlSize: parentMenu.get('controlSize'),
           exampleView: parentMenu.get('exampleView')
         });
+        return subMenu;
       }
     }
 
@@ -208,6 +226,17 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
   init: function () {
     sc_super();
     this.contentDidChange();
+  },
+
+  /** @private */
+  destroy: function () {
+    sc_super();
+
+    var subMenu = this._subMenu;
+    if (subMenu) {
+      subMenu.destroy();
+      this._subMenu = null;
+    }
   },
 
   /** SC.MenuItemView is not able to update itself in place at this time. */
@@ -352,7 +381,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
   */
   showSubMenu: function () {
     var subMenu = this.get('subMenu');
-    if (subMenu) {
+    if (subMenu && !subMenu.get('isAttached')) {
       subMenu.set('mouseHasEntered', NO);
       subMenu.popup(this, [0, 0, 0]);
     }
@@ -759,6 +788,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
 */
 SC.MenuItemView._contentPropertyToMenuItemPropertyMapping = {
   itemTitleKey: 'title',
+  itemValueKey: 'value',
   itemToolTipKey: 'toolTip',
   itemIsEnabledKey: 'isEnabled',
   itemIconKey: 'icon',

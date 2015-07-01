@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/*global module, test, clearHtmlbody, htmlbody, ok, equals, same, stop, start */
+/*globals module, test, clearHtmlbody, htmlbody, ok, equals, same, stop, start */
 
 
 function evaluatePicker(pane) {
@@ -32,6 +32,7 @@ module("SC.PickerPane UI", {
     htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
     anchor.standardSetup().setup();
   },
+
   teardown: function () {
     anchor.standardSetup().teardown();
     clearHtmlbody();
@@ -55,8 +56,10 @@ test("verify default picker pane content container is visible at correct locatio
     paneDefault.popup(anchor.view('anchor'), SC.PICKER);
   });
   evaluatePicker(paneDefault);
-  paneDefault.remove();
-  paneDefault.destroy();
+
+  SC.run(function () {
+    paneDefault.destroy();
+  });
 });
 
 test("verify default picker pane content container is visible at correct location with right size (live resize)", function () {
@@ -84,8 +87,9 @@ test("verify default picker pane content container is visible at correct locatio
   equals(newLayout.height, 300, "The new height should be");
   equals(newLayout.top, firstLayout.top - 100, "The new top should be");
 
-  paneDefault.remove();
-  paneDefault.destroy();
+  SC.run(function () {
+    paneDefault.destroy();
+  });
 });
 
 test("verify menu picker pane content container is visible at correct location with right size", function () {
@@ -99,8 +103,10 @@ test("verify menu picker pane content container is visible at correct location w
     paneMenu.popup(anchor.view('anchor'), SC.PICKER_MENU);
   });
   evaluatePicker(paneMenu);
-  paneMenu.remove();
-  paneMenu.destroy();
+
+  SC.run(function () {
+    paneMenu.destroy();
+  });
 });
 
 test("verify fixed picker pane content container is visible at correct location with right size", function () {
@@ -115,8 +121,10 @@ test("verify fixed picker pane content container is visible at correct location 
     paneFixed.popup(anchor.view('anchor'), SC.PICKER_FIXED);
   });
   evaluatePicker(paneFixed);
-  paneFixed.remove();
-  paneFixed.destroy();
+
+  SC.run(function () {
+    paneFixed.destroy();
+  });
 });
 
 test("verify pointer picker pane content container is visible at correct location with right size", function () {
@@ -130,6 +138,8 @@ test("verify pointer picker pane content container is visible at correct locatio
     panePointer.popup(anchor.view('anchor'), SC.PICKER_POINTER, [3, 0, 1, 2, 2]);
   });
   evaluatePicker(panePointer);
-  panePointer.remove();
-  panePointer.destroy();
+
+  SC.run(function () {
+    panePointer.destroy();
+  });
 });

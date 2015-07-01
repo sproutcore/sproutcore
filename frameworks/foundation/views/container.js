@@ -189,6 +189,22 @@ SC.ContainerView = SC.View.extend(
         this.set('nowShowing', view);
       }
     }
+
+    // Observe for changes to the content view and initialize once.
+    this.addObserver('contentView', this, this._sc_contentViewDidChange);
+    this._sc_contentViewDidChange();
+  },
+
+  /** @private Cancels the active transition. */
+  _sc_cancelTransitions: function () {
+    var contentStatecharts = this._contentStatecharts;
+
+    // Exit all the statecharts immediately. This mutates the array!
+    if (contentStatecharts) {
+      for (var i = contentStatecharts.length - 1; i >= 0; i--) {
+        contentStatecharts[i].doExit(true);
+      }
+    }
   },
 
   /** @private
@@ -223,20 +239,25 @@ SC.ContainerView = SC.View.extend(
     call replaceContent.  Override replaceContent to change how the view is
     swapped out.
   */
-  contentViewDidChange: function () {
-    this.replaceContent(this.get('contentView'));
-  }.observes('contentView'),
+  _sc_contentViewDidChange: function () {
+    var contentView = this.get('contentView');
+
+    // If it's an uninstantiated view, then attempt to instantiate it.
+    if (contentView && contentView.kindOf(SC.CoreView)) {
+      contentView = this.createChildView(contentView);
+    }
+
+    this.replaceContent(contentView);
+  },
 
   /** @private */
   destroy: function () {
-    var contentStatecharts = this._contentStatecharts;
+    // Clean up observers.
+    this.removeObserver('contentView', this, this._sc_contentViewDidChange);
 
-    // Exit all the statecharts immediately. This mutates the array!
-    if (contentStatecharts) {
-      for (var i = contentStatecharts.length - 1; i >= 0; i--) {
-        contentStatecharts[i].doExit(true);
-      }
-    }
+    // Cancel any active transitions.
+    // Note: this will also destroy any content view that the container created.
+    this._sc_cancelTransitions();
 
     // Remove our internal reference to the statecharts.
     this._contentStatecharts = this._currentStatechart = null;
@@ -255,20 +276,34 @@ SC.ContainerView = SC.View.extend(
 
     // If it's a string, try to turn it into the object it references...
     if (SC.typeOf(content) === SC.T_STRING && content.length > 0) {
-      if (content.indexOf('.') > 0) {
-        content = SC.objectForPropertyPath(content);
-      } else {
-        var tempContent = this.getPath(content);
+      var dotspot = content.indexOf('.');
+      // No dot means a local property, either to this view or this view's page.
+      if (dotspot === -1) {
+        var tempContent = this.get(content);
         content = SC.kindOf(tempContent, SC.CoreView) ? tempContent : SC.objectForPropertyPath(content, this.get('page'));
+      }
+      // Dot at beginning means local property path.
+      else if (dotspot === 0) {
+        content = this.getPath(content.slice(1));
+      }
+      // Dot after the beginning
+      else {
+        content = SC.objectForPropertyPath(content);
       }
     }
 
     // If it's an uninstantiated view, then attempt to instantiate it.
     if (content && content.kindOf(SC.CoreView)) {
       content = this.createChildView(content);
-    } else {
+    }
+
+    //@if(debug)
+    // Prevent developers from assigning non-view content to a container.
+    if (content && !SC.kindOf(content, SC.CoreView)) {
+      SC.error("Developer Error: You should not assign non-View content to an SC.ContainerView.");
       content = null;
     }
+    //@endif
 
     // Sets the content.
     this.set('contentView', content);
@@ -351,6 +386,22 @@ SC.ContainerView = SC.View.extend(
 
     // Track the current statechart.
     this._currentStatechart = newStatechart;
+  },
+
+  /** @private SC.Observable.prototype */
+  set: function (key, value) {
+
+    // Changing the transitionSwap in the middle of a transition must cancel the transitions.
+    if (key === 'transitionSwap' && this.get('isTransitioning')) {
+      //@if(debug)
+      SC.warn("Developer Warning: You should not change the value of transitionSwap on %@ while the container view is transitioning. The transition was cancelled.".fmt(this));
+      //@endif
+
+      // Cancel the active transitions.
+      this._sc_cancelTransitions();
+    }
+
+    return sc_super();
   }
 
 });

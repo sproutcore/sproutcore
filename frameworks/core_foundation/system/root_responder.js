@@ -230,7 +230,7 @@ SC.RootResponder = SC.Object.extend(
       var candidate;
       while (previousKeyPanes.length > 0) {
         candidate = previousKeyPanes.pop();
-        if (candidate.get('isPaneAttached')  &&  candidate.get('acceptsKeyPane')) {
+        if (candidate.get('isVisibleInWindow') && candidate.get('acceptsKeyPane')) {
           newKeyPane = candidate ;
           break ;
         }
@@ -575,13 +575,17 @@ SC.RootResponder = SC.Object.extend(
   sendAction: function( action, target, sender, pane, context, firstResponder) {
     target = this.targetForAction(action, target, sender, pane, firstResponder) ;
 
-    // HACK: If the target is a ResponderContext, forward the action.
-    if (target && target.isResponderContext) {
-      return !!target.sendAction(action, sender, context, firstResponder);
-    } else return target && target.tryToPerform(action, sender);
+    if (target) {
+      // HACK: If the target is a ResponderContext, forward the action.
+      if (target.isResponderContext) {
+        return !!target.sendAction(action, sender, context, firstResponder);
+      } else {
+        return target.tryToPerform(action, sender, context);
+      }
+    }
   },
 
-  _responderFor: function(target, methodName, firstResponder) {
+  _responderFor: function (target, methodName, firstResponder) {
     var defaultResponder = target ? target.get('defaultResponder') : null;
 
     if (target) {
@@ -634,11 +638,13 @@ SC.RootResponder = SC.Object.extend(
 
     // 2. an explicit target was passed...
     if (target) {
+      // Normalize String targets to Objects
       if (SC.typeOf(target) === SC.T_STRING) {
-        target =  SC.objectForPropertyPath(target) ||
-                  SC.objectForPropertyPath(target, sender);
+        target = SC.objectForPropertyPath(target) ||
+                 SC.objectForPropertyPath(target, sender);
       }
 
+      // Ensure that the target responds to the method.
       if (target && !target.isResponderContext) {
         if (target.respondsTo && !target.respondsTo(methodName)) {
           target = null ;
@@ -693,8 +699,11 @@ SC.RootResponder = SC.Object.extend(
     @param {SC.Event} evt
     @returns {SC.View} view instance or null
   */
-  targetViewForEvent: function(evt) {
-    return evt.target ? SC.$(evt.target).view()[0] : null ;
+  targetViewForEvent: function (evt) {
+    var ret = null;
+    if (evt.target) { ret = SC.viewFor(evt.target); }
+
+    return ret;
   },
 
   /**
@@ -714,7 +723,7 @@ SC.RootResponder = SC.Object.extend(
   sendEvent: function(action, evt, target) {
     var pane, ret ;
 
-    SC.run(function() {
+    SC.run(function send_event() {
       // get the target pane
       if (target) pane = target.get('pane') ;
       else pane = this.get('menuPane') || this.get('keyPane') || this.get('mainPane') ;
@@ -845,7 +854,6 @@ SC.RootResponder = SC.Object.extend(
           var responder = this ;
 
           document.body['on' + keyName] = function(e) {
-            // return method.call(responder, SC.Event.normalizeEvent(e));
             return method.call(responder, SC.Event.normalizeEvent(event || window.event)); // this is IE :(
           };
 
@@ -877,7 +885,7 @@ SC.RootResponder = SC.Object.extend(
     }
     SC.Event.add(document, mousewheel, this, this.mousewheel);
 
-    // do some initial set
+    // Do some initial set up.
     this.set('currentWindowSize', this.computeWindowSize()) ;
 
     // TODO: Is this workaround still valid?
@@ -968,7 +976,7 @@ SC.RootResponder = SC.Object.extend(
     // Once the actual event name is determined, simply remove all the extras.
     // This should prevent any problems with browsers that fire multiple events.
     ['transitionend', variation1, variation2, variation3].forEach(function (keyName) {
-      if (keyName != actualEventName) {
+      if (keyName !== actualEventName) {
         SC.Event.remove(document, keyName, this, this[keyName]);
         this[keyName] = null;
     }
@@ -996,7 +1004,7 @@ SC.RootResponder = SC.Object.extend(
     // Once the actual event name is determined, simply remove all the extras.
     // This should prevent any problems with browsers that fire multiple events.
     ['animationend', variation1, variation2, variation3].forEach(function (keyName) {
-      if (keyName != actualEventName) {
+      if (keyName !== actualEventName) {
         SC.Event.remove(document, keyName, this, this[keyName]);
         this[keyName] = null;
     }
@@ -1007,7 +1015,7 @@ SC.RootResponder = SC.Object.extend(
     variation2 = lowerDomPrefix + 'AnimationIteration';
     variation3 = domPrefix + 'AnimationIteration';
     ['animationiteration', variation1, variation2, variation3].forEach(function (keyName) {
-      if (keyName != actualEventName) {
+      if (keyName !== actualEventName) {
         SC.Event.remove(document, keyName, this, this[keyName]);
         this[keyName] = null;
       }
@@ -1018,7 +1026,7 @@ SC.RootResponder = SC.Object.extend(
     variation2 = lowerDomPrefix + 'AnimationStart';
     variation3 = domPrefix + 'AnimationStart';
     ['animationstart', variation1, variation2, variation3].forEach(function (keyName) {
-      if (keyName != actualEventName) {
+      if (keyName !== actualEventName) {
         SC.Event.remove(document, keyName, this, this[keyName]);
         this[keyName] = null;
       }
@@ -1065,24 +1073,32 @@ SC.RootResponder = SC.Object.extend(
     for implementing scaling.
 
     This method is also available on SC.Touch objects, and you will usually call it from there.
-  */
-  averagedTouchesForView: function(view, added) {
-    var len,
-      t = this.touchesForView(view),
 
-    // cache per view to avoid gc
+    @param {SC.View} view The view whose touches should be averaged.
+    @param {SC.Touch} additionalTouch This method uses touchesForView; if you call it from
+        touchStart, that touch will not yet be included in touchesForView. To accommodate this,
+        you should pass the view to this method (or pass YES to SC.Touch#averagedTouchesForView's
+        `addSelf` argument).
+  */
+  averagedTouchesForView: function(view, additionalTouch) {
+    var t = this.touchesForView(view),
+      len, averaged, additionalTouchIsDuplicate;
+
+    // Each view gets its own cached average touches object for performance.
     averaged = view._scrr_averagedTouches || (view._scrr_averagedTouches = {});
 
-    if ((!t || t.length === 0) && !added) {
+    // FAST PATH: no touches to track.
+    if ((!t || t.length === 0) && !additionalTouch) {
       averaged.x = 0;
       averaged.y = 0;
       averaged.d = 0;
-      averaged.touchCount = 0;
+      averaged.velocityX = 0;
+      averaged.velocityY = 0;
 
+    // Otherwise, average the touches.
     } else {
-      // make array of touches using cached array
+      // Cache the array object used by this method. (Cleared at the end to prevent memory leaks.)
       var touches = this._averagedTouches_touches || (this._averagedTouches_touches = []);
-      touches.length = 0;
 
       // copy touches into array
       if (t) {
@@ -1090,47 +1106,18 @@ SC.RootResponder = SC.Object.extend(
         len = t.length;
         for(i = 0; i < len; i++) {
           touches.push(t[i]);
+          if (additionalTouch && t[i] === additionalTouch) additionalTouchIsDuplicate = YES;
         }
       }
 
-      // add added if needed
-      if (added) touches.push(added);
+      // Add additionalTouch if present and not duplicated.
+      if (additionalTouch && !additionalTouchIsDuplicate) touches.push(additionalTouch);
 
-      // prepare variables for looping
-      var idx, touch,
-          ax = 0, ay = 0, dx, dy, ad = 0;
-      len = touches.length;
+      // Calculate the average.
+      SC.Touch.averagedTouch(touches, averaged);
 
-      // first, add
-      for (idx = 0; idx < len; idx++) {
-        touch = touches[idx];
-        ax += touch.pageX;
-        ay += touch.pageY;
-      }
-
-      // now, average
-      ax /= len;
-      ay /= len;
-
-      // distance
-      for (idx = 0; idx < len; idx++) {
-        touch = touches[idx];
-
-        // get distance from average
-        dx = Math.abs(touch.pageX - ax);
-        dy = Math.abs(touch.pageY - ay);
-
-        // Pythagoras was clever...
-        ad += Math.pow(dx * dx + dy * dy, 0.5);
-      }
-
-      // average
-      ad /= len;
-
-      averaged.x = ax;
-      averaged.y = ay;
-      averaged.d = ad;
-      averaged.touchCount = len;
+      // Clear the touches array to prevent touch object leaks.
+      touches.length = 0;
     }
 
     return averaged;
@@ -1140,8 +1127,10 @@ SC.RootResponder = SC.Object.extend(
     // sanity-check
     if (touch.hasEnded) throw new Error("Attempt to assign a touch that is already finished.");
 
-    // unassign from old view if necessary
+    // Fast path, the touch is already assigned to the view.
     if (touch.view === view) return;
+
+    // unassign from old view if necessary
     if (touch.view) {
       this.unassignTouch(touch);
     }
@@ -1166,8 +1155,10 @@ SC.RootResponder = SC.Object.extend(
     // find view entry
     var view, viewEntry;
 
-    // get view
+    // Fast path, the touch is not assigned to a view.
     if (!touch.view) return; // touch.view should===touch.touchResponder eventually :)
+
+    // get view
     view = touch.view;
 
     // get view entry
@@ -1211,17 +1202,23 @@ SC.RootResponder = SC.Object.extend(
       (or, though it's not recommended, change it), check touch.touchResponders.
 
     @param {SC.Touch} touch
-    @param {SC.Responder} responder The view to assign to the touch. (Must implement touchStart.)
-    @param {Boolean} shouldStack Whether the new responder should replace the old one, or stack with it. Stacked responders are easy to revert.
-    @param {Boolean} upViewChain Whether the attempt to find a responder which implements touchStart should bubble up the responder chain.
+    @param {SC.Responder} responder The view to assign to the touch. (It, or if bubbling then an ancestor,
+      must implement touchStart.)
+    @param {Boolean} shouldStack Whether the new responder should replace the old one, or stack with it.
+      Stacked responders are easy to revert via `SC.Touch#restoreLastTouchResponder`.
+    @param {Boolean|SC.Responder} bubblesTo If YES, will attempt to find a `touchStart` responder up the
+      responder chain. If NO or undefined, will only check the passed responder. If you pass a responder
+      for this argument, the attempt will bubble until it reaches the passed responder, allowing you to
+      restrict the bubbling to a portion of the responder chain. ((Note that this responder will not be
+      given an opportunity to respond to the event.)
+    @returns {Boolean} Whether a valid touch responder was found and assigned.
   */
-  makeTouchResponder: function(touch, responder, shouldStack, upViewChain) {
-
+  makeTouchResponder: function(touch, responder, shouldStack, bubblesTo) {
     // In certain cases (SC.Gesture being one), we have to call makeTouchResponder
     // from inside makeTouchResponder so we queue it up here.
     if (this._isMakingTouchResponder) {
-      this._queuedTouchResponder = [touch, responder, shouldStack, upViewChain];
-      return;
+      this._queuedTouchResponder = [touch, responder, shouldStack, bubblesTo];
+      return YES; // um?
     }
     this._isMakingTouchResponder = YES;
 
@@ -1234,7 +1231,7 @@ SC.RootResponder = SC.Object.extend(
     if (touch.touchResponder === responder) {
       this._isMakingTouchResponder = NO;
       this._flushQueuedTouchResponder();
-      return;
+      return YES; // more um
     }
 
     // send touchStart
@@ -1244,13 +1241,13 @@ SC.RootResponder = SC.Object.extend(
     else pane = this.get('keyPane') || this.get('mainPane') ;
 
     // if the responder is not already in the stack...
-
     if (stack.indexOf(responder) < 0) {
-      // if we need to go up the view chain, do so
-      if (upViewChain) {
+
+      // if we need to go up the view chain, do so via SC.Pane#sendEvent.
+      if (bubblesTo) {
         // if we found a valid pane, send the event to it
         try {
-          responder = (pane) ? pane.sendEvent("touchStart", touch, responder) : null ;
+          responder = pane ? pane.sendEvent("touchStart", touch, responder, bubblesTo) : null ;
         } catch (e) {
           SC.Logger.error("Error in touchStart: " + e);
           responder = null;
@@ -1318,24 +1315,36 @@ SC.RootResponder = SC.Object.extend(
       }
     }
 
-
+    // Unflag that this method is running, and flush the queue if any.
     this._isMakingTouchResponder = NO;
-    this._flushQueuedTouchResponder();
+    this._flushQueuedTouchResponder(); // this may need to be &&'ed with the responder to give the correct return value...
 
+    return !!responder;
   },
 
   /**
-    captureTouch is used to find the view to handle a touch. It starts at the starting point and works down
-    to the touch's target, looking for a view which captures the touch. If no view is found, it uses the target
-    view.
+    Before the touchStart event is sent up the usual responder chain, the views along that same responder chain
+    are given the opportunity to capture the touch event, preventing child views (including the target) from
+    hearing about it. This of course proceeds in the opposite direction from a usual event bubbling, starting at
+    the target's first ancestor and proceeding towards the target. This method implements the capture phase.
 
-    Then, it triggers a touchStart event starting at whatever the found view was; this propagates up the view chain
-    until a view responds YES. This view becomes the touch's owner.
+    If no view captures the touch, this method will return NO, and makeTouchResponder is then called for the
+    target, proceeding with standard target-to-pane event bubbling for `touchStart`.
 
-    You usually do not call captureTouch, and if you do call it, you'd call it on the touch itself:
-    touch.captureTouch(startingPoint, shouldStack)
+    For an example of captureTouch in action, see SC.ScrollView's touch handling, which by default captures the
+    touch and holds it for 150ms to allow it to determine whether the user is tapping or scrolling.
 
-    If shouldStack is YES, the previous responder will be kept so that it may be returned to later.
+    You will usually not call this method yourself, and if you do, you should call the corresponding convenience
+    method on the touch itself.
+
+    @param {SC.Touch} touch The touch to offer up for capture.
+    @param {?SC.Responder} startingPoint The view whose children should be given an opportunity to capture
+      the event. (The starting point itself is not asked.)
+    @param {Boolean} shouldStack Whether any capturing responder should stack with existing responders.
+      Stacked responders are easy to revert via `SC.Touch#restoreLastTouchResponder`.
+
+    @returns {Boolean} Whether or not the touch was captured. If it was not, you should pass it to
+      `makeTouchResponder` for standard event bubbling.
   */
   captureTouch: function(touch, startingPoint, shouldStack) {
     if (!startingPoint) startingPoint = this;
@@ -1348,7 +1357,8 @@ SC.RootResponder = SC.Object.extend(
       SC.Logger.info('  -- Received one touch on %@'.fmt(target.toString()));
     }
     //@endif
-    // work up the chain until we get the root
+    // Generate the captureTouch responder chain by working backwards from the target
+    // to the starting point. (Don't include the starting point.)
     while (view && (view !== startingPoint)) {
       chain.unshift(view);
       view = view.get('nextResponder');
@@ -1368,21 +1378,19 @@ SC.RootResponder = SC.Object.extend(
         //@endif
 
         // if so, make it the touch's responder
-        this.makeTouchResponder(touch, view, shouldStack, YES); // triggers touchStart/Cancel/etc. event.
-        return; // and that's all we need
+        this.makeTouchResponder(touch, view, shouldStack, startingPoint); // (touch, target, should stack, bubbles back to startingPoint, or all the way up.)
+        return YES; // and that's all we need
       }
     }
 
     //@if (debug)
-    if (SC.LOG_TOUCH_EVENTS) SC.Logger.info("   -- Didn't find a view that returned YES to captureTouch, so we're calling touchStart");
+    if (SC.LOG_TOUCH_EVENTS) SC.Logger.info("   -- Didn't find a view that returned YES to captureTouch.");
     //@endif
 
-    // if we did not capture the touch (obviously we didn't)
-    // we need to figure out what view _will_
-    // Thankfully, makeTouchResponder does exactly that: starts at the view it is supplied and keeps calling startTouch
-    this.makeTouchResponder(touch, target, shouldStack, YES);
+    return NO;
   },
 
+  //@if(debug)
   /** @private
     Artificially calls endTouch for any touch which is no longer present. This is necessary because
     _sometimes_, WebKit ends up not sending endtouch.
@@ -1402,13 +1410,18 @@ SC.RootResponder = SC.Object.extend(
     }
 
     // end said touches
+    if (end.length) {
+      console.warn('Ending missing touches: ' + end.toString());
+    }
     for (idx = 0, len = end.length; idx < len; idx++) {
       this.endTouch(end[idx]);
       this.finishTouch(end[idx]);
     }
   },
+  //@endif
 
   _touchCount: 0,
+
   /** @private
     Ends a specific touch (for a bit, at least). This does not "finish" a touch; it merely calls
     touchEnd, touchCancelled, etc. A re-dispatch (through recapture or makeTouchResponder) will terminate
@@ -1448,15 +1461,14 @@ SC.RootResponder = SC.Object.extend(
     "Finishes" a touch. That is, it eradicates it from our touch entries and removes all responder, etc. properties.
   */
   finishTouch: function(touch) {
-    var elem;
-
     // ensure the touch is indeed unassigned.
     this.unassignTouch(touch);
 
     // If we rescued this touch's initial element, we should remove it
     // from the DOM and garbage collect now. See setup() for an
     // explanation of this bug/workaround.
-    if (elem = touch._rescuedElement) {
+    var elem = touch._rescuedElement;
+    if (elem) {
       if (elem.swapNode && elem.swapNode.parentNode) {
         elem.swapNode.parentNode.replaceChild(elem, elem.swapNode);
       } else if (elem.parentNode === SC.touchHoldingPen) {
@@ -1466,7 +1478,6 @@ SC.RootResponder = SC.Object.extend(
       elem.swapNode = null;
       elem = null;
     }
-
 
     // clear responders (just to be thorough)
     touch.touchResponders = null;
@@ -1497,12 +1508,15 @@ SC.RootResponder = SC.Object.extend(
     var hidingTouchIntercept = NO;
 
     SC.run(function() {
-      // sometimes WebKit is a bit... iffy:
+      //@if(debug)
+      // When using breakpoints on touch start, we will lose the end touch event.
       this.endMissingTouches(evt.touches);
+      //@endif
 
-      // as you were...
       // loop through changed touches, calling touchStart, etc.
-      var idx, touches = evt.changedTouches, len = touches.length,
+      var changedTouches = evt.changedTouches,
+          len = changedTouches.length,
+          idx,
           touch, touchEntry;
 
       // prepare event for touch mapping.
@@ -1510,7 +1524,7 @@ SC.RootResponder = SC.Object.extend(
 
       // Loop through each touch we received in this event
       for (idx = 0; idx < len; idx++) {
-        touch = touches[idx];
+        touch = changedTouches[idx];
 
         // Create an SC.Touch instance for every touch.
         touchEntry = SC.Touch.create(touch, this);
@@ -1532,17 +1546,17 @@ SC.RootResponder = SC.Object.extend(
         // set the event (so default action, etc. can be stopped)
         touchEntry.event = evt; // will be unset momentarily
 
-        // send out event thing: creates a chain, goes up it, then down it,
-        // with startTouch and cancelTouch. in this case, only startTouch, as
-        // there are no existing touch responders. We send the touchEntry
-        // because it is cached (we add the helpers only once)
-        this.captureTouch(touchEntry, this);
+        // First we allow any view in the responder chain to capture the touch, before triggering the standard touchStart
+        // handler chain.
+        var captured = this.captureTouch(touchEntry, this);
+        if (!captured) this.makeTouchResponder(touchEntry, touchEntry.targetView, NO, YES); // (touch, target, shouldn't stack, bubbles all the way)
 
         // Unset the reference to the original event so we can garbage collect.
         touchEntry.event = null;
       }
-    }, this);
 
+      evt.touchContext = null;
+    }, this);
 
     // hack for text fields
     if (hidingTouchIntercept) {
@@ -1586,7 +1600,23 @@ SC.RootResponder = SC.Object.extend(
 
         if (touchEntry.hidesTouchIntercept) hidingTouchIntercept = YES;
 
-        // update touch
+        // update touch velocity (moving average)
+        var duration = evt.timeStamp - touchEntry.timeStamp,
+          velocityLambda, latestXVelocity, latestYVelocity;
+        // Given uneven timing between events, we should give less weight to shorter (less accurate)
+        // events, with no consideration at all given zero-time events.
+        if (duration !== 0) {
+          // Lambda (how heavily we're weighting the latest number)
+          velocityLambda = Math.min(1, duration / 80);
+          // X
+          latestXVelocity = (touch.pageX - touchEntry.pageX) / duration;
+          touchEntry.velocityX = (1.0 - velocityLambda) * touchEntry.velocityX + velocityLambda * (latestXVelocity);
+          // Y
+          latestYVelocity = (touch.pageY - touchEntry.pageY) / duration;
+          touchEntry.velocityY = (1.0 - velocityLambda) * touchEntry.velocityY + velocityLambda * (latestYVelocity);
+        }
+
+        // update touch position et al.
         touchEntry.pageX = touch.pageX;
         touchEntry.pageY = touch.pageY;
         touchEntry.clientX = touch.clientX;
@@ -1594,6 +1624,7 @@ SC.RootResponder = SC.Object.extend(
         touchEntry.screenX = touch.screenX;
         touchEntry.screenY = touch.screenY;
         touchEntry.timeStamp = evt.timeStamp;
+        touchEntry.type = evt.type;
         touchEntry.event = evt;
 
         // if the touch entry has a view
@@ -1638,6 +1669,8 @@ SC.RootResponder = SC.Object.extend(
         evt.screenY = firstTouch.screenY;
         evt.startX = firstTouch.startX;
         evt.startY = firstTouch.startY;
+        evt.velocityX = firstTouch.velocityX;
+        evt.velocityY = firstTouch.velocityY;
         evt.touchContext = this; // Injects the root responder so it can call e.g. `touchesForView`.
 
         // Give the view a chance to handle touchesDragged. (Don't bubble; viewTouches is view-specific.)
@@ -1652,6 +1685,8 @@ SC.RootResponder = SC.Object.extend(
         touchEntry = this._touches[touch.identifier];
         if (touchEntry) touchEntry.event = null;
       }
+      evt.touchContext = null;
+      evt.viewChangedTouches = null;
     }, this);
 
     return evt.hasCustomEventHandling;
@@ -1678,7 +1713,23 @@ SC.RootResponder = SC.Object.extend(
         // check if there is an entry
         if (!touchEntry) continue;
 
-        // continue work
+        // update touch velocity (moving average)
+        var duration = evt.timeStamp - touchEntry.timeStamp,
+          velocityLambda, latestXVelocity, latestYVelocity;
+        // Given uneven timing between events, we should give less weight to shorter (less accurate)
+        // events, with no consideration at all given zero-time events.
+        if (duration !== 0) {
+          // Lambda (how heavily we're weighting the latest number)
+          velocityLambda = Math.min(1, duration / 80);
+          // X
+          latestXVelocity = (touch.pageX - touchEntry.pageX) / duration;
+          touchEntry.velocityX = (1.0 - velocityLambda) * touchEntry.velocityX + velocityLambda * (latestXVelocity);
+          // Y
+          latestYVelocity = (touch.pageY - touchEntry.pageY) / duration;
+          touchEntry.velocityY = (1.0 - velocityLambda) * touchEntry.velocityY + velocityLambda * (latestYVelocity);
+        }
+
+        // update touch position et al.
         touchEntry.timeStamp = evt.timeStamp;
         touchEntry.pageX = touch.pageX;
         touchEntry.pageY = touch.pageY;
@@ -1869,8 +1920,8 @@ SC.RootResponder = SC.Object.extend(
   keydown: function(evt) {
     if (SC.none(evt)) return YES;
     var keyCode = evt.keyCode;
-    if(SC.browser.isMozilla && evt.keyCode===9){
-      this.keydownCounter=1;
+    if (SC.browser.isMozilla && evt.keyCode===9) {
+      this.keydownCounter = 1;
     }
     // Fix for IME input (japanese, mandarin).
     // If the KeyCode is 229 wait for the keyup and
@@ -1942,9 +1993,9 @@ SC.RootResponder = SC.Object.extend(
         keyCode   = evt.keyCode,
         isFirefox = SC.browser.isMozilla;
 
-    if(isFirefox && evt.keyCode===9){
+    if (isFirefox && evt.keyCode===9) {
       this.keydownCounter++;
-      if(this.keydownCounter==2) return YES;
+      if (this.keydownCounter === 2) return YES;
     }
 
     // delete is handled in keydown() for most browsers
@@ -2001,7 +2052,7 @@ SC.RootResponder = SC.Object.extend(
   beforedeactivate: function(evt) {
     var toElement = evt.toElement;
     if (toElement && toElement.tagName && toElement.tagName!=="IFRAME") {
-      var view = SC.$(toElement).view()[0];
+      var view = SC.viewFor(toElement);
       //The following line is necessary to allow/block text selection for IE,
       // in combination with the selectstart event.
       if (view && view.get('blocksIEDeactivate')) return NO;
@@ -2017,32 +2068,36 @@ SC.RootResponder = SC.Object.extend(
     // First, save the click count. The click count resets if the mouse down
     // event occurs more than 250 ms later than the mouse up event or more
     // than 8 pixels away from the mouse down event or if the button used is different.
-    this._clickCount += 1 ;
-    if (!this._lastMouseUpAt || this._lastClickWhich !== evt.which || ((Date.now() - this._lastMouseUpAt) > 250)) {
-      this._clickCount = 1 ;
-    } else {
-      var deltaX = this._lastMouseDownX - evt.clientX,
-          deltaY = this._lastMouseDownY - evt.clientY,
-          distance = Math.sqrt(deltaX*deltaX + deltaY*deltaY) ;
-
-      if (distance > 8.0) this._clickCount = 1 ;
-    }
-    evt.clickCount = this._clickCount ;
-
-    this._lastClickWhich = evt.which;
-    this._lastMouseDownX = evt.clientX ;
-    this._lastMouseDownY = evt.clientY ;
+    this._clickCount += 1;
 
     var view = this.targetViewForEvent(evt);
 
     view = this._mouseDownView = this.sendEvent('mouseDown', evt, view) ;
     if (view && view.respondsTo('mouseDragged')) this._mouseCanDrag = YES ;
 
-    // Determine if any views took responsibility for the
-    // event. If so, save that information so we can prevent
-    // the next click event we receive from propagating to the browser.
+    // Determine if any views took responsibility for the event. If so, save that information so we
+    // can prevent the next click event we receive from propagating to the browser.
     var ret = view ? evt.hasCustomEventHandling : YES;
     this._lastMouseDownCustomHandling = ret;
+
+    // If it has been too long since the last click, the handler has changed or the mouse has moved
+    // too far, reset the click count.
+    if (!this._lastMouseUpAt || this._lastMouseDownView !== this._mouseDownView || ((Date.now() - this._lastMouseUpAt) > 250)) {
+      this._clickCount = 1;
+    } else {
+      var deltaX = this._lastMouseDownX - evt.clientX,
+          deltaY = this._lastMouseDownY - evt.clientY,
+          distance = Math.sqrt(deltaX*deltaX + deltaY*deltaY) ;
+
+      if (distance > 8.0) this._clickCount = 1;
+    }
+    evt.clickCount = this._clickCount;
+
+    // Cache the handler and point of the last mouse down in order to determine whether a successive mouse down should
+    // still increment the click count.
+    this._lastMouseDownView = this._mouseDownView;
+    this._lastMouseDownX = evt.clientX;
+    this._lastMouseDownY = evt.clientY;
 
     return ret;
   },
@@ -2064,44 +2119,43 @@ SC.RootResponder = SC.Object.extend(
         dragView.tryToPerform('mouseUp', evt);
       });
     } else {
-
       var view = this._mouseDownView,
         targetView = this.targetViewForEvent(evt);
 
-    // record click count.
-    evt.clickCount = this._clickCount ;
+      // record click count.
+      evt.clickCount = this._clickCount ;
 
-    // attempt the mouseup call only if there's a target.
-    // don't want a mouseup going to anyone unless they handled the mousedown...
-    if (view) {
-      handler = this.sendEvent('mouseUp', evt, view) ;
+      // attempt the mouseup call only if there's a target.
+      // don't want a mouseup going to anyone unless they handled the mousedown...
+      if (view) {
+        handler = this.sendEvent('mouseUp', evt, view) ;
 
-      // try doubleClick
-      if (!handler && (this._clickCount === 2)) {
-        handler = this.sendEvent('doubleClick', evt, view) ;
-        clickOrDoubleClickDidTrigger = YES;
+        // try doubleClick
+        if (!handler && this._clickCount === 2) {
+          handler = this.sendEvent('doubleClick', evt, view) ;
+          clickOrDoubleClickDidTrigger = YES;
+        }
+
+        // try single click
+        if (!handler) {
+          handler = this.sendEvent('click', evt, view) ;
+          clickOrDoubleClickDidTrigger = YES;
+        }
       }
 
-      // try single click
-      if (!handler) {
-        handler = this.sendEvent('click', evt, view) ;
-        clickOrDoubleClickDidTrigger = YES;
-      }
-    }
+      // try whoever's under the mouse if we haven't handle the mouse up yet
+      if (!handler && !clickOrDoubleClickDidTrigger) {
 
-    // try whoever's under the mouse if we haven't handle the mouse up yet
-    if (!handler && !clickOrDoubleClickDidTrigger) {
+        // try doubleClick
+        if (this._clickCount === 2) {
+          handler = this.sendEvent('doubleClick', evt, targetView);
+        }
 
-      // try doubleClick
-      if (this._clickCount === 2) {
-        handler = this.sendEvent('doubleClick', evt, targetView);
+        // try singleClick
+        if (!handler) {
+          handler = this.sendEvent('click', evt, targetView) ;
+        }
       }
-
-      // try singleClick
-      if (!handler) {
-        handler = this.sendEvent('click', evt, targetView) ;
-      }
-    }
     }
 
     // cleanup
@@ -2247,6 +2301,7 @@ SC.RootResponder = SC.Object.extend(
   dragenter: function(evt) {
     SC.run(function() { this._dragenter(evt); }, this);
   },
+
   /** @private */
   _dragenter: function(evt) {
     if (!this._dragCounter) {
@@ -2255,10 +2310,12 @@ SC.RootResponder = SC.Object.extend(
     else this._dragCounter++;
     return this._dragover(evt);
   },
+
   /** @private The dragleave event comes from the browser when a data-ful drag leaves any element. */
   dragleave: function(evt) {
     SC.run(function() { this._dragleave(evt); }, this);
   },
+
   /** @private */
   _dragleave: function(evt) {
     this._dragCounter--;
@@ -2278,10 +2335,12 @@ SC.RootResponder = SC.Object.extend(
       this._dragover(evt);
     });
   },
+
   /** @private This event fires continuously while the dataful drag is over the document. */
   dragover: function(evt) {
     SC.run(function() { this._dragover(evt); }, this);
   },
+
   /** @private */
   _dragover: function(evt) {
     // If it's a file being dragged, prevent the default (leaving the app and opening the file).
@@ -2334,7 +2393,7 @@ SC.RootResponder = SC.Object.extend(
         view = nd[loc];
         if (ld.indexOf(view) === -1) {
           view.tryToPerform('dataDragEntered', evt);
-        }        
+        }
       }
       // Finally, send hover events to everybody.
       for (loc = 0, len = nd.length; loc < len; loc++) {
@@ -2352,6 +2411,7 @@ SC.RootResponder = SC.Object.extend(
   drop: function(evt) {
     SC.run(function() { this._drop(evt); }, this);
   },
+
   /** @private */
   _drop: function(evt) {
     // If it's a file being dragged, prevent the default (leaving the app and opening the file).
@@ -2438,32 +2498,32 @@ SC.RootResponder = SC.Object.extend(
 
   /* @private Handler for animationstart events. */
   animationstart: function (evt) {
-      var view = this.targetViewForEvent(evt) ;
-      this.sendEvent('animationDidStart', evt, view) ;
+    var view = this.targetViewForEvent(evt);
+    this.sendEvent('animationDidStart', evt, view);
 
     return view ? evt.hasCustomEventHandling : YES;
   },
 
   /* @private Handler for animationiteration events. */
   animationiteration: function (evt) {
-      var view = this.targetViewForEvent(evt) ;
-      this.sendEvent('animationDidIterate', evt, view) ;
+    var view = this.targetViewForEvent(evt);
+    this.sendEvent('animationDidIterate', evt, view);
 
     return view ? evt.hasCustomEventHandling : YES;
   },
 
   /* @private Handler for animationend events. */
   animationend: function (evt) {
-      var view = this.targetViewForEvent(evt) ;
-      this.sendEvent('animationDidEnd', evt, view) ;
+    var view = this.targetViewForEvent(evt);
+    this.sendEvent('animationDidEnd', evt, view);
 
     return view ? evt.hasCustomEventHandling : YES;
   },
 
   /* @private Handler for transitionend events. */
   transitionend: function (evt) {
-      var view = this.targetViewForEvent(evt) ;
-      this.sendEvent('transitionDidEnd', evt, view) ;
+    var view = this.targetViewForEvent(evt);
+    this.sendEvent('transitionDidEnd', evt, view);
 
     return view ? evt.hasCustomEventHandling : YES;
   }
@@ -2474,8 +2534,9 @@ SC.RootResponder = SC.Object.extend(
   Invoked when the document is ready, but before main is called.  Creates
   an instance and sets up event listeners as needed.
 */
-SC.ready(SC.RootResponder, SC.RootResponder.ready = function() {
+SC.ready(SC.RootResponder, SC.RootResponder.ready = function () {
   var r;
-  r = SC.RootResponder.responder = SC.RootResponder.create() ;
-  r.setup() ;
+
+  r = SC.RootResponder.responder = SC.RootResponder.create();
+  r.setup();
 });

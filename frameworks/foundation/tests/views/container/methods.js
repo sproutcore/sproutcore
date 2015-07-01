@@ -21,10 +21,6 @@ module("SC.ContainerView Methods", {
         childViews: [containerView]
       }).append();
     });
-
-    SC.run(function () {
-      containerView.awake();
-    });
   },
 
   teardown: function () {

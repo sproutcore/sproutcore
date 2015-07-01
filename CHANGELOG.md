@@ -1,19 +1,229 @@
 CHANGE LOG
 ==========
 
+Edge
+-----------
+
+### NEW FEATURES
+### CHANGES & IMPROVEMENTS
+
+#### Runtime
+
+* The `SC.guidFor()` method (primarily used internally) no longer maintains a cache for String and Number GUIDs. Because the GUID for a String or a Number is essentially its own value, the caching process actually takes longer than it does to simply generate a GUID key from the given String or Number (see http://jsperf.com/cache-vs-manipulate). More importantly, this removes the memory overhead of maintaining the GUID cache, which was also unable to be cleaned.
+
+### DEPRECATIONS & REMOVALS
+### BUG FIXES
+
+1.11.1
+-----------
+
+### BUG FIXES
+
+* Added a retina version of the SC.ToolbarView image. This prevents the bleedthrough of adjacent sprites on retina displays (noticeable as pink in development mode).
+* Added retina versions of all SC.ButtonView images. This includes capsule and pointer images at every control size. Previously, the capsule theme was only supported at SC.REGULAR_CONTROL_SIZE and the pointer theme was only supported at SC.REGULAR_CONTROL_SIZE or SC.HUGE_CONTROL_SIZE.
+
 1.11.0
 -----------
 
-### FEATURES
+### NEW FEATURES
 
+#### General
+
+* The `hasObserverFor` method of `SC.Observable` has been improved to also be able to optionally check against a specific target and method. This allows the developer to properly check for the existence of a specific handler before adding it rather than only being able to check for the existence of any handler (without knowing which handler it is).
+
+### CHANGES & IMPROVEMENTS
+
+#### SC.Gesturable & SC.Gesture (SC.TapGesture, SC.PinchGesture, SC.SwipeGesture)
+
+After some investigation, it was found that there were a number of issues with the built-in gesture support. For example, two touch taps would throw an exception, pinches would fail to register and in particular, supporting multiple gestures failed in a number of scenarios. In order to fix these problems, the gesture code has been rewritten from the top-down.
+
+It is now possible to mixin SC.Gesturable to a view and use events to react to multiple gestures concurrently. Examples of the advanced type of behavior that the gesture code allows include:
+
+* Responding to single finger, two finger or any other number of touch taps, pinches (2+ touches) or swipes individually or as a group. For example, your code may want to perform different actions when a single finger taps vs. when there is a two finger tap.
+* A touch session, the time between when the first touch begins and the last touch ends, may contain more than one gesture. For example, it's possible for the user to perform a pinch, then use a third finger to tap, then swipe the remaining fingers. For example, imagine using pinch to scale an image, tap to save the change and then swipe to move it aside all without lifting the fingers. At the least, the ability to perform gestures in a single touch session multiple times, makes the gesture recognition more robust against stray accidental touches.
+* Swipe gestures can now be configured to match against any arbitrary angles, not just left, right, up & down.
+* Swipe gestures no longer trigger by simply moving far enough in one direction. They must also move quickly (configurable) and end immediately.
+
+*How does this affect your code?*  
+
+For the most part, this should have no effect on existing implementors of SC.Gesturable. The three built-in gestures: SC.TapGesture, SC.PinchGesture, and SC.SwipeGesture are still defined and they work much better than before. However if you have defined a custom SC.Gesture subclass, it will unfortunately not work correctly with this update. Because we felt the previous version of SC.Gesture's API was too complex and incompatible with the behavior we needed to achieve, we decided it was better to rewrite it in a simpler form. We're very sorry for this backwards incompatibility, but because of the previous issues with gestures, we believe no one was able to use them anyway.
+
+#### Legacy Framework
+
+There is now a sub-framework within SproutCore, `:'sproutcore/legacy'`, which is meant to contain all code providing support for older browsers. This includes the existing polyfill for `window.requestAnimationFrame` and a brand new polyfill for `Object.keys`. The legacy framework is included by default by requiring `:sproutcore` in a project's or an app's Buildfile. The legacy framework itself requires the `:sproutcore/desktop` framework, which allows for any legacy code in the SproutCore controls to be separated out.  
+
+Therefore, to build an app that will only work with the newest browsers (probably not a great idea —), you may change your Buildfile requirements to include only the specific SproutCore sub-frameworks you need. For example,
+
+    config :my_app, :required => [:"sproutcore/desktop", :"sproutcore/datastore"]
+
+### DEPRECATIONS & REMOVALS
+
+* The `owner` property of SC.View has been deprecated for general use. This property is identical to the existing `parentView` property on all views. It existed in order for some ancestor view to claim ownership of a descendent view, so that the descendent could reference the ancestor directly as `owner` rather than using some chain like `parentView.parentView...`. However, this type of connection can still be achieved by the an ancestor simply assigning `owner`, or whichever property they want to use, none-the-less and there's no need for every single SC.View to have it assigned.
+
+Note: This deprecation will show a console warning in debug (i.e. non-production) mode.
+
+### BUG FIXES
+
+* Fixed several regressions from previous release candidates.
+
+1.11.0.rc3
+-----------
+
+### NEW FEATURES
+
+#### SC.NestedStore
+
+`SC.NestedStore` has a new property, `conflictedStoreKeys`, which is an array of all store keys that currently have conflicts with the nested store's parent. A conflict in a nested store can occur when the data in the parent store changes *after* the nested store has accessed and modified it.  
+
+For instance, in a multi-user system where records can be edited by multiple people at the same time, the client may use polling or websockets to update the records in the main store asynchronously in the background. With such a scenario it would be possible for the current user to be editing a record that someone else has changed in the meantime. If the client attempted to commit the changes from the nested store it would get an exception because of the conflict. Instead, the developer can now check the value of `conflictedStoreKeys` and if it is `null`, then commit the changes and if it is an array of store keys, then they know which records have conflicts and can deal with them directly.
+
+#### SC.Binding
+
+There are two new binding transforms, `string` and `integer`, that ensure the value is *always* a `String` or an integer `Number`. Examples include returning an empty `String` for `null` or `undefined` values when using the `string` transform and returning a 0 for these same values when using the `integer` transform. Furthermore, if the `integer` transform is given a String, it will be parsed to an integer `Number` according to the extra argument `radix` (which is 10 by default).
+
+There is also a new binding transform, `mix`, that allows for the aggregation of multiple bound properties into a single property through a given function. It is often the case that a single property depends on two or more bound properties in a complex manner that isn't handled by the current `and` and `or` transforms. To handle this situation previously, the developer would need to write the code to bind in the external property values and then make a local computed property dependent on each of these. The `mix` transform does exactly the same thing, but with less typing on the developer's part.  
+
+For example, to create a mix binding that concatenates two external properties in a non-trivial way, we can now do the following,  
+
+    currentGroupUserLabel: SC.LabelView.extend({
+
+      // Ex. Returns one of "", "Selected Group", or "Selected Group: Selected User"
+      valueBinding: SC.Binding.mix(
+        'MyApp.groupController.name', // The group name (may be null).
+        'MyApp.userController.fullName', // The user full name (may be null).
+
+        // Aggregate function. The arguments match the bound property values above.
+        function (groupName, userFullName) {
+          if (SC.none(userFullName)) {
+            if (SC.none(groupName)) {
+              return ''; // No group and no user. Ex. ""
+            } else {
+              return groupName; // Just a group. Ex. "Selected Group"
+            }
+          } else {
+            return '%@: %@'.fmt(groupName, userFullName); // Group and user. Ex. "Selected Group: Selected User"
+          }
+        })
+
+    })
+
+#### General
+
+* *Updated Description* Scale is now a first-class layout property, correctly impacting `frame` and `clippingFrame`. If a view is scaled, the width & height of the frame will be correct as the view appears. For example, a view with layout equal to `{ width: 100, height: 100, scale: 2 }` will report a frame of `{ x: 0, y: 0, width: 200, height: 200, scale: 2 }`. The scale also takes a scaling origin into account as well and as part of this change, there are two new layout properties: `transformOriginX` and `transformOriginY`, which define the percentage (between 0.0 and 1.0) on the respective axis about which the scale transform is applied. These properties affect all transform styles and so can be used to also change the origin of a rotate style.  
+
+### CHANGES & IMPROVEMENTS
+
+#### Documentation  
+
+- Added lots of documentation to `SC.Request` (examples), `SC.Query` (local vs. remote) and `SC.DateTime` (`adjust` and `advance`).   
+- Cleaned up documentation of all protocols, including a warning not to mix in protocols and fixed some problems that prevented some protocols from being properly generated on docs.sproutcore.com.  
+- Added `SC.ObjectMixinProtocol` with documentation on using mixins with `SC.Object` as well as the methods `initMixin` and  `destroyMixin` that are supported.  
+- Added documentation on touch event handling to `SC.ResponderProtocol` (i.e. the protocol that may be implemented by `SC.Responder` subclasses like `SC.View`).  
+- Added/improved documentation on `SC.Gesturable` mixin.  
+
+#### SC.PickerPane  
+
+This view has been given special behavior when used with SC.View's `transitionIn` plugin support. If the plugin defines `layoutProperties` of either `scale` or `rotate`, then the picker will adjust its transform origin X & Y position to appear to scale or rotate out of the anchor. The result is a very nice effect that picker panes appear to pop out of their anchors.  
+To see it in effect, simply set the `transitionIn` property of the pane to one of `SC.View.SCALE_IN` or `SC.View.POP_IN`.
+
+#### SC.SegmentedView  
+
+This view was refactored slightly to remove the special overflow view if `shouldHandleOverflow` is `false` (default). Previously the overflow view was always created and appended even if it was not to be used.  
+
+#### General
+
+* The automatically adjusted size component of the layouts of `SC.ListView` and `SC.GridView` have changed to set `height` and `width` instead of `minHeight` and `minWidth` (as it applies). The reason for this change is so that the entire list of items can be GPU accelerated by setting `wantsAcceleratedLayer: true` on the view. GPU accelerated positioning using the `translateX` and `translateY` transforms requires that the view have a fixed position (top & left) and a fixed size (height & width). These views already have a fixed position by default and now by having them adjust their `height` or `width` (depending on the direction), it is possible to accelerate these views by also fixing the other size component (i.e. if the list scrolls vertically, the list will set its height, so the developer needs to set the lists width to a fixed value and then add `wantsAcceleratedLayer: true`).  
+
+Test Results:
+
+    With min-height (i.e. can't accelerate):       With height (and accelerated):
+
+      JS Function:       ~5.9ms                      JS Function:       ~5.9ms
+      Recalc. Style:     ~0.3ms                      Recalc. Style:     ~0.3ms
+      Layout:            ~0.3ms                      Update Layer Tree: ~0.2ms
+      Update Layer Tree: ~0.2ms                      Composite Layers:  ~0.3ms
+      Paint:             ~2.4ms
+      Composite Layers:  ~0.3ms
+      Update Layer Tree: ~0.1ms
+      Paint x 8:         ~6.0ms
+
+*How does this affect your code?*  
+
+Because lists and grids have an implied layout of `{ top: 0, bottom: 0, left: 0, right: 0 }`, they used to always stretch to fill their parent containing view. This is no longer the case and so a collection with too few items to fill the containing view will only be as tall or as wide as its items warrant. This will affect any background styles that were applied to the collection (such as the Ace theme did), which previously would have covered the whole containing view's background. Unfortunately, those background styles need to be moved to the style of the containing view in order to prevent any styling regressions after updating to this new version.  
+
+Therefore, to go along with this change the `background: white` style in the Ace theme that was applied to `$theme.collection` has been moved to `$theme.sc-scroll-view`. It has also been changed to `background-color: white`, which is less likely to conflict with other background styles.  
+
+*How do I check for style regressions?*  
+To ensure that any background styles applied to your collections still look correct, you should do a search through your stylesheets for `.collection` and move any custom background styles over to an `.sc-scroll-view` class.
+
+* The SC.Binding transforms `and` and `or` have been refactored to use the new `mix` code. This means that you can now pass more than two property paths to these transforms.  
+
+For example,  
+
+    isEnabledBinding: SC.Binding.and('.hasValue', '.valueIsValid', '.userIsAllowed')
+
+### DEPRECATIONS & REMOVALS
+
+* The `isPaneAttached` property of SC.Pane has been deprecated. This property is identical to the existing `isAttached` property of SC.View that SC.Pane extends and so `isPaneAttached` is not needed. Please use `isAttached` instead.  
+
+Note: This deprecation will show a console warning in debug (i.e. non-production) mode.
+
+### BUG FIXES
+
+* Added code to prevent a possible issue that could occur when animating to an implied layout position. For instance, if a view has a layout set to `{ top: 5 }`, the implied layout is actually `{ top: 5, right: 0, bottom: 0, left: 0 }`. The issue that could arise is if the code tried to animate to an implied value (ex. `view.animate('left', 0, { duration: 1 }, callbackFunc)`), the animation wouldn't actually need to run and the callback function would fail to fire.
+* Fixed possible issues that may occur when code altered child views in any of the view state callback functions: `didCreateLayer`, `didAppendToDocument`, `didHideInDocument`, `didShowInDocument`. The issue was that the callback functions were called on the parent before the child was updated to the proper new state. For example, if a developer set the visibility of a child view to false in `didCreateLayer`, at that point the child view would have still been in an unrendered state and optimizations preventing visibility changes to unrendered views would have meant the visibility change would have been lost.
+* Fixed an issue that could occur when using temporary IDs with newly created records. Because the `id` property is a computed property, once it has been read (i.e. `myNewRecord.get('id')`), it will remain cached for any further reads. This can become an issue in situations where the ID of the record changes after being saved to the server. For instance, a new record may be given a temporary ID when it is created and the temporary id may be accessed via `get`. After that record is saved to the server, a call to `store.dataSourceDidComplete(RecordType, newBody, newBody.id)` would properly update the `id` value in the store, but would fail to clear the record instance's cache of `id`. Therefore, a successive call to `get('id')` would return the old value.
+* Fixed an issue with observing the `selection` property of `SC.TextFieldView`. Since the `input` element doesn't update its `selectionStart` and `selectionEnd` values until after the event execution completes, the mouse and keypress event handlers that affect the selection must wait until after the run loop before notifying that the selection property has changed.
+* `SC.RootResponder` mistook two successive mousedown events at the same point as a double click even if the target of the second mousedown was different. The result was that if a view moved suddenly on a first click, a second immediate click at the same point would try to call `doubleClick` on the new target view instead of just `mouseUp`.
+* Fixed a regression in SC.CollectionView that prevented double clicks from triggering the action. Closes #1304 & #1305.
+
+1.11.0.rc2
+-----------
+
+### CHANGES & IMPROVEMENTS
+
+* SC.ScrollView alignment handling has been improved for container (i.e. the scroll view) or content size changes. This change partially addresses a regression that allowed the content to appear offset incorrectly when it or the scroll view's size changed. But after some investigation, the behavior has also been improved to support the following scenarios:  
+
+1. The scroll view is left (or top) aligned, scrolled to the maximum right (or bottom) edge and container or content changes size: the content should stick to the right (or bottom) side
+2. The scroll view is left (or top) aligned, scrolled to the minimum left (or top) edge and container or content changes size: the content should stick to the left (or top) side
+3. The scroll view is right (or bottom) aligned, scrolled to the maximum right (or bottom) edge and container or content changes size: the content should stick to the right (or bottom) side
+4. The scroll view is right (or bottom) aligned, scrolled to the minimum left (or top) edge and container or content changes size: the content should stick to the left (or top) side
+5. The scroll view is center (or middle) aligned, scrolled to the center (or middle) and container or content changes size: the content should stick to the center (or middle)
+
+* Refactored SC.Event slightly. Most importantly, SC.Event instances are now cached per event type in order to avoid constant memory re-allocation. Previously, every DOM event was normalized into a new SC.Event object, which was later freed. In order to reduce the amount of memory churn, one SC.Event instance is cached per type of event and updated with the new DOM event as it comes in.
+* Removed long deprecated method, `SC.browser.compareVersion`. This method was deprecated in version 1.7 and is not used anywhere within the framework. As the deprecation warning noted, developers should use the `SC.browser.compare` method for doing a proper comparison between version strings.
+* The core methods used in SC.View layout have been slightly optimized to avoid memory re-allocation. Since SC.View layout code may run repeatedly in short order (e.g. re-positioning during scrolling), we need to ensure that no new objects are created each time. The reason for this is so that we're not quickly adding hundreds of small objects to the garbage heap that will need to be collected. Since we have no control over when garbage collection occurs, the best we can do is try to avoid it and to ensure that it completes as quickly as possible.
+* The argument for the SC.ActionSupport mixin's main method `fireAction` has been changed from `action` to `context`. This allows calling-time specific information to be passed to the action + target on each call. To specify the `action` for `fireAction` to use, the existing `action` property should still be set. As part of this change, the documentation for SC.ActionSupport has been greatly extended and includes tips on supporting multiple actions or targets and for implementing actions on targets.
+  
+Along with this change, the `actionContext` property has also now been deprecated and will be removed in a future version of SproutCore.
+
+Note: this is a backwards-compatible change. If a String is passed to `fireAction` *and* no `action` property exists, the argument will be used as the `action` (i.e. no context will be sent). When this occurs, a Developer Warning will appear in the console. Likewise, a Developer Warning will appear if `actionContext` is set prior to a view being initialized.
+* SC.ButtonView and SC.CollectionView have both been altered slightly to use SC.ActionSupport. This has no affect on the use of action & target in these views.
+* Moved tracing code of SC.ResponderContext and SC.Module to debug-only. This prevents the debugging code from being included in production builds, thus reducing the overall deployed file size slightly.
+* Optimized use of the `arguments` object in several locations in order to avoid its instantiation. There were several occurrences of code copying the `arguments` object into an Array using `slice`; this is very costly for performance as it causes the browser to instantiate the `arguments` object in order to do the slice. Instead, these occurrences were converted to either access the arguments by index without a copy or to do a fast copy without instantiation. See http://jsperf.com/closure-with-arguments for an example of the performance difference this can make. Using slice is anywhere from ~50% to ~90% slower depending on the browser.  
+  
+Affected: SC.Request, SC.WebSocket, SC.DelegateSupport, SC.Color, SC.Event, SC.Store, SC.Module, SC.Object, SC.Function, SC.State, SC.Statechart
+* Named two anonymous functions: send_event & handle_event in order to aid in debugging and profiling of the core framework.
+
+### BUG FIXES
+
+* Fixed a very slow memory leak in SC.browser. Caching of the experimental style names for the current browser would fail intermittently since the cache key was being kept on the CSSStyleDeclaration which the browser (seen in Chrome) would occasionally drop. Caching is now done per experimental style name, which is more correct and has the added benefit of being marginally faster than using SC.guidFor.
+* Fixed a deficiency in SC.RootResponder.prototype.sendAction. It failed to pass the given context argument along to the target unless the target was a ResponderContext object (i.e. SC.Pane or SC.Application).
+* Fixed a memory leak in SC.WebSocket due to a set on an undeclared (i.e. global) variable.
+* Fixed an issue with SC.SegmentedView that meant its frame property failed to update when its layout was changed.
+
+1.11.0.rc1
+-----------
+
+### NEW FEATURES
+
+* Added polymorphic record support to `SC.Record`. This experimental framework has been in use in a few projects and has recently been vastly improved to fix bugs and improve its performance. Includes unit tests and examples
+* Added new properties to `SC.Request` instances: `allowCredentials` (default true, which will indicate that credentials be included for cross-domain requests (e.g. xhr.withCredentials = true) and `isSameDomain` (readonly computed property, true if the protocol, domain and port match exactly).  
+These new properties can be used by an `SC.Response` subclass to include allowing credentials for cross domain requests.
+* Added `dragDidSucceed`, `dragDidCancel`, `source.dragSlideBackDidEnd` callbacks to `SC.Drag`.
 * `SC.View.VERTICAL_STACK` & `SC.View.HORIZONTAL_STACK` have been improved to allow child views in the stack to resize to fill available space. Previously, every child view needed to have a height or width specified with the exception of the last child view which could be resized to fit the remaining space of the parent view. This option was enabled by setting `resizeToFit` to `false` in the `childViewLayoutOptions` hash. In 1.11, we can now set `resizeToFit` to `false` and have all child views without an explicit width or height respectively, resize to fill the available space. By default the available space will be shared evenly by all of these child views, but a more specific per child view weighting can be applied by specifing a `fillRatio` on the child views. For instance, to split the available space between two flexible child views as 1/3 and 2/3, the first view would have a `fillRatio` of 1 and the second view would have a `fillRatio` of 2.
-* Updates SC.SceneView to support the new SC.ContainerView hardware-accelerable transitions.
-* Adds new SC.WebSocket wrapper class with proper run loop behavior.
-* The last item view in a CollectionView now gets an isLast property.
-* In the test runner app, adds links to individual test URLs for easier access.
-* Adds SC.ListItemView's right icon as a click-action zone to accompany the existing left icon action support.
-* Many developer warnings and errors that would previously appear in production have been restricted to dev-mode only.
-* Binding helper methods SC.Binding.and & SC.Binding.or are now fully armed and operational, including supporting local properties.
+* Adds new `SC.WebSocket` wrapper class with proper run loop behavior.
+* Adds `SC.ListItemView`'s right icon as a click-action zone to accompany the existing left icon action support.
 * SC.TextFieldView now supports browser autocompletion via its boolean autoComplete property.
 * SC.ContainerView transition plugins can now specify reversable transitions.
 * The developer warnings that are logged when you try to bind to a non-bindable object (or forget a leadoff period on a local property) has been improved and clarified substantially.
@@ -26,34 +236,104 @@ CHANGE LOG
 * SC.Drag#slideBack now works as advertised!
 * SC.UndoManager has been refactored to allow easier undo action grouping; see documentation for details. SC.UndoManager#registerUndo has been replaced with the cleaner SC.UndoManager#registerUndoAction API, which provides support for the standard target/action pattern.
 * SC.DateFieldView now supports freeform keyboard number entry.
-* iOS-style Overlaid scroller bars now fade out when not in use.
-* SC.Color#cssText is now read/write, allowing you to bind it to a user-enterable text field. SC.Color now implements SC.Error and enters an error state when given bad input.
 * SC.MenuPane now has an escapeHTML property which it proxies to its items.
-* SC.Request.manager has two new methods: isPending and isInFlight.
-* Adds long-overdue SC.Binding.equalTo.
+* `SC.Request.manager` has two new methods: `isPending` and `isInFlight`.
+* Adds `SC.Binding.equalTo`.
 * Adds boolean shouldAutoResize property to SC.SegmentedView.
-* Added documentation and constants will make SC.PickerPane positioning and customization much easier.
-* Now includes "minimal-ui" viewport meta tag for awesomer Mobile Safari apps.
+* Now includes "minimal-ui" viewport meta tag for Mobile Safari apps.
 * Adds stackNextTouchResponder and stackCandidateTouchResponder methods to SC.Touch to make it easier to pass touch respondership between views.
-* SC.ListView can now be horizontal as well as vertical with new layoutDirection property. Renames all rowHeight properties to rowSize.
-* Adds new opt-in API (SC.Store#chainAutonomousStore) for nested stores which can interact with the data source. This allows you to commit nested store changes to the server before committing successful updates to the parent store with SC.NestedStore#commitSuccessfulChanges.
-* Setting SC.ScrollView#delaysContentTouches will now give your content views full control over touch events in question. As a side effect, native touch handling is now possible inside scroll views.
-* SC.ScrollView#scale now works as advertised!
-* Scale is now a first-class layout function, correctly impacting frame and clippingFrame. As a result, scaled content within a CollectionView will now correctly calculate which item views should be currently visible.
-* Adds official SC.Scalable protocol.
-* SC.SliderView has a new markSteps property, which draws a mark element for each step. It also gains an updateOnScroll property, which allows you to prevent it from handling mouseWheel events (in a scroll view for example).
-* The improved documentation for SC.Object's stupendously useful didChangeFor method will hopefully encourage its use.
-* Use SC.ScrollView's horizontalAlign and verticalAlign properties to align fixed-width or -height content.
-* Adds support for calculated properties to String.fmt.
-* Adds toolTip to SC.MenuItemView, and the corresponding itemToolTipKey to SC.MenuView.
+* Adds horizontal layout for `SC.ListView` using `layoutDirection` property.
+* Adds new opt-in API (`SC.Store.prototype.chainAutonomousStore`) for nested stores which can interact with the data source. This allows you to commit nested store changes to the server before committing successful updates to the parent store with `SC.NestedStore.prototype.commitSuccessfulChanges`.
+* Setting `SC.ScrollView.prototype.delaysContentTouches` will now give your content views full control over touch events in question. As a side effect, native touch handling is now possible inside scroll views.
+* `SC.SliderView` has a new `markSteps` property, which draws a mark element for each step. It also gains an `updateOnScroll` property, which allows you to prevent it from handling `mouseWheel` events (in a scroll view for example).
+* Adds support for calculated properties to `String.fmt`.
+* Adds `toolTip` property to `SC.MenuItemView`, and the corresponding `itemToolTipKey` to `SC.MenuView`.
 
-### CHANGES
+### CHANGES & IMPROVEMENTS
 
-* Improves the performance and code structure of SC.TreeItemObserver and SC.TreeController by optimizing overactive observers and object creation. Improves delegate and item handling, and documentation.
-* Adds ie10 class to body element when detected (legacy).
-* Adds standard touch support to SC.PopupButtonView.
-* Adds a visual cue to menu items with submenus.
-* Adds a Developer Error when attempting to add records without IDs to relationships.
+* SC.ScrollView complete refactor:
+  * If `horizontalOverlay` or `verticalOverlay` is true, it will use `SC.OverlayScrollerView` by default. It's no longer necessary to also set `horizontalScrollerView: SC.OverlayScrollerView` in order to get overlaid scrollers.
+  * Use SC.ScrollView's horizontalAlign and verticalAlign properties to align fixed-width or -height content.
+  * SC.ScrollView#scale now works as advertised!
+  * iOS-style Overlaid scroller bars now fade out when not in use.
+  * Ensures that scaling the view maintains the visual center.
+  * Improves touch support significantly. Including centered zooming for pinch gestures, smoother bounce-back overdrag past the boundaries.
+  * Improves gesture animation performance and feel with requestAnimationFrame.
+  * Supports flexible sized GPU accelerated content. When the content of the view has an undefined width or height in its layout and has `wantsAcceleratedLayer` set to `true`, `SC.ScrollView` will fix the undefined size (width or height) of the content to *fit* the container so that the content may be scrolled using `translateX` & `translateY`.
+  * Uses shared objects for adjusting the content & container views of SC.ScrollView. This prevents repeated memory allocs while scrolling, which must eventually be garbage collected (a painful occurrence in JavaScript).
+* Improves SC.Touch documentation.
+* The improved documentation for SC.Object's didChangeFor method will hopefully encourage its use.
+* The last item view in a CollectionView now gets an isLast property.
+* Removes an extra Object instantiation in `SC.View.prototype.computeParentDimensions` (if frame wasn't given, an empty Object was instantiated for no real use). Also removes pre-obfuscation of variables.
+* Speeds up and slims down the `SC.View.prototype.adjust` method. When a single key is passed to `adjust()` it no longer creates an Object just to iterate the single key. Likewise, the resulting call to `_checkForResize()` on layout changes is improved by removing the creation of two Objects used for testing and by removing the over achieving test (the test covered the case of concurrent effective border and size changes, which are very rare and not critical to fail the test).
+* Cleaned up the SC.Pane unit tests (were leaving panes attached, missing run loops, etc.) and fixed the situation where calling destroy on a building out view would fail to remove the view's layer immediately.
+* Improves the SC.View cancel animation method to work with centerX/centerY animations. Disabled the rotation decompositions on X & Y axes, since they don't work in all cases.
+* Changed SC.GridView to provide its own height rather than minHeight. Note: We use height, because this allows the list view to be positioned with translateX, translateY.
+* Refactored SC.MenuScrollView.
+  * Reduced code by removing duplicate properties from its superclass SC.ScrollView.
+  * Renamed verticalScrollerView & verticalScrollerView2 to topScrollerView & bottomScrollerView respectively to make it clearer which they are and to avoid confusion with the verticalScrollerView property of SC.ScrollView.
+  * Removed four (!) extra observers (one which was totally useless on the non-existant horizontal scroller visibility).
+  * Tidied up the createChildViews code to be more readable and not make excess calls to reposition the scrollers.
+  * Improved the appearance/disappearance of the scrollers. It now shifts the content view at the same time that the container view adjusts to show/hide scrollers so that the content view never appears to jump, which also ensures that there is no extra space at the bottom of the container view.
+* Pulled SC.MenuScrollerView into its own file and refactors it slightly.
+  * Reduced the amount of code by removing duplicate properties from its superclass SC.ScrollerView.
+  * Removed unused code (ownerScrollValueKey computed property & _sc_scroller_valueDidChange observer(!)).
+  * Improved the readability of the _scrollMenu method.
+* Refactored SC.MenuPane slightly:
+  * Fixed a problem where the items array was not observed for content changes when it was set on create (includes unit test).
+  * Removed an unnecessary layout change in createChildViews, which also meant that creating a menu pane as a singleton (i.e. with no run loop) would throw warnings.
+  * Slightly simplified the code by removing duplicated properties from the superclass SC.PickerPane and reusing the items observer code for initialization.
+* Changed the default maximum of SC.ScrollerView to be 0. It was 100 previously, which is arbitrary and incorrect.
+* Removed an extra call to SC.RootResponder's computeWindowSize() each time that a pane is appended. This is unnecessary, since the root responder recomputes its window size property whenever the window actually resizes.
+* Changed SC.MenuItemView's handling of submenus. Previously if the item's submenu was visible and the mouse exited back onto the menu item view, it tried to re-append the same submenu. Instead, it now checks to see if its submenu is already attached before attempting to enter it again.
+* Allows for optimization of SC.RenderContext's setStyle method (Removes V8 "ForIn is not fast case" warning, see http://commondatastorage.googleapis.com/io-2013/presentations/223.pdf).
+* Many developer warnings and errors that would previously appear in production have been restricted to dev-mode only.
+* Improved performance of core SC methods: SC.mixin, SC.supplement as well as SC.Function.enhance. SC.mixin and SC.supplement iterated the arguments object to insert a boolean flag to pass to a private function that then iterated its arguments in order to ignore the flag argument, which is totally unnecessary. Instead, SC.mixin and SC.supplement iterate the arguments once and pass the new Array to the private function as a second argument, removing the need for a second iteration.  
+  
+As well, these three areas all accessed the arguments object to copy it, which requires the browser to instantiate it, which is costly. Instead, we now do a fast copy (similar to this: http://jsperf.com/closure-with-arguments) without instantiating the arguments object.  
+  
+Finally, by doing a fast copy of arguments these functions are now optimizable by V8, whereas they weren't previously.  
+  
+Benchmark: `SC.mixin` & `SC.supplement` ~ 58% faster
+* Calls adjustLayout on initialization of SC.CollectionView.  
+  
+Certain containing views, transitions and specialized layout engines need to know what type of layout their child views will have in order to make the proper adjustments. SC.CollectionView subclasses typically set a width or a height themselves, but when this happens late, the actual layout style of the collection is misunderstood at initialization to be something different.
+* Improved the management of the content view for SC.ContainerView.
+* Improved the default styling of overlay scroller views. Making them look more like natural overlay scrollers in OS X/iOS and making them visible on dark backgrounds.
+* Prevents mousewheel events from jumping the slider while the mouse is pressed (i.e. for dragging). Certain mice have a very jittery wheel event (i.e. the Apple Magic Mouse) that results in wheel events firing while the user is trying to drag a slider.
+* Un-deprecated rotate as a layout property (which is equal to rotateZ).
+* Improved SC.State performance by removing expensive observers.
+
+SC.State had two `observes` helper functions used to be notified when its `enteredSubstates` and `currentSubstates` arrays change. Since these arrays are modified by the owner statechart, the observers needed to be chained enumerable observers. However, this resulted in slower object initialization for each state object and excess observer firing as the entered and current substates change. Instead, we simply notify the target state directly each time that the statechart makes a change to its `enteredSubstates` and `currentSubstates`.
+* Improved SC.ScrollView performance a tiny bit by removing the unnecessary chained binding back from the scrollers to their owner. Scrollers are created automatically by the SC.ScrollView and are not moved between different owners.
+* Added documentation and constants will make SC.PickerPane positioning and customization much easier.
+* Significantly improved performance of SC.PickerPanes attached to element's within an SC.ScrollView.
+
+There were a couple of issues hampering performance for SC.PickerPanes within SC.ScrollViews. The first was that the scroll view observers were too greedy observing (the unfortunately noisy) horizontalScrollOffset and verticalScrollOffset of the scroll view for changes and repositioning on each change. What this meant was that an SC.PickerPane could reposition itself up to 6 times in a single run loop as the content of the scroll view changed even thought the scroll offsets may not have changed at all. Instead, the proper pattern for observing multiple properties (or noisy properties) is to filter the input through an invokeX (i.e. so even though 6 calls to the observer function occur, we only call positionPane once, via invokeOnce). Additionally, we no longer observe the offsets if the scroll view can't even scroll (in either direction). And finally, to ensure that the anchor element is in its new position before we re-position, we actually use invokeNext as our input filter.
+* Fixed several inconsistencies in property referencing within SC.PickerPane. There were multiple places where '.' notation was used instead of get/set. Also tidies up some unclear code.
+* Removed the enabling of run loop logging when SC.LOG_BINDINGS is set. The run loop logs are very noisy and make it harder to follow the binding changes. Also forced some of the logging code into debug builds only.
+* Cancels active transitions of SC.ContainerView when transitionSwap is altered mid-transition. This includes a developer warning.
+* Renamed all `rowHeight` properties to `rowSize` for `SC.CollectionRowDelegate`.
+* Added retina version images for SC.SliderView in Ace.
+* Removed several lines of debugging code from production builds of SC.Observable using @if(debug).
+* Updates to jQuery 1.11.1. Notably, there was a serious memory leak in jQuery 1.8 where the tokenCache grew continuously (because keys in the cache have a " " appended to them and the code tried to delete keys without taking the " " into account).
+* Updates SC.SceneView to support the new SC.ContainerView hardware-accelerable transitions.
+* SC.Color#cssText is now read/write, allowing you to bind it to a user-enterable text field. SC.Color now implements SC.Error and enters an error state when given bad input.
+* Fixed memory leaks in SC.ListView and SC.CollectionView. Since these views add observers to their related objects, they need to also properly remove those observers again when the views themselves are destroyed. Otherwise, when collection views are removed, the observers on the related objects become stranded.
+* SC.Query's internal token tree is now a proper SC.Error when in an error state.
+* Removed all uses of `enhance` within the SC.View `reopen`s in core_foundation. The `_enhance` function is inordinately slow in Firefox (version 31 on OS X). Benchmarks of creating 100 views in a loop takes ~1800ms with the enhance's and only ~38ms without any in Firefox on OS X. In Chrome and Safari on OS X, the difference is negligible.
+* Removed an excess display property (i.e. an observer) in all instances using SC.ContentDisplay, since `content` is already observed for changes and `displayDidChange` is called within that function.
+* Updated SC.RenderContext to use the value property of the DOM Attribute, as nodeValue is deprecated.
+* Refactored commandCodes function of SC.Event to be easier to read and with more descriptive inline documentation.
+* Use 24-hour clock notation for French times.
+* Now allows duplicate items to appear in a collection and still be selected independently. Previously, all collection view selection was done per object, which would mean the first instance of the object in the content was always selected. Instead, selection is done by index only so that the same object can appear many times and each be selected separately.
+* Replaced a couple of latent style.webkitTransform calls with experimentalStyleNameFor, which is forward compatible and cross-platform compatible.
+* Reimplemented itemValueKey support in SC.MenuPane.
+* Improved the performance and code structure of SC.TreeItemObserver and SC.TreeController by optimizing overactive observers and object creation. Improved delegate and item handling, and documentation.
+* Added ie10 class to body element when detected (legacy).
+* Added standard touch support to SC.PopupButtonView.
+* Added a visual cue to menu items with submenus.
+* Added a Developer Error when attempting to add records without IDs to relationships.
 * Zero-duration calls to animate will now adjust-and-callback on the next run loop, like any other animation.
 * Improves SC.TextFieldView key handling.
 * Controls will now use isEnabledInPane (which calculates based on a number of things) instead of isEnabled to determine whether they're enabled.
@@ -67,13 +347,13 @@ CHANGE LOG
 * Fixes up some bad overrides of interpretKeyEvents. Make sure to use, rather than override, this method in your own code.
 * SC.TextFieldView now supports selection direction when the browser allows.
 * Many webkit-specific properties under the hood – for example, transform CSS – have been replaced with correctly browser-detected versions.
-* VERTICAL_STACK and HORIZONTAL_STACK child layout plugins now support the use of minHeight and minWidth.
+* `SC.View.VERTICAL_STACK` and `SC.View.HORIZONTAL_STACK` child layout plugins now support the use of `minHeight` and `minWidth`.
 * CoreTest, our QUnit like testing suite, now includes a "warn" method to explicitly create a warning.
 * SC.MenuPane will ignore the first item if it is a separator.
 * A number of improvements and backwards-compatibility fixes have been made to the SC.SelectView replacement class found in the experimental frameworks.
 * You can now customize your SC.AlertPane's buttons' isDefault, isCancel, tooltips, layerId and localize properties.
-* Adds developer warning when calling SC.PickerPane#append. You should use SC.PickerPane#popup instead.
-* Adds a layout orientation class to SC.SplitDividerView.
+* Adds developer warning when calling `SC.PickerPane.prototype.append`. A developer should always use `SC.PickerPane.prototype.popup` to display a picker pane.
+* Adds a layout orientation class to `SC.SplitDividerView`.
 * Adds SC.String#escapeCssIdForSelector method to handle '.' and ':' characters, which are valid in CSS IDs but which must be escaped for use in jQuery selectors.
 * In development mode, SC.ChildArray (nested toMany attribute) now has a helpfully verbose toString method.
 * runtime framework no longer requires jQuery. jQuery requirement moved to core_foundation.
@@ -92,21 +372,60 @@ CHANGE LOG
 * Separates SC.View#isFixedSize property into isFixedWidth and isFixedHeight, allowing for an even finer-grained optimization of child view resize notifications.
 * Adds a Developer Error when setting up a nested record attribute with an inverse property (via toOne or toMany).
 * SC.TextFieldView's maxLength property can now be updated live.
+* SC.ContainerView can now take local property paths (e.g. '.localPage.view') as nowShowing.
+* Binding helper methods `SC.Binding.and` and `SC.Binding.or` are now fully operational, including supporting local properties.
+* In the test runner app, adds links to individual test URLs for easier access.
 
 ### DEPRECATIONS & REMOVALS
 
+* Removed the old experimental MenuScrollView, but kept the unit tests.
+* Removed the SC.MenuPane.VERTICAL_OFFSET property. SC.PickerPane already has a provision for offsetting panes from the window's edges, windowPadding, and that is the property that is being used now.
+* Deprecated calculatedHeight and calculatedWidth. SC.ScrollView has to observe the content's frame anyway and so it's better to have just the frame observer in the scroll view be intelligent about what triggers an update (size not position) and save two extra observers in scroll views.
+* Deprecated the `view()` addition to SC.$ in favor of a new `SC.viewFor()` method. The SC.$.view() method was called excessively by SC.RootResponder to find the target SC.View instance for events, but was wasteful as it required creating an Array in jQuery only to ever use the first item. `SC.viewFor` method does the same thing about three times faster.
+* Removed deprecated views SC.SelectFieldView and SC.SelectButtonView.
+* Removed unused SC.PreloadBundleTask class.
 * The SC.AutoMixins mixin, which mixes mixins into child views, has been deprecated and added permanently to SC.View.
 * SC.UndoManager#registerUndo has been deprecated in favor of SC.UndoManager#registerUndoAction.
-* Renames SC.TouchScrollerView to SC.OverlayScrollerView.
-* Removes SC.ListView's totalRowHeight property. This value is now calculated privately.
-* Removes long-deprecated SC.SAFARI_FOCUS_BEHAVIOR in favor of SC.FOCUS_ALL_CONTROLS.
-* Removes deprecated (experimental) SC.CollectionViewFastPath. Fast-path behavior became standard issue in v1.10.0.
-* Removes long-deprecated SC.Scrollable mixin.
-* Removes long-deprecated SC.TextFieldView's isPassword and continuouslyUpdatesValue properties.
+* Renamed SC.TouchScrollerView to SC.OverlayScrollerView.
+* Removed SC.ListView's totalRowHeight property. This value is now calculated privately.
+* Removed long-deprecated SC.SAFARI_FOCUS_BEHAVIOR in favor of SC.FOCUS_ALL_CONTROLS.
+* Removed deprecated (experimental) SC.CollectionViewFastPath. Fast-path behavior became standard issue in v1.10.0.
+* Removed long-deprecated SC.Scrollable mixin.
+* Removed long-deprecated SC.TextFieldView's isPassword and continuouslyUpdatesValue properties.
 * SC.Object's `superclass` instance method has been deprecated. Use `sc_super()` or arguments.callee.base.apply(this, arguments) instead.
+* SC.CollectionView item views with static layouts should now behave better.
+* Nested records are now cleared from a store on SC.Store#reset.
+* Makes a number of improvements to SC.ChildArray, including removing KVO property pollution from the underlying raw array.
+* Removes KVO pollution on SC.ManyArray's underlying raw arrays.
+* SC.TextFieldView's hint implementation is now much simpler and less bug-ridden.
 
 ### BUG FIXES
 
+* Fixes a serious visual problem with translated and scaled views. The scale transform was being applied before the translation, which meant the translation became scaled. The result was content rendered in the wrong place by the browser.
+* Fixed a regression in SC.TabView that failed to get nowShowing views from the page akin to SC.ContainerView. Also removed extra duplicate observer in SC.TabView and fixed unit test to properly clean up (was leaving panes attached).
+* Fixed SC.MenuPane automatic resizing to fit within the window. The positioning code used in SC.PickerPane failed to apply adjustments to the width or height of the pane, which had been calculated to fit long menus within the window. Also improves the menu positioning code to respect the value of windowPadding (previously it used hard coded secret numbers within the code).
+* Fixed SC.ContainerView's override of set so that it may be chainable.
+* Fixed an accessibility issue with SC.SegmentedView when no renderDelegate exists and also fixes a bug in which a segmented view positioned at 0,0 and clicked on at 0,0 would trigger the middle item view.
+* Made check for pending animations in SC.View's adjust() method safer (fixes error in IE 9).
+* Fixed a critical bug in polymorphic record support while significantly improving performance and reducing memory consumption of polymorphic records.
+
+The previous polymorphic record support took care to ensure that the same store key was returned for all polymorphic classes by duplicating the store key to id mapping on each related polymorphic class. But where it failed was in situations where the store manipulated the store keys hashes directly (ex. replaceIdFor()), which would result in different store key to id mappings between polymorphic classes. Also, duplicating the mapping on each class was very wasteful and slow due to recursion. Instead, now the mapping is stored only once on the root polymorphic record and all subclasses simply reference it directly. This removes the duplicate memory use and removes the need to recurse each time that a new polymorphic record is added to the store.
+* Fixed SC.ObserverSet to pass the given context to the observer method.  SC.ObserverSet.prototype.add() accepts a third argument, context, but it did not actually pass it along to the observer method.
+* Fixed a noisy reposition of SC.PickerPane.
+
+The pane listened to changes to its borderFrame in order to know whether to reposition itself or not. This means that changes to its size (width/height) allowed it to reposition to best fit, but because repositioning ends up changing the same borderFrame, it meant one (potentially dangerous) extra call through positionPane for no reason. Instead, we use viewDidResize, which only gets called on size (width/height) changes.
+* Fixed a problem with excessive layout updates for certain types of views. If a view used `viewDidResize` to check for size changes and then make further adjustments to its position, because of a late cache update, the adjustments to its position would appear as further changes to its size. In particular, SC.PickerPane suffered from this, since it re-positions itself whenever its size changes.
+* Fixed issues with unregistering nested records. There were a few issues with unregistering nested records:
+
+  1) SC.ChildArray did not unregister nested records at all, so toMany relations with nested records did not work properly.
+  2) When a child was unregistered from its parent, that did not propagate to children of the child, leading to problems when nesting was several levels deep.
+  3) There were two additional caches that were not being cleared when the nested record was unregistered.
+
+* When the online/offline value of window changes, ensure that a run loop runs when setting isOffline of SC.device.
+* Fixed auto resize prepareLayerForStringMeasurement to take padding of a layer into account when setting the maxWidth on the layer.
+* Ensures computeLayout in SC.GridView returns sane values when itemsPerRow is 0.
+* Now ensures that views are notified that their pane has changed when an ancestor parent changes. Also ensures that views that are orphaned update their pane.
+* The layout functions convertFrameFromView and convertFrameToView now consider the views' scale values.
 * A number of fixes to the deprecated template view framework.
 * Fixes a bug where array's removeObject method was doing squishy == comparisons instead of strict === comparisons. Could sometimes cause the wrong item to be removed.
 * Fixes a bug where apps loading in background windows would fail to launch until they were foregrounded. This was caused by unnecessarily waiting for animation support sniffer callbacks to fire; many browsers defer animation events when a tab is out of sight.
@@ -148,9 +467,6 @@ CHANGE LOG
 * Fixes a bug where SC.CollectionViews could not have a custom layerId set.
 * Fixes a bug where SC.ScrollView's scrollToRect method preferred the bottom right of a larger-than-clippingFrame rect. The top left is now preferred, like you'd expect.
 * Fixes a number of bugs with SC.SplitView's divider view CSS.
-* SC.CollectionView item views with static layouts should now behave better.
-* Nested records are now cleared from a store on SC.Store#reset.
-* Makes a number of improvements to SC.ChildArray, including removing KVO property pollution from the underlying raw array.
 * Fixes a bug where SC.DateField's format property was failing to update when formatDate, formatTime or formatDateTime changed.
 * Fixes a bug where SC.CollectionView#itemViewForContentIndex would happily return an empty view for a bogus content index.
 * Fixes a bug where hitting enter on an empty SC.CollectionView would throw an error while trying to edit nonexistent items.
@@ -161,9 +477,7 @@ CHANGE LOG
 * Fixes a bug where children of ATTACHED_SHOWING (transitioning) views were incorrectly set to ATTACHED_HIDDEN_BY_PARENT until the transition completed.
 * Fixes a bug where rotate layout property was being incorrectly proxied to rotateX. Now correctly proxies to layoutZ.
 * Adds a workaround to age-old IE XHR bug where 204 statuses would be mangled to 1223 for no apparent reason.
-* Removes KVO pollution on SC.ManyArray's underlying raw arrays.
 * Fixes a number of bugs where setting various SC.SliderView properties to null would break everything.
-* SC.TextFieldView's hint implementation is now much simpler and less bug-ridden.
 * Fixes a bug where interpretKeyEvents would crash on the rare occasion that cmd.match returned null.
 * Fixes a rare security vulnerability when a TextFieldView's hint property was set to user-supplied data.
 * Removes an invalid condition that prevented key down validation in any browser that supported the touch event.

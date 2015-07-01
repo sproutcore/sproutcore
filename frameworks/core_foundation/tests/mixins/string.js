@@ -7,8 +7,15 @@
 /*global module test equals context ok same should_throw*/
 var LocaleObject;
 
+var defaultLocale;
 module('SC.Object', {
   setup: function() {
+    // Cache the current locale.
+    defaultLocale = SC.Locale.currentLocale;
+
+    // Force it to English
+    String.preferredLanguage = 'en';
+    SC.Locale.currentLocale = SC.Locale.createCurrentLocale();
 
     LocaleObject = SC.Locale.create({
       init: function(){
@@ -21,7 +28,7 @@ module('SC.Object', {
       }
     });
     this.currentLocale = LocaleObject;
-    
+
     SC.stringsFor('English', {
       'Test': '%@',
       'Test.Multiple': '%@ %@'
@@ -33,7 +40,13 @@ module('SC.Object', {
       'Button.width': 80,
       'Button.height': 30
     });
+  },
+
+  teardown: function () {
+    // Return the current locale.
+    SC.Locale.currentLocale = defaultLocale;
   }
+
 });
 
 test("'one two three'.w() => ['one','two','three']", function() {

@@ -10,51 +10,114 @@ sc_require('core') ;
 /**
   @class
 
-  This class permits you to perform queries on your data store or a remote
-  data store. Here is a simple example of a local query:
+  This class permits you to perform queries on your data store or a remote data store. Here is a
+  simple example of a *local* (see below) query,
 
       query = SC.Query.create({
-        conditions: "firstName = 'Jonny' AND lastName = 'Cash'"
+        conditions: "firstName = 'Johnny' AND lastName = 'Cash'"
       });
 
-  To find all records of your store, that match the query, use find with
-  the query as an argument:
+  This query, when used with the store, will return all records which have record attributes of
+  `firstName` equal to 'Johnny' and `lastName` equal to 'Cash'. To use the query with the store
+  simple pass it to `find` like so,
 
       records = MyApp.store.find(query);
 
-  `records` will be a record array containing all matching records.
-  To limit the query to a record type of `MyApp.MyModel`,
-  you can specify the type as a property of the query like this:
+  In this example, `records` will be an `SC.RecordArray` array containing all matching records. The
+  amazing feature of record arrays backed by *local* queries is that they update automatically
+  whenever the records in the store change. This means that once we've run the query once, any time
+  data is loaded or unloaded from the store, the results of the query (i.e. `records`) will
+  update automatically. This allows for truly powerful and dynamic uses, such as having a list of
+  filtered results that continually updates instantly as data pages in or out in the background.
+
+  To limit the query to a record type of `MyApp.MyModel`, you can specify the type as a property of
+  the query like this,
 
       query = SC.Query.create({
-        conditions: "firstName = 'Jonny' AND lastName = 'Cash'",
+        conditions: "firstName = 'Johnny' AND lastName = 'Cash'",
         recordType: MyApp.MyModel
       });
 
-  Calling `find()` like above will now return only records of type MyApp.MyModel.
-  It is recommended to limit your query to a record type, since the query will
-  have to look for matching records in the whole store if no record type
-  is given.
+  Calling `find()` like above will now return only records of type MyApp.MyModel. It is recommended
+  to limit your query to a record type, since the query will have to look for matching records in
+  the whole store if no record type is given.
 
-  You can give an order, which the resulting records should follow, like this:
+  You can also give an order for *local* queries, which the resulting records will use,
 
       query = SC.Query.create({
-        conditions: "firstName = 'Jonny' AND lastName = 'Cash'",
+        conditions: "firstName = 'Johnny' AND lastName = 'Cash'",
         recordType: MyApp.MyModel,
         orderBy: "lastName, year DESC"
       });
 
-  The default order direction is ascending. You can change it to descending
-  by writing `'DESC'` behind the property name like in the example above.
-  If no order is given, or records are equal in respect to a given order,
-  records will be ordered by their storeKey.
+  The default order direction is ascending. You can change it to descending by writing `'DESC'`
+  behind the property name as was done in the example above. If no order is given, or records are
+  equal in respect to a given order, records will be ordered by their storeKeys which increment
+  depending on load order.
 
-  You can check if a certain record matches the query by calling
+  Note, you can check if a certain record matches the query by calling `query.contains(record)`.
 
-      query.contains(record);
+  ## Local vs. Remote Queries
 
-  SproutCore Query Language
-  =====
+  The default type for queries is 'local', but there is another type we can use called 'remote'.
+  The distinction between local and remote queries is a common tripping point for new SproutCore
+  developers, but hopefully the following description helps keep it clear. The terms local and
+  remote refer to the *location of the data where the query is performed and by whom*. A local query
+  will be run by the client against the store of data within the client, while a remote query will
+  be run on by the server against some remote store of data. This seems simple enough, but it can
+  lead to a few misconceptions.
+
+  The first misconception is that local queries don't ever result in a call to a server. This is
+  not the case; when a local query is first used with the store it will generally result in a call
+  to the server, but whether or not it does depends on your store's data source. Keep this in mind,
+  local queries *only run against the data loaded in the client's store*. If the client store is
+  empty, the results of the query will be empty even though there may be thousands of matching
+  records on a server somewhere. That's why when a query is first used, the store will look for a
+  data source that implements the `fetch(store, query)` method. Your data source can then decide
+  whether additional data should be loaded into the store first in order to better fulfill the
+  query.
+
+  This is entirely up to your client/server implementation, but a common use case is to have a
+  general query trigger the load of a large set of data and then any more specific queries will only
+  run against what was already loaded. For more details, @see SC.DataSource.prototype.fetch. So to
+  recap, local queries are passed to the data source fetch method the first time they are used so
+  that the data source has a chance to load additional data that the query may need.
+
+  Once we get past the first misconception; local queries are actually pretty easy to understand and
+  to work with. We run the queries, get the resulting record array and watch as the results almost
+  magically update as the data in the client changes. Local queries are the default type, and
+  typically we will use local queries almost exclusively in SproutCore apps. So why do we have a
+  remote type?
+
+  In a previous paragraph, we considered how a local query would be empty if the local store was
+  empty even though there may be thousands of matching records on a server. Well what if there were
+  millions of records on the server? When dealing with extremely large datasets, it's not feasible
+  to load all of the records into the client so that the client can run a query against them. This
+  is the role of the 'remote' type. Remote queries are not actually "run" by the client at all,
+  which is the next misconception; you cannot run a remote query.
+
+  This misconception is another way of saying that you can't set conditions or order on a remote
+  query. The 'remote' SC.Query type is simply a reflection of some database query that was run
+  against a data store somewhere outside of the client. For example, say we want to still find all
+  the records on the server with `firstName` equal to 'Johnny' and `lastName` equal to 'Cash', but
+  now there are millions of records. This type of query is best left to a MySQL or other database on
+  a server and thus the server will have exposed an API endpoint that will return the results of
+  such a search when passed some search terms.
+
+  Again, this is entirely up to your client/server configuration, but the way it is handled by the
+  data source is nearly identical to how local queries will be handled. In both situations, the
+  data source is passed the query the first time it is run and when the data source is done it calls
+  the same method on the store, `dataSourceDidFetchQuery`. In both situations too, any data that the
+  data source receives should be loaded into the client store using `loadRecords`. However, because
+  there may be lots of other data in the client store, the 'remote' query must also be told which
+  records pertain to it and in what order, which is done by passing the store keys of the new data
+  also to `dataSourceDidFetchQuery`.
+
+  So to recap, use 'local' queries to filter the data currently in the client store and use 'remote'
+  queries to represent results filtered by a remote server. Both may be used by a data source to
+  load data from a server.
+
+  ## SproutCore Query Language
 
   Features of the query language:
 
@@ -85,7 +148,7 @@ sc_require('core') ;
 
   You cannot use both types of parameters in a single query!
 
-  Operators:
+  ### Operators:
 
    - `=`
    - `!=`
@@ -106,7 +169,7 @@ sc_require('core') ;
                       of a Model class on its right side, only records of this
                       type will match)
 
-  Boolean Operators:
+  ### Boolean Operators:
 
    - `AND`
    - `OR`
@@ -117,8 +180,7 @@ sc_require('core') ;
    - `(` and `)`
 
 
-  Adding Your Own Query Handlers
-  ---
+  ## Adding Your Own Query Handlers
 
   You can extend the query language with your own operators by calling:
 
@@ -134,7 +196,7 @@ sc_require('core') ;
   @extends SC.Freezable
   @since SproutCore 1.0
 */
-
+// TODO: Rename local vs. remote to avoid confusion.
 SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
   /** @scope SC.Query.prototype */ {
 
@@ -183,7 +245,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
 
     @type String | Function
   */
-  orderBy:     null,
+  orderBy: null,
 
   /**
     The base record type or types for the query.  This must be specified to
@@ -454,7 +516,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     this._order = this.buildOrder(this.get('orderBy'));
 
     this._isReady = !!tree && !tree.error;
-    if (tree && tree.error) throw tree.error;
+    if (tree && tree.error) SC.throw(tree.error);
     return this._isReady;
   },
 
@@ -680,7 +742,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       evaluate:         function (r,w) {
                           var left  = this.leftSide.evaluate(r,w);
                           var right = this.rightSide.evaluate(r,w);
-                          return SC.compare(left, right) == -1; //left < right;
+                          return SC.compare(left, right) === -1; //left < right;
                         }
     },
 
@@ -694,7 +756,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       evaluate:         function (r,w) {
                           var left  = this.leftSide.evaluate(r,w);
                           var right = this.rightSide.evaluate(r,w);
-                          return SC.compare(left, right) != 1; //left <= right;
+                          return SC.compare(left, right) !== 1; //left <= right;
                         }
     },
 
@@ -708,7 +770,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       evaluate:         function (r,w) {
                           var left  = this.leftSide.evaluate(r,w);
                           var right = this.rightSide.evaluate(r,w);
-                          return SC.compare(left, right) == 1; //left > right;
+                          return SC.compare(left, right) === 1; //left > right;
                         }
     },
 
@@ -722,7 +784,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       evaluate:         function (r,w) {
                           var left  = this.leftSide.evaluate(r,w);
                           var right = this.rightSide.evaluate(r,w);
-                          return SC.compare(left, right) != -1; //left >= right;
+                          return SC.compare(left, right) !== -1; //left >= right;
                         }
     },
 
@@ -772,7 +834,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                             if (allType !== SC.T_ARRAY) all = all.toArray();
                             var found  = false;
                             var i      = 0;
-                            while ( found===false && i<all.length ) {
+                            while ( found === false && i < all.length ) {
                               if ( value == all[i] ) found = true;
                               i++;
                             }
@@ -900,14 +962,12 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
         c                   = null,
         t                   = null,
         token               = null,
-        tokenType           = null,
         currentToken        = null,
         currentTokenType    = null,
         currentTokenValue   = null,
         currentDelimiter    = null,
         endOfString         = false,
         endOfToken          = false,
-        belongsToToken      = false,
         skipThisCharacter   = false,
         rememberCount       = {};
 
@@ -927,8 +987,8 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       // reserved words
       if ( !t.delimited ) {
         for ( var anotherToken in grammar ) {
-          if ( grammar[anotherToken].reservedWord
-               && anotherToken == tokenValue ) {
+          if (grammar[anotherToken].reservedWord &&
+              anotherToken == tokenValue ) {
             tokenType = anotherToken;
           }
         }
@@ -1084,8 +1144,8 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       var p = position;
       var tl = tokenLogic(p);
       if ( !tl )            return false;
-      if (side == 'left')   return tl.leftType;
-      if (side == 'right')  return tl.rightType;
+      if (side === 'left')   return tl.leftType;
+      if (side === 'right')  return tl.rightType;
     }
 
     function evalType (position) {
@@ -1109,8 +1169,8 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     function tokenIsMissingChilds (position) {
       var p = position;
       if ( p < 0 )  return true;
-      return (expectedType('left',p) && !l[p].leftSide)
-          || (expectedType('right',p) && !l[p].rightSide);
+      return (expectedType('left',p) && !l[p].leftSide) ||
+             (expectedType('right',p) && !l[p].rightSide);
     }
 
     function typesAreMatching (parent, child) {
@@ -1160,15 +1220,15 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
 
     // step through the tokenList
 
-    for (i=0; i < l.length; i++) {
+    for (i = 0; i < l.length; i++) {
       shouldCheckAgain = false;
 
-      if ( l[i].tokenType == 'UNKNOWN' ) {
+      if ( l[i].tokenType === 'UNKNOWN' ) {
         error.push('found unknown token: '+l[i].tokenValue);
       }
 
-      if ( l[i].tokenType == 'OPEN_PAREN' ) openParenthesisStack.push(i);
-      if ( l[i].tokenType == 'CLOSE_PAREN' ) removeParenthesesPair(i);
+      if ( l[i].tokenType === 'OPEN_PAREN' ) openParenthesisStack.push(i);
+      if ( l[i].tokenType === 'CLOSE_PAREN' ) removeParenthesesPair(i);
 
       if ( preceedingTokenCanBeMadeChild(i) ) makeChild(i);
 
@@ -1182,13 +1242,23 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     }
 
     // error if tokenList l is not a single token now
-    if (l.length == 1) l = l[0];
+    if (l.length === 1) l = l[0];
     else error.push('string did not resolve to a single tree');
 
-    // error?
-    if (error.length > 0) return {error: error.join(',\n'), tree: l};
-    // everything fine - token list is now a tree and can be returned
-    else return l;
+    // If we have errors, return an error object.
+    if (error.length > 0) {
+      return {
+        error: error.join(',\n'),
+        tree: l,
+        // Conform to SC.Error.
+        isError: YES,
+        errorVal: function() { return this.error; }
+      };
+    }
+    // Otherwise the token list is now a tree and can be returned.
+    else {
+      return l;
+    }
 
   },
 
@@ -1213,6 +1283,26 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       return orderOp;
     }
     else {
+      // @if(debug)
+      // debug mode syntax checks.
+      // first check is position of ASC or DESC
+      var ASCpos = orderOp.indexOf("ASC");
+      var DESCpos = orderOp.indexOf("DESC");
+      if (ASCpos > -1 || DESCpos > -1) { // if they exist
+        if (ASCpos > -1 && (ASCpos + 3) !== orderOp.length) {
+          SC.warn("Developer Warning: You have an orderBy syntax error in a Query, %@: ASC should be in the last position.".fmt(orderOp));
+        }
+        if (DESCpos > -1 && (DESCpos + 4) !== orderOp.length) {
+          SC.warn("Developer Warning: You have an orderBy syntax error in a Query, %@: DESC should be in the last position.".fmt(orderOp));
+        }
+      }
+      
+      // check for improper separation chars
+      if (orderOp.indexOf(":") > -1 || orderOp.indexOf(":") > -1) {
+        SC.warn("Developer Warning: You have an orderBy syntax error in a Query, %@: Colons or semicolons should not be used as a separation character.".fmt(orderOp));
+      }
+      // @endif
+
       var o = orderOp.split(',');
       for (var i=0; i < o.length; i++) {
         var p = o[i];
@@ -1220,7 +1310,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
         p = p.replace(/\s+/,',');
         p = p.split(',');
         o[i] = {propertyName: p[0]};
-        if (p[1] && p[1] == 'DESC') o[i].descending = true;
+        if (p[1] && p[1] === 'DESC') o[i].descending = true;
       }
 
       return o;
@@ -1294,7 +1384,7 @@ SC.Query.mixin( /** @scope SC.Query */ {
   orderStoreKeys: function(storeKeys, query, store) {
     // apply the sort if there is one
     if (storeKeys) {
-      var res = storeKeys.sort(function(a, b) {
+      storeKeys.sort(function(a, b) {
         return SC.Query.compareStoreKeys(query, store, a, b);
       });
     }

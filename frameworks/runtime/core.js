@@ -29,6 +29,12 @@ if (typeof console === 'undefined') {
   console.log = console.info = console.warn = console.error = function () {};
 }
 
+// prevent console.trace from blowing things up - some browsers like IE10 has
+// a console object but no console.trace
+if (!console.trace) {
+    console.trace = function() {};
+}
+
 window.SC = window.SC || {};
 window.SproutCore = window.SproutCore || SC;
 
@@ -39,7 +45,7 @@ window.SproutCore = window.SproutCore || SC;
 // rest of the methods go into the mixin defined below.
 
 /**
-  @version Edge
+  @version 1.11.0
   @namespace
 
   All SproutCore methods and functions are defined
@@ -56,7 +62,7 @@ window.SproutCore = window.SproutCore || SC;
 */
 SC = window.SC; // This is dumb but necessary for jsdoc to get it right
 
-SC.VERSION = 'Edge';
+SC.VERSION = '1.11.0';
 
 /**
   @private
@@ -74,10 +80,9 @@ SC.VERSION = 'Edge';
   @returns {Object} the target object.
   @static
 */
-SC._baseMixin = function (override) {
-  var args = Array.prototype.slice.call(arguments, 1),
-  // copy reference to target object
-      target = args[0] || {},
+SC._baseMixin = function (override, args) {
+  // Copy reference to target object
+  var target = args[0] || {},
       idx = 1,
       length = args.length,
       options, copy, key;
@@ -116,9 +121,12 @@ SC._baseMixin = function (override) {
   @static
 */
 SC.mixin = function () {
-  var args = Array.prototype.slice.call(arguments);
-  args.unshift(true);
-  return SC._baseMixin.apply(this, args);
+  // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
+  // TODO: Add macro to build tools for this.
+  var args = new Array(arguments.length); // Array.prototype.slice.call(arguments)
+  for (var i = 0, len = args.length; i < len; i++) { args[i] = arguments[i]; }
+
+  return SC._baseMixin(true, args);
 };
 
 /**
@@ -134,9 +142,12 @@ SC.mixin = function () {
   @static
 */
 SC.supplement = function () {
-  var args = Array.prototype.slice.call(arguments);
-  args.unshift(false);
-  return SC._baseMixin.apply(this, args);
+  // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object which is costly.
+  // TODO: Add macro to build tools for this.
+  var args = new Array(arguments.length); // Array.prototype.slice.call(arguments)
+  for (var i = 0, len = args.length; i < len; i++) { args[i] = arguments[i]; }
+
+  return SC._baseMixin(false, args);
 };
 
 /**
@@ -346,14 +357,10 @@ SC.mixin(/** @scope window.SC.prototype */ {
   guidKey: "SproutCore" + (SC.VERSION + Math.random()).replace(/\D/g, ""),
 
   // Used for guid generation...
-  _guidPrefixes: {"number": "nu", "string": "st"},
-  _guidCaches:   {"number": {},   "string": {}},
-  _numberGuids: [],
-  _stringGuids: {},
   _keyCache: {},
   _uuid: 0,
 
-  /**"
+  /**
     Returns a unique GUID for the object.  If the object does not yet have
     a guid, one will be assigned to it.  You can call this on any object,
     SC.Object-based or not, but be aware that it will add a _guid property.
@@ -373,13 +380,7 @@ SC.mixin(/** @scope window.SC.prototype */ {
 
     // Don't allow prototype changes to String etc. to change the guidFor
     if (type === SC.T_NUMBER || type === SC.T_STRING) {
-      cache = this._guidCaches[type];
-      ret   = cache[obj];
-      if (!ret) {
-        ret        = "st" + (SC._uuid++);
-        cache[obj] = ret;
-      }
-      return ret;
+      return '(' + obj + ')'; // E.g. '(Abc)' or '(123)'
     } else if (type === SC.T_BOOL) {
       return (obj) ? "(true)" : "(false)";
     }
@@ -719,6 +720,7 @@ SC.mixin(/** @scope window.SC.prototype */ {
     @returns {Array} array with [object, property] if found or null
   */
   tupleForPropertyPath: function (path, root) {
+    /* jshint eqnull:true */
     // if passed nothing, return nothing.
     if (path == null) return null;
 

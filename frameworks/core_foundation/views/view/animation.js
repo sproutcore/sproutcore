@@ -82,6 +82,9 @@ SC.LayoutState = {
 SC.View.reopen(
   /** @scope SC.View.prototype */ {
 
+  /** @private Shared object used to avoid continually initializing/destroying objects. */
+  _SC_DECOMPOSED_TRANSFORM_MAP: null,
+
   /* @private Internal variable to store the active (i.e. applied) animations. */
   _activeAnimations: null,
 
@@ -186,7 +189,7 @@ SC.View.reopen(
         );
 
     The animate functions are intelligent in how they apply animations and
-    calling animate in a manner that would effect an ongoing animation (i.e.
+    calling animate in a manner that would affect an ongoing animation (i.e.
     animating left again while it is still in transition) will result in
     the ongoing animation callback firing immediately with isCancelled set to
     true and adjusting the transition to accomodate the new settings.
@@ -324,13 +327,13 @@ SC.View.reopen(
 
     // Get the layout (may be a previous layout already animating).
     if (!this._prevLayout) {
-      this._prevLayout = SC.clone(this.get('layout'));
+      this._prevLayout = SC.clone(this.get('explicitLayout'));
     }
 
     if (!pendingAnimations) { pendingAnimations = this._pendingAnimations = {}; }
 
     // Get the layout (may be a partially adjusted one already queued up).
-    layout = this._animateLayout || SC.clone(this.get('layout'));
+    layout = this._animateLayout || SC.clone(this.get('explicitLayout'));
 
     // Handle old style rotation.
     if (!SC.none(hash.rotate)) {
@@ -402,11 +405,6 @@ SC.View.reopen(
 
       // Always run the animation asynchronously so that the original layout is guaranteed to be applied to the DOM.
       this.invokeNext('_animate');
-
-      // Route.
-      if (this.get('viewState') === SC.CoreView.ATTACHED_SHOWN) {
-        this.set('viewState', SC.CoreView.ATTACHED_SHOWN_ANIMATING);
-      }
     } else if (!optionsDidChange) {
       this.invokeNext(function () {
         this.runAnimationCallback(options, null, false);
@@ -430,6 +428,11 @@ SC.View.reopen(
 
       // Apply the animation layout.
       this.set('layout', animationLayout);
+
+      // Route.
+      if (this.get('viewState') === SC.CoreView.ATTACHED_SHOWN) {
+        this.set('viewState', SC.CoreView.ATTACHED_SHOWN_ANIMATING);
+      }
     }
   },
 
@@ -442,23 +445,23 @@ SC.View.reopen(
     @returns {SC.View} receiver
   */
   // TODO: Do this using CSS animations instead.
-  _animateFrames: function (frames, callback, initialDelay, count) {
-    // Normalize the private argument `count`.
-    if (SC.none(count)) { count = 0; }
+  _animateFrames: function (frames, callback, initialDelay, _sc_frameCount) {
+    // Normalize the private argument `_sc_frameCount`.
+    if (SC.none(_sc_frameCount)) { _sc_frameCount = 0; }
 
-    var frame = frames[count];
+    var frame = frames[_sc_frameCount];
 
     this.animate(frame.value, {
       delay: initialDelay,
       duration: frame.duration,
       timing: frame.timing
     }, function (data) {
-      count += 1;
+      _sc_frameCount += 1;
 
       // Keep iterating while frames exist and the animations weren't cancelled.
-      if (!data.isCancelled && count < frames.length) {
+      if (!data.isCancelled && _sc_frameCount < frames.length) {
         // Only delay on the first animation.  Increase count to the next frame.
-        this._animateFrames(frames, callback, 0, count);
+        this._animateFrames(frames, callback, 0, _sc_frameCount);
       } else {
         // Done.
         if (callback) callback(data);
@@ -539,7 +542,7 @@ SC.View.reopen(
 
     // Adjust to final position.
     if (didCancel && !!layout) {
-      this.adjust(layout);
+      this.set('layout', layout);
     }
 
     // Clean up.
@@ -573,6 +576,76 @@ SC.View.reopen(
     }
   },
 
+  /** @private Decompose a transformation matrix. */
+  // TODO: Add skew support
+  _sc_decompose3DTransformMatrix: function (matrix, expectsScale) {
+    var ret = SC.View._SC_DECOMPOSED_TRANSFORM_MAP,  // Shared object used to avoid continually initializing/destroying
+      toDegrees = 180 / Math.PI;
+      // determinant;
+
+    // Create the decomposition map once. Note: This is a shared object, all properties must be overwritten each time.
+    if (!ret) { ret = SC.View._SC_DECOMPOSED_TRANSFORM_MAP = {}; }
+
+    // Calculate the scale.
+    if (expectsScale) {
+      ret.scaleX = Math.sqrt((matrix.m11 * matrix.m11) + (matrix.m12 * matrix.m12) + (matrix.m13 * matrix.m13));
+      // if (matrix.m11 < 0) ret.scaleX = ret.scaleX * -1;
+      ret.scaleY = Math.sqrt((matrix.m21 * matrix.m21) + (matrix.m22 * matrix.m22) + (matrix.m23 * matrix.m23));
+      ret.scaleZ = Math.sqrt((matrix.m31 * matrix.m31) + (matrix.m32 * matrix.m32) + (matrix.m33 * matrix.m33));
+
+      // Decompose scale from the matrix.
+      matrix = matrix.scale(1 / ret.scaleX, 1 / ret.scaleY, 1 / ret.scaleZ);
+    } else {
+      ret.scaleX = 1;
+      ret.scaleY = 1;
+      ret.scaleZ = 1;
+    }
+
+    // console.log("scales: %@, %@, %@".fmt(ret.scaleX, ret.scaleY, ret.scaleZ));
+
+    // Find the 3 Euler angles. Note the order applied using SC.CSS_TRANSFORM_NAMES in layout_style.js.
+    ret.rotateZ = -Math.atan2(matrix.m21, matrix.m11) * toDegrees; // Between -180° and 180°
+    // ret.rotateY = Math.atan2(-matrix.m31, Math.sqrt((matrix.m32 * matrix.m32) + (matrix.m33 * matrix.m33))) * toDegrees;  // Between -90° and 90°
+    // ret.rotateX = Math.atan2(matrix.m32, matrix.m33) * toDegrees; // Between -180° and 180°
+
+    // console.log("rotations: %@, %@, %@".fmt(ret.rotateX, ret.rotateY, ret.rotateZ));
+
+    // if (ret.rotateX < 0) { ret.rotateX = 360 + ret.rotateX; } // Convert to 0° to 360°
+    // if (ret.rotateY < 0) { ret.rotateY = 180 + ret.rotateY; } // Convert to 0° to 180°
+    if (ret.rotateZ < 0) { ret.rotateZ = 360 + ret.rotateZ; } // Convert to 0° to 360°
+
+    // Pull out the translate values directly.
+    ret.translateX = matrix.m41;
+    ret.translateY = matrix.m42;
+    ret.translateZ = matrix.m43;
+
+    // console.log("translations: %@, %@, %@".fmt(ret.translateX, ret.translateY, ret.translateZ));
+
+    return ret;
+  },
+
+  /** @private Replace scientific E notation values with fixed decimal values. */
+  _sc_removeENotationFromMatrixString: function (matrixString) {
+    var components,
+      numbers,
+      ret;
+
+    components = matrixString.split(/\(|\)/);
+    numbers = components[1].split(',');
+    for (var i = 0, len = numbers.length; i < len; i++) {
+      var number = numbers[i];
+
+      // Transform E notation into fixed decimal (20 is maximum allowed).
+      if (number.indexOf('e') > 0) {
+        numbers[i] = window.parseFloat(number).toFixed(20);
+      }
+    }
+
+    ret = components[0] + '(' + numbers.join(', ') + ')';
+
+    return ret;
+  },
+
   /** @private
     Returns the live values of the properties being animated on a view while it
     is animating.  Getting the layout of the view after a call to animate will
@@ -594,44 +667,92 @@ SC.View.reopen(
   */
   liveAdjustments: function () {
     var activeAnimations = this._activeAnimations,
-      jqueryEl = this.$(),
+      el = this.get('layer'),
       ret = {},
       transformKey = SC.browser.experimentalCSSNameFor('transform');
 
     if (activeAnimations) {
       for (var key in activeAnimations) {
+        var value = document.defaultView.getComputedStyle(el)[key];
+
+        // If a transform is being transitioned, decompose the matrices.
         if (key === transformKey) {
-          var matrix = jqueryEl.css(key),
-            CSSMatrixClass = SC.browser.experimentalNameFor(window, 'CSSMatrix');
+          var CSSMatrixClass = SC.browser.experimentalNameFor(window, 'CSSMatrix'),
+            matrix;
 
           if (CSSMatrixClass !== SC.UNSUPPORTED) {
-            matrix = new window[CSSMatrixClass](matrix);
 
-            // Calculate rotateX
-            ret.rotateX = Math.atan2(matrix.m32, matrix.m33) * (180 / Math.PI);
+            // Convert scientific E number representations to fixed numbers.
+            // In WebKit at least, these throw exceptions when used to generate the matrix. To test,
+            // paste the following in a browser console:
+            //    new WebKitCSSMatrix('matrix(-1, 1.22464679914735e-16, -1.22464679914735e-16, -1, 0, 0)')
+            value = this._sc_removeENotationFromMatrixString(value);
+            matrix = new window[CSSMatrixClass](value);
 
-            // Calculate rotateY
-            ret.rotateY = Math.atan2(-matrix.m31, Math.sqrt(Math.pow(matrix.m32, 2) + Math.pow(matrix.m33, 2))) * (180 / Math.PI);
+            /* jshint eqnull:true */
+            var layout = this.get('layout'),
+              scaleLayout = layout.scale,
+              expectsScale = scaleLayout != null,
+              decomposition = this._sc_decompose3DTransformMatrix(matrix, expectsScale);
 
-            // Calculate rotateZ
-            ret.rotateZ = -Math.atan2(matrix.m21, matrix.m11) * (180 / Math.PI);
+            // The rotation decompositions aren't working properly, ignore them.
+            // Set rotateX.
+            // if (layout.rotateX != null) {
+            //   ret.rotateX = decomposition.rotateX;
+            // }
 
-            // Calculate scaleX
-            ret.scale = Math.sqrt(Math.pow(matrix.m11, 2) + Math.pow(matrix.m12, 2) + Math.pow(matrix.m13, 2));
-            if (matrix.m11 < 0) ret.scale = ret.scale * -1;
+            // // Set rotateY.
+            // if (layout.rotateY != null) {
+            //   ret.rotateY = decomposition.rotateY;
+            // }
 
-            // Retrieve translateX & translateY
-            ret.left = matrix.e;
-            ret.top = matrix.f;
+            // Set rotateZ.
+            if (layout.rotateZ != null) {
+              ret.rotateZ = decomposition.rotateZ;
+            }
+
+            // Set scale.
+            if (expectsScale) {
+              // If the scale was set in the layout as an Array, return it as an Array.
+              if (SC.typeOf(scaleLayout) === SC.T_ARRAY) {
+                ret.scale = [decomposition.scaleX, decomposition.scaleY];
+
+              // If the scale was set in the layout as an Object, return it as an Object.
+              } else if (SC.typeOf(scaleLayout) === SC.T_HASH) {
+                ret.scale = { x: decomposition.scaleX, y: decomposition.scaleY };
+
+              // Return it as a single value.
+              } else {
+                ret.scale = decomposition.scaleX;
+              }
+            }
+
+            // Set top & left.
+            if (this.get('hasAcceleratedLayer')) {
+              ret.left = decomposition.translateX;
+              ret.top = decomposition.translateY;
+            }
           } else {
-            matrix = matrix.match(/^matrix\((.*)\)$/)[1].split(/,\s*/);
-            if (matrix) {
+            matrix = value.match(/^matrix\((.*)\)$/)[1].split(/,\s*/);
+            // If the view has translated position, retrieve translateX & translateY.
+            if (matrix && this.get('hasAcceleratedLayer')) {
               ret.left = parseInt(matrix[4], 10);
               ret.top = parseInt(matrix[5], 10);
             }
           }
+
+        // Determine the current style.
         } else {
-          ret[key] = parseInt(jqueryEl.css(key), 10);
+          value = window.parseFloat(value, 10);
+
+          // Account for centerX & centerY animations (margin-left & margin-top).
+          if (key === 'centerX') {
+            value = value + parseInt(document.defaultView.getComputedStyle(el).width, 10) / 2; // Use the actual width.
+          } else if (key === 'centerY') {
+            value = value + parseInt(document.defaultView.getComputedStyle(el).height, 10) / 2; // Use the actual height.
+          }
+
+          ret[key] = value;
         }
       }
     }

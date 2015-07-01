@@ -30,7 +30,9 @@
     children if not. (See SC.ScrollView#delaysContentTouches for more.) In order to support this use case, `captureTouch`
     bubbles the opposite way as usual: beginning with the target's pane and bubbling *down* towards the target itself.
     `captureTouch` is passed a single instance of `SC.Touch`, and must return YES if it wishes to capture the touch and
-    become its responder.
+    become its responder. (If your view doesn't want to immediately capture the touch, but instead wants to suggest itself
+    as a fallback handler in case the child view resigns respondership, it can do so by passing itself to the touch's
+    `stackCandidateTouchResponder` method.)
   - `touchStart` -- When a touch begins, or when a new view responder is first given access to it (see "Touch Responders"
     below), the touch is passed to this method.
   - `touchesDragged` -- Whenever any touches move, the `touchesDragged` method is called on the current view responder
@@ -41,9 +43,9 @@
     the touch object which is ending.
   - `touchCancelled` -- This method is generally only called if you have changed the touch's responder. See "Touch
     Responders" below; in brief, if you pass the touch to another responder via `makeTouchResponder`, fully resigning
-    your touch respondership, you will receive a `touchCancelled` call for the next event; if you pass the touch to another 
+    your touch respondership, you will receive a `touchCancelled` call for the next event; if you pass the touch to another
     responder via `stackNextTouchResponder`, and never receive it back, you will receive a `touchCancelled` call when the
-    event finishes. (Note that because RootResponder must call touchStart to determine if a view will accept respondership,
+    touch finishes. (Note that because RootResponder must call touchStart to determine if a view will accept respondership,
     touchStart is called on a new responder before touchCancelled is called on the outgoing one.)
 
   The touchesDragged Multitouch Event Object
@@ -52,7 +54,7 @@
   access the touches for a specific view from the `touchesForView` method, or get an average position of the touches
   on a view from the convenient `averagedTouchesForView` method. For your convenience when dealing with the common
   single-touch view, the `touchesDragged` event object also exposes the positional page, client, screen and start X/Y
-  values from the *first touch*. If you are interested inhandling more than one touch, or in handling an average of
+  values from the *first touch*. If you are interested in handling more than one touch, or in handling an average of
   in-flight touches, you should ignore these values. (Note that this event object exposes an array of touch events at
   `touches`. These are the browser's raw touch events, and should be avoided or used with care.)
 
@@ -64,7 +66,7 @@
   A view becomes a touch responder by implementing touchStart (and not returning NO). (Out-of-order views can capture
   touch responder status by implementing captureTouch and returning YES.) Once a view is a touch responder, only that
   view will receive subsequent `touchesDragged` and `touchEnd` events; these events do not bubble like mouse events, and
-  they do not automatically switch to other views if the touch moves outside of its initial responder.
+  they do *not* automatically switch to other views if the touch moves outside of its initial responder.
 
   In some situations, you will want to pass control on to another view during the course of a touch, for example if
   it goes over another view. To permanently pass respondership to another view:
@@ -72,7 +74,7 @@
       if (shouldPassTouch) {
         touch.makeTouchResponder(nextView);
       }
-  
+
   This will trigger `touchStart` on the new responder, and `touchCancel` on the outgoing one. The new responder will begin
   receiving `touchesDragged` events in place of the outgoing one.
 
@@ -88,8 +90,8 @@
   Note that the previous responder will not receive `touchCancelled` immediately, since the touch may return to it before
   the end; instead, it will only receive `touchCancelled` when the touch is ended.
 
-  (If you would like to add a view as a fallback responder without triggering automatic calls to its `touchStart` and
-  `touchCancelled`, for example as an alternative to returning YES from `captureTouch`, you can call
+  (If you would like to add a view as a fallback responder without triggering unnecessary calls to its `touchStart` and
+  `touchCancelled` events, for example as an alternative to returning YES from `captureTouch`, you can call
   `stackCandidateTouchResponder` instead.)
 
   When the child view decides that the touch has moved enough to be a scroll, it should pass touch respondership back
@@ -105,33 +107,32 @@
 SC.Touch = function(touch, touchContext) {
   // get the raw target view (we'll refine later)
   this.touchContext = touchContext;
-  this.identifier = touch.identifier; // for now, our internal id is WebKit's id.
+  // Get the touch's unique ID.
+  this.identifier = touch.identifier;
 
   var target = touch.target, targetView;
+
+  // Special-case handling for TextFieldView's touch intercept overlays.
   if (target && SC.$(target).hasClass("touch-intercept")) {
-    touch.target.style.webkitTransform = "translate3d(0px,-5000px,0px)";
+    touch.target.style[SC.browser.experimentalStyleNameFor('transform')] = "translate3d(0px,-5000px,0px)";
     target = document.elementFromPoint(touch.pageX, touch.pageY);
-    if (target) targetView = SC.$(target).view()[0];
+    if (target) targetView = SC.viewFor(target);
 
     this.hidesTouchIntercept = NO;
     if (target.tagName === "INPUT") {
       this.hidesTouchIntercept = touch.target;
     } else {
-      touch.target.style.webkitTransform = "translate3d(0px,0px,0px)";
+      touch.target.style[SC.browser.experimentalStyleNameFor('transform')] = "translate3d(0px,0px,0px)";
     }
   } else {
-    targetView = touch.target ? SC.$(touch.target).view()[0] : null;
+    targetView = touch.target ? SC.viewFor(touch.target) : null;
   }
+
   this.targetView = targetView;
   this.target = target;
-  this.hasEnded = NO;
   this.type = touch.type;
-  this.clickCount = 1;
 
-  this.view = undefined;
-  this.touchResponder = this.nextTouchResponder = undefined;
   this.touchResponders = [];
-  this.candidateTouchResponders = null;
 
   this.startX = this.pageX = touch.pageX;
   this.startY = this.pageY = touch.pageY;
@@ -142,13 +143,173 @@ SC.Touch = function(touch, touchContext) {
 };
 
 SC.Touch.prototype = {
+  //@if(debug)
+  // Debug-mode only.
+  toString: function () {
+    return "SC.Touch (%@)".fmt(this.identifier);
+  },
+  //@endif
+
   /**@scope SC.Touch.prototype*/
+
+  /** @private
+    The responder that's responsible for the creation and management of this touch. Usually this will be
+    your app's root responder. You must pass this on create, and should not change it afterwards.
+
+    @type {SC.RootResponder}
+  */
+  touchContext: null,
+
+  /**
+    This touch's unique identifier. Provided by the browser and used to track touches through their lifetime.
+    You will not usually need to use this, as SproutCore's touch objects themselves persist throughout the
+    lifetime of a touch.
+
+    @type {Number}
+  */
+  identifier: null,
+
+  /**
+    The touch's initial target element.
+
+    @type: {Element}
+  */
+  target: null,
+
+  /**
+    The view for the touch's initial target element.
+
+    @type {SC.View}
+  */
+  targetView: null,
+
+  /**
+    The touch's current view. (Usually this is the same as the current touchResponder.)
+
+    @type {SC.View}
+  */
+  view: null,
+
+  /**
+    The touch's current responder, i.e. the view that is currently receiving events for this touch.
+
+    You can use the following methods to pass respondership for this touch between views as needed:
+    `makeTouchResponder`, `stackNextTouchResponder`, `restoreLastTouchResponder`, and `stackCandidateTouchResponder`.
+    See each method's documentation, and "Touch Responders: Passing Touches Around" above, for more.
+
+    @type {SC.Responder}
+  */
+  touchResponder: null,
+
+  /**
+    Whether the touch has ended yet. If you are caching touches outside of the RootResponder, it is your
+    responsibility to check this property and handle ended touches appropriately.
+
+    @type {Boolean}
+  */
+  hasEnded: NO,
+
+  /**
+    The touch's latest browser event's type, for example 'touchstart', 'touchmove', or 'touchend'.
+
+    Note that SproutCore's event model differs from that of the browser, so it is not recommended that
+    you use this property unless you know what you're doing.
+
+    @type {String}
+  */
+  type: null,
+
+  /** @private
+    A faked mouse event property used to prevent unexpected behavior when proxying touch events to mouse
+    event handlers.
+  */
+  clickCount: 1,
+
+  /**
+    The timestamp of the touch's most recent event. This is the time as of when all of the touch's
+    positional values are accurate.
+
+    @type {Number}
+  */
+  timeStamp: null,
+
+  /**
+    The touch's latest clientX position (relative to the viewport).
+
+    @type {Number}
+  */
+  clientX: null,
+
+  /**
+    The touch's latest clientY position (relative to the viewport).
+
+    @type {Number}
+  */
+  clientY: null,
+
+  /**
+    The touch's latest screenX position (relative to the screen).
+
+    @type {Number}
+  */
+  screenX: null,
+
+  /**
+    The touch's latest screenY position (relative to the screen).
+
+    @type {Number}
+  */
+  screenY: null,
+
+  /**
+    The touch's latest pageX position (relative to the document).
+
+    @type {Number}
+  */
+  pageX: null,
+
+  /**
+    The touch's latest pageY position (relative to the document).
+
+    @type {Number}
+  */
+  pageY: null,
+
+  /**
+    The touch's initial pageX value. Useful for tracking a touch's total relative movement.
+
+    @type {Number}
+  */
+  startX: null,
+
+  /**
+    The touch's initial pageY value.
+
+    @type {Number}
+  */
+  startY: null,
+
+  /**
+    The touch's horizontal velocity, in pixels per millisecond, at the time of its last event. (Positive
+    velocities indicate movement leftward, negative velocities indicate movement rightward.)
+
+    @type {Number}
+  */
+  velocityX: 0,
+
+  /**
+    The touch's vertical velocity, in pixels per millisecond, at the time of its last event. (Positive
+    velocities indicate movement downward, negative velocities indicate movement upward.)
+
+    @type {Number}
+  */
+  velocityY: 0,
 
   /** @private */
   unhideTouchIntercept: function() {
     var intercept = this.hidesTouchIntercept;
     if (intercept) {
-      setTimeout(function() { intercept.style.webkitTransform = "translate3d(0px,0px,0px)"; }, 500);
+      setTimeout(function() { intercept.style[SC.browser.experimentalStyleNameFor('transform')] = "translate3d(0px,0px,0px)"; }, 500);
     }
   },
 
@@ -189,15 +350,29 @@ SC.Touch.prototype = {
     this.touchContext.endTouch(this);
   },
 
-  /**
+  /** @private
     This property, contrary to its name, stores the last touch responder for possible use later in the touch's
     lifecycle. You will usually not use this property directly, instead calling `stackNextTouchResponder` to pass
-    the touch to a different view, and `restoreLastTouchResponder` to pass it back to this one.
+    the touch to a different view, and `restoreLastTouchResponder` to pass it back to the previous one.
 
     @type {SC.Responder}
-    @default null
   */
   nextTouchResponder: null,
+
+  /** @private
+    An array of previous touch responders.
+
+    @type {Array}
+  */
+  touchResponders: null,
+
+  /** @private
+    A lazily-created array of candidate touch responders. Use `stackCandidateTouchResponder` to add candidates;
+    candidates are used as a fallback if the touch is out of previous touch responders.
+
+    @type {Array}
+  */
+  candidateTouchResponders: null,
 
   /**
     A convenience method for making the passed view the touch's new responder, retaining the
@@ -266,12 +441,19 @@ SC.Touch.prototype = {
     When returning control of a touch to a previous handler, you should call
     `restoreLastTouchResponder` instead.
 
-    @param {SC.Responder} responder The view which should become responder.
-    @param {Boolean} shouldStack Whether the previous touch responder should be retained for possible use later in the touch's lifecycle.
-    @param {Boolean} upChain Whether or not a fallback responder should be sought up the responder chain if responder doesn't capture or handle the touch.
+    @param {SC.Responder} responder The view to assign to the touch. (It, or if bubbling then an ancestor,
+      must implement touchStart.)
+    @param {Boolean} shouldStack Whether the new responder should replace the old one, or stack with it.
+      Stacked responders are easy to revert via `SC.Touch#restoreLastTouchResponder`.
+    @param {Boolean|SC.Responder} bubblesTo If YES, will attempt to find a `touchStart` responder up the
+      responder chain. If NO or undefined, will only check the passed responder. If you pass a responder
+      for this argument, the attempt will bubble until it reaches the passed responder, allowing you to
+      restrict the bubbling to a portion of the responder chain. (Note that this responder will not be
+      given an opportunity to respond to the event.)
+    @returns {Boolean} Whether a valid touch responder was found and assigned.
   */
-  makeTouchResponder: function(responder, shouldStack, upViewChain) {
-    this.touchContext.makeTouchResponder(this, responder, shouldStack, upViewChain);
+  makeTouchResponder: function(responder, shouldStack, bubblesTo) {
+    return this.touchContext.makeTouchResponder(this, responder, shouldStack, bubblesTo);
   },
 
   /**
@@ -294,18 +476,29 @@ SC.Touch.prototype = {
   },
 
   /**
-    Captures, or recaptures, the touch. This works from the touch's raw target view
-    up to the startingPoint, and finds either a view that returns YES to captureTouch() or
-    touchStart().
+    Captures, or recaptures, this touch. This works from the startingPoint's first child up to the
+    touch's target view to find a view which implements `captureTouch` and returns YES. If the touch
+    is captured, then this method will perform a standard `touchStart` event bubbling beginning with
+    the view which captured the touch. If no view captures the touch, then this method returns NO,
+    and you should call the `makeTouchResponder` method to trigger a standard `touchStart` bubbling
+    from the initial target on down.
 
     You will generally not call this method yourself, instead exposing on
     your view either a `touchStart` event handler method, or a `captureTouch`
     method which is passed a touch object and returns YES. This method
     is used in situations where touches need to be juggled between views,
     such as when being handled by a descendent of a ScrollView.
+
+    @param {?SC.Responder} startingPoint The view whose children should be given an opportunity
+      to capture the event. (The starting point itself is not asked.)
+    @param {Boolean} shouldStack Whether any capturing responder should stack with existing responders.
+      Stacked responders are easy to revert via `SC.Touch#restoreLastTouchResponder`.
+
+    @returns {Boolean} Whether the touch was captured. If it was not, you should pass it to
+      `makeTouchResponder` for standard event bubbling.
   */
   captureTouch: function(startingPoint, shouldStack) {
-    this.touchContext.captureTouch(this, startingPoint, shouldStack);
+    return this.touchContext.captureTouch(this, startingPoint, shouldStack);
   },
 
   /**
@@ -334,11 +527,11 @@ SC.Touch.prototype = {
   /**
     Returns average data--x, y, and d (distance)--for the touches owned by the supplied view.
 
-    addSelf adds this touch to the set being considered. This is useful from touchStart. If
-    you use it from anywhere else, it will make this touch be used twice--so use caution.
+    See notes on the addSelf argument for an important consideration when calling from `touchStart`.
 
     @param {SC.Responder} view
-    @param {Boolean} addSelf
+    @param {Boolean} addSelf Includes the receiver in calculations. Pass YES for this if calling
+        from touchStart, as the touch will not yet be included by default.
   */
   averagedTouchesForView: function(view, addSelf) {
     return this.touchContext.averagedTouchesForView(view, (addSelf ? this : null));
@@ -346,7 +539,76 @@ SC.Touch.prototype = {
 };
 
 SC.mixin(SC.Touch, {
+
   create: function(touch, touchContext) {
     return new SC.Touch(touch, touchContext);
+  },
+
+  /**
+    Returns the averaged touch for an array of given touches. The averaged touch includes the
+    average position of all the touches (i.e. the center point), the averaged distance of all
+    the touches (i.e. the average of each touch's distance to the center) and the average velocity
+    of each touch.
+
+    The returned Object has a signature like,
+
+        {
+          x: ...,
+          y: ...,
+          velocityX: ...,
+          velocityY: ...,
+          d: ...
+        }
+
+    @param {Array} touches An array of touches to average.
+    @param {Object} objectRef An Object to assign the values to rather than creating a new Object. If you pass an Object to this method, that same Object will be returned with the values assigned to it. This is useful in order to only alloc memory once and hold it in order to avoid garbage collection. The trade-off is that more memory remains in use indefinitely.
+    @returns {Object} The averaged touch.
+  */
+  averagedTouch: function (touches, objectRef) {
+    var len = touches.length,
+        ax = 0, ay = 0, avx = 0, avy = 0,
+        idx, touch;
+
+    // If no holder object is given, create a new one.
+    if (objectRef === undefined) { objectRef = {}; }
+
+    // Sum the positions and velocities of each touch.
+    for (idx = 0; idx < len; idx++) {
+      touch = touches[idx];
+      ax += touch.pageX;
+      ay += touch.pageY;
+      avx += touch.velocityX;
+      avy += touch.velocityY;
+    }
+
+    // Average each value.
+    ax /= len;
+    ay /= len;
+    avx /= len;
+    avy /= len;
+
+    // Calculate average distance.
+    var ad = 0;
+    for (idx = 0; idx < len; idx++) {
+      touch = touches[idx];
+
+      // Get distance for each from average position.
+      var dx = Math.abs(touch.pageX - ax);
+      var dy = Math.abs(touch.pageY - ay);
+
+      // Pythagoras was clever...
+      ad += Math.pow(dx * dx + dy * dy, 0.5);
+    }
+
+    // Average value.
+    ad /= len;
+
+    objectRef.x = ax;
+    objectRef.y = ay;
+    objectRef.velocityX = avx;
+    objectRef.velocityY = avy;
+    objectRef.d = ad;
+
+    return objectRef;
   }
 });

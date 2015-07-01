@@ -128,8 +128,8 @@ SC.ObserverSet = {
     for( var i=0, l=members.length; i<l; i++ ) {
       member = members[i];
 
-      // method.call(target);
-      member[1].call(member[0]);
+      // Call the method (member[1]) on the target (member[0]) with the context (member[2])
+      member[1].call(member[0], member[2]);
 
       //@if(debug)
       // If we have logging info specified for who scheduled the particular

@@ -4,13 +4,8 @@
 //            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-
 sc_require('panes/pane');
-sc_require('panes/keyboard');
-sc_require('panes/layout');
-sc_require('panes/manipulation');
-sc_require('panes/visibility');
-sc_require('panes/pane_statechart');
+
 
 /** @class
 

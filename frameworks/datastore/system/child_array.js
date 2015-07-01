@@ -64,7 +64,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @type SC.Store
     @readonly
   */
-  store: function () {
+  store: function() {
     return this.getPath('record.store');
   }.property('record').cacheable(),
 
@@ -74,7 +74,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @type Number
     @readonly
   */
-  storeKey: function () {
+  storeKey: function() {
     return this.getPath('record.storeKey');
   }.property('record').cacheable(),
 
@@ -87,7 +87,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @type SC.Array
     @property
   */
-  readOnlyChildren: function () {
+  readOnlyChildren: function() {
     return this.get('record').readAttribute(this.get('propertyName'));
   }.property(),
 
@@ -99,10 +99,10 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @type {SC.Array}
     @property
   */
-  editableChildren: function () {
-    var store = this.get('store'),
+  editableChildren: function() {
+    var store    = this.get('store'),
         storeKey = this.get('storeKey'),
-        pname = this.get('propertyName'),
+        pname    = this.get('propertyName'),
         ret, hash;
 
     ret = store.readEditableProperty(storeKey, pname);
@@ -111,7 +111,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
       ret = hash[pname] = [];
     }
 
-    return ret;
+    return ret ;
   }.property(),
 
   // ..........................................................
@@ -124,7 +124,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @type Number
     @property
   */
-  length: function () {
+  length: function() {
     var children = this.get('readOnlyChildren');
     return children ? children.length : 0;
   }.property('readOnlyChildren'),
@@ -136,16 +136,16 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @param {Number} idx index of the object to retrieve.
     @returns {SC.Record} The nested record if found or undefined if not.
   */
-  objectAt: function (idx) {
-    var recs = this._records,
-      children = this.get('readOnlyChildren'),
+  objectAt: function(idx) {
+    var recs      = this._records,
+        children = this.get('readOnlyChildren'),
       hash, ret,
       pname = this.get('propertyName'),
       parent = this.get('record'),
       len = children ? children.length : 0;
 
     if (!children) return undefined; // nothing to do
-    if (recs && (ret = recs[idx])) return ret; // cached
+    if (recs && (ret=recs[idx])) return ret ; // cached
 
     // If not a good index return undefined
     if (idx >= len) return undefined;
@@ -154,7 +154,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
     // not in cache, materialize
     if (!recs) this._records = recs = []; // create cache
-    recs[idx] = ret = parent.registerNestedRecord(hash, pname, pname + '.' + idx);
+    recs[idx] = ret = parent.registerNestedRecord(hash, pname, pname+'.'+idx);
 
     return ret;
   },
@@ -169,11 +169,11 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @param {Number} recs array with records to replace. These may be JavaScript objects or nested SC.Record objects.
     @returns {SC.ChildArray}
   */
-  replace: function (idx, amt, recs) {
+  replace: function(idx, amt, recs) {
     var children = this.get('editableChildren'),
       recsLen = recs ? (recs.get ? recs.get('length') : recs.length) : 0,
       parent = this.get('record'),
-      pname = this.get('propertyName'),
+      pname    = this.get('propertyName'),
       store = this.get('store'),
       removeCount, addCount,
       defaultRecordType, storeKeysById,
@@ -185,6 +185,11 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
     // Convert any SC.Record objects into JavaScript objects.
     newObjects = this._processRecordsToHashes(recs);
+
+    // Unregister the records being replaced.
+    // for (i = idx, len = children.length; i < len; ++i) {
+    //  this.unregisterNestedRecord(i);
+    // }
 
     // Ensure that all removed objects are pre-registered in case any instances are outstanding.
     // These objects will improperly reflect being registered to this parent, but
@@ -256,9 +261,36 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
   },
 
   /**
+    Unregisters a child record from its parent record.
+
+    Since accessing a child (nested) record creates a new data hash for the
+    child and caches the child record and its relationship to the parent record,
+    it's important to clear those caches when the child record is overwritten
+    or removed.  This function tells the store to remove the child record from
+    the store's various child record caches.
+
+    You should not need to call this function directly.  Simply setting the
+    child record property on the parent to a different value will cause the
+    previous child record to be unregistered.
+
+    @param {Number} idx The index of the child record.
+  */
+  // unregisterNestedRecord: function(idx) {
+  //   var childArray, childRecord, csk, store,
+  //       record   = this.get('record'),
+  //       pname    = this.get('propertyName');
+  //
+  //   store = record.get('store');
+  //   childArray = record.getPath(pname);
+  //   childRecord = childArray.objectAt(idx);
+  //   csk = childRecord.get('storeKey');
+  //   store.unregisterChildFromParent(csk);
+  // },
+
+  /**
     Calls normalize on each object in the array
   */
-  normalize: function () {
+  normalize: function(){
     this.forEach(function (rec) {
       if (rec.normalize) rec.normalize();
     });
@@ -299,7 +331,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     var oldLength = this.get('length'),
       children = this.get('readOnlyChildren'),
       newLength = children ? children.length : 0,
-      store = this.get('store'),
+      // store = this.get('store'),
       prevChildren = this._sc_prevChildren;
 
     // Fast Path! No actual change to our backing array attribute so we should
@@ -335,4 +367,4 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     this._sc_prevChildren = children;
   }
 
-});
+}) ;

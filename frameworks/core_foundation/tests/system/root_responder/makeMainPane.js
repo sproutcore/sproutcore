@@ -4,11 +4,11 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/*global module test equals context ok same Q$ htmlbody */
+/*global module, test, equals, ok */
 module("SC.RootResponder#makeMainPane");
 
 test("returns receiver", function() {
-  var p1 = SC.Pane.create(), p2 = SC.Pane.create();
+  var p1 = SC.Pane.create();
   var r = SC.RootResponder.create();
   equals(r.makeMainPane(p1), r, 'returns receiver');
 });
@@ -19,9 +19,13 @@ test("changes mainPane to new pane", function() {
   
   r.makeMainPane(p1);
   equals(r.get('mainPane'), p1, 'mainPane should be p1');
+  ok(p1.get('isMainPane'), 'p1 should know');
+  ok(!p2.get('isMainPane'), 'p2 should have no illusions');
 
   r.makeMainPane(p2);
-  equals(r.get('mainPane'), p2, 'mainPane should be p2');
+  equals(r.get('mainPane'), p2, 'mainPane should change to p2');
+  ok(p2.get('isMainPane'), 'p2 should know about its promotion');
+  ok(!p1.get('isMainPane'), 'p1 should know about its demotion');  
   
 });
 

@@ -124,13 +124,19 @@ SC.View.reopen(
     var handled = true,
       enabledState = this.get('enabledState');
 
+    // If the view itself is disabled, then we can enable it.
     if (enabledState === SC.CoreView.DISABLED) {
-      // If the view itself is disabled, then we can enable it.
+      // Update the enabled state of all children. Top-down, because if a child is disabled on its own it
+      // won't affect its childrens' state and we can bail out early.
       this._callOnChildViews('_parentDidEnableInPane');
       this._gotoEnabledState();
+
+    // If the view is disabled and has a disabled parent, we can enable it, but it will be disabled by the parent.
     } else if (enabledState === SC.CoreView.DISABLED_AND_BY_PARENT) {
       // The view is no longer disabled itself, but still disabled by an ancestor.
       this._gotoDisabledByParentState();
+
+    // If the view is not disabled, we can't enable it.
     } else {
       handled = false;
     }
@@ -145,15 +151,22 @@ SC.View.reopen(
 
     // If the view is not itself disabled, then we can disable it.
     if (enabledState === SC.CoreView.ENABLED) {
+      // Update the disabled state of all children. Top-down, because if a child is disabled on its own it
+      // won't affect its childrens' state and we can bail out early.
+      this._callOnChildViews('_parentDidDisableInPane');
+      this._gotoDisabledState();
+
+      // Ensure that first responder status is given up.
       if (this.get('isFirstResponder')) {
         this.resignFirstResponder();
       }
 
-      this._callOnChildViews('_parentDidDisableInPane');
-      this._gotoDisabledState();
+    // If the view is disabled because of a disabled parent, we can disable the view itself too.
     } else if (enabledState === SC.CoreView.DISABLED_BY_PARENT) {
       // The view is now disabled itself and disabled by an ancestor.
       this._gotoDisabledAndByParentState();
+
+    // If the view is not enabled, we can't disable it.
     } else {
       handled = false;
     }
@@ -164,14 +177,6 @@ SC.View.reopen(
   // ------------------------------------------------------------------------
   // Methods
   //
-
-  /** @private */
-  init: function (original) {
-    original();
-
-    // If the view is pre-configured as disabled, then go to the proper initial state.
-    if (!this.get('isEnabled')) { this._doDisable(); }
-  }.enhance(),
 
   /** @private
     Observes the isEnabled property and resigns first responder if set to NO.
@@ -209,16 +214,6 @@ SC.View.reopen(
       this._enabledStyleNeedsUpdate = true;
     }
   },
-
-  /** @private Enhance. */
-  _executeQueuedUpdates: function (original) {
-    original();
-
-    // Update the layout style of the layer if necessary.
-    if (this._enabledStyleNeedsUpdate) {
-      this._doUpdateEnabledStyle();
-    }
-  }.enhance(),
 
   /** @private */
   _doUpdateEnabledStyle: function () {
@@ -272,16 +267,6 @@ SC.View.reopen(
     }
   },
 
-  applyAttributesToContext: function (original, context) {
-    original(context);
-
-    if (!this.get('isEnabled')) {
-      context.addClass('disabled');
-      context.setAttr('aria-disabled', 'true');
-    }
-
-  }.enhance(),
-
   /** @private */
   _gotoEnabledState: function () {
     this.set('enabledState', SC.CoreView.ENABLED);
@@ -294,13 +279,11 @@ SC.View.reopen(
 
   /** @private */
   _gotoDisabledAndByParentState: function () {
-    // Update the state.
     this.set('enabledState', SC.CoreView.DISABLED_AND_BY_PARENT);
   },
 
   /** @private */
   _gotoDisabledByParentState: function () {
-    // Update the state.
     this.set('enabledState', SC.CoreView.DISABLED_BY_PARENT);
   }
 

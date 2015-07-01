@@ -6,15 +6,24 @@
 // ==========================================================================
 /*global ActiveXObject */
 
-/*
-  TODO Document SC.Response and SC.XHRResponse
-*/
-
 /**
   @class
 
-  A response represents a single response from a server request.  An instance
-  of this class is returned whenever you call SC.Request.send().
+  A response represents a single response from a server request and handles the communication to
+  the server.  An instance of this class is returned whenever you call `SC.Request.send()`.
+
+  SproutCore only defines one concrete subclass of `SC.Response`,`SC.XHRResponse`. In order to
+  use `SC.Request` with a non-XHR request type you should create a custom class that extends
+  `SC.Response` and set your custom class as the value of `responseClass` on all requests.
+
+  For example,
+
+      var request = SC.Request.getUrl(resourceAddress)
+                              .set('responseClass', MyApp.CustomProtocolResponse)
+                              .send();
+
+  To extend `SC.Response`, please look at the property and methods listed below. For more examples,
+  please look at the code in `SC.XHRResponse`.
 
   @extend SC.Object
   @since SproutCore 1.0
@@ -168,6 +177,7 @@ SC.Response = SC.Object.extend(
   */
   body: function() {
     // TODO: support XML
+    // TODO: why not use the content-type header?
     var ret = this.get('encodedBody');
     if (ret && this.get('isJSON')) {
       try {
@@ -429,8 +439,14 @@ SC.Response = SC.Object.extend(
 /**
   @class
 
-  Concrete implementation of SC.Response that implements support for using
-  XHR requests.
+  Concrete implementation of `SC.Response` that implements support for using XHR requests. This is
+  the default response class that `SC.Request` uses and it is able to create cross-browser
+  compatible XHR requests to the address defined on a request and to notify according to the status
+  code fallbacks registered on the request.
+
+  You will not typically deal with this class other than to receive an instance of it when handling
+  `SC.Request` responses. For more information on how to create a request and handle an XHR response,
+  please @see SC.Request.
 
   @extends SC.Response
   @since SproutCore 1.0
@@ -577,6 +593,11 @@ SC.XHRResponse = SC.Response.extend(
     headers = this.getPath('request.headers');
     for (var headerKey in headers) {
       rawRequest.setRequestHeader(headerKey, headers[headerKey]);
+    }
+
+    // Do we need to allow Cookies for x-domain requests?
+    if (!this.getPath('request.isSameDomain') && this.getPath('request.allowCredentials')) {
+      rawRequest.withCredentials = true;
     }
 
     // now send the actual request body - for sync requests browser will

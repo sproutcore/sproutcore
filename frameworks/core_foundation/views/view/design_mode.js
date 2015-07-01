@@ -67,6 +67,65 @@ SC.View.reopen(
     }
   },
 
+  _sc_assignProperty: function (key, value) {
+    if (key === 'layout') {
+      var newExplicitLayout = this._sc_computeExplicitLayout(value), // Convert the layout to an explicit layout.
+          layoutDiff = {},
+          explicitLayout = this.get('explicitLayout');
+      for (var layoutKey in newExplicitLayout) {
+        var currentValue = explicitLayout[layoutKey];
+
+        layoutDiff[layoutKey] = currentValue === undefined ? null : currentValue;
+
+        if (layoutKey === 'centerX') {
+          layoutDiff.left = explicitLayout.left;
+          layoutDiff.right = explicitLayout.right;
+        }
+
+        if (layoutKey === 'centerY') {
+          layoutDiff.top = explicitLayout.top;
+          layoutDiff.bottom = explicitLayout.bottom;
+        }
+      }
+
+      this._originalProperties.layout = layoutDiff;
+    } else {
+      // Get the original value of the property for reset.
+      this._originalProperties[key] = this.get(key);
+    }
+
+    // Apply the override.
+    if (key === 'layout') {
+      //@if(debug)
+      if (SC.LOG_DESIGN_MODE || this.SC_LOG_DESIGN_MODE) {
+        SC.Logger.log('  - Adjusting %@: %@ (cached as %@)'.fmt(key, SC.inspect(value), SC.inspect(this._originalProperties[key])));
+      }
+      //@endif
+      this.adjust(value);
+    } else {
+      //@if(debug)
+      if (SC.LOG_DESIGN_MODE || this.SC_LOG_DESIGN_MODE) {
+        SC.Logger.log('  - Setting %@: %@ (cached as %@)'.fmt(key, SC.inspect(value), SC.inspect(this._originalProperties[key])));
+      }
+      //@endif
+      this.set(key,value);
+    }
+  },
+
+  _sc_revertProperty: function (key, oldValue) {
+    //@if(debug)
+    if (SC.LOG_DESIGN_MODE || this.SC_LOG_DESIGN_MODE) {
+      SC.Logger.log('  - Resetting %@ to %@'.fmt(key, SC.inspect(oldValue)));
+    }
+    //@endif
+
+    if (key === 'layout') {
+      this.adjust(oldValue);
+    } else {
+      this.set(key, oldValue);
+    }
+  },
+
   /**
     Updates the design mode for this view.
 
@@ -114,18 +173,13 @@ SC.View.reopen(
       prevProperties = this._originalProperties;
       if (prevProperties) {
         //@if(debug)
-        if (SC.LOG_DESIGN_MODE) {
-          SC.Logger.log('%@ — Removing previous design property overrides from "%@":'.fmt(this, lastDesignMode));
+        if (SC.LOG_DESIGN_MODE || this.SC_LOG_DESIGN_MODE) {
+          SC.Logger.log('%@ — Removing previous design property overrides set by "%@":'.fmt(this, lastDesignMode));
         }
         //@endif
 
         for (key in prevProperties) {
-          //@if(debug)
-          if (SC.LOG_DESIGN_MODE) {
-            SC.Logger.log('  - Resetting %@ to %@'.fmt(key, prevProperties[key]));
-          }
-          //@endif
-          this.set(key, prevProperties[key]);
+          this._sc_revertProperty(key, prevProperties[key]);
         }
 
         // Remove the cache.
@@ -138,7 +192,7 @@ SC.View.reopen(
           newProperties = SC.merge(modeAdjust[size], modeAdjust[designMode]);
 
           //@if(debug)
-          if (SC.LOG_DESIGN_MODE) {
+          if (SC.LOG_DESIGN_MODE || this.SC_LOG_DESIGN_MODE) {
             SC.Logger.log('%@ — Applying design properties for "%@":'.fmt(this, designMode));
           }
           //@endif
@@ -146,21 +200,7 @@ SC.View.reopen(
           // Cache the original properties for reset.
           this._originalProperties = {};
           for (key in newProperties) {
-            // Cache the original value for reset.
-            this._originalProperties[key] = this.get(key);
-
-            //@if(debug)
-            if (SC.LOG_DESIGN_MODE) {
-              SC.Logger.log('  - Setting %@: %@'.fmt(key, newProperties[key]));
-            }
-            //@endif
-
-            // Apply the override.
-            if (key === 'layout') {
-              this.adjust(newProperties[key]);
-            } else {
-              this.set(key, newProperties[key]);
-            }
+            this._sc_assignProperty(key, newProperties[key]);
           }
         }
       }

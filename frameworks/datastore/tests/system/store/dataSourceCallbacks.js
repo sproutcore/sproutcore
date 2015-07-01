@@ -3,14 +3,14 @@
 // Copyright: ©2006-2011 Apple Inc. and contributors.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-/*globals module ok equals same test MyApp */
+/*globals module, ok, equals, same, test */
 
-var store, storeKey, json;
+var store, json1, json2, json3, json4, json5, json6, json7, json8, json9, json10, json11, json12, json13, json14, json15, json16, storeKey1, storeKey2, storeKey3, storeKey4, storeKey5, storeKey6, storeKey7, storeKey8, storeKey9, storeKey10, storeKey11, storeKey12, storeKey13, storeKey14, storeKey15, storeKey16;
 module("SC.Store#dataSourceCallbacks", {
   setup: function() {
-    
+
     store = SC.Store.create();
-    
+
     json1 = {
       guid: "commitGUID1",
       string: "string",
@@ -123,19 +123,19 @@ module("SC.Store#dataSourceCallbacks", {
     store.writeDataHash(storeKey7, json7, SC.Record.BUSY_DESTROYING);
     storeKey8 = SC.Store.generateStoreKey();
     store.writeDataHash(storeKey8, json8, SC.Record.BUSY);
-  
+
     storeKey9 = SC.Store.generateStoreKey();
     store.writeDataHash(storeKey9, json9, SC.Record.READY_CLEAN);
     storeKey10 = SC.Store.generateStoreKey();
     store.writeDataHash(storeKey10, json10, SC.Record.BUSY_DESTROYING);
     storeKey11 = SC.Store.generateStoreKey();
     store.writeDataHash(storeKey11, json11, SC.Record.BUSY_CREATING);
-  
+
     storeKey12 = SC.Store.generateStoreKey();
     store.writeDataHash(storeKey12, json12, SC.Record.READY_CLEAN);
     storeKey13 = SC.Store.generateStoreKey();
     store.writeDataHash(storeKey13, json13, SC.Record.BUSY_CREATING);
-  
+
     storeKey14 = SC.Store.generateStoreKey();
     store.writeDataHash(storeKey14, json14, SC.Record.READY_CLEAN);
     storeKey15 = SC.Store.generateStoreKey();
@@ -143,11 +143,11 @@ module("SC.Store#dataSourceCallbacks", {
 
     storeKey16 = SC.Store.generateStoreKey();
     store.writeDataHash(storeKey16, json16, SC.Record.BUSY_LOADING);
-  
+
     SC.RunLoop.begin();
-  
+
   },
-  
+
   teardown: function() {
     SC.RunLoop.end();
   }
@@ -157,46 +157,46 @@ test("Confirm that dataSourceDidCancel switched the records to the right states"
   var msg='', status;
   try{
     store.dataSourceDidCancel(storeKey1);
-    msg='';  
-  }catch(error){
-    msg=error.message;
-  }
-  equals(SC.Record.BAD_STATE_ERROR.message, msg, 
-    "should throw the following error ");
-  
-  store.dataSourceDidCancel(storeKey2);
-  status = store.readStatus( storeKey2);
-  equals(status, SC.Record.EMPTY, "the status should have changed to EMPTY");
-  
-  store.dataSourceDidCancel(storeKey3);
-  status = store.readStatus( storeKey3);
-  equals(status, SC.Record.READY_NEW, "the status should have changed to READY_NEW");
-  
-  store.dataSourceDidCancel(storeKey4);
-  status = store.readStatus( storeKey4);
-  equals(status, SC.Record.READY_DIRTY, "the status should have changed to READY_DIRTY");
-  
-  store.dataSourceDidCancel(storeKey5);
-  status = store.readStatus( storeKey5);
-  equals(status, SC.Record.READY_CLEAN, "the status should have changed to READY_CLEAN");
-  
-  store.dataSourceDidCancel(storeKey6);
-  status = store.readStatus( storeKey6);
-  equals(status, SC.Record.READY_DIRTY, "the status should have changed to READY_DIRTY");
-  
-  store.dataSourceDidCancel(storeKey7);
-  status = store.readStatus( storeKey7);
-  equals(status, SC.Record.DESTROYED_DIRTY, "the status should have changed to DESTROYED_DIRTY");
-  
-  try{
-    store.dataSourceDidCancel(storeKey8);  
     msg='';
   }catch(error){
     msg=error.message;
   }
-  equals(SC.Record.BAD_STATE_ERROR.message, msg, 
+  equals(SC.Record.BAD_STATE_ERROR.toString(), msg, 
     "should throw the following error ");
-  
+
+  store.dataSourceDidCancel(storeKey2);
+  status = store.readStatus( storeKey2);
+  equals(status, SC.Record.EMPTY, "the status should have changed to EMPTY");
+
+  store.dataSourceDidCancel(storeKey3);
+  status = store.readStatus( storeKey3);
+  equals(status, SC.Record.READY_NEW, "the status should have changed to READY_NEW");
+
+  store.dataSourceDidCancel(storeKey4);
+  status = store.readStatus( storeKey4);
+  equals(status, SC.Record.READY_DIRTY, "the status should have changed to READY_DIRTY");
+
+  store.dataSourceDidCancel(storeKey5);
+  status = store.readStatus( storeKey5);
+  equals(status, SC.Record.READY_CLEAN, "the status should have changed to READY_CLEAN");
+
+  store.dataSourceDidCancel(storeKey6);
+  status = store.readStatus( storeKey6);
+  equals(status, SC.Record.READY_DIRTY, "the status should have changed to READY_DIRTY");
+
+  store.dataSourceDidCancel(storeKey7);
+  status = store.readStatus( storeKey7);
+  equals(status, SC.Record.DESTROYED_DIRTY, "the status should have changed to DESTROYED_DIRTY");
+
+  try{
+    store.dataSourceDidCancel(storeKey8);
+    msg='';
+  }catch(error){
+    msg=error.message;
+  }
+  equals(SC.Record.BAD_STATE_ERROR.toString(), msg, 
+    "should throw the following error ");
+
 });
 
 
@@ -204,61 +204,85 @@ test("Confirm that dataSourceDidComplete switched the records to the right state
   var msg='', status;
   try{
     store.dataSourceDidComplete(storeKey9);
-    msg='';  
-  }catch(error){
-    msg=error.message;
-  }
-  equals(SC.Record.BAD_STATE_ERROR.message, msg, 
-    "should throw the following error ");
-
-  try{
-    store.dataSourceDidComplete(storeKey10);  
     msg='';
   }catch(error){
     msg=error.message;
   }
-  equals(SC.Record.BAD_STATE_ERROR.message, msg, 
+  equals(SC.Record.BAD_STATE_ERROR.toString(), msg, 
     "should throw the following error ");
-  
+
+  try{
+    store.dataSourceDidComplete(storeKey10);
+    msg='';
+  }catch(error){
+    msg=error.message;
+  }
+  equals(SC.Record.BAD_STATE_ERROR.toString(), msg, 
+    "should throw the following error ");
+
   store.dataSourceDidComplete(storeKey11);
   status = store.readStatus( storeKey11);
   equals(status, SC.Record.READY_CLEAN, "the status should have changed to READY_CLEAN.");
-  
+
 });
 
+/**
+  There was a situation that when the id of the record was accessed it would remain cached even if
+  dataSourceDidComplete() was called with a new id.
+*/
+test("Confirm that passing a new id to dataSourceDidComplete clears the cached id on the record", function () {
+  var MyRecordType = SC.Record.extend({});
+
+  // Assign the store key to a record type so we can materialize the record.
+  SC.Store.replaceRecordTypeFor(storeKey11, MyRecordType);
+  SC.Store.idsByStoreKey[storeKey11] = 'commitGUID11';
+
+  var record = store.materializeRecord(storeKey11),
+      tempId = record.get('id'),
+      body;
+
+  equals(tempId, 'commitGUID11', "The id should originally be");
+
+  // Went to the server, came back with actual id.
+  body = SC.copy(json11);
+  body.guid = 'actualID';
+  store.dataSourceDidComplete(storeKey11, body, body.guid);
+
+  equals(record.get('id'), 'actualID', "The id should update now to be");
+});
 
 test("Confirm that dataSourceDidDestroy switched the records to the right states", function() {
   var msg='', status;
   try{
-    store.dataSourceDidDestroy(storeKey12);  
+    store.dataSourceDidDestroy(storeKey12);
     msg='';
   }catch(error){
     msg=error.message;
   }  
-  equals(SC.Record.BAD_STATE_ERROR.message, msg, 
+  equals(SC.Record.BAD_STATE_ERROR.toString(), msg, 
     "should throw the following error ");
-  
+
   store.dataSourceDidDestroy(storeKey13);
   status = store.readStatus( storeKey13);
   equals(status, SC.Record.DESTROYED_CLEAN, "the status should have changed to DESTROYED_CLEAN.");
-  
+
 });
 
 
 test("Confirm that dataSourceDidError switched the records to the right states", function() {
   var msg='', status;
   try{
-    store.dataSourceDidError(storeKey14, SC.Record.BAD_STATE_ERROR);  
+    store.dataSourceDidError(storeKey14, SC.Record.BAD_STATE_ERROR);
     msg='';
   }catch(error){
     msg = error.message;
   }
-  equals(SC.Record.BAD_STATE_ERROR.message, msg, 
+  equals(SC.Record.BAD_STATE_ERROR.toString(), msg, 
     "should throw the following error ");
 
   store.dataSourceDidError(storeKey15, SC.Record.BAD_STATE_ERROR);
   status = store.readStatus( storeKey15);
-  equals(status, SC.Record.ERROR, 
+  equals(status, SC.Record.ERROR,
     "the status shouldn't have changed.");
 });
 
@@ -272,7 +296,7 @@ test("Confirm that errors passed to dataSourceDidError make it into the recordEr
   } catch (error) {
     msg = error.message;
   }
- 
+
   equals(store.recordErrors[storeKey16], SC.Record.GENERIC_ERROR,
     "recordErrors[storeKey] should be the right error object");
 });

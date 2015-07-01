@@ -71,12 +71,16 @@ SC.DelegateSupport = {
 
     @param {Object} delegate a delegate object.  May be null.
     @param {String} methodName a method name
-    @param {Object...} args (OPTIONAL) any additional arguments
+    @param {Object...} [args...] any additional arguments
 
     @returns {Object} value returned by delegate
   */
-  invokeDelegateMethod: function(delegate, methodName, args) {
-    args = SC.A(arguments); args = args.slice(2, args.length) ;
+  invokeDelegateMethod: function(delegate, methodName) {
+    // Fast arguments access.
+    // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
+    var args = new Array(arguments.length - 2); //  SC.A(arguments).slice(2)
+    for (var i = 0, len = args.length; i < len; i++) { args[i] = arguments[i + 2]; }
+
     if (!delegate || !delegate[methodName]) delegate = this ;
 
     var method = delegate[methodName];

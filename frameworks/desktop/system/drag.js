@@ -108,7 +108,7 @@ SC.View.reopen(
     - `dataSource` --  Optional object that will provide the data for the drag to
       be consumed by the drop target.  If you do not pass this parameter or the
       data hash, then the source object will be used if it implements the
-      SC.DragDataSource protocol.
+      SC.DragDataSourceProtocol protocol.
 
     - `anchorView` -- if you pass this optional view, then the drag will only be
       allowed to happen within this view.  The ghostView will actually be added
@@ -294,7 +294,7 @@ SC.Drag = SC.Object.extend(
     a drag dynamically.  The data source can and often is the drag source
     object itself.
 
-    Data Source objects must comply with the `SC.DragDataSource` interface.  If
+    Data Source objects must comply with the `SC.DragDataSourceProtocol` interface.  If
     you do not want to implement this interface, you can provide the data
     directly with the data property.
 
@@ -303,7 +303,7 @@ SC.Drag = SC.Object.extend(
     these properties.
 
     @readOnly
-    @type SC.DragDataSource
+    @type SC.DragDataSourceProtocol
   */
   dataSource: null,
 
@@ -455,9 +455,17 @@ SC.Drag = SC.Object.extend(
     else {
       this._endDrag();
     }
-    // notify the source that everything has completed
-    var source = this.source;
-    if (source && source.dragDidEnd) source.dragDidEnd(this, loc, op);
+
+    var source = this.get('source');
+    if (source) {
+      // notify the source that the drag succeeded
+      if (source.dragDidSucceed && op !== SC.DRAG_NONE) source.dragDidSucceed(this, loc, op);
+      // notify the source that the drag was cancelled
+      else if (source.dragDidCancel && op === SC.DRAG_NONE) source.dragDidCancel(this, loc, op);
+
+      // always notify the source that everything has completed
+      if (source.dragDidEnd) source.dragDidEnd(this, loc, op);
+    }
   },
 
   // ..........................................
@@ -694,7 +702,13 @@ SC.Drag = SC.Object.extend(
 
       // Animate the ghost view back to its original position; destroy after.
       this.ghostView.animate(slidebackLayout, 0.5, this, function () {
-        this.invokeNext(this._endDrag);
+        this.invokeNext(function() {
+          // notify the source that slideback has completed
+          var source = this.get('source');
+          if (this.get('slideBack') && source && source.dragSlideBackDidEnd) source.dragSlideBackDidEnd(this);
+
+          this._endDrag();
+        });
       });
 
     }
@@ -1040,7 +1054,7 @@ SC.Drag.mixin(
     isDropTarget property set to `YES`.  You generally will not need to call it
     yourself.
 
-    @param {SC.View} target a view implementing the SC.DropTarget protocol
+    @param {SC.View} target a view implementing the SC.DropTargetProtocol protocol
   */
   addDropTarget: function (target) {
     this._dropTargets[SC.guidFor(target)] = target;

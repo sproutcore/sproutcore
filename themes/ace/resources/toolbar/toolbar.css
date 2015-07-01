@@ -2,7 +2,7 @@
 
 $theme.toolbar {
   @include box-shadow(rgba(0,0,0,0.3) 0 0 2px);
-  @include slice(toolbar.png, $width: 1, $repeat: repeat-x);
+  @include slice(toolbar_44px.png, $width: 1, $repeat: repeat-x);
   border-color: #999;
   border-style: solid;
   color: #505050;

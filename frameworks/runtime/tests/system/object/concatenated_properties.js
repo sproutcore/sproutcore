@@ -24,7 +24,7 @@
 
     var values = obj.get('values'),
         expected = ['a', 'b', 'c', 'd', 'e', 'f'];
-    ok(values.isEqual(expected), "should concatenate values property (expected: %@, got: %@)".fmt(expected, values));
+    same(values, expected, "should concatenate values property (expected: %@, got: %@)".fmt(expected, values));
   });
 
   test("concatenates subclasses", function() {
@@ -35,7 +35,7 @@
 
     var values = obj.get('values'),
         expected = ['a', 'b', 'c', 'd', 'e', 'f'];
-    ok(values.isEqual(expected), "should concatenate values property (expected: %@, got: %@)".fmt(expected, values));
+    same(values, expected, "should concatenate values property (expected: %@, got: %@)".fmt(expected, values));
   });
 
   test("concatenates reopen", function() {
@@ -46,7 +46,7 @@
 
     var values = obj.get('values'),
         expected = ['a', 'b', 'c', 'd', 'e', 'f'];
-    ok(values.isEqual(expected), "should concatenate values property (expected: %@, got: %@)".fmt(expected, values));
+    same(values, expected, "should concatenate values property (expected: %@, got: %@)".fmt(expected, values));
   });
 
   test("concatenates mixin", function() {
@@ -60,7 +60,7 @@
 
     var values = obj.get('values'),
         expected = ['a', 'b', 'c', 'd', 'e', 'f'];
-    ok(values.isEqual(expected), "should concatenate values property (expected: %@, got: %@)".fmt(expected, values));
+    same(values, expected, "should concatenate values property (expected: %@, got: %@)".fmt(expected, values));
   });
 
   test("concatenates reopen, subclass, and instance", function() {
@@ -70,7 +70,7 @@
 
     var values = obj.get('values'),
         expected = ['a', 'b', 'c', 'd', 'e', 'f'];
-    ok(values.isEqual(expected), "should concatenate values property (expected: %@, got: %@)".fmt(expected, values));
+    same(values, expected, "should concatenate values property (expected: %@, got: %@)".fmt(expected, values));
   });
 
 

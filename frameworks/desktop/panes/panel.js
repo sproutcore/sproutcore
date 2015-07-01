@@ -199,16 +199,18 @@ SC.PanelPane = SC.Pane.extend(
 
   /** @private - if isModal state changes, update pane state if needed. */
   _isModalDidChange: function() {
-    var pane, isModal = this.get('isModal');
+    var modalPane,
+        isModal = this.get('isModal');
+
     if (isModal) {
-      if (!this._isShowingModal && this.get('viewState') & SC.CoreView.IS_SHOWN && (pane = this._modalPane())) {
+      if (!this._isShowingModal && (modalPane = this._modalPane())) {
         this._isShowingModal = YES;
-        pane.paneWillAppend(this);
+        modalPane.paneWillAppend(this);
       }
     } else {
-      if (this._isShowingModal && (pane = this._modalPane())) {
-        this._isShowingModal = NO ;
-        pane.paneDidRemove(this);
+      if (this._isShowingModal && (modalPane = this._modalPane())) {
+        this._isShowingModal = NO;
+        modalPane.paneDidRemove(this);
       }
     }
   }.observes('isModal'),

@@ -199,13 +199,13 @@ SC.AutoResize = {
     @private
     Begins observing the auto resize field.
   */
+  // @if (debug)
   initMixin: function() {
-    // @if (debug)
     if (!this.get('supportsAutoResize')) {
       throw new Error("View `%@` does not support automatic resize. See documentation for SC.AutoResize".fmt(this));
     }
-    // @endif
   },
+  // @endif
 
   /**
     If this property is provided, all views that share the same value for this property will be resized as a batch for increased performance.
@@ -220,16 +220,22 @@ SC.AutoResize = {
   scheduleMeasurement: function() {
     var batchResizeId = this.get('batchResizeId');
 
-    // only measure if we are visible, active, and the text or style actually changed
-    if (!this.get('shouldMeasureSize') || !this.get('isVisibleInWindow') || (this.get('autoResizeText') === this._lastMeasuredText && batchResizeId === this._lastMeasuredId)) return;
+    // only measure if we are visible, active, and the text or style or maxWidth or maxHeight actually changed
+    if (!this.get('shouldMeasureSize') ||
+        !this.get('isVisibleInWindow') ||
+        (this.get('autoResizeText') === this._lastMeasuredText && batchResizeId === this._lastMeasuredId && this.get('maxHeight') === this._lastMeasuredMaxHeight && this.get('maxWidth') === this._lastMeasuredMaxWidth)) {
+        return;
+    }
 
     // batchResizeId is allowed to be undefined; views without an id will just
     // get measured one at a time
     SC.AutoResizeManager.scheduleMeasurementForView(this, batchResizeId);
-  }.observes('isVisibleInWindow', 'shouldMeasureSize', 'autoResizeText', 'batchResizeId'),
+  }.observes('isVisibleInWindow', 'shouldMeasureSize', 'autoResizeText', 'batchResizeId', 'maxWidth', 'maxHeight'),
 
+  /** @private */
   _lastMeasuredText: null,
 
+  /** @private */
   _cachedMetrics: function(key, value) {
     if(!this.get('shouldCacheSizes')) return;
 
@@ -250,11 +256,12 @@ SC.AutoResize = {
     @param batch For internal use during batch resizing.
   */
   measureSize: function(batch) {
-    var metrics, layer = this.get('autoResizeLayer'), autoResizeText = this.get('autoResizeText'),
+    var metrics, layer = this.get('autoResizeLayer'),
+        autoResizeText = this.get('autoResizeText'),
         ignoreEscape = !this.get('escapeHTML'),
         batchResizeId = this.get('batchResizeId'),
-        cachedMetrics = this.get('_cachedMetrics'),
-        maxFontSize = this.get('maxFontSize');
+        cachedMetrics = this.get('_cachedMetrics');
+        // maxFontSize = this.get('maxFontSize');
 
     if (!layer) return;
 
@@ -294,6 +301,8 @@ SC.AutoResize = {
     // set the measured value so we can avoid extra measurements in the future
     this._lastMeasuredText = autoResizeText;
     this._lastMeasuredId = batchResizeId;
+    this._lastMeasuredMaxWidth = this.get('maxWidth');
+    this._lastMeasuredMaxHeight = this.get('maxHeight');
 
     return metrics;
   },
@@ -318,7 +327,11 @@ SC.AutoResize = {
     // layer. This way, the height will grow appropriately to fit the target as
     // text *wraps* within the current width.
     if (!this.get('shouldResizeWidth')) {
-      layer.style.maxWidth = $(layer).width() + 'px';
+      layer.style.maxWidth = $(layer).outerWidth() + 'px';
+    }
+
+    if (this.get('shouldResizeWidth') && this.get('maxWidth')) {
+      layer.style.maxWidth = this.get('maxWidth') + 'px';
     }
   },
 
@@ -353,7 +366,8 @@ SC.AutoResize = {
         // the frame will be truncated
         width = frame.width - 1, height = frame.height - 1,
         measured = this.get('measuredSize'),
-        mWidth = measured.width, mHeight = measured.height;
+        mWidth = measured.width, mHeight = measured.height,
+        actual;
 
     // figure out and apply padding to the width/height
     if(SC.typeOf(padding) === SC.T_NUMBER) {
@@ -382,7 +396,6 @@ SC.AutoResize = {
       var xProportion = width / mWidth, yProportion = height / mHeight,
 
           guestimate = Math.floor(maxFontSize * Math.min(xProportion, yProportion)),
-          actual,
 
           classNames = this.get('classNames'),
           ignoreEscape = !this.get('escapeHTML'),
@@ -472,7 +485,7 @@ SC.AutoResize = {
 
     TODO: consider making the measurement state a formal SC.View state
   */
-  _transitionIn: function (original) {
+  _transitionIn: function (original, inPlace) {
     // In order to allow views to measure and adjust themselves on append, we
     // can't transition until after the measurement is done.
     var preTransitionOpacity = this.get('layout').opacity || 1;
@@ -480,7 +493,7 @@ SC.AutoResize = {
     this.adjust('opacity', 0);
     this.invokeNext(function () {
       this.adjust('opacity', preTransitionOpacity);
-      original();
+      original(inPlace);
     });
   }.enhance()
 
@@ -515,7 +528,7 @@ SC.AutoResizeManager = {
   scheduleMeasurementForView: function(view) {
     this.measurementQueue.add(view);
 
-    SC.RunLoop.currentRunLoop.invokeLast(this.doBatchResize);
+    SC.RunLoop.currentRunLoop.invokeOnce(this.doBatchResize);
   },
 
   /**
@@ -587,4 +600,5 @@ SC.AutoResizeManager = {
       }
     }
   }
+
 };

@@ -84,48 +84,6 @@ SC.mixin(SC.browser,
   },
 
   /**
-    @deprecated Since 1.7. Use SC.browser.compare(version, otherVersion) instead.
-
-    Pass any number of arguments, and this will check them against the browser
-    version split on ".".  If any of them are not equal, return the inequality.
-    If as many arguments as were passed in are equal, return 0.  If something
-    is NaN, return 0.
-  */
-
-  // Deprecation Note:
-  //
-  // This function forces the comparison against the value of
-  // SC.browser.version, but the old value of SC.browser.version would
-  // occasionally be the browser's version or the layout engine's version,
-  // which could cause unexpected results.  As well, there was no way to
-  // compare the actual browser version or OS version.
-  compareVersion: function () {
-    //@if(debug)
-    SC.warn('Developer Warning: SC.browser.compareVersion() has been deprecated.  Please ' +
-        'use SC.browser.compare() instead.  Example: ' +
-        'SC.browser.compareVersion(16,0,912) < 0 becomes ' +
-        'SC.browser.compare(SC.browser.engineVersion, \'16.0.912\').');
-    //@endif
-
-    if (this._versionSplit === undefined) {
-      var coerce = function (part) {
-        return Number(part.match(/^[0-9]+/));
-      };
-      this._versionSplit = SC.A(this.version.split('.')).map(coerce);
-    }
-
-    var tests = SC.A(arguments).map(Number);
-    for (var i = 0; i < tests.length; i++) {
-      var check = this._versionSplit[i] - tests[i];
-      if (isNaN(check)) return 0;
-      if (check !== 0) return check;
-    }
-
-    return 0;
-  },
-
-
-  /**
     This simple method allows you to more safely use experimental properties and
     methods in current and future browsers.
 
@@ -180,19 +138,6 @@ SC.mixin(SC.browser,
     @returns {string} The name of the property or method on the target or SC.UNSUPPORTED if no method found.
   */
   experimentalNameFor: function (target, standardName, testValue) {
-    var cachedNames = this._cachedNames,
-      targetGuid = SC.guidFor(target);
-
-    // Fast path & cache initialization.
-    if (!cachedNames) {
-      cachedNames = this._cachedNames = {};
-      cachedNames[targetGuid] = {};
-    } else if (!cachedNames[targetGuid]) {
-      cachedNames[targetGuid] = {};
-    } else if (cachedNames[targetGuid][standardName]) {
-      return cachedNames[targetGuid][standardName];
-    }
-
     // Test the property name.
     var ret = standardName;
 
@@ -219,9 +164,6 @@ SC.mixin(SC.browser,
         }
       }
     }
-
-    // Cache the experimental property name (even SC.UNSUPPORTED) for quick repeat access.
-    cachedNames[targetGuid][standardName] = ret;
 
     return ret;
   },
@@ -262,13 +204,28 @@ SC.mixin(SC.browser,
     @returns {string} Future-proof style name for use in the current browser or SC.UNSUPPORTED if no style support found.
   */
   experimentalStyleNameFor: function (standardStyleName, testValue) {
-    // Test the style name.
-    var el = this._testEl;
+    var cachedNames = this._sc_experimentalStyleNames,
+        ret;
 
-    // Create a test element and cache it for repeated use.
-    if (!el) { el = this._testEl = document.createElement("div"); }
+    // Fast path & cache initialization.
+    if (!cachedNames) {
+      cachedNames = this._sc_experimentalStyleNames = {};
+    }
 
-    return this.experimentalNameFor(el.style, standardStyleName, testValue);
+    if (cachedNames[standardStyleName]) {
+      ret = cachedNames[standardStyleName];
+    } else {
+      // Test the style name.
+      var el = this._testEl;
+
+      // Create a test element and cache it for repeated use.
+      if (!el) { el = this._testEl = document.createElement("div"); }
+
+      // Cache the experimental style name (even SC.UNSUPPORTED) for quick repeat access.
+      ret = cachedNames[standardStyleName] = this.experimentalNameFor(el.style, standardStyleName, testValue);
+    }
+
+    return ret;
   },
 
   /**

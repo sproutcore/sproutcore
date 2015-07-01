@@ -70,7 +70,7 @@ SC.StaticContentView = SC.View.extend(
     automatically.
   */
   contentLayoutDidChange: function() {
-    this._viewFrameDidChange();
+    this._sc_viewFrameDidChange();
   },
 
   // ..........................................................
@@ -103,24 +103,14 @@ SC.StaticContentView = SC.View.extend(
         x: 0,
         y: 0,
         width: rect.width,
-        originalWidth: rect.width,
-        height: rect.height,
-        originalHeight: rect.height,
-        scale: 1,
-        transformOriginX: 0.5,
-        transformOriginY: 0.5
+        height: rect.height
       };
     } else {
       return {
         x: 0,
         y: 0,
         width: layer.clientWidth,
-        originalWidth: rect.width,
-        height: layer.clientHeight,
-        originalHeight: rect.height,
-        scale: 1,
-        transformOriginX: 0.5,
-        transformOriginY: 0.5
+        height: layer.clientHeight
       };
     }
   }.property('content').cacheable(),

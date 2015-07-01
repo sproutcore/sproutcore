@@ -194,17 +194,14 @@ SC.MIXED_STATE = '__MIXED__';
 
    * `dataSourceDidFetchQuery(query)` &mdash; the data source must call this when
      it has completed fetching any related data for the query. This returns the
-     query results (i.e. the record array) status into a `READY` state.
+     query results (i.e. the record array) status into a `READY` state. If the query is a 'remote'
+     type, the ordered array of store keys representing the results from the server must be passed
+     as a second argument.
    * `dataSourceDidErrorQuery(query, error)` &mdash; the data source should call
      this if it encounters an error in executing the query. This puts the query
      results into an `ERROR` state.
    * `dataSourceDidCancelQuery(query)` &mdash; the data source should call this
      if loading the results is cancelled.
-
-  In addition to these callbacks, the method `loadQueryResults(query, storeKey)`
-  is used by data sources when handling remote queries. This method is similar to
-  `dataSourceDidFetchQuery()`, except that you also provide an array of storeKeys
-  (or a promise to provide store keys) that comprises the result set.
 
   @extend SC.Object
   @since SproutCore 1.0
@@ -248,13 +245,11 @@ SC.DataSource = SC.Object.extend( /** @scope SC.DataSource.prototype */ {
     server instead of from memory.  Usually you will only need to use this
     type of query when loading large amounts of data from the server.
 
-    Like Local queries, to fetch a remote query you will need to load any data
+    Like local queries, to fetch a remote query you will need to load any data
     you need to fetch from the server and add the records to the store.  Once
     you are finished loading this data, however, you must also call
-    SC.Store#loadQueryResults() to actually set an array of storeKeys that
-    represent the latest results from the server.  This will implicitly also
-    call datasSourceDidFetchQuery() so you don't need to call this method
-    yourself.
+    SC.Store#dataSourceDidFetchQuery() with the array of storeKeys that
+    represent the latest results from the server.
 
     If you want to support incremental loading from the server for remote
     queries, you can do so by passing a SC.SparseArray instance instead of

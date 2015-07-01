@@ -37,21 +37,21 @@
 SC.ScrollerView = SC.View.extend(
 /** @scope SC.ScrollerView.prototype */ {
 
-  /**
+  /** @private
     @type Array
     @default ['sc-scroller-view']
     @see SC.View#classNames
   */
   classNames: ['sc-scroller-view'],
 
-  /**
+  /** @private
     @type Array
     @default ['thumbPosition', 'thumbLength', 'controlsHidden']
     @see SC.View#displayProperties
   */
   displayProperties: ['thumbPosition', 'thumbLength', 'controlsHidden'],
 
-  /**
+  /** @private
     The WAI-ARIA role for scroller view.
 
     @type String
@@ -76,12 +76,6 @@ SC.ScrollerView = SC.View.extend(
   */
   shouldScrollToClick: NO,
 
-
-  /** @private
-    The in-touch-scroll value.
-  */
-  _touchScrollValue: NO,
-
   /**
     The value of the scroller.
 
@@ -89,29 +83,21 @@ SC.ScrollerView = SC.View.extend(
 
     @field
     @type Number
-    @observes maximum
-    @observes minimum
+    @default null
   */
-  value: function (key, val) {
-    var minimum = this.get('minimum');
-    if (val !== undefined) {
-      this._scs_value = val;
-    }
-
-    val = this._scs_value || minimum; // default value is at top/left
-    return Math.max(Math.min(val, this.get('maximum')), minimum);
-  }.property('maximum', 'minimum').cacheable(),
+  value: null,
 
   /**
+    The displayed value of the scroller.
+
+    This is the value of the scroller constrained within the minimum and maximum values.
+
     @type Number
     @observes value
   */
   displayValue: function () {
-    var ret;
-    if (this.get("_touchScrollValue")) ret = this.get("_touchScrollValue");
-    else ret = this.get("value");
-    return ret;
-  }.property("value", "_touchScrollValue").cacheable(),
+    return Math.max(Math.min(this.get("value"), this.get('maximum')), this.get('minimum'));
+  }.property("value", 'minimum', 'maximum').cacheable(),
 
   /**
     The portion of the track that the thumb should fill. Usually the
@@ -134,9 +120,9 @@ SC.ScrollerView = SC.View.extend(
     When set less than the height of the scroller, the scroller is disabled.
 
     @type Number
-    @default 100
+    @default 0
   */
-  maximum: 100,
+  maximum: 0,
 
   /**
     The minimum offset value for the scroller.  This will be used to calculate
@@ -326,6 +312,8 @@ SC.ScrollerView = SC.View.extend(
 
       //addressing accessibility
       context.setAttr('aria-valuenow', this.get('value'));
+      if (this.didChangeFor('render-min', 'minimum')) context.setAttr('aria-valuemin', this.get('minimum'));
+      if (this.didChangeFor('render-max', 'maximum')) context.setAttr('aria-valuemax', this.get('maximum'));
     }
   },
 
@@ -349,35 +337,6 @@ SC.ScrollerView = SC.View.extend(
     }
   },
 
-  /** @private */
-  touchScrollDidStart: function (value) {
-    this.set("_touchScrollValue", value);
-  },
-
-  /** @private */
-  touchScrollDidEnd: function (value) {
-    SC.run(function () {
-      this.set("_touchScrollValue", NO);
-    }, this);
-  },
-
-  /* @private Internal property used to track the rate of touch scroll change events. */
-  _lastTouchScrollTime: null,
-
-  /** @private */
-  touchScrollDidChange: function (value) {
-    // Fast path!  Don't try to update too soon.
-    if (Date.now() - this._lastTouchScrollTime < 30) { return; }
-
-    // TODO: perform a raw update that doesn't require the run loop.
-    SC.run(function () {
-      this.set("_touchScrollValue", value);
-    }, this);
-
-    // Track the last time we updated.
-    this._lastTouchScrollTime = Date.now();
-  },
-
   // ..........................................................
   // THUMB MANAGEMENT
   //
@@ -395,20 +354,90 @@ SC.ScrollerView = SC.View.extend(
 
     @param {Number} position the position of the thumb in pixels
   */
-  adjustThumbPosition: function (thumb, position) {
-    // Don't touch the DOM if the position hasn't changed
-    if (this._thumbPosition === position) return;
+  adjustThumbPosition: function (thumb, thumbPosition) {
+    var transformAttribute = SC.browser.experimentalCSSNameFor('transform'),
+        thumbEl = thumb[0];
 
-    switch (this.get('layoutDirection')) {
-    case SC.LAYOUT_VERTICAL:
-      thumb.css('top', position);
-      break;
-    case SC.LAYOUT_HORIZONTAL:
-      thumb.css('left', position);
-      break;
+    // Don't touch the DOM if the position hasn't changed.
+    if (this._thumbPosition !== thumbPosition) {
+      // Consider that the parent view may be animating its final position, then we need to also animate
+      // our final position.
+      var parentView = this.get('parentView'),
+        parentIsAnimating = parentView._sc_isAnimating;
+
+      if (SC.platform.supportsCSSTransitions) {
+        var transitionStyle = SC.browser.experimentalStyleNameFor('transition');
+
+        if (parentIsAnimating) {
+          var duration = parentView._sc_animationDuration,
+            timing = parentView._sc_animationTiming.toString();
+
+          // Will use translation transform to position thumb.
+          if (SC.platform.supportsCSSTransforms) {
+            thumbEl.style[transitionStyle] = transformAttribute + ' ' + duration + 's ' + timing;
+
+          // Will use top/left style to position thumb.
+          } else {
+            switch (this.get('layoutDirection')) {
+            case SC.LAYOUT_VERTICAL:
+              thumbEl.style[transitionStyle] = 'top ' + duration + 's ' + timing;
+              break;
+            case SC.LAYOUT_HORIZONTAL:
+              thumbEl.style[transitionStyle] = 'left ' + duration + 's ' + timing;
+              break;
+            }
+          }
+
+        // No duration, clear any previous transition.
+        } else {
+          thumbEl.style[transitionStyle] = '';
+        }
+      }
+
+
+      // Position the thumb.
+      var transformStyle;
+      switch (this.get('layoutDirection')) {
+      case SC.LAYOUT_VERTICAL:
+
+        // Use translation transform to position thumb.
+        if (SC.platform.supportsCSSTransforms) {
+          transformStyle = 'translateX(0px) translateY(' + thumbPosition + 'px)';
+
+          // TODO: Is this a necessary check?
+          if (SC.platform.supportsCSS3DTransforms) { transformStyle += ' translateZ(0px)'; }
+
+          thumbEl.style[transformAttribute] = transformStyle;
+
+        // Use top style to position thumb.
+        } else {
+          thumbEl.style.top = thumbPosition;
+        }
+
+        break;
+
+      case SC.LAYOUT_HORIZONTAL:
+        // Use translation transform to position thumb.
+        if (SC.platform.supportsCSSTransforms) {
+
+          transformStyle = 'translateX(' + thumbPosition + 'px) translateY(0px)';
+
+          // TODO: Is this a necessary check?
+          if (SC.platform.supportsCSS3DTransforms) { transformStyle += ' translateZ(0px)'; }
+
+          thumbEl.style[transformAttribute] = transformStyle;
+
+        // Use left style to position thumb.
+        } else {
+          thumbEl.style.left = thumbPosition;
+        }
+
+        break;
+      }
     }
 
-    this._thumbPosition = position;
+    // Cache these values to check for changes.
+    this._thumbPosition = thumbPosition;
   },
 
   /** @private */
@@ -479,13 +508,25 @@ SC.ScrollerView = SC.View.extend(
     @property
   */
   thumbLength: function () {
-    var length;
+    var value = this.get('value'),
+        maximum = this.get('maximum'),
+        minimum = this.get('minimum'),
+        proportion = this.get('proportion'),
+        length;
 
-    length = Math.floor(this.get('trackLength') * this.get('proportion'));
+    // If the value is beyond the minimum or maximums, shrink our thumb length to represent the amount
+    // of over scroll. Do this proportionally for the best effect!
+    if (value < minimum) {
+      proportion -= (minimum - value) / maximum;
+    } else if (value > maximum) {
+      proportion -= (value - maximum) / maximum;
+    }
+
+    length = Math.floor(this.get('trackLength') * proportion);
     length = isNaN(length) ? 0 : length;
 
     return Math.max(length, this.get('minimumThumbLength'));
-  }.property('trackLength', 'proportion').cacheable(),
+  }.property('value', 'minimum', 'maximum', 'trackLength', 'proportion').cacheable(),
 
   /** @private
     The position of the thumb in the track.
@@ -494,14 +535,14 @@ SC.ScrollerView = SC.View.extend(
     @isReadOnly
   */
   thumbPosition: function () {
-    var value = this.get('displayValue'),
-        max = this.get('maximum'),
+    var displayValue = this.get('displayValue'),
+        maximum = this.get('maximum'),
         trackLength = this.get('trackLength'),
         thumbLength = this.get('thumbLength'),
         capLength = this.get('capLength'),
         capOverlap = this.get('capOverlap'), position;
 
-    position = (value / max) * (trackLength - thumbLength);
+    position = (displayValue / maximum) * (trackLength - thumbLength);
     position += capLength - capOverlap; // account for the top/left cap
 
     return Math.floor(isNaN(position) ? 0 : position);
@@ -643,7 +684,7 @@ SC.ScrollerView = SC.View.extend(
       }
 
       if (scrollToClick) {
-        this.set('value', this.valueForPosition(mousePosition - (thumbLength / 2)));
+        this.set('value', Math.min(this.get('maximum'), Math.max(this.get('minimum'), this.valueForPosition(mousePosition - (thumbLength / 2)))));
 
         // and start a normal mouse down
         thumbPosition = this.get('thumbPosition');
@@ -745,11 +786,11 @@ SC.ScrollerView = SC.View.extend(
         // Too bad.
         if (evt.shiftKey) delta = -delta;
 
-        this.set('value', Math.round(this._valueAtDragStart + delta * 2));
+        this.set('value', Math.min(this.get('maximum'), Math.max(this.get('minimum'), Math.round(this._valueAtDragStart + delta * 2))));
       } else {
         thumbPosition = thumbPositionAtDragStart + delta;
         length = this.get('trackLength') - this.get('thumbLength');
-        this.set('value', Math.round((thumbPosition / length) * this.get('maximum')));
+        this.set('value', Math.min(this.get('maximum'), Math.max(this.get('minimum'), Math.round((thumbPosition / length) * this.get('maximum')))));
       }
 
     } else if (isScrollingUp || isScrollingDown) {
@@ -949,22 +990,132 @@ SC.OverlayScrollerView = SC.ScrollerView.extend(
 
   /** @private */
   adjustThumb: function (thumb, thumbPosition, thumbLength) {
-    var transformCSS = SC.browser.experimentalCSSNameFor('transform');
-    var thumbInner = this.$('.thumb-inner');
+    var transformAttribute = SC.browser.experimentalCSSNameFor('transform'),
+        thumbEl = thumb[0],
+        thumbInner = this.$('.thumb-inner'),
+        thumbInnerEl = thumbInner[0];
 
-    switch (this.get('layoutDirection')) {
-    case SC.LAYOUT_VERTICAL:
-      if (this._thumbPosition !== thumbPosition) thumb.css(transformCSS, 'translate3d(0px,' + thumbPosition + 'px,0px)');
-      if (this._thumbSize !== thumbLength) {
-        thumbInner.css(transformCSS, 'translate3d(0px,' + Math.round(thumbLength - 1044) + 'px,0px)');
+    // Don't touch the DOM if the position hasn't changed.
+    if (this._thumbPosition !== thumbPosition) {
+      // Consider that the parent view may be animating its final position, then we need to also animate
+      // our final position.
+      var parentView = this.get('parentView'),
+        parentIsAnimating = parentView._sc_isAnimating;
+
+      if (SC.platform.supportsCSSTransitions) {
+        var transitionStyle = SC.browser.experimentalStyleNameFor('transition');
+
+        if (parentIsAnimating) {
+          var duration = parentView._sc_animationDuration,
+            timing = parentView._sc_animationTiming.toString();
+
+          // Will use translation transform to position thumb.
+          if (SC.platform.supportsCSSTransforms) {
+            thumbEl.style[transitionStyle] = transformAttribute + ' ' + duration + 's ' + timing;
+
+            if (this._thumbSize !== thumbLength) {
+              thumbInnerEl.style[transitionStyle] = transformAttribute + ' ' + duration + 's ' + timing;
+            }
+
+          // Will use top/left style to position thumb.
+          } else {
+            switch (this.get('layoutDirection')) {
+            case SC.LAYOUT_VERTICAL:
+              thumbEl.style[transitionStyle] = 'top ' + duration + 's ' + timing;
+
+              if (this._thumbSize !== thumbLength) {
+                thumbInnerEl.style[transitionStyle] = 'top ' + duration + 's ' + timing;
+              }
+
+              break;
+            case SC.LAYOUT_HORIZONTAL:
+              thumbEl.style[transitionStyle] = 'left ' + duration + 's ' + timing;
+
+              if (this._thumbSize !== thumbLength) {
+                thumbInnerEl.style[transitionStyle] = 'left ' + duration + 's ' + timing;
+              }
+
+              break;
+            }
+          }
+
+        // No duration, clear any previous transition.
+        } else {
+          thumbEl.style[transitionStyle] = '';
+          thumbInnerEl.style[transitionStyle] = '';
+        }
       }
-      break;
-    case SC.LAYOUT_HORIZONTAL:
-      if (this._thumbPosition !== thumbPosition) thumb.css(transformCSS, 'translate3d(' + thumbPosition + 'px,0px,0px)');
-      if (this._thumbSize !== thumbLength) {
-        thumbInner.css(transformCSS, 'translate3d(' + Math.round(thumbLength - 1044) + 'px,0px,0px)');
+
+
+      // Position the thumb.
+      var transformStyle;
+      switch (this.get('layoutDirection')) {
+      case SC.LAYOUT_VERTICAL:
+
+        // Use translation transform to position thumb.
+        if (SC.platform.supportsCSSTransforms) {
+          transformStyle = 'translateX(0px) translateY(' + thumbPosition + 'px)';
+
+          // TODO: Is this a necessary check?
+          if (SC.platform.supportsCSS3DTransforms) { transformStyle += ' translateZ(0px)'; }
+
+          thumbEl.style[transformAttribute] = transformStyle;
+          // thumb.css(transformCSS, 'translate3d(0px,' + thumbPosition + 'px,0px)');
+
+          if (this._thumbSize !== thumbLength) {
+            transformStyle = 'translateX(0px) translateY(' + Math.round(thumbLength - 1044) + 'px)';
+
+            // TODO: Is this a necessary check?
+            if (SC.platform.supportsCSS3DTransforms) { transformStyle += ' translateZ(0px)'; }
+
+            // thumbInner.css(transformCSS, 'translate3d(0px,' + Math.round(thumbLength - 1044) + 'px,0px)');
+            thumbInnerEl.style[transformAttribute] = transformStyle;
+          }
+
+        // Use top style to position thumb.
+        } else {
+          thumbEl.style.top = thumbPosition;
+
+          if (this._thumbSize !== thumbLength) {
+            thumbInnerEl.style.top = Math.round(thumbLength - 1044);
+          }
+        }
+
+        break;
+
+      case SC.LAYOUT_HORIZONTAL:
+        // Use translation transform to position thumb.
+        if (SC.platform.supportsCSSTransforms) {
+
+          transformStyle = 'translateX(' + thumbPosition + 'px) translateY(0px)';
+
+          // TODO: Is this a necessary check?
+          if (SC.platform.supportsCSS3DTransforms) { transformStyle += ' translateZ(0px)'; }
+
+          thumbEl.style[transformAttribute] = transformStyle;
+          // thumb.css(transformCSS, 'translate3d(0px,' + thumbPosition + 'px,0px)');
+
+          if (this._thumbSize !== thumbLength) {
+            transformStyle = 'translateX(' + Math.round(thumbLength - 1044) + 'px) translateY(0px)';
+
+            // TODO: Is this a necessary check?
+            if (SC.platform.supportsCSS3DTransforms) { transformStyle += ' translateZ(0px)'; }
+
+            // thumbInner.css(transformCSS, 'translate3d(0px,' + Math.round(thumbLength - 1044) + 'px,0px)');
+            thumbInnerEl.style[transformAttribute] = transformStyle;
+          }
+
+        // Use left style to position thumb.
+        } else {
+          thumbEl.style.left = thumbPosition;
+
+          if (this._thumbSize !== thumbLength) {
+            thumbInnerEl.style.left = Math.round(thumbLength - 1044);
+          }
+        }
+
+        break;
       }
-      break;
     }
 
     // Cache these values to check for changes.
@@ -1005,11 +1156,10 @@ SC.OverlayScrollerView = SC.ScrollerView.extend(
                     '<div class="cap"></div>');
       this.renderButtons(context, this.get('hasButtons'));
       this.renderThumb(context, thumbPosition, thumbLength);
-    }
 
-    else {
-      // The HTML has already been generated, so all we have to do is
-      // reposition and resize the thumb
+    // The HTML has already been generated, so all we have to do is
+    // reposition and resize the thumb
+    } else {
 
       // If we aren't displaying controls don't bother
       if (this.get('controlsHidden')) return;

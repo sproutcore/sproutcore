@@ -150,6 +150,17 @@ test("adding a pane twice should have no effect", function() {
   pane.destroy();
 });
 
+test("SC.Pane#append correctly returns the receiver.", function() {
+  var pane = SC.Pane.create(),
+    ret = pane.append();
+
+  equals(pane, ret, 'SC.Pane#append returns the receiver');
+
+  // Clean up.
+  pane.destroy();
+});
+
+
 test("adding/remove/adding pane", function() {
   var pane = SC.Pane.create();
   var elem1 = Q$('body').get(0), elem2 = Q$('#appendtest').get(0);
@@ -181,7 +192,7 @@ test("removeFromParent throws an exception", function() {
     pane.append();
     pane.removeFromParent();
   } catch(e) {
-    exceptionCaught = (e instanceof SC.Error);
+    exceptionCaught = true;
   } finally {
     pane.remove();
   }
@@ -223,7 +234,7 @@ test("updates frame and clippingFrame when loading MainPane", function() {
 
   // needs a fixed layout size to make sure the sizes stay constant
   var pane = SC.MainPane.create();
-  var w = SC.RootResponder.responder.computeWindowSize().width;
+  var windowWidth = SC.RootResponder.responder.computeWindowSize().width;
 
   // add the pane to the main window.  should resize the frames
   SC.run(function() {
@@ -231,8 +242,8 @@ test("updates frame and clippingFrame when loading MainPane", function() {
   });
 
   // should equal window size
-  equals(pane.get('frame').width, w, 'frame width should have changed');
-  equals(pane.get('clippingFrame').width, w, 'clippingFrame width should have changed');
+  equals(pane.get('frame').width, windowWidth, 'frame width should have changed');
+  equals(pane.get('clippingFrame').width, windowWidth, 'clippingFrame width should have changed');
 
   // Clean up.
   pane.destroy();

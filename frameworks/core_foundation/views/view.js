@@ -99,6 +99,14 @@ SC.CoreView.reopen(
   */
   createdByParent: false,
 
+  /** @deprecated Version 1.11.0 Please use parentView instead. */
+  owner: function () {
+    //@if(debug)
+    SC.warn("Developer Warning: The `owner` property of SC.View has been deprecated in favor of the `parentView`, which is the same value. Please use `parentView`.");
+    //@endif
+    return this.get('parentView');
+  }.property('parentView').cacheable(),
+
   /**
     The current pane.
 
@@ -404,7 +412,9 @@ SC.CoreView.reopen(
     @returns {SC.View} receiver
   */
   createLayer: function () {
-    this._doRender();
+    if (!this.get('_isRendered')) {
+      this._doRender();
+    }
 
     return this;
   },
@@ -433,7 +443,9 @@ SC.CoreView.reopen(
       this._doDetach();
     }
 
-    this._doDestroyLayer();
+    if (this.get('_isRendered')) {
+      this._doDestroyLayer();
+    }
 
     return this;
   },
@@ -957,27 +969,6 @@ SC.CoreView.reopen(
   },
 
   /**
-    Wakes up the view. The default implementation immediately syncs any
-    bindings, which may cause the view to need its display updated. You
-    can override this method to perform any additional setup. Be sure to
-    call sc_super to setup bindings and to call awake on childViews.
-
-    It is best to awake a view before you add it to the DOM.  This way when
-    the DOM is generated, it will have the correct initial values and will
-    not require any additional setup.
-
-    @returns {void}
-  */
-  awake: function () {
-    sc_super();
-    var childViews = this.get('childViews'), len = childViews.length, idx;
-    for (idx = 0; idx < len; ++idx) {
-      if (!childViews[idx]) { continue; }
-      childViews[idx].awake();
-    }
-  },
-
-  /**
     Frame describes this view's current bounding rect, relative to its parent view. You
     can use this, for example, to reliably access a width for a view whose layout is
     defined with left and right. (Note that width and height values are calculated in
@@ -1013,12 +1004,10 @@ SC.CoreView.reopen(
       /*
         TODO Can probably have some better width/height values - CC
         FIXME This will probably not work right with borders - PW
-        FIXME This assumes and reports a scale of 1 - DCP
       */
-      f.width = f.originalWidth = layer.offsetWidth;
-      f.height = f.originalHeight = layer.offsetHeight;
-      f.scale = 1;
-      f.transformOriginX = f.transformOriginY = 0.5;
+      f.width = layer.offsetWidth;
+      f.height = layer.offsetHeight;
+
       return f;
     }
 
@@ -1031,14 +1020,12 @@ SC.CoreView.reopen(
   },
 
   /** @private Call the method recursively on all child views. */
-  _callOnChildViews: function (methodName, context) {
+  _callOnChildViews: function (methodName, isTopDown, context) {
     var childView,
       childViews = this.get('childViews'),
       method,
       shouldContinue;
 
-    // Could have support for arguments, but accessing Arguments and using apply is slower than using call, so avoid it.
-    // args = SC.$A(arguments).slice(1);
     for (var i = childViews.length - 1; i >= 0; i--) {
       childView = childViews[i];
 
@@ -1047,12 +1034,20 @@ SC.CoreView.reopen(
 
       // Look up the method on the child.
       method = childView[methodName];
-      // method.apply(childView, args);  This is slower.
-      shouldContinue = method.call(childView, context);
+
+      // Call the method on this view *before* its children.
+      if (isTopDown === undefined || isTopDown) {
+        shouldContinue = method.call(childView, context);
+      }
 
       // Recurse.
       if (shouldContinue === undefined || shouldContinue) {
-        childView._callOnChildViews(methodName, context);
+        childView._callOnChildViews(methodName, isTopDown, context);
+      }
+
+      // Call the method on this view *after* its children.
+      if (isTopDown === false) {
+        method.call(childView, context);
       }
     }
   },
@@ -1074,11 +1069,10 @@ SC.CoreView.reopen(
     // FAST PATH: No frame, no clipping frame.
     if (!f) return null;
 
+    /*jshint eqnull:true */
     var scale = (f.scale == null) ? 1 : f.scale,
-        scaleIsArray = NO,
         pv = this.get('parentView'),
         pcf = pv ? pv.get('clippingFrame') : null,
-        sf, spcf, originX, originY, deltaH, deltaW,
         ret;
 
     // FAST PATH: No parent clipping frame, no change. (The origin and scale are reset from parent view's
@@ -1118,7 +1112,7 @@ SC.CoreView.reopen(
     This method is invoked whenever the clippingFrame changes, notifying
     each child view that its clippingFrame has also changed.
   */
-  _sc_view_clippingFrameDidChange: function () {
+  _sc_clippingFrameDidChange: function () {
     this.notifyPropertyChange('clippingFrame');
   },
 
@@ -1142,7 +1136,9 @@ SC.CoreView.reopen(
     @returns {SC.View} receiver
   */
   removeChild: function (view, immediately) {
-    view._doDetach(immediately);
+    if (view.get('isAttached')) {
+      view._doDetach(immediately);
+    }
 
     // If the view will transition out, wait for the transition to complete
     // before orphaning the view entirely.
@@ -1173,11 +1169,13 @@ SC.CoreView.reopen(
     @returns {SC.View} receiver
   */
   removeChildAndDestroy: function (view, immediately) {
-    view._doDetach(immediately);
+    if (view.get('isAttached')) {
+      view._doDetach(immediately);
+    }
 
     // If the view will transition out, wait for the transition to complete
     // before destroying the view entirely.
-    if (view.get('transitionOut') && !immediately) {
+    if (view.get('isAttached') && view.get('transitionOut') && !immediately) {
       view.addObserver('isAttached', this, this._destroyChildView);
     } else {
       view.destroy(); // Destroys the layer and the view.
@@ -1301,11 +1299,15 @@ SC.CoreView.reopen(
     } else {
       // Immediately remove the layer if attached (ignores transitionOut). This
       // will detach the layer for all child views as well.
-      this._doDetach(true);
+      if (this.get('isAttached')) {
+        this._doDetach(true);
+      }
 
       // Clear the layer if rendered.  This will clear all child views layer
       // references as well.
-      this._doDestroyLayer();
+      if (this.get('_isRendered')) {
+        this._doDestroyLayer();
+      }
 
       // Complete the destroy.
       this._destroy();
@@ -1328,8 +1330,6 @@ SC.CoreView.reopen(
     // Orphan the view if adopted.
     this._doOrphan();
 
-    // TODO: Deprecate owner in this sense.
-    this.set('owner', null);
     delete this.page;
   },
 
@@ -1422,8 +1422,8 @@ SC.CoreView.reopen(
       // clone the hash that was given so we do not pollute it if it's being reused
       else { attrs = SC.clone(attrs); }
 
-      // Assign the owner, parentView & page to ourself.
-      attrs.owner = attrs.parentView = this;
+      // Assign the parentView & page to ourself.
+      attrs.parentView = this;
       if (!attrs.page) { attrs.page = this.page; }
 
       // Track that we created this view.
@@ -1438,12 +1438,13 @@ SC.CoreView.reopen(
       } else {
         view = view.create(attrs);
       }
-    // Assign the parentView & owner if the view is an instance.
+    // Assign the parentView if the view is an instance.
     // TODO: This should not be accepting view instances, for the purpose of lazy code elsewhere in the framework.
     //       We should ensure users of `createChildViews` are using appendChild and other manipulation methods.
     } else {
       view.set('parentView', this);
-      view.set('owner', this);
+      view._adopted();
+
       if (!view.get('page')) { view.set('page', this.page); }
     }
 
@@ -1931,8 +1932,8 @@ SC.CoreView.unload = function () {
 
    1. They display – translating your application's state into drawing
      instructions for the web browser, and
-   2. They react – acting as first responders for incoming keyboard, mouse, and
-     touch events.
+   2. They react – acting as responders for incoming keyboard, mouse, and touch
+     events.
 
   View Basics
   ====
@@ -1944,28 +1945,28 @@ SC.CoreView.unload = function () {
   documentation for more.)
 
   Other than positioning, SproutCore relies on CSS for all your styling needs.
-  Set an array of CSS classes on the classNames property, then style them with
-  standard CSS. (SproutCore comes with Sass support built in, too.) If you have
-  a class that you want automatically added and removed as another property
-  changes, take a look at classNameBindings.
+  Set an array of CSS classes on the `classNames` property, then style them with
+  standard CSS. (SproutCore's build tools come with Sass support built in, too.)
+  If you have a class that you want automatically added and removed as another
+  property changes, take a look at `classNameBindings`.
 
   Different view classes do different things. The so-called "Big Five" view
   classes are SC.LabelView, for displaying (optionally editable, optionally
   localizable) text; SC.ButtonView, for the user to poke; SC.CollectionView
-  (most often its subclass SC.ListView) for displaying an array of content;
+  (most often as its subclass SC.ListView) for displaying an array of content;
   SC.ContainerView, for easily swapping child views in and out; and SC.ScrollView,
   for containing larger views and allowing them to be scrolled.
 
   All views live in panes (subclasses of SC.Pane, like SC.MainPane and SC.PanelPane),
-  which are views that know how to append themselves directly to the document. Panes
-  also serve as routers for events, like mouse, touch and keyboard events, that are
+  which are parentless views that know how to append themselves directly to the document.
+  Panes also serve as routers for events, like mouse, touch and keyboard events, that are
   bound for their views. (See "View Events" below for more.)
 
-  For best performance, you should define your view and pane classes inside an
-  SC.Page instance, getting them as needed with `get`. As its name suggests,
-  SC.Page's one job is to instantiate views once on demand, deferring the expensive
-  view creation process until each view is needed. Correctly using SC.Page is considered
-  an important best practice for high-performance applications.
+  For best performance, you should define your view and pane instances with `extend()`
+  inside an SC.Page instance, getting them as needed with `get`. As its name suggests,
+  SC.Page's only job is to instantiate views once when first requested, deferring the
+  expensive view creation process until each view is needed. Correctly using SC.Page is
+  considered an important best practice for high-performance applications.
 
   View Initialization
   ====
@@ -2009,7 +2010,7 @@ SC.CoreView.unload = function () {
   One of SproutCore's optimizations is application-wide event delegation: SproutCore
   handles and standardizes events for you before sending them through your view layer's
   chain of responding views. You should never need to attach event listeners to elements;
-  instead, just implement methods like `click`, `doubleClick`, `mouseEnter` and
+  instead, just implement methods like `click`, `doubleClick`, `mouseEntered` and
   `dataDragHover` on your views.
 
   Note that events generally bubble up an event's responder chain, which is made up of the
@@ -2048,13 +2049,13 @@ SC.CoreView.unload = function () {
   the mouse has entered and exited views, and sending the correct event to each view in
   the responder chain. For example, if a mouse moves within a parent view but crosses from
   one child view to another, the parent view will receive a mouseMoved event while the child
-  views will receive mouseEnter and mouseExit events.
+  views will receive mouseEntered and mouseExit events.
 
   In contrast to mouse click events, mouse movement events are called on the entire responder
   chain regardless of how you handle it along the way - a view and its parent, both implementing
   event methods, will both be notified of the event.
 
-  - `mouseEnter` -- Called when the cursor first enters a view. Called on every view that has
+  - `mouseEntered` -- Called when the cursor first enters a view. Called on every view that has
     just entered the responder chain.
   - `mouseMoved` -- Called when the cursor moves over a view.
   - `mouseExited` -- Called when the cursor leaves a view. Called on every view that has
@@ -2083,14 +2084,15 @@ SC.CoreView.unload = function () {
     button. A view must implement `mouseDown` (and not return NO) in order to be notified
     of the subsequent drag and up events.
   - `mouseDrag` -- Called on the target view if it handled mouseDown. A view must implement
-    mouseDown (and not return NO) in order to receive mouseUp; only the view which handled a
+    mouseDown (and not return NO) in order to receive mouseDrag; only the view which handled a
     given click sequence's mouseDown will receive `mouseDrag` events (and will continue to
     receive them even if the user drags the mouse off of it).
   - `mouseUp` -- Called on the target view when the user lifts a mouse button. A view must
     implement mouseDown (and not return NO) in order to receive mouseUp.
 
   SproutCore implements a higher-level API for handling in-application dragging and dropping.
-  See `SC.Drag`, `SC.DragSource`, `SC.DragDataSource`, and `SC.DropTarget` for more.
+  See `SC.Drag`, `SC.DragSourceProtocol`, `SC.DragDataSourceProtocol`, and `SC.DropTargetProtocol`
+  for more.
 
   Data-drag events
   ----
@@ -2104,8 +2106,7 @@ SC.CoreView.unload = function () {
   By default, SproutCore cancels the default behavior of any data drag event which carries URLs
   or files, as by default these would quit the app and open the dragged item in the browser. If
   you wish to implement data drag-and-drop support in your application, you should set the event's
-  dataTransfer.dropEffect property to 'copy' in a `dataDragHovered` event handler (or in the
-  equivalent statechart event; see below).
+  dataTransfer.dropEffect property to 'copy' in a `dataDragHovered` event handler.
 
   - `dataDragEntered` -- Triggered when a data drag enters a view. You can use this handler to
     update the view to visually signal that a drop is possible.
@@ -2167,7 +2168,7 @@ SC.CoreView.unload = function () {
   encounter a view which handles the event and does not return NO.
 
   SproutCore implements a set of very convenient, higher-level keyboard events for action keys
-  such as *tab*, *enter,* and the arrow keys. These are not triggered automatically, but you
+  such as *tab*, *enter*, and the arrow keys. These are not triggered automatically, but you
   can gain access to them by proxying the keyboard event of your choice to `interpretKeyEvent`.
   For example:
 
@@ -2205,7 +2206,322 @@ SC.CoreView.unload = function () {
 SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
   classNames: ['sc-view'],
 
-  displayProperties: []
+  displayProperties: [],
+
+  /** @private Enhance. */
+  _executeQueuedUpdates: function () {
+    sc_super();
+
+    // Enabled
+    // Update the layout style of the layer if necessary.
+    if (this._enabledStyleNeedsUpdate) {
+      this._doUpdateEnabledStyle();
+    }
+
+    // Layout
+    // Update the layout style of the layer if necessary.
+    if (this._layoutStyleNeedsUpdate) {
+      this._doUpdateLayoutStyle();
+    }
+  },
+
+  /** Apply the attributes to the context. */
+  applyAttributesToContext: function (context) {
+    // Cursor
+    var cursor = this.get('cursor');
+    if (cursor) { context.addClass(cursor.get('className')); }
+
+    // Enabled
+    if (!this.get('isEnabled')) {
+      context.addClass('disabled');
+      context.setAttr('aria-disabled', 'true');
+    }
+
+    // Layout
+    // Have to pass 'true' for second argument for legacy.
+    this.renderLayout(context, true);
+
+    if (this.get('useStaticLayout')) { context.addClass('sc-static-layout'); }
+
+    // Background color defaults to null; for performance reasons we should ignore it
+    // unless it's ever been non-null.
+    var backgroundColor = this.get('backgroundColor');
+    if (!SC.none(backgroundColor) || this._scv_hasBackgroundColor) {
+      this._scv_hasBackgroundColor = YES;
+      if (backgroundColor) context.setStyle('backgroundColor', backgroundColor);
+      else context.removeStyle('backgroundColor');
+    }
+
+    // Theming
+    var theme = this.get('theme');
+    var themeClassNames = theme.classNames, idx, len = themeClassNames.length;
+
+    for (idx = 0; idx < len; idx++) {
+      context.addClass(themeClassNames[idx]);
+    }
+
+    sc_super();
+
+    var renderDelegate = this.get('renderDelegate');
+    if (renderDelegate && renderDelegate.className) {
+      context.addClass(renderDelegate.className);
+    }
+
+    // @if(debug)
+    if (renderDelegate && renderDelegate.name) {
+      SC.Logger.error("Render delegates now use 'className' instead of 'name'.");
+      SC.Logger.error("Name '%@' will be ignored.", renderDelegate.name);
+    }
+    // @endif
+  },
+
+  /**
+    Computes what the frame of this view would be if the parent were resized
+    to the passed dimensions.  You can use this method to project the size of
+    a frame based on the resize behavior of the parent.
+
+    This method is used especially by the scroll view to automatically
+    calculate when scrollviews should be visible.
+
+    Passing null for the parent dimensions will use the actual current
+    parent dimensions.  This is the same method used to calculate the current
+    frame when it changes.
+
+    @param {Rect} pdim the projected parent dimensions (optional)
+    @returns {Rect} the computed frame
+  */
+  computeFrameWithParentFrame: function (pdim) {
+    // Layout.
+    var layout = this.get('layout'),
+        f;
+
+    // We can't predict the frame for static layout, so just return the view's
+    // current frame (see original computeFrameWithParentFrame in views/view.js)
+    if (this.get('useStaticLayout')) {
+      f = sc_super();
+      f = f ? this._sc_adjustForBorder(f, layout) : null;
+      f = f ? this._sc_adjustForScale(f, layout) : null;
+      return f;
+    }
+
+    f = {};
+
+    var error, layer, AUTO = SC.LAYOUT_AUTO,
+        dH, dW, //shortHand for parentDimensions
+        lR = layout.right,
+        lL = layout.left,
+        lT = layout.top,
+        lB = layout.bottom,
+        lW = layout.width,
+        lH = layout.height,
+        lcX = layout.centerX,
+        lcY = layout.centerY;
+
+    if (lW === AUTO) {
+      SC.throw(("%@.layout() cannot use width:auto if staticLayout is disabled").fmt(this), "%@".fmt(this), -1);
+    }
+
+    if (lH === AUTO) {
+      SC.throw(("%@.layout() cannot use height:auto if staticLayout is disabled").fmt(this), "%@".fmt(this), -1);
+    }
+
+    if (!pdim) { pdim = this.computeParentDimensions(layout); }
+    dH = pdim.height;
+    dW = pdim.width;
+
+    // handle left aligned and left/right
+    if (!SC.none(lL)) {
+      if (SC.isPercentage(lL)) {
+        f.x = dW * lL;
+      } else {
+        f.x = lL;
+      }
+
+      if (lW !== undefined) {
+        if (lW === AUTO) { f.width = AUTO; }
+        else if (SC.isPercentage(lW)) { f.width = dW * lW; }
+        else { f.width = lW; }
+      } else { // better have lR!
+        f.width = dW - f.x;
+        if (lR && SC.isPercentage(lR)) { f.width = f.width - (lR * dW); }
+        else { f.width = f.width - (lR || 0); }
+      }
+
+    // handle right aligned
+    } else if (!SC.none(lR)) {
+      if (SC.none(lW)) {
+        if (SC.isPercentage(lR)) {
+          f.width = dW - (dW * lR);
+        }
+        else f.width = dW - lR;
+        f.x = 0;
+      } else {
+        if (lW === AUTO) f.width = AUTO;
+        else if (SC.isPercentage(lW)) f.width = dW * lW;
+        else f.width = (lW || 0);
+        if (SC.isPercentage(lW)) f.x = dW - (lR * dW) - f.width;
+        else f.x = dW - lR - f.width;
+      }
+
+    // handle centered
+    } else if (!SC.none(lcX)) {
+      if (lW === AUTO) f.width = AUTO;
+      else if (SC.isPercentage(lW)) f.width = lW * dW;
+      else f.width = (lW || 0);
+      if (SC.isPercentage(lcX)) f.x = (dW - f.width) / 2 + (lcX * dW);
+      else f.x = (dW - f.width) / 2 + lcX;
+    } else {
+      f.x = 0; // fallback
+      if (SC.none(lW)) {
+        f.width = dW;
+      } else {
+        if (lW === AUTO) f.width = AUTO;
+        if (SC.isPercentage(lW)) f.width = lW * dW;
+        else f.width = (lW || 0);
+      }
+    }
+
+    // handle top aligned and top/bottom
+    if (!SC.none(lT)) {
+      if (SC.isPercentage(lT)) f.y = lT * dH;
+      else f.y = lT;
+      if (lH !== undefined) {
+        if (lH === AUTO) f.height = AUTO;
+        else if (SC.isPercentage(lH)) f.height = lH * dH;
+        else f.height = lH;
+      } else { // better have lB!
+        if (lB && SC.isPercentage(lB)) f.height = dH - f.y - (lB * dH);
+        else f.height = dH - f.y - (lB || 0);
+      }
+
+    // handle bottom aligned
+    } else if (!SC.none(lB)) {
+      if (SC.none(lH)) {
+        if (SC.isPercentage(lB)) f.height = dH - (lB * dH);
+        else f.height = dH - lB;
+        f.y = 0;
+      } else {
+        if (lH === AUTO) f.height = AUTO;
+        if (lH && SC.isPercentage(lH)) f.height = lH * dH;
+        else f.height = (lH || 0);
+        if (SC.isPercentage(lB)) f.y = dH - (lB * dH) - f.height;
+        else f.y = dH - lB - f.height;
+      }
+
+    // handle centered
+    } else if (!SC.none(lcY)) {
+      if (lH === AUTO) f.height = AUTO;
+      if (lH && SC.isPercentage(lH)) f.height = lH * dH;
+      else f.height = (lH || 0);
+      if (SC.isPercentage(lcY)) f.y = (dH - f.height) / 2 + (lcY * dH);
+      else f.y = (dH - f.height) / 2 + lcY;
+
+    // fallback
+    } else {
+      f.y = 0; // fallback
+      if (SC.none(lH)) {
+        f.height = dH;
+      } else {
+        if (lH === AUTO) f.height = AUTO;
+        if (SC.isPercentage(lH)) f.height = lH * dH;
+        else f.height = lH || 0;
+      }
+    }
+
+    f.x = Math.floor(f.x);
+    f.y = Math.floor(f.y);
+    if (f.height !== AUTO) f.height = Math.floor(f.height);
+    if (f.width !== AUTO) f.width = Math.floor(f.width);
+
+    // if width or height were set to auto and we have a layer, try lookup
+    if (f.height === AUTO || f.width === AUTO) {
+      layer = this.get('layer');
+      if (f.height === AUTO) f.height = layer ? layer.clientHeight : 0;
+      if (f.width === AUTO) f.width = layer ? layer.clientWidth : 0;
+    }
+
+    // Okay we have all our numbers. Let's adjust them for things.
+
+    // First, adjust for border.
+    f = this._sc_adjustForBorder(f, layout);
+
+    // Make sure the width/height fix their min/max (note the inlining of SC.none for performance)...
+    /*jshint eqnull:true */
+    if ((layout.maxHeight != null) && (f.height > layout.maxHeight)) f.height = layout.maxHeight;
+    if ((layout.minHeight != null) && (f.height < layout.minHeight)) f.height = layout.minHeight;
+    if ((layout.maxWidth != null) && (f.width > layout.maxWidth)) f.width = layout.maxWidth;
+    if ((layout.minWidth != null) && (f.width < layout.minWidth)) f.width = layout.minWidth;
+
+    // Finally, adjust for scale.
+    f = this._sc_adjustForScale(f, layout);
+
+    return f;
+  },
+
+  init: function () {
+    sc_super();
+
+    // Enabled.
+    // If the view is pre-configured as disabled, then go to the proper initial state.
+    if (!this.get('isEnabled')) { this._doDisable(); }
+
+    // Layout
+    this._previousLayout = this.get('layout');
+
+    // Apply the automatic child view layout if it is defined.
+    var childViewLayout = this.childViewLayout;
+    if (childViewLayout) {
+      // Layout the child views once.
+      this.set('childViewsNeedLayout', true);
+      this.layoutChildViewsIfNeeded();
+
+      // If the child view layout is live, start observing affecting properties.
+      if (this.get('isChildViewLayoutLive')) {
+        this.addObserver('childViews.[]', this, this._cvl_childViewsDidChange);
+        // DISABLED. this.addObserver('childViewLayout', this, this._cvl_childViewLayoutDidChange);
+        this.addObserver('childViewLayoutOptions', this, this._cvl_childViewLayoutDidChange);
+
+        // Initialize the child views.
+        this._cvl_setupChildViewsLiveLayout();
+
+        // Initialize our own frame observer.
+        if (!this.get('isFixedSize') && childViewLayout.layoutDependsOnSize && childViewLayout.layoutDependsOnSize(this)) {
+          this.addObserver('frame', this, this._cvl_childViewLayoutDidChange);
+        }
+      }
+    }
+
+    // Theming
+    this._lastTheme = this.get('theme');
+
+  },
+
+  /** @private */
+  destroy: function () {
+    // Clean up.
+    this._previousLayout = null;
+
+    return sc_super();
+  },
+
+  /** SC.CoreView.prototype. */
+  removeChild: function(view) {
+    // Manipulation
+    if (!view) { return this; } // nothing to do
+    if (view.parentView !== this) {
+      throw new Error("%@.removeChild(%@) must belong to parent".fmt(this, view));
+    }
+
+    // notify views
+    // TODO: Deprecate these notifications.
+    if (view.willRemoveFromParent) { view.willRemoveFromParent() ; }
+    if (this.willRemoveChild) { this.willRemoveChild(view) ; }
+
+    sc_super();
+
+    return this;
+  }
+
 });
 
 //unload views for IE, trying to collect memory.

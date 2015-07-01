@@ -353,8 +353,6 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     this should be the same as the content property, but sometimes we need to
     generate something different because the content is not a regular array.
 
-    Passing YES to the force parameter will force this value to be recomputed.
-
     @returns {SC.Array} observable or null
   */
   _scac_observableContent: function () {

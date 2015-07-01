@@ -16,14 +16,14 @@
   @extends SC.View
   @extends SC.Control
   @since SproutCore 1.0
-  @test in progress
 */
 SC.SliderView = SC.View.extend(SC.Control,
 /** @scope SC.SliderView.prototype */ {
 
+  /** @private */
   classNames: 'sc-slider-view',
 
-  /**
+  /** @private
     The WAI-ARIA role for slider view. This property's value should not be
     changed.
 
@@ -32,24 +32,22 @@ SC.SliderView = SC.View.extend(SC.Control,
   ariaRole: 'slider',
 
   /**
-    Bind this to the current value of the progress bar.  Note that by default
-    an empty value will disable the progress bar and a multiple value too make
-    it indeterminate.
+    The current value of the slider.
   */
   value: 0.50,
   valueBindingDefault: SC.Binding.single().notEmpty(),
 
   /**
-    The minimum value of the progress.
+    The minimum value of the slider.
 
-    @type {Number}
+    @type Number
     @default 0
   */
   minimum: 0,
   minimumBindingDefault: SC.Binding.single().notEmpty(),
 
   /**
-    Optionally specify the key used to extract the minimum progress value
+    Optionally specify the key used to extract the minimum slider value
     from the content object.  If this is set to null then the minimum value
     will not be derived from the content object.
 
@@ -58,16 +56,16 @@ SC.SliderView = SC.View.extend(SC.Control,
   contentMinimumKey: null,
 
   /**
-    The maximum value of the progress bar.
+    The maximum value of the slider bar.
 
-    @type {Number}
+    @type Number
     @default 1
   */
   maximum: 1,
   maximumBindingDefault: SC.Binding.single().notEmpty(),
 
   /**
-    Optionally specify the key used to extract the maximum progress value
+    Optionally specify the key used to extract the maximum slider value
     from the content object.  If this is set to null then the maximum value
     will not be derived from the content object.
 
@@ -80,7 +78,7 @@ SC.SliderView = SC.View.extend(SC.Control,
 
     All values will be rounded to this step size when displayed.
 
-    @type {Number}
+    @type Number
     @default 0.1
   */
   step: 0.1,
@@ -89,8 +87,8 @@ SC.SliderView = SC.View.extend(SC.Control,
     When set to true, this draws and positions an element for each step, giving
     your theme the opportunity to show a mark at each step.
 
-    @type {Boolean}
-    @default {false}
+    @type Boolean
+    @default false
   */
   markSteps: false,
 
@@ -99,8 +97,8 @@ SC.SliderView = SC.View.extend(SC.Control,
     value. Set to false to prevent a slider in a scroll view from hijacking scroll
     events mid-scroll, for example.
 
-    @type {Boolean}
-    @default {true}
+    @type Boolean
+    @default true
   */
   updateOnScroll: true,
 
@@ -109,10 +107,10 @@ SC.SliderView = SC.View.extend(SC.Control,
   //
 
   /* @private The full list includes min, max, and stepPositions, but those are redundant with displayValue. */
-  displayProperties: ['displayValue', 'ariaValue', 'markSteps'],
+  displayProperties: ['displayValue', 'markSteps'],
 
   /** @private
-   @property
+   @type Number
    The raw, unchanged value to be provided to screen readers and the like.
   */
   ariaValue: function() {
@@ -128,7 +126,7 @@ SC.SliderView = SC.View.extend(SC.Control,
   /*
     The value, converted to a percent out of 100 between maximum and minimum.
 
-    @property
+    @type Number
     @readonly
   */
   displayValue: function() {
@@ -139,9 +137,9 @@ SC.SliderView = SC.View.extend(SC.Control,
     If a nonzero step is specified, this property contains an array of each step's value between
     min and max (inclusive).
 
-    @property
+    @type Array
+    @default null
     @readonly
-    @type {Array|null}
   */
   steps: function() {
     var step = this.get('step');
@@ -165,9 +163,9 @@ SC.SliderView = SC.View.extend(SC.Control,
     expressed as a fraction between 0 and 1 (inclusive). You can use these values to generate
     and position labels for each step, for example.
 
-    @property
+    @type Array
+    @default null
     @readonly
-    @type {Array|null}
   */
   stepPositions: function() {
     var steps = this.get('steps');
@@ -183,7 +181,7 @@ SC.SliderView = SC.View.extend(SC.Control,
     return ret;
   }.property('steps').cacheable(),
 
-  // Given a particular value, returns the percentage value.
+  /** @private Given a particular value, returns the percentage value. */
   _displayValueForValue: function(value) {
     var min = this.get('minimum'),
         max = this.get('maximum'),
@@ -203,16 +201,37 @@ SC.SliderView = SC.View.extend(SC.Control,
     return value;
   },
 
+  /** @private Clears the mouse just down flag. */
+  _sc_clearMouseJustDown: function () {
+    this._sc_isMouseJustDown = NO;
+  },
+
+  /** @private Flag used to track when the mouse is pressed. */
   _isMouseDown: NO,
+
+  /** @private Flag used to track when mouse was just down so that mousewheel events firing as the finger is lifted don't shoot the slider over. */
+  _sc_isMouseJustDown: NO,
+
+  /** @private Timer used to track time immediately after a mouse up event. */
+  _sc_clearMouseJustDownTimer: null,
 
   /* @private */
   mouseDown: function(evt) {
     // Fast path, reject secondary clicks.
-    if (evt.which !== 1) return false;
+    if (evt.which && evt.which !== 1) return false;
 
     if (!this.get('isEnabledInPane')) return YES; // nothing to do...
     this.set('isActive', YES);
     this._isMouseDown = YES ;
+
+    // Clear existing mouse just down timer.
+    if (this._sc_clearMouseJustDownTimer) {
+      this._sc_clearMouseJustDownTimer.invalidate();
+      this._sc_clearMouseJustDownTimer = null;
+    }
+
+    this._sc_isMouseJustDown = NO;
+
     return this._triggerHandle(evt, YES);
   },
 
@@ -226,6 +245,12 @@ SC.SliderView = SC.View.extend(SC.Control,
     if (this._isMouseDown) this.set('isActive', NO);
     var ret = this._isMouseDown ? this._triggerHandle(evt) : YES ;
     this._isMouseDown = NO;
+
+    // To avoid annoying jitter from Magic Mouse (which sends mousewheel events while trying
+    // to lift your finger after a drag), ignore mousewheel events for a small period of time.
+    this._sc_isMouseJustDown = YES;
+    this._sc_clearMouseJustDownTimer = this.invokeLater(this._sc_clearMouseJustDown, 250);
+
     return ret ;
   },
 
@@ -233,6 +258,11 @@ SC.SliderView = SC.View.extend(SC.Control,
   mouseWheel: function(evt) {
     if (!this.get('isEnabledInPane')) return NO;
     if (!this.get('updateOnScroll')) return NO;
+
+    // If the Magic Mouse is pressed, it still sends mousewheel events rapidly, we don't want errant wheel
+    // events to move the slider.
+    if (this._isMouseDown || this._sc_isMouseJustDown) return NO;
+
     var min = this.get('minimum'),
         max = this.get('maximum'),
         step = this.get('step') || ((max - min) / 20),

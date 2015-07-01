@@ -26,9 +26,7 @@ test('childViews specified as classes are also destroyed.', function() {
 
   SC.run(function() {
     ok(!v2.get('parentView'), 'destroying a parent removes the parentView reference from the child.');
-    ok(v2.get('owner') === null, 'destroying a parent removes the owner reference from the child.');
     ok(!v3.get('parentView'), 'destroying a parent removes the parentView reference from the grandchild.');
-    ok(v3.get('owner') === null, 'destroying a parent removes the owner reference from the grandchild.');
   });
 });
 
@@ -40,7 +38,6 @@ test('childViews specified as instances are also destroyed.', function() {
 
   SC.run(function() {
     ok(!v2.get('parentView'), 'destroying a parent removes the parentView reference from the child.');
-    ok(v2.get('owner') === null, 'destroying a parent removes the owner reference from the child.');
   });
 });
 

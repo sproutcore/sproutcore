@@ -34,7 +34,7 @@ SC.MediaControlsView = SC.View.extend(
     icon: 'play',
     layout: { top: 0, left: 0, width: 20, height:20},
     action: "playPause",
-    targetBinding: "*owner.target"
+    targetBinding: ".parentView.target"
   }),
 
   progressView: SC.MediaSlider.extend({
@@ -42,15 +42,15 @@ SC.MediaControlsView = SC.View.extend(
     value:0,
     minimum: 0,
     step:0.1,
-    valueBinding: "*owner.target.currentTime" ,
-    maximumBinding: "*owner.target.duration",
-    mediaViewBinding: "*owner.target"
+    valueBinding: ".parentView*target.currentTime" ,
+    maximumBinding: ".parentView*target.duration",
+    mediaViewBinding: ".parentView.target"
   }),
 
   timeView: SC.LabelView.extend({
     layout: { top: 0, right: 160, width: 60, height:20},
     classNames: 'time',
-    valueBinding: '*owner.target.time'
+    valueBinding: '.parentView*target.time'
   }),
 
   theaterButton: SC.ButtonView.extend({
@@ -59,7 +59,7 @@ SC.MediaControlsView = SC.View.extend(
     titleMinWidth: 35,
     layout: { top: 0, right: 140, width: 20, height:20},
     action: "fullScreen",
-    targetBinding: "*owner.target"
+    targetBinding: ".parentView.target"
   }),
 
   minusLabelView: SC.LabelView.extend({
@@ -71,7 +71,7 @@ SC.MediaControlsView = SC.View.extend(
   volumeView: SC.MediaSlider.extend({
     layout: { top: 0, right: 25, width: 90, height:20},
     value:0,
-    valueBinding: "*owner.target.volume" ,
+    valueBinding: ".parentView*target.volume" ,
     minimum: 0,
     maximum: 1,
     step: 0.01

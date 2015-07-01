@@ -6,6 +6,7 @@
 // ==========================================================================
 
 sc_require('views/collection');
+sc_require('views/list_item');
 sc_require('mixins/collection_row_delegate');
 
 /** @class
@@ -83,6 +84,9 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
   _sc_offsetCache: null,
 
   /** @private */
+  _sc_rowDelegate: null,
+
+  /** @private */
   _sc_rowSize: null,
 
   /**
@@ -129,7 +133,29 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
   /** @private */
   init: function () {
     sc_super();
+
     this._sc_rowDelegateDidChange();
+  },
+
+  /** @private SC.CollectionView.prototype.destroy. */
+  destroy: function () {
+    sc_super();
+
+    // All manipulations made to objects we use must be reversed!
+    var del = this._sc_rowDelegate;
+    if (del) {
+      del.removeObserver('_sc_totalRowSize', this, this._sc_rowSizeDidChange);
+      del.removeObserver('customRowSizeIndexes', this, this._sc_customRowSizeIndexesDidChange);
+
+      this._sc_rowDelegate = null;
+    }
+
+    var customRowSizeIndexes = this._sc_customRowSizeIndexes;
+    if (customRowSizeIndexes) {
+      customRowSizeIndexes.removeObserver('[]', this, this._sc_customRowSizeIndexesContentDidChange);
+
+      this._sc_customRowSizeIndexes = null;
+    }
   },
 
   /** @private */
@@ -419,18 +445,20 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
   computeLayout: function () {
     // default layout
     var ret = this._sc_layout,
-      layoutDirection = this.get('layoutDirection');
+      layoutDirection = this.get('layoutDirection'),
+      del = this.get('rowDelegate'),
+      rowSpacing = del.get('rowSpacing');
 
     // Initialize lazily.
     if (!ret) ret = this._sc_layout = {};
 
     // Support both vertical and horizontal lists.
     if (layoutDirection === SC.LAYOUT_HORIZONTAL) {
-      ret.minWidth = this.rowOffsetForContentIndex(this.get('length'));
-      this.set('calculatedWidth', ret.minWidth);
+      // Don't include the row spacing after the last item in the width.
+      ret.width = Math.max(this.rowOffsetForContentIndex(this.get('length')) - rowSpacing, 0);
     } else {
-      ret.minHeight = this.rowOffsetForContentIndex(this.get('length'));
-      this.set('calculatedHeight', ret.minHeight);
+      // Don't include the row spacing after the last item in the height.
+      ret.height = Math.max(this.rowOffsetForContentIndex(this.get('length')) - rowSpacing, 0);
     }
     return ret;
   },
@@ -482,8 +510,9 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     @returns {SC.IndexSet} now showing indexes
   */
   contentIndexesInRect: function (rect) {
-    var totalRowSize = this.get('rowDelegate').get('_sc_totalRowSize'),
-      rowSpacing = this.get('rowSpacing'),
+    var del = this.get('rowDelegate'),
+      totalRowSize = del.get('_sc_totalRowSize'),
+      rowSpacing = del.get('rowSpacing'),
       totalRowSizeWithSpacing = totalRowSize + rowSpacing,
       layoutDirection = this.get('layoutDirection'),
       len = this.get('length'),
@@ -570,8 +599,9 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
     classNames: 'sc-list-insertion-point',
 
     layout: function (key, value) {
-      var layoutDirection = this.get('layoutDirection'),
-        key = layoutDirection === SC.LAYOUT_HORIZONTAL ? 'width' : 'height';
+      var layoutDirection = this.get('layoutDirection');
+
+      key = layoutDirection === SC.LAYOUT_HORIZONTAL ? 'width' : 'height';
 
       // Getter – create layout hash.
       if (value === undefined) {
@@ -741,7 +771,7 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
 
     // now we know which index we are in.  if dropOperation is DROP_ON, figure
     // if we can drop on or not.
-    if (dropOperation == SC.DROP_ON) {
+    if (dropOperation === SC.DROP_ON) {
       // editable size - reduce height by a bit to handle dropping
       if (this.get('isEditable')) diff = Math.min(Math.floor((max - min) * 0.2), 5);
       else diff = 0;

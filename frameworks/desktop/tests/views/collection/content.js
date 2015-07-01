@@ -21,7 +21,7 @@ module("SC.CollectionView.content", {
       // ..........................................................
       // STUB: computeLayout
       //
-      computeLayout: CoreTest.stub('computeLayout'),
+      computeLayout: CoreTest.stub('computeLayout', SC.CollectionView.prototype.computeLayout),
 
       // ..........................................................
       // STUB: RELOAD
@@ -127,7 +127,9 @@ module("SC.CollectionView.content", {
 test("setting content for first time", function() {
   equals(view.get('content'), null, 'precond - view.content should be null');
 
-  view.set('content', content1);
+  SC.run(function () {
+    view.set('content', content1);
+  });
   view.reload.expect(YES, 2); // should reload everything
   view.contentPropertyDidChange.expect(0); // should not call
   view.computeLayout.expect(YES);
@@ -136,10 +138,14 @@ test("setting content for first time", function() {
 
 test("changing content with different size", function() {
 
-  view.set('content', "a b".w());
+  SC.run(function () {
+    view.set('content', "a b".w());
+  });
   view.reset();
 
-  view.set('content', content2);
+  SC.run(function () {
+    view.set('content', content2);
+  });
   view.reload.expect(YES, 2); // call twice?
   view.contentPropertyDidChange.expect(0); // should not call
   view.computeLayout.expect(YES);
@@ -148,10 +154,14 @@ test("changing content with different size", function() {
 
 test("changing content with same size", function() {
 
-  view.set('content', "a b".w());
+  SC.run(function () {
+    view.set('content', "a b".w());
+  });
   view.reset();
 
-  view.set('content', content2);
+  SC.run(function () {
+    view.set('content', content2);
+  });
   view.reload.expect(YES);
   view.contentPropertyDidChange.expect(0); // should not call
   view.computeLayout.expect(YES);
@@ -160,10 +170,14 @@ test("changing content with same size", function() {
 
 test("changing the content of a single item should reload that item", function() {
 
-  view.set('content', content1);
+  SC.run(function () {
+    view.set('content', content1);
+  });
   view.reset(); // don't care about this fire
 
-  content1.replace(1,1, ["X"]);
+  SC.run(function () {
+    content1.replace(1,1, ["X"]);
+  });
   view.reload.expect(SC.IndexSet.create(1));
   view.contentPropertyDidChange.expect(0); // should not call
   view.computeLayout.expect(YES);
@@ -172,11 +186,15 @@ test("changing the content of a single item should reload that item", function()
 
 test("changing the content of several items should reload each item", function() {
 
-  view.set('content', content1);
+  SC.run(function () {
+    view.set('content', content1);
+  });
   view.reset(); // don't care about this fire
 
-  content1.replace(1,1, ["X"]);
-  content1.replace(3,1, ["X"]);
+  SC.run(function () {
+    content1.replace(1,1, ["X"]);
+    content1.replace(3,1, ["X"]);
+  });
   view.reload.expect(SC.IndexSet.create(1).add(3));
   view.contentPropertyDidChange.expect(0); // should not call
   view.computeLayout.expect(YES);
@@ -185,11 +203,15 @@ test("changing the content of several items should reload each item", function()
 
 test("adding to end of content should reload new items", function() {
 
-  view.set('content', content1);
+  SC.run(function () {
+    view.set('content', content1);
+  });
   view.reset(); // don't care about this fire
 
-  content1.pushObject("X");
-  content1.pushObject("Y");
+  SC.run(function () {
+    content1.pushObject("X");
+    content1.pushObject("Y");
+  });
 
   view.reload.expect(SC.IndexSet.create(content1.get('length')-2, 2));
   view.contentPropertyDidChange.expect(0); // should not call
@@ -199,11 +221,15 @@ test("adding to end of content should reload new items", function() {
 
 test("removing from end of content should reload removed items", function() {
 
-  view.set('content', content1);
+  SC.run(function () {
+    view.set('content', content1);
+  });
   view.reset(); // don't care about this fire
 
-  content1.popObject();
-  content1.popObject();
+  SC.run(function () {
+    content1.popObject();
+    content1.popObject();
+  });
 
   view.reload.expect(SC.IndexSet.create(content1.get('length'), 2));
   view.contentPropertyDidChange.expect(0); // should not call
@@ -212,10 +238,14 @@ test("removing from end of content should reload removed items", function() {
 });
 
 test("inserting into middle should reload all following items", function() {
-  view.set('content', content1);
+  SC.run(function () {
+    view.set('content', content1);
+  });
   view.reset(); // don't care about this fire
 
-  content1.insertAt(3, 'FOO');
+  SC.run(function () {
+    content1.insertAt(3, 'FOO');
+  });
 
   view.reload.expect(SC.IndexSet.create(3, content1.get('length')-3));
   view.contentPropertyDidChange.expect(0); // should not call
@@ -228,7 +258,9 @@ test("inserting into middle should reload all following items", function() {
 //
 
 test("editing properties", function() {
-  view.set('content', content1);
+  SC.run(function () {
+    view.set('content', content1);
+  });
   view.reset();
   view.contentPropertyDidChange.reset();
 

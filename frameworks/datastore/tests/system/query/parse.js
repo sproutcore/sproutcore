@@ -3,7 +3,7 @@
 // Copyright: ©2006-2011 Apple Inc. and contributors.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-/*globals module ok equals same test MyApp */
+/*global module, ok, equals, warn, test */
 
 // test parsing of query string
 var q;
@@ -216,9 +216,23 @@ test("token tree should build", function() {
   q.conditions = "(firstName MATCHES {firstName} OR lastName BEGINS_WITH 'Lone') AND is_a_beauty = true";
   q.parse();
   ok(q._tokenList.length == 13, 'list should have 13 tokens');
-  ok(!q._tokenTree.error, 'there should be no errors');
+  ok(!q._tokenTree.isError, 'there should be no errors');
   ok(q._tokenTree.tokenValue == 'AND', 'tree root should be AND');
   
 });
 
+test("token tree should error", function() {
+  q.conditions = "(firstName MATCHES {firstName} OR lastName BEGINS_WITH 'Lone') AND is_a_beauty =";
+  try {
+    q.parse();
+  } catch(e) {}
+  ok(q._tokenTree.isError, "Parsing an unparsable query results in an error.");
 
+  warn('Parsing "(firstName =)" should result in an error but does not.');
+  // // This should be an error case but is not. I don't have time to track it down at the moment.
+  // q.conditions = "(firstName =)";
+  // try {
+  //   q.parse();
+  // } catch(e) {}
+  // ok(q._tokenTree.isError, "Parsing an unparsable query results in an error.");
+});

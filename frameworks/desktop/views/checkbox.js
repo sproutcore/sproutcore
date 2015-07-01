@@ -77,7 +77,7 @@ SC.CheckboxView = SC.ButtonView.extend(
   /** @private */
   mouseDown: function(evt) {
     // Fast path, reject secondary clicks.
-    if (evt.which !== 1) return false;
+    if (evt.which && evt.which !== 1) return false;
 
     if(!this.get('isEnabledInPane')) return YES;
     this.set('isActive', YES);

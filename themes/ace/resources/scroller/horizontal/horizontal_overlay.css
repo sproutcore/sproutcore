@@ -34,25 +34,41 @@ $theme.sc-overlay-scroller-view.sc-horizontal {
   }
 
   .thumb-top {
-    background: black;
-    height: 5px;
+    @include border-left-radius(4px);
+    background-color: $overlay-thumb-background-color;
+    background-image: none;
+    border-left: 1px solid $overlay-thumb-border-color;
+    border-top: 1px solid $overlay-thumb-border-color;
+    border-bottom: 1px solid $overlay-thumb-border-color;
+    height: 7px;
+    top: 2px;
   }
 
   .thumb-clip {
+    height: 9px; /* +2px for white border */
+    top: 2px;
   }
 
   .thumb-inner {
   }
 
   .thumb-center {
-    background: black;
+    background-color: $overlay-thumb-background-color;
+    background-image: none;
+    border-top: 1px solid $overlay-thumb-border-color;
+    border-bottom: 1px solid $overlay-thumb-border-color;
     width: initial;
-    height: 5px;
+    height: 7px;
   }
 
   .thumb-bottom {
-    background: black;
-    height: 5px;
+    @include border-right-radius(4px);
+    background-color: $overlay-thumb-background-color;
+    background-image: none;
+    border-right: 1px solid $overlay-thumb-border-color;
+    border-top: 1px solid $overlay-thumb-border-color;
+    border-bottom: 1px solid $overlay-thumb-border-color;
+    height: 7px;
   }
 
 }

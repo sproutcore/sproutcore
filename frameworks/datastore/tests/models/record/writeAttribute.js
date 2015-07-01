@@ -3,7 +3,7 @@
 // Copyright: ©2006-2011 Apple Inc. and contributors.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
-/*globals module ok equals same test MyApp */
+/*globals module, ok, equals, same, test */
 
 var store, Foo, json, foo ;
 module("SC.Record#writeAttribute", {
@@ -77,7 +77,7 @@ test("raises exception if you try to write an attribute before an attribute hash
   try {
     foo.writeAttribute("foo", "bar");
   } catch(e) {
-    equals(e, SC.Record.BAD_STATE_ERROR, 'should throw BAD_STATE_ERROR');
+    equals(e.message, SC.Record.BAD_STATE_ERROR.toString(), 'should throw BAD_STATE_ERROR');
     cnt++;
   }
   equals(cnt, 1, 'should raise exception');
@@ -108,10 +108,11 @@ test("Writing a new guid", function(){
 });
 
 test("Writing primaryKey of 'id'", function(){
-  PrimaryKeyId = SC.Record.extend({ primaryKey: 'id' });
+  var PrimaryKeyId = SC.Record.extend({ primaryKey: 'id' });
   var foo2 = store.createRecord(PrimaryKeyId, { id: 1 });
 
   equals(foo2.get('id'), 1, 'foo2.id should be 1');
   foo2.set('id', 2);
   equals(foo2.get('id'), 2, 'foo2.id should be 2');
+  equals(store.idFor(foo2.get('storeKey')), 2, 'foo2.id should be 2 in the store');
 });

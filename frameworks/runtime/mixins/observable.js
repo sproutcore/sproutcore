@@ -9,13 +9,16 @@ sc_require('ext/function');
 sc_require('private/observer_set');
 sc_require('private/chain_observer');
 
+//@if(debug)
 /**
-  Set to YES to have all observing activity logged to the console.  This
-  should be used for debugging only.
+  Set to YES to have all observing activity logged to the console.
+
+  This is only available in debug mode.
 
   @type Boolean
 */
 SC.LOG_OBSERVERS = false;
+//@endif
 
 SC.OBSERVES_HANDLER_ADD = 0;
 SC.OBSERVES_HANDLER_REMOVE = 1;
@@ -136,7 +139,67 @@ SC.OBSERVES_HANDLER_REMOVE = 1;
 
   @since SproutCore 1.0
 */
-SC.Observable = /** @scope SC.Observable.prototype */{
+SC.Observable = /** @scope SC.Observable.prototype */ {
+
+  //@if(debug)
+  /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */
+
+  /**
+    Allows you to inspect a property for changes. Whenever the named property
+    changes, a log will be printed to the console. This (along with removeProbe)
+    are convenience methods meant for debugging purposes.
+
+    @param {String} key The name of the property you want probed for changes
+  */
+  addProbe: function (key) { this.addObserver(key, SC.logChange); },
+
+  /**
+    Stops a running probe from observing changes to the observer.
+
+    @param {String} key The name of the property you want probed for changes
+  */
+  removeProbe: function (key) { this.removeObserver(key, SC.logChange); },
+
+  /**
+    Logs the named properties to the console.
+
+    @param {String...} propertyNames one or more property names
+  */
+  logProperty: function () {
+    var props = SC.$A(arguments),
+        prop, propsLen, idx;
+    for (idx = 0, propsLen = props.length; idx < propsLen; idx++) {
+      prop = props[idx];
+      console.log('%@:%@: '.fmt(SC.guidFor(this), prop), this.get(prop));
+    }
+  },
+
+  /* END DEBUG ONLY PROPERTIES AND METHODS */
+  //@endif
+
+  /** @private Property cache. */
+  _kvo_cache: null,
+
+  /** @private Whether properties of the object will be cacheable. Becomes true if any one computed property is .cacheable() */
+  _kvo_cacheable: false,
+
+  /** @private Cache of dependepents for a property. */
+  _kvo_cachedep: null,
+
+  /** @private */
+  _kvo_changeLevel: 0,
+
+  /** @private */
+  _kvo_changes: null,
+
+  /** @private */
+  _kvo_cloned: null,
+
+  /** @private */
+  _kvo_revision: 0,
+
+  /** @private */
+  _observableInited: false,
 
   /**
     Walk like that ol' duck
@@ -211,6 +274,7 @@ SC.Observable = /** @scope SC.Observable.prototype */{
       if (ret.isCacheable) {
         cache = this._kvo_cache;
         if (!cache) cache = this._kvo_cache = {};
+
         return (cache[ret.cacheKey] !== undefined) ? cache[ret.cacheKey] : (cache[ret.cacheKey] = ret.call(this, key));
       } else return ret.call(this, key);
     } else return ret;
@@ -274,9 +338,9 @@ SC.Observable = /** @scope SC.Observable.prototype */{
     if (value === undefined && SC.typeOf(key) === SC.T_HASH) {
       var hash = key;
 
-      for (key in hash) {
-        if (!hash.hasOwnProperty(key)) continue;
-        this.set(key, hash[key]);
+      for (var hashKey in hash) {
+        if (!hash.hasOwnProperty(hashKey)) continue;
+        this.set(hashKey, hash[hashKey]);
       }
 
       return this;
@@ -363,7 +427,7 @@ SC.Observable = /** @scope SC.Observable.prototype */{
     @returns {SC.Observable}
   */
   beginPropertyChanges: function () {
-    this._kvo_changeLevel = (this._kvo_changeLevel || 0) + 1;
+    this._kvo_changeLevel = this._kvo_changeLevel + 1;
     return this;
   },
 
@@ -427,10 +491,13 @@ SC.Observable = /** @scope SC.Observable.prototype */{
     @returns {SC.Observable}
   */
   propertyDidChange: function (key, value, _keepCache) {
-    this._kvo_revision = (this._kvo_revision || 0) + 1;
-    var level = this._kvo_changeLevel || 0,
-        cachedep, idx, dfunc, func,
-        log = SC.LOG_OBSERVERS && (this.LOG_OBSERVING !== NO);
+    this._kvo_revision = this._kvo_revision + 1;
+    var level = this._kvo_changeLevel,
+        cachedep, idx, dfunc, func;
+
+    //@if(debug)
+    var log = SC.LOG_OBSERVERS && (this.LOG_OBSERVING !== NO);
+    //@endif
 
     // If any dependent keys contain this property in their path,
     // invalidate the cache of the computed property and re-setup chain with
@@ -487,12 +554,16 @@ SC.Observable = /** @scope SC.Observable.prototype */{
       changes.add(key);
 
       if (suspended) {
+        //@if(debug)
         if (log) console.log("%@%@: will not notify observers because observing is suspended".fmt(SC.KVO_SPACES, this));
+        //@endif
         SC.Observers.objectHasPendingChanges(this);
       }
 
     // otherwise notify property observers immediately
-    } else this._notifyPropertyObservers(key);
+    } else {
+      this._notifyPropertyObservers(key);
+    }
 
     return this;
   },
@@ -847,18 +918,79 @@ SC.Observable = /** @scope SC.Observable.prototype */{
     an expensive action until someone begins observing a particular property
     on the object.
 
+    Optionally, you may pass a target and method to check for the
+    presence of a particular observer. You can use this to avoid creating
+    duplicate observers in situations where that's likely.
+
     @param {String} key key to check
+    @param {Object} [target] the target that the observer uses
+    @param {Function|String} [method]) the method on the target that the observer uses
     @returns {Boolean}
   */
-  hasObserverFor: function (key) {
+  hasObserverFor: function (key, target, method) {
     SC.Observers.flush(this); // hookup as many observers as possible.
 
     var observers = this[SC.keyFor('_kvo_observers', key)],
-      locals = this[SC.keyFor('_kvo_local', key)];
+        chains = this._kvo_for(SC.keyFor('_kvo_chains', key)),
+        locals = this[SC.keyFor('_kvo_local', key)],
+        isChain = key.indexOf('.') >= 0;
 
-    if (locals && locals.length > 0) return YES;
-    if (observers && observers.getMembers().length > 0) return YES;
-    return NO;
+    // Fast path: no target/method.
+    if (target === undefined) {
+      if (isChain) {
+        if (chains && chains.length > 0) return YES;
+      } else {
+        // Found locally.
+        if (locals && locals.length > 0) return YES;
+        if (observers && observers.getMembers().length > 0) return YES;
+      }
+      return NO;
+
+    // Slow path: target/method.
+    } else {
+      if (method === undefined) {
+        method = target;
+        target = this;
+      }
+      if (typeof method === "string") method = target[method];
+      if (!method) throw new Error("Developer Error: If present, the `method` argument of hasObserverFor must be (or refer to) a function.");
+
+      // Declare our iterators.
+      var i, len;
+
+      // Check remote chains.
+      if (isChain) {
+        if (!chains || !chains.length) return NO;
+        len = chains.length;
+        for (i = 0; i < len; i++) {
+          if (chains[i].masterTarget === target && chains[i].masterMethod === method) return YES;
+        }
+        return NO;
+
+      // Check locals.
+      } else if (target === this) {
+        if (!locals) return NO;
+        len = locals.length;
+        for (i = 0; i < len; i++) {
+          if (this[locals[i]] === method) return YES;
+        }
+        return NO;
+
+      // Check remotes.
+      } else {
+        if (!observers || !observers.members) return NO;
+
+        len = observers.members.length;
+        var member;
+        for (i = 0; i < len; i++) {
+          member = observers.members[i];
+          // If this is a non-chained observer, the first item is the target and the second is the method.
+          if (member[0] === target && member[1] === method) return YES;
+        }
+        return NO;
+      }
+      // TODO: Remote chains.
+    }
   },
 
   /**
@@ -1093,28 +1225,33 @@ SC.Observable = /** @scope SC.Observable.prototype */{
     return observers ? observers.getMembers() : [];
   },
 
-  // this private method actually notifies the observers for any keys in the
-  // observer queue.  If you pass a key it will be added to the queue.
+  /** @private
+    This private method actually notifies the observers for any keys in the observer queue.  If you
+    pass a key it will be added to the queue.
+  */
   _notifyPropertyObservers: function (key) {
+    // Ensure that this object has been initialized.
     if (!this._observableInited) this.initObservable();
 
     SC.Observers.flush(this); // hookup as many observers as possible.
 
-    var log = SC.LOG_OBSERVERS && this.LOG_OBSERVING !== NO,
-        observers, changes, dependents, starObservers, idx, keys, rev,
+    var observers, changes, dependents, starObservers, idx, keys, rev,
         members, membersLength, member, memberLoc, target, method, loc, func,
         context, spaces, cache;
 
+    //@if(debug)
+    var log = SC.LOG_OBSERVERS && this.LOG_OBSERVING !== NO;
     if (log) {
       spaces = SC.KVO_SPACES = (SC.KVO_SPACES || '') + '  ';
       console.log('%@%@: notifying observers after change to key "%@"'.fmt(spaces, this, key));
     }
+    //@endif
 
     // Get any starObservers -- they will be notified of all changes.
-    starObservers =  this['_kvo_observers_*'];
+    starObservers = this['_kvo_observers_*'];
 
     // prevent notifications from being sent until complete
-    this._kvo_changeLevel = (this._kvo_changeLevel || 0) + 1;
+    this._kvo_changeLevel = this._kvo_changeLevel + 1;
 
     // keep sending notifications as long as there are changes
     while (((changes = this._kvo_changes) && (changes.length > 0)) || key) {
@@ -1134,10 +1271,13 @@ SC.Observable = /** @scope SC.Observable.prototype */{
         changes.add('*');
         changes.addEach(this._kvo_for('_kvo_observed_keys', SC.CoreSet));
 
-      } else if (key) changes.add(key);
+      } else if (key) {
+        changes.add(key);
+      }
 
       // Now go through the set and add all dependent keys...
-      if (dependents = this._kvo_dependents) {
+      dependents = this._kvo_dependents;
+      if (dependents) {
 
         // NOTE: each time we loop, we check the changes length, this
         // way any dependent keys added to the set will also be evaluated...
@@ -1148,9 +1288,11 @@ SC.Observable = /** @scope SC.Observable.prototype */{
           // for each dependent key, add to set of changes.  Also, if key
           // value is a cacheable property, clear the cached value...
           if (keys && (loc = keys.length)) {
+            //@if(debug)
             if (log) {
               console.log("%@...including dependent keys for %@: %@".fmt(spaces, key, keys));
             }
+            //@endif
             cache = this._kvo_cache;
             if (!cache) cache = this._kvo_cache = {};
             while (--loc >= 0) {
@@ -1183,6 +1325,7 @@ SC.Observable = /** @scope SC.Observable.prototype */{
           // observer, you will not be notified until the next time.)
           members = observers.getMembers();
           membersLength = members.length;
+
           for (memberLoc = 0; memberLoc < membersLength; memberLoc++) {
             member = members[memberLoc];
 
@@ -1195,7 +1338,9 @@ SC.Observable = /** @scope SC.Observable.prototype */{
             context = member[2];
             member[3] = rev;
 
+            //@if(debug)
             if (log) console.log('%@...firing observer on %@ for key "%@"'.fmt(spaces, target, key));
+            //@endif
             if (context !== undefined) {
               method.call(target, this, key, null, context, rev);
             } else {
@@ -1216,7 +1361,10 @@ SC.Observable = /** @scope SC.Observable.prototype */{
             member = members[memberLoc];
             method = this[member]; // try to find observer function
             if (method) {
+              //@if(debug)
               if (log) console.log('%@...firing local observer %@.%@ for key "%@"'.fmt(spaces, this, member, key));
+              //@endif
+
               method.call(this, this, key, null, rev);
             }
           }
@@ -1234,7 +1382,9 @@ SC.Observable = /** @scope SC.Observable.prototype */{
             method = member[1];
             context = member[2];
 
+            //@if(debug)
             if (log) console.log('%@...firing * observer on %@ for key "%@"'.fmt(spaces, target, key));
+            //@endif
             if (context !== undefined) {
               method.call(target, this, key, null, context, rev);
             } else {
@@ -1245,7 +1395,9 @@ SC.Observable = /** @scope SC.Observable.prototype */{
 
         // if there is a default property observer, call that also
         if (this.propertyObserver) {
+          //@if(debug)
           if (log) console.log('%@...firing %@.propertyObserver for key "%@"'.fmt(spaces, this, key));
+          //@endif
           this.propertyObserver(this, key, null, rev);
         }
       } // while(changes.length>0)
@@ -1261,7 +1413,9 @@ SC.Observable = /** @scope SC.Observable.prototype */{
     // done with loop, reduce change level so that future sets can resume
     this._kvo_changeLevel = (this._kvo_changeLevel || 1) - 1;
 
+    //@if(debug)
     if (log) SC.KVO_SPACES = spaces.slice(0, -2);
+    //@endif
 
     return YES; // finished successfully
   },
@@ -1385,9 +1539,9 @@ SC.Observable = /** @scope SC.Observable.prototype */{
     seenValues = valueCache[context] || {};
     seenRevisions = revisionCache[context] || {};
 
-    // prepare too loop!
+    // prepare to loop!
     ret = false;
-    currentRevision = this._kvo_revision || 0;
+    currentRevision = this._kvo_revision;
     idx = arguments.length;
     while (--idx >= 1) {  // NB: loop only to 1 to ignore context arg.
       key = arguments[idx];
@@ -1494,11 +1648,10 @@ SC.Observable = /** @scope SC.Observable.prototype */{
     @returns {Array} Values of property keys.
   */
   getEach: function () {
-    var keys = SC.A(arguments),
-      ret = [], idx, idxLen;
+    var ret = [], idx, idxLen;
 
-    for (idx = 0, idxLen = keys.length; idx < idxLen; idx++) {
-      ret[ret.length] = this.getPath(keys[idx]);
+    for (idx = 0, idxLen = arguments.length; idx < idxLen; idx++) {
+      ret[ret.length] = this.getPath(arguments[idx]);
     }
     return ret;
   },
@@ -1582,44 +1735,16 @@ SC.Observable = /** @scope SC.Observable.prototype */{
     return this;
   },
 
-  /**
-    Allows you to inspect a property for changes. Whenever the named property
-    changes, a log will be printed to the console. This (along with removeProbe)
-    are convenience methods meant for debugging purposes.
-
-    @param {String} key The name of the property you want probed for changes
-  */
-  addProbe: function (key) { this.addObserver(key, SC.logChange); },
-
-  /**
-    Stops a running probe from observing changes to the observer.
-
-    @param {String} key The name of the property you want probed for changes
-  */
-  removeProbe: function (key) { this.removeObserver(key, SC.logChange); },
-
-  /**
-    Logs the named properties to the console.
-
-    @param {String...} propertyNames one or more property names
-  */
-  logProperty: function () {
-    var props = SC.$A(arguments),
-        prop, propsLen, idx;
-    for (idx = 0, propsLen = props.length; idx < propsLen; idx++) {
-      prop = props[idx];
-      console.log('%@:%@: '.fmt(SC.guidFor(this), prop), this.get(prop));
-    }
-  },
-
   propertyRevision: 1
 
 };
 
-/** @private used by addProbe/removeProbe */
+//@if(debug)
+/** @private used by addProbe/removeProbe. Debug mode only. */
 SC.logChange = function logChange(target, key, value) {
   console.log("CHANGE: %@[%@] => %@".fmt(target, key, target.get(key)));
 };
+//@endif
 
 /**
   Retrieves a property from an object, using get() if the
@@ -1629,6 +1754,7 @@ SC.logChange = function logChange(target, key, value) {
   @param  {String}  key the property to retrieve
 */
 SC.mixin(SC, {
+
   get: function (object, key) {
     if (!object) return undefined;
     if (key === undefined) return this[object];
@@ -1650,6 +1776,7 @@ SC.mixin(SC, {
     }
     return SC.objectForPropertyPath(path, object);
   }
+
 });
 
 // Make all Array's observable

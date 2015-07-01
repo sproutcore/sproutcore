@@ -61,6 +61,9 @@ sc_require('views/menu_item');
 SC.MenuPane = SC.PickerPane.extend(
 /** @scope SC.MenuPane.prototype */ {
 
+  /** @private Cache of the items array, used for clean up of observers. */
+  _sc_menu_items: null,
+
   /**
     @type Array
     @default ['sc-menu']
@@ -292,6 +295,8 @@ SC.MenuPane = SC.PickerPane.extend(
    // this.set('anchor',anchorViewOrElement);
     if (preferMatrix) this.set('preferMatrix', preferMatrix);
 
+    // Resize the pane's initial height to fit the height of the menu.
+    // Note: SC.PickerPane's positioning code may adjust the height to fit within the window.
     this.adjust('height', this.get('menuHeight'));
     this.positionPane();
 
@@ -303,6 +308,11 @@ SC.MenuPane = SC.PickerPane.extend(
 
     // Prevent body overflow (we don't want to overflow because of shadows).
     SC.bodyOverflowArbitrator.requestHidden(this, true);
+
+    //@if(debug)
+    // A debug-mode only flag to indicate that the popup method was called (see override of append in SC.PickerPane).
+    this._sc_didUsePopup = true;
+    //@endif
 
     this.append();
   },
@@ -319,6 +329,15 @@ SC.MenuPane = SC.PickerPane.extend(
     @commonTask Menu Item Properties
   */
   itemTitleKey: 'title',
+
+  /**
+    The name of the property that contains the value for each item.
+
+    @type String
+    @default "value"
+    @commonTask Menu Item Properties
+  */
+  itemValueKey: 'value',
 
   /**
     The name of the property that contains the tooltip for each item.
@@ -476,7 +495,7 @@ SC.MenuPane = SC.PickerPane.extend(
     @isReadOnly
     @type Array
   */
-  menuItemKeys: ['itemTitleKey', 'itemToolTipKey', 'itemIsEnabledKey', 'itemIconKey', 'itemSeparatorKey', 'itemActionKey', 'itemCheckboxKey', 'itemShortCutKey', 'itemHeightKey', 'itemSubMenuKey', 'itemKeyEquivalentKey', 'itemTargetKey', 'itemLayerIdKey'],
+  menuItemKeys: ['itemTitleKey', 'itemValueKey', 'itemToolTipKey', 'itemIsEnabledKey', 'itemIconKey', 'itemSeparatorKey', 'itemActionKey', 'itemCheckboxKey', 'itemShortCutKey', 'itemHeightKey', 'itemSubMenuKey', 'itemKeyEquivalentKey', 'itemTargetKey', 'itemLayerIdKey'],
 
   // ..........................................................
   // DEFAULT PROPERTIES
@@ -505,15 +524,6 @@ SC.MenuPane = SC.PickerPane.extend(
   /** @private */
   preferType: SC.PICKER_MENU,
 
-  /**
-    Create a modal pane beneath the menu that will prevent any mouse clicks
-    that fall outside the menu pane from triggering an inadvertent action.
-
-    @type Boolean
-    @private
-  */
-  isModal: YES,
-
   // ..........................................................
   // INTERNAL METHODS
   //
@@ -529,6 +539,9 @@ SC.MenuPane = SC.PickerPane.extend(
 
     // Continue initializing now that default values exist.
     sc_super();
+
+    // Initialize the observer function once.
+    this._sc_menu_itemsDidChange();
   },
 
   displayProperties: ['controlSize'],
@@ -544,29 +557,18 @@ SC.MenuPane = SC.PickerPane.extend(
     @returns {SC.View} receiver
   */
   createChildViews: function () {
-    var scroll, menuView, menuItemViews;
+    var scroll, menuView;
+
+    // Create the menu items collection view.
+    // TODO: Should this not be an SC.ListView?
+    menuView = this._menuView = SC.View.create({
+      layout: { height: 0 }
+    });
 
     scroll = this._menuScrollView = this.createChildView(SC.MenuScrollView, {
-      controlSize: this.get('controlSize')
+      controlSize: this.get('controlSize'),
+      contentView: menuView
     });
-
-    menuView = this._menuView = SC.View.create({
-      parentViewDidResize: function () {
-        this.notifyPropertyChange('frame');
-      },
-
-      viewDidResize: function () {
-
-      }
-    });
-
-    menuItemViews = this.get('menuItemViews');
-    menuView.replaceAllChildren(menuItemViews);
-
-    // Adjust our menu view's layout to fit the calculated menu height.
-    menuView.set('layout', { top: 0, left: 0, height : this.get('menuHeight')});
-
-    scroll.set('contentView', menuView);
 
     this.childViews = [scroll];
 
@@ -681,17 +683,6 @@ SC.MenuPane = SC.PickerPane.extend(
       height = item.get(heightKey);
       if (!height) {
         height = item.get(separatorKey) ? separatorHeight : defaultHeight;
-        //@if(debug)
-        // TODO: Remove in 1.10 and 2.0
-        // Help the developer if they were relying on the previously misleading
-        // default value of itemSeparatorKey.  We need to ensure that the change
-        // is backwards compatible with apps prior to 1.9.
-        if (separatorKey === 'isSeparator' && SC.none(item.get('isSeparator')) && item.get('separator')) {
-          SC.warn("Developer Warning: the default value of itemSeparatorKey has been changed from 'separator' to 'isSeparator' to match the documentation.  Please update your menu item properties to 'isSeparator: YES' to remove this warning.");
-          height = separatorHeight;
-          item.set('isSeparator', YES);
-        }
-        //@endif
       }
 
       propertiesHash = {
@@ -761,7 +752,7 @@ SC.MenuPane = SC.PickerPane.extend(
     return this;
   }.property('isSubMenu').cacheable(),
 
-
+  /** @private @see SC.Object */
   destroy: function () {
     var ret = sc_super();
 
@@ -848,6 +839,7 @@ SC.MenuPane = SC.PickerPane.extend(
     return ret;
   }.property('items').cacheable(),
 
+  /** @private */
   _sc_menu_itemsDidChange: function () {
     var items = this.get('items');
 
@@ -870,6 +862,7 @@ SC.MenuPane = SC.PickerPane.extend(
     this._menuView.adjust('height', this.get('menuHeight'));
   }.observes('items'),
 
+  /** @private */
   _sc_menu_itemPropertiesDidChange: function () {
     // Indicate that the displayItems changed.
     this.notifyPropertyChange('displayItems');
@@ -894,6 +887,7 @@ SC.MenuPane = SC.PickerPane.extend(
     return this._currentMenuItem;
   }.property().cacheable(),
 
+  /** @private */
   _sc_menu_currentMenuItemDidChange: function () {
     var currentMenuItem = this.get('currentMenuItem'),
         previousMenuItem = this.get('previousMenuItem');
@@ -1081,7 +1075,7 @@ SC.MenuPane = SC.PickerPane.extend(
         verticalOffset = 0,
         verticalPageScroll;
 
-    if (this._menuScrollView && this._menuScrollView.verticalScrollerView2) {
+    if (this._menuScrollView && this._menuScrollView.bottomScrollerView) {
 
       if (currentMenuItem) {
         idx = currentMenuItem.getPath('content.contentIndex');
@@ -1127,7 +1121,7 @@ SC.MenuPane = SC.PickerPane.extend(
         verticalOffset = 0,
         verticalPageScroll;
 
-    if (this._menuScrollView && this._menuScrollView.verticalScrollerView) {
+    if (this._menuScrollView && this._menuScrollView.topScrollerView) {
 
       if (currentMenuItem) {
         idx = currentMenuItem.getPath('content.contentIndex');
@@ -1268,15 +1262,43 @@ SC.MenuPane = SC.PickerPane.extend(
   }
 });
 
+
+/** @private */
 SC._menu_fetchKeys = function (k) {
   return this.get(k);
 };
+
+/** @private */
 SC._menu_fetchItem = function (k) {
   if (!k) return null;
   return this.get ? this.get(k) : this[k];
 };
 
-// If a menu pane exceeds the height of the viewport, it will
-// be truncated to fit. This value determines the amount by which
-// the menu will be offset from the top and bottom of the viewport.
-SC.MenuPane.VERTICAL_OFFSET = 23;
+
+/**
+  Default metrics for the different control sizes.
+*/
+SC.MenuPane.TINY_MENU_ITEM_HEIGHT = 10;
+// SC.MenuPane.TINY_MENU_ITEM_SEPARATOR_HEIGHT = 2;
+// SC.MenuPane.TINY_MENU_HEIGHT_PADDING = 2;
+// SC.MenuPane.TINY_SUBMENU_OFFSET_X = 0;
+
+SC.MenuPane.SMALL_MENU_ITEM_HEIGHT = 16;
+// SC.MenuPane.SMALL_MENU_ITEM_SEPARATOR_HEIGHT = 7;
+// SC.MenuPane.SMALL_MENU_HEIGHT_PADDING = 4;
+// SC.MenuPane.SMALL_SUBMENU_OFFSET_X = 2;
+
+SC.MenuPane.REGULAR_MENU_ITEM_HEIGHT = 22;
+// SC.MenuPane.REGULAR_MENU_ITEM_SEPARATOR_HEIGHT = 9;
+// SC.MenuPane.REGULAR_MENU_HEIGHT_PADDING = 6;
+// SC.MenuPane.REGULAR_SUBMENU_OFFSET_X = 2;
+
+SC.MenuPane.LARGE_MENU_ITEM_HEIGHT = 31;
+// SC.MenuPane.LARGE_MENU_ITEM_SEPARATOR_HEIGHT = 20;
+// SC.MenuPane.LARGE_MENU_HEIGHT_PADDING = 0;
+// SC.MenuPane.LARGE_SUBMENU_OFFSET_X = 4;
+
+SC.MenuPane.HUGE_MENU_ITEM_HEIGHT = 20;
+// SC.MenuPane.HUGE_MENU_ITEM_SEPARATOR_HEIGHT = 9;
+// SC.MenuPane.HUGE_MENU_HEIGHT_PADDING = 0;
+// SC.MenuPane.HUGE_SUBMENU_OFFSET_X = 0;

@@ -174,8 +174,15 @@ SC._BindableSpan = SC.TemplateView.extend(
     elem = context.element();
     this.$().replaceWith(elem);
     this.set('layer', elem);
-    this._rendered();
-    this._callOnChildViews('_parentDidRender');
+
+    this._sc_addRenderedStateObservers();
+    this._callOnChildViews('_sc_addRenderedStateObservers');
+
+    // Notify for each child (that changed state) in reverse so that each child is in the proper
+    // state before its parent potentially alters its state. For example, a parent could modify
+    // children in `didCreateLayer`.
+    this._callOnChildViews('_notifyDidRender', false);
+    this._notifyDidRender();
   }
 });
 

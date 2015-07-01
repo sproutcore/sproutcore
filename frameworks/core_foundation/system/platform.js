@@ -81,18 +81,18 @@ SC.platform = SC.Object.create({
   touch: (!SC.none(window.ontouchstart) || SC.browser.name === SC.BROWSER.android || 'ontouchstart' in document.documentElement) && SC.none(window._phantom),
 
   /**
-    YES if the current browser supports bounce on scroll.
+    True if bouncing on scroll is expected in the current platform.
 
     @type Boolean
   */
   bounceOnScroll: SC.browser.os === SC.OS.ios,
 
   /**
-    YES if the current browser supports pinch to zoom.
+    True if pinch-to-zoom is expected in the current platform.
 
     @type Boolean
   */
-  pinchToZoom:  SC.browser.os === SC.OS.ios,
+  pinchToZoom: SC.browser.os === SC.OS.ios,
 
   /**
     A hash that contains properties that indicate support for new HTML5
@@ -450,6 +450,13 @@ SC.platform = SC.Object.create({
     @type Boolean
   */
   supportsOrientationChange: ('onorientationchange' in window),
+
+  /**
+    Whether the browser supports WebSocket or not.
+
+    @type Boolean
+  */
+  supportsWebSocket: ("WebSocket" in window),
 
   /**
     Whether the browser supports WebSQL.

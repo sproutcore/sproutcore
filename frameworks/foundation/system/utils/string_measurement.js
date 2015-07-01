@@ -114,7 +114,7 @@ SC.mixin( /** @scope SC */ {
     @param classNames {String} (Optional) Class names to add to the test element.
   */
   prepareStringMeasurement: function(exampleElement, classNames) {
-    var element = this._metricsCalculationElement, classes, styles, style,
+    var element = this._metricsCalculationElement, classes, style,
         cqElem;
 
     // collect the class names

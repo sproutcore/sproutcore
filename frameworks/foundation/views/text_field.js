@@ -7,7 +7,6 @@
 
 sc_require('views/field');
 sc_require('system/text_selection');
-sc_require('mixins/static_layout');
 sc_require('mixins/editable');
 
 SC.AUTOCAPITALIZE_NONE = 'none';
@@ -754,7 +753,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       }
 
       if (!SC.none(autoCapitalize)) {
-        if (SC.typeOf(autoCapitalize) == 'boolean') {
+        if (SC.typeOf(autoCapitalize) === 'boolean') {
           input.attr('autocapitalize', !autoCapitalize ? 'none' : 'sentences');
         } else {
           input.attr('autocapitalize', autoCapitalize);
@@ -1260,10 +1259,12 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     if (SC.browser.isMozilla &&
         evt.keyCode === SC.Event.KEY_RETURN) { this.fieldValueDidChange(); }
 
-    // The caret/selection could have moved.  In some browsers, though, the
-    // element's values won't be updated until after this event is finished
-    // processing.
-    this.notifyPropertyChange('selection');
+    // The caret/selection may have changed.
+    // This cannot notify immediately, because in some browsers (tested Chrome 39.0 on OS X), the
+    // value of `selectionStart` and `selectionEnd` won't have updated yet. Thus if we notified
+    // immediately, observers of this view's `selection` property would get the old value.
+    this.invokeNext(this._textField_selectionDidChange);
+
     evt.allowDefault();
     return true;
   },
@@ -1288,10 +1289,12 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       return true;
     }
 
-    // The caret/selection could have moved.  In some browsers, though, the
-    // element's values won't be updated until after this event is finished
-    // processing.
-    this.notifyPropertyChange('selection');
+    // The caret/selection may have changed.
+    // This cannot notify immediately, because in some browsers (tested Chrome 39.0 on OS X), the
+    // value of `selectionStart` and `selectionEnd` won't have updated yet. Thus if we notified
+    // immediately, observers of this view's `selection` property would get the old value.
+    this.invokeNext(this._textField_selectionDidChange);
+
     return sc_super();
   },
 

@@ -82,7 +82,7 @@ SC.Benchmark = {
     does not yet exist, you cannot call .start() and .end(), but adding the items to
     SC.benchmarkPreloadEvents will ensure they are included.
 
-    @type Hash
+    @type Object
     @default {}
   */
   events: {},
@@ -95,7 +95,7 @@ SC.Benchmark = {
       - *amt*: the total time consumed by this (divide by runs to get avg)
       - *name*: an optional longer name you assigned to the stat key.  Set this  using name().
 
-    @type Hash
+    @type Object
     @default {}
   */
   stats: {},
@@ -122,7 +122,7 @@ SC.Benchmark = {
     @param {String} name
       A name that identifies the event. If addEvent is called again with the same name,
       the previous call's timestamp will be overwritten.
-    @param {Timestamp} time
+    @param {Number} time
       Optional. The timestamp to record for the event.
   */
   addEvent: function(name, time) {
@@ -143,26 +143,31 @@ SC.Benchmark = {
     @param {String} parentKey
       A unique key that identifies the parent benchmark.  All calls to
       start/end with the same key will be groups together.
-    @param {Boolean} topLevelOnly
-      If true then recursive calls to this method with the same key will be
-      ignored.
     @param {Number} time
       Only pass if you want to explicitly set the start time.  Otherwise the
       start time is now.
+    @param {Boolean} topLevelOnly
+      If true then recursive calls to this method with the same key will be
+      ignored.
     @returns {String} the passed key
   */
   start: function(key, parentKey, time, topLevelOnly) {
-    if (!this.enabled) return ;
+    var start,
+        stat;
 
-    var start = (time || Date.now()), stat;
+    if (this.enabled) {
+      start = time || Date.now();
 
-    if (parentKey) stat = this._subStatFor(key, parentKey) ;
-    else stat = this._statFor(key) ;
+      if (parentKey) stat = this._subStatFor(key, parentKey);
+      else stat = this._statFor(key);
 
-    if (topLevelOnly && stat._starts.length > 0) stat._starts.push('ignore');
-    else stat._starts.push(start) ;
+      if (stat) {
+        if (topLevelOnly && stat._starts.length > 0) stat._starts.push('ignore');
+        else stat._starts.push(start);
 
-    stat._times.push({start: start, _subStats: {}});
+        stat._times.push({ start: start, _subStats: {} });
+      }
+    }
     return key;
   },
 
@@ -179,42 +184,46 @@ SC.Benchmark = {
       time is now.
   */
   end: function(key, parentKey, time) {
-    var stat;
-    if (!this.enabled) return ;
-    if(parentKey)
-    {
-      stat = this._subStatFor(key, parentKey) ;
+    var stat,
+        start,
+        end,
+        dur;
+
+    if (!this.enabled) { return; }
+
+    if (parentKey) {
+      stat = this._subStatFor(key, parentKey);
+    } else {
+      stat = this._statFor(key);
     }
-    else
-    {
-      stat = this._statFor(key) ;
-    }
-    var start = stat._starts.pop() ;
-    if (!start) {
+
+    if (stat && stat._starts.length) {
+      start = stat._starts.pop();
+
+      // top level only.
+      if (start !== 'ignore') {
+        end = (time || Date.now());
+        dur = end - start;
+
+        stat._times[stat._times.length-1].end = end;
+        stat._times[stat._times.length-1].dur = dur;
+
+        stat.amt += dur;
+        stat.runs++;
+
+        if (this.verbose) { this.log(key); }
+      }
+    } else {
       SC.Logger.log('SC.Benchmark "%@" ended without a matching start.  No information was saved.'.fmt(key));
-      return ;
     }
-
-    // top level only.
-    if (start == 'ignore') return ;
-
-    var end = (time || Date.now()) ;
-    var dur = end - start;
-
-    stat._times[stat._times.length-1].end = end;
-    stat._times[stat._times.length-1].dur = dur;
-
-    stat.amt += dur ;
-    stat.runs++ ;
-
-    if (this.verbose) this.log(key) ;
   },
 
-  /*
+  /**
     Set the inital global start time.
+
+    @param {Number} time global start time
   */
-  setGlobalStartTime: function(time)
-  {
+  setGlobalStartTime: function(time) {
     this.globalStartTime = time;
   },
 
@@ -222,48 +231,58 @@ SC.Benchmark = {
     This is a simple way to benchmark a function.  The function will be
     run with the name you provide the number of times you indicate.  Only the
     function is a required param.
+
+    @param {Function} func function to benchmark
+    @param {String} [key] benchmark key
+    @param {Number} [reps] how many times to run the function
+    @returns {*} Most recent return value from func
   */
   bench: function(func, key, reps) {
-    if (!key) key = "bench%@".fmt(this._benchCount++) ;
-    if (!reps) reps = 1 ;
-    var ret ;
+    var ret;
+    if (!key) { key = "bench%@".fmt(this._benchCount++); }
+    if (!reps) { reps = 1; }
 
-    while(--reps >= 0) {
-      var timeKey = SC.Benchmark.start(key) ;
+    while (--reps >= 0) {
+      SC.Benchmark.start(key);
       ret = func();
-      SC.Benchmark.end(timeKey) ;
+      SC.Benchmark.end(key);
     }
 
     return ret ;
   },
 
   /**
-    This bit of metaprogramming magic install a wrapper around a method and
-    benchmark it whenever it is run.
+    Install a wrapper around a method to benchmark it whenever it is run.
+
+    @param {Object} object target object to install on
+    @param {String} method name of the method on object
+    @param {Boolean} topLevelOnly should recursive calls to this method
+                                  with the same key will be ignored
   */
-  install: function(object,method, topLevelOnly) {
-    // vae the original method.
-    object['b__' + method] = object[method] ;
-    var __func = object['b__' + method];
+  install: function(object, method, topLevelOnly) {
+    // save the original method.
+    var fn = object['b__' + method] = object[method],
+        join = Array.prototype.join;
 
     // replace with this helper.
     object[method] = function() {
-      var key = '%@(%@)'.fmt(method, $A(arguments).join(', ')) ;
-      SC.Benchmark.start(key, topLevelOnly) ;
-      var ret = __func.apply(this, arguments) ;
-      SC.Benchmark.end(key) ;
-      return ret ;
-    } ;
+      var key = '%@(%@)'.fmt(method, join.call(arguments, ', ')),
+          ret;
+      SC.Benchmark.start(key, null, null, topLevelOnly);
+      ret = fn.apply(this, arguments);
+      SC.Benchmark.end(key);
+      return ret;
+    };
   },
 
   /**
     Restore the original method, deactivating the benchmark.
 
     @param {Object} object the object to change
-    @param {String} method the method name as a string.
+    @param {String} method the method name as a string
   */
-  restore: function(object,method) {
-    object[method] = object['b__' + method] ;
+  restore: function(object, method) {
+    object[method] = object['b__' + method];
   },
 
   /**
@@ -530,7 +549,7 @@ SC.Benchmark = {
 
     // the browsers may have their own event hash. Ours uses the same format, so
     // all that we need to do is mixin the browser's to our own.
-    if (typeof webkitPerformnce !== 'undefined') SC.mixin(preloadEvents, webkitPerformane.timing);
+    if (typeof webkitPerformance !== 'undefined') SC.mixin(preloadEvents, webkitPerformance.timing);
 
     // we will attempt to find when the loading started and use that as our
     // global start time, but only do so if the global start time is not already set.
@@ -640,11 +659,19 @@ SC.Benchmark = {
   // Generate the traditional report show multiple runs averaged.
   /** @private */
   _genReport: function(key) {
-    var stat = this._statFor(key) ;
-    var avg = (stat.runs > 0) ? (Math.floor(stat.amt * 1000 / stat.runs) / 1000) : 0 ;
-    var last = stat._times[stat._times.length - 1];
+    var stat = this._statFor(key),
+        avg = (stat.runs > 0) ? (Math.floor(stat.amt * 1000 / stat.runs) / 1000) : 0,
+        last,
+        ret;
 
-    return 'BENCH %@ msec: %@ (%@x); latest: %@'.fmt(avg, (stat.name || key), stat.runs, last.end - last.start);
+    if (stat._times.length) {
+      last = stat._times[stat._times.length - 1];
+      ret = 'BENCH %@ msec: %@ (%@x); latest: %@'.fmt(avg, (stat.name || key), stat.runs, last.end - last.start);
+    } else {
+      ret = 'No information for SC.Benchmark "%@".'.fmt(key);
+    }
+
+    return ret;
   },
 
   // Generate the report in the form of at time line. This returns the parent.
@@ -679,16 +706,20 @@ SC.Benchmark = {
   // creates it.
   /** @private */
   _subStatFor: function(key, parentKey) {
-    var parentTimeLen = this.stats[parentKey]._times.length;
-    if(parentTimeLen === 0) return;
-    var parentSubStats = this.stats[parentKey]._times[this.stats[parentKey]._times.length-1]._subStats;
-    var ret = parentSubStats[key] ;
+    var parentStat = this.stats[parentKey],
+        parentTimeLen = parentStat ? parentStat._times.length : 0,
+        parentSubStats,
+        ret;
+
+    if (!parentTimeLen) { return; }
+    parentSubStats = parentStat._times[parentTimeLen - 1]._subStats;
+    ret = parentSubStats[key];
     if (!ret) {
-      parentSubStats[key] = {
+      ret = parentSubStats[key] = {
         runs: 0, amt: 0, name: key, _starts: [], _times: []
       };
-      ret = parentSubStats[key];
     }
+
     return ret ;
   },
 
@@ -696,14 +727,13 @@ SC.Benchmark = {
   // creates it.
   /** @private */
   _statFor: function(key) {
-    var ret = this.stats[key] ;
+    var ret = this.stats[key];
     if (!ret) {
       ret = this.stats[key] = {
         runs: 0, amt: 0, name: key, _starts: [], _times: []
       };
-      ret = this.stats[key];
     }
-    return ret ;
+    return ret;
   },
 
   /** @private */

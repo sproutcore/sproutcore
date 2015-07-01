@@ -4,7 +4,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/*global module test equals context ok same Q$ htmlbody */
+/*global module, test, equals, same */
 
 // ..........................................................
 // viewDidResize()
@@ -45,8 +45,14 @@ test("parentViewDidResize should only be called when the parent's layout propert
   equals(callCount, 2, 'parentViewDidResize should invoke twice');
 
   // This is tricky, if the height increases, but the same size border is added, the effective height/width is unchanged.
-  SC.run(function () { view.adjust({'height': 70, 'borderTop': 10 }); });
-  equals(callCount, 2, 'parentViewDidResize should invoke twice');
+  /*
+    Testing for this type of change on every call to adjust isn't worth the computation cost. Essentially,
+    what we lose is that parentViewDidResize will get called still if a view happens to adjust its border and
+    size at the same time, such that its frame doesn't change, which has a very small chance of occurring and
+    isn't critical if it does occur.
+    */
+  // SC.run(function () { view.adjust({'height': 70, 'borderTop': 10 }); });
+  // equals(callCount, 2, 'parentViewDidResize should invoke twice');
 });
 
 test("The view's frame should only notify changes when its layout changes if the effective size or position actually change.", function () {
@@ -62,25 +68,29 @@ test("The view's frame should only notify changes when its layout changes if the
       layout: { width: 200, height: 200 }
     });
 
-  SC.run(function () { view2.set('layout', { height: 50, width: 50 }); });
+  // Because the view is created independently and then added to a parent, it's frame should change
+  // once when added to the parent.
   equals(view2.get('frameCallCount'), 1, 'frame should have notified changing once.');
 
+  SC.run(function () { view2.set('layout', { height: 50, width: 50 }); });
+  equals(view2.get('frameCallCount'), 2, 'frame should have notified changing twice.');
+
   SC.run(function () { view2.adjust('top', 0); });
-  equals(view2.get('frameCallCount'), 2, 'frame should have notified changing once.');
+  equals(view2.get('frameCallCount'), 3, 'frame should have notified changing thrice.');
 
   SC.run(function () { view2.adjust('height', 100); });
-  equals(view2.get('frameCallCount'), 3, 'frame should have notified changing twice.');
+  equals(view2.get('frameCallCount'), 4, 'frame should have notified changing four times.');
 
   // Tricky.
   SC.run(function () { view2.adjust({ 'height': 110, 'borderTop': 10, 'top': -10 }); });
-  equals(view2.get('frameCallCount'), 4, 'frame should have notified changing twice.');
+  equals(view2.get('frameCallCount'), 5, 'frame should have notified changing five times.');
 
   SC.run(function () { view2.adjust('width', null); });
-  equals(view2.get('frameCallCount'), 5, 'frame should have notified changing thrice.');
+  equals(view2.get('frameCallCount'), 6, 'frame should have notified changing six times.');
 
   // Tricky.
   SC.run(function () { view2.adjust('width', 200); });
-  equals(view2.get('frameCallCount'), 6, 'frame should have notified changing thrice.');
+  equals(view2.get('frameCallCount'), 7, 'frame should have notified changing seven times.');
 });
 
 test("making sure that the frame value is correct inside viewDidResize()", function() {
@@ -141,73 +151,101 @@ test("When parentViewDidResize is called on a view, it should only notify on fra
     });
 
   // try with fixed layout
-  view.set('layout', { top: 10, left: 10, height: 10, width: 10 });
-  view.viewDidResize.reset(); view.frameCallCount = 0;
-  parentView.adjust({ width: 90, height: 90 });
+  SC.run(function () {
+    view.set('layout', { top: 10, left: 10, height: 10, width: 10 });
+    view.viewDidResize.reset(); view.frameCallCount = 0;
+    parentView.adjust({ width: 90, height: 90 });
+  });
   view.viewDidResize.expect(0, "Should not notify view resize with fixed position and fixed size");
   equals(view.frameCallCount, 0, 'Should not notify frame changed with fixed position and fixed size.');
 
   // Try with flexible height
-  view.set('layout', { top: 10, left: 10, bottom: 10, width: 10 });
-  // Adjust height.
-  view.viewDidResize.reset(); view.frameCallCount = 0;
-  parentView.adjust({ height: 80 });
+  SC.run(function () {
+    view.set('layout', { top: 10, left: 10, bottom: 10, width: 10 });
+    // Adjust height.
+    view.viewDidResize.reset(); view.frameCallCount = 0;
+    parentView.adjust({ height: 80 });
+  });
   view.viewDidResize.expect(1, "View with fixed width and flexible height SHOULD resize when parent's height is adjusted");
   equals(view.frameCallCount, 1, "Adjusting parent's height SHOULD notify frame with fixed position, fixed width and flexible height");
+
   // Adjust width.
   view.viewDidResize.reset(); view.frameCallCount = 0;
-  parentView.adjust({ width: 80 });
+
+  SC.run(function () {
+    parentView.adjust({ width: 80 });
+  });
   view.viewDidResize.expect(0, "View with fixed width and flexible height should NOT resize when parent's width is adjusted");
   equals(view.frameCallCount, 0, "Adjusting parent's width should NOT notify frame with fixed position, fixed width and flexible height");
+
   // Adjust both.
   view.viewDidResize.reset(); view.frameCallCount = 0;
-  parentView.adjust({ width: 90, height: 90 });
+
+  SC.run(function () {
+    parentView.adjust({ width: 90, height: 90 });
+  });
   view.viewDidResize.expect(1, "View with fixed width and flexible height SHOULD resize when parent's height and width are adjusted");
   equals(view.frameCallCount, 1, "Adjusting parent's height and width SHOULD notify frame with fixed position, fixed width and flexible height");
 
   // try with flexible width
-  view.set('layout', { top: 10, left: 10, height: 10, right: 10 });
-  // Adjust height.
-  view.viewDidResize.reset(); view.frameCallCount = 0;
-  parentView.adjust({ height: 80 });
+  SC.run(function () {
+    view.set('layout', { top: 10, left: 10, height: 10, right: 10 });
+    // Adjust height.
+    view.viewDidResize.reset(); view.frameCallCount = 0;
+    parentView.adjust({ height: 80 });
+  });
   view.viewDidResize.expect(0, "View with flexible width and fixed height should NOT resize when parent's height is adjusted");
   equals(view.frameCallCount, 0, "Adjusting parent's height should NOT notify frame with fixed position, flexible width and fixed height");
+
   // Adjust width.
   view.viewDidResize.reset(); view.frameCallCount = 0;
-  parentView.adjust({ width: 80 });
+  SC.run(function () {
+    parentView.adjust({ width: 80 });
+  });
   view.viewDidResize.expect(1, "View with flexible width and fixed height SHOULD resize when parent's width is adjusted");
   equals(view.frameCallCount, 1, "Adjusting parent's width SHOULD notify frame with fixed position, flexible width and fixed height");
+
   // Adjust both.
   view.viewDidResize.reset(); view.frameCallCount = 0;
-  parentView.adjust({ width: 90, height: 90 });
+  SC.run(function () {
+    parentView.adjust({ width: 90, height: 90 });
+  });
   view.viewDidResize.expect(1, "View with flexible width and fixed height SHOULD resize when parent's height and width are adjusted");
   equals(view.frameCallCount, 1, "Adjusting parent's height and width SHOULD notify frame with fixed position, flexible width and fixed height");
 
   // try with right align
-  view.set('layout', { top: 10, right: 10, height: 10, width: 10 });
-  view.viewDidResize.reset(); view.frameCallCount = 0;
-  SC.run(function() { parentView.adjust({ width: 60, height: 60 }); });
+  SC.run(function () {
+    view.set('layout', { top: 10, right: 10, height: 10, width: 10 });
+    view.viewDidResize.reset(); view.frameCallCount = 0;
+    parentView.adjust({ width: 60, height: 60 });
+  });
   view.viewDidResize.expect(0);
   equals(view.frameCallCount, 1, 'right align: should notify frame changed when isFixedPosition: %@ and isFixedSize: %@'.fmt(view.get('isFixedPosition'), view.get('isFixedSize')));
 
   // try with bottom align
-  view.set('layout', { left: 10, bottom: 10, height: 10, width: 10 });
-  view.viewDidResize.reset(); view.frameCallCount = 0;
-  parentView.adjust({ width: 50, height: 50 });
+  SC.run(function () {
+    view.set('layout', { left: 10, bottom: 10, height: 10, width: 10 });
+    view.viewDidResize.reset(); view.frameCallCount = 0;
+    parentView.adjust({ width: 50, height: 50 });
+  });
   view.viewDidResize.expect(0);
   equals(view.frameCallCount, 1, 'bottom align: should notify frame changed when isFixedPosition: %@ and isFixedSize: %@'.fmt(view.get('isFixedPosition'), view.get('isFixedSize')));
 
   // try with center horizontal align
-  view.set('layout', { centerX: 10, top: 10, height: 10, width: 10 });
-  view.viewDidResize.reset(); view.frameCallCount = 0;
-  parentView.adjust({ width: 40, height: 40 });
+  SC.run(function () {
+    view.set('layout', { centerX: 10, top: 10, height: 10, width: 10 });
+    view.viewDidResize.reset(); view.frameCallCount = 0;
+    parentView.adjust({ width: 40, height: 40 });
+  });
   view.viewDidResize.expect(0);
   equals(view.frameCallCount, 1, 'centerX: should notify frame changed when isFixedPosition: %@ and isFixedSize: %@'.fmt(view.get('isFixedPosition'), view.get('isFixedSize')));
 
   // try with center vertical align
-  view.set('layout', { left: 10, centerY: 10, height: 10, width: 10 });
-  view.viewDidResize.reset(); view.frameCallCount = 0;
-  parentView.adjust({ width: 30, height: 30 });
+  SC.run(function () {
+    view.set('layout', { left: 10, centerY: 10, height: 10, width: 10 });
+    view.viewDidResize.reset(); view.frameCallCount = 0;
+    parentView.adjust({ width: 30, height: 30 });
+  });
   view.viewDidResize.expect(0);
   equals(view.frameCallCount, 1, 'centerY: should notify frame changed when isFixedPosition: %@ and isFixedSize: %@'.fmt(view.get('isFixedPosition'), view.get('isFixedSize')));
 });

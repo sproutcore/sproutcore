@@ -25,11 +25,8 @@ sc_require('system/responder');
 */
 SC.ResponderContext = {
 
-  // ..........................................................
-  // PROPERTIES
-  //
-
-  isResponderContext: YES,
+  //@if(debug)
+  /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */
 
   /** @property
 
@@ -37,6 +34,15 @@ SC.ResponderContext = {
     responder changes.
   */
   trace: NO,
+
+  /* END DEBUG ONLY PROPERTIES AND METHODS */
+  //@endif
+
+  // ..........................................................
+  // PROPERTIES
+  //
+
+  isResponderContext: YES,
 
   /** @property
     The default responder.  Set this to point to a responder object that can
@@ -90,6 +96,7 @@ SC.ResponderContext = {
     return responder._scrc_name || responder.toString(); // try again
   },
 
+  /** @private */
   _findResponderNamesFor: function(responder, level, path) {
     var key, value;
 
@@ -122,21 +129,27 @@ SC.ResponderContext = {
   makeFirstResponder: function(responder, evt) {
     var current = this.get('firstResponder'),
         last    = this.get('nextResponder'),
+        //@if(debug)
         trace   = this.get('trace'),
+        //@endif
         common ;
 
     if (this._locked) {
+      //@if(debug)
       if (trace) {
         SC.Logger.log('%@: AFTER ACTION: makeFirstResponder => %@'.fmt(this, this.responderNameFor(responder)));
       }
+      //@endif
 
       this._pendingResponder = responder;
       return ;
     }
 
+    //@if(debug)
     if (trace) {
       SC.Logger.log('%@: makeFirstResponder => %@'.fmt(this, this.responderNameFor(responder)));
     }
+    //@endif
 
     if (responder) responder.set("becomingFirstResponder", YES);
 
@@ -167,7 +180,7 @@ SC.ResponderContext = {
     if (responder) responder.set('isFirstResponder', YES);
 
     this._notifyDidBecomeFirstResponder(responder, responder, common);
-    
+
     // now, tell everyone the good news!
     this.endPropertyChanges();
 
@@ -220,20 +233,25 @@ SC.ResponderContext = {
 
     @param {String} action name of action
     @param {Object} sender object sending the action
-    @param {Object} context optional additional context info
+    @param {Object} [context] additional context info
     @returns {SC.Responder} the responder that handled it or null
   */
   sendAction: function(action, sender, context) {
     var working = this.get('firstResponder'),
         last    = this.get('nextResponder'),
+        //@if(debug)
         trace   = this.get('trace'),
+        //@endif
         handled = NO,
         responder;
 
     this._locked = YES;
+
+    //@if(debug)
     if (trace) {
       SC.Logger.log("%@: begin action '%@' (%@, %@)".fmt(this, action, sender, context));
     }
+    //@endif
 
     if (!handled && !working && this.tryToPerform) {
       handled = this.tryToPerform(action, sender, context);
@@ -249,10 +267,12 @@ SC.ResponderContext = {
       }
     }
 
+    //@if(debug)
     if (trace) {
       if (!handled) SC.Logger.log("%@:  action '%@' NOT HANDLED".fmt(this,action));
       else SC.Logger.log("%@: action '%@' handled by %@".fmt(this, action, this.responderNameFor(working)));
     }
+    //@endif
 
     this._locked = NO ;
 

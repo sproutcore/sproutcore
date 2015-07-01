@@ -15,6 +15,7 @@ var initModels = function () {
     /** Child Record Namespace */
     nestedRecordNamespace: NestedRecord,
     name: SC.Record.attr(String),
+    content: SC.Record.toOne('SC.Record', { isNested: true }),
     contents: SC.Record.toMany('SC.Record', { isNested: true })
   });
 
@@ -42,6 +43,11 @@ module("Data Store Tests for Nested Records", {
         type: 'Directory',
         name: 'Dir 1',
         guid: 1,
+        content: {
+          type: 'File',
+          guid: 44,
+          name: 'File 4'
+        },
         contents: [
           {
             type: 'Directory',
@@ -131,6 +137,18 @@ test("Proper Status", function () {
 
   // Shallow property update.
   SC.run(function() { first.get('contents').objectAt(0).set('name', 'Dir 2 - Updated') });
+  equals(first.get('status'), SC.Record.READY_DIRTY, 'first record has a READY_DIRTY State');
+});
+
+test("Property update", function () {
+  var first, second;
+
+  // First
+  SC.run(function() { first = store.materializeRecord(storeKeys[0]); });
+  equals(first.get('status'), SC.Record.READY_CLEAN, 'first record has a READY_CLEAN State');
+
+  // Nested property update.
+  SC.run(function() { first.get('content').set('name', 'File 4 - Updated') });
   equals(first.get('status'), SC.Record.READY_DIRTY, 'first record has a READY_DIRTY State');
 });
 
@@ -237,6 +255,11 @@ test("Store#pushRetrieve for parent updates the child records", function () {
       type: 'Directory',
       name: 'Dir 1 Changed',
       guid: 1,
+      content: {
+        type: 'File',
+        guid: 444,
+        name: 'File 4 Changed'
+      },
       contents: [
         {
           type: 'Directory',
@@ -260,6 +283,7 @@ test("Store#pushRetrieve for parent updates the child records", function () {
 
   parent = store.materializeRecord(storeKeys[0]);
   nr = parent.get('contents').get('firstObject');
+  var cr = parent.get('content');
 
   ok(nr, "Got nested record");
   equals(nr.get('name'), 'Dir 2', "Dir id:2 has correct name");
@@ -270,8 +294,13 @@ test("Store#pushRetrieve for parent updates the child records", function () {
 
   equals(parent.get('name'), 'Dir 1 Changed', 'Dir id:1 name was changed');
   equals(nr.get('name'), 'Dir 2 Changed', "Dir id:2 name was changed");
+  equals(cr.get('name'), 'File 4 Changed', "File id:444 name was changed");
 });
 
+// When the length of the nested array changes, only the values that were previously retrieved will
+// be updated. However, if the nested array length change is due to inserting of an object before
+// the previously retrieved object. The previously retrieved object's hash will be updated
+// incorrectly.
 test("Store#pushRetrieve for parent updates the child records, even on different path", function () {
   SC.RunLoop.begin()
   var parent = store.materializeRecord(storeKeys[0]),
@@ -280,6 +309,11 @@ test("Store#pushRetrieve for parent updates the child records, even on different
       type: 'Directory',
       name: 'Dir 1 Changed',
       guid: 1,
+      content: {
+        type: 'File',
+        guid: 8,
+        name: 'File 8'
+      },
       contents: [
         {
           type: 'Directory',

@@ -225,11 +225,24 @@ SC.PICKER_MENU_POINTER = 'menu-pointer';
 
   Positioning: SC.POSITION_BOTTOM (3) > SC.POSITION_RIGHT (0) > SC.POSITION_LEFT (1) > SC.POSITION_TOP (2). Fallback to SC.POSITION_BOTTOM (3).
 
+  ### Transition-In Special Handling
+
+  This view has special behavior when used with SC.View's `transitionIn` plugin support. If the
+  plugin defines `layoutProperties` of either `scale` or `rotate`, then the picker will adjust its
+  transform origin X & Y position to appear to scale or rotate out of the anchor. The result is a
+  very nice effect that picker panes appear to pop out of their anchors. To see it in effect,
+  simply set the `transitionIn` property of the pane to one of `SC.View.SCALE_IN` or `SC.View.POP_IN`.
+
   @extends SC.PalettePane
   @since SproutCore 1.0
 */
 SC.PickerPane = SC.PalettePane.extend(
 /** @scope SC.PickerPane.prototype */ {
+
+  //@if(debug)
+  /** @private Debug-mode only flag for ensuring that the pane is appended via `popup`. */
+  _sc_didUsePopup: false,
+  //@endif
 
   /**
     @type Array
@@ -290,9 +303,15 @@ SC.PickerPane = SC.PalettePane.extend(
     }
     // Setter
     else {
+      // Strip jQuery objects. (We do this first in case an empty one is passed in.)
+      if (value && value.isCoreQuery) value = value[0];
+
+      // Throw an error if a null or empty value is set. You're not allowed to go anchorless.
+      // (TODO: why can't we go anchorless? positionPane happily centers an unmoored pane.)
       if (!value) {
-        throw "You must set 'anchorElement' to either a view or a DOM element";
+        SC.throw("You must set 'anchorElement' to either a view or a DOM element");
       }
+
       // Clean up any previous anchor elements.
       this._removeScrollObservers();
 
@@ -510,21 +529,27 @@ SC.PickerPane = SC.PalettePane.extend(
   windowPadding: null,
 
   //@if(debug)
+  // Provide some developer support. People have occasionally been misled by calling `append`
+  // on PickerPanes, which fails to position the pane properly. Hopefully, we can give
+  // them a clue to speed up finding the problem.
   /** @private SC.Pane */
   append: function () {
-    // Provide some developer support. People have occasionally been misled by calling append
-    // on PickerPanes, which fails to position the pane properly. Hopefully, we can give
-    // them a clue to speed up finding the problem.
-    if (SC.none(this.get('anchorElement'))) {
+    if (!this._sc_didUsePopup) {
       SC.warn("Developer Warning: You should not use .append() with SC.PickerPane. Instead use .popup() and pass in an anchor view or element.");
     }
 
-    sc_super();
+    this._sc_didUsePopup = false;
+
+    return sc_super();
   },
   //@endif
 
-  /* @private Observe the frame for changes so that we can reposition if necessary. */
-  borderFrameDidChange: function () {
+  /* @private If the pane changes size, reposition as necessary. */
+  viewDidResize: function () {
+    // Don't forget to call the superclass method.
+    sc_super();
+
+    // Re-position.
     this.positionPane(true);
   },
 
@@ -547,8 +572,10 @@ SC.PickerPane = SC.PalettePane.extend(
     this.positionPane();
     this._hideOverflow();
 
-    // Start observing the frame for changes.
-    this.addObserver('borderFrame', this.borderFrameDidChange);
+    //@if(debug)
+    // A debug-mode only flag to indicate that the popup method was called (see override of append).
+    this._sc_didUsePopup = true;
+    //@endif
 
     return this.append();
   },
@@ -560,25 +587,26 @@ SC.PickerPane = SC.PalettePane.extend(
     fallback to center.
   */
   positionPane: function (useAnchorCached) {
-    useAnchorCached = useAnchorCached && this.get('anchorCached');
-
-    var anchor       = useAnchorCached ? this.get('anchorCached') : this.get('anchorElement'),
-      frame        = this.get('borderFrame'),
-      preferType   = this.get('preferType'),
+    var frame = this.get('borderFrame'),
+      preferType = this.get('preferType'),
       preferMatrix = this.get('preferMatrix'),
-      origin, adjustHash;
+      origin, adjustHash,
+      anchor, anchorCached, anchorElement;
 
     // usually an anchorElement will be passed.  The ideal position is just
     // below the anchor + default or custom offset according to preferType.
     // If that is not possible, fitPositionToScreen will take care of that for
     // other alternative and fallback position.
+    anchorCached = this.get('anchorCached');
+    anchorElement = this.get('anchorElement');
+    if (useAnchorCached && anchorCached) {
+      anchor = anchorCached;
+    } else if (anchorElement) {
+      anchor = this.computeAnchorRect(anchorElement);
+      this.set('anchorCached', anchor);
+    } // else no anchor to use
 
     if (anchor) {
-      if (!useAnchorCached) {
-        anchor = this.computeAnchorRect(anchor);
-        this.set('anchorCached', anchor);
-      }
-
       origin = SC.cloneRect(anchor);
 
       // Adjust the origin for offset based positioning.
@@ -589,11 +617,12 @@ SC.PickerPane = SC.PalettePane.extend(
           // default below the anchor with fine-tuned visual alignment
           // for Menu to appear just below the anchorElement.
           this.set('preferMatrix', [1, 4, 3]);
+          preferMatrix = this.get('preferMatrix');
         }
 
         // fine-tuned visual alignment from preferMatrix
-        origin.x += ((this.preferMatrix[2] === 0) ? origin.width : 0) + this.preferMatrix[0];
-        origin.y += ((this.preferMatrix[2] === 3) ? origin.height : 0) + this.preferMatrix[1];
+        origin.x += ((preferMatrix[2] === 0) ? origin.width : 0) + preferMatrix[0];
+        origin.y += ((preferMatrix[2] === 3) ? origin.height : 0) + preferMatrix[1];
         break;
       default:
         origin.y += origin.height;
@@ -604,25 +633,95 @@ SC.PickerPane = SC.PalettePane.extend(
       // frames, add those properties.
       anchor.halfWidth = parseInt(anchor.width * 0.5, 0);
       anchor.halfHeight = parseInt(anchor.height * 0.5, 0);
-      frame.halfWidth = parseInt(frame.originalWidth * 0.5, 0);
-      frame.halfHeight = parseInt(frame.originalHeight * 0.5, 0);
 
-      origin = this.fitPositionToScreen(origin, frame, anchor);
+      // Don't pollute the borderFrame rect.
+      frame = SC.cloneRect(frame);
+      frame.halfWidth = parseInt(frame.width * 0.5, 0);
+      frame.halfHeight = parseInt(frame.height * 0.5, 0);
+
+      frame = this.fitPositionToScreen(origin, frame, anchor);
+
+      // Create an adjustment layout from the computed position.
       adjustHash = {
-        left: origin.x,
-        top: origin.y
+        left: frame.x,
+        top: frame.y
       };
+
+      // If the computed position also constrains width or height, add it to the adjustment.
+      /*jshint eqnull:true*/
+      if (frame.width != null) {
+        adjustHash.width = frame.width;
+      }
+
+      if (frame.height != null) {
+        adjustHash.height = frame.height;
+      }
+
+      /*
+        Special case behavior for transitions that include scale or rotate: notably SC.View.SCALE_IN and SC.View.POP_IN.
+
+        We make an assumption that the picker should always scale out of the anchor, so we set the
+        transform origin accordingly.
+      */
+      var transitionIn = this.get('transitionIn');
+      if (transitionIn && (transitionIn.layoutProperties.indexOf('scale') >= 0 || transitionIn.layoutProperties.indexOf('rotate') >= 0)) {
+        var transformOriginX, transformOriginY;
+
+        switch (preferType) {
+        // If the picker uses a pointer, set the origin to the pointer.
+        case SC.PICKER_POINTER:
+        case SC.PICKER_MENU_POINTER:
+          switch (this.get('pointerPos')) {
+          case 'perfectTop':
+            transformOriginX = (frame.halfWidth + this.get('pointerPosX')) / frame.width;
+            transformOriginY = 1;
+            break;
+          case 'perfectRight':
+            transformOriginX = 0;
+            transformOriginY = (frame.halfHeight + this.get('pointerPosY')) / frame.height;
+            break;
+          case 'perfectBottom':
+            transformOriginX = (frame.halfWidth + this.get('pointerPosX')) / frame.width;
+            transformOriginY = 0;
+            break;
+          case 'perfectLeft':
+            transformOriginX = 1;
+            transformOriginY = (frame.halfHeight + this.get('pointerPosY')) / frame.height;
+            break;
+          }
+          break;
+
+        // If the picker doesn't use a pointer, set the origin to the correct corner.
+        case SC.PICKER_MENU:
+        case SC.PICKER_FIXED:
+          if (frame.x >= anchor.x) {
+            transformOriginX = 0;
+          } else {
+            transformOriginX = 1;
+          }
+          if (frame.y >= anchor.y) {
+            transformOriginY = 0;
+          } else {
+            transformOriginY = 1;
+          }
+
+          break;
+        }
+
+        adjustHash.transformOriginX = transformOriginX;
+        adjustHash.transformOriginY = transformOriginY;
+      }
+
       // Adjust.
       this.adjust(adjustHash);
-    }
+
     // if no anchor view has been set for some reason, just center.
-    else {
+    } else {
       this.adjust({
         centerX: 0,
         centerY: 0
       });
     }
-    this.updateLayout();
 
     return this;
   },
@@ -676,11 +775,11 @@ SC.PickerPane = SC.PalettePane.extend(
   },
 
   /** @private
-    This method will dispatch to the right re-position rule according to preferType
+    This method will dispatch to the correct re-position rule according to preferType
   */
-  fitPositionToScreen: function (preferredPosition, picker, anchor) {
-    var wsize = SC.RootResponder.responder.computeWindowSize(),
-        wret = { x: 0, y: 0, width: wsize.width, height: wsize.height };
+  fitPositionToScreen: function (preferredPosition, frame, anchorFrame) {
+    var windowSize = SC.RootResponder.responder.computeWindowSize(),
+        windowFrame = { x: 0, y: 0, width: windowSize.width, height: windowSize.height };
 
     // if window size is smaller than the minimum size of app, use minimum size.
     var mainPane = SC.RootResponder.responder.mainPane;
@@ -688,32 +787,33 @@ SC.PickerPane = SC.PalettePane.extend(
       var minWidth = mainPane.layout.minWidth,
           minHeight = mainPane.layout.minHeight;
 
-      if (minWidth && wret.width < minWidth) {
-        wret.width = mainPane.layout.minWidth;
+      if (minWidth && windowFrame.width < minWidth) {
+        windowFrame.width = mainPane.layout.minWidth;
       }
 
-      if (minHeight && wret.height < minHeight) {
-        wret.height = mainPane.layout.minHeight;
+      if (minHeight && windowFrame.height < minHeight) {
+        windowFrame.height = mainPane.layout.minHeight;
       }
     }
 
-    picker.x = preferredPosition.x;
-    picker.y = preferredPosition.y;
+    frame.x = preferredPosition.x;
+    frame.y = preferredPosition.y;
 
-    if (this.preferType) {
-      switch (this.preferType) {
+    var preferType = this.get('preferType');
+    if (preferType) {
+      switch (preferType) {
       case SC.PICKER_MENU:
         // apply menu re-position rule
-        picker = this.fitPositionToScreenMenu(wret, picker, this.get('isSubMenu'));
+        frame = this.fitPositionToScreenMenu(windowFrame, frame, this.get('isSubMenu'));
         break;
       case SC.PICKER_MENU_POINTER:
-        this.setupPointer(anchor);
-        picker = this.fitPositionToScreenMenuPointer(wret, picker, anchor);
+        this.setupPointer(anchorFrame);
+        frame = this.fitPositionToScreenMenuPointer(windowFrame, frame, anchorFrame);
         break;
       case SC.PICKER_POINTER:
         // apply pointer re-position rule
-        this.setupPointer(anchor);
-        picker = this.fitPositionToScreenPointer(wret, picker, anchor);
+        this.setupPointer(anchorFrame);
+        frame = this.fitPositionToScreenPointer(windowFrame, frame, anchorFrame);
         break;
       case SC.PICKER_FIXED:
         // skip fitPositionToScreen
@@ -723,52 +823,53 @@ SC.PickerPane = SC.PalettePane.extend(
       }
     } else {
       // apply default re-position rule
-      picker = this.fitPositionToScreenDefault(wret, picker, anchor);
+      frame = this.fitPositionToScreenDefault(windowFrame, frame, anchorFrame);
     }
-    // this.displayDidChange();
-    return picker;
+
+    return frame;
   },
 
   /** @private
     re-position rule migrated from old SC.OverlayPaneView.
     shift x, y to optimized picker visibility and make sure top-left corner is always visible.
   */
-  fitPositionToScreenDefault: function (w, f, a) {
-    var mx;
+  fitPositionToScreenDefault: function (windowFrame, frame, anchorFrame) {
+    var maximum;
 
     // make sure the right edge fits on the screen.  If not, anchor to
     // right edge of anchor or right edge of window, whichever is closer.
-    if (SC.maxX(f) > w.width) {
-      mx = Math.max(SC.maxX(a), f.width);
-      f.x = Math.min(mx, w.width) - f.width;
+    if (SC.maxX(frame) > windowFrame.width) {
+      maximum = Math.max(SC.maxX(anchorFrame), frame.width);
+      frame.x = Math.min(maximum, windowFrame.width) - frame.width;
     }
 
     // if the left edge is off of the screen, try to position at left edge
     // of anchor.  If that pushes right edge off screen, shift back until
     // right is on screen or left = 0
-    if (SC.minX(f) < 0) {
-      f.x = SC.minX(Math.max(a, 0));
-      if (SC.maxX(f) > w.width) {
-        f.x = Math.max(0, w.width - f.width);
+    if (SC.minX(frame) < 0) {
+      frame.x = SC.minX(Math.max(anchorFrame, 0));
+      if (SC.maxX(frame) > windowFrame.width) {
+        frame.x = Math.max(0, windowFrame.width - frame.width);
       }
     }
 
     // make sure bottom edge fits on screen.  If not, try to anchor to top
     // of anchor or bottom edge of screen.
-    if (SC.maxY(f) > w.height) {
-      mx = Math.max((a.y - f.height), 0);
-      if (mx > w.height) {
-        f.y = Math.max(0, w.height - f.height);
-      } else { f.y = mx; }
+    if (SC.maxY(frame) > windowFrame.height) {
+      maximum = Math.max((anchorFrame.y - frame.height), 0);
+      if (maximum > windowFrame.height) {
+        frame.y = Math.max(0, windowFrame.height - frame.height);
+      } else { frame.y = maximum; }
     }
 
-    // if Top edge is off screen, try to anchor to bottom of anchor. If that
+    // if top edge is off screen, try to anchor to bottom of anchor. If that
     // pushes off bottom edge, shift up until it is back on screen or top =0
-    if (SC.minY(f) < 0) {
-      mx = Math.min(SC.maxY(a), (w.height - a.height));
-      f.y = Math.max(mx, 0);
+    if (SC.minY(frame) < 0) {
+      maximum = Math.min(SC.maxY(anchorFrame), (windowFrame.height - anchorFrame.height));
+      frame.y = Math.max(maximum, 0);
     }
-    return f;
+
+    return frame;
   },
 
   /** @private
@@ -780,44 +881,48 @@ SC.PickerPane = SC.PalettePane.extend(
     If the menu is a submenu, we also want to reposition the pane to the left
     of the parent menu if it would otherwise exceed the width of the viewport.
   */
-  fitPositionToScreenMenu: function (windowFrame, paneFrame, subMenu) {
+  fitPositionToScreenMenu: function (windowFrame, frame, subMenu) {
+    var windowPadding = this.get('windowPadding');
+
     // Set up init location for submenu
     if (subMenu) {
-      paneFrame.x -= this.get('submenuOffsetX');
-      paneFrame.y -= Math.floor(this.get('menuHeightPadding') / 2);
+      frame.x -= this.get('submenuOffsetX');
+      frame.y -= Math.floor(this.get('menuHeightPadding') / 2);
     }
 
-    // If the right edge of the pane is within 20 pixels of the right edge
+    // Make sure we are at least the window padding from the left edge of the screen to start.
+    if (frame.x < windowPadding) {
+      frame.x = windowPadding;
+    }
+
+    // If the right edge of the pane is within the window padding of the right edge
     // of the window, we need to reposition it.
-    if ((paneFrame.x + paneFrame.width) > (windowFrame.width - 20)) {
+    if ((frame.x + frame.width + windowPadding) > windowFrame.width) {
       if (subMenu) {
         // Submenus should be re-anchored to the left of the parent menu
-        paneFrame.x = paneFrame.x - (paneFrame.width * 2);
+        frame.x = frame.x - (frame.width * 2);
       } else {
-        // Otherwise, just position the pane 20 pixels from the right edge
-        paneFrame.x = windowFrame.width - paneFrame.width - 20;
+        // Otherwise, just shift the pane windowPadding pixels from the right edge
+        frame.x = windowFrame.width - frame.width - windowPadding;
       }
     }
 
-    // Make sure we are at least 7 pixels from the left edge of the screen.
-    if (paneFrame.x < 7) { paneFrame.x = 7; }
-
-    if (paneFrame.y < 7) {
-      paneFrame.height += paneFrame.y;
-      paneFrame.y = 7;
+    // Make sure we are at least the window padding from the top edge of the screen to start.
+    if (frame.y < windowPadding) {
+      frame.y = windowPadding;
     }
 
-    // If the height of the menu is bigger than the window height, resize it.
-    if (paneFrame.height + paneFrame.y + 35 >= windowFrame.height) {
-      if (paneFrame.height + 50 >= windowFrame.height) {
-        paneFrame.y = SC.MenuPane.VERTICAL_OFFSET;
-        paneFrame.height = windowFrame.height - (SC.MenuPane.VERTICAL_OFFSET * 2);
-      } else {
-        paneFrame.y += (windowFrame.height - (paneFrame.height + paneFrame.y + 35));
-      }
+    // If the height of the menu is bigger than the window height, shift it upward.
+    if (frame.y + frame.height + windowPadding > windowFrame.height) {
+      frame.y = Math.max(windowPadding, windowFrame.height - frame.height - windowPadding);
     }
 
-    return paneFrame;
+    // If the height of the menu is still bigger than the window height, resize it.
+    if (frame.y + frame.height + windowPadding > windowFrame.height) {
+      frame.height = windowFrame.height - (2 * windowPadding);
+    }
+
+    return frame;
   },
 
   /** @private
@@ -829,25 +934,25 @@ SC.PickerPane = SC.PalettePane.extend(
 
     @returns {Rect}
   */
-  fitPositionToScreenMenuPointer: function (w, f, a) {
-    f = this.fitPositionToScreenPointer(w, f, a);
+  fitPositionToScreenMenuPointer: function (windowFrame, frame, anchorFrame) {
+    frame = this.fitPositionToScreenPointer(windowFrame, frame, anchorFrame);
 
     // If the height of the menu is bigger than the window height, resize it.
-    if (f.height + f.y + 35 >= w.height) {
-      f.height = w.height - f.y - (SC.MenuPane.VERTICAL_OFFSET * 2);
+    if (frame.height + frame.y + 35 >= windowFrame.height) {
+      frame.height = windowFrame.height - frame.y - (SC.MenuPane.VERTICAL_OFFSET * 2);
     }
 
-    return f;
+    return frame;
   },
 
   /** @private
     re-position rule for triangle pointer picker.
   */
-  fitPositionToScreenPointer: function (w, f, a) {
+  fitPositionToScreenPointer: function (windowFrame, frame, anchorFrame) {
     var curType,
         deltas,
-        matrix = this.preferMatrix,
-        offset = this.pointerOffset,
+        matrix = this.get('preferMatrix'),
+        offset = this.get('pointerOffset'),
         topLefts, botRights,
         windowPadding = this.get('windowPadding');
 
@@ -855,32 +960,32 @@ SC.PickerPane = SC.PalettePane.extend(
     // frames, while taking the pointer offset into account.
     topLefts = [
       // Top left [x, y] if positioned evenly to the right of the anchor
-      [a.x + a.width + offset[0], a.y + a.halfHeight - f.halfHeight],
+      [anchorFrame.x + anchorFrame.width + offset[0], anchorFrame.y + anchorFrame.halfHeight - frame.halfHeight],
 
       // Top left [x, y] if positioned evenly to the left of the anchor
-      [a.x - f.originalWidth + offset[1], a.y + a.halfHeight - f.halfHeight],
+      [anchorFrame.x - frame.width + offset[1], anchorFrame.y + anchorFrame.halfHeight - frame.halfHeight],
 
       // Top left [x, y] if positioned evenly above the anchor
-      [a.x + a.halfWidth - f.halfWidth, a.y - f.originalHeight + offset[2]],
+      [anchorFrame.x + anchorFrame.halfWidth - frame.halfWidth, anchorFrame.y - frame.height + offset[2]],
 
       // Top left [x, y] if positioned evenly below the anchor
-      [a.x + a.halfWidth - f.halfWidth, a.y + a.height + offset[3]]
+      [anchorFrame.x + anchorFrame.halfWidth - frame.halfWidth, anchorFrame.y + anchorFrame.height + offset[3]]
     ];
 
     // Determine the bottom-right corner of each of the 4 perfectly positioned
     // frames, while taking the pointer offset into account.
     botRights = [
       // Bottom right [x, y] if positioned evenly to the right of the anchor
-      [a.x + a.width + f.width + offset[0], a.y + a.halfHeight + f.halfHeight],
+      [anchorFrame.x + anchorFrame.width + frame.width + offset[0], anchorFrame.y + anchorFrame.halfHeight + frame.halfHeight],
 
       // Bottom right [x, y] if positioned evenly to the left of the anchor
-      [a.x + offset[1], a.y + a.halfHeight + f.halfHeight],
+      [anchorFrame.x + offset[1], anchorFrame.y + anchorFrame.halfHeight + frame.halfHeight],
 
       // Bottom right [x, y] if positioned evenly above the anchor
-      [a.x + a.halfWidth + f.halfWidth, a.y + offset[2]],
+      [anchorFrame.x + anchorFrame.halfWidth + frame.halfWidth, anchorFrame.y + offset[2]],
 
       // Bottom right [x, y] if positioned evenly below the anchor
-      [a.x + a.halfWidth + f.halfWidth, a.y + a.height + f.height + offset[3]]
+      [anchorFrame.x + anchorFrame.halfWidth + frame.halfWidth, anchorFrame.y + anchorFrame.height + frame.height + offset[3]]
     ];
 
     // Loop through the preferred matrix, hopefully finding one that will fit
@@ -899,8 +1004,8 @@ SC.PickerPane = SC.PalettePane.extend(
       // option for positioning.
       deltas = {
         top: topLefts[curType][1] - windowPadding,
-        right: w.width - windowPadding - botRights[curType][0],
-        bottom: w.height - windowPadding - botRights[curType][1],
+        right: windowFrame.width - windowPadding - botRights[curType][0],
+        bottom: windowFrame.height - windowPadding - botRights[curType][1],
         left: topLefts[curType][0] - windowPadding
       };
 
@@ -916,8 +1021,8 @@ SC.PickerPane = SC.PalettePane.extend(
           deltas.bottom >= 0 &&
           deltas.left >= 0) {
 
-        f.x = topLefts[curType][0];
-        f.y = topLefts[curType][1];
+        frame.x = topLefts[curType][0];
+        frame.y = topLefts[curType][1];
 
         this.set('pointerPosX', 0);
         this.set('pointerPosY', 0);
@@ -932,11 +1037,11 @@ SC.PickerPane = SC.PalettePane.extend(
       } else if (((curType === 0 && deltas.right >= 0) || // Right fits for preferred right
                  (curType === 1 &&  deltas.left >= 0)) && // or left fits for preferred left,
                  deltas.top < 0 && // but top doesn't fit,
-                 deltas.top + f.halfHeight >= 0) {  // yet it could.
+                 deltas.top + frame.halfHeight >= 0) {  // yet it could.
 
         // Adjust the pane position by the amount of downward shifting.
-        f.x = topLefts[curType][0];
-        f.y = topLefts[curType][1] - deltas.top;
+        frame.x = topLefts[curType][0];
+        frame.y = topLefts[curType][1] - deltas.top;
 
         // Offset the pointer position by the opposite amount of downward
         // shifting (minus half the height of the pointer).
@@ -952,11 +1057,11 @@ SC.PickerPane = SC.PalettePane.extend(
       } else if (((curType === 0 && deltas.right >= 0) || // Right fits for preferred right
                  (curType === 1 &&  deltas.left >= 0)) && // or left fits for preferred left,
                  deltas.bottom < 0 && // but bottom doesn't fit,
-                 deltas.bottom + f.halfHeight >= 0) {  // yet it could.
+                 deltas.bottom + frame.halfHeight >= 0) {  // yet it could.
 
         // Adjust the pane position by the amount of upward shifting.
-        f.x = topLefts[curType][0];
-        f.y = topLefts[curType][1] + deltas.bottom;
+        frame.x = topLefts[curType][0];
+        frame.y = topLefts[curType][1] + deltas.bottom;
 
         // Offset the pointer position by the opposite amount of upward
         // shifting (minus half the height of the pointer).
@@ -973,11 +1078,11 @@ SC.PickerPane = SC.PalettePane.extend(
       } else if (((curType === 2 && deltas.top >= 0) || // Top fits for preferred top
                  (curType === 3 &&  deltas.bottom >= 0)) && // or bottom fits for preferred bottom,
                  deltas.right < 0 && // but right doesn't fit,
-                 deltas.right + f.halfWidth >= 0) {  // yet it could.
+                 deltas.right + frame.halfWidth >= 0) {  // yet it could.
 
         // Adjust the pane position by the amount of leftward shifting.
-        f.x = topLefts[curType][0] + deltas.right;
-        f.y = topLefts[curType][1];
+        frame.x = topLefts[curType][0] + deltas.right;
+        frame.y = topLefts[curType][1];
 
         // Offset the pointer position by the opposite amount of leftward
         // shifting (minus half the width of the pointer).
@@ -994,11 +1099,11 @@ SC.PickerPane = SC.PalettePane.extend(
       } else if (((curType === 2 && deltas.top >= 0) || // Top fits for preferred top
                  (curType === 3 &&  deltas.bottom >= 0)) && // or bottom fits for preferred bottom,
                  deltas.left < 0 && // but left doesn't fit,
-                 deltas.left + f.halfWidth >= 0) {  // yet it could.
+                 deltas.left + frame.halfWidth >= 0) {  // yet it could.
 
         // Adjust the pane position by the amount of leftward shifting.
-        f.x = topLefts[curType][0] - deltas.left;
-        f.y = topLefts[curType][1];
+        frame.x = topLefts[curType][0] - deltas.left;
+        frame.y = topLefts[curType][1];
 
         // Offset the pointer position by the opposite amount of leftward
         // shifting (minus half the width of the pointer).
@@ -1010,19 +1115,17 @@ SC.PickerPane = SC.PalettePane.extend(
 
     }
 
-    // If no arrangement was found to fit, then use the fall back preferred
-    // type.
+    // If no arrangement was found to fit, then use the fall back preferred type.
     if (i === pointerLen) {
       if (matrix[4] === -1) {
-        //f.x = a.x > 0 ? a.x + 23 : 0; // another alternative align to left
-        f.x = a.x + a.halfWidth;
-        f.y = a.y + a.halfHeight - f.halfHeight;
+        frame.x = anchorFrame.x + anchorFrame.halfWidth;
+        frame.y = anchorFrame.y + anchorFrame.halfHeight - frame.halfHeight;
 
         this.set('pointerPos', this._sc_pointerLayout[0] + ' fallback');
-        this.set('pointerPosY', f.halfHeight - 40);
+        this.set('pointerPosY', frame.halfHeight - 40);
       } else {
-        f.x = topLefts[matrix[4]][0];
-        f.y = topLefts[matrix[4]][1];
+        frame.x = topLefts[matrix[4]][0];
+        frame.y = topLefts[matrix[4]][1];
 
         this.set('pointerPos', this._sc_pointerLayout[matrix[4]]);
         this.set('pointerPosY', 0);
@@ -1033,7 +1136,7 @@ SC.PickerPane = SC.PalettePane.extend(
 
     this.invokeLast(this._adjustPointerPosition);
 
-    return f;
+    return frame;
   },
 
   /** @private Measure the pointer element and adjust it by the determined offset. */
@@ -1064,12 +1167,12 @@ SC.PickerPane = SC.PalettePane.extend(
     and size if not provided explicitly.
   */
   setupPointer: function (a) {
-    var pointerOffset = this.pointerOffset,
+    var pointerOffset = this.get('pointerOffset'),
         K = SC.PickerPane;
 
     // Set windowPadding and pointerOffset (SC.PICKER_MENU_POINTER only).
     if (!pointerOffset || pointerOffset.length !== 4) {
-      if (this.get('preferType') == SC.PICKER_MENU || this.get('preferType') == SC.PICKER_MENU_POINTER) {
+      if (this.get('preferType') === SC.PICKER_MENU || this.get('preferType') === SC.PICKER_MENU_POINTER) {
         switch (this.get('controlSize')) {
         case SC.TINY_CONTROL_SIZE:
           this.set('pointerOffset', K.TINY_PICKER_MENU_POINTER_OFFSET);
@@ -1115,7 +1218,8 @@ SC.PickerPane = SC.PalettePane.extend(
     // set up preferMatrix according to type if not provided explicitly:
     // take default [0, 1, 2, 3, 2] for picker, [3, 0, 1, 2, 3] for menu picker if
     // custom matrix not provided explicitly
-    if (!this.preferMatrix || this.preferMatrix.length !== 5) {
+    var preferMatrix = this.get('preferMatrix');
+    if (!preferMatrix || preferMatrix.length !== 5) {
       // menu-picker default re-position rule :
       // perfect bottom (3) > perfect right (0) > perfect left (1) > perfect top (2)
       // fallback to perfect bottom (3)
@@ -1180,17 +1284,18 @@ SC.PickerPane = SC.PalettePane.extend(
   windowSizeDidChange: function (oldSize, newSize) {
     sc_super();
 
-    if (this.repositionOnWindowResize) { this.positionPane(); }
+    if (this.repositionOnWindowResize) {
+      // Do this in the next run loop. This ensures that positionPane is only called once even if scroll view
+      // offsets are changing at the same time as the window is resizing (see _scrollOffsetDidChange below).
+      this.invokeNext(this.positionPane);
+    }
   },
 
   remove: function () {
-    if (this.get('isVisibleInWindow') && this.get('isPaneAttached')) {
+    if (this.get('isVisibleInWindow')) {
       this._withdrawOverflowRequest();
     }
     this._removeScrollObservers();
-
-    // Stop observing the frame for changes.
-    this.removeObserver('borderFrame', this.borderFrameDidChange);
 
     return sc_super();
   },
@@ -1241,28 +1346,53 @@ SC.PickerPane = SC.PalettePane.extend(
   _setupScrollObservers: function (anchorView) {
     var scrollView = this._getScrollViewOfView(anchorView);
     if (scrollView) {
-      scrollView.addObserver('horizontalScrollOffset', this, this._scrollOffsetDidChange);
-      scrollView.addObserver('verticalScrollOffset', this, this._scrollOffsetDidChange);
+      scrollView.addObserver('canScrollHorizontal', this, this._scrollCanScrollHorizontalDidChange);
+      scrollView.addObserver('canScrollVertical', this, this._scrollCanScrollVerticalDidChange);
+
+      // Fire the observers once to initialize them.
+      this._scrollCanScrollHorizontalDidChange(scrollView);
+      this._scrollCanScrollVerticalDidChange(scrollView);
+
       this._scrollView = scrollView;
     }
   },
 
-  /** @private
-    Teardown observers setup in _setupScrollObservers.
-  */
+  /** @private Modify horizontalScrollOffset observer. */
+  _scrollCanScrollHorizontalDidChange: function (scrollView) {
+    if (scrollView.get('canScrollHorizontal')) {
+      scrollView.addObserver('horizontalScrollOffset', this, this._scrollOffsetDidChange);
+    } else {
+      scrollView.removeObserver('horizontalScrollOffset', this, this._scrollOffsetDidChange);
+    }
+  },
+
+  /** @private Modify verticalScrollOffset observer. */
+  _scrollCanScrollVerticalDidChange: function (scrollView) {
+    if (scrollView.get('canScrollVertical')) {
+      scrollView.addObserver('verticalScrollOffset', this, this._scrollOffsetDidChange);
+    } else {
+      scrollView.removeObserver('verticalScrollOffset', this, this._scrollOffsetDidChange);
+    }
+  },
+
+  /** @private Teardown observers setup in _setupScrollObservers. */
   _removeScrollObservers: function () {
     var scrollView = this._scrollView;
     if (scrollView) {
+      scrollView.removeObserver('canScrollHorizontal', this, this._scrollCanScrollHorizontalDidChange);
+      scrollView.removeObserver('canScrollVertical', this, this._scrollCanScrollVerticalDidChange);
       scrollView.removeObserver('horizontalScrollOffset', this, this._scrollOffsetDidChange);
       scrollView.removeObserver('verticalScrollOffset', this, this._scrollOffsetDidChange);
     }
   },
 
-  /** @private
-    Reposition pane whenever scroll offsets change.
-  */
+  /** @private Reposition pane whenever scroll offsets change. */
   _scrollOffsetDidChange: function () {
-    this.positionPane();
+    // Filter the observer firing. We don't want to reposition multiple times if both horizontal and vertical
+    // scroll offsets are updating.
+    // Note: do this *after* the current run loop finishes. This allows the scroll view to scroll to
+    // actually move so that the anchor's position is correct before we reposition.
+    this.invokeNext(this.positionPane);
   },
 
   /** @private SC.Object */
@@ -1280,6 +1410,7 @@ SC.PickerPane = SC.PalettePane.extend(
     this._anchorHTMLElement = null;
     return sc_super();
   }
+
 });
 
 

@@ -570,7 +570,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     if (!(SC.kindOf(rootState, SC.State) && rootState.isClass)) {
       msg = "Unable to initialize statechart. Root state must be a state class";
       this.statechartLogError(msg);
-      throw msg;
+      SC.throw(msg);
     }
 
     rootState = this.createRootState(rootState, {
@@ -584,7 +584,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     if (SC.kindOf(rootState.get('initialSubstate'), SC.EmptyState)) {
       msg = "Unable to initialize statechart. Root state must have an initial substate explicitly defined";
       this.statechartLogError(msg);
-      throw msg;
+      SC.throw(msg);
     }
 
     if (!SC.empty(this.get('initialState'))) {
@@ -742,7 +742,12 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
       return;
     }
 
-    var args = this._processGotoStateArgs(arguments);
+    // Fast arguments access.
+    // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
+    var args = new Array(arguments.length); //  SC.$A(arguments)
+    for (var i = 0, len = args.length; i < len; i++) { args[i] = arguments[i]; }
+
+    args = this._processGotoStateArgs(args);
 
     state = args.state;
     fromCurrentState = args.fromCurrentState;
@@ -810,7 +815,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
       // For many states, we list each on its own line.
       if (len > 2) {
         msg = "current states before:\n%@";
-        msg = msg.fmt(this.get('currentStates').getEach('fullPath').join('\n'));        
+        msg = msg.fmt(this.get('currentStates').getEach('fullPath').join('\n'));
       }
       // For a few states, all on one line.
       else if (len > 0) {
@@ -975,6 +980,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
       parentState = state.get('parentState');
       while (parentState) {
         parentState.get('currentSubstates').removeObject(state);
+        parentState.notifyPropertyChange('currentSubstates');
         parentState = parentState.get('parentState');
       }
     }
@@ -982,6 +988,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     parentState = state;
     while (parentState) {
       parentState.get('enteredSubstates').removeObject(state);
+      parentState.notifyPropertyChange('enteredSubstates');
       parentState = parentState.get('parentState');
     }
 
@@ -992,6 +999,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     //@endif
 
     state.set('currentSubstates', []);
+    state.notifyPropertyChange('currentSubstates');
 
     state.stateWillBecomeExited(context);
     var result = this.exitState(state, context);
@@ -1028,6 +1036,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
       parentState = state;
       while (parentState) {
         parentState.get('currentSubstates').pushObject(state);
+        parentState.notifyPropertyChange('currentSubstates');
         parentState = parentState.get('parentState');
       }
     }
@@ -1035,6 +1044,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
     parentState = state;
     while (parentState) {
       parentState.get('enteredSubstates').pushObject(state);
+      parentState.notifyPropertyChange('enteredSubstates');
       parentState = parentState.get('parentState');
     }
 
@@ -1125,7 +1135,12 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
       return;
     }
 
-    var args = this._processGotoStateArgs(arguments);
+    // Fast arguments access.
+    // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
+    var args = new Array(arguments.length); //  SC.$A(arguments)
+    for (var i = 0, len = args.length; i < len; i++) { args[i] = arguments[i]; }
+
+    args = this._processGotoStateArgs(args);
 
     state = args.state;
     fromCurrentState = args.fromCurrentState;
@@ -1229,7 +1244,7 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
     //@if(debug)
     if (trace) {
-      if (!statechartHandledEvent) this.statechartLogTrace("No state was able handle event %@".fmt(event), SC.TRACE_STATECHART_STYLE.action);
+      if (!statechartHandledEvent) this.statechartLogTrace("No state was able to handle event %@".fmt(event), SC.TRACE_STATECHART_STYLE.action);
       this.statechartLogTrace("END sendEvent: '%@'".fmt(event), SC.TRACE_STATECHART_STYLE.action);
     }
     //@endif
@@ -1625,7 +1640,6 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
       len = null,
       value = null;
 
-    args = SC.$A(args);
     args = args.filter(function (item) {
       return item !== undefined;
     });

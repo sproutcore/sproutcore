@@ -276,6 +276,16 @@ test('Basic Submenus', function () {
       smallMenu.remove();
     });
     ok(!subMenu.get('isVisibleInWindow'), 'submenus should close if their parent menu is closed');
+    equals(subMenu.getPath('items.length'), 2, 'submenus should have 2 items');
+
+    menuItem.get('content').set('subMenu', [{ title: 'Submenu item 3' }]);
+    subMenu = menuItem.get('subMenu');
+    equals(subMenu.getPath('items.length'), 1, 'submenus should have 1 item');
+
+    smallMenu.destroy();
+    ok(smallMenu.get('isDestroyed'), 'smallMenu should be destroyed');
+    ok(menuItem.get('isDestroyed'), 'menuItem should be destroyed');
+    ok(subMenu.get('isDestroyed'), 'submenus should be destroyed');
     start();
   }, 150);
 });
@@ -448,6 +458,7 @@ test('Menu item keys', function () {
   items = [
     {
       TheTitle: 'Menu item',
+      TheValue: 1,
       TheToolTip: 'Menu tooltip',
       AmIEnabled: false,
       MyIcon: 'folder',
@@ -462,6 +473,7 @@ test('Menu item keys', function () {
       layout: { width: 200 },
       items: items,
       itemTitleKey: 'TheTitle',
+      itemValueKey: 'TheValue',
       itemToolTipKey: 'TheToolTip',
       itemIsEnabledKey: 'AmIEnabled',
       itemIconKey: 'MyIcon',
@@ -475,9 +487,11 @@ test('Menu item keys', function () {
   menuItem = menuPane.get('menuItemViews')[0];
 
   equals(menuItem.get('title'), 'Menu item');
+  equals(menuItem.get('value'), 1);
   equals(menuItem.get('toolTip'), 'Menu tooltip');
   equals(menuItem.get('isEnabled'), false);
   equals(menuItem.get('icon'), 'folder');
   ok(SC.kindOf(menuItem.get('subMenu'), SC.MenuPane));
   equals(menuItem.get('isSeparator'), false);
+  clickOn(menuPane);
 });

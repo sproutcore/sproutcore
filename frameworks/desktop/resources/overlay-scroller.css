@@ -41,12 +41,11 @@
   .thumb {
     @include transform(translateZ(0px));
     position: absolute;
-    opacity: 0.5;
     overflow: hidden;
   }
 
   .thumb-top {
-    background: black;
+    background-color: black;
     position: absolute;
   }
 
@@ -61,12 +60,12 @@
   }
 
   .thumb-center {
-    background: black;
+    background-color: black;
     position: absolute;
   }
 
   .thumb-bottom {
-    background: black;
+    background-color: black;
     position: absolute;
   }
 
@@ -88,7 +87,7 @@
       @include border-top-radius(4px);
       width: 7px;
       top: 0px;
-      left: 5px;
+      left: 3px;
       height: 10px;
     }
 
@@ -96,7 +95,7 @@
       height: 1034px;
       width: 7px;
       top: 10px;
-      left: 5px;
+      left: 3px;
     }
 
     .thumb-inner {
@@ -133,7 +132,7 @@
     .thumb-top {
       @include border-left-radius(4px);
       width: 10px;
-      top: 5px;
+      top: 3px;
       left: 0px;
       height: 7px;
     }
@@ -142,7 +141,7 @@
       width: 1034px;
       height: 7px;
       left: 10px;
-      top: 5px;
+      top: 3px;
     }
 
     .thumb-inner {
@@ -172,21 +171,17 @@
   &.sc-vertical, &.sc-horizontal {
 
     &.fade-in {
-      .thumb {
-        @include transition-duration(0.1s);
-        @include transition-property(opacity);
-        @include transition-timing-function(ease);
-        opacity: 0.5;
-      }
+      @include transition-duration(0.1s);
+      @include transition-property(opacity);
+      @include transition-timing-function(ease);
+      opacity: 0.5;
     }
 
     &.fade-out {
-      .thumb {
-        @include transition-duration(0.5s);
-        @include transition-property(opacity);
-        @include transition-timing-function(ease);
-        opacity: 0;
-      }
+      @include transition-duration(0.5s);
+      @include transition-property(opacity);
+      @include transition-timing-function(ease);
+      opacity: 0;
     }
   }
 }

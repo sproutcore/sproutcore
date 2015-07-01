@@ -7,7 +7,7 @@
 // ========================================================================
 // SC.Binding Tests
 // ========================================================================
-/*globals module, test, ok, isObj, equals, expects */
+/*globals module, test, ok, equals */
 
 var FromObject, fromObject, midObject, toObject, binding, Bon1, bon2, first, second, third, binding1, binding2;
 
@@ -366,6 +366,7 @@ test("two bindings to the same value should sync in the order they are initializ
 
 });
 
+var BindableObject;
 module("Binding transforms", {
   setup: function () {
     BindableObject = SC.Object.extend({
@@ -373,7 +374,8 @@ module("Binding transforms", {
       numericValue: 42,
       stringValue: 'forty-two',
       arrayValue: [4, 2],
-      undefinedValue: undefined
+      undefinedValue: undefined,
+      nullValue: null
     });
     // temporarily set up two source objects in the SC namespace so we can
     // use property paths to access them
@@ -407,9 +409,112 @@ test('Binding sync when only transformed value has changed', function () {
   equals(toObject.get('transformedValue'), 'VALUE IS UNDEFINED', 'value is undefined, so bound value should be');
 });
 
-test("ALL THE OTHER BINDING TRANSFORMS.");
+test("the integer transform", function() {
+  var toObject;
 
-test("equalTo", function() {
+  SC.run(function () {
+    toObject = SC.Object.create({
+      aNumber: null,
+      aNumberBinding: SC.Binding.oneWay('SC.testControllerA.nullValue').integer(10)
+    });
+  });
+
+  equals(toObject.get('aNumber'), 0, "Value is null, so bound value should should be");
+
+  SC.run(function () {
+    SC.testControllerA.set('nullValue', '123abc');
+  });
+
+  equals(toObject.get('aNumber'), window.parseInt('123abc', 10), "Value is String, so bound value should be");
+
+  SC.run(function () {
+    SC.testControllerA.set('nullValue', 'abc123');
+  });
+
+  equals(toObject.get('aNumber'), 0, "Value is non-parseable String, so bound value should be");
+
+  SC.run(function () {
+    SC.testControllerA.set('nullValue', NaN);
+  });
+
+  equals(toObject.get('aNumber'), 0, "Value is NaN, so bound value should be");
+
+  SC.run(function () {
+    SC.testControllerA.set('nullValue', Infinity);
+  });
+
+  equals(toObject.get('aNumber'), Infinity, "Value is Infinity, so bound value should be");
+
+  SC.run(function () {
+    SC.testControllerA.set('nullValue', true);
+  });
+
+  equals(toObject.get('aNumber'), 1, "Value is Boolean true, so bound value should be");
+
+  SC.run(function () {
+    SC.testControllerA.set('nullValue', false);
+  });
+
+  equals(toObject.get('aNumber'), 0, "Value is Boolean false, so bound value should be");
+
+  SC.run(function () {
+    SC.testControllerA.set('nullValue', {});
+  });
+
+  equals(toObject.get('aNumber'), 0, "Value is Object, so bound value should be");
+
+  SC.run(function () {
+    SC.testControllerA.set('nullValue', SC.Object.create({}));
+  });
+
+  equals(toObject.get('aNumber'), 0, "Value is SC.Object instance, so bound value should be");
+});
+
+
+test("the string transform", function() {
+  var toObject;
+
+  SC.run(function () {
+    toObject = SC.Object.create({
+      aString: null,
+      aStringBinding: SC.Binding.oneWay('SC.testControllerA.nullValue').string()
+    });
+  });
+
+  equals(toObject.get('aString'), '', "Value is null, so bound value should should be");
+
+  SC.run(function () {
+    SC.testControllerA.set('nullValue', 1);
+  });
+
+  equals(toObject.get('aString'), '1', "Value is Number, so bound value should be");
+
+  SC.run(function () {
+    SC.testControllerA.set('nullValue', true);
+  });
+
+  equals(toObject.get('aString'), 'true', "Value is Boolean true, so bound value should be");
+
+  SC.run(function () {
+    SC.testControllerA.set('nullValue', false);
+  });
+
+  equals(toObject.get('aString'), 'false', "Value is Boolean false, so bound value should be");
+
+  SC.run(function () {
+    SC.testControllerA.set('nullValue', {});
+  });
+
+  equals(toObject.get('aString'), {}.toString(), "Value is Object, so bound value should be");
+
+  SC.run(function () {
+    SC.testControllerA.set('nullValue', SC.Object.create({ toString: function () { return 'An SC.Object'; }}));
+  });
+
+  equals(toObject.get('aString'), 'An SC.Object', "Value is SC.Object instance, so bound value should be");
+});
+
+test("the equalTo transform", function() {
   SC.RunLoop.begin();
   var toObject = SC.Object.create({
     isFortyTwo: null,
@@ -433,14 +538,16 @@ module("Binding transform: `and`", {
     // use property paths to access them
     SC.testControllerA = SC.Object.create({ value: NO });
     SC.testControllerB = SC.Object.create({ value: NO });
+    SC.testControllerC = SC.Object.create({ value: NO });
 
     toObject = SC.Object.create({
       value: null,
-      valueBinding: SC.Binding.and('SC.testControllerA.value', 'SC.testControllerB.value'),
+      valueBinding: SC.Binding.and('SC.testControllerA.value', 'SC.testControllerB.value', 'SC.testControllerC.value'),
       localValue1: NO,
       localValue2: NO,
+      localValue3: NO,
       boundLocalValue: NO,
-      boundLocalValueBinding: SC.Binding.and('.localValue1', '.localValue2')
+      boundLocalValueBinding: SC.Binding.and('.localValue1', '.localValue2', '.localValue3')
     });
   },
 
@@ -449,13 +556,16 @@ module("Binding transform: `and`", {
     delete SC.testControllerA;
     SC.testControllerB.destroy();
     delete SC.testControllerB;
+    SC.testControllerC.destroy();
+    delete SC.testControllerC;
   }
 });
 
-test("bound value should be YES if both sources are YES", function () {
+test("bound value should be YES if all sources are YES", function () {
   SC.RunLoop.begin();
   SC.testControllerA.set('value', YES);
   SC.testControllerB.set('value', YES);
+  SC.testControllerC.set('value', YES);
   SC.RunLoop.end();
 
   SC.Binding.flushPendingChanges();
@@ -464,6 +574,7 @@ test("bound value should be YES if both sources are YES", function () {
   SC.RunLoop.begin();
   toObject.set('localValue1', YES);
   toObject.set('localValue2', YES);
+  toObject.set('localValue3', YES);
   SC.RunLoop.end();
 
   SC.Binding.flushPendingChanges();
@@ -474,50 +585,56 @@ test("toObject.value should be NO if either source is NO", function () {
   SC.RunLoop.begin();
   SC.testControllerA.set('value', YES);
   SC.testControllerB.set('value', NO);
+  SC.testControllerC.set('value', YES);
   SC.RunLoop.end();
 
   SC.Binding.flushPendingChanges();
-  equals(toObject.get('value'), NO, 'Bound value on YES/NO');
+  equals(toObject.get('value'), NO, 'Bound value on YES/NO/YES');
 
   SC.RunLoop.begin();
   SC.testControllerA.set('value', YES);
   SC.testControllerB.set('value', YES);
+  SC.testControllerC.set('value', YES);
   SC.RunLoop.end();
 
   SC.Binding.flushPendingChanges();
-  equals(toObject.get('value'), YES, 'Bound value on YES/YES');
+  equals(toObject.get('value'), YES, 'Bound value on YES/YES/YES');
 
   SC.RunLoop.begin();
   SC.testControllerA.set('value', NO);
   SC.testControllerB.set('value', YES);
+  SC.testControllerC.set('value', NO);
   SC.RunLoop.end();
 
   SC.Binding.flushPendingChanges();
-  equals(toObject.get('value'), NO, 'Bound value on NO/YES');
+  equals(toObject.get('value'), NO, 'Bound value on NO/YES/NO');
 
   SC.RunLoop.begin();
   toObject.set('localValue1', YES);
   toObject.set('localValue2', NO);
+  toObject.set('localValue3', YES);
   SC.RunLoop.end();
 
   SC.Binding.flushPendingChanges();
-  equals(toObject.get('boundLocalValue'), NO, 'Local bound value on YES/NO');
+  equals(toObject.get('boundLocalValue'), NO, 'Local bound value on YES/NO/YES');
 
   SC.RunLoop.begin();
   toObject.set('localValue1', YES);
   toObject.set('localValue2', YES);
+  toObject.set('localValue3', YES);
   SC.RunLoop.end();
 
   SC.Binding.flushPendingChanges();
-  equals(toObject.get('boundLocalValue'), YES, 'Local bound value on YES/YES');
+  equals(toObject.get('boundLocalValue'), YES, 'Local bound value on YES/YES/YES');
 
   SC.RunLoop.begin();
   toObject.set('localValue1', NO);
   toObject.set('localValue2', YES);
+  toObject.set('localValue2', NO);
   SC.RunLoop.end();
 
   SC.Binding.flushPendingChanges();
-  equals(toObject.get('boundLocalValue'), NO, 'Local bound value on NO/YES');
+  equals(toObject.get('boundLocalValue'), NO, 'Local bound value on NO/YES/NO');
 });
 
 test("remote paths work when binding is defined on a class", function() {
@@ -718,6 +835,62 @@ test("local paths work when binding is defined on a class", function() {
 
 });
 
+module("Binding transform: `mix`", {
+
+  setup: function () {
+    // temporarily set up two source objects in the SC namespace so we can
+    // use property paths to access them
+    SC.testControllerA = SC.Object.create({ value: 0 });
+    SC.testControllerB = SC.Object.create({ value: 1 });
+    SC.testControllerC = SC.Object.create({ value: 2 });
+
+    toObject = SC.Object.create({
+      value: null,
+      valueBinding: SC.Binding.mix('SC.testControllerA.value', 'SC.testControllerB.value', 'SC.testControllerC.value',
+                                   function(v1,v2,v3) {
+                                     return v1+'-'+v2+'-'+v3;
+                                   } ),
+      localValue1: 1,
+      localValue2: 2,
+      localValue3: 3,
+      boundLocalValue: NO,
+      boundLocalValueBinding: SC.Binding.mix('.localValue1', '.localValue2', '.localValue3',
+                                             function(v1,v2,v3) {
+                                               return v1+'+'+v2+'+'+v3;
+                                             } )
+    });
+  },
+
+  teardown: function () {
+    SC.testControllerA.destroy();
+    delete SC.testControllerA;
+    SC.testControllerB.destroy();
+    delete SC.testControllerB;
+    SC.testControllerC.destroy();
+    delete SC.testControllerC;
+  }
+});
+
+test("bound value should be calculated correctly", function () {
+  SC.RunLoop.begin();
+  SC.testControllerA.set('value', 0);
+  SC.testControllerB.set('value', 10);
+  SC.testControllerC.set('value', 20);
+  SC.RunLoop.end();
+
+  SC.Binding.flushPendingChanges();
+  equals(toObject.get('value'), '0-10-20', 'Bound value');
+
+  SC.RunLoop.begin();
+  toObject.set('localValue1', 0);
+  toObject.set('localValue2', 10);
+  toObject.set('localValue3', 20);
+  SC.RunLoop.end();
+
+  SC.Binding.flushPendingChanges();
+  equals(toObject.get('boundLocalValue'), '0+10+20', 'Local bound value');
+});
+
 module("Binding with '[]'", {
   setup: function () {
     fromObject = SC.Object.create({ value: [] });
@@ -751,8 +924,7 @@ module("propertyNameBinding with longhand", {
   teardown: function () {
     TestNamespace.fromObject.destroy();
     TestNamespace.toObject.destroy();
-    delete TestNamespace.fromObject;
-    delete TestNamespace.toObject;
+    TestNamespace = null;
   }
 });
 
@@ -815,7 +987,7 @@ test("Bindings override in subclasses.", function() {
   });
   SC.RunLoop.end();
 
-  ok(fromObject._bindings.length === 1, "Duplicate bindings are not created.")
+  ok(fromObject._bindings.length === 1, "Duplicate bindings are not created.");
 
   equals(fromObject.get('value'), 'world', "Superclass binding should have been overridden in the subclass, giving value a value of");
 

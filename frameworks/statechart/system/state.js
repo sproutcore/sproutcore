@@ -323,9 +323,6 @@ SC.State = SC.Object.extend(
         matchedInitialSubstate = NO,
         initialSubstate = this.get('initialSubstate'),
         substatesAreConcurrent = this.get('substatesAreConcurrent'),
-        statechart = this.get('statechart'),
-        i = 0,
-        len = 0,
         valueIsFunc = NO,
         historyState = null;
 
@@ -553,7 +550,7 @@ SC.State = SC.Object.extend(
 
     @param {String} name a unique name for the given substate.
     @param {SC.State} state a class that derives from `SC.State`
-    @param {Hash} [attr] liternal to be applied to the substate
+    @param {Object} [attr] literal to be applied to the substate
     @returns {SC.State} an instance of the given state class
   */
   addSubstate: function(name, state, attr) {
@@ -1324,7 +1321,7 @@ SC.State = SC.Object.extend(
     statechart framework use.
   */
   _configureAllStateObserveHandlers: function(action) {
-    var key, values, value, dotIndex, path, observer, i, root;
+    var key, values, dotIndex, path, observer, i, root;
 
     for (key in this._registeredStateObserveHandlers) {
       values = this._registeredStateObserveHandlers[key];
@@ -1417,16 +1414,6 @@ SC.State = SC.Object.extend(
   },
 
   /** @private */
-  _enteredSubstatesDidChange: function() {
-    this.notifyPropertyChange('enteredSubstates');
-  }.observes('*enteredSubstates.[]'),
-
-  /** @private */
-  _currentSubstatesDidChange: function() {
-    this.notifyPropertyChange('currentSubstates');
-  }.observes('*currentSubstates.[]'),
-
-  /** @private */
   _statechartOwnerDidChange: function() {
     this.notifyPropertyChange('owner');
   },
@@ -1475,7 +1462,13 @@ SC.State = SC.Object.extend(
   @param args {Hash,...} Optional. Hash objects to be added to the created state
 */
 SC.State.plugin = function(value) {
-  var args = SC.A(arguments); args.shift();
+  var args;
+
+  // Fast arguments access.
+  // Accessing `arguments.length` is just a Number and doesn't materialize the `arguments` object, which is costly.
+  args = new Array(arguments.length - 1); // SC.A(arguments).shift()
+  for (var i = 0, len = args.length; i < len; i++) { args[i] = arguments[i + 1]; }
+
   var func = function() {
     var klass = SC.objectForPropertyPath(value);
     if (!klass) {

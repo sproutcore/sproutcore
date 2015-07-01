@@ -87,7 +87,8 @@ SC.IndexSet = SC.mixin({},
     if (SC.none(start) && !SC.none(length)) lengthIsValid = NO; // stay invalid.
     else if (SC.none(length)) lengthIsValid = YES;
     else if (SC.typeOf(length) === SC.T_NUMBER && !isNaN(length)) lengthIsValid = YES;
-    // Check validitty and throw if needed.
+
+    // Check validity and throw if needed.
     if (!startIsValid || !lengthIsValid) {
       var argsString = SC.A(arguments).join(', ');
       throw new Error("SC.IndexSet created with invalid parameters (%@). You must call SC.IndexSet with zero, one or two valid numeric arguments.".fmt(argsString));
@@ -455,7 +456,6 @@ SC.IndexSet = SC.mixin({},
       }
     }
 
-    var oldlen = this.length;
     this._content.length=1;
     this._content[0] = 0;
     this.length = this.max = 0; // reset without notifying since add()
@@ -475,7 +475,7 @@ SC.IndexSet = SC.mixin({},
     this._sc_validateIndexSetArguments.apply(this, arguments);
     //@endif
 
-    if (this.isFrozen) throw SC.FROZEN_ERROR;
+    if (this.isFrozen) throw new Error(SC.FROZEN_ERROR);
 
     var content, cur, next;
 
@@ -652,7 +652,7 @@ SC.IndexSet = SC.mixin({},
     this._sc_validateIndexSetArguments.apply(this, arguments);
     //@endif
 
-    if (this.isFrozen) throw SC.FROZEN_ERROR;
+    if (this.isFrozen) throw new Error(SC.FROZEN_ERROR);
 
     // normalize input
     if (length === undefined) {
@@ -677,7 +677,6 @@ SC.IndexSet = SC.mixin({},
 
     // special case - appending to end of set
     var max     = this.get('max'),
-        oldmax  = max,
         content = this._content,
         cur, next, delta, value, last;
 
@@ -829,7 +828,7 @@ SC.IndexSet = SC.mixin({},
     Clears the set
   */
   clear: function () {
-    if (this.isFrozen) throw SC.FROZEN_ERROR;
+    if (this.isFrozen) throw new Error(SC.FROZEN_ERROR);
 
     var oldlen = this.length;
     this._content.length = 1;
@@ -845,7 +844,7 @@ SC.IndexSet = SC.mixin({},
     @param {Enumerable} objects The list of ranges you want to add
   */
   addEach: function (objects) {
-    if (this.isFrozen) throw SC.FROZEN_ERROR;
+    if (this.isFrozen) throw new Error(SC.FROZEN_ERROR);
 
     this.beginPropertyChanges();
     var idx = objects.get('length');
@@ -865,7 +864,7 @@ SC.IndexSet = SC.mixin({},
     @param {Object...} objects The list of objects you want to remove
   */
   removeEach: function (objects) {
-    if (this.isFrozen) throw SC.FROZEN_ERROR;
+    if (this.isFrozen) throw new Error(SC.FROZEN_ERROR);
 
     this.beginPropertyChanges();
 
@@ -1114,7 +1113,6 @@ SC.IndexSet = SC.mixin({},
 
     var content = this._content,
         cur     = 0,
-        idx     = 0,
         next    = content[cur];
 
     if (target === undefined) target = null;
@@ -1295,9 +1293,7 @@ SC.IndexSet = SC.mixin({},
       str.push(length === 1 ? start : "%@..%@".fmt(start, start + length - 1));
     }, this);
     return "SC.IndexSet<%@>".fmt(str.join(','));
-  },
-
-  max: 0
+  }
 
 });
 

@@ -882,28 +882,33 @@ SC.RenderContext = SC.Builder.create(
     // Add the updated styles to the internal styles object.
     if (SC.typeOf(nameOrStyles) === SC.T_HASH) {
       for (var key in nameOrStyles) {
-        if (!nameOrStyles.hasOwnProperty(key)) continue;
-
-        value = nameOrStyles[key];
-
-        didChange = this._deleteComboStyles(styles, key) || didChange;
-        didChange = this._setOnHash(styles, key, value) || didChange;
+        // Call a separate function so that it may be optimized.
+        didChange = this._sc_setStyleFromObject(didChange, key, nameOrStyles, styles);
       }
     } else {
       didChange = this._deleteComboStyles(styles, nameOrStyles);
       didChange = this._setOnHash(styles, nameOrStyles, value) || didChange;
     }
 
-    if (didChange) {
-
-      // Set the styles on the element if we have one already.
-      if (this._elem) {
-        // Note: jQuery .css doesn't remove old styles
-        this.$().css(styles);
-      }
+    // Set the styles on the element if we have one already.
+    if (didChange && this._elem) {
+      // Note: jQuery .css doesn't remove old styles
+      this.$().css(styles);
     }
 
     return this;
+  },
+
+  /** @private Sets the style by key from the styles object. This allows for optimization outside of the for..in loop. */
+  _sc_setStyleFromObject: function (didChange, key, stylesObject, styles) {
+    if (!stylesObject.hasOwnProperty(key)) return false;
+
+    var value = stylesObject[key];
+
+    didChange = this._deleteComboStyles(styles, key) || didChange;
+    didChange = this._setOnHash(styles, key, value) || didChange;
+
+    return didChange;
   },
 
   /** @private */
@@ -926,10 +931,10 @@ SC.RenderContext = SC.Builder.create(
 
   /** @private Sets or unsets the key:value on the hash and returns whether a change occurred. */
   _setOnHash: function (hash, key, value) {
-    /*jshint eqnull:true*/
     var cur = hash[key],
       didChange = true;
 
+    /*jshint eqnull:true */
     if (cur == null && value != null) {
       hash[key] = value;
     } else if (cur != null && value == null) {
@@ -947,7 +952,7 @@ SC.RenderContext = SC.Builder.create(
   /**
     Removes all styles from the context.
 
-    Be aware that setStyle() only effects the styles specified.  If there
+    Be aware that setStyle() only affects the styles specified.  If there
     are existing styles that are not modified by a call to setStyle(), they
     will remain on the context.  For example, if you call addStyle('margin-left', 10)
     and addStyle('margin-right', 10) followed by setClass({ 'margin-right': null }),
@@ -1009,7 +1014,7 @@ SC.RenderContext = SC.Builder.create(
           attr = elAttrs.item(i);
           name = attr.nodeName;
           if (name.match(/^(?!class|style).*$/i)) {
-            attrs[name] = attr.nodeValue;
+            attrs[name] = attr.value;
           }
         }
 

@@ -33,6 +33,72 @@ sc_require('system/query');
   You can bulk update attributes from the server using the
   `updateAttributes()` method.
 
+  # Polymorphic Records
+
+  SC.Record also supports polymorphism, which allows subclasses of a record type to share a common
+  identity. Polymorphism is similar to inheritance (i.e. a polymorphic subclass inherits its parents
+  properties), but differs in that polymorphic subclasses can be considered to be "equal" to each
+  other and their superclass. This means that any memmber of the polymorphic class group should be
+  able to stand in for any other member.
+
+  These examples may help identify the difference. First, let's look at the classic inheritance
+  model,
+
+      // This is the "root" class. All subclasses of MyApp.Person will be unique from MyApp.Person.
+      MyApp.Person = SC.Record.extend({});
+
+      // As a subclass, MyApp.Female inherits from a MyApp.Person, but is not "equal" to it.
+      MyApp.Female = MyApp.Person.extend({
+        isFemale: true
+      });
+
+      // As a subclass, MyApp.Male inherits from a MyApp.Person, but is not "equal" to it.
+      MyApp.Male = MyApp.Person.extend({
+        isMale: true
+      });
+
+      // Load two unique records into the store.
+      MyApp.store.createRecord(MyApp.Female, { guid: '1' });
+      MyApp.store.createRecord(MyApp.Male, { guid: '2' });
+
+      // Now we can see that these records are isolated from each other.
+      var female = MyApp.store.find(MyApp.Person, '1'); // Returns an SC.Record.EMPTY record.
+      var male = MyApp.store.find(MyApp.Person, '2'); // Returns an SC.Record.EMPTY record.
+
+      // These records are MyApp.Person only.
+      SC.kindOf(female, MyApp.Female); // false
+      SC.kindOf(male, MyApp.Male); // false
+
+  Next, let's make MyApp.Person a polymorphic class,
+
+      // This is the "root" polymorphic class. All subclasses of MyApp.Person will be able to stand-in as a MyApp.Person.
+      MyApp.Person = SC.Record.extend({
+        isPolymorphic: true
+      });
+
+      // As a polymorphic subclass, MyApp.Female is "equal" to a MyApp.Person.
+      MyApp.Female = MyApp.Person.extend({
+        isFemale: true
+      });
+
+      // As a polymorphic subclass, MyApp.Male is "equal" to a MyApp.Person.
+      MyApp.Male = MyApp.Person.extend({
+        isMale: true
+      });
+
+      // Load two unique records into the store.
+      MyApp.store.createRecord(MyApp.Female, { guid: '1' });
+      MyApp.store.createRecord(MyApp.Male, { guid: '2' });
+
+      // Now we can see that these records are in fact "equal" to each other. Which means that if we
+      // search for "people", we will get "males" & "females".
+      var female = MyApp.store.find(MyApp.Person, '1'); // Returns record.
+      var male = MyApp.store.find(MyApp.Person, '2'); // Returns record.
+
+      // These records are MyApp.Person as well as their unique subclass.
+      SC.kindOf(female, MyApp.Female); // true
+      SC.kindOf(male, MyApp.Male); // true
+
   @extends SC.Object
   @see SC.RecordAttribute
   @since SproutCore 1.0
@@ -84,26 +150,9 @@ SC.Record = SC.Object.extend(
   */
   isRecord: YES,
 
-  /**
-    If you have nested records
-
-    @type Boolean
-    @default NO
-  */
-  isParentRecord: NO,
-
-  // ...............................
-  // PROPERTIES
+  // ----------------------------------------------------------------------------------------------
+  // Properties
   //
-
-  /**
-    This is the primary key used to distinguish records.  If the keys
-    match, the records are assumed to be identical.
-
-    @type String
-    @default 'guid'
-  */
-  primaryKey: 'guid',
 
   /**
     Returns the id for the record instance.  The id is used to uniquely
@@ -123,6 +172,23 @@ SC.Record = SC.Object.extend(
       return SC.Store.idFor(this.storeKey);
     }
   }.property('storeKey').cacheable(),
+
+  /**
+    If you have nested records
+
+    @type Boolean
+    @default NO
+  */
+  isParentRecord: NO,
+
+  /**
+    This is the primary key used to distinguish records.  If the keys
+    match, the records are assumed to be identical.
+
+    @type String
+    @default 'guid'
+  */
+  primaryKey: 'guid',
 
   /**
     All records generally have a life cycle as they are created or loaded into
@@ -197,7 +263,7 @@ SC.Record = SC.Object.extend(
   isEditable: function(key, value) {
     if (value !== undefined) this._screc_isEditable = value;
     if (this.get('status') & SC.Record.READY) return this._screc_isEditable;
-    else return NO ;
+    else return NO;
   }.property('status').cacheable(),
 
   /**
@@ -333,7 +399,7 @@ SC.Record = SC.Object.extend(
       rec.refresh(recordOnly, callback);
     }
 
-    return this ;
+    return this;
   },
 
   /**
@@ -367,7 +433,7 @@ SC.Record = SC.Object.extend(
       rec.destroy(recordOnly);
     }
 
-    return this ;
+    return this;
   },
 
   /**
@@ -397,7 +463,7 @@ SC.Record = SC.Object.extend(
     // status to them.
     this.propagateToAggregates();
 
-    return this ;
+    return this;
   },
 
   toJSON: function(){
@@ -424,7 +490,7 @@ SC.Record = SC.Object.extend(
   */
   beginEditing: function() {
     this._editLevel++;
-    return this ;
+    return this;
   },
 
   /**
@@ -442,7 +508,7 @@ SC.Record = SC.Object.extend(
       this._editLevel = 0;
       this.recordDidChange(key);
     }
-    return this ;
+    return this;
   },
 
   /**
@@ -455,7 +521,7 @@ SC.Record = SC.Object.extend(
   readAttribute: function(key) {
     var store = this.get('store'), storeKey = this.storeKey;
     var attrs = store.readDataHash(storeKey);
-    return attrs ? attrs[key] : undefined ;
+    return attrs ? attrs[key] : undefined;
   },
 
   /**
@@ -476,7 +542,7 @@ SC.Record = SC.Object.extend(
         attrs;
 
     attrs = store.readEditableDataHash(storeKey);
-    if (!attrs) throw SC.Record.BAD_STATE_ERROR;
+    if (!attrs) SC.Record.BAD_STATE_ERROR.throw();
 
     // if value is the same, do not flag record as dirty
     if (value !== attrs[key]) {
@@ -496,7 +562,7 @@ SC.Record = SC.Object.extend(
         store.dataHashDidChange(storeKey, null, undefined, key);
       }
     }
-    return this ;
+    return this;
   },
 
   /**
@@ -600,7 +666,7 @@ SC.Record = SC.Object.extend(
 
       // also notify manyArrays
       var manyArrays = this.relationships,
-          loc        = manyArrays ? manyArrays.length : 0 ;
+          loc        = manyArrays ? manyArrays.length : 0;
       while(--loc>=0) manyArrays[loc].recordPropertyDidChange(keys);
     }
   },
@@ -627,11 +693,10 @@ SC.Record = SC.Object.extend(
 
   normalize: function(includeNull) {
     var primaryKey = this.primaryKey,
-        recordId   = this.get('id'),
         store      = this.get('store'),
         storeKey   = this.get('storeKey'),
         keysToKeep = {},
-        key, valueForKey, typeClass, recHash, attrValue, normChild,  isRecord,
+        key, valueForKey, typeClass, recHash, attrValue, isRecord,
         isChild, defaultVal, keyForDataHash, attr;
 
     var dataHash = store.readEditableDataHash(storeKey) || {};
@@ -773,7 +838,6 @@ SC.Record = SC.Object.extend(
   */
   commitRecord: function(params, recordOnly, callback) {
     var store = this.get('store'), rec, ro,
-        sk = this.get('storeKey'),
         prKey = store.parentStoreKeyExists();
 
     // If we only want to commit this record or it doesn't have a parent record
@@ -785,7 +849,7 @@ SC.Record = SC.Object.extend(
       rec = store.materializeRecord(prKey);
       rec.commitRecord(params, recordOnly, callback);
     }
-    return this ;
+    return this;
   },
 
   // ..........................................................
@@ -813,7 +877,7 @@ SC.Record = SC.Object.extend(
     @dependsOn isError
   */
   errorValue: function() {
-    return this.get('isError') ? SC.val(this.get('errorObject')) : null ;
+    return this.get('isError') ? SC.val(this.get('errorObject')) : null;
   }.property('isError').cacheable(),
 
   /**
@@ -828,7 +892,7 @@ SC.Record = SC.Object.extend(
     if (this.get('isError')) {
       var store = this.get('store');
       return store.readError(this.get('storeKey')) || SC.Record.GENERIC_ERROR;
-    } else return null ;
+    } else return null;
   }.property('isError').cacheable(),
 
   // ...............................
@@ -933,7 +997,7 @@ SC.Record = SC.Object.extend(
      @param {SC.Record} the record that was materialized
     */
   _materializeNestedRecordType: function(value, key){
-    var childNS, recordType, ret;
+    var childNS, recordType;
 
     // Get the record type, first checking the "type" property on the hash.
     if (SC.typeOf(value) === SC.T_HASH) {
@@ -966,7 +1030,7 @@ SC.Record = SC.Object.extend(
     @returns {SC.Record} the nested record created
    */
   createNestedRecord: function(recordType, hash, psk, path) {
-    var store = this.get('store'), id, sk, pk, cr = null;
+    var store = this.get('store'), id, sk, cr = null;
 
     hash = hash || {}; // init if needed
 
@@ -979,7 +1043,7 @@ SC.Record = SC.Object.extend(
     // that we don't keep making new storeKeys for the same child record each
     // time that it is reloaded.
     id = hash[recordType.prototype.primaryKey];
-    if (!id) this.generateIdForChild(cr);
+    if (!id) { id = this.generateIdForChild(cr); }
     if (!id) { id = psk + '.' + path; }
 
     // If there is an id, there may also be a storeKey.  If so, update the
@@ -1007,7 +1071,7 @@ SC.Record = SC.Object.extend(
    */
   generateIdForChild: function(childRecord){}
 
-}) ;
+});
 
 // Class Methods
 SC.Record.mixin( /** @scope SC.Record */ {
@@ -1282,7 +1346,7 @@ SC.Record.mixin( /** @scope SC.Record */ {
     @constant
     @type SC.Error
   */
-  BAD_STATE_ERROR:     SC.$error("Internal Inconsistency"),
+  BAD_STATE_ERROR: SC.$error("Internal Inconsistency"),
 
   /**
     Error for when you try to create a new record that already exists.
@@ -1300,7 +1364,7 @@ SC.Record.mixin( /** @scope SC.Record */ {
     @constant
     @type SC.Error
   */
-  NOT_FOUND_ERROR:     SC.$error("Not found "),
+  NOT_FOUND_ERROR: SC.$error("Not found "),
 
   /**
     Error for when you try to modify a record that is currently busy
@@ -1309,7 +1373,7 @@ SC.Record.mixin( /** @scope SC.Record */ {
     @constant
     @type SC.Error
   */
-  BUSY_ERROR:          SC.$error("Busy"),
+  BUSY_ERROR: SC.$error("Busy"),
 
   /**
     Generic unknown record error
@@ -1318,7 +1382,24 @@ SC.Record.mixin( /** @scope SC.Record */ {
     @constant
     @type SC.Error
   */
-  GENERIC_ERROR:       SC.$error("Generic Error"),
+  GENERIC_ERROR: SC.$error("Generic Error"),
+
+  /**
+    If true, then searches for records of this type will return subclass instances. For example:
+
+        Person = SC.Record.extend();
+        Person.isPolymorphic = true;
+
+        Male = Person.extend();
+        Female = Person.extend();
+
+    Using SC.Store#find, or a toOne or toMany relationship on Person will then return records of
+    type Male and Female. Polymorphic record types must have unique GUIDs across all subclasses.
+
+    @type Boolean
+    @default NO
+  */
+  isPolymorphic: NO,
 
   /**
     @private
@@ -1366,7 +1447,7 @@ SC.Record.mixin( /** @scope SC.Record */ {
     @returns {SC.RecordAttribute} created instance
   */
   fetch: function(recordType, opts) {
-    return SC.FetchedAttribute.attr(recordType, opts) ;
+    return SC.FetchedAttribute.attr(recordType, opts);
   },
 
   /**
@@ -1453,16 +1534,28 @@ SC.Record.mixin( /** @scope SC.Record */ {
   },
 
   /**
-    Returns all storeKeys mapped by Id for this record type.  This method is
-    used mostly by the `SC.Store` and the Record to coordinate.  You will rarely
-    need to call this method yourself.
+    Returns all storeKeys mapped by Id for this record type.  This method is used mostly by the
+    `SC.Store` and the Record to coordinate.  You will rarely need to call this method yourself.
 
-    @returns {Hash}
+    Note that for polymorpic record classes, all store keys are kept on the top-most polymorphic
+    superclass. This ensures that store key by id requests at any level return only the one unique
+    store key.
+
+    @see SC.Record.storeKeysById
   */
   storeKeysById: function() {
-    var key = SC.keyFor('storeKey', SC.guidFor(this)),
-        ret = this[key];
-    if (!ret) ret = this[key] = {};
+    var superclass = this.superclass,
+      key = SC.keyFor('storeKey', SC.guidFor(this)),
+      ret = this[key];
+
+    if (!ret) {
+      if (this.isPolymorphic && superclass.isPolymorphic && superclass !== SC.Record) {
+        ret = this[key] = superclass.storeKeysById();
+      } else {
+        ret = this[key] = {};
+      }
+    }
+
     return ret;
   },
 
@@ -1479,16 +1572,16 @@ SC.Record.mixin( /** @scope SC.Record */ {
   */
   storeKeyFor: function(id) {
     var storeKeys = this.storeKeysById(),
-        ret       = storeKeys[id];
+        ret = storeKeys[id];
 
     if (!ret) {
       ret = SC.Store.generateStoreKey();
-      SC.Store.idsByStoreKey[ret] = id ;
-      SC.Store.recordTypesByStoreKey[ret] = this ;
-      storeKeys[id] = ret ;
+      SC.Store.idsByStoreKey[ret] = id;
+      SC.Store.recordTypesByStoreKey[ret] = this;
+      storeKeys[id] = ret;
     }
 
-    return ret ;
+    return ret;
   },
 
   /**
@@ -1501,9 +1594,9 @@ SC.Record.mixin( /** @scope SC.Record */ {
   */
   storeKeyExists: function(id) {
     var storeKeys = this.storeKeysById(),
-        ret       = storeKeys[id];
+        ret = storeKeys[id];
 
-    return ret ;
+    return ret;
   },
 
   /**
@@ -1517,10 +1610,19 @@ SC.Record.mixin( /** @scope SC.Record */ {
     return store.find(this, id);
   },
 
-  /** @private - enhance extend to notify SC.Query as well. */
+  /** @private - enhance extend to notify SC.Query and ensure polymorphic subclasses are marked as polymorphic as well. */
   extend: function() {
     var ret = SC.Object.extend.apply(this, arguments);
-    if(SC.Query) SC.Query._scq_didDefineRecordType(ret);
-    return ret ;
+
+    if (SC.Query) SC.Query._scq_didDefineRecordType(ret);
+
+    // All subclasses of a polymorphic class, must also be polymorphic.
+    if (ret.prototype.hasOwnProperty('isPolymorphic')) {
+      ret.isPolymorphic = ret.prototype.isPolymorphic;
+      delete ret.prototype.isPolymorphic;
+    }
+
+    return ret;
   }
+
 });
