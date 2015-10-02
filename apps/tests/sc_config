@@ -1,0 +1,16 @@
+BT._TESTAPP = BT.AppBuilder.create({
+  name: "sproutcore/tests",
+  path: dirname(),
+  doNotBuild: true,
+  includeTests: true,
+  theme: "sproutcore:ace",
+  frameworks: ["sproutcore:debug","sproutcore:testing","sproutcore", "sproutcore:datastore","sproutcore:core_tools"]
+});
+
+//[{
+//    ref: "sproutcore",
+//    all: {
+//      debug: {
+//        urlTemplate: "/%{frameworkName}/%{relativePath}"
+//      }
+//    }

@@ -1,0 +1,4 @@
+BT.addApp(BT.AppBuilder.create({
+  name: "statechart_routing",
+  path: BT.curDir
+}));

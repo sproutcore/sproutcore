@@ -1,0 +1,29 @@
+
+BT.addFramework(BT.Framework.extend({
+  ref: "sproutcore",
+  path: dirname(),
+  isWrapperFramework: true,
+  all: {
+    debug: {
+      combinedScripts: true,
+      combinedStylesheets: true,
+    },
+    production: {
+      combinedScripts: true,
+      combinedStylesheets: true,
+    }
+  },
+  dependencies: ["sproutcore:desktop","sproutcore:datastore","sproutcore:statechart"]
+}));
+
+BT.addTheme(BT.Theme.extend({
+  ref: "sproutcore:empty_theme",
+  path: dirname() + "/themes/empty_theme"
+}));
+
+BT.addTheme(BT.Theme.extend({
+  ref: "sproutcore:ace",
+  cssName: "ace",
+  path: dirname() + "/themes/ace",
+  dependencies: ["sproutcore:empty_theme"]
+}));

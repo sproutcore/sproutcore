@@ -1,0 +1,5 @@
+BT.addFramework(BT.Framework.extend({
+  ref: "sproutcore:foundation",
+  path: dirname(),
+  dependencies: ["sproutcore:routing", "sproutcore:core_foundation","sproutcore:datetime","sproutcore:datetime:localized","sproutcore:ajax"]
+}));

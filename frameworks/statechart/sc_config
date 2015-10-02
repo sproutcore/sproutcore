@@ -1,0 +1,6 @@
+BT.addFramework(BT.Framework.extend({
+  ref: "sproutcore:statechart",
+  path: dirname(),
+  dependencies: ["sproutcore:core_foundation"],
+  testDependencies: ["sproutcore:core_foundation", "sproutcore:desktop", "sproutcore:routing"]
+}));

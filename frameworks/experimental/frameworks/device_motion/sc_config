@@ -1,0 +1,4 @@
+BT.addFramework(BT.Framework.extend({
+  ref: "sproutcore:experimental:device_motion",
+  path: dirname()
+}));

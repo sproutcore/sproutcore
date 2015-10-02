@@ -1,0 +1,5 @@
+BT.addFramework(BT.Framework.extend({
+  ref: "sproutcore:datastore",
+  path: dirname(),
+  dependencies: ["sproutcore:runtime","sproutcore:datetime"]
+}));
