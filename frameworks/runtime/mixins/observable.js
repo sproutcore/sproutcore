@@ -932,7 +932,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
 
     var observers = this['_kvo_observers-' + key],
         chains = this._kvo_for('_kvo_chains-' + key),
-        locals = this['_kvo_local' + key],
+        locals = this['_kvo_local-' + key],
         isChain = key.indexOf('.') >= 0;
 
     // Fast path: no target/method.
