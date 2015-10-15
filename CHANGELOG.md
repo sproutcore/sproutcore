@@ -15,6 +15,9 @@ Edge
 
 * The Ruby Buildtools nicknamed abbot are no longer supported.
 
+
+* Deprecation of SC.keyFor. It is used to create identification keys, but simply adding strings together is already faster than trying to read them from the cache.
+
 ### BUG FIXES
 
 1.11.1
