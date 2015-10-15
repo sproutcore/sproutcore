@@ -531,7 +531,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
   */
   queryWithScope: function(recordArray) {
     // look for a cached query on record array.
-    var key = SC.keyFor('__query__', SC.guidFor(this)),
+    var key = '__query___' + SC.guidFor(this),
         ret = recordArray[key];
 
     if (!ret) {
@@ -1297,7 +1297,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
           SC.warn("Developer Warning: You have an orderBy syntax error in a Query, %@: DESC should be in the last position.".fmt(orderOp));
         }
       }
-      
+
       // check for improper separation chars
       if (orderOp.indexOf(":") > -1 || orderOp.indexOf(":") > -1) {
         SC.warn("Developer Warning: You have an orderBy syntax error in a Query, %@: Colons or semicolons should not be used as a separation character.".fmt(orderOp));
