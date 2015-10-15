@@ -781,7 +781,7 @@ SC.ViewDesigner = SC.Object.extend(
   prepareReposition: function(info) {
     var view = this.get('view'),
         layout = view ? SC.copy(view.get('layout')) : {};
-    info[SC.keyFor('layout', SC.guidFor(this))] = layout;
+    info['layout-' + SC.guidFor(this)] = layout;
     return this ;
   },
 
@@ -1008,7 +1008,7 @@ SC.ViewDesigner = SC.Object.extend(
 
   _mouseReposition: function(evt, info, keys, ret) {
     var delta  = evt[keys.evtPoint] - info[keys.point],
-        layout = info[SC.keyFor('layout', SC.guidFor(this))],
+        layout = info['layout-' + SC.guidFor(this))],
         view   = this.get('view'),
 
         headKey   = keys.head,

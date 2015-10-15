@@ -1545,7 +1545,7 @@ SC.Record.mixin( /** @scope SC.Record */ {
   */
   storeKeysById: function() {
     var superclass = this.superclass,
-      key = SC.keyFor('storeKey', SC.guidFor(this)),
+      key = 'storeKey-' + SC.guidFor(this),
       ret = this[key];
 
     if (!ret) {
