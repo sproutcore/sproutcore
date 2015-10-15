@@ -121,7 +121,7 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
     var type      = this.get('typeClass'),
         supportNewRecords = this.get('supportNewRecords'),
         attrKey   = this.get('key') || key,
-        arrayKey  = SC.keyFor('__manyArray__', SC.guidFor(this)),
+        arrayKey  = '__manyArray___' + SC.guidFor(this),
         ret       = record[arrayKey],
         rel;
 

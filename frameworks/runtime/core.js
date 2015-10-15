@@ -406,6 +406,7 @@ SC.mixin(/** @scope window.SC.prototype */ {
     @returns {String} result
   */
   keyFor: function (prefix, key) {
+    SC.warn("Developer notice: the use of SC.keyFor is deprecated");
     var ret, pcache = this._keyCache[prefix];
     if (!pcache) pcache = this._keyCache[prefix] = {}; // get cache for prefix
     ret = pcache[key];
