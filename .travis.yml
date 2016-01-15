@@ -5,6 +5,8 @@ rvm:
 install: true
 
 before_script:
+  - gem update bundler
+  - bundler -v
   - ./scripts/run_sc_server_master.sh
   - sleep 5 # give sc-server some time to start
 
