@@ -16,7 +16,7 @@ cat > Gemfile <<EOF
 source "http://rubygems.org"
 gem "sproutcore", :path => "./abbot/"
 EOF
-bundle install --binstubs
+bundle install
 ./bin/sc-init master
 cd master
 mkdir frameworks
