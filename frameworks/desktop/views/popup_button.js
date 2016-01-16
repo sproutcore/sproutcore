@@ -165,9 +165,9 @@ SC.PopupButtonView = SC.ButtonView.extend({
     
     @property
     @type Array
-    @default [0, 0, 0]
+    @default null
   */
-  menuPreferMatrix: [0, 0, 0],
+  menuPreferMatrix: null,
 
   /**
     @private
