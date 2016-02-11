@@ -1,15 +1,11 @@
-language: ruby
-rvm:
-  - 1.9.3
-
-install: true
+language: node_js
+node_js:
+  - 0.12
 
 before_script:
-  - gem update bundler
-  - bundler -v
   #- ./scripts/run_sc_server_master.sh
   - ./scripts/run_bt_server_master.sh
-  - sleep 5 # give sc-server some time to start
+  - sleep 15 # give sc-server some time to start
 
 script: phantomjs phantomjs/test_runner.js --no-experimental --exclude-targets=/sproutcore/greenhouse
 
