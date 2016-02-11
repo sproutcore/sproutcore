@@ -23,10 +23,10 @@ ln -s ${OLD_PWD} sproutcore
 cd ..
 if [ -z ${TRAVIS_JOB_ID} ]; then
     # not running under travis, stay in foreground until stopped
-    ../sproutcore/bin/sproutcore serve --localOnly=true --port=${PORT}
+    ../sproutcore/bin/sproutcore serve --local-only=true --port=${PORT}
 else
     # running under travis, daemonize
     #( ../bin/sc-server --host=${IP} --port=${PORT} --allow-from-ips=${ALLOW_IPS:-"*.*.*.*"} & ) || /bin/true
-    ( ../sproutcore/bin/sproutcore serve --localOnly=true --port=${PORT} & ) || /bin/true
+    ( ../sproutcore/bin/sproutcore serve --local-only=true --port=${PORT} --include-tests & ) || /bin/true
 fi
 cd ${OLD_PWD}
