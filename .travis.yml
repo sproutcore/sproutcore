@@ -1,6 +1,6 @@
 language: node_js
 node_js:
-  - 0.12
+  - "0.12"
 
 before_script:
   #- ./scripts/run_sc_server_master.sh
