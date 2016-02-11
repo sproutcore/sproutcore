@@ -6,7 +6,6 @@
 // ==========================================================================
 
 sc_require('core') ;
-sc_require('models/record');
 
 /**
   @class
@@ -1297,7 +1296,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
           SC.warn("Developer Warning: You have an orderBy syntax error in a Query, %@: DESC should be in the last position.".fmt(orderOp));
         }
       }
-      
+
       // check for improper separation chars
       if (orderOp.indexOf(":") > -1 || orderOp.indexOf(":") > -1) {
         SC.warn("Developer Warning: You have an orderBy syntax error in a Query, %@: Colons or semicolons should not be used as a separation character.".fmt(orderOp));
