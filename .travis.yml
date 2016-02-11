@@ -7,7 +7,7 @@ before_script:
   - ./scripts/run_bt_server_master.sh
   - sleep 15 # give sc-server some time to start
 
-script: phantomjs phantomjs/test_runner.js --no-experimental --exclude-targets=/sproutcore/greenhouse
+script: phantomjs phantomjs/test_runner_bt.js --no-experimental --exclude-targets=/sproutcore/greenhouse
 
 notifications:
   webhooks:
