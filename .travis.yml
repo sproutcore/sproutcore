@@ -2,6 +2,8 @@ language: node_js
 node_js:
   - "0.12"
 
+sudo: false
+
 before_script:
   #- ./scripts/run_sc_server_master.sh
   - ./scripts/run_bt_server_master.sh
