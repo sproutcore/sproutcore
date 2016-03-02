@@ -779,22 +779,6 @@ SC.RootResponder = SC.Object.extend(
     if(SC.browser.isIE8OrLower) this.listenFor(['focusin', 'focusout'], document);
     else this.listenFor(['focus', 'blur'], window);
 
-    // handle special case for keypress- you can't use normal listener to block
-    // the backspace key on Mozilla
-    if (this.keypress) {
-      if (SC.CAPTURE_BACKSPACE_KEY && SC.browser.isMozilla) {
-        var responder = this ;
-        document.onkeypress = function(e) {
-          e = SC.Event.normalizeEvent(e);
-          return responder.keypress.call(responder, e);
-        };
-
-      // Otherwise, just add a normal event handler.
-      } else {
-        SC.Event.add(document, 'keypress', this, this.keypress);
-      }
-    }
-
     // Add an array of transition listeners for immediate use (these will be cleaned up when actual testing completes).
     // Because the transition test happens asynchronously and because we don't want to
     // delay the launch of the application in order to a transition test (the app won't
@@ -2017,14 +2001,11 @@ SC.RootResponder = SC.Object.extend(
       // duplicate the event sent in keydown when a modifier key is pressed.
       if (isFirefoxArrowKeys || this._isPrintableKey(evt)) {
         return this.sendEvent('keyDown', evt) ? evt.hasCustomEventHandling : YES;
-    }
+      }
     }
   },
 
   keyup: function(evt) {
-    // to end the simulation of keypress in firefox set the _ffevt to null
-    if(this._ffevt) this._ffevt=null;
-
     // modifier keys are handled separately by the 'flagsChanged' event
     // send event for modifier key changes, but only stop processing if this is only a modifier change
     var ret = this._handleModifierChanges(evt);
