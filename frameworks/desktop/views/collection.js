@@ -581,7 +581,24 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
   */
   adjustLayout: function () {
     var layout = this.computeLayout();
-    if (layout) { this.adjust(layout); }
+
+    if (layout) { 
+      // make sure the collection is not smaller than it's container which cause
+      // trouble when trying to drag items at the end of the list.
+      var parentViewFrame = this.getPath('parentView.frame');
+
+      if (parentViewFrame) {
+        if (layout.height < parentViewFrame.height) {
+          layout.height = parentViewFrame.height;
+        }
+
+        if (layout.width < parentViewFrame.width) {
+          layout.width = parentViewFrame.width;
+        }
+      }
+
+      this.adjust(layout); 
+    }
   },
 
   /**
@@ -966,7 +983,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
       length = this.get('length');
       if (length > 1 && invalid.max === length) {
         invalid.add(length - 2);
-    }
+      }
     } else {
       this._invalidIndexes = YES ; // force a total reload
     }
@@ -3118,6 +3135,12 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
   */
   collectionViewShouldSelectItem: function(view, item) {
     return this.get('isSelectable') ;
+  },
+
+  /** @private */
+  viewDidResize: function () {
+    this.invokeOnce('adjustLayout');
+    sc_super();
   },
 
   /** @private
