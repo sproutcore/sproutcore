@@ -1,8 +1,7 @@
-@import "mixins.css";
-@import "variables.css";
+@import "compass/css3";
 
 $theme.button {
-  @include box-sizing();
+  @include box-sizing('border-box');
   background-color: $button-bg;
   border: 1px solid $button-border-color;
   box-shadow: $button-box-shadow;

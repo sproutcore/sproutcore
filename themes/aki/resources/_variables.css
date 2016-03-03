@@ -335,7 +335,7 @@ $source-list-item-drop-target-text-shadow: $collection-item-drop-target-text-sha
 // WELL
 //
 
-$well-bg: rgba(255,255,255,.5);
+$well-bg: #F7F7F7;
 $well-border: none;
 $well-box-shadow: inset 0px 1px 3px rgba(0,0,0,0.3);
 $well-border-radius: 6px;

@@ -1,4 +1,3 @@
-@import "variables-dark.css";
 
 @theme(dark) {
   $theme.button {
