@@ -1,5 +1,4 @@
-@import "variables.css";
-@import "mixins.css";
+@import "compass/css3";
 
 $theme.sc-text-field-view {
   background-color: transparent;
@@ -46,7 +45,7 @@ $theme.sc-text-field-view {
     left: 0;
     bottom: 0;
     top: 0;
-    @include box-sizing();
+    @include box-sizing('border-box');
   }
   
   
