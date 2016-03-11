@@ -310,15 +310,21 @@ SC.NestedStore = SC.Store.extend(
   /**
     Returns the `SC.Error` object associated with a specific record.
 
-    Delegates the call to the parent store.
+    If this is an autonomous nested store call the base class, otherwise
+    delegates the call to the parent store.
 
     @param {Number} storeKey The store key of the record.
 
     @returns {SC.Error} SC.Error or null if no error associated with the record.
   */
   readError: function(storeKey) {
-    var parentStore = this.get('parentStore');
-    return parentStore ? parentStore.readError(storeKey) : null;
+    if ( this.get( "dataSource" ) ) {
+      return sc_super();
+    }
+    else {
+      var parentStore = this.get('parentStore');
+      return parentStore ? parentStore.readError(storeKey) : null;
+    }
   },
 
   /**
