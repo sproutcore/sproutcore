@@ -311,7 +311,7 @@ SC.NestedStore = SC.Store.extend(
     Returns the `SC.Error` object associated with a specific record.
 
     If this is an autonomous nested store call the base class, otherwise
-    delegates the call to the parent store.
+    delegate the call to the parent store.
 
     @param {Number} storeKey The store key of the record.
 
