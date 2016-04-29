@@ -1,302 +1,266 @@
-// ==========================================================================
-// Project:   SproutCore - JavaScript Application Framework
-// Copyright: ©2006-2011 Strobe Inc. and contributors.
+// Copyright: ©2006-2010 Sprout Systems, Inc. and contributors.
 //            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
 sc_require('views/button');
 
-/** @class
+/**
+ * @class
+ * @extends SC.ButtonView
+ * @version 1.6
+ * @author Alex Iskander
+ */
+SC.PopupButtonView = SC.ButtonView.extend({
+  /** @scope SC.PopupButtonView.prototype */
 
-  SC.PopupButtonView displays a pop-up menu when clicked, from which the user
-  can select an item.
-
-  To use, create the SC.PopupButtonView as you would a standard SC.ButtonView,
-  then set the menu property to an instance of SC.MenuPane. For example:
-
-      SC.PopupButtonView.design({
-        layout: { width: 200, height: 18 },
-        menuBinding: 'MyApp.menuController.menuPane'
-      });
-
-  You would then have your MyApp.menuController return an instance of the menu
-  to display.
-
-  @extends SC.ButtonView
-  @author Santosh Shanbhogue
-  @author Tom Dale
-  @copyright 2008-2011, Strobe Inc. and contributors.
-  @version 1.0
-*/
-SC.PopupButtonView = SC.ButtonView.extend(
-/** @scope SC.PopupButtonView.prototype */ {
 
   /**
-    @type Array
-    @default ['sc-popup-button']
-    @see SC.View#classNames
-  */
-  classNames: ['sc-popup-button'],
-
-  /**
+    The render delegate to use to render and update the HTML for the PopupButton.
+    
     @type String
     @default 'popupButtonRenderDelegate'
   */
   renderDelegateName: 'popupButtonRenderDelegate',
 
-
-  // ..........................................................
-  // PROPERTIES
-  //
-
   /**
-    The prefer matrix to use when displaying the menu.
-
-    @property
-  */
-  preferMatrix: null,
-
-  /**
-    The SC.MenuPane that should be displayed when the button is clicked.
-
+    The menu that will pop up when this button is clicked. This can be a class or
+    an instance.
+    
     @type {SC.MenuPane}
-    @default null
+    @default SC.MenuPane
   */
-  menu: null,
+  menu: SC.MenuPane,
 
   /**
-    If YES and the menu is a class, this will cause a task that will instantiate the menu
-    to be added to SC.backgroundTaskQueue.
+    If YES, a menu instantiation task will be placed in SproutCore's
+    `SC.backgroundTaskQueue` so the menu will be instantiated before 
+    the user taps the button, improving response time.
 
     @type Boolean
     @default NO
+    @property
   */
   shouldLoadInBackground: NO,
 
-  // ..........................................................
-  // INTERNAL SUPPORT
-  //
-
-  /** @private
-    If necessary, adds the loading of the menu to the background task queue.
+  /**
+   * @private
+   * If YES, the menu has been instantiated; if NO, the 'menu' property
+   * still has a class instead of an instance.
   */
-  init: function() {
-    sc_super();
-    this._setupMenu();
-    if (this.get('shouldLoadInBackground')) {
-      SC.backgroundTaskQueue.push(SC.PopupButtonMenuLoader.create({ popupButton: this }));
-    }
-  },
-
-  /** @private
-    Sets up binding on the menu, removing any old ones if necessary.
-  */
-  _setupMenu: function() {
-    var menu = this.get('instantiatedMenu');
-
-    // clear existing bindings
-    if (this.isActiveBinding) this.isActiveBinding.disconnect();
-    this.isActiveBinding = null;
-
-    // if there is a menu
-    if (menu && !menu.isClass) {
-      this.isActiveBinding = this.bind('isActive', menu, 'isVisibleInWindow');
-    }
-  },
-
-  /** @private
-    Setup the bindings for menu...
-  */
-  _popup_menuDidChange: function() {
-    this._setupMenu();
-  }.observes('menu'),
+  _menuIsLoaded: NO,
 
   /** @private
     isActive is NO, but when the menu is instantiated, it is bound to the menu's isVisibleInWindow property.
   */
   isActive: NO,
 
-  /** @private
-    Instantiates the menu if it is not already instantiated.
+  acceptsFirstResponder: YES,
+  
+
+  /**
+    @private
   */
-  _instantiateMenu: function() {
-    // get menu
-    var menu = this.get('menu');
+  init: function() {
+    sc_super();
 
-    // if it is already instantiated or does not exist, we cannot do anything
-    if (!menu || !menu.isClass) return;
-
-    // create
-    this.menu = menu.create();
-
-    // setup
-    this._setupMenu();
+    // keep track of the current instantiated menu separately from
+    // our property. This allows us to destroy it when the property
+    // changes, and to track if the property change was initiated by
+    // us (since we set `menu` to the instantiated menu).
+    this._currentMenu = null;
+    this.invokeOnce('scheduleMenuSetupIfNeeded');
   },
 
-  /** @private
-    The guaranteed-instantiated menu.
-  */
-  instantiatedMenu: function() {
-    // get the menu
+  /**
+    Adds menu instantiation to the background task queue if the menu
+    is not already instantiated and if shouldLoadInBackground is YES.
+    
+    @method
+    @private
+   */
+  scheduleMenuSetupIfNeeded: function() {
     var menu = this.get('menu');
 
-    // if it is a class, we need to instantiate it
-    if (menu && menu.isClass) {
-      // do so
-      this._instantiateMenu();
+    if (menu && menu.isClass && this.get('shouldLoadInBackground')) {
+      SC.backgroundTaskQueue.push(SC.PopupButtonView.InstantiateMenuTask.create({ popupButton: this }));
+    }
+  },
 
-      // get the new version of the local
-      menu = this.get('menu');
+  /** @private if the menu changes, it must be set up again. */
+  menuDidChange: function() {
+    // first, check if we are the ones who changed the property
+    // by setting it to the instantiated menu
+    var menu = this.get('menu');
+    if (menu === this._currentMenu) { 
+      return;
     }
 
-    // return
-    return menu;
-  }.property('menu').cacheable(),
+    this.invokeOnce('scheduleMenuSetupIfNeeded');
+  }.observes('menu'),
 
-  /** @private
-    Displays the menu.
-
-    @param {SC.Event} evt
+  /**
+   Instantiates the menu if it exists and is not already instantiated.
+   If another menu is already instantiated, it will be destroyed.
   */
-  action: function(evt) {
-    var menu = this.get('instantiatedMenu') ;
+  setupMenu: function() {
+    var menu = this.get('menu');
 
-    if (!menu) {
-      // @if (debug)
-      SC.Logger.warn("SC.PopupButton - Unable to show menu because the menu property is set to %@.".fmt(menu));
-      // @endif
-      return NO ;
+    // handle our existing menu, if any
+    if (menu === this._currentMenu) { return; }
+    if (this._currentMenu) {
+      this.isActiveBinding.disconnect();
+
+      this._currentMenu.destroy();
+      this._currentMenu = null;
     }
 
-    menu.popup(this, this.get('preferMatrix')) ;
+    // do not do anything if there is nothing to do.
+    if (menu && menu.isClass) {
+      menu = this.createMenu(menu);
+    }
+
+    this._currentMenu = menu;
+    this.set('menu', menu);
+
+    this.isActiveBinding = this.bind('isActive', menu, 'isVisibleInWindow');
+  },
+
+  /**
+    Called to instantiate a menu. You can override this to set properties
+    such as the menu's width or the currently selected item.
+    
+    @param {SC.MenuPane} menu The MenuPane class to instantiate.
+  */
+  createMenu: function(menu) {
+    return menu.create();
+  },
+
+
+  /**
+    Shows the PopupButton's menu. You can call this to show it manually.
+    
+    NOTE: The menu will not be shown until the end of the Run Loop.
+  */
+  showMenu: function() {
+    // problem: menu's bindings may not flush
+    this.setupMenu();
+
+    // solution: pop up the menu later. Ugly-ish, but not too bad:
+    this.invokeLast('_showMenu');
+  },
+
+  /**
+    Hides the PopupButton's menu if it is currently showing.
+  */
+  hideMenu: function() {
+    var menu = this.get('menu');
+    if (menu && !menu.isClass) {
+      menu.remove();
+    }
+  },
+
+  /**
+    The prefer matrix (positioning information) to use to pop up the new menu.
+    
+    @property
+    @type Array
+    @default null
+  */
+  menuPreferMatrix: null,
+
+  /**
+    @private
+    The actual showing of the menu is delayed because bindings may need
+    to flush.
+  */
+  _showMenu: function() {
+    var menu = this.get('menu');
+
+    menu.popup(this, this.get('menuPreferMatrix'));
+  },
+
+  /** @private */
+  mouseDown: function(evt) {
+    // If disabled, handle mouse down but ignore it.
+    if (!this.get('isEnabled')) return YES ;
+
+    this.set('_mouseDown', YES);
+
+    this.showMenu();
+    
+    this._mouseDownTimestamp = null;
+    
+    // Some nutty stuff going on here. If the number of menu items is large, and
+    // it takes over 400 ms to create, then invokeLater will not return control
+    // to the browser, thereby causing the menu pane to dismiss itself
+    // instantly. Using setTimeout will guarantee that control goes back to the
+    // browser.
+    var self = this;
+
+    // there is a bit of a race condition: we could get mouse up immediately.
+    // In that case, we will take note that the timestamp is 0 and treat it
+    // as if it were Date.now() at the time of checking.
+    self._mouseDownTimestamp = 0;
+
+    setTimeout(function() {
+      self._mouseDownTimestamp = Date.now();
+    }, 1);
+    
+    this.becomeFirstResponder();
+
     return YES;
   },
 
-  /** @private
-    On mouse down, we set the state of the button, save some state for further
-    processing, then call the button's action method.
-
-    @param {SC.Event} evt
-    @returns {Boolean}
-  */
-  mouseDown: function(evt) {
-    // Fast path, reject secondary clicks.
-    if (evt.which && evt.which !== 1) return false;
-
-    // If disabled, handle mouse down but ignore it.
-    if (!this.get('isEnabledInPane')) return YES ;
-
-    this._isMouseDown = YES;
-
-    this._action() ;
-
-    // Store the current timestamp. We register the timestamp after a setTimeout
-    // so that the menu has been rendered, in case that operation
-    // takes more than a few hundred milliseconds.
-
-    // One mouseUp, we'll use this value to determine how long the mouse was
-    // pressed.
-
-    // we need to keep track that we opened it just now in case we get the
-    // mouseUp before render finishes. If it is 0, then we know we have not
-    // waited long enough.
-    this._menuRenderedTimestamp = 0;
-
-    var self = this;
-
-    // setTimeout guarantees that all rendering is done. The browser will even
-    // have rendered by this point.
-    setTimeout(function() {
-      SC.run(function(){
-        // a run loop might be overkill here but what if Date.now fails?
-        self._menuRenderedTimestamp = Date.now();
-      });
-    }, 1);
-
-    this.becomeFirstResponder();
-
-    return YES ;
-  },
-
-  /** @private
-    Because we responded YES to the mouseDown event, we have responsibility
-    for handling the corresponding mouseUp event.
-
-    However, the user may click on this button, then drag the mouse down to a
-    menu item, and release the mouse over the menu item. We therefore need to
-    delegate any mouseUp events to the menu's menu item, if one is selected.
-
-    We also need to differentiate between a single click and a click and hold.
-    If the user clicks and holds, we want to close the menu when they release.
-    Otherwise, we should wait until they click on the menu's modal pane before
-    removing our active state.
-
-    @param {SC.Event} evt
-    @returns {Boolean}
-  */
+  /** @private */
   mouseUp: function(evt) {
-    var timestamp = new Date().getTime(),
-        previousTimestamp = this._menuRenderedTimestamp,
-        menu = this.get('instantiatedMenu'),
-        touch = SC.platform.touch,
-        targetMenuItem;
+    var menu = this.get('menu'), targetMenuItem, success;
 
-    // normalize the previousTimestamp: if it is 0, it might as well be now.
-    // 0 means that we have not even triggered the nearly-immediate saving of timestamp.
-    if (previousTimestamp === 0) previousTimestamp = Date.now();
-
-    if (menu) {
-      // Get the menu item the user is currently hovering their mouse over
+    if (menu && this.get('_mouseDown')) {
       targetMenuItem = menu.getPath('rootMenu.targetMenuItem');
 
-      if (targetMenuItem) {
-        // Have the menu item perform its action.
-        // If the menu returns NO, it had no action to
-        // perform, so we should close the menu immediately.
-        if (!targetMenuItem.performAction()) menu.remove();
-      } else {
-        // If the user waits more than certain amount of time between
-        // mouseDown and mouseUp, we can assume that they are clicking and
-        // dragging to the menu item, and we should close the menu if they
-        //mouseup anywhere not inside the menu.
-        if (!touch && (timestamp - previousTimestamp > SC.ButtonView.CLICK_AND_HOLD_DELAY)) {
+      // normalize the mouseDownTimestamp: it may not have been set yet.
+      if (this._mouseDownTimestamp === 0) {
+        this._mouseDownTimestamp = Date.now();
+      }
+
+      // If the user waits more than 400ms between mouseDown and mouseUp,
+      // we can assume that they are clicking and dragging to the menu item,
+      // and we should close the menu if they mouseup anywhere not inside
+      // the menu.
+      if(evt.timeStamp - this._mouseDownTimestamp > 400) {
+        if (targetMenuItem && menu.get('mouseHasEntered') && this._mouseDownTimestamp) {
+          // Have the menu item perform its action.
+          // If the menu returns NO, it had no action to
+          // perform, so we should close the menu immediately.
+          if (!targetMenuItem.performAction()) {
+            menu.remove();
+          }
+        }
+
+        else {
           menu.remove();
         }
       }
     }
 
-    // Reset state.
-    this._isMouseDown = NO;
-    sc_super();
+    this._mouseDownTimestamp = undefined;
     return YES;
   },
 
-  /** @private
-    Overrides ButtonView's mouseExited method to remove the behavior where the
-    active state is removed on mouse exit. We want the button to remain active
-    as long as the menu is visible.
-
-    @param {SC.Event} evt
-    @returns {Boolean}
+  /**
+    @private
+    
+    Shows the menu when the user presses Enter. Otherwise, hands it off to button
+    to decide what to do.
   */
-  mouseExited: function(evt) {
-    return YES;
-  },
+  keyDown: function(event) {
+    if (event.which == 13) {
+      this.showMenu();
+      return YES;
+    }
 
-  /** @private
-    Overrides performKeyEquivalent method to pass any keyboard shortcuts to
-    the menu.
-
-    @param {String} charCode string corresponding to shortcut pressed (e.g.,
-    alt_shift_z)
-    @param {SC.Event} evt
-  */
-  performKeyEquivalent: function(charCode, evt) {
-    if (!this.get('isEnabledInPane')) return NO ;
-    var menu = this.get('instantiatedMenu') ;
-
-    return (!!menu && menu.performKeyEquivalent(charCode, evt, YES)) ;
+    return sc_super();
   },
 
   /** @private */
@@ -308,16 +272,29 @@ SC.PopupButtonView = SC.ButtonView.extend(
   touchEnd: function(evt) {
     return this.mouseUp(evt);
   }
-
 });
 
 /**
-  @private
-  Handles lazy instantiation of popup button menu.
+  @class
+  
+  An SC.Task that handles instantiating a PopupButtonView's menu. It is used
+  by SC.PopupButtonView to instantiate the menu in the backgroundTaskQueue.
 */
-SC.PopupButtonMenuLoader = SC.Task.extend({
+SC.PopupButtonView.InstantiateMenuTask = SC.Task.extend(
+  /**@scope SC.PopupButtonView.InstantiateMenuTask.prototype */ {
+    
+  /**
+    The popupButton whose menu should be instantiated.
+    
+    @property
+    @type {SC.PopupButtonView}
+    @default null
+  */
   popupButton: null,
-  run: function() {
-    if (this.popupButton) this.popupButton._instantiateMenu();
+  
+  /** Instantiates the menu. */
+  run: function(queue) {
+    this.popupButton.setupMenu();
   }
 });
+
