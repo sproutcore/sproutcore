@@ -779,22 +779,6 @@ SC.RootResponder = SC.Object.extend(
     if(SC.browser.isIE8OrLower) this.listenFor(['focusin', 'focusout'], document);
     else this.listenFor(['focus', 'blur'], window);
 
-    // handle special case for keypress- you can't use normal listener to block
-    // the backspace key on Mozilla
-    if (this.keypress) {
-      if (SC.CAPTURE_BACKSPACE_KEY && SC.browser.isMozilla) {
-        var responder = this ;
-        document.onkeypress = function(e) {
-          e = SC.Event.normalizeEvent(e);
-          return responder.keypress.call(responder, e);
-        };
-
-      // Otherwise, just add a normal event handler.
-      } else {
-        SC.Event.add(document, 'keypress', this, this.keypress);
-      }
-    }
-
     // Add an array of transition listeners for immediate use (these will be cleaned up when actual testing completes).
     // Because the transition test happens asynchronously and because we don't want to
     // delay the launch of the application in order to a transition test (the app won't
@@ -1890,27 +1874,10 @@ SC.RootResponder = SC.Object.extend(
     return !!SC.MODIFIER_KEYS[evt.charCode];
   },
 
-   /**
-     @private
-     Determines if the key is printable (and therefore should be dispatched from keypress).
-     Some browsers send backspace, tab, enter, and escape on keypress, so we want to
-     explicitly ignore those here.
-
-     @param {KeyboardEvent} evt keypress event
-     @returns {Boolean}
-   */
-  _isPrintableKey: function (evt) {
-    return ((evt.originalEvent.which === undefined || evt.originalEvent.which > 0) &&
-      !(evt.which === 8 || evt.which === 9 || evt.which === 13 || evt.which === 27));
-  },
-
   /** @private
     The keydown event occurs whenever the physically depressed key changes.
     This event is used to deliver the flagsChanged event and to with function
     keys and keyboard shortcuts.
-
-    All actions that might cause an actual insertion of text are handled in
-    the keypress event.
 
     References:
         http://www.quirksmode.org/js/keys.html
@@ -1920,9 +1887,6 @@ SC.RootResponder = SC.Object.extend(
   keydown: function(evt) {
     if (SC.none(evt)) return YES;
     var keyCode = evt.keyCode;
-    if (SC.browser.isMozilla && evt.keyCode===9) {
-      this.keydownCounter = 1;
-    }
     // Fix for IME input (japanese, mandarin).
     // If the KeyCode is 229 wait for the keyup and
     // trigger a keyDown if it is is enter onKeyup.
@@ -1960,10 +1924,6 @@ SC.RootResponder = SC.Object.extend(
       // otherwise, send as keyDown event.  If no one was interested in this
       // keyDown event (probably the case), just let the browser do its own
       // processing.
-
-      // Arrow keys are handled in keypress for firefox
-      if (keyCode>=37 && keyCode<=40 && SC.browser.isMozilla) return YES;
-
       ret = this.sendEvent('keyDown', evt) ;
 
       // attempt key equivalent if key not handled
@@ -1980,51 +1940,7 @@ SC.RootResponder = SC.Object.extend(
     return forceBlock ? NO : ret ;
   },
 
-  /** @private
-    The keypress event occurs after the user has typed something useful that
-    the browser would like to insert.  Unlike keydown, the input codes here
-    have been processed to reflect that actual text you might want to insert.
-
-    Normally ignore any function or non-printable key events.  Otherwise, just
-    trigger a keyDown.
-  */
-  keypress: function(evt) {
-    var ret,
-        keyCode   = evt.keyCode,
-        isFirefox = SC.browser.isMozilla;
-
-    if (isFirefox && evt.keyCode===9) {
-      this.keydownCounter++;
-      if (this.keydownCounter === 2) return YES;
-    }
-
-    // delete is handled in keydown() for most browsers
-    if (isFirefox && (evt.which === 8)) {
-      //get the keycode and set it for which.
-      evt.which = keyCode;
-      ret = this.sendEvent('keyDown', evt);
-      return ret ? (SC.allowsBackspaceToPreviousPage || evt.hasCustomEventHandling) : YES ;
-
-    // normal processing.  send keyDown for printable keys...
-    //there is a special case for arrow key repeating of events in FF.
-    } else {
-      var isFirefoxArrowKeys = (keyCode >= 37 && keyCode <= 40 && isFirefox),
-          charCode           = evt.charCode;
-
-      if ((charCode !== undefined && charCode === 0 && evt.keyCode!==9) && !isFirefoxArrowKeys) return YES;
-      if (isFirefoxArrowKeys) evt.which = keyCode;
-      // we only want to rethrow if this is a printable key so that we don't
-      // duplicate the event sent in keydown when a modifier key is pressed.
-      if (isFirefoxArrowKeys || this._isPrintableKey(evt)) {
-        return this.sendEvent('keyDown', evt) ? evt.hasCustomEventHandling : YES;
-    }
-    }
-  },
-
   keyup: function(evt) {
-    // to end the simulation of keypress in firefox set the _ffevt to null
-    if(this._ffevt) this._ffevt=null;
-
     // modifier keys are handled separately by the 'flagsChanged' event
     // send event for modifier key changes, but only stop processing if this is only a modifier change
     var ret = this._handleModifierChanges(evt);

@@ -90,7 +90,6 @@ function clickOn(view, shiftKey, ctrlKey) {
 
   @param {SC.View} view the view
   @param {Number} keyCode key to simulate
-  @param {Boolean} [isKeyPress] simulate key press event
   @param {Boolean} [shiftKey] simulate shift key pressed
   @param {Boolean} [ctrlKey] simulate ctrlKey pressed
 */
@@ -100,7 +99,7 @@ function keyPressOn(view, keyCode, isKeyPress, shiftKey, ctrlKey) {
       shiftKey: !!shiftKey,
       ctrlKey: !!ctrlKey,
       keyCode: keyCode,
-      charCode: isKeyPress ? keyCode : 0,
+      charCode: 0,
       which: keyCode
     },
     ev;
@@ -109,11 +108,6 @@ function keyPressOn(view, keyCode, isKeyPress, shiftKey, ctrlKey) {
 
   ev = SC.Event.simulateEvent(layer, 'keydown', opts);
   SC.Event.trigger(layer, 'keydown', [ev]);
-
-  if (isKeyPress) {
-    ev = SC.Event.simulateEvent(layer, 'keypress', opts);
-    SC.Event.trigger(layer, 'keypress', [ev]);
-  }
 
   ev = SC.Event.simulateEvent(layer, 'keyup', opts);
   SC.Event.trigger(layer, 'keyup', [ev]);

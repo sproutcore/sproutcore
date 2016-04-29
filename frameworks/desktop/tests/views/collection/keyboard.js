@@ -22,17 +22,16 @@ pane.add('default', SC.CollectionView, {
 
   @param {SC.View} view the view
   @param {Number} keyCode key to simulate
-  @param {Boolean} [isKeyPress] simulate key press event
   @param {Boolean} [shiftKey] simulate shift key pressed
   @param {Boolean} [ctrlKey] simulate ctrlKey pressed
 */
-function keyPressOn(view, keyCode, isKeyPress, shiftKey, ctrlKey) {
+function keyPressOn(view, keyCode, shiftKey, ctrlKey) {
   var layer = view.get('layer'),
     opts = {
       shiftKey: !!shiftKey,
       ctrlKey: !!ctrlKey,
       keyCode: keyCode,
-      charCode: isKeyPress ? keyCode : 0,
+      charCode: 0,
       which: keyCode
     },
     ev;
@@ -41,11 +40,6 @@ function keyPressOn(view, keyCode, isKeyPress, shiftKey, ctrlKey) {
 
   ev = SC.Event.simulateEvent(layer, 'keydown', opts);
   SC.Event.trigger(layer, 'keydown', [ev]);
-
-  if (isKeyPress) {
-    ev = SC.Event.simulateEvent(layer, 'keypress', opts);
-    SC.Event.trigger(layer, 'keypress', [ev]);
-  }
 
   ev = SC.Event.simulateEvent(layer, 'keyup', opts);
   SC.Event.trigger(layer, 'keyup', [ev]);
@@ -129,7 +123,7 @@ test("moveDownAndModifySelection", function () {
   });
   equals(view.getPath('selection.length'), 1, 'Should have a single selected row');
   SC.run(function () {
-    keyPressOn(view, SC.Event.KEY_DOWN, false, true, false);
+    keyPressOn(view, SC.Event.KEY_DOWN, true, false);
   });
   equals(view.getPath('selection.length'), 2, 'Should have an additional selected row');
   SC.run(function () {
@@ -138,7 +132,7 @@ test("moveDownAndModifySelection", function () {
   });
   equals(view.getPath('selection.length'), 1, 'Should have a single selected row');
   SC.run(function () {
-    keyPressOn(view, SC.Event.KEY_DOWN, false, true, false);
+    keyPressOn(view, SC.Event.KEY_DOWN, true, false);
   });
   equals(view.getPath('selection.length'), 1, 'Should still have a single selected row');
 
@@ -157,7 +151,7 @@ test("moveUpAndModifySelection", function () {
   });
   equals(view.getPath('selection.length'), 1, 'Should have a single selected row');
   SC.run(function () {
-    keyPressOn(view, SC.Event.KEY_UP, false, true, false);
+    keyPressOn(view, SC.Event.KEY_UP, true, false);
   });
   equals(view.getPath('selection.length'), 2, 'Should have an additional selected row');
   SC.run(function () {
@@ -166,7 +160,7 @@ test("moveUpAndModifySelection", function () {
   });
   equals(view.getPath('selection.length'), 1, 'Should have a single selected row');
   SC.run(function () {
-    keyPressOn(view, SC.Event.KEY_UP, false, true, false);
+    keyPressOn(view, SC.Event.KEY_UP, true, false);
   });
   equals(view.getPath('selection.length'), 1, 'Should still have a single selected row');
 
