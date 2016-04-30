@@ -13,7 +13,7 @@ BT.addFramework(BT.Framework.extend({
       combinedStylesheets: true,
     }
   },
-  dependencies: ["sproutcore:desktop","sproutcore:datastore","sproutcore:statechart"],
+  dependencies: ["sproutcore:legacy", "sproutcore:desktop", "sproutcore:datastore", "sproutcore:statechart"],
   testDependencies: ["sproutcore:debug", "sproutcore:testing"]
 }));
 
