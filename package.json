@@ -1,0 +1,65 @@
+{
+  "_args": [
+    [
+      "sproutnode@git://github.com/sproutcore/sproutcore.git#team/mauritslamers/sproutnode",
+      "/Users/maurits/Development/sproutcore/meetme/node_modules/sproutcore"
+    ]
+  ],
+  "_from": "git://github.com/sproutcore/sproutcore.git#team/mauritslamers/sproutnode",
+  "_id": "sproutnode@1.10.3",
+  "_inCache": true,
+  "_installable": true,
+  "_location": "/sproutnode",
+  "_phantomChildren": {},
+  "_requested": {
+    "hosted": {
+      "directUrl": "https://raw.githubusercontent.com/sproutcore/sproutcore/team%2Fmauritslamers%2Fsproutnode/package.json",
+      "gitUrl": "git://github.com/sproutcore/sproutcore.git#team/mauritslamers/sproutnode",
+      "httpsUrl": "git+https://github.com/sproutcore/sproutcore.git#team/mauritslamers/sproutnode",
+      "shortcut": "github:sproutcore/sproutcore#team/mauritslamers/sproutnode",
+      "ssh": "git@github.com:sproutcore/sproutcore.git#team/mauritslamers/sproutnode",
+      "sshUrl": "git+ssh://git@github.com/sproutcore/sproutcore.git#team/mauritslamers/sproutnode",
+      "type": "github"
+    },
+    "name": "sproutnode",
+    "raw": "sproutnode@git://github.com/sproutcore/sproutcore.git#team/mauritslamers/sproutnode",
+    "rawSpec": "git://github.com/sproutcore/sproutcore.git#team/mauritslamers/sproutnode",
+    "scope": null,
+    "spec": "git://github.com/sproutcore/sproutcore.git#team/mauritslamers/sproutnode",
+    "type": "hosted"
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "git://github.com/sproutcore/sproutcore.git#7e40b6ce4d64b4552e0361748ef79a4106109479",
+  "_shasum": "4d3329785f0bb5a51405c3abcba1bb175b29369d",
+  "_shrinkwrap": null,
+  "_spec": "sproutnode@git://github.com/sproutcore/sproutcore.git#team/mauritslamers/sproutnode",
+  "_where": "/Users/maurits/Development/sproutcore/meetme/node_modules/sproutcore",
+  "author": "",
+  "bugs": {
+    "url": "https://github.com/sproutcore/sproutcore/issues"
+  },
+  "dependencies": {},
+  "description": "A SproutCore runtime environment for NodeJS",
+  "devDependencies": {},
+  "gitHead": "7e40b6ce4d64b4552e0361748ef79a4106109479",
+  "homepage": "https://www.sproutcore.com",
+  "keywords": [
+    "SproutCore"
+  ],
+  "license": "MIT",
+  "main": "lib/index.js",
+  "name": "sproutnode",
+  "optionalDependencies": {},
+  "readme": "[![Build Status](https://travis-ci.org/sproutcore/sproutcore.png?branch=master)](https://travis-ci.org/sproutcore/sproutcore)\n\nSproutCore: For Native-Caliber Web Apps\n=======\n\nSproutCore is a JS-MVC framework for building blazing-fast, native-caliber web\napplications. SproutCore's full-stack approach to single-page application\ndevelopment gives you the tools you need to build rich, powerful applications...\nwhich happen to run in the browser.\n\n## Getting Started\n\nThe easiest way to get started with SproutCore is to install the Ruby gem.\nYou can find instructions [here](http://sproutcore.com/install/). Once you've\ngot SproutCore installed, checkout the\n[Getting Started](http://guides.sproutcore.com/getting_started.html) tutorial.\n\n## Next Steps\n\nOnce you're through the Getting Started tutorial:\n\n- Check out the [Showcase](http://showcase.sproutcore.com/) for demos of a number\n  of views and concepts.\n- Check out lead developer Tyler Keating's book,\n  [SproutCore Web Application Development](http://blog.sproutcore.com/sproutcore-book-available/).\n- Check out Juniper, the [web app](http://juniper.dcporter.net/) +\n  [annotated source code](https://github.com/dcporter/juniper) combo, for a deep\n  dive into SproutCore features and best practices in action.\n\n## Support\n\nResources for SproutCore developers include [the docs](http://docs.sproutcore.com/)\nfor API documentation, and [the Guides](http://guides.sproutcore.com/) for a\nseries of topical walk-throughs.\n\nFor additional SproutCore user support, join the\n[mailing list](https://groups.google.com/group/sproutcore), or stop by the #sproutcore\n[IRC channel](http://sproutcore.com/community/#tab=irc). For those interested in\ncontributing to the framework itself, please join sproutcore-dev@googlegroups.com.\n\n## Acknowledgements\n\nSproutCore includes code from a number of different open source projects\nincluding:\n\n* [jQuery](http://www.jquery.com/)\n* [Prototype](http://www.prototypejs.org/)\n* [Datejs](http://www.datejs.com/)\n* [JSON2](http://www.json.org/)\n\n",
+  "readmeFilename": "README.md",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/sproutcore/sproutcore.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "1.10.3"
+}
