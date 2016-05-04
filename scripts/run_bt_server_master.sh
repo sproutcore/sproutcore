@@ -27,6 +27,6 @@ if [ -z ${TRAVIS_JOB_ID} ]; then
 else
     # running under travis, daemonize
     #( ../bin/sc-server --host=${IP} --port=${PORT} --allow-from-ips=${ALLOW_IPS:-"*.*.*.*"} & ) || /bin/true
-    ( ../sproutcore/bin/sproutcore serve --local-only=true --port=${PORT} --include-tests & ) || /bin/true
+    ( ../sproutcore/bin/sproutcore serve --local-only=true --port=${PORT} --include-tests --disable-bt-feedback & ) || /bin/true
 fi
 cd ${OLD_PWD}
