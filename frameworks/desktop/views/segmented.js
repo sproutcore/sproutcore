@@ -378,6 +378,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     var items = this.get('items') || [],
         localItem,                        // Used to avoid altering the original items
         previousItem,
+        tmpItem,
         childViews = this.get('childViews'),
         childView,
         overflowView = this.get('overflowView'),
@@ -487,6 +488,15 @@ SC.SegmentedView = SC.View.extend(SC.Control,
             localItem.removeObserver(itemKey, this, this.itemContentDidChange);
             localItem.addObserver(itemKey, this, this.itemContentDidChange, i);
           }
+        }
+        
+        if (localItem instanceof SC.Record) {
+          tmpItem = SC.Object.create();
+          for (j = itemKeys.get('length') - 1; j >= 0; j--) {
+            itemKey = this.get(itemKeys.objectAt(j));
+            tmpItem[itemKey] = localItem.get(itemKey);
+          }
+          localItem = tmpItem;
         }
       } else {
         SC.Logger.error('SC.SegmentedView items may be Strings, Objects (ie. Hashes) or SC.Objects only');
