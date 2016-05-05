@@ -39,7 +39,7 @@ var CommentView = SC.View.extend(SC.Control, {
       this.updateCommentLabel();
     }
 
-    if (this.owner && this.owner.updateHeight) this.owner.updateHeight();
+    if (this.owner && this.owner.updateSize) this.owner.updateSize();
   },
 
   updateFromLabel: function () {
