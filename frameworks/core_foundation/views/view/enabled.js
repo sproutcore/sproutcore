@@ -204,6 +204,7 @@ SC.View.reopen(
     // Update the display if in a visible state.
     switch (state) {
     case SC.CoreView.ATTACHED_SHOWN:
+    case SC.CoreView.ATTACHED_SHOWN_ANIMATING:
     case SC.CoreView.ATTACHED_SHOWING:
     case SC.CoreView.ATTACHED_BUILDING_IN:
       // Update the display.
