@@ -847,17 +847,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       this.invokeLast(this._addTextAreaEvents);
     } else {
       this._addTextAreaEvents();
-
-      // In Firefox, for input fields only (that is, not textarea elements),
-      // if the cursor is at the end of the field, the "down" key will not
-      // result in a "keypress" event for the document (only for the input
-      // element), although it will be bubbled up in other contexts.  Since
-      // SproutCore's event dispatching requires the document to see the
-      // event, we'll manually forward the event along.
-      if (SC.browser.isMozilla) {
-        var input = this.$input();
-        SC.Event.add(input, 'keypress', this, this._firefox_dispatch_keypress);
-      }
     }
   },
 
@@ -918,7 +907,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     SC.Event.remove(input, 'focus',  this, this._textField_fieldDidFocus);
     SC.Event.remove(input, 'blur',   this, this._textField_fieldDidBlur);
     SC.Event.remove(input, 'select', this, this._textField_selectionDidChange);
-    SC.Event.remove(input, 'keypress',  this, this._firefox_dispatch_keypress);
     SC.Event.remove(input, 'input', this, this._textField_inputDidChange);
   },
 
@@ -1026,28 +1014,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     Move magic number out so it can be over-written later in inline editor
    */
   _topOffsetForFirefoxCursorFix: 3,
-
-  /** @private
-    In Firefox, as of 3.6 -- including 3.0 and 3.5 -- for input fields only
-    (that is, not textarea elements), if the cursor is at the end of the
-    field, the "down" key will not result in a "keypress" event for the
-    document (only for the input element), although it will be bubbled up in
-    other contexts.  Since SproutCore's event dispatching requires the
-    document to see the event, we'll manually forward the event along.
-   */
-  _firefox_dispatch_keypress: function (evt) {
-    var selection = this.get('selection'),
-        value     = this.get('value'),
-        valueLen  = value ? value.length : 0,
-        responder;
-
-    if (!selection || ((selection.get('length') === 0 && (selection.get('start') === 0) || selection.get('end') === valueLen))) {
-      responder = SC.RootResponder.responder;
-      if (evt.keyCode === 9) return;
-      responder.keypress.call(responder, evt);
-      evt.stopPropagation();
-    }
-  },
 
   /** @private */
   _textField_selectionDidChange: function () {
