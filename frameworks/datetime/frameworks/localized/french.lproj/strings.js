@@ -8,7 +8,7 @@
 SC.stringsFor('fr', {
   '_SC.DateTime.dayNames': 'Dimanche Lundi Mardi Mercredi Jeudi Vendredi Samedi',
   '_SC.DateTime.abbreviatedDayNames': 'Dim Lun Mar Mer Jeu Ven Sam',
-  '_SC.DateTime.monthNames': 'Janvier Février Mars Avril Mai Juin Juillet Août Septembre Octobre Novembre Decembre',
+  '_SC.DateTime.monthNames': 'Janvier Février Mars Avril Mai Juin Juillet Août Septembre Octobre Novembre Décembre',
   '_SC.DateTime.abbreviatedMonthNames': 'Janv Févr Mars Avr Mai Juin Juil Août Sept Oct Nov Déc',
   '_SC.DateTime.AMPMNames':'AM PM',
 
