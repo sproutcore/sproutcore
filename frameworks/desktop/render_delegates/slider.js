@@ -58,7 +58,10 @@ SC.BaseTheme.sliderRenderDelegate = SC.RenderDelegate.create({
     }
 
     // Draw the handle.
-    context.push('<div class="sc-handle" style="left: ' + dataSource.get('value') + '%"></div>');
+    context.begin('div')
+      .addClass('sc-handle')
+      .setStyle('left', '%@%'.fmt(dataSource.get('value')))
+      .end();
 
     // End the track element.
     context = context.end();
