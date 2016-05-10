@@ -1112,6 +1112,11 @@ Array.prototype.isEnumerable = YES;
       }
       return ret;
     },
+
+    filterProperties: function (opts) {
+      return SC.ArrayQuery.filter(this, opts);
+    },
+
     //returns a matrix
     groupBy: function (key) {
       var len = this.length,
@@ -1157,6 +1162,10 @@ Array.prototype.isEnumerable = YES;
       }
       next = null;
       return ret;
+    },
+
+    findProperties: function (opts) {
+      return SC.ArrayQuery.find(this, opts);
     },
 
     everyProperty: function (key, value) {
