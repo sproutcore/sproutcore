@@ -330,15 +330,21 @@ SC.NestedStore = SC.Store.extend(
   /**
     Returns the `SC.Error` object associated with a specific query.
 
-    Delegates the call to the parent store.
+    If this is an autonomous nested store call the base class, otherwise
+    delegate the call to the parent store.
 
     @param {SC.Query} query The SC.Query with which the error is associated.
 
     @returns {SC.Error} SC.Error or null if no error associated with the query.
   */
   readQueryError: function(query) {
-    var parentStore = this.get('parentStore');
-    return parentStore ? parentStore.readQueryError(query) : null;
+    if ( this.get( "dataSource" ) ) {
+      return sc_super();
+    }
+    else {
+      var parentStore = this.get('parentStore');
+      return parentStore ? parentStore.readQueryError(query) : null;
+    }
   },
 
   /** @private - adapt for nested store */
