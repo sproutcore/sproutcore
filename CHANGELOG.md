@@ -10,6 +10,7 @@ Edge
 #### Runtime
 
 * The `SC.guidFor()` method (primarily used internally) no longer maintains a cache for String and Number GUIDs. Because the GUID for a String or a Number is essentially its own value, the caching process actually takes longer than it does to simply generate a GUID key from the given String or Number (see http://jsperf.com/cache-vs-manipulate). More importantly, this removes the memory overhead of maintaining the GUID cache, which was also unable to be cleaned.
+* Errors generated on autonomous nested stores are retained in the nested store base class. readError() and readQueryError() were consulting the parent stores error list for the error to return.  This was changed to consult the base class error list for cases where the nested store is autonomous.
 
 ### DEPRECATIONS & REMOVALS
 
@@ -202,14 +203,14 @@ Note: This deprecation will show a console warning in debug (i.e. non-production
 * Removed long deprecated method, `SC.browser.compareVersion`. This method was deprecated in version 1.7 and is not used anywhere within the framework. As the deprecation warning noted, developers should use the `SC.browser.compare` method for doing a proper comparison between version strings.
 * The core methods used in SC.View layout have been slightly optimized to avoid memory re-allocation. Since SC.View layout code may run repeatedly in short order (e.g. re-positioning during scrolling), we need to ensure that no new objects are created each time. The reason for this is so that we're not quickly adding hundreds of small objects to the garbage heap that will need to be collected. Since we have no control over when garbage collection occurs, the best we can do is try to avoid it and to ensure that it completes as quickly as possible.
 * The argument for the SC.ActionSupport mixin's main method `fireAction` has been changed from `action` to `context`. This allows calling-time specific information to be passed to the action + target on each call. To specify the `action` for `fireAction` to use, the existing `action` property should still be set. As part of this change, the documentation for SC.ActionSupport has been greatly extended and includes tips on supporting multiple actions or targets and for implementing actions on targets.
-  
+
 Along with this change, the `actionContext` property has also now been deprecated and will be removed in a future version of SproutCore.
 
 Note: this is a backwards-compatible change. If a String is passed to `fireAction` *and* no `action` property exists, the argument will be used as the `action` (i.e. no context will be sent). When this occurs, a Developer Warning will appear in the console. Likewise, a Developer Warning will appear if `actionContext` is set prior to a view being initialized.
 * SC.ButtonView and SC.CollectionView have both been altered slightly to use SC.ActionSupport. This has no affect on the use of action & target in these views.
 * Moved tracing code of SC.ResponderContext and SC.Module to debug-only. This prevents the debugging code from being included in production builds, thus reducing the overall deployed file size slightly.
 * Optimized use of the `arguments` object in several locations in order to avoid its instantiation. There were several occurrences of code copying the `arguments` object into an Array using `slice`; this is very costly for performance as it causes the browser to instantiate the `arguments` object in order to do the slice. Instead, these occurrences were converted to either access the arguments by index without a copy or to do a fast copy without instantiation. See http://jsperf.com/closure-with-arguments for an example of the performance difference this can make. Using slice is anywhere from ~50% to ~90% slower depending on the browser.  
-  
+
 Affected: SC.Request, SC.WebSocket, SC.DelegateSupport, SC.Color, SC.Event, SC.Store, SC.Module, SC.Object, SC.Function, SC.State, SC.Statechart
 * Named two anonymous functions: send_event & handle_event in order to aid in debugging and profiling of the core framework.
 
@@ -297,14 +298,14 @@ These new properties can be used by an `SC.Response` subclass to include allowin
 * Allows for optimization of SC.RenderContext's setStyle method (Removes V8 "ForIn is not fast case" warning, see http://commondatastorage.googleapis.com/io-2013/presentations/223.pdf).
 * Many developer warnings and errors that would previously appear in production have been restricted to dev-mode only.
 * Improved performance of core SC methods: SC.mixin, SC.supplement as well as SC.Function.enhance. SC.mixin and SC.supplement iterated the arguments object to insert a boolean flag to pass to a private function that then iterated its arguments in order to ignore the flag argument, which is totally unnecessary. Instead, SC.mixin and SC.supplement iterate the arguments once and pass the new Array to the private function as a second argument, removing the need for a second iteration.  
-  
+
 As well, these three areas all accessed the arguments object to copy it, which requires the browser to instantiate it, which is costly. Instead, we now do a fast copy (similar to this: http://jsperf.com/closure-with-arguments) without instantiating the arguments object.  
-  
+
 Finally, by doing a fast copy of arguments these functions are now optimizable by V8, whereas they weren't previously.  
-  
+
 Benchmark: `SC.mixin` & `SC.supplement` ~ 58% faster
 * Calls adjustLayout on initialization of SC.CollectionView.  
-  
+
 Certain containing views, transitions and specialized layout engines need to know what type of layout their child views will have in order to make the proper adjustments. SC.CollectionView subclasses typically set a width or a height themselves, but when this happens late, the actual layout style of the collection is misunderstood at initialization to be something different.
 * Improved the management of the content view for SC.ContainerView.
 * Improved the default styling of overlay scroller views. Making them look more like natural overlay scrollers in OS X/iOS and making them visible on dark backgrounds.
@@ -681,7 +682,7 @@ Adds adjustLayout method to SC.CollectionView which can be used with invokeOnce 
 * Adds the inline text field to the view's parent rather than its pane. If any view in the chain from pane to the view's parent has a zIndex, the text field won't be visible. By adding it to the parent instead, there's a greater chance that nothing special will need to be done with the text field.
 * Add a difference method to SC.DateTime.  SC.DateTime.prototype.difference(a, b, format).
 
-  This method allows you to very easily compute the number of weeks, days, hours, 
+  This method allows you to very easily compute the number of weeks, days, hours,
   minutes, or seconds between two dates.
 * Improved String.fmt handling of missing named arguments.
 * The SC.Store.reset() method was not clearing out previously constructed
@@ -696,51 +697,51 @@ This patch ensures that the entire store is cleared, and adds a few unit
 tests that enforce the one-record-array-per-query contract.
 * Fixes the order of the container and segmented view in the DOM for SC.TabView so that the segmented view should be rendered above the container without having to resort to forced z-index settings.
 * Adds transition plugin support to SC.ContainerView and introduces five
-  pre-built plugins: SC.ContainerView.PUSH, SC.ContainerView.DISSOLVE, 
+  pre-built plugins: SC.ContainerView.PUSH, SC.ContainerView.DISSOLVE,
   SC.ContainerView.FADE_COLOR, SC.ContainerView.MOVE_IN and SC.ContainerView.REVEAL.
 * Adds a developer error message if an SC.View is created using an existing layerId. This should prevent some weirdness from occurring.
 * Refactors SC.View:animate().
 
   - animate() uses invokeNext() so that the developer never needs to monkey with
-    the run loop in order to call animate(). Animations will only begin after 
-    the browser has had a chance to flush any changes to the DOM, thus ensuring 
-    that the animation actually occurs. This will make using .animate() much 
+    the run loop in order to call animate(). Animations will only begin after
+    the browser has had a chance to flush any changes to the DOM, thus ensuring
+    that the animation actually occurs. This will make using .animate() much
     easier whereas previously, developers would revert to invokeLater/invokeLast
     to try and make sure the DOM style existed before animate would adjust it.
-  - the animate() function can now accept a target argument as well as a method, 
+  - the animate() function can now accept a target argument as well as a method,
     which conforms to the standard used by many methods in SproutCore.
-  - if no target it given the view itself will be the value of `this` in the 
-    callback. Previously, this would be the layoutStyleCalculator, an internal 
+  - if no target it given the view itself will be the value of `this` in the
+    callback. Previously, this would be the layoutStyleCalculator, an internal
     object of SC.View.
   - the animate() function is thoroughly documented now, including notes on how
     to hardware accelerate position changes.
-  - uses new additions to SC.platform and SC.browser to make animations forward 
+  - uses new additions to SC.platform and SC.browser to make animations forward
     compatible and fixes animate() on Firefox nightly
-  - hardware accelerated styles no longer remain in the DOM after the animation 
+  - hardware accelerated styles no longer remain in the DOM after the animation
     completes (i.e. sometimes the translate values would stay in the style)
-  - resetAnimation() has been renamed to cancelAnimation(), because reset 
+  - resetAnimation() has been renamed to cancelAnimation(), because reset
     indicates 'revert', but the default behavior doesn't revert the layout.
   - added SC.LayoutState enum for use by cancelAnimation().
-  - fixes hasAcceleratedLayer to be dependent on the layout. Previously, 
-    adjusting a non-accelerated layout to an accelerate-able layout failed to 
+  - fixes hasAcceleratedLayer to be dependent on the layout. Previously,
+    adjusting a non-accelerated layout to an accelerate-able layout failed to
     update the property and hasAcceleratedLayer would be incorrect.
-  - cancelAnimation() can now cancel an animation and adjust the layout to its 
-    current value during the transition, to its original value or to the final 
-    value which is the default. The current value even works for accelerated 
+  - cancelAnimation() can now cancel an animation and adjust the layout to its
+    current value during the transition, to its original value or to the final
+    value which is the default. The current value even works for accelerated
     transitions that use transforms and return CSSMatrix values while animating.
-  - simplifies the code somewhat and cleans up a lot of loose ends that remained 
-    since the original code was largely copy-pasted over from the old animation 
+  - simplifies the code somewhat and cleans up a lot of loose ends that remained
+    since the original code was largely copy-pasted over from the old animation
     framework.
-  - removes an observer on the view's layout from within the 
-    layoutStyleCalculator and properly chained up the dependencies to remove 
+  - removes an observer on the view's layout from within the
+    layoutStyleCalculator and properly chained up the dependencies to remove
     some manual notification code.
-  - Previously, each SC.View created an SC.LayoutStyleCalculator object that it 
+  - Previously, each SC.View created an SC.LayoutStyleCalculator object that it
     used in a truly dubious manner. The LayoutStyleCalculator was supposed to be a group of functions that could be shared between all views, but instead each view had to create and modify its own instance of the calculator. The calculator had several internal state variables which meant it could not be shared between views. The calculator also cross-referenced the view itself and was never cleaned up resulting in a memory leak.  This update untangles the view from the calculator so that the calculator can be shared between views (not really much reason to even have this separate, but none-the-less…).
 * Changes the internal classNames of SC.Theme to be an Array rather than a CoreSet. Having it as a Set makes no sense and the amount of property overloading is ridiculous. We have to check for Objects, Arrays, Strings and Sets, which is a waste of code rather than just standardizing on an Array like classNames is on SC.View. Also, this causes problems if developers use the theme's classNames and assume it will be an Array like with SC.View.
-* Refactors transition and animation testing of SC.platform; 
-  adds SC.browser.cssPrefix, SC.browser.domPrefix and SC.browser.classPrefix; 
-  adds SC.browser.experimentalNameFor(), SC.browser.experimentalStyleNameFor() 
-  and SC.browser. experimentalCSSNameFor() methods; 
+* Refactors transition and animation testing of SC.platform;
+  adds SC.browser.cssPrefix, SC.browser.domPrefix and SC.browser.classPrefix;
+  adds SC.browser.experimentalNameFor(), SC.browser.experimentalStyleNameFor()
+  and SC.browser. experimentalCSSNameFor() methods;
   adds SC.UNSUPPORTED constant.
 
   There were many problems with the animation and transition tests that existed before. There was no forward support so browsers, like the Firefox nightly that have dropped prefixes, would fail to identify as supporting transitions and transforms. Also, animation event listeners were hard coded into RootResponder for webkit only. Also the event names needed to be forward supported as well and because there is no consistency in the event naming, the real transition and animation events may not have been captured on certain browsers.
@@ -748,26 +749,26 @@ tests that enforce the one-record-array-per-query contract.
   Now, SC.platform does quick and precise tests to determine the actual event names allowing the RootResponder to listen only to the properly named events rather than using a shotgun approach with a bunch of different browser prefixes.
 
   To make the code forward compatible for when prefixes are dropped, SC.browser has three new support functions: experimentalNameFor(), experimentalStyleNameFor(), experimentalCSSNameFor(). These functions return the proper name for experimental names for object classes & properties, DOM properties and CSS attributes, not by guessing, but by testing the standard name and then testing prefixed versions of the name if necessary. This allows developers to avoid writing code like: SC.browser.cssPrefix + "box-shadow black 0 1px 2px", which will fail on browsers that no longer need a prefix and instead use: SC.browser.experimentalCSSNameFor('boxShadow'), which will return either "box-shadow", some browser prefix + "box-shadow" or SC.UNSUPPORTED (allowing you to do something else).
-* Makes invokeNext trigger the next run of the run loop if none is scheduled. 
-  This makes invokeNext the appropriate method to use when needing the DOM to 
+* Makes invokeNext trigger the next run of the run loop if none is scheduled.
+  This makes invokeNext the appropriate method to use when needing the DOM to
   be up-to-date before running code against it.
 
-  Previously, invokeNext functions would not run until the next run loop 
-  occurred, which if there were no events or timers, might mean that the code 
-  won't run for a long time. While invokeLast lets you put code at the end of 
+  Previously, invokeNext functions would not run until the next run loop
+  occurred, which if there were no events or timers, might mean that the code
+  won't run for a long time. While invokeLast lets you put code at the end of
   the run loop, the DOM will not have yet been updated and invokeLater is risky
-  to use at small intervals, because if the interval is too small, the 
+  to use at small intervals, because if the interval is too small, the
   invokeLater code will run in the current run of the run loop and again the DOM
-  will not have been updated. Instead, invokeNext now ensures that the run loop 
-  completes execution and schedules an immediate timeout in order to allow the 
+  will not have been updated. Instead, invokeNext now ensures that the run loop
+  completes execution and schedules an immediate timeout in order to allow the
   browser to update the DOM.
 
-  This works with the timer additions to the run loop, so additional run loops 
+  This works with the timer additions to the run loop, so additional run loops
   only run once even if there is an invokeLater expiring at the same time as the
   invokeNext timeout triggers a new run loop.
-* Refactors SC.RenderContext to simplify the API, introduce consistent naming 
-  and make it behave appropriately. This should remove the guess work about 
-  whether a function is or is not supported by the context and make it easier 
+* Refactors SC.RenderContext to simplify the API, introduce consistent naming
+  and make it behave appropriately. This should remove the guess work about
+  whether a function is or is not supported by the context and make it easier
   to remember the names and parameters of each method.
 
   - There are now 3 similar access methods: attrs(), classes(), styles()
@@ -775,26 +776,26 @@ tests that enforce the one-record-array-per-query contract.
   - There are now 3 similar remove methods: removeAttr(), removeClass(), removeStyle()
   - There are now 2 similar reset methods: resetClasses(), resetStyles()
   - Fully backwards compatible.
-  - Duplicate and inconsistent method names have been deprecated: css(), html(), 
+  - Duplicate and inconsistent method names have been deprecated: css(), html(),
     classNames(), resetClassNames(), attr()
-  - Adds several Developer Warnings to aid developers in updating their code 
+  - Adds several Developer Warnings to aid developers in updating their code
     (in debug mode only as not to take up space in production).
-* Added platform detection for the Apache Cordova (formerly phonegap) 
+* Added platform detection for the Apache Cordova (formerly phonegap)
   javascript-to-mobile bridge.
-* Added gitignore entries for .project and .settings, which are eclipse-specific 
+* Added gitignore entries for .project and .settings, which are eclipse-specific
   configuration files.
 * Updates jQuery framework to 1.8.3 and removes buffered jQuery.
 * Patches jQuery to prevent security warnings in IE.
 
-  This does NOT patch jQuery to make all calls to .append(), .insert(), etc. 
+  This does NOT patch jQuery to make all calls to .append(), .insert(), etc.
   pass security validation in IE. Instead it uses execUnsafeLocalFunction to
   perform jQuery's tests that are based on invalid HTML.
 * Minor optimizations to Array#filterProperty.
-* Improves animation support for current and future browsers. The previous 
-  platform checks prevented using accelerated layers on non-webkit platforms, 
-  plus any browser that dropped the prefixes would indicate that they did not 
+* Improves animation support for current and future browsers. The previous
+  platform checks prevented using accelerated layers on non-webkit platforms,
+  plus any browser that dropped the prefixes would indicate that they did not
   have support for transitions and transforms.
-* Removes duplicate transitionend event listeners and only listens for the 
+* Removes duplicate transitionend event listeners and only listens for the
   supported platforms event.
 * Adds 'delay' option to set the transition-delay property
 * Adds new SproutCore-only date time formatter, %E, to SC.DateTime which returns
@@ -815,39 +816,39 @@ tests that enforce the one-record-array-per-query contract.
     date.toFormattedString("%E"); // "About a week ago"
 
 * Adds SC.appCache and SC.platform.supportsApplicationCache.
-  Working with the application cache is a confusing and time-consuming task. 
-  This simple object abstracts out the most important properties for developers 
-  to use: hasNewVersion, isNewVersionValid, progress and isReadyForOffline all 
-  the while using the minimum number of event listeners which are properly 
-  cleaned up when unneeded. It also has a property shouldPoll that will lazily 
-  look for updates in the background at a fixed interval. This could be 
-  especially useful in a test environment, where you want to ensure that the 
-  testers aren't running the old version (which happens frequently when using 
+  Working with the application cache is a confusing and time-consuming task.
+  This simple object abstracts out the most important properties for developers
+  to use: hasNewVersion, isNewVersionValid, progress and isReadyForOffline all
+  the while using the minimum number of event listeners which are properly
+  cleaned up when unneeded. It also has a property shouldPoll that will lazily
+  look for updates in the background at a fixed interval. This could be
+  especially useful in a test environment, where you want to ensure that the
+  testers aren't running the old version (which happens frequently when using
   the application cache).
 * Improves the center calculation for view layouts. Previously you could not use
-  a % width or height with a center value, but there is no technical reason for 
-  this limitation. For example, a view with width: 0.3% and centerX: 0, should 
-  get the layout style: "width: 30%; left: 50%; margin-left: -15%". Previously 
-  it would show a warning and give the view a non-functioning style: 
+  a % width or height with a center value, but there is no technical reason for
+  this limitation. For example, a view with width: 0.3% and centerX: 0, should
+  get the layout style: "width: 30%; left: 50%; margin-left: -15%". Previously
+  it would show a warning and give the view a non-functioning style:
   "width: 30%; left: 50%; margin-left: 50%".
-* Removes a lot of legacy default CSS attached to SC.SegmentedView. Also makes 
-  default SproutCore theme more easily allow for sprited button images (requires 
-  a width and height on the icon). After some consideration, the icon sizes are 
-  set by default to: 12x12px for small, 14x14px for regular, 16x16px for large 
-  and 24x24px for huge. These sizes fit well with the theme and although odd 
-  numbered heights would position a bit more nicely, even numbered height icons 
+* Removes a lot of legacy default CSS attached to SC.SegmentedView. Also makes
+  default SproutCore theme more easily allow for sprited button images (requires
+  a width and height on the icon). After some consideration, the icon sizes are
+  set by default to: 12x12px for small, 14x14px for regular, 16x16px for large
+  and 24x24px for huge. These sizes fit well with the theme and although odd
+  numbered heights would position a bit more nicely, even numbered height icons
   are much more common.
-* Allows SC.State to represent the empty ("") route. Previously, there was no 
-  way for a state to represent the empty route using representRoute:. Now a 
-  state can set representRoute: "" to be triggered when the empty route is 
+* Allows SC.State to represent the empty ("") route. Previously, there was no
+  way for a state to represent the empty route using representRoute:. Now a
+  state can set representRoute: "" to be triggered when the empty route is
   fired.
 * Improves SC.request.deparam so that it can accept a full URL, not just the
-  params section only. 
+  params section only.
 * Adds SC.platform.supportsWebSQL and SC.platform.supportsIndexedDB.
 * Improves the Welcome apps slightly:
   - sorts the apps by name alphabetically
   - groups SproutCore apps after project apps
-  - adds a new icon for app targets to further differentiate between the 
+  - adds a new icon for app targets to further differentiate between the
     developer's apps and the SproutCore apps (Used in the TestRunner app too)
 
 ### DEPRECATIONS & REMOVALS
@@ -868,22 +869,22 @@ Also added better documentation for using dataSourceDidFetchQuery.
 * Deprecates useFastPath in SC.CollectionView (i.e. SC.CollectionFastPath) since the performance improvements have been baked in by default.
 * Deprecates SC.BENCHMARK_RELOAD as a public property of SC.CollectionView. This is a property used for developing and improving SC.CollectionView and doesn't need to be public. It also doesn't need to be included in production code. Anyone hacking on SC.CollectionView can add (and later remove) their own benchmarks while they are coding it.
 * Deprecates SC.platform.cssPrefix and SC.platform.domCSSPrefix in favor of
-  SC.browser.cssPrefix, SC.browser.domPrefix and SC.browser.classPrefix. The css 
-  prefix and dom prefix in SC.platform were calculated from the user agent, which 
+  SC.browser.cssPrefix, SC.browser.domPrefix and SC.browser.classPrefix. The css
+  prefix and dom prefix in SC.platform were calculated from the user agent, which
   duplicated work already being done with more rigor in SC.browser.
 * The :template_view framework is no longer included by default when requiring
   :sproutcore.  This framework is now partially deprecated, meaning that it
   won't be officially supported by the core team.  But it is not scheduled
-  to be removed in any successive version and therefor anyone using it is 
+  to be removed in any successive version and therefor anyone using it is
   welcome to continue doing so.
-* The default value of SC.SelectView:itemSeparatorKey has been changed from 
-  'separator' to 'isSeparator' to match the documentation.  If a property 
-  'separator' is found on the item, it will still be used and a developer 
+* The default value of SC.SelectView:itemSeparatorKey has been changed from
+  'separator' to 'isSeparator' to match the documentation.  If a property
+  'separator' is found on the item, it will still be used and a developer
   warning will appear in debug mode.
 * The 'owner' property that is assigned to child views is deprecated and may
-  be removed in a future release.  This property is assigned to a view's 
-  childViews when the view is created.  However, it is a duplication of the 
-  property 'parentView' and it is not maintained properly and not assigned if a 
+  be removed in a future release.  This property is assigned to a view's
+  childViews when the view is created.  However, it is a duplication of the
+  property 'parentView' and it is not maintained properly and not assigned if a
   childView is added later using appendChild() or replaceChild().
 
 
@@ -892,7 +893,7 @@ Also added better documentation for using dataSourceDidFetchQuery.
 * Removes the blockers that prevented all browsers that support touch events from using mouse events. Note: a browser's support of touch events is no indication of a touch capable device or even that the touch capable device will not need to send mouse events (via a plugged in mouse for example). When implementing touch support in a custom control, you should call evt.preventDefault in touchEnd to prevent additional mouse events from being sent by the browser.
 * Prevents extremely bizarre bug where an iPad will fail to detect the os in iOS, in spite of following the correct code path. The correct value is assigned to an array and then re-read from the same array a moment later. For some unknown reason, when the value is re-read from the array it would return the old value. Side effects of this are that all hacks looking for mobile safari would fail (including touch handling in text fields).
 * Fixes a regression in SC.ScrollView that threw an exception when beginning a new touch drag while a previous one was still decelerating.
-* Prevents successive clicks with two different mouse buttons from being considered a double click. 
+* Prevents successive clicks with two different mouse buttons from being considered a double click.
 * Fixes a bad conditional that coerced 0 frame widths to a false value. This caused excessive reloads of SC.GridView.
 * Fixes #1093 issue where a view would fail to be hidden if its pane was removed mid-transition.
 * Fixes #1087 issue with triggering and canceling animation in same runloop.
@@ -942,7 +943,7 @@ rendered if a value exits for that key.
 The currentStates property was remaining cached after the statechart was
 destroyed. This meant that when respondsTo was called, it would still
 iterate through these now destroyed states, causing a crash.
-* Fixes bug that allowed the context menu to appear regardless of overriding contextMenu in a view or setting SC.CONTEXT_MENU_ENABLED or isContextMenuEnabled to false. This makes the context menu event handling behave the same as the key, mouse, etc. event handling. 
+* Fixes bug that allowed the context menu to appear regardless of overriding contextMenu in a view or setting SC.CONTEXT_MENU_ENABLED or isContextMenuEnabled to false. This makes the context menu event handling behave the same as the key, mouse, etc. event handling.
 * Fix SC.TextFieldView to insert a new line when the enter key is press on a text area
 
 A fix were already there for the SC.InlineTextFieldView class so I copy
@@ -992,46 +993,46 @@ can't be call because the collection will handle the mouseDown event.
 * Fixes debug images and test iframe.html being included in builds. These files (one of which is 2.5MB) would get included into every build, because they were at the wrong path. I removed the apple logo which appears unused in the tests and fixed the directory structure and file references so that 'a_sample_image.jpg' and 'iframe.html' don't get included in production builds.
 
 Note: this is especially a problem if you wanted to create an app manifest based on the contents of the built static directory. The client would have to download a 2.5MB debug image that is never used.
-* Fixes a regression with SC.CollectionView that occurred after a previous fix 
-  to remove a view DOM leak. SC.CollectionView previously created a view with 
-  the same layerId as the view to be replaced before replacing it, which only 
-  worked because of some weird logic external to the CollectionView that used to 
-  prevent a view from being able to find its layer if it didn't have a 
-  parentView (which was also the cause of a leak because the layer might still 
-  exist in the DOM). In any case, having two views use the same layerId at the 
+* Fixes a regression with SC.CollectionView that occurred after a previous fix
+  to remove a view DOM leak. SC.CollectionView previously created a view with
+  the same layerId as the view to be replaced before replacing it, which only
+  worked because of some weird logic external to the CollectionView that used to
+  prevent a view from being able to find its layer if it didn't have a
+  parentView (which was also the cause of a leak because the layer might still
+  exist in the DOM). In any case, having two views use the same layerId at the
   same time is a bad idea.
 * Fixes duplicate 'input' property in SC.platform.
-* Fixes bug noticed by updated jQuery. The previous version of 
-  SC.RenderContext:addStyle() would replace styles, which was really only due 
-  to an undocumented behavior of jQuery, plus it is semantically incorrect for 
-  'add' to replace. The refactor of RenderContext makes the functions behave 
+* Fixes bug noticed by updated jQuery. The previous version of
+  SC.RenderContext:addStyle() would replace styles, which was really only due
+  to an undocumented behavior of jQuery, plus it is semantically incorrect for
+  'add' to replace. The refactor of RenderContext makes the functions behave
   properly.
-* Fixes SC.View:animate() failing to work on Firefox 16+ and IE10+, since they 
+* Fixes SC.View:animate() failing to work on Firefox 16+ and IE10+, since they
   have dropped prefixes on the properties.
-* Fixes problem with cleaning up bindings on SC.View. Previously, SC.View would 
-  destroy itself first before calling the super destroy method. This would 
-  remove the parentView object from all childViews, which meant that when the 
-  super destroy method tried to remove bindings and observers, it was unable to 
+* Fixes problem with cleaning up bindings on SC.View. Previously, SC.View would
+  destroy itself first before calling the super destroy method. This would
+  remove the parentView object from all childViews, which meant that when the
+  super destroy method tried to remove bindings and observers, it was unable to
   resolve any parentView property paths and thus unable to remove any bindings
   to the view's parentView.
-* Fixes minor memory leak in SC.Set.  The way that SC.Set removes objects is 
-  to "untrack" the internal index of the object by shrinking its length, but it 
-  never actually removed the object at the last index. The only way that the 
-  object could be freed is if a new object is inserted at the same internal 
-  index, thus replacing it. If the objects were removed in the reverse order 
-  that they were added, every object would still be in the set (until they were 
+* Fixes minor memory leak in SC.Set.  The way that SC.Set removes objects is
+  to "untrack" the internal index of the object by shrinking its length, but it
+  never actually removed the object at the last index. The only way that the
+  object could be freed is if a new object is inserted at the same internal
+  index, thus replacing it. If the objects were removed in the reverse order
+  that they were added, every object would still be in the set (until they were
   possibly overwritten).
-* Fixes moderate memory leak with bindings and observers.  Previously, SC.Binding 
-  objects and observers were never cleaned up even as views and objects were 
+* Fixes moderate memory leak with bindings and observers.  Previously, SC.Binding
+  objects and observers were never cleaned up even as views and objects were
   destroyed which could prevent the views and objects from being garbage collected
   and prevented the binding objects from being garbage collected.
-* Fixes minor memory leak in SC.ObserverSet. Each time that a new observer is 
-  added to an object the ObserverSet for the object will add a tracking hash for 
-  the target and the method. As more methods are tracked for the target, they 
-  are added and as methods are no longer tracked for the target, they are 
-  removed. However, even when no methods are tracked for the target, an empty 
-  tracking hash for the target still exists. This creates a small leak of memory, 
-  because the target may have been destroyed and freed, but we are still 
+* Fixes minor memory leak in SC.ObserverSet. Each time that a new observer is
+  added to an object the ObserverSet for the object will add a tracking hash for
+  the target and the method. As more methods are tracked for the target, they
+  are added and as methods are no longer tracked for the target, they are
+  removed. However, even when no methods are tracked for the target, an empty
+  tracking hash for the target still exists. This creates a small leak of memory,
+  because the target may have been destroyed and freed, but we are still
   maintaining an empty tracking hash for it.
 
 1.9.2 - BUG FIX RELEASE
@@ -1051,58 +1052,58 @@ Note: this is especially a problem if you wanted to create an app manifest based
 * Fixes the hint value for SC.LabelView so that it will appear when the label has no value and isEditable is true. Includes unit test.
 * No longer modifies the underlying items given to an SC.SegmentedView with an
   overflow menu directly so that we don't invariably dirty the original object.
-* Fixes regression in IE7 and IE8 which caused XHR requests to fail to notify. 
+* Fixes regression in IE7 and IE8 which caused XHR requests to fail to notify.
   Also fixes unit tests to pass in IE7+.
-* Fixes debug images and test iframe.html being included in builds. These files 
-  (one of which is 2.5MB) would get included into every build, because they were 
-  at the wrong path. I removed the apple logo which appears unused in the tests 
-  and fixed the directory structure and file references so that 
+* Fixes debug images and test iframe.html being included in builds. These files
+  (one of which is 2.5MB) would get included into every build, because they were
+  at the wrong path. I removed the apple logo which appears unused in the tests
+  and fixed the directory structure and file references so that
   'a_sample_image.jpg' and 'iframe.html' don't get included in production builds.
 
-  Note: this is especially a problem if you wanted to create an app manifest 
+  Note: this is especially a problem if you wanted to create an app manifest
   based on the contents of the built static directory. The client would have to
   download a 2.5MB debug image that is never used.
 * Fixes SC.browser unit tests
 * Fixes determination of touch support in Chrome on Win 8.
-* Adds missing un-prefixed border-radius rules to the default theme for browsers 
+* Adds missing un-prefixed border-radius rules to the default theme for browsers
   that have dropped the prefix.
 
 1.9.1 - BUG FIX RELEASE
 ----------
 
 * Unit tests verifying ALL fixes are included.
-* Fixes a bug that left childView elements in the DOM when they were rendered as 
+* Fixes a bug that left childView elements in the DOM when they were rendered as
   part of their parent's layer and the child was later removed.
 
-  If childView layers are rendered when the parentView's layer is created, the 
-  `layer` property on the childView will not be cached.  What occurs is that if 
-  the childView is then removed from the parent view without ever having its 
-  `layer` requested, when it comes time to destroy the DOM layer of the 
-  childView, it will try to find it with a `get('layer')`. The bug was that it 
-  only returned a layer if the view has a parent view. However, since the child 
-  was removed from the parent first and then destroyed, it no longer has a 
+  If childView layers are rendered when the parentView's layer is created, the
+  `layer` property on the childView will not be cached.  What occurs is that if
+  the childView is then removed from the parent view without ever having its
+  `layer` requested, when it comes time to destroy the DOM layer of the
+  childView, it will try to find it with a `get('layer')`. The bug was that it
+  only returned a layer if the view has a parent view. However, since the child
+  was removed from the parent first and then destroyed, it no longer has a
   parent view and would not try to find its leftover DOM layer.
-* Fixes improper implementation of SC.SelectionSet:constrain (fixes #870).  It 
-  was naively using forEach to iterate through the objects while mutating the 
+* Fixes improper implementation of SC.SelectionSet:constrain (fixes #870).  It
+  was naively using forEach to iterate through the objects while mutating the
   array so that the last object could never be constrained.
 * Fixes implicit globals in SC.MenuPane, creating a possible memory leak.
 * Fixes memory leak with child views of SC.View.  The 'owner' property prevented
   views from being able to be garbage collected when they are destroyed.
 * Fixes SC.stringFromLayout() to include all the layout properties.
-* Fixes the excess calling of parentViewDidResize on child views when the view's 
-  position changes, but it's size doesn't. Previously, views that had fixed 
-  sizes (i.e. width + height), but not fixed positions (i.e. not left + top) 
-  would still call parentViewDidResize on their own child views each time that 
-  the view's parent view resized. However, this isn't necessary, because changes 
-  to the view's parent view will effect the view's frame, but if the view has a 
+* Fixes the excess calling of parentViewDidResize on child views when the view's
+  position changes, but it's size doesn't. Previously, views that had fixed
+  sizes (i.e. width + height), but not fixed positions (i.e. not left + top)
+  would still call parentViewDidResize on their own child views each time that
+  the view's parent view resized. However, this isn't necessary, because changes
+  to the view's parent view will effect the view's frame, but if the view has a
   fixed size, it will not effect the child view's frames.
-  - This fixes a strange issue that occurs with SC.ImageView's viewDidResize 
+  - This fixes a strange issue that occurs with SC.ImageView's viewDidResize
     implementation, where it fails to resize appropriately.
-  - This separates isFixedLayout into isFixedPosition + isFixedSize, allowing us 
-    more options to decide what to do when the layout is a fixed position vs. a 
+  - This separates isFixedLayout into isFixedPosition + isFixedSize, allowing us
+    more options to decide what to do when the layout is a fixed position vs. a
     fixed size vs. both vs. neither.
   - Note: A similar optimization already exists in layoutDidChange.
-* Fixes bug in SC.Locale that caused localizations to be overwritten by the 
+* Fixes bug in SC.Locale that caused localizations to be overwritten by the
   last language localized.
 * Fixes SC.Request's application of the Content-Type header.  It was incorrectly
   adding the header for requests that don't have a body which would cause some
@@ -1140,7 +1141,7 @@ Note: this is especially a problem if you wanted to create an app manifest based
   because this is for non-event driven animations.
 * Adds indeterminate SC.ProgressView support.
   - updated to match new SproutCore theme
-  - uses CSS animation if possible or else falls back to highly optimized 
+  - uses CSS animation if possible or else falls back to highly optimized
   JavaScript animation.
 * Adds `useUnixTime` attribute to SC.DateTime record attribute handlers.
 * Adds XHR2 event notification support.
@@ -1150,24 +1151,24 @@ Note: this is especially a problem if you wanted to create an app manifest based
   - req.notify('progress', this, this.reqDidProgress); // Handle 'progress' events
   - req.notify('abort', this, this.reqDidAbort); // Handle 'abort' events
   - req.notify('upload.progress', this, this.reqUploadDidProgress); // Handle 'progress' events on the XMLHttpRequestUpload
-* Adds ability for SC.Query to compare through association (i.e. 
+* Adds ability for SC.Query to compare through association (i.e.
   query.orderBy = 'address.street' now works).
 * Adds several more unit tests and fixes outdated unit tests.
 * Moves base CSS for SC.ButtonView, SC.CheckboxView and SC.RadioView out of the
-  foundation framework and into the desktop framework where these views are 
+  foundation framework and into the desktop framework where these views are
   defined.
 * Prevents exception when setting SC.SelectView items to null.
 * Prevents exception when clicking on a content-less SC.CollectionView.
 * Improves SC.SelectView handling of separator items.
-  - Previously, if a separator item didn't include a title, it would throw an 
+  - Previously, if a separator item didn't include a title, it would throw an
   exception in String loc().
-  - Added a small improvement to the SelectView performance since separator 
+  - Added a small improvement to the SelectView performance since separator
   items can't be selected so we don't need to check them.
-  - Added unit test showing that the first selectable item becomes the default 
-  value when no value is set. This prevents disabled items or separators from 
+  - Added unit test showing that the first selectable item becomes the default
+  value when no value is set. This prevents disabled items or separators from
   being default.
-* Adds binding between a tree controller and it's tree item observer to keep 
-  the selection options between the two in sync ('allowsSelection', 
+* Adds binding between a tree controller and it's tree item observer to keep
+  the selection options between the two in sync ('allowsSelection',
   'allowsMultipleSelection', 'allowsEmptySelection').
 * Adds 'interpretKeyEvents' support to SC.TextFieldView allowing you to implement
   special handling of many common keys.  For example, it is now easy to submit
@@ -1175,86 +1176,86 @@ Note: this is especially a problem if you wanted to create an app manifest based
   an insertNewline() method to the text field view.  Other interpreted keys are:
   escape, delete, backspace, tab, left arrow, right arrow, up arrow, down arrow,
   home, end, page up and page down.
-* Moves key_bindings to core_foundation so it can be with views/view/keyboard 
+* Moves key_bindings to core_foundation so it can be with views/view/keyboard
   (the only file that uses it).
 * Refactors createNestedRecord for child records without primary keys:
-  - The previous version had some broken code, such as checking for the 
-  existence of id, although it is not set anywhere previously or passed to the 
-  function and creating an existingId variable for no purpose. It also wrapped 
+  - The previous version had some broken code, such as checking for the
+  existence of id, although it is not set anywhere previously or passed to the
+  function and creating an existingId variable for no purpose. It also wrapped
   most of the function in a run loop, but this is not necessary.
-  - The previous version would create a new record even if the child record has 
-  no primary key, which would auto-generate a new primary key and thus a new 
-  store key each time that same child record needed to be re-accessed. It also 
+  - The previous version would create a new record even if the child record has
+  no primary key, which would auto-generate a new primary key and thus a new
+  store key each time that same child record needed to be re-accessed. It also
   did extra work fixing up the store by having to manipulate the id after creation.
-  - This version generates a re-usable id upfront for child records that don't 
-  have a primary key value. This means that the id is unique to that child 
-  record and if the child record is unloaded and reloaded, even though it 
-  doesn't have a primary key, it will still get the same generated id and thus, 
-  get the same store key in the store, preventing the store from creating new 
+  - This version generates a re-usable id upfront for child records that don't
+  have a primary key value. This means that the id is unique to that child
+  record and if the child record is unloaded and reloaded, even though it
+  doesn't have a primary key, it will still get the same generated id and thus,
+  get the same store key in the store, preventing the store from creating new
   objects and leaking the caches on the old child record.
-* Changes SC.ArrayController orderBy syntax to 'key ASC' or 'key DESC', not 
+* Changes SC.ArrayController orderBy syntax to 'key ASC' or 'key DESC', not
   'ASC key' or 'DESC key'.
-  - SC.Query's and MySQL's ordering syntax are both 'key DIR' and so 
+  - SC.Query's and MySQL's ordering syntax are both 'key DIR' and so
   SC.ArrayController's syntax should be the same.
 * Adds functionality to SC.routes to pull the parameters out of the location
   when it is URL encoded.  For example, 'videos/5?format=h264&size=small&url=http%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DG0k3kHtyoqc%26feature%3Dg-logo%26context%3DG21d2678FOAAAAAAABAA' now properly has url: 'http://www.youtube.com/watch?v=G0k3kHtyoqc&feature=g-logo&context=G21d2678FOAAAAAAABAA'
   in the params object.
 * Adds observer support of firstObject and lastObject on Enumerables.
-  Note: Any Object that mixes in SC.Enumerable must pass the start and length 
-  arguments to enumerableContentDidChange() for firstObject and lastObject to 
+  Note: Any Object that mixes in SC.Enumerable must pass the start and length
+  arguments to enumerableContentDidChange() for firstObject and lastObject to
   be independently observable.
-* Fixes SC.ArrayController so that when orderBy changes, the firstObject and 
+* Fixes SC.ArrayController so that when orderBy changes, the firstObject and
   lastObject properties are invalidated and thus recomputed if needed.
-* Refactors SC.GridView so that the adjustment of item views only updates when 
-  the frame changes.  It is also has much better performance by only changing on 
+* Refactors SC.GridView so that the adjustment of item views only updates when
+  the frame changes.  It is also has much better performance by only changing on
   a width change, since items are positioned left to right and only changing
   the items currently visible.
   - This also makes SC.GridView work with sparse data, where it would previously
   have requested the entire array of data each time the clipping frame changed (happens on scroll in SC.ScrollView).
   - This fixes a problem rotating grid views on an iPad.
-* Improves SC.DROP_ON support for SC.ListView and SC.GridView. These views now 
-  update the target item's isDropTarget property to reflect that it is the 
-  target of a drag and drop operation, which allows us to style the drop target 
+* Improves SC.DROP_ON support for SC.ListView and SC.GridView. These views now
+  update the target item's isDropTarget property to reflect that it is the
+  target of a drag and drop operation, which allows us to style the drop target
   item appropriately.
-  - Previously the support was commented out in SC.GridView and was incorrectly 
+  - Previously the support was commented out in SC.GridView and was incorrectly
   implemented in SC.ListView (it wiped out the isSelected value on the target items).
 * Prevents exception on SC.CollectionFastPath when calling itemViewForContentIndex()
   before the view was visible.
 * Enhances SC.SegmentedView to support vertical layout and adds a vertical layout theme.
 * Makes SC.DisclosureView default CSS more directly targeted to that type of
   button only.
-* Removes internal _observers, _bindings and _properties arrays from SC.Object 
+* Removes internal _observers, _bindings and _properties arrays from SC.Object
   classes after they are created.  This was a waste of memory.
-* Reduces the default touchBoundary on touch controls from 50px outside, which 
+* Reduces the default touchBoundary on touch controls from 50px outside, which
   is really big, to 25px outside.
 * Makes iframes scrollable in iOS by default.
-* Fixes the default value of SC.MenuPane's itemSeparatorKey to be 'isSeparator' 
+* Fixes the default value of SC.MenuPane's itemSeparatorKey to be 'isSeparator'
   as indicated in the documentation.
 * SC.LabelView with a value of null or undefined will render an empty string "",
   not "null" or "undefined".
-* Adds a warning in debug mode when duplicate bindings for the same key are 
-  detected. This warning detects when a binding is being created more than once 
+* Adds a warning in debug mode when duplicate bindings for the same key are
+  detected. This warning detects when a binding is being created more than once
   for the same property.
   - For example, if you define 'smallBinding' inside 'MyApp.ParentClass = SC.View.extend({ smallBinding: … ' and then extend MyApp.ParentClass further like so 'childView1: MyApp.ParentClass.extend({ smallBinding: … ', then childView1 would have the same binding to small appearing twice in its bindings Array. This can lead to strange behavior when you try connect and disconnect the bindings on the fly.
 * Adds support to SC.MenuPane for pgUp/pgDown/home/end to navigate the menu.
 * Improves SC.ModalPane's automatic disabling of covered SC.TextFieldViews.  
-  SC.ModalPane will disable tabbing into any fields not in the current pane, so 
+  SC.ModalPane will disable tabbing into any fields not in the current pane, so
   that tabbing won't jump "behind" the modal pane.  However, if the text field
   had isBrowserFocusable set to NO, SC.ModalPane would unintentionally set it to
   YES when it was done.  This is no longer the case and SC.ModalPane will respect
   the previous value of isBrowserFocusable on each text field.
 * SC.View:animate() no longer fires multiple callbacks when animating more than
   one property at the same time.
-* Adds support for SC.Object:invokeOnceLater() so that additional arguments that 
+* Adds support for SC.Object:invokeOnceLater() so that additional arguments that
   are given are passed to the target method.
 
 ### DEPRECATIONS & REMOVALS
 
-* The default value of SC.Menu:itemSeparatorKey has been changed from 'separator' 
+* The default value of SC.Menu:itemSeparatorKey has been changed from 'separator'
   to 'isSeparator' to match the documentation.  If a property 'separator' is found
-  on the menu item, it will still be used and a developer warning will appear in 
+  on the menu item, it will still be used and a developer warning will appear in
   debug mode.
-* SC.ArrayController's orderBy direction syntax has been changed to match that 
+* SC.ArrayController's orderBy direction syntax has been changed to match that
   of SC.Query and MySQL.  Using the previous syntax will result in a developer
   warning in debug mode.
 * Removes the TestControls app from SproutCore.  This app was not well-maintained
@@ -1262,75 +1263,75 @@ Note: this is especially a problem if you wanted to create an app manifest based
 
 ### BUG FIXES
 
-* Fixes touchIsInBoundary function of SC.View to account for the fact that the 
+* Fixes touchIsInBoundary function of SC.View to account for the fact that the
   screen coordinates of the view can change without its frame or parentView changing.
-* Fixes critical bug in SC.View:animate() where animating a layout property and then 
-  later animating a different layout property on the same view would throw an 
+* Fixes critical bug in SC.View:animate() where animating a layout property and then
+  later animating a different layout property on the same view would throw an
   exception.
 * Fixes edge cases of SC.View:animate() so that callbacks are still fired if
   animating to the current value or animating with a duration of zero.
-* Fixes missing computed properties, bindings and observers when reopening a 
-  class.  When re-opening a class we have to also re-configure all current 
-  subclasses of that class. If we don't, then any computed properties, bindings 
-  or observers added in the reopen() won't be registered in instances of the 
+* Fixes missing computed properties, bindings and observers when reopening a
+  class.  When re-opening a class we have to also re-configure all current
+  subclasses of that class. If we don't, then any computed properties, bindings
+  or observers added in the reopen() won't be registered in instances of the
   subclass.
-  - Makes the call to reopen() recurse through all the current class's subclasses 
-  in order to re-extend them. If the hash given to reopen() contains computed 
+  - Makes the call to reopen() recurse through all the current class's subclasses
+  in order to re-extend them. If the hash given to reopen() contains computed
   properties, bindings or observers, these will be registered for the subclass.
-  - Takes care not to override properties that the subclass may have defined 
+  - Takes care not to override properties that the subclass may have defined
   prior to the reopen().
 * Fixes SC.Object.prototype.mixin so that the mixed in objects' observables are initialized.
 * Prevents multiple change notifications firing with changes to SC.Array and SC.SparseArray.
-* Fixes SC.ArrayController's orderBy to work with more than a single Array item. 
+* Fixes SC.ArrayController's orderBy to work with more than a single Array item.
   Ex.  testController.set('orderBy', ['lastName', 'firstName']) would not have ordered by firstName second.
 * Fixes SC.UserDefaults readDefault for Firefox 13 to return a default value.
 * Fixes memory leak in the store when removing or replacing child records.
-  - The first time that you access a child record, the store updates four caches: 
+  - The first time that you access a child record, the store updates four caches:
     parentRecords (parentStoreKeys => [childStoreKeys]), childRecords (childStoreKeys => parentStoreKeys), records (SC.Record instances), dataHashes (SC.record backing attributes).
-  - Previously, if you set the child record to null or unloaded and reloaded the 
-  parent record or set the child record to a new child record and the child 
-  record doesn't have a primary key, the store would create duplicates on all 
+  - Previously, if you set the child record to null or unloaded and reloaded the
+  parent record or set the child record to a new child record and the child
+  record doesn't have a primary key, the store would create duplicates on all
   these hashes, resulting in a memory leak.
-  - Now each time that you set the value of the child record on the parent, it 
+  - Now each time that you set the value of the child record on the parent, it
   clears the old child record caches in the store.
-  - See previous tests to prove the memory leak, by modifying the child record 
+  - See previous tests to prove the memory leak, by modifying the child record
   and checking the number of properties in the store's caches.
-* Removes SC.SegmentedView's observers from items when they are removed from 
-  the view.  This prevents a case where a removed item calls itemContentDidChange 
+* Removes SC.SegmentedView's observers from items when they are removed from
+  the view.  This prevents a case where a removed item calls itemContentDidChange
   and puts itself back in a segment.
 * Fixes customized classNameBindings. (ex. classNameBindings: ['isWorking:wkg'])
 * Fixes memory leak with SC.TextFieldView accessory views and with typing large
   amounts of text.
-* Fixes addition of has-icon class to list items that don't actually have an 
+* Fixes addition of has-icon class to list items that don't actually have an
   icon defined.
-  - There are situations where a ListItem will have `hasContentIcon` set to true, 
-  but will not have an icon defined. It's more proper to not add the has-icon 
+  - There are situations where a ListItem will have `hasContentIcon` set to true,
+  but will not have an icon defined. It's more proper to not add the has-icon
   class, which makes space for an icon, if there is no icon.
 * Fixes gray background appearing on first and last segments and white background
   appearing on first and last disabled segmentes of SC.SegmentedView.
 * Fixes mouse move, enter, exiting on SC.SegmentedView when a segment is disabled.
-  - previously, the disabled segment still received the active class when the 
+  - previously, the disabled segment still received the active class when the
   mouse moved into it or over it
   - added unit tests to show that the active class is properly applied
-* Fixes the application of defaultValues to the data hash in createRecord and 
-  also allows the provided hash to use the attribute name OR the attribute key 
+* Fixes the application of defaultValues to the data hash in createRecord and
+  also allows the provided hash to use the attribute name OR the attribute key
   when there is a key.
-  - The previous implementation would assign 'null' data hash properties for 
+  - The previous implementation would assign 'null' data hash properties for
     every property in the record, now the data hash only includes attributes.
-  - The default value would be applied to the attribute name in the data hash, 
+  - The default value would be applied to the attribute name in the data hash,
     which didn't work if the attribute used a key.
-  - Previously, if a record attribute had a key, then accidentally passing the 
-    attribute name instead of the attribute key would fail to work correctly. 
-    Now it will accept the name and/or the key and only store the key in the 
+  - Previously, if a record attribute had a key, then accidentally passing the
+    attribute name instead of the attribute key would fail to work correctly.
+    Now it will accept the name and/or the key and only store the key in the
     data hash.
 * Fixes the default styling for SC.TextFielView on IE, Opera and Mobile Safari.
 * Fixes the styling for icons on SC.LabelView.
-  - the previous style caused the entire label to be position relative with 
-  middle vertical-align when an icon was included. Those styles should only 
+  - the previous style caused the entire label to be position relative with
+  middle vertical-align when an icon was included. Those styles should only
   apply to the img.
 * Fixes theming of SC.SegmentedView.
   - fixed the disabled style wasn't being applied to the view or its segments
-  - changed font size of regular size view from 11px to 12px which matches the 
+  - changed font size of regular size view from 11px to 12px which matches the
     font size of regular size button
   - fixed the img positioning to be properly centred for the different size controls
 * Fixes Jumbo control size style on SC.ButtonView to allow for 24px high icons.
@@ -1338,7 +1339,7 @@ Note: this is especially a problem if you wanted to create an app manifest based
   the previous content.
 * Fixes default CSS on SC.ListItemView img.right-icon
 * Fixes default vertical icon position for SC.SMALL_CONTROL_SIZE checkbox.
-* Converts background-position CSS which is not yet supported by FireFox to CSS 
+* Converts background-position CSS which is not yet supported by FireFox to CSS
   which is currently supported by FireFox.
 * Fixes regression with SC.offset and Mobile Safari targeted code.
 
@@ -1346,21 +1347,21 @@ Note: this is especially a problem if you wanted to create an app manifest based
 1.8.2 - BUG FIX RELEASE
 ----------
 
-* Thinned picker pane border divs so that they don't overlap the content view. 
+* Thinned picker pane border divs so that they don't overlap the content view.
   [0b06db2]
-* Prevents target property conflict when configuring button targets with 
+* Prevents target property conflict when configuring button targets with
   SC.AlertPane. [0364b5c]
-* Changed the aria-orientation of horizontal SC.ScrollView to 'horizontal' from 
+* Changed the aria-orientation of horizontal SC.ScrollView to 'horizontal' from
   'vertical'. [c3ee69b]
-* Allows SC.CollectionFastPath to work with sparse content by always returning 
+* Allows SC.CollectionFastPath to work with sparse content by always returning
   an item view even when content isn't yet available. [020653b]
-* Prevents SC.GridView from iterating over its content array in order to work 
+* Prevents SC.GridView from iterating over its content array in order to work
   with sparse content. [020653b]
-* The 'mobile-safari' body class name is no longer being added in all browsers. 
+* The 'mobile-safari' body class name is no longer being added in all browsers.
   [b491224]
-* Enables pasting in SC.TextFieldView to notify that the value changed. 
+* Enables pasting in SC.TextFieldView to notify that the value changed.
   [a51318b]
-* Prevents default touch behavior being intercepted on <textarea> and <select> 
+* Prevents default touch behavior being intercepted on <textarea> and <select>
   elements in mobile Safari. [8093963]
 
 1.8.1 - BUG FIX RELEASE
