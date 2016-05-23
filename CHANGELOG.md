@@ -14,6 +14,11 @@ Edge
 ### DEPRECATIONS & REMOVALS
 ### BUG FIXES
 
+#### Error reporting in autonomous nested stores
+
+Errors generated on autonomous nested stores are retained in the nested store base class. readError() and readQueryError() were consulting the parent stores error list for the error to return.  This was changed to consult the base class error list for cases where the nested store is autonomous.
+
+
 1.11.1
 -----------
 
