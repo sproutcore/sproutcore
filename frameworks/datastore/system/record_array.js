@@ -465,6 +465,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   storeDidFetchQuery: function(query) {
     // only set to ready clean if the query has been remote and the server fetched it
     if (query.get('isRemote')) this.setIfChanged('status', SC.Record.READY_CLEAN);
+    else this.invokeLater('flush');
     return this ;
   },
 
