@@ -530,7 +530,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
   */
   queryWithScope: function(recordArray) {
     // look for a cached query on record array.
-    var key = SC.keyFor('__query__', SC.guidFor(this)),
+    var key = '__query___' + SC.guidFor(this),
         ret = recordArray[key];
 
     if (!ret) {
