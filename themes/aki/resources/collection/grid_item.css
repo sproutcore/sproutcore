@@ -1,0 +1,33 @@
+
+$theme.sc-grid-view {
+  background: $grid-bg;
+
+  .sc-collection-item {
+    background: $grid-item-bg;
+    color: $grid-item-text-color;
+    text-shadow: $grid-item-text-shadow;
+  }
+
+  .sc-collection-item.even {
+    background: $grid-item-even-bg;
+    color: $grid-item-even-text-color;
+    text-shadow: $grid-item-even-text-shadow;
+  }
+
+  .sc-collection-item.even.sel,
+  .sc-collection-item.sel {
+    background: $sel-grid-item-bg;
+    color: $sel-grid-item-text-color;
+    text-shadow: $sel-grid-item-text-shadow;
+  }
+
+  .sc-collection-item.even.drop-target,
+  .sc-collection-item.drop-target {
+    background: $grid-item-drop-target-bg;
+    color: $grid-item-drop-target-text-color;
+    text-shadow: $grid-item-drop-target-text-shadow;
+  }
+}
+
+
+  

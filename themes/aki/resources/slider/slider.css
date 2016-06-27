@@ -1,0 +1,42 @@
+
+$theme.slider {
+  overflow: visible;
+
+  .sc-slider-step-mark {
+    position: absolute;
+    width: 1px;
+    background-color: $slider-step-mark-color;
+    top: 50%;
+    margin-left: -1px;
+    &.sc-slider-step-mark-first, &.sc-slider-step-mark-last {
+      display: none;
+    }
+  }
+
+  .track {
+    position: absolute;
+    top: 50%; left: 0; right: 0;
+    background-color: $slider-bg;
+    border: $slider-border;
+    box-shadow: $slider-box-shadow;
+  }
+
+  .sc-handle {
+    @include transform(translate3d(0,0,0));
+    display: block; 
+    position: absolute;
+    top: 50%; 
+    background-color: $slider-handle-bg; 
+    box-shadow: $slider-handle-box-shadow;
+    border: $slider-handler-border;
+  }
+
+  &.disabled { opacity: .5; }
+
+  &.active {
+    .sc-handle { 
+      background-color: $active-slider-handle-bg;
+      box-shadow: $active-slider-handle-box-shadow;
+    }
+  }
+}

@@ -1,0 +1,22 @@
+$theme.master-detail {
+  background: #333;
+  
+  &.round-toolbars $theme.toolbar {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+  }
+  
+  & > .sc-view {
+    background: #ccc;
+  }
+  
+  
+  & > .sc-view {
+    @include background(linear-gradient(top,#ddd,#bbb));
+  }
+  
+  &.round-toolbars > .sc-view {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+  }
+}

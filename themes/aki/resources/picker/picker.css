@@ -1,0 +1,56 @@
+
+$theme.sc-pane.sc-panel.sc-picker {
+  background: transparent;
+
+  /* The panel background extends outside the pane's frame by the shadow amount. */
+  .panel-background {
+    background-color: $picker-bg;
+    border: $picker-border;
+    box-shadow: $picker-box-shadow;
+    border-radius: $picker-border-radius; 
+  }
+
+  &.picker {
+    .sc-pointer {
+      background-color: $picker-bg;
+      border: $picker-border;
+      box-shadow: $picker-box-shadow;
+      position: absolute;
+      height: 30px;
+      width: 30px;
+      @include transform(translateY(-2px) rotate(45deg));
+    }
+
+    &.perfectBottom {
+      .sc-pointer {
+        left: 50%;
+        top: -18px;
+        box-shadow: $picker-pointer-bottom-box-shadow;
+      }
+    }
+
+    &.perfectRight {
+      .sc-pointer {
+        left: -18px;
+        top: 50%;
+        box-shadow: $picker-pointer-right-box-shadow;
+      }
+    }
+
+    &.perfectLeft {
+      .sc-pointer {
+        right: -18px;
+        top: 50%;
+        box-shadow: $picker-pointer-left-box-shadow;
+      }
+    }
+
+    &.perfectTop {
+      .sc-pointer {
+        bottom: -21px;
+        left: 50%;
+        box-shadow: $picker-pointer-top-box-shadow;
+      }
+    }
+  }
+}

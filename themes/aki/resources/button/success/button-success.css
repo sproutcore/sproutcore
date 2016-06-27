@@ -1,0 +1,47 @@
+
+@theme(success) {
+  $theme.button {
+
+    background-color: $button-success-bg;
+    border: 1px solid $button-success-border-color;
+    box-shadow: $button-success-box-shadow;
+
+    color: $button-success-text-color;
+    text-shadow: $button-success-text-shadow;
+
+    &:hover {
+      background-color: $hover-button-success-bg;
+      border-color: $hover-button-success-border-color;
+      color: $hover-button-success-text-color;
+      text-shadow: $hover-button-success-text-shadow;
+    }
+
+    &.active {
+      background-color: $active-button-success-bg;
+      border-color: $active-button-success-border-color;
+      color: $active-button-success-text-color;
+      text-shadow: $active-button-success-text-shadow;
+    }
+
+    &.sel, &.def {
+      background-color: $sel-button-success-bg;
+      border-color: $sel-button-success-border-color;
+      color: $sel-button-success-text-color;
+      text-shadow: $sel-button-success-text-shadow;
+    }
+
+    &.sel:hover, &.def:hover {
+      background-color: $sel-hover-button-success-bg;
+      border-color: $sel-hover-button-success-border-color;
+      color: $sel-hover-button-success-text-color;
+      text-shadow: $sel-hover-button-success-text-shadow;
+    }
+
+    &.sel.active {
+      background-color: $sel-active-button-success-bg;
+      border-color: $sel-active-button-success-border-color;
+      color: $sel-active-button-success-text-color;
+      text-shadow: $sel-active-button-success-text-shadow;
+    }
+  }
+}

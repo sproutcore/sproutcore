@@ -1,0 +1,47 @@
+
+@theme(info) {
+  $theme.button {
+
+    background-color: $button-info-bg;
+    border: 1px solid $button-info-border-color;
+    box-shadow: $button-info-box-shadow;
+
+    color: $button-info-text-color;
+    text-shadow: $button-info-text-shadow;
+
+    &:hover {
+      background-color: $hover-button-info-bg;
+      border-color: $hover-button-info-border-color;
+      color: $hover-button-info-text-color;
+      text-shadow: $hover-button-info-text-shadow;
+    }
+
+    &.active {
+      background-color: $active-button-info-bg;
+      border-color: $active-button-info-border-color;
+      color: $active-button-info-text-color;
+      text-shadow: $active-button-info-text-shadow;
+    }
+
+    &.sel, &.def {
+      background-color: $sel-button-info-bg;
+      border-color: $sel-button-info-border-color;
+      color: $sel-button-info-text-color;
+      text-shadow: $sel-button-info-text-shadow;
+    }
+
+    &.sel:hover, &.def:hover {
+      background-color: $sel-hover-button-info-bg;
+      border-color: $sel-hover-button-info-border-color;
+      color: $sel-hover-button-info-text-color;
+      text-shadow: $sel-hover-button-info-text-shadow;
+    }
+
+    &.sel.active {
+      background-color: $sel-active-button-info-bg;
+      border-color: $sel-active-button-info-border-color;
+      color: $sel-active-button-info-text-color;
+      text-shadow: $sel-active-button-info-text-shadow;
+    }
+  }
+}
