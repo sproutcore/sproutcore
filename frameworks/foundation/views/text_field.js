@@ -1232,6 +1232,42 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   },
 
   /** @private */
+  moveLeftAndModifySelection: function (evt) {
+    evt.allowDefault();
+    return YES;
+  },
+
+  /** @private */
+  moveRightAndModifySelection: function (evt) {
+    evt.allowDefault();
+    return YES;
+  },
+
+  /** @private */
+  moveUpAndModifySelection: function (evt) {
+    evt.allowDefault();
+    return YES;
+  },
+
+  /** @private */
+  moveDownAndModifySelection: function (evt) {
+    evt.allowDefault();
+    return YES;
+  },
+
+  /** @private */
+  moveToBeginningOfDocument: function (evt) {
+    evt.allowDefault();
+    return YES;
+  },
+
+  /** @private */
+  moveToEndOfDocument: function (evt) {
+    evt.allowDefault();
+    return YES;
+  },
+
+  /** @private */
   selectAll: function (evt) {
     evt.allowDefault();
     return true;
@@ -1253,6 +1289,24 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       return true;
     }
     return false;
+  },
+
+  /** @private */
+  pageDown: function (evt) {
+    if (this.get('isTextArea')) {
+      evt.allowDefault();
+      return YES;
+    }
+    return NO;
+  },
+
+  /** @private */
+  pageUp: function (evt) {
+    if (this.get('isTextArea')) {
+      evt.allowDefault();
+      return YES;
+    }
+    return NO;
   },
 
   keyUp: function (evt) {
