@@ -1,0 +1,34 @@
+$theme.sc-multi-select-view {
+  background-color: #FFF;
+  border: 1px solid #CCC;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+  
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+$theme.sc-multi-select-item-view {
+  display: none;
+
+  &.selected {
+    display: inline-block;
+    border: 1px #AAA solid;
+    padding: 1px 4px;
+    margin: 1px;
+    position: relative;
+    width: auto;
+    background-color: #DDD;
+    border-radius: 3px;
+
+    i {
+      cursor: pointer;
+      color: #333;
+      margin-left: 3px;
+    }
+  }
+}
