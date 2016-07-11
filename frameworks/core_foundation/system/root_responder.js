@@ -2222,6 +2222,10 @@ SC.RootResponder = SC.Object.extend(
    trigger calls to mouseDragged.
   */
   mousemove: function(evt) {
+    // When dragging an element out of the browser window, the event target is set to an
+    // instance of Document in Firefox which lead to a crash in the SC#viewFor method.
+    // To prevent this, we make sure the event target is an instance of Element.
+    if (!(evt.target instanceof Element)) return;
 
     if (SC.browser.isIE) {
       if (this._lastMoveX === evt.clientX && this._lastMoveY === evt.clientY) return;
