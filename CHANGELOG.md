@@ -20,6 +20,8 @@ Edge
 
 ### BUG FIXES
 
+* Removed dependency on deprecated SC.MENUPANE.VERTICAL_OFFSET property that could cause a height NaN error in SC.PickerPane
+
 1.11.1
 -----------
 
