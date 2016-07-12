@@ -632,7 +632,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
       var self = this;
       // added and resume the chain observer.
       observedKeys.forEach(function (key) {
-        kvoKey = SC.keyFor('_kvo_content_observers', key);
+        kvoKey = '_kvo_content_observers_' + key;
 
         // Get all original ChainObservers associated with the key
         self._kvo_for(kvoKey).forEach(function (observer) {
@@ -655,7 +655,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
 
       // added and resume the chain observer.
       observedKeys.forEach(function (key) {
-        kvoKey = SC.keyFor('_kvo_content_observers', key);
+        kvoKey = '_kvo_content_observers_' + key;
 
         // Loop through removed objects and remove any enumerable observers that
         // belong to them.
@@ -811,7 +811,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
 
     // Maintain a list of observers on the item so we can remove them
     // if it is removed from the enumerable.
-    item._kvo_for(SC.keyFor('_kvo_content_observers', key)).push(observer);
+    item._kvo_for('_kvo_content_observers_' + key).push(observer);
   },
 
   /**
@@ -838,7 +838,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     this._kvo_for('_kvo_content_observed_keys', SC.CoreSet).push(key);
 
     // Add the passed ChainObserver to an ObserverSet for that key
-    var kvoKey = SC.keyFor('_kvo_content_observers', key);
+    var kvoKey = '_kvo_content_observers_' + key;
     this._kvo_for(kvoKey).push(chainObserver);
 
     // Add an observer on the '[]' property of this array.
@@ -869,7 +869,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
 
     if (observedKeys.contains(key)) {
 
-      kvoKey = SC.keyFor('_kvo_content_observers', key);
+      kvoKey = '_kvo_content_observers_' + key;
       observers = this._kvo_for(kvoKey);
 
       observers.removeObject(chainObserver);

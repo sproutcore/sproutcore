@@ -13,7 +13,8 @@ BT.addFramework(BT.Framework.extend({
       combinedStylesheets: true,
     }
   },
-  dependencies: ["sproutcore:desktop","sproutcore:datastore","sproutcore:statechart"]
+  dependencies: ["sproutcore:legacy", "sproutcore:desktop", "sproutcore:datastore", "sproutcore:statechart"],
+  testDependencies: ["sproutcore:debug", "sproutcore:testing"]
 }));
 
 BT.addTheme(BT.Theme.extend({
@@ -27,3 +28,9 @@ BT.addTheme(BT.Theme.extend({
   path: dirname() + "/themes/ace",
   dependencies: ["sproutcore:empty_theme"]
 }));
+
+BT.addTheme(BT.Theme.extend({
+  ref: "sproutcore:legacy",
+  path: dirname() + "/themes/legacy_theme",
+  dependencies: ["sproutcore:empty_theme"]
+}))

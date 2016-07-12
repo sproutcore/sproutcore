@@ -1,0 +1,34 @@
+
+$theme.split-divider {
+  background: transparent;
+  border: 0 none;
+  z-index: 1;
+
+  .line {
+    background: $split-divider-bg;
+    border: 0 none;
+    position: absolute;
+  }
+
+  &.sc-layout-horizontal {
+    .line {
+      left: 3px;
+      right: 3px;
+      top: 0;
+      bottom: 0;
+      border-left: $split-divider-border;
+      border-right: $split-divider-border;
+    }
+  }
+
+  &.sc-layout-vertical {
+    .line {
+      top: 3px;
+      bottom: 3px;
+      left: 0;
+      right: 0;
+      border-top: $split-divider-border;
+      border-bottom: $split-divider-border;
+    }
+  }
+}

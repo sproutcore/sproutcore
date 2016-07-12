@@ -1,0 +1,47 @@
+
+@theme(dark) {
+  $theme.button {
+
+    background-color: $button-dark-bg;
+    border: 1px solid $button-dark-border-color;
+    box-shadow: $button-dark-box-shadow;
+
+    color: $button-dark-text-color;
+    text-shadow: $button-dark-text-shadow;
+
+    &:hover {
+      background-color: $hover-button-dark-bg;
+      border-color: $hover-button-dark-border-color;
+      color: $hover-button-dark-text-color;
+      text-shadow: $hover-button-dark-text-shadow;
+    }
+
+    &.active {
+      background-color: $active-button-dark-bg;
+      border-color: $active-button-dark-border-color;
+      color: $active-button-dark-text-color;
+      text-shadow: $active-button-dark-text-shadow;
+    }
+
+    &.sel, &.def {
+      background-color: $sel-button-dark-bg;
+      border-color: $sel-button-dark-border-color;
+      color: $sel-button-dark-text-color;
+      text-shadow: $sel-button-dark-text-shadow;
+    }
+
+    &.sel:hover, &.def:hover {
+      background-color: $sel-hover-button-dark-bg;
+      border-color: $sel-hover-button-dark-border-color;
+      color: $sel-hover-button-dark-text-color;
+      text-shadow: $sel-hover-button-dark-text-shadow;
+    }
+
+    &.sel.active {
+      background-color: $sel-active-button-dark-bg;
+      border-color: $sel-active-button-dark-border-color;
+      color: $sel-active-button-dark-text-color;
+      text-shadow: $sel-active-button-dark-text-shadow;
+    }
+  }
+}

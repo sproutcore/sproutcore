@@ -1,0 +1,33 @@
+
+// Keep the collectionView clean for now.
+// 
+// $theme.collection {
+//   background: $collection-bg;
+// 
+//   .sc-collection-item {
+//     background: $collection-item-bg;
+//     color: $collection-item-text-color;
+//     text-shadow: $collection-item-text-shadow;
+//   }
+// 
+//   &.alternating .sc-collection-item.even {
+//     background: $collection-item-even-bg;
+//     color: $collection-item-even-text-color;
+//     text-shadow: $collection-item-even-text-shadow;
+//   }
+// 
+//   &.alternating .sc-collection-item.even.sel,
+//   .sc-collection-item.sel {
+//     background: $sel-collection-item-bg;
+//     color: $sel-collection-item-text-color;
+//     text-shadow: $sel-collection-item-text-shadow;
+//   }
+// 
+//   /* Collection items that are the target of an SC.DROP_ON operation. */
+//   &.alternating .sc-collection-item.even.drop-target,
+//   .sc-collection-item.drop-target {
+//     background: $collection-item-drop-target-bg;
+//     color: $collection-item-drop-target-text-color;
+//     text-shadow: $collection-item-drop-target-text-shadow;
+//   }
+// }
