@@ -371,18 +371,21 @@ SC.mixin(/** @scope window.SC.prototype */ {
     @returns {String} the unique guid for this instance.
   */
   guidFor: function (obj) {
-    var cache, ret,
-        type = typeof obj;
-
-    // special cases where we don't want to add a key to object
-    if (obj === undefined) return "(undefined)";
-    if (obj === null) return "(null)";
-
-    // Don't allow prototype changes to String etc. to change the guidFor
-    if (type === SC.T_NUMBER || type === SC.T_STRING) {
-      return '(' + obj + ')'; // E.g. '(Abc)' or '(123)'
-    } else if (type === SC.T_BOOL) {
-      return (obj) ? "(true)" : "(false)";
+    switch (typeof obj) {
+      case 'number': // SC.T_NUMBER
+      case 'string': // SC.T_STRING
+        // Don't allow prototype changes to String etc. to change the guidFor
+        return '(' + obj + ')'; // E.g. '(Abc)' or '(123)'
+      break;
+      case 'boolean': // SC.T_BOOLEAN
+        return obj ? "(true)" : "(false)";
+      break;
+      case 'undefined': // SC.T_UNDEFINED
+        return "(undefined)";
+      break;
+      case 'object':
+        if (obj === null) return "(null)";
+      break;
     }
 
     var guidKey = this.guidKey;
