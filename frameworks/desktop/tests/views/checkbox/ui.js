@@ -67,7 +67,7 @@ test("basic", function() {
   var input = view.$();
   equals(input.attr('aria-checked'), 'false',  'input should not be checked');
 
-  var label = view.$('span.label');
+  var label = view.$('span.sc-button-label');
   equals(label.text(), 'Hello World', 'should have label');
 });
 
@@ -79,7 +79,7 @@ test("selected", function() {
   var input = view.$();
   equals(input.attr('aria-checked'), 'true','input should be checked');
 
-  var label = view.$('span.label');
+  var label = view.$('span.sc-button-label');
   equals(label.text(), 'Hello World', 'should have label');
 });
 
@@ -91,7 +91,7 @@ test("disabled", function() {
   var input = view.$();
   equals(input.attr('aria-checked'), 'false','input should not be checked');
 
-  var label = view.$('span.label');
+  var label = view.$('span.sc-button-label');
   equals(label.text(), 'Hello World', 'should have label');
 });
 
@@ -103,7 +103,7 @@ test("disabled - selected", function() {
   var input = view.$();
   equals(input.attr('aria-checked'), 'true','input should be checked');
 
-  var label = view.$('span.label');
+  var label = view.$('span.sc-button-label');
   equals(label.text(), 'Hello World', 'should have label');
 });
 
@@ -114,6 +114,6 @@ test("role", function() {
 
 test("aria-labelledby", function() {
   var view = pane.view('aria-label');
-  equals(document.getElementById(view.$().attr('aria-labelledby')), view.$('span.label')[0], "aria-labelledby points at the label");
+  equals(document.getElementById(view.$().attr('aria-labelledby')), view.$('span.sc-button-label')[0], "aria-labelledby points at the label");
 });
 })();

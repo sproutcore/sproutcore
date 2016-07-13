@@ -259,7 +259,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
     if (exampleFrame && elem) {
       var frame = SC.offset(elem, 'parent');
 
-      layout.top = targetLayout.top + frame.y - exampleFrame.height/2;
+      layout.top = targetLayout.top + frame.y;
       layout.left = targetLayout.left + frame.x;
       layout.height = exampleFrame.height;
       layout.width = exampleFrame.width;

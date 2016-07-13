@@ -825,7 +825,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
       chain.masterMethod = method;
 
       // Save in set for chain observers.
-      this._kvo_for(SC.keyFor('_kvo_chains', key)).push(chain);
+      this._kvo_for('_kvo_chains_' + key).push(chain);
 
     // Create observers if needed...
     } else {
@@ -838,7 +838,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
       }
 
       if (target === this) target = null; // use null for observers only.
-      kvoKey = SC.keyFor('_kvo_observers', key);
+      kvoKey = '_kvo_observers_' + key;
       this._kvo_for(kvoKey, SC.ObserverSet).add(target, method, context);
       this._kvo_for('_kvo_observed_keys', SC.CoreSet).add(key);
     }
@@ -876,7 +876,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     if (key.indexOf('.') >= 0) {
 
       // try to find matching chains
-      kvoKey = SC.keyFor('_kvo_chains', key);
+      kvoKey = '_kvo_chains_' + key;
       if (chains = this[kvoKey]) {
 
         // if chains have not been cloned yet, do so now.
@@ -895,7 +895,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     // otherwise, just like a normal observer.
     } else {
       if (target === this) target = null; // use null for observers only.
-      kvoKey = SC.keyFor('_kvo_observers', key);
+      kvoKey = '_kvo_observers_' + key;
       if (observers = this[kvoKey]) {
         // if observers have not been cloned yet, do so now
         observers = this._kvo_for(kvoKey);
@@ -930,9 +930,9 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
   hasObserverFor: function (key, target, method) {
     SC.Observers.flush(this); // hookup as many observers as possible.
 
-    var observers = this[SC.keyFor('_kvo_observers', key)],
-        chains = this._kvo_for(SC.keyFor('_kvo_chains', key)),
-        locals = this[SC.keyFor('_kvo_local', key)],
+    var observers = this['_kvo_observers_' + key],
+        chains = this._kvo_for('_kvo_chains_' + key),
+        locals = this['_kvo_local_' + key],
         isChain = key.indexOf('.') >= 0;
 
     // Fast path: no target/method.
@@ -1221,7 +1221,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
   observersForKey: function (key) {
     SC.Observers.flush(this); // hookup as many observers as possible.
 
-    var observers = this[SC.keyFor('_kvo_observers', key)];
+    var observers = this['_kvo_observers_' + key];
     return observers ? observers.getMembers() : [];
   },
 
@@ -1311,7 +1311,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
         key = changes.pop(); // the changed key
 
         // find any observers and notify them...
-        observers = this[SC.keyFor('_kvo_observers', key)];
+        observers = this['_kvo_observers_' + key];
 
         if (observers) {
           // We need to clone the 'members' structure here in case any of the
@@ -1352,7 +1352,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
         // look for local observers.  Local observers are added by SC.Object
         // as an optimization to avoid having to add observers for every
         // instance when you are just observing your local object.
-        members = this[SC.keyFor('_kvo_local', key)];
+        members = this['_kvo_local_' + key];
         if (members) {
           // Note:  Since, unlike above, we don't expect local observers to be
           //        removed in general, we will not clone 'members'.

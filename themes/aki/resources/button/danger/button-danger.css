@@ -1,0 +1,47 @@
+
+@theme(danger) {
+  $theme.button {
+
+    background-color: $button-danger-bg;
+    border: 1px solid $button-danger-border-color;
+    box-shadow: $button-danger-box-shadow;
+
+    color: $button-danger-text-color;
+    text-shadow: $button-danger-text-shadow;
+
+    &:hover {
+      background-color: $hover-button-danger-bg;
+      border-color: $hover-button-danger-border-color;
+      color: $hover-button-danger-text-color;
+      text-shadow: $hover-button-danger-text-shadow;
+    }
+
+    &.active {
+      background-color: $active-button-danger-bg;
+      border-color: $active-button-danger-border-color;
+      color: $active-button-danger-text-color;
+      text-shadow: $active-button-danger-text-shadow;
+    }
+
+    &.sel, &.def {
+      background-color: $sel-button-danger-bg;
+      border-color: $sel-button-danger-border-color;
+      color: $sel-button-danger-text-color;
+      text-shadow: $sel-button-danger-text-shadow;
+    }
+
+    &.sel:hover, &.def:hover {
+      background-color: $sel-hover-button-danger-bg;
+      border-color: $sel-hover-button-danger-border-color;
+      color: $sel-hover-button-danger-text-color;
+      text-shadow: $sel-hover-button-danger-text-shadow;
+    }
+
+    &.sel.active {
+      background-color: $sel-active-button-danger-bg;
+      border-color: $sel-active-button-danger-border-color;
+      color: $sel-active-button-danger-text-color;
+      text-shadow: $sel-active-button-danger-text-shadow;
+    }
+  }
+}

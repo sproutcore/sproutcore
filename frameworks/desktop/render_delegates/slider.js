@@ -58,8 +58,7 @@ SC.BaseTheme.sliderRenderDelegate = SC.RenderDelegate.create({
     }
 
     // Draw the handle.
-    context.begin('img')
-      .setAttr('src', SC.BLANK_IMAGE_URL)
+    context.begin('div')
       .addClass('sc-handle')
       .setStyle('left', '%@%'.fmt(dataSource.get('value')))
       .end();

@@ -939,7 +939,7 @@ SC.PickerPane = SC.PalettePane.extend(
 
     // If the height of the menu is bigger than the window height, resize it.
     if (frame.height + frame.y + 35 >= windowFrame.height) {
-      frame.height = windowFrame.height - frame.y - (SC.MenuPane.VERTICAL_OFFSET * 2);
+      frame.height = windowFrame.height - frame.y - (this.get('windowPadding') * 2);
     }
 
     return frame;

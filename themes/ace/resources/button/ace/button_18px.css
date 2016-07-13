@@ -9,10 +9,6 @@
       padding-top:2px;
     }
 
-    img {
-      top: -2px;
-    }
-
     @include slices("normal_button_18px.png", $left: 3, $right: 3);
 
     &.active {

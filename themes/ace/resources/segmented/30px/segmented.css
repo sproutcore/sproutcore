@@ -33,12 +33,12 @@ $theme.sc-segment-view {
     line-height: 30px;
     margin-left: 9px;
     margin-right: 10px;
-  }
 
-  img.icon {
-    height: 16px;
-    top: 7px;
-    width: 16px;
+    .icon {
+      height: 16px;
+      top: 7px;
+      width: 16px;
+    }
   }
 
   &.sc-first-segment .left {
