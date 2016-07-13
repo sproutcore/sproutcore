@@ -57,23 +57,16 @@ SC.ComboBoxView = SC.View.extend(SC.ItemFilter, {
       menu = this._menu;
 
     if (!menu) {
-      var menu = SC.MenuPane.create({
-        layout: { width: 250, minHeight: 25, maxHeight: 250 },
-        preferType: SC.PICKER_MENU_POINTER, 
+      var menu = SC.AutoResizingMenuPane.create({
+        preferMatrix: [1, 1, SC.POSITION_BOTTOM],
+
+        acceptsKeyPane: false,
 
         itemsBinding: SC.Binding.from('items', that).oneWay(),
 
-        exampleView: SC.MenuItemView.extend({
-          // Prevent the text field from loosing the focus
-          acceptsKeyPane: false,
-        }),
-
         action: function(rootMenu) {
           var selectedItem = rootMenu.get('selectedItem');
-
-          if (selectedItem) {
-            that.set('selectedMenuItem', selectedItem.get('value'));
-          }
+          that.set('selectedMenuItem', selectedItem);
         },
 
       });
