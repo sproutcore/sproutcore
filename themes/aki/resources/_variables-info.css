@@ -1,7 +1,7 @@
 
 $button-info-bg: hsl(180, 85%, 65%);
 $button-info-border-color: rgba(0,0,0,.5);
-$button-info-box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.5);
+$button-info-box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.15);
 $button-info-text-color: #FFF;
 $button-info-text-shadow: 0 1px 1px rgba(0,0,0,.5);
 

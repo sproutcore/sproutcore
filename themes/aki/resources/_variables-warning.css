@@ -1,7 +1,7 @@
 
 $button-warning-bg: hsl(20, 85%, 65%);
 $button-warning-border-color: rgba(0,0,0,.5);
-$button-warning-box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.3);
+$button-warning-box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.15);
 $button-warning-text-color: #FFF;
 $button-warning-text-shadow: 0 1px 1px rgba(0,0,0,.5);
 
