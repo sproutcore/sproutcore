@@ -14,6 +14,12 @@ sc_require('views/button');
 SC.PopupButtonView = SC.ButtonView.extend({
   /** @scope SC.PopupButtonView.prototype */
 
+  /**
+    @type Array
+    @default ['sc-popup-button-view']
+    @see SC.View#classNames
+  */
+  classNames: ['sc-popup-button-view'],
 
   /**
     The render delegate to use to render and update the HTML for the PopupButton.
