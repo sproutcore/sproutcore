@@ -134,19 +134,23 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     that this status is not directly related to the status of the array's records:
 
     - The store returns local queries immediately, regardless of any first-time loading
-      they may trigger. (Note that by default, local queries are limited to 100ms
-      processing time per run loop, so very complex queries may take several run loops
-      to return to `READY` status. You can edit `SC.RecordArray.QUERY_MATCHING_THRESHOLD`
-      to change this duration.)
+      they may trigger. Because local queries are not performed until any of its
+      contents is requested (lazy), the default status of the returned local query is
+      `BUSY_REFRESH`, and will only be updated after the query has been performed.
+      Note that by default, local queries are limited to 100ms processing time per run
+      loop, so very complex queries may take several run loops to return to `READY` status.
+      You can edit `SC.RecordArray.QUERY_MATCHING_THRESHOLD` to change this duration.
     - The store fulfills remote queries by passing them to your data source's `fetch`
       method. While fetching, it sets your array's status to `BUSY_LOADING` or
-      `BUSY_REFRESHING`. Once your data source has finished fetching (successfully or
+      `BUSY_REFRESH`. Once your data source has finished fetching (successfully or
       otherwise), it will call the appropriate store methods (e.g. `dataSourceDidFetchQuery`
       or `dataSourceDidErrorQuery`), which will update the query's array's status.
 
-    Thus, a record array may have a `READY` status while records are still loading (if
-    a local query triggers a call to `SC.DataSource#fetch`), and will not reflect the
-    `DIRTY` status of any of its records.
+    The intended behavior is that a record array only will become `READY` when all records
+    have been loaded and the query itself has been fully performed.
+    However, it may happen that a record array returned for a remote query
+    will get a `READY` status before the query itself has been fully performed.
+    A record array will not reflect the `DIRTY` status of any of its records.
 
     @type Number
   */
@@ -459,7 +463,9 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @returns {SC.RecordArray} receiver
   */
   storeDidFetchQuery: function(query) {
-    this.setIfChanged('status', SC.Record.READY_CLEAN);
+    // only set to ready clean if the query has been remote and the server fetched it
+    if (query.get('isRemote')) this.setIfChanged('status', SC.Record.READY_CLEAN);
+    else this.flush();
     return this ;
   },
 
@@ -639,14 +645,19 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     }
 
     // if we reach our threshold of pacing we need to schedule the rest of the
-    // storeKeys to also be updated
+    // storeKeys to also be updated. Set status to BUSY_REFRESH to indicate pacing.
     if (storeKeysToPace.length > 0) {
+      this.set('status', SC.Record.BUSY_REFRESH);
       this.invokeNext(function () {
         if (!this || this.get('isDestroyed')) return;
         this.set('needsFlush', YES);
         this._scq_changedStoreKeys = SC.IndexSet.create().addEach(storeKeysToPace);
         this.flush();
       });
+    }
+    else {
+      // either ready with pacing or no pacing needed, set status to ready
+      this.set('status', SC.Record.READY_CLEAN);
     }
 
     // clear set of changed store keys

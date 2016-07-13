@@ -1,0 +1,16 @@
+
+$theme.sc-grid-insertion-point {
+  overflow: visible;
+  background-color: $grid-insertion-point-bg;
+  z-index: 1000;
+}
+
+$theme.sc-grid-insertion-point > .anchor {
+  position: absolute;
+  width: 8px;
+  top: -3px;
+  left: -3px;
+  height: 8px;
+  border-radius: 4px;
+  background-color: $grid-insertion-point-bg;
+}

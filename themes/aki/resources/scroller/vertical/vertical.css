@@ -1,0 +1,40 @@
+
+$theme.sc-scroller-view.sc-vertical {
+  .track {
+    background-color: $scroller-track-bg;
+    border-left: 1px solid $scroller-track-border-color;
+    box-shadow: $scroller-track-box-shadow;
+    position: absolute;
+  	top: 0;
+  	right: 0;
+  	bottom: 0;
+  	width: 9px;
+
+    &:hover {
+      background-color: $hover-scroller-track-bg;
+      border-left: 1px solid $hover-scroller-track-border-color;
+    }
+
+    &:active {
+      background-color: $active-scroller-track-bg;
+      border-left: 1px solid $active-scroller-track-border-color;
+    }
+  } 
+
+  .thumb {
+  	position: absolute;
+    background-color: $scroller-thumb-bg;
+    border: 1px solid $scroller-thumb-border-color;
+    box-shadow: $scroller-thumb-box-shadow;
+    width: 8px;
+
+    &:hover {
+      background-color: $hover-scroller-thumb-bg;
+      border: 1px solid $hover-scroller-thumb-border-color;
+    }
+    &:active {
+      background-color: $active-scroller-thumb-bg;
+      border: 1px solid $active-scroller-thumb-border-color;
+    }
+  }
+}

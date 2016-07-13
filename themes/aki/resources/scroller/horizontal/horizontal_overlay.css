@@ -1,0 +1,33 @@
+
+/* Overrides of the themed horizontal scroller to take it back to a basic black transparent OS X style overlay. */
+$theme.sc-overlay-scroller-view.sc-horizontal {
+
+  /* Track */
+  .track,
+  .cap, 
+  .endcap,
+  .button-top, 
+  .button-bottom, 
+  .button-top:hover, 
+  .button-top:active {
+    background: none;
+  }
+
+  /* Thumb */
+  .thumb, 
+  .thumb:hover, 
+  .thumb:active {
+    background: none;
+    border: none;
+    box-shadow: none;
+    height: 12px;
+  }
+
+  .thumb-top, 
+  .thumb-center, 
+  .thumb-bottom {
+    background-color: $scroller-thumb-bg;
+    height: 5px;
+  }
+
+}

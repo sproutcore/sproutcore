@@ -115,7 +115,7 @@ test("Check that all labels have the right classes and styles set", function() {
 
   viewElem = pane.view('iconclass').$();
   ok(viewElem.hasClass('icon'), 'view element should have "icon" class');
-  ok(viewElem.find('img').hasClass('icon'), 'img element inside view should have "icon" class');
+  ok(viewElem.find('div').hasClass('icon'), 'image inside view should have "icon" class');
 
   viewElem=pane.view('icon').$();
   ok(viewElem.hasClass('sc-view'), 'title,icon,disabled.hasClass(sc-view) should be YES');

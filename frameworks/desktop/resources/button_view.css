@@ -20,9 +20,10 @@
     line-height: 21px;
     text-align: center;
   }
-  img {
+  .sc-button-label .icon {
+    display: inline-block;
     vertical-align: middle ;
-    margin-right: 2px;
+    margin-right: 4px;
     position: relative ;
     top: -1px;
     left: -2px;

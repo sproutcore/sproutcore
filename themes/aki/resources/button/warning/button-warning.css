@@ -1,0 +1,47 @@
+
+@theme(warning) {
+  $theme.button {
+
+    background-color: $button-warning-bg;
+    border: 1px solid $button-warning-border-color;
+    box-shadow: $button-warning-box-shadow;
+
+    color: $button-warning-text-color;
+    text-shadow: $button-warning-text-shadow;
+
+    &:hover {
+      background-color: $hover-button-warning-bg;
+      border-color: $hover-button-warning-border-color;
+      color: $hover-button-warning-text-color;
+      text-shadow: $hover-button-warning-text-shadow;
+    }
+
+    &.active {
+      background-color: $active-button-warning-bg;
+      border-color: $active-button-warning-border-color;
+      color: $active-button-warning-text-color;
+      text-shadow: $active-button-warning-text-shadow;
+    }
+
+    &.sel, &.def {
+      background-color: $sel-button-warning-bg;
+      border-color: $sel-button-warning-border-color;
+      color: $sel-button-warning-text-color;
+      text-shadow: $sel-button-warning-text-shadow;
+    }
+
+    &.sel:hover, &.def:hover {
+      background-color: $sel-hover-button-warning-bg;
+      border-color: $sel-hover-button-warning-border-color;
+      color: $sel-hover-button-warning-text-color;
+      text-shadow: $sel-hover-button-warning-text-shadow;
+    }
+
+    &.sel.active {
+      background-color: $sel-active-button-warning-bg;
+      border-color: $sel-active-button-warning-border-color;
+      color: $sel-active-button-warning-text-color;
+      text-shadow: $sel-active-button-warning-text-shadow;
+    }
+  }
+}

@@ -12,12 +12,17 @@ Edge
 * The `SC.guidFor()` method (primarily used internally) no longer maintains a cache for String and Number GUIDs. Because the GUID for a String or a Number is essentially its own value, the caching process actually takes longer than it does to simply generate a GUID key from the given String or Number (see http://jsperf.com/cache-vs-manipulate). More importantly, this removes the memory overhead of maintaining the GUID cache, which was also unable to be cleaned.
 
 ### DEPRECATIONS & REMOVALS
+
+* The Ruby Buildtools nicknamed abbot are no longer supported.
+
+
+* Deprecation of SC.keyFor. It is used to create identification keys, but simply adding strings together is already faster than trying to read them from the cache.
+
 ### BUG FIXES
 
-#### Error reporting in autonomous nested stores
+* Errors generated on autonomous nested stores are retained in the nested store base class. readError() and readQueryError() were consulting the parent stores error list for the error to return.  This was changed to consult the base class error list for cases where the nested store is autonomous.
 
-Errors generated on autonomous nested stores are retained in the nested store base class. readError() and readQueryError() were consulting the parent stores error list for the error to return.  This was changed to consult the base class error list for cases where the nested store is autonomous.
-
+* Removed dependency on deprecated SC.MENUPANE.VERTICAL_OFFSET property that could cause a height NaN error in SC.PickerPane
 
 1.11.1
 -----------

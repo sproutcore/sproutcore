@@ -40,7 +40,7 @@ var pane = SC.ControlTestPane.design()
     layout: { left: 0, right: 0, top: 0, height: 300 },
     hasHorizontalScroller: NO,
     contentView: SC.GridView.design({
-      content: ContentArray.create({ length: 5 }),
+      content: ContentArray.create({ length: 10 }),
       contentValueKey: "title",
       contentCheckboxKey: "isDone",
       contentUnreadCountKey: "unread",
@@ -149,6 +149,45 @@ test("drag on grid view with SC.DROP_ON support", function() {
   };
 
   setTimeout(f, 200);
+  stop(700); // stops the test runner
+});
+
+test("ghost offset when drag on grid view", function() {
+  var ev,
+    frame,
+    itemView,
+    layer,
+    gridView = pane.view("basic").get('contentView');
+
+  // Configure the view to accept drop on.
+  SC.run(function () {
+    gridView.set('canReorderContent', YES);
+  });
+
+  itemView = gridView.itemViewForContentIndex(7);
+  frame = itemView.get('frame');
+  layer = itemView.get('layer');
+
+  ev = SC.Event.simulateEvent(layer, 'mousedown', { pageX: frame.x, pageY: frame.y });
+  SC.Event.trigger(layer, 'mousedown', [ev]);
+  ev._sc_clearNormalizedEvent();
+
+  setTimeout(function() {
+    ev = SC.Event.simulateEvent(layer, 'mousemove');
+    SC.Event.trigger(layer, 'mousemove', [ev]);
+
+    var offset = gridView.convertFrameToView(itemView.get('frame')),
+      ghostOffset = SC.RootResponder.responder._drag.ghostOffset;
+
+    equals((offset.x + ghostOffset.x)/2, frame.x, "ghostOffset should have took into account the mousedown event pageX property");
+    equals((offset.y + ghostOffset.y)/2, frame.y, "ghostOffset should have took into account the mousedown event pageY property");
+
+    // Clean up
+    ev = SC.Event.simulateEvent(layer, 'mouseup');
+    SC.Event.trigger(layer, 'mouseup', [ev]);
+    
+    start();
+  }, 200);
   stop(700); // stops the test runner
 });
 

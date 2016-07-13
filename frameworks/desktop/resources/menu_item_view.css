@@ -57,7 +57,7 @@
     height: 1px;
     border-bottom: 1px #cccccc solid;
   }
-  img {
+  .icon {
     left: 24px;
     top: 3px;
     display: block;
