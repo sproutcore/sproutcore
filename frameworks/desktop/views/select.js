@@ -1,52 +1,63 @@
-// Copyright: ©2006-2010 Sprout Systems, Inc. and contributors.
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2011 Strobe Inc. and contributors.
 //            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('views/popup_button');
-sc_require('mixins/select_view_menu');
-sc_require('ext/menu');
+sc_require('views/button');
 
 /**
- * @class
- * @extends SC.PopupButtonView
- * @version 2.0
- * @author Alex Iskander
- */
-SC.SelectView = SC.PopupButtonView.extend({
-  /** @scope SC.SelectView.prototype */
+  @class
 
-  //
-  // Properties
-  //
-  theme: 'popup',
-  renderDelegateName: 'selectRenderDelegate',
+  SelectView has a functionality similar to that of SelectField
+
+  Clicking the SelectView button displays a menu pane with a
+  list of items. The selected item will be displayed on the button.
+  User has the option of enabling checkbox for the selected menu item.
+
+  @extends SC.ButtonView
+  @version 1.0
+  @author Alex Iskander, Mohammed Ashik
+*/
+SC.SelectView = SC.ButtonView.extend(
+/** @scope SC.SelectView.prototype */ {
 
   /**
-    The array of items to populate the menu. This can be a simple array of strings,
-    objects or hashes. If you pass objects or hashes, you can also set the
-    various itemKey properties to tell the menu how to extract the information
-    it needs.
+    @field
+    @type Boolean
+    @default YES
+  */
+  acceptsFirstResponder: function () {
+    return this.get('isEnabledInPane');
+  }.property('isEnabledInPane'),
+
+  /**
+    If true, titles will be escaped to avoid scripting attacks.
+
+    @type Boolean
+    @default YES
+  */
+  escapeHTML: YES,
+  escapeHTMLBindingDefault: SC.Binding.oneWay().bool(),
+
+  /**
+    An array of items that will be form the menu you want to show.
 
     @type Array
     @default []
   */
-  items: null,
+  items: [],
 
-  /**
-    Binding default for an array of items
-
-    @property
-    @default SC.Binding.multiple()
-  */
+  /** @private */
   itemsBindingDefault: SC.Binding.multiple(),
 
   /**
-    They key in the items which maps to the title.
-    This only applies for items that are hashes or SC.Objects.
+    If you set this to a non-null value, then the name shown for each
+    menu item will be pulled from the object using the named property.
+    if this is null, the collection items themselves will be used.
 
-    @property
-    @type {String}
+    @type String
     @default null
   */
   itemTitleKey: null,
@@ -56,27 +67,25 @@ SC.SelectView = SC.PopupButtonView.extend({
     be used to sort the items.  If this is not set, then itemTitleKey will
     be used.
 
-    @property
-    @type: {String}
+    @type String
     @default null
   */
   itemSortKey: null,
 
   /**
-    They key in the items which maps to the value.
-    This only applies for items that are hashes or SC.Objects.
+     Set this to a non-null value to use a key from the passed set of items
+     as the value for the options popup.  If you don't set this, then the
+     items themselves will be used as the value.
 
-     @property
-     @type {String}
+     @type String
      @default null
   */
   itemValueKey: null,
 
   /**
-     Key used to extract icons from the items array.
+     Key used to extract icons from the items array
 
-     @property
-     @type {String}
+     @type String
      @default null
   */
   itemIconKey: null,
@@ -84,43 +93,20 @@ SC.SelectView = SC.PopupButtonView.extend({
   /**
     Key to use to identify separators.
 
-    Items that have this property set to YES will be drawn as separators.
-
-    @property
-    @type {String}
-    @default null
+    @type String
+    @default "isSeparator"
   */
   itemSeparatorKey: "isSeparator",
 
   /**
     Key used to indicate if the item is to be enabled.
 
-    @property
-    @type {String}
-    @default null
+    @type String
+    @default "isEnabled"
   */
   itemIsEnabledKey: "isEnabled",
 
   /**
-    Set this to non-null to place an empty option at the top of the menu.
-
-    @property
-    @type String
-    @default null
-  */
-  emptyName: null,
-
-  /**
-    If true, titles will be escaped to avoid scripting attacks.
-
-    @type Boolean
-    @default YES
-  */
-  escapeHTML: YES,
-
-  /**
-    If true, the empty name and the default title will be localized.
-    
     @type Boolean
     @default YES
   */
@@ -136,232 +122,249 @@ SC.SelectView = SC.PopupButtonView.extend({
   disableSort: YES,
 
   /**
-   The menu that will pop up when this button is clicked.
-
-   The default menu has its properties bound to the SC.SelectView,
-   meaning that it will get all its items from the SelectView.
-   You may override the menu entirely with one of your own; if you
-   mix in SC.SelectViewMenu, it'll get the bindings and the extended
-   MenuItemView that draws its checkbox when it is the selected item.
-
-   @property
-   @type {SC.MenuPane}
-   @default SC.AutoResizingMenuPane.extend(SC.SelectViewMenu)
+    @type Array
+    @default ['sc-select-button']
+    @see SC.View#classNames
   */
-  menu: SC.AutoResizingMenuPane.extend(SC.SelectViewMenu),
+  classNames: ['sc-select-view'],
 
   /**
-    The currently selected item. If no item is selected, `null`.
+    Menu attached to the SelectView.
+
+    @type SC.View
+    @default SC.MenuView
+  */
+  menu: null,
+
+  /**
+    List of actual menu items, handed off to the menu view.
+
+    @property
+    @private
+    @type:{Array}
+  */
+  _itemList: [],
+
+  /**
+    Property to set the index of the selected menu item. This in turn
+    is used to calculate the preferMatrix.
+
+    @property
+    @type Number
+    @default null
+    @private
+  */
+  _itemIdx: null,
+
+  /**
+     Current Value of the SelectView
+
+     @type Object
+     @default null
+  */
+  value: null,
+
+  /**
+    if this property is set to 'YES', a checkbox is shown next to the
+    selected menu item.
+
+    @type Boolean
+    @default YES
+  */
+  checkboxEnabled: YES,
+
+  /**
+    if this property is set to 'YES', a checkbox is shown next to the
+    selected menu item.
+
+    @type Boolean
+    @default YES
+  */
+  showCheckbox: YES,
+
+  /**
+    Set this to non-null to place an empty option at the top of the menu.
+
+    @property
+    @type String
+    @default null
+  */
+  emptyName: null,
+
+  /**
+    Default value of the select button.
+     This will be the first item from the menu item list.
 
     @private
-    @type SC.Object
-    @default null
-    @isReadOnly
-   */
-  selectedItem: null,
-  selectedItemBinding: '*menu.rootMenu.selectedItem',
+  */
+  _defaultVal: null,
 
+  /**
+    Default title of the select button.
+     This will be the title corresponding to the _defaultVal.
+
+    @private
+  */
+  _defaultTitle: null,
+
+  /**
+    Default icon of the select button.
+     This will be the icon corresponding to the _defaultVal.
+
+    @private
+  */
+  _defaultIcon: null,
+
+  /**
+    The button theme will be popup
+
+    @type String
+    @default 'popup'
+    @readOnly
+  */
+  theme: 'popup',
+
+  /**
+    @type SC.Array
+    @default ['icon', 'value','controlSize']
+    @see SC.View#displayProperties
+  */
+  displayProperties: ['icon', 'value','controlSize', 'escapeHTML', 'emptyName'],
+
+  /**
+    Prefer matrix to position the select button menu such that the
+    selected item for the menu item will appear aligned to the
+    the button. The value at the second index(0) changes based on the
+    position(index) of the menu item in the menu pane.
+
+    @type Array
+    @default null
+  */
+  preferMatrix: null,
+
+  /**
+    Property to set the menu item height. This in turn is used for
+    the calculation of prefMatrix.
+
+    @type Number
+    @default 20
+  */
+  CUSTOM_MENU_ITEM_HEIGHT: 20,
+
+  /**
+    Binds the button's selection state to the menu's visibility.
+
+    @private
+  */
+  isActiveBinding: '*menu.isVisibleInWindow',
+
+  /**
+    If this property is set to 'YES', the menu pane will be positioned
+    below the anchor.
+
+    @type Boolean
+    @default NO
+  */
+  isDefaultPosition: NO,
+
+  /**
+    lastMenuWidth is the width of the last menu which was created from
+    the items of this select button.
+
+    @private
+  */
+  lastMenuWidth: null,
+
+  /**
+    Example view used for menu items.
+
+    @type SC.View
+    @default null
+  */
+  exampleView: null,
+
+  /**
+    customView menu offset width
+
+    @type Number
+    @default 0
+  */
+  customViewMenuOffsetWidth: 0,
+
+  /**
+    This is a property for enabling/disabling ellipsis
+
+    @type Boolean
+    @default YES
+  */
+  needsEllipsis: YES,
+
+  /**
+    This property allows you at add extra padding to the height
+    of the menu pane.
+
+    @type Number
+    @default 0
+  */
+  menuPaneHeightPadding: 0,
+
+  /**
+    The amount of space to add to the calculated width of the menu item strings to
+    determine the width of the menu pane.
+
+    @type Number
+    @default 35
+  */
+  menuItemPadding: 35,
+
+  /**
+    @type Boolean
+    @default NO
+  */
+  isContextMenuEnabled: NO,
 
   /**
     This is a property to enable/disable focus rings in buttons.
-    For SelectView, it is a default.
+    For select_button, we are making it a default.
 
-    @property
-    @type {Boolean}
+    @type Boolean
     @default YES
+    @see SC.ButtonView#supportFocusRing
   */
-  supportsFocusRing: YES,
-
+  supportFocusRing: YES,
 
   /**
-    * @private
+  * @private
+  * Overwritten to calculate the content corresponding to items configured at creation
   */
   init: function() {
     sc_super();
 
-    // call valueDidChange to get the initial item, if any
-    this._scsv_valueDidChange();
+    this.itemsDidChange();
   },
 
-  /** @private */
-  _itemTitleKey: function() {
-    return this.get('itemTitleKey') || 'title';
-  }.property('itemTitleKey').cacheable(),
-
-  /** @private */
-  _itemValueKey: function() {
-    return this.get('itemValueKey') || 'value';
-  }.property('itemValueKey').cacheable(),
-
-  /** @private */
-  _itemIsEnabledKey: function() {
-    return this.get('itemIsEnabledKey') || 'isEnabled';
-  }.property('itemIsEnabledKey').cacheable(),
-
   /**
+    Left Alignment based on the size of the button
+
     @private
-
-    This gets the value for a specific menu item. 
-    
-    This method therefore accepts both the menu items as created for the menupane's displayItems
-    AND the raw items provided by the developer in `items`.
   */
-  _scsv_getValueForMenuItem: function(item) {
-    var valueKey = this.get('_itemValueKey');
-
-    if (!item.isDisplayItem && !this.get('itemValueKey')) {
-      return item;
-    } else if (item.get) {
-      return item.get(valueKey);
-    } else {
-      return item[valueKey];
+  leftAlign: function () {
+    switch (this.get('controlSize')) {
+      case SC.TINY_CONTROL_SIZE:
+        return SC.SelectView.TINY_OFFSET_X;
+      case SC.SMALL_CONTROL_SIZE:
+        return SC.SelectView.SMALL_OFFSET_X;
+      case SC.REGULAR_CONTROL_SIZE:
+        return SC.SelectView.REGULAR_OFFSET_X;
+      case SC.LARGE_CONTROL_SIZE:
+        return SC.SelectView.LARGE_OFFSET_X;
+      case SC.HUGE_CONTROL_SIZE:
+        return SC.SelectView.HUGE_OFFSET_X;
     }
-  },
+    return 0;
+  }.property('controlSize'),
 
   /**
-    * When the selected item changes, we need to update our value.
-    * @private
-  */
-  _scsv_selectedItemDidChange: function() {
-    var sel = this.get('selectedItem'),
-        last = this._scsv_lastSelection;
-
-    // selected item could be a menu item from SC.MenuPane's displayItems, or it could
-    // be a raw item. So, we have to use _scsv_getValueForMenuItem to resolve it.
-    if (sel) {
-      this.setIfChanged('value', this._scsv_getValueForMenuItem(sel));
-    }
-
-    // add/remove observers for the title and value so we can invalidate.
-    if (last && last.addObserver && sel !== last) {
-      last.removeObserver('*', this, '_scsv_selectedItemPropertyDidChange');
-    }
-
-    if (sel && sel.addObserver && sel !== last) {
-      sel.addObserver('*', this, '_scsv_selectedItemPropertyDidChange');
-    }
-
-    this._scsv_lastSelection = sel;
-  }.observes('selectedItem'),
-
-  // called when either title or value changes on the selected item
-  _scsv_selectedItemPropertyDidChange: function(item) {
-    this.notifyPropertyChange('title');
-    this.notifyPropertyChange('icon');
-    this.set('value', this._scsv_getValueForMenuItem(item));
-  },
-
-  /**
-    The title of the button, derived from the selected item.
-  */
-  title: function() {
-    var sel = this.get('selectedItem');
-
-    if (!sel) {
-      return this.get('defaultTitle');
-    } else {
-      var itemTitleKey = this.get('_itemTitleKey');
-      if (itemTitleKey) {
-        if (sel.get) return sel.get(itemTitleKey);
-        else if (SC.typeOf(sel) == SC.T_HASH) return sel[itemTitleKey];
-      }
-      return sel.toString();
-    }
-  }.property('selectedItem').cacheable(),
-
-  /** @private */
-  defaultTitle: function() {
-    var emptyName = this.get('emptyName');
-    if (emptyName) {
-      emptyName = this.get('localize') ? SC.String.loc(emptyName) : emptyName;
-      emptyName = this.get('escapeHTML') ? SC.RenderContext.escapeHTML(emptyName) : emptyName;
-    }
-    return emptyName || '';
-  }.property('emptyName').cacheable(),
-
-  /**
-    The icon of the button, derived from the selected item.
-  */
-  icon: function() {
-    var sel = this.get('selectedItem'),
-      itemIconKey = this.get('itemIconKey');
-
-    if (sel && itemIconKey) {
-      if (sel.get) return sel.get(itemIconKey);
-      else if (SC.typeOf(sel) == SC.T_HASH) return sel[itemIconKey];
-    }
-    return null;      
-  }.property('selectedItem').cacheable(),
-
-  /**
-    Returns an array of normalized display items.
-
-    Adds the empty name to the items if applicable.
-
-    `displayItems` should never be set directly; instead, set `items` and
-    `displayItems` will update automatically.
-
-    @type Array
-    @returns {Array} array of display items.
-    @isReadOnly
-  */
-  displayItems: function () {
-    var items = this.get('items'),
-      emptyName = this.get('emptyName'),
-      len,
-      ret = [], idx, item, itemType;
-
-    if (!items) len = 0;
-    else len = items.get('length');
-
-    for (idx = 0; idx < len; idx++) {
-      item = items.objectAt(idx);
-
-      // fast track out if we can't do anything with this item
-      if (!item || (!ret.length && item[this.get('itemSeparatorKey')])) continue;
-
-      itemType = SC.typeOf(item);
-      if (itemType === SC.T_STRING) {
-        item = this._addDisplayItem(item, item);
-      } else if (itemType === SC.T_HASH) {
-        item = SC.Object.create(item);
-      }
-      item.contentIndex = idx;
-
-      ret.push(item);
-    }
-
-    ret = this.sortObjects(ret);
-
-    if (emptyName) {
-      if (len) ret.unshift(this._addDisplayItem(null, null, true));
-      ret.unshift(this._addDisplayItem(emptyName, null));
-    }
-
-    return ret;
-  }.property().cacheable(),
-
-  /** @private */
-  _scsv_itemsDidChange: function () {
-    this.notifyPropertyChange('displayItems');
-  }.observes('*items.[]'),
-
-  /** @private */
-  _addDisplayItem: function (title, value, isSeparator) {
-    var item = SC.Object.create({
-      isDisplayItem: true
-    });
-
-    item[this.get('_itemTitleKey')] = title;
-    item[this.get('_itemValueKey')] = value;
-    item[this.get('_itemIsEnabledKey')] = true;
-    item[this.get('itemSeparatorKey')] = !!isSeparator;
-
-    return item;
-  },
-
-  /**
-
     override this method to implement your own sorting of the menu. By
     default, menu items are sorted using the value shown or the sortKey
 
@@ -369,9 +372,9 @@ SC.SelectView = SC.PopupButtonView.extend({
     @returns {SC.Array} sorted array of objects
   */
   sortObjects: function (objects) {
-    if (!this.get('disableSort')) {
-      var nameKey = this.get('itemSortKey') || this.get('_itemTitleKey');
-      objects = objects.sort(function(a, b) {
+    if (!this.get('disableSort')){
+      var nameKey = this.get('itemSortKey') || this.get('itemTitleKey');
+      objects = objects.sort(function (a,b) {
         if (nameKey) {
           a = a.get ? a.get(nameKey) : a[nameKey];
           b = b.get ? b.get(nameKey) : b[nameKey];
@@ -383,193 +386,491 @@ SC.SelectView = SC.PopupButtonView.extend({
   },
 
   /**
-    * When the value changes, we need to update selectedItem.
-    * @private
+    Observer called whenever the items collection or an element of this collection changes
+
+    @private
   */
-  _scsv_valueDidChange: function() {
-    var displayItems = this.get('displayItems');
-    if (!displayItems) return;
+  itemsDidChange: function() {
+    var escapeHTML, items, len, nameKey, iconKey, valueKey, separatorKey, showCheckbox,
+      currentSelectedVal, shouldLocalize, isSeparator, itemList, isChecked,
+      idx, name, icon, value, item, itemEnabled, isEnabledKey, emptyName, isSameRecord;
 
-    var len = displayItems.get ? displayItems.get('length') : displayItems.length, 
-      idx, item;
+    items = this.get('items') || [];
+    items = this.sortObjects(items);
+    len = items.length;
 
-    for (idx = 0; idx < len; idx++) {
-      item = displayItems.objectAt(idx);
-      
-      if (this.isValueEqualTo(item)) {
-        this.setIfChanged('selectedItem', item);
-        return;
+    //Get the nameKey, iconKey and valueKey set by the user
+    nameKey = this.get('itemTitleKey');
+    iconKey = this.get('itemIconKey');
+    valueKey = this.get('itemValueKey');
+    separatorKey = this.get('itemSeparatorKey');
+    showCheckbox = this.get('showCheckbox');
+    isEnabledKey = this.get('itemIsEnabledKey');
+    escapeHTML = this.get('escapeHTML');
+
+    //get the current selected value
+    currentSelectedVal = this.get('value');
+
+    // get the localization flag.
+    shouldLocalize = this.get('localize');
+
+    //itemList array to set the menu items
+    itemList = [];
+
+    //to set the 'checkbox' property of menu items
+    isChecked = YES;
+
+    //index for finding the first item in the list
+    idx = 0;
+
+    // Add the empty name to the list if applicable
+    emptyName = this.get('emptyName');
+
+    if (!SC.none(emptyName)) {
+      emptyName = shouldLocalize ? SC.String.loc(emptyName) : emptyName;
+      emptyName = escapeHTML ? SC.RenderContext.escapeHTML(emptyName) : emptyName;
+
+      item = SC.Object.create({
+        isSeparator: NO,
+        title: emptyName,
+        icon: null,
+        value: null,
+        isEnabled: YES,
+        checkbox: NO,
+        target: this,
+        action: 'displaySelectedItem'
+      });
+
+      if (SC.none(currentSelectedVal)) {
+        this.set('title', emptyName);
+      }
+
+      //Set the items in the itemList array
+      itemList.push(item);
+    }
+
+    items.forEach(function (object) {
+      if (object || object === 0) {
+        //@if (debug)
+        // TODO: Remove in 1.11 and 2.0
+        // Help the developer if they were relying on the previously misleading
+        // default value of itemSeparatorKey.  We need to ensure that the change
+        // is backwards compatible with apps prior to 1.10.
+        if (separatorKey === 'isSeparator') {
+          if ((object.get && SC.none(object.get('isSeparator')) && object.get('separator')) || (SC.none(object.isSeparator) && object.separator)) {
+            SC.warn("Developer Warning: the default value of itemSeparatorKey has been changed from 'separator' to 'isSeparator' to match the documentation.  Please update your select item properties to 'isSeparator: YES' to remove this warning.");
+            if (object.set) { object.set('isSeparator', object.get('separator')); }
+            else { object.isSeparator = object.separator; }
+          }
+        }
+        //@endif
+
+        // get the separator
+        isSeparator = separatorKey ? (object.get ? object.get(separatorKey) : object[separatorKey]) : NO;
+
+        if (isSeparator) {
+          item = SC.Object.create({
+            isSeparator: true,
+            value: '_sc_separator_item'
+          });
+        } else {
+          //Get the name value. If value key is not specified convert obj
+          //to string
+          name = nameKey ? (object.get ?
+            object.get(nameKey) : object[nameKey]) : object.toString();
+
+          //@if (debug)
+          // Help the developer if they don't define a matching itemTitleKey.
+          if (!name) {
+            SC.warn("Developer Warning: SC.SelectView: Every item, other than separator items, should have the '%@' property defined!".fmt(nameKey));
+            name = '';
+          }
+          //@endif
+          // localize name if specified.
+          name = shouldLocalize ? SC.String.loc(name) : name;
+          name = escapeHTML ? SC.RenderContext.escapeHTML(name) : name;
+
+          //Get the icon value
+          icon = iconKey ? (object.get ?
+            object.get(iconKey) : object[iconKey]) : null;
+          if (SC.none(object[iconKey])) icon = null;
+
+          // get the value using the valueKey or the object
+          value = valueKey ? (object.get ?
+            object.get(valueKey) : object[valueKey]) : object;
+
+          if (!SC.none(currentSelectedVal) && !SC.none(value)) {
+
+            // If the objects in question are records, we should just their storeKeys
+            isSameRecord = false;
+            if (SC.kindOf(currentSelectedVal, SC.Record) && SC.kindOf(value, SC.Record)) {
+              isSameRecord = currentSelectedVal.get('storeKey') === value.get('storeKey');
+            }
+
+            if (currentSelectedVal === value || isSameRecord) {
+              this.set('title', name);
+              this.set('icon', icon);
+            }
+          }
+
+          //Check if the item is currentSelectedItem or not
+          if (value === this.get('value')) {
+
+            //set the _itemIdx - To change the prefMatrix accordingly.
+            this.set('_itemIdx', idx);
+            isChecked = !showCheckbox ? NO : YES;
+          } else {
+            isChecked = NO;
+          }
+
+          // Check if the item is enabled
+          itemEnabled = (object.get ? object.get(isEnabledKey) : object[isEnabledKey]);
+          if (NO !== itemEnabled) itemEnabled = YES;
+
+          // Set the first non-separator selectable item from the list as the
+          // default selected item
+          if (SC.none(this._defaultVal) && itemEnabled) {
+            this._defaultVal = value;
+            this._defaultTitle = name;
+            this._defaultIcon = icon;
+          }
+
+          item = SC.Object.create({
+            action: 'displaySelectedItem',
+            title: name,
+            icon: icon,
+            value: value,
+            isEnabled: itemEnabled,
+            checkbox: isChecked,
+            target: this
+          });
+        }
+
+        //Set the items in the itemList array
+        itemList.push(item);
+
+      }
+
+      idx += 1;
+
+    }, this );
+
+    this.set('_itemList', itemList);
+
+    var value = this.get('value');
+    if (SC.none(value)) {
+      if (SC.none(emptyName)) {
+        this.set('value', this._defaultVal);
+        this.set('title', this._defaultTitle);
+        this.set('icon', this._defaultIcon);
+      }
+      else this.set('title', emptyName);
+    }
+
+    //Set the preference matrix for the menu pane
+    this.changeSelectPreferMatrix();
+  }.observes( '*items.[]' ),
+
+  /**
+    @private
+    @param {DOMMouseEvent} evt mouseup event that triggered the action
+  */
+  _action: function (evt) {
+    var buttonLabel, menuWidth, scrollWidth, lastMenuWidth, offsetWidth,
+      items, elementOffsetWidth, largestMenuWidth, item, idx,
+      value, itemList, menuControlSize, menuHeightPadding, customView,
+      menu, itemsLength, itemIdx, escapeHTML;
+
+    buttonLabel = this.$('.sc-button-label')[0];
+
+    var menuWidthOffset = SC.SelectView.MENU_WIDTH_OFFSET;
+    if (!this.get('isDefaultPosition')) {
+      switch (this.get('controlSize')) {
+        case SC.TINY_CONTROL_SIZE:
+          menuWidthOffset += SC.SelectView.TINY_POPUP_MENU_WIDTH_OFFSET;
+          break;
+        case SC.SMALL_CONTROL_SIZE:
+          menuWidthOffset += SC.SelectView.SMALL_POPUP_MENU_WIDTH_OFFSET;
+          break;
+        case SC.REGULAR_CONTROL_SIZE:
+          menuWidthOffset += SC.SelectView.REGULAR_POPUP_MENU_WIDTH_OFFSET;
+          break;
+        case SC.LARGE_CONTROL_SIZE:
+          menuWidthOffset += SC.SelectView.LARGE_POPUP_MENU_WIDTH_OFFSET;
+          break;
+        case SC.HUGE_CONTROL_SIZE:
+          menuWidthOffset += SC.SelectView.HUGE_POPUP_MENU_WIDTH_OFFSET;
+          break;
+      }
+    }
+    // Get the length of the text on the button in pixels
+    menuWidth = this.get('layer').offsetWidth + menuWidthOffset;
+
+    // Get the length of the text on the button in pixels
+    menuWidth = this.get('layer').offsetWidth;
+    scrollWidth = buttonLabel.scrollWidth;
+    lastMenuWidth = this.get('lastMenuWidth');
+    if (scrollWidth) {
+       // Get the original width of the label in the button
+       offsetWidth = buttonLabel.offsetWidth;
+       if (scrollWidth && offsetWidth) {
+          menuWidth = menuWidth + scrollWidth - offsetWidth;
+       }
+    }
+    if (!lastMenuWidth || (menuWidth > lastMenuWidth)) {
+      lastMenuWidth = menuWidth;
+    }
+
+    items = this.get('_itemList');
+
+    var customViewClassName = this.get('customViewClassName');
+    // var customViewMenuOffsetWidth = this.get('customViewMenuOffsetWidth');
+    var className = 'sc-view sc-pane sc-panel sc-palette sc-picker sc-menu select-button sc-scroll-view sc-menu-scroll-view sc-container-view menuContainer sc-button-view sc-menu-item sc-regular-size';
+    className = customViewClassName ? (className + ' ' + customViewClassName) : className;
+
+    SC.prepareStringMeasurement("", className);
+    for (idx = 0, itemsLength = items.length; idx < itemsLength; ++idx) {
+      //getting the width of largest menu item
+      item = items.objectAt(idx);
+      elementOffsetWidth = SC.measureString(item.title).width;
+
+      if (!largestMenuWidth || (elementOffsetWidth > largestMenuWidth)) {
+        largestMenuWidth = elementOffsetWidth;
+      }
+    }
+    SC.teardownStringMeasurement();
+
+    lastMenuWidth = (largestMenuWidth + this.menuItemPadding > lastMenuWidth) ?
+                      largestMenuWidth + this.menuItemPadding : lastMenuWidth;
+
+    // Get the window size width and compare with the lastMenuWidth.
+    // If it is greater than windows width then reduce the maxwidth by 25px
+    // so that the ellipsis property is enabled by default
+    var maxWidth = SC.RootResponder.responder.get('currentWindowSize').width;
+    if (lastMenuWidth > maxWidth) {
+      lastMenuWidth = (maxWidth - 25);
+    }
+
+    this.set('lastMenuWidth',lastMenuWidth);
+    value = this.get('value');
+    itemList = this.get('_itemList');
+    menuControlSize = this.get('controlSize');
+    menuHeightPadding = this.get('menuPaneHeightPadding');
+    escapeHTML = this.get('escapeHTML');
+
+    // get the user defined custom view
+    customView = this.get('exampleView') || SC.MenuItemView.extend({ escapeHTML: escapeHTML });
+
+    menu  = SC.MenuPane.create({
+
+      /**
+        Class name - select-button-item
+      */
+      classNames: ['select-button'],
+
+      /**
+        The menu items are set from the itemList property of SelectView
+
+        @property
+      */
+      items: itemList,
+
+      /**
+        Example view which will be used to create the Menu Items
+
+        @default SC.MenuItemView
+        @type SC.View
+      */
+      exampleView: customView,
+
+      /**
+        This property enables all the items and makes them selectable.
+
+        @property
+      */
+      isEnabled: YES,
+
+      menuHeightPadding: menuHeightPadding,
+
+      preferType: SC.PICKER_MENU,
+      itemHeightKey: 'height',
+      layout: { width: lastMenuWidth },
+      controlSize: menuControlSize,
+      itemWidth: lastMenuWidth
+    });
+
+    // no menu to toggle... bail...
+    if (!menu) return NO;
+    menu.popup(this, this.preferMatrix);
+    this.set('menu', menu);
+
+    itemIdx = this._itemIdx;
+    if (!SC.empty(itemIdx) && itemIdx > -1) {
+    // if there is an item selected, make it the first responder
+      customView = menu.menuItemViewForContentIndex(itemIdx);
+      if (customView) { customView.becomeFirstResponder(); }
+    }
+
+    this.set('isActive', YES);
+    return YES;
+  },
+
+  /** @private
+     Action method for the select button menu items
+  */
+  displaySelectedItem: function (menuView) {
+    var currentItem = menuView.get("selectedItem");
+
+    this.set("value", currentItem.get("value"));
+  },
+
+  /** @private Each time the value changes, update each item's checkbox property and update our display properties. */
+  valueDidChange: function () {
+    var itemList = this._itemList,
+      showCheckbox = this.get('showCheckbox'),
+      value = this.get('value');
+
+    // Find the newly selected item (if any).
+    for (var i = 0, len = itemList.length; i < len; i++) {
+      var item = itemList[i],
+        isChecked = false;
+
+      if (value === item.get('value')) {
+        isChecked = showCheckbox;
+        this.set("title", item.get("title"));
+        this.set("icon", item.get("icon"));
+        this.set("_itemIdx", item.get("contentIndex"));
+      }
+
+      item.set('checkbox', isChecked);
+    }
+
+  }.observes('value'),
+
+  /** @private
+     Set the "top" attribute in the prefer matrix property which will
+     position menu such that the selected item in the menu will be
+     place aligned to the item on the button when menu is opened.
+  */
+  changeSelectPreferMatrix: function () {
+    var controlSizeTuning = 0, customMenuItemHeight = 0;
+    switch (this.get('controlSize')) {
+      case SC.TINY_CONTROL_SIZE:
+        controlSizeTuning = SC.SelectView.TINY_OFFSET_Y;
+        customMenuItemHeight = SC.MenuPane.TINY_MENU_ITEM_HEIGHT;
+        break;
+      case SC.SMALL_CONTROL_SIZE:
+        controlSizeTuning = SC.SelectView.SMALL_OFFSET_Y;
+        customMenuItemHeight = SC.MenuPane.SMALL_MENU_ITEM_HEIGHT;
+        break;
+      case SC.REGULAR_CONTROL_SIZE:
+        controlSizeTuning = SC.SelectView.REGULAR_OFFSET_Y;
+        customMenuItemHeight = SC.MenuPane.REGULAR_MENU_ITEM_HEIGHT;
+        break;
+      case SC.LARGE_CONTROL_SIZE:
+        controlSizeTuning = SC.SelectView.LARGE_OFFSET_Y;
+        customMenuItemHeight = SC.MenuPane.LARGE_MENU_ITEM_HEIGHT;
+        break;
+      case SC.HUGE_CONTROL_SIZE:
+        controlSizeTuning = SC.SelectView.HUGE_OFFSET_Y;
+        customMenuItemHeight = SC.MenuPane.HUGE_MENU_ITEM_HEIGHT;
+        break;
+    }
+
+    var preferMatrixAttributeTop = controlSizeTuning,
+      itemIdx = this.get('_itemIdx'),
+      leftAlign = this.get('leftAlign'), defPreferMatrix, tempPreferMatrix;
+
+    if (this.get('isDefaultPosition')) {
+      defPreferMatrix = [1, 0, 3];
+      this.set('preferMatrix', defPreferMatrix);
+    } else {
+      if (itemIdx) {
+        preferMatrixAttributeTop = itemIdx * customMenuItemHeight +
+          controlSizeTuning;
+      }
+      tempPreferMatrix = [leftAlign, -preferMatrixAttributeTop, 2];
+      this.set('preferMatrix', tempPreferMatrix);
+    }
+  },
+
+  /**
+    @private
+    Holding down the button should display the menu pane.
+  */
+  mouseDown: function (evt) {
+    // Fast path, reject secondary clicks.
+    if (evt.which !== 1) return false;
+
+    if (!this.get('isEnabledInPane')) return YES; // handled event, but do nothing
+    this.set('isActive', YES);
+    this._isMouseDown = YES;
+    this.becomeFirstResponder();
+    this._action();
+    return YES;
+  },
+
+  /** @private
+    Because we responded YES to the mouseDown event, we have responsibility
+    for handling the corresponding mouseUp event.
+
+    However, the user may click on this button, then drag the mouse down to a
+    menu item, and release the mouse over the menu item. We therefore need to
+    delegate any mouseUp events to the menu's menu item, if one is selected.
+
+    We also need to differentiate between a single click and a click and hold.
+    If the user clicks and holds, we want to close the menu when they release.
+    Otherwise, we should wait until they click on the menu's modal pane before
+    removing our active state.
+
+    @param {SC.Event} evt
+    @returns {Boolean}
+  */
+  mouseUp: function (evt) {
+    var menu = this.get('menu'), targetMenuItem;
+
+    if (menu) {
+      targetMenuItem = menu.getPath('rootMenu.targetMenuItem');
+
+      if (targetMenuItem && menu.get('mouseHasEntered')) {
+        // Have the menu item perform its action.
+        // If the menu returns NO, it had no action to
+        // perform, so we should close the menu immediately.
+        if (!targetMenuItem.performAction()) menu.remove();
+      } else {
+        // If the user waits more than 200ms between mouseDown and mouseUp,
+        // we can assume that they are clicking and dragging to the menu item,
+        // and we should close the menu if they mouseup anywhere not inside
+        // the menu.
+        if (evt.timeStamp - this._mouseDownTimestamp > 400) {
+          menu.remove();
+        }
       }
     }
 
-    // if we got here, this means no item is selected
-    this.setIfChanged('selectedItem', null);
-  }.observes('value', 'displayItems'),
+    // Reset state.
+    this._isMouseDown = NO;
+    this.set("isActive", NO);
+    return YES;
+  },
 
-  /**
-    Check is the passed item is equal to the current value.
-
-    @param {Object} object to check
-    @returns {Boolean}
+  /** @private
+    Override mouseExited to not remove the active state on mouseexit.
   */
-  isValueEqualTo: function(item) {
-    var a = this.get('value'),
-      b = this._scsv_getValueForMenuItem(item);
-
-    return a === b;
+  mouseExited: function () {
+    return YES;
   },
 
   /**
-    SelectView must set the selectView property on the menu so that the menu's
-    properties get bound to the SelectView's. The bindings get set up by
-    the SelectViewMenu mixin, which should be mixed in to any SelectView menu.
-
-    In addition, the initial selected item and the initial minimum menu width are set.
     @private
-  */
-  createMenu: function(klass) {
-    var attrs = {
-      selectView: this,
-      selectedItem: this.get('selectedItem'),
-      minimumMenuWidth: this.get('minimumMenuWidth'),
-      escapeHTML: this.get('escapeHTML'),
-      localize: this.get('localize')
-    };
-
-    return klass.create(attrs);
-  },
-
-  /**
-    The amount by which to offset the menu's left position when displaying it.
-    This can be used to make sure the selected menu item is directly on top of
-    the label in the SelectView.
-
-    By default, this comes from the render delegate's menuLeftOffset property.
-    If you are writing a theme, you should set the value there.
-
-    @property
-    @type Number
-    @default 'menuLeftOffset' from render delegate if present, or 0.
-  */
-  menuLeftOffset: SC.propertyFromRenderDelegate('menuLeftOffset', 0),
-
-  /**
-    The amount by which to offset the menu's top position when displaying it.
-    This is added to any amount calculated based on the 'top' of a menu item.
-
-    This can be used to make sure the selected menu item's label is directly on
-    top of the SelectView's label.
-
-    By default, this comes from the render delegate's menuTopOffset property.
-    If you are writing a theme, you should set the value there.
-
-    @property
-    @type Number
-    @default 'menuTopOffset' from render delegate if present, or 0.
-  */
-  menuTopOffset: SC.propertyFromRenderDelegate('menuTopOffset', 0),
-
-  /**
-    An amount to add to the menu's minimum width. For instance, this could be
-    set to a negative value to let arrows on the side of the SelectView be visible.
-
-    By default, this comes from the render delegate's menuMinimumWidthOffset property.
-    If you are writing a theme, you should set the value there.
-
-    @property
-    @type Number
-    @default 'menuWidthOffset' from render delegate if present, or 0.
-  */
-  menuMinimumWidthOffset: SC.propertyFromRenderDelegate('menuMinimumWidthOffset', 0),
-
-  /**
-    The prefer matrix for menu positioning. It is calculated so that the selected
-    menu item is positioned directly over the SelectView.
-
-    @property
-    @type Array
-    @private
-  */
-  menuPreferMatrix: function() {
-    var menu = this.get('menu'),
-        leftPosition = this.get('menuLeftOffset'),
-        topPosition = this.get('menuTopOffset');
-
-    if (!menu) {
-      return [leftPosition, topPosition, 2];
-    }
-
-    var idx = this.get('_selectedItemIndex'), itemViews = menu.get('menuItemViews');
-    if (idx > -1) {
-      var layout = itemViews[idx].get('layout');
-      return [leftPosition, topPosition - layout.top + (layout.height/2), 2];
-    }
-
-    return [leftPosition, topPosition, 2];
-
-  }.property('value', 'menu').cacheable(),
-
-  /**
-    Used to calculate things like the menu's top position.
-
-    @private
-  */
-  _selectedItemIndex: function() {
-    var menu = this.get('menu');
-    if (!menu) {
-      return -1;
-    }
-
-    // We have to find the selected item, and then get its 'top' position so we
-    // can position the menu correctly.
-    var itemViews = menu.get('menuItemViews'), 
-      len = itemViews.length,
-      idx, view;
-
-    for (idx = 0; idx < len; idx++) {
-      view = itemViews[idx];
-
-      if (this.isValueEqualTo(view.get('content'))) break;
-    }
-
-    if (idx < len) {
-      return idx;
-    }
-
-    return -1;
-  }.property('value', 'menu').cacheable(),
-
-  /**
-    The minimum width for the child menu. For instance, this property can make the
-    menu always cover the entire SelectView--or, alternatively, cover all but the
-    arrows on the side.
-
-    By default, it is calculated by adding the menuMinimumWidthOffset to the view's
-    width. If you are writing a theme and want to change the width so the menu covers
-    a specific part of the select view, change your render delegate's menuMinimumWidthOffset
-    property.
-
-    @type Number
-    @property
-  */
-  minimumMenuWidth: function() {
-    return this.get('frame').width + this.get('menuMinimumWidthOffset');
-  }.property('frame', 'menuMinimumWidthOffset').cacheable(),
-
-  //
-  // KEY HANDLING
-  //
-  /**
-    @private
-
     Handle Key event - Down arrow key
   */
-  keyDown: function(event) {
+  keyDown: function (event) {
     if ( this.interpretKeyEvents(event) ) {
       return YES;
     }
     else {
-      sc_super();
+      return sc_super();
     }
   },
 
@@ -592,10 +893,128 @@ SC.SelectView = SC.PopupButtonView.extend({
   },
 
   /** @private
-   Function overridden - tied to the isEnabled state
+    Override the button isSelectedDidChange function in order to not perform any action
+    on selecting the select_button
   */
-  acceptsFirstResponder: function() {
-    return this.get('isEnabled');
-  }.property('isEnabled').cacheable()
+  _button_isSelectedDidChange: function () {
+
+  }.observes('isSelected')
 
 });
+
+/**
+  @static
+  @type Number
+  @default 0
+*/
+SC.SelectView.TINY_OFFSET_X = 0;
+
+/**
+  @static
+  @type Number
+  @default 0
+*/
+SC.SelectView.TINY_OFFSET_Y = 0;
+
+/**
+  @static
+  @type Number
+  @default 0
+*/
+SC.SelectView.TINY_POPUP_MENU_WIDTH_OFFSET = 0;
+
+
+/**
+  @static
+  @type Number
+  @default -18
+*/
+SC.SelectView.SMALL_OFFSET_X = -18;
+
+/**
+  @static
+  @type Number
+  @default 3
+*/
+SC.SelectView.SMALL_OFFSET_Y = 3;
+
+/**
+  @static
+  @type Number
+  @default 7
+*/
+SC.SelectView.SMALL_POPUP_MENU_WIDTH_OFFSET = 7;
+
+
+/**
+  @static
+  @type Number
+  @default -17
+*/
+SC.SelectView.REGULAR_OFFSET_X = -17;
+
+/**
+  @static
+  @type Number
+  @default 1
+*/
+SC.SelectView.REGULAR_OFFSET_Y = 0;
+
+/**
+  @static
+  @type Number
+  @default 4
+*/
+SC.SelectView.REGULAR_POPUP_MENU_WIDTH_OFFSET = 4;
+
+
+/**
+  @static
+  @type Number
+  @default -17
+*/
+SC.SelectView.LARGE_OFFSET_X = -17;
+
+/**
+  @static
+  @type Number
+  @default 6
+*/
+SC.SelectView.LARGE_OFFSET_Y = 6;
+
+/**
+  @static
+  @type Number
+  @default 3
+*/
+SC.SelectView.LARGE_POPUP_MENU_WIDTH_OFFSET = 3;
+
+
+/**
+  @static
+  @type Number
+  @default 0
+*/
+SC.SelectView.HUGE_OFFSET_X = 0;
+
+/**
+  @static
+  @type Number
+  @default 0
+*/
+SC.SelectView.HUGE_OFFSET_Y = 0;
+
+/**
+  @static
+  @type Number
+  @default 0
+*/
+SC.SelectView.HUGE_POPUP_MENU_WIDTH_OFFSET = 0;
+
+
+/**
+  @static
+  @type Number
+  @default -2
+*/
+SC.SelectView.MENU_WIDTH_OFFSET = -2;

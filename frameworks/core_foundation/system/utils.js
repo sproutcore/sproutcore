@@ -98,15 +98,15 @@ SC.mixin( /** @scope SC */ {
     var userAgent,
         index,
         mobileBuildNumber,
-        result = jQuery(elem).offset();
+        result;
 
     relativeToFlag = relativeToFlag || 'document';
 
     if (relativeToFlag === 'parent') {
-      var parentOffset = jQuery(elem).offsetParent().offset();
-      result.left -= parentOffset.left;
-      result.top -= parentOffset.top;
+      result = jQuery(elem).position();
     } else {
+      result = jQuery(elem).offset();
+
       // jQuery does not workaround a problem with Mobile Safari versions prior to 4.1 that add the scroll
       // offset to the results of getBoundingClientRect.
       //

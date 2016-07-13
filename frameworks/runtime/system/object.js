@@ -175,7 +175,7 @@ SC._object_extend = function _object_extend(base, ext, proto) {
       if (paths) {
         pathLoc = paths.length;
         while (--pathLoc >= 0) {
-          local = base._kvo_for('_kvo_local_' + paths[pathLoc], SC.CoreSet);
+          local = base._kvo_for(SC.keyFor('_kvo_local', paths[pathLoc]), SC.CoreSet);
           local.add(key);
           base._kvo_for('_kvo_observed_keys', SC.CoreSet).add(paths[pathLoc]);
         }

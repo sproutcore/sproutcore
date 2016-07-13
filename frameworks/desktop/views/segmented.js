@@ -594,6 +594,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
 
     var childViews = this.get('childViews'),
         childView,
+        value = this.get('value'),
         overflowView = this.get('overflowView'),
         isHorizontal = this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL,
         visibleDim = isHorizontal ? this.$().width() : this.$().height(),  // The inner width/height of the div
@@ -640,7 +641,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         if (i === 0) overflowView.set('isFirstSegment', YES);
 
         // If the overflowed segment was selected, show the overflowView as selected instead
-        if (this.isSegmentSelected(childView)) {
+        if (SC.isArray(value) ? value.indexOf(childView.get('value')) >= 0 : value === childView.get('value')) {
           overflowView.set('isSelected', YES);
         }
       } else {
@@ -664,15 +665,6 @@ SC.SegmentedView = SC.View.extend(SC.Control,
 
     // Store the minimum dimension (height/width) before overflow
     this.cachedMinimumDim = curElementsDim + this.cachedOverflowDim;
-  },
-
-  /**
-    Check if the segment is selected.
-  */
-  isSegmentSelected: function (childView) {
-    var value = this.get('value');
-
-    return SC.isArray(value) ? value.indexOf(childView.get('value')) >= 0 : value === childView.get('value');
   },
 
   /**
@@ -803,7 +795,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     var childViews,
         childView,
         i, length,
-        value;
+        value, isArray;
 
     // handle tab key
     if (evt.which === 9 || evt.keyCode === 9) {
@@ -819,6 +811,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
 
       length = childViews.get('length');
       value = this.get('value');
+      isArray = SC.isArray(value);
 
       // Select from the left to the right
       if (evt.which === 39 || evt.which === 40) {
@@ -826,7 +819,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         if (value) {
           for (i = 0; i < length - 2; i++) {
             childView = childViews.objectAt(i);
-            if (this.isSegmentSelected(childView)) {
+            if (isArray ? (value.indexOf(childView.get('value')) >= 0) : (childView.get('value') === value)) {
               this.triggerItemAtIndex(i + 1);
             }
           }
@@ -841,7 +834,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         if (value) {
           for (i = 1; i < length - 1; i++) {
             childView = childViews.objectAt(i);
-            if (this.isSegmentSelected(childView)) {
+            if (isArray ? (value.indexOf(childView.get('value')) >= 0) : (childView.get('value') === value)) {
               this.triggerItemAtIndex(i - 1);
             }
           }
@@ -1267,7 +1260,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     Whenever the value changes, update the segments accordingly.
   */
   valueDidChange: function () {
-    var overflowItemsLength,
+    var value = this.get('value'),
+        overflowItemsLength,
         childViews = this.get('childViews'),
         childViewsLength = this.get('shouldHandleOverflow') ? childViews.get('length') - 1 : childViews.get('length'),
         overflowIndex = Infinity,
@@ -1285,7 +1279,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
 
     for (var i = childViewsLength - 1; i >= 0; i--) {
       childView = childViews.objectAt(i);
-      if (this.isSegmentSelected(childView)) {
+      if (SC.isArray(value) ? value.indexOf(childView.get('value')) >= 0 : value === childView.get('value')) {
         childView.set('isSelected', YES);
 
         // If we've gone over the overflow index, the child view is represented in overflow items

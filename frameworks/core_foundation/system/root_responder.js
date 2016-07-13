@@ -773,11 +773,27 @@ SC.RootResponder = SC.Object.extend(
   */
   setup: function() {
     // handle basic events
-    this.listenFor(['touchstart', 'touchmove', 'touchend', 'touchcancel', 'keydown', 'keypress', 'keyup', 'beforedeactivate', 'mousedown', 'mouseup', 'dragenter', 'dragover', 'dragleave', 'drop', 'click', 'dblclick', 'mousemove', 'contextmenu'], document)
+    this.listenFor(['touchstart', 'touchmove', 'touchend', 'touchcancel', 'keydown', 'keyup', 'beforedeactivate', 'mousedown', 'mouseup', 'dragenter', 'dragover', 'dragleave', 'drop', 'click', 'dblclick', 'mousemove', 'contextmenu'], document)
         .listenFor(['resize'], window);
 
     if(SC.browser.isIE8OrLower) this.listenFor(['focusin', 'focusout'], document);
     else this.listenFor(['focus', 'blur'], window);
+
+    // handle special case for keypress- you can't use normal listener to block
+    // the backspace key on Mozilla
+    if (this.keypress) {
+      if (SC.CAPTURE_BACKSPACE_KEY && SC.browser.isMozilla) {
+        var responder = this ;
+        document.onkeypress = function(e) {
+          e = SC.Event.normalizeEvent(e);
+          return responder.keypress.call(responder, e);
+        };
+
+      // Otherwise, just add a normal event handler.
+      } else {
+        SC.Event.add(document, 'keypress', this, this.keypress);
+      }
+    }
 
     // Add an array of transition listeners for immediate use (these will be cleaned up when actual testing completes).
     // Because the transition test happens asynchronously and because we don't want to
@@ -1147,16 +1163,14 @@ SC.RootResponder = SC.Object.extend(
 
     // get view entry
     viewEntry = this._touchedViews[SC.guidFor(view)];
-    if (viewEntry) {
-      viewEntry.touches.remove(touch);
-      viewEntry.touchCount--;
+    viewEntry.touches.remove(touch);
+    viewEntry.touchCount--;
 
-      // remove view entry if needed
-      if (viewEntry.touchCount < 1) {
-        view.set("hasTouch", NO);
-        viewEntry.view = null;
-        delete this._touchedViews[SC.guidFor(view)];
-      }
+    // remove view entry if needed
+    if (viewEntry.touchCount < 1) {
+      view.set("hasTouch", NO);
+      viewEntry.view = null;
+      delete this._touchedViews[SC.guidFor(view)];
     }
 
     // clear view
@@ -1895,6 +1909,9 @@ SC.RootResponder = SC.Object.extend(
     This event is used to deliver the flagsChanged event and to with function
     keys and keyboard shortcuts.
 
+    All actions that might cause an actual insertion of text are handled in
+    the keypress event.
+
     References:
         http://www.quirksmode.org/js/keys.html
         https://developer.mozilla.org/en/DOM/KeyboardEvent
@@ -1903,6 +1920,9 @@ SC.RootResponder = SC.Object.extend(
   keydown: function(evt) {
     if (SC.none(evt)) return YES;
     var keyCode = evt.keyCode;
+    if (SC.browser.isMozilla && evt.keyCode===9) {
+      this.keydownCounter = 1;
+    }
     // Fix for IME input (japanese, mandarin).
     // If the KeyCode is 229 wait for the keyup and
     // trigger a keyDown if it is is enter onKeyup.
@@ -1940,6 +1960,10 @@ SC.RootResponder = SC.Object.extend(
       // otherwise, send as keyDown event.  If no one was interested in this
       // keyDown event (probably the case), just let the browser do its own
       // processing.
+
+      // Arrow keys are handled in keypress for firefox
+      if (keyCode>=37 && keyCode<=40 && SC.browser.isMozilla) return YES;
+
       ret = this.sendEvent('keyDown', evt) ;
 
       // attempt key equivalent if key not handled
@@ -1965,22 +1989,42 @@ SC.RootResponder = SC.Object.extend(
     trigger a keyDown.
   */
   keypress: function(evt) {
-    // Firefox 
-    if (this._isFunctionOrNonPrintableKey(evt)) return YES;
-
     var ret,
-        keyCode = evt.keyCode,
-        charCode = evt.charCode;
+        keyCode   = evt.keyCode,
+        isFirefox = SC.browser.isMozilla;
 
-    if ((charCode !== undefined && charCode === 0 && evt.keyCode !== 9)) return YES;
-    // we only want to rethrow if this is a printable key so that we don't
-    // duplicate the event sent in keydown when a modifier key is pressed.
-    if (this._isPrintableKey(evt)) {
-      return this.sendEvent('keyDown', evt) ? evt.hasCustomEventHandling : YES;
+    if (isFirefox && evt.keyCode===9) {
+      this.keydownCounter++;
+      if (this.keydownCounter === 2) return YES;
+    }
+
+    // delete is handled in keydown() for most browsers
+    if (isFirefox && (evt.which === 8)) {
+      //get the keycode and set it for which.
+      evt.which = keyCode;
+      ret = this.sendEvent('keyDown', evt);
+      return ret ? (SC.allowsBackspaceToPreviousPage || evt.hasCustomEventHandling) : YES ;
+
+    // normal processing.  send keyDown for printable keys...
+    //there is a special case for arrow key repeating of events in FF.
+    } else {
+      var isFirefoxArrowKeys = (keyCode >= 37 && keyCode <= 40 && isFirefox),
+          charCode           = evt.charCode;
+
+      if ((charCode !== undefined && charCode === 0 && evt.keyCode!==9) && !isFirefoxArrowKeys) return YES;
+      if (isFirefoxArrowKeys) evt.which = keyCode;
+      // we only want to rethrow if this is a printable key so that we don't
+      // duplicate the event sent in keydown when a modifier key is pressed.
+      if (isFirefoxArrowKeys || this._isPrintableKey(evt)) {
+        return this.sendEvent('keyDown', evt) ? evt.hasCustomEventHandling : YES;
+    }
     }
   },
 
   keyup: function(evt) {
+    // to end the simulation of keypress in firefox set the _ffevt to null
+    if(this._ffevt) this._ffevt=null;
+
     // modifier keys are handled separately by the 'flagsChanged' event
     // send event for modifier key changes, but only stop processing if this is only a modifier change
     var ret = this._handleModifierChanges(evt);

@@ -32,8 +32,9 @@ function evaluatePane(pane, message, description, caption, button1Title, button2
   ok(pane.childViews[0].childViews[1].get('isVisibleInWindow'), 'pane.div.div.isVisibleInWindow should be YES');
 
   // content
-  ok(pane.childViews[0].childViews[0].$('div').hasClass('icon'), 'pane.div.info.div should have icon class');
-  ok(pane.childViews[0].childViews[0].$('div').hasClass(iconClass), 'pane.div.info.div should have %@ class'.fmt(iconClass));
+  ok(pane.childViews[0].childViews[0].$('img'), 'pane.div.info.img existence should be YES');
+  ok(pane.childViews[0].childViews[0].$('img').hasClass('icon'), 'pane.div.info.img should have icon class');
+  ok(pane.childViews[0].childViews[0].$('img').hasClass(iconClass), 'pane.div.info.img should have %@ class'.fmt(iconClass));
   ok(pane.childViews[0].childViews[0].$('h1'), 'pane.div.info.h1 existence should be YES');
   equals(pane.childViews[0].childViews[0].$('h1').text(), 'AlertPane.message', 'pane.div.info.h1 should have title');
 

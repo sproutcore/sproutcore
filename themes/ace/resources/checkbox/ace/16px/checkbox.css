@@ -9,7 +9,7 @@ $theme.checkbox {
     @include slice("checkbox_unchecked.png");
   }
   
-  .sc-button-label {
+  .label {
     position: absolute;
     left: 22px;
   }

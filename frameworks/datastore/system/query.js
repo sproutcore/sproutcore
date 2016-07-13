@@ -508,15 +508,15 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
   */
   parse: function() {
     var conditions = this.get('conditions'),
-      lang = this.get('queryLanguage'),
-      tokens, tree;
+        lang       = this.get('queryLanguage'),
+        tokens, tree;
 
     tokens = this._tokenList = this.tokenizeString(conditions, lang);
     tree = this._tokenTree = this.buildTokenTree(tokens, lang);
     this._order = this.buildOrder(this.get('orderBy'));
 
     this._isReady = !!tree && !tree.error;
-    if (tree && tree.error) SC.throw(this.toString()+ ': ' + tree.error);
+    if (tree && tree.error) SC.throw(tree.error);
     return this._isReady;
   },
 
@@ -530,7 +530,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
   */
   queryWithScope: function(recordArray) {
     // look for a cached query on record array.
-    var key = '__query___' + SC.guidFor(this),
+    var key = SC.keyFor('__query__', SC.guidFor(this)),
         ret = recordArray[key];
 
     if (!ret) {
@@ -956,18 +956,20 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     @returns {Array} list of tokens
   */
   tokenizeString: function (inputString, grammar) {
-    var tokenList = [],
-      c = null,
-      t = null,
-      token = null,
-      currentToken = null,
-      currentTokenType = null,
-      currentTokenValue = null,
-      currentDelimiter = null,
-      endOfString = false,
-      endOfToken = false,
-      skipThisCharacter = false,
-      rememberCount = {};
+
+
+    var tokenList           = [],
+        c                   = null,
+        t                   = null,
+        token               = null,
+        currentToken        = null,
+        currentTokenType    = null,
+        currentTokenValue   = null,
+        currentDelimiter    = null,
+        endOfString         = false,
+        endOfToken          = false,
+        skipThisCharacter   = false,
+        rememberCount       = {};
 
 
     // helper function that adds tokens to the tokenList
@@ -1005,8 +1007,8 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       tokenList.push( {tokenType: tokenType, tokenValue: tokenValue} );
 
       // and clean up currentToken
-      currentToken = null;
-      currentTokenType = null;
+      currentToken      = null;
+      currentTokenType  = null;
       currentTokenValue = null;
     }
 
@@ -1105,11 +1107,13 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     @returns {Object} token tree
   */
   buildTokenTree: function (tokenList, treeLogic) {
-    var l = tokenList.slice(),
-      i = 0,
-      openParenthesisStack = [],
-      shouldCheckAgain = false,
-      error = [];
+
+    var l                    = tokenList.slice();
+    var i                    = 0;
+    var openParenthesisStack = [];
+    var shouldCheckAgain     = false;
+    var error                = [];
+
 
     // empty tokenList is a special case
     if (!tokenList || tokenList.length === 0) {
@@ -1123,17 +1127,10 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       var p = position;
       if ( p < 0 ) return false;
 
-      var token = l[p];
+      var tl = treeLogic[l[p].tokenType];
 
-      if (!token) {
-        error.push("token at position '%@'  is not defined.".fmt(position));
-        return false;
-      }
-
-      var tl = treeLogic[token.tokenType];
-
-      if (!tl) {
-        error.push("logic for token '%@' is not defined.".fmt(token.tokenType));
+      if ( ! tl ) {
+        error.push("logic for token '"+l[p].tokenType+"' is not defined");
         return false;
       }
 
@@ -1246,7 +1243,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
 
     // error if tokenList l is not a single token now
     if (l.length === 1) l = l[0];
-    else error.push("string did not resolve to a single tree.");
+    else error.push('string did not resolve to a single tree');
 
     // If we have errors, return an error object.
     if (error.length > 0) {

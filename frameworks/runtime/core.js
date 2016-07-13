@@ -45,7 +45,7 @@ window.SproutCore = window.SproutCore || SC;
 // rest of the methods go into the mixin defined below.
 
 /**
-  @version 2.0.0-alpha
+  @version 1.11.0
   @namespace
 
   All SproutCore methods and functions are defined
@@ -62,7 +62,7 @@ window.SproutCore = window.SproutCore || SC;
 */
 SC = window.SC; // This is dumb but necessary for jsdoc to get it right
 
-SC.VERSION = '2.0.0-alpha';
+SC.VERSION = '1.11.0';
 
 /**
   @private
@@ -406,7 +406,6 @@ SC.mixin(/** @scope window.SC.prototype */ {
     @returns {String} result
   */
   keyFor: function (prefix, key) {
-    SC.warn("Developer notice: the use of SC.keyFor is deprecated");
     var ret, pcache = this._keyCache[prefix];
     if (!pcache) pcache = this._keyCache[prefix] = {}; // get cache for prefix
     ret = pcache[key];

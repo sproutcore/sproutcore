@@ -55,42 +55,42 @@
   &.has-checkbox.has-icon label {
   	left: 44px;
   }
-  .icon,
-  .right-icon {
+  img.icon,
+  img.right-icon {
   	margin-top: -9px;
   	position: absolute;
   	top: 50%;
   }
-  .icon {
+  img.icon {
     margin-top: -9px;
   	position: absolute;
   	top: 50%;
   	left: 5px;
   }
-  .right-icon {
+  img.right-icon {
     margin-top: -9px;
   	position: absolute;
   	top: 50%;
     right: 5px;
   }
-  &.has-checkbox .icon {
+  &.has-checkbox img.icon {
   	left: 25px;
   }
   
   &.has-count {
-    .right-icon {
+    img.right-icon {
       right: 32px;
     }
-    &.two-digit .right-icon {
+    &.two-digit img.right-icon {
       right: 38px;
     }
-    &.three-digit .right-icon {
+    &.three-digit img.right-icon {
       right: 44px;
     }
-    &.four-digit .right-icon {
+    &.four-digit img.right-icon {
       right: 50px;
     }
-    &.five-digit .right-icon {
+    &.five-digit img.right-icon {
       right: 56px;
     }
   }

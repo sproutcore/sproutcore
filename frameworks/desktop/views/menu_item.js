@@ -323,13 +323,17 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
   */
   renderImage: function (context, image) {
     // get a class name and url to include if relevant
-    var classArray = ['icon'];
+
+    var url, className;
     if (image && SC.ImageView.valueIsUrl(image)) {
-      context.begin('img').addClass(classArray).setAttr('src', image).end();
+      url = image;
+      className = '';
     } else {
-      classArray.push(image);
-      context.begin('div').addClass(classArray).end();
+      className = image;
+      url = SC.BLANK_IMAGE_URL;
     }
+    // generate the img element...
+    context.begin('img').addClass('image').addClass(className).setAttr('src', url).end();
   },
 
   /** @private

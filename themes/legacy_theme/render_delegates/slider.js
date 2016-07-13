@@ -23,7 +23,8 @@ SC.LegacyTheme.sliderRenderDelegate = SC.RenderDelegate.create({
   render: function(dataSource, context) {
     this.addSizeClassName(dataSource, context);
 
-    var valueMax    = dataSource.get('maximum'),
+    var blankImage  = SC.BLANK_IMAGE_URL,
+        valueMax    = dataSource.get('maximum'),
         valueMin    = dataSource.get('minimum'),
         valueNow    = dataSource.get('ariaValue');
 
@@ -37,14 +38,16 @@ SC.LegacyTheme.sliderRenderDelegate = SC.RenderDelegate.create({
     context.push('<span class="sc-inner">',
                   '<span class="sc-leftcap"></span>',
                   '<span class="sc-rightcap"></span>',
-                  '<span class="sc-handle" style="left: ', dataSource.get('value'), '%"></span>',
+                  '<img src="', blankImage,
+                  '" class="sc-handle" style="left: ', dataSource.get('value'), '%" />',
                   '</span>');
   },
 
   update: function(dataSource, jquery) {
     this.updateSizeClassName(dataSource, jquery);
 
-    var valueMax    = dataSource.get('maximum'),
+    var blankImage  = SC.BLANK_IMAGE_URL,
+        valueMax    = dataSource.get('maximum'),
         valueMin    = dataSource.get('minimum'),
         valueNow    = dataSource.get('ariaValue');
 

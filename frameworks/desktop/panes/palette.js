@@ -6,7 +6,6 @@
 // ==========================================================================
 
 sc_require('panes/panel');
-sc_require('panes/draggable');
 
 /** @class
   Displays a non-modal, default positioned, drag&drop-able palette pane.
