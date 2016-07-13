@@ -361,6 +361,15 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
   */
   selectOnMouseDown: YES,
 
+
+  /**
+    Toggle disclosure state on double click.
+
+    @type Boolean
+    @default YES
+  */
+  toggleDisclosureOnDoubleClick: YES,
+
   /**
     The view class to use when creating new item views.
 
@@ -2249,6 +2258,12 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
             didSelect = false,
             sel, isSelected,
             contentIndex;
+
+        if (this.get('toggleDisclosureOnDoubleClick') && ev.clickCount > 1) {
+          if (itemView && SC.typeOf(itemView.toggleDisclosure) === SC.T_FUNCTION) {
+            itemView.toggleDisclosure();
+          }
+        }
 
         // Determine the content index of the item view.
         contentIndex = itemView ? itemView.get('contentIndex') : -1;
