@@ -30,6 +30,13 @@ BT.addTheme(BT.Theme.extend({
 }));
 
 BT.addTheme(BT.Theme.extend({
+  ref: "sproutcore:aki",
+  cssName: "aki",
+  path: dirname() + "/themes/aki",
+  dependencies: ["sproutcore:empty_theme"]
+}));
+
+BT.addTheme(BT.Theme.extend({
   ref: "sproutcore:legacy",
   path: dirname() + "/themes/legacy_theme",
   dependencies: ["sproutcore:empty_theme"]
