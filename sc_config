@@ -29,8 +29,22 @@ BT.addTheme(BT.Theme.extend({
   dependencies: ["sproutcore:empty_theme"]
 }));
 
+
+BT.addTheme(BT.Theme.extend({
+  ref: "sproutcore:aki",
+  cssName: "aki",
+  path: dirname() + "/themes/aki",
+  dependencies: ["sproutcore:empty_theme"]
+}));
+
 BT.addTheme(BT.Theme.extend({
   ref: "sproutcore:legacy",
+  cssName: "sc-theme",
   path: dirname() + "/themes/legacy_theme",
   dependencies: ["sproutcore:empty_theme"]
-}))
+}));
+
+if (BT.AppBuilder.prototype.includeTests) {
+  sc_require('apps/tests/sc_config');
+}
+

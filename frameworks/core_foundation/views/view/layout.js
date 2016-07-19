@@ -1079,8 +1079,8 @@ SC.View.reopen(
     // the childViewLayout plugin.
     set = this._needLayoutViews;
     if (set) {
-      for (i = 0, len = set.length; i < len; ++i) {
-        set[i].updateLayout(force);
+      for (i = 0, len = set.get('length'); i < len; ++i) {
+        set.objectAt(i).updateLayout(force);
       }
 
       set.clear(); // reset & reuse

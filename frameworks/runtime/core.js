@@ -103,7 +103,7 @@ SC._baseMixin = function (override, args) {
     }
     // Manually copy toString() because some JS engines do not enumerate it
     // (such as IE8)
-    if (options.hasOwnProperty('toString')) target.toString = options.toString;
+    // if (options.hasOwnProperty('toString')) target.toString = options.toString;
   }
 
   return target;
@@ -735,7 +735,7 @@ SC.mixin(/** @scope window.SC.prototype */ {
     key = (stopAt >= 0) ? path.slice(stopAt + 1) : path;
 
     // convert path to object.
-    var obj = this.objectForPropertyPath(path, root, stopAt);
+    var obj = (stopAt === -1)? root: this.objectForPropertyPath(path, root, stopAt);
     return (obj && key) ? [obj, key] : null;
   },
 
@@ -751,12 +751,28 @@ SC.mixin(/** @scope window.SC.prototype */ {
   objectForPropertyPath: function (path, root, stopAt) {
 
     var loc, nextDotAt, key, max;
+    var arpath;
 
     if (!root) root = window;
 
     // faster method for strings
     if (typeof path === "string") {
       if (stopAt === undefined) stopAt = path.length;
+
+      // if (stopAt === -1) return root;
+      // if (stopAt === undefined) {
+      //   stopAt = path.length;
+      //   arpath = path.split(".");
+      // }
+      // else {
+      //   if (path.indexOf(".") === -1) {
+      //     arpath = [path];
+      //   } else {
+      //     arpath = path.slice(0, stopAt).split(".");
+      //   }
+      // }
+      // path = arpath;
+      // console.log(arpath);
       loc = 0;
       while ((root) && (loc < stopAt)) {
         nextDotAt = path.indexOf('.', loc);
@@ -778,7 +794,7 @@ SC.mixin(/** @scope window.SC.prototype */ {
         if (key) root = (root.get) ? root.get(key) : root[key];
       }
       if (loc < max) root = undefined;
-    }
+   }
 
     return root;
   },

@@ -82,7 +82,7 @@ SC.InlineEditor = {
     @param {SC.View} editable the view being edited
     @returns {Boolean} whether the editor was able to successfully begin editing
   */
-  beginEditing:function(editable) {
+  beginEditing: function(editable) {
     if(this.get('isEditing') || !editable || !editable.isInlineEditable) return NO;
 
     var del, target;

@@ -730,6 +730,60 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
     listeners[statusOrEvent].push({target: target, action: action, args: args});
 
     return this;
+  },
+
+  /**
+    The following functions allow for a more Promise like use of SC.Request. The function passed in will be
+    called once for every valid record, but only if the result is valid
+    If the result is invalid, catch is called instead.
+   */
+  _initPromise: function () {
+    if (!this._promises) this._promises = {};
+    // check whether we are already in
+    var l = this.get('listeners');
+    if (l && l[0] && l[0].findProperty('action', this._handlePromises)) {
+      return; // don't add another notifier, one is enough
+    }
+    else this.notify(this, this._handlePromises);
+  },
+
+  _promises: null,
+
+  // being called by notify
+  _handlePromises: function (result) {
+    var promises = this._promises;
+    if (SC.ok(result)) {
+      var body = result.get('body');
+      if (promises.forEach && body instanceof Array) {
+        body.forEach(promises.forEach);
+      }
+      else if (promises.then) {
+        promises.then(body);
+      }
+    }
+    else {
+      if (promises.catch) {
+        promises.catch(result);
+      }
+    }
+  },
+
+  forEach: function (fn) {
+    this._initPromise();
+    this._promises.forEach = fn;
+    return this;
+  },
+
+  then: function (fn) {
+    this._initPromise();
+    this._promises.then = fn;
+    return this;
+  },
+
+  catch: function (fn) {
+    this._initPromise();
+    this._promises.catch = fn;
+    return this;
   }
 
 });

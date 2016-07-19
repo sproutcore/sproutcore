@@ -666,14 +666,14 @@ SC.Binding = /** @scope SC.Binding.prototype */{
         // connect any bindings
         queue, binding;
 
-    while ((queue = this._connectQueue).length > 0) {
+    while ((queue = this._connectQueue).get('length') > 0) {
       this._connectQueue = this._alternateConnectQueue;
       this._alternateConnectQueue = queue;
       while ((binding = queue.pop())) { binding._connect(); }
     }
 
     // loop through the changed queue...
-    while ((queue = this._changeQueue).length > 0) {
+    while ((queue = this._changeQueue).get('length') > 0) {
       //@if(debug)
       if (SC.LOG_BINDINGS) SC.Logger.log("Begin: Trigger changed bindings");
       //@endif

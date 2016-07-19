@@ -253,6 +253,7 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     @returns {void}
   */
   render: function (context) {
+    console.log('render in menu item');
     var content = this.get('content'),
         val,
         menu = this.get('parentMenu'),

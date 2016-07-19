@@ -258,7 +258,7 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
       }
 
       for (i = objects.get('length') - 1; i >= 0; --i) {
-        object = objects[i];
+        object = objects.objectAt(i);
         idx = source.indexOf(object);
         if (start.contains(idx)) {
           objects.remove(object);
@@ -480,7 +480,7 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
     if (objects = this._objects) {
       var i, cur;
       for (i = objects.length - 1; i >= 0; i--) {
-        cur = objects[i];
+        cur = objects.objectAt(i);
         if (source.indexOf(cur) < 0) this.removeObject(cur);
       }
     }

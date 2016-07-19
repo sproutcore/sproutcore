@@ -148,7 +148,7 @@ SC.Observers = {
           ro;
 
       for ( i=0; i<len; i++ ) {
-        ro = set[i]; // get the range observer
+        ro = set.objectAt(i); // get the range observer
         if ( ro.setupPending(object) ) {
           out.push(ro); // save to remove later
         }
@@ -187,9 +187,12 @@ SC.Observers = {
       pending = this._pending ;
       this._pending = SC.CoreSet.create() ;
 
-      var idx, len = pending.length;
+      var idx, len = pending.get('length');
       for(idx=0;idx<len;idx++) {
-        pending[idx]._notifyPropertyObservers() ;
+        if (pending.objectAt) {
+          pending.objectAt(idx)._notifyPropertyObservers() ;
+        }
+        // else pending[idx]._notifyPropertyObservers() ;
       }
       pending.clear();
       pending = null ;

@@ -1965,7 +1965,7 @@ SC.RootResponder = SC.Object.extend(
     trigger a keyDown.
   */
   keypress: function(evt) {
-    // Firefox 
+    // Firefox
     if (this._isFunctionOrNonPrintableKey(evt)) return YES;
 
     var ret,
