@@ -285,8 +285,8 @@ SC.Set = SC.mixin({},
     // Cannot add null to a set.
     if (obj === null || obj === undefined) return this;
 
-    var hashFunc,
-        guid = ((hashFunc = obj.hash) && (typeof hashFunc === "function")) ? hashFunc.call(obj) : SC.guidFor(obj),
+    var hashFunc = obj.hash,
+        guid = (hashFunc && (typeof hashFunc === "function")) ? hashFunc.call(obj) : SC.guidFor(obj),
         idx  = this[guid],
         len  = this.length;
 
@@ -346,8 +346,8 @@ SC.Set = SC.mixin({},
     // faster than calling them "normally" in IE8.
     if (obj === null || obj === undefined) return this ;
 
-    var hashFunc,
-        guid = (obj && (hashFunc = obj.hash) && (typeof hashFunc === SC.T_FUNCTION)) ? hashFunc.call(obj) : SC.guidFor(obj),
+    var hashFunc = obj.hash,
+        guid = (hashFunc && (typeof hashFunc === SC.T_FUNCTION)) ? hashFunc.call(obj) : SC.guidFor(obj),
         idx  = this[guid],
         len  = this.length,
         tmp;
@@ -493,7 +493,11 @@ SC.Set = SC.mixin({},
   },
 
   /** @private */
-  isObservable: YES
+  isObservable: YES,
+
+  objectAt: function (idx) {
+    return this[idx];
+  }
 
 });
 
@@ -533,10 +537,194 @@ SC.Set._pool = [];
   @extends SC.Set
   @since SproutCore 1.0
 */
-SC.CoreSet = SC.beget(SC.Set);
+// SC.CoreSet = SC.beget(SC.Set);
 
-/** @private */
-SC.CoreSet.isObservable = NO;
+// /** @private */
+// SC.CoreSet.isObservable = NO;
 
-/** @private */
-SC.CoreSet.constructor = SC.CoreSet;
+// /** @private */
+// SC.CoreSet.constructor = SC.CoreSet;
+
+
+SC.CoreSet = function () {
+  this.isSet = true;
+  this.isSCArray = true; // pretend to be an SC.Array, because in a way, we are
+  // and it makes it easier for any other SC.Set to copy our contents.
+  // console.log('CoreSet created');
+};
+
+SC.CoreSet.create = function (items) {
+  var ret = new SC.CoreSet();
+  if (items) {
+    ret.addEach(items);
+  }
+
+  // Object.defineProperty(ret, 'length', {
+  //   get: function () {
+  //     throw Error('something is trying to directly access a CoreSet');
+  //   }
+  // });
+
+  // ['0', '1', '2', '3', '4', '5', '6', '7'].forEach(function (n) {
+  //   Object.defineProperty(ret, n, {
+  //     get: function () {
+  //       throw Error('something is trying to directly access a CoreSet');
+  //     }
+  //   });
+  // });
+
+  // Object.defineProperty(ret, '1', {
+  //   get: function () {
+  //     throw Error('something is trying to directly access a CoreSet');
+  //   }
+  // });
+  // })
+
+  return ret;
+};
+
+SC.CoreSet.prototype = {
+
+  //@if(debug)
+  //
+  addObserver: function () {
+    throw new Error('A CoreSet is not observable, use an SC.Set instead ');
+  },
+
+  removeObserver: function () {
+    throw new Error('A CoreSet is not observable, use an SC.Set instead');
+  },
+
+  //@endif(debug)
+
+  add: function (obj) {
+    if (this.isFrozen) throw new Error(SC.FROZEN_ERROR);
+    var s = this._set;
+    if (!s) s = this._set = [];
+    if (s.indexOf(obj) === -1) s.push(obj);
+    return this;
+  },
+
+  isEqual: function (set) {
+    var s = this._set;
+    if (!s) s = this._set = [];
+    if (!set || !set.isSet || (set.get('length') !== s.length)) {
+      return false;
+    }
+    return s.every(function (o) {
+      return set.contains(o);
+    });
+  },
+
+  // length: function () {
+  //   var s = this._set;
+  //   if (!s) s = this.set = [];
+  //   return s.length;
+  // },
+
+  remove: function (obj) {
+    if (this.isFrozen) throw new Error(SC.FROZEN_ERROR);
+    var s = this._set;
+    if (!obj) return;
+    if (!s) return;
+    var obj_i = s.indexOf(obj);
+    if (obj_i === -1) return;
+    s.splice(obj_i, 1);
+  },
+
+  copy: function () {
+    var ret = SC.CoreSet.create();
+    ret._set = this._set;
+    return ret;
+  },
+
+  destroy: function () {
+    if (this.isFrozen) throw new Error(SC.FROZEN_ERROR);
+    // this._set.forEach(function (o) { if (o.destroy) o.destroy(); });
+    this._set = null;
+  },
+
+  clear: function () {
+    if (this.isFrozen) throw new Error(SC.FROZEN_ERROR);
+    this._set = null;
+  },
+
+  addEach: function (objs) {
+    if (this.isFrozen) throw new Error(SC.FROZEN_ERROR);
+    if (!this._set) this._set = [];
+    var idx = objs.get('length');
+    while(--idx >= 0) this.add(objs.objectAt(idx));
+    return this;
+  },
+
+  removeEach: function (objs) {
+    if (this.isFrozen) throw new Error(SC.FROZEN_ERROR);
+    if (!this._set) this._set = [];
+    objs.forEach(function (o) {
+      this.remove(o);
+    }, this);
+  },
+
+  get: function (key) {
+    if (key === 'length') return this._set? this._set.length: 0;
+    var k = this[key];
+    if (SC.typeOf(k) === SC.T_FUNCTION) return k.call(this, key);
+    else return k;
+  },
+
+  objectAt: function (index) {
+    return this._set[index];
+  },
+
+  pop: function () {
+    if (this.isFrozen) throw new Error(SC.FROZEN_ERROR);
+    return this._set.pop();
+  },
+
+  forEach: function (f, target) {
+    var s = this._set;
+    if (!s) s = this._set = [];
+    s.forEach(f, target);
+    return this;
+  },
+
+  firstObject: function () {
+    var s = this._set;
+    if (!s) s = this._set = [];
+    return s[0];
+  },
+
+  contains: function (o) {
+    var s = this._set;
+    if (!s) s = this._set = [];
+    return s.indexOf(o) !== -1;
+  },
+
+  freeze: function () {
+    this.isFrozen = true;
+    return this; // don't really freeze stuff (yet)
+  },
+
+  find: function (fn, target) {
+    var s = this._set;
+    if (!s) s = this._set = [];
+    return s.find(fn, target);
+  },
+
+  push: function (obj) {
+    if (this.isFrozen) throw new Error(SC.FROZEN_ERROR);
+    return this.add(obj);
+  },
+
+  toArray: function () {
+    return this._set;
+  },
+
+  toString: function() {
+    var s = this._set;
+    if (!s) s = this._set = [];
+    var len = s.length, idx, ary = [];
+    for (idx = 0; idx < len; idx++) ary[idx] = s[idx];
+    return "SC.Set<%@>".fmt(ary.join(',')) ;
+  },
+};

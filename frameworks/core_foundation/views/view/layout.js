@@ -1079,8 +1079,8 @@ SC.View.reopen(
     // the childViewLayout plugin.
     set = this._needLayoutViews;
     if (set) {
-      for (i = 0, len = set.length; i < len; ++i) {
-        set[i].updateLayout(force);
+      for (i = 0, len = set.get('length'); i < len; ++i) {
+        set.objectAt(i).updateLayout(force);
       }
 
       set.clear(); // reset & reuse
@@ -1402,6 +1402,22 @@ SC.View.reopen(
     }
 
     sc_super();
+  },
+
+  /** @private Extension: The 'orphaned' event (uses isFixedSize so our childViews are notified if our frame changes). */
+  _orphaned: function () {
+    sc_super();
+
+    if (!this.isDestroyed) {
+      // If our size depends on our parent, it will have changed on orphaning.
+      var isFixedSize = this.get('isFixedSize');
+      if (isFixedSize) {
+      // Even if our size is fixed, our frame may have changed (in particular if the anchor is not top/left)
+      this._sc_viewFrameDidChange();
+      } else {
+        this.viewDidResize();
+      }
+    }
   },
 
   /** @private Extension: The 'updatedContent' event. */

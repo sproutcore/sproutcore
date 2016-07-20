@@ -106,14 +106,14 @@ test("loading more records should not sending _flushRecordChanges() until the en
 
   var storeKeys = store.loadRecords(Application.File, moreData);
   equals(storeKeys.length, 3, 'precon - should have loaded three records');
-  equals(store.recordPropertyChanges.storeKeys.length, 3, 'should be three storeKeys in changelog');
+  equals(store.recordPropertyChanges.storeKeys.get('length'), 3, 'should be three storeKeys in changelog');
 
   SC.RunLoop.end();
 
   // recordPropertyChanges may not exist after notifications have gone out.
   // treat that like having len=0
   var changes = store.recordPropertyChanges;
-  var len = (changes && changes.storeKeys) ? changes.storeKeys.length : 0;
+  var len = (changes && changes.storeKeys) ? changes.storeKeys.get('length') : 0;
   equals(len, 0, 'should be zero storeKeys in changelog');
 
 });

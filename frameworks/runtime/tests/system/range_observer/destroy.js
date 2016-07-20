@@ -9,26 +9,26 @@
 var source, indexes, observer, obj ; // base array to work with
 module("SC.RangeObserver#destroy", {
   setup: function() {
-    
+
     // create array with 5 SC.Object's in them
     source = [1,2,3,4,5].map(function(x) {
       return SC.Object.create({ item: x, foo: "bar" }) ;
-    }, this); 
+    }, this);
 
     indexes = SC.IndexSet.create(2,2); // select 2..3
-    
+
     observer = SC.Object.create({
-      
-      callCount: 0, 
-      
-      rangeDidChange: function() { 
+
+      callCount: 0,
+
+      rangeDidChange: function() {
         this.callCount++;
       }
-      
+
     });
 
     obj = SC.RangeObserver.create(source, indexes, observer, observer.rangeDidChange, "context", YES);
-    
+
   }
 });
 
@@ -40,10 +40,10 @@ test("returns receiver", function() {
 
 // ..........................................................
 // OBSERVING
-// 
+//
 
 // NOTE: Since we are lazy about observing changes, we want to test both what
-// happens if you destroy the observer before any changes have happend and 
+// happens if you destroy the observer before any changes have happend and
 // after changes have happened.
 
 test("never observes changes if no changes happend", function() {
@@ -57,7 +57,7 @@ test("never observes changes if no changes happend", function() {
   equals(observer.callCount, 0, 'range observer should not fire');
 });
 
-test("stops observes changes if changes happend before destroy", function() {
+test("stops observes changes if changes happened before destroy", function() {
   var len = source.length, idx;
 
   // change property on each object

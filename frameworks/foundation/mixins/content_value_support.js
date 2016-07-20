@@ -365,7 +365,7 @@ SC.ContentValueSupport = {
         var i, len = oldKeys.get('length');
 
         for (i = 0; i < len; i++) {
-          contentKey = oldKeys[i];
+          contentKey = oldKeys.objectAt(i);
 
           old.removeObserver(contentKey, this, f);
         }

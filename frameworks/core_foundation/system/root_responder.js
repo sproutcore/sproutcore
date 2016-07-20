@@ -1072,7 +1072,7 @@ SC.RootResponder = SC.Object.extend(
     averaged = view._scrr_averagedTouches || (view._scrr_averagedTouches = {});
 
     // FAST PATH: no touches to track.
-    if ((!t || t.length === 0) && !additionalTouch) {
+    if ((!t || t.get('length') === 0) && !additionalTouch) {
       averaged.x = 0;
       averaged.y = 0;
       averaged.d = 0;
@@ -1086,11 +1086,12 @@ SC.RootResponder = SC.Object.extend(
 
       // copy touches into array
       if (t) {
-        var i;
-        len = t.length;
+        var i, touch;
+        len = t.get('length');
         for(i = 0; i < len; i++) {
-          touches.push(t[i]);
-          if (additionalTouch && t[i] === additionalTouch) additionalTouchIsDuplicate = YES;
+          touch = t.objectAt(i);
+          touches.push(touch);
+          if (additionalTouch && touch === additionalTouch) additionalTouchIsDuplicate = YES;
         }
       }
 
@@ -1123,7 +1124,7 @@ SC.RootResponder = SC.Object.extend(
     if (!this._touchedViews[SC.guidFor(view)]) {
       this._touchedViews[SC.guidFor(view)] = {
         view: view,
-        touches: SC.CoreSet.create([]),
+        touches: SC.CoreSet.create(),
         touchCount: 0
       };
       view.set("hasTouch", YES);
@@ -1965,7 +1966,7 @@ SC.RootResponder = SC.Object.extend(
     trigger a keyDown.
   */
   keypress: function(evt) {
-    // Firefox 
+    // Firefox
     if (this._isFunctionOrNonPrintableKey(evt)) return YES;
 
     var ret,

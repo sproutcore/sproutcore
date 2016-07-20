@@ -45,7 +45,10 @@ module("SC.View#captureTouch", {
             // When touch is dragged, this passes control of the touch BACK to the outer view.
             touchesDragged: function(evt, viewTouches) {
               innerDragged++;
-              viewTouches.invoke('restoreLastTouchResponder');
+              viewTouches.forEach(function (v) {
+                if (v.restoreLastTouchResponder) v.restoreLastTouchResponder();
+              });
+              // viewTouches.invoke('restoreLastTouchResponder');
             },
             touchCancelled: function() { innerCancel++; },
             touchEnd: function() { innerEnd++; }
@@ -74,7 +77,6 @@ test("Touch event handling and juggling.", function() {
 
   // Trigger touchstart: outerView.captureTouch > outerView.touchStart
   SC.Event.trigger(layer, 'touchstart', [event]);
-
   equals(outerCapture, 1, "To capture the initial touch, outerView.captureTouch should have run:");
   equals(outerStart, 1, "Having captured the initial touch, outerView.touchStart should have run:");
   if (innerStart) ok(false, "outerView.innerStart should not have been called yet!");

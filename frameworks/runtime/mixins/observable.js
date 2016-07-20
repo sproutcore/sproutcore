@@ -446,7 +446,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
   endPropertyChanges: function () {
     this._kvo_changeLevel = (this._kvo_changeLevel || 1) - 1;
     var level = this._kvo_changeLevel, changes = this._kvo_changes;
-    if ((level <= 0) && changes && (changes.length > 0) && !SC.Observers.isObservingSuspended) {
+    if ((level <= 0) && changes && (changes.get('length') > 0) && !SC.Observers.isObservingSuspended) {
       this._notifyPropertyObservers();
     }
     return this;
@@ -883,9 +883,9 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
         chains = this._kvo_for(kvoKey);
 
         // remove any chains
-        idx = chains.length;
+        idx = chains.get('length');
         while (--idx >= 0) {
-          chain = chains[idx];
+          chain = chains.objectAt(idx);
           if (chain && (chain.masterTarget === target) && (chain.masterMethod === method)) {
             chains[idx] = chain.destroyChain();
           }
@@ -938,10 +938,10 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     // Fast path: no target/method.
     if (target === undefined) {
       if (isChain) {
-        if (chains && chains.length > 0) return YES;
+        if (chains && chains.get('length') > 0) return YES;
       } else {
         // Found locally.
-        if (locals && locals.length > 0) return YES;
+        if (locals && locals.get('length') > 0) return YES;
         if (observers && observers.getMembers().length > 0) return YES;
       }
       return NO;
@@ -960,19 +960,19 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
 
       // Check remote chains.
       if (isChain) {
-        if (!chains || !chains.length) return NO;
-        len = chains.length;
+        if (!chains || !chains.get('length')) return NO;
+        len = chains.get('length');
         for (i = 0; i < len; i++) {
-          if (chains[i].masterTarget === target && chains[i].masterMethod === method) return YES;
+          if (chains.objectAt(i).masterTarget === target && chains.objectAt(i).masterMethod === method) return YES;
         }
         return NO;
 
       // Check locals.
       } else if (target === this) {
         if (!locals) return NO;
-        len = locals.length;
+        len = locals.get('length');
         for (i = 0; i < len; i++) {
-          if (this[locals[i]] === method) return YES;
+          if (this[locals.objectAt(i)] === method) return YES;
         }
         return NO;
 
@@ -1254,7 +1254,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     this._kvo_changeLevel = this._kvo_changeLevel + 1;
 
     // keep sending notifications as long as there are changes
-    while (((changes = this._kvo_changes) && (changes.length > 0)) || key) {
+    while (((changes = this._kvo_changes) && (changes.get('length') > 0)) || key) {
 
       // increment revision
       rev = ++this.propertyRevision;
@@ -1281,8 +1281,8 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
 
         // NOTE: each time we loop, we check the changes length, this
         // way any dependent keys added to the set will also be evaluated...
-        for (idx = 0; idx < changes.length; idx++) {
-          key = changes[idx];
+        for (idx = 0; idx < changes.get('length'); idx++) {
+          key = changes.objectAt(idx);
           keys = dependents[key];
 
           // for each dependent key, add to set of changes.  Also, if key
@@ -1307,7 +1307,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
       } // if (dependents...)
 
       // now iterate through all changed keys and notify observers.
-      while (changes.length > 0) {
+      while (changes.get('length') > 0) {
         key = changes.pop(); // the changed key
 
         // find any observers and notify them...
@@ -1356,9 +1356,9 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
         if (members) {
           // Note:  Since, unlike above, we don't expect local observers to be
           //        removed in general, we will not clone 'members'.
-          membersLength = members.length;
+          membersLength = members.get('length');
           for (memberLoc = 0; memberLoc < membersLength; memberLoc++) {
-            member = members[memberLoc];
+            member = members.objectAt(memberLoc);
             method = this[member]; // try to find observer function
             if (method) {
               //@if(debug)

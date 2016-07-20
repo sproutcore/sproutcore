@@ -564,7 +564,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     this.notifyPropertyChange('length'); // flush caches
 
     // schedule info for range observers
-    if (rangeob && rangeob.length > 0) {
+    if (rangeob && rangeob.get('length') > 0) {
       changes = this._array_rangeChanges;
       if (!changes) { changes = this._array_rangeChanges = SC.IndexSet.create(); }
       if (removedCount === addedCount) {
@@ -889,11 +889,11 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
   _array_notifyRangeObservers: function () {
     var rangeob = this._array_rangeObservers,
         changes = this._array_rangeChanges,
-        len     = rangeob ? rangeob.length : 0,
+        len     = rangeob ? rangeob.get('length') : 0,
         idx;
 
     if (len > 0 && changes && changes.length > 0) {
-      for (idx = 0; idx < len; idx++) rangeob[idx].rangeDidChange(changes);
+      for (idx = 0; idx < len; idx++) rangeob.objectAt(idx).rangeDidChange(changes);
       changes.clear(); // reset for later notifications
     }
   }
