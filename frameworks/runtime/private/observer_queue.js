@@ -189,10 +189,7 @@ SC.Observers = {
 
       var idx, len = pending.get('length');
       for(idx=0;idx<len;idx++) {
-        if (pending.objectAt) {
-          pending.objectAt(idx)._notifyPropertyObservers() ;
-        }
-        // else pending[idx]._notifyPropertyObservers() ;
+        pending.objectAt(idx)._notifyPropertyObservers();
       }
       pending.clear();
       pending = null ;
