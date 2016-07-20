@@ -297,6 +297,7 @@ SC.mixin(/** @scope window.SC.prototype */ {
   isArray: function (obj) {
     if (!obj || obj.setInterval) { return false; }
     if (Array.isArray && Array.isArray(obj)) { return true; }
+    if (obj.isSCArray) { return true; }
     if (obj.objectAt) { return true; }
     if (obj.length !== undefined && SC._nativeTypeOf(obj) === "object") { return true; }
 
