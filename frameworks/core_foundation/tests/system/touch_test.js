@@ -47,7 +47,7 @@ module("SC.View#captureTouch", {
               innerDragged++;
               viewTouches.forEach(function (v) {
                 if (v.restoreLastTouchResponder) v.restoreLastTouchResponder();
-              })
+              });
               // viewTouches.invoke('restoreLastTouchResponder');
             },
             touchCancelled: function() { innerCancel++; },
@@ -74,7 +74,7 @@ test("Touch event handling and juggling.", function() {
   event.touches = [];
   event.identifier = 4;
   event.changedTouches = [event];
-  debugger;
+
   // Trigger touchstart: outerView.captureTouch > outerView.touchStart
   SC.Event.trigger(layer, 'touchstart', [event]);
   equals(outerCapture, 1, "To capture the initial touch, outerView.captureTouch should have run:");

@@ -21,7 +21,6 @@ test("basic copy", function() {
 
   var keys = 'conditions orderBy recordType recordTypes parameters location scope'.w();
   var copy = q.copy();
-  debugger;
   equals(copy.isFrozen, NO, 'copy should not be frozen');
   keys.forEach(function(key) {
     equals(copy.get(key), q.get(key), 'copy.%@ should = original.%@'.fmt(key, key));
