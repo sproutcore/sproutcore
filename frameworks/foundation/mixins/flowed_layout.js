@@ -789,9 +789,9 @@ SC.FlowedLayout = {
       nowObserving.add(child);
     }
 
-    len = previouslyObserving.length;
+    len = previouslyObserving.get('length');
     for (idx = 0; idx < len; idx++) {
-      this.unobserveChildLayout(previouslyObserving[idx]);
+      this.unobserveChildLayout(previouslyObserving.objectAt(idx));
     }
   },
 
@@ -814,9 +814,9 @@ SC.FlowedLayout = {
     var isObserving = this._scfl_isObserving;
     if (!isObserving) return;
 
-    var len = isObserving.length, idx;
+    var len = isObserving.get('length'), idx;
     for (idx = 0; idx < len; idx++) {
-      this.unobserveChildLayout(isObserving[idx]);
+      this.unobserveChildLayout(isObserving.objectAt(idx));
     }
   },
 

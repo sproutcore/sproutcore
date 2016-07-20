@@ -479,7 +479,7 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
     // remove objects not in source
     if (objects = this._objects) {
       var i, cur;
-      for (i = objects.length - 1; i >= 0; i--) {
+      for (i = objects.get('length') - 1; i >= 0; i--) {
         cur = objects.objectAt(i);
         if (source.indexOf(cur) < 0) this.removeObject(cur);
       }

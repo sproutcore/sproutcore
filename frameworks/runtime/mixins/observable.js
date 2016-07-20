@@ -970,9 +970,9 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
       // Check locals.
       } else if (target === this) {
         if (!locals) return NO;
-        len = locals.length;
+        len = locals.get('length');
         for (i = 0; i < len; i++) {
-          if (this[locals[i]] === method) return YES;
+          if (this[locals.objectAt(i)] === method) return YES;
         }
         return NO;
 

@@ -889,7 +889,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
   _array_notifyRangeObservers: function () {
     var rangeob = this._array_rangeObservers,
         changes = this._array_rangeChanges,
-        len     = rangeob ? rangeob.length : 0,
+        len     = rangeob ? rangeob.get('length') : 0,
         idx;
 
     if (len > 0 && changes && changes.length > 0) {

@@ -50,7 +50,10 @@ module("SC.ScrollView touch", {
             innerDragged++;
             // If we've scrolled more than 15 pixels, pass back to the scroller.
             if (Math.abs(evt.startY - evt.pageY) > 15) {
-              touchesForView.invoke('restoreLastTouchResponder');
+              // touchesForView.invoke('restoreLastTouchResponder');
+              touchesForView.forEach(function (t) {
+                if (t.restoreLastTouchResponder) t.restoreLastTouchResponder();
+              });
             }
           },
           touchEnd: function() {
@@ -364,7 +367,7 @@ test("Basic touch scale", function() {
   evt.changedTouches = [evt, evt2];
   SC.Event.trigger(targetLayer, 'touchstart', evt);
 
-  equals(SC.RootResponder.responder.touchesForView(scrollView).length, 2, "Two touches should result in two touches");
+  equals(SC.RootResponder.responder.touchesForView(scrollView).get('length'), 2, "Two touches should result in two touches");
 
   // Pinch out to 2x.
   evt.pageX = evt.pageY -= 100;
@@ -412,14 +415,14 @@ test("Adding and removing touches (no scaling).", function() {
   evt.changedTouches = [evt, evt2];
   SC.Event.trigger(targetLayer, 'touchstart', evt);
 
-  equals(SC.RootResponder.responder.touchesForView(scrollView).length, 2, "Two touches should result in two touches");
+  equals(SC.RootResponder.responder.touchesForView(scrollView).get('length'), 2, "Two touches should result in two touches");
 
   evt.pageY -= 100;
   evt2.pageY -= 100;
   evt.touches = [evt, evt2];
   SC.Event.trigger(targetLayer, 'touchmove', evt);
 
-  equals(SC.RootResponder.responder.touchesForView(scrollView).length, 2, "There should still be two touches");
+  equals(SC.RootResponder.responder.touchesForView(scrollView).get('length'), 2, "There should still be two touches");
   equals(scrollView.get('scale'), 1, "A two-touch gesture with no pinching should result in no scaling");
   equals(scrollView.get('horizontalScrollOffset'), 0, "A two-touch vertical scroll gesture should not scroll horizontally");
   equals(scrollView.get('verticalScrollOffset'), 100, "A two-touch vertical scroll gesture should successfully scroll vertically");
@@ -429,7 +432,7 @@ test("Adding and removing touches (no scaling).", function() {
   evt.changedTouches = [evt3];
   SC.Event.trigger(targetLayer, 'touchstart', evt);
 
-  equals(SC.RootResponder.responder.touchesForView(scrollView).length, 3, "Adding a third touch should result in three touches");
+  equals(SC.RootResponder.responder.touchesForView(scrollView).get('length'), 3, "Adding a third touch should result in three touches");
   equals(scrollView.get('scale'), 1, "Adding a third touch should not impact scaling");
   equals(scrollView.get('horizontalScrollOffset'), 0, "Adding a third touch should not impact horizontal offset");
   equals(scrollView.get('verticalScrollOffset'), 100, "Adding a third touch should not impact vertical offset");
@@ -456,7 +459,7 @@ test("Adding and removing touches while scaling.", function() {
   evt.touches = [];
   evt.changedTouches = [evt, evt2];
   SC.Event.trigger(targetLayer, 'touchstart', evt);
-  equals(SC.RootResponder.responder.touchesForView(scrollView).length, 2, "Two touches should result in two touches");
+  equals(SC.RootResponder.responder.touchesForView(scrollView).get('length'), 2, "Two touches should result in two touches");
 
   // Pinch out to 2x to begin scaling.
   evt.touches = [evt, evt2];
@@ -473,7 +476,7 @@ test("Adding and removing touches while scaling.", function() {
   evt2.changedTouches = [evt2];
   SC.Event.trigger(targetLayer, 'touchend', evt2);
 
-  equals(SC.RootResponder.responder.touchesForView(scrollView).length, 1, "Removing one of two touches should leave one touch");
+  equals(SC.RootResponder.responder.touchesForView(scrollView).get('length'), 1, "Removing one of two touches should leave one touch");
   equals(scrollView.get('scale'), 2, "Removing a touch shouldn't change scale");
   equals(scrollView.get('horizontalScrollOffset'), 500, "Removing a touch shouldn't change the horizontal offset");
   equals(scrollView.get('verticalScrollOffset'), 500, "Removing a touch shouldn't change the vertical offset");
@@ -485,7 +488,7 @@ test("Adding and removing touches while scaling.", function() {
   evt3.pageY = 700;
   SC.Event.trigger(targetLayer, 'touchstart', evt3);
 
-  equals(SC.RootResponder.responder.touchesForView(scrollView).length, 2, "Adding one touch to one touch should result in two touches");
+  equals(SC.RootResponder.responder.touchesForView(scrollView).get('length'), 2, "Adding one touch to one touch should result in two touches");
   equals(scrollView.get('scale'), 2, "Adding a touch shouldn't change scale");
   equals(scrollView.get('horizontalScrollOffset'), 500, "Adding a touch shouldn't change the horizontal offset");
   equals(scrollView.get('verticalScrollOffset'), 500, "Adding a touch shouldn't change the vertical offset");

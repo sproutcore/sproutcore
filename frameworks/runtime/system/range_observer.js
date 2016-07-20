@@ -115,7 +115,7 @@ SC.RangeObserver = /** @scope SC.RangeObserver.prototype */{
   beginObserving: function() {
     if ( !this.isDeep ) { return this; } // nothing to do
 
-    var observing = this.observing = this.observing || SC.CoreSet.create();
+    var observing = this.observing = this.observing || SC.Set.create();
 
     // cache iterator function to keep things fast
     var func = this._beginObservingForEach, source = this.source;

@@ -558,11 +558,11 @@ SC.AutoResizeManager = {
     while((len = measurementQueue.get('length')) > 0) {
       prepared = NO;
       // save the first tag we see
-      tag = measurementQueue[len - 1].get('batchResizeId');
+      tag = measurementQueue.objectAt(len - 1).get('batchResizeId');
 
       // now we iterate over all the views with the same tag
       for(i = len - 1; i >= 0; --i) {
-        view = measurementQueue[i];
+        view = measurementQueue.objectAt(i);
 
         // if the view has a different tag, skip it
         if(view.get('batchResizeId') !== tag) continue;

@@ -735,7 +735,7 @@ SC.mixin(/** @scope window.SC.prototype */ {
     key = (stopAt >= 0) ? path.slice(stopAt + 1) : path;
 
     // convert path to object.
-    var obj = (stopAt === -1)? root: this.objectForPropertyPath(path, root, stopAt);
+    var obj = (root && stopAt === -1)? root: this.objectForPropertyPath(path, root, stopAt);
     return (obj && key) ? [obj, key] : null;
   },
 

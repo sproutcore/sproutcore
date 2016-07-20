@@ -9,7 +9,7 @@
 
 var object ;
 
-module("object.registerDependentKeys()", {  
+module("object.registerDependentKeys()", {
   setup: function() {
     object = SC.Object.create({
 
@@ -42,14 +42,14 @@ test("should indicate the registered property changes if the dependent key value
   // now, change the firstName...
   object.set('firstName', 'Jane');
 
-  // since fullName is 'dependent' on firstName, then the observer for  
+  // since fullName is 'dependent' on firstName, then the observer for
   // 'fullName' should fire here because you changed a dependent key.
   equals(object.get('observedValue'), 'Jane Doe');
 
   // now change the lastName
   object.set('lastName', 'Johnson');
 
-  // again, fullName is 'dependent' on lastName, so observer for  
+  // again, fullName is 'dependent' on lastName, so observer for
   // fullName should fire.
   equals(object.get('observedValue'), 'Jane Johnson');
 });
@@ -58,22 +58,22 @@ test("should indicate the registered property changes if the dependent key value
 test("should indicate the registered property changes if the dependent key value changes and change is within begin property loop ", function() {
   // Wrap the changes with begin property changes call
   object.beginPropertyChanges();
-  
+
   // now, change the firstName & lastname...
   object.set('firstName', 'Jane');
   object.set('lastName', 'Johnson');
-  
-  // The observer for fullName should not have fired yet at this  
+
+  // The observer for fullName should not have fired yet at this
   // point because we are inside a propertyChange loop.
   equals(object.get('observedValue'), '');
-  
+
   //End the property changes loop.
   object.endPropertyChanges();
-  
+
   // now change the lastName
   object.set('lastName', 'Johnson');
 
-  // again, fullName is 'dependent' on lastName, so observer for  
+  // again, fullName is 'dependent' on lastName, so observer for
   // fullName should fire.
   equals(object.get('observedValue'), 'Jane Johnson');
 });
@@ -112,14 +112,14 @@ test("should invalidate computed property once per changed key", function() {
 
 test("should invalidate key when properties higher up in the chain change", function() {
   var notified = 0;
-  
+
   var obj = SC.Object.create({
     contact: null,
-    
+
     fullName: function(key, value) {
       return [this.getPath('contact.firstName'), this.getPath('contact.lastName')].join(' ');
     }.property('contact.firstName', 'contact.lastName').cacheable(),
-    
+
     fullNameDidChange: function() {
       notified++;
     }.observes('fullName')
@@ -127,17 +127,17 @@ test("should invalidate key when properties higher up in the chain change", func
 
   var johnDoe = SC.Object.create({ firstName: 'John', lastName: 'Doe' });
   var janeDoe = SC.Object.create({ firstName: 'Jane', lastName: 'Doe' });
-  
+
   equals(notified, 0, 'should start empty');
   SC.run(function() {  obj.set('contact', johnDoe);  });
   equals(notified, 1, 'should notify once after set content=johnDoe');
   equals(obj.get('fullName'), 'John Doe', 'should get proper name');
-  
+
   notified = 0;
   SC.run(function() { johnDoe.set('firstName', 'JOHNNY'); });
   equals(notified, 1, 'should notify again after set firstName=JOHNNY');
   equals(obj.get('fullName'), 'JOHNNY Doe', 'should get proper name');
-  
+
   notified = 0;
   SC.run(function() { obj.set('contact', janeDoe); });
   equals(notified, 1, 'should notify again after set content=janeDoe');
@@ -151,5 +151,5 @@ test("should invalidate key when properties higher up in the chain change", func
   notified = 0;
   SC.run(function() { janeDoe.set('firstName', 'Janna'); });
   equals(notified, 1, 'should notify again after set janeDoe.firstName=Janna');
-  equals(obj.get('fullName'), 'Janna Doe', 'should get proper name after firstname=Janna');  
+  equals(obj.get('fullName'), 'Janna Doe', 'should get proper name after firstname=Janna');
 });

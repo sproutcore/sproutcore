@@ -124,11 +124,11 @@ test("observer cleanup", function () {
   family.removeObserver('grandma.momma.children.@each.name', family, family.eachCallback);
 
   // Clean up.
-  equals(family._kvo_observed_keys.length, 0, "family has no observed keys");
-  equals(grandma._kvo_observed_keys.length, 0, "grandma has no observed keys");
-  equals(momma._kvo_observed_keys.length, 0, "momma has no observed keys: %@".fmt(momma._kvo_observed_keys.toArray()));
-  equals(momma.children._kvo_observed_keys.length, 0, "momma.children has no observed keys: %@".fmt(momma.children._kvo_observed_keys.toArray()));
-  equals(child1._kvo_observed_keys.length, 0, "child1 has no observed keys");
+  equals(family._kvo_observed_keys.get('length'), 0, "family has no observed keys");
+  equals(grandma._kvo_observed_keys.get('length'), 0, "grandma has no observed keys");
+  equals(momma._kvo_observed_keys.get('length'), 0, "momma has no observed keys: %@".fmt(momma._kvo_observed_keys.toArray()));
+  equals(momma.children._kvo_observed_keys.get('length'), 0, "momma.children has no observed keys: %@".fmt(momma.children._kvo_observed_keys.toArray()));
+  equals(child1._kvo_observed_keys.get('length'), 0, "child1 has no observed keys");
 });
 
 test("content observers are removed correctly", function () {
