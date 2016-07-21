@@ -2141,8 +2141,15 @@ SC.RootResponder = SC.Object.extend(
     @param {Event} evt the click event
     @returns {Boolean} whether the event should be propagated to the browser
   */
-  click: function(evt) {
+   click: function(evt) {
     if (!this._lastMouseUpCustomHandling || !this._lastMouseDownCustomHandling) {
+      var diff = Date.now() - (this._lastMouseUpAt || 0);
+      if (diff > 250) { // should be single click event.
+        var view = this.targetViewForEvent(evt);
+        // single click event, fake mouseDown and mouseUp
+        this.sendEvent('mouseDown', evt, view);
+        this.sendEvent('mouseUp', evt, view)
+      }
       evt.preventDefault();
       evt.stopPropagation();
       return NO;
