@@ -387,23 +387,14 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
 
   /** @private */
   mouseUp: function (evt) {
-    var ret = NO, del, checkboxKey, content, state, idx, set;
+    var ret = NO;
 
     // if mouse was down in checkbox -- then handle mouse up, otherwise
     // allow parent view to handle event.
     if (this._isMouseDownOnCheckbox) {
-
       // update only if mouse inside on mouse up...
       if (this._isInsideCheckbox(evt)) {
-        del = this.displayDelegate;
-        checkboxKey = this.getDelegateProperty('contentCheckboxKey', del);
-        content = this.get('content');
-        if (content && content.get) {
-          var value = content.get(checkboxKey);
-          value = (value === SC.MIXED_STATE) ? YES : !value;
-          content.set(checkboxKey, value); // update content
-          this.displayDidChange(); // repaint view...
-        }
+        this.toggleCheckbox();
       }
 
       this._removeCheckboxActiveState();
@@ -413,21 +404,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     // to parent.
     } else if (this._isMouseDownOnDisclosure) {
       if (this._isInsideDisclosure(evt)) {
-        state = this.get('disclosureState');
-        idx   = this.get('contentIndex');
-        set   = (!SC.none(idx)) ? SC.IndexSet.create(idx) : null;
-        del = this.get('displayDelegate');
-
-        if (state === SC.BRANCH_OPEN) {
-          if (set && del && del.collapse) del.collapse(set);
-          else this.set('disclosureState', SC.BRANCH_CLOSED);
-          this.displayDidChange();
-
-        } else if (state === SC.BRANCH_CLOSED) {
-          if (set && del && del.expand) del.expand(set);
-          else this.set('disclosureState', SC.BRANCH_OPEN);
-          this.displayDidChange();
-        }
+        this.toggleDisclosure();
       }
 
       this._removeDisclosureActiveState();
@@ -444,6 +421,38 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     this._isMouseDownOnDisclosure = this._isMouseInsideDisclosure = NO;
     this._isMouseInsideRightIcon = this._isMouseDownOnRightIcon = NO;
     return ret;
+  },
+
+  toggleCheckbox: function () {
+    var content = this.get('content'),
+      del = this.displayDelegate;
+
+    if (content && content.get) {
+      var checkboxKey = this.getDelegateProperty('contentCheckboxKey', del),
+        value = content.get(checkboxKey);
+
+      value = (value === SC.MIXED_STATE) ? YES : !value;
+      content.set(checkboxKey, value); // update content
+      this.displayDidChange(); // repaint view...
+    }
+  },
+
+  toggleDisclosure: function () {
+    var state = this.get('disclosureState'),
+      idx = this.get('contentIndex'),
+      set = (!SC.none(idx)) ? SC.IndexSet.create(idx) : null,
+      del = this.get('displayDelegate');
+
+    if (state === SC.BRANCH_OPEN) {
+      if (set && del && del.collapse) del.collapse(set);
+      else this.set('disclosureState', SC.BRANCH_CLOSED);
+      this.displayDidChange();
+
+    } else if (state === SC.BRANCH_CLOSED) {
+      if (set && del && del.expand) del.expand(set);
+      else this.set('disclosureState', SC.BRANCH_OPEN);
+      this.displayDidChange();
+    }
   },
 
   /** @private */
