@@ -1,0 +1,4 @@
+BT.addFramework(BT.Framework.extend({
+  ref: "sproutcore:experimental:select_ext",
+  path: dirname()
+}));
