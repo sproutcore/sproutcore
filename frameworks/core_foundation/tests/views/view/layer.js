@@ -116,15 +116,15 @@ module("SC.View#$", {
 test("returns an empty CQ object if no layer", function() {
   var v = SC.View.create();
   ok(!v.get('layer'), 'precond - should have no layer');
-  equals(v.$().size(), 0, 'should return empty CQ object');
-  equals(v.$('span').size(), 0, 'should return empty CQ object even if filter passed');
+  equals(v.$().length, 0, 'should return empty CQ object');
+  equals(v.$('span').length, 0, 'should return empty CQ object even if filter passed');
 });
 
 test("returns CQ object selecting layer if provided", function() {
   ok(view.get('layer'), 'precond - should have layer');
 
   var cq = view.$();
-  equals(cq.size(), 1, 'view.$() should have one element');
+  equals(cq.length, 1, 'view.$() should have one element');
   equals(cq.get(0), view.get('layer'), 'element should be layer');
 });
 
@@ -132,7 +132,7 @@ test("returns CQ object selecting element inside layer if provided", function() 
   ok(view.get('layer'), 'precond - should have layer');
 
   var cq = view.$('span');
-  equals(cq.size(), 1, 'view.$() should have one element');
+  equals(cq.length, 1, 'view.$() should have one element');
   equals(cq.get(0).parentNode, view.get('layer'), 'element should be in layer');
 });
 
@@ -140,7 +140,7 @@ test("returns empty CQ object if filter passed that does not match item in paren
   ok(view.get('layer'), 'precond - should have layer');
 
   var cq = view.$('body'); // would normally work if not scoped to view
-  equals(cq.size(), 0, 'view.$(body) should have no elements');
+  equals(cq.length, 0, 'view.$(body) should have no elements');
 });
 
 var parentView;

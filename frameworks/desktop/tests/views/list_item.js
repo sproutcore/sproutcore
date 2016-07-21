@@ -246,7 +246,7 @@ function basic(view, sel, disabled) {
 
 function label(view, labelText) {
   if (labelText === null) {
-    equals(view.$('label').size(), 0, 'should not have label');
+    equals(view.$('label').length, 0, 'should not have label');
   } else {
     equals(view.$('label').text(), labelText, 'should have label text');
   }
@@ -256,10 +256,10 @@ function icon(view, spriteName) {
   var cq = view.$(), iconCQ = cq.find('.icon');
   if (spriteName === null) {
     ok(!cq.hasClass('has-icon'), "should not have has-icon class");
-    equals(iconCQ.size(), 0, 'should not have image');
+    equals(iconCQ.length, 0, 'should not have image');
   } else {
     ok(cq.hasClass('has-icon'), "should have has-icon class");
-    equals(iconCQ.size(), 1, 'should have icon');
+    equals(iconCQ.length, 1, 'should have icon');
     ok(iconCQ.hasClass(spriteName), 'icon should have class name %@'.fmt(spriteName));
   }
 }
@@ -268,10 +268,10 @@ function rightIcon(view, spriteName) {
   var cq = view.$(), iconCQ = cq.find('img.right-icon');
   if (spriteName === null) {
     ok(!cq.hasClass('has-right-icon'), "should not have has-right-icon class");
-    equals(iconCQ.size(), 0, 'should not have image');
+    equals(iconCQ.length, 0, 'should not have image');
   } else {
     ok(cq.hasClass('has-right-icon'), "should have has-right-icon class");
-    equals(iconCQ.size(), 1, 'should have right-icon');
+    equals(iconCQ.length, 1, 'should have right-icon');
     ok(iconCQ.hasClass(spriteName), 'icon should have class name %@'.fmt(spriteName));
   }
 }
@@ -281,10 +281,10 @@ function disclosure(view, state) {
 
   if (state === null) {
     ok(!cq.hasClass('has-disclosure'), "should not have has-disclosure class");
-    equals(disclosureCQ.size(), 0, "should not have disclosure");
+    equals(disclosureCQ.length, 0, "should not have disclosure");
   } else {
     ok(cq.hasClass('has-disclosure'), "should have has-disclosure class");
-    equals(disclosureCQ.size(), 1, "should have disclosure element");
+    equals(disclosureCQ.length, 1, "should have disclosure element");
     equals(disclosureCQ.hasClass('sel'), state === true, "disclosure expects sel class");
   }
 }
@@ -293,10 +293,10 @@ function checkbox(view, state) {
   var cq = view.$(), checkboxCQ = cq.find('.sc-checkbox-view');
   if (state === null) {
     ok(!cq.hasClass('has-checkbox'), "should not have has-checkbox class");
-    equals(checkboxCQ.size(), 0, 'should not have checkbox');
+    equals(checkboxCQ.length, 0, 'should not have checkbox');
   } else {
     ok(cq.hasClass('has-checkbox'), "should have has-checkbox class");
-    equals(checkboxCQ.size(), 1, 'should have checkbox element');
+    equals(checkboxCQ.length, 1, 'should have checkbox element');
     equals(checkboxCQ.hasClass('sel'), state === true, 'expects sel class');
     equals(checkboxCQ.hasClass('mixed'), state === SC.MIXED_STATE, 'expects mixed class');
   }
@@ -306,10 +306,10 @@ function count(view, cnt) {
   var cq = view.$(), countCQ = cq.find('.count');
   if (cnt === null) {
     ok(!cq.hasClass('has-count'), "should not have has-count class");
-    equals(countCQ.size(), 0, 'should not have count');
+    equals(countCQ.length, 0, 'should not have count');
   } else {
     ok(cq.hasClass('has-count'), "should have has-count class");
-    equals(countCQ.size(), 1, 'should have count');
+    equals(countCQ.length, 1, 'should have count');
     equals(countCQ.text(), cnt.toString(), 'should have count text');
   }
 }
@@ -318,10 +318,10 @@ function branch(view, visible) {
   var cq = view.$(), branchCQ = cq.find('.branch');
   if (visible === null) {
     ok(!cq.hasClass('has-branch'), "should not have has-branch class");
-    equals(branchCQ.size(), 0, 'should not have branch');
+    equals(branchCQ.length, 0, 'should not have branch');
   } else {
     ok(cq.hasClass('has-branch'), "should have has-branch class");
-    equals(branchCQ.size(), 1, 'should have branch');
+    equals(branchCQ.length, 1, 'should have branch');
     equals(branchCQ.hasClass('branch-visible'), visible, 'is visible');
   }
 }
@@ -330,10 +330,10 @@ function rightIcon(view, hasIt) {
   var cq = view.$(), rightIconCQ = cq.find('.right-icon');
   if (hasIt) {
     ok(cq.hasClass('has-right-icon'), "should have has-right-icon class");
-    equals(rightIconCQ.size(), 1, 'should have right icon');
+    equals(rightIconCQ.length, 1, 'should have right icon');
   } else {
     ok(!cq.hasClass('has-right-icon'), "should not have has-right-icon class");
-    equals(rightIconCQ.size(), 0, 'should not have branch') ;
+    equals(rightIconCQ.length, 0, 'should not have branch') ;
   }
 }
 
@@ -551,4 +551,3 @@ test("right icon action event", function() {
   ok(sendActionSpy.wasCalled, 'action should have been called');
   ok(sendActionSpy.wasCalledWith(expectedAction,expectedTarget,view,spyPane), 'should have triggered the action with these arguments');
 });
-

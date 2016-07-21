@@ -489,7 +489,7 @@ var pane;
     var segments = sv.$('.sc-segment-view');
 
     // Check that we have six segments, five items and one overflow
-    var numberOfSegments = segments.size();
+    var numberOfSegments = segments.length;
     equals(numberOfSegments, 6, 'We should start with 6 segment child divs in the segment view');
 
     sv.showOverflowMenu();
@@ -506,7 +506,7 @@ var pane;
 
     // check that no elements have been consumed
     segments = sv.$('.sc-segment-view');
-    numberOfSegments = segments.size();
+    numberOfSegments = segments.length;
     equals(numberOfSegments, 6, 'We should end with 6 segment child divs in the segment view');
   });
 
