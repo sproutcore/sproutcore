@@ -348,11 +348,11 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
       // Don't grab the jQuery object repeatedly
       jqImage = $(image);
 
-      // Using bind here instead of setting onabort/onerror/onload directly
+      // Using on here instead of setting onabort/onerror/onload directly
       // fixes an issue with images having 0 width and height
-      jqImage.bind('error', errorFunc);
-      jqImage.bind('abort', errorFunc);
-      jqImage.bind('load', loadFunc);
+      jqImage.on('error', errorFunc);
+      jqImage.on('abort', errorFunc);
+      jqImage.on('load', loadFunc);
 
       image.src = value;
       return YES;

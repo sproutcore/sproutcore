@@ -54,7 +54,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   */
   $input: function() {
     var elementTagName = this._inputElementTagName(); // usually "input"
-    return this.$(elementTagName).andSelf().filter(elementTagName);
+    return this.$(elementTagName).addBack().filter(elementTagName);
   },
 
   /** @private
@@ -317,4 +317,3 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     return ret ;
   }
 });
-
