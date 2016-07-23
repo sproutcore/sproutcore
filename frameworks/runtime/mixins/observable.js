@@ -23,6 +23,8 @@ SC.LOG_OBSERVERS = false;
 SC.OBSERVES_HANDLER_ADD = 0;
 SC.OBSERVES_HANDLER_REMOVE = 1;
 
+SC.KVO_OBSERVERS_STAR = "_kvo_observers_*";
+
 /**
   @class
 
@@ -115,8 +117,8 @@ SC.OBSERVES_HANDLER_REMOVE = 1;
   changes:
 
 
-        automaticallyNotifiesObserversFor: function (key) {
-          return (key === 'balance') ? NO : sc_super();
+        automaticallyNotifiesObserversFor: function automaticallyNotifiesObserversFor (key) {
+          return (key === 'balance') ? NO : automaticallyNotifiesObserversFor.base.apply(this, arguments);
         },
 
         balance: function (key, value) {
@@ -1235,7 +1237,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
 
     SC.Observers.flush(this); // hookup as many observers as possible.
 
-    var observers, changes, dependents, starObservers, idx, keys, rev,
+    var observers, changes, changesLength, dependents, starObservers, idx, keys, rev,
         members, membersLength, member, memberLoc, target, method, loc, func,
         context, spaces, cache;
 
@@ -1248,7 +1250,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     //@endif
 
     // Get any starObservers -- they will be notified of all changes.
-    starObservers = this['_kvo_observers_*'];
+    starObservers = this[SC.KVO_OBSERVERS_STAR];
 
     // prevent notifications from being sent until complete
     this._kvo_changeLevel = this._kvo_changeLevel + 1;
@@ -1281,7 +1283,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
 
         // NOTE: each time we loop, we check the changes length, this
         // way any dependent keys added to the set will also be evaluated...
-        for (idx = 0; idx < changes.get('length'); idx++) {
+        for (idx = 0, changesLength = changes.get('length'); idx < changesLength; idx++) {
           key = changes.objectAt(idx);
           keys = dependents[key];
 

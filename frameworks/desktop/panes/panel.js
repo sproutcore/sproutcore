@@ -168,18 +168,18 @@ SC.PanelPane = SC.Pane.extend(
   },
 
   /** @private - whenever showing on screen, deal with modal pane as well */
-  appendTo: function(elem) {
+  appendTo: function appendTo (elem) {
     var pane ;
     if (!this.get('isVisibleInWindow') && this.get('isModal') && (pane = this._modalPane())) {
       this._isShowingModal = YES;
       pane.paneWillAppend(this);
     }
-    return sc_super();
+    return appendTo.base.apply(this, arguments);
   },
 
   /** @private - when removing from screen, deal with modal pane as well. */
-  remove: function() {
-    var pane, ret = sc_super();
+  remove: function remove () {
+    var pane, ret = remove.base.apply(this, arguments);
 
     if (this._isShowingModal) {
       this._isShowingModal = NO ;
@@ -188,13 +188,13 @@ SC.PanelPane = SC.Pane.extend(
     return ret ;
   },
 
-  destroy: function() {
+  destroy: function destroy () {
     var modal = this.get('modalPane');
     if (modal && !modal.isClass) {
       modal.destroy();
     }
 
-    sc_super();
+    destroy.base.apply(this, arguments);
   },
 
   /** @private - if isModal state changes, update pane state if needed. */

@@ -34,9 +34,9 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */
 
   /* @private */
-  toString: function () {
+  toString: function toString() {
     var content = this.get('content'),
-      ret = sc_super();
+      ret = toString.base.apply(this, arguments);
 
     return content ? "%@:\n  ↳ %@".fmt(ret, content) : ret;
   },
@@ -335,8 +335,8 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   //
 
   /** @private */
-  init: function () {
-    sc_super();
+  init: function init () {
+    init.base.apply(this, arguments);
     this._scac_contentDidChange();
   },
 
@@ -421,11 +421,11 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     return (this._scac_cached = content.toArray().sort(func));
   },
 
-  propertyWillChange: function (key) {
+  propertyWillChange: function propertyWillChange (key) {
     if (key === 'content') {
       this.arrayContentWillChange(0, this.get('length'), 0);
     } else {
-      return sc_super();
+      return propertyWillChange.base.apply(this, arguments);
     }
   },
 

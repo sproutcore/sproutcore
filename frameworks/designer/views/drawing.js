@@ -86,8 +86,8 @@ SC.DrawingView = SC.View.extend({
     this.updateLayerIfNeeded();
   }.observes('*shapes.[]'),
 
-  init: function(){
-    sc_super();
+  init: function init (){
+    init.base.apply(this, arguments);
 
     // Register Basic Shapes
 
@@ -160,7 +160,7 @@ SC.DrawingView = SC.View.extend({
     });
   },
 
-  render: function(context, firstTime) {
+  render: function render (context, firstTime) {
     //console.log('%@.render()'.fmt(this));
     var frame = this.get('frame');
     if (firstTime) {
@@ -192,7 +192,7 @@ SC.DrawingView = SC.View.extend({
       }
     }
 
-    return sc_super();
+    return render.base.apply(this, arguments);
   },
 
   registerShapeDrawing: function(name, drawingFunction){

@@ -197,8 +197,8 @@ SC.Application = SC.Responder.extend(SC.ResponderContext,
   },
 
   /** @private */
-  init: function () {
-    sc_super();
+  init: function init () {
+    init.base.apply(this, arguments);
 
     // Initialize the value on the RootResponder when it is ready.
     SC.ready(this, '_setDesignModes');

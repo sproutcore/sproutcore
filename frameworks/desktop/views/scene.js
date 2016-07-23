@@ -83,7 +83,7 @@ SC.SceneView = SC.ContainerView.extend(
     @param {SC.View} newContent the new content view or null.
     @see SC.ContainerView#replaceContent
   */
-  replaceContent: function(newContent) {
+  replaceContent: function replaceContent (newContent) {
     var scenes = this.get('scenes'),
       nowShowing = this.get('nowShowing'),
       outIdx = scenes ? scenes.indexOf(this._lastNowShowingView) : -1,
@@ -99,7 +99,7 @@ SC.SceneView = SC.ContainerView.extend(
       this.transitionSwapOptions = this.transitionBackwardOptions;
     }
 
-    sc_super();
+    replaceContent.base.apply(this, arguments);
   },
 
 });

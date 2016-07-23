@@ -79,7 +79,7 @@ SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.Form
   /**
     Updates keys, content, etc. on fields. Also, handles our "special" field (only-one case)
   */
-  createChildViews: function() {
+  createChildViews: function createChildViews() {
     // keep array of keys so we can pass on key to child.
     var cv = SC.clone(this.get('childViews'));
 
@@ -96,7 +96,7 @@ SC.FormRowView = SC.View.extend(SC.FlowedLayout, SC.CalculatesEmptiness, SC.Form
 
     var content = this.get('content');
 
-    sc_super();
+    createChildViews.base.apply(this, arguments);
 
 
     // now, do the actual passing it

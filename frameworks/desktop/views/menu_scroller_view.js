@@ -54,7 +54,7 @@ SC.MenuScrollerView = SC.ScrollerView.extend(
   //
 
   /** @private */
-  init: function () {
+  init: function init () {
     // Set the scrollerThickness based on controlSize
     switch (this.get('controlSize')) {
     case SC.TINY_CONTROL_SIZE:
@@ -74,7 +74,7 @@ SC.MenuScrollerView = SC.ScrollerView.extend(
       break;
     }
 
-    return sc_super();
+    return init.base.apply(this, arguments);
   },
 
   /** @private */

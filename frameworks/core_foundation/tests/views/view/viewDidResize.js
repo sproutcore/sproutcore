@@ -104,8 +104,8 @@ test("making sure that the frame value is correct inside viewDidResize()", funct
 
     layout: { left:0, top:0, width:400, height:400 },
 
-    viewDidResize: function() {
-        sc_super();
+    viewDidResize: function viewDidResize () {
+        viewDidResize.base.apply(this, arguments);
 
         // Set a global reference to my frame at this point so that we can
         // test for the correct value later.

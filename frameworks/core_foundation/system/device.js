@@ -82,8 +82,8 @@ SC.device = SC.Object.create({
   /**
     Initialize the object with some properties up front
   */
-  init: function() {
-    sc_super();
+  init: function init () {
+    init.base.apply(this, arguments);
 
     if (navigator && navigator.onLine === false) {
       this.set('isOffline', YES);

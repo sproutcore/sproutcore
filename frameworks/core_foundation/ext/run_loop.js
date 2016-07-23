@@ -31,9 +31,9 @@ SC.RunLoop = SC.RunLoop.extend(
     situation where a timer might cause an infinite loop by constantly
     rescheduling itself every time it is fired.
   */
-  endRunLoop: function() {
+  endRunLoop: function endRunLoop () {
     this.fireExpiredTimers(); // fire them timers!
-    var ret = sc_super(); // do everything else
+    var ret = endRunLoop.base.apply(this, arguments); // do everything else
     this.scheduleNextTimeout(); // schedule a timeout if timers remain
     return ret;
   },

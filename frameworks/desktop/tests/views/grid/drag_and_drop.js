@@ -46,8 +46,8 @@ var pane = SC.ControlTestPane.design()
       contentUnreadCountKey: "unread",
       rowHeight: 20,
       _didCallDragEnded: false,
-      dragEnded: function() {
-        sc_super();
+      dragEnded: function dragEnded() {
+        dragEnded.base.apply(this, arguments);
         this._didCallDragEnded = true;
       }
     })
@@ -185,7 +185,7 @@ test("ghost offset when drag on grid view", function() {
     // Clean up
     ev = SC.Event.simulateEvent(layer, 'mouseup');
     SC.Event.trigger(layer, 'mouseup', [ev]);
-    
+
     start();
   }, 200);
   stop(700); // stops the test runner

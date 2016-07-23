@@ -204,8 +204,8 @@ SC.CoreView.reopen(
   /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */
 
   /** @private Creates string representation of view, with view state. */
-  toString: function () {
-    return "%@ (%@)".fmt(sc_super(), this._viewStateString());
+  toString: function toString () {
+    return "%@ (%@)".fmt(toString.base.apply(this, arguments), this._viewStateString());
   },
 
   /** @private Creates string representation of view state.  */

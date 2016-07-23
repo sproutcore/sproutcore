@@ -533,21 +533,21 @@ SC.PickerPane = SC.PalettePane.extend(
   // on PickerPanes, which fails to position the pane properly. Hopefully, we can give
   // them a clue to speed up finding the problem.
   /** @private SC.Pane */
-  append: function () {
+  append: function append () {
     if (!this._sc_didUsePopup) {
       SC.warn("Developer Warning: You should not use .append() with SC.PickerPane. Instead use .popup() and pass in an anchor view or element.");
     }
 
     this._sc_didUsePopup = false;
 
-    return sc_super();
+    return append.base.apply(this, arguments);
   },
   //@endif
 
   /* @private If the pane changes size, reposition as necessary. */
-  viewDidResize: function () {
+  viewDidResize: function viewDidResize () {
     // Don't forget to call the superclass method.
-    sc_super();
+    viewDidResize.base.apply(this, arguments);
 
     // Re-position.
     this.positionPane(true);
@@ -1281,8 +1281,8 @@ SC.PickerPane = SC.PalettePane.extend(
   /**
     Invoked by the root responder. Re-position picker whenever the window resizes.
   */
-  windowSizeDidChange: function (oldSize, newSize) {
-    sc_super();
+  windowSizeDidChange: function windowSizeDidChange (oldSize, newSize) {
+    windowSizeDidChange.base.apply(this, arguments);
 
     if (this.repositionOnWindowResize) {
       // Do this in the next run loop. This ensures that positionPane is only called once even if scroll view
@@ -1291,13 +1291,13 @@ SC.PickerPane = SC.PalettePane.extend(
     }
   },
 
-  remove: function () {
+  remove: function remove () {
     if (this.get('isVisibleInWindow')) {
       this._withdrawOverflowRequest();
     }
     this._removeScrollObservers();
 
-    return sc_super();
+    return remove.base.apply(this, arguments);
   },
 
   /** @private
@@ -1396,19 +1396,19 @@ SC.PickerPane = SC.PalettePane.extend(
   },
 
   /** @private SC.Object */
-  init: function () {
-    sc_super();
+  init: function init () {
+    init.base.apply(this, arguments);
 
     // Set defaults that can only be configured on initialization.
     if (!this.windowPadding) { this.windowPadding = SC.PickerPane.WINDOW_PADDING; }
   },
 
   /** @private SC.Object */
-  destroy: function () {
+  destroy: function destroy () {
     this._scrollView = null;
     this._anchorView = null;
     this._anchorHTMLElement = null;
-    return sc_super();
+    return destroy.base.apply(this, arguments);
   }
 
 });

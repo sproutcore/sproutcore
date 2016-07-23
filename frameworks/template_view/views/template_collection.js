@@ -42,7 +42,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
     @private
     When the view is destroyed, remove array observers on the content array.
   */
-  destroy: function() {
+  destroy: function destroy() {
     var content = this.get('content');
     if(content) {
       content.removeArrayObservers({
@@ -52,7 +52,7 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
       });
     }
     this.removeObserver('content', this, this._sctcv_contentDidChange);
-    return sc_super();
+    return destroy.base.apply(this, arguments);
   },
 
   // In case a default content was set, trigger the child view creation
@@ -263,8 +263,8 @@ SC.TemplateCollectionView = SC.TemplateView.extend(
         "classBinding": itemOptions.classBinding
       };
 
-      renderFunc = function(context) {
-        sc_super();
+      renderFunc = function renderFunc(context) {
+        renderFunc.base.apply(this, arguments);
         SC.Handlebars.ViewHelper.applyAttributes(itemAttrs, this, context);
       };
 

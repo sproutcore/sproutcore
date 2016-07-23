@@ -1103,8 +1103,8 @@ SC.Logger = SC.Object.create(
   // INTERNAL SUPPORT
   //
 
-  init: function() {
-    sc_super();
+  init: function init () {
+    init.base.apply(this, arguments);
 
     // Set a reasonable default value if none has been set.
     if (!this.get('logOutputLevel')) {

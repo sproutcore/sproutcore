@@ -345,8 +345,8 @@ test("two bindings to the same value should sync in the order they are initializ
       fooBinding: "*owner.foo"
     }),
 
-    init: function () {
-      sc_super();
+    init: function init () {
+      init.base.apply(this, arguments);
       this.set('c', this.C.create({ owner: this }));
     }
 

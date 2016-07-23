@@ -183,8 +183,8 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
 
     @returns {void}
   */
-  viewDidResize: function () {
-    sc_super();
+  viewDidResize: function viewDidResize () {
+    viewDidResize.base.apply(this, arguments);
 
     // Note: SC.View's updateLayer() will call viewDidResize() if useStaticLayout is true.  The result of this
     // is that since our display depends on the frame, when the view or parent view resizes, viewDidResize
@@ -208,8 +208,8 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
   //
 
   /** @private */
-  init: function () {
-    sc_super();
+  init: function init () {
+    init.base.apply(this, arguments);
 
     // Start loading the image immediately on creation.
     this._valueDidChange();

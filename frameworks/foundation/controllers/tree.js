@@ -76,8 +76,8 @@ SC.TreeController = SC.ObjectController.extend(SC.SelectionSupport,
   //
 
   /** @private - setup observer on init if needed. */
-  init: function() {
-    sc_super();
+  init: function init () {
+    init.base.apply(this, arguments);
 
     // Initialize arrangedObjects.
     this._contentDidChange();

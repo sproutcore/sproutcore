@@ -18,8 +18,8 @@ sc_require('css/css_rule') ;
 SC.CSSStyleSheet = SC.Object.extend(
 /** @scope SC.CSSStyleSheet.prototype */ {
 
-  init: function() {
-    sc_super() ;
+  init: function init () {
+    init.base.apply(this, arguments);
 
     var ss = this.styleSheet ;
     if (!ss) {

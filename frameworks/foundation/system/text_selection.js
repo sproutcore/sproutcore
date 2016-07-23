@@ -80,8 +80,8 @@ SC.TextSelection = SC.Object.extend(SC.Copyable, SC.Freezable,
   // INTERNAL SUPPORT
   //
 
-  init: function () {
-    sc_super();
+  init: function init () {
+    init.base.apply(this, arguments);
     this.freeze();
   },
 

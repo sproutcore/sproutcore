@@ -56,9 +56,9 @@ SC.ObjectController = SC.Controller.extend(
   /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */
 
   /* @private */
-  toString: function () {
+  toString: function toString () {
     var content = this.get('content'),
-      ret = sc_super();
+      ret = toString.base.apply(this, arguments);
 
     return content ? "%@:\n  ↳ %@".fmt(ret, content) : ret;
   },
@@ -259,8 +259,8 @@ SC.ObjectController = SC.Controller.extend(
   //
 
   /** @private - setup observer on init if needed. */
-  init: function() {
-    sc_super();
+  init: function init() {
+    init.base.apply(this, arguments);
     if (this.get('content')) this._scoc_contentDidChange();
     if (this.get('observableContent')) this._scoc_observableContentDidChange();
   },

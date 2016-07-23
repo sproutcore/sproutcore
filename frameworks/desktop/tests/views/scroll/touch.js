@@ -24,21 +24,21 @@ module("SC.ScrollView touch", {
       childViews: ['contentView'],
       contentView: SC.ScrollView.extend({
 
-        touchStart: function() {
+        touchStart: function touchStart () {
           scrollStart++;
-          return sc_super();
+          return touchStart.base.apply(this, arguments);
         },
-        touchesDragged: function() {
+        touchesDragged: function touchDragged () {
           scrollDragged++;
-          return sc_super();
+          return touchDragged.base.apply(this, arguments);
         },
-        touchEnd: function() {
+        touchEnd: function touchEnd () {
           scrollEnd++;
-          return sc_super();
+          return touchEnd.base.apply(this, arguments);
         },
-        touchCancelled: function() {
+        touchCancelled: function touchCancelled () {
           scrollCancel++;
-          return sc_super();
+          return touchCancelled.base.apply(this, arguments);
         },
 
         contentView: SC.View.extend({

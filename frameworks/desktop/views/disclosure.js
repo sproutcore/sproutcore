@@ -7,22 +7,22 @@
 
 /**
   @class
-  
+
   Disclosure triangle button. As a subclass of SC.ButtonView, this view
   takes a lot of the same properties as a button:
-  
+
     - isEnabled: whether disclosure triangle is clickable or not
     - value: `YES` or `NO` (where `YES` implies expanded/open)
-  
+
   A disclosure view also supports expanding and collapsing via
   the keyboard.
-  
+
   @extends SC.ButtonView
   @since SproutCore 1.0
 */
 SC.DisclosureView = SC.ButtonView.extend(
 /** @scope SC.DisclosureView.prototype */ {
-  
+
   /**
     @type Array
     @default ['sc-disclosure-view']
@@ -42,24 +42,24 @@ SC.DisclosureView = SC.ButtonView.extend(
     @see SC.ButtonView#buttonBehavior
   */
   buttonBehavior: SC.TOGGLE_BEHAVIOR,
-  
+
   /**
     This is the value that will be set when the disclosure triangle is toggled
     open.
-    
+
     @type Boolean
     @default YES
   */
   toggleOnValue: YES,
-  
+
   /**
     The value that will be set when the disclosure triangle is toggled closed.
-    
+
     @type Boolean
     @default YES
   */
   toggleOffValue: NO,
-  
+
   /** @private */
   valueBindingDefault: SC.Binding.bool(),
 
@@ -69,7 +69,7 @@ SC.DisclosureView = SC.ButtonView.extend(
     Extends the behavior inherited from SC.ButtonView.
     @param evt
   */
-  keyDown: function(evt) {
+  keyDown: function keyDown (evt) {
     if (evt.which === 37 || evt.which === 38) {
       this.set('value', this.get('toggleOffValue')) ;
       return YES;
@@ -79,7 +79,7 @@ SC.DisclosureView = SC.ButtonView.extend(
       this.set('value', this.get('toggleOnValue')) ;
       return YES;
     }
-    sc_super();
+    keyDown.base.apply(this, arguments);
   }
 
 });

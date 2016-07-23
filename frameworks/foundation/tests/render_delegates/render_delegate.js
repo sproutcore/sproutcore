@@ -29,10 +29,10 @@ test("sc_super works.", function() {
   });
 
   var derived = base.create({
-    aMethod: function() {
+    aMethod: function aMethod() {
       derived_called_on = tick;
       tick++;
-      sc_super();
+      aMethod.base.apply(this, arguments);
     }
   });
 

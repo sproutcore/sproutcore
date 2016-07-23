@@ -8,9 +8,9 @@
 var MyDataSource = SC.DataSource.extend({
   retrieveRecordsArguments: [],
 
-  retrieveRecords: function(store, storeKeys) {
+  retrieveRecords: function retrieveRecords (store, storeKeys) {
     this.get('retrieveRecordsArguments').push(storeKeys);
-    sc_super();
+    retrieveRecords.base.apply(this, arguments);
   }
 });
 

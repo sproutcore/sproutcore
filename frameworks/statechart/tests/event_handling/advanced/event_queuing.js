@@ -12,8 +12,8 @@ module("Statechart Event Queuing", {
     TestState = SC.State.extend({
       _handledEvents: null,
 
-      init: function() {
-        sc_super();
+      init: function init () {
+        init.base.apply(this, arguments);
         this.reset();
       },
 

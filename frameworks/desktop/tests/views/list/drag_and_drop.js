@@ -46,8 +46,8 @@ var pane = SC.ControlTestPane.design()
       contentUnreadCountKey: "unread",
       rowHeight: 20,
       _didCallDragEnded: false,
-      dragEnded: function() {
-        sc_super();
+      dragEnded: function dragEnded() {
+        dragEnded.base.apply(this, arguments);
         this._didCallDragEnded = true;
       }
     })
@@ -62,8 +62,8 @@ var pane = SC.ControlTestPane.design()
       contentUnreadCountKey: "unread",
       rowHeight: 20,
       _didCallDragEnded: false,
-      dragEnded: function() {
-        sc_super();
+      dragEnded: function dragEnded() {
+        dragEnded.base.apply(this, arguments);
         this._didCallDragEnded = true;
       }
     })

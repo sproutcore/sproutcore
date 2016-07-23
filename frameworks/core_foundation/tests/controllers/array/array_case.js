@@ -312,7 +312,7 @@ test("verify enumerable propety chains invalidate without error on ArrayControll
   } catch (e) {
     didError = YES;
   }
-  
+
   ok(!didError, "Adding an object to an empty array controller with orderBy and an enumerable property chain proceeds without error.");
 
 });
@@ -327,17 +327,17 @@ test("verify arrayContentWillChange and arrayContentDidChange are called with co
   controller = SC.ArrayController.create({
     content: [],
     orderBy: 'value ASC',
-    arrayContentWillChange: function(start, removed, added) {
+    arrayContentWillChange: function arrayContentWillChange(start, removed, added) {
       equals(start, expectedStart, testMessage.fmt('arrayContentWillChange', 'start'));
       equals(removed, expectedRemoved, testMessage.fmt('arrayContentWillChange', 'removed'));
       equals(added, expectedAdded, testMessage.fmt('arrayContentWillChange', 'added'));
-      return sc_super();
+      return arrayContentWillChange.base.apply(this, arguments);
     },
-    arrayContentDidChange: function(start, removed, added) {
+    arrayContentDidChange: function arrayContentDidChange(start, removed, added) {
       equals(start, expectedStart, testMessage.fmt('arrayContentDidChange', 'start'));
       equals(removed, expectedRemoved, testMessage.fmt('arrayContentDidChange', 'removed'));
       equals(added, expectedAdded, testMessage.fmt('arrayContentDidChange', 'added'));
-      return sc_super();
+      return arrayContentDidChange.base.apply(this, arguments);
     }
   });
 

@@ -424,9 +424,9 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
   // then allow the new line to proceed by calling the super class.
   // Otherwise, try to commit the edit.
   /** @private */
-  insertNewline: function(evt) {
+  insertNewline: function insertNewline (evt) {
     if (this.get('isTextArea')) {
-      return sc_super();
+      return insertNewline.base.apply(this, arguments);
     } else {
       this.commitEditing() ;
       return YES ;

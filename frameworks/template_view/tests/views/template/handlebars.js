@@ -305,8 +305,8 @@ test("should not update when a property is removed from the view", function() {
       foo: SC.Object.create({
         baz: "unicorns",
 
-        removeObserver: function(property, func) {
-          sc_super();
+        removeObserver: function removeObserver (property, func) {
+          removeObserver.base.apply(this, arguments);
           removeCalled++;
         }
       })

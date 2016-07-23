@@ -44,8 +44,8 @@ test("subclassing and then enhancing the parent", function() {
   equals(obj.loudly("foo"), "FOO!");
 
   SubKlass = Klass.extend({
-    loudly: function(string) {
-      return "ZOMG " + sc_super(); // ZOMG FOO!
+    loudly: function loudly(string) {
+      return "ZOMG " + loudly.base.apply(this, arguments); // ZOMG FOO!
     }
   });
 
@@ -81,8 +81,8 @@ test("calling sc_super inside a reopened class", function() {
   SubKlass = Klass.extend({});
 
   SubKlass.reopen({
-    loudly: function(string) {
-      return "ZOMG " + sc_super();
+    loudly: function loudly(string) {
+      return "ZOMG " + loudly.base.apply(this, arguments);
     }
   });
 
@@ -106,8 +106,8 @@ test("calling sc_super inside a reopened class, reverse", function() {
   var Klass = SC.Object.extend();
 
   var object = Klass.create({
-    loudly: function(string) {
-      return sc_super() + "!";
+    loudly: function loudly(string) {
+      return loudly.base.apply(this, arguments) + "!";
     }
   });
 
@@ -122,8 +122,8 @@ test("calling sc_super inside a reopened class, reverse", function() {
 
 test("sc_super to a non-method", function() {
   var Klass = SC.Object.extend({
-    wot: function() {
-      return sc_super();
+    wot: function wot() {
+      return wot.base.apply(this, arguments);
     }
   });
 
@@ -150,8 +150,8 @@ test("sc_super works in enhanced methods", function() {
   });
 
   SubKlass.reopen({
-    loudly: function(original, string) {
-      return sc_super();
+    loudly: function loudly (original, string) {
+      return loudly.base.apply(this, arguments);
     }.enhance()
   });
 

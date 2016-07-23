@@ -158,10 +158,10 @@ SC.FlowedLayout = {
     Overridden to only update if it is a view we do not manage, or the width or height has changed
     since our last record of it.
   */
-  layoutDidChangeFor: function(c) {
+  layoutDidChangeFor: function layoutDidChangeFor(c) {
     // now, check if anything has changed
     var l = c._scfl_lastLayout, cl = c.get('layout'), f = c.get('frame');
-    if (!l) return sc_super();
+    if (!l) return layoutDidChangeFor.base.apply(this, arguments);
 
     var same = YES;
 
@@ -175,12 +175,12 @@ SC.FlowedLayout = {
     else if (!l.height && !c.get('fillHeight') && f.height !== c._scfl_lastFrame.height) same = NO;
 
     if (same) {
-      return sc_super();
+      return layoutDidChangeFor.base.apply(this, arguments);
     }
 
     // nothing has changed. This is where we do something
     this._scfl_tileOnce();
-    sc_super();
+    layoutDidChangeFor.base.apply(this, arguments);
   },
 
   /** @private

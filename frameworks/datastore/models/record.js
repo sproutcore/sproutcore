@@ -910,13 +910,13 @@ SC.Record = SC.Object.extend(
     @param value {Object} the value to set or null.
     @returns {SC.Record}
   */
-  set: function(key, value) {
+  set: function set (key, value) {
     var func = this[key];
 
     if (func && func.isProperty && func.get && !func.get('isEditable')) {
       return this;
     }
-    return sc_super();
+    return set.base.apply(this, arguments);
   },
 
   /**

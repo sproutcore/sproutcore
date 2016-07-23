@@ -1141,7 +1141,7 @@ SC.View.reopen(
     be invalid, we need to force layoutDidChange() to immediately run
     whenever 'layout' is set.
   */
-  propertyDidChange: function (key, value, _keepCache) {
+  propertyDidChange: function propertyDidChange (key, value, _keepCache) {
     //@if(debug)
     // Debug mode only property validation.
     if (key === 'layout') {
@@ -1175,12 +1175,12 @@ SC.View.reopen(
     }
 
     // Resume notification as usual.
-    return sc_super();
+    return propertyDidChange.base.apply(this, arguments);
   },
 
   /**
   */
-  // propertyWillChange: function (key) {
+  // propertyWillChange: function propertyWillChange (key) {
   //   // To allow layout to be a computed property, we check if any property has
   //   // changed and if layout is dependent on the property.
   //   var layoutChange = false;
@@ -1193,7 +1193,7 @@ SC.View.reopen(
   //     this._sc_previousLayout = this.get('layout');
   //   }
 
-  //   return sc_super();
+  //   return propertyWillChange.base.apply(this, arguments);
   // },
 
   /**
@@ -1391,7 +1391,7 @@ SC.View.reopen(
   },
 
   /** @private Override: The 'adopted' event (uses isFixedSize so our childViews are notified if our frame changes). */
-  _adopted: function (beforeView) {
+  _adopted: function _adopted (beforeView) {
     // If our size depends on our parent, it will have changed on adoption.
     var isFixedSize = this.get('isFixedSize');
     if (isFixedSize) {
@@ -1401,12 +1401,12 @@ SC.View.reopen(
       this.viewDidResize();
     }
 
-    sc_super();
+    _adopted.base.apply(this, arguments);
   },
 
   /** @private Extension: The 'orphaned' event (uses isFixedSize so our childViews are notified if our frame changes). */
-  _orphaned: function () {
-    sc_super();
+  _orphaned: function _orphaned () {
+    _orphaned.base.apply(this, arguments);
 
     if (!this.isDestroyed) {
       // If our size depends on our parent, it will have changed on orphaning.
@@ -1421,8 +1421,8 @@ SC.View.reopen(
   },
 
   /** @private Extension: The 'updatedContent' event. */
-  _updatedContent: function () {
-    sc_super();
+  _updatedContent: function _updatedContent () {
+    _updatedContent.base.apply(this, arguments);
 
     // If this view uses static layout, then notify that the frame (likely)
     // changed.

@@ -552,18 +552,18 @@ test("Calling viewDidResize on a view notifies its child views", function () {
     childViews: ['regular', 'core'],
 
     regular: SC.View.extend({
-      viewDidResize: function () {
+      viewDidResize: function viewDidResize () {
         regularViewCounter++;
         // Make sure we call the default implementation to
         // ensure potential blow-uppy behavior is invoked
-        sc_super();
+        viewDidResize.base.apply(this, arguments);
       }
     }),
 
     core: SC.CoreView.extend({
-      viewDidResize: function () {
+      viewDidResize: function viewDidResize () {
         coreViewCounter++;
-        sc_super();
+        viewDidResize.base.apply(this, arguments);
       }
     })
   });

@@ -34,7 +34,7 @@
       view1: SC.View,
       view2: SC.View
     }),
-    init: function() { sc_super(); this.viewPage = this.viewPage.create(); } // have to create page
+    init: function init () { init.base.apply(this, arguments); this.viewPage = this.viewPage.create(); } // have to create page
   });
 
   pane.add("nestedContainer", SC.ContainerView, {
@@ -262,7 +262,7 @@
     equals(container1.getPath('view1.frame.height'), 100, 'nowShowing#view1: view1 height should be');
 
 
-    container2.get('view4').adjust('top', 10); 
+    container2.get('view4').adjust('top', 10);
     view.set("nowShowing", 'container2');
 
     equals(container1.get('isVisibleInWindow'), false, "nowShowing#view4: container1 visbility should be");

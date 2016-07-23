@@ -233,8 +233,8 @@ SC.State = SC.Object.extend(
     return del.statechartAcquireLocationForState(sc, this);
   }.property().idempotent(),
 
-  init: function() {
-    sc_super();
+  init: function init () {
+    init.base.apply(this, arguments);
 
     this._registeredEventHandlers = {};
     this._registeredStringEventHandlers = {};
@@ -261,7 +261,7 @@ SC.State = SC.Object.extend(
     }
   },
 
-  destroy: function() {
+  destroy: function destroy () {
     var sc = this.get('statechart'),
         ownerKey = sc ? sc.get('statechartOwnerKey') : null;
 
@@ -304,7 +304,7 @@ SC.State = SC.Object.extend(
     this._registeredSubstatePaths = null;
     this._registeredSubstates = null;
 
-    sc_super();
+    destroy.base.apply(this, arguments);
   },
 
   /**

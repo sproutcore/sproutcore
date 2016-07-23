@@ -18,8 +18,8 @@ module('SC.Object', {
     SC.Locale.currentLocale = SC.Locale.createCurrentLocale();
 
     LocaleObject = SC.Locale.create({
-      init: function(){
-        sc_super();
+      init: function init (){
+        init.base.apply(this, arguments);
         //hash of new languages
         var newLocales = { deflang: 'dl', empty: '' };
 

@@ -156,10 +156,10 @@ test("set designMode on item views", function() {
     updateDesignModeCount = 0;
 
   view.set('exampleView', SC.View.extend({
-    updateDesignMode: function () {
+    updateDesignMode: function updateDesignMode () {
       updateDesignModeCount++;
 
-      sc_super();
+      updateDesignMode.base.apply(this, arguments);
     }
   }));
 

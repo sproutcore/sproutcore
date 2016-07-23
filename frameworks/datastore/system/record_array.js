@@ -71,13 +71,13 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */
 
   /* @private */
-  toString: function () {
+  toString: function toString () {
     var statusString = this.statusString(),
       storeKeys = this.get('storeKeys'),
       query = this.get('query'),
       length = this.get('length');
 
-    return "%@({\n    query: %@,\n    storeKeys: [%@],\n    length: %@,\n    … }) %@".fmt(sc_super(), query, storeKeys, length, statusString);
+    return "%@({\n    query: %@,\n    storeKeys: [%@],\n    length: %@,\n    … }) %@".fmt(toString.base.apply(this, arguments), query, storeKeys, length, statusString);
   },
 
   /** @private */
@@ -422,12 +422,12 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
     @returns {SC.RecordArray} receiver
   */
-  destroy: function() {
+  destroy: function destroy () {
     if (!this.get('isDestroyed')) {
       this.get('store').recordArrayWillDestroy(this);
     }
 
-    sc_super();
+    destroy.base.apply(this, arguments);
   },
 
   // ..........................................................
@@ -739,7 +739,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   // INTERNAL SUPPORT
   //
 
-  propertyWillChange: function(key) {
+  propertyWillChange: function propertyWillChange (key) {
     if (key === 'storeKeys') {
       var storeKeys = this.get('storeKeys');
       var len = storeKeys ? storeKeys.get('length') : 0;
@@ -747,7 +747,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
       this.arrayContentWillChange(0, len, 0);
     }
 
-    return sc_super();
+    return propertyWillChange.base.apply(this, arguments);
   },
 
   /** @private
@@ -811,8 +811,8 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   },
 
   /** @private */
-  init: function() {
-    sc_super();
+  init: function init () {
+    init.base.apply(this, arguments);
     this._storeKeysDidChange();
   }
 

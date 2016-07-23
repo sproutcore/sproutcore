@@ -392,8 +392,8 @@ SC.Timer = SC.Object.extend(
     }
   },
 
-  init: function() {
-    sc_super();
+  init: function init () {
+    init.base.apply(this, arguments);
 
     // convert startTime and until to times if they are dates.
     if (this.startTime instanceof Date) {

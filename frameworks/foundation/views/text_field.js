@@ -513,8 +513,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   displayProperties: ['isBrowserFocusable', 'formattedHint', 'fieldValue', 'isEditing', 'isEditable', 'isEnabledInPane',
                       'leftAccessoryView', 'rightAccessoryView', 'isTextArea', 'maxLength'],
 
-  createChildViews: function () {
-    sc_super();
+  createChildViews: function createChildViews () {
+    createChildViews.base.apply(this, arguments);
     this.accessoryViewObserver();
   },
 
@@ -837,8 +837,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   /**
     Override of SC.FieldView.prototype.didCreateLayer.
   */
-  didCreateLayer: function () {
-    sc_super();
+  didCreateLayer: function didCreateLayer () {
+    didCreateLayer.base.apply(this, arguments);
 
     // For some strange reason if we add focus/blur events to textarea
     // inmediately they won't work. However if I add them at the end of the
@@ -900,8 +900,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   /**
     Removes all the events attached to the textfield
    */
-  willDestroyLayer: function () {
-    sc_super();
+  willDestroyLayer: function willDestroyLayer () {
+    willDestroyLayer.base.apply(this, arguments);
 
     var input = this.$input();
     SC.Event.remove(input, 'focus',  this, this._textField_fieldDidFocus);
@@ -1289,7 +1289,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     return true;
   },
 
-  mouseDown: function (evt) {
+  mouseDown: function mouseDown (evt) {
     if (!this.get('isEnabledInPane')) {
       evt.stop();
       return true;
@@ -1297,11 +1297,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       this._txtFieldMouseDown = true;
       this.becomeFirstResponder();
 
-      return sc_super();
+      return mouseDown.base.apply(this, arguments);
     }
   },
 
-  mouseUp: function (evt) {
+  mouseUp: function mouseUp (evt) {
     this._txtFieldMouseDown = false;
 
     if (!this.get('isEnabledInPane')) {
@@ -1315,7 +1315,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     // immediately, observers of this view's `selection` property would get the old value.
     this.invokeNext(this._textField_selectionDidChange);
 
-    return sc_super();
+    return mouseUp.base.apply(this, arguments);
   },
 
   touchStart: function (evt) {

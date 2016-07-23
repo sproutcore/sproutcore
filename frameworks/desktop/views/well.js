@@ -55,8 +55,8 @@ SC.WellView = SC.ContainerView.extend(
      Overrides createChildViews and replaces the layout of the contentView
      with the one in contentLayout.
    */
-  createChildView: function (view, attrs) {
-    view = sc_super();
+  createChildView: function createChildView (view, attrs) {
+    view = createChildView.base.apply(this, arguments);
 
     view.set('layout', this.contentLayout);
     return view;
@@ -66,11 +66,11 @@ SC.WellView = SC.ContainerView.extend(
      Invoked whenever the content property changes.  This method will simply set the contentLayout
      in the new contentView.
    */
-  _sc_contentViewDidChange: function () {
+  _sc_contentViewDidChange: function _sc_contentViewDidChange () {
     var contentView = this.get('contentView');
     contentView.set('layout', this.contentLayout);
 
-    sc_super();
+    _sc_contentViewDidChange.base.apply(this, arguments);
   }
 
 });

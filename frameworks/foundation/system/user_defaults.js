@@ -313,8 +313,8 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     if (didChange) this.allPropertiesDidChange();
   }.observes('userDomain', 'appDomain'),
 
-  init: function() {
-    sc_super();
+  init: function init () {
+    init.base.apply(this, arguments);
     var isIE7;
 
     // Increment the jQuery ready counter, so that SproutCore will

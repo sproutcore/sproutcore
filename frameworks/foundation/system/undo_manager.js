@@ -122,7 +122,7 @@
 SC.UndoManager = SC.Object.extend(
 /** @scope SC.UndoManager.prototype */ {
 
-  /** 
+  /**
     If name arguments are passed into `registerUndoAction` or related methods, then this property
     will expose the last undo action's name. You can use this to show the user what type of action
     will be undone (for example "typing" or "delete").
@@ -132,11 +132,11 @@ SC.UndoManager = SC.Object.extend(
     @type String
     @default null
   */
-  undoActionName: function () { 
+  undoActionName: function () {
     return this.undoStack ? this.undoStack.name : null;
   }.property('undoStack').cacheable(),
 
-  /** 
+  /**
     Exposes the timestamp of the most recent undo action.
 
     @field
@@ -148,7 +148,7 @@ SC.UndoManager = SC.Object.extend(
     return this.undoStack ? this.undoStack.timeStamp : null;
   }.property('undoStack').cacheable(),
 
-  /** 
+  /**
     If name arguments are passed into `registerUndoAction` or related methods, then this property
     will expose the last redo action's name. You can use this to show the user what type of
     action will be redone (for example "Redo typing" or "Redo delete").
@@ -158,11 +158,11 @@ SC.UndoManager = SC.Object.extend(
     @type String
     @default null
   */
-  redoActionName: function () { 
+  redoActionName: function () {
     return this.redoStack ? this.redoStack.name : null;
   }.property('redoStack').cacheable(),
 
-  /** 
+  /**
     Exposes the timestamp of the most recent redo action.
 
     @field
@@ -174,23 +174,23 @@ SC.UndoManager = SC.Object.extend(
     return this.redoStack ? this.redoStack.timeStamp : null;
   }.property('redoStack').cacheable(),
 
-  /** 
+  /**
     True if there is an undo action on the stack. Use to validate your menu item or enable
     your button.
-    
+
     @field
     @readonly
     @type Boolean
     @default NO
   */
-  canUndo: function () { 
+  canUndo: function () {
     return !SC.none(this.undoStack);
   }.property('undoStack').cacheable(),
-  
-  /** 
+
+  /**
     True if there is an redo action on the stack. Use to validate your menu item or enable
     your button.
-    
+
     @field
     @readonly
     @type Boolean
@@ -199,7 +199,7 @@ SC.UndoManager = SC.Object.extend(
   canRedo: function () {
     return !SC.none(this.redoStack);
   }.property('redoStack').cacheable(),
-  
+
   /**
     Tries to undo the last action. Fails if an undo group is currently open.
 
@@ -211,7 +211,7 @@ SC.UndoManager = SC.Object.extend(
 
   /**
     Tries to redo the last action. Fails if a redo group is currently open.
-    
+
     @returns {Boolean} YES if succeeded, NO otherwise.
   */
   redo: function () {
@@ -235,19 +235,19 @@ SC.UndoManager = SC.Object.extend(
     @default 0
   */
   maxStackLength: 0,
-  
+
   /**
     @type Boolean
     @default NO
   */
   isUndoing: NO,
-  
+
   /**
     @type Boolean
     @default NO
   */
-  isRedoing: NO, 
-  
+  isRedoing: NO,
+
   // --------------------------------
   // UNDO ACTION REGISTRATION
   //
@@ -255,7 +255,7 @@ SC.UndoManager = SC.Object.extend(
   /**
     Registers an undo action. If called while an undo is in progress (i.e. from your
     undo method, or from observers which it triggers), registers a redo action instead.
-    
+
     @param {String|Object} target The action's target (`this`).
     @param {String|Function} action The method on `target` to be called.
     @param {Object} context The context passed to the action when called.
@@ -272,7 +272,7 @@ SC.UndoManager = SC.Object.extend(
       }
       this.beginUndoGroup(name);
     }
-    
+
     this.registerGroupedUndoAction(target, action, context);
   },
 
@@ -347,7 +347,7 @@ SC.UndoManager = SC.Object.extend(
 
     this.set(stack, this._activeGroup);
   },
- 
+
   /**
     Ends a group of undo functions. All functions in an undo group will be undone or redone
     together when `undo` or `redo` is called.
@@ -384,7 +384,7 @@ SC.UndoManager = SC.Object.extend(
 
   /**
     Change the name of the current undo group.
-    
+
     @param {String} name
   */
   setActionName: function (name) {
@@ -396,20 +396,20 @@ SC.UndoManager = SC.Object.extend(
     }
     this._activeGroup.name = name;
   },
-  
+
   // --------------------------------
   // PRIVATE
   //
-  
+
   /** @private */
   _activeGroup: null,
-  
+
   /** @private */
   undoStack: null,
-  
+
   /** @private */
-  redoStack: null, 
-  
+  redoStack: null,
+
   /** @private */
   _undoOrRedo: function (stack, state) {
     // Close out any open undo groups.
@@ -457,11 +457,11 @@ SC.UndoManager = SC.Object.extend(
   },
 
   /** @private */
-  destroy: function() {
+  destroy: function destroy () {
     this._activeGroup = null;
     this.set('undoStack', null);
     this.set('redoStack', null);
-    return sc_super();
+    return destroy.base.apply(this, arguments);
   },
 
   /** @private Deprecated as of 1.11. Use registerUndoAction instead. */

@@ -157,7 +157,8 @@ SC._object_extend = function _object_extend(base, ext, proto) {
       // itself to avoid infinite loops.
       if (!value.superclass && (value !== (cur = base[key]))) {
         value.superclass = cur || K;
-        value.base = proto ? SC._detect_base(value, proto, key) : cur || K;
+        // only add _detect_base when super will be used
+        value.base = proto && value.name === key ? SC._detect_base(value, proto, key) : cur || K;
       }
 
       // handle regular observers
@@ -609,9 +610,9 @@ SC.Object.prototype = {
           var MyClass = SC.Object.extend({
              extraMixin: null,
 
-             init: function () {
+             init: function init () {
                this.mixin(this.extraMixin);
-               sc_super();
+               init.base.apply(this, arguments);
              }
           });
 

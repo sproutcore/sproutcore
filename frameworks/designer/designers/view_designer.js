@@ -551,13 +551,13 @@ SC.ViewDesigner = SC.Object.extend(
   // PRIVATE METHODS
   //
 
-  init: function() {
+  init: function init () {
 
     // setup design from view state...
     this.awakeDesign();
 
     // setup bindings, etc
-    sc_super();
+    init.base.apply(this, arguments);
 
     // now add observer for property changes on view to relay change out.
     this.viewDidChange();
@@ -568,8 +568,8 @@ SC.ViewDesigner = SC.Object.extend(
 
   },
 
-  destroy: function() {
-    sc_super();
+  destroy: function destroy() {
+    destroy.base.apply(this, arguments);
     this.set('view', null); // clears the view observer...
   },
 
@@ -595,7 +595,7 @@ SC.ViewDesigner = SC.Object.extend(
     }
   }.observes('designIsSelected'),
 
-  tryToPerform: function(methodName, arg1, arg2) {
+  tryToPerform: function tryToPerform (methodName, arg1, arg2) {
     // only handle event if we are in design mode
     var page = this.view ? this.view.get('page') : null ;
     var isDesignMode = page ? page.get('needsDesigner') || page.get('isDesignMode') : NO ;
@@ -603,7 +603,7 @@ SC.ViewDesigner = SC.Object.extend(
     // if we are in design mode, route event handling to the designer
     // otherwise, invoke default method.
     if (isDesignMode) {
-      return sc_super();
+      return tryToPerform.base.apply(this, arguments);
     } else {
       return SC.Object.prototype.tryToPerform.apply(this.view, arguments);
     }

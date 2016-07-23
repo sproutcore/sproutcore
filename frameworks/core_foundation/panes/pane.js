@@ -215,7 +215,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   //
 
   /** @private */
-  _executeDoAttach: function () {
+  _executeDoAttach: function _executeDoAttach () {
     // hook into root responder
     var responder = (this.rootResponder = SC.RootResponder.responder);
     responder.panes.add(this);
@@ -226,7 +226,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     // Set the initial design mode.  The responder will update this if it changes.
     this.updateDesignMode(this.get('designMode'), responder.get('currentDesignMode'));
 
-    sc_super();
+    _executeDoAttach.base.apply(this, arguments)
 
     // Legacy.
     this.paneDidAttach();
@@ -246,8 +246,8 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   },
 
   /** @private */
-  _executeDoDetach: function () {
-    sc_super();
+  _executeDoDetach: function _executeDoDetach () {
+    _executeDoDetach.base.apply(this, arguments)
 
     // remove intercept
     this._sc_removeIntercept();
@@ -364,8 +364,8 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
 
     @returns {Rect} current window size
   */
-  computeParentDimensions: function (frame) {
-    if (this.get('designer') && SC.suppressMain) { return sc_super(); }
+  computeParentDimensions: function computeParentDimensions (frame) {
+    if (this.get('designer') && SC.suppressMain) { return computeParentDimensions.base.apply(this, arguments); }
 
     var wDim = {x: 0, y: 0, width: 1000, height: 1000},
         layout = this.get('layout');
@@ -469,7 +469,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   },
 
   /** @private */
-  init: function () {
+  init: function init () {
     // Backwards compatibility
     //@if(debug)
     // TODO: REMOVE THIS
@@ -481,7 +481,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     // if a layer was set manually then we will just attach to existing HTML.
     var hasLayer = !!this.get('layer');
 
-    sc_super();
+    init.base.apply(this, arguments);
 
     if (hasLayer) {
       this._attached();
@@ -624,8 +624,8 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @param evt {SC.Event} the keydown event
     @returns {Boolean} YES if you handled the method; NO otherwise
   */
-  performKeyEquivalent: function (keystring, evt) {
-    var ret = sc_super(); // try normal view behavior first
+  performKeyEquivalent: function performKeyEquivalent (keystring, evt) {
+    var ret = performKeyEquivalent.base.apply(this, arguments); // try normal view behavior first
 
     if (!ret) {
       var defaultResponder = this.get('defaultResponder') ;

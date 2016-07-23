@@ -141,8 +141,8 @@ SC.WorkspaceView = SC.View.extend(
   /** @private
     Creates the child views. Specifically, instantiates master and detail views.
   */
-  createChildViews: function() {
-    sc_super();
+  createChildViews: function createChildViews () {
+    createChildViews.base.apply(this, arguments);
 
     var topToolbar = this.get("topToolbar");
     if (topToolbar) {

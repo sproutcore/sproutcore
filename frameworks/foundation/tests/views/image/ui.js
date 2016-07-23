@@ -283,10 +283,10 @@
       useCanvas: NO,
       useStaticLayout: YES,
 
-      render: function (context) {
+      render: function render (context) {
         context.setStyle({ width: 588, height: 90 });
 
-        sc_super();
+        render.base.apply(this, arguments);
       }
     });
 
@@ -323,10 +323,10 @@
       value: logoURL + "?lastmod=" + Math.round(Math.random() * 100000),
       useStaticLayout: YES,
 
-      render: function (context) {
+      render: function render (context) {
         context.setStyle({ width: 588, height: 90 });
 
-        sc_super();
+        render.base.apply(this, arguments);
       }
     });
 
@@ -616,7 +616,7 @@
       el = jqEl[0],
       jqImgEl,
       imgEl;
-    
+
     ok(!jqEl.attr('class'), "The empty image should have no class.");
     equals(el.tagName, 'IMG', "The empty image should be a IMG");
 

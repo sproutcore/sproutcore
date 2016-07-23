@@ -151,8 +151,8 @@ SC.CascadeDataSource = SC.DataSource.extend(
   //
 
   /** @private */
-  init: function() {
-    sc_super();
+  init: function init () {
+    init.base.apply(this, arguments);
 
     // if a dataSources array is defined, look for any strings and lookup
     // the same on the data source.  Replace.

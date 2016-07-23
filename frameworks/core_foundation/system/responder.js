@@ -122,10 +122,10 @@ SC.Responder = SC.Object.extend( /** @scope SC.Responder.prototype */ {
   didBecomeFirstResponder: function (responder) {},
 
   /** SC.Object.prototype.destroy */
-  destroy: function () {
+  destroy: function destroy () {
     this.resignFirstResponder();
 
-    sc_super();
+    destroy.base.apply(this, arguments)
   }
 
 });

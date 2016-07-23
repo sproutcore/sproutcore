@@ -455,8 +455,8 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
   //
 
   /** @private - save keyEquivalent for later use */
-  init: function() {
-    sc_super();
+  init: function init () {
+    init.base.apply(this, arguments);
 
     var keyEquivalent = this.get('keyEquivalent');
     // Cache the key equivalent. The key equivalent is saved so that if,

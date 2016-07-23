@@ -24,8 +24,8 @@ module("object.registerDependentKeys()", {
         }.property(),
 
         // init to setup registerDependentKey...
-        init: function() {
-          sc_super();
+        init: function init () {
+          init.base.apply(this, arguments);
           this.registerDependentKey('fullName', 'firstName', 'lastName');
         },
 

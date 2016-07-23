@@ -116,11 +116,11 @@ SC.NestedStore = SC.Store.extend(
     @param {SC.Query} query query object to use.
     @returns {SC.Record|SC.RecordArray}
   */
-  find: function(query) {
+  find: function find (query) {
     if (query && query.isQuery && query.get('location') !== SC.Query.LOCAL) {
       throw new Error("SC.Store#find() can only accept LOCAL queries in nested stores");
     }
-    return sc_super();
+    return find.base.apply(this, arguments);
   },
 
   /**
@@ -262,13 +262,13 @@ SC.NestedStore = SC.Store.extend(
 
     @returns {SC.Store} receiver
   */
-  destroy: function() {
+  destroy: function destroy () {
     this.discardChanges();
 
     var parentStore = this.get('parentStore');
     if (parentStore) parentStore.willDestroyNestedStore(this);
 
-    sc_super();
+    destroy.base.apply(this, arguments);
     return this ;
   },
 
@@ -317,9 +317,9 @@ SC.NestedStore = SC.Store.extend(
 
     @returns {SC.Error} SC.Error or null if no error associated with the record.
   */
-  readError: function(storeKey) {
+  readError: function readError (storeKey) {
     if ( this.get( "dataSource" ) ) {
-      return sc_super();
+      return readError.base.apply(this, arguments);
     }
     else {
       var parentStore = this.get('parentStore');
@@ -337,9 +337,9 @@ SC.NestedStore = SC.Store.extend(
 
     @returns {SC.Error} SC.Error or null if no error associated with the query.
   */
-  readQueryError: function(query) {
+  readQueryError: function readQueryError (query) {
     if ( this.get( "dataSource" ) ) {
-      return sc_super();
+      return readQueryError.base.apply(this, arguments);
     }
     else {
       var parentStore = this.get('parentStore');
@@ -494,14 +494,14 @@ SC.NestedStore = SC.Store.extend(
   },
 
   /** @private - adds chaining support */
-  removeDataHash: function(storeKey, status) {
+  removeDataHash: function removeDataHash (storeKey, status) {
 
     // record optimistic lock revision
     var locks = this.locks;
     if (!locks) locks = this.locks = [];
     if (!locks[storeKey]) locks[storeKey] = this.revisions[storeKey] || 1;
 
-    return sc_super();
+    return removeDataHash.base.apply(this, arguments);
   },
 
   /** @private - bookkeeping for a single data hash. */
@@ -558,9 +558,9 @@ SC.NestedStore = SC.Store.extend(
   //
 
   /** @private - adapt for nested store */
-  commitChangesFromNestedStore: function(nestedStore, changes, force) {
+  commitChangesFromNestedStore: function commitChangesFromNestedStore (nestedStore, changes, force) {
 
-    sc_super();
+    commitChangesFromNestedStore.base.apply(this, arguments);
 
     // save a lock for each store key if it does not have one already
     // also add each storeKey to my own changes set.
@@ -669,33 +669,33 @@ SC.NestedStore = SC.Store.extend(
   },
 
   /** @private - adapt for nested store */
-  commitRecords: function(recordTypes, ids, storeKeys) {
+  commitRecords: function commitRecords (recordTypes, ids, storeKeys) {
     if( this.get( "dataSource" ) )
-      return sc_super();
+      return commitRecords.base.apply(this, arguments);
     else
       SC.Store.NESTED_STORE_UNSUPPORTED_ERROR.throw();
   },
 
   /** @private - adapt for nested store */
-  commitRecord: function(recordType, id, storeKey) {
+  commitRecord: function commitRecord (recordType, id, storeKey) {
     if( this.get( "dataSource" ) )
-      return sc_super();
+      return commitRecord.base.apply(this, arguments);
     else
       SC.Store.NESTED_STORE_UNSUPPORTED_ERROR.throw();
   },
 
   /** @private - adapt for nested store */
-  cancelRecords: function(recordTypes, ids, storeKeys) {
+  cancelRecords: function cancelRecords (recordTypes, ids, storeKeys) {
     if( this.get( "dataSource" ) )
-      return sc_super();
+      return cancelRecords.base.apply(this, arguments);
     else
       SC.Store.NESTED_STORE_UNSUPPORTED_ERROR.throw();
   },
 
   /** @private - adapt for nested store */
-  cancelRecord: function(recordType, id, storeKey) {
+  cancelRecord: function cancelRecord (recordType, id, storeKey) {
     if( this.get( "dataSource" ) )
-      return sc_super();
+      return cancelRecord.base.apply(this, arguments);
     else
       SC.Store.NESTED_STORE_UNSUPPORTED_ERROR.throw();
   },
@@ -706,33 +706,33 @@ SC.NestedStore = SC.Store.extend(
   // Methods called by the data source on the store
 
   /** @private - adapt for nested store */
-  dataSourceDidCancel: function(storeKey) {
+  dataSourceDidCancel: function dataSourceDidCancel (storeKey) {
     if( this.get( "dataSource" ) )
-      return sc_super();
+      return dataSourceDidCancel.base.apply(this, arguments);
     else
       SC.Store.NESTED_STORE_UNSUPPORTED_ERROR.throw();
   },
 
   /** @private - adapt for nested store */
-  dataSourceDidComplete: function(storeKey, dataHash, newId) {
+  dataSourceDidComplete: function dataSourceDidComplete (storeKey, dataHash, newId) {
     if( this.get( "dataSource" ) )
-      return sc_super();
+      return dataSourceDidComplete.base.apply(this, arguments);
     else
       SC.Store.NESTED_STORE_UNSUPPORTED_ERROR.throw();
   },
 
   /** @private - adapt for nested store */
-  dataSourceDidDestroy: function(storeKey) {
+  dataSourceDidDestroy: function dataSourceDidDestroy (storeKey) {
     if( this.get( "dataSource" ) )
-      return sc_super();
+      return dataSourceDidDestroy.base.apply(this, arguments);
     else
       SC.Store.NESTED_STORE_UNSUPPORTED_ERROR.throw();
   },
 
   /** @private - adapt for nested store */
-  dataSourceDidError: function(storeKey, error) {
+  dataSourceDidError: function dataSourceDidError (storeKey, error) {
     if( this.get( "dataSource" ) )
-      return sc_super();
+      return dataSourceDidError.base.apply(this, arguments);
     else
       SC.Store.NESTED_STORE_UNSUPPORTED_ERROR.throw();
   },
@@ -742,25 +742,25 @@ SC.NestedStore = SC.Store.extend(
   //
 
   /** @private - adapt for nested store */
-  pushRetrieve: function(recordType, id, dataHash, storeKey) {
+  pushRetrieve: function pushRetrieve (recordType, id, dataHash, storeKey) {
     if( this.get( "dataSource" ) )
-      return sc_super();
+      return pushRetrieve.base.apply(this, arguments);
     else
       SC.Store.NESTED_STORE_UNSUPPORTED_ERROR.throw();
   },
 
   /** @private - adapt for nested store */
-  pushDestroy: function(recordType, id, storeKey) {
+  pushDestroy: function pushDestroy (recordType, id, storeKey) {
     if( this.get( "dataSource" ) )
-      return sc_super();
+      return pushDestroy.base.apply(this, arguments);
     else
       SC.Store.NESTED_STORE_UNSUPPORTED_ERROR.throw();
   },
 
   /** @private - adapt for nested store */
-  pushError: function(recordType, id, error, storeKey) {
+  pushError: function pushError (recordType, id, error, storeKey) {
     if( this.get( "dataSource" ) )
-      return sc_super();
+      return pushError.base.apply(this, arguments);
     else
       SC.Store.NESTED_STORE_UNSUPPORTED_ERROR.throw();
   }

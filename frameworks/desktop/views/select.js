@@ -120,7 +120,7 @@ SC.SelectView = SC.PopupButtonView.extend({
 
   /**
     If true, the empty name and the default title will be localized.
-    
+
     @type Boolean
     @default YES
   */
@@ -176,8 +176,8 @@ SC.SelectView = SC.PopupButtonView.extend({
   /**
     * @private
   */
-  init: function() {
-    sc_super();
+  init: function init () {
+    init.base.apply(this, arguments);
 
     // call valueDidChange to get the initial item, if any
     this._scsv_valueDidChange();
@@ -201,8 +201,8 @@ SC.SelectView = SC.PopupButtonView.extend({
   /**
     @private
 
-    This gets the value for a specific menu item. 
-    
+    This gets the value for a specific menu item.
+
     This method therefore accepts both the menu items as created for the menupane's displayItems
     AND the raw items provided by the developer in `items`.
   */
@@ -290,7 +290,7 @@ SC.SelectView = SC.PopupButtonView.extend({
       if (sel.get) return sel.get(itemIconKey);
       else if (SC.typeOf(sel) == SC.T_HASH) return sel[itemIconKey];
     }
-    return null;      
+    return null;
   }.property('selectedItem').cacheable(),
 
   /**
@@ -390,12 +390,12 @@ SC.SelectView = SC.PopupButtonView.extend({
     var displayItems = this.get('displayItems');
     if (!displayItems) return;
 
-    var len = displayItems.get ? displayItems.get('length') : displayItems.length, 
+    var len = displayItems.get ? displayItems.get('length') : displayItems.length,
       idx, item;
 
     for (idx = 0; idx < len; idx++) {
       item = displayItems.objectAt(idx);
-      
+
       if (this.isValueEqualTo(item)) {
         this.setIfChanged('selectedItem', item);
         return;
@@ -522,7 +522,7 @@ SC.SelectView = SC.PopupButtonView.extend({
 
     // We have to find the selected item, and then get its 'top' position so we
     // can position the menu correctly.
-    var itemViews = menu.get('menuItemViews'), 
+    var itemViews = menu.get('menuItemViews'),
       len = itemViews.length,
       idx, view;
 
@@ -564,12 +564,12 @@ SC.SelectView = SC.PopupButtonView.extend({
 
     Handle Key event - Down arrow key
   */
-  keyDown: function(event) {
+  keyDown: function keyDown (event) {
     if ( this.interpretKeyEvents(event) ) {
       return YES;
     }
     else {
-      sc_super();
+      keyDown.base.apply(this, arguments);
     }
   },
 

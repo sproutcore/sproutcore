@@ -22,11 +22,11 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
   /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */
 
   /* @private */
-  toString: function () {
+  toString: function toString () {
     var propertyName = this.get('propertyName'),
       length = this.get('length');
 
-    return "%@({  propertyName: '%@',  length: %@,  … })".fmt(sc_super(), propertyName, length);
+    return "%@({  propertyName: '%@',  length: %@,  … })".fmt(toString.base.apply(this, arguments), propertyName, length);
   },
 
   /* END DEBUG ONLY PROPERTIES AND METHODS */

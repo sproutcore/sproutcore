@@ -47,8 +47,8 @@ SC.Cursor = SC.Object.extend(
 /** @scope SC.Cursor.prototype */ {
 
   /** @private */
-  init: function () {
-    sc_super();
+  init: function init () {
+    init.base.apply(this, arguments);
 
     // create a unique style rule and add it to the shared cursor style sheet
     var cursorStyle = this.get('cursorStyle') || SC.DEFAULT_CURSOR,

@@ -22,8 +22,8 @@ module("SC.Store#materializeRecord", {
       last: SC.Record.attr(String),
       age: SC.Record.attr(Number),
       isAlive: SC.Record.attr(Boolean),
-      init: function() {
-        sc_super();
+      init: function init () {
+        init.base.apply(this, arguments);
         return this.get('store').materializeRecord(this.get('storeKey'));
       }
     });

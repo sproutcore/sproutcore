@@ -2749,20 +2749,20 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   //
 
   /** @private */
-  init: function() {
-    sc_super();
+  init: function init () {
+    init.base.apply(this, arguments);
     this.reset();
   },
 
 
-  toString: function() {
+  toString: function toString () {
     // Include the name if the client has specified one.
     var name = this.get('name');
     if (!name) {
-      return sc_super();
+      return toString.base.apply(this, arguments);
     }
     else {
-      var ret = sc_super();
+      var ret = toString.base.apply(this, arguments);
       return "%@ (%@)".fmt(name, ret);
     }
   },

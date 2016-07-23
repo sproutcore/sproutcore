@@ -32,8 +32,8 @@ SC.TableHeaderView = SC.View.extend({
 
     layout: { left: 0, right: 0, bottom: 0 },
 
-    init: function() {
-      sc_super();
+    init: function init () {
+      init.base.apply(this, arguments);
 
       var tableHeaderView = this.get('parentView');
 
@@ -70,8 +70,8 @@ SC.TableHeaderView = SC.View.extend({
   // ========================================================
   // = For the column we look after, set up some observers. =
   // ========================================================
-  init: function() {
-    sc_super();
+  init: function init () {
+    init.base.apply(this, arguments);
 
     var column = this.get('column');
     column.addObserver('width',     this, '_scthv_layoutDidChange');
@@ -92,22 +92,19 @@ SC.TableHeaderView = SC.View.extend({
     return this.get('column').get('sortState');
   }.property(),
 
-  mouseDown: function(evt) {
+  mouseDown: function mouseDown(evt) {
     var tableView = this.get('tableView');
-    return tableView ? tableView.mouseDownInTableHeaderView(evt, this) :
-     sc_super();
+    return tableView ? tableView.mouseDownInTableHeaderView(evt, this) : mouseDown.base.apply(this, arguments);
   },
 
-  mouseUp: function(evt) {
+  mouseUp: function mouseUp (evt) {
     var tableView = this.get('tableView');
-    return tableView ? tableView.mouseUpInTableHeaderView(evt, this) :
-     sc_super();
+    return tableView ? tableView.mouseUpInTableHeaderView(evt, this) : mouseUp.base.apply(this, arguments);
   },
 
-  mouseDragged: function(evt) {
+  mouseDragged: function mouseDragged (evt) {
     var tableView = this.get('tableView');
-    return tableView ? tableView.mouseDraggedInTableHeaderView(evt, this) :
-     sc_super();
+    return tableView ? tableView.mouseDraggedInTableHeaderView(evt, this) : mouseDragged.base.apply(this, arguments);
   },
 
   _scthv_dragViewForHeader: function() {

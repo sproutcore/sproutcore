@@ -429,8 +429,8 @@ SC.Response = SC.Object.extend(
 
     @returns {String}
   */
-  toString: function() {
-    var ret = sc_super();
+  toString: function toString() {
+    var ret = toString.base.apply(this, arguments);
     return "%@<%@ %@, status=%@".fmt(ret, this.get('type'), this.get('address'), this.get('status'));
   }
 

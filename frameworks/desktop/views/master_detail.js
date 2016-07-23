@@ -154,8 +154,8 @@ SC.MasterDetailView = SC.View.extend(
   }.observes('frame'),
 
   /** @private */
-  init: function() {
-    sc_super();
+  init: function init () {
+    init.base.apply(this, arguments);
     this._scmd_frameDidChange();
     this._scmd_masterIsHiddenDidChange();
   },

@@ -3157,8 +3157,8 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
   }.observes('nowShowing'),
 
   /** @private */
-  init: function() {
-     sc_super();
+  init: function init () {
+    init.base.apply(this, arguments);
 
     //@if (debug)
     if (this.useFastPath) {
@@ -3186,8 +3186,8 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
   },
 
   /** @private SC.View.prototype.destroy. */
-  destroy: function () {
-    sc_super();
+  destroy: function destroy () {
+    destroy.base.apply(this, arguments);
 
     // All manipulations made to objects we use must be reversed!
     var content = this._content;

@@ -57,8 +57,8 @@ SC.MainPane = SC.Pane.extend({
   },
 
   /** @private The 'updatedLayout' event. */
-  _updatedLayout: function () {
-    sc_super();
+  _updatedLayout: function _updatedLayout () {
+    _updatedLayout.base.apply(this, arguments);
 
     // If by chance the minHeight or minWidth changed we would need to alter the body overflow request.
     this.setBodyOverflowIfNeeded();

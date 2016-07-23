@@ -170,10 +170,10 @@ SC.ContainerView = SC.View.extend(
   //
 
   /** @private */
-  init: function () {
+  init: function init () {
     var view;
 
-    sc_super();
+    init.base.apply(this, arguments);
 
     if (this.get('nowShowing')) {
       // If nowShowing is directly set, invoke the instantiation of
@@ -216,10 +216,10 @@ SC.ContainerView = SC.View.extend(
     left/top while the transition is in process so neither view thinks it
     is clipped.
    */
-  clippingFrame: function () {
+  clippingFrame: function clippingFrame () {
     var contentStatecharts = this._contentStatecharts,
       frame = this.get('frame'),
-      ret = sc_super();
+      ret = clippingFrame.base.apply(this, arguments);
 
     // Allow for a modified clippingFrame while transitioning.
     if (this.get('isTransitioning')) {
@@ -251,7 +251,7 @@ SC.ContainerView = SC.View.extend(
   },
 
   /** @private */
-  destroy: function () {
+  destroy: function destroy () {
     // Clean up observers.
     this.removeObserver('contentView', this, this._sc_contentViewDidChange);
 
@@ -262,7 +262,7 @@ SC.ContainerView = SC.View.extend(
     // Remove our internal reference to the statecharts.
     this._contentStatecharts = this._currentStatechart = null;
 
-    return sc_super();
+    return destroy.base.apply(this, arguments);
   },
 
   /** @private
@@ -389,7 +389,7 @@ SC.ContainerView = SC.View.extend(
   },
 
   /** @private SC.Observable.prototype */
-  set: function (key, value) {
+  set: function set (key, value) {
 
     // Changing the transitionSwap in the middle of a transition must cancel the transitions.
     if (key === 'transitionSwap' && this.get('isTransitioning')) {
@@ -401,7 +401,7 @@ SC.ContainerView = SC.View.extend(
       this._sc_cancelTransitions();
     }
 
-    return sc_super();
+    return set.base.apply(this, arguments);
   }
 
 });
@@ -437,8 +437,8 @@ SC.ContainerContentStatechart = SC.Object.extend({
   // Methods
   //
 
-  init: function () {
-    sc_super();
+  init: function init () {
+    init.base.apply(this, arguments);
 
     // Default entry state.
     this.gotoEnteringState();

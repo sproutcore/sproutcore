@@ -163,10 +163,10 @@ SC.PageDesignController = SC.Object.extend({
   // ..........................................................
   // INTERNAL SUPPORT
   //
-  init: function() {
+  init: function init () {
     this.designers = SC.Set.create();
     this.sel = [];
-    sc_super();
+    init.base.apply(this, arguments);
   }
 
 }) ;

@@ -397,8 +397,8 @@ SC.appCache = SC.Object.create(
   },
 
   /** @private */
-  init: function () {
-    sc_super();
+  init: function init () {
+    init.base.apply(this, arguments);
 
     if (SC.platform.supportsApplicationCache) {
       // By the time that this object is created, we may have already passed

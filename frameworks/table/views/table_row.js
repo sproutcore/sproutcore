@@ -34,8 +34,8 @@ SC.TableRowView = SC.View.extend({
   // METHODS
   //
 
-  init: function() {
-    sc_super();
+  init: function init () {
+    init.base.apply(this, arguments)
     this._sctrv_handleChildren();
   },
 
@@ -49,18 +49,18 @@ SC.TableRowView = SC.View.extend({
     return this.get('tableView').get('columns');
   }.property(),
 
-  render: function(context, firstTime) {
-    sc_super();
-    context.setClass('sel', this.get('isSelected'));
-  },
+  // render: function render (context, firstTime) {
+  //   sc_super();
+  //   context.setClass('sel', this.get('isSelected'));
+  // },
 
-  render: function(context, firstTime) {
+  render: function render (context, firstTime) {
     var classArray = [];
 
     classArray.push((this.get('contentIndex')%2 === 0) ? 'even' : 'odd');
     context.addClass(classArray);
 
-    sc_super();
+    render.base.apply(this, arguments);
   },
 
   renderChildViews: function(context, firstTime) {

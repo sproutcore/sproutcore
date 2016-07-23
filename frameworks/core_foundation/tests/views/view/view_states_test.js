@@ -487,8 +487,8 @@ test("Adjusting unrelated layout property (not specified in transition's layoutP
   var view = SC.View.create({
     transitionIn: transition,
     layout: { height: 40 },
-    didTransitionIn: function() {
-      sc_super();
+    didTransitionIn: function didTransitionIn () {
+      didTransitionIn.base.apply(this, arguments);
       equals(this.getPath('layout.height'), 30, "height adjusted during an opacity transition is retained after the transition is complete");
       start();
     }

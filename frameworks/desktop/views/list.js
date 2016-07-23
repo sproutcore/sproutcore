@@ -131,15 +131,15 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
   //
 
   /** @private */
-  init: function () {
-    sc_super();
+  init: function init () {
+    init.base.apply(this, arguments);
 
     this._sc_rowDelegateDidChange();
   },
 
   /** @private SC.CollectionView.prototype.destroy. */
-  destroy: function () {
-    sc_super();
+  destroy: function destroy () {
+    destroy.base.apply(this, arguments);
 
     // All manipulations made to objects we use must be reversed!
     var del = this._sc_rowDelegate;
@@ -159,10 +159,10 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
   },
 
   /** @private */
-  render: function (context, firstTime) {
+  render: function render (context, firstTime) {
     context.setClass('alternating', this.get('showAlternatingRows'));
 
-    return sc_super();
+    return render.base.apply(this, arguments);
   },
 
   // ..........................................................

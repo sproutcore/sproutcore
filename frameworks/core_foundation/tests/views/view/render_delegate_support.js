@@ -113,8 +113,8 @@ test("Extending view with render delegate by implementing old render method", fu
   });
 
   var childView = parentView.create({
-    render: function(context, firstTime) {
-      sc_super();
+    render: function render (context, firstTime) {
+      render.base.apply(this, arguments);
     }
   });
 

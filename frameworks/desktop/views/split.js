@@ -165,11 +165,11 @@ SC.SplitView = SC.View.extend({
   }.observes('splitChildCursorStyle'),
 
   /** @private */
-  init: function() {
+  init: function init () {
     // set up the SC.Cursor instance that this view and all the subviews
     // will share.
     this.cursor = SC.Cursor.create();
-    sc_super();
+    init.base.apply(this, arguments);
   },
 
   // RENDERING
@@ -201,10 +201,10 @@ SC.SplitView = SC.View.extend({
   }.property('frame', 'layoutDirection').cacheable(),
 
   /** @private */
-  viewDidResize: function () {
+  viewDidResize: function viewDidResize () {
     this.scheduleTiling();
 
-    sc_super();
+    viewDidResize.base.apply(this, arguments);
   },
 
   /** @private */
@@ -293,8 +293,8 @@ SC.SplitView = SC.View.extend({
     this._scsv_settingUpChildViews = NO;
   },
 
-  createChildViews: function() {
-    sc_super();
+  createChildViews: function createChildViews () {
+    createChildViews.base.apply(this, arguments);
 
     if (this._scsv_settingUpChildViews) return;
     this._scsv_settingUpChildViews = YES;

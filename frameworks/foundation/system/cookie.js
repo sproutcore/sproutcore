@@ -88,11 +88,11 @@ SC.Cookie = SC.Object.extend(
   /**
     Sets SC.Cookie#expires to -1, which destroys the cookie.
   */
-  destroy: function() {
+  destroy: function destroy () {
     this.set('expires', -1);
     this.write();
 
-    sc_super();
+    destroy.base.apply(this, arguments);
   },
 
   /**
@@ -169,7 +169,7 @@ SC.CookieMonster = {
       SC.Logger.log("YUM!");
       return cookie.destroy();
     }
-    
+
     SC.Logger.error("Y U PASS ME NO COOKIE? %@", cookie);
     return NO;
   }

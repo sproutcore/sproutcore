@@ -944,10 +944,10 @@ SC.CoreView.reopen(
      - register the view with the global views hash, which is used for event
        dispatch
   */
-  init: function () {
+  init: function init () {
     var childViews, layerId;
 
-    sc_super();
+    init.base.apply(this, arguments);
 
     layerId = this._lastLayerId = this.get('layerId');
 
@@ -1282,14 +1282,14 @@ SC.CoreView.reopen(
 
     @returns {SC.View} receiver
   */
-  destroy: function () {
+  destroy: function destroy () {
     // Fast path!
     if (this.get('isDestroyed')) { return this; }
 
     // Do generic destroy. It takes care of mixins and sets isDestroyed to YES.
     // Do this first, since it cleans up bindings that may apply to parentView
     // (which we will soon null out).
-    var ret = sc_super();
+    var ret = destroy.base.apply(this, arguments);
 
     // If our parent is already destroyed, then we can defer destroying ourself
     // and our own child views momentarily.
@@ -2209,8 +2209,8 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
   displayProperties: [],
 
   /** @private Enhance. */
-  _executeQueuedUpdates: function () {
-    sc_super();
+  _executeQueuedUpdates: function _executeQueuedUpdates () {
+    _executeQueuedUpdates.base.apply(this, arguments);
 
     // Enabled
     // Update the layout style of the layer if necessary.
@@ -2226,7 +2226,7 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
   },
 
   /** Apply the attributes to the context. */
-  applyAttributesToContext: function (context) {
+  applyAttributesToContext: function applyAttributesToContext (context) {
     // Cursor
     var cursor = this.get('cursor');
     if (cursor) { context.addClass(cursor.get('className')); }
@@ -2260,7 +2260,7 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
       context.addClass(themeClassNames[idx]);
     }
 
-    sc_super();
+    applyAttributesToContext.base.apply(this, arguments);
 
     var renderDelegate = this.get('renderDelegate');
     if (renderDelegate && renderDelegate.className) {
@@ -2290,7 +2290,7 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
     @param {Rect} pdim the projected parent dimensions (optional)
     @returns {Rect} the computed frame
   */
-  computeFrameWithParentFrame: function (pdim) {
+  computeFrameWithParentFrame: function computeFrameWithParentFrame (pdim) {
     // Layout.
     var layout = this.get('layout'),
         f;
@@ -2298,7 +2298,7 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
     // We can't predict the frame for static layout, so just return the view's
     // current frame (see original computeFrameWithParentFrame in views/view.js)
     if (this.get('useStaticLayout')) {
-      f = sc_super();
+      f = computeFrameWithParentFrame.base.apply(this, arguments);
       f = f ? this._sc_adjustForBorder(f, layout) : null;
       f = f ? this._sc_adjustForScale(f, layout) : null;
       return f;
@@ -2458,8 +2458,8 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
     return f;
   },
 
-  init: function () {
-    sc_super();
+  init: function init () {
+    init.base.apply(this, arguments);
 
     // Enabled.
     // If the view is pre-configured as disabled, then go to the proper initial state.
@@ -2497,15 +2497,15 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
   },
 
   /** @private */
-  destroy: function () {
+  destroy: function destroy () {
     // Clean up.
     this._previousLayout = null;
 
-    return sc_super();
+    return destroy.base.apply(this, arguments);
   },
 
   /** SC.CoreView.prototype. */
-  removeChild: function(view) {
+  removeChild: function removeChild (view) {
     // Manipulation
     if (!view) { return this; } // nothing to do
     if (view.parentView !== this) {
@@ -2517,7 +2517,7 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
     if (view.willRemoveFromParent) { view.willRemoveFromParent() ; }
     if (this.willRemoveChild) { this.willRemoveChild(view) ; }
 
-    sc_super();
+    removeChild.base.apply(this, arguments);
 
     return this;
   }

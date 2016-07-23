@@ -330,8 +330,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     Call itemsDidChange once to initialize segment child views for the items that exist at
     creation time.
   */
-  init: function () {
-    sc_super();
+  init: function init () {
+    init.base.apply(this, arguments);
 
     // Initialize.
     this.shouldHandleOverflowDidChange();
@@ -1245,8 +1245,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
 
       // We need to be able to update our overflow segment even if the user clicks outside of the menu.  Since
       // there is no callback method or observable property when the menu closes, override modalPaneDidClick().
-      modalPaneDidClick: function () {
-        sc_super();
+      modalPaneDidClick: function modalPaneDidClick () {
+        modalPaneDidClick.base.apply(this, arguments);
 
         // Cleanup
         this.removeObserver('selectedItem', self, 'selectOverflowItem');

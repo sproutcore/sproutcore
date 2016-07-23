@@ -68,8 +68,8 @@ SC.TableView = SC.ListView.extend(SC.TableDelegate, {
 
   layout: { left: 0, right: 0, top: 0, bottom: 0 },
 
-  init: function() {
-    sc_super();
+  init: function init () {
+    init.base.apply(this, arguments);
 
     window.table = this; // DEBUG
     //this._sctv_columnsDidChange();
@@ -127,7 +127,7 @@ SC.TableView = SC.ListView.extend(SC.TableDelegate, {
 
   },
 
-  mouseDraggedInTableHeaderView: function(evt, header) {
+  mouseDraggedInTableHeaderView: function mouseDraggedInTableHeaderView (evt, header) {
     SC.RunLoop.begin();
     var isInDragMode = this.get('isInDragMode');
     if (!isInDragMode) return NO;
@@ -143,7 +143,7 @@ SC.TableView = SC.ListView.extend(SC.TableDelegate, {
       this._dragging = true;
     }
 
-    return sc_super();
+    return mouseDraggedInTableHeaderView.base.apply(this, arguments);
     SC.RunLoop.end();
   },
 
@@ -343,8 +343,8 @@ SC.TableView = SC.ListView.extend(SC.TableDelegate, {
   //
 
 
-  computeLayout: function() {
-    var layout = sc_super(),
+  computeLayout: function computeLayout() {
+    var layout = computeLayout.base.apply(this, arguments),
         containerView = this.get('containerView'),
         frame = this.get('frame');
 

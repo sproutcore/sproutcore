@@ -758,8 +758,8 @@
     SC.run(function () {
       var leftAccessoryView = SC.View.design({
         layout:  { top: 1, left: 2, width: 16, height: 16 },
-        init: function () {
-          sc_super();
+        init: function init () {
+          init.base.apply(this, arguments);
           leftAccessoryViewInitCount++;
         }
       });
@@ -778,8 +778,8 @@
     SC.run(function () {
       var rightAccessoryView = SC.View.design({
         layout:  { top: 1, right: 3, width: 17, height: 16 },
-        init: function () {
-          sc_super();
+        init: function init () {
+          init.base.apply(this, arguments);
           rightAccessoryViewInitCount++;
         }
       });

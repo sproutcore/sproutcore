@@ -29,8 +29,8 @@ var DesignModeTestView = SC.View.extend({
     l: { layout: { left: null, right: null, centerX: 0, width: 100 } }
   },
 
-  init: function () {
-    sc_super();
+  init: function init () {
+    init.base.apply(this, arguments);
 
     // Stub the set method.
     this.set = CoreTest.stub('setDesignMode', {

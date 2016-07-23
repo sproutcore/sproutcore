@@ -223,14 +223,14 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
   },
 
   /** @private */
-  init: function () {
-    sc_super();
+  init: function init () {
+    init.base.apply(this, arguments);
     this.contentDidChange();
   },
 
   /** @private */
-  destroy: function () {
-    sc_super();
+  destroy: function destroy () {
+    destroy.base.apply(this, arguments);
 
     var subMenu = this._subMenu;
     if (subMenu) {

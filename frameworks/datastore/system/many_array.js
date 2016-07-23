@@ -27,11 +27,11 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
   /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */
 
   /* @private */
-  toString: function () {
+  toString: function toString () {
     var readOnlyStoreIds = this.get('readOnlyStoreIds'),
       length = this.get('length');
 
-    return "%@({\n  ids: [%@],\n  length: %@,\n  … })".fmt(sc_super(), readOnlyStoreIds, length);
+    return "%@({\n  ids: [%@],\n  length: %@,\n  … })".fmt(toString.base.apply(this, arguments), readOnlyStoreIds, length);
   },
 
   /* END DEBUG ONLY PROPERTIES AND METHODS */
@@ -533,15 +533,15 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
   //
 
   /** @private */
-  unknownProperty: function (key, value) {
+  unknownProperty: function unknownProperty (key, value) {
     var ret;
     if (SC.typeOf(key) === SC.T_STRING) ret = this.reducedProperty(key, value);
-    return ret === undefined ? sc_super() : ret;
+    return ret === undefined ? unknownProperty.base.apply(this, arguments) : ret;
   },
 
   /** @private */
-  init: function () {
-    sc_super();
+  init: function init () {
+    init.base.apply(this, arguments);
 
     // Initialize.
     this.recordPropertyDidChange();

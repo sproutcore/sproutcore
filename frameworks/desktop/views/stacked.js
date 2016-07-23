@@ -111,8 +111,8 @@ SC.StackedView = SC.CollectionView.extend(
     Whenever the collection view reloads some views, reset the cache on the
     frame as well so that it will recalculate.
   */
-  reloadIfNeeded: function () {
-    sc_super();
+  reloadIfNeeded: function reloadIfNeeded() {
+    reloadIfNeeded.base.apply(this, arguments);
 
     return this.updateHeight();
   },

@@ -75,8 +75,8 @@ var ShapeCanvasView = SC.CollectionView.extend({
 
   // save position on screen at mouse down so that we can properly compute
   // you can save in mouseDownInfo, which will be cleared on mouseUp
-  mouseDown: function(ev) {
-    var ret = sc_super();
+  mouseDown: function mouseDown (ev) {
+    var ret = mouseDown.base.apply(this, arguments);
     if (ret) {
       var offset = { x: ev.pageX, y: ev.pageY };
       this.mouseDownInfo.dragAnchor = this.convertFrameFromView(offset, null);
@@ -85,7 +85,7 @@ var ShapeCanvasView = SC.CollectionView.extend({
   },
 
   // handle dragging of content around on the screen
-  mouseDragged: function(ev) {
+  mouseDragged: function mouseDragged(ev) {
     var info   = this.mouseDownInfo,
         items  = info.dragContent,
         anchor = info.dragAnchor,
@@ -123,7 +123,7 @@ var ShapeCanvasView = SC.CollectionView.extend({
     }
 
     // if anchor is empty, dragging is disabled for this mouse down.
-    if (!anchor) return sc_super();
+    if (!anchor) return mouseDragged.base.apply(this, arguments);
 
     // now figure the adjustment for content items.
     adjust = this.convertFrameFromView({ x: ev.pageX, y: ev.pageY }, null);

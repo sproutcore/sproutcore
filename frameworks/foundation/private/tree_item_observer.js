@@ -38,9 +38,9 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
   /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */
 
   /* @private */
-  toString: function () {
+  toString: function toString () {
     var item = this.get('item'),
-      ret = sc_super();
+      ret = toString.base.apply(this, arguments);
 
     return item ? "%@:\n  ↳ %@".fmt(ret, item) : ret;
   },
@@ -792,8 +792,8 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
   },
 
   /** SC.Object.prototype.init */
-  init: function () {
-    sc_super();
+  init: function init () {
+    init.base.apply(this, arguments);
 
     // Initialize the item and the delegate. Be sure to set up the delegate first,
     // because it determines the keys to observe on the item.
@@ -807,7 +807,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     Called just before a branch observer is removed.  Should stop any
     observing and invalidate any child observers.
   */
-  destroy: function () {
+  destroy: function destroy () {
     this.invalidateBranchObserversAt(0);
     this._objectAtCache = null;
     this._notifyParent = NO; // parent doesn't care anymore
@@ -822,7 +822,7 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
 
     this.set('length', 0);
 
-    sc_super();
+    destroy.base.apply(this, arguments);
   },
 
   /** @private */

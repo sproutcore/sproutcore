@@ -1746,7 +1746,7 @@ SC.ScrollView = SC.View.extend({
   },
 
   /** @private */
-  destroy: function() {
+  destroy: function destroy () {
     // Clean up.
     this._sc_removeContentViewObservers();
     this.removeObserver('contentView', this, this._sc_contentViewDidChange);
@@ -1754,7 +1754,7 @@ SC.ScrollView = SC.View.extend({
     this.removeObserver('horizontalAlign', this, this._sc_horizontalAlignDidChange);
     this.removeObserver('verticalAlign', this, this._sc_verticalAlignDidChange);
 
-    sc_super();
+    destroy.base.apply(this, arguments);
   },
 
   /** @private SC.View */
@@ -1786,8 +1786,8 @@ SC.ScrollView = SC.View.extend({
   },
 
   /** SC.Object.prototype */
-  init: function () {
-    sc_super();
+  init: function init () {
+    init.base.apply(this, arguments);
 
     // Observe the content view for changes and initialize once.
     this.addObserver('contentView', this, this._sc_contentViewDidChange);
@@ -2038,10 +2038,10 @@ SC.ScrollView = SC.View.extend({
     @param {SC.View} view view to scroll or null to scroll receiver visible
     @returns {Boolean} YES if scroll position was changed
   */
-  scrollToVisible: function (view) {
+  scrollToVisible: function scrollToVisible (view) {
 
     // if no view is passed, do default
-    if (arguments.length === 0) return sc_super();
+    if (arguments.length === 0) return scrollToVisible.base.apply(this, arguments);
 
     var contentView = this.get('contentView');
     if (!contentView) return NO; // nothing to do if no contentView.

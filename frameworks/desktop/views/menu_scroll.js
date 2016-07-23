@@ -90,8 +90,8 @@ SC.MenuScrollView = SC.ScrollView.extend(
   //
 
   /** @private @see SC.ScrollView. Check frame changes for size changes. */
-  _sc_contentViewFrameDidChange: function () {
-    sc_super();
+  _sc_contentViewFrameDidChange: function _sc_contentViewFrameDidChange () {
+    _sc_contentViewFrameDidChange.base.apply(this, arguments);
 
     // Unlike a normal SC.ScrollView, the visibility of the top & bottom scrollers changes as the
     // scrolling commences. For example, once the user scrolls a tiny bit, we need to show the
@@ -100,7 +100,7 @@ SC.MenuScrollView = SC.ScrollView.extend(
   },
 
   /** @private @see SC.ScrollView. When the content view's size changes, we need to update our scroll offset properties. */
-  _sc_repositionContentViewUnfiltered: function () {
+  _sc_repositionContentViewUnfiltered: function _sc_repositionContentViewUnfiltered () {
     var hasVerticalScroller = this.get('hasVerticalScroller'),
         // UNUSED. minimumVerticalScrollOffset = this.get('minimumVerticalScrollOffset'),
         maximumVerticalScrollOffset = this.get('maximumVerticalScrollOffset');
@@ -121,7 +121,7 @@ SC.MenuScrollView = SC.ScrollView.extend(
       }
     }
 
-    sc_super();
+    _sc_repositionContentViewUnfiltered.base.apply(this, arguments);
   },
 
   /** @private @see SC.ScrollView. Re-position the scrollers and content depending on the need to scroll or not. */

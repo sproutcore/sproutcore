@@ -529,7 +529,7 @@ SC.MenuPane = SC.PickerPane.extend(
   //
 
   /** @private */
-  init: function () {
+  init: function init () {
     // Initialize the items array.
     if (!this.items) { this.items = []; }
 
@@ -538,7 +538,7 @@ SC.MenuPane = SC.PickerPane.extend(
     this._keyEquivalents = {};
 
     // Continue initializing now that default values exist.
-    sc_super();
+    init.base.apply(this, arguments);
 
     // Initialize the observer function once.
     this._sc_menu_itemsDidChange();
@@ -753,8 +753,8 @@ SC.MenuPane = SC.PickerPane.extend(
   }.property('isSubMenu').cacheable(),
 
   /** @private @see SC.Object */
-  destroy: function () {
-    var ret = sc_super();
+  destroy: function destroy () {
+    var ret = destroy.base.apply(this, arguments);
 
     // Clean up previous enumerable observer.
     if (this._sc_menu_items) {
@@ -777,9 +777,9 @@ SC.MenuPane = SC.PickerPane.extend(
 
     @private
   */
-  windowSizeDidChange: function () {
+  windowSizeDidChange: function windowSizeDidChange () {
     this.remove();
-    return sc_super();
+    return windowSizeDidChange.base.apply(this, arguments);
   },
 
   /**

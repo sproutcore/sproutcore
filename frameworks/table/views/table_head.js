@@ -22,8 +22,8 @@ SC.TableHeadView = SC.View.extend({
 
   dragOrder: null,
 
-  init: function() {
-    sc_super();
+  init: function init () {
+    init.base.apply(this, arguments);
     this._scthv_handleChildren();
   },
 
