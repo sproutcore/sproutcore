@@ -20,7 +20,7 @@ module("Task Queue",{
 test("Adding a task should not cause it to run.",function(){
   var task = SC.Task.create({ run: function(){ this.ran = YES; } });
   taskQueue.push(task);
-  
+
   ok(!task.ran, "Task should not have run");
 });
 
@@ -29,8 +29,18 @@ test("Adding a task and calling run() should cause the task to be run.",function
   var task = SC.Task.create({ run: function(){ this.ran = YES; } });
   taskQueue.push(task);
   taskQueue.run();
-  
+
   ok(task.ran, "Task should have run");
+});
+
+test("Adding a function and calling run() should cause the function to be run.",function(){
+  var ran = false,
+    task = function() { ran = true; };
+
+  taskQueue.push(task);
+  taskQueue.run();
+
+  ok(ran, "Function should have run");
 });
 
 test("Adding multiple tasks and calling run should run the tasks in order.",function(){
@@ -41,7 +51,7 @@ test("Adding multiple tasks and calling run should run the tasks in order.",func
   taskQueue.push(t3 = task.create());
   taskQueue.push(t4 = task.create());
   taskQueue.run();
-  
+
   equals(t1.ran, 0, "Task 1 should be first");
   equals(t2.ran, 1, "Task 1 should be second");
   equals(t3.ran, 2, "Task 1 should be third");

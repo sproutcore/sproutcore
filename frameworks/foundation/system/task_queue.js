@@ -22,6 +22,10 @@ sc_require("tasks/task");
         run: function() { return 'mytask'; }
       }));
 
+      // or
+
+      SC.backgroundTaskQueue.push(function() { return 'mytask'; });
+
   @extends SC.Object
   @extends SC.Task
  */
@@ -204,8 +208,18 @@ SC.TaskQueue = SC.Task.extend({
     var task, start = Date.now();
 
     while (task = this.next()) {
-      task.run(this);
-      
+      if (SC.typeOf(task) === SC.T_FUNCTION) {
+        task.call(this);
+      }
+      //@if (debug)
+      else if (!task.isTask) {
+        SC.error("Developer Error: The added task is not valid.");
+      }
+      //@endif
+      else {
+        task.run(this);
+      }
+
       // check if the limit has been exceeded
       if (Date.now() - start > limit) break;
     }
