@@ -5,13 +5,24 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/**
+/** @class
   Represents a single task which can be run by a task queue. Note that tasks
   are actually allowed to add themselves back onto the queue if they did not/
   might not finish.
-*/
+
+  @extends SC.Object
+ */
 SC.Task = SC.Object.extend({
+
+  /**
+    Walk like a duck
+
+    @type Boolean
+  */
+  isTask: true,
+
   run: function(queue) {
     // if needed, you could put the task back on the queue for later finishing.
   }
+
 });
