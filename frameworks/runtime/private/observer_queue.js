@@ -143,7 +143,7 @@ SC.Observers = {
     // observers need it.
     if ( object._kvo_needsRangeObserver ) {
       var set = this.rangeObservers,
-          len = set ? set.get('length') : 0,
+          len = set ? set.length : 0,
           out = this._TMP_OUT,
           ro;
 

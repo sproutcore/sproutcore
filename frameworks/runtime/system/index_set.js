@@ -847,7 +847,7 @@ SC.IndexSet = SC.mixin({},
     if (this.isFrozen) throw new Error(SC.FROZEN_ERROR);
 
     this.beginPropertyChanges();
-    var idx = objects.get('length');
+    var idx = SC.get(objects, 'length');
     if (objects.isSCArray) {
       while(--idx >= 0) this.add(objects.objectAt(idx));
     } else if (objects.isEnumerable) {

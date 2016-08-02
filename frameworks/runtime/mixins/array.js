@@ -626,7 +626,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     var kvoKey;
 
     // Only setup and teardown enumerable observers if we have keys to observe
-    if (observedKeys.get('length') > 0) {
+    if (observedKeys.length > 0) {
       addedObjects = this.slice(start, start + addedCount);
 
       var self = this;
@@ -650,7 +650,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     var kvoKey;
 
     // Only setup and teardown enumerable observers if we have keys to observe
-    if (observedKeys.get('length') > 0) {
+    if (observedKeys.length > 0) {
       removedObjects = this.slice(start, start + removedCount);
 
       // added and resume the chain observer.
