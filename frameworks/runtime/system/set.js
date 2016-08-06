@@ -643,7 +643,7 @@ SC.CoreSet.prototype = {
 
   destroy: function () {
     if (!this.isFrozen) {
-      this.clear();
+      this.length = 0;
       SC.CoreSet._pool.push(this);
     }
     //@if(debug)
@@ -655,7 +655,7 @@ SC.CoreSet.prototype = {
 
   clear: function () {
     if (!this.isFrozen) {
-      this.splice(0, this.length);
+      this.length = 0;
     }
     //@if(debug)
     else {
