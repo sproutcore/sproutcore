@@ -43,6 +43,11 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
   */
   isContextMenuEnabled: NO,
 
+  /**
+    Disable this menu item if no target can be found for the specified action.
+  */
+  shouldDisableWhenNoTargetResponds: NO,
+
   // ..........................................................
   // KEY PROPERTIES
   //
@@ -69,8 +74,14 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
     @property {Boolean}
   */
   isEnabled: function() {
-    return this.getContentProperty('itemIsEnabledKey') !== NO &&
-           this.getContentProperty('itemSeparatorKey') !== YES;
+    if(NO === this.getContentProperty('itemIsEnabledKey'))
+      return NO;
+    if(YES === this.getContentProperty('itemSeparatorKey'))
+      return NO;
+    if(this.get('shouldDisableWhenNoTargetResponds'))
+      return this.canSendAction();
+
+    return YES;
   }.property('content.isEnabled').cacheable(),
 
   /**
@@ -365,6 +376,21 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
   },
 
   /**
+    Validates that a target is available for the action to trigger.
+    @private
+  */
+  canSendAction: function() {
+    var action = this.getContentProperty('itemActionKey'),
+          target = this.getContentProperty('itemTargetKey'),
+          rootMenu = this.getPath('parentMenu.rootMenu'),
+          responder = this.getPath('pane.rootResponder') || SC.RootResponder.responder;
+    target = (target === undefined) ? rootMenu.get('target') : target;
+    var targetForAction = responder.targetForAction(action, target, this);
+
+    return ! SC.none(targetForAction);
+  },
+
+  /**
     Toggles the focus class name on the menu item layer to quickly flash the
     highlight. This indicates to the user that a selection has been made.
 
@@ -655,7 +681,13 @@ SC.MenuItemView = SC.View.extend(SC.ContentDisplay,
         }
       }
     }
-  }
+  },
+
+  paneObserver: function() {
+      // re-evaluate isEnabled every time the menu is reopened
+      // so the RootResponder check is rerun.
+      this.notifyPropertyChange('isEnabled');
+  }.observes('*pane.isPaneAttached')
 
 }) ;
 
