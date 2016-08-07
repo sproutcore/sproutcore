@@ -859,6 +859,10 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     this._fixupTextLayout();
   },
 
+  didAppendToDocument: function() {
+    this._fixupTextLayout();
+  },
+
   /** @private
     Apply proper text layout to hint and input.
    */
