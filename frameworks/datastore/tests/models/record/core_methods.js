@@ -60,3 +60,12 @@ test("JSON encoding an SC.Record should encode the attributes", function(){
 
   same(MyApp.json, result, "original = encoded record");
 });
+
+test("If passed in an SC.Record, then encode the datahash instead", function(){
+  
+  var str = SC.json.encode(MyApp.foo);
+  var result = SC.json.decode(str);
+	
+	same(MyApp.json,result, "original = encoded record");
+	
+});
