@@ -2015,7 +2015,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       storeKeys = this.changelog;
     }
 
-    len = storeKeys ? storeKeys.get('length') : (ids ? ids.get('length') : 0);
+    len = storeKeys ? storeKeys.length : (ids ? ids.get('length') : 0);
 
     for(idx=0;idx<len;idx++) {
 
