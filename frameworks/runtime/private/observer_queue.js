@@ -185,14 +185,16 @@ SC.Observers = {
     var pending ;
     if(--this.isObservingSuspended <= 0) {
       pending = this._pending ;
-      this._pending = SC.CoreSet.create() ;
+      if (pending.length > 0) {
+        this._pending = SC.CoreSet.create() ;
 
-      var idx, len = pending.length;
-      for(idx=0;idx<len;idx++) {
-        pending[idx]._notifyPropertyObservers() ;
+        var idx, len = pending.length;
+        for(idx=0;idx<len;idx++) {
+          pending[idx]._notifyPropertyObservers() ;
+        }
+        pending.clear();
+        pending = null ;
       }
-      pending.clear();
-      pending = null ;
     }
   }
 
