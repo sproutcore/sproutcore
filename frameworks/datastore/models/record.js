@@ -617,6 +617,17 @@ SC.Record = SC.Object.extend(
     return this.get('attributes');
   },
 
+  /**
+     This function is included specifically to make it easier to compare records through
+     SC.isEqual. Because of this function, it will compare records based on a string representation
+     of their attributes. If this is the same, they are regarded to be equal.
+     This is especially useful to compare child records with "normal" records.
+     @return {String} hashified JSON string of the contents of this record.
+   */
+  hash: function () {
+    return "%" + JSON.stringify(this.get('toJSON'));
+  },
+
   // ...............................
   // ATTRIBUTES
   //

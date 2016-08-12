@@ -12,6 +12,10 @@ Edge
 * The `SC.guidFor()` method (primarily used internally) no longer maintains a cache for String and Number GUIDs. Because the GUID for a String or a Number is essentially its own value, the caching process actually takes longer than it does to simply generate a GUID key from the given String or Number (see http://jsperf.com/cache-vs-manipulate). More importantly, this removes the memory overhead of maintaining the GUID cache, which was also unable to be cleaned.
 * Errors generated on autonomous nested stores are retained in the nested store base class. readError() and readQueryError() were consulting the parent stores error list for the error to return.  This was changed to consult the base class error list for cases where the nested store is autonomous.
 
+* The implementation of the nested records has been replaced by one which doesn't require the splitting up of records into parents and childs. A nested structure has a SC.Record instance on top, which either returns an SC.Record instance for a child (a nested toOne) or an SC.ChildArray for a set of children (a nested toMany). There is only one datahash in the store, and all changes are propagated through the top SC.Record instance. 
+This implementation brings a few noticable differences with the old one, such as that you can no longer search for child records in the store. 
+At the same time, this nested records system makes working with a json document store much more straightforward. Be aware however that you might run into issues. Running shiftObject for example on a SC.ChildArray will not return an SC.Record instance but a plain hash. The implementation also brings in a way to compare records through isEqual by comparing their JSON representations.
+
 ### DEPRECATIONS & REMOVALS
 
 * The Ruby Buildtools nicknamed abbot are no longer supported.
