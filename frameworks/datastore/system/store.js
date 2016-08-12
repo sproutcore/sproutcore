@@ -428,10 +428,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     if (hash) this.dataHashes[storeKey] = hash;
     if (status) {
       this.statuses[storeKey] = status;
-      // if status changed, make sure the record knows
-      if (records && records[storeKey]) {
-        records[storeKey].storeDidChangeProperties(YES);
-      }
     }
 
     // also note that this hash is now editable
@@ -510,7 +506,13 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   writeStatus: function(storeKey, newStatus) {
     // use writeDataHash for now to handle optimistic lock.  maximize code
     // reuse.
-    return this.writeDataHash(storeKey, null, newStatus);
+    var records = this.records, rec;
+    var ret = this.writeDataHash(storeKey, null, newStatus);
+    // status changed, make sure any children of this record know
+    if (records && (rec = records[storeKey])) {
+      if (rec.isParentRecord) rec.notifyChildren(['status']);
+    }
+    return ret;
   },
 
   /**
