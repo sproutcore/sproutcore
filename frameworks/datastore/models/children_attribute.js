@@ -28,6 +28,8 @@ sc_require('system/child_array');
 SC.ChildrenAttribute = SC.ChildAttribute.extend(
   /** @scope SC.ChildrenAttribute.prototype */ {
 
+  isChildrenAttribute: true,
+
   // ..........................................................
   // LOW-LEVEL METHODS
   //
@@ -44,8 +46,8 @@ SC.ChildrenAttribute = SC.ChildAttribute.extend(
     // same object.
     if (!ret) {
       ret = SC.ChildArray.create({
-        record: record,
-        propertyName: attrKey,
+        parentObject: record,
+        parentAttribute: attrKey,
         defaultRecordType: recordType
       });
 

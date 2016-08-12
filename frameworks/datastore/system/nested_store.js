@@ -448,7 +448,7 @@ SC.NestedStore = SC.Store.extend(
   },
 
   /** @private - adds chaining support -
-    Does not call sc_super because the implementation of the method vary too
+    Does not call sc_super because the implementations of the method vary too
     much.
   */
   writeDataHash: function(storeKey, hash, status) {
@@ -487,9 +487,6 @@ SC.NestedStore = SC.Store.extend(
     if (!editables) editables = this.editables = [];
     editables[storeKey] = 1 ; // use number for dense array support
 
-    // propagate the data to the child records
-    this._updateChildRecordHashes(storeKey, hash, status);
-
     return this ;
   },
 
@@ -523,8 +520,7 @@ SC.NestedStore = SC.Store.extend(
     var changes = this.get('chainedChanges');
     if (!changes) changes = this.chainedChanges = SC.Set.create();
 
-    var that = this,
-        didAddChainedChanges = false;
+    var didAddChainedChanges = false;
 
     for (idx = 0; idx < len; idx++) {
       if (isArray) storeKey = storeKeys[idx];
@@ -539,10 +535,6 @@ SC.NestedStore = SC.Store.extend(
 
       this._notifyRecordPropertyChange(storeKey, statusOnly, key);
 
-      // notify also the child records
-      this._propagateToChildren(storeKey, function(storeKey){
-        that.dataHashDidChange(storeKey, null, statusOnly, key);
-      });
     }
 
     this.setIfChanged('hasChanges', YES);

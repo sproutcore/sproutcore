@@ -101,29 +101,6 @@ test("Proper Initialization", function () {
   ok(SC.instanceOf(second, NestedRecord.File), "second record is a instance of a NestedRecord.File Object");
 });
 
-test("Test that reset() clears out the store for re-use", function () {
-  var isEmptyObject = function ( obj ) {
-    var name;
-
-    for (name in obj) {
-      return false;
-    }
-    return true;
-  };
-
-  var parent, child;
-  SC.run(function() { parent = store.materializeRecord(storeKeys[0]); });
-  SC.run(function() { child = parent.get('contents').firstObject(); });
-
-  ok(!isEmptyObject(store.parentRecords), "We expect there to be values in store.parentRecords");
-  ok(!isEmptyObject(store.childRecords), "We expect there to be values in store.childRecords");
-
-  store.reset();
-
-  ok(isEmptyObject(store.parentRecords), "We expect there to no longer be any values in store.parentRecords");
-  ok(isEmptyObject(store.childRecords), "We expect there to no longer be any values in store.childRecords");
-});
-
 test("Proper Status", function () {
   var first, second;
 
@@ -195,7 +172,7 @@ test("Can Push onto child array", function () {
 
 test("Use in Nested Store", function () {
   var nstore, dir, c, file,
-      pk, id, nFile, nDir;
+      pk, id, nFile, nDir, nC;
 
   // First, find the first file
   SC.run(function() { dir = store.find(NestedRecord.Directory, 1); });
@@ -217,7 +194,18 @@ test("Use in Nested Store", function () {
   SC.RunLoop.begin();
   pk = file.get('primaryKey');
   id = file.get(pk);
-  nFile = nstore.find(NestedRecord.File, id);
+  //nFile = nstore.find(NestedRecord.File, id);
+  nDir = nstore.find(NestedRecord.Directory, 1);
+  ok(nDir, "Nested > Directory id: 1 exists");
+  equals(nDir.get('name'), 'Dir 1', "Nested > Directory id:1 has a name of 'Dir 1'");
+  nC = nDir.get('contents');
+  ok(nC, "Nested > Content of Directory id:1 exists");
+  nDir = nC.objectAt(0);
+  ok(nDir, "Nested > Directory id:2 exists");
+  equals(nDir.get('name'), 'Dir 2', "Nested > Directory id:2 has a name of 'Dir 2'");
+  nC = nDir.get('contents');
+  ok(nC, "Nested > Content of Directory id:2 exists");
+  nFile = nC.objectAt(0);
   SC.RunLoop.end();
   ok(nFile, "Nested > File id:1 exists");
   equals(nFile.get('name'), 'File 1', "Nested > File id:1 has a name of 'File 1'");
@@ -249,62 +237,7 @@ test("Use in Nested Store", function () {
 
 test("Store#pushRetrieve for parent updates the child records", function () {
   SC.RunLoop.begin()
-  var parent = store.materializeRecord(storeKeys[0]),
-    nr = parent.get('contents').firstObject(),
-    newDataHash = {
-      type: 'Directory',
-      name: 'Dir 1 Changed',
-      guid: 1,
-      content: {
-        type: 'File',
-        guid: 444,
-        name: 'File 4 Changed'
-      },
-      contents: [
-        {
-          type: 'Directory',
-          name: 'Dir 2 Changed',
-          guid: 2,
-          contents: [
-            {
-              type: 'File',
-              guid: 3,
-              name: 'File 1'
-            },
-            {
-              type: 'File',
-              guid: 4,
-              name: 'File 2'
-            }
-          ]
-        }
-      ]
-    };
-
-  parent = store.materializeRecord(storeKeys[0]);
-  nr = parent.get('contents').get('firstObject');
-  var cr = parent.get('content');
-
-  ok(nr, "Got nested record");
-  equals(nr.get('name'), 'Dir 2', "Dir id:2 has correct name");
-
-  store.pushRetrieve(null, null, newDataHash, storeKeys[0]);
-  store.flush();
-  SC.RunLoop.end()
-
-  equals(parent.get('name'), 'Dir 1 Changed', 'Dir id:1 name was changed');
-  equals(nr.get('name'), 'Dir 2 Changed', "Dir id:2 name was changed");
-  equals(cr.get('name'), 'File 4 Changed', "File id:444 name was changed");
-});
-
-// When the length of the nested array changes, only the values that were previously retrieved will
-// be updated. However, if the nested array length change is due to inserting of an object before
-// the previously retrieved object. The previously retrieved object's hash will be updated
-// incorrectly.
-test("Store#pushRetrieve for parent updates the child records, even on different path", function () {
-  SC.RunLoop.begin()
-  var parent = store.materializeRecord(storeKeys[0]),
-    nr = parent.get('contents').firstObject(),
+  var parent, nr, nestedFileOne, nestedFileTwo,
     newDataHash = {
       type: 'Directory',
       name: 'Dir 1 Changed',
@@ -352,139 +285,21 @@ test("Store#pushRetrieve for parent updates the child records, even on different
       ]
     };
 
-  parent = store.materializeRecord(storeKeys[0]);
-  nr = store.find(NestedRecord.Directory,2);
+  SC.run(function () {
+    parent = store.materializeRecord(storeKeys[0]);
+    nr = parent.get('contents').firstObject();
+    nestedFileOne = nr.get('contents').objectAt(0);
+    nestedFileTwo = nr.get('contents').objectAt(1);
+  });
 
   ok(nr, "Got nested record");
   equals(nr.get('name'), 'Dir 2', "Dir id:2 has correct name");
 
-  store.pushRetrieve(null, null, newDataHash, storeKeys[0]);
-  store.flush();
-  SC.RunLoop.end()
+  SC.run(function () {
+    store.pushRetrieve(null, null, newDataHash, storeKeys[0]);
+    store.flush();
+  });
 
   equals(parent.get('name'), 'Dir 1 Changed', 'Dir id:1 name was changed');
-  equals(nr.get('name'), 'Dir 2 Changed', "Dir id:2 name has changed");
-});
-
-test("Store#pushRetrieve for parent updates the child records, works on first object", function () {
-  SC.RunLoop.begin()
-  var parent = store.materializeRecord(storeKeys[0]),
-    nr = parent.get('contents').firstObject(),
-    newDataHash = {
-      type: 'Directory',
-      name: 'Dir 1 Changed',
-      guid: 1,
-      contents: [
-        {
-          type: 'Directory',
-          name: 'Dir 3',
-          guid: 5,
-          contents: [
-            {
-              type: 'File',
-              guid: 6,
-              name: 'File 6'
-            },
-            {
-              type: 'File',
-              guid: 7,
-              name: 'File 7'
-            }
-          ]
-        },
-        {
-          type: 'Directory',
-          name: 'Dir 2 Changed',
-          guid: 2,
-          contents: [
-            {
-              type: 'File',
-              guid: 3,
-              name: 'File 1'
-            },
-            {
-              type: 'File',
-              guid: 4,
-              name: 'File 2'
-            }
-          ]
-        }
-      ]
-    };
-
-  parent = store.materializeRecord(storeKeys[0]);
-  nr = parent.get('contents').firstObject();
-
-  ok(nr, "Got nested record");
-  equals(nr.get('name'), 'Dir 2', "Dir id:2 has correct name");
-
-  store.pushRetrieve(null, null, newDataHash, storeKeys[0]);
-  store.flush();
-  SC.RunLoop.end()
-
-  equals(parent.get('name'), 'Dir 1 Changed', 'Dir id:1 name was changed');
-  equals(nr.get('name'), 'Dir 2 Changed', "First object name has changed");
-});
-
-test("Store#pushRetrieve for parent updates the child records, on paths nested more than 2 levels", function () {
-  SC.RunLoop.begin()
-  var parent = store.materializeRecord(storeKeys[0]),
-    nr = parent.get('contents').firstObject().get('contents').firstObject(),
-    newDataHash = {
-      type: 'Directory',
-      name: 'Dir 1 Changed',
-      guid: 1,
-      contents: [
-        {
-          type: 'Directory',
-          name: 'Dir 3',
-          guid: 5,
-          contents: [
-            {
-              type: 'File',
-              guid: 6,
-              name: 'File 6'
-            },
-            {
-              type: 'File',
-              guid: 7,
-              name: 'File 7'
-            }
-          ]
-        },
-        {
-          type: 'Directory',
-          name: 'Dir 2 Changed',
-          guid: 2,
-          contents: [
-            {
-              type: 'File',
-              guid: 3,
-              name: 'File 1 Changed'
-            },
-            {
-              type: 'File',
-              guid: 4,
-              name: 'File 2'
-            }
-          ]
-        }
-      ]
-    };
-
-  ok(nr, "(deep walk) Got nested record");
-  equals(nr.get('name'), 'File 1', "(deep walk) File id:3 has correct name");
-
-  parent = store.materializeRecord(storeKeys[0]);
-  nr = store.find(NestedRecord.File,3);
-
-  ok(nr, "Got nested record");
-  equals(nr.get('name'), 'File 1', "File id:3 has correct name");
-
-  store.pushRetrieve(null, null, newDataHash, storeKeys[0]);
-  store.flush();
-  SC.RunLoop.end()
-
-  equals(parent.get('name'), 'Dir 1 Changed', 'Dir id:1 name was changed');
-  equals(nr.get('name'), 'File 1 Changed', "File id:3 name has changed");
+  equals(nr.get('name'), 'Dir 3', "Dir id:3 name has changed");
 });
