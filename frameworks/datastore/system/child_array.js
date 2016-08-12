@@ -196,7 +196,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     attrs = parent.get('attributes');
     if (attrs) return attrs[parentAttr];
     else return attrs;
-  },
+  }.property(),
 
   /**
      Returns the status of the underlying record
@@ -262,7 +262,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
   */
   replace: function (idx, amt, recs) {
     var children = this.get('editableChildren'),
-        len = recs ? SC.get(recs, length): 0,
+        len = recs ? SC.get(recs, 'length'): 0,
         record = this.get('parentObject'), newRecs,
         pname = this.get('parentAttribute');
 
@@ -293,6 +293,25 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return this;
   },
 
+
+  /**
+    returns the first object on the
+   */
+
+  shiftObject: function () {
+    var ret, obj;
+    if (this.get('length') === 0) return null;
+    else {
+      obj = this.objectAt(0);
+      if (obj) {
+        ret = obj.get('attributes');
+        SC.Array.shiftObject.apply(this);
+        return ret;
+      }
+    }
+    return ret || null;
+  },
+
   /** @private
     Converts a records array into an array of hashes
 
@@ -302,10 +321,15 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
   _processRecordsToHashes: function (recs) {
     return recs.map(function (me) {
-      if (me.get) {
-        var store = me.get('store');
-        var sk = me.get('storeKey');
-        return store.readDataHash(sk);
+      if (me.isRecord) {
+        if (me.isChildRecord) {
+          return me.get('attributes');
+        }
+        else {
+          var store = me.get('store');
+          var sk = me.get('storeKey');
+          return store.readDataHash(sk);
+        }
       }
       else return me;
     });
@@ -365,6 +389,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
           for (j = 0; j < numkeys; j += 1) {
             obj.notifyPropertyChange(keys[j]);
           }
+          obj.notifyPropertyChange('status');
         }
         if (obj.notifyChildren) {
           obj.notifyChildren(keys);

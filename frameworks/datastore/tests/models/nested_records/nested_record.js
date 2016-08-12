@@ -284,10 +284,7 @@ test("Basic Write As a Hash when Child Record has no primary key", function () {
     name: 'New Child Name',
     value: 'Red Goo'
   });
-  debugger;
   var cr = testParent3.get('info');
-  // somehow in the end of the runloop the cache gets cleared and info reset. this makes the cache value
-  // in testParent different from cr.
   SC.RunLoop.end();
   // Check Model Class information
   ok(SC.kindOf(cr, SC.Record), "set() with an object creates an actual instance that is a kind of a SC.Record Object");
@@ -302,7 +299,6 @@ test("Basic Write As a Hash when Child Record has no primary key", function () {
   ok(cr.get('status') & SC.Record.DIRTY, 'check that the child record is dirty');
   ok(testParent3.get('status') & SC.Record.DIRTY, 'check that the parent record is dirty');
   var newCR = testParent3.get('info');
-  debugger; // run debugger to see why newCR and cr are not considered the same.
   same(newCR, cr, "after a set('name', <new>) on child, checking to see that the parent has received the changes from the child record");
   same(testParent3.readAttribute('info'), cr.get('attributes'), "after a set('name', <new>) on child, readAttribute on the parent should be correct for info child attributes");
 });

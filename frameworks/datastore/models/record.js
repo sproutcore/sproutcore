@@ -564,6 +564,7 @@ SC.Record = SC.Object.extend(
           else {
             if (obj.notifyPropertyChange) {
               obj.notifyPropertyChange(keys);
+              obj.notifyPropertyChange('status');
             }
           }
           if (obj.notifyChildren) {
@@ -572,6 +573,12 @@ SC.Record = SC.Object.extend(
         }
       }
     }
+    if (this.isChildRecord) {
+      // this makes sure the cache on the status property is invalidated whenever a change
+      // from either the store or somewhere else in the nested record structure is propagated.
+      this.notifyPropertyChange('status');
+    }
+
   },
 
   /**
@@ -951,7 +958,10 @@ SC.Record = SC.Object.extend(
         this.notifyPropertyChange('status');
         this.endPropertyChanges();
       } else {
-        if (isParent) this.notifyChildren();
+        if (isParent) {
+          this.notifyChildren();
+          this.notifyPropertyChange('status');
+        }
         else this.allPropertiesDidChange();
       }
 
