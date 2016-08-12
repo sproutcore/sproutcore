@@ -959,6 +959,16 @@ SC.Record = SC.Object.extend(
         this.endPropertyChanges();
       } else {
         if (isParent) {
+          // this is an alternative to allPropertiesDidChange() which would invalidate the cache on
+          // all the child record and child array properties. Perhaps move to notifyChildren?
+          // Suspicion is that this problem also plays at nested records.
+          var p;
+          for (var i in this) {
+            p = this[i];
+            if (p && p.isRecordAttribute && (!p.isChildAttribute || p.isChildrenAttribute)) {
+              this.notifyPropertyChange(i);
+            }
+          }
           this.notifyChildren();
           this.notifyPropertyChange('status');
         }
@@ -1365,7 +1375,7 @@ SC.Record = SC.Object.extend(
 
       // reverse lookup, we have the hash key, but no direct available attributes
       if (!recordType && key && !this[key]) {
-        item = this._findRecordAttributeFor(key);
+        var item = this._findRecordAttributeFor(key);
         if (item) {
           recordType = item.get('typeClass');
         }
