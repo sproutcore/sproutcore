@@ -435,6 +435,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     if (!editables) editables = this.editables = [];
     editables[storeKey] = 1 ; // use number for dense array support
 
+    var records = this.records, rec;
+    if (records && (rec = records[storeKey])) {
+      if (rec.isParentRecord) rec.notifyChildren(['status']);
+    }
+
     return this ;
   },
 
@@ -546,6 +551,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       if (isArray) storeKey = storeKeys[idx];
       this.revisions[storeKey] = rev;
       this._notifyRecordPropertyChange(storeKey, statusOnly, key);
+
     }
 
     return this ;
