@@ -625,7 +625,7 @@ SC.Record = SC.Object.extend(
      @return {String} hashified JSON string of the contents of this record.
    */
   hash: function () {
-    return "%" + JSON.stringify(this.get('toJSON'));
+    return "%" + JSON.stringify(this.get('attributes'));
   },
 
   // ...............................
