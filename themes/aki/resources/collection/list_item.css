@@ -6,8 +6,8 @@ $theme.sc-list-view {
     background: $list-item-bg;
     color: $list-item-text-color;
     text-shadow: $list-item-text-shadow;
-  
-    &.even {
+
+    &.even, &.alternating {
       background: $list-item-even-bg;
       color: $list-item-even-text-color;
       text-shadow: $list-item-even-text-shadow;
@@ -26,7 +26,7 @@ $theme.sc-list-view {
       color: $list-item-drop-target-text-color;
       text-shadow: $list-item-drop-target-text-shadow;
     }
-  
+
 
     $theme.checkbox {
       background-color: transparent;
