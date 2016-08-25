@@ -7,15 +7,7 @@ $theme.sc-source-list {
     background: $source-list-item-bg;
     color: $source-list-item-text-color;
     text-shadow: $source-list-item-text-shadow;
-    
 
-    &.even {
-      background: $source-list-item-even-bg;
-      color: $source-list-item-even-text-color;
-      text-shadow: $source-list-item-even-text-shadow;
-    }
-
-    &.even.sel,
     &.sel {
       background: $sel-source-list-item-bg;
       color: $sel-source-list-item-text-color;
@@ -26,7 +18,6 @@ $theme.sc-source-list {
       //border-bottom: 1px solid $sel-source-list-item-border-bottom-color;
     }
 
-    &.even.drop-target,
     &.drop-target {
       background: $source-list-item-drop-target-bg;
       color: $source-list-item-drop-target-text-color;
@@ -78,6 +69,31 @@ $theme.sc-source-list {
 
     &.has-icon {
       label { left: 22px; }
+    }
+  }
+
+  &.alternating {
+
+    &.even {
+      background: $source-list-item-even-bg;
+      color: $source-list-item-even-text-color;
+      text-shadow: $source-list-item-even-text-shadow;
+    }
+
+    &.even.sel {
+      background: $sel-source-list-item-bg;
+      color: $sel-source-list-item-text-color;
+      box-shadow: $sel-source-list-item-box-color;
+      font-weight: bold;
+      text-shadow: $sel-source-list-item-text-shadow;
+      //border-top: 1px solid $sel-source-list-item-border-top-color;
+      //border-bottom: 1px solid $sel-source-list-item-border-bottom-color;
+    }
+
+    &.even.drop-target {
+      background: $source-list-item-drop-target-bg;
+      color: $source-list-item-drop-target-text-color;
+      text-shadow: $source-list-item-drop-target-text-shadow;
     }
   }
 }
