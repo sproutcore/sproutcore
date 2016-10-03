@@ -40,7 +40,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     var value = this.get('value');
     if (SC.typeOf(value) === SC.T_ERROR) value = value.get('errorValue');
     return this.fieldValueForObject(value);
-  }.property('value', 'validator').cacheable(),
+  }.property('value', 'validatorObject').cacheable(),
 
   // ..........................................................
   // PRIMITIVES
