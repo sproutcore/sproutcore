@@ -136,6 +136,15 @@ SC.SplitView = SC.View.extend({
   layoutDirection: SC.LAYOUT_HORIZONTAL,
 
   /**
+   Determines whether the SplitView should lay out its children
+   horizontally or vertically.
+
+   @type dividerSize
+   @default 1
+  */
+  dividerSize: 1,
+
+  /**
    * Determines whether the SplitView should attempt to resize its
    * child views to fit within the SplitView's own frame (the default).
    *
@@ -176,7 +185,7 @@ SC.SplitView = SC.View.extend({
   // Things like layoutDirection must be rendered as class names.
   // We delegate to a render delegate.
   //
-  displayProperties: ['layoutDirection'],
+  displayProperties: ['dividerSize', 'layoutDirection'],
   renderDelegateName: 'splitRenderDelegate',
 
   //
@@ -221,6 +230,21 @@ SC.SplitView = SC.View.extend({
       if (view.get('isSplitDivider')) view.setIfChanged('layoutDirection', layoutDirection);
     }
   }.observes('layoutDirection'),
+
+  /** @private */
+  dividerSizeDidChange: function() {
+    // Schedule tiling.
+    this.scheduleTiling();
+    // Propagate to dividers.
+    var dividerSize = this.get('dividerSize'),
+        childViews = this.get('childViews'),
+        len = childViews ? childViews.get('length') : 0,
+        i, view;
+    for (i = 0; i < len; i++) {
+      view = childViews[i];
+      if (view.get('isSplitDivider')) view.setIfChanged('size', dividerSize);
+    }
+  }.observes('dividerSize'),
 
   //
   // PUBLIC CHILD VIEW ADJUSTMENT API
@@ -317,6 +341,7 @@ SC.SplitView = SC.View.extend({
   _scsv_setupChildViews: function() {
     var del = this.get('delegate'),
         layoutDirection = this.get('layoutDirection'),
+        dividerSize = this.get('dividerSize'),
 
         children = this.get('childViews').copy(), len = children.length, idx,
         child, lastChild, lastNonDividerChild,
@@ -365,6 +390,7 @@ SC.SplitView = SC.View.extend({
         if (divider) {
           divider.setIfChanged('isSplitDivider', YES);
           divider.setIfChanged('layoutDirection', layoutDirection);
+          divider.setIfChanged('size', dividerSize);
 
           newDividers[dividerId] = divider;
 
