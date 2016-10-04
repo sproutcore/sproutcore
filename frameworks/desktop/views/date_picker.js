@@ -14,7 +14,7 @@
   flexible layouts.)
 
   @extends SC.View
-  @since SproutCore 1.11
+  @since SproutCore 2.0
   @author Evin Grano
   @author Mike Ball
   @author Dave Porter
@@ -87,7 +87,7 @@ SC.DatePickerView = SC.View.extend(SC.ActionSupport, {
 
   /**
     Selects today.
-    
+
     @method
     @returns receiver
   */
@@ -246,9 +246,8 @@ SC.DatePickerView = SC.View.extend(SC.ActionSupport, {
 
     // Date stuff.
     var target = evt.target,
-        dateIdentifier = target.id,
-        date = this._scdpv_parseSelectedDate(evt.target.id);
-    
+      date = this._scdpv_parseSelectedDate(target);
+
     if (date) {
       this._isDraggingDate = YES;
       this.set('_beingSelectedDate', date);
@@ -263,10 +262,8 @@ SC.DatePickerView = SC.View.extend(SC.ActionSupport, {
   },
 
   mouseDragged: function(evt) {
-    var target = evt.target,
-        dateIdentifier = target.id,
-        date = this._scdpv_parseSelectedDate(evt.target.id);
-    
+    var date = this._scdpv_parseSelectedDate(evt.target);
+
     if (this._isDraggingDate) {
       // If we got a date on mouseDown, and we have one now, update it.
       if (date) {
@@ -274,7 +271,7 @@ SC.DatePickerView = SC.View.extend(SC.ActionSupport, {
       }
       else {
         this.set('_beingSelectedDate', null);
-      } 
+      }
       return YES;
     }
 
@@ -283,12 +280,14 @@ SC.DatePickerView = SC.View.extend(SC.ActionSupport, {
 
   /** @private */
   touchUp: function(evt) { return this.mouseUp(evt) },
+
   /** @private */
   mouseUp: function(evt) {
+    var target = evt.target;
 
     // Handle date stuff.
     if (!this._draggingDateDidEnd) {
-      var date = this._scdpv_parseSelectedDate(evt.target.id);
+      var date = this._scdpv_parseSelectedDate(target);
       if (date) {
         this.set('_beingSelectedDate', null);
         this._scdpv_setValue(this._scdpv_dateWithSelectedTime(date));
@@ -299,7 +298,7 @@ SC.DatePickerView = SC.View.extend(SC.ActionSupport, {
 
     // Handle button stuff.
     var displayFromDate = this.get('displayFromDate'),
-        className = evt.target.className,
+        className = target.className,
         param;
 
     if (className.match('button')) {
@@ -329,15 +328,12 @@ SC.DatePickerView = SC.View.extend(SC.ActionSupport, {
   /** @private */
   displayProperties: ['displayFromDate', 'value', '_beingSelectedDate'],
 
-  /** @private
-    NOTE: This is some old janky rendering. If you have improved it, please submit a pull request!
-    TODO: - Redo the rendering & CSS to enable more than just one width and height!
-          - Add render/update for more efficient updating
-  */
+  /** @private */
   render: function(context, firstTime) {
     var displayFromDate = this.get('displayFromDate'),
         startDay = displayFromDate.get('dayOfWeek'),
-        currDate = displayFromDate.advance({day: -startDay}),
+        startDayOffset = 1,
+        currDate = displayFromDate.advance({day: -startDay+startDayOffset }),
         selDate = this.get('value'),
         mouseDownDate = this.get('_beingSelectedDate'),
         todaysDate = SC.DateTime.create(),
@@ -347,49 +343,64 @@ SC.DatePickerView = SC.View.extend(SC.ActionSupport, {
     // Render header
     context = context.begin().addClass('header')
       context.begin().addClass('month').text(displayFromDate.toFormattedString('%B %Y')).end()
+      context.begin().addClass('button previous-year').end()
       context.begin().addClass('button previous').end()
-      context.begin().addClass('button next').end();
-    context = context.end()
+      context.begin().addClass('button next').end()
+      context.begin().addClass('button next-year').end();
+
+      for (var i = 0; i < 7; i++) {
+        context.begin('div').addClass('day-of-week').text(weekdayStrings[i]).end();
+      }
+
+    context = context.end();
 
     // Render body
     context = context.begin('div').addClass('body');
 
-    for (var i = 0; i < 7; i++) {
-      context.begin('div').addClass('day name').text(weekdayStrings[i]).end();
+    var day=0,
+        id, className,
+        dayWidth = 100/7,
+        weekHeight = 100/6;
+
+    for(var i=0;i<6;i++) {
+      context = context.begin('div').setStyle({ top: (weekHeight*i)+'%' }).addClass('week');
+
+      for(var j=0;j<7;j++) {
+        uniqueDayIdentifier = this._scdpv_createUniqueDayIdentifier(currDate);
+
+        classNames = ['day'];
+
+        // Present month
+        if (currDate.get('month') === displayFromDate.get('month')) classNames.push('present');
+        // Past month
+        else if (SC.DateTime.compareDate(currDate, displayFromDate) < 0) classNames.push('past');
+        // Future month
+        else classNames.push('future');
+
+        isToday = currDate.get('day') === todaysDate.get('day') && currDate.get('month') === todaysDate.get('month') && currDate.get('year') === todaysDate.get('year');
+        isSelectedDate = selDate && currDate.get('day') === selDate.get('day') && currDate.get('month') === selDate.get('month') && currDate.get('year') === selDate.get('year');
+        isBeingSelectedDate = mouseDownDate && currDate.get('day') === mouseDownDate.get('day') && currDate.get('month') === mouseDownDate.get('month') && currDate.get('year') === mouseDownDate.get('year');
+
+        if (isToday) classNames.push('today');
+        if (isSelectedDate) classNames.push('sel');
+        if (isBeingSelectedDate) classNames.push('active');
+
+        context.begin()
+               .setAttr('id', uniqueDayIdentifier)
+               .setStyle({
+                 left: (dayWidth*j)+'%',
+                 width: dayWidth+'%',
+               })
+               .addClass(classNames)
+               .begin('div').text(currDate.get('day')).end()
+               .end();
+
+        currDate = currDate.advance({ day: 1 });
+      }
+      context = context.end();
     }
 
-    context = context.begin().addClass('grid');
-
-    for (var gIdx = 0; gIdx < 42; gIdx++) {
-      uniqueDayIdentifier = this._scdpv_createUniqueDayIdentifier(currDate);
-
-      classNames = ['day'];
-
-      // Present month
-      if (currDate.get('month') === displayFromDate.get('month')) classNames.push('present');
-      // Past month
-      else if (SC.DateTime.compareDate(currDate, displayFromDate) < 0) classNames.push('past');
-      // Future month
-      else classNames.push('future');
-
-      isToday = currDate.get('day') === todaysDate.get('day') && currDate.get('month') === todaysDate.get('month') && currDate.get('year') === todaysDate.get('year');
-      isSelectedDate = selDate && currDate.get('day') === selDate.get('day') && currDate.get('month') === selDate.get('month') && currDate.get('year') === selDate.get('year');
-      isBeingSelectedDate = mouseDownDate && currDate.get('day') === mouseDownDate.get('day') && currDate.get('month') === mouseDownDate.get('month') && currDate.get('year') === mouseDownDate.get('year');
-
-      if (isToday) classNames.push('today');
-      if (isSelectedDate) classNames.push('sel');
-      if (isBeingSelectedDate) classNames.push('active');
-
-      context.begin()
-             .setAttr('id', uniqueDayIdentifier)
-             .addClass(classNames)
-             .text(currDate.get('day'))
-             .end();
-
-      currDate = currDate.advance({ day: 1 });
-    }
-
-    context = context.end().end();
+    context = context.end();
   },
 
   /** @private */
@@ -401,7 +412,13 @@ SC.DatePickerView = SC.View.extend(SC.ActionSupport, {
   },
 
   /** @private */
-  _scdpv_parseSelectedDate: function(dateIdentifier) {
+  _scdpv_parseSelectedDate: function(target) {
+    var dateIdentifier;
+
+    while (target && !(dateIdentifier = target.id)) {
+      target = target.parentNode;
+    }
+
     if (!SC.empty(dateIdentifier)) {
       var dataArray = dateIdentifier.split('-');
       if (dataArray.length === 5 && dataArray[0] === 'scdate' && dataArray[1] === this.get('layerId')) {

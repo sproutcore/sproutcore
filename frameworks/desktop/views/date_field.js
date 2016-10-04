@@ -7,6 +7,7 @@
 /*globals SC */
 
 sc_require('views/date_picker');
+sc_require('views/image_button');
 
 /** @class
 
@@ -96,6 +97,14 @@ SC.DateFieldView = SC.TextFieldView.extend(
   allowNumericInput: YES,
 
   /**
+    Set this to NO to allow the value to be set to null if a delete key is hit.
+
+    @type Boolean
+    @default NO
+  */
+  canDelete: NO,
+
+  /**
     The format used for showing only the time. Used when showDate is NO and showTime is YES.
 
     @type String
@@ -118,6 +127,14 @@ SC.DateFieldView = SC.TextFieldView.extend(
     @default '%d/%m/%Y %I:%M %p'
   */
   formatDateTime: '%d/%m/%Y %I:%M %p',
+
+  /**
+    Whether or not the view should display a picker button as rightAccessoryView.
+
+    @type Boolean
+    @default NO
+  */
+  showPickerButton: NO,
 
   /**
     Whether or not the view uses a date picker for picking dates. If set to YES, then a date
@@ -148,6 +165,21 @@ SC.DateFieldView = SC.TextFieldView.extend(
   updateOnPickerChange: NO,
 
   /*
+    The button to be used if showPickerButton is YES. By default, this is a ImageButtonView with
+    the class name `sc-picker-button`. Override to provide your own button. You should specify a
+    class; it will be instantiated as needed.
+
+    The default implementations of set the button as rightAccessoryView.
+
+    @type SC.ImageButtonView
+    @default SC.ImageButtonView
+  */
+  pickerButton: SC.ImageButtonView.extend({
+    layout: { right: 4, centerY: 0, width: 16, height: 16 },
+    classNames: ['sc-picker-button'],
+  }),
+
+  /*
     The date picker to be used if showDatePicker is YES. By default, this is a PickerPane with
     SC.DatePickerView. Override to provide your own date picker. The picker's value property
     will be bound to this view's value property. You should specify a class; it will be instantiated
@@ -163,7 +195,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
   */
   datePicker: SC.PickerPane.extend({
     value: null,
-    layout: { width: 205, height: 224 },
+    layout: { width: 205, height: 215 },
     preferType: SC.PICKER_POINTER,
     preferMatrix: [3, 2, 0, 1, 3],
     // Slight hack here to enable arrow-key proxying.
@@ -183,10 +215,11 @@ SC.DateFieldView = SC.TextFieldView.extend(
   datePickerIsShowing: function(key, value) {
     // Getter.
     if (value === undefined) return NO; // initial value; should be permanently cached until set.
+
     // Setter. (If the view fails to successfully executes the change, tryToPerform returns NO.)
     if (value) {
       this.setIfChanged('_datePickerValue', this.get('value'));
-      this._scdfv_instantiateDatePicker();
+
       return !(this.tryToPerform('appendDatePicker') === NO);
     }
     else return !!(this.tryToPerform('removeDatePicker') === NO);
@@ -205,14 +238,16 @@ SC.DateFieldView = SC.TextFieldView.extend(
     @method
   */
   appendDatePicker: function() {
+    this._scdfv_instantiateDatePickerIfNeeded();
+    var datePicker = this.datePicker;
+
     // If no datePicker instance, datePicker doesn't expose `popup` method, or datePicker is
     // explicitly not appended, there's nothing to do.
-    if (!this.datePicker || this.datePicker.isClass) return NO;
-    if (!this.datePicker.popup) return NO;
-    var isAppended = this.datePicker.get('isAttached');
-    if (isAppended & SC.View.IS_ATTACHED) return YES;
+    if (!datePicker || datePicker.isClass || !datePicker.popup) return NO;
+    if (datePicker.get('isAttached')) return YES;
+
     // Do the business.
-    this.datePicker.popup(this);
+    datePicker.popup(this);
     return YES;
   },
 
@@ -230,14 +265,15 @@ SC.DateFieldView = SC.TextFieldView.extend(
     @returns {Boolean} success
   */
   removeDatePicker: function() {
+    var datePicker = this.datePicker;
+
     // If no datePicker instance, datePicker doesn't expose `remove` method, or datePicker is
     // explicitly appended, there's nothing to do.
-    if (!this.datePicker || this.datePicker.isClass) return NO;
-    if (!this.datePicker.remove) return NO;
-    var isAppended = this.datePicker.get('isAttached');
-    if (!(isAppended & SC.View.IS_ATTACHED)) return YES;
+    if (!datePicker || datePicker.isClass || !datePicker.remove) return YES;
+    if (!datePicker.get('isAttached')) return YES;
+
     // Do the business.
-    this.datePicker.remove();
+    datePicker.remove();
     return YES;
   },
 
@@ -347,8 +383,10 @@ SC.DateFieldView = SC.TextFieldView.extend(
   */
   updateValue: function(key, upOrDown) {
     // 0 is DOWN - 1 is UP
-    var newValue = (upOrDown === 0) ? -1 : 1;
-    var value = this.get('value'), hour;
+    var value = this.get('value') || SC.DateTime.create(),
+      newValue = (upOrDown === 0) ? -1 : 1,
+      hour;
+
     switch(key) {
       case '%a': case '%d': case '%j': this.set('value', value.advance({ day: newValue })); break;
       case '%b': case '%m': this.set('value', value.advance({ month: newValue })); break;
@@ -394,13 +432,13 @@ SC.DateFieldView = SC.TextFieldView.extend(
     if (this.get('updateOnPickerChange')) {
       this.setIfChanged('value', this.get('_datePickerValue'));
     }
+
     // If we're set to dismiss on change and we're visible, update then dismiss.
     if (this.get('dismissPickerOnChange') && this.get('datePickerIsShowing') && !this._isProxyingKeystroke) {
       this.setIfChanged('value', this.get('_datePickerValue'));
       this.set('datePickerIsShowing', NO);
       this.resignFirstResponder();
     }
-    delete this._isProxyingKeystroke;
   }.observes('_datePickerValue'),
 
   /** @private Handles syncing our value to the date picker's value, in case it changes from elsewhere. */
@@ -415,9 +453,11 @@ SC.DateFieldView = SC.TextFieldView.extend(
   },
 
   /** @private Instantiates the datePicker if needed. */
-  _scdfv_instantiateDatePicker: function() {
-    if (!this.getPath('datePicker.isClass')) return;
-    this.datePicker = this.datePicker.create({
+  _scdfv_instantiateDatePickerIfNeeded: function() {
+    var datePicker = this.datePicker;
+    if (!datePicker || !datePicker.isClass) return;
+
+    this.datePicker = datePicker.create({
       _dateFieldView: this,
       valueBinding: SC.Binding.from('_datePickerValue', this),
       // Keystrokes should be handled by the DateFieldView.
@@ -428,6 +468,10 @@ SC.DateFieldView = SC.TextFieldView.extend(
         var ret = sc_super();
         this._dateFieldView._scdfv_pickerDidDismissByModalPane();
         return ret;
+      },
+      remove: function() {
+        this._dateFieldView.set('datePickerIsShowing', NO);
+        return sc_super();
       },
       // Cleanup.
       destroy: function() {
@@ -442,12 +486,17 @@ SC.DateFieldView = SC.TextFieldView.extend(
     date picker accepted the proxy.
   */
   _scdfv_proxyKeystrokeToDatePicker: function(keyEventName, keyEvent) {
+    var datePicker = this.datePicker,
+      ret = null;
+
     this._isProxyingKeystroke = YES; // statehack
-    if (!this.get('datePickerIsShowing')) return NO;
-    if (!this.getPath('datePicker.isObject')) return NO;
-    if (this.getPath('datePicker.isPane')) return this.datePicker.sendEvent(keyEventName, keyEvent);
-    else return this.datePicker.tryToPerform(keyEventName, keyEvent);
-    delete this._isProxyingKeystroke;
+    if (!this.get('datePickerIsShowing')) ret = NO;
+    else if (!datePicker.get('isObject')) ret = NO;
+    else if (datePicker.get('isPane')) ret = datePicker.sendEvent(keyEventName, keyEvent);
+    else ret = datePicker.tryToPerform(keyEventName, keyEvent);
+    this._isProxyingKeystroke = NO;
+
+    return ret;
   },
 
   /** @private Shows or hides the date picker as necessary. */
@@ -478,16 +527,40 @@ SC.DateFieldView = SC.TextFieldView.extend(
     this._scdfv_manageDatePickerShowing();
     return ret;
   },
+
   /** @private */
   willLoseFirstResponder: function() {
     this.set('datePickerIsShowing', NO);
   },
+
   /** @private */
   destroy: function() {
     sc_super();
     if (this.datePicker && !this.datePicker.isClass) this.datePicker.destroy();
     this.datePicker = null;
   },
+
+  // ..........................................................
+  // Picker Button Support
+  //
+
+  rightAccessoryView: function() {
+    var that = this,
+      pickerButton = this.get('pickerButton');
+
+    if (pickerButton && this.get('showPickerButton')) {
+      if (pickerButton.isClass) {
+        pickerButton = pickerButton.create({
+          action: function() {
+            that.set('datePickerIsShowing', YES);
+          },
+        })
+      }
+
+      pickerButton.bind('isEnabled', [this, 'isEnabled']);
+      return pickerButton;
+    }
+  }.property(),
 
   // ..........................................................
   // Key Event Support
@@ -622,11 +695,17 @@ SC.DateFieldView = SC.TextFieldView.extend(
 
   /** @private */
   deleteBackward: function(evt) {
+    if (this.get('canDelete')) {
+      this.set('value', null);
+    }
     return YES;
   },
 
   /** @private */
   deleteForward: function(evt) {
+    if (this.get('canDelete')) {
+      this.set('value', null);
+    }
     return YES;
   },
 
@@ -647,7 +726,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
           ts = this.get('tabsSelections'),
           key = ts[as].get('key');
 
-      var value = this.get('value'),
+      var value = this.get('value') || SC.DateTime.create(),
           lastValue = this._lastValue,
           length = 2,
           min = 0,
