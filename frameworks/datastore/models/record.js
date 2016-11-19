@@ -580,9 +580,11 @@ SC.Record = SC.Object.extend(
   */
   propagateToAggregates: function() {
     var storeKey   = this.get('storeKey'),
-        recordType = this.get('recordType'),
-        aggregates = recordType.__sc_aggregate_keys,
-        idx, len, key, prop, val, recs;
+      // We don't use the recordType computed property in the case where
+      // it has been overridden
+      recordType = SC.Store.recordTypeFor(storeKey),
+      aggregates = recordType.__sc_aggregate_keys,
+      idx, len, key, prop, val, recs;
 
     // if recordType aggregates are not set up yet, make sure to
     // create the cache first
@@ -809,7 +811,9 @@ SC.Record = SC.Object.extend(
       // first check if we should ignore unknown properties for this
       // recordType
       var storeKey = this.get('storeKey'),
-        recordType = this.get('recordType');
+        // We don't use the recordType computed property in the case where
+        // it has been overridden
+        recordType = SC.Store.recordTypeFor(storeKey);
 
       if(recordType.ignoreUnknownProperties===YES) {
         this[key] = value;
