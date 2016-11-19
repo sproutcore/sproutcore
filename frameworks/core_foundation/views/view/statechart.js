@@ -367,6 +367,10 @@ SC.CoreView.reopen(
       // Set the parentView.
       this.set('parentView', parentView);
 
+      // Invalidate the cached parent frame
+      this._scv_parentHeight = null;
+      this._scv_parentWidth = null;
+
       // Add to the new parent's childViews array.
       if (siblings.needsClone) { parentView.set('childViews', []); }
       idx = (beforeView) ? siblings.indexOf(beforeView) : siblings.length;
