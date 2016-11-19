@@ -248,6 +248,8 @@ SC.Response = SC.Object.extend(
     // first give the source a chance to fixup the request and response
     // then freeze req so no more changes can happen.
     if (source && source.willSend) { source.willSend(req, this); }
+
+    req.set('requestTime', Date.now());
     req.freeze();
 
     // if the source did not cancel the request, then invoke the transport
