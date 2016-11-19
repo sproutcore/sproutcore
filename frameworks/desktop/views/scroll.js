@@ -1511,6 +1511,7 @@ SC.ScrollView = SC.View.extend({
       y: touch.scrollVelocity.y * 10
     };
 
+    touch.lastEventTime = Date.now();
     touch.animationID = window.requestAnimationFrame(function () {
       self.decelerateAnimation();
     });
