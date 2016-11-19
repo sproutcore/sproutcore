@@ -41,6 +41,9 @@ SC.BaseTheme.radioGroupRenderDelegate = SC.RenderDelegate.create({
     context.setAttr('role', 'radiogroup');
     context.setAttr('aria-disabled', dataSource.get('isEnabled') ? 'false' : 'true');
 
+    if (len == 0)
+      context.push("");
+
     for (idx = 0; idx < len; idx++) {
       item = items[idx];
       context = context.begin('div')
