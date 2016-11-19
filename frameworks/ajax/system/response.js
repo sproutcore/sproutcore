@@ -54,7 +54,7 @@ SC.Response = SC.Object.extend(
     @default `this`
   */
   errorValue: function() {
-    return this;
+    return this.get('isError') ? SC.val(this.get('errorObject')) : null;
   }.property().cacheable(),
 
   /**
@@ -186,7 +186,7 @@ SC.Response = SC.Object.extend(
         return SC.Error.create({
           message: e.name + ': ' + e.message,
           label: 'Response',
-          errorValue: this });
+          errorValue: this.get('status') });
       }
     }
     return ret;
@@ -358,12 +358,9 @@ SC.Response = SC.Object.extend(
       this.receive(function(proceed) {
         if (!proceed) { return; }
 
-        // Set our value to an error.
-        var error = SC.$error("HTTP Request timed out", "Request", 0);
-        error.set("errorValue", this);
-        this.set('isError', YES);
-        this.set('errorObject', error);
         this.set('status', 0);
+        this.set('isError', YES);
+        this.set('errorObject', SC.$error("HTTP Request timed out", "Request", 0));
       }, this);
 
       return YES;
@@ -647,34 +644,21 @@ SC.XHRResponse = SC.Response.extend(
     var listener, listeners, listenersForKey,
       rawRequest = this.get('rawRequest'),
       readyState = rawRequest.readyState,
-      request,
-      error, status, msg;
+      request;
 
     if (readyState === 4 && !this.get('timedOut')) {
       this.receive(function(proceed) {
         if (!proceed) { return; }
 
         // collect the status and decide if we're in an error state or not
-        status = -1;
-        try {
-          status = rawRequest.status || 0;
-          // IE mangles 204 to 1223. See http://bugs.jquery.com/ticket/1450 and many others
-          status = status === 1223 ? 204 : status;
-        } catch (e) {}
+        var status = rawRequest.status || 0;
+        // IE mangles 204 to 1223. See http://bugs.jquery.com/ticket/1450 and many others
+        status = status === 1223 ? 204 : status;
 
         // if there was an error - setup error and save it
         if ((status < 200) || (status >= 300)) {
-
-          try {
-            msg = rawRequest.statusText || '';
-          } catch(e2) {
-            msg = '';
-          }
-
-          error = SC.$error(msg || "HTTP Request failed", "Request", status);
-          error.set("errorValue", this);
           this.set('isError', YES);
-          this.set('errorObject', error);
+          this.set('errorObject', SC.$error(rawRequest.statusText || "HTTP Request failed", "Request", status));
         }
 
         // set the status - this will trigger changes on related properties

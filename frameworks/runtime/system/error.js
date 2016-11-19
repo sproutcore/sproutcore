@@ -14,15 +14,15 @@ sc_require('ext/function');
   An error, used to represent an error state.
 
   Many API's within SproutCore will return an instance of this object whenever
-  they have an error occur.  An error includes an error code, description,
+  they have an error occur.  An error includes an errorValue, description,
   and optional human readable label that indicates the item that failed.
 
   Depending on the error, other properties may also be added to the object
   to help you recover from the failure.
 
   You can pass error objects to various UI elements to display the error in
-  the interface. You can easily determine if the value returned by some API is
-  an error or not using the helper SC.ok(value).
+  the interface. You can easily determine if the errorValue returned by some API is
+  an error or not using the helper SC.ok(errorValue).
 
   Faking Error Objects
   ---
@@ -43,13 +43,6 @@ SC.Error = SC.Object.extend(
 /** @scope SC.Error.prototype */ {
 
   /**
-    error code.  Used to designate the error type.
-
-    @type Number
-  */
-  code: -1,
-
-  /**
     Human readable description of the error.  This can also be a non-localized
     key.
 
@@ -58,7 +51,7 @@ SC.Error = SC.Object.extend(
   message: '',
 
   /**
-    The value the error represents.  This is used when wrapping a value inside
+    The errorValue the error represents.  This is used when wrapping a errorValue inside
     of an error to represent the validation failure.
 
     @type Object
@@ -106,7 +99,7 @@ SC.Error = SC.Object.extend(
 
   /** @private */
   toString: function() {
-    return "SC.Error:%@:%@ (%@)".fmt(SC.guidFor(this), this.get('message'), this.get('code'));
+    return "SC.Error:%@:%@ (%@)".fmt(SC.guidFor(this), this.get('message'), this.get('errorValue'));
   },
 
   /**
@@ -121,31 +114,30 @@ SC.Error.mixin({
 
   /**
     Creates a new SC.Error instance with the passed description, label, and
-    code.  All parameters are optional.
+    errorValue.  All parameters are optional.
 
     @param description {String} human readable description of the error
     @param label {String} human readable name of the item with the error
-    @param code {Number} an error code to use for testing.
+    @param errorValue {Number} an errorValue to use for testing.
     @returns {SC.Error} new error instance.
   */
-  desc: function(description, label, value, code) {
-    var opts = { message: description } ;
-    if (label !== undefined) opts.label = label ;
-    if (code !== undefined) opts.code = code ;
-    if (value !== undefined) opts.errorValue = value ;
+  desc: function(description, label, errorValue) {
+    var opts = { message: description };
+    if (label !== undefined) opts.label = label;
+    if (errorValue !== undefined) opts.errorValue = errorValue;
     return this.create(opts) ;
   },
 
   /**
     Throw a new SC.Error instance with the passed description, label, and
-    code.  All parameters are optional.
+    errorValue.  All parameters are optional.
 
     @param description {String} human readable description of the error
     @param label {String} human readable name of the item with the error
-    @param code {Number} an error code to use for testing.
+    @param errorValue {Number} an errorValue to use for testing.
     @returns {SC.Error} new error instance.
   */
-  'throw': function(description, label, value, code) {
+  'throw': function(description, label, errorValue) {
     this.desc.apply(this, arguments).throw();
   }
 
@@ -156,11 +148,11 @@ SC.Error.mixin({
 
   @param description {String} human readable description of the error
   @param label {String} human readable name of the item with the error
-  @param code {Number} an error code to use for testing.
+  @param errorValue {Number} an errorValue to use for testing.
   @returns {SC.Error} new error instance.
 */
-SC.$error = function(description, label, value, c) {
-  return SC.Error.desc(description, label, value, c);
+SC.$error = function(description, label, errorValue) {
+  return SC.Error.desc(description, label, errorValue);
 };
 
 /**
@@ -168,20 +160,20 @@ SC.$error = function(description, label, value, c) {
 
   @param description {String} human readable description of the error
   @param label {String} human readable name of the item with the error
-  @param code {Number} an error code to use for testing.
+  @param errorValue {Number} an errorValue to use for testing.
   @returns {SC.Error} new error instance.
 */
-SC.throw = function(description, label, value, c) {
-  SC.Error.throw(description, label, value, c);
+SC.throw = function(description, label, errorValue) {
+  SC.Error.throw(description, label, errorValue);
 };
 
 /** @private */
 SC.$throw = SC.throw;
 
 /**
-  Returns NO if the passed value is an error object or false.
+  Returns NO if the passed errorValue is an error object or false.
 
-  @param {Object} ret object value
+  @param {Object} ret object errorValue
   @returns {Boolean}
 */
 SC.ok = function(ret) {
@@ -192,16 +184,16 @@ SC.ok = function(ret) {
 SC.$ok = SC.ok;
 
 /**
-  Returns the value of an object.  If the passed object is an error, returns
-  the value associated with the error; otherwise returns the receiver itself.
+  Returns the errorValue of an object.  If the passed object is an error, returns
+  the errorValue associated with the error; otherwise returns the receiver itself.
 
   @param {Object} obj the object
-  @returns {Object} value
+  @returns {Object} errorValue
 */
 SC.val = function(obj) {
-  if (obj && obj.isError) {
-    return obj.get ? obj.get('errorValue') : null ; // Error has no value
-  } else return obj ;
+  if (SC.get(obj, 'isError')) {
+    return SC.get(obj, 'errorValue');
+  } else return obj;
 };
 
 /** @private */
@@ -210,7 +202,7 @@ SC.$val = SC.val;
 // STANDARD ERROR OBJECTS
 
 /**
-  Standard error code for errors that do not support multiple values.
+  Standard errorValue for errors that do not support multiple errorValues.
 
   @type Number
 */
