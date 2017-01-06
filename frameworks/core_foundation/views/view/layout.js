@@ -1281,14 +1281,6 @@ SC.View.reopen(
     this._checkForResize();
   },
 
-  /** @private Extension: The 'orphaned' event. */
-  _orphaned: function (oldParentView) {
-    sc_super();
-
-    // Our frame may change once we've been removed from a parent.
-    if (!this.isDestroyed) { this._checkForResize(); }
-  },
-
   /** @private Extension: The 'updatedContent' event. */
   _updatedContent: function () {
     sc_super();
