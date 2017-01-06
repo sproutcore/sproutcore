@@ -257,7 +257,11 @@ SC.mixin(SC.View,
         totalAvailableSpace = 0,
         totalFillAvailableSpaceRatio = 0,
         spacing = options.spacing || 0,
-        i, len;
+        i, len = childViews.get('length');
+
+      view._childViewsStartPositions = (view._childViewsStartPositions && view._childViewsStartPositions.length == len)
+                                         ? view._childViewsStartPositions : new Array(len);
+      view._childViewsToClipSystematically = view._childViewsToClipSystematically || [];
 
       // if the view is not configured to resize to fit content, then we give a chance to the children to fill the available space
       // we make a 1st pass to check the conditions, to evaluate the available space and the proportions between children
@@ -268,7 +272,7 @@ SC.mixin(SC.View,
         if( !totalAvailableSpace )
           return;
 
-        for (i = 0, len = childViews.get('length'); i < len; i++) {
+        for (i = 0; i < len; i++) {
           var childView = childViews.objectAt(i),
             layout,
             fillRatio,
@@ -332,17 +336,23 @@ SC.mixin(SC.View,
       marginAfter = options.paddingBefore || 0;
       paddingAfter = options.paddingAfter || 0;
 
-      for (i = 0, len = childViews.get('length'); i < len; i++) {
+      for (i = 0; i < len; i++) {
         var childView = childViews.objectAt(i),
           layout, width,
           adjustLeft,
           adjustRight,
-          marginBefore;
+          marginBefore,
+          isVisible = childView.get('isVisible');
 
         // Ignore child views with useAbsoluteLayout true, useStaticLayout true or that are not visible.
-        if (!childView.get('isVisible') ||
+        if (!isVisible ||
           childView.get('useAbsoluteLayout') ||
           childView.get('useStaticLayout')) {
+          view._childViewsStartPositions[i] = null;
+
+          if (isVisible) {
+            view._childViewsToClipSystematically.push( i );
+          }
           continue;
         }
 
@@ -396,6 +406,8 @@ SC.mixin(SC.View,
         if( adjustLeft )
           childView.adjust('left', position);
 
+        view._childViewsStartPositions[i] = position;
+
         position += childView.getPath('borderFrame.width');
 
         // Determine the right margin.
@@ -412,8 +424,76 @@ SC.mixin(SC.View,
       if (resizeToFit && view.getPath('layout.width') !== position) {
         view.adjust('width', position);
       }
-    }
+    },
 
+    shouldNotifyChildViewsOnParentLayoutChange: function (view) {
+      var currentLayout = view.get("layout");
+
+      if (view._previousLayout && currentLayout) {
+        return ( view._previousLayout.height != currentLayout.height ) ||
+               ( view._previousLayout.top != currentLayout.top ) ||
+               ( view._previousLayout.bottom != currentLayout.bottom );
+      }
+
+      return YES;
+    },
+
+    notifyChildViewsOnClippingFrameDidChange: function (view) {
+      var childViews = view.get("childViews");
+
+      if (view._childViewsStartPositions &&
+          (childViews.get( "length") == view._childViewsStartPositions.length)) {
+        var len = view._childViewsStartPositions.length;
+
+        if (len > 0) {
+          var clippingFrame = view.get('clippingFrame');
+          var clippingStart = clippingFrame.x;
+          var clippingEnd = clippingStart + clippingFrame.width;
+          var idx = 0;
+          var position;
+          var previousChild = null;
+          var startIndexFound = NO;
+
+          for (; idx<len; ++idx ) {
+            position = view._childViewsStartPositions[idx];
+
+            if (position != null) {
+              if (startIndexFound) {
+                if (position<clippingEnd) {
+                  childViews[idx]._sc_view_recursiveCallClippingFrameDidChange();
+                } else {
+                  break;
+                }
+              } else {
+                if (position >= clippingStart) {
+                  startIndexFound = YES;
+
+                  if (previousChild != null) {
+                    childViews[previousChild]._sc_view_recursiveCallClippingFrameDidChange();
+                  }
+                  childViews[idx]._sc_view_recursiveCallClippingFrameDidChange();
+                } else {
+                  if (idx == len - 1) {
+                    childViews[idx]._sc_view_recursiveCallClippingFrameDidChange();
+                  }
+                }
+
+                previousChild = idx;
+              }
+            }
+          }
+
+          if (view._childViewsToClipSystematically) {
+            view._childViewsToClipSystematically.forEach( function(idx) {
+              childViews[idx]._sc_view_recursiveCallClippingFrameDidChange();
+            } );
+          }
+          return;
+        }
+      }
+
+      view._callOnChildViews('_sc_view_clippingFrameDidChange');
+    }
   }
 
 });

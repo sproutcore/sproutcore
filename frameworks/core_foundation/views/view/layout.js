@@ -750,14 +750,26 @@ SC.View.reopen(
 
     @returns {void}
   */
-  viewDidResize: function () {
+  viewDidResize: function (layoutChange) {
     this._viewFrameDidChange();
 
-    // Also notify our children.
-    var cv = this.childViews, len, idx, view;
-    for (idx = 0; idx < (len = cv.length); ++idx) {
-      view = cv[idx];
-      view.tryToPerform('parentViewDidResize');
+    // Also notify our children if needed.
+    var shouldNotifyChildren = YES;
+    var childViewLayout = this.childViewLayout;
+
+    // check if the child layout plugin uses a custom algorithm in order to
+    // decide if the child views should be notified or not
+    if (layoutChange && childViewLayout && childViewLayout.shouldNotifyChildViewsOnParentLayoutChange &&
+        (this.get('childViewLayoutOptions') || {}).useLayoutFastPath) {
+      shouldNotifyChildren = childViewLayout.shouldNotifyChildViewsOnParentLayoutChange(this);
+    }
+
+    if (shouldNotifyChildren) {
+      var cv = this.childViews, len, idx, view;
+      for (idx = 0; idx < (len = cv.length); ++idx) {
+        view = cv[idx];
+        view.tryToPerform('parentViewDidResize');
+      }
     }
   },
 
@@ -769,7 +781,15 @@ SC.View.reopen(
   */
   _viewFrameDidChange: function () {
     this.notifyPropertyChange('frame');
-    this._callOnChildViews('_sc_view_clippingFrameDidChange');
+
+    var childViewLayout = this.childViewLayout;
+
+    if (childViewLayout && childViewLayout.notifyChildViewsOnClippingFrameDidChange) {
+      childViewLayout.notifyChildViewsOnClippingFrameDidChange(this);
+    }
+    else {
+      this._callOnChildViews('_sc_view_clippingFrameDidChange');
+    }
   },
 
   // Implementation note: As a general rule, paired method calls, such as
@@ -869,7 +889,7 @@ SC.View.reopen(
     }
 
     // Optimize notifications depending on if we resized or just moved.
-    this._checkForResize();
+    this._checkForResize(YES);
 
     // Notify layoutView/parentView, unless we are transitioning.
     var layoutView = this.get('layoutView');
@@ -889,7 +909,7 @@ SC.View.reopen(
   },
 
   /** @private */
-  _checkForResize: function () {
+  _checkForResize: function (layoutChange) {
     // Did our layout change in a way that could cause us to be resized?  If
     // not, then there's no need to invalidate the frames of our child views.
     var previousLayout = this._previousLayout,
@@ -916,7 +936,7 @@ SC.View.reopen(
     }
 
     if (didResize) {
-      this.viewDidResize();
+      this.viewDidResize(layoutChange);
     } else {
       // Even if we didn't resize, our frame may have changed
       // TODO: consider checking for position changes by testing the resulting frame against the cached frame.  This is difficult to do.

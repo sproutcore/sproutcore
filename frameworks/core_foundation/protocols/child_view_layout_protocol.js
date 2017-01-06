@@ -54,6 +54,29 @@ SC.ChildViewLayoutProtocol = {
 
     @param {SC.View} view The view that is using this plugin.
   */
-  layoutChildViews: function (view) {}
+  layoutChildViews: function (view) {},
 
+  /**
+    This *optional* method will be called when the view is resized. By
+    returning `true` from this call, we would be indicating that,
+    it should notify the child views through parentViewDidResize.
+
+    This method should only be called for views configured with useLayoutFastPath.
+
+    For example, in order to improve the performance, a vertical stack that is known
+    to have a fixed height, may avoid notifying the child views whenever its height changes.
+
+    @param {SC.View} view The view that is using this plugin.
+    @returns {Boolean} `true` if the view's resize should trigger a parent resize notification on the child views.
+  */
+  shouldNotifyChildViewsOnParentLayoutChange: function (view) {},
+
+  /**
+    This *optional* method will be called when the view clipping frame changes.
+    It may implement a custom mechanism that notifies only visible child views,
+    therefore vastly improving the performance.
+
+    @param {SC.View} view The view that is using this plugin.
+  */
+  notifyChildViewsOnClippingFrameDidChange: function (view) {}
 };

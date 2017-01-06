@@ -1079,6 +1079,28 @@ SC.CoreView.reopen(
   */
   _sc_view_clippingFrameDidChange: function () {
     this.notifyPropertyChange('clippingFrame');
+
+    // If the childViewLayout provides a custom notification mechanism, use it and stop the recursive call
+    var childViewLayout = this.childViewLayout;
+
+    if (childViewLayout && childViewLayout.notifyChildViewsOnClippingFrameDidChange) {
+      childViewLayout.notifyChildViewsOnClippingFrameDidChange(this);
+      return NO;
+    }
+  },
+
+  /** @private
+    This helper method is invoked by child layout plugins whenever the clippingFrame changes, notifying
+    each child view that its clippingFrame has also changed.
+  */
+  _sc_view_recursiveCallClippingFrameDidChange: function () {
+    var childViewLayout = this.childViewLayout;
+
+    var shouldCallOnChildViews = this._sc_view_clippingFrameDidChange();
+
+    if (shouldCallOnChildViews === undefined || shouldCallOnChildViews) {
+      this._callOnChildViews('_sc_view_clippingFrameDidChange');
+    }
   },
 
   /**
