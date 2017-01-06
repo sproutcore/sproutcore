@@ -94,9 +94,13 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     }else if(this.HTML5DB_noLocalStorage){
       storageSafari3 = this._safari3DB;
     }else{
-      localStorage = window.localStorage ;
-      if (!localStorage && window.globalStorage) {
-        localStorage = window.globalStorage[window.location.hostname];
+      try {
+        localStorage = window.localStorage;
+        if (!localStorage && window.globalStorage) {
+          localStorage = window.globalStorage[window.location.hostname];
+        }
+      }catch(e){
+        SC.Logger.error("Failed using localStorage. "+e);
       }
     }
     if (localStorage || storageSafari3) {
@@ -156,10 +160,15 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     }else if(this.HTML5DB_noLocalStorage){
       storageSafari3 = this._safari3DB;
     }else{
-       localStorage = window.localStorage ;
-       if (!localStorage && window.globalStorage) {
-         localStorage = window.globalStorage[window.location.hostname];
-       }
+      try {
+        localStorage = window.localStorage;
+        if (!localStorage && window.globalStorage) {
+          localStorage = window.globalStorage[window.location.hostname];
+        }
+      }catch(e){
+        SC.Logger.error("Failed using localStorage. "+e);
+      }
+
     }
     key=["SC.UserDefaults",userKeyName].join('-at-');
     if (localStorage || storageSafari3) {
@@ -221,14 +230,18 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
         SC.browser.compare(SC.browser.version, '7') === 0;
 
     if(isIE7){
-       localStorage=document.body;
+      localStorage=document.body;
     }else if(this.HTML5DB_noLocalStorage){
-         storageSafari3 = this._safari3DB;
+      storageSafari3 = this._safari3DB;
     }else{
-       localStorage = window.localStorage ;
-       if (!localStorage && window.globalStorage) {
-         localStorage = window.globalStorage[window.location.hostname];
-       }
+      try {
+        localStorage = window.localStorage;
+        if (!localStorage && window.globalStorage) {
+          localStorage = window.globalStorage[window.location.hostname];
+        }
+      }catch(e){
+        SC.Logger.error("Failed using localStorage. "+e);
+      }
     }
 
     key=["SC.UserDefaults",userKeyName].join('-at-');
