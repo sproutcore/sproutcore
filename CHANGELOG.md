@@ -22,6 +22,7 @@ Edge
 ### BUG FIXES
 
 * Removed dependency on deprecated SC.MENUPANE.VERTICAL_OFFSET property that could cause a height NaN error in SC.PickerPane
+* Fix for uncaught error in SC.UserDefaults when accessing window.localStorage and adding a definition and extension of SC.UserDefaultsDelegate
 
 1.11.1
 -----------
@@ -2396,4 +2397,3 @@ BROWSER
 * Resolve a bug where other panes would disappear if a menu pane was opened (IE7 only).
 * Fix for SC.button on IE7, now it calculates the label with once is appended to the document
 * SC.TextFieldView: Default hint as empty string to avoid IE displaying null in the text fields
-
