@@ -1,10 +1,11 @@
 CHANGE LOG
 ==========
 
-Edge
+1.11.stable
 -----------
 
 ### NEW FEATURES
+
 ### CHANGES & IMPROVEMENTS
 
 #### Runtime
@@ -13,6 +14,8 @@ Edge
 
 ### DEPRECATIONS & REMOVALS
 ### BUG FIXES
+
+* Fix for uncaught error in SC.UserDefaults when accessing window.localStorage and adding a definition and extension of SC.UserDefaultsDelegate
 
 1.11.1
 -----------
