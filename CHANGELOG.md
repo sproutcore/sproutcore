@@ -21,6 +21,8 @@ Edge
 
 ### BUG FIXES
 
+* Errors generated on autonomous nested stores are retained in the nested store base class. readError() and readQueryError() were consulting the parent stores error list for the error to return.  This was changed to consult the base class error list for cases where the nested store is autonomous.
+
 * Removed dependency on deprecated SC.MENUPANE.VERTICAL_OFFSET property that could cause a height NaN error in SC.PickerPane
 * Fix for uncaught error in SC.UserDefaults when accessing window.localStorage and adding a definition and extension of SC.UserDefaultsDelegate
 
