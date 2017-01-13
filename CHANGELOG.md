@@ -21,6 +21,7 @@ Edge
 
 ### BUG FIXES
 
+* Re-attach pane modal if owner pane is re-attached during transition out
 * Removed dependency on deprecated SC.MENUPANE.VERTICAL_OFFSET property that could cause a height NaN error in SC.PickerPane
 * Fix for uncaught error in SC.UserDefaults when accessing window.localStorage and adding a definition and extension of SC.UserDefaultsDelegate
 
