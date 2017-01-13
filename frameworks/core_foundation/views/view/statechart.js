@@ -2139,6 +2139,12 @@ SC.CoreView.reopen(
     var transitionOut = this.get('transitionOut'),
       options = this.get('transitionOutOptions') || {};
 
+    //@if (debug)
+    if (SC.LOG_VIEW_STATES || this.SC_LOG_VIEW_STATE) {
+      SC.Logger.log('%c%@ — _transitionOut()'.fmt(this), SC.LOG_VIEW_STATES_STYLE[this.get('viewState')]);
+    }
+    //@endif
+
     if (!inPlace) {
       this._setupTransition(transitionOut);
     }

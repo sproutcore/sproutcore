@@ -118,6 +118,43 @@ test("Verify SC.PanelPane#isModal", function() {
   });
 });
 
+test("Verify panel pane's modal will be attached/detached during lifecycle", function() {
+  var modalPane = SC.ModalPane.create();
+  var pane = SC.PanelPane.create({
+    contentView: SC.View,
+    modalPane: modalPane,
+    isModal: YES,
+    transitionIn: SC.View.FADE_IN,
+    transitionOut: SC.View.FADE_OUT
+  });
+
+  // normal life cycle
+
+  SC.run(function () {
+    pane.append();
+  });
+  equals(pane.getPath('modalPane.viewState'), SC.CoreView.ATTACHED_SHOWN, "Modal pane is attached when pane becomes visible");
+  equals(pane.$().prev()[0], modalPane.get('layer'), "Modal pane is attached right before the pane");
+  SC.run(function () {
+    pane.remove();
+  });
+  equals(pane.getPath('modalPane.viewState'), SC.CoreView.UNATTACHED, "Modal pane is unattached when pane becomes isvisible");
+
+  // life cycle when there are midstream changes
+
+  SC.run(function () {
+    pane.append();
+    pane.remove();
+    pane.append();
+  });
+  equals(pane.getPath('modalPane.viewState'), SC.CoreView.ATTACHED_SHOWN, "Modal pane is attached when pane becomes visible");
+  equals(pane.$().prev()[0], modalPane.get('layer'), "Modal pane is attached right before the pane");
+
+  SC.run(function () {
+    pane.destroy();
+  });
+});
+
 test("Should changing isModal when a pane is transitioning out not append the modal pane?");
 /*
   Previously, if the panel pane was not shown it would simply not append the modal pane to it. Which

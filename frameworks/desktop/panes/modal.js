@@ -44,7 +44,23 @@ SC.ModalPane = SC.Pane.extend(
   paneWillAppend: function(pane) {
     var _tmpPane;
     this._openPaneCount++;
-    if (!this.get('isVisibleInWindow')) this.append();
+    if (!this.get('isVisibleInWindow')) {
+      // before appending the modal pane, need to figure out if the pane
+      // is visible or not so we can know where to attach the picker pane.
+      
+      if (pane.get('isVisibleInWindow')) {
+        // if the pane is already visible, make sure the modal pane is
+        // append below the pane
+        var self = this;
+        this.insert(function () {
+          self._doAttach(document.body, pane.get('layer'));
+        });
+      }
+      else {
+        // if the pane is not visible, just do a simple append
+        this.append();
+      }
+    }
     var panes = SC.RootResponder.responder.panes;
     for(var i=0, iLen=panes.length; i<iLen; i++ ){
       _tmpPane = panes[i];
