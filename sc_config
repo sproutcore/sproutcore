@@ -40,4 +40,8 @@ BT.addTheme(BT.Theme.extend({
   ref: "sproutcore:legacy",
   path: dirname() + "/themes/legacy_theme",
   dependencies: ["sproutcore:empty_theme"]
-}))
+}));
+
+if (BT.AppBuilder.prototype.includeTests) {
+  sc_require(require('path').join(dirname(), "apps", "tests", "sc_config"));
+}
