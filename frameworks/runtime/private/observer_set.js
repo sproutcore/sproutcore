@@ -25,7 +25,7 @@ SC.ObserverSet = {
     Adds the named target/method observer to the set.  The method must be
     a function, not a string.
   */
-  add: function(target, method, context) {
+  add: function(target, method, context, loggingInfo) {
     var targetGuid = SC.guidFor(target),
         methodGuid = SC.guidFor(method),
         targets    = this._members,
@@ -46,7 +46,7 @@ SC.ObserverSet = {
       // If deferred call logging info was specified (i.e., in debug mode when
       // such logging is enabled), we need to add it to the enqueued target/
       // method.
-      member[3] = arguments[3];
+      member[3] = loggingInfo;
       //@endif
 
       members.push(member);
@@ -56,8 +56,7 @@ SC.ObserverSet = {
       // If deferred call logging info was specified (i.e., in debug mode when
       // such logging is enabled), we need to add it to the enqueued target/
       // method.
-      var loggingInfo = arguments[3],
-          memberLoggingInfo;
+      var memberLoggingInfo;
 
       if (loggingInfo) {
         member            = members[index];
