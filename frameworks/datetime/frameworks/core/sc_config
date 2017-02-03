@@ -1,4 +1,5 @@
 BT.addFramework(BT.Framework.extend({
   ref: "sproutcore:datetime:core",
-  path: dirname()
+  path: dirname(),
+  dependencies: ["sproutcore:runtime"]
 }));
