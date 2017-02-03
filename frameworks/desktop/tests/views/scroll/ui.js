@@ -66,8 +66,17 @@
       verticalScrollerView: SC.OverlayScrollerView,
       horizontalOverlay: YES,
       horizontalScrollerView: SC.OverlayScrollerView
-    });
+    })
 
+    .add("no fade scrollers", SC.ScrollView, {
+      contentView: iv,
+      verticalOverlay: YES,
+      verticalScrollerView: SC.OverlayScrollerView,
+      verticalFade: NO,
+      horizontalOverlay: YES,
+      horizontalScrollerView: SC.OverlayScrollerView,
+      horizontalFade: NO
+    });
 
   // ..........................................................
   // TEST VIEWS
@@ -291,6 +300,29 @@
         start();
       }, 200);
 
+    }, 1000);
+  });
+
+  test('Scrollers remain visible with horizontalFade: NO, verticalFade: NO', function() {
+    var view = pane.view('no fade scrollers'),
+        verticalScroller = view.get('verticalScrollerView'),
+        horizontalScroller = view.get('horizontalScrollerView'),
+        horizontalOpacity,
+        verticalOpacity;
+
+    stop(2000);
+    expect(2);
+    SC.RunLoop.begin();
+    view._sc_fadeInHorizontalScroller();
+    view._sc_fadeInVerticalScroller();
+    SC.RunLoop.end();
+    setTimeout(function() {
+      verticalOpacity = verticalScroller.$().css('opacity');
+      horizontalOpacity = horizontalScroller.$().css('opacity');
+
+      equals(verticalOpacity, '0.5', 'after fadein, vertical scroller opacity should remain 0.5');
+      equals(horizontalOpacity, '0.5', 'after fadein, horizontal scroller opacity should remain 0.5');
+      start();
     }, 1000);
   });
 
