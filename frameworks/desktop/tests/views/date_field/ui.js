@@ -15,7 +15,8 @@
 
   .add("with value", SC.DateFieldView, {
     hint: "dd/mm/yyyy",
-    value: SC.DateTime.create({ day: 1, month: 1, year: 2010 })
+    value: SC.DateTime.create({ day: 1, month: 1, year: 2010 }),
+    rightAccessoryView: null
   })
 
   .add("disabled - empty", SC.DateFieldView, {
