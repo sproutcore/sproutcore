@@ -1219,6 +1219,7 @@ SC.ScrollView = SC.View.extend({
   /** @private Fade in the horizontal scroller. Each scroller fades in/out independently. */
   _sc_fadeInHorizontalScroller: function () {
     var canScrollHorizontal = this.get('canScrollHorizontal'),
+      horizontalFade = this.get('horizontalFade'),
       horizontalScroller = this.get('horizontalScrollerView'),
       delay;
 
@@ -1231,9 +1232,11 @@ SC.ScrollView = SC.View.extend({
         // Fade in.
         horizontalScroller.fadeIn();
 
-        // Wait the minimum time before fading out again.
-        delay = this.get('_sc_minimumFadeOutDelay');
-        this._sc_horizontalFadeOutTimer = this.invokeLater(this._sc_fadeOutHorizontalScroller, delay);
+        if (horizontalFade) {
+          // Wait the minimum time before fading out again.
+          delay = this.get('_sc_minimumFadeOutDelay');
+          this._sc_horizontalFadeOutTimer = this.invokeLater(this._sc_fadeOutHorizontalScroller, delay);
+        }
       }
     }
   },
@@ -1241,6 +1244,7 @@ SC.ScrollView = SC.View.extend({
   /** @private Fade in the vertical scroller. Each scroller fades in/out independently. */
   _sc_fadeInVerticalScroller: function () {
     var canScrollVertical = this.get('canScrollVertical'),
+      verticalFade = this.get('verticalFade'),
       verticalScroller = this.get('verticalScrollerView'),
       delay;
 
@@ -1254,9 +1258,11 @@ SC.ScrollView = SC.View.extend({
         // Fade in.
         verticalScroller.fadeIn();
 
-        // Wait the minimum time before fading out again.
-        delay = this.get('_sc_minimumFadeOutDelay');
-        this._sc_verticalFadeOutTimer = this.invokeLater(this._sc_fadeOutVerticalScroller, delay);
+        if (verticalFade) {
+          // Wait the minimum time before fading out again.
+          delay = this.get('_sc_minimumFadeOutDelay');
+          this._sc_verticalFadeOutTimer = this.invokeLater(this._sc_fadeOutVerticalScroller, delay);
+        }
       }
     }
   },
