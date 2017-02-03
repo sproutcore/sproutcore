@@ -12,21 +12,19 @@
 module("SC.ERROR");
 
 test("SC.Error.desc creates an error instance with description,label and code", function() {
-  var c = SC.Error.desc('This is an error instance','Error Instance', "FOO", 99999);
+  var c = SC.Error.desc('This is an error instance','Error Instance', "FOO");
   equals(SC.T_ERROR,SC.typeOf(c),'Error instance');
   equals('This is an error instance',c.message,'Description');
   equals('Error Instance',c.label,'Label');
   equals(c.get('errorValue'), "FOO", 'error value should be set');
-  equals(99999,c.code,'Code');
 });
 
 test("SC.$error creates an error instance with description,label and code",function(){
-  var d = SC.$error('This is a new error instance','New Error Instance', "FOO", 99999);
+  var d = SC.$error('This is a new error instance','New Error Instance', "FOO");
   equals(SC.T_ERROR,SC.typeOf(d),'New Error instance');
   equals('This is a new error instance',d.message,'Description');
   equals('New Error Instance',d.label,'Label');
   equals(d.get('errorValue'), "FOO", 'error value should be set');
-  equals(99999,d.code,'Code');
 });
 
 test("SC.$ok should return YES if the passed value is an error object or false", function() {
@@ -60,7 +58,7 @@ test("errorObject property should return the error itself", function() {
 
 test("SC.Error#throw throw an error with description,label and code", function() {
   var msg='',
-    error = SC.Error.desc('This is an error instance','Error Instance', "FOO", 99999);
+    error = SC.Error.desc('This is an error instance','Error Instance', "FOO");
   try{
     error.throw();
   }catch(e){
@@ -72,9 +70,9 @@ test("SC.Error#throw throw an error with description,label and code", function()
 test("SC.$throw creates and throw an error instance with description,label and code", function() {
   var msg='';
   try{
-    SC.$throw('This is an error instance','Error Instance', "FOO", 99999)
+    SC.$throw('This is an error instance','Error Instance', "FOO")
   }catch(error){
     msg=error.message;
   }
-  equals(msg.split(':')[2], 'This is an error instance (99999)', "should throw the following error ");
+  equals(msg.split(':')[2], 'This is an error instance (FOO)', "should throw the following error ");
 });
