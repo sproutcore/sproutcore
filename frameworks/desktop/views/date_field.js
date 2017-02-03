@@ -430,12 +430,12 @@ SC.DateFieldView = SC.TextFieldView.extend(
   _scdfv_datePickerValueDidChange: function() {
     // If we're set to update on change, update.
     if (this.get('updateOnPickerChange')) {
-      this.setIfChanged('value', this.get('_datePickerValue'));
+      this._scdfv_setPickerValue();
     }
 
     // If we're set to dismiss on change and we're visible, update then dismiss.
     if (this.get('dismissPickerOnChange') && this.get('datePickerIsShowing') && !this._isProxyingKeystroke) {
-      this.setIfChanged('value', this.get('_datePickerValue'));
+      this._scdfv_setPickerValue();
       this.set('datePickerIsShowing', NO);
       this.resignFirstResponder();
     }
@@ -448,8 +448,13 @@ SC.DateFieldView = SC.TextFieldView.extend(
 
   /** @private If the user dismisses the modal, sync up the values and resign. */
   _scdfv_pickerDidDismissByModalPane: function() {
-    this.setIfChanged('value', this.get('_datePickerValue'));
+    this._scdfv_setPickerValue();
     this.resignFirstResponder();
+  },
+
+  /** @private */
+  _scdfv_setPickerValue: function() {
+    this.setIfChanged('value', this.get('_datePickerValue'));
   },
 
   /** @private Instantiates the datePicker if needed. */
@@ -632,7 +637,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
     // Give the date picker a chance to react first.
     this._scdfv_proxyKeystrokeToDatePicker('insertNewline', evt);
     if (this.get('datePickerIsShowing')) {
-      this.setIfChanged('value', this.get('_datePickerValue'));
+      this._scdfv_setPickerValue();
       this.set('datePickerIsShowing', NO);
       this.resignFirstResponder();
     }
