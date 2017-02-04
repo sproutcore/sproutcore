@@ -240,8 +240,8 @@ SC.Record = SC.Object.extend(
     This is the record type for the record.
   */
   recordType: function() {
-    return this.get('store').recordTypeFor(this.get('storeKey'));
-  }.property('storeKey').cacheable(),
+    return this.constructor;
+  }.property().cacheable(),
 
   /**
     YES when the record has been destroyed
