@@ -345,6 +345,14 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
   body: null,
 
   /**
+    The timestamp of the start of the request.
+
+    @type Number
+    @default null
+  */
+  requestTime: null,
+
+  /**
     The body, encoded as JSON or XML if needed.
 
     @field
