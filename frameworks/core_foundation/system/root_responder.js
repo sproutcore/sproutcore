@@ -872,31 +872,21 @@ SC.RootResponder = SC.Object.extend(
     // Do some initial set up.
     this.set('currentWindowSize', this.computeWindowSize()) ;
 
-    // TODO: Is this workaround still valid?
-    if (SC.browser.os === SC.OS.ios && SC.browser.name === SC.BROWSER.safari) {
-
-      // If the browser is identifying itself as a touch-enabled browser, but
-      // touch events are not present, assume this is a desktop browser doing
-      // user agent spoofing and simulate touch events automatically.
-      if (SC.platform && !SC.platform.touch) {
-        SC.platform.simulateTouchEvents();
-      }
-
-      // Monkey patch RunLoop if we're in MobileSafari
-      var f = SC.RunLoop.prototype.endRunLoop, patch;
-
+    var f = SC.RunLoop.prototype.endRunLoop,
       patch = function() {
         // Call original endRunLoop implementation.
         if (f) f.apply(this, arguments);
 
-        // This is a workaround for a bug in MobileSafari.
+        // This is a workaround for a weird behavior on touch devices.
         // Specifically, if the target of a touchstart event is removed from the DOM,
         // you will not receive future touchmove or touchend events. What we do is, at the
         // end of every runloop, check to see if the target of any touches has been removed
         // from the DOM. If so, we re-append it to the DOM and hide it. We then mark the target
         // as having been moved, and it is de-allocated in the corresponding touchend event.
-        var touches = SC.RootResponder.responder._touches, touch, elem, target, found = NO;
+        var touches = SC.RootResponder.responder._touches;
         if (touches) {
+          var touch, elem, target, found = NO;
+
           // Iterate through the touches we're currently tracking
           for (touch in touches) {
             if (touches[touch]._rescuedElement) continue; // only do once
@@ -937,8 +927,7 @@ SC.RootResponder = SC.Object.extend(
           }
         }
       };
-      SC.RunLoop.prototype.endRunLoop = patch;
-    }
+    SC.RunLoop.prototype.endRunLoop = patch;
   },
 
   /**
