@@ -808,9 +808,6 @@ SC.clone = SC.copy;
 /** @private Alias for SC.A() */
 SC.$A = SC.A;
 
-/** @private Provided for compatibility with old HTML templates. */
-SC.didLoad = SC.K;
-
 /** @private Used by SC.compare */
 SC.ORDER_DEFINITION = [ SC.T_ERROR,
                         SC.T_UNDEFINED,

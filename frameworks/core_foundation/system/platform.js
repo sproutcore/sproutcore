@@ -481,7 +481,7 @@ SC.platform = SC.Object.create({
     This requires that you (the engineer) manually include the cordova
     javascript library for the appropriate platform (Android, iOS, etc)
     in your code. There are various methods of doing this; creating your own
-    platform-specific index.rhtml is probably the easiest option.
+    platform-specific index.ejs is probably the easiest option.
 
     WARNING: Using the javascript_libs Buildfile option for the cordova include
     will NOT work. The library will be included after your application code,
