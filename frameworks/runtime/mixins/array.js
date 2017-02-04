@@ -12,8 +12,6 @@ sc_require('mixins/observable');
 sc_require('mixins/enumerable');
 sc_require('system/range_observer');
 
-SC.OUT_OF_RANGE_EXCEPTION = "Index out of range";
-
 SC.CoreArray = /** @lends SC.Array.prototype */ {
 
   /**
@@ -138,7 +136,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     @param {Object} object object to insert
   */
   insertAt: function (idx, object) {
-    if (idx > this.get('length')) throw new Error(SC.OUT_OF_RANGE_EXCEPTION);
+    if (idx > this.get('length')) throw new Error("Index '"+idx+"' is out of range 0-"+this.get('length'));
     this.replace(idx, 0, [object]);
     return this;
   },
@@ -149,7 +147,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     index set.
 
     If you pass a single index or a start and length that is beyond the
-    length this method will throw an SC.OUT_OF_RANGE_EXCEPTION
+    length this method will throw an error
 
     @param {Number|SC.IndexSet} start index, start of range, or index set
     @param {Number} length length of passing range
@@ -161,9 +159,7 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
 
     if (typeof start === SC.T_NUMBER) {
 
-      if ((start < 0) || (start >= this.get('length'))) {
-        throw new Error(SC.OUT_OF_RANGE_EXCEPTION);
-      }
+      if ((start < 0) || (start >= this.get('length'))) throw new Error("Index '"+start+"' is out of range 0-"+this.get('length'));
 
       // fast case
       if (length === undefined) {
