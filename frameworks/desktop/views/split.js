@@ -561,7 +561,7 @@ SC.SplitView = SC.View.extend({
       if (isResizable === useResizable) {
         // if outOfSize === -1 then we are aggressively resizing (not resizing proportionally)
         if (outOfSize === -1) size += diff;
-        else size += (size / outOfSize) * diff;
+        else if (outOfSize !== 0) size += (size / outOfSize) * diff;
 
         size = Math.round(size);
 
