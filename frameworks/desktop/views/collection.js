@@ -2410,7 +2410,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     var itemView = this.itemViewForEvent(touch),
         contentIndex = itemView ? itemView.get('contentIndex') : -1;
 
-    if (!this.get('isEnabledInPane')) return contentIndex > -1;
+    if (!this.get('isSelectable') || !this.get('isEnabledInPane')) return contentIndex > -1;
 
     // become first responder if possible.
     this.becomeFirstResponder() ;
@@ -2457,7 +2457,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
         contentIndex = itemView ? itemView.get('contentIndex') : -1,
         isSelected = NO, sel, shouldSelect;
 
-    if (!this.get('isEnabledInPane')) return contentIndex > -1;
+    if (!this.get('isSelectable') || !this.get('isEnabledInPane')) return contentIndex > -1;
 
     if (contentIndex > -1) {
       if (this.get('useToggleSelection')) {
