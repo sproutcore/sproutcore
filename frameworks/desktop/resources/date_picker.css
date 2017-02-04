@@ -1,0 +1,137 @@
+/* ==========================================================================
+*  Project: SproutCore - JavaScript Application Framework
+*  Copyright: ©2006-2011 Strobe Inc. and contributors.
+*             Portions ©2008-2011 Apple Inc. All rights reserved.
+*  License:   Licensed under MIT license (see license.js)
+*  ==========================================================================
+*/
+
+/* Button */
+
+.sc-picker-button {
+  &:before {
+    content: "\f073";
+    font: normal normal normal 16px/1 FontAwesome;
+  }
+
+  &.disabled { opacity: 0.6; }
+}
+
+/* Calendar */
+
+/* Header */
+.sc-date-picker {
+  .header {
+    height: 39px;
+    background-color: #3A3A3A;
+    text-align: center;
+    padding-top: 6px;
+    color: #FFF;
+    position: relative;
+    z-index: 1;
+    border-bottom: 1px solid #000;
+  }
+
+  .month {
+    height: 22px;
+    text-shadow: black 0px 1px 0px;
+    width: 100%;
+    font-weight: bold;
+  }
+
+  .button {
+    position: absolute;
+    top: 3px;
+    width: 30px;
+    height: 20px;
+
+    &:before {
+      font: normal normal normal 14px/1 FontAwesome;
+      position: relative;
+      top: 2px;
+      color: #EEE;
+      text-shadow: black 0px 1px 0px;
+    }
+
+    &:hover { &:before { color: #FAFAFA; text-shadow: rgba(255,255,255,1) 0px 0px 10px; } }
+    &:active { &:before { color: #FFF; text-shadow: rgba(255,255,255,0.6) 0px 0px 10px; } }
+
+    &.previous-year { left: 0; &:before { content: "\f100"; }}
+    &.previous { left: 20px; &:before { content: "\f104"; }}
+    &.next { right: 20px; &:before { content: "\f105"; }}
+    &.next-year { right: 0; &:before { content: "\f101"; }}
+  }
+
+  .day-of-week {
+    display: inline-block;
+    font-size: 10px;
+    height: 15px;
+    text-shadow: black 0px 1px 0px;
+    width: 14.28%;
+    color: #EAEAEA;
+  }
+
+
+  .body {
+    position: absolute;
+    top: 46px;
+    bottom: 1px;
+    left: 1px;
+    right: 1px;
+  }
+
+  .week {
+    position: absolute;
+    width: 100%;
+    height: 16.666666666666668%;
+    box-shadow: 1px 1px 0 #ddd;
+  }
+
+  .day {
+    position: absolute;
+    height: 100%;
+    background: #FFF;
+    box-shadow: -1px -1px 0px #ddd;
+
+    > div {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      margin-left: -8px;
+      margin-top: -8px;
+      height: 16px;
+      width: 16px;
+      line-height: 16px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    &.present {
+      color: #353535;
+      text-shadow: 0 1px 0 rgba(255, 255, 255, .7);
+      background: #fefefe;
+    }
+
+    &.past, &.future {
+      color: #aaa;
+      text-shadow: 0 1px 0 rgba(255, 255, 255, .7);
+      background: #eee;
+    }
+
+    &.today {
+      color: #fff;
+      text-shadow: 0 1px 0 rgba(0, 0, 0, .7);
+      background: #a2a8ae;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5), inset 1px 1px 0px #6f6f6f, -1px -1px 0px #ddd;
+    }
+
+    &.sel, &.active {
+      color: #fff;
+      text-shadow: 0 1px 0 rgba(0, 0, 0, .7);
+      background: #5A99F2;
+      &.active {
+        opacity: 0.7;
+      }
+    }
+  }
+}
