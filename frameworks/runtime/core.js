@@ -401,6 +401,8 @@ SC.mixin(/** @scope window.SC.prototype */ {
     efficient than simply combining strings because it uses a cache
     internally for performance.
 
+    TODO deprecated warning, we should remove this in a future release
+    
     @param {String} prefix the prefix to attach to the key
     @param {String} key The key
     @returns {String} result
@@ -807,6 +809,9 @@ SC.clone = SC.copy;
 
 /** @private Alias for SC.A() */
 SC.$A = SC.A;
+
+/** @private Provided for compatibility with old HTML templates. */
+SC.didLoad = SC.K;
 
 /** @private Used by SC.compare */
 SC.ORDER_DEFINITION = [ SC.T_ERROR,
