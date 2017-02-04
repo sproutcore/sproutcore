@@ -17,7 +17,7 @@ npm install
 cd ..
 sproutcore/bin/sproutcore init master
 cd master
-mkdir frameworks
+mkdir -p frameworks
 cd frameworks
 ln -s ${OLD_PWD} sproutcore
 cd ..
