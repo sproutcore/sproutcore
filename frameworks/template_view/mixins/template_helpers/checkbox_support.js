@@ -26,7 +26,7 @@ SC.Checkbox = SC.TemplateView.extend(
   didCreateLayer: function() {
     var self = this;
 
-    this.$('input').bind('change', function() {
+    this.$('input').on('change', function() {
       self.domValueDidChange(this);
     });
   },
@@ -65,4 +65,3 @@ SC.CheckboxSupport = /** @scope SC.CheckboxSupport */{
     return value;
   }.property().idempotent()
 };
-
