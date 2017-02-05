@@ -14,7 +14,7 @@ sc_require("tasks/task");
 
   ### Basic Use
 
-  SC.backgroundTaskQueue instanciate SC.TaskQueue with the option runWhenIdle
+  SC.backgroundTaskQueue instanciates SC.TaskQueue with the option runWhenIdle
   set to `true`. You can use it to add tasks conveniently.
 
 
