@@ -62,6 +62,7 @@ SC.SelectSearchView = SC.SelectView.extend({
     didAppendToDocument: function () {
       sc_super();
       this._textFieldView.beginEditing();
+      this.get('selectView').notifyPropertyChange('searchValue'); // this causes the view to open the last selected list
     },
 
     createChildViews: function () {
