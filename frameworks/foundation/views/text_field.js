@@ -992,6 +992,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     if (this.get('applyImmediately') && timerNotPending) {
       this.invokeLater(this.fieldValueDidChange, 10);
     }
+    else {
+      this.updateHintOnFocus();
+    }
   },
 
   /** @private
