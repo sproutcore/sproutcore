@@ -409,8 +409,8 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
         }
         order = match[2] ? -1 : 1;
 
-        if (a) { valueA = a.isObservable ? a.get(key) : a[key]; }
-        if (b) { valueB = b.isObservable ? b.get(key) : b[key]; }
+        if (a) { valueA = a.isObservable ? a.getPath(key) : a[key]; }
+        if (b) { valueB = b.isObservable ? b.getPath(key) : b[key]; }
 
         status = SC.compare(valueA, valueB) * order;
       }
