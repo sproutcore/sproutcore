@@ -227,14 +227,14 @@ test("array orderBy using String with property path", function(){
     orderBy: 'title.title ASC'
   });
 
-  equals(testController.get('firstSelectableObject'), content[0], 'first selectable object should be the first object in arrangedObjects');
-  equals(testController.get('lastObject'), content[4], 'lastObject should be the last object in content');
+  equals(testController.get('firstSelectableObject'), c[0], 'first selectable object should be the first object in arrangedObjects');
+  equals(testController.get('lastObject'), c[4], 'lastObject should be the last object in content');
 
   // Reorder the content
   testController.set('orderBy', 'title.title DESC');
 
-  equals(testController.get('firstSelectableObject'), content[4], 'first selectable object should be the first object in arrangedObjects (changed order)');
-  equals(testController.get('lastObject'), content[0], 'lastObject should be the first object in content (changed order)');
+  equals(testController.get('firstSelectableObject'), c[4], 'first selectable object should be the first object in arrangedObjects (changed order)');
+  equals(testController.get('lastObject'), c[0], 'lastObject should be the first object in content (changed order)');
 });
 
 
