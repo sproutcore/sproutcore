@@ -470,7 +470,8 @@ SC.IndexSet = SC.mixin({},
     @param {Number} [length=1] The length of range.
     @returns {SC.IndexSet} receiver
   */
-  add: function (start, length) {
+  add: function (_start, _length) {
+    var start = _start, length = _length;
     //@if (debug)
     this._sc_validateIndexSetArguments.apply(this, arguments);
     //@endif
