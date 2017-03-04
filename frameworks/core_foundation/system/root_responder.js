@@ -980,7 +980,7 @@ SC.RootResponder = SC.Object.extend(
         SC.Event.remove(document, keyName, this, this[keyName]);
         this[keyName] = null;
     }
-    });
+    }, this);
   },
 
   /**
@@ -1007,8 +1007,8 @@ SC.RootResponder = SC.Object.extend(
       if (keyName !== actualEventName) {
         SC.Event.remove(document, keyName, this, this[keyName]);
         this[keyName] = null;
-    }
-    });
+      }
+    }, this);
 
     actualEventName = SC.platform.animationiterationEventName;
     variation1 = lowerDomPrefix + 'animationiteration';
@@ -1019,7 +1019,7 @@ SC.RootResponder = SC.Object.extend(
         SC.Event.remove(document, keyName, this, this[keyName]);
         this[keyName] = null;
       }
-    });
+    }, this);
 
     actualEventName = SC.platform.animationstartEventName;
     variation1 = lowerDomPrefix + 'animationstart';
@@ -1030,7 +1030,7 @@ SC.RootResponder = SC.Object.extend(
         SC.Event.remove(document, keyName, this, this[keyName]);
         this[keyName] = null;
       }
-    });
+    }, this);
   },
 
   // ...........................................................................
