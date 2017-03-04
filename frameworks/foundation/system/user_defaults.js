@@ -122,7 +122,7 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     }
 
     // if not found in localStorage, try to notify delegate
-    del = this.delegate ;
+    var del = this.delegate ;
     if (del && del.userDefaultsNeedsDefault) {
       ret = del.userDefaultsNeedsDefault(this, keyName, userKeyName);
     }
