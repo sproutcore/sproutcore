@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 /*global require, console */
-
+'use strict';
 // These commands are used by the build tools to control load order.  On the
 // client side these are a no-op.
 if (!window.require) { window.require = function require() {}; }
@@ -405,7 +405,7 @@ SC.mixin(/** @scope window.SC.prototype */ {
     internally for performance.
 
     TODO deprecated warning, we should remove this in a future release
-    
+
     @param {String} prefix the prefix to attach to the key
     @param {String} key The key
     @returns {String} result
