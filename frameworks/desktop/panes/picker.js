@@ -644,7 +644,9 @@ SC.PickerPane = SC.PalettePane.extend(
       // Create an adjustment layout from the computed position.
       adjustHash = {
         left: frame.x,
-        top: frame.y
+        top: frame.y,
+        width: frame.width,
+        height: frame.height
       };
 
       // If the computed position also constrains width or height, add it to the adjustment.
