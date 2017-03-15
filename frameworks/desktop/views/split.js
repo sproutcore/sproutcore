@@ -944,6 +944,7 @@ SC.SplitView = SC.View.extend({
   */
   splitViewGetSizeForChild: function(splitView, child) {
     var size = child.get('size');
+    if (size < 1) size = this.get('frame').width * size;
     if (SC.none(size)) return 100;
 
     return size;
