@@ -233,7 +233,19 @@ SC.routes = SC.Object.create(
     return this._extractLocation(key, value);
   }.property(),
 
-  _extractLocation: function(key, value) {
+  /*
+    Works exactly like 'informLocation' but it is not triggering any history change
+  */
+  replaceLocation: function(value){
+    this._skipRoute = YES;
+    lsk = this.location.lastSetValueKey;
+    if (lsk && this._kvo_cache) this._kvo_cache[lsk] = value;
+    lsk = this.informLocation.lastSetValueKey;
+    if (lsk && this._kvo_cache) this._kvo_cache[lsk] = value;
+    this._extractLocation(undefined, value, YES);
+  },
+
+  _extractLocation: function(key, value, replaceState) {
     var crumbs, encodedValue;
 
     if (value !== undefined) {
@@ -255,7 +267,11 @@ SC.routes = SC.Object.create(
           }
           window.history.pushState(null, null, this.get('baseURI') + encodedValue);
         } else {
-          window.location.hash = encodedValue;
+          if (replaceState && SC.platform.supportsHistory) {
+            window.history.replaceState( undefined, undefined, "#" + encodedValue );
+          } else {
+            window.location.hash = encodedValue;
+          }
         }
       }
 
