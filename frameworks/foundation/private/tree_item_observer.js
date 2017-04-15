@@ -1022,16 +1022,25 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     Computes the children for the passed item.
   */
   _computeChildren: function (item) {
-    var key;
+    var ret, del, key;
 
-    if (!item) { // no item - no children
-      return null;
-    } else if (item.isTreeItemContent) {  // item implements TreeItemContent - call directly
-      return item.get('treeItemChildren');
-    } else { // otherwise get treeItemChildrenKey from delegate
+    // no item - no children
+    if (!item) { ret = null; }
+
+    // item implement TreeItemContent - call directly
+    else if (item.isTreeItemContent) { ret = item.get('treeItemChildren'); }
+
+    // otherwise get treeItemChildrenKey from delegate
+    else {
       key = this.get('treeItemChildrenKey');
-      return item.get(key);
+      ret = item.get(key);
     }
+
+    if (ret && ret.get('length') === 0) {
+      ret = null;
+    }
+
+    return ret;
   },
 
   /** @private

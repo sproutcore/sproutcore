@@ -106,14 +106,21 @@ module("SC.TreeItemObserver - Group Use Case", {
             title: "C.%@".fmt(x), outline: 1
           });
         })
-      })];
+      }),
+
+      TestObject.create({
+        isGroup: YES,
+        title: "D",
+        outline: 0,
+        children: []
+      })
+    ];
 
     root = TestObject.create({
       title: "ROOT",
       children: content,
       isExpanded: YES
     });
-
 
     extra = TestObject.create({ title: "EXTRA" });
 
@@ -138,7 +145,9 @@ module("SC.TreeItemObserver - Group Use Case", {
       content[1].children[2], // 9
       content[1].children[3], // 10
       content[1].children[4], // 11
-      content[2]];            // 12
+      content[2],             // 12
+      content[3]              // 13
+    ];
 
     delegate = Delegate.create();
 
@@ -256,7 +265,7 @@ test("replacing object in group", function() {
   flattened.replace(9, 1, [extra]);
 
   // changed reflect nearest top-level group
-  var change = SC.IndexSet.create(6, flattened.length-7);
+  var change = SC.IndexSet.create(6, flattened.length - 8);
   verifyObjectAt(obs, flattened, change, "after replacing");
 });
 
@@ -322,7 +331,8 @@ test("pushing object to top level with children", function() {
 test("popping object at top level with children", function() {
   SC.run(function() {
     content.popObject(); // first one has no children
-    content.popObject(); // second one has children
+    content.popObject(); // second one has no children
+    content.popObject(); // third one has children
   });
 
   flattened.length=6; // truncate
