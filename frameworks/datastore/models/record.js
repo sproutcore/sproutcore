@@ -594,8 +594,14 @@ SC.Record = SC.Object.extend(
       aggregates = [];
       for (key in this) {
         prop = this[key];
-        if (prop  &&  prop.isRecordAttribute  &&  prop.aggregate === YES) {
+        if (prop  &&  prop.isRecordAttribute  &&  (prop.aggregate === YES || prop.aggregatePropertyChanges === YES)) {
           aggregates.push(key);
+
+          //@if(debug)
+          if (prop.aggregatePropertyChanges && !prop.inverse) {
+            SC.warn("Developer Warning: The inverse property of the '%@' relationship needs to be set when setting aggregatePropertyChanges to true".fmt(key));
+          }
+          //@endif
         }
       }
       recordType.__sc_aggregate_keys = aggregates;
@@ -643,11 +649,29 @@ SC.Record = SC.Object.extend(
       }
     };
 
+    /**
+      @private
+
+      Notify the record that a property of its relationship has changed.
+
+      @param {SC.Record} record to notify
+    */
+    iterProp = function(recs, prop) {
+      recs.forEach(function(rec) {
+        if (rec) {
+          var inverse = prop.inverse;
+          if (inverse) rec.notifyPropertyChange(inverse);
+        }
+      }, this);
+    };
+
     for(idx=0,len=aggregates.length;idx<len;++idx) {
       key = aggregates[idx];
+      prop = this[key];
       val = this.get(key);
       recs = SC.kindOf(val, SC.ManyArray) ? val : [val];
-      recs.forEach(iter, this);
+      if (prop.aggregate) recs.forEach(iter, this);
+      if (prop.aggregatePropertyChanges) iterProp.call(this, recs, prop);
     }
   },
 
