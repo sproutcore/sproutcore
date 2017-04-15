@@ -488,7 +488,7 @@ SC.IndexSet = SC.mixin({},
 
       cur = 0;
       next = content[0];
-      while(next !== 0) {
+      while(next && next !== 0) {
         if (next>0) this.add(cur, next-cur);
         cur = next<0 ? 0-next : next;
         next = content[cur];
@@ -928,7 +928,7 @@ SC.IndexSet = SC.mixin({},
         source  = this.source;
 
     if (target === undefined) target = null;
-    while (next !== 0) {
+    while (next && next !== 0) {
       if (next > 0) callback.call(target, cur, next - cur, this, source);
       cur  = Math.abs(next);
       next = content[cur];
