@@ -740,6 +740,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
 
       input.attr('maxLength', maxLength);
 
+      input.attr('maxLength', maxLength);
+
       // IE8 has problems aligning the input text in the center
       // This is a workaround for centering it.
       if (SC.browser.name === SC.BROWSER.ie && SC.browser.version <= 8 && !isTextArea) {
