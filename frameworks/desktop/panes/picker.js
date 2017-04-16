@@ -329,7 +329,7 @@ SC.PickerPane = SC.PalettePane.extend(
         return value;
       }
     }
-  }.property().cacheable(),
+  }.property(),
 
   /** @private
     anchor rect calculated by computeAnchorRect from init popup
