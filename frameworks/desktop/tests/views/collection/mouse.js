@@ -216,6 +216,17 @@ test("clicking on an unselected item should fire action when actOnSelect is true
   equals(actionCalled, 1, "Action called when item is selected");
 });
 
+test("double-clicking on an unselected item should fire action when actOnSelect is false", function() {
+  view.set('actOnSelect', NO);
+
+  SC.RootResponder.responder._lastMouseUpAt = null ; // HACK: don't want a doubleClick from previous tests
+  equals(actionCalled, 0, "precond - action hasn't been called");
+  clickOn(view, 1, NO, NO);
+  equals(actionCalled, 0, "No action is called on first click");
+  clickOn(view, 1, NO, NO);
+  equals(actionCalled, 1, "Action called when item receives second click");
+});
+
 test("clicking on an unselected item should fire action when useToggleSelection is true and actOnSelect is true", function() {
   view.set('useToggleSelection', YES);
   view.set('actOnSelect', YES);
