@@ -1075,7 +1075,7 @@ SC.DateTime.mixin(SC.Comparable,
         }
       }
     } catch (e) {
-      SC.Logger.log('SC.DateTime.createFromString ' + e.toString());
+      SC.Logger.error('SC.DateTime.createFromString ' + e.toString());
       return null;
     }
 
