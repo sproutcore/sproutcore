@@ -954,11 +954,6 @@ SC.Event.prototype = {
     @returns {SC.Event} receiver
   */
   preventDefault: function() {
-    var evt = this.originalEvent ;
-    if (evt) {
-      if (evt.preventDefault) evt.preventDefault() ;
-      else evt.returnValue = NO ; // IE8
-    }
     this.hasCustomEventHandling = YES ;
     return this ;
   },
