@@ -636,7 +636,15 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
       // Bind the global event handler to the element
       if (elem.addEventListener) {
-        elem.addEventListener(eventType, listener, useCapture);
+        if (SC.platform.supportsPassiveEventlisteners) {
+          elem.addEventListener(eventType, listener, {
+            capture: useCapture,
+            passive: false
+          });
+        }
+        else {
+          elem.addEventListener(eventType, listener, useCapture);
+        }
       } else if (elem.attachEvent) {
         // attachEvent is not working for IE8 and xhr objects
         // there is currently a hack in request , but it needs to fixed here.
