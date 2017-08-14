@@ -238,7 +238,13 @@ SC.DatePickerView = SC.View.extend(SC.ActionSupport, {
   //
 
   /** @private */
-  touchDown: function(evt) { return this.mouseDown(evt) },
+  touchStart: function(evt) {
+    // We do not call mouseDown as it will update the view and detach the
+    // target from the DOM. The root responder will rescue it but
+    // _scdpv_parseSelectedDate will not be able to retrieve its parentNode
+    return true;
+  },
+
   /** @private */
   mouseDown: function(evt) {
     // Become first responder if appropriate.
@@ -279,7 +285,9 @@ SC.DatePickerView = SC.View.extend(SC.ActionSupport, {
   },
 
   /** @private */
-  touchUp: function(evt) { return this.mouseUp(evt) },
+  touchEnd: function(evt) {
+    return this.mouseUp(evt);
+  },
 
   /** @private */
   mouseUp: function(evt) {
