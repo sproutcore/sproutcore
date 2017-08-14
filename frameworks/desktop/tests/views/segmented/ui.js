@@ -511,6 +511,16 @@ var pane;
     segments = sv.$('.sc-segment-view');
     numberOfSegments = segments.length;
     equals(numberOfSegments, 6, 'We should end with 6 segment child divs in the segment view');
+
+    sv.showOverflowMenu();
+    var newMenu = SC.viewFor(SC.$('.sc-menu')[0]);
+    equals(menu, newMenu, 'The same menu should have been used');
+
+    SC.run(function() {
+      sv.destroy();
+    });
+
+    ok(menu.isDestroyed, "Menu is destroyed when view is destroyed.");
   });
 
   test("Check that the segmented view and segments have aria roles set", function () {
