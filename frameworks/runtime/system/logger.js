@@ -1509,7 +1509,7 @@ SC.Logger = SC.Object.create(
     // Have we exceeded the maximum size?  If so, do some pruning.
     len = recordedMessages.length;
     if (len > this.get('recordedLogMessagesMaximumLength')) {
-      recordedMessages.splice(0, (len - this.get('recordedLogMessagesPruningMinimumLength')));
+      recordedMessages.splice(-this.get('recordedLogMessagesPruningMinimumLength'));
     }
 
     // Notify that the array content changed.
