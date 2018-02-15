@@ -278,7 +278,7 @@ SC.Logger = SC.Object.create(
 
     @type Number
   */
-  recordedLogMessagesPruningMinimumLength: 100,
+  recordedLogMessagesPruningMinimumLength: 400,
 
 
   /**
