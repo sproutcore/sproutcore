@@ -66,10 +66,9 @@ module("SC.CascadeDataSource", {
         return NO;
       },
 
-      retrieveRecords: function (st, storeKeys, ids) {
+      retrieveRecords: function (st, storeKeys) {
         equals(store, st, "should equal store");
         equals(0, storeKeys[0], "should equal [0]");
-        equals("id", ids[0], 'should equal ["id"]');
         return YES;
       },
 
@@ -125,7 +124,7 @@ test("Verify dataSource returns 'YES' when handled by a child dataSource for fet
 });
 
 test("Verify dataSource returns 'YES' when handled by a child dataSource for retrieveRecords", function () {
-  ok(Sample.dataSource.retrieveRecords(store, [0], ['id']), "retrieveRecords should be handled by baz");
+  ok(Sample.dataSource.retrieveRecords(store, [0]), "retrieveRecords should be handled by baz");
 });
 
 test("Verify dataSource returns 'NO' when not handled by a child dataSource", function () {
