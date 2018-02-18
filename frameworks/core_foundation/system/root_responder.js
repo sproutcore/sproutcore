@@ -773,7 +773,7 @@ SC.RootResponder = SC.Object.extend(
   */
   setup: function() {
     // handle basic events
-    this.listenFor(['touchstart', 'touchmove', 'touchend', 'touchcancel', 'keydown', 'keypress', 'keyup', 'beforedeactivate', 'mousedown', 'mouseup', 'dragenter', 'dragover', 'dragleave', 'drop', 'click', 'dblclick', 'mousemove', 'contextmenu'], document)
+    this.listenFor(['touchstart', 'touchmove', 'touchend', 'touchcancel', 'keydown', 'keypress', 'keyup', 'beforedeactivate', 'mousedown', 'mouseup', 'dragenter', 'dragover', 'dragleave', 'drop', 'click', 'dblclick', 'mousemove', 'mouseleave', 'contextmenu'], document)
         .listenFor(['resize'], window);
 
     if(SC.browser.isIE8OrLower) this.listenFor(['focusin', 'focusout'], document);
@@ -2250,6 +2250,17 @@ SC.RootResponder = SC.Object.extend(
          }
        }
     }, this);
+  },
+
+  /** @private */
+  mouseleave: function(evt) {
+    var lh = this._lastHovered || [], loc, len;
+
+    for (loc=0, len=lh.length; loc < len; loc++) {
+      lh[loc].tryToPerform('mouseExited', evt);
+    }
+
+    this._lastHovered = null;
   },
 
   // These event handlers prevent default file handling, and enable the dataDrag API.
