@@ -1708,6 +1708,7 @@ SC.CoreView.reopen(
     case SC.CoreView.UNRENDERED:
     case SC.CoreView.UNATTACHED:
     case SC.CoreView.ATTACHED_HIDDEN:
+    case SC.CoreView.ATTACHED_HIDDEN_BY_PARENT:
       break;
 
     // Invalid states.
@@ -1715,7 +1716,7 @@ SC.CoreView.reopen(
       //@if(debug)
       // Add some debugging only warnings for if the view statechart is breaking assumptions.
       // All animating states should have been canceled when parent will hide is called.
-      // ATTACHED_HIDING, ATTACHED_BUILDING_IN, ATTACHED_SHOWING, ATTACHED_BUILDING_OUT, ATTACHED_BUILDING_OUT_BY_PARENT, ATTACHED_PARTIAL, ATTACHED_HIDDEN_BY_PARENT, ATTACHED_SHOWN_ANIMATING
+      // ATTACHED_HIDING, ATTACHED_BUILDING_IN, ATTACHED_SHOWING, ATTACHED_BUILDING_OUT, ATTACHED_BUILDING_OUT_BY_PARENT, ATTACHED_PARTIAL, ATTACHED_SHOWN_ANIMATING
       SC.warn("Core Developer Warning: Found invalid state for view %@ in _parentDidHideInDocument".fmt(this));
       //@endif
     }
