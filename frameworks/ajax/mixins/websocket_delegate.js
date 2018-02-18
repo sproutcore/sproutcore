@@ -4,9 +4,9 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/** 
+/**
   @namespace
-  
+
   A WebSocket Delegate is consulted by `SC.WebSocket` when events are received.
   You may want to handle this events before propagate them to eventual listeners.
 
@@ -16,12 +16,12 @@
       server: 'ws://server',
       delegate: MyApp.WebSocketDelegate
     });
-  
+
   @since SproutCore 1.11
   @author Nicolas BADIA
 */
 SC.WebSocketDelegate = {
-  
+
   /**
     Walk like a duck
 
@@ -43,28 +43,17 @@ SC.WebSocketDelegate = {
 
   /**
     A message has been received. Before processing it, you have
-    a chance to check it. 
+    a chance to check it.
 
     For example, if `isJSON` is true, you will want to check if the message
     is a correct JSON.
 
     @param webSocket {SC.WebSocket} The webSocket object
-    @param data {String}  
+    @param data {String}
     @returns {String|Boolean} Return true to prevent further handling
   */
   webSocketDidReceiveMessage: function (webSocket, data) {
-    switch(data) {
-      case 'ping': return true; break;
-    }
-
-    if (this.get('isJSON')) {
-      try {
-        JSON.parse(data);
-      }
-      catch(e) {
-        return true;
-      }
-    }
+    return false;
   },
 
   /**
@@ -81,10 +70,9 @@ SC.WebSocketDelegate = {
     Call when an error occur.
 
     @param webSocket {SC.WebSocket} The webSocket object
-    @param event {Event} 
+    @param event {Event}
     @returns {Boolean} Return true to prevent further handling
   */
   webSocketDidError: function (webSocket, event) {},
 
 };
-
