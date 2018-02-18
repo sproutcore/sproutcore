@@ -472,6 +472,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
 
           if (itemKey) {
             previousItem.removeObserver(itemKey, this, this.itemContentDidChange);
+            previousItem.destroy();
           }
         }
       }
@@ -494,16 +495,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
 
         localItem = SC.Object.create(localItem);
       } else if (localItem instanceof SC.Object)  {
-
-        // We don't need to make any changes to SC.Object items, but we can observe them
-        for (j = itemKeys.get('length') - 1; j >= 0; j--) {
-          itemKey = this.get(itemKeys.objectAt(j));
-
-          if (itemKey) {
-            localItem.removeObserver(itemKey, this, this.itemContentDidChange);
-            localItem.addObserver(itemKey, this, this.itemContentDidChange, i);
-          }
-        }
+        localItem = this.formatLocalItem(itemKeys, localItem);
       } else {
         SC.Logger.error('SC.SegmentedView items may be Strings, Objects (ie. Hashes) or SC.Objects only');
       }
@@ -541,15 +533,28 @@ SC.SegmentedView = SC.View.extend(SC.Control,
 
     childView = childViews.objectAt(index);
     if (childView) {
+      var localItem = this.formatLocalItem(this.get('itemKeys'), item, childView.get(localItem));
 
       // Update the childView
-      childView.updateItem(this, item);
+      childView.updateItem(this, localItem);
 
       // Reset our measurements (which depend on width/height or title) and adjust visible views
       if (this.get('shouldHandleOverflow')) {
         this.invokeLast(this.remeasure);
       }
     }
+  },
+
+  formatLocalItem: function (itemKeys, item, localItem) {
+    if (item instanceof SC.Record) {
+      if (!localItem) localItem = SC.Object.create();
+      for (j = itemKeys.get('length') - 1; j >= 0; j--) {
+        itemKey = this.get(itemKeys.objectAt(j));
+        localItem[itemKey] = item.get(itemKey);
+      }
+      item = localItem;
+    }
+    return item;
   },
 
   /** @private
