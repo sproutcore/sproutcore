@@ -214,6 +214,8 @@ SC.Application = SC.Responder.extend(SC.ResponderContext,
       responder.set('designModes', designModes);
       // UNUSED.
       // this.bind('designMode', SC.Binding.from('SC.RootResponder.responder.currentDesignMode'));
+
+      responder.mediaViews = SC.Set.create();
     }
   }
 

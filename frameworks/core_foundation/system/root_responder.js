@@ -312,6 +312,7 @@ SC.RootResponder = SC.Object.extend(
   resize: function() {
     this._resize();
     this._assignDesignMode();
+    this._handleMediaQueries();
 
     return YES; //always allow normal processing to continue.
   },
@@ -352,6 +353,17 @@ SC.RootResponder = SC.Object.extend(
         }, this);
       }
     }
+  },
+
+  /** @private */
+  _handleMediaQueries: function () {
+    var mediaViews = this.mediaViews;
+
+    if (mediaViews) mediaViews.forEach(function(view) {
+      SC.run(function() {
+        view.handleMediaQueries();
+      });
+    });
   },
 
   /**

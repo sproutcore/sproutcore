@@ -2494,12 +2494,15 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
     // Theming
     this._lastTheme = this.get('theme');
 
+    this.registerMediaQueries();
   },
 
   /** @private */
   destroy: function () {
     // Clean up.
     this._previousLayout = null;
+
+    this.unregisterMediaQueries();
 
     return sc_super();
   },
@@ -2526,5 +2529,3 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
 
 //unload views for IE, trying to collect memory.
 if (SC.browser.isIE) SC.Event.add(window, 'unload', SC.View, SC.View.unload);
-
-
