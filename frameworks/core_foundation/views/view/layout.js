@@ -1088,7 +1088,7 @@ SC.View.reopen(
     @returns {void}
     @test in viewDidResize
   */
-  parentViewDidResize: function (parentFrame) {
+  parentViewDidResize: function (parentFrame, force) {
     // Determine if our position may have changed.
     var positionMayHaveChanged = !this.get('isFixedPosition');
 
@@ -1110,8 +1110,8 @@ SC.View.reopen(
     this._scv_parentWidth = parentWidth;
 
     // If our height or width changed, our resulting frame change may impact our child views.
-    if (heightMayHaveChanged || widthMayHaveChanged) {
-      this.viewDidResize();
+    if (force || heightMayHaveChanged || widthMayHaveChanged) {
+      this.viewDidResize(force);
     }
     // If our size didn't change but our position did, our frame will change, but it won't impact our child
     // views' frames. (Note that the _sc_viewFrameDidChange call is made by viewDidResize above.)
@@ -1220,7 +1220,7 @@ SC.View.reopen(
 
     @returns {void}
   */
-  viewDidResize: function () {
+  viewDidResize: function (force) {
     this._sc_viewFrameDidChange();
     this.notifyMediaChilds();
 
@@ -1230,7 +1230,7 @@ SC.View.reopen(
         len, idx, view;
     for (idx = 0; idx < (len = cv.length); ++idx) {
       view = cv[idx];
-      view.tryToPerform('parentViewDidResize', frame);
+      view.tryToPerform('parentViewDidResize', frame, force);
     }
   },
 

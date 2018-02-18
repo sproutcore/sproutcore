@@ -364,7 +364,8 @@ SC.View.reopen(
       cur = layout[property];
       curAnim = pendingAnimations[property];
 
-      if (SC.none(value)) { throw new Error("Can only animate to an actual value!"); }
+      // Can only animate to an actual value
+      if (SC.none(value)) continue;
 
       // If the new adjustment changes the previous adjustment's options before
       // it has rendered, overwrite the previous adjustment.
@@ -673,6 +674,7 @@ SC.View.reopen(
     if (activeAnimations) {
       for (var key in activeAnimations) {
         var value = document.defaultView.getComputedStyle(el)[key];
+        if (value === '') continue;
 
         // If a transform is being transitioned, decompose the matrices.
         if (key === 'transform') {
@@ -782,6 +784,9 @@ SC.View.reopen(
 
         this._activeAnimations = this._prevLayout = null;
       }
+
+      // Force frame update
+      this.viewDidResize(true);
 
       // Run the callback.
       this.runAnimationCallback(animation, evt, NO);
