@@ -145,6 +145,12 @@ SC.View.reopen(
     @param {String} [designMode] the name of the design mode
    */
   updateDesignMode: function (lastDesignMode, designMode) {
+    // to work with binded properties (like isVisible)
+    this.invokeLast(function() {
+      this._updateDesignMode(lastDesignMode, designMode);
+    });
+  },
+  _updateDesignMode: function (lastDesignMode, designMode) {
     // Fast path.
     if (lastDesignMode === designMode) { return; }
 
@@ -166,47 +172,13 @@ SC.View.reopen(
 
     modeAdjust = this.get('modeAdjust');
     if (modeAdjust) {
-      // Stop observing changes for a moment.
-      this.beginPropertyChanges();
-
-      // Unset any previous properties.
-      prevProperties = this._originalProperties;
-      if (prevProperties) {
-        //@if(debug)
-        if (SC.LOG_DESIGN_MODE || this.SC_LOG_DESIGN_MODE) {
-          SC.Logger.log('%@ — Removing previous design property overrides set by "%@":'.fmt(this, lastDesignMode));
-        }
-        //@endif
-
-        for (key in prevProperties) {
-          this._sc_revertProperty(key, prevProperties[key]);
-        }
-
-        // Remove the cache.
-        this._originalProperties = null;
-      }
-
       if (designMode) {
         // Apply new properties. The orientation specific properties override the size properties.
         if (modeAdjust[size] || modeAdjust[designMode]) {
           newProperties = SC.merge(modeAdjust[size], modeAdjust[designMode]);
-
-          //@if(debug)
-          if (SC.LOG_DESIGN_MODE || this.SC_LOG_DESIGN_MODE) {
-            SC.Logger.log('%@ — Applying design properties for "%@":'.fmt(this, designMode));
-          }
-          //@endif
-
-          // Cache the original properties for reset.
-          this._originalProperties = {};
-          for (key in newProperties) {
-            this._sc_assignProperty(key, newProperties[key]);
-          }
         }
       }
-
-      // Resume observing.
-      this.endPropertyChanges();
+      this._applyDesignMode(newProperties);
     }
 
     // Apply the design mode as a class name.
@@ -241,6 +213,33 @@ SC.View.reopen(
 
     // Set the designMode on each child view (may be null).
     this.adjustChildDesignModes(lastDesignMode, designMode);
+  },
+
+  _applyDesignMode: function (newProperties) {
+    // Stop observing changes for a moment.
+    this.beginPropertyChanges();
+
+    // Unset any previous properties.
+    prevProperties = this._originalProperties;
+    if (prevProperties) {
+      for (key in prevProperties) {
+        this._sc_revertProperty(key, prevProperties[key]);
+      }
+
+      // Remove the cache.
+      this._originalProperties = null;
+    }
+
+    if (newProperties) {
+      // Cache the original properties for reset.
+      this._originalProperties = {};
+      for (key in newProperties) {
+        this._sc_assignProperty(key, newProperties[key]);
+      }
+    }
+
+    // Resume observing.
+    this.endPropertyChanges();
   }
 
 });
