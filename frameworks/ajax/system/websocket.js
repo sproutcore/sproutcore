@@ -93,12 +93,20 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
   autoReconnect: true,
 
   /**
-    The interval in milliseconds to wait before trying to reconnect.
+    The initial interval to wait in milliseconds before trying to reconnect.
 
     @type SC.WebSocketDelegate
     @default null
   */
   reconnectInterval: 10000, // 10 seconds
+
+  /**
+    The maximum interval to wait in milliseconds before trying to reconnect.
+
+    @type SC.WebSocketDelegate
+    @default null
+  */
+  maxReconnectInterval: 120000, // 2 minutes
 
   // ..........................................................
   // PUBLIC METHODS
@@ -268,6 +276,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
     var del = this.get('objectDelegate');
 
     this.set('isConnected', true);
+    this._currentReconnectInterval = this.get('reconnectInterval');
 
     var ret = del.webSocketDidOpen(this, event);
     if (ret !== true) this._notifyListeners('onopen', event);
@@ -364,8 +373,11 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
   tryReconnect: function() {
     if (!this.get('autoReconnect')) return;
 
-    var that = this;
-    setTimeout(function() { that.connect(); }, this.get('reconnectInterval'));
+    var currentReconnectInterval = this._currentReconnectInterval || this.get('reconnectInterval');
+
+    this.invokeOnceLater('connect', currentReconnectInterval);
+
+    this._currentReconnectInterval = Math.min(currentReconnectInterval+this.get('reconnectInterval'), this.get('maxReconnectInterval'));
   },
 
   /**
