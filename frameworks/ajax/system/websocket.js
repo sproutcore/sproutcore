@@ -108,6 +108,23 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
   */
   maxReconnectInterval: 120000, // 2 minutes
 
+  /**
+    The initial interval to wait in milliseconds before retry to send a message.
+
+    @type SC.WebSocketDelegate
+    @default null
+  */
+  retryInterval: 1000, // 1 seconds
+
+  /**
+    The maximum interval to wait in milliseconds before retry to send a message.
+
+    @type SC.WebSocketDelegate
+    @default null
+  */
+  maxRetryInterval: 60000, // 1 minute
+
+
   // ..........................................................
   // PUBLIC METHODS
   //
@@ -258,10 +275,26 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
         message = JSON.stringify(message);
       }
 
-      this.socket.send(message);
-    } else {
-      this.addToQueue(message);
+      // Error can occur when the network is unstable and
+      // if the WebSocket connection is in CONNECTING state.
+      try {
+        this.socket.send(message);
+        this._currentRetryInterval = this.get('retryInterval');
+        return this;
+      }
+      catch(e) {
+        var currentRetryInterval = this._currentRetryInterval || this.get('retryInterval');
+
+        SC.Logger.error("Error while sending a websocket message: '%@'. Will try again in %@ seconds.".fmt(e.message, currentRetryInterval/100));
+
+        this.invokeOnceLater('fireQueue', currentRetryInterval);
+
+        this._currentRetryInterval = Math.min(currentRetryInterval+this.get('retryInterval'), this.get('maxRetryInterval'));
+      }
     }
+
+    this.addToQueue(message);
+
     return this;
   },
 
