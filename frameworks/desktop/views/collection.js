@@ -2210,7 +2210,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
 
       if (content) {
         var itemView = this.itemViewForEvent(ev),
-            allowsMultipleSel = this.get('allowsMultipleSelection'),
+            allowsMultipleSel = content.get('allowsMultipleSelection'),
             didSelect = false,
             sel, isSelected,
             contentIndex;
@@ -2350,7 +2350,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
         if (this.get('useToggleSelection')) {
           // If the toggle wasn't done on mouse down, handle it now.
           if (!this.get('selectOnMouseDown') && itemView) {
-            var allowsMultipleSel = this.get('allowsMultipleSelection');
+            var allowsMultipleSel = content.get('allowsMultipleSelection');
 
             // determine if item is selected. If so, then go on.
             sel = this.get('selection') ;
