@@ -78,7 +78,7 @@ SC.platform = SC.Object.create({
 
     @type Boolean
   */
-  touch: (!SC.none(window.ontouchstart) || SC.browser.name === SC.BROWSER.android || 'ontouchstart' in document.documentElement) && SC.none(window._phantom),
+  touch: (('ontouchstart' in window) || window.DocumentTouch && document instanceof DocumentTouch) && SC.none(window._phantom),
 
   /**
     True if bouncing on scroll is expected in the current platform.
