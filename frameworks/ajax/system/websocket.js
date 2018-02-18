@@ -109,9 +109,13 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
 
     @returns {SC.WebSocket} The SC.WebSocket object.
   */
-  connect: function() {
+  connect: function(server) {
     // If not supported or already connected, return.
     if (!SC.platform.supportsWebSocket || this.socket) return this;
+
+    if (server) {
+      this.set('server', server);
+    }
 
     // Connect.
     try {
