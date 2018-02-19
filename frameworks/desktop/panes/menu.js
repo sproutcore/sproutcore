@@ -582,6 +582,7 @@ SC.MenuPane = SC.PickerPane.extend(
     be the key pane when attached.
   */
   didAppendToDocument: function () {
+    if (this._itemsNeedUpdate) this._sc_menu_itemsDidChange();
     this.becomeMenuPane();
   },
 
@@ -841,6 +842,9 @@ SC.MenuPane = SC.PickerPane.extend(
 
   /** @private */
   _sc_menu_itemsDidChange: function () {
+    if (!this.get('isVisibleInWindow')) return this._itemsNeedUpdate = true;
+    this._itemsNeedUpdate = false;
+
     var items = this.get('items');
 
     // Clean up previous enumerable observer.
