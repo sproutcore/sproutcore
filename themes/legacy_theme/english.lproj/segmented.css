@@ -17,9 +17,6 @@
 
 .sc-theme .sc-segmented-view.disabled .sc-segment-view .sc-button-label .icon {
 	opacity: 0.5;
-	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
-  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
-  -moz-opacity: 0.5;
 }
 
 /* @group Layout */
@@ -266,5 +263,3 @@
 /* @end */
 
 /* @end */
-
-

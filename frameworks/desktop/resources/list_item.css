@@ -69,7 +69,7 @@
   &.has-checkbox .icon {
   	left: 25px;
   }
-  
+
   &.has-count {
     .right-icon {
       right: 32px;
@@ -97,8 +97,6 @@
   	top:  50%;
   	margin-top: -8px;
 
-  	-webkit-border-radius: 2px;
-  	-moz-border-radius: 2px;
   	border-radius: 2px;
   	background-color: #d0d0d0 ;
     & .active {
@@ -123,10 +121,8 @@
   	border: 1px #888 solid;
   	letter-spacing: -1px;
     border-radius: 7px;
-  	-webkit-border-radius: 7px;
-  	-moz-border-radius: 7px;
   }
-  
+
   .branch {
   	position: absolute;
   	width: 16px;

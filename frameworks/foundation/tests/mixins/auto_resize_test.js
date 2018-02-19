@@ -218,8 +218,6 @@ test("Resize height only for textarea where textarea has padding.", function () 
   SC.run(function () {
     view.$('textarea').css({
       'padding': '10px',
-      '-webkit-box-sizing': 'border-box',
-      '-moz-box-sizing': 'border-box',
       'box-sizing': 'border-box'
     });
   });
@@ -280,8 +278,6 @@ test("Resize text only for input where input has padding.", function () {
   SC.run(function () {
     view.$('input').css({
       'padding': '10px',
-      '-webkit-box-sizing': 'border-box',
-      '-moz-box-sizing': 'border-box',
       'box-sizing': 'border-box'
     });
   });
