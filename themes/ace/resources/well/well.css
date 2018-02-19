@@ -1,7 +1,6 @@
 $theme.well {
-  -sc-border-radius: 5px;
+  border-radius: 5px;
   border: 1px solid #999;
-  -webkit-box-shadow: 1px 1px 1px rgba(255, 255, 255, .3);
+  box-shadow: 1px 1px 1px rgba(255, 255, 255, .3);
   overflow:hidden;
 }
-

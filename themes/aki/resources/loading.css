@@ -1,10 +1,10 @@
 
-@-webkit-keyframes startup {
+@keyframes startup {
   0% { bottom: -33px; }
   100% { bottom: -10px; }
 }
 
-@-webkit-keyframes loading {
+@keyframes loading {
   0% { color: #444; }
   50% { color: #777; }
   100% { color: #444; }
@@ -12,8 +12,7 @@
 
 #loading {
   background: #eee;
-  background: -moz-linear-gradient(top,#ddd,#bbb);
-  background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ddd), to(#bbb));
+  background: linear-gradient( #ddd, #bbb);
   bottom: 0;
   left: 0;
   overflow: hidden;
@@ -23,12 +22,11 @@
 }
 
 #loading p.loading {
-  -webkit-animation-name: startup, loading;
-  -webkit-animation-duration: 0.8s, 1.5s;
-  -webkit-animation-iteration-count: 1, infinite;
-  -webkit-animation-timing-function: ease-out ease;
-
-  -sc-box-shadow: inset rgba(0,0,0,0.5) 0 0 3px;
+  animation-name: startup, loading;
+  animation-duration: 0.8s, 1.5s;
+  animation-iteration-count: 1, infinite;
+  animation-timing-function: ease-out ease;
+  box-shadow: inset rgba(0,0,0,0.5) 0 0 3px;
   background-color: #e4e4e4;
   background-image: #DDD;
   border-top: 1px solid #999;

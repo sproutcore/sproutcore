@@ -29,47 +29,19 @@ $theme.progress {
     .content {
       .middle {
         background: sc_static("progress_view_indeterminate_content.png") repeat-x;
-          -webkit-animation-name: _sc_progressview_indeterminate;
-          -webkit-animation-duration:$indeterminate_anim_duration;
-          -webkit-animation-direction: normal;
-          -webkit-animation-timing-function:linear;
-          -webkit-animation-play-state:paused;
-          -webkit-animation-iteration-count: infinite;
-          -moz-animation-name: _sc_progressview_indeterminate;
-          -moz-animation-duration:$indeterminate_anim_duration;
-          -moz-animation-direction: normal;
-          -moz-animation-timing-function:linear;
-          -moz-animation-play-state:paused;
-          -moz-animation-iteration-count: infinite;
-          -ms-animation-name: _sc_progressview_indeterminate;
-          -ms-animation-duration:$indeterminate_anim_duration;
-          -ms-animation-direction: normal;
-          -ms-animation-timing-function:linear;
-          -ms-animation-play-state:paused;
-          -ms-animation-iteration-count: infinite;
-          -o-animation-name: _sc_progressview_indeterminate;
-          -o-animation-duration:$indeterminate_anim_duration;
-          -o-animation-direction: normal;
-          -o-animation-timing-function:linear;
-          -o-animation-play-state:paused;
-          -o-animation-iteration-count: infinite;
-          animation-name: _sc_progressview_indeterminate;
-          animation-duration:$indeterminate_anim_duration;
-          animation-direction: normal;
-          animation-timing-function:linear;
-          animation-play-state:paused;
-          animation-iteration-count: infinite;
+        animation-name: _sc_progressview_indeterminate;
+        animation-duration:$indeterminate_anim_duration;
+        animation-direction: normal;
+        animation-timing-function:linear;
+        animation-play-state:paused;
+        animation-iteration-count: infinite;
       }
     }
 
     &.running {
       .content {
         .middle {
-            -webkit-animation-play-state:running;
-            -moz-animation-play-state:running;
-            -ms-animation-play-state:running;
-            -o-animation-play-state:running;
-            animation-play-state:running;
+          animation-play-state:running;
         }
       }
     }
@@ -80,42 +52,6 @@ $theme.progress {
   }
 }
 
-
-@-webkit-keyframes _sc_progressview_indeterminate {
-    0% {
-        background-position:0px 0;
-    }
-    100% {
-        background-position:42px 0;
-    }
-}
-
-@-moz-keyframes _sc_progressview_indeterminate {
-    0% {
-        background-position:0px 0;
-    }
-    100% {
-        background-position:42px 0;
-    }
-}
-
-@-ms-keyframes _sc_progressview_indeterminate {
-    0% {
-        background-position:0px 0;
-    }
-    100% {
-        background-position:42px 0;
-    }
-}
-
-@-o-keyframes _sc_progressview_indeterminate {
-    0% {
-        background-position:0px 0;
-    }
-    100% {
-        background-position:42px 0;
-    }
-}
 
 @keyframes _sc_progressview_indeterminate {
     0% {
