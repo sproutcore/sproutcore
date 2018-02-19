@@ -1210,18 +1210,20 @@ SC.MenuPane = SC.PickerPane.extend(
     }
 
     return NO;
-
   },
 
   selectMenuItemForString: function (buffer) {
-    var items = this.get('menuItemViews'), item, title, idx, len, bufferLength;
+    var items = this.get('menuItemViews');
     if (!items) return;
 
-    bufferLength = buffer.length;
-    len = items.get('length');
+    var titleKey = this.get('itemTitleKey'),
+      bufferLength = buffer.length,
+      len = items.get('length'),
+      item, title, idx;
+
     for (idx = 0; idx < len; idx++) {
       item = items.objectAt(idx);
-      title = item.get('title');
+      title = item.get(titleKey);
 
       if (!title) continue;
 
