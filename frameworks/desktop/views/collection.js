@@ -774,6 +774,18 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     return del.get('allowsMultipleSelection');
   }.property(),
 
+  /**
+    Convenience property to know if empty selection is allowed.
+
+    @type Boolean
+    @readOnly
+  */
+  allowsEmptySelection: function() {
+    var del = this.delegateFor('allowsEmptySelection', this.get('delegate'), this.get('content'));
+
+    return del.get('allowsEmptySelection');
+  }.property(),
+
 
   // ..........................................................
   // CONTENT CHANGES
@@ -1868,12 +1880,11 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     Remove selection of any selected items.
   */
   deselectAll: function() {
-    var content = this.get('content'),
-        del = this.delegateFor('allowsEmptySelection', this.get('delegate'), content);
+    if (this.get('allowsEmptySelection')) {
+      var length = this.get('length'),
+        sel = length ? SC.IndexSet.create(0, length) : null;
 
-    if (del && del.get('allowsEmptySelection')) {
-      var sel = content ? SC.IndexSet.create(0, content.get('length')) : null;
-    this.deselect(sel, NO) ;
+      this.deselect(sel, NO) ;
     }
     return YES ;
   },
