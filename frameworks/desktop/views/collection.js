@@ -361,6 +361,13 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
   */
   selectOnMouseDown: YES,
 
+  /**
+    Ajust selection on page move.
+
+    @type Boolean
+    @readOnly
+  */
+  selectOnPageMove: YES,
 
   /**
     Toggle disclosure state on double click.
@@ -761,6 +768,30 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     var del = this.get('delegate'), content = this.get('content');
     return this.delegateFor('isCollectionContent', del, content);
   }.property('delegate', 'content').cacheable(),
+
+  /**
+    Convenience property to know if multiple selection is allowed.
+
+    @type Boolean
+    @readOnly
+  */
+  allowsMultipleSelection: function() {
+    var del = this.delegateFor('allowsMultipleSelection', this.get('delegate'), this.get('content'));
+
+    return del.get('allowsMultipleSelection');
+  }.property(),
+
+  /**
+    Convenience property to know if empty selection is allowed.
+
+    @type Boolean
+    @readOnly
+  */
+  allowsEmptySelection: function() {
+    var del = this.delegateFor('allowsEmptySelection', this.get('delegate'), this.get('content'));
+
+    return del.get('allowsEmptySelection');
+  }.property(),
 
 
   // ..........................................................
@@ -1755,6 +1786,19 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
   },
 
   /**
+    Scroll the index and select it if multiple selection is not allowed.
+
+    @param {Integer} [index] The index of the item to move to
+    @returns {SC.CollectionView} receiver
+  */
+  moveToContentIndex: function (index) {
+    index = this._findNextSelectableItemFromIndex(index);
+    this.scrollToContentIndex(index);
+    if (this.get('selectOnPageMove')) this.select(index);
+    return this;
+  },
+
+  /**
     Deletes the selected content if canDeleteContent is YES.  This will invoke
     delegate methods to provide fine-grained control.  Returns YES if the
     deletion was possible, even if none actually occurred.
@@ -1843,12 +1887,11 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     Handle select all keyboard event.
   */
   selectAll: function(evt) {
-    var content = this.get('content'),
-        del = this.delegateFor('allowsMultipleSelection', this.get('delegate'), content);
+    if (this.get('allowsMultipleSelection')) {
+      var length = this.get('length'),
+        sel = length ? SC.IndexSet.create(0, length) : null;
 
-    if (del && del.get('allowsMultipleSelection')) {
-      var sel = content ? SC.IndexSet.create(0, content.get('length')) : null;
-    this.select(sel, NO) ;
+      this.select(sel, NO) ;
     }
     return YES ;
   },
@@ -1857,12 +1900,11 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     Remove selection of any selected items.
   */
   deselectAll: function() {
-    var content = this.get('content'),
-        del = this.delegateFor('allowsEmptySelection', this.get('delegate'), content);
+    if (this.get('allowsEmptySelection')) {
+      var length = this.get('length'),
+        sel = length ? SC.IndexSet.create(0, length) : null;
 
-    if (del && del.get('allowsEmptySelection')) {
-      var sel = content ? SC.IndexSet.create(0, content.get('length')) : null;
-    this.deselect(sel, NO) ;
+      this.deselect(sel, NO) ;
     }
     return YES ;
   },
@@ -1879,6 +1921,48 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
   */
   deleteForward: function(evt) {
     return this.deleteSelection() ;
+  },
+
+  /**
+    Scroll to the first item.
+
+    @private
+ */
+ moveToBeginningOfDocument: function (sender, evt) {
+   this.moveToContentIndex(0);
+   return true ;
+ },
+
+  /**
+    Scroll to the last item.
+
+    @private
+  */
+  moveToEndOfDocument: function (sender, evt) {
+    this.moveToContentIndex(this.get('length')-1);
+    return true ;
+  },
+
+  /**
+    Scroll to the next page.
+
+    @private
+  */
+  pageDown: function (sender, evt) {
+    var indexes = this.get('nowShowing');
+    this.moveToContentIndex(indexes.max+indexes.length);
+    return YES;
+  },
+
+  /**
+    Scroll to the previous page.
+
+    @private
+  */
+  pageUp: function (sender, evt) {
+    var indexes = this.get('nowShowing');
+    this.moveToContentIndex(indexes.max-(indexes.length*2));
+    return YES;
   },
 
   /** @private
@@ -1991,24 +2075,18 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
 
   /** @private */
   moveDownAndModifySelection: function(sender, evt) {
-    var content = this.get('content'),
-        del = this.delegateFor('allowsMultipleSelection', this.get('delegate'), content);
-
-    if (del && del.get('allowsMultipleSelection')) {
-    this.selectNextItem(true, this.get('itemsPerRow') || 1) ;
-    this._cv_performSelectAction(null, evt, this.ACTION_DELAY);
+    if (this.get('allowsMultipleSelection')) {
+      this.selectNextItem(true, this.get('itemsPerRow') || 1) ;
+      this._cv_performSelectAction(null, evt, this.ACTION_DELAY);
     }
     return true ;
   },
 
   /** @private */
   moveUpAndModifySelection: function(sender, evt) {
-    var content = this.get('content'),
-        del = this.delegateFor('allowsMultipleSelection', this.get('delegate'), content);
-
-    if (del && del.get('allowsMultipleSelection')) {
-    this.selectPreviousItem(true, this.get('itemsPerRow') || 1) ;
-    this._cv_performSelectAction(null, evt, this.ACTION_DELAY);
+    if (this.get('allowsMultipleSelection')) {
+      this.selectPreviousItem(true, this.get('itemsPerRow') || 1) ;
+      this._cv_performSelectAction(null, evt, this.ACTION_DELAY);
     }
     return true ;
   },
