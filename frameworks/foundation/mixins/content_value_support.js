@@ -186,6 +186,9 @@ SC.ContentValueSupport = {
       if (content) v = content.get ? content.get(contentKey) : content[contentKey];
       else v = null;
 
+      // special case for isEnabled which must be true until it is specified to be false
+      if (prop === 'isEnabled' && v !== false) v = true;
+
       this.setIfChanged(prop, v);
     }
 
@@ -391,4 +394,3 @@ SC.ContentValueSupport = {
     }
   }
 };
-
