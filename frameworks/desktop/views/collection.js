@@ -361,6 +361,13 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
   */
   selectOnMouseDown: YES,
 
+  /**
+    Ajust selection on page move.
+
+    @type Boolean
+    @readOnly
+  */
+  selectOnPageMove: YES,
 
   /**
     Toggle disclosure state on double click.
@@ -1779,6 +1786,19 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
   },
 
   /**
+    Scroll the index and select it if multiple selection is not allowed.
+
+    @param {Integer} [index] The index of the item to move to
+    @returns {SC.CollectionView} receiver
+  */
+  moveToContentIndex: function (index) {
+    index = this._findNextSelectableItemFromIndex(index);
+    this.scrollToContentIndex(index);
+    if (this.get('selectOnPageMove')) this.select(index);
+    return this;
+  },
+
+  /**
     Deletes the selected content if canDeleteContent is YES.  This will invoke
     delegate methods to provide fine-grained control.  Returns YES if the
     deletion was possible, even if none actually occurred.
@@ -1843,8 +1863,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
 
   /** @private */
   keyDown: function(evt) {
-    var ret = this.interpretKeyEvents(evt) ;
-    return !ret ? NO : ret ;
+    return this.interpretKeyEvents(evt) || false;
   },
 
   /** @private */
@@ -1901,6 +1920,48 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
   */
   deleteForward: function(evt) {
     return this.deleteSelection() ;
+  },
+
+  /**
+    Scroll to the first item.
+
+    @private
+ */
+ moveToBeginningOfDocument: function (sender, evt) {
+   this.moveToContentIndex(0);
+   return true ;
+ },
+
+  /**
+    Scroll to the last item.
+
+    @private
+  */
+  moveToEndOfDocument: function (sender, evt) {
+    this.moveToContentIndex(this.get('length')-1);
+    return true ;
+  },
+
+  /**
+    Scroll to the next page.
+
+    @private
+  */
+  pageDown: function (sender, evt) {
+    var indexes = this.get('nowShowing');
+    this.moveToContentIndex(Math.min(this.get('length')-1, indexes.max+indexes.length));
+    return YES;
+  },
+
+  /**
+    Scroll to the previous page.
+
+    @private
+  */
+  pageUp: function (sender, evt) {
+    var indexes = this.get('nowShowing');
+    this.moveToContentIndex(Math.max(0, indexes.max-(indexes.length*2)));
+    return YES;
   },
 
   /** @private
