@@ -111,8 +111,7 @@ test("basic", function() {
   equals(view.$('.content')[0].style.width, "25%", 'width should be 25%');
 
   // browsers compute the width after % adjustment differently.  just be close
-  var v = (SC.browser.isIE || SC.browser.isMozilla || SC.browser.isChrome) ? 63 : 62;
-  equals(view.$('.content').width(), v, 'pixel width ');
+  ok(Math.abs(view.$('.content').width() - 62.5) < 1, 'pixel width ');
 
 });
 
@@ -257,7 +256,7 @@ test("changing value to over maximum", function() {
 
   // browsers compute the width after % adjustment differently.  just be close
   var v = (SC.browser.isIE || SC.browser.isMozilla || SC.browser.isChrome) ? 63 : 62;
-  equals(view.$('.content').width(), v, 'precon - pixel width should be fixed');
+  ok(Math.abs(view.$('.content').width() - 62.5) < 1, 'precon - pixel width should be fixed');
   SC.RunLoop.begin();
   view.set('value', 110);
   SC.RunLoop.end();
