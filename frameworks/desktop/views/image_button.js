@@ -24,16 +24,15 @@
   You could then add some CSS rule for a normal state:
 
       $theme.image-button .my-image-button-icon {
-        @include slice('my-image-button-image.png');
+        background-image: url('my-image-button-image.png');
 
         // and an active state:
         &.active {
-          @include slice('my-image-button-image-active.png');
+          background-image: url('my-image-button-image-active.png');
         }
       }
 
-  Note: in addition to using SCSS and the Chance directives shown above, you
-  can use normal CSS syntax and sc_static.
+  Note: in addition to using SCSS, you can use normal CSS syntax and sc_static.
 
   @extends SC.View
   @extends SC.Control
