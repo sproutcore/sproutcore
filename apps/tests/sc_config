@@ -3,7 +3,7 @@ BT._TESTAPP = BT.AppBuilder.create({
   path: dirname(),
   doNotBuild: true,
   includeTests: true,
-  theme: "sproutcore:ace",
+  theme: "sproutcore:aki",
   frameworks: ["sproutcore:debug","sproutcore:testing","sproutcore", "sproutcore:datastore","sproutcore:core_tools"]
 });
 
