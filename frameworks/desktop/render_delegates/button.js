@@ -70,7 +70,6 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
       context.setAttr('title', toolTip);
     }
 
-    this.includeSlices(dataSource, context, SC.THREE_SLICE);
     // accessibility
     if(dataSource.get('isSegment')){
       context.setAttr('aria-selected', isSelected.toString());
@@ -88,7 +87,6 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
 
     if (dataSource.get('supportFocusRing')) {
       context = context.begin('div').addClass('focus-ring');
-      this.includeSlices(dataSource, context, SC.THREE_SLICE);
       context = context.end();
     }
   },

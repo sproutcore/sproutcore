@@ -18,7 +18,7 @@ SC.View.reopen(
     If null (the default), the view will set its 'theme' property to
     be equal to 'baseTheme'.
 
-    Example: themeName: 'ace'
+    Example: themeName: 'aki'
 
     @type String
   */
@@ -93,8 +93,8 @@ SC.View.reopen(
     The SC.Theme instance in which the 'theme' property should look for the theme
     named by 'themeName'.
 
-    For example, if 'baseTheme' is SC.AceTheme, and 'themeName' is 'popover',
-    it will look to see if SC.AceTheme has a child theme named 'popover',
+    For example, if 'baseTheme' is SC.AkiTheme, and 'themeName' is 'popover',
+    it will look to see if SC.AkiTheme has a child theme named 'popover',
     and _then_, if it is not found, look globally.
 
     @private
@@ -373,5 +373,3 @@ SC.propertyFromRenderDelegate = function(propertyName, def) {
     return def;
   }.property('renderDelegate').cacheable();
 };
-
-

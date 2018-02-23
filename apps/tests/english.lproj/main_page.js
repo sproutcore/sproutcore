@@ -228,5 +228,3 @@ TestRunner.mainPage = SC.Page.design({
   })
 
 });
-
-
