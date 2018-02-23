@@ -11,10 +11,11 @@ echo "Running in $WD..."
 /bin/mkdir -p ${WD} || /bin/true
 cd ${WD}
 
-git clone https://github.com/sproutcore/build-tools sproutcore
+npm install https://github.com/sproutcore/build-tools
+#git clone https://github.com/sproutcore/build-tools sproutcore
 cd sproutcore
-npm install
-cd ..
+#npm install
+#cd ..
 sproutcore/bin/sproutcore init master
 cd master
 mkdir -p frameworks
