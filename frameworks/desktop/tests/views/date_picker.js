@@ -16,13 +16,13 @@ var pane = SC.ControlTestPane.design()
   });
 
 var now = SC.DateTime.create();
-  
+
 pane.show(); // add a test to show the test pane
 window.pane = pane ;
 
 // ..........................................................
 // BASIC TESTS
-// 
+//
 module("Basic init", pane.standardSetup());
 
 test("Proper default start-on date", function() {
@@ -51,4 +51,22 @@ test("Changing view date", function() {
     view.showSelectedDate();
     equals(view.getPath('displayFromDate.month'), now.get('month'), 'Calling showSelectedDate method returns view to current month');
   });
+});
+
+test("Mouse event", function() {
+  var view = pane.view('basic'),
+    layer = view.get('layer'),
+    ev;
+
+  view._scdpv_parseSelectedDate = function(target) {
+    return SC.DateTime.create({ year: 2000 });
+  }
+
+  ev = SC.Event.simulateEvent(layer, 'mousedown');
+  SC.Event.trigger(layer, 'mousedown', [ev]);
+
+  ev = SC.Event.simulateEvent(layer, 'mouseup');
+  SC.Event.trigger(layer, 'mouseup', [ev]);
+
+  equals(view.getPath('value.year'), 2000, 'basic,default begins with correct date');
 });
