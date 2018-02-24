@@ -338,7 +338,7 @@ SC.DatePickerView = SC.View.extend(SC.ActionSupport, {
         mouseDownDate = this.get('_beingSelectedDate'),
         todaysDate = SC.DateTime.create(),
         weekdayStrings = this.get('weekdayStrings') || SC.DateTime.abbreviatedDayNames,
-        classNames, uniqueDayIdentifier, isCurrentMonth, isActiveDate, isToday;
+        classNames, uniqueDayIdentifier, isCurrentMonth, isActiveDate, isToday, isSelectedDate, isBeingSelectedDate;
 
     // Render header
     context = context.begin().addClass('header')
