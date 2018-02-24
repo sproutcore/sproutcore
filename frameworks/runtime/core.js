@@ -405,7 +405,7 @@ SC.mixin(/** @scope window.SC.prototype */ {
     internally for performance.
 
     TODO deprecated warning, we should remove this in a future release
-    
+
     @param {String} prefix the prefix to attach to the key
     @param {String} key The key
     @returns {String} result
@@ -495,7 +495,7 @@ SC.mixin(/** @scope window.SC.prototype */ {
    @returns {NUMBER} -1 if v < w, 0 if v = w and 1 if v > w.
 
   */
-  compare: function (v, w) {
+  compare: function compare (v, w) {
     // Doing a '===' check is very cheap, so in the case of equality, checking
     // this up-front is a big win.
     if (v === w) return 0;
@@ -544,9 +544,8 @@ SC.mixin(/** @scope window.SC.prototype */ {
       var l = Math.min(vLen, wLen);
       var r = 0;
       var i = 0;
-      var thisFunc = arguments.callee;
       while (r === 0 && i < l) {
-        r = thisFunc(v[i], w[i]);
+        r = compare(v[i], w[i]);
         i++;
       }
       if (r !== 0) return r;
