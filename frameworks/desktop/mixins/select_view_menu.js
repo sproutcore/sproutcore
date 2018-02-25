@@ -101,7 +101,7 @@ SC.SelectViewMenu = {
   /** @private */
   _svm_bindToProperties: [
     { from: 'displayItems', to: 'items' },
-    'itemTitleKey', 'itemValueKey', 'itemIsEnabledKey',
+    'itemTitleKey', 'itemValueKey', 'itemIsEnabledKey', 'itemUnreadCountKey', 
     'itemIconKey', 'itemHeightKey', 'itemSubMenuKey', 'itemSeparatorKey',
     'itemTargetKey', 'itemActionKey', 'itemCheckboxKey', 'itemShortCutKey',
     'itemKeyEquivalentKey', 'itemDisableMenuFlashKey', 'minimumMenuWidth',

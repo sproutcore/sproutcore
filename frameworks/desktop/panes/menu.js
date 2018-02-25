@@ -353,6 +353,15 @@ SC.MenuPane = SC.PickerPane.extend(SC.SelectionSupport,
   itemIconKey: 'icon',
 
   /**
+    The name of the property that contains the icon for each item.
+
+    @type String
+    @default "count"
+    @commonTask Menu Item Properties
+  */
+  itemUnreadCountKey: 'count',
+
+  /**
     The name of the property that contains the height for each item.
 
     @readOnly
@@ -463,7 +472,7 @@ SC.MenuPane = SC.PickerPane.extend(SC.SelectionSupport,
     @isReadOnly
     @type Array
   */
-  itemKeys: ['itemTitleKey', 'itemValueKey', 'itemToolTipKey', 'itemIsEnabledKey', 'itemIconKey', 'itemSeparatorKey', 'itemActionKey', 'itemCheckboxKey', 'itemShortCutKey', 'itemHeightKey', 'itemSubMenuKey', 'itemKeyEquivalentKey', 'itemDisableMenuFlashKey', 'itemTargetKey'],
+  itemKeys: ['itemTitleKey', 'itemValueKey', 'itemToolTipKey', 'itemIsEnabledKey', 'itemIconKey', 'itemUnreadCountKey', 'itemSeparatorKey', 'itemActionKey', 'itemCheckboxKey', 'itemShortCutKey', 'itemHeightKey', 'itemSubMenuKey', 'itemKeyEquivalentKey', 'itemDisableMenuFlashKey', 'itemTargetKey'],
 
 
   // ..........................................................

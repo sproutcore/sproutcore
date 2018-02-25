@@ -432,6 +432,7 @@ test('Menu item keys', function () {
       TheToolTip: 'Menu tooltip',
       AmIEnabled: false,
       MyIcon: 'folder',
+      TheCount: 2,
       MyHeight: 50,
       MySubmenu: submenu,
       AmIASeparator: false
@@ -445,6 +446,7 @@ test('Menu item keys', function () {
       itemTitleKey: 'TheTitle',
       itemValueKey: 'TheValue',
       itemToolTipKey: 'TheToolTip',
+      itemUnreadCountKey: 'TheCount',
       itemIsEnabledKey: 'AmIEnabled',
       itemIconKey: 'MyIcon',
       itemSubMenuKey: 'MySubmenu',
@@ -461,6 +463,7 @@ test('Menu item keys', function () {
   equals(menuItem.get('toolTip'), 'Menu tooltip', 'check toolTip');
   equals(menuItem.get('isEnabled'), false, 'check isEnabled');
   equals(menuItem.get('icon'), 'folder', 'check icon');
+  equals(menuItem.get('count'), 2, 'check count');
   SC.run(function() {
     ok(SC.kindOf(menuItem.get('subMenuView'), SC.MenuPane), 'check subMenu');
   });
