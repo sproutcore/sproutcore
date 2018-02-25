@@ -18,11 +18,11 @@ test("Proxying all properties from SelectView to MenuView works.", function() {
   var proxyProperties = [
     'items',
     'target', 'action',
-    'itemTitleKey', 'itemIsEnabledKey', 'itemValueKey', 'itemIconKey', 
+    'itemTitleKey', 'itemIsEnabledKey', 'itemValueKey', 'itemIconKey', 'itemUnreadCountKey', 
     'itemHeightKey', 'itemSubMenuKey', 'itemSeparatorKey', 'itemTargetKey',
     'itemActionKey', 'itemCheckboxKey', 'itemShortCutKey',
-    'itemKeyEquivalentKey', 'itemDisableMenuFlashKey', 
-    
+    'itemKeyEquivalentKey', 'itemDisableMenuFlashKey',
+
     'preferType', 'preferMatrix'
   ];
 

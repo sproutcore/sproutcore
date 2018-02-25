@@ -31,7 +31,7 @@ SC.MenuItemView = SC.ListItemView.extend(SC.Control,
     @default ['title', 'isEnabled', 'isSeparator', 'isChecked']
     @see SC.View#displayProperties
   */
-  displayProperties: ['title', 'toolTip', 'isEnabled', 'icon', 'isSeparator', 'shortcut', 'isChecked'],
+  displayProperties: ['title', 'toolTip', 'isEnabled', 'icon', 'count', 'isSeparator', 'shortcut', 'isChecked'],
 
   /**
     The WAI-ARIA role for menu items.
@@ -80,6 +80,7 @@ SC.MenuItemView = SC.ListItemView.extend(SC.Control,
     itemValueKey: 'value',
     itemToolTipKey: 'toolTip',
     itemIconKey: 'icon',
+    itemUnreadCountKey: 'count',
     itemSeparatorKey: 'isSeparator',
     itemShortCutKey: 'shortcut',
     itemCheckboxKey: 'isChecked',
@@ -246,6 +247,11 @@ SC.MenuItemView = SC.ListItemView.extend(SC.Control,
       if (val) {
         this.renderShortcut(context, val);
       }
+
+      val = this.get('count');
+      if (val) {
+        this.renderUnreadCount(context, val);
+      }
     }
 
     context = context.end();
@@ -306,6 +312,17 @@ SC.MenuItemView = SC.ListItemView.extend(SC.Control,
   */
   renderShortcut: function (context, shortcut) {
     context.push('<span class = "shortcut">' + shortcut + '</span>');
+  },
+
+  /** @private
+   Generates the string used to represent the unread count. override this to
+   return your own custom HTML
+
+   @param {SC.RenderContext} context the render context
+   @returns {void}
+  */
+  renderUnreadCount: function(context, count) {
+    context.push('<span class="count"><span class="inner">'+count+'</span></span>') ;
   },
 
   /**
