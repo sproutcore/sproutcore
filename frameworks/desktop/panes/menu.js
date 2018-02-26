@@ -546,8 +546,7 @@ SC.MenuPane = SC.PickerPane.extend(SC.SelectionSupport,
 
   /** @private */
   createListView: function(opt) {
-    var that = this,
-      selectView = this.selectView || this,
+    var selectView = this.selectView || this,
       listView;
 
     if (!opt) opt = {};

@@ -4,12 +4,107 @@ sc_require("mixins/item_filter");
 
 SC.ComboBoxView = SC.View.extend(SC.ItemFilter, {
 
+  /**
+    The value of the selected item
+
+    @property
+    @default null
+  */
   value: null,
 
-  selectedMenuItem: null,
+  /**
+    The array of items to populate the menu. This can be a simple array of strings,
+    objects or hashes. If you pass objects or hashes, you can also set the
+    various itemKey properties to tell the menu how to extract the information
+    it needs.
 
+    @type Array
+    @default []
+  */
+  items: null,
+
+  /**
+    Binding default for an array of items
+
+    @property
+    @default SC.Binding.multiple()
+  */
+  itemsBindingDefault: SC.Binding.multiple(),
+
+  /**
+    They key in the items which maps to the title.
+    This only applies for items that are hashes or SC.Objects.
+
+    @property
+    @type {String}
+    @default "title"
+  */
+  itemTitleKey: "title",
+
+  /**
+    They key in the items which maps to the value.
+    This only applies for items that are hashes or SC.Objects.
+
+     @property
+     @type {String}
+     @default null
+  */
+  itemValueKey: null,
+
+  /**
+     Key used to extract icons from the items array.
+
+     @property
+     @type {String}
+     @default null
+  */
+  itemIconKey: null,
+
+  /**
+    Key to use to identify separators.
+
+    Items that have this property set to YES will be drawn as separators.
+
+    @property
+    @type {String}
+    @default "isSeparator"
+  */
+  itemSeparatorKey: "isSeparator",
+
+  /**
+    Key used to indicate if the item is to be enabled.
+
+    @property
+    @type {String}
+    @default "isEnabled"
+  */
+  itemIsEnabledKey: "isEnabled",
+
+  /**
+    If true, titles will be escaped to avoid scripting attacks.
+
+    @type Boolean
+    @default YES
+  */
+  escapeHTML: YES,
+
+  /**
+   The text field view to use.
+
+   @property
+   @type {SC.TextFieldView}
+   @default SC.TextFieldView
+  */
   textFieldView: SC.TextFieldView,
 
+  /**
+    * @private
+  */
+  selectedMenuItem: null,
+
+  /**
+    * @private
+  */
   createChildViews: function() {
     var that = this,
       view;
@@ -39,7 +134,9 @@ SC.ComboBoxView = SC.View.extend(SC.ItemFilter, {
     this.set('childViews', [view]);
   },
 
-
+  /**
+    * @private
+  */
   didSelectItemDelegate: function() {
     var item = this.get('selectedMenuItem'),
       value = SC.get(item, this.get('itemValueKey'));
@@ -48,25 +145,24 @@ SC.ComboBoxView = SC.View.extend(SC.ItemFilter, {
     this.set('value', value);
   }.observes('selectedMenuItem'),
 
-
+  /**
+    * @private
+  */
   popupMenu: function() {
-    var that = this,
-      layer = this.get('layer'),
+    var layer = this.get('layer'),
       menu = this._menu;
 
     if (!menu) {
       var menu = SC.AutoResizingMenuPane.create({
         preferMatrix: [1, 1, SC.POSITION_BOTTOM],
-
+        selectView: this,
         acceptsKeyPane: false,
-
-        itemsBinding: SC.Binding.from('items', that).oneWay(),
-
+        escapeHTML: this.get('escapeHTML'),
+        itemsBinding: SC.Binding.from('items', this).oneWay(),
         action: function(rootMenu) {
           var selectedItem = rootMenu.get('selectedItem');
-          that.set('selectedMenuItem', selectedItem);
-        },
-
+          this.selectView.set('selectedMenuItem', selectedItem);
+        }
       });
 
       this._menu = menu;
