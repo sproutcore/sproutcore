@@ -32,7 +32,7 @@ SC.SelectSearchView = SC.SelectView.extend(SC.ItemFilter, {
     return searchValue? this.searchItems(ret, searchValue, itemTitleKey): ret;
   }.property().cacheable(),
 
-  menu: SC.MenuSeachPane.extend(SC.SelectViewMenu, {
+  menu: SC.MenuSearchPane.extend(SC.SelectViewMenu, {
     searchView: function() {
       return this.get('selectView');
     }.property('selectView').cacheable(),
