@@ -11,6 +11,8 @@ SC.MenuSeachPane = SC.AutoResizingMenuPane.extend({
 
   isKeyPane: true,
 
+  menuHeightPadding: 28,
+
   didAppendToDocument: function () {
     sc_super();
     this._textFieldView.becomeFirstResponder();
@@ -18,11 +20,7 @@ SC.MenuSeachPane = SC.AutoResizingMenuPane.extend({
   },
 
   createChildViews: function () {
-    var textField, scroll, menuView;
-
-    menuView = this._menuView = SC.View.create({
-      layout: { height: 0 }
-    });
+    var textField, scroll;
 
     textField = this._textFieldView = this.createChildView(SC.TextFieldView, {
       layout: { top: 1, right: 1, left: 1, height: 24 },
@@ -36,32 +34,14 @@ SC.MenuSeachPane = SC.AutoResizingMenuPane.extend({
 
     textField.bind('value', this.get('searchView'), 'searchValue');
 
-    scroll = this._menuScrollView = this.createChildView(SC.MenuScrollView, {
+    scroll = this.createScrollView({
       layout: { top: 25 },
-      controlSize: this.get('controlSize'),
-      contentView: menuView
+      contentView: this.createListView()
     });
 
     this.childViews = [textField, scroll];
 
     return this;
-  },
-
-
-  _updateMenuWidth: function() {
-    var menuItemViews = this.get('menuItemViews');
-    if (!menuItemViews) return;
-
-    var len = menuItemViews.length, idx, view,
-        width = this.get('minimumMenuWidth');
-
-    for (idx = 0; idx < len; idx++) {
-      view = menuItemViews[idx];
-      width = Math.max(width, view.get('measuredSize').width + this.get('menuWidthPadding'));
-    }
-
-    this.adjust({ 'width': width, height: this.get('menuHeight')+25 });
-    this.positionPane();
-  },
+  }
 
 });

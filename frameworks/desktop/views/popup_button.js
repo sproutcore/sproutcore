@@ -191,55 +191,33 @@ SC.PopupButtonView = SC.ButtonView.extend({
     // If disabled, handle mouse down but ignore it.
     if (!this.get('isEnabled')) return YES ;
 
-    this.set('_mouseDown', YES);
+    this._mouseDown = true;
 
     this.showMenu();
 
-    this._mouseDownTimestamp = null;
+    this._mouseDownTimestamp = Date.now();
 
-    // Some nutty stuff going on here. If the number of menu items is large, and
-    // it takes over 400 ms to create, then invokeLater will not return control
-    // to the browser, thereby causing the menu pane to dismiss itself
-    // instantly. Using setTimeout will guarantee that control goes back to the
-    // browser.
-    var self = this;
-
-    // there is a bit of a race condition: we could get mouse up immediately.
-    // In that case, we will take note that the timestamp is 0 and treat it
-    // as if it were Date.now() at the time of checking.
-    self._mouseDownTimestamp = 0;
-
-    setTimeout(function() {
-      self._mouseDownTimestamp = Date.now();
-    }, 1);
-
-    this.becomeFirstResponder();
+    this.becomeFirstResponder(evt);
 
     return YES;
   },
 
   /** @private */
   mouseUp: function(evt) {
-    var menu = this.get('menu'), targetMenuItem, success;
+    var menu = this.get('menu');
 
-    if (menu && this.get('_mouseDown')) {
-      targetMenuItem = menu.getPath('rootMenu.targetMenuItem');
-
-      // normalize the mouseDownTimestamp: it may not have been set yet.
-      if (this._mouseDownTimestamp === 0) {
-        this._mouseDownTimestamp = Date.now();
-      }
-
+    if (menu && this._mouseDown) {
       // If the user waits more than 400ms between mouseDown and mouseUp,
       // we can assume that they are clicking and dragging to the menu item,
       // and we should close the menu if they mouseup anywhere not inside
       // the menu.
-      if(evt.timeStamp - this._mouseDownTimestamp > 400) {
-        if (targetMenuItem && menu.get('mouseHasEntered') && this._mouseDownTimestamp) {
+      if(Date.now() - this._mouseDownTimestamp > 400) {
+        var currentMenuItem = menu.getPath('rootMenu.currentMenuItem');
+        if (currentMenuItem && this._mouseDownTimestamp) {
           // Have the menu item perform its action.
           // If the menu returns NO, it had no action to
           // perform, so we should close the menu immediately.
-          if (!targetMenuItem.performAction()) {
+          if (!currentMenuItem.performAction()) {
             menu.remove();
           }
         }
@@ -249,7 +227,7 @@ SC.PopupButtonView = SC.ButtonView.extend({
         }
       }
     }
-
+    this._mouseDown = false;
     this._mouseDownTimestamp = undefined;
     return YES;
   },
