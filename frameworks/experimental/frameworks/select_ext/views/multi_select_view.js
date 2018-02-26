@@ -238,7 +238,7 @@ SC.MultiSelectView = SC.CollectionView.extend({
     this.set('popup', popup);
     popup.set('minimumMenuWidth', this.get('frame').width);
     popup.set('width', this.get('frame').width);
-    this.isActiveBinding = this.bind('isActive', popup, 'isVisibileInWindow');
+    this.isActiveBinding = this.bind('isActive', popup, 'isVisibleInWindow');
     this.allItemsBinding = this.bind('allItems', popup, 'items');
     this._selectedValueBinding = this.bind('_selectedValue', popup, 'selectedItem');
   },
@@ -330,7 +330,7 @@ SC.MultiSelectView = SC.CollectionView.extend({
   mouseDown: function (evt) {
     // sc_super();
     // if (!this.get('isEnabled')) return YES;
-    // this.set('_mouseDown', YES);
+    // this._mouseDown = true;
     // // decide whether it needs popups
     // debugger;
     this.showPopup();

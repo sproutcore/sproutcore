@@ -23,6 +23,13 @@ SC.SelectView = SC.PopupButtonView.extend({
   renderDelegateName: 'selectRenderDelegate',
 
   /**
+    @type Array
+    @default ['sc-menu']
+    @see SC.View#classNames
+  */
+  classNames: ['sc-select-view'],
+
+  /**
     The array of items to populate the menu. This can be a simple array of strings,
     objects or hashes. If you pass objects or hashes, you can also set the
     various itemKey properties to tell the menu how to extract the information
@@ -47,9 +54,9 @@ SC.SelectView = SC.PopupButtonView.extend({
 
     @property
     @type {String}
-    @default null
+    @default "title"
   */
-  itemTitleKey: null,
+  itemTitleKey: "title",
 
   /**
     If you set this to a non-null value, then the value of this key will
@@ -88,7 +95,7 @@ SC.SelectView = SC.PopupButtonView.extend({
 
     @property
     @type {String}
-    @default null
+    @default "isSeparator"
   */
   itemSeparatorKey: "isSeparator",
 
@@ -97,7 +104,7 @@ SC.SelectView = SC.PopupButtonView.extend({
 
     @property
     @type {String}
-    @default null
+    @default "isEnabled"
   */
   itemIsEnabledKey: "isEnabled",
 
@@ -120,7 +127,7 @@ SC.SelectView = SC.PopupButtonView.extend({
 
   /**
     If true, the empty name and the default title will be localized.
-    
+
     @type Boolean
     @default YES
   */
@@ -183,38 +190,22 @@ SC.SelectView = SC.PopupButtonView.extend({
     this._scsv_valueDidChange();
   },
 
-  /** @private */
-  _itemTitleKey: function() {
-    return this.get('itemTitleKey') || 'title';
-  }.property('itemTitleKey').cacheable(),
-
-  /** @private */
-  _itemValueKey: function() {
-    return this.get('itemValueKey') || 'value';
-  }.property('itemValueKey').cacheable(),
-
-  /** @private */
-  _itemIsEnabledKey: function() {
-    return this.get('itemIsEnabledKey') || 'isEnabled';
-  }.property('itemIsEnabledKey').cacheable(),
-
   /**
     @private
 
-    This gets the value for a specific menu item. 
-    
+    This gets the value for a specific menu item.
+
     This method therefore accepts both the menu items as created for the menupane's displayItems
     AND the raw items provided by the developer in `items`.
   */
   _scsv_getValueForMenuItem: function(item) {
-    var valueKey = this.get('_itemValueKey');
+    var valueKey = this.get('itemValueKey');
 
-    if (!item.isDisplayItem && !this.get('itemValueKey')) {
+    if (item.isDisplayItem) return null;
+    if (!valueKey) {
       return item;
-    } else if (item.get) {
-      return item.get(valueKey);
     } else {
-      return item[valueKey];
+      return SC.get(item, valueKey);
     }
   },
 
@@ -260,7 +251,7 @@ SC.SelectView = SC.PopupButtonView.extend({
     if (!sel) {
       return this.get('defaultTitle');
     } else {
-      var itemTitleKey = this.get('_itemTitleKey');
+      var itemTitleKey = this.get('itemTitleKey');
       if (itemTitleKey) {
         if (sel.get) return sel.get(itemTitleKey);
         else if (SC.typeOf(sel) == SC.T_HASH) return sel[itemTitleKey];
@@ -290,7 +281,7 @@ SC.SelectView = SC.PopupButtonView.extend({
       if (sel.get) return sel.get(itemIconKey);
       else if (SC.typeOf(sel) == SC.T_HASH) return sel[itemIconKey];
     }
-    return null;      
+    return null;
   }.property('selectedItem').cacheable(),
 
   /**
@@ -308,28 +299,10 @@ SC.SelectView = SC.PopupButtonView.extend({
   displayItems: function () {
     var items = this.get('items'),
       emptyName = this.get('emptyName'),
-      len,
-      ret = [], idx, item, itemType;
+      len = 0,
+      ret = SC.A(items);
 
-    if (!items) len = 0;
-    else len = items.get('length');
-
-    for (idx = 0; idx < len; idx++) {
-      item = items.objectAt(idx);
-
-      // fast track out if we can't do anything with this item
-      if (!item || (!ret.length && item[this.get('itemSeparatorKey')])) continue;
-
-      itemType = SC.typeOf(item);
-      if (itemType === SC.T_STRING) {
-        item = this._addDisplayItem(item, item);
-      } else if (itemType === SC.T_HASH) {
-        item = SC.Object.create(item);
-      }
-      item.contentIndex = idx;
-
-      ret.push(item);
-    }
+    if (items) len = items.get('length');
 
     ret = this.sortObjects(ret);
 
@@ -352,9 +325,8 @@ SC.SelectView = SC.PopupButtonView.extend({
       isDisplayItem: true
     });
 
-    item[this.get('_itemTitleKey')] = title;
-    item[this.get('_itemValueKey')] = value;
-    item[this.get('_itemIsEnabledKey')] = true;
+    item[this.get('itemTitleKey')] = title;
+    item[this.get('itemIsEnabledKey')] = true;
     item[this.get('itemSeparatorKey')] = !!isSeparator;
 
     return item;
@@ -370,9 +342,9 @@ SC.SelectView = SC.PopupButtonView.extend({
   */
   sortObjects: function (objects) {
     if (!this.get('disableSort')) {
-      var nameKey = this.get('itemSortKey') || this.get('_itemTitleKey');
+      var nameKey = this.get('itemSortKey') || this.get('itemTitleKey');
       objects = objects.sort(function(a, b) {
-        if (nameKey) {
+        if (nameKey && SC.typeOf(a) === SC.T_HASH) {
           a = a.get ? a.get(nameKey) : a[nameKey];
           b = b.get ? b.get(nameKey) : b[nameKey];
         }
@@ -387,24 +359,31 @@ SC.SelectView = SC.PopupButtonView.extend({
     * @private
   */
   _scsv_valueDidChange: function() {
-    var displayItems = this.get('displayItems');
-    if (!displayItems) return;
+    var item = this._findItem(this.get('displayItems'));
+    this.setIfChanged('selectedItem', item);
+  }.observes('value', 'displayItems'),
 
-    var len = displayItems.get ? displayItems.get('length') : displayItems.length, 
-      idx, item;
+  /** @private */
+  _findItem: function(items) {
+    if (!items) return;
+
+    var len = SC.get(items, 'length'),
+      subKey = this.get('itemSubMenuKey') || 'subMenu',
+      idx, item, found;
 
     for (idx = 0; idx < len; idx++) {
-      item = displayItems.objectAt(idx);
-      
+      item = items.objectAt(idx);
+
       if (this.isValueEqualTo(item)) {
-        this.setIfChanged('selectedItem', item);
-        return;
+        return item;
       }
+
+      found = this._findItem(SC.get(item, subKey));
+      if (found) return found;
     }
 
-    // if we got here, this means no item is selected
-    this.setIfChanged('selectedItem', null);
-  }.observes('value', 'displayItems'),
+    return null;
+  },
 
   /**
     Check is the passed item is equal to the current value.
@@ -432,8 +411,7 @@ SC.SelectView = SC.PopupButtonView.extend({
       selectView: this,
       selectedItem: this.get('selectedItem'),
       minimumMenuWidth: this.get('minimumMenuWidth'),
-      escapeHTML: this.get('escapeHTML'),
-      localize: this.get('localize')
+      escapeHTML: this.get('escapeHTML')
     };
 
     return klass.create(attrs);
@@ -522,7 +500,7 @@ SC.SelectView = SC.PopupButtonView.extend({
 
     // We have to find the selected item, and then get its 'top' position so we
     // can position the menu correctly.
-    var itemViews = menu.get('menuItemViews'), 
+    var itemViews = menu.get('menuItemViews'),
       len = itemViews.length,
       idx, view;
 

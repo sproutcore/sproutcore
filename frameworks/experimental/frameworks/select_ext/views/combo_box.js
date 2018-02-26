@@ -9,11 +9,11 @@ SC.ComboBoxView = SC.View.extend(SC.ItemFilter, {
   selectedMenuItem: null,
 
   textFieldView: SC.TextFieldView,
-  
+
   createChildViews: function() {
-    var that = this,  
+    var that = this,
       view;
-    
+
     view = that.createChildView(this.get('textFieldView'), {
       isEnabledBinding: SC.Binding.from('isEnabled', this).oneWay(),
       valueBinding: SC.Binding.from('value', this),
@@ -25,9 +25,9 @@ SC.ComboBoxView = SC.View.extend(SC.ItemFilter, {
         if (that._menu) {
           that._menu.remove();
         }
-        
+
         var value = this.get('value');
-        
+
         if (value !== that._lastValue) {
           that._lastValue = value;
           that.filterItems(value);
@@ -47,8 +47,6 @@ SC.ComboBoxView = SC.View.extend(SC.ItemFilter, {
     this._lastValue = value;
     this.set('value', value);
   }.observes('selectedMenuItem'),
-
-
 
 
   popupMenu: function() {
@@ -71,19 +69,12 @@ SC.ComboBoxView = SC.View.extend(SC.ItemFilter, {
 
       });
 
-      menu.menuItemKeys.forEach(function(menuItemKey) {
-        var itemKey = that.get(menuItemKey);
-        if (itemKey) menu.set(menuItemKey, itemKey);
-      });
-
       this._menu = menu;
     }
 
     this.invokeLast(function() {
       menu.popup(layer);
     });
-  },
-
+  }
 
 });
-

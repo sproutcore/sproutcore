@@ -1,5 +1,8 @@
 
-SC.SelectSearchView = SC.SelectView.extend({
+sc_require("mixins/item_filter");
+
+
+SC.SelectSearchView = SC.SelectView.extend(SC.ItemFilter, {
 
   menuPreferMatrix: [0, -24, SC.POSITION_BOTTOM],
 
@@ -22,26 +25,6 @@ SC.SelectSearchView = SC.SelectView.extend({
     this._searchCache = null;
   }.observes('itemTitleKey', 'itemSearchKey'),
 
-  searchItems: function(items, value, key) {
-    // we cache the searchValues by index
-    var searchCache = this._searchCache;
-    if (!searchCache && key) {
-      searchCache = this._searchCache = items.getEach(key);
-    }
-    var ret;
-    SC.Benchmark.start('searchItems');
-    if (value) {
-      var reg = new RegExp(value, "i");
-      ret = items.filter(function(item, itemIndex) {
-        // var itemValue = key ? SC.get(item, key) : item;
-        var itemValue = key? searchCache[itemIndex]: item;
-        return SC.typeOf(itemValue) === SC.T_STRING ? itemValue.search(reg) !== -1 : false;
-      });
-    }
-    SC.Benchmark.end('searchItems');
-    return ret;
-  },
-
   displayItems: function () {
     var ret = sc_super();
     var searchValue = this.get('searchValue');
@@ -56,4 +39,3 @@ SC.SelectSearchView = SC.SelectView.extend({
   })
 
 });
-
