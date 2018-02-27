@@ -1023,6 +1023,18 @@ SC.MenuPane = SC.PickerPane.extend(SC.SelectionSupport,
     },
 
     /** @private */
+    moveDown: function(sender, evt) {
+      this.selectNextItem(false, this.get('itemsPerRow') || 1) ;
+      return true ;
+    },
+
+    /** @private */
+    moveUp: function(sender, evt) {
+      this.selectPreviousItem(false, this.get('itemsPerRow') || 1) ;
+      return true ;
+    },
+
+    /** @private */
     moveLeft: function (sender, evt) {
       this.parentMenu.remove();
       return true;
