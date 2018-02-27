@@ -5,6 +5,7 @@
 
 sc_require('views/popup_button');
 sc_require('mixins/select_view_menu');
+sc_require('mixins/item_formatter');
 sc_require('ext/menu');
 
 /**
@@ -13,7 +14,7 @@ sc_require('ext/menu');
  * @version 2.0
  * @author Alex Iskander
  */
-SC.SelectView = SC.PopupButtonView.extend({
+SC.SelectView = SC.PopupButtonView.extend(SC.ItemFormatter, {
   /** @scope SC.SelectView.prototype */
 
   //
@@ -190,6 +191,15 @@ SC.SelectView = SC.PopupButtonView.extend({
     this._scsv_valueDidChange();
   },
 
+  /** @private @see SC.Object */
+  destroy: function () {
+    var ret = sc_super();
+
+    this.destroyFormattedItems();
+
+    return ret;
+  },
+
   /**
     @private
 
@@ -201,7 +211,7 @@ SC.SelectView = SC.PopupButtonView.extend({
   _scsv_getValueForMenuItem: function(item) {
     var valueKey = this.get('itemValueKey');
 
-    if (item.isDisplayItem) return null;
+    if (item.isEmptyName) return null;
     if (!valueKey) {
       return item;
     } else {
@@ -299,17 +309,13 @@ SC.SelectView = SC.PopupButtonView.extend({
   displayItems: function () {
     var items = this.get('items'),
       emptyName = this.get('emptyName'),
-      len = 0,
       ret = SC.A(items);
 
     if (items) len = items.get('length');
 
     ret = this.sortObjects(ret);
 
-    if (emptyName) {
-      if (len) ret.unshift(this._addDisplayItem(null, null, true));
-      ret.unshift(this._addDisplayItem(emptyName, null));
-    }
+    ret = this.formatItems(ret, emptyName);
 
     return ret;
   }.property().cacheable(),
@@ -319,21 +325,7 @@ SC.SelectView = SC.PopupButtonView.extend({
     this.notifyPropertyChange('displayItems');
   }.observes('*items.[]'),
 
-  /** @private */
-  _addDisplayItem: function (title, value, isSeparator) {
-    var item = SC.Object.create({
-      isDisplayItem: true
-    });
-
-    item[this.get('itemTitleKey')] = title;
-    item[this.get('itemIsEnabledKey')] = true;
-    item[this.get('itemSeparatorKey')] = !!isSeparator;
-
-    return item;
-  },
-
   /**
-
     override this method to implement your own sorting of the menu. By
     default, menu items are sorted using the value shown or the sortKey
 
@@ -355,8 +347,8 @@ SC.SelectView = SC.PopupButtonView.extend({
   },
 
   /**
-    * When the value changes, we need to update selectedItem.
-    * @private
+    When the value changes, we need to update selectedItem.
+    @private
   */
   _scsv_valueDidChange: function() {
     var item = this._findItem(this.get('displayItems'));
