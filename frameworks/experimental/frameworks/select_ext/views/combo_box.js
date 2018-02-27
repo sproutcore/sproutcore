@@ -128,6 +128,28 @@ SC.ComboBoxView = SC.View.extend(SC.ItemFilter, {
           that.filterItems(value);
         }
       }.observes('value'),
+
+      /** @private */
+      moveDown: function(sender, evt) {
+        var menu = that._menu;
+        if (menu) return menu._listView.moveDown(sender, evt);
+        return true;
+      },
+
+      /** @private */
+      moveUp: function(sender, evt) {
+        var menu = that._menu;
+        if (menu) return menu._listView.moveUp(sender, evt);
+        return true;
+      },
+
+      /** @private */
+      insertNewline: function(evt) {
+        var menu = that._menu;
+        if (menu) return menu._listView.performAction(evt);
+        return true;
+      },
+
     });
 
     this.set('textFieldView', view);
@@ -156,12 +178,13 @@ SC.ComboBoxView = SC.View.extend(SC.ItemFilter, {
       var menu = SC.AutoResizingMenuPane.create({
         preferMatrix: [1, 1, SC.POSITION_BOTTOM],
         selectView: this,
-        acceptsKeyPane: false,
+        acceptsMenuPane: false,
         escapeHTML: this.get('escapeHTML'),
         itemsBinding: SC.Binding.from('items', this).oneWay(),
+
         action: function(rootMenu) {
           var selectedItem = rootMenu.get('selectedItem');
-          this.selectView.set('selectedMenuItem', selectedItem);
+          rootMenu.selectView.set('selectedMenuItem', selectedItem);
         }
       });
 

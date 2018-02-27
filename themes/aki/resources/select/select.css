@@ -2,5 +2,9 @@
 $theme.sc-select-view {
   background-color: $select-bg;
   color: $select-text-color;
-}
 
+  &.focus {
+    border: 1px solid $focus-field-border-color;
+    box-shadow: $focus-field-box-shadow;
+  }
+}
