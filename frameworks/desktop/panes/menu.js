@@ -8,6 +8,7 @@
 sc_require('panes/picker');
 sc_require('views/list');
 sc_require('views/menu_item');
+sc_require('mixins/item_formatter');
 
 /**
   @class
@@ -59,7 +60,7 @@ sc_require('views/menu_item');
   @extends SC.PickerPane
   @since SproutCore 1.0
 */
-SC.MenuPane = SC.PickerPane.extend(SC.SelectionSupport,
+SC.MenuPane = SC.PickerPane.extend(SC.ItemFormatter, SC.SelectionSupport,
 /** @scope SC.MenuPane.prototype */ {
 
   /** @private Cache of the items array, used for clean up of observers. */
@@ -756,26 +757,13 @@ SC.MenuPane = SC.PickerPane.extend(SC.SelectionSupport,
       this._listView.destroy();
     }
 
-    this.destroyDisplayItems();
+    this.destroyFormattedItems();
 
     // Clean up caches.
     this._sc_menu_items = null;
     this._listView = null;
 
     return ret;
-  },
-
-  destroyDisplayItems: function () {
-    var items = this._lastDisplayItems,
-      itemKeys = this.itemKeys,
-      itemKeyLen = itemKeys.length,
-      j, itemKey;
-
-    if (items) items.forEach(function(item) {
-      if (item._isLocal) item.destroy();
-    }, this);
-
-    this._lastDisplayItems = null;
   },
 
   /**
@@ -811,52 +799,8 @@ SC.MenuPane = SC.PickerPane.extend(SC.SelectionSupport,
     @type Array
     @isReadOnly
   */
-  displayItems: function () {
-    var items = this.get('items'),
-      len,
-      titleKey = this.get('itemTitleKey'),
-      valueKey = this.get('itemValueKey'),
-      isEnabledKey = this.get('itemIsEnabledKey'),
-      itemSeparatorKey = this.get('itemSeparatorKey'),
-      ret = [], idx, item, itemName, itemType, isLocal;
-
-    if (!items) return [];
-
-    this.destroyDisplayItems();
-
-    len = items.get('length');
-
-    // Loop through the items property and transmute as needed, then
-    // copy the new objects into the ret array.
-    for (idx = 0; idx < len; idx++) {
-      item = items.objectAt(idx);
-      if (!item) continue;
-
-      isLocal = false;
-      itemType = SC.typeOf(item);
-      if (itemType === SC.T_STRING) {
-        itemName = item;
-        item = SC.Object.create();
-        item[titleKey] = itemName;
-        item[valueKey] = itemName;
-        isLocal = true;
-      } else if (itemType === SC.T_HASH) {
-        // Do not display the first separator only if it don't have a title
-        if (!ret.length && SC.get(item, itemSeparatorKey) && !SC.get(item, titleKey)) continue;
-
-        item = SC.Object.create(item);
-        isLocal = true;
-      }
-
-      if (isLocal) item._isLocal = isLocal;
-      if (item[itemSeparatorKey]) item[isEnabledKey] = false;
-
-      ret.push(item);
-    }
-
-    this._lastDisplayItems = ret;
-
-    return ret;
+  displayItems: function() {
+    return this.formatItems(this.get('items'));
   }.property().cacheable(),
 
   /** @private */

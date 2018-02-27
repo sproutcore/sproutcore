@@ -94,6 +94,11 @@ SC.SelectViewMenu = {
 
   }),
 
+  /** @private */
+  displayItems: function() {
+    return this.selectView.get('displayItems');
+  }.property().cacheable(),
+
   //
   // CODE TO BIND TO SELECTVIEW PROPERTIES
   //
@@ -101,7 +106,7 @@ SC.SelectViewMenu = {
   /** @private */
   _svm_bindToProperties: [
     { from: 'displayItems', to: 'items' },
-    'itemTitleKey', 'itemValueKey', 'itemIsEnabledKey', 'itemUnreadCountKey', 
+    'itemTitleKey', 'itemValueKey', 'itemIsEnabledKey', 'itemUnreadCountKey',
     'itemIconKey', 'itemHeightKey', 'itemSubMenuKey', 'itemSeparatorKey',
     'itemTargetKey', 'itemActionKey', 'itemCheckboxKey', 'itemShortCutKey',
     'itemKeyEquivalentKey', 'itemDisableMenuFlashKey', 'minimumMenuWidth',

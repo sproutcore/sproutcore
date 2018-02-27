@@ -78,6 +78,20 @@ SC.PopupButtonView = SC.ButtonView.extend({
     this.invokeOnce('scheduleMenuSetupIfNeeded');
   },
 
+  /** @private @see SC.Object */
+  destroy: function () {
+    var ret = sc_super();
+
+    if (this._currentMenu) {
+      this.isActiveBinding.disconnect();
+      this._currentMenu.destroy();
+      this._currentMenu = null;
+      this.menu = null;
+    }
+
+    return ret;
+  },
+
   /**
     Adds menu instantiation to the background task queue if the menu
     is not already instantiated and if shouldLoadInBackground is YES.
