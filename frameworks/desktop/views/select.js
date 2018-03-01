@@ -233,24 +233,8 @@ SC.SelectView = SC.PopupButtonView.extend(SC.ItemFormatter, {
       this.setIfChanged('value', this._scsv_getValueForMenuItem(sel));
     }
 
-    // add/remove observers for the title and value so we can invalidate.
-    if (last && last.addObserver && sel !== last) {
-      last.removeObserver('*', this, '_scsv_selectedItemPropertyDidChange');
-    }
-
-    if (sel && sel.addObserver && sel !== last) {
-      sel.addObserver('*', this, '_scsv_selectedItemPropertyDidChange');
-    }
-
     this._scsv_lastSelection = sel;
   }.observes('selectedItem'),
-
-  // called when either title or value changes on the selected item
-  _scsv_selectedItemPropertyDidChange: function(item) {
-    this.notifyPropertyChange('title');
-    this.notifyPropertyChange('icon');
-    this.set('value', this._scsv_getValueForMenuItem(item));
-  },
 
   /**
     The title of the button, derived from the selected item.
