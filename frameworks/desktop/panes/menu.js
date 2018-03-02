@@ -63,9 +63,6 @@ sc_require('mixins/item_formatter');
 SC.MenuPane = SC.PickerPane.extend(SC.ItemFormatter, SC.SelectionSupport,
 /** @scope SC.MenuPane.prototype */ {
 
-  /** @private Cache of the items array, used for clean up of observers. */
-  _sc_menu_items: null,
-
   /**
     @type Array
     @default ['sc-menu']
@@ -520,7 +517,7 @@ SC.MenuPane = SC.PickerPane.extend(SC.ItemFormatter, SC.SelectionSupport,
     sc_super();
 
     // Initialize the observer function once.
-    this._sc_menu_itemsDidChange();
+    this.itemsDidChange();
   },
 
   displayProperties: ['controlSize'],
@@ -590,7 +587,7 @@ SC.MenuPane = SC.PickerPane.extend(SC.ItemFormatter, SC.SelectionSupport,
     be the key pane when attached.
   */
   didAppendToDocument: function () {
-    if (this._itemsNeedUpdate) this._sc_menu_itemsDidChange();
+    if (this._itemsNeedUpdate) this.itemsDidChange();
     this.becomeMenuPane();
   },
 
@@ -746,11 +743,6 @@ SC.MenuPane = SC.PickerPane.extend(SC.ItemFormatter, SC.SelectionSupport,
   destroy: function () {
     var ret = sc_super();
 
-    // Clean up previous enumerable observer.
-    if (this._sc_menu_items) {
-      this._sc_menu_items.removeObserver('[]', this, '_sc_menu_itemPropertiesDidChange');
-    }
-
     // Destroy the menu view we created.  The scroll view's container will falseT
     // destroy this because it receives it already instantiated.
     if (this._listView) {
@@ -760,7 +752,6 @@ SC.MenuPane = SC.PickerPane.extend(SC.ItemFormatter, SC.SelectionSupport,
     this.destroyFormattedItems();
 
     // Clean up caches.
-    this._sc_menu_items = null;
     this._listView = null;
 
     return ret;
@@ -804,37 +795,17 @@ SC.MenuPane = SC.PickerPane.extend(SC.ItemFormatter, SC.SelectionSupport,
   }.property().cacheable(),
 
   /** @private */
-  _sc_menu_itemsDidChange: function () {
+  itemsDidChange: function () {
     if (!this.get('isVisibleInWindow')) return this._itemsNeedUpdate = true;
     this._itemsNeedUpdate = false;
 
-    var items = this.get('items');
-
-    // Clean up previous enumerable observer.
-    if (this._sc_menu_items) {
-      this._sc_menu_items.removeObserver('[]', this, '_sc_menu_itemPropertiesDidChange');
-    }
-
-    // Add new enumerable observer
-    if (items) {
-      items.addObserver('[]', this, '_sc_menu_itemPropertiesDidChange');
-    }
-
-    // Cache the last items.
-    this._sc_menu_items = items;
-
-    this._sc_menu_itemPropertiesDidChange();
-  }.observes('items'),
-
-  /** @private */
-  _sc_menu_itemPropertiesDidChange: function () {
     // Indicate that the displayItems changed.
     this.notifyPropertyChange('displayItems');
     this.get('menuItemViews');
 
     this.adjust('height', this.get('menuHeight'));
     this.positionPane();
-  },
+  }.observes('*items.[]'),
 
   currentMenuItem: function () {
     return this._listView.itemViewForContentObject(this.getPath('selection.firstObject'));
