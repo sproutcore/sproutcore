@@ -307,7 +307,7 @@ SC.SelectView = SC.PopupButtonView.extend(SC.ItemFormatter, {
   /** @private */
   _scsv_itemsDidChange: function () {
     this.notifyPropertyChange('displayItems');
-  }.observes('*items.[]'),
+  }.observes('*items.[]', 'emptyName'),
 
   /**
     override this method to implement your own sorting of the menu. By
