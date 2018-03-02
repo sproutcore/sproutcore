@@ -148,7 +148,7 @@ SC.SelectViewMenu = {
     for (idx = 0; idx < len; idx++) {
       key = props[idx];
 
-      if (SC.typeOf(from) === SC.T_HASH) {
+      if (SC.typeOf(key) === SC.T_HASH) {
         key = key.to;
       }
       this[key + 'Binding'].disconnect();
