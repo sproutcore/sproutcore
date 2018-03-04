@@ -111,7 +111,7 @@ SC.XHRResponse = SC.Response.extend(
   /**
     Starts the transport of the request
 
-    @returns {XMLHttpRequest|ActiveXObject}
+    @returns {XMLHttpRequest}
   */
   invokeTransport: function() {
     var listener, listeners, listenersForKey,
@@ -207,25 +207,10 @@ SC.XHRResponse = SC.Response.extend(
     You can override this if you need to, for example, create an XHR on a
     different domain name from an iframe.
 
-    @returns {XMLHttpRequest|ActiveXObject}
+    @returns {XMLHttpRequest}
   */
   createRequest: function() {
-    var rawRequest;
-
-    // check native support first
-    if (window.XMLHttpRequest) {
-      rawRequest = new XMLHttpRequest();
-    } else {
-      // There are two relevant Microsoft MSXML object types.
-      // See here for more information:
-      // http://www.snook.ca/archives/javascript/xmlhttprequest_activex_ie/
-      // http://blogs.msdn.com/b/xmlteam/archive/2006/10/23/using-the-right-version-of-msxml-in-internet-explorer.aspx
-      // http://msdn.microsoft.com/en-us/library/windows/desktop/ms763742(v=vs.85).aspx
-      try { rawRequest = new ActiveXObject("MSXML2.XMLHTTP.6.0");  } catch(e) {}
-      try { if (!rawRequest) rawRequest = new ActiveXObject("MSXML2.XMLHTTP");  } catch(e) {}
-    }
-
-    return rawRequest;
+    return new XMLHttpRequest();
   },
 
   /**
