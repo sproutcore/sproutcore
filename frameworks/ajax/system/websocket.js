@@ -408,9 +408,13 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
 
     var currentReconnectInterval = this._currentReconnectInterval || this.get('reconnectInterval');
 
-    this.invokeOnceLater('connect', currentReconnectInterval);
+    this.invokeOnceLater('doTryReconnect', currentReconnectInterval);
 
     this._currentReconnectInterval = Math.min(currentReconnectInterval+this.get('reconnectInterval'), this.get('maxReconnectInterval'));
+  },
+
+  doTryReconnect: function() {
+    this.connect();
   },
 
   /**
