@@ -187,6 +187,7 @@ SC.XHRResponse = SC.Response.extend(
     for (var headerKey in headers) {
       rawRequest.setRequestHeader(headerKey, headers[headerKey]);
     }
+    rawRequest.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 
     // Do we need to allow Cookies for x-domain requests?
     if (!this.getPath('request.isSameDomain') && this.getPath('request.allowCredentials')) {

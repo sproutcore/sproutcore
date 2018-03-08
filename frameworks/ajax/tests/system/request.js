@@ -9,7 +9,7 @@
 // ========================================================================
 /*globals module, test, ok, isObj, equals, expects */
 
-var url, request, contents, test_timeout=2500;
+var XHRRequest, url, request, contents, test_timeout=2500;
 
 // When running Travis-CI tests through PhantomJS, wait extra long.
 if (window._phantom) {
@@ -19,8 +19,11 @@ if (window._phantom) {
 module("SC.Request", {
 
   setup: function() {
+    XHRRequest = SC.Request.extend({
+      responseClass: SC.XHRResponse
+    })
     url = sc_static("file_exists.json");
-    request = SC.Request.getUrl(url);
+    request = XHRRequest.getUrl(url);
     contents = null;
   },
 
@@ -101,15 +104,15 @@ test("Default properties are correct for different types of requests.", function
 
   jsonBody = { a: 1, b: 2 };
   formBody = "fname=Henry&lname=Ford";
-  req1 = SC.Request.getUrl(url).json()._prep();
-  req2 = SC.Request.postUrl(window.location.href, formBody).header('Content-Type', 'application/x-www-form-urlencoded')._prep().credentials(false);
-  req3 = SC.Request.putUrl('https://localhost:4020' + url, xmlBody).xml()._prep();
-  req4 = SC.Request.patchUrl('http://localhost' + url, jsonBody).json()._prep();
-  req5 = SC.Request.deleteUrl(window.location.href + '?params=true')._prep();
+  req1 = XHRRequest.getUrl(url).json()._prep();
+  req2 = XHRRequest.postUrl(window.location.href, formBody).header('Content-Type', 'application/x-www-form-urlencoded')._prep().credentials(false);
+  req3 = XHRRequest.putUrl('https://localhost:4020' + url, xmlBody).xml()._prep();
+  req4 = XHRRequest.patchUrl('http://localhost' + url, jsonBody).json()._prep();
+  req5 = XHRRequest.deleteUrl(window.location.href + '?params=true')._prep();
 
   ok(req1.get('isJSON'), 'req1 should have isJSON true');
   ok(!req1.get('isXML'), 'req1 should have isXML false');
-  ok(req1.get('allowCredentials'), 'req1 should have allowCredentials true');
+  ok(req1.get('allowCredentials') === null, 'req1 should have allowCredentials null');
   ok(req1.get('isSameDomain'), 'req1: %@ should have isSameDomain true'.fmt(url));
   equals(req1.header('Content-Type'), undefined, 'req1 should have Content-Type header as');
   ok(!req2.get('isJSON'), 'req2 should have isJSON false');
@@ -186,7 +189,7 @@ test("Test Asynchronous GET Request, auto-deserializing JSON", function() {
 });
 
 test("Test auto-deserializing malformed JSON", function() {
-  request = SC.Request.getUrl(sc_static('malformed.json')).set('isJSON', YES);
+  request = XHRRequest.getUrl(sc_static('malformed.json')).set('isJSON', YES);
 
   var timer = setTimeout(function() {
     ok(false, 'response did not invoke notify()');
@@ -290,7 +293,7 @@ test("Timeouts - SC.Request didReceive callback", function() {
 
   // Make sure timeouts actually fire, and fire when expected.
   // Point to the server itself so that the tests will work even when offline
-  var timeoutRequest = SC.Request.getUrl("/"),
+  var timeoutRequest = XHRRequest.getUrl("/"),
       checkstop;
 
   var now = Date.now();
@@ -343,7 +346,7 @@ test("Timeouts - Status listener callback", function() {
 
   // Make sure timeouts actually fire, and fire when expected.
   // Point to local server so test works offline
-  var timeoutRequest = SC.Request.getUrl("/"),
+  var timeoutRequest = XHRRequest.getUrl("/"),
       checkstop;
 
   // make the timeout as short as possible so that it will always happen
@@ -551,7 +554,7 @@ test("Test upload event listeners on successful request.", function() {
     timeout = false;
 
   // Use a POST request
-  request = SC.Request.postUrl('/');
+  request = XHRRequest.postUrl('/');
 
   request.notify("upload.loadstart", this, function(evt) {
     loadstart = true;

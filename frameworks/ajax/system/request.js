@@ -200,9 +200,9 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
     You can change this property using the chainable `credentials()` helper method (or set it directly).
 
     @type Boolean
-    @default YES
+    @default null
   */
-  allowCredentials: YES,
+  allowCredentials: null,
 
   /**
     Sends the request asynchronously instead of blocking the browser. You
@@ -576,7 +576,6 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
     var hasContentType = !!this.header('Content-Type');
 
     if (this.get('attachIdentifyingHeaders')) {
-      this.header('X-Requested-With', 'XMLHttpRequest');
       this.header('X-SproutCore-Version', SC.VERSION);
     }
 
