@@ -242,7 +242,7 @@ SC.SelectView = SC.PopupButtonView.extend(SC.ItemFormatter, {
   title: function() {
     var sel = this.get('selectedItem');
 
-    if (!sel) {
+    if (!sel || this._scsv_getValueForMenuItem(sel) == null) {
       return this.get('defaultTitle');
     } else {
       var itemTitleKey = this.get('itemTitleKey');
@@ -252,7 +252,7 @@ SC.SelectView = SC.PopupButtonView.extend(SC.ItemFormatter, {
       }
       return sel.toString();
     }
-  }.property('selectedItem').cacheable(),
+  }.property('selectedItem', 'defaultTitle').cacheable(),
 
   /** @private */
   defaultTitle: function() {
