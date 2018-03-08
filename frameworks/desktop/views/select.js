@@ -295,8 +295,6 @@ SC.SelectView = SC.PopupButtonView.extend(SC.ItemFormatter, {
       emptyName = this.get('emptyName'),
       ret = SC.A(items);
 
-    if (items) len = items.get('length');
-
     ret = this.sortObjects(ret);
 
     ret = this.formatItems(ret, emptyName);
