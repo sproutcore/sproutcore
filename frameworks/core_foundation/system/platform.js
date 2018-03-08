@@ -463,6 +463,13 @@ SC.platform = SC.Object.create({
   } (),
 
   /**
+    Whether the browser supports fetch.
+
+    @type Boolean
+  */
+  supportsFetch: ("fetch" in window),
+
+  /**
     Whether the browser supports the orientationchange event.
 
     @type Boolean

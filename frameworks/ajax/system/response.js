@@ -297,7 +297,7 @@ SC.Response = SC.Object.extend(
       if (source && source.willReceive) { source.willReceive(req, this); }
 
       // invoke the callback.  note if the response was cancelled or not
-      callback.call(context, !this.get('isCancelled'));
+      if (callback) callback.call(context, !this.get('isCancelled'));
 
       // if we weren't cancelled, then give the source first crack at handling
       // the response.  if the source doesn't want listeners to be notified,
