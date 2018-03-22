@@ -676,56 +676,13 @@ SC.View.reopen(
 
         // If a transform is being transitioned, decompose the matrices.
         if (key === 'transform') {
-          // Convert scientific E number representations to fixed numbers.
-          // In WebKit at least, these throw exceptions when used to generate the matrix. To test,
-          // paste the following in a browser console:
-          //    new WebKitCSSMatrix('matrix(-1, 1.22464679914735e-16, -1.22464679914735e-16, -1, 0, 0)')
-          value = this._sc_removeENotationFromMatrixString(value);
-          matrix = new window[CSSMatrixClass](value);
-
-          /* jshint eqnull:true */
-          var layout = this.get('layout'),
-            scaleLayout = layout.scale,
-            expectsScale = scaleLayout != null,
-            decomposition = this._sc_decompose3DTransformMatrix(matrix, expectsScale);
-
-          // The rotation decompositions aren't working properly, ignore them.
-          // Set rotateX.
-          // if (layout.rotateX != null) {
-          //   ret.rotateX = decomposition.rotateX;
-          // }
-
-          // // Set rotateY.
-          // if (layout.rotateY != null) {
-          //   ret.rotateY = decomposition.rotateY;
-          // }
-
-          // Set rotateZ.
-          if (layout.rotateZ != null) {
-            ret.rotateZ = decomposition.rotateZ;
+          var matrix = value.match(/^matrix\((.*)\)$/)[1].split(/,\s*/);
+          // If the view has translated position, retrieve translateX & translateY.
+          if (matrix && this.get('hasAcceleratedLayer')) {
+            ret.left = parseInt(matrix[4], 10);
+            ret.top = parseInt(matrix[5], 10);
           }
 
-          // Set scale.
-          if (expectsScale) {
-            // If the scale was set in the layout as an Array, return it as an Array.
-            if (SC.typeOf(scaleLayout) === SC.T_ARRAY) {
-              ret.scale = [decomposition.scaleX, decomposition.scaleY];
-
-            // If the scale was set in the layout as an Object, return it as an Object.
-            } else if (SC.typeOf(scaleLayout) === SC.T_HASH) {
-              ret.scale = { x: decomposition.scaleX, y: decomposition.scaleY };
-
-            // Return it as a single value.
-            } else {
-              ret.scale = decomposition.scaleX;
-            }
-          }
-
-          // Set top & left.
-          if (this.get('hasAcceleratedLayer')) {
-            ret.left = decomposition.translateX;
-            ret.top = decomposition.translateY;
-          }
         // Determine the current style.
         } else {
           value = window.parseFloat(value, 10);
