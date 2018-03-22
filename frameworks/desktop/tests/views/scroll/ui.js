@@ -178,21 +178,21 @@
   });
 
   test("disabled", function() {
-     var view = pane.view('disabled');
-     ok(view.$().hasClass('disabled'), 'should have disabled class');
-     ok(!view.$().hasClass('sel'), 'should not have sel class');
-   });
+    var view = pane.view('disabled');
+    ok(view.$().hasClass('disabled'), 'should have disabled class');
+    ok(!view.$().hasClass('sel'), 'should not have sel class');
+  });
 
-   test("non-zero bottom in vertical scrollbar", function() {
-      var view = pane.view('verticalScrollerLayout');
-      var scroller = view.get('verticalScrollerView') ;
-      ok(scroller, 'should have vertical scroller view');
-      equals(scroller.get('layout').bottom,16, 'should have layout.bottom of scroller as ');
-      equals(scroller.$()[0].style.bottom,'16px', 'should have style.bottom of scroller as ');
-    });
+  test("non-zero bottom in vertical scrollbar", function() {
+    var view = pane.view('verticalScrollerLayout');
+    var scroller = view.get('verticalScrollerView') ;
+    ok(scroller, 'should have vertical scroller view');
+    equals(scroller.get('layout').bottom,16, 'should have layout.bottom of scroller as ');
+    equals(scroller.$()[0].style.bottom,'16px', 'should have style.bottom of scroller as ');
+  });
 
-   test('ScrollView should readjust scroll transform if layer changes', function() {
-     var view = pane.view('basic2'), cv = view.get('contentView'),
+  test('ScrollView should readjust scroll transform if layer changes', function() {
+    var view = pane.view('basic2'), cv = view.get('contentView'),
       prevTransform;
 
     // Get the previous style transform.
@@ -207,8 +207,6 @@
     equals(cv.get('layer').style['transform'],
       prevTransform,
       'The new layer has had the scroll transform style applied');
-
-    // TODO: Simulate transform-not-supported environment and test fallback (marginTop/Left)
   });
 
   test('Scroller views of scroll view should have aria attributes set', function() {
