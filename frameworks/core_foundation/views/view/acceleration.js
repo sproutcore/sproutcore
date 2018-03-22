@@ -21,7 +21,7 @@ SC.View.reopen({
     Specifies whether transforms can be used to move the layer.
   */
   hasAcceleratedLayer: function () {
-    return (SC.platform.supportsCSSTransforms && this.get('wantsAcceleratedLayer') && this.get('isFixedLayout'));
+    return (this.get('wantsAcceleratedLayer') && this.get('isFixedLayout'));
   }.property('wantsAcceleratedLayer', 'isFixedLayout').cacheable()
 
 });

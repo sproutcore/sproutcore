@@ -96,28 +96,6 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
     });
 
     jQuery.find('.content').css('width', (value * 100) + "%");
-
-    // fallback for browsers that don't support css transitions
-    if(!SC.platform.supportsCSSTransitions) {
-      if (!this._queue[jQuery[0].id]) {
-        this._queue[jQuery[0].id] = {
-          offset:0,
-          element:SC.$(jQuery).find('.content .middle'),
-          shouldAnimate:false
-        };
-      }
-
-      if (isIndeterminate && isRunning && isVisibleInWindow) {
-        // save offset in the queue and request animation
-        this._queue[jQuery[0].id].shouldAnimate = true;
-        this.animate(dataSource);
-      } else if (!isIndeterminate) {
-        // Clear out our custom background-position when isIndeterminate toggles.
-        this._queue[jQuery[0].id].element.css('background-position', '');
-      } else {
-        this._queue[jQuery[0].id].shouldAnimate = false;
-      }
-    }
   },
 
   /** @private Queue of objects to animate: { id, offset, element } */
@@ -151,6 +129,8 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
       for (id in viewsToAnimate) {
         if (viewsToAnimate.hasOwnProperty(id)) {
           params=viewsToAnimate[id];
+
+          // TODO not documented
           if (params.shouldAnimate) {
             self._animating = true;
             animations++;

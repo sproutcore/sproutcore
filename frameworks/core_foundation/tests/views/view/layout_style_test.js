@@ -18,13 +18,8 @@
   frameKeys = ['x', 'y', 'width', 'height', 'scale', 'transformOriginX', 'transformOriginY'];
   layoutKeys = ['width', 'height', 'top', 'bottom', 'marginLeft', 'marginTop', 'left', 'right',
     'minWidth', 'maxWidth', 'minHeight', 'maxHeight', 'borderTopWidth', 'borderBottomWidth',
-    'borderLeftWidth', 'borderRightWidth'];
-
-  // On supported platforms, test CSS transforms too.
-  if (SC.platform.supportsCSSTransforms) {
-    layoutKeys.push('transform');
-    layoutKeys.push('transformOrigin');
-  }
+    'borderLeftWidth', 'borderRightWidth',
+    'transform', 'transformOrigin'];
 
   /*
     helper method to test the layout of a view.  Applies the passed layout to a
@@ -65,8 +60,8 @@
     // test
     layoutKeys.forEach(function (key) {
       var testKey;
-      if (key === 'transform') testKey = SC.browser.experimentalStyleNameFor('transform');
-      else if (key === 'transformOrigin') testKey = SC.browser.experimentalStyleNameFor('transformOrigin');
+      if (key === 'transform') testKey = 'transform';
+      else if (key === 'transformOrigin') testKey = 'transformOrigin');
       else testKey = key;
       equals(layoutStyle[testKey], no_s[key], "STYLE NO PARENT %@".fmt(key));
     });
@@ -93,8 +88,8 @@
     // test again
     layoutKeys.forEach(function (key) {
       var testKey;
-      if (key === 'transform') testKey = SC.browser.experimentalStyleNameFor('transform');
-      else if (key === 'transformOrigin') testKey = SC.browser.experimentalStyleNameFor('transformOrigin');
+      if (key === 'transform') testKey = 'transform';
+      else if (key === 'transformOrigin') testKey = 'transformOrigin');
       else testKey = key;
       equals(layoutStyle[testKey], with_s[key], "STYLE W/ PARENT %@".fmt(key));
     });
@@ -659,7 +654,7 @@
   });
 
   function transformFor(view) {
-    return view.get('layer').style[SC.browser.experimentalStyleNameFor('transform')];
+    return view.get('layer').style['transform'];
   }
 
   test("layout {rotateX}", function () {
@@ -737,90 +732,84 @@
   });
 
 
-  if (SC.platform.supportsCSSTransforms) {
+  // ..........................................................
+  // TEST FRAME/STYLEFRAME WITH ACCELERATE LAYOUT VARIATIONS
+  //
+  // NOTE:  Each test evaluates the frame before and after adding it to the
+  // parent.
 
-    // ..........................................................
-    // TEST FRAME/STYLEFRAME WITH ACCELERATE LAYOUT VARIATIONS
-    //
-    // NOTE:  Each test evaluates the frame before and after adding it to the
-    // parent.
+  module('ACCELERATED LAYOUT VARIATIONS', {
+    setup: function () {
+      commonSetup.setup();
+      child.set('wantsAcceleratedLayer', YES);
+    },
 
-    module('ACCELERATED LAYOUT VARIATIONS', {
-      setup: function () {
-        commonSetup.setup();
-        child.set('wantsAcceleratedLayer', YES);
-      },
+    teardown: commonSetup.teardown
+  });
 
-      teardown: commonSetup.teardown
+  test("layout {top, left, width, height}", function () {
+    var layout = { top: 10, left: 10, width: 50, height: 50 };
+    var expectedTransform = 'translateX(10px) translateY(10px) translateZ(0px)';
+    var s = { top: 0, left: 0, width: 50, height: 50, transform: expectedTransform };
+    var no_f = { x: 10, y: 10, width: 50, height: 50 };
+    var with_f = { x: 10, y: 10, width: 50, height: 50 };
+
+    performLayoutTest(layout, no_f, s, with_f, s, YES);
+  });
+
+  test("layout {top, left, bottom, right}", function () {
+
+    var layout = { top: 10, left: 10, bottom: 10, right: 10 };
+    var no_f = { x: 10, y: 10, width: 0, height: 0 };
+    var with_f = { x: 10, y: 10, width: 180, height: 180 };
+    var s = { top: 10, left: 10, bottom: 10, right: 10, transform: null };
+
+    performLayoutTest(layout, no_f, s, with_f, s, NO);
+  });
+
+  test("layout {top, left, width: auto, height: auto}", function () {
+    // Reset.
+    child.destroy();
+
+    child = SC.View.create({
+      wantsAcceleratedLayer: YES,
+      useStaticLayout: YES,
+      render: function (context) {
+        // needed for auto
+        context.push('<div style="padding: 10px"></div>');
+      }
     });
 
-    test("layout {top, left, width, height}", function () {
-      var layout = { top: 10, left: 10, width: 50, height: 50 };
-      var expectedTransform = 'translateX(10px) translateY(10px)';
-      if (SC.platform.supportsCSS3DTransforms) expectedTransform += ' translateZ(0px)';
-      var s = { top: 0, left: 0, width: 50, height: 50, transform: expectedTransform };
-      var no_f = { x: 10, y: 10, width: 50, height: 50 };
-      var with_f = { x: 10, y: 10, width: 50, height: 50 };
+    // parent MUST have a layer.
+    parent.createLayer();
+    var layer = parent.get('layer');
+    document.body.appendChild(layer);
 
-      performLayoutTest(layout, no_f, s, with_f, s, YES);
-    });
+    var layout = { top: 0, left: 0, width: 'auto', height: 'auto' };
+    var no_f = null;
+    // See test below
+    var with_f; // { x: 0, y: 0, width: 200, height: 200 };
+    var s = { top: 0, left: 0, width: 'auto', height: 'auto', transform: null };
 
-    test("layout {top, left, bottom, right}", function () {
+    performLayoutTest(layout, no_f, s, with_f, s, NO);
 
-      var layout = { top: 10, left: 10, bottom: 10, right: 10 };
-      var no_f = { x: 10, y: 10, width: 0, height: 0 };
-      var with_f = { x: 10, y: 10, width: 180, height: 180 };
-      var s = { top: 10, left: 10, bottom: 10, right: 10, transform: null };
+    layer.parentNode.removeChild(layer);
 
-      performLayoutTest(layout, no_f, s, with_f, s, NO);
-    });
+    child.destroy();
+  });
 
-    test("layout {top, left, width: auto, height: auto}", function () {
-      // Reset.
-      child.destroy();
+  // See commented lines in test above
+  test("layout {top, left, width: auto, height: auto} - frame");
 
-      child = SC.View.create({
-        wantsAcceleratedLayer: YES,
-        useStaticLayout: YES,
-        render: function (context) {
-          // needed for auto
-          context.push('<div style="padding: 10px"></div>');
-        }
-      });
+  test("layout w/ percentage {top, left, width, height}", function () {
 
-      // parent MUST have a layer.
-      parent.createLayer();
-      var layer = parent.get('layer');
-      document.body.appendChild(layer);
+    var layout = { top: 0.1, left: 0.1, width: 0.5, height: 0.5 };
+    var s = { top: '10%', left: '10%', width: '50%', height: '50%', transform: null };
+    var no_f = { x: 0, y: 0, width: 0, height: 0 };
+    var with_f = { x: 20, y: 20, width: 100, height: 100 };
 
-      var layout = { top: 0, left: 0, width: 'auto', height: 'auto' };
-      var no_f = null;
-      // See test below
-      var with_f; // { x: 0, y: 0, width: 200, height: 200 };
-      var s = { top: 0, left: 0, width: 'auto', height: 'auto', transform: null };
-
-      performLayoutTest(layout, no_f, s, with_f, s, NO);
-
-      layer.parentNode.removeChild(layer);
-
-      child.destroy();
-    });
-
-    // See commented lines in test above
-    test("layout {top, left, width: auto, height: auto} - frame");
-
-    test("layout w/ percentage {top, left, width, height}", function () {
-
-      var layout = { top: 0.1, left: 0.1, width: 0.5, height: 0.5 };
-      var s = { top: '10%', left: '10%', width: '50%', height: '50%', transform: null };
-      var no_f = { x: 0, y: 0, width: 0, height: 0 };
-      var with_f = { x: 20, y: 20, width: 100, height: 100 };
-
-      performLayoutTest(layout, no_f, s, with_f, s, NO);
-    });
-
-  }
-
+    performLayoutTest(layout, no_f, s, with_f, s, NO);
+  });
 
 
   // ..........................................................

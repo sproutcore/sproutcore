@@ -96,46 +96,40 @@ SC.View.LayoutStyleCalculator = {
     style.backgroundPosition = this._valueOrNull(layout.backgroundPosition);
 
     // Handle transforms (including reset).
-    if (SC.platform.supportsCSSTransforms) {
-      var transformAttribute = SC.browser.experimentalStyleNameFor('transform'),
-        transforms = this._SC_TRANSFORMS_ARRAY, // Shared object used to avoid continually initializing/destroying objects.
-        transformMap = SC.CSS_TRANSFORM_MAP;
+    var transforms = this._SC_TRANSFORMS_ARRAY, // Shared object used to avoid continually initializing/destroying objects.
+      transformMap = SC.CSS_TRANSFORM_MAP;
 
-      // Create the array once. Note: This is a shared array; it must be set to 0 length each time.
-      if (!transforms) { transforms = this._SC_TRANSFORMS_ARRAY = []; }
+    // Create the array once. Note: This is a shared array; it must be set to 0 length each time.
+    if (!transforms) { transforms = this._SC_TRANSFORMS_ARRAY = []; }
 
-      // The order of the transforms is important so that we can decompose them
-      // from the transformation matrix later if necessary.
-      for (var i = 0, len = SC.CSS_TRANSFORM_NAMES.length; i < len; i++) {
-        var transformName = SC.CSS_TRANSFORM_NAMES[i],
-          layoutTransform = layout[transformName];
+    // The order of the transforms is important so that we can decompose them
+    // from the transformation matrix later if necessary.
+    for (var i = 0, len = SC.CSS_TRANSFORM_NAMES.length; i < len; i++) {
+      var transformName = SC.CSS_TRANSFORM_NAMES[i],
+        layoutTransform = layout[transformName];
 
-        if (layoutTransform != null) {
-          // normalizing transforms like rotateX: 5 to rotateX(5deg)
-          transforms.push(transformMap[transformName](layoutTransform));
-        }
-      }
-
-      // Set or reset the transform style.
-      style[transformAttribute] = transforms.length > 0 ? transforms.join(' ') : null;
-
-      // Transform origin.
-      var transformOriginAttribute = SC.browser.experimentalStyleNameFor('transformOrigin'),
-        originX = layout.transformOriginX,
-        originY = layout.transformOriginY;
-      if (originX == null && originY == null) {
-        style[transformOriginAttribute] = null;
-      } else {
-        if (originX == null) originX = 0.5;
-        if (originY == null) originY = 0.5;
-        style[transformOriginAttribute] = (originX * 100) + '% ' + (originY * 100) + '%';
+      if (layoutTransform != null) {
+        // normalizing transforms like rotateX: 5 to rotateX(5deg)
+        transforms.push(transformMap[transformName](layoutTransform));
       }
     }
 
-    // Reset any transitions.
-    if (SC.platform.supportsCSSTransitions) {
-      style[SC.browser.experimentalStyleNameFor('transition')] = null;
+    // Set or reset the transform style.
+    style['transform'] = transforms.length > 0 ? transforms.join(' ') : null;
+
+    // Transform origin.
+    var transformOriginAttribute = 'transformOrigin',
+      originX = layout.transformOriginX,
+      originY = layout.transformOriginY;
+    if (originX == null && originY == null) {
+      style[transformOriginAttribute] = null;
+    } else {
+      if (originX == null) originX = 0.5;
+      if (originY == null) originY = 0.5;
+      style[transformOriginAttribute] = (originX * 100) + '% ' + (originY * 100) + '%';
     }
+
+    style['transition'] = null;
 
     // Reset shared object!
     this._SC_TRANSFORMS_ARRAY.length = 0;
@@ -366,20 +360,16 @@ SC.View.LayoutStyleCalculator = {
       }
 
       if (shouldTranslate) {
-        var transformAttribute = SC.browser.experimentalStyleNameFor('transform'),
-          curValue = style[transformAttribute],
+        var curValue = style['transform'],
           newValue;
 
-        newValue = 'translateX(' + style.left + 'px) translateY(' + style.top + 'px)';
-
-        // double check to make sure this is needed
-        if (SC.platform.supportsCSS3DTransforms) { newValue += ' translateZ(0px)'; }
+        newValue = 'translateX(' + style.left + 'px) translateY(' + style.top + 'px) translateZ(0px)';
 
         // Append any current transforms.
         // NOTE: The order of transforms is important. If we scale before translate, our translations
         // will be scaled and incorrect.
         if (curValue) { newValue += ' ' + curValue; }
-        style[transformAttribute] = newValue;
+        style['transform'] = newValue;
 
         // Set the absolute left & top style to 0,0 (will be translated from there).
         style.left = 0;
@@ -389,63 +379,59 @@ SC.View.LayoutStyleCalculator = {
 
     // Handle animations
     if (animations) {
-      if (SC.platform.supportsCSSTransitions) {
-        var transitions = this._SC_TRANSITIONS_ARRAY; // Shared object used to avoid continually initializing/destroying objects.
+      var transitions = this._SC_TRANSITIONS_ARRAY; // Shared object used to avoid continually initializing/destroying objects.
 
-        // Create the array once. Note: This is a shared array; it must be set to 0 length each time.
-        if (!transitions) { transitions = this._SC_TRANSITIONS_ARRAY = []; }
+      // Create the array once. Note: This is a shared array; it must be set to 0 length each time.
+      if (!transitions) { transitions = this._SC_TRANSITIONS_ARRAY = []; }
 
-        for (key in animations) {
-          var animation = animations[key],
-            isTransformProperty = !!SC.CSS_TRANSFORM_MAP[key],
-            isTurboProperty = shouldTranslate && (key === 'top' || key === 'left');
+      for (key in animations) {
+        var animation = animations[key],
+          isTransformProperty = !!SC.CSS_TRANSFORM_MAP[key],
+          isTurboProperty = shouldTranslate && (key === 'top' || key === 'left');
 
-          if (SC.platform.supportsCSSTransforms && (isTurboProperty || isTransformProperty)) {
-            // Untrack the un-transformed property name.
-            delete animations[key];
+        if ((isTurboProperty || isTransformProperty)) {
+          // Untrack the un-transformed property name.
+          delete animations[key];
 
-            // The key will be either 'transform' or one of '-webkit-transform', '-ms-transform', '-moz-transform', '-o-transform'
-            key = SC.browser.experimentalCSSNameFor('transform');
+          // The key will be either 'transform' or one of '-webkit-transform', '-ms-transform', '-moz-transform', '-o-transform'
+          key = 'transform';
 
-            var curTransformAnimation = animations[key];
+          var curTransformAnimation = animations[key];
 
-            // Because multiple transforms actually share one CSS property, we can't animate multiple transforms
-            // at different speeds. So, to handle that case, we just force them to all have the same length.
-            if (curTransformAnimation) {
-              //@if(debug)
-              if (curTransformAnimation.duration !== animation.duration || curTransformAnimation.timing !== animation.timing || curTransformAnimation.delay !== animation.delay) {
-                SC.Logger.warn("Developer Warning: Can't animate transforms with different durations, timings or delays! Using the first options specified.");
-              }
-              //@endif
-              animation = curTransformAnimation;
-            } else {
-              // Track the transformed property name.
-              animations[key] = animation;
+          // Because multiple transforms actually share one CSS property, we can't animate multiple transforms
+          // at different speeds. So, to handle that case, we just force them to all have the same length.
+          if (curTransformAnimation) {
+            //@if(debug)
+            if (curTransformAnimation.duration !== animation.duration || curTransformAnimation.timing !== animation.timing || curTransformAnimation.delay !== animation.delay) {
+              SC.Logger.warn("Developer Warning: Can't animate transforms with different durations, timings or delays! Using the first options specified.");
             }
-          }
-
-          // Fix up the centerX & centerY properties.
-          if (key === 'centerX') { key = 'margin-left'; }
-          if (key === 'centerY') { key = 'margin-top'; }
-
-          // We're actually storing the css for the animation on layout.animate[key].css
-          animation.css = key + " " + animation.duration + "s " + animation.timing + " " + animation.delay + "s";
-
-          // If there are multiple transform properties, we only need to set this key once.
-          // We already checked before to make sure they have the same duration.
-          // if (!pendingAnimations[key]) {
-          if (transitions.indexOf(animation.css) < 0) {
-            transitions.push(animation.css);
+            //@endif
+            animation = curTransformAnimation;
+          } else {
+            // Track the transformed property name.
+            animations[key] = animation;
           }
         }
 
-        style[SC.browser.experimentalStyleNameFor('transition')] = transitions.join(", ");
+        // Fix up the centerX & centerY properties.
+        if (key === 'centerX') { key = 'margin-left'; }
+        if (key === 'centerY') { key = 'margin-top'; }
 
-        // Reset shared object!
-        this._SC_TRANSITIONS_ARRAY.length = 0;
-      } else {
-        // TODO: Do it the JS way
+        // We're actually storing the css for the animation on layout.animate[key].css
+        animation.css = key + " " + animation.duration + "s " + animation.timing + " " + animation.delay + "s";
+
+        // If there are multiple transform properties, we only need to set this key once.
+        // We already checked before to make sure they have the same duration.
+        // if (!pendingAnimations[key]) {
+        if (transitions.indexOf(animation.css) < 0) {
+          transitions.push(animation.css);
+        }
       }
+
+      style['transition'] = transitions.join(", ");
+
+      // Reset shared object!
+      this._SC_TRANSITIONS_ARRAY.length = 0;
     }
   }
 

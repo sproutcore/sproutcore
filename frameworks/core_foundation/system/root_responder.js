@@ -784,51 +784,13 @@ SC.RootResponder = SC.Object.extend(
     // delay the launch of the application in order to a transition test (the app won't
     // load if the browser tab is not visible), we start off by listening to everything
     // and when the test is completed, we remove the extras to avoid double callbacks.
-    if (SC.platform.supportsCSSTransitions) {
-      var domPrefix = SC.browser.domPrefix,
-        lowerDomPrefix = domPrefix.toLowerCase(),
-        variation1 = lowerDomPrefix + 'transitionend',
-        variation2 = lowerDomPrefix + 'TransitionEnd',
-        variation3 = domPrefix + 'TransitionEnd';
+    var domPrefix = SC.browser.domPrefix,
+      lowerDomPrefix = domPrefix.toLowerCase();
 
-      // Ensure that the callback name used maps to our implemented function name.
-      this[variation1] = this[variation2] = this[variation3] = this.transitionend;
-
-      // ex. transitionend, webkittransitionend, webkitTransitionEnd, WebkitTransitionEnd
-      this.listenFor(['transitionend', variation1, variation2, variation3], document);
-
-      if (SC.platform.supportsCSSAnimations) {
-        variation1 = lowerDomPrefix + 'animationstart';
-        variation2 = lowerDomPrefix + 'AnimationStart';
-        variation3 = domPrefix + 'AnimationStart';
-
-        // Ensure that the callback name used maps to our implemented function name.
-        this[variation1] = this[variation2] = this[variation3] = this.animationstart;
-
-        // ex. animationstart, webkitanimationstart, webkitAnimationStart, WebkitAnimationStart
-        this.listenFor(['animationstart', variation1, variation2, variation3], document);
-
-        variation1 = lowerDomPrefix + 'animationiteration';
-        variation2 = lowerDomPrefix + 'AnimationIteration';
-        variation3 = domPrefix + 'AnimationIteration';
-
-        // Ensure that the callback name used maps to our implemented function name.
-        this[variation1] = this[variation2] = this[variation3] = this.animationiteration;
-
-        // ex. animationiteration, webkitanimationiteration, webkitAnimationIteration, WebkitAnimationIteration
-        this.listenFor(['animationiteration', variation1, variation2, variation3], document);
-
-        variation1 = lowerDomPrefix + 'animationend';
-        variation2 = lowerDomPrefix + 'AnimationEnd';
-        variation3 = domPrefix + 'AnimationEnd';
-
-        // Ensure that the callback name used maps to our implemented function name.
-        this[variation1] = this[variation2] = this[variation3] = this.animationend;
-
-        // ex. animationend, webkitanimationend, webkitAnimationEnd, WebkitAnimationEnd
-        this.listenFor(['animationend', variation1, variation2, variation3], document);
-      }
-    }
+    this.listenFor(['transitionend'], document);
+    this.listenFor(['animationstart'], document);
+    this.listenFor(['animationiteration'], document);
+    this.listenFor(['animationend'], document);
 
     // handle these two events specially in IE
     ['drag', 'selectstart'].forEach(function(keyName) {
@@ -928,82 +890,6 @@ SC.RootResponder = SC.Object.extend(
         }
       };
     SC.RunLoop.prototype.endRunLoop = patch;
-  },
-
-  /**
-    Cleans up the additional transition event listeners.
-
-    NOTE: requires that SC.RootResponser.responder.transitionendEventName
-    has been determined.
-
-    @returns {void}
-  */
-  cleanUpTransitionListeners: function () {
-    var actualEventName = SC.platform.transitionendEventName,
-      domPrefix = SC.browser.domPrefix,
-      lowerDomPrefix = domPrefix.toLowerCase(),
-      variation1 = lowerDomPrefix + 'transitionend',
-      variation2 = lowerDomPrefix + 'TransitionEnd',
-      variation3 = domPrefix + 'TransitionEnd';
-
-    // Once the actual event name is determined, simply remove all the extras.
-    // This should prevent any problems with browsers that fire multiple events.
-    ['transitionend', variation1, variation2, variation3].forEach(function (keyName) {
-      if (keyName !== actualEventName) {
-        SC.Event.remove(document, keyName, this, this[keyName]);
-        this[keyName] = null;
-    }
-    }, this);
-  },
-
-  /**
-    Cleans up the additional animation event listeners.
-
-    NOTE: requires that SC.RootResponser.responder.animationstartEventName,
-    SC.RootResponser.responder.animationendEventName and
-    SC.RootResponser.responder.animationiterationEventName have been
-    determined.
-
-    @returns {void}
-  */
-  cleanUpAnimationListeners: function () {
-    var domPrefix = SC.browser.domPrefix,
-      lowerDomPrefix = domPrefix.toLowerCase(),
-      actualEventName = SC.platform.animationendEventName,
-      variation1 = lowerDomPrefix + 'animationend',
-      variation2 = lowerDomPrefix + 'AnimationEnd',
-      variation3 = domPrefix + 'AnimationEnd';
-
-    // Once the actual event name is determined, simply remove all the extras.
-    // This should prevent any problems with browsers that fire multiple events.
-    ['animationend', variation1, variation2, variation3].forEach(function (keyName) {
-      if (keyName !== actualEventName) {
-        SC.Event.remove(document, keyName, this, this[keyName]);
-        this[keyName] = null;
-    }
-    }, this);
-
-    actualEventName = SC.platform.animationiterationEventName;
-    variation1 = lowerDomPrefix + 'animationiteration';
-    variation2 = lowerDomPrefix + 'AnimationIteration';
-    variation3 = domPrefix + 'AnimationIteration';
-    ['animationiteration', variation1, variation2, variation3].forEach(function (keyName) {
-      if (keyName !== actualEventName) {
-        SC.Event.remove(document, keyName, this, this[keyName]);
-        this[keyName] = null;
-      }
-    }, this);
-
-    actualEventName = SC.platform.animationstartEventName;
-    variation1 = lowerDomPrefix + 'animationstart';
-    variation2 = lowerDomPrefix + 'AnimationStart';
-    variation3 = domPrefix + 'AnimationStart';
-    ['animationstart', variation1, variation2, variation3].forEach(function (keyName) {
-      if (keyName !== actualEventName) {
-        SC.Event.remove(document, keyName, this, this[keyName]);
-        this[keyName] = null;
-      }
-    }, this);
   },
 
   // ...........................................................................

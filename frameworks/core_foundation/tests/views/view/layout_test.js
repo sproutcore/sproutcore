@@ -497,12 +497,6 @@ test("is invoked on parentView if no layoutView whenever layout property changes
 });
 
 test("proxies rotate to rotateZ when 3D transforms are supported", function () {
-  // Retain CSS support information so we can return to it.
-  var actualSupport = SC.platform.get('supportsCSS3DTransforms'),
-      view;
-
-  // YES SUPPORT
-  SC.platform.set('supportsCSS3DTransforms', YES);
   view = SC.View.create();
   SC.run(function () {
     view.set('layout', { rotate: 45 });
@@ -511,20 +505,6 @@ test("proxies rotate to rotateZ when 3D transforms are supported", function () {
   equals(view.get('layout').rotateZ, 45, "should set rotateZ");
   // Clean up.
   view.destroy();
-
-  // NO SUPPORT
-  SC.platform.set('supportsCSS3DTransforms', NO);
-  view = SC.View.create();
-  SC.run(function () {
-    view.set('layout', { rotate: 45 });
-  });
-  equals(view.get('layout').rotate, 45, "should retain rotate");
-  equals(view.get('layout').rotateZ, undefined, "should not set rotateZ");
-  // Clean up.
-  view.destroy();
-
-  // Clean up bigger picture.
-  SC.platform.set('supportsCSS3DTransforms', actualSupport);
 });
 
 test("rotateZ and rotate together", function () {
