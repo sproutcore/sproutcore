@@ -364,37 +364,34 @@ SC.platform = SC.Object.create({
   /**
     Whether the browser supports CSS animations.
 
+    @deprecated
     @type Boolean
   */
-  supportsCSSAnimations: SC.browser.experimentalStyleNameFor('animation') !== SC.UNSUPPORTED,
-
-  /**
-    Whether the browser supports CSS transitions.
-
-    @type Boolean
-  */
-  supportsCSSTransitions: SC.browser.experimentalStyleNameFor('transition') !== SC.UNSUPPORTED,
+  supportsCSSAnimations: true,
 
   /**
     Whether the browser supports 2D CSS transforms.
 
+    @deprecated
     @type Boolean
   */
-  supportsCSSTransforms: SC.browser.experimentalStyleNameFor('transform') !== SC.UNSUPPORTED,
+  supportsCSSTransforms: true,
 
   /**
     Whether the browser can properly handle 3D CSS transforms.
 
+    @deprecated
     @type Boolean
   */
-  supportsCSS3DTransforms: SC.browser.experimentalStyleNameFor('perspective') !== SC.UNSUPPORTED,
+  supportsCSS3DTransforms: true,
 
   /**
     Whether the browser supports the application cache.
 
+    @deprecated applicationCache has been removed from the Web standards.
     @type Boolean
   */
-  supportsApplicationCache: ('applicationCache' in window),
+  supportsApplicationCache: false,
 
   /**
     Whether the browser supports the hashchange event.
@@ -486,9 +483,10 @@ SC.platform = SC.Object.create({
   /**
     Whether the browser supports WebSQL.
 
+    @deprecated WebSQL has been removed from the Web standards.
     @type Boolean
   */
-  supportsWebSQL: ('openDatabase' in window),
+  supportsWebSQL: false,
 
   /**
     Because iOS is slow to dispatch the window.onorientationchange event,
@@ -518,172 +516,4 @@ SC.platform = SC.Object.create({
   // Check for the global cordova property.
   cordova: (typeof window.cordova !== "undefined")
 
-});
-
-/** @private
-  Test the transition and animation event names of this platform.  We could hard
-  code event names into the framework, but at some point things would change and
-  we would get it wrong.  Instead we perform actual tests to find out the proper
-  names and only add the proper listeners.
-
-  Once the tests are completed the RootResponder is notified in order to clean up
-  unnecessary transition and animation event listeners.
-*/
-SC.ready(function () {
-  // This will add 4 different variations of the named event listener and clean
-  // them up again.
-  // Note: we pass in capitalizedEventName, because we can't just capitalize
-  // the standard event name.  For example, in WebKit the standard transitionend
-  // event is named webkitTransitionEnd, not webkitTransitionend.
-  var executeTest = function (el, standardEventName, capitalizedEventName, cleanUpFunc) {
-    var domPrefix = SC.browser.domPrefix,
-      lowerDomPrefix = domPrefix.toLowerCase(),
-      eventNameKey = standardEventName + 'EventName',
-      callback = function (evt) {
-        var domPrefix = SC.browser.domPrefix,
-          lowerDomPrefix = domPrefix.toLowerCase(),
-          eventNameKey = standardEventName + 'EventName';
-
-        // Remove all the event listeners.
-        el.removeEventListener(standardEventName, callback, NO);
-        el.removeEventListener(lowerDomPrefix + standardEventName, callback, NO);
-        el.removeEventListener(lowerDomPrefix + capitalizedEventName, callback, NO);
-        el.removeEventListener(domPrefix + capitalizedEventName, callback, NO);
-
-        // The cleanup timer re-uses this function and doesn't pass evt.
-        if (evt) {
-          SC.platform[eventNameKey] = evt.type;
-
-          // Don't allow the event to bubble, because SC.RootResponder will be
-          // adding event listeners as soon as the testing is complete.  It is
-          // important that SC.RootResponder's listeners don't catch the last
-          // test event.
-          evt.stopPropagation();
-        }
-
-        // Call the clean up function, pass in success state.
-        if (cleanUpFunc) { cleanUpFunc(!!evt); }
-      };
-
-    // Set the initial value as unsupported.
-    SC.platform[eventNameKey] = SC.UNSUPPORTED;
-
-    // Try the various implementations.
-    // ex. transitionend, webkittransitionend, webkitTransitionEnd, WebkitTransitionEnd
-    el.addEventListener(standardEventName, callback, NO);
-    el.addEventListener(lowerDomPrefix + standardEventName, callback, NO);
-    el.addEventListener(lowerDomPrefix + capitalizedEventName, callback, NO);
-    el.addEventListener(domPrefix + capitalizedEventName, callback, NO);
-  };
-
-  // Set up and execute the transition event test.
-  if (SC.platform.supportsCSSTransitions) {
-    var transitionEl = document.createElement('div'),
-      transitionStyleName = SC.browser.experimentalStyleNameFor('transition', 'all 1ms linear');
-
-    transitionEl.style[transitionStyleName] = 'all 1ms linear';
-
-    // Test transition events.
-    executeTest(transitionEl, 'transitionend', 'TransitionEnd', function (success) {
-      // If an end event never fired, we can't really support CSS transitions in SproutCore.
-      if (success) {
-        // Set up the SC transition event listener.
-        SC.RootResponder.responder.cleanUpTransitionListeners();
-      } else {
-        SC.platform.supportsCSSTransitions = NO;
-      }
-
-      transitionEl.parentNode.removeChild(transitionEl);
-      transitionEl = null;
-    });
-
-    // Append the test element.
-    document.documentElement.appendChild(transitionEl);
-
-    // Break execution to allow the browser to update the DOM before altering the style.
-    setTimeout(function () {
-      transitionEl.style.opacity = '0';
-    });
-
-    // Set up and execute the animation event test.
-    if (SC.platform.supportsCSSAnimations) {
-      var animationEl = document.createElement('div'),
-        keyframes,
-        prefixedKeyframes;
-
-      // Generate both the regular and prefixed version of the style.
-      keyframes = '@keyframes _sc_animation_test { from { opacity: 1; } to { opacity: 0; } }';
-      prefixedKeyframes = '@' + SC.browser.cssPrefix + 'keyframes _sc_prefixed_animation_test { from { opacity: 1; } to { opacity: 0; } }';
-
-      // Add test animation styles.
-      animationEl.innerHTML = '<style>' + keyframes + '\n' + prefixedKeyframes + '</style>';
-
-      // Set up and execute the animation event test.
-      animationEl.style.animation = '_sc_animation_test 1ms linear';
-      animationEl.style[SC.browser.domPrefix + 'Animation'] = '_sc_prefixed_animation_test 5ms linear';
-
-      // NOTE: We could test start, but it's extra work and easier just to test the end
-      // and infer the start event name from it.  Keeping this code for example.
-      // executeTest(animationEl, 'animationstart', 'AnimationStart', function (success) {
-      //   // If an iteration start never fired, we can't really support CSS transitions in SproutCore.
-      //   if (!success) {
-      //     SC.platform.supportsCSSAnimations = NO;
-      //   }
-      // });
-
-      // NOTE: Testing iteration event support proves very problematic.  Many
-      // browsers can't iterate less than several milliseconds which means we
-      // have to wait too long to find out this event name.  Instead we test
-      // the end only and infer the iteration event name from it. Keeping this
-      // code for example, but it wont' work reliably unless the animation style
-      // is something like '_sc_animation_test 30ms linear' (i.e. ~60ms wait time)
-      // executeTest(animationEl, 'animationiteration', 'AnimationIteration', function (success) {
-      //   // If an iteration event never fired, we can't really support CSS transitions in SproutCore.
-      //   if (!success) {
-      //     SC.platform.supportsCSSAnimations = NO;
-      //   }
-      // });
-
-      // Test animation events.
-      executeTest(animationEl, 'animationend', 'AnimationEnd', function (success) {
-        // If an end event never fired, we can't really support CSS animations in SproutCore.
-        if (success) {
-          // Infer the start and iteration event names based on the success of the end event.
-          var domPrefix = SC.browser.domPrefix,
-            lowerDomPrefix = domPrefix.toLowerCase(),
-            endEventName = SC.platform.animationendEventName;
-
-          switch (endEventName) {
-          case lowerDomPrefix + 'animationend':
-            SC.platform.animationstartEventName = lowerDomPrefix + 'animationstart';
-            SC.platform.animationiterationEventName = lowerDomPrefix + 'animationiteration';
-            break;
-          case lowerDomPrefix + 'AnimationEnd':
-            SC.platform.animationstartEventName = lowerDomPrefix + 'AnimationStart';
-            SC.platform.animationiterationEventName = lowerDomPrefix + 'AnimationIteration';
-            break;
-          case domPrefix + 'AnimationEnd':
-            SC.platform.animationstartEventName = domPrefix + 'AnimationStart';
-            SC.platform.animationiterationEventName = domPrefix + 'AnimationIteration';
-            break;
-          default:
-            SC.platform.animationstartEventName = 'animationstart';
-            SC.platform.animationiterationEventName = 'animationiteration';
-          }
-
-          // Set up the SC animation event listeners.
-          SC.RootResponder.responder.cleanUpAnimationListeners();
-        } else {
-          SC.platform.supportsCSSAnimations = NO;
-        }
-
-        // Clean up.
-        animationEl.parentNode.removeChild(animationEl);
-        animationEl = null;
-      });
-
-      // Break execution to allow the browser to update the DOM before altering the style.
-      document.documentElement.appendChild(animationEl);
-    }
-  }
 });

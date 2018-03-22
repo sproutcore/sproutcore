@@ -557,8 +557,8 @@ SC.View.reopen(
     immediately and the animations removed from the queue.
   */
   didRenderAnimations: function () {
-    // Transitions not supported or the document is not visible.
-    if (!SC.platform.supportsCSSTransitions || document.hidden) {
+    // The document is not visible.
+    if (document.hidden) {
       var pendingAnimations = this._pendingAnimations;
 
       for (var key in pendingAnimations) {
@@ -668,79 +668,64 @@ SC.View.reopen(
   liveAdjustments: function () {
     var activeAnimations = this._activeAnimations,
       el = this.get('layer'),
-      ret = {},
-      transformKey = SC.browser.experimentalCSSNameFor('transform');
+      ret = {};
 
     if (activeAnimations) {
       for (var key in activeAnimations) {
         var value = document.defaultView.getComputedStyle(el)[key];
 
         // If a transform is being transitioned, decompose the matrices.
-        if (key === transformKey) {
-          var CSSMatrixClass = SC.browser.experimentalNameFor(window, 'CSSMatrix'),
-            matrix;
+        if (key === 'transform') {
+          // Convert scientific E number representations to fixed numbers.
+          // In WebKit at least, these throw exceptions when used to generate the matrix. To test,
+          // paste the following in a browser console:
+          //    new WebKitCSSMatrix('matrix(-1, 1.22464679914735e-16, -1.22464679914735e-16, -1, 0, 0)')
+          value = this._sc_removeENotationFromMatrixString(value);
+          matrix = new window[CSSMatrixClass](value);
 
-          if (CSSMatrixClass !== SC.UNSUPPORTED) {
+          /* jshint eqnull:true */
+          var layout = this.get('layout'),
+            scaleLayout = layout.scale,
+            expectsScale = scaleLayout != null,
+            decomposition = this._sc_decompose3DTransformMatrix(matrix, expectsScale);
 
-            // Convert scientific E number representations to fixed numbers.
-            // In WebKit at least, these throw exceptions when used to generate the matrix. To test,
-            // paste the following in a browser console:
-            //    new WebKitCSSMatrix('matrix(-1, 1.22464679914735e-16, -1.22464679914735e-16, -1, 0, 0)')
-            value = this._sc_removeENotationFromMatrixString(value);
-            matrix = new window[CSSMatrixClass](value);
+          // The rotation decompositions aren't working properly, ignore them.
+          // Set rotateX.
+          // if (layout.rotateX != null) {
+          //   ret.rotateX = decomposition.rotateX;
+          // }
 
-            /* jshint eqnull:true */
-            var layout = this.get('layout'),
-              scaleLayout = layout.scale,
-              expectsScale = scaleLayout != null,
-              decomposition = this._sc_decompose3DTransformMatrix(matrix, expectsScale);
+          // // Set rotateY.
+          // if (layout.rotateY != null) {
+          //   ret.rotateY = decomposition.rotateY;
+          // }
 
-            // The rotation decompositions aren't working properly, ignore them.
-            // Set rotateX.
-            // if (layout.rotateX != null) {
-            //   ret.rotateX = decomposition.rotateX;
-            // }
+          // Set rotateZ.
+          if (layout.rotateZ != null) {
+            ret.rotateZ = decomposition.rotateZ;
+          }
 
-            // // Set rotateY.
-            // if (layout.rotateY != null) {
-            //   ret.rotateY = decomposition.rotateY;
-            // }
+          // Set scale.
+          if (expectsScale) {
+            // If the scale was set in the layout as an Array, return it as an Array.
+            if (SC.typeOf(scaleLayout) === SC.T_ARRAY) {
+              ret.scale = [decomposition.scaleX, decomposition.scaleY];
 
-            // Set rotateZ.
-            if (layout.rotateZ != null) {
-              ret.rotateZ = decomposition.rotateZ;
-            }
+            // If the scale was set in the layout as an Object, return it as an Object.
+            } else if (SC.typeOf(scaleLayout) === SC.T_HASH) {
+              ret.scale = { x: decomposition.scaleX, y: decomposition.scaleY };
 
-            // Set scale.
-            if (expectsScale) {
-              // If the scale was set in the layout as an Array, return it as an Array.
-              if (SC.typeOf(scaleLayout) === SC.T_ARRAY) {
-                ret.scale = [decomposition.scaleX, decomposition.scaleY];
-
-              // If the scale was set in the layout as an Object, return it as an Object.
-              } else if (SC.typeOf(scaleLayout) === SC.T_HASH) {
-                ret.scale = { x: decomposition.scaleX, y: decomposition.scaleY };
-
-              // Return it as a single value.
-              } else {
-                ret.scale = decomposition.scaleX;
-              }
-            }
-
-            // Set top & left.
-            if (this.get('hasAcceleratedLayer')) {
-              ret.left = decomposition.translateX;
-              ret.top = decomposition.translateY;
-            }
-          } else {
-            matrix = value.match(/^matrix\((.*)\)$/)[1].split(/,\s*/);
-            // If the view has translated position, retrieve translateX & translateY.
-            if (matrix && this.get('hasAcceleratedLayer')) {
-              ret.left = parseInt(matrix[4], 10);
-              ret.top = parseInt(matrix[5], 10);
+            // Return it as a single value.
+            } else {
+              ret.scale = decomposition.scaleX;
             }
           }
 
+          // Set top & left.
+          if (this.get('hasAcceleratedLayer')) {
+            ret.left = decomposition.translateX;
+            ret.top = decomposition.translateY;
+          }
         // Determine the current style.
         } else {
           value = window.parseFloat(value, 10);
@@ -775,7 +760,7 @@ SC.View.reopen(
         }
       }
 
-      layer.style[SC.browser.experimentalStyleNameFor('transition')] = updatedCSS.join(', ');
+      layer.style['transition'] = updatedCSS.join(', ');
     }
   },
 
@@ -853,8 +838,8 @@ SC.View.reopen(
    pending and active animations.
    */
   willRenderAnimations: function () {
-    // Only apply the style if supported by the platform and the document is visible.
-    if (SC.platform.supportsCSSTransitions && !document.hidden) {
+    // Only apply the style if the document is visible.
+    if (!document.hidden) {
       var pendingAnimations = this._pendingAnimations;
 
       if (pendingAnimations) {

@@ -451,39 +451,29 @@ SC.View.reopen(
 
   /** @private */
   _sc_adjustForScale: function (frame, layout) {
+    // Get the scale and transform origins, if not provided. (Note inlining of SC.none for performance)
+    /*jshint eqnull:true*/
+    var scale = layout.scale,
+        oX = layout.transformOriginX,
+        oY = layout.transformOriginY;
 
-    // Scale not supported on this platform, ignore the layout values.
-    if (!SC.platform.supportsCSSTransforms) {
-      frame.scale = 1;
-      frame.transformOriginX = frame.transformOriginY = 0.5;
+    // If the scale is set and isn't 1, do some calculations.
+    if (scale != null && scale !== 1) {
+      // Scale the rect.
+      frame = SC.scaleRect(frame, scale, oX, oY);
 
-    // Use scale.
-    } else {
+      // Add the scale and original unscaled height and width.
+      frame.scale = scale;
+    }
 
-      // Get the scale and transform origins, if not provided. (Note inlining of SC.none for performance)
-      /*jshint eqnull:true*/
-      var scale = layout.scale,
-          oX = layout.transformOriginX,
-          oY = layout.transformOriginY;
+    // If the origin is set and isn't 0.5, include it.
+    if (oX != null && oX !== 0.5) {
+      frame.transformOriginX = oX;
+    }
 
-      // If the scale is set and isn't 1, do some calculations.
-      if (scale != null && scale !== 1) {
-        // Scale the rect.
-        frame = SC.scaleRect(frame, scale, oX, oY);
-
-        // Add the scale and original unscaled height and width.
-        frame.scale = scale;
-      }
-
-      // If the origin is set and isn't 0.5, include it.
-      if (oX != null && oX !== 0.5) {
-        frame.transformOriginX = oX;
-      }
-
-      // If the origin is set and isn't 0.5, include it.
-      if (oY != null && oY !== 0.5) {
-        frame.transformOriginY = oY;
-      }
+    // If the origin is set and isn't 0.5, include it.
+    if (oY != null && oY !== 0.5) {
+      frame.transformOriginY = oY;
     }
 
     // Make sure width/height are never < 0.
@@ -967,7 +957,7 @@ SC.View.reopen(
 
     // Handle old style rotation.
     if (!SC.none(currentLayout.rotate)) {
-      if (SC.none(currentLayout.rotateZ) && SC.platform.get('supportsCSS3DTransforms')) {
+      if (SC.none(currentLayout.rotateZ)) {
         currentLayout.rotateZ = currentLayout.rotate;
         delete currentLayout.rotate;
       }

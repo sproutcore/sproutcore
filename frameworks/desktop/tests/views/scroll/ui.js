@@ -110,7 +110,7 @@
     var view = pane.view('basic2'),
       contentView = view.get('contentView'),
       elem = contentView.getPath('layer'),
-      transformAttr = SC.browser.experimentalStyleNameFor('transform'),
+      transformAttr = 'transform',
       transformTemplate = 'translateX(%@px) translateY(%@px) translateZ(%@px) scale(%@)';
 
     // CLASS
@@ -137,20 +137,14 @@
       view.scrollTo(0,100);
     });
     equals(view.get('verticalScrollOffset'), 100, 'Vertical scrolling should adjust verticalScrollOffset');
-    if (SC.platform.get('supportsCSSTransforms')) {
-      equals(elem.style[transformAttr], transformTemplate.fmt(0, -100, 0, 1), 'Vertical scrolling should adjust transform on the contentView layer');
-    }
-    // TODO: Simulate unsupported browser and test fallback (containerView's marginTop)
+    equals(elem.style[transformAttr], transformTemplate.fmt(0, -100, 0, 1), 'Vertical scrolling should adjust transform on the contentView layer');
 
     // SCROLLING HORIZONTALLY
     SC.run(function() {
       view.scrollTo(50,0);
     });
     equals(view.get('horizontalScrollOffset'), 50, 'horizontal scrolling should adjust horizontalScrollOffset');
-    if (SC.platform.get('supportsCSSTransforms')) {
-      equals(elem.style[transformAttr], transformTemplate.fmt(-50, 0, 0, 1), 'Horizontal scrolling should adjust transform on the contentView layer.');
-    }
-    // TODO: Simulate unsupported browser and test fallback (containerView's marginLeft)
+    equals(elem.style[transformAttr], transformTemplate.fmt(-50, 0, 0, 1), 'Horizontal scrolling should adjust transform on the contentView layer.');
 
     // ADJUSTING CONTENT LAYOUT WHILE SCROLLED SHOULD STAY CENTERED
     // Reproducing this bug requires that there be no adjustment already scheduled.
@@ -158,10 +152,7 @@
       contentView.adjust('height', 450);
     });
 
-    if (SC.platform.get('supportsCSSTransforms')) {
-      equals(elem.style[transformAttr], transformTemplate.fmt(-50, 0, 0, 1), 'Adjusting content size should not affect scroll transform positioning');
-    }
-    // TODO: Simulate unsupported browser and test fallback (containerView's marginLeft)
+    equals(elem.style[transformAttr], transformTemplate.fmt(-50, 0, 0, 1), 'Adjusting content size should not affect scroll transform positioning');
   });
 
   test("Basic scroller visibility", function() {
@@ -209,11 +200,11 @@
       view.scrollTo(10, 10);
       view._sc_repositionContentViewUnfiltered(); // This method is PRIVATE. (Called here to cheat, synchronously testing an asynchronous operation.)
     });
-    prevTransform = cv.get('layer').style[SC.browser.experimentalStyleNameFor('transform')];
+    prevTransform = cv.get('layer').style['transform'];
 
     SC.run(cv.replaceLayer, cv);
 
-    equals(cv.get('layer').style[SC.browser.experimentalStyleNameFor('transform')],
+    equals(cv.get('layer').style['transform'],
       prevTransform,
       'The new layer has had the scroll transform style applied');
 
