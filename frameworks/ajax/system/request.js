@@ -6,6 +6,7 @@
 // ==========================================================================
 
 sc_require('system/response');
+sc_require('system/xhr_response');
 
 /**
   @class
