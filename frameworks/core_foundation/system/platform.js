@@ -81,20 +81,6 @@ SC.platform = SC.Object.create({
   touch: (('ontouchstart' in window) || window.DocumentTouch && document instanceof DocumentTouch) && SC.none(window._phantom),
 
   /**
-    True if bouncing on scroll is expected in the current platform.
-
-    @type Boolean
-  */
-  bounceOnScroll: SC.browser.os === SC.OS.ios,
-
-  /**
-    True if pinch-to-zoom is expected in the current platform.
-
-    @type Boolean
-  */
-  pinchToZoom: SC.browser.os === SC.OS.ios,
-
-  /**
     A hash that contains properties that indicate support for new HTML5
     a attributes.
 
@@ -149,17 +135,6 @@ SC.platform = SC.Object.create({
   */
   standalone: !!navigator.standalone,
 
-
-  /** @deprecated Since version 1.10. Use SC.browser.cssPrefix.
-    Prefix for browser specific CSS attributes.
-  */
-  cssPrefix: SC.browser.cssPrefix,
-
-  /** @deprecated Since version 1.10. Use SC.browser.domPrefix.
-    Prefix for browser specific CSS attributes when used in the DOM.
-  */
-  domCSSPrefix: SC.browser.domPrefix,
-
   /**
     Call this method to swap out the default mouse handlers with proxy methods
     that will translate mouse events to touch events.
@@ -179,7 +154,6 @@ SC.platform = SC.Object.create({
 
     // Tell the app that we now "speak" touch
     SC.platform.touch = YES;
-    SC.platform.bounceOnScroll = YES;
 
     // CSS selectors may depend on the touch class name being present
     document.body.className = document.body.className + ' touch';
@@ -419,7 +393,7 @@ SC.platform = SC.Object.create({
     @type Boolean
   */
   supportsIndexedDB: function () {
-    return !!(window.indexedDB || window[SC.browser.domPrefix + 'IndexedDB']);
+    return !!window.indexedDB;
   }(),
 
   /**
@@ -496,7 +470,7 @@ SC.platform = SC.Object.create({
 
     @type Boolean
   */
-  windowSizeDeterminesOrientation: SC.browser.os === SC.OS.ios || !('onorientationchange' in window),
+  windowSizeDeterminesOrientation: !('onorientationchange' in window),
 
   /**
     Does this browser support the Apache Cordova (formerly phonegap) runtime?

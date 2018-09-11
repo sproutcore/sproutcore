@@ -373,15 +373,15 @@ SC.RootResponder = SC.Object.extend(
       SC.$('body').addClass('sc-focus').removeClass('sc-blur');
 
       SC.run(function () {
-      // If the app is getting focus again set the first responder to the first
-      // valid firstResponder view in the view's tree
-      if(!SC.TABBING_ONLY_INSIDE_DOCUMENT && !SC.browser.isIE8OrLower){
-        var keyPane = SC.RootResponder.responder.get('keyPane');
-        if (keyPane) {
-          var nextValidKeyView = keyPane.get('nextValidKeyView');
-          if (nextValidKeyView) keyPane.makeFirstResponder(nextValidKeyView);
+        // If the app is getting focus again set the first responder to the first
+        // valid firstResponder view in the view's tree
+        if(!SC.TABBING_ONLY_INSIDE_DOCUMENT){
+          var keyPane = SC.RootResponder.responder.get('keyPane');
+          if (keyPane) {
+            var nextValidKeyView = keyPane.get('nextValidKeyView');
+            if (nextValidKeyView) keyPane.makeFirstResponder(nextValidKeyView, evt);
+          }
         }
-      }
 
         this.set('hasFocus', YES);
       }, this);
@@ -776,17 +776,13 @@ SC.RootResponder = SC.Object.extend(
     this.listenFor(['touchstart', 'touchmove', 'touchend', 'touchcancel', 'keydown', 'keypress', 'keyup', 'beforedeactivate', 'mousedown', 'mouseup', 'dragenter', 'dragover', 'dragleave', 'drop', 'click', 'dblclick', 'mousemove', 'mouseleave', 'contextmenu'], document)
         .listenFor(['resize'], window);
 
-    if(SC.browser.isIE8OrLower) this.listenFor(['focusin', 'focusout'], document);
-    else this.listenFor(['focus', 'blur'], window);
+    this.listenFor(['focus', 'blur'], window);
 
     // Add an array of transition listeners for immediate use (these will be cleaned up when actual testing completes).
     // Because the transition test happens asynchronously and because we don't want to
     // delay the launch of the application in order to a transition test (the app won't
     // load if the browser tab is not visible), we start off by listening to everything
     // and when the test is completed, we remove the extras to avoid double callbacks.
-    var domPrefix = SC.browser.domPrefix,
-      lowerDomPrefix = domPrefix.toLowerCase();
-
     this.listenFor(['transitionend'], document);
     this.listenFor(['animationstart'], document);
     this.listenFor(['animationiteration'], document);
@@ -796,21 +792,7 @@ SC.RootResponder = SC.Object.extend(
     ['drag', 'selectstart'].forEach(function(keyName) {
       var method = this[keyName] ;
       if (method) {
-        if (SC.browser.isIE) {
-          var responder = this ;
-
-          document.body['on' + keyName] = function(e) {
-            return method.call(responder, SC.Event.normalizeEvent(event || window.event)); // this is IE :(
-          };
-
-          // be sure to cleanup memory leaks
-           SC.Event.add(window, 'unload', this, function() {
-            document.body['on' + keyName] = null;
-          });
-
-        } else {
-          SC.Event.add(document, keyName, this, method);
-        }
+        SC.Event.add(document, keyName, this, method);
       }
     }, this);
 
@@ -1643,13 +1625,6 @@ SC.RootResponder = SC.Object.extend(
      get touch events. Textfields just need to get the default focus action.
   */
   ignoreTouchHandle: function(evt) {
-    if(SC.browser.isMobileSafari){
-      var tag = evt.target.tagName;
-      if(tag==="INPUT" || tag==="TEXTAREA" || tag==="A" || tag==="SELECT"){
-        evt.allowDefault();
-        return YES;
-      }
-    }
     return NO;
   },
 
@@ -1794,9 +1769,6 @@ SC.RootResponder = SC.Object.extend(
       this._mouseDownView = null;
       return YES;
     }
-
-    // Firefox does NOT handle delete here...
-    if (SC.browser.isMozilla && (evt.which === 8)) return true ;
 
     // modifier keys are handled separately by the 'flagsChanged' event
     // send event for modifier key changes, but only stop processing if this
@@ -2034,11 +2006,7 @@ SC.RootResponder = SC.Object.extend(
   },
 
   dblclick: function(evt){
-    if (SC.browser.isIE8OrLower) {
-      this._clickCount = 2;
-      // this._onmouseup(evt);
-      this.mouseup(evt);
-    }
+
   },
 
   mousewheel: function(evt) {
@@ -2065,10 +2033,6 @@ SC.RootResponder = SC.Object.extend(
     // To prevent this, we make sure the event target is an instance of Element.
     if (!(evt.target instanceof Element)) return;
 
-    if (SC.browser.isIE) {
-      if (this._lastMoveX === evt.clientX && this._lastMoveY === evt.clientY) return;
-    }
-
     // We'll record the last positions in all browsers, in case a special pane
     // or some such UI absolutely needs this information.
     this._lastMoveX = evt.clientX;
@@ -2083,14 +2047,7 @@ SC.RootResponder = SC.Object.extend(
        // only do mouse[Moved|Entered|Exited|Dragged] if not in a drag session
        // drags send their own events, e.g. drag[Moved|Entered|Exited]
       if (dragView) {
-         //IE triggers mousemove at the same time as mousedown
-         if(SC.browser.isIE){
-           if (this._lastMouseDownX !== evt.clientX || this._lastMouseDownY !== evt.clientY) {
-            dragView.tryToPerform('mouseDragged', evt);
-           }
-        } else {
-          dragView.tryToPerform('mouseDragged', evt);
-         }
+        dragView.tryToPerform('mouseDragged', evt);
        } else {
         var lh = this._lastHovered || [], nh = [], loc, len,
              view = this.targetViewForEvent(evt) ;
@@ -2125,14 +2082,7 @@ SC.RootResponder = SC.Object.extend(
          // also, if a mouseDownView exists, call the mouseDragged action, if
          // it exists.
          if (this._mouseDownView) {
-           if(SC.browser.isIE){
-             if (this._lastMouseDownX !== evt.clientX && this._lastMouseDownY !== evt.clientY) {
-               this._mouseDownView.tryToPerform('mouseDragged', evt);
-             }
-           }
-           else {
-             this._mouseDownView.tryToPerform('mouseDragged', evt);
-           }
+          this._mouseDownView.tryToPerform('mouseDragged', evt);
          }
        }
     }, this);

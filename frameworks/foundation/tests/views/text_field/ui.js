@@ -367,7 +367,7 @@
   });
 
 
-  if (!SC.browser.isIE && !SC.platform.input.placeholder) {
+  if (!SC.platform.input.placeholder) {
     test("Changing value to null -- password field", function () {
       var view = pane.view('password-hint'),
           input = view.$('input');

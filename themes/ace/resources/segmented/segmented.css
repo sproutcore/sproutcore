@@ -23,10 +23,6 @@ $theme.sc-segment-view {
   position: relative;
   padding: 0;
 
-  .ie7 & {
-    display: inline;
-  }
-
   /* The base style has a gray background added to the first and last segments. */
   &.sc-first-segment { background: none;  margin: 0; padding: 0;}
   &.sc-last-segment { background: none;  margin: 0; padding: 0; }

@@ -61,10 +61,6 @@ test("Test Quicktime Support", function() {
 test("Test HTML5 Audio Support", function() {
   var isAudioSupported = NO;
   try {
-    if(SC.browser.isMozilla && SC.browser.compare(SC.browser.mozilla, "3.6") <= 0) {
-      throw new Error();
-    }
-
     var doc = document.createElement('Audio');
     isAudioSupported = !!doc.canPlayType;
     delete doc;
@@ -81,10 +77,6 @@ test("Test HTML5 Audio Support", function() {
 test("Test HTML5 Video Support", function() {
   var isVideoSupported = NO;
   try {
-    if(SC.browser.isMozilla && SC.browser.compare(SC.browser.mozilla, "3.6") <= 0) {
-      throw new Error();
-    }
-
     var doc = document.createElement('Video');
     isVideoSupported = !!doc.canPlayType;
     delete doc;
@@ -147,7 +139,7 @@ test("Test Audio Playback detection", function() {
  */
 test("Test OGG Support", function() {
   // Only Mozilla, Chrome and Opera support OGG.
-  var isOggSupported = SC.mediaCapabilities.hasVideoPlayback && (SC.browser.isMozilla || SC.browser.isChrome || SC.browser.isOpera);
+  var isOggSupported = SC.mediaCapabilities.hasVideoPlayback;
   equals(SC.mediaCapabilities.isOggSupported, isOggSupported, "OGG Support support flag must match what we've found in the browser");
 });
 
@@ -156,7 +148,7 @@ test("Test OGG Support", function() {
  */
 test("Test WebM Support", function() {
   // Only Mozilla, Chrome and Opera support WebM.
-  var isWebMSupported = SC.mediaCapabilities.hasVideoPlayback && (SC.browser.isMozilla || SC.browser.isChrome || SC.browser.isOpera);
+  var isWebMSupported = SC.mediaCapabilities.hasVideoPlayback;
   equals(SC.mediaCapabilities.isWebMSupported, isWebMSupported, "WebM Support support flag must match what we've found in the browser");
 });
 
@@ -174,6 +166,6 @@ test("Test FLV Support", function() {
  */
 test("Test MP4 Support", function() {
   // Only IE, Chrome and Safari support MP4
-  var isMP4Supported = SC.mediaCapabilities.hasVideoPlayback && (SC.browser.isIE || SC.browser.isChrome || SC.browser.isSafari)
+  var isMP4Supported = SC.mediaCapabilities.hasVideoPlayback;
   equals(SC.mediaCapabilities.isMP4Supported, isMP4Supported, "MP4 Support support flag must match what we've found in the browser");
 });

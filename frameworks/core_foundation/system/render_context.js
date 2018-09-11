@@ -767,10 +767,6 @@ SC.RenderContext = SC.Builder.create(
         var attr = this.$().attr('style');
 
         if (attr && (attr = attr.toString()).length > 0) {
-          // Ensure attributes are lower case for IE
-          if (SC.browser.name === SC.BROWSER.ie) {
-            attr = attr.toLowerCase();
-          }
           var styles = {},
             match,
             regex = this._STYLE_REGEX;

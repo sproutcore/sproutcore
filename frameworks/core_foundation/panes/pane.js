@@ -378,19 +378,6 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     if (document && document.body) {
       wDim.width = document.body.clientWidth;
       wDim.height = document.body.clientHeight;
-
-      // IE7 is the only browser which reports clientHeight _including_ scrollbar.
-      if (SC.browser.name === SC.BROWSER.ie &&
-          SC.browser.compare(SC.browser.version, "7") === 0) {
-
-        var scrollbarSize = SC.platform.get('scrollbarSize');
-        if (document.body.scrollWidth > wDim.width) {
-          wDim.width -= scrollbarSize;
-        }
-        if (document.body.scrollHeight > wDim.height) {
-          wDim.height -= scrollbarSize;
-        }
-      }
     }
 
     // If there is a minWidth or minHeight set on the pane, take that

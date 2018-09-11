@@ -164,9 +164,7 @@ SC.DrawingView = SC.View.extend({
     //console.log('%@.render()'.fmt(this));
     var frame = this.get('frame');
     if (firstTime) {
-      if (!SC.browser.isIE) {
-        context.push('<canvas class="base-layer" width="%@" height="%@">You can\'t use canvas tags</canvas>'.fmt(frame.width, frame.height));
-      }
+      context.push('<canvas class="base-layer" width="%@" height="%@">You can\'t use canvas tags</canvas>'.fmt(frame.width, frame.height));
     }
     else {
       var canvasElem = this.$('canvas.base-layer');

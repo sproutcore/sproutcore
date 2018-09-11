@@ -112,31 +112,10 @@ SC.mixin( /** @scope SC */ {
       result.left -= parentOffset.left;
       result.top -= parentOffset.top;
     } else {
-      // jQuery does not workaround a problem with Mobile Safari versions prior to 4.1 that add the scroll
-      // offset to the results of getBoundingClientRect.
-      //
-      // See http://dev.jquery.it/ticket/6446
-      if (SC.browser.isMobileSafari) {
-        userAgent = navigator.userAgent;
-        index = userAgent.indexOf('Mobile/');
-        mobileBuildNumber = userAgent.substring(index + 7, index + 9);
-
-        if (parseInt(SC.browser.mobileSafari, 0) <= 532 || (mobileBuildNumber <= "8A")) {
-          result.left -= window.pageXOffset;
-          result.top -= window.pageYOffset;
-        }
-      }
-
       // Subtract the scroll offset for viewport coordinates
-      if (relativeToFlag === 'viewport') {
-
-        if(SC.browser.isIE8OrLower){
-          result.left -= $(window).scrollLeft();
-          result.top -= $(window).scrollTop();
-        }else{
-          result.left -= window.pageXOffset;
-          result.top -= window.pageYOffset;
-        }
+      if (relativeTo === 'viewport') {
+        result.left -= window.pageXOffset;
+        result.top -= window.pageYOffset;
       }
     }
 

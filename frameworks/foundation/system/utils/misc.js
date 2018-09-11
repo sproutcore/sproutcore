@@ -27,21 +27,14 @@ SC.mixin( /** @scope SC */ {
     tempDLIFrame.style.top='-10000px';
     tempDLIFrame.style.left='-10000px';
     // Don't set the iFrame content yet if this is Safari
-    if (!SC.browser.isSafari) {
-      SC.$(tempDLIFrame).attr('src',path);
-    }
+    SC.$(tempDLIFrame).attr('src',path);
     document.getElementsByTagName('body')[0].appendChild(tempDLIFrame);
-    if (SC.browser.isSafari) {
-      SC.$(tempDLIFrame).attr('src',path);
-    }
     this._downloadFrames = this._downloadFrames + 1;
-    if (!SC.browser.isSafari) {
-      var r = function() {
-        document.body.removeChild(document.getElementById(frameId));
-        frameId = null;
-      } ;
-      r.invokeLater(null, 2000);
-    }
+    var r = function() {
+      document.body.removeChild(document.getElementById(frameId));
+      frameId = null;
+    } ;
+    r.invokeLater(null, 2000);
     //remove possible IE7 leak
     tempDLIFrame = null;
   },

@@ -193,7 +193,7 @@ test("set styles override style attr", function() {
 
 test("set styles handle custom browser attributes", function() {
   context.resetStyles();
-  context.setStyle({ columnCount: '3', mozColumnCount: '3', webkitColumnCount: '3', oColumnCount: '3', msColumnCount: '3' });
+  context.setStyle({ columnCount: '3' });
   context.update();
 
   // Browsers return single attribute styles differently, sometimes with a trailing ';'
@@ -201,8 +201,5 @@ test("set styles handle custom browser attributes", function() {
   var style = SC.$(elem).attr("style").trim();
   if (!style.match(/;$/)) style += ';' ;
 
-  // Older Gecko completely ignores css attributes that it doesn't understand.
-  if(SC.browser.isMozilla) equals(style, "-moz-column-count: 3;");
-  else if (SC.browser.isIE) equals(style, "-ms-column-count: 3;");
-  else if (SC.browser.engine === SC.ENGINE.webkit) equals(style, "-webkit-column-count: 3;");
+  equals(style, "column-count: 3;");
 });
