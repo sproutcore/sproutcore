@@ -359,6 +359,7 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
       - `%W` -- Week number of the current year,
           starting with the first Monday as the first
           day of the first week (00..53)
+      - `%N` -- ISO-8601 numeric representation of the day of the week (1 for Monday through 7 for Sunday)
       - `%w` -- Day of the week (Sunday is 0, 0..6)
       - `%x` -- Preferred representation for the date alone, no time
       - `%X` -- Preferred representation for the time alone, no date
@@ -1155,6 +1156,7 @@ SC.DateTime.mixin(SC.Comparable,
       case 'u': return this._pad(this._get('utc')); //utc
       case 'U': return this._pad(this._get('week0'));
       case 'W': return this._pad(this._get('week1'));
+      case 'N': return this._get('dayOfWeek') || 7;
       case 'w': return this._get('dayOfWeek');
       case 'x': return this._date.toDateString();
       case 'X': return this._date.toTimeString();
@@ -1180,7 +1182,7 @@ SC.DateTime.mixin(SC.Comparable,
     // need to move into local time zone for these calculations
     this._setCalcState(start - (timezone * 60000), 0); // so simulate a shifted 'UTC' time
 
-    return format.replace(/\%([aAbBcdeEDhHiIjmMopsSUWwxXyYZ\%])/g, function() {
+    return format.replace(/\%([aAbBcdeEDhHiIjmMNopsSUWwxXyYZ\%])/g, function() {
       var v = that.__toFormattedString.call(that, arguments, start, timezone);
       return v;
     });
