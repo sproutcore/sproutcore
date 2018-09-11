@@ -646,16 +646,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       spellCheckString = '', autocapitalizeString = '', autocorrectString = '',
       autocompleteString = '', activeStateString = '', browserFocusableString = '',
       name, adjustmentStyle, type, paddingElementStyle,
-      fieldClassNames, isOldSafari;
+      fieldClassNames;
 
     context.setClass('text-area', isTextArea);
-
-    //Adding this to differentiate between older and newer versions of safari
-    //since the internal default field padding changed
-    isOldSafari = SC.browser.isWebkit &&
-        SC.browser.compare(SC.browser.engineVersion, '532') < 0;
-    context.setClass('oldWebKitFieldPadding', isOldSafari);
-
 
     if (firstTime || this._forceRenderFirstTime) {
       this._forceRenderFirstTime = false;
@@ -739,12 +732,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       }
 
       input.attr('maxLength', maxLength);
-
-      // IE8 has problems aligning the input text in the center
-      // This is a workaround for centering it.
-      if (SC.browser.name === SC.BROWSER.ie && SC.browser.version <= 8 && !isTextArea) {
-        input.css('line-height', this.get('frame').height + 'px');
-      }
 
       if (!SC.none(autoCorrect)) {
         input.attr('autocorrect', !autoCorrect ? 'off' : 'on');
@@ -864,11 +851,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
    */
   _fixupTextLayout: function () {
     var height = this.get('frame').height;
-
-    if (SC.browser.name === SC.BROWSER.ie && SC.browser.version <= 8 &&
-        !this.get('isTextArea')) {
-      this.$input().css('line-height', height + 'px');
-    }
 
     if (this.get('useHintOverlay') && !this.get('isTextArea')) {
       var hintJQ = this.$('.hint');
@@ -1056,14 +1038,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     // Make sure input element still exists, as a redraw could have remove it
     // already.
     if (inputElem) {
-      // Determine if the OS is OS 10.7 "Lion"
-      isLion = SC.browser.os === SC.OS.mac &&
-          SC.browser.compare(SC.browser.osVersion, '10.7') === 0;
-
-      if (!(SC.browser.name === SC.BROWSER.safari &&
-            isLion && SC.buildLocale === 'ko-kr')) {
-        inputElem.select();
-      }
+      inputElem.select();
     }
     else this._textField_selectionDidChange();
   },
@@ -1107,9 +1082,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       var val = this.get('value');
 
       // This code is nasty. It's thanks to Gecko .keycode table that has characters like '&' with the same keycode as up arrow key
-      if (val && ((!SC.browser.isMozilla && which > 47) ||
-                  (SC.browser.isMozilla && ((which > 32 && which < 43) || which > 47) && !(keyCode > 36 && keyCode < 41))) &&
-          (val.length >= this.get('maxLength'))) {
+      if (val && val.length >= this.get('maxLength')) {
         maxLengthReached = true;
       }
     }
@@ -1279,9 +1252,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   },
 
   keyUp: function (evt) {
-    if (SC.browser.isMozilla &&
-        evt.keyCode === SC.Event.KEY_RETURN) { this.fieldValueDidChange(); }
-
     // The caret/selection may have changed.
     // This cannot notify immediately, because in some browsers (tested Chrome 39.0 on OS X), the
     // value of `selectionStart` and `selectionEnd` won't have updated yet. Thus if we notified

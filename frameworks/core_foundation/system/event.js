@@ -174,10 +174,6 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     // cannot register events on text nodes, etc.
     if ( elem.nodeType === 3 || elem.nodeType === 8 ) return SC.Event;
 
-    // For whatever reason, IE has trouble passing the window object
-    // around, causing it to be cloned in the process
-    if (SC.browser.name === SC.BROWSER.ie && elem.setInterval) elem = window;
-
     // if target is a function, treat it as the method, with optional context
     if (SC.typeOf(target) === SC.T_FUNCTION) {
       context = method;
@@ -522,16 +518,14 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     },
 
     /** @private
-        Implement support for mouseenter on browsers other than IE */
+        Implement support for mouseenter */
     mouseenter: {
       setup: function() {
-        if ( SC.browser.name === SC.BROWSER.ie ) return NO;
         SC.Event.add(this, 'mouseover', SC.Event.special.mouseenter.handler);
         return YES;
       },
 
       teardown: function() {
-        if ( SC.browser.name === SC.BROWSER.ie ) return NO;
         SC.Event.remove(this, 'mouseover', SC.Event.special.mouseenter.handler);
         return YES;
       },
@@ -547,16 +541,14 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     },
 
     /** @private
-        Implement support for mouseleave on browsers other than IE */
+        Implement support for mouseleave */
     mouseleave: {
       setup: function() {
-        if ( SC.browser.name === SC.BROWSER.ie ) return NO;
         SC.Event.add(this, "mouseout", SC.Event.special.mouseleave.handler);
         return YES;
       },
 
       teardown: function() {
-        if ( SC.browser.name === SC.BROWSER.ie ) return NO;
         SC.Event.remove(this, "mouseout", SC.Event.special.mouseleave.handler);
         return YES;
       },
@@ -773,7 +765,6 @@ SC.Event.prototype = {
     this.pageY = null;
     this.which = null;
     this.metaKey = null;
-    this.wheelDelta = null;
     this.wheelDeltaY = null;
     this.wheelDeltaX = null;
   },
@@ -1008,29 +999,8 @@ SC.Event.prototype = {
 
     @returns {String}
   */
-  // Warning.
-  // Older versions of IE don't support charCode, but on keypress return the
-  // ASCII value in keyCode instead of the key code.  Therefore, if this code is
-  // used on keyDown in IE versions prior to 9.0, it will fail.
-  // Since SproutCore passes the keydown and keypress events as a keyDown
-  // method, it's most likely that this code will cause unexpected problems
-  // in IE 7 & IE 8.
-  //
-  // Reference: http://unixpapa.com/js/key.html
   getCharString: function() {
-    if(SC.browser.name === SC.BROWSER.ie &&
-        SC.browser.compare(SC.browser.version, '9.0') < 0) {
-      // Return an empty String for backspace, tab, left, right, up or down.
-      if(this.keyCode === 8 || this.keyCode === 9 ||
-          (this.keyCode >= 37 && this.keyCode <= 40)) {
-        return String.fromCharCode(0);
-      } else {
-        // This will only be accurate if the event is a keypress event.
-        return (this.keyCode>0) ? String.fromCharCode(this.keyCode) : null;
-      }
-    } else {
-      return (this.charCode>0) ? String.fromCharCode(this.charCode) : null;
-    }
+    return (this.charCode>0) ? String.fromCharCode(this.charCode) : null;
   },
 
   /**
@@ -1122,11 +1092,6 @@ SC.Event.stopObserving = SC.Event.remove ;
 /** Alias for trigger() method.  This provides a Prototype-like API */
 SC.Event.fire = SC.Event.trigger;
 
-// Register unload handler to eliminate any registered handlers
-// This avoids leaks in IE and issues with mouseout or other handlers on
-// other browsers.
-
-if(SC.browser.name === SC.BROWSER.ie) SC.Event.add(window, 'unload', SC.Event.prototype, SC.Event.unload) ;
 
 SC.MODIFIER_KEYS = {
   16:'shift', 17:'ctrl', 18: 'alt'

@@ -141,8 +141,6 @@ SC.mixin( /** @scope SC */ {
       metrics.searchPerformed = false;
     }
     metrics.browserCorrection = 0;
-    if(SC.browser.isIE) metrics.browserCorrection = 1;
-    if(SC.browser.isMozilla) metrics.browserCorrection = 1;
     metrics.width = Math.min(maxWidth,metrics.width+metrics.browserCorrection);
     if(cache) {
       var entry = cache.list[lines];

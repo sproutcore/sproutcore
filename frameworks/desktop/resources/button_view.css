@@ -28,8 +28,4 @@
     top: -1px;
     left: -2px;
   }
-
-  .ie7 &{
-    display: inline;
-  }
 }

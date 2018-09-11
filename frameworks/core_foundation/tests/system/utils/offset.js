@@ -22,16 +22,6 @@ module("SC.offset", {
 
     SC.RunLoop.begin();
 
-    // Even though a full SC app doesn't really allow the viewport to be scaled or scrolled by default (thus
-    // the offset by viewport will always equal offset by document), we simulate an app that uses a
-    // scrollable viewport to test the validity of the functions.
-    var viewportEl;
-    if (SC.browser.isMobileSafari) {
-      viewportEl = $("[name='viewport']")[0];
-
-      viewportEl.setAttribute('content','initial-scale=0.8, minimum-scale=0.5, maximum-scale=1.2, user-scalable=yes, width=device-height');
-    }
-
     pane = SC.MainPane.create({
       childViews: [
         SC.View.extend({
@@ -52,20 +42,6 @@ module("SC.offset", {
               layout: { top: 10, left: 10, width: 20, height: 20 }
             })]
         })]
-
-      // Useful for debugging in iOS
-      // /** Allow default touch events */
-      //  touchStart: function(touch) {
-      //    if (SC.browser.isMobileSafari) touch.allowDefault();
-      //  },
-      //
-      //  touchesDragged: function(evt, touches) {
-      //    if (SC.browser.isMobileSafari) evt.allowDefault();
-      //  },
-      //
-      //  touchEnd: function(touch) {
-      //    if (SC.browser.isMobileSafari) touch.allowDefault();
-      //  }
     });
     pane.append();
     SC.RunLoop.end();
@@ -77,11 +53,8 @@ module("SC.offset", {
   },
 
   teardown: function() {
-    // Useful for debugging in iOS
-    // if (!SC.browser.isMobileSafari) {
-      pane.remove();
-      pane = view1 = view2 = view3 = view4 = null;
-    // }
+    pane.remove();
+    pane = view1 = view2 = view3 = view4 = null;
 
     clearHtmlbody();
   }

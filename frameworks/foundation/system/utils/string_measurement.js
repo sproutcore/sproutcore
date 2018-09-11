@@ -184,19 +184,11 @@ SC.mixin( /** @scope SC */ {
     else if (typeof element.innerText != "undefined") element.innerText = string;
     else element.textContent = string;
 
-    // for some reason IE measures 1 pixel too small
-    if(SC.browser.isIE) padding = 1;
-
     // generate result
     var result = {
       width: element.clientWidth + padding,
       height: element.clientHeight
     };
-
-    // Firefox seems to be 1 px short at times, especially with non english characters.
-    if (SC.browser.isMozilla) {
-      result.width += 1;
-    }
 
     element = null;
     return result;

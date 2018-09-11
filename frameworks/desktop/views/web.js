@@ -98,14 +98,8 @@ SC.WebView = SC.View.extend(SC.Control, {/** @scope SC.WebView.prototype */
           // setting the width before the height gives more accurate results..
           // at least for the test iframe content i'm using.
           //TODO: try out document flows other than top to bottom.
-          if (!SC.browser.isIE) {
-            this.$().width(docElement.scrollWidth);
-            this.$().height(docElement.scrollHeight);
-          }
-          else {
-            this.$().width(docElement.scrollWidth + 12);
-            this.$().height(docElement.scrollHeight + 5);
-          }
+          this.$().width(docElement.scrollWidth);
+          this.$().height(docElement.scrollHeight);
         }
       }
     }

@@ -764,12 +764,9 @@ SC.PickerPane = SC.PalettePane.extend(
     }
     ret.height = (wsize.height - ret.y) < ret.height ? (wsize.height - ret.y) : ret.height;
 
-    if (!SC.browser.isIE && window.scrollX > 0 || window.scrollY > 0) {
+    if (window.scrollX > 0 || window.scrollY > 0) {
       ret.x += window.scrollX;
       ret.y += window.scrollY;
-    } else if (SC.browser.isIE && (document.documentElement.scrollTop > 0 || document.documentElement.scrollLeft > 0)) {
-      ret.x += document.documentElement.scrollLeft;
-      ret.y += document.documentElement.scrollTop;
     }
     return ret;
   },

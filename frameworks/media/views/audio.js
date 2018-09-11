@@ -157,17 +157,7 @@ SC.AudioView = SC.View.extend(
           {
             break;
           }
-          // TODO: this doesn't seem like the best way to determine what tags to use!
-          if(SC.browser.name === SC.BROWSER.ie){
-            context.push('<object id="qt_event_source" '+
-                        'classid="clsid:CB927D12-4FF7-4a9e-A169-56E4B8A75598" '+
-                        'codebase="http://www.apple.com/qtactivex/qtplugin.cab#version=7,2,1,0"> '+
-                        '</object> ');
-          }
           context.push('<object width="100%" height="100%"');
-          if(SC.browser.name === SC.BROWSER.ie){
-            context.push('style="behavior:url(#qt_event_source);"');
-          }
           context.push('classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" '+
                       'id="qt_'+id+'" '+
                       'codebase="http://www.apple.com/qtactivex/qtplugin.cab">'+
