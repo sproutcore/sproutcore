@@ -163,7 +163,7 @@ SC.platform = SC.Object.create({
     this._simtouch_counter = 1;
 
     // Remove events that don't exist in touch environments
-    this.removeEvents(['click', 'dblclick', 'mouseout', 'mouseover', 'mousewheel']);
+    this.removeEvents(['click', 'dblclick', 'mouseout', 'mouseover', 'wheel']);
 
     // Replace mouse events with our translation methods
     this.replaceEvent('mousemove', this._simtouch_mousemove);
