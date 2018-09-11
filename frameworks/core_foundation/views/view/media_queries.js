@@ -16,13 +16,11 @@ SC.View.reopen(
 
   /**
     The dynamic adjustments to apply to this view depending on the current
-    window width.
+    window size.
 
-    The media hash will be applied if the window width is smaller than the
-    media key.
-    If several hash matches, they will all be applied.
-    If some hashes contains the same property, the one from the smaller
-    applicable media will be used.
+    The synthax to use for the media hash key is the same as CSS media query.
+
+    If several hash matches, they will all be applied in order.
 
     exemple:
 
@@ -30,8 +28,8 @@ SC.View.reopen(
           layout: { left: 20 },
           title: 'Hello World',
           media: {
-            500: { layout: { left: 5 } },
-            1000: { title: 'Hello', layout: { left: 10 } }
+            '(max-width: 1000px)': { title: 'Hello', layout: { left: 10 } },
+            '(max-width: 800px) or (max-height: 500px)': { layout: { left: 5 } }
           }
         })
 
@@ -52,12 +50,6 @@ SC.View.reopen(
 
     SC.RootResponder.responder.mediaViews.add(this);
 
-    var mediaWidths = [];
-    for (maxWidth in media) {
-      mediaWidths.push(parseInt(maxWidth));
-    }
-    this._mediaWidths = mediaWidths.sort(function(a, b) { return a - b; });
-
     this.handleMediaQueries();
   },
 
@@ -69,14 +61,12 @@ SC.View.reopen(
   },
 
   handleMediaQueries: function() {
-    var ws = SC.RootResponder.responder.get('currentWindowSize').width,
-      mediaWidths = this._mediaWidths,
+    var media = this.media,
       query, properties;
 
-    for (var i = mediaWidths.length-1; i >= 0; i--) {
-      query = mediaWidths[i];
-      if (ws < query) {
-        var props = SC.copy(this.media[query]);
+    for (query in media) {
+      if (this.matchMedia(query)) {
+        var props = SC.copy(media[query]);
 
         if (!properties) properties = props;
         else SC.mixin(properties, props);
@@ -85,5 +75,48 @@ SC.View.reopen(
 
     this._applyDesignMode(properties);
   },
+
+  /** @private See: https://github.com/paulirish/matchMedia.js */
+  matchMedia: function(media) {
+    // For browsers that support matchMedium api such as IE 9 and webkit
+    var styleMedia = (window.styleMedia || window.media);
+
+    // For those that don't support matchMedium
+    if (!styleMedia) {
+      var style = document.createElement('style'),
+          script = document.getElementsByTagName('script')[0],
+          info = null;
+
+      style.type = 'text/css';
+      style.id = 'matchmediajs-test';
+
+      if (!script) {
+        document.head.appendChild(style);
+      } else {
+        script.parentNode.insertBefore(style, script);
+      }
+
+      // 'style.currentStyle' is used by IE <= 8 and 'window.getComputedStyle' for all other browsers
+      info = ('getComputedStyle' in window) && window.getComputedStyle(style, null) || style.currentStyle;
+
+      styleMedia = {
+        matchMedium: function(media) {
+          var text = '@media ' + media + '{ #matchmediajs-test { width: 1px; } }';
+
+          // 'style.styleSheet' is used by IE <= 8 and 'style.textContent' for all other browsers
+          if (style.styleSheet) {
+              style.styleSheet.cssText = text;
+          } else {
+              style.textContent = text;
+          }
+
+          // Test if media query is true or false
+          return info.width === '1px';
+        }
+      };
+    }
+
+    return styleMedia.matchMedium(media || 'all');
+  }
 
 });
