@@ -14,51 +14,6 @@ SC.mixin( /** @scope SC */ {
   ],
 
   /**
-    Returns a string representation of the layout hash.
-
-    Layouts can contain the following keys:
-      - left: the left edge
-      - top: the top edge
-      - right: the right edge
-      - bottom: the bottom edge
-      - height: the height
-      - width: the width
-      - centerX: an offset from center X
-      - centerY: an offset from center Y
-      - minWidth: a minimum width
-      - minHeight: a minimum height
-      - maxWidth: a maximum width
-      - maxHeight: a maximum height
-      - rotateX
-      - rotateY
-      - rotateZ
-      - scale
-
-    @param layout {Hash} The layout hash to stringify.
-    @returns {String} A string representation of the layout hash.
-  */
-  stringFromLayout: function(layout) {
-    // Put them in the reverse order that we want to display them, because
-    // iterating in reverse is faster for CPUs that can compare against zero
-    // quickly.
-    var keys = ['maxHeight', 'maxWidth', 'minHeight', 'minWidth', 'centerY',
-                'centerX', 'width', 'height', 'bottom', 'right', 'top',
-                'left', 'zIndex', 'opacity', 'border', 'borderLeft',
-                'borderRight', 'borderTop', 'borderBottom', 'rotateX',
-                'rotateY', 'rotateZ', 'scale'],
-        keyValues = [], key,
-        i = keys.length;
-    while (--i >= 0) {
-      key = keys[i];
-      if (layout.hasOwnProperty(key)) {
-        keyValues.push(key + ':' + layout[key]);
-      }
-    }
-
-    return '{ ' + keyValues.join(', ') + ' }';
-  },
-
-  /**
     Given a string and a fixed width, calculates the height of that
     block of text using a style string, a set of class names,
     or both.
