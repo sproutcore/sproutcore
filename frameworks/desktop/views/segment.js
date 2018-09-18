@@ -189,16 +189,52 @@ SC.SegmentView = SC.View.extend(SC.Control,
         itemKey,
         viewKeys = parentView.get('viewKeys'),
         viewKey,
+        localItem = this.get('localItem'),
+        asObserver = localItem && localItem instanceof SC.Object,
+        needObserver = item instanceof SC.Object,
         i;
 
     for (i = itemKeys.get('length') - 1; i >= 0; i--) {
       itemKey = parentView.get(itemKeys.objectAt(i));
       viewKey = viewKeys.objectAt(i);
 
-      // Don't overwrite the default value if none exists in the item
-      if (!SC.none(item.get(itemKey))) this.set(viewKey, item.get(itemKey));
+      if (itemKey) {
+        if (asObserver) {
+          localItem.removeObserver(itemKey, parentView, 'itemContentDidChange', this);
+        }
+        if (needObserver) {
+          item.addObserver(itemKey, parentView, 'itemContentDidChange', this);
+        }
+
+        // Don't overwrite the default value if none exists in the item
+        if (!SC.none(item.get(itemKey))) this.set(viewKey, item.get(itemKey));
+      }
     }
 
     this.set('localItem', item);
+  },
+
+  /** @private */
+  destroy: function() {
+    var localItem = this.get('localItem');
+    if (localItem && localItem instanceof SC.Object) {
+      var parentView = this.get('parentView'),
+        itemKeys = parentView.get('itemKeys'),
+        itemKey,
+        i;
+
+      for (i = itemKeys.get('length') - 1; i >= 0; i--) {
+        itemKey = parentView.get(itemKeys.objectAt(i));
+        if (itemKey) {
+          localItem.removeObserver(itemKey, parentView, 'itemContentDidChange', this);
+        }
+      }
+
+      localItem.destroy();
+    }
+
+    this.set('localItem', null);
+
+    return sc_super();
   }
 });
