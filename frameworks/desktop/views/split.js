@@ -981,8 +981,13 @@ SC.SplitView = SC.View.extend({
 
     if (child.get('canCollapse')) {
       var collapseAtSize = child.get('collapseAtSize');
-      if (collapseAtSize && size < collapseAtSize) return this.get('collapsedSize');
+      if (collapseAtSize && size < collapseAtSize) {
+        child.set('isCollapsed', true);
+        return this.get('collapsedSize');
+      }
     }
+
+    child.setIfChanged('isCollapsed', false);
 
     var minSize = child.get('minimumSize') || 0;
     if (minSize !== undefined && minSize !== null) size = Math.max(minSize, size);

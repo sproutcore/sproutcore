@@ -194,6 +194,14 @@ SC.SplitChild =
   */
   allowsIndirectAdjustments: YES,
 
+  /**
+    The current collapse state of the view.
+
+    @readonly
+    @type {Boolean}
+  */
+  isCollapsed: NO,
+
   /** @private Include SC.NeedsSplitParent if it hasn't already been included. */
   initMixin: function () {
     if (!this.splitView) {
