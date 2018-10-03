@@ -100,7 +100,7 @@ SC.SplitView = SC.View.extend({
     @default ['sc-split-view']
     @readonly
     @see SC.View#classNames
-   */
+  */
   classNames: ['sc-split-view'],
 
   /**
@@ -109,7 +109,7 @@ SC.SplitView = SC.View.extend({
     @type Boolean
     @default true
     @readonly
-   */
+  */
   isSplitView: YES,
 
   /**
@@ -152,23 +152,23 @@ SC.SplitView = SC.View.extend({
   collapsedSize: 0,
 
   /**
-   * Determines whether the SplitView should attempt to resize its
-   * child views to fit within the SplitView's own frame (the default).
-   *
-   * If NO, the SplitView will decide its own size based on its children.
-   *
-   * @type Boolean
-   * @default true
+    Determines whether the SplitView should attempt to resize its
+    child views to fit within the SplitView's own frame (the default).
+
+    If NO, the SplitView will decide its own size based on its children.
+
+    @type Boolean
+    @default true
   */
   shouldResizeChildrenToFit: YES,
 
   /**
-   * The cursor of the child view currently being dragged (if any).
-   * This allows the cursor to be used even if the user drags "too far",
-   * past the child's own boundaries.
-   *
-   * @type String
-   * @default null
+    The cursor of the child view currently being dragged (if any).
+    This allows the cursor to be used even if the user drags "too far",
+    past the child's own boundaries.
+
+    @type String
+    @default null
   */
   splitChildCursorStyle: null,
 
@@ -199,14 +199,14 @@ SC.SplitView = SC.View.extend({
   // UTILITIES
   //
   /**
-   * @private
-   * Returns either the width or the height of the SplitView's frame,
-   * depending on the value of layoutDirection. If layoutDirection is
-   * SC.LAYOUT_HORIZONTAL, this will return the SplitView's width; otherwise,
-   * the SplitView's height.
-   *
-   * @property
-   * @type {Number}
+    @private
+    Returns either the width or the height of the SplitView's frame,
+    depending on the value of layoutDirection. If layoutDirection is
+    SC.LAYOUT_HORIZONTAL, this will return the SplitView's width; otherwise,
+    the SplitView's height.
+
+    @property
+    @type {Number}
   */
   _frameSize: function(){
     if (this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL) {
@@ -242,35 +242,35 @@ SC.SplitView = SC.View.extend({
   // PUBLIC CHILD VIEW ADJUSTMENT API
   //
   /**
-   * Attempts to adjust the position of a child view, such as a divider.
-   *
-   * The implementation for this may be overridden in the delegate method
-   * splitViewAdjustPositionForChild.
-   *
-   * You may use this method to automatically collapse the view by setting
-   * the view's position to the position of the next or previous view (accessible
-   * via the child's nextView and previousView properties and the
-   * getPositionForChild method).
-   *
-   * @param {SC.View} child The child to move.
-   * @param {Number} position The position to move the child to.
-   * @returns {Number} The position to which the child was actually moved.
+    Attempts to adjust the position of a child view, such as a divider.
+
+    The implementation for this may be overridden in the delegate method
+    splitViewAdjustPositionForChild.
+
+    You may use this method to automatically collapse the view by setting
+    the view's position to the position of the next or previous view (accessible
+    via the child's nextView and previousView properties and the
+    getPositionForChild method).
+
+    @param {SC.View} child The child to move.
+    @param {Number} position The position to move the child to.
+    @returns {Number} The position to which the child was actually moved.
   */
   adjustPositionForChild: function(child, position){
     return this.invokeDelegateMethod(this.get('delegate'), 'splitViewAdjustPositionForChild', this, child, position);
   },
 
   /**
-   * Returns the position within the split view for a child view,
-   * such as a divider. This position is not necessarily identical
-   * to the view's actual layout 'left' or 'right'; that position could
-   * be offset--for instance, to give a larger grab area to the divider.
-   *
-   * The implementation for this is in the delegate method
-   * splitViewGetPositionForChild.
-   *
-   * @param {SC.View} child The child whose position to find.
-   * @returns {Number} The position.
+    Returns the position within the split view for a child view,
+    such as a divider. This position is not necessarily identical
+    to the view's actual layout 'left' or 'right'; that position could
+    be offset--for instance, to give a larger grab area to the divider.
+
+    The implementation for this is in the delegate method
+    splitViewGetPositionForChild.
+
+    @param {SC.View} child The child whose position to find.
+    @returns {Number} The position.
   */
   getPositionForChild: function(child){
     return this.invokeDelegateMethod(this.get('delegate'), 'splitViewGetPositionForChild', this, child);
@@ -298,14 +298,14 @@ SC.SplitView = SC.View.extend({
   },
 
   /**
-   * @private
-   * During initialization and whenever the child views change, SplitView needs
-   * to set some helper properties on the children and create any needed dividers.
-   *
-   * Note: If dividers are added, childViews changes, causing this to be called again;
-   * this is proper, because this updates the nextView, etc. properties appropriately.
-   *
-   * The helper properties are: previousView, nextView, viewIndex.
+    @private
+    During initialization and whenever the child views change, SplitView needs
+    to set some helper properties on the children and create any needed dividers.
+
+    Note: If dividers are added, childViews changes, causing this to be called again;
+    this is proper, because this updates the nextView, etc. properties appropriately.
+
+    The helper properties are: previousView, nextView, viewIndex.
   */
   _scsv_setupChildViews: function() {
     var del = this.get('delegate'),
@@ -411,14 +411,14 @@ SC.SplitView = SC.View.extend({
   },
 
   /**
-   * @private
-   * Tiling is the simpler of two layout paths. Tiling lays out all of the
-   * children according to their size, and, if shouldResizeChildrenToFit is
-   * YES, attempts to resize the children to fit in the SplitView.
-   *
-   * It is called when the child views are initializing or have changed, and
-   * when the SplitView is resized.
-   *
+    @private
+    Tiling is the simpler of two layout paths. Tiling lays out all of the
+    children according to their size, and, if shouldResizeChildrenToFit is
+    YES, attempts to resize the children to fit in the SplitView.
+
+    It is called when the child views are initializing or have changed, and
+    when the SplitView is resized.
+
   */
   _scsv_tile: function() {
     var del = this.get('delegate');
@@ -457,13 +457,13 @@ SC.SplitView = SC.View.extend({
   },
 
   /**
-   * Lays out the children one next to each other or one on top of the other,
-   * based on their sizes. It returns the total size.
-   *
-   * You may override this method in a delegate.
-   *
-   * @param {SC.SplitView} splitView The SplitView whose children need layout.
-   * @returns {Number} The total size of all the SplitView's children.
+    Lays out the children one next to each other or one on top of the other,
+    based on their sizes. It returns the total size.
+
+    You may override this method in a delegate.
+
+    @param {SC.SplitView} splitView The SplitView whose children need layout.
+    @returns {Number} The total size of all the SplitView's children.
   */
   splitViewLayoutChildren: function(splitView) {
     var del = this.get('delegate');
@@ -482,14 +482,14 @@ SC.SplitView = SC.View.extend({
   },
 
   /**
-   * Attempts to resize the child views of the split view to fit in the SplitView's
-   * frame. So it may proportionally adjust the child views, the current size of the
-   * SplitView's content is passed.
-   *
-   * You may override this method in a delegate.
-   *
-   * @param {SC.SplitView} splitView The SC.SplitView whose children should be resized.
-   * @param {Number} contentSize The current not-yet-resized size of the SplitView's content.
+    Attempts to resize the child views of the split view to fit in the SplitView's
+    frame. So it may proportionally adjust the child views, the current size of the
+    SplitView's content is passed.
+
+    You may override this method in a delegate.
+
+    @param {SC.SplitView} splitView The SC.SplitView whose children should be resized.
+    @param {Number} contentSize The current not-yet-resized size of the SplitView's content.
   */
   splitViewResizeChildrenToFit: function(splitView, contentSize) {
     var del = this.get('delegate');
@@ -534,11 +534,11 @@ SC.SplitView = SC.View.extend({
   },
 
   /**
-   * @private
-   * Utility method used by splitViewResizeChildrenToFit to do the proportionate
-   * sizing of child views.
-   *
-   * @returns {Number} The new runningSize.
+    @private
+    Utility method used by splitViewResizeChildrenToFit to do the proportionate
+    sizing of child views.
+
+    @returns {Number} The new runningSize.
   */
   _resizeChildrenForSize: function(runningSize, targetSize, useResizable, outOfSize) {
     var del = this.get('delegate');
@@ -579,14 +579,14 @@ SC.SplitView = SC.View.extend({
   },
 
   /**
-   * Determines whether the SplitView should attempt to resize the specified
-   * child view when the SplitView's size changes.
-   *
-   * You may override this method in a delegate.
-   *
-   * @param {SC.SplitView} splitView The SplitView that owns the child.
-   * @param {SC.View} child The child view.
-   * @returns {Boolean}
+    Determines whether the SplitView should attempt to resize the specified
+    child view when the SplitView's size changes.
+
+    You may override this method in a delegate.
+
+    @param {SC.SplitView} splitView The SplitView that owns the child.
+    @param {SC.View} child The child view.
+    @returns {Boolean}
   */
   splitViewShouldResizeChildToFit: function(splitView, child) {
     return (
@@ -596,15 +596,15 @@ SC.SplitView = SC.View.extend({
   },
 
   /**
-   * Attempts to move a single child from its current position to
-   * a desired position.
-   *
-   * You may override the behavior on a delegate.
-   *
-   * @param {SC.SplitView} splitView The splitView whose child should be moved.
-   * @param {SC.View} child The child which should be moved.
-   * @param {Number} position The position to attempt to move the child to.
-   * @returns {Number} The final position of the child.
+    Attempts to move a single child from its current position to
+    a desired position.
+
+    You may override the behavior on a delegate.
+
+    @param {SC.SplitView} splitView The splitView whose child should be moved.
+    @param {SC.View} child The child which should be moved.
+    @param {Number} position The position to attempt to move the child to.
+    @returns {Number} The final position of the child.
   */
   splitViewAdjustPositionForChild: function(splitView, child, position) {
     // var del = this.get('delegate');
@@ -644,24 +644,24 @@ SC.SplitView = SC.View.extend({
   },
 
   /**
-   * @private
-   * Creates a plan in which to prepare changes to the SplitView's children.
-   *
-   * A plan is an array with the same number of elements as the SplitView has children.
-   * Each element is a hash containing these properties:
-   *
-   * - child: the view the hash represents
-   * - originalPosition: the position before the planning process
-   * - position: the planned new position.
-   * - originalSize: the size before the planning process
-   * - size: the planned new size.
-   *
-   * The repositioning and resizing logic can, at any time, reset part of the plan
-   * to its original state, allowing layout processes to be run non-destructively.
-   * In addition, storing the original positions and sizes is more performant
-   * than looking them up each time.
-   *
-   * @returns {Plan}
+    @private
+    Creates a plan in which to prepare changes to the SplitView's children.
+
+    A plan is an array with the same number of elements as the SplitView has children.
+    Each element is a hash containing these properties:
+
+    - child: the view the hash represents
+    - originalPosition: the position before the planning process
+    - position: the planned new position.
+    - originalSize: the size before the planning process
+    - size: the planned new size.
+
+    The repositioning and resizing logic can, at any time, reset part of the plan
+    to its original state, allowing layout processes to be run non-destructively.
+    In addition, storing the original positions and sizes is more performant
+    than looking them up each time.
+
+    @returns {Plan}
   */
   _scsv_createPlan: function() {
     var del = this.get('delegate'),
@@ -686,13 +686,13 @@ SC.SplitView = SC.View.extend({
   },
 
   /**
-    * @private
-    * Resets a range of the plan to its original settings.
-    *
-    * @param {Plan} plan The plan.
-    * @param {Number} first The first item in the range.
-    * @param {Number} last The last item in the range.
-   */
+      @private
+      Resets a range of the plan to its original settings.
+
+      @param {Plan} plan The plan.
+      @param {Number} first The first item in the range.
+      @param {Number} last The last item in the range.
+  */
    _scsv_resetPlanRange: function(plan, first, last) {
      for (var idx = first; idx <= last; idx++) {
        plan[idx].position = plan[idx].originalPosition;
@@ -701,10 +701,10 @@ SC.SplitView = SC.View.extend({
    },
 
   /**
-   * @private
-   * Commits the changes specified in the plan to the child views.
-   *
-   * @param {Plan} plan The plan with the changes.
+    @private
+    Commits the changes specified in the plan to the child views.
+
+    @param {Plan} plan The plan with the changes.
   */
   _scsv_commitPlan: function(plan) {
     var del = this.get('delegate'), len = plan.length, idx, item, end = 0;
@@ -733,26 +733,26 @@ SC.SplitView = SC.View.extend({
   },
 
   /**
-   * Moves the specified child view as close as it can to the specified
-   * position, saving all changes this causes into the plan.
-   *
-   * The "directness" of the action also comes into play. An action is direct if:
-   *
-   * - The child being modified is the originating child (the one being dragged, most likely)
-   * - The child is being _positioned_ as is immediately _after_ the originating child.
-   * - The child is being _sized_ and is immediately _before_ the originating child.
-   *
-   * This means that direct actions modify the originating child or the border between
-   * it and a sibling. Some child views don't like to accept indirect actions, as the
-   * indirect actions may confuse or annoy users in some cases.
-   *
-   * @param {Plan} plan The plan write changes to (and get some data from).
-   * @param {SC.View} child The child to move.
-   * @param {Number} position The position to attempt to move the child to.
-   * @param {Boolean} source The child from which the attempt to adjust originated—used
-   * to determine directness.
-   *
-   * @returns {Number} The final position of the child.
+    Moves the specified child view as close as it can to the specified
+    position, saving all changes this causes into the plan.
+
+    The "directness" of the action also comes into play. An action is direct if:
+
+    - The child being modified is the originating child (the one being dragged, most likely)
+    - The child is being _positioned_ as is immediately _after_ the originating child.
+    - The child is being _sized_ and is immediately _before_ the originating child.
+
+    This means that direct actions modify the originating child or the border between
+    it and a sibling. Some child views don't like to accept indirect actions, as the
+    indirect actions may confuse or annoy users in some cases.
+
+    @param {Plan} plan The plan write changes to (and get some data from).
+    @param {SC.View} child The child to move.
+    @param {Number} position The position to attempt to move the child to.
+    @param {Boolean} source The child from which the attempt to adjust originated—used
+    to determine directness.
+
+    @returns {Number} The final position of the child.
   */
   _scsv_adjustPositionForChildInPlan: function(plan, child, position, source) {
     var del = this.get('delegate');
@@ -881,20 +881,20 @@ SC.SplitView = SC.View.extend({
   },
 
   /**
-   * Returns a view instance to be used as a divider between two other views,
-   * or null if no divider should be used.
-   *
-   * The value of the 'splitDividerView' property will be instantiated. The default
-   * value of this property is 'SC.SplitDividerView'. If the value is null or undefined,
-   * null will be returned, and the SplitView will not automatically create dividers.
-   *
-   * You may override this method in a delegate.
-   *
-   * @param {SC.SplitView} splitView The split view that is hte parent of the
-   * two views.
-   * @param {SC.View} view1 The first view.
-   * @param {SC.View} view2 The second view.
-   * @returns {SC.View} The view instance to use as a divider.
+    Returns a view instance to be used as a divider between two other views,
+    or null if no divider should be used.
+
+    The value of the 'splitDividerView' property will be instantiated. The default
+    value of this property is 'SC.SplitDividerView'. If the value is null or undefined,
+    null will be returned, and the SplitView will not automatically create dividers.
+
+    You may override this method in a delegate.
+
+    @param {SC.SplitView} splitView The split view that is hte parent of the
+    two views.
+    @param {SC.View} view1 The first view.
+    @param {SC.View} view2 The second view.
+    @returns {SC.View} The view instance to use as a divider.
   */
   splitViewDividerBetween: function(splitView, view1, view2){
     if (!this.get('splitDividerView')) return null;
@@ -906,39 +906,39 @@ SC.SplitView = SC.View.extend({
   },
 
   /**
-   * Returns the current position for the specified child.
-   *
-   * You may override this in a delegate.
-   *
-   * @param {SC.SplitView} splitView The SplitView which owns the child.
-   * @param {SC.View} child The child.
-   * @returns Number
+    Returns the current position for the specified child.
+
+    You may override this in a delegate.
+
+    @param {SC.SplitView} splitView The SplitView which owns the child.
+    @param {SC.View} child The child.
+    @returns Number
   */
   splitViewGetPositionForChild: function(splitView, child) {
     return child.get('position');
   },
 
   /**
-   * Sets the position for the specified child.
-   *
-   * You may override this in a delegate.
-   *
-   * @param {SC.SplitView} splitView The SplitView which owns the child.
-   * @param {SC.View} child The child.
-   * @param {Number} position The position to move the child to.
+    Sets the position for the specified child.
+
+    You may override this in a delegate.
+
+    @param {SC.SplitView} splitView The SplitView which owns the child.
+    @param {SC.View} child The child.
+    @param {Number} position The position to move the child to.
   */
   splitViewSetPositionForChild: function(splitView, child, position) {
     child.set('position', position);
   },
 
   /**
-   * Returns the current size for the specified child.
-   *
-   * You may override this in a delegate.
-   *
-   * @param {SC.SplitView} splitView The SplitView which owns the child.
-   * @param {SC.View} child The child.
-   * @returns Number
+    Returns the current size for the specified child.
+
+    You may override this in a delegate.
+
+    @param {SC.SplitView} splitView The SplitView which owns the child.
+    @param {SC.View} child The child.
+    @returns Number
   */
   splitViewGetSizeForChild: function(splitView, child) {
     var size = child.get('size');
@@ -949,30 +949,30 @@ SC.SplitView = SC.View.extend({
   },
 
   /**
-   * Sets the size for the specified child.
-   *
-   * You may override this in a delegate.
-   *
-   * @param {SC.SplitView} splitView The SplitView which owns the child.
-   * @param {SC.View} child The child.
-   * @param {Number} position The size to give the child.
+    Sets the size for the specified child.
+
+    You may override this in a delegate.
+
+    @param {SC.SplitView} splitView The SplitView which owns the child.
+    @param {SC.View} child The child.
+    @param {Number} position The size to give the child.
   */
   splitViewSetSizeForChild: function(splitView, child, size) {
     child.set('size', size);
   },
 
   /**
-   * Returns the nearest valid size to a proposed size for a child view.
-   * By default, constrains the size to the range specified by the child's
-   * minimumSize and maximumSize properties, and returns 0 if the child
-   * has canCollapse set and the size is less than the child's collapseAtSize.
-   *
-   * You may override this in a delegate.
-   *
-   * @param {SC.SplitView} splitView The SplitView which owns the child.
-   * @param {SC.View} child The child.
-   * @param {Number} position The proposed size for the child.
-   * @returns Number
+    Returns the nearest valid size to a proposed size for a child view.
+    By default, constrains the size to the range specified by the child's
+    minimumSize and maximumSize properties, and returns 0 if the child
+    has canCollapse set and the size is less than the child's collapseAtSize.
+
+    You may override this in a delegate.
+
+    @param {SC.SplitView} splitView The SplitView which owns the child.
+    @param {SC.View} child The child.
+    @param {Number} position The proposed size for the child.
+    @returns Number
   */
   splitViewConstrainSizeForChild: function(splitView, child, size) {
     if (child.get('autoResizeStyle') === SC.FIXED_SIZE) {
