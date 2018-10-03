@@ -136,6 +136,14 @@ SC.SplitView = SC.View.extend({
   layoutDirection: SC.LAYOUT_HORIZONTAL,
 
   /**
+   Size of the collapsed views.
+
+   @type collapsedSize
+   @default 0
+  */
+  collapsedSize: 0,
+
+  /**
    * Determines whether the SplitView should attempt to resize its
    * child views to fit within the SplitView's own frame (the default).
    *
@@ -986,7 +994,7 @@ SC.SplitView = SC.View.extend({
 
     if (child.get('canCollapse')) {
       var collapseAtSize = child.get('collapseAtSize');
-      if (collapseAtSize && size < collapseAtSize) return 0;
+      if (collapseAtSize && size < collapseAtSize) return this.get('collapsedSize');
     }
 
     var minSize = child.get('minimumSize') || 0;
