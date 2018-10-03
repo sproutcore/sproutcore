@@ -904,6 +904,9 @@ SC.SplitView = SC.View.extend({
   splitViewDividerBetween: function(splitView, view1, view2){
     if (!this.get('splitDividerView')) return null;
 
+    var nextView = view1.nextView;
+    if (nextView.isSplitDivider) return nextView;
+
     return this.get('splitDividerView').create();
   },
 
