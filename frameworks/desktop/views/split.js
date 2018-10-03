@@ -284,40 +284,17 @@ SC.SplitView = SC.View.extend({
   // sets the SplitView child properties such as nextView, previousView, etc.,
   // and which adds dividers.
   didAddChild: function() {
-    // we have to add a guard because _scsv_setupChildViews may add or remove
-    // dividers, causing this method to be called again uselessly.
-    // this is purely for performance. The guard goes here, rather than in
-    // setupChildViews, because of the invokeOnce.
-    if (this._scsv_settingUpChildViews) return;
-    this._scsv_settingUpChildViews = YES;
-
     this.invokeOnce('_scsv_setupChildViews');
-
-    this._scsv_settingUpChildViews = NO;
   },
 
   didRemoveChild: function() {
-    // we have to add a guard because _scsv_setupChildViews may add or remove
-    // dividers, causing this method to be called again uselessly.
-    // this is purely for performance. The guard goes here, rather than in
-    // setupChildViews, because of the invokeOnce.
-    if (this._scsv_settingUpChildViews) return;
-    this._scsv_settingUpChildViews = YES;
-
     this.invokeOnce('_scsv_setupChildViews');
-
-    this._scsv_settingUpChildViews = NO;
   },
 
   createChildViews: function() {
     sc_super();
 
-    if (this._scsv_settingUpChildViews) return;
-    this._scsv_settingUpChildViews = YES;
-
     this.invokeOnce('_scsv_setupChildViews');
-
-    this._scsv_settingUpChildViews = NO;
   },
 
   /**
