@@ -136,6 +136,14 @@ SC.SplitView = SC.View.extend({
   layoutDirection: SC.LAYOUT_HORIZONTAL,
 
   /**
+   Size of the dividers.
+
+   @type dividerSize
+   @default 1
+  */
+  dividerSize: 1,
+
+  /**
    Size of the collapsed views.
 
    @type collapsedSize
@@ -325,6 +333,7 @@ SC.SplitView = SC.View.extend({
   _scsv_setupChildViews: function() {
     var del = this.get('delegate'),
         layoutDirection = this.get('layoutDirection'),
+        dividerSize = this.get('dividerSize'),
 
         children = this.get('childViews').copy(), len = children.length, idx,
         child, lastChild, lastNonDividerChild,
@@ -373,6 +382,7 @@ SC.SplitView = SC.View.extend({
         if (divider) {
           divider.setIfChanged('isSplitDivider', YES);
           divider.setIfChanged('layoutDirection', layoutDirection);
+          if (SC.none(divider.get('size'))) divider.set('size', dividerSize);
 
           newDividers[dividerId] = divider;
 
