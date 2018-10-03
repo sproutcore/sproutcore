@@ -474,8 +474,8 @@ SC.SplitView = SC.View.extend({
     for (idx = 0; idx < len; idx++) {
       child = children[idx];
 
-      this.invokeDelegateMethod(del, 'splitViewSetPositionForChild', this, children[idx], pos);
-      pos += this.invokeDelegateMethod(del, 'splitViewGetSizeForChild', this, children[idx]);
+      this.invokeDelegateMethod(del, 'splitViewSetPositionForChild', this, child, pos);
+      pos += this.invokeDelegateMethod(del, 'splitViewGetSizeForChild', this, child);
     }
 
     return pos;
@@ -777,7 +777,7 @@ SC.SplitView = SC.View.extend({
     //
     var previousChild = child.previousView, nextChild = child.nextView,
         previousChildPosition, previousChildSize,
-        nextChildPosition, nextChildSize,
+        nextChildPosition,
         size = plan[child.viewIndex].size;
 
     if (previousChild && !previousChild._splitViewIsAdjusting) {
@@ -942,8 +942,16 @@ SC.SplitView = SC.View.extend({
   */
   splitViewGetSizeForChild: function(splitView, child) {
     var size = child.get('size');
+
+    if (SC.none(size)) {
+      if (child.get('isSplitDivider')) return null;
+      //@if(debug)
+      SC.warn("Developer Warning: This split child view size is invalid.");
+      //@endif
+      return 100;
+    }
+
     if (size < 1) size = this.get('frame').width * size;
-    if (SC.none(size)) return 100;
 
     return size;
   },
@@ -975,6 +983,8 @@ SC.SplitView = SC.View.extend({
     @returns Number
   */
   splitViewConstrainSizeForChild: function(splitView, child, size) {
+    if (!child.get('isVisible')) return 0;
+
     if (child.get('autoResizeStyle') === SC.FIXED_SIZE) {
       return this.invokeDelegateMethod(this.get('delegate'), 'splitViewGetSizeForChild', this, child);
     }

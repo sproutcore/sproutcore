@@ -204,6 +204,8 @@ SC.SplitChild =
 
   /** @private Include SC.NeedsSplitParent if it hasn't already been included. */
   initMixin: function () {
+    this._initialSize = this.get('size');
+
     if (!this.splitView) {
       this.mixin(SC.NeedsSplitParent);
     }
@@ -253,5 +255,21 @@ SC.SplitChild =
   /** @private */
   splitViewLayoutDirectionDidChange: function() {
     this.invokeOnce('splitChildLayoutDidChange');
-  }.observes('splitViewLayoutDirection')
+  }.observes('splitViewLayoutDirection'),
+
+  /** @private */
+  _sc_visibilityDidChange: function () {
+    var split = this.get('splitView');
+    if (!split) return;
+
+    if (!this.get('isVisible')) {
+      this._lastSize = this.get('size');
+    }
+    else {
+      this.set('size', this._lastSize || this._initialSize);
+    }
+
+    split.didAddChild();
+  }.observes('isVisible'),
+
 };
