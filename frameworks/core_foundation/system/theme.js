@@ -9,8 +9,8 @@
   Represents a theme, and is also the core theme in which SC looks for
   other themes.
 
-  If an SC.View has a theme of "ace", it will look in its parent's theme
-  for the theme "ace". If there is no parent--that is, if the view is a
+  If an SC.View has a theme of "aki", it will look in its parent's theme
+  for the theme "aki". If there is no parent--that is, if the view is a
   frame--it will look in SC.Theme for the named theme. To find a theme,
   it calls find(themeName) on the theme.
 
@@ -196,7 +196,7 @@ SC.Theme = {
     base.subtheme. This will create a new theme with the name "popup",
     derived from "base". Everyone is happy.
 
-    But what happens if you then change the parent theme to "ace"? The view
+    But what happens if you then change the parent theme to "aki"? The view
     will try again to find "popup", and it will find it-- but it will still be
     a child theme of "base"; SC.View _needs_ to re-subtheme it, but it won't
     know it needs to, because it has been found.

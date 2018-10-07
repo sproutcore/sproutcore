@@ -110,7 +110,7 @@ SC.BUTTON3_STATUS = 'button3';
     discover and unavailable on touch devices!
   - `isDefault` -- You may specify a different button than the first, rightmost button
     to be the default (triggered by the enter key, and visually distinct in the default
-    Ace theme).
+    Aki theme).
   - `isCancel` -- You may specify a different button than the second, middle button
     to be the cancel button (triggered by the escape key).
   - `target` & `action` -- Supports the target/action pattern (see "Responding to User

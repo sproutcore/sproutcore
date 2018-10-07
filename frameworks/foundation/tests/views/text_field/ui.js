@@ -478,19 +478,6 @@
         'the selection direction should be backward');
   });
 
-  test("Getting no selection direction", function () {
-    var view = pane.view('with value');
-    var fieldElement = view.$input()[0];
-    fieldElement.focus();
-    fieldElement.size = 10;     // Avoid Firefox 3.5 issue
-
-    fieldElement.setSelectionRange(2, 5, 'none');
-
-    var fetchedSelection = view.get('selection');
-    ok(!SC.platform.input.selectionDirection || fetchedSelection.get('direction') === 'none',
-        'the selection direction should be none');
-  });
-
   test("Getting forward selection direction", function () {
     var view = pane.view('with value');
     var fieldElement = view.$input()[0];

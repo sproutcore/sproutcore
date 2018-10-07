@@ -11,8 +11,8 @@ var dt, options, ms, timezone, startTime, timezones;
 
 module("SC.DateTime", {
   setup: function() {
-    ms = 487054822032; // June 8, 1985, 05:00:22:32 UTC
-    options = { year: 1985, month: 6, day: 8, hour: 4, minute: 0, second: 22, millisecond: 32, timezone: 60 }; // an arbitrary time zone
+    ms = 487141222032; // June 9, 1985, 05:00:22:32 UTC
+    options = { year: 1985, month: 6, day: 9, hour: 4, minute: 0, second: 22, millisecond: 32, timezone: 60 }; // an arbitrary time zone
     dt = SC.DateTime.create(options);
     timezones = [480, 420, 0, -60, -120, -330]; // PST, PDT, UTC, CET, CEST, Mumbai
   },
@@ -229,13 +229,13 @@ test('compare', function() {
 
 test('Format', function() {
   equals(
-    dt.toFormattedString('%a %A %b %B %d %D %h %H %I %j %m %M %p %S %w %y %Y %%a %E'),
-    'Sat Saturday Jun June 08 8 4 04 04 159 06 00 AM 22 6 85 1985 %a 31 years ago');
+    dt.toFormattedString('%a %A %b %B %d %D %h %H %I %j %m %M %p %S %N %w %y %Y %%a %E'),
+    'Sun Sunday Jun June 09 9 4 04 04 160 06 00 AM 22 7 0 85 1985 %a 33 years ago');
 
   equals(dt.toFormattedString('%Z'), formatTimezone(dt.get('timezone')));
-  equals(dt.adjust({ timezone:    0 }).toFormattedString('%Y-%m-%d %H:%M:%S %Z'), '1985-06-08 05:00:22 +00:00');
-  equals(dt.adjust({ timezone: -120 }).toFormattedString('%Y-%m-%d %H:%M:%S %Z'), '1985-06-08 07:00:22 +02:00');
-  equals(dt.adjust({ timezone:  420 }).toFormattedString('%Y-%m-%d %H:%M:%S %Z'), '1985-06-07 22:00:22 -07:00'); // the previous day
+  equals(dt.adjust({ timezone:    0 }).toFormattedString('%Y-%m-%d %H:%M:%S %Z'), '1985-06-09 05:00:22 +00:00');
+  equals(dt.adjust({ timezone: -120 }).toFormattedString('%Y-%m-%d %H:%M:%S %Z'), '1985-06-09 07:00:22 +02:00');
+  equals(dt.adjust({ timezone:  420 }).toFormattedString('%Y-%m-%d %H:%M:%S %Z'), '1985-06-08 22:00:22 -07:00'); // the previous day
 });
 
 /**
@@ -271,7 +271,7 @@ test('fancy getters', function() {
   equals(SC.DateTime.create({ year: 2000, month: 2, day: 1 }).get('daysInMonth'), 29);
   equals(SC.DateTime.create({ year: 2001, month: 2, day: 1 }).get('daysInMonth'), 28);
 
-  equals(dt.get('dayOfYear'), 159);
+  equals(dt.get('dayOfYear'), 160);
   equals(SC.DateTime.create({ year: 2000, month: 12, day: 31 }).get('dayOfYear'), 366);
   equals(SC.DateTime.create({ year: 2001, month: 12, day: 31 }).get('dayOfYear'), 365);
 
@@ -283,9 +283,9 @@ test('fancy getters', function() {
   equals(SC.DateTime.create({ year: 2006, month: 12, day: 31 }).get('week0'), 53);
   equals(SC.DateTime.create({ year: 2006, month: 12, day: 31 }).get('week1'), 52);
 
-  equals(dt.get('lastMonday'), dt.advance({ day: -5 }), 'dt.advance(day: -5)');
-  equals(dt.get('nextFriday'), dt.advance({ day: 6 }), 'dt.advance(day: 6)');
-  equals(dt.get('lastWednesday'), dt.advance({ day: -3 }), 'dt.advance(day: -3)');
+  equals(dt.get('lastMonday'), dt.advance({ day: -6 }), 'dt.advance(day: -5)');
+  equals(dt.get('nextFriday'), dt.advance({ day: 5 }), 'dt.advance(day: 6)');
+  equals(dt.get('lastWednesday'), dt.advance({ day: -4 }), 'dt.advance(day: -3)');
 
   equals(
     SC.DateTime.create({ year: 2010, month: 9, day: 29, hour: 0, minute: 30, timezone: -120 }).adjust({ day: 1 }).get('lastMonday').toISO8601(),

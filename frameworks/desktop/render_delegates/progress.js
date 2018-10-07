@@ -57,13 +57,10 @@ SC.BaseTheme.progressRenderDelegate = SC.RenderDelegate.create({
       'sc-complete':(value >= 1 && !isIndeterminate)
     });
 
-    context = context.begin('div').addClass('track');
-    this.includeSlices(dataSource, context, SC.THREE_SLICE);
-    context = context.end();
+    context = context.begin('div').addClass('track').end();
 
     context = context.begin('div').addClass('content');
     context.setStyle('width', (value * 100) + "%");
-    this.includeSlices(dataSource, context, SC.THREE_SLICE);
     context = context.end();
   },
 

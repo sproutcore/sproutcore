@@ -344,6 +344,24 @@ SC.platform = SC.Object.create({
   },
 
   /**
+    Whether the browser supports passive event listeners.
+
+    @type Boolean
+  */
+  supportsPassiveEventlisteners: function () {
+    var supportsPassiveOption = false;
+    try {
+      var opts = Object.defineProperty({}, 'passive', {
+        get: function() {
+          supportsPassiveOption = true;
+        }
+      });
+      window.addEventListener('test', null, opts);
+    } catch (e) {}
+    return supportsPassiveOption;
+  }(),
+
+  /**
     Whether the browser supports CSS animations.
 
     @type Boolean

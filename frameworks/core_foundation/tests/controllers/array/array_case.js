@@ -217,6 +217,26 @@ test("array orderBy using String", function(){
   equals(testController.get('lastObject'), content[0], 'lastObject should be the first object in content (changed order)');
 });
 
+test("array orderBy using String with property path", function(){
+  var c = "1 2 3 4 5".w().map(function(x) {
+    return TestObject.create({ title: { title: x }});
+  });
+
+  var testController = SC.ArrayController.create({
+    content: c,
+    orderBy: 'title.title ASC'
+  });
+
+  equals(testController.get('firstSelectableObject'), c[0], 'first selectable object should be the first object in arrangedObjects');
+  equals(testController.get('lastObject'), c[4], 'lastObject should be the last object in content');
+
+  // Reorder the content
+  testController.set('orderBy', 'title.title DESC');
+
+  equals(testController.get('firstSelectableObject'), c[4], 'first selectable object should be the first object in arrangedObjects (changed order)');
+  equals(testController.get('lastObject'), c[0], 'lastObject should be the first object in content (changed order)');
+});
+
 
 test("array orderBy using Array", function(){
   var complexContent,
@@ -312,7 +332,7 @@ test("verify enumerable propety chains invalidate without error on ArrayControll
   } catch (e) {
     didError = YES;
   }
-  
+
   ok(!didError, "Adding an object to an empty array controller with orderBy and an enumerable property chain proceeds without error.");
 
 });

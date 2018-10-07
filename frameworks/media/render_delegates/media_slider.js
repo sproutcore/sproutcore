@@ -35,7 +35,6 @@ SC.BaseTheme.mediaSliderRenderDelegate = SC.RenderDelegate.create({
     }
 
     context = context.begin('span').addClass('track');
-    this.includeSlices(dataSource, context, SC.THREE_SLICE);
     context.push('<span class="sc-loaded-ranges"></span>');
     context.push('<div class="sc-handle" style="left: ' + dataSource.get('value') + '%"></div>');
 

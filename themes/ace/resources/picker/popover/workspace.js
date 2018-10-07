@@ -12,9 +12,8 @@ SC.AceTheme.Popover.workspaceRenderDelegate = SC.RenderDelegate.create({
       'top-toolbar': dataSource.get('hasTopToolbar'),
       'bottom-toolbar': dataSource.get('hasBottomToolbar')
     });
-    
+
     context = context.begin('div').addClass('popover-background');
-    this.includeSlices(dataSource, context, SC.NINE_SLICE);
     context.push("<div class = 'sc-pointer'></div>");
     context = context.end();
   },

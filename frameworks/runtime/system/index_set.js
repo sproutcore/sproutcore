@@ -69,7 +69,8 @@ SC.IndexSet = SC.mixin({},
 
   //@if(debug)
   /** @private Validates the standard IndexSet method arguments. */
-  _sc_validateIndexSetArguments: function (start, length) {
+  _sc_validateIndexSetArguments: function (_start, _length) {
+    var start = _start, length = _length;
     // Validate arguments. Potential bad usages include trying to call SC.IndexSet.create() with SproutCore's standard property-hash
     // idiom, and passing in the results of bad math (NaN in particular causes problems).
     var startIsValid = NO,
@@ -470,7 +471,8 @@ SC.IndexSet = SC.mixin({},
     @param {Number} [length=1] The length of range.
     @returns {SC.IndexSet} receiver
   */
-  add: function (start, length) {
+  add: function (_start, _length) {
+    var start = _start, length = _length;
     //@if (debug)
     this._sc_validateIndexSetArguments.apply(this, arguments);
     //@endif

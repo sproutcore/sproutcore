@@ -872,8 +872,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
 
     if (this.get('useHintOverlay') && !this.get('isTextArea')) {
       var hintJQ = this.$('.hint');
-
-      hintJQ.css('line-height', hintJQ.outerHeight() + 'px');
+      // in some cases hintJQ.outerHeight() can return 0, so default to height
+      hintJQ.css('line-height', (hintJQ.outerHeight() || height) + 'px');
     }
   },
 
@@ -991,6 +991,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     var timerNotPending = SC.empty(this._fieldValueDidChangeTimer) || !this._fieldValueDidChangeTimer.get('isValid');
     if (this.get('applyImmediately') && timerNotPending) {
       this.invokeLater(this.fieldValueDidChange, 10);
+    }
+    else {
+      this.updateHintOnFocus();
     }
   },
 

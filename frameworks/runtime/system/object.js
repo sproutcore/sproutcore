@@ -855,14 +855,14 @@ SC.Object.prototype = {
     //@if(debug)
     // If we're logging deferred calls, send along the information that needs to
     // be recorded.
-    var originatingTarget, originatingMethod, originatingStack;
     if (SC.LOG_DEFERRED_CALLS) {
-      originatingTarget = this;
-      originatingStack  = SC._getRecentStack();
-      originatingMethod = originatingStack[0];
+      var originatingTarget = this,
+        originatingStack  = SC._getRecentStack(),
+        originatingMethod = originatingStack[0];
+
+      SC.RunLoop.currentRunLoop.invokeOnce(this, method, originatingTarget, originatingMethod, originatingStack);
+      return this;
     }
-    SC.RunLoop.currentRunLoop.invokeOnce(this, method, originatingTarget, originatingMethod, originatingStack);
-    return this;
     //@endif
     SC.RunLoop.currentRunLoop.invokeOnce(this, method);
     return this;
@@ -1089,4 +1089,3 @@ SC._object_className = function (obj) {
   while (ret && !ret._object_className) ret = ret.superclass;
   return (ret && ret._object_className) ? ret._object_className : 'Anonymous';
 };
-

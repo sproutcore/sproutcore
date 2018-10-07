@@ -279,7 +279,8 @@ var pane;
         ok((seg.className.indexOf('sc-last-segment') >= 0), 'last segment has the right classname assigned.');
       }
 
-      ok((seg.childNodes[3].className.indexOf('sc-button-label') >= 0), 'segment ' + i + ' should have a label.');
+      // debugger;
+      ok($(seg.childNodes, 'sc-button-label').length === 1, 'segment ' + i + ' should have a label.');
 
       if (i !== 0 && i < seglen - 1) {
         ok((seg.className.indexOf('sc-middle-segment') >= 0), 'middle segments have the right classname assigned.');
@@ -313,8 +314,10 @@ var pane;
       if (i == seglen - 1) {
         ok((seg.className.indexOf('sc-last-segment') >= 0), 'last segment has the right classname assigned.');
       }
-      ok((seg.childNodes[3].className.indexOf('sc-button-label') >= 0), 'segment ' + i + ' should have a label.');
-      ok((seg.childNodes[3].childNodes[0].src.length > 0), 'segment ' + i + ' should have an icon.');
+
+      var label = $(seg.childNodes, 'sc-button-label')[0];
+      ok(label, 'segment ' + i + ' should have a label.');
+      ok(label.children[0].src.length > 0, 'segment ' + i + ' should have an icon.');
 
       if (i !== 0 && i != seglen - 1) {
         ok((seg.className.indexOf('sc-middle-segment') >= 0), 'middle segments have the right classname assigned.');

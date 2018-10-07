@@ -8,22 +8,22 @@
 
 /*global module test equals context ok */
 
-var Ace, Dark, Capsule, DarkCapsule, AceOnly;
+var Aki, Dark, Capsule, DarkCapsule, AkiOnly;
 
 module("SC.Theme", {
   setup: function() {
-    // make and register Ace
-    Ace = SC.Theme.create({
-      name: 'ace',
-      classNames: ["ace"]
+    // make and register Aki
+    Aki = SC.Theme.create({
+      name: 'aki',
+      classNames: ["aki"]
     });
-    SC.Theme.addTheme(Ace);
+    SC.Theme.addTheme(Aki);
 
     // Dark
-    Dark = Ace.subtheme("dark");
+    Dark = Aki.subtheme("dark");
 
     // Capsule
-    Capsule = Ace.subtheme("capsule");
+    Capsule = Aki.subtheme("capsule");
   },
 
   teardown: function() {
@@ -40,8 +40,8 @@ function themeIs(themeInstance, shouldBe, classNames) {
 }
 
 test("Calling SC.Theme.find finds proper theme.", function(){
-  var ace = SC.Theme.find("ace");
-  themeIs(ace, Ace, ["ace"]);
+  var aki = SC.Theme.find("aki");
+  themeIs(aki, Aki, ["aki"]);
 });
 
 test("There is no proliferation of theme registration (that is, subthemes are not registered globally)", function(){
@@ -50,29 +50,27 @@ test("There is no proliferation of theme registration (that is, subthemes are no
 });
 
 test("Calling find on a subtheme class finds proper theme.", function(){
-  var dark = Ace.find("dark");
+  var dark = Aki.find("dark");
 
   // child themes are specialized
-  themeIs(dark.baseTheme, Dark, ["ace", "dark"]);
+  themeIs(dark.baseTheme, Dark, ["aki", "dark"]);
 });
 
 test("Calling find on a theme instance finds proper theme.", function(){
-  var ace = SC.Theme.find("ace");
-  var dark = ace.find("dark");
+  var aki = SC.Theme.find("aki");
+  var dark = aki.find("dark");
 
   // child themes are specialized (that means derived by the parent theme)
-  themeIs(dark.baseTheme, Dark, ["ace", "dark"]);
+  themeIs(dark.baseTheme, Dark, ["aki", "dark"]);
 });
 
 test("Calling find on a subtheme instance finds the proper theme.", function(){
-  var dark = Ace.find("dark");
+  var dark = Aki.find("dark");
   var capsule = dark.find("capsule");
 
   // child themes are specialized (that is, derived by the parent)
-  themeIs(capsule.baseTheme, Capsule, ["ace", "capsule"]);
+  themeIs(capsule.baseTheme, Capsule, ["aki", "capsule"]);
 
   // and now we are testing said specialization
-  themeIs(capsule, capsule, ["ace", "capsule", "dark"]);
+  themeIs(capsule, capsule, ["aki", "capsule", "dark"]);
 });
-
-
