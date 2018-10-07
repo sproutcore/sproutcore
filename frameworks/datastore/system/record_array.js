@@ -571,7 +571,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
         K         = SC.Record,
         storeKeysToPace = [],
         startDate = new Date(),
-        rec, status, recordType, sourceKeys, scope, included;
+        rec, status, recordType, sourceKeys, scope, included, readyPacing;
 
     // if we have storeKeys already, just look at the changed keys
     var oldStoreKeys = storeKeys;
@@ -656,8 +656,8 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
       });
     }
     else {
-      // either ready with pacing or no pacing needed, set status to ready
-      this.set('status', SC.Record.READY_CLEAN);
+      // either ready with pacing or no pacing needed, set status to ready after storekeys are set
+      readyPacing = true;
     }
 
     // clear set of changed store keys
@@ -681,6 +681,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
         this.set('storeKeys', SC.clone(storeKeys)); // replace content
       }
     }
+    if (readyPacing) this.set('status', SC.Record.READY_CLEAN);
 
     return this;
   },
