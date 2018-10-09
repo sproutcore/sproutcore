@@ -76,47 +76,44 @@ SC.View.reopen(
     this._applyDesignMode(properties);
   },
 
-  /** @private See: https://github.com/paulirish/matchMedia.js */
+  /** @private Modified version of: https://github.com/paulirish/matchMedia.js */
   matchMedia: function(media) {
     // For browsers that support matchMedium api such as IE 9 and webkit
     var styleMedia = (window.styleMedia || window.media);
 
     // For those that don't support matchMedium
     if (!styleMedia) {
-      var style = document.createElement('style'),
+      var mediaId = media.replace(/\W/g,'_');
+      styleMedia = this._sc_styleMedias[mediaId];
+
+      if (!styleMedia) {
+        var style = document.createElement('style'),
           script = document.getElementsByTagName('script')[0],
           info = null;
 
-      style.type = 'text/css';
-      style.id = 'matchmediajs-test';
+        style.type = 'text/css';
+        style.id = 'sc-matchmedia'+mediaId;
 
-      if (!script) {
-        document.head.appendChild(style);
-      } else {
-        script.parentNode.insertBefore(style, script);
-      }
+        if (!script) document.head.appendChild(style);
+        else script.parentNode.insertBefore(style, script);
 
-      // 'style.currentStyle' is used by IE <= 8 and 'window.getComputedStyle' for all other browsers
-      info = ('getComputedStyle' in window) && window.getComputedStyle(style, null) || style.currentStyle;
+        info = window.getComputedStyle(style, null);
 
-      styleMedia = {
-        matchMedium: function(media) {
-          var text = '@media ' + media + '{ #matchmediajs-test { width: 1px; } }';
-
-          // 'style.styleSheet' is used by IE <= 8 and 'style.textContent' for all other browsers
-          if (style.styleSheet) {
-              style.styleSheet.cssText = text;
-          } else {
-              style.textContent = text;
+        styleMedia = {
+          matchMedium: function(media) {
+            style.textContent = '@media ' + media + '{ #sc-matchmedia'+mediaId+' { width: 1px; } }';
+            return info.width === '1px';
           }
+        };
 
-          // Test if media query is true or false
-          return info.width === '1px';
-        }
-      };
+        this._sc_styleMedias[mediaId] = styleMedia;
+      }
     }
 
     return styleMedia.matchMedium(media || 'all');
-  }
+  },
+
+  /** @private */
+  _sc_styleMedias: {}
 
 });
