@@ -68,30 +68,35 @@ SC.View.reopen(
   },
 
   _sc_assignProperty: function (key, value) {
-    if (key === 'layout') {
-      var newExplicitLayout = this._sc_computeExplicitLayout(value), // Convert the layout to an explicit layout.
+    switch (key) {
+      case 'layout':
+        var newExplicitLayout = this._sc_computeExplicitLayout(value), // Convert the layout to an explicit layout.
           layoutDiff = {},
           explicitLayout = this.get('explicitLayout');
-      for (var layoutKey in newExplicitLayout) {
-        var currentValue = explicitLayout[layoutKey];
 
-        layoutDiff[layoutKey] = currentValue === undefined ? null : currentValue;
+        for (var layoutKey in newExplicitLayout) {
+          var currentValue = explicitLayout[layoutKey];
 
-        if (layoutKey === 'centerX') {
-          layoutDiff.left = explicitLayout.left;
-          layoutDiff.right = explicitLayout.right;
+          layoutDiff[layoutKey] = currentValue === undefined ? null : currentValue;
+
+          if (layoutKey === 'centerX') {
+            layoutDiff.left = explicitLayout.left;
+            layoutDiff.right = explicitLayout.right;
+          }
+
+          if (layoutKey === 'centerY') {
+            layoutDiff.top = explicitLayout.top;
+            layoutDiff.bottom = explicitLayout.bottom;
+          }
         }
 
-        if (layoutKey === 'centerY') {
-          layoutDiff.top = explicitLayout.top;
-          layoutDiff.bottom = explicitLayout.bottom;
-        }
-      }
+        this._originalProperties.layout = layoutDiff;
+      break;
 
-      this._originalProperties.layout = layoutDiff;
-    } else {
-      // Get the original value of the property for reset.
-      this._originalProperties[key] = this.get(key);
+      default:
+        // Get the original value of the property for reset.
+        this._originalProperties[key] = this.get(key);
+      break;
     }
 
     // Apply the override.
@@ -108,6 +113,9 @@ SC.View.reopen(
         SC.Logger.log('  - Setting %@: %@ (cached as %@)'.fmt(key, SC.inspect(value), SC.inspect(this._originalProperties[key])));
       }
       //@endif
+
+      var binding = this[key+'Binding'];
+      if (binding) binding.disconnect();
       this.set(key,value);
     }
   },
@@ -119,10 +127,16 @@ SC.View.reopen(
     }
     //@endif
 
-    if (key === 'layout') {
-      this.adjust(oldValue);
-    } else {
-      this.set(key, oldValue);
+    switch (key) {
+      case 'layout':
+        this.adjust(oldValue);
+      break;
+
+      default:
+        var binding = this[key+'Binding'];
+        if (binding) binding.connect();
+        this.set(key, oldValue);
+      break;
     }
   },
 
