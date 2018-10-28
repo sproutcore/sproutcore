@@ -941,6 +941,7 @@ SC.SplitView = SC.View.extend({
     @returns Number
   */
   splitViewGetSizeForChild: function(splitView, child) {
+    if (!child.get('isVisible')) return 0;
     var size = child.get('size');
 
     if (SC.none(size)) {
