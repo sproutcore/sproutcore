@@ -1177,6 +1177,10 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   */
   selectOverflowItem: function (menu) {
     var item = menu.get('selectedItem');
+    if (!item) return;
+
+    // Unset selectedItem to get the notification if the same item is selected twice
+    menu.set('selectedItem', null);
 
     this.triggerItemAtIndex(item.get('index'));
 
