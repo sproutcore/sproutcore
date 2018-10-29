@@ -983,7 +983,8 @@ SC.findClassNames = function () {
   SC._object_foundObjectClassNames = true;
 
   var seen = [],
-      detectedSC = false;
+    firstCharTest = /^[A-Z0-9]/;
+
   var searchObject = function (root, object, levels) {
 
     var path, value, type;
@@ -994,14 +995,13 @@ SC.findClassNames = function () {
     seen.push(object);
 
     for (var key in object) {
-      if (key === '__scope__') continue;
-      if (key === 'superclass') continue;
-      if (key === '__SC__') key = 'SC';
-      if (!key.match(/^[A-Z0-9]/)) continue;
-      if (key === 'SC') {
-        if (detectedSC) continue;
-        detectedSC = true;
+      switch (key) {
+        case '__scope__':
+        case 'superclass':
+          continue;
+        break;
       }
+      if (!key.match(firstCharTest)) continue;
 
       path = (root) ? [root, key].join('.') : key;
       value = object[key];
@@ -1033,17 +1033,6 @@ SC.findClassNames = function () {
     }
   };
 
-  // Fix for IE 7 and 8 in order to detect the SC global variable. When you create
-  // a global variable in IE, it is not added to the window object like in other
-  // browsers. Therefore the searchObject method will not pick it up. So we have to
-  // update the window object to have a reference to the global variable. And
-  // doing window['SC'] does not work since the global variable already exists. For
-  // any object that you create that is used act as a namespace, be sure to create it
-  // like so:
-  //
-  //   window.MyApp = window.MyApp || SC.Object.create({ ... })
-  //
-  window.__SC__ = SC;
   searchObject(null, window, 2);
 };
 
