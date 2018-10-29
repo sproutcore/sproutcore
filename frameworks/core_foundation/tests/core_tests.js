@@ -24,19 +24,11 @@ module("SC", {
 });
 
 test("SC.viewFor() Argument validation", function() {
-  try {
-    SC.viewFor();
-    ok(false, "Throws an exception when the argument is not given.");
-  } catch (ex) {
-    ok(true, "Throws an exception when the argument is not given.");
-  }
+  var ret = SC.viewFor();
+  equals(ret, null, "Return null when the argument is not given.");
 
-  try {
-    SC.viewFor("blarg");
-    ok(false, "Throws an exception when the argument is not an Element.");
-  } catch (ex) {
-    ok(true, "Throws an exception when the argument is not an Element.");
-  }
+  var ret = SC.viewFor("blarg");
+  equals(ret, null, "Return null when the argument is not an Element.");
 });
 
 test("SC.viewFor() Usage", function() {
