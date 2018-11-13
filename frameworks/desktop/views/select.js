@@ -237,6 +237,12 @@ SC.SelectView = SC.PopupButtonView.extend(SC.ItemFormatter, {
   }.observes('selectedItem'),
 
   /**
+    * @private
+    * Prevent displaying the button as selected when the value is true
+  */
+  _button_valueDidChange: function() {},
+
+  /**
     The title of the button, derived from the selected item.
   */
   title: function() {
