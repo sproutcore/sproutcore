@@ -21,6 +21,12 @@ $theme.sc-text-field-view {
     text-shadow: $field-text-shadow;
   }
 
+  &.disabled {
+    input, textarea, .sc-text-field-accessory-view {
+      opacity: .5;
+    }
+  }
+
 
   &.focus .border {
     border: 1px solid $focus-field-border-color;

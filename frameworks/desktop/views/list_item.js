@@ -947,6 +947,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
 
     source
       .set('isSelected', state && (state !== SC.MIXED_STATE))
+      .set('isMixed', state === SC.MIXED_STATE)
       .set('isEnabled', this.get('isEnabled') && this.get('contentIsEditable'))
       .set('isActive', this._checkboxIsActive)
       .set('title', '');

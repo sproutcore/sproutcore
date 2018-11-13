@@ -37,10 +37,11 @@ SC.BaseTheme.checkboxRenderDelegate = SC.RenderDelegate.create({
     // the label id is used so we can set the aria labelledby attribute
     labelId = SC.guidFor(dataSource) + "-label";
 
-    var isSelected = dataSource.get('isSelected') || NO;
-    var isActive = dataSource.get('isActive');
+    var isSelected = dataSource.get('isSelected'),
+      isMixed = dataSource.get('isMixed'),
+      isActive = dataSource.get('isActive'),
+      ariaIsSelected;
 
-    var ariaIsSelected;
     if (isSelected === SC.MIXED_STATE) ariaIsSelected = 'mixed';
     else if (isSelected) ariaIsSelected = 'true';
     else ariaIsSelected = 'false';
@@ -51,6 +52,7 @@ SC.BaseTheme.checkboxRenderDelegate = SC.RenderDelegate.create({
 
     context.setClass({
       'sel': isSelected,
+      'mixed': isMixed,
       'active': isActive
     });
 
@@ -64,12 +66,12 @@ SC.BaseTheme.checkboxRenderDelegate = SC.RenderDelegate.create({
   update: function(dataSource, jquery) {
     this.updateSizeClassName(dataSource, jquery);
 
-    var theme = dataSource.get('theme');
+    var theme = dataSource.get('theme'),
+      isSelected = dataSource.get('isSelected'),
+      isMixed = dataSource.get('isMixed'),
+      isActive = dataSource.get('isActive'),
+      ariaIsSelected;
 
-    var isSelected = dataSource.get('isSelected');
-    var isActive = dataSource.get('isActive');
-
-    var ariaIsSelected;
     if (isSelected === SC.MIXED_STATE) ariaIsSelected = 'mixed';
     else if (isSelected) ariaIsSelected = 'true';
     else ariaIsSelected = 'false';
@@ -85,6 +87,7 @@ SC.BaseTheme.checkboxRenderDelegate = SC.RenderDelegate.create({
     // add class names
     jquery.setClass({
       'sel': isSelected,
+      'mixed': isMixed,
       'active': isActive
     });
   }

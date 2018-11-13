@@ -1,17 +1,24 @@
 @theme(sc-small-size) {
 
 $theme.checkbox {
-  
+
   .button {
     width: 12px;
     height: 12px;
-    
+
     &:after {
       top: -2px;
       font-size: 12px;
     }
   }
-  
+
+  &.mixed .button {
+    &:after {
+      top: 4px;
+      left: 1px;
+    }
+  }
+
 }
 
 }
