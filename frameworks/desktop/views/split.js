@@ -208,11 +208,13 @@ SC.SplitView = SC.View.extend({
     @property
     @type {Number}
   */
-  _frameSize: function(){
+  _frameSize: function() {
+    var frame = this.get('frame');
+
     if (this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL) {
-      return this.get('frame').width;
+      return frame.width;
     } else {
-      return this.get('frame').height;
+      return frame.height;
     }
   }.property('frame', 'layoutDirection').cacheable(),
 
@@ -952,7 +954,9 @@ SC.SplitView = SC.View.extend({
       return 100;
     }
 
-    if (size < 1) size = this.get('frame').width * size;
+    if (size < 1) {
+      size = this.get('_frameSize') * size;
+    }
 
     return size;
   },
