@@ -17,16 +17,21 @@ SC.SelectSearchView = SC.SelectView.extend(SC.ItemFilter, {
   },
 
   _scsv_itemsDidChange: function () {
+    this.notifyPropertyChange('_displayItems');
     this.notifyPropertyChange('displayItems');
     this._searchCache = null;
-  }.observes('*items.[]'),
+  }.observes('*items.[]', 'emptyName'),
 
   _sscsv_invalidateSearchCache: function () {
     this._searchCache = null;
   }.observes('itemTitleKey', 'itemSearchKey'),
 
+  _displayItems: function () {
+    return this.formatDisplayItems();
+  }.property().cacheable(),
+
   displayItems: function () {
-    var ret = sc_super();
+    var ret = this.get('_displayItems');
     var searchValue = this.get('searchValue');
     var itemTitleKey = this.get('itemSearchKey') || this.get('itemTitleKey') || 'title';
     return searchValue? this.searchItems(ret, searchValue, itemTitleKey): ret;
