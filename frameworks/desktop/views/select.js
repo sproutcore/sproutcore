@@ -297,6 +297,10 @@ SC.SelectView = SC.PopupButtonView.extend(SC.ItemFormatter, {
     @isReadOnly
   */
   displayItems: function () {
+    return this.formatDisplayItems();
+  }.property().cacheable(),
+
+  formatDisplayItems: function () {
     var items = this.get('items'),
       emptyName = this.get('emptyName'),
       ret = SC.A(items);
@@ -306,7 +310,7 @@ SC.SelectView = SC.PopupButtonView.extend(SC.ItemFormatter, {
     ret = this.formatItems(ret, emptyName);
 
     return ret;
-  }.property().cacheable(),
+  },
 
   /** @private */
   _scsv_itemsDidChange: function () {
