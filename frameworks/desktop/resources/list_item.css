@@ -54,16 +54,16 @@
   &.has-checkbox.has-icon label {
   	left: 44px;
   }
-  .icon,
-  .right-icon {
+  .sc-outline .icon,
+  .sc-outline .right-icon {
   	margin-top: -8px;
   	position: absolute;
   	top: 50%;
   }
-  .icon {
+  .sc-outline .icon {
   	left: 5px;
   }
-  .right-icon {
+  .sc-outline .right-icon {
     right: 5px;
   }
   &.has-checkbox .icon {
