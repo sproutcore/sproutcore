@@ -1010,7 +1010,7 @@ SC.MenuPane = SC.PickerPane.extend(SC.ItemFormatter, SC.SelectionSupport,
 
         if (!title) continue;
 
-        title = title.replace(/ /g, '').substr(0, bufferLength).toUpperCase();
+        title = (title+'').replace(/ /g, '').substr(0, bufferLength).toUpperCase();
         if (title === buffer) {
           this.select(idx);
           break;
