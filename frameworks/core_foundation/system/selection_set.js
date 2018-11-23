@@ -283,7 +283,6 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
     return this ;
   },
 
-
   /**
     Returns YES if the selection contains the named index, range of indexes.
 
@@ -606,6 +605,21 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
     }, this);
     if (this._objects) sets.push(this._objects.toString());
     return "SC.SelectionSet:%@<%@>".fmt(SC.guidFor(this), sets.join(','));
+  },
+
+  /**
+    Return the object at the specified index.
+
+    @param {Number} idx index of the object
+    @returns {Object}
+  */
+  objectAt: function(idx) {
+    var objects = [];
+
+    // TODO: Make this more efficient.  Right now it collects all objects first.
+    this.forEach(function(o) { objects.push(o); }, this);
+
+    return objects.objectAt(idx);
   },
 
   /** @private */
