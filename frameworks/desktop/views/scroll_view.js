@@ -1795,6 +1795,14 @@ SC.ScrollView = SC.View.extend({
   init: function () {
     sc_super();
 
+    //@if(debug)
+    var contentViewLayout = this.getPath('contentView.layout');
+    if (contentViewLayout) {
+      if (contentViewLayout.top) SC.warn("Developer Warning: The `top` property of the `layout` will be overridden.");
+      if (contentViewLayout.left) SC.warn("Developer Warning: The `left` property of the `layout` will be overridden.");
+    }
+    //@endif
+
     // Observe the content view for changes and initialize once.
     this.addObserver('contentView', this, this._sc_contentViewDidChange);
     this._sc_contentViewDidChange();
