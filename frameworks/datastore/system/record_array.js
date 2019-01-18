@@ -681,8 +681,12 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
         this.set('storeKeys', SC.clone(storeKeys)); // replace content
       }
     }
-    if (readyPacing) this.set('status', SC.Record.READY_CLEAN);
-
+    if (readyPacing) {
+      this.set('status', SC.Record.READY_CLEAN);
+      // make sure that observers will be fired even if the status
+      // was already READY_CLEAN
+      if (didChange) this.notifyPropertyChange('status');
+    }
     return this;
   },
 
