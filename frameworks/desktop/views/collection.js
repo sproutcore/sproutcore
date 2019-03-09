@@ -2261,7 +2261,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
 
         if (this.get('toggleDisclosureOnDoubleClick') && ev.clickCount > 1) {
           if (itemView && SC.typeOf(itemView.toggleDisclosure) === SC.T_FUNCTION) {
-            itemView.toggleDisclosure();
+            itemView.toggleDisclosure(ev);
           }
         }
 

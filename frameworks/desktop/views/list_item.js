@@ -404,7 +404,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     // to parent.
     } else if (this._isMouseDownOnDisclosure) {
       if (this._isInsideDisclosure(evt)) {
-        this.toggleDisclosure();
+        this.toggleDisclosure(evt);
       }
 
       this._removeDisclosureActiveState();
@@ -437,11 +437,21 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     }
   },
 
-  toggleDisclosure: function () {
+  toggleDisclosure: function (evt) {
     var state = this.get('disclosureState'),
-      idx = this.get('contentIndex'),
-      set = (!SC.none(idx)) ? SC.IndexSet.create(idx) : null,
+      set = [],
       del = this.get('displayDelegate');
+
+    if (evt.ctrlKey || evt.metaKey || evt.altKey || evt.shiftKey) {
+      del.get('content').map(function(content, idx) {
+        if (content && !content.hideDisclosure) set.push(idx);
+      });
+      // Needed when expanding all items
+      set.reverse();
+    }
+    else {
+      set.push(this.get('contentIndex'));
+    }
 
     if (state === SC.BRANCH_OPEN) {
       if (set && del && del.collapse) del.collapse(set);
