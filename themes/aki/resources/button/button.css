@@ -74,17 +74,16 @@ $theme.button {
 
 /*
 
-TODO: Add support for pointer button
-
+TODO: Improve support for pointer button
+*/
 @theme(point-left) {
   $theme.button {
-    
+    clip-path: polygon(14px 0%, 100% 0%, 100% 100%, 14px 100%, 0% 50%);
   }
 }
 
 @theme(point-right) {
   $theme.button {
-    
+    clip-path: polygon(0% 0%, calc(100% - 14px) 0%, 100% 50%, calc(100% - 14px) 100%, 0% 100%);
   }
 }
-*/
