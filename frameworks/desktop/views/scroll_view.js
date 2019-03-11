@@ -1882,7 +1882,7 @@ SC.ScrollView = SC.View.extend({
   */
   scrollLeftLine: function (lines) {
     if (lines === undefined) lines = 1;
-    return this.scrollTo(0 - this.get('horizontalLineScroll') * lines, null);
+    return this.scrollBy(0 - this.get('horizontalLineScroll') * lines, null);
   },
 
   /**
@@ -1908,7 +1908,7 @@ SC.ScrollView = SC.View.extend({
   */
   scrollRightLine: function (lines) {
     if (lines === undefined) lines = 1;
-    return this.scrollTo(this.get('horizontalLineScroll') * lines, null);
+    return this.scrollBy(this.get('horizontalLineScroll') * lines, null);
   },
 
   /**
