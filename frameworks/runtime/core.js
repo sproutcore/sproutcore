@@ -646,8 +646,16 @@ SC.mixin(/** @scope window.SC.prototype */ {
 
     // fast paths
     if (object) {
-      if (object.isCopyable) return object.copy(deep);
-      if (object.clone)      return object.clone();
+      if (object.isCopyable) {
+        if (!object.copy) {
+          SC.error("The object '%@' does not implement a 'copy' method.".fmt(object));
+          return object;
+        }
+        return object.copy(deep);
+      }
+      if (object.clone) {
+        return object.clone();
+      }
     }
 
     switch (SC._nativeTypeOf(object)) {
