@@ -372,14 +372,24 @@ SC.AlertPane = SC.PanelPane.extend(
         classNames: ['info'],
         useStaticLayout: YES,
 
+        mouseWheel: function(evt) {
+          evt.allowDefault();
+          return true;
+        },
+
         /** @private */
         render: function(context, firstTime) {
           var pane = this.get('pane');
           if(pane.get('icon') == 'blank') context.addClass('plain');
           context.push('<div class="icon '+pane.get('icon')+'" ></div>');
           context.begin('h1').addClass('header').text(pane.get('message') || '').end();
+          context = context.begin('div').addClass('body');
           context.push(pane.get('displayDescription') || '');
           context.push(pane.get('displayCaption') || '');
+          context = context.end();
+          context.push(pane.showTextFieldView(this) || '');
+          context.push(pane.showCheckboxView(this) || '');
+          context.push(pane.showSelectFieldView(this) || '');
           context.push('<div class="separator"></div>');
 
         }
