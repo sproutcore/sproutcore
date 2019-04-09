@@ -28,7 +28,7 @@ function evaluatePane(pane, message, description, caption, button1Title, button2
   ok(pane.childViews[0].get('isVisibleInWindow'), 'pane.div.isVisibleInWindow should be YES');
   ok(pane.childViews[0].$().hasClass('sc-view'), 'pane.div should have sc-view class');
   ok(pane.childViews[0].childViews[0].get('isVisibleInWindow'), 'pane.div.info.isVisibleInWindow should be YES');
-  ok(pane.childViews[0].childViews[0].$().hasClass('info'), 'pane.div.info should have info class');
+  ok(pane.childViews[0].childViews[0].$().hasClass('alert-wrap'), 'pane.div.info should have info class');
   ok(pane.childViews[0].childViews[1].get('isVisibleInWindow'), 'pane.div.div.isVisibleInWindow should be YES');
 
   // content

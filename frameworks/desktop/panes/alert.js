@@ -369,7 +369,7 @@ SC.AlertPane = SC.PanelPane.extend(
 
     childViews: [
       SC.View.extend({
-        classNames: ['info'],
+        classNames: ['alert-wrap'],
         useStaticLayout: YES,
 
         /** @private */
