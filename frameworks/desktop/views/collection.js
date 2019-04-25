@@ -777,7 +777,10 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
   */
   allowsMultipleSelection: function() {
     var del = this.delegateFor('allowsMultipleSelection', this.get('delegate'), this.get('content'));
-
+    if (del === this) {
+      SC.$error("No delegate found for 'allowsMultipleSelection'");
+      return false;
+    }
     return del.get('allowsMultipleSelection');
   }.property(),
 
