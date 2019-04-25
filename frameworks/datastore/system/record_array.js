@@ -197,9 +197,10 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     records.
 
     @param {Number} idx index of the object
+    @param {Boolean} omitMaterializing
     @return {SC.Record} materialized record
   */
-  objectAt: function(idx) {
+  objectAt: function(idx, omitMaterializing) {
 
     this.flush(); // cleanup pending if needed
 
@@ -213,12 +214,13 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
     // not in cache, materialize
     if (!recs) this._scra_records = recs = [] ; // create cache
-    storeKey = storeKeys.objectAt(idx);
+    storeKey = storeKeys.objectAt(idx, omitMaterializing);
 
     if (storeKey) {
       // if record is not loaded already, then ask the data source to
       // retrieve it
       if (store.peekStatus(storeKey) === SC.Record.EMPTY) {
+        if (omitMaterializing) return undefined;
         store.retrieveRecord(null, null, storeKey);
       }
       recs[idx] = ret = store.materializeRecord(storeKey);

@@ -285,9 +285,9 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   /** @private
     Returns the object at the specified index based on the observable content
   */
-  objectAt: function (idx) {
+  objectAt: function (idx, omitMaterializing) {
     var content = this._scac_observableContent();
-    return content ? content.objectAt(idx) : undefined;
+    return content ? content.objectAt(idx, omitMaterializing) : undefined;
   },
 
   /** @private
