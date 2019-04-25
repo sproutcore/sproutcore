@@ -694,6 +694,28 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
 
     if (objects) objects.forEach(callback, target);
     return this ;
+  },
+
+  /** GestiXi */
+  forEachLoaded: function(callback, target) {
+    var sets = this._sets,
+        objects = this._objects,
+        len = sets ? sets.length : 0,
+        set, idx,
+        isComplete = true;
+
+    for(idx=0;idx<len;idx++) {
+      set = sets[idx];
+      if (set) isComplete = set.forEachLoadedObject(callback, target);
+    }
+
+    if (isComplete && objects) objects.forEach(callback, target);
+    return isComplete;
+  },
+
+  /** GestiXi */
+  isFullyLoaded: function() {
+    return this.forEachLoaded(function() {});
   }
 
 });

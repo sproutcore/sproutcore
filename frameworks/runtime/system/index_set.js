@@ -1131,6 +1131,33 @@ SC.IndexSet = SC.mixin({},
     return this;
   },
 
+  /** GestiXi */
+  forEachLoadedObject: function (callback, target) {
+    var source  = this.source;
+    if (!source) throw new Error("%@.forEachObject() requires source".fmt(this));
+
+    var content = this._content,
+        cur     = 0,
+        next    = content[cur],
+        object;
+
+    if (target === undefined) target = null;
+    while (next !== 0) {
+
+      while(cur < next) {
+        object = source.objectAt(cur, true);
+        if (!object) return false;
+
+        callback.call(target, object, cur, source, this);
+        cur++;
+      }
+
+      cur  = Math.abs(next);
+      next = content[cur];
+    }
+    return true;
+  },
+
   /**
     Adds all indexes where the object appears to the set.  If firstOnly is
     passed, then it will find only the first index and add it.  If  you know
