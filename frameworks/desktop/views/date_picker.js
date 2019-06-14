@@ -65,6 +65,14 @@ SC.DatePickerView = SC.View.extend(SC.ActionSupport, {
   action: null,
 
   /*
+    Set the first day of the week: Sunday is 0, Monday is 1, etc.
+
+    @type Number
+    @default 0
+  */
+  firstDay: 0,
+
+  /*
     Override this property with an array of seven strings if you want to customize the day
     names used. Defaults to SC.DateTime's localized abbreviated day names.
 
@@ -339,9 +347,9 @@ SC.DatePickerView = SC.View.extend(SC.ActionSupport, {
   /** @private */
   render: function(context, firstTime) {
     var displayFromDate = this.get('displayFromDate'),
-        startDay = displayFromDate.get('dayOfWeek'),
-        startDayOffset = 1,
-        currDate = displayFromDate.advance({day: -startDay+startDayOffset }),
+        firstDay = this.get('firstDay'),
+        startDay = (displayFromDate.get('dayOfWeek')-firstDay),
+        currDate = displayFromDate.advance({day: -(startDay >= 0 ? startDay : 6) }),
         selDate = this.get('value'),
         mouseDownDate = this.get('_beingSelectedDate'),
         todaysDate = SC.DateTime.create(),
@@ -356,8 +364,10 @@ SC.DatePickerView = SC.View.extend(SC.ActionSupport, {
       context.begin().addClass('button next').end()
       context.begin().addClass('button next-year').end();
 
-      for (var i = 0; i < 7; i++) {
-        context.begin('div').addClass('day-of-week').text(weekdayStrings[i]).end();
+      for (var i = firstDay; i < 7+firstDay; i++) {
+        var weekDayIndex = i;
+        if (weekDayIndex > 6) weekDayIndex -= 7;
+        context.begin('div').addClass('day-of-week').text(weekdayStrings[weekDayIndex]).end();
       }
 
     context = context.end();
@@ -365,10 +375,8 @@ SC.DatePickerView = SC.View.extend(SC.ActionSupport, {
     // Render body
     context = context.begin('div').addClass('body');
 
-    var day=0,
-        id, className,
-        dayWidth = 100/7,
-        weekHeight = 100/6;
+    var dayWidth = 100/7,
+      weekHeight = 100/6;
 
     for(var i=0;i<6;i++) {
       context = context.begin('div').setStyle({ top: (weekHeight*i)+'%' }).addClass('week');
