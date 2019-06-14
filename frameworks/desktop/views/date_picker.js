@@ -70,7 +70,7 @@ SC.DatePickerView = SC.View.extend(SC.ActionSupport, {
     @type Number
     @default 0
   */
-  firstDay: 0,
+  firstDay: 1,
 
   /*
     Override this property with an array of seven strings if you want to customize the day
