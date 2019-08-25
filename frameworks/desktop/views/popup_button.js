@@ -183,7 +183,7 @@ SC.PopupButtonView = SC.ButtonView.extend({
   _showMenu: function() {
     var menu = this.get('menu');
 
-    menu.popup(this, this.get('menuPreferMatrix'));
+    if (menu) menu.popup(this, this.get('menuPreferMatrix'));
   },
 
   /** @private */
