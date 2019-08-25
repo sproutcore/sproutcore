@@ -72,16 +72,6 @@ SC.mediaCapabilities = SC.Object.create({});
       }
     }
   }
-  // IE ActiveX detection
-  if(window.ActiveXObject) {
-    try {
-      var control = new ActiveXObject('ShockwaveFlash.ShockwaveFlash');
-      delete control;
-      SC.mediaCapabilities.isFlashSupported = YES;
-    } catch(e) {
-      // Do nothing- The ActiveX object isn't available.
-    }
-  }
 
   /**
    * Specifies whether the browser supports quicktime media playback.
@@ -96,26 +86,6 @@ SC.mediaCapabilities = SC.Object.create({});
       if(navigator.plugins[i].name.indexOf("QuickTime") >= 0) {
         SC.mediaCapabilities.isQuicktimeSupported = YES;
       }
-    }
-  }
-  // IE ActiveX detection
-  if(window.ActiveXObject) {
-    var control = null;
-    try {
-      control = new ActiveXObject('QuickTime.QuickTime');
-      delete control;
-      SC.mediaCapabilities.isQuicktimeSupported = YES;
-    } catch(e) {
-      // Do nothing- the ActiveX object isn't available.
-    }
-
-    try {
-      // This generates a user prompt in Internet Explorer 7
-      control = new ActiveXObject('QuickTimeCheckObject.QuickTimeCheck');
-      delete control;
-      SC.mediaCapabilities.isQuicktimeSupported = YES;
-    } catch(e) {
-      // Do nothing- The ActiveX object isn't available.
     }
   }
 

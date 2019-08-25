@@ -63,30 +63,8 @@ test("Default properties are correct for different types of requests.", function
   var formBody,
     headers,
     jsonBody,
-    xmlBody,
+    xmlBody = document.implementation.createDocument(null, null, null),
     req1, req2, req3, req4, req5;
-
-    // use this document for creating XML
-    if (document.implementation.createDocument) {
-      xmlBody = document.implementation.createDocument(null, null, null);
-    } else if (typeof (ActiveXObject) != "undefined") {
-      // Use ActiveXObject for IE prior to version 9.
-      var progIDs = [
-        "Msxml2.DOMDocument.6.0",
-        "Msxml2.DOMDocument.5.0",
-        "Msxml2.DOMDocument.4.0",
-        "Msxml2.DOMDocument.3.0",
-        "MSXML2.DOMDocument",
-        "MSXML.DOMDocument"
-      ];
-
-      for (var i = 0; i < progIDs.length; i++) {
-        try {
-          xmlBody = new ActiveXObject(progIDs[i]);
-          break;
-        } catch(e) {}
-      }
-    }
 
     // function that creates the XML structure
     function o() {
