@@ -136,7 +136,8 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
     @param {Object} object object to insert
   */
   insertAt: function (idx, object) {
-    if (idx > this.get('length')) throw new Error("Index '"+idx+"' is out of range 0-"+this.get('length'));
+    var len = this.get('length');
+    if (idx > len) throw new Error("Index '"+idx+"' is out of range 0-"+len);
     this.replace(idx, 0, [object]);
     return this;
   },
@@ -158,8 +159,8 @@ SC.CoreArray = /** @lends SC.Array.prototype */ {
         empty = [];
 
     if (typeof start === SC.T_NUMBER) {
-
-      if ((start < 0) || (start >= this.get('length'))) throw new Error("Index '"+start+"' is out of range 0-"+this.get('length'));
+      var len = this.get('length');
+      if ((start < 0) || (start >= len)) throw new Error("Index '"+start+"' is out of range 0-"+len);
 
       // fast case
       if (length === undefined) {
