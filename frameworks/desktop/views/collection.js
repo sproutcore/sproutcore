@@ -2486,26 +2486,8 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
   //
 
   /** @private */
-  touchStart: function(touch, evt) {
-    var itemView = this.itemViewForEvent(touch),
-        contentIndex = itemView ? itemView.get('contentIndex') : -1;
-
-    if (!this.get('isSelectable') || !this.get('isEnabledInPane')) return contentIndex > -1;
-
-    // become first responder if possible.
-    this.becomeFirstResponder() ;
-
-    this._touchSelectedView = itemView;
-
-    if (!this.get('useToggleSelection')) {
-      // We're faking the selection visually here
-      // Only track this if we added a selection so we can remove it later
-      if (itemView && !itemView.get('isSelected')) {
-        itemView.set('isSelected', YES);
-      }
-    }
-
-    return YES;
+  touchStart: function(touch) {
+    return this.mouseDown(touch);
   },
 
   /** @private */
@@ -2524,41 +2506,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
 
   /** @private */
   touchEnd: function(touch) {
-    /*
-      TODO [CC] We should be using itemViewForEvent here, but because
-            ListItemView re-renders itself once isSelected is called
-            in touchStart, the elements attached to this event are
-            getting orphaned and this event is basically a complete
-            fail when using touch events.
-    */
-    // var itemView = this.itemViewForEvent(touch),
-    var content = this.get('content'),
-        itemView = this._touchSelectedView,
-        contentIndex = itemView ? itemView.get('contentIndex') : -1,
-        isSelected = NO, sel, shouldSelect;
-
-    if (!this.get('isSelectable') || !this.get('isEnabledInPane')) return contentIndex > -1;
-
-    if (contentIndex > -1) {
-      if (this.get('useToggleSelection')) {
-        sel = this.get('selection');
-        isSelected = sel && sel.contains(content, contentIndex, 1);
-        shouldSelect = !isSelected;
-      }
-      else
-        shouldSelect = true;
-
-      if (shouldSelect) {
-        this.select(contentIndex, NO);
-
-        // If actOnSelect is implemented, the action will be fired.
-        this._cv_performSelectAction(itemView, touch, 0);
-      } else {
-        this.deselect(contentIndex);
-      }
-    }
-
-    this._touchSelectedView = null;
+    return this.mouseUp(touch);
   },
 
   /** @private */
