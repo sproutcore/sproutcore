@@ -230,7 +230,7 @@ test('compare', function() {
 test('Format', function() {
   equals(
     dt.toFormattedString('%a %A %b %B %d %D %h %H %I %j %m %M %p %S %N %w %y %Y %%a %E'),
-    'Sun Sunday Jun June 09 9 4 04 04 160 06 00 AM 22 7 0 85 1985 %a 33 years ago');
+    'Sun Sunday Jun June 09 9 4 04 04 160 06 00 AM 22 7 0 85 1985 %a 34 years ago');
 
   equals(dt.toFormattedString('%Z'), formatTimezone(dt.get('timezone')));
   equals(dt.adjust({ timezone:    0 }).toFormattedString('%Y-%m-%d %H:%M:%S %Z'), '1985-06-09 05:00:22 +00:00');
