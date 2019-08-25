@@ -1,0 +1,72 @@
+
+$theme.checkbox {
+  border: 0 none;
+
+  &.disabled {
+    opacity: .5;
+  }
+
+  .button {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    background-color: $checkbox-bg;
+    border: 1px solid $checkbox-border-color;
+    box-shadow: $checkbox-box-shadow;
+
+
+    &:after {
+      position: absolute;
+      font-family: FontAwesome;
+      top: -1px;
+      font-size: 13px;
+      font-weight: 900;
+      color: $checkbox-bg;
+      text-shadow: none;
+      content: "\f00c";
+    }
+  }
+
+  .sc-button-label {
+    position: absolute;
+    left: 22px;
+  }
+
+  &.active .button {
+    background-color: $checkbox-bg-active;
+    border: 1px solid $active-checkbox-border-color;
+  }
+
+  &.sel .button {
+    background-color: $sel-checkbox-bg;
+    border: 1px solid $sel-checkbox-border-color;
+  }
+
+  &.sel.active .button {
+    background-color: $sel-active-checkbox-bg;
+    border: 1px solid $sel-active-checkbox-border-color;
+  }
+
+  &.mixed .button {
+    background-color: $sel-checkbox-bg;
+    border: 1px solid $sel-checkbox-border-color;
+
+    &:after {
+      content: '';
+      position: absolute;
+      top: 5px;
+      left: 2px;
+      width: 10px;
+      height: 4px;
+      border-radius: 1px;
+      background-color: $radio-bg;
+    }
+  }
+
+  &.mixed.active .button {
+    background-color: $sel-active-checkbox-bg;
+    border: 1px solid $sel-active-checkbox-border-color;
+  }
+
+}

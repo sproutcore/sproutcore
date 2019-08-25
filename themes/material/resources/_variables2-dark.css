@@ -1,0 +1,114 @@
+
+// ..........................................................
+// GLOBALS
+//
+
+$default-dark-bg: #222;
+
+$default-dark-text-color: #FFF;
+
+$sel-default-dark-text-color: #000;
+
+
+// ..........................................................
+// BUTTON
+//
+
+$button-dark-bg: #666;
+$button-dark-border-color: rgba(0,0,0,.5);
+$button-dark-box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.15);
+$button-dark-text-color: #FFF;
+$button-dark-text-shadow: 0 1px 1px rgba(0,0,0,.5);
+
+$hover-button-dark-bg: #555;
+$hover-button-dark-border-color: $button-dark-border-color;
+$hover-button-dark-text-color: $button-dark-text-color;
+$hover-button-dark-text-shadow: $button-dark-text-shadow;
+
+$active-button-dark-bg: #444;
+$active-button-dark-border-color: $button-dark-border-color;
+$active-button-dark-text-color: $button-dark-text-color;
+$active-button-dark-text-shadow: $button-dark-text-shadow;
+
+$sel-button-dark-bg: #333;
+$sel-button-dark-border-color: $button-dark-border-color;
+$sel-button-dark-text-color: $button-dark-text-color;
+$sel-button-dark-text-shadow: $button-dark-text-shadow;
+
+$sel-hover-button-dark-bg: #222;
+$sel-hover-button-dark-border-color: $button-dark-border-color;
+$sel-hover-button-dark-text-color: $button-dark-text-color;
+$sel-hover-button-dark-text-shadow: $button-dark-text-shadow;
+
+$sel-active-button-dark-bg: #000;
+$sel-active-button-dark-border-color: $button-dark-border-color;
+$sel-active-button-dark-text-color: $button-dark-text-color;
+$sel-active-button-dark-text-shadow: $button-dark-text-shadow;
+
+
+// ..........................................................
+// SLIDER
+//
+
+$slider-dark-bg: transparent;
+$slider-dark-border: 1px solid #999;
+$slider-dark-box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.5);
+
+$slider-step-mark-dark-color: #999;
+
+$slider-handle-dark-bg: #FFF;
+$slider-handler-dark-border: none;
+$slider-handle-dark-box-shadow: 0px 0px 3px 1px rgba(0, 0, 0, 0.5);
+
+$active-slider-handle-dark-bg: #DDD;
+$active-slider-handle-dark-box-shadow: 0px 0px 3px 1px rgba(0, 0, 0, 0.5);
+
+
+// ..........................................................
+// COLLECTION
+//
+
+$sel-collection-dark-bg: #FFF;
+$collection-dark-bg: #222;
+
+$collection-dark-item-bg: transparent;
+$collection-dark-item-text-color: $default-dark-text-color;
+$collection-dark-item-text-shadow: none;
+
+$collection-dark-item-even-bg: $collection-dark-bg;
+$collection-dark-item-even-text-color: $default-dark-text-color;
+$collection-dark-item-even-text-shadow: none;
+
+$sel-collection-dark-item-bg: $sel-collection-dark-bg;
+$sel-collection-dark-item-text-color: $sel-default-dark-text-color;
+$sel-collection-dark-item-text-shadow: none;
+
+$collection-dark-item-drop-target-bg: #bcd7ec;
+$collection-dark-item-drop-target-text-color: $sel-default-dark-text-color;
+$collection-dark-item-drop-target-text-shadow: none;
+
+
+// ..........................................................
+// SOURCE LIST
+//
+
+$list-dark-bg: $collection-dark-bg;
+
+$list-dark-item-bg: $collection-dark-item-bg;
+$list-dark-item-text-color: $collection-dark-item-text-color;
+$list-dark-item-text-shadow: $collection-dark-item-text-shadow;
+
+$list-dark-item-even-bg: $collection-dark-item-even-bg;
+$list-dark-item-even-text-color: $collection-dark-item-even-text-color;
+$list-dark-item-even-text-shadow: $collection-dark-item-even-text-shadow;
+
+$sel-list-dark-item-bg: $sel-collection-dark-item-bg;
+$sel-list-dark-item-text-color: $sel-default-dark-text-color;
+$sel-list-dark-item-text-shadow: $sel-default-text-shadow; // TODO _variables not includes
+$sel-list-dark-item-box-color: inset 0 1px 0px #000, inset 0 -1px 0 #000;
+$sel-list-dark-item-border-top-color: $sel-default-bg;
+$sel-list-dark-item-border-bottom-color: $sel-default-bg;
+
+$list-dark-item-drop-target-bg: $collection-dark-item-drop-target-bg;
+$list-dark-item-drop-target-text-color: $collection-dark-item-drop-target-text-color;
+$list-dark-item-drop-target-text-shadow: $collection-dark-item-drop-target-text-shadow;

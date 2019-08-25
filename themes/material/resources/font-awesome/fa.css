@@ -1,0 +1,54 @@
+@font-face {
+  font-family: 'Font Awesome 5 Brands';
+  font-style: normal;
+  font-weight: normal;
+  src: sc_static('fa-brands-400.woff2') format('woff2'),
+    sc_static('fa-brands-400.woff') format('woff'),
+    sc_static('fa-brands-400.ttf') format('truetype'),
+    sc_static('fa-brands-400.svg') format('svg');
+}
+.fab {
+  font-family: 'Font Awesome 5 Brands';
+}
+
+@font-face {
+  font-family: 'FontAwesome';
+  font-style: normal;
+  font-weight: 300;
+  src: sc_static('fa-light-300.woff2') format('woff2'),
+    sc_static('fa-light-300.woff') format('woff'),
+    sc_static('fa-light-300.ttf') format('truetype'),
+    sc_static('fa-light-300.svg') format('svg');
+}
+.fa, .fal {
+  font-family: 'FontAwesome';
+  font-weight: 300;
+}
+
+@font-face {
+  font-family: 'FontAwesome';
+  font-style: normal;
+  font-weight: 400;
+  src: sc_static('fa-regular-400.woff2') format('woff2'),
+    sc_static('fa-regular-400.woff') format('woff'),
+    sc_static('fa-regular-400.ttf') format('truetype'),
+    sc_static('fa-regular-400.svg') format('svg');
+}
+.far {
+  font-family: 'FontAwesome';
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: 'FontAwesome';
+  font-style: normal;
+  font-weight: 900;
+  src: sc_static('fa-solid-900.woff2') format('woff2'),
+    sc_static('fa-solid-900.woff') format('woff'),
+    sc_static('fa-solid-900.ttf') format('truetype'),
+    sc_static('fa-solid-900.svg') format('svg');
+}
+.fas {
+  font-family: 'FontAwesome';
+  font-weight: 900;
+}

@@ -1,0 +1,31 @@
+
+$button-info-bg: hsl(180, 75%, 45%);
+$button-info-border-color: rgba(0,0,0,.1);
+$button-info-box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.15);
+$button-info-text-color: #FFF;
+$button-info-text-shadow: 0 1px 1px rgba(0,0,0,.5);
+
+$hover-button-info-bg: hsl(180, 75%, 40%);
+$hover-button-info-border-color: $button-info-border-color;
+$hover-button-info-text-color: $button-info-text-color;
+$hover-button-info-text-shadow: $button-info-text-shadow;
+
+$active-button-info-bg: hsl(180, 75%, 35%);
+$active-button-info-border-color: $button-info-border-color;
+$active-button-info-text-color: $button-info-text-color;
+$active-button-info-text-shadow: $button-info-text-shadow;
+
+$sel-button-info-bg: hsl(180, 65%, 45%);
+$sel-button-info-border-color: $button-info-border-color;
+$sel-button-info-text-color: $button-info-text-color;
+$sel-button-info-text-shadow: $button-info-text-shadow;
+
+$sel-hover-button-info-bg: hsl(180, 65%, 40%);
+$sel-hover-button-info-border-color: $button-info-border-color;
+$sel-hover-button-info-text-color: $button-info-text-color;
+$sel-hover-button-info-text-shadow: $button-info-text-shadow;
+
+$sel-active-button-info-bg: hsl(180, 65%, 35%);
+$sel-active-button-info-border-color: $button-info-border-color;
+$sel-active-button-info-text-color: $button-info-text-color;
+$sel-active-button-info-text-shadow: $button-info-text-shadow;

@@ -1,0 +1,83 @@
+
+
+$theme.sc-source-list {
+  background: $source-list-bg;
+
+  .sc-collection-item {
+    background: $source-list-item-bg;
+    color: $source-list-item-text-color;
+    text-shadow: $source-list-item-text-shadow;
+
+
+    &.even {
+      background: $source-list-item-even-bg;
+      color: $source-list-item-even-text-color;
+      text-shadow: $source-list-item-even-text-shadow;
+    }
+
+    &.even.sel,
+    &.sel {
+      background: $sel-source-list-item-bg;
+      color: $sel-source-list-item-text-color;
+      box-shadow: $sel-source-list-item-box-color;
+      font-weight: bold;
+      text-shadow: $sel-source-list-item-text-shadow;
+      //border-top: 1px solid $sel-source-list-item-border-top-color;
+      //border-bottom: 1px solid $sel-source-list-item-border-bottom-color;
+    }
+
+    &.even.drop-target,
+    &.drop-target {
+      background: $source-list-item-drop-target-bg;
+      color: $source-list-item-drop-target-text-color;
+      text-shadow: $source-list-item-drop-target-text-shadow;
+    }
+
+    &.sc-group-item {
+      font-weight: bold;
+      font-size:12px;
+    }
+
+    &.sc-list-item-view .sc-outline label {
+      top: 50%;
+      margin-top: -9px;
+      font-size:14px;
+    }
+
+    .disclosure, .checkbox, .icon {
+      left: 0;
+    }
+
+    &.has-disclosure {
+      .checkbox { left: 18px; }
+      .icon { left: 16px; }
+      label { left: 18px; }
+
+      &.has-checkbox {
+        .icon { left: 38px; }
+        label { left: 40px; }
+
+        &.has-icon {
+          label { left: 62px; }
+        }
+      }
+
+      &.has-icon {
+        label { left: 40px; }
+      }
+    }
+
+    &.has-checkbox {
+      .icon { left: 20px; }
+      label { left: 22px; }
+
+      &.has-icon {
+        label { left: 44px; }
+      }
+    }
+
+    &.has-icon {
+      label { left: 28px; }
+    }
+  }
+}

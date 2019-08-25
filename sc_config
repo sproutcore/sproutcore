@@ -37,6 +37,13 @@ BT.addTheme(BT.Theme.extend({
 }));
 
 BT.addTheme(BT.Theme.extend({
+  ref: "sproutcore:material",
+  cssName: "material",
+  path: dirname() + "/themes/material",
+  dependencies: ["sproutcore:empty_theme"]
+}));
+
+BT.addTheme(BT.Theme.extend({
   ref: "sproutcore:legacy",
   path: dirname() + "/themes/legacy_theme",
   dependencies: ["sproutcore:empty_theme"]

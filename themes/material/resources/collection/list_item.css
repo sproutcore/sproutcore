@@ -1,0 +1,67 @@
+
+$theme.sc-list-view {
+  background: $list-bg;
+
+  .sc-collection-item {
+    background: $list-item-bg;
+    color: $list-item-text-color;
+    text-shadow: $list-item-text-shadow;
+
+    &.even {
+      background: $list-item-even-bg;
+      color: $list-item-even-text-color;
+      text-shadow: $list-item-even-text-shadow;
+    }
+
+    &.even.sel,
+    &.sel {
+      background: $sel-list-item-bg;
+      color: $sel-list-item-text-color;
+      text-shadow: $sel-list-item-text-shadow;
+    }
+
+    &.even.drop-target,
+    &.drop-target {
+      background: $list-item-drop-target-bg;
+      color: $list-item-drop-target-text-color;
+      text-shadow: $list-item-drop-target-text-shadow;
+    }
+
+
+    $theme.checkbox {
+      background-color: transparent;
+      border: 0 none;
+      margin-top: -7px;
+    }
+
+    $theme.disclosure {
+      position: absolute;
+      top: 50%;
+      margin-top: -7px;
+      width: 18px;
+      height: 18px;
+    }
+
+    $theme.icon {
+      margin-top: -8px;
+    }
+
+    &.has-icon label {
+      left: 28px;
+    }
+
+    &.has-checkbox {
+      label { left: 28px; }
+
+      &.has-icon {
+        label { left: 48px; }
+      }
+    }
+
+    .count .inner {
+      position: relative;
+      top: 1px;
+      text-shadow: none;
+    }
+  }
+}

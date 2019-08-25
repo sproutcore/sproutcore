@@ -1,0 +1,90 @@
+@import "compass/css3";
+
+$theme.button {
+  box-sizing: border-box;
+  background-color: $button-bg;
+  border: 1px solid $button-border-color;
+  box-shadow: $button-box-shadow;
+
+  color: $button-text-color;
+  text-shadow: $button-text-shadow;
+
+  &:hover {
+    background-color: $hover-button-bg;
+    border-color: $hover-button-border-color;
+    color: $hover-button-text-color;
+    text-shadow: $hover-button-text-shadow;
+  }
+
+  &.active {
+    background-color: $active-button-bg;
+    border-color: $active-button-border-color;
+    color: $active-button-text-color;
+    text-shadow: $active-button-text-shadow;
+  }
+
+  &.def {
+    font-weight: 500;
+  }
+
+  &.sel, &.def {
+    background-color: $sel-button-bg;
+    border-color: $sel-button-border-color;
+    color: $sel-button-text-color;
+    text-shadow: $sel-button-text-shadow;
+  }
+
+  &.sel:hover, &.def:hover {
+    background-color: $sel-hover-button-bg;
+    border-color: $sel-hover-button-border-color;
+    color: $sel-hover-button-text-color;
+    text-shadow: $sel-hover-button-text-shadow;
+  }
+
+  &.sel.active, &.def.active {
+    background-color: $sel-active-button-bg;
+    border-color: $sel-active-button-border-color;
+    color: $sel-active-button-text-color;
+    text-shadow: $sel-active-button-text-shadow;
+  }
+
+  &.disabled {
+    opacity: .5;
+  }
+
+  .sc-button-label {
+    position: relative;
+    display: block;
+    line-height: 21px;
+    text-align: center;
+    margin-top: 0;
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+
+  &.sc-static-layout {
+    display: inline-block;
+  }
+}
+
+
+@theme(capsule) {
+  $theme.button {
+    border-radius: 30px;
+  }
+}
+
+/*
+TODO: Improve support for pointer button
+*/
+@theme(point-left) {
+  $theme.button {
+    clip-path: polygon(14px 0%, 100% 0%, 100% 100%, 14px 100%, 0% 50%);
+  }
+}
+
+@theme(point-right) {
+  $theme.button {
+    clip-path: polygon(0% 0%, calc(100% - 14px) 0%, 100% 50%, calc(100% - 14px) 100%, 0% 100%);
+  }
+}

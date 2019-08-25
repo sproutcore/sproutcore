@@ -1,0 +1,9 @@
+
+@theme(dark) {
+  $theme.sc-popup-button-view {
+
+    &:after {
+      color: $button-dark-text-color;
+    }
+  }
+}

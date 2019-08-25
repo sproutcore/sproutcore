@@ -1,0 +1,420 @@
+
+// ..........................................................
+// GLOBALS
+//
+
+$black-text-shadow: 0 1px 1px rgba(0,0,0,.5);
+$white-text-shadow: 0 1px 1px white;
+
+$primary-color: hsl(215, 85%, 65%);
+$hover-primary-color: hsl(215, 85%, 60%);
+$active-primary-color: hsl(215, 85%, 55%);
+
+
+$default-bg: #FDFDFD;
+$default-border-color: rgba(0, 0, 0, 0.1);
+$default-border: 1px solid $default-border-color;
+$default-box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.05);
+$default-button-text-color: #444;
+$default-text-color: #000;
+$default-text-shadow: $white-text-shadow;
+
+$hover-default-bg: #EDEDED;
+$hover-default-border-color: $default-border-color;
+$hover-default-border: 1px solid $hover-default-border-color;
+$hover-default-text-color: #444;
+$hover-default-text-shadow: $white-text-shadow;
+
+$active-default-bg: #DDD;
+$active-default-border-color: $default-border-color;
+$active-default-border: 1px solid $active-default-border-color;
+$active-default-text-color: #444;
+$active-default-text-shadow: $white-text-shadow;
+
+$sel-default-bg: hsl(215, 75%, 65%);
+$sel-default-border-color: $default-border-color;
+$sel-default-text-color: #FFF;
+$sel-default-text-shadow: $black-text-shadow;
+
+$sel-hover-default-bg: hsl(215, 75%, 60%);
+$sel-hover-default-border-color: $default-border-color;
+$sel-hover-default-border: 1px solid $sel-default-border-color;
+$sel-hover-default-text-color: #FFF;
+$sel-hover-default-text-shadow: $black-text-shadow;
+
+$sel-active-default-bg: hsl(215, 75%, 55%);
+$sel-active-default-border-color: $default-border-color;
+$sel-active-default-text-color: #FFF;
+$sel-active-default-text-shadow: $black-text-shadow;
+
+$disable-default-text-color: #A0A0A0;
+
+
+$border-radius-small: 0px;
+$border-radius-regular: 1px;
+$border-radius-large: 2px;
+$border-radius-jumbo: 3px;
+
+
+
+
+
+// ..........................................................
+// BUTTON
+//
+
+$button-bg: $default-bg;
+$button-border-color: $default-border-color;
+$button-box-shadow: $default-box-shadow;
+$button-text-color: $default-button-text-color;
+$button-text-shadow: $default-text-shadow;
+
+$hover-button-bg: $hover-default-bg;
+$hover-button-border-color: $hover-default-border-color;
+$hover-button-text-color: $hover-default-text-color;
+$hover-button-text-shadow: $hover-default-text-shadow;
+
+$active-button-bg: $active-default-bg;
+$active-button-border-color: $active-default-border-color;
+$active-button-text-color: $active-default-text-color;
+$active-button-text-shadow: $active-default-text-shadow;
+
+$sel-button-bg: $sel-default-bg;
+$sel-button-border-color: $sel-default-border-color;
+$sel-button-text-color: $sel-default-text-color;
+$sel-button-text-shadow: $sel-default-text-shadow;
+
+$sel-hover-button-bg: $sel-hover-default-bg;
+$sel-hover-button-border-color: $sel-hover-default-border-color;
+$sel-hover-button-text-color: $sel-hover-default-text-color;
+$sel-hover-button-text-shadow: $sel-hover-default-text-shadow;
+
+$sel-active-button-bg: $sel-active-default-bg;
+$sel-active-button-border-color: $sel-active-default-border-color;
+$sel-active-button-text-color: $sel-active-default-text-color;
+$sel-active-button-text-shadow: $sel-active-default-text-shadow;
+
+$button-border-radius-small: $border-radius-small;
+$button-border-radius-regular: $border-radius-regular;
+$button-border-radius-large: $border-radius-large;
+$button-border-radius-jumbo: $border-radius-jumbo;
+
+
+// ..........................................................
+// SELECT
+//
+
+$select-bg: $default-bg;
+$select-text-color: #222;
+
+
+// ..........................................................
+// SEGMENTED
+//
+
+$segmented-border-size: 1px;
+
+$segment-bg: $default-bg;
+$segment-border-color: $default-border-color;
+$segment-box-shadow: $button-box-shadow;
+$middle-segment-border-color: $default-border-color;
+$segment-text-color: $default-button-text-color;
+$segment-text-shadow: $default-text-shadow;
+
+$active-segment-bg: $active-default-bg;
+$active-segment-border-color: $active-default-border-color;
+$active-segment-text-color: $active-default-text-color;
+$active-segment-text-shadow: $active-default-text-shadow;
+
+$sel-segment-bg: $sel-default-bg;
+$sel-segment-border-color: $sel-default-border-color;
+$sel-segment-text-color: $sel-default-text-color;
+$sel-segment-text-shadow: $sel-default-text-shadow;
+
+$sel-active-segment-bg: $sel-active-default-bg;
+$sel-active-segment-border-color: $sel-active-default-border-color;
+$sel-active-segment-text-color: $sel-active-default-text-color;
+$sel-active-segment-text-shadow: $sel-active-default-text-shadow;
+
+$segment-border-radius-small: $border-radius-small;
+$segment-border-radius-regular: $border-radius-regular;
+$segment-border-radius-large: $border-radius-large;
+$segment-border-radius-jumbo: $border-radius-jumbo;
+
+
+// ..........................................................
+// FIELD
+//
+
+$outline-color: #66AFE9;
+$field-inset-box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+
+$field-bg: #FFF;
+$field-border-color: #CCC;
+$field-box-shadow: $field-inset-box-shadow;
+$field-border-radius: 2px;
+
+$field-text-color: #000;
+$field-text-shadow: none;
+
+$focus-field-border-color: rgba(82, 168, 236, 0.8); // rgba(82, 168, 236, 0.8)
+$focus-field-box-shadow: 0 0 5px rgba(82, 168, 236, .8), inset 0 0 2px rgba(82, 168, 236,.6);
+
+
+// ..........................................................
+// CHECKBOX
+//
+
+$checkbox-bg: #FFF;
+$checkbox-border-color: $default-border-color;
+$checkbox-box-shadow: $button-box-shadow;
+$checkbox-bg-active: $active-default-bg;
+$active-checkbox-border-color: $active-default-border-color;
+$sel-checkbox-bg: $sel-default-bg;
+$sel-checkbox-border-color: $sel-default-border-color;
+$sel-active-checkbox-bg: $sel-active-default-bg;
+$sel-active-checkbox-border-color: $sel-active-default-border-color;
+
+
+// ..........................................................
+// RADIO
+//
+
+$radio-bg: #FFF;
+$radio-border-color: $default-border-color;
+$radio-box-shadow: $button-box-shadow;
+$radio-bg-active: $active-default-bg;
+$active-radio-border-color: $active-default-border-color;
+$sel-radio-bg: $sel-default-bg;
+$sel-radio-border-color: $sel-default-border-color;
+$sel-active-radio-bg: $sel-active-default-bg;
+$sel-active-radio-border-color: $sel-active-default-border-color;
+
+
+// ..........................................................
+// PANEL
+//
+
+$panel-bg: #FFF;
+$panel-border: none;
+$panel-box-shadow: 0 0 5px rgba(0,0,0,.4);
+$panel-info-box-shadow: 0 0 5px 2px darkblue;
+$panel-warn-box-shadow: 0 0 5px 2px darkorange;
+$panel-error-box-shadow: 0 0 5px 2px red;
+$panel-border-radius: 2px;
+
+
+// ..........................................................
+// PICKER
+//
+
+$picker-bg: $panel-bg;
+$picker-border: none;
+$picker-box-shadow: $panel-box-shadow;
+$picker-border-radius: $panel-border-radius;
+
+$picker-pointer-bottom-box-shadow: -2px -2px 2px rgba(0, 0, 0, 0.2);
+$picker-pointer-right-box-shadow: -2px 2px 2px rgba(0, 0, 0, 0.2);
+$picker-pointer-left-box-shadow: 2px -2px 2px rgba(0, 0, 0, 0.2);
+$picker-pointer-top-box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.2);
+
+
+// ..........................................................
+// MENU
+//
+
+$menu-bg: $panel-bg;
+$menu-border-color: $panel-border;
+$menu-box-shadow: $panel-box-shadow;
+$menu-border-radius: $panel-border-radius;
+$menu-item-text-color: $default-text-color;
+
+$hover-menu-item-bg: $sel-default-bg;
+$hover-menu-item-text-color: $sel-default-text-color;
+$disable-menu-item-text-color: $disable-default-text-color;
+
+
+// ..........................................................
+// COLLECTION
+//
+
+$sel-collection-bg: #608AB9;
+$collection-bg: #FAFAFA;
+
+$collection-item-bg: transparent;
+$collection-item-text-color: $default-text-color;
+$collection-item-text-shadow: none;
+
+$collection-item-even-bg: #eef3f6;
+$collection-item-even-text-color: $default-text-color;
+$collection-item-even-text-shadow: none;
+
+$sel-collection-item-bg: $sel-collection-bg;
+$sel-collection-item-text-color: $sel-default-text-color;
+$sel-collection-item-text-shadow: none;
+
+$collection-item-drop-target-bg: #bcd7ec;
+$collection-item-drop-target-text-color: $sel-default-text-color;
+$collection-item-drop-target-text-shadow: none;
+
+
+// ..........................................................
+// LIST
+//
+
+$list-bg: white;
+
+$list-item-bg: white;
+$list-item-text-color: #000;
+$list-item-text-shadow: none;
+
+$list-item-even-bg: $collection-item-even-bg;
+$list-item-even-text-color: $collection-item-even-text-color;
+$list-item-even-text-shadow: none;
+
+$sel-list-item-bg: $sel-collection-item-bg;
+$sel-list-item-text-color: $sel-collection-item-text-color;
+$sel-list-item-text-shadow: none;
+
+$list-item-drop-target-bg: $collection-item-drop-target-bg;
+$list-item-drop-target-text-color: $collection-item-drop-target-text-color;
+$list-item-drop-target-text-shadow: none;
+
+$list-insertion-point-bg: #9ABAC9;
+
+
+// ..........................................................
+// GRID
+//
+
+$grid-bg: $list-bg;
+
+$grid-item-bg: $list-item-bg;
+$grid-item-text-color: $list-item-text-color;
+$grid-item-text-shadow: $list-item-text-shadow;
+
+$grid-item-even-bg: $list-item-even-bg;
+$grid-item-even-text-color: $list-item-even-text-color;
+$grid-item-even-text-shadow: $list-item-even-text-shadow;
+
+$sel-grid-item-bg: $sel-list-item-bg;
+$sel-grid-item-text-color: $sel-list-item-text-color;
+$sel-grid-item-text-shadow: $sel-list-item-text-shadow;
+
+$grid-item-drop-target-bg: $list-item-drop-target-bg;
+$grid-item-drop-target-text-color: $list-item-drop-target-text-color;
+$grid-item-drop-target-text-shadow: $list-item-drop-target-text-shadow;
+
+$grid-insertion-point-bg: $list-insertion-point-bg;
+
+
+// ..........................................................
+// SOURCE LIST
+//
+
+$source-list-bg: $collection-bg;
+
+$source-list-item-bg: $collection-item-bg;
+$source-list-item-text-color: $collection-item-text-color;
+$source-list-item-text-shadow: $collection-item-text-shadow;
+
+$source-list-item-even-bg: $collection-item-even-bg;
+$source-list-item-even-text-color: $collection-item-even-text-color;
+$source-list-item-even-text-shadow: $collection-item-even-text-shadow;
+
+$sel-source-list-item-bg: $sel-collection-item-bg;
+$sel-source-list-item-text-color: $sel-default-text-color;
+$sel-source-list-item-text-shadow: $sel-default-text-shadow;
+$sel-source-list-item-box-color: inset 0 1px 0px rgba(0, 0, 0, 0.6), inset 0 2px 0px rgba(255, 255, 255, 0.4), inset 0 -1px 0 rgba(0, 0, 0, 0.5);
+$sel-source-list-item-border-top-color: $sel-default-bg;
+$sel-source-list-item-border-bottom-color: $sel-default-bg;
+
+$source-list-item-drop-target-bg: $collection-item-drop-target-bg;
+$source-list-item-drop-target-text-color: $collection-item-drop-target-text-color;
+$source-list-item-drop-target-text-shadow: $collection-item-drop-target-text-shadow;
+
+
+// ..........................................................
+// WELL
+//
+
+$well-bg: #F7F7F7;
+$well-border: none;
+$well-box-shadow: inset 0px 1px 3px rgba(0,0,0,0.3);
+$well-border-radius: 6px;
+
+
+// ..........................................................
+// DISCLOSURE
+//
+
+$disclosure-text-color: #7B7B7B;
+$active-disclosure-text-color: #494949;
+
+
+// ..........................................................
+// PROGRESS
+//
+
+$progress-bg: #FFF;
+$progress-box-shadow: 0px; // TODO use material mixin
+$progress-border-radius: 0px;
+$sel-progress-bg: $sel-default-bg;
+$sel-progress-border-color: $sel-default-border-color;
+
+
+// ..........................................................
+// SCROLLER
+//
+
+$scroller-track-bg: #FAFAFA;
+$scroller-track-border-color: rgba(0, 0, 0, 0.25);
+$scroller-track-box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.1);
+$hover-scroller-track-bg: $scroller-track-bg;
+$hover-scroller-track-border-color: $scroller-track-border-color;
+$active-scroller-track-bg: $scroller-track-bg;
+$active-scroller-track-border-color: $scroller-track-border-color;
+
+$scroller-thumb-bg: $primary-color;
+$scroller-thumb-border-color: rgba(0, 0, 0, 0.25);
+$scroller-thumb-box-shadow: $default-box-shadow;
+$hover-scroller-thumb-bg: $hover-primary-color;
+$hover-scroller-thumb-border-color: $scroller-thumb-border-color;
+$active-scroller-thumb-bg: $active-primary-color;
+$active-scroller-thumb-border-color: $scroller-thumb-border-color;
+
+
+// ..........................................................
+// SLIDER
+//
+
+$slider-bg: transparent;
+$slider-border: 1px solid #FFF;
+$slider-box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.5);
+
+$slider-step-mark-color: #FFF;
+
+$slider-handle-bg: #FFF;
+$slider-handler-border: none;
+$slider-handle-box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.25);
+
+$active-slider-handle-bg: $active-default-bg;
+$active-slider-handle-box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.25);
+
+
+// ..........................................................
+// SPLIT DIVIDER
+//
+
+$split-divider-bg: #000;
+$split-divider-box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+
+
+// ..........................................................
+// TOOLBAR
+//
+
+$toolbar-bg: #EEE;
+$toolbar-border: none;
+$toolbar-box-shadow: $default-box-shadow;
+$toolbar-text-color: $default-text-color;

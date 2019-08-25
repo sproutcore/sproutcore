@@ -1,0 +1,8 @@
+
+$theme.toolbar {
+  background-color: $toolbar-bg;
+  border: $toolbar-border;
+  box-shadow: $toolbar-box-shadow;
+  color: $toolbar-text-color;
+  text-shadow: 0 1px 1px white;
+}

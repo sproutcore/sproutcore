@@ -1,0 +1,78 @@
+@import "compass/css3";
+
+$theme.sc-text-field-view {
+  background-color: transparent;
+  appearance: none;
+
+  transition-property: box-shadow, border;
+  transition-duration: 0.2s;
+  transition-timing-function: linear;
+
+  .border {
+    background-color: $field-bg;
+    border: 1px solid $field-border-color;
+    box-shadow: $field-box-shadow;
+    border-radius: $field-border-radius;
+  }
+
+  input, textarea {
+    left: 2px;
+    color: $field-text-color;
+    text-shadow: $field-text-shadow;
+  }
+
+  &.disabled {
+    input, textarea, .sc-text-field-accessory-view {
+      opacity: .5;
+    }
+  }
+
+
+  &.focus .border {
+    border: 1px solid $focus-field-border-color;
+    box-shadow: $focus-field-box-shadow;
+  }
+
+
+  .sc-hint, .hint {
+    z-index: 0; top: 5px;
+  }
+
+  &.text-area .padding {
+    right: 1px;
+    left: 0px;
+    bottom: 1px;
+    top: 1px;
+  }
+
+  textarea {
+    padding: 4px;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    top: 0;
+    box-sizing: border-box;
+  }
+
+
+}
+
+// TODO a tester
+.firefox $theme.sc-text-field-view {
+  &.text-area .padding {
+    right: 0;
+    left: 4px;
+    bottom: 4px;
+    top: 4px;
+  }
+
+  textarea {
+    padding: 0px;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+  }
+}

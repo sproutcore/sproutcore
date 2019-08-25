@@ -65,7 +65,7 @@ SC.MultiSelectView = SC.CollectionView.extend({
 
       // if content is not editable, then always let collection view handle the
       // event.
-      if (this._isInsideElementWithClassName('fa-remove', evt)) {
+      if (this._isInsideElementWithClassName('fa-times', evt)) {
         this._isMouseDownOnRemove = YES;
         return YES;
       }
@@ -75,7 +75,7 @@ SC.MultiSelectView = SC.CollectionView.extend({
 
     mouseUp: function (evt) {
       if (this._isMouseDownOnRemove) {
-        if (this._isInsideElementWithClassName('fa-remove', evt)) {
+        if (this._isInsideElementWithClassName('fa-times', evt)) {
           // remove the item from selection
           var del = this.displayDelegate;
           del.deselect(this.get('contentIndex'));
@@ -101,7 +101,7 @@ SC.MultiSelectView = SC.CollectionView.extend({
       if (this.get('isSelected') && value) {
         context.addClass('selected');
         context.push(value);
-        context.push('<i class="fa fa-remove"></i>');
+        context.push('<i class="fal fa-times"></i>');
       }
       else {
         context.removeClass('selected');
@@ -124,7 +124,7 @@ SC.MultiSelectView = SC.CollectionView.extend({
     var top = 0;
     return sel.map(function (v) {
       var value = SC.get(content.objectAt(v), ckv);
-      var width = SC.metricsForString(value, 'div', ['fa-remove', 'sc-multi-select-item-view']).width * 2;
+      var width = SC.metricsForString(value, 'div', ['fa-times', 'sc-multi-select-item-view']).width * 2;
       var ret = {
         left: left,
         top: top,
@@ -160,7 +160,7 @@ SC.MultiSelectView = SC.CollectionView.extend({
     //   var item = content.objectAt(contentIndex);
     //   var labelKey = this.get('contentValueKey');
     //   var value = SC.get(item, labelKey);
-    //   width = SC.metricsForString(value, 'div', ['fa-remove', 'sc-multi-select-item-view']).width * 2;
+    //   width = SC.metricsForString(value, 'div', ['fa-times', 'sc-multi-select-item-view']).width * 2;
     // }
 
 
@@ -347,7 +347,7 @@ SC.MultiSelectView = SC.CollectionView.extend({
     // // decide whether it needs popups
     // debugger;
     this.showPopup();
-    this.becomeFirstResponder();
+    this.becomeFirstResponder(evt);
     return YES;
   },
 
@@ -369,5 +369,3 @@ SC.MultiSelectView.InstantiatePopupTask = SC.Task.extend({
     this.multiSelectView.setupPopup();
   }
 });
-
-

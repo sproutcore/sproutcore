@@ -1,0 +1,10 @@
+
+@theme(sc-regular-size) {
+
+  $theme.sc-popup-button-view {
+    &.sc-static-layout .sc-button-label {
+      margin-left: 2px;
+      margin-right: 20px;
+    }
+  }
+}

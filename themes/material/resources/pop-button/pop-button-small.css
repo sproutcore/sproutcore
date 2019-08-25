@@ -1,0 +1,14 @@
+
+@theme(sc-small-size) {
+
+  $theme.sc-popup-button-view {
+    &:after {
+      top: 0;
+    }
+
+    &.sc-static-layout .sc-button-label {
+      margin-left: 0px;
+      margin-right: 18px;
+    }
+  }
+}

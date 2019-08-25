@@ -1,0 +1,16 @@
+
+$theme.sc-list-insertion-point {
+  overflow: visible;
+  background-color: $list-insertion-point-bg;
+  z-index: 1000;
+}
+
+$theme.sc-list-insertion-point > .anchor {
+  position: absolute;
+  width: 8px;
+  top: -3px;
+  left: -4px;
+  height: 8px;
+  border-radius: 4px;
+  background-color: $list-insertion-point-bg;
+}

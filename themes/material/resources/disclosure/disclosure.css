@@ -1,0 +1,31 @@
+
+$theme.disclosure {
+
+  border: 0 none;
+  color: black;
+  text-shadow: 0 1px 1px rgba(255,255,255,.4);
+
+  .sc-button-label {
+    left: 18px;
+  }
+
+  .disclosure.button {
+    width: 14px;
+    height: 14px;
+
+    &.open:after, &.closed:after {
+      position: absolute;
+      font-family: FontAwesome;
+      top: -4px;
+      font-size: 18px;
+      font-weight: 900;
+      color: $disclosure-text-color;
+    }
+
+    &.open:after { content: "\f0d7"; }
+    &.closed:after { content: "\f0da"; }
+
+    &.active { color: $active-disclosure-text-color; }
+  }
+}
+

@@ -1,0 +1,31 @@
+
+@theme(sc-huge-size) {
+
+  $theme.button {
+    height: 36px;
+    font-size: 14px;
+    border-radius: $button-border-radius-large;
+
+    .sc-button-label {
+      margin-top: 6px;
+      height: 24px;
+    }
+
+    &.sc-static-layout .sc-button-label {
+      margin-left: 14px;
+      margin-right: 14px;
+    }
+  }
+
+}
+
+
+@theme(capsule) {
+  $theme.button {
+    &.sc-static-layout .sc-button-label {
+      margin-left: 18px;
+      margin-right: 18px;
+    }
+  }
+}
+

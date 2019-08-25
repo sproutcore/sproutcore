@@ -1,0 +1,31 @@
+
+$button-success-bg: hsl(125, 75%, 50%);
+$button-success-border-color: rgba(0,0,0,.25);
+$button-success-box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.15);
+$button-success-text-color: #FFF;
+$button-success-text-shadow: 0 1px 1px rgba(0,0,0,.5);
+
+$hover-button-success-bg: hsl(125, 75%, 45%);
+$hover-button-success-border-color: $button-success-border-color;
+$hover-button-success-text-color: $button-success-text-color;
+$hover-button-success-text-shadow: $button-success-text-shadow;
+
+$active-button-success-bg: hsl(125, 75%, 40%);
+$active-button-success-border-color: $button-success-border-color;
+$active-button-success-text-color: $button-success-text-color;
+$active-button-success-text-shadow: $button-success-text-shadow;
+
+$sel-button-success-bg: hsl(125, 65%, 50%);
+$sel-button-success-border-color: $button-success-border-color;
+$sel-button-success-text-color: $button-success-text-color;
+$sel-button-success-text-shadow: $button-success-text-shadow;
+
+$sel-hover-button-success-bg: hsl(125, 65%, 45%);
+$sel-hover-button-success-border-color: $button-success-border-color;
+$sel-hover-button-success-text-color: $button-success-text-color;
+$sel-hover-button-success-text-shadow: $button-success-text-shadow;
+
+$sel-active-button-success-bg: hsl(125, 65%, 40%);
+$sel-active-button-success-border-color: $button-success-border-color;
+$sel-active-button-success-text-color: $button-success-text-color;
+$sel-active-button-success-text-shadow: $button-success-text-shadow;

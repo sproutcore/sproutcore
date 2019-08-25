@@ -1,0 +1,33 @@
+
+$theme.sc-pane.sc-panel {
+  background: transparent;
+
+  .panel-background {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+
+    background-color: $panel-bg;
+    border: $panel-border;
+    box-shadow: $panel-box-shadow;
+    border-radius: $panel-border-radius;
+  }
+
+  &.sc-alert-info {
+    .panel-background {
+      box-shadow: $panel-info-box-shadow;
+    }
+  }
+  &.sc-alert-warn {
+    .panel-background {
+      box-shadow: $panel-warn-box-shadow;
+    }
+  }
+  &.sc-alert-error {
+    .panel-background {
+      box-shadow: $panel-error-box-shadow;
+    }
+  }
+}

@@ -1,0 +1,31 @@
+
+$button-warning-bg: hsl(20, 85%, 55%);
+$button-warning-border-color: rgba(0,0,0,.25);
+$button-warning-box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.15);
+$button-warning-text-color: #FFF;
+$button-warning-text-shadow: 0 1px 1px rgba(0,0,0,.5);
+
+$hover-button-warning-bg: hsl(20, 85%, 50%);
+$hover-button-warning-border-color: $button-warning-border-color;
+$hover-button-warning-text-color: $button-warning-text-color;
+$hover-button-warning-text-shadow: $button-warning-text-shadow;
+
+$active-button-warning-bg: hsl(20, 85%, 45%);
+$active-button-warning-border-color: $button-warning-border-color;
+$active-button-warning-text-color: $button-warning-text-color;
+$active-button-warning-text-shadow: $button-warning-text-shadow;
+
+$sel-button-warning-bg: hsl(20, 75%, 55%);
+$sel-button-warning-border-color: $button-warning-border-color;
+$sel-button-warning-text-color: $button-warning-text-color;
+$sel-button-warning-text-shadow: $button-warning-text-shadow;
+
+$sel-hover-button-warning-bg: hsl(20, 75%, 50%);
+$sel-hover-button-warning-border-color: $button-warning-border-color;
+$sel-hover-button-warning-text-color: $button-warning-text-color;
+$sel-hover-button-warning-text-shadow: $button-warning-text-shadow;
+
+$sel-active-button-warning-bg: hsl(20, 75%, 45%);
+$sel-active-button-warning-border-color: $button-warning-border-color;
+$sel-active-button-warning-text-color: $button-warning-text-color;
+$sel-active-button-warning-text-shadow: $button-warning-text-shadow;

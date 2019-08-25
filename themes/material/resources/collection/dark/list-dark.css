@@ -1,0 +1,36 @@
+
+@theme(dark) {
+  $theme.sc-list-view {
+
+    background: $list-dark-bg;
+
+    .sc-collection-item {
+      background: $list-dark-item-bg;
+      color: $list-dark-item-text-color;
+      text-shadow: $list-dark-item-text-shadow;
+
+
+      &.even {
+        background: $list-dark-item-even-bg;
+        color: $list-dark-item-even-text-color;
+        text-shadow: $list-dark-item-even-text-shadow;
+      }
+
+      &.even.sel,
+      &.sel {
+        background: $sel-list-dark-item-bg;
+        color: $sel-list-dark-item-text-color;
+        box-shadow: $sel-list-dark-item-box-color;
+        text-shadow: $sel-list-dark-item-text-shadow;
+        //border-top: 1px solid $sel-list-dark-item-border-top-color;
+        //border-bottom: 1px solid $sel-list-dark-item-border-bottom-color;
+      }
+
+      &.even.drop-target,
+      &.drop-target {
+        background: $list-dark-item-drop-target-bg;
+        color: $list-dark-item-drop-target-text-color;
+        text-shadow: $list-dark-item-drop-target-text-shadow;
+      }
+  }
+}

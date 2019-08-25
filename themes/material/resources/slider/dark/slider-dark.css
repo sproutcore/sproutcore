@@ -1,0 +1,26 @@
+
+@theme(dark) {
+
+$theme.slider {
+  .sc-slider-step-mark {
+    background-color: $slider-step-mark-dark-color;
+  }
+
+  .track {
+    border: $slider-dark-border;
+  }
+
+  .sc-handle {
+    background-color: $slider-handle-dark-bg; 
+    box-shadow: $slider-handle-dark-box-shadow;
+    border: $slider-handler-dark-border;
+  }
+
+  &.active {
+    .sc-handle { 
+      background-color: $active-slider-handle-dark-bg;
+      box-shadow: $active-slider-handle-dark-box-shadow;
+    }
+  }
+}
+}

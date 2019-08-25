@@ -1,0 +1,31 @@
+
+$button-danger-bg: hsl(0, 85%, 60%);
+$button-danger-border-color: rgba(0,0,0,.5);
+$button-danger-box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.15);
+$button-danger-text-color: #FFF;
+$button-danger-text-shadow: 0 1px 1px rgba(0,0,0,.5);
+
+$hover-button-danger-bg: hsl(0, 85%, 55%);
+$hover-button-danger-border-color: $button-danger-border-color;
+$hover-button-danger-text-color: $button-danger-text-color;
+$hover-button-danger-text-shadow: $button-danger-text-shadow;
+
+$active-button-danger-bg: hsl(0, 85%, 50%);
+$active-button-danger-border-color: $button-danger-border-color;
+$active-button-danger-text-color: $button-danger-text-color;
+$active-button-danger-text-shadow: $button-danger-text-shadow;
+
+$sel-button-danger-bg: hsl(0, 75%, 60%);
+$sel-button-danger-border-color: $button-danger-border-color;
+$sel-button-danger-text-color: $button-danger-text-color;
+$sel-button-danger-text-shadow: $button-danger-text-shadow;
+
+$sel-hover-button-danger-bg: hsl(0, 75%, 55%);
+$sel-hover-button-danger-border-color: $button-danger-border-color;
+$sel-hover-button-danger-text-color: $button-danger-text-color;
+$sel-hover-button-danger-text-shadow: $button-danger-text-shadow;
+
+$sel-active-button-danger-bg: hsl(0, 75%, 50%);
+$sel-active-button-danger-border-color: $button-danger-border-color;
+$sel-active-button-danger-text-color: $button-danger-text-color;
+$sel-active-button-danger-text-shadow: $button-danger-text-shadow;

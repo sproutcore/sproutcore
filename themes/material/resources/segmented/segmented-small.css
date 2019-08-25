@@ -1,0 +1,39 @@
+
+@theme(sc-small-size) {
+
+$theme.sc-segment-view {
+  font-size: 11px;
+  padding: 0px 5px 1px;
+
+  .sc-button-label {
+    .icon {
+      top: 1px;
+      &:before {
+        font-size: 13px;
+      }
+    }
+  }
+
+  &.sc-first-segment {
+    border-top-left-radius: $segment-border-radius-small;
+    border-bottom-left-radius: $segment-border-radius-small;
+
+    &.vertical {
+      border-radius: 0;
+      border-top-left-radius: $segment-border-radius-small;
+      border-top-right-radius: $segment-border-radius-small;
+    }
+  }
+  &.sc-last-segment {
+    border-top-right-radius: $segment-border-radius-small;
+    border-bottom-right-radius: $segment-border-radius-small;
+
+    &.vertical {
+      border-radius: 0;
+      border-bottom-left-radius: $segment-border-radius-small;
+      border-bottom-right-radius: $segment-border-radius-small;
+    }
+  }
+}
+
+}

@@ -1,0 +1,29 @@
+
+$theme.sc-popup-button-view {
+
+  &:after {
+    position: absolute;
+    font-family: FontAwesome;
+    top: 3px;
+    right: 8px;
+    font-size: 13px;
+    line-height: 18px;
+    font-weight: 900;
+    color: $button-text-color;
+    content: "\f107";
+  }
+
+  .sc-button-label {
+    margin-left: 2px;
+    text-align: left;
+    margin-right: 15px;
+    vertical-align: top;
+  }
+
+  &.sc-static-layout .sc-button-label {
+    display: inline-block;
+    margin-left: 0px;
+    margin-right: 20px;
+  }
+
+}

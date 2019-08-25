@@ -1,0 +1,90 @@
+
+$theme.sc-segmented-view {
+  overflow: visible;
+
+  &.disabled {
+    opacity: 0.5;
+  }
+
+}
+
+$theme.sc-segment-view {
+  margin: 0;
+  background-color: $segment-bg;
+  border: $segmented-border-size solid $segment-border-color;
+  border-left-color: $middle-segment-border-color;
+  border-left-width: 1px;
+  border-right-width: 0;
+  box-shadow: $segment-box-shadow;
+  vertical-align: top;
+
+  .sc-button-label {
+    vertical-align: top;
+
+    &.icon {
+      padding-left: 20px;
+    }
+    .icon {
+      display: inline-block;
+      position: absolute;
+      top: -1px;
+      left: -4px;
+    }
+  }
+
+  &.vertical {
+    border-left-color: $segment-border-color;
+    border-left-width: $segmented-border-size;
+    border-right-width: $segmented-border-size;
+    border-bottom-width: 0;
+    border-top-width: 1px;
+    border-top-color: $middle-segment-border-color;
+  }
+  color: $segment-text-color;
+  text-shadow: $segment-text-shadow;
+  overflow: hidden;
+
+  &.sc-first-segment {
+    border-left-color: $segment-border-color;
+    border-left-width: $segmented-border-size;
+    &.vertical {
+      border-top-color: $segment-border-color;
+      border-top-width: $segmented-border-size;
+    }
+  }
+
+  &.sc-last-segment {
+    border-right-width: $segmented-border-size;
+    &.vertical { border-bottom-width: $segmented-border-size; }
+  }
+
+  .sc-button-label {
+    position: relative;
+  }
+
+  &.active {
+    background-color: $active-segment-bg;
+    border-color: $active-segment-border-color;
+    color: $active-segment-text-color;
+    text-shadow: $active-segment-text-shadow;
+  }
+
+  &.disabled {
+    opacity: 0.5;
+  }
+
+  &.sel {
+    background-color: $sel-segment-bg;
+    border-color: $sel-segment-border-color;
+    color: $sel-segment-text-color;
+    text-shadow: $sel-segment-text-shadow;
+  }
+
+  &.sel.active {
+    background-color: $sel-active-segment-bg;
+    border-color: $sel-active-segment-border-color;
+    color: $sel-active-segment-text-color;
+    text-shadow: $sel-active-segment-text-shadow;
+  }
+
+}
