@@ -1747,7 +1747,7 @@ SC.logChange = function logChange(target, key, value) {
 //@endif
 
 /**
-  Retrieves a property from an object, using get() if the
+  Retrieves/Defines a property from an object, using get/set() if the
   object implements SC.Observable.
 
   @param  {Object}  object  the object to query
@@ -1755,6 +1755,13 @@ SC.logChange = function logChange(target, key, value) {
 */
 SC.mixin(SC, {
 
+  /**
+    Retrieves a property from an object at a specified key, using get() if
+    the object implements SC.Observable.
+
+    @param  {Object}  object  the object to query
+    @param  {String}  path the path to the property to retrieve
+  */
   get: function (object, key) {
     if (!object) return undefined;
     if (key === undefined) return this[object];
@@ -1775,6 +1782,24 @@ SC.mixin(SC, {
       object = window;
     }
     return SC.objectForPropertyPath(path, object);
+  },
+
+  /**
+    Defines a property from an object at a specified key, using set() if
+    the object implements SC.Observable.
+
+    @param  {Object}  object the object update
+    @param  {String}  key the key to define
+    @param  {String}  value the value to set
+  */
+  set: function (object, key, value) {
+    if (object && key) {
+      if (object.set) object.set(key, value);
+      else {
+        if (value === undefined) unset(object[key]);
+        else object[key] = value;
+      }
+    }
   }
 
 });
