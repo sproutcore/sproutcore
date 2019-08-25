@@ -980,6 +980,7 @@ SC.CoreView.reopen(
     // Result: Queue an update to the visibility style.
     case SC.CoreView.UNATTACHED:
     case SC.CoreView.ATTACHED_PARTIAL:
+    case SC.CoreView.ATTACHED_HIDDEN_BY_PARENT:
       // Queue the visibility update for the next time we display.
       this._visibleStyleNeedsUpdate = true;
 
