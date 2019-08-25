@@ -433,7 +433,7 @@ test('checkbox', function () {
 
 test('count', function () {
   // no count should show when count = 0;
-  count(pane.view('count - 0'), null);
+  count(pane.view('count - 0'), 0);
   count(pane.view('count - 10'), 10);
 });
 
@@ -515,7 +515,7 @@ test("changing count value should update display", function () {
   adjustContent(view, 'count', 100);
   count(view, 100); // verify change
 
-  adjustContent(view, 'count', 0);
+  adjustContent(view, 'count', null);
   count(view, null); // verify change
 });
 

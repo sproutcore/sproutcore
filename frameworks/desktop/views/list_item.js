@@ -841,8 +841,9 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
 
     // handle unread count
     key = this.getDelegateProperty('contentUnreadCountKey', del);
-    value = (key && content) ? (content.get ? content.get(key) : content[key]) : null;
-    if (!SC.none(value) && (value !== 0)) {
+    value = (key && content) ? SC.get(content, key) : null;
+    if (!SC.none(value) && value !== '') {
+      console.log(value);
       this.renderCount(working, value);
       var digits = ['zero', 'one', 'two', 'three', 'four', 'five'];
       var valueLength = value.toString().length;
