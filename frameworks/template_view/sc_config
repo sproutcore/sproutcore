@@ -1,6 +1,0 @@
-BT.addFramework(BT.Framework.extend({
-  ref: "sproutcore:template_view",
-  path: dirname(),
-  dependencies: ["sproutcore:core_foundation"],
-  testDependencies: ["sproutcore:core_foundation"]
-}));
