@@ -2,7 +2,7 @@
 
 $theme.sc-text-field-view {
   background-color: transparent;
-  @include appearance(none);
+  appearance: none;
 
   transition-property: box-shadow, border;
   transition-duration: 0.2s;
@@ -25,30 +25,30 @@ $theme.sc-text-field-view {
   &.focus .border {
     border: 1px solid $focus-field-border-color;
     box-shadow: $focus-field-box-shadow;
-  } 
+  }
 
 
   .sc-hint, .hint {
     z-index: 0; top: 5px;
   }
-  
+
   &.text-area .padding {
     right: 1px;
     left: 0px;
     bottom: 1px;
     top: 1px;
   }
-    
-  textarea { 
+
+  textarea {
     padding: 4px;
     right: 0;
     left: 0;
     bottom: 0;
     top: 0;
-    @include box-sizing('border-box');
+    box-sizing: border-box;
   }
-  
-  
+
+
 }
 
 // TODO a tester
@@ -60,13 +60,13 @@ $theme.sc-text-field-view {
     top: 4px;
   }
 
-  textarea { 
+  textarea {
     padding: 0px;
     right: 0;
     left: 0;
     bottom: 0;
     top: 0;
     height: 100%;
-    width: 100%; 
+    width: 100%;
   }
 }
