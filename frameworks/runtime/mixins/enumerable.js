@@ -355,6 +355,39 @@ SC.Enumerable = /** @scope SC.Enumerable.prototype */{
     });
   },
 
+  /**
+    Returns an array sorted by the value of the passed key parameters.
+    null objects will be sorted first.  You can pass either an array of keys
+    or multiple parameters which will act as key names
+
+    @param {String} key one or more key names
+    @returns {Array}
+  */
+  sortPropertyPath: function (key) {
+    var keys = (typeof key === SC.T_STRING) ? arguments : key,
+        len  = keys.length,
+        src;
+
+    // get the src array to sort
+    if (this instanceof Array) src = this;
+    else {
+      src = [];
+      this.forEach(function (i) { src.push(i); });
+    }
+
+    if (!src) return [];
+    return src.sort(function (a, b) {
+      var idx, key, aValue, bValue, ret = 0;
+
+      for (idx = 0; ret === 0 && idx < len; idx++) {
+        key = keys[idx];
+        aValue = a ? (a.getPath ? a.getPath(key) : a[key]) : null;
+        bValue = b ? (b.getPath ? b.getPath(key) : b[key]) : null;
+        ret = SC.compare(aValue, bValue);
+      }
+      return ret;
+    });
+  },
 
   /**
     Returns an array with just the items with the matched property.  You
