@@ -102,8 +102,8 @@
     stop();
     SC.Event.add(view.$('iframe')[0], 'load', this,
     function() {
-      ok(view.$().height() === 150, "height of view should not change based on content");
-      ok(view.$().width() === 250, "width of view should not change based on content");
+      ok(view.$().height() <= 150, "height of view should not change based on content");
+      ok(view.$().width() <= 250, "width of view should not change based on content");
       start();
     });
   });
