@@ -69,13 +69,18 @@ SC.Responder = SC.Object.extend( /** @scope SC.Responder.prototype */ {
     Call this method on your view or responder to make it become first
     responder.
 
+    @param {SC.Event} [evt] event that caused this to be invoked. optional because there is not always an event that
+                            triggers this to be called, but should be passed if available. will be passed through to
+                            the [will|did]LoseKeyResponderTo/[will|did]BecomeKeyResponderFrom callbacks.
     @returns {SC.Responder} receiver
   */
-  becomeFirstResponder: function () {
+  becomeFirstResponder: function (evt) {
     var pane = this.get('pane') || this.get('responderContext') ||
               this.pane();
     if (pane && this.get('acceptsFirstResponder')) {
-      if (pane.get('firstResponder') !== this) pane.makeFirstResponder(this);
+      if (pane.get('firstResponder') !== this) {
+        pane.makeFirstResponder(this, evt);
+      }
     }
     return this;
   },

@@ -186,7 +186,7 @@ SC.ResponderContext = {
 
     this._locked = NO ;
     if (this._pendingResponder) {
-      this.makeFirstResponder(this._pendingResponder);
+      this.makeFirstResponder(this._pendingResponder, evt);
       this._pendingResponder = null;
     }
 

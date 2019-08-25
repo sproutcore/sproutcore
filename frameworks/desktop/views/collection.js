@@ -2074,14 +2074,14 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
 
   insertTab: function(evt) {
     var view = this.get('nextValidKeyView');
-    if (view) view.becomeFirstResponder();
+    if (view) view.becomeFirstResponder(evt);
     else evt.allowDefault();
     return YES ; // handled
   },
 
   insertBacktab: function(evt) {
     var view = this.get('previousValidKeyView');
-    if (view) view.becomeFirstResponder();
+    if (view) view.becomeFirstResponder(evt);
     else evt.allowDefault();
     return YES ; // handled
   },
@@ -2138,7 +2138,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
             contentIndex;
 
         // Ensure that the view is first responder if possible.
-        this.becomeFirstResponder();
+        this.becomeFirstResponder(ev);
 
         // Determine the content index of the item view.
         contentIndex = itemView ? itemView.get('contentIndex') : -1;

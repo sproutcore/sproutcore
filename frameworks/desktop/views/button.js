@@ -665,7 +665,7 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
       this._action(evt);
     } else if (!this._isFocused && (buttonBehavior!==SC.PUSH_BEHAVIOR)) {
       this._isFocused = YES ;
-      this.becomeFirstResponder();
+      this.becomeFirstResponder(evt);
     }
 
     return YES;
@@ -717,7 +717,7 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
       this._action(touch);
     } else if (!this._isFocused && (buttonBehavior!==SC.PUSH_BEHAVIOR)) {
       this._isFocused = YES ;
-      this.becomeFirstResponder();
+      this.becomeFirstResponder(touch);
     }
 
     // don't want to do whatever default is...
@@ -761,7 +761,7 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
      if(!this.get('isEnabledInPane')) return YES;
     if (evt.which === 9 || evt.keyCode === 9) {
       var view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
-      if(view) view.becomeFirstResponder();
+      if(view) view.becomeFirstResponder(evt);
       else evt.allowDefault();
       return YES ; // handled
     }
@@ -850,11 +850,11 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
 
 
   /** @private */
-  didBecomeKeyResponderFrom: function(keyView) {
+  didBecomeKeyResponderFrom: function(keyView, evt) {
     // focus the text field.
     if (!this._isFocused) {
       this._isFocused = YES ;
-      this.becomeFirstResponder();
+      this.becomeFirstResponder(evt);
       if (this.get('isVisibleInWindow')) {
         this.$().focus();
       }
@@ -862,7 +862,7 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
   },
 
   /** @private */
-  willLoseKeyResponderTo: function(responder) {
+  willLoseKeyResponderTo: function(responder, evt) {
     if (this._isFocused) this._isFocused = NO ;
   },
 
@@ -914,5 +914,3 @@ SC.ButtonView.TRIGGER_DELAY = 200;
 SC.ButtonView.CLICK_AND_HOLD_DELAY = SC.browser.isIE ? 600 : 300;
 
 SC.REGULAR_BUTTON_HEIGHT=24;
-
-

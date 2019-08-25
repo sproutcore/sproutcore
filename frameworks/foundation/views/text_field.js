@@ -934,7 +934,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   },
 
   fieldDidFocus: function (evt) {
-    this.becomeFirstResponder();
+    this.becomeFirstResponder(evt);
 
     this.beginEditing(evt);
 
@@ -1033,7 +1033,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     When we become first responder, focus the text field if needed and
     hide the hint text.
    */
-  didBecomeKeyResponderFrom: function (keyView) {
+  didBecomeKeyResponderFrom: function (keyView, evt) {
     if (this.get('isVisibleInWindow')) {
       var inp = this.$input()[0];
       try {
@@ -1072,7 +1072,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     When we lose first responder, blur the text field if needed and show
     the hint text if needed.
    */
-  didLoseKeyResponderTo: function (keyView) {
+  didLoseKeyResponderTo: function (keyView, evt) {
     var el = this.$input()[0];
     if (el) el.blur();
     this.invokeLater("scrollToOriginIfNeeded", 100);
@@ -1141,7 +1141,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
 
     // Otherwise, handle.
     var view = this.get('nextValidKeyView');
-    if (view) view.becomeFirstResponder();
+    if (view) view.becomeFirstResponder(evt);
     else evt.allowDefault();
     return true; // handled
   },
@@ -1156,7 +1156,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
 
     // Otherwise, handle.
     var view = this.get('previousValidKeyView');
-    if (view) view.becomeFirstResponder();
+    if (view) view.becomeFirstResponder(evt);
     else evt.allowDefault();
     return true; // handled
   },
@@ -1298,7 +1298,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       return true;
     } else {
       this._txtFieldMouseDown = true;
-      this.becomeFirstResponder();
+      this.becomeFirstResponder(evt);
 
       return sc_super();
     }
