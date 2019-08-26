@@ -497,14 +497,14 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   }.observes('*items.[]'),
 
   /** @private
-    This observer method is called whenever any of the relevant properties of an item change.  This only applies
-    to SC.Object based items that may be observed.
+    This observer method is called whenever any of the relevant properties of an item change.
+    This only applies to SC.Object based items that may be observed.
   */
-  itemContentDidChange: function (item, key, alwaysNull, index) {
+  itemContentDidChange: function (item, key) {
     var childViews = this.get('childViews'),
-        childView;
+      index = this.get('items').indexOf(item),
+      childView = childViews.objectAt(index);
 
-    childView = childViews.objectAt(index);
     if (childView) {
       var localItem = this.formatLocalItem(this.get('itemKeys'), item, childView.get('localItem'));
 
@@ -513,7 +513,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
 
       // Reset our measurements (which depend on width/height or title) and adjust visible views
       if (this.get('shouldHandleOverflow')) {
-        this.invokeLast(this.remeasure);
+        this.invokeLast('remeasure');
       }
     }
   },
@@ -525,6 +525,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         itemKey = this.get(itemKeys.objectAt(j));
         localItem[itemKey] = item.get(itemKey);
       }
+      localItem._originalObject = item;
       item = localItem;
     }
     return item;

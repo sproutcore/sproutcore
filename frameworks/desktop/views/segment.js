@@ -192,6 +192,8 @@ SC.SegmentView = SC.View.extend(SC.Control,
         localItem = this.get('localItem'),
         asObserver = localItem && localItem instanceof SC.Object,
         needObserver = item instanceof SC.Object,
+        prevItem = asObserver ? localItem._originalObject ? localItem._originalObject : localItem : null,
+        newItem = needObserver ? item._originalObject ? item._originalObject : item : null,
         i;
 
     for (i = itemKeys.get('length') - 1; i >= 0; i--) {
@@ -199,11 +201,11 @@ SC.SegmentView = SC.View.extend(SC.Control,
       viewKey = viewKeys.objectAt(i);
 
       if (itemKey) {
-        if (asObserver) {
-          localItem.removeObserver(itemKey, parentView, 'itemContentDidChange', this);
+        if (prevItem) {
+          prevItem.removeObserver(itemKey, parentView, 'itemContentDidChange');
         }
-        if (needObserver) {
-          item.addObserver(itemKey, parentView, 'itemContentDidChange', this);
+        if (newItem) {
+          newItem.addObserver(itemKey, parentView, 'itemContentDidChange');
         }
 
         // Don't overwrite the default value if none exists in the item
@@ -221,12 +223,13 @@ SC.SegmentView = SC.View.extend(SC.Control,
       var parentView = this.get('parentView'),
         itemKeys = parentView.get('itemKeys'),
         itemKey,
+        item = localItem._originalObject ? localItem._originalObject : localItem,
         i;
 
       for (i = itemKeys.get('length') - 1; i >= 0; i--) {
         itemKey = parentView.get(itemKeys.objectAt(i));
         if (itemKey) {
-          localItem.removeObserver(itemKey, parentView, 'itemContentDidChange', this);
+          item.removeObserver(itemKey, parentView, 'itemContentDidChange');
         }
       }
 
