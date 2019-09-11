@@ -702,6 +702,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
   deleteBackward: function(evt) {
     if (this.get('canDelete')) {
       this.set('value', null);
+      this.set('activeSelection', 0);
     }
     return YES;
   },
@@ -710,6 +711,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
   deleteForward: function(evt) {
     if (this.get('canDelete')) {
       this.set('value', null);
+      this.set('activeSelection', 0);
     }
     return YES;
   },
