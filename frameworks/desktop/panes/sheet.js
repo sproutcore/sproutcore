@@ -42,12 +42,6 @@ SC.SheetPane = SC.PanelPane.extend(
     classNames: ['sc-sheet'],
 
     /**
-     @type SC.View
-     @default SC.ModalPane
-     */
-    modalPane: SC.ModalPane,
-
-    /**
      * Duration in seconds
      * @type {Number}
      */
