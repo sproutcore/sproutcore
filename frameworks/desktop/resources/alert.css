@@ -21,6 +21,11 @@
       margin-bottom: 6px;
       font-family: inherit ;
     }
+    .body {
+      max-height: 200px;
+      overflow: auto;
+      -webkit-overflow-scrolling:touch;
+    }
     .description {
       padding: 0;
       margin: 6px 0px;
