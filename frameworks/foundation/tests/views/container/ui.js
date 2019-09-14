@@ -51,39 +51,24 @@
 
       view3: SC.View.create(),
       view4: SC.View.create()
-    })
+    }),
+
+    // prevent destroying containers on teardown
+    destroy: function() {},
   });
 
   pane.add("cleans-up-views", SC.ContainerView, {
     nowShowing: 'uninstantiatedView',
-
+    cacheInstanciatedViews: false,
     uninstantiatedView: SC.View
   });
 
-    // .add("disabled - single selection", SC.ListView, {
-    //   isEnabled: NO,
-    //   content: content,
-    //   contentValueKey: 'title',
-    //   selection: singleSelection
-    // })
-    //
-    // .add("single selection", SC.ListView, {
-    //   content: content,
-    //   contentValueKey: 'title',
-    //   selection: singleSelection
-    // })
-    //
-    // .add("multiple selection, contiguous", SC.ListView, {
-    //   content: content,
-    //   contentValueKey: 'title',
-    //   selection: multiSelectionContiguous
-    // })
-    //
-    // .add("multiple selection, discontiguous", SC.ListView, {
-    //   content: content,
-    //   contentValueKey: 'title',
-    //   selection: multiSelectionDiscontiguous
-    // })
+  pane.add("cache-views", SC.ContainerView, {
+    nowShowing: 'uninstantiatedView',
+    cacheInstanciatedViews: true,
+    uninstantiatedView: SC.View
+  });
+
 
   // ..........................................................
   // TEST VIEWS
@@ -95,10 +80,8 @@
     ok(!view.$().hasClass('disabled'), 'should not have disabled class');
     ok(!view.$().hasClass('sel'), 'should not have sel class');
 
-    var contentView = view.get('contentView') ;
-
-    // ok(contentView.kindOf(SC.ContainerView), 'default contentView is an SC.ContainerView');
-    // ok(contentView.get('contentView') === null, 'default contentView should have no contentView itself');
+    ok(view.kindOf(SC.ContainerView), 'default contentView is an SC.ContainerView');
+    ok(view.get('contentView') === null, 'default contentView should have no contentView itself');
   });
 
   test("disabled", function() {
@@ -106,18 +89,6 @@
     ok(view.$().hasClass('disabled'), 'should have disabled class');
     ok(!view.$().hasClass('sel'), 'should not have sel class');
   });
-
-  // test("disabled - single selection", function() {
-  //   var view = pane.view('disabled - single selection');
-  //   ok(view.$().hasClass('disabled'), 'should have disabled class');
-  //   ok(view.itemViewAtContentIndex(0).$().hasClass('sel'), 'should have sel class');
-  //  });
-  //
-  //  test("single selection", function() {
-  //    var view = pane.view('single selection');
-  //    ok(view.itemViewAtContentIndex(0).$().hasClass('sc-collection-item'), 'should have sc-collection-item class');
-  //    ok(view.itemViewAtContentIndex(0).$().hasClass('sel'), 'should have sel class');
-  //   });
 
   test("changing nowShowing", function() {
     var view = pane.view('basic');
@@ -192,6 +163,37 @@
     contentView = view.get('contentView');
     SC.run(function() { view.set('nowShowing', null); });
     equals(contentView.isDestroyed, YES, "should have destroyed the previous view it instantiated (from class)");
+
+    SC.run(function() { view.set('nowShowing', SC.View.create()); });
+    contentView = view.get('contentView');
+    equals(contentView.isDestroyed, NO, "The content view should not be destroyed");
+
+    view.destroy();
+    equals(contentView.isDestroyed, YES, "should have destroyed the content view");
+
+  });
+
+  test("Cache instantiated views", function() {
+    var view = pane.view("cache-views");
+    view.awake();
+
+    var contentViewFromPath = view.get('contentView');
+    SC.run(function() { view.set('nowShowing', SC.View.create()); });
+    equals(contentViewFromPath.isDestroyed, NO, "should not have destroyed the previous view it instantiated (from path)");
+
+    var contentView = view.get('contentView');
+    SC.run(function() { view.set('nowShowing', SC.View.extend()); });
+    equals(contentView.isDestroyed, NO, "should not have destroyed the previous view because it was already instantiated");
+
+    var contentViewFromClass = view.get('contentView');
+    SC.run(function() { view.set('nowShowing', null); });
+    equals(contentViewFromClass.isDestroyed, NO, "should not have destroyed the previous view it instantiated (from class)");
+
+    view.destroy();
+    equals(view.isDestroyed, YES, "should have destroyed the container");
+    equals(contentViewFromPath.isDestroyed, YES, "should have destroyed the view it instantiated (from path)");
+    equals(contentView.isDestroyed, NO, "should not have destroyed the view that was already instantiated");
+    equals(contentViewFromClass.isDestroyed, YES, "should have destroyed the view it instantiated (from class)");
   });
 
   test("Nested container view", function() {
@@ -262,7 +264,7 @@
     equals(container1.getPath('view1.frame.height'), 100, 'nowShowing#view1: view1 height should be');
 
 
-    container2.get('view4').adjust('top', 10); 
+    container2.get('view4').adjust('top', 10);
     view.set("nowShowing", 'container2');
 
     equals(container1.get('isVisibleInWindow'), false, "nowShowing#view4: container1 visbility should be");
