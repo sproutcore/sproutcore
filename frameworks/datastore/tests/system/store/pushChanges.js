@@ -34,6 +34,10 @@ module("SC.Store#pushChanges", {
 
     storeKey6 = SC.Store.generateStoreKey();
     store.writeDataHash(storeKey6, json, SC.Record.BUSY_LOADING);
+
+    storeKey7 = SC.Store.generateStoreKey();
+    store.writeDataHash(storeKey7, json, SC.Record.READY_CLEAN);
+
     SC.RunLoop.end();
   },
 
@@ -47,6 +51,13 @@ test("Do a pushRetrieve and check if there is conflicts", function () {
   var res = store.pushRetrieve(SC.Record, undefined, undefined, storeKey1);
   equals(res, storeKey1, "There is no conflict, pushRetrieve was succesful.");
   res = store.pushRetrieve(SC.Record, undefined, undefined, storeKey4);
+  ok(!res, "There is a conflict, because of the state, this is expected.");
+});
+
+test("Do a pushRetrievePatch and check if there is conflicts", function () {
+  var res = store.pushRetrievePatch(SC.Record, undefined, undefined, storeKey1);
+  equals(res, storeKey1, "There is no conflict, pushRetrievePatch was succesful.");
+  res = store.pushRetrievePatch(SC.Record, undefined, undefined, storeKey4);
   ok(!res, "There is a conflict, because of the state, this is expected.");
 });
 
@@ -79,4 +90,11 @@ test("A pushRetrieve updating the id of an existing record should update the pri
   store.pushRetrieve(SC.Record, 1, recSecond, sK);
   SC.RunLoop.end();
   equals(store.idFor(sK), 1); // id should now have been updated
+});
+
+test("A pushRetrievePatch should merge only some attributes", function () {
+  var res = store.pushRetrievePatch(SC.Record, undefined, { number: 100 }, storeKey7);
+  var ret = store.readDataHash(storeKey7);
+  equals( 100, ret.number, "The new value of a patched attribute should be found into the hash" );
+  equals( YES, ret.bool, "The value of an attribute that was not patched should be preserved" );
 });
