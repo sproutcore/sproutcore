@@ -965,7 +965,10 @@ SC.DateTime.mixin(SC.Comparable,
 
     // if simply milliseconds since Jan 1, 1970 are given, just use those
     if (SC.typeOf(arg) === SC.T_NUMBER) {
-      arg = { milliseconds: arg };
+      arg = {
+        milliseconds: arg,
+        timezone: new Date(arg).getTimezoneOffset()
+      };
     }
 
     // Default to local machine time zone if none is given
@@ -1208,7 +1211,7 @@ SC.DateTime.mixin(SC.Comparable,
                        0 if a == b
   */
   compare: function(a, b) {
-    if (SC.none(a) || SC.none(b)) throw new Error("You must pass two valid dates to compare()");
+    if (SC.none(a) || SC.none(b)) throw new Error("You must pass two valid dates to compare("+a+", "+b+")");
     var ma = a.get('milliseconds');
     var mb = b.get('milliseconds');
     return ma < mb ? -1 : ma === mb ? 0 : 1;
