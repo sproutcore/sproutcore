@@ -535,8 +535,7 @@ SC.run = function (callback, target, forceNested) {
 
       // If the exception was not handled, throw it again so the browser
       // can deal with it (and potentially use it for debugging).
-      // (We don't throw it in IE because the user will see two errors)
-      if (!handled && !SC.browser.isIE) {
+      if (!handled) {
         throw e;
       }
     }

@@ -36,54 +36,6 @@ SC.Event = function(originalEvent) {
 SC.mixin(SC.Event, /** @scope SC.Event */ {
 
   /**
-    We need this because some browsers deliver different values
-    for mouse wheel deltas. Once the first mouse wheel event has
-    been run, this value will get set.
-
-    @field
-    @type Number
-    @default 1
-  */
-  MOUSE_WHEEL_MULTIPLIER: function() {
-    var deltaMultiplier = 1,
-        version = SC.browser.engineVersion;
-
-    if (SC.browser.name === SC.BROWSER.safari) {
-      deltaMultiplier = 0.4;
-      // Safari 5.0.1 and up
-      if (SC.browser.compare(version, '533.17') > 0 && SC.browser.compare(version, '534') < 0) {
-        deltaMultiplier = 0.004;
-      } else if (SC.browser.compare(version, '533') < 0) {
-        // Scrolling in Safari 5.0
-        deltaMultiplier = 40;
-      }
-    }else if(SC.browser.name === SC.BROWSER.ie){
-      deltaMultiplier = 0.3;
-    }else if(SC.browser.name === SC.BROWSER.chrome){
-      deltaMultiplier = 0.4;
-    }
-    return deltaMultiplier;
-  }(),
-
-  /**
-    This represents the limit in the delta before a different multiplier
-    will be applied. Because we can't generated an accurate mouse
-    wheel event ahead of time, and browsers deliver differing values
-    for mouse wheel deltas, this is necessary to ensure that
-    browsers that scale their values largely are dealt with correctly
-    in the future.
-
-    @type Number
-    @default 1000
-  */
-  MOUSE_WHEEL_DELTA_LIMIT: 1000,
-
-  /** @private
-    We only want to invalidate once
-  */
-  _MOUSE_WHEEL_LIMIT_INVALIDATED: NO,
-
-  /**
     Standard method to create a new event.  Pass the native browser event you
     wish to wrap if needed.
   */
@@ -173,10 +125,6 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
     // cannot register events on text nodes, etc.
     if ( elem.nodeType === 3 || elem.nodeType === 8 ) return SC.Event;
-
-    // For whatever reason, IE has trouble passing the window object
-    // around, causing it to be cloned in the process
-    if (SC.browser.name === SC.BROWSER.ie && elem.setInterval) elem = window;
 
     // if target is a function, treat it as the method, with optional context
     if (SC.typeOf(target) === SC.T_FUNCTION) {
@@ -522,16 +470,14 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     },
 
     /** @private
-        Implement support for mouseenter on browsers other than IE */
+        Implement support for mouseenter */
     mouseenter: {
       setup: function() {
-        if ( SC.browser.name === SC.BROWSER.ie ) return NO;
         SC.Event.add(this, 'mouseover', SC.Event.special.mouseenter.handler);
         return YES;
       },
 
       teardown: function() {
-        if ( SC.browser.name === SC.BROWSER.ie ) return NO;
         SC.Event.remove(this, 'mouseover', SC.Event.special.mouseenter.handler);
         return YES;
       },
@@ -547,16 +493,14 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     },
 
     /** @private
-        Implement support for mouseleave on browsers other than IE */
+        Implement support for mouseleave */
     mouseleave: {
       setup: function() {
-        if ( SC.browser.name === SC.BROWSER.ie ) return NO;
         SC.Event.add(this, "mouseout", SC.Event.special.mouseleave.handler);
         return YES;
       },
 
       teardown: function() {
-        if ( SC.browser.name === SC.BROWSER.ie ) return NO;
         SC.Event.remove(this, "mouseout", SC.Event.special.mouseleave.handler);
         return YES;
       },
@@ -773,7 +717,6 @@ SC.Event.prototype = {
     this.pageY = null;
     this.which = null;
     this.metaKey = null;
-    this.wheelDelta = null;
     this.wheelDeltaY = null;
     this.wheelDeltaX = null;
   },
@@ -835,80 +778,9 @@ SC.Event.prototype = {
       this.which = ((this.button & 1) ? 1 : ((this.button & 2) ? 3 : ( (this.button & 4) ? 2 : 0 ) ));
     }
 
-    // Normalize wheel delta values for mousewheel events.
-    /*
-      Taken from https://developer.mozilla.org/en-US/docs/Web/Events/mousewheel
-      IE and Opera (Presto) only support wheelDelta attribute and do not support horizontal scroll.
-
-      The wheelDeltaX attribute value indicates the wheelDelta attribute value along the horizontal axis. When a user operates the device for scrolling to right, the value is negative. Otherwise, i.e., if it's to left, the value is positive.
-
-      The wheelDeltaY attribute value indicates the wheelDelta attribute value along the vertical axis. The sign of the value is the same as the wheelDelta attribute value.
-
-      IE
-
-      The value is the same as the delta value of WM_MOUSEWHEEL or WM_MOUSEHWHEEL. It means that if the mouse wheel doesn't support high resolution scroll, the value is 120 per notch. The value isn't changed even if the scroll amount of system settings is page scroll.
-
-      ## Chrome
-
-      On Windows, the value is the same as the delta value of WM_MOUSEWHEEL or WM_MOUSEHWHEEL. And also, the value isn't changed even if the scroll amount of system settings is page scroll, i.e., the value is the same as IE on Windows.
-
-      On Linux, the value is 120 or -120 per native wheel event. This makes the same behavior as IE and Chrome for Windows.
-
-      On Mac, the value is complicated. The value is changed if the device that causes the native wheel event supports continuous scroll.
-
-      If the device supports continuous scroll (e.g., trackpad of MacBook or mouse wheel which can be turned smoothly), the value is computed from accelerated scroll amount. In this case, the value is the same as Safari.
-
-      If the device does not support continuous scroll (typically, old mouse wheel which cannot be turned smoothly), the value is computed from non-accelerated scroll amount (120 per notch). In this case, the value is different from Safari.
-
-      This difference makes a serious issue for web application developers. That is, web developers cannot know if mousewheel event is caused by which device.
-
-      See WebInputEventFactory::mouseWheelEvent of the Chromium's source code for the detail.
-
-      ## Safari
-
-      The value is always computed from accelerated scroll amount. This is really different from other browsers except Chrome with continuous scroll supported device.
-
-      Note: tested with the Windows package, the earliest available version was Safari 3.0 from 2007. It could be that earlier versions (on Mac) support the properties too.
-
-      ## Opera (Presto)
-
-      The value is always the detail attribute value ✕ 40.
-
-      On Windows, since the detail attribute value is computed from actual scroll amount, the value is different from other browsers except the scroll amount per notch is 3 lines in system settings or a page.
-
-      On Linux, the value is 80 or -80 per native wheel event. This is different from other browsers.
-
-      On Mac, the detail attribute value is computed from accelerated scroll amout of native event. The value is usually much bigger than Safari's or Chrome's value.
-    */
-    if (this.type === 'mousewheel' || this.type === 'DOMMouseScroll' || this.type === 'MozMousePixelScroll') {
-      var deltaMultiplier = SC.Event.MOUSE_WHEEL_MULTIPLIER;
-
-      // normalize wheelDelta, wheelDeltaX, & wheelDeltaY for Safari
-      if (SC.browser.isWebkit && originalEvent.wheelDelta !== undefined) {
-        this.wheelDelta = 0 - (originalEvent.wheelDeltaY || originalEvent.wheelDeltaX);
-        this.wheelDeltaY = 0 - (originalEvent.wheelDeltaY || 0);
-        this.wheelDeltaX = 0 - (originalEvent.wheelDeltaX || 0);
-
-      // normalize wheelDelta for Firefox (all Mozilla browsers)
-      // note that we multiple the delta on FF to make it's acceleration more natural.
-      } else if (!SC.none(originalEvent.detail) && SC.browser.isMozilla) {
-        if (originalEvent.axis && (originalEvent.axis === originalEvent.HORIZONTAL_AXIS)) {
-          this.wheelDeltaX = originalEvent.detail;
-          this.wheelDelta = this.wheelDeltaY = 0;
-        } else {
-          this.wheelDelta = this.wheelDeltaY = originalEvent.detail;
-          this.wheelDeltaX = 0;
-        }
-
-      // handle all other legacy browser
-      } else {
-        this.wheelDelta = this.wheelDeltaY = SC.browser.isIE || SC.browser.isOpera ? 0 - originalEvent.wheelDelta : originalEvent.wheelDelta;
-        this.wheelDeltaX = 0;
-      }
-
-      this.wheelDelta *= deltaMultiplier;
-      this.wheelDeltaX *= deltaMultiplier;
-      this.wheelDeltaY *= deltaMultiplier;
+    if (this.type === 'wheel') {
+      this.wheelDeltaX = originalEvent.deltaX;
+      this.wheelDeltaY = originalEvent.deltaY;
     }
   },
 
@@ -1008,29 +880,8 @@ SC.Event.prototype = {
 
     @returns {String}
   */
-  // Warning.
-  // Older versions of IE don't support charCode, but on keypress return the
-  // ASCII value in keyCode instead of the key code.  Therefore, if this code is
-  // used on keyDown in IE versions prior to 9.0, it will fail.
-  // Since SproutCore passes the keydown and keypress events as a keyDown
-  // method, it's most likely that this code will cause unexpected problems
-  // in IE 7 & IE 8.
-  //
-  // Reference: http://unixpapa.com/js/key.html
   getCharString: function() {
-    if(SC.browser.name === SC.BROWSER.ie &&
-        SC.browser.compare(SC.browser.version, '9.0') < 0) {
-      // Return an empty String for backspace, tab, left, right, up or down.
-      if(this.keyCode === 8 || this.keyCode === 9 ||
-          (this.keyCode >= 37 && this.keyCode <= 40)) {
-        return String.fromCharCode(0);
-      } else {
-        // This will only be accurate if the event is a keypress event.
-        return (this.keyCode>0) ? String.fromCharCode(this.keyCode) : null;
-      }
-    } else {
-      return (this.charCode>0) ? String.fromCharCode(this.charCode) : null;
-    }
+    return (this.charCode>0) ? String.fromCharCode(this.charCode) : null;
   },
 
   /**
@@ -1122,11 +973,6 @@ SC.Event.stopObserving = SC.Event.remove ;
 /** Alias for trigger() method.  This provides a Prototype-like API */
 SC.Event.fire = SC.Event.trigger;
 
-// Register unload handler to eliminate any registered handlers
-// This avoids leaks in IE and issues with mouseout or other handlers on
-// other browsers.
-
-if(SC.browser.name === SC.BROWSER.ie) SC.Event.add(window, 'unload', SC.Event.prototype, SC.Event.unload) ;
 
 SC.MODIFIER_KEYS = {
   16:'shift', 17:'ctrl', 18: 'alt'

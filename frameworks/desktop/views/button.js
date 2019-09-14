@@ -864,33 +864,6 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
   /** @private */
   willLoseKeyResponderTo: function(responder, evt) {
     if (this._isFocused) this._isFocused = NO ;
-  },
-
-  /** @private */
-  didAppendToDocument: function() {
-    if(SC.browser.isIE &&
-        SC.browser.compare(SC.browser.version, '7') === 0 &&
-        this.get('useStaticLayout')){
-      var layout = this.get('layout'),
-          elem = this.$(), w=0;
-      if(elem && elem[0] && (w=elem[0].clientWidth) && w!==0 && this._labelMinWidthIE7===0){
-        var label = this.$('.sc-button-label'),
-            paddingRight = parseInt(label.css('paddingRight'),0),
-            paddingLeft = parseInt(label.css('paddingLeft'),0),
-            marginRight = parseInt(label.css('marginRight'),0),
-            marginLeft = parseInt(label.css('marginLeft'),0);
-        if(marginRight=='auto') SC.Logger.log(marginRight+","+marginLeft+","+paddingRight+","+paddingLeft);
-        if(!paddingRight && isNaN(paddingRight)) paddingRight = 0;
-        if(!paddingLeft && isNaN(paddingLeft)) paddingLeft = 0;
-        if(!marginRight && isNaN(marginRight)) marginRight = 0;
-        if(!marginLeft && isNaN(marginLeft)) marginLeft = 0;
-
-        this._labelMinWidthIE7 = w-(paddingRight + paddingLeft)-(marginRight + marginLeft);
-        label.css('minWidth', this._labelMinWidthIE7+'px');
-      }else{
-        this.invokeLater(this.didAppendToDocument, 1);
-      }
-    }
   }
 
 }) ;
@@ -911,6 +884,6 @@ SC.ButtonView.TRIGGER_DELAY = 200;
   @constant
   @type Number
 */
-SC.ButtonView.CLICK_AND_HOLD_DELAY = SC.browser.isIE ? 600 : 300;
+SC.ButtonView.CLICK_AND_HOLD_DELAY = 300;
 
 SC.REGULAR_BUTTON_HEIGHT=24;

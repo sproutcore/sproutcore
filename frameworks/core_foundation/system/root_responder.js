@@ -373,15 +373,15 @@ SC.RootResponder = SC.Object.extend(
       SC.$('body').addClass('sc-focus').removeClass('sc-blur');
 
       SC.run(function () {
-      // If the app is getting focus again set the first responder to the first
-      // valid firstResponder view in the view's tree
-      if(!SC.TABBING_ONLY_INSIDE_DOCUMENT && !SC.browser.isIE8OrLower){
-        var keyPane = SC.RootResponder.responder.get('keyPane');
-        if (keyPane) {
-          var nextValidKeyView = keyPane.get('nextValidKeyView');
-          if (nextValidKeyView) keyPane.makeFirstResponder(nextValidKeyView);
+        // If the app is getting focus again set the first responder to the first
+        // valid firstResponder view in the view's tree
+        if(!SC.TABBING_ONLY_INSIDE_DOCUMENT){
+          var keyPane = SC.RootResponder.responder.get('keyPane');
+          if (keyPane) {
+            var nextValidKeyView = keyPane.get('nextValidKeyView');
+            if (nextValidKeyView) keyPane.makeFirstResponder(nextValidKeyView, evt);
+          }
         }
-      }
 
         this.set('hasFocus', YES);
       }, this);
@@ -776,98 +776,27 @@ SC.RootResponder = SC.Object.extend(
     this.listenFor(['touchstart', 'touchmove', 'touchend', 'touchcancel', 'keydown', 'keypress', 'keyup', 'beforedeactivate', 'mousedown', 'mouseup', 'dragenter', 'dragover', 'dragleave', 'drop', 'click', 'dblclick', 'mousemove', 'mouseleave', 'contextmenu'], document)
         .listenFor(['resize'], window);
 
-    if(SC.browser.isIE8OrLower) this.listenFor(['focusin', 'focusout'], document);
-    else this.listenFor(['focus', 'blur'], window);
+    this.listenFor(['focus', 'blur'], window);
 
     // Add an array of transition listeners for immediate use (these will be cleaned up when actual testing completes).
     // Because the transition test happens asynchronously and because we don't want to
     // delay the launch of the application in order to a transition test (the app won't
     // load if the browser tab is not visible), we start off by listening to everything
     // and when the test is completed, we remove the extras to avoid double callbacks.
-    if (SC.platform.supportsCSSTransitions) {
-      var domPrefix = SC.browser.domPrefix,
-        lowerDomPrefix = domPrefix.toLowerCase(),
-        variation1 = lowerDomPrefix + 'transitionend',
-        variation2 = lowerDomPrefix + 'TransitionEnd',
-        variation3 = domPrefix + 'TransitionEnd';
-
-      // Ensure that the callback name used maps to our implemented function name.
-      this[variation1] = this[variation2] = this[variation3] = this.transitionend;
-
-      // ex. transitionend, webkittransitionend, webkitTransitionEnd, WebkitTransitionEnd
-      this.listenFor(['transitionend', variation1, variation2, variation3], document);
-
-      if (SC.platform.supportsCSSAnimations) {
-        variation1 = lowerDomPrefix + 'animationstart';
-        variation2 = lowerDomPrefix + 'AnimationStart';
-        variation3 = domPrefix + 'AnimationStart';
-
-        // Ensure that the callback name used maps to our implemented function name.
-        this[variation1] = this[variation2] = this[variation3] = this.animationstart;
-
-        // ex. animationstart, webkitanimationstart, webkitAnimationStart, WebkitAnimationStart
-        this.listenFor(['animationstart', variation1, variation2, variation3], document);
-
-        variation1 = lowerDomPrefix + 'animationiteration';
-        variation2 = lowerDomPrefix + 'AnimationIteration';
-        variation3 = domPrefix + 'AnimationIteration';
-
-        // Ensure that the callback name used maps to our implemented function name.
-        this[variation1] = this[variation2] = this[variation3] = this.animationiteration;
-
-        // ex. animationiteration, webkitanimationiteration, webkitAnimationIteration, WebkitAnimationIteration
-        this.listenFor(['animationiteration', variation1, variation2, variation3], document);
-
-        variation1 = lowerDomPrefix + 'animationend';
-        variation2 = lowerDomPrefix + 'AnimationEnd';
-        variation3 = domPrefix + 'AnimationEnd';
-
-        // Ensure that the callback name used maps to our implemented function name.
-        this[variation1] = this[variation2] = this[variation3] = this.animationend;
-
-        // ex. animationend, webkitanimationend, webkitAnimationEnd, WebkitAnimationEnd
-        this.listenFor(['animationend', variation1, variation2, variation3], document);
-      }
-    }
+    this.listenFor(['transitionend'], document);
+    this.listenFor(['animationstart'], document);
+    this.listenFor(['animationiteration'], document);
+    this.listenFor(['animationend'], document);
 
     // handle these two events specially in IE
     ['drag', 'selectstart'].forEach(function(keyName) {
       var method = this[keyName] ;
       if (method) {
-        if (SC.browser.isIE) {
-          var responder = this ;
-
-          document.body['on' + keyName] = function(e) {
-            return method.call(responder, SC.Event.normalizeEvent(event || window.event)); // this is IE :(
-          };
-
-          // be sure to cleanup memory leaks
-           SC.Event.add(window, 'unload', this, function() {
-            document.body['on' + keyName] = null;
-          });
-
-        } else {
-          SC.Event.add(document, keyName, this, method);
-        }
+        SC.Event.add(document, keyName, this, method);
       }
     }, this);
 
-    var mousewheel = 'mousewheel';
-
-    // Firefox emits different mousewheel events than other browsers
-    if (SC.browser.isMozilla) {
-      // For Firefox < 3.5, subscribe to DOMMouseScroll events
-      if (SC.browser.compare(SC.browser.engineVersion, '1.9.1') < 0) {
-        mousewheel = 'DOMMouseScroll';
-
-      // For Firefox 3.5 and greater, we can listen for MozMousePixelScroll,
-      // which supports pixel-precision scrolling devices, like MacBook
-      // trackpads.
-      } else {
-        mousewheel = 'MozMousePixelScroll';
-      }
-    }
-    SC.Event.add(document, mousewheel, this, this.mousewheel);
+    SC.Event.add(document, 'wheel', this, this.mousewheel);
 
     // Do some initial set up.
     this.set('currentWindowSize', this.computeWindowSize()) ;
@@ -928,82 +857,6 @@ SC.RootResponder = SC.Object.extend(
         }
       };
     SC.RunLoop.prototype.endRunLoop = patch;
-  },
-
-  /**
-    Cleans up the additional transition event listeners.
-
-    NOTE: requires that SC.RootResponser.responder.transitionendEventName
-    has been determined.
-
-    @returns {void}
-  */
-  cleanUpTransitionListeners: function () {
-    var actualEventName = SC.platform.transitionendEventName,
-      domPrefix = SC.browser.domPrefix,
-      lowerDomPrefix = domPrefix.toLowerCase(),
-      variation1 = lowerDomPrefix + 'transitionend',
-      variation2 = lowerDomPrefix + 'TransitionEnd',
-      variation3 = domPrefix + 'TransitionEnd';
-
-    // Once the actual event name is determined, simply remove all the extras.
-    // This should prevent any problems with browsers that fire multiple events.
-    ['transitionend', variation1, variation2, variation3].forEach(function (keyName) {
-      if (keyName !== actualEventName) {
-        SC.Event.remove(document, keyName, this, this[keyName]);
-        this[keyName] = null;
-    }
-    }, this);
-  },
-
-  /**
-    Cleans up the additional animation event listeners.
-
-    NOTE: requires that SC.RootResponser.responder.animationstartEventName,
-    SC.RootResponser.responder.animationendEventName and
-    SC.RootResponser.responder.animationiterationEventName have been
-    determined.
-
-    @returns {void}
-  */
-  cleanUpAnimationListeners: function () {
-    var domPrefix = SC.browser.domPrefix,
-      lowerDomPrefix = domPrefix.toLowerCase(),
-      actualEventName = SC.platform.animationendEventName,
-      variation1 = lowerDomPrefix + 'animationend',
-      variation2 = lowerDomPrefix + 'AnimationEnd',
-      variation3 = domPrefix + 'AnimationEnd';
-
-    // Once the actual event name is determined, simply remove all the extras.
-    // This should prevent any problems with browsers that fire multiple events.
-    ['animationend', variation1, variation2, variation3].forEach(function (keyName) {
-      if (keyName !== actualEventName) {
-        SC.Event.remove(document, keyName, this, this[keyName]);
-        this[keyName] = null;
-    }
-    }, this);
-
-    actualEventName = SC.platform.animationiterationEventName;
-    variation1 = lowerDomPrefix + 'animationiteration';
-    variation2 = lowerDomPrefix + 'AnimationIteration';
-    variation3 = domPrefix + 'AnimationIteration';
-    ['animationiteration', variation1, variation2, variation3].forEach(function (keyName) {
-      if (keyName !== actualEventName) {
-        SC.Event.remove(document, keyName, this, this[keyName]);
-        this[keyName] = null;
-      }
-    }, this);
-
-    actualEventName = SC.platform.animationstartEventName;
-    variation1 = lowerDomPrefix + 'animationstart';
-    variation2 = lowerDomPrefix + 'AnimationStart';
-    variation3 = domPrefix + 'AnimationStart';
-    ['animationstart', variation1, variation2, variation3].forEach(function (keyName) {
-      if (keyName !== actualEventName) {
-        SC.Event.remove(document, keyName, this, this[keyName]);
-        this[keyName] = null;
-      }
-    }, this);
   },
 
   // ...........................................................................
@@ -1757,13 +1610,6 @@ SC.RootResponder = SC.Object.extend(
      get touch events. Textfields just need to get the default focus action.
   */
   ignoreTouchHandle: function(evt) {
-    if(SC.browser.isMobileSafari){
-      var tag = evt.target.tagName;
-      if(tag==="INPUT" || tag==="TEXTAREA" || tag==="A" || tag==="SELECT"){
-        evt.allowDefault();
-        return YES;
-      }
-    }
     return NO;
   },
 
@@ -1908,9 +1754,6 @@ SC.RootResponder = SC.Object.extend(
       this._mouseDownView = null;
       return YES;
     }
-
-    // Firefox does NOT handle delete here...
-    if (SC.browser.isMozilla && (evt.which === 8)) return true ;
 
     // modifier keys are handled separately by the 'flagsChanged' event
     // send event for modifier key changes, but only stop processing if this
@@ -2148,11 +1991,7 @@ SC.RootResponder = SC.Object.extend(
   },
 
   dblclick: function(evt){
-    if (SC.browser.isIE8OrLower) {
-      this._clickCount = 2;
-      // this._onmouseup(evt);
-      this.mouseup(evt);
-    }
+
   },
 
   mousewheel: function(evt) {
@@ -2179,10 +2018,6 @@ SC.RootResponder = SC.Object.extend(
     // To prevent this, we make sure the event target is an instance of Element.
     if (!(evt.target instanceof Element)) return;
 
-    if (SC.browser.isIE) {
-      if (this._lastMoveX === evt.clientX && this._lastMoveY === evt.clientY) return;
-    }
-
     // We'll record the last positions in all browsers, in case a special pane
     // or some such UI absolutely needs this information.
     this._lastMoveX = evt.clientX;
@@ -2197,14 +2032,7 @@ SC.RootResponder = SC.Object.extend(
        // only do mouse[Moved|Entered|Exited|Dragged] if not in a drag session
        // drags send their own events, e.g. drag[Moved|Entered|Exited]
       if (dragView) {
-         //IE triggers mousemove at the same time as mousedown
-         if(SC.browser.isIE){
-           if (this._lastMouseDownX !== evt.clientX || this._lastMouseDownY !== evt.clientY) {
-            dragView.tryToPerform('mouseDragged', evt);
-           }
-        } else {
-          dragView.tryToPerform('mouseDragged', evt);
-         }
+        dragView.tryToPerform('mouseDragged', evt);
        } else {
         var lh = this._lastHovered || [], nh = [], loc, len,
              view = this.targetViewForEvent(evt) ;
@@ -2239,14 +2067,7 @@ SC.RootResponder = SC.Object.extend(
          // also, if a mouseDownView exists, call the mouseDragged action, if
          // it exists.
          if (this._mouseDownView) {
-           if(SC.browser.isIE){
-             if (this._lastMouseDownX !== evt.clientX && this._lastMouseDownY !== evt.clientY) {
-               this._mouseDownView.tryToPerform('mouseDragged', evt);
-             }
-           }
-           else {
-             this._mouseDownView.tryToPerform('mouseDragged', evt);
-           }
+          this._mouseDownView.tryToPerform('mouseDragged', evt);
          }
        }
     }, this);

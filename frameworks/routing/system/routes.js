@@ -324,11 +324,6 @@ SC.routes = SC.Object.create(
     // Remove the '#' prefix
     loc = (loc && loc.length > 0) ? loc.slice(1, loc.length) : '';
 
-    if (!(SC.browser.isMozilla && SC.browser.compare(SC.browser.mozilla, "41.0") > 0)) {
-      // because of bug https://bugzilla.mozilla.org/show_bug.cgi?id=483304
-      loc = decodeURI(loc);
-    }
-
     if (this.get('location') !== loc && !this._skipRoute) {
       SC.run(function() {
         this.set('location', loc);

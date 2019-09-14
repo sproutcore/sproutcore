@@ -310,11 +310,8 @@ test("on indeterminate state animation respects start,stop", function() {
         ok(view.$().hasClass('running'), 'should have running class');
 
         var newBgPos = view.$('.content .middle').css('background-position');
-        if(SC.platform.supportsCSSTransitions) {
-            ok((currentBgPos === newBgPos), 'bg pos should NOT have changed on platforms that support css transitions (old was '+currentBgPos+' new is: '+newBgPos+')');
-        } else {
-            ok(!(currentBgPos === newBgPos), 'bg pos should have changed (old was '+currentBgPos+' new is: '+newBgPos+')');
-        }
+        
+        ok((currentBgPos === newBgPos), 'bg pos should NOT have changed on platforms that support css transitions (old was '+currentBgPos+' new is: '+newBgPos+')');
 
         SC.RunLoop.begin();
         view.set('isRunning', NO);

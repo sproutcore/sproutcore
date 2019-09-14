@@ -37,12 +37,6 @@ test("should emit style in tag if opts.styles is defined", function() {
   ok(context.get(0).match(/style=\"alpha: beta; foo: bar; \"/), '<div> has style="alpha: beta; foo: bar; "');
 });
 
-test("should emit style with custom browser attributes", function() {
-  context.setStyle({ mozColumnCount: '3', webkitColumnCount: '3', oColumnCount: '3', msColumnCount: '3' }).end();
-  ok(context.get(0).match('<div style="-moz-column-count: 3; -webkit-column-count: 3; -o-column-count: 3; -ms-column-count: 3; " >'),
-                            '<div> has style="-moz-column-count: 3; -webkit-column-count: 3, -o-column-count: 3, -ms-column-count: 3; "');
-});
-
 test("should write arbitrary attrs has in opts", function() {
   context.setAttr({ foo: "bar", bar: "baz" }).end();
   ok(context.get(0).match(/foo=\"bar\"/), 'has foo="bar"');

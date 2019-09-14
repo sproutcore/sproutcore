@@ -268,7 +268,7 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
       divStyle.top = "0px";
       divStyle.right = "0px";
       divStyle.bottom = "0px";
-      divStyle[SC.browser.experimentalStyleNameFor('transform')] = "translateZ(0px)";
+      divStyle['transform'] = "translateZ(0px)";
       divStyle.zIndex = this.get("zIndex") + this.get("touchZ");
       div.className = "touch-intercept";
       div.id = "touch-intercept-" + SC.guidFor(this);
@@ -378,19 +378,6 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     if (document && document.body) {
       wDim.width = document.body.clientWidth;
       wDim.height = document.body.clientHeight;
-
-      // IE7 is the only browser which reports clientHeight _including_ scrollbar.
-      if (SC.browser.name === SC.BROWSER.ie &&
-          SC.browser.compare(SC.browser.version, "7") === 0) {
-
-        var scrollbarSize = SC.platform.get('scrollbarSize');
-        if (document.body.scrollWidth > wDim.width) {
-          wDim.width -= scrollbarSize;
-        }
-        if (document.body.scrollHeight > wDim.height) {
-          wDim.height -= scrollbarSize;
-        }
-      }
     }
 
     // If there is a minWidth or minHeight set on the pane, take that

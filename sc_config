@@ -14,7 +14,7 @@ BT.addFramework(BT.Framework.extend({
     }
   },
   dependencies: ["sproutcore:legacy", "sproutcore:desktop", "sproutcore:datastore", "sproutcore:statechart"],
-  testDependencies: ["sproutcore:debug", "sproutcore:testing"]
+  testDependencies: ["sproutcore:testing"]
 }));
 
 BT.addTheme(BT.Theme.extend({

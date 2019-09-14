@@ -114,7 +114,7 @@ SC.Touch = function(touch, touchContext) {
 
   // Special-case handling for TextFieldView's touch intercept overlays.
   if (target && SC.$(target).hasClass("touch-intercept")) {
-    touch.target.style[SC.browser.experimentalStyleNameFor('transform')] = "translate3d(0px,-5000px,0px)";
+    touch.target.style['transform'] = "translate3d(0px,-5000px,0px)";
     target = document.elementFromPoint(touch.pageX, touch.pageY);
     if (target) targetView = SC.viewFor(target);
 
@@ -122,7 +122,7 @@ SC.Touch = function(touch, touchContext) {
     if (target.tagName === "INPUT") {
       this.hidesTouchIntercept = touch.target;
     } else {
-      touch.target.style[SC.browser.experimentalStyleNameFor('transform')] = "translate3d(0px,0px,0px)";
+      touch.target.style['transform'] = "translate3d(0px,0px,0px)";
     }
   } else {
     targetView = touch.target ? SC.viewFor(touch.target) : null;
@@ -309,7 +309,7 @@ SC.Touch.prototype = {
   unhideTouchIntercept: function() {
     var intercept = this.hidesTouchIntercept;
     if (intercept) {
-      setTimeout(function() { intercept.style[SC.browser.experimentalStyleNameFor('transform')] = "translate3d(0px,0px,0px)"; }, 500);
+      setTimeout(function() { intercept.style['transform'] = "translate3d(0px,0px,0px)"; }, 500);
     }
   },
 

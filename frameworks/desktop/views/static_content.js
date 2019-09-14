@@ -96,7 +96,7 @@ SC.StaticContentView = SC.View.extend(
 
     if (!layer) return { x: 0, y: 0, width: 0, height: 0 };
 
-    if (layer.getBoundingClientRect && !SC.browser.isIE8OrLower) {
+    if (layer.getBoundingClientRect) {
       rect = layer.getBoundingClientRect();
 
       return {
