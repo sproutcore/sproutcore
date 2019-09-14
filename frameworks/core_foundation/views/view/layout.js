@@ -1441,7 +1441,7 @@ SC.View.mixin(
 
     // X Conversion
     // handle left aligned and left/right
-    if (!SC.none(lL)) {
+    if (SC.isNumber(lL)) {
       if (SC.isPercentage(lL)) ret.left = lL * pFW;
       else ret.left = lL;
       if (lW !== undefined) {
@@ -1454,10 +1454,10 @@ SC.View.mixin(
       }
 
     // handle right aligned
-    } else if (!SC.none(lR)) {
+    } else if (SC.isNumber(lR)) {
 
       // if no width, calculate it from the parent frame
-      if (SC.none(lW)) {
+      if (!SC.isNumber(lW)) {
         ret.left = 0;
         if (lR && SC.isPercentage(lR)) ret.width = pFW - (lR * pFW);
         else ret.width = pFW - (lR || 0);
@@ -1474,7 +1474,7 @@ SC.View.mixin(
       }
 
     // handle centered
-    } else if (!SC.none(lcX)) {
+    } else if (SC.isNumber(lcX)) {
       if (lW && SC.isPercentage(lW)) ret.width = (lW * pFW);
       else ret.width = (lW || 0);
       ret.left = ((pFW - ret.width) / 2);
@@ -1482,7 +1482,7 @@ SC.View.mixin(
       else ret.left = ret.left + lcX;
 
     // if width defined, assume left of zero
-    } else if (!SC.none(lW)) {
+    } else if (SC.isNumber(lW)) {
       ret.left =  0;
       if (lW === SC.LAYOUT_AUTO) ret.width = SC.LAYOUT_AUTO;
       else {
@@ -1502,7 +1502,7 @@ SC.View.mixin(
 
     // Y Conversion
     // handle left aligned and top/bottom
-    if (!SC.none(lT)) {
+    if (SC.isNumber(lT)) {
       if (SC.isPercentage(lT)) ret.top = lT * pFH;
       else ret.top = lT;
       if (lH !== undefined) {
@@ -1516,10 +1516,10 @@ SC.View.mixin(
       }
 
     // handle bottom aligned
-    } else if (!SC.none(lB)) {
+    } else if (SC.isNumber(lB)) {
 
       // if no height, calculate it from the parent frame
-      if (SC.none(lH)) {
+      if (!SC.isNumber(lH)) {
         ret.top = 0;
         if (lB && SC.isPercentage(lB)) ret.height = pFH - (lB * pFH);
         else ret.height = pFH - (lB || 0);
@@ -1537,7 +1537,7 @@ SC.View.mixin(
       }
 
     // handle centered
-    } else if (!SC.none(lcY)) {
+    } else if (SC.isNumber(lcY)) {
       if (lH && SC.isPercentage(lH)) ret.height = (lH * pFH);
       else ret.height = (lH || 0);
       ret.top = ((pFH - ret.height) / 2);
@@ -1545,7 +1545,7 @@ SC.View.mixin(
       else ret.top = ret.top + lcY;
 
     // if height defined, assume top of zero
-    } else if (!SC.none(lH)) {
+    } else if (SC.isNumber(lH)) {
       ret.top =  0;
       if (lH === SC.LAYOUT_AUTO) ret.height = SC.LAYOUT_AUTO;
       else if (SC.isPercentage(lH)) ret.height = lH * pFH;

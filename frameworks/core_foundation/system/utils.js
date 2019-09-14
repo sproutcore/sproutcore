@@ -32,6 +32,11 @@ SC.mixin( /** @scope SC */ {
     return url ;
   },
 
+  /** Return true if it is a number */
+  isNumber: function(val){
+    return typeof(val) === SC.T_NUMBER && !isNaN(val);
+  },
+
   /** Return true if the number is between 0 and 1 */
   isPercentage: function(val){
     return (val<1 && val>0);
