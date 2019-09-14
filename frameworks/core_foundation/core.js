@@ -4,6 +4,7 @@
 //            Portions ©2008-2011 Apple Inc. All rights reserved.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
+'use strict';
 
 /**
   Indicates that the collection view expects to accept a drop ON the specified

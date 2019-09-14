@@ -980,7 +980,7 @@ SC.RootResponder = SC.Object.extend(
       if (keyName !== actualEventName) {
         SC.Event.remove(document, keyName, this, this[keyName]);
         this[keyName] = null;
-    }
+      }
     }, this);
 
     actualEventName = SC.platform.animationiterationEventName;
