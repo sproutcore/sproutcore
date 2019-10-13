@@ -87,7 +87,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
   /**
     Whether to attempt to reconnect automatically if the connection is closed or not.
 
-    @type SC.WebSocketDelegate
+    @type Boolean
     @default true
   */
   autoReconnect: true,
@@ -95,34 +95,52 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
   /**
     The initial interval to wait in milliseconds before trying to reconnect.
 
-    @type SC.WebSocketDelegate
-    @default null
+    @type Number
+    @default 10000
   */
   reconnectInterval: 10000, // 10 seconds
 
   /**
     The maximum interval to wait in milliseconds before trying to reconnect.
 
-    @type SC.WebSocketDelegate
-    @default null
+    @type Number
+    @default 120000
   */
   maxReconnectInterval: 120000, // 2 minutes
 
   /**
     The initial interval to wait in milliseconds before retry to send a message.
 
-    @type SC.WebSocketDelegate
-    @default null
+    @type Number
+    @default 1000
   */
   retryInterval: 1000, // 1 seconds
 
   /**
     The maximum interval to wait in milliseconds before retry to send a message.
 
-    @type SC.WebSocketDelegate
-    @default null
+    @type Number
+    @default 60000
   */
   maxRetryInterval: 60000, // 1 minute
+
+  /**
+    The count of connection attempt.
+
+    @type Number
+    @default 0
+    @readonly
+  */
+  connectAttemptCount: 0,
+
+  /**
+    The connection attempt limit until with prevent any other connection.
+    0 means no limit.
+
+    @type Number
+    @default 0
+  */
+  connectAttemptLimit: 0,
 
 
   // ..........................................................
@@ -137,6 +155,9 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
   connect: function(server) {
     // If not supported or already connected, return.
     if (!SC.platform.supportsWebSocket || this.socket) return this;
+
+    var connectAttemptLimit = this.connectAttemptLimit;
+    if (connectAttemptLimit > 0 && this.connectAttemptCount >= connectAttemptLimit) return this;
 
     if (server) {
       this.set('server', server);
@@ -170,6 +191,8 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
           self.onError(error);
         });
       };
+
+      this.connectAttemptCount++;
     } catch (e) {
       SC.error('An error has occurred while connnecting to the websocket server: ' + e);
     }
@@ -310,6 +333,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
 
     this.set('isConnected', true);
     this._currentReconnectInterval = this.get('reconnectInterval');
+    this.connectAttemptCount = 0;
 
     var ret = del.webSocketDidOpen(this, event);
     if (ret !== true) this._notifyListeners('onopen', event);
@@ -392,6 +416,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
     if (!queue || queue.length === 0) return;
 
     queue = SC.A(queue);
+
     this.queue = null;
 
     for (var i = 0, len = queue.length; i < len; i++) {
