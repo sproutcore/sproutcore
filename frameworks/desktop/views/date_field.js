@@ -373,7 +373,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
   updateTextSelectionObserver: function() {
     var as = this.get('activeSelection');
     var ts = this.get('tabsSelections');
-    if (this.get('isEditing')) {
+    if (this.get('isEditing') && ts[as]) {
       this.selection(null, ts[as].get('textSelection'));
     }
   }.observes('activeSelection', 'value'),
