@@ -1930,7 +1930,7 @@ SC.CoreView.unload = function () {
 
   Base class for managing a view.  Views provide two functions:
 
-   1. They display – translating your application's state into drawing
+   1. They display – translating your application's state into drawing
      instructions for the web browser, and
    2. They react – acting as responders for incoming keyboard, mouse, and touch
      events.
@@ -1939,7 +1939,7 @@ SC.CoreView.unload = function () {
   ====
 
   SproutCore's view layer is made up of a tree of SC.View instances, nested
-  using the `childViews` list – usually an array of local property names. You
+  using the `childViews` list – usually an array of local property names. You
   position each view by specifying a set of layout keys, like 'left', 'right',
   'width', or 'centerX', in a hash on the layout property. (See the 'layout'
   documentation for more.)

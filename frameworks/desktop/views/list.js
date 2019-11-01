@@ -603,7 +603,7 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
 
       key = layoutDirection === SC.LAYOUT_HORIZONTAL ? 'width' : 'height';
 
-      // Getter – create layout hash.
+      // Getter – create layout hash.
       if (value === undefined) {
         value = {};
       }

@@ -88,7 +88,7 @@ module("SC.ScrollView touch", {
 });
 
 
-// Test a touch lifecycle with no vertical movement and delaysContentTouches: YES - the scroll view will capture the touch,
+// Test a touch lifecycle with no vertical movement and delaysContentTouches: YES - the scroll view will capture the touch,
 // but since there was no scroll, it will give inner views a chance to respond to it on touchEnd.
 test("Tapping with delaysContentTouches: YES", function() {
   // Trigger touchstart
@@ -113,7 +113,7 @@ test("Tapping with delaysContentTouches: YES", function() {
 });
 
 
-// Test a touch lifecycle with some vertical movement and delaysContentTouches: YES - The scroll view will capture the
+// Test a touch lifecycle with some vertical movement and delaysContentTouches: YES - The scroll view will capture the
 // touch, and since there was a scroll, the inner view will not receive any notifications whatsoever.
 test("Dragging with delaysContentTouches: YES", function() {
   // Trigger touchstart
@@ -140,7 +140,7 @@ test("Dragging with delaysContentTouches: YES", function() {
 });
 
 
-// Test a touch lifecycle with no vertical movement and delaysContentTouches: NO - the scroll view should not partake in this touch at all.
+// Test a touch lifecycle with no vertical movement and delaysContentTouches: NO - the scroll view should not partake in this touch at all.
 test("Tapping with delaysContentTouches: NO", function() {
   scrollView.set('delaysContentTouches', NO);
 
@@ -164,7 +164,7 @@ test("Tapping with delaysContentTouches: NO", function() {
 });
 
 
-// Tests a touch lifecycle with some vertical movement and delaysContentTouches: NO - the inner view will receive the touch,
+// Tests a touch lifecycle with some vertical movement and delaysContentTouches: NO - the inner view will receive the touch,
 // but upon it becoming a drag will voluntarily relinquish it back to the scroll view. (See innerView.touchesDragged in the
 // current module.setup method.)
 test("Dragging with delaysContentTouches: NO", function() {

@@ -55,13 +55,13 @@ It is now possible to mixin SC.Gesturable to a view and use events to react to m
 * Swipe gestures can now be configured to match against any arbitrary angles, not just left, right, up & down.
 * Swipe gestures no longer trigger by simply moving far enough in one direction. They must also move quickly (configurable) and end immediately.
 
-*How does this affect your code?*  
+*How does this affect your code?*
 
 For the most part, this should have no effect on existing implementors of SC.Gesturable. The three built-in gestures: SC.TapGesture, SC.PinchGesture, and SC.SwipeGesture are still defined and they work much better than before. However if you have defined a custom SC.Gesture subclass, it will unfortunately not work correctly with this update. Because we felt the previous version of SC.Gesture's API was too complex and incompatible with the behavior we needed to achieve, we decided it was better to rewrite it in a simpler form. We're very sorry for this backwards incompatibility, but because of the previous issues with gestures, we believe no one was able to use them anyway.
 
 #### Legacy Framework
 
-There is now a sub-framework within SproutCore, `:'sproutcore/legacy'`, which is meant to contain all code providing support for older browsers. This includes the existing polyfill for `window.requestAnimationFrame` and a brand new polyfill for `Object.keys`. The legacy framework is included by default by requiring `:sproutcore` in a project's or an app's Buildfile. The legacy framework itself requires the `:sproutcore/desktop` framework, which allows for any legacy code in the SproutCore controls to be separated out.  
+There is now a sub-framework within SproutCore, `:'sproutcore/legacy'`, which is meant to contain all code providing support for older browsers. This includes the existing polyfill for `window.requestAnimationFrame` and a brand new polyfill for `Object.keys`. The legacy framework is included by default by requiring `:sproutcore` in a project's or an app's Buildfile. The legacy framework itself requires the `:sproutcore/desktop` framework, which allows for any legacy code in the SproutCore controls to be separated out.
 
 Therefore, to build an app that will only work with the newest browsers (probably not a great idea —), you may change your Buildfile requirements to include only the specific SproutCore sub-frameworks you need. For example,
 
@@ -84,7 +84,7 @@ Note: This deprecation will show a console warning in debug (i.e. non-production
 
 #### SC.NestedStore
 
-`SC.NestedStore` has a new property, `conflictedStoreKeys`, which is an array of all store keys that currently have conflicts with the nested store's parent. A conflict in a nested store can occur when the data in the parent store changes *after* the nested store has accessed and modified it.  
+`SC.NestedStore` has a new property, `conflictedStoreKeys`, which is an array of all store keys that currently have conflicts with the nested store's parent. A conflict in a nested store can occur when the data in the parent store changes *after* the nested store has accessed and modified it.
 
 For instance, in a multi-user system where records can be edited by multiple people at the same time, the client may use polling or websockets to update the records in the main store asynchronously in the background. With such a scenario it would be possible for the current user to be editing a record that someone else has changed in the meantime. If the client attempted to commit the changes from the nested store it would get an exception because of the conflict. Instead, the developer can now check the value of `conflictedStoreKeys` and if it is `null`, then commit the changes and if it is an array of store keys, then they know which records have conflicts and can deal with them directly.
 
@@ -92,9 +92,9 @@ For instance, in a multi-user system where records can be edited by multiple peo
 
 There are two new binding transforms, `string` and `integer`, that ensure the value is *always* a `String` or an integer `Number`. Examples include returning an empty `String` for `null` or `undefined` values when using the `string` transform and returning a 0 for these same values when using the `integer` transform. Furthermore, if the `integer` transform is given a String, it will be parsed to an integer `Number` according to the extra argument `radix` (which is 10 by default).
 
-There is also a new binding transform, `mix`, that allows for the aggregation of multiple bound properties into a single property through a given function. It is often the case that a single property depends on two or more bound properties in a complex manner that isn't handled by the current `and` and `or` transforms. To handle this situation previously, the developer would need to write the code to bind in the external property values and then make a local computed property dependent on each of these. The `mix` transform does exactly the same thing, but with less typing on the developer's part.  
+There is also a new binding transform, `mix`, that allows for the aggregation of multiple bound properties into a single property through a given function. It is often the case that a single property depends on two or more bound properties in a complex manner that isn't handled by the current `and` and `or` transforms. To handle this situation previously, the developer would need to write the code to bind in the external property values and then make a local computed property dependent on each of these. The `mix` transform does exactly the same thing, but with less typing on the developer's part.
 
-For example, to create a mix binding that concatenates two external properties in a non-trivial way, we can now do the following,  
+For example, to create a mix binding that concatenates two external properties in a non-trivial way, we can now do the following,
 
     currentGroupUserLabel: SC.LabelView.extend({
 
@@ -120,30 +120,30 @@ For example, to create a mix binding that concatenates two external properties i
 
 #### General
 
-* *Updated Description* Scale is now a first-class layout property, correctly impacting `frame` and `clippingFrame`. If a view is scaled, the width & height of the frame will be correct as the view appears. For example, a view with layout equal to `{ width: 100, height: 100, scale: 2 }` will report a frame of `{ x: 0, y: 0, width: 200, height: 200, scale: 2 }`. The scale also takes a scaling origin into account as well and as part of this change, there are two new layout properties: `transformOriginX` and `transformOriginY`, which define the percentage (between 0.0 and 1.0) on the respective axis about which the scale transform is applied. These properties affect all transform styles and so can be used to also change the origin of a rotate style.  
+* *Updated Description* Scale is now a first-class layout property, correctly impacting `frame` and `clippingFrame`. If a view is scaled, the width & height of the frame will be correct as the view appears. For example, a view with layout equal to `{ width: 100, height: 100, scale: 2 }` will report a frame of `{ x: 0, y: 0, width: 200, height: 200, scale: 2 }`. The scale also takes a scaling origin into account as well and as part of this change, there are two new layout properties: `transformOriginX` and `transformOriginY`, which define the percentage (between 0.0 and 1.0) on the respective axis about which the scale transform is applied. These properties affect all transform styles and so can be used to also change the origin of a rotate style.
 
 ### CHANGES & IMPROVEMENTS
 
-#### Documentation  
+#### Documentation
 
-- Added lots of documentation to `SC.Request` (examples), `SC.Query` (local vs. remote) and `SC.DateTime` (`adjust` and `advance`).   
-- Cleaned up documentation of all protocols, including a warning not to mix in protocols and fixed some problems that prevented some protocols from being properly generated on docs.sproutcore.com.  
-- Added `SC.ObjectMixinProtocol` with documentation on using mixins with `SC.Object` as well as the methods `initMixin` and  `destroyMixin` that are supported.  
-- Added documentation on touch event handling to `SC.ResponderProtocol` (i.e. the protocol that may be implemented by `SC.Responder` subclasses like `SC.View`).  
-- Added/improved documentation on `SC.Gesturable` mixin.  
+- Added lots of documentation to `SC.Request` (examples), `SC.Query` (local vs. remote) and `SC.DateTime` (`adjust` and `advance`).
+- Cleaned up documentation of all protocols, including a warning not to mix in protocols and fixed some problems that prevented some protocols from being properly generated on docs.sproutcore.com.
+- Added `SC.ObjectMixinProtocol` with documentation on using mixins with `SC.Object` as well as the methods `initMixin` and  `destroyMixin` that are supported.
+- Added documentation on touch event handling to `SC.ResponderProtocol` (i.e. the protocol that may be implemented by `SC.Responder` subclasses like `SC.View`).
+- Added/improved documentation on `SC.Gesturable` mixin.
 
-#### SC.PickerPane  
+#### SC.PickerPane
 
-This view has been given special behavior when used with SC.View's `transitionIn` plugin support. If the plugin defines `layoutProperties` of either `scale` or `rotate`, then the picker will adjust its transform origin X & Y position to appear to scale or rotate out of the anchor. The result is a very nice effect that picker panes appear to pop out of their anchors.  
+This view has been given special behavior when used with SC.View's `transitionIn` plugin support. If the plugin defines `layoutProperties` of either `scale` or `rotate`, then the picker will adjust its transform origin X & Y position to appear to scale or rotate out of the anchor. The result is a very nice effect that picker panes appear to pop out of their anchors.
 To see it in effect, simply set the `transitionIn` property of the pane to one of `SC.View.SCALE_IN` or `SC.View.POP_IN`.
 
-#### SC.SegmentedView  
+#### SC.SegmentedView
 
-This view was refactored slightly to remove the special overflow view if `shouldHandleOverflow` is `false` (default). Previously the overflow view was always created and appended even if it was not to be used.  
+This view was refactored slightly to remove the special overflow view if `shouldHandleOverflow` is `false` (default). Previously the overflow view was always created and appended even if it was not to be used.
 
 #### General
 
-* The automatically adjusted size component of the layouts of `SC.ListView` and `SC.GridView` have changed to set `height` and `width` instead of `minHeight` and `minWidth` (as it applies). The reason for this change is so that the entire list of items can be GPU accelerated by setting `wantsAcceleratedLayer: true` on the view. GPU accelerated positioning using the `translateX` and `translateY` transforms requires that the view have a fixed position (top & left) and a fixed size (height & width). These views already have a fixed position by default and now by having them adjust their `height` or `width` (depending on the direction), it is possible to accelerate these views by also fixing the other size component (i.e. if the list scrolls vertically, the list will set its height, so the developer needs to set the lists width to a fixed value and then add `wantsAcceleratedLayer: true`).  
+* The automatically adjusted size component of the layouts of `SC.ListView` and `SC.GridView` have changed to set `height` and `width` instead of `minHeight` and `minWidth` (as it applies). The reason for this change is so that the entire list of items can be GPU accelerated by setting `wantsAcceleratedLayer: true` on the view. GPU accelerated positioning using the `translateX` and `translateY` transforms requires that the view have a fixed position (top & left) and a fixed size (height & width). These views already have a fixed position by default and now by having them adjust their `height` or `width` (depending on the direction), it is possible to accelerate these views by also fixing the other size component (i.e. if the list scrolls vertically, the list will set its height, so the developer needs to set the lists width to a fixed value and then add `wantsAcceleratedLayer: true`).
 
 Test Results:
 
@@ -158,24 +158,24 @@ Test Results:
       Update Layer Tree: ~0.1ms
       Paint x 8:         ~6.0ms
 
-*How does this affect your code?*  
+*How does this affect your code?*
 
-Because lists and grids have an implied layout of `{ top: 0, bottom: 0, left: 0, right: 0 }`, they used to always stretch to fill their parent containing view. This is no longer the case and so a collection with too few items to fill the containing view will only be as tall or as wide as its items warrant. This will affect any background styles that were applied to the collection (such as the Ace theme did), which previously would have covered the whole containing view's background. Unfortunately, those background styles need to be moved to the style of the containing view in order to prevent any styling regressions after updating to this new version.  
+Because lists and grids have an implied layout of `{ top: 0, bottom: 0, left: 0, right: 0 }`, they used to always stretch to fill their parent containing view. This is no longer the case and so a collection with too few items to fill the containing view will only be as tall or as wide as its items warrant. This will affect any background styles that were applied to the collection (such as the Ace theme did), which previously would have covered the whole containing view's background. Unfortunately, those background styles need to be moved to the style of the containing view in order to prevent any styling regressions after updating to this new version.
 
-Therefore, to go along with this change the `background: white` style in the Ace theme that was applied to `$theme.collection` has been moved to `$theme.sc-scroll-view`. It has also been changed to `background-color: white`, which is less likely to conflict with other background styles.  
+Therefore, to go along with this change the `background: white` style in the Ace theme that was applied to `$theme.collection` has been moved to `$theme.sc-scroll-view`. It has also been changed to `background-color: white`, which is less likely to conflict with other background styles.
 
-*How do I check for style regressions?*  
+*How do I check for style regressions?*
 To ensure that any background styles applied to your collections still look correct, you should do a search through your stylesheets for `.collection` and move any custom background styles over to an `.sc-scroll-view` class.
 
-* The SC.Binding transforms `and` and `or` have been refactored to use the new `mix` code. This means that you can now pass more than two property paths to these transforms.  
+* The SC.Binding transforms `and` and `or` have been refactored to use the new `mix` code. This means that you can now pass more than two property paths to these transforms.
 
-For example,  
+For example,
 
     isEnabledBinding: SC.Binding.and('.hasValue', '.valueIsValid', '.userIsAllowed')
 
 ### DEPRECATIONS & REMOVALS
 
-* The `isPaneAttached` property of SC.Pane has been deprecated. This property is identical to the existing `isAttached` property of SC.View that SC.Pane extends and so `isPaneAttached` is not needed. Please use `isAttached` instead.  
+* The `isPaneAttached` property of SC.Pane has been deprecated. This property is identical to the existing `isAttached` property of SC.View that SC.Pane extends and so `isPaneAttached` is not needed. Please use `isAttached` instead.
 
 Note: This deprecation will show a console warning in debug (i.e. non-production) mode.
 
@@ -193,7 +193,7 @@ Note: This deprecation will show a console warning in debug (i.e. non-production
 
 ### CHANGES & IMPROVEMENTS
 
-* SC.ScrollView alignment handling has been improved for container (i.e. the scroll view) or content size changes. This change partially addresses a regression that allowed the content to appear offset incorrectly when it or the scroll view's size changed. But after some investigation, the behavior has also been improved to support the following scenarios:  
+* SC.ScrollView alignment handling has been improved for container (i.e. the scroll view) or content size changes. This change partially addresses a regression that allowed the content to appear offset incorrectly when it or the scroll view's size changed. But after some investigation, the behavior has also been improved to support the following scenarios:
 
 1. The scroll view is left (or top) aligned, scrolled to the maximum right (or bottom) edge and container or content changes size: the content should stick to the right (or bottom) side
 2. The scroll view is left (or top) aligned, scrolled to the minimum left (or top) edge and container or content changes size: the content should stick to the left (or top) side
@@ -211,7 +211,7 @@ Along with this change, the `actionContext` property has also now been deprecate
 Note: this is a backwards-compatible change. If a String is passed to `fireAction` *and* no `action` property exists, the argument will be used as the `action` (i.e. no context will be sent). When this occurs, a Developer Warning will appear in the console. Likewise, a Developer Warning will appear if `actionContext` is set prior to a view being initialized.
 * SC.ButtonView and SC.CollectionView have both been altered slightly to use SC.ActionSupport. This has no affect on the use of action & target in these views.
 * Moved tracing code of SC.ResponderContext and SC.Module to debug-only. This prevents the debugging code from being included in production builds, thus reducing the overall deployed file size slightly.
-* Optimized use of the `arguments` object in several locations in order to avoid its instantiation. There were several occurrences of code copying the `arguments` object into an Array using `slice`; this is very costly for performance as it causes the browser to instantiate the `arguments` object in order to do the slice. Instead, these occurrences were converted to either access the arguments by index without a copy or to do a fast copy without instantiation. See http://jsperf.com/closure-with-arguments for an example of the performance difference this can make. Using slice is anywhere from ~50% to ~90% slower depending on the browser.  
+* Optimized use of the `arguments` object in several locations in order to avoid its instantiation. There were several occurrences of code copying the `arguments` object into an Array using `slice`; this is very costly for performance as it causes the browser to instantiate the `arguments` object in order to do the slice. Instead, these occurrences were converted to either access the arguments by index without a copy or to do a fast copy without instantiation. See http://jsperf.com/closure-with-arguments for an example of the performance difference this can make. Using slice is anywhere from ~50% to ~90% slower depending on the browser.
 
 Affected: SC.Request, SC.WebSocket, SC.DelegateSupport, SC.Color, SC.Event, SC.Store, SC.Module, SC.Object, SC.Function, SC.State, SC.Statechart
 * Named two anonymous functions: send_event & handle_event in order to aid in debugging and profiling of the core framework.
@@ -229,7 +229,7 @@ Affected: SC.Request, SC.WebSocket, SC.DelegateSupport, SC.Color, SC.Event, SC.S
 ### NEW FEATURES
 
 * Added polymorphic record support to `SC.Record`. This experimental framework has been in use in a few projects and has recently been vastly improved to fix bugs and improve its performance. Includes unit tests and examples
-* Added new properties to `SC.Request` instances: `allowCredentials` (default true, which will indicate that credentials be included for cross-domain requests (e.g. xhr.withCredentials = true) and `isSameDomain` (readonly computed property, true if the protocol, domain and port match exactly).  
+* Added new properties to `SC.Request` instances: `allowCredentials` (default true, which will indicate that credentials be included for cross-domain requests (e.g. xhr.withCredentials = true) and `isSameDomain` (readonly computed property, true if the protocol, domain and port match exactly).
 These new properties can be used by an `SC.Response` subclass to include allowing credentials for cross domain requests.
 * Added `dragDidSucceed`, `dragDidCancel`, `source.dragSlideBackDidEnd` callbacks to `SC.Drag`.
 * `SC.View.VERTICAL_STACK` & `SC.View.HORIZONTAL_STACK` have been improved to allow child views in the stack to resize to fill available space. Previously, every child view needed to have a height or width specified with the exception of the last child view which could be resized to fit the remaining space of the parent view. This option was enabled by setting `resizeToFit` to `false` in the `childViewLayoutOptions` hash. In 1.11, we can now set `resizeToFit` to `false` and have all child views without an explicit width or height respectively, resize to fill the available space. By default the available space will be shared evenly by all of these child views, but a more specific per child view weighting can be applied by specifing a `fillRatio` on the child views. For instance, to split the available space between two flexible child views as 1/3 and 2/3, the first view would have a `fillRatio` of 1 and the second view would have a `fillRatio` of 2.
@@ -299,14 +299,14 @@ These new properties can be used by an `SC.Response` subclass to include allowin
 * Changed SC.MenuItemView's handling of submenus. Previously if the item's submenu was visible and the mouse exited back onto the menu item view, it tried to re-append the same submenu. Instead, it now checks to see if its submenu is already attached before attempting to enter it again.
 * Allows for optimization of SC.RenderContext's setStyle method (Removes V8 "ForIn is not fast case" warning, see http://commondatastorage.googleapis.com/io-2013/presentations/223.pdf).
 * Many developer warnings and errors that would previously appear in production have been restricted to dev-mode only.
-* Improved performance of core SC methods: SC.mixin, SC.supplement as well as SC.Function.enhance. SC.mixin and SC.supplement iterated the arguments object to insert a boolean flag to pass to a private function that then iterated its arguments in order to ignore the flag argument, which is totally unnecessary. Instead, SC.mixin and SC.supplement iterate the arguments once and pass the new Array to the private function as a second argument, removing the need for a second iteration.  
+* Improved performance of core SC methods: SC.mixin, SC.supplement as well as SC.Function.enhance. SC.mixin and SC.supplement iterated the arguments object to insert a boolean flag to pass to a private function that then iterated its arguments in order to ignore the flag argument, which is totally unnecessary. Instead, SC.mixin and SC.supplement iterate the arguments once and pass the new Array to the private function as a second argument, removing the need for a second iteration.
 
-As well, these three areas all accessed the arguments object to copy it, which requires the browser to instantiate it, which is costly. Instead, we now do a fast copy (similar to this: http://jsperf.com/closure-with-arguments) without instantiating the arguments object.  
+As well, these three areas all accessed the arguments object to copy it, which requires the browser to instantiate it, which is costly. Instead, we now do a fast copy (similar to this: http://jsperf.com/closure-with-arguments) without instantiating the arguments object.
 
-Finally, by doing a fast copy of arguments these functions are now optimizable by V8, whereas they weren't previously.  
+Finally, by doing a fast copy of arguments these functions are now optimizable by V8, whereas they weren't previously.
 
 Benchmark: `SC.mixin` & `SC.supplement` ~ 58% faster
-* Calls adjustLayout on initialization of SC.CollectionView.  
+* Calls adjustLayout on initialization of SC.CollectionView.
 
 Certain containing views, transitions and specialized layout engines need to know what type of layout their child views will have in order to make the proper adjustments. SC.CollectionView subclasses typically set a width or a height themselves, but when this happens late, the actual layout style of the collection is misunderstood at initialization to be something different.
 * Improved the management of the content view for SC.ContainerView.
@@ -357,7 +357,7 @@ There were a couple of issues hampering performance for SC.PickerPanes within SC
 * DateTime localizations are now available in French.
 * Fixes up some bad overrides of interpretKeyEvents. Make sure to use, rather than override, this method in your own code.
 * SC.TextFieldView now supports selection direction when the browser allows.
-* Many webkit-specific properties under the hood – for example, transform CSS – have been replaced with correctly browser-detected versions.
+* Many webkit-specific properties under the hood – for example, transform CSS – have been replaced with correctly browser-detected versions.
 * `SC.View.VERTICAL_STACK` and `SC.View.HORIZONTAL_STACK` child layout plugins now support the use of `minHeight` and `minWidth`.
 * CoreTest, our QUnit like testing suite, now includes a "warn" method to explicitly create a warning.
 * SC.MenuPane will ignore the first item if it is a separator.
@@ -1240,7 +1240,7 @@ Note: this is especially a problem if you wanted to create an app manifest based
   for the same property.
   - For example, if you define 'smallBinding' inside 'MyApp.ParentClass = SC.View.extend({ smallBinding: … ' and then extend MyApp.ParentClass further like so 'childView1: MyApp.ParentClass.extend({ smallBinding: … ', then childView1 would have the same binding to small appearing twice in its bindings Array. This can lead to strange behavior when you try connect and disconnect the bindings on the fly.
 * Adds support to SC.MenuPane for pgUp/pgDown/home/end to navigate the menu.
-* Improves SC.ModalPane's automatic disabling of covered SC.TextFieldViews.  
+* Improves SC.ModalPane's automatic disabling of covered SC.TextFieldViews.
   SC.ModalPane will disable tabbing into any fields not in the current pane, so
   that tabbing won't jump "behind" the modal pane.  However, if the text field
   had isBrowserFocusable set to NO, SC.ModalPane would unintentionally set it to

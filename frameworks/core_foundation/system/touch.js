@@ -15,7 +15,7 @@
   target element at `target`, its target SC.View at `targetView`, and the touch's unique identifier at `identifier`,
   which may be relied upon to identify a particular touch for the duration of its lifecycle.
 
-  A touch object exists for the duration of the touch – literally for as long as your finger is on the screen – and
+  A touch object exists for the duration of the touch – literally for as long as your finger is on the screen – and
   is sent to a number of touch events on your views. Touch events are sent to the touch's current responder, set initially
   by checking the responder chain for views which implement `touchStart` (or `captureTouch`, see "Touch Events" below),
   and can be passed to other views as needed (see "Touch Responders" below).
@@ -33,7 +33,7 @@
     become its responder. (If your view doesn't want to immediately capture the touch, but instead wants to suggest itself
     as a fallback handler in case the child view resigns respondership, it can do so by passing itself to the touch's
     `stackCandidateTouchResponder` method.)
-  - `touchStart` -- When a touch begins, or when a new view responder is first given access to it (see "Touch Responders"
+  - `touchStart` -- When a touch begins, or when a new view responder is first given access to it (see "Touch Responders"
     below), the touch is passed to this method.
   - `touchesDragged` -- Whenever any touches move, the `touchesDragged` method is called on the current view responder
     for any touches that have changed. The method is provided two arguments: a special multitouch event object (see "The
