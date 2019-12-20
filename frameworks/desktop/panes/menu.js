@@ -266,6 +266,14 @@ SC.MenuPane = SC.PickerPane.extend(
   */
   isContextMenuEnabled: NO,
 
+  /**
+    Close the menu if the user resizes the window.
+
+    @type Boolean
+    @default true
+  */
+  removeOnWindowResize: true,
+
 
   // ..........................................................
   // METHODS
@@ -770,16 +778,6 @@ SC.MenuPane = SC.PickerPane.extend(
     this._menuView = null;
 
     return ret;
-  },
-
-  /**
-    Close the menu if the user resizes the window.
-
-    @private
-  */
-  windowSizeDidChange: function () {
-    this.remove();
-    return sc_super();
   },
 
   /**
