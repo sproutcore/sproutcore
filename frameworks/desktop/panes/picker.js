@@ -1281,7 +1281,7 @@ SC.PickerPane = SC.PalettePane.extend(
   windowSizeDidChange: function (oldSize, newSize) {
     sc_super();
 
-    if (this.repositionOnWindowResize) {
+    if (!this.removeOnWindowResize && this.repositionOnWindowResize) {
       // Do this in the next run loop. This ensures that positionPane is only called once even if scroll view
       // offsets are changing at the same time as the window is resizing (see _scrollOffsetDidChange below).
       this.invokeNext(this.positionPane);

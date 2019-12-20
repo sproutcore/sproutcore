@@ -210,6 +210,15 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
   */
   zIndex: 0,
 
+  /**
+    Determine if the pane should be removed if the user resizes the window.
+
+    @type Boolean
+    @default false
+  */
+  removeOnWindowResize: NO,
+
+
   // -----------------------------------------------------------------------------------------------
   // Methods
   //
@@ -893,9 +902,15 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     @returns {SC.Pane} receiver
   */
   windowSizeDidChange: function (oldSize, newSize) {
-    this.set('currentWindowSize', newSize);
-    this.setBodyOverflowIfNeeded();
-    this.parentViewDidResize(newSize); // start notifications.
+    if (this.removeOnWindowResize) {
+      this.remove();
+    }
+    else {
+      this.set('currentWindowSize', newSize);
+      this.setBodyOverflowIfNeeded();
+      this.parentViewDidResize(newSize); // start notifications.
+    }
+
     return this;
   }
 
