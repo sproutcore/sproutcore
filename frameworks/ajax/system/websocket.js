@@ -142,6 +142,16 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
   */
   connectAttemptLimit: 0,
 
+  /**
+    Return true if the connection is ready
+
+    @type Boolean
+  */
+  isReady: function() {
+    return this.isConnected === true && this.isAuth !== false;
+  }.property(),
+
+
   // ..........................................................
   // PUBLIC METHODS
   //
@@ -288,7 +298,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
     @returns {SC.WebSocket}
   */
   send: function(message) {
-    if (this.isConnected === true && this.isAuth !== false) {
+    if (this.get('isReady')) {
       if (this.isJSON) {
         message = JSON.stringify(message);
       }
@@ -395,6 +405,7 @@ SC.WebSocket = SC.Object.extend(SC.DelegateSupport, SC.WebSocketDelegate,
     if (!queue || queue.length === 0) return;
 
     queue = SC.A(queue);
+
     this.queue = null;
 
     for (var i = 0, len = queue.length; i < len; i++) {
