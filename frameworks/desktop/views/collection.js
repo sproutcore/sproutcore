@@ -3471,7 +3471,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     itemView.beginPropertyChanges();
 
     // Update the view with the new properties.
-    itemView.set('content', attrs.content);
+    itemView.set('content', attrs.content !== undefined ? attrs.content : null);
     itemView.set('contentIndex', attrs.contentIndex);
     itemView.set('isEnabled', attrs.isEnabled);
     itemView.set('isEditable', attrs.isEditable);
