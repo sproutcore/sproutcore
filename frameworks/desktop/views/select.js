@@ -119,6 +119,25 @@ SC.SelectView = SC.PopupButtonView.extend(SC.ItemFormatter, {
   emptyName: null,
 
   /**
+    Convenience property to know if multiple selection is allowed.
+    If true, the value is expected to be null or an array.
+
+    @type Boolean
+    @default NO
+   */
+  allowsMultipleSelection: false,
+
+
+  /**
+    The selection count name to display when several items are selected.
+    e.g.: `5 Items`
+
+    @type String
+    @default "Items"
+   */
+  multipleSelectionName: "Items",
+
+  /**
     If true, titles will be escaped to avoid scripting attacks.
 
     @type Boolean
@@ -211,7 +230,7 @@ SC.SelectView = SC.PopupButtonView.extend(SC.ItemFormatter, {
   _scsv_getValueForMenuItem: function(item) {
     var valueKey = this.get('itemValueKey');
 
-    if (item.isEmptyName) return null;
+    if (item.isEmptyItem) return null;
     if (!valueKey) {
       return item;
     } else {
@@ -224,13 +243,32 @@ SC.SelectView = SC.PopupButtonView.extend(SC.ItemFormatter, {
     * @private
   */
   _scsv_selectedItemDidChange: function() {
-    var sel = this.get('selectedItem'),
-        last = this._scsv_lastSelection;
+    var sel = this.get('selectedItem');
 
     // selected item could be a menu item from SC.MenuPane's displayItems, or it could
     // be a raw item. So, we have to use _scsv_getValueForMenuItem to resolve it.
     if (sel) {
-      this.setIfChanged('value', this._scsv_getValueForMenuItem(sel));
+      var value = this._scsv_getValueForMenuItem(sel);
+
+      if (this.get('allowsMultipleSelection')) {
+        if (sel.isSelectAllItem) {
+          var valueKey = this.get('itemValueKey');
+
+          value = this.get('items').map(function(item) {
+            return SC.get(item, valueKey);
+          });
+        }
+        else {
+          var values = SC.A(this.get('value'));
+
+          if (value === null) values = [];
+          else if (values.contains(value)) values.removeObject(value);
+          else values.pushObject(value);
+          value = values;
+        }
+      }
+
+      this.setIfChanged('value', value);
     }
 
     this._scsv_lastSelection = sel;
@@ -246,19 +284,56 @@ SC.SelectView = SC.PopupButtonView.extend(SC.ItemFormatter, {
     The title of the button, derived from the selected item.
   */
   title: function() {
-    var sel = this.get('selectedItem');
+    var sel = this.get('selectedItem'),
+      allowsMultipleSelection = this.get('allowsMultipleSelection'),
+      value = this.get('value');
 
-    if (!sel || this._scsv_getValueForMenuItem(sel) == null) {
+    if ((!allowsMultipleSelection || !value) && (!sel || this._scsv_getValueForMenuItem(sel) == null)) {
       return this.get('defaultTitle');
     } else {
-      var itemTitleKey = this.get('itemTitleKey');
+      var itemValueKey = this.get('itemValueKey'),
+        itemTitleKey = this.get('itemTitleKey');
+
+      if (this.get('allowsMultipleSelection')) {
+        var items = this.get('items') || [],
+          values = this.get('value');
+
+        if (SC.typeOf(values) === SC.T_ARRAY) {
+          var len = values.length;
+
+          if (len === 1) {
+            sel = items.findProperty(itemValueKey, values[0]);
+          }
+          else if (!len) {
+            return this.get('emptyName');
+          }
+          else if (len < 3) {
+            ret = values.map(function(val) {
+              var sel = items.findProperty(itemValueKey, val);
+
+              if (itemTitleKey) {
+                if (sel.get) return sel.get(itemTitleKey);
+                else if (SC.typeOf(sel) == SC.T_HASH) return sel[itemTitleKey];
+              }
+              return sel.toString();
+            }).join(' • ');
+
+            return ret;
+          }
+          else {
+            return len+' '+this.get('multipleSelectionName');
+          }
+        }
+        else return 'bad format';
+      }
+
       if (itemTitleKey) {
         if (sel.get) return sel.get(itemTitleKey);
         else if (SC.typeOf(sel) == SC.T_HASH) return sel[itemTitleKey];
       }
       return sel.toString();
     }
-  }.property('selectedItem', 'defaultTitle').cacheable(),
+  }.property('selectedItem', 'defaultTitle', 'value').cacheable(),
 
   /** @private */
   defaultTitle: function() {
