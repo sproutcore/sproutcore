@@ -25,7 +25,7 @@ SC.ItemFormatter = {
         ret.unshift(item);
       }
 
-      var item = SC.Object.create({ isEmptyName: true });
+      var item = SC.Object.create({ isEmptyItem: true });
       item[titleKey] = emptyName;
       ret.unshift(item);
     }

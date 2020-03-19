@@ -32,7 +32,6 @@ SC.SelectViewMenu = {
   value: null,
   valueBinding: '.selectView.value',
 
-
   /**
     @private
     Invalidates menu items' isChecked property when the selectView's value changes.
@@ -78,18 +77,29 @@ SC.SelectViewMenu = {
 
     isChecked: function() {
       var parentMenu = this.get('parentMenu'),
-        selectView;
+        content = this.get('content'),
+        selectView,
+        isChecked;
 
       while (!selectView) {
         selectView = parentMenu.get('selectView');
         parentMenu = parentMenu.get('parentMenu');
       }
 
-      // _lastIsChecked is used by the SelectViewMenu mixin above to determine whether
-      // the isChecked property needs to be invalidated.
-      this._lastIsChecked = selectView.isValueEqualTo(this.get('content'));
+      if (selectView.get('allowsMultipleSelection')) {
+        var value = selectView.get('value'),
+          itemValue = selectView._scsv_getValueForMenuItem(content);
 
-      return this._lastIsChecked;
+        isChecked = (SC.typeOf(value) === SC.T_ARRAY && value.contains(itemValue));
+      }
+      else {
+        // _lastIsChecked is used by the SelectViewMenu mixin above to determine whether
+        // the isChecked property needs to be invalidated.
+        isChecked = selectView.isValueEqualTo(content);
+      }
+
+      this._lastIsChecked = isChecked;
+      return isChecked;
     }.property()
 
   }),
