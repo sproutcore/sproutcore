@@ -101,7 +101,15 @@ var pane = SC.ControlTestPane.design()
     })
 
     .add("SelectWithSeparator", SC.SelectView, {
-      items: [{ title: "None", isSeparator: YES },
+      items: [{ isSeparator: YES },
+        { title: "Low", isEnabled: NO },
+        { isSeparator: YES },
+        { title: "High" }],
+      itemTitleKey: 'title'
+    })
+
+    .add("SelectWithTitleSeparator", SC.SelectView, {
+      items: [{ title: "Title", isSeparator: YES },
         { title: "Low", isEnabled: NO },
         { isSeparator: YES },
         { title: "High" }],
@@ -136,6 +144,7 @@ test("Check the visiblity of the selectButtons", function() {
   ok(pane.view('StaticLayout').get('isVisibleInWindow'), 'StaticLayout.isVisibleInWindow should be YES') ;
   ok(pane.view('SelectButtonWithEmptyName').get('isVisibleInWindow'), 'SelectButtonWithEmptyName.isVisibleInWindow should be YES') ;
   ok(pane.view('SelectWithSeparator').get('isVisibleInWindow'), 'SelectButtonWithEmptyName.isVisibleInWindow should be YES') ;
+  ok(pane.view('SelectWithTitleSeparator').get('isVisibleInWindow'), 'SelectButtonWithEmptyName.isVisibleInWindow should be YES') ;
 }) ;
 
 //test2
@@ -282,8 +291,27 @@ test("SelectWithSeparator", function() {
   ok(!view.$().hasClass('sel'), 'hasClass(sel) should be NO') ;
   ok(!view.$().hasClass('disabled'), 'hasClass(disabled) should be NO') ;
   ok(!view.$().hasClass('def'), 'hasClass(def) should be NO') ;
-  
+
   SC.run(function() { view.showMenu(); });
   equals(view.getPath("menu.displayItems")[0].title, 'Low', 'The label should be "Low"');
+  SC.run(function() { view.hideMenu(); });
+});
+
+/**
+  This is just a simple test that shows that when the first item provided to
+  SC.SelectView is a separator with a title, it is displayed
+*/
+test("SelectWithTitleSeparator", function() {
+  var view=pane.view('SelectWithTitleSeparator');
+  ok(!view.$().hasClass('icon'), 'hasClass(Icon) should be NO') ;
+  ok(view.$().hasClass('sc-view'), 'hasClass(sc-view) should be YES') ;
+  ok(view.$().hasClass('sc-button-view'), 'hasClass(sc-button-view) should be YES') ;
+  ok(view.$().hasClass('sc-regular-size'), 'hasClass(sc-regular-size) should be YES') ;
+  ok(!view.$().hasClass('sel'), 'hasClass(sel) should be NO') ;
+  ok(!view.$().hasClass('disabled'), 'hasClass(disabled) should be NO') ;
+  ok(!view.$().hasClass('def'), 'hasClass(def) should be NO') ;
+
+  SC.run(function() { view.showMenu(); });
+  equals(view.getPath("menu.displayItems")[0].title, 'Title', 'The label should be "Title"');
   SC.run(function() { view.hideMenu(); });
 });

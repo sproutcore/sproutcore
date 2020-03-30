@@ -6,7 +6,7 @@ $theme.sc-menu {
     background-color: $menu-bg;
     border: 1px solid $menu-border-color;
     box-shadow: $menu-box-shadow;
-    border-radius: $menu-border-radius; 
+    border-radius: $menu-border-radius;
   }
 
   /* may want to make some of this control size dependent... */
@@ -21,26 +21,26 @@ $theme.sc-menu {
     }
 
     &:first-child {
-      border-top-left-radius: $menu-border-radius; 
-      border-top-right-radius: $menu-border-radius; 
+      border-top-left-radius: $menu-border-radius;
+      border-top-right-radius: $menu-border-radius;
     }
 
     &:last-child {
-      border-bottom-left-radius: $menu-border-radius; 
-      border-bottom-right-radius: $menu-border-radius; 
+      border-bottom-left-radius: $menu-border-radius;
+      border-bottom-right-radius: $menu-border-radius;
     }
 
     .has-icon .value {
       margin-left: 42px;
     }
 
-    &.focus, a:hover {
+    &.sel {
       span { color: $hover-menu-item-text-color; }
       background-color: $hover-menu-item-bg;
       text-shadow: 0 -1px 1px rgba(0, 0, 0, .6);
     }
 
-    &.disabled a:hover, &.disabled.focus a:hover {
+    &.disabled.sel {
       span { color: $disable-menu-item-text-color; }
       text-shadow: none;
       border: none;
@@ -49,7 +49,6 @@ $theme.sc-menu {
 
     .icon {
       left: 20px;
-      top: 2px;
     }
 
     /* CHECKBOXES */
@@ -66,7 +65,7 @@ $theme.sc-menu {
       }
     }
 
-    &.focus .checkbox, &:hover .checkbox {
+    &.sel .checkbox {
       &:after {
         color: $hover-menu-item-text-color;
       }
@@ -91,7 +90,7 @@ $theme.sc-menu {
     position: absolute;
     left: 50%; top: 0px; margin-left: -7px;
     height: 14px; width: 14px;
-  
+
     &:after {
       position: absolute;
       font-family: FontAwesome;
@@ -105,7 +104,7 @@ $theme.sc-menu {
     position: absolute;
     left: 50%; bottom: 0px; margin-left: -7px;
     height: 14px; width: 14px;
-  
+
     &:after {
       position: absolute;
       font-family: FontAwesome;

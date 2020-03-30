@@ -11,10 +11,8 @@
   top: 50%;
   left: 50%;
   display: block;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
   border-radius: 4px;
-  -webkit-box-shadow: rgba(0,0,0,0.2) 0px 1px 0px;
+  box-shadow: rgba(0,0,0,0.2) 0px 1px 0px;
   opacity: 0.9;
   margin-left: -4px;
   margin-top: -4px;
@@ -55,4 +53,3 @@
 .sc-view.handles .handle.bottom.left {
   cursor: default;
 }
-

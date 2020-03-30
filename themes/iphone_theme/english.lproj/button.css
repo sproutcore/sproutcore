@@ -15,7 +15,7 @@
 	color: #000;
 	text-shadow: #fff 0 1px 1px;
 
-	-webkit-border-image: sc_static('images/whiteButton.png') 0 14 0 14;
+	border-image: sc_static('images/whiteButton.png') 0 14 0 14;
   text-decoration: none;
 }
 
@@ -35,7 +35,7 @@
 }
 
 .sc-view.sc-button-view.active {
-	-webkit-border-image: sc_static('images/blueButton.png') 0 14 0 14;
+	border-image: sc_static('images/blueButton.png') 0 14 0 14;
 	color: #fff;
 	text-shadow: #000 0 1px 1px;
 }

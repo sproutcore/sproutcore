@@ -3,9 +3,9 @@
 .sc-list-item-view{
   &.sc-regular-size {
     font-size: 12px;
-  } 
+  }
   &.sel {
-  	background-color: #888; 
+  	background-color: #888;
   	color: white ;
   	.sc-checkbox-view {
     	border: 1px #333 solid;
@@ -26,27 +26,26 @@
   &.has-branch .count {
   	right: 16px;
   }
-  label {
-  	top: 50%;
-  	height: 18px;
-  	display: block;
-  	position: absolute; 
-  	margin-top: -9px;
-  	line-height: 18px;
-  	left:  4px;
-  	right: 4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    -o-text-overflow: ellipsis;
-    -ms-text-overflow: ellipsis;
-  }
   .sc-outline {
     position: absolute;
     left: 0;
     top: 0;
     right: 0;
     bottom: 0;
+
+    > label {
+      top: 50%;
+      height: 18px;
+      display: block;
+      position: absolute;
+      margin-top: -9px;
+      line-height: 18px;
+      left:  4px;
+      right: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   }
   &.has-icon label,
   &.has-checkbox label {
@@ -57,26 +56,20 @@
   }
   .icon,
   .right-icon {
-  	margin-top: -9px;
+  	margin-top: -8px;
   	position: absolute;
   	top: 50%;
   }
   .icon {
-    margin-top: -9px;
-  	position: absolute;
-  	top: 50%;
   	left: 5px;
   }
   .right-icon {
-    margin-top: -9px;
-  	position: absolute;
-  	top: 50%;
     right: 5px;
   }
   &.has-checkbox .icon {
   	left: 25px;
   }
-  
+
   &.has-count {
     .right-icon {
       right: 32px;
@@ -104,8 +97,6 @@
   	top:  50%;
   	margin-top: -8px;
 
-  	-webkit-border-radius: 2px;
-  	-moz-border-radius: 2px;
   	border-radius: 2px;
   	background-color: #d0d0d0 ;
     & .active {
@@ -130,10 +121,8 @@
   	border: 1px #888 solid;
   	letter-spacing: -1px;
     border-radius: 7px;
-  	-webkit-border-radius: 7px;
-  	-moz-border-radius: 7px;
   }
-  
+
   .branch {
   	position: absolute;
   	width: 16px;

@@ -46,7 +46,7 @@ module('SC.MenuPane Methods', {
 
   teardown: function() {
     SC.run(function () {
-      if (!menu.isDestroyed) { menu.destroy(); }
+      menu.destroy();
       anchor.destroy();
     });
 
@@ -88,19 +88,29 @@ test('displayItems', function() {
     output, count;
 
   menu.menuHeight = 1;
+
   SC.run(function () {
     items.pushObject({ title: 'Added Menu Item' });
+    equals(menu.displayItemsCount, 0, 'displayItems should not change when the menu is not visible');
+    ok(menu.get('menuHeight') === 1, 'menuHeight should be recalculated when displayItems changes');
+
+    menu.popup();
+  });
+
+  SC.run(function () {
     equals(menu.displayItemsCount, 1, 'displayItems should change when items content changes');
     ok(menu.get('menuHeight') > 1, 'menuHeight should be recalculated when displayItems changes');
 
+    items.pushObject({ title: 'Added Menu Item' });
+    equals(menu.displayItemsCount, 2, 'displayItems should change when items content changes');
+
     menu.set('items', strings);
-    equals(menu.displayItemsCount, 2, 'displayItems should change when items property changes');
+    equals(menu.displayItemsCount, 3, 'displayItems should change when items property changes');
 
     output = menu.get('displayItems')[0];
     equals(SC.typeOf(output), SC.T_OBJECT, 'strings should be transformed into objects');
     equals(output.title, 'Alpha', 'title property of transformed object should match original string');
     equals(output.value, 'Alpha', 'value property of transformed object should match original string');
-    equals(output.isEnabled, YES, 'isEnabled property of transformed object should be YES');
 
     var hashes = [
       { title: 'Yankee' },
@@ -122,15 +132,25 @@ test('displayItems', function() {
     output = menu.get('displayItems')[0];
     equals(SC.typeOf(output), SC.T_OBJECT, 'displayItems should not convert objects');
     equals(SC.guidFor(output), SC.guidFor(objects[0]), 'objects should be identical to provided objects');
+
+    objects[0].set('title', 'Boomland');
+  });
+
+  SC.run(function () {
+    equals(output.get('title'), 'Boomland', 'object properties should be updated');
+    equals(menu.get('menuItemViews')[0].get('title'), 'Boomland', 'object properties should be updated');
   });
 });
 
 test('displayItems - Edge Cases', function() {
   SC.run(function () {
+    menu.popup();
+
     menu.set('items', [null, null, false, 0, 'Real Item']);
 
     var output = menu.get('displayItems');
     equals(output.get('length'), 1, 'displayItems should strip out invalid items');
+    equals(output[0].get('title'), 'Real Item', 'object properties should correspond to hash properties');
 
     menu.set('items', ['Yellow', { title: 'Country' }, SC.Object.create({ title: 'Teeth' })]);
     output = menu.get('displayItems');
@@ -141,13 +161,16 @@ test('displayItems - Edge Cases', function() {
     menu.set('items', []);
     equals(menu.getPath('displayItems.length'), 0, 'displayItems should be empty if items is empty');
     menu.set('items', null);
-    equals(menu.get('displayItems'), null, 'displayItems should be null if items is null');
+    equals(menu.get('displayItems').length, 0, 'displayItems should be null if items is null');
   });
 });
 
 test('menuItemViewForContentIndex', function() {
   SC.run(function () {
     menu.popup();
+  });
+
+  SC.run(function () {
     var view = menu.menuItemViewForContentIndex(0);
     equals(items[0].title, view.$('.value').text(), 'menu item views should match content items');
   });
@@ -157,15 +180,28 @@ test('menuItemViewForContentIndex', function() {
 /** There was a bug that destroying the menu pane failed to destroy its internally
   created menu view. */
 test('destroy should destroy the menu view', function () {
-  var menuView = menu._menuView,
-    menuItemView = menu.get('menuItemViews')[0];
+  var menuView = menu._listView,
+    items = [SC.Object.create({ title: 'Forever' }), { title: 'Lost' }, 'Dead'];
+
 
   SC.run(function () {
+    var menuItemView = menu.get('menuItemViews')[0];
     menu.popup();
-    menu.destroy();
+    menu.set('items', items);
   });
 
-  ok(menuView.get('isDestroyed'), 'destroying the menu pane also destroys the menu view.');
-  ok(menuItemView.get('isDestroyed'), 'destroying the menu pane also destroys the menu view child views.');
-  ok(!menuView._menuView, "desroying the menu pane removes the internal reference to the menu view.");
+
+  SC.run(function () {
+    menu.destroy();
+
+    ok(menuView.get('isDestroyed'), 'destroying the menu pane also destroys the menu view.');
+    ok(!menu._listView, "desroying the menu pane removes the internal reference to the menu view.");
+
+    displayItems = menu.get('displayItems');
+    ok(!displayItems[0].get('isDestroyed'), 'instanciated objects should not be destroyed');
+    ok(!items[0].get('isDestroyed'), 'instanciated objects should not be destroyed');
+    ok(displayItems[1].get('isDestroyed'), '1 should be destroyed');
+    ok(displayItems[2].get('isDestroyed'), '2 should be destroyed');
+
+  });
 })

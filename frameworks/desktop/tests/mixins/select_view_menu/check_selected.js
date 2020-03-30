@@ -7,6 +7,7 @@ test("Selected menu item is checked", function() {
   SC.RunLoop.begin();
   var selectView = SC.SelectView.create({
     items: "A B C D E".w(),
+    itemValueKey: 'value',
     value: "A"
   });
   selectView.showMenu();

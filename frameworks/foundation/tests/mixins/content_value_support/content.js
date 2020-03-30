@@ -289,3 +289,33 @@ test("different contentKeys after creation are observed correctly", function () 
 
   equals(this.count, 3, "observer was not called again on setting old observed keys");
 });
+
+// ..........................................................
+// handleIsEnabled()
+//
+module("SC.ContentValueSupport#isEnabled", {
+  setup: function () {
+    this.obj = SC.Object.create(SC.ContentValueSupport, SC.DelegateSupport, {
+      contentKeys: {
+        contentIsEnabledKey: 'isEnabled'
+      },
+      contentIsEnabledKey: 'isEnabled',
+      content: SC.Object.create()
+    });
+  },
+
+  teardown: function () {
+    this.obj.destroy();
+    this.obj = null;
+  }
+});
+
+test("different isEnabled setting are translated correctly", function () {
+  equals(this.obj.get('isEnabled'), true, "value is translated correctly");
+
+  this.obj.set('content', SC.Object.create({ isEnabled: false }));
+  equals(this.obj.get('isEnabled'), false, "value is translated correctly");
+
+  this.obj.set('content', SC.Object.create({ isEnabled: true }));
+  equals(this.obj.get('isEnabled'), true, "value is translated correctly");
+});

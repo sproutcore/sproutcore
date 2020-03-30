@@ -3,7 +3,6 @@
 .sc-progress-view {
 	border: 1px solid #555555;
 	background-color: #c8c8c8;
-	-webkit-border-radius: 2px;
 	border-radius: 2px;
 
 	&.disabled {
@@ -18,8 +17,8 @@
   	bottom: 0px;
    	background: #555555;
   	border-right: 1px solid #555555;
-  	-webkit-transition: all 0.01s linear;
-  	-webkit-transform: translate3d(0,0,0);
+  	transition: all 0.01s linear;
+  	transform: translate3d(0,0,0);
   }
 
   &.sc-indeterminate .sc-inner {
