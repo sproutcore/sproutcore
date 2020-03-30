@@ -1242,8 +1242,8 @@ SC.DateTime.mixin(SC.Comparable,
     Returns the interval of time between the two passed in DateTimes in units
     according to the format.
 
-    You can display the difference in weeks (w), days (d), hours (h), minutes (M)
-    or seconds (S).
+    You can display the difference in years (W), weeks (w), days (d),
+    hours (h), minutes (M) or seconds (S).
 
     @param {SC.DateTime} a the first DateTime instance
     @param {SC.DateTime} b the second DateTime instance
@@ -1254,28 +1254,39 @@ SC.DateTime.mixin(SC.Comparable,
     var ma = a.get('milliseconds'),
         mb = b.get('milliseconds'),
         diff = mb - ma,
-        divider;
+        divider = 1;
 
     switch(format) {
     case 'd':
     case 'D':
+    case 'day':
       divider = 864e5;  // day: 1000 * 60 * 60 * 24
       break;
     case 'h':
     case 'H':
+    case 'hour':
       divider = 36e5; // hour: 1000 * 60 * 60
       break;
     case 'M':
+    case 'minute':
       divider = 6e4; // minute: 1000 * 60
       break;
     case 'S':
+    case 'second':
       divider = 1e3;  // second: 1000
       break;
     case 's':
       divider = 1;
       break;
     case 'W':
+    case 'week':
       divider = 6048e5; // week: 1000 * 60 * 60 * 24 * 7
+      break;
+    case 'month':
+      diff = this.monthDiff(a, b);
+      break;
+    case 'year':
+      diff = this.monthDiff(a, b) / 12;
       break;
     default:
       throw new Error(format + " is not supported");
@@ -1284,9 +1295,13 @@ SC.DateTime.mixin(SC.Comparable,
     var ret = diff/divider;
 
     return Math.round(ret);
+  },
+
+  monthDiff: function(a, b) {
+    var wholeMonthDiff = ((b.get('year') - a.get('year')) * 12) + (b.get('month') - a.get('month'));
+
+    return wholeMonthDiff;
   }
-
-
 
 });
 
