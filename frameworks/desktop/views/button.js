@@ -438,7 +438,6 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
   */
   triggerAction: function(evt) {
     this._action(evt, YES);
-    this.didTriggerAction();
     this.set('isActive', NO);
   },
 
@@ -816,6 +815,8 @@ SC.ButtonView = SC.View.extend(SC.ActionSupport, SC.Control,
       //if (this.action) this.action(evt);
       this._runAction(evt);
     }
+
+    this.didTriggerAction();
   },
 
   /** @private */
