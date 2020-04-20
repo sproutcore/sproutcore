@@ -390,13 +390,6 @@ SC.platform = SC.Object.create({
   supportsCSS3DTransforms: SC.browser.experimentalStyleNameFor('perspective') !== SC.UNSUPPORTED,
 
   /**
-    Whether the browser supports the application cache.
-
-    @type Boolean
-  */
-  supportsApplicationCache: ('applicationCache' in window),
-
-  /**
     Whether the browser supports the hashchange event.
 
     @type Boolean
