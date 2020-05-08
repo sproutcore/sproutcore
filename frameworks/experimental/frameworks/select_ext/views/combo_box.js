@@ -4,16 +4,31 @@ sc_require("mixins/item_filter");
 
 SC.ComboBoxView = SC.View.extend(SC.ItemFilter, {
 
+  /**
+   * Items to use as search items
+   * @type {[type]}
+   */
+  items: null,
+
+  /**
+   * What property of the item should be used as title
+   * @type {String}
+   */
+  itemTitleKey: 'title',
+
+  /**
+   * The value of the selected item
+   */
   value: null,
 
   selectedMenuItem: null,
 
   textFieldView: SC.TextFieldView,
-  
+
   createChildViews: function() {
-    var that = this,  
+    var that = this,
       view;
-    
+
     view = that.createChildView(this.get('textFieldView'), {
       isEnabledBinding: SC.Binding.from('isEnabled', this).oneWay(),
       valueBinding: SC.Binding.from('value', this),
@@ -25,9 +40,9 @@ SC.ComboBoxView = SC.View.extend(SC.ItemFilter, {
         if (that._menu) {
           that._menu.remove();
         }
-        
+
         var value = this.get('value');
-        
+
         if (value !== that._lastValue) {
           that._lastValue = value;
           that.filterItems(value);
