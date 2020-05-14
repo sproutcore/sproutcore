@@ -1495,8 +1495,7 @@ SC.Logger = SC.Object.create(
     'recordedLogMessagesPruningMinimumLength'.
   */
   _addRecordedMessageEntry: function(entry) {
-    var recordedMessages = this.get('recordedLogMessages'),
-        len;
+    var recordedMessages = this.get('recordedLogMessages');
 
     // Lazily create the array.
     if (!recordedMessages) {
@@ -1506,10 +1505,20 @@ SC.Logger = SC.Object.create(
 
     recordedMessages.push(entry);
 
-    // Have we exceeded the maximum size?  If so, do some pruning.
-    len = recordedMessages.length;
-    if (len > this.get('recordedLogMessagesMaximumLength')) {
-      recordedMessages.splice(-this.get('recordedLogMessagesPruningMinimumLength'));
+    // Have we exceeded the maximum size? If so, do some pruning.
+    if (recordedMessages.length > this.get('recordedLogMessagesMaximumLength')) {
+      var pruningMinLen = this.get('recordedLogMessagesPruningMinimumLength'),
+        typesToRemove = ['none', 'error', 'warn', 'info', 'debug'];
+
+      while (typesToRemove.length) {
+        var typeToRemove = typesToRemove.pop(),
+          index = 0;
+
+        while (recordedMessages.length > pruningMinLen && index < recordedMessages.length) {
+          if (typeToRemove !== recordedMessages[index].type) index++;
+          else recordedMessages.splice(index, 1);
+        }
+      }
     }
 
     // Notify that the array content changed.
