@@ -11,8 +11,6 @@ $theme.sc-list-insertion-point > .anchor {
   top: -3px;
   left: -4px;
   height: 8px;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
   border-radius: 4px;
   background-color: $list-insertion-point-bg;
 }

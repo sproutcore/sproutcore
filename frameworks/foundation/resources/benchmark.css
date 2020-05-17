@@ -1,7 +1,7 @@
 
 /* SC.Benchmark */
 .sc-benchmark-pane {
-  -webkit-box-shadow: 0px 0px 5px black;
+  box-shadow: 0px 0px 5px black;
   background: white;
   background-color: rgba(255,255,255,.95);
   z-index: 10000;
@@ -39,9 +39,6 @@
   border-top: 1px solid #aaa;
   border-bottom: 1px solid #aaa;
   opacity: 0.4;
-  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=40);
-  -moz-opacity:0.4;
-  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=40)";
 }
 
 .sc-benchmark-tick
@@ -71,12 +68,9 @@
   white-space: nowrap;
   border: 1px solid #CC6633;
   background-color: #FFCC33;
-  background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#FFCD82), to(#DE9C00));
+  background: gradient(linear, 0% 0%, 0% 100%, from(#FFCD82), to(#DE9C00));
   border-radius: 4px;
-  -moz-border-radius: 4px;
-  -webkit-border-radius: 4px;
   line-height: 14px;
-  -webkit-box-shadow: 0px 1px 2px rgba(0,0,0,.5);
   text-shadow: rgba(255,255,255,.5) 0px 1px 0px;
   color: #4F3800;
 
@@ -95,9 +89,6 @@
 {
   background-color: #ddd;
   opacity: 0.4;
-  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=40);
-  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=40)";
-  -moz-opacity:0.4;
 }
 
 .sc-benchmark-event {
@@ -107,9 +98,8 @@
 }
 
 .sc-benchmark-event:hover {
-  -webkit-border-radius: 5px;
   border: 2px solid white;
-  -webkit-box-shadow: 0px 0px 5px black;
+  box-shadow: 0px 0px 5px black;
   background-color: red;
 }
 
@@ -140,4 +130,3 @@
 .sc-benchmark-event.idx6 {
   background: #800000;
 }
-

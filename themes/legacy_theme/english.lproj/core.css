@@ -47,7 +47,7 @@ body.sc-theme .sc-view.sc-top-border {
 }
 
 .sc-theme .sc-pane.sc-main {
-	background: -webkit-gradient(linear, left top, left bottom, from(#57647f), to(#848ea2));
+	background: linear-gradient(#57647f,#848ea2);
 	color: white;
 }
 
@@ -57,7 +57,7 @@ body.sc-theme .sc-view.sc-top-border {
   left: 0;
   bottom: 0;
   right: 0;
-	background: -webkit-gradient(linear, left top, left bottom, from(#57647f), to(#848ea2));
+	background: linear-gradient(#57647f,#848ea2);
 	color: white;
 }
 
@@ -73,4 +73,3 @@ body.sc-theme .sc-view.sc-top-border {
   border-top: 1px #b1baca solid;
   text-align: right;
 }
-

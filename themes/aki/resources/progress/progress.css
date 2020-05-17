@@ -19,7 +19,7 @@ $theme.progress {
     left: 0;
     top: 0;
     bottom: 0;
-    background-color: $sel-progress-bg; 
+    background-color: $sel-progress-bg;
     border-radius: $progress-border-radius;
   }
 
@@ -30,31 +30,21 @@ $theme.progress {
       right: 0;
 
       .middle {
-        position: absolute; 
+        position: absolute;
         top: 0; left: 0; bottom: 0; right: 0;
-        background-image: 
-          -webkit-gradient(linear, 0 0, 100% 100%, 
-            color-stop(.25, rgba(255, 255, 255, .2)), 
-            color-stop(.25, transparent), color-stop(.5, transparent), 
-            color-stop(.5, rgba(255, 255, 255, .2)), 
-            color-stop(.75, rgba(255, 255, 255, .2)), 
-            color-stop(.75, transparent), to(transparent)
-          );
-        background-image: 
-          -moz-linear-gradient(
-            -45deg, 
-            rgba(255, 255, 255, .2) 25%, 
-            transparent 25%, 
-            transparent 50%, 
-            rgba(255, 255, 255, .2) 50%, 
-            rgba(255, 255, 255, .2) 75%, 
-            transparent 75%, 
+        background-image:
+          linear-gradient(
+            -45deg,
+            rgba(255, 255, 255, .2) 25%,
+            transparent 25%,
+            transparent 50%,
+            rgba(255, 255, 255, .2) 50%,
+            rgba(255, 255, 255, .2) 75%,
+            transparent 75%,
             transparent
           );
 
         background-size: 25px 25px;
-        -webkit-background-size: 25px 25px;
-        -moz-background-size: 25px 25px;
       }
     }
 
@@ -62,8 +52,6 @@ $theme.progress {
       .content {
         .middle {
           animation: _sc_progressview_indeterminate 2.5s linear infinite;
-        -webkit-animation: _sc_progressview_indeterminate 2.5s linear infinite;
-        -moz-transition: _sc_progressview_indeterminate 2.5s linear infinite;
         }
       }
     }
@@ -72,27 +60,6 @@ $theme.progress {
   &.disabled {
     opacity: .5;
   }
-}
-
-
-@-webkit-keyframes _sc_progressview_indeterminate {
-  0% { background-position:0px 0; }
-  100% { background-position:25px 0; }
-}
-
-@-moz-keyframes _sc_progressview_indeterminate {
-  0% { background-position:0px 0; }
-  100% { background-position:25px 0; }
-}
-
-@-ms-keyframes _sc_progressview_indeterminate {
-  0% { background-position:0px 0; }
-  100% { background-position:25px 0; }
-}
-
-@-o-keyframes _sc_progressview_indeterminate {
-  0% { background-position:0px 0; }
-  100% { background-position:25px 0; }
 }
 
 @keyframes _sc_progressview_indeterminate {

@@ -2,8 +2,6 @@
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	-o-text-overflow: ellipsis;
-  -ms-text-overflow: ellipsis;
 }
 
 body {
@@ -17,4 +15,3 @@ body {
  	font-size: 12px;
  	line-height: 1.4;
 }
-

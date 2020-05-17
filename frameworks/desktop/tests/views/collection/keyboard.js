@@ -174,4 +174,103 @@ test("moveUpAndModifySelection", function () {
   controller.set('allowsMultipleSelection', true);
 });
 
+test("moveEvents", function () {
+  var view = pane.view('default');
+
+  SC.run(function () {
+    pane.becomeKeyPane();
+    view.set('acceptsFirstResponder', true);
+    view.becomeFirstResponder();
+    view.select(1);
+  });
+
+  equals(view.getPath('selection.firstObject.value'), 2, 'Second item should be selected');
+  SC.run(function () {
+    keyPressOn(view, SC.Event.KEY_END);
+  });
+  equals(view.getPath('selection.firstObject.value'), 10);
+	SC.run(function () {
+    keyPressOn(view, SC.Event.KEY_HOME);
+  });
+	equals(view.getPath('selection.firstObject.value'), 1);
+	SC.run(function () {
+    keyPressOn(view, SC.Event.KEY_PAGEDOWN);
+  });
+	equals(view.getPath('selection.firstObject.value'), 10);
+	SC.run(function () {
+    keyPressOn(view, SC.Event.KEY_PAGEUP);
+  });
+	equals(view.getPath('selection.firstObject.value'), 1);
+	SC.run(function () {
+    keyPressOn(view, SC.Event.KEY_PAGEUP);
+  });
+	equals(view.getPath('selection.firstObject.value'), 1);
+	SC.run(function () {
+    keyPressOn(view, SC.Event.KEY_DOWN);
+  });
+	equals(view.getPath('selection.firstObject.value'), 2);
+	SC.run(function () {
+    keyPressOn(view, SC.Event.KEY_LEFT);
+  });
+	equals(view.getPath('selection.firstObject.value'), 2);
+	SC.run(function () {
+    keyPressOn(view, SC.Event.KEY_RIGHT);
+  });
+	equals(view.getPath('selection.firstObject.value'), 2);
+	SC.run(function () {
+    keyPressOn(view, SC.Event.KEY_UP);
+  });
+	equals(view.getPath('selection.firstObject.value'), 1);
+});
+
+test("moveEvents with selectOnPageMove disabled", function () {
+  var view = pane.view('default');
+
+  SC.run(function () {
+		view.set('selectOnPageMove', false);
+    pane.becomeKeyPane();
+    view.set('acceptsFirstResponder', true);
+    view.becomeFirstResponder();
+    view.select(1);
+  });
+
+  equals(view.getPath('selection.firstObject.value'), 2, 'Second item should be selected');
+  SC.run(function () {
+    keyPressOn(view, SC.Event.KEY_END);
+  });
+  equals(view.getPath('selection.firstObject.value'), 2);
+	SC.run(function () {
+    keyPressOn(view, SC.Event.KEY_HOME);
+  });
+	equals(view.getPath('selection.firstObject.value'), 2);
+	SC.run(function () {
+    keyPressOn(view, SC.Event.KEY_PAGEDOWN);
+  });
+	equals(view.getPath('selection.firstObject.value'), 2);
+	SC.run(function () {
+    keyPressOn(view, SC.Event.KEY_PAGEUP);
+  });
+	equals(view.getPath('selection.firstObject.value'), 2);
+	SC.run(function () {
+    keyPressOn(view, SC.Event.KEY_PAGEUP);
+  });
+	equals(view.getPath('selection.firstObject.value'), 2);
+	SC.run(function () {
+    keyPressOn(view, SC.Event.KEY_DOWN);
+  });
+	equals(view.getPath('selection.firstObject.value'), 3);
+	SC.run(function () {
+    keyPressOn(view, SC.Event.KEY_LEFT);
+  });
+	equals(view.getPath('selection.firstObject.value'), 3);
+	SC.run(function () {
+    keyPressOn(view, SC.Event.KEY_RIGHT);
+  });
+	equals(view.getPath('selection.firstObject.value'), 3);
+	SC.run(function () {
+    keyPressOn(view, SC.Event.KEY_UP);
+  });
+	equals(view.getPath('selection.firstObject.value'), 2);
+});
+
 // TODO: yeah all the other keyboard stuff.

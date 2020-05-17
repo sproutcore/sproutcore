@@ -5,6 +5,5 @@
 .sc-view.high-light .cover{
   background-color: #000;
   opacity: 0.5;
-  -moz-opacity:0.5;
   position: absolute;
 }

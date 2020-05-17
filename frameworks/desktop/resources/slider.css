@@ -10,8 +10,6 @@
   	top: 6px;
   	background: gray;
     border-radius: 3px;
-  	-webkit-border-radius: 3px;
-  	-moz-border-radius: 3px;
     .sc-leftcap{
       display: none;
     }
@@ -27,7 +25,5 @@
   	position: absolute;
   	background: black;
   	border-radius: 6px;
-    -webkit-border-radius: 6px;
-  	-moz-border-radius: 6px;
   }
 }

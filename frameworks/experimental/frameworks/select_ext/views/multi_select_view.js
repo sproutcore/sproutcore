@@ -14,12 +14,23 @@ SC.MultiSelectView = SC.CollectionView.extend({
 
   selectOnMouseDown: NO,
 
+  /**
+   * What to to display when empty
+   * @type {String}
+   */
+  emptyName: null,
+
   init: function () {
     sc_super();
 
     this._currentPopup = null;
     this.invokeOnce('schedulePopupSetupIfNeeded');
+    this._showOrHideEmptyName();
   },
+
+  _showOrHideEmptyName: function () {
+    // this should show the message from emptyName
+  }.observes('emptyName', 'selection'),
 
   // renderDelegateName: 'multiSelectViewRenderDelegate',
   //
@@ -238,7 +249,7 @@ SC.MultiSelectView = SC.CollectionView.extend({
     this.set('popup', popup);
     popup.set('minimumMenuWidth', this.get('frame').width);
     popup.set('width', this.get('frame').width);
-    this.isActiveBinding = this.bind('isActive', popup, 'isVisibileInWindow');
+    this.isActiveBinding = this.bind('isActive', popup, 'isVisibleInWindow');
     this.allItemsBinding = this.bind('allItems', popup, 'items');
     this._selectedValueBinding = this.bind('_selectedValue', popup, 'selectedItem');
   },
@@ -255,19 +266,20 @@ SC.MultiSelectView = SC.CollectionView.extend({
   }.observes('_selectedValue'),
 
   allItems: function () {
-    console.log('allItmes');
-    var sel = this.get('selection');
     var titleKey = this.get('contentValueKey');
-    var me = this;
-    var count = 0;
-    return this.get('content').map(function (item, index) {
+    var ret = this.get('content').map(function (item, index) {
       return SC.Object.create({
         title: SC.get(item, titleKey),
         value: index,
         item: item
       });
     });
-  }.property().cacheable(),
+    return ret;
+  }.property('length').cacheable(),
+
+  _updateAllItems: function () {
+    this.setupPopup();
+  }.observes('length'),
 
   createPopup: function (popup) {
     return popup.create({
@@ -328,9 +340,10 @@ SC.MultiSelectView = SC.CollectionView.extend({
   //when mouseDown is over an empty area in the view, ie not one of the already selected
   // options, it should show the popup.
   mouseDown: function (evt) {
+    if (!this.get('isEnabled')) return false;
     // sc_super();
     // if (!this.get('isEnabled')) return YES;
-    // this.set('_mouseDown', YES);
+    // this._mouseDown = true;
     // // decide whether it needs popups
     // debugger;
     this.showPopup();

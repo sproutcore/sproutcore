@@ -10,26 +10,28 @@ var pane, menu, callCount = 0;
 
 module("SC.MenuItemView", {
   setup: function() {
-   pane = SC.MainPane.create({
-     layout: { width: 100, height: 20, centerX: 0, centerY: 0 },
-     childViews: 'button'.w(),
+    SC.run(function () {
+      pane = SC.MainPane.create({
+        layout: { width: 100, height: 20, centerX: 0, centerY: 0 },
+        childViews: 'button'.w(),
 
-     button: SC.ButtonView.design({
-       menuItemAction: function() {
-         callCount += 1;
-       }
-     })
-   }).append();
+        button: SC.ButtonView.design({
+          menuItemAction: function() {
+            callCount += 1;
+          }
+        })
+      }).append();
 
-   pane.makeFirstResponder(pane.button);
+      pane.makeFirstResponder(pane.button);
 
-   menu = SC.MenuPane.create({
-     items: [
-      { title: 'Send Action', action: 'menuItemAction' }
-     ]
-   });
+      menu = SC.MenuPane.create({
+        items: [
+           { title: 'Send Action', action: 'menuItemAction' }
+        ]
+      });
 
-   menu.popup(pane.anchor);
+      menu.popup(pane.anchor);
+    });
   },
 
   teardown: function() {

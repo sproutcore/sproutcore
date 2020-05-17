@@ -12,7 +12,7 @@
 SC.SelectViewMenu = {
   /**
     The SelectView to bind to.
-    
+
     @property
     @type {SC.SelectView}
     @default null
@@ -22,19 +22,18 @@ SC.SelectViewMenu = {
   //
   // CODE TO MAKE ITEMS BE CHECKED WHEN SELECTED:
   //
-  
+
   /**
     The current value of the SelectView.
-    
+
     @property
     @default null
   */
   value: null,
   valueBinding: '.selectView.value',
 
-
-  /** 
-    @private 
+  /**
+    @private
     Invalidates menu items' isChecked property when the selectView's value changes.
   */
   valueDidChange: function() {
@@ -56,36 +55,69 @@ SC.SelectViewMenu = {
   /**
     An overridden MenuItemView to create for each menu item that makes itself checked if
     it is selected.
-    
+
     @property
     @type {SC.MenuItemView}
     @default SC.MenuItemView subclass
   */
   exampleView: SC.AutoResizingMenuItemView.extend({
+
+    contentKeys: {
+      itemTitleKey: 'title',
+      itemValueKey: 'value',
+      itemToolTipKey: 'toolTip',
+      itemIconKey: 'icon',
+      itemUnreadCountKey: 'count',
+      itemSeparatorKey: 'isSeparator',
+      itemShortCutKey: 'shortcut',
+      //itemCheckboxKey: 'isChecked',
+      itemIsEnabledKey: 'isEnabled',
+      itemSubMenuKey: 'subMenu'
+    },
+
     isChecked: function() {
-      var selectView = this.getPath('parentMenu.selectView');
+      var parentMenu = this.get('parentMenu'),
+        content = this.get('content'),
+        selectView,
+        isChecked;
 
-      // _lastIsChecked is used by the SelectViewMenu mixin above to determine whether
-      // the isChecked property needs to be invalidated.
-      this._lastIsChecked = selectView.isValueEqualTo(this.get('content'));
-      
-      return this._lastIsChecked;
-    }.property(),
+      while (!selectView) {
+        selectView = parentMenu.get('selectView');
+        parentMenu = parentMenu.get('parentMenu');
+      }
 
-    displayProperties: ['isChecked']
+      if (selectView.get('allowsMultipleSelection')) {
+        var value = selectView.get('value'),
+          itemValue = selectView._scsv_getValueForMenuItem(content);
+
+        isChecked = (SC.typeOf(value) === SC.T_ARRAY && value.contains(itemValue));
+      }
+      else {
+        // _lastIsChecked is used by the SelectViewMenu mixin above to determine whether
+        // the isChecked property needs to be invalidated.
+        isChecked = selectView.isValueEqualTo(content);
+      }
+
+      this._lastIsChecked = isChecked;
+      return isChecked;
+    }.property()
+
   }),
+
+  /** @private */
+  displayItems: function() {
+    return this.selectView.get('displayItems');
+  }.property().cacheable(),
 
   //
   // CODE TO BIND TO SELECTVIEW PROPERTIES
   //
-  
+
   /** @private */
   _svm_bindToProperties: [
     { from: 'displayItems', to: 'items' },
-    { from: '_itemTitleKey', to: 'itemTitleKey' },
-    { from: '_itemIsEnabledKey', to: 'itemIsEnabledKey' },
-    { from: '_itemValueKey', to: 'itemValueKey' },
-    'itemIconKey', 'itemHeightKey', 'itemSubMenuKey', 'itemSeparatorKey', 
+    'itemTitleKey', 'itemValueKey', 'itemIsEnabledKey', 'itemUnreadCountKey',
+    'itemIconKey', 'itemHeightKey', 'itemSubMenuKey', 'itemSeparatorKey',
     'itemTargetKey', 'itemActionKey', 'itemCheckboxKey', 'itemShortCutKey',
     'itemKeyEquivalentKey', 'itemDisableMenuFlashKey', 'minimumMenuWidth',
     'target', 'action',
@@ -126,7 +158,7 @@ SC.SelectViewMenu = {
     for (idx = 0; idx < len; idx++) {
       key = props[idx];
 
-      if (SC.typeOf(from) === SC.T_HASH) {
+      if (SC.typeOf(key) === SC.T_HASH) {
         key = key.to;
       }
       this[key + 'Binding'].disconnect();
@@ -149,5 +181,3 @@ SC.SelectViewMenu = {
     this._svm_clearBindings();
   }
 };
-
-

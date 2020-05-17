@@ -67,9 +67,6 @@
 .sc-theme .sc-radio-view.disabled .sc-button-label .icon,
 .sc-theme .sc-radio-view .sc-radio-button.disabled .sc-button-label .icon {
 	opacity: 0.5;
-	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
-  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
-  -moz-opacity:0.5;
 }
 
 /* @end */
@@ -123,4 +120,3 @@
 }
 
 /* @end */
-
