@@ -188,7 +188,7 @@ SC.RecordAttribute = SC.Object.extend(
         ret ;
 
     // walk up class hierarchy looking for a transform handler
-    while(klass && !(ret = transforms[SC.guidFor(klass)])) {
+    while(klass && !(ret = transforms[SC.edgeGuidFor(klass)])) {
       // check if super has create property to detect SC.Object's
       if(klass.superclass.hasOwnProperty('create')) klass = klass.superclass ;
       // otherwise return the function transform handler
@@ -410,7 +410,7 @@ SC.RecordAttribute.mixin(
     @returns {SC.RecordAttribute} receiver
   */
   registerTransform: function(klass, transform) {
-    SC.RecordAttribute.transforms[SC.guidFor(klass)] = transform;
+    SC.RecordAttribute.transforms[SC.edgeGuidFor(klass)] = transform;
   }
 });
 

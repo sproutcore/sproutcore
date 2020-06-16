@@ -213,7 +213,7 @@ SC.Set = SC.mixin({},
     // length.  Therefore the found idx must both be defined and less than
     // the current length.
     if (obj === null) return NO ;
-    var idx = this[SC.hashFor(obj)] ;
+    var idx = this[SC.guidFor(obj)] ;
     return (!SC.none(idx) && (idx < this.length) && (this[idx]===obj)) ;
   },
 
@@ -278,15 +278,10 @@ SC.Set = SC.mixin({},
   add: function(obj) {
     if (this.isFrozen) throw new Error(SC.FROZEN_ERROR);
 
-    // Implementation note:  SC.none() and SC.hashFor() is inlined because sets are
-    // fundamental in SproutCore, and the inlined code is ~ 25% faster than
-    // calling SC.hashFor() in IE8.
-
     // Cannot add null to a set.
     if (obj === null || obj === undefined) return this;
 
-    var hashFunc,
-        guid = ((hashFunc = obj.hash) && (typeof hashFunc === "function")) ? hashFunc.call(obj) : SC.guidFor(obj),
+    var guid = SC.guidFor(obj),
         idx  = this[guid],
         len  = this.length;
 
@@ -341,13 +336,9 @@ SC.Set = SC.mixin({},
   remove: function(obj) {
     if (this.isFrozen) throw new Error(SC.FROZEN_ERROR);
 
-    // Implementation note:  SC.none() and SC.hashFor() are inlined because
-    // sets are fundamental in SproutCore, and the inlined code is ~ 25%
-    // faster than calling them "normally" in IE8.
     if (obj === null || obj === undefined) return this ;
 
-    var hashFunc,
-        guid = (obj && (hashFunc = obj.hash) && (typeof hashFunc === SC.T_FUNCTION)) ? hashFunc.call(obj) : SC.guidFor(obj),
+    var guid = SC.guidFor(obj),
         idx  = this[guid],
         len  = this.length,
         tmp;
@@ -365,7 +356,7 @@ SC.Set = SC.mixin({},
       // we need to keep a reference to "obj" so we can alert others below;
       // so, no changing it. Instead, create a temporary variable.
       tmp = this[idx] = this[len-1];
-      guid = (tmp && (hashFunc = tmp.hash) && (typeof hashFunc === SC.T_FUNCTION)) ? hashFunc.call(tmp) : SC.guidFor(tmp);
+      guid = SC.guidFor(tmp);
       this[guid] = idx;
     }
 

@@ -391,12 +391,21 @@ SC.mixin(/** @scope window.SC.prototype */ {
     var guidKey = this.guidKey;
     if (obj[guidKey]) return obj[guidKey];
 
+    //@if(debug)
     // More special cases; not as common, so we check for them after the cache
     // lookup
+    if (obj === Object) throw new Error("SC.guidFor does not support 'Object' anymore");
+    if (obj === Array) throw new Error("SC.guidFor does not support 'Array' anymore");
+    //@endif
+
+    return SC.generateGuid(obj, "sc");
+  },
+
+  edgeGuidFor: function (obj) {
     if (obj === Object) return '(Object)';
     if (obj === Array) return '(Array)';
 
-    return SC.generateGuid(obj, "sc");
+    return SC.guidFor(obj);
   },
 
   /**
