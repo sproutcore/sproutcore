@@ -1974,6 +1974,7 @@ SC.CoreView.reopen(
     // Result: Don't continue.
     case SC.CoreView.UNRENDERED:
     case SC.CoreView.UNATTACHED:
+    case SC.CoreView.ATTACHED_PARTIAL:
       shouldContinue = false;
       break;
 
@@ -1981,7 +1982,7 @@ SC.CoreView.reopen(
     default:
       //@if(debug)
       // Add some debugging only warnings for if the view statechart is breaking assumptions.
-      // These states should not be reachable here: ATTACHED_PARTIAL, ATTACHED_BUILDING_OUT_BY_PARENT
+      // These states should not be reachable here: ATTACHED_BUILDING_OUT_BY_PARENT
       SC.warn("Core Developer Warning: Found invalid state for view %@ in _parentWillDetach".fmt(this));
       //@endif
       // There's no need to continue to further child views.
