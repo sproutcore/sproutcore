@@ -16,3 +16,4 @@ Gemfile*
 .strobe/
 .project
 .settings/
+.vscode/
