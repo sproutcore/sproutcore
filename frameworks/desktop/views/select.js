@@ -230,7 +230,7 @@ SC.SelectView = SC.PopupButtonView.extend(SC.ItemFormatter, {
   _scsv_getValueForMenuItem: function(item) {
     var valueKey = this.get('itemValueKey');
 
-    if (item.isEmptyItem) return null;
+    if (!item || item.isEmptyItem) return null;
     if (!valueKey) {
       return item;
     } else {
