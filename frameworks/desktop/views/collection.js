@@ -895,15 +895,14 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
       - update layout for receiver
   */
   _cv_contentDidChange: function() {
-    var content = this.get('content'),
-        lfunc   = this.contentLengthDidChange ;
+    var content = this.get('content');
 
     if (content === this._content) return; // nothing to do
 
     // cleanup old content
     this.removeContentRangeObserver();
     if (this._content) {
-      this._content.removeObserver('length', this, lfunc);
+      this._content.removeObserver('length', this, 'contentLengthDidChange');
     }
 
     // Destroy all pooled views.
@@ -920,7 +919,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
 
     // add new observers - range observer will be added lazily
     if (content) {
-      content.addObserver('length', this, lfunc);
+      content.addObserver('length', this, 'contentLengthDidChange');
     }
 
     // notify all items changed
@@ -975,7 +974,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
       length = this.get('length');
       if (length > 1 && invalid.max === length) {
         invalid.add(length - 2);
-    }
+      }
     } else {
       this._invalidIndexes = YES ; // force a total reload
     }
@@ -3207,7 +3206,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     // All manipulations made to objects we use must be reversed!
     var content = this._content;
     if (content) {
-      content.removeObserver('length', this, this.contentLengthDidChange);
+      content.removeObserver('length', this, 'contentLengthDidChange');
 
       this._content = null;
     }
