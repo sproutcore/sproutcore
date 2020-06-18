@@ -3,6 +3,7 @@
 .eprj
 .svn
 .gitattributes
+.push.settings.jsonc
 *.swp
 *.swo
 *.iml
