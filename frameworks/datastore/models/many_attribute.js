@@ -179,7 +179,7 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
 
       inverseKey = this.get('inverse');
 
-      // if we have an inverse relationship, get the inverse records and  
+      // if we have an inverse relationship, get the inverse records and
       // notify them of what is happening.
       if (inverseKey) {
         oldRecords = SC.A(this._scsa_call(record, key));
@@ -207,7 +207,7 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
       // cache.
       nvalue = this.fromType(record, key, newRecords) ; // convert to attribute.
       record.writeAttribute(attrKey, nvalue, !this.get('isMaster'));
-    } 
+    }
 
     return this._scsa_call(record, key);
   },

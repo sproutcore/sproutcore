@@ -555,7 +555,7 @@ SC.AutoResizeManager = {
     var tag, view, layer, measurementQueue = this.measurementQueue, prepared, autoResizeText,
     i, len;
 
-    while((len = measurementQueue.get('length')) > 0) {
+    while((len = measurementQueue.length) > 0) {
       prepared = NO;
       // save the first tag we see
       tag = measurementQueue[len - 1].get('batchResizeId');

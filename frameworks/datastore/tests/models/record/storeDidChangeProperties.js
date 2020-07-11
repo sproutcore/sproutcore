@@ -9,34 +9,33 @@ var store, child, Foo, json, foo ;
 module("SC.Record#storeDidChangeProperties", {
   setup: function() {
     SC.RunLoop.begin();
-    
+
     store = SC.Store.create();
     Foo = SC.Record.extend({
-      
+
       // record diagnostic change
       statusCnt: 0,
       statusDidChange: function() {
         this.statusCnt++;
       }.observes('status'),
-      
+
       fooCnt: 0,
       fooDidChange: function() {
         this.fooCnt++;
       }.observes('foo')
-      
+
     });
-    
-    
-    json = { 
-      foo: "bar", 
+
+    json = {
+      foo: "bar",
       number: 123,
       bool: YES,
-      array: [1,2,3] 
+      array: [1,2,3]
     };
-    
+
     foo = store.createRecord(Foo, json);
     store.writeStatus(foo.storeKey, SC.Record.READY_CLEAN);
-    
+
     SC.RunLoop.end();
   }
 });
@@ -53,7 +52,7 @@ function expect(fooObject, expectedStatusCnt, expectedFooCnt) {
 
 // ..........................................................
 // BASIC BEHAVIORS
-// 
+//
 
 test("should change status only if statusOnly=YES", function() {
   checkPreconditions();
@@ -70,25 +69,25 @@ test("should change attrs  & status if statusOnly=NO", function() {
 
 // ..........................................................
 // VERIFY CALL SCENARIOS
-// 
+//
 
 test("editing a clean record should change all", function() {
   checkPreconditions();
-  
+
   SC.RunLoop.begin();
   foo.writeAttribute("foo", "baz"); // NB: Must be different from "foo"
   SC.RunLoop.end();
-  
+
   expect(foo,2,1);
 });
 
 test("editing an attribute to same value should do nothing", function() {
   checkPreconditions();
-  
+
   SC.RunLoop.begin();
   foo.writeAttribute("foo", "bar"); // NB: Must be "bar"
   SC.RunLoop.end();
-  
+
   expect(foo,0,0);
 });
 
@@ -111,7 +110,7 @@ test("refreshing a record should change status", function() {
 
 test("committing attribute changes from nested store should change attrs", function() {
   checkPreconditions();
-  
+
   SC.RunLoop.begin();
   var child = store.chain();
   var foo2 = child.materializeRecord(foo.storeKey);
@@ -120,7 +119,7 @@ test("committing attribute changes from nested store should change attrs", funct
   SC.RunLoop.end();
   // no changes should happen yet on foo.
   expect(foo,0,0);
-  
+
   SC.RunLoop.begin();
   // commit
   child.commitChanges();
@@ -135,23 +134,23 @@ test("changing attributes on a parent store should notify child store if inherit
   var parentfoo = store.materializeRecord(foo.storeKey);
   var childfoo = child.materializeRecord(foo.storeKey);
   equals(child.storeKeyEditState(foo.storeKey), SC.Store.INHERITED, 'precond - foo should be inherited from parent store');
-  
+
   SC.RunLoop.begin();
   parentfoo.writeAttribute('foo', 'baz'); // must not be bar
   SC.RunLoop.end();
-  
+
   expect(childfoo,1,1); // should reflect on child
 });
 
 test("changing attributes on a parent store should NOT notify child store if locked", function() {
-  
+
   var child = store.chain();
   var oldfoo = foo;
   var parentfoo = store.materializeRecord(foo.storeKey);
   var childfoo = child.materializeRecord(foo.storeKey);
   childfoo.readAttribute('foo');
   equals(child.storeKeyEditState(foo.storeKey), SC.Store.EDITABLE, 'precond - foo should be locked from parent store');
-   
+
   SC.RunLoop.begin();
   parentfoo.writeAttribute('foo', 'baz'); // must not be bar
   SC.RunLoop.end();

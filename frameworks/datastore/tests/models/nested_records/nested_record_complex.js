@@ -84,8 +84,7 @@ module("Basic SC.Record Functions w/ a Parent > Child > Child", {
   }
 });
 
-test("Function: readAttribute() in the Parent Record",
-function() {
+test("Function: readAttribute() in the Parent Record", function() {
 
   equals(testParent.readAttribute('name'), 'Parent Name', "readAttribute should be correct for name attribute");
   equals(testParent.readAttribute('nothing'), null, "readAttribute should be correct for invalid key");
@@ -109,8 +108,7 @@ function() {
   //   "readAttribute should be correct for 'person' child attribute");
 });
 
-test("Function: readAttribute() in the Parent > Child",
-function() {
+test("Function: readAttribute() in the Parent > Child", function() {
   var person = testParent.get('person');
   ok(person, "check to see if the first child in the chain exists");
   equals(person.readAttribute('name'), 'Albert', "child readAttribute should be correct for name attribute");
@@ -125,8 +123,7 @@ function() {
     "readAttribute should be correct for address on the child");
 });
 
-test("Function: readAttribute() in the Parent > Child > Child",
-function() {
+test("Function: readAttribute() in the Parent > Child > Child", function() {
   var address = testParent.getPath('person.address');
   ok(address, "check to see if the child of the child in the chain exists with a getPath()");
   equals(address.readAttribute('street'), '123 Sesame St', "child readAttribute should be correct for street attribute w/ getPath()");
@@ -140,25 +137,26 @@ function() {
   equals(address2.readAttribute('nothing'), null, "child readAttribute should be correct for invalid key w/ get()");
 });
 
-test("Function: writeAttribute() in the Parent Record",
-function() {
+test("Function: writeAttribute() in the Parent Record", function() {
 
-  testParent.writeAttribute('name', 'New Parent Name');
+  SC.run(function () { testParent.writeAttribute('name', 'New Parent Name'); });
   equals(testParent.get('name'), 'New Parent Name', "writeAttribute should be the new name attribute");
 
-  testParent.writeAttribute('nothing', 'nothing');
+  SC.run(function () { testParent.writeAttribute('nothing', 'nothing'); });
   equals(testParent.get('nothing'), 'nothing', "writeAttribute should be correct for new key");
 
-  testParent.writeAttribute('person',
-  {
-    type: 'Person',
-    name: 'Al Gore',
-    address: {
-      type: 'Address',
-      street: '123 Crazy St',
-      city: 'Khacki Pants',
-      state: 'Insanity'
-    }
+  SC.run(function () {
+    testParent.writeAttribute('person',
+      {
+        type: 'Person',
+        name: 'Al Gore',
+        address: {
+          type: 'Address',
+          street: '123 Crazy St',
+          city: 'Khacki Pants',
+          state: 'Insanity'
+        }
+      });
   });
   same(testParent.readAttribute('person'),
     {
@@ -174,10 +172,9 @@ function() {
     "writeAttribute with readAttribute should be correct for person child attribute");
 });
 
-test("Function: writeAttribute() in the Parent > Child",
-function() {
+test("Function: writeAttribute() in the Parent > Child", function() {
   var person = testParent.get('person');
-  person.writeAttribute('name', 'Luke Skywalker');
+  SC.run(function () { person.writeAttribute('name', 'Luke Skywalker'); });
   equals(person.readAttribute('name'), 'Luke Skywalker', "writeAttribute should be the new name attribute on the child");
   var p = testParent.readAttribute('person');
   equals(p.name, 'Luke Skywalker', "check to see if a writeAttribute single change on the child will reflect on the parent");
@@ -189,7 +186,7 @@ function() {
     city: 'Springfield',
     state: 'IL'
   };
-  person.writeAttribute('address', newAddress);
+  SC.run(function () { person.writeAttribute('address', newAddress); });
   same(person.readAttribute('address'), {
     type: 'Address',
     street: '1 Way Street',
@@ -205,10 +202,9 @@ function() {
   }, "check to see if a writeAttribute address change on the child will reflect on the parent");
 });
 
-test("Function: writeAttribute() in the Parent > Child > Child",
-function() {
+test("Function: writeAttribute() in the Parent > Child > Child", function() {
   var address = testParent.getPath('person.address');
-  address.writeAttribute('street', '1 Death Star Lane');
+  SC.run(function () { address.writeAttribute('street', '1 Death Star Lane'); });
   equals(address.readAttribute('street'), '1 Death Star Lane', "writeAttribute should be the new name attribute on the child.street");
   // Now, test the person
   var p = testParent.readAttribute('person');
@@ -218,8 +214,7 @@ function() {
   equals(parentAttrs.person.address.street, '1 Death Star Lane', "check to see if a writeAttribute change on the child will reflect on the child > child > parent.attributes.person.address.street");
 });
 
-test("Basic Read",
-function() {
+test("Basic Read", function() {
 
   // Test general gets
   equals(testParent.get('name'), 'Parent Name', "Parent.get() should be correct for name attribute");
@@ -231,63 +226,44 @@ function() {
   ok(SC.kindOf(p, SC.Record), "(parent > child).get() creates an actual instance that is a kind of a SC.Record Object");
   ok(SC.instanceOf(p, NestedRecord.Person), "(parent > child).get() creates an actual instance of a Person Object");
 
-  // Check reference information
-  var pKey = p.get('id');
-  var storeRef = store.find(NestedRecord.Person, pKey);
-  ok(storeRef, 'checking that the store has the instance of the child record with proper primary key');
-  equals(p, storeRef, "checking the parent reference is the same as the direct store reference");
-  same(storeRef.get('attributes'), testParent.readAttribute('person'), "check that the ChildRecord's attributes are the same as the parent.person's readAttribute for the reference");
-
   var a = testParent.getPath('person.address');
   // Check Model Class information
   ok(SC.kindOf(a, SC.Record), "(parent > child > child) w/ getPath() creates an actual instance that is a kind of a SC.Record Object");
   ok(SC.instanceOf(a, NestedRecord.Address), "(parent > child > child) w/ getPath() creates an actual instance of an Address Object");
 
-  // Check reference information
-  var aKey = a.get('id');
-  storeRef = store.find(NestedRecord.Address, aKey);
-  ok(storeRef, 'checking that the store has the instance of the (parent > child > child) record with proper primary key');
-  equals(a, storeRef, "checking the (parent > child > child) reference is the same as the direct store reference");
-  same(storeRef.get('attributes'), p.readAttribute('address'), "check that the ChildRecord's attributes are the same as the (parent > child.address)'s readAttribute for the reference");
 });
 
-test("Basic Write",
-function() {
+test("Basic Write", function() {
   var oldP, p, key, oldKey, storeRef;
   var a, parentAttrs;
   // Test general gets
-  testParent.set('name', 'New Parent Name');
+  SC.run(function () { testParent.set('name', 'New Parent Name'); });
   equals(testParent.get('name'), 'New Parent Name', "set() should change name attribute");
-  testParent.set('nothing', 'nothing');
+  SC.run(function () { testParent.set('nothing', 'nothing'); });
   equals(testParent.get('nothing'), 'nothing', "set should change non-existent property to a new property");
 
   // Test Child Record creation
   oldP = testParent.get('person');
   oldKey = oldP.get('id');
-  testParent.set('person', {
-    type: 'Person',
-    name: 'Al Gore',
-    address: {
-      type: 'Address',
-      street: '123 Crazy St',
-      city: 'Khacki Pants',
-      state: 'Insanity'
-    }
+  SC.run(function () {
+    testParent.set('person', {
+      type: 'Person',
+      name: 'Al Gore',
+      address: {
+        type: 'Address',
+        street: '123 Crazy St',
+        city: 'Khacki Pants',
+        state: 'Insanity'
+      }
+    });
   });
   p = testParent.get('person');
   // Check Model Class information
   ok(SC.kindOf(p, SC.Record), "set() with an object creates an actual instance that is a kind of a SC.Record Object");
   ok(SC.instanceOf(p, NestedRecord.Person), "set() with an object creates an actual instance of a ChildRecordTest Object");
 
-  // Check reference information
-  key = p.get('id');
-  storeRef = store.find(NestedRecord.Person, key);
-  ok(storeRef, 'after a set() with an object, checking that the store has the instance of the child record with proper primary key');
-  equals(p, storeRef, "after a set with an object, checking the parent reference is the same as the direct store reference");
-  ok((oldKey === key), 'check to see that the old child record has the same key as the new child record');
-
   // Check for changes on the child bubble to the parent.
-  p.set('name', 'Child Name Change');
+  SC.run(function () { p.set('name', 'Child Name Change'); });
   equals(p.get('name'), 'Child Name Change', "after a set('name', <new>) on child, checking that the value is updated");
   ok(p.get('status') & SC.Record.DIRTY, 'check that the child record is dirty');
   ok(testParent.get('status') & SC.Record.DIRTY, 'check that the parent record is dirty');
@@ -298,7 +274,7 @@ function() {
 
   // Check changes on the address
   a = testParent.getPath('person.address');
-  a.set('street', '321 Nutty Professor Lane');
+  SC.run(function () { a.set('street', '321 Nutty Professor Lane'); });
   parentAttrs = testParent.readAttribute('person');
   same(a.get('attributes'), parentAttrs.address, "after a set('street', <new>) on address child, checking to see that the parent has received the changes from the child record");
 });
