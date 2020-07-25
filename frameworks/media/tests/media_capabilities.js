@@ -9,22 +9,21 @@ module("SC.mediaCapabilities", {});
 
 /**
  * Is Flash supported?
- * 
+ *
  * These unit tests are largely meaningless, because we can't actually control
- * the navigator.plugins array or the window.ActiveXObject class, nor can we
- * manipulate the existence of the getUserMedia properties. Without being able
- * to toggle them dynamically, the best we can test is whether the return value
- * of the capabilities object is the same as is available via plugins... and
- * since that would consist of (at this time) the exact same code, it's somewhat
- * redundant. Still, this unit test is included in case something changes in the
- * future.
- * 
+ * the navigator.plugins array, nor can we manipulate the existence of the
+ * getUserMedia properties. Without being able to toggle them dynamically, the
+ * best we can test is whether the return value of the capabilities object is
+ * the same as is available via plugins... and since that would consist of
+ * (at this time) the exact same code, it's somewhat redundant.
+ * Still, this unit test is included in case something changes in the future.
+ *
  * @see Department of Redundancy Department
  */
 test("Test Flash Support", function() {
-  
+
   doesFlashExist = NO;
-  
+
   // Non-IE detection
   if(navigator.plugins) {
     for( var i = 0; i < navigator.plugins.length; i++) {
@@ -32,15 +31,8 @@ test("Test Flash Support", function() {
         doesFlashExist = YES;
       }
     }
-  } else if(window.ActiveXObject) {
-    try {
-      var control = new ActiveXObject('ShockwaveFlash.ShockwaveFlash');
-      delete control;
-      doesFlashExist = YES;
-    } catch(e) {
-    }
   }
-  
+
   equals(SC.mediaCapabilities.isFlashSupported, doesFlashExist, "Flash plugin result must match what the browser supports.");
 });
 
@@ -48,9 +40,9 @@ test("Test Flash Support", function() {
  * Is Quicktime supported?
  */
 test("Test Quicktime Support", function() {
-  
+
   doesQuicktimeExist = NO;
-  
+
   // Non-IE detection
   if(navigator.plugins) {
     for( var i = 0; i < navigator.plugins.length; i++) {
@@ -58,15 +50,8 @@ test("Test Quicktime Support", function() {
         doesQuicktimeExist = YES;
       }
     }
-  } else if(window.ActiveXObject) {
-    try {
-      var control = new ActiveXObject('QuickTime.QuickTime');
-      delete control;
-      doesQuicktimeExist = YES;
-    } catch(e) {
-    }
   }
-  
+
   equals(SC.mediaCapabilities.isQuicktimeSupported, doesQuicktimeExist, "Quicktime plugin result must match what the browser supports.");
 });
 
@@ -79,14 +64,14 @@ test("Test HTML5 Audio Support", function() {
     if(SC.browser.isMozilla && SC.browser.compare(SC.browser.mozilla, "3.6") <= 0) {
       throw new Error();
     }
-    
+
     var doc = document.createElement('Audio');
     isAudioSupported = !!doc.canPlayType;
     delete doc;
-    
+
   } catch(e) {
   }
-  
+
   equals(SC.mediaCapabilities.isHTML5AudioSupported, isAudioSupported, "Audio Support flag must match what we've been able to determine from the browser.");
 });
 
@@ -99,13 +84,13 @@ test("Test HTML5 Video Support", function() {
     if(SC.browser.isMozilla && SC.browser.compare(SC.browser.mozilla, "3.6") <= 0) {
       throw new Error();
     }
-    
+
     var doc = document.createElement('Video');
     isVideoSupported = !!doc.canPlayType;
     delete doc;
   } catch(e) {
   }
-  
+
   equals(SC.mediaCapabilities.isHTML5VideoSupported, isVideoSupported, "Video Support flag must match what we've been able to determine from the browser.");
 });
 
