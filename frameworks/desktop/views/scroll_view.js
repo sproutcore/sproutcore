@@ -186,12 +186,6 @@ SC.ScrollView = SC.View.extend({
   /** @private The actual scale. */
   _sc_scale: 1,
 
-  /** @private Flag used to indicate when we should resize the content width manually. */
-  // _sc_shouldResizeContentWidth: false,
-
-  /** @private Flag used to indicate when we should resize the content height manually. */
-  // _sc_shouldResizeContentHeight: false,
-
   /** @private The offset center x of a multi-touch gesture. */
   _sc_touchCenterX: null,
 
@@ -964,16 +958,13 @@ SC.ScrollView = SC.View.extend({
       // }
 
       // Update the scrollers regardless.
-      // if (!didAdjust) {
       this._sc_contentViewSizeDidChange(lastMinimumHorizontalScrollOffset, lastMaximumHorizontalScrollOffset, lastMinimumVerticalScrollOffset, lastMaximumVerticalScrollOffset);
-      // }
     }
-
   },
 
   /** @private Whenever the contentView of the container changes, set up new observers and clean up old observers. */
   _sc_contentViewDidChange: function () {
-    var newView = this.get('contentView'), // Our content view.
+    var contentView = this.get('contentView'), // Our content view.
       containerView = this.get('containerView'),
       frameChangeFunc = this._sc_contentViewFrameDidChange;
 
@@ -981,65 +972,25 @@ SC.ScrollView = SC.View.extend({
     this._sc_removeContentViewObservers();
 
     // Reset caches.
-    // this._sc_shouldResizeContentWidth = false;
-    // this._sc_shouldResizeContentHeight = false;
     this._sc_contentHeight = 0;
     this._sc_contentWidth = 0;
     this._sc_contentScale = undefined;
 
     // Assign the content view to our container view. This ensures that it is instantiated.
-    containerView.set('contentView', newView);
-    newView = this.contentView = containerView.get('contentView'); // Actual content view.
+    containerView.set('contentView', contentView);
+    contentView = this.contentView = containerView.get('contentView'); // Actual content view.
 
-    if (newView) {
-      /* jshint eqnull:true */
-
-      // Be wary of content views that replace their layers.
-      // newView.addObserver('layer', this, layerChangeFunc);
-
-      if (!newView.useStaticLayout) {
-        // When a view wants an accelerated layer and isn't a fixed size, we convert it to a fixed
-        // size and resize it when our container resizes.
-        // if (newView.get('wantsAcceleratedLayer') && !newView.get('isFixedSize')) {
-        //   var contentViewLayout = newView.get('layout');
-
-        //   // Fix the width.
-        //   if (contentViewLayout.width == null) {
-        //     this._sc_shouldResizeContentWidth = true; // Flag to indicate that when the container's width changes, we should update the content's width.
-
-        //     newView.adjust({
-        //       right: null,
-        //       width: this._sc_containerWidth
-        //     });
-        //   }
-
-        //   // Fix the height.
-        //   if (contentViewLayout.height == null) {
-        //     this._sc_shouldResizeContentHeight = true; // Flag to indicate that when the container's height changes, we should update the content's height.
-
-        //     newView.adjust({
-        //       bottom: null,
-        //       height: this._sc_containerHeight
-        //     });
-        //   }
-        // }
-      }
-
+    if (contentView) {
       // TODO: Can we remove this if a calculated property exists?
-      newView.addObserver('frame', this, frameChangeFunc);
+      contentView.addObserver('frame', this, frameChangeFunc);
 
       // Initialize once.
       this._sc_contentViewFrameDidChange();
     }
 
     // Cache the current content view so that we can properly clean up when it changes.
-    this._sc_contentView = newView;
+    this._sc_contentView = contentView;
   },
-
-  /** @private */
-  // _sc_contentViewLayerDidChange: function () {
-  //   ???
-  // },
 
   /** @private Check frame changes for size changes. */
   _sc_contentViewFrameDidChange: function () {
@@ -1564,14 +1515,9 @@ SC.ScrollView = SC.View.extend({
   _sc_removeContentViewObservers: function () {
     var oldView = this._sc_contentView,
       frameChangeFunc = this._sc_contentViewFrameDidChange;
-      // layerChangeFunc = this._sc_contentViewLayerDidChange;
 
     if (oldView) {
       oldView.removeObserver('frame', this, frameChangeFunc);
-      // oldView.removeObserver('layer', this, layerChangeFunc);
-
-      // this._sc_shouldResizeContentWidth = false;
-      // this._sc_shouldResizeContentHeight = false;
     }
   },
 
