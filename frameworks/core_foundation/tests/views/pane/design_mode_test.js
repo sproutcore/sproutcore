@@ -148,7 +148,7 @@ test("When RootResponder has designModes, it sets designMode on its panes and th
     orientation = SC.device.orientation;
 
   windowSize = responder.get('currentWindowSize');
-  responder.set('designModes', { s: ((windowSize.width - 10) * (windowSize.height - 10)) / window.devicePixelRatio, l: Infinity });
+  responder.set('designModes', { s: ((windowSize.width - 10) * (windowSize.height - 10)), l: Infinity });
 
   pane = pane.create();
 
@@ -191,7 +191,7 @@ test("When updateDesignMode() is called on a pane, it sets designMode properly o
     orientation = SC.device.orientation;
 
   windowSize = responder.get('currentWindowSize');
-  responder.set('designModes', { s: ((windowSize.width - 10) * (windowSize.height - 10)) / window.devicePixelRatio, l: Infinity });
+  responder.set('designModes', { s: ((windowSize.width - 10) * (windowSize.height - 10)), l: Infinity });
 
   SC.run(function () {
     pane = pane.create().append();
@@ -253,7 +253,7 @@ test("When RootResponder has designModes, and you add a view to a pane, it sets 
     orientation = SC.device.orientation;
 
   windowSize = responder.get('currentWindowSize');
-  responder.set('designModes', { s: ((windowSize.width - 10) * (windowSize.height - 10)) / window.devicePixelRatio, l: Infinity });
+  responder.set('designModes', { s: ((windowSize.width - 10) * (windowSize.height - 10)), l: Infinity });
 
   SC.run(function () {
     pane = pane.create().append();
@@ -284,7 +284,7 @@ test("When you set designModes on RootResponder, it sets designMode on its panes
   view4.set.expect(0);
 
   windowSize = responder.get('currentWindowSize');
-  responder.set('designModes', { s: ((windowSize.width - 10) * (windowSize.height - 10)) / window.devicePixelRatio, l: Infinity });
+  responder.set('designModes', { s: ((windowSize.width - 10) * (windowSize.height - 10)), l: Infinity });
 
   // designMode should be set (for initialization)
   view1.set.expect(1);
@@ -315,7 +315,7 @@ test("When you change designModes on RootResponder, it sets designMode on the pa
     orientation = SC.device.orientation;
 
   windowSize = responder.get('currentWindowSize');
-  responder.set('designModes', { s: ((windowSize.width - 10) * (windowSize.height - 10)) / window.devicePixelRatio, l: Infinity });
+  responder.set('designModes', { s: ((windowSize.width - 10) * (windowSize.height - 10)), l: Infinity });
 
   SC.run(function () {
     pane = pane.create().append();
@@ -344,7 +344,7 @@ test("When you change designModes on RootResponder, it sets designMode on the pa
   same(view4.get('classNames'), ['sc-view', 'sc-large'], "classNames for view4 should be");
 
   // Change the small threshold
-  responder.set('designModes', { s: ((windowSize.width + 10) * (windowSize.height + 10)) / window.devicePixelRatio, l: Infinity });
+  responder.set('designModes', { s: ((windowSize.width + 10) * (windowSize.height + 10)), l: Infinity });
 
   // designMode should be set
   view1.set.expect(2);
@@ -370,8 +370,8 @@ test("When you change designModes on RootResponder, it sets designMode on the pa
 
   // Add a medium threshold
   responder.set('designModes', {
-    s: ((windowSize.width - 10) * (windowSize.height - 10)) / window.devicePixelRatio,
-    m: ((windowSize.width + 10) * (windowSize.height + 10)) / window.devicePixelRatio,
+    s: ((windowSize.width - 10) * (windowSize.height - 10)),
+    m: ((windowSize.width + 10) * (windowSize.height + 10)),
     l: Infinity
   });
 
@@ -406,7 +406,7 @@ test("When the design mode changes, overrides are reverted.");
 //     orientation = SC.device.orientation;
 
 //   windowSize = responder.get('currentWindowSize');
-//   responder.set('designModes', { s: ((windowSize.width - 10) * (windowSize.height - 10)) / window.devicePixelRatio, l: Infinity });
+//   responder.set('designModes', { s: ((windowSize.width - 10) * (windowSize.height - 10)), l: Infinity });
 
 //   SC.run(function () {
 //     pane = pane.create().append();
@@ -440,7 +440,7 @@ test("When you unset designModes on RootResponder, it clears designMode on its p
     orientation = SC.device.orientation;
 
   windowSize = responder.get('currentWindowSize');
-  responder.set('designModes', { s: ((windowSize.width - 10) * (windowSize.height - 10)) / window.devicePixelRatio, l: Infinity });
+  responder.set('designModes', { s: ((windowSize.width - 10) * (windowSize.height - 10)), l: Infinity });
 
   SC.run(function () {
     pane = pane.create().append();

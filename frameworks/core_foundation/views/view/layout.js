@@ -1232,6 +1232,7 @@ SC.View.reopen(
   */
   viewDidResize: function () {
     this._sc_viewFrameDidChange();
+    this.notifyMediaChilds();
 
     // Also notify our children.
     var cv = this.childViews,
@@ -1385,6 +1386,8 @@ SC.View.reopen(
       // We call viewDidResize so that it calls parentViewDidResize on all child views.
       this.viewDidResize();
     }
+
+    this.registerMediaQueries();
 
     // Notify.
     if (this.didAppendToDocument) { this.didAppendToDocument(); }

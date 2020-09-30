@@ -1544,6 +1544,8 @@ SC.CoreView.reopen(
     // If we don't have the layout module then we don't know the frame until appended to the document.
     this.notifyPropertyChange('frame');
 
+    this.registerMediaQueries();
+
     // Notify.
     if (this.didAppendToDocument) { this.didAppendToDocument(); }
   },
@@ -1591,6 +1593,7 @@ SC.CoreView.reopen(
 
   /** @private Attempts to call `willRemoveFromDocument` on the view. */
   _notifyWillDetach: function () {
+    this.unregisterMediaQueries();
     if (this.willRemoveFromDocument) { this.willRemoveFromDocument(); }
   },
 
