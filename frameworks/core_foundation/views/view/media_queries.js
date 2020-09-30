@@ -4,6 +4,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
+sc_require("system/media_query");
 sc_require("views/view");
 
 /** @private This adds media queries support to SC.View. */
@@ -28,7 +29,8 @@ SC.View.reopen(
           layout: { left: 20 },
           title: 'Hello World',
           media: {
-            '(max-width: 1000px)': { title: 'Hello', layout: { left: 10 } },
+            '(max-window-width: 1200px)': { title: 'Hello', layout: { left: 15 } },
+            '(max-width: 1000px)': { title: 'Hi', layout: { left: 10 } },
             '(max-width: 800px) or (max-height: 500px)': { layout: { left: 5 } }
           }
         })
@@ -39,33 +41,67 @@ SC.View.reopen(
   */
   media: null,
 
+  /**
+    By default, the size of the parentView will be used. You can travel more
+    levels up by increasing this property.
+
+    @property Number
+    @default 0
+  */
+  mediaParentDepth: 0,
+
+
   // ------------------------------------------------------------------------
   // Methods
   //
+
+  /**
+    @private
+
+    Will apply media queries on child views depend of its size.
+  */
+  notifyMediaChilds: function () {
+    var mediaChilds = this.mediaChilds;
+
+    if (mediaChilds) mediaChilds.forEach(function(view) {
+      view.applyMediaQueries();
+    });
+  },
 
   /** @private */
   registerMediaQueries: function () {
     var media = this.media;
     if (!media) return;
 
-    SC.RootResponder.responder.mediaViews.add(this);
+    var mediaParentDepth = this.mediaParentDepth,
+      parent = this;
 
-    this.handleMediaQueries();
+    while (parent && mediaParentDepth >= 0) {
+      mediaParentDepth--;
+      parent = parent.parentView;
+    }
+    if (parent) {
+      if (!parent.mediaChilds) parent.mediaChilds = SC.Set.create();
+      parent.mediaChilds.add(this);
+
+      this._mediaParent = parent;
+      this.applyMediaQueries();
+    }
+    else SC.error("Could not find the parent view to register the media queries");
   },
 
   unregisterMediaQueries: function () {
-    var media = this.media;
-    if (!media) return;
-
-    SC.RootResponder.responder.mediaViews.remove(this);
+    if (!this._mediaParent) return;
+    this._mediaParent.mediaChilds.remove(this);
+    this._mediaParent = null;
   },
 
-  handleMediaQueries: function() {
+  applyMediaQueries: function() {
     var media = this.media,
       query, properties;
 
     for (query in media) {
-      if (this.matchMedia(query)) {
+      if (SC.MediaQuery.matchQuery(query || 'all', this._mediaParent.get('frame'))) {
         var props = SC.copy(media[query]);
 
         if (!properties) properties = props;
@@ -74,46 +110,6 @@ SC.View.reopen(
     }
 
     this._applyDesignMode(properties);
-  },
-
-  /** @private Modified version of: https://github.com/paulirish/matchMedia.js */
-  matchMedia: function(media) {
-    // For browsers that support matchMedium api such as IE 9 and webkit
-    var styleMedia = (window.styleMedia || window.media);
-
-    // For those that don't support matchMedium
-    if (!styleMedia) {
-      var mediaId = media.replace(/\W/g,'_');
-      styleMedia = this._sc_styleMedias[mediaId];
-
-      if (!styleMedia) {
-        var style = document.createElement('style'),
-          script = document.getElementsByTagName('script')[0],
-          info = null;
-
-        style.type = 'text/css';
-        style.id = 'sc-matchmedia'+mediaId;
-
-        if (!script) document.head.appendChild(style);
-        else script.parentNode.insertBefore(style, script);
-
-        info = window.getComputedStyle(style, null);
-
-        styleMedia = {
-          matchMedium: function(media) {
-            style.textContent = '@media ' + media + '{ #sc-matchmedia'+mediaId+' { width: 1px; } }';
-            return info.width === '1px';
-          }
-        };
-
-        this._sc_styleMedias[mediaId] = styleMedia;
-      }
-    }
-
-    return styleMedia.matchMedium(media || 'all');
-  },
-
-  /** @private */
-  _sc_styleMedias: {}
+  }
 
 });
