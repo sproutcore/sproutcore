@@ -2493,16 +2493,12 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
 
     // Theming
     this._lastTheme = this.get('theme');
-
-    this.registerMediaQueries();
   },
 
   /** @private */
   destroy: function () {
     // Clean up.
     this._previousLayout = null;
-
-    this.unregisterMediaQueries();
 
     return sc_super();
   },
