@@ -95,20 +95,21 @@ SC.mixin( /** @scope SC */ {
 
     @param {DOMElement|jQuery|String} elem the element to find the offset of.
       This is passed to `jQuery()`, so any value supported by `jQuery()` will work.
-    @param {String} relativeToFlag flag to determine which relative element to determine offset by.
-      One of either: 'document', 'viewport' or 'parent' (default: 'document').
+    @param {DOMElement|String} relativeTo determine which relative element to determine offset by.
+      Can be: 'document', 'viewport', 'parent' or a DOM element (default: 'document').
     @returns {Object} the offset of the element as an Object (ie. Hash) in the form { x: value, y: value }.
    */
-  offset: function(elem, relativeToFlag) {
+  offset: function(elem, relativeTo) {
     var userAgent,
         index,
         mobileBuildNumber,
         result = jQuery(elem).offset();
 
-    relativeToFlag = relativeToFlag || 'document';
+    relativeTo = relativeTo || 'document';
 
-    if (relativeToFlag === 'parent') {
-      var parentOffset = jQuery(elem).offsetParent().offset();
+    if (relativeTo === 'parent' || relativeTo instanceof Element) {
+      var relativeEl = relativeTo === 'parent' ? jQuery(elem).offsetParent() : jQuery(relativeTo),
+        parentOffset = relativeEl.offset();
       result.left -= parentOffset.left;
       result.top -= parentOffset.top;
     } else {

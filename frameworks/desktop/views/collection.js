@@ -370,6 +370,14 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
   selectOnPageMove: YES,
 
   /**
+    Set to false to trigger simple click even on double click.
+
+    @type Boolean
+    @default YES
+  */
+  allowsDoubleClick: true,
+
+  /**
     Toggle disclosure state on double click.
 
     @type Boolean
@@ -597,7 +605,8 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
   */
   adjustLayout: function () {
     var layout = this.computeLayout();
-    if (layout) { this.adjust(layout); }
+
+    if (layout) this.adjust(layout);
   },
 
   /**
@@ -908,9 +917,18 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     @returns {void}
   */
   contentLengthDidChange: function() {
-    var content = this.get('content');
-    this.set('length', content ? content.get('length') : 0);
-    this.invokeOnce(this.adjustLayout);
+    var content = this.get('content'),
+      len = content ? content.get('length') : 0;
+
+    this.set('length', len);
+    this.invokeOnce('adjustLayout');
+
+    // If there is no content, _cv_nowShowingDidChange will not reload the
+    // collection when it becomes visible again. If we do not reload here,
+    // we will endup with the previous content.
+    if (len === 0 && !this.getPath('nowShowing.length')) {
+      this.reload();
+    }
   },
 
   /** @private
@@ -1068,9 +1086,10 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
         // Get the existing item view, if there is one.
         existing = itemViews ? itemViews[idx] : null;
         if (existing) {
-          this._removeItemView(existing, idx);
-          }
+          // We need to destroy the item we the all collection is reaload
+          this._removeItemView(existing, idx, true);
         }
+      }
 
       // Only after the children are removed should we create the new views.
       // We do this in order to maximize the chance of re-use should the view
@@ -1131,7 +1150,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     if (SC.none(idx) || idx < 0 || idx >= this.get('length')) {
       //@if(debug)
       // Developer support
-      SC.warn("Developer Warning: %@ - itemViewForContentIndex(%@): The index, %@, is not within the range of the content.".fmt(this, idx, idx));
+      console.error("Developer Warning: %@ - itemViewForContentIndex(%@): The index, %@, is not within the range of the content.".fmt(this, idx, idx));
       //@endif
 
       return null; // FAST PATH!!
@@ -1181,7 +1200,10 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
 
         // Recreate the layer if it was destroyed.
         if (!ret.get('_isRendered')) {
-          ret.invokeOnce(ret._doRender);
+          ret.invokeOnce('_doRender');
+        }
+        else {
+          ret.invokeOnce('_doUpdateContent');
         }
         }
       }
@@ -1305,7 +1327,8 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     // okay, found the DOM node for the view, go ahead and create it
     // first, find the contentIndex
     if (contentIndex >= this.get('length')) {
-      throw new Error("layout for item view %@ was found when item view does not exist (%@)".fmt(id, this));
+      SC.error("layout for item view %@ with contentIndex '%@ >= %@' was found when item view does not exist (%@)".fmt(id, contentIndex, this.get('length'), this));
+      return null;
     }
 
     return this.itemViewForContentIndex(contentIndex);
@@ -1372,6 +1395,8 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
 
     this._cv_selection = sel ;
     this._cv_selectionContentDidChange();
+
+    if (this.scrollToSelection) this.scrollToSelection();
   }.observes('selection'),
 
   /** @private
@@ -1597,6 +1622,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
         range.add(proposedIndex);
         ret = del.collectionViewShouldSelectIndexes(this, range);
         if (ret && ret.get('length') >= 1) return proposedIndex ;
+        if (ret === false) return proposedIndex-1;
         range.remove(proposedIndex);
       }
       proposedIndex++;
@@ -1639,6 +1665,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
         range.add(proposedIndex);
         ret = del.collectionViewShouldSelectIndexes(this, range);
         if (ret && ret.get('length') >= 1) return proposedIndex ;
+        if (ret === false) return proposedIndex+1;
         range.remove(proposedIndex);
       }
       proposedIndex--;
@@ -2325,7 +2352,8 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
   /** @private */
   mouseUp: function(ev) {
     var isEnabledInPane = this.get('isEnabledInPane'),
-        isSelectable = this.get('isSelectable');
+      allowsDoubleClick = this.get('allowsDoubleClick'),
+      isSelectable = this.get('isSelectable');
 
     // If enabled and selectable, handle the event.
     if (isEnabledInPane && isSelectable) {
@@ -2407,8 +2435,13 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
 
             // if cannot edit, schedule a reselect (but give doubleClick a chance)
             if (!canEdit) {
-              if (this._cv_reselectTimer) this._cv_reselectTimer.invalidate() ;
-              this._cv_reselectTimer = this.invokeLater(this.select, 300, idx, false) ;
+              if (allowsDoubleClick) {
+                if (this._cv_reselectTimer) this._cv_reselectTimer.invalidate() ;
+                this._cv_reselectTimer = this.invokeLater(this.select, 300, idx, false) ;
+              }
+              else {
+                this.select(idx, false);
+              }
             }
           }
 
@@ -2431,7 +2464,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     // Track that mouse is up no matter what (e.g. mouse went down and then view was disabled before mouse up).
     this._sc_isMouseDown = false;
 
-    return false;  // Bubble event to allow doubleClick to be called.
+    return !allowsDoubleClick;  // Bubble event to allow doubleClick to be called.
   },
 
   /** @private */
@@ -2477,7 +2510,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
   mouseWheel: function (evt) {
     // Capture mouse wheel events when mouse is pressed or immediately after a mouse up (to avoid
     // excessive Magic Mouse wheel events while the person lifts their finger).
-    return this._sc_isMouseDown || this._sc_isMouseJustDown;
+    return this._sc_isMouseJustDown;
   },
 
   // ..........................................................
@@ -2677,6 +2710,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
           event: info.event,
           source: this,
           dragView: dragView,
+          itemView: info.itemView,
           ghost: NO,
           ghostActsLikeCursor: del.ghostActsLikeCursor,
           slideBack: YES,
@@ -2704,7 +2738,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     var indexes = this.get('nowShowing').without(dragContent),
         dragLayer = this.get('layer').cloneNode(false),
         view = SC.View.create({ layer: dragLayer, parentView: this }),
-        height=0, layout;
+        height = 0, top = 0, layout;
 
     indexes = this.get('nowShowing').without(indexes);
 
@@ -2748,6 +2782,12 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
         itemView.updateLayerIfNeeded();
       }
 
+      // Utile lorsque l'on drag des modules
+      if (!top && itemView.get('useStaticLayout')) {
+        top = itemView.get('frame').y;
+      }
+
+
       if (layer) {
         dragLayer.appendChild(layer);
         layout = itemView.get('layout');
@@ -2760,7 +2800,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     }, this);
 
     // we don't want to show the scrollbars, resize the dragview
-    view.set('layout', {height:height});
+    view.set('layout', { top: top, height: height });
 
     dragLayer = null;
     return view ;
@@ -2974,7 +3014,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     if (dragOp !== SC.DRAG_NONE) {
       if ((this._lastInsertionIndex !== idx) || (this._lastDropOperation !== dropOp)) {
         var itemView = this.itemViewForContentIndex(idx) ;
-        this.showInsertionPoint(itemView, dropOp) ;
+        this.showInsertionPoint(itemView, dropOp, drag);
       }
 
       this._lastInsertionIndex = idx ;
@@ -3140,17 +3180,17 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
 
   /** @private - when we are about to become visible, reload if needed. */
   willShowInDocument: function () {
-    if (this._invalidIndexes) this.invokeOnce(this.reloadIfNeeded);
+    if (this._invalidIndexes) this.invokeOnce('reloadIfNeeded');
     if (this._invalidSelection) {
-      this.invokeOnce(this.reloadSelectionIndexesIfNeeded);
+      this.invokeOnce('reloadSelectionIndexesIfNeeded');
     }
   },
 
   /** @private - when we are added, reload if needed. */
   didAppendToDocument: function () {
-    if (this._invalidIndexes) this.invokeOnce(this.reloadIfNeeded);
+    if (this._invalidIndexes) this.invokeOnce('reloadIfNeeded');
     if (this._invalidSelection) {
-      this.invokeOnce(this.reloadSelectionIndexesIfNeeded);
+      this.invokeOnce('reloadSelectionIndexesIfNeeded');
     }
   },
 
@@ -3513,7 +3553,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
   /** @private
     Removes the item view, pooling it for re-use if possible.
   */
-  _removeItemView: function (itemView, idx) {
+  _removeItemView: function (itemView, idx, forceDestroy) {
     var exampleView,
       items = this.get('content'),
       canPoolView, canPoolLayer,
@@ -3525,7 +3565,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
     // Don't pool views whose content has changed, because if the example
     // view used is different than the new content, we would pool the wrong
     // type of view.
-    if (items && itemView.get('content') === items.objectAt(idx)) {
+    if (!forceDestroy && items && itemView.get('content') === items.objectAt(idx)) {
 
       exampleView = this._exampleViewForContentIndex(idx);
       prototype = exampleView.prototype;

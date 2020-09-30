@@ -427,13 +427,26 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     var content = this.get('content'),
       del = this.displayDelegate;
 
-    if (content && content.get) {
-      var checkboxKey = this.getDelegateProperty('contentCheckboxKey', del),
-        value = content.get(checkboxKey);
+    var selectionDelegate = del.delegate ? del.delegate : del.get('selectionDelegate'),
+      canChange = true;
 
-      value = (value === SC.MIXED_STATE) ? YES : !value;
-      content.set(checkboxKey, value); // update content
-      this.displayDidChange(); // repaint view...
+    if (selectionDelegate && selectionDelegate.checkboxListWillChange) {
+      canChange = selectionDelegate.checkboxListWillChange(this);
+    }
+
+    if (canChange) {
+      if (content) {
+        var checkboxKey = this.getDelegateProperty('contentCheckboxKey', del),
+          value = SC.get(content, checkboxKey);
+
+        value = (value === SC.MIXED_STATE) ? YES : !value;
+        SC.set(content, checkboxKey, value); // update content
+        this.displayDidChange(); // repaint view...
+      }
+
+      if (selectionDelegate && selectionDelegate.checkboxListDidChange) {
+        selectionDelegate.checkboxListDidChange(this);
+      }
     }
   },
 
@@ -572,12 +585,12 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
 
   /** @private */
   _addRightIconActiveState: function () {
-    this.$('img.right-icon').setClass('active', YES);
+    this.$('.right-icon').setClass('active', YES);
   },
 
   /** @private */
   _removeRightIconActiveState: function () {
-    this.$('img.right-icon').removeClass('active');
+    this.$('.right-icon').removeClass('active');
 
     var pane = this.get('pane'),
         del = this.displayDelegate,
@@ -587,7 +600,6 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     if (action && pane) {
        pane.rootResponder.sendAction(action, target, this, pane);
     }
-
   },
 
   /** @private
@@ -607,7 +619,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     if (!labelKey) return NO;
 
     // get the element to check for.
-    var el = this.$label()[0];
+    var el = this.$label(evt)[0];
     if (!el) return NO; // no label to check for.
 
     var cur = evt.target, layer = this.get('layer');
@@ -651,13 +663,20 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     else return original();
   }.enhance(),
 
+  // Utile pour tableView lorsque l'on souhaite pouvoir éditer
+  getContentLabelKey: function() {
+    return this.getDelegateProperty('contentValueKey', this.get('displayDelegate'));
+  },
+  elementForEditor: function(el) {
+    return el[0];
+  },
   /*
     Configures the editor to overlay the label properly.
   */
   inlineEditorWillBeginEditing: function (editor, editable, value) {
     var content   = this.get('content'),
         del       = this.get('displayDelegate'),
-        labelKey  = this.getDelegateProperty('contentValueKey', del),
+        labelKey  = this.getContentLabelKey(),
         el        = this.$label(),
         validator = this.get('validator'),
         f, v, offset, fontSize, top, lineHeight, escapeHTML,
@@ -686,7 +705,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
       } else this._oldLineHeight = null;
     }
 
-    el = el[0];
+    el = this.elementForEditor(el);
     offset = SC.offset(el);
 
     f.x = offset.x;
@@ -710,7 +729,11 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     Allow editing.
   */
   inlineEditorShouldBeginEditing: function (inlineEditor) {
-    return YES;
+    var selectionDelegate = this.displayDelegate.get('selectionDelegate');
+    if (selectionDelegate && selectionDelegate.canEditValue) {
+      return selectionDelegate.canEditValue(this);
+    }
+    else return YES;
   },
 
   /** @private
@@ -734,7 +757,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
   inlineEditorDidCommitEditing: function (editor, finalValue, editable) {
     var content = this.get('content');
     var del = this.displayDelegate;
-    var labelKey = this.getDelegateProperty('contentValueKey', del);
+    var labelKey = this.getContentLabelKey();
 
     if (labelKey && content) {
       if (content.set) content.set(labelKey, finalValue);
@@ -744,6 +767,11 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     else this.set('content', finalValue);
 
     this.displayDidChange();
+
+    var selectionDelegate = this.displayDelegate.get('selectionDelegate');
+    if (selectionDelegate && selectionDelegate.valueListDidChange) {
+      selectionDelegate.valueListDidChange(this);
+    }
 
     this._endEditing();
   },
@@ -774,6 +802,9 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
         indent  = this.get('outlineIndent'),
         key, value, working, classArray = [];
 
+    // enhance render doesn't work...
+    if (this.renderRowColor) this.renderRowColor(this, context);
+
     // add alternating row classes
     classArray.push((this.get('contentIndex') % 2 === 0) ? 'even' : 'odd');
     context.setClass('disabled', !this.get('isEnabled'));
@@ -785,7 +816,12 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
 
     // handle disclosure triangle
     value = this.get('disclosureState');
-    if (value !== SC.LEAF_NODE) {
+
+    // is-menu est utilié pour le siteWeb pour faire des menus
+    if (content && content.isMenu) {
+      classArray.push(content.menuClass || 'is-menu');
+    }
+    if (value !== SC.LEAF_NODE && !content.hideDisclosure) {
       this.renderDisclosure(working, value);
       classArray.push('has-disclosure');
     } else if (this._disclosureRenderSource) {
@@ -800,7 +836,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     key = this.getDelegateProperty('contentCheckboxKey', del);
     if (key) {
       value = content ? (content.get ? content.get(key) : content[key]) : NO;
-      if (value !== null) {
+      if (!SC.none(value)) {
         this.renderCheckbox(working, value);
         classArray.push('has-checkbox');
       } else if (this._checkboxRenderSource) {
@@ -851,9 +887,8 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
 
     // handle unread count
     key = this.getDelegateProperty('contentUnreadCountKey', del);
-    value = (key && content) ? SC.get(content, key) : null;
+    value = (key && content) ? (content.get ? content.get(key) : content[key]) : null;
     if (!SC.none(value) && value !== '') {
-      console.log(value);
       this.renderCount(working, value);
       var digits = ['zero', 'one', 'two', 'three', 'four', 'five'];
       var valueLength = value.toString().length;
@@ -935,7 +970,7 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     // sc-list-item-checkbox; however, themes expect something different, unfortunately.
     context = context.begin('div')
       .addClass('sc-checkbox-view')
-      .addClass('sc-regular-size')
+      .addClass('sc-small-size')
       .addClass(this.get('theme').classNames)
       .addClass(renderer.get('className'));
 
@@ -946,10 +981,11 @@ SC.ListItemView = SC.View.extend(SC.InlineEditable, SC.Control,
     }
 
     source
+      .set('controlSize', SC.SMALL_CONTROL_SIZE)
       .set('isSelected', state && (state !== SC.MIXED_STATE))
       .set('isMixed', state === SC.MIXED_STATE)
       .set('isEnabled', this.get('isEnabled') && this.get('contentIsEditable'))
-      .set('isActive', this._checkboxIsActive)
+      .set('isActive', false)
       .set('title', '');
 
     renderer.render(source, context);

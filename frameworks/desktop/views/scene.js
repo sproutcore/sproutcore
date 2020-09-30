@@ -84,19 +84,23 @@ SC.SceneView = SC.ContainerView.extend(
     @see SC.ContainerView#replaceContent
   */
   replaceContent: function(newContent) {
-    var scenes = this.get('scenes'),
-      nowShowing = this.get('nowShowing'),
-      outIdx = scenes ? scenes.indexOf(this._lastNowShowingView) : -1,
-      inIdx = scenes ? scenes.indexOf(nowShowing) : -1;
+    // Fix an issue with markdown views in the articleArticle state
+    if (newContent && newContent.get('viewState') !== SC.CoreView.UNRENDERED) {
+      var scenes = this.get('scenes'),
+        nowShowing = this.get('nowShowing'),
+        outIdx = scenes ? scenes.indexOf(this._lastNowShowingView) : -1,
+        inIdx = scenes ? scenes.indexOf(nowShowing) : -1;
 
-    this._lastNowShowingView = nowShowing;
 
-    if (outIdx < inIdx) {
-      this.transitionSwap = this.transitionForward;
-      this.transitionSwapOptions = this.transitionForwardOptions;
-    } else {
-      this.transitionSwap = this.transitionBackward;
-      this.transitionSwapOptions = this.transitionBackwardOptions;
+      this._lastNowShowingView = nowShowing;
+
+      if (outIdx < inIdx) {
+        this.transitionSwap = this.transitionForward;
+        this.transitionSwapOptions = this.transitionForwardOptions;
+      } else {
+        this.transitionSwap = this.transitionBackward;
+        this.transitionSwapOptions = this.transitionBackwardOptions;
+      }
     }
 
     sc_super();

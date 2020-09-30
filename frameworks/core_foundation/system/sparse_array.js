@@ -116,6 +116,9 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     this._TMP_RANGE = {};
   },
 
+
+  prefetchIndex: 50,
+
   /**
     Returns the object at the specified index.  If the value for the index
     is currently undefined, invokes the didRequestIndex() method to notify
@@ -132,14 +135,21 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     @return {Object} the object
   */
   objectAt: function(idx, omitMaterializing) {
-    var content = this._sa_content, ret ;
+    var content = this._sa_content, ret,
+      len = this.get('length');
 
-    if (idx >= this.get('length')) return undefined;
+    if (idx >= len) return undefined;
     if (!content) content = this._sa_content = [] ;
     if ((ret = content[idx]) === undefined) {
       if(!omitMaterializing) this.requestIndex(idx);
       ret = content[idx]; // just in case the delegate provided immediately
     }
+
+    var prefetchIndex = this.get('prefetchIndex');
+    if (prefetchIndex && !idx%prefetchIndex && content[idx+prefetchIndex] === undefined && len > prefetchIndex) {
+      this.requestIndex(idx+prefetchIndex);
+    }
+
     return ret ;
   },
 
@@ -374,6 +384,16 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     this.arrayContentDidChange(idx, amt, len);
 
     return this ;
+  },
+
+  removeObject: function(obj) {
+    var content = this._sa_content;
+    if (!content) content = this._sa_content = [];
+    
+    var storeKey = SC.typeOf(obj) === SC.T_NUMBER ? obj : obj.get('storeKey');
+    content.removeObject(storeKey);
+    this.provideLength(this._length - 1);
+    return this;
   },
 
   /**

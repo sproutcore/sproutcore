@@ -243,7 +243,7 @@ SC.mixin(SC.View,
           cij = columnIndex+j;
           if (!columnSizes[cij]) columnSizes[cij] = {};
           columnSizes[cij].layoutWidth = Math.max(columnSizes[cij].layoutWidth || 0, columnWidth);
-          columnSizes[cij].fillRatio = Math.max(columnSizes[cij].fillRatio || 0, columnFillRatio || 0);
+          columnSizes[cij].fillRatio = Math.max(columnSizes[cij].fillRatio || 0, columnFillRatio || 0);
         }
 
         if (childView._sc_height) rowHeight = (childView._sc_height - ((rowSpan-1)*rowSpace)) / rowSpan;
@@ -252,7 +252,7 @@ SC.mixin(SC.View,
           if (!rowSizes[rij]) rowSizes[rij] = {};
 
           rowSizes[rij].layoutHeight = Math.max(rowSizes[rij].layoutHeight || 0, rowHeight);
-          rowSizes[rij].fillRatio = Math.max(rowSizes[rij].fillRatio || 0, rowFillRatio || 0);
+          rowSizes[rij].fillRatio = Math.max(rowSizes[rij].fillRatio || 0, rowFillRatio || 0);
         }
 
         for (j = 0; j < columnSpan; j++) {

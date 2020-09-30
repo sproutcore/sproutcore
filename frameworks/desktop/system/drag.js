@@ -351,49 +351,49 @@ SC.Drag = SC.Object.extend(
 
     var evt = this.event;
 
-    // compute the ghost offset from the original start location
+    var loc = this.computeLocation(evt);
 
-    var loc = { x: evt.pageX, y: evt.pageY };
-    this.set('location', loc);
+		if (this.get('sourceIsDraggable')) {
+	    var dv = this._getDragView() ;
+	    var pv = dv.get('parentView') ;
 
-    if (this.get('sourceIsDraggable')) {
-      var dv = this._getDragView();
-      var pv = dv.get('parentView');
+	    // convert to global coordinates
+	    var origin = pv ? pv.convertFrameToView(dv.get('frame'), this.get('anchorView')) : dv.get('frame') ;
 
-      // convert to global coordinates
-      var origin = pv ? pv.convertFrameToView(dv.get('frame'), null) : dv.get('frame');
+	    if (this.get('ghost')) {
+	      // Hide the dragView
+	      this._dragViewWasVisible = dv.get('isVisible') ;
+	      dv.set('isVisible', NO) ;
+	    }
 
-      if (this.get('ghost')) {
-        // Hide the dragView
-        this._dragViewWasVisible = dv.get('isVisible');
-        dv.set('isVisible', NO);
-      }
+	    if (this.ghostActsLikeCursor) this.ghostOffset = { x: 14, y: 14 };
+	    else this.ghostOffset = { x: (loc.x-origin.x), y: (loc.y-origin.y) } ;
 
-      if (this.ghostActsLikeCursor) this.ghostOffset = { x: 14, y: 14 };
-      else this.ghostOffset = { x: (loc.x - origin.x), y: (loc.y - origin.y) };
+	    // position the ghost view
+	    if(!this._ghostViewHidden) this._positionGhostView(evt) ;
 
-      // position the ghost view
-      if (!this._ghostViewHidden) this._positionGhostView(evt);
-
-      if (evt.makeTouchResponder) {
-        // Should use invokeLater if I can figure it out
-        var self = this;
-        SC.Timer.schedule({
-          target: evt,
-          action: function () {
-            if (!evt.hasEnded) evt.makeTouchResponder(self, YES);
-          },
-          interval: 1
-        });
-      }
-      else {
-        // notify root responder that a drag is in process
-        this.ghostView.rootResponder.dragDidStart(this, evt);
-      }
+	    if (evt.makeTouchResponder) {
+	      // Should use invokeLater if I can figure it out
+	      var self = this;
+	      SC.Timer.schedule({
+	        target: evt,
+	        action: function() {
+	          if (!evt.hasEnded) evt.makeTouchResponder(self, YES);
+	        },
+	        interval: 1
+	      });
+	    }
+	    else {
+	      // notify root responder that a drag is in process
+	      this.ghostView.rootResponder.dragDidStart(this, evt) ;
+	    }
+		}
+    else {
+      SC.RootResponder.responder.dragDidStart(this, evt) ;
     }
 
-    var source = this.source;
-    if (source && source.dragDidBegin) source.dragDidBegin(this, loc);
+    var source = this.source ;
+    if (source && source.dragDidBegin) source.dragDidBegin(this, loc) ;
 
     // let all drop targets know that a drag has started
     var ary = this._dropTargets();
@@ -405,6 +405,43 @@ SC.Drag = SC.Object.extend(
 
       target.tryToPerform('dragStarted', this, evt);
     }
+  },
+
+  computeLocation: function(evt) {
+    var anchorView = this.get('anchorView'),
+        loc = { x: evt.pageX, y: evt.pageY };
+
+    if (anchorView) {
+        // Permet de prendre en compte le scroll
+      if (SC.none(this._initialScroll)) {
+        this._initialScroll = this.computeCurrentScrollOffsets();
+      }
+      var initialScroll = this._initialScroll,
+          currentScrollOffsets = this.computeCurrentScrollOffsets();
+
+      loc.x += currentScrollOffsets.x - initialScroll.x;
+      loc.y += currentScrollOffsets.y - initialScroll.y;
+    }
+
+    this.set('location', loc);
+
+    return loc;
+  },
+
+  computeCurrentScrollOffsets: function() {
+    var ret = { x: 0, y: 0 },
+        ary = this._scrollableViews(),
+        len = ary ? ary.length : 0,
+        target, frame, idx;
+
+    for (idx=0; idx<len; idx++) {
+      target = ary[idx] ;
+
+      ret.x += target.get('horizontalScrollOffset');
+      ret.y += target.get('verticalScrollOffset');
+    }
+
+    return ret;
   },
 
   /** @private
@@ -490,8 +527,8 @@ SC.Drag = SC.Object.extend(
     }
 
     // save the new location to avoid duplicate mouseDragged event processing
-    loc = { x: evt.pageX, y: evt.pageY };
-    this.set('location', loc);
+    loc = this.computeLocation(evt);
+
     this._lastMouseDraggedEvent = evt;
 
     // STEP 1: Determine the deepest drop target that allows an operation.
@@ -515,11 +552,15 @@ SC.Drag = SC.Object.extend(
         op = op & target.computeDragOperations(this, evt, op);
       } else op = SC.DRAG_NONE; // assume drops AREN'T allowed
 
-      this.allowedDragOperations = op;
+      op = this._computeDragOperationFor(evt, target);
 
       // if DRAG_NONE, then look for the next parent that is a drop zone
-      if (op === SC.DRAG_NONE) target = this._findNextDropTarget(target);
+      if (op === SC.DRAG_NONE) target = this._findNextDropTarget(evt) ;
     }
+
+    // We recompute the drag operation because if the while were stop because
+    // the last target was found, the op will be the one of the last target
+    this.allowedDragOperations = this._computeDragOperationFor(evt, target);
 
     // STEP 2: Refocus the drop target if needed
     if (target !== last) {
@@ -536,7 +577,7 @@ SC.Drag = SC.Object.extend(
     }
 
     // notify source that the drag moved
-    if (source && source.dragDidMove) source.dragDidMove(this, loc);
+    if (source && source.dragDidMove) source.dragDidMove(this, evt, loc);
 
     // reposition the ghostView
     if (this.get('sourceIsDraggable') && !this._ghostViewHidden) this._positionGhostView(evt);
@@ -553,22 +594,18 @@ SC.Drag = SC.Object.extend(
     executes the drop target protocol to try to complete the drag operation.
   */
   mouseUp: function (evt) {
-    var loc    = { x: evt.pageX, y: evt.pageY },
+    var loc    = this.computeLocation(evt),
         target = this._lastTarget,
         op     = this.allowedDragOperations;
 
-    this.set('location', loc);
-
     // try to have the drop target perform the drop...
-    try {
+
       if (target && target.acceptDragOperation && target.acceptDragOperation(this, op)) {
         op = target.performDragOperation ? target.performDragOperation(this, op) : SC.DRAG_NONE;
       } else {
         op = SC.DRAG_NONE;
       }
-    } catch (e) {
-      SC.Logger.error('Exception in SC.Drag.mouseUp(acceptDragOperation|performDragOperation): %@'.fmt(e));
-    }
+
 
     this.endDrag(evt, op);
   },
@@ -576,6 +613,27 @@ SC.Drag = SC.Object.extend(
   /** @private */
   touchEnd: function (evt) {
     this.mouseUp(evt);
+  },
+
+  /** @private
+    Returns the dragOperation for the specified target.
+  */
+  _computeDragOperationFor: function(evt, target){
+    var source = this.source,
+        op = SC.DRAG_NONE;
+
+    // make sure the drag source will permit a drop operation on the named
+    // target
+    if (target && source && source.dragSourceOperationMaskFor) {
+      op = source.dragSourceOperationMaskFor(this, target) ;
+    } else op = SC.DRAG_ANY ; // assume drops are allowed
+
+    // now, let's see if the target will accept the drag
+    if ((op !== SC.DRAG_NONE) && target && target.computeDragOperations) {
+      op = op & target.computeDragOperations(this, evt, op) ;
+    } else op = SC.DRAG_NONE ; // assume drops AREN'T allowed
+
+    return op;
   },
 
   /** @private
@@ -640,7 +698,14 @@ SC.Drag = SC.Object.extend(
       }
     });
 
-    view.append();  // add to window
+    var anchorView = this.get('anchorView');
+
+    if (anchorView) {
+      view.appendTo(anchorView.get('layer'));
+    }
+    else {
+      view.append();  // add to window
+    }
   },
 
   /** @private
@@ -802,12 +867,13 @@ SC.Drag = SC.Object.extend(
     This will search through the drop targets, looking for one in the target
     area.
   */
-  _findDropTarget: function (evt) {
+  _findDropTarget: function (evt, _idx) {
     var loc = { x: evt.pageX, y: evt.pageY };
 
     var target, frame;
     var ary = this._dropTargets();
-    for (var idx = 0, len = ary.length; idx < len; idx++) {
+    for (var idx=_idx || 0, len=ary.length; idx<len; idx++) {
+      this._idx = idx;
       target = ary[idx];
 
       // If the target is not visible, it is not valid.
@@ -826,13 +892,16 @@ SC.Drag = SC.Object.extend(
   /** @private
     Search the parent nodes of the target to find another view matching the
     drop target.  Returns null if no matching target is found.
+
+    Unlike the previous implementation, we don't search the parent nodes of the target
+    to find another view matching the drop target. Instead, we continue to loop through
+    the other drop targets. This way if the drop target we're looking for isn't a parent
+    of the first target found, we will still be able to find it.
+
+    Returns null if no matching target is found.
   */
-  _findNextDropTarget: function (target) {
-    var dropTargets = SC.Drag._dropTargets;
-    while ((target = target.get('parentView'))) {
-      if (dropTargets[SC.guidFor(target)]) return target;
-    }
-    return null;
+  _findNextDropTarget: function(evt) {
+    return this._findDropTarget(evt, this._idx+1);
   },
 
   // ............................................
@@ -939,11 +1008,10 @@ SC.Drag = SC.Object.extend(
 
     // STEP 3: Scroll!
     if (scrollableView && (hscroll || vscroll)) {
-      var scroll = {
-        x: hscroll * this._horizontalScrollAmount,
-        y: vscroll * this._verticalScrollAmount
-      };
-      scrollableView.scrollBy(scroll);
+      var x = hscroll * this._horizontalScrollAmount,
+        y = vscroll * this._verticalScrollAmount;
+
+      scrollableView.scrollBy(x, y);
     }
 
     // If a scrollable view was found, then check later

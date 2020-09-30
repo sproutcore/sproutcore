@@ -685,7 +685,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
 
     for (var i = 0, length = cv.length; i < length - 1; i++) {
       v = cv[i];
-      f = v.get('frame');
+      // bug si le segment est affiché masqué, puis rendu visible (exemple: segmentedview de la recherche avancé)
+      f = v.frame();
       dims[i] = isHorizontal ? f.width : f.height;
     }
 
@@ -702,7 +703,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
 
     v = cv.length && cv[cv.length - 1];
     if (v) {
-      f = v.get('frame');
+      f = v.frame();
       return isHorizontal ? f.width : f.height;
     }
 
@@ -1136,7 +1137,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
           value = value.without(childValue);
         }
       } else {
-        value = value.concat(childValue);
+        value = value.concat(childValue).uniq();
       }
     }
 
@@ -1165,6 +1166,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     if (action && resp) {
       resp.sendAction(action, this.get('target'), this, this.get('pane'), value);
     }
+
+    if (this.callOnValueChange) this.callOnValueChange(index);
   },
 
   /** @private
@@ -1253,7 +1256,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     return this.get('overflowViewClass').create({
       layout: { width: 200 },
       itemTitleKey: this.get('itemTitleKey'),
-      itemIconKey: this.get('itemIconKey'),
+      itemIconKey: this.get('itemIconOverflowKey')?this.get('itemIconOverflowKey'):this.get('itemIconKey'),
       itemIsEnabledKey: this.get('itemIsEnabledKey'),
       itemKeyEquivalentKey: this.get('itemKeyEquivalentKey'),
       itemCheckboxKey: 'isChecked',
@@ -1272,8 +1275,10 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   cleanupOverflowMenu: function(menu) {
     menu.removeObserver('selectedItem', this, 'selectOverflowItem');
 
-    this.activeChildView.set('isActive', NO);
-    this.activeChildView = null;
+    if (this.activeChildView) {
+      this.activeChildView.set('isActive', NO);
+      this.activeChildView = null;
+    }
   },
 
   /** @private

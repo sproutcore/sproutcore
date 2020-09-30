@@ -855,8 +855,9 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                           var values = this.rightSide.evaluate(r,w);
                           var found  = false;
                           var i      = 0;
-                          while ( found===false && i<values.length ) {
-                            if ( prop == values[i] ) found = true;
+                          if (values === null) return false;
+                          while (found === false && i < values.length) {
+                            if (prop === values[i]) found = true;
                             i++;
                           }
                           return found;
@@ -1649,4 +1650,3 @@ SC.Query.registerQueryExtension = function(tokenName, token) {
 
 // shorthand
 SC.Q = SC.Query.from ;
-

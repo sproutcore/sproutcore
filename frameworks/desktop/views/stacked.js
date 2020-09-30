@@ -23,9 +23,6 @@ sc_require('views/collection');
   layout your views will probably overlay on top of each other and will look
   incorrect.
 
-  Note also that the default layout for this view set's the height to "auto".
-  This is usually the behavior you will want.
-
   @extends SC.CollectionView
   @since SproutCore 0.9
 */
@@ -41,13 +38,25 @@ SC.StackedView = SC.CollectionView.extend(
 
   /**
     Default layout for a stacked view will fill the parent view but auto-
-    adjust the height of the view.
+    adjust the height or width of the view.
 
     @type Hash
-    @default `{ top: 0, left: 0, right: 0, height: 1 }`
+    @default `{ top: 0, left: 0 }`
     @see SC.View#layout
   */
   layout: { top: 0, left: 0, right: 0, height: 1 },
+
+  /**
+    Determines the layout direction of the rows of items, either vertically or
+    horizontally. Possible values:
+
+      - SC.LAYOUT_HORIZONTAL
+      - SC.LAYOUT_VERTICAL
+
+    @type String
+    @default SC.LAYOUT_VERTICAL
+  */
+  layoutDirection: SC.LAYOUT_VERTICAL,
 
   /**
     Return full range of its indexes for nowShowing
@@ -60,24 +69,24 @@ SC.StackedView = SC.CollectionView.extend(
   },
 
   /**
-    Updates the height of the stacked view to reflect the current content of
+    Updates the size of the stacked view to reflect the current content of
     the view.  This is called automatically whenever an item view is reloaded.
-    You can also call this method directly if the height of one of your views
+    You can also call this method directly if the size of one of your views
     has changed.
 
-    The height will be recomputed based on the actual location and dimensions
+    The size will be recomputed based on the actual location and dimensions
     of the last child view.
 
-    Note that normally this method will defer actually updating the height
+    Note that normally this method will defer actually updating the size
     of the view until the end of the run loop.  You can force an immediate
     update by passing YES to the "immediately" parameter.
 
     @param {Boolean} immediately YES to update immediately
     @returns {SC.StackedView} receiver
   */
-  updateHeight: function (immediately) {
-    if (immediately) this._updateHeight();
-    else this.invokeLast(this._updateHeight);
+  updateSize: function (immediately) {
+    if (immediately) this._updateSize();
+    else this.invokeLast(this._updateSize);
     // ^ use invokeLast() here because we need to wait until all rendering has
     //   completed.
 
@@ -85,22 +94,25 @@ SC.StackedView = SC.CollectionView.extend(
   },
 
   /** @private */
-  _updateHeight: function () {
+  _updateSize: function () {
 
-    var childViews = this.get('childViews'),
-        len        = childViews.get('length'),
-        view, layer, height;
+    var layoutDirection = this.get('layoutDirection'),
+      sizeKey = layoutDirection === SC.LAYOUT_VERTICAL ? 'Height' : 'Width',
+      offsetKey = layoutDirection === SC.LAYOUT_VERTICAL ? 'Top' : 'Left',
+      childViews = this.get('childViews'),
+      len = childViews.get('length'),
+      view, layer, size;
 
     if (len === 0) {
-      height = 1;
+      size = 1;
     } else {
       view = childViews.objectAt(len - 1);
       layer = view ? view.get('layer') : null;
-      height = layer ? (layer.offsetTop + layer.offsetHeight) : 1;
+      size = layer ? (layer['offset'+offsetKey] + layer['offset'+sizeKey]) : 1;
       layer = null; // avoid memory leaks
     }
-    this.adjust('minHeight', height);
-    this.set('calculatedHeight', height);
+    this.adjust('min'+sizeKey, size);
+    this.set('calculated'+sizeKey, size);
   },
 
   // ..........................................................
@@ -114,13 +126,13 @@ SC.StackedView = SC.CollectionView.extend(
   reloadIfNeeded: function () {
     sc_super();
 
-    return this.updateHeight();
+    return this.updateSize();
   },
 
   /** @private
-    When layer is first created, make sure we update the height using the
+    When layer is first created, make sure we update the size using the
     newly calculated value.
   */
-  didCreateLayer: function () { return this.updateHeight(); }
+  didCreateLayer: function () { return this.updateSize(); }
 
 });

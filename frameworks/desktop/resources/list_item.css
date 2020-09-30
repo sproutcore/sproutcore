@@ -62,6 +62,8 @@
   }
   .sc-outline .icon {
   	left: 5px;
+  	width: 20px;
+    display: inline-block;
   }
   .sc-outline .right-icon {
     right: 5px;

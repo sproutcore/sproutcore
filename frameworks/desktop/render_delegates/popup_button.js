@@ -16,6 +16,9 @@ SC.BaseTheme.popupButtonRenderDelegate = SC.BaseTheme.buttonRenderDelegate.creat
   },
 
   update: function(dataSource, jQuery) {
+    var maxWidth = dataSource.get('layout').maxWidth;
+    if (maxWidth) jQuery.find('.sc-button-label').css({ maxWidth: maxWidth-20 });
+
     sc_super();
   }
 });

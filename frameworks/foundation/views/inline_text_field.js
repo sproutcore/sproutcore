@@ -197,6 +197,9 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
   * @params {element} the dom element to copy
   */
 	updateStyle: function(exampleElement) {
+    // Arrive si on est en train d'éditer un mode de paiement, puis qu'on en cré un autre
+    if (!exampleElement) return;
+
     if(exampleElement.length) exampleElement = exampleElement[0];
 
     // the styles are placed into a style element so that they can be overridden
@@ -257,7 +260,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
 
     // In case where the label is part of an SC.ListItemView
     if (exampleFrame && elem) {
-      var frame = SC.offset(elem, 'parent');
+      var frame = SC.offset(elem, target.get('layer'));
 
       layout.top = targetLayout.top + frame.y;
       layout.left = targetLayout.left + frame.x;
@@ -376,6 +379,19 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
   touchStart: function(e){
     this.mouseDown(e);
   },
+
+  /** @private */
+  keyDown: function(evt) {
+    var ret = this.interpretKeyEvents(evt) ;
+    if (!ret) evt.allowDefault();
+    this.fieldValueDidChange(true);
+    return !!ret;
+  },
+
+  /** @private */
+  insertText: null,
+
+  //keyUp: function() { return true; },
 
   _scitf_blurInput: function() {
     var el = this.$input()[0];

@@ -215,6 +215,8 @@ SC.RadioView = SC.View.extend(SC.Control,
   */
   itemIconKey: null,
 
+  allowsMultipleSelection: false,
+
   /**  @private
     Invoked whenever the item array or an item in the array is changed.
     This method will regenerate the list of items.
@@ -248,6 +250,7 @@ SC.RadioView = SC.View.extend(SC.Control,
         ariaLabelKey = this.get('itemAriaLabelKey'),
         ret = this._displayItems || [], max = (items)? items.get('length') : 0,
         item, title, width, value, idx, isEnabled, icon, sel, active,
+        checkGuid = false,
         ariaLabeledBy, ariaLabel;
 
     for(idx=0;idx<max;idx++) {
@@ -272,7 +275,15 @@ SC.RadioView = SC.View.extend(SC.Control,
 
         if (valueKey) {
           value = item.get ? item.get(valueKey) : item[valueKey];
-        } else value = item;
+        } else {
+          // afin que l'on puisse utiliser des records sans ce soucier si le record est nested ou pas
+          value = item;
+          
+          var guidValue = item?item.get('guid'):item;
+          var guidViewValue = viewValue && viewValue.isRecord ? viewValue.get('guid') : viewValue;
+          
+          checkGuid = true;
+        }
 
         if (isEnabledKey) {
           isEnabled = item.get ? item.get(isEnabledKey) : item[isEnabledKey];
@@ -313,8 +324,10 @@ SC.RadioView = SC.View.extend(SC.Control,
         width: width,
         value: value,
 
+        allowsMultipleSelection: this.get('allowsMultipleSelection'), 
+
         isEnabled: isEnabled,
-        isSelected: (isArray && viewValue.indexOf(value) >= 0 && viewValue.length === 1) || (viewValue === value),
+        isSelected: (checkGuid && guidValue === guidViewValue) || (isArray && viewValue.indexOf(value) >= 0 && viewValue.length === 1) || (viewValue === value),
         isMixed: (isArray && viewValue.indexOf(value) >= 0),
         isActive: this._activeRadioButton === idx,
         theme: this.get('theme'),
@@ -379,11 +392,30 @@ SC.RadioView = SC.View.extend(SC.Control,
     this._activeRadioButton = undefined;
 
     if (index !== undefined) {
-      var item = this.get('displayItems')[index];
-      if (item.get('isEnabled')) {
-        item.set('isActive', NO);
+      var item = displayItems[index];
+
+      if (item && item.get('isEnabled')) {
+        item.set('isActive', false);
         delegate.updateRadioAtIndex(proxy, elem, index);
-        this.set('value', item.value);
+
+        if (this.get('allowsMultipleSelection')) {
+          var value = this.get('value');
+          // If multiple selection is allow, make sure value is an array
+          // We use SC.A to make sure the controller is notify that the value change
+          value = SC.isArray(value)?SC.A(value):SC.makeArray(value);
+
+          if (value.get('length') > 0 && jQuery.inArray(item.value, value) !== -1) {
+            value.removeObject(item.value);
+          }
+          else {
+            value.pushObject(item.value);
+          }
+
+          this.set('value', value);
+        }
+        else {
+          this.set('value', item.value);
+        }
       }
     }
 

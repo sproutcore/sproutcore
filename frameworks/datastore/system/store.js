@@ -671,8 +671,18 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
       } else if (status & SC.Record.BUSY) {
         // make sure nested store does not have any changes before resetting
-        if(store.get('hasChanges')) K.CHAIN_CONFLICT_ERROR.throw();
-        store.reset();
+        if (store.get('hasChanges')) {
+          SC.Logger.error('SC.store#_notifyRecordPropertyChange store:'+store+' - storeKey:'+storeKey+' - key:'+key+' - statusOnly:'+statusOnly+' - status:'+status);
+          /*
+          UPDATE: if there is changes, we just ignore them...
+          // we check that the record is not busy destroy. Sinon, erreur si transforme un recu d'acompte avec contact en facture, puis masque les recu d'acompte, puis reload et supprime la facture.
+          if (status !== SC.Record.BUSY_DESTROYING) {
+            SC.$throw("Nested Store has changes");
+          }
+          */
+        }
+
+        //store.reset();
       }
     }
 
@@ -980,9 +990,12 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     }
   },
 
+  findForRelatedRecord: function (recordType, id, relatedRecord) {
+    return this._findRecord(recordType, id, relatedRecord);
+  },
+
   /** @private */
   _findQuery: function(query, createIfNeeded, refreshIfNew) {
-
     // lookup the local RecordArray for this query.
     var cache = this._scst_recordArraysByQuery,
         key   = SC.guidFor(query),
@@ -1007,7 +1020,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
 
   /** @private */
-  _findRecord: function(recordType, id) {
+  _findRecord: function(recordType, id, relatedRecord) {
 
     var storeKey ;
 
@@ -1021,8 +1034,25 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // as well.
     } else storeKey = id ? recordType.storeKeyFor(id) : null;
 
-    if (storeKey && (this.peekStatus(storeKey) === SC.Record.EMPTY)) {
-      storeKey = this.retrieveRecord(recordType, id);
+    if (storeKey) {
+      var status = this.peekStatus(storeKey);
+
+      if (status === SC.Record.EMPTY || status === SC.Record.BUSY_LOADING) {
+        if (relatedRecord) {
+          SC.Store.addRelatedRecordToNotify(this, recordType, id, relatedRecord);
+        }
+
+        if (status === SC.Record.EMPTY) {
+          var callback = null;
+          if (relatedRecord) {
+            callback = function () {
+              SC.Store.notifyRelatedRecords(recordType, id);
+            };
+          }
+
+          storeKey = this.retrieveRecord(recordType, id, null, null, callback);
+        }
+      }
     }
 
     // now we have the storeKey, materialize the record and return it.
@@ -1378,7 +1408,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     // remove the data hash, set the new status and remove the cached record.
     this.removeDataHash(storeKey, status);
-    this.dataHashDidChange(storeKey);
+
+    // Notifier que l'on décharger un record et unutile et performance killer
+    //this.dataHashDidChange(storeKey);
     delete this.records[storeKey];
 
     // If this record is a parent record, unregister all of its child records.
@@ -1904,7 +1936,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         if (queue[key] && !queue[key].completed) allFinished = false;
       });
       if (allFinished) {
-        if (SC.typeOf(callback.callback) === SC.T_ARRAY) {
+        if (SC.typeOf(callback.callback) === SC.T_ARRAY) {
           //@if(debug)
           SC.warn("Developer Warning: callbacks array has been deprecated in favor of a single callback function.");
           //@endif
@@ -3095,6 +3127,50 @@ SC.Store.mixin(/** @scope SC.Store.prototype */{
   replaceRecordTypeFor: function(storeKey, recordType) {
     this.recordTypesByStoreKey[storeKey] = recordType;
     return this ;
+  },
+
+  /** @private */
+  _relatedRecordToNotify: {},
+
+  /** @private */
+  addRelatedRecordToNotify: function(store, recordType, id, relatedRecord) {
+    var set = this._relatedRecordToNotify,
+      key = recordType+id,
+      obj = set[key];
+
+    if (obj) {
+      obj.recs.add(relatedRecord);
+    }
+    else {
+      set[key] = { store: store, recs: SC.Set.create().add(relatedRecord) };
+    }
+  },
+
+  /** @private */
+  notifyRelatedRecords: function(recordType, id, propertyName) {
+    var key = recordType+id,
+      obj = this._relatedRecordToNotify[key];
+    if (!obj) return;
+
+    var store = obj.store;
+
+    obj.recs.forEach(function(rec) {
+      if (propertyName) {
+        rec.notifyPropertyChange(propertyName);
+      }
+      else {
+        var recType = store.recordTypeFor(rec.storeKey);
+        for(var key in recType.prototype) {
+          var attr = recType.prototype[key];
+
+          if (attr && attr.type === recordType._object_className) {
+            rec.notifyPropertyChange(key);
+          }
+        }
+      }
+    }, this);
+
+    delete this._relatedRecordToNotify[key];
   }
 
 });

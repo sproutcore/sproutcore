@@ -69,23 +69,32 @@ SC.BaseTheme.canvasImageRenderDelegate = SC.RenderDelegate.create({
       dataSource.renderState._last_class = value;
     }
 
+    context = context.begin('canvas');
+
     context.setAttr('width', width);
     context.setAttr('height', height);
+
+    // Adjust the layout of the img
+    context.addStyle(this.imageStyles(dataSource));
+
+    context = context.end();
   },
 
   update: function (dataSource, jquery) {
-    var elem = jquery[0],
-        image = dataSource.get('image'),
-        frame = dataSource.get('frame'),
-        frameWidth = frame.width,
-        frameHeight = frame.height,
-        innerFrame = dataSource.get('innerFrame'),
-        backgroundColor = dataSource.get('backgroundColor'),
-        renderState = dataSource.get('renderState'),
-        context,
-        lastClass = dataSource.renderState._last_class,
-        type = dataSource.get('type') || SC.IMAGE_TYPE_URL,
-        value = dataSource.get('value');
+    var $canvas = jquery.find('canvas'),
+      elem = $canvas[0],
+      image = dataSource.get('image'),
+      frame = dataSource.get('frame'),
+      dpr = window.devicePixelRatio || 1,
+      frameWidth = frame.width*dpr,
+      frameHeight = frame.height*dpr,
+      innerFrame = dataSource.get('innerFrame'),
+      backgroundColor = dataSource.get('backgroundColor'),
+      renderState = dataSource.get('renderState'),
+      canvas,
+      lastClass = dataSource.renderState._last_class,
+      type = dataSource.get('type') || SC.IMAGE_TYPE_URL,
+      value = dataSource.get('value');
 
     // Support for CSS sprites
     if (lastClass) jquery.removeClass(lastClass);
@@ -93,10 +102,10 @@ SC.BaseTheme.canvasImageRenderDelegate = SC.RenderDelegate.create({
       jquery.addClass(value);
       dataSource.renderState._last_class = value;
 
-      // Clear the context in case there was a URL previously
+      // Clear the canvas in case there was a URL previously
       if (elem && elem.getContext) {
-        context = elem.getContext('2d');
-        context.clearRect(0, 0, frameWidth, frameHeight);
+        canvas = elem.getContext('2d');
+        canvas.clearRect(0, 0, frameWidth, frameHeight);
       }
     } else {
 
@@ -112,17 +121,16 @@ SC.BaseTheme.canvasImageRenderDelegate = SC.RenderDelegate.create({
           elem.height = frameHeight;
           elem.width = frameWidth;
 
-          context = elem.getContext('2d');
-
-          context.clearRect(0, 0, frameWidth, frameHeight);
+          canvas = elem.getContext('2d');
+          canvas.clearRect(0, 0, frameWidth, frameHeight);
 
           if (backgroundColor) {
-            context.fillStyle = backgroundColor;
-            context.fillRect(0, 0, frameWidth, frameHeight);
+            canvas.fillStyle = backgroundColor;
+            canvas.fillRect(0, 0, frameWidth, frameHeight);
           }
 
           if (image && image.complete) {
-            context.drawImage(image, Math.floor(innerFrame.x), Math.floor(innerFrame.y), Math.floor(innerFrame.width), Math.floor(innerFrame.height));
+            canvas.drawImage(image, innerFrame.x, innerFrame.y, innerFrame.width*dpr, innerFrame.height*dpr);
           }
         }
 
@@ -132,6 +140,18 @@ SC.BaseTheme.canvasImageRenderDelegate = SC.RenderDelegate.create({
         renderState._lastImageComplete = image && image.complete;
       }
     }
+
+    $canvas.css(this.imageStyles(dataSource));
+  },
+
+  imageStyles: function (dataSource) {
+    return {
+      position: 'absolute',
+      left: 0,
+      top: 0,
+      width: '100%',
+      height: '100%',
+    };
   }
 
 });

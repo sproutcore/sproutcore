@@ -353,9 +353,9 @@ SC.View.reopen(
       if (!hash.hasOwnProperty(property) || !SC.ANIMATABLE_PROPERTIES[property]) {
 
         //@if(debug)
-        if (!SC.ANIMATABLE_PROPERTIES[property]) {
-          SC.warn("Developer Warning: The property `%@` is not animatable using SC.View:animate().".fmt(property));
-        }
+        // if (!SC.ANIMATABLE_PROPERTIES[property]) {
+        //   SC.warn("Developer Warning: The property `%@` is not animatable using SC.View:animate().".fmt(property));
+        // }
         //@endif
         continue;
       }

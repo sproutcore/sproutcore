@@ -244,6 +244,9 @@ SC.PickerPane = SC.PalettePane.extend(
   _sc_didUsePopup: false,
   //@endif
 
+  //transitionIn: SC.View.POP_IN,
+  //transitionOut: SC.View.SCALE_OUT,
+
   /**
     @type Array
     @default ['sc-picker']
@@ -563,12 +566,11 @@ SC.PickerPane = SC.PalettePane.extend(
     @returns {SC.PickerPane} receiver
   */
   popup: function (anchorViewOrElement, preferType, preferMatrix, pointerOffset) {
-    this.beginPropertyChanges();
     this.setIfChanged('anchorElement', anchorViewOrElement);
-    if (preferType) { this.set('preferType', preferType); }
-    if (preferMatrix) { this.set('preferMatrix', preferMatrix); }
-    if (pointerOffset) { this.set('pointerOffset', pointerOffset); }
-    this.endPropertyChanges();
+    if (preferType) this.set('preferType', preferType);
+    if (preferMatrix) this.set('preferMatrix', preferMatrix);
+    if (pointerOffset) this.set('pointerOffset', pointerOffset);
+
     this.positionPane();
     this._hideOverflow();
 
@@ -735,9 +737,19 @@ SC.PickerPane = SC.PalettePane.extend(
   computeAnchorRect: function (anchor) {
     var bounding, ret, cq,
         wsize = SC.RootResponder.responder.computeWindowSize();
+
+    // If the anchor is an event
+    if (anchor.pageX) {
+      ret = {
+        x:      anchor.pageX,
+        y:      anchor.pageY,
+        width:  10,
+        height: 10
+      };
+    }
     // Some browsers natively implement getBoundingClientRect, so if it's
     // available we'll use it for speed.
-    if (anchor.getBoundingClientRect) {
+    else if (anchor.getBoundingClientRect) {
       // Webkit and Firefox 3.5 will get everything they need by
       // calling getBoundingClientRect()
       bounding = anchor.getBoundingClientRect();
@@ -801,7 +813,7 @@ SC.PickerPane = SC.PalettePane.extend(
       switch (preferType) {
       case SC.PICKER_MENU:
         // apply menu re-position rule
-        frame = this.fitPositionToScreenMenu(windowFrame, frame, this.get('isSubMenu'));
+        frame = this.fitPositionToScreenMenu(windowFrame, frame, anchorFrame, this.get('isSubMenu'));
         break;
       case SC.PICKER_MENU_POINTER:
         this.setupPointer(anchorFrame);
@@ -878,8 +890,9 @@ SC.PickerPane = SC.PalettePane.extend(
     If the menu is a submenu, we also want to reposition the pane to the left
     of the parent menu if it would otherwise exceed the width of the viewport.
   */
-  fitPositionToScreenMenu: function (windowFrame, frame, subMenu) {
-    var windowPadding = this.get('windowPadding');
+  fitPositionToScreenMenu: function (windowFrame, frame, anchorFrame, subMenu) {
+    var windowPadding = this.get('windowPadding'),
+      preferMatrix = this.get('preferMatrix');
 
     // Set up init location for submenu
     if (subMenu) {
@@ -897,7 +910,7 @@ SC.PickerPane = SC.PalettePane.extend(
     if ((frame.x + frame.width + windowPadding) > windowFrame.width) {
       if (subMenu) {
         // Submenus should be re-anchored to the left of the parent menu
-        frame.x = frame.x - (frame.width * 2);
+        frame.x = frame.x - (anchorFrame.width + frame.width) + (this.get('submenuOffsetX') * 2);
       } else {
         // Otherwise, just shift the pane windowPadding pixels from the right edge
         frame.x = windowFrame.width - frame.width - windowPadding;
@@ -911,7 +924,7 @@ SC.PickerPane = SC.PalettePane.extend(
 
     // If the height of the menu is bigger than the window height, shift it upward.
     if (frame.y + frame.height + windowPadding > windowFrame.height) {
-      frame.y = Math.max(windowPadding, windowFrame.height - frame.height - windowPadding);
+      frame.y = Math.max(windowPadding, windowFrame.height - frame.height - anchorFrame.height);
     }
 
     // If the height of the menu is still bigger than the window height, resize it.
@@ -1115,11 +1128,24 @@ SC.PickerPane = SC.PalettePane.extend(
     // If no arrangement was found to fit, then use the fall back preferred type.
     if (i === pointerLen) {
       if (matrix[4] === -1) {
-        frame.x = anchorFrame.x + anchorFrame.halfWidth;
-        frame.y = anchorFrame.y + anchorFrame.halfHeight - frame.halfHeight;
+        var windowPadding = this.get('windowPadding'),
+          ws = SC.RootResponder.responder.get('currentWindowSize'),
+          maxWidth = windowFrame.width - anchorFrame.x - frame.width - windowPadding;
 
-        this.set('pointerPos', this._sc_pointerLayout[0] + ' fallback');
-        this.set('pointerPosY', frame.halfHeight - 40);
+        frame.x = anchorFrame.x + (maxWidth < anchorFrame.halfWidth ? maxWidth : anchorFrame.halfWidth);
+
+        if (anchorFrame.y < ws.height/2) { // if the anchor is in the top part
+          frame.y = windowPadding;
+        }
+        else {
+          frame.y = ws.height - frame.height - windowPadding;
+        }
+
+        this.set('pointerPos', this._sc_pointerLayout[0]);
+        this.set('pointerPosY', anchorFrame.y - (frame.y + frame.halfHeight)+15);
+
+        // Needed in the case the pointerPos changed to re-render it
+        this.invokeLast(function() { this.notifyPropertyChange('pointerPos'); });
       } else {
         frame.x = topLefts[matrix[4]][0];
         frame.y = topLefts[matrix[4]][1];
@@ -1263,6 +1289,8 @@ SC.PickerPane = SC.PalettePane.extend(
 
   /** @private */
   mouseDown: function (evt) {
+    // Utile pour la toolbar de wysiwyg du site
+    if (!this.isAnchored && !this.isModal) return sc_super();
     return this.modalPaneDidClick(evt);
   },
 

@@ -361,7 +361,8 @@ SC.State = SC.Object.extend(
 
       if (SC.kindOf(value, SC.State) && value.isClass && this[key] !== this.constructor) {
         state = this._addSubstate(key, value);
-        if (key === initialSubstate) {
+        // Utile pour compteVente state car initialSubstate représente le state est pas la key
+        if (key === initialSubstate || value === initialSubstate) {
           this.set('initialSubstate', state);
           matchedInitialSubstate = YES;
         } else if (historyState && historyState.get('defaultState') === key) {
@@ -1222,6 +1223,7 @@ SC.State = SC.Object.extend(
   */
   stateWillBecomeEntered: function(context) {
     this._isEnteringState = YES;
+    this._setupAllStateObserveHandlers();
   },
 
   /**
@@ -1234,7 +1236,6 @@ SC.State = SC.Object.extend(
     @see #enterState
   */
   stateDidBecomeEntered: function(context) {
-    this._setupAllStateObserveHandlers();
     this._isEnteringState = NO;
   },
 

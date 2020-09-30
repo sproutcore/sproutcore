@@ -514,6 +514,8 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     this._toRoot = this._toTarget = null;
     this._fromRoot = this._fromTarget = null;
     this._toObserverData = this._fromObserverData = null;
+
+    this.removePropertyObservers();
   },
 
   /** @private
@@ -614,7 +616,8 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     should be called just before using this._bindingValue.
   */
   _computeBindingValue: function () {
-    var source = this._bindingSource,
+    var that = this,
+        source = this._bindingSource,
         key    = this._bindingKey,
         v;
 
@@ -634,10 +637,11 @@ SC.Binding = /** @scope SC.Binding.prototype */{
         transform;
 
     if (transforms) {
+      var isForward = this.isForward();
       len = transforms.length;
       for (idx = 0; idx < len; idx++) {
         transform = transforms[idx];
-        value = transform(value, this);
+        value = transform(value, isForward, this);
       }
     }
 
@@ -713,6 +717,8 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     binding value from one side to the other.
   */
   applyBindingValue: function () {
+    if (this.isDestroyed) return;
+    
     // compute the binding targets if needed.
     this._computeBindingTargets();
     this._computeBindingValue();
@@ -732,8 +738,11 @@ SC.Binding = /** @scope SC.Binding.prototype */{
       if (log) SC.Logger.log("%@: %@ -> %@".fmt(this, v, tv));
       if (bench) SC.Benchmark.start(this.toString() + "->");
       //@endif
-
-      this._fromTarget.setPathIfChanged(this._fromPropertyKey, v);
+      if (this.isForward()) {
+        this._fromTarget.setPathIfChanged(this._fromPropertyKey, v);
+      } else {
+        this._fromTarget.setPathIfChanged(this._fromPropertyKey, tv);
+      }
 
       //@if(debug)
       if (bench) SC.Benchmark.end(this.toString() + "->");
@@ -748,7 +757,11 @@ SC.Binding = /** @scope SC.Binding.prototype */{
       if (bench) SC.Benchmark.start(this.toString() + "<-");
       //@endif
 
-      this._toTarget.setPathIfChanged(this._toPropertyKey, tv);
+      if (this.isForward()) {
+        this._toTarget.setPathIfChanged(this._toPropertyKey, tv);
+      } else {
+        this._toTarget.setPathIfChanged(this._toPropertyKey, v);
+      }
 
       //@if(debug)
       if (bench) SC.Benchmark.start(this.toString() + "<-");
@@ -810,11 +823,11 @@ SC.Binding = /** @scope SC.Binding.prototype */{
 
       // get the new value
       v = target.getPath(key);
-      tv = this._computeTransformedValue(v);
+      // tv = this._computeTransformedValue(v); is not compatible with isForward
 
       // if the new value is different from the current binding value, then
       // schedule to register an update.
-      if (v !== this._bindingValue || tv !== this._transformedBindingValue || key === '[]') {
+      if (v !== this._bindingValue || key === '[]') {
         this._setBindingValue(target, key);
         SC.Binding._changeQueue.add(this); // save for later.
       }
@@ -877,6 +890,19 @@ SC.Binding = /** @scope SC.Binding.prototype */{
   // -------------------------------
   // Helper Methods
   //
+
+  /**
+    Returns the direction of the binding.  If isForward is YES, then the value   
+    being passed came from the "from" side of the binding (i.e. the "Binding.path" 
+    you named).  If isForward is NO, then the value came from the "to" side (i.e. 
+    the property you named with "propertyBinding").  You can vary your transform 
+    behavior if you are based on the direction of the change.
+    
+    @returns {Boolean}
+  */
+  isForward: function() {
+    return this._fromTarget === this._bindingSource;
+  },
 
   /**
     Configures the binding as one way.  A one-way binding will relay changes
@@ -1478,6 +1504,30 @@ SC.Binding = /** @scope SC.Binding.prototype */{
     return this._sc_mixImpl(paths, arguments[len]);
   },
 
+  add: function () {
+    // Fast copy.
+    var len = arguments.length,
+        paths = new Array(len);
+    for (var i = 0; i < len; i++) { paths[i] = arguments[i]; }
+
+    // Create a new mix implementation for the OR function.
+    return this._sc_mixImpl( paths, function() {
+      var result = 0;
+      for (i = 0; !result && (i < arguments.length); i++) { // Bails early if any value is true.
+        result += arguments[i];
+      }
+
+      return result;
+    });
+  },
+  
+  isNull: function (fromPath) {
+    return this.from(fromPath).oneWay().transform(function (v) {
+      var t = SC.typeOf(v);
+      return (t === SC.T_ERROR) ? v : SC.none(v);
+    });
+  },
+
   /**
     Adds a transform that will return YES if the value is equal to equalValue, NO otherwise.
 
@@ -1511,6 +1561,36 @@ SC.Binding = /** @scope SC.Binding.prototype */{
 
     var oneWay = this._oneWay ? '[oneWay]' : '';
     return "SC.Binding%@(%@ -> %@)%@".fmt(SC.guidFor(this), from, to, oneWay);
+  },
+
+
+  addPropertyObserver: function(target, property, markAsDefined) {
+    if (!property || this._didSetPropertyObservers) return;
+    if (!this._propertiesObserved) this._propertiesObserved = [];
+
+    target.addObserver(property, this, 'recomputeBinding');
+
+    this._propertiesObserved.push({ target: target, property: property });
+
+    if (markAsDefined !== false) this._didSetPropertyObservers = true;
+  },
+
+  recomputeBinding: function() {
+    SC.Binding._changeQueue.add(this);
+  },
+  
+
+  removePropertyObservers: function() {
+    if (this._propertiesObserved) {
+      this._propertiesObserved.forEach(function(propertyObserved) {
+        propertyObserved.target.removeObserver(propertyObserved.property, this, 'recomputeBinding');
+
+        // Not sure this is useful
+        propertyObserved.target = propertyObserved.property = null;
+      }, this); 
+
+      this._didSetPropertyObservers = this._propertiesObserved = null;
+    }
   }
 };
 

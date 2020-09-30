@@ -998,7 +998,7 @@ SC.CoreView.reopen(
       // Add some debugging only warnings for if the view statechart code is being improperly used.
       // Telling the view to show when it is already visible isn't correct:
       // ATTACHED_SHOWN, ATTACHED_SHOWN_ANIMATING, ATTACHED_SHOWING, ATTACHED_HIDDEN_BY_PARENT, ATTACHED_BUILDING_IN, ATTACHED_BUILDING_OUT_BY_PARENT, ATTACHED_BUILDING_OUT
-      SC.warn("Core Developer Warning: Found invalid state for view, %@, in _doShow".fmt(this));
+      //SC.warn("Core Developer Warning: Found invalid state for view, %@, in _doShow".fmt(this));
       //@endif
 
       shouldHandle = false;
@@ -1086,15 +1086,17 @@ SC.CoreView.reopen(
       this._executeDoDetach();
     } else if (state === SC.CoreView.ATTACHED_BUILDING_OUT_BY_PARENT) {
       var owningView = this._owningView;
-      // We can't clean up the transition until the parent is done.  For
-      // example, a fast child build out inside of a slow parent build out.
-      owningView._sc_buildOutCount--;
+      if (owningView) {
+        // We can't clean up the transition until the parent is done.  For
+        // example, a fast child build out inside of a slow parent build out.
+        owningView._sc_buildOutCount--;
 
-      if (owningView._sc_buildOutCount === 0) {
-        owningView._executeDoDetach();
+        if (owningView._sc_buildOutCount === 0) {
+          owningView._executeDoDetach();
 
-        // Clean up.
-        this._owningView = null;
+          // Clean up.
+          this._owningView = null;
+        }
       }
     } else if (state === SC.CoreView.ATTACHED_HIDING) {
       this._teardownTransition();

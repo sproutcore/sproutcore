@@ -59,11 +59,6 @@ SC.ImageView = SC.View.extend(SC.Control, SC.InnerFrame,
     return (this.get('useCanvas') ? 'canvasImage' : 'image') + "RenderDelegate";
   }.property('useCanvas').cacheable(),
 
-  /** @private */
-  tagName: function () {
-    return this.get('useCanvas') ? 'canvas' : 'div';
-  }.property('useCanvas').cacheable(),
-
 
   // ..........................................................
   // Properties

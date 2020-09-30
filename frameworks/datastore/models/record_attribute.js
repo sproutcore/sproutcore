@@ -134,6 +134,20 @@ SC.RecordAttribute = SC.Object.extend(
   */
   aggregate: NO,
 
+  /**
+    Can only be used for toOne or toMany relationship attributes. If YES,
+    this flag will notify any related objects when a property of this 
+    record changes.
+
+    Useful when you want a computed property observing on a toOne or toMany
+    relationship, and you want it to be recomputed when a property of
+    the relationship has changed.
+
+    @type Boolean
+    @default NO
+  */
+  aggregatePropertyChanges: NO,
+
 
   /**
     Can only be used for toOne or toMany relationship attributes. If YES,
@@ -482,7 +496,17 @@ SC.RecordAttribute.registerTransform(SC.Record, {
   to: function(id, attr, recordType, parentRecord) {
     var store = parentRecord.get('store');
     if (SC.none(id) || (id==="")) return null;
-    else return store.find(recordType, id);
+    else {
+      var rec = store.findForRelatedRecord(recordType, id, parentRecord);
+      
+      if (rec && !rec.get('isLoaded')) {
+        rec.addChangeCallback(function() {
+          parentRecord.notifyPropertyChange(attr);
+        });
+      }
+
+      return rec;
+    }
   },
 
   /** @private - convert a record instance to a record id */
@@ -495,8 +519,16 @@ SC.RecordAttribute.registerTransform(SC.T_FUNCTION, {
   /** @private - convert a record id to a record instance */
   to: function(id, attr, recordType, parentRecord) {
     recordType = recordType.apply(parentRecord);
-    var store = parentRecord.get('store');
-    return store.find(recordType, id);
+    var store = parentRecord.get('store'),
+      rec = store.find(recordType, id);
+    
+    // @if (debug)
+    if (rec && !rec.get('isLoaded')) {
+      throw new Error('The record is not loaded. We should add a `addChangeCallback`');
+    }
+    // @endif
+
+    return rec;
   },
 
   /** @private - convert a record instance to a record id */
@@ -607,7 +639,7 @@ if (SC.DateTime && !SC.RecordAttribute.transforms[SC.guidFor(SC.DateTime)]) {
       Convert a DateTime to a String
     */
     from: function(dt, attr) {
-      if (SC.none(dt)) return dt;
+      if (SC.none(dt) || !dt.toFormattedString) return null;
       if (attr.get('useUnixTime')) {
         return dt.get('milliseconds')/1000;
       }

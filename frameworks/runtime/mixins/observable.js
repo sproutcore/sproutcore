@@ -384,6 +384,9 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
 
     } else if (func === undefined) {
       if (notify) this.propertyWillChange(key);
+      //@if(debug)
+      if (value === undefined) SC.warn("Tried to set 'undefined' to the property '%@'.".fmt(key));
+      //@endif
       this.unknownProperty(key, value);
       if (notify) this.propertyDidChange(key, ret);
 
@@ -1746,7 +1749,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
 //@if(debug)
 /** @private used by addProbe/removeProbe. Debug mode only. */
 SC.logChange = function logChange(target, key, value) {
-  console.log("CHANGE: %@[%@] => %@".fmt(target, key, target.get(key)));
+  console.trace("CHANGE: %@[%@] => %@".fmt(target, key, target.get(key)));
 };
 //@endif
 

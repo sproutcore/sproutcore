@@ -20,11 +20,16 @@ SC.ItemFilter = {
     var regexp, ret;
 
     if (value) {
-      regexp = new RegExp(value, "i");
-      ret = items.filter(function(item) {
-        var itemValue = key ? SC.get(item, key) : item;
-        return SC.typeOf(itemValue) === SC.T_STRING ? itemValue.search(regexp) !== -1 : false;
-      });
+      try {
+        regexp = new RegExp(value, "i");
+        ret = items.filter(function(item) {
+          var itemValue = key ? SC.get(item, key) : item;
+          return SC.typeOf(itemValue) === SC.T_STRING ? itemValue.search(regexp) !== -1 : false;
+        });
+      }
+      catch(e) {
+        SC.Logger.error('SC.ItemFilter.searchItems ' + e.toString());
+      }
     }
 
     return ret;

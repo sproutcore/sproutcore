@@ -127,14 +127,14 @@ SC.ToolbarView = SC.View.extend(
     @type String
     @default null
   */
-  anchorLocation: null,
+  anchorLocation: SC.ANCHOR_BOTTOM,
 
   // ..........................................................
   // INTERNAL SUPPORT
   //
 
   /** @private */
-  layout: { left: 0, right: 0, height: 32, zIndex: 10 },
+  layout: { left: -4, right: -4, height: 26, zIndex: 10 },
 
   /** @private */
   init: function () {

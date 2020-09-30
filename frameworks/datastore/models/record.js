@@ -106,9 +106,6 @@ sc_require('system/query');
 SC.Record = SC.Object.extend(
 /** @scope SC.Record.prototype */ {
 
-  //@if(debug)
-  /* BEGIN DEBUG ONLY PROPERTIES AND METHODS */
-
   /** @private
     Creates string representation of record, with status.
 
@@ -138,9 +135,6 @@ SC.Record = SC.Object.extend(
 
     return ret.join(" ");
   },
-
-  /* END DEBUG ONLY PROPERTIES AND METHODS */
-  //@endif
 
   /**
     Walk like a duck
@@ -552,7 +546,13 @@ SC.Record = SC.Object.extend(
         attrs;
 
     attrs = store.readEditableDataHash(storeKey);
-    if (!attrs) SC.Record.BAD_STATE_ERROR.throw();
+
+    if (!attrs) {
+      SC.Logger.error(this+'#writeAttribute: no attrs. key: '+key+' - value: '+value+' - ignoreDidChange: '+ignoreDidChange+' - store: '+store+''+' - storeKey: '+storeKey+' - attrs: '+attrs+' - status: '+this.get('status'));
+
+      // Ceci arrive si on edite un contact et que l'on change la selection sans enregistrer (à cause de pays et que le record est supprimé). Voici contact_edition_view (fin de la page)
+      return this ;//SC.Record.BAD_STATE_ERROR.throw();
+    }
 
     // if value is the same, do not flag record as dirty
     if (value !== attrs[key]) {
@@ -594,8 +594,14 @@ SC.Record = SC.Object.extend(
       aggregates = [];
       for (key in this) {
         prop = this[key];
-        if (prop  &&  prop.isRecordAttribute  &&  prop.aggregate === YES) {
+        if (prop  &&  prop.isRecordAttribute  &&  (prop.aggregate === YES || prop.aggregatePropertyChanges === YES)) {
           aggregates.push(key);
+
+          //@if(debug)
+          if (prop.aggregatePropertyChanges && !prop.inverse) {
+            SC.warn("Developer Warning: The inverse property of the '%@' relationship needs to be set when setting aggregatePropertyChanges to true".fmt(key));
+          }
+          //@endif
         }
       }
       recordType.__sc_aggregate_keys = aggregates;
@@ -608,7 +614,7 @@ SC.Record = SC.Object.extend(
         readyNew   = K.READY_NEW,
         destroyed  = K.DESTROYED,
         readyClean = K.READY_CLEAN,
-        iter;
+        iter, iterProp;
 
     /**
       @private
@@ -643,11 +649,38 @@ SC.Record = SC.Object.extend(
       }
     };
 
+    /**
+      @private
+
+      Notify the record that a property of its relationship has changed.
+
+      @param {SC.Record} record to notify
+    */
+    iterProp = function(recs, key) {
+      recs.forEach(function(rec) {
+        if (rec) {
+          var inverse = this[key].inverse;
+          if (inverse) rec.notifyPropertyChange(inverse);
+        }
+      }, this);
+    };
+
     for(idx=0,len=aggregates.length;idx<len;++idx) {
       key = aggregates[idx];
+      prop = this[key];
       val = this.get(key);
-      recs = SC.kindOf(val, SC.ManyArray) ? val : [val];
-      recs.forEach(iter, this);
+
+      if (SC.kindOf(val, SC.ManyArray)) {
+        recs = val.get('loadedRecords');
+      }
+      else {
+        recs = [val];
+      }
+
+      if (recs) {
+        if (prop.aggregate) recs.forEach(iter, this);
+        if (prop.aggregatePropertyChanges) iterProp.call(this, recs, key);
+      }
     }
   },
 
@@ -679,7 +712,28 @@ SC.Record = SC.Object.extend(
       var manyArrays = this.relationships,
           loc        = manyArrays ? manyArrays.length : 0;
       while(--loc>=0) manyArrays[loc].recordPropertyDidChange(keys);
+
+      this.propagateToAggregates();
     }
+
+    this._sc_callChangeCallbacks();
+  },
+
+  _sc_callChangeCallbacks: function() {
+    var changeCallbacks = this._sc_changeCallbacks;
+    if (!changeCallbacks) return;
+
+    changeCallbacks.forEach(function(fn) {
+      fn.call(this);
+    }, this);
+    this._sc_changeCallbacks = null;
+  },
+
+  addChangeCallback: function(fn) {
+    var changeCallbacks = this._sc_changeCallbacks;
+    if (!changeCallbacks) changeCallbacks = this._sc_changeCallbacks = [];
+
+    changeCallbacks.push(fn);
   },
 
   /**
@@ -926,6 +980,9 @@ SC.Record = SC.Object.extend(
     var func = this[key];
 
     if (func && func.isProperty && func.get && !func.get('isEditable')) {
+      //@if(debug)
+      SC.info("Cannot set the property '%@' as it is not editable.".fmt(key));
+      //@endif
       return this;
     }
     return sc_super();

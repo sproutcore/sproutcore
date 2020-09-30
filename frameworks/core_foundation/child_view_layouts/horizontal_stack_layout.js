@@ -732,6 +732,6 @@ SC.mixin(SC.View,
     @extends SC.ChildViewLayoutProtocol
     @since Version 1.10
   */
-  VERTICAL_STACK: new _SC_VIEW_STACK_PLUGIN('vertical')
+  //VERTICAL_STACK: new _SC_VIEW_STACK_PLUGIN('vertical')
 
 });

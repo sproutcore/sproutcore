@@ -56,6 +56,7 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
 
     context.setClass('ellipsis', dataSource.get('needsEllipsis') || NO);
     context.setClass('icon', dataSource.get('icon') || NO);
+    context.setClass('no-title', !dataSource.get('title'));
 
     var html = this.htmlForTitleAndIcon(dataSource);
     context.push(html);
@@ -85,6 +86,9 @@ SC.BaseTheme.labelRenderDelegate = SC.RenderDelegate.create({
     } else {
       jquery.removeAttr('title');
     }
+
+    jquery.setClass('icon', dataSource.get('icon') || NO);
+    jquery.setClass('no-title', !dataSource.get('title'));
 
     jquery.setClass('ellipsis', dataSource.get('needsEllipsis') || NO);
 

@@ -13,8 +13,6 @@ SC.BaseTheme.pickerRenderDelegate = SC.RenderDelegate.create({
   render: function (dataSource, context) {
     var panelRenderDelegate = dataSource.get('theme').panelRenderDelegate;
 
-    panelRenderDelegate.render(dataSource, context);
-
     var preferType = dataSource.get('preferType'),
       pointerPosition = dataSource.get('pointerPos');
 
@@ -25,6 +23,9 @@ SC.BaseTheme.pickerRenderDelegate = SC.RenderDelegate.create({
       // Track the last pointerPosition used so that we can remove it when it changes.
       dataSource.renderState._lastPointerPosition = pointerPosition;
     }
+
+    // The background should be after the pointer
+    panelRenderDelegate.render(dataSource, context);
   },
 
   update: function (dataSource, $) {

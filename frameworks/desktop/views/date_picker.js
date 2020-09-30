@@ -100,7 +100,7 @@ SC.DatePickerView = SC.View.extend(SC.ActionSupport, {
     @returns receiver
   */
   selectToday: function() {
-    this._scdpv_setValue(this._scdpv_dateWithSelectedTime( SC.DateTime.create() ));
+    this._scdpv_setValue(SC.DateTime.create());
     return this;
   },
 
@@ -121,7 +121,7 @@ SC.DatePickerView = SC.View.extend(SC.ActionSupport, {
   _scdpv_setValue: function(date) {
     var currentDate = this.get('date');
     if (date === currentDate) return; // nothing to do.
-    this.set('value', date);
+    this.set('value', this._scdpv_dateWithSelectedTime(date));
     this.fireAction();
   },
 
@@ -256,7 +256,7 @@ SC.DatePickerView = SC.View.extend(SC.ActionSupport, {
   /** @private */
   mouseDown: function(evt) {
     // Become first responder if appropriate.
-    this.becomeFirstResponder();
+    this.becomeFirstResponder(evt);
 
     // Date stuff.
     var target = evt.target,
@@ -306,7 +306,7 @@ SC.DatePickerView = SC.View.extend(SC.ActionSupport, {
       var date = this._scdpv_parseSelectedDate(target);
       if (date) {
         this.set('_beingSelectedDate', null);
-        this._scdpv_setValue(this._scdpv_dateWithSelectedTime(date));
+        this._scdpv_setValue(date);
       }
     }
     this._isDraggingDate = NO;
@@ -441,7 +441,7 @@ SC.DatePickerView = SC.View.extend(SC.ActionSupport, {
         var day = dataArray[2];
         var month = dataArray[3];
         var year = dataArray[4];
-        return SC.DateTime.create({ day: day, month: month, year: year });
+        return SC.DateTime.create({ day: day, month: month, year: year, hour: 0, minute: 0, second: 0 });
       }
     }
     return null;

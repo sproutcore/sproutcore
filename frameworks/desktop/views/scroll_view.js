@@ -296,6 +296,46 @@ SC.ScrollView = SC.View.extend({
   contentView: null,
 
   /**
+    Determine if the minimum height of the contentView should match the height of its container.
+
+    This is needed for collection views in order to be able to drag items at the end of the list.
+
+    @type Boolean
+    @default false
+  */
+  shouldResizeContentHeight: function() {
+    return this.get('hasVerticalScroller') && this.get('shouldResizeContentView');
+  }.property(),
+
+  /**
+    Determine if the minimum width of the contentView should match the width of its container.
+
+    This is needed for grid views in order to be able to drag items at the end of the list.
+
+    @type Boolean
+    @default false
+  */
+  shouldResizeContentWidth: function() {
+    return this.get('hasHorizontalScroller') && this.get('shouldResizeContentView');
+  }.property(),
+
+  /**
+    Determine if the minimum size of the contentView should match the size of its container.
+
+    This is needed for collection views in order to be able to drag items at the end of the list.
+
+    It is not always on by default because it can be problematic for contentViews which have there
+    child views layout from the right of the contentView if a minWidth become defined.
+
+    @type Boolean
+    @default false
+  */
+  shouldResizeContentView: function () {
+    var cv = this.get('contentView');
+    return SC.kindOf(cv, SC.CollectionView) && !SC.kindOf(cv, SC.StackedView);
+  }.property('contentView').cacheable(),
+
+  /**
     The scroll deceleration rate.
 
     @type Number
@@ -945,17 +985,8 @@ SC.ScrollView = SC.View.extend({
     this.set('_sc_containerWidth', containerFrame.width);
 
     if (contentView) {
-      // var didAdjust = false;
-
-      // if (this._sc_shouldResizeContentHeight) {
-      //   contentView.adjust('height', containerFrame.height);
-      //   didAdjust = true;
-      // }
-
-      // if (this._sc_shouldResizeContentWidth) {
-      //   contentView.adjust('width', containerFrame.width);
-      //   didAdjust = true;
-      // }
+      if (this.get('shouldResizeContentHeight')) contentView.adjust('minHeight', containerFrame.height);
+      if (this.get('shouldResizeContentWidth')) contentView.adjust('minWidth', containerFrame.width);
 
       // Update the scrollers regardless.
       this._sc_contentViewSizeDidChange(lastMinimumHorizontalScrollOffset, lastMaximumHorizontalScrollOffset, lastMinimumVerticalScrollOffset, lastMaximumVerticalScrollOffset);
@@ -1654,7 +1685,6 @@ SC.ScrollView = SC.View.extend({
 
       // Replace the class property with an instance.
       scrollerView = this.horizontalScrollerView = this.createChildView(scrollerView, {
-        isVisible: !this.get('autohidesHorizontalScroller'),
         layoutDirection: SC.LAYOUT_HORIZONTAL,
         value: this.get('horizontalScrollOffset'),
         valueBinding: '.parentView.horizontalScrollOffset', // Bind the value of the scroller to our horizontal offset.
@@ -1681,7 +1711,6 @@ SC.ScrollView = SC.View.extend({
 
       // Replace the class property with an instance.
       scrollerView = this.verticalScrollerView = this.createChildView(scrollerView, {
-        isVisible: !this.get('autohidesVerticalScroller'),
         layoutDirection: SC.LAYOUT_VERTICAL,
         value: this.get('verticalScrollOffset'),
         valueBinding: '.parentView.verticalScrollOffset', // Bind the value of the scroller to our vertical offset.
@@ -1890,9 +1919,10 @@ SC.ScrollView = SC.View.extend({
 
     @param {Number} x the x scroll location
     @param {Number} y the y scroll location
+    @param {Number} duration the duration scroll animation
     @returns {SC.ScrollView} receiver
   */
-  scrollTo: function (x, y) {
+  scrollTo: function (x, y, duration) {
     // Normalize (deprecated).
     if (y === undefined && SC.typeOf(x) === SC.T_HASH) {
       //@if(debug)
@@ -1906,15 +1936,54 @@ SC.ScrollView = SC.View.extend({
     }
 
     if (!SC.none(x)) {
-      this.set('horizontalScrollOffset', x);
+      this._animateScrollTo('horizontalScrollOffset', x, duration);
     }
 
     if (!SC.none(y)) {
-      this.set('verticalScrollOffset', y);
+      this._animateScrollTo('verticalScrollOffset', y, duration);
     }
 
     return this;
   },
+
+  /** @private */
+  _animateScrollTo: function (key, value, duration) {
+    if (duration) {
+      var initialOffset = this.get(key),
+        offset = initialOffset,
+        timeout = 1;
+
+      while (offset !== value) {
+        offset = this._scrollToEase(timeout, initialOffset, value-initialOffset, duration);
+
+        if (timeout > duration) offset = value;
+
+        this._scrollToLater(key, offset, timeout);
+        timeout++;
+      }
+    }
+    else {
+      this.set(key, value);
+    }
+  },
+
+  /** @private */
+  _scrollToLater: function (key, value, timeout) {
+    this.invokeLater(function() {
+      this.set(key, value);
+    }, timeout);
+  },
+
+  /** @private
+    The easing method (cubic easing in/out) used with scrollTo.
+  */
+  _scrollToEase: function (t, b, c, d) {
+    t /= d/2;
+    if (t < 1) return c/2*t*t*t + b;
+    t -= 2;
+    return c/2*(t*t*t + 2) + b;
+  },
+
 
   /**
     Scroll to the supplied rectangle.

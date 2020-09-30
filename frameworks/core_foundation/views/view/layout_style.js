@@ -66,12 +66,23 @@ SC.View.LayoutStyleCalculator = {
     // Reset properties that might not be set from style to style.
     style.marginLeft = null;
     style.marginTop = null;
+    style.marginBottom = null;
+    style.marginRight = null;
 
     // Position and size.
     style.bottom = layout.bottom;
     style.right = layout.right;
     style.left = layout.left;
     style.top = layout.top;
+
+    //if (this.get('useStaticLayout')) {
+      if (layout.marginBottom) style.marginBottom = Math.floor(layout.marginBottom);
+      if (layout.marginRight) style.marginRight = Math.floor(layout.marginRight);
+      if (layout.marginLeft) style.marginLeft = Math.floor(layout.marginLeft);
+      if (layout.marginTop) style.marginTop = Math.floor(layout.marginTop);
+    //}
+    
+
     style.centerX = layout.centerX;
     style.centerY = layout.centerY;
     style.height = layout.height;

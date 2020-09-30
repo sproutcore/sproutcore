@@ -142,10 +142,56 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     ret = store.readEditableProperty(storeKey, pname);
     if (!ret) {
       hash = store.readEditableDataHash(storeKey);
+
+      // Lorsque l'on met a jour les relations, un tempGuid peut être défini comme record inverse
+      // Dans ce cas, aucun hash n'est défini. On arrête la fonction si c'est le cas pour éviter une erreur
+      if (!hash) {
+        // @if (debug)
+        console.error("SC.ManyArray.editableStoreIds: aucun hash n'est défini. null a été renvoyé. Store: "+store, storeKey, pname);
+        // @endif
+
+        return [];
+      }
+
       ret = hash[pname] = [];
     }
 
     // if (ret !== this._sc_prevStoreIds) this.recordPropertyDidChange();
+    return ret;
+  }.property(),
+
+
+  /**
+    Returns an editable array of ready `record`s.
+
+    @type {SC.Array}
+    @property
+  */
+  loadedRecords: function () {
+    var storeIds  = this.get('readOnlyStoreIds'),
+      store = this.get('store'),
+      recordType = this.get('recordType'),
+      storeKey, status,
+      ret = [];
+
+    if (!storeIds || !store) return undefined; // nothing to do
+
+    storeIds.forEach(function(storeId) {
+      // Handle transient records.
+      if (typeof storeId === SC.T_STRING && storeId.indexOf('_sc_id_placeholder_') === 0) {
+        storeKey = storeId.replace('_sc_id_placeholder_', '');
+      } else {
+        storeKey = store.storeKeyFor(recordType, storeId);
+      }
+      
+      status = store.readStatus(storeKey);
+
+      // If record is not loaded already, then ask the data source to retrieve it.
+      if (status !== SC.Record.EMPTY && status !== SC.Record.BUSY_LOADING) {
+        ret.push(store.materializeRecord(storeKey));
+      }
+    });
+
     return ret;
   }.property(),
 
@@ -247,9 +293,20 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
       storeKey = store.storeKeyFor(recordType, storeId);
     }
 
+    var status = store.readStatus(storeKey);
     // If record is not loaded already, then ask the data source to retrieve it.
-    if (store.readStatus(storeKey) === SC.Record.EMPTY) {
-      store.retrieveRecord(recordType, null, storeKey);
+    if (status === SC.Record.EMPTY || status === SC.Record.BUSY_LOADING) {
+      var record = this.record,
+        propertyName = this.propertyName;
+
+      SC.Store.addRelatedRecordToNotify(store, recordType, storeKey, record);
+
+      if (status === SC.Record.EMPTY) {
+        var callback = function () {
+          SC.Store.notifyRelatedRecords(recordType, storeKey, propertyName);
+        }
+        store.retrieveRecord(recordType, null, storeKey, null, callback);
+      }
     }
 
     recs[idx] = ret = store.materializeRecord(storeKey);

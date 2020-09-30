@@ -248,6 +248,9 @@ SC.AlertPane = SC.PanelPane.extend(
   */
   delegate: null,
 
+  escapeHTML: YES,
+  isTextSelectable: NO,
+
   /**
     The icon URL or class name. If you do not set this, an alert icon will
     be shown instead.
@@ -296,7 +299,7 @@ SC.AlertPane = SC.PanelPane.extend(
     var desc = this.get('description');
     if (!desc || desc.length === 0) return desc ;
 
-    desc = SC.RenderContext.escapeHTML(desc); // remove HTML
+    if (this.escapeHTML) desc = SC.RenderContext.escapeHTML(desc); // remove HTML
     return '<p class="description">' + desc.split('\n').join('</p><p class="description">') + '</p>';
   }.property('description').cacheable(),
 
@@ -321,9 +324,118 @@ SC.AlertPane = SC.PanelPane.extend(
     var caption = this.get('caption');
     if (!caption || caption.length === 0) return caption ;
 
-    caption = SC.RenderContext.escapeHTML(caption); // remove HTML
+    if (this.escapeHTML) caption = SC.RenderContext.escapeHTML(caption); // remove HTML
     return '<p class="caption">' + caption.split('\n').join('</p><p class="caption">') + '</p>';
   }.property('caption').cacheable(),
+
+
+  /**
+    Set to yes to display a textFieldView
+
+    @property {Boolean}
+  */
+  displayTextFieldView: NO,
+
+  /**
+    The value to set in the textFieldView
+
+    @property {String}
+  */
+  textFieldValue: '',
+
+  /**
+    The value to set in the textFieldView
+
+    @property {String}
+  */
+  textFieldView: SC.TextFieldView,
+  textFieldLayout: null,
+
+  showTextFieldView: function(view) {
+    if (!this.get('displayTextFieldView')) return false;
+
+    var layout = this.textFieldLayout || { bottom: 65, height: 24, left: 18, right: 18 },
+      textFieldValue = this.get('textFieldValue');
+
+    var textFieldView = this.textFieldView.create({
+      layout: layout,
+      value: textFieldValue,
+      makeFirstResponderOnAppend: true
+    })
+    view.appendChild(textFieldView);
+    this.set('textFieldView', textFieldView);
+    return '<div style="height: '+(layout.height+10)+'px;"></div>';
+  },
+
+  /**
+    Set to yes to display a checkboxView
+
+    @property {Boolean}
+  */
+  displayCheckboxView: NO,
+
+  /**
+    The title to set in the checkboxView
+
+    @property {String}
+  */
+  checkboxTitle: false,
+
+  /**
+    The value to set in the checkboxView
+
+    @property {String}
+  */
+  checkboxValue: false,
+
+  showCheckboxView: function(view) {
+    if (!this.get('displayCheckboxView')) return false;
+
+    var checkboxTitle = this.get('checkboxTitle'),
+        checkboxValue = this.get('checkboxValue');
+
+    var checkboxView = SC.CheckboxView.create({
+      layout: { bottom: 55, height: 24, left: 18, right: 18 },
+      title: checkboxTitle,
+      value: checkboxValue,
+    })
+    view.appendChild(checkboxView);
+    this.set('checkboxView', checkboxView);
+    return '<div style="height: 35px;"></div>';
+  },
+
+  /**
+    Set to yes to display a selectView
+
+    @property {Boolean}
+  */
+  displaySelectView: NO,
+
+  selectTitleKey: '',
+  selectValueKey: null,
+  selectIconKey: 'icon',
+  selectSortKey: '',
+  selectEmptyName: '',
+  selectItems: [],
+  selectValue: '',
+
+  showSelectFieldView: function(view) {
+    if (!this.get('displaySelectView')) return false;
+
+    var selectView = SC.SelectView.create({
+      layout: { bottom: 65, height: 24, left: 18, right: 18 },
+      itemTitleKey: this.get('selectTitleKey'),
+      itemValueKey: this.get('selectValueKey'),
+      itemIconKey: this.get('selectIconKey'),
+      itemSortKey: this.get('selectSortKey'),
+      emptyName: this.get('selectEmptyName'),
+      items: this.get('selectItems'),
+      value: this.get('selectValue'),
+    })
+    view.appendChild(selectView);
+    this.set('selectView', selectView);
+    return '<div style="height: 35px;"></div>';
+  },
 
   /**
     The button view for button 1 (OK).
@@ -358,7 +470,11 @@ SC.AlertPane = SC.PanelPane.extend(
     @default { top : 0.3, centerX: 0, width: 500 }
     @see SC.View#layout
   */
-  layout: { top : 0.3, centerX: 0, width: 500 },
+  layout: { top: 0.3, centerX: 0, width: 500 },
+
+  media: {
+    '(max-width: 450px)': { layout: { width: .94 } },
+  },
 
   /** @private - internal view that is actually displayed */
   contentView: SC.View.extend({
@@ -372,21 +488,31 @@ SC.AlertPane = SC.PanelPane.extend(
         classNames: ['alert-wrap'],
         useStaticLayout: YES,
 
+        mouseWheel: function(evt) {
+          evt.allowDefault();
+          return true;
+        },
+
         /** @private */
         render: function(context, firstTime) {
           var pane = this.get('pane');
           if(pane.get('icon') == 'blank') context.addClass('plain');
-          context.push('<div class="icon '+pane.get('icon')+'" ></div>');
+          if(pane.get('isTextSelectable')) context.addClass('allow-select');
+          context.push('<div class="alert-icon '+pane.get('icon')+'" ></div>');
           context.begin('h1').addClass('header').text(pane.get('message') || '').end();
+          context = context.begin('div').addClass('body');
           context.push(pane.get('displayDescription') || '');
           context.push(pane.get('displayCaption') || '');
+          context = context.end();
+          context.push(pane.showTextFieldView(this) || '');
+          context.push(pane.showCheckboxView(this) || '');
+          context.push(pane.showSelectFieldView(this) || '');
           context.push('<div class="separator"></div>');
-
         }
       }),
 
       SC.View.extend({
-        layout: { bottom: 13, height: 24, right: 18, width: 466 },
+        layout: { bottom: 13, height: 24, left: 18, right: 18 },
         childViews: ['cancelButton', 'okButton'],
         classNames: ['text-align-right'],
 
@@ -441,25 +567,31 @@ SC.AlertPane = SC.PanelPane.extend(
   */
   dismiss: function(sender) {
     var del = this.delegate,
-        rootResponder, action, target;
+        rootResponder, action, target, value = null;
+
+    if (this.get('displayTextFieldView')) value = this.getPath('textFieldView.value');
+    else if (this.get('displayCheckboxView')) value = this.getPath('checkboxView.value');
+    else if (this.get('displaySelectView')) value = this.getPath('selectView.value');
 
     if (del && del.alertPaneDidDismiss) {
-      del.alertPaneDidDismiss(this, sender.get('actionKey'));
+      del.alertPaneDidDismiss(this, sender.get('actionKey'), value);
     }
-
-    if (action = (sender && sender.get('customAction'))) {
-      if (SC.typeOf(action) === SC.T_FUNCTION) {
+    else if(action = (sender && sender.get('customAction'))) {
+      if(SC.typeOf(action)===SC.T_FUNCTION) {
         action.call(action);
-      } else {
+      }
+      else if(target = sender.get('target')) {
+        target.tryToPerform(action, this, value);
+      }
+      else {
         rootResponder = this.getPath('pane.rootResponder');
         if(rootResponder) {
-          target = sender.get('customTarget');
-          rootResponder.sendAction(action, target || del, this, this, null, this);
+          rootResponder.sendAction(action, del, this, value);
         }
       }
     }
 
-    this.remove(); // hide alert
+    this.destroy(); // hide alert
   },
 
   /** @private
@@ -496,6 +628,12 @@ SC.AlertPane.mixin(
     // normalize the arguments if this is a deprecated call
     args = SC.AlertPane._argumentsCall.apply(this, arguments);
 
+    if (args.actAsNotification) {
+      args.classNames = 'alert-success';
+      args.isModal = false;
+      args.layout = { top: 5, left: 5, width: 300 };
+    }
+
     var pane = this.create(args),
         idx,
         buttons = args.buttons,
@@ -527,7 +665,7 @@ SC.AlertPane.mixin(
         toolTip = button.toolTip;
         action = button.action;
         target = button.target;
-        themeName = args.themeName || 'capsule';
+        themeName = button.themeName || args.themeName || 'capsule';
 
         // If any button has the isDefault/isCancel flags set, we
         // explicitly cast the button's flag to bool, ensuring that this
@@ -554,8 +692,22 @@ SC.AlertPane.mixin(
       buttonView.set('isVisible', YES);
     }
 
-    var show = pane.append(); // make visible.
-    pane.adjust('height', pane.childViews[0].$().height());
+    SC.Logger.debug('SC.AlerPane#show: icon: ' + args.icon + ' - message: ' + args.message + ' - description: ' + args.description);
+
+    var show = pane.append(), // make visible.
+      height = pane.childViews[0].$().height();
+
+    if (args.actAsNotification) {
+      pane.setPath('contentView.childViews.1.isVisible', false);
+      pane.setPath('contentView.childViews.2.isVisible', false);
+      height -= 50;
+
+      pane.invokeLater('remove', 4500);
+      if (this._lastNotification) this._lastNotification.remove();
+      this._lastNotification = pane;
+    }
+
+    pane.adjust('height', height);
     pane.updateLayout();
     return show;
   },
@@ -571,6 +723,7 @@ SC.AlertPane.mixin(
     // normalize the arguments if this is a deprecated call
     args = SC.AlertPane._argumentsCall.apply(this, arguments);
 
+    args.classNames = ['sc-alert-warn'];
     args.icon = 'sc-icon-alert-48';
     return this.show(args);
   },
@@ -586,6 +739,7 @@ SC.AlertPane.mixin(
     // normalize the arguments if this is a deprecated call
     args = SC.AlertPane._argumentsCall.apply(this, arguments);
 
+    args.classNames = ['sc-alert-info'];
     args.icon = 'sc-icon-info-48';
     return this.show(args);
   },
@@ -601,6 +755,7 @@ SC.AlertPane.mixin(
     // normalize the arguments if this is a deprecated call
     args = SC.AlertPane._argumentsCall.apply(this, arguments);
 
+    args.classNames = ['sc-alert-error'];
     args.icon = 'sc-icon-error-48';
     return this.show(args);
   },

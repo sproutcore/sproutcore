@@ -211,6 +211,8 @@ SC.IndexSet = SC.mixin({},
 
     // the accelerator pointed to the middle of a range
     if (next === undefined) {
+      // prevent infinit loop
+      if (ret === undefined) return ret;
       next = this.rangeStartForIndex(ret);
     } else {
       next = Math.abs(next);
@@ -1274,16 +1276,12 @@ SC.IndexSet = SC.mixin({},
         next    = content[cur];
 
     if (target === undefined) target = null;
-    while (next !== 0) {
-      if (isFinite(next)) {
-        while(cur < next) {
-          callback.call(target, cur++, idx++, this, source);
-        }
-        cur  = Math.abs(next);
-        next = content[cur];
-      } else {
-        throw new Error("Developer Error: You may not iterate an infinite range in SC.IndexSet.");
+    while (next !== 0 && isFinite(next)) {
+      while(cur < next) {
+        callback.call(target, cur++, idx++, this, source);
       }
+      cur  = Math.abs(next);
+      next = content[cur];
     }
     return this;
   },

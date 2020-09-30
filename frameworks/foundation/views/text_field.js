@@ -714,7 +714,13 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
                       '">' + value + '</textarea></div>');
       } else {
         type = this.get('type');
-        context.push('<input aria-label="' + hint + '" class="' + fieldClassNames + '" type="' + type +
+        var formattedType = 'text';
+        switch(type) {
+          case 'password':
+            formattedType = type;
+          break;
+        }
+        context.push('<input aria-label="' + hint + '" class="' + fieldClassNames + '" type="' + formattedType +
                       '" name="' + name + '"' + activeStateString + hintAttr +
                       spellCheckString + autocorrectString + autocapitalizeString +
                       autocompleteString + browserFocusableString + ' maxlength="' + maxLength +

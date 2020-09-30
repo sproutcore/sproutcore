@@ -158,6 +158,7 @@ SC.WorkspaceView = SC.View.extend(
 
     var content = this.get("contentView");
     content = this.contentView = this.activeContentView = this.createChildView(content);
+    content.classNames.push('workspace-content');
     this.appendChild(content);
 
     this.invokeOnce("_scws_tile");

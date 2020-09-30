@@ -1333,6 +1333,13 @@ SC.RootResponder = SC.Object.extend(
     // As a workaround just let the browser to use the default behavior.
     if(this.ignoreTouchHandle(evt)) return YES;
 
+    // Afin de pouvoir ouvrir le panneau d'édition des événements
+    // Il faudrait aussi mettre en place une solution pour les clic droit
+    this._touchCount += 1;
+    if ((Date.now() - this._lastMouseUpAt) > 250) this._touchCount = 1;
+    this._lastMouseUpAt = Date.now();
+    evt.clickCount = this._touchCount;
+
     var hidingTouchIntercept = NO;
 
     SC.run(function() {
@@ -1485,24 +1492,26 @@ SC.RootResponder = SC.Object.extend(
 
         // the first VIEW touch should be the touch info sent
         viewTouches = this.touchesForView(view);
-        firstTouch = viewTouches.firstObject();
+        if (viewTouches) {
+          firstTouch = viewTouches.firstObject();
 
-        // Load the event up with data from the first touch. THIS IS FOR CONVENIENCE ONLY in cases where the developer
-        // only cares about one touch.
-        evt.pageX = firstTouch.pageX;
-        evt.pageY = firstTouch.pageY;
-        evt.clientX = firstTouch.clientX;
-        evt.clientY = firstTouch.clientY;
-        evt.screenX = firstTouch.screenX;
-        evt.screenY = firstTouch.screenY;
-        evt.startX = firstTouch.startX;
-        evt.startY = firstTouch.startY;
-        evt.velocityX = firstTouch.velocityX;
-        evt.velocityY = firstTouch.velocityY;
-        evt.touchContext = this; // Injects the root responder so it can call e.g. `touchesForView`.
+          // Load the event up with data from the first touch. THIS IS FOR CONVENIENCE ONLY in cases where the developer
+          // only cares about one touch.
+          evt.pageX = firstTouch.pageX;
+          evt.pageY = firstTouch.pageY;
+          evt.clientX = firstTouch.clientX;
+          evt.clientY = firstTouch.clientY;
+          evt.screenX = firstTouch.screenX;
+          evt.screenY = firstTouch.screenY;
+          evt.startX = firstTouch.startX;
+          evt.startY = firstTouch.startY;
+          evt.velocityX = firstTouch.velocityX;
+          evt.velocityY = firstTouch.velocityY;
+          evt.touchContext = this; // Injects the root responder so it can call e.g. `touchesForView`.
 
-        // Give the view a chance to handle touchesDragged. (Don't bubble; viewTouches is view-specific.)
-        view.tryToPerform("touchesDragged", evt, viewTouches);
+          // Give the view a chance to handle touchesDragged. (Don't bubble; viewTouches is view-specific.)
+          view.tryToPerform("touchesDragged", evt, viewTouches);
+        }
       }
 
       // clear references to event
@@ -1567,6 +1576,12 @@ SC.RootResponder = SC.Object.extend(
         touchEntry.screenY = touch.screenY;
         touchEntry.type = 'touchend';
         touchEntry.event = evt;
+        touchEntry.clickCount = this._touchCount;
+
+        //touchEntry.duration = duration;
+        if (duration > 500) {
+          touchEntry.which = 3;
+        }
 
         //@if (debug)
         if (SC.LOG_TOUCH_EVENTS) SC.Logger.info('-- Received touch end');
@@ -1579,6 +1594,11 @@ SC.RootResponder = SC.Object.extend(
         if (this._drag) {
           this._drag.tryToPerform('mouseUp', touch) ;
           this._drag = null ;
+        }
+
+        // HACK
+        if (this._touchCount === 2) {
+          this.sendEvent('doubleClick', touchEntry, touchEntry.targetView);
         }
 
         // unassign
@@ -1941,7 +1961,13 @@ SC.RootResponder = SC.Object.extend(
 
         // try singleClick
         if (!handler) {
-          handler = this.sendEvent('click', evt, targetView) ;
+          if (targetView && targetView.forceDefaultMouseEvents) {
+            this._lastMouseDownCustomHandling = true;
+            handler = false;
+          }
+          else {
+            handler = this.sendEvent('click', evt, targetView) ;
+          }
         }
       }
     }
@@ -1998,7 +2024,8 @@ SC.RootResponder = SC.Object.extend(
     var view = this.targetViewForEvent(evt) ,
         handler = this.sendEvent('mouseWheel', evt, view) ;
 
-    return (handler) ? evt.hasCustomEventHandling : YES ;
+    // returning false prevent the whole document from scrolling
+    return (handler) ? evt.hasCustomEventHandling : false ;
   },
 
   _lastHovered: null,

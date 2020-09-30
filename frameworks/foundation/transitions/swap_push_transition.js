@@ -147,6 +147,15 @@ SC.mixin(SC.ContainerView,
     },
 
     /** @private */
+    // Fixes the issue with the article page when doing search quickly
+    reverseBuildOut: function (statechart, container, content, options) {
+      // Cancel the animation in place.
+      content.cancelAnimation(SC.LayoutState.CURRENT);
+
+      this.buildInToView(statechart, container, content, null, options);
+    },
+
+    /** @private */
     didBuildOutFromView: function (container, content, options) {
       // Convert to a flexible layout.
       content.adjust({ bottom: 0, right: 0, height: null, width: null });

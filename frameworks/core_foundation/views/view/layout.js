@@ -1143,7 +1143,7 @@ SC.View.reopen(
         var layoutValue = value[property];
         if (isNaN(layoutValue) && (layoutValue !== SC.LAYOUT_AUTO) &&
             !SC._ROTATION_VALUE_REGEX.exec(layoutValue) && !SC._SCALE_VALUE_REGEX.exec(layoutValue)) {
-          throw new Error("SC.View layout property set to invalid value, %@: %@.".fmt(property, layoutValue));
+          SC.warn("%@ layout property set to invalid value, %@: %@.".fmt(this+'', property, layoutValue));
         }
       }
     }

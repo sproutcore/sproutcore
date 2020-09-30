@@ -903,22 +903,50 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
 
   /** @private */
   _executeGotoStateActions: function (gotoState, actions, marker, context) {
+    context = context?context:{};
+
     var action = null,
         len = actions.length,
-        actionResult = null;
+        actionResult = null,
+        _marker;
 
-    marker = SC.none(marker) ? 0 : marker;
+    _marker = marker = SC.none(marker) ? 0 : marker;
+
+    // We first check if we can exit every state
+    for (; marker < len; marker += 1) {
+      action = actions[marker];
+
+      // FOR TEST RUNNER
+      if (!action.state.canExitState) break;
+
+      switch (action.action) {
+        case SC.EXIT_STATE:
+          actionResult = action.state.canExitState(context);
+          break;
+          
+        case SC.ENTER_STATE:
+          actionResult = action.state.canEnterState(context);
+          break;
+      }
+
+      if (!actionResult) {
+        this._cleanupStateTransition();
+        return;
+      }
+    }
+
+    marker = _marker;
 
     for (; marker < len; marker += 1) {
       this._currentGotoStateAction = action = actions[marker];
       switch (action.action) {
-      case SC.EXIT_STATE:
-        actionResult = this._exitState(action.state, context);
-        break;
-
-      case SC.ENTER_STATE:
-        actionResult = this._enterState(action.state, action.currentState, context);
-        break;
+        case SC.EXIT_STATE:
+          actionResult = this._exitState(action.state, context);
+          break;
+          
+        case SC.ENTER_STATE:
+          actionResult = this._enterState(action.state, action.currentState, context);
+          break;
       }
 
       //
@@ -957,7 +985,11 @@ SC.StatechartManager = /** @scope SC.StatechartManager.prototype */{
       this.statechartLogTrace("END gotoState: %@".fmt(gotoState), SC.TRACE_STATECHART_STYLE.gotoState);
     }
     //@endif
+    var del = this.get('statechartDelegate');
 
+    // IF FOR TEST RUNNER
+    if (del.statechatEndGotoState) del.statechatEndGotoState(context);
+    
     this._cleanupStateTransition();
   },
 

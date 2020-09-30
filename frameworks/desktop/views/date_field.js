@@ -248,6 +248,9 @@ SC.DateFieldView = SC.TextFieldView.extend(
 
     // Do the business.
     datePicker.popup(this);
+
+    this.willBeginEditing();
+
     return YES;
   },
 
@@ -274,6 +277,9 @@ SC.DateFieldView = SC.TextFieldView.extend(
 
     // Do the business.
     datePicker.remove();
+
+    this.didCommitEditing();
+
     return YES;
   },
 
@@ -309,9 +315,9 @@ SC.DateFieldView = SC.TextFieldView.extend(
     var st = this.get('showTime');
     var sd = this.get('showDate');
     if (st === YES && sd === YES) return this.get('formatDateTime');
-    if (st === YES) return this.get('formatTime');
-    return this.get('formatDate');
-  }.property('showTime', 'showDate', 'formatDateTime', 'formatDate', 'formatTime').cacheable(),
+    if (sd === YES) return this.get('formatDate');
+    return this.get('formatTime');
+  }.property('showTime', 'showDate', 'formatDate', 'formatTime', 'formatDateTime').cacheable(),
 
   /**
     Validates the entered text against the view's current date format.
@@ -367,23 +373,30 @@ SC.DateFieldView = SC.TextFieldView.extend(
     return arr;
   }.property('format').cacheable(),
 
+  /** @private */
+  _scdfv_activeSelectionObserver: function() {
+    this._insertCount = 0;
+    this.updateDatePickerShowing();
+    this.updateTextSelection();
+  }.observes('activeSelection'),
+
   /** @private
     If the activeSelection changes or the value changes, update the "TextSelection" to show accordingly.
   */
-  updateTextSelectionObserver: function() {
+  updateTextSelection: function() {
     var as = this.get('activeSelection');
     var ts = this.get('tabsSelections');
     if (this.get('isEditing') && ts[as]) {
       this.selection(null, ts[as].get('textSelection'));
     }
-  }.observes('activeSelection', 'value'),
+  },
 
   /** @private
     Updates the value according the key.
   */
   updateValue: function(key, upOrDown) {
     // 0 is DOWN - 1 is UP
-    var value = this.get('value') || SC.DateTime.create(),
+    var value = this._formattedValue(),
       newValue = (upOrDown === 0) ? -1 : 1,
       hour;
 
@@ -444,6 +457,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
   /** @private Handles syncing our value to the date picker's value, in case it changes from elsewhere. */
   _scdfv_valueDidChange: function() {
     this.setIfChanged('_datePickerValue', this.get('value'));
+    this.updateTextSelection();
   }.observes('value'),
 
   /** @private If the user dismisses the modal, sync up the values and resign. */
@@ -504,8 +518,13 @@ SC.DateFieldView = SC.TextFieldView.extend(
     return ret;
   },
 
-  /** @private Shows or hides the date picker as necessary. */
+  /** @private */
   _scdfv_manageDatePickerShowing: function() {
+    this.updateDatePickerShowing();
+  }.observes('useDatePicker'),
+
+  /** @private Shows or hides the date picker as necessary. */
+  updateDatePickerShowing: function() {
     // See if we should show or not.
     var shouldShow = NO;
     if (this.get('useDatePicker')) {
@@ -524,7 +543,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
     else {
       this.set('datePickerIsShowing', NO);
     }
-  }.observes('activeSelection', 'useDatePicker'),
+  },
 
   /** @private */
   didBecomeFirstResponder: function() {
@@ -717,6 +736,13 @@ SC.DateFieldView = SC.TextFieldView.extend(
   },
 
   /** @private */
+  _formattedValue: function() {
+    return this.get('value') || SC.DateTime.create({ hour: 0, minute: 0, second: 0 });
+  }.property(),
+
+  /** @private */
+  _insertCount: 0,
+  /** @private */
   _numericCharacters: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
   /** @private */
   _nonnumericCharacters: [' ', '-', '/', ':'],
@@ -729,11 +755,13 @@ SC.DateFieldView = SC.TextFieldView.extend(
 
     // If it's a numeric character (and we're doing those), validate and apply it.
     if (this.get('allowNumericInput') && this._numericCharacters.contains(chr)) {
+      this._insertCount++;
+
       var as = this.get('activeSelection'),
           ts = this.get('tabsSelections'),
           key = ts[as].get('key');
 
-      var value = this.get('value') || SC.DateTime.create(),
+      var value = this._formattedValue(),
           lastValue = this._lastValue,
           length = 2,
           min = 0,
@@ -799,6 +827,7 @@ SC.DateFieldView = SC.TextFieldView.extend(
 
       this._lastValue = lastValue;
       this._lastKey = key;
+      if (this._insertCount === length) this.moveRight();
     }
 
     // Regardless, we handled the event.

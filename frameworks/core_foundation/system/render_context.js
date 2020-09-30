@@ -1235,6 +1235,10 @@ SC.RenderContext = SC.Builder.create(
   SC.RenderContext.escapeHTML = function (text) {
     if (!text) return '';
     if (SC.typeOf(text) === SC.T_NUMBER) { text = text.toString(); }
+    if (!text.replace) {
+      SC.Logger.error("The text '%@' of type '%@' does not support replace.", text, SC.typeOf(text));
+      return text;
+    }
     return text.replace(_escapeHTMLRegex, _escapeHTMLMethod);
   };
 })();

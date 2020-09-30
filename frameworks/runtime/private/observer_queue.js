@@ -73,7 +73,7 @@ SC.Observers = {
     //@if(debug)
     // Add some developer support indicating that the observer was not removed.
     else {
-      SC.warn("Developer Warning: Attempted to remove observer for propertyPath %@ with root %@ and failed.  This may be because an object that the path refers to is no longer available.".fmt(propertyPath, pathRoot));
+      //SC.warn("Developer Warning: Attempted to remove observer for propertyPath %@ with root %@ and failed.  This may be because an object that the path refers to is no longer available.".fmt(propertyPath, pathRoot));
     }
     //@endif
 

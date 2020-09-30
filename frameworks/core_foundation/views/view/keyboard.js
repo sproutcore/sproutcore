@@ -302,6 +302,8 @@ SC.View.reopen(
         else next = this.get('pane');
       }
 
+      if(!next) break;
+
       // if it's a valid firstResponder, we're done!
       if(next.get('isVisibleInWindow') && next.get('acceptsFirstResponder')) {
         return next;

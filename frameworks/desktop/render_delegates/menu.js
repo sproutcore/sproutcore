@@ -31,7 +31,7 @@ SC.BaseTheme.menuRenderDelegate = SC.BaseTheme.pickerRenderDelegate.create({
   menuHeightPadding: 6,
 
   // amount to add to any calculated menu width to determine the actual width
-  menuWidthPadding: 50,
+  menuWidthPadding: 60,
 
   minimumMenuWidth: 50,
 

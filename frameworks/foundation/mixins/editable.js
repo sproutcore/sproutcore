@@ -85,8 +85,10 @@ SC.Editable = {
     this.becomeFirstResponder();
     this.endPropertyChanges();
 
+    this.willBeginEditing();
     return YES ;
   },
+  willBeginEditing: function() {},
 
   /**
     Ends editing on the view, discarding any changes that were made to the
@@ -146,8 +148,10 @@ SC.Editable = {
     if (!this.get('isEditing')) return YES;
     this.set('isEditing', NO) ;
     this.resignFirstResponder();
+    this.didCommitEditing();
 
     return YES ;
-  }
+  },
+  didCommitEditing: function() {}
 
 } ;

@@ -94,7 +94,7 @@ SC.mixin( /** @scope SC */ {
 
     cqElem = SC.$(element);
     // two possibilities: example element or type string
-    if (SC.typeOf(exampleElement) != SC.T_STRING) {
+    if (exampleElement instanceof Element) {
       var computed = null;
       if (document.defaultView && document.defaultView.getComputedStyle) {
         computed = document.defaultView.getComputedStyle(exampleElement, null);
@@ -130,12 +130,14 @@ SC.mixin( /** @scope SC */ {
       });
      // clean up
       computed = null;
-    } else {
+    } else if (SC.typeOf(exampleElement) === SC.T_STRING) {
       // it is a style string already
       style = exampleElement;
 
       // set style
       cqElem.attr("style", style + "; position:absolute; left: 0px; top: 0px; bottom: auto; right: auto; width: auto; height: auto;");
+    } else {
+      SC.$error("The exampleElement '%@' of type '%@' is not valid".fmt(exampleElement, SC.typeOf(exampleElement)));
     }
 
     element.className = classes;

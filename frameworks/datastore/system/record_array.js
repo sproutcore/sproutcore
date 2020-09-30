@@ -310,8 +310,8 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   indexOf: function(record, startAt) {
     if (!SC.kindOf(record, SC.Record)) {
       //@if(debug)
-      SC.Logger.warn("Developer Warning: Used SC.RecordArray's `indexOf` on %@, which is not an SC.Record. SC.RecordArray only works with records.".fmt(record));
-      SC.Logger.trace();
+      /*SC.Logger.warn("Developer Warning: Used SC.RecordArray's `indexOf` on %@, which is not an SC.Record. SC.RecordArray only works with records.".fmt(record));
+      SC.Logger.trace();*/
       //@endif
       return -1; // only takes records
     }
@@ -689,6 +689,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
       // was already READY_CLEAN
       if (didChange) this.notifyPropertyChange('status');
     }
+
     return this;
   },
 

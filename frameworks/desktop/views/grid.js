@@ -18,6 +18,49 @@ sc_require('views/list');
   allows you to modify the appearance of the drop target grid item accordingly
   (@see SC.ListItemView#isDropTarget).
 
+
+  ## Advanced usage examples
+
+  ### Fixed item count per column and row
+
+    itemsPerColumn: null,
+    itemsPerColumnBinding: SC.Binding.oneWay('...itemsPerColumn'),
+
+    itemsPerRow: null,
+    itemsPerRowBinding: SC.Binding.oneWay('...itemsPerRow'),
+
+    rowHeight: function () {
+      var frameHeight = this.get('clippingFrame').height,
+        itemsPerColumn = this.get('itemsPerColumn'),
+        rowHeight = frameHeight / itemsPerColumn;
+
+      return rowHeight;
+    }.property('itemsPerColumn', '_frameHeight').cacheable(),
+
+    columnWidth: function () {
+      var frameWidth = this.get('clippingFrame').width,
+        itemsPerRow = this.get('itemsPerRow'),
+        columnWidth = frameWidth / itemsPerRow;
+
+      return columnWidth;
+    }.property('itemsPerRow', '_frameWidth').cacheable(),
+
+
+  ### Fixed row height and column width
+
+    rowHeightBinding: SC.Binding.oneWay('...cellSize'),
+
+    columnWidthBinding: SC.Binding.oneWay('...cellSize')
+
+    stretchedRowHeight: function() {
+      return this.get('rowHeight');
+    }.property('rowHeight').cacheable(),,
+
+    stretchedColumnWidth: function() {
+      return this.get('columnWidth');
+    }.property('columnWidth').cacheable(),
+
+
   @extends SC.ListView
   @author Charles Jolley
   @version 1.0
@@ -123,11 +166,14 @@ SC.GridView = SC.ListView.extend(
 
   /** @private */
   columnCount: function () {
-    var length = this.get('length') || 0,
+    var length = this.get('length') || 0,
       itemsPerColumn = this.get('itemsPerColumn');
 
     return Math.ceil(length / itemsPerColumn);
   }.property('itemsPerColumn', 'length').cacheable(),
+
+
+
 
   /** @private */
   stretchedColumnWidth: function() {
@@ -224,13 +270,13 @@ SC.GridView = SC.ListView.extend(
         columnCount = this.get('columnCount');
 
       ret.width = columnCount * columnWidth;
-      this.set('calculatedWidth', ret.width);
+      //this.set('calculatedWidth', ret.width);
     } else {
       var rowHeight = this.get('rowHeight') || 48,
         rowCount = this.get('rowCount');
 
       ret.height = rowCount * rowHeight;
-      this.set('calculatedHeight', ret.height);
+      //this.set('calculatedHeight', ret.height);
     }
     return ret;
   },
@@ -257,7 +303,11 @@ SC.GridView = SC.ListView.extend(
 
   /** @private */
   showInsertionPoint: function (itemView, dropOperation) {
-    if (!itemView) return;
+    // If no itemView, it means we drag at the end
+    if (!itemView) {
+      itemView = this.itemViewForContentObject(this.getPath('content.lastObject'));
+      dropOperation = SC.DROP_AFTER;
+    }
 
     // if drop on, then just add a class...
     if (dropOperation & SC.DROP_ON) {
@@ -292,7 +342,7 @@ SC.GridView = SC.ListView.extend(
       // Adjust the position of the insertion point.
       top = layout.top;
       left = layout.left;
-      if (dropOperation & SC.DROP_AFTER) left += layout.width;
+      if (dropOperation & SC.DROP_AFTER) left += layout.width - 2;
       var height = layout.height;
 
       // Adjust the position of the insertion point.
@@ -320,7 +370,7 @@ SC.GridView = SC.ListView.extend(
     var f = this.get('frame'),
         sf = this.get('clippingFrame'),
         itemsPerRow = this.get('itemsPerRow'),
-        columnWidth = Math.floor(f.width / itemsPerRow),
+        columnWidth = this.get('stretchedColumnWidth'),
         row = Math.floor((loc.y - f.y - sf.y) / this.get('rowHeight'));
 
     var retOp = SC.DROP_BEFORE,
@@ -352,6 +402,8 @@ SC.GridView = SC.ListView.extend(
     Update all of their layouts if necessary.
   */
   viewDidResize: function () {
+    sc_super();
+
     var frame = this.get('clippingFrame'),
       lastFrameWidth = this._lastFrameWidth,
       width = frame.width,
@@ -383,8 +435,6 @@ SC.GridView = SC.ListView.extend(
       this.adjustChildLayouts();
       this.invokeOnce('adjustLayout');
     }
-
-    sc_super();
   },
 
   /** @private */
