@@ -812,7 +812,7 @@ SC.Logger = SC.Object.create(
 
     @returns {String}
   */
-  stringifyRecordedLogMessages: function() {
+  stringifyRecordedLogMessages: function(reverse) {
     var ret           = "",
         entries       = this.get('recordedLogMessages'),
         indentation   = 0,
@@ -823,6 +823,8 @@ SC.Logger = SC.Object.create(
         title, newIndentation, disparity;
 
     if (entries) {
+      if (reverse) entries = entries.reverse();
+
       for (i = 0, iLen = entries.length;  i < iLen;  ++i) {
         entry = entries[i];
         type  = entry.type;
