@@ -27,7 +27,7 @@ SC.SplitDividerView = SC.View.extend(SC.SplitChild, SC.SplitThumb,
 
   /** @private */
   classNameBindings: ['layoutDirection'],
-  
+
   /**
     Walks like a duck. Used and maintained by SC.SplitView to keep track
     of which of its childViews are dividers.
@@ -40,7 +40,7 @@ SC.SplitDividerView = SC.View.extend(SC.SplitChild, SC.SplitThumb,
     The layout direction of the parent SplitView. May be SC.LAYOUT_VERTICAL
     or SC.LAYOUT_HORIZONTAL. This property is also added as a class on this
     view.
-    
+
     You generally will not set this property yourself; it is managed by the
     parent SplitView.
 
@@ -59,8 +59,8 @@ SC.SplitDividerView = SC.View.extend(SC.SplitChild, SC.SplitThumb,
   autoResizeStyle: 'sc-fixed-size',
 
   movesSibling: SC.MOVES_CHILD,
-  
-  size: SC.propertyFromRenderDelegate('dividerSize', 10),
+
+  size: null,
 
   renderDelegateName: 'splitDividerRenderDelegate'
 });
