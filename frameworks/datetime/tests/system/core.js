@@ -230,7 +230,7 @@ test('compare', function() {
 test('Format', function() {
   equals(
     dt.toFormattedString('%a %A %b %B %d %D %h %H %I %j %m %M %p %S %N %w %y %Y %%a %E'),
-    'Sun Sunday Jun June 09 9 4 04 04 160 06 00 AM 22 7 0 85 1985 %a 34 years ago');
+    'Sun Sunday Jun June 09 9 4 04 04 160 06 00 AM 22 7 0 85 1985 %a 35 years ago');
 
   equals(dt.toFormattedString('%Z'), formatTimezone(dt.get('timezone')));
   equals(dt.adjust({ timezone:    0 }).toFormattedString('%Y-%m-%d %H:%M:%S %Z'), '1985-06-09 05:00:22 +00:00');
@@ -453,8 +453,15 @@ test('difference', function() {
   equals(SC.DateTime.difference(SC.DateTime.parse('2010-12-18', '%Y-%m-%d'), SC.DateTime.parse('2010-12-09', '%Y-%m-%d'), 'd'), -9);
   equals(SC.DateTime.difference(SC.DateTime.parse('2010-12-09 02:00:00', '%Y-%m-%d %H:%M:%S'), SC.DateTime.parse('2010-12-09 01:00:00', '%Y-%m-%d %H:%M:%S'), 'H'), -1);
   equals(SC.DateTime.difference(SC.DateTime.parse('2010-12-09 01:00:00', '%Y-%m-%d %H:%M:%S'), SC.DateTime.parse('2010-12-09 01:10:00', '%Y-%m-%d %H:%M:%S'), 'H'), 0);
-  equals(SC.DateTime.difference(SC.DateTime.parse('2010-12-09 01:00:00', '%Y-%m-%d %H:%M:%S'), SC.DateTime.parse('2010-12-09 01:50:00', '%Y-%m-%d %H:%M:%S'), 'H'), 1);
+  equals(SC.DateTime.difference(SC.DateTime.parse('2010-12-09 01:00:00', '%Y-%m-%d %H:%M:%S'), SC.DateTime.parse('2010-12-09 01:50:00', '%Y-%m-%d %H:%M:%S'), 'H'), 0);
+  equals(SC.DateTime.difference(SC.DateTime.parse('2010-12-09 01:00:00', '%Y-%m-%d %H:%M:%S'), SC.DateTime.parse('2010-12-09 02:10:00', '%Y-%m-%d %H:%M:%S'), 'H'), 1);
   equals(SC.DateTime.difference(SC.DateTime.parse('2010-12-09 01:01:00', '%Y-%m-%d %H:%M:%S'), SC.DateTime.parse('2010-12-09 01:10:10', '%Y-%m-%d %H:%M:%S'), 'M'), 9);
   equals(SC.DateTime.difference(SC.DateTime.parse('2010-12-09 01:00:00', '%Y-%m-%d %H:%M:%S'), SC.DateTime.parse('2010-12-09 01:00:20', '%Y-%m-%d %H:%M:%S'), 'S'), 20);
   equals(SC.DateTime.difference(SC.DateTime.parse('2010-12-09 01:10:00', '%Y-%m-%d %H:%M:%S'), SC.DateTime.parse('2010-12-09 01:00:00', '%Y-%m-%d %H:%M:%S'), 'S'), -600);
+  equals(SC.DateTime.difference(SC.DateTime.parse('2010-11-09 01:00:00', '%Y-%m-%d %H:%M:%S'), SC.DateTime.parse('2010-12-09 01:00:00', '%Y-%m-%d %H:%M:%S'), 'month'), 1);
+  equals(SC.DateTime.difference(SC.DateTime.parse('2010-02-28 01:00:00', '%Y-%m-%d %H:%M:%S'), SC.DateTime.parse('2010-03-28 01:00:00', '%Y-%m-%d %H:%M:%S'), 'month'), 1);
+  equals(SC.DateTime.difference(SC.DateTime.parse('2009-12-09 01:00:00', '%Y-%m-%d %H:%M:%S'), SC.DateTime.parse('2010-12-09 01:00:00', '%Y-%m-%d %H:%M:%S'), 'year'), 1);
+  equals(SC.DateTime.difference(SC.DateTime.parse('2009-12-09 00:00:00', '%Y-%m-%d %H:%M:%S'), SC.DateTime.parse('2010-12-09 01:00:00', '%Y-%m-%d %H:%M:%S'), 'year'), 1);
+  equals(SC.DateTime.difference(SC.DateTime.parse('2009-12-09 02:00:00', '%Y-%m-%d %H:%M:%S'), SC.DateTime.parse('2010-12-09 01:00:00', '%Y-%m-%d %H:%M:%S'), 'year'), 0);
+  equals(SC.DateTime.difference(SC.DateTime.parse('2010-12-09 01:00:00', '%Y-%m-%d %H:%M:%S'), SC.DateTime.parse('2009-12-09 00:00:00', '%Y-%m-%d %H:%M:%S'), 'year'), -1);
 });

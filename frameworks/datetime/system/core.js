@@ -1248,8 +1248,9 @@ SC.DateTime.mixin(SC.Comparable,
     @param {SC.DateTime} a the first DateTime instance
     @param {SC.DateTime} b the second DateTime instance
     @param {String} format the interval to get the difference in
+    @param {Boolean} asFloat by default, it will truncate the result to zero decimal places, returning an integer. Pass true if you want a floating point number.
   */
-  difference: function(a, b, format) {
+  difference: function(a, b, format, asFloat) {
     if (SC.none(a) || SC.none(b)) throw new Error("You must pass two valid dates to difference()");
     var ma = a.get('milliseconds'),
         mb = b.get('milliseconds'),
@@ -1283,10 +1284,10 @@ SC.DateTime.mixin(SC.Comparable,
       divider = 6048e5; // week: 1000 * 60 * 60 * 24 * 7
       break;
     case 'month':
-      diff = this.monthDiff(a, b);
+      diff = this.monthDiff(b, a);
       break;
     case 'year':
-      diff = this.monthDiff(a, b) / 12;
+      diff = this.monthDiff(b, a) / 12;
       break;
     default:
       throw new Error(format + " is not supported");
@@ -1294,13 +1295,38 @@ SC.DateTime.mixin(SC.Comparable,
 
     var ret = diff/divider;
 
-    return Math.round(ret);
+    return asFloat ? ret : (ret < 0 ? Math.ceil(ret) || 0 : Math.floor(ret));
   },
 
   monthDiff: function(a, b) {
-    var wholeMonthDiff = ((b.get('year') - a.get('year')) * 12) + (b.get('month') - a.get('month'));
+    if (SC.DateTime.compare(a, b) < 0) {
+        // end-of-month calculations work correct when the start month has more
+        // days than the end month.
+        return -this.monthDiff(b, a);
+    }
 
-    return wholeMonthDiff;
+    // difference in months
+    var bM = b.get('milliseconds'),
+      wholeMonthDiff = ((b.get('year') - a.get('year')) * 12) + (b.get('month') - a.get('month')),
+      // b is in (anchor - 1 month, anchor + 1 month)
+      anchor = a.advance({ month: wholeMonthDiff }),
+      anchorM = anchor.get('milliseconds'),
+      anchor2,
+
+      adjust;
+
+    if ((bM - anchorM) < 0) {
+        anchor2 = a.advance({ month: wholeMonthDiff-1 });
+        // linear across the month
+        adjust = (bM - anchorM) / (anchorM - anchor2.get('milliseconds'));
+    } else {
+        anchor2 = a.advance({ month: wholeMonthDiff+1 });
+        // linear across the month
+        adjust = (bM - anchorM) / (anchor2.get('milliseconds') - anchorM);
+    }
+
+    //check for negative zero, return zero if negative zero
+    return -(wholeMonthDiff + adjust) || 0;
   }
 
 });
