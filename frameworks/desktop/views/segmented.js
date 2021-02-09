@@ -263,6 +263,14 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   shouldHandleOverflow: YES,
 
   /**
+    The array of overflowed items to display.
+
+    @type Array
+    @default null
+  */
+  overflowItems: null,
+
+  /**
     The title to use for the overflow segment if it appears.
 
     NOTE: This will not be HTML escaped and must never be assigned to user inserted text!
@@ -287,6 +295,14 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     @default null
   */
   overflowIcon: null,
+
+  /**
+    The view class used when creating the overflowMenu.
+
+    @type SC.View
+    @default SC.MenuPane
+  */
+  overflowViewClass: SC.MenuPane,
 
   /**
     The view class used when creating segments.
@@ -377,37 +393,23 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   itemsDidChange: function () {
     var items = this.get('items') || [],
         localItem,                        // Used to avoid altering the original items
-        previousItem,
         childViews = this.get('childViews'),
         childView,
         overflowView = this.get('overflowView'),
         value = this.get('value'),        // The value can change if items that were once selected are removed
         isSelected,
         itemKeys = this.get('itemKeys'),
-        itemKey,
         segmentViewClass = this.get('segmentViewClass'),
+        childViewsLength = this.get('shouldHandleOverflow') ? childViews.get('length') - 1 : childViews.get('length'),
         i, j;
 
     // Update childViews
-    var childViewsLength = this.get('shouldHandleOverflow') ? childViews.get('length') - 1 : childViews.get('length');
     if (childViewsLength > items.get('length')) {   // We've lost segments (ie. childViews)
 
       // Remove unneeded segments from the end back
       for (i = childViewsLength - 1; i >= items.get('length'); i--) {
         childView = childViews.objectAt(i);
         localItem = childView.get('localItem');
-
-        // Remove observers from items we are losing off the end
-        if (localItem instanceof SC.Object) {
-
-          for (j = itemKeys.get('length') - 1; j >= 0; j--) {
-            itemKey = this.get(itemKeys.objectAt(j));
-
-            if (itemKey) {
-              localItem.removeObserver(itemKey, this, this.itemContentDidChange);
-            }
-          }
-        }
 
         // If a selected childView has been removed then update our value
         if (SC.isArray(value)) {
@@ -447,18 +449,6 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     for (i = 0; i < items.get('length'); i++) {
       localItem = items.objectAt(i);
       childView = childViews.objectAt(i);
-      previousItem = childView.get('localItem');
-
-      if (previousItem instanceof SC.Object && !items.contains(previousItem)) {
-        // If the old item is no longer in the view, remove its observers
-        for (j = itemKeys.get('length') - 1; j >= 0; j--) {
-          itemKey = this.get(itemKeys.objectAt(j));
-
-          if (itemKey) {
-            previousItem.removeObserver(itemKey, this, this.itemContentDidChange);
-          }
-        }
-      }
 
       // Skip null/undefined items (but don't skip empty strings)
       if (SC.none(localItem)) continue;
@@ -477,17 +467,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       } else if (SC.typeOf(localItem) === SC.T_HASH) {
 
         localItem = SC.Object.create(localItem);
-      } else if (localItem instanceof SC.Object)  {
-
-        // We don't need to make any changes to SC.Object items, but we can observe them
-        for (j = itemKeys.get('length') - 1; j >= 0; j--) {
-          itemKey = this.get(itemKeys.objectAt(j));
-
-          if (itemKey) {
-            localItem.removeObserver(itemKey, this, this.itemContentDidChange);
-            localItem.addObserver(itemKey, this, this.itemContentDidChange, i);
-          }
-        }
+      } else if (localItem instanceof SC.Object) {
+        localItem = this.formatLocalItem(itemKeys, localItem);
       } else {
         SC.Logger.error('SC.SegmentedView items may be Strings, Objects (ie. Hashes) or SC.Objects only');
       }
@@ -525,15 +506,28 @@ SC.SegmentedView = SC.View.extend(SC.Control,
 
     childView = childViews.objectAt(index);
     if (childView) {
+      var localItem = this.formatLocalItem(this.get('itemKeys'), item, childView.get('localItem'));
 
       // Update the childView
-      childView.updateItem(this, item);
+      childView.updateItem(this, localItem);
 
       // Reset our measurements (which depend on width/height or title) and adjust visible views
       if (this.get('shouldHandleOverflow')) {
         this.invokeLast(this.remeasure);
       }
     }
+  },
+
+  formatLocalItem: function (itemKeys, item, localItem) {
+    if (SC.Record && item instanceof SC.Record) {
+      if (!localItem) localItem = SC.Object.create();
+      for (j = itemKeys.get('length') - 1; j >= 0; j--) {
+        itemKey = this.get(itemKeys.objectAt(j));
+        localItem[itemKey] = item.get(itemKey);
+      }
+      item = localItem;
+    }
+    return item;
   },
 
   /** @private
@@ -603,7 +597,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         wantsAutoResize = this.get('shouldAutoResize'),
         layoutProperty = isHorizontal ? 'width' : 'height',
         canAutoResize = !SC.none(this.getPath('layout.%@'.fmt(layoutProperty))),
-        willAutoResize = wantsAutoResize && canAutoResize;
+        willAutoResize = wantsAutoResize && canAutoResize,
+        overflowItems = [];
 
     // If child views and cachedDims lengths are out of sync here, it means adjustOverflow
     // got called in between itemsDidChange and remeasure. Since we know that the remeasure is
@@ -613,9 +608,6 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     // This variable is useful to optimize when we are overflowing
     isOverflowing = NO;
     overflowView.set('isSelected', NO);
-
-    // Clear out the overflow items (these are the items not currently visible)
-    this.overflowItems = [];
 
     length = this.cachedDims.length;
     for (i = 0; i < length; i++) {
@@ -632,7 +624,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       // Update the view depending on overflow state.
       if (isOverflowing) {
         // Add the localItem to the overflowItems
-        this.overflowItems.pushObject(childView.get('localItem'));
+        overflowItems.pushObject(childView.get('localItem'));
 
         childView.set('isVisible', NO);
 
@@ -650,6 +642,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         if (i === 0) overflowView.set('isFirstSegment', NO);
       }
     }
+
+    this.set('overflowItems', overflowItems);
 
     // Show/hide the overflow view as needed.
     overflowView.set('isVisible', isOverflowing);
@@ -1184,30 +1178,22 @@ SC.SegmentedView = SC.View.extend(SC.Control,
 
     this.triggerItemAtIndex(item.get('index'));
 
-    // Cleanup
-    menu.removeObserver('selectedItem', this, 'selectOverflowItem');
-
-    this.activeChildView.set('isActive', NO);
-    this.activeChildView = null;
+    this.cleanupOverflowMenu(menu);
   },
 
-  /** @private
-    Presents the popup menu containing overflowed segments.
-  */
-  showOverflowMenu: function () {
-    var self = this,
-        childViews = this.get('childViews'),
+  /** @private */
+  formatOverflowItems: function(overflowItems) {
+    var childViews = this.get('childViews'),
         itemValueKey = this.get('itemValueKey'),
         itemLayerIdKey = this.get('itemLayerIdKey'),
-        overflowItems = this.overflowItems,
         overflowItemsLength,
         startIndex,
         isArray,
         value,
         item,
-        layerId,
-        layer,
-        overflowElement;
+        layerId;
+
+    if (!overflowItems) overflowItems = this.get('overflowItems');
 
     // Check the currently selected item if it is in overflowItems
     overflowItemsLength = overflowItems.get('length');
@@ -1236,10 +1222,35 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       }
     }
 
+    return overflowItems;
+  },
+
+  /** @private
+    Presents the popup menu containing overflowed segments.
+  */
+  showOverflowMenu: function () {
+    var menu = this._overflowView;
+    if (!menu) menu = this._overflowView = this.createOverflowMenu();
+
+    menu.set('items', this.formatOverflowItems());
+
+    var layer = this.get('layer'),
+      overflowElement = layer.childNodes[layer.childNodes.length - 1];
+
+    menu.popup(overflowElement);
+
+    menu.addObserver("selectedItem", this, 'selectOverflowItem');
+  },
+
+  /** @private
+    Create the popup menu containing overflowed segments.
+  */
+  createOverflowMenu: function() {
+    var self = this;
+
     // TODO: we can't pass a shortcut key to the menu, because it isn't a property of SegmentedView (yet?)
-    var menu = SC.MenuPane.create({
+    return this.get('overflowViewClass').create({
       layout: { width: 200 },
-      items: overflowItems,
       itemTitleKey: this.get('itemTitleKey'),
       itemIconKey: this.get('itemIconKey'),
       itemIsEnabledKey: this.get('itemIsEnabledKey'),
@@ -1251,27 +1262,25 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       // there is no callback method or observable property when the menu closes, override modalPaneDidClick().
       modalPaneDidClick: function () {
         sc_super();
-
-        // Cleanup
-        this.removeObserver('selectedItem', self, 'selectOverflowItem');
-
-        self.activeChildView.set('isActive', NO);
-        self.activeChildView = null;
+        self.cleanupOverflowMenu(this);
       }
     });
+  },
 
-    layer = this.get('layer');
-    overflowElement = layer.childNodes[layer.childNodes.length - 1];
-    menu.popup(overflowElement);
+  /** @private */
+  cleanupOverflowMenu: function(menu) {
+    menu.removeObserver('selectedItem', this, 'selectOverflowItem');
 
-    menu.addObserver("selectedItem", this, 'selectOverflowItem');
+    this.activeChildView.set('isActive', NO);
+    this.activeChildView = null;
   },
 
   /** @private
     Whenever the value changes, update the segments accordingly.
   */
   valueDidChange: function () {
-    var overflowItemsLength,
+    var overflowItems = this.get('overflowItems'),
+        overflowItemsLength,
         childViews = this.get('childViews'),
         childViewsLength = this.get('shouldHandleOverflow') ? childViews.get('length') - 1 : childViews.get('length'),
         overflowIndex = Infinity,
@@ -1279,8 +1288,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         childView;
 
     // The index where childViews are all overflowed
-    if (this.overflowItems) {
-      overflowItemsLength = this.overflowItems.get('length');
+    if (overflowItems) {
+      overflowItemsLength = overflowItems.get('length');
       overflowIndex = childViewsLength - overflowItemsLength;
 
       // Clear out the selected value of the overflowView (if it's set)
@@ -1298,6 +1307,16 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         childView.set('isSelected', NO);
       }
     }
-  }.observes('value')
+  }.observes('value'),
+
+  /** @private @see SC.Object */
+  destroy: function () {
+    var ret = sc_super();
+
+    // Destroy the menu view we created.
+    if (this._overflowView) this._overflowView.destroy();
+
+    return ret;
+  }
 
 });
