@@ -99,7 +99,7 @@ SC.CascadeDataSource = SC.DataSource.extend(
 
 
   /** @private - just cascades */
-  retrieveRecords: function(store, storeKeys, ids) {
+  retrieveRecords: function(store, storeKeys) {
     var sources = this.get('dataSources'),
         len     = sources ? sources.length : 0,
         ret     = NO,

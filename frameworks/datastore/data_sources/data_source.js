@@ -291,11 +291,10 @@ SC.DataSource = SC.Object.extend( /** @scope SC.DataSource.prototype */ {
 
     @param {SC.Store} store the requesting store
     @param {Array} storeKeys
-    @param {Array} ids - optional
     @returns {Boolean} YES if handled, NO otherwise
   */
-  retrieveRecords: function(store, storeKeys, ids) {
-    return this._handleEach(store, storeKeys, this.retrieveRecord, ids);
+  retrieveRecords: function(store, storeKeys) {
+    return this._handleEach(store, storeKeys, this.retrieveRecord);
   },
 
   /**
@@ -391,7 +390,7 @@ SC.DataSource = SC.Object.extend( /** @scope SC.DataSource.prototype */ {
 
   */
   updateRecords: function(store, storeKeys, params) {
-    return this._handleEach(store, storeKeys, this.updateRecord, null, params);
+    return this._handleEach(store, storeKeys, this.updateRecord, params);
   },
 
   /**
@@ -415,7 +414,7 @@ SC.DataSource = SC.Object.extend( /** @scope SC.DataSource.prototype */ {
 
   */
   createRecords: function(store, storeKeys, params) {
-    return this._handleEach(store, storeKeys, this.createRecord, null, params);
+    return this._handleEach(store, storeKeys, this.createRecord, params);
   },
 
   /**
@@ -437,19 +436,17 @@ SC.DataSource = SC.Object.extend( /** @scope SC.DataSource.prototype */ {
 
   */
   destroyRecords: function(store, storeKeys, params) {
-    return this._handleEach(store, storeKeys, this.destroyRecord, null, params);
+    return this._handleEach(store, storeKeys, this.destroyRecord, params);
   },
 
   /** @private
     invokes the named action for each store key.  returns proper value
   */
-  _handleEach: function(store, storeKeys, action, ids, params) {
-    var len = storeKeys.length, idx, ret, cur, idOrParams;
+  _handleEach: function(store, storeKeys, action, params) {
+    var len = storeKeys.length, idx, ret, cur;
 
     for(idx=0;idx<len;idx++) {
-      idOrParams = ids ? ids[idx] : params;
-
-      cur = action.call(this, store, storeKeys[idx], idOrParams);
+      cur = action.call(this, store, storeKeys[idx], params);
       if (ret === undefined) {
         ret = cur ;
       } else if (ret === YES) {
@@ -488,10 +485,9 @@ SC.DataSource = SC.Object.extend( /** @scope SC.DataSource.prototype */ {
 
     @param {SC.Store} store the requesting store
     @param {Array} storeKey key to retrieve
-    @param {String} id the id to retrieve
     @returns {Boolean} YES if handled
   */
-  retrieveRecord: function(store, storeKey, id) {
+  retrieveRecord: function(store, storeKey) {
     return NO ;
   },
 
