@@ -428,9 +428,6 @@ SC.Record = SC.Object.extend(
     if (ro){
       store.destroyRecord(null, null, sk);
       this.notifyPropertyChange('status');
-      // If there are any aggregate records, we might need to propagate our new
-      // status to them.
-      this.propagateToAggregates();
 
     } else if (prKey){
       rec = store.materializeRecord(prKey);
@@ -462,10 +459,6 @@ SC.Record = SC.Object.extend(
 
     this.get('store').recordDidChange(null, null, this.get('storeKey'), key);
     this.notifyPropertyChange('status');
-
-    // If there are any aggregate records, we might need to propagate our new
-    // status to them.
-    this.propagateToAggregates();
 
     return this;
   },
@@ -671,7 +664,7 @@ SC.Record = SC.Object.extend(
       val = this.get(key);
 
       if (SC.kindOf(val, SC.ManyArray)) {
-        recs = val.get('loadedRecords');
+        recs = val.getLoadedRecords();
       }
       else {
         recs = [val];
@@ -694,8 +687,6 @@ SC.Record = SC.Object.extend(
     @returns {SC.Record} receiver
   */
   storeDidChangeProperties: function(statusOnly, keys) {
-    // TODO:  Should this function call propagateToAggregates() at the
-    //        appropriate times?
     if (statusOnly) this.notifyPropertyChange('status');
     else {
       if (keys) {

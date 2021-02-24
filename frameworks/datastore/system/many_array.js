@@ -167,14 +167,15 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @type {SC.Array}
     @property
   */
-  loadedRecords: function () {
+  getLoadedRecords: function () {
     var storeIds  = this.get('readOnlyStoreIds'),
-      store = this.get('store'),
-      recordType = this.get('recordType'),
-      storeKey, status,
-      ret = [];
+      store = this.get('store');
 
     if (!storeIds || !store) return undefined; // nothing to do
+
+    var recordType = this.get('recordType'),
+      storeKey, status,
+      ret = [];
 
     storeIds.forEach(function(storeId) {
       // Handle transient records.
@@ -183,7 +184,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
       } else {
         storeKey = store.storeKeyFor(recordType, storeId);
       }
-      
+
       status = store.readStatus(storeKey);
 
       // If record is not loaded already, then ask the data source to retrieve it.
@@ -193,7 +194,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     });
 
     return ret;
-  }.property(),
+  },
 
 
   // ..........................................................
