@@ -53,7 +53,8 @@ $disable-default-text-color: #A0A0A0;
 $border-radius-small: 0px;
 $border-radius-regular: 1px;
 $border-radius-large: 2px;
-$border-radius-jumbo: 3px;
+$border-radius-huge: 3px;
+$border-radius-jumbo: 4px;
 
 
 
@@ -97,6 +98,7 @@ $sel-active-button-text-shadow: $sel-active-default-text-shadow;
 $button-border-radius-small: $border-radius-small;
 $button-border-radius-regular: $border-radius-regular;
 $button-border-radius-large: $border-radius-large;
+$button-border-radius-huge: $border-radius-huge;
 $button-border-radius-jumbo: $border-radius-jumbo;
 
 
@@ -139,6 +141,7 @@ $sel-active-segment-text-shadow: $sel-active-default-text-shadow;
 $segment-border-radius-small: $border-radius-small;
 $segment-border-radius-regular: $border-radius-regular;
 $segment-border-radius-large: $border-radius-large;
+$segment-border-radius-huge: $border-radius-huge;
 $segment-border-radius-jumbo: $border-radius-jumbo;
 
 

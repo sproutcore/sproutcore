@@ -1,0 +1,33 @@
+
+@theme(sc-huge-size) {
+
+$theme.sc-segment-view {
+  font-size: 16px;
+  padding: 6px 10px;
+
+
+  .sc-button-label .icon { left: -5px; top: 1px; }
+
+  &.sc-first-segment {
+    border-top-left-radius: $segment-border-radius-huge;
+    border-bottom-left-radius: $segment-border-radius-huge;
+
+    &.vertical {
+      border-radius: 0;
+      border-top-left-radius: $segment-border-radius-huge;
+      border-top-right-radius: $segment-border-radius-huge;
+    }
+  }
+  &.sc-last-segment {
+    border-top-right-radius: $segment-border-radius-huge;
+    border-bottom-right-radius: $segment-border-radius-huge;
+
+    &.vertical {
+      border-radius: 0;
+      border-bottom-left-radius: $segment-border-radius-huge;
+      border-bottom-right-radius: $segment-border-radius-huge;
+    }
+  }
+}
+
+}

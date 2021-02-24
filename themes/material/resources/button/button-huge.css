@@ -3,7 +3,7 @@
 
   $theme.button {
     height: 36px;
-    font-size: 14px;
+    font-size: 16px;
     border-radius: $button-border-radius-large;
 
     .sc-button-label {
