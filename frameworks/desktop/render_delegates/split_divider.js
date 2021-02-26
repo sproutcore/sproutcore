@@ -8,8 +8,8 @@
 SC.BaseTheme.splitDividerRenderDelegate = SC.RenderDelegate.create({
   className: 'split-divider',
 
-  splitPositionOffset: -5,
-  splitSizeOffset: 10,
+  splitPositionOffset: 0,
+  splitSizeOffset: 0,
 
   render: function(dataSource, context) {
     this.addSizeClassName(dataSource, context);
@@ -17,6 +17,7 @@ SC.BaseTheme.splitDividerRenderDelegate = SC.RenderDelegate.create({
     // the divider view itself is the grabber, but the visible line
     // may be inside of it.
     context.push("<div class='line'></div>");
+    context.push("<div class='sm-circle'></div>");
   },
 
   update: function(dataSource, jquery) {

@@ -1,6 +1,7 @@
 
 $theme.split-divider {
   background: transparent;
+  overflow: visible;
   border: 0 none;
   z-index: 1;
 
@@ -9,23 +10,83 @@ $theme.split-divider {
     box-shadow: $split-divider-box-shadow;
     border: 0 none;
     position: absolute;
+    &:after {
+      content: '';
+      position: absolute;
+    }
+  }
+  .sm-circle {
+    display: none;
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background: rgba(255,255,255,.5);
+    border: 1px solid rgba(0,0,0,0.5);
+    border-radius: 30px;
+    &:after {
+      position: absolute;
+      font: normal normal 400 17px/1 FontAwesome;
+      position: absolute;
+    }
   }
 
   &.sc-layout-horizontal {
     .line {
-      left: 5px;
-      right: 5px;
+      left: 0;
+      right: 0;
       top: 0;
       bottom: 0;
+      &:after {
+        left: -4px;
+        right: -4px;
+        top: 0;
+        bottom: 0;
+      }
+    }
+    .sm-circle {
+      left: -15px;
+      bottom: 5%;
+      &:after {
+        content: "\f07e";
+        top: 7px;
+        left: 6px;
+      }
     }
   }
 
   &.sc-layout-vertical {
     .line {
-      top: 5px;
-      bottom: 5px;
+      top: 0;
+      bottom: 0;
       left: 0;
       right: 0;
+
+      &:after {
+        top: -4px;
+        bottom: -4px;
+        left: 0;
+        right: 0;
+      }
+    }
+
+    .sm-circle {
+      top: -15px;
+      right: 5%;
+      &:after {
+        content: "\f07d";
+        left: 10px;
+        top: 7px;
+      }
     }
   }
+}
+
+$theme.touch .split-divider {
+  .sm-circle {
+    display: block;
+  }
+}
+
+.no-sm-circle .sm-circle {
+  display: none !important;
 }

@@ -219,6 +219,13 @@ SC.SplitView = SC.View.extend({
   }.property('frame', 'layoutDirection').cacheable(),
 
   /** @private */
+  splitChildViews: function() {
+    return this.get('childViews').filter(function(childView) {
+      return childView.isSplitChild;
+    });
+  }.property(),
+
+  /** @private */
   viewDidResize: function () {
     this.scheduleTiling();
 
@@ -231,7 +238,7 @@ SC.SplitView = SC.View.extend({
     this.scheduleTiling();
     // Propagate to dividers.
     var layoutDirection = this.get('layoutDirection'),
-        childViews = this.get('childViews'),
+        childViews = this.get('splitChildViews'),
         len = childViews ? childViews.get('length') : 0,
         i, view;
     for (i = 0; i < len; i++) {
@@ -294,10 +301,87 @@ SC.SplitView = SC.View.extend({
     this.invokeOnce('_scsv_setupChildViews');
   },
 
+  /**
+    Define this property with a subclass of an SC.SegmentedView to enable
+    mobile support.
+
+    @type SC.SegmentedView
+    @default null
+  */
+  selectorView: null,
+
+  /**
+    If the frame width is smaller that `minSizeForSelector` and if you
+    defined a `selectorView`, this property will be set to true.
+
+    @type Boolean
+    @default false
+    @readonly
+  */
+  showSelector: false,
+
+  /**
+    This is binded to the selectorView value.
+
+    @type String
+    @default null
+    @readonly
+  */
+  selectedChild: null,
+
+  /**
+    The minimum size at witch the selector will be show.
+    If 0 it will be computed based on the minimumSize of the childs.
+
+    @type Number
+    @default 0
+    @readonly
+  */
+  minSizeForSelector: 0,
+
+  selectedChildDidChange: function() {
+    this.scheduleTiling();
+  }.observes('selectedChild'),
+
   createChildViews: function() {
     sc_super();
 
     this.invokeOnce('_scsv_setupChildViews');
+
+    var selectorView = this.get('selectorView');
+    if (selectorView) {
+      var minSize = this.minSizeForSelector,
+        missingMinimumSize = false;
+
+      if (!minSize) this.get('childViews').forEach(function(child) {
+        if (child.minimumSize) minSize += child.minimumSize;
+        else missingMinimumSize = true;
+      });
+
+      if (missingMinimumSize) {
+        SC.$error('Missing minimum size');
+      }
+      else {
+        this.minSizeForSelector = minSize;
+
+        var selectorBgView = this.selectorBgView;
+        if (selectorBgView) {
+          this.appendChild(selectorBgView.create({
+            isVisibleBinding: SC.Binding.from('showSelector', this).oneWay()
+          }));
+        }
+
+        selectorView = this.selectorView = selectorView.create({
+          valueBinding: SC.Binding.from('selectedChild', this),
+          isVisibleBinding: SC.Binding.from('showSelector', this).oneWay()
+        })
+        this.appendChild(selectorView);
+
+        this.invokeNext(function() {
+          this.set('selectedChild', selectorView.get('items')[0].value);
+        })
+      }
+    }
   },
 
   /**
@@ -315,7 +399,7 @@ SC.SplitView = SC.View.extend({
         layoutDirection = this.get('layoutDirection'),
         dividerSize = this.get('dividerSize'),
 
-        children = this.get('childViews').copy(), len = children.length, idx,
+        children = this.get('splitChildViews'), len = children.length, idx,
         child, lastChild, lastNonDividerChild,
 
         oldDividers = this._scsv_dividers || {}, newDividers = {}, divider, dividerId;
@@ -345,7 +429,6 @@ SC.SplitView = SC.View.extend({
       child.previousView = lastChild;
       child.nextView = undefined;
       child.viewIndex = idx;
-      if (SC.none(child._preferedSize)) child._preferedSize = child.size;
 
       if (lastChild) {
         lastChild.nextView = child;
@@ -441,24 +524,62 @@ SC.SplitView = SC.View.extend({
     // - If not meant to automatically resize children to fit, change the SplitView
     //   size to match the total size of all children.
 
-    var size, frameSize = this.get('_frameSize');
-
-    size = this.invokeDelegateMethod(del, 'splitViewLayoutChildren', this);
-
-    if (this.get('shouldResizeChildrenToFit') && size !== frameSize) {
-      this.invokeDelegateMethod(del, 'splitViewResizeChildrenToFit', this, size);
+    var minSizeForSelector = this.minSizeForSelector,
+      showSelector = this.showSelector,
+      frameSize = this.get('_frameSize'),
       size = this.invokeDelegateMethod(del, 'splitViewLayoutChildren', this);
-    }
 
-    if (!this.get('shouldResizeChildrenToFit')) {
-      if (this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL) {
-        this.adjust('width', size);
-      } else {
-        this.adjust('height', size);
+    if (minSizeForSelector && frameSize <= minSizeForSelector) {
+      var selectedChild = this.get('selectedChild'),
+        selectedView = this[selectedChild];
+
+      this.get('splitChildViews').forEach(function(child) {
+        if (child.isSplitDivider) child.set('isVisible', false);
+        else {
+          child.set('position', 0);
+          child.set('size', selectedView === child ? frameSize : 0);
+        }
+      });
+
+      this.set('showSelector', true);
+    }
+    else {
+      if (this.showSelector) {
+        this.get('splitChildViews').forEach(function(child) {
+          if (child.isSplitDivider) child.set('isVisible', true);
+          else {
+            var cm = child.get('minimumSize');
+            if (cm) child.set('size', cm);
+          }
+        });
+        this.set('showSelector', false);
+        this._scsv_setupChildViews();
+      }
+      else {
+        if (this.get('shouldResizeChildrenToFit') && size !== frameSize) {
+          this.invokeDelegateMethod(del, 'splitViewResizeChildrenToFit', this, size);
+          size = this.invokeDelegateMethod(del, 'splitViewLayoutChildren', this);
+        }
+
+        if (!this.get('shouldResizeChildrenToFit')) {
+          if (this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL) {
+            this.adjust('width', size);
+          } else {
+            this.adjust('height', size);
+          }
+        }
       }
     }
 
+    if (showSelector !== this.showSelector) {
+      this.notifyShowSelectorDidChange(this.showSelector);
+    }
+
     this.set('needsTiling', NO);
+  },
+
+  notifyShowSelectorDidChange: function(showSelector) {
+    // Delegate
   },
 
   /**
@@ -473,7 +594,7 @@ SC.SplitView = SC.View.extend({
   splitViewLayoutChildren: function(splitView) {
     var del = this.get('delegate');
 
-    var children = this.get('childViews'), len = children.length, idx,
+    var children = this.get('splitChildViews'), len = children.length, idx,
         child, pos = 0;
 
     for (idx = 0; idx < len; idx++) {
@@ -510,7 +631,7 @@ SC.SplitView = SC.View.extend({
     //
 
     var frameSize = this.get('_frameSize');
-    var children = this.get('childViews'), len = children.length, idx,
+    var children = this.get('splitChildViews'), len = children.length, idx,
         child, resizableSize = 0, nonResizableSize = 0, childSize;
 
     // To do this sizing while keeping things proportionate, the total size of resizable
@@ -548,7 +669,7 @@ SC.SplitView = SC.View.extend({
   _resizeChildrenForSize: function(runningSize, targetSize, useResizable, outOfSize) {
     var del = this.get('delegate');
 
-    var children = this.get('childViews'), idx, len = children.length, child;
+    var children = this.get('splitChildViews'), idx, len = children.length, child;
 
     var diff = targetSize - runningSize;
     for (idx = 0; idx < len; idx++) {
@@ -567,7 +688,6 @@ SC.SplitView = SC.View.extend({
 
         size = this.invokeDelegateMethod(del, 'splitViewConstrainSizeForChild', this, child, size);
         this.invokeDelegateMethod(del, 'splitViewSetSizeForChild', this, child, size);
-
 
         // we remove the original child size—but we don't add it back.
         // we don't add it back because the load is no longer shared.
@@ -672,7 +792,7 @@ SC.SplitView = SC.View.extend({
   */
   _scsv_createPlan: function() {
     var del = this.get('delegate'),
-        plan = [], children = this.get('childViews'), idx, len = children.length,
+        plan = [], children = this.get('splitChildViews'), idx, len = children.length,
         child, childPosition, childSize;
 
     for (idx = 0; idx < len; idx++) {
@@ -964,7 +1084,7 @@ SC.SplitView = SC.View.extend({
     }
 
     if (!child.isSplitDivider && (size <= this.get('collapsedSize')) && !child.get('didRequestCollapse')) {
-      size = child._preferedSize || this.get('minimumSize') || 0;
+      size = child._initialSize || this.get('minimumSize') || 0;
     }
 
     return size;

@@ -52,6 +52,13 @@ SC.NeedsSplitParent = {
 SC.SplitChild =
   /** @scope SC.SplitChild.prototype */{
   /**
+    Walk like a duck.
+
+    @type Boolean
+  */
+  isSplitChild: YES,
+
+  /**
     Set to YES if your Split Child is a divider view.
 
     @type Boolean
@@ -234,14 +241,18 @@ SC.SplitChild =
     if (!split) return;
 
     var position = this.get('position') + this.get('positionOffset'),
-        size = this.get('size') + this.get('sizeOffset');
+        size = this.get('size') + this.get('sizeOffset'),
+        childBottom = 0;
 
+    if (split.showSelector) {
+      childBottom = split.selectorView.layout.height-1;
+    }
 
     if (split.get('layoutDirection') === SC.LAYOUT_HORIZONTAL) {
       this.set('layout', {
         left: position,
         width: size,
-        top: 0, bottom: 0
+        top: 0, bottom: childBottom
       });
     } else {
       this.set('layout', {
