@@ -470,11 +470,7 @@ SC.AlertPane = SC.PanelPane.extend(
     @default { top : 0.3, centerX: 0, width: 500 }
     @see SC.View#layout
   */
-  layout: { top: 0.3, centerX: 0, width: 500 },
-
-  media: {
-    '(max-width: 450px)': { layout: { width: .94 } },
-  },
+  layout: { top: 0.25, centerX: 0, width: 500 },
 
   /** @private - internal view that is actually displayed */
   contentView: SC.View.extend({

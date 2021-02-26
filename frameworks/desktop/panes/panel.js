@@ -170,6 +170,11 @@ SC.PanelPane = SC.Pane.extend(
   /** @private - whenever showing on screen, deal with modal pane as well */
   appendTo: function(elem) {
     var pane ;
+
+    if (this.layout.width > window.innerWidth) {
+      this.layout.width = window.innerWidth - 10;
+    }
+
     // show the modal only if the pane is currently not visible, or if the pane
     // is currently transitioning out
     if ((!this.get('isVisibleInWindow') || this.get('viewState') == SC.CoreView.ATTACHED_BUILDING_OUT) && this.get('isModal') && (pane = this._modalPane())) {
