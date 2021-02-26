@@ -259,6 +259,7 @@ SC.SplitView = SC.View.extend({
     @returns {Number} The position to which the child was actually moved.
   */
   adjustPositionForChild: function(child, position){
+    this._didRequestMove = true;
     return this.invokeDelegateMethod(this.get('delegate'), 'splitViewAdjustPositionForChild', this, child, position);
   },
 
@@ -344,6 +345,7 @@ SC.SplitView = SC.View.extend({
       child.previousView = lastChild;
       child.nextView = undefined;
       child.viewIndex = idx;
+      if (SC.none(child._preferedSize)) child._preferedSize = child.size;
 
       if (lastChild) {
         lastChild.nextView = child;
@@ -359,6 +361,7 @@ SC.SplitView = SC.View.extend({
         }
 
         if (divider) {
+          divider.setIfChanged('isVisible', lastNonDividerChild.get('isVisible'));
           divider.setIfChanged('isSplitDivider', YES);
           divider.setIfChanged('layoutDirection', layoutDirection);
           if (SC.none(divider.get('size'))) divider.set('size', dividerSize);
@@ -641,6 +644,8 @@ SC.SplitView = SC.View.extend({
     var plan = this._scsv_createPlan();
     var finalPosition = this._scsv_adjustPositionForChildInPlan(plan, child, position, child);
     this._scsv_commitPlan(plan);
+
+    this._didRequestMove = false;
 
     return finalPosition;
   },
@@ -958,6 +963,10 @@ SC.SplitView = SC.View.extend({
       size = this.get('_frameSize') * size;
     }
 
+    if (!child.isSplitDivider && (size <= this.get('collapsedSize')) && !child.get('didRequestCollapse')) {
+      size = child._preferedSize || this.get('minimumSize') || 0;
+    }
+
     return size;
   },
 
@@ -972,6 +981,12 @@ SC.SplitView = SC.View.extend({
   */
   splitViewSetSizeForChild: function(splitView, child, size) {
     child.set('size', size);
+
+    var isCollapsed = size <= this.get('collapsedSize');
+    if (isCollapsed !== child.get('isCollapsed')) {
+      child.set('isCollapsed', isCollapsed);
+      child.set('didRequestCollapse', isCollapsed && this._didRequestMove);
+    }
   },
 
   /**
@@ -997,12 +1012,9 @@ SC.SplitView = SC.View.extend({
     if (child.get('canCollapse')) {
       var collapseAtSize = child.get('collapseAtSize');
       if (collapseAtSize && size < collapseAtSize) {
-        child.set('isCollapsed', true);
         return this.get('collapsedSize');
       }
     }
-
-    child.setIfChanged('isCollapsed', false);
 
     var minSize = child.get('minimumSize') || 0;
     if (minSize !== undefined && minSize !== null) size = Math.max(minSize, size);

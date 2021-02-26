@@ -259,17 +259,20 @@ SC.SplitChild =
 
   /** @private */
   _sc_visibilityDidChange: function () {
-    var split = this.get('splitView');
+    var split = this.get('splitView'),
+      isSplitDivider = this.isSplitDivider;
+
     if (!split) return;
 
     if (!this.get('isVisible')) {
       this._lastSize = this.get('size');
+      if (!isSplitDivider) split.didRemoveChild();
     }
     else {
       this.set('size', this._lastSize || this._initialSize);
+      if (!isSplitDivider) split.didAddChild();
     }
 
-    split.didAddChild();
   }.observes('isVisible'),
 
 };
