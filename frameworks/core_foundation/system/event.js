@@ -779,8 +779,14 @@ SC.Event.prototype = {
     }
 
     if (this.type === 'wheel') {
-      this.wheelDeltaX = originalEvent.deltaX;
-      this.wheelDeltaY = originalEvent.deltaY;
+      var deltaMode = originalEvent.deltaMode,
+        coef = 1; // DOM_DELTA_PIXEL
+
+      if (deltaMode === 1) coef = 18; // DOM_DELTA_LINE
+      else if (deltaMode === 2) coef = 360; // DOM_DELTA_PAGE
+
+      this.wheelDeltaX = originalEvent.deltaX * coef;
+      this.wheelDeltaY = originalEvent.deltaY * coef;
     }
   },
 
