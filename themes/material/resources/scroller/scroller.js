@@ -2,7 +2,7 @@
 
 SC.ScrollerView.reopen({
 
-  scrollbarThickness: 10,
+  scrollbarThickness: 14,
   capLength: 0,
   capOverlap: 0,
   buttonLength: 2,

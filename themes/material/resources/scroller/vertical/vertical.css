@@ -8,7 +8,7 @@ $theme.sc-scroller-view.sc-vertical {
   	top: 0;
   	right: 0;
   	bottom: 0;
-  	width: 9px;
+  	width: 13px;
 
     &:hover {
       background-color: $hover-scroller-track-bg;
@@ -19,14 +19,14 @@ $theme.sc-scroller-view.sc-vertical {
       background-color: $active-scroller-track-bg;
       border-left: 1px solid $active-scroller-track-border-color;
     }
-  } 
+  }
 
   .thumb {
   	position: absolute;
     background-color: $scroller-thumb-bg;
     border: 1px solid $scroller-thumb-border-color;
     box-shadow: $scroller-thumb-box-shadow;
-    width: 8px;
+    width: 12px;
 
     &:hover {
       background-color: $hover-scroller-thumb-bg;
