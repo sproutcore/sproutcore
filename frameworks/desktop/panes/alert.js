@@ -411,6 +411,7 @@ SC.AlertPane = SC.PanelPane.extend(
   */
   displaySelectView: NO,
 
+  selectView: null,
   selectTitleKey: '',
   selectValueKey: null,
   selectIconKey: 'icon',
@@ -422,19 +423,22 @@ SC.AlertPane = SC.PanelPane.extend(
   showSelectFieldView: function(view) {
     if (!this.get('displaySelectView')) return false;
 
-    var selectView = SC.SelectView.create({
-      layout: { bottom: 65, height: 24, left: 18, right: 18 },
-      itemTitleKey: this.get('selectTitleKey'),
-      itemValueKey: this.get('selectValueKey'),
-      itemIconKey: this.get('selectIconKey'),
-      itemSortKey: this.get('selectSortKey'),
-      emptyName: this.get('selectEmptyName'),
-      items: this.get('selectItems'),
-      value: this.get('selectValue'),
-    })
+    var pane = this.get('pane'),
+      height = this.get('selectHeight') || 24,
+      selectView = (this.get('selectView') || SC.SelectView).create({
+        layout: { bottom: 65, height: height, left: pane.get('icon') !== 'blank' ? 74 : 18, right: 18 },
+        itemTitleKey: this.get('selectTitleKey'),
+        itemValueKey: this.get('selectValueKey'),
+        itemIconKey: this.get('selectIconKey'),
+        itemSortKey: this.get('selectSortKey'),
+        emptyName: this.get('selectEmptyName'),
+        items: this.get('selectItems'),
+        value: this.get('selectValue'),
+      });
+
     view.appendChild(selectView);
     this.set('selectView', selectView);
-    return '<div style="height: 35px;"></div>';
+    return '<div style="height: '+(height+10)+'px;"></div>';
   },
 
   /**
