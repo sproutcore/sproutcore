@@ -283,6 +283,15 @@ test('fancy getters', function() {
   equals(SC.DateTime.create({ year: 2006, month: 12, day: 31 }).get('week0'), 53);
   equals(SC.DateTime.create({ year: 2006, month: 12, day: 31 }).get('week1'), 52);
 
+  equals(SC.DateTime.create({ year: 2006, month:  1, day:  1 }).get('isoWeek'),  52);
+  equals(SC.DateTime.create({ year: 2006, month:  1, day:  8 }).get('isoWeek'),  1);
+  equals(SC.DateTime.create({ year: 2006, month: 12, day: 30 }).get('isoWeek'), 52);
+  equals(SC.DateTime.create({ year: 2006, month: 12, day: 31 }).get('isoWeek'), 52);
+  equals(SC.DateTime.create({ year: 2007, month: 01, day: 01 }).get('isoWeek'), 1);
+  equals(SC.DateTime.create({ year: 2021, month: 1, day: 3 }).get('isoWeek'), 53);
+  equals(SC.DateTime.create({ year: 2021, month: 1, day: 4 }).get('isoWeek'), 1);
+  equals(SC.DateTime.create({ year: 2021, month: 1, day: 10 }).get('isoWeek'), 1);
+
   equals(dt.get('lastMonday'), dt.advance({ day: -6 }), 'dt.advance(day: -5)');
   equals(dt.get('nextFriday'), dt.advance({ day: 5 }), 'dt.advance(day: 6)');
   equals(dt.get('lastWednesday'), dt.advance({ day: -4 }), 'dt.advance(day: -3)');

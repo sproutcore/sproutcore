@@ -805,6 +805,18 @@ SC.DateTime.mixin(SC.Comparable,
         v = doy;
       }
 
+      // isoWeek
+      if ((v === null) && (key === 'isoWeek')) {
+        var date = new Date(d.getTime());
+        date.setHours(0, 0, 0, 0);
+        // Thursday in current week decides the year.
+        date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+        // January 4 is always in week 1.
+        var week1 = new Date(date.getFullYear(), 0, 4);
+        // Adjust to Thursday in week 1 and count number of weeks from date to week1.
+        v = 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+      }
+
       // week, week0 or week1
       if ((v === null) && (key.slice(0, 4) === 'week')) {
         // firstDayOfWeek should be 0 (Sunday) or 1 (Monday)
@@ -1158,7 +1170,7 @@ SC.DateTime.mixin(SC.Comparable,
       case 's': return this._pad(this._get('millisecond'), 3);
       case 'u': return this._pad(this._get('utc')); //utc
       case 'U': return this._pad(this._get('week0'));
-      case 'W': return this._pad(this._get('week1'));
+      case 'W': return this._pad(this._get('isoWeek'));
       case 'N': return this._get('dayOfWeek') || 7;
       case 'w': return this._get('dayOfWeek');
       case 'x': return this._date.toDateString();
