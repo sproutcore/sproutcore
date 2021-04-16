@@ -529,7 +529,7 @@ SC.SplitView = SC.View.extend({
       frameSize = this.get('_frameSize'),
       size = this.invokeDelegateMethod(del, 'splitViewLayoutChildren', this);
 
-    if (minSizeForSelector && frameSize <= minSizeForSelector) {
+    if (minSizeForSelector && ((!showSelector && frameSize <= minSizeForSelector) || (showSelector && Math.abs(frameSize - minSizeForSelector) < 50))) {
       var selectedChild = this.get('selectedChild'),
         selectedView = this[selectedChild];
 
