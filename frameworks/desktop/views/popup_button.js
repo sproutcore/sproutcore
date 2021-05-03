@@ -220,12 +220,14 @@ SC.PopupButtonView = SC.ButtonView.extend({
   mouseUp: function(evt) {
     var menu = this.get('menu');
 
-    if (menu && this._mouseDown) {
+    // If it is not a menuPane, there is not reason to close it and it might
+    // take more than 400ms to render, which would close immedialty.
+    if (SC.kindOf(menu, SC.MenuPane) && this._mouseDown) {
       // If the user waits more than 400ms between mouseDown and mouseUp,
       // we can assume that they are clicking and dragging to the menu item,
       // and we should close the menu if they mouseup anywhere not inside
       // the menu.
-      if(Date.now() - this._mouseDownTimestamp > 400) {
+      if (Date.now() - this._mouseDownTimestamp > 400) {
         var currentMenuItem = menu.getPath('rootMenu.currentMenuItem');
         if (currentMenuItem && this._mouseDownTimestamp) {
           // Have the menu item perform its action.
@@ -235,7 +237,6 @@ SC.PopupButtonView = SC.ButtonView.extend({
             menu.remove();
           }
         }
-
         else {
           menu.remove();
         }
