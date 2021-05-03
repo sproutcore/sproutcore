@@ -278,10 +278,10 @@ SC.RadioView = SC.View.extend(SC.Control,
         } else {
           // afin que l'on puisse utiliser des records sans ce soucier si le record est nested ou pas
           value = item;
-          
+
           var guidValue = item?item.get('guid'):item;
           var guidViewValue = viewValue && viewValue.isRecord ? viewValue.get('guid') : viewValue;
-          
+
           checkGuid = true;
         }
 
@@ -324,7 +324,8 @@ SC.RadioView = SC.View.extend(SC.Control,
         width: width,
         value: value,
 
-        allowsMultipleSelection: this.get('allowsMultipleSelection'), 
+        allowsMultipleSelection: this.get('allowsMultipleSelection'),
+        extraHtml: this.get('extraHtml'),
 
         isEnabled: isEnabled,
         isSelected: (checkGuid && guidValue === guidViewValue) || (isArray && viewValue.indexOf(value) >= 0 && viewValue.length === 1) || (viewValue === value),
