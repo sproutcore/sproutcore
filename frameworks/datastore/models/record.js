@@ -543,7 +543,7 @@ SC.Record = SC.Object.extend(
     if (!attrs) {
       var error = this+'#writeAttribute: no attrs. key: '+key+' - value: '+value+' - ignoreDidChange: '+ignoreDidChange+' - store: '+store+''+' - storeKey: '+storeKey+' - attrs: '+attrs+' - status: '+this.get('status');
       SC.Logger.error(error);
-      GX.reportError(error);
+      //GX.reportError(error);
 
       // Ceci arrive si on edite un contact et que l'on change la selection sans enregistrer (à cause de pays et que le record est supprimé). Voici contact_edition_view (fin de la page)
       return this ;//SC.Record.BAD_STATE_ERROR.throw();
