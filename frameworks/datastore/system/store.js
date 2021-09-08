@@ -2086,9 +2086,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       status = this.readStatus(storeKey);
 
       switch (status) {
-        case K.ERROR:
-          K.NOT_FOUND_ERROR.throw();
-        break;
         case K.READY_NEW:
         case K.READY_DIRTY:
         case K.DESTROYED_DIRTY:
@@ -2100,6 +2097,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         break;
         // ignore K.EMPTY, K.BUSY_LOADING, K.BUSY_CREATING, K.BUSY_COMMITTING,
         // K.BUSY_REFRESH_CLEAN, K_BUSY_REFRESH_DIRTY, KBUSY_DESTROYING
+        // K.ERROR
         default:
           SC.Logger.warn("Cannot commit storeKey '%@' as its status is '%@'".fmt(storeKey, status));
         break;
