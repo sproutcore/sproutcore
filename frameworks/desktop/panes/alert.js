@@ -413,6 +413,7 @@ SC.AlertPane = SC.PanelPane.extend(
 
   selectView: null,
   selectTitleKey: '',
+  selectIsEnabledKey: 'isEnabled',
   selectValueKey: null,
   selectIconKey: 'icon',
   selectSortKey: '',
@@ -429,6 +430,7 @@ SC.AlertPane = SC.PanelPane.extend(
         layout: { bottom: 65, height: height, left: pane.get('icon') !== 'blank' ? 74 : 18, right: 18 },
         itemTitleKey: this.get('selectTitleKey'),
         itemValueKey: this.get('selectValueKey'),
+        itemIsEnabledKey: this.get('selectIsEnabledKey'),
         itemIconKey: this.get('selectIconKey'),
         itemSortKey: this.get('selectSortKey'),
         emptyName: this.get('selectEmptyName'),
