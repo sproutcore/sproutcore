@@ -413,7 +413,7 @@ SC.AlertPane = SC.PanelPane.extend(
 
   selectView: null,
   selectTitleKey: '',
-  selectIsEnabledKey: 'isEnabled',
+  selectIsEnabledKey: null,
   selectValueKey: null,
   selectIconKey: 'icon',
   selectSortKey: '',
