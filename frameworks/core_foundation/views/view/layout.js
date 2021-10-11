@@ -1221,6 +1221,11 @@ SC.View.reopen(
     @returns {void}
   */
   viewDidResize: function (force) {
+    this._sc_viewDidResize(force);
+  },
+
+  /** @private */
+  _sc_viewDidResize: function (force) {
     this._sc_viewFrameDidChange();
     this.notifyMediaChilds();
 

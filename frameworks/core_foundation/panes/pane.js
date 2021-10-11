@@ -908,7 +908,9 @@ SC.Pane = SC.View.extend(SC.ResponderContext,
     else {
       this.set('currentWindowSize', newSize);
       this.setBodyOverflowIfNeeded();
-      this.parentViewDidResize(newSize); // start notifications.
+
+      // Force it to properly handle `window-width` and `window-height` media queries
+      this.parentViewDidResize(newSize, true); // start notifications.
     }
 
     return this;

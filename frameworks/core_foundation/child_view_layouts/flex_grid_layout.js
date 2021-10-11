@@ -384,9 +384,9 @@ SC.mixin(SC.View,
         view.adjust(newLayout);
       }
 
-      view.viewDidResize = function() {
+      view.viewDidResize = function(force) {
         this.layoutChildViews();
-        this._sc_viewFrameDidChange();
+        this._sc_viewDidResize(force);
       };
     },
 
