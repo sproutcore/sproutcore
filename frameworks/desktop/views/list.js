@@ -460,6 +460,13 @@ SC.ListView = SC.CollectionView.extend(SC.CollectionRowDelegate,
       // Don't include the row spacing after the last item in the height.
       ret.height = Math.max(this.rowOffsetForContentIndex(this.get('length')) - rowSpacing, 0);
     }
+
+    // Hardcoded limit over which the view will not be render properly
+    // 8 000 000: Works fine Firefox
+    // 10 000 000: End of the list not displayed in Firefox but ok in Chrome
+    // 17 900 000: List not working at all in Firefox
+    if (ret.height > 17000000) ret.height = 17000000;
+
     return ret;
   },
 
