@@ -318,11 +318,7 @@ SC.ScrollerView = SC.View.extend(
   },
 
   renderThumb: function (context, layoutDirection, thumbLength, thumbPosition) {
-    var styleString;
-    if (layoutDirection === SC.LAYOUT_HORIZONTAL) styleString = 'width: ' + thumbLength + 'px; left: ' + thumbPosition + 'px;';
-    else styleString = 'height: ' + thumbLength + 'px; top: ' + thumbPosition + 'px;';
-
-    context.push('<div class="thumb" style="%@">'.fmt(styleString),
+    context.push('<div class="thumb">',
                  '<div class="thumb-center"></div>',
                  '<div class="thumb-top"></div>',
                  '<div class="thumb-bottom"></div></div>');
