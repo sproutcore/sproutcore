@@ -2382,7 +2382,7 @@ SC.RootResponder = SC.Object.extend(
   /** @private */
   _drop: function(evt) {
     // If it's a file being dragged, prevent the default (leaving the app and opening the file).
-    if (evt.dataTransfer.types && (evt.dataTransfer.types.contains('Files') || evt.dataTransfer.types.contains('text/uri-list'))) {
+    if (evt.dataTransfer && evt.dataTransfer.types && (evt.dataTransfer.types.contains('Files') || evt.dataTransfer.types.contains('text/uri-list'))) {
       evt.preventDefault();
       evt.stopPropagation();
       // Set the default drag effect to 'none'. Views may reverse this if they wish.
