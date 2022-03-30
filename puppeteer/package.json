@@ -1,0 +1,15 @@
+{
+  "name": "sc-puppeteer-test-runner",
+  "version": "1.0.0",
+  "description": "Puppeteer based test runner for SproutCore",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "James Chao",
+  "license": "ISC",
+  "dependencies": {
+    "minimist": "^1.2.6",
+    "puppeteer": "^13.5.1"
+  }
+}

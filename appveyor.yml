@@ -1,0 +1,19 @@
+image: Ubuntu2004
+
+environment:
+  nodejs_version: "14"
+
+init:
+  - git config --global core.autocrlf true
+
+install:
+  - ./scripts/run_bt_server_master.sh
+  - sleep 15 # give sc-server some time to start
+
+build: off
+
+test_script:
+  # Output useful info for debugging.
+  - node --version
+  - npm --version
+  - node puppeteer/run_tests.js --no-experimental --exclude-targets=/sproutcore/greenhouse

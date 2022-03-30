@@ -21,7 +21,7 @@ mkdir -p frameworks
 cd frameworks
 ln -s ${OLD_PWD} sproutcore
 cd ..
-if [ -z ${TRAVIS_JOB_ID} ]; then
+if [ -z ${APPVEYOR_BUILD_ID} ]; then
     # not running under travis, stay in foreground until stopped
     ../sproutcore/bin/sproutcore serve --local-only=true --port=${PORT}
 else
