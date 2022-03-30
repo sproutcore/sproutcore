@@ -7,6 +7,7 @@ init:
   - git config --global core.autocrlf true
 
 install:
+  - node --version
   - cd puppeteer
   - npm install
   - cd ..
