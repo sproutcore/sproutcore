@@ -7,6 +7,9 @@ init:
   - git config --global core.autocrlf true
 
 install:
+  - cd puppeteer
+  - npm install
+  - cd ..
   - ./scripts/run_bt_server_master.sh
   - sleep 15 # give sc-server some time to start
 
