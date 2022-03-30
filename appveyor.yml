@@ -8,8 +8,21 @@ install:
   - node --version
   - cd puppeteer
   - npm install
+  - cd $APPVEYOR_BUILD_FOLDER
   - cd ..
-  - ./scripts/run_bt_server_master.sh
+  - mkdir -p SCTEST
+  - cd SCTEST
+  - git clone https://github.com/sproutcore/build-tools sproutcore
+  - cd sproutcore
+  - npm install
+  - cd ..
+  - sproutcore/bin/sproutcore init master
+  - cd master
+  - mkdir -p frameworks
+  - cd frameworks
+  - ln -s $APPVEYOR_BUILD_FOLDER sproutcore
+  - ../sproutcore/bin/sproutcore serve --local-only=true --port=4020 --include-tests --disable-bt-feedback &
+  - cd $APPVEYOR_BUILD_FOLDER
   - sleep 15 # give sc-server some time to start
 
 build: off
