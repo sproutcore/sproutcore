@@ -1,12 +1,10 @@
 image: Ubuntu2004
 
-environment:
-  nodejs_version: "14"
-
 init:
   - git config --global core.autocrlf true
 
 install:
+  - nvm use 14
   - node --version
   - cd puppeteer
   - npm install
