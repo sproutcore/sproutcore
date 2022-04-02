@@ -25,6 +25,8 @@
     "exports-loader": "^2.0.0",
     "imports-loader": "^2.0.0",
     "mini-css-extract-plugin": "^1.6.2",
+    "minimist": "^1.2.6",
+    "puppeteer": "^13.5.2",
     "sass": "^1.33.0",
     "sass-loader": "^11.1.0",
     "schema-utils": "^3.1.1",

@@ -87,7 +87,7 @@ SC._BindableSpan = SC.TemplateView.extend(
 
     @param {SC.RenderContext} renderContext}
   */
-  render: function(renderContext) {
+  render: function render(renderContext) {
     // If not invoked via a triple-mustache ({{{foo}}}), escape
     // the content of the template.
     var escape = this.get('isEscaped');
@@ -146,7 +146,7 @@ SC._BindableSpan = SC.TemplateView.extend(
       this.set('template', function() { return ''; });
     }
 
-    return sc_super();
+    return render.base.apply(this, arguments);
   },
 
   /**

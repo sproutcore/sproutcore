@@ -369,7 +369,7 @@ test("Timeouts - Status listener callback", function() {
       checkstop;
 
   // make the timeout as short as possible so that it will always happen
-  timeoutRequest.timeoutAfter(10).notify(this, function(response) {
+  timeoutRequest.timeoutAfter(1).notify(this, function(response) {
     start();
     clearTimeout(checkstop);
 

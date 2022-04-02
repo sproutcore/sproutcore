@@ -279,6 +279,20 @@ devConfig.plugins.push(
         done: (stats) => {
             console.log('\n\nTest server ready!\n\n');
             compilationStats = stats;
+            // auto start the tests here...
+            // const { spawn } = require('child_process');
+            // const test_runner = spawn("node", ["scripts/run_puppeteer.js", '--exclude-targets "/sproutcore/greenhouse"']);
+            // test_runner.stdout.on('data', data => {
+            //     console.log('stdout: ', data.toString());
+            // });
+            // test_runner.stderr.on('data', data => {
+            //     console.log('stderr: ', data.toString());
+            // });
+
+            // test_runner.on('close', code => {
+            //     console.log('test runner exited with code', code);
+            //     process.exit(code); // also quit the dev server
+            // });
         },
     })
 );

@@ -124,6 +124,7 @@ module.exports = {
         test: /\.js$/,
         exclude: /node_modules/,
         use: [
+          'imports-loader?wrapper=window',
           {
             loader: path.resolve('./lib/sc_super_loader.js'),
             options: {
@@ -131,7 +132,16 @@ module.exports = {
               injectImport: false
             }
           },
-          'imports-loader?wrapper=window',
+          {
+            loader: path.resolve(
+                './lib/sc_static_url_loader.js'
+            ),
+          },
+          {
+            loader: path.resolve(
+                './lib/sc_ifdebug_fixtures_loader.js'
+            ),
+          },
         ]
       }
     ]

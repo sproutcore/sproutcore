@@ -8,6 +8,7 @@
 
 // map used to exist, this is here for backwards compatibility
 var Q$ = jQuery;
+window.Q$ = Q$;
 
 /** @namespace
 
