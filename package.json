@@ -1,0 +1,36 @@
+{
+  "name": "sproutcore",
+  "version": "1.12.0-webpack",
+  "description": "A MVC framework for building native-calibre web applications.",
+  "main": "dist/sproutcore.js",
+  "exports": {
+    ".": "./build/sproutcore.js",
+    "./legacy_theme": "./build/legacy_theme.js",
+    "./sproutcore.css": "./build/sproutcore.css"
+  },
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "webpack serve --config webpack.tests.js",
+    "build": "node_modules/.bin/webpack --mode=production"
+  },
+  "author": "Charles Jolley, Tyler Keating, Maurits Lamers, Nicolas Badia",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "compass-mixins-fixed": "^1.0.1",
+    "css-loader": "^5.1.2",
+    "css-minimizer-webpack-plugin": "^3.4.1",
+    "exports-loader": "^2.0.0",
+    "imports-loader": "^2.0.0",
+    "mini-css-extract-plugin": "^1.6.2",
+    "sass": "^1.33.0",
+    "sass-loader": "^11.1.0",
+    "schema-utils": "^3.1.1",
+    "webpack": "^5.71.0",
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "^4.7.4",
+    "webpack-merge": "^5.8.0"
+  }
+}

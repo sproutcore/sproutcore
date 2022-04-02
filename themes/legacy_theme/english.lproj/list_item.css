@@ -70,13 +70,13 @@
 /* @group Branch */
 
 .sc-list-item-view .branch {
-	background-image: sc_static('icons/mini_454545');
+	background-image: sc_static('icons/mini_454545.png');
 	background-position: -32px 0;
 }
 
 .sc-list-item-view.sel .branch,
 .sc-list-item-view.active .branch {
-	background-image: sc_static('icons/mini_ffffff');
+	background-image: sc_static('icons/mini_ffffff.png');
 }
 
 /* @end */

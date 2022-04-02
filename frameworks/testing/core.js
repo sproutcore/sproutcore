@@ -6,13 +6,6 @@
 // ==========================================================================
 /*globals CoreTest */
 
-// these compiler directives are normally defined in runtime's core.  But
-// since the testing framework needs to be totally independent, we redefine
-// them here also.
-var require = require || function sc_require() {};
-var sc_require = sc_require || require;
-var sc_resource = sc_resource || function sc_resource() {};
-
 // map used to exist, this is here for backwards compatibility
 var Q$ = jQuery;
 
