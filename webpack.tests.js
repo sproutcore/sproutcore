@@ -1,6 +1,5 @@
 const fs = require('fs');
 const path = require('path');
-const { Compiler, Stats } = require('webpack');
 const devConfig = require('./webpack.dev.js');
 
 // don't split chunks as it complicates test URLs
@@ -252,21 +251,6 @@ devConfig.devServer.hot = false;
 devConfig.devServer.webSocketServer = false;
 
 
-class CompilerHookPlugin {
-    constructor(options) {
-        this.options = options;
-    }
-
-    apply(compiler) {
-        (Object.keys(this.options)).forEach( hookName => {
-                // This hook function typing is a bit too complicated so just using
-                // "any" as an escape hatch for now
-                const fn = this.options[hookName];
-                compiler.hooks[hookName].tap('CompilerHookPlugin', fn);
-            }
-        );
-    }
-}
 
 let compilationStats;
 

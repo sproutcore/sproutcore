@@ -1,5 +1,21 @@
 const testConfig = require('./webpack.tests.js');
 
+class CompilerHookPlugin {
+    constructor(options) {
+        this.options = options;
+    }
+
+    apply(compiler) {
+        (Object.keys(this.options)).forEach( hookName => {
+                // This hook function typing is a bit too complicated so just using
+                // "any" as an escape hatch for now
+                const fn = this.options[hookName];
+                compiler.hooks[hookName].tap('CompilerHookPlugin', fn);
+            }
+        );
+    }
+}
+
 testConfig.plugins.push(
     new CompilerHookPlugin({
         done: (stats) => {
