@@ -1,6 +1,7 @@
 image: Ubuntu
 
 install:
+  - node --version
   - npm install
 
 test_script: 
