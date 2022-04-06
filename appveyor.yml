@@ -1,7 +1,7 @@
 image: Ubuntu
 
 install:
-  - node --version
+  - nvm use 14
   - npm install
 
 test_script: 
