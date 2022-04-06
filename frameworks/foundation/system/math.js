@@ -35,10 +35,6 @@ SC.Math = SC.Object.create(
     parameter is provided, the number will be rounded outward (ie. providing
     -3 will round to the thousands).
     
-    Function is insufficient for high negative values of decimalPlace parameter.
-    For example, (123456.789).round(-5) should evaluate to 100000 but instead
-    evaluates to 99999.999... 
-    
     @param {Number} n The number to round
     @param {Integer} decimalPlace
     @returns {Number}
@@ -47,9 +43,8 @@ SC.Math = SC.Object.create(
     if (!decimalPlace) decimalPlace = 0;
     var factor = Math.pow(10, decimalPlace);
     if (decimalPlace < 0) {
-       // stop rounding errors from hurting the factor...
-      var s = factor.toString();
-      factor = s.substring(0, s.indexOf("1")+1);
+      // create a factor of 10 without extra floating point artefacts
+      factor = 1/Math.round(1/Math.pow(10, decimalPlace));
     }
     n = n.valueOf();
     return Math.round(n * factor) / factor;
