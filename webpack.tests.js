@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { Compiler, Stats } = require('webpack');
 const devConfig = require('./webpack.dev.js');
 
 // don't split chunks as it complicates test URLs
@@ -251,6 +252,21 @@ devConfig.devServer.hot = false;
 devConfig.devServer.webSocketServer = false;
 
 
+class CompilerHookPlugin {
+    constructor(options) {
+        this.options = options;
+    }
+
+    apply(compiler) {
+        (Object.keys(this.options)).forEach( hookName => {
+                // This hook function typing is a bit too complicated so just using
+                // "any" as an escape hatch for now
+                const fn = this.options[hookName];
+                compiler.hooks[hookName].tap('CompilerHookPlugin', fn);
+            }
+        );
+    }
+}
 
 let compilationStats;
 
@@ -258,6 +274,14 @@ devConfig.plugins = devConfig.plugins ?? [];
 // this is very brittle, as it tries to refer to the mini css extract plugin by location in the plugins 
 // array. A better detection would be better.
 devConfig.plugins[0].options.filename = '[name].css';
+devConfig.plugins.push(
+    new CompilerHookPlugin({
+        done: (stats) => {
+            console.log('\n\nTest server ready!\n\n');
+            compilationStats = stats;
+        },
+    })
+);
 
 // this is to provide the sc/targets.json and the -index.json
 devConfig.devServer.onBeforeSetupMiddleware = function (devServer) {

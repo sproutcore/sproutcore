@@ -16,10 +16,12 @@ class CompilerHookPlugin {
     }
 }
 
+let compilationStats;
+
 testConfig.plugins.push(
     new CompilerHookPlugin({
         done: (stats) => {
-            console.log('\n\nTest server ready!\n\n');
+            console.log('\n\nAbout to start testrunner\n\n');
             compilationStats = stats;
             // auto start the tests here...
             const { spawn } = require('child_process');
