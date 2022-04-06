@@ -2,9 +2,8 @@ image: Ubuntu
 
 install:
   - npm install
-  - npm run rest &
 
-test_script:
-  - node scripts/run_puppeteer.js --exclude-targets "/sproutcore/greenhouse,/sproutcore/frameworks/designer"
+test_script: 
+  - npm run testrunner
 
 build: off
