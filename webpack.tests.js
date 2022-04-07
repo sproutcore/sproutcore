@@ -286,15 +286,23 @@ devConfig.plugins.push(
 // this is to provide the sc/targets.json and the -index.json
 devConfig.devServer.onBeforeSetupMiddleware = function (devServer) {
     const app = devServer.app;
+    app.get('/', function (req, res) {
+        // this is specifically for the request timeout tests
+        // and this has to wait a bit, because it is too fast for the timeouts
+        setTimeout(() => { res.send('ok'); }, 100);
+    });
+
     app.post('/', function (req, res) {
         // this is specifically for the request post and upload event tests.
+        // and this has to wait a bit, because it is too fast for the timeouts
         res.send('ok');
     });
     
     app.get('/ready', function (req, res) {
         // only return 200 status if compilation is completed
         if (compilationStats) {
-            res.send('ok');
+            // res.send('ok');
+            setTimeout(() => { res.send('ok'); }, 100);
         } else {
             res.sendStatus(503);
         }
@@ -341,6 +349,7 @@ devConfig.devServer.onBeforeSetupMiddleware = function (devServer) {
             const cssPath = files.find(f => f.match(/\.css$/));
 
             const html = `
+            <!DOCTYPE html>
             <html>
               <head>
                 <title>${htmlUrl}</title>

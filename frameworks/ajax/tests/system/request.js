@@ -11,10 +11,11 @@
 
 var url, request, contents, test_timeout=2500;
 
-// When running Travis-CI tests through PhantomJS, wait extra long.
-if (window._phantom) {
+// When running Puppeteer tests through Headless Chrome, wait extra long.
+if (window.webdriver) {
   test_timeout=5000;
 }
+
 
 module("SC.Request", {
 
