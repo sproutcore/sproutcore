@@ -632,10 +632,8 @@ function fetchTestsForTarget(browser, target) {
     return goToPage(browser, url, (page, resolve, reject) => {
         page.on('load', () => {
             const evalResults = page.evaluate(() => {
-                // return JSON.parse(document.getElementsByTagName('pre')[0].innerHTML);
                 const pre = document.getElementsByTagName('pre');
                 if (pre && pre[0] && pre[0].innerHTML) {
-                    // return JSON.parse(document.getElementsByTagName('pre')[0].innerHTML);
                     return JSON.parse(pre[0].innerHTML);
                 }
                 else if (document.body && document.body.innerText) {
@@ -705,12 +703,8 @@ function fetchTargets(browser) {
     return goToPage(browser, url, (page, resolve, reject) => {
         page.on('load', () => {
             page.evaluate(() => {
-                // return JSON.parse(document.getElementsByTagName('pre')[0].innerHTML);
-                // return JSON.parse(document.getElementsByTagName('pre')[0].innerHTML);
-                // return JSON.parse(document.body.innerText);
                 const pre = document.getElementsByTagName('pre');
                 if (pre && pre[0] && pre[0].innerHTML) {
-                    // return JSON.parse(document.getElementsByTagName('pre')[0].innerHTML);
                     return JSON.parse(pre[0].innerHTML);
                 }
                 else if (document.body && document.body.innerText) {
@@ -777,7 +771,7 @@ if (!args.help) {
     console.log('      --exclude-targets                  Comma-delimited list of targets to exclude');
     console.log('      --target-kinds                     Comma-delimited list of target kinds to include');
     console.log('      --filter                           Regular expression to use to filter tests');
-    console.log('      --[no-]experimetal                 Shortcut to control inclusion of experimental framework tests [true]');
+    console.log('      --[no-]experimental                 Shortcut to control inclusion of experimental framework tests [true]');
     console.log('      --travis, env[TRAVIS]              Running under Travis CI [false]');
     console.log('  -v, --verbose, env[VERBOSE]            Log test assertion results [false]');
     console.log('  -V, --very-verbose, env[VERY_VERBOSE]  Log test page console messages [false]');
