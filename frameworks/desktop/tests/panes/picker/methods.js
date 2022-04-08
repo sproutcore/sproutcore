@@ -108,7 +108,7 @@ test("check action on pane#mouseDown with removeAction and removeTarget set", fu
 
   ok(!pane.get('isVisibleInWindow'), 'pane.isVisibleInWindow should be NO after mouseDown');
   ok(target.get('fooInvoked'), 'target.fooInvoked should be YES');
-  ok(target.get('sender'), pane, 'target.sender should be pane');
+  ok(target.get('sender') === pane, 'target.sender should be pane');
 
   SC.run(function () {
     pane.destroy();
