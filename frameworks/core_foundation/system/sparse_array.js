@@ -389,10 +389,22 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
   removeObject: function(obj) {
     var content = this._sa_content;
     if (!content) content = this._sa_content = [];
-    
+
     var storeKey = SC.typeOf(obj) === SC.T_NUMBER ? obj : obj.get('storeKey');
-    content.removeObject(storeKey);
-    this.provideLength(this._length - 1);
+
+    var loc = content.get('length') || 0,
+      didRemove = false;
+
+    while (--loc >= 0) {
+      var curObject = content.objectAt(loc);
+      if (curObject === storeKey) {
+        content.removeAt(loc);
+        didRemove = true;
+      }
+    }
+
+    if (didRemove) this.provideLength(this._length - 1);
+
     return this;
   },
 
