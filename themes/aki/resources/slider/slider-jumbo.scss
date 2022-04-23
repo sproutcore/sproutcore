@@ -1,7 +1,7 @@
 
 @theme(sc-jumbo-size) {
 
-  $theme.slider {
+  #{$theme}.slider {
     .track {
       height: 6px; margin-top: -2px;
       border-radius: 3px;
