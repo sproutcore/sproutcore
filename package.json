@@ -11,6 +11,9 @@
   "directories": {
     "lib": "lib"
   },
+  "bin": {
+    "create_indexjs": "./lib/update_indexjs.js"
+  },
   "scripts": {
     "test": "webpack serve --config webpack.tests.js",
     "testrunner": "webpack serve --config webpack.testrunner.js",
