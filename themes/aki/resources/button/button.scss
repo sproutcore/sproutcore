@@ -1,6 +1,6 @@
 @import "compass/css3";
 
-$theme.button {
+#{$theme}.button {
   box-sizing: border-box;
   background-color: $button-bg;
   border: 1px solid $button-border-color;
@@ -67,7 +67,7 @@ $theme.button {
 
 
 @theme(capsule) {
-  $theme.button {
+  #{$theme}.button {
     border-radius: 30px;
   }
 }
@@ -77,13 +77,13 @@ $theme.button {
 TODO: Add support for pointer button
 
 @theme(point-left) {
-  $theme.button {
+  #{$theme}.button {
 
   }
 }
 
 @theme(point-right) {
-  $theme.button {
+  #{$theme}.button {
 
   }
 }

@@ -1,7 +1,7 @@
 
 @theme(sc-small-size) {
 
-  $theme.slider {
+  #{$theme}.slider {
     .track {
       height: 4px; margin-top: -2px;
       border-radius: 2px;

@@ -1,11 +1,11 @@
 
-$theme.sc-grid-insertion-point {
+#{$theme}.sc-grid-insertion-point {
   overflow: visible;
   background-color: $grid-insertion-point-bg;
   z-index: 1000;
 }
 
-$theme.sc-grid-insertion-point > .anchor {
+#{$theme}.sc-grid-insertion-point > .anchor {
   position: absolute;
   width: 8px;
   top: -3px;

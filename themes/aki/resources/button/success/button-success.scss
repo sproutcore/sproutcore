@@ -1,6 +1,6 @@
 
 @theme(success) {
-  $theme.button {
+  #{$theme}.button {
 
     background-color: $button-success-bg;
     border: 1px solid $button-success-border-color;

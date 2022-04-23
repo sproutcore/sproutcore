@@ -1,7 +1,7 @@
 
 @theme(sc-small-size) {
 
-  $theme.sc-popup-button-view {
+  #{$theme}.sc-popup-button-view {
     &:after {
       top: 0;
     }

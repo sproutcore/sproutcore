@@ -1,6 +1,6 @@
 
 @theme(danger) {
-  $theme.button {
+  #{$theme}.button {
 
     background-color: $button-danger-bg;
     border: 1px solid $button-danger-border-color;

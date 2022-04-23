@@ -1,6 +1,6 @@
 
 @theme(info) {
-  $theme.button {
+  #{$theme}.button {
 
     background-color: $button-info-bg;
     border: 1px solid $button-info-border-color;

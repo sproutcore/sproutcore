@@ -1,7 +1,7 @@
 
 @theme(sc-regular-size) {
 
-  $theme.button {
+  #{$theme}.button {
     height: 24px;
     border-radius: $button-border-radius-regular;
 
@@ -20,7 +20,7 @@
 
 
 @theme(capsule) {
-  $theme.button {
+  #{$theme}.button {
     border-radius: 30px;
     
     &.sc-static-layout .sc-button-label {

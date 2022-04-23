@@ -1,10 +1,10 @@
 
-$theme.radio-group {
+#{$theme}.radio-group {
   line-height: 18px;
   vertical-align: middle;
 }
 
-$theme.radio {
+#{$theme}.radio {
   position: relative;
   display:block;
   height:18px;
@@ -81,7 +81,7 @@ $theme.radio {
   }
 }
 
-$theme.radio-group.sc-layout-horizontal $theme.radio, $theme.radio.sc-layout-horizontal {
+#{$theme}.radio-group.sc-layout-horizontal #{$theme}.radio, #{$theme}.radio.sc-layout-horizontal {
   display: inline-block;
   -moz-display: inline-block;
   margin-right: 14px;

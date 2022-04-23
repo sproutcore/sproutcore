@@ -1,6 +1,6 @@
 
 @theme(dark) {
-  $theme.button {
+  #{$theme}.button {
 
     background-color: $button-dark-bg;
     border: 1px solid $button-dark-border-color;

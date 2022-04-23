@@ -1,5 +1,5 @@
 
-$theme.sc-segmented-view {
+#{$theme}.sc-segmented-view {
   overflow: visible;
 
   &.disabled {
@@ -8,7 +8,7 @@ $theme.sc-segmented-view {
 
 }
 
-$theme.sc-segment-view {
+#{$theme}.sc-segment-view {
   margin: 0;
   background-color: $segment-bg;
   border: $segmented-border-size solid $segment-border-color;

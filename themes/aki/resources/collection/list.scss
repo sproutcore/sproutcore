@@ -1,11 +1,11 @@
 
-$theme.sc-list-insertion-point {
+#{$theme}.sc-list-insertion-point {
   overflow: visible;
   background-color: $list-insertion-point-bg;
   z-index: 1000;
 }
 
-$theme.sc-list-insertion-point > .anchor {
+#{$theme}.sc-list-insertion-point > .anchor {
   position: absolute;
   width: 8px;
   top: -3px;

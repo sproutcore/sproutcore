@@ -1,5 +1,5 @@
 
-$theme.sc-list-view {
+#{$theme}.sc-list-view {
   background: $list-bg;
 
   .sc-collection-item {
@@ -28,13 +28,13 @@ $theme.sc-list-view {
     }
   
 
-    $theme.checkbox {
+    #{$theme}.checkbox {
       background-color: transparent;
       border: 0 none;
       margin-top: -7px;
     }
 
-    $theme.disclosure {
+    #{$theme}.disclosure {
       position: absolute;
       top: 50%;
       margin-top: -7px;
@@ -42,7 +42,7 @@ $theme.sc-list-view {
       height: 18px;
     }
 
-    $theme.icon {
+    #{$theme}.icon {
       margin-top: -8px;
     }
 

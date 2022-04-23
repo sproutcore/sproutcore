@@ -1,6 +1,6 @@
 
 /* Overrides of the themed vertical scroller to take it back to a basic black transparent OS X style overlay. */
-$theme.sc-overlay-scroller-view.sc-vertical {
+#{$theme}.sc-overlay-scroller-view.sc-vertical {
 
   /* Track */
   .track,

@@ -1,6 +1,6 @@
 @import "compass/css3";
 
-$theme.sc-text-field-view {
+#{$theme}.sc-text-field-view {
   background-color: transparent;
   appearance: none;
 
@@ -52,7 +52,7 @@ $theme.sc-text-field-view {
 }
 
 // TODO a tester
-.firefox $theme.sc-text-field-view {
+.firefox #{$theme}.sc-text-field-view {
   &.text-area .padding {
     right: 0;
     left: 4px;

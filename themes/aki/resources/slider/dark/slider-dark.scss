@@ -1,7 +1,7 @@
 
 @theme(dark) {
 
-$theme.slider {
+#{$theme}.slider {
   .sc-slider-step-mark {
     background-color: $slider-step-mark-dark-color;
   }

@@ -1,5 +1,5 @@
 
-$theme.sc-scroller-view.sc-horizontal {
+#{$theme}.sc-scroller-view.sc-horizontal {
   .track {
     background-color: $scroller-track-bg;
     border-top: 1px solid $scroller-track-border-color;
