@@ -5,7 +5,9 @@
   "main": "dist/sproutcore.js",
   "exports": {
     ".": "./build/sproutcore.js",
+    "./source": "./index.js",
     "./legacy_theme": "./build/legacy_theme.js",
+    "./aki_theme": "./themes/aki/index.js",
     "./sproutcore.css": "./build/sproutcore.css"
   },
   "directories": {
