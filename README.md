@@ -45,6 +45,9 @@ transition.
   `sc_require` and write out this sort order in the index.js file. Any subsequent updates are better 
   performed manually in the index.js
 
+The following steps you will need to do manually:
+- for every app, you will need to replace `function main () { // content }` with `window.main = function main () { //content }`. Because of the way Webpack wraps the non-module SC code of your app, the main function will not be exported to the window object.
+
 ## Next Steps
 
 Once you're through the Getting Started tutorial:
