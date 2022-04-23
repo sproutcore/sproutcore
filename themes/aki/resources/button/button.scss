@@ -1,5 +1,5 @@
 @import "compass/css3";
-
+@import "../variables";
 #{$theme}.button {
   box-sizing: border-box;
   background-color: $button-bg;

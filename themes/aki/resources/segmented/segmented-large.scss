@@ -1,3 +1,4 @@
+@import "../variables";
 
 @theme(sc-large-size) {
 
@@ -27,5 +28,7 @@
       border-bottom-right-radius: $segment-border-radius-large; 
     }
   }
+
+}
 
 }
