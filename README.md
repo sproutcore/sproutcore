@@ -1,22 +1,49 @@
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/sproutcore/sproutcore?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Build Status](https://travis-ci.org/sproutcore/sproutcore.png?branch=master)](https://travis-ci.org/sproutcore/sproutcore)
 
 SproutCore 2: For Native-Caliber Web Apps
 =======
 
-> **Sproutcore 2.12** replaces the NodeJS buildtools with webpack
+> **Sproutcore 2.0** replaces the NodeJS buildtools with webpack
 
 SproutCore is a JS-MVC framework for building blazing-fast, native-caliber web
 applications. SproutCore's full-stack approach to single-page application
 development gives you the tools you need to build rich, powerful applications...
 which happen to run in the browser.
 
+
+## Install
+
+For a global install, run
+
+`npm install -g sproutcore`
+
+If you do not want a global install, follow the steps under .
+
 ## Getting Started
 
-The easiest way to get started with SproutCore is to install the Ruby gem.
-You can find instructions [here](http://sproutcore.com/install/). Once you've
-got SproutCore installed, checkout the
-[Getting Started](http://guides.sproutcore.com/getting_started.html) tutorial.
+When you have SproutCore globally installed, you can run the following to create a new project:
+
+`sproutcore init`
+
+To update an existing project Sproutcore 1.x project, or create a new project with SproutCore as 
+local dependency, the following steps apply.
+
+If your project does not already have a package.json file, create one by running 
+`npm init` and enter the necessary details.
+
+Next run `npm install --save-dev sproutcore`
+
+When you are creating a new project, you can now create a project structure as you like. The only thing
+necessary is to make sure that SproutCore is being loaded by your app.
+
+When updating an existing project, the SproutCore package provides a few tools that help you make the
+transition. 
+
+- `npx sproutcore_init` will create a basic webpack configuration
+- `npx sproutcore_index` will create an `index.js` file that can serve as the webpack entry for 
+  your app or framework. It will parse your JS files, sort them based on the information provided through
+  `sc_require` and write out this sort order in the index.js file. Any subsequent updates are better 
+  performed manually in the index.js
 
 ## Next Steps
 
