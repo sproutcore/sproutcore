@@ -1,0 +1,10 @@
+image: Ubuntu
+
+install:
+  - nvm use 14
+  - npm install
+
+test_script: 
+  - npm run testrunner
+
+build: off

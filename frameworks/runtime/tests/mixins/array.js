@@ -12,7 +12,7 @@
 //
 
 sc_require('debug/test_suites/array');
-
+require('../../debug/test_suites/array');
 SC.ArraySuite.generate("built-in Array");
 
 // ..........................................................

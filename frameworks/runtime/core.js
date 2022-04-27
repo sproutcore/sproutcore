@@ -8,10 +8,7 @@
 
 // These commands are used by the build tools to control load order.  On the
 // client side these are a no-op.
-if (!window.require) { window.require = function require() {}; }
-if (!window.sc_require) { window.sc_require = require; }
-if (!window.sc_resource) { window.sc_resource = function sc_resource() {}; }
-sc_require('license');
+
 
 // ........................................
 // GLOBAL CONSTANTS

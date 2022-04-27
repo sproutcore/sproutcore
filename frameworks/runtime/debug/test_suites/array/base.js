@@ -312,7 +312,7 @@ SC.ArraySuite = SC.TestSuite.create("Verify SC.Array compliance: %@#%@", {
         equals(this.callCount, 1, 'expects one callback');
         
         if (source !== undefined && source !== NO) {
-          ok(this.source, source, 'source should equal array');
+          equals(this.source, source, 'source should equal array');
         }
         
         if (object !== undefined && object !== NO) {

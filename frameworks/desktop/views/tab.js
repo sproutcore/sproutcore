@@ -257,14 +257,14 @@ SC.TabView = SC.View.extend(
       }.observes('value'),
 
       /** @private */
-      init: function() {
+      init: function init () {
         // before we setup the rest of the view, copy key config properties
         // from the owner view...
         var pv = this.get('parentView');
         if (pv) {
           SC._TAB_ITEM_KEYS.forEach(function(k) { this[k] = pv.get(k); }, this);
         }
-        return sc_super();
+        return init.base.apply(this, arguments);
       }
     });
 

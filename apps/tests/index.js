@@ -1,0 +1,11 @@
+require('./english.lproj/strings.js');
+require('./core.js');
+require('./controllers/source.js');
+require('./controllers/target.js');
+require('./controllers/targets.js');
+require('./controllers/test.js');
+require('./controllers/tests.js');
+require('./statechart.js');
+require('./views/offset_checkbox.js');
+require('./english.lproj/main_page.js');
+require('./main.js')

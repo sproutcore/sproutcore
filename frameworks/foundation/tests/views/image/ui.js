@@ -79,7 +79,7 @@
       // Status has changed, but the observer fires immediately, so pause in order to have the DOM updated
       setTimeout(function () {
         imgEl = imageView.$('img');
-        ok(imgEl.attr('src').indexOf(logoURL) !== 0, "img src should be set to logoURL");
+        ok(imgEl.attr('src').indexOf(logoURL) === 0, "img src should be set to logoURL");
 
         window.start(); // continue the tests
         }, 100);

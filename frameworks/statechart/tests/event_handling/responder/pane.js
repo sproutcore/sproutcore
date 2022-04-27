@@ -3,7 +3,9 @@
 // ==========================================================================
 /*globals SC statechart */
 
-window.startchart = null;
+require('../../../../desktop');
+
+// window.statechart = null;
 var pane, button, fooInvokedCount;
 
 // ..........................................................
