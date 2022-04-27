@@ -110,6 +110,9 @@ module.exports = {
             }
           },
           {
+            loader: path.join(__dirname, './lib/sc_attheme_loader.js'),
+          },
+          {
             loader: path.resolve('./lib/sc_static_url_loader.js'),
           },
 
