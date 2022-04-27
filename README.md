@@ -81,7 +81,7 @@ becomes
 The original macro was a simple text replacement. The new macro is also implemented as a text replacement, but because of the additional 
 syntax complications it becomes much more tricky to implement a reliable replacer. This is further complicated by the short-hand method
 definition in ES6 and later. So, while it does an attempt to do a replacement and will often succeed, there are situations where it will 
-not do the right thing. In these cases, you will need to a manual adjustment.
+not do the right thing. In these cases, you will need to do a manual adjustment.
 
 
 
