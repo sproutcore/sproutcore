@@ -317,7 +317,7 @@ SC.DatePickerView = SC.View.extend(SC.ActionSupport, {
         className = target.className,
         param;
 
-    if (className.match('button')) {
+    if (className && className.match('button')) {
       var unit = className.match('previous') ? -1 : 1;
 
       if (className.match('year')) {
