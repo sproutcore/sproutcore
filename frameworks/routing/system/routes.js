@@ -325,9 +325,7 @@ SC.routes = SC.Object.create(
     loc = (loc && loc.length > 0) ? loc.slice(1, loc.length) : '';
 
     if (this.get('location') !== loc && !this._skipRoute) {
-      SC.run(function() {
-        this.set('location', loc);
-      }, this);
+      this.changeLocation(loc);
     }
 
     this._skipRoute = NO;
@@ -348,14 +346,18 @@ SC.routes = SC.Object.create(
       loc = loc.slice(base.length + 1, loc.length);
 
       if (this.get('location') !== loc && !this._skipRoute) {
-        SC.run(function() {
-          this.set('location', loc);
-        }, this);
+        this.changeLocation(loc);
       }
     }
 
     this._skipRoute = NO;
     this._exogenous = NO;
+  },
+
+  changeLocation: function(loc) {
+    SC.run(function() {
+      this.set('location', loc);
+    }, this);
   },
 
   /**
