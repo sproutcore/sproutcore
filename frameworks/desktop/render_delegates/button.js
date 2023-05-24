@@ -111,7 +111,7 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
     }
 
     if (dataSource.get('isSegment')) {
-      jquery.attr('aria-selected', dataSource.get('isSelected').toString());
+      jquery.attr('aria-current', dataSource.get('isSelected').toString());
     } else if (isToggle) {
       jquery.attr('aria-pressed', dataSource.get('isActive').toString());
     }
