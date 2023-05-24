@@ -72,7 +72,7 @@ SC.BaseTheme.buttonRenderDelegate = SC.RenderDelegate.create({
 
     // accessibility
     if(dataSource.get('isSegment')){
-      context.setAttr('aria-selected', isSelected.toString());
+      context.setAttr('aria-current', isSelected.toString());
     }else if(isToggle) {
       context.setAttr('aria-pressed', isActive.toString());
     }
