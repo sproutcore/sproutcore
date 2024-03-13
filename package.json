@@ -1,0 +1,22 @@
+{
+  "name": "sproutnode",
+  "version": "1.11.0",
+  "description": "A SproutCore runtime environment for NodeJS",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/sproutcore/sproutcore"
+  },
+  "keywords": [
+    "SproutCore"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sproutcore/sproutcore/issues"
+  },
+  "homepage": "https://www.sproutcore.com"
+}

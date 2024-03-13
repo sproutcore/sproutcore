@@ -5,6 +5,8 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
+sc_require('system/locale');
+
 /**
  * Returns the ordinal associated for the current number.
  */
