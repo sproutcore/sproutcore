@@ -5,6 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
+sc_require("system/browser");
 
 /**
   A constant indicating an unsupported method, property or other.
