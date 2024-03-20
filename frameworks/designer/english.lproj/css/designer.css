@@ -6,14 +6,14 @@
 */
 
 body.sc-theme,
-body.sc-theme > .sc-pane.sc-main.workspace { 
+body.sc-theme > .sc-pane.sc-main.workspace {
   overflow: hidden;
   background: static_url('images/main-bg.png');
 }
 
 .workspace {
   background: static_url('images/main-bg.png');
-  
+
 }
 
 /* Design Area
@@ -23,14 +23,10 @@ body.sc-theme > .sc-pane.sc-main.workspace {
   background: #fff;
   border: 1px solid #1c1c1c;
   box-shadow: 0 3px 6px rgba(0,0,0,0.75);
-  -moz-box-shadow: 0 3px 6px rgba(0,0,0,0.75);
-  -webkit-box-shadow: 0 3px 6px rgba(0,0,0,0.75);
 }
 
 .workspace .rotated-page {
   transform: rotate(0.8deg);
-  -moz-transform: rotate(0.8deg);
-  -webkit-transform: rotate(0.8deg);
   border: 1px solid #111;
   background: #ccc;
 }
@@ -93,4 +89,3 @@ body.sc-theme > .sc-pane.sc-main.workspace {
 .workspace .dock .sc-collection-item .icon.page {
   background: static_url('images/page.png') no-repeat;
 }
-

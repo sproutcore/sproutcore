@@ -1,5 +1,8 @@
 
-SC.SelectSearchView = SC.SelectView.extend({
+sc_require("mixins/item_filter");
+
+
+SC.SelectSearchView = SC.SelectView.extend(SC.ItemFilter, {
 
   menuPreferMatrix: [0, -24, SC.POSITION_BOTTOM],
 
@@ -14,46 +17,30 @@ SC.SelectSearchView = SC.SelectView.extend({
   },
 
   _scsv_itemsDidChange: function () {
+    this.notifyPropertyChange('_displayItems');
     this.notifyPropertyChange('displayItems');
     this._searchCache = null;
-  }.observes('*items.[]'),
+  }.observes('*items.[]', 'emptyName'),
 
   _sscsv_invalidateSearchCache: function () {
     this._searchCache = null;
   }.observes('itemTitleKey', 'itemSearchKey'),
 
-  searchItems: function(items, value, key) {
-    // we cache the searchValues by index
-    var searchCache = this._searchCache;
-    if (!searchCache && key) {
-      searchCache = this._searchCache = items.getEach(key);
-    }
-    var ret;
-    SC.Benchmark.start('searchItems');
-    if (value) {
-      var reg = new RegExp(value, "i");
-      ret = items.filter(function(item, itemIndex) {
-        // var itemValue = key ? SC.get(item, key) : item;
-        var itemValue = key? searchCache[itemIndex]: item;
-        return SC.typeOf(itemValue) === SC.T_STRING ? itemValue.search(reg) !== -1 : false;
-      });
-    }
-    SC.Benchmark.end('searchItems');
-    return ret;
-  },
+  _displayItems: function () {
+    return this.formatDisplayItems();
+  }.property().cacheable(),
 
   displayItems: function () {
-    var ret = sc_super();
+    var ret = this.get('_displayItems');
     var searchValue = this.get('searchValue');
     var itemTitleKey = this.get('itemSearchKey') || this.get('itemTitleKey') || 'title';
     return searchValue? this.searchItems(ret, searchValue, itemTitleKey): ret;
   }.property().cacheable(),
 
-  menu: SC.MenuSeachPane.extend(SC.SelectViewMenu, {
+  menu: SC.MenuSearchPane.extend(SC.SelectViewMenu, {
     searchView: function() {
       return this.get('selectView');
     }.property('selectView').cacheable(),
   })
 
 });
-

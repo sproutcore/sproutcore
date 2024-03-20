@@ -52,6 +52,5 @@ $theme.radio {
 
 $theme.radio-group.sc-layout-horizontal $theme.radio, $theme.radio.sc-layout-horizontal {
   display: inline-block;
-  -moz-display: inline-block;
   margin-right: 14px;
 }
