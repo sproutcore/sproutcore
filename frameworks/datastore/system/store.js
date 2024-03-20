@@ -1770,19 +1770,19 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Array} ids ids to retrieve
     @param {Array} storeKeys (optional) store keys to retrieve
     @param {Boolean} isRefresh
-    @param {Function|Array} callback function or array of functions
+    @param {Function} callback function
     @returns {Array} storeKeys to be retrieved
   */
-  retrieveRecords: function(recordTypes, ids, storeKeys, isRefresh, callbacks) {
+  retrieveRecords: function(recordTypes, ids, storeKeys, isRefresh, callback) {
 
-    var source  = this._getDataSource(),
+    var source = this._getDataSource(),
         isArray = SC.typeOf(recordTypes) === SC.T_ARRAY,
-        hasCallbackArray = SC.typeOf(callbacks) === SC.T_ARRAY,
-        len     = (!storeKeys) ? ids.length : storeKeys.length,
-        ret     = [],
-        rev     = SC.Store.generateStoreKey(),
-        K       = SC.Record,
-        recordType, idx, storeKey, status, ok, callback;
+        len = (!storeKeys) ? ids.length : storeKeys.length,
+        storeKeysToRetrieve = [],
+        ret = [],
+        rev = SC.Store.generateStoreKey(),
+        K = SC.Record,
+        recordType, idx, storeKey, status, ok;
 
     if (!isArray) recordType = recordTypes;
 
@@ -1796,26 +1796,18 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         if (isArray) recordType = recordTypes[idx];
         storeKey = recordType.storeKeyFor(ids[idx]);
       }
-      //collect the callback
-      callback = hasCallbackArray ? callbacks[idx] : callbacks;
 
       // collect status and process
       status = this.readStatus(storeKey);
 
       // K.EMPTY, K.ERROR, K.DESTROYED_CLEAN - initial retrieval
       if ((status === K.EMPTY) || (status === K.ERROR) || (status === K.DESTROYED_CLEAN)) {
-        this.writeStatus(storeKey, K.BUSY_LOADING);
-        this.dataHashDidChange(storeKey, rev, YES);
-        ret.push(storeKey);
-        this._setCallbackForStoreKey(storeKey, callback, hasCallbackArray, storeKeys);
+        storeKeysToRetrieve.push(storeKey);
       // otherwise, ignore record unless isRefresh is YES.
       } else if (isRefresh) {
         // K.READY_CLEAN, K.READY_DIRTY, ignore K.READY_NEW
         if (status & K.READY) {
-          this.writeStatus(storeKey, K.BUSY_REFRESH | (status & 0x03)) ;
-          this.dataHashDidChange(storeKey, rev, YES);
-          ret.push(storeKey);
-          this._setCallbackForStoreKey(storeKey, callback, hasCallbackArray, storeKeys);
+          storeKeysToRetrieve.push(storeKey);
         // K.BUSY_DESTROYING, K.BUSY_COMMITTING, K.BUSY_CREATING
         } else if ((status === K.BUSY_DESTROYING) || (status === K.BUSY_CREATING) || (status === K.BUSY_COMMITTING)) {
           K.BUSY_ERROR.throw();
@@ -1829,10 +1821,30 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       }
     }
 
+    storeKeysToRetrieve.forEach(function(storeKey) {
+
+      // collect status and process
+      status = this.readStatus(storeKey);
+
+      // K.EMPTY, K.ERROR, K.DESTROYED_CLEAN - initial retrieval
+      if ((status === K.EMPTY) || (status === K.ERROR) || (status === K.DESTROYED_CLEAN)) {
+        this.writeStatus(storeKey, K.BUSY_LOADING);
+        this.dataHashDidChange(storeKey, rev, YES);
+        ret.push(storeKey);
+        this._setCallbackForStoreKey(storeKey, callback, storeKeysToRetrieve);
+      }
+      else if (status & K.READY) {
+        this.writeStatus(storeKey, K.BUSY_REFRESH | (status & 0x03)) ;
+        this.dataHashDidChange(storeKey, rev, YES);
+        ret.push(storeKey);
+        this._setCallbackForStoreKey(storeKey, callback, storeKeysToRetrieve);
+      }
+    }, this);
+
     // now retrieve storeKeys from dataSource.  if there is no dataSource,
     // then act as if we couldn't retrieve.
     ok = NO;
-    if (source) ok = source.retrieveRecords.call(source, this, ret, ids);
+    if (source) ok = source.retrieveRecords.call(source, this, ret);
 
     // if the data source could not retrieve or if there is no source, then
     // simulate the data source calling dataSourceDidError on those we are
@@ -1865,10 +1877,13 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @private
     stores the callbacks for the storeKeys that are inflight
   **/
-  _setCallbackForStoreKey: function(storeKey, callback, hasCallbackArray, storeKeys){
-    var queue = this._callback_queue;
-    if(hasCallbackArray) queue[storeKey] = {callback: callback, otherKeys: storeKeys};
-    else queue[storeKey] = callback;
+  _setCallbackForStoreKey: function(storeKey, callback, storeKeys) {
+    if (!callback) return;
+
+    this._callback_queue[storeKey] = {
+      callback: callback,
+      storeKeys: storeKeys
+    };
   },
 
   /**
@@ -1876,29 +1891,35 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     Retrieves and calls callback for `storeKey` if exists, also handles if a single callback is
     needed for one key..
   **/
-  _retrieveCallbackForStoreKey: function(storeKey){
+  _retrieveCallbackForStoreKey: function(storeKey) {
     var queue = this._callback_queue,
-        callback = queue[storeKey],
-        allFinished, keys;
-    if(callback){
-      if(SC.typeOf(callback) === SC.T_FUNCTION){
-        callback.call(); //args?
-        delete queue[storeKey]; //cleanup
-      }
-      else if(SC.typeOf(callback) === SC.T_HASH){
-        callback.completed = YES;
-        keys = callback.storeKeys;
-        keys.forEach(function(key){
-          if(!queue[key].completed) allFinished = YES;
-        });
-        if(allFinished){
-          callback.callback.call(); // args?
-          //cleanup
-          keys.forEach(function(key){
-            delete queue[key];
+      callback = queue[storeKey],
+      allFinished = true,
+      keys;
+
+    if (callback) {
+      callback.completed = true;
+      keys = callback.storeKeys;
+      keys.forEach(function(key){
+        if (queue[key] && !queue[key].completed) allFinished = false;
+      });
+      if (allFinished) {
+        if (SC.typeOf(callback.callback) === SC.T_ARRAY) {
+          //@if(debug)
+          SC.warn("Developer Warning: callbacks array has been deprecated in favor of a single callback function.");
+          //@endif
+          callback.callback.forEach(function(cb) {
+            cb();
           });
         }
+        else {
+          callback.callback.call(); // args?
+        }
 
+        //cleanup
+        keys.forEach(function(key){
+          delete queue[key];
+        });
       }
     }
   },
@@ -1910,6 +1931,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   _cancelCallback: function(storeKey){
     var queue = this._callback_queue;
     if(queue[storeKey]){
+      SC.Logger.info("Did cancel the callback for the storeKey '%@'".fmt(storeKey));
       delete queue[storeKey];
     }
   },
@@ -1995,18 +2017,18 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {SC.Set} storeKeys to commit
     @param {Hash} params optional additional parameters to pass along to the
       data source
-    @param {Function|Array} callback function or array of callbacks
+    @param {Function} callback function
 
     @returns {Boolean} if the action was succesful.
   */
-  commitRecords: function(recordTypes, ids, storeKeys, params, callbacks) {
-    var source    = this._getDataSource(),
-        isArray   = SC.typeOf(recordTypes) === SC.T_ARRAY,
-        hasCallbackArray = SC.typeOf(callbacks) === SC.T_ARRAY,
-        retCreate= [], retUpdate= [], retDestroy = [],
-        rev       = SC.Store.generateStoreKey(),
-        K         = SC.Record,
-        recordType, idx, storeKey, status, ret, len, callback;
+  commitRecords: function(recordTypes, ids, storeKeys, params, callback) {
+    var source = this._getDataSource(),
+        isArray = SC.typeOf(recordTypes) === SC.T_ARRAY,
+        retCreate = [], retUpdate = [], retDestroy = [],
+        storeKeysToCommit = [],
+        rev = SC.Store.generateStoreKey(),
+        K = SC.Record,
+        recordType, idx, storeKey, status, ret, len;
 
     // If no params are passed, look up storeKeys in the changelog property.
     // Remove any committed records from changelog property.
@@ -2028,54 +2050,77 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         storeKey = recordType.storeKeyFor(ids[idx]);
       }
 
-      //collect the callback
-      callback = hasCallbackArray ? callbacks[idx] : callbacks;
-
       // collect status and process
       status = this.readStatus(storeKey);
 
-      if (status === K.ERROR) {
-        K.NOT_FOUND_ERROR.throw();
-      }
-      else {
-        if(status === K.READY_NEW) {
-          this.writeStatus(storeKey, K.BUSY_CREATING);
+      switch (status) {
+        case K.ERROR:
+          K.NOT_FOUND_ERROR.throw();
+        break;
+        case K.READY_NEW:
+        case K.READY_DIRTY:
+        case K.DESTROYED_DIRTY:
+          storeKeysToCommit.push(storeKey);
+        break;
+        case K.READY_CLEAN:
+        case K.DESTROYED_CLEAN:
           this.dataHashDidChange(storeKey, rev, YES);
-          retCreate.push(storeKey);
-          this._setCallbackForStoreKey(storeKey, callback, hasCallbackArray, storeKeys);
-        } else if (status === K.READY_DIRTY) {
-          this.writeStatus(storeKey, K.BUSY_COMMITTING);
-          this.dataHashDidChange(storeKey, rev, YES);
-          retUpdate.push(storeKey);
-          this._setCallbackForStoreKey(storeKey, callback, hasCallbackArray, storeKeys);
-        } else if (status === K.DESTROYED_DIRTY) {
-          this.writeStatus(storeKey, K.BUSY_DESTROYING);
-          this.dataHashDidChange(storeKey, rev, YES);
-          retDestroy.push(storeKey);
-          this._setCallbackForStoreKey(storeKey, callback, hasCallbackArray, storeKeys);
-        } else if (status === K.DESTROYED_CLEAN) {
-          this.dataHashDidChange(storeKey, rev, YES);
-        }
-        // ignore K.EMPTY, K.READY_CLEAN, K.BUSY_LOADING, K.BUSY_CREATING, K.BUSY_COMMITTING,
+        break;
+        // ignore K.EMPTY, K.BUSY_LOADING, K.BUSY_CREATING, K.BUSY_COMMITTING,
         // K.BUSY_REFRESH_CLEAN, K_BUSY_REFRESH_DIRTY, KBUSY_DESTROYING
+        default:
+          SC.Logger.warn("Cannot commit storeKey '%@' as its status is '%@'".fmt(storeKey, status));
+        break;
       }
     }
 
+    storeKeysToCommit.forEach(function(storeKey) {
+      // collect status and process
+      status = this.readStatus(storeKey);
+      switch (status) {
+        case K.READY_NEW:
+          this.writeStatus(storeKey, K.BUSY_CREATING);
+          this.dataHashDidChange(storeKey, rev, YES);
+          retCreate.push(storeKey);
+          this._setCallbackForStoreKey(storeKey, callback, storeKeysToCommit);
+        break;
+        case K.READY_DIRTY:
+          this.writeStatus(storeKey, K.BUSY_COMMITTING);
+          this.dataHashDidChange(storeKey, rev, YES);
+          retUpdate.push(storeKey);
+          this._setCallbackForStoreKey(storeKey, callback, storeKeysToCommit);
+        break;
+        case K.DESTROYED_DIRTY:
+          this.writeStatus(storeKey, K.BUSY_DESTROYING);
+          this.dataHashDidChange(storeKey, rev, YES);
+          retDestroy.push(storeKey);
+          this._setCallbackForStoreKey(storeKey, callback, storeKeysToCommit);
+        break;
+      }
+    }, this);
+
     // now commit storeKeys to dataSource
-    if (source && (len>0 || params)) {
+    if (source && (storeKeysToCommit.length>0 || params)) {
       ret = source.commitRecords.call(source, this, retCreate, retUpdate, retDestroy, params);
     }
 
     //remove all committed changes from changelog
-    if (ret && !recordTypes && !ids) {
-      if (storeKeys === this.changelog) {
-        this.changelog = null;
+    //if we manually update a record with writeDataHash, changelog may be null
+    if (this.changelog) {
+      if (storeKeys) {
+        if (storeKeys === this.changelog) {
+          this.changelog = null;
+        }
+        else {
+          this.changelog.removeEach(storeKeys);
+        }
       }
       else {
-        this.changelog.removeEach(storeKeys);
+        this.changelog.removeEach(storeKeysToCommit);
       }
     }
-    return ret ;
+
+    return ret;
   },
 
   /**
@@ -2091,7 +2136,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Number} storeKey the storeKey of the record to commit
     @param {Hash} params optional additional params that will passed down
       to the data source
-    @param {Function|Array} callback function or array of functions
+    @param {Function} callback function
     @returns {Boolean} if the action was successful.
   */
   commitRecord: function(recordType, id, storeKey, params, callback) {
