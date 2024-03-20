@@ -13,6 +13,7 @@ cd ${WD}
 
 git clone https://github.com/sproutcore/build-tools sproutcore
 cd sproutcore
+git checkout es5strict
 npm install
 cd ..
 sproutcore/bin/sproutcore init master

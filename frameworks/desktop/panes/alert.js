@@ -500,7 +500,7 @@ SC.AlertPane.mixin(
         idx,
         buttons = args.buttons,
         button, buttonView, layerId, title, toolTip, action, target, themeName,
-        isDefault, isCancel, hasDefault, hasCancel;
+        isDefault, isCancel, hasDefault, hasCancel, localize;
 
     if (buttons) {
       //@if(debug)

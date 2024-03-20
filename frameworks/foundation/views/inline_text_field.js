@@ -368,8 +368,8 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.InlineEditor,
   // TODO: make textArea automatically resize to fit content
 
   /** @private */
-  mouseDown: function(e) {
-    arguments.callee.base.call(this, e) ;
+  mouseDown: function mouseDown (e) {
+    mouseDown.base.call(this, e) ;
     return this.get('isEditing');
   },
 

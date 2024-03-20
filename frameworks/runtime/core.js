@@ -5,7 +5,7 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 /*global require, console */
-
+'use strict';
 // These commands are used by the build tools to control load order.  On the
 // client side these are a no-op.
 if (!window.require) { window.require = function require() {}; }
