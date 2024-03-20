@@ -101,6 +101,21 @@ SC.ContainerView = SC.View.extend(
   isTransitioning: NO,
 
   /**
+    If the view to display is not instantiated, SC.ContainerView will instanciate
+    it for you when the view is entered.
+
+    if cacheInstanciatedViews is set to true, the instanciated views will be
+    cached for later reuse. Otherwise, the instanciated views will be destroyed
+    when the view is exited.
+
+    All the cached views will be destroy if the container itself is destroy.
+
+    @type Boolean
+    @default true
+  */
+  cacheInstanciatedViews: true,
+
+  /**
     Optional path name for the content view.  Set this to a property path
     pointing to the view you want to display.  This will automatically change
     the content view for you. If you pass a relative property path or a single
@@ -256,11 +271,27 @@ SC.ContainerView = SC.View.extend(
     this.removeObserver('contentView', this, this._sc_contentViewDidChange);
 
     // Cancel any active transitions.
-    // Note: this will also destroy any content view that the container created.
     this._sc_cancelTransitions();
+    var contentView = this.get('contentView');
 
     // Remove our internal reference to the statecharts.
     this._contentStatecharts = this._currentStatechart = null;
+
+    if (this._cachedViews) {
+      this._cachedViews.forEach(function(cachedView) {
+        cachedView.instance.parentView = this;
+        cachedView.instance.destroy();
+        cachedView.instance.parentView = null;
+      }, this);
+      this._cachedViews = null;
+    }
+
+    if (contentView) {
+      contentView.parentView = this;
+      contentView.destroy();
+      contentView.parentView = null;
+      this.contentView = null;
+    }
 
     return sc_super();
   },
@@ -272,7 +303,10 @@ SC.ContainerView = SC.View.extend(
   */
   nowShowingDidChange: function () {
     // This code turns this.nowShowing into a view object by any means necessary.
-    var content = this.get('nowShowing');
+    var content = this.get('nowShowing'),
+      nowShowing = content+'',
+      cacheInstanciatedViews = this.get('cacheInstanciatedViews'),
+      cachedViews = this._cachedViews;
 
     // If it's a string, try to turn it into the object it references...
     if (SC.typeOf(content) === SC.T_STRING && content.length > 0) {
@@ -292,11 +326,6 @@ SC.ContainerView = SC.View.extend(
       }
     }
 
-    // If it's an uninstantiated view, then attempt to instantiate it.
-    if (content && content.kindOf(SC.CoreView)) {
-      content = this.createChildView(content);
-    }
-
     //@if(debug)
     // Prevent developers from assigning non-view content to a container.
     if (content && !SC.kindOf(content, SC.CoreView)) {
@@ -304,6 +333,26 @@ SC.ContainerView = SC.View.extend(
       content = null;
     }
     //@endif
+
+    if (content && content.kindOf(SC.CoreView)) {
+      // If it's an uninstantiated view, then attempt to instantiate it.
+      if (SC.typeOf(content) === SC.T_CLASS) {
+        if (cachedViews) {
+          var obj = cachedViews.findProperty('nowShowing', nowShowing);
+          if (obj) {
+            content = obj.instance;
+          }
+        }
+      }
+
+      if (SC.typeOf(content) === SC.T_CLASS) {
+        content = this.createChildView(content);
+        if (cacheInstanciatedViews) {
+          if (!cachedViews) cachedViews = this._cachedViews = [];
+          cachedViews.push({ nowShowing: nowShowing, instance: content });
+        }
+      }
+    }
 
     // Sets the content.
     this.set('contentView', content);
@@ -625,7 +674,7 @@ SC.ContainerContentStatechart = SC.Object.extend({
         transitionSwap.didBuildOutFromView(container, content, options);
       }
 
-      if (content.createdByParent) {
+      if (content.createdByParent && !container.get('cacheInstanciatedViews')) {
         container.removeChildAndDestroy(content);
       } else {
         container.removeChild(content);
