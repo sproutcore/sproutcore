@@ -46,6 +46,15 @@ var userAgents = {
     engine: SC.ENGINE.webkit,
     engineVersion: '535.7'
   },
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/194.0.4606.54 Safari/537.36": {
+    device: SC.DEVICE.desktop,
+    name: SC.BROWSER.chrome,
+    version: '194.0.4606.54',
+    os: SC.OS.win,
+    osVersion: '10.0',
+    engine: SC.ENGINE.webkit,
+    engineVersion: '537.36'
+  },
 
 // OPERA
 
@@ -219,6 +228,15 @@ var userAgents = {
     osVersion: '10.6',
     engine: SC.ENGINE.gecko,
     engineVersion: '1.9.1.13'
+  },
+  "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.15; en-US; rv:196.0) Gecko/20100101 Firefox/196.0": {
+    device: SC.DEVICE.desktop,
+    name: SC.BROWSER.firefox,
+    version: '196.0',
+    os: SC.OS.mac,
+    osVersion: '10.15',
+    engine: SC.ENGINE.gecko,
+    engineVersion: '196.0'
   },
   "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en-US; rv:1.9.2.10) Gecko/20100914 Firefox/3.6.10": {
     device: SC.DEVICE.desktop,
