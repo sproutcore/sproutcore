@@ -2330,7 +2330,7 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
     dW = pdim.width;
 
     // handle left aligned and left/right
-    if (!SC.none(lL)) {
+    if (SC.isNumber(lL)) {
       if (SC.isPercentage(lL)) {
         f.x = dW * lL;
       } else {
@@ -2348,8 +2348,8 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
       }
 
     // handle right aligned
-    } else if (!SC.none(lR)) {
-      if (SC.none(lW)) {
+    } else if (SC.isNumber(lR)) {
+      if (!SC.isNumber(lW)) {
         if (SC.isPercentage(lR)) {
           f.width = dW - (dW * lR);
         }
@@ -2364,7 +2364,7 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
       }
 
     // handle centered
-    } else if (!SC.none(lcX)) {
+    } else if (SC.isNumber(lcX)) {
       if (lW === AUTO) f.width = AUTO;
       else if (SC.isPercentage(lW)) f.width = lW * dW;
       else f.width = (lW || 0);
@@ -2372,7 +2372,7 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
       else f.x = (dW - f.width) / 2 + lcX;
     } else {
       f.x = 0; // fallback
-      if (SC.none(lW)) {
+      if (!SC.isNumber(lW)) {
         f.width = dW;
       } else {
         if (lW === AUTO) f.width = AUTO;
@@ -2382,7 +2382,7 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
     }
 
     // handle top aligned and top/bottom
-    if (!SC.none(lT)) {
+    if (SC.isNumber(lT)) {
       if (SC.isPercentage(lT)) f.y = lT * dH;
       else f.y = lT;
       if (lH !== undefined) {
@@ -2395,8 +2395,8 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
       }
 
     // handle bottom aligned
-    } else if (!SC.none(lB)) {
-      if (SC.none(lH)) {
+    } else if (SC.isNumber(lB)) {
+      if (!SC.isNumber(lH)) {
         if (SC.isPercentage(lB)) f.height = dH - (lB * dH);
         else f.height = dH - lB;
         f.y = 0;
@@ -2409,7 +2409,7 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
       }
 
     // handle centered
-    } else if (!SC.none(lcY)) {
+    } else if (SC.isNumber(lcY)) {
       if (lH === AUTO) f.height = AUTO;
       if (lH && SC.isPercentage(lH)) f.height = lH * dH;
       else f.height = (lH || 0);
@@ -2419,7 +2419,7 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
     // fallback
     } else {
       f.y = 0; // fallback
-      if (SC.none(lH)) {
+      if (!SC.isNumber(lH)) {
         f.height = dH;
       } else {
         if (lH === AUTO) f.height = AUTO;
