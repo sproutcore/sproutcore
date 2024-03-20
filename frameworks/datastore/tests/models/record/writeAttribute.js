@@ -31,7 +31,9 @@ module("SC.Record#writeAttribute", {
 });
 
 test("returns receiver", function() {
-  equals(foo.writeAttribute("bar", "baz"), foo, 'should return receiver');
+  SC.run(function () {
+    equals(foo.writeAttribute("bar", "baz"), foo, 'should return receiver');
+  });
 });
 
 test("first time writing should mark record as dirty", function() {
@@ -77,7 +79,7 @@ test("raises exception if you try to write an attribute before an attribute hash
   try {
     foo.writeAttribute("foo", "bar");
   } catch(e) {
-    equals(e.message, SC.Record.BAD_STATE_ERROR.toString(), 'should throw BAD_STATE_ERROR');
+    equals(e.message, SC.Record.BAD_STATE_ERROR.message, 'should throw BAD_STATE_ERROR');
     cnt++;
   }
   equals(cnt, 1, 'should raise exception');
@@ -103,16 +105,17 @@ test("Writing to an attribute in chained store sets correct status", function() 
 
 test("Writing a new guid", function(){
   equals(foo.get('id'), 1, 'foo.id should be 1');
-  foo.set('guid', 2);
+  SC.run(function () { foo.set('guid', 2); });
   equals(foo.get('id'), 2, 'foo.id should be 2');
 });
 
 test("Writing primaryKey of 'id'", function(){
   var PrimaryKeyId = SC.Record.extend({ primaryKey: 'id' });
-  var foo2 = store.createRecord(PrimaryKeyId, { id: 1 });
+  var foo2;
+  SC.run(function () { foo2 = store.createRecord(PrimaryKeyId, { id: 1 }); });
 
   equals(foo2.get('id'), 1, 'foo2.id should be 1');
-  foo2.set('id', 2);
+  SC.run(function () { foo2.set('id', 2); });
   equals(foo2.get('id'), 2, 'foo2.id should be 2');
   equals(store.idFor(foo2.get('storeKey')), 2, 'foo2.id should be 2 in the store');
 });

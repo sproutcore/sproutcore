@@ -143,7 +143,7 @@ SC.Observers = {
     // observers need it.
     if ( object._kvo_needsRangeObserver ) {
       var set = this.rangeObservers,
-          len = set ? set.get('length') : 0,
+          len = set ? set.length : 0,
           out = this._TMP_OUT,
           ro;
 
@@ -185,14 +185,16 @@ SC.Observers = {
     var pending ;
     if(--this.isObservingSuspended <= 0) {
       pending = this._pending ;
-      this._pending = SC.CoreSet.create() ;
+      if (pending.length > 0) {
+        this._pending = SC.CoreSet.create() ;
 
-      var idx, len = pending.length;
-      for(idx=0;idx<len;idx++) {
-        pending[idx]._notifyPropertyObservers() ;
+        var idx, len = pending.length;
+        for(idx=0;idx<len;idx++) {
+          pending[idx]._notifyPropertyObservers() ;
+        }
+        pending.clear();
+        pending = null ;
       }
-      pending.clear();
-      pending = null ;
     }
   }
 

@@ -353,7 +353,7 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
   addObjects: function(objects) {
     var cur = this._objects,
         oldlen, newlen;
-    if (!cur) cur = this._objects = SC.CoreSet.create();
+    if (!cur) cur = this._objects = SC.Set.create();
     oldlen = cur.get('length');
 
     cur.addEach(objects);

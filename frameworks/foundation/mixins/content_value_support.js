@@ -362,7 +362,7 @@ SC.ContentValueSupport = {
 
       // set case
       else {
-        var i, len = oldKeys.get('length');
+        var i, len = oldKeys.length;
 
         for (i = 0; i < len; i++) {
           contentKey = oldKeys[i];

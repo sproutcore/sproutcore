@@ -26,6 +26,8 @@ sc_require('models/record_attribute');
 SC.ChildAttribute = SC.RecordAttribute.extend(
   /** @scope SC.ChildAttribute.prototype */ {
 
+  isChildAttribute: YES,
+
   isNestedRecordTransform: YES,
 
   // ..........................................................
@@ -33,44 +35,38 @@ SC.ChildAttribute = SC.RecordAttribute.extend(
   //
 
   /**  @private - adapted for to one relationship */
-  toType: function(record, key, value) {
+  toType: function (record, key, value) {
     var ret   = null, rel,
         recordType  = this.get('typeClass');
 
     if (!record) {
       throw new Error('SC.Child: Error during transform: Unable to retrieve parent record.');
     }
-    if (!SC.none(value)) ret = record.registerNestedRecord(value, key);
+    ret = record.materializeNestedRecord(value, key);
 
     return ret;
   },
 
   // Default fromType is just returning itself
   fromType: function(record, key, value) {
-    var sk, store, ret;
+    var sk, store, ret, attrs, attrkey = this.get('key') || key;
 
     if (record) {
-      // Unregister the old child (nested) record.
-      if (record.readAttribute(key)) {
-        record.unregisterNestedRecord(key);
-      }
-
       if (SC.none(value)) {
-        // Handle null value.
-        record.writeAttribute(key, value);
+        record.writeAttribute(attrkey, value);
         ret = value;
-      } else {
-        // Register the nested record with this record (the parent).
-        ret = record.registerNestedRecord(value, key);
-
-        if (ret) {
-          // Write the data hash of the nested record to the store.
-          sk = ret.get('storeKey');
-          store = ret.get('store');
-          record.writeAttribute(key, store.readDataHash(sk));
-        } else if (value) {
-          // If registration failed, just write the value.
-          record.writeAttribute(key, value);
+      } else { // value is truthy
+        if (value.isRecord) {
+          if (value.isChildRecord) { // get the attributes
+            attrs = value.get('attributes');
+          }
+          else {
+            attrs = value.get('store').readEditableDataHash(value.get('storeKey')); // we should clone
+          }
+          record.writeAttribute(attrkey, attrs);
+        }
+        else {
+          record.writeAttribute(attrkey, value);
         }
       }
     }
@@ -85,22 +81,22 @@ SC.ChildAttribute = SC.RecordAttribute.extend(
     @param {Object} value the property value if called as a setter
     @returns {Object} property value
   */
-  call: function(record, key, value) {
+  call: function (record, key, value) {
     var attrKey = this.get('key') || key;
     if (value !== undefined) {
-      value = this.fromType(record, key, value) ; // convert to attribute.
+      value = this.fromType(record, key, value); // convert to attribute.
     } else {
       value = record.readAttribute(attrKey);
       if (SC.none(value) && (value = this.get('defaultValue'))) {
         if (typeof value === SC.T_FUNCTION) {
           value = this.defaultValue(record, key, this);
           // write default value so it doesn't have to be executed again
-          if(record.attributes()) record.writeAttribute(attrKey, value, true);
+          if (record.attributes()) record.writeAttribute(attrKey, value, true);
         }
       } else value = this.toType(record, key, value);
     }
 
-    return value ;
+    return value;
   }
 });
 

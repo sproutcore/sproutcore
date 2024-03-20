@@ -959,7 +959,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   fieldDidBlur: function (evt) {
     this.resignFirstResponder(evt);
 
-    if (this.get('commitOnBlur')) this.commitEditing(evt);
+    if (this.get('commitOnBlur')) {
+      SC.run(function () {
+        this.commitEditing(evt);
+      }, this);
+    }
 
     // get the pane we hid intercept pane for (if any)
     var touchPane = this._didHideInterceptForPane;

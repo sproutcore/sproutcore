@@ -526,17 +526,191 @@ SC.Set._pool = [];
 
 /** @class
 
-  CoreSet is just like Set but not observable.  If you want to use the set
-  as a simple data structure with no observing, CoreSet is slightly faster
+  CoreSet is an Array-like object, which has almost the same API as SC.Set, but is not observable.
+  If you want to use the set as a simple data structure with no observing, CoreSet is faster
   and more memory efficient.
 
-  @extends SC.Set
-  @since SproutCore 1.0
+  @since SproutCore 2.0
 */
-SC.CoreSet = SC.beget(SC.Set);
 
-/** @private */
-SC.CoreSet.isObservable = NO;
+SC.CoreSet = function (newContents) {
+  Array.prototype.constructor.apply(this);
+  var len;
+  if (newContents && (len = SC.get(newContents, 'length')) > 0) {
+    for (var i = 0; i < len; i += 1) {
+      this.add(newContents[i]);
+    }
+  }
+  return this;
+};
 
-/** @private */
-SC.CoreSet.constructor = SC.CoreSet;
+SC.CoreSet.create = function (newContents) {
+  var pool = SC.CoreSet._pool;
+  if (!newContents && pool.length > 0) {
+    return pool.pop();
+  }
+  else return new SC.CoreSet(newContents);
+};
+
+SC.CoreSet._pool = [];
+
+SC.CoreSet.prototype = {
+
+  isSet: true,
+
+  isFrozen: false,
+
+  isEnumerable: true, // makes sure other objects think it looks like an array.
+
+  push: Array.prototype.push,
+  splice: Array.prototype.splice,
+  pop: Array.prototype.pop,
+  forEach: Array.prototype.forEach,
+  indexOf: Array.prototype.indexOf,
+  map: Array.prototype.map,
+  find: Array.prototype.find,
+  filter: Array.prototype.filter,
+
+  isEqual: function(obj) {
+    var len = this.length;
+    // fail fast
+    if (!obj || !obj.isSet || SC.get(obj,'length') !== len) {
+      return false;
+    }
+
+    var loc = len;
+    while(--loc>=0) {
+      if (!obj.contains(this[loc])) return false;
+    }
+
+    return true;
+  },
+
+  add: function (obj) {
+    if (!this.isFrozen) {
+      if (this.indexOf(obj) === -1) this.push(obj);
+    }
+    //@if(debug)
+    else {
+      SC.Logger.warn('Developer Warning: trying to add to a frozen SC.CoreSet')
+    }
+    //@endif
+    return this;
+  },
+
+  addEach: function (set) {
+    if (!this.isFrozen) {
+      for (var i = set.length - 1; i >= 0; i -= 1) {
+        this.add(set[i]);
+      }
+    }
+    //@if(debug)
+    else {
+      SC.Logger.warn('Developer Warning: trying to perform addEach on a frozen SC.CoreSet')
+    }
+    //@endif
+    return this;
+  },
+
+  remove: function (obj) {
+    if (!this.isFrozen) {
+      var i = this.indexOf(obj);
+      if (i > -1) this.splice(i, 1);
+    }
+    //@if(debug)
+    else {
+      SC.Logger.warn('Developer Warning: trying to remove from a frozen SC.CoreSet')
+    }
+    //@endif
+    return this;
+  },
+
+  removeEach: function (set) {
+    if (!this.isFrozen) {
+      set.forEach(function (i) { this.remove(i); }, this);
+    }
+    //@if(debug)
+    else {
+      SC.Logger.warn('Developer Warning: trying to perform removeEach on a frozen SC.CoreSet')
+    }
+    //@endif
+    return this;
+  },
+
+  clone: function () {
+    return SC.CoreSet.create(this);
+  },
+
+  destroy: function () {
+    if (!this.isFrozen) {
+      this.length = 0;
+      SC.CoreSet._pool.push(this);
+    }
+    //@if(debug)
+    else {
+      SC.Logger.warn('Developer Warning: trying to destroy a frozen SC.CoreSet')
+    }
+    //@endif
+  },
+
+  clear: function () {
+    if (!this.isFrozen) {
+      this.length = 0;
+    }
+    //@if(debug)
+    else {
+      SC.Logger.warn('Developer Warning: trying to clear a frozen SC.CoreSet')
+    }
+    //@endif
+    return this;
+  },
+
+  contains: function (obj) {
+    return this.indexOf(obj) > -1;
+  },
+
+  copy: function () {
+    return SC.CoreSet.create(this);
+  },
+
+  toString: function() {
+    var len = this.length, idx, ary = [];
+    for (idx = 0; idx < len; idx++) ary[idx] = this[idx];
+    return "SC.CoreSet<%@>".fmt(ary.join(',')) ;
+  },
+
+  toArray: function () {
+    return this.map(function (i) {
+      return i;
+    });
+  },
+
+  firstObject: function () {
+    return this[0];
+  },
+
+  invoke: function (funname) {
+    SC.warn("Developer Warning: SC.CoreSet.invoke is deprecated");
+    if (arguments.length > 1) {
+      console.log('SC.CoreSet.invoke called with arguments:', arguments);
+    }
+    this.forEach(function (i) {
+      if (i[funname]) i[funname]();
+    });
+  },
+
+  freeze: function () {
+    this.isFrozen = true;
+    return this;
+  },
+
+  addSetObserver: function () {
+    throw new Error("trying to add a set observer to a SC.CoreSet");
+  },
+
+  removeSetObserver: function () {
+    throw new Error("trying to remove a set observer from a SC.CoreSet");
+  }
+
+};
+

@@ -644,7 +644,7 @@ SC.Observable = /** @scope SC.Observable.prototype */ {
     var chains = this._chainsFor(property);
     chains.remove(chain);
 
-    if (chains.get('length') === 0) {
+    if (chains.length === 0) {
       delete this._kvo_property_chains[property];
     }
   },

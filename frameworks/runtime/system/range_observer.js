@@ -149,7 +149,7 @@ SC.RangeObserver = /** @scope SC.RangeObserver.prototype */{
   setupPending: function(object) {
     var observing = this.observing ;
 
-    if ( this.isObserving || !observing || (observing.get('length')===0) ) {
+    if ( this.isObserving || !observing || (observing.length === 0) ) {
       return true ;
     }
 
