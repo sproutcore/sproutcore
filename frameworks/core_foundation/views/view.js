@@ -2493,7 +2493,6 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
 
     // Theming
     this._lastTheme = this.get('theme');
-
   },
 
   /** @private */
@@ -2526,5 +2525,3 @@ SC.View = SC.CoreView.extend(/** @scope SC.View.prototype */{
 
 //unload views for IE, trying to collect memory.
 if (SC.browser.isIE) SC.Event.add(window, 'unload', SC.View, SC.View.unload);
-
-
