@@ -1,5 +1,5 @@
 
-SC.MenuSeachPane = SC.AutoResizingMenuPane.extend({
+SC.MenuSearchPane = SC.AutoResizingMenuPane.extend({
 
   // Prevent the text field from loosing the focus
   // UPDATE: Not working and still buggy
