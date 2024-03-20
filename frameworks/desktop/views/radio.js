@@ -216,29 +216,15 @@ SC.RadioView = SC.View.extend(SC.Control,
   itemIconKey: null,
 
   /**  @private
-    If the items array itself changes, add/remove observer on item...
-  */
-  itemsDidChange: function() {
-    if (this._items) {
-      this._items.removeObserver('[]', this, this.itemContentDidChange);
-    }
-    this._items = this.get('items');
-    if (this._items) {
-      this._items.addObserver('[]', this, this.itemContentDidChange);
-    }
-    this.itemContentDidChange();
-  }.observes('items'),
-
-  /** @private
     Invoked whenever the item array or an item in the array is changed.
     This method will regenerate the list of items.
   */
-  itemContentDidChange: function() {
+  itemsDidChange: function() {
     // Force regeneration of buttons
     this._renderAsFirstTime = YES;
 
     this.notifyPropertyChange('displayItems');
-  },
+  }.observes('*items.[]'),
 
   // ..........................................................
   // PRIVATE SUPPORT

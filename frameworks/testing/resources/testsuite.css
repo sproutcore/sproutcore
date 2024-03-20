@@ -1,9 +1,9 @@
 #qunit,
-#qunit div, 
-#qunit h1 { 
-  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', verdana, sans-serif; 
-  margin: 0; 
-  padding: 0 
+#qunit div,
+#qunit h1 {
+  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', verdana, sans-serif;
+  margin: 0;
+  padding: 0
 }
 
 #qunit {
@@ -13,43 +13,43 @@
   right: 0;
   bottom: 0;
   overflow: auto;
-  font-size: 10pt; 
+  font-size: 10pt;
 }
 
-#qunit h1 { 
-  padding: 15px; 
-  font-size: large; 
-  background-color: #06b; 
-  color: white; 
+#qunit h1 {
+  padding: 15px;
+  font-size: large;
+  background-color: #06b;
+  color: white;
 }
 
 #qunit h1 a { color: white; }
 
-#qunit h2 { 
-  padding: 10px; 
-  background-color: #eee; 
-  color: black; 
-  margin: 0; 
-  font-size: small; 
-  font-weight: normal 
+#qunit h2 {
+  padding: 10px;
+  background-color: #eee;
+  color: black;
+  margin: 0;
+  font-size: small;
+  font-weight: normal
 }
 
-#qunit .pass { color: green; } 
-#qunit .fail { color: red; } 
+#qunit .pass { color: green; }
+#qunit .fail { color: red; }
 #qunit p.result { margin-left: 1em; }
 
-#qunit #banner { 
-  height: 2em; 
-  border-bottom: 1px solid white; 
+#qunit #banner {
+  height: 2em;
+  border-bottom: 1px solid white;
 }
 
 #qunit h2.pass { background-color: green; }
 #qunit h2.fail { background-color: red; }
 
-#qunit div.testrunner-toolbar { 
-  background: #eee; 
-  border-top: 1px solid black; 
-  padding: 10px; 
+#qunit div.testrunner-toolbar {
+  background: #eee;
+  border-top: 1px solid black;
+  padding: 10px;
 }
 
 #qunit ol#tests > li > strong { cursor:pointer; }
@@ -83,9 +83,6 @@
 #qunit div.medheight { height: 50px; }
 #qunit div.medopacity {
 	opacity: 0.5;
-	filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
-  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)"; 
-  -moz-opacity:0.5;
 }
 
 #qunit div.nowidth {
@@ -98,10 +95,6 @@
 
 #qunit div.noopacity {
 	opacity: 0;
-	filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
-  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)"; 
-  -moz-opacity:0;
-  
 }
 
 #qunit div.hidden {
