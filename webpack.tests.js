@@ -1,6 +1,5 @@
 const fs = require('fs');
 const path = require('path');
-const { Compiler, Stats } = require('webpack');
 const devConfig = require('./webpack.dev.js');
 
 // don't split chunks as it complicates test URLs
@@ -271,7 +270,7 @@ class CompilerHookPlugin {
 let compilationStats;
 
 devConfig.plugins = devConfig.plugins ?? [];
-// this is very brittle, as it tries to refer to the mini css extract plugin by location in the plugins 
+// this is very brittle, as it tries to refer to the mini css extract plugin by location in the plugins
 // array. A better detection would be better.
 devConfig.plugins[0].options.filename = '[name].css';
 devConfig.plugins.push(
@@ -297,7 +296,7 @@ devConfig.devServer.onBeforeSetupMiddleware = function (devServer) {
         // and this has to wait a bit, because it is too fast for the timeouts
         res.send('ok');
     });
-    
+
     app.get('/ready', function (req, res) {
         // only return 200 status if compilation is completed
         if (compilationStats) {
@@ -307,7 +306,7 @@ devConfig.devServer.onBeforeSetupMiddleware = function (devServer) {
             res.sendStatus(503);
         }
     });
-    
+
     app.get('/sc/targets.json', function (req, res) {
         const targets = getAllTargets(allTests);
         res.send(JSON.stringify(targets));
