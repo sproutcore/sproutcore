@@ -20,7 +20,8 @@
   "scripts": {
     "test": "webpack serve --config webpack.tests.js",
     "testrunner": "webpack serve --config webpack.testrunner.js",
-    "build": "node_modules/.bin/webpack --mode=production"
+    "build": "node_modules/.bin/webpack --mode=production",
+    "update_indexjs": "node lib/update_indexjs.js"
   },
   "author": "Charles Jolley, Tyler Keating, Maurits Lamers, Nicolas Badia",
   "license": "MIT",
