@@ -3,7 +3,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
   name: "SproutCore",
-  mode: 'development', // for now
+  mode: 'development',
   context: __dirname,
   entry: {
     bootstrap: './frameworks/bootstrap/index.js',
@@ -91,11 +91,8 @@ module.exports = {
       {
         test: /\.s?css$/i,
         use: [
-          // 'style-loader', // inject in html
           MiniCssExtractPlugin.loader,
-
           'css-loader', // convert to es modules
-          // 'sass-loader' // convert sass to css
           {
             loader: 'sass-loader',
             options: {
@@ -150,14 +147,9 @@ module.exports = {
     ]
   },
   output: {
-    path: path.join(__dirname, 'build'),
-    // filename: "SproutCore.[name].js",
-    // filename: "sproutcore.js",
-    // library: ["SC"],
     library: ["[name]"],
     libraryTarget: 'var',
     globalObject: 'window',
-    // iife: false
   },
   optimization: {
     // useExports: true
