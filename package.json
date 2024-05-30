@@ -25,7 +25,10 @@
   },
   "author": "Charles Jolley, Tyler Keating, Maurits Lamers, Nicolas Badia",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+
+    "commander": "^12.1.0"
+  },
   "devDependencies": {
     "compass-mixins-fixed": "^1.0.1",
     "css-loader": "^5.1.2",
