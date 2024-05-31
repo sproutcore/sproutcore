@@ -1,0 +1,9 @@
+require('../desktop');
+require('./media_capabilities.js');
+require('./render_delegates/media_slider.js');
+require('./views/media_slider.js');
+require('./views/mini_controls.js');
+require('./views/simple_controls.js');
+require('./views/controls.js');
+require('./views/audio.js');
+require('./views/video.js');

@@ -199,3 +199,48 @@ test("subclasses should contain defined subclasses", function() {
   var kls2 = obj1.extend();
   ok(obj1.subclasses.contains(kls2), 'obj1.subclasses should contain kls2');
 });
+
+let BaseKlass, ExtendedKlass;
+
+module("SC.Object ES5 strict compatible way of calling sc_super", {
+  setup: function () {
+
+    BaseKlass = SC.Object.extend({
+
+      originalMethodCalled: 0,
+
+      myMethod: function () {
+        this.originalMethodCalled += 1;
+        return this.originalMethodCalled;
+      },
+
+      myOtherMethod: function () {
+        return "test";
+      }
+
+    });
+
+    ExtendedKlass = BaseKlass.extend({
+      myMethod: function t () {
+        return t.base.apply(this, arguments);
+      },
+
+      myOtherMethod: function t () {
+        return t.base.apply(this, arguments);
+      }
+    })
+    
+  },
+
+  teardown: function () {
+    BaseKlass = ExtendedKlass = null;
+  }
+});
+
+test("ES5 strict sc_super through named methods works correctly", function () {
+  const eo = ExtendedKlass.create();
+  equals(eo.myMethod(), 1, "when overridden only the base method should be called");
+
+  equals(eo.myOtherMethod(), "test", "two methods using the same name are not confused");
+  
+});

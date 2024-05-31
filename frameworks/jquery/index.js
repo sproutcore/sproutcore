@@ -1,0 +1,1 @@
+require('./jquery-3.5.0.slim.js');

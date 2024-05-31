@@ -17,3 +17,6 @@ Gemfile*
 .project
 .settings/
 .vscode/
+node_modules
+build/
+dist/

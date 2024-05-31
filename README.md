@@ -1,22 +1,26 @@
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/sproutcore/sproutcore?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Build Status](https://travis-ci.org/sproutcore/sproutcore.png?branch=master)](https://travis-ci.org/sproutcore/sproutcore)
 
 SproutCore 2: For Native-Caliber Web Apps
 =======
 
-> **Sproutcore 2** no longer support the *Abbot Buildtools* which has been replaced by the new [Node.js Build Tools](https://github.com/sproutcore/build-tools).
+> **Sproutcore 2.0** replaces the NodeJS buildtools with webpack. Migrating? Check [Migration docs](./MIGRATING.md)!
 
 SproutCore is a JS-MVC framework for building blazing-fast, native-caliber web
 applications. SproutCore's full-stack approach to single-page application
 development gives you the tools you need to build rich, powerful applications...
 which happen to run in the browser.
 
+## Requirements
+
+You need to have NodeJS installed.
+
 ## Getting Started
 
-The easiest way to get started with SproutCore is to install the Ruby gem.
-You can find instructions [here](http://sproutcore.com/install/). Once you've
-got SproutCore installed, checkout the
-[Getting Started](http://guides.sproutcore.com/getting_started.html) tutorial.
+To create a new project, you can run the following to create a new project:
+
+`npm init sproutcore project [projectname]`
+
+This will give you a sample project, with a basic statechart, main view, a model and model data.
 
 ## Next Steps
 

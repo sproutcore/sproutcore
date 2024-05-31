@@ -11,10 +11,11 @@
 
 var url, request, contents, test_timeout=2500;
 
-// When running Travis-CI tests through PhantomJS, wait extra long.
-if (window._phantom) {
+// When running Puppeteer tests through Headless Chrome, wait extra long.
+if (window.webdriver) {
   test_timeout=5000;
 }
+
 
 module("SC.Request", {
 
@@ -369,7 +370,7 @@ test("Timeouts - Status listener callback", function() {
       checkstop;
 
   // make the timeout as short as possible so that it will always happen
-  timeoutRequest.timeoutAfter(10).notify(this, function(response) {
+  timeoutRequest.timeoutAfter(1).notify(this, function(response) {
     start();
     clearTimeout(checkstop);
 

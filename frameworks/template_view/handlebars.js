@@ -1,5 +1,5 @@
 // lib/handlebars/base.js
-var Handlebars = {};
+var Handlebars = window.Handlebars = {};
 
 Handlebars.VERSION = "1.0.beta.2";
 

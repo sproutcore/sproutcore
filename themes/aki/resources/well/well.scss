@@ -1,0 +1,10 @@
+@import "../variables";
+
+#{$theme}.well {
+  overflow:hidden;
+
+  background-color: $well-bg; 
+  border: $well-border;
+  box-shadow: $well-box-shadow; 
+  border-radius: $well-border-radius; 
+}

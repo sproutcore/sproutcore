@@ -719,3 +719,22 @@ window.clearHtmlbody = function() {
 window.htmlbody = function(string) {
   CoreTest.defaultPlan().htmlbody(string);
 };
+
+window.ctModule = function(desc, l) {
+  CoreTest.defaultPlan().module(desc, l);
+};
+
+// create a test.  If this is the first time, create the test plan and
+// runner.  This will cause the test to run on page load
+window.ctTest = function(desc, func) {
+  CoreTest.defaultPlan().test(desc, func);
+};
+
+// reset htmlbody for unit testing
+window.ctClearHtmlbody = function() {
+  CoreTest.defaultPlan().clearHtmlbody();
+};
+
+window.ctHtmlbody = function(string) {
+  CoreTest.defaultPlan().htmlbody(string);
+};

@@ -1,9 +1,0 @@
-/* This default stylesheet for forms maximizes fluidity. */
-$theme.sc-form-label {
-  white-space:pre; text-align: right; 
-}
-
-$theme.form-row {
-  overflow: visible;
-}
-

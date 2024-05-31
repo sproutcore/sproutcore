@@ -34,7 +34,10 @@
       view1: SC.View,
       view2: SC.View
     }),
-    init: function() { sc_super(); this.viewPage = this.viewPage.create(); } // have to create page
+    init: function() { 
+      sc_super(); 
+      this.viewPage = this.viewPage.create(); 
+    } // have to create page
   });
 
   pane.add("nestedContainer", SC.ContainerView, {

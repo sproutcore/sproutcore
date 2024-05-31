@@ -1368,7 +1368,16 @@ SC.View.reopen(
       layoutStyle = this.get('layoutStyle');
 
     for (var styleName in layoutStyle) {
-      layer.style[styleName] = layoutStyle[styleName];
+      if (!layoutStyle.hasOwnProperty(styleName)) continue;
+      if (styleName !== 'transition') {
+        layer.style[styleName] = layoutStyle[styleName];
+      }
+      else {
+        // force a reflow after applying transition, otherwise 
+        // the transition events possibly won't run
+        layer.style['transition'] = layoutStyle['transition'];    
+        layer.offsetTop; // this forces a reflow
+      }
     }
 
     // Reset that an update is required.

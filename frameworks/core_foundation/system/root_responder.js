@@ -2503,7 +2503,8 @@ SC.RootResponder = SC.Object.extend(
 */
 SC.ready(SC.RootResponder, SC.RootResponder.ready = function () {
   var r;
-
-  r = SC.RootResponder.responder = SC.RootResponder.create();
-  r.setup();
+  if (!SC.RootResponder.responder) {
+    r = SC.RootResponder.responder = SC.RootResponder.create();
+    r.setup();
+  }
 });
