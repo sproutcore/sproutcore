@@ -1336,6 +1336,7 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
 
   // ..........................................................
   // DISCLOSURE SUPPORT
+
   //
 
   /**
@@ -1352,7 +1353,14 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
 
     indexes.forEach(function(i) {
       var state = del.contentIndexDisclosureState(this, content, i);
-      if (state === SC.BRANCH_CLOSED) del.contentIndexExpand(this,content,i);
+      if (state === SC.BRANCH_CLOSED) {
+        del.contentIndexExpand(this,content,i);
+
+        // Attempt to fix this issue: https://app.gestixi.com/ticket/6000
+        // The solution could involve the _disclosureStateCache
+        //var itemView = this.itemViewForContentIndex(i);
+        //if (itemView) itemView.set('disclosureState', SC.BRANCH_OPEN);
+      }
     }, this);
     return this;
   },
@@ -1371,7 +1379,13 @@ SC.CollectionView = SC.View.extend(SC.ActionSupport, SC.CollectionViewDelegate, 
 
     indexes.forEach(function(i) {
       var state = del.contentIndexDisclosureState(this, content, i);
-      if (state === SC.BRANCH_OPEN) del.contentIndexCollapse(this,content,i);
+      if (state === SC.BRANCH_OPEN) {
+        del.contentIndexCollapse(this,content,i);
+
+        // Attempt to fix this issue: https://app.gestixi.com/ticket/6000
+        //var itemView = this.itemViewForContentIndex(i);
+        //if (itemView) itemView.set('disclosureState', SC.BRANCH_CLOSED);
+      }
     }, this);
     return this;
   },

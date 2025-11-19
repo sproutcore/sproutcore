@@ -320,6 +320,20 @@ SC.Record = SC.Object.extend(
   }.property(),
 
   /**
+    This will return the raw attributes that you can edit directly.  If you
+    make changes to this hash, be sure to call `beginEditing()` before you get
+    the attributes and `endEditing()` afterwards.
+
+    @type Hash
+    @property
+  **/
+  hasAttribute: function() {
+    var store    = this.get('store'),
+        storeKey = this.storeKey;
+    return this.get('attributes');
+  },
+
+  /**
     This will return the raw attributes that you cannot edit directly.  It is
     useful if you want to efficiently look at multiple attributes in bulk.  If
     you would like to edit the attributes, see the `attributes` property

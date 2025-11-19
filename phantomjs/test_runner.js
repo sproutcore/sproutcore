@@ -1,72 +1,61 @@
- /**
-  PhantomJS Unit Test Runner
+/**
+  Puppeteer Unit Test Runner
   ==========================
 
-  This script can be used to run the SproutCore unit tests in PhantomJS. It is used
-  with SproutCore's Travis-CI integration to automatically run unit tests on every
-  push.
+  This script can be used to run the SproutCore unit tests in Puppeteer.
 
   This script can also be used to run tests locally, either for developing SproutCore
   or for all of your own app's unit tests.
-  - Download or otherwise arrive at the phantomjs binary for your platform of choice
-    (see http://phantomjs.org/download.html).
   - Run sc-server. (If you run it on a custom port, note the port number and see below.)
   - Run this script to run the unit tests provided by sc-server.
 
   Run all tests:
 
-    phantomjs test_runner.js
+    node test_runner.js
 
   Run all tests with sc-server running on a custom port:
 
-    phantomjs test_runner.js --port 4021
+    node test_runner.js --port 4021
 
   Run only runtime and desktop unit tests:
 
-    phantomjs test_runner.js --include-targets "/sproutcore/runtime,/sproutcore/desktop"
+    node test_runner.js --include-targets "/sproutcore/runtime,/sproutcore/desktop"
 
   Run everything but greenhouse tests (a good idea):
 
-    phantomjs test_runner.js --exclude-targets "/sproutcore/greenhouse"
+    node test_runner.js --exclude-targets "/sproutcore/greenhouse"
 
   Get help:
 
-    phantomjs test_runner.js -h
+    node test_runner.js -h
 */
 
-/*globals require, phantom, console */
-
-// HACK: rename require so abbot does not warn about it
-var require_module = require;
-
 // require modules
-var system = require_module('system'),
-    webpage = require_module('webpage'),
-    minimist = require_module('./minimist'),
-    Q = require_module('./q');
+const minimist = require('minimist');
+const puppeteer = require('puppeteer');
 
 // constants
-var EXIT_SUCCESS = 0,
-    EXIT_FAILURE = 1,
-    EXIT_ERROR = 2,
-    PASSED = 'passed',
-    FAILED = 'failed',
-    ERRORS = "errors",
-    WARNINGS = "warnings",
-    TIMEOUT = 'timeout',
-    SKIPPED = 'skipped',
-    PASS_COLOR = '\x1b[32m',
-    FAIL_COLOR = '\x1b[31m',
-    ERROR_COLOR = '\x1b[41m',
-    WARN_COLOR = '\x1b[33m',
-    TIMEOUT_COLOR = '\x1b[36m',
-    SKIPPED_COLOR = '\x1b[46m',
-    RESET_COLOR = '\x1b[0m',
-    TIMEOUT_WAIT = 30000;
+const EXIT_SUCCESS = 0;
+const EXIT_FAILURE = 1;
+const EXIT_ERROR = 2;
+const PASSED = 'passed';
+const FAILED = 'failed';
+const ERRORS = 'errors';
+const WARNINGS = 'warnings';
+const TIMEOUT = 'timeout';
+const SKIPPED = 'skipped';
+const PASS_COLOR = '\x1b[32m';
+const FAIL_COLOR = '\x1b[31m';
+const ERROR_COLOR = '\x1b[41m';
+const WARN_COLOR = '\x1b[33m';
+const TIMEOUT_COLOR = '\x1b[36m';
+const SKIPPED_COLOR = '\x1b[46m';
+const RESET_COLOR = '\x1b[0m';
+const TIMEOUT_WAIT = 30000;
 
 // vars
-var args = processArgs(system.args.slice(1), system.env),
-    urlRoot = 'http://' + args.host + ':' + args.port;
+const args = processArgs(process.argv.slice(2), process.env);
+const urlRoot = `http://${args.host}:${args.port}`;
 
 /**
   Processes command line arguments.
@@ -78,7 +67,7 @@ var args = processArgs(system.args.slice(1), system.env),
   @param {Object} env Environment variables
   @returns {{ travis: boolean, host: string, port: number, includeTargets: ?Array, excludeTargets: ?Array,
               filter: ?RegExp, experimental: boolean, verbose: boolean, veryVerbose: boolean, help: boolean }}
- */
+*/
 function processArgs(args, env) {
   args = minimist(args, {
     default: {
@@ -92,7 +81,7 @@ function processArgs(args, env) {
       experimental: true,
       verbose: !!env.VERBOSE && !env.TRAVIS,
       veryVerbose: !!env.VERY_VERBOSE,
-      help: false
+      help: false,
     },
     alias: {
       includeTargets: 'include-targets',
@@ -100,8 +89,8 @@ function processArgs(args, env) {
       targetKinds: 'target-kinds',
       verbose: 'v',
       veryVerbose: ['V', 'very-verbose'],
-      help: 'h'
-    }
+      help: 'h',
+    },
   });
 
   if (typeof args.includeTargets === 'string') {
@@ -133,19 +122,18 @@ function processArgs(args, env) {
 
   @param {Array} allResults The results object for each test (including skipped tests).
   @returns {number} Final result of the test run. Will be 0 if all tests passed, otherwise 1, so it can be passed
-                    directly to phantom.exit().
+                    directly to process.exit().
 */
 function logSummary(allResults) {
-  var ran = 0,
-      passed = 0,
-      failed = 0,
-      errored = 0,
-      warned = 0,
-      timedout = 0,
-      skipped = 0,
-      parts;
+  let ran = 0;
+  let passed = 0;
+  let failed = 0;
+  let errored = 0;
+  let warned = 0;
+  let timedout = 0;
+  let skipped = 0;
 
-  allResults.forEach(function (results) {
+  allResults.forEach(results => {
     if (results.result === PASSED) {
       passed++;
     } else if (results.result === FAILED) {
@@ -165,9 +153,7 @@ function logSummary(allResults) {
     }
   });
 
-  parts = [
-    '\nRan ', ran, ' of ', allResults.length + ' tests.'
-  ];
+  const parts = ['\nRan ', ran, ' of ', `${allResults.length} tests.`];
 
   if (failed > 0) {
     parts.push(' ');
@@ -195,13 +181,13 @@ function logSummary(allResults) {
 
   console.log(parts.join(''));
 
-  allResults.forEach(function (results) {
+  allResults.forEach(results => {
     if (results.result !== PASSED && results.result !== SKIPPED) {
       logTestResult(results, results.test);
     }
   });
 
-  return (failed + errored + timedout > 0) ? EXIT_FAILURE : EXIT_SUCCESS;
+  return failed + errored + timedout > 0 ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 
 /**
@@ -221,7 +207,7 @@ function logSummary(allResults) {
   @returns {boolean} false if this target should be filtered out
 */
 function filterTarget(target) {
-  var include = true;
+  let include = true;
 
   if (args.targetKinds && args.targetKinds.indexOf(target.kind) < 0) {
     include = false;
@@ -263,30 +249,30 @@ function filterTest(test) {
                     the text to the correct color for the test result
 */
 function colorForResult(result) {
-  var color;
+  let color;
 
   switch (result) {
-  case PASSED:
-    color = PASS_COLOR;
-    break;
-  case FAILED:
-    color = FAIL_COLOR;
-    break;
-  case ERRORS:
-    color = ERROR_COLOR;
-    break;
-  case WARNINGS:
-    color = WARN_COLOR;
-    break;
-  case TIMEOUT:
-    color = TIMEOUT_COLOR;
-    break;
-  case SKIPPED:
-    color = SKIPPED_COLOR;
-    break;
-  default:
-    color = '';
-    break;
+    case PASSED:
+      color = PASS_COLOR;
+      break;
+    case FAILED:
+      color = FAIL_COLOR;
+      break;
+    case ERRORS:
+      color = ERROR_COLOR;
+      break;
+    case WARNINGS:
+      color = WARN_COLOR;
+      break;
+    case TIMEOUT:
+      color = TIMEOUT_COLOR;
+      break;
+    case SKIPPED:
+      color = SKIPPED_COLOR;
+      break;
+    default:
+      color = '';
+      break;
   }
 
   return color;
@@ -299,7 +285,7 @@ function colorForResult(result) {
   @returns {string} String describing the test result
 */
 function getTestResult(results) {
-  var testResult;
+  let testResult;
 
   if (results.isSkipped) {
     testResult = SKIPPED;
@@ -328,24 +314,24 @@ function getTestResult(results) {
  * @param {string} testResult Test result string
  */
 function logTestAssertions(results, testResult) {
-  var assertionsByTest;
+  let assertionsByTest;
   if (args.verbose || testResult === FAILED || testResult === ERRORS) {
     assertionsByTest = {};
 
-    results.assertions.forEach(function (assertion) {
-      var parts = assertion.module.split('\n'),
-          testId = parts[1] + ' module: ' + assertion.test;
+    results.assertions.forEach(assertion => {
+      const parts = assertion.module.split('\n');
+      const testId = `${parts[1]} module: ${assertion.test}`;
       assertionsByTest[testId] = assertionsByTest[testId] || [];
       assertionsByTest[testId].push(assertion);
     });
 
-    Object.keys(assertionsByTest).forEach(function (testId) {
-      var assertions = assertionsByTest[testId],
-          firstFail = true;
+    Object.keys(assertionsByTest).forEach(testId => {
+      const assertions = assertionsByTest[testId];
+      let firstFail = true;
 
-      assertions.forEach(function (assertion) {
-        var parts,
-            color;
+      assertions.forEach(assertion => {
+        let parts;
+        let color;
 
         if (args.verbose || assertion.result !== PASSED) {
           if (firstFail) {
@@ -354,9 +340,7 @@ function logTestAssertions(results, testResult) {
           }
 
           color = colorForResult(assertion.result);
-          parts = [
-            '  ', assertion.message, ': ', color, assertion.result, RESET_COLOR
-          ];
+          parts = ['  ', assertion.message, ': ', color, assertion.result, RESET_COLOR];
 
           console.log(parts.join(''));
         }
@@ -372,16 +356,24 @@ function logTestAssertions(results, testResult) {
   @param {Object} test Test object
 */
 function logTestResult(results, test) {
-  var testResult = getTestResult(results),
-      testResultColor = colorForResult(testResult),
-      parts;
+  const testResult = getTestResult(results);
+  const testResultColor = colorForResult(testResult);
 
   results.result = testResult;
 
-  parts = [
-    '[', test.index + 1, '/', test.totalTests, ']',
-    ' ', testResultColor, test.url,
-    ' (', testResult, ')', RESET_COLOR
+  const parts = [
+    '[',
+    test.index + 1,
+    '/',
+    test.totalTests,
+    ']',
+    ' ',
+    testResultColor,
+    test.url,
+    ' (',
+    testResult,
+    ')',
+    RESET_COLOR,
   ];
 
   // Check that the test page actually ran (wasn't skipped, didn't timeout).
@@ -454,71 +446,102 @@ function logTestResult(results, test) {
     * If any unhandled exceptions occurred during the test.
     * If the test takes too long to run (possibly due to an unhandled exception).
 
-  @param {WebPage} page PhantomJS page for the unit test
-  @param {Q.defer} deferred Deferred object representing the result of the test
+  @param {WebPage} page Puppeteer page for the unit test
   @param {Object} test Test object
 */
-function configureTestPage(page, deferred, test) {
-  var timeoutId;
+function configureTestPage(page, test) {
+  return new Promise(resolve => {
+    let isCompleted = false;
 
-  // Set a reasonable viewport size.
-  page.viewportSize = { width: 1024, height: 768 };
+    let timeoutId;
 
-  // When the unit test notifies us that it is complete,
-  // resolve the promise and log the result.
-  page.onCallback = function (results) {
-    // Make sure we haven't already resolved this test.
-    if (deferred.promise.isPending()) {
-      page.close();
-      results.test = test;
-      clearTimeout(timeoutId);
-      results.hadUnhandledError = !!test.hadUnhandledError;
-      logTestResult(results, test);
-      deferred.resolve(results);
-    }
-  };
+    // Set a reasonable viewport size.
+    page.setViewport({ width: 1024, height: 768 });
 
-  // If an unhandled exception or some other error occurs,
-  // the test page may never invoke callPhantom. We want to
-  // make sure we don't wait forever, so set a timeout.
-  // If we hit this, we will resolve the promise as a timeout.
-  timeoutId = setTimeout(function () {
-    var results;
+    // When the unit test notifies us that it is complete,
+    // resolve the promise and log the result.
+    // The SproutCore tests was built for PhantomJS so uses `callPhantom`
+    // to pass back the test results.
+    page.exposeFunction('callPhantom', results => {
+      // Make sure we haven't already resolved this test.
+      if (!isCompleted) {
+        page.close();
+        results.test = test;
+        clearTimeout(timeoutId);
+        results.hadUnhandledError = !!test.hadUnhandledError;
+        logTestResult(results, test);
 
-    // If not resolved yet, resolve as a timeout, possibly due to an
-    // unhandled exception.
-    if (deferred.promise.isPending()) {
-      page.close();
+        isCompleted = true;
+        resolve(results);
+      }
+    });
 
-      results = {
-        isTimeout: true,
-        hadUnhandledError: !!test.hadUnhandledError,
-        test: test
-      };
+    // If an unhandled exception or some other error occurs,
+    // the test page may never invoke callPhantom. We want to
+    // make sure we don't wait forever, so set a timeout.
+    // If we hit this, we will resolve the promise as a timeout.
+    timeoutId = setTimeout(() => {
+      let results;
 
-      logTestResult(results, test);
-      deferred.resolve(results);
-    }
-  }, TIMEOUT_WAIT);
+      // If not resolved yet, resolve as a timeout, possibly due to an
+      // unhandled exception.
+      if (!isCompleted) {
+        page.close();
 
-  page.onError = function (msg, trace) {
-    // If very verbose, dump console messages to the console.
+        results = {
+          isTimeout: true,
+          hadUnhandledError: !!test.hadUnhandledError,
+          test,
+        };
+
+        logTestResult(results, test);
+        resolve(results);
+      }
+    }, TIMEOUT_WAIT);
+
+    page.on('pageError', error => {
+      const msg = error.message;
+
+      // If very verbose, dump console messages to the console.
+      if (args.veryVerbose) {
+        console.log(`ERROR: ${msg}`);
+      }
+      // Indicate that an error occurred. This may or may not cause the unit
+      // test to fail to complete. We will not resolve the promise right now.
+      // Instead, wait to see if the script finished, otherwise the timeout
+      // will handle it.
+      test.hadUnhandledError = true;
+    });
+
     if (args.veryVerbose) {
-      console.log('ERROR: ' + msg);
+      // If very verbose, dump console messages to the console.
+      page.onConsoleMessage = msg => {
+        console.log(`CONSOLE: ${msg}`);
+      };
     }
-    // Indicate that an error occurred. This may or may not cause the unit
-    // test to fail to complete. We will not resolve the promise right now.
-    // Instead, wait to see if the script finished, otherwise the timeout
-    // will handle it.
-    test.hadUnhandledError = true;
-  };
+  });
+}
 
-  if (args.veryVerbose) {
-    // If very verbose, dump console messages to the console.
-    page.onConsoleMessage = function (msg) {
-      console.log('CONSOLE: ' + msg);
-    };
-  }
+/**
+ * Helper function that creates a new page and for it to go to the provided URL.
+ *
+ * @param {*} browser Puppeteer browser object
+ * @param {String} url url for the new page to go to
+ * @param {Function} setupPage optional function for setting up the page
+ */
+function goToPage(browser, url, setupPage = () => {}) {
+  return new Promise((resolve, reject) => {
+    browser.newPage().then(page => {
+      page.on('error', () => {
+        reject(new Error(`Error for page: ${url}`));
+      });
+
+      // call the setup callback
+      setupPage(page, resolve, reject);
+
+      page.goto(url).catch(reject);
+    });
+  });
 }
 
 /**
@@ -529,70 +552,62 @@ function configureTestPage(page, deferred, test) {
   resolved.
 
   @param {Object} test Test object
-  @returns {Q.promise} Promise which will resolve upon test completion
+  @returns {Promise} Promise which will resolve upon test completion
 */
-function runTest(test) {
-  var url,
-      page,
-      results,
-      deferred = Q.defer();
-
+function runTest(browser, test) {
   // Check if we should run this test.
   if (filterTest(test)) {
-    url = urlRoot + test.url;
-    page = webpage.create();
-    configureTestPage(page, deferred, test);
-
-    page.open(url, function (status) {
-      if (status === 'fail') {
-        // Page failed to load, reject the promise.
-        page.close();
-        deferred.reject(new Error('Could not open page: ' + url));
-      }
+    const url = urlRoot + test.url;
+    return goToPage(browser, url, (page, resolve, reject) => {
+      configureTestPage(page, test)
+        .then(resolve)
+        .catch(reject);
     });
   } else {
     // Resolve as a skipped test.
-    results = {
+    const results = {
       isSkipped: true,
-      test: test
+      test,
     };
     logTestResult(results, test);
-    deferred.resolve(results);
+    Promise.resolve(results);
   }
-
-  return deferred.promise;
 }
 
 /**
   Runs all the unit tests.
 
   Returns a single promise which will resolve when all unit tests have completed.
+
+  NOTE: the following note applies to the PhantomJS test runner. We may be able to
+        parallelize the tests with node/puppeteer.
+
   This function is a little complex because we can't fire off all the tests in
   parallel. Doing so causes PhantomJS to run out of resources. So the
   promises need to be chained in sequence.
 
   @param {Array} tests Test object for all the unit tests
-  @returns {Q.promise} Promise which will resolve when all tests finish
+  @returns {Promise} Promise which will resolve when all tests finish
 */
-function runTests(tests) {
-  var len = tests.length;
+function runTests(browser, tests) {
+  const len = tests.length;
 
   // Reduce the tests down to a single promise.
-  return tests.reduce(function (p, test, idx) {
+  return tests.reduce((p, test, idx) => {
     // Set the index/length for the test, so we can log progress.
     test.index = idx;
     test.totalTests = len;
 
     // Chain a new promise...
-    return p.then(function (allResults) {
+    return p.then(allResults => {
       // that returns the promise from running the test...
-      return runTest(test).then(function (results) {
+      return runTest(browser, test).then(results => {
         // that pushes its result onto the list of test results.
         allResults.push(results);
         return allResults;
       });
     });
-  }, Q([]));
+  }, Promise.resolve([]));
 }
 
 /**
@@ -604,34 +619,32 @@ function runTests(tests) {
   and we get our list of tests.
 
   @param {Object} target Target object
-  @returns {Q.promise} Promise which will resolve when we get the
+  @returns {Promise} Promise which will resolve when we get the
                        list of test for the target
 */
-function fetchTestsForTarget(target) {
-  var url = urlRoot + target.link_tests,
-      page = webpage.create(),
-      deferred = Q.defer();
+function fetchTestsForTarget(browser, target) {
+  const url = urlRoot + target.link_tests;
 
-  page.open(url, function (status) {
-    var tests;
-
-    if (status === 'success') {
-      tests = this.evaluate(function () {
+  return goToPage(browser, url, (page, resolve, reject) => {
+    page.on('load', () => {
+      const evalResults = page.evaluate(() => {
         return JSON.parse(document.getElementsByTagName('pre')[0].innerHTML);
       });
-      page.close();
 
-      if (tests) {
-        deferred.resolve(tests);
-      } else {
-        deferred.reject(new Error('Could not find tests'));
-      }
-    } else {
-      deferred.reject(new Error('Could not open page: ' + url));
-    }
+      evalResults
+        .then(tests => {
+          if (tests) {
+            resolve(tests);
+            page.close();
+          } else {
+            reject(new Error('Could not find tests'));
+          }
+        })
+        .catch(error => {
+          reject(error);
+        });
+    });
   });
-
-  return deferred.promise;
 }
 
 /**
@@ -641,29 +654,28 @@ function fetchTestsForTarget(target) {
   have been fetched.
 
   @param {Array} targets Target objects for all the targets
-  @returns {Q.promise} Promise which will resolve when all test for
+  @returns {Promise} Promise which will resolve when all test for
                        all targets have been fetched
 */
-function fetchTests(targets) {
+function fetchTests(browser, targets) {
   // Reduce the targets down to a single promise.
-  return targets.reduce(function (p, target) {
+  return targets.reduce((p, target) => {
     // Check if we should handle this target.
     if (filterTarget(target)) {
       // Chain a new promise...
-      return p.then(function (allTests) {
+      return p.then(allTests => {
         // that returns the promise from fetching the tests...
-        return fetchTestsForTarget(target).then(function (tests) {
+        return fetchTestsForTarget(browser, target).then(tests => {
           // that pushes its result onto the list of tests.
           return allTests.concat(tests);
         });
       });
-    } else {
-      // If we filter out the target, we completely ignore it.
-      // So just return the previous promise, don't chain anything
-      // extra for this target.
-      return p;
     }
-  }, Q([]));
+    // If we filter out the target, we completely ignore it.
+    // So just return the previous promise, don't chain anything
+    // extra for this target.
+    return p;
+  }, Promise.resolve([]));
 }
 
 /**
@@ -673,33 +685,29 @@ function fetchTests(targets) {
   Returns a promise that resolves when the JSON page finishes loading
   and we get our list of targets.
 
-  @returns {Q.promise} Promise which will resolve when we get the list of targets
+  @returns {Promise} Promise which will resolve when we get the list of targets
 */
-function fetchTargets() {
-  var url = urlRoot + '/sc/targets.json',
-      page = webpage.create(),
-      deferred = Q.defer();
+function fetchTargets(browser) {
+  const url = `${urlRoot}/sc/targets.json`;
 
-  page.open(url, function (status) {
-    var targets;
-
-    if (status === 'success') {
-      targets = this.evaluate(function () {
+  return goToPage(browser, url, (page, resolve, reject) => {
+    page.on('load', () => {
+      page.evaluate(() => {
         return JSON.parse(document.getElementsByTagName('pre')[0].innerHTML);
-      });
-      page.close();
-
-      if (targets) {
-        deferred.resolve(targets);
-      } else {
-        deferred.reject(new Error('Could not find targets'));
-      }
-    } else {
-      deferred.reject(new Error('Could not open page: ' + url));
-    }
+      })
+              .then(targets => {
+                  if (targets) {
+                      page.close();
+                      resolve(targets);
+                  } else {
+                      reject(new Error('Could not find targets'));
+                  }
+              })
+              .catch(error => {
+                  reject(error);
+              });
+    });
   });
-
-  return deferred.promise;
 }
 
 /**
@@ -711,29 +719,32 @@ function fetchTargets() {
     * Runs the tests (including logging the result of each test).
     * Logs a summary of the test results.
 
-  @returns {Q.promise} Promise that resolves when the test runner finishes.
+  @returns {Promise} Promise that resolves when the test runner finishes.
 */
-function run() {
-  return Q.fcall(fetchTargets)
-      .then(fetchTests)
-      .then(runTests)
-      .then(logSummary);
+async function run() {
+  const browser = await puppeteer.launch();
+
+  const targets = await fetchTargets(browser);
+  const tests = await fetchTests(browser, targets);
+  const results = await runTests(browser, tests);
+  return logSummary(results);
 }
 
 if (!args.help) {
   // Run the test runner.
-  // Exit phantom with an exit status indicating if the tests passed or failed.
+  // Exit with an exit status indicating if the tests passed or failed.
   run()
-      .then(function (finalResult) {
-        phantom.exit(finalResult);
-      }, function (reason) {
-        console.log(reason);
-        phantom.exit(EXIT_ERROR);
-      });
+    .then(finalResult => {
+      process.exit(finalResult);
+    })
+    .catch(reason => {
+      console.log(reason);
+      process.exit(EXIT_ERROR);
+    });
 } else {
-  console.log('SproutCore PhantomJS Test Runner');
+  console.log('SproutCore Puppeteer Test Runner');
   console.log('');
-  console.log('  Runs unit tests under PhantomJS. Requires sc-server to be running.');
+  console.log('  Runs unit tests under Puppeteer. Requires sc-server to be running.');
   console.log('  Options below, command line options override environment variables.');
   console.log('');
   console.log('Options:');
@@ -750,5 +761,5 @@ if (!args.help) {
   console.log('  -V, --very-verbose, env[VERY_VERBOSE]  Log test page console messages [false]');
   console.log('  -h, --help                             This help page');
 
-  phantom.exit(EXIT_SUCCESS);
+  process.exit(EXIT_SUCCESS);
 }
