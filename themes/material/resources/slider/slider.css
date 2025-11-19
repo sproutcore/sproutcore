@@ -22,11 +22,11 @@ $theme.slider {
   }
 
   .sc-handle {
-    @include transform(translate3d(0,0,0));
-    display: block; 
+    transform: translateY(-2px) rotate(45deg);
+    display: block;
     position: absolute;
-    top: 50%; 
-    background-color: $slider-handle-bg; 
+    top: 50%;
+    background-color: $slider-handle-bg;
     box-shadow: $slider-handle-box-shadow;
     border: $slider-handler-border;
   }
@@ -34,7 +34,7 @@ $theme.slider {
   &.disabled { opacity: .5; }
 
   &.active {
-    .sc-handle { 
+    .sc-handle {
       background-color: $active-slider-handle-bg;
       box-shadow: $active-slider-handle-box-shadow;
     }

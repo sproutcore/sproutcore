@@ -1,4 +1,3 @@
-@import "compass/css3";
 
 $theme.button {
   box-sizing: border-box;
@@ -27,7 +26,7 @@ $theme.button {
     background-color: $sel-button-bg;
     border-color: $sel-button-border-color;
     color: $sel-button-text-color;
-    font-weight:200;
+    font-weight: 200;
     text-shadow: $sel-button-text-shadow;
   }
 
@@ -42,7 +41,7 @@ $theme.button {
     background-color: $sel-active-button-bg;
     border-color: $sel-active-button-border-color;
     color: $sel-active-button-text-color;
-    font-weight:200;
+    font-weight: 200;
     text-shadow: $sel-active-button-text-shadow;
   }
 
@@ -64,7 +63,6 @@ $theme.button {
     display: inline-block;
   }
 }
-
 
 @theme(capsule) {
   $theme.button {

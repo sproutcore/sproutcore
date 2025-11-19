@@ -1,7 +1,6 @@
-@import "compass/css3";
 
 $theme.toolbar {
-  @include box-shadow(rgba(0,0,0,0.3) 0 0 2px);
+  box-shadow: rgba(0,0,0,0.3) 0 0 2px;
   @include slice(toolbar_44px.png, $width: 1, $repeat: repeat-x);
   border-color: #999;
   border-style: solid;

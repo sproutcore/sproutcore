@@ -1,4 +1,3 @@
-@import "compass/css3";
 
 $theme.sc-text-field-view {
   background-color: transparent;
@@ -27,15 +26,14 @@ $theme.sc-text-field-view {
     }
   }
 
-
   &.focus .border {
     border: 1px solid $focus-field-border-color;
     box-shadow: $focus-field-box-shadow;
   }
 
-
   .sc-hint, .hint {
-    z-index: 0; top: 5px;
+    z-index: 0;
+    top: 5px;
   }
 
   &.text-area .padding {
@@ -53,7 +51,6 @@ $theme.sc-text-field-view {
     top: 0;
     box-sizing: border-box;
   }
-
 
 }
 

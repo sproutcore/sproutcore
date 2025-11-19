@@ -1,5 +1,3 @@
-@import "compass/css3";
-
 
 .sc-overlay-scroller-view {
 
@@ -39,7 +37,7 @@
 
   /* Thumb */
   .thumb {
-    @include transform(translateZ(0px));
+    transform: translateZ(0px);
     position: absolute;
     overflow: hidden;
   }
@@ -55,7 +53,7 @@
   }
 
   .thumb-inner {
-    @include transform(translate3d(0px,0px,0px));
+    transform: translate3d(0px,0px,0px);
     position: absolute;
   }
 
@@ -84,7 +82,8 @@
     }
 
     .thumb-top {
-      @include border-top-radius(4px);
+      border-top-left-radius: 4px;
+      border-top-right-radius: 4px;
       width: 7px;
       top: 0px;
       left: 3px;
@@ -113,7 +112,8 @@
     }
 
     .thumb-bottom {
-      @include border-bottom-radius(4px);
+      border-bottom-left-radius: 4px;
+      border-bottom-right-radius: 4px;
       width: 7px;
       top: 1024px;
       left: 0px;
@@ -130,7 +130,8 @@
     }
 
     .thumb-top {
-      @include border-left-radius(4px);
+      border-top-left-radius: 4px;
+      border-bottom-left-radius: 4px;
       width: 10px;
       top: 3px;
       left: 0px;
@@ -159,7 +160,8 @@
     }
 
     .thumb-bottom {
-      @include border-right-radius(4px);
+      border-top-right-radius: 4px;
+      border-bottom-right-radius: 4px;
       height: 7px;
       left: 1024px;
       top: 0px;
@@ -171,16 +173,16 @@
   &.sc-vertical, &.sc-horizontal {
 
     &.fade-in {
-      @include transition-duration(0.1s);
-      @include transition-property(opacity);
-      @include transition-timing-function(ease);
+      transition-duration: 0.1s;
+      transition-property: opacity;
+      transition-timing-function: ease;
       opacity: 0.5;
     }
 
     &.fade-out {
-      @include transition-duration(0.5s);
-      @include transition-property(opacity);
-      @include transition-timing-function(ease);
+      transition-duration: 0.5s;
+      transition-property: opacity;
+      transition-timing-function: ease;
       opacity: 0;
     }
   }
