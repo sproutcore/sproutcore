@@ -98,6 +98,23 @@ SC.ComboBoxView = SC.View.extend(SC.ItemFilter, {
   textFieldView: SC.TextFieldView,
 
   /**
+   The menu view to use.
+
+   @property
+   @type {SC.MenuPane}
+   @default SC.AutoResizingMenuPane
+  */
+  menuView: SC.AutoResizingMenuPane,
+
+  /**
+    If true, auto popup the menu when a value is typed.
+
+    @type Boolean
+    @default YES
+  */
+  autoPopupMenu: false,
+
+  /**
     * @private
   */
   selectedMenuItem: null,
@@ -117,16 +134,15 @@ SC.ComboBoxView = SC.View.extend(SC.ItemFilter, {
       maxLength: 5096,
 
       valueDidChange: function() {
-        if (that._menu) {
-          that._menu.remove();
-        }
-
         var value = this.get('value');
 
         if (value !== that._lastValue) {
           that._lastValue = value;
           that.filterItems(value);
         }
+
+        if (value && that.get('autoPopupMenu')) that.popupMenu();
+        if (!value && that._menu) that._menu.remove();
       }.observes('value'),
 
       /** @private */
@@ -171,12 +187,11 @@ SC.ComboBoxView = SC.View.extend(SC.ItemFilter, {
     * @private
   */
   popupMenu: function() {
-    var layer = this.get('layer'),
-      menu = this._menu;
+    const layer = this.get('layer');
+    let menu = this._menu;
 
     if (!menu) {
-      var menu = SC.AutoResizingMenuPane.create({
-        preferMatrix: [1, 1, SC.POSITION_BOTTOM],
+      menu = this.get('menuView').create({
         selectView: this,
         acceptsMenuPane: false,
         escapeHTML: this.get('escapeHTML'),
@@ -191,9 +206,16 @@ SC.ComboBoxView = SC.View.extend(SC.ItemFilter, {
       this._menu = menu;
     }
 
-    this.invokeLast(function() {
-      menu.popup(layer);
+    if (menu.get('isVisibleInWindow')) return;
+
+    let frame = menu.computeAnchorRect(layer);
+    menu.adjust({
+      top: frame.y + frame.height + 2,
+      left: frame.x,
+      width: frame.width,
+      height: menu.get('menuHeight'),
     });
-  }
+    menu.invokeLast('append');
+  },
 
 });
