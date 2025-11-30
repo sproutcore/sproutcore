@@ -101,6 +101,8 @@ SC.SplitChild =
   */
   size: undefined,
 
+  savedSize: undefined,
+
   /**
     [RO] The current position of the SC.SplitView. This is read-only, and is set
     by the SplitView as it positions the views.

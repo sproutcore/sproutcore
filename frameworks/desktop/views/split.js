@@ -182,6 +182,8 @@ SC.SplitView = SC.View.extend({
 
   /** @private */
   init: function() {
+    this.initChildNames = SC.A(this.get('childViews'));
+
     // set up the SC.Cursor instance that this view and all the subviews
     // will share.
     this.cursor = SC.Cursor.create();
@@ -265,7 +267,10 @@ SC.SplitView = SC.View.extend({
     @param {Number} position The position to move the child to.
     @returns {Number} The position to which the child was actually moved.
   */
-  adjustPositionForChild: function(child, position){
+  adjustPositionForChild: function(child, position) {
+    const hash = this.get('currentSaveableHash');
+    if (hash) this.set('_didRequestMoveOnce'+hash, true);
+
     this._didRequestMove = true;
     return this.invokeDelegateMethod(this.get('delegate'), 'splitViewAdjustPositionForChild', this, child, position);
   },
@@ -348,6 +353,10 @@ SC.SplitView = SC.View.extend({
 
     this.invokeOnce('_scsv_setupChildViews');
 
+    // If there is another SC.SplitView as child, it will be render first
+    // We need to setup again to have the saved size
+    this.invokeLater('_scsv_setupChildViews');
+
     var selectorView = this.get('selectorView');
     if (selectorView) {
       var minSize = this.minSizeForSelector,
@@ -418,6 +427,12 @@ SC.SplitView = SC.View.extend({
         }
       }
 
+      let savedSize = this.savedSizeFor(child);
+      if (savedSize) {
+        child.set('size', savedSize);
+        child.set('savedSize', savedSize);
+      }
+
       // we initialize the size first thing in case the size is empty (fill)
       // if it is empty, the way we position the views would lead to inconsistent
       // sizes. In addition, we will constrain all initial sizes so they'll be valid
@@ -474,6 +489,88 @@ SC.SplitView = SC.View.extend({
     // retile immediately.
     this._scsv_tile();
   },
+
+
+  //
+  // SAVE SIZES
+  //
+
+  sizeId: null,
+  initChildNames: null,
+
+  savedSizeFor: function(childView) {
+    const sizeId = this.get('sizeId');
+    const layoutDirection = this.get('layoutDirection');
+    const curFrameSize = this.get('_frameSize');
+
+    if (sizeId && (!this.didRequestMoveOnce())) {
+      const hash = this.get('currentSaveableHash');
+      let name = null;
+      this.initChildNames.forEach(n => { if (childView === this[n]) name = n; });
+
+      if (name) {
+        let sizes = GX.userDefaults.get('splitView-'+sizeId+'-'+layoutDirection+'-'+hash);
+        if (sizes && sizes[name]) {
+          return Math.max(sizes[name] * (curFrameSize / sizes.total), childView.get('minimumSize'));
+        }
+      }
+    }
+  },
+
+  childViewNameFor: function(childView) {
+    let name = null;
+
+    if (this.initChildNames) {
+      this.initChildNames.forEach(n => { if (childView === this[n]) name = n; });
+    }
+
+    return name;
+  },
+
+  saveSizes: function() {
+    const sizeId = this.get('sizeId');
+    const layoutDirection = this.get('layoutDirection');
+
+    if (sizeId && this.didRequestMoveOnce()) {
+      let sizes = {};
+      let hash = this.get('currentSaveableHash');
+
+      this.initChildNames.forEach(n => {
+        let view = this[n];
+        if (view.get('isVisible') && !view.get('isSplitDivider')) {
+          let size = view.get('size');
+          sizes[n] = size;
+          view.set('savedSize', size);
+        }
+      });
+
+      sizes.total = this.get('_frameSize');
+
+      return GX.userDefaults.set('splitView-'+sizeId+'-'+layoutDirection+'-'+hash, sizes);
+    }
+  },
+
+  currentSaveableHash: function() {
+    const sizeId = this.get('sizeId');
+    let hash = '';
+    if (sizeId) {
+      this.initChildNames.forEach(n => {
+        let view = this[n];
+        if (!view) console.log(n, this);
+        if (view.get('isVisible') && !view.get('isSplitDivider')) {
+          hash += n;
+        }
+      });
+    }
+    return hash;
+  }.property(),
+
+  didRequestMoveOnce: function() {
+    const hash = this.get('currentSaveableHash');
+    if (hash && this.get('_didRequestMoveOnce'+hash)) return true;
+    return false;
+  },
+
 
   //
   // BASIC LAYOUT CODE
@@ -576,6 +673,8 @@ SC.SplitView = SC.View.extend({
     }
 
     this.set('needsTiling', NO);
+
+    this.invokeOnce('saveSizes');
   },
 
   notifyShowSelectorDidChange: function(showSelector) {
@@ -857,6 +956,8 @@ SC.SplitView = SC.View.extend({
         this.adjust('height', end);
       }
     }
+
+    this.invokeOnce('saveSizes');
   },
 
   /**
