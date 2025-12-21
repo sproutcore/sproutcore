@@ -247,7 +247,7 @@ SC.SplitChild =
         childBottom = 0;
 
     if (split.showSelector) {
-      childBottom = split.selectorView.layout.height-1;
+      childBottom = split.selectorView.layout.height;
     }
 
     if (split.get('layoutDirection') === SC.LAYOUT_HORIZONTAL) {

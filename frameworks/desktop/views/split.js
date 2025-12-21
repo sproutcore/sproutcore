@@ -534,7 +534,7 @@ SC.SplitView = SC.View.extend({
     const sizeId = this.get('sizeId');
     const layoutDirection = this.get('layoutDirection');
 
-    if (sizeId && this.didRequestMoveOnce()) {
+    if (sizeId && this.didRequestMoveOnce() && !this.get('showSelector')) {
       let sizes = {};
       let hash = this.get('currentSaveableHash');
 
@@ -652,7 +652,7 @@ SC.SplitView = SC.View.extend({
             child.set('isVisible', true);
           }
           else {
-            var cm = child.get('minimumSize');
+            var cm = child.get('savedSize') || child.get('minimumSize');
             if (cm) child.set('size', cm);
           }
         });
