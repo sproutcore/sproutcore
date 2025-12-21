@@ -8,15 +8,15 @@ build: 3167
 /* base.css, part of YUI's CSS Foundation */
 h1 {
 	/*18px via YUI Fonts CSS foundation*/
-	font-size:138.5%;  
+	font-size:138.5%;
 }
 h2 {
 	/*16px via YUI Fonts CSS foundation*/
-	font-size:123.1%; 
+	font-size:123.1%;
 }
 h3 {
 	/*14px via YUI Fonts CSS foundation*/
-	font-size:108%;  
+	font-size:108%;
 }
 h1,h2,h3 {
 	/* top & bottom margin based on font size */
@@ -24,13 +24,13 @@ h1,h2,h3 {
 }
 h1,h2,h3,h4,h5,h6{
 	/*bringing boldness back to headers and the strong element*/
-	font-weight:bold; 
+	font-weight:bold;
 }
 abbr,acronym {
 	/*indicating to users that more info is available */
 	border-bottom:1px dotted #000;
 	cursor:help;
-} 
+}
 em {
 	/*bringing italics back to the em element*/
 	font-style:italic;
@@ -45,7 +45,7 @@ ol,ul,dl {
 }
 ol li {
 	/*giving OL's LIs generated numbers*/
-	list-style: decimal outside;	
+	list-style: decimal outside;
 }
 ul li {
 	/*giving UL's LIs generated disc markers*/
@@ -56,8 +56,7 @@ dl dd {
 	margin-left:1em;
 }
 th,td {
-	/*borders and padding to make the table readable*/
-	border:1px solid #000;
+	/*padding to make the table readable*/
 	padding:.5em;
 }
 th {
@@ -75,6 +74,6 @@ p,fieldset,table,pre {
 	/*so things don't run into each other*/
 	margin-bottom:1em;
 }
-/* setting a consistent width, 160px; 
+/* setting a consistent width, 160px;
    control of type=file still not possible */
 input[type=text],input[type=password],textarea{width:12.25em;*width:11.9em;}
