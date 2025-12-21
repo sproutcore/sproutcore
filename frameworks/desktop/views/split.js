@@ -459,7 +459,10 @@ SC.SplitView = SC.View.extend({
         }
 
         if (divider) {
-          divider.setIfChanged('isVisible', lastNonDividerChild.get('isVisible'));
+          if (!divider.isVisibleBinding && !divider.hasCustomVisibility) {
+            divider.setIfChanged('isVisible', lastNonDividerChild.get('isVisible'));
+          }
+
           divider.setIfChanged('isSplitDivider', YES);
           divider.setIfChanged('layoutDirection', layoutDirection);
           if (SC.none(divider.get('size'))) divider.set('size', dividerSize);
@@ -631,7 +634,9 @@ SC.SplitView = SC.View.extend({
         selectedView = this[selectedChild];
 
       this.get('splitChildViews').forEach(function(child) {
-        if (child.isSplitDivider) child.set('isVisible', false);
+        if (child.isSplitDivider) {
+          child.set('isVisible', false);
+        }
         else {
           child.set('position', 0);
           child.set('size', selectedView === child ? frameSize : 0);
@@ -643,7 +648,9 @@ SC.SplitView = SC.View.extend({
     else {
       if (this.showSelector) {
         this.get('splitChildViews').forEach(function(child) {
-          if (child.isSplitDivider) child.set('isVisible', true);
+          if (child.isSplitDivider) {
+            child.set('isVisible', true);
+          }
           else {
             var cm = child.get('minimumSize');
             if (cm) child.set('size', cm);
