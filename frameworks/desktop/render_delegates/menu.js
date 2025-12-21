@@ -28,7 +28,7 @@ SC.BaseTheme.menuRenderDelegate = SC.BaseTheme.pickerRenderDelegate.create({
   itemSeparatorHeight: 9,
 
   // amount to add to the calculated menu height
-  menuHeightPadding: 6,
+  menuHeightPadding: 10,
 
   // amount to add to any calculated menu width to determine the actual width
   menuWidthPadding: 60,
@@ -48,14 +48,14 @@ SC.BaseTheme.menuRenderDelegate = SC.BaseTheme.pickerRenderDelegate.create({
   'sc-small-size': {
     itemHeight: 16,
     itemSeparatorHeight: 7,
-    menuHeightPadding: 4,
+    menuHeightPadding: 6,
     submenuOffsetX: 2
   },
 
   'sc-large-size': {
     itemHeight: 60,
     itemSeparatorHeight: 20,
-    menuHeightPadding: 0,
+    menuHeightPadding: 14,
     submenuOffsetX: 4
   },
 
