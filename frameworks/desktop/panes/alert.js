@@ -354,7 +354,7 @@ SC.AlertPane = SC.PanelPane.extend(
   showTextFieldView: function(view) {
     if (!this.get('displayTextFieldView')) return false;
 
-    var layout = this.textFieldLayout || { bottom: 65, height: 24, left: 18, right: 18 },
+    var layout = this.textFieldLayout || { bottom: 65, height: 28, left: 18, right: 18 },
       textFieldValue = this.get('textFieldValue');
 
     var textFieldView = this.textFieldView.create({
@@ -395,7 +395,7 @@ SC.AlertPane = SC.PanelPane.extend(
         checkboxValue = this.get('checkboxValue');
 
     var checkboxView = SC.CheckboxView.create({
-      layout: { bottom: 55, height: 24, left: 18, right: 18 },
+      layout: { bottom: 55, height: 28, left: 18, right: 18 },
       title: checkboxTitle,
       value: checkboxValue,
     })
@@ -425,7 +425,7 @@ SC.AlertPane = SC.PanelPane.extend(
     if (!this.get('displaySelectView')) return false;
 
     var pane = this.get('pane'),
-      height = this.get('selectHeight') || 24,
+      height = this.get('selectHeight') || 28,
       selectView = (this.get('selectView') || SC.SelectView).create({
         layout: { bottom: 65, height: height, left: pane.get('icon') !== 'blank' ? 74 : 18, right: 18 },
         itemTitleKey: this.get('selectTitleKey'),
@@ -514,7 +514,7 @@ SC.AlertPane = SC.PanelPane.extend(
       }),
 
       SC.View.extend({
-        layout: { bottom: 13, height: 24, left: 18, right: 18 },
+        layout: { bottom: 11, height: 28, left: 11, right: 11 },
         childViews: ['cancelButton', 'okButton'],
         classNames: ['text-align-right'],
 
@@ -522,7 +522,7 @@ SC.AlertPane = SC.PanelPane.extend(
           useStaticLayout: YES,
           actionKey: SC.BUTTON2_STATUS,
           localize: YES,
-          layout: { right: 5, height: 'auto', width: 'auto', bottom: 0 },
+          layout: { right: 5, height: 28, width: 'auto', bottom: 0 },
           isCancel: YES,
           action: "dismiss",
           isVisible: NO
@@ -532,7 +532,7 @@ SC.AlertPane = SC.PanelPane.extend(
           useStaticLayout: YES,
           actionKey: SC.BUTTON1_STATUS,
           localize: YES,
-          layout: { left: 0, height: 'auto', width: 'auto', bottom: 0 },
+          layout: { left: 0, height: 28, width: 'auto', bottom: 0 },
           isDefault: YES,
           action: "dismiss",
           isVisible: NO
@@ -540,13 +540,13 @@ SC.AlertPane = SC.PanelPane.extend(
       }),
 
       SC.View.extend({
-        layout: { bottom: 13, height: 24, left: 18, width: 150 },
+        layout: { bottom: 11, height: 28, left: 11, width: 150 },
         childViews: [
           SC.ButtonView.extend({
             useStaticLayout: YES,
             actionKey: SC.BUTTON3_STATUS,
             localize: YES,
-            layout: { left: 0, height: 'auto', width: 'auto', bottom: 0 },
+            layout: { left: 0, height: 28, width: 'auto', bottom: 0 },
             action: "dismiss",
             isVisible: NO
           })]
