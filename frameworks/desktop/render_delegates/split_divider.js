@@ -17,7 +17,6 @@ SC.BaseTheme.splitDividerRenderDelegate = SC.RenderDelegate.create({
     // the divider view itself is the grabber, but the visible line
     // may be inside of it.
     context.push("<div class='line'></div>");
-    context.push("<div class='sm-circle'></div>");
   },
 
   update: function(dataSource, jquery) {

@@ -15,20 +15,6 @@ $theme.split-divider {
       position: absolute;
     }
   }
-  .sm-circle {
-    display: none;
-    position: absolute;
-    width: 30px;
-    height: 30px;
-    background: rgba(255,255,255,.5);
-    border: 1px solid rgba(0,0,0,0.5);
-    border-radius: 30px;
-    &:after {
-      position: absolute;
-      font: normal normal 400 17px/1 FontAwesome;
-      position: absolute;
-    }
-  }
 
   &.sc-layout-horizontal {
     .line {
@@ -41,15 +27,6 @@ $theme.split-divider {
         right: -4px;
         top: 0;
         bottom: 0;
-      }
-    }
-    .sm-circle {
-      left: -15px;
-      bottom: 5%;
-      &:after {
-        content: "\f07e";
-        top: 7px;
-        left: 6px;
       }
     }
   }
@@ -68,25 +45,5 @@ $theme.split-divider {
         right: 0;
       }
     }
-
-    .sm-circle {
-      top: -15px;
-      right: 5%;
-      &:after {
-        content: "\f07d";
-        left: 10px;
-        top: 7px;
-      }
-    }
   }
-}
-
-$theme.touch .split-divider {
-  .sm-circle {
-    display: block;
-  }
-}
-
-.no-sm-circle .sm-circle {
-  display: none !important;
 }
