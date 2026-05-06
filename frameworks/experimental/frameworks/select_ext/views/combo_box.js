@@ -115,6 +115,13 @@ SC.ComboBoxView = SC.View.extend(SC.ItemFilter, {
   autoPopupMenu: false,
 
   /**
+    @property
+    @type {String}
+    @default "below"
+  */
+  popupMode: 'below',
+
+  /**
     * @private
   */
   selectedMenuItem: null,
@@ -208,14 +215,24 @@ SC.ComboBoxView = SC.View.extend(SC.ItemFilter, {
 
     if (menu.get('isVisibleInWindow')) return;
 
-    let frame = menu.computeAnchorRect(layer);
-    menu.adjust({
-      top: frame.y + frame.height + 2,
-      left: frame.x,
-      width: frame.width,
-      height: menu.get('menuHeight'),
-    });
-    menu.invokeLast('append');
+    if (this.get('popupMode') === 'below') {
+      const frame = menu.computeAnchorRect(layer);
+      const top = frame.y + frame.height + 2;
+      const left = frame.x;
+      const wSize = SC.RootResponder.responder.computeWindowSize();
+
+      menu.adjust({
+        top: top,
+        left: left,
+        maxWidth: wSize.width - left - 10,
+        height: menu.get('menuHeight'),
+        maxHeight: wSize.height - top - 10,
+      });
+      menu.invokeLast('append');
+    }
+    else {
+      menu.popup(this, SC.PICKER_POINTER, [3,0,1,2,-1]);
+    }
   },
 
 });
