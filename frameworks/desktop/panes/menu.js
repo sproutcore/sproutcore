@@ -889,7 +889,12 @@ SC.MenuPane = SC.PickerPane.extend(SC.ItemFormatter, SC.SelectionSupport,
 
     touchStart: function(evt) {
       this.mouseMoved(evt);
-      return true;
+      return this.mouseDown(evt);
+    },
+
+    touchEnd: function(evt) {
+      this.mouseUp(evt);
+      return this.mouseExited(evt);
     },
 
     /**
