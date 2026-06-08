@@ -18,7 +18,7 @@ html{
 */
 /*
 	TODO test putting a class on HEAD.
-		- Fails on FF. 
+		- Fails on FF.
 */
 body,
 div,
@@ -64,7 +64,6 @@ caption,
 cite,
 code,
 dfn,
-em,
 th,
 var {
 	font-style:normal;
