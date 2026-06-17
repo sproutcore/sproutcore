@@ -670,7 +670,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       }
 
       if (!SC.none(autoComplete)) {
-        autocompleteString = ' autocomplete=' + (!autoComplete ? '"off"' : '"on"');
+        autocompleteString = ' autocomplete=' + (!autoComplete ? '"new-password"' : '"on"');
       }
 
       if (!isBrowserFocusable) {
@@ -756,7 +756,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       }
 
       if (!SC.none(autoComplete)) {
-        input.attr('autoComplete', !autoComplete ? 'off' : 'on');
+        input.attr('autoComplete', !autoComplete ? 'new-password' : 'on');
       } else {
         input.attr('autoComplete', null);
       }
