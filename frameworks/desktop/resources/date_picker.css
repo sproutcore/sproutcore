@@ -11,7 +11,7 @@
 .sc-picker-button {
   &:before {
     content: "\f073";
-    font: normal normal 300 16px/1 FontAwesome;
+    font: normal normal 300 16px/1 var(--fa-family-classic);
   }
 
   &.disabled { opacity: 0.6; }
