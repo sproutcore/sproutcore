@@ -202,7 +202,7 @@ SC.ActionSupport =
   // TODO: remove backwards compatibility for `action` argument
   fireAction: function (actionOrContext) {
     var pane = this.get('pane'),
-      rootResponder = pane.get('rootResponder'),
+      rootResponder = pane ? pane.get('rootResponder') : null,
       action = this.get('action'),
       context;
 
